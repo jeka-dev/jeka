@@ -26,10 +26,7 @@ public class JavaProjectBuilder extends BaseProjectBuilder {
 	} 
 	
 	public static void main(String[] args) {
-		JavaProjectBuilder builder = new JavaProjectBuilder();
-		builder.clean();
-		builder.compile();
-		builder.copyResources();
+		new JavaProjectBuilder().doDefault();
 	}
 	
 	protected Directory classDir() {

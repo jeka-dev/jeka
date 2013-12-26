@@ -1,6 +1,8 @@
 package org.javake;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.Writer;
 
 public class BaseProjectBuilder {
 	
@@ -31,6 +33,10 @@ public class BaseProjectBuilder {
 
 	protected Directory buildOuputDir() {
 		return baseDir().relative("build/output", true);
+	}
+	
+	protected Writer writer() {
+		return new PrintWriter(System.out);
 	}
 
 }
