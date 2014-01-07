@@ -29,9 +29,9 @@ public class Directory {
 		return new File(base, relativePath);
 	}
 	
-	public void copyTo(File destinationDir, FilenameFilter filter) {
+	public int copyTo(File destinationDir, FilenameFilter filter) {
 		FileUtils.assertDir(destinationDir);
-		FileUtils.copyDir(base, destinationDir, filter);
+		return FileUtils.copyDir(base, destinationDir, filter);
 	}
 
 	public File getBase() {
@@ -44,7 +44,7 @@ public class Directory {
 	}
 
 	public List<File> allFiles(FilenameFilter filter) {
-		List<File> dirs = new LinkedList<>();
+		List<File> dirs = new LinkedList<File>();
 		dirs.add(base);
 		return filesOf(dirs, filter);
 	}
@@ -56,9 +56,9 @@ public class Directory {
 	
 
 	private static List<File> filesOf(Iterable<File> dirs, FilenameFilter filter) {
-		final List<File> result = new LinkedList<>();
+		final List<File> result = new LinkedList<File>();
 		for (File dir : dirs) {
-			List<File> subDirs = new LinkedList<>();
+			List<File> subDirs = new LinkedList<File>();
 			for (File file : dir.listFiles()) {
 				if (file.isDirectory()) {
 					subDirs.add(file);

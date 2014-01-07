@@ -33,22 +33,29 @@ public class JavaProjectBuilder extends BaseProjectBuilder {
 		return buildOuputDir().relative("classes", true);
 	}
 	
+	// ------------ Operations ------------
+	
 	public boolean compile() {
-	    JavaCompilation compilation = new JavaCompilation();
-	    compilation.addSourceFiles(sourceFiles());
+		JavaCompilation compilation = new JavaCompilation();
+	    List<File> sourceFiles = sourceFiles();
+	    compilation.addSourceFiles(sourceFiles);
 	    compilation.setOutputDirectory(classDir().getBase());
-	    return compilation.compile();
+	    boolean result = compilation.compile();
+	    logger().info(sourceFiles.size() + " source files compiled to " + classDir().getBase().getPath());
+	    return result;
 	}
 	
 	public void copyResources() {
-		sourceDir().copyTo(classDir().getBase(), FileUtils.reverse(SOURCE_FILTER));
+		int count = sourceDir().copyTo(classDir().getBase(), FileUtils.reverse(SOURCE_FILTER));
 		if (resourceDir().getBase().exists()) {
-			resourceDir().copyTo(classDir().getBase(), null);
+			count += resourceDir().copyTo(classDir().getBase(), null);
 		}
+		logger().info(count + " resource files copied to " + classDir().getBase().getPath());
 	}
 	
+	@Override
 	public void doDefault() {
-		clean();
+		super.doDefault();
 		compile();
 		copyResources();
 	}

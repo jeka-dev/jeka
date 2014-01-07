@@ -2,7 +2,6 @@ package org.javake;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -12,8 +11,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
-import javax.management.RuntimeErrorException;
 
 public class FileUtils {
 
@@ -28,17 +25,20 @@ public class FileUtils {
 		}
 	}
 
-	@SafeVarargs
+	
 	public static List<File> sum(List<File>... files) {
-		List<File> result = new LinkedList<>();
+		List<File> result = new LinkedList<File>();
 		for (List<File> list : files) {
 			result.addAll(list);
 		}
 		return result;
 	}
+	
+	
 
-	public static void copyDir(File sourceLocation, File targetLocation,
+	public static int copyDir(File sourceLocation, File targetLocation,
 			FilenameFilter filter) {
+		int count = 0;
 		if (sourceLocation.isDirectory()) {
 			if (!targetLocation.exists()) {
 				targetLocation.mkdir();
@@ -46,9 +46,11 @@ public class FileUtils {
 
 			String[] children = sourceLocation.list(filter);
 			for (int i = 0; i < children.length; i++) {
-				copyDir(new File(sourceLocation, children[i]), new File(
+				int subCount = copyDir(new File(sourceLocation, children[i]), new File(
 						targetLocation, children[i]), filter);
+				count = count + subCount;
 			}
+			return count;
 		} else {
 			try {
 				InputStream in = new FileInputStream(sourceLocation);
@@ -67,6 +69,7 @@ public class FileUtils {
 								+ sourceLocation.getAbsolutePath() + " to "
 								+ targetLocation.getAbsolutePath(), e);
 			}
+			return 1;
 		}
 	}
 

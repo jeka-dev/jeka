@@ -11,12 +11,12 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
 
-public class JavaCompilation {
+public final class JavaCompilation {
 	
 	private final JavaCompiler compiler;
 	private final StandardJavaFileManager fileManager;
 	
-	private final List<String> options = new LinkedList<>();
+	private final List<String> options = new LinkedList<String>();
 	private final List<File> javaSourceFiles = new LinkedList<File>();
 
 	public JavaCompilation(JavaCompiler compiler) {

@@ -15,6 +15,7 @@ public class JarProjectBuilder extends JavaProjectBuilder {
 	public void jar() {
 		File zip = buildOuputDir().file(jarName());
 		classDir().asZip(zip, zipLevel());
+		logger().info("Jar created : " + zip.getPath());
 	}
 	
 	@Override
