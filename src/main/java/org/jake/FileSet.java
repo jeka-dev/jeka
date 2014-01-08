@@ -2,11 +2,14 @@ package org.jake;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import org.jake.utils.FileUtils;
 
 /**
  * Mutable set of files. Exposes an convenient fluent interface to add, remove, filter
@@ -35,6 +38,10 @@ public class FileSet implements Iterable<File> {
 	public Set<File> asSet() {
 		return Collections.unmodifiableSet(files);
 	} 
+	
+	public int count() {
+		return files.size();
+	}
 	
 	public FileSet addSingle(File file) {
 		files.add(file);
@@ -92,6 +99,12 @@ public class FileSet implements Iterable<File> {
 	@Override
 	public Iterator<File> iterator() {
 		return files.iterator();
+	}
+	
+	public void print(PrintStream printStream) {
+		for (File file : files) {
+			printStream.println(file.getPath().toCharArray() );
+		}
 	}
 	
 

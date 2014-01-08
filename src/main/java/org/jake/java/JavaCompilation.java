@@ -10,6 +10,8 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
+import org.jake.Directory;
+
 
 public final class JavaCompilation {
 	
@@ -27,6 +29,10 @@ public final class JavaCompilation {
 	
 	public JavaCompilation() {
 		this(getDefaultOrFail());
+	}
+	
+	public void setOutputDirectory(Directory dir) {
+		setOutputDirectory(dir.getBase());
 	}
 	
 	public void setOutputDirectory(File dir) {

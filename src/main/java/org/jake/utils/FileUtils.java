@@ -1,5 +1,6 @@
-package org.jake;
+package org.jake.utils;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -10,7 +11,10 @@ import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
+
+
 
 public class FileUtils {
 
@@ -137,19 +141,16 @@ public class FileUtils {
 		}
 	}
 
-	public static void zipDir(File zipFile, File dir, int level) {
+	public static void zipDir(File zipFile, int level,  File ...dirs) {
 
 		FileOutputStream fos;
 		try {
 			fos = new FileOutputStream(zipFile);
-
 			ZipOutputStream zos = new ZipOutputStream(fos);
-			
-			// level - the compression level (0-9)
-			zos.setLevel(9);
-
-			addFolder(zos, canonicalPath(dir), canonicalPath(dir));
-
+			zos.setLevel(level);
+			for(File dir : dirs) {
+				addFolder(zos, canonicalPath(dir), canonicalPath(dir));
+			}
 			zos.close();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -157,32 +158,45 @@ public class FileUtils {
 
 	}
 
-	private static void addFolder(ZipOutputStream zos, String folderName,
+	private static void addFolder(ZipOutputStream zos, String fileName,
 			String baseFolderName) throws IOException {
-		File f = new File(folderName);
-		if (f.isDirectory()) {
-			File f2[] = f.listFiles();
-			for (int i = 0; i < f2.length; i++) {
-				addFolder(zos, f2[i].getAbsolutePath(), baseFolderName);
+		
+		final File fileToZip = new File(fileName);
+		if (fileToZip.isDirectory()) {
+			final File[] files = fileToZip.listFiles();
+			for (int i = 0; i < files.length; i++) {
+				addFolder(zos, files[i].getAbsolutePath(), baseFolderName);
 			}
 		} else {
-			String entryName = folderName.substring(
-					baseFolderName.length() + 1, folderName.length());
-			ZipEntry ze = new ZipEntry(entryName);
-			zos.putNextEntry(ze);
-			FileInputStream in = new FileInputStream(folderName);
-			int len;
-			byte buffer[] = new byte[1024];
-			while ((len = in.read(buffer)) > 0) {
-				zos.write(buffer, 0, len);
+			String entryName = fileName.substring(
+					baseFolderName.length() + 1 , fileName.length());
+			entryName = entryName.replace(File.separatorChar, '/');
+			System.out.println("entry zip name = '" + entryName+"'");
+			
+			ZipEntry zipEntry = new ZipEntry(entryName);
+			try {
+				zos.putNextEntry(zipEntry);
+			} catch (ZipException e) {
+				
+				// Ignore duplicate entry - no overwriting
+				return;
 			}
+			FileInputStream in = new FileInputStream(fileName);
+			int buffer = 2048;
+			BufferedInputStream bufferedInputStream = new BufferedInputStream(in, buffer);
+			int count;
+			byte data[] = new byte[buffer];
+			while((count = bufferedInputStream.read(data, 0, buffer)) != -1) {
+		        zos.write(data, 0, count);
+		    }
+			bufferedInputStream.close();
 			in.close();
 			zos.closeEntry();
 		}
 	}
 	
-	public static FileSet fileSetOf(File dir) {
-		final FileSet result = new FileSet();
+	public static List<File> fileSetOf(File dir) {
+		final List< result = new FileSet();
 		for (File file : dir.listFiles()) {
 			if (file.isDirectory()) {
 				result.addSingle(file);

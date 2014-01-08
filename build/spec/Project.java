@@ -3,6 +3,7 @@
 import java.io.File;
 
 import org.jake.java.JakeJarBuilder;
+import org.jake.utils.FileUtils;
 
 public class Project extends JakeJarBuilder {
 	
@@ -20,7 +21,8 @@ public class Project extends JakeJarBuilder {
 	public void jar() {
 		super.jar();
 		File jarFile = buildOuputDir().file("jake.jar");
-		classDir().asZip(jarFile, zipLevel());
+		FileUtils.zipDir(jarFile, zipLevel(), classDir().getBase(), sourceDir().getBase());
+		sourceDir().fileSet().print(System.out);
 		logger().info(jarFile.getPath() + " created");
 	}
 	

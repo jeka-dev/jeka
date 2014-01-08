@@ -3,6 +3,8 @@ package org.jake;
 import java.io.File;
 import java.io.FilenameFilter;
 
+import org.jake.utils.FileUtils;
+
 public class Directory {
 
 	private final File base;
@@ -31,9 +33,21 @@ public class Directory {
 		FileUtils.assertDir(destinationDir);
 		return FileUtils.copyDir(base, destinationDir, filter);
 	}
+	
+	public int copyTo(Directory destinationDir, FilenameFilter filter) {
+		return copyTo(destinationDir.getBase(), filter);
+	}
 
 	public File getBase() {
 		return base;
+	}
+	
+	public boolean exists() {
+		return base.exists();
+	}
+	
+	public String path() {
+		return base.getPath();
 	}
 	
 	public FileSet fileSet() {
@@ -41,7 +55,7 @@ public class Directory {
 	}
 
 	public void asZip(File zipFile, int compressLevel) {
-		FileUtils.zipDir(zipFile, base, compressLevel);
+		FileUtils.zipDir(zipFile, compressLevel, base);
 	}
 	
 }

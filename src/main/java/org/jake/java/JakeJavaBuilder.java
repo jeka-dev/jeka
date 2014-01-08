@@ -4,8 +4,8 @@ import java.io.FilenameFilter;
 
 import org.jake.Directory;
 import org.jake.FileSet;
-import org.jake.FileUtils;
 import org.jake.JakeBaseBuilder;
+import org.jake.utils.FileUtils;
 
 public class JakeJavaBuilder extends JakeBaseBuilder {
 	
@@ -38,22 +38,32 @@ public class JakeJavaBuilder extends JakeBaseBuilder {
 	
 	// ------------ Operations ------------
 	
+	/**
+	 * Compiles source files returned by {@link #sourceFiles()}.
+	 */
 	public boolean compile() {
 		JavaCompilation compilation = new JavaCompilation();
 	    FileSet sourceFiles = sourceFiles();
-	    logger().info("Compiling " + sourceFiles.asSet().size() + " source files to " + classDir().getBase().getPath());
+	    logger().info("Compiling " + sourceFiles.count() + " source files to " + classDir().path());
 	    compilation.addSourceFiles(sourceFiles);
-	    compilation.setOutputDirectory(classDir().getBase());
+	    compilation.setOutputDirectory(classDir());
 	    boolean result = compilation.compile();
 	    logger().info("Done");
 	    return result;
 	}
 	
+	/**
+	 * Copy in {@link #classDir()}
+	 * <ul>
+	 * 		<li>Files located in {@link #sourceDir()} except .java files</li>
+	 * 		<li>Files located in {@link #resourceDir()} if not null</li>
+	 * <ul>
+	 */
 	public void copyResources() {
 		logger().info("Coping resource files to " + classDir().getBase().getPath());
-		int count = sourceDir().copyTo(classDir().getBase(), FileUtils.reverse(SOURCE_FILTER));
-		if (resourceDir() != null && resourceDir().getBase().exists()) {
-			count += resourceDir().copyTo(classDir().getBase(), null);
+		int count = sourceDir().copyTo(classDir(), FileUtils.reverse(SOURCE_FILTER));
+		if (resourceDir() != null && resourceDir().exists()) {
+			count += resourceDir().copyTo(classDir(), null);
 		}
 		logger().info(count + " file(s) copied");
 	}

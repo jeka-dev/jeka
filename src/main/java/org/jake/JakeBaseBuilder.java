@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.jake.utils.FileUtils;
+
 /**
  * Base project builder defining some commons tasks and utilities 
  * necessary for any kind of project, regardless the technology.

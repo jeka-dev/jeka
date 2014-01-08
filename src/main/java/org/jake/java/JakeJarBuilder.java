@@ -1,6 +1,7 @@
 package org.jake.java;
 
 import java.io.File;
+import java.util.zip.ZipOutputStream;
 
 public class JakeJarBuilder extends JakeJavaBuilder {
 	
@@ -9,7 +10,7 @@ public class JakeJarBuilder extends JakeJavaBuilder {
 	}
 	
 	protected int zipLevel() {
-		return 0;
+		return ZipOutputStream.DEFLATED;
 	}
 	
 	public void jar() {
