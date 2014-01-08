@@ -1,4 +1,4 @@
-package org.javake;
+package org.jake;
 
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Formatter;
@@ -41,7 +41,10 @@ public final class LogUtils {
 			
 			@Override
 			public synchronized String format(LogRecord record) {
-				return record.getLevel() + ": " + record.getMessage() + "\n";
+				if (record.getLevel() == Level.INFO) {
+					return "- " + record.getMessage() + "\n";
+				}
+				return record.getLevel() + "- " + record.getMessage() + "\n";
 			}
 			
 		};
@@ -73,7 +76,7 @@ public final class LogUtils {
 	}
 	
 	private static Handler createDefaultHandler() {
-		Handler handler = new ConsoleHandler();
+		ConsoleHandler handler = new ConsoleHandler();
 		handler.setFormatter(createDefaultFormatter());
 		return handler;
 	} 

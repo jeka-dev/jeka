@@ -1,4 +1,4 @@
-package org.javake.java;
+package org.jake.java;
 
 import java.io.File;
 import java.util.LinkedList;

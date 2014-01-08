@@ -1,12 +1,14 @@
 
 
-import org.javake.java.JarProjectBuilder;
+import java.io.File;
 
-public class Project extends JarProjectBuilder {
+import org.jake.java.JakeJarBuilder;
+
+public class Project extends JakeJarBuilder {
 	
 	@Override
 	protected String projectName() {
-		return "javake";
+		return "jake";
 	}
 	
 	@Override
@@ -17,7 +19,9 @@ public class Project extends JarProjectBuilder {
 	@Override
 	public void jar() {
 		super.jar();
-		classDir().asZip(buildOuputDir().file("javake.jar"), zipLevel());
+		File jarFile = buildOuputDir().file("jake.jar");
+		classDir().asZip(jarFile, zipLevel());
+		logger().info(jarFile.getPath() + " created");
 	}
 	
 	public static void main(String[] args) {

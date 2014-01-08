@@ -1,14 +1,13 @@
-package org.javake.java;
+package org.jake.java;
 
-import java.io.File;
 import java.io.FilenameFilter;
-import java.util.List;
 
-import org.javake.BaseProjectBuilder;
-import org.javake.Directory;
-import org.javake.FileUtils;
+import org.jake.Directory;
+import org.jake.FileSet;
+import org.jake.FileUtils;
+import org.jake.JakeBaseBuilder;
 
-public class JavaProjectBuilder extends BaseProjectBuilder {
+public class JakeJavaBuilder extends JakeBaseBuilder {
 	
 	protected static final FilenameFilter SOURCE_FILTER = FileUtils.endingBy(".java");
 	
@@ -17,16 +16,20 @@ public class JavaProjectBuilder extends BaseProjectBuilder {
 		return baseDir().relative("src/main/java", false);
 	}
 	
+	/**
+	 * Specific directory where resources are stored. If resources 
+	 * are only stored along the source files then returns <code>null</code>.
+	 */
 	protected Directory resourceDir() {
 		return baseDir().relative("src/main/resources", false);
 	}
 	
-	protected List<File> sourceFiles() {
-		return sourceDir().allFiles(SOURCE_FILTER);
+	protected FileSet sourceFiles() {
+		return sourceDir().fileSet().retainOnly(SOURCE_FILTER);
 	} 
 	
 	public static void main(String[] args) {
-		new JavaProjectBuilder().doDefault();
+		new JakeJavaBuilder().doDefault();
 	}
 	
 	protected Directory classDir() {
@@ -37,20 +40,22 @@ public class JavaProjectBuilder extends BaseProjectBuilder {
 	
 	public boolean compile() {
 		JavaCompilation compilation = new JavaCompilation();
-	    List<File> sourceFiles = sourceFiles();
+	    FileSet sourceFiles = sourceFiles();
+	    logger().info("Compiling " + sourceFiles.asSet().size() + " source files to " + classDir().getBase().getPath());
 	    compilation.addSourceFiles(sourceFiles);
 	    compilation.setOutputDirectory(classDir().getBase());
 	    boolean result = compilation.compile();
-	    logger().info(sourceFiles.size() + " source files compiled to " + classDir().getBase().getPath());
+	    logger().info("Done");
 	    return result;
 	}
 	
 	public void copyResources() {
+		logger().info("Coping resource files to " + classDir().getBase().getPath());
 		int count = sourceDir().copyTo(classDir().getBase(), FileUtils.reverse(SOURCE_FILTER));
-		if (resourceDir().getBase().exists()) {
+		if (resourceDir() != null && resourceDir().getBase().exists()) {
 			count += resourceDir().copyTo(classDir().getBase(), null);
 		}
-		logger().info(count + " resource files copied to " + classDir().getBase().getPath());
+		logger().info(count + " file(s) copied");
 	}
 	
 	@Override

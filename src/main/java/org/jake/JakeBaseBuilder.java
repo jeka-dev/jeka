@@ -1,4 +1,4 @@
-package org.javake;
+package org.jake;
 
 import java.io.File;
 import java.util.logging.Level;
@@ -10,13 +10,13 @@ import java.util.logging.Logger;
  * 
  * @author Djeang
  */
-public class BaseProjectBuilder {
+public class JakeBaseBuilder {
 	
 	protected static final File WORKING_DIR = new File(".");
 	
 	private final Logger DEFAULT_LOGGER = LogUtils.createDefaultLogger();
 	
-	protected BaseProjectBuilder() {
+	protected JakeBaseBuilder() {
 		LogUtils.setSystemPropertyLevelOr(logger(), getDefaultLogLevel());
 	}
 	
@@ -82,8 +82,9 @@ public class BaseProjectBuilder {
 	 * Task for cleaning up the output directory.
 	 */
 	public void clean() {
+		logger().info("Cleaning output directory " + buildOuputDir().getBase().getPath() );
 		FileUtils.deleteDirContent(buildOuputDir().getBase());
-		logger().info("Output directory " + buildOuputDir().getBase().getPath() + " cleaned.");
+		logger().info("Done");
 	}
 	
 	/**

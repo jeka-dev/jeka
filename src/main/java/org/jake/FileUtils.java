@@ -1,4 +1,4 @@
-package org.javake;
+package org.jake;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -115,6 +115,19 @@ public class FileUtils {
 		int index = absPath.lastIndexOf(File.separator);
 		return absPath.substring(index);
 	}
+	
+	public static boolean isParent(File parentCandidate, File childCandidtate) {
+		File parent = childCandidtate;
+		while (true) {
+			parent = parent.getParentFile();
+			if (parent == null) {
+				return false;
+			}
+			if (parent.equals(parentCandidate)) {
+				return true;
+			}
+		}
+	}
 
 	public static String canonicalPath(File file) {
 		try {
@@ -166,6 +179,19 @@ public class FileUtils {
 			in.close();
 			zos.closeEntry();
 		}
+	}
+	
+	public static FileSet fileSetOf(File dir) {
+		final FileSet result = new FileSet();
+		for (File file : dir.listFiles()) {
+			if (file.isDirectory()) {
+				result.addSingle(file);
+				result.add(fileSetOf(file));
+			} else {
+				result.add(file);
+			}
+		}	
+		return result;
 	}
 
 }

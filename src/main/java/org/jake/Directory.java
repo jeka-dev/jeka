@@ -1,9 +1,7 @@
-package org.javake;
+package org.jake;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.LinkedList;
-import java.util.List;
 
 public class Directory {
 
@@ -37,38 +35,13 @@ public class Directory {
 	public File getBase() {
 		return base;
 	}
-
-
-	public List<File> allFilesEndingBy(final String... suffixes) {
-		return allFiles(FileUtils.endingBy(suffixes));
-	}
-
-	public List<File> allFiles(FilenameFilter filter) {
-		List<File> dirs = new LinkedList<File>();
-		dirs.add(base);
-		return filesOf(dirs, filter);
-	}
 	
+	public FileSet fileSet() {
+		return FileUtils.fileSetOf(getBase());
+	}
+
 	public void asZip(File zipFile, int compressLevel) {
 		FileUtils.zipDir(zipFile, base, compressLevel);
 	}
 	
-	
-
-	private static List<File> filesOf(Iterable<File> dirs, FilenameFilter filter) {
-		final List<File> result = new LinkedList<File>();
-		for (File dir : dirs) {
-			List<File> subDirs = new LinkedList<File>();
-			for (File file : dir.listFiles()) {
-				if (file.isDirectory()) {
-					subDirs.add(file);
-				} else if (filter == null || filter.accept(dir, file.getName())) {
-					result.add(file);
-				}
-			}
-			result.addAll(filesOf(subDirs, filter));
-		}
-		return result;
-	}
-
 }

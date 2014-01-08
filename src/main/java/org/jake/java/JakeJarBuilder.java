@@ -1,8 +1,8 @@
-package org.javake.java;
+package org.jake.java;
 
 import java.io.File;
 
-public class JarProjectBuilder extends JavaProjectBuilder {
+public class JakeJarBuilder extends JakeJavaBuilder {
 	
 	protected String jarName() {
 		return projectName() + versionSuffix() + ".jar";
@@ -13,9 +13,10 @@ public class JarProjectBuilder extends JavaProjectBuilder {
 	}
 	
 	public void jar() {
+		logger().info("Creating jar file(s)");
 		File zip = buildOuputDir().file(jarName());
 		classDir().asZip(zip, zipLevel());
-		logger().info("Jar created : " + zip.getPath());
+		logger().info(zip.getPath() + " created");
 	}
 	
 	@Override
@@ -25,7 +26,7 @@ public class JarProjectBuilder extends JavaProjectBuilder {
 	}
 	
 	public static void main(String[] args) {
-		new JarProjectBuilder().doDefault();
+		new JakeJarBuilder().doDefault();
 	}
 
 }
