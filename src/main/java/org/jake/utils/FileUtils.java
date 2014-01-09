@@ -120,19 +120,22 @@ public class FileUtils {
 		return absPath.substring(index);
 	}
 	
-	public static boolean isParent(File parentCandidate, File childCandidtate) {
+	public static boolean isAncestor(File ancestorCandidate, File childCandidtate) {
 		File parent = childCandidtate;
 		while (true) {
 			parent = parent.getParentFile();
 			if (parent == null) {
 				return false;
 			}
-			if (parent.equals(parentCandidate)) {
+			if (parent.equals(ancestorCandidate)) {
 				return true;
 			}
 		}
 	}
 
+	/**
+	 * A 'checked exception free' version of {@link File#getCanonicalPath()}.
+	 */
 	public static String canonicalPath(File file) {
 		try {
 			return file.getCanonicalPath();
@@ -141,13 +144,22 @@ public class FileUtils {
 		}
 	}
 
-	public static void zipDir(File zipFile, int level,  File ...dirs) {
-
+	/**
+	 * Zips the content of the specified directories into the specified zipFile. 
+	 * If the specified zip file does not exist, the method will create it.
+	 * 
+	 * @param zipLevel the compression level (0-9) as specified in {@link ZipOutputStream#setLevel(int)}.
+	 */
+	public static void zipDir(File zipFile, int zipLevel,  File ...dirs) {
+		
 		FileOutputStream fos;
 		try {
+			if (!zipFile.exists()) {
+				zipFile.createNewFile();
+			}
 			fos = new FileOutputStream(zipFile);
 			ZipOutputStream zos = new ZipOutputStream(fos);
-			zos.setLevel(level);
+			zos.setLevel(zipLevel);
 			for(File dir : dirs) {
 				addFolder(zos, canonicalPath(dir), canonicalPath(dir));
 			}
@@ -195,12 +207,15 @@ public class FileUtils {
 		}
 	}
 	
-	public static List<File> fileSetOf(File dir) {
-		final List< result = new FileSet();
+	/**
+	 * Returns all files contained recursively in the specified directory.
+	 */
+	public static List<File> filesOf(File dir) {
+		final List<File> result = new LinkedList<File>();
 		for (File file : dir.listFiles()) {
 			if (file.isDirectory()) {
-				result.addSingle(file);
-				result.add(fileSetOf(file));
+				result.add(file);
+				result.addAll(filesOf(file));
 			} else {
 				result.add(file);
 			}

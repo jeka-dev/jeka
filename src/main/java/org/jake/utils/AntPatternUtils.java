@@ -16,73 +16,25 @@
 
 package org.jake.utils;
 
-import java.nio.file.PathMatcher;
 
 /**
- * PathMatcher implementation for Ant-style path patterns.
- * Examples are provided below.
- *
- * <p>Part of this mapping code has been kindly borrowed from
- * <a href="http://ant.apache.org">Apache Ant</a>.
- *
- * <p>The mapping matches URLs using the following rules:<br>
- * <ul>
- * <li>? matches one character</li>
- * <li>* matches zero or more characters</li>
- * <li>** matches zero or more 'directories' in a path</li>
+ * Utils to deal with ant pattern syle using '**', '*' and '?' wildcard.
+ * In nutshell : <ul>
+ * <li>'**' means any directory</li>
+ * <li>'*'  means any sequence or 0 or more characters</li>
+ * <li>'?' means any single character</li>
  * </ul>
- *
- * <p>Some examples:<br>
- * <ul>
- * <li><code>com/t?st.jsp</code> - matches <code>com/test.jsp</code> but also
- * <code>com/tast.jsp</code> or <code>com/txst.jsp</code></li>
- * <li><code>com/*.jsp</code> - matches all <code>.jsp</code> files in the
- * <code>com</code> directory</li>
- * <li><code>com/&#42;&#42;/test.jsp</code> - matches all <code>test.jsp</code>
- * files underneath the <code>com</code> path</li>
- * <li><code>org/springframework/&#42;&#42;/*.jsp</code> - matches all <code>.jsp</code>
- * files underneath the <code>org/springframework</code> path</li>
- * <li><code>org/&#42;&#42;/servlet/bla.jsp</code> - matches
- * <code>org/springframework/servlet/bla.jsp</code> but also
- * <code>org/springframework/testing/servlet/bla.jsp</code> and
- * <code>org/servlet/bla.jsp</code></li>
- * </ul>
- *
- * @author Alef Arendsen
- * @author Juergen Hoeller
- * @author Rob Harrop
- * @since 16.07.2003
+ * See <a href="http://ant.apache.org/manual/dirtasks.html#patterns">Ant documentation</a>
+ * 
+ * <i><p>Part of this mapping code has been kindly borrowed from
+ * <a href="http://ant.apache.org">Apache Ant</a> and 
+ * <a href="https://github.com/spring-projects/spring-framework">Spring Framework</a></i>
  */
-public class AntPathMatcher implements PathMatcher {
+public class AntPatternUtils  {
 
-	/** Default path separator: "/" */
-	public static final String DEFAULT_PATH_SEPARATOR = "/";
+	private static final String PATH_SEPARATOR = "/";
 
-	private String pathSeparator = DEFAULT_PATH_SEPARATOR;
-
-
-	/**
-	 * Set the path separator to use for pattern parsing.
-	 * Default is "/", as in Ant.
-	 */
-	public void setPathSeparator(String pathSeparator) {
-		this.pathSeparator = (pathSeparator != null ? pathSeparator : DEFAULT_PATH_SEPARATOR);
-	}
-
-
-	public boolean isPattern(String path) {
-		return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
-	}
-
-	public boolean match(String pattern, String path) {
-		return doMatch(pattern, path, true);
-	}
-
-	public boolean matchStart(String pattern, String path) {
-		return doMatch(pattern, path, false);
-	}
-
-
+	
 	/**
 	 * Actually match the given <code>path</code> against the given <code>pattern</code>.
 	 * @param pattern the pattern to match against
@@ -92,13 +44,13 @@ public class AntPathMatcher implements PathMatcher {
 	 * @return <code>true</code> if the supplied <code>path</code> matched,
 	 * <code>false</code> if it didn't
 	 */
-	protected boolean doMatch(String pattern, String path, boolean fullMatch) {
-		if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
+	public static boolean doMatch(String pattern, String path) {
+		if (path.startsWith(PATH_SEPARATOR) != pattern.startsWith(PATH_SEPARATOR)) {
 			return false;
 		}
 
-		String[] pattDirs = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
-		String[] pathDirs = StringUtils.tokenizeToStringArray(path, this.pathSeparator);
+		String[] pattDirs = StringUtils.split(pattern, PATH_SEPARATOR);
+		String[] pathDirs = StringUtils.split(path, PATH_SEPARATOR);
 
 		int pattIdxStart = 0;
 		int pattIdxEnd = pattDirs.length - 1;
@@ -121,14 +73,11 @@ public class AntPathMatcher implements PathMatcher {
 		if (pathIdxStart > pathIdxEnd) {
 			// Path is exhausted, only match if rest of pattern is * or **'s
 			if (pattIdxStart > pattIdxEnd) {
-				return (pattern.endsWith(this.pathSeparator) ?
-						path.endsWith(this.pathSeparator) : !path.endsWith(this.pathSeparator));
-			}
-			if (!fullMatch) {
-				return true;
+				return (pattern.endsWith(PATH_SEPARATOR) ?
+						path.endsWith(PATH_SEPARATOR) : !path.endsWith(PATH_SEPARATOR));
 			}
 			if (pattIdxStart == pattIdxEnd && pattDirs[pattIdxStart].equals("*") &&
-					path.endsWith(this.pathSeparator)) {
+					path.endsWith(PATH_SEPARATOR)) {
 				return true;
 			}
 			for (int i = pattIdxStart; i <= pattIdxEnd; i++) {
@@ -142,10 +91,7 @@ public class AntPathMatcher implements PathMatcher {
 			// String not exhausted, but pattern is. Failure.
 			return false;
 		}
-		else if (!fullMatch && "**".equals(pattDirs[pattIdxStart])) {
-			// Path start definitely matches due to "**" part in pattern.
-			return true;
-		}
+		
 
 		// up to last '**'
 		while (pattIdxStart <= pattIdxEnd && pathIdxStart <= pathIdxEnd) {
@@ -230,7 +176,7 @@ public class AntPathMatcher implements PathMatcher {
 	 * @return <code>true</code> if the string matches against the
 	 * pattern, or <code>false</code> otherwise.
 	 */
-	private boolean matchStrings(String pattern, String str) {
+	private static boolean matchStrings(String pattern, String str) {
 		char[] patArr = pattern.toCharArray();
 		char[] strArr = str.toCharArray();
 		int patIdxStart = 0;
@@ -364,52 +310,7 @@ public class AntPathMatcher implements PathMatcher {
 		return true;
 	}
 
-	/**
-	 * Given a pattern and a full path, determine the pattern-mapped part.
-	 * <p>For example:
-	 * <ul>
-	 * <li>'<code>/docs/cvs/commit.html</code>' and '<code>/docs/cvs/commit.html</code> -> ''</li>
-	 * <li>'<code>/docs/*</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
-	 * <li>'<code>/docs/cvs/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>commit.html</code>'</li>
-	 * <li>'<code>/docs/**</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
-	 * <li>'<code>/docs/**\/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>cvs/commit.html</code>'</li>
-	 * <li>'<code>/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>docs/cvs/commit.html</code>'</li>
-	 * <li>'<code>*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>/docs/cvs/commit.html</code>'</li>
-	 * <li>'<code>*</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>/docs/cvs/commit.html</code>'</li>
-	 * </ul>
-	 * <p>Assumes that {@link #match} returns <code>true</code> for '<code>pattern</code>'
-	 * and '<code>path</code>', but does <strong>not</strong> enforce this.
-	 */
-	public String extractPathWithinPattern(String pattern, String path) {
-		String[] patternParts = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
-		String[] pathParts = StringUtils.tokenizeToStringArray(path, this.pathSeparator);
-
-		StringBuffer buffer = new StringBuffer();
-
-		// Add any path parts that have a wildcarded pattern part.
-		int puts = 0;
-		for (int i = 0; i < patternParts.length; i++) {
-			String patternPart = patternParts[i];
-			if ((patternPart.indexOf('*') > -1 || patternPart.indexOf('?') > -1) && pathParts.length >= i + 1) {
-				if (puts > 0 || (i == 0 && !pattern.startsWith(this.pathSeparator))) {
-					buffer.append(this.pathSeparator);
-				}
-				buffer.append(pathParts[i]);
-				puts++;
-			}
-		}
-
-		// Append any trailing path parts.
-		for (int i = patternParts.length; i < pathParts.length; i++) {
-			if (puts > 0 || i > 0) {
-				buffer.append(this.pathSeparator);
-			}
-			buffer.append(pathParts[i]);
-		}
-
-		return buffer.toString();
-		
-	}
+	
 	
 	
 

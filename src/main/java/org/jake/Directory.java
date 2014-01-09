@@ -51,7 +51,7 @@ public class Directory {
 	}
 	
 	public FileSet fileSet() {
-		return FileUtils.fileSetOf(getBase());
+		return new FileSet(FileUtils.filesOf(getBase()));
 	}
 
 	public void asZip(File zipFile, int compressLevel) {

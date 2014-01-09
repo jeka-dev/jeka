@@ -73,7 +73,7 @@ public class FileSet implements Iterable<File> {
 		if (fileToRemove.isDirectory()) {
 			for (Iterator<File> it = files.iterator(); it.hasNext();) {
 				File file = it.next();
-				if (FileUtils.isParent(fileToRemove, file)) {
+				if (FileUtils.isAncestor(fileToRemove, file)) {
 					it.remove();
 				}
 			}
