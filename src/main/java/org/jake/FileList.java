@@ -1,7 +1,6 @@
 package org.jake;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,11 +18,19 @@ import org.jake.utils.FileUtils;
  * 
  * @author Djeang.
  */
-public class FileSet implements Iterable<File> {
+public class FileList implements Iterable<File> {
 	
 	private final Set<File> files;
 	
-	public FileSet(Iterable<File> files) {
+	public static FileList of(Iterable<File> files) {
+		return new FileList(files);
+	}
+	
+	public static FileList empty() {
+		return new FileList();
+	}
+	
+	private FileList(Iterable<File> files) {
 		this.files = new HashSet<File>();
 		for (File file : files) {
 			this.files.add(file);
@@ -31,31 +38,27 @@ public class FileSet implements Iterable<File> {
 	} 
 	
 	@SuppressWarnings("unchecked")
-	public FileSet() {
+	private FileList() {
 		this(Collections.EMPTY_SET);
 	}
-	
-	public Set<File> asSet() {
-		return Collections.unmodifiableSet(files);
-	} 
 	
 	public int count() {
 		return files.size();
 	}
 	
-	public FileSet addSingle(File file) {
+	public FileList addSingle(File file) {
 		files.add(file);
 		return this;
 	}
 	
-	public FileSet add(File ...filesToAdd) {
+	public FileList add(File ...filesToAdd) {
 		for (File file : filesToAdd) {
 			files.add(file);
 		}
 		return this;
 	}
 	
-	public FileSet add(Iterable<File> filesToAdd) {
+	public FileList add(Iterable<File> filesToAdd) {
 		for (File file : filesToAdd) {
 			files.add(file);
 		}
@@ -68,7 +71,7 @@ public class FileSet implements Iterable<File> {
 	 * @param fileToRemove
 	 * @return
 	 */
-	public FileSet remove(File fileToRemove) {
+	public FileList remove(File fileToRemove) {
 		files.remove(fileToRemove);
 		if (fileToRemove.isDirectory()) {
 			for (Iterator<File> it = files.iterator(); it.hasNext();) {
@@ -81,18 +84,18 @@ public class FileSet implements Iterable<File> {
 		return this;
 	}
 	
-	public FileSet retainOnly(FilenameFilter filter) {
+	public FileList retainOnly(Filter filter) {
 		for (Iterator<File> it = this.iterator(); it.hasNext();) {
 			File file = it.next();
-			if(! filter.accept(file.getParentFile(), file.getName())) {
+			if(! filter.fileFilter().accept(file)) {
 				it.remove();
 			}
 		}
 		return this;
 	}
 	
-	public FileSet retainsOnlyFilesEndingBy(final String... suffixes) {
-		return retainOnly(FileUtils.endingBy(suffixes));
+	public FileList retainOnlyFilesEndingBy(final String... suffixes) {
+		return retainOnly(Filter.of(FileUtils.endingBy(suffixes)));
 	}
 	
 

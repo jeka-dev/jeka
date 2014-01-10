@@ -3,7 +3,7 @@ package org.jake.java;
 import java.io.File;
 import java.util.zip.ZipOutputStream;
 
-public class JakeJarBuilder extends JakeJavaBuilder {
+public class JakeJarBuild extends JakeJavaBuild {
 	
 	protected String jarName() {
 		return projectName() + versionSuffix() + ".jar";
@@ -27,7 +27,7 @@ public class JakeJarBuilder extends JakeJavaBuilder {
 	}
 	
 	public static void main(String[] args) {
-		new JakeJarBuilder().doDefault();
+		new JakeJarBuild().doDefault();
 	}
 
 }

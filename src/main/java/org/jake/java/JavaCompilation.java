@@ -10,7 +10,8 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import org.jake.Directory;
+import org.jake.BuildException;
+import org.jake.DirView;
 
 
 public final class JavaCompilation {
@@ -31,7 +32,7 @@ public final class JavaCompilation {
 		this(getDefaultOrFail());
 	}
 	
-	public void setOutputDirectory(Directory dir) {
+	public void setOutputDirectory(DirView dir) {
 		setOutputDirectory(dir.getBase());
 	}
 	
@@ -56,6 +57,18 @@ public final class JavaCompilation {
 		CompilationTask task = compiler.getTask(null, null, null, options, null, javaFileObjects);
 		return task.call();
 	}
+	
+	public void compileOrFail() {
+		Iterable<? extends JavaFileObject> javaFileObjects = 
+				fileManager.getJavaFileObjectsFromFiles(this.javaSourceFiles);
+		CompilationTask task = compiler.getTask(null, null, null, options, null, javaFileObjects);
+		boolean result = task.call(); {
+			if (!result) {
+				throw new BuildException("Compilation failure.");
+			}
+		}
+	}
+	
 	
 	private static JavaCompiler getDefaultOrFail() {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();

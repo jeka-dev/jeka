@@ -16,6 +16,8 @@
 
 package org.jake.utils;
 
+import java.io.File;
+
 
 /**
  * Utils to deal with ant pattern syle using '**', '*' and '?' wildcard.
@@ -32,23 +34,20 @@ package org.jake.utils;
  */
 public class AntPatternUtils  {
 
-	private static final String PATH_SEPARATOR = "/";
+	private static final char PATH_SEPARATOR_CHAR = '/';
+	
+	private static final String PATH_SEPARATOR = "" + PATH_SEPARATOR_CHAR;
 
 	
 	/**
-	 * Actually match the given <code>path</code> against the given <code>pattern</code>.
-	 * @param pattern the pattern to match against
-	 * @param path the path String to test
-	 * @param fullMatch whether a full pattern match is required
-	 * (else a pattern match as far as the given base path goes is sufficient)
-	 * @return <code>true</code> if the supplied <code>path</code> matched,
-	 * <code>false</code> if it didn't
+	 * Matches the given <code>path</code> against the given <code>pattern</code>.
 	 */
 	public static boolean doMatch(String pattern, String path) {
-		if (path.startsWith(PATH_SEPARATOR) != pattern.startsWith(PATH_SEPARATOR)) {
-			return false;
-		}
-
+		
+		// First clean path and pattern to remove leading '/', '.' or '\' characters
+		pattern = normalize(pattern);
+		path = normalize(path);
+		
 		String[] pattDirs = StringUtils.split(pattern, PATH_SEPARATOR);
 		String[] pathDirs = StringUtils.split(path, PATH_SEPARATOR);
 
@@ -308,6 +307,20 @@ public class AntPatternUtils  {
 		}
 
 		return true;
+	}
+	
+	private static String normalize(String pathOrPattern) {
+		if (pathOrPattern.startsWith(PATH_SEPARATOR)) {
+			pathOrPattern = pathOrPattern.substring(1);
+		}
+		pathOrPattern = pathOrPattern.replace(File.separatorChar, PATH_SEPARATOR_CHAR);
+		if (pathOrPattern.startsWith("." + PATH_SEPARATOR) || pathOrPattern.startsWith("." + File.separator)) {
+			pathOrPattern = pathOrPattern.substring(2);
+		}
+		if (pathOrPattern.startsWith(PATH_SEPARATOR) || pathOrPattern.startsWith(File.separator)) {
+			pathOrPattern = pathOrPattern.substring(1);
+		}
+		return pathOrPattern;
 	}
 
 	

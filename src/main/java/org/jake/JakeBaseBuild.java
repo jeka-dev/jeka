@@ -12,13 +12,13 @@ import org.jake.utils.FileUtils;
  * 
  * @author Djeang
  */
-public class JakeBaseBuilder {
+public class JakeBaseBuild {
 	
 	protected static final File WORKING_DIR = new File(".");
 	
 	private final Logger DEFAULT_LOGGER = LogUtils.createDefaultLogger();
 	
-	protected JakeBaseBuilder() {
+	protected JakeBaseBuild() {
 		LogUtils.setSystemPropertyLevelOr(logger(), getDefaultLogLevel());
 	}
 	
@@ -66,15 +66,15 @@ public class JakeBaseBuilder {
 	 * The base directory for this project. All file/directory path are 
 	 * resolved from this directory.
 	 */
-	protected Directory baseDir() {
-		return new Directory(WORKING_DIR);
+	protected DirView baseDir() {
+		return DirView.of(WORKING_DIR);
 	}
 
 	/**
 	 * The output directory where all the final and intermediate 
 	 * artefacts are generated.  
 	 */
-	protected Directory buildOuputDir() {
+	protected DirView buildOuputDir() {
 		return baseDir().relative("build/output", true);
 	}
 	

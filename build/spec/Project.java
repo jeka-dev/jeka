@@ -2,10 +2,10 @@
 
 import java.io.File;
 
-import org.jake.java.JakeJarBuilder;
+import org.jake.java.JakeJarBuild;
 import org.jake.utils.FileUtils;
 
-public class Project extends JakeJarBuilder {
+public class Project extends JakeJarBuild {
 	
 	@Override
 	protected String projectName() {
@@ -22,7 +22,7 @@ public class Project extends JakeJarBuilder {
 		super.jar();
 		File jarFile = buildOuputDir().file("jake.jar");
 		FileUtils.zipDir(jarFile, zipLevel(), classDir().getBase(), sourceDir().getBase());
-		sourceDir().fileSet().print(System.out);
+		sourceDir().print(System.out);
 		logger().info(jarFile.getPath() + " created");
 	}
 	

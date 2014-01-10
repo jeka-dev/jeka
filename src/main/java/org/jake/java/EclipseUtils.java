@@ -5,7 +5,7 @@ import java.io.File;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.jake.FileSet;
+import org.jake.FileList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -15,8 +15,8 @@ public final class EclipseUtils {
 	
 	private EclipseUtils() {}
 	
-	public static FileSet getLibClasspathEntry(File projectDir) {
-		FileSet result = new FileSet();
+	public static FileList getLibClasspathEntry(File projectDir) {
+		FileList result = FileList.empty();
 		Document document = getDotClassPathAsDom(projectDir);
 		NodeList nodeList = document.getElementsByTagName("classpathentry");
 		for (int i = 0; i < nodeList.getLength(); i++) {
