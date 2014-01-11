@@ -37,9 +37,11 @@ public class FileUtils {
 		return result;
 	}
 
-	public static int copyDir(File source, File targetDir, FileFilter filter) {
-
-		FileUtils.assertDir(targetDir);
+	public static int copyDir(File source, File targetDir, FileFilter filter, boolean copyEmptyDir) {
+		System.out.println("+ source " + source.getPath());
+		System.out.println("+ target " + targetDir.getPath());
+		
+		assertDir(source);
 		if (source.equals(targetDir)) {
 			throw new IllegalArgumentException(
 					"Base and destination directory can't be the same : " + source.getPath());
@@ -49,40 +51,48 @@ public class FileUtils {
 					+ source.getPath() + ":(" + filter
 					+ ") cannot contain destination directory "
 					+ targetDir.getPath()
-					+ ". Narrow the filter or change target destination.");
+					+ ". Narrow filter or change the target directory.");
 		}
-				
-		// If source is directory
-		if (source.isDirectory()) {
-			if (!targetDir.exists()) {
-				targetDir.mkdir();
-			}
-
-			File[] children = source.listFiles();
-			int count = 0;
-			for (int i = 0; i < children.length; i++) {
-				File child = children[i];
-				if (child.isFile() && !filter.accept(child)) {
-					continue;
-				}
-				if (child.equals(targetDir)) {
-					continue;
-				}
-				int subCount = copyDir(	child, targetDir, filter);
-				count = count + subCount;
-			}
-			return count;
+		if (targetDir.isFile()) {
+			throw new IllegalArgumentException(targetDir.getPath() + " is file. Should be directory");
 		}
 		
-		// If source is file
-		final File targetFile = new File(targetDir, source.getName());
-		copyFile(source, targetFile);
-		return 1;
+				
+		final File[] children = source.listFiles();
+		int count = 0;
+		for (int i = 0; i < children.length; i++) {
+			File child = children[i];
+				if (child.isFile()) {
+					if (filter.accept(child)) {
+						final File targetFile = new File(targetDir, child.getName());
+					    copyFile(child, targetFile);
+					    count ++;
+					}
+				} else { 
+					final File subdir = new File(targetDir, child.getName());
+					if (filter.accept(subdir) && copyEmptyDir) {
+						subdir.mkdirs();
+					}
+					int subCount = copyDir(	child, subdir, filter, copyEmptyDir);
+					count = count + subCount;
+				}
+				
+		}
+		return count;
 	}
 	
 	public static void copyFile(File from, File to) {
+		if (!from.exists()) {
+			throw new IllegalArgumentException("File " + from.getPath()+ " does not exist.");
+		}
+		if (from.isDirectory()) {
+			throw new IllegalArgumentException(from.getPath() + " is a directory. Should be a path.");
+		}
 		try {
 			InputStream in = new FileInputStream(from);
+			if (!to.getParentFile().exists()) {
+				to.getParentFile().mkdirs();
+			}
 			if (!to.exists()) {
 				to.createNewFile();
 			}

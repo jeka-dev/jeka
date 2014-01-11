@@ -30,12 +30,17 @@ public class DirView implements Iterable<File> {
 		this(base, Filter.none());
 	}
 
-	public DirView relative(String relativePath, boolean createIfAbsent) {
+	public DirView relative(String relativePath) {
 		File newBase = new File(base, relativePath);
-		if (!newBase.exists() && createIfAbsent) {
-			newBase.mkdirs();
-		}
+		
 		return new DirView(newBase);
+	}
+	
+	public DirView createIfNotExist() {
+		if (!base.exists() ) {
+			base.mkdirs();
+		}
+		return this;
 	}
 	
 	public File file(String relativePath) {
@@ -44,7 +49,7 @@ public class DirView implements Iterable<File> {
 	
 	public int copyTo(File destinationDir) {
 		FileUtils.assertDir(destinationDir);
-		return FileUtils.copyDir(base, destinationDir, filter.fileFilter());
+		return FileUtils.copyDir(base, destinationDir, filter.fileFilter(), true);
 	}
 	
 	public int copyTo(DirView destinationDir) {

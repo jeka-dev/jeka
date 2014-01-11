@@ -75,7 +75,7 @@ public class JakeBaseBuild {
 	 * artefacts are generated.  
 	 */
 	protected DirView buildOuputDir() {
-		return baseDir().relative("build/output", true);
+		return baseDir().relative("build/output").createIfNotExist();
 	}
 	
 	// ------------ Operations ------------

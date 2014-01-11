@@ -16,7 +16,7 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	 * method. 
 	 */
 	protected DirView sourceDir() {
-		return baseDir().relative("src/main/java", false);
+		return baseDir().relative("src/main/java");
 	}
 	
 	/**
@@ -24,7 +24,7 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	 * are only stored along the source files then returns <code>null</code>.
 	 */
 	protected DirView resourceDir() {
-		return baseDir().relative("src/main/resources", false);
+		return baseDir().relative("src/main/resources");
 	}
 	
 	protected Iterable<File> sourceFiles() {
@@ -36,7 +36,7 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	}
 	
 	protected DirView classDir() {
-		return buildOuputDir().relative("classes", true);
+		return buildOuputDir().relative("classes").createIfNotExist();
 	}
 	
 	// ------------ Operations ------------
@@ -46,7 +46,6 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	 */
 	public void compile() {
 		JavaCompilation compilation = new JavaCompilation();
-		DirView dirView = sourceDir();
 		FileList fileList = FileList.of(sourceFiles());
 	    logger().info("Compiling " + fileList.count() + " source files to " + classDir().path());
 	    compilation.addSourceFiles(fileList);
@@ -72,11 +71,9 @@ public class JakeJavaBuild extends JakeBaseBuild {
 		}
 		
 		// Copy resources from resource directory
-		System.out.println("---------------- copy resources");
 		if (resourceDir() != null && resourceDir().exists()) {
-			count += resourceDir().copyTo(classDir());
+		//	count += resourceDir().copyTo(classDir());
 		}
-		System.out.println("---------------- copy resources done");
 		logger().info(count + " file(s) copied");
 	}
 	
