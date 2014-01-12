@@ -1,4 +1,4 @@
-package org.jake;
+package org.jake.utils;
 
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Formatter;

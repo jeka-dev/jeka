@@ -5,6 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jake.utils.FileUtils;
+import org.jake.utils.LogUtils;
 
 /**
  * Base project builder defining some commons tasks and utilities 
