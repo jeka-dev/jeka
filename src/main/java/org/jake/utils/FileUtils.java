@@ -36,10 +36,19 @@ public class FileUtils {
 		}
 		return result;
 	}
+	
+	public static String getRelativePath(File baseDir, File file) {
+		String baseDirPath = canonicalPath(baseDir);
+		String filePath = canonicalPath(file);
+		if (!filePath.startsWith(baseDirPath)) {
+			throw new IllegalArgumentException("File " + filePath + " is not part of " + baseDirPath);
+		}
+		String relativePath = filePath.substring(baseDirPath.length() +1);
+		System.out.println(relativePath);
+		return relativePath;
+	}
 
 	public static int copyDir(File source, File targetDir, FileFilter filter, boolean copyEmptyDir) {
-		System.out.println("+ source " + source.getPath());
-		System.out.println("+ target " + targetDir.getPath());
 		
 		assertDir(source);
 		if (source.equals(targetDir)) {
@@ -178,7 +187,6 @@ public class FileUtils {
 			public boolean accept(File candidate) {
 				for (final String antPattern : antPatterns) {
 					boolean match = AntPatternUtils.doMatch(antPattern, candidate.getPath());
-					System.out.println("pattern :" + antPattern + ", path:" + candidate.getPath() + ":" +  match);
 					if (match) {
 						return true;
 					}
@@ -255,11 +263,15 @@ public class FileUtils {
 			if (parent == null) {
 				return false;
 			}
-			if (parent.equals(ancestorCandidate)) {
+			if (isSame(parent, ancestorCandidate)) {
 				return true;
 			}
 		}
 	}
+	
+	public static boolean isSame(File file1, File file2) {
+		return canonicalFile(file1).equals(canonicalFile(file2));
+	} 
 
 	/**
 	 * A 'checked exception free' version of {@link File#getCanonicalPath()}.
@@ -271,6 +283,21 @@ public class FileUtils {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	/**
+	 * A 'checked exception free' version of {@link File#getCanonicalFile()}.
+	 */
+	public static File canonicalFile(File file) {
+		try {
+			return file.getCanonicalFile();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public static void zipDir(File zipFile, int zipLevel, File... dirs) {
+		zipDir(zipFile, zipLevel, Arrays.asList(dirs));
+	}
 
 	/**
 	 * Zips the content of the specified directories into the specified zipFile.
@@ -280,7 +307,7 @@ public class FileUtils {
 	 *            the compression level (0-9) as specified in
 	 *            {@link ZipOutputStream#setLevel(int)}.
 	 */
-	public static void zipDir(File zipFile, int zipLevel, File... dirs) {
+	public static void zipDir(File zipFile, int zipLevel, Iterable<File> dirs) {
 
 		FileOutputStream fos;
 		try {
@@ -341,14 +368,14 @@ public class FileUtils {
 	 * Returns all files contained recursively in the specified directory.
 	 */
 	public static List<File> filesOf(File dir, boolean includeFolder) {
-		return flatten(dir, noneFileFilter(), includeFolder);
+		return filesOf(dir, noneFileFilter(), includeFolder);
 	}
 
 	/**
 	 * Returns all files contained recursively in the specified directory.
 	 * Folders are not returned.
 	 */
-	public static List<File> flatten(File dir, FileFilter fileFilter, boolean includeFolders) {
+	public static List<File> filesOf(File dir, FileFilter fileFilter, boolean includeFolders) {
 		final List<File> result = new LinkedList<File>();
 		for (File file : dir.listFiles()) {
 			if (file.isFile() && !fileFilter.accept(file)) {
@@ -358,7 +385,7 @@ public class FileUtils {
 				if (includeFolders) {
 					result.add(file);
 				}
-				result.addAll(flatten(file, fileFilter, includeFolders));
+				result.addAll(filesOf(file, fileFilter, includeFolders));
 			} else {
 				result.add(file);
 			}

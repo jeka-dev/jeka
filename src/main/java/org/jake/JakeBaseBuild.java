@@ -8,19 +8,31 @@ import org.jake.utils.FileUtils;
 
 /**
  * Base project builder defining some commons tasks and utilities 
- * necessary for any kind of project, regardless the technology.
+ * necessary for any kind of project, regardless involved technologies.
  * 
- * @author Djeang
+ * @author Jerome Angibaud
  */
 public class JakeBaseBuild {
 	
-	protected static final File WORKING_DIR = new File(".");
+	protected static final File WORKING_DIR = FileUtils.canonicalFile(new File("."));
 	
 	private final Logger DEFAULT_LOGGER = LogUtils.createDefaultLogger();
 	
 	protected JakeBaseBuild() {
 		LogUtils.setSystemPropertyLevelOr(logger(), getDefaultLogLevel());
 	}
+	
+	private Arguments args;
+	
+	protected JakeBaseBuild withArgs(String[] args) {
+		this.args = Arguments.of(args);
+		return this;
+	}
+	
+	protected Arguments args() {
+		return args;
+	}
+	
 	
 	/**
 	 * The default level to use for the default logger when 

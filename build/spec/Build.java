@@ -1,7 +1,9 @@
 
 
 import java.io.File;
+import java.net.URLClassLoader;
 
+import org.jake.java.ClasspathUtils;
 import org.jake.java.JakeJarBuild;
 import org.jake.utils.FileUtils;
 
@@ -26,6 +28,7 @@ public class Build extends JakeJarBuild {
 	}
 	
 	public static void main(String[] args) {
+		ClasspathUtils.getSearchPath((URLClassLoader) Build.class.getClassLoader());
 		new Build().doDefault();
 	}
 

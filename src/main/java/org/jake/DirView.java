@@ -97,7 +97,7 @@ public class DirView implements Iterable<File> {
 	}
 	
 	public List<File> fileList() {
-		return FileUtils.flatten(base, filter.fileFilter(), false);
+		return FileUtils.filesOf(base, filter.fileFilter(), false);
 	}
 
 	@Override
