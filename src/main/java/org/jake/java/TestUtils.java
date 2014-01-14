@@ -22,9 +22,12 @@ public final class TestUtils {
 	
 	public static Result launchJunitOnAllClasses(ClassLoader classLoader, File projectDir) {
 		File entry = ClasspathUtils.getClassEntryInsideProject(projectDir).get(0);
-		Class[] classes = ClasspathUtils.getAllTopLevelClassesAsArray(classLoader, entry);
+		Iterable<Class> classes = ClasspathUtils.getAllTopLevelClasses(classLoader, entry);
 		return launchJunit(classes);
 	}
+	
+	
+	
 	
 	
 

@@ -2,7 +2,6 @@ package org.jake.java;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -103,13 +102,6 @@ public final class ClasspathUtils {
 		String baseClassName = className.replace('.', '/') + ".class";
 		URLClassLoader classLoader = new URLClassLoader(new URL[] { url });
 		boolean result = (classLoader.findResource(baseClassName) != null);
-		try {
-			classLoader.close();
-		} catch (IOException e) {
-			throw new RuntimeException(
-					"Can't close class loader on single url " + url.toString(),
-					e);
-		}
 		return result;
 	}
 	
