@@ -19,7 +19,6 @@ public class AntPatternUtilsTest {
 	}
 
 	
-	
 	@Test
 	public void testDoMatchNotOk() {
 		String path = "foo/bar.txt";
@@ -27,7 +26,6 @@ public class AntPatternUtilsTest {
 		assertTrue(!AntPatternUtils.doMatch("foo/br.txt", path));	
 		assertTrue(!AntPatternUtils.doMatch("k*/bar.txt", path));
 	}
-	
 	
 	private void testDoMatchOk(String path) {
 		assertTrue(AntPatternUtils.doMatch("**/*.txt", path));
