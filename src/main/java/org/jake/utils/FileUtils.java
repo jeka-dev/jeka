@@ -44,7 +44,6 @@ public class FileUtils {
 			throw new IllegalArgumentException("File " + filePath + " is not part of " + baseDirPath);
 		}
 		String relativePath = filePath.substring(baseDirPath.length() +1);
-		System.out.println(relativePath);
 		return relativePath;
 	}
 

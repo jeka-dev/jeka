@@ -27,14 +27,15 @@ public class JakeIdeBuild extends JakeBaseBuild {
 	public void simpleJar() {
 		logger().info("Creating jar file");
 		List<File> classDirs = ClasspathUtils.getClassEntryInsideProject(baseDir().getBase());
-		System.out.println(classDirs);
 		File jarFile = buildOuputDir().file(jarBaseName() + ".jar");
 		FileUtils.zipDir(jarFile, zipLevel(), classDirs);
 		logger().info(jarFile.getPath() + " created");
 	}
 	
 	public void test() {
-		TestUtils.launchJunitOnAllClasses(ClasspathUtils.getRunningJakeClassLoader(), baseDir().getBase());
+		logger().info("Launching tests ...");
+		int count = TestUtils.launchJunitTests(ClasspathUtils.getRunningJakeClassLoader(), baseDir().getBase());
+		logger().info(count + " test(s) Lauched.");
 	}
 	
 	@Override
