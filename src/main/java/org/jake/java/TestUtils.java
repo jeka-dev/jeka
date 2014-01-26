@@ -1,6 +1,7 @@
 package org.jake.java;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -14,7 +15,6 @@ import org.jake.utils.IterableUtils;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
-import org.junit.runners.model.TestClass;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public final class TestUtils {
@@ -52,7 +52,7 @@ public final class TestUtils {
 		Collection<Class> classes = getJunitTestClassesInProject(classLoader, projectDir);
 		
 		if (isJunit4InClasspath(classLoader)) {
-			Class[] classArray = IterableUtils.asArray(classes, Class.class);
+			Class[] classArray = IterableUtils.toArray(classes, Class.class);
 			Result result = JUnitCore.runClasses(classArray);
 			return result.getRunCount();
 		
@@ -101,8 +101,13 @@ public final class TestUtils {
 		if (Modifier.isAbstract(candidateClass.getModifiers())) {
 			return false;
 		}
-		TestClass testClass = new TestClass(candidateClass);
-		return !testClass.getAnnotatedMethods(testAnnotation).isEmpty();
+		Method[] methods = candidateClass.getMethods();
+		for (Method method : methods) {
+			if (method.isAnnotationPresent(Test.class)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	private static <T> Class<T> load(ClassLoader classLoader, String name) {

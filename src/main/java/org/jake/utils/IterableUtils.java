@@ -19,9 +19,15 @@ public class IterableUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T> T[] asArray(Iterable<T> it, Class<T> clazz) {
+	public static <T> T[] toArray(Iterable<T> it, Class<T> clazz) {
 		List<T> list = toList(it);
-		return (T[]) Array.newInstance(clazz, list.size());
+		T[] result = (T[]) Array.newInstance(clazz, list.size());
+		int i = 0;
+		for (T t : list) {
+			result[i] = t;
+			i++;
+		}
+		return result;
 	}
 
 }

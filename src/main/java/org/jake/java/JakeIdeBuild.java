@@ -34,8 +34,8 @@ public class JakeIdeBuild extends JakeBaseBuild {
 	
 	public void test() {
 		logger().info("Launching tests ...");
-		int count = TestUtils.launchJunitTests(ClasspathUtils.getRunningJakeClassLoader(), baseDir().getBase());
-		logger().info(count + " test(s) Lauched.");
+		int count = TestUtils.launchJunitTests(ClasspathUtils.getBuildClassLoader(), baseDir().getBase());
+		logger().info(count + " test(s) Launched.");
 	}
 	
 	@Override

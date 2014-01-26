@@ -47,7 +47,7 @@ public final class ClasspathUtils {
 	
 	
 
-	public static URLClassLoader getRunningJakeClassLoader() {
+	public static URLClassLoader getBuildClassLoader() {
 		return (URLClassLoader) JakeJarBuild.class.getClassLoader();
 	}
 
@@ -61,13 +61,13 @@ public final class ClasspathUtils {
 	}
 
 	public static List<File> getDefaultEmbededDependencies(File projectDir) {
-		URLClassLoader classLoader = getRunningJakeClassLoader();
+		URLClassLoader classLoader = getBuildClassLoader();
 		return getSearchPathMinusEntriesContaingAnyOf(classLoader,
 				JAKE_HINT_CLASS, LOMBOK_HINT_CLASS, JUNIT_HINT_CLASS);
 	}
 
 	public static List<File> getClassEntryInsideProject(File projectDir) {
-		List<File> entries = getSearchPath(getRunningJakeClassLoader());
+		List<File> entries = getSearchPath(getBuildClassLoader());
 		List<File> result = new LinkedList<File>();
 		for (File file : entries) {
 			if (file.isDirectory()
@@ -115,7 +115,7 @@ public final class ClasspathUtils {
 	
 	@SuppressWarnings("rawtypes")
 	public static Class[] getAllTopLevelClassesAsArray(ClassLoader classLoader, File entryDirectory) {
-		return IterableUtils.asArray(getAllTopLevelClasses(classLoader, entryDirectory), Class.class);
+		return IterableUtils.toArray(getAllTopLevelClasses(classLoader, entryDirectory), Class.class);
 	}
 
 	@SuppressWarnings("rawtypes")
