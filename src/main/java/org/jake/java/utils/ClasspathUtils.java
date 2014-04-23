@@ -116,7 +116,7 @@ public final class ClasspathUtils {
 	
 	@SuppressWarnings("rawtypes")
 	public static Class[] getAllTopLevelClassesAsArray(ClassLoader classLoader, File entryDirectory) {
-		return IterableUtils.asArray(getAllTopLevelClasses(classLoader, entryDirectory), Class.class);
+		return IterableUtils.toArray(getAllTopLevelClasses(classLoader, entryDirectory), Class.class);
 	}
 
 	@SuppressWarnings("rawtypes")

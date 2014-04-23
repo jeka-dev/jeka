@@ -54,7 +54,7 @@ public final class TestUtils {
 		Collection<Class> classes = getJunitTestClassesInProject(classLoader, projectDir);
 		
 		if (isJunit4InClasspath(classLoader)) {
-			Class[] classArray = IterableUtils.asArray(classes, Class.class);
+			Class[] classArray = IterableUtils.toArray(classes, Class.class);
 			Result result = JUnitCore.runClasses(classArray);
 			return result.getRunCount();
 		

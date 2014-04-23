@@ -35,15 +35,9 @@ public class JakeIdeBuild extends JakeBaseBuild {
 	}
 	
 	public void test() {
-<<<<<<< HEAD
 		logger().info("Launching test(s) ...");
 		int count = TestUtils.launchJunitTests(ClasspathUtils.getRunningJakeClassLoader(), baseDir().getBase());
 		logger().info(count + " test(s) Lauched.");
-=======
-		logger().info("Launching tests ...");
-		int count = TestUtils.launchJunitTests(ClasspathUtils.getBuildClassLoader(), baseDir().getBase());
-		logger().info(count + " test(s) Launched.");
->>>>>>> branch 'master' of https://github.com/djeang/javake.git
 	}
 	
 	@Override
