@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.zip.ZipOutputStream;
 
 import org.jake.JakeBaseBuild;
+import org.jake.java.utils.ClasspathUtils;
+import org.jake.java.utils.TestUtils;
 import org.jake.utils.FileUtils;
 
 /**
@@ -33,7 +35,7 @@ public class JakeIdeBuild extends JakeBaseBuild {
 	}
 	
 	public void test() {
-		logger().info("Launching tests ...");
+		logger().info("Launching test(s) ...");
 		int count = TestUtils.launchJunitTests(ClasspathUtils.getRunningJakeClassLoader(), baseDir().getBase());
 		logger().info(count + " test(s) Lauched.");
 	}

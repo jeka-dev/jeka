@@ -1,6 +1,7 @@
-package org.jake.java;
+package org.jake.java.utils;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -14,7 +15,6 @@ import org.jake.utils.IterableUtils;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
-import org.junit.runners.model.TestClass;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public final class TestUtils {
@@ -47,7 +47,9 @@ public final class TestUtils {
 		}
 	}
 	
-	
+	/**
+	 *  @return The count of test run.
+	 */
 	public static int launchJunitTests(ClassLoader classLoader, File projectDir) {
 		Collection<Class> classes = getJunitTestClassesInProject(classLoader, projectDir);
 		
@@ -60,6 +62,7 @@ public final class TestUtils {
 		if (isJunit3InClassPath(classLoader)) {
 			int i = 0;
 			for (Class clazz : classes) {
+				System.out.println(clazz);
 				i = i + TestRunner.run(new TestSuite(clazz)).runCount();
 			}
 			return i;
@@ -101,8 +104,7 @@ public final class TestUtils {
 		if (Modifier.isAbstract(candidateClass.getModifiers())) {
 			return false;
 		}
-		TestClass testClass = new TestClass(candidateClass);
-		return !testClass.getAnnotatedMethods(testAnnotation).isEmpty();
+		return hasConcreteTestMethods(candidateClass, testAnnotation);
 	}
 	
 	private static <T> Class<T> load(ClassLoader classLoader, String name) {
@@ -113,8 +115,17 @@ public final class TestUtils {
 		}
 	}
 	
-	
-	
+	private static boolean hasConcreteTestMethods(Class candidateClass, Class<Test> testAnnotation) {
+		for (Method method : candidateClass.getMethods()) {
+			int modifiers = method.getModifiers();
+			if (!Modifier.isAbstract(modifiers) 
+					&& Modifier.isPublic(modifiers)
+					&& method.getAnnotation(testAnnotation) != null) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 
 }

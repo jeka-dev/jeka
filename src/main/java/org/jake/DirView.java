@@ -7,6 +7,13 @@ import java.util.List;
 
 import org.jake.utils.FileUtils;
 
+/**
+ * A directory that may be filtered or not. If there is no <code>Filter</code> than this stands 
+ * simply for a directory. If a filter is defined on, than this stands for only a part of this directory, 
+ * meaning that files or subfolder filtered are not part of this.
+ * 
+ * @author Jerome Angibaud
+ */
 public class DirView implements Iterable<File> {
 
 	private final File base;

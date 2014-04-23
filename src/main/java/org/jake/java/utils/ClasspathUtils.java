@@ -1,4 +1,4 @@
-package org.jake.java;
+package org.jake.java.utils;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jake.JakeBaseBuild;
+import org.jake.java.JakeJarBuild;
 import org.jake.utils.FileUtils;
 import org.jake.utils.IterableUtils;
 

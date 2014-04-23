@@ -1,4 +1,4 @@
-package org.jake.java;
+package org.jake.java.utils;
 
 import java.io.File;
 

@@ -1,11 +1,9 @@
 
 
-import java.io.File;
 import java.net.URLClassLoader;
 
-import org.jake.java.ClasspathUtils;
 import org.jake.java.JakeJarBuild;
-import org.jake.utils.FileUtils;
+import org.jake.java.utils.ClasspathUtils;
 
 public class Build extends JakeJarBuild {
 	
@@ -20,13 +18,11 @@ public class Build extends JakeJarBuild {
 	}
 	
 	@Override
-	public void jar() {
-		super.jar();
-		File jarFile = buildOuputDir().file("jake.jar");
-		FileUtils.zipDir(jarFile, zipLevel(), classDir().getBase(), sourceDir().getBase());
-		logger().info(jarFile.getPath() + " created");
+	protected String jarName() {
+		return this.projectName() + ".jar";
 	}
 	
+			
 	public static void main(String[] args) {
 		ClasspathUtils.getSearchPath((URLClassLoader) Build.class.getClassLoader());
 		new Build().doDefault();
