@@ -11,6 +11,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
+import org.jake.java.ClassFilter;
 import org.jake.utils.IterableUtils;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
@@ -47,12 +48,26 @@ public final class TestUtils {
 		}
 	}
 	
+	public static int launchJunitTests(ClassLoader classLoader, File projectDir) {
+		return launchJunitTests(classLoader, projectDir, ClassFilter.acceptAll());
+	}
+	
+	public static int launchJunitTests(ClassLoader classLoader, File projectDir, ClassFilter classFilter) {
+		Collection<Class> classes = getJunitTestClassesInProject(classLoader, projectDir);
+		Collection<Class> effectiveClasses = new LinkedList<Class>();
+		for (Class clazz : classes) {
+			if (classFilter.accept(clazz)) {
+				effectiveClasses.add(clazz);
+			}
+		}
+		return launchJunitTests(classLoader, effectiveClasses);
+	}
+	
 	/**
 	 *  @return The count of test run.
 	 */
-	public static int launchJunitTests(ClassLoader classLoader, File projectDir) {
-		Collection<Class> classes = getJunitTestClassesInProject(classLoader, projectDir);
-		
+	public static int launchJunitTests(ClassLoader classLoader, Collection<Class> classes) {
+				
 		if (isJunit4InClasspath(classLoader)) {
 			Class[] classArray = IterableUtils.toArray(classes, Class.class);
 			Result result = JUnitCore.runClasses(classArray);

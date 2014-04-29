@@ -25,8 +25,8 @@ public class Filter {
 		return new Filter(FileUtils.asExcludeFileFilter(antPatterns));
 	}
 	
-	public static Filter none() {
-		return new Filter(FileUtils.noneFileFilter());
+	public static Filter acceptAll() {
+		return new Filter(FileUtils.acceptAll());
 	}
 	
 	

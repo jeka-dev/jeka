@@ -34,7 +34,7 @@ public class DirView implements Iterable<File> {
 	}
 	
 	private DirView(File base) {
-		this(base, Filter.none());
+		this(base, Filter.acceptAll());
 	}
 
 	public DirView relative(String relativePath) {
