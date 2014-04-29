@@ -82,7 +82,6 @@ public class JakeJavaBuild extends JakeBaseBuild {
 		super.doDefault();
 		compile();
 		copyResources();
-		
 	}
 	
 
