@@ -3,7 +3,7 @@ package org.jake.java;
 import java.util.regex.Pattern;
 
 /**
- * Filter on <code>Class</code> object. 
+ * Filter on <code>Class</code> objects. 
  * 
  * @author Jerome Angibaud
  */
@@ -97,3 +97,5 @@ public abstract class ClassFilter {
 	
 
 }
+
+
