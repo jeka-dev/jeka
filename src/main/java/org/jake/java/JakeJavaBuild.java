@@ -21,7 +21,7 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	
 	/**
 	 * Specific directory where resources are stored. If resources 
-	 * are only stored along the source files then returns <code>null</code>.
+	 * are only stored along the source files then return <code>null</code>.
 	 */
 	protected DirView resourceDir() {
 		return baseDir().relative("src/main/resources");

@@ -1,4 +1,4 @@
-package org.jake.java;
+package org.jake.java.utils;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -11,6 +11,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
+import org.jake.java.ClassFilter;
 import org.jake.utils.IterableUtils;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
@@ -47,10 +48,26 @@ public final class TestUtils {
 		}
 	}
 	
-	
 	public static int launchJunitTests(ClassLoader classLoader, File projectDir) {
+		return launchJunitTests(classLoader, projectDir, ClassFilter.acceptAll());
+	}
+	
+	public static int launchJunitTests(ClassLoader classLoader, File projectDir, ClassFilter classFilter) {
 		Collection<Class> classes = getJunitTestClassesInProject(classLoader, projectDir);
-		
+		Collection<Class> effectiveClasses = new LinkedList<Class>();
+		for (Class clazz : classes) {
+			if (classFilter.accept(clazz)) {
+				effectiveClasses.add(clazz);
+			}
+		}
+		return launchJunitTests(classLoader, effectiveClasses);
+	}
+	
+	/**
+	 *  @return The count of test run.
+	 */
+	public static int launchJunitTests(ClassLoader classLoader, Collection<Class> classes) {
+				
 		if (isJunit4InClasspath(classLoader)) {
 			Class[] classArray = IterableUtils.toArray(classes, Class.class);
 			Result result = JUnitCore.runClasses(classArray);
@@ -60,6 +77,7 @@ public final class TestUtils {
 		if (isJunit3InClassPath(classLoader)) {
 			int i = 0;
 			for (Class clazz : classes) {
+				System.out.println(clazz);
 				i = i + TestRunner.run(new TestSuite(clazz)).runCount();
 			}
 			return i;
@@ -101,13 +119,7 @@ public final class TestUtils {
 		if (Modifier.isAbstract(candidateClass.getModifiers())) {
 			return false;
 		}
-		Method[] methods = candidateClass.getMethods();
-		for (Method method : methods) {
-			if (method.isAnnotationPresent(Test.class)) {
-				return true;
-			}
-		}
-		return false;
+		return hasConcreteTestMethods(candidateClass, testAnnotation);
 	}
 	
 	private static <T> Class<T> load(ClassLoader classLoader, String name) {
@@ -118,8 +130,17 @@ public final class TestUtils {
 		}
 	}
 	
-	
-	
+	private static boolean hasConcreteTestMethods(Class candidateClass, Class<Test> testAnnotation) {
+		for (Method method : candidateClass.getMethods()) {
+			int modifiers = method.getModifiers();
+			if (!Modifier.isAbstract(modifiers) 
+					&& Modifier.isPublic(modifiers)
+					&& method.getAnnotation(testAnnotation) != null) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 
 }

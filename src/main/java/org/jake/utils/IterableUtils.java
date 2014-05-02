@@ -23,7 +23,7 @@ public class IterableUtils {
 		List<T> list = toList(it);
 		T[] result = (T[]) Array.newInstance(clazz, list.size());
 		int i = 0;
-		for (T t : list) {
+		for (T t : it) {
 			result[i] = t;
 			i++;
 		}

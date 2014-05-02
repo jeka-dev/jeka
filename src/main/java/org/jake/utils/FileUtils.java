@@ -221,7 +221,7 @@ public class FileUtils {
 		};
 	}
 
-	public static FileFilter noneFileFilter() {
+	public static FileFilter acceptAll() {
 		return new FileFilter() {
 
 			@Override
@@ -231,7 +231,7 @@ public class FileUtils {
 
 			@Override
 			public String toString() {
-				return "Nope Filter";
+				return "Accept-All filter";
 			}
 		};
 	}
@@ -367,7 +367,7 @@ public class FileUtils {
 	 * Returns all files contained recursively in the specified directory.
 	 */
 	public static List<File> filesOf(File dir, boolean includeFolder) {
-		return filesOf(dir, noneFileFilter(), includeFolder);
+		return filesOf(dir, acceptAll(), includeFolder);
 	}
 
 	/**

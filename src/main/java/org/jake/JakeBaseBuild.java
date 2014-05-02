@@ -54,7 +54,7 @@ public class JakeBaseBuild {
 	 * The current version for this project. Might look like "0.6.3". 
 	 */
 	protected String version() {
-		return null;
+		return "0.1-SNAPSHOT";
 	}
 	
 	/**
