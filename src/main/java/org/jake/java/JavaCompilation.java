@@ -12,6 +12,7 @@ import javax.tools.ToolProvider;
 
 import org.jake.BuildException;
 import org.jake.DirView;
+import org.jake.utils.FileUtils;
 
 
 public final class JavaCompilation {
@@ -45,11 +46,17 @@ public final class JavaCompilation {
 		options.add(dir.getAbsolutePath());
 	}
 	
+	public void setClasspath(Iterable<File> files) {
+		options.add("-cp");
+		options.add(FileUtils.asPath(files, ";"));
+	}
+	
 	public void addSourceFiles(Iterable<File> files) {
 		for (File file : files) {
 			this.javaSourceFiles.add(file);
 		}
 	}
+	
 	
 	public boolean compile() {
 		Iterable<? extends JavaFileObject> javaFileObjects = 

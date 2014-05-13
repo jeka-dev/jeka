@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -253,6 +254,18 @@ public class FileUtils {
 		int index = absPath.lastIndexOf(File.separator);
 		return absPath.substring(index);
 	}
+	
+	public static String asPath(Iterable<File> files, String separator) {
+		StringBuilder builder = new StringBuilder();
+		Iterator<File> fileIt = files.iterator();
+		while (fileIt.hasNext()) {
+			builder.append(fileIt.next().getAbsolutePath());
+			if (fileIt.hasNext()) {
+				builder.append(separator);
+			}
+		}
+		return builder.toString();
+	}
 
 	public static boolean isAncestor(File ancestorCandidate,
 			File childCandidtate) {
@@ -372,7 +385,6 @@ public class FileUtils {
 
 	/**
 	 * Returns all files contained recursively in the specified directory.
-	 * Folders are not returned.
 	 */
 	public static List<File> filesOf(File dir, FileFilter fileFilter, boolean includeFolders) {
 		final List<File> result = new LinkedList<File>();
@@ -387,6 +399,19 @@ public class FileUtils {
 				result.addAll(filesOf(file, fileFilter, includeFolders));
 			} else {
 				result.add(file);
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Returns count of files contained recursively in the specified directory.
+	 */
+	public static int count(File dir, FileFilter fileFilter, boolean includeFolders) {
+		int result = 0;
+		for (File file : dir.listFiles()) {
+			if ((file.isFile() || includeFolders)  && fileFilter.accept(file)) {
+				result++;
 			}
 		}
 		return result;

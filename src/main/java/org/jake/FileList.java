@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.jake.utils.FileUtils;
@@ -24,6 +26,14 @@ public class FileList implements Iterable<File> {
 	
 	public static FileList of(Iterable<File> files) {
 		return new FileList(files);
+	}
+	
+	public static FileList of(DirViews dirViews) {
+		final List<File> list = new LinkedList<File>();
+		for (DirView dirView : dirViews) {
+			list.addAll(dirView.fileList());
+		}
+		return new FileList(list);
 	}
 	
 	public static FileList empty() {

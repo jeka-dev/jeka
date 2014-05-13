@@ -3,78 +3,112 @@ package org.jake.java;
 import java.io.File;
 
 import org.jake.DirView;
-import org.jake.FileList;
+import org.jake.DirViews;
 import org.jake.Filter;
 import org.jake.JakeBaseBuild;
 
 public class JakeJavaBuild extends JakeBaseBuild {
 	
-	protected static final Filter JAVA_SOURCE_ONLY = Filter.include("**/*.java");
+	protected static final Filter JAVA_SOURCE_ONLY_FILTER = Filter.include("**/*.java");
+	
+	public static final Filter RESOURCE_FILTER = Filter.exclude("**/*.java")
+			.andExcludeAll("**/package.html").andExcludeAll("**/doc-files");
 	
 	/**
-	 * Returns <code>DirVieww>/code> to be used by the default {@link #sourceFiles()}
-	 * method. 
+	 * Returns location of production source code.
 	 */
-	protected DirView sourceDir() {
-		return baseDir().relative("src/main/java");
+	protected DirViews sourceDirs() {
+		return DirViews.of( baseDir().relative("src/main/java") );
 	}
 	
 	/**
-	 * Specific directory where resources are stored. If resources 
-	 * are only stored along the source files then return <code>null</code>.
+	 * Returns location of production resources.
 	 */
-	protected DirView resourceDir() {
-		return baseDir().relative("src/main/resources");
-	}
-	
-	protected Iterable<File> sourceFiles() {
-		return sourceDir().andFilter(JAVA_SOURCE_ONLY);
+	protected DirViews resourceDirs() {
+		return sourceDirs().withFilter(RESOURCE_FILTER).and(baseDir().relative("src/main/resources"));
 	} 
 	
-	public static void main(String[] args) {
-		new JakeJavaBuild().doDefault();
+	/**
+	 * Returns location of test source code.
+	 */
+	protected DirViews testSourceDirs() {
+		return DirViews.of( baseDir().relative("src/test/java") );
 	}
 	
-	protected DirView classDir() {
-		return buildOuputDir().relative("classes").createIfNotExist();
+	/**
+	 * Returns location of test resources.
+	 */
+	protected DirViews testResourceDirs() {
+		return DirViews.of(baseDir().relative("src/test/resources"))
+				.and(testSourceDirs().withFilter(RESOURCE_FILTER));
+	} 
+		
+		
+	protected File classDir() {
+		return buildOuputDir().relative("classes").createIfNotExist().getBase();
 	}
+	
+	protected File testClassDir() {
+		return buildOuputDir().relative("testClasses").createIfNotExist().getBase();
+	}
+	
+	protected BuildPath buildPath() {
+		final DirView libDir = baseDir().relative("/build/libs");
+		return BuildPath
+				.compile(    libDir.include("/*.jar", "/compile/*.jar") )
+				.andRuntime( libDir.include("/runtime/*.jar"))
+				.andTest(    libDir.include("/test/*.jar"))
+				.andProvided(libDir.include("/provided/*.jar"));
+	}
+	
 	
 	// ------------ Operations ------------
 	
-	/**
-	 * Compiles source files returned by {@link #sourceFiles()}.
-	 */
-	public void compile() {
+	
+	protected void compile(DirViews sources, File destination) {
 		JavaCompilation compilation = new JavaCompilation();
-		FileList fileList = FileList.of(sourceFiles());
-	    logger().info("Compiling " + fileList.count() + " source files to " + classDir().path());
-	    compilation.addSourceFiles(fileList);
+		DirViews javaSources = sources.withFilter(JAVA_SOURCE_ONLY_FILTER);
+	    logger().info("Compiling " + javaSources.fileCount(false) + " source files to " + destination.getPath());
+	    compilation.addSourceFiles(javaSources.asIterableFile());
 	    compilation.setOutputDirectory(classDir());
 	    compilation.compileOrFail();
 	    logger().info("Done");
 	}
 	
 	/**
-	 * Copy in {@link #classDir()}
-	 * <ul>
-	 * 		<li>Files located in {@link #sourceDir()} except .java files</li>
-	 * 		<li>Files located in {@link #resourceDir()} if not null</li>
-	 * <ul>
+	 * Compiles production code.
+	 */
+	public void compile() {
+		compile(sourceDirs(), classDir());
+	}
+	
+	/**
+	 * Compiles test code.
+	 */
+	public void compileTest() {
+		compile(testSourceDirs(), testClassDir());
+	}
+	
+	/**
+	 * Copies production resources in <code>class dir</code>. 
 	 */
 	public void copyResources() {
-		logger().info("Coping resource files to " + classDir().getBase().getPath());
-		int count = 0;
-		
-		// Copy resources from source directory
-		if (sourceDir() != null && sourceDir().exists()) {
-			count += sourceDir().andFilter(JAVA_SOURCE_ONLY.reverse()).copyTo(classDir());
-		}
-		
-		// Copy resources from resource directory
-		if (resourceDir() != null && resourceDir().exists()) {
-		//	count += resourceDir().copyTo(classDir());
-		}
+		logger().info("Coping resource files to " + classDir().getPath());
+		int count = resourceDirs().copyTo(classDir());
 		logger().info(count + " file(s) copied");
+	}
+	
+	/**
+	 * Copies test resource in <code>class dir</code>. 
+	 */
+	public void copyTestResources() {
+		logger().info("Coping resource files to " + classDir().getPath());
+		int count = resourceDirs().copyTo(classDir());
+		logger().info(count + " file(s) copied");
+	}
+	
+	public void runUnitTest() {
+		
 	}
 	
 	@Override
@@ -82,6 +116,12 @@ public class JakeJavaBuild extends JakeBaseBuild {
 		super.doDefault();
 		compile();
 		copyResources();
+		compileTest();
+		copyResources();
+	}
+	
+	public static void main(String[] args) {
+		new JakeJavaBuild().doDefault();
 	}
 	
 

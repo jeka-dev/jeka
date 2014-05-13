@@ -3,6 +3,8 @@ package org.jake.java;
 import java.io.File;
 import java.util.zip.ZipOutputStream;
 
+import org.jake.DirView;
+
 public class JakeJarBuild extends JakeJavaBuild {
 	
 	protected String jarName() {
@@ -16,7 +18,7 @@ public class JakeJarBuild extends JakeJavaBuild {
 	public void jar() {
 		logger().info("Creating jar file(s)");
 		File zip = buildOuputDir().file(jarName());
-		classDir().asZip(zip, zipLevel());
+		DirView.of(classDir()).asZip(zip, zipLevel());
 		logger().info(zip.getPath() + " created");
 	}
 	

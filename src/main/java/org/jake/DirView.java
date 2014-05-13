@@ -99,9 +99,26 @@ public class DirView implements Iterable<File> {
 	}
 	
 	
-	public DirView andFilter(Filter filter) {
+	public DirView filter(Filter filter) {
 		return new DirView(base, this.filter.combine(filter));
 	}
+	
+	public DirView include(String ... antPatterns) {
+		return filter(Filter.include(antPatterns));
+	}
+	
+	public DirView exclude(String ... antPatterns) {
+		return filter(Filter.exclude(antPatterns));
+	}
+	
+	public DirViews and(DirView dirView) {
+		return DirViews.of(this, dirView);
+	}
+	
+	public DirViews and(DirViews dirViews) {
+		return DirViews.of(this).and(dirViews);
+	}
+	
 	
 	public List<File> fileList() {
 		return FileUtils.filesOf(base, filter.fileFilter(), false);
@@ -116,6 +133,10 @@ public class DirView implements Iterable<File> {
 		for (File file : this) {
 			printStream.println(file.getPath());
 		}
+	}
+	
+	public int fileCount(boolean includeFolder) {
+		return FileUtils.count(base, filter.fileFilter(), includeFolder);
 	}
 	
 	@Override
