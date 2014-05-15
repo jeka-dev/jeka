@@ -1,9 +1,7 @@
 
 
-import java.net.URLClassLoader;
-
+import org.jake.BuildOption;
 import org.jake.java.JakeJarBuild;
-import org.jake.java.utils.ClasspathUtils;
 
 public class Build extends JakeJarBuild {
 	
@@ -24,7 +22,7 @@ public class Build extends JakeJarBuild {
 	
 			
 	public static void main(String[] args) {
-		ClasspathUtils.getSearchPath((URLClassLoader) Build.class.getClassLoader());
+		BuildOption.set(args);
 		new Build().doDefault();
 	}
 

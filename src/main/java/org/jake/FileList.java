@@ -31,7 +31,7 @@ public class FileList implements Iterable<File> {
 	public static FileList of(DirViews dirViews) {
 		final List<File> list = new LinkedList<File>();
 		for (DirView dirView : dirViews) {
-			list.addAll(dirView.fileList());
+			list.addAll(dirView.listFiles());
 		}
 		return new FileList(list);
 	}
@@ -92,20 +92,6 @@ public class FileList implements Iterable<File> {
 			}
 		}
 		return this;
-	}
-	
-	public FileList retainOnly(Filter filter) {
-		for (Iterator<File> it = this.iterator(); it.hasNext();) {
-			File file = it.next();
-			if(! filter.fileFilter().accept(file)) {
-				it.remove();
-			}
-		}
-		return this;
-	}
-	
-	public FileList retainOnlyFilesEndingBy(final String... suffixes) {
-		return retainOnly(Filter.of(FileUtils.endingBy(suffixes)));
 	}
 	
 

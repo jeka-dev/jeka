@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.zip.ZipOutputStream;
 
 import org.jake.DirView;
+import org.jake.Notifier;
 
 public class JakeJarBuild extends JakeJavaBuild {
 	
@@ -16,10 +17,10 @@ public class JakeJarBuild extends JakeJavaBuild {
 	}
 	
 	public void jar() {
-		logger().info("Creating jar file(s)");
+		Notifier.start("Creating jar file(s)");
 		File zip = buildOuputDir().file(jarName());
 		DirView.of(classDir()).asZip(zip, zipLevel());
-		logger().info(zip.getPath() + " created");
+		Notifier.done(zip.getPath() + " created");
 	}
 	
 	@Override

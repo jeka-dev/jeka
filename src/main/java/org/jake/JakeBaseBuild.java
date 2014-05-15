@@ -23,18 +23,6 @@ public class JakeBaseBuild {
 		LogUtils.setSystemPropertyLevelOr(logger(), getDefaultLogLevel());
 	}
 	
-	private Arguments args;
-	
-	protected JakeBaseBuild withArgs(String[] args) {
-		this.args = Arguments.of(args);
-		return this;
-	}
-	
-	protected Arguments args() {
-		return args;
-	}
-	
-	
 	/**
 	 * The default level to use for the default logger when 
 	 * 'java.util.logging.level' system property is not set. 
@@ -97,9 +85,9 @@ public class JakeBaseBuild {
 	 * Task for cleaning up the output directory.
 	 */
 	public void clean() {
-		logger().info("Cleaning output directory " + buildOuputDir().getBase().getPath() );
+		Notifier.start("Cleaning output directory " + buildOuputDir().getBase().getPath() );
 		FileUtils.deleteDirContent(buildOuputDir().getBase());
-		logger().info("Done");
+		Notifier.done();
 	}
 	
 	/**

@@ -79,7 +79,7 @@ public class FileUtils {
 					}
 				} else { 
 					final File subdir = new File(targetDir, child.getName());
-					if (filter.accept(subdir) && copyEmptyDir) {
+					if (filter.accept(child) && copyEmptyDir) {
 						subdir.mkdirs();
 					}
 					int subCount = copyDir(	child, subdir, filter, copyEmptyDir);
@@ -180,13 +180,15 @@ public class FileUtils {
 		};
 	}
 
-	public static FileFilter asIncludeFileFilter(final String... antPatterns) {
+	public static FileFilter asIncludeFileFilter(final File baseDir,  final String... antPatterns) {
 		return new FileFilter() {
 
 			@Override
 			public boolean accept(File candidate) {
+				final String path = getRelativePath(baseDir, candidate);
 				for (final String antPattern : antPatterns) {
-					boolean match = AntPatternUtils.doMatch(antPattern, candidate.getPath());
+					
+					boolean match = AntPatternUtils.doMatch(antPattern, path);
 					if (match) {
 						return true;
 					}
@@ -201,14 +203,15 @@ public class FileUtils {
 		};
 	}
 
-	public static FileFilter asExcludeFileFilter(final String... antPatterns) {
+	public static FileFilter asExcludeFileFilter(final File baseDir,final String... antPatterns) {
 		return new FileFilter() {
 
 			@Override
 			public boolean accept(File candidate) {
+				final String path = getRelativePath(baseDir, candidate);
 				for (final String antPattern : antPatterns) {
 					if (AntPatternUtils
-							.doMatch(antPattern, candidate.getPath())) {
+							.doMatch(antPattern, path)) {
 						return false;
 					}
 				}
@@ -410,7 +413,15 @@ public class FileUtils {
 	public static int count(File dir, FileFilter fileFilter, boolean includeFolders) {
 		int result = 0;
 		for (File file : dir.listFiles()) {
-			if ((file.isFile() || includeFolders)  && fileFilter.accept(file)) {
+			if (file.isFile() && !fileFilter.accept(file)) {
+				continue;
+			}
+			if (file.isDirectory()) {
+				if (includeFolders) {
+					result++;
+				}
+				result = result + count(file, fileFilter, includeFolders);
+			} else {
 				result++;
 			}
 		}

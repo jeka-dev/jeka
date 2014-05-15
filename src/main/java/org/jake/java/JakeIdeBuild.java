@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
 
+import org.jake.BuildOption;
 import org.jake.JakeBaseBuild;
 import org.jake.java.utils.ClasspathUtils;
 import org.jake.java.utils.TestUtils;
@@ -48,7 +49,8 @@ public class JakeIdeBuild extends JakeBaseBuild {
 	}
 	
 	public static void main(String[] args) {
-		new JakeIdeBuild().withArgs(args).doDefault();
+		BuildOption.set(args);
+		new JakeIdeBuild().doDefault();
 	}
 
 }

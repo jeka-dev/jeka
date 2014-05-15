@@ -6,8 +6,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.utils.IterableUtils;
-
 public class DirViews implements Iterable<DirView> {
 	
 	private final List<DirView> dirViews;
@@ -47,7 +45,9 @@ public class DirViews implements Iterable<DirView> {
 	public int copyTo(File destinationDir) {
 		int count = 0;
 		for (DirView dirView : dirViews) {
-			count += dirView.copyTo(destinationDir);
+			if (dirView.exists()) {
+				count += dirView.copyTo(destinationDir);
+			}
 		}
 		return count;
 	}
@@ -61,20 +61,22 @@ public class DirViews implements Iterable<DirView> {
 	}
 	
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Iterable<File> asIterableFile() {
-		final List iterables = dirViews;
-		return IterableUtils.chainAll(iterables);
+	public List<File> listFiles() {
+		final LinkedList<File> result = new LinkedList<File>();
+		for (DirView dirView : this.dirViews) {
+			if (dirView.getBase().exists()) {
+				result.addAll(dirView.listFiles());
+			}
+		}
+		return result;
 	}
 	
-	public int fileCount(boolean includeFolder) {
+	public int countFiles(boolean includeFolder) {
 		int result = 0;
 		for (DirView dirView : dirViews) {
 			result += dirView.fileCount(includeFolder);
 		}
 		return result;
 	}
-
-	
 	
 }

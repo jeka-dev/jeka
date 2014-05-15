@@ -6,12 +6,13 @@ import org.jake.DirView;
 import org.jake.DirViews;
 import org.jake.Filter;
 import org.jake.JakeBaseBuild;
+import org.jake.Notifier;
 
 public class JakeJavaBuild extends JakeBaseBuild {
 	
 	protected static final Filter JAVA_SOURCE_ONLY_FILTER = Filter.include("**/*.java");
 	
-	public static final Filter RESOURCE_FILTER = Filter.exclude("**/*.java")
+	protected static final Filter RESOURCE_FILTER = Filter.exclude("**/*.java")
 			.andExcludeAll("**/package.html").andExcludeAll("**/doc-files");
 	
 	/**
@@ -55,56 +56,58 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	protected BuildPath buildPath() {
 		final DirView libDir = baseDir().relative("/build/libs");
 		return BuildPath
-				.compile(    libDir.include("/*.jar", "/compile/*.jar") )
-				.andRuntime( libDir.include("/runtime/*.jar"))
-				.andTest(    libDir.include("/test/*.jar"))
-				.andProvided(libDir.include("/provided/*.jar"));
+				.compile(    libDir.include("/*.jar", "compile/*.jar") )
+				.andRuntime( libDir.include("runtime/*.jar"))
+				.andTest(    libDir.include("test/*.jar"))
+				.andProvided(libDir.include("provided/*.jar"));
 	}
 	
 	
 	// ------------ Operations ------------
 	
 	
-	protected void compile(DirViews sources, File destination) {
+	protected void compile(DirViews sources, File destination, Iterable<File> classpath) {
 		JavaCompilation compilation = new JavaCompilation();
 		DirViews javaSources = sources.withFilter(JAVA_SOURCE_ONLY_FILTER);
-	    logger().info("Compiling " + javaSources.fileCount(false) + " source files to " + destination.getPath());
-	    compilation.addSourceFiles(javaSources.asIterableFile());
-	    compilation.setOutputDirectory(classDir());
+		Notifier.start("Compiling " + javaSources.countFiles(false) + " source files to " + destination.getPath());
+	    compilation.addSourceFiles(javaSources.listFiles());
+	    compilation.setClasspath(classpath);
+	    compilation.setOutputDirectory(destination);
 	    compilation.compileOrFail();
-	    logger().info("Done");
+	    Notifier.done();
 	}
 	
 	/**
 	 * Compiles production code.
 	 */
 	public void compile() {
-		compile(sourceDirs(), classDir());
+		compile(sourceDirs(), classDir(), this.buildPath().getComputedCompileLibs());
 	}
 	
 	/**
 	 * Compiles test code.
 	 */
 	public void compileTest() {
-		compile(testSourceDirs(), testClassDir());
+		compile(testSourceDirs(), testClassDir(), 
+				this.buildPath().getComputedTestLibs(this.classDir()));
 	}
 	
 	/**
 	 * Copies production resources in <code>class dir</code>. 
 	 */
 	public void copyResources() {
-		logger().info("Coping resource files to " + classDir().getPath());
+		Notifier.start("Coping resource files to " + classDir().getPath());
 		int count = resourceDirs().copyTo(classDir());
-		logger().info(count + " file(s) copied");
+		Notifier.done(count + " file(s) copied.");
 	}
 	
 	/**
 	 * Copies test resource in <code>class dir</code>. 
 	 */
 	public void copyTestResources() {
-		logger().info("Coping resource files to " + classDir().getPath());
-		int count = resourceDirs().copyTo(classDir());
-		logger().info(count + " file(s) copied");
+		Notifier.start("Coping test resource files to " + testClassDir().getPath());
+		int count = testResourceDirs().copyTo(testClassDir());
+		Notifier.done(count + " file(s) copied.");
 	}
 	
 	public void runUnitTest() {
@@ -117,7 +120,7 @@ public class JakeJavaBuild extends JakeBaseBuild {
 		compile();
 		copyResources();
 		compileTest();
-		copyResources();
+		copyTestResources();
 	}
 	
 	public static void main(String[] args) {

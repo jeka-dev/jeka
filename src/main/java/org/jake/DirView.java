@@ -34,7 +34,7 @@ public class DirView implements Iterable<File> {
 	}
 	
 	private DirView(File base) {
-		this(base, Filter.acceptAll());
+		this(base, Filter.ACCEPT_ALL);
 	}
 
 	public DirView relative(String relativePath) {
@@ -56,7 +56,7 @@ public class DirView implements Iterable<File> {
 	
 	public int copyTo(File destinationDir) {
 		FileUtils.assertDir(destinationDir);
-		return FileUtils.copyDir(base, destinationDir, filter.fileFilter(), true);
+		return FileUtils.copyDir(base, destinationDir, filter.toFileFilter(base), true);
 	}
 	
 	public int copyTo(DirView destinationDir) {
@@ -91,7 +91,8 @@ public class DirView implements Iterable<File> {
 		if (!this.isAncestorOf(file)) {
 			return false;
 		}
-		return this.filter.fileFilter().accept(file);
+		final String relativePath = FileUtils.getRelativePath(base, file);
+		return this.filter.accept(relativePath);
 	}
 	
 	public boolean isAncestorOf(File file) {
@@ -100,7 +101,10 @@ public class DirView implements Iterable<File> {
 	
 	
 	public DirView filter(Filter filter) {
-		return new DirView(base, this.filter.combine(filter));
+		if (this.filter == Filter.ACCEPT_ALL) {
+			return new DirView(base, filter);
+		}
+		return new DirView(base, this.filter.and(filter));
 	}
 	
 	public DirView include(String ... antPatterns) {
@@ -120,13 +124,16 @@ public class DirView implements Iterable<File> {
 	}
 	
 	
-	public List<File> fileList() {
-		return FileUtils.filesOf(base, filter.fileFilter(), false);
+	public List<File> listFiles() {
+		if (!base.exists()) {
+			throw new IllegalStateException("Folder " + base.getAbsolutePath() + " does nor exist.");
+		}
+		return FileUtils.filesOf(base, filter.toFileFilter(base), false);
 	}
 
 	@Override
 	public Iterator<File> iterator() {
-		return fileList().iterator();
+		return listFiles().iterator();
 	}
 	
 	public void print(PrintStream printStream) {
@@ -136,7 +143,7 @@ public class DirView implements Iterable<File> {
 	}
 	
 	public int fileCount(boolean includeFolder) {
-		return FileUtils.count(base, filter.fileFilter(), includeFolder);
+		return FileUtils.count(base, filter.toFileFilter(base), includeFolder);
 	}
 	
 	@Override

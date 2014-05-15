@@ -38,24 +38,24 @@ public final class BuildPath {
 	}
 	
 	public static BuildPath compile(DirViews dirViews) {
-		return new BuildPath(dirViews.asIterableFile(), 
+		return new BuildPath(dirViews.listFiles(), 
 				IterableUtils.emptyFile(), IterableUtils.emptyFile(), IterableUtils.emptyFile());
 	}
 	
 	public BuildPath andRuntime(DirViews dirViews) {
-		return andRuntime(dirViews.asIterableFile());
+		return andRuntime(dirViews.listFiles());
 	}
 	
 	public BuildPath andTest(DirViews dirViews) {
-		return andTest(dirViews.asIterableFile());
+		return andTest(dirViews.listFiles());
 	}
 	
 	public BuildPath andProvided(DirViews dirViews) {
-		return andProvided(dirViews.asIterableFile());
+		return andProvided(dirViews.listFiles());
 	}
 	
 	public BuildPath andCompile(DirViews dirViews) {
-		return andCompile(dirViews.asIterableFile());
+		return andCompile(dirViews.listFiles());
 	}
 	
 	public BuildPath andRuntime(File file) {
@@ -144,8 +144,8 @@ public final class BuildPath {
 	 * Libraries finally used both for compile and run test. 
 	 */
 	@SuppressWarnings("unchecked")
-	public Iterable<File> getComputedTestLibs() {
-		return IterableUtils.chain(compileLibs, providedLibs, runtimeLibs, testLibs);
+	public Iterable<File> getComputedTestLibs(File compiledClassesDir) {
+		return IterableUtils.chain(compiledClassesDir, compileLibs, providedLibs, runtimeLibs, testLibs);
 	}
 	
 	/**

@@ -2,6 +2,7 @@ package org.jake.utils;
 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -45,15 +46,42 @@ public class IterableUtils {
 	}
 	
 	public static <T> Iterable<T> chain(Iterable<T> ... iterables) {
-		return new ChainedIterable<T>(iterables);
+		return chainAll(Arrays.asList(iterables));
 	}
 	
-	public static <T> Iterable<T> chain(Iterable<T> iterables, T ... items) {
-		return chain(iterables, items);
+	@SuppressWarnings("unchecked")
+	public static <T> Iterable<T> chain(Iterable<T> iterable, T ... items) {
+		return chain(iterable, Arrays.asList(items));
+	}
+	
+	public static <T> Iterable<T> chain(T item, Iterable<T> ... iterables) {
+		final List<Iterable<T>> list = new LinkedList<Iterable<T>>();
+		final List<T> single = new ArrayList<T>(3);
+		single.add(item);
+		list.add(single);
+		list.addAll(Arrays.asList(iterables));
+		return chainAll(list);
 	}
 	
 	public static <T> Iterable<T> chainAll(Iterable<Iterable<T>> iterables) {
-		return new ChainedIterable<T>(iterables);
+		final List<Iterable<T>> effectiveIterables = removeEmptyIt(iterables);
+		if (effectiveIterables.isEmpty()) {
+			return Collections.emptyList();
+		}
+		if (effectiveIterables.size() == 1) {
+			return effectiveIterables.get(0);
+		}
+		return new ChainedIterable<T>(effectiveIterables);
+	}
+	
+	private static <T> List<Iterable<T>> removeEmptyIt(Iterable<Iterable<T>> iterables) {
+		List<Iterable<T>> result = new LinkedList<Iterable<T>>();
+		for (Iterable<T> iterable : iterables) {
+			if (iterable.iterator().hasNext()) {
+				result.add(iterable);
+			}
+		}
+		return result;
 	}
 	
 	public static final class ChainedIterable<T> implements Iterable<T> {
@@ -130,6 +158,7 @@ public class IterableUtils {
 		}
 		
 	}
+	
 	
 	
 
