@@ -97,5 +97,3 @@ public abstract class ClassFilter {
 	
 
 }
-
-
