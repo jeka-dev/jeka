@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class IterableUtils {
 	
@@ -160,6 +161,13 @@ public class IterableUtils {
 	}
 	
 	
-	
+	/**
+	 * Convenient method to put several entry in a map having the same value at once.
+	 */
+	public static <K, V> void putMultiEntry(Map<K,V> map, Iterable<K> keys, V value) {
+		for (K key : keys) {
+			map.put(key, value);
+		}
+	}
 
 }

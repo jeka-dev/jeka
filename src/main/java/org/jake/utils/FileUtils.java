@@ -239,6 +239,21 @@ public class FileUtils {
 			}
 		};
 	}
+	
+	public static FileFilter acceptOnly(final File fileToAccept) {
+		return new FileFilter() {
+
+			@Override
+			public boolean accept(File pathname) {
+				return pathname.equals(fileToAccept);
+			}
+
+			@Override
+			public String toString() {
+				return "Accept only " + fileToAccept.getAbsolutePath();
+			}
+		};
+	}
 
 	public static void deleteDirContent(File dir) {
 		File[] files = dir.listFiles();
@@ -390,6 +405,7 @@ public class FileUtils {
 	 * Returns all files contained recursively in the specified directory.
 	 */
 	public static List<File> filesOf(File dir, FileFilter fileFilter, boolean includeFolders) {
+		assertDir(dir);
 		final List<File> result = new LinkedList<File>();
 		for (File file : dir.listFiles()) {
 			if (file.isFile() && !fileFilter.accept(file)) {

@@ -60,10 +60,10 @@ public class DirView implements Iterable<File> {
 	}
 	
 	public int copyTo(DirView destinationDir) {
-		return copyTo(destinationDir.getBase());
+		return copyTo(destinationDir.root());
 	}
 
-	public File getBase() {
+	public File root() {
 		return base;
 	}
 	

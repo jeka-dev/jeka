@@ -1,8 +1,10 @@
 package org.jake.java.utils;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +14,7 @@ import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
 import org.jake.java.ClassFilter;
+import org.jake.utils.FileUtils;
 import org.jake.utils.IterableUtils;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
@@ -30,7 +33,7 @@ public final class TestUtils {
 	
 	
 	
-	public static boolean isJunit4InClasspath(ClassLoader classLoader)  {
+	public static boolean isJunit4In(ClassLoader classLoader)  {
 		try {
 			classLoader.loadClass(JUNIT4_RUNNER_CLASS_NAME);
 			return true;
@@ -39,7 +42,7 @@ public final class TestUtils {
 		}
 	}
 	
-	public static boolean isJunit3InClassPath(ClassLoader classLoader) {
+	public static boolean isJunit3In(ClassLoader classLoader) {
 		try {
 			classLoader.loadClass(JUNIT3_RUNNER_CLASS_NAME);
 			return true;
@@ -48,12 +51,35 @@ public final class TestUtils {
 		}
 	}
 	
-	public static int launchJunitTests(ClassLoader classLoader, File projectDir) {
-		return launchJunitTests(classLoader, projectDir, ClassFilter.acceptAll());
+	/**
+	 * Launches every <code>JUnit</code> test found in the <code>URLClassLoader</code>. Only filtered entries 
+	 * of the classloader are taken in account. 
+	 * 
+	 * @see #launchJunitTests(ClassLoader, File, ClassFilter)
+	 */
+	public static int launchJunitTests(URLClassLoader classLoader, File entry) {
+		return launchJunitTests(classLoader, FileUtils.acceptAll(), ClassFilter.acceptAll());
 	}
 	
-	public static int launchJunitTests(ClassLoader classLoader, File projectDir, ClassFilter classFilter) {
-		Collection<Class> classes = getJunitTestClassesInProject(classLoader, projectDir);
+	/**
+	 * Launches every <code>JUnit</code> test found in the <code>URLClassLoader</code>. Only filtered entries 
+	 * of the classloader are taken in account. 
+	 * 
+	 * @see #launchJunitTests(ClassLoader, File, ClassFilter)
+	 */
+	public static int launchJunitTests(URLClassLoader classLoader, FileFilter entryFilter) {
+		return launchJunitTests(classLoader, entryFilter, ClassFilter.acceptAll());
+	}
+	
+	/**
+	 * Launches every <code>JUnit</code> test found in the <code>URLClassLoader</code> that conform to :
+	 * <ul>
+	 * <li>The class test belong to a a classloader entry that match the <code>entryFilter</code>passed as parameter</li>
+	 * <li>The class conform to the <code>classFilter</code> passed as parameter.</li>
+	 * </ul>
+	 */
+	public static int launchJunitTests(URLClassLoader classLoader, FileFilter entryFilter, ClassFilter classFilter) {
+		Collection<Class> classes = getJunitTestClassesInProject(classLoader, entryFilter);
 		Collection<Class> effectiveClasses = new LinkedList<Class>();
 		for (Class clazz : classes) {
 			if (classFilter.accept(clazz)) {
@@ -64,17 +90,17 @@ public final class TestUtils {
 	}
 	
 	/**
-	 *  @return The count of test run.
+	 * Launches <code>JUnit</code> test fon lasses passed as parameter. Tests are launched using the given classloader. 
 	 */
 	public static int launchJunitTests(ClassLoader classLoader, Collection<Class> classes) {
 				
-		if (isJunit4InClasspath(classLoader)) {
+		if (isJunit4In(classLoader)) {
 			Class[] classArray = IterableUtils.toArray(classes, Class.class);
 			Result result = JUnitCore.runClasses(classArray);
 			return result.getRunCount();
 		
 		} 
-		if (isJunit3InClassPath(classLoader)) {
+		if (isJunit3In(classLoader)) {
 			int i = 0;
 			for (Class clazz : classes) {
 				System.out.println(clazz);
@@ -85,11 +111,10 @@ public final class TestUtils {
 		return 0;
 	}
 	
-	public static Collection<Class> getJunitTestClassesInProject(ClassLoader classLoader, File projectDir) {
-		File entry = ClasspathUtils.getClassEntryInsideProject(projectDir).get(0);
-		Iterable<Class> classes = ClasspathUtils.getAllTopLevelClasses(classLoader, entry);
+	public static Collection<Class> getJunitTestClassesInProject(URLClassLoader classLoader, FileFilter entryFilter) {
+		final Iterable<Class> classes = ClassloaderUtils.getAllTopLevelClasses(classLoader, entryFilter);
 		List<Class> testClasses = new LinkedList<Class>();
-		if (isJunit4InClasspath(classLoader)) {
+		if (isJunit4In(classLoader)) {
 			Class<Test> testAnnotation = load(classLoader, JUNIT4_TEST_ANNOTATION_CLASS_NAME);
 			Class<TestCase> testCaseClass = load(classLoader, JUNIT3_TEST_CASE_CLASS_NAME);
 			for (Class clazz : classes) {
@@ -97,7 +122,7 @@ public final class TestUtils {
 					testClasses.add(clazz);
 				}
 			}
-		} else if (isJunit3InClassPath(classLoader)) {
+		} else if (isJunit3In(classLoader)) {
 			Class<TestCase> testCaseClass = load(classLoader, JUNIT3_TEST_CASE_CLASS_NAME);
 			for (Class clazz : classes) {
 				if (isJunit3Test(clazz, testCaseClass)) {
@@ -141,6 +166,8 @@ public final class TestUtils {
 		}
 		return false;
 	}
+	
+	
 	
 
 }
