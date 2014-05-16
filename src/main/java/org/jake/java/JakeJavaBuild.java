@@ -1,12 +1,16 @@
 package org.jake.java;
 
 import java.io.File;
+import java.net.URLClassLoader;
 
 import org.jake.DirView;
 import org.jake.DirViews;
 import org.jake.Filter;
 import org.jake.JakeBaseBuild;
 import org.jake.Notifier;
+import org.jake.java.utils.ClassloaderUtils;
+import org.jake.java.utils.TestUtils;
+import org.jake.utils.FileUtils;
 
 public class JakeJavaBuild extends JakeBaseBuild {
 	
@@ -46,11 +50,11 @@ public class JakeJavaBuild extends JakeBaseBuild {
 		
 		
 	protected File classDir() {
-		return buildOuputDir().relative("classes").createIfNotExist().getBase();
+		return buildOuputDir().relative("classes").createIfNotExist().root();
 	}
 	
 	protected File testClassDir() {
-		return buildOuputDir().relative("testClasses").createIfNotExist().getBase();
+		return buildOuputDir().relative("testClasses").createIfNotExist().root();
 	}
 	
 	protected BuildPath buildPath() {
@@ -110,8 +114,11 @@ public class JakeJavaBuild extends JakeBaseBuild {
 		Notifier.done(count + " file(s) copied.");
 	}
 	
-	public void runUnitTest() {
-		
+	public void runUnitTests() {
+		Notifier.start("Launching JUnit Tests");
+		final URLClassLoader classLoader = ClassloaderUtils.createFrom(this.buildPath().getComputedTestLibs(testClassDir()));
+		int count = TestUtils.launchJunitTests(classLoader, FileUtils.acceptOnly(testClassDir()));
+		Notifier.done(count + " test(s) Launched.");	
 	}
 	
 	@Override
@@ -121,6 +128,7 @@ public class JakeJavaBuild extends JakeBaseBuild {
 		copyResources();
 		compileTest();
 		copyTestResources();
+		runUnitTests();
 	}
 	
 	public static void main(String[] args) {

@@ -34,7 +34,7 @@ public final class JavaCompilation {
 	}
 	
 	public void setOutputDirectory(DirView dir) {
-		setOutputDirectory(dir.getBase());
+		setOutputDirectory(dir.root());
 	}
 	
 	public void setOutputDirectory(File dir) {

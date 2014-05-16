@@ -39,7 +39,7 @@ public class DirViews implements Iterable<DirView> {
 	}
 	
 	public int copyTo(DirView destinationDir) {
-		return this.copyTo(destinationDir.getBase());
+		return this.copyTo(destinationDir.root());
 	}
 	
 	public int copyTo(File destinationDir) {
@@ -64,7 +64,7 @@ public class DirViews implements Iterable<DirView> {
 	public List<File> listFiles() {
 		final LinkedList<File> result = new LinkedList<File>();
 		for (DirView dirView : this.dirViews) {
-			if (dirView.getBase().exists()) {
+			if (dirView.root().exists()) {
 				result.addAll(dirView.listFiles());
 			}
 		}

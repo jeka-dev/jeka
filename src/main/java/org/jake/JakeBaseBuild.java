@@ -60,7 +60,7 @@ public class JakeBaseBuild {
 	 * The project name. This is likely to used in produced artefacts. 
 	 */
 	protected String projectName() {
-		return FileUtils.fileName(baseDir().getBase());
+		return FileUtils.fileName(baseDir().root());
 	}
 	
 	/**
@@ -85,8 +85,8 @@ public class JakeBaseBuild {
 	 * Task for cleaning up the output directory.
 	 */
 	public void clean() {
-		Notifier.start("Cleaning output directory " + buildOuputDir().getBase().getPath() );
-		FileUtils.deleteDirContent(buildOuputDir().getBase());
+		Notifier.start("Cleaning output directory " + buildOuputDir().root().getPath() );
+		FileUtils.deleteDirContent(buildOuputDir().root());
 		Notifier.done();
 	}
 	
