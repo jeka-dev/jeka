@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -37,23 +38,26 @@ public class FileUtils {
 		}
 		return result;
 	}
-	
+
 	public static String getRelativePath(File baseDir, File file) {
 		String baseDirPath = canonicalPath(baseDir);
 		String filePath = canonicalPath(file);
 		if (!filePath.startsWith(baseDirPath)) {
-			throw new IllegalArgumentException("File " + filePath + " is not part of " + baseDirPath);
+			throw new IllegalArgumentException("File " + filePath
+					+ " is not part of " + baseDirPath);
 		}
-		String relativePath = filePath.substring(baseDirPath.length() +1);
+		String relativePath = filePath.substring(baseDirPath.length() + 1);
 		return relativePath;
 	}
 
-	public static int copyDir(File source, File targetDir, FileFilter filter, boolean copyEmptyDir) {
-		
+	public static int copyDir(File source, File targetDir, FileFilter filter,
+			boolean copyEmptyDir) {
+
 		assertDir(source);
 		if (source.equals(targetDir)) {
 			throw new IllegalArgumentException(
-					"Base and destination directory can't be the same : " + source.getPath());
+					"Base and destination directory can't be the same : "
+							+ source.getPath());
 		}
 		if (isAncestor(source, targetDir) && filter.accept(targetDir)) {
 			throw new IllegalArgumentException("Base filtered directory "
@@ -63,39 +67,41 @@ public class FileUtils {
 					+ ". Narrow filter or change the target directory.");
 		}
 		if (targetDir.isFile()) {
-			throw new IllegalArgumentException(targetDir.getPath() + " is file. Should be directory");
+			throw new IllegalArgumentException(targetDir.getPath()
+					+ " is file. Should be directory");
 		}
-		
-				
+
 		final File[] children = source.listFiles();
 		int count = 0;
 		for (int i = 0; i < children.length; i++) {
 			File child = children[i];
-				if (child.isFile()) {
-					if (filter.accept(child)) {
-						final File targetFile = new File(targetDir, child.getName());
-					    copyFile(child, targetFile);
-					    count ++;
-					}
-				} else { 
-					final File subdir = new File(targetDir, child.getName());
-					if (filter.accept(child) && copyEmptyDir) {
-						subdir.mkdirs();
-					}
-					int subCount = copyDir(	child, subdir, filter, copyEmptyDir);
-					count = count + subCount;
+			if (child.isFile()) {
+				if (filter.accept(child)) {
+					final File targetFile = new File(targetDir, child.getName());
+					copyFile(child, targetFile);
+					count++;
 				}
-				
+			} else {
+				final File subdir = new File(targetDir, child.getName());
+				if (filter.accept(child) && copyEmptyDir) {
+					subdir.mkdirs();
+				}
+				int subCount = copyDir(child, subdir, filter, copyEmptyDir);
+				count = count + subCount;
+			}
+
 		}
 		return count;
 	}
-	
+
 	public static void copyFile(File from, File to) {
 		if (!from.exists()) {
-			throw new IllegalArgumentException("File " + from.getPath()+ " does not exist.");
+			throw new IllegalArgumentException("File " + from.getPath()
+					+ " does not exist.");
 		}
 		if (from.isDirectory()) {
-			throw new IllegalArgumentException(from.getPath() + " is a directory. Should be a path.");
+			throw new IllegalArgumentException(from.getPath()
+					+ " is a directory. Should be a path.");
 		}
 		try {
 			InputStream in = new FileInputStream(from);
@@ -116,13 +122,11 @@ public class FileUtils {
 			out.close();
 		} catch (IOException e) {
 			throw new RuntimeException(
-					"IO exception occured while copying file "
-							+ from.getPath() + " to "
-							+ to.getPath(), e);
+					"IO exception occured while copying file " + from.getPath()
+							+ " to " + to.getPath(), e);
 		}
-		
+
 	}
-	
 
 	public static FileFilter endingBy(final String... suffixes) {
 		return new FileFilter() {
@@ -180,14 +184,15 @@ public class FileUtils {
 		};
 	}
 
-	public static FileFilter asIncludeFileFilter(final File baseDir,  final String... antPatterns) {
+	public static FileFilter asIncludeFileFilter(final File baseDir,
+			final String... antPatterns) {
 		return new FileFilter() {
 
 			@Override
 			public boolean accept(File candidate) {
 				final String path = getRelativePath(baseDir, candidate);
 				for (final String antPattern : antPatterns) {
-					
+
 					boolean match = AntPatternUtils.doMatch(antPattern, path);
 					if (match) {
 						return true;
@@ -203,15 +208,15 @@ public class FileUtils {
 		};
 	}
 
-	public static FileFilter asExcludeFileFilter(final File baseDir,final String... antPatterns) {
+	public static FileFilter asExcludeFileFilter(final File baseDir,
+			final String... antPatterns) {
 		return new FileFilter() {
 
 			@Override
 			public boolean accept(File candidate) {
 				final String path = getRelativePath(baseDir, candidate);
 				for (final String antPattern : antPatterns) {
-					if (AntPatternUtils
-							.doMatch(antPattern, path)) {
+					if (AntPatternUtils.doMatch(antPattern, path)) {
 						return false;
 					}
 				}
@@ -239,7 +244,7 @@ public class FileUtils {
 			}
 		};
 	}
-	
+
 	public static FileFilter acceptOnly(final File fileToAccept) {
 		return new FileFilter() {
 
@@ -272,7 +277,7 @@ public class FileUtils {
 		int index = absPath.lastIndexOf(File.separator);
 		return absPath.substring(index);
 	}
-	
+
 	public static String asPath(Iterable<File> files, String separator) {
 		StringBuilder builder = new StringBuilder();
 		Iterator<File> fileIt = files.iterator();
@@ -298,10 +303,10 @@ public class FileUtils {
 			}
 		}
 	}
-	
+
 	public static boolean isSame(File file1, File file2) {
 		return canonicalFile(file1).equals(canonicalFile(file2));
-	} 
+	}
 
 	/**
 	 * A 'checked exception free' version of {@link File#getCanonicalPath()}.
@@ -313,7 +318,7 @@ public class FileUtils {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	/**
 	 * A 'checked exception free' version of {@link File#getCanonicalFile()}.
 	 */
@@ -324,7 +329,7 @@ public class FileUtils {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	public static void zipDir(File zipFile, int zipLevel, File... dirs) {
 		zipDir(zipFile, zipLevel, Arrays.asList(dirs));
 	}
@@ -339,16 +344,10 @@ public class FileUtils {
 	 */
 	public static void zipDir(File zipFile, int zipLevel, Iterable<File> dirs) {
 
-		FileOutputStream fos;
+		final ZipOutputStream zos = createZipOutputStream(zipFile, zipLevel);
 		try {
-			if (!zipFile.exists()) {
-				zipFile.createNewFile();
-			}
-			fos = new FileOutputStream(zipFile);
-			ZipOutputStream zos = new ZipOutputStream(fos);
-			zos.setLevel(zipLevel);
 			for (File dir : dirs) {
-				addFolder(zos, canonicalPath(dir), canonicalPath(dir));
+				addZipEntry(zos, dir, dir);
 			}
 			zos.close();
 		} catch (IOException e) {
@@ -357,18 +356,42 @@ public class FileUtils {
 
 	}
 
-	private static void addFolder(ZipOutputStream zos, String fileName,
-			String baseFolderName) throws IOException {
+	public static ZipOutputStream createZipOutputStream(File file,
+			int compressLevel) {
+		try {
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			final FileOutputStream fos = new FileOutputStream(file);
+			final ZipOutputStream zos = new ZipOutputStream(fos);
+			zos.setLevel(compressLevel);
+			return zos;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 
-		final File fileToZip = new File(fileName);
+	}
+
+	/**
+	 * Add a zip entry into the provided <code>ZipOutputStream</code>. The zip
+	 * entry is the part of <code>filePathToZip</code> truncated with the
+	 * <code>baseFolderPath</code>.
+	 * <p>
+	 * So a file or folder <code>c:\my\base\folder\my\file\to\zip.txt</code>
+	 * will be added in archive using <code>my/file/to/zip.txt</code> entry.
+	 */
+	public static void addZipEntry(ZipOutputStream zos, File fileToZip,
+			File baseFolder) {
+
 		if (fileToZip.isDirectory()) {
 			final File[] files = fileToZip.listFiles();
 			for (int i = 0; i < files.length; i++) {
-				addFolder(zos, files[i].getAbsolutePath(), baseFolderName);
+				addZipEntry(zos, files[i], baseFolder);
 			}
 		} else {
-			String entryName = fileName.substring(baseFolderName.length() + 1,
-					fileName.length());
+			String filePathToZip = canonicalPath(fileToZip);
+			String entryName = filePathToZip.substring(
+					canonicalPath(baseFolder).length() + 1, filePathToZip.length());
 			entryName = entryName.replace(File.separatorChar, '/');
 
 			ZipEntry zipEntry = new ZipEntry(entryName);
@@ -378,19 +401,31 @@ public class FileUtils {
 
 				// Ignore duplicate entry - no overwriting
 				return;
+			} catch (IOException e) {
+				throw new RuntimeException("Error while adding zip entry "
+						+ zipEntry, e);
 			}
-			FileInputStream in = new FileInputStream(fileName);
+			FileInputStream in;
+			try {
+				in = new FileInputStream(filePathToZip);
+			} catch (FileNotFoundException e) {
+				throw new IllegalStateException(e);
+			}
 			int buffer = 2048;
 			BufferedInputStream bufferedInputStream = new BufferedInputStream(
 					in, buffer);
 			int count;
-			byte data[] = new byte[buffer];
-			while ((count = bufferedInputStream.read(data, 0, buffer)) != -1) {
-				zos.write(data, 0, count);
+			try {
+				byte data[] = new byte[buffer];
+				while ((count = bufferedInputStream.read(data, 0, buffer)) != -1) {
+					zos.write(data, 0, count);
+				}
+				bufferedInputStream.close();
+				in.close();
+				zos.closeEntry();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-			bufferedInputStream.close();
-			in.close();
-			zos.closeEntry();
 		}
 	}
 
@@ -404,7 +439,8 @@ public class FileUtils {
 	/**
 	 * Returns all files contained recursively in the specified directory.
 	 */
-	public static List<File> filesOf(File dir, FileFilter fileFilter, boolean includeFolders) {
+	public static List<File> filesOf(File dir, FileFilter fileFilter,
+			boolean includeFolders) {
 		assertDir(dir);
 		final List<File> result = new LinkedList<File>();
 		for (File file : dir.listFiles()) {
@@ -422,11 +458,12 @@ public class FileUtils {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Returns count of files contained recursively in the specified directory.
 	 */
-	public static int count(File dir, FileFilter fileFilter, boolean includeFolders) {
+	public static int count(File dir, FileFilter fileFilter,
+			boolean includeFolders) {
 		int result = 0;
 		for (File file : dir.listFiles()) {
 			if (file.isFile() && !fileFilter.accept(file)) {
