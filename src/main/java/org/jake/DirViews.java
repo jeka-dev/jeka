@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.zip.Deflater;
 
 public class DirViews implements Iterable<DirView> {
 	
@@ -77,6 +78,14 @@ public class DirViews implements Iterable<DirView> {
 			result += dirView.fileCount(includeFolder);
 		}
 		return result;
+	}
+	
+	public void zip(File destFile, int zipLevel) {
+		Zip.of(this).create(destFile, zipLevel);
+	}
+	
+	public void zip(File destFile) {
+		this.zip(destFile, Deflater.DEFAULT_COMPRESSION);;
 	}
 	
 }

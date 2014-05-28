@@ -17,7 +17,7 @@ public class Build extends JakeJarBuild {
 	
 	@Override
 	protected String jarName() {
-		return this.projectName() + ".jar";  // Don't need the version info within the name
+		return this.projectName();  // Don't need the version info within the name
 	}
 	
 			

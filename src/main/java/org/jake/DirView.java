@@ -79,7 +79,7 @@ public class DirView implements Iterable<File> {
 		return base.getPath();
 	}
 
-	public void asZip(File zipFile, int compressLevel) {
+	public void zip(File zipFile, int compressLevel) {
 		FileUtils.zipDir(zipFile, compressLevel, base);
 	}
 	
