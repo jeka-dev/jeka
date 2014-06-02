@@ -11,6 +11,7 @@ import org.jake.Notifier;
 import org.jake.java.utils.ClassloaderUtils;
 import org.jake.java.utils.TestUtils;
 import org.jake.utils.FileUtils;
+import org.jake.utils.IterableUtils;
 
 public class JakeJavaBuild extends JakeBaseBuild {
 	
@@ -57,13 +58,14 @@ public class JakeJavaBuild extends JakeBaseBuild {
 		return buildOuputDir().relative("testClasses").createIfNotExist().root();
 	}
 	
-	protected BuildPath buildPath() {
+	protected DependencyResolver dependenciesPath() {
 		final DirView libDir = baseDir().relative("/build/libs");
-		return BuildPath
-				.compile(    libDir.include("/*.jar", "compile/*.jar") )
-				.andRuntime( libDir.include("runtime/*.jar"))
-				.andTest(    libDir.include("test/*.jar"))
-				.andProvided(libDir.include("provided/*.jar"));
+		return LocalDependencyResolver
+				.compileAndRuntime(libDir.include("/*.jar") )
+				.withCompileOnly(  libDir.include("compile-only/*.jar"))
+				.withRuntimeOnly(  libDir.include("runtime-only/*.jar"))
+				.withTest(         libDir.include("test/*.jar"));
+				
 	}
 	
 	
@@ -85,15 +87,16 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	 * Compiles production code.
 	 */
 	public void compile() {
-		compile(sourceDirs(), classDir(), this.buildPath().getComputedCompileLibs());
+		compile(sourceDirs(), classDir(), this.dependenciesPath().compileDependencies());
 	}
 	
 	/**
 	 * Compiles test code.
 	 */
+	@SuppressWarnings("unchecked")
 	public void compileTest() {
 		compile(testSourceDirs(), testClassDir(), 
-				this.buildPath().getComputedTestLibs(this.classDir()));
+				IterableUtils.concatToList(this.classDir(), this.dependenciesPath().testDependencies()));
 	}
 	
 	/**
@@ -114,9 +117,11 @@ public class JakeJavaBuild extends JakeBaseBuild {
 		Notifier.done(count + " file(s) copied.");
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void runUnitTests() {
 		Notifier.start("Launching JUnit Tests");
-		final URLClassLoader classLoader = ClassloaderUtils.createFrom(this.buildPath().getComputedTestLibs(testClassDir()));
+		final URLClassLoader classLoader = ClassloaderUtils.createFrom(
+				IterableUtils.concatToList(this.testClassDir(), this.dependenciesPath().testDependencies()));
 		int count = TestUtils.launchJunitTests(classLoader, FileUtils.acceptOnly(testClassDir()));
 		Notifier.done(count + " test(s) Launched.");	
 	}

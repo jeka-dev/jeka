@@ -16,10 +16,13 @@ public class IterableUtils {
 		return Collections.emptyList();
 	}
 	
-	public static <T> Iterable<T> single(T item) {
+	public static <T> List<T> single(T item) {
+		if (item == null) {
+			return Collections.emptyList();
+		}
 		final List<T> result = new LinkedList<T>();
 		result.add(item);
-		return result;
+		return Collections.unmodifiableList(result);
 	}
 	
 	
@@ -169,5 +172,25 @@ public class IterableUtils {
 			map.put(key, value);
 		}
 	}
+	
+	public static <T> List<T> concatLists(Iterable<? extends T> ...lists) {
+		final List<T> result = new LinkedList<T>();
+		for (Iterable<? extends T> list : lists) {
+			for (T item : list) {
+				result.add(item);
+			}
+		}
+		return result;
+	} 
+	
+	
+	public static <T> List<T> concatToList(T item, Iterable<? extends T> ...lists) {
+		final List<T> result = new LinkedList<T>();
+		result.add(item);
+		result.addAll(concatLists(lists));
+		return result;
+	}
+	
+	
 
 }

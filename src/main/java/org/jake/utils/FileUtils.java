@@ -11,11 +11,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 public class FileUtils {
@@ -371,6 +373,21 @@ public class FileUtils {
 		}
 
 	}
+	
+	public static void mergeZip(ZipOutputStream zos, ZipFile zipFile) {
+		final Enumeration<? extends ZipEntry> entries = zipFile.entries();
+	    while (entries.hasMoreElements()) {
+	    	final ZipEntry e = entries.nextElement();
+	    	try {
+				zos.putNextEntry(new ZipEntry(e.getName()));
+				if (!e.isDirectory()) {
+		    		addEntryInputStream(zos, e.getName(), zipFile.getInputStream(e));;
+			    }
+			} catch (IOException e1) {
+				throw new RuntimeException("Error while merging entry " + e.getName() + " from zip file " + zipFile.getName(), e1);
+			}
+	    }
+	}
 
 	/**
 	 * Add a zip entry into the provided <code>ZipOutputStream</code>. The zip
@@ -393,41 +410,46 @@ public class FileUtils {
 			String entryName = filePathToZip.substring(
 					canonicalPath(baseFolder).length() + 1, filePathToZip.length());
 			entryName = entryName.replace(File.separatorChar, '/');
-
-			ZipEntry zipEntry = new ZipEntry(entryName);
+			final FileInputStream inputStream;
 			try {
-				zos.putNextEntry(zipEntry);
-			} catch (ZipException e) {
-
-				// Ignore duplicate entry - no overwriting
-				return;
-			} catch (IOException e) {
-				throw new RuntimeException("Error while adding zip entry "
-						+ zipEntry, e);
-			}
-			FileInputStream in;
-			try {
-				in = new FileInputStream(filePathToZip);
+				inputStream = new FileInputStream(filePathToZip);
 			} catch (FileNotFoundException e) {
 				throw new IllegalStateException(e);
 			}
-			int buffer = 2048;
-			BufferedInputStream bufferedInputStream = new BufferedInputStream(
-					in, buffer);
-			int count;
-			try {
-				byte data[] = new byte[buffer];
-				while ((count = bufferedInputStream.read(data, 0, buffer)) != -1) {
-					zos.write(data, 0, count);
-				}
-				bufferedInputStream.close();
-				in.close();
-				zos.closeEntry();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			addEntryInputStream(zos, entryName, inputStream);
 		}
 	}
+	
+	private static void addEntryInputStream(ZipOutputStream zos, String entryName, InputStream inputStream) {
+		final ZipEntry zipEntry = new ZipEntry(entryName);
+		try {
+			zos.putNextEntry(zipEntry);
+		} catch (ZipException e) {
+
+			// Ignore duplicate entry - no overwriting
+			return;
+		} catch (IOException e) {
+			throw new RuntimeException("Error while adding zip entry "
+					+ zipEntry, e);
+		}
+		final int buffer = 2048;
+		final BufferedInputStream bufferedInputStream = new BufferedInputStream(
+				inputStream, buffer);
+		int count;
+		try {
+			byte data[] = new byte[buffer];
+			while ((count = bufferedInputStream.read(data, 0, buffer)) != -1) {
+				zos.write(data, 0, count);
+			}
+			bufferedInputStream.close();
+			inputStream.close();
+			zos.closeEntry();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+		
+	
 
 	/**
 	 * Returns all files contained recursively in the specified directory.

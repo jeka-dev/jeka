@@ -79,6 +79,10 @@ public class JakeBaseBuild {
 		return baseDir().relative("build/output").createIfNotExist();
 	}
 	
+	protected File buildOuputDir(String relativePath) {
+		return buildOuputDir().file(relativePath);
+	}
+	
 	// ------------ Operations ------------
 	
 	/**

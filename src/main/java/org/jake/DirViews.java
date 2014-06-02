@@ -88,4 +88,15 @@ public class DirViews implements Iterable<DirView> {
 		this.zip(destFile, Deflater.DEFAULT_COMPRESSION);;
 	}
 	
+	/**
+	 * Convenient method to list files over several <code>DirViews</code>.
+	 */
+	public static List<File> toFiles(DirViews ...dirViewsList) {
+		final List<File> result = new LinkedList<File>();
+		for (DirViews dirViews : dirViewsList) {
+			result.addAll(dirViews.listFiles());
+		}
+		return result;
+	}
+	
 }
