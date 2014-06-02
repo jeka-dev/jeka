@@ -44,6 +44,7 @@ public final class LocalDependencyResolver extends DependencyResolver {
 			.withTest(         libDir.include("test/*.jar"));
 	}
 	
+
 	@SuppressWarnings("unchecked")
 	public static LocalDependencyResolver compileAndRuntime(DirView dirView) {
 		return new LocalDependencyResolver(dirView.listFiles(), 

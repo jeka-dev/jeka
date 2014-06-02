@@ -376,6 +376,7 @@ public class FileUtils {
 
 	}
 	
+
 	public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile) {
 		final Set<String> duplicateEntries = new HashSet<String>();
 		final Enumeration<? extends ZipEntry> entries = zipFile.entries();
@@ -394,6 +395,7 @@ public class FileUtils {
 	    }
 	    return duplicateEntries;
 	}
+
 
 	/**
 	 * Add a zip entry into the provided <code>ZipOutputStream</code>. The zip
@@ -426,6 +428,7 @@ public class FileUtils {
 		}
 	}
 	
+
 	private static boolean addEntryInputStream(ZipOutputStream zos, String entryName, InputStream inputStream) {
 		final ZipEntry zipEntry = new ZipEntry(entryName);
 		try {
@@ -466,7 +469,7 @@ public class FileUtils {
 	} 
 	
 	
-	
+
 
 	/**
 	 * Returns all files contained recursively in the specified directory.
