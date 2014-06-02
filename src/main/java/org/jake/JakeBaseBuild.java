@@ -70,13 +70,21 @@ public class JakeBaseBuild {
 	protected DirView baseDir() {
 		return DirView.of(WORKING_DIR);
 	}
+	
+	protected File baseDir(String relativePath) {
+		return DirView.of(WORKING_DIR).file(relativePath);
+	}
 
 	/**
 	 * The output directory where all the final and intermediate 
 	 * artefacts are generated.  
 	 */
 	protected DirView buildOuputDir() {
-		return baseDir().relative("build/output").createIfNotExist();
+		return baseDir().sub("build/output").createIfNotExist();
+	}
+	
+	protected File buildOuputDir(String relativePath) {
+		return buildOuputDir().file(relativePath);
 	}
 	
 	// ------------ Operations ------------

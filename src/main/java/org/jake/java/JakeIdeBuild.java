@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.net.URLClassLoader;
 import java.util.List;
-import java.util.zip.ZipOutputStream;
+import java.util.zip.Deflater;
 
 import org.jake.BuildOption;
 import org.jake.JakeBaseBuild;
@@ -27,7 +27,7 @@ public class JakeIdeBuild extends JakeBaseBuild {
 	}
 	
 	protected int zipLevel() {
-		return ZipOutputStream.DEFLATED;
+		return Deflater.DEFAULT_COMPRESSION;
 	}
 	
 	public void simpleJar() {

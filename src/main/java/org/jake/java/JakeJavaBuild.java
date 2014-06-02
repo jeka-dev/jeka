@@ -3,7 +3,6 @@ package org.jake.java;
 import java.io.File;
 import java.net.URLClassLoader;
 
-import org.jake.DirView;
 import org.jake.DirViews;
 import org.jake.Filter;
 import org.jake.JakeBaseBuild;
@@ -11,6 +10,7 @@ import org.jake.Notifier;
 import org.jake.java.utils.ClassloaderUtils;
 import org.jake.java.utils.TestUtils;
 import org.jake.utils.FileUtils;
+import org.jake.utils.IterableUtils;
 
 public class JakeJavaBuild extends JakeBaseBuild {
 	
@@ -23,47 +23,42 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	 * Returns location of production source code.
 	 */
 	protected DirViews sourceDirs() {
-		return DirViews.of( baseDir().relative("src/main/java") );
+		return DirViews.of( baseDir().sub("src/main/java") );
 	}
 	
 	/**
 	 * Returns location of production resources.
 	 */
 	protected DirViews resourceDirs() {
-		return sourceDirs().withFilter(RESOURCE_FILTER).and(baseDir().relative("src/main/resources"));
+		return sourceDirs().withFilter(RESOURCE_FILTER).and(baseDir().sub("src/main/resources"));
 	} 
 	
 	/**
 	 * Returns location of test source code.
 	 */
 	protected DirViews testSourceDirs() {
-		return DirViews.of( baseDir().relative("src/test/java") );
+		return DirViews.of( baseDir().sub("src/test/java") );
 	}
 	
 	/**
 	 * Returns location of test resources.
 	 */
 	protected DirViews testResourceDirs() {
-		return DirViews.of(baseDir().relative("src/test/resources"))
+		return DirViews.of(baseDir().sub("src/test/resources"))
 				.and(testSourceDirs().withFilter(RESOURCE_FILTER));
 	} 
 		
 		
 	protected File classDir() {
-		return buildOuputDir().relative("classes").createIfNotExist().root();
+		return buildOuputDir().sub("classes").createIfNotExist().root();
 	}
 	
 	protected File testClassDir() {
-		return buildOuputDir().relative("testClasses").createIfNotExist().root();
+		return buildOuputDir().sub("testClasses").createIfNotExist().root();
 	}
 	
-	protected BuildPath buildPath() {
-		final DirView libDir = baseDir().relative("/build/libs");
-		return BuildPath
-				.compile(    libDir.include("/*.jar", "compile/*.jar") )
-				.andRuntime( libDir.include("runtime/*.jar"))
-				.andTest(    libDir.include("test/*.jar"))
-				.andProvided(libDir.include("provided/*.jar"));
+	protected DependencyResolver dependenciesPath() {
+		return LocalDependencyResolver.standard(baseDir("build/libs"));		
 	}
 	
 	
@@ -85,15 +80,16 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	 * Compiles production code.
 	 */
 	public void compile() {
-		compile(sourceDirs(), classDir(), this.buildPath().getComputedCompileLibs());
+		compile(sourceDirs(), classDir(), this.dependenciesPath().compileDependencies());
 	}
 	
 	/**
 	 * Compiles test code.
 	 */
+	@SuppressWarnings("unchecked")
 	public void compileTest() {
 		compile(testSourceDirs(), testClassDir(), 
-				this.buildPath().getComputedTestLibs(this.classDir()));
+				IterableUtils.concatToList(this.classDir(), this.dependenciesPath().testDependencies()));
 	}
 	
 	/**
@@ -114,9 +110,11 @@ public class JakeJavaBuild extends JakeBaseBuild {
 		Notifier.done(count + " file(s) copied.");
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void runUnitTests() {
 		Notifier.start("Launching JUnit Tests");
-		final URLClassLoader classLoader = ClassloaderUtils.createFrom(this.buildPath().getComputedTestLibs(testClassDir()));
+		final URLClassLoader classLoader = ClassloaderUtils.createFrom(
+				IterableUtils.concatToList(this.testClassDir(), this.dependenciesPath().testDependencies()));
 		int count = TestUtils.launchJunitTests(classLoader, FileUtils.acceptOnly(testClassDir()));
 		Notifier.done(count + " test(s) Launched.");	
 	}

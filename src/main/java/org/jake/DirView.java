@@ -37,7 +37,7 @@ public class DirView implements Iterable<File> {
 		this(base, Filter.ACCEPT_ALL);
 	}
 
-	public DirView relative(String relativePath) {
+	public DirView sub(String relativePath) {
 		File newBase = new File(base, relativePath);
 		
 		return new DirView(newBase);
@@ -150,5 +150,7 @@ public class DirView implements Iterable<File> {
 	public String toString() {
 		return base.getPath() + ":" + filter;
 	}
+	
+	
 	
 }
