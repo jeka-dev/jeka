@@ -37,6 +37,7 @@ public class JakeJarBuild extends JakeJavaBuild {
 	public void doDefault() {
 		super.doDefault();
 		jar();
+		javadoc();
 	}
 	
 	public static void main(String[] args) {

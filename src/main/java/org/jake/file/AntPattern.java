@@ -24,13 +24,14 @@ import org.jake.utils.StringUtils;
 
 
 /**
- * Utils to deal with ant pattern syle using '**', '*' and '?' wildcard.
- * In nutshell : <ul>
+ * Stands for an Ant file pattern. These patterns are used to include or exclude files within a folder. 
+ * In a nutshell : <ul>
  * <li>'**' means any directory</li>
  * <li>'*'  means any sequence or 0 or more characters</li>
  * <li>'?' means any single character</li>
  * </ul>
- * See <a href="http://ant.apache.org/manual/dirtasks.html#patterns">Ant documentation</a>
+ * For example <code>&#42;&#42;/&#42;.java</code> matches <code>foo/subfoo/bar.java</code> <br/>
+ * See <a href="http://ant.apache.org/manual/dirtasks.html#patterns">Ant Pattern documentation</a>
  * 
  * <i><p>Part of this mapping code has been kindly borrowed from
  * <a href="http://ant.apache.org">Apache Ant</a> and 

@@ -136,7 +136,6 @@ public class JakeJavaBuild extends JakeBaseBuild {
 		compileTest();
 		copyTestResources();
 		runUnitTests();
-		javadoc();
 	}
 	
 	public static void main(String[] args) {
