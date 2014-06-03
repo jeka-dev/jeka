@@ -1,4 +1,4 @@
-package org.jake;
+package org.jake.file;
 
 import java.io.File;
 import java.util.Arrays;
@@ -71,6 +71,14 @@ public class DirViews implements Iterable<DirView> {
 		}
 		return result;
 	}
+	
+	public List<File> listRoots() {
+		final List<File> result = new LinkedList<File>();
+		for(DirView dirView : dirViews) {
+			result.add(dirView.root());
+		}
+		return result;
+	} 
 	
 	public int countFiles(boolean includeFolder) {
 		int result = 0;

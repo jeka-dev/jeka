@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jake.utils.FileUtils;
+import org.jake.file.utils.FileUtils;
 import org.jake.utils.IterableUtils;
 
 /**

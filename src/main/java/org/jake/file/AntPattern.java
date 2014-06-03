@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package org.jake.utils;
+package org.jake.file;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jake.utils.StringUtils;
 
 
 /**
@@ -32,20 +36,37 @@ import java.io.File;
  * <a href="http://ant.apache.org">Apache Ant</a> and 
  * <a href="https://github.com/spring-projects/spring-framework">Spring Framework</a></i>
  */
-public class AntPatternUtils  {
+class AntPattern  {
 
 	private static final char PATH_SEPARATOR_CHAR = '/';
 	
 	private static final String PATH_SEPARATOR = "" + PATH_SEPARATOR_CHAR;
+	
+	private final String pattern;
+	
+	private AntPattern(String pattern) {
+		this.pattern = normalize(pattern);
+	}
+	
+	public static AntPattern of(String pattern) {
+		return new AntPattern(pattern);
+	}
+	
+	public static AntPattern[] arrayOf(String ...patterns) {
+		final List<AntPattern> result = new ArrayList<AntPattern>(patterns.length);
+		for (String pattern : patterns) {
+			result.add(AntPattern.of(pattern));
+		}
+		return result.toArray(new AntPattern[0]);
+	}
 
 	
 	/**
 	 * Matches the given <code>path</code> against the given <code>pattern</code>.
 	 */
-	public static boolean doMatch(String pattern, String path) {
+	public boolean doMatch(String path) {
 		
 		// First clean path and pattern to remove leading '/', '.' or '\' characters
-		pattern = normalize(pattern);
 		path = normalize(path);
 		
 		String[] pattDirs = StringUtils.split(pattern, PATH_SEPARATOR);

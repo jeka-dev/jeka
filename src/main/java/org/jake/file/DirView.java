@@ -1,11 +1,11 @@
-package org.jake;
+package org.jake.file;
 
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.List;
 
-import org.jake.utils.FileUtils;
+import org.jake.file.utils.FileUtils;
 
 /**
  * A directory that may be filtered or not. If there is no <code>Filter</code> than this stands 

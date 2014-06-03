@@ -9,9 +9,9 @@ import java.util.zip.Deflater;
 import org.jake.BuildOption;
 import org.jake.JakeBaseBuild;
 import org.jake.Notifier;
+import org.jake.file.utils.FileUtils;
 import org.jake.java.utils.ClassloaderUtils;
 import org.jake.java.utils.TestUtils;
-import org.jake.utils.FileUtils;
 
 /**
  * This build is meant to be executed by the IDE (as Eclipse) in the project context.

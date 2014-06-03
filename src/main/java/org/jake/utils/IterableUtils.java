@@ -1,6 +1,5 @@
 package org.jake.utils;
 
-import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,9 +11,7 @@ import java.util.Map;
 
 public class IterableUtils {
 	
-	public static Iterable<File> emptyFile() {
-		return Collections.emptyList();
-	}
+	
 	
 	public static <T> List<T> single(T item) {
 		if (item == null) {

@@ -1,11 +1,10 @@
-package org.jake;
+package org.jake.file;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
 
-import org.jake.utils.AntPatternUtils;
-import org.jake.utils.FileUtils;
+import org.jake.file.utils.FileUtils;
 
 public abstract class Filter {
 	
@@ -21,11 +20,11 @@ public abstract class Filter {
 	public abstract boolean accept(String relativePath);
 	
 	public static Filter include(String ... antPatterns) {
-		return new IncludeFilter(antPatterns);
+		return new IncludeFilter(AntPattern.arrayOf(antPatterns));
 	}
 	
 	public static Filter exclude(String ... antPatterns) {
-		return new ExcludeFilter(antPatterns);
+		return new ExcludeFilter(AntPattern.arrayOf(antPatterns));
 	}
 		
 	public Filter andIncludeOnly(String ... antPatterns) {
@@ -69,9 +68,9 @@ public abstract class Filter {
 	
 	private static class IncludeFilter extends Filter {
 		
-		private final String[] antPatterns;
+		private final AntPattern[] antPatterns;
 		
-		public IncludeFilter(String[] antPatterns) {
+		public IncludeFilter(AntPattern[] antPatterns) {
 			super();
 			this.antPatterns = antPatterns;
 		}
@@ -79,9 +78,8 @@ public abstract class Filter {
 		@Override
 		public boolean accept(String relativePath) {
 			
-			for (final String antPattern : antPatterns) {
-				
-				boolean match = AntPatternUtils.doMatch(antPattern, relativePath);
+			for (final AntPattern antPattern : antPatterns) {
+				final boolean match = antPattern.doMatch(relativePath);
 				if (match) {
 					return true;
 				}
@@ -97,9 +95,9 @@ public abstract class Filter {
 	
 	private static class ExcludeFilter extends Filter {
 		
-		private final String[] antPatterns;
+		private final AntPattern[] antPatterns;
 		
-		public ExcludeFilter(String[] antPatterns) {
+		public ExcludeFilter(AntPattern[] antPatterns) {
 			super();
 			this.antPatterns = antPatterns;
 		}
@@ -107,9 +105,9 @@ public abstract class Filter {
 		@Override
 		public boolean accept(String relativePath) {
 			
-			for (final String antPattern : antPatterns) {
+			for (final AntPattern antPattern : antPatterns) {
 				
-				boolean match = !AntPatternUtils.doMatch(antPattern, relativePath);
+				boolean match = !antPattern.doMatch(relativePath);
 				if (match) {
 					return true;
 				}

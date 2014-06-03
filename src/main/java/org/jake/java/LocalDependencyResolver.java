@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
-import org.jake.DirView;
-import org.jake.DirViews;
-import org.jake.utils.FileUtils;
+import org.jake.file.DirView;
+import org.jake.file.DirViews;
+import org.jake.file.utils.FileUtils;
 import org.jake.utils.IterableUtils;
 
 public final class LocalDependencyResolver extends DependencyResolver {

@@ -1,4 +1,4 @@
-package org.jake.utils;
+package org.jake.file.utils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -188,51 +188,7 @@ public class FileUtils {
 		};
 	}
 
-	public static FileFilter asIncludeFileFilter(final File baseDir,
-			final String... antPatterns) {
-		return new FileFilter() {
-
-			@Override
-			public boolean accept(File candidate) {
-				final String path = getRelativePath(baseDir, candidate);
-				for (final String antPattern : antPatterns) {
-
-					boolean match = AntPatternUtils.doMatch(antPattern, path);
-					if (match) {
-						return true;
-					}
-				}
-				return false;
-			}
-
-			@Override
-			public String toString() {
-				return "includes" + Arrays.toString(antPatterns);
-			}
-		};
-	}
-
-	public static FileFilter asExcludeFileFilter(final File baseDir,
-			final String... antPatterns) {
-		return new FileFilter() {
-
-			@Override
-			public boolean accept(File candidate) {
-				final String path = getRelativePath(baseDir, candidate);
-				for (final String antPattern : antPatterns) {
-					if (AntPatternUtils.doMatch(antPattern, path)) {
-						return false;
-					}
-				}
-				return true;
-			}
-
-			@Override
-			public String toString() {
-				return "excludes" + Arrays.toString(antPatterns);
-			}
-		};
-	}
+	
 
 	public static FileFilter acceptAll() {
 		return new FileFilter() {

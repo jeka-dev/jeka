@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.zip.Deflater;
 
 import org.jake.Notifier;
-import org.jake.Zip;
+import org.jake.file.Zip;
 
 public class JakeJarBuild extends JakeJavaBuild {
 	

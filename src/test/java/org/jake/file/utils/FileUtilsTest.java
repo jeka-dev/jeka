@@ -1,4 +1,4 @@
-package org.jake.utils;
+package org.jake.file.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -8,6 +8,7 @@ import java.io.FileFilter;
 import java.net.URL;
 import java.util.List;
 
+import org.jake.file.utils.FileUtils;
 import org.junit.Test;
 
 public class FileUtilsTest {
@@ -40,17 +41,6 @@ public class FileUtilsTest {
 		assertEquals(1, files.size());
 	}
 	
-	@Test
-	public void testAsIncludeFilter() throws Exception {
-		URL sampleFileUrl = FileUtilsTest.class.getResource("samplefolder/subfolder/sample.txt");
-		File sampleFile = new File(sampleFileUrl.toURI().getPath());
-		File sampleDir = sampleFile.getParentFile().getParentFile();
-		
-		FileFilter filter = FileUtils.asIncludeFileFilter(sampleDir, "/subfolder/sample.txt");
-		assertTrue(filter.accept(sampleFile));
-		
-		filter = FileUtils.asIncludeFileFilter(sampleDir, "/subfolder/sample.txt");
-		assertTrue(filter.accept(sampleFile));
-	}
+	
 
 }

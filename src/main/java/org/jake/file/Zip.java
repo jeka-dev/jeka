@@ -1,4 +1,4 @@
-package org.jake;
+package org.jake.file;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,10 +6,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.zip.Deflater;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import org.jake.utils.FileUtils;
+import org.jake.file.utils.FileUtils;
 
 public class Zip {
 	
@@ -64,6 +65,10 @@ public class Zip {
 		final List<File> archives = new LinkedList<File>(this.archivestoMerge);
 		archives.addAll(archiveFiles);
 		return new Zip(items, archives);
+	}
+	
+	public void create(File zipFile) {
+		this.create(zipFile, Deflater.DEFAULT_COMPRESSION);
 	}
 	
 	public void create(File zipFile, int compressLevel) {

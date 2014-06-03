@@ -3,13 +3,14 @@ package org.jake.java;
 import java.io.File;
 import java.net.URLClassLoader;
 
-import org.jake.DirViews;
-import org.jake.Filter;
 import org.jake.JakeBaseBuild;
 import org.jake.Notifier;
+import org.jake.file.DirViews;
+import org.jake.file.Filter;
+import org.jake.file.Zip;
+import org.jake.file.utils.FileUtils;
 import org.jake.java.utils.ClassloaderUtils;
 import org.jake.java.utils.TestUtils;
-import org.jake.utils.FileUtils;
 import org.jake.utils.IterableUtils;
 
 public class JakeJavaBuild extends JakeBaseBuild {
@@ -119,6 +120,14 @@ public class JakeJavaBuild extends JakeBaseBuild {
 		Notifier.done(count + " test(s) Launched.");	
 	}
 	
+	public void javadoc() {
+		Notifier.start("Generating Javadoc");
+		File dir = buildOuputDir(projectName() + "-javadoc");
+		Javadoc.of(this.sourceDirs()).process(dir);
+		Zip.of(dir).create(buildOuputDir(projectName() + "-javadoc.zip"));
+		Notifier.done();
+	}
+	
 	@Override
 	public void doDefault() {
 		super.doDefault();
@@ -127,6 +136,7 @@ public class JakeJavaBuild extends JakeBaseBuild {
 		compileTest();
 		copyTestResources();
 		runUnitTests();
+		javadoc();
 	}
 	
 	public static void main(String[] args) {

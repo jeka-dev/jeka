@@ -13,8 +13,8 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
+import org.jake.file.utils.FileUtils;
 import org.jake.java.ClassFilter;
-import org.jake.utils.FileUtils;
 import org.jake.utils.IterableUtils;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;

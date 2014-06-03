@@ -11,8 +11,8 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
 import org.jake.BuildException;
-import org.jake.DirView;
-import org.jake.utils.FileUtils;
+import org.jake.file.DirView;
+import org.jake.file.utils.FileUtils;
 
 
 public final class JavaCompilation {

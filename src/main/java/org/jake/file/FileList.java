@@ -1,4 +1,4 @@
-package org.jake;
+package org.jake.file;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.jake.utils.FileUtils;
+import org.jake.file.utils.FileUtils;
 
 /**
  * Mutable set of files. Exposes an convenient fluent interface to add, remove, filter

@@ -1,4 +1,4 @@
-package org.jake;
+package org.jake.file;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.net.URL;
 
+import org.jake.file.DirView;
 import org.junit.Test;
 
 public class DirViewTest {
