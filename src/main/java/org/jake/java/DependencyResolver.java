@@ -15,18 +15,18 @@ public abstract class DependencyResolver {
 	/**
 	 * All libraries finally used to compile the production code.
 	 */
-	public abstract List<File> compileDependencies();
+	public abstract List<File> compile();
 
 	/**
 	 * All libraries finally used both for compile and run test. 
 	 */
-	public abstract List<File> testDependencies();
+	public abstract List<File> test();
 
 	/**
 	 * All libraries finally to be embedded in deliveries (as war or fat jar files). It contains 
 	 * generally dependencies needed for compilation plus extra runtime-only dependencies.
 	 */
-	public abstract List<File> runtimeDependencies();
+	public abstract List<File> runtime();
 	
 		
 	public DependencyResolver merge(DependencyResolver other, File otherClasses, File otherTestClasses) {
@@ -75,20 +75,20 @@ public abstract class DependencyResolver {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public List<File> compileDependencies() {
-			return IterableUtils.concatLists(base.compileDependencies(), IterableUtils.single(otherClasses), other.compileDependencies() );
+		public List<File> compile() {
+			return IterableUtils.concatLists(base.compile(), IterableUtils.single(otherClasses), other.compile() );
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public List<File> testDependencies() {
-			return IterableUtils.concatLists(base.testDependencies(), IterableUtils.single(otherTestClasses), other.testDependencies() );
+		public List<File> test() {
+			return IterableUtils.concatLists(base.test(), IterableUtils.single(otherTestClasses), other.test() );
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public List<File> runtimeDependencies() {
-			return IterableUtils.concatLists(base.runtimeDependencies(), other.runtimeDependencies() );
+		public List<File> runtime() {
+			return IterableUtils.concatLists(base.runtime(), other.runtime() );
 
 		}
 		

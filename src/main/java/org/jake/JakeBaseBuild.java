@@ -2,11 +2,9 @@ package org.jake;
 
 import java.io.File;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jake.file.DirView;
 import org.jake.file.utils.FileUtils;
-import org.jake.utils.LogUtils;
 
 /**
  * Base project builder defining some commons tasks and utilities 
@@ -18,10 +16,7 @@ public class JakeBaseBuild {
 	
 	protected static final File WORKING_DIR = FileUtils.canonicalFile(new File("."));
 	
-	private final Logger DEFAULT_LOGGER = LogUtils.createDefaultLogger();
-	
 	protected JakeBaseBuild() {
-		LogUtils.setSystemPropertyLevelOr(logger(), getDefaultLogLevel());
 	}
 	
 	/**
@@ -31,14 +26,7 @@ public class JakeBaseBuild {
 	protected Level getDefaultLogLevel() {
 		return Level.INFO;
 	}
-	
-	/**
-	 * The logger to use to log all build operation.
-	 */
-	protected Logger logger() {
-		return DEFAULT_LOGGER;
-	}
-	
+
 	/**
 	 * The current version for this project. Might look like "0.6.3". 
 	 */

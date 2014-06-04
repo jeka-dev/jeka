@@ -142,11 +142,11 @@ public final class LocalDependencyResolver extends DependencyResolver {
 	}
 	
 	/**
-	 * @see org.jake.java.DependencyResolver#compileDependencies()
+	 * @see org.jake.java.DependencyResolver#compile()
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<File> compileDependencies() {
+	public List<File> compile() {
 		return IterableUtils.concatLists(compileAndRuntimeLibs, compileOnlyLibs);
 	}
 	
@@ -155,16 +155,16 @@ public final class LocalDependencyResolver extends DependencyResolver {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<File> testDependencies() {
+	public List<File> test() {
 		return IterableUtils.concatLists( compileAndRuntimeLibs, compileOnlyLibs, runtimeOnlyLibs, testLibs);
 	}
 	
 	/**
-	 * @see org.jake.java.DependencyResolver#runtimeDependencies()
+	 * @see org.jake.java.DependencyResolver#runtime()
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<File> runtimeDependencies() {
+	public List<File> runtime() {
 		return IterableUtils.concatLists(compileAndRuntimeLibs, runtimeOnlyLibs);
 	}
 	

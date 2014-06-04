@@ -25,9 +25,9 @@ public class JakeJarBuild extends JakeJavaBuild {
 		Zip.of(testSourceDirs(), testResourceDirs()).create(buildOuputDir(jarName() + "-test-sources.jar"), zipLevel());
 		
 		// Create a fat jar if runtime dependencies are defined on
-		if (!dependenciesPath().runtimeDependencies().isEmpty()) {
+		if (!dependenciesPath().runtime().isEmpty()) {
 			final File fatJarFile = buildOuputDir(jarName() + "-fat.jar");
-			base.merge(dependenciesPath().runtimeDependencies()).create(fatJarFile, zipLevel());
+			base.merge(dependenciesPath().runtime()).create(fatJarFile, zipLevel());
 		}
 		
 		Notifier.done();

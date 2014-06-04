@@ -81,7 +81,7 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	 * Compiles production code.
 	 */
 	public void compile() {
-		compile(sourceDirs(), classDir(), this.dependenciesPath().compileDependencies());
+		compile(sourceDirs(), classDir(), this.dependenciesPath().compile());
 	}
 	
 	/**
@@ -90,7 +90,7 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	@SuppressWarnings("unchecked")
 	public void compileTest() {
 		compile(testSourceDirs(), testClassDir(), 
-				IterableUtils.concatToList(this.classDir(), this.dependenciesPath().testDependencies()));
+				IterableUtils.concatToList(this.classDir(), this.dependenciesPath().test()));
 	}
 	
 	/**
@@ -115,7 +115,7 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	public void runUnitTests() {
 		Notifier.start("Launching JUnit Tests");
 		final URLClassLoader classLoader = ClassloaderUtils.createFrom(
-				IterableUtils.concatToList(this.testClassDir(), this.dependenciesPath().testDependencies()));
+				IterableUtils.concatToList(this.testClassDir(), this.dependenciesPath().test()));
 		int count = TestUtils.launchJunitTests(classLoader, FileUtils.acceptOnly(testClassDir()));
 		Notifier.done(count + " test(s) Launched.");	
 	}
@@ -123,7 +123,7 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	public void javadoc() {
 		Notifier.start("Generating Javadoc");
 		File dir = buildOuputDir(projectName() + "-javadoc");
-		Javadoc.of(this.sourceDirs()).process(dir);
+		Javadoc.of(this.sourceDirs()).withClasspath(this.dependenciesPath().compile()).process(dir);
 		Zip.of(dir).create(buildOuputDir(projectName() + "-javadoc.zip"));
 		Notifier.done();
 	}
