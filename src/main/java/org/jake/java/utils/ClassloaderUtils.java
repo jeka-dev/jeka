@@ -194,7 +194,7 @@ public class ClassloaderUtils {
 		
 	}
 	
-	public static URLClassLoader augment(URLClassLoader base, URL[] extra) {
+	public static URLClassLoader plus(URLClassLoader base, URL[] extra) {
 		List<URL> urls = new LinkedList<URL>(Arrays.asList(base.getURLs()));
 		for (URL url : extra) {
 			urls.add(url);
@@ -202,5 +202,6 @@ public class ClassloaderUtils {
 		URL[] newUrls = urls.toArray(new URL[0]);
 		return new URLClassLoader(newUrls, base.getParent());
 	}
-
+	
+	
 }

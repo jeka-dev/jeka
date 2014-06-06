@@ -206,6 +206,18 @@ public final class ReflectUtils {
 			return null;
 		}
 	}
+	
+	public static Method getDeclaredMethod(Class<?> clazz, String name, Class<?> ...argTypes) {
+		try {
+			Method method = clazz.getDeclaredMethod(name, argTypes);
+			method.setAccessible(true);
+			return method;
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchMethodException e) {
+			return null;
+		}
+	}
 
 
 }

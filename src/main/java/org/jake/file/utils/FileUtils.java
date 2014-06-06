@@ -10,6 +10,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -32,6 +34,14 @@ public class FileUtils {
 		if (!candidate.isDirectory()) {
 			throw new IllegalArgumentException(candidate
 					+ " is not a directory.");
+		}
+	}
+	
+	public static URL toUrl(File file) {
+		try {
+			return file.toURI().toURL();
+		} catch (MalformedURLException e) {
+			throw new IllegalStateException(e);
 		}
 	}
 
