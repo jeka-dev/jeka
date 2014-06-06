@@ -93,10 +93,8 @@ public class Javadoc {
 		Class<?> mainClass = getJavadocMainClass(ClassloaderUtils.current());
 		ReflectUtils.newInstance(mainClass);
 		Method method = ReflectUtils.getMethod(mainClass, "execute", String.class, PrintWriter.class, PrintWriter.class, PrintWriter.class, String.class, new String[0].getClass());
-		System.out.println(ClassloaderUtils.toString(mainClass.getClassLoader()));
 		ReflectUtils.invoke(null, method, "Javadoc", errorWriter, warnWriter, normalWriter, 
 				docletString, args);
-		System.out.println("OK!!!");
 	}
 	
 	public static Class<?> getJavadocMainClass(URLClassLoader base) {

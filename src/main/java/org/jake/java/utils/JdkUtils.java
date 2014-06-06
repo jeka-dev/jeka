@@ -10,7 +10,6 @@ public class JdkUtils {
 	
 	public static File toolsJar() {
 		String jdkLocation = System.getProperty("java.home");
-		System.out.println("java_home=" + jdkLocation);
 		File javaHome = new File(jdkLocation);
 		try {
 			return new File(javaHome, "../lib/tools.jar").getCanonicalFile();

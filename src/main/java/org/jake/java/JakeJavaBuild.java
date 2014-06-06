@@ -7,6 +7,7 @@ import org.jake.Notifier;
 import org.jake.file.DirViews;
 import org.jake.file.Filter;
 import org.jake.file.Zip;
+import org.jake.java.TestResult.Failure;
 import org.jake.utils.IterableUtils;
 
 public class JakeJavaBuild extends JakeBaseBuild {
@@ -114,7 +115,16 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	public void runUnitTests() {
 		Notifier.start("Launching JUnit Tests");
 		TestResult result = juniter().launchAll(this.testClassDir());
-		Notifier.done(result.runCount() + " test(s) run.");	
+		if (result.failureCount() > 0) {
+			Notifier.info(result.toString());
+			for (Failure failure : result.failures()) {
+				Notifier.info(failure.toString());
+			}
+			Notifier.done();
+		} else {
+			Notifier.done(result.toString());
+		}
+			
 	}
 	
 	public void javadoc() {

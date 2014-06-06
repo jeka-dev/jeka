@@ -34,6 +34,10 @@ public class TestResult {
 	public int ignoreCount() {
 		return ignoreCount;
 	}
+	
+	public int failureCount() {
+		return failures.size();
+	}
 
 	public static class Failure {
 		private final String className;
@@ -57,6 +61,11 @@ public class TestResult {
 
 		public ExceptionDescription getExceptionDescription() {
 			return exceptionDescription;
+		}
+		
+		@Override
+		public String toString() {
+			return className + ":" + testName + "\n" + exceptionDescription.toString();
 		}
 	
 	}
@@ -95,7 +104,26 @@ public class TestResult {
 			return cause;
 		}
 		
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append(className + " : " + message);
+			builder.append("\n");
+			for (int i = 0; i < stackTrace.length; i++) {
+				builder.append(stackTrace[i]).append("\n");
+			}
+			if (cause != null) {
+				builder.append(cause.toString());
+			}
+			return builder.toString();
+		}
 		
+		
+	}
+	
+	@Override
+	public String toString() {
+		return "" + runCount + " test(s) run, " + failureCount() + " failure(s), " + ignoreCount + " ignored." ;
 	}
 
 }

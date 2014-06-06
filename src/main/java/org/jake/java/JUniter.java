@@ -62,7 +62,6 @@ public class JUniter {
 	public TestResult launchAll(Iterable<File> testClassDirs, FileFilter fileFilter, ClassFilter classFilter) {
 		final Iterable<File> urls = IterableUtils.concatLists(testClassDirs, this.classpath);
 		final URLClassLoader classLoader = ClassloaderUtils.createFrom(urls, ClassLoader.getSystemClassLoader());
-		System.out.println(Arrays.asList(classLoader.getURLs()));
 		final Collection<Class> testClasses = 
 				getJunitTestClassesInClassLoader(classLoader, fileFilter, true);
 		final Collection<Class> effectiveClasses = new LinkedList<Class>();
