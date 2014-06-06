@@ -3,6 +3,7 @@ package org.jake.java;
 import java.io.File;
 import java.util.zip.Deflater;
 
+import org.jake.BuildOption;
 import org.jake.Notifier;
 import org.jake.file.Zip;
 
@@ -41,6 +42,7 @@ public class JakeJarBuild extends JakeJavaBuild {
 	}
 	
 	public static void main(String[] args) {
+		BuildOption.set(args);
 		new JakeJarBuild().doDefault();
 	}
 

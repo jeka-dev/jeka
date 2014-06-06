@@ -1,16 +1,12 @@
 package org.jake.java;
 
 import java.io.File;
-import java.net.URLClassLoader;
 
 import org.jake.JakeBaseBuild;
 import org.jake.Notifier;
 import org.jake.file.DirViews;
 import org.jake.file.Filter;
 import org.jake.file.Zip;
-import org.jake.file.utils.FileUtils;
-import org.jake.java.utils.ClassloaderUtils;
-import org.jake.java.utils.TestUtils;
 import org.jake.utils.IterableUtils;
 
 public class JakeJavaBuild extends JakeBaseBuild {
@@ -65,6 +61,10 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	
 	// ------------ Operations ------------
 	
+	protected JUniter juniter() {
+		return JUniter.classpath(this.classDir(), this.dependenciesPath().test());
+	}
+	
 	
 	protected void compile(DirViews sources, File destination, Iterable<File> classpath) {
 		JavaCompilation compilation = new JavaCompilation();
@@ -103,7 +103,7 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	}
 	
 	/**
-	 * Copies test resource in <code>class dir</code>. 
+	 * Copies test resource in <code>test class dir</code>. 
 	 */
 	public void copyTestResources() {
 		Notifier.start("Coping test resource files to " + testClassDir().getPath());
@@ -111,20 +111,19 @@ public class JakeJavaBuild extends JakeBaseBuild {
 		Notifier.done(count + " file(s) copied.");
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void runUnitTests() {
 		Notifier.start("Launching JUnit Tests");
-		final URLClassLoader classLoader = ClassloaderUtils.createFrom(
-				IterableUtils.concatToList(this.testClassDir(), this.dependenciesPath().test()));
-		int count = TestUtils.launchJunitTests(classLoader, FileUtils.acceptOnly(testClassDir()));
-		Notifier.done(count + " test(s) Launched.");	
+		TestResult result = juniter().launchAll(this.testClassDir());
+		Notifier.done(result.runCount() + " test(s) run.");	
 	}
 	
 	public void javadoc() {
 		Notifier.start("Generating Javadoc");
 		File dir = buildOuputDir(projectName() + "-javadoc");
 		Javadoc.of(this.sourceDirs()).withClasspath(this.dependenciesPath().compile()).process(dir);
-		Zip.of(dir).create(buildOuputDir(projectName() + "-javadoc.zip"));
+		if (dir.exists()) {
+			Zip.of(dir).create(buildOuputDir(projectName() + "-javadoc.zip"));
+		}
 		Notifier.done();
 	}
 	

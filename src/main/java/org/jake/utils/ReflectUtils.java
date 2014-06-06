@@ -196,6 +196,16 @@ public final class ReflectUtils {
 		}
 		return result;
 	}
+	
+	public static Method getMethod(Class<?> clazz, String name, Class<?> ...argTypes) {
+		try {
+			return clazz.getMethod(name, argTypes);
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchMethodException e) {
+			return null;
+		}
+	}
 
 
 }

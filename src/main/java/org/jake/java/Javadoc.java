@@ -2,14 +2,20 @@ package org.jake.java;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.tools.ToolProvider;
 
 import org.jake.BuildOption;
 import org.jake.Notifier;
 import org.jake.file.DirViews;
 import org.jake.file.utils.FileUtils;
+import org.jake.java.utils.ClassloaderUtils;
+import org.jake.java.utils.JdkUtils;
+import org.jake.utils.ReflectUtils;
 
 public class Javadoc {
 	
@@ -53,14 +59,16 @@ public class Javadoc {
 		list.add(FileUtils.asPath(this.srcDirs.listRoots(), ";"));
 		list.add("-d");
 		list.add(outputDir.getAbsolutePath());
-		if (classpath != null) {
-			list.add("-classpath");
-			list.add(FileUtils.asPath(this.classpath, ";"));
-		}
 		if (BuildOption.isVerbose()) {
 			list.add("-verbose");
 		} else {
 			list.add("-quiet");
+		}
+		list.add("-docletpath");
+		list.add(JdkUtils.toolsJar().getPath());
+		if (classpath != null && classpath.iterator().hasNext()) {
+			list.add("-classpath");
+			list.add(FileUtils.asPath(this.classpath, ";"));
 		}
 		if (!this.extraArgs.trim().isEmpty()) {
 			String[] extraArgs = this.extraArgs.split(" ");
@@ -80,7 +88,16 @@ public class Javadoc {
 	
 	private static void execute(Class<?> doclet, PrintWriter normalWriter, PrintWriter warnWriter, PrintWriter errorWriter, String[] args) {
 		String docletString = doclet != null ? doclet.getName() : "com.sun.tools.doclets.standard.Standard";
-		com.sun.tools.javadoc.Main.execute("javadoc", errorWriter, warnWriter, normalWriter, 
+		Class<?> mainClass;
+		try {
+			mainClass = Class.forName("com.sun.tools.javadoc.Main", true, ToolProvider.getSystemToolClassLoader());
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+		ReflectUtils.newInstance(mainClass);
+		Method method = ReflectUtils.getMethod(mainClass, "execute", String.class, PrintWriter.class, PrintWriter.class, PrintWriter.class, String.class, new String[0].getClass());
+		System.out.println(ClassloaderUtils.toString(mainClass.getClassLoader()));
+		ReflectUtils.invoke(null, method, "Javadoc", errorWriter, warnWriter, normalWriter, 
 				docletString, args);
 	}
 

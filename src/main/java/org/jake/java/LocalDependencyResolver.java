@@ -41,7 +41,7 @@ public final class LocalDependencyResolver extends DependencyResolver {
 			.compileAndRuntime(libDir.include("/*.jar") )
 			.withCompileOnly(  libDir.include("compile-only/*.jar"))
 			.withRuntimeOnly(  libDir.include("runtime-only/*.jar"))
-			.withTest(         libDir.include("test/*.jar"));
+			.withTest(         libDir.include("test/*.jar", "tests/*.jar"));
 	}
 	
 
@@ -156,7 +156,7 @@ public final class LocalDependencyResolver extends DependencyResolver {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<File> test() {
-		return IterableUtils.concatLists( compileAndRuntimeLibs, compileOnlyLibs, runtimeOnlyLibs, testLibs);
+		return IterableUtils.concatLists( compileAndRuntimeLibs, runtimeOnlyLibs, testLibs);
 	}
 	
 	/**

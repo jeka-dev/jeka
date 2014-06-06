@@ -11,7 +11,6 @@ import org.jake.JakeBaseBuild;
 import org.jake.Notifier;
 import org.jake.file.utils.FileUtils;
 import org.jake.java.utils.ClassloaderUtils;
-import org.jake.java.utils.TestUtils;
 
 /**
  * This build is meant to be executed by the IDE (as Eclipse) in the project context.
@@ -40,8 +39,8 @@ public class JakeIdeBuild extends JakeBaseBuild {
 	
 	public void test() {
 		Notifier.start("Launching test(s)");
-		int count = TestUtils.launchJunitTests(ClassloaderUtils.current(), getProjectFileFilter());
-		Notifier.done(count + " test(s) Launched.");
+		//int count = TestUtils.launchJunitTests(ClassloaderUtils.current(), getProjectFileFilter());
+		Notifier.done(0 + " test(s) Launched.");
 	}
 	
 	@Override
