@@ -92,7 +92,7 @@ public class Javadoc {
 		try {
 			mainClass = Class.forName("com.sun.tools.javadoc.Main", true, ToolProvider.getSystemToolClassLoader());
 		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("It seems that you are running a JRE instead of a JDK, please run Jake using a JDK.", e);
 		}
 		ReflectUtils.newInstance(mainClass);
 		Method method = ReflectUtils.getMethod(mainClass, "execute", String.class, PrintWriter.class, PrintWriter.class, PrintWriter.class, String.class, new String[0].getClass());
