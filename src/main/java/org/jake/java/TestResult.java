@@ -1,8 +1,10 @@
 package org.jake.java;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
+import org.jake.Notifier;
 import org.jake.utils.IterableUtils;
 
 public class TestResult {
@@ -38,6 +40,25 @@ public class TestResult {
 	public int failureCount() {
 		return failures.size();
 	}
+	
+	public void printToNotifier() {
+		Notifier.getInfoWriter().flush();
+		if (failureCount() == 0) {
+			Notifier.info(toString());
+		} else {
+			Notifier.warn(toString());
+		}
+		for (Failure failure : failures) {
+			for (String string : failure.toStrings()) {
+				Notifier.warn(string);
+			}
+		}
+	}
+	
+	@Override
+	public String toString() {
+		return "" + runCount + " test(s) run, " + failureCount() + " failure(s), " + ignoreCount + " ignored." ;
+	}
 
 	public static class Failure {
 		private final String className;
@@ -63,11 +84,23 @@ public class TestResult {
 			return exceptionDescription;
 		}
 		
-		@Override
-		public String toString() {
-			return className + ":" + testName + "\n" + exceptionDescription.toString();
+		
+		public List<String> toStrings() {
+			List<String> result = new LinkedList<String>();
+			result.add("");
+			result.add(className + "#" + testName + " > " + exceptionDescription.getClassName() 
+					+ messageOrEmpty(exceptionDescription.getMessage()));
+			result.addAll(exceptionDescription.stackTracesAsStrings());
+			return result;
 		}
 	
+	}
+	
+	private static String messageOrEmpty(String exceptionMessage) {
+		if (exceptionMessage == null) {
+			return "";
+		}
+		return " : " + exceptionMessage;
 	}
 	
 	public static class ExceptionDescription {
@@ -104,26 +137,29 @@ public class TestResult {
 			return cause;
 		}
 		
-		@Override
-		public String toString() {
-			StringBuilder builder = new StringBuilder();
-			builder.append(className + " : " + message);
-			builder.append("\n");
+		
+		public List<String> stackTracesAsStrings() {
+			return stackTracesAsStrings(null);
+		}
+		
+		private List<String> stackTracesAsStrings(String prefix) {
+			final List<String> result = new LinkedList<String>();
+			if (prefix != null) {
+				result.add(prefix);
+			}
 			for (int i = 0; i < stackTrace.length; i++) {
-				builder.append(stackTrace[i]).append("\n");
+				result.add("  " + stackTrace[i]);
 			}
 			if (cause != null) {
-				builder.append(cause.toString());
+				result.addAll(cause.stackTracesAsStrings("Caused by : " + cause.getClassName() 
+						+ messageOrEmpty(cause.getMessage())));
 			}
-			return builder.toString();
+			return result;
 		}
 		
 		
 	}
 	
-	@Override
-	public String toString() {
-		return "" + runCount + " test(s) run, " + failureCount() + " failure(s), " + ignoreCount + " ignored." ;
-	}
+	
 
 }

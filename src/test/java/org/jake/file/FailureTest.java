@@ -8,12 +8,12 @@ public class FailureTest {
 	
 	@Test
 	public void doAssertFailure() {
-		Assert.fail();
+		Assert.fail("it must fail");
 	}
 	
 	@Test
 	public void doExceptionraise() {
-		throw new RuntimeException();
+		throw new RuntimeException( new RuntimeException("exception2"));
 	}
 	
 	@Test
