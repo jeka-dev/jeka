@@ -35,23 +35,34 @@ public class JUniter {
 	
 	private final List<File> classpath;
 	
+	private final boolean isolatedClassloaders;
+	
 		
-	private JUniter(Iterable<File> classpath) {
+	private JUniter(Iterable<File> classpath, boolean isolatedClassloaders) {
 		this.classpath = IterableUtils.toList(classpath);
+		this.isolatedClassloaders = isolatedClassloaders;
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static JUniter classpath(File dir, Iterable<File> dirs) {
-		return new JUniter(IterableUtils.concatToList(dir, dirs));
+		return new JUniter(IterableUtils.concatToList(dir, dirs), false);
 	} 
 	
 	public static JUniter classpath(Iterable<File> dirs) {
-		return new JUniter(dirs);
+		return new JUniter(dirs, false);
 	} 
 	
 	@SuppressWarnings("unchecked")
 	public static JUniter noClasspath() {
-		return new JUniter(Collections.EMPTY_LIST);
+		return new JUniter(Collections.EMPTY_LIST, false);
+	}
+	
+	public JUniter withIsolatedClassLoaders() {
+		return new JUniter(classpath, true);
+	}
+	
+	public JUniter withIsolatedClassLoaders(boolean isolatedClassLoader) {
+		return new JUniter(classpath, isolatedClassLoader);
 	}
 	
 	public TestResult launchAll(File... testClassDirs) {
@@ -61,9 +72,17 @@ public class JUniter {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public TestResult launchAll(Iterable<File> testClassDirs, FileFilter fileFilter, ClassFilter classFilter) {
 		final Iterable<File> urls = IterableUtils.concatLists(testClassDirs, this.classpath);
-		final URLClassLoader classLoader = ClassloaderUtils.createFrom(urls, ClassLoader.getSystemClassLoader());
-		final Collection<Class> testClasses = 
-				getJunitTestClassesInClassLoader(classLoader, fileFilter, true);
+		final Collection<Class> testClasses;
+		if (isolatedClassloaders) {
+			testClasses = new LinkedList<Class>();
+			for 
+		} else {
+			final URLClassLoader classLoader = ClassloaderUtils.createFrom(urls, ClassLoader.getSystemClassLoader().getParent());
+			testClasses = 
+					getJunitTestClassesInClassLoader(classLoader, fileFilter, true);
+		}
+		
+		
 		final Collection<Class> effectiveClasses = new LinkedList<Class>();
 		for (Class clazz : testClasses) {
 			if (classFilter.accept(clazz)) {
@@ -79,6 +98,7 @@ public class JUniter {
 			return TestResult.empty();
 		}
 		final ClassLoader classLoader = classes.iterator().next().getClassLoader();
+		System.out.println(ClassloaderUtils.toString(classLoader));
 		if (isJunit4In(classLoader)) {
 			Class<?>[] classArray = IterableUtils.toArray(classes, Class.class);
 			Class<?> junitCoreClass = ClassloaderUtils.loadClass(classLoader, JUNIT4_RUNNER_CLASS_NAME);

@@ -8,6 +8,6 @@
 <listEntry value="org.eclipse.ui.externaltools.launchGroup"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="${env_var:JAVA_HOME}\bin\java.exe"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-Xdebug -classpath ${workspace_loc:/org.jake}\build\output\jake.jar org.jake.java.JakeJarBuild -verbose"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-Xdebug -classpath ${workspace_loc:/org.jake}\build\output\jake.jar org.jake.java.JakeJarBuild"/>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY" value="${workspace_loc:/org.jake}"/>
 </launchConfiguration>

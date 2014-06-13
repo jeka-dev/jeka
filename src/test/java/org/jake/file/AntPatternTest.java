@@ -2,14 +2,12 @@ package org.jake.file;
 
 import static org.junit.Assert.assertTrue;
 
-import org.jake.java.utils.ClassloaderUtils;
 import org.junit.Test;
 
 public class AntPatternTest {
 
 	@Test
 	public void testDoMatchOk() {
-		System.out.println(ClassloaderUtils.toString(AntPatternTest.class.getClassLoader()));
 		this.testDoMatchOk("foo/bar.txt");
 		this.testDoMatchOk(".\\foo\\bar.txt");
 		this.testDoMatchOk("./foo/bar.txt");
