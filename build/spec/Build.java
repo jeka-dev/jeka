@@ -19,11 +19,12 @@ public class Build extends JakeJarBuild {
 	protected String jarName() {
 		return this.projectName();  // Don't need the version info within the name
 	}
-	
 			
 	public static void main(String[] args) {
 		BuildOption.set(args);
-		new Build().doDefault();
+		Build build = new Build();
+		build.doDefault();
+		//build.javadoc();
 	}
 
 }

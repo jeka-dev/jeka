@@ -44,6 +44,14 @@ public class FileUtils {
 			throw new IllegalStateException(e);
 		}
 	}
+	
+	public static List<File> toFiles(URL...urls) {
+		final List<File> result = new LinkedList<File>();
+		for (URL url : urls) {
+			result.add(new File(url.getFile()));
+		}
+		return result;
+	}
 
 	public static List<File> sum(List<File>... files) {
 		List<File> result = new LinkedList<File>();

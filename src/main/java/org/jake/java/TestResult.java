@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jake.BuildOption;
 import org.jake.Notifier;
 import org.jake.utils.IterableUtils;
 
@@ -42,17 +43,27 @@ public class TestResult {
 	}
 	
 	public void printToNotifier() {
-		Notifier.getInfoWriter().flush();
+		Notifier.nextLine();
 		if (failureCount() == 0) {
 			Notifier.info(toString());
 		} else {
-			Notifier.warn(toString());
+			Notifier.info(toString());
+		}
+		if (BuildOption.isVerbose()) {
+			Notifier.nextLine();
 		}
 		for (Failure failure : failures) {
-			for (String string : failure.toStrings()) {
-				Notifier.warn(string);
+			for (String string : failure.toStrings(BuildOption.isVerbose())) {
+				Notifier.info(string);
 			}
+			if (BuildOption.isVerbose()) {
+				Notifier.nextLine();
+			}
+			
 		}
+		if (!BuildOption.isVerbose()) {
+			Notifier.info("Launch Jake in verbose mode to display failure stack traces.");
+		} 
 	}
 	
 	@Override
@@ -85,12 +96,13 @@ public class TestResult {
 		}
 		
 		
-		public List<String> toStrings() {
+		public List<String> toStrings(boolean withStackTrace) {
 			List<String> result = new LinkedList<String>();
-			result.add("");
 			result.add(className + "#" + testName + " > " + exceptionDescription.getClassName() 
 					+ messageOrEmpty(exceptionDescription.getMessage()));
-			result.addAll(exceptionDescription.stackTracesAsStrings());
+			if (withStackTrace) {
+				result.addAll(exceptionDescription.stackTracesAsStrings());
+			} 			
 			return result;
 		}
 	
