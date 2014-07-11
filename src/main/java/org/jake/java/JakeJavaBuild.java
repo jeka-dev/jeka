@@ -55,7 +55,7 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	}
 	
 	protected DependencyResolver dependenciesPath() {
-		return LocalDependencyResolver.standard(baseDir("build/libs"));		
+		return LocalDependencyResolver.standardIfExist(baseDir("build/libs"));				
 	}
 	
 	

@@ -30,7 +30,7 @@ public final class LocalDependencyResolver extends DependencyResolver {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static LocalDependencyResolver of() {
+	public static LocalDependencyResolver none() {
 		return new LocalDependencyResolver(Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST
 				, Collections.EMPTY_LIST);
 	}
@@ -42,6 +42,13 @@ public final class LocalDependencyResolver extends DependencyResolver {
 			.withCompileOnly(  libDir.include("compile-only/*.jar"))
 			.withRuntimeOnly(  libDir.include("runtime-only/*.jar"))
 			.withTest(         libDir.include("test/*.jar", "tests/*.jar"));
+	}
+	
+	public static LocalDependencyResolver standardIfExist(File libDirectory) {
+		if (libDirectory.exists()) {
+			return standard(libDirectory);
+		}
+		return none();
 	}
 	
 
