@@ -1,22 +1,31 @@
 package org.jake.java.eclipse;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.jake.file.DirView;
 
 class ResourcePath {
 	
 	private final String projectName;
 	
 	private final String pathWithinProject;
+	
+	private final boolean testScoped;
+	
+	private final File file;
 
-	private ResourcePath(String projectName, String pathWithinProject) {
+	private ResourcePath(String projectName, String pathWithinProject, File file, boolean testScoped) {
 		super();
 		this.projectName = projectName;
 		this.pathWithinProject = pathWithinProject;
+		this.testScoped = testScoped;
+		this.file = file;
 	}
 	
-	public static ResourcePath fromClassentry(String classpathEntry) {
+	public static ResourcePath fromClasspathEntryLib(String classpathEntry, boolean testScoped) {
 		final String projectName;
 		final String pathInProject;
 		if (classpathEntry.startsWith("/")) {
@@ -27,10 +36,34 @@ class ResourcePath {
 			projectName = null;
 			pathInProject = classpathEntry;
 		}
-		return new ResourcePath(projectName, pathInProject);
+		return new ResourcePath(projectName, pathInProject, null, testScoped);
 	}
 	
+	public static List<ResourcePath> fromClasspathEntryCon(File jakeJarfile, String path) {
+		File containerDir = new File(jakeJarfile.getParent(), "eclipse/containers");
+		if (!containerDir.exists()) {
+			return Collections.emptyList();
+		}
+		String folderName = path.replace('/', '_').replace('\\', '_');
+		File conFolder = new File(containerDir, folderName);
+		if (!conFolder.exists()) {
+			return Collections.emptyList();
+		}
+		DirView dirView = DirView.of(conFolder).include("**/*.jar");
+		boolean testScoped = path.toLowerCase().contains("junit");
+		List<ResourcePath> result = new LinkedList<ResourcePath>();
+		for (File file : dirView.listFiles()) {
+			result.add(new ResourcePath(null, null, file, testScoped));
+		}
+		return result;
+	}
+	
+	
+	
 	public File toFile(File projectFolder) {
+		if (file != null) {
+			return file;
+		}
 		File parent = projectFolder.getParentFile();
 		if (projectName == null) {
 			return new File(pathWithinProject);
@@ -48,6 +81,10 @@ class ResourcePath {
 		}
 		return result;
 		
+	}
+	
+	public boolean isTestScoped() {
+		return testScoped;
 	}
 	
 	

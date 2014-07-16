@@ -31,7 +31,7 @@ public class JakeBaseBuild {
 	 * The current version for this project. Might look like "0.6.3". 
 	 */
 	protected String version() {
-		return "0.1-SNAPSHOT";
+		return null;
 	}
 	
 	/**
@@ -39,7 +39,7 @@ public class JakeBaseBuild {
 	 * Might look like "-0.6.3". 
 	 */
 	protected String versionSuffix() {
-		if (version() == null) {
+		if (version() == null || version().isEmpty()) {
 			return "";
 		}
 		return "-" + version();
@@ -95,7 +95,5 @@ public class JakeBaseBuild {
 	public void doDefault() {
 		clean();
 	}
-	
-		
 
 }

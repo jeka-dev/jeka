@@ -1,6 +1,9 @@
 
 
+import java.io.File;
+
 import org.jake.BuildOption;
+import org.jake.file.utils.FileUtils;
 import org.jake.java.JakeJarBuild;
 
 public class Build extends JakeJarBuild {
@@ -25,6 +28,16 @@ public class Build extends JakeJarBuild {
 		Build build = new Build();
 		build.doDefault();
 		//build.javadoc();
+		build.distrib();
+	}
+	
+	public void distrib() {
+		File distribDir = buildOuputDir("jake-distrib");
+		FileUtils.copyDir(baseDir("src/main/dist"), distribDir, null, true);
+		File jarFile = buildOuputDir(jarName()+".jar");
+		FileUtils.copyFileToDir(jarFile, distribDir);
+		FileUtils.copyFileToDir(buildOuputDir(jarName() + "-sources.jar"), distribDir);
+		FileUtils.zipDir(buildOuputDir("jake-distrib.zip"), zipLevel(), distribDir);
 	}
 
 }

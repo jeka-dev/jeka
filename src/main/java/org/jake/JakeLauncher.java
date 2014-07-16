@@ -28,9 +28,6 @@ public class JakeLauncher {
 
 	private static final String DEFAULT_JAVA_SOURCE = "src/main/java";
 
-	// cache
-	private static File JAKE_JAR_FILE;
-
 	public static void main(String[] args) {
 		BuildOption.set(args);
 		JakeLauncher launcher = new JakeLauncher();
@@ -152,7 +149,7 @@ public class JakeLauncher {
 				result.add(file);
 			}
 		}
-		final File jakeJarFile = getJakeJarFile();
+		final File jakeJarFile = JakeLocator.getJakeJarFile();
 		final File extLibDir = new File(jakeJarFile.getParentFile(), "ext");
 		if (extLibDir.exists() && extLibDir.isDirectory()) {
 			result.addAll(FileUtils.filesOf(extLibDir,
@@ -161,26 +158,7 @@ public class JakeLauncher {
 		return result;
 	}
 
-	private static File getJakeJarFile() {
-		if (JAKE_JAR_FILE != null) {
-			return JAKE_JAR_FILE;
-		}
-		URL[] urls = ClassloaderUtils.current().getURLs();
-		for (URL url : urls) {
-			File file = new File(url.getFile());
-			URLClassLoader classLoader = ClassloaderUtils.createFrom(
-					IterableUtils.single(file), ClassLoader
-							.getSystemClassLoader().getParent());
-			try {
-				classLoader.loadClass(JakeLauncher.class.getName());
-				JAKE_JAR_FILE = file;
-				return file;
-			} catch (ClassNotFoundException e) {
-				// Class just not there
-			}
-		}
-		throw new IllegalStateException("JakeLauncher not found in classpath");
-	}
+	
 
 	private static List<String> getBuildClassNames(Iterable<File> classpath) {
 

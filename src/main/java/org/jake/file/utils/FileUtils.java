@@ -74,7 +74,9 @@ public class FileUtils {
 
 	public static int copyDir(File source, File targetDir, FileFilter filter,
 			boolean copyEmptyDir) {
-
+		if (filter == null) {
+			filter = acceptAll();
+		}
 		assertDir(source);
 		if (source.equals(targetDir)) {
 			throw new IllegalArgumentException(
@@ -115,25 +117,30 @@ public class FileUtils {
 		}
 		return count;
 	}
+	
+	public static void copyFileToDir(File from, File toDir) {
+		File to = new File(toDir, from.getName());
+		copyFile(from, to);
+	}
 
-	public static void copyFile(File from, File to) {
+	public static void copyFile(File from, File toFile) {
 		if (!from.exists()) {
 			throw new IllegalArgumentException("File " + from.getPath()
 					+ " does not exist.");
 		}
 		if (from.isDirectory()) {
 			throw new IllegalArgumentException(from.getPath()
-					+ " is a directory. Should be a path.");
+					+ " is a directory. Should be a file.");
 		}
 		try {
 			InputStream in = new FileInputStream(from);
-			if (!to.getParentFile().exists()) {
-				to.getParentFile().mkdirs();
+			if (!toFile.getParentFile().exists()) {
+				toFile.getParentFile().mkdirs();
 			}
-			if (!to.exists()) {
-				to.createNewFile();
+			if (!toFile.exists()) {
+				toFile.createNewFile();
 			}
-			OutputStream out = new FileOutputStream(to);
+			OutputStream out = new FileOutputStream(toFile);
 
 			byte[] buf = new byte[1024];
 			int len;
@@ -145,7 +152,7 @@ public class FileUtils {
 		} catch (IOException e) {
 			throw new RuntimeException(
 					"IO exception occured while copying file " + from.getPath()
-							+ " to " + to.getPath(), e);
+							+ " to " + toFile.getPath(), e);
 		}
 
 	}

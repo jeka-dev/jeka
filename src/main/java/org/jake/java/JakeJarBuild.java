@@ -18,7 +18,7 @@ public class JakeJarBuild extends JakeJavaBuild {
 	}
 	
 	public void jar() {
-		Notifier.start("Packaging");
+		Notifier.start("Packaging as jar");
 		Zip base = Zip.of(classDir());
 		base.create(buildOuputDir(jarName() + ".jar"), zipLevel());
 		Zip.of(sourceDirs(), resourceDirs()).create(buildOuputDir(jarName() + "-sources.jar"), zipLevel());

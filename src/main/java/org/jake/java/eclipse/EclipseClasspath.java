@@ -16,27 +16,36 @@ class EclipseClasspath {
 	
 	private final List<ResourcePath> libEntries;
 
-	private EclipseClasspath(Document document) {
+	private EclipseClasspath(Document document, File jakeJarFile) {
 		super();
-		this.libEntries = getLibClasspathEntry(document);
+		this.libEntries = getLibClasspathEntry(jakeJarFile, document);
 		
 	}
 	
-	public static EclipseClasspath fromFile(File classpathFile) {
-		Document document = getDotClassPathAsDom(classpathFile);
-		return new EclipseClasspath(document);
+	public static EclipseClasspath fromFile(File classpathFile, File jakeJarFile) {
+		final Document document = getDotClassPathAsDom(classpathFile);
+		return new EclipseClasspath(document, jakeJarFile);
 	}
 	
-	private static List<ResourcePath> getLibClasspathEntry(Document document) {
+	private static List<ResourcePath> getLibClasspathEntry(File jakeJarFile, Document document) {
 		final List<ResourcePath> result = new LinkedList<ResourcePath>();
 		final NodeList nodeList = document.getElementsByTagName("classpathentry");
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			final Node node = nodeList.item(i);
 			final Element element = (Element) node;
-			if (element.getAttribute("kind").equals("lib")) {
+			String kind = element.getAttribute("kind");
+			if (kind.equals("lib")) {
 				final String path = element.getAttribute("path");
-				final ResourcePath resourceLocation = ResourcePath.fromClassentry(path);
+				final ResourcePath resourceLocation = ResourcePath.fromClasspathEntryLib(path, false);
 				result.add(resourceLocation);
+			} else if (kind.equals("con")) {
+				final String path = element.getAttribute("path");
+				final List<ResourcePath> resourceLocations = ResourcePath.fromClasspathEntryCon(jakeJarFile, path);
+				result.addAll(resourceLocations);
+			
+				
+				
+				
 			}
 		}
 		return result;
@@ -62,6 +71,7 @@ class EclipseClasspath {
 	public List<ResourcePath> getLibEntries() {
 		return libEntries;
 	}
+	
 	
 	
 	
