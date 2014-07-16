@@ -56,7 +56,7 @@ public class JakeEclipse {
 	}
 	
 	private static final boolean isCompileOnly(File file) {
-		if (file.getName().toUpperCase().equals("lombok.jar")) {
+		if (file.getName().toLowerCase().equals("lombok.jar")) {
 			return true;
 		}
 		return false;
