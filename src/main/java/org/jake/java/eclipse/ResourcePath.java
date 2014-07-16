@@ -1,4 +1,4 @@
-package org.jake.eclipse;
+package org.jake.java.eclipse;
 
 import java.io.File;
 import java.util.LinkedList;

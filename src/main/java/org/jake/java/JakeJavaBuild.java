@@ -7,11 +7,14 @@ import org.jake.Notifier;
 import org.jake.file.DirViews;
 import org.jake.file.Filter;
 import org.jake.file.Zip;
+import org.jake.java.eclipse.JakeEclipse;
 import org.jake.utils.IterableUtils;
 
 public class JakeJavaBuild extends JakeBaseBuild {
 	
 	protected static final Filter JAVA_SOURCE_ONLY_FILTER = Filter.include("**/*.java");
+	
+	protected static final String STD_LIB_PATH = "build/libs"; 
 	
 	protected static final Filter RESOURCE_FILTER = Filter.exclude("**/*.java")
 			.andExcludeAll("**/package.html").andExcludeAll("**/doc-files");
@@ -55,7 +58,15 @@ public class JakeJavaBuild extends JakeBaseBuild {
 	}
 	
 	protected DependencyResolver dependenciesPath() {
-		return LocalDependencyResolver.standardIfExist(baseDir("build/libs"));				
+		final File folder = baseDir(STD_LIB_PATH);
+		if (folder.exists()) {
+			return LocalDependencyResolver.standard(baseDir(STD_LIB_PATH));
+		} else if (JakeEclipse.isDotClasspathPresent(baseDir().root())) {
+			return JakeEclipse.dependencyResolver(baseDir().root());
+		} else {
+			return LocalDependencyResolver.none();
+		}
+						
 	}
 	
 	

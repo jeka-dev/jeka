@@ -1,6 +1,8 @@
 package org.jake;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -23,9 +25,9 @@ public class JakeLauncher {
 	private static final String BUILD_LIB_DIR = "build/libs/build";
 
 	private static final String BUILD_BIN_DIR = "build/output/build-bin";
-	
+
 	private static final String DEFAULT_JAVA_SOURCE = "src/main/java";
-	
+
 	// cache
 	private static File JAKE_JAR_FILE;
 
@@ -35,10 +37,18 @@ public class JakeLauncher {
 		Iterable<File> compileClasspath = launcher
 				.resolveBuildCompileClasspath();
 		DirView buildSourceDir = DirView.of(new File(BUILD_SOURCE_DIR));
-		if (launcher.hasBuildSource(buildSourceDir)) {
-			launcher.compileBuild(compileClasspath);
+		
+			if (launcher.hasBuildSource(buildSourceDir)) {
+				launcher.compileBuild(compileClasspath);
+			}
+		boolean result = launcher.launch(compileClasspath);
+		if (result) {
+			Notifier.info("Build success.");
+		} else {
+			Notifier.info("Build failed.");
+			System.exit(1);
 		}
-		launcher.launch(compileClasspath);
+		
 	}
 
 	private boolean hasBuildSource(DirView sourceDir) {
@@ -77,36 +87,61 @@ public class JakeLauncher {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void launch(Iterable<File> compileClasspath) {
-		File buildBin = new File(BUILD_BIN_DIR);
-		Iterable<File> runtimeClassPath = IterableUtils.concatToList(buildBin,
-				compileClasspath);
-		URLClassLoader classLoader = ClassloaderUtils.createFrom(
+	private boolean launch(Iterable<File> compileClasspath) {
+		final File buildBin = new File(BUILD_BIN_DIR);
+		final Iterable<File> runtimeClassPath = IterableUtils.concatToList(
+				buildBin, compileClasspath);
+		final URLClassLoader classLoader = ClassloaderUtils.createFrom(
 				runtimeClassPath, JakeLauncher.class.getClassLoader());
 
 		// Find the Build class
-		List<String> buildClassNames = getBuildClassNames(IterableUtils.single(buildBin));
+		final List<String> buildClassNames = getBuildClassNames(IterableUtils
+				.single(buildBin));
 		final String buildClassName;
 		if (!buildClassNames.isEmpty()) {
 			buildClassName = buildClassNames.get(0);
 		} else {
 			buildClassName = defaultBuildClassName();
 			if (buildClassName == null) {
-				throw new IllegalStateException("No build class found for this project and cannot find default build class that fits.");
-			} 
+				throw new IllegalStateException(
+						"No build class found for this project and cannot find default build class that fits.");
+			}
 		}
-		Notifier.info("Using " + buildClassName + " as build class.");
-		
-		Class buildClass = ClassloaderUtils.loadClass(classLoader, buildClassName);
+		final Class buildClass = ClassloaderUtils.loadClass(classLoader,
+				buildClassName);
 
-		Object build = ReflectUtils.newInstance(buildClass);
-		String command = "doDefault";
+		final Object build = ReflectUtils.newInstance(buildClass);
+		final String command = "doDefault";
 		Notifier.info("Use Build class " + buildClass.getCanonicalName()
-				+ " with operation " + command);
-		ReflectUtils.invoke(build, command);
+				+ " with method " + command);
+
+		try {
+			Method method = build.getClass().getMethod(command);
+			method.invoke(build);
+			return true;
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchMethodException e) {
+			throw new IllegalArgumentException("No zero-arg method '" + command
+					+ "' found in class '" + buildClassName);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		} catch (InvocationTargetException e) {
+			final Throwable target = e.getTargetException();
+			if (target instanceof BuildException) {
+				Notifier.error(target.getMessage());
+				return false;
+			} else if (target instanceof RuntimeException) {
+				throw (RuntimeException) target;
+			} else {
+				throw new RuntimeException(target);
+			}
+			
+		}
+
 	}
 
-	public List<File> resolveBuildCompileClasspath() {
+	private List<File> resolveBuildCompileClasspath() {
 		final URL[] urls = ClassloaderUtils.current().getURLs();
 		final List<File> result = FileUtils.toFiles(urls);
 		final File buildLibDir = new File(BUILD_LIB_DIR);
@@ -148,8 +183,9 @@ public class JakeLauncher {
 	}
 
 	private static List<String> getBuildClassNames(Iterable<File> classpath) {
-		
-		URLClassLoader classLoader = ClassloaderUtils.createFrom(classpath, JakeLauncher.class.getClassLoader());
+
+		URLClassLoader classLoader = ClassloaderUtils.createFrom(classpath,
+				JakeLauncher.class.getClassLoader());
 
 		// Find the Build class
 		Class<?> jakeBaseBuildClass = ClassloaderUtils.loadClass(classLoader,
@@ -165,13 +201,13 @@ public class JakeLauncher {
 		}
 		return buildClasses;
 	}
-	
+
 	private static String defaultBuildClassName() {
 		if (!new File(DEFAULT_JAVA_SOURCE).exists()) {
 			return null;
 		}
 		return JakeJarBuild.class.getName();
-		
+
 	}
 
 }

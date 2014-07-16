@@ -1,4 +1,4 @@
-package org.jake.eclipse;
+package org.jake.java.eclipse;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -44,7 +44,7 @@ class EclipseClasspath {
 	
 	private static Document getDotClassPathAsDom(File classpathFile) {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		if (classpathFile.exists()) {
+		if (!classpathFile.exists()) {
 			throw new IllegalStateException(".classpath file not found.");
 		}
 		try {
