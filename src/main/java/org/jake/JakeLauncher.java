@@ -12,7 +12,7 @@ import java.util.Set;
 
 import org.jake.file.JakeDirView;
 import org.jake.file.utils.JakeUtilsFile;
-import org.jake.java.JakeJarBuild;
+import org.jake.java.JakeBuildJar;
 import org.jake.java.JakeJavaCompiler;
 import org.jake.java.utils.JakeUtilsClassloader;
 import org.jake.utils.JakeUtilsIterable;
@@ -124,7 +124,7 @@ public class JakeLauncher {
 			throw new RuntimeException(e);
 		} catch (final InvocationTargetException e) {
 			final Throwable target = e.getTargetException();
-			if (target instanceof JakeBuildException) {
+			if (target instanceof JakeException) {
 				JakeLogger.error(target.getMessage());
 				return false;
 			} else if (target instanceof RuntimeException) {
@@ -166,7 +166,7 @@ public class JakeLauncher {
 
 		// Find the Build class
 		final Class<?> jakeBaseBuildClass = JakeUtilsClassloader.loadClass(classLoader,
-				JakeBaseBuild.class.getName());
+				JakeBuildBase.class.getName());
 		final Set<Class> classes = JakeUtilsClassloader.getAllTopLevelClasses(
 				classLoader, JakeUtilsFile.acceptAll(), true);
 		final List<String> buildClasses = new LinkedList<String>();
@@ -183,7 +183,7 @@ public class JakeLauncher {
 		if (!new File(DEFAULT_JAVA_SOURCE).exists()) {
 			return null;
 		}
-		return JakeJarBuild.class.getName();
+		return JakeBuildJar.class.getName();
 
 	}
 

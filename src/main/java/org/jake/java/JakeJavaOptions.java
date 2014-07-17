@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jake.JakeOptions;
-import org.jake.JakeOptions.PropertyCollector;
 import org.jake.file.utils.JakeUtilsFile;
 
 public class JakeJavaOptions extends JakeOptions {

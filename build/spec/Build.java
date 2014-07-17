@@ -3,9 +3,9 @@
 import java.io.File;
 
 import org.jake.file.utils.JakeUtilsFile;
-import org.jake.java.JakeJarBuild;
+import org.jake.java.JakeBuildJar;
 
-public class Build extends JakeJarBuild {
+public class Build extends JakeBuildJar {
 
 	@Override
 	protected String projectName() {

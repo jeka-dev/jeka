@@ -6,7 +6,7 @@ import java.util.zip.Deflater;
 import org.jake.JakeLogger;
 import org.jake.file.JakeZip;
 
-public class JakeJarBuild extends JakeJavaBuild {
+public class JakeBuildJar extends JakeBuildJava {
 
 	protected String jarName() {
 		return projectName() + versionSuffix();
@@ -40,7 +40,7 @@ public class JakeJarBuild extends JakeJavaBuild {
 	}
 
 	public static void main(String[] args) {
-		new JakeJarBuild().doDefault();
+		new JakeBuildJar().doDefault();
 	}
 
 }

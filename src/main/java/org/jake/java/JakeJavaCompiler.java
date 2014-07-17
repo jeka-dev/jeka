@@ -10,7 +10,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import org.jake.JakeBuildException;
+import org.jake.JakeException;
 import org.jake.file.JakeDirView;
 import org.jake.file.utils.JakeUtilsFile;
 
@@ -71,7 +71,7 @@ public final class JakeJavaCompiler {
 		CompilationTask task = compiler.getTask(null, null, null, options, null, javaFileObjects);
 		boolean result = task.call(); {
 			if (!result) {
-				throw new JakeBuildException("Compilation failure.");
+				throw new JakeException("Compilation failure.");
 			}
 		}
 	}

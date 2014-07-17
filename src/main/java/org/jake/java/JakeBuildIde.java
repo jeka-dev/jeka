@@ -6,7 +6,7 @@ import java.net.URLClassLoader;
 import java.util.List;
 import java.util.zip.Deflater;
 
-import org.jake.JakeBaseBuild;
+import org.jake.JakeBuildBase;
 import org.jake.JakeLogger;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.utils.JakeUtilsClassloader;
@@ -18,7 +18,7 @@ import org.jake.java.utils.JakeUtilsClassloader;
  * 
  * @author Jerome Angibaud
  */
-public class JakeIdeBuild extends JakeBaseBuild {
+public class JakeBuildIde extends JakeBuildBase {
 
 	protected String jarBaseName() {
 		return projectName();
@@ -50,7 +50,7 @@ public class JakeIdeBuild extends JakeBaseBuild {
 	}
 
 	public static void main(String[] args) {
-		new JakeIdeBuild().doDefault();
+		new JakeBuildIde().doDefault();
 	}
 
 	protected final FileFilter getProjectFileFilter() {
@@ -65,7 +65,7 @@ public class JakeIdeBuild extends JakeBaseBuild {
 
 	protected List<File> getProjectCompiledClasses() {
 		return JakeUtilsClassloader.getFolderClassEntriesUnder(baseDir().root(),
-				(URLClassLoader) JakeIdeBuild.class.getClassLoader());
+				(URLClassLoader) JakeBuildIde.class.getClassLoader());
 	}
 
 }

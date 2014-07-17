@@ -12,11 +12,11 @@ import org.jake.file.utils.JakeUtilsFile;
  * 
  * @author Jerome Angibaud
  */
-public class JakeBaseBuild {
+public class JakeBuildBase {
 	
 	protected static final File WORKING_DIR = JakeUtilsFile.canonicalFile(new File("."));
 	
-	protected JakeBaseBuild() {
+	protected JakeBuildBase() {
 	}
 	
 	/**
