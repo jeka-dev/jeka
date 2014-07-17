@@ -3,45 +3,43 @@ package org.jake.java;
 import java.io.File;
 import java.util.zip.Deflater;
 
-import org.jake.BuildOption;
-import org.jake.Notifier;
-import org.jake.file.Zip;
+import org.jake.JakeLogger;
+import org.jake.file.JakeZip;
 
 public class JakeJarBuild extends JakeJavaBuild {
-	
+
 	protected String jarName() {
 		return projectName() + versionSuffix();
 	}
-	
+
 	protected int zipLevel() {
 		return Deflater.DEFAULT_COMPRESSION;
 	}
-	
+
 	public void jar() {
-		Notifier.start("Packaging as jar");
-		Zip base = Zip.of(classDir());
+		JakeLogger.start("Packaging as jar");
+		final JakeZip base = JakeZip.of(classDir());
 		base.create(buildOuputDir(jarName() + ".jar"), zipLevel());
-		Zip.of(sourceDirs(), resourceDirs()).create(buildOuputDir(jarName() + "-sources.jar"), zipLevel());
-		Zip.of(testClassDir()).create(buildOuputDir(jarName() + "-test.jar"), zipLevel());
-		Zip.of(testSourceDirs(), testResourceDirs()).create(buildOuputDir(jarName() + "-test-sources.jar"), zipLevel());
-		
+		JakeZip.of(sourceDirs(), resourceDirs()).create(buildOuputDir(jarName() + "-sources.jar"), zipLevel());
+		JakeZip.of(testClassDir()).create(buildOuputDir(jarName() + "-test.jar"), zipLevel());
+		JakeZip.of(testSourceDirs(), testResourceDirs()).create(buildOuputDir(jarName() + "-test-sources.jar"), zipLevel());
+
 		// Create a fat jar if runtime dependencies are defined on
-		if (!dependenciesPath().runtime().isEmpty()) {
+		if (!dependencyPath().runtime().isEmpty()) {
 			final File fatJarFile = buildOuputDir(jarName() + "-fat.jar");
-			base.merge(dependenciesPath().runtime()).create(fatJarFile, zipLevel());
+			base.merge(dependencyPath().runtime()).create(fatJarFile, zipLevel());
 		}
-		
-		Notifier.done();
+
+		JakeLogger.done();
 	}
-	
+
 	@Override
 	public void doDefault() {
 		super.doDefault();
 		jar();
 	}
-	
+
 	public static void main(String[] args) {
-		BuildOption.set(args);
 		new JakeJarBuild().doDefault();
 	}
 

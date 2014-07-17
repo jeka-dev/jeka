@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.net.URL;
 
-import org.jake.file.DirView;
+import org.jake.file.JakeDirView;
 import org.junit.Test;
 
 public class DirViewTest {
@@ -18,10 +18,10 @@ public class DirViewTest {
 		assertTrue(sampleFile.exists());
 		File sampleFolder = sampleFile.getParentFile().getParentFile();
 		
-		DirView subfolderTxt = DirView.of(sampleFolder).include("/subfolder/*.txt");
+		JakeDirView subfolderTxt = JakeDirView.of(sampleFolder).include("/subfolder/*.txt");
 		assertEquals(1, subfolderTxt.listFiles().size());
 		
-		subfolderTxt = DirView.of(sampleFolder).include("subfolder/*.txt");
+		subfolderTxt = JakeDirView.of(sampleFolder).include("subfolder/*.txt");
 		assertEquals(1, subfolderTxt.listFiles().size());
 		
 	}

@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.file.DirView;
+import org.jake.file.JakeDirView;
 
 class ResourcePath {
 	
@@ -49,7 +49,7 @@ class ResourcePath {
 		if (!conFolder.exists()) {
 			return Collections.emptyList();
 		}
-		DirView dirView = DirView.of(conFolder).include("**/*.jar");
+		JakeDirView dirView = JakeDirView.of(conFolder).include("**/*.jar");
 		boolean testScoped = path.toLowerCase().contains("junit");
 		List<ResourcePath> result = new LinkedList<ResourcePath>();
 		for (File file : dirView.listFiles()) {

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-public final class StringUtils {
+public final class JakeUtilsString {
 	
 	public static String[] split(String str, String delimiters) {
 		StringTokenizer st = new StringTokenizer(str, delimiters);

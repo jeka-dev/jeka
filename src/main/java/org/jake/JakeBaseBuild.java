@@ -3,7 +3,7 @@ package org.jake;
 import java.io.File;
 import java.util.logging.Level;
 
-import org.jake.file.DirView;
+import org.jake.file.JakeDirView;
 import org.jake.file.utils.FileUtils;
 
 /**
@@ -56,19 +56,19 @@ public class JakeBaseBuild {
 	 * The base directory for this project. All file/directory path are 
 	 * resolved from this directory.
 	 */
-	protected DirView baseDir() {
-		return DirView.of(WORKING_DIR);
+	protected JakeDirView baseDir() {
+		return JakeDirView.of(WORKING_DIR);
 	}
 	
 	protected File baseDir(String relativePath) {
-		return DirView.of(WORKING_DIR).file(relativePath);
+		return JakeDirView.of(WORKING_DIR).file(relativePath);
 	}
 
 	/**
 	 * The output directory where all the final and intermediate 
 	 * artefacts are generated.  
 	 */
-	protected DirView buildOuputDir() {
+	protected JakeDirView buildOuputDir() {
 		return baseDir().sub("build/output").createIfNotExist();
 	}
 	
@@ -84,9 +84,9 @@ public class JakeBaseBuild {
 	 * Task for cleaning up the output directory.
 	 */
 	public void clean() {
-		Notifier.start("Cleaning output directory " + buildOuputDir().root().getPath() );
+		JakeLogger.start("Cleaning output directory " + buildOuputDir().root().getPath() );
 		FileUtils.deleteDirContent(buildOuputDir().root());
-		Notifier.done();
+		JakeLogger.done();
 	}
 	
 	/**

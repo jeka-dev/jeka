@@ -7,45 +7,45 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.Deflater;
 
-public class DirViews implements Iterable<DirView> {
+public class JakeDirViewSet implements Iterable<JakeDirView> {
 	
-	private final List<DirView> dirViews;
+	private final List<JakeDirView> dirViews;
 	
-	private DirViews(List<DirView> dirViews) {
+	private JakeDirViewSet(List<JakeDirView> dirViews) {
 		this.dirViews = dirViews;
 	}
 	
-	public static final DirViews of(DirView...dirViews) {
-		return new DirViews(Arrays.asList(dirViews));
+	public static final JakeDirViewSet of(JakeDirView...dirViews) {
+		return new JakeDirViewSet(Arrays.asList(dirViews));
 	}
 	
-	public final DirViews and(DirView ...dirViews) {
-		List<DirView> list = new LinkedList<DirView>(this.dirViews);
+	public final JakeDirViewSet and(JakeDirView ...dirViews) {
+		List<JakeDirView> list = new LinkedList<JakeDirView>(this.dirViews);
 		list.addAll(Arrays.asList(dirViews));
-		return new DirViews(list);
+		return new JakeDirViewSet(list);
 	}
 	
-	public final DirViews and(DirViews ...dirViewsList) {
-		List<DirView> list = new LinkedList<DirView>(this.dirViews);
-		for (DirViews views : dirViewsList) {
+	public final JakeDirViewSet and(JakeDirViewSet ...dirViewsList) {
+		List<JakeDirView> list = new LinkedList<JakeDirView>(this.dirViews);
+		for (JakeDirViewSet views : dirViewsList) {
 			list.addAll(views.dirViews);
 		}
-		return new DirViews(list);
+		return new JakeDirViewSet(list);
 	}
 
 
 	@Override
-	public Iterator<DirView> iterator() {
+	public Iterator<JakeDirView> iterator() {
 		return dirViews.iterator();
 	}
 	
-	public int copyTo(DirView destinationDir) {
+	public int copyTo(JakeDirView destinationDir) {
 		return this.copyTo(destinationDir.root());
 	}
 	
 	public int copyTo(File destinationDir) {
 		int count = 0;
-		for (DirView dirView : dirViews) {
+		for (JakeDirView dirView : dirViews) {
 			if (dirView.exists()) {
 				count += dirView.copyTo(destinationDir);
 			}
@@ -53,18 +53,18 @@ public class DirViews implements Iterable<DirView> {
 		return count;
 	}
 	
-	public DirViews withFilter(Filter filter) {
-		List<DirView> list = new LinkedList<DirView>();
-		for (DirView dirView : this.dirViews) {
+	public JakeDirViewSet withFilter(JakeFileFilter filter) {
+		List<JakeDirView> list = new LinkedList<JakeDirView>();
+		for (JakeDirView dirView : this.dirViews) {
 			list.add(dirView.filter(filter));
 		}
-		return new DirViews(list);
+		return new JakeDirViewSet(list);
 	}
 	
 	
 	public List<File> listFiles() {
 		final LinkedList<File> result = new LinkedList<File>();
-		for (DirView dirView : this.dirViews) {
+		for (JakeDirView dirView : this.dirViews) {
 			if (dirView.root().exists()) {
 				result.addAll(dirView.listFiles());
 			}
@@ -74,7 +74,7 @@ public class DirViews implements Iterable<DirView> {
 	
 	public List<File> listRoots() {
 		final List<File> result = new LinkedList<File>();
-		for(DirView dirView : dirViews) {
+		for(JakeDirView dirView : dirViews) {
 			result.add(dirView.root());
 		}
 		return result;
@@ -82,14 +82,14 @@ public class DirViews implements Iterable<DirView> {
 	
 	public int countFiles(boolean includeFolder) {
 		int result = 0;
-		for (DirView dirView : dirViews) {
+		for (JakeDirView dirView : dirViews) {
 			result += dirView.fileCount(includeFolder);
 		}
 		return result;
 	}
 	
 	public void zip(File destFile, int zipLevel) {
-		Zip.of(this).create(destFile, zipLevel);
+		JakeZip.of(this).create(destFile, zipLevel);
 	}
 	
 	public void zip(File destFile) {
@@ -99,9 +99,9 @@ public class DirViews implements Iterable<DirView> {
 	/**
 	 * Convenient method to list files over several <code>DirViews</code>.
 	 */
-	public static List<File> toFiles(DirViews ...dirViewsList) {
+	public static List<File> toFiles(JakeDirViewSet ...dirViewsList) {
 		final List<File> result = new LinkedList<File>();
-		for (DirViews dirViews : dirViewsList) {
+		for (JakeDirViewSet dirViews : dirViewsList) {
 			result.addAll(dirViews.listFiles());
 		}
 		return result;

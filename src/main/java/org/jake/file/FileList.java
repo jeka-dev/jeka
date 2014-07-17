@@ -28,9 +28,9 @@ public class FileList implements Iterable<File> {
 		return new FileList(files);
 	}
 	
-	public static FileList of(DirViews dirViews) {
+	public static FileList of(JakeDirViewSet dirViews) {
 		final List<File> list = new LinkedList<File>();
-		for (DirView dirView : dirViews) {
+		for (JakeDirView dirView : dirViews) {
 			list.addAll(dirView.listFiles());
 		}
 		return new FileList(list);

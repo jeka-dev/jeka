@@ -24,6 +24,8 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import org.jake.utils.JakeUtilsString;
+
 public class FileUtils {
 
 	public static void assertDir(File candidate) {
@@ -36,39 +38,39 @@ public class FileUtils {
 					+ " is not a directory.");
 		}
 	}
-	
+
 	public static URL toUrl(File file) {
 		try {
 			return file.toURI().toURL();
-		} catch (MalformedURLException e) {
+		} catch (final MalformedURLException e) {
 			throw new IllegalStateException(e);
 		}
 	}
-	
+
 	public static List<File> toFiles(URL...urls) {
 		final List<File> result = new LinkedList<File>();
-		for (URL url : urls) {
+		for (final URL url : urls) {
 			result.add(new File(url.getFile()));
 		}
 		return result;
 	}
 
 	public static List<File> sum(List<File>... files) {
-		List<File> result = new LinkedList<File>();
-		for (List<File> list : files) {
+		final List<File> result = new LinkedList<File>();
+		for (final List<File> list : files) {
 			result.addAll(list);
 		}
 		return result;
 	}
 
 	public static String getRelativePath(File baseDir, File file) {
-		String baseDirPath = canonicalPath(baseDir);
-		String filePath = canonicalPath(file);
+		final String baseDirPath = canonicalPath(baseDir);
+		final String filePath = canonicalPath(file);
 		if (!filePath.startsWith(baseDirPath)) {
 			throw new IllegalArgumentException("File " + filePath
 					+ " is not part of " + baseDirPath);
 		}
-		String relativePath = filePath.substring(baseDirPath.length() + 1);
+		final String relativePath = filePath.substring(baseDirPath.length() + 1);
 		return relativePath;
 	}
 
@@ -97,8 +99,7 @@ public class FileUtils {
 
 		final File[] children = source.listFiles();
 		int count = 0;
-		for (int i = 0; i < children.length; i++) {
-			File child = children[i];
+		for (final File child : children) {
 			if (child.isFile()) {
 				if (filter.accept(child)) {
 					final File targetFile = new File(targetDir, child.getName());
@@ -110,16 +111,16 @@ public class FileUtils {
 				if (filter.accept(child) && copyEmptyDir) {
 					subdir.mkdirs();
 				}
-				int subCount = copyDir(child, subdir, filter, copyEmptyDir);
+				final int subCount = copyDir(child, subdir, filter, copyEmptyDir);
 				count = count + subCount;
 			}
 
 		}
 		return count;
 	}
-	
+
 	public static void copyFileToDir(File from, File toDir) {
-		File to = new File(toDir, from.getName());
+		final File to = new File(toDir, from.getName());
 		copyFile(from, to);
 	}
 
@@ -133,26 +134,26 @@ public class FileUtils {
 					+ " is a directory. Should be a file.");
 		}
 		try {
-			InputStream in = new FileInputStream(from);
+			final InputStream in = new FileInputStream(from);
 			if (!toFile.getParentFile().exists()) {
 				toFile.getParentFile().mkdirs();
 			}
 			if (!toFile.exists()) {
 				toFile.createNewFile();
 			}
-			OutputStream out = new FileOutputStream(toFile);
+			final OutputStream out = new FileOutputStream(toFile);
 
-			byte[] buf = new byte[1024];
+			final byte[] buf = new byte[1024];
 			int len;
 			while ((len = in.read(buf)) > 0) {
 				out.write(buf, 0, len);
 			}
 			in.close();
 			out.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(
 					"IO exception occured while copying file " + from.getPath()
-							+ " to " + toFile.getPath(), e);
+					+ " to " + toFile.getPath(), e);
 		}
 
 	}
@@ -162,7 +163,7 @@ public class FileUtils {
 
 			@Override
 			public boolean accept(File file) {
-				for (String suffix : suffixes) {
+				for (final String suffix : suffixes) {
 					if (file.getName().endsWith(suffix)) {
 						return true;
 					}
@@ -213,7 +214,7 @@ public class FileUtils {
 		};
 	}
 
-	
+
 
 	public static FileFilter acceptAll() {
 		return new FileFilter() {
@@ -246,9 +247,9 @@ public class FileUtils {
 	}
 
 	public static void deleteDirContent(File dir) {
-		File[] files = dir.listFiles();
+		final File[] files = dir.listFiles();
 		if (files != null) {
-			for (File file : files) {
+			for (final File file : files) {
 				if (file.isDirectory()) {
 					deleteDirContent(file);
 				}
@@ -258,14 +259,14 @@ public class FileUtils {
 	}
 
 	public static String fileName(File anyFile) {
-		String absPath = canonicalPath(anyFile);
-		int index = absPath.lastIndexOf(File.separator);
+		final String absPath = canonicalPath(anyFile);
+		final int index = absPath.lastIndexOf(File.separator);
 		return absPath.substring(index);
 	}
 
-	public static String asPath(Iterable<File> files, String separator) {
-		StringBuilder builder = new StringBuilder();
-		Iterator<File> fileIt = files.iterator();
+	public static String toPathString(Iterable<File> files, String separator) {
+		final StringBuilder builder = new StringBuilder();
+		final Iterator<File> fileIt = files.iterator();
 		while (fileIt.hasNext()) {
 			builder.append(fileIt.next().getAbsolutePath());
 			if (fileIt.hasNext()) {
@@ -273,6 +274,19 @@ public class FileUtils {
 			}
 		}
 		return builder.toString();
+	}
+
+	public static List<File> toPath(String pathAsString, String separator, File baseDir) {
+		final String[] paths = JakeUtilsString.split(pathAsString, separator);
+		final List<File> result = new LinkedList<File>();
+		for (final String path : paths) {
+			File file = new File(path);
+			if (!file.isAbsolute()) {
+				file = new File(baseDir, path);
+			}
+			result.add(file);
+		}
+		return result;
 	}
 
 	public static boolean isAncestor(File ancestorCandidate,
@@ -299,7 +313,7 @@ public class FileUtils {
 	public static String canonicalPath(File file) {
 		try {
 			return file.getCanonicalPath();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -310,7 +324,7 @@ public class FileUtils {
 	public static File canonicalFile(File file) {
 		try {
 			return file.getCanonicalFile();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -331,11 +345,11 @@ public class FileUtils {
 
 		final ZipOutputStream zos = createZipOutputStream(zipFile, zipLevel);
 		try {
-			for (File dir : dirs) {
+			for (final File dir : dirs) {
 				addZipEntry(zos, dir, dir);
 			}
 			zos.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -351,30 +365,30 @@ public class FileUtils {
 			final ZipOutputStream zos = new ZipOutputStream(fos);
 			zos.setLevel(compressLevel);
 			return zos;
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 
 	}
-	
+
 
 	public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile) {
 		final Set<String> duplicateEntries = new HashSet<String>();
 		final Enumeration<? extends ZipEntry> entries = zipFile.entries();
-	    while (entries.hasMoreElements()) {
-	    	final ZipEntry e = entries.nextElement();
-	    	try {
+		while (entries.hasMoreElements()) {
+			final ZipEntry e = entries.nextElement();
+			try {
 				if (!e.isDirectory()) {
-		    		boolean success = addEntryInputStream(zos, e.getName(), zipFile.getInputStream(e));;
-		    		if (!success) {
-		    			duplicateEntries.add(e.getName());
-		    		}
+					final boolean success = addEntryInputStream(zos, e.getName(), zipFile.getInputStream(e));;
+					if (!success) {
+						duplicateEntries.add(e.getName());
+					}
 				}
-			} catch (IOException e1) {
+			} catch (final IOException e1) {
 				throw new RuntimeException("Error while merging entry " + e.getName() + " from zip file " + zipFile.getName(), e1);
 			}
-	    }
-	    return duplicateEntries;
+		}
+		return duplicateEntries;
 	}
 
 
@@ -391,34 +405,34 @@ public class FileUtils {
 
 		if (fileToZip.isDirectory()) {
 			final File[] files = fileToZip.listFiles();
-			for (int i = 0; i < files.length; i++) {
-				addZipEntry(zos, files[i], baseFolder);
+			for (final File file : files) {
+				addZipEntry(zos, file, baseFolder);
 			}
 		} else {
-			String filePathToZip = canonicalPath(fileToZip);
+			final String filePathToZip = canonicalPath(fileToZip);
 			String entryName = filePathToZip.substring(
 					canonicalPath(baseFolder).length() + 1, filePathToZip.length());
 			entryName = entryName.replace(File.separatorChar, '/');
 			final FileInputStream inputStream;
 			try {
 				inputStream = new FileInputStream(filePathToZip);
-			} catch (FileNotFoundException e) {
+			} catch (final FileNotFoundException e) {
 				throw new IllegalStateException(e);
 			}
 			addEntryInputStream(zos, entryName, inputStream);
 		}
 	}
-	
+
 
 	private static boolean addEntryInputStream(ZipOutputStream zos, String entryName, InputStream inputStream) {
 		final ZipEntry zipEntry = new ZipEntry(entryName);
 		try {
 			zos.putNextEntry(zipEntry);
-		} catch (ZipException e) {
+		} catch (final ZipException e) {
 
 			// Ignore duplicate entry - no overwriting
 			return false;
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException("Error while adding zip entry "
 					+ zipEntry, e);
 		}
@@ -427,7 +441,7 @@ public class FileUtils {
 				inputStream, buffer);
 		int count;
 		try {
-			byte data[] = new byte[buffer];
+			final byte data[] = new byte[buffer];
 			while ((count = bufferedInputStream.read(data, 0, buffer)) != -1) {
 				zos.write(data, 0, count);
 			}
@@ -435,21 +449,21 @@ public class FileUtils {
 			inputStream.close();
 			zos.closeEntry();
 			return true;
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
-	
+
+
 	public static void closeZipEntryQuietly(ZipOutputStream outputStream) {
 		try {
 			outputStream.closeEntry();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
-		}		
-	} 
-	
-	
+		}
+	}
+
+
 
 
 	/**
@@ -466,7 +480,7 @@ public class FileUtils {
 			boolean includeFolders) {
 		assertDir(dir);
 		final List<File> result = new LinkedList<File>();
-		for (File file : dir.listFiles()) {
+		for (final File file : dir.listFiles()) {
 			if (file.isFile() && !fileFilter.accept(file)) {
 				continue;
 			}
@@ -488,7 +502,7 @@ public class FileUtils {
 	public static int count(File dir, FileFilter fileFilter,
 			boolean includeFolders) {
 		int result = 0;
-		for (File file : dir.listFiles()) {
+		for (final File file : dir.listFiles()) {
 			if (file.isFile() && !fileFilter.accept(file)) {
 				continue;
 			}
@@ -502,6 +516,10 @@ public class FileUtils {
 			}
 		}
 		return result;
+	}
+
+	public static File workingDir() {
+		return new File(System.getProperty("user.dir"));
 	}
 
 }

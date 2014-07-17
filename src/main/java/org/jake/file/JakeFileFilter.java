@@ -6,9 +6,9 @@ import java.util.Arrays;
 
 import org.jake.file.utils.FileUtils;
 
-public abstract class Filter {
+public abstract class JakeFileFilter {
 	
-	public static final Filter ACCEPT_ALL = new Filter() {
+	public static final JakeFileFilter ACCEPT_ALL = new JakeFileFilter() {
 
 		@Override
 		public boolean accept(String relativePath) {
@@ -19,36 +19,36 @@ public abstract class Filter {
 	
 	public abstract boolean accept(String relativePath);
 	
-	public static Filter include(String ... antPatterns) {
+	public static JakeFileFilter include(String ... antPatterns) {
 		return new IncludeFilter(AntPattern.arrayOf(antPatterns));
 	}
 	
-	public static Filter exclude(String ... antPatterns) {
+	public static JakeFileFilter exclude(String ... antPatterns) {
 		return new ExcludeFilter(AntPattern.arrayOf(antPatterns));
 	}
 		
-	public Filter andIncludeOnly(String ... antPatterns) {
+	public JakeFileFilter andIncludeOnly(String ... antPatterns) {
 		return this.and(include(antPatterns));
 	}
 	
-	public Filter andExcludeAll(String ... antPatterns) {
+	public JakeFileFilter andExcludeAll(String ... antPatterns) {
 		return this.and(exclude(antPatterns));
 	}
 	
-	public Filter and(Filter other) {
+	public JakeFileFilter and(JakeFileFilter other) {
 		return and(this, other);
 	}
 	
-	public Filter or(Filter other) {
+	public JakeFileFilter or(JakeFileFilter other) {
 		return or(this, other);
 	}
 	
-	public Filter reverse() {
-		return new Filter() {
+	public JakeFileFilter reverse() {
+		return new JakeFileFilter() {
 
 			@Override
 			public boolean accept(String relativePath) {
-				return !Filter.this.accept(relativePath);
+				return !JakeFileFilter.this.accept(relativePath);
 			}
 			
 		};
@@ -60,13 +60,13 @@ public abstract class Filter {
 			@Override
 			public boolean accept(File file) {
 				final String relativePath = FileUtils.getRelativePath(baseDir, file);
-				return Filter.this.accept(relativePath);
+				return JakeFileFilter.this.accept(relativePath);
 			}
 		};
 	}
 	
 	
-	private static class IncludeFilter extends Filter {
+	private static class IncludeFilter extends JakeFileFilter {
 		
 		private final AntPattern[] antPatterns;
 		
@@ -93,7 +93,7 @@ public abstract class Filter {
 		}
 	} 
 	
-	private static class ExcludeFilter extends Filter {
+	private static class ExcludeFilter extends JakeFileFilter {
 		
 		private final AntPattern[] antPatterns;
 		
@@ -121,9 +121,9 @@ public abstract class Filter {
 		}
 	} 
 	
-	private static Filter and(final Filter filter1, final Filter filter2) {
+	private static JakeFileFilter and(final JakeFileFilter filter1, final JakeFileFilter filter2) {
 		
-		return new Filter() {
+		return new JakeFileFilter() {
 
 			@Override
 			public boolean accept(String candidate) {
@@ -137,9 +137,9 @@ public abstract class Filter {
 		};
 	}
 	
-	private static Filter or(final Filter filter1, final Filter filter2) {
+	private static JakeFileFilter or(final JakeFileFilter filter1, final JakeFileFilter filter2) {
 		
-		return new Filter() {
+		return new JakeFileFilter() {
 
 			@Override
 			public boolean accept(String candidate) {

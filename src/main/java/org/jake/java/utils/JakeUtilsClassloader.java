@@ -15,12 +15,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jake.file.utils.FileUtils;
-import org.jake.utils.IterableUtils;
+import org.jake.utils.JakeUtilsIterable;
 
 /**
  * Convenient methods to deal with <code>ClassLoader</codes>.
  */
-public class ClassloaderUtils {
+public class JakeUtilsClassloader {
 	
 	/**
 	 * A {@link FileFilter} accepting only .class files.
@@ -38,7 +38,7 @@ public class ClassloaderUtils {
 	 * not an <code>UrlClassLoader</code>.
 	 */
 	public static URLClassLoader current() {
-		return (URLClassLoader) ClassloaderUtils.class.getClassLoader();
+		return (URLClassLoader) JakeUtilsClassloader.class.getClassLoader();
 	}
 	
 	public static URLClassLoader createFrom(Iterable<File> entries) {
@@ -88,7 +88,7 @@ public class ClassloaderUtils {
 	 * directory passed as parameter.
 	 */
 	public static List<File> getFolderClassEntriesUnder(File baseDir, URLClassLoader classLoader) {
-		final List<File> entries = ClassloaderUtils.getUrlsAsFiles(classLoader);
+		final List<File> entries = JakeUtilsClassloader.getUrlsAsFiles(classLoader);
 		final List<File> result = new LinkedList<File>();
 		for (File file : entries) {
 			if (file.isDirectory()
@@ -150,7 +150,7 @@ public class ClassloaderUtils {
 				if (onlyFolder && file.isDirectory()) {
 					final List<File> files = FileUtils.filesOf(file, CLASS_FILE_FILTER, false);
 					classfiles.addAll(files);
-					IterableUtils.putMultiEntry(file2Entry, files, file);
+					JakeUtilsIterable.putMultiEntry(file2Entry, files, file);
 				}
 			}
 		}

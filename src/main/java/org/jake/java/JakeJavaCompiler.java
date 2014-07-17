@@ -10,12 +10,12 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import org.jake.BuildException;
-import org.jake.file.DirView;
+import org.jake.JakeBuildException;
+import org.jake.file.JakeDirView;
 import org.jake.file.utils.FileUtils;
 
 
-public final class JavaCompilation {
+public final class JakeJavaCompiler {
 	
 	private final JavaCompiler compiler;
 	private final StandardJavaFileManager fileManager;
@@ -23,17 +23,17 @@ public final class JavaCompilation {
 	private final List<String> options = new LinkedList<String>();
 	private final List<File> javaSourceFiles = new LinkedList<File>();
 
-	public JavaCompilation(JavaCompiler compiler) {
+	public JakeJavaCompiler(JavaCompiler compiler) {
 		super();
 		this.compiler = compiler;
 		this.fileManager = compiler.getStandardFileManager(null, null, null);
 	}
 	
-	public JavaCompilation() {
+	public JakeJavaCompiler() {
 		this(getDefaultOrFail());
 	}
 	
-	public void setOutputDirectory(DirView dir) {
+	public void setOutputDirectory(JakeDirView dir) {
 		setOutputDirectory(dir.root());
 	}
 	
@@ -48,7 +48,7 @@ public final class JavaCompilation {
 	
 	public void setClasspath(Iterable<File> files) {
 		options.add("-cp");
-		options.add(FileUtils.asPath(files, ";"));
+		options.add(FileUtils.toPathString(files, ";"));
 	}
 	
 	public void addSourceFiles(Iterable<File> files) {
@@ -71,7 +71,7 @@ public final class JavaCompilation {
 		CompilationTask task = compiler.getTask(null, null, null, options, null, javaFileObjects);
 		boolean result = task.call(); {
 			if (!result) {
-				throw new BuildException("Compilation failure.");
+				throw new JakeBuildException("Compilation failure.");
 			}
 		}
 	}

@@ -14,17 +14,17 @@ import org.jake.file.utils.FileUtils;
  * 
  * @author Jerome Angibaud
  */
-public class DirView implements Iterable<File> {
+public class JakeDirView implements Iterable<File> {
 
 	private final File base;
 	
-	private final Filter filter;
+	private final JakeFileFilter filter;
 
-	public static DirView of(File base) {
-		return new DirView(base);
+	public static JakeDirView of(File base) {
+		return new JakeDirView(base);
 	}
 	
-	private DirView(File base, Filter filter) {
+	private JakeDirView(File base, JakeFileFilter filter) {
 		super();
 		if (base.exists() && !base.isDirectory()) {
 			throw new IllegalArgumentException(base + " is not a directory.");
@@ -33,17 +33,17 @@ public class DirView implements Iterable<File> {
 		this.filter = filter;
 	}
 	
-	private DirView(File base) {
-		this(base, Filter.ACCEPT_ALL);
+	private JakeDirView(File base) {
+		this(base, JakeFileFilter.ACCEPT_ALL);
 	}
 
-	public DirView sub(String relativePath) {
+	public JakeDirView sub(String relativePath) {
 		File newBase = new File(base, relativePath);
 		
-		return new DirView(newBase);
+		return new JakeDirView(newBase);
 	}
 	
-	public DirView createIfNotExist() {
+	public JakeDirView createIfNotExist() {
 		if (!base.exists() ) {
 			base.mkdirs();
 		}
@@ -59,7 +59,7 @@ public class DirView implements Iterable<File> {
 		return FileUtils.copyDir(base, destinationDir, filter.toFileFilter(base), true);
 	}
 	
-	public int copyTo(DirView destinationDir) {
+	public int copyTo(JakeDirView destinationDir) {
 		return copyTo(destinationDir.root());
 	}
 
@@ -67,7 +67,7 @@ public class DirView implements Iterable<File> {
 		return base;
 	}
 	
-	public Filter getFilter() {
+	public JakeFileFilter getFilter() {
 		return filter;
 	}
 	
@@ -83,8 +83,8 @@ public class DirView implements Iterable<File> {
 		FileUtils.zipDir(zipFile, compressLevel, base);
 	}
 	
-	public DirView noFiltering() {
-		return new DirView(base);
+	public JakeDirView noFiltering() {
+		return new JakeDirView(base);
 	}
 	
 	public boolean contains(File file) {
@@ -100,27 +100,27 @@ public class DirView implements Iterable<File> {
 	}
 	
 	
-	public DirView filter(Filter filter) {
-		if (this.filter == Filter.ACCEPT_ALL) {
-			return new DirView(base, filter);
+	public JakeDirView filter(JakeFileFilter filter) {
+		if (this.filter == JakeFileFilter.ACCEPT_ALL) {
+			return new JakeDirView(base, filter);
 		}
-		return new DirView(base, this.filter.and(filter));
+		return new JakeDirView(base, this.filter.and(filter));
 	}
 	
-	public DirView include(String ... antPatterns) {
-		return filter(Filter.include(antPatterns));
+	public JakeDirView include(String ... antPatterns) {
+		return filter(JakeFileFilter.include(antPatterns));
 	}
 	
-	public DirView exclude(String ... antPatterns) {
-		return filter(Filter.exclude(antPatterns));
+	public JakeDirView exclude(String ... antPatterns) {
+		return filter(JakeFileFilter.exclude(antPatterns));
 	}
 	
-	public DirViews and(DirView dirView) {
-		return DirViews.of(this, dirView);
+	public JakeDirViewSet and(JakeDirView dirView) {
+		return JakeDirViewSet.of(this, dirView);
 	}
 	
-	public DirViews and(DirViews dirViews) {
-		return DirViews.of(this).and(dirViews);
+	public JakeDirViewSet and(JakeDirViewSet dirViews) {
+		return JakeDirViewSet.of(this).and(dirViews);
 	}
 	
 	

@@ -3,14 +3,14 @@ package org.jake.java;
 import java.io.File;
 import java.util.List;
 
-import org.jake.utils.IterableUtils;
+import org.jake.utils.JakeUtilsIterable;
 
 /**
  * Defines where are located required dependencies for various scope.
  * 
  * @author Djeang
  */
-public abstract class DependencyResolver {
+public abstract class JakeJavaDependencyResolver {
 
 	/**
 	 * All libraries finally used to compile the production code.
@@ -29,23 +29,23 @@ public abstract class DependencyResolver {
 	public abstract List<File> runtime();
 	
 		
-	public DependencyResolver merge(DependencyResolver other, File otherClasses, File otherTestClasses) {
+	public JakeJavaDependencyResolver merge(JakeJavaDependencyResolver other, File otherClasses, File otherTestClasses) {
 		return new TransitiveDependencyResolver(this, other, otherClasses, otherTestClasses);
 	} 
 	
-	protected class TransitiveDependencyResolver extends DependencyResolver {
+	protected class TransitiveDependencyResolver extends JakeJavaDependencyResolver {
 		
-		private final DependencyResolver base;
+		private final JakeJavaDependencyResolver base;
 		
-		private final DependencyResolver other;
+		private final JakeJavaDependencyResolver other;
 		
 		private final File otherClasses;
 		
 		private final File otherTestClasses;
 
 		
-		public TransitiveDependencyResolver(DependencyResolver base,
-				DependencyResolver other, File otherClasses, File otherTestClasses) {
+		public TransitiveDependencyResolver(JakeJavaDependencyResolver base,
+				JakeJavaDependencyResolver other, File otherClasses, File otherTestClasses) {
 			super();
 			this.base = base;
 			this.other = other;
@@ -54,8 +54,8 @@ public abstract class DependencyResolver {
 		}
 		
 	
-		public TransitiveDependencyResolver(DependencyResolver base,
-				DependencyResolver other, File otherClasses) {
+		public TransitiveDependencyResolver(JakeJavaDependencyResolver base,
+				JakeJavaDependencyResolver other, File otherClasses) {
 			super();
 			this.base = base;
 			this.other = other;
@@ -64,8 +64,8 @@ public abstract class DependencyResolver {
 		}
 		
 		
-		public TransitiveDependencyResolver(DependencyResolver base,
-				DependencyResolver other) {
+		public TransitiveDependencyResolver(JakeJavaDependencyResolver base,
+				JakeJavaDependencyResolver other) {
 			super();
 			this.base = base;
 			this.other = other;
@@ -76,19 +76,19 @@ public abstract class DependencyResolver {
 		@SuppressWarnings("unchecked")
 		@Override
 		public List<File> compile() {
-			return IterableUtils.concatLists(base.compile(), IterableUtils.single(otherClasses), other.compile() );
+			return JakeUtilsIterable.concatLists(base.compile(), JakeUtilsIterable.single(otherClasses), other.compile() );
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
 		public List<File> test() {
-			return IterableUtils.concatLists(base.test(), IterableUtils.single(otherTestClasses), other.test() );
+			return JakeUtilsIterable.concatLists(base.test(), JakeUtilsIterable.single(otherTestClasses), other.test() );
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
 		public List<File> runtime() {
-			return IterableUtils.concatLists(base.runtime(), other.runtime() );
+			return JakeUtilsIterable.concatLists(base.runtime(), other.runtime() );
 
 		}
 		

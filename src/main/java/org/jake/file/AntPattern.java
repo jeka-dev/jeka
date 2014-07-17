@@ -20,7 +20,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jake.utils.StringUtils;
+import org.jake.utils.JakeUtilsString;
 
 
 /**
@@ -70,8 +70,8 @@ class AntPattern  {
 		// First clean path and pattern to remove leading '/', '.' or '\' characters
 		path = normalize(path);
 		
-		String[] pattDirs = StringUtils.split(pattern, PATH_SEPARATOR);
-		String[] pathDirs = StringUtils.split(path, PATH_SEPARATOR);
+		String[] pattDirs = JakeUtilsString.split(pattern, PATH_SEPARATOR);
+		String[] pathDirs = JakeUtilsString.split(path, PATH_SEPARATOR);
 
 		int pattIdxStart = 0;
 		int pattIdxEnd = pattDirs.length - 1;
