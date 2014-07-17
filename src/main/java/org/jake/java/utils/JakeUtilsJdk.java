@@ -6,7 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-public class JdkUtils {
+public class JakeUtilsJdk {
 	
 	public static File toolsJar() {
 		String jdkLocation = System.getProperty("java.home");

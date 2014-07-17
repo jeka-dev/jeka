@@ -13,13 +13,13 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.file.utils.FileUtils;
-import org.jake.java.TestResult.ExceptionDescription;
-import org.jake.java.utils.ClassloaderUtils;
-import org.jake.utils.IterableUtils;
-import org.jake.utils.ReflectUtils;
+import org.jake.file.utils.JakeUtilsFile;
+import org.jake.java.JakeTestResult.ExceptionDescription;
+import org.jake.java.utils.JakeUtilsClassloader;
+import org.jake.utils.JakeUtilsIterable;
+import org.jake.utils.JakeUtilsReflect;
 
-public class JUniter {
+public class JakeJUnit {
 
 	private static final String JUNIT4_RUNNER_CLASS_NAME = "org.junit.runner.JUnitCore";
 
@@ -34,37 +34,37 @@ public class JUniter {
 
 	private final List<File> classpath;
 
-	private JUniter(Iterable<File> classpath) {
-		this.classpath = IterableUtils.toList(classpath);
+	private JakeJUnit(Iterable<File> classpath) {
+		this.classpath = JakeUtilsIterable.toList(classpath);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static JUniter classpath(File dir, Iterable<File> dirs) {
-		return new JUniter(IterableUtils.concatToList(dir, dirs));
+	public static JakeJUnit classpath(File dir, Iterable<File> dirs) {
+		return new JakeJUnit(JakeUtilsIterable.concatToList(dir, dirs));
 	}
 
-	public static JUniter classpath(Iterable<File> dirs) {
-		return new JUniter(dirs);
+	public static JakeJUnit classpath(Iterable<File> dirs) {
+		return new JakeJUnit(dirs);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static JUniter noClasspath() {
-		return new JUniter(Collections.EMPTY_LIST);
+	public static JakeJUnit noClasspath() {
+		return new JakeJUnit(Collections.EMPTY_LIST);
 	}
 
-	public TestResult launchAll(File... testClassDirs) {
-		return launchAll(Arrays.asList(testClassDirs), FileUtils.acceptAll(),
-				ClassFilter.acceptAll());
+	public JakeTestResult launchAll(File... testClassDirs) {
+		return launchAll(Arrays.asList(testClassDirs), JakeUtilsFile.acceptAll(),
+				JakeClassFilter.acceptAll());
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public TestResult launchAll(Iterable<File> testClassDirs,
-			FileFilter fileFilter, ClassFilter classFilter) {
-		final Iterable<File> urls = IterableUtils.concatLists(testClassDirs,
+	public JakeTestResult launchAll(Iterable<File> testClassDirs,
+			FileFilter fileFilter, JakeClassFilter classFilter) {
+		final Iterable<File> urls = JakeUtilsIterable.concatLists(testClassDirs,
 				this.classpath);
 		final Collection<Class> testClasses;
 
-		final URLClassLoader classLoader = ClassloaderUtils.createFrom(urls,
+		final URLClassLoader classLoader = JakeUtilsClassloader.createFrom(urls,
 				ClassLoader.getSystemClassLoader().getParent());
 		testClasses = getJunitTestClassesInClassLoader(classLoader, fileFilter,
 				true);
@@ -79,51 +79,51 @@ public class JUniter {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public TestResult launch(Iterable<Class> classes) {
+	public JakeTestResult launch(Iterable<Class> classes) {
 		if (!classes.iterator().hasNext()) {
-			return TestResult.empty();
+			return JakeTestResult.empty();
 		}
 		final ClassLoader classLoader = classes.iterator().next()
 				.getClassLoader();
 		if (isJunit4In(classLoader)) {
-			Class<?>[] classArray = IterableUtils.toArray(classes, Class.class);
-			Class<?> junitCoreClass = ClassloaderUtils.loadClass(classLoader,
+			Class<?>[] classArray = JakeUtilsIterable.toArray(classes, Class.class);
+			Class<?> junitCoreClass = JakeUtilsClassloader.loadClass(classLoader,
 					JUNIT4_RUNNER_CLASS_NAME);
-			Method runClassesMethod = ReflectUtils.getMethod(junitCoreClass,
+			Method runClassesMethod = JakeUtilsReflect.getMethod(junitCoreClass,
 					"runClasses", ARRAY_OF_CLASSES_TYPE);
-			Object junit4Result = ReflectUtils.invoke(null, runClassesMethod,
+			Object junit4Result = JakeUtilsReflect.invoke(null, runClassesMethod,
 					(Object) classArray);
 			return fromJunit4Result(junit4Result);
 		}
-		return TestResult.empty();
+		return JakeTestResult.empty();
 	}
 
-	private static TestResult fromJunit4Result(Object result) {
-		final Integer runCount = ReflectUtils.invoke(result, "getRunCount");
-		final Integer ignoreCount = ReflectUtils.invoke(result,
+	private static JakeTestResult fromJunit4Result(Object result) {
+		final Integer runCount = JakeUtilsReflect.invoke(result, "getRunCount");
+		final Integer ignoreCount = JakeUtilsReflect.invoke(result,
 				"getIgnoreCount");
-		final List<Object> junitFailures = ReflectUtils.invoke(result,
+		final List<Object> junitFailures = JakeUtilsReflect.invoke(result,
 				"getFailures");
-		final List<TestResult.Failure> failures = new ArrayList<TestResult.Failure>(
+		final List<JakeTestResult.Failure> failures = new ArrayList<JakeTestResult.Failure>(
 				junitFailures.size());
 		for (Object junitFailure : junitFailures) {
 			failures.add(fromJunit4Failure(junitFailure));
 		}
-		return new TestResult(runCount, ignoreCount, failures);
+		return new JakeTestResult(runCount, ignoreCount, failures);
 
 	}
 
-	private static TestResult.Failure fromJunit4Failure(Object junit4failure) {
-		Object junit4Description = ReflectUtils.invoke(junit4failure,
+	private static JakeTestResult.Failure fromJunit4Failure(Object junit4failure) {
+		Object junit4Description = JakeUtilsReflect.invoke(junit4failure,
 				"getDescription");
-		String testClassName = ReflectUtils.invoke(junit4Description,
+		String testClassName = JakeUtilsReflect.invoke(junit4Description,
 				"getClassName");
-		String testMethodName = ReflectUtils.invoke(junit4Description,
+		String testMethodName = JakeUtilsReflect.invoke(junit4Description,
 				"getMethodName");
-		Throwable exception = ReflectUtils
+		Throwable exception = JakeUtilsReflect
 				.invoke(junit4failure, "getException");
 		ExceptionDescription description = new ExceptionDescription(exception);
-		return new TestResult.Failure(testClassName, testMethodName,
+		return new JakeTestResult.Failure(testClassName, testMethodName,
 				description);
 	}
 
@@ -131,7 +131,7 @@ public class JUniter {
 	public static Collection<Class> getJunitTestClassesInClassLoader(
 			URLClassLoader classLoader, FileFilter entryFilter,
 			boolean onlyFolder) {
-		final Iterable<Class> classes = ClassloaderUtils.getAllTopLevelClasses(
+		final Iterable<Class> classes = JakeUtilsClassloader.getAllTopLevelClasses(
 				classLoader, entryFilter, onlyFolder);
 		List<Class> testClasses = new LinkedList<Class>();
 		if (isJunit4In(classLoader)) {

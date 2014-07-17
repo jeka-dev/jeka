@@ -3,8 +3,8 @@ package org.jake;
 import java.io.File;
 import java.util.logging.Level;
 
-import org.jake.file.DirView;
-import org.jake.file.utils.FileUtils;
+import org.jake.file.JakeDirView;
+import org.jake.file.utils.JakeUtilsFile;
 
 /**
  * Base project builder defining some commons tasks and utilities 
@@ -14,7 +14,7 @@ import org.jake.file.utils.FileUtils;
  */
 public class JakeBaseBuild {
 	
-	protected static final File WORKING_DIR = FileUtils.canonicalFile(new File("."));
+	protected static final File WORKING_DIR = JakeUtilsFile.canonicalFile(new File("."));
 	
 	protected JakeBaseBuild() {
 	}
@@ -49,26 +49,26 @@ public class JakeBaseBuild {
 	 * The project name. This is likely to used in produced artefacts. 
 	 */
 	protected String projectName() {
-		return FileUtils.fileName(baseDir().root());
+		return JakeUtilsFile.fileName(baseDir().root());
 	}
 	
 	/**
 	 * The base directory for this project. All file/directory path are 
 	 * resolved from this directory.
 	 */
-	protected DirView baseDir() {
-		return DirView.of(WORKING_DIR);
+	protected JakeDirView baseDir() {
+		return JakeDirView.of(WORKING_DIR);
 	}
 	
 	protected File baseDir(String relativePath) {
-		return DirView.of(WORKING_DIR).file(relativePath);
+		return JakeDirView.of(WORKING_DIR).file(relativePath);
 	}
 
 	/**
 	 * The output directory where all the final and intermediate 
 	 * artefacts are generated.  
 	 */
-	protected DirView buildOuputDir() {
+	protected JakeDirView buildOuputDir() {
 		return baseDir().sub("build/output").createIfNotExist();
 	}
 	
@@ -84,9 +84,9 @@ public class JakeBaseBuild {
 	 * Task for cleaning up the output directory.
 	 */
 	public void clean() {
-		Notifier.start("Cleaning output directory " + buildOuputDir().root().getPath() );
-		FileUtils.deleteDirContent(buildOuputDir().root());
-		Notifier.done();
+		JakeLogger.start("Cleaning output directory " + buildOuputDir().root().getPath() );
+		JakeUtilsFile.deleteDirContent(buildOuputDir().root());
+		JakeLogger.done();
 	}
 	
 	/**

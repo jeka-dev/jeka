@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jake.JakeLocator;
-import org.jake.java.DependencyResolver;
+import org.jake.java.JakeJavaDependencyResolver;
 
 public class JakeEclipse {
 	
@@ -18,7 +18,7 @@ public class JakeEclipse {
 		return eclipseClasspath.getLibEntries();
 	}
 	
-	public static DependencyResolver dependencyResolver(File projectFolder) {
+	public static JakeJavaDependencyResolver dependencyResolver(File projectFolder) {
 		final List<ResourcePath> path = buildPath(projectFolder, JakeLocator.getJakeJarFile()); 
 		final List<File> compilePath = new LinkedList<File>(); 
 		final List<File> runtimePath = new LinkedList<File>();
@@ -36,7 +36,7 @@ public class JakeEclipse {
 				testPath.add(file);
 			}
 		}
-		return new DependencyResolver() {
+		return new JakeJavaDependencyResolver() {
 			
 			@Override
 			public List<File> test() {

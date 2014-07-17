@@ -7,9 +7,9 @@ import java.util.regex.Pattern;
  * 
  * @author Jerome Angibaud
  */
-public abstract class ClassFilter {
+public abstract class JakeClassFilter {
 	
-	private static final ClassFilter ACCEPT_ALL = new ClassFilter() {
+	private static final JakeClassFilter ACCEPT_ALL = new JakeClassFilter() {
 
 		@Override
 		public boolean accept(Class<?> candidate) {
@@ -21,12 +21,12 @@ public abstract class ClassFilter {
 	
 	public abstract boolean accept(Class<?> candidate);
 	
-	public static ClassFilter acceptAll() {
+	public static JakeClassFilter acceptAll() {
 		return ACCEPT_ALL;
 	}
 	
-	public static ClassFilter endingBy(final String suffix) {
-		return new ClassFilter() {
+	public static JakeClassFilter endingBy(final String suffix) {
+		return new JakeClassFilter() {
 
 			@Override
 			public boolean accept(Class<?> candidate) {
@@ -36,8 +36,8 @@ public abstract class ClassFilter {
 		};
 	}
 	
-	public static ClassFilter startWith(final String prefix) {
-		return new ClassFilter() {
+	public static JakeClassFilter startWith(final String prefix) {
+		return new JakeClassFilter() {
 
 			@Override
 			public boolean accept(Class<?> candidate) {
@@ -47,8 +47,8 @@ public abstract class ClassFilter {
 		};
 	}
 	
-	public static ClassFilter simpleNameMatching(final Pattern pattern) {
-		return new ClassFilter() {
+	public static JakeClassFilter simpleNameMatching(final Pattern pattern) {
+		return new JakeClassFilter() {
 
 			@Override
 			public boolean accept(Class<?> candidate) {
@@ -58,8 +58,8 @@ public abstract class ClassFilter {
 		};
 	}
 	
-	public static ClassFilter qualifiedNameMatching(final Pattern pattern) {
-		return new ClassFilter() {
+	public static JakeClassFilter qualifiedNameMatching(final Pattern pattern) {
+		return new JakeClassFilter() {
 
 			@Override
 			public boolean accept(Class<?> candidate) {
@@ -69,8 +69,8 @@ public abstract class ClassFilter {
 		};
 	}
 	
-	public ClassFilter union(final ClassFilter classFilter) {
-		return new ClassFilter() {
+	public JakeClassFilter union(final JakeClassFilter classFilter) {
+		return new JakeClassFilter() {
 			
 			@Override
 			public boolean accept(Class<?> candidate) {
@@ -82,8 +82,8 @@ public abstract class ClassFilter {
 		};
 	}
 	
-	public ClassFilter intersect(final ClassFilter classFilter) {
-		return new ClassFilter() {
+	public JakeClassFilter intersect(final JakeClassFilter classFilter) {
+		return new JakeClassFilter() {
 			
 			@Override
 			public boolean accept(Class<?> candidate) {

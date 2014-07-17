@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public final class ReflectUtils {
+public final class JakeUtilsReflect {
 
 	public static void setFieldValueIgnoreAbsent(Object object, String fieldName, Object value) {
 		try {

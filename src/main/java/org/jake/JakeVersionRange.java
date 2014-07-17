@@ -1,11 +1,11 @@
 package org.jake;
 
-public class VersionRange {
+public class JakeVersionRange {
 	
 	private final String from;
 	private final String to;
 
-	private VersionRange(String base, String to) {
+	private JakeVersionRange(String base, String to) {
 		super();
 		this.from = base;
 		this.to = to;

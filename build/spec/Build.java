@@ -2,42 +2,40 @@
 
 import java.io.File;
 
-import org.jake.BuildOption;
-import org.jake.file.utils.FileUtils;
+import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeJarBuild;
 
 public class Build extends JakeJarBuild {
-	
+
 	@Override
 	protected String projectName() {
 		return "jake";
 	}
-	
+
 	@Override
 	protected String version() {
 		return "0.1-SNAPSHOT";
 	}
-	
+
 	@Override
 	protected String jarName() {
 		return this.projectName();  // Don't need the version info within the name
 	}
-			
+
 	public static void main(String[] args) {
-		BuildOption.set(args);
-		Build build = new Build();
+		final Build build = new Build();
 		build.doDefault();
 		//build.javadoc();
 		build.distrib();
 	}
-	
+
 	public void distrib() {
-		File distribDir = buildOuputDir("jake-distrib");
-		FileUtils.copyDir(baseDir("src/main/dist"), distribDir, null, true);
-		File jarFile = buildOuputDir(jarName()+".jar");
-		FileUtils.copyFileToDir(jarFile, distribDir);
-		FileUtils.copyFileToDir(buildOuputDir(jarName() + "-sources.jar"), distribDir);
-		FileUtils.zipDir(buildOuputDir("jake-distrib.zip"), zipLevel(), distribDir);
+		final File distribDir = buildOuputDir("jake-distrib");
+		JakeUtilsFile.copyDir(baseDir("src/main/dist"), distribDir, null, true);
+		final File jarFile = buildOuputDir(jarName()+".jar");
+		JakeUtilsFile.copyFileToDir(jarFile, distribDir);
+		JakeUtilsFile.copyFileToDir(buildOuputDir(jarName() + "-sources.jar"), distribDir);
+		JakeUtilsFile.zipDir(buildOuputDir("jake-distrib.zip"), zipLevel(), distribDir);
 	}
 
 }

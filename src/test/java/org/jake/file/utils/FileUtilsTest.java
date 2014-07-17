@@ -8,7 +8,7 @@ import java.io.FileFilter;
 import java.net.URL;
 import java.util.List;
 
-import org.jake.file.utils.FileUtils;
+import org.jake.file.utils.JakeUtilsFile;
 import org.junit.Test;
 
 public class FileUtilsTest {
@@ -20,10 +20,10 @@ public class FileUtilsTest {
 		assertTrue(sampleFile.exists());
 		File sampleDir = sampleFile.getParentFile().getParentFile();
 		
-		List<File> files = FileUtils.filesOf(sampleDir, false);
+		List<File> files = JakeUtilsFile.filesOf(sampleDir, false);
 		assertEquals(1, files.size());
 		
-		files = FileUtils.filesOf(sampleDir, true);
+		files = JakeUtilsFile.filesOf(sampleDir, true);
 		assertEquals(2, files.size());
 		
 		FileFilter fileFilter = new FileFilter() {
@@ -34,10 +34,10 @@ public class FileUtilsTest {
 			}
 		};
 		
-		files = FileUtils.filesOf(sampleDir, fileFilter, false);
+		files = JakeUtilsFile.filesOf(sampleDir, fileFilter, false);
 		assertEquals(0, files.size());
 		
-		files = FileUtils.filesOf(sampleDir, fileFilter, true);
+		files = JakeUtilsFile.filesOf(sampleDir, fileFilter, true);
 		assertEquals(1, files.size());
 	}
 	
