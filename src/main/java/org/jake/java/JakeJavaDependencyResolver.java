@@ -18,32 +18,47 @@ public abstract class JakeJavaDependencyResolver {
 	public abstract List<File> compile();
 
 	/**
-	 * All libraries finally used both for compile and run test. 
+	 * All libraries finally used both for compile and run test.
 	 */
 	public abstract List<File> test();
 
 	/**
-	 * All libraries finally to be embedded in deliveries (as war or fat jar files). It contains 
+	 * All libraries finally to be embedded in deliveries (as war or fat jar files). It contains
 	 * generally dependencies needed for compilation plus extra runtime-only dependencies.
 	 */
 	public abstract List<File> runtime();
-	
-		
+
+
 	public JakeJavaDependencyResolver merge(JakeJavaDependencyResolver other, File otherClasses, File otherTestClasses) {
 		return new TransitiveDependencyResolver(this, other, otherClasses, otherTestClasses);
-	} 
-	
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder builder = new StringBuilder();
+		builder.append(this.getClass().getSimpleName()).append("\n");
+		builder.append("compile: ").append(JakeUtilsIterable.toString(compile(), ";")).append("\n");
+		builder.append("runtime: ").append(JakeUtilsIterable.toString(runtime(), ";")).append("\n");
+		builder.append("test: ").append(JakeUtilsIterable.toString(test(), ";"));
+		return builder.toString();
+	}
+
+
+	public boolean isEmpty() {
+		return compile().isEmpty() && test().isEmpty() && runtime().isEmpty();
+	}
+
 	protected class TransitiveDependencyResolver extends JakeJavaDependencyResolver {
-		
+
 		private final JakeJavaDependencyResolver base;
-		
+
 		private final JakeJavaDependencyResolver other;
-		
+
 		private final File otherClasses;
-		
+
 		private final File otherTestClasses;
 
-		
+
 		public TransitiveDependencyResolver(JakeJavaDependencyResolver base,
 				JakeJavaDependencyResolver other, File otherClasses, File otherTestClasses) {
 			super();
@@ -52,8 +67,8 @@ public abstract class JakeJavaDependencyResolver {
 			this.otherClasses = otherClasses;
 			this.otherTestClasses = otherTestClasses;
 		}
-		
-	
+
+
 		public TransitiveDependencyResolver(JakeJavaDependencyResolver base,
 				JakeJavaDependencyResolver other, File otherClasses) {
 			super();
@@ -62,8 +77,8 @@ public abstract class JakeJavaDependencyResolver {
 			this.otherClasses = otherClasses;
 			this.otherTestClasses = null;
 		}
-		
-		
+
+
 		public TransitiveDependencyResolver(JakeJavaDependencyResolver base,
 				JakeJavaDependencyResolver other) {
 			super();
@@ -91,8 +106,8 @@ public abstract class JakeJavaDependencyResolver {
 			return JakeUtilsIterable.concatLists(base.runtime(), other.runtime() );
 
 		}
-		
-		
+
+
 	}
 
 }

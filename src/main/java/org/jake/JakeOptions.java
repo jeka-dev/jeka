@@ -1,17 +1,17 @@
 package org.jake;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+
+import org.jake.utils.JakeUtilsIterable;
 
 public class JakeOptions {
 
-	private static final JakeOptions instance;
-
-
-	static {
-		instance = new JakeOptions();
-	}
+	private static final JakeOptions instance = new JakeOptions();
 
 	private final PropertyCollector propCollector;
 
@@ -87,6 +87,39 @@ public class JakeOptions {
 			return this.properties.toString();
 		}
 
+		@Override
+		public String toString() {
+			final List<String> strings = new LinkedList<String>();
+			for (final PropDefinition propertyDef : this.definitions) {
+				final String name = propertyDef.name;
+				final String value = properties.getProperty(name);
+				if (value!= null) {
+					strings.add(propertyDef.name + " = " + value);
+				}
+			}
+			return JakeUtilsIterable.toString(strings, ";");
+		}
+
+		public String toStringDetails() {
+			final Set<Object> remainings = new HashSet<Object>(this.properties.keySet());
+			final Iterator<Object> it = remainings.iterator();
+			while (it.hasNext()) {
+				final String name = (String) it.next();
+				if (!name.startsWith("jake.")) {
+					it.remove();
+				}
+			}
+			final List<String> strings = new LinkedList<String>();
+			for (final PropDefinition propertyDef : this.definitions) {
+				final String name = propertyDef.name;
+				final String value = properties.getProperty(name);
+				strings.add(propertyDef.name + "=" + propertyDef.valueOrDefault(value));
+			}
+			final StringBuilder builder = new StringBuilder(JakeUtilsIterable.toString(strings, ";"));
+			builder.append(" (Unused props :" + JakeUtilsIterable.toString(remainings, ";") + ")");
+			return builder.toString();
+		}
+
 	}
 
 	protected static final class PropDefinition implements
@@ -108,6 +141,13 @@ public class JakeOptions {
 			this.defaultValue = defaultValue;
 			this.definition = definition;
 			this.type = type.getSimpleName();
+		}
+
+		public Object valueOrDefault(Object value) {
+			if (value == null) {
+				return defaultValue;
+			}
+			return value;
 		}
 
 		@Override

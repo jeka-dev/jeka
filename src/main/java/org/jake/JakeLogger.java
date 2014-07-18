@@ -78,7 +78,7 @@ public class JakeLogger {
 		errorOffsetWriter.setDelegate(errorWriter);
 	}
 
-	private static void flush() {
+	public static void flush() {
 		try {
 			infoOffsetWriter.delegate.flush();
 			warnOffsetWriter.delegate.flush();

@@ -19,6 +19,8 @@ public class JakeBuildJava extends JakeBuildBase {
 	protected static final JakeFileFilter RESOURCE_FILTER = JakeFileFilter.exclude("**/*.java")
 			.andExcludeAll("**/package.html").andExcludeAll("**/doc-files");
 
+	private JakeJavaDependencyResolver cachedResolver;
+
 	/**
 	 * Returns location of production source code.
 	 */
@@ -57,7 +59,7 @@ public class JakeBuildJava extends JakeBuildBase {
 		return buildOuputDir().sub("testClasses").createIfNotExist().root();
 	}
 
-	protected JakeJavaDependencyResolver dependencyPath() {
+	protected JakeJavaDependencyResolver resolveDependencyPath() {
 		final File folder = baseDir(STD_LIB_PATH);
 		final JakeJavaDependencyResolver resolver;
 		if (folder.exists()) {
@@ -67,9 +69,22 @@ public class JakeBuildJava extends JakeBuildBase {
 		} else {
 			resolver = JakeLocalDependencyResolver.empty();
 		}
-		return resolver.merge(JakeJavaOptions.extraPath(), null, null);
+		return resolver;
 	}
 
+
+	protected final JakeJavaDependencyResolver dependencyPath() {
+		if (cachedResolver == null) {
+			final JakeJavaDependencyResolver resolver = resolveDependencyPath();
+			JakeLogger.info("Resolved Dependencies " + resolver);
+			final JakeJavaDependencyResolver extraResolver = JakeJavaOptions.extraPath();
+			if (!extraResolver.isEmpty()) {
+				JakeLogger.info("Using extra libs " + extraResolver);
+			}
+			cachedResolver = resolveDependencyPath().merge(extraResolver, null, null);
+		}
+		return cachedResolver;
+	}
 
 	// ------------ Operations ------------
 
@@ -82,6 +97,7 @@ public class JakeBuildJava extends JakeBuildBase {
 		final JakeJavaCompiler compilation = new JakeJavaCompiler();
 		final JakeDirViewSet javaSources = sources.withFilter(JAVA_SOURCE_ONLY_FILTER);
 		JakeLogger.start("Compiling " + javaSources.countFiles(false) + " source files to " + destination.getPath());
+		JakeLogger.nextLine();
 		compilation.addSourceFiles(javaSources.listFiles());
 		compilation.setClasspath(classpath);
 		compilation.setOutputDirectory(destination);

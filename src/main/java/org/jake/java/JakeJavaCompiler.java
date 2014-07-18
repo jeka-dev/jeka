@@ -11,15 +11,16 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
 import org.jake.JakeException;
+import org.jake.JakeLogger;
 import org.jake.file.JakeDirView;
 import org.jake.file.utils.JakeUtilsFile;
 
 
 public final class JakeJavaCompiler {
-	
+
 	private final JavaCompiler compiler;
 	private final StandardJavaFileManager fileManager;
-	
+
 	private final List<String> options = new LinkedList<String>();
 	private final List<File> javaSourceFiles = new LinkedList<File>();
 
@@ -28,63 +29,65 @@ public final class JakeJavaCompiler {
 		this.compiler = compiler;
 		this.fileManager = compiler.getStandardFileManager(null, null, null);
 	}
-	
+
 	public JakeJavaCompiler() {
 		this(getDefaultOrFail());
 	}
-	
+
 	public void setOutputDirectory(JakeDirView dir) {
 		setOutputDirectory(dir.root());
 	}
-	
+
 	public void setOutputDirectory(File dir) {
 		if (!dir.isDirectory()) {
-			throw new IllegalArgumentException(dir.getAbsolutePath() 
+			throw new IllegalArgumentException(dir.getAbsolutePath()
 					+ " is not a directory.");
 		}
 		options.add("-d");
 		options.add(dir.getAbsolutePath());
 	}
-	
+
 	public void setClasspath(Iterable<File> files) {
 		options.add("-cp");
 		options.add(JakeUtilsFile.toPathString(files, ";"));
 	}
-	
+
 	public void addSourceFiles(Iterable<File> files) {
-		for (File file : files) {
+		for (final File file : files) {
 			this.javaSourceFiles.add(file);
 		}
 	}
-	
-	
+
+
 	public boolean compile() {
-		Iterable<? extends JavaFileObject> javaFileObjects = 
+		final Iterable<? extends JavaFileObject> javaFileObjects =
 				fileManager.getJavaFileObjectsFromFiles(this.javaSourceFiles);
-		CompilationTask task = compiler.getTask(null, null, null, options, null, javaFileObjects);
+		final CompilationTask task = compiler.getTask(null, null, null, options, null, javaFileObjects);
+		JakeLogger.flush();
 		return task.call();
 	}
-	
+
 	public void compileOrFail() {
-		Iterable<? extends JavaFileObject> javaFileObjects = 
+		final Iterable<? extends JavaFileObject> javaFileObjects =
 				fileManager.getJavaFileObjectsFromFiles(this.javaSourceFiles);
-		CompilationTask task = compiler.getTask(null, null, null, options, null, javaFileObjects);
-		boolean result = task.call(); {
+		final CompilationTask task = compiler.getTask(null, null, null, options, null, javaFileObjects);
+		JakeLogger.flush();
+		final boolean result = task.call(); {
 			if (!result) {
 				throw new JakeException("Compilation failure.");
 			}
 		}
 	}
-	
-	
+
+
 	private static JavaCompiler getDefaultOrFail() {
-		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+		final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 		if (compiler == null) {
 			throw new IllegalStateException("This plateform does not provide compiler.");
 		}
 		return compiler;
 	}
-	
-	
+
+
 
 }
