@@ -67,7 +67,7 @@ public class JakeTestResult {
 			}
 
 		}
-		if (!JakeOptions.isVerbose()) {
+		if (!JakeOptions.isVerbose() && !failures.isEmpty()) {
 			JakeLogger.info("Launch Jake in verbose mode to display failure stack traces.");
 		}
 	}

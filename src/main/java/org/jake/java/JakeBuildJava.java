@@ -73,7 +73,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 
-	protected final JakeJavaDependencyResolver dependencyPath() {
+	public final JakeJavaDependencyResolver dependencyPath() {
 		if (cachedResolver == null) {
 			JakeLogger.startAndNextLine("Resolving Dependencies ");
 			final JakeJavaDependencyResolver resolver = resolveDependencyPath();

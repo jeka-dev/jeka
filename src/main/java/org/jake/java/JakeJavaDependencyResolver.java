@@ -25,7 +25,8 @@ public abstract class JakeJavaDependencyResolver {
 
 	/**
 	 * All libraries finally to be embedded in deliveries (as war or fat jar files). It contains
-	 * generally dependencies needed for compilation plus extra runtime-only dependencies.
+	 * generally dependencies needed for compilation plus extra runtime-only dependencies. So that's the
+	 * general rule that libs contained in {@link #compile()} are contained in {@link #runtime()} as well.
 	 */
 	public abstract List<File> runtime();
 

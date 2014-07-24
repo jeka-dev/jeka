@@ -519,7 +519,7 @@ public class JakeUtilsFile {
 	}
 
 	public static File workingDir() {
-		return new File(System.getProperty("user.dir"));
+		return JakeUtilsFile.canonicalFile(new File("."));
 	}
 
 }
