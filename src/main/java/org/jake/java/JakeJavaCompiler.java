@@ -64,7 +64,9 @@ public final class JakeJavaCompiler {
 				fileManager.getJavaFileObjectsFromFiles(this.javaSourceFiles);
 		final CompilationTask task = compiler.getTask(null, null, null, options, null, javaFileObjects);
 		JakeLogger.flush();
-		return task.call();
+		final boolean result = task.call();
+		JakeLogger.flush();
+		return result;
 	}
 
 	public void compileOrFail() {
@@ -72,11 +74,12 @@ public final class JakeJavaCompiler {
 				fileManager.getJavaFileObjectsFromFiles(this.javaSourceFiles);
 		final CompilationTask task = compiler.getTask(null, null, null, options, null, javaFileObjects);
 		JakeLogger.flush();
-		final boolean result = task.call(); {
-			if (!result) {
-				throw new JakeException("Compilation failure.");
-			}
+		final boolean result = task.call();
+		JakeLogger.flush();
+		if (!result) {
+			throw new JakeException("Compilation failure.");
 		}
+
 	}
 
 

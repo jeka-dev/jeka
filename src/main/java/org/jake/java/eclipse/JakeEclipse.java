@@ -6,62 +6,45 @@ import java.util.List;
 
 import org.jake.JakeLocator;
 import org.jake.java.JakeJavaDependencyResolver;
+import org.jake.java.JakeLocalDependencyResolver;
 
 public class JakeEclipse {
-	
+
 	public static boolean isDotClasspathPresent(File projectFolder) {
 		return new File(projectFolder, ".classpath").exists();
 	}
-	
+
 	private static List<ResourcePath> buildPath(File projectFolder, File jakeJarFile) {
-		EclipseClasspath eclipseClasspath = EclipseClasspath.fromFile(new File(projectFolder, ".classpath"), jakeJarFile);
+		final EclipseClasspath eclipseClasspath = EclipseClasspath.fromFile(new File(projectFolder, ".classpath"), jakeJarFile);
 		return eclipseClasspath.getLibEntries();
 	}
-	
+
 	public static JakeJavaDependencyResolver dependencyResolver(File projectFolder) {
-		final List<ResourcePath> path = buildPath(projectFolder, JakeLocator.getJakeJarFile()); 
-		final List<File> compilePath = new LinkedList<File>(); 
-		final List<File> runtimePath = new LinkedList<File>();
-		final List<File> testPath = new LinkedList<File>();
-		for (ResourcePath resourcePath : path) {
-			File file = resourcePath.toFile(projectFolder);
+		final List<ResourcePath> path = buildPath(projectFolder, JakeLocator.getJakeJarFile());
+		final List<File> compileAndRuntimeLibPath = new LinkedList<File>();
+		final List<File> runtimeOnlyLibPath = new LinkedList<File>();
+		final List<File> testLibPath = new LinkedList<File>();
+		final List<File> compileOnlyLibPath = new LinkedList<File>();
+		for (final ResourcePath resourcePath : path) {
+			final File file = resourcePath.toFile(projectFolder);
 			if (resourcePath.isTestScoped()) {
-				testPath.add(file);
+				testLibPath.add(file);
 			} else if (isCompileOnly(file)) {
-				compilePath.add(file);
-				testPath.add(file);
+				compileOnlyLibPath.add(file);
+				testLibPath.add(file);
 			} else {
-				compilePath.add(file);
-				runtimePath.add(file);
-				testPath.add(file);
+				compileAndRuntimeLibPath.add(file);
 			}
 		}
-		return new JakeJavaDependencyResolver() {
-			
-			@Override
-			public List<File> test() {
-				return testPath;
-			}
-			
-			@Override
-			public List<File> runtime() {
-				return runtimePath;
-			}
-			
-			@Override
-			public List<File> compile() {
-				return compilePath;
-			}
-		};
+		return new JakeLocalDependencyResolver(compileAndRuntimeLibPath, runtimeOnlyLibPath,
+				testLibPath, compileOnlyLibPath);
 	}
-	
+
 	private static final boolean isCompileOnly(File file) {
 		if (file.getName().toLowerCase().equals("lombok.jar")) {
 			return true;
 		}
 		return false;
 	}
-	
-	
 
 }

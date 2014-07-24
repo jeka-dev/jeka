@@ -19,12 +19,12 @@ public final class JakeLocalDependencyResolver extends JakeJavaDependencyResolve
 	
 	private final List<File> compileOnlyLibs;
 
-	public JakeLocalDependencyResolver(List<File> compileLibs,
-			List<File> runtimeLibs, List<File> testLibs,
+	public JakeLocalDependencyResolver(List<File> compileAndRuntimeLibs,
+			List<File> runtimeOnlyLibs, List<File> testLibs,
 			List<File> providedLibs) {
 		super();
-		this.compileAndRuntimeLibs = compileLibs;
-		this.runtimeOnlyLibs = runtimeLibs;
+		this.compileAndRuntimeLibs = compileAndRuntimeLibs;
+		this.runtimeOnlyLibs = runtimeOnlyLibs;
 		this.testLibs = testLibs;
 		this.compileOnlyLibs = providedLibs;
 	}

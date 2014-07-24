@@ -1,6 +1,7 @@
 package org.jake.java;
 
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.jake.utils.JakeUtilsIterable;
@@ -30,17 +31,20 @@ public abstract class JakeJavaDependencyResolver {
 
 
 	public JakeJavaDependencyResolver merge(JakeJavaDependencyResolver other, File otherClasses, File otherTestClasses) {
-		return new TransitiveDependencyResolver(this, other, otherClasses, otherTestClasses);
+		return new MergedDependencyResolver(this, other, otherClasses, otherTestClasses);
 	}
 
-	@Override
-	public String toString() {
-		final StringBuilder builder = new StringBuilder();
-		builder.append(this.getClass().getSimpleName()).append("\n");
-		builder.append("compile: ").append(JakeUtilsIterable.toString(compile(), ";")).append("\n");
-		builder.append("runtime: ").append(JakeUtilsIterable.toString(runtime(), ";")).append("\n");
-		builder.append("test: ").append(JakeUtilsIterable.toString(test(), ";"));
-		return builder.toString();
+
+	public List<String> toStrings() {
+		final List<String> result = new LinkedList<String>();
+		result.add(this.getClass().getSimpleName());
+		final List<File> compileLibs = compile();
+		final List<File> runtimeLibs = runtime();
+		final List<File> testLibs = test();
+		result.add("compile (" + compileLibs.size()+ " libs): " + JakeUtilsIterable.toString(compile(),  ";"));
+		result.add("runtime (" + runtimeLibs.size()+ " libs): " + JakeUtilsIterable.toString(runtime(), ";"));
+		result.add("test ("+testLibs.size()+ " libs): " + JakeUtilsIterable.toString(test(), ";"));
+		return result;
 	}
 
 
@@ -48,7 +52,7 @@ public abstract class JakeJavaDependencyResolver {
 		return compile().isEmpty() && test().isEmpty() && runtime().isEmpty();
 	}
 
-	protected class TransitiveDependencyResolver extends JakeJavaDependencyResolver {
+	private class MergedDependencyResolver extends JakeJavaDependencyResolver {
 
 		private final JakeJavaDependencyResolver base;
 
@@ -59,7 +63,7 @@ public abstract class JakeJavaDependencyResolver {
 		private final File otherTestClasses;
 
 
-		public TransitiveDependencyResolver(JakeJavaDependencyResolver base,
+		public MergedDependencyResolver(JakeJavaDependencyResolver base,
 				JakeJavaDependencyResolver other, File otherClasses, File otherTestClasses) {
 			super();
 			this.base = base;
@@ -68,25 +72,6 @@ public abstract class JakeJavaDependencyResolver {
 			this.otherTestClasses = otherTestClasses;
 		}
 
-
-		public TransitiveDependencyResolver(JakeJavaDependencyResolver base,
-				JakeJavaDependencyResolver other, File otherClasses) {
-			super();
-			this.base = base;
-			this.other = other;
-			this.otherClasses = otherClasses;
-			this.otherTestClasses = null;
-		}
-
-
-		public TransitiveDependencyResolver(JakeJavaDependencyResolver base,
-				JakeJavaDependencyResolver other) {
-			super();
-			this.base = base;
-			this.other = other;
-			this.otherClasses = null;
-			this.otherTestClasses = null;
-		}
 
 		@SuppressWarnings("unchecked")
 		@Override

@@ -75,13 +75,17 @@ public class JakeBuildJava extends JakeBuildBase {
 
 	protected final JakeJavaDependencyResolver dependencyPath() {
 		if (cachedResolver == null) {
+			JakeLogger.startAndNextLine("Resolving Dependencies ");
 			final JakeJavaDependencyResolver resolver = resolveDependencyPath();
-			JakeLogger.info("Resolved Dependencies " + resolver);
 			final JakeJavaDependencyResolver extraResolver = JakeJavaOptions.extraPath();
 			if (!extraResolver.isEmpty()) {
-				JakeLogger.info("Using extra libs " + extraResolver);
+				JakeLogger.info("Using extra libs : ", extraResolver.toStrings());
+				cachedResolver = resolver.merge(extraResolver, null, null);
+			} else {
+				cachedResolver = resolver;
 			}
-			cachedResolver = resolveDependencyPath().merge(extraResolver, null, null);
+			JakeLogger.info("Effective resolver : ", cachedResolver.toStrings());
+			JakeLogger.done();
 		}
 		return cachedResolver;
 	}

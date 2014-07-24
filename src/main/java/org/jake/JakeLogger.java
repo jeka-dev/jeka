@@ -28,6 +28,11 @@ public class JakeLogger {
 		warnOffsetWriter.inc();
 	}
 
+	public static void startAndNextLine(String message) {
+		start(message);
+		nextLine();
+	}
+
 	public static void done() {
 		infoWriter.println("Done.");
 		infoOffsetWriter.dec();
@@ -45,6 +50,14 @@ public class JakeLogger {
 	public static void info(String message) {
 		infoWriter.println(message);
 	}
+
+	public static void info(String message, Iterable<String> lines) {
+		infoWriter.print(message);
+		for (final String line : lines) {
+			infoWriter.println(line);
+		}
+	}
+
 
 	public static void warn(String message) {
 		flush();

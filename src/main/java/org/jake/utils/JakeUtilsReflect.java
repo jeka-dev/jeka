@@ -21,7 +21,7 @@ public final class JakeUtilsReflect {
 				field.setAccessible(true);
 			}
 			field.set(object, value);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -46,7 +46,7 @@ public final class JakeUtilsReflect {
 	public static <T> T getFieldValue(Object object, Field field) {
 		try {
 			return (T) field.get(object);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -54,7 +54,7 @@ public final class JakeUtilsReflect {
 	public static void setFieldValue(Object object, Field field, Object value) {
 		try {
 			field.set(object, value);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -70,7 +70,7 @@ public final class JakeUtilsReflect {
 				field.setAccessible(true);
 			}
 			return field.get(object);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -111,7 +111,7 @@ public final class JakeUtilsReflect {
 				constructor.setAccessible(true);
 			}
 			return constructor.newInstance();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -121,7 +121,7 @@ public final class JakeUtilsReflect {
 		try {
 			final Method method = target.getClass().getMethod(methodName);
 			return (T) method.invoke(target);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -137,7 +137,7 @@ public final class JakeUtilsReflect {
 		return result;
 	}
 
-	
+
 
 
 	public static Map<String, Method> retainsPropertyMethod(Method[] methods) {
@@ -151,7 +151,7 @@ public final class JakeUtilsReflect {
 		}
 		return result;
 	}
-	
+
 	public static Map<String, Method> retainsPropertyMethod(Class<?> clazz, Class<?> cap) {
 		final Map<String, Method> map = retainsPropertyMethod(clazz.getDeclaredMethods());
 		if (cap.equals(clazz.getSuperclass())) {
@@ -166,20 +166,20 @@ public final class JakeUtilsReflect {
 	public static <V> V invoke(Object target, Method method, Object... params) {
 		try {
 			return (V) method.invoke(target, params);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException("Error while invoking " + method + " with params "
 					+ Arrays.toString(params), e);
-		} 
+		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static <V> V invokeStatic(Method method, Object... params) {
 		try {
 			return (V) method.invoke(null, params);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException("Error while invoking " + method + " with params "
 					+ Arrays.toString(params), e);
-		} 
+		}
 	}
 
 	public static Class<?> getClosestParent(Class<?> target, Set<Class<?>> others) {
@@ -196,27 +196,32 @@ public final class JakeUtilsReflect {
 		}
 		return result;
 	}
-	
+
 	public static Method getMethod(Class<?> clazz, String name, Class<?> ...argTypes) {
 		try {
 			return clazz.getMethod(name, argTypes);
-		} catch (SecurityException e) {
+		} catch (final SecurityException e) {
 			throw new RuntimeException(e);
-		} catch (NoSuchMethodException e) {
+		} catch (final NoSuchMethodException e) {
+			throw new IllegalStateException("No method " + name + " with argTypes "
+					+ toString(argTypes) + " found on class " +clazz.getName());
+		}
+	}
+
+	public static Method getDeclaredMethod(Class<?> clazz, String name, Class<?> ...argTypes) {
+		try {
+			final Method method = clazz.getDeclaredMethod(name, argTypes);
+			method.setAccessible(true);
+			return method;
+		} catch (final SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (final NoSuchMethodException e) {
 			return null;
 		}
 	}
-	
-	public static Method getDeclaredMethod(Class<?> clazz, String name, Class<?> ...argTypes) {
-		try {
-			Method method = clazz.getDeclaredMethod(name, argTypes);
-			method.setAccessible(true);
-			return method;
-		} catch (SecurityException e) {
-			throw new RuntimeException(e);
-		} catch (NoSuchMethodException e) {
-			return null;
-		}
+
+	public static String toString(Class<?>...classes) {
+		return "[" + JakeUtilsIterable.toString(Arrays.asList(classes), ", ") + "]";
 	}
 
 
