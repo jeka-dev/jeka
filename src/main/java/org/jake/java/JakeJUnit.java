@@ -67,7 +67,6 @@ public class JakeJUnit {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public JakeTestResult launchAll(Iterable<File> testClassDirs,
 			FileFilter fileFilter, JakeClassFilter classFilter) {
-		JakeLogger.flush();
 		final Iterable<File> urls = JakeUtilsIterable.concatLists(testClassDirs,
 				this.classpath);
 		final Collection<Class> testClasses;
@@ -89,9 +88,11 @@ public class JakeJUnit {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public JakeTestResult launch(Iterable<Class> classes) {
 		JakeLogger.flush();
+
 		if (!classes.iterator().hasNext()) {
-			return JakeTestResult.empty();
+			return JakeTestResult.empty(0);
 		}
+		final long start = System.nanoTime();
 		final ClassLoader classLoader = classes.iterator().next()
 				.getClassLoader();
 		if (isJunit4In(classLoader)) {
@@ -102,7 +103,9 @@ public class JakeJUnit {
 					"runClasses", ARRAY_OF_CLASSES_TYPE);
 			final Object junit4Result = JakeUtilsReflect.invoke(null, runClassesMethod,
 					(Object) classArray);
-			return fromJunit4Result(junit4Result);
+			final long end = System.nanoTime();
+			final long duration = (end - start) / 1000000;
+			return fromJunit4Result(junit4Result, duration);
 		} else if (isJunit3In(classLoader)) {
 			final Object suite = createJunit3TestSuite(classLoader, classes);
 			final Class testResultClass = JakeUtilsClassloader.loadClass(classLoader, JUNIT3_TEST_RESULT_CLASS_NAME);
@@ -110,12 +113,14 @@ public class JakeJUnit {
 			final Method runMethod = JakeUtilsReflect.getMethod(suite.getClass(),
 					"run", testResultClass);
 			JakeUtilsReflect.invoke(suite, runMethod, testResult);
-			return fromJunit3Result(testResult);
+			final long end = System.nanoTime();
+			final long duration = (end - start) / 1000000;
+			return fromJunit3Result(testResult, duration);
 		}
-		return JakeTestResult.empty();
+		throw new IllegalStateException("No Junit found on test classpath.");
 	}
 
-	private static JakeTestResult fromJunit4Result(Object result) {
+	private static JakeTestResult fromJunit4Result(Object result, long durationInMillis) {
 		final Integer runCount = JakeUtilsReflect.invoke(result, "getRunCount");
 		final Integer ignoreCount = JakeUtilsReflect.invoke(result,
 				"getIgnoreCount");
@@ -126,7 +131,7 @@ public class JakeJUnit {
 		for (final Object junitFailure : junitFailures) {
 			failures.add(fromJunit4Failure(junitFailure));
 		}
-		return new JakeTestResult(runCount, ignoreCount, failures);
+		return new JakeTestResult(runCount, ignoreCount, failures, durationInMillis);
 
 	}
 
@@ -255,7 +260,7 @@ public class JakeJUnit {
 		}
 	}
 
-	private static JakeTestResult fromJunit3Result(Object result) {
+	private static JakeTestResult fromJunit3Result(Object result, long durationInMillis) {
 		final Integer runCount = JakeUtilsReflect.invoke(result, "runCount");
 		final Integer ignoreCount = 0;
 		final Enumeration<Object> junitFailures = JakeUtilsReflect.invoke(result,
@@ -271,7 +276,7 @@ public class JakeJUnit {
 			final Object junitError = junitErrors.nextElement();
 			failures.add(fromJunit3Failure(junitError));
 		}
-		return new JakeTestResult(runCount, ignoreCount, failures);
+		return new JakeTestResult(runCount, ignoreCount, failures, durationInMillis);
 
 	}
 

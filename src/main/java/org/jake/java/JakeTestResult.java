@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.JakeOptions;
 import org.jake.JakeLogger;
+import org.jake.JakeOptions;
 import org.jake.utils.JakeUtilsIterable;
 
 public class JakeTestResult {
@@ -13,17 +13,19 @@ public class JakeTestResult {
 	private final List<Failure> failures;
 	private final int runCount;
 	private final int ignoreCount;
+	private final long durationInMilis;
 
 
-	public JakeTestResult(int totaltestCount, int ignoreCount, Iterable<Failure> failures) {
+	public JakeTestResult(int totaltestCount, int ignoreCount, Iterable<Failure> failures, long durationInMillis) {
 		this.runCount = totaltestCount;
 		this.ignoreCount = ignoreCount;
 		this.failures = JakeUtilsIterable.toList(failures);
+		this.durationInMilis = durationInMillis;
 	}
 
 	@SuppressWarnings("unchecked")
-	public static JakeTestResult empty() {
-		return new JakeTestResult(0,0, Collections.EMPTY_LIST);
+	public static JakeTestResult empty(long durationInMillis) {
+		return new JakeTestResult(0,0, Collections.EMPTY_LIST, durationInMillis);
 	}
 
 	public List<Failure> failures() {
@@ -40,6 +42,10 @@ public class JakeTestResult {
 
 	public int failureCount() {
 		return failures.size();
+	}
+
+	public long durationInMillis() {
+		return durationInMilis;
 	}
 
 	public void printToNotifier() {
@@ -68,7 +74,7 @@ public class JakeTestResult {
 
 	@Override
 	public String toString() {
-		return "" + runCount + " test(s) run, " + failureCount() + " failure(s), " + ignoreCount + " ignored." ;
+		return "" + runCount + " test(s) run, " + failureCount() + " failure(s), " + ignoreCount + " ignored. In " + durationInMilis + " milliseconds." ;
 	}
 
 	public static class Failure {
