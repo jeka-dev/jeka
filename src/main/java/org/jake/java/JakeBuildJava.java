@@ -3,7 +3,7 @@ package org.jake.java;
 import java.io.File;
 
 import org.jake.JakeBuildBase;
-import org.jake.JakeLogger;
+import org.jake.JakeLog;
 import org.jake.file.JakeDirViewSet;
 import org.jake.file.JakeFileFilter;
 import org.jake.file.JakeZip;
@@ -75,17 +75,17 @@ public class JakeBuildJava extends JakeBuildBase {
 
 	public final JakeJavaDependencyResolver dependencyPath() {
 		if (cachedResolver == null) {
-			JakeLogger.startAndNextLine("Resolving Dependencies ");
+			JakeLog.startAndNextLine("Resolving Dependencies ");
 			final JakeJavaDependencyResolver resolver = resolveDependencyPath();
 			final JakeJavaDependencyResolver extraResolver = JakeJavaOptions.extraPath();
 			if (!extraResolver.isEmpty()) {
-				JakeLogger.info("Using extra libs : ", extraResolver.toStrings());
+				JakeLog.info("Using extra libs : ", extraResolver.toStrings());
 				cachedResolver = resolver.merge(extraResolver, null, null);
 			} else {
 				cachedResolver = resolver;
 			}
-			JakeLogger.info("Effective resolver : ", cachedResolver.toStrings());
-			JakeLogger.done();
+			JakeLog.info("Effective resolver : ", cachedResolver.toStrings());
+			JakeLog.done();
 		}
 		return cachedResolver;
 	}
@@ -100,13 +100,13 @@ public class JakeBuildJava extends JakeBuildBase {
 	protected void compile(JakeDirViewSet sources, File destination, Iterable<File> classpath) {
 		final JakeJavaCompiler compilation = new JakeJavaCompiler();
 		final JakeDirViewSet javaSources = sources.withFilter(JAVA_SOURCE_ONLY_FILTER);
-		JakeLogger.start("Compiling " + javaSources.countFiles(false) + " source files to " + destination.getPath());
-		JakeLogger.nextLine();
+		JakeLog.start("Compiling " + javaSources.countFiles(false) + " source files to " + destination.getPath());
+		JakeLog.nextLine();
 		compilation.addSourceFiles(javaSources.listFiles());
 		compilation.setClasspath(classpath);
 		compilation.setOutputDirectory(destination);
 		compilation.compileOrFail();
-		JakeLogger.done();
+		JakeLog.done();
 	}
 
 	/**
@@ -129,34 +129,34 @@ public class JakeBuildJava extends JakeBuildBase {
 	 * Copies production resources in <code>class dir</code>.
 	 */
 	public void copyResources() {
-		JakeLogger.start("Coping resource files to " + classDir().getPath());
+		JakeLog.start("Coping resource files to " + classDir().getPath());
 		final int count = resourceDirs().copyTo(classDir());
-		JakeLogger.done(count + " file(s) copied.");
+		JakeLog.done(count + " file(s) copied.");
 	}
 
 	/**
 	 * Copies test resource in <code>test class dir</code>.
 	 */
 	public void copyTestResources() {
-		JakeLogger.start("Coping test resource files to " + testClassDir().getPath());
+		JakeLog.start("Coping test resource files to " + testClassDir().getPath());
 		final int count = testResourceDirs().copyTo(testClassDir());
-		JakeLogger.done(count + " file(s) copied.");
+		JakeLog.done(count + " file(s) copied.");
 	}
 
 	public void runUnitTests() {
-		JakeLogger.start("Launching JUnit Tests");
+		JakeLog.start("Launching JUnit Tests");
 		juniter().launchAll(this.testClassDir()).printToNotifier();
-		JakeLogger.done();
+		JakeLog.done();
 	}
 
 	public void javadoc() {
-		JakeLogger.start("Generating Javadoc");
+		JakeLog.start("Generating Javadoc");
 		final File dir = buildOuputDir(projectName() + "-javadoc");
 		JakeJavadoc.of(this.sourceDirs()).withClasspath(this.dependencyPath().compile()).process(dir);
 		if (dir.exists()) {
 			JakeZip.of(dir).create(buildOuputDir(projectName() + "-javadoc.zip"));
 		}
-		JakeLogger.done();
+		JakeLog.done();
 	}
 
 	@Override

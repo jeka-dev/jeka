@@ -1,5 +1,6 @@
 package org.jake.utils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -182,6 +183,8 @@ public final class JakeUtilsReflect {
 		}
 	}
 
+
+
 	public static Class<?> getClosestParent(Class<?> target, Set<Class<?>> others) {
 		Class<?> result = null;
 		for (final Class<?> candidate : others) {
@@ -208,6 +211,16 @@ public final class JakeUtilsReflect {
 		}
 	}
 
+	public static Method getMethodOrNull(Class<?> clazz, String name, Class<?> ...argTypes) {
+		try {
+			return clazz.getMethod(name, argTypes);
+		} catch (final SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (final NoSuchMethodException e) {
+			return null;
+		}
+	}
+
 	public static Method getDeclaredMethod(Class<?> clazz, String name, Class<?> ...argTypes) {
 		try {
 			final Method method = clazz.getDeclaredMethod(name, argTypes);
@@ -223,6 +236,36 @@ public final class JakeUtilsReflect {
 	public static String toString(Class<?>...classes) {
 		return "[" + JakeUtilsIterable.toString(Arrays.asList(classes), ", ") + "]";
 	}
+
+
+	public static boolean isMethodPublicIn(Class<?> clazz, String method, Class<?> ...args) {
+		try {
+			clazz.getMethod(method, args);
+		} catch (final NoSuchMethodException e) {
+			return false;
+		}
+		return true;
+	}
+
+	public static <T extends Annotation> T getInheritedAnnotation(Method method, Class<T> annotationClass) {
+		final T result = method.getAnnotation(annotationClass);
+		if (result != null) {
+			return result;
+		}
+		final Class<?> methodSuperClass = method.getDeclaringClass().getSuperclass();
+		if (methodSuperClass != null) {
+			final Method superMethod = getMethodOrNull(methodSuperClass, method.getName(), method.getParameterTypes());
+			if (superMethod == null) {
+				return null;
+			}
+			return getInheritedAnnotation(superMethod, annotationClass);
+		}
+		return null;
+	}
+
+
+
+
 
 
 }

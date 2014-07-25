@@ -15,7 +15,7 @@ import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.JakeLogger;
+import org.jake.JakeLog;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeTestResult.ExceptionDescription;
 import org.jake.java.utils.JakeUtilsClassloader;
@@ -87,7 +87,7 @@ public class JakeJUnit {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public JakeTestResult launch(Iterable<Class> classes) {
-		JakeLogger.flush();
+		JakeLog.flush();
 
 		if (!classes.iterator().hasNext()) {
 			return JakeTestResult.empty(0);

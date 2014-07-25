@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jake.JakeOptions;
-import org.jake.JakeLogger;
+import org.jake.JakeLog;
 import org.jake.file.JakeDirViewSet;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.utils.JakeUtilsClassloader;
@@ -50,9 +50,9 @@ public class JakeJavadoc {
 
 	public void process(File outputDir) {
 		final String[] args = toArguments(outputDir);
-		JakeLogger.nextLine();
-		execute(doclet, new PrintWriter(JakeLogger.getInfoWriter()),JakeLogger.getWarnWriter(),JakeLogger.getErrorWriter(), args);
-		JakeLogger.getWarnWriter().flush();
+		JakeLog.nextLine();
+		execute(doclet, new PrintWriter(JakeLog.getInfoWriter()),JakeLog.getWarnWriter(),JakeLog.getErrorWriter(), args);
+		JakeLog.getWarnWriter().flush();
 	}
 
 	private String[] toArguments(File outputDir) {

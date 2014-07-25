@@ -45,7 +45,15 @@ public class JakeOptions {
 		private final List<PropDefinition> definitions = new LinkedList<JakeOptions.PropDefinition>();
 
 		public static PropertyCollector systemProps() {
-			return new PropertyCollector(System.getProperties());
+			final Properties properties = new Properties(System.getProperties());
+			for (final Object name : System.getProperties().keySet()) {
+				final String key = (String) name;
+				if (key.startsWith("java.") || key.startsWith("sun.") || key.startsWith("user.")
+						|| key.equals("path.separator") || key.equals("file.encoding")) {
+					properties.remove(name);
+				}
+			}
+			return new PropertyCollector(properties);
 		}
 
 		public PropertyCollector(Properties properties) {
@@ -61,7 +69,7 @@ public class JakeOptions {
 				return defaultValue;
 			}
 			final String value = properties.getProperty(name);
-			if (value == null) {
+			if (value == null || value.equals("")) {
 				return true;
 			}
 			return Boolean.parseBoolean(value);
@@ -119,6 +127,8 @@ public class JakeOptions {
 			builder.append(" (Unused props :" + JakeUtilsIterable.toString(remainings, ";") + ")");
 			return builder.toString();
 		}
+
+
 
 	}
 

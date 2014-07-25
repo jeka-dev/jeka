@@ -6,7 +6,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
 
-public class JakeLogger {
+public class JakeLog {
 
 	private static OffsetWriter infoOffsetWriter = new OffsetWriter(new BufferedWriter(new OutputStreamWriter(System.out)));
 
@@ -62,11 +62,13 @@ public class JakeLogger {
 	public static void warn(String message) {
 		flush();
 		warnWriter.println(message);
+		warnWriter.flush();
 	}
 
 	public static void error(String message) {
 		flush();
 		errorWriter.println(message);
+		errorWriter.flush();
 	}
 
 	public static void nextLine() {
@@ -99,6 +101,12 @@ public class JakeLogger {
 		} catch (final IOException e) {
 			throw new RuntimeException("Can't flush log output.");
 		}
+	}
+
+	public static void increaseOffset(int delta) {
+		infoOffsetWriter.offsetLevel += delta;
+		errorOffsetWriter.offsetLevel += delta;
+		warnOffsetWriter.offsetLevel += delta;
 	}
 
 	private static class OffsetWriter extends Writer {
@@ -162,12 +170,6 @@ public class JakeLogger {
 			}
 		}
 
-
-
 	}
-
-
-
-
 
 }

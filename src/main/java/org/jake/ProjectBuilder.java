@@ -17,6 +17,7 @@ import org.jake.java.JakeJavaCompiler;
 import org.jake.java.utils.JakeUtilsClassloader;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
+import org.jake.utils.JakeUtilsString;
 
 class ProjectBuilder {
 
@@ -35,17 +36,18 @@ class ProjectBuilder {
 		this.root = root;
 	}
 
-	public boolean build() {
-		final Iterable<File> compileClasspath = this.resolveBuildCompileClasspath();
+	public boolean build(Iterable<String> actions) {
+		final Iterable<File> compileClasspath = this
+				.resolveBuildCompileClasspath();
 
 		if (this.hasBuildSource()) {
 			this.compileBuild(compileClasspath);
 		}
-		final boolean result = this.launch(compileClasspath);
+		final boolean result = this.launch(compileClasspath, actions);
 		if (result) {
-			JakeLogger.info("Build success.");
+			JakeLog.info("Build success.");
 		} else {
-			JakeLogger.info("Build failed.");
+			JakeLog.info("Build failed.");
 		}
 		return result;
 
@@ -54,7 +56,7 @@ class ProjectBuilder {
 	private boolean hasBuildSource() {
 		final File buildSource = new File(root, BUILD_SOURCE_DIR);
 		if (!buildSource.exists()) {
-			JakeLogger.info(buildSource.getAbsolutePath()
+			JakeLog.info(buildSource.getAbsolutePath()
 					+ " directory not exists.");
 			return false;
 		}
@@ -62,7 +64,8 @@ class ProjectBuilder {
 	}
 
 	private void compileBuild(Iterable<File> classpath) {
-		final JakeDirView buildSource = JakeDirView.of(new File(root, BUILD_SOURCE_DIR));
+		final JakeDirView buildSource = JakeDirView.of(new File(root,
+				BUILD_SOURCE_DIR));
 		if (!buildSource.exists()) {
 			throw new IllegalStateException(
 					BUILD_SOURCE_DIR
@@ -77,17 +80,18 @@ class ProjectBuilder {
 			buildBinDir.mkdirs();
 		}
 		javaCompilation.setOutputDirectory(buildBinDir);
-		JakeLogger.start("Compiling build sources to "
+		JakeLog.start("Compiling build sources to "
 				+ buildBinDir.getAbsolutePath());
 		final boolean result = javaCompilation.compile();
-		JakeLogger.done();
+		JakeLog.done();
 		if (result == false) {
-			JakeLogger.error("Build script can't be compiled.");
+			JakeLog.error("Build script can't be compiled.");
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private boolean launch(Iterable<File> compileClasspath) {
+	@SuppressWarnings({ "unchecked" })
+	private boolean launch(Iterable<File> compileClasspath,
+			Iterable<String> actions) {
 		final File buildBin = new File(root, BUILD_BIN_DIR);
 		final Iterable<File> runtimeClassPath = JakeUtilsIterable.concatToList(
 				buildBin, compileClasspath);
@@ -107,38 +111,63 @@ class ProjectBuilder {
 						"No build class found for this project and cannot find default build class that fits.");
 			}
 		}
-		final Class buildClass = JakeUtilsClassloader.loadClass(classLoader,
-				buildClassName);
+		final Class<JakeBuildBase> buildClass = (Class<JakeBuildBase>) JakeUtilsClassloader
+				.loadClass(classLoader, buildClassName);
 
-		final Object build = JakeUtilsReflect.newInstance(buildClass);
-		final String command = "doDefault";
-		JakeLogger.info("Use Build class " + buildClass.getCanonicalName()
-				+ " with method " + command);
-
-		try {
-			final Method method = build.getClass().getMethod(command);
-			method.invoke(build);
-			return true;
-		} catch (final SecurityException e) {
-			throw new RuntimeException(e);
-		} catch (final NoSuchMethodException e) {
-			throw new IllegalArgumentException("No zero-arg method '" + command
-					+ "' found in class '" + buildClassName);
-		} catch (final IllegalAccessException e) {
-			throw new RuntimeException(e);
-		} catch (final InvocationTargetException e) {
-			final Throwable target = e.getTargetException();
-			if (target instanceof JakeException) {
-				JakeLogger.error(target.getMessage());
-				return false;
-			} else if (target instanceof RuntimeException) {
-				throw (RuntimeException) target;
-			} else {
-				throw new RuntimeException(target);
-			}
-
+		final JakeBuildBase build = JakeUtilsReflect.newInstance(buildClass);
+		final List<String> methods = new LinkedList<String>();
+		for (final String action : actions) {
+			methods.add(action.equals("default") ? "doDefault" : action);
+		}
+		if (methods.isEmpty()) {
+			methods.add("doDefault");
 		}
 
+		JakeLog.info("Use build class '" + buildClass.getCanonicalName()
+				+ "' with methods : "
+				+ JakeUtilsIterable.toString(methods, ", ") + ".");
+		JakeLog.info("Using options :");
+		final String optionDesc = JakeUtilsReflect.newInstance(
+				build.optionClass()).toString();
+		JakeLog.info(optionDesc);
+
+		JakeLog.nextLine();
+
+		for (final String methodName : methods) {
+			final Method method;
+			final String actionIntro = "Action : " + methodName;
+			JakeLog.info(actionIntro);
+			JakeLog.info(JakeUtilsString.repeat("-", actionIntro.length()));
+			try {
+				method = build.getClass().getMethod(methodName);
+			} catch (final NoSuchMethodException e) {
+				JakeLog.warn("No zero-arg method '" + methodName
+						+ "' found in class '" + buildClassName + "'. Skip.");
+				continue;
+			}
+			try {
+				method.invoke(build);
+			} catch (final SecurityException e) {
+				throw new RuntimeException(e);
+			} catch (final IllegalAccessException e) {
+				throw new RuntimeException(e);
+			} catch (final InvocationTargetException e) {
+				final Throwable target = e.getTargetException();
+				if (target instanceof JakeException) {
+					JakeLog.error(target.getMessage());
+					return false;
+				} else if (target instanceof RuntimeException) {
+					throw (RuntimeException) target;
+				} else {
+					throw new RuntimeException(target);
+				}
+
+			}
+			JakeLog.flush();
+			JakeLog.nextLine();
+		}
+		JakeLog.nextLine();
+		return true;
 	}
 
 	private List<File> resolveBuildCompileClasspath() {
@@ -161,22 +190,21 @@ class ProjectBuilder {
 		return result;
 	}
 
-
-
 	@SuppressWarnings("rawtypes")
 	private static List<String> getBuildClassNames(Iterable<File> classpath) {
 
-		final URLClassLoader classLoader = JakeUtilsClassloader.createFrom(classpath,
-				JakeLauncher.class.getClassLoader());
+		final URLClassLoader classLoader = JakeUtilsClassloader.createFrom(
+				classpath, JakeLauncher.class.getClassLoader());
 
 		// Find the Build class
-		final Class<?> jakeBaseBuildClass = JakeUtilsClassloader.loadClass(classLoader,
-				JakeBuildBase.class.getName());
+		final Class<?> jakeBaseBuildClass = JakeUtilsClassloader.loadClass(
+				classLoader, JakeBuildBase.class.getName());
 		final Set<Class> classes = JakeUtilsClassloader.getAllTopLevelClasses(
 				classLoader, JakeUtilsFile.acceptAll(), true);
 		final List<String> buildClasses = new LinkedList<String>();
 		for (final Class clazz : classes) {
-			final boolean isAbstract = Modifier.isAbstract(clazz.getModifiers());
+			final boolean isAbstract = Modifier
+					.isAbstract(clazz.getModifiers());
 			if (!isAbstract && jakeBaseBuildClass.isAssignableFrom(clazz)) {
 				buildClasses.add(clazz.getName());
 			}
@@ -190,6 +218,5 @@ class ProjectBuilder {
 		}
 		return JakeBuildJar.class.getName();
 	}
-
 
 }

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.zip.Deflater;
 
 import org.jake.JakeBuildBase;
-import org.jake.JakeLogger;
+import org.jake.JakeLog;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.utils.JakeUtilsClassloader;
 
@@ -29,17 +29,17 @@ public class JakeBuildIde extends JakeBuildBase {
 	}
 
 	public void simpleJar() {
-		JakeLogger.start("Creating jar file");
+		JakeLog.start("Creating jar file");
 		final List<File> classDirs = getProjectCompiledClasses();
 		final File jarFile = buildOuputDir().file(jarBaseName() + ".jar");
 		JakeUtilsFile.zipDir(jarFile, zipLevel(), classDirs);
-		JakeLogger.done(jarFile.getPath() + " created");
+		JakeLog.done(jarFile.getPath() + " created");
 	}
 
 	public void test() {
-		JakeLogger.start("Launching test(s)");
+		JakeLog.start("Launching test(s)");
 		//int count = TestUtils.launchJunitTests(ClassloaderUtils.current(), getProjectFileFilter());
-		JakeLogger.done(0 + " test(s) Launched.");
+		JakeLog.done(0 + " test(s) Launched.");
 	}
 
 	@Override

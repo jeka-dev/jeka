@@ -11,7 +11,7 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
 import org.jake.JakeException;
-import org.jake.JakeLogger;
+import org.jake.JakeLog;
 import org.jake.file.JakeDirView;
 import org.jake.file.utils.JakeUtilsFile;
 
@@ -63,9 +63,9 @@ public final class JakeJavaCompiler {
 		final Iterable<? extends JavaFileObject> javaFileObjects =
 				fileManager.getJavaFileObjectsFromFiles(this.javaSourceFiles);
 		final CompilationTask task = compiler.getTask(null, null, null, options, null, javaFileObjects);
-		JakeLogger.flush();
+		JakeLog.flush();
 		final boolean result = task.call();
-		JakeLogger.flush();
+		JakeLog.flush();
 		return result;
 	}
 
@@ -73,9 +73,9 @@ public final class JakeJavaCompiler {
 		final Iterable<? extends JavaFileObject> javaFileObjects =
 				fileManager.getJavaFileObjectsFromFiles(this.javaSourceFiles);
 		final CompilationTask task = compiler.getTask(null, null, null, options, null, javaFileObjects);
-		JakeLogger.flush();
+		JakeLog.flush();
 		final boolean result = task.call();
-		JakeLogger.flush();
+		JakeLog.flush();
 		if (!result) {
 			throw new JakeException("Compilation failure.");
 		}
