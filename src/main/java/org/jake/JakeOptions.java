@@ -49,8 +49,12 @@ public class JakeOptions {
 			for (final Object name : System.getProperties().keySet()) {
 				final String key = (String) name;
 				if (key.startsWith("java.") || key.startsWith("sun.") || key.startsWith("user.")
-						|| key.equals("path.separator") || key.equals("file.encoding")) {
+						|| key.equals("path.separator") || key.equals("file.encoding")
+						|| key.equals("os.arch") || key.equals("file.encoding.pkg")) {
 					properties.remove(name);
+					System.out.println("s++++++++ sys remove " + name);
+				} else {
+					System.out.println("s++++++++ sys keeeeeeeeeeeeeeeeeeeeeep " + name);
 				}
 			}
 			return new PropertyCollector(properties);

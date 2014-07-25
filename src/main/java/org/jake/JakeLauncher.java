@@ -36,10 +36,12 @@ public class JakeLauncher {
 			if (arg.startsWith("-D")) {
 				final int equalIndex = arg.indexOf("=");
 				if (equalIndex <= -1) {
+					System.out.println("++++++++++ add sys prop " + arg.substring(2) + "=''");
 					System.setProperty(arg.substring(2), "");
 				} else {
 					final String name = arg.substring(2, equalIndex);
-					final String value = arg.substring(equalIndex);
+					final String value = arg.substring(equalIndex+1);
+					System.out.println("++++++++++ add sys prop " + name + "=" + value );
 					System.setProperty(name, value);
 				}
 			}
