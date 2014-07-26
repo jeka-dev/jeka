@@ -37,6 +37,7 @@ class ProjectBuilder {
 	}
 
 	public boolean build(Iterable<String> actions) {
+		final long start = System.nanoTime();
 		final Iterable<File> compileClasspath = this
 				.resolveBuildCompileClasspath();
 
@@ -44,10 +45,13 @@ class ProjectBuilder {
 			this.compileBuild(compileClasspath);
 		}
 		final boolean result = this.launch(compileClasspath, actions);
+		final long durationMillis = (System.nanoTime() - start)/ 1000000;
+		final float duration = durationMillis / 1000f;
+
 		if (result) {
-			JakeLog.info("Build success.");
+			JakeLog.info("Build success in " + duration + " seconds.");
 		} else {
-			JakeLog.info("Build failed.");
+			JakeLog.info("Build failed in " + duration + " seconds.");
 		}
 		return result;
 

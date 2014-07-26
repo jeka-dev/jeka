@@ -1,5 +1,6 @@
 package org.jake;
 
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,8 +10,12 @@ import org.jake.utils.JakeUtilsString;
 public class JakeLauncher {
 
 	public static void main(String[] args) {
-		printAscciArt();
-		JakeLog.info(JakeUtilsString.repeat(" ", 70) + "The 100% Java build system.");
+		final int lenght = printAsciiArt1();
+		JakeLog.info(JakeUtilsString.repeat(" ", lenght) + "The 100% Java build system.");
+		final String version = JakeUtilsFile.readResourceIfExist("org/jake/version.txt");
+		if (version != null) {
+			JakeLog.info(JakeUtilsString.repeat(" ", 70) + "Version : " + version);
+		}
 		JakeLog.nextLine();
 		defineSystemProps(args);
 		final List<String> actions = extractAcions(args);
@@ -36,12 +41,10 @@ public class JakeLauncher {
 			if (arg.startsWith("-D")) {
 				final int equalIndex = arg.indexOf("=");
 				if (equalIndex <= -1) {
-					System.out.println("++++++++++ add sys prop " + arg.substring(2) + "=''");
 					System.setProperty(arg.substring(2), "");
 				} else {
 					final String name = arg.substring(2, equalIndex);
 					final String value = arg.substring(equalIndex+1);
-					System.out.println("++++++++++ add sys prop " + name + "=" + value );
 					System.setProperty(name, value);
 				}
 			}
@@ -49,19 +52,17 @@ public class JakeLauncher {
 	}
 
 
-
-	private static void printAscciArt() {
-		JakeLog.info("             _              _                   _                 _      ");
-		JakeLog.info("            /\\ \\           / /\\                /\\_\\              /\\ \\    ");
-		JakeLog.info("            \\ \\ \\         / /  \\              / / /  _          /  \\ \\   ");
-		JakeLog.info("            /\\ \\_\\       / / /\\ \\            / / /  /\\_\\       / /\\ \\ \\  ");
-		JakeLog.info("           / /\\/_/      / / /\\ \\ \\          / / /__/ / /      / / /\\ \\_\\ ");
-		JakeLog.info("  _       / / /        / / /  \\ \\ \\        / /\\_____/ /      / /_/_ \\/_/ ");
-		JakeLog.info(" /\\ \\    / / /        / / /___/ /\\ \\      / /\\_______/      / /____/\\    ");
-		JakeLog.info(" \\ \\_\\  / / /        / / /_____/ /\\ \\    / / /\\ \\ \\        / /\\____\\/    ");
-		JakeLog.info(" / / /_/ / /        / /_________/\\ \\ \\  / / /  \\ \\ \\      / / /______    ");
-		JakeLog.info("/ / /__\\/ /        / / /_       __\\ \\_\\/ / /    \\ \\ \\    / / /_______\\   ");
-		JakeLog.info("\\/_______/         \\_\\___\\     /____/_/\\/_/      \\_\\_\\   \\/__________/   ");
+	public static int printAsciiArt1() {
+		final InputStream inputStream = JakeLauncher.class.getResourceAsStream("ascii1.txt");
+		final List<String> lines = JakeUtilsFile.toLines(inputStream);
+		int i = 0;
+		for (final String line: lines) {
+			if (i < line.length()) {
+				i = line.length();
+			}
+			JakeLog.info(line);
+		}
+		return i;
 	}
 
 }

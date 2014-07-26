@@ -52,9 +52,6 @@ public class JakeOptions {
 						|| key.equals("path.separator") || key.equals("file.encoding")
 						|| key.equals("os.arch") || key.equals("file.encoding.pkg")) {
 					properties.remove(name);
-					System.out.println("s++++++++ sys remove " + name);
-				} else {
-					System.out.println("s++++++++ sys keeeeeeeeeeeeeeeeeeeeeep " + name);
 				}
 			}
 			return new PropertyCollector(properties);

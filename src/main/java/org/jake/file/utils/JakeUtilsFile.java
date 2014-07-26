@@ -1,14 +1,17 @@
 package org.jake.file.utils;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -47,7 +50,7 @@ public class JakeUtilsFile {
 		}
 	}
 
-	public static List<File> toFiles(URL...urls) {
+	public static List<File> toFiles(URL... urls) {
 		final List<File> result = new LinkedList<File>();
 		for (final URL url : urls) {
 			result.add(new File(url.getFile()));
@@ -70,7 +73,8 @@ public class JakeUtilsFile {
 			throw new IllegalArgumentException("File " + filePath
 					+ " is not part of " + baseDirPath);
 		}
-		final String relativePath = filePath.substring(baseDirPath.length() + 1);
+		final String relativePath = filePath
+				.substring(baseDirPath.length() + 1);
 		return relativePath;
 	}
 
@@ -111,7 +115,8 @@ public class JakeUtilsFile {
 				if (filter.accept(child) && copyEmptyDir) {
 					subdir.mkdirs();
 				}
-				final int subCount = copyDir(child, subdir, filter, copyEmptyDir);
+				final int subCount = copyDir(child, subdir, filter,
+						copyEmptyDir);
 				count = count + subCount;
 			}
 
@@ -214,8 +219,6 @@ public class JakeUtilsFile {
 		};
 	}
 
-
-
 	public static FileFilter acceptAll() {
 		return new FileFilter() {
 
@@ -276,7 +279,8 @@ public class JakeUtilsFile {
 		return builder.toString();
 	}
 
-	public static List<File> toPath(String pathAsString, String separator, File baseDir) {
+	public static List<File> toPath(String pathAsString, String separator,
+			File baseDir) {
 		final String[] paths = JakeUtilsString.split(pathAsString, separator);
 		final List<File> result = new LinkedList<File>();
 		for (final String path : paths) {
@@ -371,7 +375,6 @@ public class JakeUtilsFile {
 
 	}
 
-
 	public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile) {
 		final Set<String> duplicateEntries = new HashSet<String>();
 		final Enumeration<? extends ZipEntry> entries = zipFile.entries();
@@ -379,18 +382,21 @@ public class JakeUtilsFile {
 			final ZipEntry e = entries.nextElement();
 			try {
 				if (!e.isDirectory()) {
-					final boolean success = addEntryInputStream(zos, e.getName(), zipFile.getInputStream(e));;
+					final boolean success = addEntryInputStream(zos,
+							e.getName(), zipFile.getInputStream(e));
+					;
 					if (!success) {
 						duplicateEntries.add(e.getName());
 					}
 				}
 			} catch (final IOException e1) {
-				throw new RuntimeException("Error while merging entry " + e.getName() + " from zip file " + zipFile.getName(), e1);
+				throw new RuntimeException("Error while merging entry "
+						+ e.getName() + " from zip file " + zipFile.getName(),
+						e1);
 			}
 		}
 		return duplicateEntries;
 	}
-
 
 	/**
 	 * Add a zip entry into the provided <code>ZipOutputStream</code>. The zip
@@ -411,7 +417,8 @@ public class JakeUtilsFile {
 		} else {
 			final String filePathToZip = canonicalPath(fileToZip);
 			String entryName = filePathToZip.substring(
-					canonicalPath(baseFolder).length() + 1, filePathToZip.length());
+					canonicalPath(baseFolder).length() + 1,
+					filePathToZip.length());
 			entryName = entryName.replace(File.separatorChar, '/');
 			final FileInputStream inputStream;
 			try {
@@ -423,8 +430,8 @@ public class JakeUtilsFile {
 		}
 	}
 
-
-	private static boolean addEntryInputStream(ZipOutputStream zos, String entryName, InputStream inputStream) {
+	private static boolean addEntryInputStream(ZipOutputStream zos,
+			String entryName, InputStream inputStream) {
 		final ZipEntry zipEntry = new ZipEntry(entryName);
 		try {
 			zos.putNextEntry(zipEntry);
@@ -454,7 +461,6 @@ public class JakeUtilsFile {
 		}
 	}
 
-
 	public static void closeZipEntryQuietly(ZipOutputStream outputStream) {
 		try {
 			outputStream.closeEntry();
@@ -462,9 +468,6 @@ public class JakeUtilsFile {
 			throw new RuntimeException(e);
 		}
 	}
-
-
-
 
 	/**
 	 * Returns all files contained recursively in the specified directory.
@@ -521,5 +524,63 @@ public class JakeUtilsFile {
 	public static File workingDir() {
 		return JakeUtilsFile.canonicalFile(new File("."));
 	}
+
+	public static void writeString(File file, String content, boolean append) {
+		try {
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			final FileWriter fileWriter = new FileWriter(file, append);
+			fileWriter.append(content);
+			fileWriter.close();
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static String readResource(String resourcePath) {
+		final InputStream is = JakeUtilsFile.class.getClassLoader().getResourceAsStream(resourcePath);
+		return toLine(is);
+	}
+
+	public static String readResourceIfExist(String resourcePath) {
+		final InputStream is = JakeUtilsFile.class.getClassLoader().getResourceAsStream(resourcePath);
+		if (is == null) {
+			return null;
+		}
+		return toLine(is);
+	}
+
+	public static String toLine(InputStream in)	{
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		final StringBuilder out = new StringBuilder();
+		final String newLine = System.getProperty("line.separator");
+		String line;
+		try {
+			while ((line = reader.readLine()) != null) {
+				out.append(line);
+				out.append(newLine);
+			}
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+		return out.toString();
+	}
+
+	public static List<String> toLines(InputStream in)	{
+		final List<String> result = new LinkedList<String>();
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		String line;
+		try {
+			while ((line = reader.readLine()) != null) {
+				result.add(line);
+			}
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+		return result;
+	}
+
+
 
 }
