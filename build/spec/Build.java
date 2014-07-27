@@ -1,5 +1,4 @@
 
-
 import java.io.File;
 
 import org.jake.JakeDoc;
@@ -44,7 +43,5 @@ public class Build extends JakeBuildJar {
 		JakeUtilsFile.zipDir(distripZipFile, zipLevel(), distribDir);
 		JakeLog.done(distripZipFile.getPath() + " created");
 	}
-
-
 
 }

@@ -187,7 +187,7 @@ public class JakeBuildBase {
 		}
 
 		public static void log(List<ActionDescription> actions) {
-			Class currentDecClass = null;
+			Class<?> currentDecClass = null;
 			Collections.sort(actions);
 			for(final ActionDescription actionDescription : actions) {
 				if (actionDescription.declaringClass != currentDecClass) {
