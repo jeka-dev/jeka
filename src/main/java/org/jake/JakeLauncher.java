@@ -1,8 +1,10 @@
 package org.jake;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsString;
@@ -10,13 +12,8 @@ import org.jake.utils.JakeUtilsString;
 public class JakeLauncher {
 
 	public static void main(String[] args) {
-		final int lenght = printAsciiArt1();
-		JakeLog.info(JakeUtilsString.repeat(" ", lenght) + "The 100% Java build system.");
-		final String version = JakeUtilsFile.readResourceIfExist("org/jake/version.txt");
-		if (version != null) {
-			JakeLog.info(JakeUtilsString.repeat(" ", 70) + "Version : " + version);
-		}
-		JakeLog.nextLine();
+		displayIntro();
+		OptionStore.options = extractOptions(args);
 		defineSystemProps(args);
 		final List<String> actions = extractAcions(args);
 		final ProjectBuilder projectBuilder = new ProjectBuilder(JakeUtilsFile.workingDir());
@@ -51,6 +48,23 @@ public class JakeLauncher {
 		}
 	}
 
+	private static Map<String, String> extractOptions(String[] args) {
+		final Map<String, String> result = new HashMap<String, String>();
+		for (final String arg : args) {
+			if (arg.startsWith("-O")) {
+				final int equalIndex = arg.indexOf("=");
+				if (equalIndex <= -1) {
+					result.put(arg.substring(2), "");
+				} else {
+					final String name = arg.substring(2, equalIndex);
+					final String value = arg.substring(equalIndex+1);
+					result.put(name, value);
+				}
+			}
+		}
+		return result;
+	}
+
 
 	public static int printAsciiArt1() {
 		final InputStream inputStream = JakeLauncher.class.getResourceAsStream("ascii1.txt");
@@ -63,6 +77,16 @@ public class JakeLauncher {
 			JakeLog.info(line);
 		}
 		return i;
+	}
+
+	private static void displayIntro() {
+		final int lenght = printAsciiArt1();
+		JakeLog.info(JakeUtilsString.repeat(" ", lenght) + "The 100% Java build system.");
+		final String version = JakeUtilsFile.readResourceIfExist("org/jake/version.txt");
+		if (version != null) {
+			JakeLog.info(JakeUtilsString.repeat(" ", 70) + "Version : " + version);
+		}
+		JakeLog.nextLine();
 	}
 
 }

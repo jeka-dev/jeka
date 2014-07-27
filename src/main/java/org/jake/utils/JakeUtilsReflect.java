@@ -7,8 +7,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.jake.JakeOption;
 
 public final class JakeUtilsReflect {
 
@@ -54,6 +58,7 @@ public final class JakeUtilsReflect {
 
 	public static void setFieldValue(Object object, Field field, Object value) {
 		try {
+			setAccessibleIfNeeded(field);
 			field.set(object, value);
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
@@ -261,6 +266,21 @@ public final class JakeUtilsReflect {
 			return getInheritedAnnotation(superMethod, annotationClass);
 		}
 		return null;
+	}
+
+	public static List<Field> getAllDeclaredField(Class<?> clazz, Class<? extends Annotation> annotationClass) {
+		final List<Field> result = new LinkedList<Field>();
+		for (final Field field : clazz.getDeclaredFields()) {
+			final JakeOption jakeOption = field.getAnnotation(JakeOption.class);
+			if (jakeOption != null) {
+				result.add(field);
+			}
+		}
+		final Class<?> superClass = clazz.getSuperclass();
+		if (superClass != null) {
+			result.addAll(getAllDeclaredField(superClass, annotationClass));
+		}
+		return result;
 	}
 
 

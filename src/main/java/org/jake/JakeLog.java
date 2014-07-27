@@ -103,7 +103,7 @@ public class JakeLog {
 		}
 	}
 
-	public static void increaseOffset(int delta) {
+	public static void offset(int delta) {
 		infoOffsetWriter.offsetLevel += delta;
 		errorOffsetWriter.offsetLevel += delta;
 		warnOffsetWriter.offsetLevel += delta;

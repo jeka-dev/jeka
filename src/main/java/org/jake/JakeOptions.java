@@ -1,178 +1,135 @@
 package org.jake;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 import java.util.Set;
 
-import org.jake.utils.JakeUtilsIterable;
+import org.jake.utils.JakeUtilsReflect;
+import org.jake.utils.JakeUtilsString;
 
 public class JakeOptions {
 
-	private static final JakeOptions instance = new JakeOptions();
+	protected static JakeOptions INSTANCE = new JakeOptions();
 
-	private final PropertyCollector propCollector;
+	private final Map<String, String> nonStandardOptions = new HashMap<String, String>();
 
-	private final boolean verbose;
+	@JakeOption(defaultValue="false", value="Set it to true to log more details.")
+	private boolean verbose;
 
+	@JakeOption(defaultValue="false", value="Set it to true to turn off logs.")
+	private boolean silent;
 
 	protected JakeOptions() {
-		this(PropertyCollector.systemProps());
+		this.init(augmentWithSystemProps(OptionStore.options));
 	}
 
-	protected JakeOptions(PropertyCollector props) {
-		this.propCollector = props;
-		this.verbose = props.boolOr("jake.verbose", false,
-				"Set it to true to display more details in console.");
+	private void init(Map<String, String> props) {
+		final List<Field> fields = JakeUtilsReflect.getAllDeclaredField(this.getClass(), JakeOption.class);
+		final Set<String> names = new HashSet<String>();
+		for (final Field field : fields) {
+			final String name = field.getName();
+			names.add(name);
+			final JakeOption option = field.getAnnotation(JakeOption.class);
+			final Class<?> type = field.getType();
+			final boolean present = props.containsKey(name);
+			String stringValue = present ? props.get(name) : option.defaultValue();
+
+			// Special case for boolean
+			if (type.equals(Boolean.class) && present && stringValue == null) {
+				stringValue = "true";
+			}
+
+			final Object value;
+			if (stringValue.equals("null")) {
+				value = null;
+			} else {
+				try {
+					value = JakeUtilsString.parse(type, stringValue);
+				} catch(final IllegalArgumentException e) {
+					throw new JakeException("Option " + name + "=" + stringValue
+							+ " can't be parsed to type " + type.getName() + " : " + e.getMessage());
+				}
+			}
+			JakeUtilsReflect.setFieldValue(this, field, value);
+		}
+		this.nonStandardOptions.clear();
+		for (final Map.Entry<String, String> entry : props.entrySet()) {
+			if (!names.contains(entry.getKey())) {
+				this.nonStandardOptions.put(entry.getKey(), entry.getValue());
+			}
+		}
+
+	}
+
+	public List<String> toStrings() {
+		final List<String> list = new LinkedList<String>();
+		final List<Field> fields = JakeUtilsReflect.getAllDeclaredField(this.getClass(), JakeOption.class);
+		StringBuilder builder = new StringBuilder("Standard options : ");
+		for (final Field field : fields) {
+			final String name = field.getName();
+			final String value = JakeUtilsString.toString(JakeUtilsReflect.getFieldValue(this, name));
+			builder.append(name).append("=").append(value).append(", ");
+		}
+		builder.delete(builder.length()-2, builder.length()-1);
+		list.add(builder.toString() );
+		if (!nonStandardOptions.isEmpty()) {
+			builder = new StringBuilder("Free options : ");
+			for (final Map.Entry<String, String> entry : nonStandardOptions.entrySet()) {
+				builder.append(entry.getKey()).append("=").append(entry.getValue()).append(", ");
+			}
+			builder.delete(builder.length()-2, builder.length()-1);
+			list.add(builder.toString());
+		}
+		return list;
+	}
+
+	public List<String> help() {
+		final List<String> result = new LinkedList<String>();
+		final List<Field> fields = JakeUtilsReflect.getAllDeclaredField(this.getClass(), JakeOption.class);
+		for (final Field field : fields) {
+			final String name = field.getName();
+			final JakeOption option = field.getAnnotation(JakeOption.class);
+			final Class<?> type = field.getType();
+			final String defaultValue = option.defaultValue();
+			final String string = name +" (" + type.getSimpleName()+", default="+ defaultValue+") : ";
+			result.add( string + option.value()[0] );
+			if (option.value().length > 1) {
+				final String margin = JakeUtilsString.repeat(" ", string.length());
+				for (int i=1; i < option.value().length; i++) {
+					result.add(margin + option.value()[i]);
+				}
+			}
+			result.add("");
+		}
+		return result;
+	}
+
+	private static Map<String, String> augmentWithSystemProps(Map<String,String> map) {
+		final Map<String, String> result = new HashMap<String, String>(map);
+		for (final Object name : System.getProperties().keySet()) {
+			final String value = System.getProperty(name.toString());
+			if (name.toString().startsWith("jake.")) {
+				result.put(name.toString().substring(5), value);
+			}
+		}
+		return result;
+
 	}
 
 
 	public static boolean isVerbose() {
-		return instance.verbose;
+		return INSTANCE.verbose;
 	}
 
-	@Override
-	public String toString() {
-		return propCollector.toStringValues();
+	public static boolean isSlent() {
+		return INSTANCE. silent;
 	}
 
-	public static final class PropertyCollector {
-
-		private final Properties properties;
-
-		private final List<PropDefinition> definitions = new LinkedList<JakeOptions.PropDefinition>();
-
-		public static PropertyCollector systemProps() {
-			final Properties properties = new Properties(System.getProperties());
-			for (final Object name : System.getProperties().keySet()) {
-				final String key = (String) name;
-				if (key.startsWith("java.") || key.startsWith("sun.") || key.startsWith("user.")
-						|| key.equals("path.separator") || key.equals("file.encoding")
-						|| key.equals("os.arch") || key.equals("file.encoding.pkg")) {
-					properties.remove(name);
-				}
-			}
-			return new PropertyCollector(properties);
-		}
-
-		public PropertyCollector(Properties properties) {
-			this.properties = properties;
-		}
-
-		public boolean boolOr(String name, boolean defaultValue,
-				String definition) {
-			definitions.add(new PropDefinition(name, defaultValue, definition,
-					Boolean.class));
-			final boolean present = properties.containsKey(name);
-			if (!present) {
-				return defaultValue;
-			}
-			final String value = properties.getProperty(name);
-			if (value == null || value.equals("")) {
-				return true;
-			}
-			return Boolean.parseBoolean(value);
-		}
-
-		public String stringOr(String name, String defaultValue,
-				String definition) {
-			definitions.add(new PropDefinition(name, defaultValue, definition,
-					String.class));
-			final boolean present = properties.containsKey(name);
-			if (!present) {
-				return defaultValue;
-			}
-			final String value = properties.getProperty(name);
-			if (value == null) {
-				return defaultValue;
-			}
-			return value;
-		}
 
 
-		public String toStringValues() {
-			return this.properties.toString();
-		}
-
-		@Override
-		public String toString() {
-			final List<String> strings = new LinkedList<String>();
-			for (final PropDefinition propertyDef : this.definitions) {
-				final String name = propertyDef.name;
-				final String value = properties.getProperty(name);
-				if (value!= null) {
-					strings.add(propertyDef.name + " = " + value);
-				}
-			}
-			return JakeUtilsIterable.toString(strings, ";");
-		}
-
-		public String toStringDetails() {
-			final Set<Object> remainings = new HashSet<Object>(this.properties.keySet());
-			final Iterator<Object> it = remainings.iterator();
-			while (it.hasNext()) {
-				final String name = (String) it.next();
-				if (!name.startsWith("jake.")) {
-					it.remove();
-				}
-			}
-			final List<String> strings = new LinkedList<String>();
-			for (final PropDefinition propertyDef : this.definitions) {
-				final String name = propertyDef.name;
-				final String value = properties.getProperty(name);
-				strings.add(propertyDef.name + "=" + propertyDef.valueOrDefault(value));
-			}
-			final StringBuilder builder = new StringBuilder(JakeUtilsIterable.toString(strings, ";"));
-			builder.append(" (Unused props :" + JakeUtilsIterable.toString(remainings, ";") + ")");
-			return builder.toString();
-		}
-
-
-
-	}
-
-	protected static final class PropDefinition implements
-	Comparable<PropDefinition> {
-
-		private final String name;
-
-		private final Object defaultValue;
-
-		private final String definition;
-
-		private final String type;
-
-		@SuppressWarnings("rawtypes")
-		public PropDefinition(String name, Object defaultValue,
-				String definition, Class type) {
-			super();
-			this.name = name;
-			this.defaultValue = defaultValue;
-			this.definition = definition;
-			this.type = type.getSimpleName();
-		}
-
-		public Object valueOrDefault(Object value) {
-			if (value == null) {
-				return defaultValue;
-			}
-			return value;
-		}
-
-		@Override
-		public String toString() {
-			return name + " : " + definition + " Type = " + type
-					+ ", defauft value = " + defaultValue;
-		}
-
-		@Override
-		public int compareTo(PropDefinition other) {
-			this.name.compareTo(other.name);
-			return 0;
-		}
-
-	}
 
 }

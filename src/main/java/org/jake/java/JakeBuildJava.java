@@ -3,7 +3,9 @@ package org.jake.java;
 import java.io.File;
 
 import org.jake.JakeBuildBase;
+import org.jake.JakeDoc;
 import org.jake.JakeLog;
+import org.jake.JakeOptions;
 import org.jake.file.JakeDirViewSet;
 import org.jake.file.JakeFileFilter;
 import org.jake.file.JakeZip;
@@ -77,7 +79,7 @@ public class JakeBuildJava extends JakeBuildBase {
 		if (cachedResolver == null) {
 			JakeLog.startAndNextLine("Resolving Dependencies ");
 			final JakeJavaDependencyResolver resolver = resolveDependencyPath();
-			final JakeJavaDependencyResolver extraResolver = JakeJavaOptions.extraPath();
+			final JakeJavaDependencyResolver extraResolver = JakeJavaOptions.extraPath(baseDir().root());
 			if (!extraResolver.isEmpty()) {
 				JakeLog.info("Using extra libs : ", extraResolver.toStrings());
 				cachedResolver = resolver.merge(extraResolver, null, null);
@@ -109,46 +111,40 @@ public class JakeBuildJava extends JakeBuildBase {
 		JakeLog.done();
 	}
 
-	/**
-	 * Compiles production code.
-	 */
+	@JakeDoc("Compile all production code to the classes directory.")
 	public void compile() {
 		compile(sourceDirs(), classDir(), this.dependencyPath().compile());
 	}
 
-	/**
-	 * Compiles test code.
-	 */
+	@JakeDoc("Compile all test code to the test classes directory.")
 	@SuppressWarnings("unchecked")
 	public void compileTest() {
 		compile(testSourceDirs(), testClassDir(),
 				JakeUtilsIterable.concatToList(this.classDir(), this.dependencyPath().test()));
 	}
 
-	/**
-	 * Copies production resources in <code>class dir</code>.
-	 */
+	@JakeDoc("Copy all production resources to the classes directory.")
 	public void copyResources() {
 		JakeLog.start("Coping resource files to " + classDir().getPath());
 		final int count = resourceDirs().copyTo(classDir());
 		JakeLog.done(count + " file(s) copied.");
 	}
 
-	/**
-	 * Copies test resource in <code>test class dir</code>.
-	 */
+	@JakeDoc("Copy all test resources to the test classes directory.")
 	public void copyTestResources() {
 		JakeLog.start("Coping test resource files to " + testClassDir().getPath());
 		final int count = testResourceDirs().copyTo(testClassDir());
 		JakeLog.done(count + " file(s) copied.");
 	}
 
+	@JakeDoc("Run all unit tests.")
 	public void runUnitTests() {
 		JakeLog.start("Launching JUnit Tests");
 		juniter().launchAll(this.testClassDir()).printToNotifier();
 		JakeLog.done();
 	}
 
+	@JakeDoc("Produce the Javadoc.")
 	public void javadoc() {
 		JakeLog.start("Generating Javadoc");
 		final File dir = buildOuputDir(projectName() + "-javadoc");
@@ -159,6 +155,7 @@ public class JakeBuildJava extends JakeBuildBase {
 		JakeLog.done();
 	}
 
+	@JakeDoc("Compile production code and resources, copy test code and resources then launch the unit tests.")
 	@Override
 	public void doDefault() {
 		super.doDefault();
@@ -171,6 +168,11 @@ public class JakeBuildJava extends JakeBuildBase {
 
 	public static void main(String[] args) {
 		new JakeBuildJava().doDefault();
+	}
+
+	@Override
+	protected Class<? extends JakeOptions> optionClass() {
+		return JakeJavaOptions.class;
 	}
 
 

@@ -4,32 +4,48 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
+import org.jake.JakeOption;
 import org.jake.JakeOptions;
 import org.jake.file.utils.JakeUtilsFile;
 
 public class JakeJavaOptions extends JakeOptions {
 
-	private static final JakeJavaOptions instance = new JakeJavaOptions(PropertyCollector.systemProps());
+	private static final JakeJavaOptions INSTANCE = new JakeJavaOptions();
 
-	private final JakeLocalDependencyResolver extraPaths;
+	@JakeOption({"Mention if you want to add extra lib in your 'compile' scope but not in your 'runtime' scope. It can be absolute or relative to the project base dir.",
+		"These libs will be added to the compile path but won't be embedded in war files or fat jars.",
+	"Example : -OextraProvidedPath=C:\\libs\\mylib.jar;libs/others/**/*.jar"})
+	private String extraProvidedPath;
 
-	protected JakeJavaOptions(PropertyCollector props) {
-		super(props);
-		final File workingDir = JakeUtilsFile.workingDir();
+	@JakeOption({"Mention if you want to add extra lib in your 'runtime' scope path. It can be absolute or relative to the project base dir.",
+		"These libs will be added to the runtime path.",
+	"Example : -OextraRuntimePath=C:\\libs\\mylib.jar;libs/others/**/*.jar"})
+	private String extraRuntimePath;
 
-		final String extraProvidedPathString = props.stringOr("jake.extraProvidedPath", null,
-				"Mention id you want to add extra lib in your 'provided' scope path. It can be absolute or relative to the working dir." +
-						"These libs will be added to the compile path but won't be embedded in war files of fat jars. " +
-				"Example : -Djake.extraProvidedPath=C:\\libs\\mylib.jar;libs/others/**/*.jar");
+	@JakeOption({"Mention if you want to add extra lib in your 'compile' scope path. It can be absolute or relative to the project base dir.",
+		"These libs will be added to the compile and runtime path.",
+	"Example : -OextraCompilePath=C:\\libs\\mylib.jar;libs/others/**/*.jar"})
+	private String extraCompilePath;
 
+	@JakeOption({"Mention if you want to add extra lib in your 'test' scope path. It can be absolute or relative to the project base dir.",
+		"These libs will be added to the compile and runtime path.",
+	"Example : -OextraTestPath=C:\\libs\\mylib.jar;libs/others/**/*.jar"})
+	private String extraTestPath;
 
-		final List<File> extraProvidedPath = toPath(workingDir, extraProvidedPathString);
-		this.extraPaths = JakeLocalDependencyResolver.empty().withCompileOnly(extraProvidedPath);
-
+	protected JakeJavaOptions() {
 	}
 
-	public static JakeLocalDependencyResolver extraPath() {
-		return instance.extraPaths;
+	public static JakeLocalDependencyResolver extraPath(File baseDir) {
+		return INSTANCE.computeExtraPath(baseDir);
+	}
+
+	private JakeLocalDependencyResolver computeExtraPath(File baseDir) {
+		final List<File> extraProvidedPathList = toPath(baseDir, extraProvidedPath);
+		final List<File> extraCompilePathList = toPath(baseDir, extraCompilePath);
+		final List<File> extraRuntimePathList = toPath(baseDir, extraRuntimePath);
+		final List<File> extraTestPathList = toPath(baseDir, extraTestPath);
+		return new JakeLocalDependencyResolver(extraCompilePathList, extraRuntimePathList,
+				extraTestPathList, extraProvidedPathList);
 	}
 
 	private static final List<File> toPath(File workingDir, String pathAsString) {

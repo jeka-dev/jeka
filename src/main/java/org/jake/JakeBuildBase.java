@@ -26,7 +26,7 @@ public class JakeBuildBase {
 	protected JakeBuildBase() {
 	}
 
-	protected Class<JakeOptions> optionClass() {
+	protected Class<? extends JakeOptions> optionClass() {
 		return JakeOptions.class;
 	}
 
@@ -106,6 +106,7 @@ public class JakeBuildBase {
 	@JakeDoc("Display all available actions defined in this build.")
 	public void help() {
 		JakeLog.info("Available action(s) for build '" + this.getClass().getName() + "' : " );
+		JakeLog.offset(2);
 		final List<ActionDescription> list = new LinkedList<JakeBuildBase.ActionDescription>();
 		for (final Method method : this.getClass().getMethods()) {
 
@@ -132,6 +133,14 @@ public class JakeBuildBase {
 			list.add(actionDescription);
 		}
 		ActionDescription.log(list);
+		JakeLog.offset(-2);
+		JakeLog.nextLine();
+		JakeLog.info("Standard options for this build : ");
+		JakeLog.nextLine();
+		JakeLog.offset(2);
+		final JakeOptions options = JakeUtilsReflect.newInstance(this.optionClass());
+		JakeLog.info("", options.help());
+		JakeLog.offset(-2);
 	}
 
 	private static class ActionDescription implements Comparable<ActionDescription> {
@@ -182,9 +191,9 @@ public class JakeBuildBase {
 					JakeLog.info("From " + actionDescription.declaringClass.getName());
 					currentDecClass = actionDescription.declaringClass;
 				}
-				JakeLog.increaseOffset(1);
+				JakeLog.offset(1);
 				actionDescription.log();
-				JakeLog.increaseOffset(-1);
+				JakeLog.offset(-1);
 			}
 			JakeLog.nextLine();
 		}

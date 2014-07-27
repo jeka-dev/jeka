@@ -44,6 +44,7 @@ class ProjectBuilder {
 		if (this.hasBuildSource()) {
 			this.compileBuild(compileClasspath);
 		}
+		JakeLog.nextLine();
 		final boolean result = this.launch(compileClasspath, actions);
 		final long durationMillis = (System.nanoTime() - start)/ 1000000;
 		final float duration = durationMillis / 1000f;
@@ -54,7 +55,6 @@ class ProjectBuilder {
 			JakeLog.info("Build failed in " + duration + " seconds.");
 		}
 		return result;
-
 	}
 
 	private boolean hasBuildSource() {
@@ -130,10 +130,9 @@ class ProjectBuilder {
 		JakeLog.info("Use build class '" + buildClass.getCanonicalName()
 				+ "' with methods : "
 				+ JakeUtilsIterable.toString(methods, ", ") + ".");
-		JakeLog.info("Using options :");
-		final String optionDesc = JakeUtilsReflect.newInstance(
-				build.optionClass()).toString();
-		JakeLog.info(optionDesc);
+		final List<String> optionDesc = JakeUtilsReflect.newInstance(
+				build.optionClass()).toStrings();
+		JakeLog.info("", optionDesc);
 
 		JakeLog.nextLine();
 
