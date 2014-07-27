@@ -58,6 +58,12 @@ public class JakeLog {
 		}
 	}
 
+	public static void info(Iterable<String> lines) {
+		for (final String line : lines) {
+			infoWriter.println(line);
+		}
+	}
+
 
 	public static void warn(String message) {
 		flush();

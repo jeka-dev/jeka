@@ -105,6 +105,10 @@ public class JakeBuildBase {
 
 	@JakeDoc("Display all available actions defined in this build.")
 	public void help() {
+		JakeLog.info("Usage: jake [actions] [-OoptionName=value...] [-DsystemPropName=value...]");
+		JakeLog.info("When no action specified, then 'default' action is processed.");
+		JakeLog.info("Ex: jake javadoc compile -Overbose=true -Oother=xxx -DmyProp=Xxxx");
+		JakeLog.nextLine();
 		JakeLog.info("Available action(s) for build '" + this.getClass().getName() + "' : " );
 		JakeLog.offset(2);
 		final List<ActionDescription> list = new LinkedList<JakeBuildBase.ActionDescription>();
@@ -135,11 +139,11 @@ public class JakeBuildBase {
 		ActionDescription.log(list);
 		JakeLog.offset(-2);
 		JakeLog.nextLine();
-		JakeLog.info("Standard options for this build : ");
+		JakeLog.info("Standard options for this build class : ");
 		JakeLog.nextLine();
 		JakeLog.offset(2);
 		final JakeOptions options = JakeUtilsReflect.newInstance(this.optionClass());
-		JakeLog.info("", options.help());
+		JakeLog.info(options.help());
 		JakeLog.offset(-2);
 	}
 

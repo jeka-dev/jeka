@@ -15,7 +15,7 @@ public class JakeOptions {
 
 	protected static JakeOptions INSTANCE = new JakeOptions();
 
-	private final Map<String, String> nonStandardOptions = new HashMap<String, String>();
+	private final Map<String, String> freeOptions = new HashMap<String, String>();
 
 	@JakeOption(defaultValue="false", value="Set it to true to log more details.")
 	private boolean verbose;
@@ -24,10 +24,17 @@ public class JakeOptions {
 	private boolean silent;
 
 	protected JakeOptions() {
-		this.init(augmentWithSystemProps(OptionStore.options));
-	}
 
-	private void init(Map<String, String> props) {
+		// The string form options are stored in a static field of OptionStore class.
+		// The static field is supposed to be populated prior this class is
+		// invoked.
+
+		// To make it possible to pass options without populating OptionStore first,
+		// we can use system properties. Only system property prefixed with 'jake.'
+		// will be taken in account. Example: -Djake.verbose=true will set the option verbose=true.
+		final Map<String, String> props = augmentWithSystemProps(OptionStore.options);
+
+		// Field are populated using reflection.
 		final List<Field> fields = JakeUtilsReflect.getAllDeclaredField(this.getClass(), JakeOption.class);
 		final Set<String> names = new HashSet<String>();
 		for (final Field field : fields) {
@@ -38,7 +45,7 @@ public class JakeOptions {
 			final boolean present = props.containsKey(name);
 			String stringValue = present ? props.get(name) : option.defaultValue();
 
-			// Special case for boolean
+			// Special case for boolean : '-Osilent' is equivalent to '-Osilent=true'
 			if (type.equals(Boolean.class) && present && stringValue == null) {
 				stringValue = "true";
 			}
@@ -56,15 +63,38 @@ public class JakeOptions {
 			}
 			JakeUtilsReflect.setFieldValue(this, field, value);
 		}
-		this.nonStandardOptions.clear();
+		this.freeOptions.clear();
 		for (final Map.Entry<String, String> entry : props.entrySet()) {
 			if (!names.contains(entry.getKey())) {
-				this.nonStandardOptions.put(entry.getKey(), entry.getValue());
+				this.freeOptions.put(entry.getKey(), entry.getValue());
 			}
 		}
+	}
+
+
+	private static Map<String, String> augmentWithSystemProps(Map<String,String> map) {
+		final Map<String, String> result = new HashMap<String, String>(map);
+		for (final Object name : System.getProperties().keySet()) {
+			final String value = System.getProperty(name.toString());
+			if (name.toString().startsWith("jake.")) {
+				result.put(name.toString().substring(5), value);
+			}
+		}
+		return result;
 
 	}
 
+	public static boolean isVerbose() {
+		return INSTANCE.verbose;
+	}
+
+	public static boolean isSlent() {
+		return INSTANCE. silent;
+	}
+
+	/**
+	 * Returns a multi-line text standing the current option values.
+	 */
 	public List<String> toStrings() {
 		final List<String> list = new LinkedList<String>();
 		final List<Field> fields = JakeUtilsReflect.getAllDeclaredField(this.getClass(), JakeOption.class);
@@ -76,9 +106,9 @@ public class JakeOptions {
 		}
 		builder.delete(builder.length()-2, builder.length()-1);
 		list.add(builder.toString() );
-		if (!nonStandardOptions.isEmpty()) {
+		if (!freeOptions.isEmpty()) {
 			builder = new StringBuilder("Free options : ");
-			for (final Map.Entry<String, String> entry : nonStandardOptions.entrySet()) {
+			for (final Map.Entry<String, String> entry : freeOptions.entrySet()) {
 				builder.append(entry.getKey()).append("=").append(entry.getValue()).append(", ");
 			}
 			builder.delete(builder.length()-2, builder.length()-1);
@@ -87,6 +117,9 @@ public class JakeOptions {
 		return list;
 	}
 
+	/**
+	 * Returns a multi-line text standing for the descriptions of the available options.
+	 */
 	public List<String> help() {
 		final List<String> result = new LinkedList<String>();
 		final List<Field> fields = JakeUtilsReflect.getAllDeclaredField(this.getClass(), JakeOption.class);
@@ -107,29 +140,5 @@ public class JakeOptions {
 		}
 		return result;
 	}
-
-	private static Map<String, String> augmentWithSystemProps(Map<String,String> map) {
-		final Map<String, String> result = new HashMap<String, String>(map);
-		for (final Object name : System.getProperties().keySet()) {
-			final String value = System.getProperty(name.toString());
-			if (name.toString().startsWith("jake.")) {
-				result.put(name.toString().substring(5), value);
-			}
-		}
-		return result;
-
-	}
-
-
-	public static boolean isVerbose() {
-		return INSTANCE.verbose;
-	}
-
-	public static boolean isSlent() {
-		return INSTANCE. silent;
-	}
-
-
-
 
 }
