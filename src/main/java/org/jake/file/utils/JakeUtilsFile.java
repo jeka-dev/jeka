@@ -15,6 +15,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -539,20 +541,23 @@ public class JakeUtilsFile {
 	}
 
 	public static String readResource(String resourcePath) {
-		final InputStream is = JakeUtilsFile.class.getClassLoader().getResourceAsStream(resourcePath);
+		final InputStream is = JakeUtilsFile.class.getClassLoader()
+				.getResourceAsStream(resourcePath);
 		return toLine(is);
 	}
 
 	public static String readResourceIfExist(String resourcePath) {
-		final InputStream is = JakeUtilsFile.class.getClassLoader().getResourceAsStream(resourcePath);
+		final InputStream is = JakeUtilsFile.class.getClassLoader()
+				.getResourceAsStream(resourcePath);
 		if (is == null) {
 			return null;
 		}
 		return toLine(is);
 	}
 
-	public static String toLine(InputStream in)	{
-		final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+	public static String toLine(InputStream in) {
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(
+				in));
 		final StringBuilder out = new StringBuilder();
 		final String newLine = System.getProperty("line.separator");
 		String line;
@@ -567,9 +572,10 @@ public class JakeUtilsFile {
 		return out.toString();
 	}
 
-	public static List<String> toLines(InputStream in)	{
+	public static List<String> toLines(InputStream in) {
 		final List<String> result = new LinkedList<String>();
-		final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(
+				in));
 		String line;
 		try {
 			while ((line = reader.readLine()) != null) {
@@ -577,6 +583,46 @@ public class JakeUtilsFile {
 			}
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
+		}
+		return result;
+	}
+
+	public static String createChecksum(File file) {
+		InputStream fis;
+		try {
+			fis = new FileInputStream(file);
+		} catch (final FileNotFoundException e) {
+			throw new IllegalArgumentException(file.getPath() + " not found.", e);
+		}
+
+		final byte[] buffer = new byte[1024];
+		MessageDigest complete;
+		try {
+			complete = MessageDigest.getInstance("MD5");
+		} catch (final NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+		int numRead;
+		do {
+			try {
+				numRead = fis.read(buffer);
+			} catch (final IOException e) {
+				throw new RuntimeException(e);
+			}
+			if (numRead > 0) {
+				complete.update(buffer, 0, numRead);
+			}
+		} while (numRead != -1);
+		try {
+			fis.close();
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+		final byte[] bytes = complete.digest();
+		String result = "";
+		for (final byte element : bytes) {
+			result += Integer.toString((element & 0xff) + 0x100, 16).substring(
+					1);
 		}
 		return result;
 	}

@@ -6,6 +6,7 @@ import java.util.zip.Deflater;
 import org.jake.JakeDoc;
 import org.jake.JakeLog;
 import org.jake.file.JakeZip;
+import org.jake.file.utils.JakeUtilsFile;
 
 public class JakeBuildJar extends JakeBuildJava implements JakeJarModule {
 
@@ -38,8 +39,14 @@ public class JakeBuildJar extends JakeBuildJava implements JakeJarModule {
 		return buildOuputDir(jarName() + "-test-sources.jar");
 	}
 
+
+	public File fatJarFile() {
+		return buildOuputDir(jarName() + "-fat.jar");
+	}
+
 	@JakeDoc({	"Create jar file containing the binaries, along others containing sources, test binaries and test sources.",
-	"The jar containing the binary is the one that will be used as a depe,dence for other project."})
+		"The jar containing the binary is the one that will be used as a depe,dence for other project.",
+	"This method has to be invoked after compile, tests and recourses processed."})
 	public void jar() {
 		JakeLog.startAndNextLine("Packaging as jar");
 		final JakeZip base = JakeZip.of(classDir());
@@ -55,16 +62,29 @@ public class JakeBuildJar extends JakeBuildJava implements JakeJarModule {
 		JakeLog.done();
 	}
 
+	@JakeDoc("Create jar file containing the binaries for itself and all its compile and runtime dependencies.")
 	public void fatJar() {
-		final File fatJarFile = buildOuputDir(jarName() + "-fat.jar");
-		JakeLog.info("Creating file : " + fatJarFile.getPath());
-		JakeZip.of(classDir()).merge(dependencyPath().runtime()).create(fatJarFile, zipLevel());
+		JakeLog.info("Creating file : " + fatJarFile().getPath());
+		JakeZip.of(classDir()).merge(dependencyPath().runtime()).create(fatJarFile(), zipLevel());
 	}
 
+	@JakeDoc("Do clean, compile, test, process resources and then make jar.")
 	@Override
 	public void doDefault() {
 		super.doDefault();
 		jar();
+	}
+
+	@JakeDoc("Create MD5 check sum for both regular and fat jar files.")
+	public void checksum() {
+		final File file = buildOuputDir(jarName() + ".md5");
+		JakeLog.info("Creating file : " + file);
+		JakeUtilsFile.writeString(file, JakeUtilsFile.createChecksum(jarFile()), false);
+		if (fatJarFile().exists()) {
+			final File fatSum = buildOuputDir(jarName() + "-fat" + ".md5");
+			JakeLog.info("Creating file : " + fatSum);
+			JakeUtilsFile.writeString(fatSum, JakeUtilsFile.createChecksum(fatJarFile()), false);
+		}
 	}
 
 	public static void main(String[] args) {

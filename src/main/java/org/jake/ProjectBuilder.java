@@ -30,15 +30,39 @@ class ProjectBuilder {
 
 	private static final String DEFAULT_JAVA_SOURCE = "src/main/java";
 
-	private final File root;
+	private final File moduleBaseDir;
 
-	public ProjectBuilder(File root) {
+	private final String moduleRelativePath;
+
+	/**
+	 * Create a module builder where is specified the base directory of the module along
+	 * its relative path to the 'root' module.
+	 * The Relative path is used to display the module under build
+	 */
+	public ProjectBuilder(File buildBaseParentDir, File moduleBaseDir) {
 		super();
-		this.root = root;
+		this.moduleBaseDir = moduleBaseDir;
+		this.moduleRelativePath = JakeUtilsFile.getRelativePath(buildBaseParentDir, moduleBaseDir);
 	}
 
-	public boolean build(Iterable<String> actions) {
+	public ProjectBuilder(File moduleBaseDir) {
+		super();
+		this.moduleBaseDir = moduleBaseDir;
+		this.moduleRelativePath = moduleBaseDir.getName();
+	}
+
+
+
+	public boolean build(Iterable<String> methods) {
 		final long start = System.nanoTime();
+
+		final String pattern = "-";
+		final String intro = "Building module : " + moduleRelativePath;
+		JakeLog.info(JakeUtilsString.repeat(pattern, intro.length() ));
+		JakeLog.info(intro);
+		JakeLog.info(JakeUtilsString.repeat(pattern, intro.length() ));
+		JakeLog.nextLine();
+
 		final Iterable<File> buildClasspath = this
 				.resolveBuildCompileClasspath();
 
@@ -48,19 +72,19 @@ class ProjectBuilder {
 			JakeLog.info("No specific build class provided, will use default one (Specific build Java sources are supposed to be in [Project dir]/build/spec directory)." );
 		}
 		JakeLog.nextLine();
-		final boolean result = this.launch(buildClasspath, actions);
-		final float duration = JakeUtilsTime.durationInSeconds(start);
+		final boolean result = this.launch(buildClasspath, methods);
 
+		final float duration = JakeUtilsTime.durationInSeconds(start);
 		if (result) {
-			JakeLog.info("Build success in " + duration + " seconds.");
+			JakeLog.info("Module " + moduleRelativePath + " processed with success in " + duration + " seconds.");
 		} else {
-			JakeLog.info("Build failed in " + duration + " seconds.");
+			JakeLog.info("Module " + moduleRelativePath + " failed after " + duration + " seconds.");
 		}
 		return result;
 	}
 
 	private boolean hasBuildSource() {
-		final File buildSource = new File(root, BUILD_SOURCE_DIR);
+		final File buildSource = new File(moduleBaseDir, BUILD_SOURCE_DIR);
 		if (!buildSource.exists()) {
 			return false;
 		}
@@ -68,7 +92,7 @@ class ProjectBuilder {
 	}
 
 	private void compileBuild(Iterable<File> classpath) {
-		final JakeDirView buildSource = JakeDirView.of(new File(root,
+		final JakeDirView buildSource = JakeDirView.of(new File(moduleBaseDir,
 				BUILD_SOURCE_DIR));
 		if (!buildSource.exists()) {
 			throw new IllegalStateException(
@@ -79,7 +103,7 @@ class ProjectBuilder {
 		final JakeJavaCompiler javaCompilation = new JakeJavaCompiler();
 		javaCompilation.addSourceFiles(buildSource.include("**/*.java"));
 		javaCompilation.setClasspath(classpath);
-		final File buildBinDir = new File(root, BUILD_BIN_DIR);
+		final File buildBinDir = new File(moduleBaseDir, BUILD_BIN_DIR);
 		if (!buildBinDir.exists()) {
 			buildBinDir.mkdirs();
 		}
@@ -97,7 +121,7 @@ class ProjectBuilder {
 	@SuppressWarnings({ "unchecked" })
 	private boolean launch(Iterable<File> compileClasspath,
 			Iterable<String> actions) {
-		final File buildBin = new File(root, BUILD_BIN_DIR);
+		final File buildBin = new File(moduleBaseDir, BUILD_BIN_DIR);
 		final Iterable<File> runtimeClassPath = JakeUtilsIterable.concatToList(
 				buildBin, compileClasspath);
 		final URLClassLoader classLoader = JakeUtilsClassloader.createFrom(
@@ -170,7 +194,6 @@ class ProjectBuilder {
 			JakeLog.flush();
 			JakeLog.nextLine();
 		}
-		JakeLog.nextLine();
 		return true;
 	}
 
@@ -217,7 +240,7 @@ class ProjectBuilder {
 	}
 
 	private String defaultBuildClassName() {
-		if (!new File(root, DEFAULT_JAVA_SOURCE).exists()) {
+		if (!new File(moduleBaseDir, DEFAULT_JAVA_SOURCE).exists()) {
 			return null;
 		}
 		return JakeBuildJar.class.getName();
