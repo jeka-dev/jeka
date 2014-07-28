@@ -18,6 +18,7 @@ import org.jake.java.utils.JakeUtilsClassloader;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
+import org.jake.utils.JakeUtilsTime;
 
 class ProjectBuilder {
 
@@ -38,16 +39,17 @@ class ProjectBuilder {
 
 	public boolean build(Iterable<String> actions) {
 		final long start = System.nanoTime();
-		final Iterable<File> compileClasspath = this
+		final Iterable<File> buildClasspath = this
 				.resolveBuildCompileClasspath();
 
 		if (this.hasBuildSource()) {
-			this.compileBuild(compileClasspath);
+			this.compileBuild(buildClasspath);
+		} else {
+			JakeLog.info("No specific build class provided, will use default one (Specific build Java sources are supposed to be in [Project dir]/build/spec directory)." );
 		}
 		JakeLog.nextLine();
-		final boolean result = this.launch(compileClasspath, actions);
-		final long durationMillis = (System.nanoTime() - start)/ 1000000;
-		final float duration = durationMillis / 1000f;
+		final boolean result = this.launch(buildClasspath, actions);
+		final float duration = JakeUtilsTime.durationInSeconds(start);
 
 		if (result) {
 			JakeLog.info("Build success in " + duration + " seconds.");
@@ -60,8 +62,6 @@ class ProjectBuilder {
 	private boolean hasBuildSource() {
 		final File buildSource = new File(root, BUILD_SOURCE_DIR);
 		if (!buildSource.exists()) {
-			JakeLog.info(buildSource.getAbsolutePath()
-					+ " directory not exists.");
 			return false;
 		}
 		return true;
@@ -84,10 +84,11 @@ class ProjectBuilder {
 			buildBinDir.mkdirs();
 		}
 		javaCompilation.setOutputDirectory(buildBinDir);
-		JakeLog.start("Compiling build sources to "
-				+ buildBinDir.getAbsolutePath());
+		JakeLog.info("Compiling build sources to "
+				+ buildBinDir.getAbsolutePath() + "...");
+		JakeLog.info("using classpath " + System.getProperty("java.class.path"));
 		final boolean result = javaCompilation.compile();
-		JakeLog.done();
+		JakeLog.info("Done");
 		if (result == false) {
 			JakeLog.error("Build script can't be compiled.");
 		}

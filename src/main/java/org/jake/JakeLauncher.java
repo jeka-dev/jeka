@@ -13,6 +13,10 @@ public class JakeLauncher {
 
 	public static void main(String[] args) {
 		displayIntro();
+		JakeLog.info("Java Home : " + System.getProperty("java.home"));
+		JakeLog.info("Java Version : " + System.getProperty("java.version")+ ", " + System.getProperty("java.vendor"));
+		JakeLog.info("Jake class path : " + System.getProperty("java.class.path"));
+		JakeLog.nextLine();
 		OptionStore.options = extractOptions(args);
 		defineSystemProps(args);
 		final List<String> actions = extractAcions(args);
@@ -84,7 +88,7 @@ public class JakeLauncher {
 		JakeLog.info(JakeUtilsString.repeat(" ", lenght) + "The 100% Java build system.");
 		final String version = JakeUtilsFile.readResourceIfExist("org/jake/version.txt");
 		if (version != null) {
-			JakeLog.info(JakeUtilsString.repeat(" ", 70) + "Version : " + version);
+			JakeLog.info(JakeUtilsString.repeat(" ", lenght) + "Version : " + version);
 		}
 		JakeLog.nextLine();
 	}
