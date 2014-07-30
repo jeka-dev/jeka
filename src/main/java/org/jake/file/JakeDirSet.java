@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.Deflater;
 
+import org.jake.utils.JakeUtilsIterable;
+
 public class JakeDirSet implements Iterable<JakeDir> {
 
 	private final List<JakeDir> dirViews;
@@ -18,6 +20,11 @@ public class JakeDirSet implements Iterable<JakeDir> {
 		}
 		this.dirViews = dirs;
 	}
+
+	public static final JakeDirSet of(Iterable<JakeDir> dirs) {
+		return new JakeDirSet(JakeUtilsIterable.toList(dirs));
+	}
+
 
 	public static final JakeDirSet of(JakeDir...dirViews) {
 		return new JakeDirSet(Arrays.asList(dirViews));
