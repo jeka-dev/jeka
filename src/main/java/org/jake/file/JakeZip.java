@@ -32,11 +32,11 @@ public class JakeZip {
 		return new JakeZip(Arrays.asList( fileOrDirs));
 	}
 	
-	public static JakeZip of(JakeDirView ...dirViews) {
+	public static JakeZip of(JakeDir ...dirViews) {
 		return new JakeZip(Arrays.asList(dirViews));
 	}
 	
-	public static JakeZip of(JakeDirViewSet ...dirViews) {
+	public static JakeZip of(JakeDirSet ...dirViews) {
 		return new JakeZip(Arrays.asList(dirViews));
 	}
 	
@@ -51,13 +51,13 @@ public class JakeZip {
 		return and(Arrays.asList(fileOrDirs));
 	}
 	
-	public JakeZip and(JakeDirView ...dirViews) {
-		return and(JakeDirViewSet.of(dirViews).listFiles());
+	public JakeZip and(JakeDir ...dirViews) {
+		return and(JakeDirSet.of(dirViews).listFiles());
 		
 	}
 	
-	public JakeZip and(JakeDirViewSet ...dirViews) {
-		return and(JakeDirViewSet.toFiles(dirViews));
+	public JakeZip and(JakeDirSet ...dirViews) {
+		return and(JakeDirSet.toFiles(dirViews));
 	}
 	
 	public JakeZip merge(List<File> archiveFiles) {
@@ -84,12 +84,12 @@ public class JakeZip {
 				} else {
 					JakeUtilsFile.addZipEntry(zos, file, file);
 				}
-			} else if (item instanceof JakeDirView) {
-				final JakeDirView dirView = (JakeDirView) item;
+			} else if (item instanceof JakeDir) {
+				final JakeDir dirView = (JakeDir) item;
 				addDirView(zos, dirView);
-			} else if (item instanceof JakeDirViewSet) {
-				final JakeDirViewSet dirViews = (JakeDirViewSet) item;
-				for (JakeDirView dirView : dirViews) {
+			} else if (item instanceof JakeDirSet) {
+				final JakeDirSet dirViews = (JakeDirSet) item;
+				for (JakeDir dirView : dirViews) {
 					addDirView(zos, dirView);
 				}
 			} else {
@@ -115,7 +115,7 @@ public class JakeZip {
 		}
 	}
 	
-	private void addDirView(ZipOutputStream zos, JakeDirView dirView) {
+	private void addDirView(ZipOutputStream zos, JakeDir dirView) {
 		if (!dirView.exists()) {
 			return;
 		}

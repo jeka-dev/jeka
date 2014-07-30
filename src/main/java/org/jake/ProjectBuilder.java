@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.jake.file.JakeDirView;
+import org.jake.file.JakeDir;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeBuildJar;
 import org.jake.java.JakeJavaCompiler;
@@ -21,6 +21,8 @@ import org.jake.utils.JakeUtilsString;
 import org.jake.utils.JakeUtilsTime;
 
 class ProjectBuilder {
+
+	private static final String DEFAULT_METHOD_NAME = "base";
 
 	private static final String BUILD_SOURCE_DIR = "build/spec";
 
@@ -76,9 +78,9 @@ class ProjectBuilder {
 
 		final float duration = JakeUtilsTime.durationInSeconds(start);
 		if (result) {
-			JakeLog.info("Module " + moduleRelativePath + " processed with success in " + duration + " seconds.");
+			JakeLog.info("--> Module " + moduleRelativePath + " processed with success in " + duration + " seconds.");
 		} else {
-			JakeLog.info("Module " + moduleRelativePath + " failed after " + duration + " seconds.");
+			JakeLog.info("--> Module " + moduleRelativePath + " failed after " + duration + " seconds.");
 		}
 		return result;
 	}
@@ -92,7 +94,7 @@ class ProjectBuilder {
 	}
 
 	private void compileBuild(Iterable<File> classpath) {
-		final JakeDirView buildSource = JakeDirView.of(new File(moduleBaseDir,
+		final JakeDir buildSource = JakeDir.of(new File(moduleBaseDir,
 				BUILD_SOURCE_DIR));
 		if (!buildSource.exists()) {
 			throw new IllegalStateException(
@@ -111,8 +113,9 @@ class ProjectBuilder {
 		JakeLog.info("Compiling build sources to "
 				+ buildBinDir.getAbsolutePath() + "...");
 		JakeLog.info("using classpath " + System.getProperty("java.class.path"));
+		final long start = System.nanoTime();
 		final boolean result = javaCompilation.compile();
-		JakeLog.info("Done");
+		JakeLog.info("Done in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
 		if (result == false) {
 			JakeLog.error("Build script can't be compiled.");
 		}
@@ -120,7 +123,7 @@ class ProjectBuilder {
 
 	@SuppressWarnings({ "unchecked" })
 	private boolean launch(Iterable<File> compileClasspath,
-			Iterable<String> actions) {
+			Iterable<String> methods) {
 		final File buildBin = new File(moduleBaseDir, BUILD_BIN_DIR);
 		final Iterable<File> runtimeClassPath = JakeUtilsIterable.concatToList(
 				buildBin, compileClasspath);
@@ -144,26 +147,20 @@ class ProjectBuilder {
 				.loadClass(classLoader, buildClassName);
 
 		final JakeBuildBase build = JakeUtilsReflect.newInstance(buildClass);
-		final List<String> methods = new LinkedList<String>();
-		for (final String action : actions) {
-			methods.add(action.equals("default") ? "doDefault" : action);
-		}
-		if (methods.isEmpty()) {
-			methods.add("doDefault");
-		}
+		JakeOptions.populateFields(build);
+
 
 		JakeLog.info("Use build class '" + buildClass.getCanonicalName()
 				+ "' with methods : "
 				+ JakeUtilsIterable.toString(methods, ", ") + ".");
-		final List<String> optionDesc = JakeUtilsReflect.newInstance(
-				build.optionClass()).toStrings();
-		JakeLog.info("", optionDesc);
-
+		if (JakeOptions.hasFieldOptions(buildClass)) {
+			JakeLog.info("With options : " + JakeOptions.fieldOptionsToString(build));
+		}
 		JakeLog.nextLine();
 
 		for (final String methodName : methods) {
 			final Method method;
-			final String actionIntro = "Action : " + methodName;
+			final String actionIntro = "Method : " + methodName;
 			JakeLog.info(actionIntro);
 			JakeLog.info(JakeUtilsString.repeat("-", actionIntro.length()));
 			try {
@@ -173,6 +170,7 @@ class ProjectBuilder {
 						+ "' found in class '" + buildClassName + "'. Skip.");
 				continue;
 			}
+			final long start = System.nanoTime();
 			try {
 				method.invoke(build);
 			} catch (final SecurityException e) {
@@ -189,7 +187,9 @@ class ProjectBuilder {
 				} else {
 					throw new RuntimeException(target);
 				}
-
+			} finally {
+				JakeLog.nextLine();
+				JakeLog.info("-> Method " + methodName + " executed in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
 			}
 			JakeLog.flush();
 			JakeLog.nextLine();

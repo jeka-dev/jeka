@@ -10,7 +10,7 @@ import org.jake.utils.JakeUtilsTime;
 public class Build extends JakeBuildJar {
 
 	public static void main(String[] args) {
-		new Build().doDefault();
+		new Build().base();
 	}
 
 	@Override
@@ -25,9 +25,8 @@ public class Build extends JakeBuildJar {
 	}
 
 	@Override
-	public void doDefault() {
-		help();
-		super.doDefault();
+	public void base() {
+		super.base();
 		distrib();
 	}
 

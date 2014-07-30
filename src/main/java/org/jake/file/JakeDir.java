@@ -8,73 +8,75 @@ import java.util.List;
 import org.jake.file.utils.JakeUtilsFile;
 
 /**
- * A directory that may be filtered or not. If there is no <code>Filter</code> than this stands 
- * simply for a directory. If a filter is defined on, than this stands for only a part of this directory, 
+ * A directory that may be filtered or not. If there is no <code>Filter</code> than this stands
+ * simply for a directory. If a filter is defined on, than this stands for only a part of this directory,
  * meaning that files or subfolder filtered are not part of this.
  * 
  * @author Jerome Angibaud
  */
-public class JakeDirView implements Iterable<File> {
+public class JakeDir implements Iterable<File> {
 
 	private final File base;
-	
+
 	private final JakeFileFilter filter;
 
-	public static JakeDirView of(File base) {
-		return new JakeDirView(base);
+	public static JakeDir of(File base) {
+		return new JakeDir(base);
 	}
-	
-	private JakeDirView(File base, JakeFileFilter filter) {
-		super();
+
+	private JakeDir(File base, JakeFileFilter filter) {
+		if (filter == null) {
+			throw new NullPointerException("filter can't be null.");
+		}
 		if (base.exists() && !base.isDirectory()) {
 			throw new IllegalArgumentException(base + " is not a directory.");
 		}
 		this.base = base;
 		this.filter = filter;
 	}
-	
-	private JakeDirView(File base) {
+
+	private JakeDir(File base) {
 		this(base, JakeFileFilter.ACCEPT_ALL);
 	}
 
-	public JakeDirView sub(String relativePath) {
-		File newBase = new File(base, relativePath);
-		
-		return new JakeDirView(newBase);
+	public JakeDir sub(String relativePath) {
+		final File newBase = new File(base, relativePath);
+
+		return new JakeDir(newBase);
 	}
-	
-	public JakeDirView createIfNotExist() {
+
+	public JakeDir createIfNotExist() {
 		if (!base.exists() ) {
 			base.mkdirs();
 		}
 		return this;
 	}
-	
+
 	public File file(String relativePath) {
 		return new File(base, relativePath);
 	}
-	
+
 	public int copyTo(File destinationDir) {
 		JakeUtilsFile.assertDir(destinationDir);
 		return JakeUtilsFile.copyDir(base, destinationDir, filter.toFileFilter(base), true);
 	}
-	
-	public int copyTo(JakeDirView destinationDir) {
+
+	public int copyTo(JakeDir destinationDir) {
 		return copyTo(destinationDir.root());
 	}
 
 	public File root() {
 		return base;
 	}
-	
+
 	public JakeFileFilter getFilter() {
 		return filter;
 	}
-	
+
 	public boolean exists() {
 		return base.exists();
 	}
-	
+
 	public String path() {
 		return base.getPath();
 	}
@@ -82,11 +84,11 @@ public class JakeDirView implements Iterable<File> {
 	public void zip(File zipFile, int compressLevel) {
 		JakeUtilsFile.zipDir(zipFile, compressLevel, base);
 	}
-	
-	public JakeDirView noFiltering() {
-		return new JakeDirView(base);
+
+	public JakeDir noFiltering() {
+		return new JakeDir(base);
 	}
-	
+
 	public boolean contains(File file) {
 		if (!this.isAncestorOf(file)) {
 			return false;
@@ -94,36 +96,36 @@ public class JakeDirView implements Iterable<File> {
 		final String relativePath = JakeUtilsFile.getRelativePath(base, file);
 		return this.filter.accept(relativePath);
 	}
-	
+
 	public boolean isAncestorOf(File file) {
 		return JakeUtilsFile.isAncestor(base, file);
 	}
-	
-	
-	public JakeDirView filter(JakeFileFilter filter) {
+
+
+	public JakeDir filter(JakeFileFilter filter) {
 		if (this.filter == JakeFileFilter.ACCEPT_ALL) {
-			return new JakeDirView(base, filter);
+			return new JakeDir(base, filter);
 		}
-		return new JakeDirView(base, this.filter.and(filter));
+		return new JakeDir(base, this.filter.and(filter));
 	}
-	
-	public JakeDirView include(String ... antPatterns) {
+
+	public JakeDir include(String ... antPatterns) {
 		return filter(JakeFileFilter.include(antPatterns));
 	}
-	
-	public JakeDirView exclude(String ... antPatterns) {
+
+	public JakeDir exclude(String ... antPatterns) {
 		return filter(JakeFileFilter.exclude(antPatterns));
 	}
-	
-	public JakeDirViewSet and(JakeDirView dirView) {
-		return JakeDirViewSet.of(this, dirView);
+
+	public JakeDirSet and(JakeDir dirView) {
+		return JakeDirSet.of(this, dirView);
 	}
-	
-	public JakeDirViewSet and(JakeDirViewSet dirViews) {
-		return JakeDirViewSet.of(this).and(dirViews);
+
+	public JakeDirSet and(JakeDirSet dirViews) {
+		return JakeDirSet.of(this).and(dirViews);
 	}
-	
-	
+
+
 	public List<File> listFiles() {
 		if (!base.exists()) {
 			throw new IllegalStateException("Folder " + base.getAbsolutePath() + " does nor exist.");
@@ -135,22 +137,22 @@ public class JakeDirView implements Iterable<File> {
 	public Iterator<File> iterator() {
 		return listFiles().iterator();
 	}
-	
+
 	public void print(PrintStream printStream) {
-		for (File file : this) {
+		for (final File file : this) {
 			printStream.println(file.getPath());
 		}
 	}
-	
+
 	public int fileCount(boolean includeFolder) {
 		return JakeUtilsFile.count(base, filter.toFileFilter(base), includeFolder);
 	}
-	
+
 	@Override
 	public String toString() {
 		return base.getPath() + ":" + filter;
 	}
-	
-	
-	
+
+
+
 }

@@ -36,6 +36,6 @@ public interface JakeJarModule {
 	/**
 	 * Returns the dependency resolver for this module.
 	 */
-	JakeJavaDependencyResolver dependencyPath();
+	JakeJavaDependencyResolver dependencyResolver();
 
 }

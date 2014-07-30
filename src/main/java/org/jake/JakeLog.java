@@ -5,8 +5,13 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.LinkedList;
+
+import org.jake.utils.JakeUtilsTime;
 
 public class JakeLog {
+
+	private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<LinkedList<Long>>();
 
 	private static OffsetWriter infoOffsetWriter = new OffsetWriter(new BufferedWriter(new OutputStreamWriter(System.out)));
 
@@ -26,6 +31,13 @@ public class JakeLog {
 		infoOffsetWriter.inc();
 		errorOffsetWriter.inc();
 		warnOffsetWriter.inc();
+		LinkedList<Long> times = START_TIMES.get();
+		if (times == null) {
+			times = new LinkedList<Long>();
+			START_TIMES.set(times);
+		}
+		times.push(System.nanoTime());
+
 	}
 
 	public static void startAndNextLine(String message) {
@@ -34,14 +46,21 @@ public class JakeLog {
 	}
 
 	public static void done() {
-		infoWriter.println("Done.");
-		infoOffsetWriter.dec();
-		errorOffsetWriter.dec();
-		warnOffsetWriter.dec();
+		doneMessage("Done");
 	}
 
 	public static void done(String message) {
-		infoWriter.println("Done : " + message);
+		doneMessage("Done : " + message);
+	}
+
+	private static void doneMessage(String message) {
+		final LinkedList<Long> times = START_TIMES.get();
+		if (times == null || times.isEmpty()) {
+			throw new IllegalStateException("This 'done' do no match to any 'start'. "
+					+"Please, use 'done' only to mention that the previous 'start' activity is done.");
+		}
+		final long start = times.poll();
+		infoWriter.println(message + " in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
 		infoOffsetWriter.dec();
 		errorOffsetWriter.dec();
 		warnOffsetWriter.dec();

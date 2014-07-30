@@ -16,10 +16,12 @@ public class JakeLauncher {
 		JakeLog.info("Java Home : " + System.getProperty("java.home"));
 		JakeLog.info("Java Version : " + System.getProperty("java.version")+ ", " + System.getProperty("java.vendor"));
 		JakeLog.info("Jake class path : " + System.getProperty("java.class.path"));
-		JakeLog.nextLine();
 		OptionStore.options = extractOptions(args);
+		JakeLog.info("Using global options : " + JakeOptions.fieldOptionsToString(JakeOptions.INSTANCE));
+		JakeLog.info("And free form options : " + JakeOptions.freeFormToString());
+		JakeLog.nextLine();
 		defineSystemProps(args);
-		final List<String> actions = extractAcions(args);
+		final List<String> actions = extractActions(args);
 		final ProjectBuilder projectBuilder = new ProjectBuilder(JakeUtilsFile.workingDir());
 		final boolean result = projectBuilder.build(actions);
 		if (!result) {
@@ -27,7 +29,7 @@ public class JakeLauncher {
 		}
 	}
 
-	private static List<String> extractAcions(String[] args) {
+	private static List<String> extractActions(String[] args) {
 		final List<String> result = new LinkedList<String>();
 		for (final String arg : args) {
 			if (!arg.startsWith("-")) {
@@ -55,12 +57,12 @@ public class JakeLauncher {
 	private static Map<String, String> extractOptions(String[] args) {
 		final Map<String, String> result = new HashMap<String, String>();
 		for (final String arg : args) {
-			if (arg.startsWith("-O")) {
+			if (arg.startsWith("-") && !arg.startsWith("-D")) {
 				final int equalIndex = arg.indexOf("=");
 				if (equalIndex <= -1) {
-					result.put(arg.substring(2), "");
+					result.put(arg.substring(1), null);
 				} else {
-					final String name = arg.substring(2, equalIndex);
+					final String name = arg.substring(1, equalIndex);
 					final String value = arg.substring(equalIndex+1);
 					result.put(name, value);
 				}

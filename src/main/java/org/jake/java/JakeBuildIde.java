@@ -43,14 +43,14 @@ public class JakeBuildIde extends JakeBuildBase {
 	}
 
 	@Override
-	public void doDefault() {
-		super.doDefault();
+	public void base() {
+		super.base();
 		test();
 		simpleJar();
 	}
 
 	public static void main(String[] args) {
-		new JakeBuildIde().doDefault();
+		new JakeBuildIde().base();
 	}
 
 	protected final FileFilter getProjectFileFilter() {

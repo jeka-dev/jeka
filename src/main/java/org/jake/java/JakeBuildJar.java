@@ -18,7 +18,6 @@ public class JakeBuildJar extends JakeBuildJava implements JakeJarModule {
 		return Deflater.DEFAULT_COMPRESSION;
 	}
 
-
 	@Override
 	public File jarFile() {
 		return buildOuputDir(jarName() + ".jar");
@@ -54,8 +53,10 @@ public class JakeBuildJar extends JakeBuildJava implements JakeJarModule {
 		base.create(jarFile(), zipLevel());
 		JakeLog.info("Creating file : " + jarSourceFile().getPath());
 		JakeZip.of(sourceDirs(), resourceDirs()).create(jarSourceFile(), zipLevel());
-		JakeLog.info("Creating file : " + jarTestFile().getPath());
-		JakeZip.of(testClassDir()).create(jarTestFile(), zipLevel());
+		if (!skipTests) {
+			JakeLog.info("Creating file : " + jarTestFile().getPath());
+			JakeZip.of(testClassDir()).create(jarTestFile(), zipLevel());
+		}
 		JakeLog.info("Creating file : " + jarTestSourceFile().getPath());
 		JakeZip.of(testSourceDirs(), testResourceDirs()).create(jarTestSourceFile(), zipLevel());
 
@@ -65,13 +66,13 @@ public class JakeBuildJar extends JakeBuildJava implements JakeJarModule {
 	@JakeDoc("Create jar file containing the binaries for itself and all its compile and runtime dependencies.")
 	public void fatJar() {
 		JakeLog.info("Creating file : " + fatJarFile().getPath());
-		JakeZip.of(classDir()).merge(dependencyPath().runtime()).create(fatJarFile(), zipLevel());
+		JakeZip.of(classDir()).merge(dependencyResolver().runtime()).create(fatJarFile(), zipLevel());
 	}
 
 	@JakeDoc("Do clean, compile, test, process resources and then make jar.")
 	@Override
-	public void doDefault() {
-		super.doDefault();
+	public void base() {
+		super.base();
 		jar();
 	}
 
@@ -88,7 +89,7 @@ public class JakeBuildJar extends JakeBuildJava implements JakeJarModule {
 	}
 
 	public static void main(String[] args) {
-		new JakeBuildJar().doDefault();
+		new JakeBuildJar().base();
 	}
 
 }

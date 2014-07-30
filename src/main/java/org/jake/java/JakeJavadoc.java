@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.jake.JakeOptions;
 import org.jake.JakeLog;
-import org.jake.file.JakeDirViewSet;
+import org.jake.file.JakeDirSet;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.utils.JakeUtilsClassloader;
 import org.jake.java.utils.JakeUtilsJdk;
@@ -21,7 +21,7 @@ public class JakeJavadoc {
 
 	private static final String JAVADOC_MAIN_CLASS_NAME = "com.sun.tools.javadoc.Main";
 
-	private final JakeDirViewSet srcDirs;
+	private final JakeDirSet srcDirs;
 
 	private final String extraArgs;
 
@@ -29,14 +29,14 @@ public class JakeJavadoc {
 
 	private final Iterable<File> classpath;
 
-	private JakeJavadoc(JakeDirViewSet srcDirs, Class<?> doclet, Iterable<File> classpath, String extraArgs) {
+	private JakeJavadoc(JakeDirSet srcDirs, Class<?> doclet, Iterable<File> classpath, String extraArgs) {
 		this.srcDirs = srcDirs;
 		this.extraArgs = extraArgs;
 		this.doclet = doclet;
 		this.classpath = classpath;
 	}
 
-	public static JakeJavadoc of(JakeDirViewSet sources) {
+	public static JakeJavadoc of(JakeDirSet sources) {
 		return new JakeJavadoc(sources, null, null, "");
 	}
 

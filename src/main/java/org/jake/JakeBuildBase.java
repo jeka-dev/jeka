@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.jake.file.JakeDirView;
+import org.jake.file.JakeDir;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
@@ -17,17 +17,19 @@ import org.jake.utils.JakeUtilsString;
  * Base project builder defining some commons tasks and utilities
  * necessary for any kind of project, regardless involved technologies.
  * 
- * @author Jerome Angibaud
+ * Classes inheriting from this one must provide a zero-argument constructor (can be private).
+ * 
+ * @author Djeang
  */
 public class JakeBuildBase {
 
-	protected static final File WORKING_DIR = JakeUtilsFile.canonicalFile(new File("."));
+	private File baseDir = JakeUtilsFile.workingDir();
 
 	protected JakeBuildBase() {
 	}
 
-	protected Class<? extends JakeOptions> optionClass() {
-		return JakeOptions.class;
+	void setBaseDir(File baseDir) {
+		this.baseDir = baseDir;
 	}
 
 	/**
@@ -67,19 +69,19 @@ public class JakeBuildBase {
 	 * The base directory for this project. All file/directory path are
 	 * resolved from this directory.
 	 */
-	protected JakeDirView baseDir() {
-		return JakeDirView.of(WORKING_DIR);
+	protected JakeDir baseDir() {
+		return JakeDir.of(baseDir);
 	}
 
 	protected File baseDir(String relativePath) {
-		return JakeDirView.of(WORKING_DIR).file(relativePath);
+		return baseDir().file(relativePath);
 	}
 
 	/**
 	 * The output directory where all the final and intermediate
 	 * artefacts are generated.
 	 */
-	protected JakeDirView buildOuputDir() {
+	protected JakeDir buildOuputDir() {
 		return baseDir().sub("build/output").createIfNotExist();
 	}
 
@@ -99,15 +101,15 @@ public class JakeBuildBase {
 	}
 
 	@JakeDoc("Conventional method standing for the default operations to perform.")
-	public void doDefault() {
+	public void base() {
 		clean();
 	}
 
 	@JakeDoc("Display all available actions defined in this build.")
 	public void help() {
-		JakeLog.info("Usage: jake [actions] [-OoptionName=value...] [-DsystemPropName=value...]");
+		JakeLog.info("Usage: jake [actions] [-optionName=value...] [-DsystemPropName=value...]");
 		JakeLog.info("When no action specified, then 'default' action is processed.");
-		JakeLog.info("Ex: jake javadoc compile -Overbose=true -Oother=xxx -DmyProp=Xxxx");
+		JakeLog.info("Ex: jake javadoc compile -verbose=true -other=xxx -DmyProp=Xxxx");
 		JakeLog.nextLine();
 		JakeLog.info("Available action(s) for build '" + this.getClass().getName() + "' : " );
 		JakeLog.offset(2);
@@ -142,8 +144,7 @@ public class JakeBuildBase {
 		JakeLog.info("Standard options for this build class : ");
 		JakeLog.nextLine();
 		JakeLog.offset(2);
-		final JakeOptions options = JakeUtilsReflect.newInstance(this.optionClass());
-		JakeLog.info(options.help());
+		JakeLog.info(JakeOptions.help(this.getClass()));
 		JakeLog.offset(-2);
 	}
 
@@ -155,7 +156,7 @@ public class JakeBuildBase {
 
 		public ActionDescription(Method method, String[] docs) {
 			super();
-			this.name = method.getName().equals("doDefault") ? "default" : method.getName();
+			this.name = method.getName();
 			this.docs = docs;
 			this.declaringClass = method.getDeclaringClass();
 		}
@@ -201,10 +202,5 @@ public class JakeBuildBase {
 			}
 			JakeLog.nextLine();
 		}
-
-
 	}
-
-
-
 }

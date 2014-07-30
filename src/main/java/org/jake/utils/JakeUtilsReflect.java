@@ -49,6 +49,7 @@ public final class JakeUtilsReflect {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T getFieldValue(Object object, Field field) {
+		setAccessibleIfNeeded(field);
 		try {
 			return (T) field.get(object);
 		} catch (final Exception e) {
@@ -268,6 +269,10 @@ public final class JakeUtilsReflect {
 		return null;
 	}
 
+	/**
+	 * Returns all fields declared in the class passed as argument or in its super classes annotated with
+	 * the supplied annotation.
+	 */
 	public static List<Field> getAllDeclaredField(Class<?> clazz, Class<? extends Annotation> annotationClass) {
 		final List<Field> result = new LinkedList<Field>();
 		for (final Field field : clazz.getDeclaredFields()) {

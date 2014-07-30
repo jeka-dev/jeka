@@ -503,10 +503,14 @@ public class JakeUtilsFile {
 
 	/**
 	 * Returns count of files contained recursively in the specified directory.
+	 * If the dir does not exist then it returns 0.
 	 */
 	public static int count(File dir, FileFilter fileFilter,
 			boolean includeFolders) {
 		int result = 0;
+		if (!dir.exists()) {
+			return 0;
+		}
 		for (final File file : dir.listFiles()) {
 			if (file.isFile() && !fileFilter.accept(file)) {
 				continue;

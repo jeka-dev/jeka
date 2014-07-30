@@ -11,8 +11,6 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface JakeOption {
 
-	String defaultValue() default "null";
-
 	String[] value();
 
 }

@@ -12,7 +12,7 @@ import javax.tools.ToolProvider;
 
 import org.jake.JakeException;
 import org.jake.JakeLog;
-import org.jake.file.JakeDirView;
+import org.jake.file.JakeDir;
 import org.jake.file.utils.JakeUtilsFile;
 
 
@@ -34,7 +34,7 @@ public final class JakeJavaCompiler {
 		this(getDefaultOrFail());
 	}
 
-	public void setOutputDirectory(JakeDirView dir) {
+	public void setOutputDirectory(JakeDir dir) {
 		setOutputDirectory(dir.root());
 	}
 

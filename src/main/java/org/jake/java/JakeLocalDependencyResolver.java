@@ -4,8 +4,8 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
-import org.jake.file.JakeDirView;
-import org.jake.file.JakeDirViewSet;
+import org.jake.file.JakeDir;
+import org.jake.file.JakeDirSet;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIterable;
 
@@ -36,7 +36,7 @@ public final class JakeLocalDependencyResolver extends JakeJavaDependencyResolve
 	}
 	
 	public static JakeLocalDependencyResolver standard(File libDirectory) {
-		final JakeDirView libDir = JakeDirView.of(libDirectory); 
+		final JakeDir libDir = JakeDir.of(libDirectory); 
 		return JakeLocalDependencyResolver
 			.compileAndRuntime(libDir.include("/*.jar") )
 			.withCompileOnly(  libDir.include("compile-only/*.jar"))
@@ -53,30 +53,30 @@ public final class JakeLocalDependencyResolver extends JakeJavaDependencyResolve
 	
 
 	@SuppressWarnings("unchecked")
-	public static JakeLocalDependencyResolver compileAndRuntime(JakeDirView dirView) {
+	public static JakeLocalDependencyResolver compileAndRuntime(JakeDir dirView) {
 		return new JakeLocalDependencyResolver(dirView.listFiles(), 
 				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static JakeLocalDependencyResolver compileAndRuntime(JakeDirViewSet dirViews) {
+	public static JakeLocalDependencyResolver compileAndRuntime(JakeDirSet dirViews) {
 		return new JakeLocalDependencyResolver(dirViews.listFiles(), 
 				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
 	}
 	
-	public JakeLocalDependencyResolver withRuntimeOnly(JakeDirViewSet dirViews) {
+	public JakeLocalDependencyResolver withRuntimeOnly(JakeDirSet dirViews) {
 		return withRuntimeOnly(dirViews.listFiles());
 	}
 	
-	public JakeLocalDependencyResolver withTest(JakeDirViewSet dirViews) {
+	public JakeLocalDependencyResolver withTest(JakeDirSet dirViews) {
 		return withTest(dirViews.listFiles());
 	}
 	
-	public JakeLocalDependencyResolver withCompileOnly(JakeDirViewSet dirViews) {
+	public JakeLocalDependencyResolver withCompileOnly(JakeDirSet dirViews) {
 		return withCompileOnly(dirViews.listFiles());
 	}
 	
-	public JakeLocalDependencyResolver withCompileAndRuntime(JakeDirViewSet dirViews) {
+	public JakeLocalDependencyResolver withCompileAndRuntime(JakeDirSet dirViews) {
 		return withCompileAndRuntime(dirViews.listFiles());
 	}
 	

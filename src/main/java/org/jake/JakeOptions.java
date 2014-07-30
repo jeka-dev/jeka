@@ -2,133 +2,148 @@ package org.jake;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
 
-public class JakeOptions {
+public final class JakeOptions {
 
-	protected static JakeOptions INSTANCE = new JakeOptions();
+	static final JakeOptions INSTANCE = new JakeOptions();
 
 	private final Map<String, String> freeOptions = new HashMap<String, String>();
 
-	@JakeOption(defaultValue="false", value="Set it to true to log more details.")
+	@JakeOption("Set it to true to log more details.")
 	private boolean verbose;
 
-	@JakeOption(defaultValue="false", value="Set it to true to turn off logs.")
+	@JakeOption("Set it to true to turn off logs.")
 	private boolean silent;
 
 	protected JakeOptions() {
 
 		// The string form options are stored in a static field of OptionStore class.
-		// The static field is supposed to be populated prior this class is
-		// invoked.
-
-		// To make it possible to pass options without populating OptionStore first,
-		// we can use system properties. Only system property prefixed with 'jake.'
-		// will be taken in account. Example: -Djake.verbose=true will set the option verbose=true.
-		final Map<String, String> props = augmentWithSystemProps(OptionStore.options);
+		// The static field is supposed to be populated prior this class is invoked.
+		freeOptions.putAll(OptionStore.options);
 
 		// Field are populated using reflection.
-		final List<Field> fields = JakeUtilsReflect.getAllDeclaredField(this.getClass(), JakeOption.class);
-		final Set<String> names = new HashSet<String>();
-		for (final Field field : fields) {
-			final String name = field.getName();
-			names.add(name);
-			final JakeOption option = field.getAnnotation(JakeOption.class);
-			final Class<?> type = field.getType();
-			final boolean present = props.containsKey(name);
-			String stringValue = present ? props.get(name) : option.defaultValue();
-
-			// Special case for boolean : '-Osilent' is equivalent to '-Osilent=true'
-			if (type.equals(Boolean.class) && present && stringValue == null) {
-				stringValue = "true";
-			}
-
-			final Object value;
-			if (stringValue.equals("null")) {
-				value = null;
-			} else {
-				try {
-					value = JakeUtilsString.parse(type, stringValue);
-				} catch(final IllegalArgumentException e) {
-					throw new JakeException("Option " + name + "=" + stringValue
-							+ " can't be parsed to type " + type.getName() + " : " + e.getMessage());
-				}
-			}
-			JakeUtilsReflect.setFieldValue(this, field, value);
-		}
-		this.freeOptions.clear();
-		for (final Map.Entry<String, String> entry : props.entrySet()) {
-			if (!names.contains(entry.getKey())) {
-				this.freeOptions.put(entry.getKey(), entry.getValue());
-			}
-		}
-	}
-
-
-	private static Map<String, String> augmentWithSystemProps(Map<String,String> map) {
-		final Map<String, String> result = new HashMap<String, String>(map);
-		for (final Object name : System.getProperties().keySet()) {
-			final String value = System.getProperty(name.toString());
-			if (name.toString().startsWith("jake.")) {
-				result.put(name.toString().substring(5), value);
-			}
-		}
-		return result;
-
+		populateFields(this, freeOptions);
 	}
 
 	public static boolean isVerbose() {
 		return INSTANCE.verbose;
 	}
 
-	public static boolean isSlent() {
+	public static boolean isSilent() {
 		return INSTANCE. silent;
+	}
+
+
+	public static boolean containsKey(String key) {
+		return INSTANCE.freeOptions.containsKey(key);
+	}
+
+	public static String get(String key) {
+		return INSTANCE.freeOptions.get(key);
+	}
+
+
+	/**
+	 * Set the field values according to the target object according the string found in props arguments.
+	 */
+	private static void populateFields(Object target, Map<String, String> props) {
+		for (final Field field : optionField(target.getClass())) {
+			final String name = field.getName();
+			final Class<?> type = field.getType();
+			final boolean present = props.containsKey(name);
+			if (present) {
+				String stringValue = props.get(name);
+
+				// Special case for boolean : '-silent' is equivalent to '-silent=true'
+				if ((type.equals(Boolean.class) || type.equals(boolean.class)) && present && stringValue == null) {
+					stringValue = "true";
+				}
+
+				final Object value;
+				if (stringValue == null || stringValue.equals("null")) {
+					value = null;
+				} else {
+					try {
+						value = JakeUtilsString.parse(type, stringValue);
+					} catch(final IllegalArgumentException e) {
+						throw new JakeException("Option " + name + "=" + stringValue
+								+ " can't be parsed to type " + type.getName() + " : " + e.getMessage());
+					}
+				}
+				JakeUtilsReflect.setFieldValue(target, field, value);
+			}
+		}
+	}
+
+	static void populateFields(JakeBuildBase build) {
+		populateFields(build, INSTANCE.freeOptions);
+	}
+
+	private static List<Field> optionField(Class<?> clazz) {
+		return JakeUtilsReflect.getAllDeclaredField(clazz, JakeOption.class);
 	}
 
 	/**
 	 * Returns a multi-line text standing the current option values.
 	 */
-	public List<String> toStrings() {
-		final List<String> list = new LinkedList<String>();
-		final List<Field> fields = JakeUtilsReflect.getAllDeclaredField(this.getClass(), JakeOption.class);
-		StringBuilder builder = new StringBuilder("Standard options : ");
-		for (final Field field : fields) {
+	static String fieldOptionsToString(Object target) {
+		final StringBuilder builder = new StringBuilder("");
+		for (final Field field : optionField(target.getClass())) {
 			final String name = field.getName();
-			final String value = JakeUtilsString.toString(JakeUtilsReflect.getFieldValue(this, name));
+			final String value = JakeUtilsString.toString(JakeUtilsReflect.getFieldValue(target, name));
 			builder.append(name).append("=").append(value).append(", ");
 		}
 		builder.delete(builder.length()-2, builder.length()-1);
-		list.add(builder.toString() );
-		if (!freeOptions.isEmpty()) {
-			builder = new StringBuilder("Free options : ");
-			for (final Map.Entry<String, String> entry : freeOptions.entrySet()) {
-				builder.append(entry.getKey()).append("=").append(entry.getValue()).append(", ");
-			}
-			builder.delete(builder.length()-2, builder.length()-1);
-			list.add(builder.toString());
+		return builder.toString();
+	}
+
+	static boolean hasFieldOptions(Class<?> clazz) {
+		return ! optionField(clazz).isEmpty();
+	}
+
+	static String freeFormToString() {
+		if (INSTANCE.freeOptions.isEmpty()) {
+			return "none";
 		}
-		return list;
+		final StringBuilder builder = new StringBuilder();
+		for (final Map.Entry<String, String> entry : INSTANCE.freeOptions.entrySet()) {
+			final Object value = entry.getValue();
+			if (value != null) {
+				builder.append(entry.getKey()).append("=").append(value);
+			} else {
+				builder.append(entry.getKey());
+			}
+			builder.append(", ");
+
+		}
+		builder.delete(builder.length()-2, builder.length()-1);
+		return builder.toString();
 	}
 
 	/**
 	 * Returns a multi-line text standing for the descriptions of the available options.
 	 */
-	public List<String> help() {
+	@SuppressWarnings("unchecked")
+	static List<String> help(Class<? extends JakeBuildBase> clazz) {
+		return JakeUtilsIterable.concatLists(doHelp(JakeOptions.class), doHelp(clazz));
+	}
+
+	private static List<String> doHelp(Class<?> clazz) {
 		final List<String> result = new LinkedList<String>();
-		final List<Field> fields = JakeUtilsReflect.getAllDeclaredField(this.getClass(), JakeOption.class);
-		for (final Field field : fields) {
+		final Object defaultObject = JakeUtilsReflect.newInstance(clazz);
+		for (final Field field : optionField(clazz)) {
 			final String name = field.getName();
 			final JakeOption option = field.getAnnotation(JakeOption.class);
 			final Class<?> type = field.getType();
-			final String defaultValue = option.defaultValue();
-			final String string = name +" (" + type.getSimpleName()+", default="+ defaultValue+") : ";
+			final Object defaultValue = JakeUtilsReflect.getFieldValue(defaultObject, field);
+			final String string = name + " (" + type.getSimpleName() + ", default= "+ stringOrNull(defaultValue) + ") : ";
 			result.add( string + option.value()[0] );
 			if (option.value().length > 1) {
 				final String margin = JakeUtilsString.repeat(" ", string.length());
@@ -139,6 +154,13 @@ public class JakeOptions {
 			result.add("");
 		}
 		return result;
+	}
+
+	private static String stringOrNull(Object object) {
+		if (object == null) {
+			return null;
+		}
+		return object.toString();
 	}
 
 }
