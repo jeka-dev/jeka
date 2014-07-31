@@ -38,7 +38,7 @@ public abstract class JakeJavaDependencyResolver {
 
 	public List<String> toStrings() {
 		final List<String> result = new LinkedList<String>();
-		result.add(this.getClass().getSimpleName());
+		result.add(this.getClass().getName());
 		final List<File> compileLibs = compile();
 		final List<File> runtimeLibs = runtime();
 		final List<File> testLibs = test();

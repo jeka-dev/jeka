@@ -10,26 +10,29 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.jake.JakeLog;
 import org.jake.file.JakeDir;
 import org.jake.file.JakeDirSet;
+import org.jake.java.eclipse.Lib.Scope;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class DotClasspath {
+class DotClasspath {
 
 	private final List<ClasspathEntry> classpathentries = new LinkedList<ClasspathEntry>();
 
 	private DotClasspath(List<ClasspathEntry> classpathentries) {
-		classpathentries.addAll(classpathentries);
+		this.classpathentries.addAll(classpathentries);
 	}
 
-	public DotClasspath from(File dotClasspathFile) {
-		return from(getDotClassPathAsDom(dotClasspathFile));
+	public static DotClasspath from(File dotClasspathFile) {
+		final Document document = getDotClassPathAsDom(dotClasspathFile);
+		return from(document);
 	}
 
-	public DotClasspath from(Document document) {
+	private static DotClasspath from(Document document) {
 		final NodeList nodeList = document.getElementsByTagName("classpathentry");
 		final List<ClasspathEntry> classpathEntries = new LinkedList<ClasspathEntry>();
 		for (int i = 0; i < nodeList.getLength(); i++) {
@@ -41,10 +44,10 @@ public class DotClasspath {
 	}
 
 	private static Document getDotClassPathAsDom(File classpathFile) {
-		final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		if (!classpathFile.exists()) {
-			throw new IllegalStateException(".classpath file not found.");
+			throw new IllegalStateException(classpathFile.getAbsolutePath() + " file not found.");
 		}
+		final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		try {
 			final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document doc;
@@ -71,12 +74,29 @@ public class DotClasspath {
 		return new Sources(JakeDirSet.of(prods), JakeDirSet.of(tests));
 	}
 
-	public List<Lib> libs(File baseFolder, Lib.ScopeSegregator libSegregator, Lib.ScopeSegregator conSegregator) {
-
+	public List<Lib> libs(File containersHome, File baseDir, Lib.ScopeSegregator libSegregator) {
+		final List<Lib> result = new LinkedList<Lib>();
+		for (final ClasspathEntry classpathEntry : classpathentries) {
+			if (classpathEntry.kind.equals(org.jake.java.eclipse.DotClasspath.ClasspathEntry.Kind.CON) ) {
+				final Scope scope = libSegregator.scoprOfCon(classpathEntry.path);
+				if (classpathEntry.path.startsWith(ClasspathEntry.JRE_CONTAINER_PREFIX)) {
+					continue;
+				}
+				for (final File file : classpathEntry.conAsFiles(baseDir, containersHome)) {
+					result.add(new Lib(file, scope));
+				}
+			} else if (classpathEntry.kind.equals(org.jake.java.eclipse.DotClasspath.ClasspathEntry.Kind.LIB)) {
+				final Scope scope = libSegregator.scopeOfLib(classpathEntry.path);
+				result.add(new Lib(classpathEntry.libAsFile(baseDir), scope));
+			}
+		}
+		return result;
 	}
 
 
 	private static class ClasspathEntry {
+
+		public final static String JRE_CONTAINER_PREFIX = "org.eclipse.jdt.launching.JRE_CONTAINER";
 
 		public enum Kind {
 			SRC, CON, LIB, UNKNOWN
@@ -116,8 +136,7 @@ public class DotClasspath {
 				kind = Kind.UNKNOWN;
 			}
 			final ClasspathEntry result = new ClasspathEntry(kind, path, excluding, including);
-			final Element attributesEl = (Element) classpathEntryEl.getElementsByTagName("attributes");
-			final NodeList nodeList = attributesEl.getChildNodes();
+			final NodeList nodeList = classpathEntryEl.getElementsByTagName("attributes");
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				final Element attributeEl = (Element) nodeList.item(i);
 				final String name = attributeEl.getAttribute("name");
@@ -133,13 +152,13 @@ public class DotClasspath {
 			}
 			final File dir = new File(baseDir, path);
 			JakeDir jakeDir = JakeDir.of(dir);
-			if (excluding != null) {
-				final String[] patterns = excluding.split("|");
+			if (!excluding.isEmpty()) {
+				final String[] patterns = excluding.split("\\|");
 				jakeDir = jakeDir.exclude(patterns);
 			}
-			if (including != null) {
-				final String[] patterns = including.split("|");
-				jakeDir = jakeDir.exclude(patterns);
+			if (!including.isEmpty()) {
+				final String[] patterns = including.split("\\|");
+				jakeDir = jakeDir.include(patterns);
 			}
 			return jakeDir;
 		}
@@ -148,17 +167,18 @@ public class DotClasspath {
 			return "true".equals(this.attributes.get("optional"));
 		}
 
-		public List<File> conAsFiles(File baseDir, File jakeHome) {
+		public List<File> conAsFiles(File baseDir, File containersDir) {
 			if (!this.kind.equals(Kind.CON)) {
 				throw new IllegalStateException("Can only get files from classpath entry of kind 'con'.");
 			}
-			final File containerDir = new File(jakeHome, "eclipse/containers");
-			if (!containerDir.exists()) {
+			if (!containersDir.exists()) {
+				JakeLog.warn("Eclipse containers directory " + containersDir.getPath() + " does not exists... ignogre.");
 				return Collections.emptyList();
 			}
 			final String folderName = path.replace('/', '_').replace('\\', '_');
-			final File conFolder = new File(containerDir, folderName);
+			final File conFolder = new File(containersDir, folderName);
 			if (!conFolder.exists()) {
+				JakeLog.warn("Eclipse containers directory " + conFolder.getPath() + " does not exists... ignogre.");
 				return Collections.emptyList();
 			}
 			final JakeDir dirView = JakeDir.of(conFolder).include("**/*.jar");
@@ -183,6 +203,5 @@ public class DotClasspath {
 		}
 
 	}
-
 
 }

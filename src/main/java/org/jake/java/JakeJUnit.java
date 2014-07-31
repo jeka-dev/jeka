@@ -73,8 +73,7 @@ public class JakeJUnit {
 
 		final URLClassLoader classLoader = JakeUtilsClassloader.createFrom(urls,
 				ClassLoader.getSystemClassLoader().getParent());
-		testClasses = getJunitTestClassesInClassLoader(classLoader, fileFilter,
-				true);
+		testClasses = getJunitTestClassesInClassLoader(classLoader, fileFilter);
 
 		final Collection<Class> effectiveClasses = new LinkedList<Class>();
 		for (final Class clazz : testClasses) {
@@ -164,10 +163,9 @@ public class JakeJUnit {
 
 	@SuppressWarnings("rawtypes")
 	public static Collection<Class> getJunitTestClassesInClassLoader(
-			URLClassLoader classLoader, FileFilter entryFilter,
-			boolean onlyFolder) {
-		final Iterable<Class> classes = JakeUtilsClassloader.getAllTopLevelClasses(
-				classLoader, entryFilter, onlyFolder);
+			URLClassLoader classLoader, FileFilter entryFilter) {
+		final Iterable<Class<?>> classes = JakeUtilsClassloader.getAllTopLevelClasses(
+				classLoader, entryFilter);
 		final List<Class> testClasses = new LinkedList<Class>();
 		if (isJunit4In(classLoader)) {
 			final Class<Annotation> testAnnotation = load(classLoader,

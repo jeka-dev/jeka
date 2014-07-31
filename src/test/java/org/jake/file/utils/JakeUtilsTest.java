@@ -11,11 +11,11 @@ import java.util.List;
 import org.jake.file.utils.JakeUtilsFile;
 import org.junit.Test;
 
-public class FileUtilsTest {
+public class JakeUtilsTest {
 
 	@Test
 	public void testFileOf() throws Exception {
-		URL sampleFileUrl = FileUtilsTest.class.getResource("samplefolder/subfolder/sample.txt");
+		URL sampleFileUrl = JakeUtilsTest.class.getResource("samplefolder/subfolder/sample.txt");
 		File sampleFile = new File(sampleFileUrl.toURI().getPath());
 		assertTrue(sampleFile.exists());
 		File sampleDir = sampleFile.getParentFile().getParentFile();

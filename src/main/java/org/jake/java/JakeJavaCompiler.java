@@ -66,6 +66,7 @@ public final class JakeJavaCompiler {
 		JakeLog.flush();
 		final boolean result = task.call();
 		JakeLog.flush();
+		System.err.flush();
 		return result;
 	}
 
@@ -76,6 +77,7 @@ public final class JakeJavaCompiler {
 		JakeLog.flush();
 		final boolean result = task.call();
 		JakeLog.flush();
+		System.err.flush();
 		if (!result) {
 			throw new JakeException("Compilation failure.");
 		}

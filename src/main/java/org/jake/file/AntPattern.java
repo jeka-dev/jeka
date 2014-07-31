@@ -24,7 +24,7 @@ import org.jake.utils.JakeUtilsString;
 
 
 /**
- * Stands for an Ant file pattern. These patterns are used to include or exclude files within a folder. 
+ * Stands for an Ant file pattern. These patterns are used to include or exclude files within a folder.
  * In a nutshell : <ul>
  * <li>'**' means any directory</li>
  * <li>'*'  means any sequence or 0 or more characters</li>
@@ -34,44 +34,44 @@ import org.jake.utils.JakeUtilsString;
  * See <a href="http://ant.apache.org/manual/dirtasks.html#patterns">Ant Pattern documentation</a>
  * 
  * <i><p>Part of this mapping code has been kindly borrowed from
- * <a href="http://ant.apache.org">Apache Ant</a> and 
+ * <a href="http://ant.apache.org">Apache Ant</a> and
  * <a href="https://github.com/spring-projects/spring-framework">Spring Framework</a></i>
  */
 class AntPattern  {
 
 	private static final char PATH_SEPARATOR_CHAR = '/';
-	
+
 	private static final String PATH_SEPARATOR = "" + PATH_SEPARATOR_CHAR;
-	
+
 	private final String pattern;
-	
+
 	private AntPattern(String pattern) {
 		this.pattern = normalize(pattern);
 	}
-	
+
 	public static AntPattern of(String pattern) {
 		return new AntPattern(pattern);
 	}
-	
+
 	public static AntPattern[] arrayOf(String ...patterns) {
 		final List<AntPattern> result = new ArrayList<AntPattern>(patterns.length);
-		for (String pattern : patterns) {
+		for (final String pattern : patterns) {
 			result.add(AntPattern.of(pattern));
 		}
 		return result.toArray(new AntPattern[0]);
 	}
 
-	
+
 	/**
 	 * Matches the given <code>path</code> against the given <code>pattern</code>.
 	 */
 	public boolean doMatch(String path) {
-		
+
 		// First clean path and pattern to remove leading '/', '.' or '\' characters
 		path = normalize(path);
-		
-		String[] pattDirs = JakeUtilsString.split(pattern, PATH_SEPARATOR);
-		String[] pathDirs = JakeUtilsString.split(path, PATH_SEPARATOR);
+
+		final String[] pattDirs = JakeUtilsString.split(pattern, PATH_SEPARATOR);
+		final String[] pathDirs = JakeUtilsString.split(path, PATH_SEPARATOR);
 
 		int pattIdxStart = 0;
 		int pattIdxEnd = pattDirs.length - 1;
@@ -80,7 +80,7 @@ class AntPattern  {
 
 		// Match all elements up to the first **
 		while (pattIdxStart <= pattIdxEnd && pathIdxStart <= pathIdxEnd) {
-			String patDir = pattDirs[pattIdxStart];
+			final String patDir = pattDirs[pattIdxStart];
 			if ("**".equals(patDir)) {
 				break;
 			}
@@ -112,11 +112,11 @@ class AntPattern  {
 			// String not exhausted, but pattern is. Failure.
 			return false;
 		}
-		
+
 
 		// up to last '**'
 		while (pattIdxStart <= pattIdxEnd && pathIdxStart <= pathIdxEnd) {
-			String patDir = pattDirs[pattIdxEnd];
+			final String patDir = pattDirs[pattIdxEnd];
 			if (patDir.equals("**")) {
 				break;
 			}
@@ -151,22 +151,22 @@ class AntPattern  {
 			}
 			// Find the pattern between padIdxStart & padIdxTmp in str between
 			// strIdxStart & strIdxEnd
-			int patLength = (patIdxTmp - pattIdxStart - 1);
-			int strLength = (pathIdxEnd - pathIdxStart + 1);
+			final int patLength = (patIdxTmp - pattIdxStart - 1);
+			final int strLength = (pathIdxEnd - pathIdxStart + 1);
 			int foundIdx = -1;
 
 			strLoop:
-			    for (int i = 0; i <= strLength - patLength; i++) {
-				    for (int j = 0; j < patLength; j++) {
-					    String subPat = pattDirs[pattIdxStart + j + 1];
-					    String subStr = pathDirs[pathIdxStart + i + j];
-					    if (!matchStrings(subPat, subStr)) {
-						    continue strLoop;
-					    }
-				    }
-				    foundIdx = pathIdxStart + i;
-				    break;
-			    }
+				for (int i = 0; i <= strLength - patLength; i++) {
+					for (int j = 0; j < patLength; j++) {
+						final String subPat = pattDirs[pattIdxStart + j + 1];
+						final String subStr = pathDirs[pathIdxStart + i + j];
+						if (!matchStrings(subPat, subStr)) {
+							continue strLoop;
+						}
+					}
+					foundIdx = pathIdxStart + i;
+					break;
+				}
 
 			if (foundIdx == -1) {
 				return false;
@@ -198,8 +198,8 @@ class AntPattern  {
 	 * pattern, or <code>false</code> otherwise.
 	 */
 	private static boolean matchStrings(String pattern, String str) {
-		char[] patArr = pattern.toCharArray();
-		char[] strArr = str.toCharArray();
+		final char[] patArr = pattern.toCharArray();
+		final char[] strArr = str.toCharArray();
 		int patIdxStart = 0;
 		int patIdxEnd = patArr.length - 1;
 		int strIdxStart = 0;
@@ -207,8 +207,8 @@ class AntPattern  {
 		char ch;
 
 		boolean containsStar = false;
-		for (int i = 0; i < patArr.length; i++) {
-			if (patArr[i] == '*') {
+		for (final char element : patArr) {
+			if (element == '*') {
 				containsStar = true;
 				break;
 			}
@@ -294,23 +294,23 @@ class AntPattern  {
 			}
 			// Find the pattern between padIdxStart & padIdxTmp in str between
 			// strIdxStart & strIdxEnd
-			int patLength = (patIdxTmp - patIdxStart - 1);
-			int strLength = (strIdxEnd - strIdxStart + 1);
+			final int patLength = (patIdxTmp - patIdxStart - 1);
+			final int strLength = (strIdxEnd - strIdxStart + 1);
 			int foundIdx = -1;
 			strLoop:
-			for (int i = 0; i <= strLength - patLength; i++) {
-				for (int j = 0; j < patLength; j++) {
-					ch = patArr[patIdxStart + j + 1];
-					if (ch != '?') {
-						if (ch != strArr[strIdxStart + i + j]) {
-							continue strLoop;
+				for (int i = 0; i <= strLength - patLength; i++) {
+					for (int j = 0; j < patLength; j++) {
+						ch = patArr[patIdxStart + j + 1];
+						if (ch != '?') {
+							if (ch != strArr[strIdxStart + i + j]) {
+								continue strLoop;
+							}
 						}
 					}
-				}
 
-				foundIdx = strIdxStart + i;
-				break;
-			}
+					foundIdx = strIdxStart + i;
+					break;
+				}
 
 			if (foundIdx == -1) {
 				return false;
@@ -330,7 +330,7 @@ class AntPattern  {
 
 		return true;
 	}
-	
+
 	private static String normalize(String pathOrPattern) {
 		if (pathOrPattern.startsWith(PATH_SEPARATOR)) {
 			pathOrPattern = pathOrPattern.substring(1);
@@ -345,8 +345,13 @@ class AntPattern  {
 		return pathOrPattern;
 	}
 
-	
-	
-	
+	@Override
+	public String toString() {
+		return pattern;
+	}
+
+
+
+
 
 }

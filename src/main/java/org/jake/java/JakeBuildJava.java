@@ -12,8 +12,9 @@ import org.jake.file.JakeDirSet;
 import org.jake.file.JakeFileFilter;
 import org.jake.file.JakeZip;
 import org.jake.file.utils.JakeUtilsFile;
-import org.jake.java.eclipse.JakeEclipse;
+import org.jake.java.utils.JakeUtilsClassloader;
 import org.jake.utils.JakeUtilsIterable;
+import org.jake.utils.JakeUtilsReflect;
 
 public class JakeBuildJava extends JakeBuildBase {
 
@@ -52,6 +53,10 @@ public class JakeBuildJava extends JakeBuildBase {
 
 	@JakeOption("Turn it on to skip tests.")
 	protected boolean skipTests;
+
+	@JakeOption({"You can force the dependencyResolver to use by specifying a class name. This class must be in Jake classpath.",
+	"You can either use a fully qulified class name or just its simple name."})
+	protected String dependencyResolver;
 
 	/**
 	 * Returns location of production source code.
@@ -121,11 +126,9 @@ public class JakeBuildJava extends JakeBuildBase {
 	protected JakeJavaDependencyResolver baseDependencyResolver() {
 		final File folder = baseDir(STD_LIB_PATH);
 		final JakeJavaDependencyResolver resolver;
+
 		if (folder.exists()) {
-			resolver = JakeLocalDependencyResolver
-					.standard(baseDir(STD_LIB_PATH));
-		} else if (JakeEclipse.isDotClasspathPresent(baseDir().root())) {
-			resolver = JakeEclipse.dependencyResolver(baseDir().root());
+			resolver = JakeLocalDependencyResolver.standard(baseDir(STD_LIB_PATH));
 		} else {
 			resolver = JakeLocalDependencyResolver.empty();
 		}
@@ -133,14 +136,29 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	/**
-	 * Returns the resolver finally used in this build. It is made of the
-	 * {@link #baseDependencyResolver()} augmented with extra-libs mentioned
+	 * Returns the resolver finally used in this build. Depending od the passed options,
+	 * It is made of the {@link #baseDependencyResolver()} augmented with extra-libs mentioned
 	 * in options <code>extraXxxxPath</code>.
 	 */
 	public final JakeJavaDependencyResolver dependencyResolver() {
 		if (cachedResolver == null) {
 			JakeLog.startAndNextLine("Resolving Dependencies ");
-			final JakeJavaDependencyResolver resolver = baseDependencyResolver();
+			final JakeJavaDependencyResolver resolver;
+			if (dependencyResolver != null) {
+				JakeLog.start("Looking for class named " + dependencyResolver);
+				final Class<? extends JakeJavaDependencyResolver> depClass =
+						JakeUtilsClassloader.loadFromSimpleName(JakeUtilsClassloader.current(),
+								dependencyResolver, JakeJavaDependencyResolver.class);
+				if (depClass == null) {
+					JakeLog.warn("Class " + dependencyResolver + " not found or it is not a " + JakeJavaDependencyResolver.class.getName() + ".");
+					resolver = baseDependencyResolver();
+				} else {
+					resolver = JakeUtilsReflect.newInstance(depClass);
+				}
+			} else {
+				resolver = baseDependencyResolver();
+			}
+
 			final JakeJavaDependencyResolver extraResolver = computeExtraPath(baseDir().root());
 			if (!extraResolver.isEmpty()) {
 				JakeLog.info("Using extra libs : ", extraResolver.toStrings());

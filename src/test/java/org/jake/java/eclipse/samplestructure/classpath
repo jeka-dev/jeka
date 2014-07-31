@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/main/java" excluding="**/.*|Anno.java"/>
+	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="lib" path="/target_plateform/jars/lombok.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="lib" path="/target_plateform/jars/json-simple-1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="/target_plateform/plugins/joda-time-1.6.2.jar" sourcepath="/target_plateform/plugins-src/joda-time-1.6-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="/target_plateform/plugins/guava-15.0.jar" sourcepath="/target_plateform/plugins-src/guava-15.0-sources.jar"/>
+	<classpathentry kind="lib" path="/target_plateform/jars/objenesis-2.1.jar" sourcepath="/target_plateform/lib-sources/objenesis-2.1-sources.jar"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>

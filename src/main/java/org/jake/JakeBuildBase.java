@@ -23,13 +23,13 @@ import org.jake.utils.JakeUtilsString;
  */
 public class JakeBuildBase {
 
-	private File baseDir = JakeUtilsFile.workingDir();
+	private File baseDirFile = JakeUtilsFile.workingDir();
 
 	protected JakeBuildBase() {
 	}
 
 	void setBaseDir(File baseDir) {
-		this.baseDir = baseDir;
+		this.baseDirFile = baseDir;
 	}
 
 	/**
@@ -70,10 +70,13 @@ public class JakeBuildBase {
 	 * resolved from this directory.
 	 */
 	protected JakeDir baseDir() {
-		return JakeDir.of(baseDir);
+		return JakeDir.of(baseDirFile);
 	}
 
 	protected File baseDir(String relativePath) {
+		if (relativePath.isEmpty()) {
+			return baseDirFile;
+		}
 		return baseDir().file(relativePath);
 	}
 

@@ -3,6 +3,7 @@ package org.jake.file;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,11 +19,16 @@ public class JakeDirSet implements Iterable<JakeDir> {
 		if (dirs == null) {
 			throw new NullPointerException("dirs can't be null.");
 		}
-		this.dirViews = dirs;
+		this.dirViews = Collections.unmodifiableList(dirs);
 	}
 
 	public static final JakeDirSet of(Iterable<JakeDir> dirs) {
 		return new JakeDirSet(JakeUtilsIterable.toList(dirs));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static final JakeDirSet empty() {
+		return new JakeDirSet(Collections.EMPTY_LIST);
 	}
 
 
@@ -99,6 +105,10 @@ public class JakeDirSet implements Iterable<JakeDir> {
 		return result;
 	}
 
+	public List<JakeDir> listJakeDir() {
+		return dirViews;
+	}
+
 	public List<File> listRoots() {
 		final List<File> result = new LinkedList<File>();
 		for(final JakeDir dirView : dirViews) {
@@ -132,6 +142,11 @@ public class JakeDirSet implements Iterable<JakeDir> {
 			result.addAll(dirViews.listFiles());
 		}
 		return result;
+	}
+
+	@Override
+	public String toString() {
+		return this.dirViews.toString();
 	}
 
 }
