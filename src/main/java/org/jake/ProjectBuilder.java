@@ -68,7 +68,6 @@ class ProjectBuilder {
 
 		final Iterable<File> buildClasspath = this
 				.resolveBuildCompileClasspath();
-		JakeLog.nextLine();
 		final boolean result = this.launch(buildClasspath, methods);
 
 		final float duration = JakeUtilsTime.durationInSeconds(start);
@@ -110,7 +109,7 @@ class ProjectBuilder {
 		JakeLog.info("using classpath " + System.getProperty("java.class.path"));
 		final long start = System.nanoTime();
 		final boolean result = javaCompilation.compile();
-		JakeLog.info("Done in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
+		JakeLog.info("Done in " + JakeUtilsTime.durationInSeconds(start) + " seconds.", "");
 		if (result == false) {
 			JakeLog.error("Build script can't be compiled.");
 		}
@@ -128,6 +127,7 @@ class ProjectBuilder {
 		JakeLog.info("Use build class '" + buildClass.getCanonicalName()
 				+ "' with methods : "
 				+ JakeUtilsIterable.toString(methods, ", ") + ".");
+		JakeLog.info("Using classpath : " + buildClasspath);
 		if (JakeOptions.hasFieldOptions(buildClass)) {
 			JakeLog.info("With options : " + JakeOptions.fieldOptionsToString(build));
 		}
@@ -222,6 +222,7 @@ class ProjectBuilder {
 			result.addAll(JakeUtilsFile.filesOf(extLibDir,
 					JakeUtilsFile.endingBy(".jar"), false));
 		}
+		result.addAll(JakeOptions.extraJakeClasspath());
 		return result;
 	}
 

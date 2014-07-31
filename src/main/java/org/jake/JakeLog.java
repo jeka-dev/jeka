@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 import org.jake.utils.JakeUtilsTime;
@@ -81,6 +82,10 @@ public class JakeLog {
 		for (final String line : lines) {
 			infoWriter.println(line);
 		}
+	}
+
+	public static void info(String ... lines) {
+		info(Arrays.asList(lines));
 	}
 
 

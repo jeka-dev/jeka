@@ -1,0 +1,9 @@
+- Clean the classloader management in ProjectBuilder. 
+  + For multi-module, we should reuse a generic classloader as much as possible to avoid memory leaks.
+  + build compile classpath should be the same as the build runtime classpath.
+  
+- Add sonar support.
+
+- Add APT support (annotation processing.) 
+
+- Add multi-module support

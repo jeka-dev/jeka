@@ -1,11 +1,14 @@
 package org.jake;
 
+import java.io.File;
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.jake.file.JakeDir;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
@@ -21,6 +24,13 @@ public final class JakeOptions {
 
 	@JakeOption("Set it to true to turn off logs.")
 	private boolean silent;
+
+	@JakeOption({"All jar files under [JAKE HOME]/ext, are part of Jake classpath. you can add libs to this folder or ",
+		"use this option to augment Jake classpath.",
+		"If it is a folder, then all jar files under this folders will be added to the classpath. If it is a single jar file, ",
+		"only this jar will be added. You can specify many folder/jar using ';'.",
+	"Exemple : -extraJakeLibs:/usr/java/libs/sonar;/usr/java/libs/apache/lucene.jar ."})
+	private String extraJakeLibs;
 
 	protected JakeOptions() {
 
@@ -47,6 +57,26 @@ public final class JakeOptions {
 
 	public static String get(String key) {
 		return INSTANCE.freeOptions.get(key);
+	}
+
+	public static List<File> extraJakeClasspath() {
+		if (INSTANCE.extraJakeLibs == null || INSTANCE.extraJakeLibs.trim().isEmpty()) {
+			return Collections.emptyList();
+		}
+		final String[] items = JakeUtilsString.split(INSTANCE.extraJakeLibs, ";");
+		final List<File> result = new LinkedList<File>();
+		for (final String item : items) {
+			final File file = new File(item.trim());
+			if (!file.exists()) {
+				throw new IllegalStateException("Extra jake libs " + file.getPath() + " can't be found.");
+			}
+			if (file.isDirectory()) {
+				result.addAll(JakeDir.of(file).include("**/*.jar", "**/*.zip").listFiles());
+			} else {
+				result.add(file);
+			}
+		}
+		return result;
 	}
 
 
