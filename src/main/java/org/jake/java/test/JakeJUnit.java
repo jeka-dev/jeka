@@ -1,4 +1,4 @@
-package org.jake.java;
+package org.jake.java.test;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -10,14 +10,14 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.jake.JakeLog;
 import org.jake.file.utils.JakeUtilsFile;
-import org.jake.java.JakeTestResult.ExceptionDescription;
+import org.jake.java.JakeClassFilter;
+import org.jake.java.test.JakeTestResult.ExceptionDescription;
 import org.jake.java.utils.JakeUtilsClassloader;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
@@ -46,17 +46,21 @@ public class JakeJUnit {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static JakeJUnit classpath(File dir, Iterable<File> dirs) {
+	public static JakeJUnit ofClasspath(File dir, Iterable<File> dirs) {
 		return new JakeJUnit(JakeUtilsIterable.concatToList(dir, dirs));
 	}
 
-	public static JakeJUnit classpath(Iterable<File> dirs) {
+	public static JakeJUnit ofCclasspath(Iterable<File> dirs) {
 		return new JakeJUnit(dirs);
 	}
 
+	public JakeJUnit withExtraLibsInClasspath(File ...files) {
+		return new JakeJUnit(JakeUtilsIterable.chain(this.classpath, files));
+	}
+
 	@SuppressWarnings("unchecked")
-	public static JakeJUnit noClasspath() {
-		return new JakeJUnit(Collections.EMPTY_LIST);
+	public JakeJUnit withExtraLibsInClasspath(Iterable<File> files) {
+		return new JakeJUnit(JakeUtilsIterable.concatLists(this.classpath, files));
 	}
 
 	public JakeTestResult launchAll(File... testClassDirs) {
@@ -277,7 +281,5 @@ public class JakeJUnit {
 		return new JakeTestResult(runCount, ignoreCount, failures, durationInMillis);
 
 	}
-
-
 
 }

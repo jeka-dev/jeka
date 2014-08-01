@@ -8,10 +8,13 @@ import org.jake.JakeBuildBase;
 import org.jake.JakeDoc;
 import org.jake.JakeLog;
 import org.jake.JakeOption;
+import org.jake.JakeOptions;
 import org.jake.file.JakeDirSet;
 import org.jake.file.JakeFileFilter;
 import org.jake.file.JakeZip;
 import org.jake.file.utils.JakeUtilsFile;
+import org.jake.java.test.JakeJUnit;
+import org.jake.java.test.JakeTestResult;
 import org.jake.java.utils.JakeUtilsClassloader;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
@@ -218,6 +221,7 @@ public class JakeBuildJava extends JakeBuildBase {
 
 
 
+
 	@JakeDoc("Copy all production resources to the classes directory.")
 	public void copyResources() {
 		JakeLog.start("Coping resource files to " + classDir().getPath());
@@ -237,8 +241,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	protected JakeJUnit juniter() {
-		return JakeJUnit.classpath(this.classDir(), this.dependencyResolver()
-				.test());
+		return JakeJUnit.ofClasspath(this.classDir(), this.dependencyResolver().test());
 	}
 
 	@JakeDoc("Run all unit tests.")
@@ -247,9 +250,19 @@ public class JakeBuildJava extends JakeBuildBase {
 			return;
 		}
 		JakeLog.start("Launching JUnit Tests");
-		juniter().launchAll(this.testClassDir()).printToNotifier();
+		final JakeTestResult result = juniter().launchAll(this.testClassDir());
+		JakeLog.info(result.toStrings());
+		if (!JakeOptions.isVerbose() && result.failureCount() > 0) {
+			JakeLog.info("Launch Jake in verbose mode to display failure stack traces.");
+		}
 		JakeLog.done();
+		afterTests(result);
 	}
+
+	protected void afterTests(JakeTestResult result) {
+		// Do nothing by default
+	}
+
 
 	@JakeDoc("Produce the Javadoc.")
 	public void javadoc() {
@@ -268,10 +281,10 @@ public class JakeBuildJava extends JakeBuildBase {
 	@Override
 	public void base() {
 		super.base();
-		compile();
 		copyResources();
-		compileTest();
+		compile();
 		copyTestResources();
+		compileTest();
 		runUnitTests();
 	}
 

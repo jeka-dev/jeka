@@ -1,10 +1,9 @@
-package org.jake.java;
+package org.jake.java.test;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.JakeLog;
 import org.jake.JakeOptions;
 import org.jake.utils.JakeUtilsIterable;
 
@@ -48,28 +47,26 @@ public class JakeTestResult {
 		return durationInMilis;
 	}
 
-	public void printToNotifier() {
-		JakeLog.nextLine();
+	public List<String> toStrings() {
+		final List<String> lines = new LinkedList<String>();
 		if (failureCount() == 0) {
-			JakeLog.info(toString());
+			lines.add(toString());
 		} else {
-			JakeLog.info(toString());
+			lines.add(toString());
 		}
 		if (JakeOptions.isVerbose()) {
-			JakeLog.nextLine();
+			lines.add("");
 		}
 		for (final Failure failure : failures) {
 			for (final String string : failure.toStrings(JakeOptions.isVerbose())) {
-				JakeLog.info(string);
+				lines.add(string);
 			}
 			if (JakeOptions.isVerbose()) {
-				JakeLog.nextLine();
+				lines.add("");
 			}
 
 		}
-		if (!JakeOptions.isVerbose() && !failures.isEmpty()) {
-			JakeLog.info("Launch Jake in verbose mode to display failure stack traces.");
-		}
+		return lines;
 	}
 
 	@Override
@@ -177,6 +174,7 @@ public class JakeTestResult {
 
 
 	}
+
 
 
 
