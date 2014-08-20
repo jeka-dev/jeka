@@ -7,7 +7,7 @@ import java.util.List;
 import org.jake.JakeOptions;
 import org.jake.utils.JakeUtilsIterable;
 
-public class JakeTestResult {
+public class JakeTestSuiteResult {
 
 	private final List<Failure> failures;
 	private final int runCount;
@@ -15,7 +15,7 @@ public class JakeTestResult {
 	private final long durationInMilis;
 
 
-	public JakeTestResult(int totaltestCount, int ignoreCount, Iterable<Failure> failures, long durationInMillis) {
+	public JakeTestSuiteResult(int totaltestCount, int ignoreCount, Iterable<Failure> failures, long durationInMillis) {
 		this.runCount = totaltestCount;
 		this.ignoreCount = ignoreCount;
 		this.failures = JakeUtilsIterable.toList(failures);
@@ -23,8 +23,8 @@ public class JakeTestResult {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static JakeTestResult empty(long durationInMillis) {
-		return new JakeTestResult(0,0, Collections.EMPTY_LIST, durationInMillis);
+	public static JakeTestSuiteResult empty(long durationInMillis) {
+		return new JakeTestSuiteResult(0,0, Collections.EMPTY_LIST, durationInMillis);
 	}
 
 	public List<Failure> failures() {

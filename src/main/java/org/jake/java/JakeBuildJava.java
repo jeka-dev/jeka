@@ -14,7 +14,8 @@ import org.jake.file.JakeFileFilter;
 import org.jake.file.JakeZip;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.test.JakeJUnit;
-import org.jake.java.test.JakeTestResult;
+import org.jake.java.test.JakeTestReportBuilder;
+import org.jake.java.test.JakeTestSuiteResult;
 import org.jake.java.utils.JakeUtilsClassloader;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
@@ -111,6 +112,13 @@ public class JakeBuildJava extends JakeBuildBase {
 	 */
 	protected File classDir() {
 		return buildOuputDir().sub("classes").createIfNotExist().root();
+	}
+
+	/**
+	 * Returns location where the test report are written.
+	 */
+	protected File testReportDir() {
+		return buildOuputDir("test-report");
 	}
 
 	/**
@@ -250,16 +258,17 @@ public class JakeBuildJava extends JakeBuildBase {
 			return;
 		}
 		JakeLog.start("Launching JUnit Tests");
-		final JakeTestResult result = juniter().launchAll(this.testClassDir());
+		final JakeTestSuiteResult result = juniter().launchAll(this.testClassDir());
 		JakeLog.info(result.toStrings());
 		if (!JakeOptions.isVerbose() && result.failureCount() > 0) {
 			JakeLog.info("Launch Jake in verbose mode to display failure stack traces.");
 		}
+		JakeTestReportBuilder.of(result).writeToFileSystem(testReportDir());
 		JakeLog.done();
 		afterTests(result);
 	}
 
-	protected void afterTests(JakeTestResult result) {
+	protected void afterTests(JakeTestSuiteResult result) {
 		// Do nothing by default
 	}
 

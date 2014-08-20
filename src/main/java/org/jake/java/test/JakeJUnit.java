@@ -17,7 +17,7 @@ import java.util.List;
 import org.jake.JakeLog;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeClassFilter;
-import org.jake.java.test.JakeTestResult.ExceptionDescription;
+import org.jake.java.test.JakeTestSuiteResult.ExceptionDescription;
 import org.jake.java.utils.JakeUtilsClassloader;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
@@ -63,13 +63,13 @@ public class JakeJUnit {
 		return new JakeJUnit(JakeUtilsIterable.concatLists(this.classpath, files));
 	}
 
-	public JakeTestResult launchAll(File... testClassDirs) {
+	public JakeTestSuiteResult launchAll(File... testClassDirs) {
 		return launchAll(Arrays.asList(testClassDirs), JakeUtilsFile.acceptAll(),
 				JakeClassFilter.acceptAll());
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public JakeTestResult launchAll(Iterable<File> testClassDirs,
+	public JakeTestSuiteResult launchAll(Iterable<File> testClassDirs,
 			FileFilter fileFilter, JakeClassFilter classFilter) {
 		final Iterable<File> urls = JakeUtilsIterable.concatLists(testClassDirs,
 				this.classpath);
@@ -89,11 +89,11 @@ public class JakeJUnit {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public JakeTestResult launch(Iterable<Class> classes) {
+	public JakeTestSuiteResult launch(Iterable<Class> classes) {
 		JakeLog.flush();
 
 		if (!classes.iterator().hasNext()) {
-			return JakeTestResult.empty(0);
+			return JakeTestSuiteResult.empty(0);
 		}
 		final long start = System.nanoTime();
 		final ClassLoader classLoader = classes.iterator().next()
@@ -123,22 +123,22 @@ public class JakeJUnit {
 		throw new IllegalStateException("No Junit found on test classpath.");
 	}
 
-	private static JakeTestResult fromJunit4Result(Object result, long durationInMillis) {
+	private static JakeTestSuiteResult fromJunit4Result(Object result, long durationInMillis) {
 		final Integer runCount = JakeUtilsReflect.invoke(result, "getRunCount");
 		final Integer ignoreCount = JakeUtilsReflect.invoke(result,
 				"getIgnoreCount");
 		final List<Object> junitFailures = JakeUtilsReflect.invoke(result,
 				"getFailures");
-		final List<JakeTestResult.Failure> failures = new ArrayList<JakeTestResult.Failure>(
+		final List<JakeTestSuiteResult.Failure> failures = new ArrayList<JakeTestSuiteResult.Failure>(
 				junitFailures.size());
 		for (final Object junitFailure : junitFailures) {
 			failures.add(fromJunit4Failure(junitFailure));
 		}
-		return new JakeTestResult(runCount, ignoreCount, failures, durationInMillis);
+		return new JakeTestSuiteResult(runCount, ignoreCount, failures, durationInMillis);
 
 	}
 
-	private static JakeTestResult.Failure fromJunit4Failure(Object junit4failure) {
+	private static JakeTestSuiteResult.Failure fromJunit4Failure(Object junit4failure) {
 		final Object junit4Description = JakeUtilsReflect.invoke(junit4failure,
 				"getDescription");
 		final String testClassName = JakeUtilsReflect.invoke(junit4Description,
@@ -148,11 +148,11 @@ public class JakeJUnit {
 		final Throwable exception = JakeUtilsReflect
 				.invoke(junit4failure, "getException");
 		final ExceptionDescription description = new ExceptionDescription(exception);
-		return new JakeTestResult.Failure(testClassName, testMethodName,
+		return new JakeTestSuiteResult.Failure(testClassName, testMethodName,
 				description);
 	}
 
-	private static JakeTestResult.Failure fromJunit3Failure(Object junit3failure) {
+	private static JakeTestSuiteResult.Failure fromJunit3Failure(Object junit3failure) {
 		final Object failedTest = JakeUtilsReflect.invoke(junit3failure,
 				"failedTest");
 		final Throwable exception = JakeUtilsReflect.invoke(junit3failure,
@@ -161,7 +161,7 @@ public class JakeJUnit {
 		final String failedTestName = failedTest.toString();
 		final int firstParenthesisIndex = failedTestName.indexOf("(");
 		final String methodName = failedTestName.substring(0, firstParenthesisIndex);
-		return new JakeTestResult.Failure(failedTest.getClass().getName(), methodName,
+		return new JakeTestSuiteResult.Failure(failedTest.getClass().getName(), methodName,
 				description);
 	}
 
@@ -262,14 +262,14 @@ public class JakeJUnit {
 		}
 	}
 
-	private static JakeTestResult fromJunit3Result(Object result, long durationInMillis) {
+	private static JakeTestSuiteResult fromJunit3Result(Object result, long durationInMillis) {
 		final Integer runCount = JakeUtilsReflect.invoke(result, "runCount");
 		final Integer ignoreCount = 0;
 		final Enumeration<Object> junitFailures = JakeUtilsReflect.invoke(result,
 				"failures");
 		final Enumeration<Object> junitErrors = JakeUtilsReflect.invoke(result,
 				"errors");
-		final List<JakeTestResult.Failure> failures = new ArrayList<JakeTestResult.Failure>();
+		final List<JakeTestSuiteResult.Failure> failures = new ArrayList<JakeTestSuiteResult.Failure>();
 		while(junitFailures.hasMoreElements()) {
 			final Object junitFailure = junitFailures.nextElement();
 			failures.add(fromJunit3Failure(junitFailure));
@@ -278,7 +278,7 @@ public class JakeJUnit {
 			final Object junitError = junitErrors.nextElement();
 			failures.add(fromJunit3Failure(junitError));
 		}
-		return new JakeTestResult(runCount, ignoreCount, failures, durationInMillis);
+		return new JakeTestSuiteResult(runCount, ignoreCount, failures, durationInMillis);
 
 	}
 
