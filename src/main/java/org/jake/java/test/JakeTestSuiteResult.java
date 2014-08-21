@@ -9,13 +9,15 @@ import org.jake.utils.JakeUtilsIterable;
 
 public class JakeTestSuiteResult {
 
+	private final String suiteName;
 	private final List<Failure> failures;
 	private final int runCount;
 	private final int ignoreCount;
 	private final long durationInMilis;
 
 
-	public JakeTestSuiteResult(int totaltestCount, int ignoreCount, Iterable<Failure> failures, long durationInMillis) {
+	public JakeTestSuiteResult(String suiteName, int totaltestCount, int ignoreCount, Iterable<Failure> failures, long durationInMillis) {
+		this.suiteName = suiteName;
 		this.runCount = totaltestCount;
 		this.ignoreCount = ignoreCount;
 		this.failures = JakeUtilsIterable.toList(failures);
@@ -23,8 +25,8 @@ public class JakeTestSuiteResult {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static JakeTestSuiteResult empty(long durationInMillis) {
-		return new JakeTestSuiteResult(0,0, Collections.EMPTY_LIST, durationInMillis);
+	public static JakeTestSuiteResult empty(String name, long durationInMillis) {
+		return new JakeTestSuiteResult(name, 0,0, Collections.EMPTY_LIST, durationInMillis);
 	}
 
 	public List<Failure> failures() {
@@ -42,6 +44,25 @@ public class JakeTestSuiteResult {
 	public int failureCount() {
 		return failures.size();
 	}
+
+	public String suiteName() {
+		return suiteName;
+	}
+
+	public int assertErrorCount() {
+		int result = 0;
+		for (final Failure failure : failures) {
+			if (failure.getExceptionDescription().isAssertError()) {
+				result ++;
+			}
+		}
+		return result;
+	}
+
+	public int errorCount() {
+		return failureCount() - assertErrorCount();
+	}
+
 
 	public long durationInMillis() {
 		return durationInMilis;
@@ -79,6 +100,7 @@ public class JakeTestSuiteResult {
 		private final String testName;
 		private final ExceptionDescription exceptionDescription;
 
+
 		public Failure(String className, String testName, ExceptionDescription exception) {
 			super();
 			this.className = className;
@@ -101,8 +123,7 @@ public class JakeTestSuiteResult {
 
 		public List<String> toStrings(boolean withStackTrace) {
 			final List<String> result = new LinkedList<String>();
-			result.add(className + "#" + testName + " > " + exceptionDescription.getClassName()
-					+ messageOrEmpty(exceptionDescription.getMessage()));
+			result.add(className + "#" + testName);
 			if (withStackTrace) {
 				result.addAll(exceptionDescription.stackTracesAsStrings());
 			}
@@ -123,6 +144,7 @@ public class JakeTestSuiteResult {
 		private final String message;
 		private final StackTraceElement[] stackTrace;
 		private final ExceptionDescription cause;
+		private final boolean assertError;
 
 		public ExceptionDescription(Throwable throwable) {
 			super();
@@ -134,6 +156,8 @@ public class JakeTestSuiteResult {
 			} else {
 				this.cause = null;
 			}
+			assertError = AssertionError.class.isAssignableFrom(throwable.getClass());
+
 		}
 
 		public String getClassName() {
@@ -152,9 +176,13 @@ public class JakeTestSuiteResult {
 			return cause;
 		}
 
+		public boolean isAssertError() {
+			return assertError;
+		}
+
 
 		public List<String> stackTracesAsStrings() {
-			return stackTracesAsStrings(null);
+			return stackTracesAsStrings(className + ": " + message);
 		}
 
 		private List<String> stackTracesAsStrings(String prefix) {
@@ -163,11 +191,11 @@ public class JakeTestSuiteResult {
 				result.add(prefix);
 			}
 			for (final StackTraceElement element : stackTrace) {
-				result.add("  " + element);
+				result.add("  at " + element);
 			}
 			if (cause != null) {
 				result.addAll(cause.stackTracesAsStrings("Caused by : " + cause.getClassName()
-						+ messageOrEmpty(cause.getMessage())));
+						+ ": " + messageOrEmpty(cause.getMessage())));
 			}
 			return result;
 		}

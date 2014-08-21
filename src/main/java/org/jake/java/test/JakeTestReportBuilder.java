@@ -23,8 +23,10 @@ public class JakeTestReportBuilder {
 	}
 
 	public void writeToFileSystem(File folder) {
-		final File file = new File(folder, "TEST-all.xml");
+		folder.mkdirs();
+		final File file = new File(folder, "TEST-"+ result.suiteName() +".xml");
 		try {
+			file.createNewFile();
 			writeFile(file);
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
@@ -33,20 +35,21 @@ public class JakeTestReportBuilder {
 
 	private void writeFile(File xmlFile) throws XMLStreamException, IOException {
 		final XMLStreamWriter writer = factory.createXMLStreamWriter(new FileWriter(xmlFile));
-
 		writer.writeStartDocument();
+		writer.writeCharacters("\n");
 		writer.writeStartElement("testsuite");
 		writer.writeAttribute("skipped", Integer.toString(result.ignoreCount()));
 		writer.writeAttribute("tests", Integer.toString(result.runCount()));
-		writer.writeAttribute("failures", Integer.toString(result.failureCount()));
-		writer.writeAttribute("errors", "to be fixed");
-		writer.writeAttribute("name", "to be fixed");
+		writer.writeAttribute("failures", Integer.toString(result.assertErrorCount()));
+		writer.writeAttribute("errors", Integer.toString(result.errorCount()));
+		writer.writeAttribute("name", result.suiteName());
 		writer.writeAttribute("time",  Float.toString((float)result.durationInMillis()/1000));
-		writer.writeEndElement();
+		writer.writeCharacters("\n");
 
 		writeProperties(writer);
 		writeFailures(writer);
 
+		writer.writeEndElement(); // ends 'testsuite'
 		writer.writeEndDocument();
 
 		writer.flush();
@@ -54,31 +57,40 @@ public class JakeTestReportBuilder {
 	}
 
 	private void writeProperties(XMLStreamWriter writer) throws XMLStreamException {
+		writer.writeCharacters("  ");
 		writer.writeStartElement("properties");
 		for (final Object name : System.getProperties().keySet()) {
-			writer.writeStartElement("property");
+			writer.writeCharacters("\n    ");
+			writer.writeEmptyElement("property");
 			writer.writeAttribute("value", System.getProperty(name.toString()));
 			writer.writeAttribute("name", name.toString());
 		}
+		writer.writeCharacters("\n  ");
 		writer.writeEndElement();
 	}
 
 	private void writeFailures(XMLStreamWriter writer) throws XMLStreamException {
 		for (final JakeTestSuiteResult.Failure failure : this.result.failures()) {
+			writer.writeCharacters("\n  ");
 			writer.writeStartElement("testcase");
 			writer.writeAttribute("classname", failure.getClassName());
 			writer.writeAttribute("name", failure.getTestName());
-			writer.writeEndElement();
-			writer.writeStartElement("failure");
+			final String errorFailure = failure.getExceptionDescription().isAssertError() ? "failure" : "error";
+			writer.writeCharacters("\n    ");
+			writer.writeStartElement(errorFailure);
 			writer.writeAttribute("message", failure.getExceptionDescription().getMessage());
+			writer.writeAttribute("type", failure.getExceptionDescription().getClassName());
+			final StringBuilder stringBuilder = new StringBuilder();
 			for (final String line : failure.getExceptionDescription().stackTracesAsStrings()) {
-				writer.writeCData(line + "\n");
+				stringBuilder.append(line).append("\n");
 			}
+			stringBuilder.append("      ");
+			writer.writeCData(stringBuilder.toString());
+			writer.writeCharacters("\n    ");
+			writer.writeEndElement();
+			writer.writeCharacters("\n  ");
 			writer.writeEndElement();
 		}
-
-
-
 	}
 
 

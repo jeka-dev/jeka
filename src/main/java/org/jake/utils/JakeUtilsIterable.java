@@ -188,6 +188,7 @@ public class JakeUtilsIterable {
 		return result;
 	}
 
+
 	public static String toString(Iterable<?> it, String separator) {
 		final StringBuilder builder = new StringBuilder();
 		final Iterator<?> iterator = it.iterator();

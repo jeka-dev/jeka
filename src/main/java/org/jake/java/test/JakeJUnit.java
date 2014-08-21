@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -91,9 +92,10 @@ public class JakeJUnit {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public JakeTestSuiteResult launch(Iterable<Class> classes) {
 		JakeLog.flush();
+		final String name = getSuiteName(classes);
 
 		if (!classes.iterator().hasNext()) {
-			return JakeTestSuiteResult.empty(0);
+			return JakeTestSuiteResult.empty(name, 0);
 		}
 		final long start = System.nanoTime();
 		final ClassLoader classLoader = classes.iterator().next()
@@ -108,7 +110,7 @@ public class JakeJUnit {
 					(Object) classArray);
 			final long end = System.nanoTime();
 			final long duration = (end - start) / 1000000;
-			return fromJunit4Result(junit4Result, duration);
+			return fromJunit4Result(name, junit4Result, duration);
 		} else if (isJunit3In(classLoader)) {
 			final Object suite = createJunit3TestSuite(classLoader, classes);
 			final Class testResultClass = JakeUtilsClassloader.loadClass(classLoader, JUNIT3_TEST_RESULT_CLASS_NAME);
@@ -118,12 +120,12 @@ public class JakeJUnit {
 			JakeUtilsReflect.invoke(suite, runMethod, testResult);
 			final long end = System.nanoTime();
 			final long duration = (end - start) / 1000000;
-			return fromJunit3Result(testResult, duration);
+			return fromJunit3Result(name, testResult, duration);
 		}
 		throw new IllegalStateException("No Junit found on test classpath.");
 	}
 
-	private static JakeTestSuiteResult fromJunit4Result(Object result, long durationInMillis) {
+	private static JakeTestSuiteResult fromJunit4Result(String suiteName, Object result, long durationInMillis) {
 		final Integer runCount = JakeUtilsReflect.invoke(result, "getRunCount");
 		final Integer ignoreCount = JakeUtilsReflect.invoke(result,
 				"getIgnoreCount");
@@ -134,7 +136,7 @@ public class JakeJUnit {
 		for (final Object junitFailure : junitFailures) {
 			failures.add(fromJunit4Failure(junitFailure));
 		}
-		return new JakeTestSuiteResult(runCount, ignoreCount, failures, durationInMillis);
+		return new JakeTestSuiteResult(suiteName, runCount, ignoreCount, failures, durationInMillis);
 
 	}
 
@@ -262,7 +264,7 @@ public class JakeJUnit {
 		}
 	}
 
-	private static JakeTestSuiteResult fromJunit3Result(Object result, long durationInMillis) {
+	private static JakeTestSuiteResult fromJunit3Result(String suiteName, Object result, long durationInMillis) {
 		final Integer runCount = JakeUtilsReflect.invoke(result, "runCount");
 		final Integer ignoreCount = 0;
 		final Enumeration<Object> junitFailures = JakeUtilsReflect.invoke(result,
@@ -278,8 +280,35 @@ public class JakeJUnit {
 			final Object junitError = junitErrors.nextElement();
 			failures.add(fromJunit3Failure(junitError));
 		}
-		return new JakeTestSuiteResult(runCount, ignoreCount, failures, durationInMillis);
+		return new JakeTestSuiteResult(suiteName, runCount, ignoreCount, failures, durationInMillis);
 
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static String getSuiteName(Iterable<Class> classes) {
+		final Iterator<Class> it = classes.iterator();
+		if (!it.hasNext()) {
+			return "";
+		}
+		final Class<?> firstClass = it.next();
+		if (!it.hasNext()) {
+			return firstClass.getName();
+		}
+		String[] result = firstClass.getPackage().getName().split("\\.");
+		while (it.hasNext()) {
+			final String[] packageName = it.next().getPackage().getName().split("\\.");
+			final int min = Math.min(result.length, packageName.length);
+			for (int i = 0; i < min; i++ ) {
+				if (!result[i].equals(packageName[i])) {
+					if (i == 0) {
+						return "ALL";
+					}
+					result = Arrays.copyOf(result, i);
+					break;
+				}
+			}
+		}
+		return JakeUtilsIterable.toString(Arrays.asList(result), ".");
 	}
 
 }
