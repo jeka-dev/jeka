@@ -19,19 +19,19 @@ public class Build extends JakeBuildJar {
 	}
 
 	@Override
-	public void copyResources() {
-		super.copyResources();
+	protected void processResources() {
+		super.processResources();
 		JakeUtilsFile.writeString(new File(classDir(),"org/jake/version.txt"), JakeUtilsTime.timestampSec(), false);
 	}
 
 	@Override
+	@JakeDoc("Compile, unit test and package Jake application in a distribution file.")
 	public void base() {
 		super.base();
 		distrib();
 	}
 
-	@JakeDoc("Creates a zip file containing the binaries for Jake full install.")
-	public void distrib() {
+	private void distrib() {
 		JakeLog.start("Packaging distrib");
 		final File distribDir = buildOuputDir("jake-distrib");
 		JakeUtilsFile.copyDir(baseDir("src/main/dist"), distribDir, null, true);

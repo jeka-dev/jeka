@@ -139,9 +139,8 @@ public class JakeUtilsClassloader {
 	 * Returns all top level classes of a given entry of a <code>URLClassLoader</code>.
 	 * 
 	 * @param classLoader The <code>UrlClassLoader</code> we retrieve the class from.
-	 * @param entryDirectory A directory which is an entry of the provided <code>ClassLoader</code>.
+	 * @param entryFilter returns only classes coming from entries satisfying this filter.
 	 */
-	@SuppressWarnings("rawtypes")
 	public static Set<Class<?>> getAllTopLevelClasses(URLClassLoader classLoader, FileFilter entryFilter) {
 		final List<File> classfiles = new LinkedList<File>();
 		final Map<File, File> file2Entry = new HashMap<File, File>();

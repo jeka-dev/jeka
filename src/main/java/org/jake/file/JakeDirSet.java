@@ -11,7 +11,7 @@ import java.util.zip.Deflater;
 
 import org.jake.utils.JakeUtilsIterable;
 
-public class JakeDirSet implements Iterable<JakeDir> {
+public final class JakeDirSet implements Iterable<JakeDir> {
 
 	private final List<JakeDir> dirViews;
 
@@ -147,6 +147,15 @@ public class JakeDirSet implements Iterable<JakeDir> {
 	@Override
 	public String toString() {
 		return this.dirViews.toString();
+	}
+
+	public boolean exist() {
+		for (final JakeDir jakeDir : this) {
+			if (jakeDir.exists()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

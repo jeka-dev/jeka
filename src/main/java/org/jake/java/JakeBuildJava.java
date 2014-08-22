@@ -22,6 +22,10 @@ import org.jake.utils.JakeUtilsReflect;
 
 public class JakeBuildJava extends JakeBuildBase {
 
+	protected enum JunitReportDetail {
+		NONE, BASIC, FULL;
+	}
+
 	protected static final JakeFileFilter JAVA_SOURCE_ONLY_FILTER = JakeFileFilter
 			.include("**/*.java");
 
@@ -58,9 +62,64 @@ public class JakeBuildJava extends JakeBuildBase {
 	@JakeOption("Turn it on to skip tests.")
 	protected boolean skipTests;
 
-	@JakeOption({"You can force the dependencyResolver to use by specifying a class name. This class must be in Jake classpath.",
-	"You can either use a fully qulified class name or just its simple name."})
+	@JakeOption({
+		"You can force the dependencyResolver to use by specifying a class name. This class must be in Jake classpath.",
+	"You can either use a fully qulified class name or just its simple name." })
 	protected String dependencyResolver;
+
+	@JakeOption({"The more details the longer tests take to be processed.",
+		"BASIC mention the total time elapsed along detail on failed tests.",
+		"FULL detailed report displays additionally the time to run each tests.",
+	"Example : -junitReportDetail=NONE"})
+	protected JunitReportDetail junitReportDetail = JunitReportDetail.BASIC;
+
+	// --------------------------- Callable Methods -----------------------
+
+	@JakeDoc("Generate sources and resources, compile production sources and process production resources to the classes directory.")
+	public void compile() {
+		JakeLog.startAndNextLine("Processing production code and resources");
+		generateSources();
+		compile(sourceDirs(), classDir(), this.dependencyResolver().compile());
+		generateResources();
+		processResources();
+		JakeLog.done();
+	}
+
+	@JakeDoc("Compile and run all unit tests.")
+	public void unitTest() {
+		if (!checkProcessTests(testSourceDirs())) {
+			return;
+		}
+		JakeLog.startAndNextLine("Process unit tests");
+		compileUnitTests();
+		processUnitTestResources();
+		runUnitTests();
+		JakeLog.done();
+	}
+
+	@JakeDoc("Produce the Javadoc.")
+	public void javadoc() {
+		JakeLog.start("Generating Javadoc");
+		final File dir = buildOuputDir(projectName() + "-javadoc");
+		JakeJavadoc.of(this.sourceDirs())
+		.withClasspath(this.dependencyResolver().compile())
+		.process(dir);
+		if (dir.exists()) {
+			JakeZip.of(dir).create(
+					buildOuputDir(projectName() + "-javadoc.zip"));
+		}
+		JakeLog.done();
+	}
+
+	@JakeDoc("Compile production code and resources, copy test code and resources then launch the unit tests.")
+	@Override
+	public void base() {
+		super.base();
+		compile();
+		unitTest();
+	}
+
+	// ----------------------- Overridable sub-methods ---------------------
 
 	/**
 	 * Returns location of production source code.
@@ -73,8 +132,8 @@ public class JakeBuildJava extends JakeBuildBase {
 	 * Returns location of production resources.
 	 */
 	protected JakeDirSet resourceDirs() {
-		return sourceDirs().withFilter(RESOURCE_FILTER)
-				.and(baseDir("src/main/resources"), generatedSourceDir());
+		return sourceDirs().withFilter(RESOURCE_FILTER).and(
+				baseDir("src/main/resources"), generatedSourceDir());
 	}
 
 	/**
@@ -106,7 +165,6 @@ public class JakeBuildJava extends JakeBuildBase {
 		return buildOuputDir("generated-ressources");
 	}
 
-
 	/**
 	 * Returns location where the java production classes are compiled.
 	 */
@@ -132,6 +190,7 @@ public class JakeBuildJava extends JakeBuildBase {
 
 	/**
 	 * Returns the base dependency resolver.
+	 * 
 	 * @see #dependencyResolver().
 	 */
 	protected JakeJavaDependencyResolver baseDependencyResolver() {
@@ -139,7 +198,8 @@ public class JakeBuildJava extends JakeBuildBase {
 		final JakeJavaDependencyResolver resolver;
 
 		if (folder.exists()) {
-			resolver = JakeLocalDependencyResolver.standard(baseDir(STD_LIB_PATH));
+			resolver = JakeLocalDependencyResolver
+					.standard(baseDir(STD_LIB_PATH));
 		} else {
 			resolver = JakeLocalDependencyResolver.empty();
 		}
@@ -147,9 +207,9 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	/**
-	 * Returns the resolver finally used in this build. Depending od the passed options,
-	 * It is made of the {@link #baseDependencyResolver()} augmented with extra-libs mentioned
-	 * in options <code>extraXxxxPath</code>.
+	 * Returns the resolver finally used in this build. Depending od the passed
+	 * options, It is made of the {@link #baseDependencyResolver()} augmented
+	 * with extra-libs mentioned in options <code>extraXxxxPath</code>.
 	 */
 	public final JakeJavaDependencyResolver dependencyResolver() {
 		if (cachedResolver == null) {
@@ -157,11 +217,14 @@ public class JakeBuildJava extends JakeBuildBase {
 			final JakeJavaDependencyResolver resolver;
 			if (dependencyResolver != null) {
 				JakeLog.start("Looking for class named " + dependencyResolver);
-				final Class<? extends JakeJavaDependencyResolver> depClass =
-						JakeUtilsClassloader.loadFromSimpleName(JakeUtilsClassloader.current(),
-								dependencyResolver, JakeJavaDependencyResolver.class);
+				final Class<? extends JakeJavaDependencyResolver> depClass = JakeUtilsClassloader
+						.loadFromSimpleName(JakeUtilsClassloader.current(),
+								dependencyResolver,
+								JakeJavaDependencyResolver.class);
 				if (depClass == null) {
-					JakeLog.warn("Class " + dependencyResolver + " not found or it is not a " + JakeJavaDependencyResolver.class.getName() + ".");
+					JakeLog.warn("Class " + dependencyResolver
+							+ " not found or it is not a "
+							+ JakeJavaDependencyResolver.class.getName() + ".");
 					resolver = baseDependencyResolver();
 				} else {
 					resolver = JakeUtilsReflect.newInstance(depClass);
@@ -170,7 +233,8 @@ public class JakeBuildJava extends JakeBuildBase {
 				resolver = baseDependencyResolver();
 			}
 
-			final JakeJavaDependencyResolver extraResolver = computeExtraPath(baseDir().root());
+			final JakeJavaDependencyResolver extraResolver = computeExtraPath(baseDir()
+					.root());
 			if (!extraResolver.isEmpty()) {
 				JakeLog.info("Using extra libs : ", extraResolver.toStrings());
 				cachedResolver = resolver.merge(extraResolver, null, null);
@@ -183,18 +247,14 @@ public class JakeBuildJava extends JakeBuildBase {
 		return cachedResolver;
 	}
 
-	// ------------ Operations ------------
-
-	@JakeDoc("Generate java sources to be compiled along the others. Do nothing by default.")
-	public void generateSources() {
-		// Do nothing
+	protected void generateSources() {
+		// Do nothing by default
 	}
 
 	@JakeDoc("Generate files to be taken as resources.  Do nothing by default.")
-	public void generateResources() {
+	protected void generateResources() {
 		// Do Nothing
 	}
-
 
 	protected void compile(JakeDirSet sources, File destination,
 			Iterable<File> classpath) {
@@ -211,100 +271,89 @@ public class JakeBuildJava extends JakeBuildBase {
 		JakeLog.done();
 	}
 
-	@JakeDoc("Compile all production code to the classes directory.")
-	public void compile() {
-		compile(sourceDirs(), classDir(), this.dependencyResolver().compile());
-	}
-
-	@JakeDoc("Compile all test code to the test classes directory.")
-	@SuppressWarnings("unchecked")
-	public void compileTest() {
-		if (skipTests) {
-			return;
-		}
-		compile(testSourceDirs(), testClassDir(),
-				JakeUtilsIterable.concatToList(this.classDir(), this
-						.dependencyResolver().test()));
-	}
-
-
-
-
-	@JakeDoc("Copy all production resources to the classes directory.")
-	public void copyResources() {
+	protected void processResources() {
 		JakeLog.start("Coping resource files to " + classDir().getPath());
 		final int count = resourceDirs().copyTo(classDir());
 		JakeLog.done(count + " file(s) copied.");
 	}
 
-	@JakeDoc("Copy all test resources to the test classes directory.")
-	public void copyTestResources() {
-		if (skipTests) {
-			return;
-		}
+	protected JakeJUnit juniter() {
+		return JakeJUnit.ofClasspath(this.classDir(), this.dependencyResolver()
+				.test());
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void compileUnitTests() {
+		compile(testSourceDirs(), testClassDir(),
+				JakeUtilsIterable.concatToList(this.classDir(), this
+						.dependencyResolver().test()));
+	}
+
+	protected void processUnitTestResources() {
 		JakeLog.start("Coping test resource files to "
 				+ testClassDir().getPath());
 		final int count = testResourceDirs().copyTo(testClassDir());
 		JakeLog.done(count + " file(s) copied.");
 	}
 
-	protected JakeJUnit juniter() {
-		return JakeJUnit.ofClasspath(this.classDir(), this.dependencyResolver().test());
+	protected void runUnitTests() {
+		runJunitTests(this.testClassDir());
 	}
 
-	@JakeDoc("Run all unit tests.")
-	public void runUnitTests() {
-		if (skipTests) {
-			return;
+	protected void runJunitTests(File testClassDir) {
+		JakeLog.startAndNextLine("Run JUnit tests");
+
+		System.out
+		if (JakeOptions.isVerbose()) {
+			JakeLog.info("-------------------------------------> Here start the test output in console.");
+		} else {
+			// Redirect system.out and err on nop stream
 		}
-		JakeLog.start("Launching JUnit Tests");
-		final JakeTestSuiteResult result = juniter().launchAll(this.testClassDir());
-		JakeLog.info(result.toStrings());
+		final JakeTestSuiteResult result = juniter().launchAll(testClassDir);
+		if (JakeOptions.isVerbose()) {
+			JakeLog.info("-------------------------------------> Here stop the test output ion console.");
+		} else {
+			// Redirect system.out and err on original streams
+		}
+
+		JakeLog.info(result.toStrings(JakeOptions.isVerbose()));
 		if (!JakeOptions.isVerbose() && result.failureCount() > 0) {
-			JakeLog.info("Launch Jake in verbose mode to display failure stack traces.");
+			JakeLog.info("Launch Jake in verbose mode to display failure stack traces in console.");
 		}
-		JakeTestReportBuilder.of(result).writeToFileSystem(testReportDir());
-		JakeLog.done();
-		afterTests(result);
-	}
-
-	protected void afterTests(JakeTestSuiteResult result) {
-		// Do nothing by default
-	}
-
-
-	@JakeDoc("Produce the Javadoc.")
-	public void javadoc() {
-		JakeLog.start("Generating Javadoc");
-		final File dir = buildOuputDir(projectName() + "-javadoc");
-		JakeJavadoc.of(this.sourceDirs())
-		.withClasspath(this.dependencyResolver().compile()).process(dir);
-		if (dir.exists()) {
-			JakeZip.of(dir).create(
-					buildOuputDir(projectName() + "-javadoc.zip"));
+		if (junitReportDetail != JunitReportDetail.NONE) {
+			JakeTestReportBuilder.of(result).writeToFileSystem(testReportDir());
 		}
 		JakeLog.done();
 	}
 
-	@JakeDoc("Compile production code and resources, copy test code and resources then launch the unit tests.")
-	@Override
-	public void base() {
-		super.base();
-		copyResources();
-		compile();
-		copyTestResources();
-		compileTest();
-		runUnitTests();
+	protected boolean checkProcessTests(JakeDirSet testSourceDirs) {
+		if (skipTests) {
+			return false;
+		}
+		if (testSourceDirs == null || testSourceDirs.listJakeDir().isEmpty()) {
+			JakeLog.info("No test source declared. Skip tests.");
+			return false;
+		}
+		if (!testResourceDirs().exist()) {
+			JakeLog.info("No existing source folder declared in " + testSourceDirs +". Skip tests.");
+			return false;
+		}
+		return true;
 	}
+
+	// ------------------------------------
 
 	public static void main(String[] args) {
 		new JakeBuildJava().base();
 	}
 
 	private JakeLocalDependencyResolver computeExtraPath(File baseDir) {
-		final List<File> extraProvidedPathList = toPath(baseDir, extraProvidedPath);
-		final List<File> extraCompilePathList = toPath(baseDir, extraCompilePath);
-		final List<File> extraRuntimePathList = toPath(baseDir, extraRuntimePath);
+		final List<File> extraProvidedPathList = toPath(baseDir,
+				extraProvidedPath);
+		final List<File> extraCompilePathList = toPath(baseDir,
+				extraCompilePath);
+		final List<File> extraRuntimePathList = toPath(baseDir,
+				extraRuntimePath);
 		final List<File> extraTestPathList = toPath(baseDir, extraTestPath);
 		return new JakeLocalDependencyResolver(extraCompilePathList,
 				extraRuntimePathList, extraTestPathList, extraProvidedPathList);

@@ -108,10 +108,10 @@ public class JakeBuildBase {
 		clean();
 	}
 
-	@JakeDoc("Display all available actions defined in this build.")
+	@JakeDoc("Display all available methods defined in this build.")
 	public void help() {
-		JakeLog.info("Usage: jake [actions] [-optionName=value...] [-DsystemPropName=value...]");
-		JakeLog.info("When no action specified, then 'default' action is processed.");
+		JakeLog.info("Usage: jake [methodA...] [-optionName=value...] [-DsystemPropName=value...]");
+		JakeLog.info("When no method specified, then 'default' action is processed.");
 		JakeLog.info("Ex: jake javadoc compile -verbose=true -other=xxx -DmyProp=Xxxx");
 		JakeLog.nextLine();
 		JakeLog.info("Available action(s) for build '" + this.getClass().getName() + "' : " );

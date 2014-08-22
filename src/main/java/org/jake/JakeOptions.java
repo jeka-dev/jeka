@@ -170,16 +170,19 @@ public final class JakeOptions {
 		final Object defaultObject = JakeUtilsReflect.newInstance(clazz);
 		for (final Field field : optionField(clazz)) {
 			final String name = field.getName();
-			final JakeOption option = field.getAnnotation(JakeOption.class);
+			final JakeOption annotation = field.getAnnotation(JakeOption.class);
 			final Class<?> type = field.getType();
 			final Object defaultValue = JakeUtilsReflect.getFieldValue(defaultObject, field);
-			final String string = name + " (" + type.getSimpleName() + ", default= "+ stringOrNull(defaultValue) + ") : ";
-			result.add( string + option.value()[0] );
-			if (option.value().length > 1) {
-				final String margin = JakeUtilsString.repeat(" ", string.length());
-				for (int i=1; i < option.value().length; i++) {
-					result.add(margin + option.value()[i]);
+			final String string = name + " (" + type.getSimpleName() + ", default="+ stringOrNull(defaultValue) + ") : ";
+			result.add( string + annotation.value()[0] );
+			final String margin = JakeUtilsString.repeat(" ", string.length());
+			if (annotation.value().length > 1) {
+				for (int i=1; i < annotation.value().length; i++) {
+					result.add(margin + annotation.value()[i]);
 				}
+			}
+			if (type.isEnum()) {
+				result.add(margin + "Valid values are : " + enumValues(type) + ".");
 			}
 			result.add("");
 		}
@@ -191,6 +194,18 @@ public final class JakeOptions {
 			return null;
 		}
 		return object.toString();
+	}
+
+	private static String enumValues(Class<?> enumClass) {
+		final Object[] values = enumClass.getEnumConstants();
+		final StringBuilder result = new StringBuilder();
+		for (int i = 0; i < values.length; i++) {
+			result.append(values[i].toString());
+			if (i+1 < values.length) {
+				result.append(", ");
+			}
+		}
+		return result.toString();
 	}
 
 }

@@ -14,7 +14,7 @@ import org.jake.file.utils.JakeUtilsFile;
  * 
  * @author Jerome Angibaud
  */
-public class JakeDir implements Iterable<File> {
+public final class JakeDir implements Iterable<File> {
 
 	private final File base;
 

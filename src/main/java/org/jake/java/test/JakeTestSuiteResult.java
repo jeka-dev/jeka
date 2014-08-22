@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.JakeOptions;
 import org.jake.utils.JakeUtilsIterable;
 
 public class JakeTestSuiteResult {
@@ -68,21 +67,21 @@ public class JakeTestSuiteResult {
 		return durationInMilis;
 	}
 
-	public List<String> toStrings() {
+	public List<String> toStrings(boolean verbose) {
 		final List<String> lines = new LinkedList<String>();
 		if (failureCount() == 0) {
 			lines.add(toString());
 		} else {
 			lines.add(toString());
 		}
-		if (JakeOptions.isVerbose()) {
+		if (verbose) {
 			lines.add("");
 		}
 		for (final Failure failure : failures) {
-			for (final String string : failure.toStrings(JakeOptions.isVerbose())) {
+			for (final String string : failure.toStrings(verbose)) {
 				lines.add(string);
 			}
-			if (JakeOptions.isVerbose()) {
+			if (verbose) {
 				lines.add("");
 			}
 
@@ -123,9 +122,14 @@ public class JakeTestSuiteResult {
 
 		public List<String> toStrings(boolean withStackTrace) {
 			final List<String> result = new LinkedList<String>();
-			result.add(className + "#" + testName);
+			final String intro = className + "#" + testName;
+
 			if (withStackTrace) {
-				result.addAll(exceptionDescription.stackTracesAsStrings());
+				final List<String> stack = exceptionDescription.stackTracesAsStrings();
+				result.add(intro + " > " + stack.get(0));
+				result.addAll(stack.subList(1, stack.size()-1));
+			} else {
+				result.add(intro);
 			}
 			return result;
 		}

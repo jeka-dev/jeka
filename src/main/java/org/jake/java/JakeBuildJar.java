@@ -38,14 +38,12 @@ public class JakeBuildJar extends JakeBuildJava implements JakeJarModule {
 		return buildOuputDir(jarName() + "-test-sources.jar");
 	}
 
-
 	public File fatJarFile() {
 		return buildOuputDir(jarName() + "-fat.jar");
 	}
 
-	@JakeDoc({	"Create jar file containing the binaries, along others containing sources, test binaries and test sources.",
-		"The jar containing the binary is the one that will be used as a depe,dence for other project.",
-	"This method has to be invoked after compile, tests and recourses processed."})
+	@JakeDoc({	"Create many jar files containing respectively binaries, sources, test binaries and test sources.",
+	"The jar containing the binary is the one that will be used as a depe,dence for other project."})
 	public void jar() {
 		JakeLog.startAndNextLine("Packaging as jar");
 		final JakeZip base = JakeZip.of(classDir());
@@ -63,13 +61,13 @@ public class JakeBuildJar extends JakeBuildJava implements JakeJarModule {
 		JakeLog.done();
 	}
 
-	@JakeDoc("Create jar file containing the binaries for itself and all its compile and runtime dependencies.")
+	@JakeDoc("Create jar file containing the binaries for itself all its dependencies.")
 	public void fatJar() {
 		JakeLog.info("Creating file : " + fatJarFile().getPath());
 		JakeZip.of(classDir()).merge(dependencyResolver().runtime()).create(fatJarFile(), zipLevel());
 	}
 
-	@JakeDoc("Do clean, compile, test, process resources and then make jar.")
+	@JakeDoc("Do clean, compile, unit test and then make jar files.")
 	@Override
 	public void base() {
 		super.base();

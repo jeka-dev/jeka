@@ -12,71 +12,71 @@ import java.util.zip.ZipOutputStream;
 
 import org.jake.file.utils.JakeUtilsFile;
 
-public class JakeZip {
-	
-	private final List<? extends Object> itemsToZip; 
-	
+public final class JakeZip {
+
+	private final List<? extends Object> itemsToZip;
+
 	private final List<File> archivestoMerge;
-	
+
 	private JakeZip(List<? extends Object> itemsToZip, List<File> archivestoMerge) {
 		this.itemsToZip = itemsToZip;
 		this.archivestoMerge = archivestoMerge;
 	}
-	
+
 	private JakeZip(List<? extends Object> itemsToZip) {
 		this.itemsToZip = itemsToZip;
 		this.archivestoMerge = Collections.emptyList();
 	}
-	
+
 	public static JakeZip of(File ...fileOrDirs) {
 		return new JakeZip(Arrays.asList( fileOrDirs));
 	}
-	
+
 	public static JakeZip of(JakeDir ...dirViews) {
 		return new JakeZip(Arrays.asList(dirViews));
 	}
-	
+
 	public static JakeZip of(JakeDirSet ...dirViews) {
 		return new JakeZip(Arrays.asList(dirViews));
 	}
-	
+
 	public JakeZip and(List<File> files) {
 		final List<Object> items = new LinkedList<Object>(this.itemsToZip);
 		final List<File> archives = new LinkedList<File>(this.archivestoMerge);
 		items.addAll(files);
 		return new JakeZip(items, archives);
 	}
-	
+
 	public JakeZip and(File ...fileOrDirs) {
 		return and(Arrays.asList(fileOrDirs));
 	}
-	
+
 	public JakeZip and(JakeDir ...dirViews) {
 		return and(JakeDirSet.of(dirViews).listFiles());
-		
+
 	}
-	
+
 	public JakeZip and(JakeDirSet ...dirViews) {
 		return and(JakeDirSet.toFiles(dirViews));
 	}
-	
+
 	public JakeZip merge(List<File> archiveFiles) {
 		final List<Object> items = new LinkedList<Object>(this.itemsToZip);
 		final List<File> archives = new LinkedList<File>(this.archivestoMerge);
 		archives.addAll(archiveFiles);
 		return new JakeZip(items, archives);
 	}
-	
+
 	public void create(File zipFile) {
 		this.create(zipFile, Deflater.DEFAULT_COMPRESSION);
 	}
-	
+
 	public void create(File zipFile, int compressLevel) {
 		final ZipOutputStream zos = JakeUtilsFile.createZipOutputStream(zipFile, compressLevel);
 		zos.setLevel(compressLevel);
-		
+
 		// Adding files to archive
-		for (Object item : this.itemsToZip) {
+		for (final Object item : this.itemsToZip) {
 			if (item instanceof File) {
 				final File file = (File) item;
 				if (file.isDirectory()) {
@@ -89,41 +89,41 @@ public class JakeZip {
 				addDirView(zos, dirView);
 			} else if (item instanceof JakeDirSet) {
 				final JakeDirSet dirViews = (JakeDirSet) item;
-				for (JakeDir dirView : dirViews) {
+				for (final JakeDir dirView : dirViews) {
 					addDirView(zos, dirView);
 				}
 			} else {
 				throw new IllegalStateException("Items of class " + item.getClass() + " not handled.");
 			}
 		}
-		
+
 		// Merging archives to this archive
-		for (File archiveToMerge : this.archivestoMerge) {
+		for (final File archiveToMerge : this.archivestoMerge) {
 			final ZipFile file;
 			try {
 				file = new ZipFile(archiveToMerge);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new RuntimeException(e);
 			}
 			JakeUtilsFile.mergeZip(zos, file);
 		}
-		
+
 		try {
 			zos.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	private void addDirView(ZipOutputStream zos, JakeDir dirView) {
 		if (!dirView.exists()) {
 			return;
 		}
 		final File base = JakeUtilsFile.canonicalFile(dirView.root());
-		for (File file : dirView) {
+		for (final File file : dirView) {
 			JakeUtilsFile.addZipEntry(zos, file, base);
 		}
 	}
-	
+
 
 }

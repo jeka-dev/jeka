@@ -31,7 +31,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.jake.utils.JakeUtilsString;
 
-public class JakeUtilsFile {
+public final class JakeUtilsFile {
 
 	public static void assertDir(File candidate) {
 		if (!candidate.exists()) {

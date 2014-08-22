@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jake.JakeLog;
-import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeClassFilter;
 import org.jake.java.test.JakeTestSuiteResult.ExceptionDescription;
 import org.jake.java.utils.JakeUtilsClassloader;
@@ -65,19 +64,30 @@ public class JakeJUnit {
 	}
 
 	public JakeTestSuiteResult launchAll(File... testClassDirs) {
-		return launchAll(Arrays.asList(testClassDirs), JakeUtilsFile.acceptAll(),
+		return launchAll(Arrays.asList(testClassDirs),
 				JakeClassFilter.acceptAll());
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public JakeTestSuiteResult launchAll(Iterable<File> testClassDirs,
-			FileFilter fileFilter, JakeClassFilter classFilter) {
+	public JakeTestSuiteResult launchAll(final Iterable<File> testClassDirs, JakeClassFilter classFilter) {
 		final Iterable<File> urls = JakeUtilsIterable.concatLists(testClassDirs,
 				this.classpath);
 		final Collection<Class> testClasses;
 
 		final URLClassLoader classLoader = JakeUtilsClassloader.createFrom(urls,
 				ClassLoader.getSystemClassLoader().getParent());
+		final FileFilter fileFilter = new FileFilter() {
+
+			@Override
+			public boolean accept(File pathname) {
+				for (final File testClassDir : testClassDirs ) {
+					if (pathname.equals(testClassDir)) {
+						return true;
+					}
+				}
+				return false;
+			}
+		};
 		testClasses = getJunitTestClassesInClassLoader(classLoader, fileFilter);
 
 		final Collection<Class> effectiveClasses = new LinkedList<Class>();
@@ -168,7 +178,7 @@ public class JakeJUnit {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static Collection<Class> getJunitTestClassesInClassLoader(
+	private static Collection<Class> getJunitTestClassesInClassLoader(
 			URLClassLoader classLoader, FileFilter entryFilter) {
 		final Iterable<Class<?>> classes = JakeUtilsClassloader.getAllTopLevelClasses(
 				classLoader, entryFilter);

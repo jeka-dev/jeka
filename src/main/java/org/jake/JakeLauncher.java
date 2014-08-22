@@ -11,6 +11,8 @@ import org.jake.utils.JakeUtilsString;
 
 public class JakeLauncher {
 
+	private static final String DEFAULT_METHOD = "base";
+
 	public static void main(String[] args) {
 		displayIntro();
 		JakeLog.info("Java Home : " + System.getProperty("java.home"));
@@ -35,6 +37,9 @@ public class JakeLauncher {
 			if (!arg.startsWith("-")) {
 				result.add(arg);
 			}
+		}
+		if (result.isEmpty()) {
+			result.add(DEFAULT_METHOD);
 		}
 		return result;
 	}
