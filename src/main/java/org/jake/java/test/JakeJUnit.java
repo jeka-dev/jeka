@@ -21,6 +21,7 @@ import org.jake.java.test.JakeTestSuiteResult.ExceptionDescription;
 import org.jake.java.utils.JakeUtilsClassloader;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
+import org.jake.utils.JakeUtilsString;
 
 public class JakeJUnit {
 
@@ -318,7 +319,7 @@ public class JakeJUnit {
 				}
 			}
 		}
-		return JakeUtilsIterable.toString(Arrays.asList(result), ".");
+		return JakeUtilsString.toString(Arrays.asList(result), ".");
 	}
 
 }

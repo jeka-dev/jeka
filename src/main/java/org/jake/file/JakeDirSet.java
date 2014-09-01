@@ -11,7 +11,7 @@ import java.util.zip.Deflater;
 
 import org.jake.utils.JakeUtilsIterable;
 
-public final class JakeDirSet implements Iterable<JakeDir> {
+public final class JakeDirSet implements Iterable<File> {
 
 	private final List<JakeDir> dirViews;
 
@@ -68,8 +68,8 @@ public final class JakeDirSet implements Iterable<JakeDir> {
 
 
 	@Override
-	public Iterator<JakeDir> iterator() {
-		return dirViews.iterator();
+	public Iterator<File> iterator() {
+		return listFiles().iterator();
 	}
 
 	public int copyTo(JakeDir destinationDir) {
@@ -89,7 +89,7 @@ public final class JakeDirSet implements Iterable<JakeDir> {
 	public JakeDirSet withFilter(JakeFileFilter filter) {
 		final List<JakeDir> list = new LinkedList<JakeDir>();
 		for (final JakeDir dirView : this.dirViews) {
-			list.add(dirView.filter(filter));
+			list.add(dirView.withFilter(filter));
 		}
 		return new JakeDirSet(list);
 	}
@@ -105,7 +105,7 @@ public final class JakeDirSet implements Iterable<JakeDir> {
 		return result;
 	}
 
-	public List<JakeDir> listJakeDir() {
+	public List<JakeDir> listJakeDirs() {
 		return dirViews;
 	}
 
@@ -150,7 +150,7 @@ public final class JakeDirSet implements Iterable<JakeDir> {
 	}
 
 	public boolean exist() {
-		for (final JakeDir jakeDir : this) {
+		for (final JakeDir jakeDir : this.dirViews) {
 			if (jakeDir.exists()) {
 				return true;
 			}

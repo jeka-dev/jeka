@@ -2,6 +2,7 @@ package org.jake.utils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -96,6 +97,36 @@ public final class JakeUtilsString {
 		} catch (final UnsupportedEncodingException e) {
 			throw new IllegalArgumentException("Illegal Hex string", e);
 		}
+	}
+
+	public static boolean equalsAny(String stringToMatch, String...stringToCheckEquals) {
+		for (final String candidate : stringToCheckEquals) {
+			if (stringToMatch.equals(candidate)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean endsWithAny(String stringToMatch, String...stringToCheckEquals) {
+		for (final String candidate : stringToCheckEquals) {
+			if (stringToMatch.endsWith(candidate)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static String toString(Iterable<?> it, String separator) {
+		final StringBuilder builder = new StringBuilder();
+		final Iterator<?> iterator = it.iterator();
+		while (iterator.hasNext()) {
+			builder.append(iterator.next().toString());
+			if (iterator.hasNext()) {
+				builder.append(separator);
+			}
+		}
+		return builder.toString();
 	}
 
 

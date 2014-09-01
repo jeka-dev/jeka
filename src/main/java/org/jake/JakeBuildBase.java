@@ -6,7 +6,6 @@ import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.jake.file.JakeDir;
 import org.jake.file.utils.JakeUtilsFile;
@@ -30,14 +29,6 @@ public class JakeBuildBase {
 
 	void setBaseDir(File baseDir) {
 		this.baseDirFile = baseDir;
-	}
-
-	/**
-	 * The default level to use for the default logger when
-	 * 'java.util.logging.level' system property is not set.
-	 */
-	protected Level getDefaultLogLevel() {
-		return Level.INFO;
 	}
 
 	/**
@@ -84,22 +75,23 @@ public class JakeBuildBase {
 	 * The output directory where all the final and intermediate
 	 * artefacts are generated.
 	 */
-	protected JakeDir buildOuputDir() {
+	protected JakeDir ouputDir() {
 		return baseDir().sub("build/output").createIfNotExist();
 	}
 
-	protected File buildOuputDir(String relativePath) {
-		return buildOuputDir().file(relativePath);
+	/**
+	 * Returns the file located at the specified path relative to the output directory.
+	 */
+	protected File ouputDir(String relativePath) {
+		return ouputDir().file(relativePath);
 	}
-
-
 
 	// ------------ Operations ------------
 
 	@JakeDoc("Clean the output directory.")
 	public void clean() {
-		JakeLog.start("Cleaning output directory " + buildOuputDir().root().getPath() );
-		JakeUtilsFile.deleteDirContent(buildOuputDir().root());
+		JakeLog.start("Cleaning output directory " + ouputDir().root().getPath() );
+		JakeUtilsFile.deleteDirContent(ouputDir().root());
 		JakeLog.done();
 	}
 

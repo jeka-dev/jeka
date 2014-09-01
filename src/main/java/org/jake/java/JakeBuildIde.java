@@ -31,7 +31,7 @@ public class JakeBuildIde extends JakeBuildBase {
 	public void simpleJar() {
 		JakeLog.start("Creating jar file");
 		final List<File> classDirs = getProjectCompiledClasses();
-		final File jarFile = buildOuputDir().file(jarBaseName() + ".jar");
+		final File jarFile = ouputDir().file(jarBaseName() + ".jar");
 		JakeUtilsFile.zipDir(jarFile, zipLevel(), classDirs);
 		JakeLog.done(jarFile.getPath() + " created");
 	}

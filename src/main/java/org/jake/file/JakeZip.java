@@ -4,26 +4,25 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.zip.Deflater;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import org.jake.file.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsIterable;
 
 public final class JakeZip {
 
-	private final List<? extends Object> itemsToZip;
+	private final Iterable<? extends Object> itemsToZip;
 
-	private final List<File> archivestoMerge;
+	private final Iterable<File> archivestoMerge;
 
-	private JakeZip(List<? extends Object> itemsToZip, List<File> archivestoMerge) {
+	private JakeZip(Iterable<? extends Object> itemsToZip, Iterable<File> archivestoMerge) {
 		this.itemsToZip = itemsToZip;
 		this.archivestoMerge = archivestoMerge;
 	}
 
-	private JakeZip(List<? extends Object> itemsToZip) {
+	private JakeZip(Iterable<? extends Object> itemsToZip) {
 		this.itemsToZip = itemsToZip;
 		this.archivestoMerge = Collections.emptyList();
 	}
@@ -32,39 +31,18 @@ public final class JakeZip {
 		return new JakeZip(Arrays.asList( fileOrDirs));
 	}
 
-	public static JakeZip of(JakeDir ...dirViews) {
-		return new JakeZip(Arrays.asList(dirViews));
+	public static JakeZip of(JakeDirSet ...jakeDirSets) {
+		return new JakeZip(Arrays.asList(jakeDirSets));
 	}
 
-	public static JakeZip of(JakeDirSet ...dirViews) {
-		return new JakeZip(Arrays.asList(dirViews));
+	public static JakeZip of(JakeDir ...jakeDirs) {
+		return new JakeZip(Arrays.asList(jakeDirs));
 	}
 
-	public JakeZip and(List<File> files) {
-		final List<Object> items = new LinkedList<Object>(this.itemsToZip);
-		final List<File> archives = new LinkedList<File>(this.archivestoMerge);
-		items.addAll(files);
-		return new JakeZip(items, archives);
-	}
 
-	public JakeZip and(File ...fileOrDirs) {
-		return and(Arrays.asList(fileOrDirs));
-	}
-
-	public JakeZip and(JakeDir ...dirViews) {
-		return and(JakeDirSet.of(dirViews).listFiles());
-
-	}
-
-	public JakeZip and(JakeDirSet ...dirViews) {
-		return and(JakeDirSet.toFiles(dirViews));
-	}
-
-	public JakeZip merge(List<File> archiveFiles) {
-		final List<Object> items = new LinkedList<Object>(this.itemsToZip);
-		final List<File> archives = new LinkedList<File>(this.archivestoMerge);
-		archives.addAll(archiveFiles);
-		return new JakeZip(items, archives);
+	@SuppressWarnings("unchecked")
+	public JakeZip merge(Iterable<File> archiveFiles) {
+		return new JakeZip(itemsToZip, JakeUtilsIterable.chain(this.archivestoMerge, archiveFiles));
 	}
 
 	public void create(File zipFile) {
@@ -79,17 +57,13 @@ public final class JakeZip {
 		for (final Object item : this.itemsToZip) {
 			if (item instanceof File) {
 				final File file = (File) item;
-				if (file.isDirectory()) {
-					JakeUtilsFile.addZipEntry(zos, file, file);
-				} else {
-					JakeUtilsFile.addZipEntry(zos, file, file);
-				}
+				JakeUtilsFile.addZipEntry(zos, file, file.getParentFile());
 			} else if (item instanceof JakeDir) {
 				final JakeDir dirView = (JakeDir) item;
 				addDirView(zos, dirView);
 			} else if (item instanceof JakeDirSet) {
 				final JakeDirSet dirViews = (JakeDirSet) item;
-				for (final JakeDir dirView : dirViews) {
+				for (final JakeDir dirView : dirViews.listJakeDirs()) {
 					addDirView(zos, dirView);
 				}
 			} else {

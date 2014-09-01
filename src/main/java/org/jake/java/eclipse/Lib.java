@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jake.java.JakeClasspath;
 import org.jake.java.JakeLocalDependencyResolver;
 
 class Lib {
@@ -36,7 +37,8 @@ class Lib {
 			case TEST : testOnlys.add(lib.file); break;
 			}
 		}
-		return new JakeLocalDependencyResolver(compileAndRuntimes, runtimeOnlys, testOnlys, compileOnlys);
+		return new JakeLocalDependencyResolver(JakeClasspath.of(compileAndRuntimes), JakeClasspath.of(runtimeOnlys),
+				JakeClasspath.of(testOnlys), JakeClasspath.of(compileOnlys));
 	}
 
 

@@ -23,7 +23,7 @@ public class DotClasspathTest {
 	@Test
 	public void testSourceDirs() throws URISyntaxException {
 		final JakeDirSet dirSet = sample().sourceDirs(structure(), Sources.ALL_PROD).prodSources;
-		assertEquals(2, dirSet.listJakeDir().size());
+		assertEquals(2, dirSet.listJakeDirs().size());
 	}
 
 	@Test
@@ -38,7 +38,7 @@ public class DotClasspathTest {
 		final JakeJavaDependencyResolver resolver = Lib.toDependencyResolver(libs);
 		assertEquals(6, libs.size());
 		System.out.println(resolver.test());
-		assertEquals(6, resolver.test().size());
+		assertEquals(6, resolver.test().files().size());
 	}
 
 	private DotClasspath sample() throws URISyntaxException {

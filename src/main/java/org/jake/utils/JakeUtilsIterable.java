@@ -189,17 +189,7 @@ public class JakeUtilsIterable {
 	}
 
 
-	public static String toString(Iterable<?> it, String separator) {
-		final StringBuilder builder = new StringBuilder();
-		final Iterator<?> iterator = it.iterator();
-		while (iterator.hasNext()) {
-			builder.append(iterator.next().toString());
-			if (iterator.hasNext()) {
-				builder.append(separator);
-			}
-		}
-		return builder.toString();
-	}
+
 
 
 

@@ -13,10 +13,16 @@ import javax.tools.ToolProvider;
 import org.jake.JakeException;
 import org.jake.JakeLog;
 import org.jake.file.JakeDir;
+import org.jake.file.JakeDirSet;
+import org.jake.file.JakeFileFilter;
 import org.jake.file.utils.JakeUtilsFile;
 
 
 public final class JakeJavaCompiler {
+
+	public static final JakeFileFilter JAVA_SOURCE_ONLY_FILTER = JakeFileFilter
+			.include("**/*.java");
+
 
 	private final JavaCompiler compiler;
 	private final StandardJavaFileManager fileManager;
@@ -24,21 +30,23 @@ public final class JakeJavaCompiler {
 	private final List<String> options = new LinkedList<String>();
 	private final List<File> javaSourceFiles = new LinkedList<File>();
 
-	public JakeJavaCompiler(JavaCompiler compiler) {
+	private final File outputDir;
+
+	private String classpath = "";
+
+	public JakeJavaCompiler(JavaCompiler compiler, File outputDir) {
 		super();
+		this.setOutputDirectory(outputDir);
+		this.outputDir = outputDir;
 		this.compiler = compiler;
 		this.fileManager = compiler.getStandardFileManager(null, null, null);
 	}
 
-	public JakeJavaCompiler() {
-		this(getDefaultOrFail());
+	public static JakeJavaCompiler ofOutput(File outputDir) {
+		return new JakeJavaCompiler(getDefaultOrFail(), outputDir);
 	}
 
-	public void setOutputDirectory(JakeDir dir) {
-		setOutputDirectory(dir.root());
-	}
-
-	public void setOutputDirectory(File dir) {
+	private void setOutputDirectory(File dir) {
 		if (!dir.isDirectory()) {
 			throw new IllegalArgumentException(dir.getAbsolutePath()
 					+ " is not a directory.");
@@ -47,15 +55,34 @@ public final class JakeJavaCompiler {
 		options.add(dir.getAbsolutePath());
 	}
 
-	public void setClasspath(Iterable<File> files) {
+	public JakeJavaCompiler setClasspath(Iterable<File> files) {
 		options.add("-cp");
-		options.add(JakeUtilsFile.toPathString(files, ";"));
+		this.classpath = JakeUtilsFile.toPathString(files, ";");
+		options.add(this.classpath);
+		return this;
 	}
 
-	public void addSourceFiles(Iterable<File> files) {
+	public JakeJavaCompiler addOption(String option) {
+		if (option.isEmpty()) {
+			return this;
+		}
+		options.add(option);
+		return this;
+	}
+
+	private JakeJavaCompiler addSourceFiles(Iterable<File> files) {
 		for (final File file : files) {
 			this.javaSourceFiles.add(file);
 		}
+		return this;
+	}
+
+	public JakeJavaCompiler addSourceFiles(JakeDirSet jakeDirSet) {
+		return addSourceFiles(jakeDirSet.withFilter(JAVA_SOURCE_ONLY_FILTER).listFiles());
+	}
+
+	public JakeJavaCompiler addSourceFiles(JakeDir jakeDir) {
+		return addSourceFiles(jakeDir.withFilter(JAVA_SOURCE_ONLY_FILTER).listFiles());
 	}
 
 
@@ -63,25 +90,22 @@ public final class JakeJavaCompiler {
 		final Iterable<? extends JavaFileObject> javaFileObjects =
 				fileManager.getJavaFileObjectsFromFiles(this.javaSourceFiles);
 		final CompilationTask task = compiler.getTask(null, null, null, options, null, javaFileObjects);
-		JakeLog.flush();
+		JakeLog.startAndNextLine(("Compiling " + javaSourceFiles.size()
+				+ " source files to " + outputDir.getPath()));
+		JakeLog.info("using classpath [" + classpath + "]" );
 		final boolean result = task.call();
-		JakeLog.flush();
-		System.err.flush();
-		return result;
+		JakeLog.done();
+		if (!result) {
+			return false;
+		}
+		return true;
+
 	}
 
 	public void compileOrFail() {
-		final Iterable<? extends JavaFileObject> javaFileObjects =
-				fileManager.getJavaFileObjectsFromFiles(this.javaSourceFiles);
-		final CompilationTask task = compiler.getTask(null, null, null, options, null, javaFileObjects);
-		JakeLog.flush();
-		final boolean result = task.call();
-		JakeLog.flush();
-		System.err.flush();
-		if (!result) {
-			throw new JakeException("Compilation failure.");
+		if (!compile()) {
+			throw new JakeException("Compilation failed.");
 		}
-
 	}
 
 

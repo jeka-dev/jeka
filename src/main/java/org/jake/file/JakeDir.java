@@ -102,7 +102,7 @@ public final class JakeDir implements Iterable<File> {
 	}
 
 
-	public JakeDir filter(JakeFileFilter filter) {
+	public JakeDir withFilter(JakeFileFilter filter) {
 		if (this.filter == JakeFileFilter.ACCEPT_ALL) {
 			return new JakeDir(base, filter);
 		}
@@ -110,11 +110,11 @@ public final class JakeDir implements Iterable<File> {
 	}
 
 	public JakeDir include(String ... antPatterns) {
-		return filter(JakeFileFilter.include(antPatterns));
+		return withFilter(JakeFileFilter.include(antPatterns));
 	}
 
 	public JakeDir exclude(String ... antPatterns) {
-		return filter(JakeFileFilter.exclude(antPatterns));
+		return withFilter(JakeFileFilter.exclude(antPatterns));
 	}
 
 	public JakeDirSet and(JakeDir dirView) {

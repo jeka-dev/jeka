@@ -35,7 +35,6 @@ class ProjectBuilder {
 
 	private final File moduleBaseDir;
 
-	private final String moduleRelativePath;
 
 	/**
 	 * Create a module builder where is specified the base directory of the module along
@@ -45,13 +44,11 @@ class ProjectBuilder {
 	public ProjectBuilder(File buildBaseParentDir, File moduleBaseDir) {
 		super();
 		this.moduleBaseDir = moduleBaseDir;
-		this.moduleRelativePath = JakeUtilsFile.getRelativePath(buildBaseParentDir, moduleBaseDir);
 	}
 
 	public ProjectBuilder(File moduleBaseDir) {
 		super();
 		this.moduleBaseDir = moduleBaseDir;
-		this.moduleRelativePath = moduleBaseDir.getName();
 	}
 
 
@@ -60,7 +57,7 @@ class ProjectBuilder {
 		final long start = System.nanoTime();
 
 		final String pattern = "-";
-		final String intro = "Building module : " + moduleRelativePath;
+		final String intro = "Building module : " + moduleBaseDir.getAbsolutePath();
 		JakeLog.info(JakeUtilsString.repeat(pattern, intro.length() ));
 		JakeLog.info(intro);
 		JakeLog.info(JakeUtilsString.repeat(pattern, intro.length() ));
@@ -72,9 +69,9 @@ class ProjectBuilder {
 
 		final float duration = JakeUtilsTime.durationInSeconds(start);
 		if (result) {
-			JakeLog.info("--> Module " + moduleRelativePath + " processed with success in " + duration + " seconds.");
+			JakeLog.info("--> Module " + moduleBaseDir.getAbsolutePath() + " processed with success in " + duration + " seconds.");
 		} else {
-			JakeLog.info("--> Module " + moduleRelativePath + " failed after " + duration + " seconds.");
+			JakeLog.info("--> Module " + moduleBaseDir.getAbsolutePath() + " failed after " + duration + " seconds.");
 		}
 		return result;
 	}
@@ -96,23 +93,17 @@ class ProjectBuilder {
 					+ " directory has not been found in this project. "
 					+ " This directory is supposed to contains build scripts (as form of java source");
 		}
-		final JakeJavaCompiler javaCompilation = new JakeJavaCompiler();
-		javaCompilation.addSourceFiles(buildSource.include("**/*.java"));
-		javaCompilation.setClasspath(classpath);
 		final File buildBinDir = new File(moduleBaseDir, BUILD_BIN_DIR);
 		if (!buildBinDir.exists()) {
 			buildBinDir.mkdirs();
 		}
-		javaCompilation.setOutputDirectory(buildBinDir);
-		JakeLog.info("Compiling build sources to "
-				+ buildBinDir.getAbsolutePath() + "...");
-		JakeLog.info("using classpath " + System.getProperty("java.class.path"));
+		JakeLog.info("Creating build binaries ...");
 		final long start = System.nanoTime();
-		final boolean result = javaCompilation.compile();
+		JakeJavaCompiler.ofOutput(buildBinDir)
+		.addSourceFiles(buildSource)
+		.setClasspath(classpath)
+		.compileOrFail();
 		JakeLog.info("Done in " + JakeUtilsTime.durationInSeconds(start) + " seconds.", "");
-		if (result == false) {
-			JakeLog.error("Build script can't be compiled.");
-		}
 	}
 
 	private boolean launch(Iterable<File> buildClasspath,
@@ -126,7 +117,7 @@ class ProjectBuilder {
 
 		JakeLog.info("Use build class '" + buildClass.getCanonicalName()
 				+ "' with methods : "
-				+ JakeUtilsIterable.toString(methods, ", ") + ".");
+				+ JakeUtilsString.toString(methods, ", ") + ".");
 		JakeLog.info("Using classpath : " + buildClasspath);
 		if (JakeOptions.hasFieldOptions(buildClass)) {
 			JakeLog.info("With options : " + JakeOptions.fieldOptionsToString(build));

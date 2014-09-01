@@ -240,7 +240,7 @@ public final class JakeUtilsReflect {
 	}
 
 	public static String toString(Class<?>...classes) {
-		return "[" + JakeUtilsIterable.toString(Arrays.asList(classes), ", ") + "]";
+		return "[" + JakeUtilsString.toString(Arrays.asList(classes), ", ") + "]";
 	}
 
 

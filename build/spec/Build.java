@@ -1,10 +1,11 @@
 
 import java.io.File;
 
-import org.jake.JakeDoc;
 import org.jake.JakeLog;
+import org.jake.file.JakeDirSet;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeBuildJar;
+import org.jake.java.JakeJavaCompiler;
 import org.jake.utils.JakeUtilsTime;
 
 public class Build extends JakeBuildJar {
@@ -25,22 +26,22 @@ public class Build extends JakeBuildJar {
 	}
 
 	@Override
-	@JakeDoc("Compile, unit test and package Jake application in a distribution file.")
-	public void base() {
-		super.base();
-		distrib();
+	protected JakeJavaCompiler compiler(JakeDirSet sources, File outputDir,
+			Iterable<File> classpath) {
+		return super.compiler(sources, outputDir, classpath); //.addOption("-Xlint:unchecked");
 	}
 
-	private void distrib() {
-		JakeLog.start("Packaging distrib");
-		final File distribDir = buildOuputDir("jake-distrib");
+	@Override
+	protected void afterPackJars() {
+		final File distribDir = ouputDir("jake-distrib");
+		final File distripZipFile = ouputDir("jake-distrib.zip");
+		JakeLog.start("Creating distrib " + distripZipFile.getPath());
 		JakeUtilsFile.copyDir(baseDir("src/main/dist"), distribDir, null, true);
-		final File jarFile = buildOuputDir(jarName()+".jar");
+		final File jarFile = ouputDir(jarName()+".jar");
 		JakeUtilsFile.copyFileToDir(jarFile, distribDir);
-		JakeUtilsFile.copyFileToDir(buildOuputDir(jarName() + "-sources.jar"), distribDir);
-		final File distripZipFile = buildOuputDir("jake-distrib.zip");
+		JakeUtilsFile.copyFileToDir(ouputDir(jarName() + "-sources.jar"), distribDir);
 		JakeUtilsFile.zipDir(distripZipFile, zipLevel(), distribDir);
-		JakeLog.done(distripZipFile.getPath() + " created");
+		JakeLog.done();
 	}
 
 }

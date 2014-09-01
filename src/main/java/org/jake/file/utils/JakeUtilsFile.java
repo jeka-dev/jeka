@@ -410,6 +410,9 @@ public final class JakeUtilsFile {
 	 */
 	public static void addZipEntry(ZipOutputStream zos, File fileToZip,
 			File baseFolder) {
+		if (!baseFolder.isDirectory()) {
+			throw new IllegalArgumentException(baseFolder.getPath() + " is not a directory." );
+		}
 
 		if (fileToZip.isDirectory()) {
 			final File[] files = fileToZip.listFiles();
@@ -418,9 +421,9 @@ public final class JakeUtilsFile {
 			}
 		} else {
 			final String filePathToZip = canonicalPath(fileToZip);
-			String entryName = filePathToZip.substring(
-					canonicalPath(baseFolder).length() + 1,
-					filePathToZip.length());
+			final int start = canonicalPath(baseFolder).length() + 1;
+			final int end = filePathToZip.length();
+			String entryName = filePathToZip.substring(start, end);
 			entryName = entryName.replace(File.separatorChar, '/');
 			final FileInputStream inputStream;
 			try {

@@ -5,6 +5,7 @@ import java.util.zip.Deflater;
 
 import org.jake.JakeDoc;
 import org.jake.JakeLog;
+import org.jake.file.JakeDirSet;
 import org.jake.file.JakeZip;
 import org.jake.file.utils.JakeUtilsFile;
 
@@ -20,45 +21,53 @@ public class JakeBuildJar extends JakeBuildJava implements JakeJarModule {
 
 	@Override
 	public File jarFile() {
-		return buildOuputDir(jarName() + ".jar");
+		return ouputDir(jarName() + ".jar");
 	}
 
 	@Override
 	public File jarSourceFile() {
-		return buildOuputDir(jarName() + "-sources.jar");
+		return ouputDir(jarName() + "-sources.jar");
 	}
 
 	@Override
 	public File jarTestFile() {
-		return buildOuputDir(jarName() + "-test.jar");
+		return ouputDir(jarName() + "-test.jar");
 	}
 
 	@Override
 	public File jarTestSourceFile() {
-		return buildOuputDir(jarName() + "-test-sources.jar");
+		return ouputDir(jarName() + "-test-sources.jar");
 	}
 
 	public File fatJarFile() {
-		return buildOuputDir(jarName() + "-fat.jar");
+		return ouputDir(jarName() + "-fat.jar");
 	}
 
 	@JakeDoc({	"Create many jar files containing respectively binaries, sources, test binaries and test sources.",
 	"The jar containing the binary is the one that will be used as a depe,dence for other project."})
-	public void jar() {
-		JakeLog.startAndNextLine("Packaging as jar");
-		final JakeZip base = JakeZip.of(classDir());
-		JakeLog.info("Creating file : " + jarFile().getPath());
-		base.create(jarFile(), zipLevel());
-		JakeLog.info("Creating file : " + jarSourceFile().getPath());
-		JakeZip.of(sourceDirs(), resourceDirs()).create(jarSourceFile(), zipLevel());
+	public void pack() {
+		JakeLog.startAndNextLine("Packaging module");
+		makeZip(JakeDirSet.of(classDir()), jarFile());
+		makeZip(sourceDirs().and(resourceDirs()), jarSourceFile());
 		if (!skipTests) {
-			JakeLog.info("Creating file : " + jarTestFile().getPath());
-			JakeZip.of(testClassDir()).create(jarTestFile(), zipLevel());
+			makeZip(JakeDirSet.of(testClassDir()), jarTestFile());
 		}
-		JakeLog.info("Creating file : " + jarTestSourceFile().getPath());
-		JakeZip.of(testSourceDirs(), testResourceDirs()).create(jarTestSourceFile(), zipLevel());
-
+		makeZip(testSourceDirs().and(testResourceDirs()), jarTestSourceFile());
+		afterPackJars();
 		JakeLog.done();
+	}
+
+	protected final void makeZip(JakeDirSet dirSet, File dest) {
+		JakeLog.start("Creating file : " + dest.getPath());
+		dirSet.zip(dest, zipLevel());
+		JakeLog.done();
+	}
+
+	/**
+	 * Override this method if you want to add some extra distribution files.
+	 */
+	protected void afterPackJars() {
+		// Do nothing by default.
 	}
 
 	@JakeDoc("Create jar file containing the binaries for itself all its dependencies.")
@@ -71,16 +80,16 @@ public class JakeBuildJar extends JakeBuildJava implements JakeJarModule {
 	@Override
 	public void base() {
 		super.base();
-		jar();
+		pack();
 	}
 
 	@JakeDoc("Create MD5 check sum for both regular and fat jar files.")
 	public void checksum() {
-		final File file = buildOuputDir(jarName() + ".md5");
+		final File file = ouputDir(jarName() + ".md5");
 		JakeLog.info("Creating file : " + file);
 		JakeUtilsFile.writeString(file, JakeUtilsFile.createChecksum(jarFile()), false);
 		if (fatJarFile().exists()) {
-			final File fatSum = buildOuputDir(jarName() + "-fat" + ".md5");
+			final File fatSum = ouputDir(jarName() + "-fat" + ".md5");
 			JakeLog.info("Creating file : " + fatSum);
 			JakeUtilsFile.writeString(fatSum, JakeUtilsFile.createChecksum(fatJarFile()), false);
 		}

@@ -9,9 +9,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.JakeOptions;
 import org.jake.JakeLog;
+import org.jake.JakeOptions;
 import org.jake.file.JakeDirSet;
+import org.jake.file.JakeZip;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.utils.JakeUtilsClassloader;
 import org.jake.java.utils.JakeUtilsJdk;
@@ -48,12 +49,26 @@ public class JakeJavadoc {
 		return new JakeJavadoc(srcDirs, doclet, classpath, extraArgs);
 	}
 
-	public void process(File outputDir) {
+	private void doProcess(File outputDir) {
+		JakeLog.startAndNextLine("Generating javadoc");
 		final String[] args = toArguments(outputDir);
 		JakeLog.nextLine();
 		execute(doclet, new PrintWriter(JakeLog.getInfoWriter()),JakeLog.getWarnWriter(),JakeLog.getErrorWriter(), args);
-		JakeLog.getWarnWriter().flush();
 	}
+
+	public void processAndZip(File outputDir, File zip) {
+		doProcess(outputDir);
+		if (outputDir.exists()) {
+			JakeZip.of(outputDir).create(zip);
+		}
+		JakeLog.done();
+	}
+
+	public void process(File outputDir) {
+		doProcess(outputDir);
+		JakeLog.done();
+	}
+
 
 	private String[] toArguments(File outputDir) {
 		final List<String> list = new LinkedList<String>();
