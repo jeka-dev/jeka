@@ -8,7 +8,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-public class JakeTestReportBuilder {
+class JakeTestReportBuilder {
 
 	private static final XMLOutputFactory factory = XMLOutputFactory.newInstance();
 

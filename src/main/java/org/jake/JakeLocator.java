@@ -4,8 +4,8 @@ import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+import org.jake.java.JakeClasspath;
 import org.jake.java.utils.JakeUtilsClassloader;
-import org.jake.utils.JakeUtilsIterable;
 
 public class JakeLocator {
 
@@ -20,7 +20,7 @@ public class JakeLocator {
 		for (final URL url : urls) {
 			final File file = new File(url.getFile());
 			final URLClassLoader classLoader = JakeUtilsClassloader.createFrom(
-					JakeUtilsIterable.single(file), ClassLoader
+					JakeClasspath.of(file), ClassLoader
 					.getSystemClassLoader().getParent());
 			try {
 				classLoader.loadClass(JakeLauncher.class.getName());

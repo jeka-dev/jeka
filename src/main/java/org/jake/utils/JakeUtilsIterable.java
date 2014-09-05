@@ -11,18 +11,6 @@ import java.util.Map;
 
 public class JakeUtilsIterable {
 
-
-
-	public static <T> List<T> single(T item) {
-		if (item == null) {
-			return Collections.emptyList();
-		}
-		final List<T> result = new LinkedList<T>();
-		result.add(item);
-		return Collections.unmodifiableList(result);
-	}
-
-
 	public static <T> List<T> toList(Iterable<T> it) {
 		if (it instanceof List) {
 			return (List<T>) it;

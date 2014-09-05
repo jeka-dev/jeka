@@ -1,11 +1,10 @@
 package org.jake.java;
 
 import java.io.File;
+import java.util.Arrays;
 
 import org.jake.file.JakeDir;
 import org.jake.file.JakeDirSet;
-import org.jake.file.utils.JakeUtilsFile;
-import org.jake.utils.JakeUtilsIterable;
 
 public final class JakeLocalDependencyResolver extends
 JakeJavaDependencyResolver {
@@ -60,36 +59,20 @@ JakeJavaDependencyResolver {
 				JakeClasspath.of(), JakeClasspath.of(), JakeClasspath.of());
 	}
 
-	public JakeLocalDependencyResolver withRuntimeOnly(JakeDirSet dirViews) {
-		return withRuntimeOnly(dirViews.listFiles());
+	public JakeLocalDependencyResolver withRuntimeOnly(File... files) {
+		return withRuntimeOnly(Arrays.asList(files));
 	}
 
-	public JakeLocalDependencyResolver withTest(JakeDirSet dirViews) {
-		return withTest(dirViews.listFiles());
+	public JakeLocalDependencyResolver withTest(File... files) {
+		return withTest(Arrays.asList(files));
 	}
 
-	public JakeLocalDependencyResolver withCompileOnly(JakeDirSet dirViews) {
-		return withCompileOnly(dirViews.listFiles());
+	public JakeLocalDependencyResolver withCompileOnly(File... files) {
+		return withCompileOnly(Arrays.asList(files));
 	}
 
-	public JakeLocalDependencyResolver withCompileAndRuntime(JakeDirSet dirViews) {
-		return withCompileAndRuntime(dirViews.listFiles());
-	}
-
-	public JakeLocalDependencyResolver withRuntimeOnly(File file) {
-		return withRuntimeOnly(JakeUtilsIterable.single(file));
-	}
-
-	public JakeLocalDependencyResolver withTest(File file) {
-		return withTest(JakeUtilsIterable.single(file));
-	}
-
-	public JakeLocalDependencyResolver withCompileOnly(File file) {
-		return withCompileOnly(JakeUtilsIterable.single(file));
-	}
-
-	public JakeLocalDependencyResolver withCompileAndRuntime(File file) {
-		return withCompileAndRuntime(JakeUtilsIterable.single(file));
+	public JakeLocalDependencyResolver withCompileAndRuntime(File ... files) {
+		return withCompileAndRuntime(Arrays.asList(files));
 	}
 
 	public JakeLocalDependencyResolver withRuntimeOnly(Iterable<File> files) {
@@ -165,8 +148,6 @@ JakeJavaDependencyResolver {
 		return compileAndRuntimeLibs.with(runtimeOnlyLibs);
 	}
 
-	public static String asString(Iterable<File> files) {
-		return JakeUtilsFile.toPathString(files, ";");
-	}
+
 
 }

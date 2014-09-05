@@ -16,14 +16,21 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jake.JakeLog;
+import org.jake.JakeOptions;
 import org.jake.java.JakeClassFilter;
+import org.jake.java.JakeClasspath;
 import org.jake.java.test.JakeTestSuiteResult.ExceptionDescription;
 import org.jake.java.utils.JakeUtilsClassloader;
+import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
 
-public class JakeJUnit {
+public final class JakeJUnit {
+
+	public enum JunitReportDetail {
+		NONE, BASIC, FULL;
+	}
 
 	private static final String JUNIT4_RUNNER_CLASS_NAME = "org.junit.runner.JUnitCore";
 
@@ -40,28 +47,37 @@ public class JakeJUnit {
 	private static final Class<?> ARRAY_OF_CLASSES_TYPE = new Class[0]
 			.getClass();
 
-	private final List<File> classpath;
+	private final JakeClasspath classpath;
 
-	private JakeJUnit(Iterable<File> classpath) {
-		this.classpath = JakeUtilsIterable.toList(classpath);
+	private final JunitReportDetail reportDetail;
+
+	private final File reportDir;
+
+	private JakeJUnit(Iterable<File> classpath, JunitReportDetail reportDetail, File reportDir) {
+		this.classpath = JakeClasspath.of(classpath);
+		this.reportDetail = reportDetail;
+		this.reportDir = reportDir;
 	}
 
 	@SuppressWarnings("unchecked")
 	public static JakeJUnit ofClasspath(File dir, Iterable<File> dirs) {
-		return new JakeJUnit(JakeUtilsIterable.concatToList(dir, dirs));
+		return new JakeJUnit(JakeUtilsIterable.concatToList(dir, dirs), JunitReportDetail.NONE, null);
 	}
 
 	public static JakeJUnit ofCclasspath(Iterable<File> dirs) {
-		return new JakeJUnit(dirs);
+		return new JakeJUnit(dirs, JunitReportDetail.NONE, null);
 	}
 
 	public JakeJUnit withExtraLibsInClasspath(File ...files) {
-		return new JakeJUnit(JakeUtilsIterable.chain(this.classpath, files));
+		return withExtraLibsInClasspath(Arrays.asList(files));
 	}
 
-	@SuppressWarnings("unchecked")
 	public JakeJUnit withExtraLibsInClasspath(Iterable<File> files) {
-		return new JakeJUnit(JakeUtilsIterable.concatLists(this.classpath, files));
+		return new JakeJUnit(JakeClasspath.of(this.classpath).with(files), this.reportDetail, this.reportDir);
+	}
+
+	public JakeJUnit withReport(JunitReportDetail reportDetail, File reportDir) {
+		return new JakeJUnit(this.classpath, reportDetail, reportDir);
 	}
 
 	public JakeTestSuiteResult launchAll(File... testClassDirs) {
@@ -102,7 +118,6 @@ public class JakeJUnit {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public JakeTestSuiteResult launch(Iterable<Class> classes) {
-		JakeLog.flush();
 		final String name = getSuiteName(classes);
 
 		if (!classes.iterator().hasNext()) {
@@ -111,29 +126,61 @@ public class JakeJUnit {
 		final long start = System.nanoTime();
 		final ClassLoader classLoader = classes.iterator().next()
 				.getClassLoader();
-		if (isJunit4In(classLoader)) {
-			final Class<?>[] classArray = JakeUtilsIterable.toArray(classes, Class.class);
-			final Class<?> junitCoreClass = JakeUtilsClassloader.loadClass(classLoader,
-					JUNIT4_RUNNER_CLASS_NAME);
-			final Method runClassesMethod = JakeUtilsReflect.getMethod(junitCoreClass,
-					"runClasses", ARRAY_OF_CLASSES_TYPE);
-			final Object junit4Result = JakeUtilsReflect.invoke(null, runClassesMethod,
-					(Object) classArray);
-			final long end = System.nanoTime();
-			final long duration = (end - start) / 1000000;
-			return fromJunit4Result(name, junit4Result, duration);
-		} else if (isJunit3In(classLoader)) {
-			final Object suite = createJunit3TestSuite(classLoader, classes);
-			final Class testResultClass = JakeUtilsClassloader.loadClass(classLoader, JUNIT3_TEST_RESULT_CLASS_NAME);
-			final Object testResult = JakeUtilsReflect.newInstance(testResultClass);
-			final Method runMethod = JakeUtilsReflect.getMethod(suite.getClass(),
-					"run", testResultClass);
-			JakeUtilsReflect.invoke(suite, runMethod, testResult);
-			final long end = System.nanoTime();
-			final long duration = (end - start) / 1000000;
-			return fromJunit3Result(name, testResult, duration);
+		JakeLog.startAndNextLine("Run JUnit tests");
+
+
+		if (JakeOptions.isVerbose()) {
+			JakeLog.info("-------------------------------------> Here starts the test output in console.");
+		} else {
+			System.setOut(JakeUtilsIO.nopPrintStream());
+			System.setErr(JakeUtilsIO.nopPrintStream());
 		}
-		throw new IllegalStateException("No Junit found on test classpath.");
+		final JakeTestSuiteResult result;
+		try {
+			if (isJunit4In(classLoader)) {
+				final Class<?>[] classArray = JakeUtilsIterable.toArray(classes, Class.class);
+				final Class<?> junitCoreClass = JakeUtilsClassloader.loadClass(classLoader,
+						JUNIT4_RUNNER_CLASS_NAME);
+				final Method runClassesMethod = JakeUtilsReflect.getMethod(junitCoreClass,
+						"runClasses", ARRAY_OF_CLASSES_TYPE);
+				final Object junit4Result = JakeUtilsReflect.invoke(null, runClassesMethod,
+						(Object) classArray);
+				final long end = System.nanoTime();
+				final long duration = (end - start) / 1000000;
+				result = fromJunit4Result(name, junit4Result, duration);
+			} else if (isJunit3In(classLoader)) {
+				final Object suite = createJunit3TestSuite(classLoader, classes);
+				final Class testResultClass = JakeUtilsClassloader.loadClass(classLoader, JUNIT3_TEST_RESULT_CLASS_NAME);
+				final Object testResult = JakeUtilsReflect.newInstance(testResultClass);
+				final Method runMethod = JakeUtilsReflect.getMethod(suite.getClass(),
+						"run", testResultClass);
+				JakeUtilsReflect.invoke(suite, runMethod, testResult);
+				final long end = System.nanoTime();
+				final long duration = (end - start) / 1000000;
+				result = fromJunit3Result(name, testResult, duration);
+			} else {
+				throw new IllegalStateException("No Junit found on test classpath.");
+			}
+
+		} finally {
+			if (JakeOptions.isVerbose()) {
+				JakeLog.info("-------------------------------------> Here stops the test output in console.");
+				JakeLog.nextLine();
+			} else {
+				System.setOut(null);
+				System.setErr(null);
+			}
+		}
+
+		JakeLog.info(result.toStrings(JakeOptions.isVerbose()));
+		if (!JakeOptions.isVerbose() && result.failureCount() > 0) {
+			JakeLog.info("Launch Jake in verbose mode to display failure stack traces in console.");
+		}
+		if (reportDetail != JunitReportDetail.NONE) {
+			JakeTestReportBuilder.of(result).writeToFileSystem(reportDir);
+		}
+		JakeLog.done("Tests run");
+		return result;
 	}
 
 	private static JakeTestSuiteResult fromJunit4Result(String suiteName, Object result, long durationInMillis) {

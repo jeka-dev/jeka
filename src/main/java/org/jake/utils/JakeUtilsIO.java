@@ -10,7 +10,7 @@ public final class JakeUtilsIO {
 	}
 
 	public static PrintStream nopPrintStream() {
-		return new PrintStream(nopPrintStream());
+		return new PrintStream(nopOuputStream());
 	}
 
 	public static OutputStream nopOuputStream() {
@@ -22,5 +22,7 @@ public final class JakeUtilsIO {
 			}
 		};
 	}
+
+
 
 }

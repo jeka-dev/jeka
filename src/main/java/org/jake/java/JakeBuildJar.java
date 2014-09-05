@@ -73,7 +73,7 @@ public class JakeBuildJar extends JakeBuildJava implements JakeJarModule {
 	@JakeDoc("Create jar file containing the binaries for itself all its dependencies.")
 	public void fatJar() {
 		JakeLog.info("Creating file : " + fatJarFile().getPath());
-		JakeZip.of(classDir()).merge(dependencyResolver().runtime()).create(fatJarFile(), zipLevel());
+		JakeZip.of(classDir()).merge(deps().runtime()).create(fatJarFile(), zipLevel());
 	}
 
 	@JakeDoc("Do clean, compile, unit test and then make jar files.")

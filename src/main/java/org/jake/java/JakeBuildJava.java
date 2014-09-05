@@ -6,22 +6,17 @@ import org.jake.JakeBuildBase;
 import org.jake.JakeDoc;
 import org.jake.JakeLog;
 import org.jake.JakeOption;
-import org.jake.JakeOptions;
 import org.jake.file.JakeDirSet;
 import org.jake.file.JakeFileFilter;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.test.JakeJUnit;
-import org.jake.java.test.JakeTestReportBuilder;
-import org.jake.java.test.JakeTestSuiteResult;
+import org.jake.java.test.JakeJUnit.JunitReportDetail;
 import org.jake.java.utils.JakeUtilsClassloader;
-import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
 
 public class JakeBuildJava extends JakeBuildBase {
 
-	protected enum JunitReportDetail {
-		NONE, BASIC, FULL;
-	}
+
 
 	protected static final JakeFileFilter JAVA_SOURCE_ONLY_FILTER = JakeFileFilter
 			.include("**/*.java");
@@ -76,7 +71,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	public void compile() {
 		JakeLog.startAndNextLine("Processing production code and resources");
 		generateSources();
-		compiler(sourceDirs(), classDir(), this.dependencyResolver().compile()).compileOrFail();;
+		compiler(sourceDirs(), classDir(), this.deps().compile()).compileOrFail();;
 		generateResources();
 		processResources();
 		JakeLog.done();
@@ -97,7 +92,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	@JakeDoc("Produce the Javadoc.")
 	public void javadoc() {
 		JakeJavadoc.of(this.sourceDirs())
-		.withClasspath(this.dependencyResolver().compile())
+		.withClasspath(this.deps().compile())
 		.processAndZip(ouputDir(projectName() + "-javadoc"), ouputDir(projectName() + "-javadoc.zip"));
 	}
 
@@ -201,7 +196,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	 * options, It is made of the {@link #baseDependencyResolver()} augmented
 	 * with extra-libs mentioned in options <code>extraXxxxPath</code>.
 	 */
-	public final JakeJavaDependencyResolver dependencyResolver() {
+	public final JakeJavaDependencyResolver deps() {
 		if (cachedResolver == null) {
 			JakeLog.startAndNextLine("Resolving Dependencies ");
 			final JakeJavaDependencyResolver resolver;
@@ -257,15 +252,13 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	protected JakeJUnit juniter() {
-		return JakeJUnit.ofClasspath(this.classDir(), this.dependencyResolver()
-				.test());
+		return JakeJUnit.ofClasspath(this.classDir(), this.deps()
+				.test()).withReport(junitReportDetail, testReportDir());
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void compileUnitTests() {
-		compiler(testSourceDirs(), testClassDir(),
-				JakeUtilsIterable.concatToList(this.classDir(), this
-						.dependencyResolver().test())).compileOrFail();;
+		final Iterable<File> classpath =  this.deps().test().withFirst(classDir());
+		compiler(testSourceDirs(), testClassDir(), classpath).compileOrFail();
 	}
 
 	protected void processUnitTestResources() {
@@ -277,29 +270,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	protected void runJunitTests(File testClassDir) {
-		JakeLog.startAndNextLine("Run JUnit tests");
-
-
-		if (JakeOptions.isVerbose()) {
-			JakeLog.info("-------------------------------------> Here start the test output in console.");
-		} else {
-			// Redirect system.out and err on nop stream
-		}
-		final JakeTestSuiteResult result = juniter().launchAll(testClassDir);
-		if (JakeOptions.isVerbose()) {
-			JakeLog.info("-------------------------------------> Here stop the test output ion console.");
-		} else {
-			// Redirect system.out and err on original streams
-		}
-
-		JakeLog.info(result.toStrings(JakeOptions.isVerbose()));
-		if (!JakeOptions.isVerbose() && result.failureCount() > 0) {
-			JakeLog.info("Launch Jake in verbose mode to display failure stack traces in console.");
-		}
-		if (junitReportDetail != JunitReportDetail.NONE) {
-			JakeTestReportBuilder.of(result).writeToFileSystem(testReportDir());
-		}
-		JakeLog.done();
+		juniter().launchAll(testClassDir);
 	}
 
 	protected boolean checkProcessTests(JakeDirSet testSourceDirs) {

@@ -13,6 +13,7 @@ import java.util.Set;
 import org.jake.file.JakeDir;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeBuildJar;
+import org.jake.java.JakeClasspath;
 import org.jake.java.JakeJavaCompiler;
 import org.jake.java.eclipse.JakeBuildEclipseProject;
 import org.jake.java.utils.JakeUtilsClassloader;
@@ -183,8 +184,7 @@ class ProjectBuilder {
 		if (this.hasBuildSource()) {
 			this.compileBuild(buildClasspath);
 			final File buildBin = new File(moduleBaseDir, BUILD_BIN_DIR);
-			final List<String> buildClassNames = getBuildClassNames(JakeUtilsIterable
-					.single(buildBin));
+			final List<String> buildClassNames = getBuildClassNames(JakeClasspath.of(buildBin));
 			if (!buildClassNames.isEmpty()) {
 				return buildClassNames.get(0);
 			} else {
