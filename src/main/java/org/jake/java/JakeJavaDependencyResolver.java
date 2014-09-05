@@ -4,6 +4,10 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jake.JakeLog;
+import org.jake.java.utils.JakeUtilsClassloader;
+import org.jake.utils.JakeUtilsReflect;
+
 /**
  * Defines where are located required dependencies for various scope.
  * 
@@ -52,6 +56,31 @@ public abstract class JakeJavaDependencyResolver {
 
 	public boolean isEmpty() {
 		return compile().isEmpty() && test().isEmpty() && runtime().isEmpty();
+	}
+
+	public static JakeJavaDependencyResolver findByClassName(String simpleOrFullClassName) {
+		final Class<? extends JakeJavaDependencyResolver> depClass = JakeUtilsClassloader
+				.loadFromSimpleName(JakeUtilsClassloader.current(),
+						simpleOrFullClassName,
+						JakeJavaDependencyResolver.class);
+		if (depClass == null) {
+			JakeLog.warn("Class " + simpleOrFullClassName
+					+ " not found or it is not a "
+					+ JakeJavaDependencyResolver.class.getName() + ".");
+			return null;
+		}
+		return JakeUtilsReflect.newInstance(depClass);
+	}
+
+	public static JakeJavaDependencyResolver findByClassNameOrDfault(String simpleOrFullClassName, JakeJavaDependencyResolver defaultResolver) {
+		if (simpleOrFullClassName == null) {
+			return defaultResolver;
+		}
+		final JakeJavaDependencyResolver result = findByClassName(simpleOrFullClassName);
+		if(result == null) {
+			return defaultResolver;
+		}
+		return defaultResolver;
 	}
 
 	private class MergedDependencyResolver extends JakeJavaDependencyResolver {

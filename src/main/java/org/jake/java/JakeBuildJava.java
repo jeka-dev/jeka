@@ -11,18 +11,17 @@ import org.jake.file.JakeFileFilter;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.test.JakeJUnit;
 import org.jake.java.test.JakeJUnit.JunitReportDetail;
-import org.jake.java.utils.JakeUtilsClassloader;
-import org.jake.utils.JakeUtilsReflect;
 
 public class JakeBuildJava extends JakeBuildBase {
 
-
-
-	protected static final JakeFileFilter JAVA_SOURCE_ONLY_FILTER = JakeFileFilter
-			.include("**/*.java");
-
+	/**
+	 * Default path for the non managed dependencies. This path is relative to {@link #baseDir()}.
+	 */
 	protected static final String STD_LIB_PATH = "build/libs";
 
+	/**
+	 * Filter to excludes everything in a java source directory which are not resources.
+	 */
 	protected static final JakeFileFilter RESOURCE_FILTER = JakeFileFilter
 			.exclude("**/*.java").andExcludeAll("**/package.html")
 			.andExcludeAll("**/doc-files");
@@ -181,7 +180,6 @@ public class JakeBuildJava extends JakeBuildBase {
 	protected JakeJavaDependencyResolver baseDependencyResolver() {
 		final File folder = baseDir(STD_LIB_PATH);
 		final JakeJavaDependencyResolver resolver;
-
 		if (folder.exists()) {
 			resolver = JakeLocalDependencyResolver
 					.standard(baseDir(STD_LIB_PATH));
@@ -199,25 +197,8 @@ public class JakeBuildJava extends JakeBuildBase {
 	public final JakeJavaDependencyResolver deps() {
 		if (cachedResolver == null) {
 			JakeLog.startAndNextLine("Resolving Dependencies ");
-			final JakeJavaDependencyResolver resolver;
-			if (dependencyResolver != null) {
-				JakeLog.start("Looking for class named " + dependencyResolver);
-				final Class<? extends JakeJavaDependencyResolver> depClass = JakeUtilsClassloader
-						.loadFromSimpleName(JakeUtilsClassloader.current(),
-								dependencyResolver,
-								JakeJavaDependencyResolver.class);
-				if (depClass == null) {
-					JakeLog.warn("Class " + dependencyResolver
-							+ " not found or it is not a "
-							+ JakeJavaDependencyResolver.class.getName() + ".");
-					resolver = baseDependencyResolver();
-				} else {
-					resolver = JakeUtilsReflect.newInstance(depClass);
-				}
-			} else {
-				resolver = baseDependencyResolver();
-			}
-
+			final JakeJavaDependencyResolver resolver = JakeJavaDependencyResolver
+					.findByClassNameOrDfault(dependencyResolver, baseDependencyResolver());
 			final JakeJavaDependencyResolver extraResolver = computeExtraPath();
 			if (!extraResolver.isEmpty()) {
 				JakeLog.info("Using extra libs : ", extraResolver.toStrings());
