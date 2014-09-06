@@ -18,6 +18,7 @@ public class JakeUtilsIterable {
 		final List<T> result = new LinkedList<T>();
 		for (final T t : it) {
 			result.add(t);
+
 		}
 		return result;
 	}
@@ -36,11 +37,6 @@ public class JakeUtilsIterable {
 
 	public static <T> Iterable<T> chain(Iterable<T> ... iterables) {
 		return chainAll(Arrays.asList(iterables));
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T> Iterable<T> chain(Iterable<T> iterable, T ... items) {
-		return chain(iterable, Arrays.asList(items));
 	}
 
 	public static <T> Iterable<T> chain(T item, Iterable<T> ... iterables) {
@@ -73,17 +69,13 @@ public class JakeUtilsIterable {
 		return result;
 	}
 
-	public static final class ChainedIterable<T> implements Iterable<T> {
+	private static final class ChainedIterable<T> implements Iterable<T> {
 
 		private final Iterable<Iterable<T>> iterables;
 
 		public ChainedIterable(Iterable<Iterable<T>> iterables) {
 			super();
 			this.iterables = iterables;
-		}
-
-		public ChainedIterable(Iterable<T>... iterables) {
-			this(Arrays.asList(iterables));
 		}
 
 

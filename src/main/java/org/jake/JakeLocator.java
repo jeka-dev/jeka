@@ -13,7 +13,7 @@ public class JakeLocator {
 		if (JAKE_JAR_FILE != null) {
 			return JAKE_JAR_FILE;
 		}
-		for (final File file : JakeClassloader.current().getFiles()) {
+		for (final File file : JakeClassloader.current().getChildClasspath()) {
 			try {
 				JakeClassloader.system().parent().createChild(file).classloader().loadClass(JakeLauncher.class.getName());
 				JAKE_JAR_FILE = file;

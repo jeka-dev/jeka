@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.jake.file.JakeDir;
-import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeBuildJar;
 import org.jake.java.JakeClassloader;
 import org.jake.java.JakeClasspath;
@@ -192,23 +191,17 @@ class ProjectBuilder {
 		return defaultBuildClassName();
 	}
 
-	private List<File> resolveBuildCompileClasspath() {
-		final List<File> result = JakeClassloader.current().getFiles();
-		final File buildLibDir = new File(BUILD_LIB_DIR);
+	private JakeClasspath resolveBuildCompileClasspath() {
+		JakeClasspath result = JakeClassloader.current().getChildClasspath();
+		final File buildLibDir = new File(moduleBaseDir, BUILD_LIB_DIR);
 		if (buildLibDir.exists() && buildLibDir.isDirectory()) {
-			final List<File> libs = JakeUtilsFile.filesOf(buildLibDir,
-					JakeUtilsFile.endingBy(".jar"), true);
-			for (final File file : libs) {
-				result.add(file);
-			}
+			result = result.with(JakeDir.of(buildLibDir).include("**/*.jar"));
 		}
-		final File jakeJarFile = JakeLocator.jakeJarFile();
-		final File extLibDir = new File(jakeJarFile.getParentFile(), "ext");
+		final File extLibDir = new File(JakeLocator.jakeHome(), "ext");
 		if (extLibDir.exists() && extLibDir.isDirectory()) {
-			result.addAll(JakeUtilsFile.filesOf(extLibDir,
-					JakeUtilsFile.endingBy(".jar"), false));
+			result = result.with(JakeDir.of(extLibDir).include("**/*.jar"));
 		}
-		result.addAll(JakeOptions.extraJakeClasspath());
+		result = result.with(JakeOptions.extraJakeClasspath());
 		return result;
 	}
 

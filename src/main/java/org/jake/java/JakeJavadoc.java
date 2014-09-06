@@ -3,8 +3,6 @@ package org.jake.java;
 import java.io.File;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,8 +12,6 @@ import org.jake.JakeOptions;
 import org.jake.file.JakeDirSet;
 import org.jake.file.JakeZip;
 import org.jake.file.utils.JakeUtilsFile;
-import org.jake.java.utils.JakeUtilsClassloader;
-import org.jake.java.utils.JakeUtilsJdk;
 import org.jake.utils.JakeUtilsReflect;
 
 public class JakeJavadoc {
@@ -82,7 +78,7 @@ public class JakeJavadoc {
 			list.add("-quiet");
 		}
 		list.add("-docletpath");
-		list.add(JakeUtilsJdk.toolsJar().getPath());
+		list.add(InternalUtils.toolsJar().getPath());
 		if (classpath != null && classpath.iterator().hasNext()) {
 			list.add("-classpath");
 			list.add(JakeUtilsFile.toPathString(this.classpath, ";"));
@@ -105,27 +101,25 @@ public class JakeJavadoc {
 
 	private static void execute(Class<?> doclet, PrintWriter normalWriter, PrintWriter warnWriter, PrintWriter errorWriter, String[] args) {
 		final String docletString = doclet != null ? doclet.getName() : "com.sun.tools.doclets.standard.Standard";
-		final Class<?> mainClass = getJavadocMainClass(JakeUtilsClassloader.current());
+		final Class<?> mainClass = getJavadocMainClass();
 		JakeUtilsReflect.newInstance(mainClass);
 		final Method method = JakeUtilsReflect.getMethod(mainClass, "execute", String.class, PrintWriter.class, PrintWriter.class, PrintWriter.class, String.class, new String[0].getClass());
 		JakeUtilsReflect.invoke(null, method, "Javadoc", errorWriter, warnWriter, normalWriter,
 				docletString, args);
 	}
 
-	public static Class<?> getJavadocMainClass(URLClassLoader base) {
-		Class<?> mainClass;
-		try {
-			mainClass = Class.forName(JAVADOC_MAIN_CLASS_NAME, true, base);
-		} catch (final ClassNotFoundException e) {
-			final Method method = JakeUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL", URL.class);
-			JakeUtilsReflect.invoke(base, method, JakeUtilsFile.toUrl(JakeUtilsJdk.toolsJar()));
-			try {
-				mainClass = Class.forName(JAVADOC_MAIN_CLASS_NAME, true, base);
-			} catch (final ClassNotFoundException e1) {
-				throw new RuntimeException("It seems that you are running a JRE instead of a JDK, please run Jake using a JDK.", e1);
-			}
-		}
-		return mainClass;
+	public static Class<?> getJavadocMainClass() {
+		return JakeClassloader.current().loadIfExist(JAVADOC_MAIN_CLASS_NAME);
+		//		Class<?> mainClass = JakeClassloader.current().loadIfExist(JAVADOC_MAIN_CLASS_NAME);
+		//		if (mainClass == null) {
+		//			final Method method = JakeUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL", URL.class);
+		//			JakeUtilsReflect.invoke(base, method, JakeUtilsFile.toUrl(JakeUtilsJdk.toolsJar()));
+		//			mainClass = JakeClassloader.current().loadIfExist(JAVADOC_MAIN_CLASS_NAME);
+		//			if (mainClass == null) {
+		//				throw new RuntimeException("It seems that you are running a JRE instead of a JDK, please run Jake using a JDK.");
+		//			}
+		//		}
+		//		return mainClass;
 	}
 
 

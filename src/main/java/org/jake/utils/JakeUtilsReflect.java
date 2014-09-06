@@ -4,42 +4,15 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.jake.JakeOption;
 
 public final class JakeUtilsReflect {
 
-	public static void setFieldValueIgnoreAbsent(Object object, String fieldName, Object value) {
-		try {
-			final Field field = getField(object.getClass(), fieldName);
-			if (field == null) {
-				return;
-			}
-			if (!field.isAccessible()) {
-				field.setAccessible(true);
-			}
-			field.set(object, value);
-		} catch (final Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
 
-	@SuppressWarnings("unchecked")
-	public static <T> Constructor<T> getNoArgConstructor(Class<T> clazz) {
-		for (final Constructor<?> constructor : clazz.getConstructors()) {
-			if (constructor.getParameterTypes().length == 0) {
-				return (Constructor<T>) constructor;
-			}
-		}
-		return null;
-	}
 
 	public static void setAccessibleIfNeeded(Field field) {
 		if (!field.isAccessible()) {
@@ -105,11 +78,6 @@ public final class JakeUtilsReflect {
 		return null;
 	}
 
-	public static boolean isWrapperClass(Class<?> clazz) {
-		return (clazz == Integer.class || clazz == Long.class || clazz == Boolean.class
-				|| clazz == Short.class || clazz == Double.class || clazz == Float.class
-				|| clazz == Byte.class || clazz == Boolean.class);
-	}
 
 	public static <T> T newInstance(Class<T> clazz) {
 		try {
@@ -133,41 +101,6 @@ public final class JakeUtilsReflect {
 		}
 	}
 
-	public static LinkedHashMap<String, Field> retainsPropertyFields(Field[] fields) {
-		final LinkedHashMap<String, Field> result = new LinkedHashMap<String, Field>();
-		for (final Field field : fields) {
-			final int modifier = field.getModifiers();
-			if (!Modifier.isStatic(modifier) && !Modifier.isTransient(modifier)) {
-				result.put(field.getName(), field);
-			}
-		}
-		return result;
-	}
-
-
-
-
-	public static Map<String, Method> retainsPropertyMethod(Method[] methods) {
-		final Map<String, Method> result = new LinkedHashMap<String, Method>();
-		for (final Method method : methods) {
-			final int modif = method.getModifiers();
-			if (!Modifier.isAbstract(modif) && Modifier.isPublic(modif)
-					&& !Modifier.isStatic(modif) && method.getParameterTypes().length <= 1) {
-				result.put(method.getName(), method);
-			}
-		}
-		return result;
-	}
-
-	public static Map<String, Method> retainsPropertyMethod(Class<?> clazz, Class<?> cap) {
-		final Map<String, Method> map = retainsPropertyMethod(clazz.getDeclaredMethods());
-		if (cap.equals(clazz.getSuperclass())) {
-			return map;
-		} else {
-			map.putAll(retainsPropertyMethod(clazz.getSuperclass(), cap));
-			return map;
-		}
-	}
 
 	@SuppressWarnings("unchecked")
 	public static <V> V invoke(Object target, Method method, Object... params) {
@@ -177,33 +110,6 @@ public final class JakeUtilsReflect {
 			throw new RuntimeException("Error while invoking " + method + " with params "
 					+ Arrays.toString(params), e);
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <V> V invokeStatic(Method method, Object... params) {
-		try {
-			return (V) method.invoke(null, params);
-		} catch (final Exception e) {
-			throw new RuntimeException("Error while invoking " + method + " with params "
-					+ Arrays.toString(params), e);
-		}
-	}
-
-
-
-	public static Class<?> getClosestParent(Class<?> target, Set<Class<?>> others) {
-		Class<?> result = null;
-		for (final Class<?> candidate : others) {
-			if (target.equals(candidate)) {
-				return candidate;
-			}
-			if (candidate.isAssignableFrom(target)) {
-				if (result == null || result.isAssignableFrom(candidate)) {
-					result = candidate;
-				}
-			}
-		}
-		return result;
 	}
 
 	public static Method getMethod(Class<?> clazz, String name, Class<?> ...argTypes) {

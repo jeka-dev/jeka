@@ -1,20 +1,15 @@
 package org.jake.file.utils;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -29,6 +24,7 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsString;
 
 public final class JakeUtilsFile {
@@ -42,30 +38,6 @@ public final class JakeUtilsFile {
 			throw new IllegalArgumentException(candidate
 					+ " is not a directory.");
 		}
-	}
-
-	public static URL toUrl(File file) {
-		try {
-			return file.toURI().toURL();
-		} catch (final MalformedURLException e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
-	public static List<File> toFiles(URL... urls) {
-		final List<File> result = new LinkedList<File>();
-		for (final URL url : urls) {
-			result.add(new File(url.getFile()));
-		}
-		return result;
-	}
-
-	public static List<File> sum(List<File>... files) {
-		final List<File> result = new LinkedList<File>();
-		for (final List<File> list : files) {
-			result.addAll(list);
-		}
-		return result;
 	}
 
 	public static String getRelativePath(File baseDir, File file) {
@@ -83,7 +55,7 @@ public final class JakeUtilsFile {
 	public static int copyDir(File source, File targetDir, FileFilter filter,
 			boolean copyEmptyDir) {
 		if (filter == null) {
-			filter = acceptAll();
+			filter = JakeFileFilters.acceptAll();
 		}
 		assertDir(source);
 		if (source.equals(targetDir)) {
@@ -163,92 +135,6 @@ public final class JakeUtilsFile {
 					+ " to " + toFile.getPath(), e);
 		}
 
-	}
-
-	public static FileFilter endingBy(final String... suffixes) {
-		return new FileFilter() {
-
-			@Override
-			public boolean accept(File file) {
-				for (final String suffix : suffixes) {
-					if (file.getName().endsWith(suffix)) {
-						return true;
-					}
-				}
-				return false;
-			}
-		};
-	}
-
-	public static FilenameFilter reverse(final FilenameFilter filter) {
-		return new FilenameFilter() {
-
-			@Override
-			public boolean accept(File dir, String name) {
-				return !filter.accept(dir, name);
-			}
-		};
-	}
-
-	public static FileFilter reverse(final FileFilter filter) {
-		return new FileFilter() {
-
-			@Override
-			public boolean accept(File candidate) {
-				return !filter.accept(candidate);
-			}
-
-			@Override
-			public String toString() {
-				return "revert of (" + filter + ")";
-			}
-		};
-	}
-
-	public static FileFilter combine(final FileFilter filter1,
-			final FileFilter filter2) {
-		return new FileFilter() {
-
-			@Override
-			public boolean accept(File candidate) {
-				return filter1.accept(candidate) && filter2.accept(candidate);
-			}
-
-			@Override
-			public String toString() {
-				return "{" + filter1 + "," + filter2 + "}";
-			}
-		};
-	}
-
-	public static FileFilter acceptAll() {
-		return new FileFilter() {
-
-			@Override
-			public boolean accept(File pathname) {
-				return true;
-			}
-
-			@Override
-			public String toString() {
-				return "Accept-All filter";
-			}
-		};
-	}
-
-	public static FileFilter acceptOnly(final File fileToAccept) {
-		return new FileFilter() {
-
-			@Override
-			public boolean accept(File pathname) {
-				return pathname.equals(fileToAccept);
-			}
-
-			@Override
-			public String toString() {
-				return "Accept only " + fileToAccept.getAbsolutePath();
-			}
-		};
 	}
 
 	public static void deleteDirContent(File dir) {
@@ -466,19 +352,13 @@ public final class JakeUtilsFile {
 		}
 	}
 
-	public static void closeZipEntryQuietly(ZipOutputStream outputStream) {
-		try {
-			outputStream.closeEntry();
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+
 
 	/**
 	 * Returns all files contained recursively in the specified directory.
 	 */
 	public static List<File> filesOf(File dir, boolean includeFolder) {
-		return filesOf(dir, acceptAll(), includeFolder);
+		return filesOf(dir, JakeFileFilters.acceptAll(), includeFolder);
 	}
 
 	/**
@@ -547,54 +427,8 @@ public final class JakeUtilsFile {
 		}
 	}
 
-	public static String readResource(String resourcePath) {
-		final InputStream is = JakeUtilsFile.class.getClassLoader()
-				.getResourceAsStream(resourcePath);
-		return toLine(is);
-	}
 
-	public static String readResourceIfExist(String resourcePath) {
-		final InputStream is = JakeUtilsFile.class.getClassLoader()
-				.getResourceAsStream(resourcePath);
-		if (is == null) {
-			return null;
-		}
-		return toLine(is);
-	}
-
-	public static String toLine(InputStream in) {
-		final BufferedReader reader = new BufferedReader(new InputStreamReader(
-				in));
-		final StringBuilder out = new StringBuilder();
-		final String newLine = System.getProperty("line.separator");
-		String line;
-		try {
-			while ((line = reader.readLine()) != null) {
-				out.append(line);
-				out.append(newLine);
-			}
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
-		return out.toString();
-	}
-
-	public static List<String> toLines(InputStream in) {
-		final List<String> result = new LinkedList<String>();
-		final BufferedReader reader = new BufferedReader(new InputStreamReader(
-				in));
-		String line;
-		try {
-			while ((line = reader.readLine()) != null) {
-				result.add(line);
-			}
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
-		return result;
-	}
-
-	public static String createChecksum(File file) {
+	public static String md5Checksum(File file) {
 		InputStream fis;
 		try {
 			fis = new FileInputStream(file);
@@ -607,24 +441,17 @@ public final class JakeUtilsFile {
 		try {
 			complete = MessageDigest.getInstance("MD5");
 		} catch (final NoSuchAlgorithmException e) {
+			JakeUtilsIO.closeQuietly(fis);
 			throw new RuntimeException(e);
 		}
 		int numRead;
 		do {
-			try {
-				numRead = fis.read(buffer);
-			} catch (final IOException e) {
-				throw new RuntimeException(e);
-			}
+			numRead = JakeUtilsIO.read(fis);
 			if (numRead > 0) {
 				complete.update(buffer, 0, numRead);
 			}
 		} while (numRead != -1);
-		try {
-			fis.close();
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
+		JakeUtilsIO.closeQuietly(fis);
 		final byte[] bytes = complete.digest();
 		String result = "";
 		for (final byte element : bytes) {

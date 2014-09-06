@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jake.file.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsString;
 
 public class JakeLauncher {
@@ -79,7 +80,7 @@ public class JakeLauncher {
 
 	public static int printAsciiArt1() {
 		final InputStream inputStream = JakeLauncher.class.getResourceAsStream("ascii1.txt");
-		final List<String> lines = JakeUtilsFile.toLines(inputStream);
+		final List<String> lines = JakeUtilsIO.readLines(inputStream);
 		int i = 0;
 		for (final String line: lines) {
 			if (i < line.length()) {
@@ -93,7 +94,7 @@ public class JakeLauncher {
 	private static void displayIntro() {
 		final int lenght = printAsciiArt1();
 		JakeLog.info(JakeUtilsString.repeat(" ", lenght) + "The 100% Java build system.");
-		final String version = JakeUtilsFile.readResourceIfExist("org/jake/version.txt");
+		final String version = JakeUtilsIO.readResourceIfExist("org/jake/version.txt");
 		if (version != null) {
 			JakeLog.info(JakeUtilsString.repeat(" ", lenght) + "Version : " + version);
 		}

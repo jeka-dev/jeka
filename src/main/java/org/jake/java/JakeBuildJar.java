@@ -87,11 +87,11 @@ public class JakeBuildJar extends JakeBuildJava implements JakeJarModule {
 	public void checksum() {
 		final File file = ouputDir(jarName() + ".md5");
 		JakeLog.info("Creating file : " + file);
-		JakeUtilsFile.writeString(file, JakeUtilsFile.createChecksum(jarFile()), false);
+		JakeUtilsFile.writeString(file, JakeUtilsFile.md5Checksum(jarFile()), false);
 		if (fatJarFile().exists()) {
 			final File fatSum = ouputDir(jarName() + "-fat" + ".md5");
 			JakeLog.info("Creating file : " + fatSum);
-			JakeUtilsFile.writeString(fatSum, JakeUtilsFile.createChecksum(fatJarFile()), false);
+			JakeUtilsFile.writeString(fatSum, JakeUtilsFile.md5Checksum(fatJarFile()), false);
 		}
 	}
 

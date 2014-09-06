@@ -65,12 +65,15 @@ public class JakeClassloader {
 		return new JakeClassloader(new URLClassLoader(toUrl(urls), this.delegate));
 	}
 
-	public List<File> getFiles() {
+	/**
+	 * Returns the classpath of this classloader without mentioning classpath of the parent classloaders.
+	 */
+	public JakeClasspath getChildClasspath() {
 		final List<File> result = new ArrayList<File>(this.delegate.getURLs().length);
 		for (final URL url : this.delegate.getURLs()) {
 			result.add(new File(url.getFile()));
 		}
-		return result;
+		return JakeClasspath.of(result);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -78,7 +81,16 @@ public class JakeClassloader {
 		try {
 			return (Class<T>) delegate.loadClass(className);
 		} catch (final ClassNotFoundException e) {
-			throw new IllegalStateException(e);
+			throw new IllegalArgumentException("Class " + className + " not found on " + this, e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends Object> Class<T> loadIfExist(String className) {
+		try {
+			return (Class<T>) delegate.loadClass(className);
+		} catch (final ClassNotFoundException e) {
+			return null;
 		}
 	}
 
@@ -138,7 +150,7 @@ public class JakeClassloader {
 	public Set<Class<?>> getAllTopLevelClasses(FileFilter entryFilter) {
 		final List<File> classfiles = new LinkedList<File>();
 		final Map<File, File> file2Entry = new HashMap<File, File>();
-		for (final File file : getFiles()) {
+		for (final File file : getChildClasspath()) {
 			if (entryFilter == null || entryFilter.accept(file)) {
 				if (file.isDirectory()) {
 					final List<File> files = JakeUtilsFile.filesOf(file, CLASS_FILE_FILTER, false);
@@ -182,6 +194,21 @@ public class JakeClassloader {
 	 */
 	private static String getAsClassName(String resourceName) {
 		return resourceName.replace(File.separatorChar, '.').substring(0, resourceName.length()-6);
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder builder = new StringBuilder();
+		builder.append(delegate.getClass().getName());
+		if (delegate instanceof URLClassLoader) {
+			for (final URL url : delegate.getURLs()) {
+				builder.append("\n  " + url);
+			}
+		}
+		if (delegate.getParent() != null) {
+			builder.append("\n").append(this.parent());
+		}
+		return builder.toString();
 	}
 
 

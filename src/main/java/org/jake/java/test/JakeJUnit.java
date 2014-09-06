@@ -273,14 +273,6 @@ public final class JakeJUnit {
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <T> Class<T> load(ClassLoader classLoader, String name) {
-		try {
-			return (Class<T>) classLoader.loadClass(name);
-		} catch (final ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 	@SuppressWarnings("rawtypes")
 	private static Object createJunit3TestSuite(JakeClassloader classLoader, Iterable<Class> testClasses) {
