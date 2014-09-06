@@ -1,11 +1,8 @@
 package org.jake;
 
 import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
 
-import org.jake.java.JakeClasspath;
-import org.jake.java.utils.JakeUtilsClassloader;
+import org.jake.java.JakeClassloader;
 
 public class JakeLocator {
 
@@ -16,14 +13,9 @@ public class JakeLocator {
 		if (JAKE_JAR_FILE != null) {
 			return JAKE_JAR_FILE;
 		}
-		final URL[] urls = JakeUtilsClassloader.current().getURLs();
-		for (final URL url : urls) {
-			final File file = new File(url.getFile());
-			final URLClassLoader classLoader = JakeUtilsClassloader.createFrom(
-					JakeClasspath.of(file), ClassLoader
-					.getSystemClassLoader().getParent());
+		for (final File file : JakeClassloader.current().getFiles()) {
 			try {
-				classLoader.loadClass(JakeLauncher.class.getName());
+				JakeClassloader.system().parent().createChild(file).classloader().loadClass(JakeLauncher.class.getName());
 				JAKE_JAR_FILE = file;
 				return file;
 			} catch (final ClassNotFoundException e) {

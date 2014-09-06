@@ -4,8 +4,6 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -13,10 +11,10 @@ import java.util.Set;
 import org.jake.file.JakeDir;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeBuildJar;
+import org.jake.java.JakeClassloader;
 import org.jake.java.JakeClasspath;
 import org.jake.java.JakeJavaCompiler;
 import org.jake.java.eclipse.JakeBuildEclipseProject;
-import org.jake.java.utils.JakeUtilsClassloader;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
@@ -166,7 +164,6 @@ class ProjectBuilder {
 
 	@SuppressWarnings("unchecked")
 	private Class<? extends JakeBuildBase> getBuildClass(Iterable<File> buildClasspath) {
-
 		final String buildClassName = resolveBuildClassName(buildClasspath);
 		if (buildClassName == null) {
 			return null;
@@ -174,10 +171,9 @@ class ProjectBuilder {
 		final File buildBin = new File(moduleBaseDir, BUILD_BIN_DIR);
 		final Iterable<File> runtimeClassPath = JakeUtilsIterable.concatToList(
 				buildBin, buildClasspath);
-		final URLClassLoader classLoader = JakeUtilsClassloader.createFrom(
-				runtimeClassPath, JakeLauncher.class.getClassLoader());
-		return (Class<JakeBuildBase>) JakeUtilsClassloader
-				.loadClass(classLoader, buildClassName);
+		final JakeClassloader classLoader = JakeClassloader.current().createChild(runtimeClassPath);
+		final Class<? extends JakeBuildBase> result = classLoader.load(buildClassName);
+		return result;
 	}
 
 	private String resolveBuildClassName(Iterable<File> buildClasspath) {
@@ -197,8 +193,7 @@ class ProjectBuilder {
 	}
 
 	private List<File> resolveBuildCompileClasspath() {
-		final URL[] urls = JakeUtilsClassloader.current().getURLs();
-		final List<File> result = JakeUtilsFile.toFiles(urls);
+		final List<File> result = JakeClassloader.current().getFiles();
 		final File buildLibDir = new File(BUILD_LIB_DIR);
 		if (buildLibDir.exists() && buildLibDir.isDirectory()) {
 			final List<File> libs = JakeUtilsFile.filesOf(buildLibDir,
@@ -220,19 +215,16 @@ class ProjectBuilder {
 	@SuppressWarnings("rawtypes")
 	private static List<String> getBuildClassNames(Iterable<File> classpath) {
 
-		final URLClassLoader classLoader = JakeUtilsClassloader.createFrom(
-				classpath, JakeLauncher.class.getClassLoader());
+		final JakeClassloader classLoader = JakeClassloader.current().createChild(classpath);
 
 		// Find the Build class
-		final Class<?> jakeBaseBuildClass = JakeUtilsClassloader.loadClass(
-				classLoader, JakeBuildBase.class.getName());
-		final Set<Class<?>> classes = JakeUtilsClassloader.getAllTopLevelClasses(
-				classLoader, JakeUtilsFile.acceptAll());
+		// TODO Not optimized. Reduce the search path to load less classes.
+		final Set<Class<?>> classes = classLoader.getAllTopLevelClasses(null);
 		final List<String> buildClasses = new LinkedList<String>();
 		for (final Class clazz : classes) {
 			final boolean isAbstract = Modifier
 					.isAbstract(clazz.getModifiers());
-			if (!isAbstract && jakeBaseBuildClass.isAssignableFrom(clazz)) {
+			if (!isAbstract && JakeBuildBase.class.isAssignableFrom(clazz)) {
 				buildClasses.add(clazz.getName());
 			}
 		}

@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jake.JakeLog;
-import org.jake.java.utils.JakeUtilsClassloader;
 import org.jake.utils.JakeUtilsReflect;
 
 /**
@@ -59,10 +58,8 @@ public abstract class JakeJavaDependencyResolver {
 	}
 
 	public static JakeJavaDependencyResolver findByClassName(String simpleOrFullClassName) {
-		final Class<? extends JakeJavaDependencyResolver> depClass = JakeUtilsClassloader
-				.loadFromSimpleName(JakeUtilsClassloader.current(),
-						simpleOrFullClassName,
-						JakeJavaDependencyResolver.class);
+		final Class<? extends JakeJavaDependencyResolver> depClass =
+				JakeClassloader.current().loadFromNameOrSimpleName(simpleOrFullClassName, JakeJavaDependencyResolver.class);
 		if (depClass == null) {
 			JakeLog.warn("Class " + simpleOrFullClassName
 					+ " not found or it is not a "

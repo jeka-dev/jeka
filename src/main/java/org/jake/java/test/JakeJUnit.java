@@ -6,7 +6,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,9 +17,9 @@ import java.util.List;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
 import org.jake.java.JakeClassFilter;
+import org.jake.java.JakeClassloader;
 import org.jake.java.JakeClasspath;
 import org.jake.java.test.JakeTestSuiteResult.ExceptionDescription;
-import org.jake.java.utils.JakeUtilsClassloader;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
@@ -85,14 +84,11 @@ public final class JakeJUnit {
 				JakeClassFilter.acceptAll());
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes" })
 	public JakeTestSuiteResult launchAll(final Iterable<File> testClassDirs, JakeClassFilter classFilter) {
-		final Iterable<File> urls = JakeUtilsIterable.concatLists(testClassDirs,
-				this.classpath);
 		final Collection<Class> testClasses;
-
-		final URLClassLoader classLoader = JakeUtilsClassloader.createFrom(urls,
-				ClassLoader.getSystemClassLoader().getParent());
+		final JakeClasspath classpath = this.classpath.withFirst(testClassDirs);
+		final JakeClassloader classLoader = JakeClassloader.system().parent().createChild(classpath);
 		final FileFilter fileFilter = new FileFilter() {
 
 			@Override
@@ -124,10 +120,8 @@ public final class JakeJUnit {
 			return JakeTestSuiteResult.empty(name, 0);
 		}
 		final long start = System.nanoTime();
-		final ClassLoader classLoader = classes.iterator().next()
-				.getClassLoader();
+		final JakeClassloader classLoader = JakeClassloader.of(classes.iterator().next());
 		JakeLog.startAndNextLine("Run JUnit tests");
-
 
 		if (JakeOptions.isVerbose()) {
 			JakeLog.info("-------------------------------------> Here starts the test output in console.");
@@ -137,10 +131,9 @@ public final class JakeJUnit {
 		}
 		final JakeTestSuiteResult result;
 		try {
-			if (isJunit4In(classLoader)) {
+			if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
 				final Class<?>[] classArray = JakeUtilsIterable.toArray(classes, Class.class);
-				final Class<?> junitCoreClass = JakeUtilsClassloader.loadClass(classLoader,
-						JUNIT4_RUNNER_CLASS_NAME);
+				final Class<?> junitCoreClass = classLoader.load(JUNIT4_RUNNER_CLASS_NAME);
 				final Method runClassesMethod = JakeUtilsReflect.getMethod(junitCoreClass,
 						"runClasses", ARRAY_OF_CLASSES_TYPE);
 				final Object junit4Result = JakeUtilsReflect.invoke(null, runClassesMethod,
@@ -148,9 +141,9 @@ public final class JakeJUnit {
 				final long end = System.nanoTime();
 				final long duration = (end - start) / 1000000;
 				result = fromJunit4Result(name, junit4Result, duration);
-			} else if (isJunit3In(classLoader)) {
+			} else if (classLoader.isDefined(JUNIT3_RUNNER_CLASS_NAME)) {
 				final Object suite = createJunit3TestSuite(classLoader, classes);
-				final Class testResultClass = JakeUtilsClassloader.loadClass(classLoader, JUNIT3_TEST_RESULT_CLASS_NAME);
+				final Class testResultClass = classLoader.load(JUNIT3_TEST_RESULT_CLASS_NAME);
 				final Object testResult = JakeUtilsReflect.newInstance(testResultClass);
 				final Method runMethod = JakeUtilsReflect.getMethod(suite.getClass(),
 						"run", testResultClass);
@@ -227,24 +220,20 @@ public final class JakeJUnit {
 
 	@SuppressWarnings("rawtypes")
 	private static Collection<Class> getJunitTestClassesInClassLoader(
-			URLClassLoader classLoader, FileFilter entryFilter) {
-		final Iterable<Class<?>> classes = JakeUtilsClassloader.getAllTopLevelClasses(
-				classLoader, entryFilter);
+			JakeClassloader classloader, FileFilter entryFilter) {
+		final Iterable<Class<?>> classes = classloader.getAllTopLevelClasses(entryFilter);
 		final List<Class> testClasses = new LinkedList<Class>();
-		if (isJunit4In(classLoader)) {
-			final Class<Annotation> testAnnotation = load(classLoader,
-					JUNIT4_TEST_ANNOTATION_CLASS_NAME);
-			final Class<?> testCaseClass = load(classLoader,
-					JUNIT3_TEST_CASE_CLASS_NAME);
+		if (classloader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
+			final Class<Annotation> testAnnotation = classloader.load(JUNIT4_TEST_ANNOTATION_CLASS_NAME);
+			final Class<?> testCaseClass = classloader.load(JUNIT3_TEST_CASE_CLASS_NAME);
 			for (final Class clazz : classes) {
 				if (isJunit3Test(clazz, testCaseClass)
 						|| isJunit4Test(clazz, testAnnotation)) {
 					testClasses.add(clazz);
 				}
 			}
-		} else if (isJunit3In(classLoader)) {
-			final Class<?> testCaseClass = load(classLoader,
-					JUNIT3_TEST_CASE_CLASS_NAME);
+		} else if (classloader.isDefined(JUNIT3_RUNNER_CLASS_NAME)) {
+			final Class<?> testCaseClass = classloader.load(JUNIT3_TEST_CASE_CLASS_NAME);
 			for (final Class clazz : classes) {
 				if (isJunit3Test(clazz, testCaseClass)) {
 					testClasses.add(clazz);
@@ -254,23 +243,7 @@ public final class JakeJUnit {
 		return testClasses;
 	}
 
-	private static boolean isJunit4In(ClassLoader classLoader) {
-		try {
-			classLoader.loadClass(JUNIT4_RUNNER_CLASS_NAME);
-			return true;
-		} catch (final ClassNotFoundException e) {
-			return false;
-		}
-	}
 
-	private static boolean isJunit3In(ClassLoader classLoader) {
-		try {
-			classLoader.loadClass(JUNIT3_RUNNER_CLASS_NAME);
-			return true;
-		} catch (final ClassNotFoundException e) {
-			return false;
-		}
-	}
 
 	public static boolean isJunit3Test(Class<?> candidtateClazz,
 			Class<?> testCaseClass) {
@@ -310,10 +283,9 @@ public final class JakeJUnit {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private static Object createJunit3TestSuite(ClassLoader classLoader, Iterable<Class> testClasses) {
+	private static Object createJunit3TestSuite(JakeClassloader classLoader, Iterable<Class> testClasses) {
 		final Class<?>[] classArray = JakeUtilsIterable.toArray(testClasses, Class.class);
-		final Class<?> testSuiteClass = JakeUtilsClassloader.loadClass(classLoader,
-				JUNIT3_TEST_SUITE_CLASS_NAME);
+		final Class<?> testSuiteClass = classLoader.load(JUNIT3_TEST_SUITE_CLASS_NAME);
 		try {
 			final Constructor constructor =  testSuiteClass.getConstructor(classArray.getClass());
 			return constructor.newInstance((Object)classArray);
