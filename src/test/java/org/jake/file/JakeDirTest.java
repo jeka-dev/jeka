@@ -9,11 +9,11 @@ import java.net.URL;
 import org.jake.file.JakeDir;
 import org.junit.Test;
 
-public class DirViewTest {
+public class JakeDirTest {
 
 	@Test
 	public void testFileList() throws Exception {
-		URL sampleFileUrl = DirViewTest.class.getResource("utils/samplefolder/subfolder/sample.txt");
+		URL sampleFileUrl = JakeDirTest.class.getResource("utils/samplefolder/subfolder/sample.txt");
 		File sampleFile = new File(sampleFileUrl.toURI().getPath());
 		assertTrue(sampleFile.exists());
 		File sampleFolder = sampleFile.getParentFile().getParentFile();

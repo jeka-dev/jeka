@@ -11,8 +11,8 @@ import org.jake.utils.JakeUtilsTime;
 public class Build extends JakeBuildJar {
 
 	public static void main(String[] args) {
-		//new Build().base();
-		new Build().javadoc();
+		new Build().base();
+		//new Build().javadoc();
 	}
 
 	@Override

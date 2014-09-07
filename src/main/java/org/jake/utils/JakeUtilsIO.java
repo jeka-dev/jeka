@@ -1,13 +1,24 @@
 package org.jake.utils;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import org.jake.file.utils.JakeUtilsFile;
@@ -117,6 +128,136 @@ public final class JakeUtilsIO {
 			throw new RuntimeException(e);
 		}
 	}
+
+	public static ZipOutputStream createZipOutputStream(File file,
+			int compressLevel) {
+		try {
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			final FileOutputStream fos = new FileOutputStream(file);
+			final ZipOutputStream zos = new ZipOutputStream(fos);
+			zos.setLevel(compressLevel);
+			return zos;
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile) {
+		final Set<String> duplicateEntries = new HashSet<String>();
+		final Enumeration<? extends ZipEntry> entries = zipFile.entries();
+		while (entries.hasMoreElements()) {
+			final ZipEntry e = entries.nextElement();
+			try {
+				if (!e.isDirectory()) {
+					final boolean success = addEntryInputStream(zos,
+							e.getName(), zipFile.getInputStream(e));
+					;
+					if (!success) {
+						duplicateEntries.add(e.getName());
+					}
+				}
+			} catch (final IOException e1) {
+				throw new RuntimeException("Error while merging entry "
+						+ e.getName() + " from zip file " + zipFile.getName(),
+						e1);
+			}
+		}
+		return duplicateEntries;
+	}
+
+	private static boolean addEntryInputStream(ZipOutputStream zos,
+			String entryName, InputStream inputStream) {
+		final ZipEntry zipEntry = new ZipEntry(entryName);
+		try {
+			zos.putNextEntry(zipEntry);
+		} catch (final ZipException e) {
+
+			// Ignore duplicate entry - no overwriting
+			return false;
+		} catch (final IOException e) {
+			throw new RuntimeException("Error while adding zip entry "
+					+ zipEntry, e);
+		}
+		final int buffer = 2048;
+		final BufferedInputStream bufferedInputStream = new BufferedInputStream(
+				inputStream, buffer);
+		int count;
+		try {
+			final byte data[] = new byte[buffer];
+			while ((count = bufferedInputStream.read(data, 0, buffer)) != -1) {
+				zos.write(data, 0, count);
+			}
+			bufferedInputStream.close();
+			inputStream.close();
+			zos.closeEntry();
+			return true;
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Add a zip entry into the provided <code>ZipOutputStream</code>. The zip
+	 * entry is the part of <code>filePathToZip</code> truncated with the
+	 * <code>baseFolderPath</code>.
+	 * <p>
+	 * So a file or folder <code>c:\my\base\folder\my\file\to\zip.txt</code>
+	 * will be added in archive using <code>my/file/to/zip.txt</code> entry.
+	 */
+	public static void addZipEntry(ZipOutputStream zos, File fileToZip,
+			File baseFolder) {
+		if (!baseFolder.isDirectory()) {
+			throw new IllegalArgumentException(baseFolder.getPath() + " is not a directory." );
+		}
+
+		if (fileToZip.isDirectory()) {
+			final File[] files = fileToZip.listFiles();
+			for (final File file : files) {
+				addZipEntry(zos, file, baseFolder);
+			}
+		} else {
+			final String filePathToZip;
+			final int start;
+			try {
+				filePathToZip = fileToZip.getCanonicalPath();
+				start = baseFolder.getCanonicalPath().length() + 1;
+			} catch (final IOException e1) {
+				throw new IllegalStateException(e1);
+			}
+
+			final int end = filePathToZip.length();
+			String entryName = filePathToZip.substring(start, end);
+			entryName = entryName.replace(File.separatorChar, '/');
+			final FileInputStream inputStream;
+			try {
+				inputStream = new FileInputStream(filePathToZip);
+			} catch (final FileNotFoundException e) {
+				throw new IllegalStateException(e);
+			}
+			addEntryInputStream(zos, entryName, inputStream);
+		}
+	}
+
+	public static ZipFile newZipFile(File file) {
+		try {
+			return new ZipFile(file);
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static void closeQietly(ZipFile zipFile) {
+		try {
+			zipFile.close();
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+
 
 
 

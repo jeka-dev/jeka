@@ -9,6 +9,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import org.jake.file.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 
 public final class JakeZip {
@@ -50,14 +51,14 @@ public final class JakeZip {
 	}
 
 	public void create(File zipFile, int compressLevel) {
-		final ZipOutputStream zos = JakeUtilsFile.createZipOutputStream(zipFile, compressLevel);
+		final ZipOutputStream zos = JakeUtilsIO.createZipOutputStream(zipFile, compressLevel);
 		zos.setLevel(compressLevel);
 
 		// Adding files to archive
 		for (final Object item : this.itemsToZip) {
 			if (item instanceof File) {
 				final File file = (File) item;
-				JakeUtilsFile.addZipEntry(zos, file, file.getParentFile());
+				JakeUtilsIO.addZipEntry(zos, file, file.getParentFile());
 			} else if (item instanceof JakeDir) {
 				final JakeDir dirView = (JakeDir) item;
 				addDirView(zos, dirView);
@@ -79,7 +80,7 @@ public final class JakeZip {
 			} catch (final IOException e) {
 				throw new RuntimeException(e);
 			}
-			JakeUtilsFile.mergeZip(zos, file);
+			JakeUtilsIO.mergeZip(zos, file);
 		}
 
 		try {
@@ -95,7 +96,7 @@ public final class JakeZip {
 		}
 		final File base = JakeUtilsFile.canonicalFile(dirView.root());
 		for (final File file : dirView) {
-			JakeUtilsFile.addZipEntry(zos, file, base);
+			JakeUtilsIO.addZipEntry(zos, file, base);
 		}
 	}
 

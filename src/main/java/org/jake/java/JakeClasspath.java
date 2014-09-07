@@ -6,8 +6,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.zip.ZipFile;
 
 import org.jake.file.JakeDir;
+import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsString;
 
@@ -77,7 +79,7 @@ public class JakeClasspath implements Iterable<File> {
 					throw new IllegalArgumentException("Classpath element defined as "
 							+ file.getName() + " is invalid : " + parent.getAbsolutePath() + " does not exist.");
 				}
-				result.addAll(JakeDir.of(parent).include("*.jar", "*.JAR").listFiles());
+				result.addAll(JakeDir.of(parent).include("*.jar").listFiles());
 			} else if (!file.exists()) {
 				throw new IllegalArgumentException("Classpath element " + file.getAbsolutePath() + " does not exist.");
 			} else if (file.isFile()) {
@@ -95,6 +97,31 @@ public class JakeClasspath implements Iterable<File> {
 	@Override
 	public Iterator<File> iterator() {
 		return files.iterator();
+	}
+
+	public File getEntryContainingClass(String className) {
+		final String path = toFilePath(className);
+		for (final File file : this) {
+			if (file.isDirectory()) {
+				System.out.println(new File(file, path).getAbsolutePath());
+				System.out.println(new File(file, path).exists());
+				if (new File(file, path).exists()) {
+					return file;
+				}
+			} else {
+				final ZipFile zipFile = JakeUtilsIO.newZipFile(file);
+				if (zipFile.getEntry(path) != null) {
+					JakeUtilsIO.closeQietly(zipFile);
+					return file;
+				}
+				JakeUtilsIO.closeQietly(zipFile);
+			}
+		}
+		return null;
+	}
+
+	static String toFilePath(String className) {
+		return className.replace('.', '/').concat(".class");
 	}
 
 
