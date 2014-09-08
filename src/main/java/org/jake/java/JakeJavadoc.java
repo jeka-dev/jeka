@@ -109,17 +109,23 @@ public class JakeJavadoc {
 	}
 
 	public static Class<?> getJavadocMainClass() {
-		return JakeClassloader.current().loadIfExist(JAVADOC_MAIN_CLASS_NAME);
-		//		Class<?> mainClass = JakeClassloader.current().loadIfExist(JAVADOC_MAIN_CLASS_NAME);
-		//		if (mainClass == null) {
-		//			final Method method = JakeUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL", URL.class);
-		//			JakeUtilsReflect.invoke(base, method, JakeUtilsFile.toUrl(JakeUtilsJdk.toolsJar()));
-		//			mainClass = JakeClassloader.current().loadIfExist(JAVADOC_MAIN_CLASS_NAME);
-		//			if (mainClass == null) {
-		//				throw new RuntimeException("It seems that you are running a JRE instead of a JDK, please run Jake using a JDK.");
-		//			}
-		//		}
-		//		return mainClass;
+		System.out.println(JakeClassloader.current());
+		Class<?> mainClass = JakeClassloader.current().loadIfExist(JAVADOC_MAIN_CLASS_NAME);
+		if (mainClass == null) {
+
+			final JakeClassloader classloader = JakeClassloader.current().and(InternalUtils.toolsJar());
+			System.out.println(classloader);
+			mainClass = JakeClassloader.current().and(InternalUtils.toolsJar()).loadIfExist(JAVADOC_MAIN_CLASS_NAME);
+
+
+			//final Method method = JakeUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL", URL.class);
+			//JakeUtilsReflect.invoke(base, method, JakeUtilsFile.toUrl(InternalUtils.toolsJar()));
+			//mainClass = JakeClassloader.current().loadIfExist(JAVADOC_MAIN_CLASS_NAME);
+			if (mainClass == null) {
+				throw new RuntimeException("It seems that you are running a JRE instead of a JDK, please run Jake using a JDK.");
+			}
+		}
+		return mainClass;
 	}
 
 

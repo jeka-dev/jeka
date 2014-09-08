@@ -65,6 +65,14 @@ public class JakeClassloader {
 		return new JakeClassloader(new URLClassLoader(toUrl(urls), this.delegate));
 	}
 
+	public JakeClassloader and(Iterable<File> files) {
+		return parent().createChild(this.getChildClasspath().and(files));
+	}
+
+	public JakeClassloader and(File...files) {
+		return and(Arrays.asList(files));
+	}
+
 	/**
 	 * Returns the classpath of this classloader without mentioning classpath of the parent classloaders.
 	 */
