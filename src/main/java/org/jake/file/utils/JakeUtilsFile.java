@@ -9,6 +9,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -158,6 +160,14 @@ public final class JakeUtilsFile {
 			}
 		}
 		return builder.toString();
+	}
+
+	public static URL toUrl(File file) {
+		try {
+			return file.toURI().toURL();
+		} catch (final MalformedURLException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	public static List<File> toPath(String pathAsString, String separator,

@@ -100,6 +100,7 @@ public class JakeJavadoc {
 
 
 	private static void execute(Class<?> doclet, PrintWriter normalWriter, PrintWriter warnWriter, PrintWriter errorWriter, String[] args) {
+
 		final String docletString = doclet != null ? doclet.getName() : "com.sun.tools.doclets.standard.Standard";
 		final Class<?> mainClass = getJavadocMainClass();
 		JakeUtilsReflect.newInstance(mainClass);
@@ -109,18 +110,11 @@ public class JakeJavadoc {
 	}
 
 	public static Class<?> getJavadocMainClass() {
-		System.out.println(JakeClassloader.current());
-		Class<?> mainClass = JakeClassloader.current().loadIfExist(JAVADOC_MAIN_CLASS_NAME);
+		final JakeClassloader classLoader = JakeClassloader.current();
+		Class<?> mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
 		if (mainClass == null) {
-
-			final JakeClassloader classloader = JakeClassloader.current().and(InternalUtils.toolsJar());
-			System.out.println(classloader);
-			mainClass = JakeClassloader.current().and(InternalUtils.toolsJar()).loadIfExist(JAVADOC_MAIN_CLASS_NAME);
-
-
-			//final Method method = JakeUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL", URL.class);
-			//JakeUtilsReflect.invoke(base, method, JakeUtilsFile.toUrl(InternalUtils.toolsJar()));
-			//mainClass = JakeClassloader.current().loadIfExist(JAVADOC_MAIN_CLASS_NAME);
+			JakeClassloader.addUrl(classLoader.classloader(), InternalUtils.toolsJar());
+			mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
 			if (mainClass == null) {
 				throw new RuntimeException("It seems that you are running a JRE instead of a JDK, please run Jake using a JDK.");
 			}

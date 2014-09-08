@@ -2,6 +2,7 @@ package org.jake.java.test;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -125,6 +126,9 @@ public final class JakeJUnit {
 		final JakeClassloader classLoader = JakeClassloader.of(classes.iterator().next());
 		JakeLog.startAndNextLine("Run JUnit tests");
 
+		final PrintStream formerOut = System.out;
+		final PrintStream formererr = System.err;
+
 		if (JakeOptions.isVerbose()) {
 			JakeLog.info("-------------------------------------> Here starts the test output in console.");
 		} else {
@@ -162,8 +166,8 @@ public final class JakeJUnit {
 				JakeLog.info("-------------------------------------> Here stops the test output in console.");
 				JakeLog.nextLine();
 			} else {
-				System.setOut(null);
-				System.setErr(null);
+				System.setOut(formerOut);
+				System.setErr(formererr);
 			}
 		}
 

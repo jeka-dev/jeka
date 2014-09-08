@@ -107,8 +107,6 @@ public class JakeClasspath implements Iterable<File> {
 		final String path = toFilePath(className);
 		for (final File file : this) {
 			if (file.isDirectory()) {
-				System.out.println(new File(file, path).getAbsolutePath());
-				System.out.println(new File(file, path).exists());
 				if (new File(file, path).exists()) {
 					return file;
 				}
@@ -127,7 +125,5 @@ public class JakeClasspath implements Iterable<File> {
 	static String toFilePath(String className) {
 		return className.replace('.', '/').concat(".class");
 	}
-
-
 
 }

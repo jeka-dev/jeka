@@ -2,6 +2,7 @@ package org.jake.java;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -16,6 +17,7 @@ import java.util.Set;
 
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIterable;
+import org.jake.utils.JakeUtilsReflect;
 
 public class JakeClassloader {
 
@@ -79,7 +81,7 @@ public class JakeClassloader {
 	public JakeClasspath getChildClasspath() {
 		final List<File> result = new ArrayList<File>(this.delegate.getURLs().length);
 		for (final URL url : this.delegate.getURLs()) {
-			result.add(new File(url.getFile()));
+			result.add(new File(url.getFile().replaceAll("%20", " ")));
 		}
 		return JakeClasspath.of(result);
 	}
@@ -217,6 +219,14 @@ public class JakeClassloader {
 			builder.append("\n").append(this.parent());
 		}
 		return builder.toString();
+	}
+
+	/**
+	 * This allow to access to protected method {@link URLClassLoader#addUrl}. Use it with caution !
+	 */
+	public static final void addUrl(URLClassLoader classLoader, File file) {
+		final Method method = JakeUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL", URL.class);
+		JakeUtilsReflect.invoke(classLoader, method, JakeUtilsFile.toUrl(file));
 	}
 
 
