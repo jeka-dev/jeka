@@ -233,12 +233,12 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	protected JakeJUnit juniter() {
-		return JakeJUnit.ofClasspath(this.classDir(), this.deps()
-				.test()).withReport(junitReportDetail, testReportDir());
+		return JakeJUnit.ofClasspath( this.classDir(), this.deps().test() )
+				.withReport(junitReportDetail, testReportDir());
 	}
 
 	protected void compileUnitTests() {
-		final Iterable<File> classpath =  this.deps().test().withFirst(classDir());
+		final Iterable<File> classpath =  this.deps().test().andAtFirst(classDir());
 		compiler(testSourceDirs(), testClassDir(), classpath).compileOrFail();
 	}
 

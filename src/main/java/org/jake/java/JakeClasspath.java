@@ -28,6 +28,10 @@ public class JakeClasspath implements Iterable<File> {
 		return new JakeClasspath(files);
 	}
 
+	public static JakeClasspath of(File file, Iterable<File> files) {
+		return JakeClasspath.of(file).and(files);
+	}
+
 	public static JakeClasspath of(File...files) {
 		return JakeClasspath.of(Arrays.asList(files));
 	}
@@ -40,21 +44,21 @@ public class JakeClasspath implements Iterable<File> {
 		return files.isEmpty();
 	}
 
-	public JakeClasspath withFirst(File ...files) {
-		return withFirst(JakeClasspath.of(files));
+	public JakeClasspath andAtFirst(File ...files) {
+		return andAtFirst(JakeClasspath.of(files));
 	}
 
 	@SuppressWarnings("unchecked")
-	public JakeClasspath withFirst(Iterable<File> otherFiles) {
+	public JakeClasspath andAtFirst(Iterable<File> otherFiles) {
 		return new JakeClasspath(JakeUtilsIterable.chain(otherFiles, this.files));
 	}
 
-	public JakeClasspath with(File ...files) {
-		return with(JakeClasspath.of(files));
+	public JakeClasspath and(File ...files) {
+		return and(JakeClasspath.of(files));
 	}
 
 	@SuppressWarnings("unchecked")
-	public JakeClasspath with(Iterable<File> otherFiles) {
+	public JakeClasspath and(Iterable<File> otherFiles) {
 		return new JakeClasspath(JakeUtilsIterable.chain(this.files, otherFiles));
 	}
 

@@ -77,26 +77,26 @@ JakeJavaDependencyResolver {
 
 	public JakeLocalDependencyResolver withRuntimeOnly(Iterable<File> files) {
 		return new JakeLocalDependencyResolver(this.compileAndRuntimeLibs,
-				this.runtimeOnlyLibs.with(files), this.testLibs,
+				this.runtimeOnlyLibs.and(files), this.testLibs,
 				this.compileOnlyLibs);
 	}
 
 	public JakeLocalDependencyResolver withTest(Iterable<File> files) {
 		return new JakeLocalDependencyResolver(this.compileAndRuntimeLibs,
-				this.runtimeOnlyLibs, this.testLibs.with(files),
+				this.runtimeOnlyLibs, this.testLibs.and(files),
 				this.compileOnlyLibs);
 	}
 
 	public JakeLocalDependencyResolver withCompileOnly(Iterable<File> files) {
 		return new JakeLocalDependencyResolver(this.compileAndRuntimeLibs,
 				this.runtimeOnlyLibs, this.testLibs,
-				this.compileOnlyLibs.with(files));
+				this.compileOnlyLibs.and(files));
 	}
 
 	public JakeLocalDependencyResolver withCompileAndRuntime(
 			Iterable<File> files) {
 		return new JakeLocalDependencyResolver(
-				this.compileAndRuntimeLibs.with(files), this.runtimeOnlyLibs,
+				this.compileAndRuntimeLibs.and(files), this.runtimeOnlyLibs,
 				this.testLibs, this.compileOnlyLibs);
 	}
 
@@ -128,7 +128,7 @@ JakeJavaDependencyResolver {
 	 */
 	@Override
 	public JakeClasspath compile() {
-		return compileAndRuntimeLibs.with(compileOnlyLibs);
+		return compileAndRuntimeLibs.and(compileOnlyLibs);
 	}
 
 	/**
@@ -136,8 +136,8 @@ JakeJavaDependencyResolver {
 	 */
 	@Override
 	public JakeClasspath test() {
-		return compileAndRuntimeLibs.with(runtimeOnlyLibs).with(testLibs)
-				.with(compileOnlyLibs);
+		return compileAndRuntimeLibs.and(runtimeOnlyLibs).and(testLibs)
+				.and(compileOnlyLibs);
 	}
 
 	/**
@@ -145,7 +145,7 @@ JakeJavaDependencyResolver {
 	 */
 	@Override
 	public JakeClasspath runtime() {
-		return compileAndRuntimeLibs.with(runtimeOnlyLibs);
+		return compileAndRuntimeLibs.and(runtimeOnlyLibs);
 	}
 
 

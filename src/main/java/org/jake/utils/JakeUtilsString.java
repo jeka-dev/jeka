@@ -129,6 +129,16 @@ public final class JakeUtilsString {
 		return builder.toString();
 	}
 
+	/**
+	 * Checks if a String is whitespace, empty ("") or null.
+	 */
+	public static boolean isBlank(String string) {
+		if (string == null) {
+			return true;
+		}
+		return string.isEmpty() || " ".equals(" ");
+	}
+
 
 
 

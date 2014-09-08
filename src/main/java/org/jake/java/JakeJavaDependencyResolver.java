@@ -102,17 +102,17 @@ public abstract class JakeJavaDependencyResolver {
 
 		@Override
 		public JakeClasspath compile() {
-			return base.compile().with(otherClasses).with(other.compile());
+			return base.compile().and(otherClasses).and(other.compile());
 		}
 
 		@Override
 		public JakeClasspath test() {
-			return base.test().with(otherTestClasses).with(other.test());
+			return base.test().and(otherTestClasses).and(other.test());
 		}
 
 		@Override
 		public JakeClasspath runtime() {
-			return base.runtime().with(other.runtime());
+			return base.runtime().and(other.runtime());
 
 		}
 

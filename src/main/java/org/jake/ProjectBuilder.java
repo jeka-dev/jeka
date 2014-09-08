@@ -195,13 +195,13 @@ class ProjectBuilder {
 		JakeClasspath result = JakeClassloader.current().getChildClasspath();
 		final File buildLibDir = new File(moduleBaseDir, BUILD_LIB_DIR);
 		if (buildLibDir.exists() && buildLibDir.isDirectory()) {
-			result = result.with(JakeDir.of(buildLibDir).include("**/*.jar"));
+			result = result.and(JakeDir.of(buildLibDir).include("**/*.jar"));
 		}
 		final File extLibDir = new File(JakeLocator.jakeHome(), "ext");
 		if (extLibDir.exists() && extLibDir.isDirectory()) {
-			result = result.with(JakeDir.of(extLibDir).include("**/*.jar"));
+			result = result.and(JakeDir.of(extLibDir).include("**/*.jar"));
 		}
-		result = result.with(JakeOptions.extraJakeClasspath());
+		result = result.and(JakeOptions.extraJakeClasspath());
 		return result;
 	}
 

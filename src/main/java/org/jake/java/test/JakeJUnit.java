@@ -19,6 +19,7 @@ import org.jake.JakeOptions;
 import org.jake.java.JakeClassFilter;
 import org.jake.java.JakeClassloader;
 import org.jake.java.JakeClasspath;
+import org.jake.java.JakeJavaProcess;
 import org.jake.java.test.JakeTestSuiteResult.ExceptionDescription;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
@@ -52,32 +53,33 @@ public final class JakeJUnit {
 
 	private final File reportDir;
 
-	private JakeJUnit(Iterable<File> classpath, JunitReportDetail reportDetail, File reportDir) {
+	private final JakeJavaProcess fork;
+
+	private JakeJUnit(Iterable<File> classpath, JunitReportDetail reportDetail, File reportDir, JakeJavaProcess fork) {
 		this.classpath = JakeClasspath.of(classpath);
 		this.reportDetail = reportDetail;
 		this.reportDir = reportDir;
+		this.fork = fork;
 	}
 
-	@SuppressWarnings("unchecked")
-	public static JakeJUnit ofClasspath(File dir, Iterable<File> dirs) {
-		return new JakeJUnit(JakeUtilsIterable.concatToList(dir, dirs), JunitReportDetail.NONE, null);
+	public static JakeJUnit ofFork(JakeJavaProcess jakeJavaProcess) {
+		return new JakeJUnit(null, JunitReportDetail.NONE, null, jakeJavaProcess);
 	}
 
-	public static JakeJUnit ofCclasspath(Iterable<File> dirs) {
-		return new JakeJUnit(dirs, JunitReportDetail.NONE, null);
+
+	public static JakeJUnit ofClasspath(File file, Iterable<File> files) {
+		return of(JakeClasspath.of(file).and(files));
 	}
 
-	public JakeJUnit withExtraLibsInClasspath(File ...files) {
-		return withExtraLibsInClasspath(Arrays.asList(files));
-	}
-
-	public JakeJUnit withExtraLibsInClasspath(Iterable<File> files) {
-		return new JakeJUnit(JakeClasspath.of(this.classpath).with(files), this.reportDetail, this.reportDir);
+	public static JakeJUnit of(JakeClasspath classpath) {
+		return new JakeJUnit(classpath, JunitReportDetail.NONE, null, null);
 	}
 
 	public JakeJUnit withReport(JunitReportDetail reportDetail, File reportDir) {
-		return new JakeJUnit(this.classpath, reportDetail, reportDir);
+		return new JakeJUnit(this.classpath, reportDetail, reportDir, this.fork);
 	}
+
+
 
 	public JakeTestSuiteResult launchAll(File... testClassDirs) {
 		return launchAll(Arrays.asList(testClassDirs),
@@ -87,7 +89,7 @@ public final class JakeJUnit {
 	@SuppressWarnings({ "rawtypes" })
 	public JakeTestSuiteResult launchAll(final Iterable<File> testClassDirs, JakeClassFilter classFilter) {
 		final Collection<Class> testClasses;
-		final JakeClasspath classpath = this.classpath.withFirst(testClassDirs);
+		final JakeClasspath classpath = this.classpath.andAtFirst(testClassDirs);
 		final JakeClassloader classLoader = JakeClassloader.system().parent().createChild(classpath);
 		final FileFilter fileFilter = new FileFilter() {
 
@@ -331,6 +333,18 @@ public final class JakeJUnit {
 			}
 		}
 		return JakeUtilsString.toString(Arrays.asList(result), ".");
+	}
+
+	private void runForkedJunit4(Iterable<Class<?>> classes) {
+		this.fork.startAndWaitFor("org.junit.JUnitCore", toStringArrays(classes));
+	}
+
+	private static String[] toStringArrays(Iterable<Class<?>> classes) {
+		final ArrayList<String> list = new ArrayList<String>();
+		for (final Class<?> clazz : classes) {
+			list.add(clazz.getName());
+		}
+		return list.toArray(new String[0]);
 	}
 
 }

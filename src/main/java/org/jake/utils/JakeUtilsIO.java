@@ -11,11 +11,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -54,6 +56,17 @@ public final class JakeUtilsIO {
 	public static void closeQuietly(InputStream inputStream) {
 		try {
 			inputStream.close();
+		} catch (final Exception e) {
+			// Ignored
+		}
+	}
+
+	/**
+	 * Close the specified output stream, ignoring any exceptions.
+	 */
+	public static void closeQuietly(OutputStream outputStream) {
+		try {
+			outputStream.close();
 		} catch (final Exception e) {
 			// Ignored
 		}
@@ -257,9 +270,81 @@ public final class JakeUtilsIO {
 		}
 	}
 
+	public static void copy(InputStream in, OutputStream out) {
+		final byte[] buf = new byte[1024];
+		int len;
+		try {
+			while ((len = in.read(buf)) > 0) {
+				out.write(buf, 0, len);
+			}
+		} catch (final IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		closeQuietly(in);
+		closeQuietly(out);
+	}
+
+	/**
+	 * Returns a thread that write each data read from the specified input stream to the specified output stream.
+	 */
+	public static StreamGobbler newStreamGobbler(InputStream is, PrintWriter os) {
+		return new StreamGobbler(is, os);
+	}
+
+	/**
+	 * Runs a thread copying all data from a stream to a specified writer.
+	 * The thread is started when the instance is created. You have to call {@link #stop()}
+	 * to stop the thread.
+	 */
+	public static class StreamGobbler {
+
+		private final InnerRunnable innerRunnable;
+
+		private StreamGobbler(InputStream is, PrintWriter os) {
+			this.innerRunnable = new InnerRunnable(is, os);
+			new Thread(innerRunnable).start();
+		}
+
+		/**
+		 * Stop the gobbling, meaning stop the thread.
+		 */
+		public StreamGobbler stop() {
+			this.innerRunnable.stop.set(true);
+			return this;
+		}
+
+		public static class InnerRunnable implements Runnable {
+
+			private final InputStream in;
+
+			private final PrintWriter out;
+
+			private final AtomicBoolean stop = new AtomicBoolean(false);
+
+			private InnerRunnable(InputStream is, PrintWriter os) {
+				this.in = is;
+				this.out = os;
+			}
+
+			@Override
+			public void run() {
+				try {
+					final InputStreamReader isr = new InputStreamReader(in);
+					final BufferedReader br = new BufferedReader(isr);
+					String line=null;
+					while ( !stop.get() && (line = br.readLine()) != null) {
+						out.println(line);
+					}
+				} catch (final IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+		}
 
 
-
+	}
 
 
 }

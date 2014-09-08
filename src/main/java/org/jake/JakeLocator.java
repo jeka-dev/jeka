@@ -36,7 +36,7 @@ public class JakeLocator {
 		final File extDir = new File(jakeHome(), "ext/compile");
 		JakeClasspath result = JakeClasspath.of(jakeJarFile());
 		if (extDir.exists()) {
-			result = result.with(JakeDir.of(extDir).include("**/*.jar"));
+			result = result.and(JakeDir.of(extDir).include("**/*.jar"));
 		}
 		return result;
 	}
