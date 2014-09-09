@@ -14,6 +14,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
@@ -21,7 +22,6 @@ import org.jake.java.JakeClassFilter;
 import org.jake.java.JakeClassloader;
 import org.jake.java.JakeClasspath;
 import org.jake.java.JakeJavaProcess;
-import org.jake.java.test.JakeTestSuiteResult.ExceptionDescription;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
@@ -120,7 +120,7 @@ public final class JakeJUnit {
 		final String name = getSuiteName(classes);
 
 		if (!classes.iterator().hasNext()) {
-			return JakeTestSuiteResult.empty(name, 0);
+			return JakeTestSuiteResult.empty((Properties) System.getProperties().clone(), name, 0);
 		}
 		final long start = System.nanoTime();
 		final JakeClassloader classLoader = JakeClassloader.of(classes.iterator().next());
@@ -142,21 +142,23 @@ public final class JakeJUnit {
 				final Class<?> junitCoreClass = classLoader.load(JUNIT4_RUNNER_CLASS_NAME);
 				final Method runClassesMethod = JakeUtilsReflect.getMethod(junitCoreClass,
 						"runClasses", ARRAY_OF_CLASSES_TYPE);
+				final Properties properties = (Properties) System.getProperties().clone();
 				final Object junit4Result = JakeUtilsReflect.invoke(null, runClassesMethod,
 						(Object) classArray);
 				final long end = System.nanoTime();
 				final long duration = (end - start) / 1000000;
-				result = fromJunit4Result(name, junit4Result, duration);
+				result = JakeTestSuiteResult.fromJunit4Result(properties, name, junit4Result, duration);
 			} else if (classLoader.isDefined(JUNIT3_RUNNER_CLASS_NAME)) {
 				final Object suite = createJunit3TestSuite(classLoader, classes);
 				final Class testResultClass = classLoader.load(JUNIT3_TEST_RESULT_CLASS_NAME);
 				final Object testResult = JakeUtilsReflect.newInstance(testResultClass);
 				final Method runMethod = JakeUtilsReflect.getMethod(suite.getClass(),
 						"run", testResultClass);
+				final Properties properties = (Properties) System.getProperties().clone();
 				JakeUtilsReflect.invoke(suite, runMethod, testResult);
 				final long end = System.nanoTime();
 				final long duration = (end - start) / 1000000;
-				result = fromJunit3Result(name, testResult, duration);
+				result = fromJunit3Result(properties, name, testResult, duration);
 			} else {
 				throw new IllegalStateException("No Junit found on test classpath.");
 			}
@@ -182,47 +184,11 @@ public final class JakeJUnit {
 		return result;
 	}
 
-	private static JakeTestSuiteResult fromJunit4Result(String suiteName, Object result, long durationInMillis) {
-		final Integer runCount = JakeUtilsReflect.invoke(result, "getRunCount");
-		final Integer ignoreCount = JakeUtilsReflect.invoke(result,
-				"getIgnoreCount");
-		final List<Object> junitFailures = JakeUtilsReflect.invoke(result,
-				"getFailures");
-		final List<JakeTestSuiteResult.Failure> failures = new ArrayList<JakeTestSuiteResult.Failure>(
-				junitFailures.size());
-		for (final Object junitFailure : junitFailures) {
-			failures.add(fromJunit4Failure(junitFailure));
-		}
-		return new JakeTestSuiteResult(suiteName, runCount, ignoreCount, failures, durationInMillis);
 
-	}
 
-	private static JakeTestSuiteResult.Failure fromJunit4Failure(Object junit4failure) {
-		final Object junit4Description = JakeUtilsReflect.invoke(junit4failure,
-				"getDescription");
-		final String testClassName = JakeUtilsReflect.invoke(junit4Description,
-				"getClassName");
-		final String testMethodName = JakeUtilsReflect.invoke(junit4Description,
-				"getMethodName");
-		final Throwable exception = JakeUtilsReflect
-				.invoke(junit4failure, "getException");
-		final ExceptionDescription description = new ExceptionDescription(exception);
-		return new JakeTestSuiteResult.Failure(testClassName, testMethodName,
-				description);
-	}
 
-	private static JakeTestSuiteResult.Failure fromJunit3Failure(Object junit3failure) {
-		final Object failedTest = JakeUtilsReflect.invoke(junit3failure,
-				"failedTest");
-		final Throwable exception = JakeUtilsReflect.invoke(junit3failure,
-				"thrownException");
-		final ExceptionDescription description = new ExceptionDescription(exception);
-		final String failedTestName = failedTest.toString();
-		final int firstParenthesisIndex = failedTestName.indexOf("(");
-		final String methodName = failedTestName.substring(0, firstParenthesisIndex);
-		return new JakeTestSuiteResult.Failure(failedTest.getClass().getName(), methodName,
-				description);
-	}
+
+
 
 	@SuppressWarnings("rawtypes")
 	private static Collection<Class> getJunitTestClassesInClassLoader(
@@ -292,7 +258,7 @@ public final class JakeJUnit {
 		}
 	}
 
-	private static JakeTestSuiteResult fromJunit3Result(String suiteName, Object result, long durationInMillis) {
+	private static JakeTestSuiteResult fromJunit3Result(Properties properties, String suiteName, Object result, long durationInMillis) {
 		final Integer runCount = JakeUtilsReflect.invoke(result, "runCount");
 		final Integer ignoreCount = 0;
 		final Enumeration<Object> junitFailures = JakeUtilsReflect.invoke(result,
@@ -302,13 +268,13 @@ public final class JakeJUnit {
 		final List<JakeTestSuiteResult.Failure> failures = new ArrayList<JakeTestSuiteResult.Failure>();
 		while(junitFailures.hasMoreElements()) {
 			final Object junitFailure = junitFailures.nextElement();
-			failures.add(fromJunit3Failure(junitFailure));
+			failures.add(JakeTestSuiteResult.fromJunit3Failure(junitFailure));
 		}
 		while(junitErrors.hasMoreElements()) {
 			final Object junitError = junitErrors.nextElement();
-			failures.add(fromJunit3Failure(junitError));
+			failures.add(JakeTestSuiteResult.fromJunit3Failure(junitError));
 		}
-		return new JakeTestSuiteResult(suiteName, runCount, ignoreCount, failures, durationInMillis);
+		return new JakeTestSuiteResult(properties, suiteName, runCount, ignoreCount, failures, durationInMillis);
 
 	}
 

@@ -357,6 +357,20 @@ public final class JakeUtilsFile {
 		return result;
 	}
 
+	public static File createTempFile(String prefix, String suffix) {
+		try {
+			return File.createTempFile(prefix, suffix);
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static void delete(File file) {
+		if (!file.delete()) {
+			throw new RuntimeException("File " + file.getAbsolutePath()  + " can't be deleted.");
+		}
+	}
+
 
 
 }

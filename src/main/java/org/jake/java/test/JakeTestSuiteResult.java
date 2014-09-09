@@ -1,21 +1,29 @@
 package org.jake.java.test;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import org.jake.utils.JakeUtilsIterable;
+import org.jake.utils.JakeUtilsReflect;
 
-public class JakeTestSuiteResult {
+public class JakeTestSuiteResult implements Serializable {
+
+	private static final long serialVersionUID = -5353195584286473050L;
 
 	private final String suiteName;
 	private final List<Failure> failures;
 	private final int runCount;
 	private final int ignoreCount;
 	private final long durationInMilis;
+	private final Properties systemProperties;
 
 
-	public JakeTestSuiteResult(String suiteName, int totaltestCount, int ignoreCount, Iterable<Failure> failures, long durationInMillis) {
+	public JakeTestSuiteResult(Properties properties, String suiteName, int totaltestCount, int ignoreCount, Iterable<Failure> failures, long durationInMillis) {
+		this.systemProperties = properties;
 		this.suiteName = suiteName;
 		this.runCount = totaltestCount;
 		this.ignoreCount = ignoreCount;
@@ -24,8 +32,8 @@ public class JakeTestSuiteResult {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static JakeTestSuiteResult empty(String name, long durationInMillis) {
-		return new JakeTestSuiteResult(name, 0,0, Collections.EMPTY_LIST, durationInMillis);
+	public static JakeTestSuiteResult empty(Properties properties, String name, long durationInMillis) {
+		return new JakeTestSuiteResult(properties, name, 0,0, Collections.EMPTY_LIST, durationInMillis);
 	}
 
 	public List<Failure> failures() {
@@ -94,7 +102,10 @@ public class JakeTestSuiteResult {
 		return "" + runCount + " test(s) run, " + failureCount() + " failure(s), " + ignoreCount + " ignored. In " + durationInMilis + " milliseconds." ;
 	}
 
-	public static class Failure {
+	public static class Failure implements Serializable {
+
+		private static final long serialVersionUID = 7089021299483181605L;
+
 		private final String className;
 		private final String testName;
 		private final ExceptionDescription exceptionDescription;
@@ -143,7 +154,10 @@ public class JakeTestSuiteResult {
 		return " : " + exceptionMessage;
 	}
 
-	public static class ExceptionDescription {
+	public static class ExceptionDescription implements Serializable {
+
+		private static final long serialVersionUID = -8619868712236132763L;
+
 		private final String className;
 		private final String message;
 		private final StackTraceElement[] stackTrace;
@@ -204,7 +218,48 @@ public class JakeTestSuiteResult {
 			return result;
 		}
 
+	}
 
+	static JakeTestSuiteResult fromJunit4Result(Properties properties, String suiteName, Object result, long durationInMillis) {
+		final Integer runCount = JakeUtilsReflect.invoke(result, "getRunCount");
+		final Integer ignoreCount = JakeUtilsReflect.invoke(result,
+				"getIgnoreCount");
+		final List<Object> junitFailures = JakeUtilsReflect.invoke(result,
+				"getFailures");
+		final List<JakeTestSuiteResult.Failure> failures = new ArrayList<JakeTestSuiteResult.Failure>(
+				junitFailures.size());
+		for (final Object junitFailure : junitFailures) {
+			failures.add(fromJunit4Failure(junitFailure));
+		}
+		return new JakeTestSuiteResult(properties, suiteName, runCount, ignoreCount, failures, durationInMillis);
+
+	}
+
+	private static JakeTestSuiteResult.Failure fromJunit4Failure(Object junit4failure) {
+		final Object junit4Description = JakeUtilsReflect.invoke(junit4failure,
+				"getDescription");
+		final String testClassName = JakeUtilsReflect.invoke(junit4Description,
+				"getClassName");
+		final String testMethodName = JakeUtilsReflect.invoke(junit4Description,
+				"getMethodName");
+		final Throwable exception = JakeUtilsReflect
+				.invoke(junit4failure, "getException");
+		final ExceptionDescription description = new ExceptionDescription(exception);
+		return new JakeTestSuiteResult.Failure(testClassName, testMethodName,
+				description);
+	}
+
+	static JakeTestSuiteResult.Failure fromJunit3Failure(Object junit3failure) {
+		final Object failedTest = JakeUtilsReflect.invoke(junit3failure,
+				"failedTest");
+		final Throwable exception = JakeUtilsReflect.invoke(junit3failure,
+				"thrownException");
+		final ExceptionDescription description = new ExceptionDescription(exception);
+		final String failedTestName = failedTest.toString();
+		final int firstParenthesisIndex = failedTestName.indexOf("(");
+		final String methodName = failedTestName.substring(0, firstParenthesisIndex);
+		return new JakeTestSuiteResult.Failure(failedTest.getClass().getName(), methodName,
+				description);
 	}
 
 

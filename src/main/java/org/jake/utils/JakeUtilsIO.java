@@ -1,6 +1,7 @@
 package org.jake.utils;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,6 +10,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -56,6 +61,17 @@ public final class JakeUtilsIO {
 	public static void closeQuietly(InputStream inputStream) {
 		try {
 			inputStream.close();
+		} catch (final Exception e) {
+			// Ignored
+		}
+	}
+
+	/**
+	 * Close the specified object input, ignoring any exceptions.
+	 */
+	public static void closeQuietly(ObjectInput objectInput) {
+		try {
+			objectInput.close();
 		} catch (final Exception e) {
 			// Ignored
 		}
@@ -132,7 +148,8 @@ public final class JakeUtilsIO {
 	}
 
 	/**
-	 * Equivalent to {@link ZipOutputStream#closeEntry()} but without checked exception.
+	 * Equivalent to {@link ZipOutputStream#closeEntry()} but without checked
+	 * exception.
 	 */
 	public static void closeEntry(ZipOutputStream outputStream) {
 		try {
@@ -223,7 +240,8 @@ public final class JakeUtilsIO {
 	public static void addZipEntry(ZipOutputStream zos, File fileToZip,
 			File baseFolder) {
 		if (!baseFolder.isDirectory()) {
-			throw new IllegalArgumentException(baseFolder.getPath() + " is not a directory." );
+			throw new IllegalArgumentException(baseFolder.getPath()
+					+ " is not a directory.");
 		}
 
 		if (fileToZip.isDirectory()) {
@@ -285,17 +303,61 @@ public final class JakeUtilsIO {
 		closeQuietly(out);
 	}
 
+	public static void serialize(Object object, File file) {
+		try {
+			final OutputStream fileOutputStream = new FileOutputStream(file);
+			final OutputStream buffer = new BufferedOutputStream(
+					fileOutputStream);
+			final ObjectOutput output = new ObjectOutputStream(buffer);
+			try {
+				output.writeObject(object);
+			} finally {
+				output.close();
+			}
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static Object deserialize(File file) {
+
+		InputStream fileInputStream;
+		try {
+			fileInputStream = new FileInputStream(file);
+		} catch (final FileNotFoundException e) {
+			throw new IllegalArgumentException(e);
+		}
+		final InputStream buffer = new BufferedInputStream(fileInputStream);
+		ObjectInput input;
+		try {
+			input = new ObjectInputStream(buffer);
+		} catch (final IOException e) {
+			closeQuietly(buffer);
+			throw new RuntimeException(e);
+		}
+		try {
+			return input.readObject();
+		} catch (final ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		} finally {
+			closeQuietly(input);
+		}
+	}
+
 	/**
-	 * Returns a thread that write each data read from the specified input stream to the specified output stream.
+	 * Returns a thread that write each data read from the specified input
+	 * stream to the specified output stream.
 	 */
 	public static StreamGobbler newStreamGobbler(InputStream is, PrintWriter os) {
 		return new StreamGobbler(is, os);
 	}
 
 	/**
-	 * Runs a thread copying all data from a stream to a specified writer.
-	 * The thread is started when the instance is created. You have to call {@link #stop()}
-	 * to stop the thread.
+	 * Runs a thread copying all data from a stream to a specified writer. The
+	 * thread is started when the instance is created. You have to call
+	 * {@link #stop()} to stop the thread.
 	 */
 	public static class StreamGobbler {
 
@@ -332,8 +394,8 @@ public final class JakeUtilsIO {
 				try {
 					final InputStreamReader isr = new InputStreamReader(in);
 					final BufferedReader br = new BufferedReader(isr);
-					String line=null;
-					while ( !stop.get() && (line = br.readLine()) != null) {
+					String line = null;
+					while (!stop.get() && (line = br.readLine()) != null) {
 						out.println(line);
 					}
 				} catch (final IOException e) {
@@ -343,8 +405,6 @@ public final class JakeUtilsIO {
 
 		}
 
-
 	}
-
 
 }

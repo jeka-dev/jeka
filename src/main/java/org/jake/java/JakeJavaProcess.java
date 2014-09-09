@@ -97,6 +97,11 @@ public class JakeJavaProcess {
 				this.agents, this.options, this.workingDir);
 	}
 
+	public JakeJavaProcess andClasspath(JakeClasspath classpath) {
+		return withClasspath(this.classpath.and(classpath));
+	}
+
+
 	private ProcessBuilder processBuilder(String command) {
 		final ProcessBuilder builder = new ProcessBuilder(command);
 		builder.redirectErrorStream(true);

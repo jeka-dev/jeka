@@ -3,6 +3,7 @@ package org.jake.java.test;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Properties;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -56,10 +57,10 @@ class JakeTestReportBuilder {
 		writer.close();
 	}
 
-	private void writeProperties(XMLStreamWriter writer) throws XMLStreamException {
+	private void writeProperties(XMLStreamWriter writer, Properties systemProperties) throws XMLStreamException {
 		writer.writeCharacters("  ");
 		writer.writeStartElement("properties");
-		for (final Object name : System.getProperties().keySet()) {
+		for (final Object name : this.result..keySet()) {
 			writer.writeCharacters("\n    ");
 			writer.writeEmptyElement("property");
 			writer.writeAttribute("value", System.getProperty(name.toString()));
