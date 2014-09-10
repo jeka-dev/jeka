@@ -89,30 +89,8 @@ public final class JakeJUnit {
 
 	@SuppressWarnings({ "rawtypes" })
 	public JakeTestSuiteResult launchAll(final Iterable<File> testClassDirs, JakeClassFilter classFilter) {
-		final Collection<Class> testClasses;
-		final JakeClasspath classpath = this.classpath.andAtFirst(testClassDirs);
-		final JakeClassloader classLoader = JakeClassloader.system().parent().createChild(classpath);
-		final FileFilter fileFilter = new FileFilter() {
-
-			@Override
-			public boolean accept(File pathname) {
-				for (final File testClassDir : testClassDirs ) {
-					if (pathname.equals(testClassDir)) {
-						return true;
-					}
-				}
-				return false;
-			}
-		};
-		testClasses = getJunitTestClassesInClassLoader(classLoader, fileFilter);
-
-		final Collection<Class> effectiveClasses = new LinkedList<Class>();
-		for (final Class clazz : testClasses) {
-			if (classFilter.accept(clazz)) {
-				effectiveClasses.add(clazz);
-			}
-		}
-		return launch(effectiveClasses);
+		final Collection<Class> testClasses = getClassesToTest(testClassDirs, classFilter);
+		return launch(testClasses);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -186,7 +164,33 @@ public final class JakeJUnit {
 
 
 
+	@SuppressWarnings("rawtypes")
+	private Collection<Class> getClassesToTest(final Iterable<File> testClassDirs, JakeClassFilter classFilter) {
+		final Collection<Class> testClasses;
+		final JakeClasspath classpath = this.classpath.andAtFirst(testClassDirs);
+		final JakeClassloader classLoader = JakeClassloader.system().parent().createChild(classpath);
+		final FileFilter fileFilter = new FileFilter() {
 
+			@Override
+			public boolean accept(File pathname) {
+				for (final File testClassDir : testClassDirs ) {
+					if (pathname.equals(testClassDir)) {
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+		testClasses = getJunitTestClassesInClassLoader(classLoader, fileFilter);
+
+		final Collection<Class> effectiveClasses = new LinkedList<Class>();
+		for (final Class clazz : testClasses) {
+			if (classFilter.accept(clazz)) {
+				effectiveClasses.add(clazz);
+			}
+		}
+		return effectiveClasses;
+	}
 
 
 
@@ -316,5 +320,7 @@ public final class JakeJUnit {
 		}
 		return list.toArray(new String[0]);
 	}
+
+
 
 }

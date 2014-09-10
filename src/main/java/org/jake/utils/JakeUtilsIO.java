@@ -3,6 +3,8 @@ package org.jake.utils;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,10 +12,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.InvalidClassException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -21,6 +25,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
@@ -346,6 +351,79 @@ public final class JakeUtilsIO {
 		}
 	}
 
+	public static <T> T cloneBySerialization(Object objectToClone) {
+		try {
+			return cloneX(objectToClone);
+		} catch (final IOException e) {
+			throw new IllegalArgumentException(e);
+		} catch (final ClassNotFoundException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
+	private static <T> T cloneX(Object x) throws IOException, ClassNotFoundException {
+		final ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		final CloneOutput cout = new CloneOutput(bout);
+		cout.writeObject(x);
+		final byte[] bytes = bout.toByteArray();
+
+		final ByteArrayInputStream bin = new ByteArrayInputStream(bytes);
+		final CloneInput cin = new CloneInput(bin, cout);
+
+		@SuppressWarnings("unchecked")
+		final
+		T clone = (T) cin.readObject();
+		cin.close();
+		return clone;
+	}
+
+	private static class CloneOutput extends ObjectOutputStream {
+		Queue<Class<?>> classQueue = new LinkedList<Class<?>>();
+
+		CloneOutput(OutputStream out) throws IOException {
+			super(out);
+		}
+
+		@Override
+		protected void annotateClass(Class<?> c) {
+			classQueue.add(c);
+		}
+
+		@Override
+		protected void annotateProxyClass(Class<?> c) {
+			classQueue.add(c);
+		}
+	}
+
+	private static class CloneInput extends ObjectInputStream {
+		private final CloneOutput output;
+
+		CloneInput(InputStream in, CloneOutput output) throws IOException {
+			super(in);
+			this.output = output;
+		}
+
+		@Override
+		protected Class<?> resolveClass(ObjectStreamClass osc)
+				throws IOException, ClassNotFoundException {
+			final Class<?> c = output.classQueue.poll();
+			final String expected = osc.getName();
+			final String found = (c == null) ? null : c.getName();
+			if (!expected.equals(found)) {
+				throw new InvalidClassException("Classes desynchronized: " +
+						"found " + found + " when expecting " + expected);
+			}
+			return c;
+		}
+
+		@Override
+		protected Class<?> resolveProxyClass(String[] interfaceNames)
+				throws IOException, ClassNotFoundException {
+			return output.classQueue.poll();
+		}
+	}
+
+
 	/**
 	 * Returns a thread that write each data read from the specified input
 	 * stream to the specified output stream.
@@ -406,5 +484,7 @@ public final class JakeUtilsIO {
 		}
 
 	}
+
+
 
 }

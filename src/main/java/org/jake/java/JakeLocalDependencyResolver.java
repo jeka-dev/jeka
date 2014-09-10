@@ -35,10 +35,10 @@ JakeJavaDependencyResolver {
 	public static JakeLocalDependencyResolver standard(File libDirectory) {
 		final JakeDir libDir = JakeDir.of(libDirectory);
 		return JakeLocalDependencyResolver
-				.compileAndRuntime(libDir.include("/*.jar"))
-				.withCompileOnly(libDir.include("compile-only/*.jar"))
-				.withRuntimeOnly(libDir.include("runtime-only/*.jar"))
-				.withTest(libDir.include("test/*.jar", "tests/*.jar"));
+				.compile(libDir.include("*.jar", "compile/*.jar"))
+				.provided(libDir.include("provided/*.jar"))
+				.runtime(libDir.include("runtime/*.jar"))
+				.test(libDir.include("test/*.jar"));
 	}
 
 	public static JakeLocalDependencyResolver standardIfExist(File libDirectory) {
@@ -48,7 +48,7 @@ JakeJavaDependencyResolver {
 		return empty();
 	}
 
-	public static JakeLocalDependencyResolver compileAndRuntime(JakeDir dirView) {
+	public static JakeLocalDependencyResolver compile(JakeDir dirView) {
 		return new JakeLocalDependencyResolver(JakeClasspath.of(dirView),
 				JakeClasspath.of(), JakeClasspath.of(), JakeClasspath.of());
 	}
@@ -60,34 +60,34 @@ JakeJavaDependencyResolver {
 	}
 
 	public JakeLocalDependencyResolver withRuntimeOnly(File... files) {
-		return withRuntimeOnly(Arrays.asList(files));
+		return runtime(Arrays.asList(files));
 	}
 
 	public JakeLocalDependencyResolver withTest(File... files) {
-		return withTest(Arrays.asList(files));
+		return test(Arrays.asList(files));
 	}
 
 	public JakeLocalDependencyResolver withCompileOnly(File... files) {
-		return withCompileOnly(Arrays.asList(files));
+		return provided(Arrays.asList(files));
 	}
 
 	public JakeLocalDependencyResolver withCompileAndRuntime(File ... files) {
 		return withCompileAndRuntime(Arrays.asList(files));
 	}
 
-	public JakeLocalDependencyResolver withRuntimeOnly(Iterable<File> files) {
+	public JakeLocalDependencyResolver runtime(Iterable<File> files) {
 		return new JakeLocalDependencyResolver(this.compileAndRuntimeLibs,
 				this.runtimeOnlyLibs.and(files), this.testLibs,
 				this.compileOnlyLibs);
 	}
 
-	public JakeLocalDependencyResolver withTest(Iterable<File> files) {
+	public JakeLocalDependencyResolver test(Iterable<File> files) {
 		return new JakeLocalDependencyResolver(this.compileAndRuntimeLibs,
 				this.runtimeOnlyLibs, this.testLibs.and(files),
 				this.compileOnlyLibs);
 	}
 
-	public JakeLocalDependencyResolver withCompileOnly(Iterable<File> files) {
+	public JakeLocalDependencyResolver provided(Iterable<File> files) {
 		return new JakeLocalDependencyResolver(this.compileAndRuntimeLibs,
 				this.runtimeOnlyLibs, this.testLibs,
 				this.compileOnlyLibs.and(files));

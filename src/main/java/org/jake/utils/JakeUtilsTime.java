@@ -17,4 +17,9 @@ public class JakeUtilsTime {
 		return duration;
 	}
 
+	public static long durationInMillis(long startNano) {
+		final long endNano = System.nanoTime();
+		return (endNano - startNano)/ 1000000;
+	}
+
 }

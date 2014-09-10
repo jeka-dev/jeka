@@ -4,7 +4,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -193,6 +195,66 @@ public final class JakeUtilsReflect {
 		}
 		return result;
 	}
+
+
+	public static <T> T invokeStaticMethod(Class<?> clazz, String methodName, Object ...args) {
+		return invokeMethod(null, clazz, methodName, args);
+	}
+
+	public static <T> T invokeInstanceMethod(Object target, String methodName, Object ...args) {
+		return invokeMethod(target, null, methodName, args);
+	}
+
+	private static <T> T invokeMethod(Object target, Class<?> clazz, String methodName, Object ...args) {
+		final boolean staticMethod = clazz == null;
+		final Class<?> effectiveClass = clazz == null ? target.getClass() : clazz;
+		final String className = effectiveClass.getName();
+		final List<Method> canditates = Arrays.asList(effectiveClass.getMethods());
+		final Class<?> types[] = new Class<?>[args.length];
+		for (int i = 0; i < args.length; i++) {
+			final Object arg = args[i];
+			types[i] = args == null ? Object.class : arg.getClass();
+		}
+		final List<Method> result = findMethodsCompatibleWith(true, canditates, methodName, types);
+		if (result.isEmpty()) {
+			throw new IllegalArgumentException("No public " + (staticMethod ? "static" : "instance") + " method found on class "
+					+ className + " for method " + methodName + " and param types " + types);
+		} else if (result.size() > 1) {
+			throw new IllegalArgumentException("Several public "+  (staticMethod ? "static" : "instance")
+					+ " methods match on class " + className + " for method " + methodName + " and param types " + types
+					+ ". You should use method #invoke(Method, Object[] args) instead." );
+		}
+		final Method method = result.get(0);
+		final T returned = invoke(target, method);
+		return returned;
+	}
+
+
+
+	private static List<Method> findMethodsCompatibleWith(boolean staticMethod, List<Method> methods,
+			String methodName, Class<?>[] argTypes) {
+		for (final Iterator<Method> it = methods.iterator(); it.hasNext();) {
+			final Method method = it.next();
+			if (!methodName.equals(method.getName())
+					|| !Arrays.equals(argTypes, method.getParameterTypes())
+					|| Modifier.isAbstract(method.getModifiers())
+					|| !isMethodArgCompatible(method, argTypes)
+					|| Modifier.isStatic(method.getModifiers()) != staticMethod) {
+				it.remove();
+			}
+		}
+		return methods;
+	}
+
+	private static boolean isMethodArgCompatible(Method method, Class<?>... argTypes) {
+		for (int i =0; i<argTypes.length; i++) {
+			if (!method.getParameterTypes()[i].isAssignableFrom(argTypes[1])) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 
 
 

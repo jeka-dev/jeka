@@ -15,19 +15,18 @@ public class JakeTestSuiteResult implements Serializable {
 	private static final long serialVersionUID = -5353195584286473050L;
 
 	private final String suiteName;
-	private final List<Failure> failures;
+	private final List<? extends TestCaseResult> testCaseResults;
 	private final int runCount;
 	private final int ignoreCount;
 	private final long durationInMilis;
 	private final Properties systemProperties;
 
-
-	public JakeTestSuiteResult(Properties properties, String suiteName, int totaltestCount, int ignoreCount, Iterable<Failure> failures, long durationInMillis) {
+	public JakeTestSuiteResult(Properties properties, String suiteName, int totaltestCount, int ignoreCount, Iterable<? extends TestCaseResult> testCaseResult, long durationInMillis) {
 		this.systemProperties = properties;
 		this.suiteName = suiteName;
 		this.runCount = totaltestCount;
 		this.ignoreCount = ignoreCount;
-		this.failures = JakeUtilsIterable.toList(failures);
+		this.testCaseResults = JakeUtilsIterable.toList(testCaseResult);
 		this.durationInMilis = durationInMillis;
 	}
 
@@ -36,8 +35,18 @@ public class JakeTestSuiteResult implements Serializable {
 		return new JakeTestSuiteResult(properties, name, 0,0, Collections.EMPTY_LIST, durationInMillis);
 	}
 
+	public List<? extends TestCaseResult> testCaseResults() {
+		return testCaseResults;
+	}
+
 	public List<Failure> failures() {
-		return failures;
+		final List<Failure> result = new LinkedList<JakeTestSuiteResult.Failure>();
+		for (final TestCaseResult caseResult : this.testCaseResults) {
+			if (caseResult instanceof Failure) {
+				result.add((Failure)caseResult);
+			}
+		}
+		return result;
 	}
 
 	public int runCount() {
@@ -49,7 +58,7 @@ public class JakeTestSuiteResult implements Serializable {
 	}
 
 	public int failureCount() {
-		return failures.size();
+		return testCaseResults.size();
 	}
 
 	public String suiteName() {
@@ -58,7 +67,7 @@ public class JakeTestSuiteResult implements Serializable {
 
 	public int assertErrorCount() {
 		int result = 0;
-		for (final Failure failure : failures) {
+		for (final Failure failure : failures()) {
 			if (failure.getExceptionDescription().isAssertError()) {
 				result ++;
 			}
@@ -85,7 +94,7 @@ public class JakeTestSuiteResult implements Serializable {
 		if (verbose) {
 			lines.add("");
 		}
-		for (final Failure failure : failures) {
+		for (final Failure failure : failures()) {
 			for (final String string : failure.toStrings(verbose)) {
 				lines.add(string);
 			}
@@ -102,20 +111,17 @@ public class JakeTestSuiteResult implements Serializable {
 		return "" + runCount + " test(s) run, " + failureCount() + " failure(s), " + ignoreCount + " ignored. In " + durationInMilis + " milliseconds." ;
 	}
 
-	public static class Failure implements Serializable {
-
-		private static final long serialVersionUID = 7089021299483181605L;
-
+	@SuppressWarnings("serial")
+	public static class TestCaseResult implements Serializable {
 		private final String className;
 		private final String testName;
-		private final ExceptionDescription exceptionDescription;
+		private final float durationInSecond;
 
-
-		public Failure(String className, String testName, ExceptionDescription exception) {
+		public TestCaseResult(String className, String testName, float durationSec) {
 			super();
 			this.className = className;
 			this.testName = testName;
-			this.exceptionDescription = exception;
+			this.durationInSecond = durationSec;
 		}
 
 		public String getClassName() {
@@ -126,6 +132,27 @@ public class JakeTestSuiteResult implements Serializable {
 			return testName;
 		}
 
+		public float getDurationInSecond() {
+			return durationInSecond;
+		}
+
+	}
+
+	public static class Failure extends TestCaseResult implements Serializable {
+
+		private static final long serialVersionUID = 7089021299483181605L;
+
+
+		private final ExceptionDescription exceptionDescription;
+
+
+		public Failure(String className, String testName, float duration, ExceptionDescription exception) {
+			super(className, testName, duration);
+			this.exceptionDescription = exception;
+		}
+
+
+
 		public ExceptionDescription getExceptionDescription() {
 			return exceptionDescription;
 		}
@@ -133,7 +160,7 @@ public class JakeTestSuiteResult implements Serializable {
 
 		public List<String> toStrings(boolean withStackTrace) {
 			final List<String> result = new LinkedList<String>();
-			final String intro = className + "#" + testName;
+			final String intro = this.getClassName() + "#" + this.getTestName();
 
 			if (withStackTrace) {
 				final List<String> stack = exceptionDescription.stackTracesAsStrings();
@@ -152,6 +179,10 @@ public class JakeTestSuiteResult implements Serializable {
 			return "";
 		}
 		return " : " + exceptionMessage;
+	}
+
+	public Properties getSystemProperties() {
+		return systemProperties;
 	}
 
 	public static class ExceptionDescription implements Serializable {
@@ -245,7 +276,7 @@ public class JakeTestSuiteResult implements Serializable {
 		final Throwable exception = JakeUtilsReflect
 				.invoke(junit4failure, "getException");
 		final ExceptionDescription description = new ExceptionDescription(exception);
-		return new JakeTestSuiteResult.Failure(testClassName, testMethodName,
+		return new JakeTestSuiteResult.Failure(testClassName, testMethodName, -1,
 				description);
 	}
 
@@ -258,7 +289,7 @@ public class JakeTestSuiteResult implements Serializable {
 		final String failedTestName = failedTest.toString();
 		final int firstParenthesisIndex = failedTestName.indexOf("(");
 		final String methodName = failedTestName.substring(0, firstParenthesisIndex);
-		return new JakeTestSuiteResult.Failure(failedTest.getClass().getName(), methodName,
+		return new JakeTestSuiteResult.Failure(failedTest.getClass().getName(), methodName,-1,
 				description);
 	}
 
