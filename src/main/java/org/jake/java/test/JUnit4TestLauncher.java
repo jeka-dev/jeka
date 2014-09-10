@@ -3,6 +3,7 @@ package org.jake.java.test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -39,7 +40,8 @@ class JUnit4TestLauncher {
 		JakeUtilsIO.serialize(result, resultFile);
 	}
 
-	public static JakeTestSuiteResult launchInFork(JakeJavaProcess jakeJavaProcess, boolean printEachTestOnConsole, JunitReportDetail reportDetail, Iterable<Class<?>> classes) {
+	@SuppressWarnings("rawtypes")
+	public static JakeTestSuiteResult launchInFork(JakeJavaProcess jakeJavaProcess, boolean printEachTestOnConsole, JunitReportDetail reportDetail, Iterable<Class> classes) {
 		final List<String> args = new LinkedList<String>();
 		final File file = JakeUtilsFile.createTempFile("testResult-", ".ser");
 		args.add("\""+ file.getAbsolutePath() +"\"");
@@ -62,15 +64,17 @@ class JUnit4TestLauncher {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static JakeTestSuiteResult launchInClassLoader(JakeClassloader classloader, Iterable<Class> classes, boolean printEachTestOnConsole, JunitReportDetail reportDetail, File reportDir) {
-		final Class[] classArray = JakeUtilsIterable.toArray(classes, Class.class);
-		final JakeClassloader loader;
-		if (needJakeInClasspath(printEachTestOnConsole, reportDetail)) {
-			loader = classloader.and(JakeLocator.jakeJarFile());
-		} else {
-			loader = classloader;
+	public static JakeTestSuiteResult launchInClassLoader(Iterable<Class> classes, boolean printEachTestOnConsole, JunitReportDetail reportDetail, File reportDir) {
+		final Iterator<Class> it = classes.iterator();
+		if (!it.hasNext()) {
+			return JakeTestSuiteResult.empty(System.getProperties(), "empty", 0);
 		}
-		return loader.invokeStaticMethod(JUnit4TestLauncher.class.getName(), "launchInProcess", classArray, printEachTestOnConsole, reportDetail, reportDir);
+		final JakeClassloader classloader = JakeClassloader.of(it.next());
+		final Class[] classArray = JakeUtilsIterable.toArray(classes, Class.class);
+		if (needJakeInClasspath(printEachTestOnConsole, reportDetail)) {
+			JakeClassloader.addUrl(classloader.classloader() , JakeLocator.jakeJarFile());
+		}
+		return classloader.invokeStaticMethod(JUnit4TestLauncher.class.getName(), "launchInProcess", classArray, printEachTestOnConsole, reportDetail, reportDir);
 	}
 
 

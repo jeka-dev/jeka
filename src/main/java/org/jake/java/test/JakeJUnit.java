@@ -106,8 +106,9 @@ public final class JakeJUnit {
 
 		final PrintStream formerOut = System.out;
 		final PrintStream formererr = System.err;
+		final boolean verbose = JakeOptions.isVerbose();
 
-		if (JakeOptions.isVerbose()) {
+		if (verbose) {
 			JakeLog.info("-------------------------------------> Here starts the test output in console.");
 		} else {
 			System.setOut(JakeUtilsIO.nopPrintStream());
@@ -116,16 +117,20 @@ public final class JakeJUnit {
 		final JakeTestSuiteResult result;
 		try {
 			if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
-				final Class<?>[] classArray = JakeUtilsIterable.toArray(classes, Class.class);
-				final Class<?> junitCoreClass = classLoader.load(JUNIT4_RUNNER_CLASS_NAME);
-				final Method runClassesMethod = JakeUtilsReflect.getMethod(junitCoreClass,
-						"runClasses", ARRAY_OF_CLASSES_TYPE);
-				final Properties properties = (Properties) System.getProperties().clone();
-				final Object junit4Result = JakeUtilsReflect.invoke(null, runClassesMethod,
-						(Object) classArray);
-				final long end = System.nanoTime();
-				final long duration = (end - start) / 1000000;
-				result = JakeTestSuiteResult.fromJunit4Result(properties, name, junit4Result, duration);
+				//				final Class<?>[] classArray = JakeUtilsIterable.toArray(classes, Class.class);
+				//				final Class<?> junitCoreClass = classLoader.load(JUNIT4_RUNNER_CLASS_NAME);
+				//				final Method runClassesMethod = JakeUtilsReflect.getMethod(junitCoreClass,
+				//						"runClasses", ARRAY_OF_CLASSES_TYPE);
+				//				final Properties properties = (Properties) System.getProperties().clone();
+				//				final Object junit4Result = JakeUtilsReflect.invoke(null, runClassesMethod,
+				//						(Object) classArray);
+				//				final long end = System.nanoTime();
+				//				final long duration = (end - start) / 1000000;
+				if (this.fork != null) {
+					result = JUnit4TestLauncher.launchInFork(fork, verbose, reportDetail, classes);
+				} else {
+					result = JUnit4TestLauncher.launchInClassLoader(classes, verbose, reportDetail, reportDir);
+				}
 			} else if (classLoader.isDefined(JUNIT3_RUNNER_CLASS_NAME)) {
 				final Object suite = createJunit3TestSuite(classLoader, classes);
 				final Class testResultClass = classLoader.load(JUNIT3_TEST_RESULT_CLASS_NAME);
@@ -155,7 +160,7 @@ public final class JakeJUnit {
 		if (!JakeOptions.isVerbose() && result.failureCount() > 0) {
 			JakeLog.info("Launch Jake in verbose mode to display failure stack traces in console.");
 		}
-		if (reportDetail != JunitReportDetail.NONE) {
+		if (reportDetail.equals(JunitReportDetail.BASIC)) {
 			JakeTestReportBuilder.of(result).writeToFileSystem(reportDir);
 		}
 		JakeLog.done("Tests run");
@@ -221,7 +226,7 @@ public final class JakeJUnit {
 
 
 
-	public static boolean isJunit3Test(Class<?> candidtateClazz,
+	private static boolean isJunit3Test(Class<?> candidtateClazz,
 			Class<?> testCaseClass) {
 		if (Modifier.isAbstract(candidtateClazz.getModifiers())) {
 			return false;
@@ -229,7 +234,7 @@ public final class JakeJUnit {
 		return testCaseClass.isAssignableFrom(candidtateClazz);
 	}
 
-	public static boolean isJunit4Test(Class<?> candidateClass,
+	private static boolean isJunit4Test(Class<?> candidateClass,
 			Class<Annotation> testAnnotation) {
 		if (Modifier.isAbstract(candidateClass.getModifiers())) {
 			return false;
