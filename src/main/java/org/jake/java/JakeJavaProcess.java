@@ -111,11 +111,11 @@ public class JakeJavaProcess {
 		return builder;
 	}
 
-	private StringBuilder runningJavaCommand() {
-		return new StringBuilder(this.javaDir.getAbsolutePath()).append(File.separator).append("java");
+	private String runningJavaCommand() {
+		return this.javaDir.getAbsolutePath()+ File.separator + "java";
 	}
 
-	private StringBuilder command() {
+	private List<String> command() {
 		return runningJavaCommand().append(options());
 	}
 

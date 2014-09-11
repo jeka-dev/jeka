@@ -233,7 +233,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	protected JakeUnit jakeUnit() {
-		final JakeClasspath classpath = JakeClasspath.of(this.classDir()).and(this.deps().test());
+		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.deps().test());
 		return JakeUnit.of(classpath).withReport(junitReportDetail, testReportDir());
 	}
 
