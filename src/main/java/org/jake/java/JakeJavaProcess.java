@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -102,7 +103,7 @@ public class JakeJavaProcess {
 	}
 
 
-	private ProcessBuilder processBuilder(String command) {
+	private ProcessBuilder processBuilder(List<String> command) {
 		final ProcessBuilder builder = new ProcessBuilder(command);
 		builder.redirectErrorStream(true);
 		if (this.workingDir != null) {
@@ -115,21 +116,16 @@ public class JakeJavaProcess {
 		return this.javaDir.getAbsolutePath()+ File.separator + "java";
 	}
 
-	private List<String> command() {
-		return runningJavaCommand().append(options());
-	}
 
-	private StringBuilder arguments(String ...arguments) {
-		final StringBuilder builder = new StringBuilder();
-		for (final String argument : arguments) {
-			builder.append(" ").append(argument);
-		}
-		return builder;
-	}
+
 
 	public int startAndWaitFor(String mainClassName, String ...arguments) {
 		JakeLog.startAndNextLine("Starting java program on class " + mainClassName + " using args : " + Arrays.toString(arguments));
-		final String command = command().append(" ").append(mainClassName).append(arguments(arguments)).toString();
+		final List<String> command = new LinkedList<String>();
+		command.add(runningJavaCommand());
+		command.addAll(options());
+		command.add(mainClassName);
+		command.addAll(Arrays.asList(arguments));
 		try {
 			final Process process = processBuilder(command).start();
 			final StreamGobbler outputStreamGobbler =
@@ -147,25 +143,27 @@ public class JakeJavaProcess {
 		}
 	}
 
-	private StringBuilder options() {
-		final StringBuilder builder = new StringBuilder();
+	private List<String> options() {
+		final List<String> list = new LinkedList<String>();
 		if (classpath != null && !classpath.isEmpty()) {
-			builder.append(" -cp \"").append(classpath.toString()).append("\"");
+			list.add("-cp");
+			list.add(classpath.toString());
 		}
 		for (final AgentLibAndOption agentLibAndOption : agents) {
-			builder.append(" -javaagent:").append(agentLibAndOption.lib);
+			list.add("-javaagent:");
+			list.add(agentLibAndOption.lib);
 			if (!JakeUtilsString.isBlank(agentLibAndOption.options)) {
-				builder.append("=").append(agentLibAndOption.options);
+				list.add("="+agentLibAndOption.options);
 			}
 		}
 		for (final String key : this.sytemProperties.keySet()) {
 			final String value = this.sytemProperties.get(key);
-			builder.append(" -D").append(key).append("=").append(value);
+			list.add("-D"+key+"="+value);
 		}
 		for (final String option : options) {
-			builder.append(" ").append(option);
+			list.add(option);
 		}
-		return builder;
+		return list;
 	}
 
 

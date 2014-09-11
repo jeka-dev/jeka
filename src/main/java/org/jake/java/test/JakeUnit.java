@@ -105,7 +105,7 @@ public final class JakeUnit {
 		JakeLog.startAndNextLine("Run JUnit tests");
 
 		final PrintStream formerOut = System.out;
-		final PrintStream formererr = System.err;
+		final PrintStream formerErr = System.err;
 		final boolean verbose = JakeOptions.isVerbose();
 
 		if (verbose) {
@@ -143,7 +143,7 @@ public final class JakeUnit {
 				JakeLog.nextLine();
 			} else {
 				System.setOut(formerOut);
-				System.setErr(formererr);
+				System.setErr(formerErr);
 			}
 		}
 

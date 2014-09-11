@@ -6,8 +6,6 @@ import org.jake.file.JakeDirSet;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeBuildJar;
 import org.jake.java.JakeJavaCompiler;
-import org.jake.java.JakeJavaProcess;
-import org.jake.java.test.JakeUnit;
 import org.jake.utils.JakeUtilsTime;
 
 public class Build extends JakeBuildJar {
@@ -34,10 +32,10 @@ public class Build extends JakeBuildJar {
 		return super.compiler(sources, outputDir, classpath); //.addOption("-Xlint:unchecked");
 	}
 
-	@Override
-	protected JakeUnit jakeUnit() {
-		return super.jakeUnit().forkKeepingSameClassPath(JakeJavaProcess.of());
-	}
+	//	@Override
+	//	protected JakeUnit jakeUnit() {
+	//		return super.jakeUnit().forkKeepingSameClassPath(JakeJavaProcess.of());
+	//	}
 
 	@Override
 	protected void afterPackJars() {
