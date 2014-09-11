@@ -15,7 +15,7 @@ import org.jake.utils.JakeUtilsString;
 
 public class JakeJavaProcess {
 
-	private static final File CURRENT_JAVA_DIR = new File(System.getProperty("java.home"));
+	private static final File CURRENT_JAVA_DIR = new File(System.getProperty("java.home"), "bin");
 
 	private final Map<String, String> sytemProperties;
 
@@ -180,6 +180,11 @@ public class JakeJavaProcess {
 			this.lib = lib;
 			this.options = options;
 		}
+	}
+
+	public JakeClasspath classpath() {
+		return classpath;
+
 	}
 
 }

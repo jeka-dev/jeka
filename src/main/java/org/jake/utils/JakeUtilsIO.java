@@ -12,7 +12,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.InvalidClassException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
@@ -22,10 +21,10 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
@@ -301,8 +300,7 @@ public final class JakeUtilsIO {
 				out.write(buf, 0, len);
 			}
 		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		closeQuietly(in);
 		closeQuietly(out);
@@ -310,9 +308,15 @@ public final class JakeUtilsIO {
 
 	public static void serialize(Object object, File file) {
 		try {
-			final OutputStream fileOutputStream = new FileOutputStream(file);
-			final OutputStream buffer = new BufferedOutputStream(
-					fileOutputStream);
+			serialize(object, new FileOutputStream(file));
+		} catch (final FileNotFoundException e) {
+			throw new IllegalArgumentException("File must exist.", e);
+		}
+	}
+
+	public static void serialize(Object object, OutputStream outputStream) {
+		try {
+			final OutputStream buffer = new BufferedOutputStream(outputStream);
 			final ObjectOutput output = new ObjectOutputStream(buffer);
 			try {
 				output.writeObject(object);
@@ -324,18 +328,44 @@ public final class JakeUtilsIO {
 		}
 	}
 
-	public static Object deserialize(File file) {
 
-		InputStream fileInputStream;
+	public static Object deserialize(File file) {
 		try {
-			fileInputStream = new FileInputStream(file);
+			return deserialize(new FileInputStream(file));
 		} catch (final FileNotFoundException e) {
 			throw new IllegalArgumentException(e);
 		}
-		final InputStream buffer = new BufferedInputStream(fileInputStream);
+	}
+
+	public static Object deserialize(InputStream inputStream) {
+		return deserialize(inputStream, JakeUtilsIO.class.getClassLoader());
+	}
+
+	public static Object deserialize(InputStream inputStream, final ClassLoader classLoader) {
+		final InputStream buffer = new BufferedInputStream(inputStream);
 		ObjectInput input;
 		try {
-			input = new ObjectInputStream(buffer);
+			input = new ObjectInputStream(buffer) {
+
+				@Override
+				protected Class<?> resolveClass(ObjectStreamClass desc)
+						throws IOException, ClassNotFoundException {
+
+					final String name = desc.getName();
+					try {
+						return Class.forName(name, false, classLoader);
+					} catch (final ClassNotFoundException ex) {
+						final Class cl = (Class) primClasses.get(name);
+						if (cl != null) {
+							return cl;
+						} else {
+							throw ex;
+						}
+					}
+
+				}
+
+			};
 		} catch (final IOException e) {
 			closeQuietly(buffer);
 			throw new RuntimeException(e);
@@ -351,76 +381,13 @@ public final class JakeUtilsIO {
 		}
 	}
 
-	public static <T> T cloneBySerialization(Object objectToClone) {
-		try {
-			return cloneX(objectToClone);
-		} catch (final IOException e) {
-			throw new IllegalArgumentException(e);
-		} catch (final ClassNotFoundException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-
-	private static <T> T cloneX(Object x) throws IOException, ClassNotFoundException {
-		final ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		final CloneOutput cout = new CloneOutput(bout);
-		cout.writeObject(x);
-		final byte[] bytes = bout.toByteArray();
-
+	@SuppressWarnings("unchecked")
+	public static <T> T cloneBySerialization(Object objectToClone, ClassLoader targetClassLoader) {
+		final ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
+		serialize(objectToClone, arrayOutputStream);
+		final byte[] bytes = arrayOutputStream.toByteArray();
 		final ByteArrayInputStream bin = new ByteArrayInputStream(bytes);
-		final CloneInput cin = new CloneInput(bin, cout);
-
-		@SuppressWarnings("unchecked")
-		final
-		T clone = (T) cin.readObject();
-		cin.close();
-		return clone;
-	}
-
-	private static class CloneOutput extends ObjectOutputStream {
-		Queue<Class<?>> classQueue = new LinkedList<Class<?>>();
-
-		CloneOutput(OutputStream out) throws IOException {
-			super(out);
-		}
-
-		@Override
-		protected void annotateClass(Class<?> c) {
-			classQueue.add(c);
-		}
-
-		@Override
-		protected void annotateProxyClass(Class<?> c) {
-			classQueue.add(c);
-		}
-	}
-
-	private static class CloneInput extends ObjectInputStream {
-		private final CloneOutput output;
-
-		CloneInput(InputStream in, CloneOutput output) throws IOException {
-			super(in);
-			this.output = output;
-		}
-
-		@Override
-		protected Class<?> resolveClass(ObjectStreamClass osc)
-				throws IOException, ClassNotFoundException {
-			final Class<?> c = output.classQueue.poll();
-			final String expected = osc.getName();
-			final String found = (c == null) ? null : c.getName();
-			if (!expected.equals(found)) {
-				throw new InvalidClassException("Classes desynchronized: " +
-						"found " + found + " when expecting " + expected);
-			}
-			return c;
-		}
-
-		@Override
-		protected Class<?> resolveProxyClass(String[] interfaceNames)
-				throws IOException, ClassNotFoundException {
-			return output.classQueue.poll();
-		}
+		return (T) deserialize(bin, targetClassLoader);
 	}
 
 
@@ -483,6 +450,20 @@ public final class JakeUtilsIO {
 
 		}
 
+	}
+
+	/** table mapping primitive type names to corresponding class objects */
+	private static final HashMap primClasses = new HashMap(8, 1.0F);
+	static {
+		primClasses.put("boolean", boolean.class);
+		primClasses.put("byte", byte.class);
+		primClasses.put("char", char.class);
+		primClasses.put("short", short.class);
+		primClasses.put("int", int.class);
+		primClasses.put("long", long.class);
+		primClasses.put("float", float.class);
+		primClasses.put("double", double.class);
+		primClasses.put("void", void.class);
 	}
 
 

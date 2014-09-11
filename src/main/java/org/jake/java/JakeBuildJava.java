@@ -9,8 +9,8 @@ import org.jake.JakeOption;
 import org.jake.file.JakeDirSet;
 import org.jake.file.JakeFileFilter;
 import org.jake.file.utils.JakeUtilsFile;
-import org.jake.java.test.JakeJUnit;
-import org.jake.java.test.JakeJUnit.JunitReportDetail;
+import org.jake.java.test.JakeUnit;
+import org.jake.java.test.JakeUnit.JunitReportDetail;
 
 public class JakeBuildJava extends JakeBuildBase {
 
@@ -232,9 +232,9 @@ public class JakeBuildJava extends JakeBuildBase {
 		JakeResourceProcessor.of(resourceDirs()).runTo(classDir());
 	}
 
-	protected JakeJUnit juniter() {
-		return JakeJUnit.ofClasspath( this.classDir(), this.deps().test() )
-				.withReport(junitReportDetail, testReportDir());
+	protected JakeUnit jakeUnit() {
+		final JakeClasspath classpath = JakeClasspath.of(this.classDir()).and(this.deps().test());
+		return JakeUnit.of(classpath).withReport(junitReportDetail, testReportDir());
 	}
 
 	protected void compileUnitTests() {
@@ -251,7 +251,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	protected void runJunitTests(File testClassDir) {
-		juniter().launchAll(testClassDir);
+		jakeUnit().launchAll(testClassDir);
 	}
 
 	protected boolean checkProcessTests(JakeDirSet testSourceDirs) {

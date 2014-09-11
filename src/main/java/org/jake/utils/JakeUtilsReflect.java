@@ -5,10 +5,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.jake.JakeOption;
 
@@ -107,6 +110,13 @@ public final class JakeUtilsReflect {
 	@SuppressWarnings("unchecked")
 	public static <V> V invoke(Object target, Method method, Object... params) {
 		try {
+			if (!method.isAccessible()) {
+				method.setAccessible(true);
+			}
+			final Class<?>[] paramTypes = new Class<?>[params.length];
+			for (int i = 0; i<params.length; i++) {
+				paramTypes[i] = params[i].getClass();
+			}
 			return (V) method.invoke(target, params);
 		} catch (final Exception e) {
 			throw new RuntimeException("Error while invoking " + method + " with params "
@@ -197,19 +207,22 @@ public final class JakeUtilsReflect {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public static <T> T invokeStaticMethod(Class<?> clazz, String methodName, Object ...args) {
-		return invokeMethod(null, clazz, methodName, args);
+		return (T) invokeMethod(null, clazz, methodName, args);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T> T invokeInstanceMethod(Object target, String methodName, Object ...args) {
-		return invokeMethod(target, null, methodName, args);
+		return (T) invokeMethod(target, null, methodName, args);
 	}
 
-	private static <T> T invokeMethod(Object target, Class<?> clazz, String methodName, Object ...args) {
-		final boolean staticMethod = clazz == null;
+	private static Object invokeMethod(Object target, Class<?> clazz, String methodName, Object ...args) {
+		final boolean staticMethod = target == null;
 		final Class<?> effectiveClass = clazz == null ? target.getClass() : clazz;
 		final String className = effectiveClass.getName();
-		final List<Method> canditates = Arrays.asList(effectiveClass.getMethods());
+		final List<Method> canditates = new ArrayList<Method>(Arrays.asList(effectiveClass.getMethods()));
+		canditates.addAll(Arrays.asList(effectiveClass.getDeclaredMethods()));
 		final Class<?> types[] = new Class<?>[args.length];
 		for (int i = 0; i < args.length; i++) {
 			final Object arg = args[i];
@@ -217,42 +230,79 @@ public final class JakeUtilsReflect {
 		}
 		final List<Method> result = findMethodsCompatibleWith(true, canditates, methodName, types);
 		if (result.isEmpty()) {
-			throw new IllegalArgumentException("No public " + (staticMethod ? "static" : "instance") + " method found on class "
-					+ className + " for method " + methodName + " and param types " + types);
+			throw new IllegalArgumentException("No " + (staticMethod ? "static" : "instance") + " method found on class "
+					+ className + " for method " + methodName + " and param types " + Arrays.toString(types));
 		} else if (result.size() > 1) {
-			throw new IllegalArgumentException("Several public "+  (staticMethod ? "static" : "instance")
-					+ " methods match on class " + className + " for method " + methodName + " and param types " + types
+			throw new IllegalArgumentException("Several "+  (staticMethod ? "static" : "instance")
+					+ " methods match on class " + className + " for method " + methodName + " and param types " + Arrays.toString(types)
 					+ ". You should use method #invoke(Method, Object[] args) instead." );
 		}
 		final Method method = result.get(0);
-		final T returned = invoke(target, method);
-		return returned;
+		return invoke(target, method, args);
 	}
 
 
 
 	private static List<Method> findMethodsCompatibleWith(boolean staticMethod, List<Method> methods,
 			String methodName, Class<?>[] argTypes) {
-		for (final Iterator<Method> it = methods.iterator(); it.hasNext();) {
+		final List<Method> list = new ArrayList<Method>(methods);
+		for (final Iterator<Method> it = list.iterator(); it.hasNext();) {
 			final Method method = it.next();
-			if (!methodName.equals(method.getName())
-					|| !Arrays.equals(argTypes, method.getParameterTypes())
-					|| Modifier.isAbstract(method.getModifiers())
-					|| !isMethodArgCompatible(method, argTypes)
-					|| Modifier.isStatic(method.getModifiers()) != staticMethod) {
+			if (!methodName.equals(method.getName())) {
 				it.remove();
+				continue;
 			}
+			if (argTypes.length != method.getParameterTypes().length) {
+				it.remove();
+				continue;
+			}
+			if (Modifier.isAbstract(method.getModifiers()) || Modifier.isStatic(method.getModifiers()) != staticMethod) {
+				it.remove();
+				continue;
+			}
+			if (!isMethodArgCompatible(method, argTypes)) {
+				it.remove();
+				continue;
+			}
+
 		}
-		return methods;
+		return list;
 	}
 
 	private static boolean isMethodArgCompatible(Method method, Class<?>... argTypes) {
 		for (int i =0; i<argTypes.length; i++) {
-			if (!method.getParameterTypes()[i].isAssignableFrom(argTypes[1])) {
+			if (!isCompatible(method.getParameterTypes()[i], argTypes[i])) {
 				return false;
 			}
 		}
 		return true;
+	}
+
+	private static boolean isCompatible(Class<?> type0, Class<?> type1) {
+		if (type0.getName().equals(type1.getName())) {
+			return true;
+		}
+		if (type0.isPrimitive()) {
+			return isCompatible(PRIMITIVE_TO_WRAPPER.get(type0), type1);
+		}
+		if (type1.isPrimitive()) {
+			return isCompatible(type0, PRIMITIVE_TO_WRAPPER.get(type1));
+		}
+		return type0.isAssignableFrom(type1);
+	}
+
+	private static final Map<Class<?>,Class<?>> PRIMITIVE_TO_WRAPPER = new HashMap<Class<?>,Class<?>>();
+
+	static{
+		PRIMITIVE_TO_WRAPPER.put(int.class, Integer.class );
+		PRIMITIVE_TO_WRAPPER.put(long.class, Long.class );
+		PRIMITIVE_TO_WRAPPER.put(double.class, Double.class );
+		PRIMITIVE_TO_WRAPPER.put(float.class, Float.class );
+		PRIMITIVE_TO_WRAPPER.put(boolean.class, Boolean.class );
+		PRIMITIVE_TO_WRAPPER.put(char.class, Character.class );
+		PRIMITIVE_TO_WRAPPER.put(byte.class, Byte.class );
+		PRIMITIVE_TO_WRAPPER.put(void.class, Void.TYPE );
+		PRIMITIVE_TO_WRAPPER.put(short.class, Short.TYPE );
 	}
 
 

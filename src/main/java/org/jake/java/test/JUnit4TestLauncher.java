@@ -14,7 +14,7 @@ import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeClassloader;
 import org.jake.java.JakeClasspath;
 import org.jake.java.JakeJavaProcess;
-import org.jake.java.test.JakeJUnit.JunitReportDetail;
+import org.jake.java.test.JakeUnit.JunitReportDetail;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsTime;

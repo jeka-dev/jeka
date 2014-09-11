@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jake.file.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
 
@@ -230,51 +231,57 @@ public class JakeClassloader {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public <T> T invokeStaticMethod(String className, String methodName, Object... args) {
-		try {
-			final Class<?> clazz = this.classloader().loadClass(className);
-			final Object[] effectiveArgs = new Object[args.length];
-			for (int i = 0; i < args.length; i++) {
-				effectiveArgs[i] = traverseClassLoader(args, this.delegate);
-			}
-			final Object returned = JakeUtilsReflect.invokeStaticMethod(clazz, methodName, args);
-			final T result = traverseClassLoader(returned, JakeClassloader.current().classloader());
-			return result;
-		} catch (final ClassNotFoundException e) {
-			throw new IllegalArgumentException(e);
+		final Class<?> clazz = this.load(className);
+		final Object[] effectiveArgs = new Object[args.length];
+		for (int i = 0; i < args.length; i++) {
+			effectiveArgs[i] = traverseClassLoader(args[i], this);
 		}
+		final Object returned = JakeUtilsReflect.invokeStaticMethod(clazz, methodName, effectiveArgs);
+		final T result = (T) traverseClassLoader(returned, JakeClassloader.current());
+		return result;
+
 	}
 
 	public <T> T invokeInstanceMethod(Object object, String methodName, Object... args) {
-		try {
-			final Object[] effectiveArgs = new Object[args.length];
-			for (int i = 0; i < args.length; i++) {
-				effectiveArgs[i] = traverseClassLoader(args, this.delegate);
-			}
-			final Object returned = JakeUtilsReflect.invokeInstanceMethod(object, methodName, args);
-			final T result = traverseClassLoader(returned, JakeClassloader.current().classloader());
-			return result;
-		} catch (final ClassNotFoundException e) {
-			throw new IllegalArgumentException(e);
+
+		final Object[] effectiveArgs = new Object[args.length];
+		for (int i = 0; i < args.length; i++) {
+			effectiveArgs[i] = traverseClassLoader(args[i], this);
 		}
+		final Object returned = JakeUtilsReflect.invokeInstanceMethod(object, methodName, effectiveArgs);
+		@SuppressWarnings("unchecked")
+		final T result = (T) traverseClassLoader(returned, JakeClassloader.current());
+		return result;
+
 	}
 
 	public Object newInstanceOf(String className) {
 		return JakeUtilsReflect.newInstance(this.load(className));
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <T> T traverseClassLoader(Object object, ClassLoader to) throws ClassNotFoundException {
+	private static Object traverseClassLoader(Object object, JakeClassloader to) {
 		if (object == null) {
 			return null;
 		}
-		final String className = object.getClass().getName();
-		final ClassLoader from = object.getClass().getClassLoader();
-		if (from.loadClass(className).equals(to.loadClass(className))) {
-			return (T) object;
+		final Class<?> clazz = object.getClass();
+		final String className;
+		if (clazz.isArray()) {
+			className = object.getClass().getComponentType().getName();
+		} else {
+			className = object.getClass().getName();
 		}
-		final Class<?> reflectUtilClass = to.loadClass(JakeUtilsReflect.class.getName());
-		return JakeUtilsReflect.invokeStaticMethod(reflectUtilClass, "cloneBySerialization", Object.class);
+
+		final JakeClassloader from = JakeClassloader.of(object.getClass());
+		final Class<?> toClass = to.load(className);
+		if (from.delegate == null && toClass.getClassLoader() == null) {
+			return object;
+		}
+		if ( from.load(className).equals(toClass)) {
+			return object;
+		}
+		return JakeUtilsIO.cloneBySerialization(object, to.classloader());
 	}
 
 }
