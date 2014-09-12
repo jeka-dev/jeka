@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import org.jake.java.JakeClassloader;
+import org.jake.java.JakeClassLoader;
 import org.jake.java.test.JakeUnit.JunitReportDetail;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsTime;
@@ -58,7 +58,7 @@ class JUnit4TestExecutor {
 				classes.add(Class.forName(each));
 			} catch (final ClassNotFoundException e) {
 				throw new IllegalArgumentException("Class "  + each
-						+ " not found in classloader " + JakeClassloader.current());
+						+ " not found in classloader " + JakeClassLoader.current());
 			}
 		}
 		return classes.toArray(new Class[0]);

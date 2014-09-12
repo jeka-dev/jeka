@@ -10,7 +10,7 @@ import java.util.Set;
 
 import org.jake.file.JakeDir;
 import org.jake.java.JakeBuildJar;
-import org.jake.java.JakeClassloader;
+import org.jake.java.JakeClassLoader;
 import org.jake.java.JakeClasspath;
 import org.jake.java.JakeJavaCompiler;
 import org.jake.java.eclipse.JakeBuildEclipseProject;
@@ -33,16 +33,6 @@ class ProjectBuilder {
 
 	private final File moduleBaseDir;
 
-
-	/**
-	 * Create a module builder where is specified the base directory of the module along
-	 * its relative path to the 'root' module.
-	 * The Relative path is used to display the module under build
-	 */
-	public ProjectBuilder(File buildBaseParentDir, File moduleBaseDir) {
-		super();
-		this.moduleBaseDir = moduleBaseDir;
-	}
 
 	public ProjectBuilder(File moduleBaseDir) {
 		super();
@@ -170,7 +160,7 @@ class ProjectBuilder {
 		final File buildBin = new File(moduleBaseDir, BUILD_BIN_DIR);
 		final Iterable<File> runtimeClassPath = JakeUtilsIterable.concatToList(
 				buildBin, buildClasspath);
-		final JakeClassloader classLoader = JakeClassloader.current().createChild(runtimeClassPath);
+		final JakeClassLoader classLoader = JakeClassLoader.current().createChild(runtimeClassPath);
 		final Class<? extends JakeBuildBase> result = classLoader.load(buildClassName);
 		return result;
 	}
@@ -192,7 +182,7 @@ class ProjectBuilder {
 	}
 
 	private JakeClasspath resolveBuildCompileClasspath() {
-		JakeClasspath result = JakeClassloader.current().getChildClasspath();
+		JakeClasspath result = JakeClassLoader.current().childClasspath();
 		final File buildLibDir = new File(moduleBaseDir, BUILD_LIB_DIR);
 		if (buildLibDir.exists() && buildLibDir.isDirectory()) {
 			result = result.and(JakeDir.of(buildLibDir).include("**/*.jar"));
@@ -208,7 +198,7 @@ class ProjectBuilder {
 	@SuppressWarnings("rawtypes")
 	private static List<String> getBuildClassNames(Iterable<File> classpath) {
 
-		final JakeClassloader classLoader = JakeClassloader.current().createChild(classpath);
+		final JakeClassLoader classLoader = JakeClassLoader.current().createChild(classpath);
 
 		// Find the Build class
 		// TODO Not optimized. Reduce the search path to load less classes.

@@ -59,7 +59,7 @@ public abstract class JakeJavaDependencyResolver {
 
 	public static JakeJavaDependencyResolver findByClassName(String simpleOrFullClassName) {
 		final Class<? extends JakeJavaDependencyResolver> depClass =
-				JakeClassloader.current().loadFromNameOrSimpleName(simpleOrFullClassName, JakeJavaDependencyResolver.class);
+				JakeClassLoader.current().loadFromNameOrSimpleName(simpleOrFullClassName, JakeJavaDependencyResolver.class);
 		if (depClass == null) {
 			JakeLog.warn("Class " + simpleOrFullClassName
 					+ " not found or it is not a "

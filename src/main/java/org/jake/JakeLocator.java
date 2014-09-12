@@ -3,7 +3,7 @@ package org.jake;
 import java.io.File;
 
 import org.jake.file.JakeDir;
-import org.jake.java.JakeClassloader;
+import org.jake.java.JakeClassLoader;
 import org.jake.java.JakeClasspath;
 
 public class JakeLocator {
@@ -15,10 +15,10 @@ public class JakeLocator {
 		if (JAKE_JAR_FILE != null) {
 			return JAKE_JAR_FILE;
 		}
-		for (final File file : JakeClassloader.current().getChildClasspath()) {
+		for (final File file : JakeClassLoader.current().childClasspath()) {
 			try {
 				// TODO not optimized. Should be implemented on the JakeClasspath class.
-				JakeClassloader.system().parent().createChild(file).classloader().loadClass(JakeLauncher.class.getName());
+				JakeClassLoader.system().parent().createChild(file).classloader().loadClass(JakeLauncher.class.getName());
 				JAKE_JAR_FILE = file;
 				return file;
 			} catch (final ClassNotFoundException e) {

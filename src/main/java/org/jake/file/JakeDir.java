@@ -3,6 +3,7 @@ package org.jake.file;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.jake.file.utils.JakeUtilsFile;
@@ -77,8 +78,12 @@ public final class JakeDir implements Iterable<File> {
 		return base.exists();
 	}
 
-	public String path() {
-		return base.getPath();
+	public List<String> relativePathes() {
+		final List<String> pathes = new LinkedList<String>();
+		for (final File file : this) {
+			pathes.add(JakeUtilsFile.getRelativePath(this.base, file));
+		}
+		return pathes;
 	}
 
 	public void zip(File zipFile, int compressLevel) {

@@ -111,10 +111,10 @@ public class JakeJavadoc {
 	}
 
 	public static Class<?> getJavadocMainClass() {
-		final JakeClassloader classLoader = JakeClassloader.current();
+		final JakeClassLoader classLoader = JakeClassLoader.current();
 		Class<?> mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
 		if (mainClass == null) {
-			JakeClassloader.addUrl(classLoader.classloader(), InternalUtils.toolsJar());
+			JakeClassLoader.addUrl(classLoader.classloader(), InternalUtils.toolsJar());
 			mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
 			if (mainClass == null) {
 				throw new RuntimeException("It seems that you are running a JRE instead of a JDK, please run Jake using a JDK.");

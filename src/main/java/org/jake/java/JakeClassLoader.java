@@ -21,7 +21,7 @@ import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
 
-public class JakeClassloader {
+public class JakeClassLoader {
 
 	/**
 	 * A {@link FileFilter} accepting only .class files.
@@ -36,57 +36,75 @@ public class JakeClassloader {
 
 	private final URLClassLoader delegate;
 
-	private JakeClassloader(URLClassLoader delegate) {
+	private JakeClassLoader(URLClassLoader delegate) {
 		this.delegate = delegate;
 	}
 
-	public static JakeClassloader current() {
-		return new JakeClassloader((URLClassLoader) JakeClassloader.class.getClassLoader());
+	public static JakeClassLoader current() {
+		return new JakeClassLoader((URLClassLoader) JakeClassLoader.class.getClassLoader());
 	}
 
-	public static JakeClassloader system() {
-		return new JakeClassloader((URLClassLoader) ClassLoader.getSystemClassLoader());
+	public static JakeClassLoader system() {
+		return new JakeClassLoader((URLClassLoader) ClassLoader.getSystemClassLoader());
 	}
 
-	public static JakeClassloader of(Class<?> clazz) {
-		return new JakeClassloader((URLClassLoader) clazz.getClassLoader());
+	public static JakeClassLoader of(Class<?> clazz) {
+		return new JakeClassLoader((URLClassLoader) clazz.getClassLoader());
 	}
 
 	public URLClassLoader classloader() {
 		return delegate;
 	}
 
-	public JakeClassloader parent() {
-		return new JakeClassloader((URLClassLoader) this.delegate.getParent());
+	public JakeClassLoader parent() {
+		return new JakeClassLoader((URLClassLoader) this.delegate.getParent());
 	}
 
-	public JakeClassloader createChild(File...urls) {
-		return new JakeClassloader(new URLClassLoader(toUrl(Arrays.asList(urls)), this.delegate));
+	public JakeClassLoader createChild(File...urls) {
+		return new JakeClassLoader(new URLClassLoader(toUrl(Arrays.asList(urls)), this.delegate));
 	}
 
 
-	public JakeClassloader createChild(Iterable<File> urls) {
-		return new JakeClassloader(new URLClassLoader(toUrl(urls), this.delegate));
+	public JakeClassLoader createChild(Iterable<File> urls) {
+		return new JakeClassLoader(new URLClassLoader(toUrl(urls), this.delegate));
 	}
 
-	public JakeClassloader and(Iterable<File> files) {
-		return parent().createChild(this.getChildClasspath().and(files));
+	public JakeClassLoader and(Iterable<File> files) {
+		return parent().createChild(this.childClasspath().and(files));
 	}
 
-	public JakeClassloader and(File...files) {
+	public JakeClassLoader and(File...files) {
 		return and(Arrays.asList(files));
 	}
 
 	/**
 	 * Returns the classpath of this classloader without mentioning classpath of the parent classloaders.
 	 */
-	public JakeClasspath getChildClasspath() {
+	public JakeClasspath childClasspath() {
 		final List<File> result = new ArrayList<File>(this.delegate.getURLs().length);
 		for (final URL url : this.delegate.getURLs()) {
 			result.add(new File(url.getFile().replaceAll("%20", " ")));
 		}
 		return JakeClasspath.of(result);
 	}
+
+	/**
+	 * Returns the complete classpath of this classloader.
+	 */
+	public JakeClasspath fullClasspath() {
+		final JakeClasspath classpath;
+		if (this.delegate.getParent() != null) {
+			classpath = this.parent().fullClasspath();
+		} else {
+			classpath = JakeClasspath.of();
+		}
+		final List<File> result = new ArrayList<File>(this.delegate.getURLs().length);
+		for (final URL url : this.delegate.getURLs()) {
+			result.add(new File(url.getFile().replaceAll("%20", " ")));
+		}
+		return classpath.and(result);
+	}
+
 
 	@SuppressWarnings("unchecked")
 	public <T extends Object> Class<T> load(String className) {
@@ -162,7 +180,7 @@ public class JakeClassloader {
 	public Set<Class<?>> getAllTopLevelClasses(FileFilter entryFilter) {
 		final List<File> classfiles = new LinkedList<File>();
 		final Map<File, File> file2Entry = new HashMap<File, File>();
-		for (final File file : getChildClasspath()) {
+		for (final File file : childClasspath()) {
 			if (entryFilter == null || entryFilter.accept(file)) {
 				if (file.isDirectory()) {
 					final List<File> files = JakeUtilsFile.filesOf(file, CLASS_FILE_FILTER, false);
@@ -241,7 +259,7 @@ public class JakeClassloader {
 		}
 		offsetJakeLog();
 		final Object returned = JakeUtilsReflect.invokeStaticMethod(clazz, methodName, effectiveArgs);
-		final T result = (T) traverseClassLoader(returned, JakeClassloader.current());
+		final T result = (T) traverseClassLoader(returned, JakeClassLoader.current());
 		return result;
 
 	}
@@ -255,7 +273,7 @@ public class JakeClassloader {
 		offsetJakeLog();
 		final Object returned = JakeUtilsReflect.invokeInstanceMethod(object, methodName, effectiveArgs);
 		@SuppressWarnings("unchecked")
-		final T result = (T) traverseClassLoader(returned, JakeClassloader.current());
+		final T result = (T) traverseClassLoader(returned, JakeClassLoader.current());
 		offsetJakeLog();
 		return result;
 
@@ -273,7 +291,7 @@ public class JakeClassloader {
 		return JakeUtilsReflect.newInstance(this.load(className));
 	}
 
-	private static Object traverseClassLoader(Object object, JakeClassloader to) {
+	private static Object traverseClassLoader(Object object, JakeClassLoader to) {
 		if (object == null) {
 			return null;
 		}
@@ -285,7 +303,7 @@ public class JakeClassloader {
 			className = object.getClass().getName();
 		}
 
-		final JakeClassloader from = JakeClassloader.of(object.getClass());
+		final JakeClassLoader from = JakeClassLoader.of(object.getClass());
 		final Class<?> toClass = to.load(className);
 		if (from.delegate == null && toClass.getClassLoader() == null) {
 			return object;

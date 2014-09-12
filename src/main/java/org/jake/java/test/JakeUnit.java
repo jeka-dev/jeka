@@ -18,7 +18,7 @@ import java.util.Properties;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
 import org.jake.java.JakeClassFilter;
-import org.jake.java.JakeClassloader;
+import org.jake.java.JakeClassLoader;
 import org.jake.java.JakeClasspath;
 import org.jake.java.JakeJavaProcess;
 import org.jake.utils.JakeUtilsIterable;
@@ -99,7 +99,7 @@ public final class JakeUnit {
 			return JakeTestSuiteResult.empty((Properties) System.getProperties().clone(), name, 0);
 		}
 		final long start = System.nanoTime();
-		final JakeClassloader classLoader = JakeClassloader.of(classes.iterator().next());
+		final JakeClassLoader classLoader = JakeClassLoader.of(classes.iterator().next());
 		JakeLog.startAndNextLine("Run JUnit tests");
 
 		final boolean verbose = JakeOptions.isVerbose();
@@ -151,7 +151,7 @@ public final class JakeUnit {
 	private Collection<Class> getClassesToTest(final Iterable<File> testClassDirs, JakeClassFilter classFilter) {
 		final Collection<Class> testClasses;
 		final JakeClasspath classpath = this.jakeClasspath().andAtFirst(testClassDirs);
-		final JakeClassloader classLoader = JakeClassloader.system().parent().createChild(classpath);
+		final JakeClassLoader classLoader = JakeClassLoader.system().parent().createChild(classpath);
 		final FileFilter fileFilter = new FileFilter() {
 
 			@Override
@@ -179,7 +179,7 @@ public final class JakeUnit {
 
 	@SuppressWarnings("rawtypes")
 	private static Collection<Class> getJunitTestClassesInClassLoader(
-			JakeClassloader classloader, FileFilter entryFilter) {
+			JakeClassLoader classloader, FileFilter entryFilter) {
 		final Iterable<Class<?>> classes = classloader.getAllTopLevelClasses(entryFilter);
 		final List<Class> testClasses = new LinkedList<Class>();
 		if (classloader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
@@ -234,7 +234,7 @@ public final class JakeUnit {
 
 
 	@SuppressWarnings("rawtypes")
-	private static Object createJunit3TestSuite(JakeClassloader classLoader, Iterable<Class> testClasses) {
+	private static Object createJunit3TestSuite(JakeClassLoader classLoader, Iterable<Class> testClasses) {
 		final Class<?>[] classArray = JakeUtilsIterable.toArray(testClasses, Class.class);
 		final Class<?> testSuiteClass = classLoader.load(JUNIT3_TEST_SUITE_CLASS_NAME);
 		try {

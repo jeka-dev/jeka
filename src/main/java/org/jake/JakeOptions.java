@@ -25,11 +25,15 @@ public final class JakeOptions {
 	@JakeOption("Set it to true to turn off logs.")
 	private boolean silent;
 
+	@JakeOption({"Set it to the full or short class name, to force the build class to use.",
+	"Example : -buildClass=my.pack.FullBuild or -buildClass=FullBuild ."})
+	private String buildClass;
+
 	@JakeOption({"All jar files under [JAKE HOME]/ext, are part of Jake classpath. you can add libs to this folder or ",
 		"use this option to augment Jake classpath.",
 		"If it is a folder, then all jar files under this folders will be added to the classpath. If it is a single jar file, ",
 		"only this jar will be added. You can specify many folder/jar using ';'.",
-	"Exemple : -extraJakeLibs:/usr/java/libs/sonar;/usr/java/libs/apache/lucene.jar ."})
+	"Exemple : -extraJakeLibs=/usr/java/libs/sonar;/usr/java/libs/apache/lucene.jar ."})
 	private String extraJakeLibs;
 
 	protected JakeOptions() {
@@ -56,6 +60,10 @@ public final class JakeOptions {
 
 	public static boolean isSilent() {
 		return INSTANCE. silent;
+	}
+	
+	static String buildClass() {
+		return INSTANCE.buildClass;
 	}
 
 
