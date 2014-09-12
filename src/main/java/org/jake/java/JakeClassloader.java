@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jake.JakeLog;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
@@ -238,6 +239,7 @@ public class JakeClassloader {
 		for (int i = 0; i < args.length; i++) {
 			effectiveArgs[i] = traverseClassLoader(args[i], this);
 		}
+		offsetJakeLog();
 		final Object returned = JakeUtilsReflect.invokeStaticMethod(clazz, methodName, effectiveArgs);
 		final T result = (T) traverseClassLoader(returned, JakeClassloader.current());
 		return result;
@@ -250,11 +252,21 @@ public class JakeClassloader {
 		for (int i = 0; i < args.length; i++) {
 			effectiveArgs[i] = traverseClassLoader(args[i], this);
 		}
+		offsetJakeLog();
 		final Object returned = JakeUtilsReflect.invokeInstanceMethod(object, methodName, effectiveArgs);
 		@SuppressWarnings("unchecked")
 		final T result = (T) traverseClassLoader(returned, JakeClassloader.current());
+		offsetJakeLog();
 		return result;
 
+	}
+
+	private void offsetJakeLog() {
+		if (this.isDefined(JakeLog.class.getName())) {
+			final int offset = JakeLog.offset();
+			final Class<?> toClass = this.load(JakeLog.class.getName());
+			JakeUtilsReflect.invokeStaticMethod(toClass, "offset", offset);
+		}
 	}
 
 	public Object newInstanceOf(String className) {

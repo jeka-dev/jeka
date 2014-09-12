@@ -2,7 +2,6 @@ package org.jake.java.test;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -22,7 +21,6 @@ import org.jake.java.JakeClassFilter;
 import org.jake.java.JakeClassloader;
 import org.jake.java.JakeClasspath;
 import org.jake.java.JakeJavaProcess;
-import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
@@ -104,50 +102,32 @@ public final class JakeUnit {
 		final JakeClassloader classLoader = JakeClassloader.of(classes.iterator().next());
 		JakeLog.startAndNextLine("Run JUnit tests");
 
-		final PrintStream formerOut = System.out;
-		final PrintStream formerErr = System.err;
 		final boolean verbose = JakeOptions.isVerbose();
 
-		if (verbose) {
-			JakeLog.info("-------------------------------------> Here starts the test output in console.");
-		} else {
-			System.setOut(JakeUtilsIO.nopPrintStream());
-			System.setErr(JakeUtilsIO.nopPrintStream());
-		}
 		final JakeTestSuiteResult result;
-		try {
-			if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
-				if (this.fork != null) {
-					result = JUnit4TestLauncher.launchInFork(fork, verbose, reportDetail, classes);
-				} else {
-					result = JUnit4TestLauncher.launchInClassLoader(classes, verbose, reportDetail, reportDir);
-				}
-			} else if (classLoader.isDefined(JUNIT3_RUNNER_CLASS_NAME)) {
-				final Object suite = createJunit3TestSuite(classLoader, classes);
-				final Class testResultClass = classLoader.load(JUNIT3_TEST_RESULT_CLASS_NAME);
-				final Object testResult = JakeUtilsReflect.newInstance(testResultClass);
-				final Method runMethod = JakeUtilsReflect.getMethod(suite.getClass(),
-						"run", testResultClass);
-				final Properties properties = (Properties) System.getProperties().clone();
-				JakeUtilsReflect.invoke(suite, runMethod, testResult);
-				final long end = System.nanoTime();
-				final long duration = (end - start) / 1000000;
-				result = fromJunit3Result(properties, name, testResult, duration);
-			} else {
-				throw new IllegalStateException("No Junit found on test classpath.");
-			}
 
-		} finally {
-			if (JakeOptions.isVerbose()) {
-				JakeLog.info("-------------------------------------> Here stops the test output in console.");
-				JakeLog.nextLine();
+		if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
+			if (this.fork != null) {
+				result = JUnit4TestLauncher.launchInFork(fork, verbose, reportDetail, classes, reportDir);
 			} else {
-				System.setOut(formerOut);
-				System.setErr(formerErr);
+				result = JUnit4TestLauncher.launchInClassLoader(classes,  verbose, reportDetail, reportDir);
 			}
+		} else if (classLoader.isDefined(JUNIT3_RUNNER_CLASS_NAME)) {
+			final Object suite = createJunit3TestSuite(classLoader, classes);
+			final Class testResultClass = classLoader.load(JUNIT3_TEST_RESULT_CLASS_NAME);
+			final Object testResult = JakeUtilsReflect.newInstance(testResultClass);
+			final Method runMethod = JakeUtilsReflect.getMethod(suite.getClass(),
+					"run", testResultClass);
+			final Properties properties = (Properties) System.getProperties().clone();
+			JakeUtilsReflect.invoke(suite, runMethod, testResult);
+			final long end = System.nanoTime();
+			final long duration = (end - start) / 1000000;
+			result = fromJunit3Result(properties, name, testResult, duration);
+		} else {
+			throw new IllegalStateException("No Junit found on test classpath.");
 		}
 
-		JakeLog.info(result.toStrings(JakeOptions.isVerbose()));
+		JakeLog.info(result.toStrings());
 		if (!JakeOptions.isVerbose() && result.failureCount() > 0) {
 			JakeLog.info("Launch Jake in verbose mode to display failure stack traces in console.");
 		}

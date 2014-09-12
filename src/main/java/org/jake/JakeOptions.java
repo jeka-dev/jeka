@@ -42,6 +42,14 @@ public final class JakeOptions {
 		populateFields(this, freeOptions);
 	}
 
+	public static void forceVerbose(boolean verbose) {
+		INSTANCE.verbose = true;
+	}
+
+	public static void forceSilent(boolean silent) {
+		INSTANCE.silent = silent;
+	}
+
 	public static boolean isVerbose() {
 		return INSTANCE.verbose;
 	}

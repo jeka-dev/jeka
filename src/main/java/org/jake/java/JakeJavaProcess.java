@@ -129,9 +129,9 @@ public class JakeJavaProcess {
 		try {
 			final Process process = processBuilder(command).start();
 			final StreamGobbler outputStreamGobbler =
-					JakeUtilsIO.newStreamGobbler(process.getInputStream(), JakeLog.getInfoWriter());
+					JakeUtilsIO.newStreamGobbler(process.getInputStream(), JakeLog.infoStream());
 			final StreamGobbler errorStreamGobbler =
-					JakeUtilsIO.newStreamGobbler(process.getErrorStream(), JakeLog.getErrorWriter());
+					JakeUtilsIO.newStreamGobbler(process.getErrorStream(), JakeLog.warnStream());
 			process.waitFor();
 			outputStreamGobbler.stop();
 			errorStreamGobbler.stop();

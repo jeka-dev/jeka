@@ -5,13 +5,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jake.JakeOption;
 
@@ -221,14 +222,14 @@ public final class JakeUtilsReflect {
 		final boolean staticMethod = target == null;
 		final Class<?> effectiveClass = clazz == null ? target.getClass() : clazz;
 		final String className = effectiveClass.getName();
-		final List<Method> canditates = new ArrayList<Method>(Arrays.asList(effectiveClass.getMethods()));
+		final Set<Method> canditates = new HashSet<Method>(Arrays.asList(effectiveClass.getMethods()));
 		canditates.addAll(Arrays.asList(effectiveClass.getDeclaredMethods()));
 		final Class<?> types[] = new Class<?>[args.length];
 		for (int i = 0; i < args.length; i++) {
 			final Object arg = args[i];
 			types[i] = args == null ? Object.class : arg.getClass();
 		}
-		final List<Method> result = findMethodsCompatibleWith(true, canditates, methodName, types);
+		final Set<Method> result = findMethodsCompatibleWith(true, canditates, methodName, types);
 		if (result.isEmpty()) {
 			throw new IllegalArgumentException("No " + (staticMethod ? "static" : "instance") + " method found on class "
 					+ className + " for method " + methodName + " and param types " + Arrays.toString(types));
@@ -237,15 +238,15 @@ public final class JakeUtilsReflect {
 					+ " methods match on class " + className + " for method " + methodName + " and param types " + Arrays.toString(types)
 					+ ". You should use method #invoke(Method, Object[] args) instead." );
 		}
-		final Method method = result.get(0);
+		final Method method = result.iterator().next();
 		return invoke(target, method, args);
 	}
 
 
 
-	private static List<Method> findMethodsCompatibleWith(boolean staticMethod, List<Method> methods,
+	private static Set<Method> findMethodsCompatibleWith(boolean staticMethod, Set<Method> methods,
 			String methodName, Class<?>[] argTypes) {
-		final List<Method> list = new ArrayList<Method>(methods);
+		final Set<Method> list = new HashSet<Method>(methods);
 		for (final Iterator<Method> it = list.iterator(); it.hasNext();) {
 			final Method method = it.next();
 			if (!methodName.equals(method.getName())) {

@@ -1,6 +1,7 @@
 package org.jake.java;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -49,7 +50,7 @@ public class JakeJavadoc {
 		JakeLog.startAndNextLine("Generating javadoc");
 		final String[] args = toArguments(outputDir);
 		JakeLog.nextLine();
-		execute(doclet, new PrintWriter(JakeLog.getInfoWriter()),JakeLog.getWarnWriter(),JakeLog.getErrorWriter(), args);
+		execute(doclet, JakeLog.infoStream(),JakeLog.warnStream(),JakeLog.errorStream(), args);
 	}
 
 	public void processAndZip(File outputDir, File zip) {
@@ -99,14 +100,14 @@ public class JakeJavadoc {
 	}
 
 
-	private static void execute(Class<?> doclet, PrintWriter normalWriter, PrintWriter warnWriter, PrintWriter errorWriter, String[] args) {
+	private static void execute(Class<?> doclet, PrintStream normalStream, PrintStream warnStream, PrintStream errorStream, String[] args) {
 
 		final String docletString = doclet != null ? doclet.getName() : "com.sun.tools.doclets.standard.Standard";
 		final Class<?> mainClass = getJavadocMainClass();
 		JakeUtilsReflect.newInstance(mainClass);
 		final Method method = JakeUtilsReflect.getMethod(mainClass, "execute", String.class, PrintWriter.class, PrintWriter.class, PrintWriter.class, String.class, new String[0].getClass());
-		JakeUtilsReflect.invoke(null, method, "Javadoc", errorWriter, warnWriter, normalWriter,
-				docletString, args);
+		JakeUtilsReflect.invoke(null, method, "Javadoc", new PrintStream(errorStream), new PrintStream(warnStream),
+				new PrintStream(normalStream), docletString, args);
 	}
 
 	public static Class<?> getJavadocMainClass() {

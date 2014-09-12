@@ -1,6 +1,7 @@
 package org.jake.java;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -23,7 +24,6 @@ public final class JakeJavaCompiler {
 	public static final JakeFileFilter JAVA_SOURCE_ONLY_FILTER = JakeFileFilter
 			.include("**/*.java");
 
-
 	private final JavaCompiler compiler;
 	private final StandardJavaFileManager fileManager;
 
@@ -34,7 +34,7 @@ public final class JakeJavaCompiler {
 
 	private String classpath = "";
 
-	public JakeJavaCompiler(JavaCompiler compiler, File outputDir) {
+	private JakeJavaCompiler(JavaCompiler compiler, File outputDir) {
 		super();
 		this.setOutputDirectory(outputDir);
 		this.outputDir = outputDir;
@@ -85,21 +85,20 @@ public final class JakeJavaCompiler {
 		return addSourceFiles(jakeDir.withFilter(JAVA_SOURCE_ONLY_FILTER).listFiles());
 	}
 
-
 	public boolean compile() {
 		final Iterable<? extends JavaFileObject> javaFileObjects =
 				fileManager.getJavaFileObjectsFromFiles(this.javaSourceFiles);
-		final CompilationTask task = compiler.getTask(null, null, null, options, null, javaFileObjects);
+		final CompilationTask task = compiler.getTask(new PrintWriter(JakeLog.warnStream()), null, null, options, null, javaFileObjects);
 		JakeLog.startAndNextLine(("Compiling " + javaSourceFiles.size()
 				+ " source files to " + outputDir.getPath()));
 		JakeLog.info("using classpath [" + classpath + "]" );
+
 		final boolean result = task.call();
 		JakeLog.done();
 		if (!result) {
 			return false;
 		}
 		return true;
-
 	}
 
 	public void compileOrFail() {
@@ -116,7 +115,5 @@ public final class JakeJavaCompiler {
 		}
 		return compiler;
 	}
-
-
 
 }

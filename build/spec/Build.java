@@ -2,6 +2,7 @@
 import java.io.File;
 
 import org.jake.JakeLog;
+import org.jake.JakeOptions;
 import org.jake.file.JakeDirSet;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeBuildJar;
@@ -11,6 +12,7 @@ import org.jake.utils.JakeUtilsTime;
 public class Build extends JakeBuildJar {
 
 	public static void main(String[] args) {
+		JakeOptions.forceVerbose(true);
 		new Build().base();
 		//new Build().javadoc();
 	}
@@ -31,11 +33,6 @@ public class Build extends JakeBuildJar {
 			Iterable<File> classpath) {
 		return super.compiler(sources, outputDir, classpath); //.addOption("-Xlint:unchecked");
 	}
-
-	//	@Override
-	//	protected JakeUnit jakeUnit() {
-	//		return super.jakeUnit().forkKeepingSameClassPath(JakeJavaProcess.of());
-	//	}
 
 	@Override
 	protected void afterPackJars() {

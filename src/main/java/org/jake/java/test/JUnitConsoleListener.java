@@ -2,55 +2,46 @@ package org.jake.java.test;
 
 import java.io.PrintStream;
 
+import org.jake.JakeLog;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
 class JUnitConsoleListener extends RunListener {
 
-	private long startTime;
+	private PrintStream out;
 
-	private long duration;
-
-	private final PrintStream out;
-
-	public JUnitConsoleListener(PrintStream out) {
-		super();
-		this.out = out;
-	}
-
+	private PrintStream err;
 
 	@Override
 	public void testStarted(Description description) throws Exception {
-		out.println("Start " + description.getClassName() + "." + description.getMethodName() + "...");
-		startTime = System.nanoTime();
+		JakeLog.start("Running " + description.getClassName() + "." + description.getMethodName() );
+		out = System.out;
+		err = System.err;
+		System.setOut(JakeLog.infoStream());
+		System.setErr(JakeLog.errorStream());
 	}
 
 	@Override
 	public void testFinished(Description description) throws Exception {
-		duration = (System.nanoTime()-startTime)/1000000;
-		out.println("Finished");
-		out.println();
+		JakeLog.done();
+		System.setOut(out);
+		System.setErr(err);
 	}
 
 	@Override
 	public void testIgnored(Description description) throws Exception {
-		out.println("Ignored");
-		out.println();
+		JakeLog.info("- Test " + description.getDisplayName() + " ignored.");
 	}
 
 	@Override
 	public void testAssumptionFailure(Failure failure) {
-		failure.getException().printStackTrace(out);
-		out.println("Assumption failure in " + duration + " ms.");
-		out.println();
+		failure.getException().printStackTrace(JakeLog.infoStream());
 	}
 
 	@Override
 	public void testFailure(Failure failure) throws Exception {
-		failure.getException().printStackTrace(out);
-		out.println("Test failure in " + duration + " ms.");
-		out.println();
+		failure.getException().printStackTrace(JakeLog.infoStream());;
 	}
 
 

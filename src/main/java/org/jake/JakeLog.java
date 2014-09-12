@@ -1,10 +1,6 @@
 package org.jake;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.Writer;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.LinkedList;
 
@@ -14,24 +10,17 @@ public class JakeLog {
 
 	private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<LinkedList<Long>>();
 
-	private static OffsetWriter infoOffsetWriter = new OffsetWriter(new BufferedWriter(new OutputStreamWriter(System.out)));
+	private static OffsetStream infoWriter = new OffsetStream(System.out);
 
-	private static OffsetWriter warnOffsetWriter = new OffsetWriter(new BufferedWriter(new OutputStreamWriter(System.err)));
+	private static OffsetStream errorWriter = new OffsetStream(System.err);
 
-	private static OffsetWriter errorOffsetWriter = new OffsetWriter(new BufferedWriter(new OutputStreamWriter(System.err)));
-
-	private static PrintWriter infoWriter = new PrintWriter(infoOffsetWriter, true);
-
-	private static PrintWriter errorWriter = new PrintWriter(errorOffsetWriter, true);
-
-	private static PrintWriter warnWriter = new PrintWriter(warnOffsetWriter, true);
-
+	private static OffsetStream warnWriter = new OffsetStream(System.err);
 
 	public static void start(String message) {
 		infoWriter.print("- " + message +  " ... " );
-		infoOffsetWriter.inc();
-		errorOffsetWriter.inc();
-		warnOffsetWriter.inc();
+		infoWriter.inc();
+		errorWriter.inc();
+		warnWriter.inc();
 		LinkedList<Long> times = START_TIMES.get();
 		if (times == null) {
 			times = new LinkedList<Long>();
@@ -62,9 +51,9 @@ public class JakeLog {
 		}
 		final long start = times.poll();
 		infoWriter.println(message + " in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
-		infoOffsetWriter.dec();
-		errorOffsetWriter.dec();
-		warnOffsetWriter.dec();
+		infoWriter.dec();
+		errorWriter.dec();
+		warnWriter.dec();
 	}
 
 	public static void info(String message) {
@@ -105,72 +94,53 @@ public class JakeLog {
 		infoWriter.println();
 	}
 
-	public static PrintWriter getInfoWriter() {
+	public static PrintStream infoStream() {
 		return infoWriter;
 	}
 
-	public static PrintWriter getWarnWriter() {
+	public static PrintStream warnStream() {
 		return warnWriter;
 	}
 
-	public static PrintWriter getErrorWriter() {
+	public static PrintStream errorStream() {
 		return errorWriter;
 	}
 
-	public static void setWritters(Writer infoWriter, Writer warnWriter, Writer errorWriter) {
-		infoOffsetWriter.setDelegate(infoWriter);
-		warnOffsetWriter.setDelegate(warnWriter);
-		errorOffsetWriter.setDelegate(errorWriter);
-	}
+
 
 	public static void flush() {
-		try {
-			infoOffsetWriter.delegate.flush();
-			warnOffsetWriter.delegate.flush();
-			errorOffsetWriter.delegate.flush();
-		} catch (final IOException e) {
-			throw new RuntimeException("Can't flush log output.");
-		}
+		infoWriter.flush();
+		warnWriter.flush();
+		errorWriter.flush();
 	}
 
 	public static void offset(int delta) {
-		infoOffsetWriter.offsetLevel += delta;
-		errorOffsetWriter.offsetLevel += delta;
-		warnOffsetWriter.offsetLevel += delta;
+		infoWriter.offsetLevel += delta;
+		errorWriter.offsetLevel += delta;
+		warnWriter.offsetLevel += delta;
 	}
 
-	private static class OffsetWriter extends Writer {
+	public static int offset() {
+		return infoWriter.offsetLevel;
+	}
 
-		private Writer delegate;
+
+	private static class OffsetStream extends PrintStream {
 
 		private int offsetLevel;
 
-		public OffsetWriter(Writer delegate) {
-			this.delegate = delegate;
+		public OffsetStream(PrintStream delegate) {
+			super(delegate);
 		}
 
 		@Override
-		public void write(char[] cbuf, int off, int len) throws IOException {
-			final String filler = getFiller();
-			final int lenght = filler.length();
+		public void write(byte[] cbuf, int off, int len)  {
+			final byte[] filler = getFiller().getBytes();
+			final int lenght = filler.length;
 			if (lenght > 0) {
-				delegate.write(filler);
+				super.write(filler,0, lenght);
 			}
-			delegate.write(cbuf, off, len);
-		}
-
-		@Override
-		public void flush() throws IOException {
-			delegate.flush();
-		}
-
-		@Override
-		public void close() throws IOException {
-			delegate.close();
-		}
-
-		public synchronized void setDelegate(Writer writer) {
-			this.delegate = writer;
+			super.write(cbuf, off, len);
 		}
 
 		private String getFiller() {
@@ -201,5 +171,6 @@ public class JakeLog {
 		}
 
 	}
+
 
 }

@@ -19,7 +19,6 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -395,7 +394,7 @@ public final class JakeUtilsIO {
 	 * Returns a thread that write each data read from the specified input
 	 * stream to the specified output stream.
 	 */
-	public static StreamGobbler newStreamGobbler(InputStream is, PrintWriter os) {
+	public static StreamGobbler newStreamGobbler(InputStream is, OutputStream os) {
 		return new StreamGobbler(is, os);
 	}
 
@@ -408,7 +407,7 @@ public final class JakeUtilsIO {
 
 		private final InnerRunnable innerRunnable;
 
-		private StreamGobbler(InputStream is, PrintWriter os) {
+		private StreamGobbler(InputStream is, OutputStream os) {
 			this.innerRunnable = new InnerRunnable(is, os);
 			new Thread(innerRunnable).start();
 		}
@@ -425,11 +424,11 @@ public final class JakeUtilsIO {
 
 			private final InputStream in;
 
-			private final PrintWriter out;
+			private final OutputStream out;
 
 			private final AtomicBoolean stop = new AtomicBoolean(false);
 
-			private InnerRunnable(InputStream is, PrintWriter os) {
+			private InnerRunnable(InputStream is, OutputStream os) {
 				this.in = is;
 				this.out = os;
 			}
@@ -441,7 +440,9 @@ public final class JakeUtilsIO {
 					final BufferedReader br = new BufferedReader(isr);
 					String line = null;
 					while (!stop.get() && (line = br.readLine()) != null) {
-						out.println(line);
+						final byte[] bytes = line.getBytes();
+						out.write(bytes, 0, bytes.length);
+						out.write('\n');
 					}
 				} catch (final IOException e) {
 					throw new RuntimeException(e);

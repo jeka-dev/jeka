@@ -84,24 +84,12 @@ public class JakeTestSuiteResult implements Serializable {
 		return durationInMilis;
 	}
 
-	public List<String> toStrings(boolean verbose) {
+	public List<String> toStrings() {
 		final List<String> lines = new LinkedList<String>();
 		if (failureCount() == 0) {
 			lines.add(toString());
 		} else {
 			lines.add(toString());
-		}
-		if (verbose) {
-			lines.add("");
-		}
-		for (final Failure failure : failures()) {
-			for (final String string : failure.toStrings(verbose)) {
-				lines.add(string);
-			}
-			if (verbose) {
-				lines.add("");
-			}
-
 		}
 		return lines;
 	}
