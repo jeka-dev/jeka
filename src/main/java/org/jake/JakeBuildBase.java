@@ -50,20 +50,44 @@ public class JakeBuildBase {
 	}
 
 	/**
-	 * The project name. This is likely to used in produced artefacts.
+	 * The project name. This is likely to used in produced artifacts.
 	 */
 	protected String projectName() {
-		return JakeUtilsFile.fileName(baseDir().root());
+		final String projectDirName = baseDir().root().getName();
+		return projectDirName.contains(".") ? JakeUtilsString.substringAfterLast(projectDirName, ".") : projectDirName;
 	}
 
 	/**
-	 * The base directory for this project. All file/directory path are
+	 * The project group name. This is likely to used in produced artifacts.
+	 */
+	protected String groupName() {
+		final String projectDirName = baseDir().root().getName();
+		return projectDirName.contains(".") ? JakeUtilsString.substringBeforeLast(projectDirName, ".") : projectDirName;
+	}
+
+	/**
+	 * By default, this method returns the concatenation of the project group and project name. It is likely to
+	 * be used as produced artifacts file names.
+	 */
+	protected String projectFullName() {
+		if (groupName() == null || groupName().equals(projectName())) {
+			return projectName();
+		}
+		return groupName()+ "." + projectName();
+	}
+
+
+	/**
+	 * Returns the base directory for this project. All file/directory path are
 	 * resolved from this directory.
 	 */
 	protected JakeDir baseDir() {
 		return JakeDir.of(baseDirFile);
 	}
 
+	/**
+	 * Return a file located at the specified path relative to the base directory.
+	 */
 	protected File baseDir(String relativePath) {
 		if (relativePath.isEmpty()) {
 			return baseDirFile;
@@ -73,7 +97,7 @@ public class JakeBuildBase {
 
 	/**
 	 * The output directory where all the final and intermediate
-	 * artefacts are generated.
+	 * artifacts are generated.
 	 */
 	protected JakeDir ouputDir() {
 		return baseDir().sub("build/output").createIfNotExist();

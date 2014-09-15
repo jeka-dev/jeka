@@ -19,6 +19,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
 
+import org.jake.JakeLog;
+import org.jake.JakeOptions;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsString;
 
@@ -115,6 +117,9 @@ public final class JakeUtilsFile {
 					+ " is a directory. Should be a file.");
 		}
 		try {
+			if (JakeOptions.isVerbose()) {
+				JakeLog.info("Coping file " + from.getAbsolutePath());
+			}
 			final InputStream in = new FileInputStream(from);
 			if (!toFile.getParentFile().exists()) {
 				toFile.getParentFile().mkdirs();
@@ -320,6 +325,7 @@ public final class JakeUtilsFile {
 	public static void writeString(File file, String content, boolean append) {
 		try {
 			if (!file.exists()) {
+				file.getParentFile().mkdirs();
 				file.createNewFile();
 			}
 			final FileWriter fileWriter = new FileWriter(file, append);

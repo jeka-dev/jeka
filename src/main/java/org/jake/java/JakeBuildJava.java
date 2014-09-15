@@ -146,7 +146,14 @@ public class JakeBuildJava extends JakeBuildBase {
 	 * Returns location of generated resources.
 	 */
 	protected File generatedResourceDir() {
-		return ouputDir("generated-ressources");
+		return ouputDir("generated-resources");
+	}
+
+	/**
+	 * Returns location of generated resources for tests.
+	 */
+	protected File generatedTestResourceDir() {
+		return ouputDir("generated-test-resources");
 	}
 
 	/**
@@ -229,7 +236,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	protected void processResources() {
-		JakeResourceProcessor.of(resourceDirs()).runTo(classDir());
+		JakeResourceProcessor.of(resourceDirs()).andIfExist(generatedResourceDir()).generateTo(classDir());
 	}
 
 	protected JakeUnit jakeUnit() {
@@ -243,7 +250,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	protected void processUnitTestResources() {
-		JakeResourceProcessor.of(testResourceDirs()).runTo(testClassDir());
+		JakeResourceProcessor.of(testResourceDirs()).andIfExist(generatedTestResourceDir()).generateTo(testClassDir());
 	}
 
 	protected void runUnitTests() {

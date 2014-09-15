@@ -18,6 +18,22 @@ public final class JakeUtilsString {
 		return tokens.toArray(new String[tokens.size()]);
 	}
 
+	public static String substringAfterLast(String string, String delimiter) {
+		final int index = string.lastIndexOf(delimiter);
+		if (index == -1 || string.endsWith(delimiter)) {
+			return "";
+		}
+		return string.substring(index+1);
+	}
+
+	public static String substringBeforeLast(String string, String delimiter) {
+		final int index = string.lastIndexOf(delimiter);
+		if (index == -1 || string.startsWith(delimiter)) {
+			return "";
+		}
+		return string.substring(0, index);
+	}
+
 	public static String repeat(String pattern, int count) {
 		final StringBuilder builder = new StringBuilder();
 		for (int i=0; i<count; i++) {
