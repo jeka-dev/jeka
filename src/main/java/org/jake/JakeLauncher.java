@@ -1,5 +1,6 @@
 package org.jake;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jake.file.utils.JakeUtilsFile;
+import org.jake.java.JakeClassLoader;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsString;
 
@@ -25,8 +27,15 @@ public class JakeLauncher {
 		JakeLog.nextLine();
 		defineSystemProps(args);
 		final List<String> actions = extractActions(args);
-		final ProjectBuilder projectBuilder = new ProjectBuilder(JakeUtilsFile.workingDir());
-		final boolean result = projectBuilder.build(actions);
+
+		final JakeClassLoader classLoader = JakeClassLoader.current().createChild();
+		final Project project = new Project(JakeUtilsFile.workingDir(), JakeUtilsFile.workingDir());
+
+		final File buildBin = project.compileBuild(classLoader.fullClasspath());
+		if (buildBin != null) {
+			JakeClassLoader.addUrl(classLoader.classloader(), buildBin);
+		}
+		final boolean result = project.executeBuild(classLoader, actions);
 		if (!result) {
 			System.exit(1);
 		}
@@ -78,7 +87,7 @@ public class JakeLauncher {
 	}
 
 
-	public static int printAsciiArt1() {
+	private static int printAsciiArt1() {
 		final InputStream inputStream = JakeLauncher.class.getResourceAsStream("ascii1.txt");
 		final List<String> lines = JakeUtilsIO.readLines(inputStream);
 		int i = 0;

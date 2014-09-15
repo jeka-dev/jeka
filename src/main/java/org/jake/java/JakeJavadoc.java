@@ -49,7 +49,6 @@ public class JakeJavadoc {
 	private void doProcess(File outputDir) {
 		JakeLog.startAndNextLine("Generating javadoc");
 		final String[] args = toArguments(outputDir);
-		JakeLog.nextLine();
 		execute(doclet, JakeLog.infoStream(),JakeLog.warnStream(),JakeLog.errorStream(), args);
 	}
 
@@ -106,8 +105,8 @@ public class JakeJavadoc {
 		final Class<?> mainClass = getJavadocMainClass();
 		JakeUtilsReflect.newInstance(mainClass);
 		final Method method = JakeUtilsReflect.getMethod(mainClass, "execute", String.class, PrintWriter.class, PrintWriter.class, PrintWriter.class, String.class, new String[0].getClass());
-		JakeUtilsReflect.invoke(null, method, "Javadoc", new PrintStream(errorStream), new PrintStream(warnStream),
-				new PrintStream(normalStream), docletString, args);
+		JakeUtilsReflect.invoke(null, method, "Javadoc", new PrintWriter(errorStream), new PrintWriter(warnStream),
+				new PrintWriter(normalStream), docletString, args);
 	}
 
 	public static Class<?> getJavadocMainClass() {

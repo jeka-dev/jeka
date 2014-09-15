@@ -127,7 +127,7 @@ public class JakeClasspath implements Iterable<File> {
 	}
 
 	public static String javaSourcePathToClassName(String javaSourcePath) {
-		return javaSourcePath.replace(".java", ".class").replace('/', '.');
+		return javaSourcePath.replace('/', '.').substring(0, javaSourcePath.length()-5);
 	}
 
 }

@@ -10,28 +10,28 @@ import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeBuildJar;
 import org.jake.java.JakeClassLoader;
 import org.jake.java.JakeClasspath;
+import org.jake.java.JakeJavaCompiler;
 import org.jake.java.eclipse.JakeBuildEclipseProject;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
 import org.jake.utils.JakeUtilsTime;
 
 /**
- * Builder for a single module. The injected class loader is supposed to include yet the build binaries.
+ * Single buildable project.
  */
-class ModuleBuilder {
-
+class Project {
 
 	private static final String BUILD_SOURCE_DIR = "build/spec";
+
+	private static final String BUILD_BIN_DIR = "build/output/build-bin";
 
 	private static final String BUILD_LIB_DIR = "build/libs/build";
 
 	private static final String DEFAULT_JAVA_SOURCE = "src/main/java";
 
-	private final File moduleBaseDir;
+	private final File projectBaseDir;
 
-	private final File parentBaseDir;
-
-	private final JakeClassLoader classLoader;
+	private final String projectRelativePath;
 
 
 	/**
@@ -39,46 +39,64 @@ class ModuleBuilder {
 	 * its relative path to the 'root' module.
 	 * The Relative path is used to display the module under build
 	 */
-	public ModuleBuilder(File buildBaseParentDir, File moduleBaseDir,JakeClassLoader classLoader) {
+	public Project(File buildBaseParentDir, File moduleBaseDir) {
 		super();
-		this.moduleBaseDir = moduleBaseDir;
-		this.parentBaseDir = buildBaseParentDir;
-		this.classLoader = classLoader;
+		this.projectBaseDir = moduleBaseDir;
+		if (buildBaseParentDir.equals(moduleBaseDir)) {
+			projectRelativePath = moduleBaseDir.getName();
+		} else {
+			projectRelativePath = JakeUtilsFile.getRelativePath(buildBaseParentDir, moduleBaseDir);
+		}
 	}
 
-	public boolean build(Iterable<String> methods) {
+	public File compileBuild(Iterable<File> classpath) {
+		final JakeDir buildSource = JakeDir.of(new File(projectBaseDir,
+				BUILD_SOURCE_DIR));
+		if (!buildSource.exists()) {
+			throw new IllegalStateException(
+					BUILD_SOURCE_DIR
+					+ " directory has not been found in this project. "
+					+ " This directory is supposed to contains build scripts (as form of java source");
+		}
+		final File buildBinDir = new File(projectBaseDir, BUILD_BIN_DIR);
+		if (!buildBinDir.exists()) {
+			buildBinDir.mkdirs();
+		}
+		displayHead("Compiling build classes for project : " + projectRelativePath);
 		final long start = System.nanoTime();
+		JakeJavaCompiler.ofOutput(buildBinDir)
+		.addSourceFiles(buildSource)
+		.setClasspath(classpath)
+		.compileOrFail();
+		JakeLog.info("Done in " + JakeUtilsTime.durationInSeconds(start) + " seconds.", "");
+		return buildBinDir;
+	}
 
-		final String pattern = "-";
-		final String intro = "Building module : " + JakeUtilsFile.getRelativePath(parentBaseDir, moduleBaseDir);
-		JakeLog.info(JakeUtilsString.repeat(pattern, intro.length() ));
-		JakeLog.info(intro);
-		JakeLog.info(JakeUtilsString.repeat(pattern, intro.length() ));
-		JakeLog.nextLine();
-		final Class<? extends JakeBuildBase> buildClass = this.findBuildClass();
-		final boolean result = this.launch(buildClass, methods);
+	public boolean executeBuild( JakeClassLoader classLoader, Iterable<String> methods) {
+		final long start = System.nanoTime();
+		displayHead("Building project : " + projectRelativePath);
+		final Class<? extends JakeBuildBase> buildClass = this.findBuildClass(classLoader);
+		final boolean result = this.launch(buildClass, methods, classLoader);
 
 		final float duration = JakeUtilsTime.durationInSeconds(start);
 		if (result) {
-			JakeLog.info("--> Module " + moduleBaseDir.getAbsolutePath() + " processed with success in " + duration + " seconds.");
+			JakeLog.info("--> Project " + projectBaseDir.getAbsolutePath() + " built with success in " + duration + " seconds.");
 		} else {
-			JakeLog.info("--> Module " + moduleBaseDir.getAbsolutePath() + " failed after " + duration + " seconds.");
+			JakeLog.info("--> Project " + projectBaseDir.getAbsolutePath() + " failed after " + duration + " seconds.");
 		}
 		return result;
 	}
 
 	private boolean hasBuildSource() {
-		final File buildSource = new File(moduleBaseDir, BUILD_SOURCE_DIR);
+		final File buildSource = new File(projectBaseDir, BUILD_SOURCE_DIR);
 		if (!buildSource.exists()) {
 			return false;
 		}
 		return true;
 	}
 
-
-
 	@SuppressWarnings("unchecked")
-	private Class<? extends JakeBuildBase> findBuildClass() {
+	private Class<? extends JakeBuildBase> findBuildClass(JakeClassLoader classLoader) {
 
 		// If class name specified in options.
 		if (!JakeUtilsString.isBlank(JakeOptions.buildClass())) {
@@ -91,7 +109,7 @@ class ModuleBuilder {
 
 		// If there is a build source
 		if (this.hasBuildSource()) {
-			final JakeDir dir = JakeDir.of(new File(moduleBaseDir, BUILD_SOURCE_DIR));
+			final JakeDir dir = JakeDir.of(new File(projectBaseDir, BUILD_SOURCE_DIR));
 			for (final String path : dir.relativePathes()) {
 				if (path.endsWith(".java")) {
 					final String className = JakeClasspath.javaSourcePathToClassName(path);
@@ -105,17 +123,17 @@ class ModuleBuilder {
 		}
 
 		// If nothing yet found use defaults
-		if (new File(moduleBaseDir, DEFAULT_JAVA_SOURCE).exists()
-				&& new File(moduleBaseDir, BUILD_LIB_DIR ).exists()) {
+		if (new File(projectBaseDir, DEFAULT_JAVA_SOURCE).exists()
+				&& new File(projectBaseDir, BUILD_LIB_DIR ).exists()) {
 			return classLoader.load(JakeBuildJar.class.getName());
 		}
-		if (JakeBuildEclipseProject.candidate(moduleBaseDir)) {
+		if (JakeBuildEclipseProject.candidate(projectBaseDir)) {
 			return classLoader.load(JakeBuildEclipseProject.class.getName());
 		}
 		return null;
 	}
 
-	private boolean launch(Class<? extends JakeBuildBase> buildClass, Iterable<String> methods) {
+	private boolean launch(Class<? extends JakeBuildBase> buildClass, Iterable<String> methods, JakeClassLoader classLoader) {
 
 		final JakeBuildBase build = JakeUtilsReflect.newInstance(buildClass);
 
@@ -165,6 +183,14 @@ class ModuleBuilder {
 			JakeLog.nextLine();
 		}
 		return true;
+	}
+
+	protected static void displayHead(String intro) {
+		final String pattern = "-";
+		JakeLog.info(JakeUtilsString.repeat(pattern, intro.length() ));
+		JakeLog.info(intro);
+		JakeLog.info(JakeUtilsString.repeat(pattern, intro.length() ));
+		JakeLog.nextLine();
 	}
 
 

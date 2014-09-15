@@ -35,7 +35,14 @@ public final class JakeUtilsFile {
 		}
 	}
 
+	/**
+	 * Returns the relative path of the specified file relative to the specified base directory.
+	 * File argument must be a child of the base directory otherwise method throw an {@link IllegalArgumentException}.
+	 */
 	public static String getRelativePath(File baseDir, File file) {
+		if(baseDir.equals(file)) {
+			throw new IllegalArgumentException("BaseDir and File can't be the same.");
+		}
 		final String baseDirPath = canonicalPath(baseDir);
 		final String filePath = canonicalPath(file);
 		if (!filePath.startsWith(baseDirPath)) {
