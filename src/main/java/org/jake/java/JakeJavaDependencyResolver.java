@@ -45,11 +45,11 @@ public abstract class JakeJavaDependencyResolver {
 		final JakeClasspath compileLibs = compile();
 		final JakeClasspath runtimeLibs = runtime();
 		final JakeClasspath testLibs = test();
-		result.add("compile (" + compileLibs.files().size() + " libs): "
+		result.add("compile (" + compileLibs.entries().size() + " libs): "
 				+ compileLibs);
-		result.add("runtime (" + runtimeLibs.files().size() + " libs): "
+		result.add("runtime (" + runtimeLibs.entries().size() + " libs): "
 				+ runtimeLibs);
-		result.add("test (" + testLibs.files().size() + " libs): " + testLibs);
+		result.add("test (" + testLibs.entries().size() + " libs): " + testLibs);
 		return result;
 	}
 

@@ -45,10 +45,11 @@ class JUnit4TestLauncher {
 	 * @param classes Non-empty <code>Iterable</code>.
 	 */
 	public static JakeTestSuiteResult launchInClassLoader(Iterable<Class> classes, boolean printEachTestOnConsole, JunitReportDetail reportDetail, File reportDir) {
-		final JakeClassLoader classloader = JakeClassLoader.of(classes.iterator().next());
+		JakeClassLoader classloader = JakeClassLoader.of(classes.iterator().next());
 		final Class[] classArray = JakeUtilsIterable.toArray(classes, Class.class);
 		if (needJakeInClasspath(printEachTestOnConsole, reportDetail)) {
-			JakeClassLoader.addUrl(classloader.classloader() , JakeLocator.jakeJarFile());
+			classloader = classloader.and(JakeLocator.jakeJarFile());
+			//classloader.addEntry(JakeLocator.jakeJarFile());
 		}
 		return classloader.invokeStaticMethod(JUnit4TestExecutor.class.getName(), "launchInProcess", classArray, printEachTestOnConsole, reportDetail, reportDir);
 	}

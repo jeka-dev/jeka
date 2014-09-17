@@ -21,6 +21,12 @@ import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
 
+/**
+ * Wrapper around {@link URLClassLoader} offering convenient methods and fluent interface to deal
+ * with <code>URLClassLoader</code>.
+ * 
+ * @author Djeang
+ */
 public class JakeClassLoader {
 
 	/**
@@ -40,39 +46,68 @@ public class JakeClassLoader {
 		this.delegate = delegate;
 	}
 
+	/**
+	 * Returns a {@link JakeClassLoader} wrapping the current class loader.
+	 * @see Class#getClassLoader()
+	 */
 	public static JakeClassLoader current() {
 		return new JakeClassLoader((URLClassLoader) JakeClassLoader.class.getClassLoader());
 	}
 
+	/**
+	 * Returns a {@link JakeClassLoader} wrapping the system class loader.
+	 * @see ClassLoader#getSystemClassLoader()
+	 */
 	public static JakeClassLoader system() {
 		return new JakeClassLoader((URLClassLoader) ClassLoader.getSystemClassLoader());
 	}
 
+	/**
+	 * Returns a {@link JakeClassLoader} wrapping the class loader having loaded the specified class.
+	 */
 	public static JakeClassLoader of(Class<?> clazz) {
 		return new JakeClassLoader((URLClassLoader) clazz.getClassLoader());
 	}
 
+	/**
+	 * Return the {@link URLClassLoader} wrapped by this object.
+	 */
 	public URLClassLoader classloader() {
 		return delegate;
 	}
 
+	/**
+	 * Returns the class loader parent of this one.
+	 * @return
+	 */
 	public JakeClassLoader parent() {
 		return new JakeClassLoader((URLClassLoader) this.delegate.getParent());
 	}
 
+	/**
+	 * @see #createChild(Iterable).
+	 */
 	public JakeClassLoader createChild(File...urls) {
 		return new JakeClassLoader(new URLClassLoader(toUrl(Arrays.asList(urls)), this.delegate));
 	}
 
-
+	/**
+	 * Creates a class loader, child of this one and having the specified entries.
+	 */
 	public JakeClassLoader createChild(Iterable<File> urls) {
 		return new JakeClassLoader(new URLClassLoader(toUrl(urls), this.delegate));
 	}
 
+	/**
+	 * Creates a class loader having the same parent and the same entries as this one plus the specified entries.
+	 */
 	public JakeClassLoader and(Iterable<File> files) {
 		return parent().createChild(this.childClasspath().and(files));
 	}
 
+	/**
+	 * @see #and(Iterable).
+	 */
 	public JakeClassLoader and(File...files) {
 		return and(Arrays.asList(files));
 	}
@@ -106,6 +141,13 @@ public class JakeClassLoader {
 	}
 
 
+	/**
+	 * Delegates the call to {@link ClassLoader#loadClass(String)} of this wrapped <code>class loader</code>.<br/>
+	 * The specified class is supposed to be defined in this class loader, otherwise an
+	 * {@link IllegalArgumentException} is thrown.
+	 * 
+	 * @see {@link #loadIfExist(String)}, {@link #isDefined(String)}
+	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Object> Class<T> load(String className) {
 		try {
@@ -115,6 +157,18 @@ public class JakeClassLoader {
 		}
 	}
 
+	/**
+	 * Loads a class given its source relative path. For example <code>loadGivenSourcePath("mypack1/subpack/MyClass.java")
+	 * will load the class <code>mypack1.subpack.MyClass</code>.
+	 */
+	public <T extends Object> Class<T> loadGivenClassSourcePath(String classSourcePath) {
+		final String className = classSourcePath.replace('/', '.').substring(0, classSourcePath.length()-5);
+		return load(className);
+	}
+
+	/**
+	 * Loads the class having the specified name or return <code>null</code> if no such class is defined in this <code>class loader</code>.
+	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Object> Class<T> loadIfExist(String className) {
 		try {
@@ -124,6 +178,9 @@ public class JakeClassLoader {
 		}
 	}
 
+	/**
+	 * Returns if the specified class is defined in this <code>class loader</code>.
+	 */
 	public boolean isDefined(String className) {
 		try {
 			delegate.loadClass(className);
@@ -242,14 +299,20 @@ public class JakeClassLoader {
 	}
 
 	/**
-	 * This allow to access to protected method {@link URLClassLoader#addUrl}. Use it with caution !
+	 * Add a new entry to this class loader.
+	 * WARN : This method has side effect on this class loader : use it with caution !
 	 */
-	public static final void addUrl(URLClassLoader classLoader, File file) {
+	public void addEntry(File entry) {
 		final Method method = JakeUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL", URL.class);
-		JakeUtilsReflect.invoke(classLoader, method, JakeUtilsFile.toUrl(file));
+		JakeUtilsReflect.invoke(this.delegate, method, JakeUtilsFile.toUrl(entry));
 	}
 
-
+	/**
+	 * Invokes a static method on the specified class using the provided arguments. <br/>
+	 * If the argument classes are the same on the current class loader and this one then arguments are passed as is,
+	 * otherwise arguments are serialize in the current class loader and  deserialized
+	 * in this class loader in order to be compliant with it.
+	 */
 	@SuppressWarnings("unchecked")
 	public <T> T invokeStaticMethod(String className, String methodName, Object... args) {
 		final Class<?> clazz = this.load(className);
@@ -264,19 +327,13 @@ public class JakeClassLoader {
 
 	}
 
-	public <T> T invokeInstanceMethod(Object object, String methodName, Object... args) {
-
-		final Object[] effectiveArgs = new Object[args.length];
-		for (int i = 0; i < args.length; i++) {
-			effectiveArgs[i] = traverseClassLoader(args[i], this);
-		}
-		offsetJakeLog();
-		final Object returned = JakeUtilsReflect.invokeInstanceMethod(object, methodName, effectiveArgs);
-		@SuppressWarnings("unchecked")
-		final T result = (T) traverseClassLoader(returned, JakeClassLoader.current());
-		offsetJakeLog();
-		return result;
-
+	/**
+	 * Creates an instance of the class having the specified name in this class loader.
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T newInstance(String className) {
+		final Class<?> clazz = this.load(className);
+		return (T) JakeUtilsReflect.newInstance(clazz);
 	}
 
 	private void offsetJakeLog() {
@@ -285,10 +342,6 @@ public class JakeClassLoader {
 			final Class<?> toClass = this.load(JakeLog.class.getName());
 			JakeUtilsReflect.invokeStaticMethod(toClass, "offset", offset);
 		}
-	}
-
-	public Object newInstanceOf(String className) {
-		return JakeUtilsReflect.newInstance(this.load(className));
 	}
 
 	private static Object traverseClassLoader(Object object, JakeClassLoader to) {

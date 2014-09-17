@@ -38,7 +38,7 @@ public class DotClasspathTest {
 		final JakeJavaDependencyResolver resolver = Lib.toDependencyResolver(libs);
 		assertEquals(6, libs.size());
 		System.out.println(resolver.test());
-		assertEquals(6, resolver.test().files().size());
+		assertEquals(6, resolver.test().entries().size());
 	}
 
 	private DotClasspath sample() throws URISyntaxException {

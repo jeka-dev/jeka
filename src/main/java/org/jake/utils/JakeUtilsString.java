@@ -152,7 +152,7 @@ public final class JakeUtilsString {
 		if (string == null) {
 			return true;
 		}
-		return string.isEmpty() || " ".equals(" ");
+		return string.isEmpty() || " ".equals(string);
 	}
 
 

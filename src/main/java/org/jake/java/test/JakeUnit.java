@@ -150,7 +150,7 @@ public final class JakeUnit {
 	@SuppressWarnings("rawtypes")
 	private Collection<Class> getClassesToTest(final Iterable<File> testClassDirs, JakeClassFilter classFilter) {
 		final Collection<Class> testClasses;
-		final JakeClasspath classpath = this.jakeClasspath().andAtFirst(testClassDirs);
+		final JakeClasspath classpath = this.jakeClasspath().andAtHead(testClassDirs);
 		final JakeClassLoader classLoader = JakeClassLoader.system().parent().createChild(classpath);
 		final FileFilter fileFilter = new FileFilter() {
 

@@ -33,7 +33,7 @@ public class JakeLauncher {
 
 		final File buildBin = project.compileBuild(classLoader.fullClasspath());
 		if (buildBin != null) {
-			JakeClassLoader.addUrl(classLoader.classloader(), buildBin);
+			classLoader.addEntry(buildBin);
 		}
 		final boolean result = project.executeBuild(classLoader, actions);
 		if (!result) {

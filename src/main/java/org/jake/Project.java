@@ -9,7 +9,6 @@ import org.jake.file.JakeDir;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeBuildJar;
 import org.jake.java.JakeClassLoader;
-import org.jake.java.JakeClasspath;
 import org.jake.java.JakeJavaCompiler;
 import org.jake.java.eclipse.JakeBuildEclipseProject;
 import org.jake.utils.JakeUtilsReflect;
@@ -112,8 +111,7 @@ class Project {
 			final JakeDir dir = JakeDir.of(new File(projectBaseDir, BUILD_SOURCE_DIR));
 			for (final String path : dir.relativePathes()) {
 				if (path.endsWith(".java")) {
-					final String className = JakeClasspath.javaSourcePathToClassName(path);
-					final Class<?> clazz = classLoader.load(className);
+					final Class<?> clazz = classLoader.loadGivenClassSourcePath(path);
 					if (JakeBuildBase.class.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers())) {
 						return (Class<? extends JakeBuildBase>) clazz;
 					}

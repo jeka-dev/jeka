@@ -245,7 +245,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	protected void compileUnitTests() {
-		final Iterable<File> classpath =  this.deps().test().andAtFirst(classDir());
+		final Iterable<File> classpath =  this.deps().test().andAtHead(classDir());
 		compiler(testSourceDirs(), testClassDir(), classpath).compileOrFail();
 	}
 
