@@ -1,4 +1,4 @@
-package org.jake.java.test;
+package org.jake.java.test.junit;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -10,7 +10,7 @@ import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeClassLoader;
 import org.jake.java.JakeClasspath;
 import org.jake.java.JakeJavaProcess;
-import org.jake.java.test.JakeUnit.JunitReportDetail;
+import org.jake.java.test.junit.JakeUnit.JunitReportDetail;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 

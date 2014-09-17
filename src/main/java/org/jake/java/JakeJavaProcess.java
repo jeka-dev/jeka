@@ -14,6 +14,11 @@ import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIO.StreamGobbler;
 import org.jake.utils.JakeUtilsString;
 
+/**
+ * 
+ * @author i19451
+ *
+ */
 public class JakeJavaProcess {
 
 	private static final File CURRENT_JAVA_DIR = new File(System.getProperty("java.home"), "bin");
@@ -118,9 +123,6 @@ public class JakeJavaProcess {
 	private String runningJavaCommand() {
 		return this.javaDir.getAbsolutePath()+ File.separator + "java";
 	}
-
-
-
 
 	public int startAndWaitFor(String mainClassName, String ...arguments) {
 		final List<String> command = new LinkedList<String>();

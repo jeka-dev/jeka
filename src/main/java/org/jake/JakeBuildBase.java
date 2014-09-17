@@ -34,7 +34,7 @@ public class JakeBuildBase {
 	/**
 	 * The current version for this project. Might look like "0.6.3".
 	 */
-	protected String version() {
+	public String version() {
 		return null;
 	}
 
@@ -52,7 +52,7 @@ public class JakeBuildBase {
 	/**
 	 * The project name. This is likely to used in produced artifacts.
 	 */
-	protected String projectName() {
+	public String projectName() {
 		final String projectDirName = baseDir().root().getName();
 		return projectDirName.contains(".") ? JakeUtilsString.substringAfterLast(projectDirName, ".") : projectDirName;
 	}
@@ -60,7 +60,7 @@ public class JakeBuildBase {
 	/**
 	 * The project group name. This is likely to used in produced artifacts.
 	 */
-	protected String groupName() {
+	public String groupName() {
 		final String projectDirName = baseDir().root().getName();
 		return projectDirName.contains(".") ? JakeUtilsString.substringBeforeLast(projectDirName, ".") : projectDirName;
 	}
@@ -69,7 +69,7 @@ public class JakeBuildBase {
 	 * By default, this method returns the concatenation of the project group and project name. It is likely to
 	 * be used as produced artifacts file names.
 	 */
-	protected String projectFullName() {
+	public String projectFullName() {
 		if (groupName() == null || groupName().equals(projectName())) {
 			return projectName();
 		}
@@ -81,14 +81,14 @@ public class JakeBuildBase {
 	 * Returns the base directory for this project. All file/directory path are
 	 * resolved from this directory.
 	 */
-	protected JakeDir baseDir() {
+	public JakeDir baseDir() {
 		return JakeDir.of(baseDirFile);
 	}
 
 	/**
 	 * Return a file located at the specified path relative to the base directory.
 	 */
-	protected File baseDir(String relativePath) {
+	public File baseDir(String relativePath) {
 		if (relativePath.isEmpty()) {
 			return baseDirFile;
 		}
@@ -99,14 +99,14 @@ public class JakeBuildBase {
 	 * The output directory where all the final and intermediate
 	 * artifacts are generated.
 	 */
-	protected JakeDir ouputDir() {
+	public JakeDir ouputDir() {
 		return baseDir().sub("build/output").createIfNotExist();
 	}
 
 	/**
 	 * Returns the file located at the specified path relative to the output directory.
 	 */
-	protected File ouputDir(String relativePath) {
+	public File ouputDir(String relativePath) {
 		return ouputDir().file(relativePath);
 	}
 

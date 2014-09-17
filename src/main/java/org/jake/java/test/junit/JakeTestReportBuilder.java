@@ -1,4 +1,4 @@
-package org.jake.java.test;
+package org.jake.java.test.junit;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -8,7 +8,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jake.java.test.JakeTestSuiteResult.Failure;
+import org.jake.java.test.junit.JakeTestSuiteResult.Failure;
 
 class JakeTestReportBuilder {
 

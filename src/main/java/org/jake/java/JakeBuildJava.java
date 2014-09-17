@@ -9,8 +9,8 @@ import org.jake.JakeOption;
 import org.jake.file.JakeDirSet;
 import org.jake.file.JakeFileFilter;
 import org.jake.file.utils.JakeUtilsFile;
-import org.jake.java.test.JakeUnit;
-import org.jake.java.test.JakeUnit.JunitReportDetail;
+import org.jake.java.test.junit.JakeUnit;
+import org.jake.java.test.junit.JakeUnit.JunitReportDetail;
 
 public class JakeBuildJava extends JakeBuildBase {
 
@@ -166,7 +166,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	/**
 	 * Returns location where the test reports are written.
 	 */
-	protected File testReportDir() {
+	public File testReportDir() {
 		return ouputDir("test-reports");
 	}
 

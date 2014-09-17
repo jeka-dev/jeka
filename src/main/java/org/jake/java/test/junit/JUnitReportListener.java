@@ -1,4 +1,4 @@
-package org.jake.java.test;
+package org.jake.java.test.junit;
 
 import org.junit.runner.notification.RunListener;
 

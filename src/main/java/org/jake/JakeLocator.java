@@ -2,9 +2,7 @@ package org.jake;
 
 import java.io.File;
 
-import org.jake.file.JakeDir;
 import org.jake.java.JakeClassLoader;
-import org.jake.java.JakeClasspath;
 
 public class JakeLocator {
 
@@ -32,13 +30,8 @@ public class JakeLocator {
 		return jakeJarFile().getParentFile();
 	}
 
-	public static JakeClasspath baseBuildClasspath() {
-		final File extDir = new File(jakeHome(), "ext/compile");
-		JakeClasspath result = JakeClasspath.of(jakeJarFile());
-		if (extDir.exists()) {
-			result = result.and(JakeDir.of(extDir).include("**/*.jar"));
-		}
-		return result;
+	public static File optionalLibsDir() {
+		return new File(jakeHome(), "libs/optional");
 	}
 
 

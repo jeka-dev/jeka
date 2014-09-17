@@ -324,7 +324,6 @@ public class JakeClassLoader {
 		final Object returned = JakeUtilsReflect.invokeStaticMethod(clazz, methodName, effectiveArgs);
 		final T result = (T) traverseClassLoader(returned, JakeClassLoader.current());
 		return result;
-
 	}
 
 	/**

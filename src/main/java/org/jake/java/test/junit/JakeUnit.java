@@ -1,4 +1,4 @@
-package org.jake.java.test;
+package org.jake.java.test.junit;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -9,6 +9,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -51,11 +52,19 @@ public final class JakeUnit {
 
 	private final JakeJavaProcess fork;
 
-	private JakeUnit(JakeClasspath classpath, JunitReportDetail reportDetail, File reportDir, JakeJavaProcess fork) {
+	private final List<Runnable> postActions;
+
+	private JakeUnit(JakeClasspath classpath, JunitReportDetail reportDetail, File reportDir, JakeJavaProcess fork, List<Runnable> runnables) {
 		this.classpath = classpath;
 		this.reportDetail = reportDetail;
 		this.reportDir = reportDir;
 		this.fork = fork;
+		this.postActions = Collections.unmodifiableList(runnables);
+	}
+
+	@SuppressWarnings("unchecked")
+	private JakeUnit(JakeClasspath classpath, JunitReportDetail reportDetail, File reportDir, JakeJavaProcess fork) {
+		this(classpath, reportDetail, reportDir, fork, Collections.EMPTY_LIST);
 	}
 
 	public static JakeUnit ofFork(JakeJavaProcess jakeJavaProcess) {
@@ -78,6 +87,37 @@ public final class JakeUnit {
 	public JakeUnit forkKeepingSameClassPath(JakeJavaProcess process) {
 		final JakeJavaProcess fork = process.withClasspath(jakeClasspath());
 		return new JakeUnit(null, reportDetail, reportDir, fork);
+	}
+
+	public JakeUnit withPostAction(Runnable runnable) {
+		final List<Runnable> list = new LinkedList<Runnable>(this.postActions);
+		list.add(runnable);
+		return new JakeUnit(classpath, reportDetail, reportDir, fork, list);
+	}
+
+	public JakeUnit fork(JakeJavaProcess process) {
+		return new JakeUnit(null, reportDetail, reportDir, process);
+	}
+
+
+	public boolean isForked() {
+		return this.fork != null;
+	}
+
+	public JakeClasspath getClasspath() {
+		return classpath;
+	}
+
+	public JunitReportDetail getReportDetail() {
+		return reportDetail;
+	}
+
+	public File getReportDir() {
+		return reportDir;
+	}
+
+	public JakeJavaProcess getFork() {
+		return fork;
 	}
 
 	public JakeTestSuiteResult launchAll(File... testClassDirs) {
@@ -133,6 +173,9 @@ public final class JakeUnit {
 		}
 		if (reportDetail.equals(JunitReportDetail.BASIC)) {
 			JakeTestReportBuilder.of(result).writeToFileSystem(reportDir);
+		}
+		for (final Runnable runnable : this.postActions) {
+			runnable.run();
 		}
 		JakeLog.done("Tests run");
 		return result;
