@@ -164,10 +164,10 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	/**
-	 * Returns location where the test report are written.
+	 * Returns location where the test reports are written.
 	 */
 	protected File testReportDir() {
-		return ouputDir("test-report");
+		return ouputDir("test-reports");
 	}
 
 	/**
@@ -241,7 +241,7 @@ public class JakeBuildJava extends JakeBuildBase {
 
 	protected JakeUnit jakeUnit() {
 		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.deps().test());
-		return JakeUnit.of(classpath).withReport(junitReportDetail, testReportDir());
+		return JakeUnit.of(classpath).withReport(junitReportDetail, new File(testReportDir(),"junit"));
 	}
 
 	protected void compileUnitTests() {

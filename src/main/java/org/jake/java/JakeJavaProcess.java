@@ -61,8 +61,11 @@ public class JakeJavaProcess {
 		if (agentLib == null) {
 			throw new NullPointerException("agentLib can't be null.");
 		}
-		if (agentLib.exists() && agentLib.exists() && agentLib.isFile()) {
-			throw new IllegalArgumentException("aggentLib must be an existing file (not a directory).");
+		if (!agentLib.exists()) {
+			throw new IllegalArgumentException("aggentLib " + agentLib.getAbsolutePath() + " not found.");
+		}
+		if (!agentLib.isFile()) {
+			throw new IllegalArgumentException("aggentLib " + agentLib.getAbsolutePath() + " is a directory, should be a file.");
 		}
 		final List<AgentLibAndOption> list = new ArrayList<JakeJavaProcess.AgentLibAndOption>(this.agents);
 		list.add(new AgentLibAndOption(agentLib.getAbsolutePath(), agentOption));
@@ -120,12 +123,12 @@ public class JakeJavaProcess {
 
 
 	public int startAndWaitFor(String mainClassName, String ...arguments) {
-		JakeLog.startAndNextLine("Starting java program on class " + mainClassName + " using args : " + Arrays.toString(arguments));
 		final List<String> command = new LinkedList<String>();
 		command.add(runningJavaCommand());
 		command.addAll(options());
 		command.add(mainClassName);
 		command.addAll(Arrays.asList(arguments));
+		JakeLog.startAndNextLine("Starting java program : " + command.toString());
 		try {
 			final Process process = processBuilder(command).start();
 			final StreamGobbler outputStreamGobbler =
@@ -150,11 +153,11 @@ public class JakeJavaProcess {
 			list.add(classpath.toString());
 		}
 		for (final AgentLibAndOption agentLibAndOption : agents) {
-			list.add("-javaagent:");
-			list.add(agentLibAndOption.lib);
+			final StringBuilder builder = new StringBuilder("-javaagent:").append(agentLibAndOption.lib);
 			if (!JakeUtilsString.isBlank(agentLibAndOption.options)) {
-				list.add("="+agentLibAndOption.options);
+				builder.append("="+agentLibAndOption.options);
 			}
+			list.add(builder.toString());
 		}
 		for (final String key : this.sytemProperties.keySet()) {
 			final String value = this.sytemProperties.get(key);
