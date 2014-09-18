@@ -4,3 +4,4 @@
 *.war
 *.ear
 /bin
+/.sonar
