@@ -2,13 +2,16 @@ package org.jake.java.test.jacoco;
 
 import java.io.File;
 
+import lombok.Data;
+
 import org.jake.JakeLocator;
 import org.jake.JakeLog;
 import org.jake.java.JakeBuildJava;
 import org.jake.java.JakeJavaProcess;
 import org.jake.java.test.junit.JakeUnit;
 
-public class Jakeoco {
+@Data
+public final class Jakeoco {
 
 	private final File agent;
 

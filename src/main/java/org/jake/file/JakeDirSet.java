@@ -13,13 +13,13 @@ import org.jake.utils.JakeUtilsIterable;
 
 public final class JakeDirSet implements Iterable<File> {
 
-	private final List<JakeDir> dirViews;
+	private final List<JakeDir> jakeDirs;
 
 	private JakeDirSet(List<JakeDir> dirs) {
 		if (dirs == null) {
 			throw new NullPointerException("dirs can't be null.");
 		}
-		this.dirViews = Collections.unmodifiableList(dirs);
+		this.jakeDirs = Collections.unmodifiableList(dirs);
 	}
 
 	public static final JakeDirSet of(Iterable<JakeDir> dirs) {
@@ -45,7 +45,7 @@ public final class JakeDirSet implements Iterable<File> {
 	}
 
 	public final JakeDirSet and(JakeDir ...dirViews) {
-		final List<JakeDir> list = new LinkedList<JakeDir>(this.dirViews);
+		final List<JakeDir> list = new LinkedList<JakeDir>(this.jakeDirs);
 		list.addAll(Arrays.asList(dirViews));
 		return new JakeDirSet(list);
 	}
@@ -59,9 +59,9 @@ public final class JakeDirSet implements Iterable<File> {
 	}
 
 	public final JakeDirSet and(JakeDirSet ...dirViewsList) {
-		final List<JakeDir> list = new LinkedList<JakeDir>(this.dirViews);
+		final List<JakeDir> list = new LinkedList<JakeDir>(this.jakeDirs);
 		for (final JakeDirSet views : dirViewsList) {
-			list.addAll(views.dirViews);
+			list.addAll(views.jakeDirs);
 		}
 		return new JakeDirSet(list);
 	}
@@ -78,7 +78,7 @@ public final class JakeDirSet implements Iterable<File> {
 
 	public int copyTo(File destinationDir) {
 		int count = 0;
-		for (final JakeDir dirView : dirViews) {
+		for (final JakeDir dirView : jakeDirs) {
 			if (dirView.exists()) {
 				count += dirView.copyTo(destinationDir);
 			}
@@ -88,7 +88,7 @@ public final class JakeDirSet implements Iterable<File> {
 
 	public JakeDirSet withFilter(JakeFileFilter filter) {
 		final List<JakeDir> list = new LinkedList<JakeDir>();
-		for (final JakeDir dirView : this.dirViews) {
+		for (final JakeDir dirView : this.jakeDirs) {
 			list.add(dirView.withFilter(filter));
 		}
 		return new JakeDirSet(list);
@@ -97,7 +97,7 @@ public final class JakeDirSet implements Iterable<File> {
 
 	public List<File> listFiles() {
 		final LinkedList<File> result = new LinkedList<File>();
-		for (final JakeDir dirView : this.dirViews) {
+		for (final JakeDir dirView : this.jakeDirs) {
 			if (dirView.root().exists()) {
 				result.addAll(dirView.listFiles());
 			}
@@ -106,12 +106,12 @@ public final class JakeDirSet implements Iterable<File> {
 	}
 
 	public List<JakeDir> listJakeDirs() {
-		return dirViews;
+		return jakeDirs;
 	}
 
 	public List<File> listRoots() {
 		final List<File> result = new LinkedList<File>();
-		for(final JakeDir dirView : dirViews) {
+		for(final JakeDir dirView : jakeDirs) {
 			result.add(dirView.root());
 		}
 		return result;
@@ -119,7 +119,7 @@ public final class JakeDirSet implements Iterable<File> {
 
 	public int countFiles(boolean includeFolder) {
 		int result = 0;
-		for (final JakeDir dirView : dirViews) {
+		for (final JakeDir dirView : jakeDirs) {
 			result += dirView.fileCount(includeFolder);
 		}
 		return result;
@@ -146,16 +146,28 @@ public final class JakeDirSet implements Iterable<File> {
 
 	@Override
 	public String toString() {
-		return this.dirViews.toString();
+		return this.jakeDirs.toString();
 	}
 
 	public boolean exist() {
-		for (final JakeDir jakeDir : this.dirViews) {
+		for (final JakeDir jakeDir : this.jakeDirs) {
 			if (jakeDir.exists()) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+
+	/**
+	 * Returns a List of all the base directories this set is made of.
+	 */
+	public List<File> baseDirs() {
+		final List<File> result = new LinkedList<File>();
+		for (final JakeDir dir : jakeDirs) {
+			result.add(dir.root());
+		}
+		return result;
 	}
 
 }

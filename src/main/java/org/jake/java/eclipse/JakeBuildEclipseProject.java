@@ -32,24 +32,24 @@ public class JakeBuildEclipseProject extends JakeBuildJar {
 	private DotClasspath cachedClasspath = null;
 
 	@Override
-	protected JakeDirSet sourceDirs() {
+	public JakeDirSet sourceDirs() {
 		final Sources.TestSegregator segregator = eclipseSmart ? Sources.SMART : Sources.ALL_PROD;
 		return dotClasspath().sourceDirs(baseDir(""), segregator).prodSources;
 	}
 
 	@Override
-	protected JakeDirSet testSourceDirs() {
+	public JakeDirSet testSourceDirs() {
 		final Sources.TestSegregator segregator = eclipseSmart ? Sources.SMART : Sources.ALL_PROD;
 		return dotClasspath().sourceDirs(baseDir(""), segregator).testSources;
 	}
 
 	@Override
-	protected JakeDirSet resourceDirs() {
+	public JakeDirSet resourceDirs() {
 		return JakeDirSet.empty();
 	}
 
 	@Override
-	protected JakeDirSet testResourceDirs() {
+	public JakeDirSet testResourceDirs() {
 		return JakeDirSet.empty();
 	}
 

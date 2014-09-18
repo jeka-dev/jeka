@@ -3,6 +3,7 @@ package org.jake;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.jake.file.JakeDir;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
+import org.jake.utils.JakeUtilsTime;
 
 /**
  * Base project builder defining some commons tasks and utilities
@@ -24,6 +26,8 @@ public class JakeBuildBase {
 
 	private File baseDirFile = JakeUtilsFile.workingDir();
 
+	private final String version = JakeUtilsTime.timestampSec();
+
 	protected JakeBuildBase() {
 	}
 
@@ -35,7 +39,7 @@ public class JakeBuildBase {
 	 * The current version for this project. Might look like "0.6.3".
 	 */
 	public String version() {
-		return null;
+		return version;
 	}
 
 	/**
@@ -176,7 +180,7 @@ public class JakeBuildBase {
 		public ActionDescription(Method method, String[] docs) {
 			super();
 			this.name = method.getName();
-			this.docs = docs;
+			this.docs = Arrays.copyOf(docs, docs.length);
 			this.declaringClass = method.getDeclaringClass();
 		}
 

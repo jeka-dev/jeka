@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.JakeException;
 import org.jake.JakeLocator;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeClassLoader;
@@ -33,10 +32,7 @@ class JUnit4TestLauncher {
 		} else {
 			process = jakeJavaProcess;
 		}
-		final int result = process.startAndWaitFor(JUnit4TestExecutor.class.getName(), args.toArray(new String[0]));
-		if (result != 0) {
-			throw new JakeException("Process returned in error.");
-		}
+		process.startAndWaitFor(JUnit4TestExecutor.class.getName(), args.toArray(new String[0]));
 		return (JakeTestSuiteResult) JakeUtilsIO.deserialize(file);
 	}
 
@@ -45,11 +41,11 @@ class JUnit4TestLauncher {
 	 * @param classes Non-empty <code>Iterable</code>.
 	 */
 	public static JakeTestSuiteResult launchInClassLoader(Iterable<Class> classes, boolean printEachTestOnConsole, JunitReportDetail reportDetail, File reportDir) {
-		JakeClassLoader classloader = JakeClassLoader.of(classes.iterator().next());
+		final JakeClassLoader classloader = JakeClassLoader.of(classes.iterator().next());
 		final Class[] classArray = JakeUtilsIterable.toArray(classes, Class.class);
 		if (needJakeInClasspath(printEachTestOnConsole, reportDetail)) {
-			classloader = classloader.and(JakeLocator.jakeJarFile());
-			//classloader.addEntry(JakeLocator.jakeJarFile());
+			//classloader = classloader.and(JakeLocator.jakeJarFile());
+			classloader.addEntry(JakeLocator.jakeJarFile());
 		}
 		return classloader.invokeStaticMethod(JUnit4TestExecutor.class.getName(), "launchInProcess", classArray, printEachTestOnConsole, reportDetail, reportDir);
 	}

@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.jake.JakeException;
 import org.jake.JakeLog;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIO.StreamGobbler;
@@ -106,8 +107,16 @@ public class JakeJavaProcess {
 				this.agents, this.options, this.workingDir);
 	}
 
+	public JakeJavaProcess withClasspath(File ...files) {
+		return withClasspath(JakeClasspath.of(files));
+	}
+
 	public JakeJavaProcess andClasspath(JakeClasspath classpath) {
 		return withClasspath(this.classpath.and(classpath));
+	}
+
+	public JakeJavaProcess andClasspath(File ...files) {
+		return withClasspath(this.classpath.and(files));
 	}
 
 
@@ -124,13 +133,14 @@ public class JakeJavaProcess {
 		return this.javaDir.getAbsolutePath()+ File.separator + "java";
 	}
 
-	public int startAndWaitFor(String mainClassName, String ...arguments) {
+	public void startAndWaitFor(String mainClassName, String ...arguments) {
 		final List<String> command = new LinkedList<String>();
 		command.add(runningJavaCommand());
 		command.addAll(options());
 		command.add(mainClassName);
 		command.addAll(Arrays.asList(arguments));
 		JakeLog.startAndNextLine("Starting java program : " + command.toString());
+		final int result;
 		try {
 			final Process process = processBuilder(command).start();
 			final StreamGobbler outputStreamGobbler =
@@ -140,11 +150,14 @@ public class JakeJavaProcess {
 			process.waitFor();
 			outputStreamGobbler.stop();
 			errorStreamGobbler.stop();
-			return process.exitValue();
+			result = process.exitValue();
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		} finally {
 			JakeLog.done();
+		}
+		if (result != 0) {
+			throw new JakeException("Process terminated in error : exit value =" + result + ".");
 		}
 	}
 

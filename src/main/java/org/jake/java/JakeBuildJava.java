@@ -105,17 +105,29 @@ public class JakeBuildJava extends JakeBuildBase {
 
 	// ----------------------- Overridable sub-methods ---------------------
 
+
+	public String sourceEncoding() {
+		return "UTF-8";
+	}
+
+	/**
+	 * Returns the location of production source code that has not been edited manually (not generated).
+	 */
+	public JakeDirSet editedSourceDirs() {
+		return JakeDirSet.of(baseDir("src/main/java"));
+	}
+
 	/**
 	 * Returns location of production source code.
 	 */
-	protected JakeDirSet sourceDirs() {
-		return JakeDirSet.of(baseDir("src/main/java"), generatedSourceDir());
+	public JakeDirSet sourceDirs() {
+		return editedSourceDirs().and(generatedSourceDir());
 	}
 
 	/**
 	 * Returns location of production resources.
 	 */
-	protected JakeDirSet resourceDirs() {
+	public JakeDirSet resourceDirs() {
 		return sourceDirs().withFilter(RESOURCE_FILTER).and(
 				baseDir("src/main/resources"), generatedSourceDir());
 	}
@@ -123,14 +135,14 @@ public class JakeBuildJava extends JakeBuildBase {
 	/**
 	 * Returns location of test source code.
 	 */
-	protected JakeDirSet testSourceDirs() {
+	public JakeDirSet testSourceDirs() {
 		return JakeDirSet.of(baseDir().sub("src/test/java"));
 	}
 
 	/**
 	 * Returns location of test resources.
 	 */
-	protected JakeDirSet testResourceDirs() {
+	public JakeDirSet testResourceDirs() {
 		return JakeDirSet.of(baseDir("src/test/resources")).and(
 				testSourceDirs().withFilter(RESOURCE_FILTER));
 	}
@@ -138,28 +150,28 @@ public class JakeBuildJava extends JakeBuildBase {
 	/**
 	 * Returns location of generated sources.
 	 */
-	protected File generatedSourceDir() {
-		return ouputDir("ganerated-sources/java");
+	public File generatedSourceDir() {
+		return ouputDir("generated-sources/java");
 	}
 
 	/**
 	 * Returns location of generated resources.
 	 */
-	protected File generatedResourceDir() {
+	public File generatedResourceDir() {
 		return ouputDir("generated-resources");
 	}
 
 	/**
 	 * Returns location of generated resources for tests.
 	 */
-	protected File generatedTestResourceDir() {
+	public File generatedTestResourceDir() {
 		return ouputDir("generated-test-resources");
 	}
 
 	/**
 	 * Returns location where the java production classes are compiled.
 	 */
-	protected File classDir() {
+	public File classDir() {
 		return ouputDir().sub("classes").createIfNotExist().root();
 	}
 
@@ -173,7 +185,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	/**
 	 * Returns location where the java production classes are compiled.
 	 */
-	protected File testClassDir() {
+	public File testClassDir() {
 		return ouputDir().sub("testClasses").createIfNotExist().root();
 	}
 

@@ -1,13 +1,18 @@
 
 import java.io.File;
+import java.util.zip.Deflater;
 
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
 import org.jake.file.utils.JakeUtilsFile;
 import org.jake.java.JakeBuildJar;
-import org.jake.utils.JakeUtilsTime;
 
 public class Build extends JakeBuildJar {
+
+	@Override
+	protected int zipLevel() {
+		return Deflater.DEFAULT_COMPRESSION;
+	}
 
 	// Just to run directly the whole build bypassing the bootstrap mechanism.
 	// (Was needed in first place to build Jake with itself).
@@ -20,7 +25,7 @@ public class Build extends JakeBuildJar {
 	@Override
 	protected void generateResources() {
 		final File versionFile = new File(generatedResourceDir(),"org/jake/version.txt");
-		JakeUtilsFile.writeString(versionFile, JakeUtilsTime.timestampSec(), false);
+		JakeUtilsFile.writeString(versionFile, version(), false);
 	}
 
 	// Create the whole distribution

@@ -77,7 +77,7 @@ public abstract class JakeFileFilter {
 
 		public IncludeFilter(AntPattern[] antPatterns) {
 			super();
-			this.antPatterns = antPatterns;
+			this.antPatterns = Arrays.copyOf(antPatterns, antPatterns.length);
 		}
 
 		@Override
@@ -104,7 +104,7 @@ public abstract class JakeFileFilter {
 
 		public ExcludeFilter(AntPattern[] antPatterns) {
 			super();
-			this.antPatterns = antPatterns;
+			this.antPatterns = Arrays.copyOf(antPatterns, antPatterns.length);
 		}
 
 		@Override
