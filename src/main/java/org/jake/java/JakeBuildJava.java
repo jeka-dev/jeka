@@ -110,6 +110,14 @@ public class JakeBuildJava extends JakeBuildBase {
 		return "UTF-8";
 	}
 
+	public String sourceJavaVersion() {
+		return JdkUtils.runningJavaVersion();
+	}
+
+	public String targetJavaVersion() {
+		return sourceJavaVersion();
+	}
+
 	/**
 	 * Returns the location of production source code that has not been edited manually (not generated).
 	 */
@@ -244,7 +252,7 @@ public class JakeBuildJava extends JakeBuildBase {
 			Iterable<File> classpath) {
 		return JakeJavaCompiler.ofOutput(outputDir)
 				.addSourceFiles(sources)
-				.setClasspath(classpath);
+				.setClasspath(classpath).setSourceVersion(this.sourceJavaVersion()).setTargetVersion(this.targetJavaVersion());
 	}
 
 	protected void processResources() {

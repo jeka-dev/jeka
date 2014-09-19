@@ -78,7 +78,7 @@ public class JakeJavadoc {
 			list.add("-quiet");
 		}
 		list.add("-docletpath");
-		list.add(InternalUtils.toolsJar().getPath());
+		list.add(JdkUtils.toolsJar().getPath());
 		if (classpath != null && classpath.iterator().hasNext()) {
 			list.add("-classpath");
 			list.add(JakeUtilsFile.toPathString(this.classpath, ";"));
@@ -113,7 +113,7 @@ public class JakeJavadoc {
 		final JakeClassLoader classLoader = JakeClassLoader.current();
 		Class<?> mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
 		if (mainClass == null) {
-			classLoader.addEntry(InternalUtils.toolsJar());
+			classLoader.addEntry(JdkUtils.toolsJar());
 			mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
 			if (mainClass == null) {
 				throw new RuntimeException("It seems that you are running a JRE instead of a JDK, please run Jake using a JDK.");

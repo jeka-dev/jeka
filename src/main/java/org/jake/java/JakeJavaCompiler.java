@@ -16,10 +16,21 @@ import org.jake.JakeLog;
 import org.jake.file.JakeDir;
 import org.jake.file.JakeDirSet;
 import org.jake.file.JakeFileFilter;
-import org.jake.file.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsString;
 
 
 public final class JakeJavaCompiler {
+
+	public static final String V1_3 = "1.3";
+
+	public static final String V1_4 = "1.4";
+
+	public static final String V5 = "5";
+
+	public static final String V6 = "6";
+
+	public static final String V7 = "7";
+
 
 	public static final JakeFileFilter JAVA_SOURCE_ONLY_FILTER = JakeFileFilter
 			.include("**/*.java");
@@ -57,8 +68,20 @@ public final class JakeJavaCompiler {
 
 	public JakeJavaCompiler setClasspath(Iterable<File> files) {
 		options.add("-cp");
-		this.classpath = JakeUtilsFile.toPathString(files, ";");
+		this.classpath = JakeClasspath.of(files).toString();
 		options.add(this.classpath);
+		return this;
+	}
+
+	public JakeJavaCompiler setSourceVersion(String version) {
+		options.add("-source");
+		options.add(version);
+		return this;
+	}
+
+	public JakeJavaCompiler setTargetVersion(String version) {
+		options.add("-target");
+		options.add(version);
 		return this;
 	}
 
@@ -90,9 +113,7 @@ public final class JakeJavaCompiler {
 				fileManager.getJavaFileObjectsFromFiles(this.javaSourceFiles);
 		final CompilationTask task = compiler.getTask(new PrintWriter(JakeLog.warnStream()), null, null, options, null, javaFileObjects);
 		JakeLog.startAndNextLine(("Compiling " + javaSourceFiles.size()
-				+ " source files to " + outputDir.getPath()));
-		JakeLog.info("using classpath [" + classpath + "]" );
-
+				+ " source files to " + outputDir.getPath()) + " using options : " + JakeUtilsString.toString(options, " "));
 		final boolean result = task.call();
 		JakeLog.done();
 		if (!result) {
@@ -106,7 +127,6 @@ public final class JakeJavaCompiler {
 			throw new JakeException("Compilation failed.");
 		}
 	}
-
 
 	private static JavaCompiler getDefaultOrFail() {
 		final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();

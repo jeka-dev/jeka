@@ -17,7 +17,7 @@ import org.jake.java.JakeJavaProcess;
 
 
 @Value
-@Builder(fluent=true, builderClassName="Builder")
+@Builder(builderClassName="Builder", fluent=true)
 public class JakeSonar {
 
 	public enum AnalyseMode {

@@ -3,7 +3,7 @@ package org.jake.java;
 import java.io.File;
 import java.io.IOException;
 
-class InternalUtils {
+class JdkUtils {
 
 	public static File toolsJar() {
 		final String jdkLocation = System.getProperty("java.home");
@@ -13,6 +13,12 @@ class InternalUtils {
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public static String runningJavaVersion() {
+		final String fullVersion = System.getProperty("java.version");
+		final int index = fullVersion.lastIndexOf(".");
+		return fullVersion.substring(0, index);
 	}
 
 }
