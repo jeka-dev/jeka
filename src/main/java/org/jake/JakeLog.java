@@ -77,6 +77,12 @@ public class JakeLog {
 		info(Arrays.asList(lines));
 	}
 
+	public static void warn(Iterable<String> lines) {
+		for (final String line : lines) {
+			warnWriter.println(line);
+		}
+	}
+
 
 	public static void warn(String message) {
 		flush();

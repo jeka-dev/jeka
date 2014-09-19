@@ -72,8 +72,8 @@ public final class JakeUnit {
 	}
 
 
-	public static JakeUnit ofClasspath(File file, Iterable<File> files) {
-		return of(JakeClasspath.of(file).and(files));
+	public static JakeUnit ofClasspath(File binDir, Iterable<File> classpathEntries) {
+		return of(JakeClasspath.of(binDir).and(classpathEntries));
 	}
 
 	public static JakeUnit of(JakeClasspath classpath) {
@@ -167,7 +167,11 @@ public final class JakeUnit {
 			throw new IllegalStateException("No Junit found on test classpath.");
 		}
 
-		JakeLog.info(result.toStrings());
+		if (result.failureCount() > 0) {
+			JakeLog.warn(result.toStrings());
+		} else {
+			JakeLog.info(result.toStrings());
+		}
 		if (!JakeOptions.isVerbose() && result.failureCount() > 0) {
 			JakeLog.info("Launch Jake in verbose mode to display failure stack traces in console.");
 		}
