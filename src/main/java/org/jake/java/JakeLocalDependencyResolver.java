@@ -124,10 +124,10 @@ JakeJavaDependencyResolver {
 	}
 
 	/**
-	 * @see org.jake.java.JakeJavaDependencyResolver#compile()
+	 * @see org.jake.java.JakeJavaDependencyResolver#compileScope()
 	 */
 	@Override
-	public JakeClasspath compile() {
+	public JakeClasspath compileScope() {
 		return compileAndRuntimeLibs.and(compileOnlyLibs);
 	}
 
@@ -135,16 +135,16 @@ JakeJavaDependencyResolver {
 	 * @see org.jake.java.JakeJavaDependencyResolver#testLibs(java.io.File)
 	 */
 	@Override
-	public JakeClasspath test() {
+	public JakeClasspath testScope() {
 		return compileAndRuntimeLibs.and(runtimeOnlyLibs).and(testLibs)
 				.and(compileOnlyLibs);
 	}
 
 	/**
-	 * @see org.jake.java.JakeJavaDependencyResolver#runtime()
+	 * @see org.jake.java.JakeJavaDependencyResolver#runtimeScope()
 	 */
 	@Override
-	public JakeClasspath runtime() {
+	public JakeClasspath runtimeScope() {
 		return compileAndRuntimeLibs.and(runtimeOnlyLibs);
 	}
 

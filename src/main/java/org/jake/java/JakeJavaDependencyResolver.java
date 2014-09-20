@@ -17,21 +17,21 @@ public abstract class JakeJavaDependencyResolver {
 	/**
 	 * All libraries finally used to compile the production code.
 	 */
-	public abstract JakeClasspath compile();
+	public abstract JakeClasspath compileScope();
 
 	/**
 	 * All libraries finally used both for compile and run test.
 	 */
-	public abstract JakeClasspath test();
+	public abstract JakeClasspath testScope();
 
 	/**
 	 * All libraries finally to be embedded in deliveries (as war or fat jar
 	 * files). It contains generally dependencies needed for compilation plus
 	 * extra runtime-only dependencies. So that's the general rule that libs
-	 * contained in {@link #compile()} are contained in {@link #runtime()} as
+	 * contained in {@link #compileScope()} are contained in {@link #runtimeScope()} as
 	 * well.
 	 */
-	public abstract JakeClasspath runtime();
+	public abstract JakeClasspath runtimeScope();
 
 	public JakeJavaDependencyResolver merge(JakeJavaDependencyResolver other,
 			File otherClasses, File otherTestClasses) {
@@ -42,9 +42,9 @@ public abstract class JakeJavaDependencyResolver {
 	public List<String> toStrings() {
 		final List<String> result = new LinkedList<String>();
 		result.add(this.getClass().getName());
-		final JakeClasspath compileLibs = compile();
-		final JakeClasspath runtimeLibs = runtime();
-		final JakeClasspath testLibs = test();
+		final JakeClasspath compileLibs = compileScope();
+		final JakeClasspath runtimeLibs = runtimeScope();
+		final JakeClasspath testLibs = testScope();
 		result.add("compile (" + compileLibs.entries().size() + " libs): "
 				+ compileLibs);
 		result.add("runtime (" + runtimeLibs.entries().size() + " libs): "
@@ -54,7 +54,7 @@ public abstract class JakeJavaDependencyResolver {
 	}
 
 	public boolean isEmpty() {
-		return compile().isEmpty() && test().isEmpty() && runtime().isEmpty();
+		return compileScope().isEmpty() && testScope().isEmpty() && runtimeScope().isEmpty();
 	}
 
 	public static JakeJavaDependencyResolver findByClassName(String simpleOrFullClassName) {
@@ -101,18 +101,18 @@ public abstract class JakeJavaDependencyResolver {
 		}
 
 		@Override
-		public JakeClasspath compile() {
-			return base.compile().and(otherClasses).and(other.compile());
+		public JakeClasspath compileScope() {
+			return base.compileScope().and(otherClasses).and(other.compileScope());
 		}
 
 		@Override
-		public JakeClasspath test() {
-			return base.test().and(otherTestClasses).and(other.test());
+		public JakeClasspath testScope() {
+			return base.testScope().and(otherTestClasses).and(other.testScope());
 		}
 
 		@Override
-		public JakeClasspath runtime() {
-			return base.runtime().and(other.runtime());
+		public JakeClasspath runtimeScope() {
+			return base.runtimeScope().and(other.runtimeScope());
 
 		}
 

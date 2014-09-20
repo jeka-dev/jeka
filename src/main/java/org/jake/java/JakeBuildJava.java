@@ -70,7 +70,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	public void compile() {
 		JakeLog.startAndNextLine("Processing production code and resources");
 		generateSources();
-		compiler(sourceDirs(), classDir(), this.deps().compile()).compileOrFail();;
+		compiler(sourceDirs(), classDir(), deps().compileScope()).compile();;
 		generateResources();
 		processResources();
 		JakeLog.done();
@@ -91,7 +91,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	@JakeDoc("Produce the Javadoc.")
 	public void javadoc() {
 		JakeJavadoc.of(this.sourceDirs())
-		.withClasspath(this.deps().compile())
+		.withClasspath(this.deps().compileScope())
 		.processAndZip(ouputDir(projectName() + "-javadoc"), ouputDir(projectName() + "-javadoc.zip"));
 	}
 
@@ -251,8 +251,10 @@ public class JakeBuildJava extends JakeBuildBase {
 	protected JakeJavaCompiler compiler(JakeDirSet sources, File outputDir,
 			Iterable<File> classpath) {
 		return JakeJavaCompiler.ofOutput(outputDir)
-				.addSourceFiles(sources)
-				.setClasspath(classpath).setSourceVersion(this.sourceJavaVersion()).setTargetVersion(this.targetJavaVersion());
+				.andSources(sources)
+				.withClasspath(classpath)
+				.withSourceVersion(this.sourceJavaVersion())
+				.withTargetVersion(this.targetJavaVersion());
 	}
 
 	protected void processResources() {
@@ -260,13 +262,13 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	protected JakeUnit jakeUnit() {
-		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.deps().test());
+		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.deps().testScope());
 		return JakeUnit.of(classpath).withReport(junitReportDetail, new File(testReportDir(),"junit"));
 	}
 
 	protected void compileUnitTests() {
-		final Iterable<File> classpath =  this.deps().test().andAtHead(classDir());
-		compiler(testSourceDirs(), testClassDir(), classpath).compileOrFail();
+		final Iterable<File> classpath =  this.deps().testScope().andHead(classDir());
+		compiler(testSourceDirs(), testClassDir(), classpath).compile();
 	}
 
 	protected void processUnitTestResources() {

@@ -37,8 +37,8 @@ public class DotClasspathTest {
 		final List<Lib> libs = sample().libs(new File(structure(),"containers"), structure(), Lib.SMART_LIB);
 		final JakeJavaDependencyResolver resolver = Lib.toDependencyResolver(libs);
 		assertEquals(6, libs.size());
-		System.out.println(resolver.test());
-		assertEquals(6, resolver.test().entries().size());
+		System.out.println(resolver.testScope());
+		assertEquals(6, resolver.testScope().entries().size());
 	}
 
 	private DotClasspath sample() throws URISyntaxException {

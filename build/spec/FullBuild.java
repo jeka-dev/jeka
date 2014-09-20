@@ -1,4 +1,8 @@
+import java.io.File;
+
 import org.jake.JakeOptions;
+import org.jake.file.JakeDirSet;
+import org.jake.java.JakeJavaCompiler;
 import org.jake.java.test.jacoco.Jakeoco;
 import org.jake.java.test.junit.JakeUnit;
 import org.jake.verify.sonar.JakeSonar;
@@ -14,6 +18,12 @@ public class FullBuild extends Build {
 
 	public void sonar() {
 		JakeSonar.of(this).launch();
+	}
+
+	@Override
+	protected JakeJavaCompiler compiler(JakeDirSet sources, File outputDir,
+			Iterable<File> classpath) {
+		return super.compiler(sources, outputDir, classpath).fork();
 	}
 
 	@Override

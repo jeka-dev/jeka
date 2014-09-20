@@ -76,15 +76,15 @@ public class JakeClasspath implements Iterable<File> {
 	/**
 	 * @see #andAtHead(Iterable).
 	 */
-	public JakeClasspath andAtHead(File ...entries) {
-		return andAtHead(JakeClasspath.of(entries));
+	public JakeClasspath andHead(File ...entries) {
+		return andHead(JakeClasspath.of(entries));
 	}
 
 	/**
 	 * Returns a <code>JakeClasspath</code> made of, in the order, the specified entries plus the entries of this one.
 	 */
 	@SuppressWarnings("unchecked")
-	public JakeClasspath andAtHead(Iterable<File> otherEntries) {
+	public JakeClasspath andHead(Iterable<File> otherEntries) {
 		return new JakeClasspath(JakeUtilsIterable.chain(otherEntries, this.entries));
 	}
 

@@ -46,7 +46,7 @@ public class JakeBuildBase {
 	 * The string used to suffix produced artefacts name to indicate version.
 	 * Might look like "-0.6.3".
 	 */
-	protected String versionSuffix() {
+	public String versionSuffix() {
 		if (version() == null || version().isEmpty()) {
 			return "";
 		}

@@ -118,7 +118,7 @@ public final class JakeUtilsFile {
 		}
 		try {
 			if (JakeOptions.isVerbose()) {
-				JakeLog.info("Coping file " + from.getAbsolutePath());
+				JakeLog.info("Coping file " + from.getAbsolutePath() + " to " + toFile.getAbsolutePath());
 			}
 			final InputStream in = new FileInputStream(from);
 			if (!toFile.getParentFile().exists()) {

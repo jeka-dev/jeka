@@ -153,12 +153,11 @@ public class JakeJavaProcess {
 			result = process.exitValue();
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
-		} finally {
-			JakeLog.done();
 		}
 		if (result != 0) {
-			throw new JakeException("Process terminated in error : exit value =" + result + ".");
+			throw new JakeException("Process terminated in error : exit value = " + result + ".");
 		}
+		JakeLog.done();
 	}
 
 	private List<String> options() {

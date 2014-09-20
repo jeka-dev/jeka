@@ -91,6 +91,12 @@ public class JakeTestSuiteResult implements Serializable {
 		} else {
 			lines.add(toString());
 		}
+		for (final TestCaseResult testCaseResult : this.testCaseResults) {
+			if (testCaseResult instanceof Failure) {
+				final Failure failure = (Failure) testCaseResult;
+				lines.add(failure.getTestName() + "." + failure.getTestName() + " : " + failure.getExceptionDescription().message);
+			}
+		}
 		return lines;
 	}
 

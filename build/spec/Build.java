@@ -37,8 +37,8 @@ public class Build extends JakeBuildJar {
 		JakeLog.start("Creating distrib " + distripZipFile.getPath());
 		JakeUtilsFile.copyDir(baseDir("src/main/dist"), distribDir, null, true);
 		final File jarFile = ouputDir(jarName()+".jar");
-		JakeUtilsFile.copyFileToDir(jarFile, distribDir);
-		JakeUtilsFile.copyFileToDir(ouputDir(jarName() + "-sources.jar"), distribDir);
+		JakeUtilsFile.copyFile(jarFile, new File(distribDir,"jake.jar"));
+		JakeUtilsFile.copyFile(ouputDir(jarName() + "-sources.jar"), new File(distribDir,"jake-source.jar"));
 		JakeUtilsFile.zipDir(distripZipFile, zipLevel(), distribDir);
 		JakeLog.done();
 	}

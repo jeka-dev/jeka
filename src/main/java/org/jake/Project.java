@@ -64,9 +64,10 @@ class Project {
 		displayHead("Compiling build classes for project : " + projectRelativePath);
 		final long start = System.nanoTime();
 		JakeJavaCompiler.ofOutput(buildBinDir)
-		.addSourceFiles(buildSource)
-		.setClasspath(classpath)
-		.compileOrFail();
+		.andSources(buildSource)
+		.withClasspath(classpath)
+		.failOnError(true)
+		.compile();
 		JakeLog.info("Done in " + JakeUtilsTime.durationInSeconds(start) + " seconds.", "");
 		return buildBinDir;
 	}
@@ -81,7 +82,7 @@ class Project {
 		if (result) {
 			JakeLog.info("--> Project " + projectBaseDir.getAbsolutePath() + " built with success in " + duration + " seconds.");
 		} else {
-			JakeLog.info("--> Project " + projectBaseDir.getAbsolutePath() + " failed after " + duration + " seconds.");
+			JakeLog.error("--> Project " + projectBaseDir.getAbsolutePath() + " failed after " + duration + " seconds.");
 		}
 		return result;
 	}
@@ -157,8 +158,10 @@ class Project {
 				continue;
 			}
 			final long start = System.nanoTime();
+			boolean success = false;
 			try {
 				method.invoke(build);
+				success = true;
 			} catch (final SecurityException e) {
 				throw new RuntimeException(e);
 			} catch (final IllegalAccessException e) {
@@ -175,7 +178,11 @@ class Project {
 				}
 			} finally {
 				JakeLog.nextLine();
-				JakeLog.info("-> Method " + methodName + " executed in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
+				if (success) {
+					JakeLog.info("-> Method " + methodName + " executed in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
+				} else {
+					JakeLog.error("-> Method " + methodName + " failed in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
+				}
 			}
 			JakeLog.flush();
 			JakeLog.nextLine();
