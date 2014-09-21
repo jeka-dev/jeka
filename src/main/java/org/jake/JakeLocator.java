@@ -2,7 +2,7 @@ package org.jake;
 
 import java.io.File;
 
-public class JakeLocator {
+public final class JakeLocator {
 
 	// cache
 	private static File JAKE_JAR_FILE;
