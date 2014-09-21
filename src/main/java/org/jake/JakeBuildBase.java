@@ -8,8 +8,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.file.JakeDir;
-import org.jake.file.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
 import org.jake.utils.JakeUtilsTime;

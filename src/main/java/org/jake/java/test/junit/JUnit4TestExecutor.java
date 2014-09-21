@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import org.jake.java.JakeClassLoader;
+import org.jake.JakeClassLoader;
 import org.jake.java.test.junit.JakeUnit.JunitReportDetail;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsTime;

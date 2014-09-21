@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jake.file;
+package org.jake;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ import org.jake.utils.JakeUtilsString;
  * <a href="http://ant.apache.org">Apache Ant</a> and
  * <a href="https://github.com/spring-projects/spring-framework">Spring Framework</a></i>
  */
-class AntPattern  {
+final class AntPattern  {
 
 	private static final char PATH_SEPARATOR_CHAR = '/';
 

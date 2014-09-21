@@ -7,7 +7,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
-import org.jake.file.JakeDirSet;
+import org.jake.JakeDirSet;
 import org.jake.java.JakeJavaDependencyResolver;
 import org.junit.Test;
 

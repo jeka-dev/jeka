@@ -1,4 +1,4 @@
-package org.jake.file.utils;
+package org.jake.utils;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
@@ -19,10 +20,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
 
-import org.jake.JakeLog;
-import org.jake.JakeOptions;
-import org.jake.utils.JakeUtilsIO;
-import org.jake.utils.JakeUtilsString;
+//import org.jake.JakeLog;
+//import org.jake.JakeOptions;
 
 public final class JakeUtilsFile {
 
@@ -58,6 +57,11 @@ public final class JakeUtilsFile {
 
 	public static int copyDir(File source, File targetDir, FileFilter filter,
 			boolean copyEmptyDir) {
+		return copyDir(source, targetDir, filter, copyEmptyDir, false, null);
+	}
+
+	public static int copyDir(File source, File targetDir, FileFilter filter,
+			boolean copyEmptyDir, boolean report, PrintStream reportStream) {
 		if (filter == null) {
 			filter = JakeFileFilters.acceptAll();
 		}
@@ -85,7 +89,7 @@ public final class JakeUtilsFile {
 			if (child.isFile()) {
 				if (filter.accept(child)) {
 					final File targetFile = new File(targetDir, child.getName());
-					copyFile(child, targetFile);
+					copyFile(child, targetFile, report, reportStream);
 					count++;
 				}
 			} else {
@@ -94,7 +98,7 @@ public final class JakeUtilsFile {
 					subdir.mkdirs();
 				}
 				final int subCount = copyDir(child, subdir, filter,
-						copyEmptyDir);
+						copyEmptyDir, report, reportStream);
 				count = count + subCount;
 			}
 
@@ -102,12 +106,16 @@ public final class JakeUtilsFile {
 		return count;
 	}
 
-	public static void copyFileToDir(File from, File toDir) {
+	public static void copyFileToDir(File from, File toDir, boolean report, PrintStream reportStream) {
 		final File to = new File(toDir, from.getName());
-		copyFile(from, to);
+		copyFile(from, to, report, reportStream);
 	}
 
 	public static void copyFile(File from, File toFile) {
+		copyFile(from, toFile, false, null);
+	}
+
+	public static void copyFile(File from, File toFile, boolean report, PrintStream reportStream) {
 		if (!from.exists()) {
 			throw new IllegalArgumentException("File " + from.getPath()
 					+ " does not exist.");
@@ -117,8 +125,8 @@ public final class JakeUtilsFile {
 					+ " is a directory. Should be a file.");
 		}
 		try {
-			if (JakeOptions.isVerbose()) {
-				JakeLog.info("Coping file " + from.getAbsolutePath() + " to " + toFile.getAbsolutePath());
+			if (report) {
+				reportStream.println("Coping file " + from.getAbsolutePath() + " to " + toFile.getAbsolutePath());
 			}
 			final InputStream in = new FileInputStream(from);
 			if (!toFile.getParentFile().exists()) {

@@ -3,11 +3,11 @@ package org.jake.java.eclipse;
 import java.io.File;
 import java.util.List;
 
+import org.jake.JakeDirSet;
 import org.jake.JakeLocator;
 import org.jake.JakeOption;
-import org.jake.file.JakeDirSet;
-import org.jake.java.JakeBuildJar;
 import org.jake.java.JakeJavaDependencyResolver;
+import org.jake.java.build.JakeBuildJar;
 
 public class JakeBuildEclipseProject extends JakeBuildJar {
 

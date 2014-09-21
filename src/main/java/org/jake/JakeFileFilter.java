@@ -1,10 +1,10 @@
-package org.jake.file;
+package org.jake;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
 
-import org.jake.file.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsFile;
 
 public abstract class JakeFileFilter {
 

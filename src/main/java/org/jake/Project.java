@@ -5,12 +5,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.jake.file.JakeDir;
-import org.jake.file.utils.JakeUtilsFile;
-import org.jake.java.JakeBuildJar;
-import org.jake.java.JakeClassLoader;
-import org.jake.java.JakeJavaCompiler;
+import org.jake.java.build.JakeBuildJar;
 import org.jake.java.eclipse.JakeBuildEclipseProject;
+import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
 import org.jake.utils.JakeUtilsTime;

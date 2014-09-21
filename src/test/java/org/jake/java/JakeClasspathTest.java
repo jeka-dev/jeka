@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.net.URL;
 
+import org.jake.JakeClasspath;
 import org.junit.Test;
 
 public class JakeClasspathTest {

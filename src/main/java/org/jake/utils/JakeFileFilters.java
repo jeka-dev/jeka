@@ -1,4 +1,4 @@
-package org.jake.file.utils;
+package org.jake.utils;
 
 import java.io.File;
 import java.io.FileFilter;

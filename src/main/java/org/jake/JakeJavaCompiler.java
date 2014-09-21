@@ -1,4 +1,4 @@
-package org.jake.java;
+package org.jake;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -17,12 +17,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
-import org.jake.JakeException;
-import org.jake.JakeLog;
-import org.jake.JakeProcess;
-import org.jake.file.JakeDir;
-import org.jake.file.JakeDirSet;
-import org.jake.file.JakeFileFilter;
 import org.jake.utils.JakeUtilsString;
 
 @Value

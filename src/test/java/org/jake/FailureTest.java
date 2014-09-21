@@ -1,4 +1,4 @@
-package org.jake.file;
+package org.jake;
 
 import org.junit.Assert;
 import org.junit.Ignore;

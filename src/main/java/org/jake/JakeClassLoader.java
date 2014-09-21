@@ -1,4 +1,4 @@
-package org.jake.java;
+package org.jake;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -15,8 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jake.JakeLog;
-import org.jake.file.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
@@ -27,7 +26,7 @@ import org.jake.utils.JakeUtilsReflect;
  * 
  * @author Djeang
  */
-public class JakeClassLoader {
+public final class JakeClassLoader {
 
 	/**
 	 * A {@link FileFilter} accepting only .class files.

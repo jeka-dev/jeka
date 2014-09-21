@@ -1,13 +1,14 @@
-package org.jake.java;
+package org.jake.java.build;
 
 import java.io.File;
 import java.util.zip.Deflater;
 
+import org.jake.JakeDirSet;
 import org.jake.JakeDoc;
 import org.jake.JakeLog;
-import org.jake.file.JakeDirSet;
-import org.jake.file.JakeZip;
-import org.jake.file.utils.JakeUtilsFile;
+import org.jake.JakeZip;
+import org.jake.java.JakeJarModule;
+import org.jake.utils.JakeUtilsFile;
 
 public class JakeBuildJar extends JakeBuildJava implements JakeJarModule {
 

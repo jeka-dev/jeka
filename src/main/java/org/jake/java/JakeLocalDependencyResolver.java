@@ -3,8 +3,9 @@ package org.jake.java;
 import java.io.File;
 import java.util.Arrays;
 
-import org.jake.file.JakeDir;
-import org.jake.file.JakeDirSet;
+import org.jake.JakeClasspath;
+import org.jake.JakeDir;
+import org.jake.JakeDirSet;
 
 public final class JakeLocalDependencyResolver extends
 JakeJavaDependencyResolver {

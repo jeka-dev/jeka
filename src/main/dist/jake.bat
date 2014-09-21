@@ -7,7 +7,7 @@ SET JAKE_HOME=%~dp0
 if "%JAVA_HOME%" == "" set "JAVA_CMD=java" 
 if not "%JAVA_HOME%" == "" set "JAVA_CMD=%JAVA_HOME%\bin\java"
 
-set "COMMAND="%JAVA_CMD%" %JAKE_JVM_OPTS% -cp "%JAKE_HOME%libs\ext\*;%JAKE_HOME%jake.jar" org.jake.JakeLauncher %*"
+set "COMMAND="%JAVA_CMD%" %JAKE_JVM_OPTS% -cp "%JAKE_HOME%libs\ext\*;%JAKE_HOME%jake.jar" org.jake.JakeMain %*"
 if not "%JAKE_ECHO_CMD%" == "" (
 	@echo on
 	echo %COMMAND%

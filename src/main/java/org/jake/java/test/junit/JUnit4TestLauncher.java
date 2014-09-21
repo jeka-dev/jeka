@@ -4,12 +4,12 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jake.JakeClassLoader;
+import org.jake.JakeClasspath;
 import org.jake.JakeLocator;
-import org.jake.file.utils.JakeUtilsFile;
-import org.jake.java.JakeClassLoader;
-import org.jake.java.JakeClasspath;
 import org.jake.java.JakeJavaProcess;
 import org.jake.java.test.junit.JakeUnit.JunitReportDetail;
+import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 

@@ -1,6 +1,6 @@
 package org.jake.java.eclipse;
 
-import org.jake.file.JakeDirSet;
+import org.jake.JakeDirSet;
 
 class Sources {
 

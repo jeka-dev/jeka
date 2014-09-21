@@ -8,14 +8,15 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jake.JakeClassLoader;
+import org.jake.JakeDirSet;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
-import org.jake.file.JakeDirSet;
-import org.jake.file.JakeZip;
-import org.jake.file.utils.JakeUtilsFile;
+import org.jake.JakeZip;
+import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsReflect;
 
-public class JakeJavadoc {
+public final class JakeJavadoc {
 
 	private static final String JAVADOC_MAIN_CLASS_NAME = "com.sun.tools.javadoc.Main";
 
@@ -78,7 +79,7 @@ public class JakeJavadoc {
 			list.add("-quiet");
 		}
 		list.add("-docletpath");
-		list.add(JdkUtils.toolsJar().getPath());
+		list.add(JakeUtilsJdk.toolsJar().getPath());
 		if (classpath != null && classpath.iterator().hasNext()) {
 			list.add("-classpath");
 			list.add(JakeUtilsFile.toPathString(this.classpath, ";"));
@@ -113,7 +114,7 @@ public class JakeJavadoc {
 		final JakeClassLoader classLoader = JakeClassLoader.current();
 		Class<?> mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
 		if (mainClass == null) {
-			classLoader.addEntry(JdkUtils.toolsJar());
+			classLoader.addEntry(JakeUtilsJdk.toolsJar());
 			mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
 			if (mainClass == null) {
 				throw new RuntimeException("It seems that you are running a JRE instead of a JDK, please run Jake using a JDK.");

@@ -1,4 +1,4 @@
-package org.jake.file.utils;
+package org.jake.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -8,7 +8,7 @@ import java.io.FileFilter;
 import java.net.URL;
 import java.util.List;
 
-import org.jake.file.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsFile;
 import org.junit.Test;
 
 public class JakeUtilsTest {

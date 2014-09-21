@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.jake.JakeClasspath;
 import org.jake.JakeException;
 import org.jake.JakeLog;
 import org.jake.utils.JakeUtilsIO;
@@ -17,10 +18,10 @@ import org.jake.utils.JakeUtilsString;
 
 /**
  * 
- * @author i19451
+ * @author Djeang
  *
  */
-public class JakeJavaProcess {
+public final class JakeJavaProcess {
 
 	private static final File CURRENT_JAVA_DIR = new File(System.getProperty("java.home"), "bin");
 
@@ -65,7 +66,7 @@ public class JakeJavaProcess {
 
 	public JakeJavaProcess andAgent(File agentLib, String agentOption) {
 		if (agentLib == null) {
-			throw new NullPointerException("agentLib can't be null.");
+			throw new IllegalArgumentException("agentLib can't be null.");
 		}
 		if (!agentLib.exists()) {
 			throw new IllegalArgumentException("aggentLib " + agentLib.getAbsolutePath() + " not found.");
@@ -101,7 +102,7 @@ public class JakeJavaProcess {
 
 	public JakeJavaProcess withClasspath(JakeClasspath classpath) {
 		if (classpath == null) {
-			throw new NullPointerException("Classpath can't be null.");
+			throw new IllegalArgumentException("Classpath can't be null.");
 		}
 		return new JakeJavaProcess(this.javaDir, this.sytemProperties, classpath,
 				this.agents, this.options, this.workingDir);

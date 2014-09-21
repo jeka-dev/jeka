@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jake.file.JakeDir;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
@@ -61,7 +60,7 @@ public final class JakeOptions {
 	public static boolean isSilent() {
 		return INSTANCE. silent;
 	}
-	
+
 	static String buildClass() {
 		return INSTANCE.buildClass;
 	}

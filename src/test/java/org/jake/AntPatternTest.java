@@ -1,7 +1,8 @@
-package org.jake.file;
+package org.jake;
 
 import static org.junit.Assert.assertTrue;
 
+import org.jake.AntPattern;
 import org.junit.Test;
 
 public class AntPatternTest {

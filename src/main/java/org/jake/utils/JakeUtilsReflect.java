@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jake.JakeOption;
+
 
 public final class JakeUtilsReflect {
 
@@ -195,7 +195,7 @@ public final class JakeUtilsReflect {
 	public static List<Field> getAllDeclaredField(Class<?> clazz, Class<? extends Annotation> annotationClass) {
 		final List<Field> result = new LinkedList<Field>();
 		for (final Field field : clazz.getDeclaredFields()) {
-			final JakeOption jakeOption = field.getAnnotation(JakeOption.class);
+			final Object jakeOption = field.getAnnotation(annotationClass);
 			if (jakeOption != null) {
 				result.add(field);
 			}

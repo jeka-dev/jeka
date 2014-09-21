@@ -1,16 +1,23 @@
-package org.jake.java;
+package org.jake.java.build;
 
 import java.io.File;
 
 import org.jake.JakeBuildBase;
+import org.jake.JakeClasspath;
+import org.jake.JakeDirSet;
 import org.jake.JakeDoc;
+import org.jake.JakeFileFilter;
+import org.jake.JakeJavaCompiler;
 import org.jake.JakeLog;
 import org.jake.JakeOption;
-import org.jake.file.JakeDirSet;
-import org.jake.file.JakeFileFilter;
-import org.jake.file.utils.JakeUtilsFile;
+import org.jake.java.JakeJavaDependencyResolver;
+import org.jake.java.JakeJavadoc;
+import org.jake.java.JakeLocalDependencyResolver;
+import org.jake.java.JakeResourceProcessor;
+import org.jake.java.JakeUtilsJdk;
 import org.jake.java.test.junit.JakeUnit;
 import org.jake.java.test.junit.JakeUnit.JunitReportDetail;
+import org.jake.utils.JakeUtilsFile;
 
 public class JakeBuildJava extends JakeBuildBase {
 
@@ -111,7 +118,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	public String sourceJavaVersion() {
-		return JdkUtils.runningJavaVersion();
+		return JakeUtilsJdk.runningJavaVersion();
 	}
 
 	public String targetJavaVersion() {

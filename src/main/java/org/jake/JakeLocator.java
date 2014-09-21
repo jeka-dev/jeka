@@ -2,8 +2,6 @@ package org.jake;
 
 import java.io.File;
 
-import org.jake.java.JakeClassLoader;
-
 public class JakeLocator {
 
 	// cache
@@ -16,7 +14,7 @@ public class JakeLocator {
 		for (final File file : JakeClassLoader.current().childClasspath()) {
 			try {
 				// TODO not optimized. Should be implemented on the JakeClasspath class.
-				JakeClassLoader.system().parent().createChild(file).classloader().loadClass(JakeLauncher.class.getName());
+				JakeClassLoader.system().parent().createChild(file).classloader().loadClass(JakeMain.class.getName());
 				JAKE_JAR_FILE = file;
 				return file;
 			} catch (final ClassNotFoundException e) {

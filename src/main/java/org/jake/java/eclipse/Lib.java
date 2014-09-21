@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.java.JakeClasspath;
+import org.jake.JakeClasspath;
 import org.jake.java.JakeLocalDependencyResolver;
 
 class Lib {

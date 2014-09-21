@@ -10,7 +10,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.jake.java.test.junit.JakeTestSuiteResult.Failure;
 
-class JakeTestReportBuilder {
+final class JakeTestReportBuilder {
 
 	private static final XMLOutputFactory factory = XMLOutputFactory
 			.newInstance();
@@ -87,6 +87,8 @@ class JakeTestReportBuilder {
 			writer.writeAttribute("name", testCaseResult.getTestName());
 			if (testCaseResult.getDurationInSecond() != -1) {
 				writer.writeAttribute("time", Float.toString(testCaseResult.getDurationInSecond()));
+			} else {
+				writer.writeAttribute("time", "0.000");
 			}
 			if (testCaseResult instanceof Failure) {
 				final Failure failure = (Failure) testCaseResult;

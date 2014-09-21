@@ -1,4 +1,4 @@
-package org.jake.file;
+package org.jake;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.util.zip.Deflater;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import org.jake.file.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 

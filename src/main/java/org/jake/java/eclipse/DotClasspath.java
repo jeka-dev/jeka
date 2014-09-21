@@ -10,16 +10,16 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.jake.JakeDir;
+import org.jake.JakeDirSet;
 import org.jake.JakeLog;
-import org.jake.file.JakeDir;
-import org.jake.file.JakeDirSet;
 import org.jake.java.eclipse.Lib.Scope;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-class DotClasspath {
+final class DotClasspath {
 
 	private final List<ClasspathEntry> classpathentries = new LinkedList<ClasspathEntry>();
 

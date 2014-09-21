@@ -3,7 +3,7 @@ package org.jake.java;
 import java.io.File;
 import java.io.IOException;
 
-class JdkUtils {
+public class JakeUtilsJdk {
 
 	public static File toolsJar() {
 		final String jdkLocation = System.getProperty("java.home");

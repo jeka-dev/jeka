@@ -16,11 +16,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import org.jake.JakeClassLoader;
+import org.jake.JakeClasspath;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
 import org.jake.java.JakeClassFilter;
-import org.jake.java.JakeClassLoader;
-import org.jake.java.JakeClasspath;
 import org.jake.java.JakeJavaProcess;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;

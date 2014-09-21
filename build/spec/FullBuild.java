@@ -1,8 +1,8 @@
 import java.io.File;
 
+import org.jake.JakeDirSet;
+import org.jake.JakeJavaCompiler;
 import org.jake.JakeOptions;
-import org.jake.file.JakeDirSet;
-import org.jake.java.JakeJavaCompiler;
 import org.jake.java.test.jacoco.Jakeoco;
 import org.jake.java.test.junit.JakeUnit;
 import org.jake.verify.sonar.JakeSonar;

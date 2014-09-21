@@ -2,12 +2,12 @@ package org.jake.java;
 
 import java.io.File;
 
+import org.jake.JakeDir;
+import org.jake.JakeDirSet;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
-import org.jake.file.JakeDir;
-import org.jake.file.JakeDirSet;
 
-public class JakeResourceProcessor {
+public final class JakeResourceProcessor {
 
 	private final JakeDirSet jakeDirSet;
 

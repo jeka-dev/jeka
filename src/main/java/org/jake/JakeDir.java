@@ -1,4 +1,4 @@
-package org.jake.file;
+package org.jake;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.file.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsFile;
 
 /**
  * A directory that may be filtered or not. If there is no <code>Filter</code> than this stands
@@ -27,7 +27,7 @@ public final class JakeDir implements Iterable<File> {
 
 	private JakeDir(File base, JakeFileFilter filter) {
 		if (filter == null) {
-			throw new NullPointerException("filter can't be null.");
+			throw new IllegalArgumentException("filter can't be null.");
 		}
 		if (base.exists() && !base.isDirectory()) {
 			throw new IllegalArgumentException(base + " is not a directory.");
@@ -59,7 +59,7 @@ public final class JakeDir implements Iterable<File> {
 
 	public int copyTo(File destinationDir) {
 		JakeUtilsFile.assertDir(destinationDir);
-		return JakeUtilsFile.copyDir(base, destinationDir, filter.toFileFilter(base), true);
+		return JakeUtilsFile.copyDir(base, destinationDir, filter.toFileFilter(base), true, JakeOptions.isVerbose(), JakeLog.infoStream());
 	}
 
 	public int copyTo(JakeDir destinationDir) {

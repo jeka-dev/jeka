@@ -4,8 +4,8 @@ import java.util.zip.Deflater;
 
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
-import org.jake.file.utils.JakeUtilsFile;
-import org.jake.java.JakeBuildJar;
+import org.jake.java.build.JakeBuildJar;
+import org.jake.utils.JakeUtilsFile;
 
 public class Build extends JakeBuildJar {
 

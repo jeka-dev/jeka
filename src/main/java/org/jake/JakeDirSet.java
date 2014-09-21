@@ -1,4 +1,4 @@
-package org.jake.file;
+package org.jake;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public final class JakeDirSet implements Iterable<File> {
 
 	private JakeDirSet(List<JakeDir> dirs) {
 		if (dirs == null) {
-			throw new NullPointerException("dirs can't be null.");
+			throw new IllegalArgumentException("dirs can't be null.");
 		}
 		this.jakeDirs = Collections.unmodifiableList(dirs);
 	}

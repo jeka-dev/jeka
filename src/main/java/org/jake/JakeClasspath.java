@@ -1,4 +1,4 @@
-package org.jake.java;
+package org.jake;
 
 import java.io.File;
 import java.util.Arrays;
@@ -8,8 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipFile;
 
-import org.jake.JakeLog;
-import org.jake.file.JakeDir;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsString;
@@ -23,7 +21,7 @@ import org.jake.utils.JakeUtilsString;
  * 
  * @author Djeang
  */
-public class JakeClasspath implements Iterable<File> {
+public final class JakeClasspath implements Iterable<File> {
 
 	private static final String WILD_CARD = "*";
 

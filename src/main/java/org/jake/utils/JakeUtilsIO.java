@@ -31,8 +31,6 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import org.jake.file.utils.JakeUtilsFile;
-
 public final class JakeUtilsIO {
 
 	private JakeUtilsIO() {
@@ -354,7 +352,7 @@ public final class JakeUtilsIO {
 					try {
 						return Class.forName(name, false, classLoader);
 					} catch (final ClassNotFoundException ex) {
-						final Class cl = (Class) primClasses.get(name);
+						final Class<?> cl = primClasses.get(name);
 						if (cl != null) {
 							return cl;
 						} else {
@@ -453,8 +451,9 @@ public final class JakeUtilsIO {
 
 	}
 
-	/** table mapping primitive type names to corresponding class objects */
-	private static final HashMap primClasses = new HashMap(8, 1.0F);
+	/* table mapping primitive type names to corresponding class objects */
+	private static final HashMap<String, Class<?>> primClasses = new HashMap<String, Class<?>>(8, 1.0F);
+
 	static {
 		primClasses.put("boolean", boolean.class);
 		primClasses.put("byte", byte.class);

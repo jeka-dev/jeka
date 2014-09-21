@@ -6,8 +6,8 @@ import lombok.Data;
 
 import org.jake.JakeLocator;
 import org.jake.JakeLog;
-import org.jake.java.JakeBuildJava;
 import org.jake.java.JakeJavaProcess;
+import org.jake.java.build.JakeBuildJava;
 import org.jake.java.test.junit.JakeUnit;
 
 @Data
@@ -37,7 +37,7 @@ public final class Jakeoco {
 			throw new IllegalStateException("No jacocoagent.jar found neither in " + defaultAgentFile().getAbsolutePath()
 					+ " nor in " + agent.getAbsolutePath() );
 		}
-		return new Jakeoco(agentFile, true, new File(jakeBuildJava.testReportDir(), "/jacoco/jacoco.exec"));
+		return new Jakeoco(agentFile, true, new File(jakeBuildJava.testReportDir(), "jacoco/jacoco.exec"));
 	}
 
 	public Jakeoco withAgent(File jacocoagent) {
@@ -45,6 +45,9 @@ public final class Jakeoco {
 	}
 
 	public JakeUnit enhance(JakeUnit jakeUnit) {
+		if (!enabled) {
+			return jakeUnit;
+		}
 		if (jakeUnit.isForked()) {
 			JakeJavaProcess process = jakeUnit.getFork();
 			process = process.andAgent(destFile, options());
@@ -57,7 +60,6 @@ public final class Jakeoco {
 	private String options() {
 		final StringBuilder builder = new StringBuilder();
 		builder.append("destfile=").append(destFile.getAbsolutePath());
-		builder.append("enabled="+ enabled);
 		return builder.toString();
 	}
 
@@ -76,8 +78,5 @@ public final class Jakeoco {
 		}
 
 	}
-
-
-
 
 }
