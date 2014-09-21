@@ -1,15 +1,13 @@
-- Add test surefire report
+- Add complete test surefire report
 
-- Add coverage report
+- Add Jacoco html report
 
-- Add external command support
-
-- Clean the classloader management in ProjectBuilder. 
-  + For multi-module, we should reuse a generic classloader as much as possible to avoid memory leaks.
-  + build compile classpath should be the same as the build runtime classpath.
+- Clean the classloader management in ProjectBuilder. (tag // TODO)
   
-- Add sonar support.
+- Add APT support (annotation processing.)
 
-- Add APT support (annotation processing.) 
+- Plugins : (jacoco, sonar, ...)
+
+- Ivy 
 
 - Add multi-module support
