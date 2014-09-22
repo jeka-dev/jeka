@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.jake.java.build.JakeBuildJar;
+import org.jake.java.build.JakeBuildJava;
 import org.jake.java.eclipse.JakeBuildEclipseProject;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsReflect;
@@ -121,7 +121,7 @@ class Project {
 		// If nothing yet found use defaults
 		if (new File(projectBaseDir, DEFAULT_JAVA_SOURCE).exists()
 				&& new File(projectBaseDir, BUILD_LIB_DIR ).exists()) {
-			return classLoader.load(JakeBuildJar.class.getName());
+			return classLoader.load(JakeBuildJava.class.getName());
 		}
 		if (JakeBuildEclipseProject.candidate(projectBaseDir)) {
 			return classLoader.load(JakeBuildEclipseProject.class.getName());

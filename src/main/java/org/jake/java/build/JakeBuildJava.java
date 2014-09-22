@@ -10,6 +10,7 @@ import org.jake.JakeFileFilter;
 import org.jake.JakeJavaCompiler;
 import org.jake.JakeLog;
 import org.jake.JakeOption;
+import org.jake.java.JakeJarPacker;
 import org.jake.java.JakeJavaDependencyResolver;
 import org.jake.java.JakeJavadoc;
 import org.jake.java.JakeLocalDependencyResolver;
@@ -60,6 +61,10 @@ public class JakeBuildJava extends JakeBuildBase {
 	@JakeOption("Turn it on to skip tests.")
 	protected boolean skipTests;
 
+	public boolean skipTests() {
+		return skipTests;
+	}
+
 	@JakeOption({
 		"You can force the dependencyResolver to use by specifying a class name. This class must be in Jake classpath.",
 	"You can either use a fully qulified class name or just its simple name." })
@@ -74,19 +79,39 @@ public class JakeBuildJava extends JakeBuildBase {
 	// --------------------------- Configurer -----------------------------
 
 	public JakeJavaCompiler productionCompiler() {
-		return JakeJavaCompiler.ofOutput(classDir()).andSources(sourceDirs()).withClasspath(deps().compileScope());
+		return JakeJavaCompiler.ofOutput(classDir())
+				.andSources(sourceDirs())
+				.withClasspath(deps().compileScope())
+				.withSourceVersion(this.sourceJavaVersion())
+				.withTargetVersion(this.targetJavaVersion());
 	}
 
 	public JakeJavaCompiler unitTestCompiler() {
-		return JakeJavaCompiler.ofOutput(testClassDir()).andSources(testSourceDirs())
-				.withClasspath(this.deps().testScope().andHead(classDir()));
+		return JakeJavaCompiler.ofOutput(testClassDir())
+				.andSources(testSourceDirs())
+				.withClasspath(this.deps().testScope().andHead(classDir()))
+				.withSourceVersion(this.sourceJavaVersion())
+				.withTargetVersion(this.targetJavaVersion());
 	}
 
 	public JakeUnit unitTester() {
 		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.deps().testScope());
 		final File junitReport = new File(this.testReportDir(), "junit");
-		return JakeUnit.of(classpath).withReportDir(junitReport).withReport(this.junitReportDetail)
+		return JakeUnit.of(classpath)
+				.withReportDir(junitReport)
+				.withReport(this.junitReportDetail)
 				.withClassesToTest(this.testClassDir());
+	}
+
+	public JakeJavadoc javadoc() {
+		final File outputDir = ouputDir(projectName() + "-javadoc");
+		final File zip =  ouputDir(projectName() + "-javadoc.zip");
+		return JakeJavadoc.of(sourceDirs(), outputDir, zip)
+				.withClasspath(deps().compileScope());
+	}
+
+	public JakeJarPacker jarPacker() {
+		return JakeJarPacker.of(this);
 	}
 
 	// --------------------------- Callable Methods -----------------------
@@ -113,11 +138,15 @@ public class JakeBuildJava extends JakeBuildBase {
 		JakeLog.done();
 	}
 
-	@JakeDoc("Produce the Javadoc.")
-	public void javadoc() {
-		JakeJavadoc.of(this.sourceDirs())
-		.withClasspath(this.deps().compileScope())
-		.processAndZip(ouputDir(projectName() + "-javadoc"), ouputDir(projectName() + "-javadoc.zip"));
+	@JakeDoc("Produce documents for this project (javadoc, Html site, ...)")
+	public void doc() {
+		javadoc().process();
+	}
+
+	@JakeDoc({	"Create many jar files containing respectively binaries, sources, test binaries and test sources.",
+	"The jar containing the binary is the one that will be used as a depe,dence for other project."})
+	public void pack() {
+		jarPacker().pack();
 	}
 
 	@JakeDoc("Compile production code and resources, compile test code and resources then launch the unit tests.")

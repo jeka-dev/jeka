@@ -2,8 +2,6 @@
 
 - Add Jacoco html report
 
-- Clean the classloader management in ProjectBuilder. (tag // TODO)
-  
 - Add APT support (annotation processing.)
 
 - Plugins : (jacoco, sonar, ...)

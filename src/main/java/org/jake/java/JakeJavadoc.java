@@ -28,41 +28,45 @@ public final class JakeJavadoc {
 
 	private final Iterable<File> classpath;
 
-	private JakeJavadoc(JakeDirSet srcDirs, Class<?> doclet, Iterable<File> classpath, String extraArgs) {
+	private final File outputDir;
+
+	private final File zipFile;
+
+	private JakeJavadoc(JakeDirSet srcDirs, Class<?> doclet, Iterable<File> classpath, String extraArgs, File outputDir, File zipFile) {
 		this.srcDirs = srcDirs;
 		this.extraArgs = extraArgs;
 		this.doclet = doclet;
 		this.classpath = classpath;
+		this.outputDir = outputDir;
+		this.zipFile = zipFile;
 	}
 
-	public static JakeJavadoc of(JakeDirSet sources) {
-		return new JakeJavadoc(sources, null, null, "");
+	public static JakeJavadoc of(JakeDirSet sources, File outputDir, File zipFile) {
+		return new JakeJavadoc(sources, null, null, "", outputDir, zipFile);
 	}
+
+
+	public static JakeJavadoc of(JakeDirSet sources, File outputDir) {
+		return new JakeJavadoc(sources, null, null, "", outputDir, null);
+	}
+
+
 
 	public JakeJavadoc withDoclet(Class<?> doclet) {
-		return new JakeJavadoc(srcDirs, doclet, classpath, extraArgs);
+		return new JakeJavadoc(srcDirs, doclet, classpath, extraArgs, outputDir, zipFile);
 	}
 
 	public JakeJavadoc withClasspath(Iterable<File> classpath) {
-		return new JakeJavadoc(srcDirs, doclet, classpath, extraArgs);
+		return new JakeJavadoc(srcDirs, doclet, classpath, extraArgs, outputDir, zipFile);
 	}
 
-	private void doProcess(File outputDir) {
+	public void process() {
 		JakeLog.startAndNextLine("Generating javadoc");
 		final String[] args = toArguments(outputDir);
 		execute(doclet, JakeLog.infoStream(),JakeLog.warnStream(),JakeLog.errorStream(), args);
-	}
-
-	public void processAndZip(File outputDir, File zip) {
-		doProcess(outputDir);
-		if (outputDir.exists()) {
-			JakeZip.of(outputDir).create(zip);
+		if (outputDir.exists() && zipFile != null) {
+			JakeZip.of(outputDir).create(zipFile);
 		}
-		JakeLog.done();
-	}
-
-	public void process(File outputDir) {
-		doProcess(outputDir);
 		JakeLog.done();
 	}
 

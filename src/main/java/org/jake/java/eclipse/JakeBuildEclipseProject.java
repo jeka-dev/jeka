@@ -7,9 +7,9 @@ import org.jake.JakeDirSet;
 import org.jake.JakeLocator;
 import org.jake.JakeOption;
 import org.jake.java.JakeJavaDependencyResolver;
-import org.jake.java.build.JakeBuildJar;
+import org.jake.java.build.JakeBuildJava;
 
-public class JakeBuildEclipseProject extends JakeBuildJar {
+public class JakeBuildEclipseProject extends JakeBuildJava {
 
 	private static final String CONTAINERS_PATH = "eclipse/containers";
 
