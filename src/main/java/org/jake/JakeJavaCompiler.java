@@ -88,6 +88,15 @@ public final class JakeJavaCompiler {
 		return new JakeJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError, JakeProcess.ofJavaTool("javac", parameters));
 	}
 
+	public JakeJavaCompiler fork(boolean fork) {
+		if (fork) {
+			return new JakeJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError, JakeProcess.ofJavaTool("javac"));
+		} else {
+			return new JakeJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError, null);
+		}
+
+	}
+
 	public JakeJavaCompiler forkOnCompiler(String executable, String ... parameters) {
 		return new JakeJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError, JakeProcess.of(executable, parameters));
 	}

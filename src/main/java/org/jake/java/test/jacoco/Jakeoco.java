@@ -11,7 +11,7 @@ import org.jake.java.build.JakeBuildJava;
 import org.jake.java.test.junit.JakeUnit;
 
 @Data
-public final class Jakeoco {
+public final class Jakeoco implements JakeUnit.Enhancer {
 
 	private final File agent;
 
@@ -44,12 +44,13 @@ public final class Jakeoco {
 		return new Jakeoco(jacocoagent, enabled, destFile);
 	}
 
+	@Override
 	public JakeUnit enhance(JakeUnit jakeUnit) {
 		if (!enabled) {
 			return jakeUnit;
 		}
-		if (jakeUnit.isForked()) {
-			JakeJavaProcess process = jakeUnit.getFork();
+		if (jakeUnit.forked()) {
+			JakeJavaProcess process = jakeUnit.processFork();
 			process = process.andAgent(destFile, options());
 			return jakeUnit.fork(process);
 		}

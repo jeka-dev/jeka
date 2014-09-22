@@ -1,7 +1,6 @@
 package org.jake.java.test.junit;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -18,9 +17,9 @@ import java.util.Properties;
 
 import org.jake.JakeClassLoader;
 import org.jake.JakeClasspath;
+import org.jake.JakeDirSet;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
-import org.jake.java.JakeClassFilter;
 import org.jake.java.JakeJavaProcess;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
@@ -30,6 +29,10 @@ public final class JakeUnit {
 
 	public enum JunitReportDetail {
 		NONE, BASIC, FULL;
+	}
+
+	public static interface Enhancer {
+		JakeUnit enhance(JakeUnit jakeUnit);
 	}
 
 	private static final String JUNIT4_RUNNER_CLASS_NAME = "org.junit.runner.JUnitCore";
@@ -54,88 +57,96 @@ public final class JakeUnit {
 
 	private final List<Runnable> postActions;
 
-	private JakeUnit(JakeClasspath classpath, JunitReportDetail reportDetail, File reportDir, JakeJavaProcess fork, List<Runnable> runnables) {
+	private final JakeDirSet classesToTest;
+
+	private JakeUnit(JakeClasspath classpath, JunitReportDetail reportDetail, File reportDir, JakeJavaProcess fork, List<Runnable> runnables, JakeDirSet testClasses) {
 		this.classpath = classpath;
 		this.reportDetail = reportDetail;
 		this.reportDir = reportDir;
 		this.fork = fork;
 		this.postActions = Collections.unmodifiableList(runnables);
+		this.classesToTest = testClasses;
 	}
 
 	@SuppressWarnings("unchecked")
-	private JakeUnit(JakeClasspath classpath, JunitReportDetail reportDetail, File reportDir, JakeJavaProcess fork) {
-		this(classpath, reportDetail, reportDir, fork, Collections.EMPTY_LIST);
+	private JakeUnit(JakeClasspath classpath, JunitReportDetail reportDetail, File reportDir, JakeJavaProcess fork, JakeDirSet testClasses) {
+		this(classpath, reportDetail, reportDir, fork, Collections.EMPTY_LIST, testClasses);
 	}
 
 	public static JakeUnit ofFork(JakeJavaProcess jakeJavaProcess) {
-		return new JakeUnit(null, JunitReportDetail.NONE, null, jakeJavaProcess);
+		return new JakeUnit(null, JunitReportDetail.NONE, null, jakeJavaProcess, JakeDirSet.empty());
 	}
-
 
 	public static JakeUnit ofClasspath(File binDir, Iterable<File> classpathEntries) {
 		return of(JakeClasspath.of(binDir).and(classpathEntries));
 	}
 
 	public static JakeUnit of(JakeClasspath classpath) {
-		return new JakeUnit(classpath, JunitReportDetail.NONE, null, null);
+		return new JakeUnit(classpath, JunitReportDetail.NONE, null, null, JakeDirSet.empty());
 	}
 
-	public JakeUnit withReport(JunitReportDetail reportDetail, File reportDir) {
-		return new JakeUnit(this.classpath, reportDetail, reportDir, this.fork);
+	public JakeUnit withReport(JunitReportDetail reportDetail) {
+		return new JakeUnit(this.classpath, reportDetail, reportDir, this.fork, classesToTest);
+	}
+
+	public JakeUnit withReportDir(File reportDir) {
+		return new JakeUnit(this.classpath, reportDetail, reportDir, this.fork, classesToTest);
 	}
 
 	public JakeUnit forkKeepingSameClassPath(JakeJavaProcess process) {
 		final JakeJavaProcess fork = process.withClasspath(jakeClasspath());
-		return new JakeUnit(null, reportDetail, reportDir, fork);
+		return new JakeUnit(null, reportDetail, reportDir, fork, this.classesToTest);
 	}
 
 	public JakeUnit withPostAction(Runnable runnable) {
 		final List<Runnable> list = new LinkedList<Runnable>(this.postActions);
 		list.add(runnable);
-		return new JakeUnit(classpath, reportDetail, reportDir, fork, list);
+		return new JakeUnit(classpath, reportDetail, reportDir, fork, list,this.classesToTest);
+	}
+
+	public JakeUnit enhancedWith(Enhancer enhancer) {
+		return enhancer.enhance(this);
 	}
 
 	public JakeUnit fork(JakeJavaProcess process) {
-		return new JakeUnit(null, reportDetail, reportDir, process);
+		return new JakeUnit(null, reportDetail, reportDir, process, this.classesToTest);
 	}
 
+	public JakeUnit withClassesToTest(JakeDirSet classesToTest) {
+		return new JakeUnit(this.classpath, reportDetail, reportDir, fork, classesToTest);
+	}
 
-	public boolean isForked() {
+	public JakeUnit withClassesToTest(File ...classDirs) {
+		return new JakeUnit(this.classpath, reportDetail, reportDir, fork, JakeDirSet.of(classDirs));
+	}
+
+	public boolean forked() {
 		return this.fork != null;
 	}
 
-	public JakeClasspath getClasspath() {
+	public JakeClasspath classpath() {
 		return classpath;
 	}
 
-	public JunitReportDetail getReportDetail() {
+	public JunitReportDetail reportDetail() {
 		return reportDetail;
 	}
 
-	public File getReportDir() {
+	public File reportDir() {
 		return reportDir;
 	}
 
-	public JakeJavaProcess getFork() {
+	public JakeJavaProcess processFork() {
 		return fork;
 	}
 
-	public JakeTestSuiteResult launchAll(File... testClassDirs) {
-		return launchAll(Arrays.asList(testClassDirs),
-				JakeClassFilter.acceptAll());
-	}
-
-	@SuppressWarnings({ "rawtypes" })
-	public JakeTestSuiteResult launchAll(final Iterable<File> testClassDirs, JakeClassFilter classFilter) {
-		final Collection<Class> testClasses = getClassesToTest(testClassDirs, classFilter);
-		return launch(testClasses);
-	}
-
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public JakeTestSuiteResult launch(Iterable<Class> classes) {
+	public JakeTestSuiteResult run() {
+		final Collection<Class> classes = getClassesToTest();
 		final String name = getSuiteName(classes);
 
 		if (!classes.iterator().hasNext()) {
+			JakeLog.warn("No test class found.");
 			return JakeTestSuiteResult.empty((Properties) System.getProperties().clone(), name, 0);
 		}
 		final long start = System.nanoTime();
@@ -192,42 +203,17 @@ public final class JakeUnit {
 		return fork.classpath();
 	}
 
-
-
 	@SuppressWarnings("rawtypes")
-	private Collection<Class> getClassesToTest(final Iterable<File> testClassDirs, JakeClassFilter classFilter) {
-		final Collection<Class> testClasses;
-		final JakeClasspath classpath = this.jakeClasspath().andHead(testClassDirs);
+	private Collection<Class> getClassesToTest() {
+		final JakeClasspath classpath = this.jakeClasspath().andHead(this.classesToTest.listRoots());
 		final JakeClassLoader classLoader = JakeClassLoader.system().parent().createChild(classpath);
-		final FileFilter fileFilter = new FileFilter() {
-
-			@Override
-			public boolean accept(File pathname) {
-				for (final File testClassDir : testClassDirs ) {
-					if (pathname.equals(testClassDir)) {
-						return true;
-					}
-				}
-				return false;
-			}
-		};
-		testClasses = getJunitTestClassesInClassLoader(classLoader, fileFilter);
-
-		final Collection<Class> effectiveClasses = new LinkedList<Class>();
-		for (final Class clazz : testClasses) {
-			if (classFilter.accept(clazz)) {
-				effectiveClasses.add(clazz);
-			}
-		}
-		return effectiveClasses;
+		return getJunitTestClassesInClassLoader(classLoader, this.classesToTest);
 	}
-
-
 
 	@SuppressWarnings("rawtypes")
 	private static Collection<Class> getJunitTestClassesInClassLoader(
-			JakeClassLoader classloader, FileFilter entryFilter) {
-		final Iterable<Class<?>> classes = classloader.getAllTopLevelClasses(entryFilter);
+			JakeClassLoader classloader, JakeDirSet jakeDirSet) {
+		final Iterable<Class<?>> classes = classloader.loadClassesIn(jakeDirSet);
 		final List<Class> testClasses = new LinkedList<Class>();
 		if (classloader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
 			final Class<Annotation> testAnnotation = classloader.load(JUNIT4_TEST_ANNOTATION_CLASS_NAME);
@@ -248,8 +234,6 @@ public final class JakeUnit {
 		}
 		return testClasses;
 	}
-
-
 
 	private static boolean isJunit3Test(Class<?> candidtateClazz,
 			Class<?> testCaseClass) {
@@ -278,7 +262,6 @@ public final class JakeUnit {
 		}
 		return false;
 	}
-
 
 	@SuppressWarnings("rawtypes")
 	private static Object createJunit3TestSuite(JakeClassLoader classLoader, Iterable<Class> testClasses) {
@@ -338,8 +321,5 @@ public final class JakeUnit {
 		}
 		return JakeUtilsString.toString(Arrays.asList(result), ".");
 	}
-
-
-
 
 }

@@ -105,6 +105,16 @@ public final class JakeDirSet implements Iterable<File> {
 		return result;
 	}
 
+	public List<String> relativePathes() {
+		final LinkedList<String> result = new LinkedList<String>();
+		for (final JakeDir dir : this.jakeDirs) {
+			if (dir.root().exists()) {
+				result.addAll(dir.relativePathes());
+			}
+		}
+		return result;
+	}
+
 	public List<JakeDir> listJakeDirs() {
 		return jakeDirs;
 	}
@@ -133,16 +143,7 @@ public final class JakeDirSet implements Iterable<File> {
 		this.zip(destFile, Deflater.DEFAULT_COMPRESSION);;
 	}
 
-	/**
-	 * Convenient method to list files over several <code>DirViews</code>.
-	 */
-	public static List<File> toFiles(JakeDirSet ...dirViewsList) {
-		final List<File> result = new LinkedList<File>();
-		for (final JakeDirSet dirViews : dirViewsList) {
-			result.addAll(dirViews.listFiles());
-		}
-		return result;
-	}
+
 
 	@Override
 	public String toString() {

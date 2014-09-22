@@ -71,13 +71,31 @@ public class JakeBuildJava extends JakeBuildBase {
 	"Example : -junitReportDetail=NONE"})
 	protected JunitReportDetail junitReportDetail = JunitReportDetail.BASIC;
 
+	// --------------------------- Configurer -----------------------------
+
+	public JakeJavaCompiler productionCompiler() {
+		return JakeJavaCompiler.ofOutput(classDir()).andSources(sourceDirs()).withClasspath(deps().compileScope());
+	}
+
+	public JakeJavaCompiler unitTestCompiler() {
+		return JakeJavaCompiler.ofOutput(testClassDir()).andSources(testSourceDirs())
+				.withClasspath(this.deps().testScope().andHead(classDir()));
+	}
+
+	public JakeUnit unitTester() {
+		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.deps().testScope());
+		final File junitReport = new File(this.testReportDir(), "junit");
+		return JakeUnit.of(classpath).withReportDir(junitReport).withReport(this.junitReportDetail)
+				.withClassesToTest(this.testClassDir());
+	}
+
 	// --------------------------- Callable Methods -----------------------
 
 	@JakeDoc("Generate sources and resources, compile production sources and process production resources to the classes directory.")
 	public void compile() {
 		JakeLog.startAndNextLine("Processing production code and resources");
 		generateSources();
-		compiler(sourceDirs(), classDir(), deps().compileScope()).compile();;
+		productionCompiler().compile();
 		generateResources();
 		processResources();
 		JakeLog.done();
@@ -89,9 +107,9 @@ public class JakeBuildJava extends JakeBuildBase {
 			return;
 		}
 		JakeLog.startAndNextLine("Process unit tests");
-		compileUnitTests();
+		unitTestCompiler().compile();
 		processUnitTestResources();
-		runUnitTests();
+		unitTester().run();
 		JakeLog.done();
 	}
 
@@ -255,39 +273,12 @@ public class JakeBuildJava extends JakeBuildBase {
 		// Do Nothing
 	}
 
-	protected JakeJavaCompiler compiler(JakeDirSet sources, File outputDir,
-			Iterable<File> classpath) {
-		return JakeJavaCompiler.ofOutput(outputDir)
-				.andSources(sources)
-				.withClasspath(classpath)
-				.withSourceVersion(this.sourceJavaVersion())
-				.withTargetVersion(this.targetJavaVersion());
-	}
-
 	protected void processResources() {
 		JakeResourceProcessor.of(resourceDirs()).andIfExist(generatedResourceDir()).generateTo(classDir());
 	}
 
-	protected JakeUnit jakeUnit() {
-		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.deps().testScope());
-		return JakeUnit.of(classpath).withReport(junitReportDetail, new File(testReportDir(),"junit"));
-	}
-
-	protected void compileUnitTests() {
-		final Iterable<File> classpath =  this.deps().testScope().andHead(classDir());
-		compiler(testSourceDirs(), testClassDir(), classpath).compile();
-	}
-
 	protected void processUnitTestResources() {
 		JakeResourceProcessor.of(testResourceDirs()).andIfExist(generatedTestResourceDir()).generateTo(testClassDir());
-	}
-
-	protected void runUnitTests() {
-		runJunitTests(this.testClassDir());
-	}
-
-	protected void runJunitTests(File testClassDir) {
-		jakeUnit().launchAll(testClassDir);
 	}
 
 	protected boolean checkProcessTests(JakeDirSet testSourceDirs) {
@@ -298,8 +289,8 @@ public class JakeBuildJava extends JakeBuildBase {
 			JakeLog.info("No test source declared. Skip tests.");
 			return false;
 		}
-		if (!testResourceDirs().exist()) {
-			JakeLog.info("No existing source folder declared in " + testSourceDirs +". Skip tests.");
+		if (!testSourceDirs().exist()) {
+			JakeLog.info("No existing test source directory found : " + testSourceDirs +". Skip tests.");
 			return false;
 		}
 		return true;

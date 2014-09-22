@@ -1,30 +1,26 @@
-import java.io.File;
-
-import org.jake.JakeDirSet;
 import org.jake.JakeJavaCompiler;
 import org.jake.JakeOptions;
 import org.jake.java.test.jacoco.Jakeoco;
 import org.jake.java.test.junit.JakeUnit;
-import org.jake.verify.sonar.JakeSonar;
 
 
 public class FullBuild extends Build {
 
-
 	@Override
-	protected JakeUnit jakeUnit() {
-		return Jakeoco.of(this).enhance(super.jakeUnit());
+	public JakeUnit unitTester() {
+		return super.unitTester().enhancedWith(Jakeoco.of(this));
 	}
+
 
 	public void sonar() {
-		JakeSonar.of(this).launch();
+		//JakeSonar.of(this).launch();
 	}
 
 	@Override
-	protected JakeJavaCompiler compiler(JakeDirSet sources, File outputDir,
-			Iterable<File> classpath) {
-		return super.compiler(sources, outputDir, classpath).fork();
+	public JakeJavaCompiler productionCompiler() {
+		return super.productionCompiler().fork(false);
 	}
+
 
 	@Override
 	public void base() {

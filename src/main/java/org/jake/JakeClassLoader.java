@@ -19,6 +19,7 @@ import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
+import org.jake.utils.JakeUtilsString;
 
 /**
  * Wrapper around {@link URLClassLoader} offering convenient methods and fluent interface to deal
@@ -199,7 +200,7 @@ public final class JakeClassLoader {
 	 * @return The loaded class or <code>null</code>.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> Class<? extends T> loadFromNameOrSimpleName(String name, Class<T> superClass) {
+	public <T> Class<? extends T> loadFromNameOrSimpleName(final String name, Class<T> superClass) {
 		try {
 			if (superClass == null) {
 				return (Class<? extends T>) delegate.loadClass(name);
@@ -212,8 +213,16 @@ public final class JakeClassLoader {
 
 		} catch (final ClassNotFoundException e) {
 
-			// TODO Not optimized. Should look only at class files having same name as the one provided.
-			final Set<Class<?>> classes = getAllTopLevelClasses(null);
+			final Set<Class<?>> classes = loadClasses(new FileFilter() {
+
+				@Override
+				public boolean accept(File pathname) {
+					if (!pathname.getName().endsWith(".class")) {
+						return false;
+					}
+					return JakeUtilsString.substringBeforeLast(pathname.getName(),".").equals(name);
+				}
+			});
 			for (final Class<?> clazz : classes) {
 				if (clazz.getSimpleName().equals(name)) {
 					if (superClass == null || superClass.isAssignableFrom(clazz)) {
@@ -233,7 +242,7 @@ public final class JakeClassLoader {
 	 * 
 	 * @param entryFilter The classpath entry filter. Can be <code>null</code>.
 	 */
-	public Set<Class<?>> getAllTopLevelClasses(FileFilter entryFilter) {
+	public Set<Class<?>> loadClasses(FileFilter entryFilter) {
 		final List<File> classfiles = new LinkedList<File>();
 		final Map<File, File> file2Entry = new HashMap<File, File>();
 		for (final File file : childClasspath()) {
@@ -257,6 +266,22 @@ public final class JakeClassLoader {
 				throw new IllegalStateException("Can't find the class " + className, e);
 			}
 			result.add(clazz);
+		}
+		return result;
+	}
+
+	/**
+	 * Returns all classes of this <code>classloader</code> that are defined inside the provided <code>JakeDirSet</code>.
+	 * 
+	 * @see JakeClassLoader#loadClasses(FileFilter)
+	 */
+	public Set<Class<?>> loadClassesIn(JakeDirSet jakeDirSet) {
+		final Set<Class<?>> result = new HashSet<Class<?>>();
+		for (final String path : jakeDirSet.relativePathes()) {
+			if (path.endsWith(".class")) {
+				final String className = getAsClassName(path);
+				result.add(this.load(className));
+			}
 		}
 		return result;
 	}
