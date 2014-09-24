@@ -1,6 +1,5 @@
 import org.jake.JakeJavaCompiler;
 import org.jake.JakeOptions;
-import org.jake.java.test.jacoco.Jakeoco;
 import org.jake.java.test.junit.JakeUnit;
 
 
@@ -8,7 +7,7 @@ public class FullBuild extends Build {
 
 	@Override
 	public JakeUnit unitTester() {
-		return super.unitTester().enhancedWith(Jakeoco.of(this));
+		return super.unitTester().enhancedWith(jacoco());
 	}
 
 

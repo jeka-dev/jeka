@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import org.jake.java.build.JakeBuildJava;
-import org.jake.java.eclipse.JakeBuildEclipseProject;
+import org.jake.java.eclipse.JakeBuildEclipse;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
@@ -123,8 +123,8 @@ class Project {
 				&& new File(projectBaseDir, BUILD_LIB_DIR ).exists()) {
 			return classLoader.load(JakeBuildJava.class.getName());
 		}
-		if (JakeBuildEclipseProject.candidate(projectBaseDir)) {
-			return classLoader.load(JakeBuildEclipseProject.class.getName());
+		if (JakeBuildEclipse.candidate(projectBaseDir)) {
+			return classLoader.load(JakeBuildEclipse.class.getName());
 		}
 		return null;
 	}

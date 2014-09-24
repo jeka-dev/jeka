@@ -65,7 +65,7 @@ public final class JakeJavadoc {
 		final String[] args = toArguments(outputDir);
 		execute(doclet, JakeLog.infoStream(),JakeLog.warnStream(),JakeLog.errorStream(), args);
 		if (outputDir.exists() && zipFile != null) {
-			JakeZip.of(outputDir).create(zipFile);
+			JakeZip.of(outputDir).to(zipFile);
 		}
 		JakeLog.done();
 	}

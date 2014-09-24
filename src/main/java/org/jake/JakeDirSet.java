@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.zip.Deflater;
 
 import org.jake.utils.JakeUtilsIterable;
 
@@ -135,14 +134,9 @@ public final class JakeDirSet implements Iterable<File> {
 		return result;
 	}
 
-	public void zip(File destFile, int zipLevel) {
-		JakeZip.of(this).create(destFile, zipLevel);
+	public JakeZip zip() {
+		return JakeZip.of(this);
 	}
-
-	public void zip(File destFile) {
-		this.zip(destFile, Deflater.DEFAULT_COMPRESSION);;
-	}
-
 
 
 	@Override

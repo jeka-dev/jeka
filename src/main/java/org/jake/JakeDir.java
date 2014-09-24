@@ -86,8 +86,8 @@ public final class JakeDir implements Iterable<File> {
 		return pathes;
 	}
 
-	public void zip(File zipFile, int compressLevel) {
-		JakeUtilsFile.zipDir(zipFile, compressLevel, base);
+	public JakeZip zip() {
+		return JakeZip.of(this);
 	}
 
 	public JakeDir noFiltering() {

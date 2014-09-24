@@ -8,7 +8,8 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jake.java.test.junit.JakeTestSuiteResult.Failure;
+import org.jake.java.test.junit.JakeTestSuiteResult.TestCaseFailure;
+import org.jake.java.test.junit.JakeTestSuiteResult.IgnoredCase;
 
 final class JakeTestReportBuilder {
 
@@ -90,8 +91,8 @@ final class JakeTestReportBuilder {
 			} else {
 				writer.writeAttribute("time", "0.000");
 			}
-			if (testCaseResult instanceof Failure) {
-				final Failure failure = (Failure) testCaseResult;
+			if (testCaseResult instanceof TestCaseFailure) {
+				final TestCaseFailure failure = (TestCaseFailure) testCaseResult;
 				final String errorFailure = failure
 						.getExceptionDescription().isAssertError() ? "failure"
 								: "error";
@@ -110,6 +111,9 @@ final class JakeTestReportBuilder {
 				writer.writeCData(stringBuilder.toString());
 				writer.writeCharacters("\n    ");
 				writer.writeEndElement();
+			} else if (testCaseResult instanceof IgnoredCase) {
+				writer.writeCharacters("\n    ");
+				writer.writeEmptyElement("skipped");
 			}
 			writer.writeCharacters("\n  ");
 			writer.writeEndElement();

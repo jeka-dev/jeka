@@ -38,7 +38,7 @@ class JUnit4TestExecutor {
 	private static JakeTestSuiteResult launchInProcess(Class<?>[] classes, boolean printEachTestOnConsole, JunitReportDetail reportDetail, File reportDir) {
 		final JUnitCore jUnitCore = new JUnitCore();
 		if (reportDetail.equals(JunitReportDetail.FULL)) {
-			jUnitCore.addListener(new JUnitReportListener());
+			jUnitCore.addListener(new JUnitReportListener(reportDir));
 		}
 		if (printEachTestOnConsole) {
 			jUnitCore.addListener(new JUnitConsoleListener());

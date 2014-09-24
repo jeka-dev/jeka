@@ -11,6 +11,7 @@ import java.util.zip.ZipOutputStream;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
+import org.jake.utils.JakeUtilsString;
 
 public final class JakeZip {
 
@@ -32,11 +33,11 @@ public final class JakeZip {
 		return new JakeZip(Arrays.asList( fileOrDirs));
 	}
 
-	public static JakeZip of(JakeDirSet ...jakeDirSets) {
+	static JakeZip of(JakeDirSet ...jakeDirSets) {
 		return new JakeZip(Arrays.asList(jakeDirSets));
 	}
 
-	public static JakeZip of(JakeDir ...jakeDirs) {
+	static JakeZip of(JakeDir ...jakeDirs) {
 		return new JakeZip(Arrays.asList(jakeDirs));
 	}
 
@@ -46,11 +47,13 @@ public final class JakeZip {
 		return new JakeZip(itemsToZip, JakeUtilsIterable.chain(this.archivestoMerge, archiveFiles));
 	}
 
-	public void create(File zipFile) {
-		this.create(zipFile, Deflater.DEFAULT_COMPRESSION);
+	public CheckSumer to(File zipFile) {
+		this.to(zipFile, Deflater.DEFAULT_COMPRESSION);
+		return new CheckSumer(zipFile);
 	}
 
-	public void create(File zipFile, int compressLevel) {
+	public CheckSumer to(File zipFile, int compressLevel) {
+		JakeLog.start("Creating zip file : " + zipFile);
 		final ZipOutputStream zos = JakeUtilsIO.createZipOutputStream(zipFile, compressLevel);
 		zos.setLevel(compressLevel);
 
@@ -88,6 +91,8 @@ public final class JakeZip {
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
+		JakeLog.done();
+		return new CheckSumer(zipFile);
 	}
 
 	private void addDirView(ZipOutputStream zos, JakeDir dirView) {
@@ -97,6 +102,33 @@ public final class JakeZip {
 		final File base = JakeUtilsFile.canonicalFile(dirView.root());
 		for (final File file : dirView) {
 			JakeUtilsIO.addZipEntry(zos, file, base);
+		}
+	}
+
+	public static final class CheckSumer {
+
+		private final File file;
+
+		public CheckSumer(File file) {
+			super();
+			this.file = file;
+		}
+
+		public CheckSumer md5() {
+			JakeLog.start("Creating MD5 file for : " + file);
+			final File parent = file.getParentFile();
+			final String md5 = JakeUtilsFile.md5Checksum(file);
+			final String fileName = JakeUtilsString.substringBeforeLast(file.getName(), ".") + ".md5";
+			JakeUtilsFile.writeString(new File(parent,  fileName), md5, false);
+			JakeLog.done();
+			return this;
+		}
+
+		public CheckSumer md5(boolean process) {
+			if (!process) {
+				return this;
+			}
+			return md5();
 		}
 	}
 

@@ -282,7 +282,7 @@ public final class JakeUnit {
 				"failures");
 		final Enumeration<Object> junitErrors = JakeUtilsReflect.invoke(result,
 				"errors");
-		final List<JakeTestSuiteResult.Failure> failures = new ArrayList<JakeTestSuiteResult.Failure>();
+		final List<JakeTestSuiteResult.TestCaseFailure> failures = new ArrayList<JakeTestSuiteResult.TestCaseFailure>();
 		while(junitFailures.hasMoreElements()) {
 			final Object junitFailure = junitFailures.nextElement();
 			failures.add(JakeTestSuiteResult.fromJunit3Failure(junitFailure));

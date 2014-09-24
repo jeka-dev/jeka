@@ -5,8 +5,8 @@ import java.util.zip.Deflater;
 import org.jake.JakeDoc;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
-import org.jake.java.JakeJarPacker;
 import org.jake.java.build.JakeBuildJava;
+import org.jake.java.build.JakeJarPacker;
 import org.jake.utils.JakeUtilsFile;
 
 public class Build extends JakeBuildJava {

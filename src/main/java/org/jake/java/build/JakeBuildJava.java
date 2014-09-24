@@ -10,12 +10,12 @@ import org.jake.JakeFileFilter;
 import org.jake.JakeJavaCompiler;
 import org.jake.JakeLog;
 import org.jake.JakeOption;
-import org.jake.java.JakeJarPacker;
 import org.jake.java.JakeJavaDependencyResolver;
 import org.jake.java.JakeJavadoc;
 import org.jake.java.JakeLocalDependencyResolver;
 import org.jake.java.JakeResourceProcessor;
 import org.jake.java.JakeUtilsJdk;
+import org.jake.java.test.jacoco.Jakeoco;
 import org.jake.java.test.junit.JakeUnit;
 import org.jake.java.test.junit.JakeUnit.JunitReportDetail;
 import org.jake.utils.JakeUtilsFile;
@@ -76,89 +76,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	"Example : -junitReportDetail=NONE"})
 	protected JunitReportDetail junitReportDetail = JunitReportDetail.BASIC;
 
-	// --------------------------- Configurer -----------------------------
-
-	public JakeJavaCompiler productionCompiler() {
-		return JakeJavaCompiler.ofOutput(classDir())
-				.andSources(sourceDirs())
-				.withClasspath(deps().compileScope())
-				.withSourceVersion(this.sourceJavaVersion())
-				.withTargetVersion(this.targetJavaVersion());
-	}
-
-	public JakeJavaCompiler unitTestCompiler() {
-		return JakeJavaCompiler.ofOutput(testClassDir())
-				.andSources(testSourceDirs())
-				.withClasspath(this.deps().testScope().andHead(classDir()))
-				.withSourceVersion(this.sourceJavaVersion())
-				.withTargetVersion(this.targetJavaVersion());
-	}
-
-	public JakeUnit unitTester() {
-		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.deps().testScope());
-		final File junitReport = new File(this.testReportDir(), "junit");
-		return JakeUnit.of(classpath)
-				.withReportDir(junitReport)
-				.withReport(this.junitReportDetail)
-				.withClassesToTest(this.testClassDir());
-	}
-
-	public JakeJavadoc javadoc() {
-		final File outputDir = ouputDir(projectName() + "-javadoc");
-		final File zip =  ouputDir(projectName() + "-javadoc.zip");
-		return JakeJavadoc.of(sourceDirs(), outputDir, zip)
-				.withClasspath(deps().compileScope());
-	}
-
-	public JakeJarPacker jarPacker() {
-		return JakeJarPacker.of(this);
-	}
-
-	// --------------------------- Callable Methods -----------------------
-
-	@JakeDoc("Generate sources and resources, compile production sources and process production resources to the classes directory.")
-	public void compile() {
-		JakeLog.startAndNextLine("Processing production code and resources");
-		generateSources();
-		productionCompiler().compile();
-		generateResources();
-		processResources();
-		JakeLog.done();
-	}
-
-	@JakeDoc("Compile and run all unit tests.")
-	public void unitTest() {
-		if (!checkProcessTests(testSourceDirs())) {
-			return;
-		}
-		JakeLog.startAndNextLine("Process unit tests");
-		unitTestCompiler().compile();
-		processUnitTestResources();
-		unitTester().run();
-		JakeLog.done();
-	}
-
-	@JakeDoc("Produce documents for this project (javadoc, Html site, ...)")
-	public void doc() {
-		javadoc().process();
-	}
-
-	@JakeDoc({	"Create many jar files containing respectively binaries, sources, test binaries and test sources.",
-	"The jar containing the binary is the one that will be used as a depe,dence for other project."})
-	public void pack() {
-		jarPacker().pack();
-	}
-
-	@JakeDoc("Compile production code and resources, compile test code and resources then launch the unit tests.")
-	@Override
-	public void base() {
-		super.base();
-		compile();
-		unitTest();
-	}
-
-	// ----------------------- Overridable sub-methods ---------------------
-
+	// --------------------------- Project settings -----------------------
 
 	public String sourceEncoding() {
 		return "UTF-8";
@@ -250,6 +168,103 @@ public class JakeBuildJava extends JakeBuildBase {
 	public File testClassDir() {
 		return ouputDir().sub("testClasses").createIfNotExist().root();
 	}
+
+	// --------------------------- Configurer -----------------------------
+
+	public JakeJavaCompiler productionCompiler() {
+		return JakeJavaCompiler.ofOutput(classDir())
+				.andSources(sourceDirs())
+				.withClasspath(deps().compileScope())
+				.withSourceVersion(this.sourceJavaVersion())
+				.withTargetVersion(this.targetJavaVersion());
+	}
+
+	public JakeJavaCompiler unitTestCompiler() {
+		return JakeJavaCompiler.ofOutput(testClassDir())
+				.andSources(testSourceDirs())
+				.withClasspath(this.deps().testScope().andHead(classDir()))
+				.withSourceVersion(this.sourceJavaVersion())
+				.withTargetVersion(this.targetJavaVersion());
+	}
+
+	public JakeUnit unitTester() {
+		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.deps().testScope());
+		final File junitReport = new File(this.testReportDir(), "junit");
+		return JakeUnit.of(classpath)
+				.withReportDir(junitReport)
+				.withReport(this.junitReportDetail)
+				.withClassesToTest(this.testClassDir());
+	}
+
+	public JakeJavadoc javadoc() {
+		final File outputDir = ouputDir(projectName() + "-javadoc");
+		final File zip =  ouputDir(projectName() + "-javadoc.zip");
+		return JakeJavadoc.of(sourceDirs(), outputDir, zip)
+				.withClasspath(deps().compileScope());
+	}
+
+	public JakeJarPacker jarPacker() {
+		return JakeJarPacker.of(this);
+	}
+
+	public Jakeoco jacoco() {
+		final File agent = baseDir("build/libs/jacoco-agent/jacocoagent.jar");
+		final File agentFile = agent.exists() ? agent : Jakeoco.defaultAgentFile();
+		if (!agentFile.exists()) {
+			throw new IllegalStateException("No jacocoagent.jar found neither in "
+					+ Jakeoco.defaultAgentFile().getAbsolutePath()
+					+ " nor in " + agent.getAbsolutePath() );
+		}
+		return Jakeoco.of(new File(testReportDir(), "jacoco/jacoco.exec")).withAgent(agentFile);
+	}
+
+	// --------------------------- Callable Methods -----------------------
+
+	@JakeDoc("Generate sources and resources, compile production sources and process production resources to the classes directory.")
+	public void compile() {
+		JakeLog.startAndNextLine("Processing production code and resources");
+		generateSources();
+		productionCompiler().compile();
+		generateResources();
+		processResources();
+		JakeLog.done();
+	}
+
+	@JakeDoc("Compile and run all unit tests.")
+	public void unitTest() {
+		if (!checkProcessTests(testSourceDirs())) {
+			return;
+		}
+		JakeLog.startAndNextLine("Process unit tests");
+		unitTestCompiler().compile();
+		processUnitTestResources();
+		unitTester().run();
+		JakeLog.done();
+	}
+
+	@JakeDoc("Produce documents for this project (javadoc, Html site, ...)")
+	public void doc() {
+		javadoc().process();
+	}
+
+	@JakeDoc({	"Create many jar files containing respectively binaries, sources, test binaries and test sources.",
+	"The jar containing the binary is the one that will be used as a depe,dence for other project."})
+	public void pack() {
+		jarPacker().pack();
+	}
+
+	@JakeDoc("Compile production code and resources, compile test code and resources then launch the unit tests.")
+	@Override
+	public void base() {
+		super.base();
+		compile();
+		unitTest();
+	}
+
+	// ----------------------- Overridable sub-methods ---------------------
+
+
+
 
 	private JakeJavaDependencyResolver cachedResolver;
 
