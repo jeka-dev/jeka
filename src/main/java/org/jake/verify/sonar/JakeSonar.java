@@ -14,7 +14,6 @@ import org.jake.JakeLocator;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
 import org.jake.java.JakeJavaProcess;
-import org.jake.java.build.JakeBuildJava;
 import org.jake.utils.JakeUtilsAssert;
 import org.jake.utils.JakeUtilsFile;
 
@@ -76,19 +75,7 @@ public final class JakeSonar {
 		return new JakeSonar(map, true);
 	}
 
-	public static JakeSonar of(JakeBuildJava buildJava) {
-		final File baseDir = buildJava.baseDir().root();
-		return JakeSonar.of(buildJava.projectFullName(), buildJava.projectName(), buildJava.version())
-				.withProjectBaseDir(baseDir)
-				.withBinaries(buildJava.classDir())
-				.withLibraries(buildJava.deps().compileScope())
-				.withSources(buildJava.editedSourceDirs().listRoots())
-				.withTest(buildJava.testSourceDirs().listRoots())
-				.withProperty(JUNIT_REPORTS_PATH, JakeUtilsFile.getRelativePath(baseDir, new File(buildJava.testReportDir(), "junit")))
-				.withProperty(SUREFIRE_REPORTS_PATH, JakeUtilsFile.getRelativePath(baseDir, new File(buildJava.testReportDir(), "junit")))
-				.withProperty(DYNAMIC_ANALYSIS, "reuseReports")
-				.withProperty(JACOCO_REPORTS_PATH, JakeUtilsFile.getRelativePath(baseDir, new File(buildJava.testReportDir(), "jacoco/jacoco.exec")));
-	}
+
 
 	public void launch() {
 		if (!enabled) {

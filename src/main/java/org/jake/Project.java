@@ -132,6 +132,7 @@ class Project {
 	private boolean launch(Class<? extends JakeBuildBase> buildClass, Iterable<String> methods, JakeClassLoader classLoader) {
 
 		final JakeBuildBase build = JakeUtilsReflect.newInstance(buildClass);
+		JakeOptions.populateFields(build);
 
 		JakeLog.info("Use build class '" + buildClass.getCanonicalName()
 				+ "' with methods : "

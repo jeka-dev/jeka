@@ -12,7 +12,7 @@ public class FullBuild extends Build {
 
 
 	public void sonar() {
-		//JakeSonar.of(this).launch();
+		jakeSonar().launch();
 	}
 
 	@Override

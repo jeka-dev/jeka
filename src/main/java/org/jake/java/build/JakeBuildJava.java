@@ -19,6 +19,7 @@ import org.jake.java.test.jacoco.Jakeoco;
 import org.jake.java.test.junit.JakeUnit;
 import org.jake.java.test.junit.JakeUnit.JunitReportDetail;
 import org.jake.utils.JakeUtilsFile;
+import org.jake.verify.sonar.JakeSonar;
 
 public class JakeBuildJava extends JakeBuildBase {
 
@@ -216,6 +217,20 @@ public class JakeBuildJava extends JakeBuildBase {
 					+ " nor in " + agent.getAbsolutePath() );
 		}
 		return Jakeoco.of(new File(testReportDir(), "jacoco/jacoco.exec")).withAgent(agentFile);
+	}
+
+	public JakeSonar jakeSonar() {
+		final File baseDir = baseDir().root();
+		return JakeSonar.of(projectFullName(), projectName(), version())
+				.withProjectBaseDir(baseDir)
+				.withBinaries(classDir())
+				.withLibraries(deps().compileScope())
+				.withSources(editedSourceDirs().listRoots())
+				.withTest(testSourceDirs().listRoots())
+				.withProperty(JakeSonar.JUNIT_REPORTS_PATH, JakeUtilsFile.getRelativePath(baseDir, new File(testReportDir(), "junit")))
+				.withProperty(JakeSonar.SUREFIRE_REPORTS_PATH, JakeUtilsFile.getRelativePath(baseDir, new File(testReportDir(), "junit")))
+				.withProperty(JakeSonar.DYNAMIC_ANALYSIS, "reuseReports")
+				.withProperty(JakeSonar.JACOCO_REPORTS_PATH, JakeUtilsFile.getRelativePath(baseDir, new File(testReportDir(), "jacoco/jacoco.exec")));
 	}
 
 	// --------------------------- Callable Methods -----------------------
