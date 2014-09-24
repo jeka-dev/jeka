@@ -221,6 +221,8 @@ public class JakeBuildJava extends JakeBuildBase {
 
 	public JakeSonar jakeSonar() {
 		final File baseDir = baseDir().root();
+		JakeLog.warnIf(this.junitReportDetail != JunitReportDetail.FULL,"*  You need to use junitReportDetail=FULL " +
+				"to get complete sonar test report but you are currently using " + this.junitReportDetail.name() + ".");
 		return JakeSonar.of(projectFullName(), projectName(), version())
 				.withProjectBaseDir(baseDir)
 				.withBinaries(classDir())

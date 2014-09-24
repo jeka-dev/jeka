@@ -90,6 +90,12 @@ public class JakeLog {
 		warnWriter.flush();
 	}
 
+	public static void warnIf(boolean condition, String message) {
+		if (condition) {
+			warn(message);
+		}
+	}
+
 	public static void error(String message) {
 		flush();
 		errorWriter.println(message);

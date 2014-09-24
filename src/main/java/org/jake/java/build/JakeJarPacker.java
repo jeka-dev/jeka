@@ -3,6 +3,7 @@ package org.jake.java.build;
 import java.io.File;
 import java.util.zip.Deflater;
 
+import org.jake.JakeDir;
 import org.jake.JakeLog;
 import org.jake.JakeZip;
 
@@ -98,14 +99,14 @@ public class JakeJarPacker {
 
 	public void pack() {
 		JakeLog.startAndNextLine("Packaging module");
-		JakeZip.of(build().classDir()).to(jarFile(), compressionLevel).md5(checkSum);
+		JakeDir.of(build().classDir()).zip().to(jarFile(), compressionLevel).md5(checkSum);
 		build().sourceDirs().and(build().resourceDirs()).zip().to(jarSourceFile(), compressionLevel);
 		if (!build().skipTests()) {
 			JakeZip.of(build().testClassDir()).to(jarTestFile(), compressionLevel);
 		}
 		build().testSourceDirs().and(build().testResourceDirs()).zip().to(jarTestSourceFile(), compressionLevel);
 		if (fatJar) {
-			JakeZip.of(build().classDir()).merge(build().deps().runtimeScope())
+			JakeDir.of(build().classDir()).zip().merge(build().deps().runtimeScope())
 			.to(fatJarFile(), compressionLevel).md5(checkSum);
 		}
 		JakeLog.done();
