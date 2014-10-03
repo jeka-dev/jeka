@@ -1,9 +1,15 @@
 package org.jake.depmanagement;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+
+import org.jake.utils.JakeUtilsIterable;
 
 /**
  * Defines a context where is defined dependencies of a given project.
@@ -83,6 +89,10 @@ public final class JakeScope {
 		return list;
 	}
 
+	public Mappings mapTo(JakeScope targetScope) {
+		return Mappings.of(this, targetScope);
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -116,6 +126,75 @@ public final class JakeScope {
 	@Override
 	public String toString() {
 		return "Scope:"+name;
+	}
+
+	private static class Mapping implements Iterable<Mapping> {
+
+		private final JakeScope from;
+		private final JakeScope to;
+
+		public Mapping(JakeScope from, JakeScope to) {
+			super();
+			this.from = from;
+			this.to = to;
+		}
+
+		@Override
+		public Iterator<Mapping> iterator() {
+			return JakeUtilsIterable.of(this).iterator();
+		}
+
+	}
+
+	public static class Mappings implements Iterable<Mapping> {
+
+		private final List<Mapping> list;
+
+		private Mappings(List<Mapping> list) {
+			super();
+			this.list = list;
+		}
+
+		public static Mappings of(JakeScope from, JakeScope to) {
+			final List<Mapping> scopes = new ArrayList<Mapping>();
+			scopes.add(new Mapping(from, to));
+			return new Mappings(scopes);
+		}
+
+		public static Mappings of(JakeScope from, String to) {
+			return of(from, JakeScope.of(to));
+		}
+
+		public Mappings and(JakeScope from, JakeScope to) {
+			final List<Mapping> scopes = new ArrayList<Mapping>(this.list);
+			scopes.add(new Mapping(from, to));
+			return new Mappings(scopes);
+		}
+
+		public Mappings and(JakeScope from, String to) {
+			return and(from, JakeScope.of(to));
+		}
+
+		public Mappings and(JakeScope from) {
+			return and(from, from);
+		}
+
+		@Override
+		public Iterator<Mapping> iterator() {
+			return list.iterator();
+		}
+
+		public Set<JakeScope> getTargetScope(JakeScope sourceScope) {
+			final HashSet<JakeScope> set = new HashSet<JakeScope>();
+			for (final Mapping mapping : list) {
+				if (sourceScope.equals(mapping.from)) {
+					set.add(mapping.to);
+				}
+			}
+			return set;
+		}
+
+
 	}
 
 }

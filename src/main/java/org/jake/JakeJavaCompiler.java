@@ -160,6 +160,4 @@ public final class JakeJavaCompiler {
 		return compiler;
 	}
 
-
-
 }

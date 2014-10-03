@@ -1,5 +1,9 @@
 package org.jake.depmanagement.ivy;
 
+import static org.jake.depmanagement.JakeScope.COMPILE;
+import static org.jake.depmanagement.JakeScope.RUNTIME;
+import static org.jake.depmanagement.JakeScope.TEST;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -16,6 +20,8 @@ import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
 import org.apache.ivy.util.DefaultMessageLogger;
 import org.apache.ivy.util.Message;
+import org.jake.depmanagement.JakeScope;
+import org.jake.depmanagement.JakeScope.Mappings;
 
 public class JakeIvy {
 
@@ -53,12 +59,12 @@ public class JakeIvy {
 		// map to master to just get the code jar. See generated ivy module xmls from maven repo
 		// on how configurations are mapped into ivy. Or check
 		// e.g. http://lightguard-jp.blogspot.de/2009/04/ivy-configurations-when-pulling-from.html
-		// dependencyDescriptor.addDependencyConfiguration("default", "master"); 
-		
+		// dependencyDescriptor.addDependencyConfiguration("default", "master");
+
 		// To get more than 1 artifact i need to declare "compile" and not "master"
 		dependencyDescriptor.addDependencyConfiguration("default", "compile");
-		
-		
+
+
 		moduleDescriptor.addDependency(dependencyDescriptor);
 
 		// now resolve
@@ -98,5 +104,12 @@ public class JakeIvy {
 
 
 	}
+
+	public void dependencies() {
+		Mappings.of(RUNTIME, COMPILE).and(RUNTIME, COMPILE).and(JakeScope.PROVIDED, "myprovided");
+		COMPILE.mapTo(RUNTIME).and(TEST, COMPILE);
+	}
+
+
 
 }

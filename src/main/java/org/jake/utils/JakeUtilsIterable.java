@@ -39,6 +39,10 @@ public class JakeUtilsIterable {
 		return chainAll(Arrays.asList(iterables));
 	}
 
+	public static <T> Iterable<T> of(T ...items) {
+		return Arrays.asList(items);
+	}
+
 	public static <T> Iterable<T> chain(T item, Iterable<T> ... iterables) {
 		final List<Iterable<T>> list = new LinkedList<Iterable<T>>();
 		final List<T> single = new ArrayList<T>(3);
