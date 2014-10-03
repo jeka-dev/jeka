@@ -21,17 +21,7 @@ public abstract class Dependency {
 		}
 	}
 
-	public static final class Module {
 
-		private final String group;
-		private final String id;
-
-		public Module(String group, String id) {
-			this.group = group;
-			this.id = id;
-		}
-
-	}
 
 	public static abstract class VersionRange {
 
