@@ -58,7 +58,11 @@ public final class JakeDir implements Iterable<File> {
 	}
 
 	public int copyTo(File destinationDir) {
-		JakeUtilsFile.assertDir(destinationDir);
+		if (!destinationDir.exists()) {
+			destinationDir.mkdirs();
+		} else {
+			JakeUtilsFile.assertDir(destinationDir);
+		}
 		return JakeUtilsFile.copyDir(base, destinationDir, filter.toFileFilter(base), true, JakeOptions.isVerbose(), JakeLog.infoStream());
 	}
 

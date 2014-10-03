@@ -2,6 +2,7 @@
 import java.io.File;
 import java.util.zip.Deflater;
 
+import org.jake.JakeDir;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
 import org.jake.java.build.JakeBuildJava;
@@ -49,6 +50,8 @@ public class Build extends JakeBuildJava {
 		final JakeJarPacker jarPacker = jarPacker();
 		JakeUtilsFile.copyFile(jarPacker.jarFile(), new File(distribDir,"jake.jar"));
 		JakeUtilsFile.copyFile(jarPacker.jarSourceFile(), new File(distribDir,"jake-sources.jar"));
+		JakeDir.of(this.baseDir("build/libs/compile")).include("**/*.jar").copyTo(new File(distribDir, "libs/required"));
+		JakeDir.of(this.baseDir("build/libs-sources")).copyTo(new File(distribDir, "libs/sources"));
 		JakeUtilsFile.zipDir(distripZipFile, Deflater.BEST_COMPRESSION, distribDir);
 		JakeLog.done();
 	}

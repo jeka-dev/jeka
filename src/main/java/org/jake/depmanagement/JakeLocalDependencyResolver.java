@@ -50,6 +50,9 @@ public final class JakeLocalDependencyResolver extends JakeDependencyResolver {
 				newFiles.add(file);
 			}
 		}
+		for(final File file : files) {
+			newFiles.add(file);
+		}
 		final HashMap<JakeScope, Iterable<File>> newMap =
 				(HashMap<JakeScope, Iterable<File>>) this.dependencies.clone();
 		newMap.put(scope, Collections.unmodifiableList(newFiles));

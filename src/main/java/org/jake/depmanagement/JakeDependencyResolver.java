@@ -40,7 +40,7 @@ public abstract class JakeDependencyResolver {
 		result.add(this.getClass().getName());
 		for (final JakeScope scope : this.declaredScopes()) {
 			final List<File> libs = this.get(scope);
-			result.add(scope.name() + libs.size() + " libs): " + libs);
+			result.add(scope.name() + " (" + libs.size() + " artifacts): " + libs);
 		}
 		return result;
 	}
