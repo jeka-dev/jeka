@@ -1,4 +1,4 @@
-package org.jake.ivy;
+package org.jake.depmanagement.ivy;
 
 import java.io.File;
 import java.io.IOException;
