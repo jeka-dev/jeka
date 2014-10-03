@@ -6,7 +6,7 @@ import java.util.List;
 import org.jake.JakeDirSet;
 import org.jake.JakeLocator;
 import org.jake.JakeOption;
-import org.jake.java.JakeJavaDependencyResolver;
+import org.jake.depmanagement.JakeDependencyResolver;
 import org.jake.java.build.JakeBuildJava;
 
 public class JakeBuildEclipse extends JakeBuildJava {
@@ -54,7 +54,7 @@ public class JakeBuildEclipse extends JakeBuildJava {
 	}
 
 	@Override
-	protected JakeJavaDependencyResolver baseDependencyResolver() {
+	protected JakeDependencyResolver baseDependencyResolver() {
 		final File containersHome;
 		if (containersPath == null) {
 			containersHome = new File(JakeLocator.jakeHome(), CONTAINERS_PATH);

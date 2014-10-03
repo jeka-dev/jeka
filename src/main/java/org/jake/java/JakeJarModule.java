@@ -2,6 +2,8 @@ package org.jake.java;
 
 import java.io.File;
 
+import org.jake.depmanagement.JakeDependencyResolver;
+
 /**
  * Defines methods that a Build class must define in order to make this module reusable by
  * other projects.
@@ -36,6 +38,6 @@ public interface JakeJarModule {
 	/**
 	 * Returns the dependency resolver for this module.
 	 */
-	JakeJavaDependencyResolver deps();
+	JakeDependencyResolver deps();
 
 }

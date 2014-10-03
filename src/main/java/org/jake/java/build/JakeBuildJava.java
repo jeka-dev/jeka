@@ -10,9 +10,10 @@ import org.jake.JakeFileFilter;
 import org.jake.JakeJavaCompiler;
 import org.jake.JakeLog;
 import org.jake.JakeOption;
-import org.jake.java.JakeJavaDependencyResolver;
+import org.jake.depmanagement.JakeDependencyResolver;
+import org.jake.depmanagement.JakeLocalDependencyResolver;
+import org.jake.depmanagement.JakeScope;
 import org.jake.java.JakeJavadoc;
-import org.jake.java.JakeLocalDependencyResolver;
 import org.jake.java.JakeResourceProcessor;
 import org.jake.java.JakeUtilsJdk;
 import org.jake.java.test.jacoco.Jakeoco;
@@ -175,7 +176,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	public JakeJavaCompiler productionCompiler() {
 		return JakeJavaCompiler.ofOutput(classDir())
 				.andSources(sourceDirs())
-				.withClasspath(deps().compileScope())
+				.withClasspath(deps(JakeScope.COMPILE))
 				.withSourceVersion(this.sourceJavaVersion())
 				.withTargetVersion(this.targetJavaVersion());
 	}
@@ -183,13 +184,13 @@ public class JakeBuildJava extends JakeBuildBase {
 	public JakeJavaCompiler unitTestCompiler() {
 		return JakeJavaCompiler.ofOutput(testClassDir())
 				.andSources(testSourceDirs())
-				.withClasspath(this.deps().testScope().andHead(classDir()))
+				.withClasspath(this.deps(JakeScope.TEST).andHead(classDir()))
 				.withSourceVersion(this.sourceJavaVersion())
 				.withTargetVersion(this.targetJavaVersion());
 	}
 
 	public JakeUnit unitTester() {
-		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.deps().testScope());
+		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.deps(JakeScope.TEST));
 		final File junitReport = new File(this.testReportDir(), "junit");
 		return JakeUnit.of(classpath)
 				.withReportDir(junitReport)
@@ -201,7 +202,7 @@ public class JakeBuildJava extends JakeBuildBase {
 		final File outputDir = ouputDir(projectName() + "-javadoc");
 		final File zip =  ouputDir(projectName() + "-javadoc.zip");
 		return JakeJavadoc.of(sourceDirs(), outputDir, zip)
-				.withClasspath(deps().compileScope());
+				.withClasspath(deps(JakeScope.COMPILE));
 	}
 
 	public JakeJarPacker jarPacker() {
@@ -226,7 +227,7 @@ public class JakeBuildJava extends JakeBuildBase {
 		return JakeSonar.of(projectFullName(), projectName(), version())
 				.withProjectBaseDir(baseDir)
 				.withBinaries(classDir())
-				.withLibraries(deps().compileScope())
+				.withLibraries(deps(JakeScope.COMPILE))
 				.withSources(editedSourceDirs().listRoots())
 				.withTest(testSourceDirs().listRoots())
 				.withProperty(JakeSonar.JUNIT_REPORTS_PATH, JakeUtilsFile.getRelativePath(baseDir, new File(testReportDir(), "junit")))
@@ -283,16 +284,16 @@ public class JakeBuildJava extends JakeBuildBase {
 
 
 
-	private JakeJavaDependencyResolver cachedResolver;
+	private JakeDependencyResolver cachedResolver;
 
 	/**
 	 * Returns the base dependency resolver.
 	 * 
 	 * @see #dependencyResolver().
 	 */
-	protected JakeJavaDependencyResolver baseDependencyResolver() {
+	protected JakeDependencyResolver baseDependencyResolver() {
 		final File folder = baseDir(STD_LIB_PATH);
-		final JakeJavaDependencyResolver resolver;
+		final JakeDependencyResolver resolver;
 		if (folder.exists()) {
 			resolver = JakeLocalDependencyResolver
 					.standard(baseDir(STD_LIB_PATH));
@@ -307,22 +308,22 @@ public class JakeBuildJava extends JakeBuildBase {
 	 * options, It is made of the {@link #baseDependencyResolver()} augmented
 	 * with extra-libs mentioned in options <code>extraXxxxPath</code>.
 	 */
-	public final JakeJavaDependencyResolver deps() {
+	public final JakeClasspath deps(JakeScope scope) {
 		if (cachedResolver == null) {
 			JakeLog.startAndNextLine("Resolving Dependencies ");
-			final JakeJavaDependencyResolver resolver = JakeJavaDependencyResolver
+			final JakeDependencyResolver resolver = JakeDependencyResolver
 					.findByClassNameOrDfault(dependencyResolver, baseDependencyResolver());
-			final JakeJavaDependencyResolver extraResolver = computeExtraPath();
+			final JakeDependencyResolver extraResolver = computeExtraPath();
 			if (!extraResolver.isEmpty()) {
 				JakeLog.info("Using extra libs : ", extraResolver.toStrings());
-				cachedResolver = resolver.merge(extraResolver, null, null);
+				cachedResolver = resolver.merge(extraResolver);
 			} else {
 				cachedResolver = resolver;
 			}
 			JakeLog.info("Effective resolver : ", cachedResolver.toStrings());
 			JakeLog.done();
 		}
-		return cachedResolver;
+		return JakeClasspath.of(cachedResolver.get(scope));
 	}
 
 	protected void generateSources() {
@@ -364,8 +365,11 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	private JakeLocalDependencyResolver computeExtraPath() {
-		return new JakeLocalDependencyResolver(
-				toPath(extraCompilePath), toPath(extraRuntimePath), toPath(extraTestPath), toPath(extraProvidedPath));
+		return JakeLocalDependencyResolver.empty()
+				.with(JakeScope.COMPILE, toPath(extraCompilePath))
+				.with(JakeScope.RUNTIME, toPath(extraRuntimePath))
+				.with(JakeScope.TEST, toPath(extraTestPath))
+				.with(JakeScope.PROVIDED, toPath(extraProvidedPath));
 	}
 
 	private final JakeClasspath toPath(String pathAsString) {

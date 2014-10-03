@@ -4,8 +4,8 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.JakeClasspath;
-import org.jake.java.JakeLocalDependencyResolver;
+import org.jake.depmanagement.JakeLocalDependencyResolver;
+import org.jake.depmanagement.JakeScope;
 
 class Lib {
 
@@ -37,8 +37,11 @@ class Lib {
 			case TEST : testOnlys.add(lib.file); break;
 			}
 		}
-		return new JakeLocalDependencyResolver(JakeClasspath.of(compileAndRuntimes), JakeClasspath.of(runtimeOnlys),
-				JakeClasspath.of(testOnlys), JakeClasspath.of(compileOnlys));
+		return JakeLocalDependencyResolver.empty()
+				.with(JakeScope.COMPILE, compileAndRuntimes)
+				.with(JakeScope.RUNTIME, runtimeOnlys)
+				.with(JakeScope.TEST, testOnlys)
+				.with(JakeScope.PROVIDED, compileOnlys);
 	}
 
 
