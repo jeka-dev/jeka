@@ -13,14 +13,8 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-
 import org.jake.utils.JakeUtilsString;
 
-@Value
-@RequiredArgsConstructor(access=AccessLevel.PRIVATE)
 public final class JakeJavaCompiler {
 
 	public static final String V1_3 = "1.3";
@@ -46,9 +40,6 @@ public final class JakeJavaCompiler {
 
 	private final JakeProcess fork;
 
-
-
-
 	@SuppressWarnings("unchecked")
 	public static JakeJavaCompiler ofOutput(File outputDir) {
 		if (!outputDir.isDirectory()) {
@@ -59,6 +50,15 @@ public final class JakeJavaCompiler {
 		options.add("-d");
 		options.add(outputDir.getAbsolutePath());
 		return new JakeJavaCompiler(options, Collections.EMPTY_LIST, true, null);
+	}
+
+	private JakeJavaCompiler(List<String> options, List<File> javaSourceFiles,
+			boolean failOnError, JakeProcess fork) {
+		super();
+		this.options = options;
+		this.javaSourceFiles = javaSourceFiles;
+		this.failOnError = failOnError;
+		this.fork = fork;
 	}
 
 	public JakeJavaCompiler failOnError(boolean fail) {
@@ -159,5 +159,7 @@ public final class JakeJavaCompiler {
 		}
 		return compiler;
 	}
+
+
 
 }

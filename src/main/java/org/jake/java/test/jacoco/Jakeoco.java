@@ -5,14 +5,11 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import lombok.Data;
-
 import org.jake.JakeLocator;
 import org.jake.JakeLog;
 import org.jake.java.JakeJavaProcess;
 import org.jake.java.test.junit.JakeUnit;
 
-@Data
 public final class Jakeoco implements JakeUnit.Enhancer {
 
 	private final File agent;
