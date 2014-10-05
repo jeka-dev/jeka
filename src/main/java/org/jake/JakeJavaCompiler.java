@@ -110,11 +110,11 @@ public final class JakeJavaCompiler {
 	}
 
 	public JakeJavaCompiler andSources(JakeDirSet jakeDirSet) {
-		return andSources(jakeDirSet.withFilter(JAVA_SOURCE_ONLY_FILTER).listFiles());
+		return andSources(jakeDirSet.andFilter(JAVA_SOURCE_ONLY_FILTER).files());
 	}
 
 	public JakeJavaCompiler andSources(JakeDir jakeDir) {
-		return andSources(jakeDir.withFilter(JAVA_SOURCE_ONLY_FILTER).listFiles());
+		return andSources(jakeDir.andFilter(JAVA_SOURCE_ONLY_FILTER).listFiles());
 	}
 
 	public boolean compile() {

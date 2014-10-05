@@ -74,7 +74,7 @@ public final class JakeJavadoc {
 	private String[] toArguments(File outputDir) {
 		final List<String> list = new LinkedList<String>();
 		list.add("-sourcepath");
-		list.add(JakeUtilsFile.toPathString(this.srcDirs.listRoots(), ";"));
+		list.add(JakeUtilsFile.toPathString(this.srcDirs.roots(), ";"));
 		list.add("-d");
 		list.add(outputDir.getAbsolutePath());
 		if (JakeOptions.isVerbose()) {
@@ -94,7 +94,7 @@ public final class JakeJavadoc {
 		}
 
 
-		for (final File sourceFile : this.srcDirs.listFiles()) {
+		for (final File sourceFile : this.srcDirs.files()) {
 			if (sourceFile.getPath().endsWith(".java")) {
 				list.add(sourceFile.getAbsolutePath());
 			}

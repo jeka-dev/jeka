@@ -67,7 +67,7 @@ public final class JakeZip {
 				addDirView(zos, dirView);
 			} else if (item instanceof JakeDirSet) {
 				final JakeDirSet dirViews = (JakeDirSet) item;
-				for (final JakeDir dirView : dirViews.listJakeDirs()) {
+				for (final JakeDir dirView : dirViews.jakeDirs()) {
 					addDirView(zos, dirView);
 				}
 			} else {

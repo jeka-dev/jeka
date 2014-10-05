@@ -205,7 +205,7 @@ public final class JakeUnit {
 
 	@SuppressWarnings("rawtypes")
 	private Collection<Class> getClassesToTest() {
-		final JakeClasspath classpath = this.jakeClasspath().andHead(this.classesToTest.listRoots());
+		final JakeClasspath classpath = this.jakeClasspath().andHead(this.classesToTest.roots());
 		final JakeClassLoader classLoader = JakeClassLoader.system().parent().createChild(classpath);
 		return getJunitTestClassesInClassLoader(classLoader, this.classesToTest);
 	}

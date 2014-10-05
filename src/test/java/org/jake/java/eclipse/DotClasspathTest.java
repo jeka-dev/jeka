@@ -24,7 +24,7 @@ public class DotClasspathTest {
 	@Test
 	public void testSourceDirs() throws URISyntaxException {
 		final JakeDirSet dirSet = sample().sourceDirs(structure(), Sources.ALL_PROD).prodSources;
-		assertEquals(2, dirSet.listJakeDirs().size());
+		assertEquals(2, dirSet.jakeDirs().size());
 	}
 
 	@Test

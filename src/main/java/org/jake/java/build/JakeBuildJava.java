@@ -110,7 +110,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	 * Returns location of production resources.
 	 */
 	public JakeDirSet resourceDirs() {
-		return sourceDirs().withFilter(RESOURCE_FILTER).and(
+		return sourceDirs().andFilter(RESOURCE_FILTER).and(
 				baseDir("src/main/resources"), generatedSourceDir());
 	}
 
@@ -126,7 +126,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	 */
 	public JakeDirSet testResourceDirs() {
 		return JakeDirSet.of(baseDir("src/test/resources")).and(
-				testSourceDirs().withFilter(RESOURCE_FILTER));
+				testSourceDirs().andFilter(RESOURCE_FILTER));
 	}
 
 	/**
@@ -228,8 +228,8 @@ public class JakeBuildJava extends JakeBuildBase {
 				.withProjectBaseDir(baseDir)
 				.withBinaries(classDir())
 				.withLibraries(deps(JakeScope.COMPILE))
-				.withSources(editedSourceDirs().listRoots())
-				.withTest(testSourceDirs().listRoots())
+				.withSources(editedSourceDirs().roots())
+				.withTest(testSourceDirs().roots())
 				.withProperty(JakeSonar.JUNIT_REPORTS_PATH, JakeUtilsFile.getRelativePath(baseDir, new File(testReportDir(), "junit")))
 				.withProperty(JakeSonar.SUREFIRE_REPORTS_PATH, JakeUtilsFile.getRelativePath(baseDir, new File(testReportDir(), "junit")))
 				.withProperty(JakeSonar.DYNAMIC_ANALYSIS, "reuseReports")
@@ -347,11 +347,11 @@ public class JakeBuildJava extends JakeBuildBase {
 		if (skipTests) {
 			return false;
 		}
-		if (testSourceDirs == null || testSourceDirs.listJakeDirs().isEmpty()) {
+		if (testSourceDirs == null || testSourceDirs.jakeDirs().isEmpty()) {
 			JakeLog.info("No test source declared. Skip tests.");
 			return false;
 		}
-		if (!testSourceDirs().exist()) {
+		if (!testSourceDirs().allExists()) {
 			JakeLog.info("No existing test source directory found : " + testSourceDirs +". Skip tests.");
 			return false;
 		}
