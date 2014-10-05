@@ -21,7 +21,7 @@ import org.apache.ivy.plugins.resolver.IBiblioResolver;
 import org.apache.ivy.util.DefaultMessageLogger;
 import org.apache.ivy.util.Message;
 import org.jake.depmanagement.JakeScope;
-import org.jake.depmanagement.JakeScope.Mappings;
+import org.jake.depmanagement.JakeScope.JakeScopeMapping;
 
 public class JakeIvy {
 
@@ -106,7 +106,7 @@ public class JakeIvy {
 	}
 
 	public void dependencies() {
-		Mappings.of(RUNTIME, COMPILE).and(RUNTIME, COMPILE).and(JakeScope.PROVIDED, "myprovided");
+		JakeScopeMapping.of(RUNTIME, COMPILE).and(RUNTIME, COMPILE).and(JakeScope.PROVIDED, "myprovided");
 		COMPILE.mapTo(RUNTIME).and(TEST, COMPILE);
 	}
 

@@ -176,7 +176,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	public JakeJavaCompiler productionCompiler() {
 		return JakeJavaCompiler.ofOutput(classDir())
 				.andSources(sourceDirs())
-				.withClasspath(deps(JakeScope.COMPILE))
+				.withClasspath(deps(JakeScope.COMPILE).and(deps(JakeScope.PROVIDED)))
 				.withSourceVersion(this.sourceJavaVersion())
 				.withTargetVersion(this.targetJavaVersion());
 	}
@@ -304,7 +304,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	/**
-	 * Returns the resolver finally used in this build. Depending od the passed
+	 * Returns the resolver finally used in this build. Depending on the passed
 	 * options, It is made of the {@link #baseDependencyResolver()} augmented
 	 * with extra-libs mentioned in options <code>extraXxxxPath</code>.
 	 */
@@ -312,7 +312,7 @@ public class JakeBuildJava extends JakeBuildBase {
 		if (cachedResolver == null) {
 			JakeLog.startAndNextLine("Resolving Dependencies ");
 			final JakeDependencyResolver resolver = JakeDependencyResolver
-					.findByClassNameOrDfault(dependencyResolver, baseDependencyResolver());
+					.findByClassNameOrDefault(dependencyResolver, baseDependencyResolver());
 			final JakeDependencyResolver extraResolver = computeExtraPath();
 			if (!extraResolver.isEmpty()) {
 				JakeLog.info("Using extra libs : ", extraResolver.toStrings());

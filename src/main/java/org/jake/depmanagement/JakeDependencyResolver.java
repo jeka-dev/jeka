@@ -8,11 +8,13 @@ import java.util.Set;
 
 import org.jake.JakeClassLoader;
 import org.jake.JakeLog;
+import org.jake.JakePath;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
 
 /**
  * Defines where are located required dependencies for various scopes.
+ * Each project has its own instance of <code>JakeDependencyResolver</code>.
  * 
  * @author Djeang
  */
@@ -20,31 +22,45 @@ public abstract class JakeDependencyResolver {
 
 	protected abstract List<File> getDeclaredDependencies(JakeScope scope);
 
+	/**
+	 * Returns the scopes used inside this resolver.
+	 */
 	public abstract Set<JakeScope> declaredScopes();
 
-	public final List<File> get(JakeScope scope) {
+
+	public final JakePath get(JakeScope scope) {
 		final List<File> result = new LinkedList<File>();
 		for (final JakeScope jakeScope : scope.impliedScopes()) {
 			result.addAll(this.getDeclaredDependencies(jakeScope));
 		}
-		return result;
+		return JakePath.of(result);
 	}
 
-
+	/**
+	 * Returns a resolver that is merge of this one and the one passed as parameters.
+	 * In other words, the returned resolver will contains dependencies of this resolver
+	 * and the specified one.
+	 */
 	public JakeDependencyResolver merge(JakeDependencyResolver other) {
 		return new MergedDependencyResolver(this, other);
 	}
 
+	/**
+	 * Returns a multi-line human readable representation of this resolver.
+	 */
 	public List<String> toStrings() {
 		final List<String> result = new LinkedList<String>();
 		result.add(this.getClass().getName());
 		for (final JakeScope scope : this.declaredScopes()) {
-			final List<File> libs = this.get(scope);
-			result.add(scope.name() + " (" + libs.size() + " artifacts): " + libs);
+			final JakePath libs = this.get(scope);
+			result.add(scope.name() + " (" + libs.entries().size() + " artifacts): " + libs);
 		}
 		return result;
 	}
 
+	/**
+	 * Returns <code>true<code> if this resolver does not contain any dependencies.
+	 */
 	public boolean isEmpty() {
 		for (final JakeScope scope : this.declaredScopes()) {
 			if (!this.get(scope).isEmpty()) {
@@ -66,7 +82,11 @@ public abstract class JakeDependencyResolver {
 		return JakeUtilsReflect.newInstance(depClass);
 	}
 
-	public static JakeDependencyResolver findByClassNameOrDfault(String simpleOrFullClassName, JakeDependencyResolver defaultResolver) {
+	/**
+	 * Returns a dependency resolver according to its class name. The class name can be
+	 * either a full qualified name (as org.mypackage.MyResolver) or simple class name (as MyResolver).
+	 */
+	public static JakeDependencyResolver findByClassNameOrDefault(String simpleOrFullClassName, JakeDependencyResolver defaultResolver) {
 		if (simpleOrFullClassName == null) {
 			return defaultResolver;
 		}
