@@ -6,6 +6,7 @@ import java.util.LinkedList;
 
 import org.jake.utils.JakeUtilsTime;
 
+
 public class JakeLog {
 
 	private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<LinkedList<Long>>();
