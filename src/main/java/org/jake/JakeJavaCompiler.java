@@ -166,10 +166,14 @@ public final class JakeJavaCompiler {
 	public JakeJavaCompiler andSources(Iterable<File> files) {
 		final List<File> newSources = new LinkedList<File>(this.javaSourceFiles);
 		for (final File file : files) {
-			newSources.add(file);
+			if (file.getName().toLowerCase().endsWith(".java")) {
+				newSources.add(file);
+			}
 		}
 		return new JakeJavaCompiler(options, newSources, failOnError, fork);
 	}
+
+
 
 	/**
 	 * Actually compile the source files to the output directory.
