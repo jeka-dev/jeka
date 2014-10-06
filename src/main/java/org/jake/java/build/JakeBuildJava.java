@@ -33,8 +33,8 @@ public class JakeBuildJava extends JakeBuildBase {
 	 * Filter to excludes everything in a java source directory which are not resources.
 	 */
 	protected static final JakeFileFilter RESOURCE_FILTER = JakeFileFilter
-			.exclude("**/*.java").andExcludeAll("**/package.html")
-			.andExcludeAll("**/doc-files");
+			.exclude("**/*.java").andExclude("**/package.html")
+			.andExclude("**/doc-files");
 
 	@JakeOption({
 		"Mention if you want to add extra lib in your 'compile' scope but not in your 'runtime' scope. It can be absolute or relative to the project base dir.",

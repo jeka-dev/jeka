@@ -8,11 +8,14 @@ import java.util.zip.Deflater;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import org.jake.utils.JakeUtilsAssert;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
-import org.jake.utils.JakeUtilsString;
 
+/**
+ * Defines element to embed in a zip archive and methods to write archive on disk.
+ */
 public final class JakeZip {
 
 	private final Iterable<? extends Object> itemsToZip;
@@ -29,8 +32,16 @@ public final class JakeZip {
 		this.archivestoMerge = Collections.emptyList();
 	}
 
-	public static JakeZip of(File ...fileOrDirs) {
-		return new JakeZip(Arrays.asList( fileOrDirs));
+	/**
+	 * Creates a {@link JakeZip} from an array of directories.
+	 */
+	public static JakeZip of(File ...dirs) {
+		for (final File file : dirs) {
+			if (!file.isDirectory()) {
+				throw new IllegalArgumentException(file.getPath() + " is not a directory.");
+			}
+		}
+		return new JakeZip(Arrays.asList( dirs));
 	}
 
 	static JakeZip of(JakeDirSet ...jakeDirSets) {
@@ -47,11 +58,17 @@ public final class JakeZip {
 		return new JakeZip(itemsToZip, JakeUtilsIterable.chain(this.archivestoMerge, archiveFiles));
 	}
 
+	/**
+	 * Zips and writes the contain of this archive to disk using {@link Deflater#DEFAULT_COMPRESSION} level.
+	 * This method returns a {@link CheckSumer} to conveniently create digests of the produced zip file.
+	 */
 	public CheckSumer to(File zipFile) {
-		this.to(zipFile, Deflater.DEFAULT_COMPRESSION);
-		return new CheckSumer(zipFile);
+		return this.to(zipFile, Deflater.DEFAULT_COMPRESSION);
 	}
 
+	/**
+	 * As {@link #to(File)} but specifying compression level.
+	 */
 	public CheckSumer to(File zipFile, int compressLevel) {
 		JakeLog.start("Creating zip file : " + zipFile);
 		final ZipOutputStream zos = JakeUtilsIO.createZipOutputStream(zipFile, compressLevel);
@@ -105,25 +122,44 @@ public final class JakeZip {
 		}
 	}
 
+	/**
+	 * Wrapper on <code>File</code> allowing to creates digests on it.
+	 * 
+	 * @author Jerome Angibaud
+	 */
 	public static final class CheckSumer {
+
+		/**
+		 * Creates an instance of {@link CheckSumer} wrapping the specified file.
+		 */
+		public static CheckSumer of(File file) {
+			return new CheckSumer(file);
+		}
 
 		private final File file;
 
-		public CheckSumer(File file) {
-			super();
+		private CheckSumer(File file) {
+			JakeUtilsAssert.isTrue(file.isFile(), file.getAbsolutePath() + " is a directory, not a file.");
 			this.file = file;
 		}
 
+		/**
+		 * Creates an MD5 digest for this wrapped file. The digest file is written in the same directory
+		 * as the digested file and has the same name + '.md5' extension.
+		 */
 		public CheckSumer md5() {
 			JakeLog.start("Creating MD5 file for : " + file);
 			final File parent = file.getParentFile();
 			final String md5 = JakeUtilsFile.md5Checksum(file);
-			final String fileName = JakeUtilsString.substringBeforeLast(file.getName(), ".") + ".md5";
+			final String fileName = file.getName() + ".md5";
 			JakeUtilsFile.writeString(new File(parent,  fileName), md5, false);
 			JakeLog.done();
 			return this;
 		}
 
+		/**
+		 * As {@link #md5()} but allow to pass a flag as parameter to actually process or not the digesting.
+		 */
 		public CheckSumer md5(boolean process) {
 			if (!process) {
 				return this;

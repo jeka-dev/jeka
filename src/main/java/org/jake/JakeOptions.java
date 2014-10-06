@@ -86,7 +86,7 @@ public final class JakeOptions {
 				throw new IllegalStateException("Extra jake libs " + file.getPath() + " can't be found.");
 			}
 			if (file.isDirectory()) {
-				result.addAll(JakeDir.of(file).include("**/*.jar", "**/*.zip").listFiles());
+				result.addAll(JakeDir.of(file).include("**/*.jar", "**/*.zip").files());
 			} else {
 				result.add(file);
 			}

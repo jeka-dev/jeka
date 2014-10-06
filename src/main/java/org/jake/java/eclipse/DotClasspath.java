@@ -183,7 +183,7 @@ final class DotClasspath {
 			}
 			final JakeDir dirView = JakeDir.of(conFolder).include("**/*.jar");
 			final List<File> result = new LinkedList<File>();
-			for (final File file : dirView.listFiles()) {
+			for (final File file : dirView.files()) {
 				result.add(file);
 			}
 			return result;

@@ -17,8 +17,8 @@
 package org.jake;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.jake.utils.JakeUtilsString;
 
@@ -39,6 +39,36 @@ import org.jake.utils.JakeUtilsString;
  */
 final class AntPattern  {
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((pattern == null) ? 0 : pattern.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final AntPattern other = (AntPattern) obj;
+		if (pattern == null) {
+			if (other.pattern != null) {
+				return false;
+			}
+		} else if (!pattern.equals(other.pattern)) {
+			return false;
+		}
+		return true;
+	}
+
 	private static final char PATH_SEPARATOR_CHAR = '/';
 
 	private static final String PATH_SEPARATOR = "" + PATH_SEPARATOR_CHAR;
@@ -53,12 +83,12 @@ final class AntPattern  {
 		return new AntPattern(pattern);
 	}
 
-	public static AntPattern[] arrayOf(String ...patterns) {
-		final List<AntPattern> result = new ArrayList<AntPattern>(patterns.length);
+	public static Set<AntPattern> setOf(String ...patterns) {
+		final Set<AntPattern> result = new HashSet<AntPattern>(patterns.length);
 		for (final String pattern : patterns) {
 			result.add(AntPattern.of(pattern));
 		}
-		return result.toArray(new AntPattern[0]);
+		return result;
 	}
 
 

@@ -1,17 +1,20 @@
 package org.jake;
 
 import java.io.File;
-import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jake.utils.JakeUtilsAssert;
 import org.jake.utils.JakeUtilsFile;
 
 /**
  * A directory that may be filtered or not. If there is no <code>Filter</code> than this stands
  * simply for a directory. If a filter is defined on, than this stands for only a part of this directory,
- * meaning that files or subfolder filtered are not part of this.
+ * meaning that files or subfolder filtered are not part of this.<br/>
+ * 
+ * When speaking about files contained in a {@link JakeDir}, we mean all files contained in its root directory
+ * or sub-directory, matching positively the filter defined on it.
  * 
  * @author Jerome Angibaud
  */
@@ -28,7 +31,11 @@ public final class JakeDir implements Iterable<File> {
 		return new JakeDir(rootDir);
 	}
 
+	/**
+	 * Creates a {@link JakeDir} having the specified root directory and filter.
+	 */
 	private JakeDir(File rootDir, JakeFileFilter filter) {
+		JakeUtilsAssert.notNull(rootDir, "Root dir can't be null.");
 		if (filter == null) {
 			throw new IllegalArgumentException("filter can't be null.");
 		}
@@ -53,6 +60,9 @@ public final class JakeDir implements Iterable<File> {
 		return new JakeDir(newBase);
 	}
 
+	/**
+	 * Creates the root directory if it does not exist.
+	 */
 	public JakeDir createIfNotExist() {
 		if (!root.exists() ) {
 			root.mkdirs();
@@ -60,10 +70,16 @@ public final class JakeDir implements Iterable<File> {
 		return this;
 	}
 
+	/**
+	 * Returns the file matching for the the given path relative to this root directory.
+	 */
 	public File file(String relativePath) {
 		return new File(root, relativePath);
 	}
 
+	/**
+	 * Copies files contained in this {@link JakeDir} to the specified directory.
+	 */
 	public int copyTo(File destinationDir) {
 		if (!destinationDir.exists()) {
 			destinationDir.mkdirs();
@@ -73,22 +89,31 @@ public final class JakeDir implements Iterable<File> {
 		return JakeUtilsFile.copyDir(root, destinationDir, filter.toFileFilter(root), true, JakeOptions.isVerbose(), JakeLog.infoStream());
 	}
 
-	public int copyTo(JakeDir destinationDir) {
-		return copyTo(destinationDir.root());
-	}
-
+	/**
+	 * Returns the root directory.
+	 */
 	public File root() {
 		return root;
 	}
 
-	public JakeFileFilter getFilter() {
+	/**
+	 * Returns the filter defined on this {@link JakeDir}, never <code>null</code>.
+	 */
+	public JakeFileFilter filter() {
 		return filter;
 	}
 
+	/**
+	 * Returns if the root directory exists. (Short hand for #root.exists()).
+	 */
 	public boolean exists() {
 		return root.exists();
 	}
 
+	/**
+	 * Returns path of each files file contained in this {@link JakeDir} relative to its
+	 * root.
+	 */
 	public List<String> relativePathes() {
 		final List<String> pathes = new LinkedList<String>();
 		for (final File file : this) {
@@ -97,14 +122,23 @@ public final class JakeDir implements Iterable<File> {
 		return pathes;
 	}
 
+	/**
+	 * Returns a {@link JakeZip} of this {@link JakeDir}.
+	 */
 	public JakeZip zip() {
 		return JakeZip.of(this);
 	}
 
+	/**
+	 * Creates a {@link JakeDir} having the same root directory as this one but without any filter.
+	 */
 	public JakeDir noFiltering() {
 		return new JakeDir(root);
 	}
 
+	/**
+	 * Returns if this file is contained in this {@link JakeDir}.
+	 */
 	public boolean contains(File file) {
 		if (!this.isAncestorOf(file)) {
 			return false;
@@ -113,7 +147,7 @@ public final class JakeDir implements Iterable<File> {
 		return this.filter.accept(relativePath);
 	}
 
-	public boolean isAncestorOf(File file) {
+	private boolean isAncestorOf(File file) {
 		return JakeUtilsFile.isAncestor(root, file);
 	}
 
@@ -128,24 +162,31 @@ public final class JakeDir implements Iterable<File> {
 		return new JakeDir(root, this.filter.and(filter));
 	}
 
+	/**
+	 * Short hand to {@link #andFilter(JakeFileFilter)} defining an include Ant pattern filter.
+	 */
 	public JakeDir include(String ... antPatterns) {
 		return andFilter(JakeFileFilter.include(antPatterns));
 	}
 
+	/**
+	 * Short hand to {@link #andFilter(JakeFileFilter)} defining an exclude Ant pattern filter.
+	 */
 	public JakeDir exclude(String ... antPatterns) {
 		return andFilter(JakeFileFilter.exclude(antPatterns));
 	}
 
+	/**
+	 * Returns a {@link JakeDirSet} made of this {@link JakeDir} and the specified one.
+	 */
 	public JakeDirSet and(JakeDir dirView) {
 		return JakeDirSet.of(this, dirView);
 	}
 
-	public JakeDirSet and(JakeDirSet dirViews) {
-		return JakeDirSet.of(this).and(dirViews);
-	}
-
-
-	public List<File> listFiles() {
+	/**
+	 * Returns the file contained in this {@link JakeDir}.
+	 */
+	public List<File> files() {
 		if (!root.exists()) {
 			throw new IllegalStateException("Folder " + root.getAbsolutePath() + " does nor exist.");
 		}
@@ -154,15 +195,12 @@ public final class JakeDir implements Iterable<File> {
 
 	@Override
 	public Iterator<File> iterator() {
-		return listFiles().iterator();
+		return files().iterator();
 	}
 
-	public void print(PrintStream printStream) {
-		for (final File file : this) {
-			printStream.println(file.getPath());
-		}
-	}
-
+	/**
+	 * Returns the file count contained in this {@link JakeDir}.
+	 */
 	public int fileCount(boolean includeFolder) {
 		return JakeUtilsFile.count(root, filter.toFileFilter(root), includeFolder);
 	}

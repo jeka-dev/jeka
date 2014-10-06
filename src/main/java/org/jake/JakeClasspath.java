@@ -121,7 +121,7 @@ public final class JakeClasspath implements Iterable<File> {
 				if (!parent.exists()) {
 					JakeLog.warn("File " + parent.getAbsolutePath() + " does not exist : classpath entry " + file.getAbsolutePath() + " will be ignored." );
 				} else {
-					result.addAll(JakeDir.of(parent).include("*.jar").listFiles());
+					result.addAll(JakeDir.of(parent).include("*.jar").files());
 				}
 			} else if (!file.exists()) {
 				throw new IllegalArgumentException("Classpath element " + file.getAbsolutePath() + " does not exist.");

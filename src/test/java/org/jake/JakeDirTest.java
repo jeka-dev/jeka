@@ -19,10 +19,10 @@ public class JakeDirTest {
 		File sampleFolder = sampleFile.getParentFile().getParentFile();
 		
 		JakeDir subfolderTxt = JakeDir.of(sampleFolder).include("/subfolder/*.txt");
-		assertEquals(1, subfolderTxt.listFiles().size());
+		assertEquals(1, subfolderTxt.files().size());
 		
 		subfolderTxt = JakeDir.of(sampleFolder).include("subfolder/*.txt");
-		assertEquals(1, subfolderTxt.listFiles().size());
+		assertEquals(1, subfolderTxt.files().size());
 		
 	}
 

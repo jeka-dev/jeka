@@ -137,7 +137,7 @@ public final class JakeDirSet implements Iterable<File> {
 		final LinkedList<File> result = new LinkedList<File>();
 		for (final JakeDir dirView : this.jakeDirs) {
 			if (dirView.root().exists()) {
-				result.addAll(dirView.listFiles());
+				result.addAll(dirView.files());
 			}
 		}
 		return result;
