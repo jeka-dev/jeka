@@ -134,7 +134,7 @@ public class JakeBuildBase {
 		JakeLog.info("Ex: jake javadoc compile -verbose=true -other=xxx -DmyProp=Xxxx");
 		JakeLog.nextLine();
 		JakeLog.info("Available action(s) for build '" + this.getClass().getName() + "' : " );
-		JakeLog.offset(2);
+		JakeLog.shift(2);
 		final List<ActionDescription> list = new LinkedList<JakeBuildBase.ActionDescription>();
 		for (final Method method : this.getClass().getMethods()) {
 
@@ -161,13 +161,13 @@ public class JakeBuildBase {
 			list.add(actionDescription);
 		}
 		ActionDescription.log(list);
-		JakeLog.offset(-2);
+		JakeLog.shift(-2);
 		JakeLog.nextLine();
 		JakeLog.info("Standard options for this build class : ");
 		JakeLog.nextLine();
-		JakeLog.offset(2);
+		JakeLog.shift(2);
 		JakeLog.info(JakeOptions.help(this.getClass()));
-		JakeLog.offset(-2);
+		JakeLog.shift(-2);
 	}
 
 	private static class ActionDescription implements Comparable<ActionDescription> {
@@ -218,9 +218,9 @@ public class JakeBuildBase {
 					JakeLog.info("From " + actionDescription.declaringClass.getName());
 					currentDecClass = actionDescription.declaringClass;
 				}
-				JakeLog.offset(1);
+				JakeLog.shift(1);
 				actionDescription.log();
-				JakeLog.offset(-1);
+				JakeLog.shift(-1);
 			}
 			JakeLog.nextLine();
 		}

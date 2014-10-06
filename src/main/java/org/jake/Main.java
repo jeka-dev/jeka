@@ -11,7 +11,12 @@ import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsString;
 
-public class JakeMain {
+/**
+ * Main class for launching Jake from command line.
+ * 
+ * @author Jerome Angibaud
+ */
+class Main {
 
 	private static final String DEFAULT_METHOD = "base";
 
@@ -87,7 +92,7 @@ public class JakeMain {
 
 
 	private static int printAsciiArt1() {
-		final InputStream inputStream = JakeMain.class.getResourceAsStream("ascii1.txt");
+		final InputStream inputStream = Main.class.getResourceAsStream("ascii1.txt");
 		final List<String> lines = JakeUtilsIO.readLines(inputStream);
 		int i = 0;
 		for (final String line: lines) {

@@ -363,7 +363,7 @@ public final class JakeClassLoader {
 		if (this.isDefined(JakeLog.class.getName())) {
 			final int offset = JakeLog.offset();
 			final Class<?> toClass = this.load(JakeLog.class.getName());
-			JakeUtilsReflect.invokeStaticMethod(toClass, "offset", offset);
+			JakeUtilsReflect.invokeStaticMethod(toClass, "shift", offset);
 		}
 	}
 

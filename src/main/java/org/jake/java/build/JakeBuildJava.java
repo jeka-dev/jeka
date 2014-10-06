@@ -202,7 +202,7 @@ public class JakeBuildJava extends JakeBuildBase {
 		final File outputDir = ouputDir(projectName() + "-javadoc");
 		final File zip =  ouputDir(projectName() + "-javadoc.zip");
 		return JakeJavadoc.of(sourceDirs(), outputDir, zip)
-				.withClasspath(deps(JakeScope.COMPILE));
+				.withClasspath(deps(JakeScope.COMPILE).and(deps(JakeScope.PROVIDED)));
 	}
 
 	public JakeJarPacker jarPacker() {

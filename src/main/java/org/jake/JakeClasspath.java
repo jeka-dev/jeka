@@ -16,8 +16,7 @@ import org.jake.utils.JakeUtilsString;
  * A sequence of file to be used as a <code>class path</code>.<br/>
  * Each file is called an <code>entry</code>.<br/>
  * Each entry is supposed to be either a <code>jar</code> file either a <code>folder</code>.<br/>
- * Non existing files are accepted as valid <code>entry</code>, though they won't contain any classes.<br/>
- * Instances of this class are immutable.
+ * Non existing files are accepted as valid <code>entry</code>, though they won't contain any classes.
  * 
  * @author Djeang
  */

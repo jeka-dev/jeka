@@ -155,6 +155,11 @@ class Project {
 						+ "' found in class '" + buildClass.getCanonicalName() + "'. Skip.");
 				continue;
 			}
+			if (!Void.TYPE.equals(method.getReturnType())) {
+				JakeLog.warn("A zero-arg method '" + methodName
+						+ "' found in class '" + buildClass.getCanonicalName() + "' but was not returning a void result. Skip.");
+				continue;
+			}
 			final long start = System.nanoTime();
 			boolean success = false;
 			try {
@@ -182,7 +187,6 @@ class Project {
 					JakeLog.error("-> Method " + methodName + " failed in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
 				}
 			}
-			JakeLog.flush();
 			JakeLog.nextLine();
 		}
 		return true;

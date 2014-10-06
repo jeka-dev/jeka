@@ -6,7 +6,11 @@ import java.util.LinkedList;
 
 import org.jake.utils.JakeUtilsTime;
 
-
+/**
+ * Logger to use to display any relevant information on the running build.
+ * 
+ * @author Jerome Angibaud
+ */
 public class JakeLog {
 
 	private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<LinkedList<Long>>();
@@ -17,11 +21,13 @@ public class JakeLog {
 
 	private static OffsetStream warnWriter = new OffsetStream(System.err);
 
+	/**
+	 * Logs a message indicating that a processing has been started. Elipsis are added at the end of the message
+	 * and all subsequent logs will be shift right until {@link #done()} is invoked.
+	 */
 	public static void start(String message) {
 		infoWriter.print("- " + message +  " ... " );
-		infoWriter.inc();
-		errorWriter.inc();
-		warnWriter.inc();
+		incOffset();
 		LinkedList<Long> times = START_TIMES.get();
 		if (times == null) {
 			times = new LinkedList<Long>();
@@ -31,15 +37,26 @@ public class JakeLog {
 
 	}
 
+	/**
+	 * As {@link #startAndNextLine(String)} but do a carriage return after the start message.
+	 */
 	public static void startAndNextLine(String message) {
 		start(message);
 		nextLine();
 	}
 
+	/**
+	 * Notify that the processing notified with 'start' has terminated.
+	 * The elapsed time between last {@link #start(String)} invoke and this method invoke is notified.
+	 * Also the the shifting due to last 'start' invoke is annihilated.
+	 */
 	public static void done() {
 		doneMessage("Done");
 	}
 
+	/**
+	 * As {@link #done()} but adding a tailored message.
+	 */
 	public static void done(String message) {
 		doneMessage("Done : " + message);
 	}
@@ -52,15 +69,19 @@ public class JakeLog {
 		}
 		final long start = times.poll();
 		infoWriter.println(message + " in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
-		infoWriter.dec();
-		errorWriter.dec();
-		warnWriter.dec();
+		decOffset();
 	}
 
+	/**
+	 * Displays a message at info level.
+	 */
 	public static void info(String message) {
 		infoWriter.println(message);
 	}
 
+	/**
+	 * Displays a multi-line message of the specified message followed by specified lines.
+	 */
 	public static void info(String message, Iterable<String> lines) {
 		infoWriter.print(message);
 		for (final String line : lines) {
@@ -68,39 +89,52 @@ public class JakeLog {
 		}
 	}
 
+	/**
+	 * Displays multi-line message.
+	 */
 	public static void info(Iterable<String> lines) {
 		for (final String line : lines) {
 			infoWriter.println(line);
 		}
 	}
 
+	/**
+	 * Displays multi-line message.
+	 */
 	public static void info(String ... lines) {
 		info(Arrays.asList(lines));
 	}
 
+	/**
+	 * Displays a multi-line message at warn level.
+	 */
 	public static void warn(Iterable<String> lines) {
 		for (final String line : lines) {
 			warnWriter.println(line);
 		}
 	}
 
-
+	/**
+	 * Displays a message at warn level.
+	 */
 	public static void warn(String message) {
-		flush();
 		warnWriter.println(message);
-		warnWriter.flush();
 	}
 
+	/**
+	 * Displays a message at warn level if the specified condition is <code>true</code>.
+	 */
 	public static void warnIf(boolean condition, String message) {
 		if (condition) {
 			warn(message);
 		}
 	}
 
+	/**
+	 * Displays a message at warn level.
+	 */
 	public static void error(String message) {
-		flush();
 		errorWriter.println(message);
-		errorWriter.flush();
 	}
 
 	public static void nextLine() {
@@ -119,20 +153,30 @@ public class JakeLog {
 		return errorWriter;
 	}
 
-
-
-	public static void flush() {
-		infoWriter.flush();
-		warnWriter.flush();
-		errorWriter.flush();
+	private static void decOffset() {
+		infoWriter.dec();
+		warnWriter.dec();
+		errorWriter.dec();
 	}
 
-	public static void offset(int delta) {
+	private static void incOffset() {
+		infoWriter.inc();
+		warnWriter.inc();
+		errorWriter.inc();
+	}
+
+	/**
+	 * Shifts the left margin. All subsequent log will be shifted <code>delta</code> characters to right.
+	 */
+	public static void shift(int delta) {
 		infoWriter.offsetLevel += delta;
 		errorWriter.offsetLevel += delta;
 		warnWriter.offsetLevel += delta;
 	}
 
+	/**
+	 * Returns the current left margin size in character.
+	 */
 	public static int offset() {
 		return infoWriter.offsetLevel;
 	}
