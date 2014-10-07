@@ -190,7 +190,7 @@ public final class JakeUnit {
 			JakeTestReportBuilder.of(result).writeToFileSystem(reportDir);
 		}
 		for (final Runnable runnable : this.postActions) {
-			runnable.run();
+			runnable.run();  // NOSONAR
 		}
 		JakeLog.done("Tests run");
 		return result;

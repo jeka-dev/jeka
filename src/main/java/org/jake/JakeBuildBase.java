@@ -137,7 +137,7 @@ public class JakeBuildBase {
 		JakeLog.nextLine();
 		JakeLog.info("Available action(s) for build '" + this.getClass().getName() + "' : " );
 		JakeLog.shift(JUMP);
-		final List<ActionDescription> list = new LinkedList<JakeBuildBase.ActionDescription>();
+		final List<CommandDescription> list = new LinkedList<JakeBuildBase.CommandDescription>();
 		for (final Method method : this.getClass().getMethods()) {
 			final int modifier = method.getModifiers();
 			if (!method.getReturnType().equals(void.class)
@@ -147,15 +147,15 @@ public class JakeBuildBase {
 				continue;
 			}
 			final JakeDoc jakeDoc = JakeUtilsReflect.getInheritedAnnotation(method, JakeDoc.class);
-			final ActionDescription actionDescription;
+			final CommandDescription actionDescription;
 			if (jakeDoc != null) {
-				actionDescription = new ActionDescription(method, jakeDoc.value());
+				actionDescription = new CommandDescription(method, jakeDoc.value());
 			} else {
-				actionDescription = new ActionDescription(method, null);
+				actionDescription = new CommandDescription(method);
 			}
 			list.add(actionDescription);
 		}
-		ActionDescription.log(list);
+		CommandDescription.log(list);
 		JakeLog.shift(-JUMP);
 		JakeLog.nextLine();
 		JakeLog.info("Standard options for this build class : ");
@@ -165,21 +165,25 @@ public class JakeBuildBase {
 		JakeLog.shift(-JUMP);
 	}
 
-	private static class ActionDescription implements Comparable<ActionDescription> {
+	private static class CommandDescription implements Comparable<CommandDescription> {
 
 		private final String name;
 		private final String[] docs;
 		private final Class<?> declaringClass;
 
-		public ActionDescription(Method method, String[] docs) {
+		public CommandDescription(Method method, String[] docs) {
 			super();
 			this.name = method.getName();
 			this.docs = Arrays.copyOf(docs, docs.length);
 			this.declaringClass = method.getDeclaringClass();
 		}
 
+		public CommandDescription(Method method) {
+			this(method, new String[0]);
+		}
+
 		@Override
-		public int compareTo(ActionDescription other) {
+		public int compareTo(CommandDescription other) {
 			if (this.declaringClass.equals(other.declaringClass)) {
 				return this.name.compareTo(other.name);
 			}
@@ -204,10 +208,10 @@ public class JakeBuildBase {
 			}
 		}
 
-		public static void log(List<ActionDescription> actions) {
+		public static void log(List<CommandDescription> actions) {
 			Class<?> currentDecClass = null;
 			Collections.sort(actions);
-			for(final ActionDescription actionDescription : actions) {
+			for(final CommandDescription actionDescription : actions) {
 				if (actionDescription.declaringClass != currentDecClass) {
 					JakeLog.nextLine();
 					JakeLog.info("From " + actionDescription.declaringClass.getName());
@@ -239,7 +243,7 @@ public class JakeBuildBase {
 			if (getClass() != obj.getClass()) {
 				return false;
 			}
-			final ActionDescription other = (ActionDescription) obj;
+			final CommandDescription other = (CommandDescription) obj;
 			if (name == null) {
 				if (other.name != null) {
 					return false;

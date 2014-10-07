@@ -74,7 +74,7 @@ public abstract class JakeClassFilter {
 
 			@Override
 			public boolean accept(Class<?> candidate) {
-				if (this.accept(candidate)) {
+				if (JakeClassFilter.this.accept(candidate)) {
 					return true;
 				}
 				return classFilter.accept(candidate);
@@ -87,7 +87,7 @@ public abstract class JakeClassFilter {
 
 			@Override
 			public boolean accept(Class<?> candidate) {
-				if (!this.accept(candidate)) {
+				if (!JakeClassFilter.this.accept(candidate)) {
 					return false;
 				}
 				return classFilter.accept(candidate);

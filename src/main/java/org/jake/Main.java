@@ -41,7 +41,7 @@ class Main {
 		}
 		final boolean result = project.executeBuild(classLoader, actions);
 		if (!result) {
-			System.exit(1);  // NOSONNAR
+			System.exit(1);  // NOSONAR
 		}
 	}
 
