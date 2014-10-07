@@ -44,7 +44,6 @@ class JUnit4TestLauncher {
 		final JakeClassLoader classloader = JakeClassLoader.of(classes.iterator().next());
 		final Class[] classArray = JakeUtilsIterable.toArray(classes, Class.class);
 		if (needJakeInClasspath(printEachTestOnConsole, reportDetail)) {
-			//classloader = classloader.and(JakeLocator.jakeJarFile());
 			classloader.addEntry(JakeLocator.jakeJarFile());
 		}
 		return classloader.invokeStaticMethod(JUnit4TestExecutor.class.getName(), "launchInProcess", classArray, printEachTestOnConsole, reportDetail, reportDir);

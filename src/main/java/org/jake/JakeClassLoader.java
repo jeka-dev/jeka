@@ -29,6 +29,12 @@ import org.jake.utils.JakeUtilsString;
  */
 public final class JakeClassLoader {
 
+	private static final String CLASS_SUFFIX = ".class";
+
+	private static final int CLASS_SUFFIX_LENGTH = CLASS_SUFFIX.length();
+
+	private static final int JAVA_SUFFIX_LENGTH = ".java".length();
+
 	/**
 	 * A {@link FileFilter} accepting only .class files.
 	 */
@@ -36,7 +42,7 @@ public final class JakeClassLoader {
 
 		@Override
 		public boolean accept(File file) {
-			return (file.isFile() && file.getName().endsWith(".class"));
+			return (file.isFile() && file.getName().endsWith(CLASS_SUFFIX));
 		}
 	};
 
@@ -162,7 +168,7 @@ public final class JakeClassLoader {
 	 * will load the class <code>mypack1.subpack.MyClass</code>.
 	 */
 	public <T extends Object> Class<T> loadGivenClassSourcePath(String classSourcePath) {
-		final String className = classSourcePath.replace('/', '.').substring(0, classSourcePath.length()-5);
+		final String className = classSourcePath.replace('/', '.').substring(0, classSourcePath.length()-JAVA_SUFFIX_LENGTH);
 		return load(className);
 	}
 
@@ -173,7 +179,7 @@ public final class JakeClassLoader {
 	public <T extends Object> Class<T> loadIfExist(String className) {
 		try {
 			return (Class<T>) delegate.loadClass(className);
-		} catch (final ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) { // NOSONAR
 			return null;
 		}
 	}
@@ -185,7 +191,7 @@ public final class JakeClassLoader {
 		try {
 			delegate.loadClass(className);
 			return true;
-		} catch (final ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) { // NOSONAR
 			return false;
 		}
 	}
@@ -211,7 +217,7 @@ public final class JakeClassLoader {
 			}
 			return null;
 
-		} catch (final ClassNotFoundException e) {
+		} catch (final ClassNotFoundException e) {  //NOSONAR
 
 			final Set<Class<?>> classes = loadClasses(new FileFilter() {
 
@@ -224,10 +230,9 @@ public final class JakeClassLoader {
 				}
 			});
 			for (final Class<?> clazz : classes) {
-				if (clazz.getSimpleName().equals(name)) {
-					if (superClass == null || superClass.isAssignableFrom(clazz)) {
-						return (Class<? extends T>) clazz;
-					}
+				if (clazz.getSimpleName().equals(name) && superClass == null || superClass.isAssignableFrom(clazz)) {
+					return (Class<? extends T>) clazz;
+
 				}
 			}
 		}
@@ -242,16 +247,14 @@ public final class JakeClassLoader {
 	 * 
 	 * @param entryFilter The classpath entry filter. Can be <code>null</code>.
 	 */
-	public Set<Class<?>> loadClasses(FileFilter entryFilter) {
+	public Set<Class<? extends Object>> loadClasses(FileFilter entryFilter) {
 		final List<File> classfiles = new LinkedList<File>();
 		final Map<File, File> file2Entry = new HashMap<File, File>();
 		for (final File file : childClasspath()) {
-			if (entryFilter == null || entryFilter.accept(file)) {
-				if (file.isDirectory()) {
-					final List<File> files = JakeUtilsFile.filesOf(file, CLASS_FILE_FILTER, false);
-					classfiles.addAll(files);
-					JakeUtilsIterable.putMultiEntry(file2Entry, files, file);
-				}
+			if (entryFilter == null || entryFilter.accept(file) && file.isDirectory()) {
+				final List<File> files = JakeUtilsFile.filesOf(file, CLASS_FILE_FILTER, false);
+				classfiles.addAll(files);
+				JakeUtilsIterable.putMultiEntry(file2Entry, files, file);
 			}
 		}
 		final Set<Class<?>> result = new HashSet<Class<?>>();
@@ -275,7 +278,7 @@ public final class JakeClassLoader {
 	 * 
 	 * @see JakeClassLoader#loadClasses(FileFilter)
 	 */
-	public Set<Class<?>> loadClassesIn(JakeDirSet jakeDirSet) {
+	public Set<Class<? extends Object>> loadClassesIn(JakeDirSet jakeDirSet) {
 		final Set<Class<?>> result = new HashSet<Class<?>>();
 		for (final String path : jakeDirSet.relativePathes()) {
 			if (path.endsWith(".class")) {
@@ -288,7 +291,7 @@ public final class JakeClassLoader {
 
 
 	private static URL[] toUrl(Iterable<File> files) {
-		final ArrayList<URL> urls = new ArrayList<URL>();
+		final List<URL> urls = new ArrayList<URL>();
 		for (final File file : files) {
 			try {
 				urls.add(file.toURI().toURL());
@@ -304,7 +307,7 @@ public final class JakeClassLoader {
 	 * name <code>com.foo.Bar</code>.
 	 */
 	private static String getAsClassName(String resourceName) {
-		return resourceName.replace(File.separatorChar, '.').substring(0, resourceName.length()-6);
+		return resourceName.replace(File.separatorChar, '.').substring(0, resourceName.length()-CLASS_SUFFIX_LENGTH);
 	}
 
 	@Override
@@ -346,8 +349,7 @@ public final class JakeClassLoader {
 		}
 		offsetJakeLog();
 		final Object returned = JakeUtilsReflect.invokeStaticMethod(clazz, methodName, effectiveArgs);
-		final T result = (T) traverseClassLoader(returned, JakeClassLoader.current());
-		return result;
+		return (T) traverseClassLoader(returned, JakeClassLoader.current());
 	}
 
 	/**

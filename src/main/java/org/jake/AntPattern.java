@@ -98,10 +98,10 @@ final class AntPattern  {
 	public boolean doMatch(String path) {
 
 		// First clean path and pattern to remove leading '/', '.' or '\' characters
-		path = normalize(path);
+		final String normalizedPath = normalize(path);
 
 		final String[] pattDirs = JakeUtilsString.split(pattern, PATH_SEPARATOR);
-		final String[] pathDirs = JakeUtilsString.split(path, PATH_SEPARATOR);
+		final String[] pathDirs = JakeUtilsString.split(normalizedPath, PATH_SEPARATOR);
 
 		int pattIdxStart = 0;
 		int pattIdxEnd = pattDirs.length - 1;
@@ -125,10 +125,10 @@ final class AntPattern  {
 			// Path is exhausted, only match if rest of pattern is * or **'s
 			if (pattIdxStart > pattIdxEnd) {
 				return (pattern.endsWith(PATH_SEPARATOR) ?
-						path.endsWith(PATH_SEPARATOR) : !path.endsWith(PATH_SEPARATOR));
+						normalizedPath.endsWith(PATH_SEPARATOR) : !normalizedPath.endsWith(PATH_SEPARATOR));
 			}
 			if (pattIdxStart == pattIdxEnd && pattDirs[pattIdxStart].equals("*") &&
-					path.endsWith(PATH_SEPARATOR)) {
+					normalizedPath.endsWith(PATH_SEPARATOR)) {
 				return true;
 			}
 			for (int i = pattIdxStart; i <= pattIdxEnd; i++) {

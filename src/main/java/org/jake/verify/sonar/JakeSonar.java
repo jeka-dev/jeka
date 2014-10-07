@@ -10,15 +10,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.jake.JakeClassLoader;
 import org.jake.JakeLocator;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
 import org.jake.java.JakeJavaProcess;
 import org.jake.utils.JakeUtilsAssert;
 import org.jake.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsObject;
 
 
 public final class JakeSonar {
+
+	private static final String SONAR_PREFIX = ".sonar";
 
 	public static final String PROJECT_KEY = "projectKey";
 	public static final String PROJECT_NAME = "projectName";
@@ -46,7 +50,7 @@ public final class JakeSonar {
 
 	private final Map<String, String> params;
 
-	public final boolean enabled;
+	private final boolean enabled;
 
 
 	private JakeSonar(Map<String, String> params, boolean enabled) {
@@ -68,8 +72,8 @@ public final class JakeSonar {
 		final Properties properties = System.getProperties();
 		for (final Object keyObject : properties.keySet()) {
 			final String key= (String) keyObject;
-			if (key.startsWith("sonar.")) {
-				map.put(key.substring(6), properties.getProperty(key));
+			if (key.startsWith(SONAR_PREFIX)) {
+				map.put(key.substring(SONAR_PREFIX.length()), properties.getProperty(key));
 			}
 		}
 		return new JakeSonar(map, true);
@@ -91,8 +95,11 @@ public final class JakeSonar {
 	}
 
 	private JakeJavaProcess javaProcess() {
+		final File sonarRunnerJar = JakeUtilsObject.firstNonNull(
+				JakeClassLoader.current().fullClasspath().getEntryContainingClass("org.sonar.runner.Main"),
+				jarRunner());
 		final JakeJavaProcess result = JakeJavaProcess.of()
-				.withClasspath(jarRunner())
+				.withClasspath(sonarRunnerJar)
 				.andOptions(toProperties());
 		return result;
 	}

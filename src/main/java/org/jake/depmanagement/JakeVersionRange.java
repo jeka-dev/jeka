@@ -1,7 +1,7 @@
 package org.jake.depmanagement;
 
 
-public class JakeVersionRange {
+public final class JakeVersionRange {
 
 	public static JakeVersionRange of(String definition) {
 		return new JakeVersionRange(definition);

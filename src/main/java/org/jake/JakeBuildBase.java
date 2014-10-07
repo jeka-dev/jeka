@@ -23,6 +23,8 @@ import org.jake.utils.JakeUtilsTime;
  */
 public class JakeBuildBase {
 
+	private static final int JUMP = 2;
+
 	private File baseDirFile = JakeUtilsFile.workingDir();
 
 	private final String version = JakeUtilsTime.timestampSec();
@@ -134,21 +136,14 @@ public class JakeBuildBase {
 		JakeLog.info("Ex: jake javadoc compile -verbose=true -other=xxx -DmyProp=Xxxx");
 		JakeLog.nextLine();
 		JakeLog.info("Available action(s) for build '" + this.getClass().getName() + "' : " );
-		JakeLog.shift(2);
+		JakeLog.shift(JUMP);
 		final List<ActionDescription> list = new LinkedList<JakeBuildBase.ActionDescription>();
 		for (final Method method : this.getClass().getMethods()) {
-
-			if (!method.getReturnType().equals(void.class)) {
-				continue;
-			}
-			if (method.getParameterTypes().length != 0) {
-				continue;
-			}
-			if (JakeUtilsReflect.isMethodPublicIn(Object.class, method.getName())) {
-				continue;
-			}
 			final int modifier = method.getModifiers();
-			if (Modifier.isAbstract(modifier) || Modifier.isStatic(modifier)) {
+			if (!method.getReturnType().equals(void.class)
+					|| method.getParameterTypes().length != 0
+					|| JakeUtilsReflect.isMethodPublicIn(Object.class, method.getName())
+					|| Modifier.isAbstract(modifier) || Modifier.isStatic(modifier)) {
 				continue;
 			}
 			final JakeDoc jakeDoc = JakeUtilsReflect.getInheritedAnnotation(method, JakeDoc.class);
@@ -161,13 +156,13 @@ public class JakeBuildBase {
 			list.add(actionDescription);
 		}
 		ActionDescription.log(list);
-		JakeLog.shift(-2);
+		JakeLog.shift(-JUMP);
 		JakeLog.nextLine();
 		JakeLog.info("Standard options for this build class : ");
 		JakeLog.nextLine();
-		JakeLog.shift(2);
+		JakeLog.shift(JUMP);
 		JakeLog.info(JakeOptions.help(this.getClass()));
-		JakeLog.shift(-2);
+		JakeLog.shift(-JUMP);
 	}
 
 	private static class ActionDescription implements Comparable<ActionDescription> {
@@ -223,6 +218,36 @@ public class JakeBuildBase {
 				JakeLog.shift(-1);
 			}
 			JakeLog.nextLine();
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			final ActionDescription other = (ActionDescription) obj;
+			if (name == null) {
+				if (other.name != null) {
+					return false;
+				}
+			} else if (!name.equals(other.name)) {
+				return false;
+			}
+			return true;
 		}
 	}
 }

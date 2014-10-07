@@ -28,33 +28,33 @@ public final class JakeScope {
 	/**
 	 * Dependencies to compile the project but that should not be embedded in produced artifacts.
 	 */
-	public static JakeScope PROVIDED = JakeScope.of("provided");
+	public static final JakeScope PROVIDED = JakeScope.of("provided");
 
 	/**
 	 * Dependencies to compile the project.
 	 */
-	public static JakeScope COMPILE = JakeScope.of("compile");
+	public static final JakeScope COMPILE = JakeScope.of("compile");
 
 	/**
 	 * Dependencies to embed in produced artifacts (as war or fat jar * files).
 	 */
-	public static JakeScope RUNTIME = JakeScope.of("runtime", COMPILE);
+	public static final JakeScope RUNTIME = JakeScope.of("runtime", COMPILE);
 
 	/**
 	 * Dependencies necessary to compile and run tests.
 	 */
-	public static JakeScope TEST = JakeScope.of("test", RUNTIME, PROVIDED);
+	public static final JakeScope TEST = JakeScope.of("test", RUNTIME, PROVIDED);
 
 	/**
 	 * Stands for the artifacts produced by the build without any dependencies.
 	 * This scope is primarily intended for scoping publication, not for dependencies dependenies.
 	 */
-	public static JakeScope MASTER = JakeScope.of("master");
+	public static final JakeScope MASTER = JakeScope.of("master");
 
 	/**
 	 * Default scope used for publishing artifacts along its runtime dependencies.
 	 */
-	public static JakeScope DEFAULT = JakeScope.of("default", MASTER, RUNTIME);
+	public static final JakeScope DEFAULT = JakeScope.of("default", MASTER, RUNTIME);
 
 	/**
 	 * Creates a new {@link JakeScope} passing its name and inherited scopes.
@@ -150,7 +150,7 @@ public final class JakeScope {
 
 
 
-	public static class JakeScopeMapping implements Iterable<JakeScopeMapping.Item> {
+	public static final class JakeScopeMapping implements Iterable<JakeScopeMapping.Item> {
 
 		public static JakeScopeMapping of(JakeScope from, JakeScope to) {
 			final List<Item> scopes = new ArrayList<Item>();
