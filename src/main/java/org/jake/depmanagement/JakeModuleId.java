@@ -7,7 +7,7 @@ import org.jake.utils.JakeUtilsString;
  * Used to identify module inside a repository.
  * Ex : group='org.hibernate' name='hibernate-core'.
  * 
- * @author djeang
+ * @author Jerome Angibaud
  */
 public final class JakeModuleId {
 

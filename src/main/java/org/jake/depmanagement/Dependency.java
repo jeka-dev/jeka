@@ -8,30 +8,58 @@ import org.jake.depmanagement.JakeScope.JakeScopeMapping;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsString;
 
-
+/**
+ * Identifier for a dependency of a project. It can be a either : <ul>
+ * <li>A module + version identifier as <code>org.hibernate:hibernate-core:3.0.+</code>,</li>
+ * <li>A project inside a multi-project build,</li>
+ * <li>Some files on the file system.</li>
+ * </ul>
+ * Each dependency is associated with a scope mapping to determine precisely how and in which scenario
+ * the dependency is necessary.
+ * 
+ * @author Jerome Angibaud
+ */
 public abstract class Dependency {
 
+	/**
+	 * Creates a {@link ModuleAndVersionRange} dependency with the specified version and scope mapping.
+	 */
 	public static ModuleAndVersionRange of(JakeModuleId module, JakeVersionRange version, JakeScopeMapping mapping) {
 		return new ModuleAndVersionRange(module, version, mapping);
 	}
 
+	/**
+	 * Creates a {@link ModuleAndVersionRange} dependency with the specified version.
+	 */
 	public static ModuleAndVersionRange of(JakeModuleId module, JakeVersionRange version) {
 		return of(module, version, JakeScopeMapping.oneToOne());
 	}
 
+	/**
+	 * Creates a {@link ModuleAndVersionRange} dependency with the specified version.
+	 */
 	public static ModuleAndVersionRange of(String organisation, String name, String version) {
 		return of(JakeModuleId.of(organisation, name), JakeVersionRange.of(version), JakeScopeMapping.oneToOne());
 	}
 
+	/**
+	 * Creates a partial dependency describing the module but not the version.
+	 */
 	public static ModuleAndVersionRange.ModuleOnly of(JakeModuleId module) {
 		final ModuleAndVersionRange moduleAndVersion = of(module, null);
 		return new ModuleAndVersionRange.ModuleOnly(moduleAndVersion);
 	}
 
+	/**
+	 * Creates a partial dependency describing the module but not the version.
+	 */
 	public static ModuleAndVersionRange.ModuleOnly of(String organisation, String name) {
 		return of(JakeModuleId.of(organisation, name));
 	}
 
+	/**
+	 * Creates a {@link ModuleAndVersionRange} dependency with the specified version.
+	 */
 	public static ModuleAndVersionRange of(String groupAndNameAndVersion) {
 		final String[] strings = JakeUtilsString.split(groupAndNameAndVersion, ":");
 		if (strings.length != 3) {
@@ -74,7 +102,10 @@ public abstract class Dependency {
 		}
 
 
-
+		/**
+		 * Intermediate class of the fluent API. You can't do anything from it except precise
+		 * the version range.
+		 */
 		public static final class ModuleOnly {
 			private final ModuleAndVersionRange module;
 
@@ -83,12 +114,12 @@ public abstract class Dependency {
 				this.module = module;
 			}
 
-			public ModuleAndVersionRange rev(JakeVersionRange version) {
+			public ModuleAndVersionRange version(JakeVersionRange version) {
 				return new ModuleAndVersionRange(module.module, version, module.scopeMapping());
 			}
 
-			public ModuleAndVersionRange rev(String version) {
-				return rev(JakeVersionRange.of(version));
+			public ModuleAndVersionRange version(String version) {
+				return version(JakeVersionRange.of(version));
 			}
 		}
 
@@ -111,6 +142,9 @@ public abstract class Dependency {
 
 	}
 
+	/**
+	 * A dependency on files located on file system.
+	 */
 	public static final class Files extends Dependency {
 
 		private final Iterable<File> files;
