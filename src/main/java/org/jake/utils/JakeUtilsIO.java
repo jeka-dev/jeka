@@ -401,7 +401,7 @@ public final class JakeUtilsIO {
 	 * thread is started when the instance is created. You have to call
 	 * {@link #stop()} to stop the thread.
 	 */
-	public static class StreamGobbler {
+	public static final class StreamGobbler {
 
 		private final InnerRunnable innerRunnable;
 

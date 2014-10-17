@@ -8,12 +8,13 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jake.java.test.junit.JakeTestSuiteResult.TestCaseFailure;
 import org.jake.java.test.junit.JakeTestSuiteResult.IgnoredCase;
+import org.jake.java.test.junit.JakeTestSuiteResult.TestCaseFailure;
+import org.jake.utils.JakeUtilsString;
 
 final class JakeTestReportBuilder {
 
-	private static final XMLOutputFactory factory = XMLOutputFactory
+	private static final XMLOutputFactory FACTORY = XMLOutputFactory
 			.newInstance();
 
 	private final JakeTestSuiteResult result;
@@ -39,7 +40,7 @@ final class JakeTestReportBuilder {
 	}
 
 	private void writeFile(File xmlFile) throws XMLStreamException, IOException {
-		final XMLStreamWriter writer = factory
+		final XMLStreamWriter writer = FACTORY
 				.createXMLStreamWriter(new FileWriter(xmlFile));
 		writer.writeStartDocument();
 		writer.writeCharacters("\n");
@@ -98,8 +99,8 @@ final class JakeTestReportBuilder {
 								: "error";
 				writer.writeCharacters("\n    ");
 				writer.writeStartElement(errorFailure);
-				writer.writeAttribute("message", failure
-						.getExceptionDescription().getMessage());
+				writer.writeAttribute("message", JakeUtilsString.escapeHtml(failure
+						.getExceptionDescription().getMessage()));
 				writer.writeAttribute("type", failure
 						.getExceptionDescription().getClassName());
 				final StringBuilder stringBuilder = new StringBuilder();

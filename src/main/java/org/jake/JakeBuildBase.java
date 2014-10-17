@@ -23,6 +23,8 @@ import org.jake.utils.JakeUtilsTime;
  */
 public class JakeBuildBase {
 
+	private static final int JUMP = 2;
+
 	private File baseDirFile = JakeUtilsFile.workingDir();
 
 	private final String version = JakeUtilsTime.timestampSec();
@@ -134,57 +136,54 @@ public class JakeBuildBase {
 		JakeLog.info("Ex: jake javadoc compile -verbose=true -other=xxx -DmyProp=Xxxx");
 		JakeLog.nextLine();
 		JakeLog.info("Available action(s) for build '" + this.getClass().getName() + "' : " );
-		JakeLog.shift(2);
-		final List<ActionDescription> list = new LinkedList<JakeBuildBase.ActionDescription>();
+		JakeLog.shift(JUMP);
+		final List<CommandDescription> list = new LinkedList<JakeBuildBase.CommandDescription>();
 		for (final Method method : this.getClass().getMethods()) {
-
-			if (!method.getReturnType().equals(void.class)) {
-				continue;
-			}
-			if (method.getParameterTypes().length != 0) {
-				continue;
-			}
-			if (JakeUtilsReflect.isMethodPublicIn(Object.class, method.getName())) {
-				continue;
-			}
 			final int modifier = method.getModifiers();
-			if (Modifier.isAbstract(modifier) || Modifier.isStatic(modifier)) {
+			if (!method.getReturnType().equals(void.class)
+					|| method.getParameterTypes().length != 0
+					|| JakeUtilsReflect.isMethodPublicIn(Object.class, method.getName())
+					|| Modifier.isAbstract(modifier) || Modifier.isStatic(modifier)) {
 				continue;
 			}
 			final JakeDoc jakeDoc = JakeUtilsReflect.getInheritedAnnotation(method, JakeDoc.class);
-			final ActionDescription actionDescription;
+			final CommandDescription actionDescription;
 			if (jakeDoc != null) {
-				actionDescription = new ActionDescription(method, jakeDoc.value());
+				actionDescription = new CommandDescription(method, jakeDoc.value());
 			} else {
-				actionDescription = new ActionDescription(method, null);
+				actionDescription = new CommandDescription(method);
 			}
 			list.add(actionDescription);
 		}
-		ActionDescription.log(list);
-		JakeLog.shift(-2);
+		CommandDescription.log(list);
+		JakeLog.shift(-JUMP);
 		JakeLog.nextLine();
 		JakeLog.info("Standard options for this build class : ");
 		JakeLog.nextLine();
-		JakeLog.shift(2);
+		JakeLog.shift(JUMP);
 		JakeLog.info(JakeOptions.help(this.getClass()));
-		JakeLog.shift(-2);
+		JakeLog.shift(-JUMP);
 	}
 
-	private static class ActionDescription implements Comparable<ActionDescription> {
+	private static class CommandDescription implements Comparable<CommandDescription> {
 
 		private final String name;
 		private final String[] docs;
 		private final Class<?> declaringClass;
 
-		public ActionDescription(Method method, String[] docs) {
+		public CommandDescription(Method method, String[] docs) {
 			super();
 			this.name = method.getName();
 			this.docs = Arrays.copyOf(docs, docs.length);
 			this.declaringClass = method.getDeclaringClass();
 		}
 
+		public CommandDescription(Method method) {
+			this(method, new String[0]);
+		}
+
 		@Override
-		public int compareTo(ActionDescription other) {
+		public int compareTo(CommandDescription other) {
 			if (this.declaringClass.equals(other.declaringClass)) {
 				return this.name.compareTo(other.name);
 			}
@@ -209,10 +208,10 @@ public class JakeBuildBase {
 			}
 		}
 
-		public static void log(List<ActionDescription> actions) {
+		public static void log(List<CommandDescription> actions) {
 			Class<?> currentDecClass = null;
 			Collections.sort(actions);
-			for(final ActionDescription actionDescription : actions) {
+			for(final CommandDescription actionDescription : actions) {
 				if (actionDescription.declaringClass != currentDecClass) {
 					JakeLog.nextLine();
 					JakeLog.info("From " + actionDescription.declaringClass.getName());
@@ -223,6 +222,36 @@ public class JakeBuildBase {
 				JakeLog.shift(-1);
 			}
 			JakeLog.nextLine();
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			final CommandDescription other = (CommandDescription) obj;
+			if (name == null) {
+				if (other.name != null) {
+					return false;
+				}
+			} else if (!name.equals(other.name)) {
+				return false;
+			}
+			return true;
 		}
 	}
 }

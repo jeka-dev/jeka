@@ -41,7 +41,7 @@ class Main {
 		}
 		final boolean result = project.executeBuild(classLoader, actions);
 		if (!result) {
-			System.exit(1);
+			System.exit(1);  // NOSONAR
 		}
 	}
 
@@ -113,5 +113,7 @@ class Main {
 		}
 		JakeLog.nextLine();
 	}
+
+	private Main() {}
 
 }

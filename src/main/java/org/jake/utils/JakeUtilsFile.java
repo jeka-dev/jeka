@@ -20,9 +20,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipOutputStream;
 
-//import org.jake.JakeLog;
-//import org.jake.JakeOptions;
-
 public final class JakeUtilsFile {
 
 	public static void assertDir(File candidate) {
@@ -60,11 +57,9 @@ public final class JakeUtilsFile {
 		return copyDir(source, targetDir, filter, copyEmptyDir, false, null);
 	}
 
-	public static int copyDir(File source, File targetDir, FileFilter filter,
+	public static int copyDir(File source, File targetDir, FileFilter filterArg,
 			boolean copyEmptyDir, boolean report, PrintStream reportStream) {
-		if (filter == null) {
-			filter = JakeFileFilters.acceptAll();
-		}
+		final FileFilter filter = JakeUtilsObject.firstNonNull(filterArg, JakeFileFilters.acceptAll());
 		assertDir(source);
 		if (source.equals(targetDir)) {
 			throw new IllegalArgumentException(

@@ -100,7 +100,7 @@ public abstract class JakeFileFilter {
 	}
 
 
-	private static class IncludeFilter extends JakeFileFilter {
+	private static final class IncludeFilter extends JakeFileFilter {
 
 		private final Set<AntPattern> antPatterns;
 

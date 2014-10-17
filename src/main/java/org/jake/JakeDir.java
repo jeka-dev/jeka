@@ -20,15 +20,19 @@ import org.jake.utils.JakeUtilsFile;
  */
 public final class JakeDir implements Iterable<File> {
 
-	private final File root;
-
-	private final JakeFileFilter filter;
-
 	/**
 	 * Creates a {@link JakeDir} having the specified root directory.
 	 */
 	public static JakeDir of(File rootDir) {
 		return new JakeDir(rootDir);
+	}
+
+	private final File root;
+
+	private final JakeFileFilter filter;
+
+	private JakeDir(File rootDir) {
+		this(rootDir, JakeFileFilter.ACCEPT_ALL);
 	}
 
 	/**
@@ -46,9 +50,7 @@ public final class JakeDir implements Iterable<File> {
 		this.filter = filter;
 	}
 
-	private JakeDir(File rootDir) {
-		this(rootDir, JakeFileFilter.ACCEPT_ALL);
-	}
+
 
 	/**
 	 * Creates a {@link JakeDir} having the default filter and the specified relative path to this root as

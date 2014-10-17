@@ -111,7 +111,7 @@ public abstract class Dependency {
 
 	}
 
-	public static class Files extends Dependency {
+	public static final class Files extends Dependency {
 
 		private final Iterable<File> files;
 

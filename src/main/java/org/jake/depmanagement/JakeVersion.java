@@ -3,7 +3,7 @@ package org.jake.depmanagement;
 import org.jake.utils.JakeUtilsAssert;
 import org.jake.utils.JakeUtilsString;
 
-public class JakeVersion implements Comparable<JakeVersion> {
+public final class JakeVersion implements Comparable<JakeVersion> {
 
 	public static JakeVersion of(String name) {
 		return new JakeVersion(name);

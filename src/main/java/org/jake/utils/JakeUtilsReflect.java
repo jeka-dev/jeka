@@ -227,7 +227,7 @@ public final class JakeUtilsReflect {
 		final Class<?> types[] = new Class<?>[args.length];
 		for (int i = 0; i < args.length; i++) {
 			final Object arg = args[i];
-			types[i] = args == null ? Object.class : arg.getClass();
+			types[i] = arg.getClass();
 		}
 		final Set<Method> result = findMethodsCompatibleWith(true, canditates, methodName, types);
 		if (result.isEmpty()) {
@@ -305,11 +305,5 @@ public final class JakeUtilsReflect {
 		PRIMITIVE_TO_WRAPPER.put(void.class, Void.TYPE );
 		PRIMITIVE_TO_WRAPPER.put(short.class, Short.TYPE );
 	}
-
-
-
-
-
-
 
 }
