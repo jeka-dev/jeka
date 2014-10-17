@@ -9,10 +9,10 @@ import org.jake.utils.JakeUtilsAssert;
 import org.jake.utils.JakeUtilsFile;
 
 /**
- * A view on a directory. This view may be filtered or not. If there is no <code>Filter</code> than this stands
- * simply for a directory. If a filter is defined on, than this stands for only a part of this directory,
- * meaning that files or sub-folder filtered are not part of this.<br/>
+ * Provides a view on files and sub-folders contained in a given directory. A <code>JakeDir</code> may
+ * have some include/exclude filters to include only or exclude some files based on ANT pattern matching. <br/>
  * 
+ *<p>
  * When speaking about files contained in a {@link JakeDir}, we mean all files contained in its root directory
  * or sub-directories, matching positively the filter defined on it.
  * 
