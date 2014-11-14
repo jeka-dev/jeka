@@ -16,11 +16,11 @@ public class DependencyTest {
 
 	@SuppressWarnings("unused")
 	@Test
-	public void test() {
+	public void testOf() {
 		Dependency dep;
 		dep = Dependency.of(JakeModuleId.of("org.hibernate", "hibernate-core"), JakeVersionRange.of("3.0.1.Final"));
-		dep = Dependency.of("org.hibernate", "hibernate-core", "3.0.1.Final");;
-		dep = Dependency.of("org.hibernate:hibernate-core:3.0.1.Final");
+		dep = Dependency.of("org.hibernate", "hibernate-core", "3.0.1.Final");
+		dep = Dependency.of("org.hibernate:hibernate-core:3.0.1+");
 	}
 
 	@Test
@@ -30,9 +30,9 @@ public class DependencyTest {
 		Assert.assertEquals("org.hibernate", dep.module().group());
 		Assert.assertEquals("hibernate-core", dep.module().name());
 		final JakeScopeMapping mapping = dep.scopeMapping();
-		final Set<JakeScope> set = new HashSet<JakeScope>();
-		set.add(PROVIDED);
-		Assert.assertEquals(set, mapping.targetScopes(COMPILE));
+		final Set<JakeScope> onlyProvidedSet = new HashSet<JakeScope>();
+		onlyProvidedSet.add(PROVIDED);
+		Assert.assertEquals(onlyProvidedSet, mapping.targetScopes(COMPILE));
 
 	}
 

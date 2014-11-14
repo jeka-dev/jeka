@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.jake.utils.JakeUtilsAssert;
 import org.jake.utils.JakeUtilsIterable;
 
 /**
@@ -52,11 +53,6 @@ public final class JakeScope {
 	public static final JakeScope MASTER = JakeScope.of("master");
 
 	/**
-	 * Default scope used for publishing artifacts along its runtime dependencies.
-	 */
-	public static final JakeScope DEFAULT = JakeScope.of("default", MASTER, RUNTIME);
-
-	/**
 	 * Creates a new {@link JakeScope} passing its name and inherited scopes.
 	 * @param name The name of the scope : should be unique within a build.
 	 * @param inheritFroms Inherited scopes.
@@ -79,6 +75,11 @@ public final class JakeScope {
 		this.excluding = excluding;
 	}
 
+	/**
+	 * Returns a <code>JakeScope</code> equals to this one but excluding the specified <code>JakeScope<code>s.
+	 * @param jakeScopes
+	 * @return
+	 */
 	public JakeScope excluding(JakeScope... jakeScopes) {
 		final List<JakeScope> exclues = new LinkedList<JakeScope>(this.excluding);
 		exclues.addAll(Arrays.asList(jakeScopes));
@@ -109,9 +110,7 @@ public final class JakeScope {
 		return JakeScopeMapping.of(this, targetScope);
 	}
 
-	public JakeScopeMapping mapToDefault() {
-		return JakeScopeMapping.of(this, DEFAULT);
-	}
+
 
 	@Override
 	public int hashCode() {
@@ -158,13 +157,16 @@ public final class JakeScope {
 			return new JakeScopeMapping(scopes);
 		}
 
-		public static JakeScopeMapping of(JakeScope from, String to) {
-			return of(from, JakeScope.of(to));
+		public static JakeScopeMapping compile() {
+			return JakeScopeMapping.of(JakeScope.COMPILE, JakeScope.COMPILE);
 		}
 
-		@SuppressWarnings("unchecked")
-		public static JakeScopeMapping oneToOne() {
-			return new JakeScopeMapping(Collections.EMPTY_LIST);
+		public static JakeScopeMapping empty() {
+			return new JakeScopeMapping(new ArrayList<Item>());
+		}
+
+		public static JakeScopeMapping of(JakeScope from, String to) {
+			return of(from, JakeScope.of(to));
 		}
 
 		private final List<Item> list;
@@ -188,14 +190,22 @@ public final class JakeScope {
 			return and(from, from);
 		}
 
-		public JakeScopeMapping minus(Iterable<JakeScopeMapping> mappings) {
-			final List<Item> items = new LinkedList<Item>(this.list);
-			for (final JakeScopeMapping mapping : mappings) {
-				items.removeAll(mapping.list);
+		JakeScopeMapping replaceLastEntries(int count, JakeScope...scopes) {
+			JakeUtilsAssert.isTrue(scopes.length != 0, "There should be at least one scope.");
+			final List<Item> items = new LinkedList<Item>();
+			int index = 0;
+			for (final Item item : this.list) {
+				if (index >= list.size() - count) {
+					for (final JakeScope jakeScope : scopes) {
+						items.add(new Item(item.from, jakeScope));
+					}
+				} else {
+					items.add(item);
+				}
+				index++;
 			}
 			return new JakeScopeMapping(items);
 		}
-
 
 		public JakeScopeMapping and(Iterable<JakeScopeMapping> mappings) {
 			final List<Item> items = new LinkedList<Item>(this.list);
@@ -218,6 +228,11 @@ public final class JakeScope {
 				}
 			}
 			return set;
+		}
+
+		@Override
+		public String toString() {
+			return list.toString();
 		}
 
 		private static class Item implements Iterable<Item> {
@@ -277,7 +292,7 @@ public final class JakeScope {
 
 			@Override
 			public String toString() {
-				return this.getClass().getSimpleName() + "[" + from + "," + "]";
+				return this.getClass().getSimpleName() + "[" + from + ", " + to + "]";
 			}
 
 		}

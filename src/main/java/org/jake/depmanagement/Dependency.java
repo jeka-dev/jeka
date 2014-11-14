@@ -1,8 +1,6 @@
 package org.jake.depmanagement;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.jake.depmanagement.JakeScope.JakeScopeMapping;
 import org.jake.utils.JakeUtilsIterable;
@@ -14,7 +12,7 @@ import org.jake.utils.JakeUtilsString;
  * <li>A project inside a multi-project build,</li>
  * <li>Some files on the file system.</li>
  * </ul>
- * Each dependency is associated with a scope mapping to determine precisely how and in which scenario
+ * Each dependency is associated with a scope mapping to determine precisely in which scenario
  * the dependency is necessary.
  * 
  * @author Jerome Angibaud
@@ -32,14 +30,14 @@ public abstract class Dependency {
 	 * Creates a {@link ModuleAndVersionRange} dependency with the specified version.
 	 */
 	public static ModuleAndVersionRange of(JakeModuleId module, JakeVersionRange version) {
-		return of(module, version, JakeScopeMapping.oneToOne());
+		return of(module, version, JakeScopeMapping.empty());
 	}
 
 	/**
 	 * Creates a {@link ModuleAndVersionRange} dependency with the specified version.
 	 */
 	public static ModuleAndVersionRange of(String organisation, String name, String version) {
-		return of(JakeModuleId.of(organisation, name), JakeVersionRange.of(version), JakeScopeMapping.oneToOne());
+		return of(JakeModuleId.of(organisation, name), JakeVersionRange.of(version), JakeScopeMapping.empty());
 	}
 
 	/**
@@ -80,12 +78,11 @@ public abstract class Dependency {
 		}
 
 		public ModuleAndVersionRange.AfterScope scope(JakeScope...scopes) {
-			final List<JakeScopeMapping> list = new LinkedList<JakeScope.JakeScopeMapping>();
+			JakeScopeMapping mapping = this.scopeMapping();
 			for (final JakeScope scope : scopes) {
-				list.add(scope.mapToDefault());
+				mapping = mapping.and(scope, scope);
 			}
-			final JakeScopeMapping mapping = this.scopeMapping().and(list);
-			return new AfterScope(module, versionRange, mapping, list);
+			return new AfterScope(module, versionRange, mapping, scopes.length);
 		}
 
 		public JakeModuleId module() {
@@ -125,16 +122,17 @@ public abstract class Dependency {
 
 		public static final class AfterScope extends ModuleAndVersionRange {
 
-			private final List<JakeScopeMapping> contextMappings;
+			private final int pending;
 
 			private AfterScope(JakeModuleId module,
-					JakeVersionRange versionRange, JakeScopeMapping mapping, List<JakeScopeMapping> context) {
+					JakeVersionRange versionRange, JakeScopeMapping mapping, int pendingCount) {
 				super(module, versionRange, mapping);
-				this.contextMappings = context;
+				this.pending = pendingCount;
 			}
 
 			public ModuleAndVersionRange mapTo(JakeScope ... scopes) {
-				return new ModuleAndVersionRange(module(), versionRange(), scopeMapping().minus(contextMappings));
+				final JakeScope.JakeScopeMapping mapping = scopeMapping().replaceLastEntries(pending, scopes);
+				return new ModuleAndVersionRange(module(), versionRange(), mapping);
 			}
 
 		}
