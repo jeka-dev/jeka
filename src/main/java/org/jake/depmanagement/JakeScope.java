@@ -148,13 +148,16 @@ public final class JakeScope {
 	}
 
 
-
 	public static final class JakeScopeMapping implements Iterable<JakeScopeMapping.Item> {
 
 		public static JakeScopeMapping of(JakeScope from, JakeScope to) {
 			final List<Item> scopes = new ArrayList<Item>();
 			scopes.add(new Item(from, to));
 			return new JakeScopeMapping(scopes);
+		}
+
+		public static Partial from(JakeScope ...scopes) {
+			return new Partial(Arrays.asList(scopes));
 		}
 
 		public static JakeScopeMapping compile() {
@@ -233,6 +236,30 @@ public final class JakeScope {
 		@Override
 		public String toString() {
 			return list.toString();
+		}
+
+		public static class Partial {
+
+			private final List<JakeScope> from;
+
+			private Partial(List<JakeScope> from) {
+				super();
+				this.from = from;
+			}
+
+
+			public JakeScopeMapping to(JakeScope... targets) {
+				final List<Item> items = new LinkedList<JakeScope.JakeScopeMapping.Item>();
+				for (final JakeScope fromScope : from) {
+					for (final JakeScope toScope : targets) {
+						items.add(new Item(fromScope, toScope));
+					}
+				}
+				return new JakeScopeMapping(items);
+			}
+
+
+
 		}
 
 		private static class Item implements Iterable<Item> {
