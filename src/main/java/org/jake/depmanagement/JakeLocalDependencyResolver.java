@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.jake.JakeDir;
 import org.jake.utils.JakeUtilsIterable;
 
 public final class JakeLocalDependencyResolver extends JakeDependencyResolver {
@@ -25,21 +24,8 @@ public final class JakeLocalDependencyResolver extends JakeDependencyResolver {
 		return new JakeLocalDependencyResolver(new HashMap<JakeScope, Iterable<File>>());
 	}
 
-	public static JakeLocalDependencyResolver standard(File libDirectory) {
-		final JakeDir libDir = JakeDir.of(libDirectory);
-		return JakeLocalDependencyResolver.empty()
-				.with(JakeScope.COMPILE, libDir.include("*.jar", "compile/*.jar"))
-				.with(JakeScope.PROVIDED, libDir.include("provided/*.jar"))
-				.with(JakeScope.RUNTIME, libDir.include("runtime/*.jar"))
-				.with(JakeScope.TEST, libDir.include("test/*.jar"));
-	}
 
-	public static JakeLocalDependencyResolver standardIfExist(File libDirectory) {
-		if (libDirectory.exists()) {
-			return standard(libDirectory);
-		}
-		return empty();
-	}
+
 
 	@SuppressWarnings("unchecked")
 	public JakeLocalDependencyResolver with(JakeScope scope, Iterable<File> files) {

@@ -1,29 +1,25 @@
 package org.jake.depmanagement;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
-import org.jake.depmanagement.JakeScope.JakeScopeMapping;
+import org.jake.utils.JakeUtilsIterable;
 
 public class Dependencies implements Iterable<JakeScopedDependency>{
 
-	private final Set<JakeScopedDependency> dependencies;
+	private final List<JakeScopedDependency> dependencies;
 
-	private Dependencies(Set<JakeScopedDependency> dependencies) {
+	private Dependencies(List<JakeScopedDependency> dependencies) {
 		super();
-		this.dependencies = Collections.unmodifiableSet(new HashSet<JakeScopedDependency>(dependencies));
+		this.dependencies = Collections.unmodifiableList(new LinkedList<JakeScopedDependency>(dependencies));
 	}
 
 	public Dependencies without(JakeModuleId jakeModuleId) {
-		final Set<JakeScopedDependency> result = new HashSet<JakeScopedDependency>(dependencies);
-		remove(result, jakeModuleId);
-		return new Dependencies(result);
-	}
-
-	private static void remove(Set<JakeScopedDependency> dependencies, JakeModuleId jakeModuleId) {
-		for (final Iterator<JakeScopedDependency> it = dependencies.iterator(); it.hasNext();) {
+		final List<JakeScopedDependency> result = new LinkedList<JakeScopedDependency>(dependencies);
+		for (final Iterator<JakeScopedDependency> it = result.iterator(); it.hasNext();) {
 			final JakeDependency dependency = it.next().dependency();
 			if (dependency instanceof JakeExternalModule) {
 				final JakeExternalModule externalModule = (JakeExternalModule) dependency;
@@ -32,6 +28,7 @@ public class Dependencies implements Iterable<JakeScopedDependency>{
 				}
 			}
 		}
+		return new Dependencies(result);
 	}
 
 	@Override
@@ -39,41 +36,80 @@ public class Dependencies implements Iterable<JakeScopedDependency>{
 		return dependencies.iterator();
 	}
 
+	@Override
+	public String toString() {
+		return dependencies.toString();
+	}
+
+	public List<JakeScopedDependency> dependencies() {
+		return dependencies;
+	}
+
+	public JakeScopedDependency get(JakeModuleId moduleId) {
+		for (final JakeScopedDependency scopedDependency : this) {
+			final JakeDependency dependency = scopedDependency.dependency();
+			if (dependency instanceof JakeExternalModule) {
+				final JakeExternalModule externalModule = (JakeExternalModule) dependency;
+				if (externalModule.moduleId().equals(moduleId)) {
+					return scopedDependency;
+				}
+			}
+		}
+		return null;
+	}
+
 	public static Builder builder() {
-		return new Builder(new HashSet<JakeScopedDependency>(), null);
+		return new Builder(new LinkedList<JakeScopedDependency>());
 	}
 
 	public static class Builder {
 
-		protected JakeDependency lastDependency;
+		protected final LinkedList<JakeScopedDependency> dependencies;
 
-		protected final Set<JakeScopedDependency> dependencies;
+		private Set<JakeScope> defaultScopes;
 
-		private JakeScopeMapping defaultScopeMapping = JakeScopeMapping.compile();
+		private JakeScopeMapping defaultMapping;
 
-		protected Builder(Set<JakeScopedDependency> dependencies, JakeDependency lastDependency) {
+		protected Builder(LinkedList<JakeScopedDependency> dependencies) {
 			super();
 			this.dependencies = dependencies;
-			this.lastDependency = lastDependency;
 		}
 
-		public Builder defaultScope(JakeScopeMapping scope) {
-			defaultScopeMapping = scope;
+		public Builder defaultScope(JakeScope ...scopes) {
+			if (scopes.length == 0) {
+				return resetDefaultScope();
+			}
+			defaultScopes = JakeUtilsIterable.setOf(scopes);
+			defaultMapping = null;
 			return this;
 		}
 
-		public Builder defaultScope(JakeScope scope) {
-			defaultScopeMapping = JakeScopeMapping.of(scope, scope);
+		public Builder defaultScope(JakeScopeMapping scopeMapping) {
+			defaultMapping = scopeMapping;
+			defaultScopes = null;
+			return this;
+		}
+
+		public Builder resetDefaultScope() {
+			defaultScopes = null;
+			defaultMapping = null;
 			return this;
 		}
 
 		public ScopebleBuilder on(JakeDependency dependency) {
-			dependencies.add(dependency.scope(defaultScopeMapping));
-			lastDependency = dependency;
+			final JakeScopedDependency scopedDependency;
+			if (defaultScopes != null) {
+				scopedDependency = JakeScopedDependency.of(dependency, defaultScopes);
+			} else if (defaultMapping != null) {
+				scopedDependency = JakeScopedDependency.of(dependency, defaultMapping);
+			} else {
+				scopedDependency = JakeScopedDependency.of(dependency);
+			}
+			dependencies.add(scopedDependency);
 			if (this instanceof ScopebleBuilder) {
 				return (ScopebleBuilder) this;
 			}
-			return new ScopebleBuilder(dependencies, dependency);
+			return new ScopebleBuilder(dependencies);
 		}
 
 		public Builder on(JakeScopedDependency dependency) {
@@ -106,19 +142,20 @@ public class Dependencies implements Iterable<JakeScopedDependency>{
 
 		public static class ScopebleBuilder extends Builder {
 
-			protected ScopebleBuilder(Set<JakeScopedDependency> dependencies, JakeDependency dependency) {
-				super(dependencies, dependency);
+			private ScopebleBuilder(LinkedList<JakeScopedDependency> dependencies) {
+				super(dependencies);
 			}
 
 			public Builder scope(JakeScopeMapping scopeMapping) {
-				final JakeModuleId moduleId = lastDependency.moduleId();
-				Dependencies.remove(dependencies, moduleId);
-				dependencies.add(lastDependency.withScope(scopeMapping));
+				final JakeDependency dependency = dependencies.pollLast().dependency();
+				dependencies.add(JakeScopedDependency.of(dependency, scopeMapping));
 				return this;
 			}
 
-			public Builder scope(JakeScope scope) {
-				return scope(JakeScopeMapping.of(scope, scope));
+			public Builder scope(JakeScope ... scopes) {
+				final JakeDependency dependency = dependencies.pollLast().dependency();
+				dependencies.add(JakeScopedDependency.of(dependency, JakeUtilsIterable.setOf(scopes)));
+				return this;
 			}
 
 		}

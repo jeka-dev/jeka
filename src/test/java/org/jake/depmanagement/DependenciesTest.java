@@ -1,18 +1,27 @@
 package org.jake.depmanagement;
 
+import static org.jake.java.build.JakeBuildJava.COMPILE;
+import static org.jake.java.build.JakeBuildJava.RUNTIME;
+
+import org.jake.utils.JakeUtilsIterable;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class DependenciesTest {
 
 	@Test
 	public void test() {
-		Dependencies.builder()
-		.on("hibernate:hjmlm:1212.0")
-		.on("spring:spring:6.3")
-		.on(secondaryDeps())
-		.on("klklkl:lklk:mlml")
-		.on("hhhhh:ll:ppp")
-		.on(JakeModuleId.of("lmlmlm:mùmùmù"), JakeVersionRange.of("5454")).build();
+		final Dependencies deps = Dependencies.builder()
+				.defaultScope(JakeScopeMapping.of(RUNTIME, RUNTIME))
+				.on("hibernate:hjmlm:1212.0")
+				.on("spring:spring:6.3").scope(COMPILE)
+				.on(secondaryDeps())
+				.on("klklkl:lklk:mlml")
+				.on("hhhhh:ll:ppp")
+				.on(JakeModuleId.of("lmlmlm:mùmùmù"), JakeVersionRange.of("5454")).build();
+		final JakeScopedDependency springDependency = deps.get(JakeModuleId.of("spring:spring"));
+		Assert.assertEquals(JakeUtilsIterable.setOf(COMPILE), springDependency.scopes());
+
 	}
 
 	private Dependencies secondaryDeps() {

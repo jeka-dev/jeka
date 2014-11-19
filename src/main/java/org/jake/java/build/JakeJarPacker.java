@@ -6,7 +6,6 @@ import java.util.zip.Deflater;
 import org.jake.JakeDir;
 import org.jake.JakeLog;
 import org.jake.JakeZip;
-import org.jake.depmanagement.JakeScope;
 
 /**
  * Jar maker for the {@link JakeBuildJava} template. This maker will get information from supplied java builder
@@ -107,7 +106,7 @@ public class JakeJarPacker {
 		}
 		build().testSourceDirs().and(build().testResourceDirs()).zip().to(jarTestSourceFile(), compressionLevel);
 		if (fatJar) {
-			JakeDir.of(build().classDir()).zip().merge(build().deps(JakeScope.RUNTIME))
+			JakeDir.of(build().classDir()).zip().merge(build().deps(JakeBuildJava.RUNTIME))
 			.to(fatJarFile(), compressionLevel).md5(checkSum);
 		}
 		JakeLog.done();

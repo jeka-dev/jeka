@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.jake.JakeBuildBase;
 import org.jake.JakeClasspath;
+import org.jake.JakeDir;
 import org.jake.JakeDirSet;
 import org.jake.JakeDoc;
 import org.jake.JakeFileFilter;
@@ -23,6 +24,26 @@ import org.jake.utils.JakeUtilsFile;
 import org.jake.verify.sonar.JakeSonar;
 
 public class JakeBuildJava extends JakeBuildBase {
+
+	/**
+	 * Dependencies to compile the project but that should not be embedded in produced artifacts.
+	 */
+	public static final JakeScope PROVIDED = JakeScope.of("provided");
+
+	/**
+	 * Dependencies to compile the project.
+	 */
+	public static final JakeScope COMPILE = JakeScope.of("compile");
+
+	/**
+	 * Dependencies to embed in produced artifacts (as war or fat jar * files).
+	 */
+	public static final JakeScope RUNTIME = JakeScope.of("runtime", COMPILE);
+
+	/**
+	 * Dependencies necessary to compile and run tests.
+	 */
+	public static final JakeScope TEST = JakeScope.of("test", RUNTIME, PROVIDED);
 
 	/**
 	 * Default path for the non managed dependencies. This path is relative to {@link #baseDir()}.
@@ -176,7 +197,7 @@ public class JakeBuildJava extends JakeBuildBase {
 	public JakeJavaCompiler productionCompiler() {
 		return JakeJavaCompiler.ofOutput(classDir())
 				.andSources(sourceDirs())
-				.withClasspath(deps(JakeScope.COMPILE).and(deps(JakeScope.PROVIDED)))
+				.withClasspath(deps(COMPILE).and(deps(PROVIDED)))
 				.withSourceVersion(this.sourceJavaVersion())
 				.withTargetVersion(this.targetJavaVersion());
 	}
@@ -184,13 +205,13 @@ public class JakeBuildJava extends JakeBuildBase {
 	public JakeJavaCompiler unitTestCompiler() {
 		return JakeJavaCompiler.ofOutput(testClassDir())
 				.andSources(testSourceDirs())
-				.withClasspath(this.deps(JakeScope.TEST).andHead(classDir()))
+				.withClasspath(this.deps(TEST).andHead(classDir()))
 				.withSourceVersion(this.sourceJavaVersion())
 				.withTargetVersion(this.targetJavaVersion());
 	}
 
 	public JakeUnit unitTester() {
-		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.deps(JakeScope.TEST));
+		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.deps(TEST));
 		final File junitReport = new File(this.testReportDir(), "junit");
 		return JakeUnit.of(classpath)
 				.withReportDir(junitReport)
@@ -202,7 +223,7 @@ public class JakeBuildJava extends JakeBuildBase {
 		final File outputDir = ouputDir(projectName() + "-javadoc");
 		final File zip =  ouputDir(projectName() + "-javadoc.zip");
 		return JakeJavadoc.of(sourceDirs(), outputDir, zip)
-				.withClasspath(deps(JakeScope.COMPILE).and(deps(JakeScope.PROVIDED)));
+				.withClasspath(deps(COMPILE).and(deps(PROVIDED)));
 	}
 
 	public JakeJarPacker jarPacker() {
@@ -227,7 +248,7 @@ public class JakeBuildJava extends JakeBuildBase {
 		return JakeSonar.of(projectFullName(), projectName(), version())
 				.withProjectBaseDir(baseDir)
 				.withBinaries(classDir())
-				.withLibraries(deps(JakeScope.COMPILE))
+				.withLibraries(deps(COMPILE))
 				.withSources(editedSourceDirs().roots())
 				.withTest(testSourceDirs().roots())
 				.withProperty(JakeSonar.JUNIT_REPORTS_PATH, JakeUtilsFile.getRelativePath(baseDir, new File(testReportDir(), "junit")))
@@ -295,8 +316,7 @@ public class JakeBuildJava extends JakeBuildBase {
 		final File folder = baseDir(STD_LIB_PATH);
 		final JakeDependencyResolver resolver;
 		if (folder.exists()) {
-			resolver = JakeLocalDependencyResolver
-					.standard(baseDir(STD_LIB_PATH));
+			resolver = localJarDependencies(baseDir(STD_LIB_PATH));
 		} else {
 			resolver = JakeLocalDependencyResolver.empty();
 		}
@@ -366,10 +386,10 @@ public class JakeBuildJava extends JakeBuildBase {
 
 	private JakeLocalDependencyResolver computeExtraPath() {
 		return JakeLocalDependencyResolver.empty()
-				.with(JakeScope.COMPILE, toPath(extraCompilePath))
-				.with(JakeScope.RUNTIME, toPath(extraRuntimePath))
-				.with(JakeScope.TEST, toPath(extraTestPath))
-				.with(JakeScope.PROVIDED, toPath(extraProvidedPath));
+				.with(COMPILE, toPath(extraCompilePath))
+				.with(RUNTIME, toPath(extraRuntimePath))
+				.with(TEST, toPath(extraTestPath))
+				.with(PROVIDED, toPath(extraProvidedPath));
 	}
 
 	private final JakeClasspath toPath(String pathAsString) {
@@ -378,5 +398,15 @@ public class JakeBuildJava extends JakeBuildBase {
 		}
 		return JakeClasspath.of(JakeUtilsFile.toPath(pathAsString, ";", baseDir().root()));
 	}
+
+	protected static JakeLocalDependencyResolver localJarDependencies(File libDirectory) {
+		final JakeDir libDir = JakeDir.of(libDirectory);
+		return JakeLocalDependencyResolver.empty()
+				.with(COMPILE, libDir.include("*.jar", "compile/*.jar"))
+				.with(PROVIDED, libDir.include("provided/*.jar"))
+				.with(RUNTIME, libDir.include("runtime/*.jar"))
+				.with(TEST, libDir.include("test/*.jar"));
+	}
+
 
 }

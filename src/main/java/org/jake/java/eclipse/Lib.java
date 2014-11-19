@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jake.depmanagement.JakeLocalDependencyResolver;
-import org.jake.depmanagement.JakeScope;
+import org.jake.java.build.JakeBuildJava;
 
 class Lib {
 
@@ -38,10 +38,10 @@ class Lib {
 			}
 		}
 		return JakeLocalDependencyResolver.empty()
-				.with(JakeScope.COMPILE, compileAndRuntimes)
-				.with(JakeScope.RUNTIME, runtimeOnlys)
-				.with(JakeScope.TEST, testOnlys)
-				.with(JakeScope.PROVIDED, compileOnlys);
+				.with(JakeBuildJava.COMPILE, compileAndRuntimes)
+				.with(JakeBuildJava.RUNTIME, runtimeOnlys)
+				.with(JakeBuildJava.TEST, testOnlys)
+				.with(JakeBuildJava.PROVIDED, compileOnlys);
 	}
 
 

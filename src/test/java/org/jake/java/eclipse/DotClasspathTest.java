@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.jake.JakeDirSet;
 import org.jake.depmanagement.JakeDependencyResolver;
-import org.jake.depmanagement.JakeScope;
+import org.jake.java.build.JakeBuildJava;
 import org.junit.Test;
 
 public class DotClasspathTest {
@@ -38,8 +38,8 @@ public class DotClasspathTest {
 		final List<Lib> libs = sample().libs(new File(structure(),"containers"), structure(), Lib.SMART_LIB);
 		final JakeDependencyResolver resolver = Lib.toDependencyResolver(libs);
 		assertEquals(6, libs.size());
-		System.out.println(resolver.get(JakeScope.TEST));
-		assertEquals(6, resolver.get(JakeScope.TEST).entries().size());
+		System.out.println(resolver.get(JakeBuildJava.TEST));
+		assertEquals(6, resolver.get(JakeBuildJava.TEST).entries().size());
 	}
 
 	private DotClasspath sample() throws URISyntaxException {

@@ -2,7 +2,6 @@ package org.jake.depmanagement;
 
 import java.io.File;
 
-import org.jake.depmanagement.JakeScope.JakeScopeMapping;
 import org.jake.utils.JakeUtilsIterable;
 
 /**
@@ -37,12 +36,5 @@ public abstract class JakeDependency {
 		}
 
 	}
-
-	public JakeScopedDependency scope(JakeScopeMapping scopeMapping) {
-		return JakeScopedDependency.of(this, scopeMapping);
-	}
-
-
-
 
 }
