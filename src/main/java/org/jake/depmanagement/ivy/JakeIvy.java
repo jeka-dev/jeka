@@ -7,6 +7,7 @@ import org.apache.ivy.Ivy;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
+import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.IvyNode;
@@ -16,10 +17,16 @@ import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
 import org.apache.ivy.util.DefaultMessageLogger;
 import org.apache.ivy.util.Message;
+import org.jake.depmanagement.Dependencies;
+import org.jake.depmanagement.JakeExternalModule;
+import org.jake.depmanagement.JakeModuleId;
+import org.jake.depmanagement.JakeScope;
+import org.jake.depmanagement.JakeScopeMapping;
+import org.jake.depmanagement.JakeScopedDependency;
 
 public class JakeIvy {
 
-	public void retrieve() {
+	public void retrieve(Dependencies dependencies) {
 		final IBiblioResolver dependencyResolver = new IBiblioResolver();
 		dependencyResolver.setRoot("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured");
 		dependencyResolver.setM2compatible(true);
@@ -48,7 +55,7 @@ public class JakeIvy {
 		// don't go transitive here, if you want the single artifact
 		final boolean transitive = true;
 		final DefaultDependencyDescriptor dependencyDescriptor = new DefaultDependencyDescriptor(moduleDescriptor, dependee, false, false, transitive);
-
+		//dependencyDescriptor.addDependencyArtifact(masterConf, dad);
 
 		// map to master to just get the code jar. See generated ivy module xmls from maven repo
 		// on how configurations are mapped into ivy. Or check
@@ -87,7 +94,7 @@ public class JakeIvy {
 		}
 
 
-		final String filePattern = new File("out").getAbsolutePath() +"/[artifact](-[classifier]).[ext]";
+		final String filePattern = new File("build/output/libs").getAbsolutePath() +"/[artifact](-[classifier]).[ext]";
 		final RetrieveOptions retrieveOptions = new RetrieveOptions().setConfs(new String[]{"default"});
 		try {
 			ivy.retrieve(moduleDescriptor.getModuleRevisionId(), filePattern, retrieveOptions);
@@ -97,6 +104,20 @@ public class JakeIvy {
 
 
 
+	}
+
+
+	public static void main(String[] args) {
+		new JakeIvy().retrieve();
+	}
+
+	private static DependencyDescriptor to(JakeScopedDependency scopedDependency, JakeScopeMapping defaultMapping) {
+		for (final JakeScopedDependency scopedDependency : dependencies) {
+			if (scopedDependency.dependency() instanceof JakeExternalModule) {
+				final JakeExternalModule externalModule = (JakeExternalModule) scopedDependency.dependency();
+				final String configuration = scopedDependency.getM
+			}
+		}
 	}
 
 

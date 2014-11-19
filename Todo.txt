@@ -1,4 +1,4 @@
-- Add Jacoco html report
+- Generate manifest
 
 - Add APT support (annotation processing.)
 
@@ -7,3 +7,5 @@
 - Ivy 
 
 - Add multi-module support
+
+- Add Jacoco html report
