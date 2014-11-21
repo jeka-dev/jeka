@@ -1,126 +1,75 @@
 package org.jake.depmanagement.ivy;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.ivy.Ivy;
-import org.apache.ivy.core.module.descriptor.Artifact;
-import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
+import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
-import org.apache.ivy.core.resolve.IvyNode;
 import org.apache.ivy.core.resolve.ResolveOptions;
-import org.apache.ivy.core.retrieve.RetrieveOptions;
 import org.apache.ivy.core.settings.IvySettings;
-import org.apache.ivy.plugins.resolver.IBiblioResolver;
-import org.apache.ivy.util.DefaultMessageLogger;
-import org.apache.ivy.util.Message;
-import org.jake.depmanagement.Dependencies;
-import org.jake.depmanagement.JakeExternalModule;
-import org.jake.depmanagement.JakeModuleId;
+import org.jake.depmanagement.JakeDependencies;
+import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeScope;
-import org.jake.depmanagement.JakeScopeMapping;
 import org.jake.depmanagement.JakeScopedDependency;
 
-public class JakeIvy {
+public final class JakeIvy {
 
-	public void retrieve(Dependencies dependencies) {
-		final IBiblioResolver dependencyResolver = new IBiblioResolver();
-		dependencyResolver.setRoot("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured");
-		dependencyResolver.setM2compatible(true);
-		dependencyResolver.setUseMavenMetadata(true);
-		dependencyResolver.setName("nexus"); // Name is necessary to avoid NPE
+	private final Ivy ivy;
 
-		final IvySettings ivySettings = new IvySettings();
-		ivySettings.addResolver(dependencyResolver);
-		ivySettings.setDefaultResolver("nexus");  // Setting a default resolver is necessary
+	private JakeIvy(Ivy ivy) {
+		super();
+		this.ivy = ivy;
+		ivy.getLoggerEngine().setDefaultLogger(new MessageLogger());
+	}
 
+	public static JakeIvy of(IvySettings ivySettings) {
 		final Ivy ivy = Ivy.newInstance(ivySettings);
-		ivy.getLoggerEngine().setDefaultLogger(new DefaultMessageLogger(Message.MSG_DEBUG));
+		return new JakeIvy(ivy);
+	}
 
-		final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(
-				"mygroupId",
-				"amyrtifactId-envelope",
-				"myversion"
-				);
+	public static JakeIvy of(JakeRepos repos) {
+		final IvySettings ivySettings = new IvySettings();
+		Translations.populateIvySettingsWithRepo(ivySettings, repos);
+		return of(ivySettings);
+	}
 
-		final ModuleRevisionId dependee = ModuleRevisionId.newInstance("org.springframework", "spring-jdbc", "3.0.0.RELEASE");
-		//final ModuleRevisionId dependee = ModuleRevisionId.newInstance("org.hibernate", "hibernate-core", "3.6.10.Final");
+	public static JakeIvy of() {
+		return of(JakeRepos.mavenCentral());
+	}
 
-		// 1st create an ivy module (this always(!) has a "default" configuration already)
-		final DefaultModuleDescriptor moduleDescriptor = DefaultModuleDescriptor.newDefaultInstance(thisModuleRevisionId);
+	public List<File> retrieve(JakeDependencies deps, JakeScope scope) {
+		final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId
+				.newInstance("mygroupId", "amyrtifactId-envelope", "myversion");
+		final DefaultModuleDescriptor moduleDescriptor = DefaultModuleDescriptor
+				.newDefaultInstance(thisModuleRevisionId);
+		for (final JakeScopedDependency scopedDependency : deps) {
+			final DependencyDescriptor dependencyDescriptor = Translations
+					.to(scopedDependency);
+			moduleDescriptor.addDependency(dependencyDescriptor);
+		}
 
-		// don't go transitive here, if you want the single artifact
-		final boolean transitive = true;
-		final DefaultDependencyDescriptor dependencyDescriptor = new DefaultDependencyDescriptor(moduleDescriptor, dependee, false, false, transitive);
-		//dependencyDescriptor.addDependencyArtifact(masterConf, dad);
+		final String[] confs = { scope.name() };
 
-		// map to master to just get the code jar. See generated ivy module xmls from maven repo
-		// on how configurations are mapped into ivy. Or check
-		// e.g. http://lightguard-jp.blogspot.de/2009/04/ivy-configurations-when-pulling-from.html
-		// dependencyDescriptor.addDependencyConfiguration("default", "master");
-
-		// To get more than 1 artifact i need to declare "compile" and not "master"
-		dependencyDescriptor.addDependencyConfiguration("default", "compile");
-
-
-		moduleDescriptor.addDependency(dependencyDescriptor);
-
-		// now resolve
-		final ResolveOptions resolveOptions = new ResolveOptions().setConfs(new String[]{"default"});
-		resolveOptions.setTransitive(transitive);
-		ResolveReport reportResolver;
+		final ResolveOptions resolveOptions = new ResolveOptions().setConfs(confs);
+		resolveOptions.setTransitive(true);
+		final ResolveReport report;
 		try {
-			reportResolver = ivy.resolve(moduleDescriptor, resolveOptions);
+			report = ivy.resolve(moduleDescriptor, resolveOptions);
 		} catch (final Exception e1) {
 			throw new RuntimeException(e1);
 		}
-		if (reportResolver.hasError()) {
-			System.out.println("*************************************************************************");
-			System.out.println(reportResolver);
-
-			throw new RuntimeException(reportResolver.getAllProblemMessages().toString());
-		}
-		for (final Object node : reportResolver.getDependencies()) {
-			final IvyNode ivyNode = (IvyNode) node;
-			final Artifact[] artifacts = ivyNode.getAllArtifacts();
-			for (final Artifact artifact : artifacts) {
-				System.out.println("*********************************"+ artifact);
-
-			}
+		final List<File> result = new LinkedList<File>();
+		for (final ArtifactDownloadReport artifactDownloadReport : report.getAllArtifactsReports()) {
+			result.add(artifactDownloadReport.getLocalFile());
 
 		}
-
-
-		final String filePattern = new File("build/output/libs").getAbsolutePath() +"/[artifact](-[classifier]).[ext]";
-		final RetrieveOptions retrieveOptions = new RetrieveOptions().setConfs(new String[]{"default"});
-		try {
-			ivy.retrieve(moduleDescriptor.getModuleRevisionId(), filePattern, retrieveOptions);
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
-
-
-
+		return result;
 	}
-
-
-	public static void main(String[] args) {
-		new JakeIvy().retrieve();
-	}
-
-	private static DependencyDescriptor to(JakeScopedDependency scopedDependency, JakeScopeMapping defaultMapping) {
-		for (final JakeScopedDependency scopedDependency : dependencies) {
-			if (scopedDependency.dependency() instanceof JakeExternalModule) {
-				final JakeExternalModule externalModule = (JakeExternalModule) scopedDependency.dependency();
-				final String configuration = scopedDependency.getM
-			}
-		}
-	}
-
-
 
 
 

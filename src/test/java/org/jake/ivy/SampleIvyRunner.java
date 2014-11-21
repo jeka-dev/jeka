@@ -1,15 +1,14 @@
-package org.jake.depmanagement.ivy;
+package org.jake.ivy;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.ivy.Ivy;
-import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
+import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
-import org.apache.ivy.core.resolve.IvyNode;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.retrieve.RetrieveOptions;
 import org.apache.ivy.core.settings.IvySettings;
@@ -17,7 +16,7 @@ import org.apache.ivy.plugins.resolver.IBiblioResolver;
 import org.apache.ivy.util.DefaultMessageLogger;
 import org.apache.ivy.util.Message;
 
-public class JakeIvyRunner {
+public class SampleIvyRunner {
 
 	public void retrieve() {
 		final IBiblioResolver dependencyResolver = new IBiblioResolver();
@@ -35,7 +34,7 @@ public class JakeIvyRunner {
 
 		final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(
 				"mygroupId",
-				"amyrtifactId-envelope",
+				"myartifactId-envelope",
 				"myversion"
 				);
 
@@ -76,13 +75,8 @@ public class JakeIvyRunner {
 
 			throw new RuntimeException(reportResolver.getAllProblemMessages().toString());
 		}
-		for (final Object node : reportResolver.getDependencies()) {
-			final IvyNode ivyNode = (IvyNode) node;
-			final Artifact[] artifacts = ivyNode.getAllArtifacts();
-			for (final Artifact artifact : artifacts) {
-				System.out.println("*********************************"+ artifact);
-
-			}
+		for (final ArtifactDownloadReport artifactDownloadReport : reportResolver.getAllArtifactsReports()) {
+			System.out.println("*********************************"+ artifactDownloadReport.getLocalFile());
 
 		}
 
@@ -101,7 +95,7 @@ public class JakeIvyRunner {
 
 
 	public static void main(String[] args) {
-		new JakeIvyRunner().retrieve();
+		new SampleIvyRunner().retrieve();
 	}
 
 

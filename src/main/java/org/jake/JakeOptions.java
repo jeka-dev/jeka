@@ -46,7 +46,7 @@ public final class JakeOptions {
 	}
 
 	public static void forceVerbose(boolean verbose) {
-		INSTANCE.verbose = true;
+		INSTANCE.verbose = verbose;
 	}
 
 	public static void forceSilent(boolean silent) {

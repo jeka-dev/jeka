@@ -11,7 +11,7 @@ public class DependenciesTest {
 
 	@Test
 	public void test() {
-		final Dependencies deps = Dependencies.builder()
+		final JakeDependencies deps = JakeDependencies.builder()
 				.defaultScope(JakeScopeMapping.of(RUNTIME, RUNTIME))
 				.on("hibernate:hjmlm:1212.0")
 				.on("spring:spring:6.3").scope(COMPILE)
@@ -24,8 +24,8 @@ public class DependenciesTest {
 
 	}
 
-	private Dependencies secondaryDeps() {
-		return Dependencies.builder()
+	private JakeDependencies secondaryDeps() {
+		return JakeDependencies.builder()
 				.on("454545:5445:54545")
 				.on("lkll:llljk:poo").build();
 	}

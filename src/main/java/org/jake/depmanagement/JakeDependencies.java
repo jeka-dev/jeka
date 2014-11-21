@@ -8,16 +8,16 @@ import java.util.Set;
 
 import org.jake.utils.JakeUtilsIterable;
 
-public class Dependencies implements Iterable<JakeScopedDependency>{
+public class JakeDependencies implements Iterable<JakeScopedDependency>{
 
 	private final List<JakeScopedDependency> dependencies;
 
-	private Dependencies(List<JakeScopedDependency> dependencies) {
+	private JakeDependencies(List<JakeScopedDependency> dependencies) {
 		super();
 		this.dependencies = Collections.unmodifiableList(new LinkedList<JakeScopedDependency>(dependencies));
 	}
 
-	public Dependencies without(JakeModuleId jakeModuleId) {
+	public JakeDependencies without(JakeModuleId jakeModuleId) {
 		final List<JakeScopedDependency> result = new LinkedList<JakeScopedDependency>(dependencies);
 		for (final Iterator<JakeScopedDependency> it = result.iterator(); it.hasNext();) {
 			final JakeDependency dependency = it.next().dependency();
@@ -28,7 +28,7 @@ public class Dependencies implements Iterable<JakeScopedDependency>{
 				}
 			}
 		}
-		return new Dependencies(result);
+		return new JakeDependencies(result);
 	}
 
 	@Override
@@ -41,9 +41,7 @@ public class Dependencies implements Iterable<JakeScopedDependency>{
 		return dependencies.toString();
 	}
 
-	public List<JakeScopedDependency> dependencies() {
-		return dependencies;
-	}
+
 
 	public JakeScopedDependency get(JakeModuleId moduleId) {
 		for (final JakeScopedDependency scopedDependency : this) {
@@ -136,8 +134,8 @@ public class Dependencies implements Iterable<JakeScopedDependency>{
 			return this;
 		}
 
-		public Dependencies build() {
-			return new Dependencies(dependencies);
+		public JakeDependencies build() {
+			return new JakeDependencies(dependencies);
 		}
 
 		public static class ScopebleBuilder extends Builder {
