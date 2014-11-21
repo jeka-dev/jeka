@@ -12,7 +12,7 @@ public abstract class JakeRepo {
 
 	@SuppressWarnings("unchecked")
 	public static MavenRepository maven(String url) {
-		return new MavenRepository(url(url), Collections.EMPTY_LIST);
+		return new MavenRepository(toUrl(url), Collections.EMPTY_LIST);
 	}
 
 	public static JakeRepo mavenCentral() {
@@ -68,7 +68,7 @@ public abstract class JakeRepo {
 		return this.getClass().getSimpleName() + "(" + url + ")";
 	}
 
-	private static URL url(String url) {
+	private static URL toUrl(String url) {
 		try {
 			return new URL(url);
 		} catch (final MalformedURLException e) {
@@ -78,9 +78,9 @@ public abstract class JakeRepo {
 
 	public static class MavenRepository extends JakeRepo {
 
-		public static final URL MAVEN_CENTRAL_URL = url("http://repo1.maven.org/maven2");
+		public static final URL MAVEN_CENTRAL_URL = toUrl("http://repo1.maven.org/maven2");
 
-		public static final URL JCENTERL_URL = url("https://jcenter.bintray.com");
+		public static final URL JCENTERL_URL = toUrl("https://jcenter.bintray.com");
 
 		private final List<URL> artifactUrls;
 
@@ -92,7 +92,7 @@ public abstract class JakeRepo {
 		public MavenRepository withArtifactUrl(String ... urls) {
 			final List<URL> list = new LinkedList<URL>();
 			for (final String url : urls) {
-				list.add(url(url));
+				list.add(toUrl(url));
 			}
 			return new MavenRepository(this.url(), list);
 		}
