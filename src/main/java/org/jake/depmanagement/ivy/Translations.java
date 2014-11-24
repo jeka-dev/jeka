@@ -1,5 +1,8 @@
 package org.jake.depmanagement.ivy;
 
+import java.io.File;
+
+import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
 import org.apache.ivy.core.module.id.ModuleId;
@@ -7,6 +10,7 @@ import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
+import org.jake.depmanagement.JakeArtifact;
 import org.jake.depmanagement.JakeDependency;
 import org.jake.depmanagement.JakeExternalModule;
 import org.jake.depmanagement.JakeModuleId;
@@ -15,7 +19,9 @@ import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeScope;
 import org.jake.depmanagement.JakeScopedDependency;
 import org.jake.depmanagement.JakeScopedDependency.ScopeType;
+import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionRange;
+import org.jake.depmanagement.JakeVersionedModule;
 
 final class Translations {
 
@@ -88,7 +94,12 @@ final class Translations {
 		}
 	}
 
-
-
+	public static JakeArtifact to(Artifact artifact, File localFile) {
+		final JakeModuleId moduleId = JakeModuleId.of(artifact.getModuleRevisionId().getOrganisation(),
+				artifact.getModuleRevisionId().getName());
+		final JakeVersionedModule module = JakeVersionedModule.of(moduleId,
+				JakeVersion.of(artifact.getModuleRevisionId().getRevision()));
+		return JakeArtifact.of(module, localFile);
+	}
 
 }

@@ -18,6 +18,10 @@ public final class JakeVersion implements Comparable<JakeVersion> {
 		this.name = name;
 	}
 
+	public String name() {
+		return name;
+	}
+
 	@Override
 	public int compareTo(JakeVersion other) {
 		return name.compareTo(other.name);
@@ -57,8 +61,9 @@ public final class JakeVersion implements Comparable<JakeVersion> {
 		return true;
 	}
 
-
-
-
+	@Override
+	public String toString() {
+		return "JakeVersion [name=" + name + "]";
+	}
 
 }
