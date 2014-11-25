@@ -65,8 +65,7 @@ public class JakeVersionedModule {
 
 	@Override
 	public String toString() {
-		return "JakeVersionedModule [moduleId=" + moduleId + ", version="
-				+ version + "]";
+		return moduleId+":"+version;
 	}
 
 }

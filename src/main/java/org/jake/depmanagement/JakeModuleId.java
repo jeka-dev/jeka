@@ -49,7 +49,7 @@ public final class JakeModuleId {
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + "=" + group+":"+name;
+		return group+":"+name;
 
 	}
 

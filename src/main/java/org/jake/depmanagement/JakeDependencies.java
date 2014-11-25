@@ -43,8 +43,6 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 		return dependencies.toString();
 	}
 
-
-
 	public JakeScopedDependency get(JakeModuleId moduleId) {
 		for (final JakeScopedDependency scopedDependency : this) {
 			final JakeDependency dependency = scopedDependency.dependency();
@@ -61,13 +59,22 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 	public Set<JakeScope> involvedScopes() {
 		final Set<JakeScope> result = new HashSet<JakeScope>();
 		for (final JakeScopedDependency dep : this.dependencies) {
-			if (dep.scopeType() == ScopeType.SIMPLE) {
-				result.addAll(dep.scopes());
-			} else if (dep.scopeType() == ScopeType.MAPPED) {
+			if (dep.scopeType() == ScopeType.MAPPED) {
 				result.addAll(dep.scopeMapping().involvedScopes());
+			} else if (dep.scopeType() == ScopeType.SIMPLE) {
+				result.addAll(dep.scopes());
 			}
 		}
 		return Collections.unmodifiableSet(result);
+	}
+
+	public boolean hasSimpleScope() {
+		for (final JakeScopedDependency dep : this.dependencies) {
+			if (dep.scopeType() == ScopeType.SIMPLE) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static Builder builder() {

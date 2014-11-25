@@ -49,10 +49,13 @@ final class Translations {
 			final Configuration configuration = to(involvedScope);
 			moduleDescriptor.addConfiguration(configuration);
 		}
+		if (dependencies.hasSimpleScope()) {
+			moduleDescriptor.addConfiguration(to(DEFAULT_CONFIGURATION));
+		}
 		if (defaultScope != null) {
 			moduleDescriptor.addConfiguration(to(defaultScope));
 		} else if (defaultMapping != null) {
-			for (final JakeScope jakeScope : defaultMapping.involvedScopes()) {
+			for (final JakeScope jakeScope : defaultMapping.entries()) {
 				moduleDescriptor.addConfiguration(to(jakeScope));
 			}
 

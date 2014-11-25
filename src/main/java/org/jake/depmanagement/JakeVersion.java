@@ -63,7 +63,7 @@ public final class JakeVersion implements Comparable<JakeVersion> {
 
 	@Override
 	public String toString() {
-		return "JakeVersion [name=" + name + "]";
+		return  name;
 	}
 
 }
