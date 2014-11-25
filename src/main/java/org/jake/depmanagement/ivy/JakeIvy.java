@@ -6,8 +6,6 @@ import java.util.List;
 
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
-import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
-import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.ResolveOptions;
@@ -17,8 +15,9 @@ import org.jake.depmanagement.JakeArtifact;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeModuleId;
 import org.jake.depmanagement.JakeRepos;
+import org.jake.depmanagement.JakeResolutionScope;
 import org.jake.depmanagement.JakeScope;
-import org.jake.depmanagement.JakeScopedDependency;
+import org.jake.depmanagement.JakeScopeMapping;
 import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionedModule;
 
@@ -51,23 +50,23 @@ public final class JakeIvy {
 		return of(JakeRepos.mavenCentral());
 	}
 
-	public List<JakeArtifact> resolve(JakeDependencies deps, JakeScope scope) {
-		return resolve(ANONYMOUS_MODULE, deps, scope);
+
+	public List<JakeArtifact> resolve(JakeDependencies deps, JakeScope defaultScope) {
+		return resolve(ANONYMOUS_MODULE, deps, JakeResolutionScope.of(Translations.DEFAULT_CONFIGURATION).withDefault(defaultScope));
 	}
 
+	public List<JakeArtifact> resolve(JakeDependencies deps, JakeScopeMapping defaultScopeMapping) {
+		return resolve(ANONYMOUS_MODULE, deps, JakeResolutionScope.of(Translations.DEFAULT_CONFIGURATION).withDefault(defaultScopeMapping));
+	}
 
-	public List<JakeArtifact> resolve(JakeVersionedModule module, JakeDependencies deps, JakeScope scope) {
-		final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId
-				.newInstance(module.moduleId().group(), module.moduleId().name(), module.version().name());
-		final DefaultModuleDescriptor moduleDescriptor = DefaultModuleDescriptor
-				.newDefaultInstance(thisModuleRevisionId);
-		for (final JakeScopedDependency scopedDependency : deps) {
-			final DependencyDescriptor dependencyDescriptor = Translations
-					.to(scopedDependency);
-			moduleDescriptor.addDependency(dependencyDescriptor);
-		}
+	public List<JakeArtifact> resolve(JakeDependencies deps) {
+		return resolve(ANONYMOUS_MODULE, deps, JakeResolutionScope.of(Translations.DEFAULT_CONFIGURATION));
+	}
 
-		final String[] confs = { scope.name() };
+	public List<JakeArtifact> resolve(JakeVersionedModule module, JakeDependencies deps, JakeResolutionScope resolutionScope) {
+		final DefaultModuleDescriptor moduleDescriptor = Translations.to(module, deps, resolutionScope.defaultScope(), resolutionScope.defaultMapping());
+
+		final String[] confs = { resolutionScope.dependencyScope().name() };
 
 		final ResolveOptions resolveOptions = new ResolveOptions().setConfs(confs);
 		resolveOptions.setTransitive(true);

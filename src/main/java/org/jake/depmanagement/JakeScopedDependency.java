@@ -14,7 +14,7 @@ import org.jake.utils.JakeUtilsIterable;
 public final class JakeScopedDependency {
 
 	public static enum ScopeType {
-		SIMPLE, MAPPED
+		SIMPLE, MAPPED, UNSET
 	}
 
 	@SuppressWarnings("unchecked")
@@ -52,50 +52,42 @@ public final class JakeScopedDependency {
 
 	public boolean isInvolving(JakeScope scope) {
 		if (scopeMapping == null) {
-			return scope.isInOrIsInheritedByAnyOf(scopes);
+			return scope.isInOrIsExtendingAnyOf(scopes);
 		}
-		return scope.isInOrIsInheritedByAnyOf(scopeMapping.entries());
+		return scope.isInOrIsExtendingAnyOf(scopeMapping.entries());
 	}
 
 	// ??????
 	public boolean isInvolving(JakeScope scope, Set<JakeScope> defaultScopes) {
-		if (scopes.contains(scope) || scope.isInOrIsInheritedByAnyOf(scopes)) {
+		if (scopes.contains(scope) || scope.isInOrIsExtendingAnyOf(scopes)) {
 			return true;
 		}
-		final boolean mapped = scopeMapping.entries().contains(scope) || scope.isInOrIsInheritedByAnyOf(scopeMapping.entries());
+		final boolean mapped = scopeMapping.entries().contains(scope) || scope.isInOrIsExtendingAnyOf(scopeMapping.entries());
 		if (!mapped) {
-			return scope.isInOrIsInheritedByAnyOf(defaultScopes);
+			return scope.isInOrIsExtendingAnyOf(defaultScopes);
 		}
 		return true;
 	}
 
-	public Set<JakeScope> mappedScopes(JakeScope scope) {
-		final Set<JakeScope> result;
-		if (this.scopeMapping != null) {
-			if (!scope.isInOrIsInheritedByAnyOf(this.scopeMapping.entries())) {
-				throw new IllegalArgumentException(scope.toString() + " is not declared in this dependency. Declared scopes are " + this.scopeMapping.entries());
-			}
-			result = this.scopeMapping.targetScopes(scope);
-		} else {
-			if (!scope.isInOrIsInheritedByAnyOf(scopes)) {
-				throw new IllegalArgumentException(scope.toString() + " is not declared in this dependency. Declared scopes are " + scopes);
-			}
-			result = JakeUtilsIterable.setOf(scope);
-		}
-		return result;
-	}
+
 
 	public ScopeType scopeType() {
-		return this.scopeMapping == null ? ScopeType.SIMPLE : ScopeType.MAPPED;
+		if (this.scopes != null && !this.scopes.isEmpty()) {
+			return ScopeType.SIMPLE;
+		}
+		if (this.scopeMapping != null && !this.scopeMapping.entries().isEmpty()) {
+			return ScopeType.MAPPED;
+		}
+		return ScopeType.UNSET;
 	}
 
 	public Set<JakeScope> scopes() {
-		JakeUtilsAssert.isTrue(this.scopeType() == ScopeType.SIMPLE, "This dependency uses simple scopes, not scope mapping. Use #scopeMapping() instead.");
+		JakeUtilsAssert.isTrue(this.scopeType() == ScopeType.SIMPLE, "This dependency does not declare simple scopes.");
 		return this.scopes;
 	}
 
 	public JakeScopeMapping scopeMapping() {
-		JakeUtilsAssert.isTrue(this.scopeType() == ScopeType.MAPPED, "This dependency uses  scopeMappings, not simple scopes. Use #scopeMapping() instead.");
+		JakeUtilsAssert.isTrue(this.scopeType() == ScopeType.MAPPED, "This dependency does not declare scope mappings.");
 		return this.scopeMapping;
 	}
 

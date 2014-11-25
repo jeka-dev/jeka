@@ -8,8 +8,6 @@ import java.util.List;
 
 public abstract class JakeRepo {
 
-
-
 	@SuppressWarnings("unchecked")
 	public static MavenRepository maven(String url) {
 		return new MavenRepository(toUrl(url), Collections.EMPTY_LIST);

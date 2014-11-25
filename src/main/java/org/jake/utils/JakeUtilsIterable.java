@@ -41,7 +41,7 @@ public class JakeUtilsIterable {
 		return Arrays.asList(items);
 	}
 
-	public static <T> Set<T> setOf(T... items) {
+	public static <T, U extends T> Set<T> setOf(U... items) {
 		final HashSet<T> result = new HashSet<T>();
 		result.addAll(Arrays.asList(items));
 		return result;

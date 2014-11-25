@@ -38,12 +38,12 @@ public class JakeBuildJava extends JakeBuildBase {
 	/**
 	 * Dependencies to embed in produced artifacts (as war or fat jar * files).
 	 */
-	public static final JakeScope RUNTIME = JakeScope.of("runtime", COMPILE);
+	public static final JakeScope RUNTIME = JakeScope.of("runtime").extending(COMPILE);
 
 	/**
 	 * Dependencies necessary to compile and run tests.
 	 */
-	public static final JakeScope TEST = JakeScope.of("test", RUNTIME, PROVIDED);
+	public static final JakeScope TEST = JakeScope.of("test").extending(RUNTIME, PROVIDED);
 
 	/**
 	 * Default path for the non managed dependencies. This path is relative to {@link #baseDir()}.

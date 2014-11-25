@@ -12,7 +12,7 @@ import org.jake.utils.JakeUtilsString;
 public class JakeExternalModule extends JakeDependency {
 
 	public static JakeExternalModule of(JakeModuleId moduleId, JakeVersionRange versionRange) {
-		return new JakeExternalModule(moduleId, versionRange);
+		return new JakeExternalModule(moduleId, versionRange, null);
 	}
 
 	public static JakeExternalModule of(String group, String name, String version) {
@@ -30,11 +30,15 @@ public class JakeExternalModule extends JakeDependency {
 
 	private final JakeModuleId module;
 	private final JakeVersionRange versionRange;
+	private final String classifier;
 
-	private JakeExternalModule(JakeModuleId module, JakeVersionRange versionRange) {
+	private JakeExternalModule(JakeModuleId module, JakeVersionRange versionRange, String classifier) {
 		this.module = module;
 		this.versionRange = versionRange;
+		this.classifier = classifier;
 	}
+
+
 
 	public JakeModuleId moduleId() {
 		return module;
@@ -42,6 +46,18 @@ public class JakeExternalModule extends JakeDependency {
 
 	public JakeVersionRange versionRange() {
 		return versionRange;
+	}
+
+	/**
+	 * Returns the Maven classifier for this dependency. This has only an effect if the dependency
+	 * is resolved in a Maven repository.
+	 */
+	public String mavenClassifier() {
+		return classifier;
+	}
+
+	public JakeExternalModule withMavenClassifier(String classifier) {
+		return new JakeExternalModule(this.module, this.versionRange, classifier);
 	}
 
 	@Override

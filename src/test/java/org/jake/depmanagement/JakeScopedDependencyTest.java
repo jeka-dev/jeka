@@ -31,12 +31,12 @@ public class JakeScopedDependencyTest {
 
 		final Set<JakeScope> sampleSet = new HashSet<JakeScope>();
 		sampleSet.add(JakeBuildJava.PROVIDED);
-		assertEquals(sampleSet, scopedDep.mappedScopes(RUNTIME));
-		assertEquals(sampleSet, scopedDep.mappedScopes(COMPILE)); // cause RUNTIME inherits from COMPILE
+		assertEquals(sampleSet, scopedDep.scopeMapping().mappedScopes(RUNTIME));
+		assertEquals(sampleSet, scopedDep.scopeMapping().mappedScopes(COMPILE)); // cause RUNTIME inherits from COMPILE
 
 		boolean failed = false;
 		try {
-			scopedDep.mappedScopes(JakeScope.of("notInvolvedScope"));
+			scopedDep.scopeMapping().mappedScopes(JakeScope.of("notInvolvedScope"));
 		} catch (final IllegalArgumentException e) {
 			failed = true;
 		}
@@ -54,12 +54,12 @@ public class JakeScopedDependencyTest {
 		assertTrue(scopedDep.isInvolving(COMPILE)); // cause RUNTIME inherits from COMPILE
 		assertTrue(!scopedDep.isInvolving(TEST));
 
-		assertEquals(JakeUtilsIterable.setOf(COMPILE), scopedDep.mappedScopes(COMPILE));
-		assertEquals(JakeUtilsIterable.setOf(RUNTIME), scopedDep.mappedScopes(RUNTIME));
+		assertEquals(JakeUtilsIterable.setOf(COMPILE), scopedDep.scopeMapping().mappedScopes(COMPILE));
+		assertEquals(JakeUtilsIterable.setOf(RUNTIME), scopedDep.scopeMapping().mappedScopes(RUNTIME));
 
 		boolean failed = false;
 		try {
-			scopedDep.mappedScopes(TEST);
+			scopedDep.scopeMapping().mappedScopes(TEST);
 		} catch (final IllegalArgumentException e) {
 			failed = true;
 		}

@@ -100,21 +100,25 @@ public final class JakeScopeMapping {
 	}
 
 
-	public Set<JakeScope> targetScopes(JakeScope sourceScope) {
+	public Set<JakeScope> mappedScopes(JakeScope sourceScope) {
 		final Set<JakeScope> result = this.map.get(sourceScope);
 		if (result != null && !result.isEmpty()) {
 			return result;
 		}
-		for (final JakeScope jakeScope : this.map.keySet()) {
-			if (jakeScope.inheritFrom(sourceScope)) {
-				return this.map.get(jakeScope);
-			}
-		}
-		return null;
+		throw new IllegalArgumentException("No mapped scope declared for " + sourceScope + ". Declared scopes are " + this.entries());
 	}
 
 	public Set<JakeScope> entries() {
 		return Collections.unmodifiableSet(this.map.keySet());
+	}
+
+	public Set<JakeScope> involvedScopes() {
+		final Set<JakeScope> result = new HashSet<JakeScope>();
+		result.addAll(entries());
+		for (final JakeScope scope : entries()) {
+			result.addAll(this.map.get(scope));
+		}
+		return Collections.unmodifiableSet(result);
 	}
 
 	@Override

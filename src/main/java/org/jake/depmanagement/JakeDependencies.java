@@ -1,11 +1,13 @@
 package org.jake.depmanagement;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.jake.depmanagement.JakeScopedDependency.ScopeType;
 import org.jake.utils.JakeUtilsIterable;
 
 public class JakeDependencies implements Iterable<JakeScopedDependency>{
@@ -54,6 +56,18 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 			}
 		}
 		return null;
+	}
+
+	public Set<JakeScope> involvedScopes() {
+		final Set<JakeScope> result = new HashSet<JakeScope>();
+		for (final JakeScopedDependency dep : this.dependencies) {
+			if (dep.scopeType() == ScopeType.SIMPLE) {
+				result.addAll(dep.scopes());
+			} else if (dep.scopeType() == ScopeType.MAPPED) {
+				result.addAll(dep.scopeMapping().involvedScopes());
+			}
+		}
+		return Collections.unmodifiableSet(result);
 	}
 
 	public static Builder builder() {
