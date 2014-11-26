@@ -58,7 +58,7 @@ public final class JakeOptions {
 	}
 
 	public static boolean isSilent() {
-		return INSTANCE. silent;
+		return INSTANCE.silent;
 	}
 
 	static String buildClass() {

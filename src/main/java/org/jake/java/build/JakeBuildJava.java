@@ -25,25 +25,17 @@ import org.jake.verify.sonar.JakeSonar;
 
 public class JakeBuildJava extends JakeBuildBase {
 
-	/**
-	 * Dependencies to compile the project but that should not be embedded in produced artifacts.
-	 */
-	public static final JakeScope PROVIDED = JakeScope.of("provided");
+	public static final JakeScope PROVIDED = JakeScope.of("provided").transitive(false)
+			.descr("Dependencies to compile the project but that should not be embedded in produced artifacts.");
 
-	/**
-	 * Dependencies to compile the project.
-	 */
-	public static final JakeScope COMPILE = JakeScope.of("compile");
+	public static final JakeScope COMPILE = JakeScope.of("compile")
+			.descr("Dependencies to compile the project.");
 
-	/**
-	 * Dependencies to embed in produced artifacts (as war or fat jar * files).
-	 */
-	public static final JakeScope RUNTIME = JakeScope.of("runtime").extending(COMPILE);
+	public static final JakeScope RUNTIME = JakeScope.of("runtime").extending(COMPILE)
+			.descr("Dependencies to embed in produced artifacts (as war or fat jar * files).");
 
-	/**
-	 * Dependencies necessary to compile and run tests.
-	 */
-	public static final JakeScope TEST = JakeScope.of("test").extending(RUNTIME, PROVIDED);
+	public static final JakeScope TEST = JakeScope.of("test").extending(RUNTIME, PROVIDED)
+			.descr("Dependencies necessary to compile and run tests.");
 
 	/**
 	 * Default path for the non managed dependencies. This path is relative to {@link #baseDir()}.

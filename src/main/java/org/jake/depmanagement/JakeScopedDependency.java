@@ -91,5 +91,11 @@ public final class JakeScopedDependency {
 		return this.scopeMapping;
 	}
 
+	@Override
+	public String toString() {
+		return dependency.toString() + "[" + (scopeMapping != null ? scopeMapping.toString() : "")
+				+ ((scopes== null || scopes.isEmpty()) ? "" : scopes.toString()) + "]";
+	}
+
 
 }

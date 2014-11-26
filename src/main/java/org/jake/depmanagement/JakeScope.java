@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.jake.utils.JakeUtilsString;
+
 /**
  * Defines a context where is defined dependencies of a given project.
  * According we need to compile, test or run the application, the dependencies may diverge.
@@ -24,25 +26,50 @@ public class JakeScope {
 	 */
 	@SuppressWarnings("unchecked")
 	public static OptionableScope of(String name) {
-		return new OptionableScope(name, Collections.EMPTY_SET);
+		return new OptionableScope(name, Collections.EMPTY_SET, "", true, true);
 	}
 
 	private final Set<JakeScope> extendedScopes;
 
 	private final String name;
 
-	private JakeScope(String name, Set<JakeScope> extendedScopes) {
+	private final String description;
+
+	private final boolean transitive;
+
+	private final boolean isPublic;
+
+	private JakeScope(String name, Set<JakeScope> extendedScopes, String description, boolean transitive, boolean isPublic) {
 		super();
+		final String illegal = JakeUtilsString.containsAnyOf(name, ",", "->", "(", "*", ")");
+		if (illegal != null) {
+			throw new IllegalArgumentException("Scope name can't contain '" + illegal + "'");
+		}
 		this.extendedScopes = Collections.unmodifiableSet(extendedScopes);
 		this.name = name;
+		this.description = description;
+		this.transitive = transitive;
+		this.isPublic = isPublic;
 	}
 
 	public String name() {
 		return name;
 	}
 
+	public String description() {
+		return description;
+	}
+
 	public Set<JakeScope> extendedScopes() {
 		return this.extendedScopes;
+	}
+
+	public boolean transitive() {
+		return this.transitive;
+	}
+
+	public boolean isPublic() {
+		return isPublic;
 	}
 
 	public List<JakeScope> impliedScopes() {
@@ -118,14 +145,33 @@ public class JakeScope {
 		return "Scope:"+name;
 	}
 
+	/**
+	 * A {@link JakeScope} allowing to define other scope from it. It exists only to serve the fluent
+	 * API purpose as for clarity we can't create derived <code>scopes</scope> directly from a {@link JakeScope} .<br/>
+	 * Use the {@link #descr(String)} method last as it returns a {@link JakeScope}.
+	 * 
+	 * @author Jerome Angibaud
+	 */
 	public static class OptionableScope extends JakeScope {
 
-		private OptionableScope(String name, Set<JakeScope> extendedScopes) {
-			super(name, extendedScopes);
+		private OptionableScope(String name, Set<JakeScope> extendedScopes, String descr, boolean transitive, boolean isPublic) {
+			super(name, extendedScopes, descr, transitive, isPublic);
 		}
 
 		public OptionableScope extending(JakeScope ...scopes) {
-			return new OptionableScope(name(), new HashSet<JakeScope>(Arrays.asList(scopes)));
+			return new OptionableScope(name(), new HashSet<JakeScope>(Arrays.asList(scopes)), description(), transitive(), isPublic());
+		}
+
+		public OptionableScope transitive(boolean transitive) {
+			return new OptionableScope(name(), extendedScopes(), description(), transitive, isPublic());
+		}
+
+		public OptionableScope isPublic(boolean isPublic) {
+			return new OptionableScope(name(), extendedScopes(), description(), transitive(), isPublic);
+		}
+
+		public JakeScope descr(String description) {
+			return new JakeScope(name(), extendedScopes(), description, transitive(), isPublic());
 		}
 
 

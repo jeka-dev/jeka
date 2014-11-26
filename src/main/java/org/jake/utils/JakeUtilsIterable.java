@@ -47,6 +47,14 @@ public class JakeUtilsIterable {
 		return result;
 	}
 
+	public static <T, U extends T> Set<T> setOf(Iterable<U> items) {
+		final HashSet<T> result = new HashSet<T>();
+		for (final U item : items) {
+			result.add(item);
+		}
+		return result;
+	}
+
 
 	public static <T> Iterable<T> chain(Iterable<T> ... iterables) {
 		return chainAll(Arrays.asList(iterables));

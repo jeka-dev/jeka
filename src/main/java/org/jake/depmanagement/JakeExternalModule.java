@@ -56,7 +56,7 @@ public class JakeExternalModule extends JakeDependency {
 		return classifier;
 	}
 
-	public JakeExternalModule withMavenClassifier(String classifier) {
+	public JakeExternalModule classifier(String classifier) {
 		return new JakeExternalModule(this.module, this.versionRange, classifier);
 	}
 

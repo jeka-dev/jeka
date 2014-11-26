@@ -28,6 +28,7 @@ import org.jake.depmanagement.JakeScopedDependency.ScopeType;
 import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionRange;
 import org.jake.depmanagement.JakeVersionedModule;
+import org.jake.utils.JakeUtilsString;
 
 final class Translations {
 
@@ -38,34 +39,12 @@ final class Translations {
 
 	private Translations() {}
 
-	public static DefaultModuleDescriptor to(JakeVersionedModule module, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping) {
+	public static DefaultModuleDescriptor toUnpublished(JakeVersionedModule module, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping) {
 		final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId
 				.newInstance(module.moduleId().group(), module.moduleId().name(), module.version().name());
-		final DefaultModuleDescriptor moduleDescriptor = DefaultModuleDescriptor
-				.newDefaultInstance(thisModuleRevisionId);
+		final DefaultModuleDescriptor moduleDescriptor = new DefaultModuleDescriptor(thisModuleRevisionId, "integration", null);
 
-		// Add configuration definitions
-		for (final JakeScope involvedScope : dependencies.involvedScopes()) {
-			final Configuration configuration = to(involvedScope);
-			moduleDescriptor.addConfiguration(configuration);
-		}
-		if (dependencies.hasSimpleScope()) {
-			moduleDescriptor.addConfiguration(to(DEFAULT_CONFIGURATION));
-		}
-		if (defaultScope != null) {
-			moduleDescriptor.addConfiguration(to(defaultScope));
-		} else if (defaultMapping != null) {
-			for (final JakeScope jakeScope : defaultMapping.entries()) {
-				moduleDescriptor.addConfiguration(to(jakeScope));
-			}
-
-		}
-
-		// Add dependency
-		for (final JakeScopedDependency scopedDependency : dependencies) {
-			final DependencyDescriptor dependencyDescriptor = to(scopedDependency, defaultScope, defaultMapping);
-			moduleDescriptor.addDependency(dependencyDescriptor);
-		}
+		populateModuleDescriptor(moduleDescriptor, dependencies, defaultScope, defaultMapping);
 		return moduleDescriptor;
 
 	}
@@ -80,7 +59,13 @@ final class Translations {
 		// filling configuration
 		if (scopedDependency.scopeType() == ScopeType.SIMPLE) {
 			for (final JakeScope scope : scopedDependency.scopes()) {
-				result.addDependencyConfiguration(DEFAULT_CONFIGURATION.name(), scope.name());
+				final JakeScopeMapping mapping = resolveSimple(scope, defaultScope, defaultMapping);
+				for (final JakeScope fromScope : mapping.entries()) {
+					for (final JakeScope mappedScope : mapping.mappedScopes(fromScope)) {
+						result.addDependencyConfiguration(fromScope.name(), mappedScope.name());
+					}
+				}
+
 			}
 		} else if (scopedDependency.scopeType() == ScopeType.MAPPED) {
 			for (final JakeScope scope : scopedDependency.scopeMapping().entries()) {
@@ -107,8 +92,8 @@ final class Translations {
 		for (final JakeScope parent : jakeScope.extendedScopes()) {
 			extendedScopes.add(parent.name());
 		}
-		return new Configuration(jakeScope.name(), Visibility.PUBLIC, "", extendedScopes.toArray(new String[0]), true, null);
-
+		final Visibility visibility = jakeScope.isPublic() ? Visibility.PUBLIC : Visibility.PRIVATE;
+		return new Configuration(jakeScope.name(), visibility, jakeScope.description(), extendedScopes.toArray(new String[0]), jakeScope.transitive(), null);
 	}
 
 	private static ModuleRevisionId to(JakeExternalModule externalModule) {
@@ -155,6 +140,69 @@ final class Translations {
 		final JakeVersionedModule module = JakeVersionedModule.of(moduleId,
 				JakeVersion.of(artifact.getModuleRevisionId().getRevision()));
 		return JakeArtifact.of(module, localFile);
+	}
+
+	private static String toIvyExpression(JakeScopeMapping scopeMapping) {
+		final List<String> list = new LinkedList<String>();
+		for (final JakeScope scope : scopeMapping.entries()) {
+			final List<String> targets = new LinkedList<String>();
+			for (final JakeScope target : scopeMapping.mappedScopes(scope)) {
+				targets.add(target.name());
+			}
+			final String item = scope.name() + " -> " + JakeUtilsString.join(targets, ",");
+			list.add(item);
+		}
+		return JakeUtilsString.join(list, "; ");
+	}
+
+	private static void populateModuleDescriptor(DefaultModuleDescriptor moduleDescriptor, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping) {
+
+
+		// Add configuration definitions
+		for (final JakeScope involvedScope : dependencies.moduleScopes()) {
+			final Configuration configuration = to(involvedScope);
+			moduleDescriptor.addConfiguration(configuration);
+		}
+		if (defaultScope != null) {
+			moduleDescriptor.setDefaultConf(defaultScope.name());
+		} else if (defaultMapping != null) {
+			moduleDescriptor.setDefaultConfMapping(toIvyExpression(defaultMapping));
+		}
+
+		// Add dependencies
+		for (final JakeScopedDependency scopedDependency : dependencies) {
+			final DependencyDescriptor dependencyDescriptor = to(scopedDependency, defaultScope, defaultMapping);
+			moduleDescriptor.addDependency(dependencyDescriptor);
+		}
+
+	}
+
+	private static JakeScopeMapping resolveSimple(JakeScope scope, JakeScope defaultScope, JakeScopeMapping defaultMapping) {
+		final JakeScopeMapping result;
+		if (scope == null) {
+			if (defaultScope == null) {
+				if (defaultMapping == null) {
+					result = JakeScopeMapping.of(JakeScope.of("default"), "default");
+				} else {
+					result = defaultMapping;
+				}
+			} else {
+				if (defaultMapping == null) {
+					result = JakeScopeMapping.of(defaultScope, defaultScope);
+				} else {
+					result = JakeScopeMapping.from(defaultScope).to(defaultMapping.mappedScopes(defaultScope));
+				}
+
+			}
+		} else {
+			if (defaultMapping == null) {
+				result = JakeScopeMapping.of(scope, scope);
+			} else {
+				result = JakeScopeMapping.from(scope).to(defaultMapping.mappedScopes(scope));
+			}
+		}
+		return result;
+
 	}
 
 }

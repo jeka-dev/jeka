@@ -12,7 +12,7 @@ public class JakeResolutionScope {
 
 	private final JakeScopeMapping defaultMapping;
 
-	public JakeScope dependencyScope() {
+	public JakeScope resolvedScope() {
 		return dependencyScope;
 	}
 
@@ -39,11 +39,11 @@ public class JakeResolutionScope {
 		}
 
 		public JakeResolutionScope withDefault(JakeScope jakeScope) {
-			return new JakeResolutionScope(dependencyScope(), jakeScope, null);
+			return new JakeResolutionScope(resolvedScope(), jakeScope, null);
 		}
 
 		public JakeResolutionScope withDefault(JakeScopeMapping jakeScopeMapping) {
-			return new JakeResolutionScope(dependencyScope(), null, jakeScopeMapping);
+			return new JakeResolutionScope(resolvedScope(), null, jakeScopeMapping);
 		}
 
 	}

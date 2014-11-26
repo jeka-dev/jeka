@@ -1,5 +1,6 @@
 package org.jake.depmanagement;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,11 +57,11 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 		return null;
 	}
 
-	public Set<JakeScope> involvedScopes() {
+	public Set<JakeScope> moduleScopes() {
 		final Set<JakeScope> result = new HashSet<JakeScope>();
 		for (final JakeScopedDependency dep : this.dependencies) {
 			if (dep.scopeType() == ScopeType.MAPPED) {
-				result.addAll(dep.scopeMapping().involvedScopes());
+				result.addAll(dep.scopeMapping().entries());
 			} else if (dep.scopeType() == ScopeType.SIMPLE) {
 				result.addAll(dep.scopes());
 			}
@@ -175,6 +176,56 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 				final JakeDependency dependency = dependencies.pollLast().dependency();
 				dependencies.add(JakeScopedDependency.of(dependency, JakeUtilsIterable.setOf(scopes)));
 				return this;
+			}
+
+			public AfterMapScopeBuilder mapScope(JakeScope ... scopes) {
+				return new AfterMapScopeBuilder(dependencies, JakeUtilsIterable.setOf(scopes) );
+			}
+
+			public static class AfterMapScopeBuilder  {
+
+				private final LinkedList<JakeScopedDependency> dependencies;
+
+				private final Iterable<JakeScope> from;
+
+				private AfterMapScopeBuilder(LinkedList<JakeScopedDependency> dependencies, Iterable<JakeScope> from) {
+					this.dependencies = dependencies;
+					this.from = from;
+				}
+
+				public AfterToBuilder to(JakeScope... jakeScopes) {
+					final JakeScopedDependency dependency = dependencies.pollLast();
+					final JakeScopeMapping mapping;
+					if (dependency.scopeType() == JakeScopedDependency.ScopeType.UNSET) {
+						mapping = JakeScopeMapping.of(from, Arrays.asList(jakeScopes));
+					}  else {
+						mapping = dependency.scopeMapping().and(from, Arrays.asList(jakeScopes));
+					}
+					dependencies.add(JakeScopedDependency.of(dependency.dependency(), mapping));
+					return new AfterToBuilder(dependencies);
+				}
+
+				public AfterToBuilder to(String... scopeNames) {
+					final JakeScope[] scopes = new JakeScope[scopeNames.length];
+					for (int i = 0; i < scopeNames.length; i++) {
+						scopes[i] = JakeScope.of(scopeNames[i]);
+					}
+					return to(scopes);
+				}
+
+			}
+
+			public static class AfterToBuilder extends Builder {
+
+				private AfterToBuilder(
+						LinkedList<JakeScopedDependency> dependencies) {
+					super(dependencies);
+				}
+
+				public AfterMapScopeBuilder and(JakeScope ...scopes) {
+					return new AfterMapScopeBuilder(dependencies, Arrays.asList(scopes));
+				}
+
 			}
 
 		}

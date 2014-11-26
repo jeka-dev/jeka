@@ -40,7 +40,7 @@ public class Build extends JakeBuildJava {
 		distrib();
 	}
 
-	// Create the whole distribution.
+	// Create the whole distribution : creates distrib directory and zip containing all
 	private void distrib() {
 		final File distribDir = ouputDir("jake-distrib");
 		final File distripZipFile = ouputDir("jake-distrib.zip");

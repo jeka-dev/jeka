@@ -8,6 +8,27 @@ import java.util.StringTokenizer;
 
 public final class JakeUtilsString {
 
+	public static String join(Iterable<String> items, String separator) {
+		final StringBuilder builder = new StringBuilder();
+		final Iterator<String> it = items.iterator();
+		while (it.hasNext()) {
+			builder.append(it.next());
+			if (it.hasNext()) {
+				builder.append(separator);
+			}
+		}
+		return builder.toString();
+	}
+
+	public static String containsAnyOf(String stringToMatch, String ... candidates) {
+		for (final String candidate : candidates) {
+			if (stringToMatch.contains(candidate)) {
+				return candidate;
+			}
+		}
+		return null;
+	}
+
 	public static String[] split(String str, String delimiters) {
 		final StringTokenizer st = new StringTokenizer(str, delimiters);
 		final List<String> tokens = new ArrayList<String>();

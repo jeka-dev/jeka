@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,8 +36,22 @@ public final class JakeScopeMapping {
 	/**
 	 * Returns a basic scope mapping between two specified scopes.
 	 */
-	public static JakeScopeMapping of(JakeScope from, String to) {
-		return of(from, JakeScope.of(to));
+	public static JakeScopeMapping of(JakeScope from, String ...toScopes) {
+		final Set<JakeScope> set = new HashSet<JakeScope>();
+		for (final String to : toScopes) {
+			set.add(JakeScope.of(to));
+		}
+		final Map<JakeScope, Set<JakeScope>> map = new HashMap<JakeScope, Set<JakeScope>>();
+		map.put(from, Collections.unmodifiableSet(set));
+		return new JakeScopeMapping(Collections.unmodifiableMap(map));
+	}
+
+	public static JakeScopeMapping of(Iterable<JakeScope> from, Iterable<JakeScope> to) {
+		final Map<JakeScope, Set<JakeScope>> map = new HashMap<JakeScope, Set<JakeScope>>();
+		for (final JakeScope scope : from) {
+			map.put(scope, JakeUtilsIterable.setOf(to));
+		}
+		return new JakeScopeMapping(map);
 	}
 
 	// ---------------- Instance members ---------------------------
@@ -76,8 +91,12 @@ public final class JakeScopeMapping {
 		return and(from, JakeUtilsIterable.listOf(to));
 	}
 
-	public JakeScopeMapping and(JakeScope from, String to) {
-		return and(from, JakeScope.of(to));
+	public JakeScopeMapping and(JakeScope from, String ...toScopes) {
+		final List<JakeScope> list = new LinkedList<JakeScope>();
+		for (final String to : toScopes) {
+			list.add(JakeScope.of(to));
+		}
+		return and(from, list);
 	}
 
 	public Partial andFrom(JakeScope ...from) {
@@ -98,6 +117,15 @@ public final class JakeScopeMapping {
 		}
 		return new JakeScopeMapping(result);
 	}
+
+	public JakeScopeMapping and(Iterable<JakeScope> from, Iterable<JakeScope> to) {
+		JakeScopeMapping result = this;
+		for (final JakeScope scope : from) {
+			result = result.and(scope, to);
+		}
+		return result;
+	}
+
 
 
 	public Set<JakeScope> mappedScopes(JakeScope sourceScope) {
@@ -126,6 +154,8 @@ public final class JakeScopeMapping {
 		return map.toString();
 	}
 
+
+
 	public static class Partial {
 
 		private final List<JakeScope> from;
@@ -139,6 +169,10 @@ public final class JakeScopeMapping {
 		}
 
 		public JakeScopeMapping to(JakeScope... targets) {
+			return to(Arrays.asList(targets));
+		}
+
+		public JakeScopeMapping to(Iterable<JakeScope> targets) {
 			JakeScopeMapping result = mapping;
 			for (final JakeScope fromScope : from) {
 				for (final JakeScope toScope : targets) {

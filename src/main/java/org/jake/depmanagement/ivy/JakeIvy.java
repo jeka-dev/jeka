@@ -60,10 +60,11 @@ public final class JakeIvy {
 	}
 
 	public List<JakeArtifact> resolve(JakeVersionedModule module, JakeDependencies deps, JakeResolutionScope resolutionScope) {
-		final DefaultModuleDescriptor moduleDescriptor = Translations.to(module, deps, resolutionScope.defaultScope(), resolutionScope.defaultMapping());
+		final DefaultModuleDescriptor moduleDescriptor = Translations.toUnpublished(module, deps, resolutionScope.defaultScope(), resolutionScope.defaultMapping());
 
 		final ResolveOptions resolveOptions = new ResolveOptions();
-		resolveOptions.setConfs(new String[] {"*"/*resolutionScope.dependencyScope().name()*/});
+		final String configuartionNameToResolve = resolutionScope.resolvedScope().name();
+		resolveOptions.setConfs(new String[] {configuartionNameToResolve});
 		resolveOptions.setTransitive(true);
 		resolveOptions.setOutputReport(JakeOptions.isVerbose());
 		final ResolveReport report;
@@ -72,15 +73,12 @@ public final class JakeIvy {
 		} catch (final Exception e1) {
 			throw new RuntimeException(e1);
 		}
-		final ConfigurationResolveReport configReport = report.getConfigurationReport("default");
+		final ConfigurationResolveReport configReport = report.getConfigurationReport(configuartionNameToResolve);
 		final List<JakeArtifact> result = new LinkedList<JakeArtifact>();
-		System.out.println("----------------------------------------------------------------" + configReport.getArtifactsNumber());
 		for (final ArtifactDownloadReport artifactDownloadReport : configReport.getAllArtifactsReports()) {
 			result.add(Translations.to(artifactDownloadReport.getArtifact(),
 					artifactDownloadReport.getLocalFile()));
-
 		}
-
 		return result;
 	}
 
