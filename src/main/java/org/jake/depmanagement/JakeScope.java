@@ -41,7 +41,7 @@ public class JakeScope {
 
 	private JakeScope(String name, Set<JakeScope> extendedScopes, String description, boolean transitive, boolean isPublic) {
 		super();
-		final String illegal = JakeUtilsString.containsAnyOf(name, ",", "->", "(", "*", ")");
+		final String illegal = JakeUtilsString.containsAnyOf(name, ",", "->");
 		if (illegal != null) {
 			throw new IllegalArgumentException("Scope name can't contain '" + illegal + "'");
 		}
@@ -98,7 +98,7 @@ public class JakeScope {
 	}
 
 	public JakeScopeMapping mapTo(JakeScope targetScope) {
-		return JakeScopeMapping.of(this, targetScope);
+		return JakeScopeMapping.of(this).to(targetScope);
 	}
 
 	public boolean isInOrIsExtendingAnyOf(Iterable<? extends JakeScope> scopes) {
@@ -142,7 +142,7 @@ public class JakeScope {
 
 	@Override
 	public String toString() {
-		return "Scope:"+name;
+		return name;
 	}
 
 	/**

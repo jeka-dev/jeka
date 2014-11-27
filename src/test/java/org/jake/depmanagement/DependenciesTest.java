@@ -12,7 +12,7 @@ public class DependenciesTest {
 	@Test
 	public void test() {
 		final JakeDependencies deps = JakeDependencies.builder()
-				.defaultScope(JakeScopeMapping.of(RUNTIME, RUNTIME))
+				.defaultScope(JakeScopeMapping.of(RUNTIME).to(RUNTIME))
 				.on("hibernate:hjmlm:1212.0")
 				.on("spring:spring:6.3").scope(COMPILE)
 				.on(secondaryDeps())

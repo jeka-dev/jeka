@@ -7,17 +7,17 @@ import java.util.List;
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
-import org.apache.ivy.core.report.ConfigurationResolveReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.core.settings.XmlSettingsParser;
+import org.apache.ivy.util.filter.Filter;
 import org.jake.JakeOptions;
 import org.jake.depmanagement.JakeArtifact;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeModuleId;
 import org.jake.depmanagement.JakeRepos;
-import org.jake.depmanagement.JakeResolutionScope;
+import org.jake.depmanagement.JakeResolutionParameters;
 import org.jake.depmanagement.JakeScope;
 import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionedModule;
@@ -51,33 +51,33 @@ public final class JakeIvy {
 		return of(JakeRepos.mavenCentral());
 	}
 
-	public List<JakeArtifact> resolve(JakeDependencies deps, JakeScope resolutionScope) {
-		return resolve(ANONYMOUS_MODULE, deps, JakeResolutionScope.of(resolutionScope));
+	public List<JakeArtifact> resolve(JakeDependencies deps, JakeScope ... resolutionScopes) {
+		return resolve(ANONYMOUS_MODULE, deps, JakeResolutionParameters.resolvedScopes(resolutionScopes));
 	}
 
-	public List<JakeArtifact> resolve(JakeDependencies deps, JakeResolutionScope resolutionScope) {
+	public List<JakeArtifact> resolve(JakeDependencies deps, JakeResolutionParameters resolutionScope) {
 		return resolve(ANONYMOUS_MODULE, deps, resolutionScope);
 	}
 
-	public List<JakeArtifact> resolve(JakeVersionedModule module, JakeDependencies deps, JakeResolutionScope resolutionScope) {
-		final DefaultModuleDescriptor moduleDescriptor = Translations.toUnpublished(module, deps, resolutionScope.defaultScope(), resolutionScope.defaultMapping());
+	public List<JakeArtifact> resolve(JakeVersionedModule module, JakeDependencies deps, JakeResolutionParameters resolutionParams) {
+		final DefaultModuleDescriptor moduleDescriptor = Translations.toUnpublished(module, deps, resolutionParams.defaultScope(), resolutionParams.defaultMapping());
 
 		final ResolveOptions resolveOptions = new ResolveOptions();
-		final String configuartionNameToResolve = resolutionScope.resolvedScope().name();
-		resolveOptions.setConfs(new String[] {configuartionNameToResolve});
+		resolveOptions.setConfs(toConfigNames(resolutionParams.resolvedScopes()));
 		resolveOptions.setTransitive(true);
 		resolveOptions.setOutputReport(JakeOptions.isVerbose());
+		resolveOptions.setLog(logLevel());
+		resolveOptions.setRefresh(resolutionParams.refreshed());
+		resolveOptions.setArtifactFilter(new ArtifactFilter());
 		final ResolveReport report;
 		try {
 			report = ivy.resolve(moduleDescriptor, resolveOptions);
 		} catch (final Exception e1) {
 			throw new RuntimeException(e1);
 		}
-		final ConfigurationResolveReport configReport = report.getConfigurationReport(configuartionNameToResolve);
 		final List<JakeArtifact> result = new LinkedList<JakeArtifact>();
-		for (final ArtifactDownloadReport artifactDownloadReport : configReport.getAllArtifactsReports()) {
-			result.add(Translations.to(artifactDownloadReport.getArtifact(),
-					artifactDownloadReport.getLocalFile()));
+		for (final String conf : resolveOptions.getConfs()) {
+			result.addAll(getArtifacts(conf, report));
 		}
 		return result;
 	}
@@ -99,9 +99,44 @@ public final class JakeIvy {
 				throw new IllegalStateException("Can't parse Ivy settings file", e);
 			}
 		}
-
 	}
 
+	private static String logLevel() {
+		if (JakeOptions.isSilent()) {
+			return "quiet";
+		}
+		if (JakeOptions.isVerbose()) {
+			return "default";
+		}
+		return "download-only";
+	}
+
+	private static String[] toConfigNames(Iterable<JakeScope> scopes) {
+		final List<String> list = new LinkedList<String>();
+		for (final JakeScope scope : scopes) {
+			list.add(scope.name());
+		}
+		return list.toArray(new String[list.size()]);
+	}
+
+	private static List<JakeArtifact> getArtifacts(String config, ResolveReport report) {
+		final List<JakeArtifact> result = new LinkedList<JakeArtifact>();
+		for (final ArtifactDownloadReport artifactDownloadReport : report.getAllArtifactsReports()) {
+			result.add(Translations.to(artifactDownloadReport.getArtifact(),
+					artifactDownloadReport.getLocalFile()));
+		}
+		return result;
+	}
+
+	private static class ArtifactFilter implements Filter {
+
+		@Override
+		public boolean accept(Object o) {
+			System.out.println("+++++++++++++++++++++++++++++++++++" + o);
+			return true;
+		}
+
+	}
 
 
 

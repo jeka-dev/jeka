@@ -16,12 +16,11 @@ public final class JakeScopeMapping {
 	// -------- Factory methods ----------------------------
 
 	/**
-	 * Returns a basic scope mapping between two specified scopes.
+	 * Returns a partially constructed mapping specifying only scope entries and
+	 * willing for the mapping values.
 	 */
-	public static JakeScopeMapping of(JakeScope from, JakeScope to) {
-		final Map<JakeScope, Set<JakeScope>> map = new HashMap<JakeScope, Set<JakeScope>>();
-		map.put(from, Collections.unmodifiableSet(JakeUtilsIterable.setOf(to)));
-		return new JakeScopeMapping(Collections.unmodifiableMap(map));
+	public static JakeScopeMapping.Partial of(JakeScope ...scopes) {
+		return of(Arrays.asList(scopes));
 	}
 
 	/**
@@ -29,30 +28,10 @@ public final class JakeScopeMapping {
 	 * willing for the mapping values.
 	 */
 	@SuppressWarnings("unchecked")
-	public static JakeScopeMapping.Partial from(JakeScope ...scopes) {
-		return new Partial(Arrays.asList(scopes), new JakeScopeMapping(Collections.EMPTY_MAP));
+	public static JakeScopeMapping.Partial of(Iterable<JakeScope> scopes) {
+		return new Partial(scopes, new JakeScopeMapping(Collections.EMPTY_MAP));
 	}
 
-	/**
-	 * Returns a basic scope mapping between two specified scopes.
-	 */
-	public static JakeScopeMapping of(JakeScope from, String ...toScopes) {
-		final Set<JakeScope> set = new HashSet<JakeScope>();
-		for (final String to : toScopes) {
-			set.add(JakeScope.of(to));
-		}
-		final Map<JakeScope, Set<JakeScope>> map = new HashMap<JakeScope, Set<JakeScope>>();
-		map.put(from, Collections.unmodifiableSet(set));
-		return new JakeScopeMapping(Collections.unmodifiableMap(map));
-	}
-
-	public static JakeScopeMapping of(Iterable<JakeScope> from, Iterable<JakeScope> to) {
-		final Map<JakeScope, Set<JakeScope>> map = new HashMap<JakeScope, Set<JakeScope>>();
-		for (final JakeScope scope : from) {
-			map.put(scope, JakeUtilsIterable.setOf(to));
-		}
-		return new JakeScopeMapping(map);
-	}
 
 	// ---------------- Instance members ---------------------------
 
@@ -87,23 +66,15 @@ public final class JakeScopeMapping {
 		return (!map.equals(other.map));
 	}
 
-	public JakeScopeMapping and(JakeScope from, JakeScope to) {
-		return and(from, JakeUtilsIterable.listOf(to));
+	public Partial and(JakeScope ...from) {
+		return and(Arrays.asList(from));
 	}
 
-	public JakeScopeMapping and(JakeScope from, String ...toScopes) {
-		final List<JakeScope> list = new LinkedList<JakeScope>();
-		for (final String to : toScopes) {
-			list.add(JakeScope.of(to));
-		}
-		return and(from, list);
+	public Partial and(Iterable<JakeScope> from) {
+		return new Partial(from, this);
 	}
 
-	public Partial andFrom(JakeScope ...from) {
-		return new Partial(Arrays.asList(from), this);
-	}
-
-	private JakeScopeMapping and(JakeScope from, Iterable<JakeScope> to) {
+	private JakeScopeMapping andFromTo(JakeScope from, Iterable<JakeScope> to) {
 		final Map<JakeScope, Set<JakeScope>> result = new HashMap<JakeScope, Set<JakeScope>>(map);
 		if (result.containsKey(from)) {
 			final Set<JakeScope> list = result.get(from);
@@ -117,16 +88,6 @@ public final class JakeScopeMapping {
 		}
 		return new JakeScopeMapping(result);
 	}
-
-	public JakeScopeMapping and(Iterable<JakeScope> from, Iterable<JakeScope> to) {
-		JakeScopeMapping result = this;
-		for (final JakeScope scope : from) {
-			result = result.and(scope, to);
-		}
-		return result;
-	}
-
-
 
 	public Set<JakeScope> mappedScopes(JakeScope sourceScope) {
 		final Set<JakeScope> result = this.map.get(sourceScope);
@@ -158,11 +119,11 @@ public final class JakeScopeMapping {
 
 	public static class Partial {
 
-		private final List<JakeScope> from;
+		private final Iterable<JakeScope> from;
 
 		private final JakeScopeMapping mapping;
 
-		private Partial(List<JakeScope> from, JakeScopeMapping mapping) {
+		private Partial(Iterable<JakeScope> from, JakeScopeMapping mapping) {
 			super();
 			this.from = from;
 			this.mapping = mapping;
@@ -172,11 +133,19 @@ public final class JakeScopeMapping {
 			return to(Arrays.asList(targets));
 		}
 
+		public JakeScopeMapping to(String... targets) {
+			final List<JakeScope> list = new LinkedList<JakeScope>();
+			for (final String target : targets) {
+				list.add(JakeScope.of(target));
+			}
+			return to(list);
+		}
+
 		public JakeScopeMapping to(Iterable<JakeScope> targets) {
 			JakeScopeMapping result = mapping;
 			for (final JakeScope fromScope : from) {
 				for (final JakeScope toScope : targets) {
-					result = result.and(fromScope, toScope);
+					result = result.andFromTo(fromScope, JakeUtilsIterable.setOf(toScope));
 				}
 			}
 			return result;

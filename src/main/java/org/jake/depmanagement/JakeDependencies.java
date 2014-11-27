@@ -197,9 +197,9 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 					final JakeScopedDependency dependency = dependencies.pollLast();
 					final JakeScopeMapping mapping;
 					if (dependency.scopeType() == JakeScopedDependency.ScopeType.UNSET) {
-						mapping = JakeScopeMapping.of(from, Arrays.asList(jakeScopes));
+						mapping = JakeScopeMapping.of(from).to(jakeScopes);
 					}  else {
-						mapping = dependency.scopeMapping().and(from, Arrays.asList(jakeScopes));
+						mapping = dependency.scopeMapping().and(from).to(jakeScopes);
 					}
 					dependencies.add(JakeScopedDependency.of(dependency.dependency(), mapping));
 					return new AfterToBuilder(dependencies);

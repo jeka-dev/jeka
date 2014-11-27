@@ -22,7 +22,7 @@ public class JakeScopedDependencyTest {
 		final JakeExternalModule dep = JakeDependency.of("org.hibernate:hibernate-core:3.0.+");
 		final JakeScope aScope = JakeScope.of("aScope");
 		final JakeScopedDependency scopedDep = JakeScopedDependency.of(dep,
-				JakeScopeMapping.from(aScope, RUNTIME).to(PROVIDED));
+				JakeScopeMapping.of(aScope, RUNTIME).to(PROVIDED));
 
 		assertTrue(scopedDep.isInvolving(COMPILE)); // cause RUNTIME inherits from COMPILE
 		assertTrue(scopedDep.isInvolving(RUNTIME));

@@ -182,23 +182,28 @@ final class Translations {
 		if (scope == null) {
 			if (defaultScope == null) {
 				if (defaultMapping == null) {
-					result = JakeScopeMapping.of(JakeScope.of("default"), "default");
+					result = JakeScopeMapping.of(JakeScope.of("default")).to("default");
 				} else {
 					result = defaultMapping;
 				}
 			} else {
 				if (defaultMapping == null) {
-					result = JakeScopeMapping.of(defaultScope, defaultScope);
+					result = JakeScopeMapping.of(defaultScope).to(defaultScope);
 				} else {
-					result = JakeScopeMapping.from(defaultScope).to(defaultMapping.mappedScopes(defaultScope));
+					result = JakeScopeMapping.of(defaultScope).to(defaultMapping.mappedScopes(defaultScope));
 				}
 
 			}
 		} else {
 			if (defaultMapping == null) {
-				result = JakeScopeMapping.of(scope, scope);
+				result = JakeScopeMapping.of(scope).to(scope);
 			} else {
-				result = JakeScopeMapping.from(scope).to(defaultMapping.mappedScopes(scope));
+				if (defaultMapping.entries().contains(scope)) {
+					result = JakeScopeMapping.of(scope).to(defaultMapping.mappedScopes(scope));
+				} else {
+					result = scope.mapTo(scope);
+				}
+
 			}
 		}
 		return result;

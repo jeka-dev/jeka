@@ -37,6 +37,16 @@ public class JakeBuildJava extends JakeBuildBase {
 	public static final JakeScope TEST = JakeScope.of("test").extending(RUNTIME, PROVIDED)
 			.descr("Dependencies necessary to compile and run tests.");
 
+	public static final JakeScope SOURCES = JakeScope.of("sources")
+			.descr("Contains the source artefacts");
+
+	public static final JakeScope JAVADOC = JakeScope.of("javadoc")
+			.descr("Contains the javadoc of this project");
+
+
+
+
+
 	/**
 	 * Default path for the non managed dependencies. This path is relative to {@link #baseDir()}.
 	 */

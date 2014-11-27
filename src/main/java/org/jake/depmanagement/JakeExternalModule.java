@@ -48,17 +48,17 @@ public class JakeExternalModule extends JakeDependency {
 		return versionRange;
 	}
 
-	/**
-	 * Returns the Maven classifier for this dependency. This has only an effect if the dependency
-	 * is resolved in a Maven repository.
-	 */
-	public String mavenClassifier() {
-		return classifier;
-	}
+//	/**
+//	 * Returns the Maven classifier for this dependency. This has only an effect if the dependency
+//	 * is resolved in a Maven repository.
+//	 */
+//	public String mavenClassifier() {
+//		return classifier;
+//	}
 
-	public JakeExternalModule classifier(String classifier) {
-		return new JakeExternalModule(this.module, this.versionRange, classifier);
-	}
+	//	public JakeExternalModule classifier(String classifier) {
+	//		return new JakeExternalModule(this.module, this.versionRange, classifier);
+	//	}
 
 	@Override
 	public String toString() {
