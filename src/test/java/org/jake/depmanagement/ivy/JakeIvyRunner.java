@@ -4,7 +4,7 @@ import static org.jake.java.build.JakeBuildJava.COMPILE;
 import static org.jake.java.build.JakeBuildJava.PROVIDED;
 import static org.jake.java.build.JakeBuildJava.SOURCES;
 
-import java.util.List;
+import java.util.Set;
 
 import org.jake.JakeOptions;
 import org.jake.depmanagement.JakeArtifact;
@@ -29,7 +29,7 @@ public class JakeIvyRunner {
 				.mapScope(COMPILE).to("compile", "default")
 				.and(PROVIDED).to("provided")
 				.build();
-		final List<JakeArtifact> artifacts = JakeIvy.of(repos).resolve(deps, COMPILE);
+		final Set<JakeArtifact> artifacts = JakeIvy.of(repos).resolve(deps, COMPILE);
 		for (final JakeArtifact artifact : artifacts) {
 			System.out.println(artifact);
 		}
@@ -40,7 +40,7 @@ public class JakeIvyRunner {
 				.andMavenCentral();
 		final JakeDependencies deps = JakeDependencies.builder()
 				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").mapScope(COMPILE).to(COMPILE, SOURCES).build();
-		final List<JakeArtifact> artifacts = JakeIvy.of(repos).resolve(deps, JakeResolutionParameters.resolvedScopes(COMPILE).withDefault(defaultMapping()));
+		final Set<JakeArtifact> artifacts = JakeIvy.of(repos).resolve(deps, JakeResolutionParameters.resolvedScopes(COMPILE).withDefault(defaultMapping()));
 		for (final JakeArtifact artifact : artifacts) {
 			System.out.println(artifact);
 		}

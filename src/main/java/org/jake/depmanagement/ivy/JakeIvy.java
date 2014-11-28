@@ -1,8 +1,10 @@
 package org.jake.depmanagement.ivy;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
@@ -51,15 +53,15 @@ public final class JakeIvy {
 		return of(JakeRepos.mavenCentral());
 	}
 
-	public List<JakeArtifact> resolve(JakeDependencies deps, JakeScope ... resolutionScopes) {
+	public Set<JakeArtifact> resolve(JakeDependencies deps, JakeScope ... resolutionScopes) {
 		return resolve(ANONYMOUS_MODULE, deps, JakeResolutionParameters.resolvedScopes(resolutionScopes));
 	}
 
-	public List<JakeArtifact> resolve(JakeDependencies deps, JakeResolutionParameters resolutionScope) {
+	public Set<JakeArtifact> resolve(JakeDependencies deps, JakeResolutionParameters resolutionScope) {
 		return resolve(ANONYMOUS_MODULE, deps, resolutionScope);
 	}
 
-	public List<JakeArtifact> resolve(JakeVersionedModule module, JakeDependencies deps, JakeResolutionParameters resolutionParams) {
+	public Set<JakeArtifact> resolve(JakeVersionedModule module, JakeDependencies deps, JakeResolutionParameters resolutionParams) {
 		final DefaultModuleDescriptor moduleDescriptor = Translations.toUnpublished(module, deps, resolutionParams.defaultScope(), resolutionParams.defaultMapping());
 
 		final ResolveOptions resolveOptions = new ResolveOptions();
@@ -75,9 +77,10 @@ public final class JakeIvy {
 		} catch (final Exception e1) {
 			throw new RuntimeException(e1);
 		}
-		final List<JakeArtifact> result = new LinkedList<JakeArtifact>();
+		final Set<JakeArtifact> result = new HashSet<JakeArtifact>();
+		final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
 		for (final String conf : resolveOptions.getConfs()) {
-			result.addAll(getArtifacts(conf, report));
+			result.addAll(getArtifacts(conf, artifactDownloadReports));
 		}
 		return result;
 	}
@@ -119,14 +122,16 @@ public final class JakeIvy {
 		return list.toArray(new String[list.size()]);
 	}
 
-	private static List<JakeArtifact> getArtifacts(String config, ResolveReport report) {
-		final List<JakeArtifact> result = new LinkedList<JakeArtifact>();
-		for (final ArtifactDownloadReport artifactDownloadReport : report.getAllArtifactsReports()) {
+	private static Set<JakeArtifact> getArtifacts(String config, ArtifactDownloadReport[] artifactDownloadReports) {
+		final Set<JakeArtifact> result = new HashSet<JakeArtifact>();
+		for (final ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
 			result.add(Translations.to(artifactDownloadReport.getArtifact(),
 					artifactDownloadReport.getLocalFile()));
 		}
 		return result;
 	}
+
+
 
 	private static class ArtifactFilter implements Filter {
 
