@@ -2,7 +2,6 @@ package org.jake.depmanagement.ivy;
 
 import static org.jake.java.build.JakeBuildJava.COMPILE;
 import static org.jake.java.build.JakeBuildJava.PROVIDED;
-import static org.jake.java.build.JakeBuildJava.SOURCES;
 
 import java.util.Set;
 
@@ -39,7 +38,7 @@ public class JakeIvyRunner {
 		final JakeRepos repos = JakeRepos.maven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured")
 				.andMavenCentral();
 		final JakeDependencies deps = JakeDependencies.builder()
-				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").mapScope(COMPILE).to(COMPILE, SOURCES).build();
+				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
 		final Set<JakeArtifact> artifacts = JakeIvy.of(repos).resolve(deps, JakeResolutionParameters.resolvedScopes(COMPILE).withDefault(defaultMapping()));
 		for (final JakeArtifact artifact : artifacts) {
 			System.out.println(artifact);
