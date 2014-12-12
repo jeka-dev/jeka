@@ -46,8 +46,18 @@ final class Translations {
 
 		populateModuleDescriptor(moduleDescriptor, dependencies, defaultScope, defaultMapping);
 		return moduleDescriptor;
-
 	}
+
+	public static DefaultModuleDescriptor toAnonymous(JakeScope defaultScope, JakeScopeMapping defaultMapping) {
+		final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId
+				.newInstance(module.moduleId().group(), module.moduleId().name(), module.version().name());
+		final DefaultModuleDescriptor moduleDescriptor = new DefaultModuleDescriptor(thisModuleRevisionId, "integration", null);
+
+		populateModuleDescriptor(moduleDescriptor, dependencies, defaultScope, defaultMapping);
+		return moduleDescriptor;
+	}
+
+
 
 	/**
 	 * @param scopedDependency must be of {@link JakeExternalModule}

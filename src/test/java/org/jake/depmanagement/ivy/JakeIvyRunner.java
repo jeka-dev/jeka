@@ -16,7 +16,7 @@ import org.jake.java.build.JakeBuildJava;
 public class JakeIvyRunner {
 
 	public static void main(String[] args) {
-		JakeOptions.forceVerbose(true);
+		JakeOptions.forceVerbose(false);
 		//spring();
 		jogl();
 	}
@@ -43,11 +43,12 @@ public class JakeIvyRunner {
 		for (final JakeArtifact artifact : artifacts) {
 			System.out.println(artifact);
 		}
+		System.out.println("--- " + artifacts.size());
 	}
 
 	private static JakeScopeMapping defaultMapping() {
-		return JakeScopeMapping.of(COMPILE).to("compile", "master")
-				.and(JakeBuildJava.RUNTIME).to("runtime", "master");
+		return JakeScopeMapping.of(COMPILE).to("compile", "archive(master)")
+				.and(JakeBuildJava.RUNTIME).to("runtime", "archive(master)");
 	}
 
 }

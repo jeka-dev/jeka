@@ -85,6 +85,19 @@ public final class JakeIvy {
 		return result;
 	}
 
+	/**
+	 * Get artifacts of the given modules published for the specified scopes (no transitive resolution).
+	 */
+	public Set<JakeArtifact> getArtifacts(Iterable<JakeVersionedModule> modules, JakeScope ...scopes) {
+
+		final Set<JakeArtifact> result = new HashSet<JakeArtifact>();
+		final DefaultModuleDescriptor defaultModuleDescriptor = new DefaultModuleDescriptor();
+		for (final JakeVersionedModule module : modules) {
+
+		}
+		ivy.res
+	}
+
 	private static void parse(IvySettings ivySettings, File jakeHome, File projectDir) {
 		final File globalSettingsXml = new File(jakeHome, "ivy/ivysettings.xml");
 		if (globalSettingsXml.exists()) {
