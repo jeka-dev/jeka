@@ -1,13 +1,19 @@
 package org.jake.depmanagement.ivy;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.ivy.Ivy;
+import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
+import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
+import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.ResolveOptions;
@@ -89,13 +95,15 @@ public final class JakeIvy {
 	 * Get artifacts of the given modules published for the specified scopes (no transitive resolution).
 	 */
 	public Set<JakeArtifact> getArtifacts(Iterable<JakeVersionedModule> modules, JakeScope ...scopes) {
-
-		final Set<JakeArtifact> result = new HashSet<JakeArtifact>();
-		final DefaultModuleDescriptor defaultModuleDescriptor = new DefaultModuleDescriptor();
+		final AttachedArtifacts result = new AttachedArtifacts();
+		final DefaultModuleDescriptor moduleDescriptor = Translations.toUnpublished(ANONYMOUS_MODULE);
 		for (final JakeVersionedModule module : modules) {
-
+			final ModuleRevisionId moduleRevisionId = Translations.to(module);
+			final DefaultDependencyDescriptor dependency = new DefaultDependencyDescriptor(moduleRevisionId, true, false);
+			dependency.
+			moduleDescriptor.addDependency();
 		}
-		ivy.res
+		ivy.getResolveEngine().
 	}
 
 	private static void parse(IvySettings ivySettings, File jakeHome, File projectDir) {
@@ -155,6 +163,45 @@ public final class JakeIvy {
 		}
 
 	}
+
+	public final class AttachedArtifacts {
+
+		private final Map<JakeModuleId, Map<JakeScope, Set<JakeArtifact>>> map= new HashMap<JakeModuleId, Map<JakeScope,Set<JakeArtifact>>>();
+
+		public AttachedArtifacts() {
+			super();
+		}
+
+		public Set<JakeArtifact> getArtifacts(JakeModuleId moduleId, JakeScope jakeScope) {
+			final Map<JakeScope, Set<JakeArtifact>> subMap = map.get(moduleId);
+			if (map == null) {
+				return Collections.emptySet();
+			}
+			final Set<JakeArtifact> artifacts = subMap.get(jakeScope);
+			if (artifacts == null) {
+				return Collections.emptySet();
+			}
+			return artifacts;
+
+		}
+
+		public void add(JakeModuleId jakeModuleId, JakeScope scope, JakeArtifact artifact) {
+			Map<JakeScope, Set<JakeArtifact>> subMap = map.get(jakeModuleId);
+			if (map == null) {
+				subMap = new HashMap<JakeScope, Set<JakeArtifact>>();
+			}
+			Set<JakeArtifact> artifacts = subMap.get(scope);
+			if (artifacts == null) {
+				artifacts = new HashSet<JakeArtifact>();
+			}
+			artifacts.add(artifact);
+		}
+
+	}
+
+
+
+}
 
 
 

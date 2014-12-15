@@ -48,16 +48,11 @@ final class Translations {
 		return moduleDescriptor;
 	}
 
-	public static DefaultModuleDescriptor toAnonymous(JakeScope defaultScope, JakeScopeMapping defaultMapping) {
+	public static DefaultModuleDescriptor toUnpublished(JakeVersionedModule module) {
 		final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId
 				.newInstance(module.moduleId().group(), module.moduleId().name(), module.version().name());
-		final DefaultModuleDescriptor moduleDescriptor = new DefaultModuleDescriptor(thisModuleRevisionId, "integration", null);
-
-		populateModuleDescriptor(moduleDescriptor, dependencies, defaultScope, defaultMapping);
-		return moduleDescriptor;
+		return new DefaultModuleDescriptor(thisModuleRevisionId, "integration", null);
 	}
-
-
 
 	/**
 	 * @param scopedDependency must be of {@link JakeExternalModule}
@@ -112,6 +107,11 @@ final class Translations {
 
 	private static ModuleId to(JakeModuleId moduleId) {
 		return new ModuleId(moduleId.group(), moduleId.name());
+	}
+
+
+	public static ModuleRevisionId to(JakeVersionedModule jakeVersionedModule) {
+		return new ModuleRevisionId(to(jakeVersionedModule.moduleId()), jakeVersionedModule.version().name());
 	}
 
 	private static String to(JakeVersionRange versionRange) {
