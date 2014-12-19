@@ -101,6 +101,14 @@ final class Translations {
 		return new Configuration(jakeScope.name(), visibility, jakeScope.description(), extendedScopes.toArray(new String[0]), jakeScope.transitive(), null);
 	}
 
+	public static String[] toConfNames(JakeScope...jakeScopes) {
+		final String[] result = new String[jakeScopes.length];
+		for(int i=0; i < jakeScopes.length; i++) {
+			result[i] = jakeScopes[i].name();
+		}
+		return result;
+	}
+
 	private static ModuleRevisionId to(JakeExternalModule externalModule) {
 		return new ModuleRevisionId(to(externalModule.moduleId()), to(externalModule.versionRange()));
 	}

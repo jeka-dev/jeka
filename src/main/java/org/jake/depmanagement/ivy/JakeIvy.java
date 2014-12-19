@@ -1,6 +1,5 @@
 package org.jake.depmanagement.ivy;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,15 +9,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.ivy.Ivy;
+import org.apache.ivy.core.module.descriptor.Configuration;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
-import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.settings.IvySettings;
-import org.apache.ivy.core.settings.XmlSettingsParser;
 import org.apache.ivy.util.filter.Filter;
 import org.jake.JakeOptions;
 import org.jake.depmanagement.JakeArtifact;
@@ -94,36 +92,46 @@ public final class JakeIvy {
 	/**
 	 * Get artifacts of the given modules published for the specified scopes (no transitive resolution).
 	 */
-	public Set<JakeArtifact> getArtifacts(Iterable<JakeVersionedModule> modules, JakeScope ...scopes) {
-		final AttachedArtifacts result = new AttachedArtifacts();
+	public AttachedArtifacts getArtifacts(Iterable<JakeVersionedModule> modules, JakeScope ...scopes) {
+		//final String defaultConf = "default";
 		final DefaultModuleDescriptor moduleDescriptor = Translations.toUnpublished(ANONYMOUS_MODULE);
+		for (final JakeScope jakeScope : scopes) {
+			moduleDescriptor.addConfiguration(new Configuration(jakeScope.name()));
+		}
 		for (final JakeVersionedModule module : modules) {
 			final ModuleRevisionId moduleRevisionId = Translations.to(module);
 			final DefaultDependencyDescriptor dependency = new DefaultDependencyDescriptor(moduleRevisionId, true, false);
-			dependency.
-			moduleDescriptor.addDependency();
+			for (final JakeScope scope : scopes) {
+				dependency.addDependencyConfiguration(scope.name(), scope.name());
+			}
+			moduleDescriptor.addDependency(dependency);
 		}
-		ivy.getResolveEngine().
+		final AttachedArtifacts result = new AttachedArtifacts();
+		final ResolveOptions resolveOptions = new ResolveOptions()
+		.setTransitive(false)
+		.setOutputReport(JakeOptions.isVerbose())
+		.setRefresh(false)
+		.setArtifactFilter(new ArtifactFilter());
+		resolveOptions.setLog(logLevel());
+		for (final JakeScope scope : scopes ) {
+			resolveOptions.setConfs(Translations.toConfNames(scope));
+			final ResolveReport report;
+			try {
+				report = ivy.resolve(moduleDescriptor, resolveOptions);
+			} catch (final Exception e1) {
+				throw new RuntimeException(e1);
+			}
+			final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
+			for (final ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
+				final JakeArtifact artifact = Translations.to(artifactDownloadReport.getArtifact(),
+						artifactDownloadReport.getLocalFile());
+				result.add(scope, artifact);
+			}
+		}
+		return result;
 	}
 
-	private static void parse(IvySettings ivySettings, File jakeHome, File projectDir) {
-		final File globalSettingsXml = new File(jakeHome, "ivy/ivysettings.xml");
-		if (globalSettingsXml.exists()) {
-			try {
-				new XmlSettingsParser(ivySettings).parse(globalSettingsXml.toURI().toURL());
-			} catch (final Exception e) {
-				throw new IllegalStateException("Can't parse Ivy settings file", e);
-			}
-		}
-		final File settingsXml = new File(projectDir, "build/ivysettings.xml");
-		if (settingsXml.exists()) {
-			try {
-				new XmlSettingsParser(ivySettings).parse(settingsXml.toURI().toURL());
-			} catch (final Exception e) {
-				throw new IllegalStateException("Can't parse Ivy settings file", e);
-			}
-		}
-	}
+
 
 	private static String logLevel() {
 		if (JakeOptions.isSilent()) {
@@ -158,7 +166,7 @@ public final class JakeIvy {
 
 		@Override
 		public boolean accept(Object o) {
-			System.out.println("+++++++++++++++++++++++++++++++++++" + o);
+			System.out.println("+++++++++++++++++++++++++++++++++++ artefact filter accept : " + o);
 			return true;
 		}
 
@@ -174,7 +182,7 @@ public final class JakeIvy {
 
 		public Set<JakeArtifact> getArtifacts(JakeModuleId moduleId, JakeScope jakeScope) {
 			final Map<JakeScope, Set<JakeArtifact>> subMap = map.get(moduleId);
-			if (map == null) {
+			if (subMap == null) {
 				return Collections.emptySet();
 			}
 			final Set<JakeArtifact> artifacts = subMap.get(jakeScope);
@@ -185,23 +193,27 @@ public final class JakeIvy {
 
 		}
 
-		public void add(JakeModuleId jakeModuleId, JakeScope scope, JakeArtifact artifact) {
-			Map<JakeScope, Set<JakeArtifact>> subMap = map.get(jakeModuleId);
-			if (map == null) {
+		public void add(JakeScope scope, JakeArtifact artifact) {
+			Map<JakeScope, Set<JakeArtifact>> subMap = map.get(artifact.versionedModule().moduleId());
+			if (subMap == null) {
 				subMap = new HashMap<JakeScope, Set<JakeArtifact>>();
+				map.put(artifact.versionedModule().moduleId(), subMap);
 			}
-			Set<JakeArtifact> artifacts = subMap.get(scope);
-			if (artifacts == null) {
-				artifacts = new HashSet<JakeArtifact>();
+			Set<JakeArtifact> subArtifacts = subMap.get(scope);
+			if (subArtifacts == null) {
+				subArtifacts = new HashSet<JakeArtifact>();
+				subMap.put(scope, subArtifacts);
 			}
-			artifacts.add(artifact);
+			subArtifacts.add(artifact);
 		}
 
+		@Override
+		public String toString() {
+			return this.map.toString();
+		}
+
+
 	}
-
-
-
-}
 
 
 

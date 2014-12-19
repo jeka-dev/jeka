@@ -3,14 +3,19 @@ package org.jake.depmanagement.ivy;
 import static org.jake.java.build.JakeBuildJava.COMPILE;
 import static org.jake.java.build.JakeBuildJava.PROVIDED;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.jake.JakeOptions;
 import org.jake.depmanagement.JakeArtifact;
 import org.jake.depmanagement.JakeDependencies;
+import org.jake.depmanagement.JakeModuleId;
 import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeResolutionParameters;
+import org.jake.depmanagement.JakeScope;
 import org.jake.depmanagement.JakeScopeMapping;
+import org.jake.depmanagement.JakeVersionedModule;
+import org.jake.depmanagement.ivy.JakeIvy.AttachedArtifacts;
 import org.jake.java.build.JakeBuildJava;
 
 public class JakeIvyRunner {
@@ -18,7 +23,8 @@ public class JakeIvyRunner {
 	public static void main(String[] args) {
 		JakeOptions.forceVerbose(false);
 		//spring();
-		jogl();
+		//jogl();
+		joglWithSource();
 	}
 
 	public static void spring() {
@@ -49,6 +55,28 @@ public class JakeIvyRunner {
 	private static JakeScopeMapping defaultMapping() {
 		return JakeScopeMapping.of(COMPILE).to("compile", "archive(master)")
 				.and(JakeBuildJava.RUNTIME).to("runtime", "archive(master)");
+	}
+
+	public static void joglWithSource() {
+		final JakeRepos repos = JakeRepos.maven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured")
+				.andMavenCentral();
+		final JakeDependencies deps = JakeDependencies.builder()
+				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
+		final JakeIvy jakeIvy = JakeIvy.of(repos);
+		final Set<JakeArtifact> artifacts = jakeIvy.resolve(deps, JakeResolutionParameters.resolvedScopes(COMPILE).withDefault(defaultMapping()));
+		final Set<JakeVersionedModule> modules = new HashSet<JakeVersionedModule>();
+		for (final JakeArtifact artifact : artifacts) {
+			modules.add(artifact.versionedModule());
+		}
+		final AttachedArtifacts result = jakeIvy.getArtifacts(modules, JakeScope.of("sources"), JakeScope.of("javadoc"), JakeScope.of("noexist"));
+		System.out.println(result);
+		final Set<JakeArtifact> artifactSet = result.getArtifacts(JakeModuleId.of("org.apache.wicket:wicket-ioc"), JakeScope.of("sources"));
+		System.out.println(artifactSet);
+		final Set<JakeArtifact> javadocArtifactSet = result.getArtifacts(JakeModuleId.of("org.apache.wicket:wicket-ioc"), JakeScope.of("javadoc"));
+		System.out.println(javadocArtifactSet);
+		final Set<JakeArtifact> noExistArtifactSet = result.getArtifacts(JakeModuleId.of("org.apache.wicket:wicket-ioc"), JakeScope.of("noexist"));
+		System.out.println(noExistArtifactSet);
+
 	}
 
 }
