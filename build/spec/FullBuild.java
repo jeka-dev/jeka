@@ -2,7 +2,11 @@ import org.jake.JakeJavaCompiler;
 import org.jake.JakeOptions;
 import org.jake.java.test.junit.JakeUnit;
 
-
+/**
+ * Build class for Jake itself.
+ * This build does not rely on any dependence manager.
+ * This build uses built-in extra feature as sonar, jacoco analysis.
+ */
 public class FullBuild extends Build {
 
 	// Add Jacoco agent to the unit test runner.

@@ -9,6 +9,10 @@ import org.jake.java.build.JakeBuildJava;
 import org.jake.java.build.JakeJarPacker;
 import org.jake.utils.JakeUtilsFile;
 
+/**
+ * Build class for Jake itself.
+ * This build does not rely on any dependence manager.
+ */
 public class Build extends JakeBuildJava {
 
 	// Just to run directly the whole build bypassing the Jake bootstrap mechanism.

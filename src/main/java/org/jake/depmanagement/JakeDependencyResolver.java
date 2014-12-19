@@ -37,7 +37,7 @@ public abstract class JakeDependencyResolver {
 	}
 
 	/**
-	 * Returns a resolver that is merge of this one and the one passed as parameters.
+	 * Returns a resolver that is a merge of this one and the one passed as parameters.
 	 * In other words, the returned resolver will contains dependencies of this resolver
 	 * and the specified one.
 	 */
