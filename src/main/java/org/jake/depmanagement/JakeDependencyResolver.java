@@ -70,7 +70,7 @@ public abstract class JakeDependencyResolver {
 		return true;
 	}
 
-	private static JakeDependencyResolver findByClassName(String simpleOrFullClassName) {
+	private static JakeDependencyResolver createByClassName(String simpleOrFullClassName) {
 		final Class<? extends JakeDependencyResolver> depClass =
 				JakeClassLoader.current().loadFromNameOrSimpleName(simpleOrFullClassName, JakeDependencyResolver.class);
 		if (depClass == null) {
@@ -86,11 +86,11 @@ public abstract class JakeDependencyResolver {
 	 * Returns a dependency resolver according to its class name. The class name can be
 	 * either a full qualified name (as org.mypackage.MyResolver) or simple class name (as MyResolver).
 	 */
-	public static JakeDependencyResolver findByClassNameOrDefault(String simpleOrFullClassName, JakeDependencyResolver defaultResolver) {
+	public static JakeDependencyResolver createByClassNameOrUseDefault(String simpleOrFullClassName, JakeDependencyResolver defaultResolver) {
 		if (simpleOrFullClassName == null) {
 			return defaultResolver;
 		}
-		final JakeDependencyResolver result = findByClassName(simpleOrFullClassName);
+		final JakeDependencyResolver result = createByClassName(simpleOrFullClassName);
 		if(result == null) {
 			return defaultResolver;
 		}

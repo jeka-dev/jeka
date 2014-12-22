@@ -14,9 +14,6 @@ import org.jake.depmanagement.JakeVersionedModule;
 
 public class JakeManagedDependencyResolver extends JakeDependencyResolver {
 
-	public static JakeManagedDependencyResolver of() {
-
-	}
 
 	private final JakeIvy jakeIvy;
 
@@ -38,9 +35,9 @@ public class JakeManagedDependencyResolver extends JakeDependencyResolver {
 	protected List<File> getDeclaredDependencies(JakeScope scope) {
 		final Set<JakeArtifact> artefacts;
 		if (module != null) {
-			artefacts = jakeIvy.resolve(module, dependencies, parameters);
+			artefacts = jakeIvy.resolve(module, dependencies, scope, parameters);
 		} else {
-			artefacts = jakeIvy.resolve(dependencies, parameters);
+			artefacts = jakeIvy.resolve(dependencies, scope, parameters);
 		}
 		final List<File> result = new LinkedList<File>();
 		for (final JakeArtifact artifact : artefacts) {

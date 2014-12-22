@@ -12,7 +12,7 @@ public class DepManagedBuild extends Build {
 
 	@Override
 	protected JakeDependencyResolver baseDependencyResolver() {
-		return JakeManagedDependencyResolver.
+		return JakeDependencyResolver.
 	}
 
 	public static void main(String[] args) {

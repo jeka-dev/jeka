@@ -3,8 +3,6 @@ package org.jake.depmanagement.ivy;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -57,19 +55,19 @@ public final class JakeIvy {
 		return of(JakeRepos.mavenCentral());
 	}
 
-	public Set<JakeArtifact> resolve(JakeDependencies deps, JakeScope ... resolutionScopes) {
-		return resolve(ANONYMOUS_MODULE, deps, JakeResolutionParameters.resolvedScopes(resolutionScopes));
+	public Set<JakeArtifact> resolve(JakeDependencies deps, JakeScope resolutionScope) {
+		return resolve(ANONYMOUS_MODULE, deps, resolutionScope, JakeResolutionParameters.of());
 	}
 
-	public Set<JakeArtifact> resolve(JakeDependencies deps, JakeResolutionParameters resolutionScope) {
-		return resolve(ANONYMOUS_MODULE, deps, resolutionScope);
+	public Set<JakeArtifact> resolve(JakeDependencies deps, JakeScope resolvedScope, JakeResolutionParameters resolutionParams) {
+		return resolve(ANONYMOUS_MODULE, deps, resolvedScope, resolutionParams);
 	}
 
-	public Set<JakeArtifact> resolve(JakeVersionedModule module, JakeDependencies deps, JakeResolutionParameters resolutionParams) {
+	public Set<JakeArtifact> resolve(JakeVersionedModule module, JakeDependencies deps, JakeScope resolvedScope, JakeResolutionParameters resolutionParams) {
 		final DefaultModuleDescriptor moduleDescriptor = Translations.toUnpublished(module, deps, resolutionParams.defaultScope(), resolutionParams.defaultMapping());
 
 		final ResolveOptions resolveOptions = new ResolveOptions();
-		resolveOptions.setConfs(toConfigNames(resolutionParams.resolvedScopes()));
+		resolveOptions.setConfs(new String[] {resolvedScope.name()});
 		resolveOptions.setTransitive(true);
 		resolveOptions.setOutputReport(JakeOptions.isVerbose());
 		resolveOptions.setLog(logLevel());
@@ -141,14 +139,6 @@ public final class JakeIvy {
 			return "default";
 		}
 		return "download-only";
-	}
-
-	private static String[] toConfigNames(Iterable<JakeScope> scopes) {
-		final List<String> list = new LinkedList<String>();
-		for (final JakeScope scope : scopes) {
-			list.add(scope.name());
-		}
-		return list.toArray(new String[list.size()]);
 	}
 
 	private static Set<JakeArtifact> getArtifacts(String config, ArtifactDownloadReport[] artifactDownloadReports) {

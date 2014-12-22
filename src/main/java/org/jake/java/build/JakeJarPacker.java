@@ -106,7 +106,7 @@ public class JakeJarPacker {
 		}
 		build().testSourceDirs().and(build().testResourceDirs()).zip().to(jarTestSourceFile(), compressionLevel);
 		if (fatJar) {
-			JakeDir.of(build().classDir()).zip().merge(build().deps(JakeBuildJava.RUNTIME))
+			JakeDir.of(build().classDir()).zip().merge(build().depsFor(JakeBuildJava.RUNTIME))
 			.to(fatJarFile(), compressionLevel).md5(checkSum);
 		}
 		JakeLog.done();
