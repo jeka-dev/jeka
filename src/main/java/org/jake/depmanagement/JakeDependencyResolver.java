@@ -6,11 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.jake.JakeClassLoader;
-import org.jake.JakeLog;
 import org.jake.JakePath;
 import org.jake.utils.JakeUtilsIterable;
-import org.jake.utils.JakeUtilsReflect;
 
 /**
  * Defines where are located required dependencies for various scopes.
@@ -68,33 +65,6 @@ public abstract class JakeDependencyResolver {
 			}
 		}
 		return true;
-	}
-
-	private static JakeDependencyResolver createByClassName(String simpleOrFullClassName) {
-		final Class<? extends JakeDependencyResolver> depClass =
-				JakeClassLoader.current().loadFromNameOrSimpleName(simpleOrFullClassName, JakeDependencyResolver.class);
-		if (depClass == null) {
-			JakeLog.warn("Class " + simpleOrFullClassName
-					+ " not found or it is not a "
-					+ JakeDependencyResolver.class.getName() + ".");
-			return null;
-		}
-		return JakeUtilsReflect.newInstance(depClass);
-	}
-
-	/**
-	 * Returns a dependency resolver according to its class name. The class name can be
-	 * either a full qualified name (as org.mypackage.MyResolver) or simple class name (as MyResolver).
-	 */
-	public static JakeDependencyResolver createByClassNameOrUseDefault(String simpleOrFullClassName, JakeDependencyResolver defaultResolver) {
-		if (simpleOrFullClassName == null) {
-			return defaultResolver;
-		}
-		final JakeDependencyResolver result = createByClassName(simpleOrFullClassName);
-		if(result == null) {
-			return defaultResolver;
-		}
-		return defaultResolver;
 	}
 
 	private class MergedDependencyResolver extends JakeDependencyResolver {

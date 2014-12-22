@@ -326,15 +326,13 @@ public class JakeBuildJava extends JakeBuildBase {
 	}
 
 	/**
-	 * Returns the resolved dependencies used in this build. Depending on the passed
-	 * options, It is made of the {@link #baseDependencyResolver()} augmented
-	 * with extra-libs mentioned in options <code>extraXxxxPath</code>.
+	 * Returns the resolved dependencies for the given scope. Depending on the passed
+	 * options, it may be augmented with extra-libs mentioned in options <code>extraXxxxPath</code>.
 	 */
 	public final JakeClasspath depsFor(JakeScope scope) {
 		if (cachedResolver == null) {
 			JakeLog.startAndNextLine("Resolving Dependencies ");
-			final JakeDependencyResolver resolver = JakeDependencyResolver
-					.createByClassNameOrUseDefault(dependencyResolver, baseDependencyResolver());
+			final JakeDependencyResolver resolver = baseDependencyResolver();
 			final JakeDependencyResolver extraResolver = computeExtraPath();
 			if (!extraResolver.isEmpty()) {
 				JakeLog.info("Using extra libs : ", extraResolver.toStrings());
