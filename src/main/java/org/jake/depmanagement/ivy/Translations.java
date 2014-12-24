@@ -184,6 +184,10 @@ final class Translations {
 		if (defaultScope != null) {
 			moduleDescriptor.setDefaultConf(defaultScope.name());
 		} else if (defaultMapping != null) {
+			for (final JakeScope scope : defaultMapping.involvedScopes()) {
+				final Configuration configuration = to(scope);
+				moduleDescriptor.addConfiguration(configuration);
+			}
 			moduleDescriptor.setDefaultConfMapping(toIvyExpression(defaultMapping));
 		}
 

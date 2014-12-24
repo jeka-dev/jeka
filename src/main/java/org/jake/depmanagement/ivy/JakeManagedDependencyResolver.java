@@ -24,7 +24,7 @@ public class JakeManagedDependencyResolver extends JakeDependencyResolver {
 	// Not necessary but nice if present in order to let Ivy hide data efficiently.
 	private final JakeVersionedModule module;
 
-	private JakeManagedDependencyResolver(JakeIvy jakeIvy, JakeDependencies dependencies, JakeResolutionParameters parameters, JakeVersionedModule module) {
+	public JakeManagedDependencyResolver(JakeIvy jakeIvy, JakeDependencies dependencies, JakeResolutionParameters parameters, JakeVersionedModule module) {
 		this.jakeIvy = jakeIvy;
 		this.dependencies = dependencies;
 		this.parameters = parameters;

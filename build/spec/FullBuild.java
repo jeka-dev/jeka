@@ -20,13 +20,13 @@ public class FullBuild extends Build {
 		jakeSonar().launch();
 	}
 
-	// Use a forked comiler to compile production (non-test) code.
+	// Use a forked compiler for production (non-test) code.
 	@Override
 	public JakeJavaCompiler productionCompiler() {
 		return super.productionCompiler().fork(false);
 	}
 
-	// Include sonar analysing in the default method
+	// Include sonar analysis in the default method
 	@Override
 	public void base() {
 		super.base();
