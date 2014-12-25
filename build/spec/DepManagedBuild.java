@@ -1,4 +1,3 @@
-import org.jake.JakeOptions;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeDependencyResolver;
 import org.jake.depmanagement.JakeModuleId;
@@ -20,20 +19,19 @@ public class DepManagedBuild extends Build {
 	protected JakeDependencyResolver baseDependencyResolver() {
 		final JakeVersionedModule module = JakeVersionedModule.of(JakeModuleId.of(groupName(), projectName()), JakeVersion.of(version()));
 		final JakeDependencies deps = JakeDependencies.builder()
-				.defaultScope(COMPILE)
+				.defaultScope(PROVIDED)
 				.on("org.apache.ivy:ivy:2.4.0-rc1")
-				.defaultScope(TEST)
 				.on("junit:junit:4.11").build();
 		final JakeScopeMapping mapping = JakeScopeMapping
-				.of(COMPILE).to(COMPILE)
-				.and(PROVIDED).to(PROVIDED)
-				.and(RUNTIME).to(RUNTIME)
-				.and(TEST).to(TEST);
+				.of(COMPILE).to("archive(master)", "compile")
+				.and(PROVIDED).to("archive(master)")
+				.and(RUNTIME).to("archive(master)", "runtime")
+				.and(TEST).to("archive(master)", "test");
 		return new JakeManagedDependencyResolver(JakeIvy.of(), deps, JakeResolutionParameters.of().withDefault(mapping), module );
 	}
 
 	public static void main(String[] args) {
-		JakeOptions.forceVerbose(true);
+		//JakeOptions.forceVerbose(true);
 		new DepManagedBuild().base();
 	}
 

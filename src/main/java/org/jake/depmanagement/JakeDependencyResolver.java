@@ -27,7 +27,7 @@ public abstract class JakeDependencyResolver {
 
 	public final JakePath get(JakeScope scope) {
 		final List<File> result = new LinkedList<File>();
-		for (final JakeScope jakeScope : scope.impliedScopes()) {
+		for (final JakeScope jakeScope : scope.ancestorScopes()) {
 			result.addAll(this.getDeclaredDependencies(jakeScope));
 		}
 		return JakePath.of(result);

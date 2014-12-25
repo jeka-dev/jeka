@@ -130,7 +130,6 @@ public final class JakeIvy {
 	}
 
 
-
 	private static String logLevel() {
 		if (JakeOptions.isSilent()) {
 			return "quiet";
@@ -151,15 +150,13 @@ public final class JakeIvy {
 	}
 
 
-
 	private static class ArtifactFilter implements Filter {
 
 		@Override
 		public boolean accept(Object o) {
-			System.out.println("+++++++++++++++++++++++++++++++++++ artefact filter accept : " + o);
+			//	System.out.println("+++++++++++++++++++++++++++++++++++ artefact filter accept : " + o);
 			return true;
 		}
-
 	}
 
 	public final class AttachedArtifacts {
@@ -202,9 +199,6 @@ public final class JakeIvy {
 			return this.map.toString();
 		}
 
-
 	}
-
-
 
 }

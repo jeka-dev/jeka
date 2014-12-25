@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jake.java.build.JakeBuildJava;
-import org.jake.utils.JakeUtilsIterable;
 import org.junit.Test;
 
 public class JakeScopedDependencyTest {
@@ -32,7 +31,6 @@ public class JakeScopedDependencyTest {
 		final Set<JakeScope> sampleSet = new HashSet<JakeScope>();
 		sampleSet.add(JakeBuildJava.PROVIDED);
 		assertEquals(sampleSet, scopedDep.scopeMapping().mappedScopes(RUNTIME));
-		assertEquals(sampleSet, scopedDep.scopeMapping().mappedScopes(COMPILE)); // cause RUNTIME inherits from COMPILE
 
 		boolean failed = false;
 		try {
@@ -41,8 +39,6 @@ public class JakeScopedDependencyTest {
 			failed = true;
 		}
 		assertTrue(failed);
-
-
 	}
 
 	@Test
@@ -53,17 +49,6 @@ public class JakeScopedDependencyTest {
 		assertTrue(scopedDep.isInvolving(RUNTIME));
 		assertTrue(scopedDep.isInvolving(COMPILE)); // cause RUNTIME inherits from COMPILE
 		assertTrue(!scopedDep.isInvolving(TEST));
-
-		assertEquals(JakeUtilsIterable.setOf(COMPILE), scopedDep.scopeMapping().mappedScopes(COMPILE));
-		assertEquals(JakeUtilsIterable.setOf(RUNTIME), scopedDep.scopeMapping().mappedScopes(RUNTIME));
-
-		boolean failed = false;
-		try {
-			scopedDep.scopeMapping().mappedScopes(TEST);
-		} catch (final IllegalArgumentException e) {
-			failed = true;
-		}
-		assertTrue(failed);
 
 	}
 

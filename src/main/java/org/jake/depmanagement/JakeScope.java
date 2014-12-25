@@ -72,11 +72,11 @@ public class JakeScope {
 		return isPublic;
 	}
 
-	public List<JakeScope> impliedScopes() {
+	public List<JakeScope> ancestorScopes() {
 		final List<JakeScope> list = new LinkedList<JakeScope>();
 		list.add(this);
 		for (final JakeScope scope : this.extendedScopes) {
-			for (final JakeScope jakeScope : scope.impliedScopes()) {
+			for (final JakeScope jakeScope : scope.ancestorScopes()) {
 				if (!list.contains(jakeScope)) {
 					list.add(jakeScope);
 				}
