@@ -181,15 +181,27 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 		}
 
 		public ScopebleBuilder on(JakeModuleId module, JakeVersionRange version) {
-			return on(JakeExternalModule.of(module, version));
+			return on(module, version, true);
+		}
+
+		public ScopebleBuilder on(JakeModuleId module, JakeVersionRange version, boolean transitive) {
+			return on(JakeExternalModule.of(module, version).transitive(transitive));
 		}
 
 		public ScopebleBuilder on(String organisation, String name, String version) {
-			return on(JakeExternalModule.of(organisation, name, version));
+			return on(organisation, name, version, true);
+		}
+
+		public ScopebleBuilder on(String organisation, String name, String version, boolean transitive) {
+			return on(JakeExternalModule.of(organisation, name, version).transitive(transitive));
 		}
 
 		public ScopebleBuilder on(String description) {
-			return on(JakeExternalModule.of(description));
+			return on(description, true);
+		}
+
+		public ScopebleBuilder on(String description, boolean transitive) {
+			return on(JakeExternalModule.of(description).transitive(transitive));
 		}
 
 		public Builder on(Iterable<JakeScopedDependency> dependencies) {
