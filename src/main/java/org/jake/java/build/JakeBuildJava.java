@@ -13,9 +13,11 @@ import org.jake.JakeFileFilter;
 import org.jake.JakeJavaCompiler;
 import org.jake.JakeLog;
 import org.jake.JakeOption;
+import org.jake.depmanagement.JakeDependencies;
+import org.jake.depmanagement.JakeDependency;
 import org.jake.depmanagement.JakeDependencyResolver;
-import org.jake.depmanagement.JakeLocalDependencyResolver;
 import org.jake.depmanagement.JakeScope;
+import org.jake.depmanagement.JakeScopeMapping;
 import org.jake.java.JakeJavadoc;
 import org.jake.java.JakeResourceProcessor;
 import org.jake.java.JakeUtilsJdk;
@@ -45,6 +47,11 @@ public class JakeBuildJava extends JakeBuildBase {
 	public static final JakeScope JAVADOC = JakeScope.of("javadoc")
 			.descr("Contains the javadoc of this project");
 
+	private static final JakeScopeMapping SCOPE_MAPPING = JakeScopeMapping
+			.of(COMPILE).to("archive(master)", COMPILE.name())
+			.and(PROVIDED).to("archive(master)")
+			.and(RUNTIME).to("archive(master)", RUNTIME.name())
+			.and(TEST).to("archive(master)", TEST.name());
 
 	/**
 	 * Default path for the non managed dependencies. This path is relative to {@link #baseDir()}.
@@ -315,15 +322,30 @@ public class JakeBuildJava extends JakeBuildBase {
 	 * @see #dependencyResolver().
 	 */
 	protected JakeDependencyResolver baseDependencyResolver() {
-		final File folder = baseDir(STD_LIB_PATH);
-		final JakeDependencyResolver resolver;
-		if (folder.exists()) {
-			resolver = localJarDependencies(folder);
-		} else {
-			resolver = JakeLocalDependencyResolver.empty();
+		final JakeDependencies dependencies = dependencies().and(extraCommandLineDeps());
+		if (dependencies.containsExternalModule()) {
+			return JakeDependencyResolver.managed(jakeIvy(), dependencies, module());
 		}
-		return resolver;
+		return JakeDependencyResolver.unmanaged(dependencies);
 	}
+
+	@Override
+	protected JakeScopeMapping scopeMapping() {
+		return SCOPE_MAPPING;
+	}
+
+	/**
+	 * Returns the dependencies of this module. By default it uses unmanaged dependencies stored
+	 * locally in the project as described by {@link #defaultUnmanagedDependencies()} method.
+	 * If you want to use managed dependencies, you must override this method.
+	 */
+	protected JakeDependencies dependencies() {
+		return defaultUnmanagedDependencies();
+	}
+
+
+
+
 
 	/**
 	 * Returns the resolved dependencies for the given scope. Depending on the passed
@@ -331,21 +353,14 @@ public class JakeBuildJava extends JakeBuildBase {
 	 */
 	public final JakeClasspath depsFor(JakeScope scope) {
 		if (cachedResolver == null) {
-			JakeLog.startAndNextLine("Resolving Dependencies ");
-			final JakeDependencyResolver resolver = baseDependencyResolver();
-			final JakeDependencyResolver extraResolver = computeExtraPath();
-			if (!extraResolver.isEmpty()) {
-				JakeLog.info("Using extra libs : ", extraResolver.toStrings());
-				cachedResolver = resolver.merge(extraResolver);
-			} else {
-				cachedResolver = resolver;
-			}
-			JakeLog.info("Effective resolver : ", cachedResolver.toStrings());
-			JakeLog.done();
+			JakeLog.startAndNextLine("Setting dependency resolver ");
+			cachedResolver = baseDependencyResolver();
+			JakeLog.done("Resolver set " + cachedResolver);
 		}
 		JakeClasspath result = cachedDeps.get(scope);
 		if (result == null) {
 			result = JakeClasspath.of(cachedResolver.get(scope));
+			JakeLog.info("Resolved scope : " + scope + "(" + result.entries().size() + " artifacts) " + result);
 			cachedDeps.put(scope, result);
 		}
 		return result;
@@ -389,12 +404,12 @@ public class JakeBuildJava extends JakeBuildBase {
 		new JakeBuildJava().base();
 	}
 
-	private JakeLocalDependencyResolver computeExtraPath() {
-		return JakeLocalDependencyResolver.empty()
-				.with(COMPILE, toPath(extraCompilePath))
-				.with(RUNTIME, toPath(extraRuntimePath))
-				.with(TEST, toPath(extraTestPath))
-				.with(PROVIDED, toPath(extraProvidedPath));
+	private JakeDependencies extraCommandLineDeps() {
+		return JakeDependencies.builder()
+				.forScopes(COMPILE).onFiles(toPath(extraCompilePath))
+				.forScopes(RUNTIME).onFiles(toPath(extraRuntimePath))
+				.forScopes(TEST).onFiles(toPath(extraTestPath))
+				.forScopes(PROVIDED).onFiles(toPath(extraProvidedPath)).build();
 	}
 
 	private final JakeClasspath toPath(String pathAsString) {
@@ -404,13 +419,13 @@ public class JakeBuildJava extends JakeBuildBase {
 		return JakeClasspath.of(JakeUtilsFile.toPath(pathAsString, ";", baseDir().root()));
 	}
 
-	protected static JakeLocalDependencyResolver localJarDependencies(File libDirectory) {
-		final JakeDir libDir = JakeDir.of(libDirectory);
-		return JakeLocalDependencyResolver.empty()
-				.with(COMPILE, libDir.include("*.jar", "compile/*.jar"))
-				.with(PROVIDED, libDir.include("provided/*.jar"))
-				.with(RUNTIME, libDir.include("runtime/*.jar"))
-				.with(TEST, libDir.include("test/*.jar"));
+	protected JakeDependencies defaultUnmanagedDependencies() {
+		final JakeDir libDir = JakeDir.of(baseDir(STD_LIB_PATH));
+		return JakeDependencies.builder()
+				.forScopes(COMPILE).on(JakeDependency.of(libDir.include("*.jar", "compile/*.jar")))
+				.forScopes(PROVIDED).on(JakeDependency.of(libDir.include("*.jar", "provided/*.jar")))
+				.forScopes(RUNTIME).on(JakeDependency.of(libDir.include("*.jar", "runtime/*.jar")))
+				.forScopes(TEST).on(JakeDependency.of(libDir.include("*.jar", "test/*.jar"))).build();
 	}
 
 

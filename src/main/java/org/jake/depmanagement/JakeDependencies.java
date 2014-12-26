@@ -1,5 +1,6 @@
 package org.jake.depmanagement;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -8,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.jake.depmanagement.JakeDependency.JakeFilesDependency;
 import org.jake.depmanagement.JakeScopedDependency.ScopeType;
 import org.jake.utils.JakeUtilsIterable;
 
@@ -18,6 +20,10 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 	private JakeDependencies(List<JakeScopedDependency> dependencies) {
 		super();
 		this.dependencies = Collections.unmodifiableList(new LinkedList<JakeScopedDependency>(dependencies));
+	}
+
+	public boolean isEmpty() {
+		return dependencies.isEmpty();
 	}
 
 	public JakeDependencies without(JakeModuleId jakeModuleId) {
@@ -34,6 +40,22 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 		return new JakeDependencies(result);
 	}
 
+	public JakeDependencies and(Iterable<JakeScopedDependency> others) {
+		if (!others.iterator().hasNext()) {
+			return this;
+		}
+		return JakeDependencies.builder().on(this).on(others).build();
+	}
+
+	public boolean containsExternalModule() {
+		for (final JakeScopedDependency scopedDependency : dependencies) {
+			if (scopedDependency.dependency() instanceof JakeExternalModule) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public Iterator<JakeScopedDependency> iterator() {
 		return dependencies.iterator();
@@ -42,6 +64,16 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 	@Override
 	public String toString() {
 		return dependencies.toString();
+	}
+
+	public Set<JakeDependency> dependenciesDeclaredWith(JakeScope scope) {
+		final Set<JakeDependency> dependencies = new HashSet<JakeDependency>();
+		for (final JakeScopedDependency scopedDependency : this) {
+			if (scopedDependency.scopes().contains(scope)) {
+				dependencies.add(scopedDependency.dependency());
+			}
+		}
+		return dependencies;
 	}
 
 	public JakeScopedDependency get(JakeModuleId moduleId) {
@@ -97,16 +129,16 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 			this.dependencies = dependencies;
 		}
 
-		public Builder defaultScope(JakeScope ...scopes) {
+		public Builder forScopes(JakeScope ...scopes) {
 			if (scopes.length == 0) {
-				return resetDefaultScope();
+				throw new IllegalArgumentException("You must specify at least one scope.");
 			}
 			defaultScopes = JakeUtilsIterable.setOf(scopes);
 			defaultMapping = null;
 			return this;
 		}
 
-		public Builder defaultScope(JakeScopeMapping scopeMapping) {
+		public Builder forScopeMapping(JakeScopeMapping scopeMapping) {
 			defaultMapping = scopeMapping;
 			defaultScopes = null;
 			return this;
@@ -117,6 +149,8 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 			defaultMapping = null;
 			return this;
 		}
+
+
 
 		public ScopebleBuilder on(JakeDependency dependency) {
 			final JakeScopedDependency scopedDependency;
@@ -139,6 +173,13 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 			return this;
 		}
 
+		public Builder onFiles(Iterable<File> files) {
+			if (!files.iterator().hasNext()) {
+				return this;
+			}
+			return on(JakeFilesDependency.of(files));
+		}
+
 		public ScopebleBuilder on(JakeModuleId module, JakeVersionRange version) {
 			return on(JakeExternalModule.of(module, version));
 		}
@@ -152,6 +193,9 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 		}
 
 		public Builder on(Iterable<JakeScopedDependency> dependencies) {
+			if (!dependencies.iterator().hasNext()) {
+				return this;
+			}
 			for (final JakeScopedDependency dependency : dependencies) {
 				this.dependencies.add(dependency);
 			}

@@ -59,7 +59,10 @@ final class Translations {
 	 */
 	private static DependencyDescriptor to(JakeScopedDependency scopedDependency, JakeScope defaultScope, JakeScopeMapping defaultMapping) {
 		final JakeExternalModule externalModule = (JakeExternalModule) scopedDependency.dependency();
-		final DefaultDependencyDescriptor result =  new DefaultDependencyDescriptor(to(externalModule), false);
+		final ModuleRevisionId moduleRevisionId = to(externalModule);
+		final boolean changing = externalModule.versionRange().definition().endsWith("-SNAPSHOT");
+		final DefaultDependencyDescriptor result =
+				new DefaultDependencyDescriptor(null, moduleRevisionId, false, changing, externalModule.transitive());
 
 		// filling configuration
 		if (scopedDependency.scopeType() == ScopeType.SIMPLE) {
@@ -183,7 +186,8 @@ final class Translations {
 		}
 		if (defaultScope != null) {
 			moduleDescriptor.setDefaultConf(defaultScope.name());
-		} else if (defaultMapping != null) {
+		}
+		if (defaultMapping != null) {
 			for (final JakeScope scope : defaultMapping.involvedScopes()) {
 				final Configuration configuration = to(scope);
 				moduleDescriptor.addConfiguration(configuration);
@@ -193,10 +197,11 @@ final class Translations {
 
 		// Add dependencies
 		for (final JakeScopedDependency scopedDependency : dependencies) {
-			final DependencyDescriptor dependencyDescriptor = to(scopedDependency, defaultScope, defaultMapping);
-			moduleDescriptor.addDependency(dependencyDescriptor);
+			if (scopedDependency.dependency() instanceof JakeExternalModule) {
+				final DependencyDescriptor dependencyDescriptor = to(scopedDependency, defaultScope, defaultMapping);
+				moduleDescriptor.addDependency(dependencyDescriptor);
+			}
 		}
-
 	}
 
 	private static JakeScopeMapping resolveSimple(JakeScope scope, JakeScope defaultScope, JakeScopeMapping defaultMapping) {

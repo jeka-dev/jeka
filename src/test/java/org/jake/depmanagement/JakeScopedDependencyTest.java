@@ -23,10 +23,10 @@ public class JakeScopedDependencyTest {
 		final JakeScopedDependency scopedDep = JakeScopedDependency.of(dep,
 				JakeScopeMapping.of(aScope, RUNTIME).to(PROVIDED));
 
-		assertTrue(scopedDep.isInvolving(COMPILE)); // cause RUNTIME inherits from COMPILE
-		assertTrue(scopedDep.isInvolving(RUNTIME));
-		assertTrue(scopedDep.isInvolving(aScope));
-		assertTrue(!scopedDep.isInvolving(TEST));
+		assertTrue(scopedDep.isInvolvedIn(COMPILE)); // cause RUNTIME inherits from COMPILE
+		assertTrue(scopedDep.isInvolvedIn(RUNTIME));
+		assertTrue(scopedDep.isInvolvedIn(aScope));
+		assertTrue(!scopedDep.isInvolvedIn(TEST));
 
 		final Set<JakeScope> sampleSet = new HashSet<JakeScope>();
 		sampleSet.add(JakeBuildJava.PROVIDED);
@@ -46,9 +46,9 @@ public class JakeScopedDependencyTest {
 		final JakeExternalModule dep = JakeDependency.of("org.hibernate:hibernate-core:3.0.+");
 		final JakeScopedDependency scopedDep = JakeScopedDependency.of(dep, RUNTIME);
 
-		assertTrue(scopedDep.isInvolving(RUNTIME));
-		assertTrue(scopedDep.isInvolving(COMPILE)); // cause RUNTIME inherits from COMPILE
-		assertTrue(!scopedDep.isInvolving(TEST));
+		assertTrue(scopedDep.isInvolvedIn(RUNTIME));
+		assertTrue(scopedDep.isInvolvedIn(COMPILE)); // cause RUNTIME inherits from COMPILE
+		assertTrue(!scopedDep.isInvolvedIn(TEST));
 
 	}
 

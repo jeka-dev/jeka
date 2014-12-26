@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.jake.utils.JakeUtilsIterable;
@@ -28,7 +29,8 @@ public final class JakePath implements Iterable<File> {
 	 * Creates a path from a sequence of files.
 	 */
 	public static JakePath of(Iterable<File> entries) {
-		return new JakePath(entries);
+		final LinkedHashSet<File> files = new LinkedHashSet<File>(JakeUtilsIterable.toList(entries));
+		return new JakePath(files);
 	}
 
 	/**

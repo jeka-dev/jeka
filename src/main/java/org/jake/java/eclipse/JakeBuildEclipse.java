@@ -6,7 +6,7 @@ import java.util.List;
 import org.jake.JakeDirSet;
 import org.jake.JakeLocator;
 import org.jake.JakeOption;
-import org.jake.depmanagement.JakeDependencyResolver;
+import org.jake.depmanagement.JakeDependencies;
 import org.jake.java.build.JakeBuildJava;
 
 public class JakeBuildEclipse extends JakeBuildJava {
@@ -54,7 +54,7 @@ public class JakeBuildEclipse extends JakeBuildJava {
 	}
 
 	@Override
-	protected JakeDependencyResolver baseDependencyResolver() {
+	protected JakeDependencies dependencies() {
 		final File containersHome;
 		if (containersPath == null) {
 			containersHome = new File(JakeLocator.jakeHome(), CONTAINERS_PATH);
@@ -63,7 +63,7 @@ public class JakeBuildEclipse extends JakeBuildJava {
 		}
 		final Lib.ScopeSegregator segregator = eclipseSmart ? Lib.SMART_LIB : Lib.ALL_COMPILE;
 		final List<Lib> libs = dotClasspath().libs( containersHome, baseDir().root(), segregator);
-		return Lib.toDependencyResolver(libs);
+		return Lib.toDependencies(libs);
 	}
 
 	private DotClasspath dotClasspath() {

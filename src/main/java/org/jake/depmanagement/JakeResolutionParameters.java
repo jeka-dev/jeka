@@ -7,6 +7,10 @@ public class JakeResolutionParameters {
 		return new JakeResolutionParameters(null, null, false);
 	}
 
+	public static JakeResolutionParameters of(JakeScopeMapping defaultScopeMapping) {
+		return new JakeResolutionParameters(null, defaultScopeMapping, false);
+	}
+
 	private final JakeScope defaultScope;
 
 	private final JakeScopeMapping defaultMapping;

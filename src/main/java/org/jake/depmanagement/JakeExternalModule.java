@@ -12,7 +12,7 @@ import org.jake.utils.JakeUtilsString;
 public class JakeExternalModule extends JakeDependency {
 
 	public static JakeExternalModule of(JakeModuleId moduleId, JakeVersionRange versionRange) {
-		return new JakeExternalModule(moduleId, versionRange, null);
+		return new JakeExternalModule(moduleId, versionRange, null, true);
 	}
 
 	public static JakeExternalModule of(String group, String name, String version) {
@@ -31,11 +31,17 @@ public class JakeExternalModule extends JakeDependency {
 	private final JakeModuleId module;
 	private final JakeVersionRange versionRange;
 	private final String classifier;
+	private final boolean transitive;
 
-	private JakeExternalModule(JakeModuleId module, JakeVersionRange versionRange, String classifier) {
+	private JakeExternalModule(JakeModuleId module, JakeVersionRange versionRange, String classifier, boolean transitive) {
 		this.module = module;
 		this.versionRange = versionRange;
 		this.classifier = classifier;
+		this.transitive = transitive;
+	}
+
+	public boolean transitive() {
+		return transitive;
 	}
 
 
@@ -48,17 +54,9 @@ public class JakeExternalModule extends JakeDependency {
 		return versionRange;
 	}
 
-//	/**
-//	 * Returns the Maven classifier for this dependency. This has only an effect if the dependency
-//	 * is resolved in a Maven repository.
-//	 */
-//	public String mavenClassifier() {
-//		return classifier;
-//	}
-
-	//	public JakeExternalModule classifier(String classifier) {
-	//		return new JakeExternalModule(this.module, this.versionRange, classifier);
-	//	}
+	public JakeExternalModule transitive(boolean transitive) {
+		return new JakeExternalModule(module, versionRange, classifier, transitive);
+	}
 
 	@Override
 	public String toString() {

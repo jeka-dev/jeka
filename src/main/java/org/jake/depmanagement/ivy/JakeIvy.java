@@ -33,45 +33,47 @@ public final class JakeIvy {
 
 	private final Ivy ivy;
 
-	private JakeIvy(Ivy ivy) {
+	private final JakeResolutionParameters parameters;
+
+	private JakeIvy(Ivy ivy, JakeResolutionParameters parameters) {
 		super();
 		this.ivy = ivy;
 		ivy.getLoggerEngine().setDefaultLogger(new MessageLogger());
+		this.parameters = parameters;
 	}
 
-	public static JakeIvy of(IvySettings ivySettings) {
+	public static JakeIvy of(IvySettings ivySettings, JakeResolutionParameters parameters) {
 		final Ivy ivy = Ivy.newInstance(ivySettings);
-		return new JakeIvy(ivy);
+		return new JakeIvy(ivy, parameters);
 	}
-
 
 	public static JakeIvy of(JakeRepos repos) {
 		final IvySettings ivySettings = new IvySettings();
 		Translations.populateIvySettingsWithRepo(ivySettings, repos);
-		return of(ivySettings);
+		return of(ivySettings, JakeResolutionParameters.of());
 	}
 
 	public static JakeIvy of() {
 		return of(JakeRepos.mavenCentral());
 	}
 
-	public Set<JakeArtifact> resolve(JakeDependencies deps, JakeScope resolutionScope) {
-		return resolve(ANONYMOUS_MODULE, deps, resolutionScope, JakeResolutionParameters.of());
+	public JakeIvy with(JakeResolutionParameters jakeResolutionParameters) {
+		return new JakeIvy(this.ivy, jakeResolutionParameters);
 	}
 
-	public Set<JakeArtifact> resolve(JakeDependencies deps, JakeScope resolvedScope, JakeResolutionParameters resolutionParams) {
-		return resolve(ANONYMOUS_MODULE, deps, resolvedScope, resolutionParams);
+	public Set<JakeArtifact> resolve(JakeDependencies deps, JakeScope resolvedScope) {
+		return resolve(ANONYMOUS_MODULE, deps, resolvedScope);
 	}
 
-	public Set<JakeArtifact> resolve(JakeVersionedModule module, JakeDependencies deps, JakeScope resolvedScope, JakeResolutionParameters resolutionParams) {
-		final DefaultModuleDescriptor moduleDescriptor = Translations.toUnpublished(module, deps, resolutionParams.defaultScope(), resolutionParams.defaultMapping());
+	public Set<JakeArtifact> resolve(JakeVersionedModule module, JakeDependencies deps, JakeScope resolvedScope) {
+		final DefaultModuleDescriptor moduleDescriptor = Translations.toUnpublished(module, deps, parameters.defaultScope(), parameters.defaultMapping());
 
 		final ResolveOptions resolveOptions = new ResolveOptions();
 		resolveOptions.setConfs(new String[] {resolvedScope.name()});
 		resolveOptions.setTransitive(true);
 		resolveOptions.setOutputReport(JakeOptions.isVerbose());
 		resolveOptions.setLog(logLevel());
-		resolveOptions.setRefresh(resolutionParams.refreshed());
+		resolveOptions.setRefresh(parameters.refreshed());
 		resolveOptions.setArtifactFilter(new ArtifactFilter());
 		final ResolveReport report;
 		try {

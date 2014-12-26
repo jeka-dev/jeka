@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.depmanagement.JakeLocalDependencyResolver;
+import org.jake.depmanagement.JakeDependencies;
 import org.jake.java.build.JakeBuildJava;
 
 class Lib {
@@ -24,7 +24,7 @@ class Lib {
 		return scope + ":" + file.getPath();
 	}
 
-	public static JakeLocalDependencyResolver toDependencyResolver(Iterable<Lib> libs) {
+	public static JakeDependencies toDependencies(Iterable<Lib> libs) {
 		final List<File> compileAndRuntimes = new LinkedList<File>();
 		final List<File> compileOnlys = new LinkedList<File>();
 		final List<File> runtimeOnlys = new LinkedList<File>();
@@ -37,11 +37,11 @@ class Lib {
 			case TEST : testOnlys.add(lib.file); break;
 			}
 		}
-		return JakeLocalDependencyResolver.empty()
-				.with(JakeBuildJava.COMPILE, compileAndRuntimes)
-				.with(JakeBuildJava.RUNTIME, runtimeOnlys)
-				.with(JakeBuildJava.TEST, testOnlys)
-				.with(JakeBuildJava.PROVIDED, compileOnlys);
+		return JakeDependencies.builder()
+				.forScopes(JakeBuildJava.COMPILE).onFiles(compileAndRuntimes)
+				.forScopes(JakeBuildJava.RUNTIME).onFiles(runtimeOnlys)
+				.forScopes(JakeBuildJava.TEST).onFiles(testOnlys)
+				.forScopes(JakeBuildJava.PROVIDED).onFiles(compileOnlys).build();
 	}
 
 

@@ -19,7 +19,7 @@ public final class JakeVersionRange {
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + "=" + definition;
+		return definition;
 	}
 
 	@Override

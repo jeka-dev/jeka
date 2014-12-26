@@ -30,7 +30,7 @@ public final class JakeScopedDependency {
 		return new JakeScopedDependency(dependency, Collections.unmodifiableSet(new HashSet<JakeScope>(scopes)), null);
 	}
 
-	// ------------------ Instance menbers --------------------
+	// ------------------ Instance members --------------------
 
 	private final JakeDependency dependency;
 
@@ -50,26 +50,13 @@ public final class JakeScopedDependency {
 		return dependency;
 	}
 
-	public boolean isInvolving(JakeScope scope) {
+
+	public boolean isInvolvedIn(JakeScope scope) {
 		if (scopeMapping == null) {
 			return scope.isInOrIsExtendingAnyOf(scopes);
 		}
 		return scope.isInOrIsExtendingAnyOf(scopeMapping.entries());
 	}
-
-	// ??????
-	public boolean isInvolving(JakeScope scope, Set<JakeScope> defaultScopes) {
-		if (scopes.contains(scope) || scope.isInOrIsExtendingAnyOf(scopes)) {
-			return true;
-		}
-		final boolean mapped = scopeMapping.entries().contains(scope) || scope.isInOrIsExtendingAnyOf(scopeMapping.entries());
-		if (!mapped) {
-			return scope.isInOrIsExtendingAnyOf(defaultScopes);
-		}
-		return true;
-	}
-
-
 
 	public ScopeType scopeType() {
 		if (this.scopes != null && !this.scopes.isEmpty()) {
@@ -85,6 +72,8 @@ public final class JakeScopedDependency {
 		JakeUtilsAssert.isTrue(this.scopeType() == ScopeType.SIMPLE, "This dependency does not declare simple scopes.");
 		return this.scopes;
 	}
+
+
 
 	public JakeScopeMapping scopeMapping() {
 		JakeUtilsAssert.isTrue(this.scopeType() == ScopeType.MAPPED, "This dependency does not declare scope mappings.");

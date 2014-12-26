@@ -30,10 +30,8 @@ public final class JakeArtifact {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((localFile == null) ? 0 : localFile.hashCode());
-		result = prime * result
-				+ ((versionedModule == null) ? 0 : versionedModule.hashCode());
+		result = prime * result + localFile.hashCode();
+		result = prime * result + versionedModule.hashCode();
 		return result;
 	}
 
@@ -49,18 +47,10 @@ public final class JakeArtifact {
 			return false;
 		}
 		final JakeArtifact other = (JakeArtifact) obj;
-		if (localFile == null) {
-			if (other.localFile != null) {
-				return false;
-			}
-		} else if (!localFile.equals(other.localFile)) {
+		if (!localFile.equals(other.localFile)) {
 			return false;
 		}
-		if (versionedModule == null) {
-			if (other.versionedModule != null) {
-				return false;
-			}
-		} else if (!versionedModule.equals(other.versionedModule)) {
+		if (!versionedModule.equals(other.versionedModule)) {
 			return false;
 		}
 		return true;

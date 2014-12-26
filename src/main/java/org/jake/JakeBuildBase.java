@@ -8,6 +8,13 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jake.depmanagement.JakeModuleId;
+import org.jake.depmanagement.JakeRepos;
+import org.jake.depmanagement.JakeResolutionParameters;
+import org.jake.depmanagement.JakeScopeMapping;
+import org.jake.depmanagement.JakeVersion;
+import org.jake.depmanagement.JakeVersionedModule;
+import org.jake.depmanagement.ivy.JakeIvy;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
@@ -79,6 +86,30 @@ public class JakeBuildBase {
 			return projectName();
 		}
 		return groupName()+ "." + projectName();
+	}
+
+	protected final JakeVersionedModule module() {
+		return JakeVersionedModule.of(JakeModuleId.of(groupName(), projectName()), JakeVersion.of(version()));
+	}
+
+	/**
+	 * Returns the parameterized JakeIvy instance to use when dealing with managed dependencies.
+	 * If you don't use managed dependencies, this method is never invoked.
+	 */
+	protected JakeIvy jakeIvy() {
+		return JakeIvy.of(downloadRepositories()).with(JakeResolutionParameters.of(scopeMapping()));
+	}
+
+	/**
+	 * Returns the download repository to retrieve artifacts from in case of using
+	 * managed dependencies.
+	 */
+	protected JakeRepos downloadRepositories() {
+		return JakeRepos.mavenCentral();
+	}
+
+	protected JakeScopeMapping scopeMapping() {
+		return null;
 	}
 
 
