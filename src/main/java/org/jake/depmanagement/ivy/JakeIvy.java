@@ -131,6 +131,10 @@ public final class JakeIvy {
 		return result;
 	}
 
+	public void publish() {
+		ivy.p
+	}
+
 
 	private static String logLevel() {
 		if (JakeOptions.isSilent()) {
