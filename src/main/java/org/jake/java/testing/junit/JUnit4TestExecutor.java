@@ -1,4 +1,4 @@
-package org.jake.java.test.junit;
+package org.jake.java.testing.junit;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.jake.JakeClassLoader;
-import org.jake.java.test.junit.JakeUnit.JunitReportDetail;
+import org.jake.java.testing.junit.JakeUnit.JunitReportDetail;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsTime;
 import org.junit.runner.JUnitCore;

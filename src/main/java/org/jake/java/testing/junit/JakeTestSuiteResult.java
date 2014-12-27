@@ -1,4 +1,4 @@
-package org.jake.java.test.junit;
+package org.jake.java.testing.junit;
 
 import java.io.Serializable;
 import java.util.ArrayList;

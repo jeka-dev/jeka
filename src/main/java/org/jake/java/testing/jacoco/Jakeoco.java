@@ -1,4 +1,4 @@
-package org.jake.java.test.jacoco;
+package org.jake.java.testing.jacoco;
 
 import java.io.File;
 import java.util.Arrays;
@@ -8,7 +8,7 @@ import java.util.List;
 import org.jake.JakeLocator;
 import org.jake.JakeLog;
 import org.jake.java.JakeJavaProcess;
-import org.jake.java.test.junit.JakeUnit;
+import org.jake.java.testing.junit.JakeUnit;
 
 public final class Jakeoco implements JakeUnit.Enhancer {
 

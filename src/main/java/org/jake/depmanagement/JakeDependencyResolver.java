@@ -1,11 +1,14 @@
 package org.jake.depmanagement;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.jake.JakeLog;
 import org.jake.JakePath;
 import org.jake.depmanagement.JakeDependency.JakeFilesDependency;
 import org.jake.depmanagement.ivy.JakeIvy;
@@ -28,6 +31,7 @@ public final class JakeDependencyResolver  {
 		return new JakeDependencyResolver(null, dependencies, null);
 	}
 
+	private final Map<JakeScope, JakePath> cachedDeps = new HashMap<JakeScope, JakePath>();
 
 	private final JakeIvy jakeIvy;
 
@@ -81,11 +85,20 @@ public final class JakeDependencyResolver  {
 	}
 
 	public final JakePath get(JakeScope scope) {
-		final List<File> result = new LinkedList<File>();
-		for (final JakeScope jakeScope : scope.ancestorScopes()) {
-			result.addAll(this.getDeclaredDependencies(jakeScope));
+		final JakePath cachedResult = this.cachedDeps.get(scope);
+		if (cachedResult != null) {
+			return cachedResult;
 		}
-		return JakePath.of(result);
+		JakeLog.startAndNextLine("Resolving dependencies for scope '" + scope.name() + "'");
+		final List<File> list = new LinkedList<File>();
+		for (final JakeScope jakeScope : scope.ancestorScopes()) {
+			list.addAll(this.getDeclaredDependencies(jakeScope));
+		}
+		final JakePath result = JakePath.of(list);
+		JakeLog.info(result.entries().size() + " artifacts: " + result);
+		JakeLog.done();
+		cachedDeps.put(scope, result);
+		return result;
 	}
 
 	/**

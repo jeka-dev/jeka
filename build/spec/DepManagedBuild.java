@@ -12,12 +12,21 @@ public class DepManagedBuild extends Build {
 		return JakeDependencies.builder()
 				.forScopes(PROVIDED)
 				.on("junit:junit:4.11")
-				.on("org.apache.ivy:ivy:2.4.0-rc1").build();
+				.on("org.apache.ivy:ivy:2.4.0-rc1")
+				.forScopes(RUNTIME)
+				.on("org.apache.maven.wagon:wagon-http:2.2").build();
+	}
+
+	@Override
+	public void base() {
+		super.base();
+		depsFor(RUNTIME);
 	}
 
 	public static void main(String[] args) {
 		//JakeOptions.forceVerbose(true);
 		new DepManagedBuild().base();
+
 	}
 
 }

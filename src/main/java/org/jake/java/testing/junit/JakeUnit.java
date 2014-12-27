@@ -1,4 +1,4 @@
-package org.jake.java.test.junit;
+package org.jake.java.testing.junit;
 
 import java.io.File;
 import java.lang.annotation.Annotation;

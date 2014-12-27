@@ -1,4 +1,4 @@
-package org.jake.java.test.junit;
+package org.jake.java.testing.junit;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -8,8 +8,8 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jake.java.test.junit.JakeTestSuiteResult.IgnoredCase;
-import org.jake.java.test.junit.JakeTestSuiteResult.TestCaseFailure;
+import org.jake.java.testing.junit.JakeTestSuiteResult.IgnoredCase;
+import org.jake.java.testing.junit.JakeTestSuiteResult.TestCaseFailure;
 import org.jake.utils.JakeUtilsString;
 
 final class JakeTestReportBuilder {

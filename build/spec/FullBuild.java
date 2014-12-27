@@ -1,6 +1,6 @@
 import org.jake.JakeJavaCompiler;
 import org.jake.JakeOptions;
-import org.jake.java.test.junit.JakeUnit;
+import org.jake.java.testing.junit.JakeUnit;
 
 /**
  * Build class for Jake itself.

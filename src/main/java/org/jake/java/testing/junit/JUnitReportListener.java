@@ -1,14 +1,14 @@
-package org.jake.java.test.junit;
+package org.jake.java.testing.junit;
 
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import org.jake.java.test.junit.JakeTestSuiteResult.ExceptionDescription;
-import org.jake.java.test.junit.JakeTestSuiteResult.IgnoredCase;
-import org.jake.java.test.junit.JakeTestSuiteResult.TestCaseFailure;
-import org.jake.java.test.junit.JakeTestSuiteResult.TestCaseResult;
+import org.jake.java.testing.junit.JakeTestSuiteResult.ExceptionDescription;
+import org.jake.java.testing.junit.JakeTestSuiteResult.IgnoredCase;
+import org.jake.java.testing.junit.JakeTestSuiteResult.TestCaseFailure;
+import org.jake.java.testing.junit.JakeTestSuiteResult.TestCaseResult;
 import org.jake.utils.JakeUtilsTime;
 import org.junit.runner.Description;
 import org.junit.runner.Result;

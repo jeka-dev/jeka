@@ -1,8 +1,6 @@
 package org.jake.java.build;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.jake.JakeBuildBase;
 import org.jake.JakeClasspath;
@@ -21,9 +19,9 @@ import org.jake.depmanagement.JakeScopeMapping;
 import org.jake.java.JakeJavadoc;
 import org.jake.java.JakeResourceProcessor;
 import org.jake.java.JakeUtilsJdk;
-import org.jake.java.test.jacoco.Jakeoco;
-import org.jake.java.test.junit.JakeUnit;
-import org.jake.java.test.junit.JakeUnit.JunitReportDetail;
+import org.jake.java.testing.jacoco.Jakeoco;
+import org.jake.java.testing.junit.JakeUnit;
+import org.jake.java.testing.junit.JakeUnit.JunitReportDetail;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.verify.sonar.JakeSonar;
 
@@ -110,7 +108,6 @@ public class JakeBuildJava extends JakeBuildBase {
 	// A cache for
 	private JakeDependencyResolver cachedResolver;
 
-	private final Map<JakeScope, JakeClasspath> cachedDeps = new HashMap<JakeScope, JakeClasspath>();
 
 	// --------------------------- Project settings -----------------------
 
@@ -357,13 +354,7 @@ public class JakeBuildJava extends JakeBuildBase {
 			cachedResolver = baseDependencyResolver();
 			JakeLog.done("Resolver set " + cachedResolver);
 		}
-		JakeClasspath result = cachedDeps.get(scope);
-		if (result == null) {
-			result = JakeClasspath.of(cachedResolver.get(scope));
-			JakeLog.info("Resolved scope : " + scope + "(" + result.entries().size() + " artifacts) " + result);
-			cachedDeps.put(scope, result);
-		}
-		return result;
+		return JakeClasspath.of(cachedResolver.get(scope));
 	}
 
 	protected void generateSources() {
