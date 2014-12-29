@@ -45,7 +45,7 @@ public class JakeIvyRunner {
 				.andMavenCentral();
 		final JakeDependencies deps = JakeDependencies.builder()
 				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
-		final Set<JakeArtifact> artifacts = JakeIvy.of(repos).with(JakeResolutionParameters.of(defaultMapping())).resolve(deps, COMPILE);
+		final Set<JakeArtifact> artifacts = JakeIvy.of(repos).resolve(deps, COMPILE, JakeResolutionParameters.of(defaultMapping()));
 		for (final JakeArtifact artifact : artifacts) {
 			System.out.println(artifact);
 		}
@@ -62,8 +62,8 @@ public class JakeIvyRunner {
 				.andMavenCentral();
 		final JakeDependencies deps = JakeDependencies.builder()
 				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
-		final JakeIvy jakeIvy = JakeIvy.of(repos).with(JakeResolutionParameters.of(defaultMapping()));
-		final Set<JakeArtifact> artifacts = jakeIvy.resolve(deps, COMPILE);
+		final JakeIvy jakeIvy = JakeIvy.of(repos);
+		final Set<JakeArtifact> artifacts = jakeIvy.resolve(deps, COMPILE, JakeResolutionParameters.of(defaultMapping()));
 		final Set<JakeVersionedModule> modules = new HashSet<JakeVersionedModule>();
 		for (final JakeArtifact artifact : artifacts) {
 			modules.add(artifact.versionedModule());
@@ -76,7 +76,6 @@ public class JakeIvyRunner {
 		System.out.println(javadocArtifactSet);
 		final Set<JakeArtifact> noExistArtifactSet = result.getArtifacts(JakeModuleId.of("org.apache.wicket:wicket-ioc"), JakeScope.of("noexist"));
 		System.out.println(noExistArtifactSet);
-
 	}
 
 }

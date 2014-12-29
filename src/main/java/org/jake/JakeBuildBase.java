@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.jake.depmanagement.JakeModuleId;
 import org.jake.depmanagement.JakeRepos;
-import org.jake.depmanagement.JakeResolutionParameters;
 import org.jake.depmanagement.JakeScopeMapping;
 import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionedModule;
@@ -97,7 +96,7 @@ public class JakeBuildBase {
 	 * If you don't use managed dependencies, this method is never invoked.
 	 */
 	protected JakeIvy jakeIvy() {
-		return JakeIvy.of(downloadRepositories()).with(JakeResolutionParameters.of(scopeMapping()));
+		return JakeIvy.of(downloadRepositories());
 	}
 
 	/**

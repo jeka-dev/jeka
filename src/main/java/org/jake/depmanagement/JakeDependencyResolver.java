@@ -15,12 +15,8 @@ import org.jake.depmanagement.ivy.JakeIvy;
 
 public final class JakeDependencyResolver  {
 
-	public static JakeDependencyResolver managed(JakeIvy jakeIvy, JakeDependencies dependencies) {
-		return managed(jakeIvy, dependencies, null);
-	}
-
-	public static JakeDependencyResolver managed(JakeIvy jakeIvy, JakeDependencies dependencies, JakeVersionedModule module) {
-		return new JakeDependencyResolver(jakeIvy, dependencies, module);
+	public static JakeDependencyResolver managed(JakeIvy jakeIvy, JakeDependencies dependencies, JakeVersionedModule module, JakeResolutionParameters resolutionParameters) {
+		return new JakeDependencyResolver(jakeIvy, dependencies, module, resolutionParameters);
 	}
 
 	public static JakeDependencyResolver unmanaged(JakeDependencies dependencies) {
@@ -28,7 +24,7 @@ public final class JakeDependencyResolver  {
 			throw new IllegalArgumentException("Your dependencies contain a reference to a managed extarnal module."
 					+ "Use #managed method factory instead.");
 		}
-		return new JakeDependencyResolver(null, dependencies, null);
+		return new JakeDependencyResolver(null, dependencies, null, null);
 	}
 
 	private final Map<JakeScope, JakePath> cachedDeps = new HashMap<JakeScope, JakePath>();
@@ -37,13 +33,16 @@ public final class JakeDependencyResolver  {
 
 	private final JakeDependencies dependencies;
 
+	private final JakeResolutionParameters parameters;
+
 	// Not necessary but nice if present in order to let Ivy hide data efficiently.
 	private final JakeVersionedModule module;
 
-	private JakeDependencyResolver(JakeIvy jakeIvy, JakeDependencies dependencies, JakeVersionedModule module) {
+	private JakeDependencyResolver(JakeIvy jakeIvy, JakeDependencies dependencies, JakeVersionedModule module, JakeResolutionParameters resolutionParameters) {
 		this.jakeIvy = jakeIvy;
 		this.dependencies = dependencies;
 		this.module = module;
+		this.parameters = resolutionParameters;
 	}
 
 	protected List<File> getDeclaredDependencies(JakeScope scope) {
@@ -58,9 +57,9 @@ public final class JakeDependencyResolver  {
 		// Add managed dependencies from Ivy
 		final Set<JakeArtifact> artefacts;
 		if (module != null) {
-			artefacts = jakeIvy.resolve(module, dependencies, scope);
+			artefacts = jakeIvy.resolve(module, dependencies, scope, parameters);
 		} else {
-			artefacts = jakeIvy.resolve(dependencies, scope);
+			artefacts = jakeIvy.resolve(dependencies, scope, parameters);
 		}
 		for (final JakeArtifact artifact : artefacts) {
 			result.add(artifact.localFile());

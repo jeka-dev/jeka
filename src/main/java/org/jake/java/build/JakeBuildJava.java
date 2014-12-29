@@ -14,6 +14,7 @@ import org.jake.JakeOption;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeDependency;
 import org.jake.depmanagement.JakeDependencyResolver;
+import org.jake.depmanagement.JakeResolutionParameters;
 import org.jake.depmanagement.JakeScope;
 import org.jake.depmanagement.JakeScopeMapping;
 import org.jake.java.JakeJavadoc;
@@ -321,7 +322,8 @@ public class JakeBuildJava extends JakeBuildBase {
 	protected JakeDependencyResolver baseDependencyResolver() {
 		final JakeDependencies dependencies = dependencies().and(extraCommandLineDeps());
 		if (dependencies.containsExternalModule()) {
-			return JakeDependencyResolver.managed(jakeIvy(), dependencies, module());
+			return JakeDependencyResolver.managed(jakeIvy(), dependencies, module(),
+					JakeResolutionParameters.of(SCOPE_MAPPING));
 		}
 		return JakeDependencyResolver.unmanaged(dependencies);
 	}

@@ -33,39 +33,36 @@ public final class JakeIvy {
 
 	private final Ivy ivy;
 
-	private final JakeResolutionParameters parameters;
-
-	private JakeIvy(Ivy ivy, JakeResolutionParameters parameters) {
+	private JakeIvy(Ivy ivy) {
 		super();
 		this.ivy = ivy;
 		ivy.getLoggerEngine().setDefaultLogger(new MessageLogger());
-		this.parameters = parameters;
 	}
 
-	public static JakeIvy of(IvySettings ivySettings, JakeResolutionParameters parameters) {
+	public static JakeIvy of(IvySettings ivySettings) {
 		final Ivy ivy = Ivy.newInstance(ivySettings);
-		return new JakeIvy(ivy, parameters);
+		return new JakeIvy(ivy);
 	}
 
 	public static JakeIvy of(JakeRepos repos) {
 		final IvySettings ivySettings = new IvySettings();
 		Translations.populateIvySettingsWithRepo(ivySettings, repos);
-		return of(ivySettings, JakeResolutionParameters.of());
+		return of(ivySettings);
 	}
 
 	public static JakeIvy of() {
 		return of(JakeRepos.mavenCentral());
 	}
 
-	public JakeIvy with(JakeResolutionParameters jakeResolutionParameters) {
-		return new JakeIvy(this.ivy, jakeResolutionParameters);
-	}
-
 	public Set<JakeArtifact> resolve(JakeDependencies deps, JakeScope resolvedScope) {
-		return resolve(ANONYMOUS_MODULE, deps, resolvedScope);
+		return resolve(ANONYMOUS_MODULE, deps, resolvedScope, JakeResolutionParameters.of());
 	}
 
-	public Set<JakeArtifact> resolve(JakeVersionedModule module, JakeDependencies deps, JakeScope resolvedScope) {
+	public Set<JakeArtifact> resolve(JakeDependencies deps, JakeScope resolvedScope, JakeResolutionParameters parameters) {
+		return resolve(ANONYMOUS_MODULE, deps, resolvedScope, parameters);
+	}
+
+	public Set<JakeArtifact> resolve(JakeVersionedModule module, JakeDependencies deps, JakeScope resolvedScope, JakeResolutionParameters parameters) {
 		final DefaultModuleDescriptor moduleDescriptor = Translations.toUnpublished(module, deps, parameters.defaultScope(), parameters.defaultMapping());
 
 		final ResolveOptions resolveOptions = new ResolveOptions();
@@ -131,9 +128,12 @@ public final class JakeIvy {
 		return result;
 	}
 
-	public void publish() {
-		ivy.p
+	public void publish(JakeModuleId module, JakeVersion version) {
+
+		ivy.publish(mrid, srcArtifactPattern, resolverName, options)
 	}
+
+
 
 
 	private static String logLevel() {
