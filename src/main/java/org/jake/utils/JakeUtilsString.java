@@ -47,6 +47,22 @@ public final class JakeUtilsString {
 		return string.substring(index+1);
 	}
 
+	public static String substringBeforeFirst(String string, String delimiter) {
+		final int index = string.indexOf(delimiter);
+		if (index == -1) {
+			return "";
+		}
+		return string.substring(0, index);
+	}
+
+	public static String substringAfterFirst(String string, String delimiter) {
+		final int index = string.indexOf(delimiter);
+		if (index == -1) {
+			return "";
+		}
+		return string.substring(index+1);
+	}
+
 	public static String substringBeforeLast(String string, String delimiter) {
 		final int index = string.lastIndexOf(delimiter);
 		if (index == -1 || string.startsWith(delimiter)) {
