@@ -24,6 +24,7 @@ import org.jake.JakeOptions;
 import org.jake.depmanagement.JakeArtifact;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeModuleId;
+import org.jake.depmanagement.JakeRepo;
 import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeResolutionParameters;
 import org.jake.depmanagement.JakeScope;
@@ -48,6 +49,10 @@ public final class JakeIvy {
 	public static JakeIvy of(IvySettings ivySettings) {
 		final Ivy ivy = Ivy.newInstance(ivySettings);
 		return new JakeIvy(ivy);
+	}
+
+	public static JakeIvy of(JakeRepo repo) {
+		return JakeIvy.of(JakeRepos.of(repo));
 	}
 
 	public static JakeIvy of(JakeRepos repos) {
@@ -160,7 +165,8 @@ public final class JakeIvy {
 			artifactName = JakeUtilsString.substringBeforeFirst(artifactName, ".");
 
 		}
-		return new DefaultArtifact(moduleId, date, artifactName, artifact.type, extension);
+		final String type = artifact.type != null ? artifact.type : extension;
+		return new DefaultArtifact(moduleId, date, artifactName, type, extension);
 	}
 
 

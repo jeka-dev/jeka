@@ -14,6 +14,10 @@ public class JakeIvyPublication implements Iterable<Artifact> {
 		return new JakeIvyPublication(new HashSet<JakeIvyPublication.Artifact>()).and(jakeScope, file, type);
 	}
 
+	public static JakeIvyPublication of(JakeScope jakeScope, File file) {
+		return new JakeIvyPublication(new HashSet<JakeIvyPublication.Artifact>()).and(jakeScope, file);
+	}
+
 	private final Set<Artifact> artifacts;
 
 	private JakeIvyPublication(Set<Artifact> artifacts) {
@@ -25,6 +29,10 @@ public class JakeIvyPublication implements Iterable<Artifact> {
 		final Set<Artifact> artifacts = new HashSet<JakeIvyPublication.Artifact>(this.artifacts);
 		artifacts.add(new Artifact(file, type, jakeScope));
 		return new JakeIvyPublication(artifacts);
+	}
+
+	public JakeIvyPublication and(JakeScope jakeScope, File file) {
+		return and(jakeScope, file, null);
 	}
 
 	@Override

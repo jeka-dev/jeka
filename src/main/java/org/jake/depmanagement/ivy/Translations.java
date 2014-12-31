@@ -1,6 +1,7 @@
 package org.jake.depmanagement.ivy;
 
 import java.io.File;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,7 +14,9 @@ import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
 import org.apache.ivy.core.module.id.ModuleId;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.settings.IvySettings;
+import org.apache.ivy.plugins.repository.file.FileRepository;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
+import org.apache.ivy.plugins.resolver.FileSystemResolver;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
 import org.jake.depmanagement.JakeArtifact;
 import org.jake.depmanagement.JakeDependencies;
@@ -129,8 +132,9 @@ final class Translations {
 		return versionRange.definition();
 	}
 
+	// see http://www.draconianoverlord.com/2010/07/18/publishing-to-maven-repos-with-ivy.html
 	private static DependencyResolver to(JakeRepo repo) {
-		if (repo instanceof JakeRepo.MavenRepository) {
+		if (repo instanceof JakeRepo.MavenRepository && !isFile(repo.url())) {
 			final IBiblioResolver result = new IBiblioResolver();
 			result.setM2compatible(true);
 			result.setUseMavenMetadata(true);
@@ -138,7 +142,19 @@ final class Translations {
 			result.setUsepoms(true);
 			return result;
 		}
+		if (repo instanceof JakeRepo.IvyRepository && isFile(repo.url())) {
+			//IvyRepository jakeIvyRepo = (IvyRepository) repo;
+			final FileRepository fileRepo = new FileRepository(new File(repo.url().getPath()));
+			final FileSystemResolver result = new FileSystemResolver();
+			result.setRepository(fileRepo);
+			return result;
+
+		}
 		throw new IllegalStateException(repo.getClass().getName() + " not handled by translator.");
+	}
+
+	private static boolean isFile(URL url) {
+		return url.getProtocol().equals("file");
 	}
 
 	public static void populateIvySettingsWithRepo(IvySettings ivySettings, JakeRepos repos) {

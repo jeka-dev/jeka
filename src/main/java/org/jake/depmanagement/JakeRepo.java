@@ -1,16 +1,13 @@
 package org.jake.depmanagement;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 public abstract class JakeRepo {
 
-	@SuppressWarnings("unchecked")
 	public static MavenRepository maven(String url) {
-		return new MavenRepository(toUrl(url), Collections.EMPTY_LIST);
+		return new MavenRepository(toUrl(url));
 	}
 
 	public static JakeRepo mavenCentral() {
@@ -20,6 +17,28 @@ public abstract class JakeRepo {
 	public static JakeRepo mavenJCenter() {
 		return maven(MavenRepository.JCENTERL_URL.toString());
 	}
+
+	public static JakeRepo.IvyRepository ivy(URL url) {
+		return new IvyRepository(url);
+	}
+
+	public static JakeRepo.IvyRepository ivy(File file) {
+		try {
+			return ivy(file.toURI().toURL());
+		} catch (final MalformedURLException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
+	public static JakeRepo.IvyRepository ivy(String url) {
+		try {
+			return ivy(new URL(url));
+		} catch (final MalformedURLException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
+
 
 	private final URL url;
 
@@ -80,23 +99,16 @@ public abstract class JakeRepo {
 
 		public static final URL JCENTERL_URL = toUrl("https://jcenter.bintray.com");
 
-		private final List<URL> artifactUrls;
-
-		private MavenRepository(URL url, List<URL> extraArtifactUrls) {
+		private MavenRepository(URL url) {
 			super(url);
-			this.artifactUrls = Collections.unmodifiableList(extraArtifactUrls);
 		}
 
-		public MavenRepository withArtifactUrl(String ... urls) {
-			final List<URL> list = new LinkedList<URL>();
-			for (final String url : urls) {
-				list.add(toUrl(url));
-			}
-			return new MavenRepository(this.url(), list);
-		}
+	}
 
-		public List<URL> artifactUrls() {
-			return artifactUrls;
+	public static class IvyRepository extends JakeRepo {
+
+		private IvyRepository(URL url) {
+			super(url);
 		}
 	}
 

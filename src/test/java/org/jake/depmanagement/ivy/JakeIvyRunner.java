@@ -3,6 +3,9 @@ package org.jake.depmanagement.ivy;
 import static org.jake.java.build.JakeBuildJava.COMPILE;
 import static org.jake.java.build.JakeBuildJava.PROVIDED;
 
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,13 +13,17 @@ import org.jake.JakeOptions;
 import org.jake.depmanagement.JakeArtifact;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeModuleId;
+import org.jake.depmanagement.JakeRepo;
 import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeResolutionParameters;
 import org.jake.depmanagement.JakeScope;
 import org.jake.depmanagement.JakeScopeMapping;
+import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionedModule;
 import org.jake.depmanagement.ivy.JakeIvy.AttachedArtifacts;
 import org.jake.java.build.JakeBuildJava;
+import org.jake.publishing.JakeIvyPublication;
+import org.jake.utils.JakeUtilsFile;
 
 public class JakeIvyRunner {
 
@@ -24,7 +31,8 @@ public class JakeIvyRunner {
 		JakeOptions.forceVerbose(false);
 		//spring();
 		//jogl();
-		joglWithSource();
+		//joglWithSource();
+		testPublish();
 	}
 
 	public static void spring() {
@@ -76,6 +84,31 @@ public class JakeIvyRunner {
 		System.out.println(javadocArtifactSet);
 		final Set<JakeArtifact> noExistArtifactSet = result.getArtifacts(JakeModuleId.of("org.apache.wicket:wicket-ioc"), JakeScope.of("noexist"));
 		System.out.println(noExistArtifactSet);
+	}
+
+	public static void testPublish() {
+		final JakeIvy jakeIvy = JakeIvy.of(ivyRepo());
+		final JakeVersionedModule versionedModule = JakeVersionedModule.of(JakeModuleId.of("mygroup:mymodule"), JakeVersion.of("myVersion"));
+		final JakeIvyPublication ivyPublication = JakeIvyPublication.of(COMPILE, sampleJarfile());
+		jakeIvy.publish(versionedModule, ivyPublication);
+
+	}
+
+	private static File sampleJarfile() {
+		final URL url = JakeIvyRunner.class.getResource("myArtifactSample.jar");
+		try {
+			return new File(url.toURI().getPath());
+		} catch (final URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static JakeRepo.IvyRepository ivyRepo() {
+		final File file = sampleJarfile();
+		final JakeIvyPublication publication = JakeIvyPublication.of(JakeScope.of("toto"), file);
+		final File baseDir = new File(JakeUtilsFile.workingDir(), "testIvyRepo");
+		baseDir.mkdir();
+		return JakeRepo.ivy(baseDir);
 	}
 
 }
