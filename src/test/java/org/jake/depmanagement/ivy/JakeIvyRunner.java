@@ -6,6 +6,7 @@ import static org.jake.java.build.JakeBuildJava.PROVIDED;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -90,7 +91,7 @@ public class JakeIvyRunner {
 		final JakeIvy jakeIvy = JakeIvy.of(ivyRepo());
 		final JakeVersionedModule versionedModule = JakeVersionedModule.of(JakeModuleId.of("mygroup:mymodule"), JakeVersion.of("myVersion"));
 		final JakeIvyPublication ivyPublication = JakeIvyPublication.of(COMPILE, sampleJarfile());
-		jakeIvy.publish(versionedModule, ivyPublication);
+		jakeIvy.publish(versionedModule, ivyPublication, JakeDependencies.builder().build(), null, null, new Date());
 
 	}
 

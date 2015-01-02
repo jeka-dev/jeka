@@ -2,12 +2,15 @@ package org.jake.depmanagement.ivy;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.Configuration;
 import org.apache.ivy.core.module.descriptor.Configuration.Visibility;
+import org.apache.ivy.core.module.descriptor.DefaultArtifact;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
@@ -23,6 +26,7 @@ import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeExternalModule;
 import org.jake.depmanagement.JakeModuleId;
 import org.jake.depmanagement.JakeRepo;
+import org.jake.depmanagement.JakeRepo.IvyRepository;
 import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeScope;
 import org.jake.depmanagement.JakeScopeMapping;
@@ -31,6 +35,7 @@ import org.jake.depmanagement.JakeScopedDependency.ScopeType;
 import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionRange;
 import org.jake.depmanagement.JakeVersionedModule;
+import org.jake.publishing.JakeIvyPublication;
 import org.jake.utils.JakeUtilsString;
 
 final class Translations {
@@ -39,6 +44,8 @@ final class Translations {
 	 * Stands for the default configuration for publishing in ivy.
 	 */
 	static final JakeScope DEFAULT_CONFIGURATION = JakeScope.of("default");
+
+	private static final String MAVEN_ARTIFACT_PATTERN = "[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]";
 
 	private Translations() {}
 
@@ -134,26 +141,39 @@ final class Translations {
 
 	// see http://www.draconianoverlord.com/2010/07/18/publishing-to-maven-repos-with-ivy.html
 	private static DependencyResolver to(JakeRepo repo) {
-		if (repo instanceof JakeRepo.MavenRepository && !isFile(repo.url())) {
-			final IBiblioResolver result = new IBiblioResolver();
-			result.setM2compatible(true);
-			result.setUseMavenMetadata(true);
-			result.setRoot(repo.url().toString());
-			result.setUsepoms(true);
-			return result;
-		}
-		if (repo instanceof JakeRepo.IvyRepository && isFile(repo.url())) {
-			//IvyRepository jakeIvyRepo = (IvyRepository) repo;
+		if (repo instanceof JakeRepo.MavenRepository) {
+			if (!isFileSystem(repo.url())) {
+				final IBiblioResolver result = new IBiblioResolver();
+				result.setM2compatible(true);
+				result.setUseMavenMetadata(true);
+				result.setRoot(repo.url().toString());
+				result.setUsepoms(true);
+				return result;
+			}
 			final FileRepository fileRepo = new FileRepository(new File(repo.url().getPath()));
 			final FileSystemResolver result = new FileSystemResolver();
 			result.setRepository(fileRepo);
+			result.addArtifactPattern(MAVEN_ARTIFACT_PATTERN);
+			result.setM2compatible(true);
 			return result;
-
 		}
-		throw new IllegalStateException(repo.getClass().getName() + " not handled by translator.");
+		final IvyRepository jakeIvyRepo = (IvyRepository) repo;
+		if (isFileSystem(repo.url())) {
+			final FileRepository fileRepo = new FileRepository(new File(repo.url().getPath()));
+			final FileSystemResolver result = new FileSystemResolver();
+			result.setRepository(fileRepo);
+			for (final String pattern :  jakeIvyRepo.artifactPatterns()) {
+				result.addArtifactPattern(completePattern(repo.url().getPath(), pattern));
+			}
+			for (final String pattern :  jakeIvyRepo.ivyPatterns()) {
+				result.addIvyPattern(completePattern(repo.url().getPath(), pattern));
+			}
+			return result;
+		}
+		throw new IllegalStateException(repo + " not handled by translator.");
 	}
 
-	private static boolean isFile(URL url) {
+	private static boolean isFileSystem(URL url) {
 		return url.getProtocol().equals("file");
 	}
 
@@ -253,4 +273,30 @@ final class Translations {
 
 	}
 
+	private static String completePattern(String url, String pattern) {
+		return url + pattern;
+	}
+
+	public static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
+			JakeIvyPublication publication, Date publishDate) {
+		for (final JakeIvyPublication.Artifact artifact : publication) {
+			final JakeScope jakeScope = artifact.jakeScope;
+			if (!Arrays.asList(descriptor.getConfigurations()).contains(jakeScope.name())) {
+				descriptor.addConfiguration(new Configuration(jakeScope.name()));
+			}
+			descriptor.addArtifact(artifact.jakeScope.name(), toPublishedArtifact(artifact, descriptor.getModuleRevisionId(), publishDate));
+		}
+	}
+
+	public static Artifact toPublishedArtifact(JakeIvyPublication.Artifact artifact, ModuleRevisionId moduleId, Date date) {
+		String artifactName = artifact.file.getName();
+		String extension = "";
+		if (artifactName.contains(".")) {
+			extension = JakeUtilsString.substringAfterFirst(artifactName, ".");
+			artifactName = JakeUtilsString.substringBeforeFirst(artifactName, ".");
+
+		}
+		final String type = artifact.type != null ? artifact.type : extension;
+		return new DefaultArtifact(moduleId, date, artifactName, type, extension);
+	}
 }

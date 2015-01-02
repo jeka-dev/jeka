@@ -1,6 +1,8 @@
 package org.jake.depmanagement.ivy;
 
+import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,9 +11,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.ivy.Ivy;
+import org.apache.ivy.core.cache.ResolutionCacheManager;
+import org.apache.ivy.core.deliver.DeliverOptions;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.Configuration;
-import org.apache.ivy.core.module.descriptor.DefaultArtifact;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
@@ -25,9 +28,11 @@ import org.jake.depmanagement.JakeArtifact;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeModuleId;
 import org.jake.depmanagement.JakeRepo;
+import org.jake.depmanagement.JakeRepo.IvyRepository;
 import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeResolutionParameters;
 import org.jake.depmanagement.JakeScope;
+import org.jake.depmanagement.JakeScopeMapping;
 import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionedModule;
 import org.jake.publishing.JakeIvyPublication;
@@ -137,7 +142,29 @@ public final class JakeIvy {
 		return result;
 	}
 
-	public void publish(JakeVersionedModule versionedModule, JakeIvyPublication publication) {
+	/**
+	 * Deliver and Publish the specified module. Dependencies, default scopes and mapping are necessary
+	 * in order to generate the ivy.xml file.
+	 * 
+	 * @param versionedModule The module/version to publish.
+	 * @param publication The artifacts to publish.
+	 * @param dependencies The dependencies of the published module
+	 * @param defaultScope The default scope of the published module
+	 * @param defaultMapping The default scope mappping of the published module
+	 * @param deliveryDate The delivery date.
+	 */
+	public void publish(JakeVersionedModule versionedModule, JakeIvyPublication publication, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping, Date deliveryDate) {
+		try {
+			deliver(versionedModule, publication, dependencies, defaultScope, defaultMapping, deliveryDate);
+		} catch (final ParseException e) {
+			throw new IllegalStateException(e);
+		} catch (final IOException e) {
+			throw new IllegalStateException(e);
+		}
+		publishArtifacts(versionedModule, publication);
+	}
+
+	private void publishArtifacts(JakeVersionedModule versionedModule, JakeIvyPublication publication) {
 		final DependencyResolver resolver = this.ivy.getSettings().getDefaultResolver();
 		final ModuleRevisionId ivyModuleRevisionId = Translations.to(versionedModule);
 		try {
@@ -147,7 +174,7 @@ public final class JakeIvy {
 		}
 		final Date publishDate = new Date();
 		for (final JakeIvyPublication.Artifact artifact : publication) {
-			final Artifact ivyArtifact = toPublishedArtifact(artifact, ivyModuleRevisionId, publishDate);
+			final Artifact ivyArtifact = Translations.toPublishedArtifact(artifact, ivyModuleRevisionId, publishDate);
 			try {
 				resolver.publish(ivyArtifact, artifact.file, true);
 				resolver.commitPublishTransaction();
@@ -157,18 +184,45 @@ public final class JakeIvy {
 		}
 	}
 
-	private static Artifact toPublishedArtifact(JakeIvyPublication.Artifact artifact, ModuleRevisionId moduleId, Date date) {
-		String artifactName = artifact.file.getName();
-		String extension = "";
-		if (artifactName.contains(".")) {
-			extension = JakeUtilsString.substringAfterFirst(artifactName, ".");
-			artifactName = JakeUtilsString.substringBeforeFirst(artifactName, ".");
 
+
+	private void deliver(JakeVersionedModule jakeVersionedModule, JakeIvyPublication publication, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping, Date deliveryDate) throws ParseException, IOException {
+		final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
+		final ModuleRevisionId moduleRevisionId = Translations.to(jakeVersionedModule);
+		final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
+		DefaultModuleDescriptor moduleDescriptor;
+		if (!cachedIvyFile.exists()) {
+			moduleDescriptor = Translations.toUnpublished(jakeVersionedModule, dependencies, defaultScope, defaultMapping);
+		} else {
+			moduleDescriptor = (DefaultModuleDescriptor) cacheManager.getResolvedModuleDescriptor(moduleRevisionId);
 		}
-		final String type = artifact.type != null ? artifact.type : extension;
-		return new DefaultArtifact(moduleId, date, artifactName, type, extension);
+		final String propsfileName = JakeUtilsString.substringBeforeLast(cachedIvyFile.getName(), ".") + ".properties";
+		final File propsFile = new File(cachedIvyFile.getParent(), propsfileName);
+		if (!propsFile.exists()) {
+			propsFile.createNewFile();
+		}
+
+		Translations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
+		cacheManager.saveResolvedModuleDescriptor(moduleDescriptor);
+
+		final DeliverOptions deliverOptions = new DeliverOptions();
+		if (publication.status != null) {
+			deliverOptions.setStatus(publication.status.name());
+		}
+		deliverOptions.setPubdate(deliveryDate);
+		deliverOptions.setPubBranch(publication.branch);
+		try {
+			this.ivy.deliver(Translations.to(jakeVersionedModule), jakeVersionedModule.version().name(), , deliverOptions);
+		} catch (final IOException e) {
+			throw new IllegalStateException(e);
+		} catch (final ParseException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
+	private JakeRepo.IvyRepository getFirstIvyRepo() {
+		for (final Depe repository : this.ivy.getSettings().getResolvers())
+	}
 
 
 
@@ -190,9 +244,6 @@ public final class JakeIvy {
 		}
 		return result;
 	}
-
-
-
 
 	public final class AttachedArtifacts {
 
