@@ -107,7 +107,7 @@ public class JakeIvyRunner {
 	}
 
 	private static JakeRepo.IvyRepository ivyRepo() {
-		final File baseDir = new File(JakeUtilsFile.workingDir(), "testIvyRepo");
+		final File baseDir = new File(JakeUtilsFile.workingDir(), "build/output/testIvyRepo");
 		baseDir.mkdir();
 		return JakeRepo.ivy(baseDir);
 	}

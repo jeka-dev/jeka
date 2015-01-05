@@ -4,10 +4,8 @@ import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.Configuration;
@@ -287,13 +285,10 @@ final class Translations {
 					descriptor.addConfiguration(new Configuration(jakeScope.name()));
 				}
 			}
-			final Set<String> scopeNames = new HashSet<String>();
-			for(final JakeScope jakeScope : artifact.jakeScopes) {
-				scopeNames.add(jakeScope.name());
-			}
-			final String scopes = JakeUtilsString.join(scopeNames, ", ");
 			final Artifact ivyArtifact = toPublishedArtifact(artifact, descriptor.getModuleRevisionId(), publishDate);
-			descriptor.addArtifact(scopes, ivyArtifact);
+			for(final JakeScope jakeScope : artifact.jakeScopes) {
+				descriptor.addArtifact(jakeScope.name(), ivyArtifact);
+			}
 		}
 	}
 
