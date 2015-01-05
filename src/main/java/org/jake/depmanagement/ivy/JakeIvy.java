@@ -11,12 +11,15 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.ivy.Ivy;
+import org.apache.ivy.core.IvyPatternHelper;
 import org.apache.ivy.core.cache.ResolutionCacheManager;
 import org.apache.ivy.core.deliver.DeliverOptions;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.Configuration;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
+import org.apache.ivy.core.module.descriptor.MDArtifact;
+import org.apache.ivy.core.module.descriptor.ModuleDescriptor;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
@@ -28,7 +31,6 @@ import org.jake.depmanagement.JakeArtifact;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeModuleId;
 import org.jake.depmanagement.JakeRepo;
-import org.jake.depmanagement.JakeRepo.IvyRepository;
 import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeResolutionParameters;
 import org.jake.depmanagement.JakeScope;
@@ -154,17 +156,18 @@ public final class JakeIvy {
 	 * @param deliveryDate The delivery date.
 	 */
 	public void publish(JakeVersionedModule versionedModule, JakeIvyPublication publication, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping, Date deliveryDate) {
+		final DeliveryResult deliveryResult;
 		try {
-			deliver(versionedModule, publication, dependencies, defaultScope, defaultMapping, deliveryDate);
+			deliveryResult = deliver(versionedModule, publication, dependencies, defaultScope, defaultMapping, deliveryDate);
 		} catch (final ParseException e) {
 			throw new IllegalStateException(e);
 		} catch (final IOException e) {
 			throw new IllegalStateException(e);
 		}
-		publishArtifacts(versionedModule, publication);
+		publishArtifacts(versionedModule, publication, deliveryDate, deliveryResult);
 	}
 
-	private void publishArtifacts(JakeVersionedModule versionedModule, JakeIvyPublication publication) {
+	private void publishArtifacts(JakeVersionedModule versionedModule, JakeIvyPublication publication, Date date, DeliveryResult deliveryResult) {
 		final DependencyResolver resolver = this.ivy.getSettings().getDefaultResolver();
 		final ModuleRevisionId ivyModuleRevisionId = Translations.to(versionedModule);
 		try {
@@ -172,30 +175,30 @@ public final class JakeIvy {
 		} catch (final IOException e) {
 			throw new IllegalStateException(e);
 		}
-		final Date publishDate = new Date();
 		for (final JakeIvyPublication.Artifact artifact : publication) {
-			final Artifact ivyArtifact = Translations.toPublishedArtifact(artifact, ivyModuleRevisionId, publishDate);
+			final Artifact ivyArtifact = Translations.toPublishedArtifact(artifact, ivyModuleRevisionId, date);
 			try {
 				resolver.publish(ivyArtifact, artifact.file, true);
-				resolver.commitPublishTransaction();
 			} catch (final IOException e) {
 				throw new IllegalStateException(e);
 			}
 		}
+		try {
+			resolver.publish(createIvyModuleDescriptorArtifact(deliveryResult.moduleDescriptor), deliveryResult.ivyModuleDescriptorFile,
+					true);
+			resolver.commitPublishTransaction();
+		} catch (final IOException e) {
+			throw new IllegalStateException(e);
+		}
+
+
 	}
 
-
-
-	private void deliver(JakeVersionedModule jakeVersionedModule, JakeIvyPublication publication, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping, Date deliveryDate) throws ParseException, IOException {
+	private DeliveryResult deliver(JakeVersionedModule jakeVersionedModule, JakeIvyPublication publication, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping, Date deliveryDate) throws ParseException, IOException {
 		final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
 		final ModuleRevisionId moduleRevisionId = Translations.to(jakeVersionedModule);
+		final DefaultModuleDescriptor moduleDescriptor = Translations.toUnpublished(jakeVersionedModule, dependencies, defaultScope, defaultMapping);
 		final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
-		DefaultModuleDescriptor moduleDescriptor;
-		if (!cachedIvyFile.exists()) {
-			moduleDescriptor = Translations.toUnpublished(jakeVersionedModule, dependencies, defaultScope, defaultMapping);
-		} else {
-			moduleDescriptor = (DefaultModuleDescriptor) cacheManager.getResolvedModuleDescriptor(moduleRevisionId);
-		}
 		final String propsfileName = JakeUtilsString.substringBeforeLast(cachedIvyFile.getName(), ".") + ".properties";
 		final File propsFile = new File(cachedIvyFile.getParent(), propsfileName);
 		if (!propsFile.exists()) {
@@ -211,20 +214,22 @@ public final class JakeIvy {
 		}
 		deliverOptions.setPubdate(deliveryDate);
 		deliverOptions.setPubBranch(publication.branch);
+		final String ivyPattern = targetDir() + "/jake/[organisation]-[module]-[revision]-ivy.xml";
 		try {
-			this.ivy.deliver(Translations.to(jakeVersionedModule), jakeVersionedModule.version().name(), , deliverOptions);
+			this.ivy.getDeliverEngine().deliver(Translations.to(jakeVersionedModule), jakeVersionedModule.version().name(), ivyPattern, deliverOptions);
 		} catch (final IOException e) {
 			throw new IllegalStateException(e);
 		} catch (final ParseException e) {
 			throw new IllegalStateException(e);
 		}
+		final File publishedIvy = this.ivy.getSettings().resolveFile(IvyPatternHelper.substitute(ivyPattern,
+				moduleDescriptor.getResolvedModuleRevisionId()));
+		return new DeliveryResult(publishedIvy, moduleDescriptor);
 	}
 
-	private JakeRepo.IvyRepository getFirstIvyRepo() {
-		for (final Depe repository : this.ivy.getSettings().getResolvers())
+	private String targetDir() {
+		return System.getProperty("java.io.tmpdir");
 	}
-
-
 
 	private static String logLevel() {
 		if (JakeOptions.isSilent()) {
@@ -284,6 +289,26 @@ public final class JakeIvy {
 		public String toString() {
 			return this.map.toString();
 		}
+
+	}
+
+	private static Artifact createIvyModuleDescriptorArtifact(ModuleDescriptor descriptor) {
+		return MDArtifact.newIvyArtifact(descriptor);
+	}
+
+	private static class DeliveryResult {
+
+		public final File ivyModuleDescriptorFile;
+
+		public final ModuleDescriptor moduleDescriptor;
+
+		public DeliveryResult(File ivyModuleDescriptorFile,
+				ModuleDescriptor moduleDescriptor) {
+			super();
+			this.ivyModuleDescriptorFile = ivyModuleDescriptorFile;
+			this.moduleDescriptor = moduleDescriptor;
+		}
+
 
 	}
 

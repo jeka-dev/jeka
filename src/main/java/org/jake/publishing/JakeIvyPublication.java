@@ -7,15 +7,16 @@ import java.util.Set;
 
 import org.jake.depmanagement.JakeScope;
 import org.jake.publishing.JakeIvyPublication.Artifact;
+import org.jake.utils.JakeUtilsIterable;
 
 public class JakeIvyPublication implements Iterable<Artifact> {
 
-	public static JakeIvyPublication of(JakeScope jakeScope, File file, String type) {
-		return new JakeIvyPublication(new HashSet<JakeIvyPublication.Artifact>(), null, null).and(jakeScope, file, type);
+	public static JakeIvyPublication of(File file, String type, JakeScope ...jakeScopes) {
+		return new JakeIvyPublication(new HashSet<JakeIvyPublication.Artifact>(), null, null).and(file, type, jakeScopes);
 	}
 
-	public static JakeIvyPublication of(JakeScope jakeScope, File file) {
-		return new JakeIvyPublication(new HashSet<JakeIvyPublication.Artifact>(), null, null).and(jakeScope, file);
+	public static JakeIvyPublication of(File file, JakeScope...jakeScopes) {
+		return new JakeIvyPublication(new HashSet<JakeIvyPublication.Artifact>(), null, null).and(file, jakeScopes);
 	}
 
 	private final Set<Artifact> artifacts;
@@ -31,14 +32,14 @@ public class JakeIvyPublication implements Iterable<Artifact> {
 		this.branch = branch;
 	}
 
-	public JakeIvyPublication and(JakeScope jakeScope, File file, String type) {
+	public JakeIvyPublication and(File file, String type, JakeScope...jakeScopes) {
 		final Set<Artifact> artifacts = new HashSet<JakeIvyPublication.Artifact>(this.artifacts);
-		artifacts.add(new Artifact(file, type, jakeScope));
+		artifacts.add(new Artifact(file, type, JakeUtilsIterable.setOf(jakeScopes)));
 		return new JakeIvyPublication(artifacts, this.status, this.branch);
 	}
 
-	public JakeIvyPublication and(JakeScope jakeScope, File file) {
-		return and(jakeScope, file, null);
+	public JakeIvyPublication and(File file, JakeScope... jakeScopes) {
+		return and(file, null, jakeScopes );
 	}
 
 	@Override
@@ -56,18 +57,18 @@ public class JakeIvyPublication implements Iterable<Artifact> {
 
 	public static class Artifact {
 
-		private Artifact(File file, String type, JakeScope jakeScope) {
+		private Artifact(File file, String type, Set<JakeScope> jakeScopes) {
 			super();
 			this.file = file;
 			this.type = type;
-			this.jakeScope = jakeScope;
+			this.jakeScopes = jakeScopes;
 		}
 
 		public final File file;
 
 		public final String type;
 
-		public final JakeScope jakeScope;
+		public final Set<JakeScope> jakeScopes;
 
 	}
 

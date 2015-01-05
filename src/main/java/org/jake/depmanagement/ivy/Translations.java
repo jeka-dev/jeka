@@ -4,8 +4,10 @@ import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.Configuration;
@@ -280,11 +282,18 @@ final class Translations {
 	public static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
 			JakeIvyPublication publication, Date publishDate) {
 		for (final JakeIvyPublication.Artifact artifact : publication) {
-			final JakeScope jakeScope = artifact.jakeScope;
-			if (!Arrays.asList(descriptor.getConfigurations()).contains(jakeScope.name())) {
-				descriptor.addConfiguration(new Configuration(jakeScope.name()));
+			for (final JakeScope jakeScope : artifact.jakeScopes) {
+				if (!Arrays.asList(descriptor.getConfigurations()).contains(jakeScope.name())) {
+					descriptor.addConfiguration(new Configuration(jakeScope.name()));
+				}
 			}
-			descriptor.addArtifact(artifact.jakeScope.name(), toPublishedArtifact(artifact, descriptor.getModuleRevisionId(), publishDate));
+			final Set<String> scopeNames = new HashSet<String>();
+			for(final JakeScope jakeScope : artifact.jakeScopes) {
+				scopeNames.add(jakeScope.name());
+			}
+			final String scopes = JakeUtilsString.join(scopeNames, ", ");
+			final Artifact ivyArtifact = toPublishedArtifact(artifact, descriptor.getModuleRevisionId(), publishDate);
+			descriptor.addArtifact(scopes, ivyArtifact);
 		}
 	}
 
@@ -299,4 +308,6 @@ final class Translations {
 		final String type = artifact.type != null ? artifact.type : extension;
 		return new DefaultArtifact(moduleId, date, artifactName, type, extension);
 	}
+
+
 }

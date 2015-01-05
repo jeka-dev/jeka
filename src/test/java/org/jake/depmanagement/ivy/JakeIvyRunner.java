@@ -90,8 +90,10 @@ public class JakeIvyRunner {
 	public static void testPublish() {
 		final JakeIvy jakeIvy = JakeIvy.of(ivyRepo());
 		final JakeVersionedModule versionedModule = JakeVersionedModule.of(JakeModuleId.of("mygroup:mymodule"), JakeVersion.of("myVersion"));
-		final JakeIvyPublication ivyPublication = JakeIvyPublication.of(COMPILE, sampleJarfile());
-		jakeIvy.publish(versionedModule, ivyPublication, JakeDependencies.builder().build(), null, null, new Date());
+		final JakeIvyPublication ivyPublication = JakeIvyPublication.of(sampleJarfile(), COMPILE, JakeBuildJava.TEST);
+		final JakeDependencies deps = JakeDependencies.builder()
+				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
+		jakeIvy.publish(versionedModule, ivyPublication,deps, null, null, new Date());
 
 	}
 
@@ -105,8 +107,6 @@ public class JakeIvyRunner {
 	}
 
 	private static JakeRepo.IvyRepository ivyRepo() {
-		final File file = sampleJarfile();
-		final JakeIvyPublication publication = JakeIvyPublication.of(JakeScope.of("toto"), file);
 		final File baseDir = new File(JakeUtilsFile.workingDir(), "testIvyRepo");
 		baseDir.mkdir();
 		return JakeRepo.ivy(baseDir);
