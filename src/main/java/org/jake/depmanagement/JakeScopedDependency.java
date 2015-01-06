@@ -80,6 +80,10 @@ public final class JakeScopedDependency {
 		return this.scopeMapping;
 	}
 
+	public JakeScopedDependency dependency(JakeDependency dependency) {
+		return new JakeScopedDependency(dependency, scopes, scopeMapping);
+	}
+
 	@Override
 	public String toString() {
 		return dependency.toString() + "[" + (scopeMapping != null ? scopeMapping.toString() : "")

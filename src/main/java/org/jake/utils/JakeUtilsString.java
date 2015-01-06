@@ -170,6 +170,15 @@ public final class JakeUtilsString {
 		return false;
 	}
 
+	public static boolean startsWithAny(String stringToMatch, String...stringToCheckEquals) {
+		for (final String candidate : stringToCheckEquals) {
+			if (stringToMatch.startsWith(candidate)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static String toString(Iterable<?> it, String separator) {
 		final StringBuilder builder = new StringBuilder();
 		final Iterator<?> iterator = it.iterator();

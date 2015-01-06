@@ -58,6 +58,11 @@ public class JakeExternalModule extends JakeDependency {
 		return new JakeExternalModule(module, versionRange, classifier, transitive);
 	}
 
+	public JakeExternalModule resolvedTo(JakeVersion version) {
+		return new JakeExternalModule(module, JakeVersionRange.of(version.name()), classifier, transitive);
+	}
+
+
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName() + "=" + module + ":" + versionRange;

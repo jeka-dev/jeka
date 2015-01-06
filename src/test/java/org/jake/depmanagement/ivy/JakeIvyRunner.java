@@ -39,7 +39,7 @@ public class JakeIvyRunner {
 	public static void spring() {
 		final JakeRepos repos = JakeRepos.maven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured").andMavenCentral();
 		final JakeDependencies deps = JakeDependencies.builder()
-				.on("org.springframework", "spring-jdbc", "3.0.0.RELEASE")
+				.on("org.springframework", "spring-jdbc", "3.0.+")
 				.mapScope(COMPILE).to("compile", "default")
 				.and(PROVIDED).to("provided")
 				.build();
@@ -47,6 +47,7 @@ public class JakeIvyRunner {
 		for (final JakeArtifact artifact : artifacts) {
 			System.out.println(artifact);
 		}
+		System.out.println(deps.resolvedWithArtifacts(artifacts));
 	}
 
 	public static void jogl() {
@@ -92,7 +93,7 @@ public class JakeIvyRunner {
 		final JakeVersionedModule versionedModule = JakeVersionedModule.of(JakeModuleId.of("mygroup:mymodule"), JakeVersion.of("myVersion"));
 		final JakeIvyPublication ivyPublication = JakeIvyPublication.of(sampleJarfile(), COMPILE, JakeBuildJava.TEST);
 		final JakeDependencies deps = JakeDependencies.builder()
-				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
+				.on("org.apache.cocoon.all:cocoon-all:3.0.+").scope(COMPILE).build();
 		jakeIvy.publish(versionedModule, ivyPublication,deps, null, null, new Date());
 
 	}

@@ -3,16 +3,23 @@ package org.jake.depmanagement;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jake.depmanagement.JakeDependency.JakeFilesDependency;
 import org.jake.depmanagement.JakeScopedDependency.ScopeType;
 import org.jake.utils.JakeUtilsIterable;
 
+/**
+ * A set of {@link JakeScopedDependency} generally standing for the entire dependencies of a project/module.
+ * 
+ * @author Jerome Angibaud.
+ */
 public class JakeDependencies implements Iterable<JakeScopedDependency>{
 
 	private final List<JakeScopedDependency> dependencies;
@@ -22,10 +29,16 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 		this.dependencies = Collections.unmodifiableList(new LinkedList<JakeScopedDependency>(dependencies));
 	}
 
+	/**
+	 * Returns <code>true</code> if this object contains no dependency.
+	 */
 	public boolean isEmpty() {
 		return dependencies.isEmpty();
 	}
 
+	/**
+	 * Returns a clone of this object minus the dependencies on the given {@link JakeModuleId}.
+	 */
 	public JakeDependencies without(JakeModuleId jakeModuleId) {
 		final List<JakeScopedDependency> result = new LinkedList<JakeScopedDependency>(dependencies);
 		for (final Iterator<JakeScopedDependency> it = result.iterator(); it.hasNext();) {
@@ -40,6 +53,9 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 		return new JakeDependencies(result);
 	}
 
+	/**
+	 * Returns a clone of this object plus the specified {@link JakeScopedDependency}s.
+	 */
 	public JakeDependencies and(Iterable<JakeScopedDependency> others) {
 		if (!others.iterator().hasNext()) {
 			return this;
@@ -47,6 +63,16 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 		return JakeDependencies.builder().on(this).on(others).build();
 	}
 
+	/**
+	 * Returns a clone of this object plus the specified {@link JakeScopedDependency}s.
+	 */
+	public JakeDependencies and(JakeScopedDependency... others) {
+		return and(Arrays.asList(others));
+	}
+
+	/**
+	 * Returns <code>true</code> if this object contains dependencies whose are {@link JakeExternalModule}.
+	 */
 	public boolean containsExternalModule() {
 		for (final JakeScopedDependency scopedDependency : dependencies) {
 			if (scopedDependency.dependency() instanceof JakeExternalModule) {
@@ -66,6 +92,9 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 		return dependencies.toString();
 	}
 
+	/**
+	 * Returns the set of {@link JakeDependency} involved for the specified {@link JakeScope}.
+	 */
 	public Set<JakeDependency> dependenciesDeclaredWith(JakeScope scope) {
 		final Set<JakeDependency> dependencies = new HashSet<JakeDependency>();
 		for (final JakeScopedDependency scopedDependency : this) {
@@ -76,6 +105,10 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 		return dependencies;
 	}
 
+	/**
+	 * Returns the {@link JakeScopedDependency} declared for the specified {@link JakeModuleId}.
+	 * Returns <code>null</code> if no dependency on this module exists in this object.
+	 */
 	public JakeScopedDependency get(JakeModuleId moduleId) {
 		for (final JakeScopedDependency scopedDependency : this) {
 			final JakeDependency dependency = scopedDependency.dependency();
@@ -89,6 +122,9 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 		return null;
 	}
 
+	/**
+	 * Returns the set of scopes involved in these dependencies.
+	 */
 	public Set<JakeScope> moduleScopes() {
 		final Set<JakeScope> result = new HashSet<JakeScope>();
 		for (final JakeScopedDependency dep : this.dependencies) {
@@ -101,15 +137,70 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 		return Collections.unmodifiableSet(result);
 	}
 
-	public boolean hasSimpleScope() {
-		for (final JakeScopedDependency dep : this.dependencies) {
-			if (dep.scopeType() == ScopeType.SIMPLE) {
-				return true;
+	/**
+	 * Returns <code>true</code> if this object contains dependency on external module whose rely
+	 * on dynamic version.
+	 * If so, when resolving, dynamic versions are replaced by fixed resolved ones.
+	 */
+	public boolean hasDynamicVersions() {
+		for (final JakeScopedDependency scopedDependency : this) {
+			if (scopedDependency.dependency() instanceof JakeExternalModule) {
+				final JakeExternalModule externalModule = (JakeExternalModule) scopedDependency.dependency();
+				final JakeVersionRange versionRange = externalModule.versionRange();
+				if (!versionRange.isFixed()) {
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 
+	/**
+	 * Convenient method to resolve using {@link JakeArtifact}s instead of {@link JakeVersionedModule}.
+	 * 
+	 * @see #resolvedWith(Iterable);
+	 */
+	public JakeDependencies resolvedWithArtifacts(Iterable<JakeArtifact> artifacts) {
+		final List<JakeVersionedModule> list = new LinkedList<JakeVersionedModule>();
+		for (final JakeArtifact artifact : artifacts) {
+			list.add(artifact.versionedModule());
+		}
+		return resolvedWith(list);
+	}
+
+	/**
+	 * Creates a clone of these dependencies replacing the dynamic versions by the static ones specified
+	 * in the {@link JakeVersionedModule}s passed as argument. <br/>
+	 */
+	public JakeDependencies resolvedWith(Iterable<JakeVersionedModule> resolvedModules) {
+		JakeDependencies result = this;
+		final Map<JakeModuleId, JakeVersion> map = toModuleVersionMap(resolvedModules);
+		for (final JakeVersionedModule versionedModule : resolvedModules) {
+			final JakeModuleId moduleId = versionedModule.moduleId();
+			final JakeScopedDependency scopedDependency = this.get(moduleId);
+			if (scopedDependency == null) {
+				continue;
+			}
+			final JakeExternalModule externalModule = (JakeExternalModule) scopedDependency.dependency();
+			if (!externalModule.versionRange().isFixed()) {
+				final JakeVersion resolvedVersion = map.get(moduleId);
+				if (resolvedVersion != null) {
+					final JakeExternalModule resolvedModule = externalModule.resolvedTo(resolvedVersion);
+					final JakeScopedDependency resolvedScopedDep = scopedDependency.dependency(resolvedModule);
+					result = result.without(moduleId).and(resolvedScopedDep);
+				}
+			}
+		}
+		return result;
+	}
+
+	private static Map<JakeModuleId, JakeVersion> toModuleVersionMap(Iterable<JakeVersionedModule> resolvedModules) {
+		final Map<JakeModuleId, JakeVersion> result = new HashMap<JakeModuleId, JakeVersion>();
+		for (final JakeVersionedModule versionedModule : resolvedModules) {
+			result.put(versionedModule.moduleId(), versionedModule.version());
+		}
+		return result;
+	}
 
 
 	public static Builder builder() {
@@ -152,7 +243,7 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 
 
 
-		public ScopebleBuilder on(JakeDependency dependency) {
+		public ScopeableBuilder on(JakeDependency dependency) {
 			final JakeScopedDependency scopedDependency;
 			if (defaultScopes != null) {
 				scopedDependency = JakeScopedDependency.of(dependency, defaultScopes);
@@ -162,10 +253,10 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 				scopedDependency = JakeScopedDependency.of(dependency);
 			}
 			dependencies.add(scopedDependency);
-			if (this instanceof ScopebleBuilder) {
-				return (ScopebleBuilder) this;
+			if (this instanceof ScopeableBuilder) {
+				return (ScopeableBuilder) this;
 			}
-			return new ScopebleBuilder(dependencies);
+			return new ScopeableBuilder(dependencies);
 		}
 
 		public Builder on(JakeScopedDependency dependency) {
@@ -180,27 +271,27 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 			return on(JakeFilesDependency.of(files));
 		}
 
-		public ScopebleBuilder on(JakeModuleId module, JakeVersionRange version) {
+		public ScopeableBuilder on(JakeModuleId module, JakeVersionRange version) {
 			return on(module, version, true);
 		}
 
-		public ScopebleBuilder on(JakeModuleId module, JakeVersionRange version, boolean transitive) {
+		public ScopeableBuilder on(JakeModuleId module, JakeVersionRange version, boolean transitive) {
 			return on(JakeExternalModule.of(module, version).transitive(transitive));
 		}
 
-		public ScopebleBuilder on(String organisation, String name, String version) {
+		public ScopeableBuilder on(String organisation, String name, String version) {
 			return on(organisation, name, version, true);
 		}
 
-		public ScopebleBuilder on(String organisation, String name, String version, boolean transitive) {
+		public ScopeableBuilder on(String organisation, String name, String version, boolean transitive) {
 			return on(JakeExternalModule.of(organisation, name, version).transitive(transitive));
 		}
 
-		public ScopebleBuilder on(String description) {
+		public ScopeableBuilder on(String description) {
 			return on(description, true);
 		}
 
-		public ScopebleBuilder on(String description, boolean transitive) {
+		public ScopeableBuilder on(String description, boolean transitive) {
 			return on(JakeExternalModule.of(description).transitive(transitive));
 		}
 
@@ -218,9 +309,9 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 			return new JakeDependencies(dependencies);
 		}
 
-		public static class ScopebleBuilder extends Builder {
+		public static class ScopeableBuilder extends Builder {
 
-			private ScopebleBuilder(LinkedList<JakeScopedDependency> dependencies) {
+			private ScopeableBuilder(LinkedList<JakeScopedDependency> dependencies) {
 				super(dependencies);
 			}
 
