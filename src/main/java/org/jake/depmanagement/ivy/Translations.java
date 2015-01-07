@@ -49,7 +49,7 @@ final class Translations {
 
 	private Translations() {}
 
-	public static DefaultModuleDescriptor toUnpublished(JakeVersionedModule module, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping) {
+	public static DefaultModuleDescriptor toPublicationFreeModule(JakeVersionedModule module, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping) {
 		final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId
 				.newInstance(module.moduleId().group(), module.moduleId().name(), module.version().name());
 		final DefaultModuleDescriptor moduleDescriptor = new DefaultModuleDescriptor(thisModuleRevisionId, "integration", null);
@@ -131,7 +131,7 @@ final class Translations {
 	}
 
 
-	public static ModuleRevisionId to(JakeVersionedModule jakeVersionedModule) {
+	public static ModuleRevisionId from(JakeVersionedModule jakeVersionedModule) {
 		return new ModuleRevisionId(to(jakeVersionedModule.moduleId()), jakeVersionedModule.version().name());
 	}
 

@@ -34,11 +34,22 @@ public final class JakeVersionRange {
 	}
 
 	/**
+	 * Returns <code>true</code> if the definition stands for a dynamic version (as "1.4.+", "[1.0,2.0[", "3.0-SNAPSHOT", ...) or
+	 * <code>false</code> if it stands for a fixed one (as "1.4.0, "2.0.3-23654114", ...).
+	 */
+	public boolean isDynamic() {
+		if (definition.endsWith("-SNAPSHOT")) {
+			return true;
+		}
+		return this.isDynamicAndResovable();
+	}
+
+	/**
 	 * Returns <code>true</code> if the definition stands for a fixed version (as 1.4.2) or
 	 * <code>false</code> if it stands for a dynamic one (as 1.4.+, 3.0-SNAPSHOT, [1.0, 2.0[, ...).
 	 */
-	public boolean isFixed() {
-		if (JakeUtilsString.endsWithAny(definition, "-SNAPSHOT", ".+", ")", "]", "[")) {
+	public boolean isDynamicAndResovable() {
+		if (JakeUtilsString.endsWithAny(definition, ".+", ")", "]", "[")) {
 			return false;
 		}
 		if (definition.startsWith("latest.")) {

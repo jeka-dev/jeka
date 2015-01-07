@@ -89,11 +89,11 @@ public class JakeIvyRunner {
 	}
 
 	public static void testPublish() {
-		final JakeIvy jakeIvy = JakeIvy.of(ivyRepo());
+		final JakeIvy jakeIvy = JakeIvy.of(JakeRepos.of(ivyRepo()).andMaven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured"));
 		final JakeVersionedModule versionedModule = JakeVersionedModule.of(JakeModuleId.of("mygroup:mymodule"), JakeVersion.of("myVersion"));
 		final JakeIvyPublication ivyPublication = JakeIvyPublication.of(sampleJarfile(), COMPILE, JakeBuildJava.TEST);
 		final JakeDependencies deps = JakeDependencies.builder()
-				.on("org.apache.cocoon.all:cocoon-all:3.0.+").scope(COMPILE).build();
+				.on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();
 		jakeIvy.publish(versionedModule, ivyPublication,deps, null, null, new Date());
 
 	}

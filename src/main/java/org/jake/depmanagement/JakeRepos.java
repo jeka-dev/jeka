@@ -20,7 +20,14 @@ public final class JakeRepos implements Iterable<JakeRepo> {
 			list.add(JakeRepo.maven(url));
 		}
 		return new JakeRepos(list);
+	}
 
+	public static JakeRepos ivy(String ... urls) {
+		final List<JakeRepo> list = new LinkedList<JakeRepo>();
+		for (final String url : urls) {
+			list.add(JakeRepo.ivy(url));
+		}
+		return new JakeRepos(list);
 	}
 
 	public static JakeRepos mavenCentral() {

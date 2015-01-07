@@ -139,15 +139,34 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 
 	/**
 	 * Returns <code>true</code> if this object contains dependency on external module whose rely
-	 * on dynamic version.
-	 * If so, when resolving, dynamic versions are replaced by fixed resolved ones.
+	 * on dynamic version. It can be either dynamic version has defined by Ivy (as "1.3.+", "[1.0, 2.0[" ,...)
+	 * or snapshot version as defined in Maven (as "1.0-SNAPSHOT).
 	 */
 	public boolean hasDynamicVersions() {
 		for (final JakeScopedDependency scopedDependency : this) {
 			if (scopedDependency.dependency() instanceof JakeExternalModule) {
 				final JakeExternalModule externalModule = (JakeExternalModule) scopedDependency.dependency();
 				final JakeVersionRange versionRange = externalModule.versionRange();
-				if (!versionRange.isFixed()) {
+				if (versionRange.isDynamic()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns <code>true</code> if this object contains dependency on external module whose rely
+	 * on dynamic version that are resolvable (Maven Snapshot versions are dynamic but not resolvable).
+	 * It only stands for dynamic versions has defined by Ivy (as "1.3.+", "[1.0, 2.0[" ,...).
+	 * If so, when resolving, dynamic versions are replaced by fixed resolved ones.
+	 */
+	public boolean hasDynamicAndResovableVersions() {
+		for (final JakeScopedDependency scopedDependency : this) {
+			if (scopedDependency.dependency() instanceof JakeExternalModule) {
+				final JakeExternalModule externalModule = (JakeExternalModule) scopedDependency.dependency();
+				final JakeVersionRange versionRange = externalModule.versionRange();
+				if (!versionRange.isDynamicAndResovable()) {
 					return true;
 				}
 			}
@@ -182,7 +201,7 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 				continue;
 			}
 			final JakeExternalModule externalModule = (JakeExternalModule) scopedDependency.dependency();
-			if (!externalModule.versionRange().isFixed()) {
+			if (externalModule.versionRange().isDynamicAndResovable()) {
 				final JakeVersion resolvedVersion = map.get(moduleId);
 				if (resolvedVersion != null) {
 					final JakeExternalModule resolvedModule = externalModule.resolvedTo(resolvedVersion);

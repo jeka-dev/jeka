@@ -137,6 +137,12 @@ public class JakeLog {
 		errorWriter.println(message);
 	}
 
+	public static void error(Iterable<String> lines) {
+		for (final String line : lines) {
+			errorWriter.println(line);
+		}
+	}
+
 	public static void nextLine() {
 		infoWriter.println();
 	}
