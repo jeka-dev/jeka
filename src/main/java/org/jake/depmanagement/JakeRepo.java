@@ -7,12 +7,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIterable;
 
 public abstract class JakeRepo {
 
 	public static MavenRepository maven(String url) {
 		return new MavenRepository(toUrl(url));
+	}
+
+	public static MavenRepository maven(File file) {
+		return new MavenRepository(JakeUtilsFile.toUrl(file));
 	}
 
 	public static JakeRepo mavenCentral() {

@@ -18,6 +18,7 @@ import org.apache.ivy.core.module.id.ModuleId;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.repository.file.FileRepository;
+import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.FileSystemResolver;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
@@ -39,6 +40,8 @@ import org.jake.publishing.JakeIvyPublication;
 import org.jake.utils.JakeUtilsString;
 
 final class Translations {
+
+	private static final String RESOLVER_NAME = "MAIN";
 
 	/**
 	 * Stands for the default configuration for publishing in ivy.
@@ -153,7 +156,7 @@ final class Translations {
 			final FileRepository fileRepo = new FileRepository(new File(repo.url().getPath()));
 			final FileSystemResolver result = new FileSystemResolver();
 			result.setRepository(fileRepo);
-			result.addArtifactPattern(MAVEN_ARTIFACT_PATTERN);
+			result.addArtifactPattern(completePattern(repo.url().getPath(), MAVEN_ARTIFACT_PATTERN));
 			result.setM2compatible(true);
 			return result;
 		}
@@ -178,18 +181,23 @@ final class Translations {
 	}
 
 	public static void populateIvySettingsWithRepo(IvySettings ivySettings, JakeRepos repos) {
-		final boolean ivyHasYetDefaultResolver = ivySettings.getDefaultResolver() != null;
-		boolean first = true;
+		final DependencyResolver resolver = toChainResolver(repos);
+		resolver.setName(RESOLVER_NAME);
+		ivySettings.addResolver(resolver);
+		ivySettings.setDefaultResolver(RESOLVER_NAME);
+	}
+
+	private static ChainResolver toChainResolver(JakeRepos repos) {
+		final ChainResolver chainResolver = new ChainResolver();
 		for(final JakeRepo jakeRepo : repos) {
 			final DependencyResolver resolver = to(jakeRepo);
 			resolver.setName(jakeRepo.toString());
-			ivySettings.addResolver(resolver);
-			if (first && !ivyHasYetDefaultResolver) {
-				ivySettings.setDefaultResolver(resolver.getName());
-			}
-			first = false;
+			chainResolver.add(resolver);
 		}
+		return chainResolver;
 	}
+
+
 
 	public static JakeArtifact to(Artifact artifact, File localFile) {
 		final JakeModuleId moduleId = JakeModuleId.of(artifact.getModuleRevisionId().getOrganisation(),

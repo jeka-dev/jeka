@@ -204,18 +204,13 @@ public final class JakeIvy {
 						+ JakeUtilsString.join(report.getAllProblemMessages(), ", "));
 			}
 		}
-		final String propsfileName = JakeUtilsString.substringBeforeLast(cachedIvyFile.getName(), ".") + ".properties";
-		final File propsFile = new File(cachedIvyFile.getParent(), propsfileName);
-		ModuleDescriptor descriptor;
 		try {
-			descriptor = cacheManager.getResolvedModuleDescriptor(moduleRevisionId);
+			cacheManager.getResolvedModuleDescriptor(moduleRevisionId);
 		} catch (final ParseException e) {
 			throw new IllegalStateException(e);
 		} catch (final IOException e) {
 			throw new IllegalStateException(e);
 		}
-
-		System.out.println(descriptor);
 		return dependencies;
 	}
 

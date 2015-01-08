@@ -33,7 +33,7 @@ public class JakeIvyRunner {
 		//spring();
 		//jogl();
 		//joglWithSource();
-		testPublish();
+		testPublishMaven();
 	}
 
 	public static void spring() {
@@ -95,8 +95,17 @@ public class JakeIvyRunner {
 		final JakeDependencies deps = JakeDependencies.builder()
 				.on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();
 		jakeIvy.publish(versionedModule, ivyPublication,deps, null, null, new Date());
-
 	}
+
+	public static void testPublishMaven() {
+		final JakeIvy jakeIvy = JakeIvy.of(JakeRepos.of(mavenRepo()).andMaven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured"));
+		final JakeVersionedModule versionedModule = JakeVersionedModule.of(JakeModuleId.of("mygroup:mymodule"), JakeVersion.of("myVersion"));
+		final JakeIvyPublication ivyPublication = JakeIvyPublication.of(sampleJarfile(), COMPILE, JakeBuildJava.TEST);
+		final JakeDependencies deps = JakeDependencies.builder()
+				.on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();
+		jakeIvy.publish(versionedModule, ivyPublication,deps, null, null, new Date());
+	}
+
 
 	private static File sampleJarfile() {
 		final URL url = JakeIvyRunner.class.getResource("myArtifactSample.jar");
@@ -112,5 +121,12 @@ public class JakeIvyRunner {
 		baseDir.mkdir();
 		return JakeRepo.ivy(baseDir);
 	}
+
+	private static JakeRepo mavenRepo() {
+		final File baseDir = new File(JakeUtilsFile.workingDir(), "build/output/mavenRepo");
+		baseDir.mkdir();
+		return JakeRepo.maven(baseDir);
+	}
+
 
 }
