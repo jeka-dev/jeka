@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.Configuration;
@@ -37,11 +38,15 @@ import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionRange;
 import org.jake.depmanagement.JakeVersionedModule;
 import org.jake.publishing.JakeIvyPublication;
+import org.jake.publishing.JakeMavenPublication;
+import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsString;
 
 final class Translations {
 
 	private static final String RESOLVER_NAME = "MAIN";
+
+	private static final String CLASIFIER_FQN = "http://ant.apache.org/ivy/extra:classifier";
 
 	/**
 	 * Stands for the default configuration for publishing in ivy.
@@ -300,6 +305,16 @@ final class Translations {
 		}
 	}
 
+	public static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
+			JakeMavenPublication publication, Date publishDate) {
+		for (final JakeMavenPublication.Artifact artifact : publication) {
+			final Artifact mavenArtifact = toPublishedArtifact(artifact, descriptor.getModuleRevisionId(), publishDate);
+			descriptor.addArtifact("default", mavenArtifact);
+		}
+	}
+
+
+
 	public static Artifact toPublishedArtifact(JakeIvyPublication.Artifact artifact, ModuleRevisionId moduleId, Date date) {
 		String artifactName = artifact.file.getName();
 		String extension = "";
@@ -311,6 +326,14 @@ final class Translations {
 		final String type = artifact.type != null ? artifact.type : extension;
 		return new DefaultArtifact(moduleId, date, artifactName, type, extension);
 	}
+
+	private static Artifact toPublishedArtifact(JakeMavenPublication.Artifact artifact, ModuleRevisionId moduleId, Date date) {
+		final String artifactName = artifact.name();
+		final String type = artifact.extension();
+		final Map<String, String> extraMap = JakeUtilsIterable.mapOf(CLASIFIER_FQN, artifact.classifier());
+		return new DefaultArtifact(moduleId, date, artifactName, type, artifact.extension(), extraMap);
+	}
+
 
 
 }

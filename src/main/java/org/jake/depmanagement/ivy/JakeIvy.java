@@ -40,6 +40,7 @@ import org.jake.depmanagement.JakeScopeMapping;
 import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionedModule;
 import org.jake.publishing.JakeIvyPublication;
+import org.jake.publishing.JakeMavenPublication;
 import org.jake.utils.JakeUtilsString;
 
 public final class JakeIvy {
@@ -158,25 +159,23 @@ public final class JakeIvy {
 	 * @param deliveryDate The delivery date.
 	 */
 	public void publish(JakeVersionedModule versionedModule, JakeIvyPublication publication, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping, Date deliveryDate) {
-		JakeDependencies publishedDependencies;
-		if (dependencies.hasDynamicAndResovableVersions()) {
-			publishedDependencies = resolveDependencies(versionedModule, dependencies);
-		} else {
-			publishedDependencies = dependencies;
-		}
-		final ModuleDescriptor moduleDescriptor;
-		try {
-			moduleDescriptor = createModuleDescriptor(versionedModule, publication, publishedDependencies, defaultScope, defaultMapping, deliveryDate);
-		} catch (final ParseException e) {
-			throw new IllegalStateException(e);
-		} catch (final IOException e) {
-			throw new IllegalStateException(e);
-		}
+		final JakeDependencies publishedDependencies = resolveDependencies(versionedModule, dependencies);
+		final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication, publishedDependencies, defaultScope, defaultMapping, deliveryDate);
 		publishArtifacts(publication, deliveryDate, moduleDescriptor);
 	}
 
+	public void publish(JakeVersionedModule versionedModule, JakeMavenPublication publication, JakeDependencies dependencies, Date deliveryDate) {
+		final JakeDependencies publishedDependencies = resolveDependencies(versionedModule, dependencies);
+		final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication, publishedDependencies, null, null, deliveryDate);
+	}
+
+
+
 	@SuppressWarnings("unchecked")
 	private JakeDependencies resolveDependencies(JakeVersionedModule module, JakeDependencies dependencies) {
+		if (!dependencies.hasDynamicAndResovableVersions()) {
+			return dependencies;
+		}
 		final ModuleRevisionId moduleRevisionId = Translations.from(module);
 		final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
 		final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
@@ -246,25 +245,36 @@ public final class JakeIvy {
 
 	}
 
-	private ModuleDescriptor createModuleDescriptor(JakeVersionedModule jakeVersionedModule, JakeIvyPublication publication, JakeDependencies resolvedDependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping, Date deliveryDate) throws ParseException, IOException {
+	private ModuleDescriptor createModuleDescriptor(JakeVersionedModule jakeVersionedModule, JakeIvyPublication publication, JakeDependencies resolvedDependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping, Date deliveryDate) {
 		final ModuleRevisionId moduleRevisionId = Translations.from(jakeVersionedModule);
 		final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
 		final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
 		final String propsfileName = JakeUtilsString.substringBeforeLast(cachedIvyFile.getName(), ".") + ".properties";
 		final File propsFile = new File(cachedIvyFile.getParent(), propsfileName);
 		if (!propsFile.exists()) {
-			propsFile.createNewFile();
+			try {
+				propsFile.createNewFile();
+			} catch (final IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 		final DefaultModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(jakeVersionedModule, resolvedDependencies, defaultScope, defaultMapping);
 		Translations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
-		cacheManager.saveResolvedModuleDescriptor(moduleDescriptor);
+		try {
+			cacheManager.saveResolvedModuleDescriptor(moduleDescriptor);
+		} catch (final ParseException e) {
+			throw new IllegalStateException(e);
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
 
 		final DeliverOptions deliverOptions = new DeliverOptions();
 		if (publication.status != null) {
 			deliverOptions.setStatus(publication.status.name());
 		}
-		deliverOptions.setPubdate(deliveryDate);
 		deliverOptions.setPubBranch(publication.branch);
+		deliverOptions.setPubdate(deliveryDate);
+
 		try {
 			this.ivy.getDeliverEngine().deliver(Translations.from(jakeVersionedModule), jakeVersionedModule.version().name(), ivyPatternForIvyFiles(), deliverOptions);
 		} catch (final IOException e) {

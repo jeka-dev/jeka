@@ -4,6 +4,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -51,6 +52,18 @@ public class JakeUtilsIterable {
 		final HashSet<T> result = new HashSet<T>();
 		for (final T item : items) {
 			result.add(item);
+		}
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T, U> Map<T, U> mapOf(T key, U value, Object ...others) {
+		final Map<T, U> result = new HashMap<T, U>();
+		result.put(key, value);
+		for (int i = 0; i<others.length; i = i + 2) {
+			final T otherKey = (T) others[i];
+			final U otherValue = (U) others[i+1];
+			result.put(otherKey, otherValue);
 		}
 		return result;
 	}
