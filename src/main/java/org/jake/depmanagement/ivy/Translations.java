@@ -148,7 +148,7 @@ final class Translations {
 	}
 
 	// see http://www.draconianoverlord.com/2010/07/18/publishing-to-maven-repos-with-ivy.html
-	private static DependencyResolver to(JakeRepo repo) {
+	private static DependencyResolver toResolver(JakeRepo repo) {
 		if (repo instanceof JakeRepo.MavenRepository) {
 			if (!isFileSystem(repo.url())) {
 				final IBiblioResolver result = new IBiblioResolver();
@@ -195,7 +195,7 @@ final class Translations {
 	private static ChainResolver toChainResolver(JakeRepos repos) {
 		final ChainResolver chainResolver = new ChainResolver();
 		for(final JakeRepo jakeRepo : repos) {
-			final DependencyResolver resolver = to(jakeRepo);
+			final DependencyResolver resolver = toResolver(jakeRepo);
 			resolver.setName(jakeRepo.toString());
 			chainResolver.add(resolver);
 		}
@@ -327,7 +327,7 @@ final class Translations {
 		return new DefaultArtifact(moduleId, date, artifactName, type, extension);
 	}
 
-	private static Artifact toPublishedArtifact(JakeMavenPublication.Artifact artifact, ModuleRevisionId moduleId, Date date) {
+	public static Artifact toPublishedArtifact(JakeMavenPublication.Artifact artifact, ModuleRevisionId moduleId, Date date) {
 		final String artifactName = artifact.name();
 		final String type = artifact.extension();
 		final Map<String, String> extraMap = JakeUtilsIterable.mapOf(CLASIFIER_FQN, artifact.classifier());
