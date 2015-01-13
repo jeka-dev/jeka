@@ -16,6 +16,7 @@ import org.apache.ivy.core.cache.ResolutionCacheManager;
 import org.apache.ivy.core.deliver.DeliverOptions;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.Configuration;
+import org.apache.ivy.core.module.descriptor.DefaultArtifact;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.MDArtifact;
@@ -25,6 +26,8 @@ import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.settings.IvySettings;
+import org.apache.ivy.plugins.parser.m2.PomModuleDescriptorWriter;
+import org.apache.ivy.plugins.parser.m2.PomWriterOptions;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.jake.JakeException;
 import org.jake.JakeLog;
@@ -261,17 +264,11 @@ public final class JakeIvy {
 				throw new IllegalStateException(e);
 			}
 		}
-		//		final File publishedIvy = this.ivy.getSettings().resolveFile(IvyPatternHelper.substitute(ivyPatternForIvyFiles(),
-		//				moduleDescriptor.getResolvedModuleRevisionId()));
-		try {
-			//			resolver.publish(createIvyModuleDescriptorArtifact(moduleDescriptor), publishedIvy,
-			//					true);
-			resolver.commitPublishTransaction();
-		} catch (final IOException e) {
-			throw new IllegalStateException(e);
-		} finally {
-			//			publishedIvy.delete();
-		}
+		final File pomFile = new File(targetDir(), "pom.xml");
+		createPomFile(moduleDescriptor, pomFile);
+		final Artifact artifact = new DefaultArtifact();
+		resolver.publish(artifact, src, overwrite);
+		pomFile.delete();
 	}
 
 	private ModuleDescriptor createModuleDescriptor(JakeVersionedModule jakeVersionedModule, JakeIvyPublication publication, JakeDependencies resolvedDependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping, Date deliveryDate) {
@@ -291,10 +288,10 @@ public final class JakeIvy {
 		Translations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
 		try {
 			cacheManager.saveResolvedModuleDescriptor(moduleDescriptor);
-		} catch (final ParseException e) {
-			throw new IllegalStateException(e);
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
+		} catch (final Exception e) {
+			cachedIvyFile.delete();
+			propsFile.delete();
+			throw new RuntimeException("Error while creating cache file for " + moduleRevisionId + ". Deleting potentially corrupted cache files.", e);
 		}
 
 		final DeliverOptions deliverOptions = new DeliverOptions();
@@ -332,10 +329,11 @@ public final class JakeIvy {
 		Translations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
 		try {
 			cacheManager.saveResolvedModuleDescriptor(moduleDescriptor);
-		} catch (final ParseException e) {
-			throw new IllegalStateException(e);
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
+		} catch (final Exception e) {
+			cachedIvyFile.delete();
+			propsFile.delete();
+			throw new RuntimeException("Error while creating cache file for "
+					+ moduleRevisionId + ". Deleting potentially corrupted cache files.", e);
 		}
 		return moduleDescriptor;
 	}
@@ -411,6 +409,15 @@ public final class JakeIvy {
 
 	private static Artifact createIvyModuleDescriptorArtifact(ModuleDescriptor descriptor) {
 		return MDArtifact.newIvyArtifact(descriptor);
+	}
+
+	private static void createPomFile(ModuleDescriptor descriptor, File file) {
+		final PomWriterOptions options = new PomWriterOptions();
+		try {
+			PomModuleDescriptorWriter.write(descriptor, file, options);
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 

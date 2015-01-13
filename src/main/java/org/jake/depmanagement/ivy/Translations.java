@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,9 @@ final class Translations {
 
 	private static final String RESOLVER_NAME = "MAIN";
 
-	private static final String CLASIFIER_FQN = "http://ant.apache.org/ivy/extra:classifier";
+	private static final String EXTRA_NAMESPACE = "http://ant.apache.org/ivy/extra";
+
+	private static final String EXTRA_PREFIX = "e";
 
 	/**
 	 * Stands for the default configuration for publishing in ivy.
@@ -309,11 +312,14 @@ final class Translations {
 			JakeMavenPublication publication, Date publishDate) {
 		for (final JakeMavenPublication.Artifact artifact : publication) {
 			final Artifact mavenArtifact = toPublishedArtifact(artifact, descriptor.getModuleRevisionId(), publishDate);
-			descriptor.addArtifact("default", mavenArtifact);
+			final String conf = artifact.classifier() == null ? "default" : artifact.classifier();
+			if (descriptor.getConfiguration(conf) == null) {
+				descriptor.addConfiguration(new Configuration(conf));
+			}
+			descriptor.addArtifact(conf, mavenArtifact);
+			descriptor.addExtraAttributeNamespace(EXTRA_PREFIX, EXTRA_NAMESPACE);
 		}
 	}
-
-
 
 	public static Artifact toPublishedArtifact(JakeIvyPublication.Artifact artifact, ModuleRevisionId moduleId, Date date) {
 		String artifactName = artifact.file.getName();
@@ -330,10 +336,13 @@ final class Translations {
 	public static Artifact toPublishedArtifact(JakeMavenPublication.Artifact artifact, ModuleRevisionId moduleId, Date date) {
 		final String artifactName = artifact.name();
 		final String type = artifact.extension();
-		final Map<String, String> extraMap = JakeUtilsIterable.mapOf(CLASIFIER_FQN, artifact.classifier());
+		final Map<String, String> extraMap;
+		if (artifact.classifier() == null) {
+			extraMap = new HashMap<String, String>();
+		} else {
+			extraMap = JakeUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", artifact.classifier());
+		}
 		return new DefaultArtifact(moduleId, date, artifactName, type, artifact.extension(), extraMap);
 	}
-
-
 
 }

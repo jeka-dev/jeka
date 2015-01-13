@@ -27,8 +27,8 @@ public class JakeMavenPublication implements Iterable<JakeMavenPublication.Artif
 		final Artifact artifact = new Artifact(file, classifier);
 		final ArtifactKey key = new ArtifactKey(artifact);
 		if (artifacts.containsKey(key)) {
-			throw new IllegalArgumentException("Can't add artifact with extension/classifier equals to "
-					+ key + " as this combination is yet present in this publication " + this);
+			throw new IllegalArgumentException("Can't add artifact with extension/classifier equals to ["
+					+ key + "] as this combination is yet present in this publication " + this);
 		}
 		final Map<ArtifactKey, Artifact> map = new HashMap<ArtifactKey, Artifact>(artifacts);
 		map.put(key, artifact);
@@ -40,7 +40,10 @@ public class JakeMavenPublication implements Iterable<JakeMavenPublication.Artif
 		return artifacts.values().iterator();
 	}
 
-
+	@Override
+	public String toString() {
+		return artifacts.toString();
+	}
 
 	public static class Artifact {
 
@@ -71,6 +74,11 @@ public class JakeMavenPublication implements Iterable<JakeMavenPublication.Artif
 
 		public String classifier() {
 			return  classifier;
+		}
+
+		@Override
+		public String toString() {
+			return file.toString() + classifier == null ? "" : ":" + classifier;
 		}
 
 	}
@@ -123,6 +131,11 @@ public class JakeMavenPublication implements Iterable<JakeMavenPublication.Artif
 				return false;
 			}
 			return true;
+		}
+
+		@Override
+		public String toString() {
+			return this.name + "," + extension;
 		}
 
 

@@ -101,7 +101,7 @@ public class JakeIvyRunner {
 	public static void testPublishMaven() {
 		final JakeIvy jakeIvy = JakeIvy.of(JakeRepos.of(mavenRepo()).andMaven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured"));
 		final JakeVersionedModule versionedModule = JakeVersionedModule.of(JakeModuleId.of("mygroup2:mymodule2"), JakeVersion.of("myVersion"));
-		final JakeMavenPublication publication = JakeMavenPublication.of(sampleJarfile());
+		final JakeMavenPublication publication = JakeMavenPublication.of(sampleJarfile()).and(sampleJarSourcefile(), "source");
 		final JakeDependencies deps = JakeDependencies.builder()
 				.on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();
 		jakeIvy.publish(versionedModule, publication,deps, new Date());
@@ -110,6 +110,15 @@ public class JakeIvyRunner {
 
 	private static File sampleJarfile() {
 		final URL url = JakeIvyRunner.class.getResource("myArtifactSample.jar");
+		try {
+			return new File(url.toURI().getPath());
+		} catch (final URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static File sampleJarSourcefile() {
+		final URL url = JakeIvyRunner.class.getResource("myArtifactSample-source.jar");
 		try {
 			return new File(url.toURI().getPath());
 		} catch (final URISyntaxException e) {
