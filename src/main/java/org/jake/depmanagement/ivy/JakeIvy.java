@@ -16,7 +16,6 @@ import org.apache.ivy.core.cache.ResolutionCacheManager;
 import org.apache.ivy.core.deliver.DeliverOptions;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.Configuration;
-import org.apache.ivy.core.module.descriptor.DefaultArtifact;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.MDArtifact;
@@ -164,13 +163,13 @@ public final class JakeIvy {
 	public void publish(JakeVersionedModule versionedModule, JakeIvyPublication publication, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping, Date deliveryDate) {
 		final JakeDependencies publishedDependencies = resolveDependencies(versionedModule, dependencies);
 		final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication, publishedDependencies, defaultScope, defaultMapping, deliveryDate);
-		publishArtifacts(publication, deliveryDate, moduleDescriptor);
+		publishIvyArtifacts(publication, deliveryDate, moduleDescriptor);
 	}
 
 	public void publish(JakeVersionedModule versionedModule, JakeMavenPublication publication, JakeDependencies dependencies, Date deliveryDate) {
 		final JakeDependencies publishedDependencies = resolveDependencies(versionedModule, dependencies);
 		final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication, publishedDependencies,deliveryDate);
-		publishArtifacts(publication, deliveryDate, moduleDescriptor);
+		publishMavenArtifacts(publication, deliveryDate, moduleDescriptor);
 	}
 
 
@@ -217,7 +216,7 @@ public final class JakeIvy {
 		return dependencies;
 	}
 
-	private void publishArtifacts(JakeIvyPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
+	private void publishIvyArtifacts(JakeIvyPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
 		final DependencyResolver resolver = this.ivy.getSettings().getDefaultResolver();
 		final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
 		try {
@@ -234,26 +233,30 @@ public final class JakeIvy {
 				throw new IllegalStateException(e);
 			}
 		}
+
+		// Publish Ivy file
 		final File publishedIvy = this.ivy.getSettings().resolveFile(IvyPatternHelper.substitute(ivyPatternForIvyFiles(),
 				moduleDescriptor.getResolvedModuleRevisionId()));
 		try {
-			resolver.publish(createIvyModuleDescriptorArtifact(moduleDescriptor), publishedIvy,
-					true);
-			resolver.commitPublishTransaction();
+			final Artifact artifact = MDArtifact.newIvyArtifact(moduleDescriptor);
+			resolver.publish(artifact, publishedIvy, true);
 		} catch (final IOException e) {
-			throw new IllegalStateException(e);
+			throw new RuntimeException(e);
+		}
+		try {
+			commitOrAbortPublication(resolver);
 		} finally {
 			publishedIvy.delete();
 		}
 	}
 
-	private void publishArtifacts(JakeMavenPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
+	private void publishMavenArtifacts(JakeMavenPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
 		final DependencyResolver resolver = this.ivy.getSettings().getDefaultResolver();
 		final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
 		try {
 			resolver.beginPublishTransaction(ivyModuleRevisionId, true);
 		} catch (final IOException e) {
-			throw new IllegalStateException(e);
+			throw new RuntimeException(e);
 		}
 
 		for (final JakeMavenPublication.Artifact artifact : publication) {
@@ -261,31 +264,35 @@ public final class JakeIvy {
 			try {
 				resolver.publish(mavenArtifact, artifact.file(), true);
 			} catch (final IOException e) {
-				throw new IllegalStateException(e);
+				throw new RuntimeException(e);
 			}
 		}
-		final File pomFile = new File(targetDir(), "pom.xml");
-		createPomFile(moduleDescriptor, pomFile);
-		final Artifact artifact = new DefaultArtifact();
-		resolver.publish(artifact, src, overwrite);
-		pomFile.delete();
+
+		// Create ivy file
+		final File ivyXml = this.ivy.getSettings().resolveFile(IvyPatternHelper.substitute(ivyPatternForIvyFiles(),
+				moduleDescriptor.getResolvedModuleRevisionId()));
+		try {
+			final Artifact artifact = MDArtifact.newIvyArtifact(moduleDescriptor);
+			resolver.publish(artifact, pomFile,	true);
+		} catch (final IOException e) {
+			throw new IllegalStateException(e);
+		}
+		try {
+			commitOrAbortPublication(resolver);
+		} finally {
+			pomFile.delete();
+		}
 	}
 
 	private ModuleDescriptor createModuleDescriptor(JakeVersionedModule jakeVersionedModule, JakeIvyPublication publication, JakeDependencies resolvedDependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping, Date deliveryDate) {
 		final ModuleRevisionId moduleRevisionId = Translations.from(jakeVersionedModule);
 		final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
 		final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
-		final String propsfileName = JakeUtilsString.substringBeforeLast(cachedIvyFile.getName(), ".") + ".properties";
-		final File propsFile = new File(cachedIvyFile.getParent(), propsfileName);
-		if (!propsFile.exists()) {
-			try {
-				propsFile.createNewFile();
-			} catch (final IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
+		final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
+
 		final DefaultModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(jakeVersionedModule, resolvedDependencies, defaultScope, defaultMapping);
 		Translations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
+
 		try {
 			cacheManager.saveResolvedModuleDescriptor(moduleDescriptor);
 		} catch (final Exception e) {
@@ -302,11 +309,9 @@ public final class JakeIvy {
 		deliverOptions.setPubdate(deliveryDate);
 
 		try {
-			this.ivy.getDeliverEngine().deliver(Translations.from(jakeVersionedModule), jakeVersionedModule.version().name(), ivyPatternForIvyFiles(), deliverOptions);
-		} catch (final IOException e) {
-			throw new IllegalStateException(e);
-		} catch (final ParseException e) {
-			throw new IllegalStateException(e);
+			this.ivy.getDeliverEngine().deliver(moduleRevisionId, moduleRevisionId.getRevision(), ivyPatternForIvyFiles(), deliverOptions);
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
 		}
 
 		return moduleDescriptor;
@@ -316,17 +321,11 @@ public final class JakeIvy {
 		final ModuleRevisionId moduleRevisionId = Translations.from(jakeVersionedModule);
 		final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
 		final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
-		final String propsfileName = JakeUtilsString.substringBeforeLast(cachedIvyFile.getName(), ".") + ".properties";
-		final File propsFile = new File(cachedIvyFile.getParent(), propsfileName);
-		if (!propsFile.exists()) {
-			try {
-				propsFile.createNewFile();
-			} catch (final IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
+		final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
+
 		final DefaultModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(jakeVersionedModule, resolvedDependencies, null, null);
 		Translations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
+
 		try {
 			cacheManager.saveResolvedModuleDescriptor(moduleDescriptor);
 		} catch (final Exception e) {
@@ -407,9 +406,7 @@ public final class JakeIvy {
 
 	}
 
-	private static Artifact createIvyModuleDescriptorArtifact(ModuleDescriptor descriptor) {
-		return MDArtifact.newIvyArtifact(descriptor);
-	}
+
 
 	private static void createPomFile(ModuleDescriptor descriptor, File file) {
 		final PomWriterOptions options = new PomWriterOptions();
@@ -417,6 +414,18 @@ public final class JakeIvy {
 			PomModuleDescriptorWriter.write(descriptor, file, options);
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	private static void commitOrAbortPublication(DependencyResolver resolver) {
+		try {
+			resolver.commitPublishTransaction();
+		} catch (final Exception e) {
+			try {
+				resolver.abortPublishTransaction();
+			} catch (final IOException e1) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 

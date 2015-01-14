@@ -34,7 +34,8 @@ public class JakeIvyRunner {
 		//spring();
 		//jogl();
 		//joglWithSource();
-		testPublishMaven();
+		testPublishIvy();
+		//testPublishMaven();
 	}
 
 	public static void spring() {
@@ -89,7 +90,7 @@ public class JakeIvyRunner {
 		System.out.println(noExistArtifactSet);
 	}
 
-	public static void testPublish() {
+	public static void testPublishIvy() {
 		final JakeIvy jakeIvy = JakeIvy.of(JakeRepos.of(ivyRepo()).andMaven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured"));
 		final JakeVersionedModule versionedModule = JakeVersionedModule.of(JakeModuleId.of("mygroup:mymodule"), JakeVersion.of("myVersion"));
 		final JakeIvyPublication ivyPublication = JakeIvyPublication.of(sampleJarfile(), COMPILE, JakeBuildJava.TEST);
