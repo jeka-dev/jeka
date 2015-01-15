@@ -34,8 +34,8 @@ public class JakeIvyRunner {
 		//spring();
 		//jogl();
 		//joglWithSource();
-		testPublishIvy();
-		//testPublishMaven();
+		//testPublishIvy();
+		testPublishMaven();
 	}
 
 	public static void spring() {
