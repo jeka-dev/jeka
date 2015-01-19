@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.ivy.Ivy;
@@ -44,6 +45,7 @@ import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionedModule;
 import org.jake.publishing.JakeIvyPublication;
 import org.jake.publishing.JakeMavenPublication;
+import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsString;
 
 public final class JakeIvy {
@@ -162,8 +164,7 @@ public final class JakeIvy {
      * @param deliveryDate The delivery date.
      */
     public void publish(JakeVersionedModule versionedModule, JakeIvyPublication publication, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping, Date deliveryDate) {
-        final JakeDependencies publishedDependencies = resolveDependencies(versionedModule, dependencies);
-        final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication, publishedDependencies, defaultScope, defaultMapping, deliveryDate);
+        final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication, dependencies, defaultScope, defaultMapping, deliveryDate);
         publishIvyArtifacts(publication, deliveryDate, moduleDescriptor);
     }
 
@@ -183,7 +184,8 @@ public final class JakeIvy {
         final ModuleRevisionId moduleRevisionId = Translations.from(module);
         final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
         final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
-        if (!cachedIvyFile.exists()) {
+        final File cachedPropFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
+        if (!cachedIvyFile.exists() || !cachedPropFile.exists()) {
             JakeLog.start("Cached resolved ivy file not found for " + module + ". Performing a fresh resolve");
             final ModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(module, dependencies, null, null);
             final ResolveOptions resolveOptions = new ResolveOptions();
@@ -214,7 +216,9 @@ public final class JakeIvy {
         } catch (final IOException e) {
             throw new IllegalStateException(e);
         }
-        return dependencies;
+        final Properties props = JakeUtilsFile.readPropertyFile(cachedPropFile);
+        final Map<JakeModuleId, JakeVersion> resolvedVersions = Translations.toModuleVersionMap(props);
+        return dependencies.resolvedWith(resolvedVersions);
     }
 
     private void publishIvyArtifacts(JakeIvyPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
@@ -288,15 +292,15 @@ public final class JakeIvy {
         }
     }
 
-    private ModuleDescriptor createModuleDescriptor(JakeVersionedModule jakeVersionedModule, JakeIvyPublication publication, JakeDependencies resolvedDependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping, Date deliveryDate) {
+    private ModuleDescriptor createModuleDescriptor(JakeVersionedModule jakeVersionedModule, JakeIvyPublication publication, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping, Date deliveryDate) {
         final ModuleRevisionId moduleRevisionId = Translations.from(jakeVersionedModule);
+
+        // First : update the module ivy cache.
         final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
         final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
         final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
-
-        final DefaultModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(jakeVersionedModule, resolvedDependencies, defaultScope, defaultMapping);
+        final DefaultModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(jakeVersionedModule, dependencies, defaultScope, defaultMapping);
         Translations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
-
         try {
             cacheManager.saveResolvedModuleDescriptor(moduleDescriptor);
         } catch (final Exception e) {
@@ -305,13 +309,16 @@ public final class JakeIvy {
             throw new RuntimeException("Error while creating cache file for " + moduleRevisionId + ". Deleting potentially corrupted cache files.", e);
         }
 
+        // Second : update the module property cache (by invoking resolution)
+        this.resolveDependencies(jakeVersionedModule, dependencies);
+
+        // Third : invoke the deliver process in order to generate the module ivy file.
         final DeliverOptions deliverOptions = new DeliverOptions();
         if (publication.status != null) {
             deliverOptions.setStatus(publication.status.name());
         }
         deliverOptions.setPubBranch(publication.branch);
         deliverOptions.setPubdate(deliveryDate);
-
         try {
             this.ivy.getDeliverEngine().deliver(moduleRevisionId, moduleRevisionId.getRevision(), ivyPatternForIvyFiles(), deliverOptions);
         } catch (final Exception e) {
