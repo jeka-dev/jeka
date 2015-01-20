@@ -1,7 +1,7 @@
 package org.jake.depmanagement;
 
-import static org.jake.java.build.JakeBuildJava.COMPILE;
-import static org.jake.java.build.JakeBuildJava.RUNTIME;
+import static org.jake.java.build.JakeJavaBuild.COMPILE;
+import static org.jake.java.build.JakeJavaBuild.RUNTIME;
 
 import org.jake.utils.JakeUtilsIterable;
 import org.junit.Assert;

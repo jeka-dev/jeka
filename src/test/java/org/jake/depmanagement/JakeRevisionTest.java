@@ -8,7 +8,7 @@ public class JakeRevisionTest {
 
 	@Test
 	public void test() {
-		assertTrue(JakeVersion.of("1.0.1").isGreaterThan(JakeVersion.of("1.0.0")));
+		assertTrue(JakeVersion.named("1.0.1").isGreaterThan(JakeVersion.named("1.0.0")));
 	}
 
 }

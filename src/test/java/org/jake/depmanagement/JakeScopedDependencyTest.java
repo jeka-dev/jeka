@@ -1,16 +1,16 @@
 package org.jake.depmanagement;
 
-import static org.jake.java.build.JakeBuildJava.COMPILE;
-import static org.jake.java.build.JakeBuildJava.PROVIDED;
-import static org.jake.java.build.JakeBuildJava.RUNTIME;
-import static org.jake.java.build.JakeBuildJava.TEST;
+import static org.jake.java.build.JakeJavaBuild.COMPILE;
+import static org.jake.java.build.JakeJavaBuild.PROVIDED;
+import static org.jake.java.build.JakeJavaBuild.RUNTIME;
+import static org.jake.java.build.JakeJavaBuild.TEST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jake.java.build.JakeBuildJava;
+import org.jake.java.build.JakeJavaBuild;
 import org.junit.Test;
 
 public class JakeScopedDependencyTest {
@@ -29,7 +29,7 @@ public class JakeScopedDependencyTest {
 		assertTrue(!scopedDep.isInvolvedIn(TEST));
 
 		final Set<JakeScope> sampleSet = new HashSet<JakeScope>();
-		sampleSet.add(JakeBuildJava.PROVIDED);
+		sampleSet.add(JakeJavaBuild.PROVIDED);
 		assertEquals(sampleSet, scopedDep.scopeMapping().mappedScopes(RUNTIME));
 
 		boolean failed = false;

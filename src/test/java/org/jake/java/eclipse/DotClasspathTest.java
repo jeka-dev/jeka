@@ -10,7 +10,7 @@ import java.util.List;
 import org.jake.JakeDirSet;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeDependency.JakeFilesDependency;
-import org.jake.java.build.JakeBuildJava;
+import org.jake.java.build.JakeJavaBuild;
 import org.junit.Test;
 
 public class DotClasspathTest {
@@ -42,8 +42,8 @@ public class DotClasspathTest {
 		final JakeDependencies deps = Lib.toDependencies(libs);
 
 
-		assertEquals(1, deps.dependenciesDeclaredWith(JakeBuildJava.TEST).size());
-		final JakeFilesDependency filesDependency = (JakeFilesDependency) deps.dependenciesDeclaredWith(JakeBuildJava.TEST).iterator().next();
+		assertEquals(1, deps.dependenciesDeclaredWith(JakeJavaBuild.TEST).size());
+		final JakeFilesDependency filesDependency = (JakeFilesDependency) deps.dependenciesDeclaredWith(JakeJavaBuild.TEST).iterator().next();
 		assertEquals(1, filesDependency.files().size());
 	}
 

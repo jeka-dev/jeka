@@ -1,7 +1,7 @@
 package org.jake.depmanagement.ivy;
 
-import static org.jake.java.build.JakeBuildJava.COMPILE;
-import static org.jake.java.build.JakeBuildJava.PROVIDED;
+import static org.jake.java.build.JakeJavaBuild.COMPILE;
+import static org.jake.java.build.JakeJavaBuild.PROVIDED;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -22,7 +22,7 @@ import org.jake.depmanagement.JakeScopeMapping;
 import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionedModule;
 import org.jake.depmanagement.ivy.JakeIvy.AttachedArtifacts;
-import org.jake.java.build.JakeBuildJava;
+import org.jake.java.build.JakeJavaBuild;
 import org.jake.publishing.JakeIvyPublication;
 import org.jake.publishing.JakeMavenPublication;
 import org.jake.utils.JakeUtilsFile;
@@ -66,7 +66,7 @@ public class JakeIvyRunner {
 
     private static JakeScopeMapping defaultMapping() {
         return JakeScopeMapping.of(COMPILE).to("compile", "archive(master)")
-                .and(JakeBuildJava.RUNTIME).to("runtime", "archive(master)");
+                .and(JakeJavaBuild.RUNTIME).to("runtime", "archive(master)");
     }
 
     public static void joglWithSource() {
@@ -92,8 +92,8 @@ public class JakeIvyRunner {
 
     public static void testPublishIvy() {
         final JakeIvy jakeIvy = JakeIvy.of(JakeRepos.of(ivyRepo()).andMaven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured"));
-        final JakeVersionedModule versionedModule = JakeVersionedModule.of(JakeModuleId.of("mygroup:mymodule"), JakeVersion.of("myVersion"));
-        final JakeIvyPublication ivyPublication = JakeIvyPublication.of(sampleJarfile(), COMPILE, JakeBuildJava.TEST);
+        final JakeVersionedModule versionedModule = JakeVersionedModule.of(JakeModuleId.of("mygroup:mymodule"), JakeVersion.named("myVersion"));
+        final JakeIvyPublication ivyPublication = JakeIvyPublication.of(sampleJarfile(), COMPILE, JakeJavaBuild.TEST);
         final JakeDependencies deps = JakeDependencies.builder()
                 .on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();
         jakeIvy.publish(versionedModule, ivyPublication,deps, null, null, new Date());
@@ -101,7 +101,7 @@ public class JakeIvyRunner {
 
     public static void testPublishMaven() {
         final JakeIvy jakeIvy = JakeIvy.of(JakeRepos.of(mavenRepo()).andMaven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured"));
-        final JakeVersionedModule versionedModule = JakeVersionedModule.of(JakeModuleId.of("mygroup2:mymodule2"), JakeVersion.of("myVersion"));
+        final JakeVersionedModule versionedModule = JakeVersionedModule.of(JakeModuleId.of("mygroup2:mymodule2"), JakeVersion.named("myVersion"));
         final JakeMavenPublication publication = JakeMavenPublication.of(sampleJarfile()).and(sampleJarSourcefile(), "source");
         final JakeDependencies deps = JakeDependencies.builder()
                 .on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();

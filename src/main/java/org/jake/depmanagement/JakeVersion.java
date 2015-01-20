@@ -5,7 +5,7 @@ import org.jake.utils.JakeUtilsString;
 
 public final class JakeVersion implements Comparable<JakeVersion> {
 
-	public static JakeVersion of(String name) {
+	public static JakeVersion named(String name) {
 		return new JakeVersion(name);
 	}
 

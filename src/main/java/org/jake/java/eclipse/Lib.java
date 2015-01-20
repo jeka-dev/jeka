@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jake.depmanagement.JakeDependencies;
-import org.jake.java.build.JakeBuildJava;
+import org.jake.java.build.JakeJavaBuild;
 
 class Lib {
 
@@ -38,10 +38,10 @@ class Lib {
 			}
 		}
 		return JakeDependencies.builder()
-				.forScopes(JakeBuildJava.COMPILE).onFiles(compileAndRuntimes)
-				.forScopes(JakeBuildJava.RUNTIME).onFiles(runtimeOnlys)
-				.forScopes(JakeBuildJava.TEST).onFiles(testOnlys)
-				.forScopes(JakeBuildJava.PROVIDED).onFiles(compileOnlys).build();
+				.forScopes(JakeJavaBuild.COMPILE).onFiles(compileAndRuntimes)
+				.forScopes(JakeJavaBuild.RUNTIME).onFiles(runtimeOnlys)
+				.forScopes(JakeJavaBuild.TEST).onFiles(testOnlys)
+				.forScopes(JakeJavaBuild.PROVIDED).onFiles(compileOnlys).build();
 	}
 
 

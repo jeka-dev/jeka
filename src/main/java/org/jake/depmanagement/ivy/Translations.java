@@ -52,6 +52,8 @@ final class Translations {
 
     private static final String EXTRA_PREFIX = "e";
 
+    private static final String PUBLISH_RESOLVER_NAME = "_publisher_";
+
     /**
      * Stands for the default configuration for publishing in ivy.
      */
@@ -59,32 +61,37 @@ final class Translations {
 
     private static final String MAVEN_ARTIFACT_PATTERN = "[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]";
 
-    private Translations() {}
+    private Translations() {
+    }
 
-    public static DefaultModuleDescriptor toPublicationFreeModule(JakeVersionedModule module, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping) {
-        final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId
-                .newInstance(module.moduleId().group(), module.moduleId().name(), module.version().name());
-        final DefaultModuleDescriptor moduleDescriptor = new DefaultModuleDescriptor(thisModuleRevisionId, "integration", null);
+    public static DefaultModuleDescriptor toPublicationFreeModule(JakeVersionedModule module,
+            JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping) {
+        final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module.moduleId().group(), module
+                .moduleId().name(), module.version().name());
+        final DefaultModuleDescriptor moduleDescriptor = new DefaultModuleDescriptor(thisModuleRevisionId,
+                "integration", null);
 
         populateModuleDescriptor(moduleDescriptor, dependencies, defaultScope, defaultMapping);
         return moduleDescriptor;
     }
 
     public static DefaultModuleDescriptor toUnpublished(JakeVersionedModule module) {
-        final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId
-                .newInstance(module.moduleId().group(), module.moduleId().name(), module.version().name());
+        final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module.moduleId().group(), module
+                .moduleId().name(), module.version().name());
         return new DefaultModuleDescriptor(thisModuleRevisionId, "integration", null);
     }
 
     /**
-     * @param scopedDependency must be of {@link JakeExternalModule}
+     * @param scopedDependency
+     *            must be of {@link JakeExternalModule}
      */
-    private static DependencyDescriptor to(JakeScopedDependency scopedDependency, JakeScope defaultScope, JakeScopeMapping defaultMapping) {
+    private static DependencyDescriptor to(JakeScopedDependency scopedDependency, JakeScope defaultScope,
+            JakeScopeMapping defaultMapping) {
         final JakeExternalModule externalModule = (JakeExternalModule) scopedDependency.dependency();
         final ModuleRevisionId moduleRevisionId = to(externalModule);
         final boolean changing = externalModule.versionRange().definition().endsWith("-SNAPSHOT");
-        final DefaultDependencyDescriptor result =
-                new DefaultDependencyDescriptor(null, moduleRevisionId, false, changing, externalModule.transitive());
+        final DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null, moduleRevisionId, false,
+                changing, externalModule.transitive());
 
         // filling configuration
         if (scopedDependency.scopeType() == ScopeType.SIMPLE) {
@@ -123,12 +130,13 @@ final class Translations {
             extendedScopes.add(parent.name());
         }
         final Visibility visibility = jakeScope.isPublic() ? Visibility.PUBLIC : Visibility.PRIVATE;
-        return new Configuration(jakeScope.name(), visibility, jakeScope.description(), extendedScopes.toArray(new String[0]), jakeScope.transitive(), null);
+        return new Configuration(jakeScope.name(), visibility, jakeScope.description(),
+                extendedScopes.toArray(new String[0]), jakeScope.transitive(), null);
     }
 
-    public static String[] toConfNames(JakeScope...jakeScopes) {
+    public static String[] toConfNames(JakeScope... jakeScopes) {
         final String[] result = new String[jakeScopes.length];
-        for(int i=0; i < jakeScopes.length; i++) {
+        for (int i = 0; i < jakeScopes.length; i++) {
             result[i] = jakeScopes[i].name();
         }
         return result;
@@ -142,7 +150,6 @@ final class Translations {
         return new ModuleId(moduleId.group(), moduleId.name());
     }
 
-
     public static ModuleRevisionId from(JakeVersionedModule jakeVersionedModule) {
         return new ModuleRevisionId(to(jakeVersionedModule.moduleId()), jakeVersionedModule.version().name());
     }
@@ -151,7 +158,8 @@ final class Translations {
         return versionRange.definition();
     }
 
-    // see http://www.draconianoverlord.com/2010/07/18/publishing-to-maven-repos-with-ivy.html
+    // see
+    // http://www.draconianoverlord.com/2010/07/18/publishing-to-maven-repos-with-ivy.html
     private static DependencyResolver toResolver(JakeRepo repo) {
         if (repo instanceof JakeRepo.MavenRepository) {
             if (!isFileSystem(repo.url())) {
@@ -174,10 +182,10 @@ final class Translations {
             final FileRepository fileRepo = new FileRepository(new File(repo.url().getPath()));
             final FileSystemResolver result = new FileSystemResolver();
             result.setRepository(fileRepo);
-            for (final String pattern :  jakeIvyRepo.artifactPatterns()) {
+            for (final String pattern : jakeIvyRepo.artifactPatterns()) {
                 result.addArtifactPattern(completePattern(repo.url().getPath(), pattern));
             }
-            for (final String pattern :  jakeIvyRepo.ivyPatterns()) {
+            for (final String pattern : jakeIvyRepo.ivyPatterns()) {
                 result.addIvyPattern(completePattern(repo.url().getPath(), pattern));
             }
             return result;
@@ -196,9 +204,29 @@ final class Translations {
         ivySettings.setDefaultResolver(RESOLVER_NAME);
     }
 
+    public static void populateIvySettingsWithPublishRepo(IvySettings ivySettings, JakeRepos repos) {
+        final int i = 0;
+        for (final JakeRepo repo : repos) {
+            final DependencyResolver resolver = toResolver(repo);
+            resolver.setName(PUBLISH_RESOLVER_NAME + i);
+            ivySettings.addResolver(resolver);
+        }
+    }
+
+    public static List<DependencyResolver> publishResolverOf(IvySettings ivySettings) {
+        final List<DependencyResolver> resolvers = new LinkedList<DependencyResolver>();
+        for (final Object resolverObject : ivySettings.getResolvers()) {
+            final DependencyResolver resolver = (DependencyResolver) resolverObject;
+            if (resolver.getName() != null && resolver.getName().startsWith(PUBLISH_RESOLVER_NAME)) {
+                resolvers.add(resolver);
+            }
+        }
+        return resolvers;
+    }
+
     private static ChainResolver toChainResolver(JakeRepos repos) {
         final ChainResolver chainResolver = new ChainResolver();
-        for(final JakeRepo jakeRepo : repos) {
+        for (final JakeRepo jakeRepo : repos) {
             final DependencyResolver resolver = toResolver(jakeRepo);
             resolver.setName(jakeRepo.toString());
             chainResolver.add(resolver);
@@ -206,13 +234,11 @@ final class Translations {
         return chainResolver;
     }
 
-
-
     public static JakeArtifact to(Artifact artifact, File localFile) {
-        final JakeModuleId moduleId = JakeModuleId.of(artifact.getModuleRevisionId().getOrganisation(),
-                artifact.getModuleRevisionId().getName());
+        final JakeModuleId moduleId = JakeModuleId.of(artifact.getModuleRevisionId().getOrganisation(), artifact
+                .getModuleRevisionId().getName());
         final JakeVersionedModule module = JakeVersionedModule.of(moduleId,
-                JakeVersion.of(artifact.getModuleRevisionId().getRevision()));
+                JakeVersion.named(artifact.getModuleRevisionId().getRevision()));
         return JakeArtifact.of(module, localFile);
     }
 
@@ -229,8 +255,8 @@ final class Translations {
         return JakeUtilsString.join(list, "; ");
     }
 
-    private static void populateModuleDescriptor(DefaultModuleDescriptor moduleDescriptor, JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping) {
-
+    private static void populateModuleDescriptor(DefaultModuleDescriptor moduleDescriptor,
+            JakeDependencies dependencies, JakeScope defaultScope, JakeScopeMapping defaultMapping) {
 
         // Add configuration definitions
         for (final JakeScope involvedScope : dependencies.moduleScopes()) {
@@ -257,7 +283,8 @@ final class Translations {
         }
     }
 
-    private static JakeScopeMapping resolveSimple(JakeScope scope, JakeScope defaultScope, JakeScopeMapping defaultMapping) {
+    private static JakeScopeMapping resolveSimple(JakeScope scope, JakeScope defaultScope,
+            JakeScopeMapping defaultMapping) {
         final JakeScopeMapping result;
         if (scope == null) {
             if (defaultScope == null) {
@@ -303,7 +330,7 @@ final class Translations {
                 }
             }
             final Artifact ivyArtifact = toPublishedArtifact(artifact, descriptor.getModuleRevisionId(), publishDate);
-            for(final JakeScope jakeScope : artifact.jakeScopes) {
+            for (final JakeScope jakeScope : artifact.jakeScopes) {
                 descriptor.addArtifact(jakeScope.name(), ivyArtifact);
             }
         }
@@ -322,7 +349,8 @@ final class Translations {
         }
     }
 
-    public static Artifact toPublishedArtifact(JakeIvyPublication.Artifact artifact, ModuleRevisionId moduleId, Date date) {
+    public static Artifact toPublishedArtifact(JakeIvyPublication.Artifact artifact, ModuleRevisionId moduleId,
+            Date date) {
         String artifactName = artifact.file.getName();
         String extension = "";
         if (artifactName.contains(".")) {
@@ -334,7 +362,8 @@ final class Translations {
         return new DefaultArtifact(moduleId, date, artifactName, type, extension);
     }
 
-    public static Artifact toPublishedArtifact(JakeMavenPublication.Artifact artifact, ModuleRevisionId moduleId, Date date) {
+    public static Artifact toPublishedArtifact(JakeMavenPublication.Artifact artifact, ModuleRevisionId moduleId,
+            Date date) {
         final String artifactName = artifact.name();
         final String type = artifact.extension();
         final Map<String, String> extraMap;
@@ -353,7 +382,7 @@ final class Translations {
             final String[] parts = props.getProperty(depMridStr).split(" ");
             final ModuleRevisionId decodedMrid = ModuleRevisionId.decode(depMridStr);
             final JakeModuleId jakeModuleId = JakeModuleId.of(decodedMrid.getOrganisation(), decodedMrid.getName());
-            final JakeVersion resolvedOrForcedVersion = JakeVersion.of(parts[2]);
+            final JakeVersion resolvedOrForcedVersion = JakeVersion.named(parts[2]);
             result.put(jakeModuleId, resolvedOrForcedVersion);
         }
         return result;
