@@ -80,7 +80,7 @@ public final class JakeIvy {
     public static JakeIvy of(JakeRepos repos) {
         final IvySettings ivySettings = new IvySettings();
         Translations.populateIvySettingsWithRepo(ivySettings, repos);
-        Translations.populateIvySettingsWithPublishRepo(ivySettings, repos);
+        Translations.populateIvySettingsWithPublishRepo(ivySettings, JakeRepos.of(repos.iterator().next()));
         return of(ivySettings);
     }
 
