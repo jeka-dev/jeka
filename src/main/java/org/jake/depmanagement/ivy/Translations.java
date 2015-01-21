@@ -160,7 +160,7 @@ final class Translations {
 
     // see
     // http://www.draconianoverlord.com/2010/07/18/publishing-to-maven-repos-with-ivy.html
-    private static DependencyResolver toResolver(JakeRepo repo) {
+    public static DependencyResolver toResolver(JakeRepo repo) {
         if (repo instanceof JakeRepo.MavenRepository) {
             if (!isFileSystem(repo.url())) {
                 final IBiblioResolver result = new IBiblioResolver();

@@ -127,7 +127,7 @@ public final class JakeOptions {
 		}
 	}
 
-	static void populateFields(JakeBuildBase build) {
+	static void populateFields(JakeBuild build) {
 		populateFields(build, INSTANCE.freeOptions);
 	}
 
@@ -176,7 +176,7 @@ public final class JakeOptions {
 	 * Returns a multi-line text standing for the descriptions of the available options.
 	 */
 	@SuppressWarnings("unchecked")
-	static List<String> help(Class<? extends JakeBuildBase> clazz) {
+	static List<String> help(Class<? extends JakeBuild> clazz) {
 		return JakeUtilsIterable.concatLists(doHelp(JakeOptions.class), doHelp(clazz));
 	}
 

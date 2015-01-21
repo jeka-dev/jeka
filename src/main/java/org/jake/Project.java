@@ -72,7 +72,7 @@ class Project {
 	public boolean executeBuild( JakeClassLoader classLoader, Iterable<String> methods) {
 		final long start = System.nanoTime();
 		displayHead("Building project : " + projectRelativePath);
-		final Class<? extends JakeBuildBase> buildClass = this.findBuildClass(classLoader);
+		final Class<? extends JakeBuild> buildClass = this.findBuildClass(classLoader);
 		final boolean result = this.launch(buildClass, methods, classLoader);
 
 		final float duration = JakeUtilsTime.durationInSeconds(start);
@@ -93,11 +93,11 @@ class Project {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Class<? extends JakeBuildBase> findBuildClass(JakeClassLoader classLoader) {
+	private Class<? extends JakeBuild> findBuildClass(JakeClassLoader classLoader) {
 
 		// If class name specified in options.
 		if (!JakeUtilsString.isBlank(JakeOptions.buildClass())) {
-			final Class<? extends JakeBuildBase> clazz = classLoader.loadFromNameOrSimpleName(JakeOptions.buildClass(), JakeBuildBase.class);
+			final Class<? extends JakeBuild> clazz = classLoader.loadFromNameOrSimpleName(JakeOptions.buildClass(), JakeBuild.class);
 			if (clazz == null) {
 				throw new JakeException("No build class named " + JakeOptions.buildClass() + " found.");
 			}
@@ -110,8 +110,8 @@ class Project {
 			for (final String path : dir.relativePathes()) {
 				if (path.endsWith(".java")) {
 					final Class<?> clazz = classLoader.loadGivenClassSourcePath(path);
-					if (JakeBuildBase.class.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers())) {
-						return (Class<? extends JakeBuildBase>) clazz;
+					if (JakeBuild.class.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers())) {
+						return (Class<? extends JakeBuild>) clazz;
 					}
 				}
 
@@ -129,9 +129,9 @@ class Project {
 		return null;
 	}
 
-	private boolean launch(Class<? extends JakeBuildBase> buildClass, Iterable<String> methods, JakeClassLoader classLoader) {
+	private boolean launch(Class<? extends JakeBuild> buildClass, Iterable<String> methods, JakeClassLoader classLoader) {
 
-		final JakeBuildBase build = JakeUtilsReflect.newInstance(buildClass);
+		final JakeBuild build = JakeUtilsReflect.newInstance(buildClass);
 		JakeOptions.populateFields(build);
 
 		JakeLog.info("Use build class '" + buildClass.getCanonicalName()

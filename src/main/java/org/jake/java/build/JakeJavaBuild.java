@@ -3,7 +3,7 @@ package org.jake.java.build;
 import java.io.File;
 import java.util.Date;
 
-import org.jake.JakeBuildBase;
+import org.jake.JakeBuild;
 import org.jake.JakeClasspath;
 import org.jake.JakeDir;
 import org.jake.JakeDirSet;
@@ -24,11 +24,22 @@ import org.jake.java.JakeUtilsJdk;
 import org.jake.java.testing.jacoco.Jakeoco;
 import org.jake.java.testing.junit.JakeUnit;
 import org.jake.java.testing.junit.JakeUnit.JunitReportDetail;
+import org.jake.publishing.JakeIvyPublication;
 import org.jake.publishing.JakeMavenPublication;
+import org.jake.publishing.JakePublisher;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.verify.sonar.JakeSonar;
 
-public class JakeJavaBuild extends JakeBuildBase {
+/**
+ * Template class to define build on Java project.
+ * This template is flexible enough to handle exotic project structure as it proposes
+ * to override default setting at different level of granularity.<b/>
+ * Beside this template define a set of "standard" scope to define dependencies.
+ * You are not forced to use it strictly but it can simplify dependency management to follow a given standard.
+ * 
+ * @author Jerome Angibaud
+ */
+public class JakeJavaBuild extends JakeBuild {
 
     public static final JakeScope PROVIDED = JakeScope.of("provided").transitive(false)
             .descr("Dependencies to compile the project but that should not be embedded in produced artifacts.");
@@ -97,31 +108,38 @@ public class JakeJavaBuild extends JakeBuildBase {
         return skipTests;
     }
 
-    @JakeOption({
-        "You can force the dependencyResolver to use by specifying a class name. This class must be in Jake classpath.",
-    "You can either use a fully qulified class name or just its simple name." })
-    protected String dependencyResolver;
-
     @JakeOption({"The more details the longer tests take to be processed.",
         "BASIC mention the total time elapsed along detail on failed tests.",
         "FULL detailed report displays additionally the time to run each tests.",
     "Example : -junitReportDetail=NONE"})
     protected JunitReportDetail junitReportDetail = JunitReportDetail.BASIC;
 
-    // A cache for
+    // A cache for dependency resolver
     private JakeDependencyResolver cachedResolver;
+
+    // A cache for artifact publisher
+    private JakePublisher cachedPublisher;
 
 
     // --------------------------- Project settings -----------------------
 
+    /**
+     * Returns the encoding of source files for the compiler.
+     */
     public String sourceEncoding() {
         return "UTF-8";
     }
 
+    /**
+     * Returns the Java source version for the compiler (as "1.4", 1.6", "7", ...).
+     */
     public String sourceJavaVersion() {
         return JakeUtilsJdk.runningJavaVersion();
     }
 
+    /**
+     * Returns the Java target version for the compiler (as "1.4", 1.6", "7", ...).
+     */
     public String targetJavaVersion() {
         return sourceJavaVersion();
     }
@@ -313,9 +331,19 @@ public class JakeJavaBuild extends JakeBuildBase {
         unitTest();
     }
 
-    public void publishMaven() {
-        this.jakeIvy().publish(module(), mavenPublication(), dependencies(), new Date());
+    @JakeDoc({"Publish the produced artifact to the defined repositories. ",
+    "This can work only if a 'publishable' repository has been defined and the artifact has been generated (pack method)."})
+    public void publish() {
+        final Date date = this.buildTime();
+        if (this.publisher().hasMavenPublishRepo()) {
+            this.publisher().publishMaven(module(), mavenPublication(), dependencies(), date);
+        }
+        if (this.publisher().hasIvyPublishRepo()) {
+            this.publisher().publishIvy(module(), ivyPublication(), dependencies(), COMPILE, SCOPE_MAPPING, date);
+        }
     }
+
+
 
     // ----------------------- Overridable sub-methods ---------------------
 
@@ -334,11 +362,6 @@ public class JakeJavaBuild extends JakeBuildBase {
         return JakeDependencyResolver.unmanaged(dependencies);
     }
 
-    @Override
-    protected JakeScopeMapping scopeMapping() {
-        return SCOPE_MAPPING;
-    }
-
     /**
      * Returns the dependencies of this module. By default it uses unmanaged dependencies stored
      * locally in the project as described by {@link #defaultUnmanagedDependencies()} method.
@@ -346,6 +369,13 @@ public class JakeJavaBuild extends JakeBuildBase {
      */
     protected JakeDependencies dependencies() {
         return defaultUnmanagedDependencies();
+    }
+
+    protected JakePublisher publisher() {
+        if (cachedPublisher == null) {
+            cachedPublisher = JakePublisher.usingIvy(jakeIvy());
+        }
+        return cachedPublisher;
     }
 
 
@@ -362,6 +392,9 @@ public class JakeJavaBuild extends JakeBuildBase {
         return JakeClasspath.of(cachedResolver.get(scope));
     }
 
+    /**
+     * Override this method if you need to
+     */
     protected void generateSources() {
         // Do nothing by default
     }
@@ -402,6 +435,20 @@ public class JakeJavaBuild extends JakeBuildBase {
                 .andOptionalIf(includeTest, packer.jarTestFile(), "test")
                 .andOptionalIf(includeTest, packer.jarTestSourceFile(), "test-sources");
     }
+
+    protected JakeIvyPublication ivyPublication(boolean includeTest) {
+        final JakeJavaPacker packer = packer();
+        return JakeIvyPublication.of(packer.jarFile(), COMPILE)
+                .and(packer.jarSourceFile(), SOURCES)
+                .andOptional(javadocMaker().zipFile(), JAVADOC)
+                .andOptionalIf(includeTest, packer.jarTestFile(), TEST)
+                .andOptionalIf(includeTest, packer.jarTestSourceFile(), TEST);
+    }
+
+    protected JakeIvyPublication ivyPublication() {
+        return ivyPublication(false);
+    }
+
 
     protected JakeMavenPublication mavenPublication() {
         return mavenPublication(false);

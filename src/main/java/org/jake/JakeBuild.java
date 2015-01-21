@@ -5,12 +5,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.jake.depmanagement.JakeModuleId;
 import org.jake.depmanagement.JakeRepos;
-import org.jake.depmanagement.JakeScopeMapping;
 import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionedModule;
 import org.jake.depmanagement.ivy.JakeIvy;
@@ -20,22 +20,20 @@ import org.jake.utils.JakeUtilsString;
 import org.jake.utils.JakeUtilsTime;
 
 /**
- * Base project builder defining some commons tasks and utilities
- * necessary for any kind of project, regardless involved technologies.
- * 
- * Classes inheriting from this one must provide a zero-argument constructor (can be private).
+ * Base class defining commons tasks and utilities
+ * necessary for building any kind of project, regardless involved technologies.
  * 
  * @author Jerome Angibaud
  */
-public class JakeBuildBase {
+public class JakeBuild {
 
     private static final int JUMP = 2;
 
     private File baseDirFile = JakeUtilsFile.workingDir();
 
-    private final String instanciationTimestamp = JakeUtilsTime.timestampSec();
+    private final Date buildTime = JakeUtilsTime.now();
 
-    protected JakeBuildBase() {
+    protected JakeBuild() {
     }
 
     void setBaseDir(File baseDir) {
@@ -47,19 +45,8 @@ public class JakeBuildBase {
      * Default is the time stamp (formatted as 'yyyyMMdd-HHmmss') this build has been instantiated.
      */
     public JakeVersion version() {
-        return JakeVersion.named(instanciationTimestamp);
+        return JakeVersion.named(JakeUtilsTime.timestampSec(buildTime));
     }
-
-    //    /**
-    //     * The string used to suffix produced artifacts name to indicate version.
-    //     * Might look like "-0.6.3".
-    //     */
-    //    private String versionSuffix() {
-    //        if (version() == null || version().isEmpty()) {
-    //            return "";
-    //        }
-    //        return "-" + version();
-    //    }
 
     /**
      * The project name. This is likely to used in produced artifacts.
@@ -115,9 +102,11 @@ public class JakeBuildBase {
         return JakeRepos.of();
     }
 
-    protected JakeScopeMapping scopeMapping() {
-        return null;
+    protected Date buildTime() {
+        return (Date) buildTime.clone();
     }
+
+
 
 
     /**
@@ -175,7 +164,7 @@ public class JakeBuildBase {
         JakeLog.nextLine();
         JakeLog.info("Available action(s) for build '" + this.getClass().getName() + "' : " );
         JakeLog.shift(JUMP);
-        final List<CommandDescription> list = new LinkedList<JakeBuildBase.CommandDescription>();
+        final List<CommandDescription> list = new LinkedList<JakeBuild.CommandDescription>();
         for (final Method method : this.getClass().getMethods()) {
             final int modifier = method.getModifiers();
             if (!method.getReturnType().equals(void.class)

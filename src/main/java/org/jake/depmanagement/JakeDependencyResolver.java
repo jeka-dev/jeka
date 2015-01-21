@@ -15,106 +15,106 @@ import org.jake.depmanagement.ivy.JakeIvy;
 
 public final class JakeDependencyResolver  {
 
-	public static JakeDependencyResolver managed(JakeIvy jakeIvy, JakeDependencies dependencies, JakeVersionedModule module, JakeResolutionParameters resolutionParameters) {
-		return new JakeDependencyResolver(jakeIvy, dependencies, module, resolutionParameters);
-	}
+    public static JakeDependencyResolver managed(JakeIvy jakeIvy, JakeDependencies dependencies, JakeVersionedModule module, JakeResolutionParameters resolutionParameters) {
+        return new JakeDependencyResolver(jakeIvy, dependencies, module, resolutionParameters);
+    }
 
-	public static JakeDependencyResolver unmanaged(JakeDependencies dependencies) {
-		if (dependencies.containsExternalModule()) {
-			throw new IllegalArgumentException("Your dependencies contain a reference to a managed extarnal module."
-					+ "Use #managed method factory instead.");
-		}
-		return new JakeDependencyResolver(null, dependencies, null, null);
-	}
+    public static JakeDependencyResolver unmanaged(JakeDependencies dependencies) {
+        if (dependencies.containsExternalModule()) {
+            throw new IllegalArgumentException("Your dependencies contain a reference to a managed extarnal module."
+                    + "Use #managed method factory instead.");
+        }
+        return new JakeDependencyResolver(null, dependencies, null, null);
+    }
 
-	private final Map<JakeScope, JakePath> cachedDeps = new HashMap<JakeScope, JakePath>();
+    private final Map<JakeScope, JakePath> cachedDeps = new HashMap<JakeScope, JakePath>();
 
-	private final JakeIvy jakeIvy;
+    private final JakeIvy jakeIvy;
 
-	private final JakeDependencies dependencies;
+    private final JakeDependencies dependencies;
 
-	private final JakeResolutionParameters parameters;
+    private final JakeResolutionParameters parameters;
 
-	// Not necessary but nice if present in order to let Ivy hide data efficiently.
-	private final JakeVersionedModule module;
+    // Not necessary but nice if present in order to let Ivy hide data efficiently.
+    private final JakeVersionedModule module;
 
-	private JakeDependencyResolver(JakeIvy jakeIvy, JakeDependencies dependencies, JakeVersionedModule module, JakeResolutionParameters resolutionParameters) {
-		this.jakeIvy = jakeIvy;
-		this.dependencies = dependencies;
-		this.module = module;
-		this.parameters = resolutionParameters;
-	}
+    private JakeDependencyResolver(JakeIvy jakeIvy, JakeDependencies dependencies, JakeVersionedModule module, JakeResolutionParameters resolutionParameters) {
+        this.jakeIvy = jakeIvy;
+        this.dependencies = dependencies;
+        this.module = module;
+        this.parameters = resolutionParameters;
+    }
 
-	protected List<File> getDeclaredDependencies(JakeScope scope) {
-		final List<File> result = new LinkedList<File>();
+    protected List<File> getDeclaredDependencies(JakeScope scope) {
+        final List<File> result = new LinkedList<File>();
 
-		// Add local, non-managed dependencies
-		result.addAll(localDependencies(scope));
-		if (jakeIvy == null) {
-			return result;
-		}
+        // Add local, non-managed dependencies
+        result.addAll(localDependencies(scope));
+        if (jakeIvy == null) {
+            return result;
+        }
 
-		// Add managed dependencies from Ivy
-		final Set<JakeArtifact> artefacts;
-		if (module != null) {
-			artefacts = jakeIvy.resolve(module, dependencies, scope, parameters);
-		} else {
-			artefacts = jakeIvy.resolve(dependencies, scope, parameters);
-		}
-		for (final JakeArtifact artifact : artefacts) {
-			result.add(artifact.localFile());
-		}
-		return result;
-	}
+        // Add managed dependencies from Ivy
+        final Set<JakeArtifact> artefacts;
+        if (module != null) {
+            artefacts = jakeIvy.resolve(module, dependencies, scope, parameters);
+        } else {
+            artefacts = jakeIvy.resolve(dependencies, scope, parameters);
+        }
+        for (final JakeArtifact artifact : artefacts) {
+            result.add(artifact.localFile());
+        }
+        return result;
+    }
 
-	private List<File> localDependencies(JakeScope jakeScope) {
-		final LinkedHashSet<File> set = new LinkedHashSet<File>();
-		for (final JakeScopedDependency scopedDependency : dependencies) {
-			if (scopedDependency.isInvolvedIn(jakeScope)
-					&& scopedDependency.dependency() instanceof JakeFilesDependency) {
-				final JakeFilesDependency fileDeps = (JakeFilesDependency) scopedDependency.dependency();
-				set.addAll(fileDeps.files());
-			}
-		}
-		return new LinkedList<File>(set);
-	}
+    private List<File> localDependencies(JakeScope jakeScope) {
+        final LinkedHashSet<File> set = new LinkedHashSet<File>();
+        for (final JakeScopedDependency scopedDependency : dependencies) {
+            if (scopedDependency.isInvolvedIn(jakeScope)
+                    && scopedDependency.dependency() instanceof JakeFilesDependency) {
+                final JakeFilesDependency fileDeps = (JakeFilesDependency) scopedDependency.dependency();
+                set.addAll(fileDeps.files());
+            }
+        }
+        return new LinkedList<File>(set);
+    }
 
-	public Set<JakeScope> declaredScopes() {
-		return this.dependencies.moduleScopes();
-	}
+    public Set<JakeScope> declaredScopes() {
+        return this.dependencies.moduleScopes();
+    }
 
-	public final JakePath get(JakeScope scope) {
-		final JakePath cachedResult = this.cachedDeps.get(scope);
-		if (cachedResult != null) {
-			return cachedResult;
-		}
-		JakeLog.startAndNextLine("Resolving dependencies for scope '" + scope.name() + "'");
-		final List<File> list = new LinkedList<File>();
-		for (final JakeScope jakeScope : scope.ancestorScopes()) {
-			list.addAll(this.getDeclaredDependencies(jakeScope));
-		}
-		final JakePath result = JakePath.of(list);
-		JakeLog.info(result.entries().size() + " artifacts: " + result);
-		JakeLog.done();
-		cachedDeps.put(scope, result);
-		return result;
-	}
+    public final JakePath get(JakeScope scope) {
+        final JakePath cachedResult = this.cachedDeps.get(scope);
+        if (cachedResult != null) {
+            return cachedResult;
+        }
+        JakeLog.startAndNextLine("Resolving dependencies for scope '" + scope.name() + "'");
+        final List<File> list = new LinkedList<File>();
+        for (final JakeScope jakeScope : scope.ancestorScopes()) {
+            list.addAll(this.getDeclaredDependencies(jakeScope));
+        }
+        final JakePath result = JakePath.of(list);
+        JakeLog.info(result.entries().size() + " artifacts: " + result);
+        JakeLog.done();
+        cachedDeps.put(scope, result);
+        return result;
+    }
 
-	/**
-	 * Returns <code>true<code> if this resolver does not contain any dependencies.
-	 */
-	public boolean isEmpty() {
-		for (final JakeScope scope : this.declaredScopes()) {
-			if (!this.get(scope).isEmpty()) {
-				return false;
-			}
-		}
-		return true;
-	}
+    /**
+     * Returns <code>true<code> if this resolver does not contain any dependencies.
+     */
+    public boolean isEmpty() {
+        for (final JakeScope scope : this.declaredScopes()) {
+            if (!this.get(scope).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-	@Override
-	public String toString() {
-		return "JakeIvy: " + jakeIvy + " , dependencies: " + dependencies;
-	}
+    @Override
+    public String toString() {
+        return "JakeIvy : dependencies: " + dependencies;
+    }
 
 }

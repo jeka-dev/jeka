@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -29,6 +30,8 @@ import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.parser.m2.PomModuleDescriptorWriter;
 import org.apache.ivy.plugins.parser.m2.PomWriterOptions;
+import org.apache.ivy.plugins.resolver.AbstractPatternsBasedResolver;
+import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.jake.JakeException;
 import org.jake.JakeLog;
@@ -48,6 +51,11 @@ import org.jake.publishing.JakeMavenPublication;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsString;
 
+/**
+ * Ivy wrapper providing high level methods. The API is expressed using Jake classes only (mostly free of Ivy classes).
+ * 
+ * @author Jerome Angibaud
+ */
 public final class JakeIvy {
 
     private static final JakeVersionedModule ANONYMOUS_MODULE = JakeVersionedModule.of(
@@ -61,7 +69,7 @@ public final class JakeIvy {
         ivy.getLoggerEngine().setDefaultLogger(new MessageLogger());
     }
 
-    public static JakeIvy of(IvySettings ivySettings) {
+    private static JakeIvy of(IvySettings ivySettings) {
         final Ivy ivy = Ivy.newInstance(ivySettings);
         return new JakeIvy(ivy);
     }
@@ -99,6 +107,40 @@ public final class JakeIvy {
         return of(JakeRepos.mavenCentral());
     }
 
+    private static boolean isMaven(DependencyResolver dependencyResolver) {
+        if (dependencyResolver instanceof ChainResolver) {
+            final ChainResolver resolver = (ChainResolver) dependencyResolver;
+            final List list = resolver.getResolvers();
+            if (list.isEmpty()) {
+                return false;
+            }
+            return isMaven((DependencyResolver) list.get(0));
+        }
+        if (dependencyResolver instanceof AbstractPatternsBasedResolver) {
+            final AbstractPatternsBasedResolver resolver = (AbstractPatternsBasedResolver) dependencyResolver;
+            return resolver.isM2compatible();
+        }
+        throw new IllegalStateException(dependencyResolver.getClass().getName() + " not handled");
+    }
+
+    public boolean hasMavenPublishRepo() {
+        for (final DependencyResolver dependencyResolver : Translations.publishResolverOf(this.ivy.getSettings())) {
+            if (isMaven(dependencyResolver)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasIvyPublishRepo() {
+        for (final DependencyResolver dependencyResolver : Translations.publishResolverOf(this.ivy.getSettings())) {
+            if (!isMaven(dependencyResolver)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Set<JakeArtifact> resolve(JakeDependencies deps, JakeScope resolvedScope) {
         return resolve(ANONYMOUS_MODULE, deps, resolvedScope, JakeResolutionParameters.of());
     }
@@ -106,6 +148,8 @@ public final class JakeIvy {
     public Set<JakeArtifact> resolve(JakeDependencies deps, JakeScope resolvedScope, JakeResolutionParameters parameters) {
         return resolve(ANONYMOUS_MODULE, deps, resolvedScope, parameters);
     }
+
+
 
     public Set<JakeArtifact> resolve(JakeVersionedModule module, JakeDependencies deps, JakeScope resolvedScope, JakeResolutionParameters parameters) {
         final DefaultModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(module, deps, parameters.defaultScope(), parameters.defaultMapping());
@@ -187,13 +231,13 @@ public final class JakeIvy {
         publishIvyArtifacts(publication, deliveryDate, moduleDescriptor);
     }
 
+
+
     public void publish(JakeVersionedModule versionedModule, JakeMavenPublication publication, JakeDependencies dependencies, Date deliveryDate) {
         final JakeDependencies publishedDependencies = resolveDependencies(versionedModule, dependencies);
         final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication, publishedDependencies,deliveryDate);
         publishMavenArtifacts(publication, deliveryDate, moduleDescriptor);
     }
-
-
 
     @SuppressWarnings("unchecked")
     private JakeDependencies resolveDependencies(JakeVersionedModule module, JakeDependencies dependencies) {
@@ -395,6 +439,8 @@ public final class JakeIvy {
         }
         return result;
     }
+
+
 
     public final class AttachedArtifacts {
 
