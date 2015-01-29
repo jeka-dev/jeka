@@ -151,7 +151,7 @@ public final class JakeUnit {
 		}
 		final long start = System.nanoTime();
 		final JakeClassLoader classLoader = JakeClassLoader.of(classes.iterator().next());
-		JakeLog.startAndNextLine("Run JUnit tests");
+		JakeLog.startln("Run JUnit tests");
 
 		final boolean verbose = JakeOptions.isVerbose();
 

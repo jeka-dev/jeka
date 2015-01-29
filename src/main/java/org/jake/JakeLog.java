@@ -38,9 +38,9 @@ public class JakeLog {
 	}
 
 	/**
-	 * As {@link #startAndNextLine(String)} but do a carriage return after the start message.
+	 * As {@link #startln(String)} but do a carriage return after the start message.
 	 */
-	public static void startAndNextLine(String message) {
+	public static void startln(String message) {
 		start(message);
 		nextLine();
 	}

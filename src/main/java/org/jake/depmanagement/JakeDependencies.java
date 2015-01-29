@@ -235,27 +235,27 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 
         protected final LinkedList<JakeScopedDependency> dependencies;
 
-        private Set<JakeScope> defaultScopes;
+        protected Set<JakeScope> defaultScopes;
 
-        private JakeScopeMapping defaultMapping;
+        protected JakeScopeMapping defaultMapping;
 
         protected Builder(LinkedList<JakeScopedDependency> dependencies) {
             super();
             this.dependencies = dependencies;
         }
 
-        public Builder forScopes(JakeScope ...scopes) {
+        public Builder usingDefaultScopes(JakeScope ...scopes) {
             if (scopes.length == 0) {
                 throw new IllegalArgumentException("You must specify at least one scope.");
             }
-            defaultScopes = JakeUtilsIterable.setOf(scopes);
-            defaultMapping = null;
+            this.defaultScopes = JakeUtilsIterable.setOf(scopes);
+            this.defaultMapping = null;
             return this;
         }
 
-        public Builder forScopeMapping(JakeScopeMapping scopeMapping) {
-            defaultMapping = scopeMapping;
-            defaultScopes = null;
+        public Builder usingDefaultScopeMapping(JakeScopeMapping scopeMapping) {
+            this.defaultMapping = scopeMapping;
+            this.defaultScopes = null;
             return this;
         }
 
@@ -280,7 +280,7 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
             if (this instanceof ScopeableBuilder) {
                 return (ScopeableBuilder) this;
             }
-            return new ScopeableBuilder(dependencies);
+            return new ScopeableBuilder(this);
         }
 
         public Builder on(JakeScopedDependency dependency) {
@@ -335,8 +335,10 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 
         public static class ScopeableBuilder extends Builder {
 
-            private ScopeableBuilder(LinkedList<JakeScopedDependency> dependencies) {
-                super(dependencies);
+            private ScopeableBuilder(Builder builder) {
+                super(builder.dependencies);
+                this.defaultMapping = builder.defaultMapping;
+                this.defaultScopes = builder.defaultScopes;
             }
 
             public Builder scope(JakeScopeMapping scopeMapping) {

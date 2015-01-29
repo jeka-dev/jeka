@@ -81,7 +81,7 @@ public final class JakeProcess {
 		final List<String> command = new LinkedList<String>();
 		command.add(this.command);
 		command.addAll(parameters);
-		JakeLog.startAndNextLine("Starting java program : " + command.toString());
+		JakeLog.startln("Starting java program : " + command.toString());
 		final int result;
 		try {
 			final ProcessBuilder processBuilder = processBuilder(command);

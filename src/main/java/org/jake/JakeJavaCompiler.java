@@ -186,7 +186,7 @@ public final class JakeJavaCompiler {
 		final JavaCompiler compiler = getDefaultOrFail();
 		final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
 
-		JakeLog.startAndNextLine(("Compiling " + javaSourceFiles.size()
+		JakeLog.startln(("Compiling " + javaSourceFiles.size()
 				+ " source files using options : " + JakeUtilsString.toString(options, " ")));
 		final boolean result;
 		if (this.fork == null) {

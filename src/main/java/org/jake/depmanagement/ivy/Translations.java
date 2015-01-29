@@ -46,20 +46,20 @@ import org.jake.utils.JakeUtilsString;
 
 final class Translations {
 
-    private static final String RESOLVER_NAME = "MAIN";
+    private static final String MAIN_RESOLVER_NAME = "MAIN";
 
     private static final String EXTRA_NAMESPACE = "http://ant.apache.org/ivy/extra";
 
     private static final String EXTRA_PREFIX = "e";
 
-    private static final String PUBLISH_RESOLVER_NAME = "_publisher_";
+    private static final String PUBLISH_RESOLVER_NAME = "publisher:";
 
     /**
      * Stands for the default configuration for publishing in ivy.
      */
     static final JakeScope DEFAULT_CONFIGURATION = JakeScope.of("default");
 
-    private static final String MAVEN_ARTIFACT_PATTERN = "[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]";
+    private static final String MAVEN_ARTIFACT_PATTERN = "/[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]";
 
     private Translations() {
     }
@@ -124,7 +124,7 @@ final class Translations {
         return result;
     }
 
-    public static Configuration to(JakeScope jakeScope) {
+    public static Configuration toConfiguration(JakeScope jakeScope) {
         final List<String> extendedScopes = new LinkedList<String>();
         for (final JakeScope parent : jakeScope.extendedScopes()) {
             extendedScopes.add(parent.name());
@@ -143,18 +143,18 @@ final class Translations {
     }
 
     private static ModuleRevisionId to(JakeExternalModule externalModule) {
-        return new ModuleRevisionId(to(externalModule.moduleId()), to(externalModule.versionRange()));
+        return new ModuleRevisionId(toModuleId(externalModule.moduleId()), toString(externalModule.versionRange()));
     }
 
-    private static ModuleId to(JakeModuleId moduleId) {
+    private static ModuleId toModuleId(JakeModuleId moduleId) {
         return new ModuleId(moduleId.group(), moduleId.name());
     }
 
-    public static ModuleRevisionId from(JakeVersionedModule jakeVersionedModule) {
-        return new ModuleRevisionId(to(jakeVersionedModule.moduleId()), jakeVersionedModule.version().name());
+    public static ModuleRevisionId toModuleRevisionId(JakeVersionedModule jakeVersionedModule) {
+        return new ModuleRevisionId(toModuleId(jakeVersionedModule.moduleId()), jakeVersionedModule.version().name());
     }
 
-    private static String to(JakeVersionRange versionRange) {
+    private static String toString(JakeVersionRange versionRange) {
         return versionRange.definition();
     }
 
@@ -199,16 +199,15 @@ final class Translations {
 
     public static void populateIvySettingsWithRepo(IvySettings ivySettings, JakeRepos repos) {
         final DependencyResolver resolver = toChainResolver(repos);
-        resolver.setName(RESOLVER_NAME);
+        resolver.setName(MAIN_RESOLVER_NAME);
         ivySettings.addResolver(resolver);
-        ivySettings.setDefaultResolver(RESOLVER_NAME);
+        ivySettings.setDefaultResolver(MAIN_RESOLVER_NAME);
     }
 
     public static void populateIvySettingsWithPublishRepo(IvySettings ivySettings, JakeRepos repos) {
-        final int i = 0;
         for (final JakeRepo repo : repos) {
             final DependencyResolver resolver = toResolver(repo);
-            resolver.setName(PUBLISH_RESOLVER_NAME + i);
+            resolver.setName(PUBLISH_RESOLVER_NAME + repo.url());
             ivySettings.addResolver(resolver);
         }
     }
@@ -260,15 +259,15 @@ final class Translations {
 
         // Add configuration definitions
         for (final JakeScope involvedScope : dependencies.moduleScopes()) {
-            final Configuration configuration = to(involvedScope);
+            final Configuration configuration = toConfiguration(involvedScope);
             moduleDescriptor.addConfiguration(configuration);
         }
         if (defaultScope != null) {
             moduleDescriptor.setDefaultConf(defaultScope.name());
         }
         if (defaultMapping != null) {
-            for (final JakeScope scope : defaultMapping.involvedScopes()) {
-                final Configuration configuration = to(scope);
+            for (final JakeScope scope : defaultMapping.entries()) {
+                final Configuration configuration = toConfiguration(scope);
                 moduleDescriptor.addConfiguration(configuration);
             }
             moduleDescriptor.setDefaultConfMapping(toIvyExpression(defaultMapping));
@@ -318,7 +317,7 @@ final class Translations {
     }
 
     private static String completePattern(String url, String pattern) {
-        return url + pattern;
+        return url + "/" + pattern;
     }
 
     public static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
@@ -326,7 +325,7 @@ final class Translations {
         for (final JakeIvyPublication.Artifact artifact : publication) {
             for (final JakeScope jakeScope : artifact.jakeScopes) {
                 if (!Arrays.asList(descriptor.getConfigurations()).contains(jakeScope.name())) {
-                    descriptor.addConfiguration(new Configuration(jakeScope.name()));
+                    descriptor.addConfiguration(toConfiguration(jakeScope));
                 }
             }
             final Artifact ivyArtifact = toPublishedArtifact(artifact, descriptor.getModuleRevisionId(), publishDate);
@@ -338,16 +337,31 @@ final class Translations {
 
     public static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
             JakeMavenPublication publication, Date publishDate) {
-        for (final JakeMavenPublication.Artifact artifact : publication) {
-            final Artifact mavenArtifact = toPublishedArtifact(artifact, descriptor.getModuleRevisionId(), publishDate);
-            final String conf = artifact.classifier() == null ? "default" : artifact.classifier();
-            if (descriptor.getConfiguration(conf) == null) {
-                descriptor.addConfiguration(new Configuration(conf));
-            }
-            descriptor.addArtifact(conf, mavenArtifact);
-            descriptor.addExtraAttributeNamespace(EXTRA_PREFIX, EXTRA_NAMESPACE);
+        
+        final Artifact mavenMainArtifact = toPublishedMavenArtifact(publication.mainArtifactFile(), publication.artifactName(),
+                null ,descriptor.getModuleRevisionId(), publishDate);
+        final String mainConf = "default";
+        populateDescriptorWithMavenArtifact(descriptor, mainConf, mavenMainArtifact);
+        
+        for (final Map.Entry<String, File> artifactEntry : publication.extraArtifacts().entrySet()) {
+            final File file = artifactEntry.getValue();
+            final String classifier = artifactEntry.getKey();
+            final Artifact mavenArtifact = toPublishedMavenArtifact(file, publication.artifactName(),
+                    classifier ,descriptor.getModuleRevisionId(), publishDate);
+            final String conf = classifier;
+            populateDescriptorWithMavenArtifact(descriptor, conf, mavenArtifact);
         }
     }
+    
+    private static void populateDescriptorWithMavenArtifact(DefaultModuleDescriptor descriptor, String conf, Artifact artifact) {
+        if (descriptor.getConfiguration(conf) == null) {
+            descriptor.addConfiguration(new Configuration(conf));
+        }
+        descriptor.addArtifact(conf, artifact);
+        descriptor.addExtraAttributeNamespace(EXTRA_PREFIX, EXTRA_NAMESPACE);
+    }
+    
+    
 
     public static Artifact toPublishedArtifact(JakeIvyPublication.Artifact artifact, ModuleRevisionId moduleId,
             Date date) {
@@ -362,17 +376,17 @@ final class Translations {
         return new DefaultArtifact(moduleId, date, artifactName, type, extension);
     }
 
-    public static Artifact toPublishedArtifact(JakeMavenPublication.Artifact artifact, ModuleRevisionId moduleId,
+    public static Artifact toPublishedMavenArtifact(File artifact, String artifactName, String classifier, ModuleRevisionId moduleId,
             Date date) {
-        final String artifactName = artifact.name();
-        final String type = artifact.extension();
+        final String extension = JakeUtilsString.substringAfterLast(artifact.getName(), ".");
+        final String type = extension;
         final Map<String, String> extraMap;
-        if (artifact.classifier() == null) {
+        if (classifier == null) {
             extraMap = new HashMap<String, String>();
         } else {
-            extraMap = JakeUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", artifact.classifier());
+            extraMap = JakeUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", classifier);
         }
-        return new DefaultArtifact(moduleId, date, artifactName, type, artifact.extension(), extraMap);
+        return new DefaultArtifact(moduleId, date, artifactName, type, extension, extraMap);
     }
 
     public static Map<JakeModuleId, JakeVersion> toModuleVersionMap(Properties props) {

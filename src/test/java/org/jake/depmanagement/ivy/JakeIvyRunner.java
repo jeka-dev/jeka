@@ -102,7 +102,7 @@ public class JakeIvyRunner {
     public static void testPublishMaven() {
         final JakeIvy jakeIvy = JakeIvy.of(JakeRepos.of(mavenRepo()).andMaven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured"));
         final JakeVersionedModule versionedModule = JakeVersionedModule.of(JakeModuleId.of("mygroup2:mymodule2"), JakeVersion.named("0.0.1"));
-        final JakeMavenPublication publication = JakeMavenPublication.of(sampleJarfile()).and(sampleJarSourcefile(), "source");
+        final JakeMavenPublication publication = JakeMavenPublication.of("mymodule2", sampleJarfile()).and(sampleJarSourcefile(), "source");
         final JakeDependencies deps = JakeDependencies.builder()
                 .on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();
         jakeIvy.publish(versionedModule, publication,deps, new Date());

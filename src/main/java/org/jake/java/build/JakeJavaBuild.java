@@ -60,10 +60,10 @@ public class JakeJavaBuild extends JakeBuild {
             .descr("Contains the javadoc of this project");
 
     private static final JakeScopeMapping SCOPE_MAPPING = JakeScopeMapping
-            .of(COMPILE).to("archive(master)", COMPILE.name())
-            .and(PROVIDED).to("archive(master)")
-            .and(RUNTIME).to("archive(master)", RUNTIME.name())
-            .and(TEST).to("archive(master)", TEST.name());
+            .of(COMPILE).to("archives(master)", COMPILE.name())
+            .and(PROVIDED).to("archives(master)", COMPILE.name())
+            .and(RUNTIME).to("archives(master)", RUNTIME.name())
+            .and(TEST).to("archives(master)", TEST.name());
 
     /**
      * Default path for the non managed dependencies. This path is relative to {@link #baseDir()}.
@@ -292,7 +292,7 @@ public class JakeJavaBuild extends JakeBuild {
 
     @JakeDoc("Generate sources and resources, compile production sources and process production resources to the classes directory.")
     public void compile() {
-        JakeLog.startAndNextLine("Processing production code and resources");
+        JakeLog.startln("Processing production code and resources");
         generateSources();
         productionCompiler().compile();
         generateResources();
@@ -305,7 +305,7 @@ public class JakeJavaBuild extends JakeBuild {
         if (!checkProcessTests(testSourceDirs())) {
             return;
         }
-        JakeLog.startAndNextLine("Process unit tests");
+        JakeLog.startln("Process unit tests");
         unitTestCompiler().compile();
         processUnitTestResources();
         unitTester().run();
@@ -385,7 +385,7 @@ public class JakeJavaBuild extends JakeBuild {
      */
     public final JakeClasspath depsFor(JakeScope scope) {
         if (cachedResolver == null) {
-            JakeLog.startAndNextLine("Setting dependency resolver ");
+            JakeLog.startln("Setting dependency resolver ");
             cachedResolver = baseDependencyResolver();
             JakeLog.done("Resolver set " + cachedResolver);
         }
@@ -427,31 +427,38 @@ public class JakeJavaBuild extends JakeBuild {
         return true;
     }
 
-    protected JakeMavenPublication mavenPublication(boolean includeTest) {
+    protected JakeMavenPublication mavenPublication(boolean includeTests, boolean includeSources) {
         final JakeJavaPacker packer = packer();
-        return JakeMavenPublication.of(packer.jarFile())
-                .and(packer.jarSourceFile(), "source")
+        return JakeMavenPublication.of(this.projectName() ,packer.jarFile())
+                .andIf(includeSources, packer.jarSourceFile(), "sources")
                 .andOptional(javadocMaker().zipFile(), "javadoc")
-                .andOptionalIf(includeTest, packer.jarTestFile(), "test")
-                .andOptionalIf(includeTest, packer.jarTestSourceFile(), "test-sources");
+                .andOptionalIf(includeTests, packer.jarTestFile(), "test")
+                .andOptionalIf(includeTests && includeSources, packer.jarTestSourceFile(), "testSources");
     }
 
-    protected JakeIvyPublication ivyPublication(boolean includeTest) {
+    protected JakeIvyPublication ivyPublication(boolean includeTests, boolean includeSources) {
         final JakeJavaPacker packer = packer();
         return JakeIvyPublication.of(packer.jarFile(), COMPILE)
-                .and(packer.jarSourceFile(), SOURCES)
-                .andOptional(javadocMaker().zipFile(), JAVADOC)
-                .andOptionalIf(includeTest, packer.jarTestFile(), TEST)
-                .andOptionalIf(includeTest, packer.jarTestSourceFile(), TEST);
+                .andIf(includeSources, packer.jarSourceFile(), "source", SOURCES)
+                .andOptional(javadocMaker().zipFile(), "javadoc", JAVADOC)
+                .andOptionalIf(includeTests, packer.jarTestFile(), "jar", TEST)
+                .andOptionalIf(includeTests, packer.jarTestSourceFile(), "source", SOURCES);
     }
 
     protected JakeIvyPublication ivyPublication() {
-        return ivyPublication(false);
+        return ivyPublication(includeTestsInPublication(), includeSourcesInPublication());
     }
 
-
     protected JakeMavenPublication mavenPublication() {
-        return mavenPublication(false);
+        return mavenPublication(includeTestsInPublication(), includeSourcesInPublication());
+    }
+
+    protected boolean includeTestsInPublication() {
+        return false;
+    }
+
+    protected boolean includeSourcesInPublication() {
+        return true;
     }
 
     // ------------------------------------
@@ -462,10 +469,10 @@ public class JakeJavaBuild extends JakeBuild {
 
     private JakeDependencies extraCommandLineDeps() {
         return JakeDependencies.builder()
-                .forScopes(COMPILE).onFiles(toPath(extraCompilePath))
-                .forScopes(RUNTIME).onFiles(toPath(extraRuntimePath))
-                .forScopes(TEST).onFiles(toPath(extraTestPath))
-                .forScopes(PROVIDED).onFiles(toPath(extraProvidedPath)).build();
+                .usingDefaultScopes(COMPILE).onFiles(toPath(extraCompilePath))
+                .usingDefaultScopes(RUNTIME).onFiles(toPath(extraRuntimePath))
+                .usingDefaultScopes(TEST).onFiles(toPath(extraTestPath))
+                .usingDefaultScopes(PROVIDED).onFiles(toPath(extraProvidedPath)).build();
     }
 
     private final JakeClasspath toPath(String pathAsString) {
@@ -478,10 +485,10 @@ public class JakeJavaBuild extends JakeBuild {
     protected JakeDependencies defaultUnmanagedDependencies() {
         final JakeDir libDir = JakeDir.of(baseDir(STD_LIB_PATH));
         return JakeDependencies.builder()
-                .forScopes(COMPILE).on(JakeDependency.of(libDir.include("*.jar", "compile/*.jar")))
-                .forScopes(PROVIDED).on(JakeDependency.of(libDir.include("*.jar", "provided/*.jar")))
-                .forScopes(RUNTIME).on(JakeDependency.of(libDir.include("*.jar", "runtime/*.jar")))
-                .forScopes(TEST).on(JakeDependency.of(libDir.include("*.jar", "test/*.jar"))).build();
+                .usingDefaultScopes(COMPILE).on(JakeDependency.of(libDir.include("*.jar", "compile/*.jar")))
+                .usingDefaultScopes(PROVIDED).on(JakeDependency.of(libDir.include("*.jar", "provided/*.jar")))
+                .usingDefaultScopes(RUNTIME).on(JakeDependency.of(libDir.include("*.jar", "runtime/*.jar")))
+                .usingDefaultScopes(TEST).on(JakeDependency.of(libDir.include("*.jar", "test/*.jar"))).build();
     }
 
 

@@ -84,7 +84,7 @@ public class JakeBuild {
      * If you don't use managed dependencies, this method is never invoked.
      */
     protected JakeIvy jakeIvy() {
-        return JakeIvy.of(downloadRepositories());
+        return JakeIvy.of(uploadRepositories(), downloadRepositories());
     }
 
     /**

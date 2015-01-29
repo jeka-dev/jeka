@@ -1,5 +1,6 @@
 package org.jake.depmanagement;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -22,6 +23,14 @@ public final class JakeRepos implements Iterable<JakeRepo> {
         return new JakeRepos(list);
     }
 
+    public static JakeRepos maven(File ...files) {
+        final List<JakeRepo> list = new LinkedList<JakeRepo>();
+        for (final File file : files) {
+            list.add(JakeRepo.maven(file));
+        }
+        return new JakeRepos(list);
+    }
+
     public static JakeRepos ivy(String ... urls) {
         final List<JakeRepo> list = new LinkedList<JakeRepo>();
         for (final String url : urls) {
@@ -29,6 +38,15 @@ public final class JakeRepos implements Iterable<JakeRepo> {
         }
         return new JakeRepos(list);
     }
+
+    public static JakeRepos ivy(File ... files) {
+        final List<JakeRepo> list = new LinkedList<JakeRepo>();
+        for (final File file : files) {
+            list.add(JakeRepo.ivy(file));
+        }
+        return new JakeRepos(list);
+    }
+
 
     public static JakeRepos mavenCentral() {
         return new JakeRepos(JakeUtilsIterable.listOf(JakeRepo.mavenCentral()));
@@ -45,6 +63,10 @@ public final class JakeRepos implements Iterable<JakeRepo> {
         this.repos = Collections.unmodifiableList(repos);
     }
 
+    public JakeRepos and(Iterable<JakeRepo> jakeRepos) {
+        return and(JakeUtilsIterable.toArray(jakeRepos, JakeRepo.class));
+    }
+
     public JakeRepos and(JakeRepo ...jakeRepoArray) {
         final List<JakeRepo> list = new LinkedList<JakeRepo>(this.repos);
         list.addAll(Arrays.asList(jakeRepoArray));
@@ -54,6 +76,18 @@ public final class JakeRepos implements Iterable<JakeRepo> {
     public JakeRepos andMaven(String ...urls) {
         final List<JakeRepo> list = new LinkedList<JakeRepo>(this.repos);
         list.addAll(maven(urls).repos);
+        return new JakeRepos(list);
+    }
+
+    public JakeRepos andIvy(File ...files) {
+        final List<JakeRepo> list = new LinkedList<JakeRepo>(this.repos);
+        list.addAll(JakeRepos.ivy(files).repos);
+        return new JakeRepos(list);
+    }
+
+    public JakeRepos andMaven(File ...files) {
+        final List<JakeRepo> list = new LinkedList<JakeRepo>(this.repos);
+        list.addAll(maven(files).repos);
         return new JakeRepos(list);
     }
 

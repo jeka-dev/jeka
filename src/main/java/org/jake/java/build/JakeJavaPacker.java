@@ -102,7 +102,7 @@ public class JakeJavaPacker {
     }
 
     public void pack() {
-        JakeLog.startAndNextLine("Packaging module");
+        JakeLog.startln("Packaging module");
         JakeDir.of(build().classDir()).zip().to(jarFile(), compressionLevel).md5(checkSum);
         build().sourceDirs().and(build().resourceDirs()).zip().to(jarSourceFile(), compressionLevel);
         if (!build().skipTests()) {

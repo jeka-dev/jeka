@@ -88,7 +88,7 @@ public final class JakeDependencyResolver  {
         if (cachedResult != null) {
             return cachedResult;
         }
-        JakeLog.startAndNextLine("Resolving dependencies for scope '" + scope.name() + "'");
+        JakeLog.startln("Resolving dependencies for scope '" + scope.name() + "'");
         final List<File> list = new LinkedList<File>();
         for (final JakeScope jakeScope : scope.ancestorScopes()) {
             list.addAll(this.getDeclaredDependencies(jakeScope));

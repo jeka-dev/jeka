@@ -15,6 +15,8 @@ import org.jake.utils.JakeUtilsFile;
  */
 public class Build extends JakeJavaBuild {
 
+    public final File distripZipFile = ouputDir("jake-distrib.zip");
+
     // Just to run directly the whole build bypassing the Jake bootstrap mechanism.
     // Was necessary in first place to build Jake with itself.
     public static void main(String[] args) {
@@ -47,7 +49,7 @@ public class Build extends JakeJavaBuild {
     // Create the whole distribution : creates distrib directory and zip containing all
     private void distrib() {
         final File distribDir = ouputDir("jake-distrib");
-        final File distripZipFile = ouputDir("jake-distrib.zip");
+        //final File distripZipFile = ouputDir("jake-distrib.zip");
 
         JakeLog.start("Creating distrib " + distripZipFile.getPath());
         JakeUtilsFile.copyDir(baseDir("src/main/dist"), distribDir, null, true);

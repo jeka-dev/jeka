@@ -38,10 +38,10 @@ class Lib {
 			}
 		}
 		return JakeDependencies.builder()
-				.forScopes(JakeJavaBuild.COMPILE).onFiles(compileAndRuntimes)
-				.forScopes(JakeJavaBuild.RUNTIME).onFiles(runtimeOnlys)
-				.forScopes(JakeJavaBuild.TEST).onFiles(testOnlys)
-				.forScopes(JakeJavaBuild.PROVIDED).onFiles(compileOnlys).build();
+				.usingDefaultScopes(JakeJavaBuild.COMPILE).onFiles(compileAndRuntimes)
+				.usingDefaultScopes(JakeJavaBuild.RUNTIME).onFiles(runtimeOnlys)
+				.usingDefaultScopes(JakeJavaBuild.TEST).onFiles(testOnlys)
+				.usingDefaultScopes(JakeJavaBuild.PROVIDED).onFiles(compileOnlys).build();
 	}
 
 

@@ -49,6 +49,13 @@ public class JakeIvyPublication implements Iterable<Artifact> {
         return this;
     }
 
+    public JakeIvyPublication andIf(boolean condition, File file, String type, JakeScope... jakeScopes) {
+        if (condition) {
+            return and(file, type, jakeScopes);
+        }
+        return this;
+    }
+
 
     public JakeIvyPublication andOptional(File file, JakeScope... jakeScopes) {
         if (file.exists()) {
@@ -57,9 +64,24 @@ public class JakeIvyPublication implements Iterable<Artifact> {
         return this;
     }
 
+    public JakeIvyPublication andOptional(File file, String type, JakeScope... jakeScopes) {
+        if (file.exists()) {
+            return and(file, type, jakeScopes);
+        }
+        return this;
+    }
+
+
     public JakeIvyPublication andOptionalIf(boolean condition, File file, JakeScope... jakeScopes) {
         if (condition) {
             return andOptional(file, jakeScopes);
+        }
+        return this;
+    }
+
+    public JakeIvyPublication andOptionalIf(boolean condition, File file, String type, JakeScope... jakeScopes) {
+        if (condition) {
+            return andOptional(file, type, jakeScopes);
         }
         return this;
     }

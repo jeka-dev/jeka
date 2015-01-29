@@ -65,7 +65,7 @@ public final class JakeJavadocMaker {
     }
 
     public void process() {
-        JakeLog.startAndNextLine("Generating javadoc");
+        JakeLog.startln("Generating javadoc");
         final String[] args = toArguments(outputDir);
         execute(doclet, JakeLog.infoStream(),JakeLog.warnStream(),JakeLog.errorStream(), args);
         if (outputDir.exists() && zipFile != null) {

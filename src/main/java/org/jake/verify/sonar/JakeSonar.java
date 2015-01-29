@@ -86,7 +86,7 @@ public final class JakeSonar {
         if (!enabled) {
             JakeLog.info("Sonar analysis skipped.");
         }
-        JakeLog.startAndNextLine("Launching Sonar analysis");
+        JakeLog.startln("Launching Sonar analysis");
         javaProcess().startAndWaitFor("org.sonar.runner.Main");
         JakeLog.done();
     }

@@ -140,7 +140,7 @@ public final class JakeJavaProcess {
 		command.addAll(options());
 		command.add(mainClassName);
 		command.addAll(Arrays.asList(arguments));
-		JakeLog.startAndNextLine("Starting java program : " + command.toString());
+		JakeLog.startln("Starting java program : " + command.toString());
 		final int result;
 		try {
 			final Process process = processBuilder(command).start();
