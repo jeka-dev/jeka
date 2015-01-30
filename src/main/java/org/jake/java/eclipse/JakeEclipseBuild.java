@@ -9,7 +9,7 @@ import org.jake.JakeOption;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.java.build.JakeJavaBuild;
 
-public class JakeBuildEclipse extends JakeJavaBuild {
+public class JakeEclipseBuild extends JakeJavaBuild {
 
 	private static final String CONTAINERS_PATH = "eclipse/containers";
 
