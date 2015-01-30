@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.zip.ZipOutputStream;
 
@@ -60,41 +62,52 @@ public final class JakeUtilsFile {
 
     public static int copyDir(File source, File targetDir, FileFilter filterArg,
             boolean copyEmptyDir, boolean report, PrintStream reportStream) {
+        return copyDirReplacingTokens(source, targetDir, filterArg, copyEmptyDir, report, reportStream, null);
+    }
+
+    public static int copyDirReplacingTokens(File fromFile, File toDir, FileFilter filterArg,
+            boolean copyEmptyDir, boolean report, PrintStream reportStream, Map<String, String> tokenValues) {
         final FileFilter filter = JakeUtilsObject.firstNonNull(filterArg, JakeFileFilters.acceptAll());
-        assertDir(source);
-        if (source.equals(targetDir)) {
+        assertDir(fromFile);
+        if (fromFile.equals(toDir)) {
             throw new IllegalArgumentException(
                     "Base and destination directory can't be the same : "
-                            + source.getPath());
+                            + fromFile.getPath());
         }
-        if (isAncestor(source, targetDir) && filter.accept(targetDir)) {
+        if (isAncestor(fromFile, toDir) && filter.accept(toDir)) {
             throw new IllegalArgumentException("Base filtered directory "
-                    + source.getPath() + ":(" + filter
+                    + fromFile.getPath() + ":(" + filter
                     + ") cannot contain destination directory "
-                    + targetDir.getPath()
+                    + toDir.getPath()
                     + ". Narrow filter or change the target directory.");
         }
-        if (targetDir.isFile()) {
-            throw new IllegalArgumentException(targetDir.getPath()
+        if (toDir.isFile()) {
+            throw new IllegalArgumentException(toDir.getPath()
                     + " is file. Should be directory");
         }
 
-        final File[] children = source.listFiles();
+        final File[] children = fromFile.listFiles();
         int count = 0;
         for (final File child : children) {
             if (child.isFile()) {
                 if (filter.accept(child)) {
-                    final File targetFile = new File(targetDir, child.getName());
-                    copyFile(child, targetFile, report, reportStream);
+                    final File targetFile = new File(toDir, child.getName());
+                    if (tokenValues == null || tokenValues.isEmpty()) {
+                        copyFile(child, targetFile, report, reportStream);
+                    } else {
+                        final File toFile = new File(toDir, fromFile.getName());
+                        copyFileReplacingTokens(child, toFile, tokenValues, report, reportStream);
+                    }
+
                     count++;
                 }
             } else {
-                final File subdir = new File(targetDir, child.getName());
+                final File subdir = new File(toDir, child.getName());
                 if (filter.accept(child) && copyEmptyDir) {
                     subdir.mkdirs();
                 }
-                final int subCount = copyDir(child, subdir, filter,
-                        copyEmptyDir, report, reportStream);
+                final int subCount = copyDirReplacingTokens(child, subdir, filter,
+                        copyEmptyDir, report, reportStream, tokenValues);
                 count = count + subCount;
             }
 
@@ -399,6 +412,53 @@ public final class JakeUtilsFile {
     public static void delete(File file) {
         if (!file.delete()) {
             throw new RuntimeException("File " + file.getAbsolutePath()  + " can't be deleted.");
+        }
+    }
+
+    public static void copyFileReplacingTokens(File in, File out, Map<String, String> replacements) {
+        copyFileReplacingTokens(in, out, replacements, false, null);
+    }
+
+    public static void copyFileReplacingTokens(File from, File to, Map<String, String> replacements, boolean report, PrintStream reportStream) {
+        if (!from.exists()) {
+            throw new IllegalArgumentException("File " + from.getPath()
+                    + " does not exist.");
+        }
+        if (from.isDirectory()) {
+            throw new IllegalArgumentException(from.getPath()
+                    + " is a directory. Should be a file.");
+        }
+        final TokenReplacingReader replacingReader = new TokenReplacingReader(from, replacements);
+        if (!to.exists()) {
+            try {
+                to.createNewFile();
+            } catch (final IOException e) {
+                JakeUtilsIO.closeQuietly(replacingReader);
+                throw new RuntimeException(e);
+            }
+        }
+        final Writer writer;
+        try {
+            writer = new FileWriter(to);
+        } catch (final IOException e) {
+            JakeUtilsIO.closeQuietly(replacingReader);
+            throw new RuntimeException(e);
+        }
+        if (report) {
+            reportStream.println("Coping and replacing token from file "
+                    + from.getAbsolutePath() + " to " + to.getAbsolutePath());
+        }
+        final char[] buf = new char[1024];
+        int len;
+        try {
+            while ((len = replacingReader.read(buf)) > 0) {
+                writer.write(buf, 0, len);
+            }
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            JakeUtilsIO.closeQuietly(writer);
+            JakeUtilsIO.closeQuietly(replacingReader);
         }
     }
 

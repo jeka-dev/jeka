@@ -2,10 +2,8 @@
 
 - Add APT support (annotation processing.)
 
-- Plugins : (jacoco, sonar, ...)
-
-- Ivy 
-
 - Add multi-module support
+
+- Plugins : (jacoco, sonar, ...)
 
 - Add Jacoco html report

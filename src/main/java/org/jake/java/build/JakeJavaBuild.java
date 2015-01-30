@@ -163,7 +163,7 @@ public class JakeJavaBuild extends JakeBuild {
      */
     public JakeDirSet resourceDirs() {
         return sourceDirs().andFilter(RESOURCE_FILTER).and(
-                baseDir("src/main/resources"), generatedSourceDir());
+                baseDir("src/main/resources")).and(generatedResourceDir());
     }
 
     /**
@@ -288,6 +288,10 @@ public class JakeJavaBuild extends JakeBuild {
                 .withProperty(JakeSonar.JACOCO_REPORTS_PATH, JakeUtilsFile.getRelativePath(baseDir, new File(testReportDir(), "jacoco/jacoco.exec")));
     }
 
+    protected JakeResourceProcessor resourceProcessor() {
+        return JakeResourceProcessor.of(resourceDirs());
+    }
+
     // --------------------------- Callable Methods -----------------------
 
     @JakeDoc("Generate sources and resources, compile production sources and process production resources to the classes directory.")
@@ -405,7 +409,7 @@ public class JakeJavaBuild extends JakeBuild {
     }
 
     protected void processResources() {
-        JakeResourceProcessor.of(resourceDirs()).andIfExist(generatedResourceDir()).generateTo(classDir());
+        this.resourceProcessor().generateTo(classDir());
     }
 
     protected void processUnitTestResources() {

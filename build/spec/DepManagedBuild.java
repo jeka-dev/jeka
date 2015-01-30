@@ -1,3 +1,4 @@
+import org.jake.JakeOptions;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeScope;
@@ -23,6 +24,7 @@ public class DepManagedBuild extends Build {
 
     @Override
     public void base() {
+        JakeOptions.forceVerbose(true);
         super.base();
         doc();
         publish();

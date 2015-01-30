@@ -5,6 +5,7 @@ import java.util.zip.Deflater;
 import org.jake.JakeDir;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
+import org.jake.java.JakeResourceProcessor;
 import org.jake.java.build.JakeJavaBuild;
 import org.jake.java.build.JakeJavaPacker;
 import org.jake.utils.JakeUtilsFile;
@@ -26,9 +27,8 @@ public class Build extends JakeJavaBuild {
 
     // Include a time stamped version file as resource.
     @Override
-    protected void generateResources() {
-        final File versionFile = new File(generatedResourceDir(),"org/jake/version.txt");
-        JakeUtilsFile.writeString(versionFile, version().name(), false);
+    protected JakeResourceProcessor resourceProcessor() {
+        return JakeResourceProcessor.of(resourceDirs(), "version", version().name());
     }
 
     // Normally the default method just go to compile and unit tests.
