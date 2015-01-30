@@ -95,7 +95,7 @@ public final class JakeUtilsFile {
                     if (tokenValues == null || tokenValues.isEmpty()) {
                         copyFile(child, targetFile, report, reportStream);
                     } else {
-                        final File toFile = new File(toDir, fromFile.getName());
+                        final File toFile = new File(toDir, targetFile.getName());
                         copyFileReplacingTokens(child, toFile, tokenValues, report, reportStream);
                     }
 
@@ -419,7 +419,7 @@ public final class JakeUtilsFile {
         copyFileReplacingTokens(in, out, replacements, false, null);
     }
 
-    public static void copyFileReplacingTokens(File from, File to, Map<String, String> replacements, boolean report, PrintStream reportStream) {
+    public static void copyFileReplacingTokens(File from, File toFile, Map<String, String> replacements, boolean report, PrintStream reportStream) {
         if (!from.exists()) {
             throw new IllegalArgumentException("File " + from.getPath()
                     + " does not exist.");
@@ -429,9 +429,9 @@ public final class JakeUtilsFile {
                     + " is a directory. Should be a file.");
         }
         final TokenReplacingReader replacingReader = new TokenReplacingReader(from, replacements);
-        if (!to.exists()) {
+        if (!toFile.exists()) {
             try {
-                to.createNewFile();
+                toFile.createNewFile();
             } catch (final IOException e) {
                 JakeUtilsIO.closeQuietly(replacingReader);
                 throw new RuntimeException(e);
@@ -439,14 +439,14 @@ public final class JakeUtilsFile {
         }
         final Writer writer;
         try {
-            writer = new FileWriter(to);
+            writer = new FileWriter(toFile);
         } catch (final IOException e) {
             JakeUtilsIO.closeQuietly(replacingReader);
             throw new RuntimeException(e);
         }
         if (report) {
             reportStream.println("Coping and replacing token from file "
-                    + from.getAbsolutePath() + " to " + to.getAbsolutePath());
+                    + from.getAbsolutePath() + " to " + toFile.getAbsolutePath());
         }
         final char[] buf = new char[1024];
         int len;
