@@ -1,5 +1,3 @@
-- Generate manifest
-
 - Add APT support (annotation processing.)
 
 - Add multi-module support
