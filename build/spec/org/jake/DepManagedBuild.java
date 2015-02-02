@@ -1,3 +1,4 @@
+package org.jake;
 import org.jake.JakeOptions;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeRepos;

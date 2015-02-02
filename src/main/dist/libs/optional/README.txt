@@ -1,2 +1,2 @@
-Put here libraries that may are likely to be use in some build. 
-libraries located here are not embedded in any class loader unless you do it specifically.
+Put here libraries that may be used in some builds. 
+Libraries located here are not embedded in any class loader unless you do it specifically.

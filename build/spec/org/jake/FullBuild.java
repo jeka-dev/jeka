@@ -1,3 +1,4 @@
+package org.jake;
 import org.jake.JakeJavaCompiler;
 import org.jake.JakeOptions;
 import org.jake.java.testing.junit.JakeUnit;

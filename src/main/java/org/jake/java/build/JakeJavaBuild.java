@@ -131,6 +131,14 @@ public class JakeJavaBuild extends JakeBuild {
     }
 
     /**
+     * Returns the level of detail, junit report is supposed produced.
+     * This level is set using by changing the junitReportDetail property.
+     */
+    public final JunitReportDetail junitReportDetail() {
+        return junitReportDetail;
+    }
+
+    /**
      * Returns the Java source version for the compiler (as "1.4", 1.6", "7", ...).
      */
     public String sourceJavaVersion() {

@@ -36,7 +36,7 @@ public class JakeBuild {
     protected JakeBuild() {
     }
 
-    void setBaseDir(File baseDir) {
+    public void setBaseDir(File baseDir) {
         this.baseDirFile = baseDir;
     }
 

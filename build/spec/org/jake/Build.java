@@ -1,3 +1,4 @@
+package org.jake;
 
 import java.io.File;
 import java.util.zip.Deflater;
