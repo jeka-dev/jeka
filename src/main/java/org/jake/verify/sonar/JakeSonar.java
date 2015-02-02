@@ -23,8 +23,11 @@ import org.jake.utils.JakeUtilsObject;
 
 public final class JakeSonar {
 
-    private static final String SONAR_PREFIX = ".sonar";
+    private static final String RUNNER_JAR_NAME = "sonar-runner.jar";
 
+    private static final String RUNNER_LOCAL_PATH = "build/libs/sonar-runner/" + RUNNER_JAR_NAME;
+
+    private static final String SONAR_PREFIX = ".sonar";
     public static final String PROJECT_KEY = "projectKey";
     public static final String PROJECT_NAME = "projectName";
     public static final String PROJECT_VERSION = "projectVersion";
@@ -159,8 +162,8 @@ public final class JakeSonar {
     }
 
     private File jarRunner() {
-        final File localJar = new File(projectDir(), "build/libs/sonar-runner/sonar-runner.jar");
-        final File sharedJar = new File(JakeLocator.optionalLibsDir(), "sonar-runner.jar");
+        final File localJar = new File(projectDir(), RUNNER_LOCAL_PATH);
+        final File sharedJar = new File(JakeLocator.optionalLibsDir(), RUNNER_JAR_NAME);
         final File jar = localJar.exists() ? localJar : sharedJar;
         if (!jar.exists()) {
             throw new IllegalStateException("No sonar-runner.jar found neither in " + localJar.getAbsolutePath()

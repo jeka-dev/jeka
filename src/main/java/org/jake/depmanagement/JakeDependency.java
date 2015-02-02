@@ -19,37 +19,57 @@ import org.jake.utils.JakeUtilsIterable;
  */
 public abstract class JakeDependency {
 
-	/**
-	 * Creates a {@link JakeExternalModule} dependency with the specified version.
-	 */
-	public static JakeExternalModule of(String groupAndNameAndVersion) {
-		return JakeExternalModule.of(groupAndNameAndVersion);
-	}
+    /**
+     * Creates a {@link JakeExternalModule} dependency with the specified version.
+     */
+    public static JakeExternalModule of(String groupAndNameAndVersion) {
+        return JakeExternalModule.of(groupAndNameAndVersion);
+    }
 
-	public static JakeFilesDependency of(Iterable<File> files) {
-		return new JakeFilesDependency(files);
-	}
+    public static JakeFilesDependency of(Iterable<File> files) {
+        return new JakeFilesDependency(files);
+    }
 
-	/**
-	 * A dependency on files located on file system.
-	 */
-	public static final class JakeFilesDependency extends JakeDependency {
+    /**
+     * A dependency on files located on file system.
+     */
+    public static final class JakeFilesDependency extends JakeDependency {
 
-		private final List<File> files;
+        private final List<File> files;
 
-		private JakeFilesDependency(Iterable<File> files) {
-			this.files = Collections.unmodifiableList(JakeUtilsIterable.toList(files));
-		}
+        private JakeFilesDependency(Iterable<File> files) {
+            this.files = Collections.unmodifiableList(JakeUtilsIterable.toList(files));
+        }
 
-		public final List<File> files() {
-			return files;
-		}
+        public final List<File> files() {
+            return files;
+        }
 
-		@Override
-		public String toString() {
-			return "Files=" + files.toString();
-		}
+        @Override
+        public String toString() {
+            return "Files=" + files.toString();
+        }
 
-	}
+    }
+
+    public static final class JakeProjectDependency extends JakeDependency {
+
+        private final String relativePath;
+
+        private JakeProjectDependency(String relativePath) {
+            super();
+            this.relativePath = relativePath;
+        }
+
+        public static JakeProjectDependency on(String relativePath) {
+            return new JakeProjectDependency(relativePath);
+        }
+
+        public String relativePath() {
+            return relativePath;
+        }
+
+
+    }
 
 }

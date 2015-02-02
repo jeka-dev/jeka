@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jake.depmanagement.JakeDependency.JakeFilesDependency;
+import org.jake.depmanagement.JakeDependency.JakeProjectDependency;
 import org.jake.depmanagement.JakeScopedDependency.ScopeType;
 import org.jake.utils.JakeUtilsIterable;
 
@@ -313,6 +314,10 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 
         public ScopeableBuilder on(String description) {
             return on(description, true);
+        }
+
+        public ScopeableBuilder onProject(String relativePath) {
+            return on(JakeProjectDependency.on(relativePath));
         }
 
         public ScopeableBuilder on(String description, boolean transitive) {
