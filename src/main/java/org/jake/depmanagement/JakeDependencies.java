@@ -266,8 +266,6 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
             return this;
         }
 
-
-
         public ScopeableBuilder on(JakeDependency dependency) {
             final JakeScopedDependency scopedDependency;
             if (defaultScopes != null) {
@@ -289,13 +287,17 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
             return this;
         }
 
-        public Builder onFiles(Iterable<File> files) {
-            if (!files.iterator().hasNext()) {
-                return this;
-            }
-            return on(JakeFilesDependency.of(files));
+        public ScopeableBuilder onFile(File file) {
+            return on(JakeFilesDependency.of(JakeUtilsIterable.listOf(file)));
         }
         
+        public ScopeableBuilder onFiles(Iterable<File> files) {
+        	ScopeableBuilder builder = new ScopeableBuilder(this);
+        	for (File file : files) {
+        		builder = builder.onFile(file);
+        	}
+        	return builder;
+        }
         
 
         public ScopeableBuilder on(JakeModuleId module, JakeVersionRange version) {
