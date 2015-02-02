@@ -295,6 +295,8 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
             }
             return on(JakeFilesDependency.of(files));
         }
+        
+        
 
         public ScopeableBuilder on(JakeModuleId module, JakeVersionRange version) {
             return on(module, version, true);

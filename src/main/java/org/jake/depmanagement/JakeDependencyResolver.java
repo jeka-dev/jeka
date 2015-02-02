@@ -45,7 +45,7 @@ public final class JakeDependencyResolver  {
         this.parameters = resolutionParameters;
     }
 
-    protected List<File> getDeclaredDependencies(JakeScope scope) {
+    private List<File> getDeclaredDependencies(JakeScope scope) {
         final List<File> result = new LinkedList<File>();
 
         // Add local, non-managed dependencies
