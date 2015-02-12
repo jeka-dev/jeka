@@ -8,7 +8,7 @@ import org.jake.depmanagement.JakeDependencyResolver;
  * Defines methods that a Build class must define in order to make this module reusable by
  * other projects.
  * 
- * @author Djeang
+ * @author Jerome Angibaud
  */
 public interface JakeJarModule {
 

@@ -17,9 +17,9 @@ import org.jake.utils.JakeUtilsIO.StreamGobbler;
 import org.jake.utils.JakeUtilsString;
 
 /**
+ * Offer fluent interface for launching Java processes.
  * 
- * @author Djeang
- *
+ * @author Jerome Angibaud
  */
 public final class JakeJavaProcess {
 

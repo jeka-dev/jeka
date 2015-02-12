@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 /**
  * Filter on <code>Class</code> objects.
  * 
- * @author Djeang
+ * @author Jerome Angibaud
  */
 public abstract class JakeClassFilter {
 

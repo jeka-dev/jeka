@@ -168,7 +168,7 @@ public final class JakeClassLoader {
 	 * will load the class <code>mypack1.subpack.MyClass</code>.
 	 */
 	public <T extends Object> Class<T> loadGivenClassSourcePath(String classSourcePath) {
-		final String className = classSourcePath.replace('/', '.').substring(0, classSourcePath.length()-JAVA_SUFFIX_LENGTH);
+		final String className = classSourcePath.replace('/', '.').replace('\\', '.').substring(0, classSourcePath.length()-JAVA_SUFFIX_LENGTH);
 		return load(className);
 	}
 

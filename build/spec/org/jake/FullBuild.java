@@ -1,6 +1,4 @@
 package org.jake;
-import org.jake.JakeJavaCompiler;
-import org.jake.JakeOptions;
 import org.jake.java.testing.junit.JakeUnit;
 
 /**
@@ -16,22 +14,10 @@ public class FullBuild extends Build {
 		return super.unitTester().enhancedWith(jacoco());
 	}
 
-	// Launch a sonar analysing
-	public void sonar() {
-		jakeSonar().launch();
-	}
-
 	// Use a forked compiler for production (non-test) code.
 	@Override
 	public JakeJavaCompiler productionCompiler() {
 		return super.productionCompiler().fork(false);
-	}
-
-	// Include sonar analysis in the default method
-	@Override
-	public void base() {
-		super.base();
-		sonar();
 	}
 
 	public static void main(String[] args) {
