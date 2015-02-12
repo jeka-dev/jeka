@@ -31,10 +31,6 @@ public final class JakeUnit {
 		NONE, BASIC, FULL;
 	}
 
-	public static interface Enhancer {
-		JakeUnit enhance(JakeUnit jakeUnit);
-	}
-
 	private static final String JUNIT4_RUNNER_CLASS_NAME = "org.junit.runner.JUnitCore";
 
 	private static final String JUNIT3_RUNNER_CLASS_NAME = "junit.textui.TestRunner";
@@ -104,8 +100,16 @@ public final class JakeUnit {
 		return new JakeUnit(classpath, reportDetail, reportDir, fork, list,this.classesToTest);
 	}
 
-	public JakeUnit enhancedWith(Enhancer enhancer) {
+	public JakeUnit enhancedWith(JakeUnitPlugin enhancer) {
 		return enhancer.enhance(this);
+	}
+
+	public JakeUnit enhancedWith(Iterable<JakeUnitPlugin> plugins) {
+		JakeUnit result = this;
+		for (final JakeUnitPlugin plugin : plugins) {
+			result = result.enhancedWith(plugin);
+		}
+		return result;
 	}
 
 	public JakeUnit fork(JakeJavaProcess process) {

@@ -8,9 +8,10 @@ import java.util.List;
 import org.jake.JakeLocator;
 import org.jake.JakeLog;
 import org.jake.java.JakeJavaProcess;
+import org.jake.java.testing.junit.JakeUnitPlugin;
 import org.jake.java.testing.junit.JakeUnit;
 
-public final class Jakeoco implements JakeUnit.Enhancer {
+public final class Jakeoco implements JakeUnitPlugin {
 
 	private final File agent;
 

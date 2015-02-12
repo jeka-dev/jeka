@@ -4,38 +4,41 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.jake.utils.JakeUtilsString;
 
 /**
- * Jake offers a very simple, yet powerfull, Plugin mechanism.<br/>
+ * Jake offers a very simple, yet powerful, plugin mechanism.<br/>
  * The plugins discovery is achieved by scanning the classpath.
  * Plugin classes are supposed to be named with a given suffix, according its type.
  * This way class scanning keep to be efficient and does not required to specify any base package.
  * 
  * For example, a plugin class of JakeJavaBuildPlugin type are supposed to be named 'my.package.XxxxxJakeJavaBuildPlugin.class'.
- * Xxxxx will be its short name, while my.package.Xxxxx will be its long name.
+ * Xxxxx will be its short name, while my.package.XxxxxJakeJavaBuildPlugin will be its full name.
  * 
  * @author Jerome Angibaud
  */
-public final class JakePlugins<T> {
+public final class JakePlugins<T> implements Iterable<T> {
 
-	private static final Map<Class<?>, JakePlugins<?>> CACHE = new HashMap<Class<?>, JakePlugins<?>>();
+	private static final Map<Class<?>, Set<Class<?>>> CACHE = new HashMap<Class<?>, Set<Class<?>>>();
 
-	@SuppressWarnings("unchecked")
+
 	public static <T> JakePlugins<T> of(Class<T> extendingClass) {
+		final JakePlugins<T> result = new JakePlugins<T>(extendingClass);
 		if (CACHE.containsKey(extendingClass)) {
-			return (JakePlugins<T>) CACHE.get(extendingClass);
+			final Set<Class<?>> pluginClasses = CACHE.get(extendingClass);
+			final String suffix = extendingClass.getSimpleName();
+			result.plugins = toPluginSet(suffix, pluginClasses);
 		}
-		final JakePlugins<T> jakePlugins = new JakePlugins<T>(extendingClass);
-		CACHE.put(extendingClass, jakePlugins);
-		return jakePlugins;
+		return result;
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <T> Set<JakePlugin<T>> from(Class<T> extendingClass) {
+
+	private static <T> Set<JakePlugin<T>> toPluginSet(Class<T> extendingClass) {
 		final String nameSuffix = extendingClass.getSimpleName();
 		final FileFilter fileFilter = new FileFilter() {
 
@@ -45,19 +48,20 @@ public final class JakePlugins<T> {
 			}
 		};
 		final Set<Class<?>> matchingClasses = JakeClassLoader.current().loadClasses(fileFilter);
-		final Set<Class<? extends T>> result = new HashSet<Class<? extends T>>();
+		final Set<Class<?>> result = new HashSet<Class<?>>();
 		for (final Class<?> candidate : matchingClasses) {
 			if (extendingClass.isAssignableFrom(candidate)) {
-				result.add((Class<? extends T>) candidate);
+				result.add(candidate);
 			}
 		}
-		return from(nameSuffix, result);
+		return toPluginSet(nameSuffix, result);
 	}
 
-	private static <T> Set<JakePlugin<T>> from(String suffix, Iterable<Class<? extends T>> classes) {
+	@SuppressWarnings("unchecked")
+	private static <T> Set<JakePlugin<T>> toPluginSet(String suffix, Iterable<Class<?>> classes) {
 		final Set<JakePlugin<T>> result = new HashSet<JakePlugins.JakePlugin<T>>();
-		for (final Class<? extends T> clazz : classes) {
-			result.add(new JakePlugin<T>(suffix, clazz));
+		for (final Class<?> clazz : classes) {
+			result.add(new JakePlugin<T>(suffix, (Class<? extends T>) clazz));
 		}
 		return result;
 	}
@@ -71,22 +75,22 @@ public final class JakePlugins<T> {
 		this.extendingClass = extendingClass;
 	}
 
-	private Set<JakePlugin<T>> plugins() {
+	private synchronized Set<JakePlugin<T>> plugins() {
 		if (plugins == null) {
-			plugins = from(extendingClass);
+			plugins = toPluginSet(extendingClass);
 		}
 		return plugins;
 	}
 
 
 	/**
-	 * Returns the plugin having a long name equals to the specified name.
+	 * Returns the plugin having a full name equals to the specified name.
 	 * If not found, returns the plugin having a short name equals to the specified name.
 	 * If not found, returns <code>null</code>.
 	 */
 	public JakePlugin<T> byName(String name) {
 		for (final JakePlugin<T> jakePlugin : this.plugins()) {
-			if (name.equals(jakePlugin.longName)) {
+			if (name.equals(jakePlugin.fullName)) {
 				return jakePlugin;
 			}
 		}
@@ -96,6 +100,16 @@ public final class JakePlugins<T> {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public Iterator<T> iterator() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public List<T> toPluginInstances() {
+
 	}
 
 
@@ -111,7 +125,7 @@ public final class JakePlugins<T> {
 
 		private final String shortName;
 
-		private final String longName;
+		private final String fullName;
 
 		private final Class<? extends T> clazz;
 
@@ -119,10 +133,10 @@ public final class JakePlugins<T> {
 			this(shortName(suffix, clazz), longName(suffix, clazz), clazz);
 		}
 
-		public JakePlugin(String shortName, String longName, Class<? extends T> clazz) {
+		private JakePlugin(String shortName, String fullName, Class<? extends T> clazz) {
 			super();
 			this.shortName = shortName;
-			this.longName = longName;
+			this.fullName = fullName;
 			this.clazz = clazz;
 		}
 
@@ -160,6 +174,9 @@ public final class JakePlugins<T> {
 
 
 	}
+
+
+
 
 
 
