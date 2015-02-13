@@ -207,6 +207,21 @@ public final class JakeUtilsReflect {
 		return result;
 	}
 
+	/**
+	 * Returns all fields declared in the class passed as argument or in its super classes.
+	 */
+	public static List<Field> getAllDeclaredField(Class<?> clazz, boolean includeSuperClass) {
+		final List<Field> result = new LinkedList<Field>();
+		for (final Field field : clazz.getDeclaredFields()) {
+			result.add(field);
+		}
+		final Class<?> superClass = clazz.getSuperclass();
+		if (superClass != null && includeSuperClass) {
+			result.addAll(getAllDeclaredField(superClass, true));
+		}
+		return result;
+	}
+
 
 	@SuppressWarnings("unchecked")
 	public static <T> T invokeStaticMethod(Class<?> clazz, String methodName, Object ...args) {

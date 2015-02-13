@@ -8,10 +8,10 @@ import java.util.List;
 import org.jake.JakeLocator;
 import org.jake.JakeLog;
 import org.jake.java.JakeJavaProcess;
-import org.jake.java.testing.junit.JakeUnitPlugin;
 import org.jake.java.testing.junit.JakeUnit;
+import org.jake.java.testing.junit.JakeUnit.Enhancer;
 
-public final class Jakeoco implements JakeUnitPlugin {
+public final class JakeocoJunitEnhancer implements Enhancer {
 
 	private final File agent;
 
@@ -21,7 +21,7 @@ public final class Jakeoco implements JakeUnitPlugin {
 
 	private final List<String> options;
 
-	private Jakeoco(File agent,boolean enabled, File destFile, List<String> options) {
+	private JakeocoJunitEnhancer(File agent,boolean enabled, File destFile, List<String> options) {
 		super();
 		this.agent = agent;
 		this.enabled = enabled;
@@ -29,12 +29,12 @@ public final class Jakeoco implements JakeUnitPlugin {
 		this.options = new LinkedList<String>();
 	}
 
-	public static Jakeoco of(File destFile) {
-		return new Jakeoco(defaultAgentFile(), true, destFile, new LinkedList<String>());
+	public static JakeocoJunitEnhancer of(File destFile) {
+		return new JakeocoJunitEnhancer(defaultAgentFile(), true, destFile, new LinkedList<String>());
 	}
 
-	public Jakeoco withAgent(File jacocoagent) {
-		return new Jakeoco(jacocoagent, enabled, destFile, options);
+	public JakeocoJunitEnhancer withAgent(File jacocoagent) {
+		return new JakeocoJunitEnhancer(jacocoagent, enabled, destFile, options);
 	}
 
 	/**
@@ -42,12 +42,12 @@ public final class Jakeoco implements JakeUnitPlugin {
 	 * One option is to be considered as a <code>pair=value</code>.<br/>
 	 * Example : <code>withOptions("dumponexit=true", "port=6301");</code>
 	 */
-	public Jakeoco withOptions(String ...options) {
-		return new Jakeoco(agent, enabled, destFile, Arrays.asList(options));
+	public JakeocoJunitEnhancer withOptions(String ...options) {
+		return new JakeocoJunitEnhancer(agent, enabled, destFile, Arrays.asList(options));
 	}
 
-	public Jakeoco enabled(boolean enabled) {
-		return new Jakeoco(this.agent, enabled, destFile, options);
+	public JakeocoJunitEnhancer enabled(boolean enabled) {
+		return new JakeocoJunitEnhancer(this.agent, enabled, destFile, options);
 	}
 
 	@Override

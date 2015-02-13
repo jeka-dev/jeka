@@ -1,4 +1,5 @@
 package org.jake;
+import org.jake.java.testing.jacoco.JakeocoJakeUnitPlugin;
 import org.jake.java.testing.junit.JakeUnit;
 
 /**
@@ -11,7 +12,7 @@ public class FullBuild extends Build {
 	// Add Jacoco agent to the unit test runner.
 	@Override
 	public JakeUnit unitTester() {
-		return super.unitTester().enhancedWith(jacoco());
+		return super.unitTester().enhancedWith(JakeocoJakeUnitPlugin.enhancer(this));
 	}
 
 	// Use a forked compiler for production (non-test) code.

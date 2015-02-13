@@ -43,6 +43,10 @@ public final class JakeUnit {
 
 	private static final String JUNIT3_TEST_RESULT_CLASS_NAME = "junit.framework.TestResult";
 
+	public static interface Enhancer {
+		JakeUnit enhance(JakeUnit jakeUnit);
+	}
+
 	private final JakeClasspath classpath;
 
 	private final JunitReportDetail reportDetail;
@@ -100,13 +104,13 @@ public final class JakeUnit {
 		return new JakeUnit(classpath, reportDetail, reportDir, fork, list,this.classesToTest);
 	}
 
-	public JakeUnit enhancedWith(JakeUnitPlugin enhancer) {
+	public JakeUnit enhancedWith(Enhancer enhancer) {
 		return enhancer.enhance(this);
 	}
 
-	public JakeUnit enhancedWith(Iterable<JakeUnitPlugin> plugins) {
+	public JakeUnit enhancedWith(Iterable<Enhancer> plugins) {
 		JakeUnit result = this;
-		for (final JakeUnitPlugin plugin : plugins) {
+		for (final Enhancer plugin : plugins) {
 			result = result.enhancedWith(plugin);
 		}
 		return result;

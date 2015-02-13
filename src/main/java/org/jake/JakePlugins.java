@@ -2,13 +2,17 @@ package org.jake;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jake.JakePlugins.JakePlugin.JakePluginConfigurer;
+import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
 
 /**
@@ -26,7 +30,6 @@ public final class JakePlugins<T> implements Iterable<T> {
 
 	private static final Map<Class<?>, Set<Class<?>>> CACHE = new HashMap<Class<?>, Set<Class<?>>>();
 
-
 	public static <T> JakePlugins<T> of(Class<T> extendingClass) {
 		final JakePlugins<T> result = new JakePlugins<T>(extendingClass);
 		if (CACHE.containsKey(extendingClass)) {
@@ -37,6 +40,82 @@ public final class JakePlugins<T> implements Iterable<T> {
 		return result;
 	}
 
+	public static List<JakePlugins<?>> declaredAsField(Object hostingInstance) {
+		final List<Field> fields = JakeUtilsReflect.getAllDeclaredField(hostingInstance.getClass(), true);
+		final List<JakePlugins<?>> result = new LinkedList<JakePlugins<?>>();
+		for (final Field field : fields) {
+			if (field.getType().equals(JakePlugins.class)) {
+				final JakePlugins<?> plugins = JakeUtilsReflect.getFieldValue(hostingInstance, field);
+				result.add(plugins);
+			}
+		}
+		return result;
+	}
+
+	private Set<JakePlugin<T>> plugins;
+
+	private final Class<T> extendingClass;
+
+	private JakePluginConfigurer<T> configurer;
+
+	private JakePlugins(Class<T> extendingClass) {
+		super();
+		this.extendingClass = extendingClass;
+	}
+
+	private Set<JakePlugin<T>> plugins() {
+		if (plugins == null) {
+			synchronized (this.plugins) {
+				final Set<JakePlugin<T>> result = toPluginSet(extendingClass);
+				if (configurer != null) {
+					for (final JakePlugin<T> jakePlugin : result) {
+						jakePlugin.configure(configurer);
+					}
+					this.plugins = result;
+				}
+			}
+		}
+		return plugins;
+	}
+
+	/**
+	 * Returns the plugin having a full name equals to the specified name.
+	 * If not found, returns the plugin having a short name equals to the specified name.
+	 * If not found, returns <code>null</code>.
+	 */
+	public JakePlugin<T> byName(String name) {
+		for (final JakePlugin<T> jakePlugin : this.plugins()) {
+			if (name.equals(jakePlugin.fullName)) {
+				return jakePlugin;
+			}
+		}
+		for (final JakePlugin<T> jakePlugin : this.plugins()) {
+			if (name.equals(jakePlugin.shortName)) {
+				return jakePlugin;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public Iterator<T> iterator() {
+		return toPluginInstances().iterator();
+	}
+
+	public void configureAll(JakePluginConfigurer<T> configurer) {
+		this.configurer = configurer;
+		synchronized (this.plugins) {
+			this.plugins = null;
+		}
+	}
+
+	private List<T> toPluginInstances() {
+		final List<T> result = new LinkedList<T>();
+		for (final JakePlugin<T> jakePlugin : this.plugins()) {
+			result.add(jakePlugin.instance());
+		}
+		return result;
+	}
 
 	private static <T> Set<JakePlugin<T>> toPluginSet(Class<T> extendingClass) {
 		final String nameSuffix = extendingClass.getSimpleName();
@@ -66,52 +145,6 @@ public final class JakePlugins<T> implements Iterable<T> {
 		return result;
 	}
 
-	private Set<JakePlugin<T>> plugins;
-
-	private final Class<T> extendingClass;
-
-	private JakePlugins(Class<T> extendingClass) {
-		super();
-		this.extendingClass = extendingClass;
-	}
-
-	private synchronized Set<JakePlugin<T>> plugins() {
-		if (plugins == null) {
-			plugins = toPluginSet(extendingClass);
-		}
-		return plugins;
-	}
-
-
-	/**
-	 * Returns the plugin having a full name equals to the specified name.
-	 * If not found, returns the plugin having a short name equals to the specified name.
-	 * If not found, returns <code>null</code>.
-	 */
-	public JakePlugin<T> byName(String name) {
-		for (final JakePlugin<T> jakePlugin : this.plugins()) {
-			if (name.equals(jakePlugin.fullName)) {
-				return jakePlugin;
-			}
-		}
-		for (final JakePlugin<T> jakePlugin : this.plugins()) {
-			if (name.equals(jakePlugin.shortName)) {
-				return jakePlugin;
-			}
-		}
-		return null;
-	}
-
-	@Override
-	public Iterator<T> iterator() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public List<T> toPluginInstances() {
-
-	}
-
 
 	public static class JakePlugin<T> {
 
@@ -129,8 +162,20 @@ public final class JakePlugins<T> implements Iterable<T> {
 
 		private final Class<? extends T> clazz;
 
+		private T instance;
+
+		private JakePluginConfigurer<T> configurer;
+
+
 		public JakePlugin(String suffix, Class<? extends T> clazz) {
 			this(shortName(suffix, clazz), longName(suffix, clazz), clazz);
+		}
+
+		public void configure(JakePluginConfigurer<T> configurer) {
+			this.configurer = configurer;
+			synchronized (this.instance) {
+				instance = null;
+			}
 		}
 
 		private JakePlugin(String shortName, String fullName, Class<? extends T> clazz) {
@@ -138,6 +183,19 @@ public final class JakePlugins<T> implements Iterable<T> {
 			this.shortName = shortName;
 			this.fullName = fullName;
 			this.clazz = clazz;
+		}
+
+		public T instance() {
+			if (instance == null) {
+				synchronized (this.instance) {
+					T result = JakeUtilsReflect.newInstance(clazz);
+					if (configurer != null) {
+						result = this.configurer.configure(result);
+					}
+					instance = result;
+				}
+			}
+			return instance;
 		}
 
 		@Override
@@ -169,6 +227,12 @@ public final class JakePlugins<T> implements Iterable<T> {
 				return false;
 			}
 			return true;
+		}
+
+		public static interface JakePluginConfigurer<T> {
+
+			T configure(T plugin);
+
 		}
 
 

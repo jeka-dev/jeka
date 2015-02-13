@@ -13,6 +13,7 @@ import org.jake.JakeJavaCompiler;
 import org.jake.JakeLog;
 import org.jake.JakeOption;
 import org.jake.JakePlugins;
+import org.jake.JakePlugins.JakePlugin.JakePluginConfigurer;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeDependency;
 import org.jake.depmanagement.JakeDependencyResolver;
@@ -22,7 +23,6 @@ import org.jake.depmanagement.JakeScopeMapping;
 import org.jake.java.JakeJavadocMaker;
 import org.jake.java.JakeResourceProcessor;
 import org.jake.java.JakeUtilsJdk;
-import org.jake.java.testing.jacoco.Jakeoco;
 import org.jake.java.testing.junit.JakeUnit;
 import org.jake.java.testing.junit.JakeUnit.JunitReportDetail;
 import org.jake.publishing.JakeIvyPublication;
@@ -77,7 +77,9 @@ public class JakeJavaBuild extends JakeBuild {
 			.exclude("**/*.java").andExclude("**/package.html")
 			.andExclude("**/doc-files");
 
-	private final JakePlugins plugins = JakePlugins.of(JakeJavaBuildPlugin.class);
+	private final JakePlugins<JakeJavaBuildPlugin> plugins = JakePlugins.of(JakeJavaBuildPlugin.class);
+
+	private final JakePlugins<JakeUnitPlugin> jakeUnitPlugins = JakePlugins.of(JakeUnitPlugin.class);
 
 	@JakeOption({
 		"Mention if you want to add extra lib in your 'compile' scope but not in your 'runtime' scope. It can be absolute or relative to the project base dir.",
@@ -125,7 +127,14 @@ public class JakeJavaBuild extends JakeBuild {
 	@Override
 	public void setBaseDir(File baseDir) {
 		super.setBaseDir(baseDir);
+		this.plugins.configureAll(new JakePluginConfigurer<JakeJavaBuildPlugin>() {
 
+			@Override
+			public JakeJavaBuildPlugin configure(JakeJavaBuildPlugin plugin) {
+				return plugin.configure(JakeJavaBuild.this);
+			}
+
+		});
 	}
 
 
@@ -276,19 +285,6 @@ public class JakeJavaBuild extends JakeBuild {
 	public JakeJavaPacker packer() {
 		return JakeJavaPacker.of(this);
 	}
-
-	public Jakeoco jacoco() {
-		final File agent = baseDir("build/libs/jacoco-agent/jacocoagent.jar");
-		final File agentFile = agent.exists() ? agent : Jakeoco.defaultAgentFile();
-		if (!agentFile.exists()) {
-			throw new IllegalStateException("No jacocoagent.jar found neither in "
-					+ Jakeoco.defaultAgentFile().getAbsolutePath()
-					+ " nor in " + agent.getAbsolutePath() );
-		}
-		return Jakeoco.of(new File(testReportDir(), "jacoco/jacoco.exec")).withAgent(agentFile);
-	}
-
-
 
 	protected JakeResourceProcessor resourceProcessor() {
 		return JakeResourceProcessor.of(resourceDirs());
