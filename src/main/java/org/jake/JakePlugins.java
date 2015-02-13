@@ -3,6 +3,7 @@ package org.jake;
 import java.io.File;
 import java.io.FileFilter;
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -63,19 +64,19 @@ public final class JakePlugins<T> implements Iterable<T> {
 		this.extendingClass = extendingClass;
 	}
 
-	private Set<JakePlugin<T>> plugins() {
+	public Set<JakePlugin<T>> plugins() {
 		if (plugins == null) {
-			synchronized (this.plugins) {
-				final Set<JakePlugin<T>> result = toPluginSet(extendingClass);
+			synchronized (this) {
+				final Set<JakePlugin<T>> result = loadAllPlugins(extendingClass);
 				if (configurer != null) {
 					for (final JakePlugin<T> jakePlugin : result) {
 						jakePlugin.configure(configurer);
 					}
-					this.plugins = result;
 				}
+				this.plugins = Collections.unmodifiableSet(result);
 			}
 		}
-		return plugins;
+		return this.plugins;
 	}
 
 	/**
@@ -117,7 +118,15 @@ public final class JakePlugins<T> implements Iterable<T> {
 		return result;
 	}
 
-	private static <T> Set<JakePlugin<T>> toPluginSet(Class<T> extendingClass) {
+	@Override
+	public String toString() {
+		if (this.plugins == null) {
+			return "Not loaded (extending class = " + this.extendingClass + ")";
+		}
+		return this.plugins.toString();
+	}
+
+	private static <T> Set<JakePlugin<T>> loadAllPlugins(Class<T> extendingClass) {
 		final String nameSuffix = extendingClass.getSimpleName();
 		final FileFilter fileFilter = new FileFilter() {
 
@@ -185,6 +194,10 @@ public final class JakePlugins<T> implements Iterable<T> {
 			this.clazz = clazz;
 		}
 
+		public Class<? extends T> pluginClass() {
+			return this.clazz;
+		}
+
 		public T instance() {
 			if (instance == null) {
 				synchronized (this.instance) {
@@ -227,6 +240,11 @@ public final class JakePlugins<T> implements Iterable<T> {
 				return false;
 			}
 			return true;
+		}
+
+		@Override
+		public String toString() {
+			return this.shortName + "(" + this.clazz.toString() + ")";
 		}
 
 		public static interface JakePluginConfigurer<T> {

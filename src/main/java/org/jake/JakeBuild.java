@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jake.JakePlugins.JakePlugin;
 import org.jake.depmanagement.JakeModuleId;
 import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeVersion;
@@ -190,6 +191,19 @@ public class JakeBuild {
 		JakeLog.shift(JUMP);
 		JakeLog.info(JakeOptions.help(this.getClass()));
 		JakeLog.shift(-JUMP);
+		displayPlugins();
+	}
+
+	private void displayPlugins() {
+		JakeLog.startln("Looking for plugins");
+		final List<JakePlugins<?>> pluginsList = JakePlugins.declaredAsField(this);
+		for (final JakePlugins<?> jakePlugins : pluginsList) {
+			System.out.println(jakePlugins);
+			for (final JakePlugin<?> jakePlugin : jakePlugins.plugins()) {
+				JakeLog.info("Found plugin : " + jakePlugin.pluginClass());
+			}
+		}
+		JakeLog.done();
 	}
 
 
