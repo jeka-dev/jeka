@@ -3,9 +3,13 @@ package org.jake;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.jake.utils.JakeUtilsIO;
@@ -136,6 +140,9 @@ public final class JakeClasspath implements Iterable<File> {
 		return result;
 	}
 
+	/**
+	 * Iterator over the entries.
+	 */
 	@Override
 	public Iterator<File> iterator() {
 		return entries.iterator();
@@ -161,6 +168,30 @@ public final class JakeClasspath implements Iterable<File> {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns all the elements contained in this classpath. It can be either a class file or
+	 * any resource file.
+	 * The element is expressed with its path relative to its containing entry.
+	 */
+	public Set<String> allItemsMatching(JakeFileFilter fileFilter) {
+		final Set<String> result = new HashSet<String>();
+		for (final File classpathEntry : this) {
+			if (classpathEntry.isDirectory()) {
+				result.addAll(JakeDir.of(classpathEntry).andFilter(fileFilter).relativePathes());
+			} else {
+				final ZipFile zipFile = JakeUtilsIO.newZipFile(classpathEntry);
+				for (final Enumeration<? extends ZipEntry> zipEntries = zipFile.entries(); zipEntries.hasMoreElements(); ) {
+					final ZipEntry zipEntry = zipEntries.nextElement();
+					if (fileFilter.accept(zipEntry.getName())) {
+						result.add(zipEntry.getName());
+					}
+				}
+				JakeUtilsIO.closeQietly(zipFile);
+			}
+		}
+		return result;
 	}
 
 	static String toFilePath(String className) {

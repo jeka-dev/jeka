@@ -10,7 +10,7 @@ import java.util.List;
 import org.jake.utils.JakeUtilsIterable;
 
 /**
- * A sequence of file to be used as a <code>path</code>.<br/>
+ * A sequence of file (folder or archive) to be used as a <code>path</code>.<br/>
  * Each file is called an <code>entry</code>.<br/>
  * Instances of this class are immutable.
  * 

@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
 Created-By: djeangdev@yahoo.fr
-Main-Class: org.jake.JakeMain
+Main-Class: org.jake.Main
 Version: ${version}

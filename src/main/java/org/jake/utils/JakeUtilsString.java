@@ -29,6 +29,15 @@ public final class JakeUtilsString {
 		return null;
 	}
 
+	public static int countOccurence(String matchedString, String occurence) {
+		int count = 0;
+		int from = 0;
+		for (final int index = matchedString.indexOf(occurence, from); index != -1; from = index) {
+			count++;
+		}
+		return count;
+	}
+
 	public static String[] split(String str, String delimiters) {
 		final StringTokenizer st = new StringTokenizer(str, delimiters);
 		final List<String> tokens = new ArrayList<String>();

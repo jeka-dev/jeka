@@ -1,8 +1,7 @@
 package org.jake;
 
-import java.io.File;
-import java.io.FileFilter;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,8 +34,7 @@ public final class JakePlugins<T> implements Iterable<T> {
 		final JakePlugins<T> result = new JakePlugins<T>(extendingClass);
 		if (CACHE.containsKey(extendingClass)) {
 			final Set<Class<?>> pluginClasses = CACHE.get(extendingClass);
-			final String suffix = extendingClass.getSimpleName();
-			result.plugins = toPluginSet(suffix, pluginClasses);
+			result.plugins = toPluginSet(extendingClass, pluginClasses);
 		}
 		return result;
 	}
@@ -128,28 +126,23 @@ public final class JakePlugins<T> implements Iterable<T> {
 
 	private static <T> Set<JakePlugin<T>> loadAllPlugins(Class<T> extendingClass) {
 		final String nameSuffix = extendingClass.getSimpleName();
-		final FileFilter fileFilter = new FileFilter() {
-
-			@Override
-			public boolean accept(File pathname) {
-				return pathname.getName().endsWith(nameSuffix + ".class");
-			}
-		};
-		final Set<Class<?>> matchingClasses = JakeClassLoader.current().loadClasses(fileFilter);
+		final Set<Class<?>> matchingClasses = JakeClassLoader.current().loadClasses("**/*"+nameSuffix);
 		final Set<Class<?>> result = new HashSet<Class<?>>();
 		for (final Class<?> candidate : matchingClasses) {
-			if (extendingClass.isAssignableFrom(candidate)) {
+			if (extendingClass.isAssignableFrom(candidate)
+					&& !Modifier.isAbstract(candidate.getModifiers())
+					&& !candidate.equals(extendingClass)) {
 				result.add(candidate);
 			}
 		}
-		return toPluginSet(nameSuffix, result);
+		return toPluginSet(extendingClass, result);
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> Set<JakePlugin<T>> toPluginSet(String suffix, Iterable<Class<?>> classes) {
+	private static <T> Set<JakePlugin<T>> toPluginSet(Class<T> extendingClass, Iterable<Class<?>> classes) {
 		final Set<JakePlugin<T>> result = new HashSet<JakePlugins.JakePlugin<T>>();
 		for (final Class<?> clazz : classes) {
-			result.add(new JakePlugin<T>(suffix, (Class<? extends T>) clazz));
+			result.add(new JakePlugin<T>(extendingClass, (Class<? extends T>) clazz));
 		}
 		return result;
 	}
@@ -157,17 +150,19 @@ public final class JakePlugins<T> implements Iterable<T> {
 
 	public static class JakePlugin<T> {
 
-		private static String shortName(String suffix, Class<?> clazz) {
-			return JakeUtilsString.substringBeforeLast(clazz.getSimpleName(), suffix);
+		private static String shortName(Class<?> extendingClass, Class<?> clazz) {
+			return JakeUtilsString.substringBeforeLast(clazz.getSimpleName(), extendingClass.getSimpleName());
 		}
 
-		private static String longName(String suffix, Class<?> clazz) {
-			return JakeUtilsString.substringBeforeLast(clazz.getName(), suffix);
+		private static String longName(Class<?> extendingClass, Class<?> clazz) {
+			return JakeUtilsString.substringBeforeLast(clazz.getName(), extendingClass.getSimpleName());
 		}
 
 		private final String shortName;
 
 		private final String fullName;
+
+		private final Class<? extends T> extendingClass;
 
 		private final Class<? extends T> clazz;
 
@@ -176,10 +171,6 @@ public final class JakePlugins<T> implements Iterable<T> {
 		private JakePluginConfigurer<T> configurer;
 
 
-		public JakePlugin(String suffix, Class<? extends T> clazz) {
-			this(shortName(suffix, clazz), longName(suffix, clazz), clazz);
-		}
-
 		public void configure(JakePluginConfigurer<T> configurer) {
 			this.configurer = configurer;
 			synchronized (this.instance) {
@@ -187,10 +178,11 @@ public final class JakePlugins<T> implements Iterable<T> {
 			}
 		}
 
-		private JakePlugin(String shortName, String fullName, Class<? extends T> clazz) {
+		public JakePlugin(Class<T> extendingClass, Class<? extends T> clazz) {
 			super();
-			this.shortName = shortName;
-			this.fullName = fullName;
+			this.extendingClass = extendingClass;
+			this.shortName = shortName(extendingClass, clazz);
+			this.fullName = longName(extendingClass, clazz);
 			this.clazz = clazz;
 		}
 
@@ -244,7 +236,7 @@ public final class JakePlugins<T> implements Iterable<T> {
 
 		@Override
 		public String toString() {
-			return this.shortName + "(" + this.clazz.toString() + ")";
+			return "name=" + this.shortName + ", fullName=" + this.fullName+ ", inheriting from " + this.extendingClass.getName();
 		}
 
 		public static interface JakePluginConfigurer<T> {
@@ -253,13 +245,7 @@ public final class JakePlugins<T> implements Iterable<T> {
 
 		}
 
-
-
 	}
-
-
-
-
 
 
 }

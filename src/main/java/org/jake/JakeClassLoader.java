@@ -219,7 +219,7 @@ public final class JakeClassLoader {
 
 		} catch (final ClassNotFoundException e) {  //NOSONAR
 
-			final Set<Class<?>> classes = loadClasses(new FileFilter() {
+			final Set<Class<?>> classes = loadClassesInEntries(new FileFilter() {
 
 				@Override
 				public boolean accept(File pathname) {
@@ -247,7 +247,7 @@ public final class JakeClassLoader {
 	 * 
 	 * @param entryFilter The classpath entry filter. Can be <code>null</code>.
 	 */
-	public Set<Class<? extends Object>> loadClasses(FileFilter entryFilter) {
+	public Set<Class<? extends Object>> loadClassesInEntries(FileFilter entryFilter) {
 		final List<File> classfiles = new LinkedList<File>();
 		final Map<File, File> file2Entry = new HashMap<File, File>();
 		for (final File file : childClasspath()) {
@@ -274,9 +274,36 @@ public final class JakeClassLoader {
 	}
 
 	/**
+	 * Loads all class having a relative path matching the supplied {@link JakeFileFilter}.
+	 * For example, if you want to load all class belonging to <code>my.pack</code> or its sub package,
+	 * then you have to supply a filter with an include pattern as <code>my/pack/&#42;&#42;/&#42;.class</code>.
+	 * Note that ending with <code>.class</code> is important.
+	 */
+	public Set<Class<?>> loadClasses(JakeFileFilter classFileFilter) {
+		final Set<Class<?>> result = new HashSet<Class<?>>();
+		final Set<String> classFiles = this.fullClasspath().allItemsMatching(classFileFilter);
+		for (final String classFile : classFiles) {
+			final String className = getAsClassName(classFile);
+			result.add(this.load(className));
+		}
+		return result;
+	}
+
+	/**
+	 * Loads all class having a relative path matching the supplied ANT pattern.
+	 * For example, if you want to load all class belonging to <code>my.pack</code> or its sub package,
+	 * then you have to supply a the following pattern <code>my/pack/&#42;&#42;/&#42;</code>.
+	 * 
+	 * @see JakeClassLoader#loadClasses(JakeFileFilter)
+	 */
+	public Set<Class<?>> loadClasses(String includingPattern) {
+		return loadClasses(JakeFileFilter.include(includingPattern+ ".class"));
+	}
+
+	/**
 	 * Returns all classes of this <code>classloader</code> that are defined inside the provided <code>JakeDirSet</code>.
 	 * 
-	 * @see JakeClassLoader#loadClasses(FileFilter)
+	 * @see JakeClassLoader#loadClassesInEntries(FileFilter)
 	 */
 	public Set<Class<? extends Object>> loadClassesIn(JakeDirSet jakeDirSet) {
 		final Set<Class<?>> result = new HashSet<Class<?>>();
@@ -307,7 +334,7 @@ public final class JakeClassLoader {
 	 * name <code>com.foo.Bar</code>.
 	 */
 	private static String getAsClassName(String resourceName) {
-		return resourceName.replace(File.separatorChar, '.').substring(0, resourceName.length()-CLASS_SUFFIX_LENGTH);
+		return resourceName.replace(File.separatorChar, '.').replace("/", ".").substring(0, resourceName.length()-CLASS_SUFFIX_LENGTH);
 	}
 
 	@Override

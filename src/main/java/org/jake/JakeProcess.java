@@ -12,7 +12,9 @@ import org.jake.utils.JakeUtilsIO.StreamGobbler;
 import org.jake.utils.JakeUtilsString;
 
 /**
- * @author Djeang
+ * Offers fluent API to define and launch external process.
+ * 
+ * @author Jerome Angibaud
  */
 public final class JakeProcess {
 
@@ -31,12 +33,16 @@ public final class JakeProcess {
 	}
 
 	/**
-	 * Initializes a <code>JakeProcess</code> using the specified commands and arguments
+	 * Defines a <code>JakeProcess</code> using the specified command and parameters.
 	 */
 	public static JakeProcess of(String command, String... parameters) {
 		return new JakeProcess(command, Arrays.asList(parameters), null);
 	}
 
+	/**
+	 * Defines a <code>JakeProcess</code> using the specified tool of the JDK and parameters.
+	 * An example of JDK tool is 'javac'.
+	 */
 	public static JakeProcess ofJavaTool(String javaTool, String... parameters) {
 		File candidate = CURRENT_JAVA_DIR;
 		final boolean exist = findTool(candidate, javaTool);
@@ -75,8 +81,9 @@ public final class JakeProcess {
 		return builder;
 	}
 
-
-
+	/**
+	 * Starts this defined process and wait for the process has finished prior returning.
+	 */
 	public int startAndWaitFor() {
 		final List<String> command = new LinkedList<String>();
 		command.add(this.command);

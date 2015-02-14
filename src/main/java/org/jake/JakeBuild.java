@@ -198,9 +198,8 @@ public class JakeBuild {
 		JakeLog.startln("Looking for plugins");
 		final List<JakePlugins<?>> pluginsList = JakePlugins.declaredAsField(this);
 		for (final JakePlugins<?> jakePlugins : pluginsList) {
-			System.out.println(jakePlugins);
 			for (final JakePlugin<?> jakePlugin : jakePlugins.plugins()) {
-				JakeLog.info("Found plugin : " + jakePlugin.pluginClass());
+				JakeLog.info("Found plugin : " + jakePlugin);
 			}
 		}
 		JakeLog.done();
