@@ -1,8 +1,18 @@
 package org.jake.java.build;
 
+import org.jake.java.testing.junit.JakeUnit;
 
-public interface JakeJavaBuildPlugin {
 
-	JakeJavaBuildPlugin configure(JakeJavaBuild build);
+public abstract class JakeJavaBuildPlugin {
+
+	public abstract void configure(JakeJavaBuild build);
+
+	public JakeUnit enhance(JakeUnit jakeUnit) {
+		return jakeUnit;
+	}
+
+	public JakeJavaPacker enhance(JakeJavaPacker packer) {
+		return packer;
+	}
 
 }

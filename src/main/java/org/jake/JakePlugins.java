@@ -193,11 +193,10 @@ public final class JakePlugins<T> implements Iterable<T> {
 		public T instance() {
 			if (instance == null) {
 				synchronized (this.instance) {
-					T result = JakeUtilsReflect.newInstance(clazz);
+					final T instance = JakeUtilsReflect.newInstance(clazz);
 					if (configurer != null) {
-						result = this.configurer.configure(result);
+						configurer.configure(instance);
 					}
-					instance = result;
 				}
 			}
 			return instance;
@@ -241,7 +240,7 @@ public final class JakePlugins<T> implements Iterable<T> {
 
 		public static interface JakePluginConfigurer<T> {
 
-			T configure(T plugin);
+			void configure(T plugin);
 
 		}
 

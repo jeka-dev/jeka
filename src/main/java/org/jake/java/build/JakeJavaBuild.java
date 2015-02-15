@@ -79,8 +79,6 @@ public class JakeJavaBuild extends JakeBuild {
 
 	private final JakePlugins<JakeJavaBuildPlugin> plugins = JakePlugins.of(JakeJavaBuildPlugin.class);
 
-	private final JakePlugins<JakeUnitPlugin> jakeUnitPlugins = JakePlugins.of(JakeUnitPlugin.class);
-
 	@JakeOption({
 		"Mention if you want to add extra lib in your 'compile' scope but not in your 'runtime' scope. It can be absolute or relative to the project base dir.",
 		"These libs will be added to the compile path but won't be embedded in war files or fat jars.",
@@ -130,8 +128,8 @@ public class JakeJavaBuild extends JakeBuild {
 		this.plugins.configureAll(new JakePluginConfigurer<JakeJavaBuildPlugin>() {
 
 			@Override
-			public JakeJavaBuildPlugin configure(JakeJavaBuildPlugin plugin) {
-				return plugin.configure(JakeJavaBuild.this);
+			public void configure(JakeJavaBuildPlugin plugin) {
+				plugin.configure(JakeJavaBuild.this);
 			}
 
 		});
