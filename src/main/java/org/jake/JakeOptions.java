@@ -14,7 +14,16 @@ import org.jake.utils.JakeUtilsString;
 
 public final class JakeOptions {
 
-	static final JakeOptions INSTANCE = new JakeOptions();
+	@SuppressWarnings("unchecked")
+	private static JakeOptions INSTANCE = new JakeOptions(Collections.EMPTY_MAP);
+
+	static JakeOptions instance() {
+		return INSTANCE;
+	}
+
+	static synchronized void populate(Map<String, String> options) {
+		INSTANCE = new JakeOptions(options);
+	}
 
 	private final Map<String, String> freeOptions = new HashMap<String, String>();
 
@@ -35,11 +44,11 @@ public final class JakeOptions {
 	"Exemple : -extraJakeLibs=/usr/java/libs/sonar;/usr/java/libs/apache/lucene.jar ."})
 	private String extraJakeLibs;
 
-	protected JakeOptions() {
+	private JakeOptions(Map<String, String> options) {
 
 		// The string form options are stored in a static field of OptionStore class.
 		// The static field is supposed to be populated prior this class is invoked.
-		freeOptions.putAll(OptionStore.options);
+		freeOptions.putAll(options);
 
 		// Field are populated using reflection.
 		populateFields(this, freeOptions);

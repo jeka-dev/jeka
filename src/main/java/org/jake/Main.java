@@ -21,8 +21,8 @@ class Main {
 		JakeLog.info("Java Version : " + System.getProperty("java.version")+ ", " + System.getProperty("java.vendor"));
 		JakeLog.info("Jake class path : " + System.getProperty("java.class.path"));
 		final CommandLine commandLine = CommandLine.of(args);
-		OptionStore.options = commandLine.options;
-		JakeLog.info("Using global options : " + JakeOptions.fieldOptionsToString(JakeOptions.INSTANCE));
+		JakeOptions.populate(commandLine.options);
+		JakeLog.info("Using global options : " + JakeOptions.fieldOptionsToString(JakeOptions.instance()));
 		JakeLog.info("And free form options : " + JakeOptions.freeFormToString());
 		JakeLog.nextLine();
 		defineSystemProps(args);

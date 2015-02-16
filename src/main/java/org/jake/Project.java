@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.jake.CommandLine.MethodInvocation;
 import org.jake.java.build.JakeJavaBuild;
 import org.jake.java.eclipse.JakeEclipseBuild;
 import org.jake.utils.JakeUtilsFile;
@@ -67,7 +68,7 @@ class Project {
 		return buildBinDir;
 	}
 
-	public boolean executeBuild( JakeClassLoader classLoader, Iterable<String> methods) {
+	public boolean executeBuild( JakeClassLoader classLoader, Iterable<MethodInvocation> methods) {
 		final long start = System.nanoTime();
 		displayHead("Building project : " + projectRelativePath);
 		final Class<? extends JakeBuild> buildClass = this.findBuildClass(classLoader);
@@ -127,7 +128,7 @@ class Project {
 		return null;
 	}
 
-	private boolean launch(Class<? extends JakeBuild> buildClass, Iterable<String> methods, JakeClassLoader classLoader) {
+	private boolean launch(Class<? extends JakeBuild> buildClass, Iterable<MethodInvocation> methods, JakeClassLoader classLoader) {
 
 		final JakeBuild build = JakeUtilsReflect.newInstance(buildClass);
 		JakeOptions.populateFields(build);
@@ -141,9 +142,13 @@ class Project {
 		}
 		JakeLog.nextLine();
 
-		for (final String methodName : methods) {
+		for (final MethodInvocation methodInvokation : methods) {
+			if (methodInvokation.isMethodPlugin()) {
+				continue;
+			}
+
 			final Method method;
-			final String actionIntro = "Method : " + methodName;
+			final String actionIntro = "Method : " + methodInvokation.toString();
 			JakeLog.info(actionIntro);
 			JakeLog.info(JakeUtilsString.repeat("-", actionIntro.length()));
 			try {
