@@ -27,6 +27,19 @@ public class JakeUtilsIterable {
 	}
 
 	@SuppressWarnings("unchecked")
+	public static <T> List<T> toGenericList(Iterable<?> it) {
+		if (it instanceof List) {
+			return (List<T>) it;
+		}
+		final List<T> result = new LinkedList<T>();
+		for (final Object t : it) {
+			result.add((T) t);
+
+		}
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
 	public static <T> T[] toArray(Iterable<T> it, Class<T> clazz) {
 		final List<T> list = toList(it);
 		final T[] result = (T[]) Array.newInstance(clazz, list.size());
@@ -38,8 +51,26 @@ public class JakeUtilsIterable {
 		return result;
 	}
 
+	@SuppressWarnings("unchecked")
+	public static <T> T[] toArrayFromNonGeneric(Iterable<?> it, Class<T> clazz) {
+		final List<T> list = toGenericList(it);
+		final T[] result = (T[]) Array.newInstance(clazz, list.size());
+		int i = 0;
+		for (final Object t : it) {
+			result[i] = (T) t;
+			i++;
+		}
+		return result;
+	}
+
+
 	public static <T> List<T> listOf(T... items) {
 		return Arrays.asList(items);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> List<T> listOfGeneric(Object... items) {
+		return ((List<T>) Arrays.asList(items));
 	}
 
 	public static <T> Set<T> setOf(T... items) {

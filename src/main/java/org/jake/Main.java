@@ -34,7 +34,8 @@ class Main {
 		if (buildBin != null) {
 			classLoader.addEntry(buildBin);
 		}
-		final boolean result = project.executeBuild(JakeUtilsFile.workingDir(), classLoader, commandLine.methods());
+		final boolean result = project.executeBuild(JakeUtilsFile.workingDir(), classLoader,
+				commandLine.methods(), commandLine.pluginSetups());
 		if (!result) {
 			System.exit(1);  // NOSONAR
 		}

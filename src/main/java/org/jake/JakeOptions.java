@@ -112,7 +112,7 @@ public final class JakeOptions {
 	/**
 	 * Set the field values according to the target object according the string found in props arguments.
 	 */
-	private static void populateFields(Object target, Map<String, String> props) {
+	static void populateFields(Object target, Map<String, String> props) {
 		for (final Field field : optionField(target.getClass())) {
 			final String name = field.getName();
 			final Class<?> type = field.getType();

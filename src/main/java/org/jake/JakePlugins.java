@@ -2,6 +2,7 @@ package org.jake;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,13 +32,31 @@ public final class JakePlugins<T>  {
 
 	private static final Map<Class<?>, Set<Class<?>>> CACHE = new HashMap<Class<?>, Set<Class<?>>>();
 
+	public static List<Object> instantiatePlugins(Iterable<Class<Object>> templateClasses,
+			Iterable<JakePluginSetup> setups) {
+		final List<Object> result = new LinkedList<Object>();
+		final Set<String> names = JakePluginSetup.names(setups);
+		for (final Class<Object> templateClass : templateClasses) {
+			final JakePlugins<Object> plugins = JakePlugins.of(templateClass);
+			final Map<String, JakePluginDescription<Object>> pluginDescriptions = plugins.loadAllByNames(names);
+			for (final String name : pluginDescriptions.keySet()) {
+				final JakePluginDescription<Object> desc = pluginDescriptions.get(name);
+				final Object plugin = JakeUtilsReflect.newInstance(desc.pluginClass());
+				final JakePluginSetup setup = JakePluginSetup.findOrFail(name, setups);
+				JakeOptions.populateFields(plugin, setup.options);
+				result.add(plugin);
+			}
+		}
+		return result;
+	}
+
 	/**
 	 * Creates a {@link JakePlugins} for the specified extension points. That means, this instance
 	 * will refer to all plugin extending the specified extension point in the
 	 * @param templateClass
 	 * @return
 	 */
-	public static <T> JakePlugins<T> of(Class<T> templateClass) {
+	static <T> JakePlugins<T> of(Class<T> templateClass) {
 		final JakePlugins<T> result = new JakePlugins<T>(templateClass);
 		if (CACHE.containsKey(templateClass)) {
 			final Set<Class<?>> pluginClasses = CACHE.get(templateClass);
@@ -63,7 +82,7 @@ public final class JakePlugins<T>  {
 	}
 
 
-	private Set<JakePlugin<T>> plugins;
+	private Set<JakePluginDescription<T>> plugins;
 
 	private final Class<T> templateClass;
 
@@ -77,10 +96,10 @@ public final class JakePlugins<T>  {
 	/**
 	 * Returns all the plugins present in classpath for this template class.
 	 */
-	public Set<JakePlugin<T>> getAll() {
+	public Set<JakePluginDescription<T>> getAll() {
 		if (plugins == null) {
 			synchronized (this) {
-				final Set<JakePlugin<T>> result = loadAllPlugins(templateClass);
+				final Set<JakePluginDescription<T>> result = loadAllPlugins(templateClass);
 				this.plugins = Collections.unmodifiableSet(result);
 			}
 		}
@@ -93,9 +112,9 @@ public final class JakePlugins<T>  {
 	 * capitalized for you so using "myPluging" or "MyPlugin" is equal.
 	 * If not found, returns <code>null</code>.
 	 */
-	public JakePlugin<T> loadByName(String name) {
+	private JakePluginDescription<T> loadByName(String name) {
 		if (!name.contains(".")) {
-			final JakePlugin<T> result = loadPluginHavingShortName(templateClass, JakeUtilsString.capitalize(name));
+			final JakePluginDescription<T> result = loadPluginHavingShortName(templateClass, JakeUtilsString.capitalize(name));
 			if (result != null) {
 				return result;
 			}
@@ -108,21 +127,13 @@ public final class JakePlugins<T>  {
 	 * 
 	 * @see JakePlugins#loadByName(String)
 	 */
-	public Map<String, JakePlugin<T>> loadAllByNames(Iterable<String> names) {
-		final Map<String, JakePlugin<T>> result = new HashMap<String, JakePlugins.JakePlugin<T>>();
+	private Map<String, JakePluginDescription<T>> loadAllByNames(Iterable<String> names) {
+		final Map<String, JakePluginDescription<T>> result = new HashMap<String, JakePlugins.JakePluginDescription<T>>();
 		for (final String name : names) {
-			final JakePlugin<T> plugin = loadByName(name);
+			final JakePluginDescription<T> plugin = loadByName(name);
 			if (plugin != null) {
 				result.put(name, plugin);
 			}
-		}
-		return result;
-	}
-
-	public List<T> pluginInstances(Iterable<String> pluginNames) {
-		final List<T> result = new LinkedList<T>();
-		for (final JakePlugin<T> jakePlugin : this.loadAllByNames(pluginNames).values()) {
-			result.add(jakePlugin.instance());
 		}
 		return result;
 	}
@@ -136,14 +147,14 @@ public final class JakePlugins<T>  {
 		return this.plugins.toString();
 	}
 
-	private static <T> Set<JakePlugin<T>> loadAllPlugins(Class<T> templateClass) {
+	private static <T> Set<JakePluginDescription<T>> loadAllPlugins(Class<T> templateClass) {
 		final String nameSuffix = templateClass.getSimpleName();
 		return loadPlugins(templateClass, "**/*" + nameSuffix);
 	}
 
-	private static <T> JakePlugin<T> loadPluginHavingShortName(Class<T> templateClass, String shortName) {
+	private static <T> JakePluginDescription<T> loadPluginHavingShortName(Class<T> templateClass, String shortName) {
 		final String nameSuffix = templateClass.getSimpleName();
-		final Set<JakePlugin<T>> set = loadPlugins(templateClass, "**/" + shortName + nameSuffix);
+		final Set<JakePluginDescription<T>> set = loadPlugins(templateClass, "**/" + shortName + nameSuffix);
 		if (set.size() > 1) {
 			throw new JakeException("Several plugin have the same short name : '" + shortName + "'. Please disambiguate with using plugin long name (full class name)."
 					+ " Following plugins have same shortName : " + set);
@@ -154,15 +165,15 @@ public final class JakePlugins<T>  {
 		return set.iterator().next();
 	}
 
-	private static <T> JakePlugin<T> loadPluginsHavingLongName(Class<T> templateClass, String longName) {
+	private static <T> JakePluginDescription<T> loadPluginsHavingLongName(Class<T> templateClass, String longName) {
 		final Class<? extends T> pluginClass = JakeClassLoader.current().loadIfExist(longName);
 		if (pluginClass == null) {
 			return null;
 		}
-		return new JakePlugin<T>(templateClass, pluginClass);
+		return new JakePluginDescription<T>(templateClass, pluginClass);
 	}
 
-	private static <T> Set<JakePlugin<T>> loadPlugins(Class<T> templateClass, String pattern) {
+	private static <T> Set<JakePluginDescription<T>> loadPlugins(Class<T> templateClass, String pattern) {
 		final Set<Class<?>> matchingClasses = JakeClassLoader.current().loadClasses(pattern);
 		final Set<Class<?>> result = new HashSet<Class<?>>();
 		for (final Class<?> candidate : matchingClasses) {
@@ -177,16 +188,16 @@ public final class JakePlugins<T>  {
 
 
 	@SuppressWarnings("unchecked")
-	private static <T> Set<JakePlugin<T>> toPluginSet(Class<T> extendingClass, Iterable<Class<?>> classes) {
-		final Set<JakePlugin<T>> result = new HashSet<JakePlugins.JakePlugin<T>>();
+	private static <T> Set<JakePluginDescription<T>> toPluginSet(Class<T> extendingClass, Iterable<Class<?>> classes) {
+		final Set<JakePluginDescription<T>> result = new HashSet<JakePlugins.JakePluginDescription<T>>();
 		for (final Class<?> clazz : classes) {
-			result.add(new JakePlugin<T>(extendingClass, (Class<? extends T>) clazz));
+			result.add(new JakePluginDescription<T>(extendingClass, (Class<? extends T>) clazz));
 		}
 		return result;
 	}
 
 
-	public static class JakePlugin<T> {
+	public static class JakePluginDescription<T> {
 
 		private static String shortName(Class<?> extendingClass, Class<?> clazz) {
 			return JakeUtilsString.substringBeforeLast(clazz.getSimpleName(), extendingClass.getSimpleName());
@@ -200,73 +211,68 @@ public final class JakePlugins<T>  {
 
 		private final String fullName;
 
-		private final Class<? extends T> extendingClass;
+		private final Class<T> templateClass;
 
 		private final Class<? extends T> clazz;
 
-		private T instance;
 
-
-		public JakePlugin(Class<T> extendingClass, Class<? extends T> clazz) {
+		public JakePluginDescription(Class<T> templateClass, Class<? extends T> clazz) {
 			super();
-			this.extendingClass = extendingClass;
-			this.shortName = shortName(extendingClass, clazz);
-			this.fullName = longName(extendingClass, clazz);
+			this.templateClass = templateClass;
+			this.shortName = shortName(templateClass, clazz);
+			this.fullName = longName(templateClass, clazz);
 			this.clazz = clazz;
 		}
 
+
+		public String shortName() {
+			return this.shortName;
+		}
+
+		public String longName() {
+			return this.longName();
+		}
+
+		public Class<T> templateClass() {
+			return templateClass;
+		}
+
 		public Class<? extends T> pluginClass() {
-			return this.clazz;
+			return clazz;
 		}
 
-		public T instance() {
-			if (instance == null) {
-				synchronized (this) {
-					instance = JakeUtilsReflect.newInstance(clazz);
-				}
+		public List<String> description() {
+			if (this.clazz.getAnnotation(JakeDoc.class) == null) {
+				return Collections.emptyList();
 			}
-			return instance;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
-			return result;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null) {
-				return false;
-			}
-			if (getClass() != obj.getClass()) {
-				return false;
-			}
-			final JakePlugin<T> other = (JakePlugin<T>) obj;
-			if (clazz == null) {
-				if (other.clazz != null) {
-					return false;
-				}
-			} else if (!clazz.equals(other.clazz)) {
-				return false;
-			}
-			return true;
+			return Arrays.asList(this.clazz.getAnnotation(JakeDoc.class).value());
 		}
 
 		@Override
 		public String toString() {
-			return "name=" + this.shortName + ", fullName=" + this.fullName+ ", inheriting from " + this.extendingClass.getName();
+			return "name=" + this.shortName + ", fullName=" + this.fullName+ ", inheriting from " + this.templateClass.getName();
 		}
 
 	}
 
 	public static class JakePluginSetup {
+
+		public static Set<String> names(Iterable<JakePluginSetup> setups) {
+			final Set<String> result = new HashSet<String>();
+			for (final JakePluginSetup setup : setups) {
+				result.add(setup.pluginName);
+			}
+			return result;
+		}
+
+		public static JakePluginSetup findOrFail(String name, Iterable<JakePluginSetup> setups) {
+			for (final JakePluginSetup setup : setups) {
+				if (name.equals(setup.pluginName)) {
+					return setup;
+				}
+			}
+			throw new IllegalArgumentException("No setup found with name " + name +" found in " + setups);
+		}
 
 		public static JakePluginSetup of(String name, Map<String, String> options) {
 			return new JakePluginSetup(name, new HashMap<String, String>(options));

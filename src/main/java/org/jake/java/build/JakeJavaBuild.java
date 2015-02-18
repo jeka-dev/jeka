@@ -1,7 +1,10 @@
 package org.jake.java.build;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.jake.JakeBuild;
 import org.jake.JakeClasspath;
@@ -12,7 +15,6 @@ import org.jake.JakeFileFilter;
 import org.jake.JakeJavaCompiler;
 import org.jake.JakeLog;
 import org.jake.JakeOption;
-import org.jake.JakePlugins;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeDependency;
 import org.jake.depmanagement.JakeDependencyResolver;
@@ -28,6 +30,7 @@ import org.jake.publishing.JakeIvyPublication;
 import org.jake.publishing.JakeMavenPublication;
 import org.jake.publishing.JakePublisher;
 import org.jake.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsIterable;
 
 /**
  * Template class to define build on Java project.
@@ -76,7 +79,7 @@ public class JakeJavaBuild extends JakeBuild {
 			.exclude("**/*.java").andExclude("**/package.html")
 			.andExclude("**/doc-files");
 
-	private final JakePlugins<JakeJavaBuildPlugin> plugins = JakePlugins.of(JakeJavaBuildPlugin.class);
+	private List<JakeJavaBuildPlugin> plugins = Collections.emptyList();
 
 	@JakeOption({
 		"Mention if you want to add extra lib in your 'compile' scope but not in your 'runtime' scope. It can be absolute or relative to the project base dir.",
@@ -122,8 +125,21 @@ public class JakeJavaBuild extends JakeBuild {
 	private JakePublisher cachedPublisher;
 
 	@Override
-	public void configurePlugin(Iterable<String> pluginNames) {
-		for (final JakeJavaBuildPlugin javaBuildPlugin : this.plugins.pluginInstances(pluginNames)) {
+	protected void setPlugins(Iterable<?> plugins) {
+		this.setPlugins(JakeUtilsIterable.toArrayFromNonGeneric(plugins, JakeJavaBuildPlugin.class));
+	}
+
+	@Override
+	protected List<Class<Object>> pluginTemplateClasses() {
+		return JakeUtilsIterable.listOfGeneric(JakeJavaBuildPlugin.class);
+	}
+
+	/**
+	 * Allow to add plugins to this build programatically.
+	 */
+	public synchronized void setPlugins(JakeJavaBuildPlugin ...plugins) {
+		this.plugins = Arrays.asList(plugins);
+		for (final JakeJavaBuildPlugin javaBuildPlugin : this.plugins) {
 			javaBuildPlugin.configure(this);
 		}
 	}

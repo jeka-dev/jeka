@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.JakePlugins.JakePlugin;
+import org.jake.JakePlugins.JakePluginDescription;
 import org.jake.depmanagement.JakeModuleId;
 import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeVersion;
@@ -44,12 +44,21 @@ public class JakeBuild {
 		this.baseDirFile = baseDir;
 	}
 
+
 	/**
-	 * Configures the plugins having the specified long or shortNames.
-	 * This method should be invoked after the {@link #setBaseDir(File)} method, so
-	 * plugins can be configured using the proper base directory.
+	 * Returns the classes accepted as template for plugins.
+	 * If you override it, do not forget to add the ones from the super class.
 	 */
-	public void configurePlugin(Iterable<String> pluginNames) {
+	protected List<Class<Object>> pluginTemplateClasses() {
+		return Collections.emptyList();
+	}
+
+	/**
+	 * Set the plugins to activate for this build.
+	 * This method should be invoked after the {@link #setBaseDir(File)} method, so
+	 * plugins can be configured using the proper base dir.
+	 */
+	protected void setPlugins(Iterable<?> plugins) {
 		// Do nothing as no plugin extension as been defined at this level.
 	}
 
@@ -210,7 +219,7 @@ public class JakeBuild {
 		JakeLog.startln("Looking for plugins");
 		final List<JakePlugins<?>> pluginsList = JakePlugins.declaredAsField(this);
 		for (final JakePlugins<?> jakePlugins : pluginsList) {
-			for (final JakePlugin<?> jakePlugin : jakePlugins.getAll()) {
+			for (final JakePluginDescription<?> jakePlugin : jakePlugins.getAll()) {
 				JakeLog.info("Found plugin : " + jakePlugin);
 			}
 		}

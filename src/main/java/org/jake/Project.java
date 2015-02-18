@@ -4,8 +4,10 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 import org.jake.CommandLine.MethodInvocation;
+import org.jake.JakePlugins.JakePluginSetup;
 import org.jake.java.build.JakeJavaBuild;
 import org.jake.java.eclipse.JakeEclipseBuild;
 import org.jake.utils.JakeUtilsFile;
@@ -68,11 +70,12 @@ class Project {
 		return buildBinDir;
 	}
 
-	public boolean executeBuild(File projectFolder, JakeClassLoader classLoader, Iterable<MethodInvocation> methods) {
+	public boolean executeBuild(File projectFolder, JakeClassLoader classLoader,
+			Iterable<MethodInvocation> methods, Iterable<JakePluginSetup> setups) {
 		final long start = System.nanoTime();
 		displayHead("Building project : " + projectRelativePath);
 		final Class<? extends JakeBuild> buildClass = this.findBuildClass(classLoader);
-		final boolean result = this.launch(projectFolder, buildClass, methods, classLoader);
+		final boolean result = this.launch(projectFolder, buildClass, methods, setups, classLoader);
 
 		final float duration = JakeUtilsTime.durationInSeconds(start);
 		if (result) {
@@ -128,12 +131,14 @@ class Project {
 		return null;
 	}
 
-	private boolean launch(File projectFolder, Class<? extends JakeBuild> buildClass, Iterable<MethodInvocation> methods, JakeClassLoader classLoader) {
+	private boolean launch(File projectFolder, Class<? extends JakeBuild> buildClass,
+			Iterable<MethodInvocation> methods, Iterable<JakePluginSetup> setups, JakeClassLoader classLoader) {
 
 		final JakeBuild build = JakeUtilsReflect.newInstance(buildClass);
 		JakeOptions.populateFields(build);
 		build.setBaseDir(projectFolder);
-
+		final List<Object> plugins = JakePlugins.instantiatePlugins(build.pluginTemplateClasses(), setups);
+		build.setPlugins(plugins);
 
 		JakeLog.info("Use build class '" + buildClass.getCanonicalName()
 				+ "' with methods : "
