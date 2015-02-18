@@ -13,7 +13,6 @@ import org.jake.JakeJavaCompiler;
 import org.jake.JakeLog;
 import org.jake.JakeOption;
 import org.jake.JakePlugins;
-import org.jake.JakePlugins.JakePlugin.JakePluginConfigurer;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeDependency;
 import org.jake.depmanagement.JakeDependencyResolver;
@@ -123,16 +122,10 @@ public class JakeJavaBuild extends JakeBuild {
 	private JakePublisher cachedPublisher;
 
 	@Override
-	public void setBaseDir(File baseDir) {
-		super.setBaseDir(baseDir);
-		this.plugins.configureAll(new JakePluginConfigurer<JakeJavaBuildPlugin>() {
-
-			@Override
-			public void configure(JakeJavaBuildPlugin plugin) {
-				plugin.configure(JakeJavaBuild.this);
-			}
-
-		});
+	public void configurePlugin(Iterable<String> pluginNames) {
+		for (final JakeJavaBuildPlugin javaBuildPlugin : this.plugins.pluginInstances(pluginNames)) {
+			javaBuildPlugin.configure(this);
+		}
 	}
 
 

@@ -12,10 +12,10 @@ public class JakePluginsTest {
 	@Test
 	public void testPluginsLoading() {
 		final JakePlugins<DummyPlugin> plugins = JakePlugins.of(DummyPlugin.class);
-		final Set<JakePlugin<DummyPlugin>> pluginSet = plugins.plugins();
+		final Set<JakePlugin<DummyPlugin>> pluginSet = plugins.getAll();
 		Assert.assertEquals(1, pluginSet.size());
 
-		Assert.assertEquals(1, JakePlugins.of(JakeJavaBuildPlugin.class).plugins().size());
+		Assert.assertEquals(1, JakePlugins.of(JakeJavaBuildPlugin.class).getAll().size());
 
 	}
 

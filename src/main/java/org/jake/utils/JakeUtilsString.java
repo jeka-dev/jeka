@@ -20,6 +20,18 @@ public final class JakeUtilsString {
 		return builder.toString();
 	}
 
+	public static String capitalize(String string) {
+		if (string.isEmpty()) {
+			return string;
+		}
+		if (string.length() == 1) {
+			return string.toUpperCase();
+		}
+		final String first = string.substring(0, 1);
+		final String remaining = string.substring(1);
+		return first.toUpperCase() + remaining;
+	}
+
 	public static String containsAnyOf(String stringToMatch, String ... candidates) {
 		for (final String candidate : candidates) {
 			if (stringToMatch.contains(candidate)) {

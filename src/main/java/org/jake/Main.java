@@ -21,7 +21,7 @@ class Main {
 		JakeLog.info("Java Version : " + System.getProperty("java.version")+ ", " + System.getProperty("java.vendor"));
 		JakeLog.info("Jake class path : " + System.getProperty("java.class.path"));
 		final CommandLine commandLine = CommandLine.of(args);
-		JakeOptions.populate(commandLine.options);
+		JakeOptions.populate(commandLine.options());
 		JakeLog.info("Using global options : " + JakeOptions.fieldOptionsToString(JakeOptions.instance()));
 		JakeLog.info("And free form options : " + JakeOptions.freeFormToString());
 		JakeLog.nextLine();
@@ -34,7 +34,7 @@ class Main {
 		if (buildBin != null) {
 			classLoader.addEntry(buildBin);
 		}
-		final boolean result = project.executeBuild(classLoader, commandLine.methods);
+		final boolean result = project.executeBuild(JakeUtilsFile.workingDir(), classLoader, commandLine.methods());
 		if (!result) {
 			System.exit(1);  // NOSONAR
 		}

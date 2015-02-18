@@ -68,11 +68,11 @@ class Project {
 		return buildBinDir;
 	}
 
-	public boolean executeBuild( JakeClassLoader classLoader, Iterable<MethodInvocation> methods) {
+	public boolean executeBuild(File projectFolder, JakeClassLoader classLoader, Iterable<MethodInvocation> methods) {
 		final long start = System.nanoTime();
 		displayHead("Building project : " + projectRelativePath);
 		final Class<? extends JakeBuild> buildClass = this.findBuildClass(classLoader);
-		final boolean result = this.launch(buildClass, methods, classLoader);
+		final boolean result = this.launch(projectFolder, buildClass, methods, classLoader);
 
 		final float duration = JakeUtilsTime.durationInSeconds(start);
 		if (result) {
@@ -128,10 +128,12 @@ class Project {
 		return null;
 	}
 
-	private boolean launch(Class<? extends JakeBuild> buildClass, Iterable<MethodInvocation> methods, JakeClassLoader classLoader) {
+	private boolean launch(File projectFolder, Class<? extends JakeBuild> buildClass, Iterable<MethodInvocation> methods, JakeClassLoader classLoader) {
 
 		final JakeBuild build = JakeUtilsReflect.newInstance(buildClass);
 		JakeOptions.populateFields(build);
+		build.setBaseDir(projectFolder);
+
 
 		JakeLog.info("Use build class '" + buildClass.getCanonicalName()
 				+ "' with methods : "
@@ -152,14 +154,14 @@ class Project {
 			JakeLog.info(actionIntro);
 			JakeLog.info(JakeUtilsString.repeat("-", actionIntro.length()));
 			try {
-				method = build.getClass().getMethod(methodName);
+				method = build.getClass().getMethod(methodInvokation.methodName);
 			} catch (final NoSuchMethodException e) {
-				JakeLog.warn("No zero-arg method '" + methodName
+				JakeLog.warn("No zero-arg method '" + methodInvokation.methodName
 						+ "' found in class '" + buildClass.getCanonicalName() + "'. Skip.");
 				continue;
 			}
 			if (!Void.TYPE.equals(method.getReturnType())) {
-				JakeLog.warn("A zero-arg method '" + methodName
+				JakeLog.warn("A zero-arg method '" + methodInvokation
 						+ "' found in class '" + buildClass.getCanonicalName() + "' but was not returning a void result. Skip.");
 				continue;
 			}
@@ -185,15 +187,16 @@ class Project {
 			} finally {
 				JakeLog.nextLine();
 				if (success) {
-					JakeLog.info("-> Method " + methodName + " executed in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
+					JakeLog.info("-> Method " + methodInvokation + " executed in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
 				} else {
-					JakeLog.error("-> Method " + methodName + " failed in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
+					JakeLog.error("-> Method " + methodInvokation + " failed in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
 				}
 			}
 			JakeLog.nextLine();
 		}
 		return true;
 	}
+
 
 	protected static void displayHead(String intro) {
 		final String pattern = "-";

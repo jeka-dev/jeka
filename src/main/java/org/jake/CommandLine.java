@@ -1,30 +1,47 @@
 package org.jake;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.jake.JakePlugins.JakePluginSetup;
 import org.jake.utils.JakeUtilsAssert;
 import org.jake.utils.JakeUtilsString;
 
 class CommandLine {
 
 	public static CommandLine of(String[] words) {
-		return new CommandLine(extractOptions(words), extractActions(words));
+		return new CommandLine(extractOptions(words), extractActions(words), extractPluginSetup(words) );
 	}
 
 	private static final String DEFAULT_METHOD = "base";
 
-	public final Map<String, String> options;
+	private final Map<String, String> options;
 
-	public final List<MethodInvocation> methods;
+	private final List<MethodInvocation> methods;
 
-	private CommandLine(Map<String, String> options, List<MethodInvocation> methods) {
+	private final Collection<JakePluginSetup> pluginSetups;
+
+	private CommandLine(Map<String, String> options, List<MethodInvocation> methods, Collection<JakePluginSetup> pluginSetups) {
 		super();
 		this.options = options;
 		this.methods = methods;
+		this.pluginSetups = pluginSetups;
+	}
+
+	public Map<String, String> options() {
+		return this.options;
+	}
+
+	public List<MethodInvocation> methods() {
+		return methods;
+	}
+
+	public Collection<JakePluginSetup> pluginSetups() {
+		return this.pluginSetups;
 	}
 
 	private static List<MethodInvocation> extractActions(String[] args) {
@@ -46,15 +63,54 @@ class CommandLine {
 			if (arg.startsWith("-") && !arg.startsWith("-D")) {
 				final int equalIndex = arg.indexOf("=");
 				if (equalIndex <= -1) {
-					result.put(arg.substring(1), null);
+					final String key = arg.substring(1);
+					if (!key.contains("#")) {
+						result.put(arg.substring(1), null);
+					}
+
 				} else {
-					final String name = arg.substring(1, equalIndex);
-					final String value = arg.substring(equalIndex+1);
-					result.put(name, value);
+					final String key = arg.substring(1, equalIndex);
+					if (!key.contains("#")) {
+						final String value = arg.substring(equalIndex+1);
+						result.put(key, value);
+					}
 				}
 			}
 		}
 		return Collections.unmodifiableMap(result);
+	}
+
+	private static Collection<JakePluginSetup> extractPluginSetup(String args[]) {
+		final Map<String, JakePluginSetup> setups = new HashMap<String, JakePlugins.JakePluginSetup>();
+		for (final String word : args) {
+			if (MethodInvocation.isPluginMethidInvokation(word)) {
+				final String pluginName = JakeUtilsString.substringBeforeFirst(word, "#");
+				if (!setups.containsKey(pluginName)) {
+					setups.put(pluginName, JakePluginSetup.of(pluginName));
+				}
+			} else if (isPluginOption(word)) {
+				final String pluginName = JakeUtilsString.substringBeforeFirst(word, "#").substring(1);
+				JakePluginSetup setup = setups.get(pluginName);
+				if (setup == null) {
+					setup = JakePluginSetup.of(pluginName);
+					setups.put(pluginName, setup);
+				}
+				final int equalIndex = word.indexOf("=");
+				if (equalIndex <= -1) {
+					final String key = JakeUtilsString.substringAfterFirst(word, "#");
+					setups.put(pluginName, setup.with(key, null));
+				} else {
+					final String key = JakeUtilsString.substringBeforeFirst( JakeUtilsString.substringAfterFirst(word, "#"), "=");
+					final String value = word.substring(equalIndex+1);
+					setups.put(pluginName, setup.with(key, value));
+				}
+			}
+		}
+		return setups.values();
+	}
+
+	private static boolean isPluginOption(String word) {
+		return word.startsWith("-") && word.indexOf("#") > 2;
 	}
 
 

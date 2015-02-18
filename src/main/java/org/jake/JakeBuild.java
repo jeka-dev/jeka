@@ -37,8 +37,20 @@ public class JakeBuild {
 	protected JakeBuild() {
 	}
 
+	/**
+	 * Defines this project base directory.
+	 */
 	public void setBaseDir(File baseDir) {
 		this.baseDirFile = baseDir;
+	}
+
+	/**
+	 * Configures the plugins having the specified long or shortNames.
+	 * This method should be invoked after the {@link #setBaseDir(File)} method, so
+	 * plugins can be configured using the proper base directory.
+	 */
+	public void configurePlugin(Iterable<String> pluginNames) {
+		// Do nothing as no plugin extension as been defined at this level.
 	}
 
 	/**
@@ -198,7 +210,7 @@ public class JakeBuild {
 		JakeLog.startln("Looking for plugins");
 		final List<JakePlugins<?>> pluginsList = JakePlugins.declaredAsField(this);
 		for (final JakePlugins<?> jakePlugins : pluginsList) {
-			for (final JakePlugin<?> jakePlugin : jakePlugins.plugins()) {
+			for (final JakePlugin<?> jakePlugin : jakePlugins.getAll()) {
 				JakeLog.info("Found plugin : " + jakePlugin);
 			}
 		}

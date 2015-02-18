@@ -54,6 +54,11 @@ public final class JakeOptions {
 		populateFields(this, freeOptions);
 	}
 
+	@SuppressWarnings("unchecked")
+	private JakeOptions() {
+		this(Collections.EMPTY_MAP);
+	}
+
 	public static void forceVerbose(boolean verbose) {
 		INSTANCE.verbose = verbose;
 	}
