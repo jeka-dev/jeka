@@ -11,7 +11,7 @@ public class FullBuild extends Build {
 
 	// Add Jacoco agent to the unit test runner.
 	@Override
-	public JakeUnit unitTester() {
+	public JakeUnit createUnitTester() {
 		return super.unitTester().enhancedWith(JakeocoJakeJavaBuildPlugin.enhancer(this));
 	}
 

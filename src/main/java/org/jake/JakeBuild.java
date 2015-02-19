@@ -181,7 +181,7 @@ public class JakeBuild {
 	@JakeDoc("Display all available methods defined in this build.")
 	public void help() {
 		JakeLog.info("Usage: jake [methodA...] [-optionName=value...] [-DsystemPropName=value...]");
-		JakeLog.info("When no method specified, then 'default' action is processed.");
+		JakeLog.info("When no method specified, then 'base' method is processed.");
 		JakeLog.info("Ex: jake javadoc compile -verbose=true -other=xxx -DmyProp=Xxxx");
 		JakeLog.nextLine();
 		JakeLog.info("Available action(s) for build '" + this.getClass().getName() + "' : " );
@@ -217,11 +217,10 @@ public class JakeBuild {
 
 	private void displayPlugins() {
 		JakeLog.startln("Looking for plugins");
-		final List<JakePlugins<?>> pluginsList = JakePlugins.declaredAsField(this);
-		for (final JakePlugins<?> jakePlugins : pluginsList) {
-			for (final JakePluginDescription<?> jakePlugin : jakePlugins.getAll()) {
-				JakeLog.info("Found plugin : " + jakePlugin);
-			}
+		final List<JakePluginDescription<?>> pluginDescriptions = JakePlugins.declaredAsField(this);
+		for (final JakePluginDescription<?> description : pluginDescriptions) {
+			JakeLog.info("Found plugin : " + description);
+			JakeLog.info(description.explanation());
 		}
 		JakeLog.done();
 	}

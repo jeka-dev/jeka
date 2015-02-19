@@ -273,7 +273,11 @@ public class JakeJavaBuild extends JakeBuild {
 				.withTargetVersion(this.targetJavaVersion());
 	}
 
-	public JakeUnit unitTester() {
+	public final JakeUnit unitTester() {
+		return JakeJavaBuildPlugin.apply(plugins, createUnitTester());
+	}
+
+	protected JakeUnit createUnitTester() {
 		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.depsFor(TEST));
 		final File junitReport = new File(this.testReportDir(), "junit");
 		return JakeUnit.of(classpath)
@@ -289,7 +293,11 @@ public class JakeJavaBuild extends JakeBuild {
 				.withClasspath(depsFor(COMPILE).and(depsFor(PROVIDED)));
 	}
 
-	public JakeJavaPacker packer() {
+	public final JakeJavaPacker packer() {
+		return JakeJavaBuildPlugin.apply(plugins, createPacker());
+	}
+
+	protected JakeJavaPacker createPacker() {
 		return JakeJavaPacker.of(this);
 	}
 

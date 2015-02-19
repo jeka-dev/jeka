@@ -1,6 +1,5 @@
 package org.jake;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,7 +17,7 @@ import org.jake.utils.JakeUtilsString;
  * Jake offers a very simple, yet powerful, plugin mechanism.<br/>
  * The plugins discovery is achieved by scanning the classpath.
  * Plugin classes are supposed to be named with a given suffix, according its template class (the abstract class they are inheriting from).
- * This way class scanning keep to be efficient and does not required to specify any base package.
+ * This way class scanning keep to be efficient without declaring any base package to scan.
  * 
  * For example, a plugin class extending <code>or.jake.java.build.JakeJavaBuildPlugin</code> template is supposed to be named 'my.package.XxxxxJakeJavaBuildPlugin.class'.
  * Xxxxx will be its short name, while my.package.XxxxxJakeJavaBuildPlugin will be its full name. It is also supposed to
@@ -69,14 +68,12 @@ public final class JakePlugins<T>  {
 	 * Returns all <code>JakePlugins</code> instances declared as field in the specified instance.
 	 * It includes fields declared in the specified instance class and the ones declared in its super classes.
 	 */
-	public static List<JakePlugins<?>> declaredAsField(Object hostingInstance) {
-		final List<Field> fields = JakeUtilsReflect.getAllDeclaredField(hostingInstance.getClass(), true);
-		final List<JakePlugins<?>> result = new LinkedList<JakePlugins<?>>();
-		for (final Field field : fields) {
-			if (field.getType().equals(JakePlugins.class)) {
-				final JakePlugins<?> plugins = JakeUtilsReflect.getFieldValue(hostingInstance, field);
-				result.add(plugins);
-			}
+	public static List<JakePluginDescription<?>> declaredAsField(JakeBuild hostingInstance) {
+		final List<JakePluginDescription<?>> result = new LinkedList<JakePluginDescription<?>>();
+		final List<Class<Object>> templateClasses = hostingInstance.pluginTemplateClasses();
+		for(final Class<Object> clazz : templateClasses) {
+			final JakePlugins<Object> plugins = JakePlugins.of(clazz);
+			result.addAll(plugins.getAll());
 		}
 		return result;
 	}
@@ -204,7 +201,7 @@ public final class JakePlugins<T>  {
 		}
 
 		private static String longName(Class<?> extendingClass, Class<?> clazz) {
-			return JakeUtilsString.substringBeforeLast(clazz.getName(), extendingClass.getSimpleName());
+			return clazz.getName();
 		}
 
 		private final String shortName;
@@ -241,7 +238,7 @@ public final class JakePlugins<T>  {
 			return clazz;
 		}
 
-		public List<String> description() {
+		public List<String> explanation() {
 			if (this.clazz.getAnnotation(JakeDoc.class) == null) {
 				return Collections.emptyList();
 			}
@@ -250,7 +247,7 @@ public final class JakePlugins<T>  {
 
 		@Override
 		public String toString() {
-			return "name=" + this.shortName + ", fullName=" + this.fullName+ ", inheriting from " + this.templateClass.getName();
+			return "name=" + this.shortName + "(" + this.fullName+ ")";
 		}
 
 	}

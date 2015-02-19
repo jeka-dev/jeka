@@ -2,6 +2,7 @@ package org.jake.java.testing.jacoco;
 
 import java.io.File;
 
+import org.jake.JakeDoc;
 import org.jake.JakeException;
 import org.jake.JakeOption;
 import org.jake.java.build.JakeJavaBuild;
@@ -9,6 +10,7 @@ import org.jake.java.build.JakeJavaBuildPlugin;
 import org.jake.java.testing.junit.JakeUnit;
 import org.jake.java.testing.junit.JakeUnit.Enhancer;
 
+@JakeDoc("Performs Jacoco code coverage analysing while junit is running.")
 public class JakeocoJakeJavaBuildPlugin extends JakeJavaBuildPlugin {
 
 	public static Enhancer enhancer(JakeJavaBuild jakeJavaBuild) {

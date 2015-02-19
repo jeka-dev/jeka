@@ -15,4 +15,20 @@ public abstract class JakeJavaBuildPlugin {
 		return packer;
 	}
 
+	public static JakeJavaPacker apply(Iterable<JakeJavaBuildPlugin> plugins, JakeJavaPacker original) {
+		JakeJavaPacker result = original;
+		for (final JakeJavaBuildPlugin plugin : plugins) {
+			result = plugin.enhance(result);
+		}
+		return result;
+	}
+
+	public static JakeUnit apply(Iterable<JakeJavaBuildPlugin> plugins, JakeUnit original) {
+		JakeUnit result = original;
+		for (final JakeJavaBuildPlugin plugin : plugins) {
+			result = plugin.enhance(result);
+		}
+		return result;
+	}
+
 }

@@ -136,6 +136,7 @@ class Project {
 
 		final JakeBuild build = JakeUtilsReflect.newInstance(buildClass);
 		JakeOptions.populateFields(build);
+
 		build.setBaseDir(projectFolder);
 		final List<Object> plugins = JakePlugins.instantiatePlugins(build.pluginTemplateClasses(), setups);
 		build.setPlugins(plugins);

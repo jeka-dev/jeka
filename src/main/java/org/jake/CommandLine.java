@@ -14,7 +14,7 @@ import org.jake.utils.JakeUtilsString;
 class CommandLine {
 
 	public static CommandLine of(String[] words) {
-		return new CommandLine(extractOptions(words), extractActions(words), extractPluginSetup(words) );
+		return new CommandLine(extractOptions(words), extractMethods(words), extractPluginSetup(words) );
 	}
 
 	private static final String DEFAULT_METHOD = "base";
@@ -44,10 +44,10 @@ class CommandLine {
 		return this.pluginSetups;
 	}
 
-	private static List<MethodInvocation> extractActions(String[] args) {
+	private static List<MethodInvocation> extractMethods(String[] args) {
 		final List<MethodInvocation> result = new LinkedList<MethodInvocation>();
 		for (final String arg : args) {
-			if (!arg.startsWith("-")) {
+			if (!arg.startsWith("-") && !arg.endsWith("#")) {
 				result.add(MethodInvocation.parse(arg));
 			}
 		}
@@ -83,7 +83,7 @@ class CommandLine {
 	private static Collection<JakePluginSetup> extractPluginSetup(String args[]) {
 		final Map<String, JakePluginSetup> setups = new HashMap<String, JakePlugins.JakePluginSetup>();
 		for (final String word : args) {
-			if (MethodInvocation.isPluginMethidInvokation(word)) {
+			if (MethodInvocation.isPluginMethodInvokation(word)) {
 				final String pluginName = JakeUtilsString.substringBeforeFirst(word, "#");
 				if (!setups.containsKey(pluginName)) {
 					setups.put(pluginName, JakePluginSetup.of(pluginName));
@@ -104,6 +104,9 @@ class CommandLine {
 					final String value = word.substring(equalIndex+1);
 					setups.put(pluginName, setup.with(key, value));
 				}
+			} else {
+				final String pluginName = JakeUtilsString.substringBeforeFirst(word, "#");
+				setups.put(pluginName, JakePluginSetup.of(pluginName));
 			}
 		}
 		return setups.values();
@@ -119,7 +122,7 @@ class CommandLine {
 	public static final class MethodInvocation {
 
 		public static MethodInvocation parse(String word) {
-			if (isPluginMethidInvokation(word)) {
+			if (isPluginMethodInvokation(word)) {
 				return pluginMethod(
 						JakeUtilsString.substringBeforeFirst(word, "#"),
 						JakeUtilsString.substringAfterLast(word, "#"));
@@ -147,8 +150,8 @@ class CommandLine {
 			this.pluginName = pluginName;
 		}
 
-		private static boolean isPluginMethidInvokation(String word) {
-			return JakeUtilsString.countOccurence(word, "#") == 1 && !word.startsWith("#");
+		private static boolean isPluginMethodInvokation(String word) {
+			return JakeUtilsString.countOccurence(word, '#') == 1 && !word.startsWith("#") && !word.endsWith("#");
 		}
 
 		public boolean isMethodPlugin() {

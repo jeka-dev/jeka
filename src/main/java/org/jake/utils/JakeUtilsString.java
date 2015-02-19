@@ -41,11 +41,12 @@ public final class JakeUtilsString {
 		return null;
 	}
 
-	public static int countOccurence(String matchedString, String occurence) {
+	public static int countOccurence(String matchedString, char occurence) {
 		int count = 0;
-		int from = 0;
-		for (final int index = matchedString.indexOf(occurence, from); index != -1; from = index) {
-			count++;
+		for (final char c : matchedString.toCharArray()) {
+			if (c == occurence) {
+				++count;
+			}
 		}
 		return count;
 	}
