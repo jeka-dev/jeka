@@ -3,7 +3,7 @@ package org.jake;
 import java.io.File;
 
 /**
- * Provides location related to running Jake instance.
+ * Provides location related to the running Jake instance.
  * 
  * @author Jerome Angibaud
  */
