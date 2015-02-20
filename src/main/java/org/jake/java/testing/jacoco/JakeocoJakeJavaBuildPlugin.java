@@ -21,15 +21,15 @@ public class JakeocoJakeJavaBuildPlugin extends JakeJavaBuildPlugin {
 
 	private Enhancer enhancer;
 
-	@JakeOption("The path of the jacocoagent.jar file. By default, it is [project dir]/build/libs/jacoco-agent/jacocoagent.jar")
-	private File jacocoAgent = new File(AGENT_RELATIVE_PATH);
+	@JakeOption("The path of the jacocoagent.jar file.")
+	private File agentFile = new File(AGENT_RELATIVE_PATH);
 
 	@Override
 	public void configure(JakeJavaBuild jakeJavaBuild) {
-		if (!jacocoAgent.isAbsolute()) {
-			jacocoAgent = jakeJavaBuild.baseDir(AGENT_RELATIVE_PATH);
+		if (!agentFile.isAbsolute()) {
+			agentFile = jakeJavaBuild.baseDir(agentFile.getPath());
 		}
-		this.enhancer = enhancer(jakeJavaBuild, jacocoAgent, true);
+		this.enhancer = enhancer(jakeJavaBuild, agentFile, true);
 	}
 
 	@Override
