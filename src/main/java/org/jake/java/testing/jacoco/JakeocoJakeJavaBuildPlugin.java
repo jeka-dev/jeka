@@ -13,22 +13,23 @@ import org.jake.java.testing.junit.JakeUnit.Enhancer;
 @JakeDoc("Performs Jacoco code coverage analysing while junit is running.")
 public class JakeocoJakeJavaBuildPlugin extends JakeJavaBuildPlugin {
 
+	private static final String AGENT_RELATIVE_PATH= "build/libs/jacoco-agent/jacocoagent.jar";
+
 	public static Enhancer enhancer(JakeJavaBuild jakeJavaBuild) {
-		return enhancer(jakeJavaBuild, jakeJavaBuild.baseDir("build/libs/jacoco-agent/jacocoagent.jar"), false);
+		return enhancer(jakeJavaBuild, jakeJavaBuild.baseDir(AGENT_RELATIVE_PATH), false);
 	}
 
 	private Enhancer enhancer;
 
 	@JakeOption("The path of the jacocoagent.jar file. By default, it is [project dir]/build/libs/jacoco-agent/jacocoagent.jar")
-	private File jacocoAgent;
+	private File jacocoAgent = new File(AGENT_RELATIVE_PATH);
 
 	@Override
 	public void configure(JakeJavaBuild jakeJavaBuild) {
-		if (jacocoAgent == null) {
-			this.enhancer = enhancer(jakeJavaBuild);
-		} else {
-			this.enhancer = enhancer(jakeJavaBuild, jacocoAgent, true);
+		if (!jacocoAgent.isAbsolute()) {
+			jacocoAgent = jakeJavaBuild.baseDir(AGENT_RELATIVE_PATH);
 		}
+		this.enhancer = enhancer(jakeJavaBuild, jacocoAgent, true);
 	}
 
 	@Override

@@ -137,16 +137,19 @@ class Project {
 		final JakeBuild build = JakeUtilsReflect.newInstance(buildClass);
 		JakeOptions.populateFields(build);
 
-		build.setBaseDir(projectFolder);
-		final List<Object> plugins = JakePlugins.instantiatePlugins(build.pluginTemplateClasses(), setups);
-		build.setPlugins(plugins);
-
 		JakeLog.info("Use build class '" + buildClass.getCanonicalName()
 				+ "' with methods : "
 				+ JakeUtilsString.toString(methods, ", ") + ".");
 		JakeLog.info("Using classpath : " + classLoader.fullClasspath());
 		if (JakeOptions.hasFieldOptions(buildClass)) {
 			JakeLog.info("With options : " + JakeOptions.fieldOptionsToString(build));
+		}
+
+		build.setBaseDir(projectFolder);
+		final List<Object> plugins = JakePlugins.instantiatePlugins(build.pluginTemplateClasses(), setups);
+		build.setPlugins(plugins);
+		for (final Object plugin : plugins) {
+			JakeLog.info("Using plugin " + plugin.getClass().getName() + " with options " + JakeOptions.fieldOptionsToString(plugin));
 		}
 		JakeLog.nextLine();
 
