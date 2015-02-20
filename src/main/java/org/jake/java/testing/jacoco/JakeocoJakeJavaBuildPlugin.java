@@ -13,7 +13,7 @@ import org.jake.java.testing.junit.JakeUnit.Enhancer;
 @JakeDoc("Performs Jacoco code coverage analysing while junit is running.")
 public class JakeocoJakeJavaBuildPlugin extends JakeJavaBuildPlugin {
 
-	private static final String AGENT_RELATIVE_PATH= "build/libs/jacoco-agent/jacocoagent.jar";
+	private static final String AGENT_RELATIVE_PATH= "build/libs/jake-extra/jacocoagent.jar";
 
 	public static Enhancer enhancer(JakeJavaBuild jakeJavaBuild) {
 		return enhancer(jakeJavaBuild, jakeJavaBuild.baseDir(AGENT_RELATIVE_PATH), false);
@@ -50,9 +50,6 @@ public class JakeocoJakeJavaBuildPlugin extends JakeJavaBuildPlugin {
 		return JakeocoJunitEnhancer.of(
 				new File(jakeJavaBuild.testReportDir(), "jacoco/jacoco.exec")).withAgent(agentFile);
 	}
-
-
-
 
 
 }

@@ -104,7 +104,7 @@ class CommandLine {
 					final String value = word.substring(equalIndex+1);
 					setups.put(pluginName, setup.with(key, value));
 				}
-			} else {
+			} else if (word.contains("#")){
 				final String pluginName = JakeUtilsString.substringBeforeFirst(word, "#");
 				setups.put(pluginName, JakePluginSetup.of(pluginName));
 			}

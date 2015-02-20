@@ -190,8 +190,12 @@ public final class JakeOptions {
 	 * Returns a multi-line text standing for the descriptions of the available options.
 	 */
 	@SuppressWarnings("unchecked")
-	static List<String> help(Class<? extends JakeBuild> clazz) {
+	static List<String> help(Class<?> clazz) {
 		return JakeUtilsIterable.concatLists(doHelp(JakeOptions.class), doHelp(clazz));
+	}
+
+	static List<String> helpClassOnly(Class<?> clazz) {
+		return doHelp(clazz);
 	}
 
 	private static List<String> doHelp(Class<?> clazz) {

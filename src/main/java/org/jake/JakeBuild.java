@@ -184,10 +184,21 @@ public class JakeBuild {
 		JakeLog.info("When no method specified, then 'base' method is processed.");
 		JakeLog.info("Ex: jake javadoc compile -verbose=true -other=xxx -DmyProp=Xxxx");
 		JakeLog.nextLine();
-		JakeLog.info("Available action(s) for build '" + this.getClass().getName() + "' : " );
+		JakeLog.info("Available method(s) for '" + this.getClass().getName() + "' : " );
+		displayHelpOnMethods(this.getClass());
+		JakeLog.nextLine();
+		JakeLog.info("Standard options for this build class : ");
+		JakeLog.nextLine();
+		JakeLog.shift(JUMP);
+		JakeLog.info(JakeOptions.help(this.getClass()));
+		JakeLog.shift(-JUMP);
+		displayPlugins();
+	}
+
+	private static void displayHelpOnMethods(Class<?> target) {
 		JakeLog.shift(JUMP);
 		final List<CommandDescription> list = new LinkedList<JakeBuild.CommandDescription>();
-		for (final Method method : this.getClass().getMethods()) {
+		for (final Method method : target.getMethods()) {
 			final int modifier = method.getModifiers();
 			if (!method.getReturnType().equals(void.class)
 					|| method.getParameterTypes().length != 0
@@ -206,23 +217,41 @@ public class JakeBuild {
 		}
 		CommandDescription.log(list);
 		JakeLog.shift(-JUMP);
-		JakeLog.nextLine();
-		JakeLog.info("Standard options for this build class : ");
-		JakeLog.nextLine();
-		JakeLog.shift(JUMP);
-		JakeLog.info(JakeOptions.help(this.getClass()));
-		JakeLog.shift(-JUMP);
-		displayPlugins();
 	}
 
 	private void displayPlugins() {
 		JakeLog.startln("Looking for plugins");
 		final List<JakePluginDescription<?>> pluginDescriptions = JakePlugins.declaredAsField(this);
 		for (final JakePluginDescription<?> description : pluginDescriptions) {
-			JakeLog.info("Found plugin : " + description);
-			JakeLog.info(description.explanation());
+			if (description.explanation() == null || description.explanation().isEmpty()) {
+				JakeLog.info();
+			} else {
+				JakeLog.info("Found plugin : " + description + " : " + description.explanation().get(0));
+			}
+		}
+		if (!pluginDescriptions.isEmpty()) {
+			JakeLog.info("To have more details about plugins, launch : jake helpPlugins.");
 		}
 		JakeLog.done();
+	}
+
+	public void helpPlugins() {
+		JakeLog.startln("Looking for plugins");
+		final List<JakePluginDescription<?>> pluginDescriptions = JakePlugins.declaredAsField(this);
+		for (final JakePluginDescription<?> description : pluginDescriptions) {
+			JakeLog.info("Plugin  Name : " + description.shortName());
+			JakeLog.shift(4);
+			JakeLog.info("Full name : " + description.fullName());
+			JakeLog.info("Template class : " + description.templateClass().getName());
+			JakeLog.info(description.explanation());
+			JakeLog.info("Available method(s) for this plugin : " );
+			displayHelpOnMethods(description.pluginClass());
+			JakeLog.info("Options for this plugin : ");
+			JakeLog.shift(JUMP);
+			JakeLog.info(JakeOptions.helpClassOnly(description.pluginClass()));
+			JakeLog.shift(-JUMP);
+			JakeLog.shift(-4);
+		}
 	}
 
 
@@ -275,7 +304,6 @@ public class JakeBuild {
 			Collections.sort(actions);
 			for(final CommandDescription actionDescription : actions) {
 				if (actionDescription.declaringClass != currentDecClass) {
-					JakeLog.nextLine();
 					JakeLog.info("From " + actionDescription.declaringClass.getName());
 					currentDecClass = actionDescription.declaringClass;
 				}
@@ -283,7 +311,6 @@ public class JakeBuild {
 				actionDescription.log();
 				JakeLog.shift(-1);
 			}
-			JakeLog.nextLine();
 		}
 
 		@Override

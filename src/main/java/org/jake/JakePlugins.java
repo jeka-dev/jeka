@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,20 +32,25 @@ public final class JakePlugins<T>  {
 
 	private static final Map<Class<?>, Set<Class<?>>> CACHE = new HashMap<Class<?>, Set<Class<?>>>();
 
-	public static List<Object> instantiatePlugins(Iterable<Class<Object>> templateClasses,
+	public static Map<String, Object> instantiatePlugins(Iterable<Class<Object>> templateClasses,
 			Iterable<JakePluginSetup> setups) {
-		final List<Object> result = new LinkedList<Object>();
+		final Map<String, Object> result = new LinkedHashMap<String, Object>();
 		final Set<String> names = JakePluginSetup.names(setups);
+		final Set<String> unmatchingNames = new HashSet<String>(names);
 		for (final Class<Object> templateClass : templateClasses) {
 			final JakePlugins<Object> plugins = JakePlugins.of(templateClass);
 			final Map<String, JakePluginDescription<Object>> pluginDescriptions = plugins.loadAllByNames(names);
+			unmatchingNames.removeAll(pluginDescriptions.keySet());
 			for (final String name : pluginDescriptions.keySet()) {
 				final JakePluginDescription<Object> desc = pluginDescriptions.get(name);
 				final Object plugin = JakeUtilsReflect.newInstance(desc.pluginClass());
 				final JakePluginSetup setup = JakePluginSetup.findOrFail(name, setups);
 				JakeOptions.populateFields(plugin, setup.options);
-				result.add(plugin);
+				result.put(name, plugin);
 			}
+		}
+		if (!unmatchingNames.isEmpty()) {
+			JakeLog.warn("No plugins found with name : " + unmatchingNames);
 		}
 		return result;
 	}
@@ -226,8 +232,8 @@ public final class JakePlugins<T>  {
 			return this.shortName;
 		}
 
-		public String longName() {
-			return this.longName();
+		public String fullName() {
+			return this.fullName;
 		}
 
 		public Class<T> templateClass() {

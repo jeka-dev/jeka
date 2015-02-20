@@ -1,5 +1,6 @@
 package org.jake.utils;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -128,6 +129,9 @@ public final class JakeUtilsString {
 			}
 			if (type.equals(Float.class) || type.equals(float.class)) {
 				return (T) Float.valueOf(stringValue);
+			}
+			if (type.equals(File.class)) {
+				return (T) new File(stringValue);
 			}
 		} catch (final NumberFormatException e) {
 			throw new IllegalArgumentException(e.getMessage(), e);

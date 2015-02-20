@@ -4,7 +4,9 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.jake.CommandLine.MethodInvocation;
 import org.jake.JakePlugins.JakePluginSetup;
@@ -146,7 +148,8 @@ class Project {
 		}
 
 		build.setBaseDir(projectFolder);
-		final List<Object> plugins = JakePlugins.instantiatePlugins(build.pluginTemplateClasses(), setups);
+		final Map<String, Object> pluginMap = JakePlugins.instantiatePlugins(build.pluginTemplateClasses(), setups);
+		final List<Object> plugins = new LinkedList<Object>(pluginMap.values());
 		build.setPlugins(plugins);
 		for (final Object plugin : plugins) {
 			JakeLog.info("Using plugin " + plugin.getClass().getName() + " with options " + JakeOptions.fieldOptionsToString(plugin));
@@ -154,30 +157,37 @@ class Project {
 		JakeLog.nextLine();
 
 		for (final MethodInvocation methodInvokation : methods) {
-			if (methodInvokation.isMethodPlugin()) {
-				continue;
-			}
 
 			final Method method;
 			final String actionIntro = "Method : " + methodInvokation.toString();
 			JakeLog.info(actionIntro);
 			JakeLog.info(JakeUtilsString.repeat("-", actionIntro.length()));
+			Class<?> targetClass = null;
 			try {
-				method = build.getClass().getMethod(methodInvokation.methodName);
+				if (methodInvokation.isMethodPlugin()) {
+					targetClass = pluginMap.get(methodInvokation.pluginName).getClass();
+				} else {
+					targetClass = buildClass;
+				}
+				method = targetClass.getMethod(methodInvokation.methodName);
 			} catch (final NoSuchMethodException e) {
 				JakeLog.warn("No zero-arg method '" + methodInvokation.methodName
-						+ "' found in class '" + buildClass.getCanonicalName() + "'. Skip.");
+						+ "' found in class '" + targetClass  + "'. Skip.");
 				continue;
 			}
 			if (!Void.TYPE.equals(method.getReturnType())) {
 				JakeLog.warn("A zero-arg method '" + methodInvokation
-						+ "' found in class '" + buildClass.getCanonicalName() + "' but was not returning a void result. Skip.");
+						+ "' found in class '" + targetClass + "' but was not returning a void result. Skip.");
 				continue;
 			}
 			final long start = System.nanoTime();
 			boolean success = false;
 			try {
-				method.invoke(build);
+				if (methodInvokation.isMethodPlugin()) {
+					method.invoke(pluginMap.get(methodInvokation.pluginName));
+				} else {
+					method.invoke(build);
+				}
 				success = true;
 			} catch (final SecurityException e) {
 				throw new RuntimeException(e);

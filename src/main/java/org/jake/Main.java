@@ -2,6 +2,7 @@ package org.jake;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 
 import org.jake.utils.JakeUtilsFile;
@@ -20,6 +21,7 @@ class Main {
 		JakeLog.info("Java Home : " + System.getProperty("java.home"));
 		JakeLog.info("Java Version : " + System.getProperty("java.version")+ ", " + System.getProperty("java.vendor"));
 		JakeLog.info("Jake class path : " + System.getProperty("java.class.path"));
+		JakeLog.info("Command line : " + JakeUtilsString.join(Arrays.asList(args), " "));
 		final CommandLine commandLine = CommandLine.of(args);
 		JakeOptions.populate(commandLine.options());
 		JakeLog.info("Using global options : " + JakeOptions.fieldOptionsToString(JakeOptions.instance()));
