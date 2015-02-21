@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jake.CommandLine.MethodInvocation;
+import org.jake.ImportAnnotationProcessor.ImportResult;
 import org.jake.JakePlugins.JakePluginSetup;
 import org.jake.java.build.JakeJavaBuild;
 import org.jake.java.eclipse.JakeEclipseBuild;
@@ -50,27 +51,33 @@ class Project {
 		}
 	}
 
-	public File compileBuild(Iterable<File> classpath) {
-		final JakeDir buildSource = JakeDir.of(new File(projectBaseDir,
-				BUILD_SOURCE_DIR));
-		if (!buildSource.exists()) {
-			JakeLog.info("No source build found at " + BUILD_SOURCE_DIR +".");
-			return null;
+	private	JakePath buildPath() {
+		final List<File> extraLibs = new LinkedList<File>();
+		final File localJakeBuild = new File(this.projectBaseDir,"build/libs/jake");
+		if (localJakeBuild.exists()) {
+			extraLibs.addAll(JakeDir.of(localJakeBuild).include("**/*.jar").files());
 		}
-		final File buildBinDir = new File(projectBaseDir, BUILD_BIN_DIR);
-		if (!buildBinDir.exists()) {
-			buildBinDir.mkdirs();
+		if (JakeLocator.libExtDir().exists()) {
+			extraLibs.addAll(JakeDir.of(JakeLocator.libExtDir()).include("**/*.jar").files());
 		}
+		return JakePath.of(extraLibs).and(JakeLocator.jakeJarFile());
+	}
+
+
+	public File compileBuild() {
 		displayHead("Compiling build classes for project : " + projectRelativePath);
 		final long start = System.nanoTime();
-		JakeJavaCompiler.ofOutput(buildBinDir)
-		.andSources(buildSource)
-		.withClasspath(classpath)
-		.failOnError(true)
-		.compile();
+		final JakePath buildPath = this.buildPath();
+		final ImportResult importsResult = this.annotedImports();
+
+		// TODO add imports to the buildPath
+
+		baseBuildCompiler().withClasspath(buildPath).compile();
 		JakeLog.info("Done in " + JakeUtilsTime.durationInSeconds(start) + " seconds.", "");
-		return buildBinDir;
+		return buildBinDir();
 	}
+
+
 
 	public boolean executeBuild(File projectFolder, JakeClassLoader classLoader,
 			Iterable<MethodInvocation> methods, Iterable<JakePluginSetup> setups) {
@@ -88,12 +95,11 @@ class Project {
 		return result;
 	}
 
-	private boolean hasBuildSource() {
-		final File buildSource = new File(projectBaseDir, BUILD_SOURCE_DIR);
-		if (!buildSource.exists()) {
+	public boolean hasBuildSource() {
+		if (!this.buildSourceDir().exists()) {
 			return false;
 		}
-		return true;
+		return JakeDir.of(buildSourceDir()).include("**/*.java").fileCount(false) > 0;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -224,6 +230,40 @@ class Project {
 		JakeLog.info(JakeUtilsString.repeat(pattern, intro.length() ));
 		JakeLog.nextLine();
 	}
+
+	private ImportResult annotedImports() {
+		JakeLog.startln("Processing annotation on build sources to get imports information");
+		baseBuildCompiler()
+		.withClasspath(JakePath.of(JakeLocator.jakeJarFile()))
+		.withAnnotationProcessingOnly()
+		.withAnnotationProcessors(ImportAnnotationProcessor.class.getName())
+		.withSourceVersion(JakeJavaCompiler.V6)
+		.withTargetVersion(JakeJavaCompiler.V6)
+		.withOptions("-nowarn")
+		.compile();
+		JakeLog.done();
+		return ImportAnnotationProcessor.getResult(buildBinDir());
+	}
+
+	private JakeJavaCompiler baseBuildCompiler() {
+		final JakeDir buildSource = JakeDir.of(buildSourceDir());
+		if (!buildBinDir().exists()) {
+			buildBinDir().mkdirs();
+		}
+		return JakeJavaCompiler.ofOutput(buildBinDir())
+				.andSources(buildSource)
+				.failOnError(true);
+	}
+
+	private File buildSourceDir() {
+		return new File(projectBaseDir, BUILD_SOURCE_DIR);
+	}
+
+	private File buildBinDir() {
+		return new File(projectBaseDir, BUILD_BIN_DIR);
+	}
+
+
 
 
 }

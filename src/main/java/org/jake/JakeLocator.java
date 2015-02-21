@@ -45,5 +45,14 @@ public final class JakeLocator {
 		return new File(jakeHome(), "libs/optional");
 	}
 
+	/**
+	 * Returns the directory where lie optional libraries.
+	 */
+	public static File libExtDir() {
+		return new File(jakeHome(), "libs/ext");
+	}
+
+
+
 
 }

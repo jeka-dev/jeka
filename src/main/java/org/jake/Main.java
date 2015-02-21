@@ -29,11 +29,11 @@ class Main {
 		JakeLog.nextLine();
 		defineSystemProps(args);
 
-		final JakeClassLoader classLoader = JakeClassLoader.current().createChild();
 		final Project project = new Project(JakeUtilsFile.workingDir(), JakeUtilsFile.workingDir());
 
-		final File buildBin = project.compileBuild(classLoader.fullClasspath());
-		if (buildBin != null) {
+		final JakeClassLoader classLoader = JakeClassLoader.current().createChild();
+		if (project.hasBuildSource()) {
+			final File buildBin = project.compileBuild();
 			classLoader.addEntry(buildBin);
 		}
 		final boolean result = project.executeBuild(JakeUtilsFile.workingDir(), classLoader,

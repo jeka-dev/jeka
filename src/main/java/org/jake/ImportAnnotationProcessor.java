@@ -2,99 +2,121 @@ package org.jake;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedSourceVersion;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 
 import org.jake.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsString;
 
-class ImportAnnotationProcessor extends AbstractProcessor {
+@SupportedSourceVersion(SourceVersion.RELEASE_6)
+@SupportedAnnotationTypes({"org.jake.JakeImport", "org.jake.JakeImportRepo"})
+public class ImportAnnotationProcessor extends AbstractProcessor {
+
+	private static final String FILE_NAME = "jakeImports.properties";
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+		if (annotations.isEmpty()) {
+			return true;
+		}
+		final List<String> imports = new LinkedList<String>();
+		final List<String> repos = new LinkedList<String>();
 		for (final Element element : roundEnv.getElementsAnnotatedWith(JakeImport.class)) {
 			final TypeElement typeElement = (TypeElement) element;
 			final JakeImport jakeImport = typeElement.getAnnotation(JakeImport.class);
-			try {
-				final FileObject fileObject =  processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "",
-						typeElement.getQualifiedName().toString() + ".properties");
-				if (jakeImport.value().length > 0) {
-					fileObject.openWriter().append("imports="+stringsToString(jakeImport.value())).append("\n");
-					final JakeImportRepo importRepo = typeElement.getAnnotation(JakeImportRepo.class);
-					if (importRepo != null && importRepo.value().length > 0) {
-						fileObject.openWriter().append("repos="+stringsToString(importRepo.value()));
-					}
-				}
-
-
-			} catch (final IOException e) {
-				throw new RuntimeException(e);
-			}
+			imports.addAll(Arrays.asList(jakeImport.value()));
 		}
-
-		return false;
-	}
-
-	private static String stringsToString(String[] imports) {
-		return JakeUtilsString.join(imports, "|");
-	}
-
-	private static List<String> stringToStrings(String string) {
-		return Arrays.asList(string.split("|"));
-	}
-
-	public static List<String> getImports(Properties props) {
-		final String property = props.getProperty("imports");
-		if (property == null) {
-			return Collections.emptyList();
+		for (final Element element : roundEnv.getElementsAnnotatedWith(JakeImportRepo.class)) {
+			final TypeElement typeElement = (TypeElement) element;
+			final JakeImportRepo importRepo = typeElement.getAnnotation(JakeImportRepo.class);
+			repos.addAll(Arrays.asList(importRepo.value()));
 		}
-		return stringToStrings(props.getProperty("imports"));
-	}
-
-	public static List<String> getRepos(Properties props) {
-		final String property = props.getProperty("repos");
-		if (property == null) {
-			return Collections.emptyList();
+		try {
+			final OutputStream outputStream =  processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "",
+					FILE_NAME).openOutputStream();
+			new ImportResult(imports, repos).storeAsPropertyFile(outputStream);
+			JakeUtilsIO.closeQuietly(outputStream);
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
 		}
-		return stringToStrings(props.getProperty("repos"));
+		return true;
 	}
 
-	public static final class Result {
+
+
+	public static final class ImportResult {
+
+		static ImportResult from(File propsFile) {
+			final Properties properties = JakeUtilsFile.readPropertyFile(propsFile);
+			return new ImportResult(getImports(properties), getRepos(properties));
+		}
 
 		public final List<String> imports;
 
 		public final List<String> repos;
 
-		private Result(List<String> imports, List<String> repos) {
+		private ImportResult(List<String> imports, List<String> repos) {
 			super();
-			this.imports = imports;
-			this.repos = repos;
+			this.imports = Collections.unmodifiableList(imports);
+			this.repos = Collections.unmodifiableList(repos);
+		}
+
+		void storeAsPropertyFile(OutputStream stream) {
+			final Properties properties = new Properties();
+			properties.put("imports", stringsToString(imports.toArray(new String[0])));
+			properties.put("repos", stringsToString(repos.toArray(new String[0])));
+			try {
+				properties.store(stream, "");
+			} catch (final IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		private static String stringsToString(String[] imports) {
+			return JakeUtilsString.join(imports, "|");
+		}
+
+		private static List<String> getImports(Properties props) {
+			final String property = props.getProperty("imports");
+			if (property == null) {
+				return Collections.emptyList();
+			}
+			return stringToStrings(props.getProperty("imports"));
+		}
+
+		private static List<String> getRepos(Properties props) {
+			final String property = props.getProperty("repos");
+			if (property == null) {
+				return Collections.emptyList();
+			}
+			return stringToStrings(props.getProperty("repos"));
+		}
+
+		private static List<String> stringToStrings(String string) {
+			return Arrays.asList(string.split("|"));
 		}
 
 	}
 
-	@SuppressWarnings("unchecked")
-	public static Result get(Class<?> clazz, File folder) {
-		final File propsFile = new File(folder, clazz.getName()+".properties");
-		if (!propsFile.exists()) {
-			return new Result(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
-		}
-		final Properties properties = JakeUtilsFile.readPropertyFile(propsFile);
-		return new Result(getImports(properties), getRepos(properties));
+
+	public static ImportResult getResult(File outputFolder) {
+		final File file = new File(outputFolder, FILE_NAME);
+		return ImportResult.from(file);
 	}
-
-
-
-
 
 }
