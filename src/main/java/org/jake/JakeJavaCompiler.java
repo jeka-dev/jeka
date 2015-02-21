@@ -126,6 +126,28 @@ public final class JakeJavaCompiler {
 	}
 
 	/**
+	 * Creates a copy of this {@link JakeJavaCompiler} but with using the specified annotation classes instead of
+	 * using the ones discovered by default Java 6 mechanism.
+	 */
+	public JakeJavaCompiler withAnnotationProcessors(String ...annotationProcessorClassNames) {
+		return andOptions("-processor", JakeUtilsString.join(annotationProcessorClassNames, ","));
+	}
+
+	/**
+	 * Creates a copy of this {@link JakeJavaCompiler} but without annotation processing.
+	 */
+	public JakeJavaCompiler withoutAnnotationProcessing() {
+		return andOptions("-proc:none");
+	}
+
+	/**
+	 * Creates a copy of this {@link JakeJavaCompiler} but only for annotation processing (no compilation).
+	 */
+	public JakeJavaCompiler withAnnotationProcessingOnly() {
+		return andOptions("-proc:only");
+	}
+
+	/**
 	 * Creates a copy of this {@link JakeJavaCompiler} but with the target version.
 	 */
 	public JakeJavaCompiler withTargetVersion(String version) {

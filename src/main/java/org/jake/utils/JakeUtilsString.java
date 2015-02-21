@@ -3,11 +3,16 @@ package org.jake.utils;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
 public final class JakeUtilsString {
+
+	public static String join(String[] items, String separator) {
+		return join(Arrays.asList(items), separator);
+	}
 
 	public static String join(Iterable<String> items, String separator) {
 		final StringBuilder builder = new StringBuilder();
