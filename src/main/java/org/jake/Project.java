@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jake.CommandLine.MethodInvocation;
-import org.jake.ImportAnnotationProcessor.ImportResult;
+import org.jake.JakeImportAnnotationProcessor.ImportResult;
 import org.jake.JakePlugins.JakePluginSetup;
 import org.jake.java.build.JakeJavaBuild;
 import org.jake.java.eclipse.JakeEclipseBuild;
@@ -236,13 +236,13 @@ class Project {
 		baseBuildCompiler()
 		.withClasspath(JakePath.of(JakeLocator.jakeJarFile()))
 		.withAnnotationProcessingOnly()
-		.withAnnotationProcessors(ImportAnnotationProcessor.class.getName())
+		.withAnnotationProcessors(JakeImportAnnotationProcessor.class.getName())
 		.withSourceVersion(JakeJavaCompiler.V6)
 		.withTargetVersion(JakeJavaCompiler.V6)
 		.withOptions("-nowarn")
 		.compile();
 		JakeLog.done();
-		return ImportAnnotationProcessor.getResult(buildBinDir());
+		return JakeImportAnnotationProcessor.getResult(buildBinDir());
 	}
 
 	private JakeJavaCompiler baseBuildCompiler() {

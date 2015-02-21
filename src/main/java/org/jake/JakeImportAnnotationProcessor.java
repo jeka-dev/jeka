@@ -25,7 +25,7 @@ import org.jake.utils.JakeUtilsString;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedAnnotationTypes({"org.jake.JakeImport", "org.jake.JakeImportRepo"})
-public class ImportAnnotationProcessor extends AbstractProcessor {
+public class JakeImportAnnotationProcessor extends AbstractProcessor {
 
 	private static final String FILE_NAME = "jakeImports.properties";
 
