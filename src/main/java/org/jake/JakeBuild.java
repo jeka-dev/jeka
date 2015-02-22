@@ -1,22 +1,18 @@
 package org.jake;
 
 import java.io.File;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.JakePlugins.JakePluginDescription;
 import org.jake.depmanagement.JakeModuleId;
+import org.jake.depmanagement.JakeRepo;
+import org.jake.depmanagement.JakeRepo.MavenRepository;
 import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionedModule;
 import org.jake.depmanagement.ivy.JakeIvy;
 import org.jake.utils.JakeUtilsFile;
-import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
 import org.jake.utils.JakeUtilsTime;
 
@@ -28,11 +24,33 @@ import org.jake.utils.JakeUtilsTime;
  */
 public class JakeBuild {
 
-	private static final int JUMP = 2;
-
 	private File baseDirFile = JakeUtilsFile.workingDir();
 
 	private final Date buildTime = JakeUtilsTime.now();
+
+	@JakeOption({"Maven or Ivy repositories to download dependency artifacts.",
+	"Prefix the Url with 'ivy:' if it is an Ivy repostory."})
+	private final String defaultDownloadRepoUrl = MavenRepository.MAVEN_CENTRAL_URL.toString();
+
+	@JakeOption({"Maven or Ivy repositories to download dependency artifacts.",
+	"Prefix the Url with 'ivy:' if it is an Ivy repostory."})
+	private final String defaultUploadRepoUrl = null;
+
+	@JakeOption({"Usename to connect to the upload repository (if needed).",
+	"Null or blank means that the upload repository will be accessed in an anonymous way."})
+	private final String defaultUploadRepoUsername = null;
+
+	@JakeOption({"Password to connect to the upload repository (if needed)."})
+	private final String defaultUploadRepoPassword = null;
+
+	@JakeOption("Set it if the releases are uploaded on a distinct repository than the snaphot.")
+	private final String defaultUploadRepoReleaseUrl = null;
+
+	@JakeOption("Set it if the releases are uploaded on a distinct repository than the snaphot.")
+	private final String defaultUploadRepoReleaseUsername = null;
+
+	@JakeOption("Set it if the releases are uploaded on a distinct repository than the snaphot.")
+	private final String defaultUploadRepoReleasePassword = null;
 
 	protected JakeBuild() {
 	}
@@ -114,21 +132,20 @@ public class JakeBuild {
 	 * managed dependencies.
 	 */
 	protected JakeRepos downloadRepositories() {
-		return JakeRepos.mavenCentral();
+		return JakeRepos.of(JakeRepo.of(this.defaultDownloadRepoUrl));
 	}
 
 	/**
 	 * Returns the upload repositories where to deploy artifacts.
 	 */
 	protected JakeRepos uploadRepositories() {
-		return JakeRepos.of();
+
+		return JakeRepos.of(JakeRepo.of(this.defaultDownloadRepoUrl));
 	}
 
 	protected Date buildTime() {
 		return (Date) buildTime.clone();
 	}
-
-
 
 
 	/**
@@ -180,167 +197,15 @@ public class JakeBuild {
 
 	@JakeDoc("Display all available methods defined in this build.")
 	public void help() {
-		JakeLog.info("Usage: jake [methodA...] [-optionName=value...] [-DsystemPropName=value...]");
-		JakeLog.info("When no method specified, then 'base' method is processed.");
-		JakeLog.info("Ex: jake javadoc compile -verbose=true -other=xxx -DmyProp=Xxxx");
-		JakeLog.nextLine();
-		JakeLog.info("Available method(s) for '" + this.getClass().getName() + "' : " );
-		displayHelpOnMethods(this.getClass());
-		JakeLog.nextLine();
-		JakeLog.info("Standard options for this build class : ");
-		JakeLog.nextLine();
-		JakeLog.shift(JUMP);
-		JakeLog.info(JakeOptions.help(this.getClass()));
-		JakeLog.shift(-JUMP);
-		displayPlugins();
+		HelpDisplayer.help(this);
 	}
 
-	private static void displayHelpOnMethods(Class<?> target) {
-		JakeLog.shift(JUMP);
-		final List<CommandDescription> list = new LinkedList<JakeBuild.CommandDescription>();
-		for (final Method method : target.getMethods()) {
-			final int modifier = method.getModifiers();
-			if (!method.getReturnType().equals(void.class)
-					|| method.getParameterTypes().length != 0
-					|| JakeUtilsReflect.isMethodPublicIn(Object.class, method.getName())
-					|| Modifier.isAbstract(modifier) || Modifier.isStatic(modifier)) {
-				continue;
-			}
-			final JakeDoc jakeDoc = JakeUtilsReflect.getInheritedAnnotation(method, JakeDoc.class);
-			final CommandDescription actionDescription;
-			if (jakeDoc != null) {
-				actionDescription = new CommandDescription(method, jakeDoc.value());
-			} else {
-				actionDescription = new CommandDescription(method);
-			}
-			list.add(actionDescription);
-		}
-		CommandDescription.log(list);
-		JakeLog.shift(-JUMP);
-	}
-
-	private void displayPlugins() {
-		JakeLog.startln("Looking for plugins");
-		final List<JakePluginDescription<?>> pluginDescriptions = JakePlugins.declaredAsField(this);
-		for (final JakePluginDescription<?> description : pluginDescriptions) {
-			if (description.explanation() == null || description.explanation().isEmpty()) {
-				JakeLog.info();
-			} else {
-				JakeLog.info("Found plugin : " + description + " : " + description.explanation().get(0));
-			}
-		}
-		if (!pluginDescriptions.isEmpty()) {
-			JakeLog.info("To have more details about plugins, launch : jake helpPlugins.");
-		}
-		JakeLog.done();
-	}
-
+	@JakeDoc("Display details on all available plugins.")
 	public void helpPlugins() {
-		JakeLog.startln("Looking for plugins");
-		final List<JakePluginDescription<?>> pluginDescriptions = JakePlugins.declaredAsField(this);
-		for (final JakePluginDescription<?> description : pluginDescriptions) {
-			JakeLog.info("Plugin  Name : " + description.shortName());
-			JakeLog.shift(4);
-			JakeLog.info("Full name : " + description.fullName());
-			JakeLog.info("Template class : " + description.templateClass().getName());
-			JakeLog.info(description.explanation());
-			JakeLog.info("Available method(s) for this plugin : " );
-			displayHelpOnMethods(description.pluginClass());
-			JakeLog.info("Options for this plugin : ");
-			JakeLog.shift(JUMP);
-			JakeLog.info(JakeOptions.helpClassOnly(description.pluginClass()));
-			JakeLog.shift(-JUMP);
-			JakeLog.shift(-4);
-		}
+		HelpDisplayer.helpPlugins(this);
 	}
 
 
 
-	private static class CommandDescription implements Comparable<CommandDescription> {
 
-		private final String name;
-		private final String[] docs;
-		private final Class<?> declaringClass;
-
-		public CommandDescription(Method method, String[] docs) {
-			super();
-			this.name = method.getName();
-			this.docs = Arrays.copyOf(docs, docs.length);
-			this.declaringClass = method.getDeclaringClass();
-		}
-
-		public CommandDescription(Method method) {
-			this(method, new String[0]);
-		}
-
-		@Override
-		public int compareTo(CommandDescription other) {
-			if (this.declaringClass.equals(other.declaringClass)) {
-				return this.name.compareTo(other.name);
-			}
-			if (this.declaringClass.isAssignableFrom(other.declaringClass)) {
-				return -1;
-			}
-			return 1;
-		}
-
-		public void log() {
-			if (docs == null || docs.length == 0) {
-				JakeLog.info(name + " : Not documented.");
-			} else if (docs.length == 1) {
-				JakeLog.info(name + " : " + docs[0]);
-			} else {
-				final String intro = name + " : ";
-				JakeLog.info(intro + docs[0]);
-				final String margin = JakeUtilsString.repeat(" ", intro.length());
-				for (int i = 1; i < docs.length; i++) {
-					JakeLog.info(margin + docs[i]);
-				}
-			}
-		}
-
-		public static void log(List<CommandDescription> actions) {
-			Class<?> currentDecClass = null;
-			Collections.sort(actions);
-			for(final CommandDescription actionDescription : actions) {
-				if (actionDescription.declaringClass != currentDecClass) {
-					JakeLog.info("From " + actionDescription.declaringClass.getName());
-					currentDecClass = actionDescription.declaringClass;
-				}
-				JakeLog.shift(1);
-				actionDescription.log();
-				JakeLog.shift(-1);
-			}
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((name == null) ? 0 : name.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null) {
-				return false;
-			}
-			if (getClass() != obj.getClass()) {
-				return false;
-			}
-			final CommandDescription other = (CommandDescription) obj;
-			if (name == null) {
-				if (other.name != null) {
-					return false;
-				}
-			} else if (!name.equals(other.name)) {
-				return false;
-			}
-			return true;
-		}
-	}
 }
