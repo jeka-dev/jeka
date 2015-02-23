@@ -22,6 +22,10 @@ public final class JakeVersion implements Comparable<JakeVersion> {
 		return name;
 	}
 
+	public boolean isSnapshot() {
+		return this.name.toLowerCase().endsWith("-snapshot");
+	}
+
 	@Override
 	public int compareTo(JakeVersion other) {
 		return name.compareTo(other.name);

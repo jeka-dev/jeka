@@ -9,15 +9,32 @@ import java.util.List;
 
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIterable;
+import org.jake.utils.JakeUtilsString;
 
 public abstract class JakeRepo {
 
+	public static JakeRepo ofOptional(String url, String userName, String password) {
+		if (JakeUtilsString.isBlank(url)) {
+			return null;
+		}
+		return of(url).withCredential(userName, password);
+	}
+
+	public static JakeRepo firstNonNull(JakeRepo ...repos) {
+		for (final JakeRepo repo : repos) {
+			if (repo != null) {
+				return repo;
+			}
+		}
+		return null;
+	}
+
 	public static MavenRepository maven(String url) {
-		return new MavenRepository(toUrl(url));
+		return new MavenRepository(toUrl(url), null, null);
 	}
 
 	public static MavenRepository maven(File file) {
-		return new MavenRepository(JakeUtilsFile.toUrl(file));
+		return new MavenRepository(JakeUtilsFile.toUrl(file), null, null);
 	}
 
 	public static JakeRepo mavenCentral() {
@@ -36,7 +53,7 @@ public abstract class JakeRepo {
 	}
 
 	public static JakeRepo.IvyRepository ivy(URL url) {
-		return new IvyRepository(url, null, null);
+		return new IvyRepository(url, null, null, null, null);
 	}
 
 	public static JakeRepo.IvyRepository ivy(File file) {
@@ -57,13 +74,40 @@ public abstract class JakeRepo {
 
 	private final URL url;
 
-	private JakeRepo(URL url) {
+	private final String userName;
+
+	private final String password;
+
+	private JakeRepo(URL url, String userName, String password) {
 		this.url = url;
+		this.userName = userName;
+		this.password = password;
 	}
 
-	public URL url() {
+	public final URL url() {
 		return url;
 	}
+
+	public final String userName() {
+		return userName;
+	}
+
+	public final String password() {
+		return password;
+	}
+
+	public boolean hasCredentials() {
+		return !JakeUtilsString.isBlank(userName);
+	}
+
+	public final JakeRepo withOptionalCredentials(String userName, String password) {
+		if (JakeUtilsString.isBlank(userName)) {
+			return this;
+		}
+		return this.withCredential(userName, password);
+	}
+
+	public abstract JakeRepo withCredential(String username, String password);
 
 	@Override
 	public int hashCode() {
@@ -114,9 +158,16 @@ public abstract class JakeRepo {
 
 		public static final URL JCENTERL_URL = toUrl("https://jcenter.bintray.com");
 
-		private MavenRepository(URL url) {
-			super(url);
+		private MavenRepository(URL url, String userName, String password) {
+			super(url, userName, password);
 		}
+
+		@Override
+		public JakeRepo withCredential(String username, String password) {
+			return new MavenRepository(this.url(), username, password);
+		}
+
+
 
 	}
 
@@ -130,18 +181,18 @@ public abstract class JakeRepo {
 
 		private static final String DEFAULT_IVY_IVY_PATTERN = "[organisation]/[module]/ivy-[revision].xml";
 
-		private IvyRepository(URL url, List<String> artifactPatterns, List<String> ivyPatterns) {
-			super(url);
+		private IvyRepository(URL url, String username, String password, List<String> artifactPatterns, List<String> ivyPatterns) {
+			super(url, username, password);
 			this.artifactPatterns = artifactPatterns;
 			this.ivyPatterns = ivyPatterns;
 		}
 
 		public IvyRepository artifactPatterns(String ...patterns) {
-			return new IvyRepository(this.url(), Collections.unmodifiableList(Arrays.asList(patterns)), ivyPatterns);
+			return new IvyRepository(this.url(), this.userName(), this.password(), Collections.unmodifiableList(Arrays.asList(patterns)), ivyPatterns);
 		}
 
 		public IvyRepository ivyPatterns(String ...patterns) {
-			return new IvyRepository(this.url(), artifactPatterns, Collections.unmodifiableList(Arrays.asList(patterns)));
+			return new IvyRepository(this.url(), this.userName(), this.password(), artifactPatterns, Collections.unmodifiableList(Arrays.asList(patterns)));
 		}
 
 		public List<String> artifactPatterns() {
@@ -156,6 +207,11 @@ public abstract class JakeRepo {
 				return JakeUtilsIterable.listOf(DEFAULT_IVY_IVY_PATTERN);
 			}
 			return ivyPatterns;
+		}
+
+		@Override
+		public JakeRepo withCredential(String username, String password) {
+			return new IvyRepository(this.url(), username, password, this.artifactPatterns, this.ivyPatterns);
 		}
 	}
 

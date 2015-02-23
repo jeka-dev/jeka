@@ -12,6 +12,7 @@ import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionedModule;
 import org.jake.depmanagement.ivy.JakeIvy;
+import org.jake.publishing.JakePublishRepos;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsString;
 import org.jake.utils.JakeUtilsTime;
@@ -30,27 +31,34 @@ public class JakeBuild {
 
 	@JakeOption({"Maven or Ivy repositories to download dependency artifacts.",
 	"Prefix the Url with 'ivy:' if it is an Ivy repostory."})
-	private final String defaultDownloadRepoUrl = MavenRepository.MAVEN_CENTRAL_URL.toString();
+	private final String downloadRepoUrl = MavenRepository.MAVEN_CENTRAL_URL.toString();
 
-	@JakeOption({"Maven or Ivy repositories to download dependency artifacts.",
-	"Prefix the Url with 'ivy:' if it is an Ivy repostory."})
-	private final String defaultUploadRepoUrl = null;
-
-	@JakeOption({"Usename to connect to the upload repository (if needed).",
+	@JakeOption({"Usename to connect to the download repository (if needed).",
 	"Null or blank means that the upload repository will be accessed in an anonymous way."})
-	private final String defaultUploadRepoUsername = null;
+	private final String dowloadRepoUsername = null;
 
-	@JakeOption({"Password to connect to the upload repository (if needed)."})
-	private final String defaultUploadRepoPassword = null;
+	@JakeOption({"Password to connect to the download repository (if needed)."})
+	private final String downloadRepoPassword = null;
 
-	@JakeOption("Set it if the releases are uploaded on a distinct repository than the snaphot.")
-	private final String defaultUploadRepoReleaseUrl = null;
+	@JakeOption({"Specify the publish repository if it is different than the download one.",
+	"Prefix the Url with 'ivy:' if it is an Ivy repository."})
+	private final String publishRepoUrl = null;
 
-	@JakeOption("Set it if the releases are uploaded on a distinct repository than the snaphot.")
-	private final String defaultUploadRepoReleaseUsername = null;
+	@JakeOption({"Usename to connect to the publish repository (if needed).",
+	"Null or blank means that the upload repository will be accessed in an anonymous way."})
+	private final String publishRepoUsername = null;
 
-	@JakeOption("Set it if the releases are uploaded on a distinct repository than the snaphot.")
-	private final String defaultUploadRepoReleasePassword = null;
+	@JakeOption({"Password to connect to the publish repository (if needed)."})
+	private final String publishRepoPassword = null;
+
+	@JakeOption("Specify the publish repository for releases if it is different than the one for snapshots.")
+	private final String publishRepoReleaseUrl = null;
+
+	@JakeOption("Usename to connect to the publish release repository (if needed).")
+	private final String publishRepoReleaseUsername = null;
+
+	@JakeOption("Password to connect to the publish release repository (if needed).")
+	private final String publishRepoReleasePassword = null;
 
 	protected JakeBuild() {
 	}
@@ -124,7 +132,7 @@ public class JakeBuild {
 	 * If you don't use managed dependencies, this method is never invoked.
 	 */
 	protected JakeIvy jakeIvy() {
-		return JakeIvy.of(uploadRepositories(), downloadRepositories());
+		return JakeIvy.of(publishRepositories(), downloadRepositories());
 	}
 
 	/**
@@ -132,15 +140,22 @@ public class JakeBuild {
 	 * managed dependencies.
 	 */
 	protected JakeRepos downloadRepositories() {
-		return JakeRepos.of(JakeRepo.of(this.defaultDownloadRepoUrl));
+		return JakeRepos.of(JakeRepo.of(this.downloadRepoUrl)
+				.withOptionalCredentials(this.dowloadRepoUsername, this.downloadRepoPassword));
 	}
 
 	/**
-	 * Returns the upload repositories where to deploy artifacts.
+	 * Returns the repositories where are published artifacts.
 	 */
-	protected JakeRepos uploadRepositories() {
+	protected JakePublishRepos publishRepositories() {
+		final JakeRepo defaultDownloadRepo = JakeRepo.ofOptional(downloadRepoUrl, dowloadRepoUsername, downloadRepoPassword);
+		final JakeRepo defaultPublishRepo = JakeRepo.ofOptional(publishRepoUrl, publishRepoUsername, publishRepoPassword);
+		final JakeRepo defaultPublishReleaseRepo = JakeRepo.ofOptional(publishRepoReleaseUrl, publishRepoReleaseUsername, publishRepoReleasePassword);
 
-		return JakeRepos.of(JakeRepo.of(this.defaultDownloadRepoUrl));
+		final JakeRepo publishRepo = JakeRepo.firstNonNull(defaultPublishRepo, defaultDownloadRepo);
+		final JakeRepo releaseRepo = JakeRepo.firstNonNull(defaultPublishReleaseRepo, publishRepo);
+
+		return JakePublishRepos.ofSnapshotAndRelease(publishRepo, releaseRepo);
 	}
 
 	protected Date buildTime() {

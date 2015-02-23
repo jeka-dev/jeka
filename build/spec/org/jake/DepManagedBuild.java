@@ -1,9 +1,9 @@
 package org.jake;
 import org.jake.depmanagement.JakeDependencies;
-import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeScope;
 import org.jake.publishing.JakeIvyPublication;
 import org.jake.publishing.JakeMavenPublication;
+import org.jake.publishing.JakePublishRepos;
 
 /**
  * Build class for Jake itself.
@@ -48,9 +48,9 @@ public class DepManagedBuild extends Build {
 	}
 
 	@Override
-	protected JakeRepos uploadRepositories() {
-		return JakeRepos.maven(baseDir().file("build/output/dummyMavenRerpo"))
-				.andIvy((baseDir().file("build/output/dummyIvyRerpo")));
+	protected JakePublishRepos publishRepositories() {
+		return JakePublishRepos.maven(baseDir().file("build/output/dummyMavenRerpo"))
+				.andIvy(JakePublishRepos.ACCEPT_ALL, (baseDir().file("build/output/dummyIvyRerpo")));
 	}
 
 	@Override
