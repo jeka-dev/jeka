@@ -22,7 +22,7 @@ public class JakeResolutionParameters {
 	/**
 	 * Returns the default scope to use for the {@link JakeDependencies} to be resolved. <code>null</code> means
 	 * no default scope.
-	 * @see <a href="http://ant.apache.org/ivy/history/2.3.0/ivyfile/configurations.html">Ivy configuration doc</a>.
+	 * @see <a href="http://ant.apache.org/ivy/history/2.3.0/ivyfile/configurations.html">Ivy configuration doc</a>
 	 */
 	public JakeScope defaultScope() {
 		return defaultScope;

@@ -156,6 +156,11 @@ final class Translations {
 		return new ModuleRevisionId(toModuleId(jakeVersionedModule.moduleId()), jakeVersionedModule.version().name());
 	}
 
+	public static JakeVersionedModule toJakeVersionedModule(ModuleRevisionId moduleRevisionId) {
+		return JakeVersionedModule.of(JakeModuleId.of(moduleRevisionId.getOrganisation(), moduleRevisionId.getName()),
+				JakeVersion.named(moduleRevisionId.getRevision()));
+	}
+
 	private static String toString(JakeVersionRange versionRange) {
 		return versionRange.definition();
 	}
@@ -212,6 +217,10 @@ final class Translations {
 			resolver.setName(PUBLISH_RESOLVER_NAME + repo.repo().url());
 			ivySettings.addResolver(resolver);
 		}
+	}
+
+	public static String publishResolverUrl(DependencyResolver resolver ) {
+		return resolver.getName().substring(PUBLISH_RESOLVER_NAME.length());
 	}
 
 	public static List<DependencyResolver> publishResolverOf(IvySettings ivySettings) {

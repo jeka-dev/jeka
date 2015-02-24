@@ -67,7 +67,7 @@ public final class JakePath implements Iterable<File> {
 	}
 
 	/**
-	 * @see #andAtHead(Iterable).
+	 * @see #andHead(Iterable)
 	 */
 	public JakePath andHead(File ...entries) {
 		return andHead(JakePath.of(entries));

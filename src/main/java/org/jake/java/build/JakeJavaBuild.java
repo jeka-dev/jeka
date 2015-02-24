@@ -340,12 +340,13 @@ public class JakeJavaBuild extends JakeBuild {
 		packer().pack();
 	}
 
-	@JakeDoc("Compile production code and resources, compile test code and resources then launch the unit tests.")
+	@JakeDoc("Compile production code and resources, compile test code and resources, launch the unit tests and create artifacts.")
 	@Override
 	public void base() {
 		super.base();
 		compile();
 		unitTest();
+		pack();
 	}
 
 	@JakeDoc({"Publish the produced artifact to the defined repositories. ",
@@ -367,8 +368,6 @@ public class JakeJavaBuild extends JakeBuild {
 
 	/**
 	 * Returns the base dependency resolver.
-	 * 
-	 * @see #dependencyResolver().
 	 */
 	protected JakeDependencyResolver baseDependencyResolver() {
 		final JakeDependencies dependencies = dependencies().and(extraCommandLineDeps());

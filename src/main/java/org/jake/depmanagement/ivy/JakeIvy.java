@@ -49,6 +49,7 @@ import org.jake.depmanagement.JakeVersionedModule;
 import org.jake.publishing.JakeIvyPublication;
 import org.jake.publishing.JakeMavenPublication;
 import org.jake.publishing.JakePublishRepos;
+import org.jake.publishing.JakePublishRepos.JakePublishRepo;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsString;
 
@@ -297,14 +298,19 @@ public final class JakeIvy {
 		return dependencies.resolvedWith(resolvedVersions);
 	}
 
-	private void publishIvyArtifacts(JakeIvyPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
+	private int publishIvyArtifacts(JakeIvyPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
+		int count = 0;
 		for (final DependencyResolver resolver : Translations.publishResolverOf(this.ivy.getSettings())) {
-			if (!isMaven(resolver)) {
+			final JakePublishRepo publishRepo = this.publishRepo.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
+			final JakeVersionedModule jakeModule = Translations.toJakeVersionedModule(moduleDescriptor.getModuleRevisionId());
+			if (!isMaven(resolver) && publishRepo.filter().accept(jakeModule)) {
 				JakeLog.startln("Publishing for repository " + resolver);
 				this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor);
 				JakeLog.done();;
+				count++;
 			}
 		}
+		return count;
 	}
 
 	private void publishIvyArtifacts(DependencyResolver resolver, JakeIvyPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
@@ -341,16 +347,18 @@ public final class JakeIvy {
 	}
 
 	private int publishMavenArtifacts(JakeMavenPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
-		int result = 0;
+		int count = 0;
 		for (final DependencyResolver resolver : Translations.publishResolverOf(this.ivy.getSettings())) {
-			if (isMaven(resolver)) {
+			final JakePublishRepo publishRepo = this.publishRepo.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
+			final JakeVersionedModule jakeModule = Translations.toJakeVersionedModule(moduleDescriptor.getModuleRevisionId());
+			if (isMaven(resolver) && publishRepo.filter().accept(jakeModule)) {
 				JakeLog.startln("Publishing for repository " + resolver);
 				this.publishMavenArtifacts(resolver, publication, date, moduleDescriptor);
 				JakeLog.done();
-				result ++;
+				count ++;
 			}
 		}
-		return result;
+		return count;
 	}
 
 	private void publishMavenArtifacts(DependencyResolver resolver, JakeMavenPublication publication, Date date, ModuleDescriptor moduleDescriptor) {

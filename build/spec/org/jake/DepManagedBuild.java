@@ -1,9 +1,10 @@
 package org.jake;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeScope;
+import org.jake.depmanagement.JakeVersion;
 import org.jake.publishing.JakeIvyPublication;
 import org.jake.publishing.JakeMavenPublication;
-import org.jake.publishing.JakePublishRepos;
+import org.jake.utils.JakeUtilsIterable;
 
 /**
  * Build class for Jake itself.
@@ -27,14 +28,22 @@ public class DepManagedBuild extends Build {
 
 	@Override
 	public void base() {
-		JakeOptions.forceVerbose(true);
 		super.base();
 		doc();
 		publish();
 	}
 
+	@Override
+	public JakeVersion version() {
+		return JakeVersion.named("1.0");
+	}
+
 	public static void main(String[] args) {
-		new DepManagedBuild().base();
+		final DepManagedBuild build = new DepManagedBuild();
+		JakeOptions.init(JakeUtilsIterable.mapOf("publishRepoUrl", "ivy:file:///c:/usertemp/i19451/jakerepo-snapshot",
+				"publishRepoReleaseUrl", "file:///c:/usertemp/i19451/jakerepo-release"));
+		JakeOptions.populateFields(build);
+		build.base();
 	}
 
 	@Override
@@ -47,11 +56,11 @@ public class DepManagedBuild extends Build {
 		return super.ivyPublication().and(distripZipFile, "distrib", DISTRIB);
 	}
 
-	@Override
-	protected JakePublishRepos publishRepositories() {
-		return JakePublishRepos.maven(baseDir().file("build/output/dummyMavenRerpo"))
-				.andIvy(JakePublishRepos.ACCEPT_ALL, (baseDir().file("build/output/dummyIvyRerpo")));
-	}
+	//	@Override
+	//	protected JakePublishRepos publishRepositories() {
+	//		return JakePublishRepos.maven(baseDir().file("build/output/dummyMavenRerpo"))
+	//				.andIvy(JakePublishRepos.ACCEPT_ALL, (baseDir().file("build/output/dummyIvyRerpo")));
+	//	}
 
 	@Override
 	protected boolean includeTestsInPublication() {

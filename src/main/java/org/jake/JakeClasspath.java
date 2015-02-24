@@ -75,7 +75,7 @@ public final class JakeClasspath implements Iterable<File> {
 	}
 
 	/**
-	 * @see #andAtHead(Iterable).
+	 * @see #andHead(Iterable)
 	 */
 	public JakeClasspath andHead(File ...entries) {
 		return andHead(JakeClasspath.of(entries));

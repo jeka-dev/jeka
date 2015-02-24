@@ -23,7 +23,7 @@ class Main {
 		JakeLog.info("Jake class path : " + System.getProperty("java.class.path"));
 		JakeLog.info("Command line : " + JakeUtilsString.join(Arrays.asList(args), " "));
 		final CommandLine commandLine = CommandLine.of(args);
-		JakeOptions.populate(commandLine.options());
+		JakeOptions.init(commandLine.options());
 		JakeLog.info("Using global options : " + JakeOptions.fieldOptionsToString(JakeOptions.instance()));
 		JakeLog.info("And free form options : " + JakeOptions.freeFormToString());
 		JakeLog.nextLine();

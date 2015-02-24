@@ -84,7 +84,6 @@ public final class JakeClassLoader {
 
 	/**
 	 * Returns the class loader parent of this one.
-	 * @return
 	 */
 	public JakeClassLoader parent() {
 		return new JakeClassLoader((URLClassLoader) this.delegate.getParent());
@@ -152,7 +151,7 @@ public final class JakeClassLoader {
 	 * The specified class is supposed to be defined in this class loader, otherwise an
 	 * {@link IllegalArgumentException} is thrown.
 	 * 
-	 * @see {@link #loadIfExist(String)}, {@link #isDefined(String)}
+	 * @see #loadIfExist(String) #isDefined(String)
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Object> Class<T> load(String className) {

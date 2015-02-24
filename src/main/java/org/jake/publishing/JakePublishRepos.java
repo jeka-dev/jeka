@@ -13,7 +13,7 @@ import org.jake.utils.JakeUtilsIterable;
 
 public final class JakePublishRepos implements Iterable<JakePublishRepo>{
 
-	interface JakePublishFilter {
+	public interface JakePublishFilter {
 
 		boolean accept(JakeVersionedModule versionedModule);
 
@@ -118,6 +118,15 @@ public final class JakePublishRepos implements Iterable<JakePublishRepo>{
 		@SuppressWarnings("unchecked")
 		final List<JakePublishRepo> list = JakeUtilsIterable.concatLists(this.repos, other.repos);
 		return new JakePublishRepos(list);
+	}
+
+	public JakePublishRepo getRepoHavingUrl(String url) {
+		for (final JakePublishRepo repo : this) {
+			if (url.equals(repo.repo().url().toExternalForm())) {
+				return repo;
+			}
+		}
+		return null;
 	}
 
 	public static final class JakePublishRepo {

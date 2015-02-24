@@ -188,7 +188,7 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 	/**
 	 * Convenient method to resolve using {@link JakeArtifact}s instead of {@link JakeVersionedModule}.
 	 * 
-	 * @see #resolvedWith(Iterable);
+	 * @see #resolvedWith(Iterable)
 	 */
 	public JakeDependencies resolvedWithArtifacts(Iterable<JakeArtifact> artifacts) {
 		final List<JakeVersionedModule> list = new LinkedList<JakeVersionedModule>();

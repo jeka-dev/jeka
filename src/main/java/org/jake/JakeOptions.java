@@ -1,6 +1,5 @@
 package org.jake;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,12 +16,18 @@ public final class JakeOptions {
 	@SuppressWarnings("unchecked")
 	private static JakeOptions INSTANCE = new JakeOptions(Collections.EMPTY_MAP);
 
+	private static boolean populated;
+
 	static JakeOptions instance() {
 		return INSTANCE;
 	}
 
-	static synchronized void populate(Map<String, String> options) {
+	static synchronized void init(Map<String, String> options) {
+		if (populated) {
+			throw new IllegalStateException("The init method can be called only once.");
+		}
 		INSTANCE = new JakeOptions(options);
+		populated = true;
 	}
 
 	private final Map<String, String> freeOptions = new HashMap<String, String>();
@@ -36,13 +41,6 @@ public final class JakeOptions {
 	@JakeOption({"Set it to the full or short class name, to force the build class to use.",
 	"Example : -buildClass=my.pack.FullBuild or -buildClass=FullBuild ."})
 	private String buildClass;
-
-	@JakeOption({"All jar files under [JAKE HOME]/ext, are part of Jake classpath. you can add libs to this folder or ",
-		"use this option to augment Jake classpath.",
-		"If it is a folder, then all jar files under this folders will be added to the classpath. If it is a single jar file, ",
-		"only this jar will be added. You can specify many folder/jar using ';'.",
-	"Exemple : -extraJakeLibs=/usr/java/libs/sonar;/usr/java/libs/apache/lucene.jar ."})
-	private String extraJakeLibs;
 
 	private JakeOptions(Map<String, String> options) {
 
@@ -86,26 +84,6 @@ public final class JakeOptions {
 
 	public static String get(String key) {
 		return INSTANCE.freeOptions.get(key);
-	}
-
-	public static List<File> extraJakeClasspath() {
-		if (INSTANCE.extraJakeLibs == null || INSTANCE.extraJakeLibs.trim().isEmpty()) {
-			return Collections.emptyList();
-		}
-		final String[] items = JakeUtilsString.split(INSTANCE.extraJakeLibs, ";");
-		final List<File> result = new LinkedList<File>();
-		for (final String item : items) {
-			final File file = new File(item.trim());
-			if (!file.exists()) {
-				throw new IllegalStateException("Extra jake libs " + file.getPath() + " can't be found.");
-			}
-			if (file.isDirectory()) {
-				result.addAll(JakeDir.of(file).include("**/*.jar", "**/*.zip").files());
-			} else {
-				result.add(file);
-			}
-		}
-		return result;
 	}
 
 

@@ -30,8 +30,6 @@ public abstract class JakeFileFilter {
 
 	/**
 	 * Returns if this filter should accept the specified relative path.
-	 * @param relativePath
-	 * @return
 	 */
 	public abstract boolean accept(String relativePath);
 
