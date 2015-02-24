@@ -55,10 +55,10 @@ public class JakeJavaBuild extends JakeBuild {
 	public static final JakeScope TEST = JakeScope.of("test").extending(RUNTIME, PROVIDED)
 			.descr("Dependencies necessary to compile and run tests.");
 
-	public static final JakeScope SOURCES = JakeScope.of("sources")
+	public static final JakeScope SOURCES = JakeScope.of("sources").transitive(false)
 			.descr("Contains the source artefacts");
 
-	public static final JakeScope JAVADOC = JakeScope.of("javadoc")
+	public static final JakeScope JAVADOC = JakeScope.of("javadoc").transitive(false)
 			.descr("Contains the javadoc of this project");
 
 	private static final JakeScopeMapping SCOPE_MAPPING = JakeScopeMapping
