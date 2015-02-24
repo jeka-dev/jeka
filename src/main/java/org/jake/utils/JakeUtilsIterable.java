@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 public class JakeUtilsIterable {
@@ -234,6 +235,14 @@ public class JakeUtilsIterable {
 		final List<T> result = new LinkedList<T>();
 		result.add(item);
 		result.addAll(concatLists(lists));
+		return result;
+	}
+
+	public static Map<String, String> propertiesToMap(Properties properties) {
+		final Map<String, String> result = new HashMap<String, String>();
+		for (final Object propKey : properties.keySet()) {
+			result.put(propKey.toString(), properties.getProperty(propKey.toString()));
+		}
 		return result;
 	}
 
