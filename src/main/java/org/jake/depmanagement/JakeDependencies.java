@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -227,6 +228,21 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Returns all files declared as {@link JakeFilesDependency} for the specified scope.
+	 */
+	public List<File> fileDependencies(JakeScope jakeScope) {
+		final LinkedHashSet<File> set = new LinkedHashSet<File>();
+		for (final JakeScopedDependency scopedDependency : this.dependencies) {
+			if (scopedDependency.isInvolvedIn(jakeScope)
+					&& scopedDependency.dependency() instanceof JakeFilesDependency) {
+				final JakeFilesDependency fileDeps = (JakeFilesDependency) scopedDependency.dependency();
+				set.addAll(fileDeps.files());
+			}
+		}
+		return new LinkedList<File>(set);
 	}
 
 	private static Map<JakeModuleId, JakeVersion> toModuleVersionMap(Iterable<JakeVersionedModule> resolvedModules) {

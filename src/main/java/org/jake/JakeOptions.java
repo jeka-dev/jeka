@@ -119,7 +119,7 @@ public final class JakeOptions {
 		}
 	}
 
-	static void populateFields(JakeBuild build) {
+	static void populateFields(Object build) {
 		populateFields(build, INSTANCE.freeOptions);
 	}
 

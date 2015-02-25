@@ -1,6 +1,8 @@
 package org.jake.depmanagement;
 
 import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 
 public final class JakeArtifact {
 
@@ -60,6 +62,14 @@ public final class JakeArtifact {
 	public String toString() {
 		return "JakeArtifact [versionedModule=" + versionedModule
 				+ ", localFile=" + localFile + "]";
+	}
+
+	public static List<File> localFiles(Iterable<JakeArtifact> artifacts) {
+		final List<File> result = new LinkedList<File>();
+		for (final JakeArtifact artifact : artifacts) {
+			result.add(artifact.localFile);
+		}
+		return result;
 	}
 
 

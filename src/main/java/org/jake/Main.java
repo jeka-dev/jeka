@@ -41,7 +41,7 @@ class Main {
 
 		final JakeClassLoader classLoader = JakeClassLoader.current().createChild();
 		if (project.hasBuildSource()) {
-			final File buildBin = project.compileBuild();
+			final File buildBin = project.compileBuild(BootstrapOptions.createPopulatedWithOptions());
 			classLoader.addEntry(buildBin);
 		}
 		final boolean result = project.executeBuild(JakeUtilsFile.workingDir(), classLoader,

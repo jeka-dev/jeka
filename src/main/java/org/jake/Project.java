@@ -7,10 +7,20 @@ import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jake.CommandLine.MethodInvocation;
 import org.jake.JakeImportAnnotationProcessor.ImportResult;
 import org.jake.JakePlugins.JakePluginSetup;
+import org.jake.depmanagement.JakeArtifact;
+import org.jake.depmanagement.JakeDependencies;
+import org.jake.depmanagement.JakeDependency;
+import org.jake.depmanagement.JakeRepo;
+import org.jake.depmanagement.JakeRepos;
+import org.jake.depmanagement.JakeScope;
+import org.jake.depmanagement.JakeScopeMapping;
+import org.jake.depmanagement.JakeScopedDependency;
+import org.jake.depmanagement.ivy.JakeIvy;
 import org.jake.java.build.JakeJavaBuild;
 import org.jake.java.eclipse.JakeEclipseBuild;
 import org.jake.utils.JakeUtilsFile;
@@ -22,6 +32,8 @@ import org.jake.utils.JakeUtilsTime;
  * Single buildable project.
  */
 class Project {
+
+	private static final JakeScope JAKE_SCOPE = JakeScope.of("jake");
 
 	private static final String BUILD_SOURCE_DIR = "build/spec";
 
@@ -51,7 +63,7 @@ class Project {
 		}
 	}
 
-	private	JakePath buildPath() {
+	private	JakePath localBuildPath() {
 		final List<File> extraLibs = new LinkedList<File>();
 		final File localJakeBuild = new File(this.projectBaseDir,"build/libs/jake");
 		if (localJakeBuild.exists()) {
@@ -64,17 +76,45 @@ class Project {
 	}
 
 
-	public File compileBuild() {
+	public File compileBuild(BootstrapOptions bootstrapOptions) {
 		displayHead("Compiling build classes for project : " + projectRelativePath);
 		final long start = System.nanoTime();
-		final JakePath buildPath = this.buildPath();
-		final ImportResult importsResult = this.annotedImports();
 
-		// TODO add imports to the buildPath
+		final ImportResult importsResult = this.annotatedImports();
+		final JakePath buildPath;
+		if (importsResult.imports.isEmpty()) {
+			buildPath = this.localBuildPath();
+		} else {
+			final JakeDependencies importedDependencies = this.importDependencies(importsResult.imports);
+			if (importedDependencies.containsExternalModule()) {
+				final JakeRepos repos = jakeCompileRepos(importsResult.repos, bootstrapOptions);
+				buildPath = this.jakeCompilePath(repos, importedDependencies);
+			} else {
+				buildPath = JakePath.of(importedDependencies.fileDependencies(JAKE_SCOPE));
+			}
+		}
 
 		baseBuildCompiler().withClasspath(buildPath).compile();
 		JakeLog.info("Done in " + JakeUtilsTime.durationInSeconds(start) + " seconds.", "");
 		return buildBinDir();
+	}
+
+
+	private JakeRepos jakeCompileRepos(List<String> importRepoUrls, BootstrapOptions bootstrapOptions) {
+		final JakeRepos result = importRepos(importRepoUrls);
+		if (bootstrapOptions.downloadRepo() != null) {
+			return result.and(bootstrapOptions.downloadRepo());
+		}
+		return result;
+
+	}
+
+	private JakeRepos importRepos(List<String> importRepoUrls) {
+		JakeRepos result = JakeRepos.of();
+		for (final String url : importRepoUrls) {
+			result = result.and(JakeRepo.of(url));
+		}
+		return result;
 	}
 
 
@@ -231,7 +271,7 @@ class Project {
 		JakeLog.nextLine();
 	}
 
-	private ImportResult annotedImports() {
+	private ImportResult annotatedImports() {
 		JakeLog.startln("Processing annotation on build sources to get imports information");
 		baseBuildCompiler()
 		.withClasspath(JakePath.of(JakeLocator.jakeJarFile()))
@@ -261,6 +301,27 @@ class Project {
 
 	private File buildBinDir() {
 		return new File(projectBaseDir, BUILD_BIN_DIR);
+	}
+
+	private JakePath jakeCompilePath(JakeRepos jakeRepos, JakeDependencies deps) {
+		final JakeIvy ivy = JakeIvy.of(jakeRepos);
+		final Set<JakeArtifact> artifacts = ivy.resolve(deps, JAKE_SCOPE);
+		return JakePath.of(JakeArtifact.localFiles(artifacts));
+	}
+
+	private JakeDependencies importDependencies(List<String> dependencies) {
+		final JakeDependencies.Builder builder = JakeDependencies.builder();
+		for (final String dependency : dependencies) {
+			if (dependency.contains(">")) {
+				final String scope = JakeUtilsString.substringBeforeFirst(dependency, ">").trim();
+				final String rest = JakeUtilsString.substringAfterLast(dependency, ">").trim();
+				final JakeDependency dep = JakeDependency.of(rest);
+				final JakeScopedDependency scopedDependency =
+						JakeScopedDependency.of(dep, JakeScopeMapping.of(JAKE_SCOPE).to(JakeScope.of(scope)));
+				builder.on(scopedDependency);
+			}
+		}
+		return builder.build();
 	}
 
 

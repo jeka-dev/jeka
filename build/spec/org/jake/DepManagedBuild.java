@@ -1,4 +1,5 @@
 package org.jake;
+import org.apache.ivy.util.StringUtils;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeScope;
 import org.jake.depmanagement.JakeVersion;
@@ -11,8 +12,9 @@ import org.jake.utils.JakeUtilsIterable;
  * This build relies on a dependency manager.
  * This build uses built-in extra feature as sonar, jacoco analysis.
  */
-@JakeImport({
-	"com.google:guava:16.0"
+@JakeImport
+({
+	"commons-lang:commons-lang:2.6"
 })
 public class DepManagedBuild extends Build {
 
@@ -31,6 +33,7 @@ public class DepManagedBuild extends Build {
 		super.base();
 		doc();
 		publish();
+		StringUtils.abbreviate("I am using commons-lang", 15);
 	}
 
 	@Override
