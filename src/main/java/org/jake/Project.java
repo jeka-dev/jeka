@@ -4,22 +4,19 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.jake.CommandLine.MethodInvocation;
-import org.jake.JakeImportAnnotationProcessor.ImportResult;
 import org.jake.JakePlugins.JakePluginSetup;
 import org.jake.depmanagement.JakeArtifact;
 import org.jake.depmanagement.JakeDependencies;
-import org.jake.depmanagement.JakeDependency;
 import org.jake.depmanagement.JakeRepo;
 import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeScope;
-import org.jake.depmanagement.JakeScopeMapping;
-import org.jake.depmanagement.JakeScopedDependency;
 import org.jake.depmanagement.ivy.JakeIvy;
 import org.jake.java.build.JakeJavaBuild;
 import org.jake.java.eclipse.JakeEclipseBuild;
@@ -33,7 +30,7 @@ import org.jake.utils.JakeUtilsTime;
  */
 class Project {
 
-	private static final JakeScope JAKE_SCOPE = JakeScope.of("jake");
+	static final JakeScope JAKE_SCOPE = JakeScope.of("jake");
 
 	private static final String BUILD_SOURCE_DIR = "build/spec";
 
@@ -79,15 +76,15 @@ class Project {
 	public File compileBuild(BootstrapOptions bootstrapOptions) {
 		displayHead("Compiling build classes for project : " + projectRelativePath);
 		final long start = System.nanoTime();
+		final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir, JakeDir.of(buildSourceDir()).include("**/*.java"));
 
-		final ImportResult importsResult = this.annotatedImports();
 		final JakePath buildPath;
-		if (importsResult.imports.isEmpty()) {
+		if (parser.dependencies().isEmpty()) {
 			buildPath = this.localBuildPath();
 		} else {
-			final JakeDependencies importedDependencies = this.importDependencies(importsResult.imports);
+			final JakeDependencies importedDependencies =  parser.dependencies();
 			if (importedDependencies.containsExternalModule()) {
-				final JakeRepos repos = jakeCompileRepos(importsResult.repos, bootstrapOptions);
+				final JakeRepos repos = jakeCompileRepos(Collections.EMPTY_LIST, bootstrapOptions);
 				buildPath = this.jakeCompilePath(repos, importedDependencies);
 			} else {
 				buildPath = JakePath.of(importedDependencies.fileDependencies(JAKE_SCOPE));
@@ -271,19 +268,7 @@ class Project {
 		JakeLog.nextLine();
 	}
 
-	private ImportResult annotatedImports() {
-		JakeLog.startln("Processing annotation on build sources to get imports information");
-		baseBuildCompiler()
-		.withClasspath(JakePath.of(JakeLocator.jakeJarFile()))
-		.withAnnotationProcessingOnly()
-		.withAnnotationProcessors(JakeImportAnnotationProcessor.class.getName())
-		.withSourceVersion(JakeJavaCompiler.V6)
-		.withTargetVersion(JakeJavaCompiler.V6)
-		.withOptions("-nowarn")
-		.compile();
-		JakeLog.done();
-		return JakeImportAnnotationProcessor.getResult(buildBinDir());
-	}
+
 
 	private JakeJavaCompiler baseBuildCompiler() {
 		final JakeDir buildSource = JakeDir.of(buildSourceDir());
@@ -308,23 +293,6 @@ class Project {
 		final Set<JakeArtifact> artifacts = ivy.resolve(deps, JAKE_SCOPE);
 		return JakePath.of(JakeArtifact.localFiles(artifacts));
 	}
-
-	private JakeDependencies importDependencies(List<String> dependencies) {
-		final JakeDependencies.Builder builder = JakeDependencies.builder();
-		for (final String dependency : dependencies) {
-			if (dependency.contains(">")) {
-				final String scope = JakeUtilsString.substringBeforeFirst(dependency, ">").trim();
-				final String rest = JakeUtilsString.substringAfterLast(dependency, ">").trim();
-				final JakeDependency dep = JakeDependency.of(rest);
-				final JakeScopedDependency scopedDependency =
-						JakeScopedDependency.of(dep, JakeScopeMapping.of(JAKE_SCOPE).to(JakeScope.of(scope)));
-				builder.on(scopedDependency);
-			}
-		}
-		return builder.build();
-	}
-
-
 
 
 }

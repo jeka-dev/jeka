@@ -110,9 +110,14 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 	public Set<JakeDependency> dependenciesDeclaredWith(JakeScope scope) {
 		final Set<JakeDependency> dependencies = new HashSet<JakeDependency>();
 		for (final JakeScopedDependency scopedDependency : this) {
-			if (scopedDependency.scopes().contains(scope)) {
+
+			if (scopedDependency.scopeType().equals(ScopeType.SIMPLE) && scopedDependency.scopes().contains(scope)) {
+				dependencies.add(scopedDependency.dependency());
+			} else if (scopedDependency.scopeType().equals(ScopeType.MAPPED)
+					&& scopedDependency.scopeMapping().entries().contains(scope)) {
 				dependencies.add(scopedDependency.dependency());
 			}
+
 		}
 		return dependencies;
 	}

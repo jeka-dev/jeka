@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jake.utils.JakeUtilsIterable;
+import org.jake.utils.JakeUtilsString;
 
 /**
  * Identifier for a dependency of a project. It can be a either : <ul>
@@ -20,11 +21,23 @@ import org.jake.utils.JakeUtilsIterable;
  */
 public abstract class JakeDependency {
 
+	public static boolean isGroupNameAndVersion(String candidate) {
+		return JakeUtilsString.countOccurence(candidate, ':') == 2;
+	}
+
 	/**
 	 * Creates a {@link JakeExternalModule} dependency with the specified version.
 	 */
 	public static JakeExternalModule of(String groupAndNameAndVersion) {
 		return JakeExternalModule.of(groupAndNameAndVersion);
+	}
+
+	public static JakeFilesDependency ofFile(File baseDir, String relativePath) {
+		final File file = new File(relativePath);
+		if (!file.isAbsolute()) {
+			return JakeFilesDependency.of(new File(baseDir, relativePath));
+		}
+		return JakeFilesDependency.of(file);
 	}
 
 	public static JakeFilesDependency of(Iterable<File> files) {

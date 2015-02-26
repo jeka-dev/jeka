@@ -47,6 +47,14 @@ public final class JakeUtilsString {
 		return null;
 	}
 
+	public static boolean containsOnly(String stringToMatch, String ... candidates) {
+		String left = stringToMatch;
+		for (final String candidate : candidates) {
+			left = left.replace(candidate, "");
+		}
+		return left.isEmpty();
+	}
+
 	public static int countOccurence(String matchedString, char occurence) {
 		int count = 0;
 		for (final char c : matchedString.toCharArray()) {

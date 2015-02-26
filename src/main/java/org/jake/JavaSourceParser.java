@@ -1,38 +1,84 @@
 package org.jake;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
+import org.jake.depmanagement.JakeDependencies;
+import org.jake.depmanagement.JakeDependency;
+import org.jake.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsString;
 
+/*
+ * Without doubt, the most crappy code of this project.
+ * The important point is that we achieve parsing without using any dependencies : just the JDK.
+ * 
+ * @author Jerome Angibaud
+ */
 class JavaSourceParser {
 
-	private final String uncommantedCode;
-
-	public boolean inQuote;
-
-	private JavaSourceParser(String uncommantedCode) {
-		super();
-		this.uncommantedCode = uncommantedCode;
+	public static JavaSourceParser of(File baseDir, File code) {
+		final InputStream inputStream = JakeUtilsIO.inputStream(code);
+		final JavaSourceParser result = new JavaSourceParser(dependencies(inputStream, baseDir, JakeUtilsFile.toUrl(code)));
+		JakeUtilsIO.closeQuietly(inputStream);
+		return result;
 	}
 
-	public List<String> imports() {
-		for (final String fullLine : lines) {
-			final String line = fullLine.toString();
+	public static JavaSourceParser of(File baseDir, Iterable<File> files) {
+		final JakeDependencies.Builder builder = JakeDependencies.builder();
+		for (final File code : files) {
+			final InputStream inputStream = JakeUtilsIO.inputStream(code);
+			builder.on(dependencies(inputStream, baseDir, JakeUtilsFile.toUrl(code)));
+			JakeUtilsIO.closeQuietly(inputStream);
 		}
+		return new JavaSourceParser(builder.build());
 	}
 
-	private String removeLeadingSpacesAndTabs(String line) {
+	public static JavaSourceParser of(File baseDir, URL code) {
+		final InputStream inputStream = JakeUtilsIO.inputStream(code);
+		final JavaSourceParser result = new JavaSourceParser(dependencies(inputStream, baseDir, code));
+		JakeUtilsIO.closeQuietly(inputStream);
+		return result;
+	}
 
+	private final JakeDependencies dependencies;
+
+	private JavaSourceParser(JakeDependencies deps) {
+		super();
+		this.dependencies = deps;
+	}
+
+	public JakeDependencies dependencies() {
+		return this.dependencies;
+	}
+
+	private static JakeDependencies dependencies(InputStream code, File baseDir, URL url) {
+		final String uncomentedCode = removeComments(code);
+		final List<String> deps = jakeImports(uncomentedCode, url);
+		return dependencies(baseDir, deps);
+	}
+
+	private static JakeDependencies dependencies(File baseDir, List<String> deps) {
+		final JakeDependencies.Builder builder = JakeDependencies.builder().usingDefaultScopes(Project.JAKE_SCOPE);
+		for (final String dependency : deps) {
+			if (JakeDependency.isGroupNameAndVersion(dependency)) {
+				builder.on(JakeDependency.of(dependency));
+			} else {
+				builder.on(JakeDependency.ofFile(baseDir, dependency));
+			}
+
+		}
+		return builder.build();
 	}
 
 	@SuppressWarnings("unchecked")
-	private static List<String> jakeImports(String code) {
+	private static List<String> jakeImports(String code, URL url) {
 		final Scanner scanner = new Scanner(code);
 		scanner.useDelimiter("");
 		while (scanner.hasNext()) {
@@ -42,54 +88,50 @@ class JavaSourceParser {
 				if (removeQuotes(nextLine).contains("class ")) {
 					return Collections.EMPTY_LIST;
 				}
+				continue;
 			}
-			String chararcter = scanner.next();
-			if (chararcter.equals("(")) {
-				return scanJakeImport(scanner);
+			final String between  = extractStringTo(scanner, "(", url, " parsing @JakeImport ");
+			if(!JakeUtilsString.containsOnly(between, " ", "\n", "\r", "\t")) {
+				continue;
 			}
-			if (!chararcter.equals("\n") || !chararcter.equals(" ") || chararcter.equals("(")) {
-				while (scanner.hasNext()) {
-					chararcter = scanner.next();
-					if (chararcter.equals("(")) {
-						return scanJakeImport(scanner);
-					}
-				}
-			}
+			return scanJakeImport(scanner, url);
 		}
 		return Collections.EMPTY_LIST;
 	}
 
 	@SuppressWarnings("unchecked")
-	private static List<String> scanJakeImport(Scanner scanner) {
-		final String arg = extractStringTo(scanner, ")");
+	private static List<String> scanJakeImport(Scanner scanner, URL url) {
+		final String context = " parsing @JakeImport ";
+		final String arg = extractStringTo(scanner, ")", url, context);
 		final List<String> items = splitIgnoringQuotes(arg, ',');
 		for (final String item : items) {
 			final String trimedItem = item.trim();
 			if (JakeUtilsString.startsWithAny(trimedItem, "\"", "{")) {
-				return startWithQuoteOrCurly(trimedItem);
+				return startWithQuoteOrCurly(trimedItem, url, context);
 			}
 			if (trimedItem.startsWith("value ") || trimedItem.startsWith("value=")) {
 				final String after = JakeUtilsString.substringAfterFirst(trimedItem, "=").trim();
-				return startWithQuoteOrCurly(after);
+				return startWithQuoteOrCurly(after, url, context);
 			}
 		}
 		return Collections.EMPTY_LIST;
 	}
 
 	@SuppressWarnings("unchecked")
-	private static List<String> startWithQuoteOrCurly(String input) {
+	private static List<String> startWithQuoteOrCurly(String input, URL url, String context) {
 		if (input.startsWith("\"")) {
 			return JakeUtilsIterable.listOf(withoutQuotes(input));
 		}
 		if (input.startsWith("{")) {
-			return braceToStrings(input);
+			return braceToStrings(input, url, context);
 		}
 		return Collections.EMPTY_LIST;
 	}
 
-	private static List<String> braceToStrings(String input) {
+	private static List<String> braceToStrings(String input, URL url, String context) {
 		final Scanner innerScanner = new Scanner(input);
-		final String braced = extractStringTo(innerScanner, "}");
+		innerScanner.findInLine("\\{");
+		final String braced = extractStringTo(innerScanner, "}", url, context);
 		final List<String> elements = splitIgnoringQuotes(braced, ',');
 		final List<String> result = new LinkedList<String>();
 		for (final String element : elements) {
@@ -122,7 +164,7 @@ class JavaSourceParser {
 		return result;
 	}
 
-	private static String extractStringTo(Scanner scanner, String delimiter) {
+	private static String extractStringTo(Scanner scanner, String delimiter, URL url, String context) {
 		boolean inQuote = false;
 		boolean escaping = false;
 		final StringBuilder builder = new StringBuilder();
@@ -131,6 +173,7 @@ class JavaSourceParser {
 			if (!inQuote) {
 				if (character.equals("\"")) {
 					inQuote = true;
+					builder.append(character);
 				} else if (character.equals(delimiter)) {
 					return builder.toString();
 				} else {
@@ -143,10 +186,13 @@ class JavaSourceParser {
 					escaping = true;
 				} else if (character.equals("\"")) {
 					inQuote = false;
+					builder.append(character);
+				} else {
+					builder.append(character);
 				}
 			}
 		}
-		throw new IllegalStateException("No ) found.");
+		throw new IllegalStateException("No matching ) found" + context + " in " +  url + "");
 	}
 
 	private static String removeQuotes(String line) {
@@ -175,7 +221,7 @@ class JavaSourceParser {
 		return builder.toString();
 	}
 
-	private static String removeComments(File file) {
+	private static String removeComments(InputStream inputStream) {
 		final int outsideComment = 0;
 		final int insideLineComment = 1;
 		final int insideblockComment = 2;
@@ -186,11 +232,7 @@ class JavaSourceParser {
 		int currentState = outsideComment;
 		final StringBuilder endResult = new StringBuilder();
 		final Scanner scanner;
-		try {
-			scanner = new Scanner(file);
-		} catch (final FileNotFoundException e) {
-			throw new RuntimeException(e);
-		}
+		scanner = new Scanner(inputStream);
 		scanner.useDelimiter("");
 		while (scanner.hasNext()) {
 			final String character = scanner.next();
