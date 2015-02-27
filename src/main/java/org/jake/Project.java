@@ -72,9 +72,14 @@ class Project {
 		return JakePath.of(extraLibs).and(JakeLocator.jakeJarFile(), JakeLocator.ivyJarFile());
 	}
 
+	public JakePath resolveBuildPathAndCompile(BootstrapOptions bootstrapOptions) {
+		final JakePath extraPath = reolveBuildPath(bootstrapOptions);
+		final File dir = compileBuild(extraPath.and(localBuildPath()));
+		return extraPath.and(dir);
+	}
 
 	@SuppressWarnings("unchecked")
-	public File compileBuild(BootstrapOptions bootstrapOptions) {
+	private JakePath reolveBuildPath(BootstrapOptions bootstrapOptions) {
 		displayHead("Compiling build classes for project : " + projectRelativePath);
 		final long start = System.nanoTime();
 		JakeLog.start("Parsing source code for gathering imports");
@@ -83,7 +88,7 @@ class Project {
 
 		final JakePath buildPath;
 		if (parser.dependencies().isEmpty()) {
-			buildPath = this.localBuildPath();
+			buildPath = JakePath.of();
 		} else {
 			JakeLog.startln("Resolving build dependencies");
 			final JakeDependencies importedDependencies =  parser.dependencies();
@@ -94,11 +99,17 @@ class Project {
 			} else {
 				extraPath = JakePath.of(importedDependencies.fileDependencies(JAKE_SCOPE));
 			}
-			buildPath = extraPath.and(this.localBuildPath());
+			buildPath = extraPath;
 			JakeLog.done();
 		}
-		baseBuildCompiler().withClasspath(buildPath).compile();
 		JakeLog.info("Done in " + JakeUtilsTime.durationInSeconds(start) + " seconds.", "");
+		return buildPath;
+	}
+
+
+
+	private File compileBuild(JakePath buildPath) {
+		baseBuildCompiler().withClasspath(buildPath).compile();
 		return buildBinDir();
 	}
 

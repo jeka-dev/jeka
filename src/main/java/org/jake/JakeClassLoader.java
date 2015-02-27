@@ -19,13 +19,12 @@ import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
-import org.jake.utils.JakeUtilsString;
 
 /**
  * Wrapper around {@link URLClassLoader} offering convenient methods and fluent interface to deal
  * with <code>URLClassLoader</code>.
  * 
- * @author Djeang
+ * @author Jerome Angibaud
  */
 public final class JakeClassLoader {
 
@@ -196,8 +195,8 @@ public final class JakeClassLoader {
 	}
 
 	/**
-	 * Load the class having the specified full name or the specified simple name
-	 * if the specified name is not a full name. Returns <code>null</code> if no class matches. </br>
+	 * Loads the class having the specified full name or the specified simple name.
+	 * Returns <code>null</code> if no class matches. </br>
 	 * For example : loadFromNameOrSimpleName("MyClass", null) may return the class my.pack.MyClass.
 	 * 
 	 * @param name The full name or the simple name of the class to load
@@ -205,7 +204,8 @@ public final class JakeClassLoader {
 	 * @return The loaded class or <code>null</code>.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> Class<? extends T> loadFromNameOrSimpleName(final String name, Class<T> superClass) {
+	public <T> Class<? extends T> loadFromNameOrSimpleName(final String name, Class<T> superClassArg) {
+		final Class<T> superClass = this.load(superClassArg.getName());
 		try {
 			if (superClass == null) {
 				return (Class<? extends T>) delegate.loadClass(name);
@@ -217,17 +217,7 @@ public final class JakeClassLoader {
 			return null;
 
 		} catch (final ClassNotFoundException e) {  //NOSONAR
-
-			final Set<Class<?>> classes = loadClassesInEntries(new FileFilter() {
-
-				@Override
-				public boolean accept(File pathname) {
-					if (!pathname.getName().endsWith(".class")) {
-						return false;
-					}
-					return JakeUtilsString.substringBeforeLast(pathname.getName(),".").equals(name);
-				}
-			});
+			final Set<Class<?>> classes = loadClasses("**/"+name);
 			for (final Class<?> clazz : classes) {
 				if (clazz.getSimpleName().equals(name) && superClass == null || superClass.isAssignableFrom(clazz)) {
 					return (Class<? extends T>) clazz;

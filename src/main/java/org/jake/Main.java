@@ -39,12 +39,14 @@ class Main {
 
 		final Project project = new Project(JakeUtilsFile.workingDir(), JakeUtilsFile.workingDir());
 
-		final JakeClassLoader classLoader = JakeClassLoader.current().createChild();
-
+		final JakeClassLoader classLoader;
 		if (project.hasBuildSource()) {
-			final File buildBin = project.compileBuild(BootstrapOptions.createPopulatedWithOptions());
-			classLoader.addEntry(buildBin);
+			final JakePath extraPath = project.resolveBuildPathAndCompile(BootstrapOptions.createPopulatedWithOptions());
+			classLoader = JakeClassLoader.current().createChild(extraPath);
+		} else {
+			classLoader = JakeClassLoader.current();
 		}
+		System.out.println(classLoader);
 		final boolean result = project.executeBuild(JakeUtilsFile.workingDir(), classLoader,
 				commandLine.methods(), commandLine.pluginSetups());
 		if (!result) {

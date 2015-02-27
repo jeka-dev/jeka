@@ -34,8 +34,6 @@ public class DepManagedBuild extends Build {
 		super.base();
 		doc();
 		publish();
-		org.apache.commons.lang.ObjectUtils.toString("toto");
-
 	}
 
 	@Override
