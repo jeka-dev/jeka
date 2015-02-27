@@ -73,15 +73,19 @@ class Project {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public File compileBuild(BootstrapOptions bootstrapOptions) {
 		displayHead("Compiling build classes for project : " + projectRelativePath);
 		final long start = System.nanoTime();
+		JakeLog.start("Parsing source code for gathering imports");
 		final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir, JakeDir.of(buildSourceDir()).include("**/*.java"));
+		JakeLog.done();
 
 		final JakePath buildPath;
 		if (parser.dependencies().isEmpty()) {
 			buildPath = this.localBuildPath();
 		} else {
+			JakeLog.start("Resolving build dependencies");
 			final JakeDependencies importedDependencies =  parser.dependencies();
 			if (importedDependencies.containsExternalModule()) {
 				final JakeRepos repos = jakeCompileRepos(Collections.EMPTY_LIST, bootstrapOptions);
@@ -89,8 +93,8 @@ class Project {
 			} else {
 				buildPath = JakePath.of(importedDependencies.fileDependencies(JAKE_SCOPE));
 			}
+			JakeLog.done();
 		}
-
 		baseBuildCompiler().withClasspath(buildPath).compile();
 		JakeLog.info("Done in " + JakeUtilsTime.durationInSeconds(start) + " seconds.", "");
 		return buildBinDir();

@@ -40,6 +40,7 @@ class Main {
 		final Project project = new Project(JakeUtilsFile.workingDir(), JakeUtilsFile.workingDir());
 
 		final JakeClassLoader classLoader = JakeClassLoader.current().createChild();
+
 		if (project.hasBuildSource()) {
 			final File buildBin = project.compileBuild(BootstrapOptions.createPopulatedWithOptions());
 			classLoader.addEntry(buildBin);

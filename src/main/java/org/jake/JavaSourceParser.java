@@ -102,35 +102,32 @@ class JavaSourceParser {
 	@SuppressWarnings("unchecked")
 	private static List<String> scanJakeImport(Scanner scanner, URL url) {
 		final String context = " parsing @JakeImport ";
-		final String arg = extractStringTo(scanner, ")", url, context);
-		final List<String> items = splitIgnoringQuotes(arg, ',');
+		final String betweenParenthesis = extractStringTo(scanner, ")", url, context);
+		final List<String> items = splitIgnoringQuotes(betweenParenthesis, ',');
 		for (final String item : items) {
 			final String trimedItem = item.trim();
-			if (JakeUtilsString.startsWithAny(trimedItem, "\"", "{")) {
-				return startWithQuoteOrCurly(trimedItem, url, context);
+			if (trimedItem.startsWith("\"")) {
+				return JakeUtilsIterable.listOf(withoutQuotes(trimedItem));
+			}
+			if (trimedItem.startsWith("{")) {
+				return curlyBraceToStrings(betweenParenthesis, url, context);
 			}
 			if (trimedItem.startsWith("value ") || trimedItem.startsWith("value=")) {
 				final String after = JakeUtilsString.substringAfterFirst(trimedItem, "=").trim();
-				return startWithQuoteOrCurly(after, url, context);
+				if (after.startsWith("\"")) {
+					return JakeUtilsIterable.listOf(withoutQuotes(after));
+				}
+				if (after.startsWith("{")) {
+					return curlyBraceToStrings(after, url, context);
+				}
 			}
 		}
 		return Collections.EMPTY_LIST;
 	}
 
-	@SuppressWarnings("unchecked")
-	private static List<String> startWithQuoteOrCurly(String input, URL url, String context) {
-		if (input.startsWith("\"")) {
-			return JakeUtilsIterable.listOf(withoutQuotes(input));
-		}
-		if (input.startsWith("{")) {
-			return braceToStrings(input, url, context);
-		}
-		return Collections.EMPTY_LIST;
-	}
-
-	private static List<String> braceToStrings(String input, URL url, String context) {
+	private static List<String> curlyBraceToStrings(String input, URL url, String context) {
 		final Scanner innerScanner = new Scanner(input);
-		innerScanner.findInLine("\\{");
+		innerScanner.useDelimiter("");
 		final String braced = extractStringTo(innerScanner, "}", url, context);
 		final List<String> elements = splitIgnoringQuotes(braced, ',');
 		final List<String> result = new LinkedList<String>();
@@ -168,8 +165,10 @@ class JavaSourceParser {
 		boolean inQuote = false;
 		boolean escaping = false;
 		final StringBuilder builder = new StringBuilder();
+		final StringBuilder all = new StringBuilder();
 		while (scanner.hasNext()) {
 			final String character = scanner.next();
+			all.append(character);
 			if (!inQuote) {
 				if (character.equals("\"")) {
 					inQuote = true;
@@ -181,7 +180,7 @@ class JavaSourceParser {
 				}
 			} else if (escaping){
 				escaping = false;
-			} else {
+			} else { // in quote
 				if (character.equals("\\")) {
 					escaping = true;
 				} else if (character.equals("\"")) {
@@ -192,7 +191,7 @@ class JavaSourceParser {
 				}
 			}
 		}
-		throw new IllegalStateException("No matching ) found" + context + " in " +  url + "");
+		throw new IllegalStateException("No matching " + delimiter + " found" + context + "in " +  url + ". " + all.toString());
 	}
 
 	private static String removeQuotes(String line) {
@@ -218,6 +217,7 @@ class JavaSourceParser {
 				}
 			}
 		}
+		scanner.close();
 		return builder.toString();
 	}
 
