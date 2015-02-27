@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeDependency;
+import org.jake.depmanagement.JakeScopeMapping;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
@@ -22,6 +23,9 @@ import org.jake.utils.JakeUtilsString;
  * @author Jerome Angibaud
  */
 class JavaSourceParser {
+
+	private static final JakeScopeMapping SCOPE_MAPPING = JakeScopeMapping.of(Project.JAKE_SCOPE).to("default(*)");
+
 
 	public static JavaSourceParser of(File baseDir, File code) {
 		final InputStream inputStream = JakeUtilsIO.inputStream(code);
@@ -65,7 +69,7 @@ class JavaSourceParser {
 	}
 
 	private static JakeDependencies dependencies(File baseDir, List<String> deps) {
-		final JakeDependencies.Builder builder = JakeDependencies.builder().usingDefaultScopes(Project.JAKE_SCOPE);
+		final JakeDependencies.Builder builder = JakeDependencies.builder().usingDefaultScopeMapping(SCOPE_MAPPING);
 		for (final String dependency : deps) {
 			if (JakeDependency.isGroupNameAndVersion(dependency)) {
 				builder.on(JakeDependency.of(dependency));

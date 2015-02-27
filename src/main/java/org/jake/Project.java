@@ -69,7 +69,7 @@ class Project {
 		if (JakeLocator.libExtDir().exists()) {
 			extraLibs.addAll(JakeDir.of(JakeLocator.libExtDir()).include("**/*.jar").files());
 		}
-		return JakePath.of(extraLibs).and(JakeLocator.jakeJarFile());
+		return JakePath.of(extraLibs).and(JakeLocator.jakeJarFile(), JakeLocator.ivyJarFile());
 	}
 
 
@@ -85,14 +85,16 @@ class Project {
 		if (parser.dependencies().isEmpty()) {
 			buildPath = this.localBuildPath();
 		} else {
-			JakeLog.start("Resolving build dependencies");
+			JakeLog.startln("Resolving build dependencies");
 			final JakeDependencies importedDependencies =  parser.dependencies();
+			final JakePath extraPath;
 			if (importedDependencies.containsExternalModule()) {
 				final JakeRepos repos = jakeCompileRepos(Collections.EMPTY_LIST, bootstrapOptions);
-				buildPath = this.jakeCompilePath(repos, importedDependencies);
+				extraPath = this.jakeCompilePath(repos, importedDependencies);
 			} else {
-				buildPath = JakePath.of(importedDependencies.fileDependencies(JAKE_SCOPE));
+				extraPath = JakePath.of(importedDependencies.fileDependencies(JAKE_SCOPE));
 			}
+			buildPath = extraPath.and(this.localBuildPath());
 			JakeLog.done();
 		}
 		baseBuildCompiler().withClasspath(buildPath).compile();

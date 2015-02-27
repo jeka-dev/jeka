@@ -7,11 +7,10 @@ import org.jake.java.testing.junit.JakeUnit;
  * This build does not rely on any dependence manager.
  * This build uses built-in extra feature as sonar, jacoco analysis.
  */
-@JakeImportRepo("http://maven.central.repo")
 @JakeImport({
-	"com.google:guava:18.0",
+	"com.google.guava:guava:18.0",
 	"../my.jar",
-	"build/lib/extra/mylib.jar, "
+	"build/lib/extra/mylib.jar"
 })
 public class FullBuild extends Build {
 

@@ -176,6 +176,9 @@ public final class JakeIvy {
 		} catch (final Exception e1) {
 			throw new RuntimeException(e1);
 		}
+		if (report.hasError()) {
+			throw new JakeException("Erros while resolving dependencies : " + report.getAllProblemMessages());
+		}
 		final Set<JakeArtifact> result = new HashSet<JakeArtifact>();
 		final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
 		for (final String conf : resolveOptions.getConfs()) {

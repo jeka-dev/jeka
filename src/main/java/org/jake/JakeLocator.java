@@ -2,6 +2,8 @@ package org.jake;
 
 import java.io.File;
 
+import org.apache.ivy.Ivy;
+
 /**
  * Provides location related to the running Jake instance.
  * 
@@ -11,6 +13,8 @@ public final class JakeLocator {
 
 	// cache
 	private static File JAKE_JAR_FILE;
+
+	private static File IVY_JAR_FILE;
 
 	public static File jakeJarFile() {
 		if (JAKE_JAR_FILE != null) {
@@ -23,6 +27,22 @@ public final class JakeLocator {
 				// TODO not optimized. Should be implemented on the JakeClasspath class.
 				JakeClassLoader.system().parent().createChild(file).classloader().loadClass(Main.class.getName());
 				JAKE_JAR_FILE = file;
+				return file;
+			} catch (final ClassNotFoundException e) {
+				// Class just not there
+			}
+		}
+		throw new IllegalStateException("Main not found in classpath");
+	}
+
+	public static File ivyJarFile() {
+		if (IVY_JAR_FILE != null) {
+			return IVY_JAR_FILE;
+		}
+		for (final File file : JakeClassLoader.current().childClasspath()) {
+			try {
+				JakeClassLoader.system().parent().createChild(file).classloader().loadClass(Ivy.class.getName());
+				IVY_JAR_FILE = file;
 				return file;
 			} catch (final ClassNotFoundException e) {
 				// Class just not there

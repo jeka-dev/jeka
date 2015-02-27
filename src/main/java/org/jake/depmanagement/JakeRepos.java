@@ -112,4 +112,9 @@ public final class JakeRepos implements Iterable<JakeRepo> {
 		return repos.iterator();
 	}
 
+	@Override
+	public String toString() {
+		return repos.toString();
+	}
+
 }

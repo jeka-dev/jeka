@@ -22,6 +22,8 @@ public class JavaSourceParserTest {
 		Assert.assertEquals(3, dependencies.dependenciesDeclaredWith(Project.JAKE_SCOPE).size());
 	}
 
+
+
 	@Test
 	public void withoutImport() {
 		final JakeDependencies  dependencies = JavaSourceParser.of(

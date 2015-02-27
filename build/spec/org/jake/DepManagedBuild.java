@@ -1,5 +1,6 @@
 package org.jake;
-import org.apache.ivy.util.StringUtils;
+
+
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeScope;
 import org.jake.depmanagement.JakeVersion;
@@ -33,7 +34,8 @@ public class DepManagedBuild extends Build {
 		super.base();
 		doc();
 		publish();
-		StringUtils.abbreviate("I am using commons-lang", 15);
+		org.apache.commons.lang.ObjectUtils.toString("toto");
+
 	}
 
 	@Override
