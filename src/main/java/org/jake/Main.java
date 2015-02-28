@@ -46,6 +46,7 @@ class Main {
 		} else {
 			classLoader = JakeClassLoader.current();
 		}
+		System.out.println(classLoader);
 		final boolean result = project.executeBuild(JakeUtilsFile.workingDir(), classLoader,
 				commandLine.methods(), commandLine.pluginSetups());
 		if (!result) {

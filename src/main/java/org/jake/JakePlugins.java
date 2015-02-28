@@ -57,9 +57,7 @@ public final class JakePlugins<T>  {
 
 	/**
 	 * Creates a {@link JakePlugins} for the specified extension points. That means, this instance
-	 * will refer to all plugin extending the specified extension point in the
-	 * @param templateClass
-	 * @return
+	 * will refer to all plugin extending the specified extension point in the parameter templateClass.
 	 */
 	static <T> JakePlugins<T> of(Class<T> templateClass) {
 		final JakePlugins<T> result = new JakePlugins<T>(templateClass);

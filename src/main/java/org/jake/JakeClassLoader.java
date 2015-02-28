@@ -200,7 +200,7 @@ public final class JakeClassLoader {
 	 * For example : loadFromNameOrSimpleName("MyClass", null) may return the class my.pack.MyClass.
 	 * 
 	 * @param name The full name or the simple name of the class to load
-	 * @param superClass If not null, the search is narrowed to classes/interfaces children of this class/interface.
+	 * @param superClassArg If not null, the search is narrowed to classes/interfaces children of this class/interface.
 	 * @return The loaded class or <code>null</code>.
 	 */
 	@SuppressWarnings("unchecked")

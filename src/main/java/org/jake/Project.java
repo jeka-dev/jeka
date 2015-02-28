@@ -106,13 +106,11 @@ class Project {
 		return buildPath;
 	}
 
-
-
 	private File compileBuild(JakePath buildPath) {
 		baseBuildCompiler().withClasspath(buildPath).compile();
+		JakeDir.of(this.buildSourceDir()).exclude("**/*.java").copyTo(this.buildBinDir());
 		return buildBinDir();
 	}
-
 
 	private JakeRepos jakeCompileRepos(List<String> importRepoUrls, BootstrapOptions bootstrapOptions) {
 		final JakeRepos result = importRepos(importRepoUrls);
