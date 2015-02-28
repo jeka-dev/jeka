@@ -110,6 +110,19 @@ public final class JakeJavaCompiler {
 		return new JakeJavaCompiler(newOptions, javaSourceFiles, failOnError, fork);
 	}
 
+
+	/**
+	 * Creates a copy of this {@link JakeJavaCompiler} but with the specified options under condition.
+	 * 
+	 * @see #andOptions(String...)
+	 */
+	public JakeJavaCompiler withOptionsIf(boolean condition, String... options) {
+		if (condition) {
+			return withOptions(options);
+		}
+		return this;
+	}
+
 	/**
 	 * Creates a copy of this {@link JakeJavaCompiler} but with the specified classpath.
 	 */

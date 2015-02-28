@@ -1,6 +1,6 @@
-- Distinct upload JakeRepo according snapshot or release.
+- copy managed dependency in local build 
 
-- Use source annotation on build class to specify import dependencies
+- eclipse as a plugin (generate buildpath)
 
 - Add multi-module support
 

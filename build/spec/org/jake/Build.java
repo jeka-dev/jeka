@@ -20,7 +20,9 @@ public class Build extends JakeJavaBuild {
 	// Was necessary in first place to build Jake with itself.
 	public static void main(String[] args) {
 		JakeOptions.forceVerbose(true);
-		new Build().base();
+		final Build build = new Build();
+		build.base();
+		build.doc();
 	}
 
 	// Include a time stamped version file as resource.
@@ -28,6 +30,12 @@ public class Build extends JakeJavaBuild {
 	protected JakeResourceProcessor resourceProcessor() {
 		return JakeResourceProcessor.of(resourceDirs(), "version", version().name());
 	}
+
+	@Override
+	protected JakeJavaPacker createPacker() {
+		return super.createPacker().withFatFar(true);
+	}
+
 
 	// Include the making of the distribution into the application packaging.
 	@Override

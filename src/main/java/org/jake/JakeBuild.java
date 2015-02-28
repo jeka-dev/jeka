@@ -5,10 +5,16 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.jake.depmanagement.JakeDependencies;
+import org.jake.depmanagement.JakeDependency;
+import org.jake.depmanagement.JakeDependencyResolver;
 import org.jake.depmanagement.JakeModuleId;
 import org.jake.depmanagement.JakeRepo;
 import org.jake.depmanagement.JakeRepo.MavenRepository;
 import org.jake.depmanagement.JakeRepos;
+import org.jake.depmanagement.JakeResolutionParameters;
+import org.jake.depmanagement.JakeScope;
+import org.jake.depmanagement.JakeScopeMapping;
 import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionedModule;
 import org.jake.depmanagement.ivy.JakeIvy;
@@ -24,6 +30,14 @@ import org.jake.utils.JakeUtilsTime;
  * @author Jerome Angibaud
  */
 public class JakeBuild {
+
+	/**
+	 * Default path for the non managed dependencies. This path is relative to {@link #baseDir()}.
+	 */
+	protected static final String STD_LIB_PATH = "build/libs";
+
+	// A cache for dependency resolver
+	private JakeDependencyResolver cachedResolver;
 
 	private File baseDirFile = JakeUtilsFile.workingDir();
 
@@ -59,6 +73,12 @@ public class JakeBuild {
 
 	@JakeOption("Password to connect to the publish release repository (if needed).")
 	private final String publishRepoReleasePassword = null;
+
+	@JakeOption({
+		"Mention if you want to add extra lib in your build path. It can be absolute or relative to the project base dir.",
+		"These libs will be added to the build path cto compile and run Jake scripts.",
+	"Example : -extraCompilePath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
+	private final String extraJakePath = null;
 
 	protected JakeBuild() {
 	}
@@ -162,6 +182,72 @@ public class JakeBuild {
 		return (Date) buildTime.clone();
 	}
 
+	/**
+	 * Returns the resolved dependencies for the given scope. Depending on the passed
+	 * options, it may be augmented with extra-libs mentioned in options <code>extraXxxxPath</code>.
+	 */
+	public final JakePath depsFor(JakeScope scope) {
+		return dependencyResolver().get(scope);
+	}
+
+	/**
+	 * Returns the dependencies of this module. By default it uses unmanaged dependencies stored
+	 * locally in the project as described by {@link #defaultUnmanagedDependencies()} method.
+	 * If you want to use managed dependencies, you must override this method.
+	 */
+	protected JakeDependencies dependencies() {
+		return defaultUnmanagedDependencies();
+	}
+
+	/**
+	 * Returns the dependencies located locally to the project.
+	 */
+	protected JakeDependencies defaultUnmanagedDependencies() {
+		final JakeDir libDir = JakeDir.of(baseDir(STD_LIB_PATH));
+		return JakeDependencies.builder()
+				.usingDefaultScopes(Project.JAKE_SCOPE)
+				.on(JakeDependency.of(libDir.include("*.jar", "jake/*.jar"))).build();
+	}
+
+	public final JakeDependencyResolver dependencyResolver() {
+		if (cachedResolver == null) {
+			JakeLog.startln("Setting dependency resolver ");
+			cachedResolver = createDependencyResolver();
+			JakeLog.done("Resolver set " + cachedResolver);
+		}
+		return cachedResolver;
+	}
+
+	/**
+	 * Returns the base dependency resolver.
+	 */
+	protected JakeDependencyResolver createDependencyResolver() {
+		final JakeDependencies dependencies = defaultUnmanagedDependencies().and(extraCommandLineDeps());
+		if (dependencies.containsExternalModule()) {
+			return JakeDependencyResolver.managed(jakeIvy(), dependencies, module(),
+					JakeResolutionParameters.of(scopeMapping()));
+		}
+		return JakeDependencyResolver.unmanaged(dependencies);
+	}
+
+	protected JakeScopeMapping scopeMapping() {
+		return JakeScopeMapping.of(Project.JAKE_SCOPE).to("default(*)");
+	}
+
+	protected JakeDependencies extraCommandLineDeps() {
+		return JakeDependencies.builder()
+				.usingDefaultScopes(Project.JAKE_SCOPE).onFiles(toPath(extraJakePath))
+				.build();
+	}
+
+	protected final JakeClasspath toPath(String pathAsString) {
+		if (pathAsString == null) {
+			return JakeClasspath.of();
+		}
+		return JakeClasspath.of(JakeUtilsFile.toPath(pathAsString, ";", baseDir().root()));
+	}
+
+
 
 	/**
 	 * Returns the base directory for this project. All file/directory path are
@@ -219,8 +305,5 @@ public class JakeBuild {
 	public void helpPlugins() {
 		HelpDisplayer.helpPlugins(this);
 	}
-
-
-
 
 }
