@@ -8,8 +8,8 @@ public class Build extends JakeJavaBuild {
 		
 	@Override
 	protected JakeDependencies dependencies() {
-		final JakeJavaBuild coreBuild = relativeProject(JakeJavaBuild.class, "../orj.jake.core");
-		return JakeDependencies.onProject(PROVIDED, coreBuild, coreBuild.classDir());
+		final JakeJavaBuild core = relativeProject(JakeJavaBuild.class, "../org.jake.core");
+		return JakeDependencies.onProject(PROVIDED, core, core.classDir());
 	}
 	
 	@Override
