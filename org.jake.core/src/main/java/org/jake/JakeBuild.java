@@ -309,7 +309,7 @@ public class JakeBuild {
 		HelpDisplayer.helpPlugins(this);
 	}
 
-	public <T extends JakeBuild> T relativeProject(Class<T> clazz, String relativePath) {
+	public final <T extends JakeBuild> T relativeProject(Class<T> clazz, String relativePath) {
 		final T build = JakeUtilsReflect.newInstance(clazz);
 		build.setBaseDir(this.baseDir(relativePath));
 		return build;
