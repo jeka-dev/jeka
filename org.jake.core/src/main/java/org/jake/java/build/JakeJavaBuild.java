@@ -73,6 +73,7 @@ public class JakeJavaBuild extends JakeBuild {
 			.exclude("**/*.java").andExclude("**/package.html")
 			.andExclude("**/doc-files");
 
+
 	private List<JakeJavaBuildPlugin> plugins = Collections.emptyList();
 
 	@JakeOption({
@@ -461,13 +462,14 @@ public class JakeJavaBuild extends JakeBuild {
 				.usingDefaultScopes(PROVIDED).onFiles(toPath(extraProvidedPath)).build();
 	}
 
-
-
 	@Override
-	protected JakeDependencies defaultUnmanagedDependencies() {
+	protected JakeDependencies localDependencies() {
 		final JakeDir libDir = JakeDir.of(baseDir(STD_LIB_PATH));
+		if (!libDir.root().exists()) {
+			return super.localDependencies();
+		}
 		return JakeDependencies.builder()
-				.on(super.defaultUnmanagedDependencies())
+				.on(super.localDependencies())
 				.usingDefaultScopes(COMPILE).on(JakeDependency.of(libDir.include("*.jar", "compile/*.jar")))
 				.usingDefaultScopes(PROVIDED).on(JakeDependency.of(libDir.include("*.jar", "provided/*.jar")))
 				.usingDefaultScopes(RUNTIME).on(JakeDependency.of(libDir.include("*.jar", "runtime/*.jar")))

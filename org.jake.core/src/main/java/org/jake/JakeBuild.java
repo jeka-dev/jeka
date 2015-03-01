@@ -20,6 +20,7 @@ import org.jake.depmanagement.JakeVersionedModule;
 import org.jake.depmanagement.ivy.JakeIvy;
 import org.jake.publishing.JakePublishRepos;
 import org.jake.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
 import org.jake.utils.JakeUtilsTime;
 
@@ -89,7 +90,6 @@ public class JakeBuild {
 	public void setBaseDir(File baseDir) {
 		this.baseDirFile = baseDir;
 	}
-
 
 	/**
 	 * Returns the classes accepted as template for plugins.
@@ -192,18 +192,21 @@ public class JakeBuild {
 
 	/**
 	 * Returns the dependencies of this module. By default it uses unmanaged dependencies stored
-	 * locally in the project as described by {@link #defaultUnmanagedDependencies()} method.
+	 * locally in the project as described by {@link #localDependencies()} method.
 	 * If you want to use managed dependencies, you must override this method.
 	 */
 	protected JakeDependencies dependencies() {
-		return defaultUnmanagedDependencies();
+		return localDependencies();
 	}
 
 	/**
 	 * Returns the dependencies located locally to the project.
 	 */
-	protected JakeDependencies defaultUnmanagedDependencies() {
+	protected JakeDependencies localDependencies() {
 		final JakeDir libDir = JakeDir.of(baseDir(STD_LIB_PATH));
+		if (!libDir.root().exists()) {
+			return JakeDependencies.builder().build();
+		}
 		return JakeDependencies.builder()
 				.usingDefaultScopes(Project.JAKE_SCOPE)
 				.on(JakeDependency.of(libDir.include("*.jar", "jake/*.jar"))).build();
@@ -222,7 +225,7 @@ public class JakeBuild {
 	 * Returns the base dependency resolver.
 	 */
 	protected JakeDependencyResolver createDependencyResolver() {
-		final JakeDependencies dependencies = defaultUnmanagedDependencies().and(extraCommandLineDeps());
+		final JakeDependencies dependencies = dependencies().and(extraCommandLineDeps());
 		if (dependencies.containsExternalModule()) {
 			return JakeDependencyResolver.managed(jakeIvy(), dependencies, module(),
 					JakeResolutionParameters.of(scopeMapping()));
@@ -253,16 +256,16 @@ public class JakeBuild {
 	 * Returns the base directory for this project. All file/directory path are
 	 * resolved from this directory.
 	 */
-	public JakeDir baseDir() {
+	public final JakeDir baseDir() {
 		return JakeDir.of(baseDirFile);
 	}
 
 	/**
 	 * Return a file located at the specified path relative to the base directory.
 	 */
-	public File baseDir(String relativePath) {
+	public final File baseDir(String relativePath) {
 		if (relativePath.isEmpty()) {
-			return baseDirFile;
+			return baseDir().root();
 		}
 		return baseDir().file(relativePath);
 	}
@@ -304,6 +307,12 @@ public class JakeBuild {
 	@JakeDoc("Display details on all available plugins.")
 	public void helpPlugins() {
 		HelpDisplayer.helpPlugins(this);
+	}
+
+	public <T extends JakeBuild> T relativeProject(Class<T> clazz, String relativePath) {
+		final T build = JakeUtilsReflect.newInstance(clazz);
+		build.setBaseDir(this.baseDir(relativePath));
+		return build;
 	}
 
 }

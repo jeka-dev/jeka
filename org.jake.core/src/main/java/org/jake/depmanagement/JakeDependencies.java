@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jake.JakeBuild;
 import org.jake.depmanagement.JakeDependency.JakeFilesDependency;
 import org.jake.depmanagement.JakeDependency.JakeProjectDependency;
 import org.jake.depmanagement.JakeScopedDependency.ScopeType;
@@ -22,7 +23,24 @@ import org.jake.utils.JakeUtilsIterable;
  * 
  * @author Jerome Angibaud.
  */
-public class JakeDependencies implements Iterable<JakeScopedDependency>{
+public class JakeDependencies implements Iterable<JakeScopedDependency> {
+
+	public static JakeDependencies on(JakeScopedDependency... scopedDependencies) {
+		return new JakeDependencies(Arrays.asList(scopedDependencies));
+	}
+
+	public static JakeDependencies on(JakeScope scope, JakeDependency ... dependencies) {
+		final List<JakeScopedDependency> list = new LinkedList<JakeScopedDependency>();
+		for (final JakeDependency dependency : dependencies) {
+			final JakeScopedDependency scopedDependency = JakeScopedDependency.of(dependency, scope);
+			list.add(scopedDependency);
+		}
+		return new JakeDependencies(list);
+	}
+
+	public static JakeDependencies onProject(JakeScope scope, JakeBuild build, File...files) {
+		return on(scope, JakeDependency.of(build, files));
+	}
 
 	private final List<JakeScopedDependency> dependencies;
 
@@ -65,11 +83,21 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 		return JakeDependencies.builder().on(this).on(others).build();
 	}
 
+
+
 	/**
 	 * Returns a clone of this object plus & {@link JakeScopedDependency}s on the specified file.
 	 */
 	public JakeDependencies andFiles(JakeScope scope, File ...files) {
 		final JakeScopedDependency scopedDependency = JakeScopedDependency.of(JakeDependency.of(files), scope);
+		return and(scopedDependency);
+	}
+
+	/**
+	 * Returns a clone of this object plus & {@link JakeScopedDependency}s on the specified project.
+	 */
+	public JakeDependencies andProject(JakeScope scope, JakeBuild project, File ...files) {
+		final JakeScopedDependency scopedDependency = JakeScopedDependency.of(JakeDependency.of(project, files), scope);
 		return and(scopedDependency);
 	}
 
@@ -351,8 +379,8 @@ public class JakeDependencies implements Iterable<JakeScopedDependency>{
 			return on(description, true);
 		}
 
-		public ScopeableBuilder onProject(String relativePath) {
-			return on(JakeProjectDependency.on(relativePath));
+		public ScopeableBuilder onProject(JakeBuild projectBuild, File ...files) {
+			return on(JakeProjectDependency.of(projectBuild, JakeUtilsIterable.setOf(files)));
 		}
 
 		public ScopeableBuilder on(String description, boolean transitive) {

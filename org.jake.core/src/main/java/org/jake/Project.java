@@ -75,13 +75,13 @@ class Project {
 	public JakePath resolveBuildPathAndCompile(BootstrapOptions bootstrapOptions) {
 		final JakePath extraPath = reolveBuildPath(bootstrapOptions);
 		final File dir = compileBuild(extraPath.and(localBuildPath()));
+		JakeLog.nextLine();
 		return extraPath.and(dir);
 	}
 
 	@SuppressWarnings("unchecked")
 	private JakePath reolveBuildPath(BootstrapOptions bootstrapOptions) {
 		displayHead("Compiling build classes for project : " + projectRelativePath);
-		final long start = System.nanoTime();
 		JakeLog.start("Parsing source code for gathering imports");
 		final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir, JakeDir.of(buildSourceDir()).include("**/*.java"));
 		JakeLog.done();
@@ -102,7 +102,6 @@ class Project {
 			buildPath = extraPath;
 			JakeLog.done();
 		}
-		JakeLog.info("Done in " + JakeUtilsTime.durationInSeconds(start) + " seconds.", "");
 		return buildPath;
 	}
 

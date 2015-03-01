@@ -1,29 +1,21 @@
 package org.jake.sonar;
 
+import org.jake.JakeJavaCompiler;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.java.build.JakeJavaBuild;
-import org.jake.java.build.JakeJavaPacker;
-import org.jake.utils.JakeUtilsFile;
 
 public class Build extends JakeJavaBuild {
-	
-	@Override
-	public void base() {
-		super.base();
-		pack();		
-	}
-	
+		
 	@Override
 	protected JakeDependencies dependencies() {
-		return super.dependencies().
-				andFiles(PROVIDED, baseDir("../jake/build/output/classes"));
+		final JakeJavaBuild coreBuild = relativeProject(JakeJavaBuild.class, "../orj.jake.core");
+		return JakeDependencies.onProject(PROVIDED, coreBuild, coreBuild.classDir());
 	}
 	
-	public static void main(String[] args) {
-		new Build().base();
-	}
-	
-	
+	@Override
+	public String sourceJavaVersion() {
+		return JakeJavaCompiler.V6;
+	}	
 		
 
 }

@@ -3,8 +3,11 @@ package org.jake.depmanagement;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.jake.JakeBuild;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsString;
 
@@ -48,6 +51,10 @@ public abstract class JakeDependency {
 		return new JakeFilesDependency(Arrays.asList(files));
 	}
 
+	public static JakeProjectDependency of(JakeBuild build, File...files) {
+		return JakeProjectDependency.of(build, JakeUtilsIterable.setOf(files));
+	}
+
 
 	/**
 	 * A dependency on files located on file system.
@@ -73,19 +80,35 @@ public abstract class JakeDependency {
 
 	public static final class JakeProjectDependency extends JakeDependency {
 
-		private final String relativePath;
+		private final JakeBuild projectBuild;
 
-		private JakeProjectDependency(String relativePath) {
+		private final Set<File> files;
+
+		private JakeProjectDependency(JakeBuild projectBuild, Set<File> files) {
 			super();
-			this.relativePath = relativePath;
+			this.projectBuild = projectBuild;
+			this.files = Collections.unmodifiableSet(files);
 		}
 
-		public static JakeProjectDependency on(String relativePath) {
-			return new JakeProjectDependency(relativePath);
+		public static JakeProjectDependency of(JakeBuild projectBuild, Set<File> files) {
+			return new JakeProjectDependency(projectBuild, new HashSet<File>(files));
 		}
 
-		public String relativePath() {
-			return relativePath;
+		public JakeBuild projectBuild() {
+			return projectBuild;
+		}
+
+		public Set<File> files() {
+			return files;
+		}
+
+		public boolean allFilesExist() {
+			for (final File file : this.files) {
+				if (!file.exists()) {
+					return false;
+				}
+			}
+			return true;
 		}
 
 

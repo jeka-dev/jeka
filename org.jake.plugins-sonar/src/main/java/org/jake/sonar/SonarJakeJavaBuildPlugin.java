@@ -8,7 +8,7 @@ import org.jake.java.build.JakeJavaBuildPlugin;
 import org.jake.java.testing.junit.JakeUnit.JunitReportDetail;
 import org.jake.utils.JakeUtilsFile;
 
-public class SonarJakeJavaBuildPlugin implements JakeJavaBuildPlugin {
+public class SonarJakeJavaBuildPlugin extends JakeJavaBuildPlugin {
 	
 	public static JakeSonar configureSonarFrom(JakeJavaBuild build) {
 		final File baseDir = build.baseDir().root();
@@ -27,11 +27,10 @@ public class SonarJakeJavaBuildPlugin implements JakeJavaBuildPlugin {
 	
 	private JakeSonar jakeSonar;
 	
-	public SonarJakeJavaBuildPlugin configure(JakeJavaBuild build) {
+	public void configure(JakeJavaBuild build) {
 		JakeLog.warnIf(build.junitReportDetail() != JunitReportDetail.FULL,"*  You need to use junitReportDetail=FULL " +
 	                "to get complete sonar test report but you are currently using " + build.junitReportDetail().name() + ".");
 	    this.jakeSonar = configureSonarFrom(build);
-	    return this;
 	}
 	
 	public void run() {
