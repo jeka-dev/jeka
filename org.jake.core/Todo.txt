@@ -1,7 +1,0 @@
-- copy managed dependency in local build 
-
-- eclipse as a plugin (generate buildpath)
-
-- Add multi-module support
-
-- Add Jacoco html report
