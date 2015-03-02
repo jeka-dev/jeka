@@ -336,8 +336,9 @@ public class JakeBuild {
 
 	public final <T extends JakeBuild> T relativeProject(Class<T> clazz, String relativePath) {
 		final T build = JakeUtilsReflect.newInstance(clazz);
-		build.locator = Locator.ofProjectRealive(this, relativePath);
-		build.forcedVersion = this.version().name();
+		final JakeBuild jakeBuild = build;
+		jakeBuild.locator = Locator.ofProjectRealive(this, relativePath);
+		jakeBuild.forcedVersion = this.version().name();
 		return build;
 	}
 

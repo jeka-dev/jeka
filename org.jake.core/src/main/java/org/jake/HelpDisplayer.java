@@ -36,17 +36,30 @@ class HelpDisplayer {
 		JakeLog.startln("Looking for plugins");
 		final List<JakePluginDescription<?>> pluginDescriptions = JakePlugins.declaredAsField(build);
 		for (final JakePluginDescription<?> description : pluginDescriptions) {
+			JakeLog.nextLine();
 			JakeLog.info("Plugin  Name : " + description.shortName());
 			JakeLog.shift(4);
 			JakeLog.info("Full name : " + description.fullName());
 			JakeLog.info("Template class : " + description.templateClass().getName());
-			JakeLog.info(description.explanation());
+			final List<String> explanations = description.explanation();
+			if (!explanations.isEmpty()) {
+				JakeLog.info("Explanation : ");
+				JakeLog.shift(2);
+				JakeLog.info(description.explanation());
+				JakeLog.shift(-2);
+			}
+
 			JakeLog.info("Available method(s) for this plugin : " );
 			displayHelpOnMethods(description.pluginClass());
-			JakeLog.info("Options for this plugin : ");
-			JakeLog.shift(JUMP);
-			JakeLog.info(JakeOptions.helpClassOnly(description.pluginClass()));
-			JakeLog.shift(-JUMP);
+			final List<String> optionHelp = JakeOptions.helpClassOnly(description.pluginClass());
+			if (optionHelp.isEmpty()) {
+				JakeLog.info("Available option(s) for this plugin : none.");
+			} else {
+				JakeLog.info("Available option(s) for this plugin : ");
+				JakeLog.shift(JUMP);
+				JakeLog.info(optionHelp);
+				JakeLog.shift(-JUMP);
+			}
 			JakeLog.shift(-4);
 		}
 	}
@@ -80,15 +93,16 @@ class HelpDisplayer {
 				continue;
 			}
 			final JakeDoc jakeDoc = JakeUtilsReflect.getInheritedAnnotation(method, JakeDoc.class);
-			final CommandDescription actionDescription;
-			if (jakeDoc != null) {
-				actionDescription = new CommandDescription(method, jakeDoc.value());
-			} else {
-				actionDescription = new CommandDescription(method);
+			if (jakeDoc == null) {
+				continue;
 			}
+			final CommandDescription actionDescription = new CommandDescription(method, jakeDoc.value());
 			list.add(actionDescription);
 		}
 		CommandDescription.log(list);
+		if (list.isEmpty()) {
+			JakeLog.info("none");
+		}
 		JakeLog.shift(-JUMP);
 	}
 
@@ -105,10 +119,6 @@ class HelpDisplayer {
 			this.name = method.getName();
 			this.docs = Arrays.copyOf(docs, docs.length);
 			this.declaringClass = method.getDeclaringClass();
-		}
-
-		public CommandDescription(Method method) {
-			this(method, new String[0]);
 		}
 
 		@Override

@@ -131,13 +131,17 @@ public final class JakeOptions {
 	 * Returns a multi-line text standing the current option values.
 	 */
 	static String fieldOptionsToString(Object target) {
-		final StringBuilder builder = new StringBuilder("");
+		final StringBuilder builder = new StringBuilder();
+		boolean hasField = false;
 		for (final Field field : optionField(target.getClass())) {
+			hasField = true;
 			final String name = field.getName();
 			final String value = JakeUtilsString.toString(JakeUtilsReflect.getFieldValue(target, name));
 			builder.append(name).append("=").append(value).append(", ");
 		}
-		builder.delete(builder.length()-2, builder.length()-1);
+		if (hasField) {
+			builder.delete(builder.length()-2, builder.length()-1);
+		}
 		return builder.toString();
 	}
 

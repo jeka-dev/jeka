@@ -10,7 +10,7 @@ public class PluginsSonarBuild extends JakeJavaBuild {
 	
 	@Override
 	protected JakeDependencies dependencies() {
-		return JakeDependencies.onProject(PROVIDED, core, core.classDir());
+		return JakeDependencies.onProject(PROVIDED, core, core.packer().jarFile());
 	}
 	
 	@Override

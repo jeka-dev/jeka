@@ -322,6 +322,13 @@ public class JakeJavaBuild extends JakeBuild {
 		javadocMaker().process();
 	}
 
+	@JakeDoc("Run checks to verify the package is valid and meets quality criteria.")
+	public void verify() {
+		for (final JakeJavaBuildPlugin buildPlugin : this.plugins) {
+			buildPlugin.verify();
+		}
+	}
+
 	@JakeDoc({	"Create many jar files containing respectively binaries, sources, test binaries and test sources.",
 	"The jar containing the binary is the one that will be used as a depe,dence for other project."})
 	public void pack() {
@@ -352,15 +359,6 @@ public class JakeJavaBuild extends JakeBuild {
 
 
 	// ----------------------- Overridable sub-methods ---------------------
-
-
-
-
-
-
-
-
-
 
 	/**
 	 * Override this method if you need to
@@ -435,6 +433,8 @@ public class JakeJavaBuild extends JakeBuild {
 	protected boolean includeSourcesInPublication() {
 		return true;
 	}
+
+
 
 	// ------------------------------------
 

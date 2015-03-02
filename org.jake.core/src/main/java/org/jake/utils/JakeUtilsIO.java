@@ -330,6 +330,26 @@ public final class JakeUtilsIO {
 		}
 	}
 
+	public static File getFileFromUrl(URL url, File secondTryParent) {
+		final File tempDir = new File(JakeUtilsFile.tempDir(), "jake");
+		final String name = JakeUtilsString.substringAfterLast(url.getPath(), "/");
+		final File firstTry = new File(tempDir, name);
+		if (firstTry.exists()) {
+			return firstTry;
+		}
+		try {
+			tempDir.mkdirs();
+			firstTry.createNewFile();
+			copyUrlToFile(url, firstTry);
+			return firstTry;
+		} catch (final Exception e) {
+			secondTryParent.mkdirs();
+			final File secondTry = new File(secondTryParent, name);
+			copyUrlToFile(url, secondTry);
+			return secondTry;
+		}
+	}
+
 	public static void copyUrlToFile(URL url, File file) {
 		final InputStream inputStream;
 		final FileOutputStream fileOutputStream;

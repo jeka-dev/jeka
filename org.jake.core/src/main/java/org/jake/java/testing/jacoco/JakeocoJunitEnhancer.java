@@ -1,15 +1,16 @@
 package org.jake.java.testing.jacoco;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jake.JakeLocator;
 import org.jake.JakeLog;
 import org.jake.java.JakeJavaProcess;
 import org.jake.java.testing.junit.JakeUnit;
 import org.jake.java.testing.junit.JakeUnit.Enhancer;
+import org.jake.utils.JakeUtilsIO;
 
 public final class JakeocoJunitEnhancer implements Enhancer {
 
@@ -21,7 +22,7 @@ public final class JakeocoJunitEnhancer implements Enhancer {
 
 	private final List<String> options;
 
-	private JakeocoJunitEnhancer(File agent,boolean enabled, File destFile, List<String> options) {
+	private JakeocoJunitEnhancer(File agent ,boolean enabled, File destFile, List<String> options) {
 		super();
 		this.agent = agent;
 		this.enabled = enabled;
@@ -29,8 +30,10 @@ public final class JakeocoJunitEnhancer implements Enhancer {
 		this.options = new LinkedList<String>();
 	}
 
-	public static JakeocoJunitEnhancer of(File destFile) {
-		return new JakeocoJunitEnhancer(defaultAgentFile(), true, destFile, new LinkedList<String>());
+	public static JakeocoJunitEnhancer of(File destFile, File projectDir) {
+		final URL url = JakeocoJakeJavaBuildPlugin.class.getResource("jacocoagent.jar");
+		final File file = JakeUtilsIO.getFileFromUrl(url, new File(projectDir, "/build/output/temp"));
+		return new JakeocoJunitEnhancer(file, true, destFile, new LinkedList<String>());
 	}
 
 	public JakeocoJunitEnhancer withAgent(File jacocoagent) {
@@ -76,9 +79,6 @@ public final class JakeocoJunitEnhancer implements Enhancer {
 		return builder.toString();
 	}
 
-	public static File defaultAgentFile() {
-		return new File(JakeLocator.optionalLibsDir(), "jacocoagent.jar");
-	}
 
 	private class Reporter implements Runnable {
 

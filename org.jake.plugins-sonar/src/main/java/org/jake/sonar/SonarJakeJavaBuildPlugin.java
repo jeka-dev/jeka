@@ -2,12 +2,14 @@ package org.jake.sonar;
 
 import java.io.File;
 
-import org.jake.JakeLog;
+import org.jake.JakeDoc;
 import org.jake.java.build.JakeJavaBuild;
 import org.jake.java.build.JakeJavaBuildPlugin;
 import org.jake.java.testing.junit.JakeUnit.JunitReportDetail;
 import org.jake.utils.JakeUtilsFile;
 
+@JakeDoc({"Run Sonar analysis",
+	"When activated this plugin run a Sonar analysis when the build 'verify' method is invoked."})
 public class SonarJakeJavaBuildPlugin extends JakeJavaBuildPlugin {
 	
 	public static JakeSonar configureSonarFrom(JakeJavaBuild build) {
@@ -28,15 +30,15 @@ public class SonarJakeJavaBuildPlugin extends JakeJavaBuildPlugin {
 	private JakeSonar jakeSonar;
 	
 	public void configure(JakeJavaBuild build) {
-		JakeLog.warnIf(build.junitReportDetail() != JunitReportDetail.FULL,"*  You need to use junitReportDetail=FULL " +
-	                "to get complete sonar test report but you are currently using " + build.junitReportDetail().name() + ".");
+		build.junitReportDetail = JunitReportDetail.FULL;
 	    this.jakeSonar = configureSonarFrom(build);
 	}
 	
-	public void run() {
+	@JakeDoc("Launch a Sonar analysis.")
+	@Override
+	public void verify() {
 		jakeSonar.launch();
 	}
-	
 	
 
 }

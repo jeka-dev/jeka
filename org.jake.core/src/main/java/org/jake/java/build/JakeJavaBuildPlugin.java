@@ -1,9 +1,16 @@
 package org.jake.java.build;
 
+import org.jake.JakeBuild;
+import org.jake.JakeBuildPlugin;
 import org.jake.java.testing.junit.JakeUnit;
 
 
-public abstract class JakeJavaBuildPlugin {
+public abstract class JakeJavaBuildPlugin extends JakeBuildPlugin {
+
+	@Override
+	public final void configure(JakeBuild build) {
+		configure((JakeJavaBuild) build);
+	}
 
 	public abstract void configure(JakeJavaBuild build);
 

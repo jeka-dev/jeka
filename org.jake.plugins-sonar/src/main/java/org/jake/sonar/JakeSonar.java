@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.jake.JakeClassLoader;
-import org.jake.JakeLocator;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
 import org.jake.depmanagement.JakeVersion;
@@ -24,11 +23,8 @@ import org.jake.utils.JakeUtilsObject;
 
 /**
  * Sonar wrapper class for launching sonar analysis in a convenient way.
- * This Sonar wrapper is not specific to Java project so can be used for to analyse 
- * any kind of project supported by Sonar.
- * 
- * If this class is run out of Jake (jake.home can't be localized), then the sonnar-runnar.jar 
- * file is expected to be found at '[project to analyse base dir]/build/libs/sonar-runner/sonar-runner.jar'.
+ * This Sonar wrapper is not specific to Java project so can be used for to analyse
+ * any kind of project supported by SonarQube.
  * 
  * @author Jerome Angibaud
  */
@@ -36,7 +32,7 @@ public final class JakeSonar {
 
     private static final String RUNNER_JAR_NAME_24 = "sonar-runner-2.4.jar";
 
-    private static final String RUNNER_LOCAL_PATH = "build/temp/" + RUNNER_JAR_NAME_24;
+    private static final String RUNNER_LOCAL_PATH = "build/output/temp/" + RUNNER_JAR_NAME_24;
 
     private static final String SONAR_PREFIX = ".sonar";
     public static final String PROJECT_KEY = "projectKey";
