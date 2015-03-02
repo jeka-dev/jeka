@@ -19,6 +19,7 @@ import org.jake.depmanagement.JakeVersion;
 import org.jake.depmanagement.JakeVersionedModule;
 import org.jake.depmanagement.ivy.JakeIvy;
 import org.jake.publishing.JakePublishRepos;
+import org.jake.publishing.JakePublisher;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
@@ -40,9 +41,12 @@ public class JakeBuild {
 	// A cache for dependency resolver
 	private JakeDependencyResolver cachedResolver;
 
-	private File baseDirFile = JakeUtilsFile.workingDir();
+	private Locator locator = Locator.ofDir(JakeUtilsFile.workingDir());
 
 	private final Date buildTime = JakeUtilsTime.now();
+
+	// A cache for artifact publisher
+	private JakePublisher cachedPublisher;
 
 	@JakeOption({"Maven or Ivy repositories to download dependency artifacts.",
 	"Prefix the Url with 'ivy:' if it is an Ivy repostory."})
@@ -88,7 +92,7 @@ public class JakeBuild {
 	 * Defines this project base directory.
 	 */
 	public void setBaseDir(File baseDir) {
-		this.baseDirFile = baseDir;
+		this.locator = Locator.ofDir(baseDir);
 	}
 
 	/**
@@ -186,8 +190,8 @@ public class JakeBuild {
 	 * Returns the resolved dependencies for the given scope. Depending on the passed
 	 * options, it may be augmented with extra-libs mentioned in options <code>extraXxxxPath</code>.
 	 */
-	public final JakePath depsFor(JakeScope scope) {
-		return dependencyResolver().get(scope);
+	public final JakePath depsFor(JakeScope ...scopes) {
+		return dependencyResolver().get(scopes);
 	}
 
 	/**
@@ -237,6 +241,13 @@ public class JakeBuild {
 		return JakeScopeMapping.of(Project.JAKE_SCOPE).to("default(*)");
 	}
 
+	protected JakePublisher publisher() {
+		if (cachedPublisher == null) {
+			cachedPublisher = JakePublisher.usingIvy(jakeIvy());
+		}
+		return cachedPublisher;
+	}
+
 	protected JakeDependencies extraCommandLineDeps() {
 		return JakeDependencies.builder()
 				.usingDefaultScopes(Project.JAKE_SCOPE).onFiles(toPath(extraJakePath))
@@ -257,7 +268,7 @@ public class JakeBuild {
 	 * resolved from this directory.
 	 */
 	public final JakeDir baseDir() {
-		return JakeDir.of(baseDirFile);
+		return JakeDir.of(locator.baseDir());
 	}
 
 	/**
@@ -311,8 +322,43 @@ public class JakeBuild {
 
 	public final <T extends JakeBuild> T relativeProject(Class<T> clazz, String relativePath) {
 		final T build = JakeUtilsReflect.newInstance(clazz);
-		build.setBaseDir(this.baseDir(relativePath));
+		build.locator = Locator.ofProjectRealive(this, relativePath);
 		return build;
 	}
+
+	private static class Locator {
+
+		private final File dir;
+
+		private final JakeBuild relateProject;
+
+		private final String relativePath;
+
+		private Locator(File dir, JakeBuild relateProject, String relativePath) {
+			super();
+			this.dir = dir;
+			this.relateProject = relateProject;
+			this.relativePath = relativePath;
+		}
+
+		public static Locator ofDir(File dir) {
+			return new Locator(dir, null, null);
+		}
+
+		public static Locator ofProjectRealive(JakeBuild build, String relativePath) {
+			return new Locator(null, build, relativePath);
+		}
+
+		public File baseDir() {
+			if (dir != null) {
+				return dir;
+			}
+			return this.relateProject.baseDir(relativePath);
+		}
+
+	}
+
+
+
 
 }

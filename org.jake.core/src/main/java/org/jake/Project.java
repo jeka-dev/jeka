@@ -81,7 +81,7 @@ class Project {
 
 	@SuppressWarnings("unchecked")
 	private JakePath reolveBuildPath(BootstrapOptions bootstrapOptions) {
-		displayHead("Compiling build classes for project : " + projectRelativePath);
+		JakeLog.displayHead("Compiling build classes for project : " + projectRelativePath);
 		JakeLog.start("Parsing source code for gathering imports");
 		final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir, JakeDir.of(buildSourceDir()).include("**/*.java"));
 		JakeLog.done();
@@ -133,7 +133,7 @@ class Project {
 	public boolean executeBuild(File projectFolder, JakeClassLoader classLoader,
 			Iterable<MethodInvocation> methods, Iterable<JakePluginSetup> setups) {
 		final long start = System.nanoTime();
-		displayHead("Building project : " + projectRelativePath);
+		JakeLog.displayHead("Building project : " + projectRelativePath);
 		final Class<? extends JakeBuild> buildClass = this.findBuildClass(classLoader);
 		final boolean result = this.launch(projectFolder, buildClass, methods, setups, classLoader);
 
@@ -274,13 +274,7 @@ class Project {
 	}
 
 
-	protected static void displayHead(String intro) {
-		final String pattern = "-";
-		JakeLog.info(JakeUtilsString.repeat(pattern, intro.length() ));
-		JakeLog.info(intro);
-		JakeLog.info(JakeUtilsString.repeat(pattern, intro.length() ));
-		JakeLog.nextLine();
-	}
+
 
 
 

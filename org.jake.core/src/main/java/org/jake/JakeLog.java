@@ -4,6 +4,7 @@ import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import org.jake.utils.JakeUtilsString;
 import org.jake.utils.JakeUtilsTime;
 
 /**
@@ -233,6 +234,14 @@ public class JakeLog {
 			}
 		}
 
+	}
+
+	public static void displayHead(String intro) {
+		final String pattern = "-";
+		JakeLog.info(JakeUtilsString.repeat(pattern, intro.length() ));
+		JakeLog.info(intro);
+		JakeLog.info(JakeUtilsString.repeat(pattern, intro.length() ));
+		JakeLog.nextLine();
 	}
 
 

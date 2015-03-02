@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jake.JakeBuild;
+import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsString;
 
@@ -102,15 +103,24 @@ public abstract class JakeDependency {
 			return files;
 		}
 
-		public boolean allFilesExist() {
-			for (final File file : this.files) {
-				if (!file.exists()) {
-					return false;
-				}
-			}
-			return true;
+		public boolean hasMissingFilesOrEmptyDirs() {
+			return !missingFilesOrEmptyDirs().isEmpty();
 		}
 
+		public Set<File> missingFilesOrEmptyDirs() {
+			final Set<File> files = new HashSet<File>();
+			for (final File file : this.files) {
+				if (!file.exists() || (file.isDirectory() && JakeUtilsFile.filesOf(file, true).isEmpty())) {
+					files.add(file);
+				}
+			}
+			return files;
+		}
+
+		@Override
+		public String toString() {
+			return projectBuild.projectName() + " (" + this.projectBuild.getClass().getName() + ")";
+		}
 
 	}
 

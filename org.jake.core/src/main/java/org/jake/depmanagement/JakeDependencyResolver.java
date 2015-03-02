@@ -48,6 +48,10 @@ public final class JakeDependencyResolver  {
 
 		// Add local, non-managed dependencies
 		result.addAll(this.dependencies.fileDependencies(scope));
+
+		// Add project dependencies
+		result.addAll(this.dependencies.projectDependencies(scope));
+
 		if (jakeIvy == null) {
 			return result;
 		}
@@ -67,7 +71,15 @@ public final class JakeDependencyResolver  {
 		return this.dependencies.moduleScopes();
 	}
 
-	public final JakePath get(JakeScope scope) {
+	public final JakePath get(JakeScope ...scopes) {
+		JakePath path = JakePath.of();
+		for (final JakeScope scope : scopes) {
+			path = path.and(getSingleScope(scope));
+		}
+		return path;
+	}
+
+	private final JakePath getSingleScope(JakeScope scope) {
 		final JakePath cachedResult = this.cachedDeps.get(scope);
 		if (cachedResult != null) {
 			return cachedResult;

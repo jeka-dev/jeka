@@ -13,10 +13,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jake.JakeBuild;
+import org.jake.JakeLog;
 import org.jake.depmanagement.JakeDependency.JakeFilesDependency;
 import org.jake.depmanagement.JakeDependency.JakeProjectDependency;
 import org.jake.depmanagement.JakeScopedDependency.ScopeType;
 import org.jake.utils.JakeUtilsIterable;
+import org.jake.utils.JakeUtilsTime;
 
 /**
  * A set of {@link JakeScopedDependency} generally standing for the entire dependencies of a project/module.
@@ -273,6 +275,30 @@ public class JakeDependencies implements Iterable<JakeScopedDependency> {
 					&& scopedDependency.dependency() instanceof JakeFilesDependency) {
 				final JakeFilesDependency fileDeps = (JakeFilesDependency) scopedDependency.dependency();
 				set.addAll(fileDeps.files());
+			}
+		}
+		return new LinkedList<File>(set);
+	}
+
+	public List<File> projectDependencies(JakeScope jakeScope) {
+		final LinkedHashSet<File> set = new LinkedHashSet<File>();
+		for (final JakeScopedDependency scopedDependency : this.dependencies) {
+			if (scopedDependency.isInvolvedIn(jakeScope)
+					&& scopedDependency.dependency() instanceof JakeProjectDependency) {
+				final JakeProjectDependency projectDeps = (JakeProjectDependency) scopedDependency.dependency();
+				if (projectDeps.hasMissingFilesOrEmptyDirs()) {
+					JakeLog.shift(1);
+					JakeLog.displayHead("Building depending project " + projectDeps);
+					final long time = System.nanoTime();
+					projectDeps.projectBuild().base();
+					JakeLog.displayHead("Project " + projectDeps + " built in " + JakeUtilsTime.durationInSeconds(time) +" seconds.");
+					JakeLog.shift(-1);
+				}
+				final Set<File> missingFiles = projectDeps.missingFilesOrEmptyDirs();
+				if (!missingFiles.isEmpty()) {
+					throw new IllegalStateException("Project " + projectDeps + " does not generate " + missingFiles);
+				}
+				set.addAll(projectDeps.files());
 			}
 		}
 		return new LinkedList<File>(set);

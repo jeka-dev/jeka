@@ -26,7 +26,6 @@ import org.jake.java.testing.junit.JakeUnit;
 import org.jake.java.testing.junit.JakeUnit.JunitReportDetail;
 import org.jake.publishing.JakeIvyPublication;
 import org.jake.publishing.JakeMavenPublication;
-import org.jake.publishing.JakePublisher;
 import org.jake.utils.JakeUtilsIterable;
 
 /**
@@ -101,7 +100,7 @@ public class JakeJavaBuild extends JakeBuild {
 	private String extraTestPath;
 
 	@JakeOption("Turn it on to skip tests.")
-	protected boolean skipTests;
+	public boolean skipTests;
 
 	public boolean skipTests() {
 		return skipTests;
@@ -111,12 +110,7 @@ public class JakeJavaBuild extends JakeBuild {
 		"BASIC mention the total time elapsed along detail on failed tests.",
 		"FULL detailed report displays additionally the time to run each tests.",
 	"Example : -junitReportDetail=NONE"})
-	protected JunitReportDetail junitReportDetail = JunitReportDetail.BASIC;
-
-
-
-	// A cache for artifact publisher
-	private JakePublisher cachedPublisher;
+	public JunitReportDetail junitReportDetail = JunitReportDetail.BASIC;
 
 	@Override
 	protected void setPlugins(Iterable<?> plugins) {
@@ -254,7 +248,7 @@ public class JakeJavaBuild extends JakeBuild {
 	public JakeJavaCompiler productionCompiler() {
 		return JakeJavaCompiler.ofOutput(classDir())
 				.andSources(sourceDirs())
-				.withClasspath(depsFor(COMPILE).and(depsFor(PROVIDED)))
+				.withClasspath(depsFor(COMPILE, PROVIDED))
 				.withSourceVersion(this.sourceJavaVersion())
 				.withTargetVersion(this.targetJavaVersion());
 	}
@@ -262,7 +256,7 @@ public class JakeJavaBuild extends JakeBuild {
 	public JakeJavaCompiler unitTestCompiler() {
 		return JakeJavaCompiler.ofOutput(testClassDir())
 				.andSources(testSourceDirs())
-				.withClasspath(this.depsFor(TEST).andHead(classDir()))
+				.withClasspath(this.depsFor(TEST, PROVIDED).andHead(classDir()))
 				.withSourceVersion(this.sourceJavaVersion())
 				.withTargetVersion(this.targetJavaVersion());
 	}
@@ -272,7 +266,7 @@ public class JakeJavaBuild extends JakeBuild {
 	}
 
 	protected JakeUnit createUnitTester() {
-		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.depsFor(TEST));
+		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.depsFor(TEST, PROVIDED));
 		final File junitReport = new File(this.testReportDir(), "junit");
 		return JakeUnit.of(classpath)
 				.withReportDir(junitReport)
@@ -284,7 +278,7 @@ public class JakeJavaBuild extends JakeBuild {
 		final File outputDir = ouputDir(projectName() + "-javadoc");
 		final File zip =  ouputDir(projectName() + "-javadoc.zip");
 		return JakeJavadocMaker.of(sourceDirs(), outputDir, zip)
-				.withClasspath(depsFor(COMPILE).and(depsFor(PROVIDED)));
+				.withClasspath(depsFor(COMPILE, PROVIDED));
 	}
 
 	public final JakeJavaPacker packer() {
@@ -364,12 +358,7 @@ public class JakeJavaBuild extends JakeBuild {
 
 
 
-	protected JakePublisher publisher() {
-		if (cachedPublisher == null) {
-			cachedPublisher = JakePublisher.usingIvy(jakeIvy());
-		}
-		return cachedPublisher;
-	}
+
 
 
 
@@ -475,6 +464,7 @@ public class JakeJavaBuild extends JakeBuild {
 				.usingDefaultScopes(RUNTIME).on(JakeDependency.of(libDir.include("*.jar", "runtime/*.jar")))
 				.usingDefaultScopes(TEST).on(JakeDependency.of(libDir.include("*.jar", "test/*.jar"))).build();
 	}
+
 
 
 }
