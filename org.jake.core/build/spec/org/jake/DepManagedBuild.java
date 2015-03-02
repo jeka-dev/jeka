@@ -28,12 +28,12 @@ public class DepManagedBuild extends Build {
 
 	@Override
 	protected JakeMavenPublication mavenPublication() {
-		return super.mavenPublication().and(distripZipFile, DISTRIB.name());
+		return super.mavenPublication().and(distripZipFile(), DISTRIB.name());
 	}
 
 	@Override
 	protected JakeIvyPublication ivyPublication() {
-		return super.ivyPublication().and(distripZipFile, "distrib", DISTRIB);
+		return super.ivyPublication().and(distripZipFile(), "distrib", DISTRIB);
 	}
 
 	@Override

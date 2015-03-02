@@ -45,7 +45,7 @@ public class JakeJavaPacker {
         return new JakeJavaPacker(buildJava);
     }
 
-    public JakeJavaPacker withFatFar(boolean fatJar) {
+    public JakeJavaPacker withFatJar(boolean fatJar) {
         return new JakeJavaPacker(this.build, includeVersion, fatJar, compressionLevel, fullName, checkSum);
     }
 

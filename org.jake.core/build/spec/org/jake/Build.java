@@ -14,15 +14,14 @@ import org.jake.utils.JakeUtilsFile;
  */
 public class Build extends JakeJavaBuild {
 
-	public final File distripZipFile = ouputDir("jake-distrib.zip");
+	public File distripZipFile() {
+		return ouputDir("jake-distrib.zip");
+	}
 
 	// Just to run directly the whole build bypassing the Jake bootstrap mechanism.
 	// Was necessary in first place to build Jake with itself.
 	public static void main(String[] args) {
-		JakeOptions.forceVerbose(true);
-		final Build build = new Build();
-		build.base();
-		build.doc();
+		new Build().base();
 	}
 
 	// Include a time stamped version file as resource.
@@ -33,7 +32,7 @@ public class Build extends JakeJavaBuild {
 
 	@Override
 	protected JakeJavaPacker createPacker() {
-		return super.createPacker().withFatFar(true);
+		return super.createPacker().withFatJar(true);
 	}
 
 
@@ -49,14 +48,14 @@ public class Build extends JakeJavaBuild {
 		final File distribDir = ouputDir("jake-distrib");
 		//final File distripZipFile = ouputDir("jake-distrib.zip");
 
-		JakeLog.start("Creating distrib " + distripZipFile.getPath());
+		JakeLog.start("Creating distrib " + distripZipFile().getPath());
 		JakeUtilsFile.copyDir(baseDir("src/main/dist"), distribDir, null, true);
 		final JakeJavaPacker jarPacker = packer();
 		JakeUtilsFile.copyFile(jarPacker.jarFile(), new File(distribDir,"jake.jar"));
 		JakeUtilsFile.copyFile(jarPacker.jarSourceFile(), new File(distribDir,"jake-sources.jar"));
 		JakeDir.of(this.baseDir("build/libs/compile")).include("**/*.jar").copyTo(new File(distribDir, "libs/required"));
 		JakeDir.of(this.baseDir("build/libs-sources")).copyTo(new File(distribDir, "libs/sources"));
-		JakeUtilsFile.zipDir(distripZipFile, Deflater.BEST_COMPRESSION, distribDir);
+		JakeUtilsFile.zipDir(distripZipFile(), Deflater.BEST_COMPRESSION, distribDir);
 		JakeLog.done();
 	}
 
