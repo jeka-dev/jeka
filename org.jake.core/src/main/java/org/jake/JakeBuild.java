@@ -79,6 +79,9 @@ public class JakeBuild {
 	@JakeOption("Password to connect to the publish release repository (if needed).")
 	private final String publishRepoReleasePassword = null;
 
+	@JakeOption("Version to inject to this build. If 'null' or blank than the version will be the one returned by #defaultVersion()" )
+	private String forcedVersion = null;
+
 	@JakeOption({
 		"Mention if you want to add extra lib in your build path. It can be absolute or relative to the project base dir.",
 		"These libs will be added to the build path cto compile and run Jake scripts.",
@@ -113,10 +116,21 @@ public class JakeBuild {
 	}
 
 	/**
+	 * The current version for this project. This may be injected using the 'version' option.
+	 * If not, it takes the result from {@link #defaultVersion()}
+	 */
+	public final JakeVersion version() {
+		if (JakeUtilsString.isBlank(this.forcedVersion)) {
+			return defaultVersion();
+		}
+		return JakeVersion.named(forcedVersion);
+	}
+
+	/**
 	 * The current version for this project. Might look like "0.6.3", "0.1-SNAPSHOT" or "20141220170532".
 	 * Default is the time stamp (formatted as 'yyyyMMdd-HHmmss') this build has been instantiated.
 	 */
-	public JakeVersion version() {
+	public JakeVersion defaultVersion() {
 		return JakeVersion.named(JakeUtilsTime.timestampSec(buildTime));
 	}
 
@@ -323,6 +337,7 @@ public class JakeBuild {
 	public final <T extends JakeBuild> T relativeProject(Class<T> clazz, String relativePath) {
 		final T build = JakeUtilsReflect.newInstance(clazz);
 		build.locator = Locator.ofProjectRealive(this, relativePath);
+		build.forcedVersion = this.version().name();
 		return build;
 	}
 
@@ -357,8 +372,6 @@ public class JakeBuild {
 		}
 
 	}
-
-
 
 
 }

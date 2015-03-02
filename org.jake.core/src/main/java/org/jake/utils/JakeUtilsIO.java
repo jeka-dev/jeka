@@ -330,6 +330,20 @@ public final class JakeUtilsIO {
 		}
 	}
 
+	public static void copyUrlToFile(URL url, File file) {
+		final InputStream inputStream;
+		final FileOutputStream fileOutputStream;
+		try {
+			inputStream = url.openStream();
+			fileOutputStream = new FileOutputStream(file);
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+		copy(inputStream, fileOutputStream);
+		closeQuietly(inputStream);
+		closeQuietly(fileOutputStream);
+	}
+
 	public static void copy(InputStream in, OutputStream out) {
 		final byte[] buf = new byte[1024];
 		int len;

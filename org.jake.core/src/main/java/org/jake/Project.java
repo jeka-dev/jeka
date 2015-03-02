@@ -273,11 +273,6 @@ class Project {
 		return true;
 	}
 
-
-
-
-
-
 	private JakeJavaCompiler baseBuildCompiler() {
 		final JakeDir buildSource = JakeDir.of(buildSourceDir());
 		if (!buildBinDir().exists()) {

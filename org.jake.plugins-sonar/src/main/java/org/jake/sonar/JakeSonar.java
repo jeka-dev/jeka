@@ -1,6 +1,7 @@
 package org.jake.sonar;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import org.jake.depmanagement.JakeVersion;
 import org.jake.java.JakeJavaProcess;
 import org.jake.utils.JakeUtilsAssert;
 import org.jake.utils.JakeUtilsFile;
+import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsObject;
 
 /**
@@ -32,9 +34,9 @@ import org.jake.utils.JakeUtilsObject;
  */
 public final class JakeSonar {
 
-    private static final String RUNNER_JAR_NAME = "sonar-runner.jar";
+    private static final String RUNNER_JAR_NAME_24 = "sonar-runner-2.4.jar";
 
-    private static final String RUNNER_LOCAL_PATH = "build/libs/sonar-runner/" + RUNNER_JAR_NAME;
+    private static final String RUNNER_LOCAL_PATH = "build/temp/" + RUNNER_JAR_NAME_24;
 
     private static final String SONAR_PREFIX = ".sonar";
     public static final String PROJECT_KEY = "projectKey";
@@ -171,14 +173,27 @@ public final class JakeSonar {
     }
 
     private File jarRunner() {
-        final File localJar = new File(projectDir(), RUNNER_LOCAL_PATH);
-        final File sharedJar = new File(JakeLocator.optionalLibsDir(), RUNNER_JAR_NAME);
-        final File jar = localJar.exists() ? localJar : sharedJar;
-        if (!jar.exists()) {
-            throw new IllegalStateException("No sonar-runner.jar found neither in " + localJar.getAbsolutePath()
-                    + " nor in " + sharedJar.getAbsolutePath() );
-        }
-        return jar;
+    	final File globalJar = new File(JakeUtilsFile.tempDir(), "/jake/" + RUNNER_JAR_NAME_24);
+    	if (!globalJar.exists()) {
+    		try {
+    			return createRunnerJar(JakeUtilsFile.tempDir()); 
+    		} catch (Exception e) {
+    			return createRunnerJar(new File(projectDir(), RUNNER_LOCAL_PATH));
+    		}
+    	} 
+    	return globalJar;
+    }
+    
+    private static File createRunnerJar(File parent) {
+    	parent.mkdirs();
+		File file = new File(parent, RUNNER_JAR_NAME_24);
+		try {
+			file.createNewFile();
+		} catch (IOException e) {
+			throw new RuntimeException();
+		}
+		JakeUtilsIO.copyUrlToFile(JakeSonar.class.getResource(RUNNER_JAR_NAME_24), file);
+		return file;
     }
 
     private Map<String, String> andParams(String key, String value) {
