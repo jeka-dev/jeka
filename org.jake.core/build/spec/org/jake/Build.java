@@ -59,4 +59,17 @@ public class Build extends JakeJavaBuild {
 		JakeLog.done();
 	}
 
+	private void distrib2() {
+		final JakeDir distribDir = baseDir().sub("build/output/jake-distrib");
+		final File distripZipFile = ouputDir("jake-distrib.zip");
+		JakeLog.start("Creating distrib " + distripZipFile().getPath());
+		final JakeJavaPacker packer = packer();
+		distribDir.copyDirContent(baseDir("src/main/dist"));
+		distribDir.copyFiles(packer.jarFile(), packer.jarSourceFile());
+		distribDir.sub("libs/required").copyDirContent(baseDir("build/libs/compile"));
+		distribDir.sub("build/libs-sources").copyDirContent(baseDir("libs/sources"));
+		distribDir.zip().to(distripZipFile, Deflater.BEST_COMPRESSION);
+		JakeLog.done();
+	}
+
 }

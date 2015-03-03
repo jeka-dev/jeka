@@ -1,4 +1,4 @@
-package org.jake.sonar;
+package org.jake.plugins.sonar;
 
 import org.jake.JakeJavaCompiler;
 import org.jake.depmanagement.JakeDependencies;

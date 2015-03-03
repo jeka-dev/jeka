@@ -1,4 +1,4 @@
-package org.jake.sonar;
+package org.jake.plugins.sonar;
 
 import java.io.File;
 import java.io.IOException;

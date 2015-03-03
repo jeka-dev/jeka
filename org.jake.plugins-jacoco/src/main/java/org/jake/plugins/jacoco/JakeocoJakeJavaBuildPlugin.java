@@ -1,4 +1,4 @@
-package org.jake.java.testing.jacoco;
+package org.jake.plugins.jacoco;
 
 import java.io.File;
 
