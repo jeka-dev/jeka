@@ -67,7 +67,7 @@ public class Build extends JakeJavaBuild {
 		distribDir.copyDirContent(baseDir("src/main/dist"));
 		distribDir.copyFiles(packer.jarFile(), packer.jarSourceFile());
 		distribDir.sub("libs/required").copyDirContent(baseDir("build/libs/compile"));
-		distribDir.sub("build/libs-sources").copyDirContent(baseDir("libs/sources"));
+		distribDir.sub("build/libs-sources").copyDirContent(baseDir("build/libs/sources"));
 		distribDir.zip().to(distripZipFile, Deflater.BEST_COMPRESSION);
 		JakeLog.done();
 	}
