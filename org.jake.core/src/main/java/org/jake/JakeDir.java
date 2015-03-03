@@ -117,19 +117,28 @@ public final class JakeDir implements Iterable<File> {
 
 	/**
 	 * Copies the content of the specified directory in the root of the root of this directory.
-	 * Only the content that matches the filter of this directory is copied.
+	 * If specified directory does not exist then nothing happen.
 	 */
 	public JakeDir copyDirContent(File dirToCopyContent) {
-		JakeUtilsFile.copyDir(dirToCopyContent, this.root, this.filter.toFileFilter(root), true);
+		createIfNotExist();
+		if (!dirToCopyContent.exists()) {
+			return this;
+		}
+		JakeUtilsFile.copyDir(dirToCopyContent, this.root, null, true);
 		return this;
 	}
 
 	/**
 	 * Copies the specified files at the root of this directory.
+	 * Folder and unexisting files are ignored.
 	 */
 	public JakeDir copyFiles(File ... filesToCopy) {
+		createIfNotExist();
 		for(final File file : filesToCopy ) {
-			JakeUtilsFile.copyFile(file, this.file(file.getName()));
+			if (file.exists() && !file.isDirectory()) {
+				JakeUtilsFile.copyFile(file, this.file(file.getName()));
+			}
+
 		}
 		return this;
 	}
