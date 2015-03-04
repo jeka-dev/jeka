@@ -12,9 +12,16 @@ import org.jake.utils.JakeUtilsReflect;
  */
 public final class JakeBuildPlugins {
 
+	private final JakeBuild holder;
+
 	private final Map<Class<? extends JakeBuildPlugin>, JakeBuildPlugin> configuredPlugins = new LinkedHashMap<Class<? extends JakeBuildPlugin>, JakeBuildPlugin>();
 
 	private final Map<Class<? extends JakeBuildPlugin>, JakeBuildPlugin> activatedPlugins = new LinkedHashMap<Class<? extends JakeBuildPlugin>, JakeBuildPlugin>();
+
+	public JakeBuildPlugins(JakeBuild holder) {
+		super();
+		this.holder = holder;
+	}
 
 	public void addhActivated(Class<? extends JakeBuildPlugin> exactPluginClass, Map<String, String> options) {
 		final JakeBuildPlugin plugin;
@@ -30,10 +37,12 @@ public final class JakeBuildPlugins {
 	}
 
 	public void addActivated(JakeBuildPlugin plugin) {
+		plugin.configure(holder);
 		activatedPlugins.put(plugin.getClass(),  plugin);
 	}
 
 	public void addConfigured(JakeBuildPlugin plugin) {
+		plugin.configure(holder);
 		configuredPlugins.put(plugin.getClass(), plugin);
 	}
 

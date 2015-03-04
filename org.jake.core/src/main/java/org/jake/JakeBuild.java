@@ -48,7 +48,7 @@ public class JakeBuild {
 	// A cache for artifact publisher
 	private JakePublisher cachedPublisher;
 
-	protected final JakeBuildPlugins plugins = new JakeBuildPlugins();
+	protected final JakeBuildPlugins plugins = new JakeBuildPlugins(this);
 
 	@JakeOption({"Maven or Ivy repositories to download dependency artifacts.",
 	"Prefix the Url with 'ivy:' if it is an Ivy repostory."})
