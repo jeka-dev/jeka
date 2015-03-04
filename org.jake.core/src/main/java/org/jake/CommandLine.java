@@ -3,11 +3,12 @@ package org.jake;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.jake.JakePlugins.JakePluginSetup;
 import org.jake.utils.JakeUtilsAssert;
 import org.jake.utils.JakeUtilsString;
 
@@ -81,7 +82,7 @@ class CommandLine {
 	}
 
 	private static Collection<JakePluginSetup> extractPluginSetup(String args[]) {
-		final Map<String, JakePluginSetup> setups = new HashMap<String, JakePlugins.JakePluginSetup>();
+		final Map<String, JakePluginSetup> setups = new HashMap<String, JakePluginSetup>();
 		for (final String word : args) {
 			if (MethodInvocation.isPluginMethodInvokation(word)) {
 				final String pluginName = JakeUtilsString.substringBeforeFirst(word, "#");
@@ -167,6 +168,51 @@ class CommandLine {
 		}
 
 
+	}
+
+	public static class JakePluginSetup {
+
+		public static Set<String> names(Iterable<JakePluginSetup> setups) {
+			final Set<String> result = new HashSet<String>();
+			for (final JakePluginSetup setup : setups) {
+				result.add(setup.pluginName);
+			}
+			return result;
+		}
+
+		public static JakePluginSetup findOrFail(String name, Iterable<JakePluginSetup> setups) {
+			for (final JakePluginSetup setup : setups) {
+				if (name.equals(setup.pluginName)) {
+					return setup;
+				}
+			}
+			throw new IllegalArgumentException("No setup found with name " + name +" found in " + setups);
+		}
+
+		public static JakePluginSetup of(String name, Map<String, String> options) {
+			return new JakePluginSetup(name, new HashMap<String, String>(options));
+		}
+
+		@SuppressWarnings("unchecked")
+		public static JakePluginSetup of(String name) {
+			return new JakePluginSetup(name, Collections.EMPTY_MAP);
+		}
+
+		public final String pluginName;
+
+		public final Map<String, String> options;
+
+		private JakePluginSetup(String pluginName, Map<String, String> options) {
+			super();
+			this.pluginName = pluginName;
+			this.options = Collections.unmodifiableMap(options);
+		}
+
+		public JakePluginSetup with(String key, String value) {
+			final Map<String, String> map = new HashMap<String, String>(options);
+			map.put(key, value);
+			return new JakePluginSetup(pluginName, map);
+		}
 	}
 
 }

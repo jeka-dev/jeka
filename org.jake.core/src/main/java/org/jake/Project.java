@@ -5,13 +5,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jake.CommandLine.JakePluginSetup;
 import org.jake.CommandLine.MethodInvocation;
-import org.jake.JakePlugins.JakePluginSetup;
+import org.jake.PluginDictionnary.JakePluginDescription;
 import org.jake.depmanagement.JakeArtifact;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeRepo;
@@ -131,7 +134,7 @@ class Project {
 
 
 	public boolean executeBuild(File projectFolder, JakeClassLoader classLoader,
-			Iterable<MethodInvocation> methods, Iterable<JakePluginSetup> setups) {
+			Iterable<MethodInvocation> methods, Iterable<CommandLine.JakePluginSetup> setups) {
 		final long start = System.nanoTime();
 		JakeLog.displayHead("Building project : " + projectRelativePath);
 		final Class<? extends JakeBuild> buildClass = this.findBuildClass(classLoader);
@@ -205,7 +208,7 @@ class Project {
 		}
 
 		build.setBaseDir(projectFolder);
-		final Map<String, Object> pluginMap = JakePlugins.instantiatePlugins(build.pluginTemplateClasses(), setups);
+		final Map<String, Object> pluginMap = instantiatePlugins(build.pluginTemplateClasses(), setups);
 		final List<Object> plugins = new LinkedList<Object>(pluginMap.values());
 		build.setPlugins(plugins);
 		for (final Object plugin : plugins) {
@@ -271,6 +274,29 @@ class Project {
 			JakeLog.nextLine();
 		}
 		return true;
+	}
+
+	private static Map<String, Object> instantiatePlugins(Iterable<Class<Object>> templateClasses,
+			Iterable<JakePluginSetup> setups) {
+		final Map<String, Object> result = new LinkedHashMap<String, Object>();
+		final Set<String> names = JakePluginSetup.names(setups);
+		final Set<String> unmatchingNames = new HashSet<String>(names);
+		for (final Class<Object> templateClass : templateClasses) {
+			final PluginDictionnary<Object> plugins = PluginDictionnary.of(templateClass);
+			final Map<String, JakePluginDescription<Object>> pluginDescriptions = plugins.loadAllByNames(names);
+			unmatchingNames.removeAll(pluginDescriptions.keySet());
+			for (final String name : pluginDescriptions.keySet()) {
+				final JakePluginDescription<Object> desc = pluginDescriptions.get(name);
+				final Object plugin = JakeUtilsReflect.newInstance(desc.pluginClass());
+				final JakePluginSetup setup = JakePluginSetup.findOrFail(name, setups);
+				JakeOptions.populateFields(plugin, setup.options);
+				result.put(name, plugin);
+			}
+		}
+		if (!unmatchingNames.isEmpty()) {
+			JakeLog.warn("No plugins found with name : " + unmatchingNames);
+		}
+		return result;
 	}
 
 	private JakeJavaCompiler baseBuildCompiler() {

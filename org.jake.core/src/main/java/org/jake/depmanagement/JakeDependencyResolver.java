@@ -63,7 +63,8 @@ public final class JakeDependencyResolver  {
 		} else {
 			artifacts = jakeIvy.resolve(dependencies, scope, parameters);
 		}
-		return JakeArtifact.localFiles(artifacts);
+		result.addAll(JakeArtifact.localFiles(artifacts));
+		return result;
 	}
 
 

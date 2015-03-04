@@ -1,8 +1,6 @@
 package org.jake.java.build;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -64,16 +62,12 @@ public class JakeJavaBuild extends JakeBuild {
 			.and(TEST).to("archives(master)", TEST.name());
 
 
-
 	/**
 	 * Filter to excludes everything in a java source directory which are not resources.
 	 */
 	protected static final JakeFileFilter RESOURCE_FILTER = JakeFileFilter
 			.exclude("**/*.java").andExclude("**/package.html")
 			.andExclude("**/doc-files");
-
-
-	private List<JakeJavaBuildPlugin> plugins = Collections.emptyList();
 
 	@JakeOption({
 		"Mention if you want to add extra lib in your 'compile' scope but not in your 'runtime' scope. It can be absolute or relative to the project base dir.",
@@ -113,25 +107,9 @@ public class JakeJavaBuild extends JakeBuild {
 	public JunitReportDetail junitReportDetail = JunitReportDetail.BASIC;
 
 	@Override
-	protected void setPlugins(Iterable<?> plugins) {
-		this.setPlugins(JakeUtilsIterable.toArrayFromNonGeneric(plugins, JakeJavaBuildPlugin.class));
-	}
-
-	@Override
 	protected List<Class<Object>> pluginTemplateClasses() {
 		return JakeUtilsIterable.listOfGeneric(JakeJavaBuildPlugin.class);
 	}
-
-	/**
-	 * Allow to add plugins to this build programatically.
-	 */
-	public synchronized void setPlugins(JakeJavaBuildPlugin ...plugins) {
-		this.plugins = Arrays.asList(plugins);
-		for (final JakeJavaBuildPlugin javaBuildPlugin : this.plugins) {
-			javaBuildPlugin.configure(this);
-		}
-	}
-
 
 	// --------------------------- Project settings -----------------------
 
@@ -262,7 +240,7 @@ public class JakeJavaBuild extends JakeBuild {
 	}
 
 	public final JakeUnit unitTester() {
-		return JakeJavaBuildPlugin.apply(plugins, createUnitTester());
+		return JakeJavaBuildPlugin.apply(plugins.get(JakeJavaBuildPlugin.class), createUnitTester());
 	}
 
 	protected JakeUnit createUnitTester() {
@@ -282,7 +260,7 @@ public class JakeJavaBuild extends JakeBuild {
 	}
 
 	public final JakeJavaPacker packer() {
-		return JakeJavaBuildPlugin.apply(plugins, createPacker());
+		return JakeJavaBuildPlugin.apply(plugins.get(JakeJavaBuildPlugin.class), createPacker());
 	}
 
 	protected JakeJavaPacker createPacker() {
@@ -322,12 +300,7 @@ public class JakeJavaBuild extends JakeBuild {
 		javadocMaker().process();
 	}
 
-	@JakeDoc("Run checks to verify the package is valid and meets quality criteria.")
-	public void verify() {
-		for (final JakeJavaBuildPlugin buildPlugin : this.plugins) {
-			buildPlugin.verify();
-		}
-	}
+
 
 	@JakeDoc({	"Create many jar files containing respectively binaries, sources, test binaries and test sources.",
 	"The jar containing the binary is the one that will be used as a depe,dence for other project."})
@@ -464,7 +437,5 @@ public class JakeJavaBuild extends JakeBuild {
 				.usingDefaultScopes(RUNTIME).on(JakeDependency.of(libDir.include("*.jar", "runtime/*.jar")))
 				.usingDefaultScopes(TEST).on(JakeDependency.of(libDir.include("*.jar", "test/*.jar"))).build();
 	}
-
-
 
 }

@@ -48,9 +48,11 @@ public class JakeBuild {
 	// A cache for artifact publisher
 	private JakePublisher cachedPublisher;
 
+	protected final JakeBuildPlugins plugins = new JakeBuildPlugins();
+
 	@JakeOption({"Maven or Ivy repositories to download dependency artifacts.",
 	"Prefix the Url with 'ivy:' if it is an Ivy repostory."})
-	private final String downloadRepoUrl = MavenRepository.MAVEN_CENTRAL_URL.toString();
+	protected String downloadRepoUrl = MavenRepository.MAVEN_CENTRAL_URL.toString();
 
 	@JakeOption({"Usename to connect to the download repository (if needed).",
 	"Null or blank means that the upload repository will be accessed in an anonymous way."})
@@ -322,6 +324,11 @@ public class JakeBuild {
 	@JakeDoc("Conventional method standing for the default operations to perform.")
 	public void base() {
 		clean();
+	}
+
+	@JakeDoc("Run checks to verify the package is valid and meets quality criteria.")
+	public void verify() {
+		JakeBuildPlugin.applyVerify(this.plugins.get(JakeBuildPlugin.class));
 	}
 
 	@JakeDoc("Display all available methods defined in this build.")

@@ -2,6 +2,7 @@ package org.jake.plugins.sonar;
 
 import java.io.File;
 
+import org.jake.JakeBuild;
 import org.jake.JakeDoc;
 import org.jake.java.build.JakeJavaBuild;
 import org.jake.java.build.JakeJavaBuildPlugin;
@@ -29,9 +30,10 @@ public class SonarJakeJavaBuildPlugin extends JakeJavaBuildPlugin {
 	
 	private JakeSonar jakeSonar;
 	
-	public void configure(JakeJavaBuild build) {
-		build.junitReportDetail = JunitReportDetail.FULL;
-	    this.jakeSonar = configureSonarFrom(build);
+	public void configure(JakeBuild build) {
+		final JakeJavaBuild javaBuild = (JakeJavaBuild) build;
+		javaBuild.junitReportDetail = JunitReportDetail.FULL;
+	    this.jakeSonar = configureSonarFrom(javaBuild);
 	}
 	
 	@JakeDoc("Launch a Sonar analysis.")

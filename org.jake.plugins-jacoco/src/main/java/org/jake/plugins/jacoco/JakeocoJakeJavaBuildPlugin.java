@@ -2,6 +2,7 @@ package org.jake.plugins.jacoco;
 
 import java.io.File;
 
+import org.jake.JakeBuild;
 import org.jake.JakeDoc;
 import org.jake.java.build.JakeJavaBuild;
 import org.jake.java.build.JakeJavaBuildPlugin;
@@ -19,8 +20,8 @@ public class JakeocoJakeJavaBuildPlugin extends JakeJavaBuildPlugin {
 	private Enhancer enhancer;
 
 	@Override
-	public void configure(JakeJavaBuild jakeJavaBuild) {
-		this.enhancer = enhancer(jakeJavaBuild);
+	public void configure(JakeBuild jakeJavaBuild) {
+		this.enhancer = enhancer((JakeJavaBuild) jakeJavaBuild);
 	}
 
 

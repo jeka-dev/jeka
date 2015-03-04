@@ -9,7 +9,12 @@ public class JakeocoBuild extends JakeJavaBuild {
 	
 	@Override
 	protected JakeDependencies dependencies() {
-		return JakeDependencies.onProject(PROVIDED, core , core.packer().jarFile());
+		return JakeDependencies.onProject(PROVIDED, core , core.packer().jarFile())
+			.andExternal(TEST, "junit:junit:4.11");
+	}
+	
+	public static void main(String[] args) {
+		new JakeocoBuild().base();
 	}
 	
 	

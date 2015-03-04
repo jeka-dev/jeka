@@ -88,7 +88,7 @@ public class JakeDependencies implements Iterable<JakeScopedDependency> {
 
 
 	/**
-	 * Returns a clone of this object plus & {@link JakeScopedDependency}s on the specified file.
+	 * Returns a clone of this object plus {@link JakeScopedDependency}s on the specified file.
 	 */
 	public JakeDependencies andFiles(JakeScope scope, File ...files) {
 		final JakeScopedDependency scopedDependency = JakeScopedDependency.of(JakeDependency.of(files), scope);
@@ -96,10 +96,20 @@ public class JakeDependencies implements Iterable<JakeScopedDependency> {
 	}
 
 	/**
-	 * Returns a clone of this object plus & {@link JakeScopedDependency}s on the specified project.
+	 * Returns a clone of this object plus {@link JakeScopedDependency}s on the specified project.
 	 */
 	public JakeDependencies andProject(JakeScope scope, JakeBuild project, File ...files) {
 		final JakeScopedDependency scopedDependency = JakeScopedDependency.of(JakeDependency.of(project, files), scope);
+		return and(scopedDependency);
+	}
+
+	/**
+	 * Returns a clone of this object plus {@link JakeScopedDependency}s on the specified external module.
+	 * @param versionedModuleId something like "org.apache:commons:1.4"
+	 */
+	public JakeDependencies andExternal(JakeScope scope, String versionedModuleId) {
+		final JakeDependency dependency = JakeDependency.of(versionedModuleId);
+		final JakeScopedDependency scopedDependency = JakeScopedDependency.of(dependency, scope);
 		return and(scopedDependency);
 	}
 
