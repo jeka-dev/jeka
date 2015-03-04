@@ -59,7 +59,7 @@ public class JakeJavaBuild extends JakeBuild {
 			.of(COMPILE).to("archives(master)", COMPILE.name())
 			.and(PROVIDED).to("archives(master)", COMPILE.name())
 			.and(RUNTIME).to("archives(master)", RUNTIME.name())
-			.and(TEST).to("archives(master)", TEST.name());
+			.and(TEST).to("archives(master)", RUNTIME.name(), "test(master)");
 
 
 	/**

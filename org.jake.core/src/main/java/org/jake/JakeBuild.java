@@ -52,7 +52,7 @@ public class JakeBuild {
 
 	@JakeOption({"Maven or Ivy repositories to download dependency artifacts.",
 	"Prefix the Url with 'ivy:' if it is an Ivy repostory."})
-	protected String downloadRepoUrl = MavenRepository.MAVEN_CENTRAL_URL.toString();
+	private final String downloadRepoUrl = MavenRepository.MAVEN_CENTRAL_URL.toString();
 
 	@JakeOption({"Usename to connect to the download repository (if needed).",
 	"Null or blank means that the upload repository will be accessed in an anonymous way."})
