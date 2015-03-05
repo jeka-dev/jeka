@@ -39,7 +39,7 @@ public class DistribBuild extends JakeBuild {
 		
 		// add plugins to the fat jar
 		File fat = dist.file(core.packer().fatJarFile().getName());
-		JakeZipper.of().merge(ext.include("**.*.jar")).appendTo(fat);
+		JakeZipper.of().merge(ext.include("**/*.jar")).appendTo(fat);
 		
 		// pack all
 		dist.zip().to(this.ouputDir("jake-distrib.jar"));
