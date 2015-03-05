@@ -24,10 +24,16 @@ public class DistribBuild extends JakeBuild {
 	@Override
 	public void base() {
 		super.base();
+		
+		// build dependee projects
 		core.base();
 		pluginsJacoco.base();
 		pluginsSonar.base();
+		
+		// copy core distribution locally
 		JakeDir dist = JakeDir.of(this.ouputDir("dist")).copyDirContent(core.distFolder());
+		
+		// Add plugins to the distribution
 		JakeDir ext = dist.sub("libs/ext").copyFiles(pluginsSonar.packer().jarFile(), pluginsJacoco.packer().jarFile());
 		dist.sub("libs/sources").copyFiles(pluginsSonar.packer().jarSourceFile(), pluginsJacoco.packer().jarSourceFile());
 		

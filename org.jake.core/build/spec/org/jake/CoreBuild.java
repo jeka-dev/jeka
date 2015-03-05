@@ -38,10 +38,10 @@ public class CoreBuild extends JakeJavaBuild {
 	@Override
 	public void pack() {
 		super.pack();
-		distrib2();
+		distrib();
 	}
 
-	private void distrib2() {
+	private void distrib() {
 		final JakeDir distribDir = baseDir().sub("build/output/jake-distrib");
 		final File distripZipFile = ouputDir("jake-distrib.zip");
 		JakeLog.startln("Creating distrib " + distripZipFile().getPath());
