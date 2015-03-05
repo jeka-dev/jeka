@@ -77,7 +77,7 @@ public final class JakeDir implements Iterable<File> {
 	 * Returns the file matching for the the given path relative to this root directory.
 	 */
 	public File file(String relativePath) {
-		return new File(root, relativePath);
+		return JakeUtilsFile.canonicalFile(new File(root, relativePath));
 	}
 
 	/**
