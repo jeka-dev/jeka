@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.jake.depmanagement.JakeRepo;
+import org.jake.depmanagement.JakeRepo.MavenRepository;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
@@ -39,15 +41,10 @@ class Main {
 
 		final Project project = new Project(JakeUtilsFile.workingDir(), JakeUtilsFile.workingDir());
 
-		final JakeClassLoader classLoader;
-		if (project.hasBuildSource()) {
-			final JakePath extraPath = project.resolveBuildPathAndCompile(BootstrapOptions.createPopulatedWithOptions());
-			classLoader = JakeClassLoader.current().createChild(extraPath);
-		} else {
-			classLoader = JakeClassLoader.current();
-		}
-		final boolean result = project.executeBuild(JakeUtilsFile.workingDir(), classLoader,
-				commandLine.methods(), commandLine.pluginSetups());
+		project.compileBuildScriptIfNeeded(DownloadRepoOptions.get());
+		JakeLog.nextLine();
+		final boolean result = project.executeBuild(
+				commandLine.methods(), commandLine.pluginSetups(), JakeOptions.buildClass());
 		if (!result) {
 			System.exit(1);  // NOSONAR
 		}
@@ -99,6 +96,34 @@ class Main {
 			JakeLog.info(JakeUtilsString.repeat(" ", lenght) + "Version : " + version);
 		}
 		JakeLog.nextLine();
+	}
+
+	private static class DownloadRepoOptions {
+
+		@JakeOption({"Maven or Ivy repositories to download dependency artifacts.",
+		"Prefix the Url with 'ivy:' if it is an Ivy repostory."})
+		private final String downloadRepoUrl = MavenRepository.MAVEN_CENTRAL_URL.toString();
+
+		@JakeOption({"Usename to connect to the download repository (if needed).",
+		"Null or blank means that the upload repository will be accessed in an anonymous way."})
+		private final String dowloadRepoUsername = null;
+
+		@JakeOption({"Password to connect to the download repository (if needed)."})
+		private final String downloadRepoPassword = null;
+
+		private JakeRepo downloadRepo() {
+			if (downloadRepoUrl == null) {
+				return null;
+			}
+			return JakeRepo.of(downloadRepoUrl).withOptionalCredentials(dowloadRepoUsername, downloadRepoPassword);
+		}
+
+		public static JakeRepo get() {
+			final DownloadRepoOptions result = new DownloadRepoOptions();
+			JakeOptions.populateFields(result);
+			return result.downloadRepo();
+		}
+
 	}
 
 	private Main() {}

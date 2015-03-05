@@ -1,10 +1,11 @@
+- Refactor org.jake.Project
+
 - Add multi-module support
    - compile jake build on multiple project @JakeImpot("../subproject");
    - slave projects (using * marker to propagate methods)
    
  - plugins
     - configure plugins in global settings.properties
-    - configure plugin programmaticaly in thr builfclass
 
 - eclipse as a plugin (generate buildpath)
 
