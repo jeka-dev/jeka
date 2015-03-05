@@ -5,7 +5,7 @@ import java.util.zip.Deflater;
 
 import org.jake.JakeDir;
 import org.jake.JakeLog;
-import org.jake.JakeZip;
+import org.jake.JakeZipper;
 
 /**
  * Jar maker for the {@link JakeJavaBuild} template. This maker will get information from supplied java builder
@@ -106,7 +106,7 @@ public class JakeJavaPacker {
 		JakeDir.of(build().classDir()).zip().to(jarFile(), compressionLevel).md5(checkSum);
 		build().sourceDirs().and(build().resourceDirs()).zip().to(jarSourceFile(), compressionLevel);
 		if (!build().skipTests() && build().testClassDir().exists() && !JakeDir.of(build.testClassDir()).files().isEmpty()) {
-			JakeZip.of(build().testClassDir()).to(jarTestFile(), compressionLevel);
+			JakeZipper.of(build().testClassDir()).to(jarTestFile(), compressionLevel);
 		}
 		if (!build.testSourceDirs().files().isEmpty()) {
 			build().testSourceDirs().and(build().testResourceDirs()).zip().to(jarTestSourceFile(), compressionLevel);

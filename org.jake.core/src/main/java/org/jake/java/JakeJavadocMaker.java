@@ -12,7 +12,7 @@ import org.jake.JakeClassLoader;
 import org.jake.JakeDirSet;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
-import org.jake.JakeZip;
+import org.jake.JakeZipper;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsReflect;
 
@@ -74,7 +74,7 @@ public final class JakeJavadocMaker {
 		final String[] args = toArguments(outputDir);
 		execute(doclet, JakeLog.infoStream(),JakeLog.warnStream(),JakeLog.errorStream(), args);
 		if (outputDir.exists() && zipFile != null) {
-			JakeZip.of(outputDir).to(zipFile);
+			JakeZipper.of(outputDir).to(zipFile);
 		}
 		JakeLog.done();
 	}

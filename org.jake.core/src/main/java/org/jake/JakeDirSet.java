@@ -211,10 +211,10 @@ public final class JakeDirSet implements Iterable<File> {
 	}
 
 	/**
-	 * Returns a {@link JakeZip} made of the files contained in this {@link JakeDirSet}.
+	 * Returns a {@link JakeZipper} made of the files contained in this {@link JakeDirSet}.
 	 */
-	public JakeZip zip() {
-		return JakeZip.of(this);
+	public JakeZipper zip() {
+		return JakeZipper.of(this);
 	}
 
 	/**

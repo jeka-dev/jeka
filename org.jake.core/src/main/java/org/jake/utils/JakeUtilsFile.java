@@ -37,6 +37,22 @@ public final class JakeUtilsFile {
 	}
 
 	/**
+	 * Moves a file to another location.
+	 */
+	public static void move(File from, File to) {
+		if (!from.renameTo(to)) {
+			copyFile(from, to);
+			if (!from.delete()) {
+				if (!to.delete()) {
+					throw new RuntimeException("Unable to delete " + to);
+				}
+				throw new RuntimeException("Unable to delete " + from);
+			}
+		}
+	}
+
+
+	/**
 	 * Returns the relative path of the specified file relative to the specified base directory.
 	 * File argument must be a child of the base directory otherwise method throw an {@link IllegalArgumentException}.
 	 */

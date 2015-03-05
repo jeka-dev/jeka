@@ -16,46 +16,50 @@ import org.jake.utils.JakeUtilsIterable;
 /**
  * Defines element to embed in a zip archive and methods to write archive on disk.
  */
-public final class JakeZip {
+public final class JakeZipper {
 
 	private final Iterable<? extends Object> itemsToZip;
 
 	private final Iterable<File> archivestoMerge;
 
-	private JakeZip(Iterable<? extends Object> itemsToZip, Iterable<File> archivestoMerge) {
+	private JakeZipper(Iterable<? extends Object> itemsToZip, Iterable<File> archivestoMerge) {
 		this.itemsToZip = itemsToZip;
 		this.archivestoMerge = archivestoMerge;
 	}
 
-	private JakeZip(Iterable<? extends Object> itemsToZip) {
+	private JakeZipper(Iterable<? extends Object> itemsToZip) {
 		this.itemsToZip = itemsToZip;
 		this.archivestoMerge = Collections.emptyList();
 	}
 
 	/**
-	 * Creates a {@link JakeZip} from an array of directories.
+	 * Creates a {@link JakeZipper} from an array of directories.
 	 */
-	public static JakeZip of(File ...dirs) {
+	public static JakeZipper of(File ...dirs) {
 		for (final File file : dirs) {
 			if (!file.isDirectory()) {
 				throw new IllegalArgumentException(file.getPath() + " is not a directory.");
 			}
 		}
-		return new JakeZip(Arrays.asList( dirs));
+		return new JakeZipper(Arrays.asList( dirs));
 	}
 
-	static JakeZip of(JakeDirSet ...jakeDirSets) {
-		return new JakeZip(Arrays.asList(jakeDirSets));
+	static JakeZipper of(JakeDirSet ...jakeDirSets) {
+		return new JakeZipper(Arrays.asList(jakeDirSets));
 	}
 
-	static JakeZip of(JakeDir ...jakeDirs) {
-		return new JakeZip(Arrays.asList(jakeDirs));
+	static JakeZipper of(JakeDir ...jakeDirs) {
+		return new JakeZipper(Arrays.asList(jakeDirs));
 	}
 
 
 	@SuppressWarnings("unchecked")
-	public JakeZip merge(Iterable<File> archiveFiles) {
-		return new JakeZip(itemsToZip, JakeUtilsIterable.chain(this.archivestoMerge, archiveFiles));
+	public JakeZipper merge(Iterable<File> archiveFiles) {
+		return new JakeZipper(itemsToZip, JakeUtilsIterable.chain(this.archivestoMerge, archiveFiles));
+	}
+
+	public JakeZipper merge(File... archiveFiles) {
+		return merge(Arrays.asList(archiveFiles));
 	}
 
 	/**
@@ -64,6 +68,18 @@ public final class JakeZip {
 	 */
 	public CheckSumer to(File zipFile) {
 		return this.to(zipFile, Deflater.DEFAULT_COMPRESSION);
+	}
+
+	public CheckSumer appendTo(File existingARchive) {
+		return this.appendTo(existingARchive, Deflater.DEFAULT_COMPRESSION);
+	}
+
+	public CheckSumer appendTo(File existingARchive, int compressionLevel) {
+		final File temp = JakeUtilsFile.createTempFile(existingARchive.getName(), "");
+		JakeUtilsFile.move(existingARchive, temp);
+		final CheckSumer checkSumer = this.merge(temp).to(existingARchive, compressionLevel);
+		temp.delete();
+		return checkSumer;
 	}
 
 	/**
@@ -98,7 +114,7 @@ public final class JakeZip {
 			try {
 				file = new ZipFile(archiveToMerge);
 			} catch (final IOException e) {
-				throw new RuntimeException(e);
+				throw new RuntimeException("Error while opening zip file " + archiveToMerge.getPath(), e);
 			}
 			JakeUtilsIO.mergeZip(zos, file);
 		}

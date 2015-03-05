@@ -45,8 +45,6 @@ class Project {
 
 	private final File projectBaseDir;
 
-	private final String projectRelativePath;
-
 	private boolean needPrecompile = true;
 
 	private boolean needCompile = true;
@@ -69,14 +67,9 @@ class Project {
 	 * its relative path to the 'root' module.
 	 * The Relative path is used to display the module under build
 	 */
-	public Project(File buildBaseParentDir, File moduleBaseDir, JakeRepos downlodRepo) {
+	public Project(File baseDir, JakeRepos downlodRepo) {
 		super();
-		this.projectBaseDir = moduleBaseDir;
-		if (buildBaseParentDir.equals(moduleBaseDir)) {
-			projectRelativePath = moduleBaseDir.getName();
-		} else {
-			projectRelativePath = JakeUtilsFile.getRelativePath(buildBaseParentDir, moduleBaseDir);
-		}
+		this.projectBaseDir = JakeUtilsFile.canonicalFile(baseDir);
 		buildRepos = downlodRepo;
 		originalBuildRepos = downlodRepo;
 		this.buildDependencies = JakeDependencies.on();
@@ -96,9 +89,11 @@ class Project {
 	}
 
 	public void compile() {
-		if (!needCompile || this.builtProjectContext.contains(this.projectBaseDir)) {
+		final boolean yetBuilt = this.builtProjectContext.contains(this);
+		if (!needCompile || yetBuilt) {
 			return;
 		}
+		JakeLog.startln("Compiling build classes for project " + this.projectBaseDir.getName());
 		this.builtProjectContext.add(this);
 		preCompile();
 		if (!this.hasBuildSource()) {
@@ -110,6 +105,7 @@ class Project {
 		this.compileBuild(extraPath.and(localBuildPath()));
 		this.buildClasspath = this.buildClasspath.and(extraPath.and(this.buildBinDir()));
 		this.needCompile = false;
+		JakeLog.done();
 	}
 
 	/**
@@ -122,7 +118,8 @@ class Project {
 			Iterable<MethodInvocation> methods, Iterable<CommandLine.JakePluginSetup> setups, String buildClassNameHint) {
 		compile();
 		final long start = System.nanoTime();
-		JakeLog.displayHead("Building project : " + projectRelativePath);
+		JakeLog.nextLine();
+		JakeLog.displayHead("Executing build for project : " + this);
 		final JakeClassLoader classLoader;
 		if (hasBuildSource() && this.buildClasspath == null) {
 			throw new IllegalStateException("You need to compile build source prior executing the build.");
@@ -183,19 +180,12 @@ class Project {
 
 	private JakePath compileDependentProjects() {
 		JakePath jakePath = JakePath.of();
-		if (!this.subProjects.isEmpty()) {
-			JakeLog.startln("Compiling build classes for dependent projects");
-		}
 		for (final File file : this.subProjects) {
-			final Project project = new Project(this.projectBaseDir, file, originalBuildRepos);
+			final Project project = new Project(file, originalBuildRepos);
 			project.builtProjectContext.addAll(this.builtProjectContext);
-			JakeLog.startln("Compiling build classes of project " + project.projectRelativePath);
 			project.compile();
-			JakeLog.done();
+			this.builtProjectContext.add(project);
 			jakePath = jakePath.and(project.buildClasspath);
-		}
-		if (!this.subProjects.isEmpty()) {
-			JakeLog.done();
 		}
 		return jakePath;
 	}
@@ -401,6 +391,11 @@ class Project {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return this.projectBaseDir.getName();
 	}
 
 

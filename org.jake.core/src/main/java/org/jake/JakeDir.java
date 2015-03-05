@@ -163,10 +163,10 @@ public final class JakeDir implements Iterable<File> {
 	}
 
 	/**
-	 * Returns a {@link JakeZip} of this {@link JakeDir}.
+	 * Returns a {@link JakeZipper} of this {@link JakeDir}.
 	 */
-	public JakeZip zip() {
-		return JakeZip.of(this);
+	public JakeZipper zip() {
+		return JakeZipper.of(this);
 	}
 
 	/**

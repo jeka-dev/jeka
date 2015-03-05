@@ -35,10 +35,9 @@ class Main {
 		JakeOptions.init(optionMap);
 		JakeLog.info("Using global options : " + JakeOptions.fieldOptionsToString(JakeOptions.instance()));
 		JakeLog.info("And free form options : " + JakeOptions.freeFormToString());
-		JakeLog.nextLine();
 		defineSystemProps(args);
 		final File workingDir = JakeUtilsFile.workingDir();
-		final Project project = new Project(workingDir, workingDir, repos());
+		final Project project = new Project(workingDir, repos());
 		JakeLog.nextLine();
 		final boolean result = project.execute(
 				commandLine.methods(), commandLine.pluginSetups(), JakeOptions.buildClass());
