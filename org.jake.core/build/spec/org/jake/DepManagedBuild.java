@@ -9,7 +9,7 @@ import org.jake.publishing.JakeMavenPublication;
 /**
  * Build class for Jake itself using managed dependencies.
  */
-public class DepManagedBuild extends Build {
+public class DepManagedBuild extends CoreBuild {
 
 	public static final JakeScope DISTRIB = JakeScope.of("distrib").descr("Contains Jake distribution zip file");
 

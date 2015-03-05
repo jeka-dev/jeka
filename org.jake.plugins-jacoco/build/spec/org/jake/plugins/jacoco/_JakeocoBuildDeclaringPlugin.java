@@ -1,17 +1,18 @@
-package org.jake.plugins.jacoco.sample;
+package org.jake.plugins.jacoco;
+
 
 import org.jake.depmanagement.JakeRepos;
-import org.jake.plugins.jacoco.JakeocoBuild;
 import org.jake.plugins.jacoco.JakeocoJakeJavaBuildPlugin;
 
 /**
  * The purpose of this build class is just for testing the plugin itself in the Ide.
- * It can't be compiled by Jake cause it refers to classes file from this project
+ * It can't be compiled by Jake cause it refers to classes file from this project.
+ * That's why its name start with '_' (java source starting with '_' are not compiled by Jake).
  */
-public class JakeocoBuildDeclaringPlugin extends JakeocoBuild {
+public class _JakeocoBuildDeclaringPlugin extends JakeocoBuild {
 	
 	public static void main(String[] args) {
-		JakeocoBuildDeclaringPlugin build = new JakeocoBuildDeclaringPlugin();
+		_JakeocoBuildDeclaringPlugin build = new _JakeocoBuildDeclaringPlugin();
 		build.plugins.addActivated(new JakeocoJakeJavaBuildPlugin());
 		build.base();
 	}

@@ -16,7 +16,6 @@ import org.jake.CommandLine.MethodInvocation;
 import org.jake.PluginDictionnary.JakePluginDescription;
 import org.jake.depmanagement.JakeArtifact;
 import org.jake.depmanagement.JakeDependencies;
-import org.jake.depmanagement.JakeRepo;
 import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeScope;
 import org.jake.depmanagement.ivy.JakeIvy;
@@ -28,7 +27,9 @@ import org.jake.utils.JakeUtilsString;
 import org.jake.utils.JakeUtilsTime;
 
 /**
- * Single buildable project.
+ * Buildable project. This class has the responsability to compile the build classes along to run them.<br/>
+ * Build class are expected to lie in [project base dir]/build/spec.<br/>
+ * Classes having simple name starting by '_' are not compiled.
  */
 class Project {
 
@@ -46,14 +47,23 @@ class Project {
 
 	private final String projectRelativePath;
 
+	private boolean needPrecompile = true;
+
+	private boolean needCompile = true;
+
+	private JakeDependencies buildDependencies;
+
+	private JakeRepos buildRepos;
+
 	private JakeClasspath classpathForExecution;
+
 
 	/**
 	 * Constructs a module builder where is specified the base directory of the module along
 	 * its relative path to the 'root' module.
 	 * The Relative path is used to display the module under build
 	 */
-	public Project(File buildBaseParentDir, File moduleBaseDir) {
+	public Project(File buildBaseParentDir, File moduleBaseDir, JakeRepos downlodRepo) {
 		super();
 		this.projectBaseDir = moduleBaseDir;
 		if (buildBaseParentDir.equals(moduleBaseDir)) {
@@ -61,25 +71,47 @@ class Project {
 		} else {
 			projectRelativePath = JakeUtilsFile.getRelativePath(buildBaseParentDir, moduleBaseDir);
 		}
+		buildRepos = downlodRepo;
+		this.buildDependencies = JakeDependencies.on();
 	}
 
-	public void compileBuildScriptIfNeeded(JakeRepos repos) {
-		if (!this.hasBuildSource()) {
-			this.classpathForExecution = JakeClasspath.of();
+	public void preCompile() {
+		if (!needPrecompile) {
+			return; // Already done
+		}
+		if (this.hasBuildSource()) {
+			final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir, JakeDir.of(buildSourceDir()).include("**/*.java"));
+			this.buildDependencies = parser.dependencies();
+			this.buildRepos = parser.importRepos().and(buildRepos);
+		}
+		needPrecompile = false;
+	}
+
+	public void compile() {
+		if (!needCompile) {
 			return;
 		}
-		final JakePath extraPath = resolveBuildPath(repos);
+		preCompile();
+		if (!this.hasBuildSource()) {
+			this.classpathForExecution = JakeClasspath.of();
+			this.needCompile = false;
+			return;
+		}
+		final JakePath extraPath = resolveBuildPath();
 		final File dir = compileBuild(extraPath.and(localBuildPath()));
 		this.classpathForExecution = JakeClasspath.of(extraPath.and(dir));
-
+		this.needCompile = false;
 	}
 
 	/**
+	 * Precompile and compile build classes (if needed) then execute the build of this project.
+	 * 
 	 * @param buildClassNameHint The full or simple class name of the build class to execute. It can be <code>null</code>
 	 * or empty.
 	 */
-	public boolean executeBuild(
+	public boolean execute(
 			Iterable<MethodInvocation> methods, Iterable<CommandLine.JakePluginSetup> setups, String buildClassNameHint) {
+		compile();
 		final long start = System.nanoTime();
 		JakeLog.displayHead("Building project : " + projectRelativePath);
 		final JakeClassLoader classLoader;
@@ -102,7 +134,7 @@ class Project {
 		return result;
 	}
 
-	public boolean hasBuildSource() {
+	private boolean hasBuildSource() {
 		if (!this.buildSourceDir().exists()) {
 			return false;
 		}
@@ -121,22 +153,19 @@ class Project {
 		return JakePath.of(extraLibs).and(JakeLocator.jakeJarFile(), JakeLocator.ivyJarFile());
 	}
 
-	private JakePath resolveBuildPath(JakeRepos repos) {
+	private JakePath resolveBuildPath() {
 		JakeLog.displayHead("Compiling build classes for project : " + projectRelativePath);
 		JakeLog.start("Parsing source code for gathering imports");
-		final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir,
-				JakeDir.of(buildSourceDir()).include("**/*.java"));
 		JakeLog.done();
-
 		final JakePath buildPath;
-		if (parser.dependencies().isEmpty()) {
+		if (buildDependencies.isEmpty()) {
 			buildPath = JakePath.of();
 		} else {
 			JakeLog.startln("Resolving build dependencies");
-			final JakeDependencies importedDependencies =  parser.dependencies();
+			final JakeDependencies importedDependencies =  buildDependencies;
 			final JakePath extraPath;
 			if (importedDependencies.containsExternalModule()) {
-				extraPath = this.jakeCompilePath(repos, importedDependencies);
+				extraPath = this.jakeCompilePath(buildRepos, importedDependencies);
 			} else {
 				extraPath = JakePath.of(importedDependencies.fileDependencies(JAKE_SCOPE));
 			}
@@ -152,22 +181,6 @@ class Project {
 		return buildBinDir();
 	}
 
-	private JakeRepos jakeCompileRepos(List<String> importRepoUrls, JakeRepo repo) {
-		final JakeRepos result = importRepos(importRepoUrls);
-		if (repo != null) {
-			return result.and(repo);
-		}
-		return result;
-
-	}
-
-	private JakeRepos importRepos(List<String> importRepoUrls) {
-		JakeRepos result = JakeRepos.of();
-		for (final String url : importRepoUrls) {
-			result = result.and(JakeRepo.of(url));
-		}
-		return result;
-	}
 
 	@SuppressWarnings("unchecked")
 	private Class<? extends JakeBuild> findBuildClass(JakeClassLoader classLoader, String classNameHint) {
@@ -220,7 +233,6 @@ class Project {
 			JakeLog.info("With options : " + JakeOptions.fieldOptionsToString(build));
 		}
 
-		build.setBaseDir(this.projectBaseDir);
 		final Map<String, Object> pluginMap = instantiatePlugins(build.pluginTemplateClasses(), setups);
 		final List<Object> plugins = new LinkedList<Object>(pluginMap.values());
 		build.setPlugins(plugins);
@@ -313,7 +325,7 @@ class Project {
 	}
 
 	private JakeJavaCompiler baseBuildCompiler() {
-		final JakeDir buildSource = JakeDir.of(buildSourceDir());
+		final JakeDir buildSource = JakeDir.of(buildSourceDir()).include("**/*.java").exclude("**/_*");
 		if (!buildBinDir().exists()) {
 			buildBinDir().mkdirs();
 		}

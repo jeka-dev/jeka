@@ -1,6 +1,7 @@
 package org.jake;
 
 import java.io.File;
+import java.util.List;
 
 import org.jake.depmanagement.JakeDependencies;
 import org.junit.Assert;
@@ -29,6 +30,15 @@ public class JavaSourceParserTest {
 		final JakeDependencies  dependencies = JavaSourceParser.of(
 				new File("."), JavaSourceParserTest.class.getResource("withoutImport.javasource")).dependencies();
 		Assert.assertEquals(0, dependencies.dependenciesDeclaredWith(Project.JAKE_SCOPE).size());
+	}
+
+	@Test
+	public void with2ProjectImports() {
+		final List<File>  projects = JavaSourceParser.of(
+				new File("."), JavaSourceParserTest.class.getResource("with2projectImports.javasource")).projects();
+		Assert.assertEquals(2, projects.size());
+		Assert.assertEquals("org.jake.foo", projects.get(0).getName());
+		Assert.assertEquals("org.jake.bar", projects.get(1).getName());
 	}
 
 

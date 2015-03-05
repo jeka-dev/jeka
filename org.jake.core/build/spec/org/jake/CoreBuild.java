@@ -11,7 +11,7 @@ import org.jake.java.build.JakeJavaPacker;
  * Build class for Jake itself.
  * This build does not rely on any dependence manager.
  */
-public class Build extends JakeJavaBuild {
+public class CoreBuild extends JakeJavaBuild {
 
 	public File distripZipFile() {
 		return ouputDir("jake-distrib.zip");
@@ -20,7 +20,7 @@ public class Build extends JakeJavaBuild {
 	// Just to run directly the whole build bypassing the Jake bootstrap mechanism.
 	// Was necessary in first place to build Jake with itself.
 	public static void main(String[] args) {
-		new Build().base();
+		new CoreBuild().base();
 	}
 
 	// Include a time stamped version file as resource.

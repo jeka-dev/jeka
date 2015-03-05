@@ -18,4 +18,6 @@ public @interface JakeImport {
 
 	String[] value();
 
+	String[] repos();
+
 }

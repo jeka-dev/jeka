@@ -1,11 +1,14 @@
 package org.jake.plugins.sonar;
 
+import org.jake.CoreBuild;
+import org.jake.JakeProject;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.java.build.JakeJavaBuild;
 
 public class PluginsSonarBuild extends JakeJavaBuild {
 		
-	private final JakeJavaBuild core = relativeProject(JakeJavaBuild.class, "../org.jake.core");
+	@JakeProject("../org.jake.core")
+	private CoreBuild core;
 	
 	@Override
 	protected JakeDependencies dependencies() {

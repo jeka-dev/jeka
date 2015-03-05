@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeDependency;
+import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeScopeMapping;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
@@ -28,47 +29,71 @@ class JavaSourceParser {
 
 
 	public static JavaSourceParser of(File baseDir, File code) {
-		final InputStream inputStream = JakeUtilsIO.inputStream(code);
-		final JavaSourceParser result = new JavaSourceParser(dependencies(inputStream, baseDir, JakeUtilsFile.toUrl(code)));
-		JakeUtilsIO.closeQuietly(inputStream);
-		return result;
+		return of(baseDir, JakeUtilsFile.toUrl(code));
 	}
 
 	public static JavaSourceParser of(File baseDir, Iterable<File> files) {
-		final JakeDependencies.Builder builder = JakeDependencies.builder();
+		JavaSourceParser result = new JavaSourceParser(JakeDependencies.on(), JakeRepos.of(), new LinkedList<File>());
 		for (final File code : files) {
-			final InputStream inputStream = JakeUtilsIO.inputStream(code);
-			builder.on(dependencies(inputStream, baseDir, JakeUtilsFile.toUrl(code)));
-			JakeUtilsIO.closeQuietly(inputStream);
+			result = result.and(of(baseDir, code));
 		}
-		return new JavaSourceParser(builder.build());
+		return result;
 	}
 
-	public static JavaSourceParser of(File baseDir, URL code) {
-		final InputStream inputStream = JakeUtilsIO.inputStream(code);
-		final JavaSourceParser result = new JavaSourceParser(dependencies(inputStream, baseDir, code));
+	public static JavaSourceParser of(File baseDir, URL codeUrl) {
+		final InputStream inputStream = JakeUtilsIO.inputStream(codeUrl);
+		final String uncomentedCode = removeComments(inputStream);
+		final JakeDependencies deps = dependencies(uncomentedCode, baseDir, codeUrl);
+		final List<File> projects = projects(uncomentedCode, baseDir, codeUrl);
+		final JavaSourceParser result = new JavaSourceParser(deps, JakeRepos.of(), projects);
 		JakeUtilsIO.closeQuietly(inputStream);
 		return result;
 	}
 
 	private final JakeDependencies dependencies;
 
-	private JavaSourceParser(JakeDependencies deps) {
+	private final JakeRepos importRepos;
+
+	private final List<File> dependecyProjects;
+
+	private JavaSourceParser(JakeDependencies deps, JakeRepos repos, List<File> dependencyProjects) {
 		super();
 		this.dependencies = deps;
+		this.importRepos = repos;
+		this.dependecyProjects = Collections.unmodifiableList(dependencyProjects);
+	}
+
+	@SuppressWarnings("unchecked")
+	private JavaSourceParser and(JavaSourceParser other) {
+		return new JavaSourceParser(this.dependencies.and(other.dependencies),
+				this.importRepos.and(other.importRepos),
+				JakeUtilsIterable.concatLists(this.dependecyProjects, other.dependecyProjects) );
 	}
 
 	public JakeDependencies dependencies() {
 		return this.dependencies;
 	}
 
-	private static JakeDependencies dependencies(InputStream code, File baseDir, URL url) {
-		final String uncomentedCode = removeComments(code);
-		final List<String> deps = jakeImports(uncomentedCode, url);
-		return dependencies(baseDir, deps);
+	public JakeRepos importRepos() {
+		return this.importRepos;
 	}
 
-	private static JakeDependencies dependencies(File baseDir, List<String> deps) {
+	public List<File> projects() {
+		return this.dependecyProjects;
+	}
+
+	private static JakeDependencies dependencies(String code, File baseDir, URL url) {
+		final List<String> deps = jakeImports(code, url);
+		return dependenciesFromImports(baseDir, deps);
+	}
+
+	private static List<File> projects(String code, File baseDir, URL url) {
+		final List<String> deps = jakeProjects(code, url);
+		return projectDependencies(baseDir, deps);
+	}
+
+
+	private static JakeDependencies dependenciesFromImports(File baseDir, List<String> deps) {
 		final JakeDependencies.Builder builder = JakeDependencies.builder().usingDefaultScopeMapping(SCOPE_MAPPING);
 		for (final String dependency : deps) {
 			if (JakeDependency.isGroupNameAndVersion(dependency)) {
@@ -79,6 +104,14 @@ class JavaSourceParser {
 
 		}
 		return builder.build();
+	}
+
+	private static List<File> projectDependencies(File baseDir, List<String> deps) {
+		final List<File> projects = new LinkedList<File>();
+		for (final String projectReltivePath : deps) {
+			projects.add(new File(baseDir, projectReltivePath));
+		}
+		return projects;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -94,18 +127,41 @@ class JavaSourceParser {
 				}
 				continue;
 			}
-			final String between  = extractStringTo(scanner, "(", url, " parsing @JakeImport ");
+			final String context = " parsing @JakeImport ";
+			final String between  = extractStringTo(scanner, "(", url, context);
 			if(!JakeUtilsString.containsOnly(between, " ", "\n", "\r", "\t")) {
 				continue;
 			}
-			return scanJakeImport(scanner, url);
+
+			return scanInsideAnnotation(scanner, url, context);
 		}
 		return Collections.EMPTY_LIST;
 	}
 
+
+	private static List<String> jakeProjects(String code, URL url) {
+		final Scanner scanner = new Scanner(code);
+		scanner.useDelimiter("");
+		final List<String> result = new LinkedList<String>();
+		while (scanner.hasNext()) {
+			final String jakeImportWord = scanner.findInLine("@JakeProject");
+			if (jakeImportWord == null) {
+				scanner.nextLine();
+				continue;
+			}
+			final String context = " parsing @JakeProject ";
+			final String between  = extractStringTo(scanner, "(", url, context);
+			if(!JakeUtilsString.containsOnly(between, " ", "\n", "\r", "\t")) {
+				continue;
+			}
+			result.addAll(scanInsideAnnotation(scanner, url, context));
+		}
+		return result;
+	}
+
 	@SuppressWarnings("unchecked")
-	private static List<String> scanJakeImport(Scanner scanner, URL url) {
-		final String context = " parsing @JakeImport ";
+	private static List<String> scanInsideAnnotation(Scanner scanner, URL url, String context) {
+
 		final String betweenParenthesis = extractStringTo(scanner, ")", url, context);
 		final List<String> items = splitIgnoringQuotes(betweenParenthesis, ',');
 		for (final String item : items) {

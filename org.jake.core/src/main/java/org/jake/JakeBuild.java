@@ -1,6 +1,7 @@
 package org.jake;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -91,13 +92,7 @@ public class JakeBuild {
 	private final String extraJakePath = null;
 
 	protected JakeBuild() {
-	}
-
-	/**
-	 * Defines this project base directory.
-	 */
-	public void setBaseDir(File baseDir) {
-		this.locator = Locator.ofDir(baseDir);
+		populateProjectBuildField(this);
 	}
 
 	/**
@@ -341,12 +336,21 @@ public class JakeBuild {
 		HelpDisplayer.helpPlugins(this);
 	}
 
-	public final <T extends JakeBuild> T relativeProject(Class<T> clazz, String relativePath) {
-		final T build = JakeUtilsReflect.newInstance(clazz);
-		final JakeBuild jakeBuild = build;
-		jakeBuild.locator = Locator.ofProjectRealive(this, relativePath);
-		jakeBuild.forcedVersion = this.version().name();
+	private static final JakeBuild relativeProject(JakeBuild jakeBuild, Class<?> clazz, String relativePath) {
+		final JakeBuild build = (JakeBuild) JakeUtilsReflect.newInstance(clazz);
+		build.locator = Locator.ofProjectRealive(jakeBuild, relativePath);
+		build.forcedVersion = jakeBuild.version().name();
 		return build;
+	}
+
+	private static void populateProjectBuildField(JakeBuild mainBuild) {
+		final List<Field> fields = JakeUtilsReflect.getAllDeclaredField(mainBuild.getClass(), JakeProject.class);
+		for (final Field field : fields) {
+			final JakeProject jakeProject = field.getAnnotation(JakeProject.class);
+			final JakeBuild subBuild = relativeProject(mainBuild, field.getType(), jakeProject.value());
+			JakeUtilsReflect.setFieldValue(mainBuild, field, subBuild);
+		}
+
 	}
 
 	private static class Locator {
@@ -380,6 +384,5 @@ public class JakeBuild {
 		}
 
 	}
-
 
 }
