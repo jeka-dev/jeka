@@ -53,9 +53,15 @@ class Project {
 
 	private JakeDependencies buildDependencies;
 
+	private final JakeRepos originalBuildRepos;
+
 	private JakeRepos buildRepos;
 
-	private JakeClasspath classpathForExecution;
+	private JakeClasspath buildClasspath = JakeClasspath.of();
+
+	private List<File> subProjects = new LinkedList<File>();
+
+	private final Set<Project> builtProjectContext = new HashSet<Project>();
 
 
 	/**
@@ -72,10 +78,11 @@ class Project {
 			projectRelativePath = JakeUtilsFile.getRelativePath(buildBaseParentDir, moduleBaseDir);
 		}
 		buildRepos = downlodRepo;
+		originalBuildRepos = downlodRepo;
 		this.buildDependencies = JakeDependencies.on();
 	}
 
-	public void preCompile() {
+	private void preCompile() {
 		if (!needPrecompile) {
 			return; // Already done
 		}
@@ -83,23 +90,25 @@ class Project {
 			final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir, JakeDir.of(buildSourceDir()).include("**/*.java"));
 			this.buildDependencies = parser.dependencies();
 			this.buildRepos = parser.importRepos().and(buildRepos);
+			this.subProjects = parser.projects();
 		}
 		needPrecompile = false;
 	}
 
 	public void compile() {
-		if (!needCompile) {
+		if (!needCompile || this.builtProjectContext.contains(this.projectBaseDir)) {
 			return;
 		}
+		this.builtProjectContext.add(this);
 		preCompile();
 		if (!this.hasBuildSource()) {
-			this.classpathForExecution = JakeClasspath.of();
 			this.needCompile = false;
 			return;
 		}
-		final JakePath extraPath = resolveBuildPath();
-		final File dir = compileBuild(extraPath.and(localBuildPath()));
-		this.classpathForExecution = JakeClasspath.of(extraPath.and(dir));
+		JakePath extraPath = resolveBuildPath();
+		extraPath = extraPath.and(compileDependentProjects());
+		this.compileBuild(extraPath.and(localBuildPath()));
+		this.buildClasspath = this.buildClasspath.and(extraPath.and(this.buildBinDir()));
 		this.needCompile = false;
 	}
 
@@ -115,13 +124,13 @@ class Project {
 		final long start = System.nanoTime();
 		JakeLog.displayHead("Building project : " + projectRelativePath);
 		final JakeClassLoader classLoader;
-		if (hasBuildSource() && this.classpathForExecution == null) {
+		if (hasBuildSource() && this.buildClasspath == null) {
 			throw new IllegalStateException("You need to compile build source prior executing the build.");
 		}
-		if (!hasBuildSource() || this.classpathForExecution.isEmpty()) {
+		if (!hasBuildSource() || this.buildClasspath.isEmpty()) {
 			classLoader = JakeClassLoader.current();
 		} else {
-			classLoader = JakeClassLoader.current().createChild(this.classpathForExecution);
+			classLoader = JakeClassLoader.current().createChild(this.buildClasspath);
 		}
 		final Class<? extends JakeBuild> buildClass = this.findBuildClass(classLoader, buildClassNameHint);
 		final boolean result = this.launch(buildClass, methods, setups, classLoader);
@@ -154,9 +163,6 @@ class Project {
 	}
 
 	private JakePath resolveBuildPath() {
-		JakeLog.displayHead("Compiling build classes for project : " + projectRelativePath);
-		JakeLog.start("Parsing source code for gathering imports");
-		JakeLog.done();
 		final JakePath buildPath;
 		if (buildDependencies.isEmpty()) {
 			buildPath = JakePath.of();
@@ -175,10 +181,28 @@ class Project {
 		return buildPath;
 	}
 
-	private File compileBuild(JakePath buildPath) {
+	private JakePath compileDependentProjects() {
+		JakePath jakePath = JakePath.of();
+		if (!this.subProjects.isEmpty()) {
+			JakeLog.startln("Compiling build classes for dependent projects");
+		}
+		for (final File file : this.subProjects) {
+			final Project project = new Project(this.projectBaseDir, file, originalBuildRepos);
+			project.builtProjectContext.addAll(this.builtProjectContext);
+			JakeLog.startln("Compiling build classes of project " + project.projectRelativePath);
+			project.compile();
+			JakeLog.done();
+			jakePath = jakePath.and(project.buildClasspath);
+		}
+		if (!this.subProjects.isEmpty()) {
+			JakeLog.done();
+		}
+		return jakePath;
+	}
+
+	private void compileBuild(JakePath buildPath) {
 		baseBuildCompiler().withClasspath(buildPath).compile();
 		JakeDir.of(this.buildSourceDir()).exclude("**/*.java").copyTo(this.buildBinDir());
-		return buildBinDir();
 	}
 
 
@@ -346,6 +370,37 @@ class Project {
 		final JakeIvy ivy = JakeIvy.of(jakeRepos);
 		final Set<JakeArtifact> artifacts = ivy.resolve(deps, JAKE_SCOPE);
 		return JakePath.of(JakeArtifact.localFiles(artifacts));
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((projectBaseDir == null) ? 0 : projectBaseDir.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final Project other = (Project) obj;
+		if (projectBaseDir == null) {
+			if (other.projectBaseDir != null) {
+				return false;
+			}
+		} else if (!projectBaseDir.equals(other.projectBaseDir)) {
+			return false;
+		}
+		return true;
 	}
 
 

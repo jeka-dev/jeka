@@ -6,7 +6,7 @@ import org.jake.depmanagement.JakeDependencies;
 import org.jake.java.build.JakeJavaBuild;
 
 
-public class JakeocoBuild extends JakeJavaBuild {
+public class PluginsJakeocoBuild extends JakeJavaBuild {
 	
 	@JakeProject("../org.jake.core")
 	public CoreBuild core;
@@ -19,7 +19,7 @@ public class JakeocoBuild extends JakeJavaBuild {
 	}
 	
 	public static void main(String[] args) {
-		new JakeocoBuild().base();
+		new PluginsJakeocoBuild().base();
 	}
 	
 	

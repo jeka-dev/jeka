@@ -9,7 +9,7 @@ import org.jake.plugins.jacoco.JakeocoJakeJavaBuildPlugin;
  * It can't be compiled by Jake cause it refers to classes file from this project.
  * That's why its name start with '_' (java source starting with '_' are not compiled by Jake).
  */
-public class _JakeocoBuildDeclaringPlugin extends JakeocoBuild {
+public class _JakeocoBuildDeclaringPlugin extends PluginsJakeocoBuild {
 	
 	public static void main(String[] args) {
 		_JakeocoBuildDeclaringPlugin build = new _JakeocoBuildDeclaringPlugin();

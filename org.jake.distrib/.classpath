@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="build/spec"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="com.redhat.ceylon.eclipse.ui.cpcontainer.RUNTIME_CONTAINER/default"/>
+	<classpathentry kind="con" path="com.redhat.ceylon.eclipse.ui.cpcontainer.CEYLON_CONTAINER/default"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.jake.core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.jake.plugins-jacoco"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.jake.plugins-sonar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
