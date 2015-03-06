@@ -23,7 +23,7 @@ public final class JakeBuildPlugins {
 		this.holder = holder;
 	}
 
-	public void addhActivated(Class<? extends JakeBuildPlugin> exactPluginClass, Map<String, String> options) {
+	public void addActivated(Class<? extends JakeBuildPlugin> exactPluginClass, Map<String, String> options) {
 		final JakeBuildPlugin plugin;
 		if (activatedPlugins.containsKey(exactPluginClass)) {
 			plugin = activatedPlugins.get(exactPluginClass);

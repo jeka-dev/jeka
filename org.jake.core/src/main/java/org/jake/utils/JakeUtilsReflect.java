@@ -107,6 +107,15 @@ public final class JakeUtilsReflect {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	public static <T> T invoke(Object target, Method method) {
+		try {
+			return (T) method.invoke(target);
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 
 	@SuppressWarnings("unchecked")
 	public static <V> V invoke(Object target, Method method, Object... params) {

@@ -12,25 +12,22 @@ import org.jake.plugins.sonar.PluginsSonarBuild;
 
 public class DistribBuild extends JakeBuild {
 	
-	@JakeProject("../org.jake.core")
-	private CoreBuild core;
-	
 	@JakeProject("../org.jake.plugins-sonar")
 	private PluginsSonarBuild pluginsSonar;
 	
 	@JakeProject("../org.jake.plugins-jacoco")
 	private PluginsJakeocoBuild pluginsJacoco;
 	
+	
 	@Override
 	public void base() {
 		super.base();
 		
 		// build dependee projects
-		core.base();
-		pluginsJacoco.base();
-		pluginsSonar.base();
+		this.buildDependencies().invokeOnAllTransitiveBase();
 		
 		// copy core distribution locally
+		CoreBuild core = pluginsJacoco.core;
 		JakeDir dist = JakeDir.of(this.ouputDir("dist")).copyDirContent(core.distFolder());
 		
 		// Add plugins to the distribution

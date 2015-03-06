@@ -45,10 +45,6 @@ class Project {
 
 	private final File projectBaseDir;
 
-	private boolean needPrecompile = true;
-
-	private boolean needCompile = true;
-
 	private JakeDependencies buildDependencies;
 
 	private final JakeRepos originalBuildRepos;
@@ -58,8 +54,6 @@ class Project {
 	private JakeClasspath buildClasspath = JakeClasspath.of();
 
 	private List<File> subProjects = new LinkedList<File>();
-
-	private final Set<Project> builtProjectContext = new HashSet<Project>();
 
 
 	/**
@@ -76,35 +70,27 @@ class Project {
 	}
 
 	private void preCompile() {
-		if (!needPrecompile) {
-			return; // Already done
-		}
-		if (this.hasBuildSource()) {
-			final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir, JakeDir.of(buildSourceDir()).include("**/*.java"));
-			this.buildDependencies = parser.dependencies();
-			this.buildRepos = parser.importRepos().and(buildRepos);
-			this.subProjects = parser.projects();
-		}
-		needPrecompile = false;
+		final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir, JakeDir.of(buildSourceDir()).include("**/*.java"));
+		this.buildDependencies = parser.dependencies();
+		this.buildRepos = parser.importRepos().and(buildRepos);
+		this.subProjects = parser.projects();
 	}
 
 	public void compile() {
-		final boolean yetBuilt = this.builtProjectContext.contains(this);
-		if (!needCompile || yetBuilt) {
+		compile(new HashSet<File>());
+	}
+
+	private void compile(Set<File> yetCompiledProjects) {
+		if (!this.hasBuildSource() || yetCompiledProjects.contains(this.projectBaseDir)) {
 			return;
 		}
-		JakeLog.startln("Compiling build classes for project " + this.projectBaseDir.getName());
-		this.builtProjectContext.add(this);
+		yetCompiledProjects.add(this.projectBaseDir);
 		preCompile();
-		if (!this.hasBuildSource()) {
-			this.needCompile = false;
-			return;
-		}
+		JakeLog.startUnderlined("Making build classes for project " + this.projectBaseDir.getName());
 		JakePath extraPath = resolveBuildPath();
-		extraPath = extraPath.and(compileDependentProjects());
+		extraPath = extraPath.and(compileDependentProjects(yetCompiledProjects));
 		this.compileBuild(extraPath.and(localBuildPath()));
 		this.buildClasspath = this.buildClasspath.and(extraPath.and(this.buildBinDir()));
-		this.needCompile = false;
 		JakeLog.done();
 	}
 
@@ -120,6 +106,7 @@ class Project {
 		final long start = System.nanoTime();
 		JakeLog.nextLine();
 		JakeLog.displayHead("Executing build for project : " + this);
+		JakeLog.nextLine();
 		final JakeClassLoader classLoader;
 		if (hasBuildSource() && this.buildClasspath == null) {
 			throw new IllegalStateException("You need to compile build source prior executing the build.");
@@ -178,13 +165,11 @@ class Project {
 		return buildPath;
 	}
 
-	private JakePath compileDependentProjects() {
+	private JakePath compileDependentProjects(Set<File> yetCompiledProjects) {
 		JakePath jakePath = JakePath.of();
 		for (final File file : this.subProjects) {
 			final Project project = new Project(file, originalBuildRepos);
-			project.builtProjectContext.addAll(this.builtProjectContext);
-			project.compile();
-			this.builtProjectContext.add(project);
+			project.compile(yetCompiledProjects);
 			jakePath = jakePath.and(project.buildClasspath);
 		}
 		return jakePath;
@@ -259,8 +244,7 @@ class Project {
 
 			final Method method;
 			final String actionIntro = "Method : " + methodInvokation.toString();
-			JakeLog.info(actionIntro);
-			JakeLog.info(JakeUtilsString.repeat("-", actionIntro.length()));
+			JakeLog.underlined(actionIntro);
 			Class<?> targetClass = null;
 			try {
 				if (methodInvokation.isMethodPlugin()) {
@@ -362,36 +346,7 @@ class Project {
 		return JakePath.of(JakeArtifact.localFiles(artifacts));
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((projectBaseDir == null) ? 0 : projectBaseDir.hashCode());
-		return result;
-	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final Project other = (Project) obj;
-		if (projectBaseDir == null) {
-			if (other.projectBaseDir != null) {
-				return false;
-			}
-		} else if (!projectBaseDir.equals(other.projectBaseDir)) {
-			return false;
-		}
-		return true;
-	}
 
 	@Override
 	public String toString() {

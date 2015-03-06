@@ -29,22 +29,43 @@ public class JakeLog {
 	public static void start(String message) {
 		infoWriter.print("- " + message +  " ... " );
 		incOffset();
+		startTimer();
+	}
+
+	private static void startTimer() {
 		LinkedList<Long> times = START_TIMES.get();
 		if (times == null) {
 			times = new LinkedList<Long>();
 			START_TIMES.set(times);
 		}
 		times.push(System.nanoTime());
-
 	}
 
 	/**
-	 * As {@link #startln(String)} but do a carriage return after the start message.
+	 * As {@link #start(String)} but do a carriage return after the start message.
 	 */
 	public static void startln(String message) {
 		start(message);
 		nextLine();
 	}
+
+	/**
+	 * As {@link #startln(String)} but underline the message.
+	 */
+	public static void startUnderlined(String message) {
+		startln(message);
+		JakeLog.info(JakeUtilsString.repeat("-", message.length() + 4));
+	}
+
+	/**
+	 * As {@link #startln(String)} but whith header message.
+	 */
+	public static void startHeaded(String message) {
+		displayHead(message);
+		incOffset();
+		startTimer();
+	}
+
 
 	/**
 	 * Notify that the processing notified with 'start' has terminated.
@@ -78,6 +99,11 @@ public class JakeLog {
 	 */
 	public static void info(String message) {
 		infoWriter.println(message);
+	}
+
+	public static void underlined(String message) {
+		JakeLog.info(message);
+		JakeLog.info(JakeUtilsString.repeat("-", message.length()));
 	}
 
 	/**
@@ -241,7 +267,6 @@ public class JakeLog {
 		JakeLog.info(JakeUtilsString.repeat(pattern, intro.length() ));
 		JakeLog.info(intro);
 		JakeLog.info(JakeUtilsString.repeat(pattern, intro.length() ));
-		JakeLog.nextLine();
 	}
 
 

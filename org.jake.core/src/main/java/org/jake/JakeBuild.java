@@ -2,8 +2,10 @@ package org.jake;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.jake.depmanagement.JakeDependencies;
@@ -83,7 +85,7 @@ public class JakeBuild {
 	private final String publishRepoReleasePassword = null;
 
 	@JakeOption("Version to inject to this build. If 'null' or blank than the version will be the one returned by #defaultVersion()" )
-	private String forcedVersion = null;
+	private final String forcedVersion = null;
 
 	@JakeOption({
 		"Mention if you want to add extra lib in your build path. It can be absolute or relative to the project base dir.",
@@ -91,8 +93,11 @@ public class JakeBuild {
 	"Example : -extraCompilePath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
 	private final String extraJakePath = null;
 
+	private final JakeBuildDependencies buildDependencies;
+
 	protected JakeBuild() {
-		populateProjectBuildField(this);
+		final List<JakeBuild> subBuilds = populateProjectBuildField(this);
+		this.buildDependencies = JakeBuildDependencies.of(subBuilds);
 	}
 
 	/**
@@ -113,22 +118,34 @@ public class JakeBuild {
 	}
 
 	/**
-	 * The current version for this project. This may be injected using the 'version' option.
-	 * If not, it takes the result from {@link #defaultVersion()}
+	 * The current version for this project. It has to be understood as the 'release version',
+	 * as this version will be used to publish artifacts. <br/>
+	 * it may take format as <code>1.0-SNAPSHOT</code>, <code>trunk-SNAPSHOT</code>, <code>1.2.3-rc1</code>, <code>1.2.3</code>, ...
+	 * This may be injected using the 'version' option, otherwise it takes the value returned by {@link #releaseVersion()}
+	 * If not, it takes the result from {@link #releaseVersion()}
 	 */
 	public final JakeVersion version() {
 		if (JakeUtilsString.isBlank(this.forcedVersion)) {
-			return defaultVersion();
+			return releaseVersion();
 		}
 		return JakeVersion.named(forcedVersion);
 	}
 
 	/**
-	 * The current version for this project. Might look like "0.6.3", "0.1-SNAPSHOT" or "20141220170532".
+	 * Returns the release version to use for publishing when this one is not enforced by the 'version' option.
+	 * 
+	 * @see #version()
+	 */
+	protected JakeVersion releaseVersion() {
+		return JakeVersion.named("1.0-SNAPSHOT");
+	}
+
+	/**
+	 * Returns the time-stamp this build has been initiated.
 	 * Default is the time stamp (formatted as 'yyyyMMdd-HHmmss') this build has been instantiated.
 	 */
-	public JakeVersion defaultVersion() {
-		return JakeVersion.named(JakeUtilsTime.timestampSec(buildTime));
+	public String buildTimestamp() {
+		return JakeUtilsTime.timestampSec(buildTime);
 	}
 
 	/**
@@ -203,6 +220,13 @@ public class JakeBuild {
 	 */
 	public final JakePath depsFor(JakeScope ...scopes) {
 		return dependencyResolver().get(scopes);
+	}
+
+	/**
+	 * Returns the builds this build references.
+	 */
+	public final JakeBuildDependencies buildDependencies() {
+		return this.buildDependencies;
 	}
 
 	/**
@@ -283,6 +307,27 @@ public class JakeBuild {
 	}
 
 	/**
+	 * This method is invoked right after the base directory of this buils had been set, so
+	 * you can initialize fields safely here.
+	 */
+	protected void init() {
+	}
+
+	/**
+	 * Invokes the specified method in this build.
+	 */
+	final void invoke(String methodName) {
+		try {
+			final Method method = this.getClass().getMethod(methodName);
+			JakeUtilsReflect.invoke(this, method);
+		} catch (final NoSuchMethodException e) {
+			JakeLog.warn("No zero-arg method '" + methodName
+					+ "' found in class '" + this.getClass()  + "'. Skip.");
+			return;
+		}
+	}
+
+	/**
 	 * Return a file located at the specified path relative to the base directory.
 	 */
 	public final File baseDir(String relativePath) {
@@ -338,19 +383,22 @@ public class JakeBuild {
 
 	private static final JakeBuild relativeProject(JakeBuild jakeBuild, Class<?> clazz, String relativePath) {
 		final JakeBuild build = (JakeBuild) JakeUtilsReflect.newInstance(clazz);
+		JakeOptions.populateFields(build);
 		build.locator = Locator.ofProjectRealive(jakeBuild, relativePath);
-		build.forcedVersion = jakeBuild.version().name();
+		build.init();
 		return build;
 	}
 
-	private static void populateProjectBuildField(JakeBuild mainBuild) {
+	private static List<JakeBuild> populateProjectBuildField(JakeBuild mainBuild) {
+		final List<JakeBuild> result = new LinkedList<JakeBuild>();
 		final List<Field> fields = JakeUtilsReflect.getAllDeclaredField(mainBuild.getClass(), JakeProject.class);
 		for (final Field field : fields) {
 			final JakeProject jakeProject = field.getAnnotation(JakeProject.class);
 			final JakeBuild subBuild = relativeProject(mainBuild, field.getType(), jakeProject.value());
 			JakeUtilsReflect.setFieldValue(mainBuild, field, subBuild);
+			result.add(subBuild);
 		}
-
+		return result;
 	}
 
 	private static class Locator {

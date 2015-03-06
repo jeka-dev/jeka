@@ -26,7 +26,7 @@ public class CoreBuild extends JakeJavaBuild {
 	// Include a time stamped version file as resource.
 	@Override
 	protected JakeResourceProcessor resourceProcessor() {
-		return JakeResourceProcessor.of(resourceDirs(), "version", version().name());
+		return JakeResourceProcessor.of(resourceDirs(), "version", version().name() + " - built at - " + buildTimestamp());
 	}
 
 	@Override
