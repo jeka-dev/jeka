@@ -5,6 +5,7 @@ import java.io.File;
 import org.jake.CoreBuild;
 import org.jake.JakeBuild;
 import org.jake.JakeDir;
+import org.jake.JakeLog;
 import org.jake.JakeProject;
 import org.jake.JakeZipper;
 import org.jake.plugins.jacoco.PluginsJakeocoBuild;
@@ -22,13 +23,19 @@ public class DistribBuild extends JakeBuild {
 	@Override
 	public void base() {
 		super.base();
+		distrib();
+	}
+	
+	public void distrib() {
 		
 		// build dependee projects
 		this.buildDependencies().invokeOnAllTransitiveBase();
 		
+		JakeLog.start("Creating distribution file");
+		
 		// copy core distribution locally
-		CoreBuild core = pluginsJacoco.core;
-		JakeDir dist = JakeDir.of(this.ouputDir("dist")).copyDirContent(core.distFolder());
+		CoreBuild core = pluginsJacoco.core;  // The core project is got by transitivity
+		JakeDir dist = JakeDir.of(this.ouputDir("dist")).copyDirContent(core.distribFolder);
 		
 		// Add plugins to the distribution
 		JakeDir ext = dist.sub("libs/ext").copyFiles(pluginsSonar.packer().jarFile(), pluginsJacoco.packer().jarFile());
@@ -39,7 +46,9 @@ public class DistribBuild extends JakeBuild {
 		JakeZipper.of().merge(ext.include("**/*.jar")).appendTo(fat);
 		
 		// pack all
-		dist.zip().to(this.ouputDir("jake-distrib.jar"));
+		dist.zip().to(this.ouputDir("jake-distrib.zip"));
+		
+		JakeLog.done();
 	}
 	
 	

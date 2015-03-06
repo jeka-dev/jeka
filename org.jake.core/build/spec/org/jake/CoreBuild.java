@@ -13,8 +13,14 @@ import org.jake.java.build.JakeJavaPacker;
  */
 public class CoreBuild extends JakeJavaBuild {
 
-	public File distripZipFile() {
-		return ouputDir("jake-distrib.zip");
+	public File distripZipFile;
+
+	public File distribFolder;
+
+	@Override
+	protected void init() {
+		distripZipFile = ouputDir("jake-distrib.zip");
+		distribFolder = ouputDir("jake-distrib");
 	}
 
 	// Just to run directly the whole build bypassing the Jake bootstrap mechanism.
@@ -31,7 +37,7 @@ public class CoreBuild extends JakeJavaBuild {
 
 	@Override
 	protected JakeJavaPacker createPacker() {
-		return super.createPacker().withFatJar(true).withFullName(true);
+		return super.createPacker().withFatJar(true);
 	}
 
 	// Include the making of the distribution into the application packaging.
@@ -42,11 +48,10 @@ public class CoreBuild extends JakeJavaBuild {
 	}
 
 	private void distrib() {
-		final JakeDir distribDir = baseDir().sub("build/output/jake-distrib");
-		final File distripZipFile = ouputDir("jake-distrib.zip");
-		JakeLog.startln("Creating distrib " + distripZipFile().getPath());
+		final JakeDir distribDir = JakeDir.of(distribFolder);
+		JakeLog.startln("Creating distrib " + distripZipFile.getPath());
 		final JakeJavaPacker packer = packer();
-		distribDir.copyDirContent(distFolder());
+		distribDir.copyDirContent(baseDir("src/main/dist"));
 		distribDir.copyFiles(packer.jarFile(), packer.fatJarFile());
 		distribDir.sub("libs/required").copyDirContent(baseDir("build/libs/compile"));
 		distribDir.sub("libs/sources").copyDirContent(baseDir("build/libs-sources")).copyFiles(packer.jarSourceFile());
@@ -54,8 +59,5 @@ public class CoreBuild extends JakeJavaBuild {
 		JakeLog.done();
 	}
 
-	public File distFolder() {
-		return baseDir("src/main/dist");
-	}
 
 }

@@ -240,7 +240,7 @@ public class JakeJavaBuild extends JakeBuild {
 	}
 
 	public final JakeUnit unitTester() {
-		return JakeJavaBuildPlugin.apply(plugins.get(JakeJavaBuildPlugin.class), createUnitTester());
+		return JakeJavaBuildPlugin.apply(plugins.getActives(), createUnitTester());
 	}
 
 	protected JakeUnit createUnitTester() {
@@ -260,7 +260,7 @@ public class JakeJavaBuild extends JakeBuild {
 	}
 
 	public final JakeJavaPacker packer() {
-		return JakeJavaBuildPlugin.apply(plugins.get(JakeJavaBuildPlugin.class), createPacker());
+		return JakeJavaBuildPlugin.apply(plugins.getActives(), createPacker());
 	}
 
 	protected JakeJavaPacker createPacker() {

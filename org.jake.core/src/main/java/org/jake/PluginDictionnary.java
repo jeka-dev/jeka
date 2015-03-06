@@ -18,10 +18,9 @@ import org.jake.utils.JakeUtilsString;
  * Jake offers a very simple, yet powerful, plugin mechanism.<br/>
  * Basically it offers to discover every classes in the classpath that inherit from a given class and that respect a certain naming covention.<br/>
  * <p>
- * The convention naming is as follow : The class simple name should suffixed by the simple name of the extended class.<br/>
+ * The convention naming is as follow : The class simple name should be suffixed by the simple name of the extended class.<br/>
  * For example, a plugin class extending <code>or.jake.java.build.JakeJavaBuildPlugin</code> class must be named 'my.package.XxxxxJakeJavaBuildPlugin.class'
- * to be discovered.
- * Xxxxx will be its short name, while my.package.XxxxxJakeJavaBuildPlugin will be its full name.
+ * to be discovered :Xxxxx will be its short name, while my.package.XxxxxJakeJavaBuildPlugin will be its full name.
  * 
  * @param <T> The plugin base class.
  * @author Jerome Angibaud

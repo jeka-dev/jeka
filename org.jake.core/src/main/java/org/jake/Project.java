@@ -223,6 +223,7 @@ class Project {
 
 		final JakeBuild build = JakeUtilsReflect.newInstance(buildClass);
 		JakeOptions.populateFields(build);
+		build.init();
 
 		JakeLog.info("Use build class '" + buildClass.getCanonicalName()
 				+ "' with methods : "
@@ -351,6 +352,10 @@ class Project {
 	@Override
 	public String toString() {
 		return this.projectBaseDir.getName();
+	}
+
+	private static List<BuildMethod> fromMethodinvokation(Iterable<CommandLine.MethodInvocation> invocation) {
+		PluginDictionnary.
 	}
 
 

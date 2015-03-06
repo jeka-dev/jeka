@@ -9,6 +9,10 @@ package org.jake;
  */
 public abstract class JakeBuildPlugin {
 
+	public Class<? extends JakeBuild> baseBuildClass() {
+		return JakeBuild.class;
+	}
+
 	public abstract void configure(JakeBuild build);
 
 	/**
@@ -18,7 +22,7 @@ public abstract class JakeBuildPlugin {
 		// Do nothing by default
 	}
 
-	static void applyVerify(Iterable<JakeBuildPlugin> plugins) {
+	static void applyVerify(Iterable<? extends JakeBuildPlugin> plugins) {
 		for (final JakeBuildPlugin plugin : plugins) {
 			plugin.verify();
 		}

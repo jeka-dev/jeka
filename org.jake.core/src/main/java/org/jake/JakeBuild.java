@@ -368,7 +368,7 @@ public class JakeBuild {
 
 	@JakeDoc("Run checks to verify the package is valid and meets quality criteria.")
 	public void verify() {
-		JakeBuildPlugin.applyVerify(this.plugins.get(JakeBuildPlugin.class));
+		JakeBuildPlugin.applyVerify(this.plugins.getActives());
 	}
 
 	@JakeDoc("Display all available methods defined in this build.")
@@ -379,6 +379,16 @@ public class JakeBuild {
 	@JakeDoc("Display details on all available plugins.")
 	public void helpPlugins() {
 		HelpDisplayer.helpPlugins(this);
+	}
+
+	void invoke(BuildMethod buildMethod) {
+		JakeLog.underlined("Method : " + buildMethod.methodName);
+		if (buildMethod.isMethodPlugin()) {
+			this.plugins.invoke(buildMethod.pluginClass, buildMethod.methodName);
+		} else {
+			this.invoke(buildMethod.methodName);
+		}
+		JakeLog.done();
 	}
 
 	private static final JakeBuild relativeProject(JakeBuild jakeBuild, Class<?> clazz, String relativePath) {

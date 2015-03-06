@@ -1,7 +1,7 @@
 package org.jake;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,12 +18,76 @@ public final class JakeBuildPlugins {
 
 	private final Map<Class<? extends JakeBuildPlugin>, JakeBuildPlugin> activatedPlugins = new LinkedHashMap<Class<? extends JakeBuildPlugin>, JakeBuildPlugin>();
 
-	public JakeBuildPlugins(JakeBuild holder) {
+	JakeBuildPlugins(JakeBuild holder) {
 		super();
 		this.holder = holder;
 	}
 
-	public void addActivated(Class<? extends JakeBuildPlugin> exactPluginClass, Map<String, String> options) {
+	/**
+	 * Add and activate the specified plugin for the holding build.
+	 * Activate means that the plugin will be executed whenever it redefine an extension point.
+	 */
+	public void addActivated(JakeBuildPlugin plugin) {
+		if (!accept(plugin)) {
+			return;
+		}
+		plugin.configure(holder);
+		activatedPlugins.put(plugin.getClass(),  plugin);
+	}
+
+	/**
+	 * Add and configure the specified plugin for the holding build.
+	 * Configure means that the plugin will not be executed at extension point. But it
+	 * is on the specified instance that method may be invoked on.
+	 */
+	public void addConfigured(JakeBuildPlugin plugin) {
+		if (!accept(plugin)) {
+			return;
+		}
+		plugin.configure(holder);
+		configuredPlugins.put(plugin.getClass(), plugin);
+	}
+
+
+	void addActivated(Class<? extends JakeBuildPlugin> exactPluginClass, Map<String, String> options) {
+		final JakeBuildPlugin plugin = getOrCreate(exactPluginClass);
+		JakeOptions.populateFields(plugin, options);
+		addActivated(plugin);
+	}
+
+	void addConfigured(Class<? extends JakeBuildPlugin> exactPluginClass, Map<String, String> options) {
+		final JakeBuildPlugin plugin = getOrCreate(exactPluginClass);
+		JakeOptions.populateFields(plugin, options);
+		addConfigured(plugin);
+	}
+
+	/**
+	 * Returns all the activated plugins for the holding plugin.
+	 */
+	public  List<JakeBuildPlugin> getActives() {
+		return new ArrayList<JakeBuildPlugin>(this.activatedPlugins.values());
+	}
+
+	void invoke(Class<JakeBuildPlugin> exactPluginClass, String method) {
+		if (!JakeUtilsReflect.isMethodPublicIn(exactPluginClass, method)) {
+			throw new JakeException("No zero-arg public method found in " + exactPluginClass.getName() );
+		}
+		JakeBuildPlugin buildPlugin = this.activatedPlugins.get(exactPluginClass);
+		if (buildPlugin == null) {
+			buildPlugin = this.configuredPlugins.get(exactPluginClass);
+		}
+		if (buildPlugin == null) {
+			buildPlugin = JakeUtilsReflect.newInstance(exactPluginClass);
+			buildPlugin.configure(holder);
+		}
+		JakeUtilsReflect.invoke(buildPlugin, method);
+	}
+
+	private boolean accept(JakeBuildPlugin plugin) {
+		return plugin.baseBuildClass().isAssignableFrom(holder.getClass());
+	}
+
+	private JakeBuildPlugin getOrCreate(Class<? extends JakeBuildPlugin> exactPluginClass) {
 		final JakeBuildPlugin plugin;
 		if (activatedPlugins.containsKey(exactPluginClass)) {
 			plugin = activatedPlugins.get(exactPluginClass);
@@ -32,29 +96,7 @@ public final class JakeBuildPlugins {
 		} else 	{
 			plugin = JakeUtilsReflect.newInstance(exactPluginClass);
 		}
-		JakeOptions.populateFields(plugin, options);
-		addActivated(plugin);
-	}
-
-	public void addActivated(JakeBuildPlugin plugin) {
-		plugin.configure(holder);
-		activatedPlugins.put(plugin.getClass(),  plugin);
-	}
-
-	public void addConfigured(JakeBuildPlugin plugin) {
-		plugin.configure(holder);
-		configuredPlugins.put(plugin.getClass(), plugin);
-	}
-
-	@SuppressWarnings({ "unchecked" })
-	public <T extends JakeBuildPlugin> List<T> get(Class<T> clazz) {
-		final List<T> result = new LinkedList<T>();
-		for (final Map.Entry<Class<? extends JakeBuildPlugin>, JakeBuildPlugin> entry : this.activatedPlugins.entrySet()) {
-			if (clazz.isAssignableFrom(entry.getKey())) {
-				result.add((T) entry.getValue());
-			}
-		}
-		return result;
+		return plugin;
 	}
 
 

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public final class JakeBuildDependencies {
@@ -45,6 +46,12 @@ public final class JakeBuildDependencies {
 			JakeLog.done("Build " + name(build));
 		}
 		JakeLog.done();
+	}
+
+	void activatePlugin(Class<? extends JakeBuildPlugin> clazz, Map<String, String> options) {
+		for (final JakeBuild build : this.transitiveBuilds()) {
+			build.plugins.addActivated(clazz, options);
+		}
 	}
 
 	private static List<String> buildNames(List<JakeBuild> builds) {
