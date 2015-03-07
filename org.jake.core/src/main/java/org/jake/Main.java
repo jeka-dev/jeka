@@ -31,7 +31,7 @@ class Main {
 		final Map<String, String> optionMap = new HashMap<String, String>();
 		optionMap.putAll(loadOptionsProperties());
 		final CommandLine commandLine = CommandLine.of(args);
-		optionMap.putAll(commandLine.options());
+		optionMap.putAll(commandLine.getSubProjectBuildOptions());
 		JakeOptions.init(optionMap);
 		JakeLog.info("Using global options : " + JakeOptions.fieldOptionsToString(JakeOptions.instance()));
 		JakeLog.info("And free form options : " + JakeOptions.freeFormToString());
@@ -39,11 +39,8 @@ class Main {
 		final File workingDir = JakeUtilsFile.workingDir();
 		final Project project = new Project(workingDir, repos());
 		JakeLog.nextLine();
-		final boolean result = project.execute(
-				commandLine.methods(), commandLine.pluginSetups(), JakeOptions.buildClass());
-		if (!result) {
-			System.exit(1);  // NOSONAR
-		}
+		project.execute(commandLine, JakeOptions.buildClass());
+		printAscii("succes.ascii");
 	}
 
 	private static JakeRepos repos() {
@@ -77,8 +74,8 @@ class Main {
 
 	}
 
-	private static int printAsciiArt1() {
-		final InputStream inputStream = Main.class.getResourceAsStream("ascii1.txt");
+	private static int printAscii(String fileName) {
+		final InputStream inputStream = Main.class.getResourceAsStream(fileName);
 		final List<String> lines = JakeUtilsIO.readLines(inputStream);
 		int i = 0;
 		for (final String line: lines) {
@@ -91,7 +88,7 @@ class Main {
 	}
 
 	private static void displayIntro() {
-		final int lenght = printAsciiArt1();
+		final int lenght = printAscii("jake.ascii");
 		JakeLog.info(JakeUtilsString.repeat(" ", lenght) + "The 100% Java build system.");
 		final String version = JakeUtilsIO.readResourceIfExist("org/jake/version.txt");
 		if (version != null) {

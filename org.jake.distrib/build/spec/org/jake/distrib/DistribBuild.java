@@ -23,7 +23,6 @@ public class DistribBuild extends JakeBuild {
 	@Override
 	public void base() {
 		super.base();
-		distrib();
 	}
 	
 	public void distrib() {
@@ -31,7 +30,7 @@ public class DistribBuild extends JakeBuild {
 		// build dependee projects
 		this.buildDependencies().invokeOnAllTransitiveBase();
 		
-		JakeLog.start("Creating distribution file");
+		JakeLog.startln("Creating distribution file");
 		
 		// copy core distribution locally
 		CoreBuild core = pluginsJacoco.core;  // The core project is got by transitivity

@@ -3,6 +3,7 @@ package org.jake.utils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -111,6 +112,14 @@ public final class JakeUtilsReflect {
 	public static <T> T invoke(Object target, Method method) {
 		try {
 			return (T) method.invoke(target);
+		} catch(final InvocationTargetException e) {
+			if (e.getTargetException() instanceof RuntimeException) {
+				throw (RuntimeException) e.getTargetException();
+			} else {
+				throw new RuntimeException(e.getTargetException());
+			}
+		} catch (final RuntimeException e) {
+			throw e;
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}

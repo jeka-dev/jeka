@@ -11,7 +11,7 @@ import org.jake.utils.JakeUtilsFile;
 
 @JakeDoc({"Run Sonar analysis",
 	"When activated this plugin run a Sonar analysis when the build 'verify' method is invoked."})
-public class SonarJakeJavaBuildPlugin extends JakeJavaBuildPlugin {
+public class JakeBuildPluginSonar extends JakeJavaBuildPlugin {
 	
 	public static JakeSonar configureSonarFrom(JakeJavaBuild build) {
 		final File baseDir = build.baseDir().root();

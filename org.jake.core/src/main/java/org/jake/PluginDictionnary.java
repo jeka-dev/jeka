@@ -16,11 +16,11 @@ import org.jake.utils.JakeUtilsString;
  * Contains the Plugin description for all concrete plugin classes extending a given base class.
  * <p>
  * Jake offers a very simple, yet powerful, plugin mechanism.<br/>
- * Basically it offers to discover every classes in the classpath that inherit from a given class and that respect a certain naming covention.<br/>
+ * Basically it offers to discover every classes in the classpath that inherit from a given class and that respect a certain naming convention.<br/>
  * <p>
- * The convention naming is as follow : The class simple name should be suffixed by the simple name of the extended class.<br/>
- * For example, a plugin class extending <code>or.jake.java.build.JakeJavaBuildPlugin</code> class must be named 'my.package.XxxxxJakeJavaBuildPlugin.class'
- * to be discovered :Xxxxx will be its short name, while my.package.XxxxxJakeJavaBuildPlugin will be its full name.
+ * The convention naming is as follow : The class simple name should be prefixed by the simple name of the plugin base class.<br/>
+ * For example, a plugin class for <code>or.jake.java.build.JakeBuildPlugin</code> class must be named 'my.package.JakeJavaBuildPluginXxxxx.class'
+ * to be discovered :Xxxxx will be its short name, while my.package.JakeJavaBuildPluginXxxxx will be its full name.
  * 
  * @param <T> The plugin base class.
  * @author Jerome Angibaud
@@ -72,7 +72,7 @@ final class PluginDictionnary<T>  {
 	 * capitalized for you so using "myPluging" or "MyPlugin" is equal.
 	 * If not found, returns <code>null</code>.
 	 */
-	private JakePluginDescription<T> loadByName(String name) {
+	public JakePluginDescription<T> loadByName(String name) {
 		if (!name.contains(".")) {
 			final JakePluginDescription<T> result = loadPluginHavingShortName(templateClass, JakeUtilsString.capitalize(name));
 			if (result != null) {
@@ -80,6 +80,18 @@ final class PluginDictionnary<T>  {
 			}
 		}
 		return loadPluginsHavingLongName(templateClass, name);
+	}
+
+	public JakePluginDescription<T> loadByNameOrFail(String name) {
+		final JakePluginDescription<T> result = loadByName(name);
+		if (result == null) {
+			throw new IllegalArgumentException("No class found having name " + simpleClassName(templateClass, name) + " for plugin '" + name +"'.");
+		}
+		return result;
+	}
+
+	private static String simpleClassName(Class<?> templateClass, String pluginName) {
+		return templateClass.getSimpleName() + JakeUtilsString.capitalize(pluginName);
 	}
 
 	/**
@@ -113,8 +125,8 @@ final class PluginDictionnary<T>  {
 	}
 
 	private static <T> JakePluginDescription<T> loadPluginHavingShortName(Class<T> templateClass, String shortName) {
-		final String nameSuffix = templateClass.getSimpleName();
-		final Set<JakePluginDescription<T>> set = loadPlugins(templateClass, "**/" + shortName + nameSuffix);
+		final String simpleName = simpleClassName(templateClass, shortName);
+		final Set<JakePluginDescription<T>> set = loadPlugins(templateClass, "**/" + simpleName);
 		if (set.size() > 1) {
 			throw new JakeException("Several plugin have the same short name : '" + shortName + "'. Please disambiguate with using plugin long name (full class name)."
 					+ " Following plugins have same shortName : " + set);
@@ -125,6 +137,7 @@ final class PluginDictionnary<T>  {
 		return set.iterator().next();
 	}
 
+
 	private static <T> JakePluginDescription<T> loadPluginsHavingLongName(Class<T> templateClass, String longName) {
 		final Class<? extends T> pluginClass = JakeClassLoader.current().loadIfExist(longName);
 		if (pluginClass == null) {
@@ -134,7 +147,7 @@ final class PluginDictionnary<T>  {
 	}
 
 	private static <T> Set<JakePluginDescription<T>> loadPlugins(Class<T> templateClass, String pattern) {
-		final Set<Class<?>> matchingClasses = JakeClassLoader.current().loadClasses(pattern);
+		final Set<Class<?>> matchingClasses = JakeClassLoader.of(templateClass).loadClasses(pattern);
 		final Set<Class<?>> result = new HashSet<Class<?>>();
 		for (final Class<?> candidate : matchingClasses) {
 			if (templateClass.isAssignableFrom(candidate)

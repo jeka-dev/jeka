@@ -31,7 +31,7 @@ public final class JakeocoJunitEnhancer implements Enhancer {
 	}
 
 	public static JakeocoJunitEnhancer of(File destFile, File projectDir) {
-		final URL url = JakeocoJakeJavaBuildPlugin.class.getResource("jacocoagent.jar");
+		final URL url = JakeBuildPluginJacoco.class.getResource("jacocoagent.jar");
 		final File file = JakeUtilsIO.getFileFromUrl(url, new File(projectDir, "/build/output/temp"));
 		return new JakeocoJunitEnhancer(file, true, destFile, new LinkedList<String>());
 	}

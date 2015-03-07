@@ -351,6 +351,15 @@ public final class JakeClassLoader {
 	}
 
 	/**
+	 * Same as {@link #addEntry(File)} but for several entries.
+	 */
+	public void addEntries(Iterable<File> entries) {
+		for (final File file : entries) {
+			addEntry(file);
+		}
+	}
+
+	/**
 	 * Invokes a static method on the specified class using the provided arguments. <br/>
 	 * If the argument classes are the same on the current class loader and this one then arguments are passed as is,
 	 * otherwise arguments are serialize in the current class loader and  deserialized

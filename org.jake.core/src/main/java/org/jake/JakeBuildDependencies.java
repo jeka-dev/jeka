@@ -33,17 +33,17 @@ public final class JakeBuildDependencies {
 	}
 
 	public void invokeOnAllTransitiveBase() {
-		this.invokeOnAllTransitive("base");
+		this.invokeOnAllTransitive(BuildMethod.normal("base"));
 	}
 
-	public void invokeOnAllTransitive(String ... methods) {
+	public void invokeOnAllTransitive(String ...methods) {
+		this.invokeOnAllTransitive(BuildMethod.normals(methods));
+	}
+
+	void invokeOnAllTransitive(BuildMethod... methods) {
 		JakeLog.startln("Invoking methods " + Arrays.toString(methods) + " on " + buildNames(transitiveBuilds()));
 		for (final JakeBuild build : transitiveBuilds()) {
-			JakeLog.startHeaded("Building " + name(build));
-			for (final String methodName : methods) {
-				build.invoke(methodName);
-			}
-			JakeLog.done("Build " + name(build));
+			build.execute(Arrays.asList(methods));
 		}
 		JakeLog.done();
 	}
@@ -61,11 +61,6 @@ public final class JakeBuildDependencies {
 		}
 		return result;
 	}
-
-	private static String name(JakeBuild build) {
-		return build.baseDir().root().getName();
-	}
-
 
 	private List<JakeBuild> resolveTransitiveBuilds(Set<BuildKey> keys) {
 		final List<JakeBuild> result = new LinkedList<JakeBuild>();

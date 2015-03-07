@@ -10,7 +10,7 @@ import org.jake.java.testing.junit.JakeUnit;
 import org.jake.java.testing.junit.JakeUnit.Enhancer;
 
 @JakeDoc("Performs Jacoco code coverage analysing while junit is running.")
-public class JakeocoJakeJavaBuildPlugin extends JakeJavaBuildPlugin {
+public class JakeBuildPluginJacoco extends JakeJavaBuildPlugin {
 
 
 	public static Enhancer enhancer(JakeJavaBuild jakeJavaBuild) {

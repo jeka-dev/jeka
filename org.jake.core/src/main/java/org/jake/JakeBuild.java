@@ -307,7 +307,7 @@ public class JakeBuild {
 	}
 
 	/**
-	 * This method is invoked right after the base directory of this buils had been set, so
+	 * This method is invoked right after the base directory of this builds had been set, so
 	 * you can initialize fields safely here.
 	 */
 	protected void init() {
@@ -317,18 +317,38 @@ public class JakeBuild {
 	 * Invokes the specified method in this build.
 	 */
 	final void invoke(String methodName) {
+		final Method method;
 		try {
-			final Method method = this.getClass().getMethod(methodName);
-			JakeUtilsReflect.invoke(this, method);
+			method = this.getClass().getMethod(methodName);
 		} catch (final NoSuchMethodException e) {
 			JakeLog.warn("No zero-arg method '" + methodName
 					+ "' found in class '" + this.getClass()  + "'. Skip.");
 			return;
 		}
+		JakeLog.startUnderlined("Method : " + methodName);
+		try {
+			JakeUtilsReflect.invoke(this, method);
+			JakeLog.done("Method " + methodName + " success.");
+		} catch (final RuntimeException e) {
+			JakeLog.done("Method " + methodName + " failed.");
+			throw e;
+		}
+	}
+
+	final void execute(Iterable<BuildMethod> methods) {
+		final String name = this.baseDir().root().getName();
+		JakeLog.startHeaded("Executing building for project " + name);
+		JakeLog.info("Using build class " + this.getClass().getName());
+		JakeLog.info("With options " + JakeOptions.fieldOptionsToString(this));
+		JakeLog.nextLine();
+		for (final BuildMethod method : methods) {
+			this.invoke(method);
+		}
+		JakeLog.done("Build " + name);
 	}
 
 	/**
-	 * Return a file located at the specified path relative to the base directory.
+	 * Returns a file located at the specified path relative to the base directory.
 	 */
 	public final File baseDir(String relativePath) {
 		if (relativePath.isEmpty()) {
@@ -382,13 +402,11 @@ public class JakeBuild {
 	}
 
 	void invoke(BuildMethod buildMethod) {
-		JakeLog.underlined("Method : " + buildMethod.methodName);
 		if (buildMethod.isMethodPlugin()) {
 			this.plugins.invoke(buildMethod.pluginClass, buildMethod.methodName);
 		} else {
 			this.invoke(buildMethod.methodName);
 		}
-		JakeLog.done();
 	}
 
 	private static final JakeBuild relativeProject(JakeBuild jakeBuild, Class<?> clazz, String relativePath) {

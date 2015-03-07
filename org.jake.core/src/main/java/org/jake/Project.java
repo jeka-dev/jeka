@@ -1,19 +1,15 @@
 package org.jake;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.jake.CommandLine.JakePluginSetup;
 import org.jake.CommandLine.MethodInvocation;
-import org.jake.PluginDictionnary.JakePluginDescription;
 import org.jake.depmanagement.JakeArtifact;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeRepos;
@@ -24,7 +20,6 @@ import org.jake.java.eclipse.JakeEclipseBuild;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
-import org.jake.utils.JakeUtilsTime;
 
 /**
  * Buildable project. This class has the responsability to compile the build classes along to run them.<br/>
@@ -51,9 +46,11 @@ class Project {
 
 	private JakeRepos buildRepos;
 
-	private JakeClasspath buildClasspath = JakeClasspath.of();
+	//private JakeClasspath buildClasspath = JakeClasspath.of();
 
 	private List<File> subProjects = new LinkedList<File>();
+
+	private JakePath buildPath;
 
 
 	/**
@@ -77,20 +74,24 @@ class Project {
 	}
 
 	public void compile() {
-		compile(new HashSet<File>());
+		final LinkedHashSet<File> entries = new LinkedHashSet<File>();
+		compile(new HashSet<File>(), entries);
+		this.buildPath = JakePath.of(entries);
+
 	}
 
-	private void compile(Set<File> yetCompiledProjects) {
+	private void compile(Set<File> yetCompiledProjects, LinkedHashSet<File> path) {
 		if (!this.hasBuildSource() || yetCompiledProjects.contains(this.projectBaseDir)) {
 			return;
 		}
 		yetCompiledProjects.add(this.projectBaseDir);
 		preCompile();
-		JakeLog.startUnderlined("Making build classes for project " + this.projectBaseDir.getName());
-		JakePath extraPath = resolveBuildPath();
-		extraPath = extraPath.and(compileDependentProjects(yetCompiledProjects));
-		this.compileBuild(extraPath.and(localBuildPath()));
-		this.buildClasspath = this.buildClasspath.and(extraPath.and(this.buildBinDir()));
+		JakeLog.startHeaded("Making build classes for project " + this.projectBaseDir.getName());
+		path.addAll(resolveBuildPath().entries());
+		path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
+		path.addAll(localBuildPath().entries());
+		this.compileBuild(JakePath.of(path));
+		path.add(this.buildBinDir());
 		JakeLog.done();
 	}
 
@@ -100,31 +101,23 @@ class Project {
 	 * @param buildClassNameHint The full or simple class name of the build class to execute. It can be <code>null</code>
 	 * or empty.
 	 */
-	public boolean execute(
-			Iterable<MethodInvocation> methods, Iterable<CommandLine.JakePluginSetup> setups, String buildClassNameHint) {
+	public void execute(CommandLine commandLine, String buildClassNameHint) {
 		compile();
-		final long start = System.nanoTime();
 		JakeLog.nextLine();
-		JakeLog.displayHead("Executing build for project : " + this);
-		JakeLog.nextLine();
-		final JakeClassLoader classLoader;
-		if (hasBuildSource() && this.buildClasspath == null) {
+		if (hasBuildSource() && this.buildPath == null) {
 			throw new IllegalStateException("You need to compile build source prior executing the build.");
 		}
-		if (!hasBuildSource() || this.buildClasspath.isEmpty()) {
-			classLoader = JakeClassLoader.current();
-		} else {
-			classLoader = JakeClassLoader.current().createChild(this.buildClasspath);
-		}
+		final JakeClassLoader classLoader = JakeClassLoader.current();
+		classLoader.addEntries(this.buildPath);
+		JakeLog.info("Setting build execution classpath to : " + classLoader.fullClasspath());
 		final Class<? extends JakeBuild> buildClass = this.findBuildClass(classLoader, buildClassNameHint);
-		final boolean result = this.launch(buildClass, methods, setups, classLoader);
-		final float duration = JakeUtilsTime.durationInSeconds(start);
-		if (result) {
-			JakeLog.info("--> Project " + projectBaseDir.getAbsolutePath() + " built with success in " + duration + " seconds.");
-		} else {
-			JakeLog.error("--> Project " + projectBaseDir.getAbsolutePath() + " failed after " + duration + " seconds.");
+
+		try {
+			this.launch(buildClass, commandLine);
+		} catch(final RuntimeException e) {
+			JakeLog.error("Project " + projectBaseDir.getAbsolutePath() + " failed");
+			throw e;
 		}
-		return result;
 	}
 
 	private boolean hasBuildSource() {
@@ -165,12 +158,11 @@ class Project {
 		return buildPath;
 	}
 
-	private JakePath compileDependentProjects(Set<File> yetCompiledProjects) {
-		JakePath jakePath = JakePath.of();
+	private JakePath compileDependentProjects(Set<File> yetCompiledProjects, LinkedHashSet<File> pathEntries) {
+		final JakePath jakePath = JakePath.of();
 		for (final File file : this.subProjects) {
 			final Project project = new Project(file, originalBuildRepos);
-			project.compile(yetCompiledProjects);
-			jakePath = jakePath.and(project.buildClasspath);
+			project.compile(yetCompiledProjects, pathEntries);
 		}
 		return jakePath;
 	}
@@ -218,110 +210,43 @@ class Project {
 		return null;
 	}
 
-	private boolean launch(Class<? extends JakeBuild> buildClass,
-			Iterable<MethodInvocation> methods, Iterable<JakePluginSetup> setups, JakeClassLoader classLoader) {
+	private void launch(Class<? extends JakeBuild> buildClass, 	CommandLine commandLine) {
 
 		final JakeBuild build = JakeUtilsReflect.newInstance(buildClass);
-		JakeOptions.populateFields(build);
+		JakeOptions.populateFields(build, commandLine.getMasterBuildOptions());
 		build.init();
 
-		JakeLog.info("Use build class '" + buildClass.getCanonicalName()
-				+ "' with methods : "
-				+ JakeUtilsString.toString(methods, ", ") + ".");
-		JakeLog.info("Using classpath : " + classLoader.fullClasspath());
-		if (JakeOptions.hasFieldOptions(buildClass)) {
-			JakeLog.info("With options : " + JakeOptions.fieldOptionsToString(build));
-		}
-
-		final Map<String, Object> pluginMap = instantiatePlugins(build.pluginTemplateClasses(), setups);
-		final List<Object> plugins = new LinkedList<Object>(pluginMap.values());
-		build.setPlugins(plugins);
-		for (final Object plugin : plugins) {
-			JakeLog.info("Using plugin " + plugin.getClass().getName() + " with options " + JakeOptions.fieldOptionsToString(plugin));
+		// setup plugins
+		final Class<JakeBuildPlugin> baseClass = JakeClassLoader.of(buildClass).load(JakeBuildPlugin.class.getName());
+		final PluginDictionnary<JakeBuildPlugin> dictionnary = PluginDictionnary.of(baseClass);
+		for (final JakePluginSetup pluginSetup : commandLine.getMasterPluginSetups()) {
+			final Class<? extends JakeBuildPlugin> pluginClass =
+					dictionnary.loadByNameOrFail(pluginSetup.pluginName).pluginClass();
+			if (pluginSetup.activated) {
+				final Object plugin = build.plugins.addActivated(pluginClass, pluginSetup.options);
+				JakeLog.info("Activating plugin " + pluginClass.getName() + " with options "
+						+ JakeOptions.fieldOptionsToString(plugin));
+			} else {
+				final Object plugin = build.plugins.addConfigured(pluginClass, pluginSetup.options);
+				JakeLog.info("Configuring plugin " + pluginClass.getName() + " with options "
+						+ JakeOptions.fieldOptionsToString(plugin));
+			}
 		}
 		JakeLog.nextLine();
 
-		for (final MethodInvocation methodInvokation : methods) {
-
-			final Method method;
-			final String actionIntro = "Method : " + methodInvokation.toString();
-			JakeLog.underlined(actionIntro);
-			Class<?> targetClass = null;
-			try {
-				if (methodInvokation.isMethodPlugin()) {
-					targetClass = pluginMap.get(methodInvokation.pluginName).getClass();
-				} else {
-					targetClass = buildClass;
-				}
-				method = targetClass.getMethod(methodInvokation.methodName);
-			} catch (final NoSuchMethodException e) {
-				JakeLog.warn("No zero-arg method '" + methodInvokation.methodName
-						+ "' found in class '" + targetClass  + "'. Skip.");
-				continue;
+		final List<BuildMethod> buildMethods = new LinkedList<BuildMethod>();
+		for (final MethodInvocation methodInvokation : commandLine.getMasterMethods()) {
+			if (methodInvokation.isMethodPlugin()) {
+				final Class<? extends JakeBuildPlugin> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName).pluginClass();
+				buildMethods.add(BuildMethod.pluginMethod(clazz, methodInvokation.methodName));
+			} else {
+				buildMethods.add(BuildMethod.normal(methodInvokation.methodName));
 			}
-			if (!Void.TYPE.equals(method.getReturnType())) {
-				JakeLog.warn("A zero-arg method '" + methodInvokation
-						+ "' found in class '" + targetClass + "' but was not returning a void result. Skip.");
-				continue;
-			}
-			final long start = System.nanoTime();
-			boolean success = false;
-			try {
-				if (methodInvokation.isMethodPlugin()) {
-					method.invoke(pluginMap.get(methodInvokation.pluginName));
-				} else {
-					method.invoke(build);
-				}
-				success = true;
-			} catch (final SecurityException e) {
-				throw new RuntimeException(e);
-			} catch (final IllegalAccessException e) {
-				throw new RuntimeException(e);
-			} catch (final InvocationTargetException e) {
-				final Throwable target = e.getTargetException();
-				if (target instanceof JakeException) {
-					JakeLog.error(target.getMessage());
-					return false;
-				} else if (target instanceof RuntimeException) {
-					throw (RuntimeException) target;
-				} else {
-					throw new RuntimeException(target);
-				}
-			} finally {
-				JakeLog.nextLine();
-				if (success) {
-					JakeLog.info("-> Method " + methodInvokation + " executed in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
-				} else {
-					JakeLog.error("-> Method " + methodInvokation + " failed in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
-				}
-			}
-			JakeLog.nextLine();
 		}
-		return true;
+		build.execute(buildMethods);
 	}
 
-	private static Map<String, Object> instantiatePlugins(Iterable<Class<Object>> templateClasses,
-			Iterable<JakePluginSetup> setups) {
-		final Map<String, Object> result = new LinkedHashMap<String, Object>();
-		final Set<String> names = JakePluginSetup.names(setups);
-		final Set<String> unmatchingNames = new HashSet<String>(names);
-		for (final Class<Object> templateClass : templateClasses) {
-			final PluginDictionnary<Object> plugins = PluginDictionnary.of(templateClass);
-			final Map<String, JakePluginDescription<Object>> pluginDescriptions = plugins.loadAllByNames(names);
-			unmatchingNames.removeAll(pluginDescriptions.keySet());
-			for (final String name : pluginDescriptions.keySet()) {
-				final JakePluginDescription<Object> desc = pluginDescriptions.get(name);
-				final Object plugin = JakeUtilsReflect.newInstance(desc.pluginClass());
-				final JakePluginSetup setup = JakePluginSetup.findOrFail(name, setups);
-				JakeOptions.populateFields(plugin, setup.options);
-				result.put(name, plugin);
-			}
-		}
-		if (!unmatchingNames.isEmpty()) {
-			JakeLog.warn("No plugins found with name : " + unmatchingNames);
-		}
-		return result;
-	}
+
 
 	private JakeJavaCompiler baseBuildCompiler() {
 		final JakeDir buildSource = JakeDir.of(buildSourceDir()).include("**/*.java").exclude("**/_*");
@@ -347,16 +272,9 @@ class Project {
 		return JakePath.of(JakeArtifact.localFiles(artifacts));
 	}
 
-
-
 	@Override
 	public String toString() {
 		return this.projectBaseDir.getName();
 	}
-
-	private static List<BuildMethod> fromMethodinvokation(Iterable<CommandLine.MethodInvocation> invocation) {
-		PluginDictionnary.
-	}
-
 
 }

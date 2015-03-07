@@ -49,16 +49,18 @@ public final class JakeBuildPlugins {
 	}
 
 
-	void addActivated(Class<? extends JakeBuildPlugin> exactPluginClass, Map<String, String> options) {
+	JakeBuildPlugin addActivated(Class<? extends JakeBuildPlugin> exactPluginClass, Map<String, String> options) {
 		final JakeBuildPlugin plugin = getOrCreate(exactPluginClass);
 		JakeOptions.populateFields(plugin, options);
 		addActivated(plugin);
+		return plugin;
 	}
 
-	void addConfigured(Class<? extends JakeBuildPlugin> exactPluginClass, Map<String, String> options) {
+	JakeBuildPlugin addConfigured(Class<? extends JakeBuildPlugin> exactPluginClass, Map<String, String> options) {
 		final JakeBuildPlugin plugin = getOrCreate(exactPluginClass);
 		JakeOptions.populateFields(plugin, options);
 		addConfigured(plugin);
+		return plugin;
 	}
 
 	/**
@@ -68,7 +70,11 @@ public final class JakeBuildPlugins {
 		return new ArrayList<JakeBuildPlugin>(this.activatedPlugins.values());
 	}
 
-	void invoke(Class<JakeBuildPlugin> exactPluginClass, String method) {
+	List<JakeBuildPlugin> getConfiguredPlugins() {
+		return new ArrayList<JakeBuildPlugin>(this.configuredPlugins.values());
+	}
+
+	void invoke(Class<? extends JakeBuildPlugin> exactPluginClass, String method) {
 		if (!JakeUtilsReflect.isMethodPublicIn(exactPluginClass, method)) {
 			throw new JakeException("No zero-arg public method found in " + exactPluginClass.getName() );
 		}

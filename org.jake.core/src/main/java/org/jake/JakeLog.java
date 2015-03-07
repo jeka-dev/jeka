@@ -27,7 +27,7 @@ public class JakeLog {
 	 * and all subsequent logs will be shift right until {@link #done()} is invoked.
 	 */
 	public static void start(String message) {
-		infoWriter.print("- " + message +  " ... " );
+		infoWriter.print(message +  " ... " );
 		incOffset();
 		startTimer();
 	}
@@ -53,8 +53,9 @@ public class JakeLog {
 	 * As {@link #startln(String)} but underline the message.
 	 */
 	public static void startUnderlined(String message) {
-		startln(message);
-		JakeLog.info(JakeUtilsString.repeat("-", message.length() + 4));
+		underlined(message);
+		incOffset();
+		startTimer();
 	}
 
 	/**
@@ -84,14 +85,15 @@ public class JakeLog {
 	}
 
 	private static void doneMessage(String message) {
+		decOffset();
 		final LinkedList<Long> times = START_TIMES.get();
 		if (times == null || times.isEmpty()) {
 			throw new IllegalStateException("This 'done' do no match to any 'start'. "
 					+"Please, use 'done' only to mention that the previous 'start' activity is done.");
 		}
 		final long start = times.poll();
-		infoWriter.println(message + " in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
-		decOffset();
+		infoWriter.println("==> " + message + " in " + JakeUtilsTime.durationInSeconds(start) + " seconds.");
+
 	}
 
 	/**
