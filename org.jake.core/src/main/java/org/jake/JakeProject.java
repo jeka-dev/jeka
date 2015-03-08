@@ -7,9 +7,10 @@ import java.lang.annotation.Target;
 
 /**
  * Specifies that the annotated element is a build of a another project.
+ * This annotated element is supposed to be a {@link JakeBuild} or its subclasses.
  * The expected value is the referenced project path relative to the project
  * the annotated element belong. <br/>
- * So for example if there is A project FooA and and project FooB belonging to the
+ * So for example if there is a project FooA and and a project FooB belonging to the
  * same folder. In project FooA we can reference project FooB by annotating
  * a {@link JakeBuild} field with value <code>../FooB</code>.
  * 

@@ -1,5 +1,8 @@
 package org.jake;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.jake.utils.JakeUtilsAssert;
 
 final class BuildMethod {
@@ -8,10 +11,10 @@ final class BuildMethod {
 		return new BuildMethod(name, null);
 	}
 
-	public static BuildMethod[] normals(String ... names) {
-		final BuildMethod[] result = new BuildMethod[names.length];
-		for (int i=0; i<names.length; i++) {
-			result[i] = BuildMethod.normal(names[i]);
+	public static List<BuildMethod> normals(String ... names) {
+		final List<BuildMethod> result = new LinkedList<BuildMethod>();
+		for (final String name : names) {
+			result.add(BuildMethod.normal(name));
 		}
 		return result;
 	}

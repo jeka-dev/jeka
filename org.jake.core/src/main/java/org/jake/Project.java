@@ -109,7 +109,7 @@ class Project {
 		}
 		final JakeClassLoader classLoader = JakeClassLoader.current();
 		classLoader.addEntries(this.buildPath);
-		JakeLog.info("Setting build execution classpath to : " + classLoader.fullClasspath());
+		JakeLog.info("Setting build execution classpath to : " + classLoader.childClasspath());
 		final Class<? extends JakeBuild> buildClass = this.findBuildClass(classLoader, buildClassNameHint);
 
 		try {
@@ -232,10 +232,32 @@ class Project {
 						+ JakeOptions.fieldOptionsToString(plugin));
 			}
 		}
+		for (final JakePluginSetup pluginSetup : commandLine.getSubProjectPluginSetups()) {
+			final Class<? extends JakeBuildPlugin> pluginClass =
+					dictionnary.loadByNameOrFail(pluginSetup.pluginName).pluginClass();
+			if (pluginSetup.activated) {
+				JakeLog.info("Activate plugin " + pluginSetup.pluginName + " on sub projects");
+				build.buildDependencies().activatePlugin(pluginClass, pluginSetup.options);
+
+			} else {
+				JakeLog.info("Configure plugin " + pluginSetup.pluginName + " on sub projects");
+				build.buildDependencies().configurePlugin(pluginClass, pluginSetup.options);
+			}
+		}
 		JakeLog.nextLine();
 
+		if (!commandLine.getSubProjectMethods().isEmpty()
+				&& !build.buildDependencies().transitiveBuilds().isEmpty()) {
+			JakeLog.startHeaded("Executing dependent projects");
+			build.buildDependencies().executeOnAllTransitive(toBuildMethods(commandLine.getSubProjectMethods(), dictionnary));
+			JakeLog.done();
+		}
+		build.execute(toBuildMethods(commandLine.getMasterMethods(), dictionnary));
+	}
+
+	private static List<BuildMethod> toBuildMethods(Iterable<MethodInvocation> invocations, PluginDictionnary<JakeBuildPlugin> dictionnary) {
 		final List<BuildMethod> buildMethods = new LinkedList<BuildMethod>();
-		for (final MethodInvocation methodInvokation : commandLine.getMasterMethods()) {
+		for (final MethodInvocation methodInvokation : invocations) {
 			if (methodInvokation.isMethodPlugin()) {
 				final Class<? extends JakeBuildPlugin> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName).pluginClass();
 				buildMethods.add(BuildMethod.pluginMethod(clazz, methodInvokation.methodName));
@@ -243,10 +265,8 @@ class Project {
 				buildMethods.add(BuildMethod.normal(methodInvokation.methodName));
 			}
 		}
-		build.execute(buildMethods);
+		return buildMethods;
 	}
-
-
 
 	private JakeJavaCompiler baseBuildCompiler() {
 		final JakeDir buildSource = JakeDir.of(buildSourceDir()).include("**/*.java").exclude("**/_*");

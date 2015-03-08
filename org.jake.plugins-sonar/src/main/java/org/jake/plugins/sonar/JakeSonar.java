@@ -97,7 +97,7 @@ public final class JakeSonar {
             JakeLog.info("Sonar analysis skipped.");
         }
         JakeLog.startln("Launching Sonar analysis");
-        javaProcess().startAndWaitFor("org.sonar.runner.Main");
+        javaProcess().startAndWaitFor("org.sonar.runner.Main","-e");
         JakeLog.done();
     }
 
@@ -112,6 +112,7 @@ public final class JakeSonar {
         final JakeJavaProcess result = JakeJavaProcess.of()
                 .withClasspath(sonarRunnerJar)
                 .andOptions(toProperties());
+        
         return result;
     }
 
@@ -159,8 +160,12 @@ public final class JakeSonar {
     private String toPaths(Iterable<File> files) {
         final Iterator<File> it = files.iterator();
         final StringBuilder result = new StringBuilder();
+        File projectDir = projectDir();
         while (it.hasNext()) {
-            result.append(JakeUtilsFile.getRelativePath(projectDir(), it.next()));
+        	File file = it.next();
+        	String relativePath = JakeUtilsFile.getRelativePath(projectDir, file);
+        	System.out.println("+++++++++++"+projectDir+"----"+file+"+++++++++"+relativePath);
+        	result.append(relativePath);
             if (it.hasNext()) {
                 result.append(",");
             }

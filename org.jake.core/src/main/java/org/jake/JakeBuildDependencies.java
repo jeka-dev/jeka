@@ -2,13 +2,14 @@ package org.jake;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.jake.utils.JakeUtilsIterable;
 
 public final class JakeBuildDependencies {
 
@@ -32,20 +33,18 @@ public final class JakeBuildDependencies {
 		return resolvedTransitiveBuilds;
 	}
 
-	public void invokeOnAllTransitiveBase() {
-		this.invokeOnAllTransitive(BuildMethod.normal("base"));
+	public void invokeBaseOnAllSubProjects() {
+		this.executeOnAllTransitive(JakeUtilsIterable.listOf(BuildMethod.normal("base")));
 	}
 
 	public void invokeOnAllTransitive(String ...methods) {
-		this.invokeOnAllTransitive(BuildMethod.normals(methods));
+		this.executeOnAllTransitive(BuildMethod.normals(methods));
 	}
 
-	void invokeOnAllTransitive(BuildMethod... methods) {
-		JakeLog.startln("Invoking methods " + Arrays.toString(methods) + " on " + buildNames(transitiveBuilds()));
+	void executeOnAllTransitive(Iterable<BuildMethod> methods) {
 		for (final JakeBuild build : transitiveBuilds()) {
-			build.execute(Arrays.asList(methods));
+			build.execute(methods);
 		}
-		JakeLog.done();
 	}
 
 	void activatePlugin(Class<? extends JakeBuildPlugin> clazz, Map<String, String> options) {
@@ -54,12 +53,10 @@ public final class JakeBuildDependencies {
 		}
 	}
 
-	private static List<String> buildNames(List<JakeBuild> builds) {
-		final List<String> result = new LinkedList<String>();
-		for (final JakeBuild build : builds) {
-			result.add(build.baseDir().root().getName());
+	void configurePlugin(Class<? extends JakeBuildPlugin> clazz, Map<String, String> options) {
+		for (final JakeBuild build : this.transitiveBuilds()) {
+			build.plugins.addConfigured(clazz, options);
 		}
-		return result;
 	}
 
 	private List<JakeBuild> resolveTransitiveBuilds(Set<BuildKey> keys) {

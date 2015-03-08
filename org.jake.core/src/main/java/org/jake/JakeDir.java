@@ -132,7 +132,7 @@ public final class JakeDir implements Iterable<File> {
 	 * Copies the specified files at the root of this directory.
 	 * Folder and unexisting files are ignored.
 	 */
-	public JakeDir copyFiles(File ... filesToCopy) {
+	public JakeDir importFiles(File ... filesToCopy) {
 		createIfNotExist();
 		for(final File file : filesToCopy ) {
 			if (file.exists() && !file.isDirectory()) {

@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.jake.JakeBuild;
 import org.jake.JakeDoc;
+import org.jake.JakePath;
 import org.jake.java.build.JakeJavaBuild;
 import org.jake.java.build.JakeJavaBuildPlugin;
 import org.jake.java.testing.junit.JakeUnit.JunitReportDetail;
@@ -15,10 +16,12 @@ public class JakeBuildPluginSonar extends JakeJavaBuildPlugin {
 	
 	public static JakeSonar configureSonarFrom(JakeJavaBuild build) {
 		final File baseDir = build.baseDir().root();
+		JakePath libs = build.depsFor(JakeJavaBuild.COMPILE, JakeJavaBuild.PROVIDED);
+		System.out.println(libs);
 		return JakeSonar.of(build.projectFullName(), build.projectName(), build.version())
                 .withProjectBaseDir(baseDir)
                 .withBinaries(build.classDir())
-                .withLibraries(build.depsFor(JakeJavaBuild.COMPILE))
+                .withLibraries(libs)
                 .withSources(build.editedSourceDirs().roots())
                 .withTest(build.testSourceDirs().roots())
                 .withProperty(JakeSonar.WORKING_DIRECTORY, build.baseDir("build/.sonar").getPath())

@@ -24,7 +24,7 @@ import org.jake.utils.JakeUtilsString;
  */
 class CommandLine {
 
-	private static final String MASTER_ONLY_SYMBOL = "@";
+	private static final String ALL_BUILD_SYMBOL = "*";
 
 	private static final String PLUGIN_SYMBOL = "#";
 
@@ -60,15 +60,14 @@ class CommandLine {
 	}
 
 
-
-
 	private static List<MethodInvocation> extractMethods(String[] words, boolean master) {
 		final List<MethodInvocation> result = new LinkedList<MethodInvocation>();
 		for (final String word : words) {
-			if (!word.startsWith("-") && !word.endsWith(PLUGIN_SYMBOL) && !word.endsWith(PLUGIN_SYMBOL+MASTER_ONLY_SYMBOL)) {
-				if (word.endsWith(MASTER_ONLY_SYMBOL) && master) {
-					result.add(MethodInvocation.parse(JakeUtilsString.substringAfterLast(word, MASTER_ONLY_SYMBOL)));
-				} else if (!word.endsWith(MASTER_ONLY_SYMBOL)) {
+			if (!word.startsWith("-") && !word.endsWith(PLUGIN_SYMBOL) && !word.endsWith(PLUGIN_SYMBOL+ALL_BUILD_SYMBOL)) {
+				if (word.endsWith(ALL_BUILD_SYMBOL)) {
+					final String trunc  = JakeUtilsString.substringBeforeLast(word, ALL_BUILD_SYMBOL);
+					result.add(MethodInvocation.parse(trunc));
+				} else if (master) {
 					result.add(MethodInvocation.parse(word));
 				}
 			}
@@ -87,20 +86,19 @@ class CommandLine {
 				if (equalIndex <= -1) {  // no '=' so we just associate the key with a null value
 					final String key = word.substring(1);
 					if (!key.contains(PLUGIN_SYMBOL)) {  // if   '#' is present this means that it concerns plugin option, not build options
-						if (key.endsWith(MASTER_ONLY_SYMBOL) && master) {
-							result.put(JakeUtilsString.substringBeforeLast(key, MASTER_ONLY_SYMBOL), null);
-						} else if (!key.endsWith(MASTER_ONLY_SYMBOL)){
+						if (key.endsWith(ALL_BUILD_SYMBOL)) {
+							result.put(JakeUtilsString.substringBeforeLast(key, ALL_BUILD_SYMBOL), null);
+						} else if (master){
 							result.put(key, null);
 						}
-
 					}
 				} else {
 					final String key = word.substring(1, equalIndex);
 					if (!key.contains(PLUGIN_SYMBOL)) {
 						final String value = word.substring(equalIndex+1);
-						if (value.endsWith(MASTER_ONLY_SYMBOL) && master) {
-							result.put(key, JakeUtilsString.substringBeforeLast(value, MASTER_ONLY_SYMBOL));
-						} else if (!value.endsWith(MASTER_ONLY_SYMBOL)){
+						if (value.endsWith(ALL_BUILD_SYMBOL)) {
+							result.put(key, JakeUtilsString.substringBeforeLast(value, ALL_BUILD_SYMBOL));
+						} else if (master){
 							result.put(key, value);
 						}
 
@@ -114,11 +112,11 @@ class CommandLine {
 	private static Collection<JakePluginSetup> extractPluginSetup(String words[], boolean master) {
 		final Map<String, JakePluginSetup> setups = new HashMap<String, JakePluginSetup>();
 		for (String word : words) {
-			if (word.endsWith(MASTER_ONLY_SYMBOL) && !master) {
+			if (!word.endsWith(ALL_BUILD_SYMBOL) && !master) {
 				continue;
 			}
-			if (word.endsWith(MASTER_ONLY_SYMBOL)) {
-				word = JakeUtilsString.substringAfterLast(word, MASTER_ONLY_SYMBOL);
+			if (word.endsWith(ALL_BUILD_SYMBOL)) {
+				word = JakeUtilsString.substringBeforeLast(word, ALL_BUILD_SYMBOL);
 			}
 			if (MethodInvocation.isPluginMethodInvokation(word)) {
 				final String pluginName = JakeUtilsString.substringBeforeFirst(word, PLUGIN_SYMBOL);
@@ -193,6 +191,9 @@ class CommandLine {
 		}
 
 		private static boolean isPluginMethodInvokation(String word) {
+			if (word.startsWith("-")) {
+				return false;
+			}
 			return JakeUtilsString.countOccurence(word, PLUGIN_SYMBOL_CHAR) == 1 && !word.startsWith(PLUGIN_SYMBOL) && !word.endsWith(PLUGIN_SYMBOL);
 		}
 

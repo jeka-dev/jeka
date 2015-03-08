@@ -323,6 +323,7 @@ public class JakeBuild {
 		} catch (final NoSuchMethodException e) {
 			JakeLog.warn("No zero-arg method '" + methodName
 					+ "' found in class '" + this.getClass()  + "'. Skip.");
+			JakeLog.warnStream().flush();
 			return;
 		}
 		JakeLog.startUnderlined("Method : " + methodName);

@@ -39,8 +39,15 @@ class Main {
 		final File workingDir = JakeUtilsFile.workingDir();
 		final Project project = new Project(workingDir, repos());
 		JakeLog.nextLine();
-		project.execute(commandLine, JakeOptions.buildClass());
-		printAscii("succes.ascii");
+		try {
+			project.execute(commandLine, JakeOptions.buildClass());
+			printAscii(false, "succes.ascii");
+		} catch (final RuntimeException e) {
+			System.err.println();
+			e.printStackTrace(System.err);
+			printAscii(true, "failed.ascii");
+			System.exit(1);
+		}
 	}
 
 	private static JakeRepos repos() {
@@ -74,7 +81,7 @@ class Main {
 
 	}
 
-	private static int printAscii(String fileName) {
+	private static int printAscii(boolean error, String fileName) {
 		final InputStream inputStream = Main.class.getResourceAsStream(fileName);
 		final List<String> lines = JakeUtilsIO.readLines(inputStream);
 		int i = 0;
@@ -82,13 +89,17 @@ class Main {
 			if (i < line.length()) {
 				i = line.length();
 			}
-			JakeLog.info(line);
+			if (error) {
+				System.err.println(line);
+			} else {
+				System.out.println(line);
+			}
 		}
 		return i;
 	}
 
 	private static void displayIntro() {
-		final int lenght = printAscii("jake.ascii");
+		final int lenght = printAscii(false, "jake.ascii");
 		JakeLog.info(JakeUtilsString.repeat(" ", lenght) + "The 100% Java build system.");
 		final String version = JakeUtilsIO.readResourceIfExist("org/jake/version.txt");
 		if (version != null) {

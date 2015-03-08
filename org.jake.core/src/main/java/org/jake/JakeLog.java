@@ -139,7 +139,7 @@ public class JakeLog {
 	 */
 	public static void warn(Iterable<String> lines) {
 		for (final String line : lines) {
-			warnWriter.println(line);
+			warn(line);
 		}
 	}
 
@@ -147,7 +147,7 @@ public class JakeLog {
 	 * Displays a message at warn level.
 	 */
 	public static void warn(String message) {
-		warnWriter.println(message);
+		infoWriter.println("WARN : " + message);
 	}
 
 	/**

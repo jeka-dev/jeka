@@ -15,7 +15,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,19 +59,10 @@ public final class JakeUtilsFile {
 	 * File argument must be a child of the base directory otherwise method throw an {@link IllegalArgumentException}.
 	 */
 	public static String getRelativePath(File baseDir, File file) {
-		if(baseDir.equals(file)) {
-			throw new IllegalArgumentException("BaseDir and File can't be the same.");
-		}
-		final String baseDirPath = canonicalPath(baseDir);
-		final String filePath = canonicalPath(file);
-		if (!filePath.startsWith(baseDirPath)) {
-			return file.toURI().relativize(baseDir.toURI()).toString();
-		}
-		final String relativePath = filePath
-				.substring(baseDirPath.length() + 1);
-		return relativePath;
+		final FilePath basePath = FilePath.of(baseDir);
+		final FilePath filePath = FilePath.of(file);
+		return filePath.relativeTo(basePath).toString();
 	}
-
 
 
 	public static int copyDir(File source, File targetDir, FileFilter filter,
@@ -483,6 +476,112 @@ public final class JakeUtilsFile {
 		}
 	}
 
+	private static class FilePath {
+
+		public static FilePath of(File file) {
+			final List<String> elements = new ArrayList<String>();
+			for (File indexFile = file; indexFile != null; indexFile = indexFile.getParentFile()) {
+				if (indexFile.getParent() == null) {
+					elements.add(JakeUtilsString.substringBeforeLast(indexFile.getPath(), File.separator));
+				} else {
+					elements.add(indexFile.getName());
+				}
+			}
+			Collections.reverse(elements);
+			return new FilePath(elements);
+		}
+
+		private final List<String> elements;
+
+		private FilePath(List<String> elements) {
+			super();
+			this.elements = Collections.unmodifiableList(elements);
+		}
+
+		private FilePath common(FilePath other) {
+			final List<String> result = new LinkedList<String>();
+			for (int i = 0; i<elements.size(); i++) {
+				if (i>= other.elements.size()) {
+					break;
+				}
+				final String thisElement = this.elements.get(i);
+				final String otherElement = other.elements.get(i);
+				if (thisElement.equals(otherElement)) {
+					result.add(thisElement);
+				} else {
+					break;
+				}
+			}
+			return new FilePath(result);
+		}
+
+		public FilePath relativeTo(FilePath otherFolder) {
+			final FilePath common = this.common(otherFolder);
+
+			// this path is a sub past of the other
+			if (common.equals(otherFolder)) {
+				List<String> result = new ArrayList<String>(this.elements);
+				result = result.subList(common.elements.size(), this.elements.size());
+				return new FilePath(result);
+			}
+
+
+			final List<String> result = new ArrayList<String>();
+			for (int i = common.elements.size(); i < otherFolder.elements.size(); i++) {
+				result.add("..");
+			}
+			result.addAll(this.relativeTo(common).elements);
+			return new FilePath(result);
+		}
+
+		@Override
+		public String toString() {
+			final StringBuilder builder = new StringBuilder();
+			final Iterator<String> it = this.elements.iterator();
+			while(it.hasNext()) {
+				builder.append(it.next());
+				if (it.hasNext()) {
+					builder.append(File.separator);
+				}
+			}
+			return builder.toString();
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((elements == null) ? 0 : elements.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			final FilePath other = (FilePath) obj;
+			if (elements == null) {
+				if (other.elements != null) {
+					return false;
+				}
+			} else if (!elements.equals(other.elements)) {
+				return false;
+			}
+			return true;
+		}
+
+
+
+
+	}
 
 
 }
