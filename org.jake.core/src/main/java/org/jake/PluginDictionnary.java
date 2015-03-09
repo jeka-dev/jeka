@@ -127,6 +127,7 @@ final class PluginDictionnary<T>  {
 	private static <T> JakePluginDescription<T> loadPluginHavingShortName(Class<T> templateClass, String shortName) {
 		final String simpleName = simpleClassName(templateClass, shortName);
 		final Set<JakePluginDescription<T>> set = loadPlugins(templateClass, "**/" + simpleName);
+		set.addAll(loadPlugins(templateClass, "**/*$" + simpleName));
 		if (set.size() > 1) {
 			throw new JakeException("Several plugin have the same short name : '" + shortName + "'. Please disambiguate with using plugin long name (full class name)."
 					+ " Following plugins have same shortName : " + set);
@@ -146,7 +147,7 @@ final class PluginDictionnary<T>  {
 		return new JakePluginDescription<T>(templateClass, pluginClass);
 	}
 
-	private static <T> Set<JakePluginDescription<T>> loadPlugins(Class<T> templateClass, String pattern) {
+	private static <T> Set<JakePluginDescription<T>> (Class<T> templateClas, String pattern) {
 		final Set<Class<?>> matchingClasses = JakeClassLoader.of(templateClass).loadClasses(pattern);
 		final Set<Class<?>> result = new HashSet<Class<?>>();
 		for (final Class<?> candidate : matchingClasses) {
