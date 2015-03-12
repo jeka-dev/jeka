@@ -10,8 +10,8 @@ public class JakePluginsTest {
 
 	@Test
 	public void testPluginsLoading() {
-		final PluginDictionnary<PluginBaseMy> plugins = PluginDictionnary.of(PluginBaseMy.class);
-		final Set<JakePluginDescription<PluginBaseMy>> pluginSet = plugins.getAll();
+		final PluginDictionnary<PluginBase> plugins = PluginDictionnary.of(PluginBase.class);
+		final Set<JakePluginDescription<PluginBase>> pluginSet = plugins.getAll();
 		Assert.assertEquals(1, pluginSet.size());
 	}
 

@@ -94,23 +94,6 @@ final class PluginDictionnary<T>  {
 		return templateClass.getSimpleName() + JakeUtilsString.capitalize(pluginName);
 	}
 
-	/**
-	 * Returns all the plugins having one of the specified names (either it be its long name or its short name).
-	 * 
-	 * @see PluginDictionnary#loadByName(String)
-	 */
-	public Map<String, JakePluginDescription<T>> loadAllByNames(Iterable<String> names) {
-		final Map<String, JakePluginDescription<T>> result = new HashMap<String, PluginDictionnary.JakePluginDescription<T>>();
-		for (final String name : names) {
-			final JakePluginDescription<T> plugin = loadByName(name);
-			if (plugin != null) {
-				result.put(name, plugin);
-			}
-		}
-		return result;
-	}
-
-
 	@Override
 	public String toString() {
 		if (this.plugins == null) {
@@ -121,7 +104,7 @@ final class PluginDictionnary<T>  {
 
 	private static <T> Set<JakePluginDescription<T>> loadAllPlugins(Class<T> templateClass) {
 		final String nameSuffix = templateClass.getSimpleName();
-		return loadPlugins(templateClass, "**/*" + nameSuffix);
+		return loadPlugins(templateClass, "**/" + nameSuffix + "*", "**/*$" + nameSuffix + "*");
 	}
 
 	private static <T> JakePluginDescription<T> loadPluginHavingShortName(Class<T> templateClass, String shortName) {
@@ -147,8 +130,8 @@ final class PluginDictionnary<T>  {
 		return new JakePluginDescription<T>(templateClass, pluginClass);
 	}
 
-	private static <T> Set<JakePluginDescription<T>> (Class<T> templateClas, String pattern) {
-		final Set<Class<?>> matchingClasses = JakeClassLoader.of(templateClass).loadClasses(pattern);
+	private static <T> Set<JakePluginDescription<T>> loadPlugins(Class<T> templateClass, String ...patterns) {
+		final Set<Class<?>> matchingClasses = JakeClassLoader.of(templateClass).loadClasses(patterns);
 		final Set<Class<?>> result = new HashSet<Class<?>>();
 		for (final Class<?> candidate : matchingClasses) {
 			if (templateClass.isAssignableFrom(candidate)
