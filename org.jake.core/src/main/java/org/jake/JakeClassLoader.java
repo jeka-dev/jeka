@@ -286,11 +286,11 @@ public final class JakeClassLoader {
 	 * @see JakeClassLoader#loadClasses(JakeFileFilter)
 	 */
 	public Set<Class<?>> loadClasses(String ... includingPatterns) {
-		JakeFileFilter fileFilter = JakeFileFilter.ACCEPT_ALL;
-		for (final String parttern : includingPatterns) {
-			fileFilter = fileFilter.andInclude(parttern + ".class");
+		final List<String> patterns = new LinkedList<String>();
+		for (final String pattern : includingPatterns) {
+			patterns.add(pattern + ".class");
 		}
-		return loadClasses(fileFilter);
+		return loadClasses(JakeFileFilter.include(patterns));
 	}
 
 	/**

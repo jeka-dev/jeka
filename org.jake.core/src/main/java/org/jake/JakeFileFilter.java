@@ -40,6 +40,11 @@ public abstract class JakeFileFilter {
 		return new IncludeFilter(AntPattern.setOf(antPatterns));
 	}
 
+	public static JakeFileFilter include(Iterable<String> antPatterns) {
+		return new IncludeFilter(AntPattern.setOf(antPatterns));
+	}
+
+
 	/**
 	 * Creates an include filter excluding the specified and patterns.
 	 */

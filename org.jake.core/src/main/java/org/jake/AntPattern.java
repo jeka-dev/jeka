@@ -17,6 +17,7 @@
 package org.jake;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -83,12 +84,16 @@ final class AntPattern  {
 		return new AntPattern(pattern);
 	}
 
-	public static Set<AntPattern> setOf(String ...patterns) {
-		final Set<AntPattern> result = new HashSet<AntPattern>(patterns.length);
+	public static Set<AntPattern> setOf(Iterable<String> patterns) {
+		final Set<AntPattern> result = new HashSet<AntPattern>();
 		for (final String pattern : patterns) {
 			result.add(AntPattern.of(pattern));
 		}
 		return result;
+	}
+
+	public static Set<AntPattern> setOf(String ...patterns) {
+		return setOf(Arrays.asList(patterns));
 	}
 
 
