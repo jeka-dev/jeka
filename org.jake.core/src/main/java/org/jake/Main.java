@@ -14,6 +14,7 @@ import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsString;
+import org.jake.utils.JakeUtilsTime;
 
 /**
  * Main class for launching Jake from command line.
@@ -23,6 +24,7 @@ import org.jake.utils.JakeUtilsString;
 class Main {
 
 	public static void main(String[] args) {
+		final long start = System.nanoTime();
 		displayIntro();
 		JakeLog.info("Java Home : " + System.getProperty("java.home"));
 		JakeLog.info("Java Version : " + System.getProperty("java.version")+ ", " + System.getProperty("java.vendor"));
@@ -41,11 +43,15 @@ class Main {
 		JakeLog.nextLine();
 		try {
 			project.execute(commandLine, JakeOptions.buildClass());
-			printAscii(false, "succes.ascii");
+			final int lenght = printAscii(false, "succes.ascii");
+			System.out.println(JakeUtilsString.repeat(" ", lenght) + "Total build time : "
+					+ JakeUtilsTime.durationInSeconds(start) + " seconds.");
 		} catch (final RuntimeException e) {
 			System.err.println();
 			e.printStackTrace(System.err);
-			printAscii(true, "failed.ascii");
+			final int lenght = printAscii(true, "failed.ascii");
+			System.err.println(JakeUtilsString.repeat(" ", lenght) + "Total build time : "
+					+ JakeUtilsTime.durationInSeconds(start) + " seconds.");
 			System.exit(1);
 		}
 	}

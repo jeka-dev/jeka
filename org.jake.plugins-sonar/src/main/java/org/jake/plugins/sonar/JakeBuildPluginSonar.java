@@ -16,10 +16,9 @@ public class JakeBuildPluginSonar extends JakeJavaBuildPlugin {
 	
 	public static JakeSonar configureSonarFrom(JakeJavaBuild build) {
 		final File baseDir = build.baseDir().root();
-		JakePath libs = build.depsFor(JakeJavaBuild.COMPILE, JakeJavaBuild.PROVIDED);
-		System.out.println(libs);
+		final JakePath libs = build.depsFor(JakeJavaBuild.COMPILE, JakeJavaBuild.PROVIDED);
 		return JakeSonar.of(build.projectFullName(), build.projectName(), build.version())
-                .withProjectBaseDir(baseDir)
+                .withProjectBaseDir(baseDir) 
                 .withBinaries(build.classDir())
                 .withLibraries(libs)
                 .withSources(build.editedSourceDirs().roots())
@@ -27,12 +26,13 @@ public class JakeBuildPluginSonar extends JakeJavaBuildPlugin {
                 .withProperty(JakeSonar.WORKING_DIRECTORY, build.baseDir("build/.sonar").getPath())
                 .withProperty(JakeSonar.JUNIT_REPORTS_PATH, JakeUtilsFile.getRelativePath(baseDir, new File(build.testReportDir(), "junit")))
                 .withProperty(JakeSonar.SUREFIRE_REPORTS_PATH, JakeUtilsFile.getRelativePath(baseDir, new File(build.testReportDir(), "junit")))
-                .withProperty(JakeSonar.DYNAMIC_ANALYSIS, "reuseReports")
+                //.withProperty(JakeSonar.DYNAMIC_ANALYSIS, "reuseReports")
                 .withProperty(JakeSonar.JACOCO_REPORTS_PATH, JakeUtilsFile.getRelativePath(baseDir, new File(build.testReportDir(), "jacoco/jacoco.exec")));
 	}
 	
 	private JakeSonar jakeSonar;
 	
+	@Override
 	public void configure(JakeBuild build) {
 		final JakeJavaBuild javaBuild = (JakeJavaBuild) build;
 		javaBuild.junitReportDetail = JunitReportDetail.FULL;

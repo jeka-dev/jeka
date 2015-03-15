@@ -337,15 +337,9 @@ public class JakeBuild {
 	}
 
 	final void execute(Iterable<BuildMethod> methods) {
-		final String name = this.baseDir().root().getName();
-		JakeLog.startHeaded("Executing building for project " + name);
-		JakeLog.info("Using build class " + this.getClass().getName());
-		JakeLog.info("With options " + JakeOptions.fieldOptionsToString(this));
-		JakeLog.nextLine();
 		for (final BuildMethod method : methods) {
 			this.invoke(method);
 		}
-		JakeLog.done("Build " + name);
 	}
 
 	/**

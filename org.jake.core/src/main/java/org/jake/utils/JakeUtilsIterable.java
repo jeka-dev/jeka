@@ -246,11 +246,4 @@ public class JakeUtilsIterable {
 		return result;
 	}
 
-
-
-
-
-
-
-
 }

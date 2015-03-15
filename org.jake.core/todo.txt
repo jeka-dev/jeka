@@ -1,6 +1,4 @@
-- plugins
-    - configure plugins in global settings.properties
+- junit surefire report maybe mal formatted as Sonar does not find classes reports.
 
 - eclipse as a plugin (generate buildpath)
 
-- Add Jacoco html report

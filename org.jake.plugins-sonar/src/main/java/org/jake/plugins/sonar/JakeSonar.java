@@ -160,25 +160,24 @@ public final class JakeSonar {
     private String toPaths(Iterable<File> files) {
         final Iterator<File> it = files.iterator();
         final StringBuilder result = new StringBuilder();
-        File projectDir = projectDir();
+        final File projectDir = projectDir();
         while (it.hasNext()) {
-        	File file = it.next();
-        	String relativePath = JakeUtilsFile.getRelativePath(projectDir, file);
-        	System.out.println("+++++++++++"+projectDir+"----"+file+"+++++++++"+relativePath);
+        	final File file = it.next();
+        	final String relativePath = JakeUtilsFile.getRelativePath(projectDir, file);
         	result.append(relativePath);
             if (it.hasNext()) {
                 result.append(",");
             }
         }
         return result.toString();
-    }
+    } 
 
     private File jarRunner() {
     	final File globalJar = new File(JakeUtilsFile.tempDir(), "/jake/" + RUNNER_JAR_NAME_24);
     	if (!globalJar.exists()) {
     		try {
     			return createRunnerJar(JakeUtilsFile.tempDir()); 
-    		} catch (Exception e) {
+    		} catch (final Exception e) {
     			return createRunnerJar(new File(projectDir(), RUNNER_LOCAL_PATH));
     		}
     	} 
@@ -187,10 +186,10 @@ public final class JakeSonar {
     
     private static File createRunnerJar(File parent) {
     	parent.mkdirs();
-		File file = new File(parent, RUNNER_JAR_NAME_24);
+		final File file = new File(parent, RUNNER_JAR_NAME_24);
 		try {
 			file.createNewFile();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException();
 		}
 		JakeUtilsIO.copyUrlToFile(JakeSonar.class.getResource(RUNNER_JAR_NAME_24), file);

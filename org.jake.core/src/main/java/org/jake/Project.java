@@ -2,10 +2,12 @@ package org.jake;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jake.CommandLine.JakePluginSetup;
@@ -104,9 +106,6 @@ class Project {
 	public void execute(CommandLine commandLine, String buildClassNameHint) {
 		compile();
 		JakeLog.nextLine();
-		if (hasBuildSource() && this.buildPath == null) {
-			throw new IllegalStateException("You need to compile build source prior executing the build.");
-		}
 		final JakeClassLoader classLoader = JakeClassLoader.current();
 		classLoader.addEntries(this.buildPath);
 		JakeLog.info("Setting build execution classpath to : " + classLoader.childClasspath());
@@ -219,40 +218,48 @@ class Project {
 		// setup plugins
 		final Class<JakeBuildPlugin> baseClass = JakeClassLoader.of(buildClass).load(JakeBuildPlugin.class.getName());
 		final PluginDictionnary<JakeBuildPlugin> dictionnary = PluginDictionnary.of(baseClass);
-		for (final JakePluginSetup pluginSetup : commandLine.getMasterPluginSetups()) {
-			final Class<? extends JakeBuildPlugin> pluginClass =
-					dictionnary.loadByNameOrFail(pluginSetup.pluginName).pluginClass();
-			if (pluginSetup.activated) {
-				final Object plugin = build.plugins.addActivated(pluginClass, pluginSetup.options);
-				JakeLog.info("Activating plugin " + pluginClass.getName() + " with options "
-						+ JakeOptions.fieldOptionsToString(plugin));
-			} else {
-				final Object plugin = build.plugins.addConfigured(pluginClass, pluginSetup.options);
-				JakeLog.info("Configuring plugin " + pluginClass.getName() + " with options "
-						+ JakeOptions.fieldOptionsToString(plugin));
-			}
-		}
-		for (final JakePluginSetup pluginSetup : commandLine.getSubProjectPluginSetups()) {
-			final Class<? extends JakeBuildPlugin> pluginClass =
-					dictionnary.loadByNameOrFail(pluginSetup.pluginName).pluginClass();
-			if (pluginSetup.activated) {
-				JakeLog.info("Activate plugin " + pluginSetup.pluginName + " on sub projects");
-				build.buildDependencies().activatePlugin(pluginClass, pluginSetup.options);
-
-			} else {
-				JakeLog.info("Configure plugin " + pluginSetup.pluginName + " on sub projects");
-				build.buildDependencies().configurePlugin(pluginClass, pluginSetup.options);
-			}
-		}
-		JakeLog.nextLine();
 
 		if (!commandLine.getSubProjectMethods().isEmpty()
 				&& !build.buildDependencies().transitiveBuilds().isEmpty()) {
 			JakeLog.startHeaded("Executing dependent projects");
-			build.buildDependencies().executeOnAllTransitive(toBuildMethods(commandLine.getSubProjectMethods(), dictionnary));
+			for (final JakeBuild subBuild : build.buildDependencies().transitiveBuilds()) {
+				configurePluginsAndRun(subBuild, commandLine.getSubProjectMethods(),
+						commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
+
+			}
 			JakeLog.done();
 		}
-		build.execute(toBuildMethods(commandLine.getMasterMethods(), dictionnary));
+		configurePluginsAndRun(build, commandLine.getMasterMethods(),
+				commandLine.getMasterPluginSetups(), commandLine.getMasterBuildOptions(), dictionnary);
+	}
+
+	private static void configurePluginsAndRun(JakeBuild build, List<MethodInvocation> invokes,
+			Collection<JakePluginSetup> pluginSetups, Map<String, String> options,  PluginDictionnary<JakeBuildPlugin> dictionnary) {
+		JakeLog.startHeaded("Executing building for project " + build.baseDir().root().getName());
+		JakeLog.info("Using build class " + build.getClass().getName());
+		JakeOptions.populateFields(build, options);
+		configureAndActivatePlugins(build, pluginSetups, dictionnary);
+		JakeLog.info("Build options : " + JakeOptions.fieldOptionsToString(build));
+		build.execute(toBuildMethods(invokes, dictionnary));
+		JakeLog.done("Build " + build.baseDir().root().getName());
+	}
+
+	private static void configureAndActivatePlugins(JakeBuild build, Collection<JakePluginSetup> pluginSetups, PluginDictionnary<JakeBuildPlugin> dictionnary) {
+		for (final JakePluginSetup pluginSetup : pluginSetups) {
+			final Class<? extends JakeBuildPlugin> pluginClass =
+					dictionnary.loadByNameOrFail(pluginSetup.pluginName).pluginClass();
+			if (pluginSetup.activated) {
+				JakeLog.startln("Activating plugin " + pluginClass.getName());
+				final Object plugin = build.plugins.addActivated(pluginClass, pluginSetup.options);
+				JakeLog.done("Activating plugin " + pluginClass.getName() + " with options "
+						+ JakeOptions.fieldOptionsToString(plugin));
+			} else {
+				JakeLog.startln("Configuring plugin " + pluginClass.getName());
+				final Object plugin = build.plugins.addConfigured(pluginClass, pluginSetup.options);
+				JakeLog.done("Configuring plugin " + pluginClass.getName() + " with options "
+						+ JakeOptions.fieldOptionsToString(plugin));
+			}
+		}
 	}
 
 	private static List<BuildMethod> toBuildMethods(Iterable<MethodInvocation> invocations, PluginDictionnary<JakeBuildPlugin> dictionnary) {
