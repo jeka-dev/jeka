@@ -51,10 +51,10 @@ public class CoreBuild extends JakeJavaBuild {
 		final JakeDir distribDir = JakeDir.of(distribFolder);
 		JakeLog.startln("Creating distrib " + distripZipFile.getPath());
 		final JakeJavaPacker packer = packer();
-		distribDir.copyDirContent(baseDir("src/main/dist"));
+		distribDir.copyInDirContent(baseDir("src/main/dist"));
 		distribDir.importFiles(packer.jarFile(), packer.fatJarFile());
-		distribDir.sub("libs/required").copyDirContent(baseDir("build/libs/compile"));
-		distribDir.sub("libs/sources").copyDirContent(baseDir("build/libs-sources")).importFiles(packer.jarSourceFile());
+		distribDir.sub("libs/required").copyInDirContent(baseDir("build/libs/compile"));
+		distribDir.sub("libs/sources").copyInDirContent(baseDir("build/libs-sources")).importFiles(packer.jarSourceFile());
 		distribDir.zip().to(distripZipFile, Deflater.BEST_COMPRESSION);
 		JakeLog.done();
 	}

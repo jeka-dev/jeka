@@ -119,7 +119,7 @@ public final class JakeDir implements Iterable<File> {
 	 * Copies the content of the specified directory in the root of the root of this directory.
 	 * If specified directory does not exist then nothing happen.
 	 */
-	public JakeDir copyDirContent(File dirToCopyContent) {
+	public JakeDir copyInDirContent(File dirToCopyContent) {
 		createIfNotExist();
 		if (!dirToCopyContent.exists()) {
 			return this;
@@ -127,6 +127,18 @@ public final class JakeDir implements Iterable<File> {
 		JakeUtilsFile.copyDir(dirToCopyContent, this.root, null, true);
 		return this;
 	}
+
+	/**
+	 * Copies the specified files in the root of the root of this directory.
+	 */
+	public JakeDir copyInFiles(Iterable<File> files) {
+		createIfNotExist();
+		for (final File file : files) {
+			JakeUtilsFile.copyFileToDir(file, this.root, false, null);
+		}
+		return this;
+	}
+
 
 	/**
 	 * Copies the specified files at the root of this directory.

@@ -31,7 +31,7 @@ public class JakeJavaPacker {
 		this(buildBase, false, false, Deflater.DEFAULT_COMPRESSION, true, false);
 	}
 
-	private JakeJavaPacker(JakeJavaBuild buildBase, boolean includeVersion, boolean fatJar, int compressionLevel, boolean fullName, boolean checkSum) {
+	protected JakeJavaPacker(JakeJavaBuild buildBase, boolean includeVersion, boolean fatJar, int compressionLevel, boolean fullName, boolean checkSum) {
 		super();
 		this.build = buildBase;
 		this.fatJar = fatJar;

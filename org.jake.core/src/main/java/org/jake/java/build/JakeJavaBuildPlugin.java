@@ -4,7 +4,11 @@ import org.jake.JakeBuild;
 import org.jake.JakeBuildPlugin;
 import org.jake.java.testing.junit.JakeUnit;
 
-
+/**
+ * Class to extend to create plugin for {@link JakeJavaBuild}.
+ * 
+ * @author Jerome Angibaud
+ */
 public abstract class JakeJavaBuildPlugin extends JakeBuildPlugin {
 
 	@Override
