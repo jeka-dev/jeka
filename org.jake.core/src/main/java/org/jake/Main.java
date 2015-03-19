@@ -34,6 +34,7 @@ class Main {
 		optionMap.putAll(loadOptionsProperties());
 		final CommandLine commandLine = CommandLine.of(args);
 		optionMap.putAll(commandLine.getSubProjectBuildOptions());
+		optionMap.putAll(commandLine.getMasterBuildOptions() );
 		JakeOptions.init(optionMap);
 		JakeLog.info("Using global options : " + JakeOptions.fieldOptionsToString(JakeOptions.instance()));
 		JakeLog.info("And free form options : " + JakeOptions.freeFormToString());

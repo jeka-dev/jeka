@@ -10,36 +10,57 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.jake.java.testing.junit.JakeTestSuiteResult.IgnoredCase;
 import org.jake.java.testing.junit.JakeTestSuiteResult.TestCaseFailure;
+import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsString;
 
-final class JakeTestReportBuilder {
+final class TestReportBuilder {
+
+	private static final String TEXT_HEAD = JakeUtilsString.repeat("-", 79);
 
 	private static final XMLOutputFactory FACTORY = XMLOutputFactory
 			.newInstance();
 
 	private final JakeTestSuiteResult result;
 
-	private JakeTestReportBuilder(JakeTestSuiteResult result) {
+	private TestReportBuilder(JakeTestSuiteResult result) {
 		this.result = result;
 	}
 
-	public static JakeTestReportBuilder of(JakeTestSuiteResult result) {
-		return new JakeTestReportBuilder(result);
+	public static TestReportBuilder of(JakeTestSuiteResult result) {
+		return new TestReportBuilder(result);
 	}
 
 	public void writeToFileSystem(File folder) {
 		folder.mkdirs();
-		final File file = new File(folder, "TEST-" + result.suiteName()
+		final File xmlFile = new File(folder, "TEST-" + result.suiteName()
 				+ ".xml");
+		final File textFile = new File(folder, result.suiteName() + ".txt");
 		try {
-			file.createNewFile();
-			writeFile(file);
+			xmlFile.createNewFile();
+			textFile.createNewFile();
+			writeXmlFile(xmlFile);
+			writeTxtFile(textFile);
+		} catch (final RuntimeException e) {
+			throw e;
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private void writeFile(File xmlFile) throws XMLStreamException, IOException {
+	private void writeTxtFile(File txtFile) {
+		final StringBuilder builder = new StringBuilder(TEXT_HEAD).append("\n")
+				.append("Test set: ").append(result.suiteName()).append("\n")
+				.append(TEXT_HEAD).append("\n")
+				.append("Tests run: ").append(result.runCount()).append(", ")
+				.append("Failures: ").append(result.assertErrorCount()).append(", ")
+				.append("Errors: ").append(result.errorCount()).append(", ")
+				.append("Skipped: ").append(result.ignoreCount()).append(", ")
+				.append("Time elapsed: ").append(result.durationInMillis()/1000f)
+				.append(" sec");
+		JakeUtilsFile.writeString(txtFile, builder.toString(), false);
+	}
+
+	private void writeXmlFile(File xmlFile) throws XMLStreamException, IOException {
 		final XMLStreamWriter writer = FACTORY
 				.createXMLStreamWriter(new FileWriter(xmlFile));
 		writer.writeStartDocument();
@@ -52,7 +73,7 @@ final class JakeTestReportBuilder {
 		writer.writeAttribute("errors", Integer.toString(result.errorCount()));
 		writer.writeAttribute("name", result.suiteName());
 		writer.writeAttribute("time",
-				Float.toString((float) result.durationInMillis() / 1000));
+				Float.toString(result.durationInMillis() / 1000f));
 		writer.writeCharacters("\n");
 
 		writeProperties(writer);

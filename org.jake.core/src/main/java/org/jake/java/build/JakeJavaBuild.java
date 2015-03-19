@@ -244,7 +244,8 @@ public class JakeJavaBuild extends JakeBuild {
 	}
 
 	protected JakeUnit createUnitTester() {
-		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir()).and(this.depsFor(TEST, PROVIDED));
+		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir())
+				.and(this.depsFor(TEST, PROVIDED));
 		final File junitReport = new File(this.testReportDir(), "junit");
 		return JakeUnit.of(classpath)
 				.withReportDir(junitReport)

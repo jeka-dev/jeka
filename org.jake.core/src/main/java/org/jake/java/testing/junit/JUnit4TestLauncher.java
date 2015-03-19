@@ -7,6 +7,7 @@ import java.util.List;
 import org.jake.JakeClassLoader;
 import org.jake.JakeClasspath;
 import org.jake.JakeLocator;
+import org.jake.JakeLog;
 import org.jake.java.JakeJavaProcess;
 import org.jake.java.testing.junit.JakeUnit.JunitReportDetail;
 import org.jake.utils.JakeUtilsFile;
@@ -27,11 +28,7 @@ class JUnit4TestLauncher {
 			args.add(clazz.getName());
 		}
 		final JakeJavaProcess process;
-		if (needJakeInClasspath(printEachTestOnConsole, reportDetail)) {
-			process = jakeJavaProcess.andClasspath(JakeClasspath.of(JakeLocator.jakeJarFile()));
-		} else {
-			process = jakeJavaProcess;
-		}
+		process = jakeJavaProcess.andClasspath(JakeClasspath.of(JakeLocator.jakeJarFile()));
 		process.startAndWaitFor(JUnit4TestExecutor.class.getName(), args.toArray(new String[0]));
 		return (JakeTestSuiteResult) JakeUtilsIO.deserialize(file);
 	}
@@ -40,18 +37,17 @@ class JUnit4TestLauncher {
 	/**
 	 * @param classes Non-empty <code>Iterable</code>.
 	 */
-	public static JakeTestSuiteResult launchInClassLoader(Iterable<Class> classes, boolean printEachTestOnConsole, JunitReportDetail reportDetail, File reportDir) {
+	public static JakeTestSuiteResult launchInClassLoader(Iterable<Class> classes, boolean verbose, JunitReportDetail reportDetail, File reportDir) {
 		final JakeClassLoader classloader = JakeClassLoader.of(classes.iterator().next());
 		final Class[] classArray = JakeUtilsIterable.toArray(classes, Class.class);
-		if (needJakeInClasspath(printEachTestOnConsole, reportDetail)) {
-			classloader.addEntry(JakeLocator.jakeJarFile());
+		classloader.addEntry(JakeLocator.jakeJarFile());
+		if (verbose) {
+			JakeLog.info("Launching test using class loader :");
+			JakeLog.info(classloader.toString());
 		}
-		return classloader.invokeStaticMethod(JUnit4TestExecutor.class.getName(), "launchInProcess", classArray, printEachTestOnConsole, reportDetail, reportDir);
+		return classloader.invokeStaticMethod(JUnit4TestExecutor.class.getName(), "launchInProcess", classArray, verbose, reportDetail, reportDir);
 	}
 
 
-	private static boolean needJakeInClasspath(boolean printEachTestOnConsole, JunitReportDetail reportDetail) {
-		return printEachTestOnConsole || reportDetail == JunitReportDetail.FULL;
-	}
 
 }

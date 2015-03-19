@@ -1,12 +1,13 @@
 package org.jake;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -117,7 +118,7 @@ public final class JakeClasspath implements Iterable<File> {
 	}
 
 	private static List<File> resolveWildCard(Iterable<File> files) {
-		final List<File> result = new LinkedList<File>();
+		final LinkedHashSet<File> result = new LinkedHashSet<File>();
 		for (final File file : files) {
 			if (file.getName().equals(WILD_CARD)) {
 				final File parent = file.getParentFile();
@@ -137,7 +138,7 @@ public final class JakeClasspath implements Iterable<File> {
 				result.add(file);
 			}
 		}
-		return result;
+		return new ArrayList<File>(result);
 	}
 
 	/**

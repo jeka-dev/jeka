@@ -110,6 +110,10 @@ class Project {
 		classLoader.addEntries(this.buildPath);
 		JakeLog.info("Setting build execution classpath to : " + classLoader.childClasspath());
 		final Class<? extends JakeBuild> buildClass = this.findBuildClass(classLoader, buildClassNameHint);
+		if (buildClass == null) {
+			throw new JakeException("Can't find or guess any build class for project hosted in " +  this.projectBaseDir
+					+ " .\nAre you sure this directory is a buildable project ?");
+		}
 
 		try {
 			this.launch(buildClass, commandLine);

@@ -20,11 +20,11 @@ public class JakeEclipseBuild extends JakeJavaBuild {
 	}
 
 	@JakeOption({"Will try to resolve dependencies against the eclipse classpath",
-		"but trying to segregate test from production code considering pathes name : ",
+		"but trying to segregate test from production code considering path names : ",
 	"if path contains 'test' then this is considered as an entry source for scope 'test'."})
 	protected boolean eclipseSmart = true;
 
-	@JakeOption({"You can specify a different place for eclipse containers folder. It is used to resole dependencies declared with kind 'CON' in .classpath.",
+	@JakeOption({"You can specify a different place for eclipse containers folder. It is used to resolve dependencies declared with kind 'CON' in .classpath.",
 		"If you do not specify, it will take [jakeHome]/eclipse/containers",
 	"It is not reccommended to change it unless for specific testing."})
 	protected String containersPath;

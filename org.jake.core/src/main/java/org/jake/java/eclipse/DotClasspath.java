@@ -12,8 +12,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.jake.JakeDir;
 import org.jake.JakeDirSet;
+import org.jake.JakeException;
 import org.jake.JakeLog;
+import org.jake.JakeOptions;
 import org.jake.java.eclipse.Lib.Scope;
+import org.jake.utils.JakeUtilsString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -77,7 +80,7 @@ final class DotClasspath {
 	public List<Lib> libs(File containersHome, File baseDir, Lib.ScopeSegregator libSegregator) {
 		final List<Lib> result = new LinkedList<Lib>();
 		for (final ClasspathEntry classpathEntry : classpathentries) {
-			if (classpathEntry.kind.equals(org.jake.java.eclipse.DotClasspath.ClasspathEntry.Kind.CON) ) {
+			if (classpathEntry.kind.equals(ClasspathEntry.Kind.CON) ) {
 				final Scope scope = libSegregator.scoprOfCon(classpathEntry.path);
 				if (classpathEntry.path.startsWith(ClasspathEntry.JRE_CONTAINER_PREFIX)) {
 					continue;
@@ -85,9 +88,25 @@ final class DotClasspath {
 				for (final File file : classpathEntry.conAsFiles(baseDir, containersHome)) {
 					result.add(new Lib(file, scope));
 				}
-			} else if (classpathEntry.kind.equals(org.jake.java.eclipse.DotClasspath.ClasspathEntry.Kind.LIB)) {
+			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.LIB)) {
 				final Scope scope = libSegregator.scopeOfLib(classpathEntry.path);
 				result.add(new Lib(classpathEntry.libAsFile(baseDir), scope));
+			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.VAR)) {
+				final String var = JakeUtilsString.substringBeforeFirst(classpathEntry.path, "/");
+				final String optionName = "eclipse.var." + var;
+				final String varFile = JakeOptions.get(optionName);
+				if (varFile == null) {
+					throw new JakeException("No option found with name " + optionName
+							+ ". It is needed in order to build this project as it is mentionned in Eclipse .classpath."
+							+ " Please set this option either in command line as -" + optionName
+							+ "=/absolute/path/for/this/var or in [jake_home]/options.properties" );
+				}
+				final File file = new File(varFile, JakeUtilsString.substringAfterFirst(classpathEntry.path, "/") );
+				if (!file.exists()) {
+					JakeLog.warn("Can't find Eclipse classpath entry : " + file.getAbsolutePath());
+				}
+				final Scope scope = libSegregator.scopeOfLib(classpathEntry.path);
+				result.add(new Lib(file, scope));
 			}
 		}
 		return result;
@@ -99,7 +118,7 @@ final class DotClasspath {
 		public final static String JRE_CONTAINER_PREFIX = "org.eclipse.jdt.launching.JRE_CONTAINER";
 
 		public enum Kind {
-			SRC, CON, LIB, UNKNOWN
+			SRC, CON, LIB, VAR, UNKNOWN
 		}
 
 		private final Kind kind;
@@ -132,6 +151,8 @@ final class DotClasspath {
 				kind = Kind.CON;
 			} else if ("src".equals(kindString)) {
 				kind = Kind.SRC;
+			} else if ("var".equals(kindString)) {
+				kind = Kind.VAR;
 			} else {
 				kind = Kind.UNKNOWN;
 			}

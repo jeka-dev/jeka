@@ -1,6 +1,7 @@
 package org.jake.java.testing.junit;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,12 +41,24 @@ class JUnit4TestExecutor {
 		if (reportDetail.equals(JunitReportDetail.FULL)) {
 			jUnitCore.addListener(new JUnitReportListener(reportDir));
 		}
+		final PrintStream out = System.out;
+		final PrintStream err = System.err;
 		if (printEachTestOnConsole) {
 			jUnitCore.addListener(new JUnitConsoleListener());
+		} else {
+			System.setErr(JakeUtilsIO.nopPrintStream());
+			System.setOut(JakeUtilsIO.nopPrintStream());
 		}
+
 		final Properties properties = (Properties) System.getProperties().clone();
 		final long start = System.nanoTime();
-		final Result result = jUnitCore.run(classes);
+		final Result result;
+		try {
+			result = jUnitCore.run(classes);
+		} finally {
+			System.setErr(err);
+			System.setOut(out);
+		}
 		final long durationInMillis = JakeUtilsTime.durationInMillis(start);
 		return JakeTestSuiteResult.fromJunit4Result(properties, "all", result, durationInMillis);
 	}

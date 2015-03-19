@@ -208,7 +208,7 @@ public final class JakeUnit {
 			JakeLog.info("Launch Jake in verbose mode to display failure stack traces in console.");
 		}
 		if (reportDetail.equals(JunitReportDetail.BASIC)) {
-			JakeTestReportBuilder.of(result).writeToFileSystem(reportDir);
+			TestReportBuilder.of(result).writeToFileSystem(reportDir);
 		}
 		for (final Runnable runnable : this.postActions) {
 			runnable.run();  // NOSONAR

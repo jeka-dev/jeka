@@ -78,9 +78,6 @@ class JUnitReportListener extends RunListener {
 	}
 
 
-
-
-
 	@Override
 	public void testRunFinished(Result result) throws Exception {
 		dump();
@@ -103,7 +100,7 @@ class JUnitReportListener extends RunListener {
 		final String suiteName = currentClass.getName();
 		final int count = cases.size();
 		final JakeTestSuiteResult result = new JakeTestSuiteResult(properties, suiteName, count, ignoreCount, cases, duration);
-		JakeTestReportBuilder.of(result).writeToFileSystem(folder);
+		TestReportBuilder.of(result).writeToFileSystem(folder);
 	}
 
 }

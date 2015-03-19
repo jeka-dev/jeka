@@ -58,7 +58,7 @@ public class JakeTestSuiteResult implements Serializable {
 	}
 
 	public int failureCount() {
-		return testCaseResults.size();
+		return failures().size();
 	}
 
 	public String suiteName() {
