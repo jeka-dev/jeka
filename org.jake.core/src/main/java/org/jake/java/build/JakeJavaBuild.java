@@ -17,6 +17,7 @@ import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeDependency;
 import org.jake.depmanagement.JakeScope;
 import org.jake.depmanagement.JakeScopeMapping;
+import org.jake.java.JakeJavaProcess;
 import org.jake.java.JakeJavadocMaker;
 import org.jake.java.JakeResourceProcessor;
 import org.jake.java.JakeUtilsJdk;
@@ -96,9 +97,8 @@ public class JakeJavaBuild extends JakeBuild {
 	@JakeOption("Turn it on to skip tests.")
 	public boolean skipTests;
 
-	public boolean skipTests() {
-		return skipTests;
-	}
+	@JakeOption("When true, unit tests are run in a forked process.")
+	public boolean forkTests;
 
 	@JakeOption({"The more details the longer tests take to be processed.",
 		"BASIC mention the total time elapsed along detail on failed tests.",
@@ -247,10 +247,14 @@ public class JakeJavaBuild extends JakeBuild {
 		final JakeClasspath classpath = JakeClasspath.of(this.testClassDir(), this.classDir())
 				.and(this.depsFor(TEST, PROVIDED));
 		final File junitReport = new File(this.testReportDir(), "junit");
-		return JakeUnit.of(classpath)
+		final JakeUnit result = JakeUnit.of(classpath)
 				.withReportDir(junitReport)
 				.withReport(this.junitReportDetail)
 				.withClassesToTest(this.testClassDir());
+		if (forkTests) {
+			return result.forkKeepingSameClassPath(JakeJavaProcess.of());
+		}
+		return result;
 	}
 
 	public JakeJavadocMaker javadocMaker() {

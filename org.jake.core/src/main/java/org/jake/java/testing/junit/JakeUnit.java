@@ -60,7 +60,7 @@ public final class JakeUnit {
 
 	private final JakeDirSet classesToTest;
 
-	private final boolean crashOnFailed;
+	private final boolean breakOnFailure;
 
 	private JakeUnit(JakeClasspath classpath, JunitReportDetail reportDetail, File reportDir, JakeJavaProcess fork, List<Runnable> runnables, JakeDirSet testClasses, boolean crashOnFailed) {
 		this.classpath = classpath;
@@ -69,7 +69,7 @@ public final class JakeUnit {
 		this.fork = fork;
 		this.postActions = Collections.unmodifiableList(runnables);
 		this.classesToTest = testClasses;
-		this.crashOnFailed = crashOnFailed;
+		this.breakOnFailure = crashOnFailed;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -90,26 +90,26 @@ public final class JakeUnit {
 	}
 
 	public JakeUnit withReport(JunitReportDetail reportDetail) {
-		return new JakeUnit(this.classpath, reportDetail, reportDir, this.fork, classesToTest, this.crashOnFailed);
+		return new JakeUnit(this.classpath, reportDetail, reportDir, this.fork, classesToTest, this.breakOnFailure);
 	}
 
 	public JakeUnit withCrashOnFailure(boolean crashOnFailure) {
-		return new JakeUnit(this.classpath, reportDetail, reportDir, this.fork, classesToTest, this.crashOnFailed);
+		return new JakeUnit(this.classpath, reportDetail, reportDir, this.fork, classesToTest, this.breakOnFailure);
 	}
 
 	public JakeUnit withReportDir(File reportDir) {
-		return new JakeUnit(this.classpath, reportDetail, reportDir, this.fork, classesToTest, this.crashOnFailed);
+		return new JakeUnit(this.classpath, reportDetail, reportDir, this.fork, classesToTest, this.breakOnFailure);
 	}
 
 	public JakeUnit forkKeepingSameClassPath(JakeJavaProcess process) {
 		final JakeJavaProcess fork = process.withClasspath(jakeClasspath());
-		return new JakeUnit(null, reportDetail, reportDir, fork, this.classesToTest, this.crashOnFailed);
+		return new JakeUnit(null, reportDetail, reportDir, fork, this.classesToTest, this.breakOnFailure);
 	}
 
 	public JakeUnit withPostAction(Runnable runnable) {
 		final List<Runnable> list = new LinkedList<Runnable>(this.postActions);
 		list.add(runnable);
-		return new JakeUnit(classpath, reportDetail, reportDir, fork, list,this.classesToTest, this.crashOnFailed);
+		return new JakeUnit(classpath, reportDetail, reportDir, fork, list,this.classesToTest, this.breakOnFailure);
 	}
 
 	public JakeUnit enhancedWith(Enhancer enhancer) {
@@ -125,15 +125,15 @@ public final class JakeUnit {
 	}
 
 	public JakeUnit fork(JakeJavaProcess process) {
-		return new JakeUnit(null, reportDetail, reportDir, process, this.classesToTest, this.crashOnFailed);
+		return new JakeUnit(null, reportDetail, reportDir, process, this.classesToTest, this.breakOnFailure);
 	}
 
 	public JakeUnit withClassesToTest(JakeDirSet classesToTest) {
-		return new JakeUnit(this.classpath, reportDetail, reportDir, fork, classesToTest, this.crashOnFailed);
+		return new JakeUnit(this.classpath, reportDetail, reportDir, fork, classesToTest, this.breakOnFailure);
 	}
 
 	public JakeUnit withClassesToTest(File ...classDirs) {
-		return new JakeUnit(this.classpath, reportDetail, reportDir, fork, JakeDirSet.of(classDirs), this.crashOnFailed);
+		return new JakeUnit(this.classpath, reportDetail, reportDir, fork, JakeDirSet.of(classDirs), this.breakOnFailure);
 	}
 
 	public boolean forked() {
@@ -195,7 +195,7 @@ public final class JakeUnit {
 		}
 
 		if (result.failureCount() > 0) {
-			if (crashOnFailed) {
+			if (breakOnFailure) {
 				JakeLog.error(result.toStrings());
 				throw new JakeException("Test failed : " + result.toString() );
 			} else {

@@ -105,7 +105,7 @@ public class JakeJavaPacker {
 		JakeLog.startln("Packaging module");
 		JakeDir.of(build().classDir()).zip().to(jarFile(), compressionLevel).md5(checkSum);
 		build().sourceDirs().and(build().resourceDirs()).zip().to(jarSourceFile(), compressionLevel);
-		if (!build().skipTests() && build().testClassDir().exists() && !JakeDir.of(build.testClassDir()).files().isEmpty()) {
+		if (!build().skipTests && build().testClassDir().exists() && !JakeDir.of(build.testClassDir()).files().isEmpty()) {
 			JakeZipper.of(build().testClassDir()).to(jarTestFile(), compressionLevel);
 		}
 		if (!build.testSourceDirs().files().isEmpty()) {
