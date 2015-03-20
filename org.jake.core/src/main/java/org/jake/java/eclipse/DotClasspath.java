@@ -213,6 +213,10 @@ final class DotClasspath {
 		public File libAsFile(File baseDir) {
 			final String projectName;
 			final String pathInProject;
+			final File pathAsFile = new File(path);
+			if (pathAsFile.isAbsolute() && pathAsFile.exists()) {
+				return pathAsFile;
+			}
 			if (path.startsWith("/")) {
 				final int secondSlashIndex = path.indexOf("/", 1);
 				projectName = path.substring(1, secondSlashIndex);

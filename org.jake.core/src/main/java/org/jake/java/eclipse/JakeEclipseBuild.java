@@ -34,7 +34,7 @@ public class JakeEclipseBuild extends JakeJavaBuild {
 	@Override
 	public JakeDirSet sourceDirs() {
 		final Sources.TestSegregator segregator = eclipseSmart ? Sources.SMART : Sources.ALL_PROD;
-		return dotClasspath().sourceDirs(baseDir(""), segregator).prodSources;
+		return dotClasspath().sourceDirs(baseDir(""), segregator).prodSources;//.andFilter(RESOURCE_FILTER.reverse());
 	}
 
 	@Override
@@ -45,12 +45,14 @@ public class JakeEclipseBuild extends JakeJavaBuild {
 
 	@Override
 	public JakeDirSet resourceDirs() {
-		return JakeDirSet.empty();
+		final Sources.TestSegregator segregator = eclipseSmart ? Sources.SMART : Sources.ALL_PROD;
+		return dotClasspath().sourceDirs(baseDir(""), segregator).prodSources.andFilter(RESOURCE_FILTER);
 	}
 
 	@Override
 	public JakeDirSet testResourceDirs() {
-		return JakeDirSet.empty();
+		final Sources.TestSegregator segregator = eclipseSmart ? Sources.SMART : Sources.ALL_PROD;
+		return dotClasspath().sourceDirs(baseDir(""), segregator).testSources.andFilter(RESOURCE_FILTER);
 	}
 
 	@Override

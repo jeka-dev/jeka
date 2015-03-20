@@ -13,12 +13,16 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
+import org.jake.utils.JakeUtilsString;
 
 /**
  * Wrapper around {@link URLClassLoader} offering convenient methods and fluent interface to deal
@@ -137,11 +141,7 @@ public final class JakeClassLoader {
 		} else {
 			classpath = JakeClasspath.of();
 		}
-		final List<File> result = new ArrayList<File>(this.delegate.getURLs().length);
-		for (final URL url : this.delegate.getURLs()) {
-			result.add(new File(url.getFile().replaceAll("%20", " ")));
-		}
-		return classpath.and(result);
+		return classpath.and(childClasspath());
 	}
 
 
@@ -390,6 +390,48 @@ public final class JakeClassLoader {
 		return (T) JakeUtilsReflect.newInstance(clazz);
 	}
 
+	public JakeClassLoader loadAllServices() {
+		final Set<Class<?>> serviceClasses = new HashSet<Class<?>>();
+		for (final File file : this.fullClasspath()) {
+			if (file.isFile()) {
+				JakeLog.trace("Scanning " + file.getPath() + " for META-INF/services.");
+				final ZipFile zipFile = JakeUtilsIO.newZipFile(file);
+				final ZipEntry serviceEntry = zipFile.getEntry("META-INF/services");
+				if (serviceEntry == null) {
+					continue;
+				}
+				for (final ZipEntry entry : JakeUtilsIO.zipEntries(zipFile)) {
+					if (entry.getName().startsWith("META-INF/services/")) {
+						final String serviceName = JakeUtilsString.substringAfterLast(entry.getName(), "/");
+						final Class<?> serviceClass = this.loadIfExist(serviceName);
+						if (serviceClass != null) {
+							JakeLog.trace("Found service providers for : "  + serviceName);
+							serviceClasses.add(serviceClass);
+						}
+					}
+				}
+			} else {
+				final File serviceDir = new File(file, "META-INF/services");
+				if (!serviceDir.exists() || !serviceDir.isDirectory()) {
+					continue;
+				}
+				for (final File candidate : serviceDir.listFiles()) {
+					final Class<?> serviceClass = this.loadIfExist(candidate.getName());
+					if (serviceClass != null) {
+						serviceClasses.add(serviceClass);
+					}
+				}
+
+			}
+		}
+		for (final Class<?> serviceClass : serviceClasses) {
+			JakeLog.trace("Reload service providers for : " + serviceClass.getName());
+			ServiceLoader.loadInstalled(serviceClass).reload();
+		}
+		return this;
+	}
+
+
 	private void offsetJakeLog() {
 		if (this.isDefined(JakeLog.class.getName())) {
 			final int offset = JakeLog.offset();
@@ -420,6 +462,8 @@ public final class JakeClassLoader {
 		}
 		return JakeUtilsIO.cloneBySerialization(object, to.classloader());
 	}
+
+
 
 
 

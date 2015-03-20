@@ -59,6 +59,18 @@ public final class JakeUtilsIO {
 		};
 	}
 
+	@SuppressWarnings("unchecked")
+	public static List<ZipEntry> zipEntries(ZipFile zipFile) {
+		final List<ZipEntry> result = new LinkedList<ZipEntry>();
+		final Enumeration<ZipEntry> en = (Enumeration<ZipEntry>) zipFile.entries();
+		while(en.hasMoreElements()) {
+			result.add(en.nextElement());
+		}
+		return result;
+	}
+
+
+
 	/**
 	 * Close the specified input stream, ignoring any exceptions.
 	 */
@@ -97,6 +109,16 @@ public final class JakeUtilsIO {
 			return new FileInputStream(file);
 		} catch (final FileNotFoundException e) {
 			throw new IllegalArgumentException("File " + file + " not found.", e);
+		}
+	}
+
+	public static InputStream inputStream(ZipFile zipFile, ZipEntry entry) {
+		try {
+			return zipFile.getInputStream(entry);
+		} catch (final FileNotFoundException e) {
+			throw new IllegalArgumentException("File " + zipFile + " not found.", e);
+		} catch (final IOException e) {
+			throw new RuntimeException("File " + zipFile + " not found.", e);
 		}
 	}
 

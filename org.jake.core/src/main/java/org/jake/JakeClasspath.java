@@ -111,7 +111,7 @@ public final class JakeClasspath implements Iterable<File> {
 		for (final Iterator<File> it = this.iterator(); it.hasNext() ;) {
 			builder.append(it.next().getAbsolutePath());
 			if (it.hasNext()) {
-				builder.append(";");
+				builder.append(File.pathSeparator);
 			}
 		}
 		return builder.toString();

@@ -84,18 +84,25 @@ public class JakeTestSuiteResult implements Serializable {
 		return durationInMilis;
 	}
 
-	public List<String> toStrings() {
+	public List<String> toStrings(boolean showStackTrace) {
 		final List<String> lines = new LinkedList<String>();
 		if (failureCount() == 0) {
 			lines.add(toString());
 		} else {
 			lines.add(toString());
 		}
+		int i = 0;
 		for (final TestCaseResult testCaseResult : this.testCaseResults) {
 			if (testCaseResult instanceof TestCaseFailure) {
 				final TestCaseFailure failure = (TestCaseFailure) testCaseResult;
-				lines.add("  -> " + failure.getClassName() + "." + failure.getTestName() + " : " + failure.getExceptionDescription().message);
+				lines.add("-> " + failure.getClassName() + "." + failure.getTestName() + " : " + failure.getExceptionDescription().message);
+				if (showStackTrace || i < 3) {
+					lines.addAll(failure.exceptionDescription.stackTracesAsStrings());
+					lines.add("");
+				}
+				i++;
 			}
+
 		}
 		return lines;
 	}

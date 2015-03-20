@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import org.jake.JakeLog;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIO.StreamGobbler;
 import org.jake.utils.JakeUtilsString;
+import org.jake.utils.JakeUtilsSystem;
 
 /**
  * Offer fluent interface for launching Java processes.
@@ -37,8 +39,10 @@ public final class JakeJavaProcess {
 
 	private final File workingDir;
 
+	private final Map<String, String> environment;
+
 	private JakeJavaProcess(File javaDir, Map<String, String> sytemProperties, JakeClasspath classpath,
-			List<AgentLibAndOption> agents, Collection<String> options, File workingDir) {
+			List<AgentLibAndOption> agents, Collection<String> options, File workingDir, Map<String, String> environment) {
 		super();
 		this.javaDir = javaDir;
 		this.sytemProperties = sytemProperties;
@@ -46,6 +50,7 @@ public final class JakeJavaProcess {
 		this.agents = agents;
 		this.options = options;
 		this.workingDir = workingDir;
+		this.environment = environment;
 	}
 
 	/**
@@ -61,7 +66,7 @@ public final class JakeJavaProcess {
 	@SuppressWarnings("unchecked")
 	public static JakeJavaProcess of(File javaDir) {
 		return new JakeJavaProcess(javaDir, Collections.EMPTY_MAP, JakeClasspath.of(),
-				Collections.EMPTY_LIST, Collections.EMPTY_LIST, null);
+				Collections.EMPTY_LIST, Collections.EMPTY_LIST, null, Collections.EMPTY_MAP);
 	}
 
 	public JakeJavaProcess andAgent(File agentLib, String agentOption) {
@@ -77,7 +82,7 @@ public final class JakeJavaProcess {
 		final List<AgentLibAndOption> list = new ArrayList<JakeJavaProcess.AgentLibAndOption>(this.agents);
 		list.add(new AgentLibAndOption(agentLib.getAbsolutePath(), agentOption));
 		return new JakeJavaProcess(this.javaDir, this.sytemProperties, this.classpath,
-				list, this.options, this.workingDir);
+				list, this.options, this.workingDir, this.environment);
 	}
 
 	public JakeJavaProcess andAgent(File agentLib) {
@@ -88,7 +93,7 @@ public final class JakeJavaProcess {
 		final List<String> list = new ArrayList<String>(this.options);
 		list.addAll(options);
 		return new JakeJavaProcess(this.javaDir, this.sytemProperties, this.classpath,
-				this.agents, list, this.workingDir);
+				this.agents, list, this.workingDir, this.environment);
 	}
 
 	public JakeJavaProcess andOptions(String... options) {
@@ -97,7 +102,7 @@ public final class JakeJavaProcess {
 
 	public JakeJavaProcess withWorkingDir(File workingDir) {
 		return new JakeJavaProcess(this.javaDir, this.sytemProperties, this.classpath,
-				this.agents, this.options, workingDir);
+				this.agents, this.options, workingDir, this.environment);
 	}
 
 	public JakeJavaProcess withClasspath(JakeClasspath classpath) {
@@ -105,7 +110,7 @@ public final class JakeJavaProcess {
 			throw new IllegalArgumentException("Classpath can't be null.");
 		}
 		return new JakeJavaProcess(this.javaDir, this.sytemProperties, classpath,
-				this.agents, this.options, this.workingDir);
+				this.agents, this.options, this.workingDir, this.environment);
 	}
 
 	public JakeJavaProcess withClasspath(File ...files) {
@@ -121,9 +126,10 @@ public final class JakeJavaProcess {
 	}
 
 
-	private ProcessBuilder processBuilder(List<String> command) {
+	private ProcessBuilder processBuilder(List<String> command, Map<String, String> env) {
 		final ProcessBuilder builder = new ProcessBuilder(command);
 		builder.redirectErrorStream(true);
+		builder.environment().putAll(env);
 		if (this.workingDir != null) {
 			builder.directory(workingDir);
 		}
@@ -136,14 +142,16 @@ public final class JakeJavaProcess {
 
 	public void startAndWaitFor(String mainClassName, String ...arguments) {
 		final List<String> command = new LinkedList<String>();
+		final OptionAndEnv optionAndEnv = optionsAndEnv();
 		command.add(runningJavaCommand());
-		command.addAll(options());
+		command.addAll(optionAndEnv.options);
 		command.add(mainClassName);
 		command.addAll(Arrays.asList(arguments));
 		JakeLog.startln("Starting java program : " + command.toString());
 		final int result;
 		try {
-			final Process process = processBuilder(command).start();
+			final Process process = processBuilder(command, optionAndEnv.env).start();
+
 			final StreamGobbler outputStreamGobbler =
 					JakeUtilsIO.newStreamGobbler(process.getInputStream(), JakeLog.infoStream());
 			final StreamGobbler errorStreamGobbler =
@@ -161,27 +169,47 @@ public final class JakeJavaProcess {
 		JakeLog.done();
 	}
 
-	private List<String> options() {
-		final List<String> list = new LinkedList<String>();
+	private OptionAndEnv optionsAndEnv() {
+		final List<String> options = new LinkedList<String>();
+		final Map<String, String> env = new HashMap<String, String>();
 		if (classpath != null && !classpath.isEmpty()) {
-			list.add("-cp");
-			list.add(classpath.toString());
+			final String classpathString = classpath.toString();
+			if (JakeUtilsSystem.IS_WINDOWS && classpathString.length() > 7500) {
+				JakeLog.warn("classpath too long, classpath will be passed using CLASSPATH env variable.");
+				env.put("CLASSPATH", classpathString);
+			} else {
+				options.add("-cp");
+				options.add(classpath.toString());
+			}
 		}
 		for (final AgentLibAndOption agentLibAndOption : agents) {
 			final StringBuilder builder = new StringBuilder("-javaagent:").append(agentLibAndOption.lib);
 			if (!JakeUtilsString.isBlank(agentLibAndOption.options)) {
 				builder.append("="+agentLibAndOption.options);
 			}
-			list.add(builder.toString());
+			options.add(builder.toString());
 		}
 		for (final String key : this.sytemProperties.keySet()) {
 			final String value = this.sytemProperties.get(key);
-			list.add("-D"+key+"="+value);
+			options.add("-D"+key+"="+value);
 		}
 		for (final String option : options) {
-			list.add(option);
+			options.add(option);
 		}
-		return list;
+		return new OptionAndEnv(options, env);
+	}
+
+	private static final class OptionAndEnv {
+
+		public final List<String> options;
+		public final Map<String, String> env;
+
+		private OptionAndEnv(List<String> options, Map<String, String> env) {
+			super();
+			this.options = options;
+			this.env = env;
+		}
+
 	}
 
 

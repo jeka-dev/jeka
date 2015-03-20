@@ -75,18 +75,18 @@ public final class JakeUtilsFile {
 		return copyDirReplacingTokens(source, targetDir, filterArg, copyEmptyDir, report, reportStream, null);
 	}
 
-	public static int copyDirReplacingTokens(File fromFile, File toDir, FileFilter filterArg,
+	public static int copyDirReplacingTokens(File fromDir, File toDir, FileFilter filterArg,
 			boolean copyEmptyDir, boolean report, PrintStream reportStream, Map<String, String> tokenValues) {
 		final FileFilter filter = JakeUtilsObject.firstNonNull(filterArg, JakeFileFilters.acceptAll());
-		assertDir(fromFile);
-		if (fromFile.equals(toDir)) {
+		assertDir(fromDir);
+		if (fromDir.equals(toDir)) {
 			throw new IllegalArgumentException(
 					"Base and destination directory can't be the same : "
-							+ fromFile.getPath());
+							+ fromDir.getPath());
 		}
-		if (isAncestor(fromFile, toDir) && filter.accept(toDir)) {
+		if (isAncestor(fromDir, toDir) && filter.accept(toDir)) {
 			throw new IllegalArgumentException("Base filtered directory "
-					+ fromFile.getPath() + ":(" + filter
+					+ fromDir.getPath() + ":(" + filter
 					+ ") cannot contain destination directory "
 					+ toDir.getPath()
 					+ ". Narrow filter or change the target directory.");
@@ -96,7 +96,10 @@ public final class JakeUtilsFile {
 					+ " is file. Should be directory");
 		}
 
-		final File[] children = fromFile.listFiles();
+		if (report) {
+			reportStream.append("Coping content of " + fromDir.getPath());
+		}
+		final File[] children = fromDir.listFiles();
 		int count = 0;
 		for (final File child : children) {
 			if (child.isFile()) {

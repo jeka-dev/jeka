@@ -70,6 +70,18 @@ public final class JakeResourceProcessor {
 		JakeLog.done(count + " file(s) copied.");
 	}
 
+	public JakeResourceProcessor with(Map<String, String> replacement) {
+		final List<ResourceDirSet> list = new LinkedList<JakeResourceProcessor.ResourceDirSet>();
+		for (final ResourceDirSet resourceDirSet : this.resourceDirSet) {
+			list.add(resourceDirSet.and(replacement));
+		}
+		return new JakeResourceProcessor(list);
+	}
+
+	public JakeResourceProcessor with(String replacedToken, String value) {
+		return this.with(JakeUtilsIterable.mapOf(replacedToken, value));
+	}
+
 	/**
 	 * @see JakeResourceProcessor#and(JakeDirSet)
 	 */
@@ -126,6 +138,17 @@ public final class JakeResourceProcessor {
 			super();
 			this.dirSet = dirSet;
 			this.replacement = replacement;
+		}
+
+		@Override
+		public String toString() {
+			return dirSet.toString() + "  " + replacement.toString();
+		}
+
+		public ResourceDirSet and(Map<String, String> replacement) {
+			final Map<String, String> map = new HashMap<String, String>(this.replacement);
+			map.putAll(replacement);
+			return new ResourceDirSet(dirSet, map);
 		}
 
 	}

@@ -67,6 +67,12 @@ public class JakeLog {
 		startTimer();
 	}
 
+	public static void trace(String message) {
+		if (JakeOptions.isVerbose()) {
+			JakeLog.info(message);
+		}
+	}
+
 
 	/**
 	 * Notify that the processing notified with 'start' has terminated.

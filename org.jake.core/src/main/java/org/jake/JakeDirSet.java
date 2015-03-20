@@ -87,10 +87,10 @@ public final class JakeDirSet implements Iterable<File> {
 	 * Creates a {@link JakeDirSet} which is a concatenation of this {@link JakeDirSet} and
 	 * the {@link JakeDirSet} array passed as parameter.
 	 */
-	public final JakeDirSet and(JakeDirSet ...dirViewsList) {
+	public final JakeDirSet and(JakeDirSet ...otherDirSets) {
 		final List<JakeDir> list = new LinkedList<JakeDir>(this.jakeDirs);
-		for (final JakeDirSet views : dirViewsList) {
-			list.addAll(views.jakeDirs);
+		for (final JakeDirSet otherDirSet : otherDirSets) {
+			list.addAll(otherDirSet.jakeDirs);
 		}
 		return new JakeDirSet(list);
 	}

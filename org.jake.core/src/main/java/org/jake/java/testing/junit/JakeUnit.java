@@ -196,13 +196,13 @@ public final class JakeUnit {
 
 		if (result.failureCount() > 0) {
 			if (breakOnFailure) {
-				JakeLog.error(result.toStrings());
+				JakeLog.error(result.toStrings(verbose));
 				throw new JakeException("Test failed : " + result.toString() );
 			} else {
-				JakeLog.warn(result.toStrings());
+				JakeLog.warn(result.toStrings(verbose));
 			}
 		} else {
-			JakeLog.info(result.toStrings());
+			JakeLog.info(result.toStrings(verbose));
 		}
 		if (!JakeOptions.isVerbose() && result.failureCount() > 0) {
 			JakeLog.info("Launch Jake in verbose mode to display failure stack traces in console.");
@@ -227,7 +227,7 @@ public final class JakeUnit {
 	@SuppressWarnings("rawtypes")
 	private Collection<Class> getClassesToTest() {
 		final JakeClasspath classpath = this.jakeClasspath().andHead(this.classesToTest.roots());
-		final JakeClassLoader classLoader = JakeClassLoader.system().parent().createChild(classpath);
+		final JakeClassLoader classLoader = JakeClassLoader.system().parent().createChild(classpath).loadAllServices();
 		return getJunitTestClassesInClassLoader(classLoader, this.classesToTest);
 	}
 

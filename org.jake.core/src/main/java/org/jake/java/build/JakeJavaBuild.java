@@ -66,7 +66,7 @@ public class JakeJavaBuild extends JakeBuild {
 	/**
 	 * Filter to excludes everything in a java source directory which are not resources.
 	 */
-	protected static final JakeFileFilter RESOURCE_FILTER = JakeFileFilter
+	public static final JakeFileFilter RESOURCE_FILTER = JakeFileFilter
 			.exclude("**/*.java").andExclude("**/package.html")
 			.andExclude("**/doc-files");
 
@@ -143,7 +143,7 @@ public class JakeJavaBuild extends JakeBuild {
 	}
 
 	/**
-	 * Returns the location of production source code that has not been edited manually (not generated).
+	 * Returns the location of production source code that has been edited manually (not generated).
 	 */
 	public JakeDirSet editedSourceDirs() {
 		return JakeDirSet.of(baseDir("src/main/java"));
