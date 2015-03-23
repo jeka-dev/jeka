@@ -1,19 +1,18 @@
 package org.jake.java.eclipse;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.jake.depmanagement.JakeDependencies;
+import org.jake.depmanagement.JakeScope;
 import org.jake.java.build.JakeJavaBuild;
 
 class Lib {
 
 	public final File file;
 
-	public final Scope scope;
+	public final JakeScope scope;
 
-	public Lib(File file, Scope scope) {
+	public Lib(File file, JakeScope scope) {
 		super();
 		this.file = file;
 		this.scope = scope;
@@ -25,36 +24,24 @@ class Lib {
 	}
 
 	public static JakeDependencies toDependencies(Iterable<Lib> libs) {
-		final List<File> compileAndRuntimes = new LinkedList<File>();
-		final List<File> compileOnlys = new LinkedList<File>();
-		final List<File> runtimeOnlys = new LinkedList<File>();
-		final List<File> testOnlys = new LinkedList<File>();
+		final JakeDependencies.Builder builder = JakeDependencies.builder();
 		for (final Lib lib : libs) {
-			switch (lib.scope) {
-			case COMPILE : compileAndRuntimes.add(lib.file); break;
-			case PROVIDED : compileOnlys.add(lib.file); break;
-			case RUNTIME : runtimeOnlys.add(lib.file); break;
-			case TEST : testOnlys.add(lib.file); break;
-			}
+			builder.onFile(lib.file).scope(lib.scope);
 		}
-		return JakeDependencies.builder()
-				.usingDefaultScopes(JakeJavaBuild.COMPILE).onFiles(compileAndRuntimes)
-				.usingDefaultScopes(JakeJavaBuild.RUNTIME).onFiles(runtimeOnlys)
-				.usingDefaultScopes(JakeJavaBuild.TEST).onFiles(testOnlys)
-				.usingDefaultScopes(JakeJavaBuild.PROVIDED).onFiles(compileOnlys).build();
+		return builder.build();
 	}
 
 
 	public static final ScopeSegregator ALL_COMPILE = new ScopeSegregator() {
 
 		@Override
-		public Scope scopeOfLib(String path) {
-			return Scope.COMPILE;
+		public JakeScope scopeOfLib(String path) {
+			return JakeJavaBuild.COMPILE;
 		}
 
 		@Override
-		public Scope scoprOfCon(String path) {
-			return Scope.COMPILE;
+		public JakeScope scopeOfCon(String path) {
+			return JakeJavaBuild.COMPILE;
 		}
 
 	};
@@ -62,39 +49,34 @@ class Lib {
 	public static final ScopeSegregator SMART_LIB = new ScopeSegregator() {
 
 		@Override
-		public Scope scopeOfLib(String path) {
+		public JakeScope scopeOfLib(String path) {
 			if (path.toLowerCase().contains("test")) {
-				return Scope.TEST;
+				return JakeJavaBuild.TEST;
 			}
 			if (path.toLowerCase().contains("lombok.jar")) {
-				return Scope.PROVIDED;
+				return JakeJavaBuild.PROVIDED;
 			}
 			if (path.toLowerCase().contains("junit")) {
-				return Scope.TEST;
+				return JakeJavaBuild.TEST;
 			}
-			return Scope.COMPILE;
+			return JakeJavaBuild.COMPILE;
 		}
 
 		@Override
-		public Scope scoprOfCon(String path) {
+		public JakeScope scopeOfCon(String path) {
 			if (path.startsWith("org.eclipse.jdt.junit.JUNIT_CONTAINER")) {
-				return Scope.TEST;
+				return JakeJavaBuild.TEST;
 			}
-			return Scope.COMPILE;
+			return JakeJavaBuild.COMPILE;
 		}
 	};
 
 
-	public enum Scope {
-		COMPILE, TEST, RUNTIME, PROVIDED
-	}
-
-
 	public static interface ScopeSegregator {
 
-		Scope scopeOfLib(String path);
+		JakeScope scopeOfLib(String path);
 
-		Scope scoprOfCon(String path);
+		JakeScope scopeOfCon(String path);
 	}
 
 

@@ -367,7 +367,9 @@ public final class JakeClassLoader {
 	 * Invokes a static method on the specified class using the provided arguments. <br/>
 	 * If the argument classes are the same on the current class loader and this one then arguments are passed as is,
 	 * otherwise arguments are serialize in the current class loader and  deserialized
-	 * in this class loader in order to be compliant with it.
+	 * in this class loader in order to be compliant with it. <br/>
+	 * The current thread context class loader is switched to this for the method execution. <br/>
+	 * It is then turned back to the former one when the execution is done.
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T invokeStaticMethod(String className, String methodName, Object... args) {
@@ -377,8 +379,15 @@ public final class JakeClassLoader {
 			effectiveArgs[i] = traverseClassLoader(args[i], this);
 		}
 		offsetJakeLog();
-		final Object returned = JakeUtilsReflect.invokeStaticMethod(clazz, methodName, effectiveArgs);
-		return (T) traverseClassLoader(returned, JakeClassLoader.current());
+		final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+		Thread.currentThread().setContextClassLoader(delegate);
+		try {
+			final Object returned = JakeUtilsReflect.invokeStaticMethod(clazz, methodName, effectiveArgs);
+			final T result = (T) traverseClassLoader(returned, JakeClassLoader.current());
+			return result;
+		} finally {
+			Thread.currentThread().setContextClassLoader(currentClassLoader);
+		}
 	}
 
 	/**
@@ -390,6 +399,10 @@ public final class JakeClassLoader {
 		return (T) JakeUtilsReflect.newInstance(clazz);
 	}
 
+	/**
+	 * Reloads all J2SE service providers. It can be necessary if adding dynamically some
+	 * service providers to the classpath.
+	 */
 	public JakeClassLoader loadAllServices() {
 		final Set<Class<?>> serviceClasses = new HashSet<Class<?>>();
 		for (final File file : this.fullClasspath()) {

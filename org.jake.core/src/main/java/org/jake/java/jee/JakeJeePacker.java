@@ -14,6 +14,10 @@ import org.jake.java.build.JakeJavaBuild;
  */
 public class JakeJeePacker {
 
+	public static JakeJeePacker of(JakeJavaBuild build) {
+		return new JakeJeePacker(build);
+	}
+
 	private final JakeJavaBuild build;
 
 	private JakeJeePacker(JakeJavaBuild build) {
@@ -21,7 +25,7 @@ public class JakeJeePacker {
 		this.build = build;
 	}
 
-	public void packWar(File webappSrc, File warDirDest, File warFileDest) {
+	public void war(File webappSrc, File warDirDest, File warFileDest) {
 		if (! new File(webappSrc, "WEB-INF/web.xml").exists()) {
 			throw new JakeException("the directory " + webappSrc.getPath()
 					+ " does not contains WEB-INF" + File.separator + "web.xml file");
@@ -32,7 +36,7 @@ public class JakeJeePacker {
 		dir.zip().to(warFileDest);
 	}
 
-	public void packEar(Iterable<File> warFiles, File earSrc, File destDir, File destFile) {
+	public void ear(Iterable<File> warFiles, File earSrc, File destDir, File destFile) {
 		JakeDir.of(destDir).copyInDirContent(earSrc).copyInFiles(warFiles).zip().to(destFile);
 	}
 

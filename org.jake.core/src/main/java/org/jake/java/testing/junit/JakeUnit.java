@@ -26,6 +26,11 @@ import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
 
+/**
+ * Convenient class to launch Junit tests.
+ * 
+ * @author Jerome Angibaud
+ */
 public final class JakeUnit {
 
 	public enum JunitReportDetail {
@@ -93,7 +98,7 @@ public final class JakeUnit {
 		return new JakeUnit(this.classpath, reportDetail, reportDir, this.fork, classesToTest, this.breakOnFailure);
 	}
 
-	public JakeUnit withCrashOnFailure(boolean crashOnFailure) {
+	public JakeUnit withBreakOnFailure(boolean crashOnFailure) {
 		return new JakeUnit(this.classpath, reportDetail, reportDir, this.fork, classesToTest, this.breakOnFailure);
 	}
 

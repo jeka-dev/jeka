@@ -15,7 +15,7 @@ import org.jake.JakeDirSet;
 import org.jake.JakeException;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
-import org.jake.java.eclipse.Lib.Scope;
+import org.jake.depmanagement.JakeScope;
 import org.jake.utils.JakeUtilsString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -81,7 +81,7 @@ final class DotClasspath {
 		final List<Lib> result = new LinkedList<Lib>();
 		for (final ClasspathEntry classpathEntry : classpathentries) {
 			if (classpathEntry.kind.equals(ClasspathEntry.Kind.CON) ) {
-				final Scope scope = libSegregator.scoprOfCon(classpathEntry.path);
+				final JakeScope scope = libSegregator.scopeOfCon(classpathEntry.path);
 				if (classpathEntry.path.startsWith(ClasspathEntry.JRE_CONTAINER_PREFIX)) {
 					continue;
 				}
@@ -89,11 +89,11 @@ final class DotClasspath {
 					result.add(new Lib(file, scope));
 				}
 			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.LIB)) {
-				final Scope scope = libSegregator.scopeOfLib(classpathEntry.path);
+				final JakeScope scope = libSegregator.scopeOfLib(classpathEntry.path);
 				result.add(new Lib(classpathEntry.libAsFile(baseDir), scope));
 			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.VAR)) {
 				final String var = JakeUtilsString.substringBeforeFirst(classpathEntry.path, "/");
-				final String optionName = "eclipse.var." + var;
+				final String optionName = JakeEclipseBuild.OPTION_VAR_PREFIX + var;
 				final String varFile = JakeOptions.get(optionName);
 				if (varFile == null) {
 					throw new JakeException("No option found with name " + optionName
@@ -105,7 +105,7 @@ final class DotClasspath {
 				if (!file.exists()) {
 					JakeLog.warn("Can't find Eclipse classpath entry : " + file.getAbsolutePath());
 				}
-				final Scope scope = libSegregator.scopeOfLib(classpathEntry.path);
+				final JakeScope scope = libSegregator.scopeOfLib(classpathEntry.path);
 				result.add(new Lib(file, scope));
 			}
 		}

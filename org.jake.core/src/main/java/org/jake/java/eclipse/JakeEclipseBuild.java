@@ -13,6 +13,8 @@ public class JakeEclipseBuild extends JakeJavaBuild {
 
 	private static final String CONTAINERS_PATH = "eclipse/containers";
 
+	static final String OPTION_VAR_PREFIX = "eclipse.var.";
+
 	public static boolean candidate(File baseDir) {
 		final File dotClasspathFile = new File(baseDir, ".classpath");
 		final File dotProject = new File(baseDir, ".project");

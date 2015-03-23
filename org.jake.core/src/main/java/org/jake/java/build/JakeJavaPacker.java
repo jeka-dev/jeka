@@ -1,6 +1,9 @@
 package org.jake.java.build;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.zip.Deflater;
 
 import org.jake.JakeDir;
@@ -27,11 +30,14 @@ public class JakeJavaPacker {
 
 	private final boolean checkSum;
 
+	private final List<Runnable> extraActions;
+
+	@SuppressWarnings("unchecked")
 	protected JakeJavaPacker(JakeJavaBuild buildBase) {
-		this(buildBase, false, false, Deflater.DEFAULT_COMPRESSION, true, false);
+		this(buildBase, false, false, Deflater.DEFAULT_COMPRESSION, true, false, Collections.EMPTY_LIST);
 	}
 
-	protected JakeJavaPacker(JakeJavaBuild buildBase, boolean includeVersion, boolean fatJar, int compressionLevel, boolean fullName, boolean checkSum) {
+	protected JakeJavaPacker(JakeJavaBuild buildBase, boolean includeVersion, boolean fatJar, int compressionLevel, boolean fullName, boolean checkSum, List<Runnable> extraActions) {
 		super();
 		this.build = buildBase;
 		this.fatJar = fatJar;
@@ -39,6 +45,7 @@ public class JakeJavaPacker {
 		this.includeVersion = includeVersion;
 		this.fullName = fullName;
 		this.checkSum = checkSum;
+		this.extraActions = extraActions;
 	}
 
 	public static JakeJavaPacker of(JakeJavaBuild buildJava) {
@@ -46,19 +53,25 @@ public class JakeJavaPacker {
 	}
 
 	public JakeJavaPacker withFatJar(boolean fatJar) {
-		return new JakeJavaPacker(this.build, includeVersion, fatJar, compressionLevel, fullName, checkSum);
+		return new JakeJavaPacker(this.build, includeVersion, fatJar, compressionLevel, fullName, checkSum, extraActions);
 	}
 
 	public JakeJavaPacker withCompression(int compressionLevel) {
-		return new JakeJavaPacker(this.build, includeVersion, fatJar, compressionLevel, fullName, checkSum);
+		return new JakeJavaPacker(this.build, includeVersion, fatJar, compressionLevel, fullName, checkSum, extraActions);
 	}
 
 	public JakeJavaPacker withIncludeVersion(boolean includeVersion) {
-		return new JakeJavaPacker(this.build, includeVersion, fatJar, compressionLevel, fullName, checkSum);
+		return new JakeJavaPacker(this.build, includeVersion, fatJar, compressionLevel, fullName, checkSum, extraActions);
 	}
 
 	public JakeJavaPacker withFullName(boolean fullName) {
-		return new JakeJavaPacker(this.build, includeVersion, fatJar, compressionLevel, fullName, checkSum);
+		return new JakeJavaPacker(this.build, includeVersion, fatJar, compressionLevel, fullName, checkSum, extraActions);
+	}
+
+	public JakeJavaPacker withExtraAction(Runnable runnable) {
+		final List<Runnable> actions = new LinkedList<Runnable>(this.extraActions);
+		actions.add(runnable);
+		return new JakeJavaPacker(this.build, includeVersion, fatJar, compressionLevel, fullName, checkSum, actions);
 	}
 
 	protected JakeJavaBuild build() {
@@ -114,6 +127,9 @@ public class JakeJavaPacker {
 		if (fatJar) {
 			JakeDir.of(build().classDir()).zip().merge(build().depsFor(JakeJavaBuild.RUNTIME))
 			.to(fatJarFile(), compressionLevel).md5(checkSum);
+		}
+		for (final Runnable action : this.extraActions) {
+			action.run();
 		}
 		JakeLog.done();
 	}
