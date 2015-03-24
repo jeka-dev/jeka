@@ -8,15 +8,27 @@ import org.jake.java.build.JakeJavaBuild;
 
 class Lib {
 
+	public static Lib file(File file, JakeScope scope) {
+		return new Lib(file, null, scope);
+	}
+
+	public static Lib project(File project, JakeScope scope) {
+		return new Lib(null, project, scope);
+	}
+
 	public final File file;
+
+	public final File project;
 
 	public final JakeScope scope;
 
-	public Lib(File file, JakeScope scope) {
+	private Lib(File file, File project, JakeScope scope) {
 		super();
 		this.file = file;
 		this.scope = scope;
+		this.project = project;
 	}
+
 
 	@Override
 	public String toString() {

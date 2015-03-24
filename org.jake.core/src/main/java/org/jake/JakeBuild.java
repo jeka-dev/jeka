@@ -44,7 +44,7 @@ public class JakeBuild {
 	// A cache for dependency resolver
 	private JakeDependencyResolver cachedResolver;
 
-	private Locator locator = Locator.ofDir(JakeUtilsFile.workingDir());
+	private File baseDir = JakeUtilsFile.workingDir();
 
 	private final Date buildTime = JakeUtilsTime.now();
 
@@ -303,11 +303,11 @@ public class JakeBuild {
 	 * resolved from this directory.
 	 */
 	public final JakeDir baseDir() {
-		return JakeDir.of(locator.baseDir());
+		return JakeDir.of(baseDir);
 	}
 
 	void setBaseDir(File baseDir) {
-		this.locator = Locator.ofDir(baseDir);
+		this.baseDir = baseDir;
 	}
 
 	/**
@@ -429,38 +429,6 @@ public class JakeBuild {
 			result.add(subBuild);
 		}
 		return result;
-	}
-
-	private static class Locator {
-
-		private final File dir;
-
-		private final JakeBuild relateProject;
-
-		private final String relativePath;
-
-		private Locator(File dir, JakeBuild relateProject, String relativePath) {
-			super();
-			this.dir = dir;
-			this.relateProject = relateProject;
-			this.relativePath = relativePath;
-		}
-
-		public static Locator ofDir(File dir) {
-			return new Locator(dir, null, null);
-		}
-
-		public static Locator ofProjectRelative(JakeBuild build, String relativePath) {
-			return new Locator(null, build, relativePath);
-		}
-
-		public File baseDir() {
-			if (dir != null) {
-				return dir;
-			}
-			return this.relateProject.baseDir(relativePath);
-		}
-
 	}
 
 }
