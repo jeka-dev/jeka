@@ -38,6 +38,10 @@ public final class JakeUtilsFile {
 		}
 	}
 
+	public static boolean equals(File fileA, File fileB) {
+		return canonicalFile(fileA).equals(canonicalFile(fileB));
+	}
+
 	/**
 	 * Moves a file to another location.
 	 */

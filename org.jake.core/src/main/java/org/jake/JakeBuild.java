@@ -306,6 +306,10 @@ public class JakeBuild {
 		return JakeDir.of(locator.baseDir());
 	}
 
+	void setBaseDir(File baseDir) {
+		this.locator = Locator.ofDir(baseDir);
+	}
+
 	/**
 	 * This method is invoked right after the base directory of this builds had been set, so
 	 * you can initialize fields safely here.
@@ -404,20 +408,23 @@ public class JakeBuild {
 		}
 	}
 
-	private static final JakeBuild relativeProject(JakeBuild jakeBuild, Class<?> clazz, String relativePath) {
-		final JakeBuild build = (JakeBuild) JakeUtilsReflect.newInstance(clazz);
+	private static final JakeBuild relativeProject(JakeBuild mainBuild, Class<? extends JakeBuild> clazz, String relativePath) {
+		final File projectDir = mainBuild.baseDir(relativePath);
+		final Project project = new Project(projectDir);
+		final JakeBuild build = project.getBuild(clazz);
 		JakeOptions.populateFields(build);
-		build.locator = Locator.ofProjectRealive(jakeBuild, relativePath);
 		build.init();
 		return build;
 	}
 
+	@SuppressWarnings("unchecked")
 	private static List<JakeBuild> populateProjectBuildField(JakeBuild mainBuild) {
 		final List<JakeBuild> result = new LinkedList<JakeBuild>();
 		final List<Field> fields = JakeUtilsReflect.getAllDeclaredField(mainBuild.getClass(), JakeProject.class);
 		for (final Field field : fields) {
 			final JakeProject jakeProject = field.getAnnotation(JakeProject.class);
-			final JakeBuild subBuild = relativeProject(mainBuild, field.getType(), jakeProject.value());
+			final JakeBuild subBuild = relativeProject(mainBuild, (Class<? extends JakeBuild>) field.getType(),
+					jakeProject.value());
 			JakeUtilsReflect.setFieldValue(mainBuild, field, subBuild);
 			result.add(subBuild);
 		}
@@ -443,7 +450,7 @@ public class JakeBuild {
 			return new Locator(dir, null, null);
 		}
 
-		public static Locator ofProjectRealive(JakeBuild build, String relativePath) {
+		public static Locator ofProjectRelative(JakeBuild build, String relativePath) {
 			return new Locator(null, build, relativePath);
 		}
 

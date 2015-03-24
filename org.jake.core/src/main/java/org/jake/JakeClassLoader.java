@@ -162,6 +162,15 @@ public final class JakeClassLoader {
 	}
 
 	/**
+	 * Loads a class given its source relative path if exists. For example <code>loadGivenSourcePath("mypack1/subpack/MyClass.java")
+	 * will load the class <code>mypack1.subpack.MyClass</code>. Return <code>null</code> if no such class exist.
+	 */
+	public <T extends Object> Class<T> loadGivenClassSourcePathIfExist(String classSourcePath) {
+		final String className = classSourcePath.replace('/', '.').replace('\\', '.').substring(0, classSourcePath.length()-JAVA_SUFFIX_LENGTH);
+		return loadIfExist(className);
+	}
+
+	/**
 	 * Loads a class given its source relative path. For example <code>loadGivenSourcePath("mypack1/subpack/MyClass.java")
 	 * will load the class <code>mypack1.subpack.MyClass</code>.
 	 */

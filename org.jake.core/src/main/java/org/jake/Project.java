@@ -1,7 +1,6 @@
 package org.jake;
 
 import java.io.File;
-import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -17,11 +16,7 @@ import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeRepos;
 import org.jake.depmanagement.JakeScope;
 import org.jake.depmanagement.ivy.JakeIvy;
-import org.jake.java.build.JakeJavaBuild;
-import org.jake.java.eclipse.JakeEclipseBuild;
 import org.jake.utils.JakeUtilsFile;
-import org.jake.utils.JakeUtilsReflect;
-import org.jake.utils.JakeUtilsString;
 
 /**
  * Buildable project. This class has the responsability to compile the build classes along to run them.<br/>
@@ -32,58 +27,47 @@ class Project {
 
 	static final JakeScope JAKE_SCOPE = JakeScope.of("jake");
 
-	private static final String BUILD_SOURCE_DIR = "build/spec";
-
-	private static final String BUILD_BIN_DIR = "build/output/build-bin";
-
-	private static final String BUILD_LIB_DIR = "build/libs/build";
-
-	private static final String DEFAULT_JAVA_SOURCE = "src/main/java";
-
 	private final File projectBaseDir;
 
 	private JakeDependencies buildDependencies;
 
-	private final JakeRepos originalBuildRepos;
-
 	private JakeRepos buildRepos;
-
-	//private JakeClasspath buildClasspath = JakeClasspath.of();
 
 	private List<File> subProjects = new LinkedList<File>();
 
 	private JakePath buildPath;
 
+	private final BuildResolver resolver;
+
 
 	/**
-	 * Constructs a module builder where is specified the base directory of the module along
-	 * its relative path to the 'root' module.
-	 * The Relative path is used to display the module under build
+	 * Constructs a project from its base directory and the download repo.
+	 * Download repo is used in case the build classes need some dependencies
+	 * in order to be compiled/run.
 	 */
-	public Project(File baseDir, JakeRepos downlodRepo) {
+	public Project(File baseDir) {
 		super();
 		this.projectBaseDir = JakeUtilsFile.canonicalFile(baseDir);
-		buildRepos = downlodRepo;
-		originalBuildRepos = downlodRepo;
+		buildRepos = repos();
 		this.buildDependencies = JakeDependencies.on();
+		this.resolver = new BuildResolver(baseDir);
 	}
 
 	private void preCompile() {
-		final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir, JakeDir.of(buildSourceDir()).include("**/*.java"));
+		final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir, JakeDir.of(resolver.buildSourceDir).include("**/*.java"));
 		this.buildDependencies = parser.dependencies();
 		this.buildRepos = parser.importRepos().and(buildRepos);
 		this.subProjects = parser.projects();
 	}
 
-	public void compile() {
+	private void compile() {
 		final LinkedHashSet<File> entries = new LinkedHashSet<File>();
 		compile(new HashSet<File>(), entries);
 		this.buildPath = JakePath.of(entries);
-
 	}
 
 	private void compile(Set<File> yetCompiledProjects, LinkedHashSet<File> path) {
-		if (!this.hasBuildSource() || yetCompiledProjects.contains(this.projectBaseDir)) {
+		if (!this.resolver.hasBuildSource() || yetCompiledProjects.contains(this.projectBaseDir)) {
 			return;
 		}
 		yetCompiledProjects.add(this.projectBaseDir);
@@ -93,12 +77,26 @@ class Project {
 		path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
 		path.addAll(localBuildPath().entries());
 		this.compileBuild(JakePath.of(path));
-		path.add(this.buildBinDir());
+		path.add(this.resolver.buildClassDir);
 		JakeLog.done();
 	}
 
+	public JakeBuild getBuild() {
+		if (resolver.needCompile()) {
+			this.compile();
+		}
+		return resolver.resolve();
+	}
+
+	public <T extends JakeBuild> T getBuild(Class<T> baseClass) {
+		if (resolver.needCompile()) {
+			this.compile();
+		}
+		return resolver.resolve(baseClass);
+	}
+
 	/**
-	 * Precompile and compile build classes (if needed) then execute the build of this project.
+	 * Pre-compile and compile build classes (if needed) then execute the build of this project.
 	 * 
 	 * @param buildClassNameHint The full or simple class name of the build class to execute. It can be <code>null</code>
 	 * or empty.
@@ -109,25 +107,17 @@ class Project {
 		final JakeClassLoader classLoader = JakeClassLoader.current();
 		classLoader.addEntries(this.buildPath);
 		JakeLog.info("Setting build execution classpath to : " + classLoader.childClasspath());
-		final Class<? extends JakeBuild> buildClass = this.findBuildClass(classLoader, buildClassNameHint);
-		if (buildClass == null) {
+		final JakeBuild build = resolver.resolve(buildClassNameHint);
+		if (build == null) {
 			throw new JakeException("Can't find or guess any build class for project hosted in " +  this.projectBaseDir
 					+ " .\nAre you sure this directory is a buildable project ?");
 		}
-
 		try {
-			this.launch(buildClass, commandLine);
+			this.launch(build, commandLine);
 		} catch(final RuntimeException e) {
 			JakeLog.error("Project " + projectBaseDir.getAbsolutePath() + " failed");
 			throw e;
 		}
-	}
-
-	private boolean hasBuildSource() {
-		if (!this.buildSourceDir().exists()) {
-			return false;
-		}
-		return JakeDir.of(buildSourceDir()).include("**/*.java").fileCount(false) > 0;
 	}
 
 	private	JakePath localBuildPath() {
@@ -164,7 +154,7 @@ class Project {
 	private JakePath compileDependentProjects(Set<File> yetCompiledProjects, LinkedHashSet<File> pathEntries) {
 		final JakePath jakePath = JakePath.of();
 		for (final File file : this.subProjects) {
-			final Project project = new Project(file, originalBuildRepos);
+			final Project project = new Project(file);
 			project.compile(yetCompiledProjects, pathEntries);
 		}
 		return jakePath;
@@ -172,55 +162,16 @@ class Project {
 
 	private void compileBuild(JakePath buildPath) {
 		baseBuildCompiler().withClasspath(buildPath).compile();
-		JakeDir.of(this.buildSourceDir()).exclude("**/*.java").copyTo(this.buildBinDir());
+		JakeDir.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir);
 	}
 
+	private void launch(JakeBuild build, CommandLine commandLine) {
 
-	@SuppressWarnings("unchecked")
-	private Class<? extends JakeBuild> findBuildClass(JakeClassLoader classLoader, String classNameHint) {
-
-		// If class name specified in options.
-		if (!JakeUtilsString.isBlank(classNameHint)) {
-			final Class<? extends JakeBuild> clazz = classLoader.loadFromNameOrSimpleName(classNameHint, JakeBuild.class);
-			if (clazz == null) {
-				throw new JakeException("No build class named " + classNameHint + " found.");
-			}
-			return clazz;
-		}
-
-		// If there is a build source
-		if (this.hasBuildSource()) {
-			final JakeDir dir = JakeDir.of(new File(projectBaseDir, BUILD_SOURCE_DIR));
-			for (final String path : dir.relativePathes()) {
-				if (path.endsWith(".java")) {
-					final Class<?> clazz = classLoader.loadGivenClassSourcePath(path);
-					if (JakeBuild.class.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers())) {
-						return (Class<? extends JakeBuild>) clazz;
-					}
-				}
-
-			}
-		}
-
-		// If nothing yet found use defaults
-		if (new File(projectBaseDir, DEFAULT_JAVA_SOURCE).exists()
-				&& new File(projectBaseDir, BUILD_LIB_DIR ).exists()) {
-			return classLoader.load(JakeJavaBuild.class.getName());
-		}
-		if (JakeEclipseBuild.candidate(projectBaseDir)) {
-			return classLoader.load(JakeEclipseBuild.class.getName());
-		}
-		return null;
-	}
-
-	private void launch(Class<? extends JakeBuild> buildClass, 	CommandLine commandLine) {
-
-		final JakeBuild build = JakeUtilsReflect.newInstance(buildClass);
 		JakeOptions.populateFields(build, commandLine.getMasterBuildOptions());
 		build.init();
 
 		// setup plugins
-		final Class<JakeBuildPlugin> baseClass = JakeClassLoader.of(buildClass).load(JakeBuildPlugin.class.getName());
+		final Class<JakeBuildPlugin> baseClass = JakeClassLoader.of(build.getClass()).load(JakeBuildPlugin.class.getName());
 		final PluginDictionnary<JakeBuildPlugin> dictionnary = PluginDictionnary.of(baseClass);
 
 		if (!commandLine.getSubProjectMethods().isEmpty()
@@ -280,22 +231,15 @@ class Project {
 	}
 
 	private JakeJavaCompiler baseBuildCompiler() {
-		final JakeDir buildSource = JakeDir.of(buildSourceDir()).include("**/*.java").exclude("**/_*");
-		if (!buildBinDir().exists()) {
-			buildBinDir().mkdirs();
+		final JakeDir buildSource = JakeDir.of(resolver.buildSourceDir).include("**/*.java").exclude("**/_*");
+		if (!resolver.buildClassDir.exists()) {
+			resolver.buildClassDir.mkdirs();
 		}
-		return JakeJavaCompiler.ofOutput(buildBinDir())
+		return JakeJavaCompiler.ofOutput(resolver.buildClassDir)
 				.andSources(buildSource)
 				.failOnError(true);
 	}
 
-	private File buildSourceDir() {
-		return new File(projectBaseDir, BUILD_SOURCE_DIR);
-	}
-
-	private File buildBinDir() {
-		return new File(projectBaseDir, BUILD_BIN_DIR);
-	}
 
 	private JakePath jakeCompilePath(JakeRepos jakeRepos, JakeDependencies deps) {
 		final JakeIvy ivy = JakeIvy.of(jakeRepos);
@@ -306,6 +250,12 @@ class Project {
 	@Override
 	public String toString() {
 		return this.projectBaseDir.getName();
+	}
+
+	private static JakeRepos repos() {
+		final JakeBuild build = new JakeBuild(); // Create a fake build just to get the download repos.
+		JakeOptions.populateFields(build);
+		return build.downloadRepositories();
 	}
 
 }

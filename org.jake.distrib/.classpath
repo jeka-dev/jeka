@@ -2,10 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="build/spec"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="con" path="com.redhat.ceylon.eclipse.ui.cpcontainer.RUNTIME_CONTAINER/default"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.jake.core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.jake.plugins-jacoco"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.jake.plugins-sonar"/>
-	<classpathentry kind="con" path="com.redhat.ceylon.eclipse.ui.cpcontainer.CEYLON_CONTAINER/default"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

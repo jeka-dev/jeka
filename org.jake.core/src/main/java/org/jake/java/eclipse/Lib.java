@@ -50,14 +50,19 @@ class Lib {
 
 		@Override
 		public JakeScope scopeOfLib(String path) {
-			if (path.toLowerCase().contains("test")) {
+			final File filePath = new File(path);
+			final String parent = filePath.getParent();
+			if (parent.equals(JakeJavaBuild.COMPILE.name())) {
+				return JakeJavaBuild.COMPILE;
+			}
+			if (parent.equals(JakeJavaBuild.TEST.name())) {
 				return JakeJavaBuild.TEST;
 			}
-			if (path.toLowerCase().contains("lombok.jar")) {
+			if (parent.equals(JakeJavaBuild.PROVIDED.name())) {
 				return JakeJavaBuild.PROVIDED;
 			}
-			if (path.toLowerCase().contains("junit")) {
-				return JakeJavaBuild.TEST;
+			if (parent.equals(JakeJavaBuild.RUNTIME.name())) {
+				return JakeJavaBuild.RUNTIME;
 			}
 			return JakeJavaBuild.COMPILE;
 		}

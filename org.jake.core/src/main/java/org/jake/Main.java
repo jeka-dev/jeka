@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.jake.depmanagement.JakeRepos;
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
 import org.jake.utils.JakeUtilsIterable;
@@ -40,7 +39,7 @@ class Main {
 		JakeLog.info("And free form options : " + JakeOptions.freeFormToString());
 		defineSystemProps(args);
 		final File workingDir = JakeUtilsFile.workingDir();
-		final Project project = new Project(workingDir, repos());
+		final Project project = new Project(workingDir);
 		JakeLog.nextLine();
 		try {
 			project.execute(commandLine, JakeOptions.buildClass());
@@ -57,11 +56,7 @@ class Main {
 		}
 	}
 
-	private static JakeRepos repos() {
-		final JakeBuild build = new JakeBuild(); // Create a fake build just to get the download repos.
-		JakeOptions.populateFields(build);
-		return build.downloadRepositories();
-	}
+
 
 	private static void defineSystemProps(String[] args) {
 		for (final String arg : args) {
