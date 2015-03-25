@@ -12,21 +12,23 @@ class Lib {
 		return new Lib(file, null, scope);
 	}
 
-	public static Lib project(File project, JakeScope scope) {
+	public static Lib project(String project, JakeScope scope) {
 		return new Lib(null, project, scope);
 	}
 
+
+
 	public final File file;
 
-	public final File project;
+	public final String projectRelativePath;
 
 	public final JakeScope scope;
 
-	private Lib(File file, File project, JakeScope scope) {
+	private Lib(File file, String projectRelativePath, JakeScope scope) {
 		super();
 		this.file = file;
 		this.scope = scope;
-		this.project = project;
+		this.projectRelativePath = projectRelativePath;
 	}
 
 
@@ -35,10 +37,15 @@ class Lib {
 		return scope + ":" + file.getPath();
 	}
 
-	public static JakeDependencies toDependencies(Iterable<Lib> libs) {
+	public static JakeDependencies toDependencies(JakeEclipseBuild masterBuild, Iterable<Lib> libs) {
 		final JakeDependencies.Builder builder = JakeDependencies.builder();
 		for (final Lib lib : libs) {
-			builder.onFile(lib.file).scope(lib.scope);
+			if (lib.projectRelativePath == null) {
+				builder.onFile(lib.file).scope(lib.scope);
+			} else {
+				final JakeJavaBuild slaveBuild = (JakeJavaBuild) masterBuild.relativeProject(lib.projectRelativePath);
+				builder.onProject(slaveBuild, slaveBuild.packer().jarFile()).scope(lib.scope);
+			}
 		}
 		return builder.build();
 	}
@@ -63,17 +70,17 @@ class Lib {
 		@Override
 		public JakeScope scopeOfLib(String path) {
 			final File filePath = new File(path);
-			final String parent = filePath.getParent();
-			if (parent.equals(JakeJavaBuild.COMPILE.name())) {
+			final String parent = filePath.getParentFile().getName();
+			if (parent.equalsIgnoreCase(JakeJavaBuild.COMPILE.name())) {
 				return JakeJavaBuild.COMPILE;
 			}
-			if (parent.equals(JakeJavaBuild.TEST.name())) {
+			if (parent.equalsIgnoreCase(JakeJavaBuild.TEST.name())) {
 				return JakeJavaBuild.TEST;
 			}
-			if (parent.equals(JakeJavaBuild.PROVIDED.name())) {
+			if (parent.equalsIgnoreCase(JakeJavaBuild.PROVIDED.name())) {
 				return JakeJavaBuild.PROVIDED;
 			}
-			if (parent.equals(JakeJavaBuild.RUNTIME.name())) {
+			if (parent.equalsIgnoreCase(JakeJavaBuild.RUNTIME.name())) {
 				return JakeJavaBuild.RUNTIME;
 			}
 			return JakeJavaBuild.COMPILE;

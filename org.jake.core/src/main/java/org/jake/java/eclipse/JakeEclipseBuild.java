@@ -67,7 +67,7 @@ public class JakeEclipseBuild extends JakeJavaBuild {
 		}
 		final Lib.ScopeSegregator segregator = eclipseSmart ? Lib.SMART_LIB : Lib.ALL_COMPILE;
 		final List<Lib> libs = dotClasspath().libs( containersHome, baseDir().root(), segregator);
-		return Lib.toDependencies(libs);
+		return Lib.toDependencies(this, libs);
 	}
 
 	private DotClasspath dotClasspath() {

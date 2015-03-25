@@ -90,7 +90,7 @@ class BuildResolver {
 	}
 
 	boolean needCompile() {
-		if (this.hasBuildSource()) {
+		if (!this.hasBuildSource()) {
 			return false;
 		}
 		final JakeDir dir = JakeDir.of(buildSourceDir);

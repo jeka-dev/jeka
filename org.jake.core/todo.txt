@@ -1,4 +1,9 @@
-- junit surefire report maybe mal formatted as Sonar does not find classes reports.
+- eclipse : project dependencies & proper war
 
-- eclipse as a plugin (generate buildpath)
+- eclipse : generate buildpath
 
+- compile/run test with other JDK (located in options)
+
+- refactor to JeKar
+
+- able to publish on maven central.

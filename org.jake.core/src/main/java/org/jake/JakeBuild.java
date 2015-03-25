@@ -400,7 +400,11 @@ public class JakeBuild {
 		HelpDisplayer.helpPlugins(this);
 	}
 
-	void invoke(BuildMethod buildMethod) {
+	public JakeBuild relativeProject(String relativePath) {
+		return relativeProject(this, null, relativePath);
+	}
+
+	private void invoke(BuildMethod buildMethod) {
 		if (buildMethod.isMethodPlugin()) {
 			this.plugins.invoke(buildMethod.pluginClass, buildMethod.methodName);
 		} else {

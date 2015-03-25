@@ -8,6 +8,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class Project {
@@ -52,7 +53,8 @@ public class Project {
 
 	private static Project from(Document document) {
 		final NodeList nodeList = document.getElementsByTagName("name");
-		final String name = nodeList.item(0).getNodeValue();
+		final Node node = nodeList.item(0);
+		final String name = node.getTextContent();
 		return new Project(name);
 	}
 

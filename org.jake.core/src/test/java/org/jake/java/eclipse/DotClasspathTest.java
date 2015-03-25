@@ -39,7 +39,7 @@ public class DotClasspathTest {
 		final List<Lib> libs = sample().libs(new File(structure(),"containers"), structure(), Lib.SMART_LIB);
 		assertEquals(6, libs.size());
 
-		final JakeDependencies deps = Lib.toDependencies(libs);
+		final JakeDependencies deps = Lib.toDependencies(null, libs);
 
 
 		assertEquals(1, deps.dependenciesDeclaredWith(JakeJavaBuild.TEST).size());

@@ -16,6 +16,7 @@ import org.jake.JakeException;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
 import org.jake.depmanagement.JakeScope;
+import org.jake.java.build.JakeJavaBuild;
 import org.jake.utils.JakeUtilsString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -90,6 +91,7 @@ final class DotClasspath {
 		final List<Lib> result = new LinkedList<Lib>();
 		final Map<String, File> projects = Project.findProjects(baseDir.getParentFile());
 		for (final ClasspathEntry classpathEntry : classpathentries) {
+
 			if (classpathEntry.kind.equals(ClasspathEntry.Kind.CON) ) {
 				final JakeScope scope = libSegregator.scopeOfCon(classpathEntry.path);
 				if (classpathEntry.path.startsWith(ClasspathEntry.JRE_CONTAINER_PREFIX)) {
@@ -98,9 +100,11 @@ final class DotClasspath {
 				for (final File file : classpathEntry.conAsFiles(baseDir, containersHome)) {
 					result.add(Lib.file(file, scope));
 				}
+
 			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.LIB)) {
 				final JakeScope scope = libSegregator.scopeOfLib(classpathEntry.path);
-				result.add(Lib.file(classpathEntry.libAsFile(baseDir), scope));
+				result.add(Lib.file(classpathEntry.libAsFile(baseDir, projects), scope));
+
 			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.VAR)) {
 				final String var = JakeUtilsString.substringBeforeFirst(classpathEntry.path, "/");
 				final String optionName = JakeEclipseBuild.OPTION_VAR_PREFIX + var;
@@ -117,6 +121,13 @@ final class DotClasspath {
 				}
 				final JakeScope scope = libSegregator.scopeOfLib(classpathEntry.path);
 				result.add(Lib.file(file, scope));
+
+			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC)) {
+				if (classpathEntry.isProjectSrc(baseDir.getParentFile(), projects)) {
+					final String projectPath = classpathEntry.projectRelativePath(baseDir, projects);
+					result.add(Lib.project(projectPath, JakeJavaBuild.COMPILE));
+				}
+
 			}
 		}
 		return result;
@@ -237,28 +248,23 @@ final class DotClasspath {
 			return new File(baseDir, path);
 		}
 
-		public boolean isProjectOutput(File parent, Map<String, File> projectLocationMap) {
-			if (!path.startsWith("/")) {
-				return false;
-			}
-			final File pathAsFile = new File(path);
-			if (pathAsFile.isAbsolute() && pathAsFile.exists()) {
-				return false;
-			}
-			final File otherProject = projectLocation(parent, projectLocationMap);
-			final File dotClasspathFile = new File(otherProject, ".classpath");
-			if (!dotClasspathFile.exists()) {
-				return false;
-			}
-			final DotClasspath dotClasspath = DotClasspath.from(dotClasspathFile);
-			final int secondSlashIndex = path.indexOf("/", 1);
-			final String pathInProject = path.substring(secondSlashIndex+1);
-			return pathInProject.equals(dotClasspath.outputPath());
+		public boolean isProjectSrc(File parent, Map<String, File> projectLocationMap) {
+			return path.startsWith("/");
+		}
+
+		public String projectRelativePath(File baseDir, Map<String, File> projectLocationMap) {
+			final File projectDir = projectLocation(baseDir.getParentFile(), projectLocationMap);
+			return "../" + projectDir.getName();
 		}
 
 		private File projectLocation(File parent, Map<String, File> projectLocationMap) {
 			final int secondSlashIndex = path.indexOf("/", 1);
-			final String projectName = path.substring(1, secondSlashIndex);
+			final String projectName;
+			if (secondSlashIndex == -1) {
+				projectName = path.substring(1);
+			} else {
+				projectName = path.substring(1, secondSlashIndex);
+			}
 			final File otherProjectDir = projectLocationMap.get(projectName);
 			if (otherProjectDir == null) {
 				throw new IllegalStateException("Project " + projectName + " not found in " + parent.getPath());
