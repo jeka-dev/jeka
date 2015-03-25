@@ -193,7 +193,7 @@ public final class JakeJavaProcess {
 			final String value = this.sytemProperties.get(key);
 			options.add("-D"+key+"="+value);
 		}
-		for (final String option : options) {
+		for (final String option :this.options) {
 			options.add(option);
 		}
 		return new OptionAndEnv(options, env);
