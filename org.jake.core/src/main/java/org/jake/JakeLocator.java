@@ -58,6 +58,15 @@ public final class JakeLocator {
 		return jakeJarFile().getParentFile();
 	}
 
+	public static File jakeUserHome() {
+		final File result = new File(System.getProperty("user.home"),".jake");
+		if (result.exists()) {
+			JakeLog.info("Create Jake user directory : " + result.getPath());
+			result.mkdirs();
+		}
+		return result;
+	}
+
 	/**
 	 * Returns the directory where lie optional libraries.
 	 */

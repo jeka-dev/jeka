@@ -106,6 +106,9 @@ public class JakeJavaBuild extends JakeBuild {
 	"Example : -junitReportDetail=NONE"})
 	public JunitReportDetail junitReportDetail = JunitReportDetail.BASIC;
 
+	@JakeOption("When true, produce a fat-jar, meaning a jar embedding all the dependencies.")
+	public boolean fatJar;
+
 	@Override
 	protected List<Class<Object>> pluginTemplateClasses() {
 		return JakeUtilsIterable.listOfGeneric(JakeJavaBuildPlugin.class);
@@ -269,7 +272,7 @@ public class JakeJavaBuild extends JakeBuild {
 	}
 
 	protected JakeJavaPacker createPacker() {
-		return JakeJavaPacker.of(this);
+		return JakeJavaPacker.of(this).withFatJar(fatJar);
 	}
 
 	protected JakeResourceProcessor resourceProcessor() {

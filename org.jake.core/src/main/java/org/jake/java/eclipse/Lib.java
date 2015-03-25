@@ -13,7 +13,9 @@ class Lib {
 
 	private static final String CONTAINERS_PATH = "eclipse/containers";
 
-	static final File containersHome = new File(JakeLocator.jakeHome(), CONTAINERS_PATH);
+	static final File CONTAINER_DIR = new File(JakeLocator.jakeHome(), CONTAINERS_PATH);
+
+	static final File CONTAINER_USER_DIR = new File(JakeLocator.jakeUserHome(), CONTAINERS_PATH);
 
 	public static Lib file(File file, JakeScope scope, boolean exported) {
 		return new Lib(file, null, scope, exported);
@@ -22,8 +24,6 @@ class Lib {
 	public static Lib project(String project, JakeScope scope, boolean exported) {
 		return new Lib(null, project, scope, exported);
 	}
-
-
 
 	public final File file;
 
@@ -114,7 +114,7 @@ class Lib {
 
 		@Override
 		public JakeScope scopeOfCon(String path) {
-			if (path.startsWith("org.eclipse.jdt.junit.JUNIT_CONTAINER")) {
+			if (path.contains("org.eclipse.jdt.junit.JUNIT_CONTAINER")) {
 				return JakeJavaBuild.TEST;
 			}
 			return JakeJavaBuild.COMPILE;

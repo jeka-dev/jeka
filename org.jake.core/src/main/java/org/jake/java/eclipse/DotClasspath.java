@@ -97,7 +97,7 @@ final class DotClasspath {
 				if (classpathEntry.path.startsWith(ClasspathEntry.JRE_CONTAINER_PREFIX)) {
 					continue;
 				}
-				for (final File file : classpathEntry.conAsFiles(baseDir, Lib.containersHome)) {
+				for (final File file : classpathEntry.conAsFiles(baseDir)) {
 					result.add(Lib.file(file, scope, classpathEntry.exported));
 				}
 
@@ -218,19 +218,25 @@ final class DotClasspath {
 			return "true".equals(this.attributes.get("optional"));
 		}
 
-		public List<File> conAsFiles(File baseDir, File containersDir) {
+		public List<File> conAsFiles(File baseDir) {
 			if (!this.kind.equals(Kind.CON)) {
 				throw new IllegalStateException("Can only get files from classpath entry of kind 'con'.");
 			}
-			if (!containersDir.exists()) {
-				JakeLog.warn("Eclipse containers directory " + containersDir.getPath() + " does not exists... ignogre.");
+			if (!Lib.CONTAINER_DIR.exists()  && !Lib.CONTAINER_USER_DIR.exists() ) {
+				JakeLog.warn("Eclipse containers directory " + Lib.CONTAINER_USER_DIR.getPath()
+						+ " or  " + Lib.CONTAINER_DIR.getPath() + " does not exists... Ignore");
 				return Collections.emptyList();
 			}
 			final String folderName = path.replace('/', '_').replace('\\', '_');
-			final File conFolder = new File(containersDir, folderName);
+			File conFolder = new File(Lib.CONTAINER_USER_DIR, folderName);
 			if (!conFolder.exists()) {
-				JakeLog.warn("Eclipse containers directory " + conFolder.getPath() + " does not exists... ignogre.");
-				return Collections.emptyList();
+				conFolder = new File(Lib.CONTAINER_DIR, folderName);
+				if (!conFolder.exists()) {
+					JakeLog.warn("Eclipse containers directory " + conFolder.getPath()
+							+ " or " + new File(Lib.CONTAINER_USER_DIR, folderName).getPath()
+							+ "  do not exists... ignogre.");
+					return Collections.emptyList();
+				}
 			}
 			final JakeDir dirView = JakeDir.of(conFolder).include("**/*.jar");
 			final List<File> result = new LinkedList<File>();
