@@ -223,6 +223,11 @@ public final class JakeJavaCompiler {
 
 		JakeLog.startln(("Compiling " + javaSourceFiles.size()
 				+ " source files using options : " + JakeUtilsString.toString(options, " ")));
+		if (javaSourceFiles.isEmpty()) {
+			JakeLog.warn("No source to compile");
+			JakeLog.done();
+			return true;
+		}
 		final boolean result;
 		if (this.fork == null) {
 			final Iterable<? extends JavaFileObject> javaFileObjects =

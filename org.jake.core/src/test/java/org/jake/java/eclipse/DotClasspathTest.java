@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.jake.JakeDirSet;
 import org.jake.depmanagement.JakeDependencies;
-import org.jake.depmanagement.JakeDependency.JakeFilesDependency;
 import org.jake.java.build.JakeJavaBuild;
 import org.junit.Test;
 
@@ -30,21 +29,21 @@ public class DotClasspathTest {
 
 	@Test
 	public void testLibs() throws URISyntaxException {
-		final List<Lib> libs = sample().libs(new File(structure(),"containers"), structure(), Lib.SMART_LIB);
-		assertEquals(6, libs.size());
+		final List<Lib> libs = sample().libs(structure(), Lib.SMART_LIB);
+		assertEquals(5, libs.size());
 	}
 
 	@Test
 	public void testToDependencies() throws URISyntaxException {
-		final List<Lib> libs = sample().libs(new File(structure(),"containers"), structure(), Lib.SMART_LIB);
-		assertEquals(6, libs.size());
+		final List<Lib> libs = sample().libs( structure(), Lib.SMART_LIB);
+		assertEquals(5, libs.size());
 
-		final JakeDependencies deps = Lib.toDependencies(null, libs);
+		final JakeDependencies deps = Lib.toDependencies(null, libs, Lib.SMART_LIB);
 
 
-		assertEquals(1, deps.dependenciesDeclaredWith(JakeJavaBuild.TEST).size());
-		final JakeFilesDependency filesDependency = (JakeFilesDependency) deps.dependenciesDeclaredWith(JakeJavaBuild.TEST).iterator().next();
-		assertEquals(1, filesDependency.files().size());
+		assertEquals(0, deps.dependenciesDeclaredWith(JakeJavaBuild.TEST).size());
+		//final JakeFilesDependency filesDependency = (JakeFilesDependency) deps.dependenciesDeclaredWith(JakeJavaBuild.TEST).iterator().next();
+		//assertEquals(1, filesDependency.files().size());
 	}
 
 	private DotClasspath sample() throws URISyntaxException {

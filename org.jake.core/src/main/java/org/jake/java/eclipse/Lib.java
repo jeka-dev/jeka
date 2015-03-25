@@ -1,19 +1,26 @@
 package org.jake.java.eclipse;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.jake.JakeLocator;
 import org.jake.depmanagement.JakeDependencies;
 import org.jake.depmanagement.JakeScope;
 import org.jake.java.build.JakeJavaBuild;
 
 class Lib {
 
-	public static Lib file(File file, JakeScope scope) {
-		return new Lib(file, null, scope);
+	private static final String CONTAINERS_PATH = "eclipse/containers";
+
+	static final File containersHome = new File(JakeLocator.jakeHome(), CONTAINERS_PATH);
+
+	public static Lib file(File file, JakeScope scope, boolean exported) {
+		return new Lib(file, null, scope, exported);
 	}
 
-	public static Lib project(String project, JakeScope scope) {
-		return new Lib(null, project, scope);
+	public static Lib project(String project, JakeScope scope, boolean exported) {
+		return new Lib(null, project, scope, exported);
 	}
 
 
@@ -24,11 +31,14 @@ class Lib {
 
 	public final JakeScope scope;
 
-	private Lib(File file, String projectRelativePath, JakeScope scope) {
+	public final boolean exported;
+
+	private Lib(File file, String projectRelativePath, JakeScope scope, boolean exported) {
 		super();
 		this.file = file;
 		this.scope = scope;
 		this.projectRelativePath = projectRelativePath;
+		this.exported = exported;
 	}
 
 
@@ -37,14 +47,30 @@ class Lib {
 		return scope + ":" + file.getPath();
 	}
 
-	public static JakeDependencies toDependencies(JakeEclipseBuild masterBuild, Iterable<Lib> libs) {
+	public static JakeDependencies toDependencies(JakeEclipseBuild masterBuild, Iterable<Lib> libs
+			, ScopeSegregator scopeSegregator) {
 		final JakeDependencies.Builder builder = JakeDependencies.builder();
 		for (final Lib lib : libs) {
 			if (lib.projectRelativePath == null) {
 				builder.onFile(lib.file).scope(lib.scope);
-			} else {
+
+			} else {  // This is project dependency
 				final JakeJavaBuild slaveBuild = (JakeJavaBuild) masterBuild.relativeProject(lib.projectRelativePath);
 				builder.onProject(slaveBuild, slaveBuild.packer().jarFile()).scope(lib.scope);
+
+				// Get the exported entry as well
+				if (slaveBuild instanceof JakeEclipseBuild) {
+					final JakeEclipseBuild eclipseBuild = (JakeEclipseBuild) slaveBuild;
+					final File dotClasspathFile = slaveBuild.baseDir(".classpath");
+					final DotClasspath dotClasspath = DotClasspath.from(dotClasspathFile);
+					final List<Lib> sublibs = new ArrayList<Lib>();
+					for (final Lib sublib : dotClasspath.libs(slaveBuild.baseDir().root(), scopeSegregator)) {
+						if (sublib.exported) {
+							sublibs.add(sublib);
+						}
+					}
+					builder.on(Lib.toDependencies(eclipseBuild, sublibs, scopeSegregator));
+				}
 			}
 		}
 		return builder.build();

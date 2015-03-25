@@ -87,7 +87,7 @@ final class DotClasspath {
 		return new Sources(JakeDirSet.of(prods), JakeDirSet.of(tests));
 	}
 
-	public List<Lib> libs(File containersHome, File baseDir, Lib.ScopeSegregator libSegregator) {
+	public List<Lib> libs(File baseDir, Lib.ScopeSegregator libSegregator) {
 		final List<Lib> result = new LinkedList<Lib>();
 		final Map<String, File> projects = Project.findProjects(baseDir.getParentFile());
 		for (final ClasspathEntry classpathEntry : classpathentries) {
@@ -97,13 +97,13 @@ final class DotClasspath {
 				if (classpathEntry.path.startsWith(ClasspathEntry.JRE_CONTAINER_PREFIX)) {
 					continue;
 				}
-				for (final File file : classpathEntry.conAsFiles(baseDir, containersHome)) {
-					result.add(Lib.file(file, scope));
+				for (final File file : classpathEntry.conAsFiles(baseDir, Lib.containersHome)) {
+					result.add(Lib.file(file, scope, classpathEntry.exported));
 				}
 
 			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.LIB)) {
 				final JakeScope scope = libSegregator.scopeOfLib(classpathEntry.path);
-				result.add(Lib.file(classpathEntry.libAsFile(baseDir, projects), scope));
+				result.add(Lib.file(classpathEntry.libAsFile(baseDir, projects), scope, classpathEntry.exported));
 
 			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.VAR)) {
 				final String var = JakeUtilsString.substringBeforeFirst(classpathEntry.path, "/");
@@ -120,18 +120,20 @@ final class DotClasspath {
 					JakeLog.warn("Can't find Eclipse classpath entry : " + file.getAbsolutePath());
 				}
 				final JakeScope scope = libSegregator.scopeOfLib(classpathEntry.path);
-				result.add(Lib.file(file, scope));
+				result.add(Lib.file(file, scope, classpathEntry.exported));
 
 			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC)) {
 				if (classpathEntry.isProjectSrc(baseDir.getParentFile(), projects)) {
 					final String projectPath = classpathEntry.projectRelativePath(baseDir, projects);
-					result.add(Lib.project(projectPath, JakeJavaBuild.COMPILE));
+					result.add(Lib.project(projectPath, JakeJavaBuild.COMPILE, classpathEntry.exported));
 				}
 
 			}
 		}
 		return result;
 	}
+
+
 
 
 	private static class ClasspathEntry {
@@ -144,6 +146,8 @@ final class DotClasspath {
 
 		private final Kind kind;
 
+		private final boolean exported;
+
 		private final String path;
 
 		private final String excluding;
@@ -152,12 +156,13 @@ final class DotClasspath {
 
 		private final Map<String, String> attributes = new HashMap<String, String>();
 
-		public ClasspathEntry(Kind kind, String path, String excluding, String including) {
+		public ClasspathEntry(Kind kind, String path, String excluding, String including, boolean exported) {
 			super();
 			this.kind = kind;
 			this.path = path;
 			this.excluding = excluding;
 			this.including = including;
+			this.exported = exported;
 		}
 
 		public static ClasspathEntry from(Element classpathEntryEl) {
@@ -179,7 +184,9 @@ final class DotClasspath {
 			} else {
 				kind = Kind.UNKNOWN;
 			}
-			final ClasspathEntry result = new ClasspathEntry(kind, path, excluding, including);
+			final String exportedString = classpathEntryEl.getAttribute("exported");
+			final boolean export = "true".equals(exportedString);
+			final ClasspathEntry result = new ClasspathEntry(kind, path, excluding, including, export);
 			final NodeList nodeList = classpathEntryEl.getElementsByTagName("attributes");
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				final Element attributeEl = (Element) nodeList.item(i);
