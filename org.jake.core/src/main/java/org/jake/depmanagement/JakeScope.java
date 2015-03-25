@@ -103,7 +103,7 @@ public class JakeScope {
 
 	public boolean isInOrIsExtendingAnyOf(Iterable<? extends JakeScope> scopes) {
 		for (final JakeScope scope : scopes) {
-			if (scope.equals(this) || scope.isExtending(this)) {
+			if (scope.equals(this) || this.isExtending(scope)) {
 				return true;
 			}
 		}

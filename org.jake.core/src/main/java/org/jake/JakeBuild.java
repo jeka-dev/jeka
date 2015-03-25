@@ -227,6 +227,7 @@ public class JakeBuild {
 	 */
 	public final JakeBuildDependencies buildDependencies() {
 		return this.buildDependencies;
+
 	}
 
 	/**
