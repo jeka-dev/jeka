@@ -93,11 +93,13 @@ public class JakeBuild {
 	"Example : -extraCompilePath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
 	private final String extraJakePath = null;
 
-	private final JakeBuildDependencies buildDependencies;
+	private final JakeBuildDependencies explicitBuildDependencies;
+
+	private JakeBuildDependencies buildDependencies;
 
 	protected JakeBuild() {
 		final List<JakeBuild> subBuilds = populateProjectBuildField(this);
-		this.buildDependencies = JakeBuildDependencies.of(subBuilds);
+		this.explicitBuildDependencies = JakeBuildDependencies.of(subBuilds);
 	}
 
 	/**
@@ -226,7 +228,10 @@ public class JakeBuild {
 	 * Returns the builds this build references.
 	 */
 	public final JakeBuildDependencies buildDependencies() {
-		return this.buildDependencies;
+		if (buildDependencies == null) {
+			buildDependencies = this.explicitBuildDependencies.and(this.dependencies().buildDependencies());
+		}
+		return buildDependencies;
 
 	}
 
@@ -362,7 +367,7 @@ public class JakeBuild {
 	 * artifacts are generated.
 	 */
 	public JakeDir ouputDir() {
-		return baseDir().sub("build/output").createIfNotExist();
+		return baseDir().sub(BuildResolver.BUILD_OUTPUT_PATH).createIfNotExist();
 	}
 
 	/**
@@ -377,7 +382,7 @@ public class JakeBuild {
 	@JakeDoc("Clean the output directory.")
 	public void clean() {
 		JakeLog.start("Cleaning output directory " + ouputDir().root().getPath() );
-		JakeUtilsFile.deleteDirContent(ouputDir().root());
+		ouputDir().exclude(BuildResolver.BUILD_BIN_DIR_NAME + "/**").deleteAll();
 		JakeLog.done();
 	}
 

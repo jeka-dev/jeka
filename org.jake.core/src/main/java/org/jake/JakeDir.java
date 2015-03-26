@@ -229,6 +229,21 @@ public final class JakeDir implements Iterable<File> {
 	}
 
 	/**
+	 * Deletes each and every files in this tree. Files excluded from this tree are not deleted.
+	 */
+	public JakeDir deleteAll() {
+		for (final File file : this) {
+			if (file.exists()) {
+				if (file.isDirectory()) {
+					JakeUtilsFile.deleteDirContent(file);
+				}
+				JakeUtilsFile.delete(file);
+			}
+		}
+		return this;
+	}
+
+	/**
 	 * Returns a {@link JakeDirSet} made of this {@link JakeDir} and the specified one.
 	 */
 	public JakeDirSet and(JakeDir dirView) {

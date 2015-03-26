@@ -322,6 +322,21 @@ public class JakeDependencies implements Iterable<JakeScopedDependency> {
 		return result;
 	}
 
+	/**
+	 * Returns all build included in these dependencies.
+	 * The builds are coming from {@link JakeProjectDependency}.
+	 */
+	public List<JakeBuild> buildDependencies() {
+		final List<JakeBuild> result = new LinkedList<JakeBuild>();
+		for (final JakeScopedDependency scopedDependency : this.dependencies) {
+			if (scopedDependency.dependency() instanceof JakeProjectDependency) {
+				final JakeProjectDependency projectDependency = (JakeProjectDependency) scopedDependency.dependency();
+				result.add(projectDependency.projectBuild());
+			}
+		}
+		return result;
+	}
+
 
 	public static Builder builder() {
 		return new Builder(new LinkedList<JakeScopedDependency>());

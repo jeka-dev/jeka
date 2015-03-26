@@ -25,11 +25,11 @@ public class DistribBuild extends JakeBuild {
 		
 		JakeLog.startln("Creating distribution file");
 		
-		// copy core distribution locally
+		JakeLog.info("Copy core distribution localy.");
 		CoreBuild core = pluginsJacoco.core;  // The core project is got by transitivity
 		JakeDir dist = JakeDir.of(this.ouputDir("dist")).copyInDirContent(core.distribFolder);
 		
-		// Add plugins to the distribution
+		JakeLog.info("Add plugins to the distribution");
 		JakeDir ext = dist.sub("libs/ext").importFiles(pluginsSonar.packer().jarFile(), pluginsJacoco.packer().jarFile());
 		dist.sub("libs/sources").importFiles(pluginsSonar.packer().jarSourceFile(), pluginsJacoco.packer().jarSourceFile());
 		

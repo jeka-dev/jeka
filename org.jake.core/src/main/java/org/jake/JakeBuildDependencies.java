@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIterable;
 
 public final class JakeBuildDependencies {
@@ -26,9 +27,14 @@ public final class JakeBuildDependencies {
 		this.buildDeps = Collections.unmodifiableList(buildDeps);
 	}
 
+	@SuppressWarnings("unchecked")
+	public JakeBuildDependencies and(List<JakeBuild> builds) {
+		return new JakeBuildDependencies(JakeUtilsIterable.concatLists(this.buildDeps, builds));
+	}
+
 	public List<JakeBuild> transitiveBuilds() {
 		if (resolvedTransitiveBuilds == null) {
-			resolvedTransitiveBuilds = resolveTransitiveBuilds(new HashSet<BuildKey>());
+			resolvedTransitiveBuilds = resolveTransitiveBuilds(new HashSet<File>());
 		}
 		return resolvedTransitiveBuilds;
 	}
@@ -59,69 +65,18 @@ public final class JakeBuildDependencies {
 		}
 	}
 
-	private List<JakeBuild> resolveTransitiveBuilds(Set<BuildKey> keys) {
+	private List<JakeBuild> resolveTransitiveBuilds(Set<File> files) {
 		final List<JakeBuild> result = new LinkedList<JakeBuild>();
 		for (final JakeBuild build : buildDeps) {
-			final BuildKey key = new BuildKey(build);
-			if (!keys.contains(key)) {
-				result.addAll(build.buildDependencies().resolveTransitiveBuilds(keys));
+			final File dir = JakeUtilsFile.canonicalFile(build.baseDir().root());
+			if (!files.contains(dir)) {
+				result.addAll(build.buildDependencies().resolveTransitiveBuilds(files));
 				result.add(build);
-				keys.add(key);
+				files.add(dir);
 			}
 		}
 		return result;
 	}
 
-	private static class BuildKey {
-
-		private final Class<?> clazz;
-
-		private final File file;
-
-		public BuildKey(JakeBuild build) {
-			super();
-			this.clazz = build.getClass();
-			this.file = build.baseDir().root();
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
-			result = prime * result + ((file == null) ? 0 : file.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null) {
-				return false;
-			}
-			if (getClass() != obj.getClass()) {
-				return false;
-			}
-			final BuildKey other = (BuildKey) obj;
-			if (clazz == null) {
-				if (other.clazz != null) {
-					return false;
-				}
-			} else if (!clazz.equals(other.clazz)) {
-				return false;
-			}
-			if (file == null) {
-				if (other.file != null) {
-					return false;
-				}
-			} else if (!file.equals(other.file)) {
-				return false;
-			}
-			return true;
-		}
-
-	}
 
 }

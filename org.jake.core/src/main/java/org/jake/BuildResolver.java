@@ -22,7 +22,11 @@ class BuildResolver {
 
 	private static final String BUILD_LIB_DIR = "build/libs/build";
 
-	private static final String BUILD_BIN_DIR = "build/output/build-bin";
+	public static final String BUILD_BIN_DIR_NAME = "build-bin";
+
+	public static final String BUILD_OUTPUT_PATH = "build/output";
+
+	private static final String BUILD_BIN_DIR = BUILD_OUTPUT_PATH + "/" + BUILD_BIN_DIR_NAME;
 
 	private final File baseDir;
 

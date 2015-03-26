@@ -17,6 +17,7 @@ public class JakePluginsTest {
 
 	interface PluginBase {}
 
+	@SuppressWarnings("unused")
 	private static class PluginBaseMy implements PluginBase {
 
 	}
