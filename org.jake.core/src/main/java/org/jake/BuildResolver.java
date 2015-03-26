@@ -99,7 +99,16 @@ class BuildResolver {
 		}
 		final JakeDir dir = JakeDir.of(buildSourceDir);
 		for (final String path : dir.relativePathes()) {
-			if (path.endsWith(".java")) {
+			if (path.endsWith(".java") ) {
+				final String simpleName;
+				if (path.contains(File.pathSeparator)) {
+					simpleName = JakeUtilsString.substringAfterLast(path, File.separator);
+				} else {
+					simpleName = path;
+				}
+				if (simpleName.startsWith("_")) {
+					continue;
+				}
 				final Class<?> clazz = JakeClassLoader.current().loadGivenClassSourcePathIfExist(path);
 				if (clazz == null) {
 					return true;

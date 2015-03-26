@@ -45,7 +45,6 @@ public class DistribBuild extends JakeBuild {
 	
 	@JakeDoc("End to end method to construct a distrib.")
 	public void doDistrib() {
-		base();
 		buildDependencies().invokeBaseOnAllSubProjects();
 		distrib();
 	} 
