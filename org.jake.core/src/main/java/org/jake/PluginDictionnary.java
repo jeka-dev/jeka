@@ -163,7 +163,7 @@ final class PluginDictionnary<T>  {
 	public static class JakePluginDescription<T> {
 
 		private static String shortName(Class<?> extendingClass, Class<?> clazz) {
-			return JakeUtilsString.substringBeforeLast(clazz.getSimpleName(), extendingClass.getSimpleName());
+			return JakeUtilsString.substringAfterFirst(clazz.getSimpleName(), extendingClass.getSimpleName());
 		}
 
 		private static String longName(Class<?> extendingClass, Class<?> clazz) {

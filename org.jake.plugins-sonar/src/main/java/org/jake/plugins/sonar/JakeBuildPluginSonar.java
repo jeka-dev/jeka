@@ -4,20 +4,24 @@ import java.io.File;
 
 import org.jake.JakeBuild;
 import org.jake.JakeDoc;
+import org.jake.JakeOptions;
 import org.jake.JakePath;
 import org.jake.java.build.JakeJavaBuild;
 import org.jake.java.build.JakeJavaBuildPlugin;
 import org.jake.java.testing.junit.JakeUnit.JunitReportDetail;
 import org.jake.utils.JakeUtilsFile;
 
-@JakeDoc({"Run Sonar analysis",
-	"When activated this plugin run a Sonar analysis when the build 'verify' method is invoked."})
+@JakeDoc({"Add SonarQube capability to a build.",
+	"The ananlysis is performed when the 'verify' method is invoked.",
+	"To parameterize this plugin just set the relevant sonar properies as options.",
+	"For example you can launch the build whith '-sonar.host.url=http://myserver/..' to specify the SonarQube server url."})
 public class JakeBuildPluginSonar extends JakeJavaBuildPlugin {
 	
 	public static JakeSonar configureSonarFrom(JakeJavaBuild build) {
 		final File baseDir = build.baseDir().root();
 		final JakePath libs = build.depsFor(JakeJavaBuild.COMPILE, JakeJavaBuild.PROVIDED);
 		return JakeSonar.of(build.projectFullName(), build.projectName(), build.version())
+				.withProperties(JakeOptions.getAllStartingWith("sonar."))
                 .withProjectBaseDir(baseDir) 
                 .withBinaries(build.classDir())
                 .withLibraries(libs)

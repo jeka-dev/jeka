@@ -77,7 +77,13 @@ class Main {
 		final File propFile = new File(JakeLocator.jakeHome(), "options.properties");
 		if (propFile.exists()) {
 			final Properties properties = JakeUtilsFile.readPropertyFile(propFile);
-			return JakeUtilsIterable.propertiesToMap(properties);
+			final File userPropFile = new File(JakeLocator.jakeUserHome(), "options.properties");
+			if (userPropFile.exists()) {
+				final Properties userProperties = JakeUtilsFile.readPropertyFile(propFile);
+				properties.putAll(userProperties);
+			}
+			final Map<String, String> result = JakeUtilsIterable.propertiesToMap(properties);
+			return result;
 		}
 		return Collections.emptyMap();
 

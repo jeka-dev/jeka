@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.jake.PluginDictionnary.JakePluginDescription;
 import org.jake.utils.JakeUtilsReflect;
@@ -34,7 +35,8 @@ class HelpDisplayer {
 
 	public static void helpPlugins(JakeBuild build) {
 		JakeLog.startln("Looking for plugins");
-		final List<JakePluginDescription<?>> pluginDescriptions = JakePluginDescription.declaredAsField(build);
+		final Set<JakePluginDescription<JakeBuildPlugin>> pluginDescriptions =
+				PluginDictionnary.of(JakeBuildPlugin.class).getAll();
 		for (final JakePluginDescription<?> description : pluginDescriptions) {
 			JakeLog.nextLine();
 			JakeLog.info("Plugin  Name : " + description.shortName());
@@ -62,6 +64,7 @@ class HelpDisplayer {
 			}
 			JakeLog.shift(-4);
 		}
+		JakeLog.done();
 	}
 
 	private static void displayPlugins(JakeBuild build) {

@@ -127,6 +127,12 @@ public final class JakeSonar {
     public JakeSonar withProperty(String key, String value) {
         return new JakeSonar(andParams(key, value), enabled);
     }
+    
+    public JakeSonar withProperties(Map<String, String> props) {
+    	final Map<String, String> newProps = new HashMap<String, String>(this.params);
+    	newProps.putAll(props);
+        return new JakeSonar(props, enabled);
+    }
 
 
     public JakeSonar withProjectBaseDir(File baseDir) {

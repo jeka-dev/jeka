@@ -96,7 +96,7 @@ public final class JakeUtilsString {
 		if (index == -1) {
 			return "";
 		}
-		return string.substring(index+1);
+		return string.substring(index + delimiter.length());
 	}
 
 	public static String substringBeforeLast(String string, String delimiter) {

@@ -86,6 +86,16 @@ public final class JakeOptions {
 		return INSTANCE.freeOptions.get(key);
 	}
 
+	public static Map<String, String> getAllStartingWith(String prefix) {
+		final Map<String, String> result = new HashMap<String, String>();
+		for (final String key : INSTANCE.freeOptions.keySet()) {
+			if (key.startsWith(prefix)) {
+				result.put(key, INSTANCE.freeOptions.get(key));
+			}
+		}
+		return result;
+	}
+
 
 	/**
 	 * Set the field values according to the target object according the string found in props arguments.
