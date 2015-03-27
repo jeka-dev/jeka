@@ -176,7 +176,7 @@ public final class JakeZipper {
 		/**
 		 * As {@link #md5()} but allow to pass a flag as parameter to actually process or not the digesting.
 		 */
-		public CheckSumer md5(boolean process) {
+		public CheckSumer md5If(boolean process) {
 			if (!process) {
 				return this;
 			}

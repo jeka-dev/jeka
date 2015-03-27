@@ -1,6 +1,6 @@
-- eclipse : project dependencies & proper war
+- eclipse : proper war
 
-- eclipse : generate buildpath
+- eclipse : generate .classpath
 
 - compile/run test with other JDK (located in options)
 

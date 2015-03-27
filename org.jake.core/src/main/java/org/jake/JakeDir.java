@@ -89,7 +89,7 @@ public final class JakeDir implements Iterable<File> {
 		} else {
 			JakeUtilsFile.assertDir(destinationDir);
 		}
-		return JakeUtilsFile.copyDir(root, destinationDir, filter.toFileFilter(root), true, JakeOptions.isVerbose(), JakeLog.infoStream());
+		return JakeUtilsFile.copyDir(root, destinationDir, filter.toFileFilter(root), true, JakeLog.infoStreamIfVerbose());
 	}
 
 	public int copyReplacingTokens(File destinationDir, Map<String, String> tokenValues) {
@@ -98,7 +98,7 @@ public final class JakeDir implements Iterable<File> {
 		} else {
 			JakeUtilsFile.assertDir(destinationDir);
 		}
-		return JakeUtilsFile.copyDirReplacingTokens(root, destinationDir, filter.toFileFilter(root), true, JakeOptions.isVerbose(), JakeLog.infoStream(), tokenValues);
+		return JakeUtilsFile.copyDirReplacingTokens(root, destinationDir, filter.toFileFilter(root), true, JakeLog.infoStreamIfVerbose(), tokenValues);
 	}
 
 	/**
@@ -134,7 +134,7 @@ public final class JakeDir implements Iterable<File> {
 	public JakeDir copyInFiles(Iterable<File> files) {
 		createIfNotExist();
 		for (final File file : files) {
-			JakeUtilsFile.copyFileToDir(file, this.root, false, null);
+			JakeUtilsFile.copyFileToDir(file, this.root, JakeLog.infoStreamIfVerbose());
 		}
 		return this;
 	}

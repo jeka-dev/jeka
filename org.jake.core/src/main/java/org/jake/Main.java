@@ -3,15 +3,12 @@ package org.jake;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsIO;
-import org.jake.utils.JakeUtilsIterable;
 import org.jake.utils.JakeUtilsString;
 import org.jake.utils.JakeUtilsTime;
 
@@ -75,18 +72,15 @@ class Main {
 
 	private static Map<String, String> loadOptionsProperties() {
 		final File propFile = new File(JakeLocator.jakeHome(), "options.properties");
+		final Map<String, String> result = new HashMap<String, String>();
 		if (propFile.exists()) {
-			final Properties properties = JakeUtilsFile.readPropertyFile(propFile);
-			final File userPropFile = new File(JakeLocator.jakeUserHome(), "options.properties");
-			if (userPropFile.exists()) {
-				final Properties userProperties = JakeUtilsFile.readPropertyFile(propFile);
-				properties.putAll(userProperties);
-			}
-			final Map<String, String> result = JakeUtilsIterable.propertiesToMap(properties);
-			return result;
+			result.putAll(JakeUtilsFile.readPropertyFileAsMap(propFile));
 		}
-		return Collections.emptyMap();
-
+		final File userPropFile = new File(JakeLocator.jakeUserHome(), "options.properties");
+		if (userPropFile.exists()) {
+			result.putAll(JakeUtilsFile.readPropertyFileAsMap(userPropFile));
+		}
+		return result;
 	}
 
 	private static int printAscii(boolean error, String fileName) {

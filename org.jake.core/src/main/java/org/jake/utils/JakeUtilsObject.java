@@ -12,4 +12,5 @@ public final class JakeUtilsObject {
 		return object1;
 	}
 
+
 }

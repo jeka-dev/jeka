@@ -32,6 +32,13 @@ public class JakeLog {
 		startTimer();
 	}
 
+	public static PrintStream infoStreamIfVerbose() {
+		if (JakeOptions.isVerbose()) {
+			return infoStream();
+		}
+		return null;
+	}
+
 	private static void startTimer() {
 		LinkedList<Long> times = START_TIMES.get();
 		if (times == null) {

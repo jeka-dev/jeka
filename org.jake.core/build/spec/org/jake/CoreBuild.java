@@ -21,6 +21,7 @@ public class CoreBuild extends JakeJavaBuild {
 	protected void init() {
 		distripZipFile = ouputDir("jake-distrib.zip");
 		distribFolder = ouputDir("jake-distrib");
+		this.fatJar = true;
 	}
 
 	// Just to run directly the whole build bypassing the Jake bootstrap mechanism.
@@ -37,7 +38,7 @@ public class CoreBuild extends JakeJavaBuild {
 
 	@Override
 	protected JakeJavaPacker createPacker() {
-		return super.createPacker().withFatJar(true);
+		return super.createPacker();
 	}
 
 	// Include the making of the distribution into the application packaging.

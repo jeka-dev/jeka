@@ -272,7 +272,7 @@ public class JakeJavaBuild extends JakeBuild {
 	}
 
 	protected JakeJavaPacker createPacker() {
-		return JakeJavaPacker.of(this).withFatJar(fatJar);
+		return JakeJavaPacker.of(this);
 	}
 
 	protected JakeResourceProcessor resourceProcessor() {

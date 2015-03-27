@@ -249,7 +249,7 @@ final class DotClasspath {
 		public File libAsFile(File baseDir, Map<String, File> projectLocationMap) {
 			final String pathInProject;
 			final File pathAsFile = new File(path);
-			if (pathAsFile.isAbsolute() && pathAsFile.exists()) {
+			if (pathAsFile.isAbsolute()) {
 				return pathAsFile;
 			}
 			if (path.startsWith("/")) {

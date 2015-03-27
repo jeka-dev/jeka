@@ -33,11 +33,11 @@ public class DistribBuild extends JakeBuild {
 		JakeDir ext = dist.sub("libs/ext").importFiles(pluginsSonar.packer().jarFile(), pluginsJacoco.packer().jarFile());
 		dist.sub("libs/sources").importFiles(pluginsSonar.packer().jarSourceFile(), pluginsJacoco.packer().jarSourceFile());
 		
-		// add plugins to the fat jar
+		JakeLog.info("Add plugins to the fat jar.");
 		File fat = dist.file(core.packer().fatJarFile().getName());
 		JakeZipper.of().merge(ext.include("**/*.jar")).appendTo(fat);
 		
-		// pack all
+		JakeLog.info("Pack all");
 		dist.zip().to(ouputDir("jake-distrib.zip"));
 		
 		JakeLog.done();
@@ -45,7 +45,7 @@ public class DistribBuild extends JakeBuild {
 	
 	@JakeDoc("End to end method to construct a distrib.")
 	public void doDistrib() {
-		buildDependencies().invokeBaseOnAllSubProjects();
+		buildDependencies().invokeBaseMethodOnAllSubProjects();
 		distrib();
 	} 
 	

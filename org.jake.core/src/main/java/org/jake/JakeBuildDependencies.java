@@ -39,7 +39,7 @@ public final class JakeBuildDependencies {
 		return resolvedTransitiveBuilds;
 	}
 
-	public void invokeBaseOnAllSubProjects() {
+	public void invokeBaseMethodOnAllSubProjects() {
 		this.executeOnAllTransitive(JakeUtilsIterable.listOf(BuildMethod.normal("base")));
 	}
 

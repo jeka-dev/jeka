@@ -1,7 +1,6 @@
 package org.jake.java.build;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.Deflater;
@@ -16,66 +15,39 @@ import org.jake.JakeZipper;
  * 
  * @author Jerome Angibaud
  */
-public class JakeJavaPacker {
+public class JakeJavaPacker implements Cloneable {
+
+	public static JakeJavaPacker.Builder builder(JakeJavaBuild build) {
+		return JakeJavaPacker.of(build).builder();
+	}
+
+	public static JakeJavaPacker of(JakeJavaBuild build) {
+		return new JakeJavaPacker(build);
+	}
 
 	private final JakeJavaBuild build;
 
-	private final boolean fatJar;
+	private int compressionLevel = Deflater.DEFAULT_COMPRESSION;
 
-	private final int compressionLevel;
+	private boolean includeVersion = false;
 
-	private final boolean includeVersion;
+	private boolean fullName = false;
 
-	private final boolean fullName;
+	private boolean checkSum = false;
 
-	private final boolean checkSum;
+	private boolean doJar = true;
 
-	private final List<Runnable> extraActions;
+	private boolean doTest = true;
 
-	@SuppressWarnings("unchecked")
-	protected JakeJavaPacker(JakeJavaBuild buildBase) {
-		this(buildBase, false, false, Deflater.DEFAULT_COMPRESSION, true, false, Collections.EMPTY_LIST);
-	}
+	private boolean doSources = true;
 
-	protected JakeJavaPacker(JakeJavaBuild buildBase, boolean includeVersion, boolean fatJar, int compressionLevel, boolean fullName, boolean checkSum, List<Runnable> extraActions) {
-		super();
-		this.build = buildBase;
-		this.fatJar = fatJar;
-		this.compressionLevel = compressionLevel;
-		this.includeVersion = includeVersion;
-		this.fullName = fullName;
-		this.checkSum = checkSum;
-		this.extraActions = extraActions;
-	}
+	private boolean doFatJar = false;
 
-	public static JakeJavaPacker of(JakeJavaBuild buildJava) {
-		return new JakeJavaPacker(buildJava);
-	}
+	private List<Extra> extraActions = new LinkedList<Extra>();
 
-	public JakeJavaPacker withFatJar(boolean fatJar) {
-		return new JakeJavaPacker(this.build, includeVersion, fatJar, compressionLevel, fullName, checkSum, extraActions);
-	}
-
-	public JakeJavaPacker withCompression(int compressionLevel) {
-		return new JakeJavaPacker(this.build, includeVersion, fatJar, compressionLevel, fullName, checkSum, extraActions);
-	}
-
-	public JakeJavaPacker withIncludeVersion(boolean includeVersion) {
-		return new JakeJavaPacker(this.build, includeVersion, fatJar, compressionLevel, fullName, checkSum, extraActions);
-	}
-
-	public JakeJavaPacker withFullName(boolean fullName) {
-		return new JakeJavaPacker(this.build, includeVersion, fatJar, compressionLevel, fullName, checkSum, extraActions);
-	}
-
-	public JakeJavaPacker withExtraAction(Runnable runnable) {
-		final List<Runnable> actions = new LinkedList<Runnable>(this.extraActions);
-		actions.add(runnable);
-		return new JakeJavaPacker(this.build, includeVersion, fatJar, compressionLevel, fullName, checkSum, actions);
-	}
-
-	protected JakeJavaBuild build() {
-		return build;
+	private JakeJavaPacker(JakeJavaBuild build) {
+		this.build = build;
+		this.doFatJar = build.fatJar;
 	}
 
 	public String baseName() {
@@ -86,53 +58,153 @@ public class JakeJavaPacker {
 		return name;
 	}
 
-	protected int zipLevel() {
-		return Deflater.DEFAULT_COMPRESSION;
+	public Builder builder() {
+		return new JakeJavaPacker.Builder(this);
 	}
 
 	public File jarFile() {
-		return build().ouputDir(baseName() + ".jar");
+		return build.ouputDir(baseName() + ".jar");
 	}
 
 	public File jarSourceFile() {
-		return build().ouputDir(baseName() + "-sources.jar");
+		return build.ouputDir(baseName() + "-sources.jar");
 	}
 
 	public File jarTestFile() {
-		return build().ouputDir(baseName() + "-test.jar");
+		return build.ouputDir(baseName() + "-test.jar");
 	}
 
 	public File jarTestSourceFile() {
-		return build().ouputDir(baseName() + "-test-sources.jar");
+		return build.ouputDir(baseName() + "-test-sources.jar");
 	}
 
 	public File fatJarFile() {
-		return build().ouputDir(baseName() + "-fat.jar");
+		return build.ouputDir(baseName() + "-fat.jar");
 	}
 
 	public File javadocFile() {
-		return build().ouputDir(baseName() + "-javadoc.jar");
+		return build.ouputDir(baseName() + "-javadoc.jar");
 	}
 
 	public void pack() {
 		JakeLog.startln("Packaging module");
-		JakeDir.of(build().classDir()).zip().to(jarFile(), compressionLevel).md5(checkSum);
-		build().sourceDirs().and(build().resourceDirs()).zip().to(jarSourceFile(), compressionLevel);
-		if (!build().skipTests && build().testClassDir().exists() && !JakeDir.of(build.testClassDir()).files().isEmpty()) {
-			JakeZipper.of(build().testClassDir()).to(jarTestFile(), compressionLevel);
+		if (doJar) {
+			JakeDir.of(build.classDir()).zip().to(jarFile(), compressionLevel).md5If(checkSum);
 		}
-		if (!build.testSourceDirs().files().isEmpty()) {
-			build().testSourceDirs().and(build().testResourceDirs()).zip().to(jarTestSourceFile(), compressionLevel);
+		if (doSources) {
+			build.sourceDirs().and(build.resourceDirs()).zip().to(jarSourceFile(), compressionLevel);
 		}
-		if (fatJar) {
-			JakeDir.of(build().classDir()).zip().merge(build().depsFor(JakeJavaBuild.RUNTIME))
-			.to(fatJarFile(), compressionLevel).md5(checkSum);
+		if (doTest && !build.skipTests && build.testClassDir().exists() && !JakeDir.of(build.testClassDir()).files().isEmpty()) {
+			JakeZipper.of(build.testClassDir()).to(jarTestFile(), compressionLevel);
 		}
-		for (final Runnable action : this.extraActions) {
-			action.run();
+		if (doTest && doSources && !build.testSourceDirs().files().isEmpty()) {
+			build.testSourceDirs().and(build.testResourceDirs()).zip().to(jarTestSourceFile(), compressionLevel);
+		}
+		if (doFatJar) {
+			JakeDir.of(build.classDir()).zip().merge(build.depsFor(JakeJavaBuild.RUNTIME))
+			.to(fatJarFile(), compressionLevel).md5If(checkSum);
+		}
+		for (final Extra action : this.extraActions) {
+			action.process(build);
 		}
 		JakeLog.done();
 	}
 
+
+
+
+
+	public interface Extra {
+
+		public void process(JakeJavaBuild build);
+
+	}
+
+	public static class Builder {
+
+		private final JakeJavaPacker packer;
+
+		private Builder(JakeJavaPacker packer) {
+			this.packer = packer.clone();
+		}
+
+		/**
+		 * Compression of the archive files. Should be expressed with {@link Deflater} constants.
+		 * Default is {@link Deflater#DEFAULT_COMPRESSION}.
+		 */
+		public Builder compressionLevel(int level) {
+			packer.compressionLevel = level;
+			return this;
+		}
+
+		/**
+		 * True to include the version in the file names.
+		 */
+		public Builder includeVersion(boolean includeVersion) {
+			packer.includeVersion = includeVersion;
+			return this;
+		}
+
+		/**
+		 * True means that the name of the archives will include the groupId of the artifact.
+		 */
+		public Builder fullName(boolean fullName) {
+			packer.fullName = fullName;
+			return this;
+		}
+
+		/**
+		 * True to generate MD-5 check sum for archives.
+		 */
+		public Builder checkSum(boolean checkSum) {
+			packer.checkSum = checkSum;
+			return this;
+		}
+
+		/**
+		 * True to generate a jar file containing both classes and resources.
+		 */
+		public Builder doJar(boolean doJar) {
+			packer.doJar = doJar;
+			return this;
+		}
+
+		public Builder doTest(Boolean doTest) {
+			packer.doTest = doTest;
+			return this;
+		}
+
+		public Builder doSources(Boolean doSources) {
+			packer.doSources = doSources;
+			return this;
+		}
+
+		public Builder doFatJar(Boolean doFatJar) {
+			packer.doFatJar = doFatJar;
+			return this;
+		}
+
+		public Builder extraAction(Extra extra) {
+			packer.extraActions.add(extra);
+			return this;
+		}
+
+		public JakeJavaPacker build() {
+			return packer.clone();
+		}
+
+	}
+
+	@Override
+	public JakeJavaPacker clone() {
+		JakeJavaPacker clone;
+		try {
+			clone = (JakeJavaPacker) super.clone();
+		} catch (final CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
+		clone.extraActions = new LinkedList<JakeJavaPacker.Extra>(this.extraActions);
+		return clone;
+	}
 
 }

@@ -11,6 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.jake.JakeException;
 import org.jake.JakeLog;
 import org.jake.JakeOptions;
+import org.jake.utils.JakeUtilsFile;
 import org.jake.utils.JakeUtilsString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -35,6 +36,15 @@ class WstCommonComponent {
 
 	public List<File> dependentModules() {
 		return this.dependentModules;
+	}
+
+	public boolean contains(File candidate) {
+		for (final File file : this.dependentModules) {
+			if (JakeUtilsFile.equals(file, candidate)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static List<File> parse(File projectDir) {

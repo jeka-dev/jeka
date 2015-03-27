@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.jake.JakeDir;
 import org.jake.JakeException;
+import org.jake.JakePath;
 import org.jake.java.build.JakeJavaBuild;
 
 /**
@@ -30,9 +31,11 @@ public class JakeJeePacker {
 			throw new JakeException("the directory " + webappSrc.getPath()
 					+ " does not contains WEB-INF" + File.separator + "web.xml file");
 		}
+		final JakePath path = build.depsFor(JakeJavaBuild.RUNTIME);
+		System.out.println(path);
 		final JakeDir dir = JakeDir.of(warDirDest).copyInDirContent(webappSrc)
 				.sub("WEB-INF/classes").copyInDirContent(build.classDir())
-				.sub("../lib").copyInFiles(build.depsFor(JakeJavaBuild.RUNTIME));
+				.sub("../lib").copyInFiles(path);
 		dir.zip().to(warFileDest);
 	}
 

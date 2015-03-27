@@ -71,16 +71,16 @@ public final class JakeUtilsFile {
 
 	public static int copyDir(File source, File targetDir, FileFilter filter,
 			boolean copyEmptyDir) {
-		return copyDir(source, targetDir, filter, copyEmptyDir, false, null);
+		return copyDir(source, targetDir, filter, copyEmptyDir, null);
 	}
 
 	public static int copyDir(File source, File targetDir, FileFilter filterArg,
-			boolean copyEmptyDir, boolean report, PrintStream reportStream) {
-		return copyDirReplacingTokens(source, targetDir, filterArg, copyEmptyDir, report, reportStream, null);
+			boolean copyEmptyDir, PrintStream reportStream) {
+		return copyDirReplacingTokens(source, targetDir, filterArg, copyEmptyDir, reportStream, null);
 	}
 
 	public static int copyDirReplacingTokens(File fromDir, File toDir, FileFilter filterArg,
-			boolean copyEmptyDir, boolean report, PrintStream reportStream, Map<String, String> tokenValues) {
+			boolean copyEmptyDir, PrintStream reportStream, Map<String, String> tokenValues) {
 		final FileFilter filter = JakeUtilsObject.firstNonNull(filterArg, JakeFileFilters.acceptAll());
 		assertDir(fromDir);
 		if (fromDir.equals(toDir)) {
@@ -100,7 +100,7 @@ public final class JakeUtilsFile {
 					+ " is file. Should be directory");
 		}
 
-		if (report) {
+		if (reportStream != null) {
 			reportStream.append("Coping content of " + fromDir.getPath());
 		}
 		final File[] children = fromDir.listFiles();
@@ -110,10 +110,10 @@ public final class JakeUtilsFile {
 				if (filter.accept(child)) {
 					final File targetFile = new File(toDir, child.getName());
 					if (tokenValues == null || tokenValues.isEmpty()) {
-						copyFile(child, targetFile, report, reportStream);
+						copyFile(child, targetFile, reportStream);
 					} else {
 						final File toFile = new File(toDir, targetFile.getName());
-						copyFileReplacingTokens(child, toFile, tokenValues, report, reportStream);
+						copyFileReplacingTokens(child, toFile, tokenValues, reportStream);
 					}
 
 					count++;
@@ -124,7 +124,7 @@ public final class JakeUtilsFile {
 					subdir.mkdirs();
 				}
 				final int subCount = copyDirReplacingTokens(child, subdir, filter,
-						copyEmptyDir, report, reportStream, tokenValues);
+						copyEmptyDir, reportStream, tokenValues);
 				count = count + subCount;
 			}
 
@@ -146,16 +146,24 @@ public final class JakeUtilsFile {
 		return props;
 	}
 
-	public static void copyFileToDir(File from, File toDir, boolean report, PrintStream reportStream) {
+	public static Map<String, String> readPropertyFileAsMap(File propertyfile) {
+		final Properties properties = readPropertyFile(propertyfile);
+		return JakeUtilsIterable.propertiesToMap(properties);
+	}
+
+	public static void copyFileToDir(File from, File toDir, PrintStream reportStream) {
 		final File to = new File(toDir, from.getName());
-		copyFile(from, to, report, reportStream);
+		copyFile(from, to, reportStream);
 	}
 
 	public static void copyFile(File from, File toFile) {
-		copyFile(from, toFile, false, null);
+		copyFile(from, toFile, null);
 	}
 
-	public static void copyFile(File from, File toFile, boolean report, PrintStream reportStream) {
+	public static void copyFile(File from, File toFile, PrintStream reportStream) {
+		if (reportStream != null) {
+			reportStream.println("Coping file " + from.getAbsolutePath() + " to " + toFile.getAbsolutePath());
+		}
 		if (!from.exists()) {
 			throw new IllegalArgumentException("File " + from.getPath()
 					+ " does not exist.");
@@ -165,9 +173,6 @@ public final class JakeUtilsFile {
 					+ " is a directory. Should be a file.");
 		}
 		try {
-			if (report) {
-				reportStream.println("Coping file " + from.getAbsolutePath() + " to " + toFile.getAbsolutePath());
-			}
 			final InputStream in = new FileInputStream(from);
 			if (!toFile.getParentFile().exists()) {
 				toFile.getParentFile().mkdirs();
@@ -437,10 +442,10 @@ public final class JakeUtilsFile {
 	}
 
 	public static void copyFileReplacingTokens(File in, File out, Map<String, String> replacements) {
-		copyFileReplacingTokens(in, out, replacements, false, null);
+		copyFileReplacingTokens(in, out, replacements, null);
 	}
 
-	public static void copyFileReplacingTokens(File from, File toFile, Map<String, String> replacements, boolean report, PrintStream reportStream) {
+	public static void copyFileReplacingTokens(File from, File toFile, Map<String, String> replacements, PrintStream reportStream) {
 		if (!from.exists()) {
 			throw new IllegalArgumentException("File " + from.getPath()
 					+ " does not exist.");
@@ -465,7 +470,7 @@ public final class JakeUtilsFile {
 			JakeUtilsIO.closeQuietly(replacingReader);
 			throw new RuntimeException(e);
 		}
-		if (report) {
+		if (reportStream != null) {
 			reportStream.println("Coping and replacing token from file "
 					+ from.getAbsolutePath() + " to " + toFile.getAbsolutePath());
 		}

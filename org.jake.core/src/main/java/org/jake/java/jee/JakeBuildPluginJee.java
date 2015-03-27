@@ -8,6 +8,7 @@ import org.jake.JakeOption;
 import org.jake.java.build.JakeJavaBuild;
 import org.jake.java.build.JakeJavaBuildPlugin;
 import org.jake.java.build.JakeJavaPacker;
+import org.jake.java.build.JakeJavaPacker.Extra;
 
 public class JakeBuildPluginJee extends JakeJavaBuildPlugin {
 
@@ -15,6 +16,12 @@ public class JakeBuildPluginJee extends JakeJavaBuildPlugin {
 
 	@JakeOption("Location of the webapp sources (containing WEB-INF dir along static resources).")
 	public String webappSrc = "src/main/webapp";
+
+	@JakeOption("True to produce a test jar containing test classes.")
+	public boolean testJar = false;
+
+	@JakeOption("True to produce a regular jar containing classes and resources.")
+	public boolean regularJar = false;
 
 	@Override
 	public void configure(JakeBuild build) {
@@ -31,21 +38,23 @@ public class JakeBuildPluginJee extends JakeJavaBuildPlugin {
 
 	@Override
 	protected JakeJavaPacker enhance(final JakeJavaPacker packer) {
-		JakeJavaPacker result = packer;
+		final JakeJavaPacker.Builder builder = packer.builder().doJar(regularJar)
+				.doTest(testJar).doFatJar(false);
 		if (webappSrcFile().exists()) {
-			result = result.withExtraAction(new Runnable() {
+			builder.extraAction(new Extra() {
 
 				@Override
-				public void run() {
+				public void process(JakeJavaBuild build) {
+					JakeLog.startln("Creating war file");
 					final File dir = build.ouputDir(packer.baseName() + "-war");
 					JakeJeePacker.of(build).war(webappSrcFile(), dir, warFile());
+					JakeLog.done();
 				}
-
 			});
 		} else {
 			JakeLog.warn("No webapp source found at " + webappSrcFile().getPath());
 		}
-		return result;
+		return builder.build();
 
 	}
 

@@ -10,8 +10,6 @@ import org.jake.java.build.JakeJavaBuild;
 
 public class JakeEclipseBuild extends JakeJavaBuild {
 
-
-
 	static final String OPTION_VAR_PREFIX = "eclipse.var.";
 
 	public static boolean candidate(File baseDir) {
@@ -30,7 +28,7 @@ public class JakeEclipseBuild extends JakeJavaBuild {
 	@Override
 	public JakeDirSet sourceDirs() {
 		final Sources.TestSegregator segregator = eclipseSmart ? Sources.SMART : Sources.ALL_PROD;
-		return dotClasspath().sourceDirs(baseDir(""), segregator).prodSources;//.andFilter(RESOURCE_FILTER.reverse());
+		return dotClasspath().sourceDirs(baseDir(""), segregator).prodSources;
 	}
 
 	@Override
