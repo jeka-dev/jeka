@@ -1,9 +1,11 @@
-- eclipse : proper war
-
 - eclipse : generate .classpath
+
+- refactor to JeKar 
+
+- able to publish on maven central.
 
 - compile/run test with other JDK (located in options)
 
-- refactor to JeKar
 
-- able to publish on maven central.
+
+
