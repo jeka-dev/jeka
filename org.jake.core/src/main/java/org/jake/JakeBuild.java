@@ -95,6 +95,9 @@ public class JakeBuild {
 
 	private final JakeBuildDependencies explicitBuildDependencies;
 
+	/**
+	 * Other builds this build depend of.
+	 */
 	private JakeBuildDependencies buildDependencies;
 
 	protected JakeBuild() {
@@ -241,7 +244,7 @@ public class JakeBuild {
 	 * If you want to use managed dependencies, you must override this method.
 	 */
 	protected JakeDependencies dependencies() {
-		return localDependencies();
+		return JakeBuildPlugin.applyDependencies(plugins.getActives(), localDependencies());
 	}
 
 	/**
@@ -260,7 +263,8 @@ public class JakeBuild {
 	public final JakeDependencyResolver dependencyResolver() {
 		if (cachedResolver == null) {
 			JakeLog.startln("Setting dependency resolver ");
-			cachedResolver = createDependencyResolver();
+			cachedResolver = JakeBuildPlugin.applyDependencyResolver(plugins.getActives()
+					, createDependencyResolver());
 			JakeLog.done("Resolver set " + cachedResolver);
 		}
 		return cachedResolver;
@@ -439,6 +443,10 @@ public class JakeBuild {
 			result.add(subBuild);
 		}
 		return result;
+	}
+
+	public <T extends JakeBuildPlugin> T pluginOf(Class<T> pluginClass) {
+		return this.plugins.findInstanceOf(pluginClass);
 	}
 
 }

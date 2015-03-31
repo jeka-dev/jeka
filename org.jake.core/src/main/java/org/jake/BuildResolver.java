@@ -4,8 +4,7 @@ import java.io.File;
 import java.lang.reflect.Modifier;
 
 import org.jake.java.build.JakeJavaBuild;
-import org.jake.java.eclipse.JakeEclipseBuild;
-import org.jake.utils.JakeUtilsFile;
+import org.jake.java.eclipse.JakeBuildPluginEclipse;
 import org.jake.utils.JakeUtilsReflect;
 import org.jake.utils.JakeUtilsString;
 
@@ -69,23 +68,6 @@ class BuildResolver {
 		return (T) resolve(null, baseClass);
 	}
 
-	/**
-	 * Resolves the {@link JakeBuild} instance to use on this project. A class name hint
-	 * can be provided in order to choose a certain build class.
-	 */
-	private JakeBuild resolve(String classNameHint, Class<? extends JakeBuild> baseClass) {
-		final Class<? extends JakeBuild> clazz = resolveClass(classNameHint, baseClass);
-		if (clazz == null) {
-			return null;
-		}
-		final JakeBuild build = JakeUtilsReflect.newInstance(clazz);
-		build.setBaseDir(baseDir);
-		if (this.isClassDefinedInProject(clazz)) {
-			enrichWithPlugins(build);
-		}
-		return build;
-	}
-
 	boolean hasBuildSource() {
 		if (!buildSourceDir.exists()) {
 			return false;
@@ -118,8 +100,7 @@ class BuildResolver {
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
-	private Class<? extends JakeBuild> resolveClass(String classNameHint, Class<? extends JakeBuild> baseClass) {
+	private JakeBuild resolve(String classNameHint, Class<? extends JakeBuild> baseClass) {
 
 		final JakeClassLoader classLoader = JakeClassLoader.current();
 
@@ -129,7 +110,9 @@ class BuildResolver {
 			if (clazz == null) {
 				throw new JakeException("No build class named " + classNameHint + " found.");
 			}
-			return clazz;
+			final JakeBuild build = JakeUtilsReflect.newInstance(clazz);
+			build.setBaseDir(this.baseDir);
+			return build;
 		}
 
 		// If there is a build source
@@ -139,7 +122,9 @@ class BuildResolver {
 				if (path.endsWith(".java")) {
 					final Class<?> clazz = classLoader.loadGivenClassSourcePath(path);
 					if (baseClass.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers())) {
-						return (Class<? extends JakeBuild>) clazz;
+						final JakeBuild build = (JakeBuild) JakeUtilsReflect.newInstance(clazz);
+						build.setBaseDir(baseDir);
+						return build;
 					}
 				}
 
@@ -147,23 +132,19 @@ class BuildResolver {
 		}
 
 		// If nothing yet found use defaults
+		final JakeBuild result = new JakeJavaBuild();
+		result.setBaseDir(baseDir);
 		if (new File(baseDir, DEFAULT_JAVA_SOURCE).exists() && buildlibDir.exists()) {
-			return classLoader.load(JakeJavaBuild.class.getName());
+			return result;
 		}
-		if (JakeEclipseBuild.candidate(baseDir)) {
-			return classLoader.load(JakeEclipseBuild.class.getName());
+		if (JakeBuildPluginEclipse.candidate(baseDir)) {
+			final JakeBuildPluginEclipse pluginEclipse = new JakeBuildPluginEclipse();
+			JakeOptions.populateFields(pluginEclipse);
+			result.plugins.addActivated(pluginEclipse);
+			return result;
 		}
+
 		return null;
 	}
-
-	private boolean isClassDefinedInProject(Class<?> clazz) {
-		final File entry = JakeClassLoader.of(clazz).fullClasspath().getEntryContainingClass(clazz.getName());
-		return JakeUtilsFile.equals(entry, buildClassDir);
-	}
-
-	private void enrichWithPlugins(JakeBuild build) {
-
-	}
-
 
 }

@@ -47,8 +47,8 @@ class Lib {
 		return scope + ":" + file.getPath();
 	}
 
-	public static JakeDependencies toDependencies(JakeEclipseBuild masterBuild, Iterable<Lib> libs
-			, ScopeSegregator scopeSegregator) {
+	public static JakeDependencies toDependencies(JakeJavaBuild masterBuild, Iterable<Lib> libs
+			, ScopeResolver scopeSegregator) {
 		final JakeDependencies.Builder builder = JakeDependencies.builder();
 		for (final Lib lib : libs) {
 			if (lib.projectRelativePath == null) {
@@ -59,8 +59,8 @@ class Lib {
 				builder.onProject(slaveBuild, slaveBuild.packer().jarFile()).scope(lib.scope);
 
 				// Get the exported entry as well
-				if (slaveBuild instanceof JakeEclipseBuild) {
-					final JakeEclipseBuild eclipseBuild = (JakeEclipseBuild) slaveBuild;
+				final JakeBuildPluginEclipse pluginEclipse = slaveBuild.pluginOf(JakeBuildPluginEclipse.class);
+				if (pluginEclipse != null) {
 					final File dotClasspathFile = slaveBuild.baseDir(".classpath");
 					final DotClasspath dotClasspath = DotClasspath.from(dotClasspathFile);
 					final List<Lib> sublibs = new ArrayList<Lib>();
@@ -69,7 +69,7 @@ class Lib {
 							sublibs.add(sublib);
 						}
 					}
-					builder.on(Lib.toDependencies(eclipseBuild, sublibs, scopeSegregator));
+					builder.on(Lib.toDependencies(slaveBuild, sublibs, scopeSegregator));
 				}
 			}
 		}
@@ -77,57 +77,6 @@ class Lib {
 	}
 
 
-	public static final ScopeSegregator ALL_COMPILE = new ScopeSegregator() {
-
-		@Override
-		public JakeScope scopeOfLib(String path) {
-			return JakeJavaBuild.COMPILE;
-		}
-
-		@Override
-		public JakeScope scopeOfCon(String path) {
-			return JakeJavaBuild.COMPILE;
-		}
-
-	};
-
-	public static final ScopeSegregator SMART_LIB = new ScopeSegregator() {
-
-		@Override
-		public JakeScope scopeOfLib(String path) {
-			final File filePath = new File(path);
-			final String parent = filePath.getParentFile().getName();
-			if (parent.equalsIgnoreCase(JakeJavaBuild.COMPILE.name())) {
-				return JakeJavaBuild.COMPILE;
-			}
-			if (parent.equalsIgnoreCase(JakeJavaBuild.TEST.name())) {
-				return JakeJavaBuild.TEST;
-			}
-			if (parent.equalsIgnoreCase(JakeJavaBuild.PROVIDED.name())) {
-				return JakeJavaBuild.PROVIDED;
-			}
-			if (parent.equalsIgnoreCase(JakeJavaBuild.RUNTIME.name())) {
-				return JakeJavaBuild.RUNTIME;
-			}
-			return JakeJavaBuild.COMPILE;
-		}
-
-		@Override
-		public JakeScope scopeOfCon(String path) {
-			if (path.contains("org.eclipse.jdt.junit.JUNIT_CONTAINER")) {
-				return JakeJavaBuild.TEST;
-			}
-			return JakeJavaBuild.COMPILE;
-		}
-	};
-
-
-	public static interface ScopeSegregator {
-
-		JakeScope scopeOfLib(String path);
-
-		JakeScope scopeOfCon(String path);
-	}
 
 
 }

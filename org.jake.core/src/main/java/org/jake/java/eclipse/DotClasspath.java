@@ -17,6 +17,7 @@ import org.jake.JakeLog;
 import org.jake.JakeOptions;
 import org.jake.depmanagement.JakeScope;
 import org.jake.java.build.JakeJavaBuild;
+import org.jake.java.eclipse.DotClasspath.ClasspathEntry.Kind;
 import org.jake.utils.JakeUtilsString;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -87,7 +88,7 @@ final class DotClasspath {
 		return new Sources(JakeDirSet.of(prods), JakeDirSet.of(tests));
 	}
 
-	public List<Lib> libs(File baseDir, Lib.ScopeSegregator libSegregator) {
+	public List<Lib> libs(File baseDir, ScopeResolver libSegregator) {
 		final List<Lib> result = new LinkedList<Lib>();
 		final Map<String, File> projects = Project.findProjects(baseDir.getParentFile());
 		for (final ClasspathEntry classpathEntry : classpathentries) {
@@ -102,12 +103,12 @@ final class DotClasspath {
 				}
 
 			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.LIB)) {
-				final JakeScope scope = libSegregator.scopeOfLib(classpathEntry.path);
+				final JakeScope scope = libSegregator.scopeOfLib(ClasspathEntry.Kind.LIB, classpathEntry.path);
 				result.add(Lib.file(classpathEntry.libAsFile(baseDir, projects), scope, classpathEntry.exported));
 
 			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.VAR)) {
 				final String var = JakeUtilsString.substringBeforeFirst(classpathEntry.path, "/");
-				final String optionName = JakeEclipseBuild.OPTION_VAR_PREFIX + var;
+				final String optionName = JakeBuildPluginEclipse.OPTION_VAR_PREFIX + var;
 				final String varFile = JakeOptions.get(optionName);
 				if (varFile == null) {
 					throw new JakeException("No option found with name " + optionName
@@ -119,7 +120,7 @@ final class DotClasspath {
 				if (!file.exists()) {
 					JakeLog.warn("Can't find Eclipse classpath entry : " + file.getAbsolutePath());
 				}
-				final JakeScope scope = libSegregator.scopeOfLib(classpathEntry.path);
+				final JakeScope scope = libSegregator.scopeOfLib(Kind.VAR, classpathEntry.path);
 				result.add(Lib.file(file, scope, classpathEntry.exported));
 
 			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC)) {
@@ -135,8 +136,8 @@ final class DotClasspath {
 
 
 
+	static class ClasspathEntry {
 
-	private static class ClasspathEntry {
 
 		public final static String JRE_CONTAINER_PREFIX = "org.eclipse.jdt.launching.JRE_CONTAINER";
 
@@ -163,6 +164,10 @@ final class DotClasspath {
 			this.excluding = excluding;
 			this.including = including;
 			this.exported = exported;
+		}
+
+		public static ClasspathEntry of(Kind kind, String path) {
+			return new ClasspathEntry(kind, path, null, null, false);
 		}
 
 		public static ClasspathEntry from(Element classpathEntryEl) {
@@ -216,6 +221,13 @@ final class DotClasspath {
 
 		public boolean isOptional() {
 			return "true".equals(this.attributes.get("optional"));
+		}
+
+		public boolean sameTypeAndPath(ClasspathEntry other)  {
+			if (!this.kind.equals(other.kind)) {
+				return false;
+			}
+			return this.path.equals(other.path);
 		}
 
 		public List<File> conAsFiles(File baseDir) {

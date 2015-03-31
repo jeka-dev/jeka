@@ -58,7 +58,12 @@ public final class JakeSonar {
     private static final String TEST = "test";
     private static final String LIBRARIES = "libraries";
     private static final String SKIP_DESIGN = "skipDesign";
-
+    
+    private static final String HOST_URL = "host.url";
+    private static final String JDBC_URL = "jdbc.url";
+    private static final String JDBC_USERNAME = "jdbc.username";
+    private static final String JDBC_PASSWORD = "jdbc.password";
+    
     private final Map<String, String> params;
 
     private final boolean enabled;
@@ -162,6 +167,25 @@ public final class JakeSonar {
     public JakeSonar withSkipDesign(boolean skip) {
         return withProperty(SKIP_DESIGN, Boolean.toString(skip));
     }
+    
+    public JakeSonar withHostUrl(String url) {
+        return withProperty(HOST_URL, url);
+    }
+    
+    public JakeSonar withJdbcUrl(String url) {
+        return withProperty(JDBC_URL, url);
+    }
+    
+    public JakeSonar withJdbcUserName(String userName) {
+        return withProperty(JDBC_USERNAME, userName);
+    }
+    
+    public JakeSonar withJdbcPassword(String pwd) {
+        return withProperty(JDBC_PASSWORD, pwd);
+    }
+    
+    
+
 
     private String toPaths(Iterable<File> files) {
         final Iterator<File> it = files.iterator();

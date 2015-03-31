@@ -29,16 +29,16 @@ public class DotClasspathTest {
 
 	@Test
 	public void testLibs() throws URISyntaxException {
-		final List<Lib> libs = sample().libs(structure(), Lib.SMART_LIB);
+		final List<Lib> libs = sample().libs(structure(), new ScopeResolverSmart(null));
 		assertEquals(5, libs.size());
 	}
 
 	@Test
 	public void testToDependencies() throws URISyntaxException {
-		final List<Lib> libs = sample().libs( structure(), Lib.SMART_LIB);
+		final List<Lib> libs = sample().libs( structure(), new ScopeResolverSmart(null));
 		assertEquals(5, libs.size());
 
-		final JakeDependencies deps = Lib.toDependencies(null, libs, Lib.SMART_LIB);
+		final JakeDependencies deps = Lib.toDependencies(null, libs, new ScopeResolverSmart(null));
 
 
 		assertEquals(0, deps.dependenciesDeclaredWith(JakeJavaBuild.TEST).size());

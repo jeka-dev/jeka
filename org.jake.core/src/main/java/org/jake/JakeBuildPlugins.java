@@ -105,5 +105,20 @@ public final class JakeBuildPlugins {
 		return plugin;
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T extends JakeBuildPlugin> T findInstanceOf(Class<T> pluginClass) {
+		for (final JakeBuildPlugin jakeBuildPlugin : this.activatedPlugins.values()) {
+			if (pluginClass.isAssignableFrom(jakeBuildPlugin.getClass())) {
+				return (T) jakeBuildPlugin;
+			}
+		}
+		for (final JakeBuildPlugin jakeBuildPlugin : this.configuredPlugins.values()) {
+			if (pluginClass.isAssignableFrom(jakeBuildPlugin.getClass())) {
+				return ((T) jakeBuildPlugin);
+			}
+		}
+		return null;
+	}
+
 
 }

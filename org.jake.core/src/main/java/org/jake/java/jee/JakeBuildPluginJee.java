@@ -37,7 +37,7 @@ public class JakeBuildPluginJee extends JakeJavaBuildPlugin {
 	}
 
 	@Override
-	protected JakeJavaPacker enhance(final JakeJavaPacker packer) {
+	protected JakeJavaPacker alterPacker(final JakeJavaPacker packer) {
 		final JakeJavaPacker.Builder builder = packer.builder().doJar(regularJar)
 				.doTest(testJar).doFatJar(false);
 		if (webappSrcFile().exists()) {

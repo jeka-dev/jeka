@@ -8,11 +8,9 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.jake.JakeException;
 import org.jake.JakeLog;
-import org.jake.JakeOptions;
-import org.jake.utils.JakeUtilsFile;
-import org.jake.utils.JakeUtilsString;
+import org.jake.java.eclipse.DotClasspath.ClasspathEntry;
+import org.jake.java.eclipse.DotClasspath.ClasspathEntry.Kind;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -20,46 +18,54 @@ import org.w3c.dom.NodeList;
 
 class WstCommonComponent {
 
+	public static final String FILE = ".settings/org.eclipse.wst.common.component";
+
 	private static final String VAR_PREFIX = "module:/classpath/var/";
 
-	private static final String lib_PREFIX = "module:/classpath/lib/";
+	private static final String LIB_PREFIX = "module:/classpath/lib/";
 
 	public static final WstCommonComponent of(File projectDir) {
 		return new WstCommonComponent(parse(projectDir));
 	}
 
-	private final List<File> dependentModules;
+	private final List<ClasspathEntry> dependentModules;
 
-	private WstCommonComponent(List<File> files) {
+	private WstCommonComponent(List<ClasspathEntry> files) {
 		this.dependentModules = Collections.unmodifiableList(files);
 	}
 
-	public List<File> dependentModules() {
+	public List<ClasspathEntry> dependentModules() {
 		return this.dependentModules;
 	}
 
-	public boolean contains(File candidate) {
-		for (final File file : this.dependentModules) {
-			if (JakeUtilsFile.equals(file, candidate)) {
+	public boolean contains(ClasspathEntry candidate) {
+		for (final ClasspathEntry entry : this.dependentModules) {
+			if (entry.sameTypeAndPath(candidate)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private static List<File> parse(File projectDir) {
-		final File file = new File(projectDir, ".settings/org.eclipse.wst.common.component");
+
+	public static final boolean existIn(File projectDir) {
+		return componentFile(projectDir).exists();
+	}
+
+	private static File componentFile(File projectDir) {
+		return new File(projectDir, FILE);
+	}
+
+	private static List<ClasspathEntry> parse(File projectDir) {
+		final File file = componentFile(projectDir);
 		if (!file.exists()) {
-			return Collections.emptyList();
+			throw new IllegalStateException("Can't find " + FILE);
 		}
 		final Document document = getFileAsDom(file);
 		return from(projectDir, document);
 	}
 
 	private static Document getFileAsDom(File file) {
-		if (!file.exists()) {
-			throw new IllegalStateException(file.getAbsolutePath() + " file not found.");
-		}
 		final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		try {
 			final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -68,53 +74,41 @@ class WstCommonComponent {
 			doc.getDocumentElement().normalize();
 			return doc;
 		} catch (final Exception e) {
-			throw new RuntimeException("Error while parsing .settings/org.eclipse.wst.common.component file : ", e);
+			throw new RuntimeException("Error while parsing " + FILE + " : ", e);
 		}
 	}
 
-	private static List<File> from(File projectDir, Document document) {
-		final NodeList nodeList = document.getElementsByTagName("classpathentry");
-		final List<File> result = new LinkedList<File>();
+	private static List<ClasspathEntry> from(File projectDir, Document document) {
+		final NodeList nodeList = document.getElementsByTagName("dependent-module");
+		final List<ClasspathEntry> result = new LinkedList<ClasspathEntry>();
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			final Node node = nodeList.item(i);
 			final Element element = (Element) node;
 			final String handle = element.getAttribute("handle");
-			final File file = handleToFile(projectDir, handle);
-			if (file != null && file.exists()) {
-				result.add(file);
+			final ClasspathEntry entry = handleToFile(projectDir, handle);
+			if (entry != null) {
+				result.add(entry);
 			}
 		}
 		return result;
 	}
 
-	private static File handleToFile(File projectDir, String handle) {
-		final File result;
+	private static ClasspathEntry handleToFile(File projectDir, String handle) {
+		final ClasspathEntry result;
 		if (handle.startsWith(VAR_PREFIX)) {
 			final String rest = handle.substring(VAR_PREFIX.length());
-			final String varName = JakeUtilsString.substringBeforeFirst(rest, "/");
-			final String key = JakeEclipseBuild.OPTION_VAR_PREFIX + varName;
-			if (JakeOptions.containsKey(varName)) {
-				final String varValue = JakeOptions.get(key);
-				final String relativeLocation = JakeUtilsString.substringAfterFirst(rest, "/");
-				result = new File(varValue + File.separator + relativeLocation);
-			} else {
-				throw new JakeException("Can't find option " + key + " to resolve file path " +
-						handle + " in .settings/org.eclipse.wst.common.component");
-			}
-		} else if (handle.startsWith(lib_PREFIX)) {
-			final String rest = handle.substring(lib_PREFIX.length());
-			final File file = new File(rest);
-			if (file.exists() && file.isAbsolute()) {
-				result = file;
-			} else {
-				result = new File(projectDir.getParentFile(), rest);
-			}
+			return ClasspathEntry.of(ClasspathEntry.Kind.VAR, rest);
+		} else if (handle.startsWith(LIB_PREFIX)) {
+			final String rest = handle.substring(LIB_PREFIX.length());
+			return ClasspathEntry.of(Kind.LIB, rest);
 		} else {
 			JakeLog.warn("Ignoring handle " + handle);
 			result = null;
 		}
 		return result;
 	}
+
+
 
 
 }

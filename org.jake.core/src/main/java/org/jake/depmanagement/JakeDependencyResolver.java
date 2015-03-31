@@ -111,7 +111,7 @@ public final class JakeDependencyResolver  {
 
 	@Override
 	public String toString() {
-		return "JakeIvy : dependencies: " + dependencies;
+		return dependencies.toString();
 	}
 
 }

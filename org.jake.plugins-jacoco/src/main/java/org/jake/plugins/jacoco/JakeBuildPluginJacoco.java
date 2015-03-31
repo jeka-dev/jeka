@@ -26,7 +26,7 @@ public class JakeBuildPluginJacoco extends JakeJavaBuildPlugin {
 
 
 	@Override
-	public JakeUnit enhance(JakeUnit jakeUnit) {
+	public JakeUnit alterUnitTester(JakeUnit jakeUnit) {
 		return this.enhancer.enhance(jakeUnit);
 	}
 

@@ -32,7 +32,6 @@ public class JakeJeePacker {
 					+ " does not contains WEB-INF" + File.separator + "web.xml file");
 		}
 		final JakePath path = build.depsFor(JakeJavaBuild.RUNTIME);
-		System.out.println(path);
 		final JakeDir dir = JakeDir.of(warDirDest).copyInDirContent(webappSrc)
 				.sub("WEB-INF/classes").copyInDirContent(build.classDir())
 				.sub("../lib").copyInFiles(path);

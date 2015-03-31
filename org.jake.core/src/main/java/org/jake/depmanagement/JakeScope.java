@@ -110,6 +110,10 @@ public class JakeScope {
 		return false;
 	}
 
+	public boolean isInOrIsExtendingAnyOf(JakeScope... scopes) {
+		return isInOrIsExtendingAnyOf(Arrays.asList(scopes));
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

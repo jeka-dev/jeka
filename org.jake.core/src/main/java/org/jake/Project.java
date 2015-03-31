@@ -192,6 +192,7 @@ class Project {
 			Collection<JakePluginSetup> pluginSetups, Map<String, String> options,  PluginDictionnary<JakeBuildPlugin> dictionnary) {
 		JakeLog.startHeaded("Executing building for project " + build.baseDir().root().getName());
 		JakeLog.info("Using build class " + build.getClass().getName());
+		JakeLog.info("With activated plugins : " + build.plugins.getActives());
 		JakeOptions.populateFields(build, options);
 		configureAndActivatePlugins(build, pluginSetups, dictionnary);
 		JakeLog.info("Build options : " + JakeOptions.fieldOptionsToString(build));

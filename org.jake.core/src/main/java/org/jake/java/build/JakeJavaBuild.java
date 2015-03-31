@@ -156,30 +156,34 @@ public class JakeJavaBuild extends JakeBuild {
 	 * Returns location of production source code.
 	 */
 	public JakeDirSet sourceDirs() {
-		return editedSourceDirs().and(generatedSourceDir());
+		return JakeJavaBuildPlugin.applySourceDirs(this.plugins.getActives(),
+				editedSourceDirs().and(generatedSourceDir()));
 	}
 
 	/**
 	 * Returns location of production resources.
 	 */
 	public JakeDirSet resourceDirs() {
-		return sourceDirs().andFilter(RESOURCE_FILTER).and(
+		final JakeDirSet original = sourceDirs().andFilter(RESOURCE_FILTER).and(
 				baseDir("src/main/resources")).and(generatedResourceDir());
+		return JakeJavaBuildPlugin.applyResourceDirs(this.plugins.getActives(), original);
 	}
 
 	/**
 	 * Returns location of test source code.
 	 */
 	public JakeDirSet testSourceDirs() {
-		return JakeDirSet.of(baseDir().sub("src/test/java"));
+		final JakeDirSet original =  JakeDirSet.of(baseDir().sub("src/test/java"));
+		return JakeJavaBuildPlugin.applyTestSourceDirs(this.plugins.getActives(), original);
 	}
 
 	/**
 	 * Returns location of test resources.
 	 */
 	public JakeDirSet testResourceDirs() {
-		return JakeDirSet.of(baseDir("src/test/resources")).and(
+		final JakeDirSet original = JakeDirSet.of(baseDir("src/test/resources")).and(
 				testSourceDirs().andFilter(RESOURCE_FILTER));
+		return JakeJavaBuildPlugin.applyTestResourceDirs(this.plugins.getActives(), original);
 	}
 
 	/**
@@ -243,7 +247,7 @@ public class JakeJavaBuild extends JakeBuild {
 	}
 
 	public final JakeUnit unitTester() {
-		return JakeJavaBuildPlugin.apply(plugins.getActives(), createUnitTester());
+		return JakeJavaBuildPlugin.applyUnitTester(plugins.getActives(), createUnitTester());
 	}
 
 	protected JakeUnit createUnitTester() {
@@ -268,7 +272,7 @@ public class JakeJavaBuild extends JakeBuild {
 	}
 
 	public final JakeJavaPacker packer() {
-		return JakeJavaBuildPlugin.apply(plugins.getActives(), createPacker());
+		return JakeJavaBuildPlugin.applyPacker(plugins.getActives(), createPacker());
 	}
 
 	protected JakeJavaPacker createPacker() {
@@ -441,9 +445,9 @@ public class JakeJavaBuild extends JakeBuild {
 		return JakeDependencies.builder()
 				.on(super.localDependencies())
 				.usingDefaultScopes(COMPILE).on(JakeDependency.of(libDir.include("*.jar", "compile/*.jar")))
-				.usingDefaultScopes(PROVIDED).on(JakeDependency.of(libDir.include("*.jar", "provided/*.jar")))
-				.usingDefaultScopes(RUNTIME).on(JakeDependency.of(libDir.include("*.jar", "runtime/*.jar")))
-				.usingDefaultScopes(TEST).on(JakeDependency.of(libDir.include("*.jar", "test/*.jar"))).build();
+				.usingDefaultScopes(PROVIDED).on(JakeDependency.of(libDir.include("provided/*.jar")))
+				.usingDefaultScopes(RUNTIME).on(JakeDependency.of(libDir.include("runtime/*.jar")))
+				.usingDefaultScopes(TEST).on(JakeDependency.of(libDir.include("test/*.jar"))).build();
 	}
 
 }
