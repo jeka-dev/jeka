@@ -315,6 +315,7 @@ final class DotClasspath {
 		writer.writeStartElement("classpath");
 		for (final JakeDependency dependency : build.dependencyResolver().get(JakeJavaBuild.RUNTIME, JakeJavaBuild.PROVIDED, JakeJavaBuild.TEST))
 			writer.writeS
+
 	}
 
 }
