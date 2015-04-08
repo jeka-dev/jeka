@@ -129,7 +129,7 @@ public final class JakeDir implements Iterable<File> {
 	}
 
 	/**
-	 * Copies the specified files in the root of the root of this directory.
+	 * Copies the specified files in the root of this directory.
 	 */
 	public JakeDir copyInFiles(Iterable<File> files) {
 		createIfNotExist();

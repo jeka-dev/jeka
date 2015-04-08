@@ -37,7 +37,7 @@ class Project {
 
 	private JakePath buildPath;
 
-	private final BuildResolver resolver;
+	private final JakeBuildResolver resolver;
 
 
 	/**
@@ -50,7 +50,7 @@ class Project {
 		this.projectBaseDir = JakeUtilsFile.canonicalFile(baseDir);
 		buildRepos = repos();
 		this.buildDependencies = JakeDependencies.on();
-		this.resolver = new BuildResolver(baseDir);
+		this.resolver = new JakeBuildResolver(baseDir);
 	}
 
 	private void preCompile() {

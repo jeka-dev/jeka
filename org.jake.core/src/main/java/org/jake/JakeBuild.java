@@ -371,7 +371,7 @@ public class JakeBuild {
 	 * artifacts are generated.
 	 */
 	public JakeDir ouputDir() {
-		return baseDir().sub(BuildResolver.BUILD_OUTPUT_PATH).createIfNotExist();
+		return baseDir().sub(JakeBuildResolver.BUILD_OUTPUT_PATH).createIfNotExist();
 	}
 
 	/**
@@ -386,7 +386,7 @@ public class JakeBuild {
 	@JakeDoc("Clean the output directory.")
 	public void clean() {
 		JakeLog.start("Cleaning output directory " + ouputDir().root().getPath() );
-		ouputDir().exclude(BuildResolver.BUILD_BIN_DIR_NAME + "/**").deleteAll();
+		ouputDir().exclude(JakeBuildResolver.BUILD_BIN_DIR_NAME + "/**").deleteAll();
 		JakeLog.done();
 	}
 

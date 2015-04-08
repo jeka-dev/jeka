@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.jake.utils.JakeUtilsIterable;
@@ -50,6 +51,16 @@ public final class JakePath implements Iterable<File> {
 			}
 		}
 		return this;
+	}
+
+	public JakePath removeDoubloons() {
+		final List<File> files = new LinkedList<File>();
+		for (final File file : this) {
+			if (!files.contains(file)) {
+				files.add(file);
+			}
+		}
+		return new JakePath(files);
 	}
 
 	/**

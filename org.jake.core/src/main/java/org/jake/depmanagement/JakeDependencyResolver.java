@@ -77,7 +77,7 @@ public final class JakeDependencyResolver  {
 		for (final JakeScope scope : scopes) {
 			path = path.and(getSingleScope(scope));
 		}
-		return path;
+		return path.removeDoubloons();
 	}
 
 	private final JakePath getSingleScope(JakeScope scope) {

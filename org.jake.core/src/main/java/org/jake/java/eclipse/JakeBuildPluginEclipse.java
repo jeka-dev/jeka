@@ -27,34 +27,46 @@ public class JakeBuildPluginEclipse extends JakeJavaBuildPlugin {
 		return (dotClasspathFile.exists() && dotProject.exists());
 	}
 
-	@JakeOption({"Will try to resolve dependencies against the eclipse classpath",
+	@JakeOption({"Flag for resolving dependencies against the eclipse classpath",
 		"but trying to segregate test from production code considering path names : ",
 	"if path contains 'test' then this is considered as an entry source for scope 'test'."})
-	protected boolean eclipseSmart = true;
+	protected boolean smartScope = true;
 
 	private DotClasspath cachedClasspath = null;
 
+	@JakeDoc("Generates Eclipse .classpath file according project dependencies.")
+	public void generateFiles() {
+		final File dotClasspathFile = this.javaBuild.baseDir(".classpath");
+		try {
+			DotClasspath.generate(this.javaBuild, dotClasspathFile);
+		} catch (final RuntimeException e) {
+			throw e;
+		} catch (final Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	@Override
 	public JakeDirSet alterSourceDirs(JakeDirSet original) {
-		final Sources.TestSegregator segregator = eclipseSmart ? Sources.SMART : Sources.ALL_PROD;
+		final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
 		return dotClasspath().sourceDirs(javaBuild.baseDir(""), segregator).prodSources;
 	}
 
 	@Override
 	public JakeDirSet alterTestSourceDirs(JakeDirSet original) {
-		final Sources.TestSegregator segregator = eclipseSmart ? Sources.SMART : Sources.ALL_PROD;
+		final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
 		return dotClasspath().sourceDirs(javaBuild.baseDir(""), segregator).testSources;
 	}
 
 	@Override
 	public JakeDirSet alterResourceDirs(JakeDirSet original) {
-		final Sources.TestSegregator segregator = eclipseSmart ? Sources.SMART : Sources.ALL_PROD;
+		final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
 		return dotClasspath().sourceDirs(javaBuild.baseDir(""), segregator).prodSources.andFilter(JakeJavaBuild.RESOURCE_FILTER);
 	}
 
 	@Override
 	public JakeDirSet alterTestResourceDirs(JakeDirSet original) {
-		final Sources.TestSegregator segregator = eclipseSmart ? Sources.SMART : Sources.ALL_PROD;
+		final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
 		return dotClasspath().sourceDirs(javaBuild.baseDir(""), segregator).testSources.andFilter(JakeJavaBuild.RESOURCE_FILTER);
 	}
 
@@ -66,7 +78,7 @@ public class JakeBuildPluginEclipse extends JakeJavaBuildPlugin {
 	}
 
 	private ScopeResolver scopeResolver() {
-		if (eclipseSmart) {
+		if (smartScope) {
 			if (WstCommonComponent.existIn(javaBuild.baseDir().root())) {
 				final WstCommonComponent wstCommonComponent = WstCommonComponent.of(javaBuild.baseDir().root());
 				return new ScopeResolverSmart(wstCommonComponent);

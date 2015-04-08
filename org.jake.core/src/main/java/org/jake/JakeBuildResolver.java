@@ -13,9 +13,9 @@ import org.jake.utils.JakeUtilsString;
  * 
  * @author Jerome Angibaud
  */
-class BuildResolver {
+public final class JakeBuildResolver {
 
-	private static final String BUILD_SOURCE_DIR = "build/spec";
+	public static final String BUILD_SOURCE_DIR = "build/spec";
 
 	private static final String DEFAULT_JAVA_SOURCE = "src/main/java";
 
@@ -37,7 +37,7 @@ class BuildResolver {
 
 	final File defaultJavaSource;
 
-	public BuildResolver(File baseDir) {
+	JakeBuildResolver(File baseDir) {
 		super();
 		this.baseDir = baseDir;
 		this.buildSourceDir = new File(baseDir, BUILD_SOURCE_DIR);
@@ -49,14 +49,14 @@ class BuildResolver {
 	/**
 	 * Resolves the {@link JakeBuild} instance to use on this project.
 	 */
-	public JakeBuild resolve() {
+	JakeBuild resolve() {
 		return resolve(null, JakeBuild.class);
 	}
 
 	/**
 	 * Resolves the {@link JakeBuild} instance to use on this project.
 	 */
-	public JakeBuild resolve(String classNameHint) {
+	JakeBuild resolve(String classNameHint) {
 		return resolve(classNameHint, JakeBuild.class);
 	}
 
@@ -64,7 +64,7 @@ class BuildResolver {
 	 * Resolves the {@link JakeBuild} instance to use on this project.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends JakeBuild> T resolve(Class<T> baseClass) {
+	<T extends JakeBuild> T resolve(Class<T> baseClass) {
 		return (T) resolve(null, baseClass);
 	}
 
