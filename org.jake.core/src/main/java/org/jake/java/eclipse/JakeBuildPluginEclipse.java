@@ -13,7 +13,7 @@ import org.jake.java.build.JakeJavaBuildPlugin;
 
 @JakeDoc({"Add capabilities for getting project information as source location and dependencies "
 		+ "directly form the Eclipse files (.project, .classspath).",
-		" This plugin allow also to genetare eclipse files from the Jake build class."
+		" This plugin also features method to genetate eclipse files from build class."
 })
 public class JakeBuildPluginEclipse extends JakeJavaBuildPlugin {
 
@@ -30,7 +30,10 @@ public class JakeBuildPluginEclipse extends JakeJavaBuildPlugin {
 	@JakeOption({"Flag for resolving dependencies against the eclipse classpath",
 		"but trying to segregate test from production code considering path names : ",
 	"if path contains 'test' then this is considered as an entry source for scope 'test'."})
-	protected boolean smartScope = true;
+	public boolean smartScope = true;
+
+	@JakeOption({"If not null, this value will be used as the JRE container path when generating .classpath file."})
+	public String jreContainer = null;
 
 	private DotClasspath cachedClasspath = null;
 
@@ -38,7 +41,7 @@ public class JakeBuildPluginEclipse extends JakeJavaBuildPlugin {
 	public void generateFiles() {
 		final File dotClasspathFile = this.javaBuild.baseDir(".classpath");
 		try {
-			DotClasspath.generate(this.javaBuild, dotClasspathFile);
+			DotClasspath.generate(this.javaBuild, dotClasspathFile, jreContainer);
 		} catch (final RuntimeException e) {
 			throw e;
 		} catch (final Exception e) {

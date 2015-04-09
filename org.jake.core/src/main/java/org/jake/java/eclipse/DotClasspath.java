@@ -312,7 +312,7 @@ final class DotClasspath {
 
 	}
 
-	static void generate(JakeJavaBuild build, File outputFile) throws IOException, XMLStreamException, FactoryConfigurationError {
+	static void generate(JakeJavaBuild build, File outputFile, String jreContainer) throws IOException, XMLStreamException, FactoryConfigurationError {
 		final FileWriter fileWriter = new FileWriter(outputFile);
 		final XMLStreamWriter writer = XMLOutputFactory.newInstance()
 				.createXMLStreamWriter(fileWriter);
@@ -376,15 +376,18 @@ final class DotClasspath {
 		// Write entry for Jake
 		writeJakeEntry(writer);
 
-		// Write entry for JDK
+		// Write entry for JRE container
 		writer.writeCharacters("\t");
 		writer.writeEmptyElement(CLASSPATHENTRY);
 		writer.writeAttribute("kind", "con");
-		writer.writeAttribute("path", "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-"
-				+ build.sourceJavaVersion() );
+		final String container = jreContainer != null ? jreContainer
+				: "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-"
+				+ build.sourceJavaVersion();
+		writer.writeAttribute("path", container);
 		writer.writeCharacters("\n");
 
 		// Write entries for regular deps
+
 		for (final File file : build.dependencyResolver().get(JakeJavaBuild.RUNTIME,
 				JakeJavaBuild.PROVIDED, JakeJavaBuild.TEST)) {
 			writeClassEntry(writer, file);

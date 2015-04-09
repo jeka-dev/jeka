@@ -139,11 +139,9 @@ class Project {
 		} else {
 			JakeLog.startln("Resolving build dependencies");
 			final JakeDependencies importedDependencies =  buildDependencies;
-			final JakePath extraPath;
+			JakePath extraPath  = JakePath.of(importedDependencies.fileDependencies(JAKE_SCOPE));
 			if (importedDependencies.containsExternalModule()) {
-				extraPath = this.jakeCompilePath(buildRepos, importedDependencies);
-			} else {
-				extraPath = JakePath.of(importedDependencies.fileDependencies(JAKE_SCOPE));
+				extraPath = extraPath.and(this.jakeCompilePath(buildRepos, importedDependencies));
 			}
 			buildPath = extraPath;
 			JakeLog.done();
