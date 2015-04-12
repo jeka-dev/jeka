@@ -5,14 +5,30 @@ Built system ala Ant, Maven or Gradle but using Java code only to describe build
 It leads in a powerfull tool yet quite simple to learn and use (launch and debug build 'script' as a regular java class).
 
 Notably Jerkar provides :
-* Powerfull dependency management (back-ended by Ivy so compatible with Maven repository)
+* Powerfull dependency management (back-ended by Ivy so compatible with Maven repositories)
 * Multi-project support
-* Powerfull fluent API to manipulate files, perform  compilations/tests, package archives and all build related stuff
-* Choice between free form builds (ala Ant) or structured build definitions (ala Maven).   
-* Hierarchical log output tracing execution time for each intermediate steps
+* Powerfull fluent API to manipulate files, perform  compilations, tests, archives and all build related stuff
+* Choice between free form builds (ala Ant) and enforced build templates (ala Maven)
+* Hierarchical log output tracing execution time for each intermediate step
+* Ability to get information from naming convention and Eclipse files, so in simpler cases you won't need to write script at all (even to generate war or perform SonarQube analysis) !!!
+
 
 The documentation is at its very early stage but the code is yet pretty close to completion for a first release. 
-I mainly need help for further testing, write documentation and polish the API... and giving some feedback of course.
+I mainly need help for further testing, writing documentation, polishing the API... and getting some feedback of course.
+
+
+Quick start :
+--
+- Create a `build` folder at the base of your project.
+- Add the jerkar.jar file (found in the distrib) in your IDE build-path
+- Create a`spec` folder under the `buid` directory and make it a source folder in your IDE 
+- Write the build class extending JkJavaBuild in this directory (in whatever package).
+- If your project respect convention, do not need managed dependencies and don't do 'special' thing, you don't even need the 3) and 4) points.
+- Launch the `org.jerkar.Main` class in your IDE or type `jerkar` in the command line.
+
+This will launch the `doDefault`method defined in your build class. Note that this method is declared in the `JkJavaBuild`
+
+
 
 Example : Let's see how Jerkar build itself
 --
@@ -61,8 +77,8 @@ The build class is as follow :
 		    distribDir.importFiles(packer.jarFile(), packer.fatJarFile());
 		    distribDir.sub("libs/required").copyInDirContent(baseDir("build/libs/compile"));
 		    distribDir.sub("libs/sources").copyInDirContent(baseDir("build/libs-sources")).importFiles(packer.jarSourceFile());
-		distribDir.zip().to(distripZipFile, Deflater.BEST_COMPRESSION);
-		JkLog.done();
+			distribDir.zip().to(distripZipFile, Deflater.BEST_COMPRESSION);
+			JkLog.done();
 	    }
 	}
 
@@ -70,11 +86,11 @@ To launch the build for creating distrib from the command line, simply type :
 
     jerkar
 
-This will interpole resources, compile, unit tests, create jar and package the full distrib in zip file. When no method specified, Jerkar invoke the `doDefault` method.
+This will interpole resources, compile, run unit tests, create jars and package the full distrib in zip file. When no method specified, Jerkar invoke the `doDefault` method.
 
-To launch a SonarQube analisys along test coverage : 
+To launch a SonarQube analysis along test coverage and producing javadoc: 
 
-    jerkar doDefault jacoco# sonar#verify
+    jerkar clean compile unitTest jacoco# sonar#verify javadoc
     
 This will compile, unit test with test coverage and launch a sonar analysis with sonar user settings. 
 `jacoco#` means that the Jacoco plugin will be activated while the junit test will be running and `sonar#verify` means that Jerkar will invoke a method called `verify`in the sonar plugin class.
