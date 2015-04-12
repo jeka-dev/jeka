@@ -19,14 +19,14 @@ I mainly need help for further testing, writing documentation, polishing the API
 
 Quick start :
 --
-- Create a `build` folder at the base of your project.
-- Add the jerkar.jar file (found in the distrib) in your IDE build-path
-- Create a`spec` folder under the `buid` directory and make it a source folder in your IDE 
-- Write the build class extending JkJavaBuild in this directory (in whatever package).
-- If your project respect convention, do not need managed dependencies and don't do 'special' thing, you don't even need the 3) and 4) points.
-- Launch the `org.jerkar.Main` class in your IDE or type `jerkar` in the command line.
+1. Create a `build` folder at the base of your project.
+2. Add the jerkar.jar file (found in the distrib) in your IDE build-path
+3. Create a`spec` folder under the `buid` directory and make it a source folder in your IDE 
+4. Write the build class extending JkJavaBuild in this directory (in whatever package).
+5. If your project respect convention, do not need managed dependencies and don't do 'special' thing, you don't even need the 3) and 4) points.
+6. Launch the `org.jerkar.Main` class in your IDE or type `jerkar` in the command line.
 
-This will launch the `doDefault`method defined in your build class. Note that this method is declared in the `JkJavaBuild`
+This will launch the `doDefault` method defined in your build class. Note that this method is declared in the `JkJavaBuild`
 
 
 
@@ -49,8 +49,8 @@ The build class is as follow :
 		    this.fatJar = true;
         }
 
-	    // Just to run directly the whole build bypassing the Jake bootstrap mechanism.
-	    // Was necessary in first place to build Jake with itself.
+	    // Just to run directly the whole build bypassing the Jerkar bootstrap mechanism.
+	    // It is necessary in first place to build Jerkar with itself.
 	    public static void main(String[] args) {
 		    new CoreBuild().base();
 	    }
