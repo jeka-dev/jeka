@@ -1,5 +1,4 @@
-![logo of jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png)
-======
+![Logo of Jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png)
 
 Built system ala Ant, Maven or Gradle but using Java code only to describe builds.
 It leads in a powerfull tool yet quite simple to learn and use (launch and debug build 'script' as a regular java class).
