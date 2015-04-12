@@ -8,9 +8,7 @@ import org.jake.publishing.JakeMavenPublication;
 import org.jake.utils.JakeUtilsIterable;
 
 /**
- * Build class for Jake itself.
- * This build relies on a dependency manager.
- * This build uses built-in extra feature as sonar, jacoco analysis.
+ * Tututututtutt
  */
 
 public class DepManagedBuild extends Build {

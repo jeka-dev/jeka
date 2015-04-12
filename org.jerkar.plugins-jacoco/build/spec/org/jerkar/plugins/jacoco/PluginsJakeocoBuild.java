@@ -8,7 +8,7 @@ import org.jerkar.java.build.JkJavaBuild;
 
 public class PluginsJakeocoBuild extends JkJavaBuild {
 	
-	@JakeProject("../org.jake.core")
+	@JakeProject("../org.jerkar.core")
 	public CoreBuild core;
 	
 	@Override

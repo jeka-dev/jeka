@@ -39,8 +39,8 @@ public final class JkBuildDependencies {
 		return resolvedTransitiveBuilds;
 	}
 
-	public void invokeBaseMethodOnAllSubProjects() {
-		this.executeOnAllTransitive(JkUtilsIterable.listOf(BuildMethod.normal("base")));
+	public void invokeDoDefaultMethodOnAllSubProjects() {
+		this.executeOnAllTransitive(JkUtilsIterable.listOf(BuildMethod.normal(CommandLine.DEFAULT_METHOD)));
 	}
 
 	public void invokeOnAllTransitive(String ...methods) {

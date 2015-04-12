@@ -5,9 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.Deflater;
 
+import org.jerkar.JakeZipper;
 import org.jerkar.JkDir;
 import org.jerkar.JkLog;
-import org.jerkar.JakeZipper;
 
 /**
  * Jar maker for the {@link JkJavaBuild} template. This maker will get information from supplied java builder
@@ -31,7 +31,7 @@ public class JkJavaPacker implements Cloneable {
 
 	private boolean includeVersion = false;
 
-	private boolean fullName = false;
+	private boolean fullName = true;
 
 	private boolean checkSum = false;
 

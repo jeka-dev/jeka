@@ -7,7 +7,7 @@ import org.jerkar.java.build.JkJavaBuild;
 
 public class PluginsSonarBuild extends JkJavaBuild {
 		
-	@JakeProject("../org.jake.core")
+	@JakeProject("../org.jerkar.core")
 	private CoreBuild core;
 	
 	@Override

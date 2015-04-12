@@ -8,12 +8,10 @@ import org.jake.publishing.JakeMavenPublication;
 import org.jake.utils.JakeUtilsIterable;
 
 /**
- * Build class for Jake itself.
- * This build relies on a dependency manager.
- * This build uses built-in extra feature as sonar, jacoco analysis.
+ * Blallaaa
  */
-@JakeImportRepo("http://maven.central.repo")
-@JakeImport
+@JkImportRepo("http://maven.central.repo")
+@JkImport
 ({
 	"commons-lang:commons-lang:2.6"
 })

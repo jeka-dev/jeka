@@ -41,7 +41,7 @@ class CommandLine {
 		return result;
 	}
 
-	private static final String DEFAULT_METHOD = "doDefault";
+	static final String DEFAULT_METHOD = "doDefault";
 
 	private Map<String, String> masterBuildOptions;
 

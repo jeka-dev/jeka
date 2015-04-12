@@ -14,10 +14,10 @@ import org.jerkar.plugins.sonar.PluginsSonarBuild;
 
 public class DistribBuild extends JkBuild {
 	
-	@JakeProject("../org.jake.plugins-sonar")
+	@JakeProject("../org.jerkar.plugins-sonar")
 	PluginsSonarBuild pluginsSonar;
 	
-	@JakeProject("../org.jake.plugins-jacoco")
+	@JakeProject("../org.jerkar.plugins-jacoco")
 	PluginsJakeocoBuild pluginsJacoco;
 	
 	@JkDoc("Construct a distrib assuming all dependent sub projects are already built.")
@@ -44,8 +44,8 @@ public class DistribBuild extends JkBuild {
 	}
 	
 	@JkDoc("End to end method to construct a distrib.")
-	public void doDistrib() {
-		buildDependencies().invokeBaseMethodOnAllSubProjects();
+	public void doDefault() {
+		buildDependencies().invokeDoDefaultMethodOnAllSubProjects();
 		distrib();
 	} 
 	
