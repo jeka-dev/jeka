@@ -1,4 +1,4 @@
-Jerkar
+![logo of jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png)
 ======
 
 Built system ala Ant, Maven or Gradle but using Java code only to describe builds.
@@ -34,6 +34,8 @@ Type `jerkar help` to get all the invokable methods provided by your build scrip
 
 Example : Let's see how Jerkar build itself
 --
+Jerkar is made of several project. The core project, some 'built-in plugin projects and the distrib project.
+ 
 The build contains directives for injecting timestamp in the Manifest file and for creating a full distribution containing jars, sources, configuration file and Windows executable.
 
 The build class is as follow :
