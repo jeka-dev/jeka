@@ -256,7 +256,7 @@ public class JkBuild {
 			return JkDependencies.builder().build();
 		}
 		return JkDependencies.builder()
-				.usingDefaultScopes(Project.JAKE_SCOPE)
+				.usingDefaultScopes(Project.BUILD_SCOPE)
 				.on(JkDependency.of(libDir.include("*.jar", "jake/*.jar"))).build();
 	}
 
@@ -283,7 +283,7 @@ public class JkBuild {
 	}
 
 	protected JkScopeMapping scopeMapping() {
-		return JkScopeMapping.of(Project.JAKE_SCOPE).to("default(*)");
+		return JkScopeMapping.of(Project.BUILD_SCOPE).to("default(*)");
 	}
 
 	protected JkPublisher publisher() {
@@ -295,7 +295,7 @@ public class JkBuild {
 
 	protected JkDependencies extraCommandLineDeps() {
 		return JkDependencies.builder()
-				.usingDefaultScopes(Project.JAKE_SCOPE).onFiles(toPath(extraJakePath))
+				.usingDefaultScopes(Project.BUILD_SCOPE).onFiles(toPath(extraJakePath))
 				.build();
 	}
 

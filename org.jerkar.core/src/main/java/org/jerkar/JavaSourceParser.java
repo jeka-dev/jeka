@@ -25,7 +25,7 @@ import org.jerkar.utils.JkUtilsString;
  */
 class JavaSourceParser {
 
-	private static final JkScopeMapping SCOPE_MAPPING = JkScopeMapping.of(Project.JAKE_SCOPE).to("default(*)");
+	private static final JkScopeMapping SCOPE_MAPPING = JkScopeMapping.of(Project.BUILD_SCOPE).to("default(*)");
 
 
 	public static JavaSourceParser of(File baseDir, File code) {

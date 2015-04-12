@@ -1,0 +1,3 @@
+Libraries found here will be usable in any Jerkar  build file.
+So for example, if you put Guava library here you can use the Guava library in any Jerkar build file. 
+These libraries precede jerkar.jar in the classpath so it can redefine default implementation class.

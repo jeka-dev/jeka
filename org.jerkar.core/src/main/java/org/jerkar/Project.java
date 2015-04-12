@@ -25,7 +25,7 @@ import org.jerkar.utils.JkUtilsFile;
  */
 class Project {
 
-	static final JkScope JAKE_SCOPE = JkScope.of("jake");
+	static final JkScope BUILD_SCOPE = JkScope.of("build");
 
 	private final File projectBaseDir;
 
@@ -139,7 +139,7 @@ class Project {
 		} else {
 			JkLog.startln("Resolving build dependencies");
 			final JkDependencies importedDependencies =  buildDependencies;
-			JkPath extraPath  = JkPath.of(importedDependencies.fileDependencies(JAKE_SCOPE));
+			JkPath extraPath  = JkPath.of(importedDependencies.fileDependencies(BUILD_SCOPE));
 			if (importedDependencies.containsExternalModule()) {
 				extraPath = extraPath.and(this.jakeCompilePath(buildRepos, importedDependencies));
 			}
@@ -242,7 +242,7 @@ class Project {
 
 	private JkPath jakeCompilePath(JkRepos jakeRepos, JkDependencies deps) {
 		final JkIvy ivy = JkIvy.of(jakeRepos);
-		final Set<JkArtifact> artifacts = ivy.resolve(deps, JAKE_SCOPE);
+		final Set<JkArtifact> artifacts = ivy.resolve(deps, BUILD_SCOPE);
 		return JkPath.of(JkArtifact.localFiles(artifacts));
 	}
 
