@@ -128,6 +128,8 @@ This will compile, unit test with test coverage, launch a sonar analysis with so
 - `sonar#verify` means that Jerkar will invoke a method called `verify`in the sonar plugin class
 - `-verbose=true`means that the log will display verbose information (this is the way to pass parameter in Jerkar)
 - `clean`, `compile`, `unitTest` and `javadoc` are build methods inherited by `CoreBuild`. 
+
+Notice that Jacoco test coverage and SonarQube analysis can be triggered without mention in the build class ! 
     
     
         
