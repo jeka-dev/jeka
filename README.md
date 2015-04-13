@@ -116,7 +116,7 @@ To launch the build for creating distrib from the command line, simply type :
     jerkar
 
 This will interpole resources (replacing ${version} by a timestamp everywhere), compile, run unit tests, create jars and package the distrib in zip file. 
-Tis command is equivalent to `jerkar doDefault` : when no method specified, Jerkar invoke the `doDefault` method.
+This command is equivalent to `jerkar doDefault` : when no method specified, Jerkar invoke the `doDefault` method.
 
 ---
 To launch a SonarQube analysis along test coverage and producing javadoc: 
