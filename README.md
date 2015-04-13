@@ -59,7 +59,6 @@ Type `jerkar help` to get all the build methods provided by your build class.
   
 
 ## Example : Let's see how Jerkar core build itself
---
 
 The build class is as follow :
 
@@ -78,9 +77,9 @@ The build class is as follow :
         }
 
 	    // Just to run directly the whole build bypassing the Jerkar bootstrap mechanism.
-	    // It is necessary in first place to build Jerkar with itself.
+	    // It was necessary in first place to build Jerkar with itself.
 	    public static void main(String[] args) {
-		    new CoreBuild().base();
+		    new CoreBuild().doDefault();
 	    }
 
 	    // Interpolize resource files replacing ${version} by a timestamp
@@ -103,8 +102,9 @@ The build class is as follow :
 		    final JkJavaPacker packer = packer();
 		    distribDir.copyInDirContent(baseDir("src/main/dist"));
 		    distribDir.importFiles(packer.jarFile(), packer.fatJarFile());
-		    distribDir.sub("libs/required").copyInDirContent(baseDir("build/libs/compile"));
-		    distribDir.sub("libs/sources").copyInDirContent(baseDir("build/libs-sources")).importFiles(packer.jarSourceFile());
+		    distribDir.sub("libs/required").importDirContent(baseDir("build/libs/compile"));
+		    distribDir.sub("libs/sources").importDirContent(baseDir("build/libs-sources"))
+		                                  .importFiles(packer.jarSourceFile());
 			distribDir.zip().to(distripZipFile, Deflater.BEST_COMPRESSION);
 			JkLog.done();
 	    }
@@ -116,7 +116,7 @@ To launch the build for creating distrib from the command line, simply type :
     jerkar
 
 This will interpole resources (replacing ${version} by a timestamp everywhere), compile, run unit tests, create jars and package the distrib in zip file. 
-Tis command is equivalent to``jerkar doDefault` : when no method specified, Jerkar invoke the `doDefault` method.
+Tis command is equivalent to `jerkar doDefault` : when no method specified, Jerkar invoke the `doDefault` method.
 
 ---
 To launch a SonarQube analysis along test coverage and producing javadoc: 
