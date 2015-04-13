@@ -1,8 +1,19 @@
 ![Logo of Jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png)
 
-Built system ala Ant, Maven or Gradle but using Java code only to describe builds.
-It leads in a powerfull tool yet quite simple to learn and use (launch and debug build 'script' as a regular java class).
+Complete built system ala Ant, Maven or Gradle but using Java code only to describe builds.
 
+# Motivations
+Using the same language for building a project than the one it is coded in brings valuable benefits :
+* You don't have to learn an extra language or XML soup just for build purpose : get higher cohesion and lower cognitive load
+* You can leverage of compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools. For static typed language as Java, it notably brings robustness to your builds.
+* Your builds can benefit from any libraries without needing to wrap it in a plugin or a specific component.
+* You can master build complexity the same way you master code complexity (ie utility classes, inheritance, composition,...) 
+* Using fluent style internal DSL, syntax get much more concise and explicit than a XML description would
+* It's easier to dig into the build engine to investigate on behavior or discover system possibilities as builds are, in end, only direct API call.
+
+Actually, for the usage i have met so far, Jerkar build files prove to be quite more concise than their Ant or Maven equivalent and comparable to Gradle scripts. 
+
+# Main features
 Notably Jerkar provides :
 * Powerfull dependency management (back-ended by Ivy so compatible with Maven repositories)
 * Multi-project support
@@ -99,5 +110,4 @@ This will compile, unit test with test coverage and launch a sonar analysis with
 `jacoco#` means that the Jacoco plugin will be activated while the junit test will be running and `sonar#verify` means that Jerkar will invoke a method called `verify`in the sonar plugin class.
     
     
-    
-    
+        
