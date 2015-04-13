@@ -91,15 +91,15 @@ The build class is as follow :
 
         // Create a distribution of Jerkar core, including jars, sources and windows/linux launch scripts
 	    private void distrib() {
-		    final JkDir distribDir = JkDir.of(distribFolder);
+		    final JkDir distrib = JkDir.of(distribFolder);
 		    JkLog.startln("Creating distrib " + distripZipFile.getPath());
 		    final JkJavaPacker packer = packer();
-		    distribDir.imprtDirContent(baseDir("src/main/dist"));
-		    distribDir.importFiles(packer.jarFile(), packer.fatJarFile());
-		    distribDir.sub("libs/required").importDirContent(baseDir("build/libs/compile"));
-		    distribDir.sub("libs/sources").importDirContent(baseDir("build/libs-sources"))
+		    distrib.importDirContent(baseDir("src/main/dist"));
+		    distrib.importFiles(packer.jarFile(), packer.fatJarFile());
+		    distrib.sub("libs/required").importDirContent(baseDir("build/libs/compile"));
+		    distrib.sub("libs/sources").importDirContent(baseDir("build/libs-sources"))
 		                                  .importFiles(packer.jarSourceFile());
-			distribDir.zip().to(distripZipFile, Deflater.BEST_COMPRESSION);
+			distrib.zip().to(distripZipFile, Deflater.BEST_COMPRESSION);
 			JkLog.done();
 	    }
 	}
@@ -110,7 +110,9 @@ To launch the build for creating distrib from the command line, simply type :
     jerkar
 
 This will interpole resources (replacing ${version} by a timestamp everywhere), compile, run unit tests, create jars and package the distrib in zip file. 
-This command is equivalent to `jerkar doDefault` : when no method specified, Jerkar invoke the `doDefault` method.
+This command is equivalent to `jerkar doDefault` : when no method specified, Jerkar invoke the `doDefault` method. Build result is *output* folder : 
+
+![image of project layout](https://github.com/jerkar/jerkar/blob/master/doc/project-layout.png)
 
 ---
 To launch a SonarQube analysis along test coverage and producing javadoc: 
