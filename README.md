@@ -1,4 +1,4 @@
-![Logo of Jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png) *J
+![Logo of Jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png)
 
 Complete built system ala Ant, Maven or Gradle but using Java code only to describe builds.
 
@@ -37,12 +37,12 @@ Jerkar is made of following projects :
 * plugins-sonar : a plugin to perform sonar analysis
 * distrib-all : the core distrib augmented with the above plugins
 
-Jerkar builds with itself. To get Jerkar full distrib build from the java source only, the simpler is to import these 4 projects in Eclipse :
+Jerkar builds with itself. To get Jerkar full distrib built from the java source only, the simpler is to import these 4 projects in Eclipse :
 * Create a Java Application run configuration
   * Make sure that the Runtime JRE is a JDK (6 or above)
   * Choose `org.jerkar.distrib-all` as project
-  * choose `org.jerkar.Main` as Main class
-* Run it : The build artifact will lie in *org.jerkar.distrib-all/build/output* directory 
+  * Choose `org.jerkar.Main` as Main class
+* Run it : It will launch a multi-project build. You will find result for full distrib in *org.jerkar.distrib-all/build/output* directory 
 
 Quick start :
 --
