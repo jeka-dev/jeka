@@ -1,8 +1,8 @@
-![Logo of Jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png)
+![Logo of Jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png) *J
 
 Complete built system ala Ant, Maven or Gradle but using Java code only to describe builds.
 
-# Motivations
+# Motivation
 Using the same language for building a project than the one it is coded in brings valuable benefits :
 * You don't have to learn an extra language or XML soup just for build purpose : get higher cohesion and lower cognitive load
 * You can leverage of compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools. For static typed language as Java, it notably brings robustness to your builds.
@@ -16,18 +16,33 @@ Additionally the following features was missing from mainstream existing tools :
 * Possibility to write nothing at all for building projects (just relying on convention and/or IDE meta-data files). 
 
 # Main features
-Notably Jerkar provides :
+Jerkar provides what a self respecting modern build system must and more :
 * Powerfull dependency management (back-ended by Ivy so compatible with Maven repositories)
+* Publication on Ivy or Maven repositories
 * Multi-project support
 * Powerfull fluent API to manipulate files, perform  compilations, tests, archives and all build related stuff
 * Choice between free form builds (ala Ant) and enforced build templates (ala Maven)
 * Hierarchical log output tracing execution time for each intermediate step
+* Pluggable architecture
 * Ability to get information from naming convention and Eclipse files, so in simpler cases you won't need to write script at all (even to generate war or perform SonarQube analysis) !!!
 
 
 The documentation is at its very early stage but the code is yet pretty close to completion for a first release. 
 I mainly need help for further testing, writing documentation, polishing the API... and getting some feedback of course.
 
+# How to build
+Jerkar is made of following projects :
+* core : Complete Jerkar project but without embbeding following plugins.
+* plugins-jacoco : a plugin to perform test coverage
+* plugins-sonar : a plugin to perform sonar analysis
+* distrib-all : the core distrib augmented with the above plugins
+
+Jerkar builds with itself. To get Jerkar full distrib build from the java source only, the simpler is to import these 4 projects in Eclipse :
+* Create a Java Application run configuration
+  * Make sure that the Runtime JRE is a JDK (6 or above)
+  * Choose `org.jerkar.distrib-all` as project
+  * choose `org.jerkar.Main` as Main class
+* Run it : The build artifact will lie in *org.jerkar.distrib-all/build/output* directory 
 
 Quick start :
 --
