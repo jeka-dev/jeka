@@ -33,7 +33,7 @@ I mainly need help for further testing, writing documentation, polishing the API
 
 # How to build
 Jerkar is made of following projects :
-* core : complete Jerkar project but without embbeding following plugins
+* core : complete Jerkar project but without embedding following plugins
 * plugins-jacoco : a plugin to perform test coverage
 * plugins-sonar : a plugin to perform sonar analysis
 * distrib-all : the core distrib augmented with the above plugins
