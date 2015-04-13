@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jerkar.CommandLine.JakePluginSetup;
+import org.jerkar.CommandLine.JkPluginSetup;
 import org.jerkar.CommandLine.MethodInvocation;
 import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkDependencies;
@@ -122,14 +122,14 @@ class Project {
 
 	private	JkPath localBuildPath() {
 		final List<File> extraLibs = new LinkedList<File>();
-		final File localJakeBuild = new File(this.projectBaseDir,"build/libs/jake");
-		if (localJakeBuild.exists()) {
-			extraLibs.addAll(JkDir.of(localJakeBuild).include("**/*.jar").files());
+		final File localJerkarBuild = new File(this.projectBaseDir,"build/libs/build");
+		if (localJerkarBuild.exists()) {
+			extraLibs.addAll(JkDir.of(localJerkarBuild).include("**/*.jar").files());
 		}
 		if (JkLocator.libExtDir().exists()) {
 			extraLibs.addAll(JkDir.of(JkLocator.libExtDir()).include("**/*.jar").files());
 		}
-		return JkPath.of(extraLibs).and(JkLocator.jakeJarFile(), JkLocator.ivyJarFile());
+		return JkPath.of(extraLibs).and(JkLocator.jerkararFile(), JkLocator.ivyJarFile());
 	}
 
 	private JkPath resolveBuildPath() {
@@ -141,7 +141,7 @@ class Project {
 			final JkDependencies importedDependencies =  buildDependencies;
 			JkPath extraPath  = JkPath.of(importedDependencies.fileDependencies(BUILD_SCOPE));
 			if (importedDependencies.containsExternalModule()) {
-				extraPath = extraPath.and(this.jakeCompilePath(buildRepos, importedDependencies));
+				extraPath = extraPath.and(this.jkCompilePath(buildRepos, importedDependencies));
 			}
 			buildPath = extraPath;
 			JkLog.done();
@@ -187,7 +187,7 @@ class Project {
 	}
 
 	private static void configurePluginsAndRun(JkBuild build, List<MethodInvocation> invokes,
-			Collection<JakePluginSetup> pluginSetups, Map<String, String> options,  PluginDictionnary<JkBuildPlugin> dictionnary) {
+			Collection<JkPluginSetup> pluginSetups, Map<String, String> options,  PluginDictionnary<JkBuildPlugin> dictionnary) {
 		JkLog.startHeaded("Executing building for project " + build.baseDir().root().getName());
 		JkLog.info("Using build class " + build.getClass().getName());
 		JkLog.info("With activated plugins : " + build.plugins.getActives());
@@ -198,8 +198,8 @@ class Project {
 		JkLog.done("Build " + build.baseDir().root().getName());
 	}
 
-	private static void configureAndActivatePlugins(JkBuild build, Collection<JakePluginSetup> pluginSetups, PluginDictionnary<JkBuildPlugin> dictionnary) {
-		for (final JakePluginSetup pluginSetup : pluginSetups) {
+	private static void configureAndActivatePlugins(JkBuild build, Collection<JkPluginSetup> pluginSetups, PluginDictionnary<JkBuildPlugin> dictionnary) {
+		for (final JkPluginSetup pluginSetup : pluginSetups) {
 			final Class<? extends JkBuildPlugin> pluginClass =
 					dictionnary.loadByNameOrFail(pluginSetup.pluginName).pluginClass();
 			if (pluginSetup.activated) {
@@ -240,8 +240,8 @@ class Project {
 	}
 
 
-	private JkPath jakeCompilePath(JkRepos jakeRepos, JkDependencies deps) {
-		final JkIvy ivy = JkIvy.of(jakeRepos);
+	private JkPath jkCompilePath(JkRepos jkRepos, JkDependencies deps) {
+		final JkIvy ivy = JkIvy.of(jkRepos);
 		final Set<JkArtifact> artifacts = ivy.resolve(deps, BUILD_SCOPE);
 		return JkPath.of(JkArtifact.localFiles(artifacts));
 	}

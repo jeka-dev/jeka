@@ -13,13 +13,13 @@ import org.jerkar.depmanagement.JkDependency;
 import org.jerkar.depmanagement.JkDependencyResolver;
 import org.jerkar.depmanagement.JkModuleId;
 import org.jerkar.depmanagement.JkRepo;
+import org.jerkar.depmanagement.JkRepo.MavenRepository;
 import org.jerkar.depmanagement.JkRepos;
 import org.jerkar.depmanagement.JkResolutionParameters;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
 import org.jerkar.depmanagement.JkVersion;
 import org.jerkar.depmanagement.JkVersionedModule;
-import org.jerkar.depmanagement.JkRepo.MavenRepository;
 import org.jerkar.depmanagement.ivy.JkIvy;
 import org.jerkar.publishing.JkPublishRepos;
 import org.jerkar.publishing.JkPublisher;
@@ -89,9 +89,9 @@ public class JkBuild {
 
 	@JkOption({
 		"Mention if you want to add extra lib in your build path. It can be absolute or relative to the project base dir.",
-		"These libs will be added to the build path cto compile and run Jake scripts.",
+		"These libs will be added to the build path cto compile and run Jerkar scripts.",
 	"Example : -extraCompilePath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
-	private final String extraJakePath = null;
+	private final String extraJerkarPath = null;
 
 	private final JkBuildDependencies explicitBuildDependencies;
 
@@ -257,7 +257,7 @@ public class JkBuild {
 		}
 		return JkDependencies.builder()
 				.usingDefaultScopes(Project.BUILD_SCOPE)
-				.on(JkDependency.of(libDir.include("*.jar", "jake/*.jar"))).build();
+				.on(JkDependency.of(libDir.include("*.jar", "build/*.jar"))).build();
 	}
 
 	public final JkDependencyResolver dependencyResolver() {
@@ -295,7 +295,7 @@ public class JkBuild {
 
 	protected JkDependencies extraCommandLineDeps() {
 		return JkDependencies.builder()
-				.usingDefaultScopes(Project.BUILD_SCOPE).onFiles(toPath(extraJakePath))
+				.usingDefaultScopes(Project.BUILD_SCOPE).onFiles(toPath(extraJerkarPath))
 				.build();
 	}
 
@@ -434,11 +434,11 @@ public class JkBuild {
 	@SuppressWarnings("unchecked")
 	private static List<JkBuild> populateProjectBuildField(JkBuild mainBuild) {
 		final List<JkBuild> result = new LinkedList<JkBuild>();
-		final List<Field> fields = JkUtilsReflect.getAllDeclaredField(mainBuild.getClass(), JakeProject.class);
+		final List<Field> fields = JkUtilsReflect.getAllDeclaredField(mainBuild.getClass(), JkProject.class);
 		for (final Field field : fields) {
-			final JakeProject jakeProject = field.getAnnotation(JakeProject.class);
+			final JkProject jkProject = field.getAnnotation(JkProject.class);
 			final JkBuild subBuild = relativeProject(mainBuild, (Class<? extends JkBuild>) field.getType(),
-					jakeProject.value());
+					jkProject.value());
 			JkUtilsReflect.setFieldValue(mainBuild, field, subBuild);
 			result.add(subBuild);
 		}

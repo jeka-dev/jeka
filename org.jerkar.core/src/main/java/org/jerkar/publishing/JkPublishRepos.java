@@ -8,12 +8,12 @@ import java.util.List;
 
 import org.jerkar.depmanagement.JkRepo;
 import org.jerkar.depmanagement.JkVersionedModule;
-import org.jerkar.publishing.JkPublishRepos.JakePublishRepo;
+import org.jerkar.publishing.JkPublishRepos.JkPublishRepo;
 import org.jerkar.utils.JkUtilsIterable;
 
-public final class JkPublishRepos implements Iterable<JakePublishRepo>{
+public final class JkPublishRepos implements Iterable<JkPublishRepo>{
 
-	public interface JakePublishFilter {
+	public interface JkPublishFilter {
 
 		boolean accept(JkVersionedModule versionedModule);
 
@@ -23,12 +23,12 @@ public final class JkPublishRepos implements Iterable<JakePublishRepo>{
 		return JkPublishRepos.of(ACCEPT_SNAPSHOT_ONLY, snapshot).and(ACCEPT_RELEASE_ONLY, optionalRelease);
 	}
 
-	public static JkPublishRepos of(JakePublishFilter filter, JkRepo ... repo) {
+	public static JkPublishRepos of(JkPublishFilter filter, JkRepo ... repo) {
 		final List<JkRepo> list = Arrays.asList(repo);
 		return new JkPublishRepos(toPublishRepo(list, filter));
 	}
 
-	public static JkPublishRepos maven(JakePublishFilter filter, String ... urls) {
+	public static JkPublishRepos maven(JkPublishFilter filter, String ... urls) {
 		final List<JkRepo> list = new LinkedList<JkRepo>();
 		for (final String url : urls) {
 			list.add(JkRepo.maven(url));
@@ -36,7 +36,7 @@ public final class JkPublishRepos implements Iterable<JakePublishRepo>{
 		return new JkPublishRepos(toPublishRepo(list, filter));
 	}
 
-	public static JkPublishRepos maven(JakePublishFilter filter, File ... files) {
+	public static JkPublishRepos maven(JkPublishFilter filter, File ... files) {
 		final List<JkRepo> list = new LinkedList<JkRepo>();
 		for (final File file : files) {
 			list.add(JkRepo.maven(file));
@@ -45,7 +45,7 @@ public final class JkPublishRepos implements Iterable<JakePublishRepo>{
 	}
 
 
-	public static JkPublishRepos ivy(JakePublishFilter filter, File ... files) {
+	public static JkPublishRepos ivy(JkPublishFilter filter, File ... files) {
 		final List<JkRepo> list = new LinkedList<JkRepo>();
 		for (final File file : files) {
 			list.add(JkRepo.ivy(file));
@@ -53,7 +53,7 @@ public final class JkPublishRepos implements Iterable<JakePublishRepo>{
 		return new JkPublishRepos(toPublishRepo(list, filter));
 	}
 
-	public static JkPublishRepos ivy(JakePublishFilter filter, String ... urls) {
+	public static JkPublishRepos ivy(JkPublishFilter filter, String ... urls) {
 		final List<JkRepo> list = new LinkedList<JkRepo>();
 		for (final String url : urls) {
 			list.add(JkRepo.ivy(url));
@@ -81,47 +81,47 @@ public final class JkPublishRepos implements Iterable<JakePublishRepo>{
 		return ivy(ACCEPT_ALL, urls);
 	}
 
-	private final List<JakePublishRepo> repos;
+	private final List<JkPublishRepo> repos;
 
-	private JkPublishRepos(List<JakePublishRepo> repos) {
+	private JkPublishRepos(List<JkPublishRepo> repos) {
 		super();
 		this.repos = repos;
 	}
 
-	public JkPublishRepos and(JakePublishFilter filter, Iterable<JkRepo> repos) {
-		final List<JakePublishRepo> list = new LinkedList<JkPublishRepos.JakePublishRepo>(this.repos);
+	public JkPublishRepos and(JkPublishFilter filter, Iterable<JkRepo> repos) {
+		final List<JkPublishRepo> list = new LinkedList<JkPublishRepos.JkPublishRepo>(this.repos);
 		list.addAll(toPublishRepo(repos, filter));
 		return new JkPublishRepos(list);
 	}
 
-	public JkPublishRepos and(JakePublishFilter filter, JkRepo ... repos) {
+	public JkPublishRepos and(JkPublishFilter filter, JkRepo ... repos) {
 		return and(JkPublishRepos.of(filter, repos));
 	}
 
-	public JkPublishRepos andMaven(JakePublishFilter filter, String ... urls) {
+	public JkPublishRepos andMaven(JkPublishFilter filter, String ... urls) {
 		return and(JkPublishRepos.maven(filter, urls));
 	}
 
-	public JkPublishRepos andMaven(JakePublishFilter filter, File ... files) {
+	public JkPublishRepos andMaven(JkPublishFilter filter, File ... files) {
 		return and(JkPublishRepos.maven(filter, files));
 	}
 
-	public JkPublishRepos andIvy(JakePublishFilter filter, String ... urls) {
+	public JkPublishRepos andIvy(JkPublishFilter filter, String ... urls) {
 		return and(JkPublishRepos.ivy(filter, urls));
 	}
 
-	public JkPublishRepos andIvy(JakePublishFilter filter, File ... files) {
+	public JkPublishRepos andIvy(JkPublishFilter filter, File ... files) {
 		return and(JkPublishRepos.ivy(filter, files));
 	}
 
 	public JkPublishRepos and(JkPublishRepos other) {
 		@SuppressWarnings("unchecked")
-		final List<JakePublishRepo> list = JkUtilsIterable.concatLists(this.repos, other.repos);
+		final List<JkPublishRepo> list = JkUtilsIterable.concatLists(this.repos, other.repos);
 		return new JkPublishRepos(list);
 	}
 
-	public JakePublishRepo getRepoHavingUrl(String url) {
-		for (final JakePublishRepo repo : this) {
+	public JkPublishRepo getRepoHavingUrl(String url) {
+		for (final JkPublishRepo repo : this) {
 			if (url.equals(repo.repo().url().toExternalForm())) {
 				return repo;
 			}
@@ -129,39 +129,39 @@ public final class JkPublishRepos implements Iterable<JakePublishRepo>{
 		return null;
 	}
 
-	public static final class JakePublishRepo {
+	public static final class JkPublishRepo {
 
-		private final JkRepo jakeRepo;
+		private final JkRepo jkRepo;
 
-		private final JakePublishFilter filter;
+		private final JkPublishFilter filter;
 
-		private JakePublishRepo(JkRepo jakeRepo, JakePublishFilter filter) {
+		private JkPublishRepo(JkRepo jkRepo, JkPublishFilter filter) {
 			super();
-			this.jakeRepo = jakeRepo;
+			this.jkRepo = jkRepo;
 			this.filter = filter;
 		}
 
 		public JkRepo repo() {
-			return jakeRepo;
+			return jkRepo;
 		}
 
-		public JakePublishFilter filter() {
+		public JkPublishFilter filter() {
 			return filter;
 		}
 
 	}
 
-	private static List<JakePublishRepo> toPublishRepo(Iterable<JkRepo> repos, JakePublishFilter filter) {
-		final List<JakePublishRepo> result = new LinkedList<JkPublishRepos.JakePublishRepo>();
+	private static List<JkPublishRepo> toPublishRepo(Iterable<JkRepo> repos, JkPublishFilter filter) {
+		final List<JkPublishRepo> result = new LinkedList<JkPublishRepos.JkPublishRepo>();
 		for (final JkRepo repo : repos) {
 
-			result.add(new JakePublishRepo(repo, filter));
+			result.add(new JkPublishRepo(repo, filter));
 		}
 		return result;
 	}
 
 
-	public static final JakePublishFilter ACCEPT_ALL= new JakePublishFilter() {
+	public static final JkPublishFilter ACCEPT_ALL= new JkPublishFilter() {
 
 		@Override
 		public boolean accept(JkVersionedModule versionedModule) {
@@ -170,7 +170,7 @@ public final class JkPublishRepos implements Iterable<JakePublishRepo>{
 
 	};
 
-	public static final JakePublishFilter ACCEPT_SNAPSHOT_ONLY= new JakePublishFilter() {
+	public static final JkPublishFilter ACCEPT_SNAPSHOT_ONLY= new JkPublishFilter() {
 
 		@Override
 		public boolean accept(JkVersionedModule versionedModule) {
@@ -179,7 +179,7 @@ public final class JkPublishRepos implements Iterable<JakePublishRepo>{
 
 	};
 
-	public static final JakePublishFilter ACCEPT_RELEASE_ONLY= new JakePublishFilter() {
+	public static final JkPublishFilter ACCEPT_RELEASE_ONLY= new JkPublishFilter() {
 
 		@Override
 		public boolean accept(JkVersionedModule versionedModule) {
@@ -189,7 +189,7 @@ public final class JkPublishRepos implements Iterable<JakePublishRepo>{
 	};
 
 	@Override
-	public Iterator<JakePublishRepo> iterator() {
+	public Iterator<JkPublishRepo> iterator() {
 		return this.repos.iterator();
 	}
 

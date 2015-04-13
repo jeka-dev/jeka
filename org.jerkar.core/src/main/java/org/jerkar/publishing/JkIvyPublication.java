@@ -11,12 +11,12 @@ import org.jerkar.utils.JkUtilsIterable;
 
 public class JkIvyPublication implements Iterable<Artifact> {
 
-    public static JkIvyPublication of(File file, String type, JkScope ...jakeScopes) {
-        return new JkIvyPublication(new HashSet<JkIvyPublication.Artifact>(), null, null).and(file, type, jakeScopes);
+    public static JkIvyPublication of(File file, String type, JkScope ...jkScopes) {
+        return new JkIvyPublication(new HashSet<JkIvyPublication.Artifact>(), null, null).and(file, type, jkScopes);
     }
 
-    public static JkIvyPublication of(File file, JkScope...jakeScopes) {
-        return new JkIvyPublication(new HashSet<JkIvyPublication.Artifact>(), null, null).and(file, jakeScopes);
+    public static JkIvyPublication of(File file, JkScope...jkScopes) {
+        return new JkIvyPublication(new HashSet<JkIvyPublication.Artifact>(), null, null).and(file, jkScopes);
     }
 
     private final Set<Artifact> artifacts;
@@ -32,56 +32,56 @@ public class JkIvyPublication implements Iterable<Artifact> {
         this.branch = branch;
     }
 
-    public JkIvyPublication and(File file, String type, JkScope...jakeScopes) {
+    public JkIvyPublication and(File file, String type, JkScope...jkScopes) {
         final Set<Artifact> artifacts = new HashSet<JkIvyPublication.Artifact>(this.artifacts);
-        artifacts.add(new Artifact(file, type, JkUtilsIterable.setOf(jakeScopes)));
+        artifacts.add(new Artifact(file, type, JkUtilsIterable.setOf(jkScopes)));
         return new JkIvyPublication(artifacts, this.status, this.branch);
     }
 
-    public JkIvyPublication and(File file, JkScope... jakeScopes) {
-        return and(file, null, jakeScopes );
+    public JkIvyPublication and(File file, JkScope... jkScopes) {
+        return and(file, null, jkScopes );
     }
 
-    public JkIvyPublication andIf(boolean condition, File file, JkScope... jakeScopes) {
+    public JkIvyPublication andIf(boolean condition, File file, JkScope... jkScopes) {
         if (condition) {
-            return and(file, jakeScopes);
+            return and(file, jkScopes);
         }
         return this;
     }
 
-    public JkIvyPublication andIf(boolean condition, File file, String type, JkScope... jakeScopes) {
+    public JkIvyPublication andIf(boolean condition, File file, String type, JkScope... jkScopes) {
         if (condition) {
-            return and(file, type, jakeScopes);
+            return and(file, type, jkScopes);
         }
         return this;
     }
 
 
-    public JkIvyPublication andOptional(File file, JkScope... jakeScopes) {
+    public JkIvyPublication andOptional(File file, JkScope... jkScopes) {
         if (file.exists()) {
-            return and(file, null, jakeScopes );
+            return and(file, null, jkScopes );
         }
         return this;
     }
 
-    public JkIvyPublication andOptional(File file, String type, JkScope... jakeScopes) {
+    public JkIvyPublication andOptional(File file, String type, JkScope... jkScopes) {
         if (file.exists()) {
-            return and(file, type, jakeScopes);
+            return and(file, type, jkScopes);
         }
         return this;
     }
 
 
-    public JkIvyPublication andOptionalIf(boolean condition, File file, JkScope... jakeScopes) {
+    public JkIvyPublication andOptionalIf(boolean condition, File file, JkScope... jkScopes) {
         if (condition) {
-            return andOptional(file, jakeScopes);
+            return andOptional(file, jkScopes);
         }
         return this;
     }
 
-    public JkIvyPublication andOptionalIf(boolean condition, File file, String type, JkScope... jakeScopes) {
+    public JkIvyPublication andOptionalIf(boolean condition, File file, String type, JkScope... jkScopes) {
         if (condition) {
-            return andOptional(file, type, jakeScopes);
+            return andOptional(file, type, jkScopes);
         }
         return this;
     }
@@ -101,18 +101,18 @@ public class JkIvyPublication implements Iterable<Artifact> {
 
     public static class Artifact {
 
-        private Artifact(File file, String type, Set<JkScope> jakeScopes) {
+        private Artifact(File file, String type, Set<JkScope> jkScopes) {
             super();
             this.file = file;
             this.type = type;
-            this.jakeScopes = jakeScopes;
+            this.jkScopes = jkScopes;
         }
 
         public final File file;
 
         public final String type;
 
-        public final Set<JkScope> jakeScopes;
+        public final Set<JkScope> jkScopes;
 
     }
 

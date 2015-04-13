@@ -36,35 +36,35 @@ public abstract class JkDependency {
 		return JkExternalModule.of(groupAndNameAndVersion);
 	}
 
-	public static JakeFilesDependency ofFile(File baseDir, String relativePath) {
+	public static JkFilesDependency ofFile(File baseDir, String relativePath) {
 		final File file = new File(relativePath);
 		if (!file.isAbsolute()) {
-			return JakeFilesDependency.of(new File(baseDir, relativePath));
+			return JkFilesDependency.of(new File(baseDir, relativePath));
 		}
-		return JakeFilesDependency.of(file);
+		return JkFilesDependency.of(file);
 	}
 
-	public static JakeFilesDependency of(Iterable<File> files) {
-		return new JakeFilesDependency(files);
+	public static JkFilesDependency of(Iterable<File> files) {
+		return new JkFilesDependency(files);
 	}
 
-	public static JakeFilesDependency of(File ... files) {
-		return new JakeFilesDependency(Arrays.asList(files));
+	public static JkFilesDependency of(File ... files) {
+		return new JkFilesDependency(Arrays.asList(files));
 	}
 
-	public static JakeProjectDependency of(JkBuild build, File...files) {
-		return JakeProjectDependency.of(build, JkUtilsIterable.setOf(files));
+	public static JkProjectDependency of(JkBuild build, File...files) {
+		return JkProjectDependency.of(build, JkUtilsIterable.setOf(files));
 	}
 
 
 	/**
 	 * A dependency on files located on file system.
 	 */
-	public static final class JakeFilesDependency extends JkDependency {
+	public static final class JkFilesDependency extends JkDependency {
 
 		private final List<File> files;
 
-		private JakeFilesDependency(Iterable<File> files) {
+		private JkFilesDependency(Iterable<File> files) {
 			this.files = Collections.unmodifiableList(JkUtilsIterable.toList(files));
 		}
 
@@ -79,20 +79,20 @@ public abstract class JkDependency {
 
 	}
 
-	public static final class JakeProjectDependency extends JkDependency {
+	public static final class JkProjectDependency extends JkDependency {
 
 		private final JkBuild projectBuild;
 
 		private final Set<File> files;
 
-		private JakeProjectDependency(JkBuild projectBuild, Set<File> files) {
+		private JkProjectDependency(JkBuild projectBuild, Set<File> files) {
 			super();
 			this.projectBuild = projectBuild;
 			this.files = Collections.unmodifiableSet(files);
 		}
 
-		public static JakeProjectDependency of(JkBuild projectBuild, Set<File> files) {
-			return new JakeProjectDependency(projectBuild, new HashSet<File>(files));
+		public static JkProjectDependency of(JkBuild projectBuild, Set<File> files) {
+			return new JkProjectDependency(projectBuild, new HashSet<File>(files));
 		}
 
 		public JkBuild projectBuild() {

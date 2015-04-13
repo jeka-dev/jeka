@@ -1,14 +1,14 @@
 package org.jerkar.plugins.jacoco;
 
 import org.jerkar.CoreBuild;
-import org.jerkar.JakeProject;
+import org.jerkar.JkProject;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.java.build.JkJavaBuild;
 
 
-public class PluginsJakeocoBuild extends JkJavaBuild {
+public class PluginsJacocoBuild extends JkJavaBuild {
 	
-	@JakeProject("../org.jerkar.core")
+	@JkProject("../org.jerkar.core")
 	public CoreBuild core;
 	
 	@Override
@@ -19,7 +19,7 @@ public class PluginsJakeocoBuild extends JkJavaBuild {
 	}
 	
 	public static void main(String[] args) {
-		new PluginsJakeocoBuild().doDefault();
+		new PluginsJacocoBuild().doDefault();
 	}
 	
 	

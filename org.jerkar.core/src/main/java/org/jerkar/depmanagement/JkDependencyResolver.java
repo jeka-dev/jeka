@@ -123,8 +123,8 @@ public final class JkDependencyResolver  {
 		}
 		JkLog.startln("Resolving dependencies for scope '" + scope.name() + "'");
 		final List<File> list = new LinkedList<File>();
-		for (final JkScope jakeScope : scope.ancestorScopes()) {
-			list.addAll(this.getDeclaredDependencies(jakeScope));
+		for (final JkScope jkScope : scope.ancestorScopes()) {
+			list.addAll(this.getDeclaredDependencies(jkScope));
 		}
 		final JkPath result = JkPath.of(list);
 		JkLog.info(result.entries().size() + " artifacts: " + result);

@@ -1,6 +1,6 @@
-package org.jake;
-import org.jake.java.testing.jacoco.JakeocoJakeJavaBuildPlugin;
-import org.jake.java.testing.junit.JakeUnit;
+package org.jerkar;
+import org.jerkar.java.testing.jacoco.jerkarocojerkarJavaBuildPlugin;
+import org.jerkar.java.testing.junit.JkUnit;
 
 /**
  * Blalalala.

@@ -76,21 +76,21 @@ public class JkScope {
 		final List<JkScope> list = new LinkedList<JkScope>();
 		list.add(this);
 		for (final JkScope scope : this.extendedScopes) {
-			for (final JkScope jakeScope : scope.ancestorScopes()) {
-				if (!list.contains(jakeScope)) {
-					list.add(jakeScope);
+			for (final JkScope jkScope : scope.ancestorScopes()) {
+				if (!list.contains(jkScope)) {
+					list.add(jkScope);
 				}
 			}
 		}
 		return list;
 	}
 
-	public boolean isExtending(JkScope jakeScope) {
+	public boolean isExtending(JkScope jkScope) {
 		if (extendedScopes == null || extendedScopes.isEmpty()) {
 			return false;
 		}
 		for (final JkScope parent : extendedScopes) {
-			if (parent.equals(jakeScope) || parent.isExtending(jakeScope)) {
+			if (parent.equals(jkScope) || parent.isExtending(jkScope)) {
 				return true;
 			}
 		}

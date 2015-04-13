@@ -15,7 +15,7 @@ import org.jerkar.utils.JkUtilsIterable;
 /**
  * This processor basically copies some resource files to a target folder (generally the class folder).
  * It can also proceed to token replacement, i.e replacing strings between <code>${</code> and <code>}</code> by a specified values.<br/>
- * The processor is constructed using a list of <code>JakeDirSets</code> and for each of them, we can associate
+ * The processor is constructed using a list of <code>JkDirSets</code> and for each of them, we can associate
  * a map of token to replace.<br/>
  * 
  * @author Jerome Angibaud

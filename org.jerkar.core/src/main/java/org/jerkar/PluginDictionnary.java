@@ -15,17 +15,17 @@ import org.jerkar.utils.JkUtilsString;
 /**
  * Contains the Plugin description for all concrete plugin classes extending a given base class.
  * <p>
- * Jake offers a very simple, yet powerful, plugin mechanism.<br/>
+ * Jerkar offers a very simple, yet powerful, plugin mechanism.<br/>
  * Basically it offers to discover every classes in the classpath that inherit from a given class and that respect a certain naming convention.<br/>
  * <p>
  * The convention naming is as follow : The class simple name should be prefixed by the simple name of the plugin base class.<br/>
- * For example, a plugin class for <code>or.jake.java.build.JakeBuildPlugin</code> class must be named 'my.package.JakeJavaBuildPluginXxxxx.class'
- * to be discovered :Xxxxx will be its short name, while my.package.JakeJavaBuildPluginXxxxx will be its full name.
+ * For example, a plugin class for <code>or.jerkar.java.build.JkBuildPlugin</code> class must be named 'my.package.JkJavaBuildPluginXxxxx.class'
+ * to be discovered :Xxxxx will be its short name, while my.package.JkJavaBuildPluginXxxxx will be its full name.
  * 
  * @param <T> The plugin base class.
  * @author Jerome Angibaud
  * 
- * @see {@link JakePluginDescription}
+ * @see {@link JkPluginDescription}
  */
 final class PluginDictionnary<T>  {
 
@@ -44,7 +44,7 @@ final class PluginDictionnary<T>  {
 		return result;
 	}
 
-	private Set<JakePluginDescription<T>> plugins;
+	private Set<JkPluginDescription<T>> plugins;
 
 	private final Class<T> templateClass;
 
@@ -56,10 +56,10 @@ final class PluginDictionnary<T>  {
 	/**
 	 * Returns all the plugins present in classpath for this template class.
 	 */
-	public Set<JakePluginDescription<T>> getAll() {
+	public Set<JkPluginDescription<T>> getAll() {
 		if (plugins == null) {
 			synchronized (this) {
-				final Set<JakePluginDescription<T>> result = loadAllPlugins(templateClass);
+				final Set<JkPluginDescription<T>> result = loadAllPlugins(templateClass);
 				this.plugins = Collections.unmodifiableSet(result);
 			}
 		}
@@ -72,9 +72,9 @@ final class PluginDictionnary<T>  {
 	 * capitalized for you so using "myPluging" or "MyPlugin" is equal.
 	 * If not found, returns <code>null</code>.
 	 */
-	public JakePluginDescription<T> loadByName(String name) {
+	public JkPluginDescription<T> loadByName(String name) {
 		if (!name.contains(".")) {
-			final JakePluginDescription<T> result = loadPluginHavingShortName(templateClass, JkUtilsString.capitalize(name));
+			final JkPluginDescription<T> result = loadPluginHavingShortName(templateClass, JkUtilsString.capitalize(name));
 			if (result != null) {
 				return result;
 			}
@@ -82,8 +82,8 @@ final class PluginDictionnary<T>  {
 		return loadPluginsHavingLongName(templateClass, name);
 	}
 
-	public JakePluginDescription<T> loadByNameOrFail(String name) {
-		final JakePluginDescription<T> result = loadByName(name);
+	public JkPluginDescription<T> loadByNameOrFail(String name) {
+		final JkPluginDescription<T> result = loadByName(name);
 		if (result == null) {
 			throw new IllegalArgumentException("No class found having name " + simpleClassName(templateClass, name) + " for plugin '" + name +"'.");
 		}
@@ -102,14 +102,14 @@ final class PluginDictionnary<T>  {
 		return this.plugins.toString();
 	}
 
-	private static <T> Set<JakePluginDescription<T>> loadAllPlugins(Class<T> templateClass) {
+	private static <T> Set<JkPluginDescription<T>> loadAllPlugins(Class<T> templateClass) {
 		final String nameSuffix = templateClass.getSimpleName();
 		return loadPlugins(templateClass, "**/" + nameSuffix + "*", "**/*$" + nameSuffix + "*");
 	}
 
-	private static <T> JakePluginDescription<T> loadPluginHavingShortName(Class<T> templateClass, String shortName) {
+	private static <T> JkPluginDescription<T> loadPluginHavingShortName(Class<T> templateClass, String shortName) {
 		final String simpleName = simpleClassName(templateClass, shortName);
-		final Set<JakePluginDescription<T>> set = loadPlugins(templateClass, "**/" + simpleName);
+		final Set<JkPluginDescription<T>> set = loadPlugins(templateClass, "**/" + simpleName);
 		set.addAll(loadPlugins(templateClass, "**/*$" + simpleName));
 		if (set.size() > 1) {
 			throw new JkException("Several plugin have the same short name : '" + shortName + "'. Please disambiguate with using plugin long name (full class name)."
@@ -122,15 +122,15 @@ final class PluginDictionnary<T>  {
 	}
 
 
-	private static <T> JakePluginDescription<T> loadPluginsHavingLongName(Class<T> templateClass, String longName) {
+	private static <T> JkPluginDescription<T> loadPluginsHavingLongName(Class<T> templateClass, String longName) {
 		final Class<? extends T> pluginClass = JkClassLoader.current().loadIfExist(longName);
 		if (pluginClass == null) {
 			return null;
 		}
-		return new JakePluginDescription<T>(templateClass, pluginClass);
+		return new JkPluginDescription<T>(templateClass, pluginClass);
 	}
 
-	private static <T> Set<JakePluginDescription<T>> loadPlugins(Class<T> templateClass, String ...patterns) {
+	private static <T> Set<JkPluginDescription<T>> loadPlugins(Class<T> templateClass, String ...patterns) {
 		final Set<Class<?>> matchingClasses = JkClassLoader.of(templateClass).loadClasses(patterns);
 		final Set<Class<?>> result = new HashSet<Class<?>>();
 		for (final Class<?> candidate : matchingClasses) {
@@ -145,10 +145,10 @@ final class PluginDictionnary<T>  {
 
 
 	@SuppressWarnings("unchecked")
-	private static <T> Set<JakePluginDescription<T>> toPluginSet(Class<T> extendingClass, Iterable<Class<?>> classes) {
-		final Set<JakePluginDescription<T>> result = new HashSet<PluginDictionnary.JakePluginDescription<T>>();
+	private static <T> Set<JkPluginDescription<T>> toPluginSet(Class<T> extendingClass, Iterable<Class<?>> classes) {
+		final Set<JkPluginDescription<T>> result = new HashSet<PluginDictionnary.JkPluginDescription<T>>();
 		for (final Class<?> clazz : classes) {
-			result.add(new JakePluginDescription<T>(extendingClass, (Class<? extends T>) clazz));
+			result.add(new JkPluginDescription<T>(extendingClass, (Class<? extends T>) clazz));
 		}
 		return result;
 	}
@@ -160,7 +160,7 @@ final class PluginDictionnary<T>  {
 	 * @author Jerome Angibaud
 	 * @param <T>
 	 */
-	public static class JakePluginDescription<T> {
+	public static class JkPluginDescription<T> {
 
 		private static String shortName(Class<?> extendingClass, Class<?> clazz) {
 			return JkUtilsString.substringAfterFirst(clazz.getSimpleName(), extendingClass.getSimpleName());
@@ -171,11 +171,11 @@ final class PluginDictionnary<T>  {
 		}
 
 		/**
-		 * Returns all <code>JakePlugins</code> instances declared as field in the specified instance.
+		 * Returns all <code>JkPlugins</code> instances declared as field in the specified instance.
 		 * It includes fields declared in the specified instance class and the ones declared in its super classes.
 		 */
-		public static List<JakePluginDescription<?>> declaredAsField(JkBuild hostingInstance) {
-			final List<JakePluginDescription<?>> result = new LinkedList<JakePluginDescription<?>>();
+		public static List<JkPluginDescription<?>> declaredAsField(JkBuild hostingInstance) {
+			final List<JkPluginDescription<?>> result = new LinkedList<JkPluginDescription<?>>();
 			final List<Class<Object>> templateClasses = hostingInstance.pluginTemplateClasses();
 			for(final Class<Object> clazz : templateClasses) {
 				final PluginDictionnary<Object> plugins = PluginDictionnary.of(clazz);
@@ -193,7 +193,7 @@ final class PluginDictionnary<T>  {
 		private final Class<? extends T> clazz;
 
 
-		public JakePluginDescription(Class<T> templateClass, Class<? extends T> clazz) {
+		public JkPluginDescription(Class<T> templateClass, Class<? extends T> clazz) {
 			super();
 			this.templateClass = templateClass;
 			this.shortName = shortName(templateClass, clazz);

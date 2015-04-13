@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.Deflater;
 
-import org.jerkar.JakeZipper;
+import org.jerkar.JkZipper;
 import org.jerkar.JkDir;
 import org.jerkar.JkLog;
 
@@ -95,7 +95,7 @@ public class JkJavaPacker implements Cloneable {
 			build.sourceDirs().and(build.resourceDirs()).zip().to(jarSourceFile(), compressionLevel);
 		}
 		if (doTest && !build.skipTests && build.testClassDir().exists() && !JkDir.of(build.testClassDir()).files().isEmpty()) {
-			JakeZipper.of(build.testClassDir()).to(jarTestFile(), compressionLevel);
+			JkZipper.of(build.testClassDir()).to(jarTestFile(), compressionLevel);
 		}
 		if (doTest && doSources && !build.testSourceDirs().files().isEmpty()) {
 			build.testSourceDirs().and(build.testResourceDirs()).zip().to(jarTestSourceFile(), compressionLevel);

@@ -203,7 +203,7 @@ public final class JkSonar {
     } 
 
     private File jarRunner() {
-    	final File globalJar = new File(JkUtilsFile.tempDir(), "/jake/" + RUNNER_JAR_NAME_24);
+    	final File globalJar = new File(JkUtilsFile.tempDir(), "/jerkar/" + RUNNER_JAR_NAME_24);
     	if (!globalJar.exists()) {
     		try {
     			return createRunnerJar(JkUtilsFile.tempDir()); 

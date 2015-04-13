@@ -353,7 +353,7 @@ public final class JkUtilsIO {
 	}
 
 	public static File getFileFromUrl(URL url, File secondTryParent) {
-		final File tempDir = new File(JkUtilsFile.tempDir(), "jake");
+		final File tempDir = new File(JkUtilsFile.tempDir(), "jerkar");
 		final String name = JkUtilsString.substringAfterLast(url.getPath(), "/");
 		final File firstTry = new File(tempDir, name);
 		if (firstTry.exists()) {

@@ -1,11 +1,11 @@
-package org.jake;
+package org.jerkar;
 import org.apache.ivy.util.StringUtils;
-import org.jake.depmanagement.JakeDependencies;
-import org.jake.depmanagement.JakeScope;
-import org.jake.depmanagement.JakeVersion;
-import org.jake.publishing.JakeIvyPublication;
-import org.jake.publishing.JakeMavenPublication;
-import org.jake.utils.JakeUtilsIterable;
+import org.jerkar.depmanagement.jerkarDependencies;
+import org.jerkar.depmanagement.jerkarScope;
+import org.jerkar.depmanagement.jerkarVersion;
+import org.jerkar.publishing.jerkarIvyPublication;
+import org.jerkar.publishing.jerkarMavenPublication;
+import org.jerkar.utils.jerkarUtilsIterable;
 
 /**
  * Blalalala
@@ -17,10 +17,10 @@ import org.jake.utils.JakeUtilsIterable;
 })
 public class DepManagedBuild extends Build {
 
-	public static final JakeScope DISTRIB = JakeScope.of("distrib").descr("Contains Jake distribution zip file");
+	public static final JkScope DISTRIB = JkScope.of("distrib").descr("Contains Jerkar distribution zip file");
 	
-	@JakeProject("../org.jake.foo")
+	@JkProject("../org.jerkar.foo")
 	public CoreBuild foo;
 	
-	@JakeProject("../org.jake.bar")
+	@JkProject("../org.jerkar.bar")
 	public CoreBuild bar;

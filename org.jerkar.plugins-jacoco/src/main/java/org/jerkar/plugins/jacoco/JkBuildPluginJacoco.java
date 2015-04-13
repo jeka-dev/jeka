@@ -13,15 +13,15 @@ import org.jerkar.java.testing.junit.JkUnit.Enhancer;
 public class JkBuildPluginJacoco extends JkJavaBuildPlugin {
 
 
-	public static Enhancer enhancer(JkJavaBuild jakeJavaBuild) {
-		return enhancer(jakeJavaBuild, jakeJavaBuild.baseDir().root());
+	public static Enhancer enhancer(JkJavaBuild jkJavaBuild) {
+		return enhancer(jkJavaBuild, jkJavaBuild.baseDir().root());
 	}
 
 	private Enhancer enhancer;
 
 	@Override
-	public void configure(JkBuild jakeJavaBuild) {
-		this.enhancer = enhancer((JkJavaBuild) jakeJavaBuild);
+	public void configure(JkBuild jkJavaBuild) {
+		this.enhancer = enhancer((JkJavaBuild) jkJavaBuild);
 	}
 
 
@@ -30,9 +30,9 @@ public class JkBuildPluginJacoco extends JkJavaBuildPlugin {
 		return this.enhancer.enhance(jkUnit);
 	}
 
-	private static Enhancer enhancer(JkJavaBuild jakeJavaBuild, File agent) {
-		final File destFile = new File(jakeJavaBuild.testReportDir(), "jacoco/jacoco.exec");
-		return JkocoJunitEnhancer.of(destFile, jakeJavaBuild.baseDir().root());
+	private static Enhancer enhancer(JkJavaBuild jkJavaBuild, File agent) {
+		final File destFile = new File(jkJavaBuild.testReportDir(), "jacoco/jacoco.exec");
+		return JkocoJunitEnhancer.of(destFile, jkJavaBuild.baseDir().root());
 	}
 
 

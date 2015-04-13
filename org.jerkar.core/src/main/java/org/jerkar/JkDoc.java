@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Documents the annotated element so that, Jake can display some
+ * Documents the annotated element so that, Jerkar can display some
  * information when 'help' or 'helpPlugins' are requested.
  * 
  * @author Jerome Angibaud

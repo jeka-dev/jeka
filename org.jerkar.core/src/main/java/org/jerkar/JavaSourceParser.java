@@ -83,12 +83,12 @@ class JavaSourceParser {
 	}
 
 	private static JkDependencies dependencies(String code, File baseDir, URL url) {
-		final List<String> deps = jakeImports(code, url);
+		final List<String> deps = jkImports(code, url);
 		return dependenciesFromImports(baseDir, deps);
 	}
 
 	private static List<File> projects(String code, File baseDir, URL url) {
-		final List<String> deps = jakeProjects(code, url);
+		final List<String> deps = jkProjects(code, url);
 		return projectDependencies(baseDir, deps);
 	}
 
@@ -115,12 +115,12 @@ class JavaSourceParser {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static List<String> jakeImports(String code, URL url) {
+	private static List<String> jkImports(String code, URL url) {
 		final Scanner scanner = new Scanner(code);
 		scanner.useDelimiter("");
 		while (scanner.hasNext()) {
-			final String jakeImportWord = scanner.findInLine("@JkImport");
-			if (jakeImportWord == null) {
+			final String jkImportWord = scanner.findInLine("@JkImport");
+			if (jkImportWord == null) {
 				final String nextLine = scanner.nextLine();
 				if (removeQuotes(nextLine).contains("class ")) {
 					return Collections.EMPTY_LIST;
@@ -139,17 +139,17 @@ class JavaSourceParser {
 	}
 
 
-	private static List<String> jakeProjects(String code, URL url) {
+	private static List<String> jkProjects(String code, URL url) {
 		final Scanner scanner = new Scanner(code);
 		scanner.useDelimiter("");
 		final List<String> result = new LinkedList<String>();
 		while (scanner.hasNext()) {
-			final String jakeImportWord = scanner.findInLine("@JakeProject");
-			if (jakeImportWord == null) {
+			final String jkImportWord = scanner.findInLine("@JkProject");
+			if (jkImportWord == null) {
 				scanner.nextLine();
 				continue;
 			}
-			final String context = " parsing @JakeProject ";
+			final String context = " parsing @JkProject ";
 			final String between  = extractStringTo(scanner, "(", url, context);
 			if(!JkUtilsString.containsOnly(between, " ", "\n", "\r", "\t")) {
 				continue;

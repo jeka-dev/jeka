@@ -66,11 +66,11 @@ public final class JkJavaCompiler {
 
 	private final boolean failOnError;
 
-	private final JakeProcess fork;
+	private final JkProcess fork;
 
 
 	private JkJavaCompiler(List<String> options, List<File> javaSourceFiles,
-			boolean failOnError, JakeProcess fork) {
+			boolean failOnError, JkProcess fork) {
 		super();
 		this.options = options;
 		this.javaSourceFiles = javaSourceFiles;
@@ -169,10 +169,10 @@ public final class JkJavaCompiler {
 
 	/**
 	 * Creates a copy of this {@link JkJavaCompiler} but with forking the javac process.
-	 * The javac process is created using specified argument defined in {@link JakeProcess#ofJavaTool(String, String...)}
+	 * The javac process is created using specified argument defined in {@link JkProcess#ofJavaTool(String, String...)}
 	 */
 	public JkJavaCompiler fork(String ... parameters) {
-		return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError, JakeProcess.ofJavaTool("javac", parameters));
+		return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError, JkProcess.ofJavaTool("javac", parameters));
 	}
 
 	/**
@@ -180,7 +180,7 @@ public final class JkJavaCompiler {
 	 */
 	public JkJavaCompiler fork(boolean fork, String... parameters) {
 		if (fork) {
-			return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError, JakeProcess.ofJavaTool("javac"));
+			return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError, JkProcess.ofJavaTool("javac"));
 		} else {
 			return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError, null);
 		}
@@ -192,7 +192,7 @@ public final class JkJavaCompiler {
 	 * @param executable The executable for the compiler as 'jike' or '/my/speciel/jdk/javac'
 	 */
 	public JkJavaCompiler forkOnCompiler(String executable, String ... parameters) {
-		return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError, JakeProcess.of(executable, parameters));
+		return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError, JkProcess.of(executable, parameters));
 	}
 
 	/**
@@ -252,8 +252,8 @@ public final class JkJavaCompiler {
 		for (final File file : javaSourceFiles) {
 			sourcePaths.add(file.getAbsolutePath());
 		}
-		final JakeProcess jakeProcess = this.fork.andParameters(options).andParameters(sourcePaths);
-		final int result = jakeProcess.startAndWaitFor();
+		final JkProcess jkProcess = this.fork.andParameters(options).andParameters(sourcePaths);
+		final int result = jkProcess.startAndWaitFor();
 		return (result == 0);
 	}
 

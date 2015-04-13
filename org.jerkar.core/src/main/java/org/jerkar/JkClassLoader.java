@@ -387,7 +387,7 @@ public final class JkClassLoader {
 		for (int i = 0; i < args.length; i++) {
 			effectiveArgs[i] = traverseClassLoader(args[i], this);
 		}
-		offsetJakeLog();
+		offsetJkLog();
 		final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 		Thread.currentThread().setContextClassLoader(delegate);
 		try {
@@ -454,7 +454,7 @@ public final class JkClassLoader {
 	}
 
 
-	private void offsetJakeLog() {
+	private void offsetJkLog() {
 		if (this.isDefined(JkLog.class.getName())) {
 			final int offset = JkLog.offset();
 			final Class<?> toClass = this.load(JkLog.class.getName());

@@ -49,12 +49,12 @@ import org.jerkar.depmanagement.JkVersionedModule;
 import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
 import org.jerkar.publishing.JkPublishRepos;
-import org.jerkar.publishing.JkPublishRepos.JakePublishRepo;
+import org.jerkar.publishing.JkPublishRepos.JkPublishRepo;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsString;
 
 /**
- * Ivy wrapper providing high level methods. The API is expressed using Jake classes only (mostly free of Ivy classes).
+ * Ivy wrapper providing high level methods. The API is expressed using Jerkar classes only (mostly free of Ivy classes).
  * 
  * @author Jerome Angibaud
  */
@@ -193,8 +193,8 @@ public final class JkIvy {
 	public AttachedArtifacts getArtifacts(Iterable<JkVersionedModule> modules, JkScope ...scopes) {
 		//final String defaultConf = "default";
 		final DefaultModuleDescriptor moduleDescriptor = Translations.toUnpublished(ANONYMOUS_MODULE);
-		for (final JkScope jakeScope : scopes) {
-			moduleDescriptor.addConfiguration(new Configuration(jakeScope.name()));
+		for (final JkScope jkScope : scopes) {
+			moduleDescriptor.addConfiguration(new Configuration(jkScope.name()));
 		}
 		for (final JkVersionedModule module : modules) {
 			final ModuleRevisionId moduleRevisionId = Translations.toModuleRevisionId(module);
@@ -304,9 +304,9 @@ public final class JkIvy {
 	private int publishIvyArtifacts(JkIvyPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
 		int count = 0;
 		for (final DependencyResolver resolver : Translations.publishResolverOf(this.ivy.getSettings())) {
-			final JakePublishRepo publishRepo = this.publishRepo.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
-			final JkVersionedModule jakeModule = Translations.toJakeVersionedModule(moduleDescriptor.getModuleRevisionId());
-			if (!isMaven(resolver) && publishRepo.filter().accept(jakeModule)) {
+			final JkPublishRepo publishRepo = this.publishRepo.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
+			final JkVersionedModule jkModule = Translations.toJerkarVersionedModule(moduleDescriptor.getModuleRevisionId());
+			if (!isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
 				JkLog.startln("Publishing for repository " + resolver);
 				this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor);
 				JkLog.done();;
@@ -352,9 +352,9 @@ public final class JkIvy {
 	private int publishMavenArtifacts(JkMavenPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
 		int count = 0;
 		for (final DependencyResolver resolver : Translations.publishResolverOf(this.ivy.getSettings())) {
-			final JakePublishRepo publishRepo = this.publishRepo.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
-			final JkVersionedModule jakeModule = Translations.toJakeVersionedModule(moduleDescriptor.getModuleRevisionId());
-			if (isMaven(resolver) && publishRepo.filter().accept(jakeModule)) {
+			final JkPublishRepo publishRepo = this.publishRepo.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
+			final JkVersionedModule jkModule = Translations.toJerkarVersionedModule(moduleDescriptor.getModuleRevisionId());
+			if (isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
 				JkLog.startln("Publishing for repository " + resolver);
 				this.publishMavenArtifacts(resolver, publication, date, moduleDescriptor);
 				JkLog.done();
@@ -403,14 +403,14 @@ public final class JkIvy {
 		commitOrAbortPublication(resolver);
 	}
 
-	private ModuleDescriptor createModuleDescriptor(JkVersionedModule jakeVersionedModule, JkIvyPublication publication, JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate) {
-		final ModuleRevisionId moduleRevisionId = Translations.toModuleRevisionId(jakeVersionedModule);
+	private ModuleDescriptor createModuleDescriptor(JkVersionedModule jkVersionedModule, JkIvyPublication publication, JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate) {
+		final ModuleRevisionId moduleRevisionId = Translations.toModuleRevisionId(jkVersionedModule);
 
 		// First : update the module ivy cache.
 		final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
 		final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
 		final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
-		final DefaultModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(jakeVersionedModule, dependencies, defaultScope, defaultMapping);
+		final DefaultModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(jkVersionedModule, dependencies, defaultScope, defaultMapping);
 		Translations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
 		try {
 			cacheManager.saveResolvedModuleDescriptor(moduleDescriptor);
@@ -421,7 +421,7 @@ public final class JkIvy {
 		}
 
 		// Second : update the module property cache (by invoking resolution)
-		this.resolveDependencies(jakeVersionedModule, dependencies);
+		this.resolveDependencies(jkVersionedModule, dependencies);
 
 		// Third : invoke the deliver process in order to generate the module ivy file.
 		final DeliverOptions deliverOptions = new DeliverOptions();
@@ -439,13 +439,13 @@ public final class JkIvy {
 		return moduleDescriptor;
 	}
 
-	private ModuleDescriptor createModuleDescriptor(JkVersionedModule jakeVersionedModule, JkMavenPublication publication, JkDependencies resolvedDependencies, Date deliveryDate) {
-		final ModuleRevisionId moduleRevisionId = Translations.toModuleRevisionId(jakeVersionedModule);
+	private ModuleDescriptor createModuleDescriptor(JkVersionedModule jkVersionedModule, JkMavenPublication publication, JkDependencies resolvedDependencies, Date deliveryDate) {
+		final ModuleRevisionId moduleRevisionId = Translations.toModuleRevisionId(jkVersionedModule);
 		final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
 		final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
 		final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
 
-		final DefaultModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(jakeVersionedModule, resolvedDependencies, null, null);
+		final DefaultModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(jkVersionedModule, resolvedDependencies, null, null);
 		Translations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
 
 		try {
@@ -460,7 +460,7 @@ public final class JkIvy {
 	}
 
 	private String ivyPatternForIvyFiles() {
-		return targetDir() + "/jake/[organisation]-[module]-[revision]-ivy.xml";
+		return targetDir() + "/jerkar/[organisation]-[module]-[revision]-ivy.xml";
 	}
 
 	private String targetDir() {
@@ -496,12 +496,12 @@ public final class JkIvy {
 			super();
 		}
 
-		public Set<JkArtifact> getArtifacts(JkModuleId moduleId, JkScope jakeScope) {
+		public Set<JkArtifact> getArtifacts(JkModuleId moduleId, JkScope jkScope) {
 			final Map<JkScope, Set<JkArtifact>> subMap = map.get(moduleId);
 			if (subMap == null) {
 				return Collections.emptySet();
 			}
-			final Set<JkArtifact> artifacts = subMap.get(jakeScope);
+			final Set<JkArtifact> artifacts = subMap.get(jkScope);
 			if (artifacts == null) {
 				return Collections.emptySet();
 			}

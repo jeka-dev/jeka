@@ -42,7 +42,7 @@ import org.jerkar.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
 import org.jerkar.publishing.JkPublishRepos;
-import org.jerkar.publishing.JkPublishRepos.JakePublishRepo;
+import org.jerkar.publishing.JkPublishRepos.JkPublishRepo;
 import org.jerkar.utils.JkUtilsIterable;
 import org.jerkar.utils.JkUtilsString;
 
@@ -126,20 +126,20 @@ final class Translations {
 		return result;
 	}
 
-	public static Configuration toConfiguration(JkScope jakeScope) {
+	public static Configuration toConfiguration(JkScope jkScope) {
 		final List<String> extendedScopes = new LinkedList<String>();
-		for (final JkScope parent : jakeScope.extendedScopes()) {
+		for (final JkScope parent : jkScope.extendedScopes()) {
 			extendedScopes.add(parent.name());
 		}
-		final Visibility visibility = jakeScope.isPublic() ? Visibility.PUBLIC : Visibility.PRIVATE;
-		return new Configuration(jakeScope.name(), visibility, jakeScope.description(),
-				extendedScopes.toArray(new String[0]), jakeScope.transitive(), null);
+		final Visibility visibility = jkScope.isPublic() ? Visibility.PUBLIC : Visibility.PRIVATE;
+		return new Configuration(jkScope.name(), visibility, jkScope.description(),
+				extendedScopes.toArray(new String[0]), jkScope.transitive(), null);
 	}
 
-	public static String[] toConfNames(JkScope... jakeScopes) {
-		final String[] result = new String[jakeScopes.length];
-		for (int i = 0; i < jakeScopes.length; i++) {
-			result[i] = jakeScopes[i].name();
+	public static String[] toConfNames(JkScope... jkScopes) {
+		final String[] result = new String[jkScopes.length];
+		for (int i = 0; i < jkScopes.length; i++) {
+			result[i] = jkScopes[i].name();
 		}
 		return result;
 	}
@@ -152,11 +152,11 @@ final class Translations {
 		return new ModuleId(moduleId.group(), moduleId.name());
 	}
 
-	public static ModuleRevisionId toModuleRevisionId(JkVersionedModule jakeVersionedModule) {
-		return new ModuleRevisionId(toModuleId(jakeVersionedModule.moduleId()), jakeVersionedModule.version().name());
+	public static ModuleRevisionId toModuleRevisionId(JkVersionedModule jkVersionedModule) {
+		return new ModuleRevisionId(toModuleId(jkVersionedModule.moduleId()), jkVersionedModule.version().name());
 	}
 
-	public static JkVersionedModule toJakeVersionedModule(ModuleRevisionId moduleRevisionId) {
+	public static JkVersionedModule toJerkarVersionedModule(ModuleRevisionId moduleRevisionId) {
 		return JkVersionedModule.of(JkModuleId.of(moduleRevisionId.getOrganisation(), moduleRevisionId.getName()),
 				JkVersion.named(moduleRevisionId.getRevision()));
 	}
@@ -184,15 +184,15 @@ final class Translations {
 			result.setM2compatible(true);
 			return result;
 		}
-		final IvyRepository jakeIvyRepo = (IvyRepository) repo;
+		final IvyRepository jkIvyRepo = (IvyRepository) repo;
 		if (isFileSystem(repo.url())) {
 			final FileRepository fileRepo = new FileRepository(new File(repo.url().getPath()));
 			final FileSystemResolver result = new FileSystemResolver();
 			result.setRepository(fileRepo);
-			for (final String pattern : jakeIvyRepo.artifactPatterns()) {
+			for (final String pattern : jkIvyRepo.artifactPatterns()) {
 				result.addArtifactPattern(completePattern(repo.url().getPath(), pattern));
 			}
-			for (final String pattern : jakeIvyRepo.ivyPatterns()) {
+			for (final String pattern : jkIvyRepo.ivyPatterns()) {
 				result.addIvyPattern(completePattern(repo.url().getPath(), pattern));
 			}
 			return result;
@@ -212,7 +212,7 @@ final class Translations {
 	}
 
 	public static void populateIvySettingsWithPublishRepo(IvySettings ivySettings, JkPublishRepos repos) {
-		for (final JakePublishRepo repo : repos) {
+		for (final JkPublishRepo repo : repos) {
 			final DependencyResolver resolver = toResolver(repo.repo());
 			resolver.setName(PUBLISH_RESOLVER_NAME + repo.repo().url());
 			ivySettings.addResolver(resolver);
@@ -236,9 +236,9 @@ final class Translations {
 
 	private static ChainResolver toChainResolver(JkRepos repos) {
 		final ChainResolver chainResolver = new ChainResolver();
-		for (final JkRepo jakeRepo : repos) {
-			final DependencyResolver resolver = toResolver(jakeRepo);
-			resolver.setName(jakeRepo.toString());
+		for (final JkRepo jkRepo : repos) {
+			final DependencyResolver resolver = toResolver(jkRepo);
+			resolver.setName(jkRepo.toString());
 			chainResolver.add(resolver);
 		}
 		return chainResolver;
@@ -334,14 +334,14 @@ final class Translations {
 	public static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
 			JkIvyPublication publication, Date publishDate) {
 		for (final JkIvyPublication.Artifact artifact : publication) {
-			for (final JkScope jakeScope : artifact.jakeScopes) {
-				if (!Arrays.asList(descriptor.getConfigurations()).contains(jakeScope.name())) {
-					descriptor.addConfiguration(toConfiguration(jakeScope));
+			for (final JkScope jkScope : artifact.jkScopes) {
+				if (!Arrays.asList(descriptor.getConfigurations()).contains(jkScope.name())) {
+					descriptor.addConfiguration(toConfiguration(jkScope));
 				}
 			}
 			final Artifact ivyArtifact = toPublishedArtifact(artifact, descriptor.getModuleRevisionId(), publishDate);
-			for (final JkScope jakeScope : artifact.jakeScopes) {
-				descriptor.addArtifact(jakeScope.name(), ivyArtifact);
+			for (final JkScope jkScope : artifact.jkScopes) {
+				descriptor.addArtifact(jkScope.name(), ivyArtifact);
 			}
 		}
 	}
@@ -406,9 +406,9 @@ final class Translations {
 			final String depMridStr = (String) depMridObject;
 			final String[] parts = props.getProperty(depMridStr).split(" ");
 			final ModuleRevisionId decodedMrid = ModuleRevisionId.decode(depMridStr);
-			final JkModuleId jakeModuleId = JkModuleId.of(decodedMrid.getOrganisation(), decodedMrid.getName());
+			final JkModuleId jkModuleId = JkModuleId.of(decodedMrid.getOrganisation(), decodedMrid.getName());
 			final JkVersion resolvedOrForcedVersion = JkVersion.named(parts[2]);
-			result.put(jakeModuleId, resolvedOrForcedVersion);
+			result.put(jkModuleId, resolvedOrForcedVersion);
 		}
 		return result;
 	}

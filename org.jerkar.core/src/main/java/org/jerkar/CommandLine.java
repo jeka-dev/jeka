@@ -51,9 +51,9 @@ class CommandLine {
 
 	private List<MethodInvocation> subProjectMethods;
 
-	private Collection<JakePluginSetup> masterPluginSetups;
+	private Collection<JkPluginSetup> masterPluginSetups;
 
-	private Collection<JakePluginSetup> subProjectPluginSetups;
+	private Collection<JkPluginSetup> subProjectPluginSetups;
 
 	private CommandLine() {
 		super();
@@ -109,8 +109,8 @@ class CommandLine {
 		return Collections.unmodifiableMap(result);
 	}
 
-	private static Collection<JakePluginSetup> extractPluginSetup(String words[], boolean master) {
-		final Map<String, JakePluginSetup> setups = new HashMap<String, JakePluginSetup>();
+	private static Collection<JkPluginSetup> extractPluginSetup(String words[], boolean master) {
+		final Map<String, JkPluginSetup> setups = new HashMap<String, JkPluginSetup>();
 		for (String word : words) {
 			if (!word.endsWith(ALL_BUILD_SYMBOL) && !master) {
 				continue;
@@ -121,21 +121,21 @@ class CommandLine {
 			if (MethodInvocation.isPluginMethodInvokation(word)) {
 				final String pluginName = JkUtilsString.substringBeforeFirst(word, PLUGIN_SYMBOL);
 				if (!setups.containsKey(pluginName)) {
-					setups.put(pluginName, JakePluginSetup.of(pluginName, false));
+					setups.put(pluginName, JkPluginSetup.of(pluginName, false));
 				}
 			} else if (MethodInvocation.isPluginActivation(word)) {
 				final String pluginName = JkUtilsString.substringBeforeFirst(word, PLUGIN_SYMBOL);
-				final JakePluginSetup setup = setups.get(pluginName);
+				final JkPluginSetup setup = setups.get(pluginName);
 				if (setup == null) {
-					setups.put(pluginName, JakePluginSetup.of(pluginName, true));
+					setups.put(pluginName, JkPluginSetup.of(pluginName, true));
 				} else {
 					setups.put(pluginName, setup.activated());
 				}
 			} else if (isPluginOption(word)) {
 				final String pluginName = JkUtilsString.substringBeforeFirst(word, PLUGIN_SYMBOL).substring(1);
-				JakePluginSetup setup = setups.get(pluginName);
+				JkPluginSetup setup = setups.get(pluginName);
 				if (setup == null) {
-					setup = JakePluginSetup.of(pluginName, false);
+					setup = JkPluginSetup.of(pluginName, false);
 					setups.put(pluginName, setup);
 				}
 				final int equalIndex = word.indexOf("=");
@@ -216,18 +216,18 @@ class CommandLine {
 
 	}
 
-	public static class JakePluginSetup {
+	public static class JkPluginSetup {
 
-		public static Set<String> names(Iterable<JakePluginSetup> setups) {
+		public static Set<String> names(Iterable<JkPluginSetup> setups) {
 			final Set<String> result = new HashSet<String>();
-			for (final JakePluginSetup setup : setups) {
+			for (final JkPluginSetup setup : setups) {
 				result.add(setup.pluginName);
 			}
 			return result;
 		}
 
-		public static JakePluginSetup findOrFail(String name, Iterable<JakePluginSetup> setups) {
-			for (final JakePluginSetup setup : setups) {
+		public static JkPluginSetup findOrFail(String name, Iterable<JkPluginSetup> setups) {
+			for (final JkPluginSetup setup : setups) {
 				if (name.equals(setup.pluginName)) {
 					return setup;
 				}
@@ -236,8 +236,8 @@ class CommandLine {
 		}
 
 		@SuppressWarnings("unchecked")
-		public static JakePluginSetup of(String name, boolean activated) {
-			return new JakePluginSetup(name, Collections.EMPTY_MAP,activated);
+		public static JkPluginSetup of(String name, boolean activated) {
+			return new JkPluginSetup(name, Collections.EMPTY_MAP,activated);
 		}
 
 		public final String pluginName;
@@ -246,21 +246,21 @@ class CommandLine {
 
 		public final boolean activated;
 
-		private JakePluginSetup(String pluginName, Map<String, String> options, boolean activated) {
+		private JkPluginSetup(String pluginName, Map<String, String> options, boolean activated) {
 			super();
 			this.pluginName = pluginName;
 			this.options = Collections.unmodifiableMap(options);
 			this.activated = activated;
 		}
 
-		public JakePluginSetup with(String key, String value) {
+		public JkPluginSetup with(String key, String value) {
 			final Map<String, String> map = new HashMap<String, String>(options);
 			map.put(key, value);
-			return new JakePluginSetup(pluginName, map, activated);
+			return new JkPluginSetup(pluginName, map, activated);
 		}
 
-		public JakePluginSetup activated(){
-			return new JakePluginSetup(pluginName, options, true);
+		public JkPluginSetup activated(){
+			return new JkPluginSetup(pluginName, options, true);
 		}
 	}
 
@@ -305,20 +305,20 @@ class CommandLine {
 		this.subProjectMethods = subProjectMethods;
 	}
 
-	public Collection<JakePluginSetup> getMasterPluginSetups() {
+	public Collection<JkPluginSetup> getMasterPluginSetups() {
 		return masterPluginSetups;
 	}
 
-	public void setMasterPluginSetups(Collection<JakePluginSetup> masterPluginSetups) {
+	public void setMasterPluginSetups(Collection<JkPluginSetup> masterPluginSetups) {
 		this.masterPluginSetups = masterPluginSetups;
 	}
 
-	public Collection<JakePluginSetup> getSubProjectPluginSetups() {
+	public Collection<JkPluginSetup> getSubProjectPluginSetups() {
 		return subProjectPluginSetups;
 	}
 
 	public void setSubProjectPluginSetups(
-			Collection<JakePluginSetup> subProjectPluginSetups) {
+			Collection<JkPluginSetup> subProjectPluginSetups) {
 		this.subProjectPluginSetups = subProjectPluginSetups;
 	}
 

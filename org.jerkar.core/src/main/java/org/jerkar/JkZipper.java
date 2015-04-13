@@ -16,49 +16,49 @@ import org.jerkar.utils.JkUtilsIterable;
 /**
  * Defines element to embed in a zip archive and methods to write archive on disk.
  */
-public final class JakeZipper {
+public final class JkZipper {
 
 	private final Iterable<? extends Object> itemsToZip;
 
 	private final Iterable<File> archivestoMerge;
 
-	private JakeZipper(Iterable<? extends Object> itemsToZip, Iterable<File> archivestoMerge) {
+	private JkZipper(Iterable<? extends Object> itemsToZip, Iterable<File> archivestoMerge) {
 		this.itemsToZip = itemsToZip;
 		this.archivestoMerge = archivestoMerge;
 	}
 
-	private JakeZipper(Iterable<? extends Object> itemsToZip) {
+	private JkZipper(Iterable<? extends Object> itemsToZip) {
 		this.itemsToZip = itemsToZip;
 		this.archivestoMerge = Collections.emptyList();
 	}
 
 	/**
-	 * Creates a {@link JakeZipper} from an array of directories.
+	 * Creates a {@link JkZipper} from an array of directories.
 	 */
-	public static JakeZipper of(File ...dirs) {
+	public static JkZipper of(File ...dirs) {
 		for (final File file : dirs) {
 			if (!file.isDirectory()) {
 				throw new IllegalArgumentException(file.getPath() + " is not a directory.");
 			}
 		}
-		return new JakeZipper(Arrays.asList( dirs));
+		return new JkZipper(Arrays.asList( dirs));
 	}
 
-	static JakeZipper of(JkDirSet ...jakeDirSets) {
-		return new JakeZipper(Arrays.asList(jakeDirSets));
+	static JkZipper of(JkDirSet ...jkDirSets) {
+		return new JkZipper(Arrays.asList(jkDirSets));
 	}
 
-	static JakeZipper of(JkDir ...jakeDirs) {
-		return new JakeZipper(Arrays.asList(jakeDirs));
+	static JkZipper of(JkDir ...jkDirs) {
+		return new JkZipper(Arrays.asList(jkDirs));
 	}
 
 
 	@SuppressWarnings("unchecked")
-	public JakeZipper merge(Iterable<File> archiveFiles) {
-		return new JakeZipper(itemsToZip, JkUtilsIterable.chain(this.archivestoMerge, archiveFiles));
+	public JkZipper merge(Iterable<File> archiveFiles) {
+		return new JkZipper(itemsToZip, JkUtilsIterable.chain(this.archivestoMerge, archiveFiles));
 	}
 
-	public JakeZipper merge(File... archiveFiles) {
+	public JkZipper merge(File... archiveFiles) {
 		return merge(Arrays.asList(archiveFiles));
 	}
 

@@ -92,9 +92,9 @@ final class DotClasspath {
 		for (final ClasspathEntry classpathEntry : classpathentries) {
 			if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC) && !classpathEntry.isOptional()) {
 				if (segregator.isTest(classpathEntry.path)) {
-					tests.add(classpathEntry.srcAsJakeDir(baseDir));
+					tests.add(classpathEntry.srcAsJkDir(baseDir));
 				} else {
-					prods.add(classpathEntry.srcAsJakeDir(baseDir));
+					prods.add(classpathEntry.srcAsJkDir(baseDir));
 				}
 			}
 		}
@@ -127,7 +127,7 @@ final class DotClasspath {
 					throw new JkException("No option found with name " + optionName
 							+ ". It is needed in order to build this project as it is mentionned in Eclipse .classpath."
 							+ " Please set this option either in command line as -" + optionName
-							+ "=/absolute/path/for/this/var or in [jake_home]/options.properties" );
+							+ "=/absolute/path/for/this/var or in [jerkar_home]/options.properties" );
 				}
 				final File file = new File(varFile, JkUtilsString.substringAfterFirst(classpathEntry.path, "/") );
 				if (!file.exists()) {
@@ -215,7 +215,7 @@ final class DotClasspath {
 			return result;
 		}
 
-		public JkDir srcAsJakeDir(File baseDir) {
+		public JkDir srcAsJkDir(File baseDir) {
 			if (!this.kind.equals(Kind.SRC)) {
 				throw new IllegalStateException("Can only get source dir from classpath entry of kind 'src'.");
 			}
@@ -373,8 +373,8 @@ final class DotClasspath {
 			writer.writeCharacters("\n");
 		}
 
-		// Write entry for Jake
-		writeJakeEntry(writer);
+		// Write entry for Jerkar
+		writeJerkarEntry(writer);
 
 		// Write entry for JRE container
 		writer.writeCharacters("\t");
@@ -418,10 +418,10 @@ final class DotClasspath {
 		writer.writeCharacters("\n");
 	}
 
-	private static void writeJakeEntry(XMLStreamWriter writer) throws XMLStreamException {
+	private static void writeJerkarEntry(XMLStreamWriter writer) throws XMLStreamException {
 		writer.writeCharacters("\t");
 		writer.writeEmptyElement(CLASSPATHENTRY);
-		final File file = JkLocator.jakeJarFile();
+		final File file = JkLocator.jerkararFile();
 		final VarReplacement varReplacement = new VarReplacement(file);
 		if (varReplacement.replaced) {
 			writer.writeAttribute("kind", "var");
@@ -430,7 +430,7 @@ final class DotClasspath {
 		}
 		writer.writeAttribute("path", varReplacement.path);
 		final String sourceFileName = JkUtilsString.substringAfterLast(file.getName(), ".jar") + "-sources.jar";
-		final File sourceFile = new File(JkLocator.jakeHome(), "libs/sources/"+ sourceFileName);
+		final File sourceFile = new File(JkLocator.jerkarHome(), "libs/sources/"+ sourceFileName);
 		if (sourceFile.exists()) {
 			final VarReplacement sourceVarReplacement = new VarReplacement(sourceFile);
 			writer.writeAttribute("sourcepath", sourceVarReplacement.path);

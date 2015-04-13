@@ -60,7 +60,7 @@ public final class JkArtifact {
 
 	@Override
 	public String toString() {
-		return "JakeArtifact [versionedModule=" + versionedModule
+		return "JkArtifact [versionedModule=" + versionedModule
 				+ ", localFile=" + localFile + "]";
 	}
 

@@ -10,10 +10,6 @@ import java.util.List;
 import org.jerkar.JkDirSet;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.java.build.JkJavaBuild;
-import org.jerkar.java.eclipse.DotClasspath;
-import org.jerkar.java.eclipse.Lib;
-import org.jerkar.java.eclipse.ScopeResolverSmart;
-import org.jerkar.java.eclipse.Sources;
 import org.junit.Test;
 
 public class DotClasspathTest {
@@ -46,8 +42,6 @@ public class DotClasspathTest {
 
 
 		assertEquals(0, deps.dependenciesDeclaredWith(JkJavaBuild.TEST).size());
-		//final JakeFilesDependency filesDependency = (JakeFilesDependency) deps.dependenciesDeclaredWith(JakeJavaBuild.TEST).iterator().next();
-		//assertEquals(1, filesDependency.files().size());
 	}
 
 	private DotClasspath sample() throws URISyntaxException {

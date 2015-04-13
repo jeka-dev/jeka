@@ -11,8 +11,8 @@ import org.jerkar.utils.JkUtilsIterable;
 
 public final class JkRepos implements Iterable<JkRepo> {
 
-	public static JkRepos of(JkRepo ...jakeRepositories) {
-		return new JkRepos(Arrays.asList(jakeRepositories));
+	public static JkRepos of(JkRepo ...jkRepositories) {
+		return new JkRepos(Arrays.asList(jkRepositories));
 	}
 
 	public static JkRepos maven(String ... urls) {
@@ -63,13 +63,13 @@ public final class JkRepos implements Iterable<JkRepo> {
 		this.repos = Collections.unmodifiableList(repos);
 	}
 
-	public JkRepos and(Iterable<JkRepo> jakeRepos) {
-		return and(JkUtilsIterable.toArray(jakeRepos, JkRepo.class));
+	public JkRepos and(Iterable<JkRepo> jkRepos) {
+		return and(JkUtilsIterable.toArray(jkRepos, JkRepo.class));
 	}
 
-	public JkRepos and(JkRepo ...jakeRepoArray) {
+	public JkRepos and(JkRepo ...jkRepoArray) {
 		final List<JkRepo> list = new LinkedList<JkRepo>(this.repos);
-		list.addAll(Arrays.asList(jakeRepoArray));
+		list.addAll(Arrays.asList(jkRepoArray));
 		return new JkRepos(list);
 	}
 

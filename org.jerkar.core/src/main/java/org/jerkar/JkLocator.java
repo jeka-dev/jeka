@@ -5,28 +5,26 @@ import java.io.File;
 import org.apache.ivy.Ivy;
 
 /**
- * Provides location related to the running Jake instance.
+ * Provides location related to the running Jerkar instance.
  * 
  * @author Jerome Angibaud
  */
 public final class JkLocator {
 
 	// cache
-	private static File JAKE_JAR_FILE;
+	private static File JERKAR_JAR_FILE;
 
 	private static File IVY_JAR_FILE;
 
-	public static File jakeJarFile() {
-		if (JAKE_JAR_FILE != null) {
-			return JAKE_JAR_FILE;
+	public static File jerkararFile() {
+		if (JERKAR_JAR_FILE != null) {
+			return JERKAR_JAR_FILE;
 		}
-		//JAKE_JAR_FILE = JkClassLoader.system().parent().createChild(file).classloader().loadClass(JakeMain.class.getName());
-		//return JAKE_JAR_FILE;
 		for (final File file : JkClassLoader.current().childClasspath()) {
 			try {
 				// TODO not optimized. Should be implemented on the JkClasspath class.
 				JkClassLoader.system().parent().createChild(file).classloader().loadClass(Main.class.getName());
-				JAKE_JAR_FILE = file;
+				JERKAR_JAR_FILE = file;
 				return file;
 			} catch (final ClassNotFoundException e) {
 				// Class just not there
@@ -48,20 +46,20 @@ public final class JkLocator {
 				// Class just not there
 			}
 		}
-		throw new IllegalStateException("JakeLauncher not found in classpath");
+		throw new IllegalStateException("Ivy not found in classpath");
 	}
 
 	/**
-	 * Returns the directory where is installed the running Jake instance.
+	 * Returns the directory where is installed the running Jerkar instance.
 	 */
-	public static File jakeHome() {
-		return jakeJarFile().getParentFile();
+	public static File jerkarHome() {
+		return jerkararFile().getParentFile();
 	}
 
-	public static File jakeUserHome() {
-		final File result = new File(System.getProperty("user.home"),".jake");
+	public static File jerkarUserHome() {
+		final File result = new File(System.getProperty("user.home"),".jerkar");
 		if (result.exists()) {
-			JkLog.info("Create Jake user directory : " + result.getPath());
+			JkLog.info("Create Jerkar user directory : " + result.getPath());
 			result.mkdirs();
 		}
 		return result;
@@ -71,14 +69,14 @@ public final class JkLocator {
 	 * Returns the directory where lie optional libraries.
 	 */
 	public static File optionalLibsDir() {
-		return new File(jakeHome(), "libs/optional");
+		return new File(jerkarHome(), "libs/optional");
 	}
 
 	/**
 	 * Returns the directory where lie optional libraries.
 	 */
 	public static File libExtDir() {
-		return new File(jakeHome(), "libs/ext");
+		return new File(jerkarHome(), "libs/ext");
 	}
 
 

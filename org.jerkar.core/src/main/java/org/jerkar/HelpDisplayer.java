@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.jerkar.PluginDictionnary.JakePluginDescription;
+import org.jerkar.PluginDictionnary.JkPluginDescription;
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;
 
@@ -18,9 +18,9 @@ class HelpDisplayer {
 
 	public static void help(JkBuild build) {
 		final Class<?> buildClazz = build.getClass();
-		JkLog.info("Usage: jake [methodA...] [-optionName=value...] [-DsystemPropName=value...]");
+		JkLog.info("Usage: jerkar [methodA...] [-optionName=value...] [-DsystemPropName=value...]");
 		JkLog.info("When no method specified, then 'base' method is processed.");
-		JkLog.info("Ex: jake javadoc compile -verbose=true -other=xxx -DmyProp=Xxxx");
+		JkLog.info("Ex: jerkar javadoc compile -verbose=true -other=xxx -DmyProp=Xxxx");
 		JkLog.nextLine();
 		JkLog.info("Available method(s) for '" + buildClazz.getName() + "' : " );
 		displayHelpOnMethods(buildClazz);
@@ -35,9 +35,9 @@ class HelpDisplayer {
 
 	public static void helpPlugins(JkBuild build) {
 		JkLog.startln("Looking for plugins");
-		final Set<JakePluginDescription<JkBuildPlugin>> pluginDescriptions =
+		final Set<JkPluginDescription<JkBuildPlugin>> pluginDescriptions =
 				PluginDictionnary.of(JkBuildPlugin.class).getAll();
-		for (final JakePluginDescription<?> description : pluginDescriptions) {
+		for (final JkPluginDescription<?> description : pluginDescriptions) {
 			JkLog.nextLine();
 			JkLog.info("Plugin  Name : " + description.shortName());
 			JkLog.shift(4);
@@ -69,8 +69,8 @@ class HelpDisplayer {
 
 	private static void displayPlugins(JkBuild build) {
 		JkLog.startln("Looking for plugins");
-		final List<JakePluginDescription<?>> pluginDescriptions = JakePluginDescription.declaredAsField(build);
-		for (final JakePluginDescription<?> description : pluginDescriptions) {
+		final List<JkPluginDescription<?>> pluginDescriptions = JkPluginDescription.declaredAsField(build);
+		for (final JkPluginDescription<?> description : pluginDescriptions) {
 			if (description.explanation() == null || description.explanation().isEmpty()) {
 				JkLog.info();
 			} else {
@@ -78,7 +78,7 @@ class HelpDisplayer {
 			}
 		}
 		if (!pluginDescriptions.isEmpty()) {
-			JkLog.info("To have more details about plugins, launch : jake helpPlugins.");
+			JkLog.info("To have more details about plugins, launch : jerkar helpPlugins.");
 		}
 		JkLog.done();
 	}

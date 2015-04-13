@@ -41,7 +41,7 @@ public final class JkocoJunitEnhancer implements Enhancer {
 	}
 
 	/**
-	 * Append some options to the returned <code>Jakeoco</code>.
+	 * Append some options to the returned <code>Jkoco</code>.
 	 * One option is to be considered as a <code>pair=value</code>.<br/>
 	 * Example : <code>withOptions("dumponexit=true", "port=6301");</code>
 	 */

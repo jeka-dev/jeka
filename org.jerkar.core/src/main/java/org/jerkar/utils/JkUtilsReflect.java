@@ -213,8 +213,8 @@ public final class JkUtilsReflect {
 	public static List<Field> getAllDeclaredField(Class<?> clazz, Class<? extends Annotation> annotationClass) {
 		final List<Field> result = new LinkedList<Field>();
 		for (final Field field : clazz.getDeclaredFields()) {
-			final Object jakeOption = field.getAnnotation(annotationClass);
-			if (jakeOption != null) {
+			final Object option = field.getAnnotation(annotationClass);
+			if (option != null) {
 				result.add(field);
 			}
 		}

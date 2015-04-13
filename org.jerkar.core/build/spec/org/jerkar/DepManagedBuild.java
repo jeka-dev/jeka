@@ -7,11 +7,11 @@ import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
 
 /**
- * Build class for Jake itself using managed dependencies.
+ * Build class for Jerkar itself using managed dependencies.
  */
 public class DepManagedBuild extends CoreBuild {
 
-	public static final JkScope DISTRIB = JkScope.of("distrib").descr("Contains Jake distribution zip file");
+	public static final JkScope DISTRIB = JkScope.of("distrib").descr("Contains Jerkar distribution zip file");
 
 	@Override
 	protected JkDependencies dependencies() {

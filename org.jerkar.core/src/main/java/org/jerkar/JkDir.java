@@ -119,7 +119,7 @@ public final class JkDir implements Iterable<File> {
 	 * Copies the content of the specified directory in the root of the root of this directory.
 	 * If specified directory does not exist then nothing happen.
 	 */
-	public JkDir copyInDirContent(File dirToCopyContent) {
+	public JkDir importDirContent(File dirToCopyContent) {
 		createIfNotExist();
 		if (!dirToCopyContent.exists()) {
 			return this;
@@ -175,10 +175,10 @@ public final class JkDir implements Iterable<File> {
 	}
 
 	/**
-	 * Returns a {@link JakeZipper} of this {@link JkDir}.
+	 * Returns a {@link JkZipper} of this {@link JkDir}.
 	 */
-	public JakeZipper zip() {
-		return JakeZipper.of(this);
+	public JkZipper zip() {
+		return JkZipper.of(this);
 	}
 
 	/**

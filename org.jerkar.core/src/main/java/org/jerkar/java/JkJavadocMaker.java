@@ -12,7 +12,7 @@ import org.jerkar.JkClassLoader;
 import org.jerkar.JkDirSet;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
-import org.jerkar.JakeZipper;
+import org.jerkar.JkZipper;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsReflect;
 
@@ -74,7 +74,7 @@ public final class JkJavadocMaker {
 		final String[] args = toArguments(outputDir);
 		execute(doclet, JkLog.infoStream(),JkLog.warnStream(),JkLog.errorStream(), args);
 		if (outputDir.exists() && zipFile != null) {
-			JakeZipper.of(outputDir).to(zipFile);
+			JkZipper.of(outputDir).to(zipFile);
 		}
 		JkLog.done();
 	}
@@ -130,7 +130,7 @@ public final class JkJavadocMaker {
 			classLoader.addEntry(JkUtilsJdk.toolsJar());
 			mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
 			if (mainClass == null) {
-				throw new RuntimeException("It seems that you are running a JRE instead of a JDK, please run Jake using a JDK.");
+				throw new RuntimeException("It seems that you are running a JRE instead of a JDK, please run Jerkar using a JDK.");
 			}
 		}
 		return mainClass;

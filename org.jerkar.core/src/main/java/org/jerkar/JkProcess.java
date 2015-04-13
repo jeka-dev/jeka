@@ -16,7 +16,7 @@ import org.jerkar.utils.JkUtilsIO.StreamGobbler;
  * 
  * @author Jerome Angibaud
  */
-public final class JakeProcess {
+public final class JkProcess {
 
 	private static final File CURRENT_JAVA_DIR = new File(System.getProperty("java.home"), "bin");
 
@@ -26,24 +26,24 @@ public final class JakeProcess {
 
 	private final File workingDir;
 
-	private JakeProcess(String command, List<String> parameters, File workingDir) {
+	private JkProcess(String command, List<String> parameters, File workingDir) {
 		this.command = command;
 		this.parameters = parameters;
 		this.workingDir = workingDir;
 	}
 
 	/**
-	 * Defines a <code>JakeProcess</code> using the specified command and parameters.
+	 * Defines a <code>JkProcess</code> using the specified command and parameters.
 	 */
-	public static JakeProcess of(String command, String... parameters) {
-		return new JakeProcess(command, Arrays.asList(parameters), null);
+	public static JkProcess of(String command, String... parameters) {
+		return new JkProcess(command, Arrays.asList(parameters), null);
 	}
 
 	/**
-	 * Defines a <code>JakeProcess</code> using the specified tool of the JDK and parameters.
+	 * Defines a <code>JkProcess</code> using the specified tool of the JDK and parameters.
 	 * An example of JDK tool is 'javac'.
 	 */
-	public static JakeProcess ofJavaTool(String javaTool, String... parameters) {
+	public static JkProcess ofJavaTool(String javaTool, String... parameters) {
 		File candidate = CURRENT_JAVA_DIR;
 		final boolean exist = findTool(candidate, javaTool);
 		if (!exist) {
@@ -58,18 +58,18 @@ public final class JakeProcess {
 	}
 
 
-	public JakeProcess andParameters(Collection<String> parameters) {
+	public JkProcess andParameters(Collection<String> parameters) {
 		final List<String> list = new ArrayList<String>(this.parameters);
 		list.addAll(parameters);
-		return new JakeProcess(command, list, workingDir);
+		return new JkProcess(command, list, workingDir);
 	}
 
-	public JakeProcess withParameters(String... parameters) {
-		return new JakeProcess(command, Arrays.asList(parameters), workingDir);
+	public JkProcess withParameters(String... parameters) {
+		return new JkProcess(command, Arrays.asList(parameters), workingDir);
 	}
 
-	public JakeProcess withWorkingDir(File workingDir) {
-		return new JakeProcess(command, parameters, workingDir);
+	public JkProcess withWorkingDir(File workingDir) {
+		return new JkProcess(command, parameters, workingDir);
 	}
 
 	private ProcessBuilder processBuilder(List<String> command) {

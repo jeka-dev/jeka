@@ -32,14 +32,14 @@ public class JkJeePacker {
 					+ " does not contains WEB-INF" + File.separator + "web.xml file");
 		}
 		final JkPath path = build.depsFor(JkJavaBuild.RUNTIME);
-		final JkDir dir = JkDir.of(warDirDest).copyInDirContent(webappSrc)
-				.sub("WEB-INF/classes").copyInDirContent(build.classDir())
+		final JkDir dir = JkDir.of(warDirDest).importDirContent(webappSrc)
+				.sub("WEB-INF/classes").importDirContent(build.classDir())
 				.sub("../lib").copyInFiles(path);
 		dir.zip().to(warFileDest);
 	}
 
 	public void ear(Iterable<File> warFiles, File earSrc, File destDir, File destFile) {
-		JkDir.of(destDir).copyInDirContent(earSrc).copyInFiles(warFiles).zip().to(destFile);
+		JkDir.of(destDir).importDirContent(earSrc).copyInFiles(warFiles).zip().to(destFile);
 	}
 
 

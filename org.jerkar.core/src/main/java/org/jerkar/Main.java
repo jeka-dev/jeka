@@ -13,7 +13,7 @@ import org.jerkar.utils.JkUtilsString;
 import org.jerkar.utils.JkUtilsTime;
 
 /**
- * Main class for launching Jake from command line.
+ * Main class for launching Jerkar from command line.
  * 
  * @author Jerome Angibaud
  */
@@ -24,7 +24,7 @@ class Main {
 		displayIntro();
 		JkLog.info("Java Home : " + System.getProperty("java.home"));
 		JkLog.info("Java Version : " + System.getProperty("java.version")+ ", " + System.getProperty("java.vendor"));
-		JkLog.info("Jake class path : " + System.getProperty("java.class.path"));
+		JkLog.info("Jerkar class path : " + System.getProperty("java.class.path"));
 		JkLog.info("Command line : " + JkUtilsString.join(Arrays.asList(args), " "));
 		final Map<String, String> optionMap = new HashMap<String, String>();
 		optionMap.putAll(loadOptionsProperties());
@@ -71,12 +71,12 @@ class Main {
 	}
 
 	private static Map<String, String> loadOptionsProperties() {
-		final File propFile = new File(JkLocator.jakeHome(), "options.properties");
+		final File propFile = new File(JkLocator.jerkarHome(), "options.properties");
 		final Map<String, String> result = new HashMap<String, String>();
 		if (propFile.exists()) {
 			result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
 		}
-		final File userPropFile = new File(JkLocator.jakeUserHome(), "options.properties");
+		final File userPropFile = new File(JkLocator.jerkarUserHome(), "options.properties");
 		if (userPropFile.exists()) {
 			result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
 		}
@@ -101,9 +101,9 @@ class Main {
 	}
 
 	private static void displayIntro() {
-		final int lenght = printAscii(false, "jake.ascii");
+		final int lenght = printAscii(false, "jerkar.ascii");
 		JkLog.info(JkUtilsString.repeat(" ", lenght) + "The 100% Java build system.");
-		final String version = JkUtilsIO.readResourceIfExist("org/jake/version.txt");
+		final String version = JkUtilsIO.readResourceIfExist("org/jerkar/version.txt");
 		if (version != null) {
 			JkLog.info(JkUtilsString.repeat(" ", lenght) + "Version : " + version);
 		}

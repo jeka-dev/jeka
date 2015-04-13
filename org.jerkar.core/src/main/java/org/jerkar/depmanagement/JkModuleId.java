@@ -12,14 +12,14 @@ import org.jerkar.utils.JkUtilsString;
 public final class JkModuleId {
 
 	/**
-	 * Creates a <code>JakeModuleId</code> from a group and a name.
+	 * Creates a <code>JkModuleId</code> from a group and a name.
 	 */
 	public static JkModuleId of(String group, String name) {
 		return new JkModuleId(group, name);
 	}
 
 	/**
-	 * Creates a <code>JakeModuleId</code> from a string formed as 'group:name'.
+	 * Creates a <code>JkModuleId</code> from a string formed as 'group:name'.
 	 */
 	public static JkModuleId of(String groupAndName) {
 		final String strings[] = JkUtilsString.split(groupAndName, ":");

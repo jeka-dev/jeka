@@ -7,18 +7,18 @@ import org.jerkar.JkBuild;
 import org.jerkar.JkDir;
 import org.jerkar.JkDoc;
 import org.jerkar.JkLog;
-import org.jerkar.JakeProject;
-import org.jerkar.JakeZipper;
-import org.jerkar.plugins.jacoco.PluginsJakeocoBuild;
+import org.jerkar.JkProject;
+import org.jerkar.JkZipper;
+import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
 
 public class DistribAllBuild extends JkBuild {
 	
-	@JakeProject("../org.jerkar.plugins-sonar")
+	@JkProject("../org.jerkar.plugins-sonar")
 	PluginsSonarBuild pluginsSonar;
 	
-	@JakeProject("../org.jerkar.plugins-jacoco")
-	PluginsJakeocoBuild pluginsJacoco;
+	@JkProject("../org.jerkar.plugins-jacoco")
+	PluginsJacocoBuild pluginsJacoco;
 	
 	@JkDoc("Construct a distrib assuming all dependent sub projects are already built.")
 	public void distrib() {
@@ -27,7 +27,7 @@ public class DistribAllBuild extends JkBuild {
 		
 		JkLog.info("Copy core distribution localy.");
 		CoreBuild core = pluginsJacoco.core;  // The core project is got by transitivity
-		JkDir dist = JkDir.of(this.ouputDir("dist")).copyInDirContent(core.distribFolder);
+		JkDir dist = JkDir.of(this.ouputDir("dist")).importDirContent(core.distribFolder);
 		
 		JkLog.info("Add plugins to the distribution");
 		JkDir ext = dist.sub("libs/ext").importFiles(pluginsSonar.packer().jarFile(), pluginsJacoco.packer().jarFile());
@@ -35,10 +35,10 @@ public class DistribAllBuild extends JkBuild {
 		
 		JkLog.info("Add plugins to the fat jar.");
 		File fat = dist.file(core.packer().fatJarFile().getName());
-		JakeZipper.of().merge(ext.include("**/*.jar")).appendTo(fat);
+		JkZipper.of().merge(ext.include("**/*.jar")).appendTo(fat);
 		
 		JkLog.info("Pack all");
-		dist.zip().to(ouputDir("jake-distrib.zip"));
+		dist.zip().to(ouputDir("jerkar-distrib.zip"));
 		
 		JkLog.done();
 	}

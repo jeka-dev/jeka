@@ -13,9 +13,9 @@ class Lib {
 
 	private static final String CONTAINERS_PATH = "eclipse/containers";
 
-	static final File CONTAINER_DIR = new File(JkLocator.jakeHome(), CONTAINERS_PATH);
+	static final File CONTAINER_DIR = new File(JkLocator.jerkarHome(), CONTAINERS_PATH);
 
-	static final File CONTAINER_USER_DIR = new File(JkLocator.jakeUserHome(), CONTAINERS_PATH);
+	static final File CONTAINER_USER_DIR = new File(JkLocator.jerkarUserHome(), CONTAINERS_PATH);
 
 	public static Lib file(File file, JkScope scope, boolean exported) {
 		return new Lib(file, null, scope, exported);

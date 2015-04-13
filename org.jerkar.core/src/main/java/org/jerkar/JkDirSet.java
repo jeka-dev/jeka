@@ -211,10 +211,10 @@ public final class JkDirSet implements Iterable<File> {
 	}
 
 	/**
-	 * Returns a {@link JakeZipper} made of the files contained in this {@link JkDirSet}.
+	 * Returns a {@link JkZipper} made of the files contained in this {@link JkDirSet}.
 	 */
-	public JakeZipper zip() {
-		return JakeZipper.of(this);
+	public JkZipper zip() {
+		return JkZipper.of(this);
 	}
 
 	/**
