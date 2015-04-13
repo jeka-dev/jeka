@@ -126,7 +126,8 @@ To launch a SonarQube analysis along test coverage and producing javadoc:
 This will compile, unit test with test coverage, launch a sonar analysis with sonar user settings and finally produce the javadoc. 
 - `jacoco#` means that the Jacoco plugin will be activated while the junit test will be running
 - `sonar#verify` means that Jerkar will invoke a method called `verify`in the sonar plugin class
-- `verbose=true`means that the log will display verbose information
+- `-verbose=true`means that the log will display verbose information (this is the way to pass parameter in Jerkar)
+- `clean`, `compile`, `unitTest` and `javadoc` are build methods inherited by `CoreBuild`. 
     
     
         
