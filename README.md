@@ -8,12 +8,12 @@ Using the same language for building a project than the one it is coded in bring
 * You can leverage of compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools. For static typed language as Java, it notably brings robustness to your builds.
 * Your builds can benefit from any libraries without needing to wrap it in a plugin or a specific component.
 * You can master build complexity the same way you master code complexity (ie utility classes, inheritance, composition,...) 
-* Using fluent style internal DSL, syntax get much more concise and explicit than a XML description would (So far, Jerkar concision is comparable to Gradle).
+* Using fluent style internal DSL, syntax get much more concise and explicit than a XML description would (so far, Jerkar concision is comparable to Gradle).
 * It's easier to dig into the build engine to investigate on behavior or discover system possibilities as builds are in essence, only API calls.
 
-Additionally the following features was missing from mainstream existing tools :
+Additionally the following features were missing from mainstream existing tools :
 * Possibility to run pluggable extra features (test coverage, special packaging, static code analysis,...) without editing the build file. 
-* Possibility to write nothing at all for building projects (just relying on convention and/or IDE meta-data files). 
+* Possibility to write nothing-at-all for building projects (just relying on convention and/or IDE meta-data files). 
 
 # Main features
 Jerkar provides what a self respecting modern build system must and more :
@@ -37,7 +37,7 @@ Jerkar is made of following projects :
 * plugins-sonar : a plugin to perform sonar analysis
 * distrib-all : the core distrib augmented with the above plugins
 
-Jerkar builds with itself. To get Jerkar full distrib built from the java source only, the simpler is to import these 4 projects in Eclipse :
+Jerkar builds with itself. To get Jerkar full distrib built from the Java sources only, the simpler is to import these 4 projects in Eclipse :
 * Create a Java Application run configuration
   * Make sure that the Runtime JRE is a JDK (6 or above)
   * Choose `org.jerkar.distrib-all` as project
