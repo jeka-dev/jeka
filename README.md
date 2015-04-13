@@ -1,6 +1,6 @@
 ![Logo of Jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png)
 
-Complete built system ala Ant, Maven or Gradle but using Java code only to describe builds.
+Complete built system ala Ant, Maven or Gradle but using **Java** code only to describe builds.
 It is intended to build project written in Java language but can be extended to cover other purposes.
 
 # Motivation
@@ -58,11 +58,8 @@ If you want to launch several methods of your build, type `jerkar doSomething do
 Type `jerkar help` to get all the build methods provided by your build class. 
   
 
-Example : Let's see how Jerkar build itself
+# Example : Let's see how Jerkar core build itself
 --
-Jerkar is made of several project. The core project, some 'built-in plugin projects and the distrib project.
- 
-The build contains directives for injecting timestamp in the Manifest file and for creating a full distribution containing jars, sources, configuration file and Windows executable.
 
 The build class is as follow :
 
@@ -116,14 +113,18 @@ To launch the build for creating distrib from the command line, simply type :
 
     jerkar
 
-This will interpole resources, compile, run unit tests, create jars and package the full distrib in zip file. When no method specified, Jerkar invoke the `doDefault` method.
+This will interpole resources (replacing ${version} by a timestamp everywhere), compile, run unit tests, create jars and package the distrib in zip file. 
+Tis command is equivalent to``jerkar doDefault` : when no method specified, Jerkar invoke the `doDefault` method.
 
+---
 To launch a SonarQube analysis along test coverage and producing javadoc: 
 
-    jerkar clean compile unitTest jacoco# sonar#verify javadoc
+    jerkar clean compile unitTest jacoco# sonar#verify javadoc -verbose=true
     
-This will compile, unit test with test coverage and launch a sonar analysis with sonar user settings. 
-`jacoco#` means that the Jacoco plugin will be activated while the junit test will be running and `sonar#verify` means that Jerkar will invoke a method called `verify`in the sonar plugin class.
+This will compile, unit test with test coverage, launch a sonar analysis with sonar user settings and finally produce the javadoc. 
+- `jacoco#` means that the Jacoco plugin will be activated while the junit test will be running
+- `sonar#verify` means that Jerkar will invoke a method called `verify`in the sonar plugin class
+- `verbose=true`means that the log will display verbose information
     
     
         
