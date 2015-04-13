@@ -1,4 +1,4 @@
-package org.jerkar.distrib;
+package org.jerkar.distrib.all;
 
 import java.io.File;
 
@@ -12,7 +12,7 @@ import org.jerkar.JakeZipper;
 import org.jerkar.plugins.jacoco.PluginsJakeocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
 
-public class DistribBuild extends JkBuild {
+public class DistribAllBuild extends JkBuild {
 	
 	@JakeProject("../org.jerkar.plugins-sonar")
 	PluginsSonarBuild pluginsSonar;

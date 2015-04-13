@@ -8,10 +8,12 @@ Using the same language for building a project than the one it is coded in bring
 * You can leverage of compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools. For static typed language as Java, it notably brings robustness to your builds.
 * Your builds can benefit from any libraries without needing to wrap it in a plugin or a specific component.
 * You can master build complexity the same way you master code complexity (ie utility classes, inheritance, composition,...) 
-* Using fluent style internal DSL, syntax get much more concise and explicit than a XML description would
-* It's easier to dig into the build engine to investigate on behavior or discover system possibilities as builds are, in end, only direct API call.
+* Using fluent style internal DSL, syntax get much more concise and explicit than a XML description would (So far, Jerkar concision is comparable to Gradle).
+* It's easier to dig into the build engine to investigate on behavior or discover system possibilities as builds are in essence, only API calls.
 
-Actually, for the usage i have met so far, Jerkar build files prove to be quite more concise than their Ant or Maven equivalent and comparable to Gradle scripts. 
+Additionally the following features was missing from mainstream existing tools :
+* Possibility to run pluggable extra features (test coverage, special packaging, static code analysis,...) without editing the build file. 
+* Possibility to write nothing at all for building projects (just relying on convention and/or IDE meta-data files). 
 
 # Main features
 Notably Jerkar provides :
@@ -72,7 +74,7 @@ The build class is as follow :
 	    // Interpolize resource files replacing ${version} by a timestamp
 	    @Override
 	    protected JkResourceProcessor resourceProcessor() {
-		    return super.resourceProcessor().with("version", version().name() + " - built at - " +                   buildTimestamp());
+		    return super.resourceProcessor().with("version", version().name() + " - built at - " + buildTimestamp());
 	    }
 
 	    // Include the making of the distribution into the application packaging.
