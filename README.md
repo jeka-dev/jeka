@@ -9,7 +9,7 @@ Using the same language for building a project than the one it is coded in bring
 * You leverage of the power and flexibility of the hosting language
 * You leverage of compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools. For static typed language as Java, it notably brings robustness to your builds
 * Your builds can benefit from any libraries without needing to wrap it in a plugin or a specific component
-* You can master build complexity the same way you master code complexity (ie utility classes, inheritance, composition,...) 
+* You can master build complexity the same way you master project code complexity (ie utility classes, inheritance, composition,...) 
 * Using fluent style internal DSL, syntax get much more concise and explicit than a XML description would (so far, Jerkar concision is comparable to Gradle)
 * It's easier to dig into the build engine to investigate on behavior or discover system possibilities as builds are in essence, only API calls
 
