@@ -1,6 +1,7 @@
 ![Logo of Jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png)
 
 Complete built system ala Ant, Maven or Gradle but using Java code only to describe builds.
+It is intended to build project written in Java language but can be extended to cover other purposes.
 
 # Motivation
 Using the same language for building a project than the one it is coded in brings valuable benefits :
