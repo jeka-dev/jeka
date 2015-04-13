@@ -58,7 +58,7 @@ If you want to launch several methods of your build, type `jerkar doSomething do
 Type `jerkar help` to get all the build methods provided by your build class. 
   
 
-# Example : Let's see how Jerkar core build itself
+## Example : Let's see how Jerkar core build itself
 --
 
 The build class is as follow :
