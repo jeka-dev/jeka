@@ -76,12 +76,6 @@ The build class is as follow :
 		    this.fatJar = true;
         }
 
-	    // Just to run directly the whole build bypassing the Jerkar bootstrap mechanism.
-	    // It was necessary in first place to build Jerkar with itself.
-	    public static void main(String[] args) {
-		    new CoreBuild().doDefault();
-	    }
-
 	    // Interpolize resource files replacing ${version} by a timestamp
 	    @Override
 	    protected JkResourceProcessor resourceProcessor() {
