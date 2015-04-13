@@ -1,20 +1,21 @@
 ![Logo of Jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png)
 
-Jerkar is a complete built system ala Maven or Gradle but using **Java** code only to describe builds.
+Jerkar is a complete built system ala Maven or Gradle but using only a **Java** internal DSL to describe builds : no XML, no foreign language.
 It is intended to build project written in Java language but can be used for any task execution purpose.
 
 # Motivation
 Using the same language for building a project than the one it is coded in brings valuable benefits :
 * You don't have to learn an extra language or XML soup just for build purpose : get higher cohesion and lower cognitive load
-* You can leverage of compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools. For static typed language as Java, it notably brings robustness to your builds.
-* Your builds can benefit from any libraries without needing to wrap it in a plugin or a specific component.
+* You leverage of the power and flexibility of the hosting language
+* You leverage of compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools. For static typed language as Java, it notably brings robustness to your builds
+* Your builds can benefit from any libraries without needing to wrap it in a plugin or a specific component
 * You can master build complexity the same way you master code complexity (ie utility classes, inheritance, composition,...) 
-* Using fluent style internal DSL, syntax get much more concise and explicit than a XML description would (so far, Jerkar concision is comparable to Gradle).
-* It's easier to dig into the build engine to investigate on behavior or discover system possibilities as builds are in essence, only API calls.
+* Using fluent style internal DSL, syntax get much more concise and explicit than a XML description would (so far, Jerkar concision is comparable to Gradle)
+* It's easier to dig into the build engine to investigate on behavior or discover system possibilities as builds are in essence, only API calls
 
 Additionally the following features were missing from mainstream existing tools :
-* Possibility to run pluggable extra features (test coverage, special packaging, static code analysis,...) without editing the build file. 
-* Possibility to write nothing-at-all for building projects (just relying on convention and/or IDE meta-data files). 
+* Possibility to run pluggable extra features (test coverage, special packaging, static code analysis,...) without editing the build file
+* Possibility to write nothing-at-all for building projects (just relying on convention and/or IDE meta-data files)
 
 # Main features
 Jerkar provides what a self respecting modern build system must and more :
@@ -60,7 +61,9 @@ Type `jerkar help` to get all the build methods provided by your build class.
 
 ## Example : Let's see how Jerkar core build itself
 
-The build class is as follow :
+Jerkar core build is not complex but not trivial. 
+Apart making standard compilation, junit tests and jar packaging, it also constructs a distrib gathering together jars, sources, property file and executable in a structured folder.
+This is the build class :
 
 ```java
     public class CoreBuild extends JkJavaBuild {
@@ -105,6 +108,8 @@ The build class is as follow :
 	}
 ```
 
+Notice that we need only to specify what is not 'standard'.
+
 To launch the build for creating distrib from the command line, simply type : 
 
     jerkar
@@ -117,13 +122,14 @@ This command is equivalent to `jerkar doDefault` : when no method specified, Jer
 ---
 To launch a SonarQube analysis along test coverage and producing javadoc: 
 
-    jerkar clean compile unitTest jacoco# sonar#verify javadoc -verbose=true
+    jerkar clean compile unitTest sonar#verify javadoc jacoco# -verbose=true
     
 This will compile, unit test with test coverage, launch a sonar analysis with sonar user settings and finally produce the javadoc. 
-- `jacoco#` means that the Jacoco plugin will be activated while the junit test will be running
-- `sonar#verify` means that Jerkar will invoke a method called `verify`in the sonar plugin class
-- `-verbose=true`means that the log will display verbose information (this is the way to pass parameter in Jerkar)
-- `clean`, `compile`, `unitTest` and `javadoc` are build methods inherited by `CoreBuild`. 
+- `clean`, `compile`, `unitTest` and `javadoc` are build methods inherited by `CoreBuild`
+- `sonar#verify` means that Jerkar will invoke a method called `verify`in the `sonar` plugin class
+- `jacoco#` means that the `jacoco` plugin will be activated while the junit test will be running
+- `-verbose=true`means that the log will display verbose information ('-' prefix is the way to pass parameter in Jerkar)
+
 
 Notice that Jacoco test coverage and SonarQube analysis are triggered without mention in the build class ! 
     
