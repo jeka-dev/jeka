@@ -71,8 +71,8 @@ The build class is as follow :
 
 	    @Override
 	    protected void init() {
-	        distripZipFile = ouputDir("jake-distrib.zip");
-            distribFolder = ouputDir("jake-distrib");
+	        distripZipFile = ouputDir("jerkar-distrib.zip");
+            distribFolder = ouputDir("jerkar-distrib");
 		    this.fatJar = true;
         }
 
@@ -100,7 +100,7 @@ The build class is as follow :
 		    final JkDir distribDir = JkDir.of(distribFolder);
 		    JkLog.startln("Creating distrib " + distripZipFile.getPath());
 		    final JkJavaPacker packer = packer();
-		    distribDir.copyInDirContent(baseDir("src/main/dist"));
+		    distribDir.imprtDirContent(baseDir("src/main/dist"));
 		    distribDir.importFiles(packer.jarFile(), packer.fatJarFile());
 		    distribDir.sub("libs/required").importDirContent(baseDir("build/libs/compile"));
 		    distribDir.sub("libs/sources").importDirContent(baseDir("build/libs-sources"))
