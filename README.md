@@ -63,6 +63,7 @@ Type `jerkar help` to get all the build methods provided by your build class.
 
 The build class is as follow :
 
+```java
     public class CoreBuild extends JkJavaBuild {
 
 	    public File distripZipFile; // The zip file that will contain the whole distrib
@@ -108,6 +109,7 @@ The build class is as follow :
 			JkLog.done();
 	    }
 	}
+```
 
 To launch the build for creating distrib from the command line, simply type : 
 
