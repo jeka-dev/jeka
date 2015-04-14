@@ -20,7 +20,7 @@ Additionally the following features were missing from mainstream existing tools 
 * Possibility to run pluggable extra features (test coverage, special packaging, static code analysis,...) without editing the build file
 * Possibility to write nothing-at-all for building projects (just relying on convention and/or IDE meta-data files)
 
-## Overcoming the shortcomings
+## Overcoming Java shortcomings
 One believes that the verbosity and the statically typed nature of Java make it hardly suitable for expressing builds.
 Jerkar tends to prove the opposite :
 * Jerkar transparently compiles the java build classes prior to execute them. This step is very quick, Jerkar velocity does not suffer from this 'extra' step
