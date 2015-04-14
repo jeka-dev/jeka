@@ -7,7 +7,7 @@ It is intended to build project written in Java language but can be used for any
 So far, for building their projects, java developers generally use a XML based (**Ant**, **Maven**) or a foreign language DSL (**Gradle**, **Rake**, **SBT**, ...) tool.
 They just can't use **Java** to create organization scalable builds. **Jerkar** purposes to fill this gap.
       
-Yet, using Java for building a Java based brings quite valuable benefits :
+Yet, using Java for building a Java based project brings quite valuable benefits :
 * You don't have to learn an extra language or XML soup just for build purpose : get higher cohesion and lower cognitive load
 * You leverage directly of the power and flexibility of Java
 * You leverage of compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools. For static typed language as Java, it notably brings robustness to your builds
