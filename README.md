@@ -21,9 +21,9 @@ Additionally the following features were missing from mainstream existing tools 
 * Possibility to write nothing-at-all for building projects (just relying on convention and/or IDE meta-data files)
 
 ## Overcoming the shortcomings
-One believes that the verbosity and the static typed nature of Java make it hardly suitable for expressing builds.
+One believes that the verbosity and the statically typed nature of Java make it hardly suitable for expressing builds.
 Jerkar tends to prove the opposite :
-* Jerker transparently compiles the java build classes prior to execute them. This step is very quick, Jerkar velocity does not suffer from this 'extra' step
+* Jerkar transparently compiles the java build classes prior to execute them. This step is very quick, Jerkar velocity does not suffer from this 'extra' step
 * Jerkar heavily relies on convention and sensitive defaults : you only need to specify what is not 'standard'
 * Jerkar features fluent APIs whose allow to express tasks in a very concise way. Jerkar build classes are close to Gradle script concision (and even more in certain cases) 
 
