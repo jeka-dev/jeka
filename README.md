@@ -4,12 +4,15 @@ Jerkar is a complete built system ala Maven or Gradle but using only a **Java** 
 It is intended to build project written in Java language but can be used for any task execution purpose.
 
 # Motivation
-Using the same language for building a project than the one it is coded in brings valuable benefits :
+So far, for building their projects, java developers generally use a XML based (**Ant**, **Maven**) or a foreign language DSL (**Gradle**, **Rake**, **SBT**, ...) tool.
+They just can't use **Java** to create organization scalable builds. **Jerkar** purposes to fill this gap.
+      
+Yet, using Java for building a Java based brings quite valuable benefits :
 * You don't have to learn an extra language or XML soup just for build purpose : get higher cohesion and lower cognitive load
-* You leverage of the power and flexibility of the hosting language
+* You leverage directly of the power and flexibility of Java
 * You leverage of compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools. For static typed language as Java, it notably brings robustness to your builds
 * Your builds can benefit from any libraries without needing to wrap it in a plugin or a specific component
-* You can master build complexity the same way you master project code complexity (ie utility classes, inheritance, composition,...) 
+* You can master build complexity the same way you master regular code complexity (ie utility classes, SoC, inheritance, composition,...) 
 * Using fluent style internal DSL, syntax get much more concise and explicit than a XML description would (so far, Jerkar concision is comparable to Gradle)
 * It's easier to dig into the build engine to investigate on behavior or discover system possibilities as builds are in essence, only API calls
 
@@ -17,8 +20,17 @@ Additionally the following features were missing from mainstream existing tools 
 * Possibility to run pluggable extra features (test coverage, special packaging, static code analysis,...) without editing the build file
 * Possibility to write nothing-at-all for building projects (just relying on convention and/or IDE meta-data files)
 
+## Overcoming the shortcomings
+One believes that the verbosity and the static typed nature of Java make it hardly suitable for expressing builds.
+Jerkar tends to prove the opposite :
+* Jerker transparently compiles the java build classes prior to execute them. This step is very quick, Jerkar velocity does not suffer from this 'extra' step
+* Jerkar heavily relies on convention and sensitive defaults : you only need to specify what is not 'standard'
+* Jerkar features fluent APIs whose allow to express tasks in a very concise way. Jerkar build classes are close to Gradle script concision (and even more in certain cases) 
+
+
 # Main features
 Jerkar provides what a self respecting modern build system must and more :
+* Provides both APIs and a command line tool.
 * Powerfull dependency management (back-ended by Ivy so compatible with Maven repositories)
 * Publication on Ivy or Maven repositories
 * Multi-project support
@@ -79,7 +91,7 @@ This is the build class :
 		    this.fatJar = true;
         }
 
-	    // Interpolize resource files replacing ${version} by a timestamp
+	    // Interpolize resource files replacing ${version} by a timestamp (in the Manifest)
 	    @Override
 	    protected JkResourceProcessor resourceProcessor() {
 		    return super.resourceProcessor().with("version", version().name() + " - built at - " + buildTimestamp());
