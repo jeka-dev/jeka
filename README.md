@@ -17,8 +17,8 @@ Yet, using Java for building a Java based project brings quite valuable benefits
 * It's easier to dig into the build engine to investigate on behavior as builds are in essence, only API calls
 
 Additionally the following features were missing from mainstream existing tools :
-* Possibility to run pluggable extra features (test coverage, special packaging, static code analysis,...) without editing the build file
-* Possibility to write nothing-at-all for building projects (just relying on convention and/or IDE meta-data files)
+* Run pluggable extra features (test coverage, special packaging, static code analysis,...) without editing the build file
+* Write nothing-at-all for building simple/standard projects (just relying on convention and/or IDE meta-data files)
 
 ## Overcoming Java shortcomings
 One believes that the verbosity and the statically typed nature of Java make it hardly suitable for expressing builds.
