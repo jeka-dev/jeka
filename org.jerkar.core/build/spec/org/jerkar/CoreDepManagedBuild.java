@@ -9,7 +9,7 @@ import org.jerkar.publishing.JkMavenPublication;
 /**
  * Build class for Jerkar itself using managed dependencies.
  */
-public class DepManagedBuild extends CoreBuild {
+public class CoreDepManagedBuild extends CoreBuild {
 
 	public static final JkScope DISTRIB = JkScope.of("distrib").descr("Contains Jerkar distribution zip file");
 
@@ -22,7 +22,7 @@ public class DepManagedBuild extends CoreBuild {
 
 
 	public static void main(String[] args) {
-		final DepManagedBuild build = new DepManagedBuild();
+		final CoreDepManagedBuild build = new CoreDepManagedBuild();
 		build.doDefault();
 	}
 

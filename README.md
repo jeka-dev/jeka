@@ -126,6 +126,8 @@ Notice that we need only to specify what is not 'standard'
 * sources, resources and tests folder are located on the conventional folders (same as Maven).
 * this build class relies on local dependencies (dependencies located conventionally inside the project) so we don't need to mention it
 
+A dependency managed flavor of this build is [CoreDepManagedBuild.java](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/build/spec/org/jerkar/CoreDepManagedBuild.java)
+
 To launch the build for creating distrib from the command line, simply type : 
 
     jerkar
