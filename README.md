@@ -18,7 +18,7 @@ Yet, using Java for building a Java based project brings quite valuable benefits
 
 Additionally the following features were missing from mainstream existing tools :
 * Run pluggable extra features (test coverage, special packaging, static code analysis,...) without editing the build file
-* Write nothing-at-all for building simple/standard projects (just relying on convention and/or IDE meta-data files)
+* Write nothing-at-all for building simple/standard projects (just relying on convention and/or IDE meta-data files, even to launch static analysis tools or generate ear/war files)
 
 ## Overcoming Java shortcomings
 One believes that the verbosity and the statically typed nature of Java make it hardly suitable for expressing builds.
@@ -61,11 +61,11 @@ Jerkar builds with itself. To get Jerkar full distrib built from the Java source
 * Run it : It will launch a multi-project build. You will find result for the full distrib in *org.jerkar.distrib-all/build/output* directory 
 
 # Quick start
-1. Add the org.jerkar.core-fat.jar (found in the distrib) in your IDE build-path. This jar includes Jerkar core along plugins classes.
-2. Create a `build/spec` folder at the base of your project and make it a source folder in your IDE. In Jerkar, all related build stuff (build definition, local 3rd party libs, produced artifacts,...) lies under *build* directory.
-3. Write the build class extending JkJavaBuild in this directory (in whatever package).
-4. If your project respect convention, do not need managed dependencies and don't do 'special' thing, you don't even need 2) and 3) points.
-5. Launch the `org.jerkar.Main` class in your IDE or type `jerkar` in the command line (with the root of your project as working directory).
+1. Add the org.jerkar.core-fat.jar (found in the distrib) in your IDE build-path. This jar includes Jerkar core along plugins classes
+2. Create a `build/spec` folder at the base of your project and make it a source folder in your IDE. In Jerkar, all related build stuff (build definition, local 3rd party libs, produced artifacts,...) lies under *build* directory
+3. Write the build class extending JkJavaBuild in this directory (in whatever package)
+4. If your project respect convention, do not need managed dependencies and don't do 'special' thing, you don't even need 2) and 3) points
+5. Launch the `org.jerkar.Main` class in your IDE or type `jerkar` in the command line (with the root of your project as working directory)
 
 This will launch the `doDefault` method defined in your build class. Note that this method is declared in the `JkJavaBuild` and invoke in sequence clean, compile, unitTest and pack methods.
 
