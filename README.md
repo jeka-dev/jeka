@@ -26,10 +26,11 @@ Jerkar tends to prove the opposite :
 * Jerkar transparently compiles the java build classes prior to execute them. This step is very quick, Jerkar velocity does not suffer from this 'extra' step
 * Jerkar heavily relies on convention and sensitive defaults : you only need to specify what is not 'standard'
 * Jerkar features fluent APIs whose allow to express tasks in a very concise way. Jerkar build classes are close to Gradle script concision (and even more in certain cases) 
-* Jerkar keeps the runtime simple (no bytecode enhancement) for easier debug 
+* Jerkar comes with no 3rd party dependency (except Ivy) to avoid version clashing.
+* Jerkar keeps the runtime simple (no bytecode enhancement) for easier debugging 
 
 # Main features
-Jerkar provides what a self respecting modern, enterprise scale, build system must and more :
+Jerkar provides what a self respecting modern, enterprise scale, build system should and more :
 * Provides both APIs and a command line tool.
 * Multi level of configuration system (Jerkar instance, user, build class, build command line)
 * Powerfull dependency management (back-ended by Ivy so compatible with Maven repositories)
@@ -124,7 +125,7 @@ Notice that we need only to specify what is not 'standard'
 * group and project name are inferred from the project folder name ('org.jerkar.core' so group is 'org.jerkar' and project is 'core')
 * version is not specified, so by default it is `1.0-SNAPSHOT`(unless you inject the version via the command line using `-forcedVersion=Xxxxx`)
 * sources, resources and tests folder are located on the conventional folders (same as Maven).
-* this build class relies on local dependencies (dependencies located conventionally inside the project) so we don't need to mention it
+* this build class relies on local dependencies (dependencies located conventionally inside the project) so we don't need to mention them
 
 A dependency managed flavor of this build is [CoreDepManagedBuild.java](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/build/spec/org/jerkar/CoreDepManagedBuild.java)
 
