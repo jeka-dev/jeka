@@ -1,20 +1,20 @@
 ![Logo of Jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png)
 
 Jerkar is a complete built system ala Maven or Gradle but using only a **Java** internal DSL to describe builds : no XML, no foreign language.
-It is intended to build project written in Java language but can be used for any task execution purpose.
+It is intended to build project written in Java language but can also be used for any task execution purpose.
 
 # Motivation
-So far, for building their projects, java developers generally use a XML based (**Ant**, **Maven**) or a foreign language DSL (**Gradle**, **Rake**, **SBT**, ...) tool.
+So far, for building their projects, java developers generally use an XML based (**Ant**, **Maven**) or a foreign language DSL (**Gradle**, **Rake**, **SBT**, ...) tool.
 They just can't use **Java** to create organization scalable builds. **Jerkar** purposes to fill this gap.
       
 Yet, using Java for building a Java based project brings quite valuable benefits :
 * You don't have to learn an extra language or XML soup just for build purpose : get higher cohesion and lower cognitive load
-* You leverage directly of the power and flexibility of Java
-* You leverage of compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools. For static typed language as Java, it notably brings robustness to your builds
+* You leverage directly the power and flexibility of Java
+* You leverage compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools. For static typed language as Java, it notably brings robustness to your builds
 * Your builds can benefit from any libraries without needing to wrap it in a plugin or a specific component
-* You can master build complexity the same way you master regular code complexity (ie utility classes, SoC, inheritance, composition,...) 
-* Using fluent style internal DSL, syntax get much more concise and explicit than a XML description would (so far, Jerkar concision is comparable to Gradle)
-* It's easier to dig into the build engine to investigate on behavior or discover system possibilities as builds are in essence, only API calls
+* You can master build complexity the same way you do for regular code (ie utility classes, SoC, inheritance, composition,...) 
+* Using fluent style internal DSL, syntax is much more concise and explicit than an XML description
+* It's easier to dig into the build engine to investigate on behavior as builds are in essence, only API calls
 
 Additionally the following features were missing from mainstream existing tools :
 * Possibility to run pluggable extra features (test coverage, special packaging, static code analysis,...) without editing the build file
@@ -26,17 +26,18 @@ Jerkar tends to prove the opposite :
 * Jerkar transparently compiles the java build classes prior to execute them. This step is very quick, Jerkar velocity does not suffer from this 'extra' step
 * Jerkar heavily relies on convention and sensitive defaults : you only need to specify what is not 'standard'
 * Jerkar features fluent APIs whose allow to express tasks in a very concise way. Jerkar build classes are close to Gradle script concision (and even more in certain cases) 
-
+* Jerkar keeps the runtime simple (no bytecode enhancement) for easier debug 
 
 # Main features
-Jerkar provides what a self respecting modern build system must and more :
+Jerkar provides what a self respecting modern, enterprise scale, build system must and more :
 * Provides both APIs and a command line tool.
+* Multi level of configuration system (Jerkar instance, user, build class, build command line)
 * Powerfull dependency management (back-ended by Ivy so compatible with Maven repositories)
 * Publication on Ivy or Maven repositories
 * Multi-project support
 * Powerfull fluent API to manipulate files, perform  compilations, tests, archives and all build related stuff
 * Choice between free form builds (ala Ant) and enforced build templates (ala Maven)
-* Hierarchical log output tracing execution time for each intermediate step
+* Hierarchical log output tracking execution time for each intermediate step
 * Pluggable architecture
 * Ability to get information from naming convention and Eclipse files, so in simpler cases you won't need to write script at all (even to generate war or perform SonarQube analysis) !!!
 
@@ -56,7 +57,7 @@ Jerkar builds with itself. To get Jerkar full distrib built from the Java source
   * Make sure that the Runtime JRE is a JDK (6 or above)
   * Choose `org.jerkar.distrib-all` as project
   * Choose `org.jerkar.Main` as Main class
-* Run it : It will launch a multi-project build. You will find result for full distrib in *org.jerkar.distrib-all/build/output* directory 
+* Run it : It will launch a multi-project build. You will find result for the full distrib in *org.jerkar.distrib-all/build/output* directory 
 
 # Quick start
 1. Add the org.jerkar.core-fat.jar (found in the distrib) in your IDE build-path. This jar includes Jerkar core along plugins classes.
@@ -73,8 +74,7 @@ Type `jerkar help` to get all the build methods provided by your build class.
 
 ## Example : Let's see how Jerkar core build itself
 
-Jerkar core build is not complex but not trivial. 
-Apart making standard compilation, junit tests and jar packaging, it also constructs a distrib gathering together jars, sources, property file and executable in a structured folder.
+Jerkar core build is not complex but do some specific stuff : apart making standard compilation, junit tests and jar packaging, it constructs a distribution archive gathering jars, sources, property, readme files and executable.
 This is the build class :
 
 ```java
@@ -120,7 +120,11 @@ This is the build class :
 	}
 ```
 
-Notice that we need only to specify what is not 'standard'.
+Notice that we need only to specify what is not 'standard'
+* group and project name are inferred from the project folder name ('org.jerkar.core' so group is 'org.jerkar' and project is 'core')
+* version is not specified, so by default it is `1.0-SNAPSHOT`(unless you inject the version via the command line using `-forcedVersion=Xxxxx`)
+* sources, resources and tests folder are located on the conventional folders (same as Maven).
+* this build class relies on local dependencies (dependencies located conventionally inside the project) so we don't need to mention it
 
 To launch the build for creating distrib from the command line, simply type : 
 
