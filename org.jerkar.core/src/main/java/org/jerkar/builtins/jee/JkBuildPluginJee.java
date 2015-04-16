@@ -1,4 +1,4 @@
-package org.jerkar.java.jee;
+package org.jerkar.builtins.jee;
 
 import java.io.File;
 

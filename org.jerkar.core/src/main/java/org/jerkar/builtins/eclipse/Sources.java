@@ -1,4 +1,4 @@
-package org.jerkar.java.eclipse;
+package org.jerkar.builtins.eclipse;
 
 import org.jerkar.JkDirSet;
 

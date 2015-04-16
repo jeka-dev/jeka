@@ -1,4 +1,4 @@
-package org.jerkar.java.eclipse;
+package org.jerkar.builtins.eclipse;
 
 import java.io.File;
 import java.util.Collections;
@@ -9,8 +9,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.jerkar.JkLog;
-import org.jerkar.java.eclipse.DotClasspath.ClasspathEntry;
-import org.jerkar.java.eclipse.DotClasspath.ClasspathEntry.Kind;
+import org.jerkar.builtins.eclipse.DotClasspath.ClasspathEntry;
+import org.jerkar.builtins.eclipse.DotClasspath.ClasspathEntry.Kind;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

@@ -1,4 +1,4 @@
-package org.jerkar.java.jee;
+package org.jerkar.builtins.jee;
 
 import java.io.File;
 
@@ -28,7 +28,7 @@ public class JkJeePacker {
 
 	public void war(File webappSrc, File warDirDest, File warFileDest) {
 		if (! new File(webappSrc, "WEB-INF/web.xml").exists()) {
-			throw new JkException("the directory " + webappSrc.getPath()
+			throw new JkException("The directory " + webappSrc.getPath()
 					+ " does not contains WEB-INF" + File.separator + "web.xml file");
 		}
 		final JkPath path = build.depsFor(JkJavaBuild.RUNTIME);

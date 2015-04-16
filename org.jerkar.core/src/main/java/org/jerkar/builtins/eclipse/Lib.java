@@ -1,4 +1,4 @@
-package org.jerkar.java.eclipse;
+package org.jerkar.builtins.eclipse;
 
 import java.io.File;
 import java.util.ArrayList;

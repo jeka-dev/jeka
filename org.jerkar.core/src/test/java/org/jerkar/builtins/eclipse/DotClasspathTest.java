@@ -1,4 +1,4 @@
-package org.jerkar.java.eclipse;
+package org.jerkar.builtins.eclipse;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,6 +8,10 @@ import java.net.URL;
 import java.util.List;
 
 import org.jerkar.JkDirSet;
+import org.jerkar.builtins.eclipse.DotClasspath;
+import org.jerkar.builtins.eclipse.Lib;
+import org.jerkar.builtins.eclipse.ScopeResolverSmart;
+import org.jerkar.builtins.eclipse.Sources;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.java.build.JkJavaBuild;
 import org.junit.Test;

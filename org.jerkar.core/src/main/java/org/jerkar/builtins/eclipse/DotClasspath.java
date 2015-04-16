@@ -1,4 +1,4 @@
-package org.jerkar.java.eclipse;
+package org.jerkar.builtins.eclipse;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -25,9 +25,9 @@ import org.jerkar.JkException;
 import org.jerkar.JkLocator;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
+import org.jerkar.builtins.eclipse.DotClasspath.ClasspathEntry.Kind;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.java.build.JkJavaBuild;
-import org.jerkar.java.eclipse.DotClasspath.ClasspathEntry.Kind;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsString;
 import org.w3c.dom.Document;

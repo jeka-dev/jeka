@@ -1,7 +1,7 @@
-package org.jerkar.java.eclipse;
+package org.jerkar.builtins.eclipse;
 
+import org.jerkar.builtins.eclipse.DotClasspath.ClasspathEntry.Kind;
 import org.jerkar.depmanagement.JkScope;
-import org.jerkar.java.eclipse.DotClasspath.ClasspathEntry.Kind;
 
 interface ScopeResolver {
 
