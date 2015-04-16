@@ -17,7 +17,7 @@ Yet, using Java for building a Java based project brings quite valuable benefits
 * Your builds can benefit from any libraries without needing to wrap it in a plugin or a specific component
 * You can master build complexity the same way you do for regular code (ie utility classes, SoC, inheritance, composition,...) 
 * Using fluent style internal DSL, syntax is much more concise and explicit than an XML description
-* It's easier to dig into the build engine to investigate on behavior as builds are in essence, only API calls
+* It's easier to dig into the build engine to investigate on behavior as builds are in essence, only direct method invocations
 
 Additionally the following features were missing from mainstream existing tools :
 * Run pluggable extra features (test coverage, special packaging, static code analysis,...) without editing the build file
@@ -26,7 +26,7 @@ Additionally the following features were missing from mainstream existing tools 
 ## Overcoming Java shortcomings
 One believes that the verbosity and the statically typed nature of Java make it hardly suitable for expressing builds.
 Jerkar tends to prove the opposite :
-* Jerkar compiles the java build classes on the fly prior to execute them. This step is very quick, Jerkar velocity does not suffer from this 'extra' step
+* Jerkar compiles the java build classes on the fly prior to execute them. This step is quick, and make the following steps even faster.
 * Jerkar heavily relies on convention and sensitive defaults : you only need to specify what is not 'standard'
 * Jerkar features fluent APIs whose allow to express tasks in a very concise way. Jerkar build script concision is close to Gradle (and even more concise in certain cases) 
 * Jerkar comes with no 3rd party dependency (except Ivy) to avoid version clashing.
