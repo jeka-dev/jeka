@@ -86,7 +86,9 @@ public final class JkBuildPlugins {
 			buildPlugin = JkUtilsReflect.newInstance(exactPluginClass);
 			buildPlugin.configure(holder);
 		}
+		JkLog.startUnderlined("Method " + method + " on plugin " + buildPlugin.getClass().getSimpleName());
 		JkUtilsReflect.invoke(buildPlugin, method);
+		JkLog.done();
 	}
 
 	private boolean accept(JkBuildPlugin plugin) {
