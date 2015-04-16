@@ -1,8 +1,9 @@
 package org.jerkar.builtins.eclipse;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,6 +39,8 @@ import org.w3c.dom.NodeList;
 final class DotClasspath {
 
 	private static final String CLASSPATHENTRY = "classpathentry";
+
+	private static final String ENCODING = "UTF-8";
 
 	private final List<ClasspathEntry> classpathentries = new LinkedList<ClasspathEntry>();
 
@@ -101,13 +104,13 @@ final class DotClasspath {
 		return new Sources(JkDirSet.of(prods), JkDirSet.of(tests));
 	}
 
-	public List<Lib> libs(File baseDir, ScopeResolver libSegregator) {
+	public List<Lib> libs(File baseDir, ScopeResolver scopeResolver) {
 		final List<Lib> result = new LinkedList<Lib>();
 		final Map<String, File> projects = Project.findProjects(baseDir.getParentFile());
 		for (final ClasspathEntry classpathEntry : classpathentries) {
 
 			if (classpathEntry.kind.equals(ClasspathEntry.Kind.CON) ) {
-				final JkScope scope = libSegregator.scopeOfCon(classpathEntry.path);
+				final JkScope scope = scopeResolver.scopeOfCon(classpathEntry.path);
 				if (classpathEntry.path.startsWith(ClasspathEntry.JRE_CONTAINER_PREFIX)) {
 					continue;
 				}
@@ -116,7 +119,7 @@ final class DotClasspath {
 				}
 
 			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.LIB)) {
-				final JkScope scope = libSegregator.scopeOfLib(ClasspathEntry.Kind.LIB, classpathEntry.path);
+				final JkScope scope = scopeResolver.scopeOfLib(ClasspathEntry.Kind.LIB, classpathEntry.path);
 				result.add(Lib.file(classpathEntry.libAsFile(baseDir, projects), scope, classpathEntry.exported));
 
 			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.VAR)) {
@@ -133,7 +136,7 @@ final class DotClasspath {
 				if (!file.exists()) {
 					JkLog.warn("Can't find Eclipse classpath entry : " + file.getAbsolutePath());
 				}
-				final JkScope scope = libSegregator.scopeOfLib(Kind.VAR, classpathEntry.path);
+				final JkScope scope = scopeResolver.scopeOfLib(Kind.VAR, classpathEntry.path);
 				result.add(Lib.file(file, scope, classpathEntry.exported));
 
 			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC)) {
@@ -313,10 +316,10 @@ final class DotClasspath {
 	}
 
 	static void generate(JkJavaBuild build, File outputFile, String jreContainer) throws IOException, XMLStreamException, FactoryConfigurationError {
-		final FileWriter fileWriter = new FileWriter(outputFile);
+		final OutputStream fos = new FileOutputStream(outputFile);
 		final XMLStreamWriter writer = XMLOutputFactory.newInstance()
-				.createXMLStreamWriter(fileWriter);
-		writer.writeStartDocument("UTF-8", "1.0");
+				.createXMLStreamWriter(fos, ENCODING);
+		writer.writeStartDocument(ENCODING, "1.0");
 		writer.writeCharacters("\n");
 		writer.writeStartElement("classpath");
 		writer.writeCharacters("\n");

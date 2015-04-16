@@ -1,16 +1,20 @@
 package org.jerkar.builtins.jee;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.jerkar.JkBuild;
+import org.jerkar.JkBuildResolver;
 import org.jerkar.JkLog;
 import org.jerkar.JkOption;
 import org.jerkar.java.build.JkJavaBuild;
 import org.jerkar.java.build.JkJavaBuildPlugin;
 import org.jerkar.java.build.JkJavaPacker;
 import org.jerkar.java.build.JkJavaPacker.Extra;
+import org.jerkar.utils.JkUtilsFile;
+import org.jerkar.utils.JkUtilsIO;
 
-public class JkBuildPluginJee extends JkJavaBuildPlugin {
+public class JkBuildPluginWar extends JkJavaBuildPlugin {
 
 	private JkJavaBuild build;
 
@@ -34,6 +38,25 @@ public class JkBuildPluginJee extends JkJavaBuildPlugin {
 
 	private File webappSrcFile() {
 		return build.baseDir(webappSrc);
+	}
+
+	@Override
+	protected void enhanceScaffold() {
+		final File webInf = this.build.baseDir(webappSrc + "/WEB-INF");
+		webInf.mkdirs();
+		try {
+			final File webxml = new File(webInf, "web.xml");
+			if (!webxml.exists()) {
+				JkLog.info("Create web.xml");
+				webxml.createNewFile();
+				JkUtilsFile.writeString(webxml, "<web-app xmlns=\"http://java.sun.com/xml/ns/javaee\" version=\"2.5\">\n", true);
+				JkUtilsFile.writeString(webxml, "</web-app>", true);
+			}
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+		final File defaultBuild = new File(this.build.baseDir(JkBuildResolver.BUILD_SOURCE_DIR), this.build.groupName() + "/Build.java");
+		JkUtilsIO.copyUrlToFile(JkBuildPluginWar.class.getResource("Build.java_sample"), JkUtilsFile.createFileIfNotExist(defaultBuild));
 	}
 
 	@Override

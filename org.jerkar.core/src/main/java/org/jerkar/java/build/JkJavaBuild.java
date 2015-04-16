@@ -161,11 +161,18 @@ public class JkJavaBuild extends JkBuild {
 	}
 
 	/**
+	 * Returns the location of production resources that has been edited manually (not generated).
+	 */
+	public JkDirSet editedResourceDirs() {
+		return JkDirSet.of(baseDir("src/main/resources"));
+	}
+
+	/**
 	 * Returns location of production resources.
 	 */
 	public JkDirSet resourceDirs() {
 		final JkDirSet original = sourceDirs().andFilter(RESOURCE_FILTER).and(
-				baseDir("src/main/resources")).and(generatedResourceDir());
+				editedResourceDirs()).and(generatedResourceDir());
 		return JkJavaBuildPlugin.applyResourceDirs(this.plugins.getActives(), original);
 	}
 
@@ -173,7 +180,7 @@ public class JkJavaBuild extends JkBuild {
 	 * Returns location of test source code.
 	 */
 	public JkDirSet testSourceDirs() {
-		final JkDirSet original =  JkDirSet.of(baseDir().sub("src/test/java"));
+		final JkDirSet original =  JkDirSet.of(baseDir("src/test/java"));
 		return JkJavaBuildPlugin.applyTestSourceDirs(this.plugins.getActives(), original);
 	}
 
@@ -284,6 +291,17 @@ public class JkJavaBuild extends JkBuild {
 	}
 
 	// --------------------------- Callable Methods -----------------------
+
+	@Override
+	public void scaffold() {
+		super.scaffold();
+		for (final JkDir dir : this.editedSourceDirs().jkDirs()) {
+			dir.root().mkdirs();
+		}
+		for (final JkDir dir : this.testSourceDirs().jkDirs()) {
+			dir.root().mkdirs();
+		}
+	}
 
 	@JkDoc("Generate sources and resources, compile production sources and process production resources to the classes directory.")
 	public void compile() {

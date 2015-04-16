@@ -86,7 +86,7 @@ public class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 				final WstCommonComponent wstCommonComponent = WstCommonComponent.of(javaBuild.baseDir().root());
 				return new ScopeResolverSmart(wstCommonComponent);
 			}
-			return null;
+			return new ScopeResolverSmart(null);
 		}
 		return new ScopeResolverAllCompile();
 	}

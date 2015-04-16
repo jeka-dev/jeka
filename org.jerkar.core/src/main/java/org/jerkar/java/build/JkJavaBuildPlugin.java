@@ -72,9 +72,6 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
 		return original;
 	}
 
-
-
-
 	static JkJavaPacker applyPacker(Iterable<? extends JkBuildPlugin> plugins, JkJavaPacker original) {
 		JkJavaPacker result = original;
 		for (final JkBuildPlugin plugin : plugins) {
@@ -122,5 +119,7 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
 		}
 		return result;
 	}
+
+
 
 }

@@ -3,7 +3,6 @@ package org.jerkar;
 import java.io.File;
 import java.lang.reflect.Modifier;
 
-import org.jerkar.builtins.eclipse.JkBuildPluginEclipse;
 import org.jerkar.java.build.JkJavaBuild;
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;
@@ -134,17 +133,7 @@ public final class JkBuildResolver {
 		// If nothing yet found use defaults
 		final JkBuild result = new JkJavaBuild();
 		result.setBaseDir(baseDir);
-		if (new File(baseDir, DEFAULT_JAVA_SOURCE).exists() && buildlibDir.exists()) {
-			return result;
-		}
-		if (JkBuildPluginEclipse.candidate(baseDir)) {
-			final JkBuildPluginEclipse pluginEclipse = new JkBuildPluginEclipse();
-			JkOptions.populateFields(pluginEclipse);
-			result.plugins.addActivated(pluginEclipse);
-			return result;
-		}
-
-		return null;
+		return result;
 	}
 
 }

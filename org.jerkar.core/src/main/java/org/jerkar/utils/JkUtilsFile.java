@@ -435,6 +435,18 @@ public final class JkUtilsFile {
 		}
 	}
 
+	public static File createFileIfNotExist(File file) {
+		try {
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			return file;
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+
 	public static void delete(File file) {
 		if (!file.delete()) {
 			throw new RuntimeException("File " + file.getAbsolutePath()  + " can't be deleted.");

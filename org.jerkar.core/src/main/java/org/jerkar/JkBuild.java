@@ -398,6 +398,15 @@ public class JkBuild {
 
 	// ------------ Operations ------------
 
+	@JkDoc("Create the project structure")
+	public void scaffold() {
+		final File spec = this.baseDir(JkBuildResolver.BUILD_SOURCE_DIR);
+		spec.mkdirs();
+		final String packageName = this.groupName().replace('.', '/');
+		new File(spec, packageName).mkdirs();
+		JkBuildPlugin.applyScafforld(this.plugins.getActives());
+	}
+
 	@JkDoc("Clean the output directory.")
 	public void clean() {
 		JkLog.start("Cleaning output directory " + ouputDir().root().getPath() );

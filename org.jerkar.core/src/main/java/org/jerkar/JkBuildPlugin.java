@@ -25,6 +25,8 @@ public abstract class JkBuildPlugin {
 		// Do nothing by default
 	}
 
+
+
 	/**
 	 * Override this method if the plugin need to alter the dependency resolver.
 	 * 
@@ -41,6 +43,13 @@ public abstract class JkBuildPlugin {
 	 */
 	protected JkDependencies alterDependencies(JkDependencies original) {
 		return original;
+	}
+
+	/**
+	 * Override the method if the plugin need to enhance scaffolding
+	 */
+	protected void enhanceScaffold() {
+		// Do nothing by default
 	}
 
 	static void applyVerify(Iterable<? extends JkBuildPlugin> plugins) {
@@ -63,6 +72,12 @@ public abstract class JkBuildPlugin {
 			result = plugin.alterDependencies(original);
 		}
 		return result;
+	}
+
+	static void applyScafforld(Iterable<? extends JkBuildPlugin> plugins) {
+		for (final JkBuildPlugin plugin : plugins) {
+			plugin.enhanceScaffold();
+		}
 	}
 
 	@Override
