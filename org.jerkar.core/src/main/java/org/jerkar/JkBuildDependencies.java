@@ -14,22 +14,25 @@ import org.jerkar.utils.JkUtilsIterable;
 
 public final class JkBuildDependencies {
 
-	public static JkBuildDependencies of(List<JkBuild> builds) {
-		return new JkBuildDependencies(new ArrayList<JkBuild>(builds));
+	static JkBuildDependencies of(JkBuild master, List<JkBuild> builds) {
+		return new JkBuildDependencies(master, new ArrayList<JkBuild>(builds));
 	}
 
 	private final List<JkBuild> buildDeps;
 
 	private List<JkBuild> resolvedTransitiveBuilds;
 
-	private JkBuildDependencies(List<JkBuild> buildDeps) {
+	private final JkBuild master;
+
+	private JkBuildDependencies(JkBuild master, List<JkBuild> buildDeps) {
 		super();
+		this.master = master;
 		this.buildDeps = Collections.unmodifiableList(buildDeps);
 	}
 
 	@SuppressWarnings("unchecked")
 	public JkBuildDependencies and(List<JkBuild> builds) {
-		return new JkBuildDependencies(JkUtilsIterable.concatLists(this.buildDeps, builds));
+		return new JkBuildDependencies(this.master, JkUtilsIterable.concatLists(this.buildDeps, builds));
 	}
 
 	public List<JkBuild> transitiveBuilds() {
@@ -47,10 +50,12 @@ public final class JkBuildDependencies {
 		this.executeOnAllTransitive(BuildMethod.normals(methods));
 	}
 
-	void executeOnAllTransitive(Iterable<BuildMethod> methods) {
+	private void executeOnAllTransitive(Iterable<BuildMethod> methods) {
+		JkLog.startln("Invoke " + methods + " on all dependents projects");
 		for (final JkBuild build : transitiveBuilds()) {
-			build.execute(methods);
+			build.execute(methods, this.master);
 		}
+		JkLog.done("invoking " + methods + " on all dependents projects");
 	}
 
 	void activatePlugin(Class<? extends JkBuildPlugin> clazz, Map<String, String> options) {

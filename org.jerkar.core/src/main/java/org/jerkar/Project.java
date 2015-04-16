@@ -172,13 +172,22 @@ class Project {
 		final Class<JkBuildPlugin> baseClass = JkClassLoader.of(build.getClass()).load(JkBuildPlugin.class.getName());
 		final PluginDictionnary<JkBuildPlugin> dictionnary = PluginDictionnary.of(baseClass);
 
-		if (!commandLine.getSubProjectMethods().isEmpty()
-				&& !build.buildDependencies().transitiveBuilds().isEmpty()) {
-			JkLog.startHeaded("Executing dependent projects");
-			for (final JkBuild subBuild : build.buildDependencies().transitiveBuilds()) {
-				configurePluginsAndRun(subBuild, commandLine.getSubProjectMethods(),
-						commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
+		if (!build.buildDependencies().transitiveBuilds().isEmpty()) {
+			if (!commandLine.getSubProjectMethods().isEmpty()) {
+				JkLog.startHeaded("Executing dependent projects");
+				for (final JkBuild subBuild : build.buildDependencies().transitiveBuilds()) {
+					configurePluginsAndRun(subBuild, commandLine.getSubProjectMethods(),
+							commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
 
+				}
+			} else {
+				JkLog.startln("Configuring dependent projects");
+				for (final JkBuild subBuild : build.buildDependencies().transitiveBuilds()) {
+					JkLog.startln("Configuring " + subBuild.baseDir().root().getName());
+					configureProject(subBuild,
+							commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
+					JkLog.done();
+				}
 			}
 			JkLog.done();
 		}
@@ -186,15 +195,20 @@ class Project {
 				commandLine.getMasterPluginSetups(), commandLine.getMasterBuildOptions(), dictionnary);
 	}
 
+	private static void configureProject(JkBuild build,
+			Collection<JkPluginSetup> pluginSetups, Map<String, String> options,  PluginDictionnary<JkBuildPlugin> dictionnary) {
+		JkOptions.populateFields(build, options);
+		configureAndActivatePlugins(build, pluginSetups, dictionnary);
+	}
+
 	private static void configurePluginsAndRun(JkBuild build, List<MethodInvocation> invokes,
 			Collection<JkPluginSetup> pluginSetups, Map<String, String> options,  PluginDictionnary<JkBuildPlugin> dictionnary) {
 		JkLog.startHeaded("Executing building for project " + build.baseDir().root().getName());
 		JkLog.info("Using build class " + build.getClass().getName());
+		configureProject(build, pluginSetups, options, dictionnary);
 		JkLog.info("With activated plugins : " + build.plugins.getActives());
-		JkOptions.populateFields(build, options);
-		configureAndActivatePlugins(build, pluginSetups, dictionnary);
 		JkLog.info("Build options : " + JkOptions.fieldOptionsToString(build));
-		build.execute(toBuildMethods(invokes, dictionnary));
+		build.execute(toBuildMethods(invokes, dictionnary), null);
 		JkLog.done("Build " + build.baseDir().root().getName());
 	}
 

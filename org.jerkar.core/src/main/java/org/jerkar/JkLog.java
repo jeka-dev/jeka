@@ -14,6 +14,8 @@ import org.jerkar.utils.JkUtilsTime;
  */
 public class JkLog {
 
+	private static final String INDENT = "    ";
+
 	private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<LinkedList<Long>>();
 
 	private static OffsetStream infoWriter = new OffsetStream(System.out);
@@ -253,14 +255,11 @@ public class JkLog {
 				return "";
 			}
 			if (offsetLevel == 1) {
-				return "  ";
+				return INDENT;
 			}
-			if (offsetLevel == 2) {
-				return "    ";
-			}
-			final StringBuilder result = new StringBuilder("      ");
-			for (int i =3; i < offsetLevel;i++) {
-				result.append("  ");
+			final StringBuilder result = new StringBuilder(INDENT);
+			for (int i = 1; i < offsetLevel;i++) {
+				result.append(INDENT);
 			}
 			return result.toString();
 		}

@@ -102,7 +102,7 @@ public class JkBuild {
 
 	protected JkBuild() {
 		final List<JkBuild> subBuilds = populateProjectBuildField(this);
-		this.explicitBuildDependencies = JkBuildDependencies.of(subBuilds);
+		this.explicitBuildDependencies = JkBuildDependencies.of(this, subBuilds);
 	}
 
 	/**
@@ -330,7 +330,7 @@ public class JkBuild {
 	/**
 	 * Invokes the specified method in this build.
 	 */
-	final void invoke(String methodName) {
+	private final void invoke(String methodName, JkBuild from) {
 		final Method method;
 		try {
 			method = this.getClass().getMethod(methodName);
@@ -340,7 +340,15 @@ public class JkBuild {
 			JkLog.warnStream().flush();
 			return;
 		}
-		JkLog.startUnderlined("Method : " + methodName);
+		final String context;
+		if (from != null) {
+			final String path  = JkUtilsFile.getRelativePath(from.baseDir().root(), this.baseDir)
+					.replace(File.separator, "/");
+			context = " from project " + path + ", class " + this.getClass().getName();
+		} else {
+			context = "";
+		}
+		JkLog.startUnderlined("Method : " + methodName + context);
 		try {
 			JkUtilsReflect.invoke(this, method);
 			JkLog.done("Method " + methodName + " success.");
@@ -350,9 +358,16 @@ public class JkBuild {
 		}
 	}
 
-	final void execute(Iterable<BuildMethod> methods) {
+	/**
+	 * Executes specified method for this build.
+	 * 
+	 * @param from If the method is invoked from an external build (multi-projects)
+	 * then you can specify the build from where it is launched in order to have proper logging.
+	 * Can be <code>null</code>.
+	 */
+	final void execute(Iterable<BuildMethod> methods, JkBuild from) {
 		for (final BuildMethod method : methods) {
-			this.invoke(method);
+			this.invoke(method, from);
 		}
 	}
 
@@ -414,11 +429,11 @@ public class JkBuild {
 		return relativeProject(this, null, relativePath);
 	}
 
-	private void invoke(BuildMethod buildMethod) {
+	private void invoke(BuildMethod buildMethod, JkBuild from) {
 		if (buildMethod.isMethodPlugin()) {
 			this.plugins.invoke(buildMethod.pluginClass, buildMethod.methodName);
 		} else {
-			this.invoke(buildMethod.methodName);
+			this.invoke(buildMethod.methodName, from);
 		}
 	}
 
