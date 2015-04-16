@@ -129,7 +129,7 @@ class Project {
 		if (JkLocator.libExtDir().exists()) {
 			extraLibs.addAll(JkDir.of(JkLocator.libExtDir()).include("**/*.jar").files());
 		}
-		return JkPath.of(extraLibs).and(JkLocator.jerkararFile(), JkLocator.ivyJarFile());
+		return JkPath.of(extraLibs).and(JkLocator.jerkarFile(), JkLocator.ivyJarFile());
 	}
 
 	private JkPath resolveBuildPath() {

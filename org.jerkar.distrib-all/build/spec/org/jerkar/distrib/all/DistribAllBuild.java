@@ -11,6 +11,8 @@ import org.jerkar.JkProject;
 import org.jerkar.JkZipper;
 import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
+import org.jerkar.utils.JkUtilsFile;
+import org.jerkar.utils.JkUtilsIO;
 
 public class DistribAllBuild extends JkBuild {
 	
@@ -27,7 +29,13 @@ public class DistribAllBuild extends JkBuild {
 		
 		JkLog.info("Copy core distribution localy.");
 		CoreBuild core = pluginsJacoco.core;  // The core project is got by transitivity
-		JkDir dist = JkDir.of(this.ouputDir("dist")).importDirContent(core.distribFolder);
+		File distDir = this.ouputDir("dist");
+		JkDir dist = JkDir.of(distDir).importDirContent(core.distribFolder);
+		String content = JkUtilsFile.read(new File(core.distribFolder, "jerkar.bat"))
+				.replace("org.jerkar.core.jar", "org.jerkar.core-fat.jar");
+		File batFile = new File(distDir, "jerkar.bat");
+		JkUtilsFile.writeString(batFile, content, false);
+		
 		
 		JkLog.info("Add plugins to the distribution");
 		JkDir ext = dist.sub("libs/ext").importFiles(pluginsSonar.packer().jarFile(), pluginsJacoco.packer().jarFile());

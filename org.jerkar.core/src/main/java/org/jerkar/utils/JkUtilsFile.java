@@ -151,6 +151,14 @@ public final class JkUtilsFile {
 		return JkUtilsIterable.propertiesToMap(properties);
 	}
 
+	public static String read(File file) {
+		final FileInputStream fileInputStream = JkUtilsIO.inputStream(file);
+		final String result = JkUtilsIO.readAsString(fileInputStream);
+		JkUtilsIO.closeQuietly(fileInputStream);
+		return result;
+	}
+
+
 	public static void copyFileToDir(File from, File toDir, PrintStream reportStream) {
 		final File to = new File(toDir, from.getName());
 		copyFile(from, to, reportStream);

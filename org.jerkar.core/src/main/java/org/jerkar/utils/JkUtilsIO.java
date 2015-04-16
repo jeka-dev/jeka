@@ -182,10 +182,10 @@ public final class JkUtilsIO {
 	public static String readResource(String resourcePath) {
 		final InputStream is = JkUtilsFile.class.getClassLoader()
 				.getResourceAsStream(resourcePath);
-		return readLine(is);
+		return readAsString(is);
 	}
 
-	public static String readLine(InputStream in) {
+	public static String readAsString(InputStream in) {
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(
 				in));
 		final StringBuilder out = new StringBuilder();
@@ -208,7 +208,7 @@ public final class JkUtilsIO {
 		if (is == null) {
 			return null;
 		}
-		return readLine(is);
+		return readAsString(is);
 	}
 
 	/**

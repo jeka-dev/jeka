@@ -424,7 +424,7 @@ final class DotClasspath {
 	private static void writeJerkarEntry(XMLStreamWriter writer) throws XMLStreamException {
 		writer.writeCharacters("\t");
 		writer.writeEmptyElement(CLASSPATHENTRY);
-		final File file = JkLocator.jerkararFile();
+		final File file = JkLocator.jerkarFile();
 		final VarReplacement varReplacement = new VarReplacement(file);
 		if (varReplacement.replaced) {
 			writer.writeAttribute("kind", "var");

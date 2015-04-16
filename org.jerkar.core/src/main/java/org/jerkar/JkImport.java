@@ -18,6 +18,6 @@ public @interface JkImport {
 
 	String[] value();
 
-	String[] repos();
+	String[] repos() default "";
 
 }

@@ -28,7 +28,7 @@ class JUnit4TestLauncher {
 			args.add(clazz.getName());
 		}
 		final JkJavaProcess process;
-		process = jkJavaProcess.andClasspath(JkClasspath.of(JkLocator.jerkararFile()));
+		process = jkJavaProcess.andClasspath(JkClasspath.of(JkLocator.jerkarFile()));
 		process.startAndWaitFor(JUnit4TestExecutor.class.getName(), args.toArray(new String[0]));
 		return (JkTestSuiteResult) JkUtilsIO.deserialize(file);
 	}
@@ -40,7 +40,7 @@ class JUnit4TestLauncher {
 	public static JkTestSuiteResult launchInClassLoader(Iterable<Class> classes, boolean verbose, JunitReportDetail reportDetail, File reportDir) {
 		final JkClassLoader classloader = JkClassLoader.of(classes.iterator().next());
 		final Class[] classArray = JkUtilsIterable.toArray(classes, Class.class);
-		classloader.addEntry(JkLocator.jerkararFile());
+		classloader.addEntry(JkLocator.jerkarFile());
 		if (verbose) {
 			JkLog.info("Launching test using class loader :");
 			JkLog.info(classloader.toString());
