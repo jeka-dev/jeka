@@ -22,6 +22,11 @@ import org.jerkar.utils.JkUtilsString;
 public class JkScope {
 
 	/**
+	 * Scope for dependencies needed to compile and run the Java build scripts
+	 */
+	public static final JkScope BUILD = JkScope.of("build").descr("Dependencies needed to compile and run the Java build scripts");
+
+	/**
 	 * Creates a new {@link JkScope} passing its name.
 	 */
 	@SuppressWarnings("unchecked")

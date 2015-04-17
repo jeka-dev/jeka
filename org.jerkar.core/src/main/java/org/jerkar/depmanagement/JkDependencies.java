@@ -402,13 +402,8 @@ public class JkDependencies implements Iterable<JkScopedDependency> {
 		}
 
 		public ScopeableBuilder onFiles(Iterable<File> files) {
-			ScopeableBuilder builder = new ScopeableBuilder(this);
-			for (final File file : files) {
-				builder = builder.onFile(file);
-			}
-			return builder;
+			return on(JkFilesDependency.of(files));
 		}
-
 
 		public ScopeableBuilder on(JkModuleId module, JkVersionRange version) {
 			return on(module, version, true);
@@ -455,6 +450,12 @@ public class JkDependencies implements Iterable<JkScopedDependency> {
 		public static class ScopeableBuilder extends Builder {
 
 			private ScopeableBuilder(Builder builder) {
+				super(builder.dependencies);
+				this.defaultMapping = builder.defaultMapping;
+				this.defaultScopes = builder.defaultScopes;
+			}
+
+			private ScopeableBuilder(Builder builder, List<JkScopedDependency> current) {
 				super(builder.dependencies);
 				this.defaultMapping = builder.defaultMapping;
 				this.defaultScopes = builder.defaultScopes;

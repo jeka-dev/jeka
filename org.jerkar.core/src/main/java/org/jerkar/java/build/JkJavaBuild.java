@@ -472,7 +472,6 @@ public class JkJavaBuild extends JkBuild {
 			return super.localDependencies();
 		}
 		return JkDependencies.builder()
-				.on(super.localDependencies())
 				.usingDefaultScopes(COMPILE).on(JkDependency.of(libDir.include("*.jar", "compile/*.jar")))
 				.usingDefaultScopes(PROVIDED).on(JkDependency.of(libDir.include("provided/*.jar")))
 				.usingDefaultScopes(RUNTIME).on(JkDependency.of(libDir.include("runtime/*.jar")))

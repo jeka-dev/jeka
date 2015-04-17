@@ -18,7 +18,7 @@ public final class JkBuildResolver {
 
 	private static final String DEFAULT_JAVA_SOURCE = "src/main/java";
 
-	private static final String BUILD_LIB_DIR = "build/libs/build";
+	public static final String BUILD_LIB_DIR = "build/libs/build";
 
 	public static final String BUILD_BIN_DIR_NAME = "build-bin";
 
@@ -135,5 +135,7 @@ public final class JkBuildResolver {
 		result.setBaseDir(baseDir);
 		return result;
 	}
+
+
 
 }

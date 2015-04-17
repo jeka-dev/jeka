@@ -11,6 +11,7 @@ import java.util.Scanner;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependency;
 import org.jerkar.depmanagement.JkRepos;
+import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIO;
@@ -25,7 +26,7 @@ import org.jerkar.utils.JkUtilsString;
  */
 class JavaSourceParser {
 
-	private static final JkScopeMapping SCOPE_MAPPING = JkScopeMapping.of(Project.BUILD_SCOPE).to("default(*)");
+	private static final JkScopeMapping SCOPE_MAPPING = JkScopeMapping.of(JkScope.BUILD).to("default(*)");
 
 
 	public static JavaSourceParser of(File baseDir, File code) {

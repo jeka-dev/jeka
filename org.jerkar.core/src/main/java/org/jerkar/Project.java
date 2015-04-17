@@ -25,8 +25,6 @@ import org.jerkar.utils.JkUtilsFile;
  */
 class Project {
 
-	static final JkScope BUILD_SCOPE = JkScope.of("build");
-
 	private final File projectBaseDir;
 
 	private JkDependencies buildDependencies;
@@ -73,13 +71,16 @@ class Project {
 		yetCompiledProjects.add(this.projectBaseDir);
 		preCompile();
 		JkLog.startHeaded("Making build classes for project " + this.projectBaseDir.getName());
-		path.addAll(resolveBuildPath().entries());
+		final JkDependencies scriptDeps = scriptDependencies();
+		final JkPath buildPath = getPathFromDependencies(this.buildRepos, scriptDeps);
+		path.addAll(buildPath.entries());
 		path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
-		path.addAll(localBuildPath().entries());
 		this.compileBuild(JkPath.of(path));
 		path.add(this.resolver.buildClassDir);
 		JkLog.done();
 	}
+
+
 
 	public JkBuild getBuild() {
 		if (resolver.needCompile()) {
@@ -120,33 +121,23 @@ class Project {
 		}
 	}
 
+	private JkDependencies scriptDependencies() {
+		return JkDependencies.builder()
+				.on(buildDependencies)
+				.onFiles(localBuildPath()).scope(JkScope.BUILD)
+				.build();
+	}
+
 	private	JkPath localBuildPath() {
 		final List<File> extraLibs = new LinkedList<File>();
-		final File localJerkarBuild = new File(this.projectBaseDir,"build/libs/build");
+		final File localJerkarBuild = new File(this.projectBaseDir,JkBuildResolver.BUILD_LIB_DIR);
 		if (localJerkarBuild.exists()) {
 			extraLibs.addAll(JkDir.of(localJerkarBuild).include("**/*.jar").files());
 		}
 		if (JkLocator.libExtDir().exists()) {
 			extraLibs.addAll(JkDir.of(JkLocator.libExtDir()).include("**/*.jar").files());
 		}
-		return JkPath.of(extraLibs).and(JkLocator.jerkarFile(), JkLocator.ivyJarFile());
-	}
-
-	private JkPath resolveBuildPath() {
-		final JkPath buildPath;
-		if (buildDependencies.isEmpty()) {
-			buildPath = JkPath.of();
-		} else {
-			JkLog.startln("Resolving build dependencies");
-			final JkDependencies importedDependencies =  buildDependencies;
-			JkPath extraPath  = JkPath.of(importedDependencies.fileDependencies(BUILD_SCOPE));
-			if (importedDependencies.containsExternalModule()) {
-				extraPath = extraPath.and(this.jkCompilePath(buildRepos, importedDependencies));
-			}
-			buildPath = extraPath;
-			JkLog.done();
-		}
-		return buildPath;
+		return JkPath.of(extraLibs).and(JkLocator.jerkarFile(), JkLocator.ivyJarFile()).removeDoubloons();
 	}
 
 	private JkPath compileDependentProjects(Set<File> yetCompiledProjects, LinkedHashSet<File> pathEntries) {
@@ -197,6 +188,7 @@ class Project {
 
 	private static void configureProject(JkBuild build,
 			Collection<JkPluginSetup> pluginSetups, Map<String, String> options,  PluginDictionnary<JkBuildPlugin> dictionnary) {
+		JkOptions.populateFields(build);
 		JkOptions.populateFields(build, options);
 		configureAndActivatePlugins(build, pluginSetups, dictionnary);
 	}
@@ -254,10 +246,15 @@ class Project {
 	}
 
 
-	private JkPath jkCompilePath(JkRepos jkRepos, JkDependencies deps) {
-		final JkIvy ivy = JkIvy.of(jkRepos);
-		final Set<JkArtifact> artifacts = ivy.resolve(deps, BUILD_SCOPE);
-		return JkPath.of(JkArtifact.localFiles(artifacts));
+	private JkPath getPathFromDependencies(JkRepos jkRepos, JkDependencies deps) {
+		JkPath result = JkPath.of();
+		if (deps.containsExternalModule()) {
+			final JkIvy ivy = JkIvy.of(jkRepos);
+			final Set<JkArtifact> artifacts = ivy.resolve(deps, JkScope.BUILD);
+			result = JkPath.of(JkArtifact.localFiles(artifacts));
+		}
+		result = result.and(deps.fileDependencies(JkScope.BUILD));
+		return result;
 	}
 
 	@Override

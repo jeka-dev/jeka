@@ -387,6 +387,8 @@ final class DotClasspath {
 		writer.writeAttribute("path", container);
 		writer.writeCharacters("\n");
 
+
+
 		// Write entries for regular deps
 
 		for (final File file : build.dependencyResolver().get(JkJavaBuild.RUNTIME,
@@ -430,11 +432,13 @@ final class DotClasspath {
 			writer.writeAttribute("kind", "lib");
 		}
 		writer.writeAttribute("path", varReplacement.path);
-		final String sourceFileName = JkUtilsString.substringAfterLast(file.getName(), ".jar") + "-sources.jar";
+		final String sourceFileName = JkUtilsString.substringBeforeLast(file.getName(), ".jar") + "-sources.jar";
 		final File sourceFile = new File(JkLocator.jerkarHome(), "libs/sources/"+ sourceFileName);
 		if (sourceFile.exists()) {
 			final VarReplacement sourceVarReplacement = new VarReplacement(sourceFile);
 			writer.writeAttribute("sourcepath", sourceVarReplacement.path);
+		} else {
+			JkLog.warn("Jekrker source file not found : " + sourceFile.getAbsolutePath());
 		}
 		writer.writeCharacters("\n");
 	}

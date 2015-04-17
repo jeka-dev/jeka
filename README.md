@@ -11,7 +11,7 @@ They just can't use **Java** to create organization scalable builds. **Jerkar** 
       
 Yet, using Java for building a Java based project brings quite valuable benefits :
 
-* Yous build 'scripts' leverage directly the power, the flexibility and the robustness of Java due to its statically typed nature
+* Your build 'scripts' leverage directly the power, the flexibility and the robustness of Java due to its statically typed nature
 * You leverage compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools
 * You don't have to learn an extra language or XML soup just for build purpose : lower cognitive load
 * Your builds can benefit from any libraries without needing to wrap it in a plugin or a specific component

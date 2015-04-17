@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.depmanagement.JkDependencies;
-import org.jerkar.depmanagement.JkDependency;
 import org.jerkar.depmanagement.JkDependencyResolver;
 import org.jerkar.depmanagement.JkModuleId;
 import org.jerkar.depmanagement.JkRepo;
@@ -96,7 +95,7 @@ public class JkBuild {
 	private final JkBuildDependencies explicitBuildDependencies;
 
 	/**
-	 * Other builds this build depend of.
+	 * Other builds (projects) this build depend of.
 	 */
 	private JkBuildDependencies buildDependencies;
 
@@ -251,13 +250,7 @@ public class JkBuild {
 	 * Returns the dependencies located locally to the project.
 	 */
 	protected JkDependencies localDependencies() {
-		final JkDir libDir = JkDir.of(baseDir(STD_LIB_PATH));
-		if (!libDir.root().exists()) {
-			return JkDependencies.builder().build();
-		}
-		return JkDependencies.builder()
-				.usingDefaultScopes(Project.BUILD_SCOPE)
-				.on(JkDependency.of(libDir.include("*.jar", "build/*.jar"))).build();
+		return JkDependencies.builder().build();
 	}
 
 	public final JkDependencyResolver dependencyResolver() {
@@ -273,7 +266,7 @@ public class JkBuild {
 	/**
 	 * Returns the base dependency resolver.
 	 */
-	protected JkDependencyResolver createDependencyResolver() {
+	private JkDependencyResolver createDependencyResolver() {
 		final JkDependencies dependencies = dependencies().and(extraCommandLineDeps());
 		if (dependencies.containsExternalModule()) {
 			return JkDependencyResolver.managed(jkIvy(), dependencies, module(),
@@ -282,8 +275,11 @@ public class JkBuild {
 		return JkDependencyResolver.unmanaged(dependencies);
 	}
 
+	/**
+	 * Returns the scope mapping used by the underlying dependency manager.
+	 */
 	protected JkScopeMapping scopeMapping() {
-		return JkScopeMapping.of(Project.BUILD_SCOPE).to("default(*)");
+		return JkScopeMapping.empty();
 	}
 
 	protected JkPublisher publisher() {
@@ -294,9 +290,7 @@ public class JkBuild {
 	}
 
 	protected JkDependencies extraCommandLineDeps() {
-		return JkDependencies.builder()
-				.usingDefaultScopes(Project.BUILD_SCOPE).onFiles(toPath(extraJerkarPath))
-				.build();
+		return JkDependencies.builder().build();
 	}
 
 	protected final JkClasspath toPath(String pathAsString) {
