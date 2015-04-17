@@ -1,12 +1,12 @@
 package org.jerkar.plugins.jacoco;
 
 import org.jerkar.CoreBuild;
+import org.jerkar.JerkarBuild;
 import org.jerkar.JkProject;
 import org.jerkar.depmanagement.JkDependencies;
-import org.jerkar.java.build.JkJavaBuild;
 
 
-public class PluginsJacocoBuild extends JkJavaBuild {
+public class PluginsJacocoBuild extends JerkarBuild {
 	
 	@JkProject("../org.jerkar.core")
 	public CoreBuild core;

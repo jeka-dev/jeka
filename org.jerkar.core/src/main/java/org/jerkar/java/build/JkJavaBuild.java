@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.jerkar.JkBuild;
+import org.jerkar.JkBuildResolver;
 import org.jerkar.JkClasspath;
 import org.jerkar.JkDir;
 import org.jerkar.JkDirSet;
@@ -25,6 +26,8 @@ import org.jerkar.java.testing.junit.JkUnit;
 import org.jerkar.java.testing.junit.JkUnit.JunitReportDetail;
 import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
+import org.jerkar.utils.JkUtilsFile;
+import org.jerkar.utils.JkUtilsIO;
 import org.jerkar.utils.JkUtilsIterable;
 
 /**
@@ -301,6 +304,14 @@ public class JkJavaBuild extends JkBuild {
 		for (final JkDir dir : this.testSourceDirs().jkDirs()) {
 			dir.root().mkdirs();
 		}
+		final File defaultBuild = new File(this.baseDir(JkBuildResolver.BUILD_SOURCE_DIR), this.groupName() + "/Build.java");
+		if (defaultBuild.exists()) {
+			return;
+		}
+		JkUtilsFile.createFileIfNotExist(defaultBuild);
+		String content = JkUtilsIO.read(JkJavaBuild.class.getResource("Build.java_sample"));
+		content = content.replace("__groupName__", this.groupName());
+		JkUtilsFile.writeString(defaultBuild, content, false);
 	}
 
 	@JkDoc("Generate sources and resources, compile production sources and process production resources to the classes directory.")

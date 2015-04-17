@@ -1,19 +1,13 @@
 package __groupName__;
 
-import org.jerkar.builtins.jee.JkBuildPluginWar;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.java.build.JkJavaBuild;
 
 class Build extends JkJavaBuild {
 	
-	protected void init() {
-		JkBuildPluginWar warPlugin = new JkBuildPluginWar();
-		this.plugins.addActivated(warPlugin);
-	}
-	
 	protected JkDependencies dependencies() {
 		return JkDependencies.builder()
-				.on("javax.servlet:servlet-api:2.5").scope(PROVIDED)
+				// Add your dependencies here
 		.build();
 	}
 	

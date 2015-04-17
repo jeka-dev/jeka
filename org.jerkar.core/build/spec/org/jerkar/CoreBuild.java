@@ -4,14 +4,13 @@ import java.io.File;
 import java.util.zip.Deflater;
 
 import org.jerkar.java.JkResourceProcessor;
-import org.jerkar.java.build.JkJavaBuild;
 import org.jerkar.java.build.JkJavaPacker;
 
 /**
  * Build class for Jerkar itself.
  * This build does not rely on any dependence manager.
  */
-public class CoreBuild extends JkJavaBuild {
+public class CoreBuild extends JerkarBuild {
 
 	public File distripZipFile;
 

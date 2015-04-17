@@ -56,7 +56,11 @@ public class JkBuildPluginWar extends JkJavaBuildPlugin {
 			throw new RuntimeException(e);
 		}
 		final File defaultBuild = new File(this.build.baseDir(JkBuildResolver.BUILD_SOURCE_DIR), this.build.groupName() + "/Build.java");
-		JkUtilsIO.copyUrlToFile(JkBuildPluginWar.class.getResource("Build.java_sample"), JkUtilsFile.createFileIfNotExist(defaultBuild));
+		defaultBuild.delete();
+		JkUtilsFile.createFileIfNotExist(defaultBuild);
+		String content = JkUtilsIO.read(JkBuildPluginWar.class.getResource("Build.java_sample"));
+		content = content.replace("__groupName__", this.build.groupName());
+		JkUtilsFile.writeString(defaultBuild, content, false);
 	}
 
 	@Override

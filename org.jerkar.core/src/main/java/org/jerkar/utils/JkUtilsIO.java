@@ -179,10 +179,18 @@ public final class JkUtilsIO {
 		return result;
 	}
 
-	public static String readResource(String resourcePath) {
-		final InputStream is = JkUtilsFile.class.getClassLoader()
-				.getResourceAsStream(resourcePath);
-		return readAsString(is);
+	public static String read(URL url) {
+		InputStream is;
+		try {
+			is = url.openStream();
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+		try {
+			return readAsString(is);
+		} finally {
+			closeQuietly(is);
+		}
 	}
 
 	public static String readAsString(InputStream in) {
