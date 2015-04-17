@@ -353,8 +353,6 @@ final class DotClasspath {
 			writer.writeCharacters("\n");
 		}
 
-
-
 		// Test Sources
 		for (final JkDir jkDir : build.testResourceDirs().and(build.testResourceDirs())
 				.jkDirs()) {

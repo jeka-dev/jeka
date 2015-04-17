@@ -9,6 +9,8 @@ import org.jerkar.JkDoc;
 import org.jerkar.JkLog;
 import org.jerkar.JkProject;
 import org.jerkar.JkZipper;
+import org.jerkar.depmanagement.JkDependencies;
+import org.jerkar.java.build.JkJavaBuild;
 import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
 import org.jerkar.utils.JkUtilsFile;
@@ -39,11 +41,15 @@ public class DistribAllBuild extends JkBuild {
 		
 		JkLog.info("Add plugins to the distribution");
 		JkDir ext = dist.sub("libs/ext").importFiles(pluginsSonar.packer().jarFile(), pluginsJacoco.packer().jarFile());
-		dist.sub("libs/sources").importFiles(pluginsSonar.packer().jarSourceFile(), pluginsJacoco.packer().jarSourceFile());
+		JkDir sourceDir = dist.sub("libs/sources");
+		sourceDir.importFiles(pluginsSonar.packer().jarSourceFile(), pluginsJacoco.packer().jarSourceFile());
 		
 		JkLog.info("Add plugins to the fat jar.");
 		File fat = dist.file(core.packer().fatJarFile().getName());
 		JkZipper.of().merge(ext.include("**/*.jar")).appendTo(fat);
+		File fatSource = sourceDir.file("org.jerkar.core-fat-sources.jar");
+		JkZipper.of().merge(sourceDir.include("**.jar", "**.zip")
+			.exclude(fatSource.getName())).to(fatSource);
 		
 		JkLog.info("Pack all");
 		dist.zip().to(ouputDir("jerkar-distrib.zip"));

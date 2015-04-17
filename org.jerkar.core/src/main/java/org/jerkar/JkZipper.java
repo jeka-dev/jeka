@@ -14,7 +14,7 @@ import org.jerkar.utils.JkUtilsIO;
 import org.jerkar.utils.JkUtilsIterable;
 
 /**
- * Defines element to embed in a zip archive and methods to write archive on disk.
+ * Defines elements to embed in a zip archive and methods to write archive on disk.
  */
 public final class JkZipper {
 
@@ -67,6 +67,7 @@ public final class JkZipper {
 	 * This method returns a {@link CheckSumer} to conveniently create digests of the produced zip file.
 	 */
 	public CheckSumer to(File zipFile) {
+		JkUtilsFile.createFileIfNotExist(zipFile);
 		return this.to(zipFile, Deflater.DEFAULT_COMPRESSION);
 	}
 
