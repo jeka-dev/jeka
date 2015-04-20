@@ -12,10 +12,15 @@ import java.util.Set;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIterable;
 
-public final class JkBuildDependencies {
+/**
+ * Holds information about inter-project dependencies in a multi-project context.
+ * 
+ * @author Jerome Angibaud
+ */
+public final class JkMultiProjectDependencies {
 
-	static JkBuildDependencies of(JkBuild master, List<JkBuild> builds) {
-		return new JkBuildDependencies(master, new ArrayList<JkBuild>(builds));
+	static JkMultiProjectDependencies of(JkBuild master, List<JkBuild> builds) {
+		return new JkMultiProjectDependencies(master, new ArrayList<JkBuild>(builds));
 	}
 
 	private final List<JkBuild> buildDeps;
@@ -24,15 +29,15 @@ public final class JkBuildDependencies {
 
 	private final JkBuild master;
 
-	private JkBuildDependencies(JkBuild master, List<JkBuild> buildDeps) {
+	private JkMultiProjectDependencies(JkBuild master, List<JkBuild> buildDeps) {
 		super();
 		this.master = master;
 		this.buildDeps = Collections.unmodifiableList(buildDeps);
 	}
 
 	@SuppressWarnings("unchecked")
-	public JkBuildDependencies and(List<JkBuild> builds) {
-		return new JkBuildDependencies(this.master, JkUtilsIterable.concatLists(this.buildDeps, builds));
+	public JkMultiProjectDependencies and(List<JkBuild> builds) {
+		return new JkMultiProjectDependencies(this.master, JkUtilsIterable.concatLists(this.buildDeps, builds));
 	}
 
 	public List<JkBuild> transitiveBuilds() {

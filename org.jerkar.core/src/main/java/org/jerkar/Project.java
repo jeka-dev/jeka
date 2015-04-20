@@ -11,9 +11,10 @@ import java.util.Set;
 
 import org.jerkar.CommandLine.JkPluginSetup;
 import org.jerkar.CommandLine.MethodInvocation;
-import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkDependencies;
+import org.jerkar.depmanagement.JkDependencyResolver;
 import org.jerkar.depmanagement.JkRepos;
+import org.jerkar.depmanagement.JkResolutionParameters;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.ivy.JkIvy;
 import org.jerkar.utils.JkUtilsFile;
@@ -71,8 +72,8 @@ class Project {
 		yetCompiledProjects.add(this.projectBaseDir);
 		preCompile();
 		JkLog.startHeaded("Making build classes for project " + this.projectBaseDir.getName());
-		final JkDependencies scriptDeps = scriptDependencies();
-		final JkPath buildPath = getPathFromDependencies(this.buildRepos, scriptDeps);
+		final JkDependencyResolver scriptDepResolver = getScriptDependencyResolver();
+		final JkPath buildPath = scriptDepResolver.get(JkScope.BUILD);
 		path.addAll(buildPath.entries());
 		path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
 		this.compileBuild(JkPath.of(path));
@@ -157,6 +158,7 @@ class Project {
 	private void launch(JkBuild build, CommandLine commandLine) {
 
 		JkOptions.populateFields(build, commandLine.getMasterBuildOptions());
+		build.setScriptDependencyResolver(getScriptDependencyResolver());
 		build.init();
 
 		// setup plugins
@@ -245,17 +247,15 @@ class Project {
 				.failOnError(true);
 	}
 
-
-	private JkPath getPathFromDependencies(JkRepos jkRepos, JkDependencies deps) {
-		JkPath result = JkPath.of();
+	private JkDependencyResolver getScriptDependencyResolver() {
+		final JkDependencies deps = this.scriptDependencies();
 		if (deps.containsExternalModule()) {
-			final JkIvy ivy = JkIvy.of(jkRepos);
-			final Set<JkArtifact> artifacts = ivy.resolve(deps, JkScope.BUILD);
-			result = JkPath.of(JkArtifact.localFiles(artifacts));
+			final JkIvy ivy = JkIvy.of(this.buildRepos);
+			return JkDependencyResolver.managed(ivy, deps, null, JkResolutionParameters.of());
 		}
-		result = result.and(deps.fileDependencies(JkScope.BUILD));
-		return result;
+		return JkDependencyResolver.unmanaged(deps);
 	}
+
 
 	@Override
 	public String toString() {

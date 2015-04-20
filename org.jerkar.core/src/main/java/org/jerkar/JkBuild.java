@@ -92,16 +92,29 @@ public class JkBuild {
 	"Example : -extraCompilePath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
 	private final String extraJerkarPath = null;
 
-	private final JkBuildDependencies explicitBuildDependencies;
+	private final JkMultiProjectDependencies explicitBuildDependencies;
 
 	/**
 	 * Other builds (projects) this build depend of.
 	 */
-	private JkBuildDependencies buildDependencies;
+	private JkMultiProjectDependencies buildDependencies;
+
+	private JkDependencyResolver scriptDependencyResolver;
 
 	protected JkBuild() {
 		final List<JkBuild> subBuilds = populateProjectBuildField(this);
-		this.explicitBuildDependencies = JkBuildDependencies.of(this, subBuilds);
+		this.explicitBuildDependencies = JkMultiProjectDependencies.of(this, subBuilds);
+	}
+
+	void setScriptDependencyResolver(JkDependencyResolver scriptDependencyResolver) {
+		this.scriptDependencyResolver = scriptDependencyResolver;
+	}
+
+	/**
+	 * Returns the dependency resolver used to compile/run scripts of this project.
+	 */
+	public JkDependencyResolver scriptDependencyResolver() {
+		return this.scriptDependencyResolver;
 	}
 
 	/**
@@ -229,7 +242,7 @@ public class JkBuild {
 	/**
 	 * Returns the builds this build references.
 	 */
-	public final JkBuildDependencies buildDependencies() {
+	public final JkMultiProjectDependencies buildDependencies() {
 		if (buildDependencies == null) {
 			buildDependencies = this.explicitBuildDependencies.and(this.dependencies().buildDependencies());
 		}
@@ -466,5 +479,7 @@ public class JkBuild {
 	public <T extends JkBuildPlugin> T pluginOf(Class<T> pluginClass) {
 		return this.plugins.findInstanceOf(pluginClass);
 	}
+
+
 
 }

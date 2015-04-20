@@ -1,8 +1,10 @@
 package org.jerkar.depmanagement;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public final class JkArtifact {
 
@@ -68,6 +70,14 @@ public final class JkArtifact {
 		final List<File> result = new LinkedList<File>();
 		for (final JkArtifact artifact : artifacts) {
 			result.add(artifact.localFile);
+		}
+		return result;
+	}
+
+	public static Set<JkVersionedModule> versionedModules(Set<JkArtifact> artifacts) {
+		final Set<JkVersionedModule> result = new HashSet<JkVersionedModule>();
+		for (final JkArtifact artifact : artifacts) {
+			result.add(artifact.versionedModule());
 		}
 		return result;
 	}
