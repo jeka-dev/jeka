@@ -5,6 +5,7 @@ import org.jerkar.java.build.JkJavaBuild;
 
 class Build extends JkJavaBuild {
 	
+	@Override
 	protected JkDependencies dependencies() {
 		return JkDependencies.builder()
 				// Add your dependencies here

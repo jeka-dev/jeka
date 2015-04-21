@@ -9,10 +9,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.JkClassLoader;
+import org.jerkar.JkDir;
 import org.jerkar.JkDirSet;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
-import org.jerkar.JkZipper;
+import org.jerkar.java.build.JkJavaBuild;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsReflect;
 
@@ -50,6 +51,16 @@ public final class JkJavadocMaker {
 		return new JkJavadocMaker(sources, null, null, "", outputDir, zipFile);
 	}
 
+	public static JkJavadocMaker of(JkJavaBuild javaBuild, boolean fullName, boolean includeVersion) {
+		String name = fullName ? javaBuild.projectFullName() : javaBuild.projectName();
+		if (includeVersion) {
+			name = name + "-" + javaBuild.version().name();
+		}
+		name = name + "-javadoc";
+		return of(javaBuild.sourceDirs(), javaBuild.ouputDir(name), javaBuild.ouputDir(name + ".jar"))
+				.withClasspath(javaBuild.depsFor(JkJavaBuild.COMPILE, JkJavaBuild.PROVIDED));
+	}
+
 
 	public static JkJavadocMaker of(JkDirSet sources, File outputDir) {
 		return new JkJavadocMaker(sources, null, null, "", outputDir, null);
@@ -74,7 +85,7 @@ public final class JkJavadocMaker {
 		final String[] args = toArguments(outputDir);
 		execute(doclet, JkLog.infoStream(),JkLog.warnStream(),JkLog.errorStream(), args);
 		if (outputDir.exists() && zipFile != null) {
-			JkZipper.of(outputDir).to(zipFile);
+			JkDir.of(outputDir).zip().to(zipFile);
 		}
 		JkLog.done();
 	}
@@ -103,7 +114,7 @@ public final class JkJavadocMaker {
 		}
 
 
-		for (final File sourceFile : this.srcDirs.files()) {
+		for (final File sourceFile : this.srcDirs.files(false)) {
 			if (sourceFile.getPath().endsWith(".java")) {
 				list.add(sourceFile.getAbsolutePath());
 			}

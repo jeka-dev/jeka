@@ -98,7 +98,7 @@ public final class JkDirSet implements Iterable<File> {
 
 	@Override
 	public Iterator<File> iterator() {
-		return files().iterator();
+		return files(false).iterator();
 	}
 
 	/**
@@ -157,11 +157,11 @@ public final class JkDirSet implements Iterable<File> {
 	/**
 	 * Returns files contained in this {@link JkDirSet} as a list of file.
 	 */
-	public List<File> files() {
+	public List<File> files(boolean includeFolders) {
 		final LinkedList<File> result = new LinkedList<File>();
 		for (final JkDir dirView : this.jkDirs) {
 			if (dirView.root().exists()) {
-				result.addAll(dirView.files());
+				result.addAll(dirView.files(includeFolders));
 			}
 		}
 		return result;

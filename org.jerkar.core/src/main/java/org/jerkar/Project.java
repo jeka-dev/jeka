@@ -133,12 +133,12 @@ class Project {
 		final List<File> extraLibs = new LinkedList<File>();
 		final File localJerkarBuild = new File(this.projectBaseDir,JkBuildResolver.BUILD_LIB_DIR);
 		if (localJerkarBuild.exists()) {
-			extraLibs.addAll(JkDir.of(localJerkarBuild).include("**/*.jar").files());
+			extraLibs.addAll(JkDir.of(localJerkarBuild).include("**/*.jar").files(false));
 		}
 		if (JkLocator.libExtDir().exists()) {
-			extraLibs.addAll(JkDir.of(JkLocator.libExtDir()).include("**/*.jar").files());
+			extraLibs.addAll(JkDir.of(JkLocator.libExtDir()).include("**/*.jar").files(false));
 		}
-		return JkPath.of(extraLibs).and(JkLocator.jerkarFile(), JkLocator.ivyJarFile()).removeDoubloons();
+		return JkPath.of(extraLibs).and(JkLocator.jerkarJarFile(), JkLocator.ivyJarFile()).removeDoubloons();
 	}
 
 	private JkPath compileDependentProjects(Set<File> yetCompiledProjects, LinkedHashSet<File> pathEntries) {

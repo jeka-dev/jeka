@@ -342,7 +342,7 @@ public final class JkUtilsFile {
 				continue;
 			}
 			if (file.isDirectory()) {
-				if (includeFolders) {
+				if (includeFolders && fileFilter.accept(file)) {
 					result.add(file);
 				}
 				result.addAll(filesOf(file, fileFilter, includeFolders));

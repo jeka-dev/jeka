@@ -232,7 +232,8 @@ public final class JkDir implements Iterable<File> {
 	 * Deletes each and every files in this tree. Files excluded from this tree are not deleted.
 	 */
 	public JkDir deleteAll() {
-		for (final File file : this) {
+		final List<File> files = this.files(true);
+		for (final File file : files) {
 			if (file.exists()) {
 				if (file.isDirectory()) {
 					JkUtilsFile.deleteDirContent(file);
@@ -253,16 +254,18 @@ public final class JkDir implements Iterable<File> {
 	/**
 	 * Returns the file contained in this {@link JkDir}.
 	 */
-	public List<File> files() {
+	public List<File> files(boolean includeFolders) {
 		if (!root.exists()) {
 			throw new IllegalStateException("Folder " + root.getAbsolutePath() + " does nor exist.");
 		}
-		return JkUtilsFile.filesOf(root, filter.toFileFilter(root), false);
+		return JkUtilsFile.filesOf(root, filter.toFileFilter(root), includeFolders);
 	}
+
+
 
 	@Override
 	public Iterator<File> iterator() {
-		return files().iterator();
+		return files(false).iterator();
 	}
 
 	/**

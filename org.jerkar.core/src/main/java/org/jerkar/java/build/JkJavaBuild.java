@@ -275,10 +275,7 @@ public class JkJavaBuild extends JkBuild {
 	}
 
 	public JkJavadocMaker javadocMaker() {
-		final File outputDir = ouputDir(projectName() + "-javadoc");
-		final File zip =  ouputDir(projectName() + "-javadoc.zip");
-		return JkJavadocMaker.of(sourceDirs(), outputDir, zip)
-				.withClasspath(depsFor(COMPILE, PROVIDED));
+		return JkJavadocMaker.of(this,  true, false);
 	}
 
 	public final JkJavaPacker packer() {

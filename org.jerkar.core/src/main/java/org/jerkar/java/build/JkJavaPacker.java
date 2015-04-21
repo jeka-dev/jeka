@@ -5,9 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.Deflater;
 
-import org.jerkar.JkZipper;
 import org.jerkar.JkDir;
 import org.jerkar.JkLog;
+import org.jerkar.JkZipper;
 
 /**
  * Jar maker for the {@link JkJavaBuild} template. This maker will get information from supplied java builder
@@ -94,10 +94,10 @@ public class JkJavaPacker implements Cloneable {
 		if (doSources) {
 			build.sourceDirs().and(build.resourceDirs()).zip().to(jarSourceFile(), compressionLevel);
 		}
-		if (doTest && !build.skipTests && build.testClassDir().exists() && !JkDir.of(build.testClassDir()).files().isEmpty()) {
+		if (doTest && !build.skipTests && build.testClassDir().exists() && !JkDir.of(build.testClassDir()).files(false).isEmpty()) {
 			JkZipper.of(build.testClassDir()).to(jarTestFile(), compressionLevel);
 		}
-		if (doTest && doSources && !build.testSourceDirs().files().isEmpty()) {
+		if (doTest && doSources && !build.testSourceDirs().files(false).isEmpty()) {
 			build.testSourceDirs().and(build.testResourceDirs()).zip().to(jarTestSourceFile(), compressionLevel);
 		}
 		if (doFatJar) {

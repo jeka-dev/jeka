@@ -96,7 +96,7 @@ public abstract class JkFileFilter {
 
 			@Override
 			public boolean accept(File file) {
-				final String relativePath = JkUtilsFile.getRelativePath(baseDir, file);
+				final String relativePath = JkUtilsFile.getRelativePath(baseDir, file).replace(File.separator, "/");
 				return JkFileFilter.this.accept(relativePath);
 			}
 		};

@@ -6,11 +6,13 @@ import org.jerkar.java.build.JkJavaBuild;
 
 class Build extends JkJavaBuild {
 	
+	@Override
 	protected void init() {
 		JkBuildPluginWar warPlugin = new JkBuildPluginWar();
 		this.plugins.addActivated(warPlugin);
 	}
 	
+	@Override
 	protected JkDependencies dependencies() {
 		return JkDependencies.builder()
 				.on("javax.servlet:servlet-api:2.5").scope(PROVIDED)

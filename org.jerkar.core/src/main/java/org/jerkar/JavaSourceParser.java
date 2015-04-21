@@ -28,7 +28,6 @@ class JavaSourceParser {
 
 	private static final JkScopeMapping SCOPE_MAPPING = JkScopeMapping.of(JkScope.BUILD).to("default(*)");
 
-
 	public static JavaSourceParser of(File baseDir, File code) {
 		return of(baseDir, JkUtilsFile.toUrl(code));
 	}

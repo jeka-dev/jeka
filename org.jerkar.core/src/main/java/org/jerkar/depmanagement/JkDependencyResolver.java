@@ -45,6 +45,10 @@ public final class JkDependencyResolver  {
 		this.parameters = resolutionParameters;
 	}
 
+	public boolean isManagedDependencyResolver() {
+		return this.jkIvy != null;
+	}
+
 	private List<File> getDeclaredDependencies(JkScope scope) {
 		final List<File> result = new LinkedList<File>();
 
@@ -73,6 +77,9 @@ public final class JkDependencyResolver  {
 	 * Resolves the managed dependencies (dependencies declared as external module).
 	 */
 	public Set<JkArtifact> resolveManagedDependencies(JkScope ... scopes) {
+		if (jkIvy == null) {
+			throw new IllegalStateException("This method cannot be invoked on an unmanaged dependency resolver.");
+		}
 		final Set<JkScope> scopesSet = new HashSet<JkScope>();
 		for (final JkScope scope : scopes) {
 			scopesSet.add(scope);

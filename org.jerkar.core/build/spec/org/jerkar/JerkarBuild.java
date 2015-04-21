@@ -9,4 +9,10 @@ public abstract class JerkarBuild extends JkJavaBuild {
 		return JkJavaCompiler.V6;
 	}
 
+	@Override
+	public void pack() {
+		super.pack();
+		this.javadocMaker().process();
+	}
+
 }

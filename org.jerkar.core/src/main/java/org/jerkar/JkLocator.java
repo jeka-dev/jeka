@@ -16,7 +16,7 @@ public final class JkLocator {
 
 	private static File IVY_JAR_FILE;
 
-	public static File jerkarFile() {
+	public static File jerkarJarFile() {
 		if (JERKAR_JAR_FILE != null) {
 			return JERKAR_JAR_FILE;
 		}
@@ -53,7 +53,7 @@ public final class JkLocator {
 	 * Returns the directory where is installed the running Jerkar instance.
 	 */
 	public static File jerkarHome() {
-		return jerkarFile().getParentFile();
+		return jerkarJarFile().getParentFile();
 	}
 
 	public static File jerkarUserHome() {
@@ -63,13 +63,6 @@ public final class JkLocator {
 			result.mkdirs();
 		}
 		return result;
-	}
-
-	/**
-	 * Returns the directory where lie optional libraries.
-	 */
-	public static File optionalLibsDir() {
-		return new File(jerkarHome(), "libs/optional");
 	}
 
 	/**
