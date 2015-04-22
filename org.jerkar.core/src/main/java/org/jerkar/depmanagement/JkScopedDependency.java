@@ -1,5 +1,6 @@
 package org.jerkar.depmanagement;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -58,6 +59,19 @@ public final class JkScopedDependency {
 		return scope.isInOrIsExtendingAnyOf(scopeMapping.entries());
 	}
 
+	public boolean isInvolvedInAnyOf(Iterable<JkScope> scopes) {
+		for (final JkScope scope : scopes) {
+			if (isInvolvedIn(scope)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean isInvolvedInAnyOf(JkScope ... scopes) {
+		return isInvolvedInAnyOf(Arrays.asList(scopes));
+	}
+
 	public ScopeType scopeType() {
 		if (this.scopes != null && !this.scopes.isEmpty()) {
 			return ScopeType.SIMPLE;
@@ -72,6 +86,16 @@ public final class JkScopedDependency {
 		JkUtilsAssert.isTrue(this.scopeType() == ScopeType.SIMPLE, "This dependency does not declare simple scopes.");
 		return this.scopes;
 	}
+
+	public JkScopedDependency withScopes(Set<JkScope> scopes) {
+		return JkScopedDependency.of(dependency, scopes);
+	}
+
+	public JkScopedDependency withScopes(JkScope ... scopes) {
+		return withScopes(JkUtilsIterable.setOf(scopes));
+	}
+
+
 
 
 

@@ -80,7 +80,7 @@ public final class JkMultiProjectDependencies {
 		for (final JkBuild build : buildDeps) {
 			final File dir = JkUtilsFile.canonicalFile(build.baseDir().root());
 			if (!files.contains(dir)) {
-				result.addAll(build.buildDependencies().resolveTransitiveBuilds(files));
+				result.addAll(build.multiProjectDependencies().resolveTransitiveBuilds(files));
 				result.add(build);
 				files.add(dir);
 			}

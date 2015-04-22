@@ -32,12 +32,7 @@ public class DistribAllBuild extends JkBuild {
 		CoreBuild core = pluginsJacoco.core;  // The core project is got by transitivity
 		File distDir = this.ouputDir("dist");
 		JkDir dist = JkDir.of(distDir).importDirContent(core.distribFolder);
-		String content = JkUtilsFile.read(new File(core.distribFolder, "jerkar.bat"))
-				.replace("org.jerkar.core.jar", "org.jerkar.core-fat.jar");
-		File batFile = new File(distDir, "jerkar.bat");
-		JkUtilsFile.writeString(batFile, content, false);
-		
-		
+				
 		JkLog.info("Add plugins to the distribution");
 		JkDir ext = dist.sub("libs/ext").importFiles(pluginsSonar.packer().jarFile(), pluginsJacoco.packer().jarFile());
 		JkDir sourceDir = dist.sub("libs-sources");
@@ -68,7 +63,7 @@ public class DistribAllBuild extends JkBuild {
 	@JkDoc("End to end method to construct a distrib.")
 	public void doDefault() {
 		super.doDefault();
-		buildDependencies().invokeDoDefaultMethodOnAllSubProjects();
+		multiProjectDependencies().invokeDoDefaultMethodOnAllSubProjects();
 		distrib();
 	} 
 	

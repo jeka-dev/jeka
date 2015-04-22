@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.jerkar.JkBuild;
 import org.jerkar.JkLog;
+import org.jerkar.JkPath;
 import org.jerkar.depmanagement.JkDependency.JkFilesDependency;
 import org.jerkar.depmanagement.JkDependency.JkProjectDependency;
 import org.jerkar.depmanagement.JkScopedDependency.ScopeType;
@@ -73,6 +74,18 @@ public class JkDependencies implements Iterable<JkScopedDependency> {
 			}
 		}
 		return new JkDependencies(result);
+	}
+
+	public JkDependencies withDefaultScope(JkScope ...scopes) {
+		final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();
+		for (JkScopedDependency dep : this) {
+			if (dep.scopeType().equals(ScopeType.UNSET) ||
+					(dep.scopeType().equals(ScopeType.SIMPLE) && dep.scopes().isEmpty())) {
+				dep = dep.withScopes(scopes);
+			}
+			list.add(dep);
+		}
+		return new JkDependencies(list);
 	}
 
 	/**
@@ -276,19 +289,20 @@ public class JkDependencies implements Iterable<JkScopedDependency> {
 	}
 
 	/**
-	 * Returns all files declared as {@link JkFilesDependency} for the specified scope.
+	 * Returns all files declared as {@link JkFilesDependency} for any of the specified scopes.
 	 */
-	public List<File> fileDependencies(JkScope jkScope) {
+	public JkPath fileDependencies(JkScope ...scopes) {
 		final LinkedHashSet<File> set = new LinkedHashSet<File>();
 		for (final JkScopedDependency scopedDependency : this.dependencies) {
-			if (scopedDependency.isInvolvedIn(jkScope)
+			if (scopedDependency.isInvolvedInAnyOf(scopes)
 					&& scopedDependency.dependency() instanceof JkFilesDependency) {
 				final JkFilesDependency fileDeps = (JkFilesDependency) scopedDependency.dependency();
 				set.addAll(fileDeps.files());
 			}
 		}
-		return new LinkedList<File>(set);
+		return JkPath.of(set);
 	}
+
 
 	public List<File> projectDependencies(JkScope jkScope) {
 		final LinkedHashSet<File> set = new LinkedHashSet<File>();
@@ -326,7 +340,7 @@ public class JkDependencies implements Iterable<JkScopedDependency> {
 	 * Returns all build included in these dependencies.
 	 * The builds are coming from {@link JkProjectDependency}.
 	 */
-	public List<JkBuild> buildDependencies() {
+	public List<JkBuild> projectDependencies() {
 		final List<JkBuild> result = new LinkedList<JkBuild>();
 		for (final JkScopedDependency scopedDependency : this.dependencies) {
 			if (scopedDependency.dependency() instanceof JkProjectDependency) {
@@ -377,6 +391,12 @@ public class JkDependencies implements Iterable<JkScopedDependency> {
 		}
 
 		public ScopeableBuilder on(JkDependency dependency) {
+			if (dependency instanceof JkFilesDependency) {
+				final JkFilesDependency fileDeps = (JkFilesDependency) dependency;
+				if (fileDeps.files().isEmpty()) {
+					return new ScopeableBuilder(this);
+				}
+			}
 			final JkScopedDependency scopedDependency;
 			if (defaultScopes != null) {
 				scopedDependency = JkScopedDependency.of(dependency, defaultScopes);

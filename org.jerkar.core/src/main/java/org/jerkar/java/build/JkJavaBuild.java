@@ -360,13 +360,12 @@ public class JkJavaBuild extends JkBuild {
 	public void publish() {
 		final Date date = this.buildTime();
 		if (this.publisher().hasMavenPublishRepo()) {
-			this.publisher().publishMaven(module(), mavenPublication(), dependencies(), date);
+			this.publisher().publishMaven(module(), mavenPublication(), dependencyResolver().declaredDependencies(), date);
 		}
 		if (this.publisher().hasIvyPublishRepo()) {
-			this.publisher().publishIvy(module(), ivyPublication(), dependencies(), COMPILE, SCOPE_MAPPING, date);
+			this.publisher().publishIvy(module(), ivyPublication(), dependencyResolver().declaredDependencies(), COMPILE, SCOPE_MAPPING, date);
 		}
 	}
-
 
 
 	// ----------------------- Overridable sub-methods ---------------------
@@ -409,6 +408,11 @@ public class JkJavaBuild extends JkBuild {
 	@Override
 	protected JkScopeMapping scopeMapping() {
 		return SCOPE_MAPPING;
+	}
+
+	@Override
+	protected JkScope defaultScope() {
+		return COMPILE;
 	}
 
 	protected JkMavenPublication mavenPublication(boolean includeTests, boolean includeSources) {
@@ -463,10 +467,10 @@ public class JkJavaBuild extends JkBuild {
 	}
 
 	@Override
-	protected JkDependencies localDependencies() {
+	protected JkDependencies implicitDependencies() {
 		final JkDir libDir = JkDir.of(baseDir(STD_LIB_PATH));
 		if (!libDir.root().exists()) {
-			return super.localDependencies();
+			return super.implicitDependencies();
 		}
 		return JkDependencies.builder()
 				.usingDefaultScopes(COMPILE).on(JkDependency.of(libDir.include("*.jar", "compile/*.jar")))
