@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -241,6 +242,16 @@ public final class JkUtilsFile {
 		} catch (final MalformedURLException e) {
 			throw new IllegalArgumentException(e);
 		}
+	}
+
+	public static File fromUrl(URL url) {
+		File result;
+		try {
+			result = new File(url.toURI());
+		} catch(final URISyntaxException e) {
+			result = new File(url.getPath());
+		}
+		return result;
 	}
 
 	public static List<File> toPath(String pathAsString, String separator,

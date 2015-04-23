@@ -42,12 +42,4 @@ public class JkJeePacker {
 		JkDir.of(destDir).importDirContent(earSrc).copyInFiles(warFiles).zip().to(destFile);
 	}
 
-
-
-
-
-
-
-
-
 }

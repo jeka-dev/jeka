@@ -316,6 +316,21 @@ public class JkBuild {
 		return cachedPublisher;
 	}
 
+	protected JkScaffolder scaffolder() {
+		return JkScaffolder.of(this).withExtraAction(new Runnable() {
+
+			@Override
+			public void run() {
+				final File spec = baseDir(JkBuildResolver.BUILD_SOURCE_DIR);
+				spec.mkdirs();
+				final String packageName = groupName().replace('.', '/');
+				new File(spec, packageName).mkdirs();
+			}
+		})
+		.withExtendedClass(JkBuild.class);
+
+	}
+
 	protected JkDependencies extraCommandLineDeps() {
 		return JkDependencies.builder().build();
 	}
@@ -420,12 +435,10 @@ public class JkBuild {
 	// ------------ Operations ------------
 
 	@JkDoc("Create the project structure")
-	public void scaffold() {
-		final File spec = this.baseDir(JkBuildResolver.BUILD_SOURCE_DIR);
-		spec.mkdirs();
-		final String packageName = this.groupName().replace('.', '/');
-		new File(spec, packageName).mkdirs();
-		JkBuildPlugin.applyScafforld(this.plugins.getActives());
+	public final void scaffold() {
+		JkScaffolder jkScaffolder = this.scaffolder();
+		jkScaffolder = JkBuildPlugin.enhanceScafforld(this.plugins.getActives(), jkScaffolder);
+		jkScaffolder.process();
 	}
 
 	@JkDoc("Clean the output directory.")

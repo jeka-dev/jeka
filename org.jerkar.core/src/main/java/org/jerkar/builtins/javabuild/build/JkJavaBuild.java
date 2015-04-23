@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.jerkar.JkBuild;
-import org.jerkar.JkBuildResolver;
 import org.jerkar.JkClasspath;
 import org.jerkar.JkDir;
 import org.jerkar.JkDirSet;
@@ -15,6 +14,7 @@ import org.jerkar.JkJavaCompiler;
 import org.jerkar.JkJavaProcess;
 import org.jerkar.JkLog;
 import org.jerkar.JkOption;
+import org.jerkar.JkScaffolder;
 import org.jerkar.builtins.javabuild.JkJavadocMaker;
 import org.jerkar.builtins.javabuild.JkResourceProcessor;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
@@ -25,8 +25,6 @@ import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
 import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
-import org.jerkar.utils.JkUtilsFile;
-import org.jerkar.utils.JkUtilsIO;
 import org.jerkar.utils.JkUtilsIterable;
 import org.jerkar.utils.JkUtilsJdk;
 
@@ -292,23 +290,24 @@ public class JkJavaBuild extends JkBuild {
 
 	// --------------------------- Callable Methods -----------------------
 
+
+
 	@Override
-	public void scaffold() {
-		super.scaffold();
-		for (final JkDir dir : this.editedSourceDirs().jkDirs()) {
-			dir.root().mkdirs();
-		}
-		for (final JkDir dir : this.testSourceDirs().jkDirs()) {
-			dir.root().mkdirs();
-		}
-		final File defaultBuild = new File(this.baseDir(JkBuildResolver.BUILD_SOURCE_DIR), this.groupName() + "/Build.java");
-		if (defaultBuild.exists()) {
-			return;
-		}
-		JkUtilsFile.createFileIfNotExist(defaultBuild);
-		String content = JkUtilsIO.read(JkJavaBuild.class.getResource("Build.java_sample"));
-		content = content.replace("__groupName__", this.groupName());
-		JkUtilsFile.writeString(defaultBuild, content, false);
+	protected JkScaffolder scaffolder() {
+		final Runnable action = new Runnable() {
+
+			@Override
+			public void run() {
+				for (final JkDir dir : editedSourceDirs().jkDirs()) {
+					dir.root().mkdirs();
+				}
+				for (final JkDir dir : testSourceDirs().jkDirs()) {
+					dir.root().mkdirs();
+				}
+			}
+		};
+		return super.scaffolder().withExtraAction(action)
+				.withExtendedClass(JkJavaBuild.class);
 	}
 
 	@JkDoc("Generate sources and resources, compile production sources and process production resources to the classes directory.")

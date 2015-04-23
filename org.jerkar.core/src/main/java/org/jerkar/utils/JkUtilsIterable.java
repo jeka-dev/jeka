@@ -246,4 +246,14 @@ public class JkUtilsIterable {
 		return result;
 	}
 
+	public static <T> List<T> withoutDoubloons(List<T> list) {
+		final List<T> result = new LinkedList<T>();
+		for(final T item : list) {
+			if (!result.contains(item)) {
+				result.add(item);
+			}
+		}
+		return result;
+	}
+
 }

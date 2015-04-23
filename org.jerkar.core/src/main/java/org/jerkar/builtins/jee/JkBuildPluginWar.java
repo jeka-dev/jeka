@@ -4,15 +4,14 @@ import java.io.File;
 import java.io.IOException;
 
 import org.jerkar.JkBuild;
-import org.jerkar.JkBuildResolver;
 import org.jerkar.JkLog;
 import org.jerkar.JkOption;
+import org.jerkar.JkScaffolder;
 import org.jerkar.builtins.javabuild.build.JkJavaBuild;
 import org.jerkar.builtins.javabuild.build.JkJavaBuildPlugin;
 import org.jerkar.builtins.javabuild.build.JkJavaPacker;
 import org.jerkar.builtins.javabuild.build.JkJavaPacker.Extra;
 import org.jerkar.utils.JkUtilsFile;
-import org.jerkar.utils.JkUtilsIO;
 
 public class JkBuildPluginWar extends JkJavaBuildPlugin {
 
@@ -41,26 +40,19 @@ public class JkBuildPluginWar extends JkJavaBuildPlugin {
 	}
 
 	@Override
-	protected void enhanceScaffold() {
-		final File webInf = this.build.baseDir(webappSrc + "/WEB-INF");
-		webInf.mkdirs();
-		try {
-			final File webxml = new File(webInf, "web.xml");
-			if (!webxml.exists()) {
-				JkLog.info("Create web.xml");
-				webxml.createNewFile();
-				JkUtilsFile.writeString(webxml, "<web-app xmlns=\"http://java.sun.com/xml/ns/javaee\" version=\"2.5\">\n", true);
-				JkUtilsFile.writeString(webxml, "</web-app>", true);
+	protected JkScaffolder enhanceScaffold(JkScaffolder jkScaffolder) {
+		final Runnable runnable = new Runnable() {
+
+			@Override
+			public void run() {
+				scaffold();
 			}
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
-		final File defaultBuild = new File(this.build.baseDir(JkBuildResolver.BUILD_SOURCE_DIR), this.build.groupName() + "/Build.java");
-		defaultBuild.delete();
-		JkUtilsFile.createFileIfNotExist(defaultBuild);
-		String content = JkUtilsIO.read(JkBuildPluginWar.class.getResource("Build.java_sample"));
-		content = content.replace("__groupName__", this.build.groupName());
-		JkUtilsFile.writeString(defaultBuild, content, false);
+		};
+		return jkScaffolder.withExtraAction(runnable)
+				.withImports(JkJavaBuildPlugin.class, JkBuildPluginWar.class)
+				.withInit("JkBuildPluginWar warPlugin = new JkBuildPluginWar();")
+				.withInit("this.plugins.addActivated(warPlugin);")
+				.withDependencies("on(\"javax.servlet:servlet-api:2.5\").scope(PROVIDED)");
 	}
 
 	@Override
@@ -83,6 +75,22 @@ public class JkBuildPluginWar extends JkJavaBuildPlugin {
 		}
 		return builder.build();
 
+	}
+
+	private void scaffold() {
+		final File webInf = this.build.baseDir(webappSrc + "/WEB-INF");
+		webInf.mkdirs();
+		try {
+			final File webxml = new File(webInf, "web.xml");
+			if (!webxml.exists()) {
+				JkLog.info("Create web.xml");
+				webxml.createNewFile();
+				JkUtilsFile.writeString(webxml, "<web-app xmlns=\"http://java.sun.com/xml/ns/javaee\" version=\"2.5\">\n", true);
+				JkUtilsFile.writeString(webxml, "</web-app>", true);
+			}
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 
