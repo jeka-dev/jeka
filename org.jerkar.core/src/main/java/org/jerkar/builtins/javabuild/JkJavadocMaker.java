@@ -1,4 +1,4 @@
-package org.jerkar.java;
+package org.jerkar.builtins.javabuild;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -13,8 +13,9 @@ import org.jerkar.JkDir;
 import org.jerkar.JkDirSet;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
-import org.jerkar.java.build.JkJavaBuild;
+import org.jerkar.builtins.javabuild.build.JkJavaBuild;
 import org.jerkar.utils.JkUtilsFile;
+import org.jerkar.utils.JkUtilsJdk;
 import org.jerkar.utils.JkUtilsReflect;
 
 /**

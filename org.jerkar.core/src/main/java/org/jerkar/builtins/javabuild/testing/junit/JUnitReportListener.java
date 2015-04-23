@@ -1,14 +1,14 @@
-package org.jerkar.java.testing.junit;
+package org.jerkar.builtins.javabuild.testing.junit;
 
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import org.jerkar.java.testing.junit.JkTestSuiteResult.ExceptionDescription;
-import org.jerkar.java.testing.junit.JkTestSuiteResult.IgnoredCase;
-import org.jerkar.java.testing.junit.JkTestSuiteResult.TestCaseFailure;
-import org.jerkar.java.testing.junit.JkTestSuiteResult.TestCaseResult;
+import org.jerkar.builtins.javabuild.testing.junit.JkTestSuiteResult.ExceptionDescription;
+import org.jerkar.builtins.javabuild.testing.junit.JkTestSuiteResult.IgnoredCase;
+import org.jerkar.builtins.javabuild.testing.junit.JkTestSuiteResult.TestCaseFailure;
+import org.jerkar.builtins.javabuild.testing.junit.JkTestSuiteResult.TestCaseResult;
 import org.jerkar.utils.JkUtilsTime;
 import org.junit.runner.Description;
 import org.junit.runner.Result;

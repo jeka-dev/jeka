@@ -1,4 +1,4 @@
-package org.jerkar.java.testing.junit;
+package org.jerkar.builtins.javabuild.testing.junit;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -6,10 +6,10 @@ import java.util.List;
 
 import org.jerkar.JkClassLoader;
 import org.jerkar.JkClasspath;
+import org.jerkar.JkJavaProcess;
 import org.jerkar.JkLocator;
 import org.jerkar.JkLog;
-import org.jerkar.java.JkJavaProcess;
-import org.jerkar.java.testing.junit.JkUnit.JunitReportDetail;
+import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIO;
 import org.jerkar.utils.JkUtilsIterable;

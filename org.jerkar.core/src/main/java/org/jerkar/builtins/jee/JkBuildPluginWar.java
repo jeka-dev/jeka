@@ -7,10 +7,10 @@ import org.jerkar.JkBuild;
 import org.jerkar.JkBuildResolver;
 import org.jerkar.JkLog;
 import org.jerkar.JkOption;
-import org.jerkar.java.build.JkJavaBuild;
-import org.jerkar.java.build.JkJavaBuildPlugin;
-import org.jerkar.java.build.JkJavaPacker;
-import org.jerkar.java.build.JkJavaPacker.Extra;
+import org.jerkar.builtins.javabuild.build.JkJavaBuild;
+import org.jerkar.builtins.javabuild.build.JkJavaBuildPlugin;
+import org.jerkar.builtins.javabuild.build.JkJavaPacker;
+import org.jerkar.builtins.javabuild.build.JkJavaPacker.Extra;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIO;
 

@@ -1,4 +1,4 @@
-package org.jerkar.java.testing.junit;
+package org.jerkar.builtins.javabuild.testing.junit;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.jerkar.JkClassLoader;
-import org.jerkar.java.testing.junit.JkUnit.JunitReportDetail;
+import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
 import org.jerkar.utils.JkUtilsIO;
 import org.jerkar.utils.JkUtilsTime;
 import org.junit.runner.JUnitCore;

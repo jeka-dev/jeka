@@ -7,9 +7,9 @@ import org.jerkar.JkBuild;
 import org.jerkar.JkDirSet;
 import org.jerkar.JkDoc;
 import org.jerkar.JkOption;
+import org.jerkar.builtins.javabuild.build.JkJavaBuild;
+import org.jerkar.builtins.javabuild.build.JkJavaBuildPlugin;
 import org.jerkar.depmanagement.JkDependencies;
-import org.jerkar.java.build.JkJavaBuild;
-import org.jerkar.java.build.JkJavaBuildPlugin;
 
 @JkDoc({"Add capabilities for getting project information as source location and dependencies "
 		+ "directly form the Eclipse files (.project, .classspath).",

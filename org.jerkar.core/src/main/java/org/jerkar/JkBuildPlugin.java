@@ -5,8 +5,6 @@ import org.jerkar.depmanagement.JkDependencyResolver;
 
 /**
  * A plugin base class to extend to alter {@link JkBuild} object.
- *
- * @param <T> The build class base the concrete class is made for.
  * 
  * @author Jerome Angibaud
  */

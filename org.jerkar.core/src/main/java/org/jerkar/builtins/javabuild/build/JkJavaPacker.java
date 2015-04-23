@@ -1,4 +1,4 @@
-package org.jerkar.java.build;
+package org.jerkar.builtins.javabuild.build;
 
 import java.io.File;
 import java.util.LinkedList;

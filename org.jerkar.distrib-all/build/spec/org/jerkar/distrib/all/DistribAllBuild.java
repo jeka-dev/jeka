@@ -10,7 +10,7 @@ import org.jerkar.JkDoc;
 import org.jerkar.JkLog;
 import org.jerkar.JkProject;
 import org.jerkar.JkZipper;
-import org.jerkar.java.JkJavadocMaker;
+import org.jerkar.builtins.javabuild.JkJavadocMaker;
 import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
 

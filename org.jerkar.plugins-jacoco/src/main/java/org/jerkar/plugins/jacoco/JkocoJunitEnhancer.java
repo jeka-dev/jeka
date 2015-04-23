@@ -6,10 +6,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jerkar.JkJavaProcess;
 import org.jerkar.JkLog;
-import org.jerkar.java.JkJavaProcess;
-import org.jerkar.java.testing.junit.JkUnit;
-import org.jerkar.java.testing.junit.JkUnit.Enhancer;
+import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
+import org.jerkar.builtins.javabuild.testing.junit.JkUnit.Enhancer;
 import org.jerkar.utils.JkUtilsIO;
 
 public final class JkocoJunitEnhancer implements Enhancer {

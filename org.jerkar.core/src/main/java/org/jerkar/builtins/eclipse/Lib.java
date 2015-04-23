@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jerkar.JkLocator;
+import org.jerkar.builtins.javabuild.build.JkJavaBuild;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkScope;
-import org.jerkar.java.build.JkJavaBuild;
 
 class Lib {
 

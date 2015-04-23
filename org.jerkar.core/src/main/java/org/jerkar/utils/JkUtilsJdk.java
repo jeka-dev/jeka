@@ -1,4 +1,4 @@
-package org.jerkar.java;
+package org.jerkar.utils;
 
 import java.io.File;
 import java.io.IOException;

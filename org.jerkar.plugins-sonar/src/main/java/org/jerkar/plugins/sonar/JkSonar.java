@@ -12,10 +12,10 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.jerkar.JkClassLoader;
+import org.jerkar.JkJavaProcess;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
 import org.jerkar.depmanagement.JkVersion;
-import org.jerkar.java.JkJavaProcess;
 import org.jerkar.utils.JkUtilsAssert;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIO;

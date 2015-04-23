@@ -1,4 +1,4 @@
-package org.jerkar.java.build;
+package org.jerkar.builtins.javabuild.build;
 
 import java.io.File;
 import java.util.Date;
@@ -12,23 +12,23 @@ import org.jerkar.JkDirSet;
 import org.jerkar.JkDoc;
 import org.jerkar.JkFileFilter;
 import org.jerkar.JkJavaCompiler;
+import org.jerkar.JkJavaProcess;
 import org.jerkar.JkLog;
 import org.jerkar.JkOption;
+import org.jerkar.builtins.javabuild.JkJavadocMaker;
+import org.jerkar.builtins.javabuild.JkResourceProcessor;
+import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
+import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependency;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
-import org.jerkar.java.JkJavaProcess;
-import org.jerkar.java.JkJavadocMaker;
-import org.jerkar.java.JkResourceProcessor;
-import org.jerkar.java.JkUtilsJdk;
-import org.jerkar.java.testing.junit.JkUnit;
-import org.jerkar.java.testing.junit.JkUnit.JunitReportDetail;
 import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIO;
 import org.jerkar.utils.JkUtilsIterable;
+import org.jerkar.utils.JkUtilsJdk;
 
 /**
  * Template class to define build on Java project.

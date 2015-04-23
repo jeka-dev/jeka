@@ -1,7 +1,7 @@
 package org.jerkar.depmanagement;
 
-import static org.jerkar.java.build.JkJavaBuild.COMPILE;
-import static org.jerkar.java.build.JkJavaBuild.RUNTIME;
+import static org.jerkar.builtins.javabuild.build.JkJavaBuild.COMPILE;
+import static org.jerkar.builtins.javabuild.build.JkJavaBuild.RUNTIME;
 
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkModuleId;
