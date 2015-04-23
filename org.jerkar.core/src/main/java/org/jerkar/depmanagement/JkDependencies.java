@@ -195,7 +195,7 @@ public class JkDependencies implements Iterable<JkScopedDependency> {
 	/**
 	 * Returns the set of scopes involved in these dependencies.
 	 */
-	public Set<JkScope> moduleScopes() {
+	public Set<JkScope> declaredScopes() {
 		final Set<JkScope> result = new HashSet<JkScope>();
 		for (final JkScopedDependency dep : this.dependencies) {
 			if (dep.scopeType() == ScopeType.MAPPED) {

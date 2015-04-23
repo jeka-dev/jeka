@@ -40,7 +40,11 @@ public final class JkMultiProjectDependencies {
 		return new JkMultiProjectDependencies(this.master, JkUtilsIterable.concatLists(this.buildDeps, builds));
 	}
 
-	public List<JkBuild> transitiveBuilds() {
+	public List<JkBuild> directProjectBuilds() {
+		return Collections.unmodifiableList(buildDeps);
+	}
+
+	public List<JkBuild> transitiveProjectBuilds() {
 		if (resolvedTransitiveBuilds == null) {
 			resolvedTransitiveBuilds = resolveTransitiveBuilds(new HashSet<File>());
 		}
@@ -57,20 +61,20 @@ public final class JkMultiProjectDependencies {
 
 	private void executeOnAllTransitive(Iterable<BuildMethod> methods) {
 		JkLog.startln("Invoke " + methods + " on all dependents projects");
-		for (final JkBuild build : transitiveBuilds()) {
+		for (final JkBuild build : transitiveProjectBuilds()) {
 			build.execute(methods, this.master);
 		}
 		JkLog.done("invoking " + methods + " on all dependents projects");
 	}
 
 	void activatePlugin(Class<? extends JkBuildPlugin> clazz, Map<String, String> options) {
-		for (final JkBuild build : this.transitiveBuilds()) {
+		for (final JkBuild build : this.transitiveProjectBuilds()) {
 			build.plugins.addActivated(clazz, options);
 		}
 	}
 
 	void configurePlugin(Class<? extends JkBuildPlugin> clazz, Map<String, String> options) {
-		for (final JkBuild build : this.transitiveBuilds()) {
+		for (final JkBuild build : this.transitiveProjectBuilds()) {
 			build.plugins.addConfigured(clazz, options);
 		}
 	}

@@ -19,6 +19,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.jerkar.JkBuild;
 import org.jerkar.JkBuildResolver;
 import org.jerkar.JkDir;
 import org.jerkar.JkDirSet;
@@ -150,7 +151,6 @@ final class DotClasspath {
 		}
 		return result;
 	}
-
 
 
 	static class ClasspathEntry {
@@ -404,15 +404,30 @@ final class DotClasspath {
 		fileDeps.addAll(build.scriptDependencyResolver().declaredDependencies().fileDependencies(JkScope.BUILD).entries());
 		for (final File file : fileDeps) {
 			final String name = JkUtilsString.substringBeforeLast(file.getName(), ".jar");
-			File source = new File(file.getParentFile(), "../../libs-sources/" + name + "-sources.jar");
+			File source = new File(file.getParentFile(), name + "-sources.jar");
+			if (!source.exists()) {
+				source = new File(file.getParentFile(), "../../libs-sources/" + name + "-sources.jar");
+			}
 			if (!source.exists()) {
 				source = new File(file.getParentFile(), "libs-sources/" + name + "-sources.jar");
 			}
-			File javadoc = new File(file.getParentFile(), "../../libs-javadoc/" + name + "-javadoc.jar");
+			File javadoc =  new File(file.getParentFile(), name + "-javadoc.jar");
+			if (!javadoc.exists()) {
+				javadoc = new File(file.getParentFile(), "../../libs-javadoc/" + name + "-javadoc.jar");
+			}
 			if (!javadoc.exists()) {
 				javadoc = new File(file.getParentFile(), "libs-javadoc/" + name + "-javadoc.jar");
 			}
 			writeClassEntry(writer, file, source, javadoc);
+		}
+
+		// Write project
+		for (final JkBuild project : build.multiProjectDependencies().directProjectBuilds()) {
+			writer.writeCharacters("\t");
+			writer.writeEmptyElement(CLASSPATHENTRY);
+			writer.writeAttribute("kind", "src");
+			writer.writeAttribute("path", "/" + project.baseDir().root().getName());
+			writer.writeCharacters("\n");
 		}
 
 		// Write output
@@ -453,21 +468,21 @@ final class DotClasspath {
 	}
 
 
-	private static void writeClassEntry(XMLStreamWriter writer, File main, File source, File javadoc) throws XMLStreamException {
+	private static void writeClassEntry(XMLStreamWriter writer, File bin, File source, File javadoc) throws XMLStreamException {
 		writer.writeCharacters("\t");
-		if (javadoc == null) {
+		if (javadoc == null || !javadoc.exists()) {
 			writer.writeEmptyElement(CLASSPATHENTRY);
 		} else {
 			writer.writeStartElement(CLASSPATHENTRY);
 		}
 
-		final VarReplacement varReplacement = new VarReplacement(main);
-		if (varReplacement.replaced) {
+		final VarReplacement binReplacement = new VarReplacement(bin);
+		if (binReplacement.replaced) {
 			writer.writeAttribute("kind", "var");
 		} else {
 			writer.writeAttribute("kind", "lib");
 		}
-		writer.writeAttribute("path", varReplacement.path);
+		writer.writeAttribute("path", binReplacement.path);
 		if (source != null && source.exists()) {
 			final VarReplacement sourceReplacement = new VarReplacement(source);
 			writer.writeAttribute("sourcepath", sourceReplacement.path);

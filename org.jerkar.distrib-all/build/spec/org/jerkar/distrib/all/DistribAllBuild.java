@@ -13,7 +13,7 @@ import org.jerkar.JkZipper;
 import org.jerkar.java.JkJavadocMaker;
 import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
-import org.jerkar.utils.JkUtilsFile;
+
 
 public class DistribAllBuild extends JkBuild {
 	

@@ -108,14 +108,6 @@ public final class JkDependencyResolver  {
 	}
 
 
-
-	/**
-	 * Returns the scopes declared in the underlying dependencies.
-	 */
-	public Set<JkScope> declaredScopes() {
-		return this.dependencies.moduleScopes();
-	}
-
 	/**
 	 * Gets the path containing all the artifact files for the specified scopes.
 	 */
@@ -148,7 +140,7 @@ public final class JkDependencyResolver  {
 	 * Returns <code>true<code> if this resolver does not contain any dependencies.
 	 */
 	public boolean isEmpty() {
-		for (final JkScope scope : this.declaredScopes()) {
+		for (final JkScope scope : this.dependencies.declaredScopes()) {
 			if (!this.get(scope).isEmpty()) {
 				return false;
 			}
