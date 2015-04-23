@@ -12,7 +12,7 @@ import org.jerkar.builtins.eclipse.DotClasspath;
 import org.jerkar.builtins.eclipse.Lib;
 import org.jerkar.builtins.eclipse.ScopeResolverSmart;
 import org.jerkar.builtins.eclipse.Sources;
-import org.jerkar.builtins.javabuild.build.JkJavaBuild;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkDependencies;
 import org.junit.Test;
 

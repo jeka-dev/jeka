@@ -1,4 +1,4 @@
-package org.jerkar.builtins.javabuild.build;
+package org.jerkar.builtins.javabuild;
 
 import org.jerkar.JkBuild;
 import org.jerkar.JkBuildPlugin;

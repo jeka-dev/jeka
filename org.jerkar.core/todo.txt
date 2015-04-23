@@ -1,13 +1,6 @@
-- eclipse : generate .classpath
-
 - maven : produce dependencies snippet from Maven project.
-
-- refactor to JeKar 
 
 - able to publish on maven central.
 
 - compile/run test with other JDK (located in options)
-
-
-
 

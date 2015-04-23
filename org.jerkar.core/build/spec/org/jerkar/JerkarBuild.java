@@ -1,6 +1,6 @@
 package org.jerkar;
 
-import org.jerkar.builtins.javabuild.build.JkJavaBuild;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
 
 public abstract class JerkarBuild extends JkJavaBuild {
 

@@ -27,7 +27,7 @@ import org.jerkar.JkException;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
 import org.jerkar.builtins.eclipse.DotClasspath.ClasspathEntry.Kind;
-import org.jerkar.builtins.javabuild.build.JkJavaBuild;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.ivy.JkIvy.AttachedArtifacts;

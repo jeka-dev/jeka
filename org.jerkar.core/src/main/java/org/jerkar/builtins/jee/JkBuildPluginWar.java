@@ -7,10 +7,10 @@ import org.jerkar.JkBuild;
 import org.jerkar.JkLog;
 import org.jerkar.JkOption;
 import org.jerkar.JkScaffolder;
-import org.jerkar.builtins.javabuild.build.JkJavaBuild;
-import org.jerkar.builtins.javabuild.build.JkJavaBuildPlugin;
-import org.jerkar.builtins.javabuild.build.JkJavaPacker;
-import org.jerkar.builtins.javabuild.build.JkJavaPacker.Extra;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
+import org.jerkar.builtins.javabuild.JkJavaBuildPlugin;
+import org.jerkar.builtins.javabuild.JkJavaPacker;
+import org.jerkar.builtins.javabuild.JkJavaPacker.Extra;
 import org.jerkar.utils.JkUtilsFile;
 
 public class JkBuildPluginWar extends JkJavaBuildPlugin {

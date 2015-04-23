@@ -1,7 +1,7 @@
 package org.jerkar.depmanagement.ivy;
 
-import static org.jerkar.builtins.javabuild.build.JkJavaBuild.COMPILE;
-import static org.jerkar.builtins.javabuild.build.JkJavaBuild.PROVIDED;
+import static org.jerkar.builtins.javabuild.JkJavaBuild.COMPILE;
+import static org.jerkar.builtins.javabuild.JkJavaBuild.PROVIDED;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jerkar.JkOptions;
-import org.jerkar.builtins.javabuild.build.JkJavaBuild;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkModuleId;

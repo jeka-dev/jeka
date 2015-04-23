@@ -4,8 +4,8 @@ import java.io.File;
 
 import org.jerkar.JkBuild;
 import org.jerkar.JkDoc;
-import org.jerkar.builtins.javabuild.build.JkJavaBuild;
-import org.jerkar.builtins.javabuild.build.JkJavaBuildPlugin;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
+import org.jerkar.builtins.javabuild.JkJavaBuildPlugin;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit.Enhancer;
 

@@ -3,8 +3,8 @@ package org.jerkar;
 import java.io.File;
 import java.util.zip.Deflater;
 
+import org.jerkar.builtins.javabuild.JkJavaPacker;
 import org.jerkar.builtins.javabuild.JkResourceProcessor;
-import org.jerkar.builtins.javabuild.build.JkJavaPacker;
 
 /**
  * Build class for Jerkar itself.

@@ -1,16 +1,16 @@
 package org.jerkar.depmanagement;
 
-import static org.jerkar.builtins.javabuild.build.JkJavaBuild.COMPILE;
-import static org.jerkar.builtins.javabuild.build.JkJavaBuild.PROVIDED;
-import static org.jerkar.builtins.javabuild.build.JkJavaBuild.RUNTIME;
-import static org.jerkar.builtins.javabuild.build.JkJavaBuild.TEST;
+import static org.jerkar.builtins.javabuild.JkJavaBuild.COMPILE;
+import static org.jerkar.builtins.javabuild.JkJavaBuild.PROVIDED;
+import static org.jerkar.builtins.javabuild.JkJavaBuild.RUNTIME;
+import static org.jerkar.builtins.javabuild.JkJavaBuild.TEST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jerkar.builtins.javabuild.build.JkJavaBuild;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkDependency;
 import org.jerkar.depmanagement.JkExternalModule;
 import org.jerkar.depmanagement.JkScope;

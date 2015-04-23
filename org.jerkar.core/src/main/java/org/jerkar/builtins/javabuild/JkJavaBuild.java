@@ -1,4 +1,4 @@
-package org.jerkar.builtins.javabuild.build;
+package org.jerkar.builtins.javabuild;
 
 import java.io.File;
 import java.util.Date;
@@ -15,8 +15,6 @@ import org.jerkar.JkJavaProcess;
 import org.jerkar.JkLog;
 import org.jerkar.JkOption;
 import org.jerkar.JkScaffolder;
-import org.jerkar.builtins.javabuild.JkJavadocMaker;
-import org.jerkar.builtins.javabuild.JkResourceProcessor;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
 import org.jerkar.depmanagement.JkDependencies;

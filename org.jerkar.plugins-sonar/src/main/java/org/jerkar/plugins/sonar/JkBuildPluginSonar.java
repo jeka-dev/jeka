@@ -6,8 +6,8 @@ import org.jerkar.JkBuild;
 import org.jerkar.JkDoc;
 import org.jerkar.JkOptions;
 import org.jerkar.JkPath;
-import org.jerkar.builtins.javabuild.build.JkJavaBuild;
-import org.jerkar.builtins.javabuild.build.JkJavaBuildPlugin;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
+import org.jerkar.builtins.javabuild.JkJavaBuildPlugin;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
 import org.jerkar.utils.JkUtilsFile;
 

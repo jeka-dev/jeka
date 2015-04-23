@@ -5,7 +5,7 @@ import java.io.File;
 import org.jerkar.JkLog;
 import org.jerkar.builtins.eclipse.DotClasspath.ClasspathEntry;
 import org.jerkar.builtins.eclipse.DotClasspath.ClasspathEntry.Kind;
-import org.jerkar.builtins.javabuild.build.JkJavaBuild;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.utils.JkUtilsString;
 

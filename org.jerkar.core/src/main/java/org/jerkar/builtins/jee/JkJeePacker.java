@@ -5,7 +5,7 @@ import java.io.File;
 import org.jerkar.JkDir;
 import org.jerkar.JkException;
 import org.jerkar.JkPath;
-import org.jerkar.builtins.javabuild.build.JkJavaBuild;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
 
 /**
  * War and Ear maker for {@link JkJavaBuild}. This maker will get information from supplied java builder
