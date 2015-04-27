@@ -5,8 +5,6 @@ import org.jerkar.depmanagement.JkDependencyResolver;
 
 /**
  * A plugin base class to extend to alter {@link JkBuild} object.
- *
- * @param <T> The build class base the concrete class is made for.
  * 
  * @author Jerome Angibaud
  */
@@ -48,8 +46,8 @@ public abstract class JkBuildPlugin {
 	/**
 	 * Override the method if the plugin need to enhance scaffolding
 	 */
-	protected void enhanceScaffold() {
-		// Do nothing by default
+	protected JkScaffolder enhanceScaffold(JkScaffolder original) {
+		return original;
 	}
 
 	static void applyVerify(Iterable<? extends JkBuildPlugin> plugins) {
@@ -74,10 +72,12 @@ public abstract class JkBuildPlugin {
 		return result;
 	}
 
-	static void applyScafforld(Iterable<? extends JkBuildPlugin> plugins) {
+	static JkScaffolder enhanceScafforld(Iterable<? extends JkBuildPlugin> plugins, JkScaffolder scaffolder) {
+		JkScaffolder result = scaffolder;
 		for (final JkBuildPlugin plugin : plugins) {
-			plugin.enhanceScaffold();
+			result = plugin.enhanceScaffold(result);
 		}
+		return result;
 	}
 
 	@Override

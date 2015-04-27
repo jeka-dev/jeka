@@ -4,10 +4,10 @@ import java.io.File;
 
 import org.jerkar.JkBuild;
 import org.jerkar.JkDoc;
-import org.jerkar.java.build.JkJavaBuild;
-import org.jerkar.java.build.JkJavaBuildPlugin;
-import org.jerkar.java.testing.junit.JkUnit;
-import org.jerkar.java.testing.junit.JkUnit.Enhancer;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
+import org.jerkar.builtins.javabuild.JkJavaBuildPlugin;
+import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
+import org.jerkar.builtins.javabuild.testing.junit.JkUnit.Enhancer;
 
 @JkDoc("Performs Jacoco code coverage analysing while junit is running.")
 public class JkBuildPluginJacoco extends JkJavaBuildPlugin {

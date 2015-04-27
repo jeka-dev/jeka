@@ -1,4 +1,4 @@
-package org.jerkar.java.testing.junit;
+package org.jerkar.builtins.javabuild.testing.junit;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -8,8 +8,8 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jerkar.java.testing.junit.JkTestSuiteResult.IgnoredCase;
-import org.jerkar.java.testing.junit.JkTestSuiteResult.TestCaseFailure;
+import org.jerkar.builtins.javabuild.testing.junit.JkTestSuiteResult.IgnoredCase;
+import org.jerkar.builtins.javabuild.testing.junit.JkTestSuiteResult.TestCaseFailure;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsString;
 

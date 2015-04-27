@@ -12,8 +12,8 @@ import org.jerkar.builtins.eclipse.DotClasspath;
 import org.jerkar.builtins.eclipse.Lib;
 import org.jerkar.builtins.eclipse.ScopeResolverSmart;
 import org.jerkar.builtins.eclipse.Sources;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkDependencies;
-import org.jerkar.java.build.JkJavaBuild;
 import org.junit.Test;
 
 public class DotClasspathTest {

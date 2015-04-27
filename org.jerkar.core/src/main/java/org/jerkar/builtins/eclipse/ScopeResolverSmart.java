@@ -5,8 +5,8 @@ import java.io.File;
 import org.jerkar.JkLog;
 import org.jerkar.builtins.eclipse.DotClasspath.ClasspathEntry;
 import org.jerkar.builtins.eclipse.DotClasspath.ClasspathEntry.Kind;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkScope;
-import org.jerkar.java.build.JkJavaBuild;
 import org.jerkar.utils.JkUtilsString;
 
 class ScopeResolverSmart implements ScopeResolver {

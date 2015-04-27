@@ -1,4 +1,4 @@
-package org.jerkar.java.test.junit;
+package org.jerkar.builtins.javabuild.test.junit;
 
 import org.junit.Test;
 

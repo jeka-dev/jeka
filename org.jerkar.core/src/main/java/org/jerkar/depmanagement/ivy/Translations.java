@@ -269,7 +269,7 @@ final class Translations {
 			JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping) {
 
 		// Add configuration definitions
-		for (final JkScope involvedScope : dependencies.moduleScopes()) {
+		for (final JkScope involvedScope : dependencies.declaredScopes()) {
 			final Configuration configuration = toConfiguration(involvedScope);
 			moduleDescriptor.addConfiguration(configuration);
 		}

@@ -19,16 +19,18 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.jerkar.JkBuild;
 import org.jerkar.JkBuildResolver;
 import org.jerkar.JkDir;
 import org.jerkar.JkDirSet;
 import org.jerkar.JkException;
-import org.jerkar.JkLocator;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
 import org.jerkar.builtins.eclipse.DotClasspath.ClasspathEntry.Kind;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
+import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkScope;
-import org.jerkar.java.build.JkJavaBuild;
+import org.jerkar.depmanagement.ivy.JkIvy.AttachedArtifacts;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsString;
 import org.w3c.dom.Document;
@@ -151,7 +153,6 @@ final class DotClasspath {
 	}
 
 
-
 	static class ClasspathEntry {
 
 
@@ -268,7 +269,7 @@ final class DotClasspath {
 			}
 			final JkDir dirView = JkDir.of(conFolder).include("**/*.jar");
 			final List<File> result = new LinkedList<File>();
-			for (final File file : dirView.files()) {
+			for (final File file : dirView.files(false)) {
 				result.add(file);
 			}
 			return result;
@@ -374,9 +375,6 @@ final class DotClasspath {
 			writer.writeCharacters("\n");
 		}
 
-		// Write entry for Jerkar
-		writeJerkarEntry(writer);
-
 		// Write entry for JRE container
 		writer.writeCharacters("\t");
 		writer.writeEmptyElement(CLASSPATHENTRY);
@@ -387,13 +385,49 @@ final class DotClasspath {
 		writer.writeAttribute("path", container);
 		writer.writeCharacters("\n");
 
+		// Write entries for external module deps
+		Set<JkArtifact> depAsArtifacts = new HashSet<JkArtifact>();
+		if (build.dependencyResolver().isManagedDependencyResolver()) {
+			depAsArtifacts = build.dependencyResolver().resolveManagedDependencies(JkJavaBuild.RUNTIME,
+					JkJavaBuild.PROVIDED, JkJavaBuild.TEST);
+			writeExternalModuleEntries(build, writer, depAsArtifacts);
+		}
+		if (build.scriptDependencyResolver().isManagedDependencyResolver()) {
+			final Set<JkArtifact> scriptDepArtifacts = build.scriptDependencyResolver().resolveManagedDependencies(JkScope.BUILD);
+			scriptDepArtifacts.removeAll(depAsArtifacts);
+			writeExternalModuleEntries(build, writer, scriptDepArtifacts);
+		}
 
+		// Write entries for file dependencies
+		final Set<File> fileDeps = new HashSet<File>(build.dependencyResolver().declaredDependencies()
+				.fileDependencies(JkJavaBuild.TEST, JkJavaBuild.PROVIDED, JkJavaBuild.COMPILE).entries());
+		fileDeps.addAll(build.scriptDependencyResolver().declaredDependencies().fileDependencies(JkScope.BUILD).entries());
+		for (final File file : fileDeps) {
+			final String name = JkUtilsString.substringBeforeLast(file.getName(), ".jar");
+			File source = new File(file.getParentFile(), name + "-sources.jar");
+			if (!source.exists()) {
+				source = new File(file.getParentFile(), "../../libs-sources/" + name + "-sources.jar");
+			}
+			if (!source.exists()) {
+				source = new File(file.getParentFile(), "libs-sources/" + name + "-sources.jar");
+			}
+			File javadoc =  new File(file.getParentFile(), name + "-javadoc.jar");
+			if (!javadoc.exists()) {
+				javadoc = new File(file.getParentFile(), "../../libs-javadoc/" + name + "-javadoc.jar");
+			}
+			if (!javadoc.exists()) {
+				javadoc = new File(file.getParentFile(), "libs-javadoc/" + name + "-javadoc.jar");
+			}
+			writeClassEntry(writer, file, source, javadoc);
+		}
 
-		// Write entries for regular deps
-
-		for (final File file : build.dependencyResolver().get(JkJavaBuild.RUNTIME,
-				JkJavaBuild.PROVIDED, JkJavaBuild.TEST)) {
-			writeClassEntry(writer, file);
+		// Write project
+		for (final JkBuild project : build.multiProjectDependencies().directProjectBuilds()) {
+			writer.writeCharacters("\t");
+			writer.writeEmptyElement(CLASSPATHENTRY);
+			writer.writeAttribute("kind", "src");
+			writer.writeAttribute("path", "/" + project.baseDir().root().getName());
+			writer.writeCharacters("\n");
 		}
 
 		// Write output
@@ -408,37 +442,62 @@ final class DotClasspath {
 		writer.close();
 	}
 
-	private static void writeClassEntry(XMLStreamWriter writer, File file) throws XMLStreamException {
-		writer.writeCharacters("\t");
-		writer.writeEmptyElement(CLASSPATHENTRY);
-		final VarReplacement varReplacement = new VarReplacement(file);
-		if (varReplacement.replaced) {
-			writer.writeAttribute("kind", "var");
-		} else {
-			writer.writeAttribute("kind", "lib");
+	private static void writeExternalModuleEntries(JkJavaBuild build,
+			final XMLStreamWriter writer, final Set<JkArtifact> depAsArtifacts)
+					throws XMLStreamException {
+		final AttachedArtifacts attachedArtifacts = build.dependencyResolver().getAttachedArtifacts(
+				JkArtifact.versionedModules(depAsArtifacts), JkJavaBuild.SOURCES, JkJavaBuild.JAVADOC);
+
+		for (final JkArtifact artifact : depAsArtifacts) {
+			final Set<JkArtifact> sourcesArtifacts = attachedArtifacts.getArtifacts(artifact.versionedModule().moduleId(), JkJavaBuild.SOURCES);
+			final File source;
+			if (!sourcesArtifacts.isEmpty()) {
+				source = sourcesArtifacts.iterator().next().localFile();
+			} else {
+				source = null;
+			}
+			final Set<JkArtifact> javadocArtifacts = attachedArtifacts.getArtifacts(artifact.versionedModule().moduleId(), JkJavaBuild.JAVADOC);
+			final File javadoc;
+			if (!javadocArtifacts.isEmpty()) {
+				javadoc = javadocArtifacts.iterator().next().localFile();
+			} else {
+				javadoc = null;
+			}
+			writeClassEntry(writer, artifact.localFile(), source, javadoc);
 		}
-		writer.writeAttribute("path", varReplacement.path);
-		writer.writeCharacters("\n");
 	}
 
-	private static void writeJerkarEntry(XMLStreamWriter writer) throws XMLStreamException {
+
+	private static void writeClassEntry(XMLStreamWriter writer, File bin, File source, File javadoc) throws XMLStreamException {
 		writer.writeCharacters("\t");
-		writer.writeEmptyElement(CLASSPATHENTRY);
-		final File file = JkLocator.jerkarFile();
-		final VarReplacement varReplacement = new VarReplacement(file);
-		if (varReplacement.replaced) {
+		if (javadoc == null || !javadoc.exists()) {
+			writer.writeEmptyElement(CLASSPATHENTRY);
+		} else {
+			writer.writeStartElement(CLASSPATHENTRY);
+		}
+
+		final VarReplacement binReplacement = new VarReplacement(bin);
+		if (binReplacement.replaced) {
 			writer.writeAttribute("kind", "var");
 		} else {
 			writer.writeAttribute("kind", "lib");
 		}
-		writer.writeAttribute("path", varReplacement.path);
-		final String sourceFileName = JkUtilsString.substringBeforeLast(file.getName(), ".jar") + "-sources.jar";
-		final File sourceFile = new File(JkLocator.jerkarHome(), "libs/sources/"+ sourceFileName);
-		if (sourceFile.exists()) {
-			final VarReplacement sourceVarReplacement = new VarReplacement(sourceFile);
-			writer.writeAttribute("sourcepath", sourceVarReplacement.path);
-		} else {
-			JkLog.warn("Jekrker source file not found : " + sourceFile.getAbsolutePath());
+		writer.writeAttribute("path", binReplacement.path);
+		if (source != null && source.exists()) {
+			final VarReplacement sourceReplacement = new VarReplacement(source);
+			writer.writeAttribute("sourcepath", sourceReplacement.path);
+		}
+		if (javadoc != null && javadoc.exists()) {
+			writer.writeCharacters("\n\t\t");
+			writer.writeStartElement("attributes");
+			writer.writeCharacters("\n\t\t\t");
+			writer.writeEmptyElement("attribute");
+			writer.writeAttribute("name", "javadoc_location");
+			writer.writeAttribute("value", "jar:file:/" + JkUtilsFile.canonicalPath(javadoc).replace(File.separator, "/"));
+			writer.writeCharacters("\n\t\t");
+			writer.writeEndElement();
+			writer.writeCharacters("\n\t");
+			writer.writeEndElement();
 		}
 		writer.writeCharacters("\n");
 	}

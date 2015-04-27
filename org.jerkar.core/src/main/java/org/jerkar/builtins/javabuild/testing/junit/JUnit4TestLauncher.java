@@ -1,4 +1,4 @@
-package org.jerkar.java.testing.junit;
+package org.jerkar.builtins.javabuild.testing.junit;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -6,10 +6,10 @@ import java.util.List;
 
 import org.jerkar.JkClassLoader;
 import org.jerkar.JkClasspath;
+import org.jerkar.JkJavaProcess;
 import org.jerkar.JkLocator;
 import org.jerkar.JkLog;
-import org.jerkar.java.JkJavaProcess;
-import org.jerkar.java.testing.junit.JkUnit.JunitReportDetail;
+import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIO;
 import org.jerkar.utils.JkUtilsIterable;
@@ -28,7 +28,7 @@ class JUnit4TestLauncher {
 			args.add(clazz.getName());
 		}
 		final JkJavaProcess process;
-		process = jkJavaProcess.andClasspath(JkClasspath.of(JkLocator.jerkarFile()));
+		process = jkJavaProcess.andClasspath(JkClasspath.of(JkLocator.jerkarJarFile()));
 		process.startAndWaitFor(JUnit4TestExecutor.class.getName(), args.toArray(new String[0]));
 		return (JkTestSuiteResult) JkUtilsIO.deserialize(file);
 	}
@@ -40,7 +40,7 @@ class JUnit4TestLauncher {
 	public static JkTestSuiteResult launchInClassLoader(Iterable<Class> classes, boolean verbose, JunitReportDetail reportDetail, File reportDir) {
 		final JkClassLoader classloader = JkClassLoader.of(classes.iterator().next());
 		final Class[] classArray = JkUtilsIterable.toArray(classes, Class.class);
-		classloader.addEntry(JkLocator.jerkarFile());
+		classloader.addEntry(JkLocator.jerkarJarFile());
 		if (verbose) {
 			JkLog.info("Launching test using class loader :");
 			JkLog.info(classloader.toString());

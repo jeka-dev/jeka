@@ -1,4 +1,4 @@
-package org.jerkar.java.testing.junit;
+package org.jerkar.builtins.javabuild.testing.junit;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -19,9 +19,9 @@ import org.jerkar.JkClassLoader;
 import org.jerkar.JkClasspath;
 import org.jerkar.JkDirSet;
 import org.jerkar.JkException;
+import org.jerkar.JkJavaProcess;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
-import org.jerkar.java.JkJavaProcess;
 import org.jerkar.utils.JkUtilsIterable;
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;

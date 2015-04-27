@@ -11,9 +11,10 @@ import java.util.Set;
 
 import org.jerkar.CommandLine.JkPluginSetup;
 import org.jerkar.CommandLine.MethodInvocation;
-import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkDependencies;
+import org.jerkar.depmanagement.JkDependencyResolver;
 import org.jerkar.depmanagement.JkRepos;
+import org.jerkar.depmanagement.JkResolutionParameters;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.ivy.JkIvy;
 import org.jerkar.utils.JkUtilsFile;
@@ -71,8 +72,8 @@ class Project {
 		yetCompiledProjects.add(this.projectBaseDir);
 		preCompile();
 		JkLog.startHeaded("Making build classes for project " + this.projectBaseDir.getName());
-		final JkDependencies scriptDeps = scriptDependencies();
-		final JkPath buildPath = getPathFromDependencies(this.buildRepos, scriptDeps);
+		final JkDependencyResolver scriptDepResolver = getScriptDependencyResolver();
+		final JkPath buildPath = scriptDepResolver.get(JkScope.BUILD);
 		path.addAll(buildPath.entries());
 		path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
 		this.compileBuild(JkPath.of(path));
@@ -132,12 +133,12 @@ class Project {
 		final List<File> extraLibs = new LinkedList<File>();
 		final File localJerkarBuild = new File(this.projectBaseDir,JkBuildResolver.BUILD_LIB_DIR);
 		if (localJerkarBuild.exists()) {
-			extraLibs.addAll(JkDir.of(localJerkarBuild).include("**/*.jar").files());
+			extraLibs.addAll(JkDir.of(localJerkarBuild).include("**/*.jar").files(false));
 		}
 		if (JkLocator.libExtDir().exists()) {
-			extraLibs.addAll(JkDir.of(JkLocator.libExtDir()).include("**/*.jar").files());
+			extraLibs.addAll(JkDir.of(JkLocator.libExtDir()).include("**/*.jar").files(false));
 		}
-		return JkPath.of(extraLibs).and(JkLocator.jerkarFile(), JkLocator.ivyJarFile()).removeDoubloons();
+		return JkPath.of(extraLibs).and(JkLocator.jerkarJarFile(), JkLocator.ivyJarFile()).removeDoubloons();
 	}
 
 	private JkPath compileDependentProjects(Set<File> yetCompiledProjects, LinkedHashSet<File> pathEntries) {
@@ -157,23 +158,24 @@ class Project {
 	private void launch(JkBuild build, CommandLine commandLine) {
 
 		JkOptions.populateFields(build, commandLine.getMasterBuildOptions());
+		build.setScriptDependencyResolver(getScriptDependencyResolver());
 		build.init();
 
 		// setup plugins
 		final Class<JkBuildPlugin> baseClass = JkClassLoader.of(build.getClass()).load(JkBuildPlugin.class.getName());
 		final PluginDictionnary<JkBuildPlugin> dictionnary = PluginDictionnary.of(baseClass);
 
-		if (!build.buildDependencies().transitiveBuilds().isEmpty()) {
+		if (!build.multiProjectDependencies().transitiveProjectBuilds().isEmpty()) {
 			if (!commandLine.getSubProjectMethods().isEmpty()) {
 				JkLog.startHeaded("Executing dependent projects");
-				for (final JkBuild subBuild : build.buildDependencies().transitiveBuilds()) {
+				for (final JkBuild subBuild : build.multiProjectDependencies().transitiveProjectBuilds()) {
 					configurePluginsAndRun(subBuild, commandLine.getSubProjectMethods(),
 							commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
 
 				}
 			} else {
 				JkLog.startln("Configuring dependent projects");
-				for (final JkBuild subBuild : build.buildDependencies().transitiveBuilds()) {
+				for (final JkBuild subBuild : build.multiProjectDependencies().transitiveProjectBuilds()) {
 					JkLog.startln("Configuring " + subBuild.baseDir().root().getName());
 					configureProject(subBuild,
 							commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
@@ -245,17 +247,15 @@ class Project {
 				.failOnError(true);
 	}
 
-
-	private JkPath getPathFromDependencies(JkRepos jkRepos, JkDependencies deps) {
-		JkPath result = JkPath.of();
+	private JkDependencyResolver getScriptDependencyResolver() {
+		final JkDependencies deps = this.scriptDependencies();
 		if (deps.containsExternalModule()) {
-			final JkIvy ivy = JkIvy.of(jkRepos);
-			final Set<JkArtifact> artifacts = ivy.resolve(deps, JkScope.BUILD);
-			result = JkPath.of(JkArtifact.localFiles(artifacts));
+			final JkIvy ivy = JkIvy.of(this.buildRepos);
+			return JkDependencyResolver.managed(ivy, deps, null, JkResolutionParameters.of());
 		}
-		result = result.and(deps.fileDependencies(JkScope.BUILD));
-		return result;
+		return JkDependencyResolver.unmanaged(deps);
 	}
+
 
 	@Override
 	public String toString() {

@@ -5,13 +5,15 @@ import java.io.File;
 import org.jerkar.CoreBuild;
 import org.jerkar.JkBuild;
 import org.jerkar.JkDir;
+import org.jerkar.JkDirSet;
 import org.jerkar.JkDoc;
 import org.jerkar.JkLog;
 import org.jerkar.JkProject;
 import org.jerkar.JkZipper;
+import org.jerkar.builtins.javabuild.JkJavadocMaker;
 import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
-import org.jerkar.utils.JkUtilsFile;
+
 
 public class DistribAllBuild extends JkBuild {
 	
@@ -30,23 +32,27 @@ public class DistribAllBuild extends JkBuild {
 		CoreBuild core = pluginsJacoco.core;  // The core project is got by transitivity
 		File distDir = this.ouputDir("dist");
 		JkDir dist = JkDir.of(distDir).importDirContent(core.distribFolder);
-		String content = JkUtilsFile.read(new File(core.distribFolder, "jerkar.bat"))
-				.replace("org.jerkar.core.jar", "org.jerkar.core-fat.jar");
-		File batFile = new File(distDir, "jerkar.bat");
-		JkUtilsFile.writeString(batFile, content, false);
-		
-		
+				
 		JkLog.info("Add plugins to the distribution");
 		JkDir ext = dist.sub("libs/ext").importFiles(pluginsSonar.packer().jarFile(), pluginsJacoco.packer().jarFile());
-		JkDir sourceDir = dist.sub("libs/sources");
+		JkDir sourceDir = dist.sub("libs-sources");
 		sourceDir.importFiles(pluginsSonar.packer().jarSourceFile(), pluginsJacoco.packer().jarSourceFile());
 		
 		JkLog.info("Add plugins to the fat jar");
 		File fat = dist.file(core.packer().fatJarFile().getName());
 		JkZipper.of().merge(ext.include("**/*.jar")).appendTo(fat);
+		
+		JkLog.info("Create a fat source jar");
 		File fatSource = sourceDir.file("org.jerkar.core-fat-sources.jar");
 		JkZipper.of().merge(sourceDir.include("**.jar", "**.zip")
 			.exclude(fatSource.getName())).to(fatSource);
+		
+		JkLog.info("Create a fat javadoc");
+		JkDirSet sources = this.pluginsJacoco.core.sourceDirs().and(this.pluginsJacoco.sourceDirs())
+				.and(this.pluginsSonar.sourceDirs());
+		File javadocAllDir = this.ouputDir("javadoc-all");
+		File javadocAllFile = dist.file("libs-javadoc/org.jerkar.core-fat-javadoc.jar");
+		JkJavadocMaker.of(sources, javadocAllDir, javadocAllFile).process();
 		
 		JkLog.info("Pack all");
 		dist.zip().to(ouputDir("jerkar-distrib.zip"));
@@ -56,7 +62,8 @@ public class DistribAllBuild extends JkBuild {
 	
 	@JkDoc("End to end method to construct a distrib.")
 	public void doDefault() {
-		buildDependencies().invokeDoDefaultMethodOnAllSubProjects();
+		super.doDefault();
+		multiProjectDependencies().invokeDoDefaultMethodOnAllSubProjects();
 		distrib();
 	} 
 	

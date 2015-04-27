@@ -1,8 +1,8 @@
 package org.jerkar.builtins.eclipse;
 
 import org.jerkar.builtins.eclipse.DotClasspath.ClasspathEntry.Kind;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkScope;
-import org.jerkar.java.build.JkJavaBuild;
 
 class ScopeResolverAllCompile  implements ScopeResolver {
 

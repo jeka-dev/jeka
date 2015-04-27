@@ -5,7 +5,7 @@ import java.io.File;
 import org.jerkar.JkDir;
 import org.jerkar.JkException;
 import org.jerkar.JkPath;
-import org.jerkar.java.build.JkJavaBuild;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
 
 /**
  * War and Ear maker for {@link JkJavaBuild}. This maker will get information from supplied java builder
@@ -41,13 +41,5 @@ public class JkJeePacker {
 	public void ear(Iterable<File> warFiles, File earSrc, File destDir, File destFile) {
 		JkDir.of(destDir).importDirContent(earSrc).copyInFiles(warFiles).zip().to(destFile);
 	}
-
-
-
-
-
-
-
-
 
 }

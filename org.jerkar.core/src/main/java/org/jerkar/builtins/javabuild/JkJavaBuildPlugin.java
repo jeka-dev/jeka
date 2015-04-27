@@ -1,9 +1,9 @@
-package org.jerkar.java.build;
+package org.jerkar.builtins.javabuild;
 
 import org.jerkar.JkBuild;
 import org.jerkar.JkBuildPlugin;
 import org.jerkar.JkDirSet;
-import org.jerkar.java.testing.junit.JkUnit;
+import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
 
 /**
  * Class to extend to create plugin for {@link JkJavaBuild}.

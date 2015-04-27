@@ -3,7 +3,7 @@ package org.jerkar;
 import java.io.File;
 import java.lang.reflect.Modifier;
 
-import org.jerkar.java.build.JkJavaBuild;
+import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;
 

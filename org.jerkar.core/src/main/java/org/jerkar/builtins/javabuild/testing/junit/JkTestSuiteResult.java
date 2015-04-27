@@ -1,4 +1,4 @@
-package org.jerkar.java.testing.junit;
+package org.jerkar.builtins.javabuild.testing.junit;
 
 import java.io.Serializable;
 import java.util.ArrayList;

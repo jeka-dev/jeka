@@ -1,4 +1,4 @@
-package org.jerkar.java;
+package org.jerkar.builtins.javabuild;
 
 import static org.junit.Assert.assertEquals;
 

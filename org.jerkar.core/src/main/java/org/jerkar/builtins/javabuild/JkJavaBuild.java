@@ -1,34 +1,30 @@
-package org.jerkar.java.build;
+package org.jerkar.builtins.javabuild;
 
 import java.io.File;
 import java.util.Date;
 import java.util.List;
 
 import org.jerkar.JkBuild;
-import org.jerkar.JkBuildResolver;
 import org.jerkar.JkClasspath;
 import org.jerkar.JkDir;
 import org.jerkar.JkDirSet;
 import org.jerkar.JkDoc;
 import org.jerkar.JkFileFilter;
 import org.jerkar.JkJavaCompiler;
+import org.jerkar.JkJavaProcess;
 import org.jerkar.JkLog;
 import org.jerkar.JkOption;
+import org.jerkar.JkScaffolder;
+import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
+import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependency;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
-import org.jerkar.java.JkJavaProcess;
-import org.jerkar.java.JkJavadocMaker;
-import org.jerkar.java.JkResourceProcessor;
-import org.jerkar.java.JkUtilsJdk;
-import org.jerkar.java.testing.junit.JkUnit;
-import org.jerkar.java.testing.junit.JkUnit.JunitReportDetail;
 import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
-import org.jerkar.utils.JkUtilsFile;
-import org.jerkar.utils.JkUtilsIO;
 import org.jerkar.utils.JkUtilsIterable;
+import org.jerkar.utils.JkUtilsJdk;
 
 /**
  * Template class to define build on Java project.
@@ -275,10 +271,7 @@ public class JkJavaBuild extends JkBuild {
 	}
 
 	public JkJavadocMaker javadocMaker() {
-		final File outputDir = ouputDir(projectName() + "-javadoc");
-		final File zip =  ouputDir(projectName() + "-javadoc.zip");
-		return JkJavadocMaker.of(sourceDirs(), outputDir, zip)
-				.withClasspath(depsFor(COMPILE, PROVIDED));
+		return JkJavadocMaker.of(this,  true, false);
 	}
 
 	public final JkJavaPacker packer() {
@@ -295,23 +288,24 @@ public class JkJavaBuild extends JkBuild {
 
 	// --------------------------- Callable Methods -----------------------
 
+
+
 	@Override
-	public void scaffold() {
-		super.scaffold();
-		for (final JkDir dir : this.editedSourceDirs().jkDirs()) {
-			dir.root().mkdirs();
-		}
-		for (final JkDir dir : this.testSourceDirs().jkDirs()) {
-			dir.root().mkdirs();
-		}
-		final File defaultBuild = new File(this.baseDir(JkBuildResolver.BUILD_SOURCE_DIR), this.groupName() + "/Build.java");
-		if (defaultBuild.exists()) {
-			return;
-		}
-		JkUtilsFile.createFileIfNotExist(defaultBuild);
-		String content = JkUtilsIO.read(JkJavaBuild.class.getResource("Build.java_sample"));
-		content = content.replace("__groupName__", this.groupName());
-		JkUtilsFile.writeString(defaultBuild, content, false);
+	protected JkScaffolder scaffolder() {
+		final Runnable action = new Runnable() {
+
+			@Override
+			public void run() {
+				for (final JkDir dir : editedSourceDirs().jkDirs()) {
+					dir.root().mkdirs();
+				}
+				for (final JkDir dir : testSourceDirs().jkDirs()) {
+					dir.root().mkdirs();
+				}
+			}
+		};
+		return super.scaffolder().withExtraAction(action)
+				.withExtendedClass(JkJavaBuild.class);
 	}
 
 	@JkDoc("Generate sources and resources, compile production sources and process production resources to the classes directory.")
@@ -363,13 +357,12 @@ public class JkJavaBuild extends JkBuild {
 	public void publish() {
 		final Date date = this.buildTime();
 		if (this.publisher().hasMavenPublishRepo()) {
-			this.publisher().publishMaven(module(), mavenPublication(), dependencies(), date);
+			this.publisher().publishMaven(module(), mavenPublication(), dependencyResolver().declaredDependencies(), date);
 		}
 		if (this.publisher().hasIvyPublishRepo()) {
-			this.publisher().publishIvy(module(), ivyPublication(), dependencies(), COMPILE, SCOPE_MAPPING, date);
+			this.publisher().publishIvy(module(), ivyPublication(), dependencyResolver().declaredDependencies(), COMPILE, SCOPE_MAPPING, date);
 		}
 	}
-
 
 
 	// ----------------------- Overridable sub-methods ---------------------
@@ -412,6 +405,11 @@ public class JkJavaBuild extends JkBuild {
 	@Override
 	protected JkScopeMapping scopeMapping() {
 		return SCOPE_MAPPING;
+	}
+
+	@Override
+	protected JkScope defaultScope() {
+		return COMPILE;
 	}
 
 	protected JkMavenPublication mavenPublication(boolean includeTests, boolean includeSources) {
@@ -466,10 +464,10 @@ public class JkJavaBuild extends JkBuild {
 	}
 
 	@Override
-	protected JkDependencies localDependencies() {
+	protected JkDependencies implicitDependencies() {
 		final JkDir libDir = JkDir.of(baseDir(STD_LIB_PATH));
 		if (!libDir.root().exists()) {
-			return super.localDependencies();
+			return super.implicitDependencies();
 		}
 		return JkDependencies.builder()
 				.usingDefaultScopes(COMPILE).on(JkDependency.of(libDir.include("*.jar", "compile/*.jar")))

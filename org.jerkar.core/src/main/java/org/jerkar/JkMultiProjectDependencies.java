@@ -12,10 +12,15 @@ import java.util.Set;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIterable;
 
-public final class JkBuildDependencies {
+/**
+ * Holds information about inter-project dependencies in a multi-project context.
+ * 
+ * @author Jerome Angibaud
+ */
+public final class JkMultiProjectDependencies {
 
-	static JkBuildDependencies of(JkBuild master, List<JkBuild> builds) {
-		return new JkBuildDependencies(master, new ArrayList<JkBuild>(builds));
+	static JkMultiProjectDependencies of(JkBuild master, List<JkBuild> builds) {
+		return new JkMultiProjectDependencies(master, new ArrayList<JkBuild>(builds));
 	}
 
 	private final List<JkBuild> buildDeps;
@@ -24,18 +29,22 @@ public final class JkBuildDependencies {
 
 	private final JkBuild master;
 
-	private JkBuildDependencies(JkBuild master, List<JkBuild> buildDeps) {
+	private JkMultiProjectDependencies(JkBuild master, List<JkBuild> buildDeps) {
 		super();
 		this.master = master;
 		this.buildDeps = Collections.unmodifiableList(buildDeps);
 	}
 
 	@SuppressWarnings("unchecked")
-	public JkBuildDependencies and(List<JkBuild> builds) {
-		return new JkBuildDependencies(this.master, JkUtilsIterable.concatLists(this.buildDeps, builds));
+	public JkMultiProjectDependencies and(List<JkBuild> builds) {
+		return new JkMultiProjectDependencies(this.master, JkUtilsIterable.concatLists(this.buildDeps, builds));
 	}
 
-	public List<JkBuild> transitiveBuilds() {
+	public List<JkBuild> directProjectBuilds() {
+		return Collections.unmodifiableList(buildDeps);
+	}
+
+	public List<JkBuild> transitiveProjectBuilds() {
 		if (resolvedTransitiveBuilds == null) {
 			resolvedTransitiveBuilds = resolveTransitiveBuilds(new HashSet<File>());
 		}
@@ -52,20 +61,20 @@ public final class JkBuildDependencies {
 
 	private void executeOnAllTransitive(Iterable<BuildMethod> methods) {
 		JkLog.startln("Invoke " + methods + " on all dependents projects");
-		for (final JkBuild build : transitiveBuilds()) {
+		for (final JkBuild build : transitiveProjectBuilds()) {
 			build.execute(methods, this.master);
 		}
 		JkLog.done("invoking " + methods + " on all dependents projects");
 	}
 
 	void activatePlugin(Class<? extends JkBuildPlugin> clazz, Map<String, String> options) {
-		for (final JkBuild build : this.transitiveBuilds()) {
+		for (final JkBuild build : this.transitiveProjectBuilds()) {
 			build.plugins.addActivated(clazz, options);
 		}
 	}
 
 	void configurePlugin(Class<? extends JkBuildPlugin> clazz, Map<String, String> options) {
-		for (final JkBuild build : this.transitiveBuilds()) {
+		for (final JkBuild build : this.transitiveProjectBuilds()) {
 			build.plugins.addConfigured(clazz, options);
 		}
 	}
@@ -75,7 +84,7 @@ public final class JkBuildDependencies {
 		for (final JkBuild build : buildDeps) {
 			final File dir = JkUtilsFile.canonicalFile(build.baseDir().root());
 			if (!files.contains(dir)) {
-				result.addAll(build.buildDependencies().resolveTransitiveBuilds(files));
+				result.addAll(build.multiProjectDependencies().resolveTransitiveBuilds(files));
 				result.add(build);
 				files.add(dir);
 			}

@@ -92,16 +92,29 @@ public class JkBuild {
 	"Example : -extraCompilePath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
 	private final String extraJerkarPath = null;
 
-	private final JkBuildDependencies explicitBuildDependencies;
+	private final JkMultiProjectDependencies explicitProjectDependencies;
 
 	/**
 	 * Other builds (projects) this build depend of.
 	 */
-	private JkBuildDependencies buildDependencies;
+	private JkMultiProjectDependencies multiProjectDependencies;
+
+	private JkDependencyResolver scriptDependencyResolver;
 
 	protected JkBuild() {
 		final List<JkBuild> subBuilds = populateProjectBuildField(this);
-		this.explicitBuildDependencies = JkBuildDependencies.of(this, subBuilds);
+		this.explicitProjectDependencies = JkMultiProjectDependencies.of(this, subBuilds);
+	}
+
+	void setScriptDependencyResolver(JkDependencyResolver scriptDependencyResolver) {
+		this.scriptDependencyResolver = scriptDependencyResolver;
+	}
+
+	/**
+	 * Returns the dependency resolver used to compile/run scripts of this project.
+	 */
+	public JkDependencyResolver scriptDependencyResolver() {
+		return this.scriptDependencyResolver;
 	}
 
 	/**
@@ -125,22 +138,22 @@ public class JkBuild {
 	 * The current version for this project. It has to be understood as the 'release version',
 	 * as this version will be used to publish artifacts. <br/>
 	 * it may take format as <code>1.0-SNAPSHOT</code>, <code>trunk-SNAPSHOT</code>, <code>1.2.3-rc1</code>, <code>1.2.3</code>, ...
-	 * This may be injected using the 'version' option, otherwise it takes the value returned by {@link #releaseVersion()}
-	 * If not, it takes the result from {@link #releaseVersion()}
+	 * This may be injected using the 'version' option, otherwise it takes the value returned by {@link #defaultVersion()}
+	 * If not, it takes the result from {@link #defaultVersion()}
 	 */
 	public final JkVersion version() {
 		if (JkUtilsString.isBlank(this.forcedVersion)) {
-			return releaseVersion();
+			return defaultVersion();
 		}
 		return JkVersion.named(forcedVersion);
 	}
 
 	/**
-	 * Returns the release version to use for publishing when this one is not enforced by the 'version' option.
+	 * Returns the version returned by {@link JkBuild#version()} when not forced.
 	 * 
 	 * @see #version()
 	 */
-	protected JkVersion releaseVersion() {
+	protected JkVersion defaultVersion() {
 		return JkVersion.named("1.0-SNAPSHOT");
 	}
 
@@ -227,29 +240,43 @@ public class JkBuild {
 	}
 
 	/**
-	 * Returns the builds this build references.
+	 * Returns dependencies on other projects
 	 */
-	public final JkBuildDependencies buildDependencies() {
-		if (buildDependencies == null) {
-			buildDependencies = this.explicitBuildDependencies.and(this.dependencies().buildDependencies());
+	public final JkMultiProjectDependencies multiProjectDependencies() {
+		if (multiProjectDependencies == null) {
+			multiProjectDependencies = this.explicitProjectDependencies.and(this.effectiveDependencies().projectDependencies());
 		}
-		return buildDependencies;
+		return multiProjectDependencies;
 
 	}
 
 	/**
 	 * Returns the dependencies of this module. By default it uses unmanaged dependencies stored
-	 * locally in the project as described by {@link #localDependencies()} method.
+	 * locally in the project as described by {@link #implicitDependencies()} method.
 	 * If you want to use managed dependencies, you must override this method.
 	 */
+	private JkDependencies effectiveDependencies() {
+		return JkBuildPlugin.applyDependencies(plugins.getActives(),
+				implicitDependencies().and(dependencies().withDefaultScope(this.defaultScope())));
+	}
+
 	protected JkDependencies dependencies() {
-		return JkBuildPlugin.applyDependencies(plugins.getActives(), localDependencies());
+		return JkDependencies.on();
 	}
 
 	/**
-	 * Returns the dependencies located locally to the project.
+	 * The scope that will be used when a dependency has been declared without scope.
 	 */
-	protected JkDependencies localDependencies() {
+	protected JkScope defaultScope() {
+		return JkScope.BUILD;
+	}
+
+	/**
+	 * Returns the dependencies that does not need to be explicitly declared.
+	 * For example, it can include all jar file located under <code>build/libs</code> directory.
+	 * <p>Normally you don't need to override this method.
+	 */
+	protected JkDependencies implicitDependencies() {
 		return JkDependencies.builder().build();
 	}
 
@@ -267,7 +294,7 @@ public class JkBuild {
 	 * Returns the base dependency resolver.
 	 */
 	private JkDependencyResolver createDependencyResolver() {
-		final JkDependencies dependencies = dependencies().and(extraCommandLineDeps());
+		final JkDependencies dependencies = effectiveDependencies().and(extraCommandLineDeps());
 		if (dependencies.containsExternalModule()) {
 			return JkDependencyResolver.managed(jkIvy(), dependencies, module(),
 					JkResolutionParameters.of(scopeMapping()));
@@ -287,6 +314,21 @@ public class JkBuild {
 			cachedPublisher = JkPublisher.usingIvy(jkIvy());
 		}
 		return cachedPublisher;
+	}
+
+	protected JkScaffolder scaffolder() {
+		return JkScaffolder.of(this).withExtraAction(new Runnable() {
+
+			@Override
+			public void run() {
+				final File spec = baseDir(JkBuildResolver.BUILD_SOURCE_DIR);
+				spec.mkdirs();
+				final String packageName = groupName().replace('.', '/');
+				new File(spec, packageName).mkdirs();
+			}
+		})
+		.withExtendedClass(JkBuild.class);
+
 	}
 
 	protected JkDependencies extraCommandLineDeps() {
@@ -393,12 +435,10 @@ public class JkBuild {
 	// ------------ Operations ------------
 
 	@JkDoc("Create the project structure")
-	public void scaffold() {
-		final File spec = this.baseDir(JkBuildResolver.BUILD_SOURCE_DIR);
-		spec.mkdirs();
-		final String packageName = this.groupName().replace('.', '/');
-		new File(spec, packageName).mkdirs();
-		JkBuildPlugin.applyScafforld(this.plugins.getActives());
+	public final void scaffold() {
+		JkScaffolder jkScaffolder = this.scaffolder();
+		jkScaffolder = JkBuildPlugin.enhanceScafforld(this.plugins.getActives(), jkScaffolder);
+		jkScaffolder.process();
 	}
 
 	@JkDoc("Clean the output directory.")
@@ -466,5 +506,7 @@ public class JkBuild {
 	public <T extends JkBuildPlugin> T pluginOf(Class<T> pluginClass) {
 		return this.plugins.findInstanceOf(pluginClass);
 	}
+
+
 
 }

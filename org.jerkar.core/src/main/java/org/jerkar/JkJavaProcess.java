@@ -1,4 +1,4 @@
-package org.jerkar.java;
+package org.jerkar;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -10,9 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jerkar.JkClasspath;
-import org.jerkar.JkException;
-import org.jerkar.JkLog;
 import org.jerkar.utils.JkUtilsIO;
 import org.jerkar.utils.JkUtilsString;
 import org.jerkar.utils.JkUtilsSystem;

@@ -45,11 +45,19 @@ public final class JkDependencyResolver  {
 		this.parameters = resolutionParameters;
 	}
 
+	public boolean isManagedDependencyResolver() {
+		return this.jkIvy != null;
+	}
+
+	public JkDependencies declaredDependencies() {
+		return this.dependencies;
+	}
+
 	private List<File> getDeclaredDependencies(JkScope scope) {
 		final List<File> result = new LinkedList<File>();
 
 		// Add local, non-managed dependencies
-		result.addAll(this.dependencies.fileDependencies(scope));
+		result.addAll(this.dependencies.fileDependencies(scope).entries());
 
 		// Add project dependencies
 		result.addAll(this.dependencies.projectDependencies(scope));
@@ -73,6 +81,9 @@ public final class JkDependencyResolver  {
 	 * Resolves the managed dependencies (dependencies declared as external module).
 	 */
 	public Set<JkArtifact> resolveManagedDependencies(JkScope ... scopes) {
+		if (jkIvy == null) {
+			throw new IllegalStateException("This method cannot be invoked on an unmanaged dependency resolver.");
+		}
 		final Set<JkScope> scopesSet = new HashSet<JkScope>();
 		for (final JkScope scope : scopes) {
 			scopesSet.add(scope);
@@ -96,14 +107,6 @@ public final class JkDependencyResolver  {
 		return jkIvy.getArtifacts(modules, scopes);
 	}
 
-
-
-	/**
-	 * Returns the scopes declared in the underlying dependencies.
-	 */
-	public Set<JkScope> declaredScopes() {
-		return this.dependencies.moduleScopes();
-	}
 
 	/**
 	 * Gets the path containing all the artifact files for the specified scopes.
@@ -137,7 +140,7 @@ public final class JkDependencyResolver  {
 	 * Returns <code>true<code> if this resolver does not contain any dependencies.
 	 */
 	public boolean isEmpty() {
-		for (final JkScope scope : this.declaredScopes()) {
+		for (final JkScope scope : this.dependencies.declaredScopes()) {
 			if (!this.get(scope).isEmpty()) {
 				return false;
 			}

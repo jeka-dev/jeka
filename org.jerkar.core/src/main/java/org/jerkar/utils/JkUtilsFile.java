@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -243,6 +244,16 @@ public final class JkUtilsFile {
 		}
 	}
 
+	public static File fromUrl(URL url) {
+		File result;
+		try {
+			result = new File(url.toURI());
+		} catch(final URISyntaxException e) {
+			result = new File(url.getPath());
+		}
+		return result;
+	}
+
 	public static List<File> toPath(String pathAsString, String separator,
 			File baseDir) {
 		final String[] paths = JkUtilsString.split(pathAsString, separator);
@@ -342,7 +353,7 @@ public final class JkUtilsFile {
 				continue;
 			}
 			if (file.isDirectory()) {
-				if (includeFolders) {
+				if (includeFolders && fileFilter.accept(file)) {
 					result.add(file);
 				}
 				result.addAll(filesOf(file, fileFilter, includeFolders));
