@@ -1,27 +1,25 @@
 ![Logo of Jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png)
 
-Jerkar is a complete built system ala Maven or Gradle but using only a **Java** internal DSL to describe builds : no XML, no foreign language.
-**Your build scripts become statically typed !!**
+Jerkar is a complete **Java** built system ala _Ant_, _Maven_ or _Gradle_ but using only a **Java** internal DSL to describe builds : no XML, no foreign language.
+Breaking a common belief, it makes prove that Java is perfectually suitable in this domain.
 
 It is primarily intended to build project written in Java language but can also be used for any task execution purpose.
 
 # Motivation
-So far, for building their projects, java developers generally use an XML based (**Ant**, **Maven**) or a foreign language DSL (**Gradle**, **Rake**, **SBT**, ...) tool.
-They just can't use **Java** to create organization scalable builds. **Jerkar** purposes to fill this gap.
-      
-Yet, using Java for building a Java based project brings quite valuable benefits :
+So far, for building their projects, java developers generally use an XML based (_Ant_, _Maven_) or a foreign language DSL (_Gradle_, _Rake_, _SBT_, ...) tool.
+They just can't use Java to create organization scalable builds. **Jerkar** purposes to fill this gap, bringing valuable benefits to your builds 'scripts' :
 
-* Your build 'scripts' leverage directly the power, the flexibility and the robustness of Java due to its statically typed nature
-* You leverage compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools
-* You don't have to learn an extra language or XML soup just for build purpose : lower cognitive load
-* Your builds can benefit from any libraries without needing to wrap it in a plugin or a specific component
-* You can master build complexity the same way you do for regular code (ie utility classes, SoC, inheritance, composition,...) 
-* Using fluent style internal DSL, syntax is much more concise and explicit than an XML description
-* It's easier to dig into the build engine to investigate on behavior as builds are in essence, only direct method invocations
+* power, flexibility and robustness of Java
+* compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools
+* no extra language or XML soup to master
+* any Java 3rd party libraries without needing to wrap it in a plugin or a specific component
+* complexity tackling the same way you do for regular code (ie utility classes, SoC, inheritance, composition,...) 
+* fluent and compact syntax documented through Javadoc
+* easy build engine investigation : builds are in essence, only direct method invocations
 
 Additionally the following features were missing from mainstream existing tools :
-* Run pluggable extra features (test coverage, special packaging, static code analysis,...) without editing the build file
-* Write nothing-at-all for building simple/standard projects (just relying on convention and/or IDE meta-data files, even to launch static analysis tools or generate ear/war files)
+* run pluggable extra features (test coverage, special packaging, static code analysis,...) without editing the build file
+* write nothing-at-all for building simple/standard projects (just relying on convention and/or IDE meta-data files, even to launch static analysis tools or generate ear/war files)
 
 ## Overcoming Java shortcomings
 One believes that the verbosity and the statically typed nature of Java make it hardly suitable for expressing builds.
@@ -34,16 +32,17 @@ Jerkar tends to prove the opposite :
 
 # Main features
 Jerkar provides what a self respecting modern, enterprise scale, build system should and more :
-* Provides both APIs and a command line tool.
-* Multi level of configuration system (Jerkar instance, user, build class, build command line)
-* Powerfull dependency management (back-ended by Ivy so compatible with Maven repositories)
-* Publication on Ivy or Maven repositories
-* Multi-project support
-* Powerfull fluent API to manipulate files, perform  compilations, tests, archives and all build related stuff
-* Choice between free form builds (ala Ant) and enforced build templates (ala Maven)
-* Hierarchical log output tracking execution time for each intermediate step
-* Pluggable architecture
-* Ability to get information from naming convention and Eclipse files, so in simpler cases you won't need to write script at all (even to generate war or perform SonarQube analysis) !!!
+* provides both APIs and a command line tool
+* multi-level configuration system (Jerkar instance, user, build class, build command line)
+* powerfull dependency management (back-ended by Ivy so compatible with Maven repositories)
+* publication on Ivy or Maven repositories
+* multi-project support
+* powerfull fluent API to manipulate files, perform  compilations, tests, archives and all build related stuff
+* choice between free form builds (ala Ant) and enforced build templates (ala Maven)
+* hierarchical log output tracking execution time for each intermediate step
+* pluggable architecture
+* scaffolding to get projects started quickly
+* ability to get information from naming convention and Eclipse files, so in simpler cases you won't need to write script at all (even to generate war or perform SonarQube analysis) !!!
 
 
 The documentation is at its very early stage but the code is yet pretty close to completion for a first release. 
@@ -64,6 +63,7 @@ Jerkar builds with itself. To get Jerkar full distrib built from the Java source
 * Run it : It will launch a multi-project build. You will find result for the full distrib in *org.jerkar.distrib-all/build/output* directory 
 
 # Quick start
+
 1. Add the org.jerkar.core-fat.jar (found in the distrib) in your IDE build-path. This jar includes Jerkar core along plugins classes
 2. Create a `build/spec` folder at the base of your project and make it a source folder in your IDE. In Jerkar, all related build stuff (build definition, local 3rd party libs, produced artifacts,...) lies under *build* directory
 3. Write the build class extending JkJavaBuild in this directory (in whatever package)
