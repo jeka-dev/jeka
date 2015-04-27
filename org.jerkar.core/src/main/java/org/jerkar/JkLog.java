@@ -29,12 +29,18 @@ public class JkLog {
 	 * and all subsequent logs will be shift right until {@link #done()} is invoked.
 	 */
 	public static void start(String message) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		infoWriter.print(message +  " ... " );
 		incOffset();
 		startTimer();
 	}
 
 	public static PrintStream infoStreamIfVerbose() {
+		if (JkOptions.isSilent()) {
+			return null;
+		}
 		if (JkOptions.isVerbose()) {
 			return infoStream();
 		}
@@ -42,6 +48,9 @@ public class JkLog {
 	}
 
 	private static void startTimer() {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		LinkedList<Long> times = START_TIMES.get();
 		if (times == null) {
 			times = new LinkedList<Long>();
@@ -54,6 +63,9 @@ public class JkLog {
 	 * As {@link #start(String)} but do a carriage return after the start message.
 	 */
 	public static void startln(String message) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		start(message);
 		nextLine();
 	}
@@ -62,6 +74,9 @@ public class JkLog {
 	 * As {@link #startln(String)} but underline the message.
 	 */
 	public static void startUnderlined(String message) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		underlined(message);
 		incOffset();
 		startTimer();
@@ -71,12 +86,18 @@ public class JkLog {
 	 * As {@link #startln(String)} but whith header message.
 	 */
 	public static void startHeaded(String message) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		displayHead(message);
 		incOffset();
 		startTimer();
 	}
 
 	public static void trace(String message) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		if (JkOptions.isVerbose()) {
 			JkLog.info(message);
 		}
@@ -100,6 +121,9 @@ public class JkLog {
 	}
 
 	private static void doneMessage(String message) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		decOffset();
 		final LinkedList<Long> times = START_TIMES.get();
 		if (times == null || times.isEmpty()) {
@@ -115,10 +139,16 @@ public class JkLog {
 	 * Displays a message at info level.
 	 */
 	public static void info(String message) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		infoWriter.println(message);
 	}
 
 	public static void underlined(String message) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		JkLog.info(message);
 		JkLog.info(JkUtilsString.repeat("-", message.length()));
 	}
@@ -127,6 +157,9 @@ public class JkLog {
 	 * Displays a multi-line message of the specified message followed by specified lines.
 	 */
 	public static void info(String message, Iterable<String> lines) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		infoWriter.print(message);
 		for (final String line : lines) {
 			infoWriter.println(line);
@@ -137,6 +170,9 @@ public class JkLog {
 	 * Displays multi-line message.
 	 */
 	public static void info(Iterable<String> lines) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		for (final String line : lines) {
 			infoWriter.println(line);
 		}
@@ -146,6 +182,9 @@ public class JkLog {
 	 * Displays multi-line message.
 	 */
 	public static void info(String ... lines) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		info(Arrays.asList(lines));
 	}
 
@@ -153,6 +192,9 @@ public class JkLog {
 	 * Displays a multi-line message at warn level.
 	 */
 	public static void warn(Iterable<String> lines) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		for (final String line : lines) {
 			warn(line);
 		}
@@ -162,6 +204,9 @@ public class JkLog {
 	 * Displays a message at warn level.
 	 */
 	public static void warn(String message) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		infoWriter.println("WARN : " + message);
 	}
 
@@ -178,16 +223,25 @@ public class JkLog {
 	 * Displays a message at warn level.
 	 */
 	public static void error(String message) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		errorWriter.println(message);
 	}
 
 	public static void error(Iterable<String> lines) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		for (final String line : lines) {
 			errorWriter.println(line);
 		}
 	}
 
 	public static void nextLine() {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		infoWriter.println();
 	}
 
@@ -277,6 +331,9 @@ public class JkLog {
 	}
 
 	public static void displayHead(String intro) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
 		final String pattern = "-";
 		JkLog.info(JkUtilsString.repeat(pattern, intro.length() ));
 		JkLog.info(intro);
