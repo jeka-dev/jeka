@@ -33,7 +33,7 @@ Jerkar prove the opposite by :
 # Main features
 Jerkar provides what a self respecting modern, enterprise scale, build system should and more :
 * provides both APIs and a command line tool
-* multi-level configuration system (Jerkar instance, user, build class, build command line)
+* multi-level configuration (system, user, project, command line)
 * powerfull dependency management (back-ended by Ivy so compatible with Maven repositories)
 * publication on Ivy or Maven repositories
 * multi-project support
