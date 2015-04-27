@@ -15,7 +15,7 @@ They just can't use Java to create organization scalable builds. **Jerkar** purp
 * any Java 3rd party libraries without needing to wrap it in a plugin or a specific component
 * complexity tackling the same way you do for regular code (ie utility classes, SoC, inheritance, composition,...) 
 * fluent and compact syntax documented through Javadoc
-* easy build engine investigation : builds are in essence, only direct method invocations
+* simplicity :In essence, Jerkar engine simply performs a sequence of method invocation
 
 Additionally the following features were missing from mainstream existing tools :
 * run pluggable extra features (test coverage, special packaging, static code analysis,...) without editing the build file
