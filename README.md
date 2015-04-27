@@ -1,7 +1,7 @@
 ![Logo of Jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png)
 
 Jerkar is a complete **Java** built system ala _Ant_, _Maven_ or _Gradle_ but using only a **Java** internal DSL to describe builds : no XML, no foreign language.
-Breaking a common belief, it makes prove that Java is perfectually suitable in this domain.
+Breaking a common belief, it makes proof that Java is perfectly suitable in this domain.
 
 It is primarily intended to build project written in Java language but can also be used for any task execution purpose.
 
@@ -23,12 +23,12 @@ Additionally the following features were missing from mainstream existing tools 
 
 ## Overcoming Java shortcomings
 One believes that the verbosity and the statically typed nature of Java make it hardly suitable for expressing builds.
-Jerkar tends to prove the opposite :
-* Jerkar compiles the java build classes on the fly prior to execute them. This step is quick, and make the following steps even faster.
-* Jerkar heavily relies on convention and sensitive defaults : you only need to specify what is not 'standard'
-* Jerkar features fluent APIs whose allow to express tasks in a very concise way. Jerkar build script concision is close to Gradle (and even more concise in certain cases) 
-* Jerkar comes with no 3rd party dependency (except Ivy) to avoid version clashing.
-* Jerkar keeps the runtime simple (no bytecode enhancement) for easier debugging 
+Jerkar prove the opposite by :
+* compiling java build classes on the fly prior to execute them. This step is quick, and make the subsequent steps even faster.
+* heavily relying on convention and sensitive defaults : you only need to specify what is not 'standard'
+* featuring fluent APIs allowing to express tasks in a very concise way. Jerkar build script concision is close to Gradle (and even more concise in certain cases) 
+* not depending on any 3rd party dependency (except Ivy) to avoid version clashing.
+* keeping the runtime simple (no bytecode enhancement) for easier debugging 
 
 # Main features
 Jerkar provides what a self respecting modern, enterprise scale, build system should and more :
