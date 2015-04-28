@@ -81,15 +81,6 @@ class Project {
 		JkLog.done();
 	}
 
-
-
-	public JkBuild getBuild() {
-		if (resolver.needCompile()) {
-			this.compile();
-		}
-		return resolver.resolve();
-	}
-
 	public <T extends JkBuild> T getBuild(Class<T> baseClass) {
 		if (resolver.needCompile()) {
 			this.compile();

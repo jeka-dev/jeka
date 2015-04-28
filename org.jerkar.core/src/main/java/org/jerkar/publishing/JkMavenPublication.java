@@ -11,7 +11,7 @@ public final class JkMavenPublication {
 
 	@SuppressWarnings("unchecked")
 	public static JkMavenPublication of(String name, File file) {
-		return new JkMavenPublication(name, file, Collections.EMPTY_MAP);
+		return new JkMavenPublication(name, file, Collections.EMPTY_MAP, null);
 	}
 
 	private final Map<String, File> artifacts;
@@ -20,11 +20,14 @@ public final class JkMavenPublication {
 
 	private final File mainArtifact;
 
-	private JkMavenPublication(String artifactName, File mainArtifact, Map<String, File> artifacts) {
+	private final JkMavenPublicationInfo extraInfo;
+
+	private JkMavenPublication(String artifactName, File mainArtifact, Map<String, File> artifacts, JkMavenPublicationInfo extraInfo) {
 		super();
 		this.artifactName = artifactName;
 		this.mainArtifact = mainArtifact;
 		this.artifacts = artifacts;
+		this.extraInfo = extraInfo;
 	}
 
 	public JkMavenPublication andIf(boolean condition, File file, String classifier) {
@@ -42,7 +45,11 @@ public final class JkMavenPublication {
 		}
 		final Map<String, File> map = new HashMap<String, File>(artifacts);
 		map.put(classifier, file);
-		return new JkMavenPublication(this.artifactName, mainArtifact, map);
+		return new JkMavenPublication(this.artifactName, mainArtifact, map, this.extraInfo);
+	}
+
+	public JkMavenPublication with(JkMavenPublicationInfo extraInfo) {
+		return new JkMavenPublication(this.artifactName, this.mainArtifact, this.artifacts, extraInfo);
 	}
 
 	public JkMavenPublication andOptional(File file, String classifier) {
@@ -71,7 +78,9 @@ public final class JkMavenPublication {
 		return artifactName;
 	}
 
-
+	public JkMavenPublicationInfo extraInfo() {
+		return this.extraInfo;
+	}
 
 	@Override
 	public String toString() {

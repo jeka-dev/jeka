@@ -1,5 +1,6 @@
 package org.jerkar;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,14 +8,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIterable;
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;
 
 public final class JkOptions {
 
-	@SuppressWarnings("unchecked")
-	private static JkOptions INSTANCE = new JkOptions(Collections.EMPTY_MAP);
+	private static JkOptions INSTANCE = new JkOptions(loadJerkarAndUserProperties());
 
 	private static boolean populated;
 
@@ -70,6 +71,9 @@ public final class JkOptions {
 	}
 
 	public static boolean isSilent() {
+		if (INSTANCE == null) {
+			return false;
+		}
 		return INSTANCE.silent;
 	}
 
@@ -231,6 +235,19 @@ public final class JkOptions {
 			}
 		}
 		return result.toString();
+	}
+
+	private static Map<String, String> loadJerkarAndUserProperties() {
+		final File propFile = new File(JkLocator.jerkarHome(), "options.properties");
+		final Map<String, String> result = new HashMap<String, String>();
+		if (propFile.exists()) {
+			result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
+		}
+		final File userPropFile = new File(JkLocator.jerkarUserHome(), "options.properties");
+		if (userPropFile.exists()) {
+			result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
+		}
+		return result;
 	}
 
 }

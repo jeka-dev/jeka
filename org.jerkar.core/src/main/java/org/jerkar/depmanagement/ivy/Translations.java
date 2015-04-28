@@ -30,15 +30,15 @@ import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkExternalModule;
 import org.jerkar.depmanagement.JkModuleId;
 import org.jerkar.depmanagement.JkRepo;
+import org.jerkar.depmanagement.JkRepo.IvyRepository;
 import org.jerkar.depmanagement.JkRepos;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
 import org.jerkar.depmanagement.JkScopedDependency;
+import org.jerkar.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.depmanagement.JkVersion;
 import org.jerkar.depmanagement.JkVersionRange;
 import org.jerkar.depmanagement.JkVersionedModule;
-import org.jerkar.depmanagement.JkRepo.IvyRepository;
-import org.jerkar.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
 import org.jerkar.publishing.JkPublishRepos;
@@ -291,7 +291,9 @@ final class Translations {
 				moduleDescriptor.addDependency(dependencyDescriptor);
 			}
 		}
+
 	}
+
 
 	private static JkScopeMapping resolveSimple(JkScope scope, JkScope defaultScope,
 			JkScopeMapping defaultMapping) {

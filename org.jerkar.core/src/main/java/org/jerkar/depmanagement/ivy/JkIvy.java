@@ -239,7 +239,7 @@ public final class JkIvy {
 	 * @param defaultMapping The default scope mapping of the published module
 	 * @param deliveryDate The delivery date.
 	 */
-	public void publish(JkVersionedModule versionedModule, JkIvyPublication publication, JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate) {
+	public void publishToIvyRepo(JkVersionedModule versionedModule, JkIvyPublication publication, JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate) {
 		JkLog.startln("Publishing for Ivy");
 		final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication, dependencies, defaultScope, defaultMapping, deliveryDate);
 		publishIvyArtifacts(publication, deliveryDate, moduleDescriptor);
@@ -248,10 +248,11 @@ public final class JkIvy {
 
 
 
-	public void publish(JkVersionedModule versionedModule, JkMavenPublication publication, JkDependencies dependencies, Date deliveryDate) {
+	public void publishToMavenRepo(JkVersionedModule versionedModule, JkMavenPublication publication, JkDependencies dependencies, Date deliveryDate) {
 		JkLog.startln("Publishing for Maven");
 		final JkDependencies publishedDependencies = resolveDependencies(versionedModule, dependencies);
-		final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication, publishedDependencies,deliveryDate);
+		final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication, publishedDependencies,deliveryDate);
+
 		publishMavenArtifacts(publication, deliveryDate, moduleDescriptor);
 		JkLog.done();
 	}
@@ -349,7 +350,7 @@ public final class JkIvy {
 		}
 	}
 
-	private int publishMavenArtifacts(JkMavenPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
+	private int publishMavenArtifacts(JkMavenPublication publication, Date date, DefaultModuleDescriptor moduleDescriptor) {
 		int count = 0;
 		for (final DependencyResolver resolver : Translations.publishResolverOf(this.ivy.getSettings())) {
 			final JkPublishRepo publishRepo = this.publishRepo.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
@@ -364,7 +365,7 @@ public final class JkIvy {
 		return count;
 	}
 
-	private void publishMavenArtifacts(DependencyResolver resolver, JkMavenPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
+	private void publishMavenArtifacts(DependencyResolver resolver, JkMavenPublication publication, Date date, DefaultModuleDescriptor moduleDescriptor) {
 		final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
 		try {
 			resolver.beginPublishTransaction(ivyModuleRevisionId, true);
@@ -394,8 +395,18 @@ public final class JkIvy {
 		try {
 			final File pomXml = new File(targetDir(), "pom.xml");
 			final Artifact artifact = new DefaultArtifact(ivyModuleRevisionId, date, ivyModuleRevisionId.getName(), "xml", "pom", true);
+			final PomWriterOptions pomWriterOptions = new PomWriterOptions();
+			File fileToDelete = null;
+			if (publication.extraInfo() != null) {
+				final File template = PomTemplateGenerator.generateTemplate(publication.extraInfo());
+				pomWriterOptions.setTemplate(template);
+				fileToDelete = template;
+			}
 
-			PomModuleDescriptorWriter.write(moduleDescriptor, pomXml, new PomWriterOptions());
+			PomModuleDescriptorWriter.write(moduleDescriptor, pomXml, pomWriterOptions);
+			if (fileToDelete != null) {
+				JkUtilsFile.delete(fileToDelete);
+			}
 			resolver.publish(artifact, pomXml,	true);
 		} catch (final IOException e) {
 			throw new IllegalStateException(e);
@@ -439,7 +450,7 @@ public final class JkIvy {
 		return moduleDescriptor;
 	}
 
-	private ModuleDescriptor createModuleDescriptor(JkVersionedModule jkVersionedModule, JkMavenPublication publication, JkDependencies resolvedDependencies, Date deliveryDate) {
+	private DefaultModuleDescriptor createModuleDescriptor(JkVersionedModule jkVersionedModule, JkMavenPublication publication, JkDependencies resolvedDependencies, Date deliveryDate) {
 		final ModuleRevisionId moduleRevisionId = Translations.toModuleRevisionId(jkVersionedModule);
 		final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
 		final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);

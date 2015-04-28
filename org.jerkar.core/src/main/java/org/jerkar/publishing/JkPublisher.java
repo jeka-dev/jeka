@@ -22,11 +22,11 @@ public final class JkPublisher {
     }
 
     public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication, JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate) {
-        this.jkIvy.publish(versionedModule, publication, dependencies, defaultScope, defaultMapping, deliveryDate);
+        this.jkIvy.publishToIvyRepo(versionedModule, publication, dependencies, defaultScope, defaultMapping, deliveryDate);
     }
 
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication, JkDependencies dependencies, Date deliveryDate) {
-        this.jkIvy.publish(versionedModule, publication, dependencies, deliveryDate);
+        this.jkIvy.publishToMavenRepo(versionedModule, publication, dependencies, deliveryDate);
     }
 
     public boolean hasMavenPublishRepo() {

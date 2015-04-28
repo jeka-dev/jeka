@@ -24,7 +24,7 @@ public final class JkBuildResolver {
 
 	public static final String BUILD_OUTPUT_PATH = "build/output";
 
-	private static final String BUILD_BIN_DIR = BUILD_OUTPUT_PATH + "/" + BUILD_BIN_DIR_NAME;
+	public static final String BUILD_BIN_DIR = BUILD_OUTPUT_PATH + "/" + BUILD_BIN_DIR_NAME;
 
 	private final File baseDir;
 

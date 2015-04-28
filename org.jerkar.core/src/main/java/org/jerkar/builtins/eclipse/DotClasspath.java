@@ -331,6 +331,7 @@ final class DotClasspath {
 			writer.writeEmptyElement(CLASSPATHENTRY);
 			writer.writeAttribute("kind", "src");
 			writer.writeAttribute("path", JkBuildResolver.BUILD_SOURCE_DIR);
+			writer.writeAttribute("output", JkBuildResolver.BUILD_BIN_DIR);
 			writer.writeCharacters("\n");
 		}
 

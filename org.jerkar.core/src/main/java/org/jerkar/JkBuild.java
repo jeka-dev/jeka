@@ -54,45 +54,45 @@ public class JkBuild {
 
 	@JkOption({"Maven or Ivy repositories to download dependency artifacts.",
 	"Prefix the Url with 'ivy:' if it is an Ivy repostory."})
-	private final String downloadRepoUrl = MavenRepository.MAVEN_CENTRAL_URL.toString();
+	protected String downloadRepoUrl = MavenRepository.MAVEN_CENTRAL_URL.toString();
 
 	@JkOption({"Usename to connect to the download repository (if needed).",
 	"Null or blank means that the upload repository will be accessed in an anonymous way."})
-	private final String dowloadRepoUsername = null;
+	protected String dowloadRepoUsername = null;
 
 	@JkOption({"Password to connect to the download repository (if needed)."})
-	private final String downloadRepoPassword = null;
+	protected String downloadRepoPassword = null;
 
 	@JkOption({"Specify the publish repository if it is different than the download one.",
 	"Prefix the Url with 'ivy:' if it is an Ivy repository."})
-	private final String publishRepoUrl = null;
+	protected String publishRepoUrl = null;
 
 	@JkOption({"Usename to connect to the publish repository (if needed).",
 	"Null or blank means that the upload repository will be accessed in an anonymous way."})
-	private final String publishRepoUsername = null;
+	protected String publishRepoUsername = null;
 
 	@JkOption({"Password to connect to the publish repository (if needed)."})
-	private final String publishRepoPassword = null;
+	protected String publishRepoPassword = null;
 
 	@JkOption("Specify the publish repository for releases if it is different than the one for snapshots.")
-	private final String publishRepoReleaseUrl = null;
+	protected String publishRepoReleaseUrl = null;
 
 	@JkOption("Usename to connect to the publish release repository (if needed).")
-	private final String publishRepoReleaseUsername = null;
+	protected String publishRepoReleaseUsername = null;
 
 	@JkOption("Password to connect to the publish release repository (if needed).")
-	private final String publishRepoReleasePassword = null;
+	protected String publishRepoReleasePassword = null;
 
 	@JkOption("Version to inject to this build. If 'null' or blank than the version will be the one returned by #defaultVersion()" )
-	private final String forcedVersion = null;
+	protected String forcedVersion = null;
 
 	@JkOption({
 		"Mention if you want to add extra lib in your build path. It can be absolute or relative to the project base dir.",
 		"These libs will be added to the build path cto compile and run Jerkar scripts.",
 	"Example : -extraCompilePath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
-	private final String extraJerkarPath = null;
+	protected String extraJerkarPath = null;
 
-	private final JkMultiProjectDependencies explicitProjectDependencies;
+	private final JkMultiProjectDependencies explicitMultiProjectDependencies;
 
 	/**
 	 * Other builds (projects) this build depend of.
@@ -102,8 +102,9 @@ public class JkBuild {
 	private JkDependencyResolver scriptDependencyResolver;
 
 	protected JkBuild() {
-		final List<JkBuild> subBuilds = populateProjectBuildField(this);
-		this.explicitProjectDependencies = JkMultiProjectDependencies.of(this, subBuilds);
+		JkOptions.populateFields(this);  // The option are also populated here so it's effective even when called from a main method
+		final List<JkBuild> subBuilds = populateMultiProjectBuildField(this);
+		this.explicitMultiProjectDependencies = JkMultiProjectDependencies.of(this, subBuilds);
 	}
 
 	void setScriptDependencyResolver(JkDependencyResolver scriptDependencyResolver) {
@@ -244,7 +245,7 @@ public class JkBuild {
 	 */
 	public final JkMultiProjectDependencies multiProjectDependencies() {
 		if (multiProjectDependencies == null) {
-			multiProjectDependencies = this.explicitProjectDependencies.and(this.effectiveDependencies().projectDependencies());
+			multiProjectDependencies = this.explicitMultiProjectDependencies.and(this.effectiveDependencies().projectDependencies());
 		}
 		return multiProjectDependencies;
 
@@ -490,7 +491,7 @@ public class JkBuild {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static List<JkBuild> populateProjectBuildField(JkBuild mainBuild) {
+	private static List<JkBuild> populateMultiProjectBuildField(JkBuild mainBuild) {
 		final List<JkBuild> result = new LinkedList<JkBuild>();
 		final List<Field> fields = JkUtilsReflect.getAllDeclaredField(mainBuild.getClass(), JkProject.class);
 		for (final Field field : fields) {

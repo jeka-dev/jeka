@@ -97,7 +97,7 @@ public class JkIvyRunner {
         final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(), COMPILE, JkJavaBuild.TEST);
         final JkDependencies deps = JkDependencies.builder()
                 .on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();
-        jkIvy.publish(versionedModule, ivyPublication,deps, null, null, new Date());
+        jkIvy.publishToIvyRepo(versionedModule, ivyPublication,deps, null, null, new Date());
     }
 
     public static void testPublishMaven() {
@@ -106,7 +106,7 @@ public class JkIvyRunner {
         final JkMavenPublication publication = JkMavenPublication.of("mymodule2", sampleJarfile()).and(sampleJarSourcefile(), "source");
         final JkDependencies deps = JkDependencies.builder()
                 .on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();
-        jkIvy.publish(versionedModule, publication,deps, new Date());
+        jkIvy.publishToMavenRepo(versionedModule, publication,deps, new Date());
     }
 
 
