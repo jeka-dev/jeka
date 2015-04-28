@@ -1,13 +1,13 @@
 ![Logo of Jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png)
 
-Jerkar is a complete **Java** built system ala _Ant_, _Maven_ or _Gradle_ but using only a **Java** internal DSL to describe builds : no XML, no foreign language.
+Jerkar is a complete **Java** built system ala _Ant_, _Maven_ or _Gradle_ but using a **Java** internal DSL to describe builds : no XML, no foreign language.
 Breaking a common belief, it makes proof that Java is perfectly suitable in this domain.
 
 It is primarily intended to build project written in Java language but can also be used for any task execution purpose.
 
 # Motivation
 So far, for building their projects, java developers generally use an XML based (_Ant_, _Maven_) or a foreign language DSL (_Gradle_, _Rake_, _SBT_, ...) tool.
-They just can't use Java to create organization scalable builds. **Jerkar** purposes to fill this gap, bringing valuable benefits to your builds 'scripts' :
+They just can't use Java to create organization scalable builds. **Jerkar** purposes to fill this gap, bringing valuable benefits to builds 'scripts' :
 
 * power, flexibility and robustness of Java
 * compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools
