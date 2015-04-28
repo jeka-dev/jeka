@@ -15,13 +15,13 @@ They just can't use Java to create organization scalable builds. **Jerkar** purp
 * any Java 3rd party libraries without needing to wrap it in a plugin or a specific component
 * complexity tackling the same way you do for regular code (ie utility classes, SoC, inheritance, composition,...) 
 * fluent and compact syntax documented through Javadoc
-* lightness, simplicity : in essence, Jerkar engine simply performs a sequence of method invocation
+* lightness, simplicity and speed : in essence, Jerkar engine simply performs method invocations on your build build class.
 
 Additionally the following features were missing from mainstream existing tools :
 * run pluggable extra features (test coverage, special packaging, static code analysis,...) without editing the build file
 * write nothing-at-all for building simple/standard projects (just relying on convention and/or IDE meta-data files, even to launch static analysis tools or generate ear/war files)
 
-## Overcoming Java shortcomings
+### Overcoming Java shortcomings
 One believes that the verbosity and the statically typed nature of Java make it hardly suitable for expressing builds.
 Jerkar prove the opposite by :
 * compiling java build classes on the fly prior to execute them. This step is quick, and make the subsequent steps even faster.
@@ -154,6 +154,8 @@ This will compile, unit test with test coverage, launch a sonar analysis with so
 
 
 Notice that Jacoco test coverage and SonarQube analysis are triggered without mention in the build class ! 
+
+
     
     
         
