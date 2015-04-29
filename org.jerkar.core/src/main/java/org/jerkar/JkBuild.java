@@ -155,7 +155,8 @@ public class JkBuild {
 	 * @see #version()
 	 */
 	protected JkVersion defaultVersion() {
-		return JkVersion.named("1.0-SNAPSHOT");
+		return JkVersion.fromOptionalResourceOrExplicit(getClass(), "1.0-SNAPSHOT");
+
 	}
 
 	/**

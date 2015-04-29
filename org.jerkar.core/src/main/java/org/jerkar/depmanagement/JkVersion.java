@@ -1,12 +1,36 @@
 package org.jerkar.depmanagement;
 
+import java.net.URL;
+
 import org.jerkar.utils.JkUtilsAssert;
+import org.jerkar.utils.JkUtilsIO;
 import org.jerkar.utils.JkUtilsString;
 
 public final class JkVersion implements Comparable<JkVersion> {
 
+	public static final String DEFAULT_VERSION_RESOURCE_NAME = "version.txt";
+
 	public static JkVersion named(String name) {
 		return new JkVersion(name);
+	}
+
+	public static JkVersion fromResource(Class<?> clazz, String name) {
+		return named(JkUtilsIO.read(clazz.getResource(name)).trim());
+	}
+
+	public static JkVersion fromResource(Class<?> clazz) {
+		return named(JkUtilsIO.read(clazz.getResource(DEFAULT_VERSION_RESOURCE_NAME)).trim());
+	}
+
+	public static JkVersion fromOptionalResourceOrExplicit(Class<?> clazz, String explicit) {
+		final URL versionResource = clazz.getResource(JkVersion.DEFAULT_VERSION_RESOURCE_NAME);
+		if (versionResource != null) {
+			final String version = JkUtilsIO.read(versionResource).trim();
+			if (!JkUtilsString.isBlank(version)) {
+				return JkVersion.named(version);
+			}
+		}
+		return JkVersion.named(explicit);
 	}
 
 	private final String name;
