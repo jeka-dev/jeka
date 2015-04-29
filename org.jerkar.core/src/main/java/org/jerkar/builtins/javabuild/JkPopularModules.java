@@ -112,7 +112,9 @@ public final class JkPopularModules {
 
 	public static final JkModuleId JACKSON_ANNOTATIONS = JkModuleId.of("com.fasterxml.jackson.core", " jackson-annotations");
 
-	public static final JkModuleId MOCKITO = JkModuleId.of("org.mockito", "org.mockito");
+	public static final JkModuleId MOCKITO_ALL = JkModuleId.of("org.mockito", "mockito-all");
+
+	public static final JkModuleId MOCKITO_CORE = JkModuleId.of("org.mockito", "mockito-core");
 
 	public static final JkModuleId HIBERNATE_CORE = JkModuleId.of("org.hibernate", "hibernate-core");
 
@@ -148,5 +150,6 @@ public final class JkPopularModules {
 
 	public static final JkModuleId SVN_KIT = JkModuleId.of("org.tmatesoft.svnkit", "svnkit");
 
+	public static final JkModuleId LOMBOK = JkModuleId.of("de.plushnikov.lombok-intellij-plugin", "lombok-plugin");
 
 }
