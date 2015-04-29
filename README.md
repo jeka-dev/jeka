@@ -47,6 +47,7 @@ and that Jerkar compile everything under this folder prior to execute the first 
 (you can however specify the executed build class by mentioning `-buildClass=MyClassSimpleName` option in Jerkar command line).
 
 #### Classic build explicit
+___
 This is an academic script for a educational purpose, normally we won't specify projectName, groupName or version
 as they are supposed to be deducted from conventions.
 ```java
@@ -82,6 +83,7 @@ public class BuildSampleClassic extends JkJavaBuild {
 The [complete code source](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassicExplicit.java)
 
 #### Classic build normal
+___
 By respecting conventions (project folder named as _groupName_._projectName_ so `org.jerkar.script-samples`)
 and leveraging default (version is read from the version.txt resource), the following script is equivalent :
 
@@ -100,6 +102,7 @@ public class BuildSampleClassic extends JkJavaBuild {
 	}	
 }
 ```
+The [complete code source](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassic.java)
 
 On the command line, under root project folder :
 - type `jerkar doDefault` => clean, compile, run tests and pack (produce jar and source jar), as mentioned in the `JkJavaBuild#doDefault` method
@@ -113,7 +116,11 @@ a code coverage report usable by tools as SonarQube
 This is launch on a local SonarQube server unless you specify specific Sonar settings. Sonar will leverage of jacoco report.
 
 
+Simpler than you was accustomed to, He ??
 
+Note that in the complete source code, you'll find a `main` method. It's mainly intended to run the whole script friendly in your favorite IDE.
+It's even faster cause you skip the script compile phase.
+___
 #Status
 
 The documentation is at its very early stage but the code is yet pretty close to completion for a first release. 
