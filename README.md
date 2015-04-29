@@ -46,7 +46,7 @@ Just know that in Jerkar, build scripts (build classes) are supposed to be store
 and that Jerkar compile everything under this folder prior to execute the first build class found 
 (you can however specify the executed build class by mentioning `-buildClass=MyClassSimpleName` option in Jerkar command line).
 
-#### Classic build explicit
+#### Explicit build
 ___
 This is an academic script for a educational purpose, normally we won't specify projectName, groupName or version
 as they are supposed to be deducted from conventions.
@@ -82,10 +82,10 @@ public class BuildSampleClassic extends JkJavaBuild {
 ```
 The [complete code source](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassicExplicit.java)
 
-#### Classic build normal
+#### Classic build
 ___
 By respecting conventions (project folder named as _groupName_._projectName_ so `org.jerkar.script-samples`)
-and leveraging default (version is read from the version.txt resource), the following script is equivalent :
+and leveraging default (version is read from the version.txt resource located in the same package as the build class), the following script is equivalent :
 
 ```java
 public class BuildSampleClassic extends JkJavaBuild {
@@ -113,10 +113,16 @@ On the command line, under root project folder :
 a code coverage report usable by tools as SonarQube
 - type `jerkar doDefault sonar#verify jacoco#` => do the default + execute the method `verify` method located in the `sonar`plugin 
 (class [JkBuildPluginSonar](org.jerkar.plugins-sonar/src/main/java/org/jerkar/plugins/sonar/JkBuildPluginSonar.java)).
-This is launch on a local SonarQube server unless you specify specific Sonar settings. Sonar will leverage of jacoco report.
+Analysis is launched on a local SonarQube server unless you specify specific Sonar settings. Sonar will leverage of jacoco report.
+- type `jerkar doDefault sonar#verify -sonar.host.url=http://my.sonar.host:8080` to specify a SonarQube server host. `-myProp=value` is the way
+in Jerkar to pass parameters (called options) through the command line.
 
+_Simpler than you was accustomed to, He ??_
 
-Simpler than you was accustomed to, He ??
+Note that there is other way for passing option than using the command line. You can define them at three other level :
+- Coded in the build script itself
+- In option.properties file located in Jerkar install directory
+- In option.propertyiesfile located in [user home]/.jerkar directory
 
 Note that in the complete source code, you'll find a `main` method. It's mainly intended to run the whole script friendly in your favorite IDE.
 It's even faster cause you skip the script compile phase.
