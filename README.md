@@ -142,8 +142,8 @@ public class BuildSampleSonarParametrized extends JkJavaBuild {
 	@Override
 	protected void init() {
 		JkBuildPluginSonar sonarPlugin = new JkBuildPluginSonar()
-			.prop(JkSonar.HOST_URL, sonarEnv.url)
-			.prop(JkSonar.BRANCH, "myBranch");
+			.prop(JkSonar.HOST_URL, sonarEnv.url)  // set one of the predefined host
+			.prop(JkSonar.BRANCH, "myBranch");  // set the branch analysis
 		this.plugins.activate(sonarPlugin);
 	}
 	
@@ -158,10 +158,6 @@ public class BuildSampleSonarParametrized extends JkJavaBuild {
 	@Override
 	public void doDefault() {
 		clean();compile();unitTest();
-		
-		// Verify method has extension point hooked by sonar plugin
-		// so when sonar plugin is activated, JkBuild#verify 
-		// launch the #verfy method on all activated plugins
 		verify(); 
 	}
 	
