@@ -176,8 +176,8 @@ public class BuildSampleSonarParametrized extends JkJavaBuild {
 			this.url = url;
 		}
 	}
-}```
-The [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleSonarParametrized.java)
+}
+``` The [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleSonarParametrized.java)
 
 # Status
 
