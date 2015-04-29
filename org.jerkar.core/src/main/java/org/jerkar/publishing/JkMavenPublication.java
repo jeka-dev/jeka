@@ -48,6 +48,10 @@ public final class JkMavenPublication {
 		return new JkMavenPublication(this.artifactName, mainArtifact, map, this.extraInfo);
 	}
 
+	/**
+	 * Returns a new publication based on this one but with the specified publication extra info required
+	 * to publish on Maven central repository.
+	 */
 	public JkMavenPublication with(JkMavenPublicationInfo extraInfo) {
 		return new JkMavenPublication(this.artifactName, this.mainArtifact, this.artifacts, extraInfo);
 	}

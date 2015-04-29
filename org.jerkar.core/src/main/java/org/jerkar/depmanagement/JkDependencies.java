@@ -429,6 +429,11 @@ public class JkDependencies implements Iterable<JkScopedDependency> {
 			return on(module, version, true);
 		}
 
+		public ScopeableBuilder on(JkModuleId module, String version) {
+			return on(module, JkVersionRange.of(version));
+		}
+
+
 		public ScopeableBuilder on(JkModuleId module, JkVersionRange version, boolean transitive) {
 			return on(JkExternalModule.of(module, version).transitive(transitive));
 		}
