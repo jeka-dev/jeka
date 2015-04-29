@@ -175,6 +175,11 @@ public class BuildSampleSonarParametrized extends JkJavaBuild {
 }
 ``` 
 The [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleSonarParametrized.java)
+The Sonar plugin is activated programatically in the script so it is not required anymore to mention it in the build script.
+So `jerkar` alone performs a clean, compile, test and sonar analysis on the default sonar environment (DEV).
+`jerkar -sonarEnv=PROD`run it upon the the PROD environment.  
+
+
 
 # Status
 
