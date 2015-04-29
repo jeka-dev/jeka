@@ -46,7 +46,7 @@ Just know that in Jerkar, build scripts (build classes) are supposed to be store
 and that Jerkar compile everything under this folder prior to execute the first build class found 
 (you can however specify the executed build class by mentioning `-buildClass=MyClassSimpleName` option in Jerkar command line).
 
-### Classic build
+#### Classic build explicit
 This is an academic script for a educational purpose, normally we won't specify projectName, groupName or version
 as they are supposed to be deducted from conventions.
 ```java
@@ -79,13 +79,14 @@ public class BuildSampleClassic extends JkJavaBuild {
 	}
 }
 ```
-The [complete code source](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassic.java)
+The [complete code source](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassicExplicit.java)
 
+#### Classic build normal
 By respecting conventions (project folder named as _groupName_._projectName_ so `org.jerkar.script-samples`)
 and leveraging default (version is read from the version.txt resource), the following script is equivalent :
 
 ```java
-public class BuildSampleClassicNaked extends JkJavaBuild {
+public class BuildSampleClassic extends JkJavaBuild {
 	
 	@Override  // Optional :  needless if you use only local dependencies
 	protected JkDependencies dependencies() {
@@ -93,7 +94,6 @@ public class BuildSampleClassicNaked extends JkJavaBuild {
 			.on(GUAVA, "18.0")  
 			.on(JERSEY_SERVER, "1.19")
 			.on("com.orientechnologies:orientdb-client:2.0.8")
-			.on(JAVAX_SERVLET_API, "2.5").scope(PROVIDED)
 			.on(JUNIT, "4.11").scope(TEST)
 			.on(MOCKITO_ALL, "1.9.5").scope(TEST)
 		.build();
@@ -102,14 +102,15 @@ public class BuildSampleClassicNaked extends JkJavaBuild {
 ```
 
 On the command line, under root project folder :
-- type `jerkar doDefault` => it will clean, compile, run tests and pack (produce jar and source jar), as mentioned in the `JkJavaBuild#doDefault` method
-- type `jerkar doDefault` => will do exactly the same thing : when no method is specified, `doDefault`is run
-- type `jerkar -fatJar -forkTests` => will do the same but also will produce a fat jar 
+- type `jerkar doDefault` => clean, compile, run tests and pack (produce jar and source jar), as mentioned in the `JkJavaBuild#doDefault` method
+- type `jerkar` => will do exactly the same thing : when no method is specified, `doDefault`is run
+- type `jerkar -fatJar -forkTests` => do the same but also will produce a fat jar 
 (jar file containg all the runtime dependencies) and run unit tests in a forked process.
 - type `jerkar jacoco#` => will do as `jerkar` but activating jacoco plugin so the run will produce 
 a code coverage report usable by tools as SonarQube
-- type `jerkar doDefault sonar#verify jacoco#` will do the default + execute the method `verify`located in the `sonar`plugin 
-(class [JkBuildPluginSonar](org.jerkar.plugins-sonar/src/main/java/org/jerkar/plugins/sonar/JkBuildPluginSonar.java))  
+- type `jerkar doDefault sonar#verify jacoco#` => do the default + execute the method `verify` method located in the `sonar`plugin 
+(class [JkBuildPluginSonar](org.jerkar.plugins-sonar/src/main/java/org/jerkar/plugins/sonar/JkBuildPluginSonar.java)).
+This is launch on a local SonarQube server unless you specify specific Sonar settings. Sonar will leverage of jacoco report.
 
 
 
