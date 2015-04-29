@@ -80,7 +80,7 @@ public class BuildSampleClassic extends JkJavaBuild {
 	}
 }
 ```
-The [complete code source](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassicExplicit.java)
+The [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassicExplicit.java)
 
 #### Classic build
 ___
@@ -102,7 +102,7 @@ public class BuildSampleClassic extends JkJavaBuild {
 	}	
 }
 ```
-The [complete code source](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassic.java)
+The [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassic.java)
 
 On the command line, under root project folder :
 - type `jerkar doDefault` => clean, compile, run tests and pack (produce jar and source jar), as mentioned in the `JkJavaBuild#doDefault` method
@@ -177,7 +177,7 @@ public class BuildSampleSonarParametrized extends JkJavaBuild {
 		}
 	}
 }```
-The [complete code source](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleSonarParametrized.java)
+The [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleSonarParametrized.java)
 
 # Status
 
