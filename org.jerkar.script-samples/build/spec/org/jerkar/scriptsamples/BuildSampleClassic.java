@@ -31,9 +31,9 @@ public class BuildSampleClassic extends JkJavaBuild {
 		return "org.jerkar";
 	}
 	
-	@Override  // Optional : needless if you get the version from you SCM
+	@Override  // Optional : needless if you get the version from your SCM or version.txt resource
 	protected JkVersion defaultVersion() {
-		return JkVersion.named("0.1-SNAPSHOT");
+		return JkVersion.named("0.3-SNAPSHOT");
 	}
 	
 	@Override  // Optional :  needless if you use only local dependencies

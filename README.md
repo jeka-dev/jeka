@@ -41,12 +41,14 @@ Jerkar provides what a self respecting modern, enterprise scale, build system sh
 Jerkar builds with itself and this is not a trivial case cause it involves multi-project, distribution crafting, 
 manifest updating and Maven publication. So you may look here to get deeper understanding: [how to build Jerkar](doc/readme-parts/build-jerkar.md) and  See [how to quick start](doc/readme-parts/quick-start.md)
 
-But to start simple, the project 'org.jerkar.script-samples' holds some build script examples. 
-Just knows that in Jerkar, build script are supposed to be stored in ´[project root]/build/spec´ folder,
+But to start simple, the project [org.jerkar.script-samples](org.jerkar.script-samples) holds some build script [examples](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples). 
+Just know that in Jerkar, build scripts (build classes) are supposed to be stored in `[project root]/build/spec` folder,
 and that Jerkar compile everything under this folder prior to execute the first build class found 
-(you can specified the executed build class by spefifying `jerkar -buildClass=MyClassSimpleName`).
+(you can however specify the executed build class by mentioning `-buildClass=MyClassSimpleName` option in Jerkar command line).
 
 ### Classic build
+This is an academic script for a educational purpose, normally we won't specify projectName, groupName or version
+as they are supposed to be deducted from conventions.
 ```java
 public class BuildSampleClassic extends JkJavaBuild {
 	
@@ -60,7 +62,7 @@ public class BuildSampleClassic extends JkJavaBuild {
 		return "org.jerkar";
 	}
 	
-	@Override  // Optional : needless if you get the version from you SCM
+	@Override   // Optional : needless if you get the version from your SCM or version.txt resource
 	protected JkVersion defaultVersion() {
 		return JkVersion.named("0.1-SNAPSHOT");
 	}
@@ -71,7 +73,6 @@ public class BuildSampleClassic extends JkJavaBuild {
 			.on(GUAVA, "18.0")   // Popular modules are available as Java constant
 			.on(JERSEY_SERVER, "1.19")
 			.on("com.orientechnologies:orientdb-client:2.0.8")
-			.on(JAVAX_SERVLET_API, "2.5").scope(PROVIDED)
 			.on(JUNIT, "4.11").scope(TEST)
 			.on(MOCKITO_ALL, "1.9.5").scope(TEST)
 		.build();
@@ -80,7 +81,39 @@ public class BuildSampleClassic extends JkJavaBuild {
 ```
 The [complete code source](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassic.java)
 
+By respecting conventions (project folder named as _groupName_._projectName_ so `org.jerkar.script-samples`)
+and leveraging default (version is read from the version.txt resource), the following script is equivalent :
 
+```java
+public class BuildSampleClassicNaked extends JkJavaBuild {
+	
+	@Override  // Optional :  needless if you use only local dependencies
+	protected JkDependencies dependencies() {
+		return JkDependencies.builder() 
+			.on(GUAVA, "18.0")  
+			.on(JERSEY_SERVER, "1.19")
+			.on("com.orientechnologies:orientdb-client:2.0.8")
+			.on(JAVAX_SERVLET_API, "2.5").scope(PROVIDED)
+			.on(JUNIT, "4.11").scope(TEST)
+			.on(MOCKITO_ALL, "1.9.5").scope(TEST)
+		.build();
+	}	
+}
+```
+
+On the command line, under root project folder :
+- type `jerkar doDefault` => it will clean, compile, run tests and pack (produce jar and source jar), as mentioned in the `JkJavaBuild#doDefault` method
+- type `jerkar doDefault` => will do exactly the same thing : when no method is specified, `doDefault`is run
+- type `jerkar -fatJar -forkTests` => will do the same but also will produce a fat jar 
+(jar file containg all the runtime dependencies) and run unit tests in a forked process.
+- type `jerkar jacoco#` => will do as `jerkar` but activating jacoco plugin so the run will produce 
+a code coverage report usable by tools as SonarQube
+- type `jerkar doDefault sonar#verify jacoco#` will do the default + execute the method `verify`located in the `sonar`plugin 
+(class [JkBuildPluginSonar](org.jerkar.plugins-sonar/src/main/java/org/jerkar/plugins/sonar/JkBuildPluginSonar.java))  
+
+
+
+#Status
 
 The documentation is at its very early stage but the code is yet pretty close to completion for a first release. 
 I mainly need help for further testing, writing documentation, polishing the API... and getting some feedback of course.
