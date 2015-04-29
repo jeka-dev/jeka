@@ -44,7 +44,7 @@ public class JkMavenPublicationInfo {
 		return andDeveloper(new JkDeveloperInfo(name, email, organisation, organisationUrl));
 	}
 
-	public JkMavenPublicationInfo withGitHubDeveloper(String name, String email) {
+	public JkMavenPublicationInfo andGitHubDeveloper(String name, String email) {
 		return andDeveloper(name, email, "GitHub", "https://github.com");
 	}
 
