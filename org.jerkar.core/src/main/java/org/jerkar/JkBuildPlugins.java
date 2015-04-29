@@ -27,7 +27,7 @@ public final class JkBuildPlugins {
 	 * Add and activate the specified plugin for the holding build.
 	 * Activate means that the plugin will be executed whenever it redefine an extension point.
 	 */
-	public void addActivated(JkBuildPlugin plugin) {
+	public void activate(JkBuildPlugin plugin) {
 		if (!accept(plugin)) {
 			return;
 		}
@@ -40,7 +40,7 @@ public final class JkBuildPlugins {
 	 * Configure means that the plugin will not be executed at extension point. But it
 	 * is on the specified instance that method may be invoked on.
 	 */
-	public void addConfigured(JkBuildPlugin plugin) {
+	public void configure(JkBuildPlugin plugin) {
 		if (!accept(plugin)) {
 			return;
 		}
@@ -52,14 +52,14 @@ public final class JkBuildPlugins {
 	JkBuildPlugin addActivated(Class<? extends JkBuildPlugin> exactPluginClass, Map<String, String> options) {
 		final JkBuildPlugin plugin = getOrCreate(exactPluginClass);
 		JkOptions.populateFields(plugin, options);
-		addActivated(plugin);
+		activate(plugin);
 		return plugin;
 	}
 
 	JkBuildPlugin addConfigured(Class<? extends JkBuildPlugin> exactPluginClass, Map<String, String> options) {
 		final JkBuildPlugin plugin = getOrCreate(exactPluginClass);
 		JkOptions.populateFields(plugin, options);
-		addConfigured(plugin);
+		configure(plugin);
 		return plugin;
 	}
 

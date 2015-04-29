@@ -51,18 +51,17 @@ public final class JkSonar {
     public static final String CLOVER_REPORTS_PATH = "clover.reportPath";
     public static final String DYNAMIC_ANALYSIS = "dynamicAnalysis";
 
-
-    private static final String PROJECT_BASE_DIR = "projectBaseDir";
-    private static final String SOURCES = "sources";
-    private static final String BINARIES = "binaries";
-    private static final String TEST = "test";
-    private static final String LIBRARIES = "libraries";
-    private static final String SKIP_DESIGN = "skipDesign";
+    public static final String PROJECT_BASE_DIR = "projectBaseDir";
+    public static final String SOURCES = "sources";
+    public static final String BINARIES = "binaries";
+    public static final String TEST = "test";
+    public static final String LIBRARIES = "libraries";
+    public static final String SKIP_DESIGN = "skipDesign";
     
-    private static final String HOST_URL = "host.url";
-    private static final String JDBC_URL = "jdbc.url";
-    private static final String JDBC_USERNAME = "jdbc.username";
-    private static final String JDBC_PASSWORD = "jdbc.password";
+    public static final String HOST_URL = "host.url";
+    public static final String JDBC_URL = "jdbc.url";
+    public static final String JDBC_USERNAME = "jdbc.username";
+    public static final String JDBC_PASSWORD = "jdbc.password";
     
     private final Map<String, String> params;
 

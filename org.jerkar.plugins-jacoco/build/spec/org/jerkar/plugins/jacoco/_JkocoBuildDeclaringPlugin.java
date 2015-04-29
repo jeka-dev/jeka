@@ -13,7 +13,7 @@ public class _JkocoBuildDeclaringPlugin extends PluginsJacocoBuild {
 	
 	public static void main(String[] args) {
 		_JkocoBuildDeclaringPlugin build = new _JkocoBuildDeclaringPlugin();
-		build.plugins.addActivated(new JkBuildPluginJacoco());
+		build.plugins.activate(new JkBuildPluginJacoco());
 		build.doDefault();
 	}
 	

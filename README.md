@@ -124,10 +124,62 @@ Note that there is other way for passing option than using the command line. You
 - In option.properties file located in Jerkar install directory
 - In option.propertyiesfile located in [user home]/.jerkar directory
 
+If you want the full method along available options on any build, simply type `jerkar help` and/or `jerkar helpPlugins`.
+
 Note that in the complete source code, you'll find a `main` method. It's mainly intended to run the whole script friendly in your favorite IDE.
 It's even faster cause you skip the script compile phase.
+
+#### Parametrized build
 ___
-#Status
+You can set parameter in the build script itself and add your custom parameters with defaults. 
+The following build define three possible sonar servers to run analysis on. It also the analysis branch.
+````java
+public class BuildSampleSonarParametrized extends JkJavaBuild {
+	
+	@JkOption("Sonar server environment")
+	protected SonarEnv sonarEnv = SonarEnv.DEV;
+	
+	@Override
+	protected void init() {
+		JkBuildPluginSonar sonarPlugin = new JkBuildPluginSonar()
+			.prop(JkSonar.HOST_URL, sonarEnv.url)
+			.prop(JkSonar.BRANCH, "myBranch");
+		this.plugins.activate(sonarPlugin);
+	}
+	
+	@Override  
+	protected JkDependencies dependencies() {
+		return JkDependencies.builder()
+			.on(GUAVA, "18.0")  
+			.on(JUNIT, "4.11").scope(TEST)
+		.build();
+	}
+	
+	@Override
+	public void doDefault() {
+		clean();compile();unitTest();
+		
+		// Verify method has extension point hooked by sonar plugin
+		// so when sonar plugin is activated, JkBuild#verify 
+		// launch the #verfy method on all activated plugins
+		verify(); 
+	}
+	
+	public enum SonarEnv {
+		DEV("dev.myhost:81"),
+		QA("qa.myhost:81"),
+		PROD("prod.myhost:80");
+		
+		public final String url;
+		
+		SonarEnv(String url) {
+			this.url = url;
+		}
+	}
+}```
+The [complete code source](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleSonarParametrized.java)
+
+# Status
 
 The documentation is at its very early stage but the code is yet pretty close to completion for a first release. 
 I mainly need help for further testing, writing documentation, polishing the API... and getting some feedback of course.
