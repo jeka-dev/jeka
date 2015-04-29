@@ -40,9 +40,10 @@ Jerkar provides what a self respecting modern, enterprise scale, build system sh
 The documentation is at its very early stage but the code is yet pretty close to completion for a first release. 
 I mainly need help for further testing, writing documentation, polishing the API... and getting some feedback of course.
 
+See [how to build Jerker](doc/readme-parts/build-jerkar.md)
 
-See [how to build Jerkar](doc/readme-parts/quick-start.md)
+See [how to quick start](doc/readme-parts/quick-start.md)
 
-See [example on how jerkar build itself](doc/readme-parts/example-jerkar-core.md)
+See [an example on how jerkar build itself](doc/readme-parts/example-jerkar-core.md)
     
         
