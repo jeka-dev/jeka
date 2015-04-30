@@ -108,22 +108,21 @@ On the command line, under root project folder :
 - type `jerkar -fatJar=true -forkTests=true` => do the same, when field values are not mentioned, Jerkar uses a default value (true for boolean fields)
 
 - type `jerkar jacoco#` => will instantiate the [jacoco plugin](org.jerkar.plugins-jacoco/src/main/java/org/jerkar/plugins/jacoco/JkBuildPluginJacoco.java) and bind it to the `BuidSampleClassic` instance. This plugin alter the `JkJavaBuild#unitTest` method 
-in such a way that tests are run with Jacoco to produce a test coverage report.
+in such a way that tests are run with Jacoco to produce a test coverage report. '#' is the mark of plugin in Jerkar command line.
 - type `jerkar jacoco# -jacoco#produceHtml` => will do the same but also set the `JkBuildPluginJacoco#produceHtml`field to `true`. It leads in producing 
 an html report along the standard jacoco.exec binary report
 
-- type `jerkar doDefault sonar#verify jacoco#` => do the default + execute the method `verify` method located in the `sonar`plugin 
-(class [JkBuildPluginSonar](org.jerkar.plugins-sonar/src/main/java/org/jerkar/plugins/sonar/JkBuildPluginSonar.java)).
+- type `jerkar doDefault sonar#verify jacoco#` => do the default + execute the method `verify` method located in the [sonar plugin] (org.jerkar.plugins-sonar/src/main/java/org/jerkar/plugins/sonar/JkBuildPluginSonar.java).
 Analysis is launched on a local SonarQube server unless you specify specific Sonar settings. Sonar will leverage of jacoco report.
 - type `jerkar doDefault sonar#verify -sonar.host.url=http://my.sonar.host:8080` to specify a SonarQube server host. `-myProp=value` is the way
 in Jerkar to pass parameters (called options) through the command line.
 
-_Simpler than you was accustomed to, He ??_
-
+```note
 Note that there is other way for passing option than using the command line. You can define them at three other level :
 - Coded in the build script itself
 - In option.properties file located in Jerkar install directory
-- In option.propertyiesfile located in [user home]/.jerkar directory
+- In option.properties file located in [user home]/.jerkar directory
+```
 
 If you want the full method along available options on any build, simply type `jerkar help` and/or `jerkar helpPlugins`.
 
