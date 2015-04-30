@@ -25,12 +25,12 @@ import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.FileSystemResolver;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
+import org.jerkar.JkModuleId;
 import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkExternalModule;
-import org.jerkar.depmanagement.JkModuleId;
 import org.jerkar.depmanagement.JkRepo;
-import org.jerkar.depmanagement.JkRepo.IvyRepository;
+import org.jerkar.depmanagement.JkRepo.JkIvyRepository;
 import org.jerkar.depmanagement.JkRepos;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
@@ -168,7 +168,7 @@ final class Translations {
 	// see
 	// http://www.draconianoverlord.com/2010/07/18/publishing-to-maven-repos-with-ivy.html
 	public static DependencyResolver toResolver(JkRepo repo) {
-		if (repo instanceof JkRepo.MavenRepository) {
+		if (repo instanceof JkRepo.JkMavenRepository) {
 			if (!isFileSystem(repo.url())) {
 				final IBiblioResolver result = new IBiblioResolver();
 				result.setM2compatible(true);
@@ -184,7 +184,7 @@ final class Translations {
 			result.setM2compatible(true);
 			return result;
 		}
-		final IvyRepository jkIvyRepo = (IvyRepository) repo;
+		final JkIvyRepository jkIvyRepo = (JkIvyRepository) repo;
 		if (isFileSystem(repo.url())) {
 			final FileRepository fileRepo = new FileRepository(new File(repo.url().getPath()));
 			final FileSystemResolver result = new FileSystemResolver();

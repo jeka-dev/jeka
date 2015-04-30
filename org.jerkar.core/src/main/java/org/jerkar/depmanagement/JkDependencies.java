@@ -15,6 +15,7 @@ import java.util.Set;
 import org.jerkar.JkBuild;
 import org.jerkar.JkLog;
 import org.jerkar.JkPath;
+import org.jerkar.JkModuleId;
 import org.jerkar.depmanagement.JkDependency.JkFilesDependency;
 import org.jerkar.depmanagement.JkDependency.JkProjectDependency;
 import org.jerkar.depmanagement.JkScopedDependency.ScopeType;

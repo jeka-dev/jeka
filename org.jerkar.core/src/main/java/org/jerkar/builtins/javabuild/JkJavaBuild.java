@@ -414,7 +414,7 @@ public class JkJavaBuild extends JkBuild {
 
 	protected JkMavenPublication mavenPublication(boolean includeTests, boolean includeSources) {
 		final JkJavaPacker packer = packer();
-		return JkMavenPublication.of(this.projectId().name() ,packer.jarFile())
+		return JkMavenPublication.of(this.moduleId().name() ,packer.jarFile())
 				.andIf(includeSources, packer.jarSourceFile(), "sources")
 				.andOptional(javadocMaker().zipFile(), "javadoc")
 				.andOptionalIf(includeTests, packer.jarTestFile(), "test")

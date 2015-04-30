@@ -46,42 +46,74 @@ Just know that in Jerkar, build scripts (build classes) are supposed to be store
 and that Jerkar compile everything under this folder prior to execute the first build class found 
 (you can however specify the executed build class by mentioning `-buildClass=MyClassSimpleName` option in Jerkar command line).
 
-#### Explicit build
+#### Java build with explicit setting
 ___
-This is an academic script for a educational purpose, normally we won't specify projectName, groupName or version
-as they are supposed to be deducted from conventions.
+To build your project with Jerkar you may need to create a class extending [JkBuild](src/main/java/org/jerkar/JkBuild.java) 
+and write method you want to execute.
+
+For Java project you may directly extend [JkJavaBuild](org.jerkar.core/src/main/java/org/jerkar/builtins/javabuild/JkJavaBuild.java) 
+so all you need is already implemented. All you need is to implement what is specific.
+
+This example is an academic script for a illustration purpose. Most these settings can be omitted 
+by following naming convention or setting Jerkar at global level.
+
 ```java
 public class BuildSampleClassic extends JkJavaBuild {
 	
 	@Override
 	// Optional : needless if you respect naming convention
-	public JkProjectId projectId() {
-		return JkProjectId.of("org.jerkar", "script-samples");
+	public JkModuleId moduleId() {
+		return JkModuleId.of("org.jerkar", "script-samples");
 	}
-	
-	@Override   // Optional : needless if you get the version from your SCM or version.txt resource
+
+	@Override
+	// Optional : needless if you get the version from your SCM or version.txt
+	// resource
 	protected JkVersion defaultVersion() {
-		return JkVersion.ofName("0.1-SNAPSHOT");
+		return JkVersion.ofName("0.3-SNAPSHOT");
+	}
+
+	@Override
+	// Optional : needless if you use only local dependencies
+	protected JkDependencies dependencies() {
+		return JkDependencies
+				.builder()
+				.on(GUAVA, "18.0")
+				// Popular modules are available as Java constant
+				.on(JERSEY_SERVER, "1.19")
+				.on("com.orientechnologies:orientdb-client:2.0.8")
+				.on(JUNIT, "4.11").scope(TEST).on(MOCKITO_ALL, "1.9.5")
+				.scope(TEST).build();
 	}
 	
-	@Override  // Optional :  needless if you use only local dependencies
-	protected JkDependencies dependencies() {
-		return JkDependencies.builder()
-			.on(GUAVA, "18.0")   // Popular modules are available as Java constant
-			.on(JERSEY_SERVER, "1.19")
-			.on("com.orientechnologies:orientdb-client:2.0.8")
-			.on(JUNIT, "4.11").scope(TEST)
-			.on(MOCKITO_ALL, "1.9.5").scope(TEST)
-		.build();
+	@Override
+	// Optional :Maven central by default. You can also set it in in 
+	// your shared [USER DIR]/.jerkar/options.propereties file  
+	protected JkRepos downloadRepositories() {
+		return JkRepos.of(JkRepo.maven("http://my.repo1"), JkRepo.mavenCentral());
 	}
+	
+	@Override
+	// Optional : You can set it in in 
+	// your shared [USER DIR]/.jerkar/options.propereties file
+	protected JkPublishRepos publishRepositories() {
+		return JkPublishRepos.ofSnapshotAndRelease(
+				JkRepo.maven("http://my.snapshot.repo"), 
+				JkRepo.ivy("http://my.release.repo"));
+	}
+
 }
 ```
 [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassicExplicit.java)
 
+Note that in the complete source code, you'll find a `main` method. It's mainly intended to run the whole script friendly in your favorite IDE.
+It's even faster cause you skip the script compile phase.
+
+
 #### Classic build
 ___
 By respecting conventions (project folder named as _groupName_._projectName_ so `org.jerkar.script-samples`)
-and leveraging default (version is read from the version.txt resource located in the same package as the build class), the following script is equivalent :
+, using defaults, and store global settings (as repositories) to shared property files the above script is reduced to :
 
 ```java
 public class BuildSampleClassic extends JkJavaBuild {
@@ -100,34 +132,30 @@ public class BuildSampleClassic extends JkJavaBuild {
 ```
 [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassic.java)
 
-On the command line, under root project folder :
+Now we get a clean script, we can start using Jerkar from command line. Under root project folder :
 - execute `jerkar doDefault` => invoke the `JkJavaBuild#doDefault` method which lead in clean, compile, compile tests, run tests and pack (produce jar and source jar).
-- type `jerkar` => do the same, the `JkJavaBuild#doDefault` method is invoked when none is specified
-- type `jerkar -fatJar=true -forkTests=true` => do the same but inject the `true` value to `JkJavaBuild#fatJar` and `JkJavaBuild#forkTests` fields. It leads in producing a fat-jar 
+- execute `jerkar` => do the same, the `JkJavaBuild#doDefault` method is invoked when none is specified
+- execute `jerkar -fatJar=true -forkTests=true` => do the same but inject the `true` value to `JkJavaBuild#fatJar` and `JkJavaBuild#forkTests` fields. It leads in producing a fat-jar 
 (jar file containg all the runtime dependencies) and running unit tests in a forked process.
-- type `jerkar -fatJar=true -forkTests=true` => do the same, when field values are not mentioned, Jerkar uses a default value (true for boolean fields)
+- execute `jerkar -fatJar=true -forkTests=true` => do the same, when field values are not mentioned, Jerkar uses a default value (true for boolean fields)
 
-- type `jerkar jacoco#` => will instantiate the [jacoco plugin](org.jerkar.plugins-jacoco/src/main/java/org/jerkar/plugins/jacoco/JkBuildPluginJacoco.java) and bind it to the `BuidSampleClassic` instance. This plugin alter the `JkJavaBuild#unitTest` method 
+- execute `jerkar jacoco#` => will instantiate the [jacoco plugin](org.jerkar.plugins-jacoco/src/main/java/org/jerkar/plugins/jacoco/JkBuildPluginJacoco.java) and bind it to the `BuidSampleClassic` instance. This plugin alter the `JkJavaBuild#unitTest` method 
 in such a way that tests are run with Jacoco to produce a test coverage report. '#' is the mark of plugin in Jerkar command line.
-- type `jerkar jacoco# -jacoco#produceHtml` => will do the same but also set the `JkBuildPluginJacoco#produceHtml`field to `true`. It leads in producing 
+- execute `jerkar jacoco# -jacoco#produceHtml` => will do the same but also set the `JkBuildPluginJacoco#produceHtml`field to `true`. It leads in producing 
 an html report along the standard jacoco.exec binary report
 
-- type `jerkar doDefault sonar#verify jacoco#` => do the default + execute the method `verify` method located in the [sonar plugin] (org.jerkar.plugins-sonar/src/main/java/org/jerkar/plugins/sonar/JkBuildPluginSonar.java).
+- execute `jerkar doDefault sonar#verify jacoco#` => do the default + execute the method `verify` method located in the [sonar plugin] (org.jerkar.plugins-sonar/src/main/java/org/jerkar/plugins/sonar/JkBuildPluginSonar.java).
 Analysis is launched on a local SonarQube server unless you specify specific Sonar settings. Sonar will leverage of jacoco report.
-- type `jerkar doDefault sonar#verify -sonar.host.url=http://my.sonar.host:8080` to specify a SonarQube server host. `-myProp=value` is the way
+- execute `jerkar doDefault sonar#verify -sonar.host.url=http://my.sonar.host:8080` to specify a SonarQube server host. `-myProp=value` is the way
 in Jerkar to pass parameters (called options) through the command line.
 
-```note
+If you want the full method along available options on any build, simply type `jerkar help` and/or `jerkar helpPlugins`.
+
 Note that there is other way for passing option than using the command line. You can define them at three other level :
 - Coded in the build script itself
 - In option.properties file located in Jerkar install directory
 - In option.properties file located in [user home]/.jerkar directory
-```
 
-If you want the full method along available options on any build, simply type `jerkar help` and/or `jerkar helpPlugins`.
-
-Note that in the complete source code, you'll find a `main` method. It's mainly intended to run the whole script friendly in your favorite IDE.
-It's even faster cause you skip the script compile phase.
 
 #### Parametrized build
 ___

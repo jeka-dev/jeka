@@ -1,6 +1,6 @@
 package org.jerkar.builtins.javabuild;
 
-import org.jerkar.depmanagement.JkModuleId;
+import org.jerkar.JkModuleId;
 
 public final class JkPopularModules {
 

@@ -1,6 +1,13 @@
 package org.jerkar.depmanagement;
 
-public class JkVersionedModule {
+import org.jerkar.JkModuleId;
+
+/**
+ * Identifies a given module in a given version
+ * 
+ * @author Jerome Angibaud
+ */
+public final class JkVersionedModule {
 
 	public static JkVersionedModule of(JkModuleId moduleId, JkVersion version) {
 		return new JkVersionedModule(moduleId, version);

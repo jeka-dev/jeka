@@ -1,9 +1,6 @@
 package org.jerkar.depmanagement;
 
-import org.jerkar.depmanagement.JkDependency;
-import org.jerkar.depmanagement.JkExternalModule;
-import org.jerkar.depmanagement.JkModuleId;
-import org.jerkar.depmanagement.JkVersionRange;
+import org.jerkar.JkModuleId;
 import org.junit.Test;
 
 public class JkExternalModuleTest {

@@ -10,9 +10,8 @@ import java.util.List;
 
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependencyResolver;
-import org.jerkar.depmanagement.JkModuleId;
 import org.jerkar.depmanagement.JkRepo;
-import org.jerkar.depmanagement.JkRepo.MavenRepository;
+import org.jerkar.depmanagement.JkRepo.JkMavenRepository;
 import org.jerkar.depmanagement.JkRepos;
 import org.jerkar.depmanagement.JkResolutionParameters;
 import org.jerkar.depmanagement.JkScope;
@@ -54,7 +53,7 @@ public class JkBuild {
 
 	@JkOption({"Maven or Ivy repositories to download dependency artifacts.",
 	"Prefix the Url with 'ivy:' if it is an Ivy repostory."})
-	protected String downloadRepoUrl = MavenRepository.MAVEN_CENTRAL_URL.toString();
+	protected String downloadRepoUrl = JkMavenRepository.MAVEN_CENTRAL_URL.toString();
 
 	@JkOption({"Usename to connect to the download repository (if needed).",
 	"Null or blank means that the upload repository will be accessed in an anonymous way."})
@@ -168,15 +167,18 @@ public class JkBuild {
 	}
 
 	/**
-	 * The project identifier. Used to name generated artifacts and by dependency manager.
+	 * Returns identifier for this project.
+	 * This identifier is used to name generated artifacts and by dependency manager.
 	 */
-	public JkProjectId projectId() {
-		return JkProjectId.of(baseDir().root().getName());
+	public JkModuleId moduleId() {
+		return JkModuleId.of(baseDir().root().getName());
 	}
 
-
+	/**
+	 * Returns
+	 */
 	protected final JkVersionedModule module() {
-		return JkVersionedModule.of(JkModuleId.of(projectId()), version());
+		return JkVersionedModule.of(moduleId(), version());
 	}
 
 	/**
@@ -306,7 +308,7 @@ public class JkBuild {
 			public void run() {
 				final File spec = baseDir(JkBuildResolver.BUILD_SOURCE_DIR);
 				spec.mkdirs();
-				final String packageName = projectId().group().replace('.', '/');
+				final String packageName = moduleId().group().replace('.', '/');
 				new File(spec, packageName).mkdirs();
 			}
 		})

@@ -51,7 +51,7 @@ public class JkJavaPacker implements Cloneable {
 	}
 
 	public String baseName() {
-		final String name = fullName ? build.projectId().toString() : build.projectId().name();
+		final String name = fullName ? build.moduleId().toString() : build.moduleId().name();
 		if (includeVersion) {
 			return name + "-" + build.version();
 		}

@@ -52,7 +52,7 @@ public final class JkJavadocMaker {
 	}
 
 	public static JkJavadocMaker of(JkJavaBuild javaBuild, boolean fullName, boolean includeVersion) {
-		String name = fullName ? javaBuild.projectId().toString(): javaBuild.projectId().toString();
+		String name = fullName ? javaBuild.moduleId().toString(): javaBuild.moduleId().toString();
 		if (includeVersion) {
 			name = name + "-" + javaBuild.version().name();
 		}

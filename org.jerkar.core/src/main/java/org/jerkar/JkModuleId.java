@@ -8,13 +8,13 @@ import org.jerkar.utils.JkUtilsString;
  * 
  * @author Jerome Angibaud
  */
-public final class JkProjectId {
+public final class JkModuleId {
 
 	/**
 	 * Creates a project id according the specified group and name.
 	 */
-	public static JkProjectId of(String group, String name) {
-		return new JkProjectId(group, name);
+	public static JkModuleId of(String group, String name) {
+		return new JkModuleId(group, name);
 	}
 
 	/**
@@ -22,20 +22,20 @@ public final class JkProjectId {
 	 * The last '.' is considered as the separator between the group and the name. <br/>
 	 * If there is no '.' then the whole string will serve both for group and name.
 	 */
-	public static JkProjectId of(String groupAndName) {
+	public static JkModuleId of(String groupAndName) {
 		if(groupAndName.contains(".")) {
 			final String group = JkUtilsString.substringBeforeLast(groupAndName, ".");
 			final String name = JkUtilsString.substringAfterLast(groupAndName, ".");
-			return new JkProjectId(group, name);
+			return new JkModuleId(group, name);
 		}
-		return new JkProjectId(groupAndName, groupAndName);
+		return new JkModuleId(groupAndName, groupAndName);
 	}
 
 	private final String group;
 
 	private final String name;
 
-	private JkProjectId(String group, String name) {
+	private JkModuleId(String group, String name) {
 		super();
 		this.group = group;
 		this.name = name;
@@ -73,7 +73,7 @@ public final class JkProjectId {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		final JkProjectId other = (JkProjectId) obj;
+		final JkModuleId other = (JkModuleId) obj;
 		if (group == null) {
 			if (other.group != null) {
 				return false;
