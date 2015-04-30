@@ -61,7 +61,7 @@ import org.jerkar.utils.JkUtilsString;
 public final class JkIvy {
 
 	private static final JkVersionedModule ANONYMOUS_MODULE = JkVersionedModule.of(
-			JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.named("anonymousVersion"));
+			JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.ofName("anonymousVersion"));
 
 	private final Ivy ivy;
 

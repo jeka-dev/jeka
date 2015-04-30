@@ -1,5 +1,6 @@
 package org.jerkar.depmanagement;
 
+import org.jerkar.JkProjectId;
 import org.jerkar.utils.JkUtilsString;
 
 /**
@@ -16,6 +17,13 @@ public final class JkModuleId {
 	 */
 	public static JkModuleId of(String group, String name) {
 		return new JkModuleId(group, name);
+	}
+
+	/**
+	 * Creates a <code>JkModuleId</code> from a group and a name.
+	 */
+	public static JkModuleId of(JkProjectId projectId) {
+		return new JkModuleId(projectId.group(), projectId.name());
 	}
 
 	/**

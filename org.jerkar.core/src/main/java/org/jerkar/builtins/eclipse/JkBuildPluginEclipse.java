@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import org.jerkar.JkBuild;
-import org.jerkar.JkDirSet;
+import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkDoc;
 import org.jerkar.JkOption;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
@@ -50,25 +50,25 @@ public class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 	}
 
 	@Override
-	public JkDirSet alterSourceDirs(JkDirSet original) {
+	public JkFileTreeSet alterSourceDirs(JkFileTreeSet original) {
 		final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
 		return dotClasspath().sourceDirs(javaBuild.baseDir(""), segregator).prodSources;
 	}
 
 	@Override
-	public JkDirSet alterTestSourceDirs(JkDirSet original) {
+	public JkFileTreeSet alterTestSourceDirs(JkFileTreeSet original) {
 		final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
 		return dotClasspath().sourceDirs(javaBuild.baseDir(""), segregator).testSources;
 	}
 
 	@Override
-	public JkDirSet alterResourceDirs(JkDirSet original) {
+	public JkFileTreeSet alterResourceDirs(JkFileTreeSet original) {
 		final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
 		return dotClasspath().sourceDirs(javaBuild.baseDir(""), segregator).prodSources.andFilter(JkJavaBuild.RESOURCE_FILTER);
 	}
 
 	@Override
-	public JkDirSet alterTestResourceDirs(JkDirSet original) {
+	public JkFileTreeSet alterTestResourceDirs(JkFileTreeSet original) {
 		final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
 		return dotClasspath().sourceDirs(javaBuild.baseDir(""), segregator).testSources.andFilter(JkJavaBuild.RESOURCE_FILTER);
 	}

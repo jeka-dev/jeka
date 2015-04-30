@@ -119,7 +119,7 @@ public abstract class JkDependency {
 
 		@Override
 		public String toString() {
-			return projectBuild.projectName() + " (" + this.projectBuild.getClass().getName() + ")";
+			return projectBuild.projectId() + " (" + this.projectBuild.getClass().getName() + ")";
 		}
 
 	}

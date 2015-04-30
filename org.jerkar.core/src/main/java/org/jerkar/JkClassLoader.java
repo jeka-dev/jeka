@@ -303,13 +303,13 @@ public final class JkClassLoader {
 	}
 
 	/**
-	 * Returns all classes of this <code>classloader</code> that are defined inside the provided <code>JkDirSet</code>.
+	 * Returns all classes of this <code>classloader</code> that are defined inside the provided <code>JkFileTreeSet</code>.
 	 * 
 	 * @see JkClassLoader#loadClassesInEntries(FileFilter)
 	 */
-	public Set<Class<? extends Object>> loadClassesIn(JkDirSet jkDirSet) {
+	public Set<Class<? extends Object>> loadClassesIn(JkFileTreeSet jkFileTreeSet) {
 		final Set<Class<?>> result = new HashSet<Class<?>>();
-		for (final String path : jkDirSet.relativePathes()) {
+		for (final String path : jkFileTreeSet.relativePathes()) {
 			if (path.endsWith(".class")) {
 				final String className = getAsClassName(path);
 				result.add(this.load(className));

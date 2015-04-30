@@ -7,7 +7,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
-import org.jerkar.JkDirSet;
+import org.jerkar.JkFileTreeSet;
 import org.jerkar.builtins.eclipse.DotClasspath;
 import org.jerkar.builtins.eclipse.Lib;
 import org.jerkar.builtins.eclipse.ScopeResolverSmart;
@@ -27,8 +27,8 @@ public class DotClasspathTest {
 
 	@Test
 	public void testSourceDirs() throws URISyntaxException {
-		final JkDirSet dirSet = sample().sourceDirs(structure(), Sources.ALL_PROD).prodSources;
-		assertEquals(2, dirSet.jkDirs().size());
+		final JkFileTreeSet dirSet = sample().sourceDirs(structure(), Sources.ALL_PROD).prodSources;
+		assertEquals(2, dirSet.jkFileTrees().size());
 	}
 
 	@Test

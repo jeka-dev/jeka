@@ -2,7 +2,7 @@ package org.jerkar.builtins.javabuild;
 
 import org.jerkar.JkBuild;
 import org.jerkar.JkBuildPlugin;
-import org.jerkar.JkDirSet;
+import org.jerkar.JkFileTreeSet;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
 
 /**
@@ -41,7 +41,7 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
 	 * 
 	 * @see JkJavaBuild#sourceDirs()
 	 */
-	protected JkDirSet alterSourceDirs(JkDirSet original) {
+	protected JkFileTreeSet alterSourceDirs(JkFileTreeSet original) {
 		return original;
 	}
 
@@ -50,7 +50,7 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
 	 * 
 	 * @see JkJavaBuild#testSourceDirs()
 	 */
-	protected JkDirSet alterTestSourceDirs(JkDirSet original) {
+	protected JkFileTreeSet alterTestSourceDirs(JkFileTreeSet original) {
 		return original;
 	}
 
@@ -59,7 +59,7 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
 	 * 
 	 * @see JkJavaBuild#resourceDirs()
 	 */
-	protected JkDirSet alterResourceDirs(JkDirSet original) {
+	protected JkFileTreeSet alterResourceDirs(JkFileTreeSet original) {
 		return original;
 	}
 
@@ -68,7 +68,7 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
 	 * 
 	 * @see JkJavaBuild#testResourceDirs()
 	 */
-	protected JkDirSet alterTestResourceDirs(JkDirSet original) {
+	protected JkFileTreeSet alterTestResourceDirs(JkFileTreeSet original) {
 		return original;
 	}
 
@@ -88,32 +88,32 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
 		return result;
 	}
 
-	static JkDirSet applySourceDirs(Iterable<? extends JkBuildPlugin> plugins, JkDirSet original) {
-		JkDirSet result = original;
+	static JkFileTreeSet applySourceDirs(Iterable<? extends JkBuildPlugin> plugins, JkFileTreeSet original) {
+		JkFileTreeSet result = original;
 		for (final JkBuildPlugin plugin : plugins) {
 			result = ((JkJavaBuildPlugin) plugin).alterSourceDirs(result);
 		}
 		return result;
 	}
 
-	static JkDirSet applyTestSourceDirs(Iterable<? extends JkBuildPlugin> plugins, JkDirSet original) {
-		JkDirSet result = original;
+	static JkFileTreeSet applyTestSourceDirs(Iterable<? extends JkBuildPlugin> plugins, JkFileTreeSet original) {
+		JkFileTreeSet result = original;
 		for (final JkBuildPlugin plugin : plugins) {
 			result = ((JkJavaBuildPlugin) plugin).alterTestSourceDirs(result);
 		}
 		return result;
 	}
 
-	static JkDirSet applyResourceDirs(Iterable<? extends JkBuildPlugin> plugins, JkDirSet original) {
-		JkDirSet result = original;
+	static JkFileTreeSet applyResourceDirs(Iterable<? extends JkBuildPlugin> plugins, JkFileTreeSet original) {
+		JkFileTreeSet result = original;
 		for (final JkBuildPlugin plugin : plugins) {
 			result = ((JkJavaBuildPlugin) plugin).alterResourceDirs(result);
 		}
 		return result;
 	}
 
-	static JkDirSet applyTestResourceDirs(Iterable<? extends JkBuildPlugin> plugins, JkDirSet original) {
-		JkDirSet result = original;
+	static JkFileTreeSet applyTestResourceDirs(Iterable<? extends JkBuildPlugin> plugins, JkFileTreeSet original) {
+		JkFileTreeSet result = original;
 		for (final JkBuildPlugin plugin : plugins) {
 			result = ((JkJavaBuildPlugin) plugin).alterTestResourceDirs(result);
 		}

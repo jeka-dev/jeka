@@ -7,8 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jerkar.JkDir;
-import org.jerkar.JkDirSet;
+import org.jerkar.JkFileTree;
+import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkLog;
 import org.jerkar.utils.JkUtilsIterable;
 
@@ -30,30 +30,30 @@ public final class JkResourceProcessor {
 	}
 
 	/**
-	 * Creates a <code>JkResourceProcessor</code> from the given <code>JkDirSet</code> without processing
+	 * Creates a <code>JkResourceProcessor</code> from the given <code>JkFileTreeSet</code> without processing
 	 * any token replacement.
 	 */
 	@SuppressWarnings("unchecked")
-	public static JkResourceProcessor of(JkDirSet dirSet) {
+	public static JkResourceProcessor of(JkFileTreeSet dirSet) {
 		return new JkResourceProcessor(JkUtilsIterable.listOf(new ResourceDirSet(dirSet, Collections.EMPTY_MAP)));
 	}
 
 	/**
-	 * Creates a <code>JkResourceProcessor</code> from the given <code>JkDirSet</code> and processes
+	 * Creates a <code>JkResourceProcessor</code> from the given <code>JkFileTreeSet</code> and processes
 	 * replacement on specified token. <br/>
 	 * For example, if you want to replace,  <code>${date}</code> by <code>2015-01-30</code> then you have to fill the specified
 	 * <code>tokenValues</code> map with the following entry : <code>"date" -> "2015-01-30"</code> (without the quotes).
 	 */
-	public static JkResourceProcessor of(JkDirSet dirSet, Map<String, String> tokenValues) {
+	public static JkResourceProcessor of(JkFileTreeSet dirSet, Map<String, String> tokenValues) {
 		return new JkResourceProcessor(JkUtilsIterable.listOf(new ResourceDirSet(dirSet, new HashMap<String, String>(tokenValues))));
 	}
 
 	/**
-	 * Creates a <code>JkResourceProcessor</code> from the given <code>JkDirSet</code> and processes
+	 * Creates a <code>JkResourceProcessor</code> from the given <code>JkFileTreeSet</code> and processes
 	 * replacement on specified tokens by the specified values. <br/>
-	 * Its just a shorthand for {@link #of(JkDirSet, Map)} specifying tokens/values map in-line.
+	 * Its just a shorthand for {@link #of(JkFileTreeSet, Map)} specifying tokens/values map in-line.
 	 */
-	public static JkResourceProcessor of(JkDirSet dirSet, String token, String value, String ...others) {
+	public static JkResourceProcessor of(JkFileTreeSet dirSet, String token, String value, String ...others) {
 		return of(dirSet, JkUtilsIterable.mapOf(token, value, (Object[]) others));
 	}
 
@@ -83,58 +83,58 @@ public final class JkResourceProcessor {
 	}
 
 	/**
-	 * @see JkResourceProcessor#and(JkDirSet)
+	 * @see JkResourceProcessor#and(JkFileTreeSet)
 	 */
 	@SuppressWarnings("unchecked")
-	public JkResourceProcessor and(JkDirSet dirSet) {
+	public JkResourceProcessor and(JkFileTreeSet dirSet) {
 		return and(dirSet, Collections.EMPTY_MAP);
 	}
 
 	/**
-	 * @see JkResourceProcessor#and(JkDirSet)
+	 * @see JkResourceProcessor#and(JkFileTreeSet)
 	 */
-	public JkResourceProcessor and(JkDir dir) {
-		return and(JkDirSet.of(dir));
+	public JkResourceProcessor and(JkFileTree dir) {
+		return and(JkFileTreeSet.of(dir));
 	}
 
 	/**
-	 * @see JkResourceProcessor#and(JkDirSet)
+	 * @see JkResourceProcessor#and(JkFileTreeSet)
 	 */
 	public JkResourceProcessor andIfExist(File ...dirs) {
-		return and(JkDirSet.of(dirs));
+		return and(JkFileTreeSet.of(dirs));
 	}
 
 	/**
-	 * @see JkResourceProcessor#and(JkDirSet)
+	 * @see JkResourceProcessor#and(JkFileTreeSet)
 	 */
 	public JkResourceProcessor andIfExist(Map<String, String> replacedValues, File ...dirs) {
-		return and(JkDirSet.of(dirs), replacedValues);
+		return and(JkFileTreeSet.of(dirs), replacedValues);
 	}
 
 	/**
-	 * Creates a <code>JkResourceProcessor</code> from this one and adding the specified <code>JkDirSet</code>
+	 * Creates a <code>JkResourceProcessor</code> from this one and adding the specified <code>JkFileTreeSet</code>
 	 * along its token to be replaced.
 	 */
-	public JkResourceProcessor and(JkDirSet dirSet, Map<String, String> tokenReplacement) {
+	public JkResourceProcessor and(JkFileTreeSet dirSet, Map<String, String> tokenReplacement) {
 		final List<ResourceDirSet> list = new LinkedList<ResourceDirSet>(this.resourceDirSet);
 		list.add(new ResourceDirSet(dirSet, new HashMap<String, String>(tokenReplacement)));
 		return new JkResourceProcessor(list);
 	}
 
 	/**
-	 * @see JkResourceProcessor#and(JkDirSet)
+	 * @see JkResourceProcessor#and(JkFileTreeSet)
 	 */
-	public JkResourceProcessor and(JkDir dir, Map<String, String> tokenReplacement) {
-		return and(JkDirSet.of(dir), tokenReplacement);
+	public JkResourceProcessor and(JkFileTree dir, Map<String, String> tokenReplacement) {
+		return and(JkFileTreeSet.of(dir), tokenReplacement);
 	}
 
 
 	private static class ResourceDirSet {
 
-		public final JkDirSet dirSet;
+		public final JkFileTreeSet dirSet;
 		public final Map<String, String> replacement;
 
-		public ResourceDirSet(JkDirSet dirSet, Map<String, String> replacement) {
+		public ResourceDirSet(JkFileTreeSet dirSet, Map<String, String> replacement) {
 			super();
 			this.dirSet = dirSet;
 			this.replacement = replacement;

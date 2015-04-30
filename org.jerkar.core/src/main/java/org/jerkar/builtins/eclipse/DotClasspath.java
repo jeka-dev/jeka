@@ -21,8 +21,8 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.jerkar.JkBuild;
 import org.jerkar.JkBuildResolver;
-import org.jerkar.JkDir;
-import org.jerkar.JkDirSet;
+import org.jerkar.JkFileTree;
+import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkException;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
@@ -92,8 +92,8 @@ final class DotClasspath {
 	}
 
 	public Sources sourceDirs(File baseDir, Sources.TestSegregator segregator) {
-		final List<JkDir> prods = new LinkedList<JkDir>();
-		final List<JkDir> tests = new LinkedList<JkDir>();
+		final List<JkFileTree> prods = new LinkedList<JkFileTree>();
+		final List<JkFileTree> tests = new LinkedList<JkFileTree>();
 		for (final ClasspathEntry classpathEntry : classpathentries) {
 			if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC) && !classpathEntry.isOptional()) {
 				if (segregator.isTest(classpathEntry.path)) {
@@ -103,7 +103,7 @@ final class DotClasspath {
 				}
 			}
 		}
-		return new Sources(JkDirSet.of(prods), JkDirSet.of(tests));
+		return new Sources(JkFileTreeSet.of(prods), JkFileTreeSet.of(tests));
 	}
 
 	public List<Lib> libs(File baseDir, ScopeResolver scopeResolver) {
@@ -219,21 +219,21 @@ final class DotClasspath {
 			return result;
 		}
 
-		public JkDir srcAsJkDir(File baseDir) {
+		public JkFileTree srcAsJkDir(File baseDir) {
 			if (!this.kind.equals(Kind.SRC)) {
 				throw new IllegalStateException("Can only get source dir from classpath entry of kind 'src'.");
 			}
 			final File dir = new File(baseDir, path);
-			JkDir jkDir = JkDir.of(dir);
+			JkFileTree jkFileTree = JkFileTree.of(dir);
 			if (!excluding.isEmpty()) {
 				final String[] patterns = excluding.split("\\|");
-				jkDir = jkDir.exclude(patterns);
+				jkFileTree = jkFileTree.exclude(patterns);
 			}
 			if (!including.isEmpty()) {
 				final String[] patterns = including.split("\\|");
-				jkDir = jkDir.include(patterns);
+				jkFileTree = jkFileTree.include(patterns);
 			}
-			return jkDir;
+			return jkFileTree;
 		}
 
 		public boolean isOptional() {
@@ -267,7 +267,7 @@ final class DotClasspath {
 					return Collections.emptyList();
 				}
 			}
-			final JkDir dirView = JkDir.of(conFolder).include("**/*.jar");
+			final JkFileTree dirView = JkFileTree.of(conFolder).include("**/*.jar");
 			final List<File> result = new LinkedList<File>();
 			for (final File file : dirView.files(false)) {
 				result.add(file);
@@ -337,12 +337,12 @@ final class DotClasspath {
 
 		// Sources
 		final Set<String> sourcePaths = new HashSet<String>();
-		for (final JkDir jkDir : build.sourceDirs().and(build.resourceDirs())
-				.jkDirs()) {
-			if (!jkDir.root().exists() ) {
+		for (final JkFileTree jkFileTree : build.sourceDirs().and(build.resourceDirs())
+				.jkFileTrees()) {
+			if (!jkFileTree.root().exists() ) {
 				continue;
 			}
-			final String path = JkUtilsFile.getRelativePath(build.baseDir(""), jkDir.root())
+			final String path = JkUtilsFile.getRelativePath(build.baseDir(""), jkFileTree.root())
 					.replace(File.separator,  "/");
 			if (sourcePaths.contains(path)) {
 				continue;
@@ -356,12 +356,12 @@ final class DotClasspath {
 		}
 
 		// Test Sources
-		for (final JkDir jkDir : build.testResourceDirs().and(build.testResourceDirs())
-				.jkDirs()) {
-			if (!jkDir.root().exists() ) {
+		for (final JkFileTree jkFileTree : build.testResourceDirs().and(build.testResourceDirs())
+				.jkFileTrees()) {
+			if (!jkFileTree.root().exists() ) {
 				continue;
 			}
-			final String path = JkUtilsFile.getRelativePath(build.baseDir(""), jkDir.root())
+			final String path = JkUtilsFile.getRelativePath(build.baseDir(""), jkFileTree.root())
 					.replace(File.separator,  "/");
 			if (sourcePaths.contains(path)) {
 				continue;

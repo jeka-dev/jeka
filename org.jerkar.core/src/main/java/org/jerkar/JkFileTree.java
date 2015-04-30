@@ -10,36 +10,36 @@ import org.jerkar.utils.JkUtilsAssert;
 import org.jerkar.utils.JkUtilsFile;
 
 /**
- * Provides a view on files and sub-folders contained in a given directory. A <code>JkDir</code> may
+ * Provides a view on files and sub-folders contained in a given directory. A <code>JkFileTree</code> may
  * have some include/exclude filters to include only or exclude some files based on ANT pattern matching. <br/>
  * 
  *<p>
- * When speaking about files contained in a {@link JkDir}, we mean all files contained in its root directory
+ * When speaking about files contained in a {@link JkFileTree}, we mean all files contained in its root directory
  * or sub-directories, matching positively the filter defined on it.
  * 
  * @author Jerome Angibaud
  */
-public final class JkDir implements Iterable<File> {
+public final class JkFileTree implements Iterable<File> {
 
 	/**
-	 * Creates a {@link JkDir} having the specified root directory.
+	 * Creates a {@link JkFileTree} having the specified root directory.
 	 */
-	public static JkDir of(File rootDir) {
-		return new JkDir(rootDir);
+	public static JkFileTree of(File rootDir) {
+		return new JkFileTree(rootDir);
 	}
 
 	private final File root;
 
 	private final JkFileFilter filter;
 
-	private JkDir(File rootDir) {
+	private JkFileTree(File rootDir) {
 		this(rootDir, JkFileFilter.ACCEPT_ALL);
 	}
 
 	/**
-	 * Creates a {@link JkDir} having the specified root directory and filter.
+	 * Creates a {@link JkFileTree} having the specified root directory and filter.
 	 */
-	private JkDir(File rootDir, JkFileFilter filter) {
+	private JkFileTree(File rootDir, JkFileFilter filter) {
 		JkUtilsAssert.notNull(rootDir, "Root dir can't be null.");
 		if (filter == null) {
 			throw new IllegalArgumentException("filter can't be null.");
@@ -54,19 +54,19 @@ public final class JkDir implements Iterable<File> {
 
 
 	/**
-	 * Creates a {@link JkDir} having the default filter and the specified relative path to this root as
+	 * Creates a {@link JkFileTree} having the default filter and the specified relative path to this root as
 	 * root directory.
 	 */
-	public JkDir sub(String relativePath) {
+	public JkFileTree sub(String relativePath) {
 		final File newBase = new File(root, relativePath);
 
-		return new JkDir(newBase);
+		return new JkFileTree(newBase);
 	}
 
 	/**
 	 * Creates the root directory if it does not exist.
 	 */
-	public JkDir createIfNotExist() {
+	public JkFileTree createIfNotExist() {
 		if (!root.exists() ) {
 			root.mkdirs();
 		}
@@ -81,7 +81,7 @@ public final class JkDir implements Iterable<File> {
 	}
 
 	/**
-	 * Copies files contained in this {@link JkDir} to the specified directory.
+	 * Copies files contained in this {@link JkFileTree} to the specified directory.
 	 */
 	public int copyTo(File destinationDir) {
 		if (!destinationDir.exists()) {
@@ -109,7 +109,7 @@ public final class JkDir implements Iterable<File> {
 	}
 
 	/**
-	 * Returns the filter defined on this {@link JkDir}, never <code>null</code>.
+	 * Returns the filter defined on this {@link JkFileTree}, never <code>null</code>.
 	 */
 	public JkFileFilter filter() {
 		return filter;
@@ -119,7 +119,7 @@ public final class JkDir implements Iterable<File> {
 	 * Copies the content of the specified directory in the root of the root of this directory.
 	 * If specified directory does not exist then nothing happen.
 	 */
-	public JkDir importDirContent(File dirToCopyContent) {
+	public JkFileTree importDirContent(File dirToCopyContent) {
 		createIfNotExist();
 		if (!dirToCopyContent.exists()) {
 			return this;
@@ -131,7 +131,7 @@ public final class JkDir implements Iterable<File> {
 	/**
 	 * Copies the specified files in the root of this directory.
 	 */
-	public JkDir copyInFiles(Iterable<File> files) {
+	public JkFileTree copyInFiles(Iterable<File> files) {
 		createIfNotExist();
 		for (final File file : files) {
 			JkUtilsFile.copyFileToDir(file, this.root, JkLog.infoStreamIfVerbose());
@@ -144,7 +144,7 @@ public final class JkDir implements Iterable<File> {
 	 * Copies the specified files at the root of this directory.
 	 * Folder and unexisting files are ignored.
 	 */
-	public JkDir importFiles(File ... filesToCopy) {
+	public JkFileTree importFiles(File ... filesToCopy) {
 		createIfNotExist();
 		for(final File file : filesToCopy ) {
 			if (file.exists() && !file.isDirectory()) {
@@ -163,7 +163,7 @@ public final class JkDir implements Iterable<File> {
 	}
 
 	/**
-	 * Returns path of each files file contained in this {@link JkDir} relative to its
+	 * Returns path of each files file contained in this {@link JkFileTree} relative to its
 	 * root.
 	 */
 	public List<String> relativePathes() {
@@ -175,21 +175,21 @@ public final class JkDir implements Iterable<File> {
 	}
 
 	/**
-	 * Returns a {@link JkZipper} of this {@link JkDir}.
+	 * Returns a {@link JkZipper} of this {@link JkFileTree}.
 	 */
 	public JkZipper zip() {
 		return JkZipper.of(this);
 	}
 
 	/**
-	 * Creates a {@link JkDir} having the same root directory as this one but without any filter.
+	 * Creates a {@link JkFileTree} having the same root directory as this one but without any filter.
 	 */
-	public JkDir noFiltering() {
-		return new JkDir(root);
+	public JkFileTree noFiltering() {
+		return new JkFileTree(root);
 	}
 
 	/**
-	 * Returns if this file is contained in this {@link JkDir}.
+	 * Returns if this file is contained in this {@link JkFileTree}.
 	 */
 	public boolean contains(File file) {
 		if (!this.isAncestorOf(file)) {
@@ -204,34 +204,34 @@ public final class JkDir implements Iterable<File> {
 	}
 
 	/**
-	 * Creates a {@link JkDir} which is a copy of this {@link JkDir} augmented
+	 * Creates a {@link JkFileTree} which is a copy of this {@link JkFileTree} augmented
 	 * with the specified {@link JkFileFilter}
 	 */
-	public JkDir andFilter(JkFileFilter filter) {
+	public JkFileTree andFilter(JkFileFilter filter) {
 		if (this.filter == JkFileFilter.ACCEPT_ALL) {
-			return new JkDir(root, filter);
+			return new JkFileTree(root, filter);
 		}
-		return new JkDir(root, this.filter.and(filter));
+		return new JkFileTree(root, this.filter.and(filter));
 	}
 
 	/**
 	 * Short hand to {@link #andFilter(JkFileFilter)} defining an include Ant pattern filter.
 	 */
-	public JkDir include(String ... antPatterns) {
+	public JkFileTree include(String ... antPatterns) {
 		return andFilter(JkFileFilter.include(antPatterns));
 	}
 
 	/**
 	 * Short hand to {@link #andFilter(JkFileFilter)} defining an exclude Ant pattern filter.
 	 */
-	public JkDir exclude(String ... antPatterns) {
+	public JkFileTree exclude(String ... antPatterns) {
 		return andFilter(JkFileFilter.exclude(antPatterns));
 	}
 
 	/**
 	 * Deletes each and every files in this tree. Files excluded from this tree are not deleted.
 	 */
-	public JkDir deleteAll() {
+	public JkFileTree deleteAll() {
 		final List<File> files = this.files(true);
 		for (final File file : files) {
 			if (file.exists()) {
@@ -245,14 +245,14 @@ public final class JkDir implements Iterable<File> {
 	}
 
 	/**
-	 * Returns a {@link JkDirSet} made of this {@link JkDir} and the specified one.
+	 * Returns a {@link JkFileTreeSet} made of this {@link JkFileTree} and the specified one.
 	 */
-	public JkDirSet and(JkDir dirView) {
-		return JkDirSet.of(this, dirView);
+	public JkFileTreeSet and(JkFileTree dirView) {
+		return JkFileTreeSet.of(this, dirView);
 	}
 
 	/**
-	 * Returns the file contained in this {@link JkDir}.
+	 * Returns the file contained in this {@link JkFileTree}.
 	 */
 	public List<File> files(boolean includeFolders) {
 		if (!root.exists()) {
@@ -269,7 +269,7 @@ public final class JkDir implements Iterable<File> {
 	}
 
 	/**
-	 * Returns the file count contained in this {@link JkDir}.
+	 * Returns the file count contained in this {@link JkFileTree}.
 	 */
 	public int fileCount(boolean includeFolder) {
 		return JkUtilsFile.count(root, filter.toFileFilter(root), includeFolder);

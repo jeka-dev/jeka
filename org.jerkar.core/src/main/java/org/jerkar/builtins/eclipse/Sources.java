@@ -1,6 +1,6 @@
 package org.jerkar.builtins.eclipse;
 
-import org.jerkar.JkDirSet;
+import org.jerkar.JkFileTreeSet;
 
 class Sources {
 
@@ -15,11 +15,11 @@ class Sources {
 	};
 
 
-	public final JkDirSet prodSources;
+	public final JkFileTreeSet prodSources;
 
-	public final JkDirSet testSources;
+	public final JkFileTreeSet testSources;
 
-	public Sources(JkDirSet prodSources, JkDirSet testSources) {
+	public Sources(JkFileTreeSet prodSources, JkFileTreeSet testSources) {
 		super();
 		this.prodSources = prodSources;
 		this.testSources = testSources;

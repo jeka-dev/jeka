@@ -146,7 +146,7 @@ public class JkBuild {
 		if (JkUtilsString.isBlank(this.forcedVersion)) {
 			return defaultVersion();
 		}
-		return JkVersion.named(forcedVersion);
+		return JkVersion.ofName(forcedVersion);
 	}
 
 	/**
@@ -168,34 +168,15 @@ public class JkBuild {
 	}
 
 	/**
-	 * The project name. This is likely to used in produced artifacts.
+	 * The project identifier. Used to name generated artifacts and by dependency manager.
 	 */
-	public String projectName() {
-		final String projectDirName = baseDir().root().getName();
-		return projectDirName.contains(".") ? JkUtilsString.substringAfterLast(projectDirName, ".") : projectDirName;
+	public JkProjectId projectId() {
+		return JkProjectId.of(baseDir().root().getName());
 	}
 
-	/**
-	 * The project group name. This is likely to used in produced artifacts.
-	 */
-	public String groupName() {
-		final String projectDirName = baseDir().root().getName();
-		return projectDirName.contains(".") ? JkUtilsString.substringBeforeLast(projectDirName, ".") : projectDirName;
-	}
-
-	/**
-	 * By default, this method returns the concatenation of the project group and project name. It is likely to
-	 * be used as produced artifacts file names.
-	 */
-	public String projectFullName() {
-		if (groupName() == null || groupName().equals(projectName())) {
-			return projectName();
-		}
-		return groupName()+ "." + projectName();
-	}
 
 	protected final JkVersionedModule module() {
-		return JkVersionedModule.of(JkModuleId.of(groupName(), projectName()), version());
+		return JkVersionedModule.of(JkModuleId.of(projectId()), version());
 	}
 
 	/**
@@ -325,7 +306,7 @@ public class JkBuild {
 			public void run() {
 				final File spec = baseDir(JkBuildResolver.BUILD_SOURCE_DIR);
 				spec.mkdirs();
-				final String packageName = groupName().replace('.', '/');
+				final String packageName = projectId().group().replace('.', '/');
 				new File(spec, packageName).mkdirs();
 			}
 		})
@@ -350,8 +331,8 @@ public class JkBuild {
 	 * Returns the base directory for this project. All file/directory path are
 	 * resolved from this directory.
 	 */
-	public final JkDir baseDir() {
-		return JkDir.of(baseDir);
+	public final JkFileTree baseDir() {
+		return JkFileTree.of(baseDir);
 	}
 
 	void setBaseDir(File baseDir) {
@@ -423,7 +404,7 @@ public class JkBuild {
 	 * The output directory where all the final and intermediate
 	 * artifacts are generated.
 	 */
-	public JkDir ouputDir() {
+	public JkFileTree ouputDir() {
 		return baseDir().sub(JkBuildResolver.BUILD_OUTPUT_PATH).createIfNotExist();
 	}
 

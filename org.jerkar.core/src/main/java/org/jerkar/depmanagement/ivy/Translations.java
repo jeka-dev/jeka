@@ -158,7 +158,7 @@ final class Translations {
 
 	public static JkVersionedModule toJerkarVersionedModule(ModuleRevisionId moduleRevisionId) {
 		return JkVersionedModule.of(JkModuleId.of(moduleRevisionId.getOrganisation(), moduleRevisionId.getName()),
-				JkVersion.named(moduleRevisionId.getRevision()));
+				JkVersion.ofName(moduleRevisionId.getRevision()));
 	}
 
 	private static String toString(JkVersionRange versionRange) {
@@ -248,7 +248,7 @@ final class Translations {
 		final JkModuleId moduleId = JkModuleId.of(artifact.getModuleRevisionId().getOrganisation(), artifact
 				.getModuleRevisionId().getName());
 		final JkVersionedModule module = JkVersionedModule.of(moduleId,
-				JkVersion.named(artifact.getModuleRevisionId().getRevision()));
+				JkVersion.ofName(artifact.getModuleRevisionId().getRevision()));
 		return JkArtifact.of(module, localFile);
 	}
 
@@ -409,7 +409,7 @@ final class Translations {
 			final String[] parts = props.getProperty(depMridStr).split(" ");
 			final ModuleRevisionId decodedMrid = ModuleRevisionId.decode(depMridStr);
 			final JkModuleId jkModuleId = JkModuleId.of(decodedMrid.getOrganisation(), decodedMrid.getName());
-			final JkVersion resolvedOrForcedVersion = JkVersion.named(parts[2]);
+			final JkVersion resolvedOrForcedVersion = JkVersion.ofName(parts[2]);
 			result.put(jkModuleId, resolvedOrForcedVersion);
 		}
 		return result;

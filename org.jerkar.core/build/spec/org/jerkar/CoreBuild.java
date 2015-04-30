@@ -43,18 +43,18 @@ public class CoreBuild extends JerkarBuild {
 	}
 
 	private void distrib() {
-		final JkDir distribDir = JkDir.of(distribFolder);
+		final JkFileTree distrib = JkFileTree.of(distribFolder);
 		JkLog.startln("Creating distrib " + distripZipFile.getPath());
 		final JkJavaPacker packer = packer();
-		distribDir.importDirContent(baseDir("src/main/dist"));
+		distrib.importDirContent(baseDir("src/main/dist"));
 
 		// Simpler to put both Jerkar and Jerkar-fat jar at the root (in order to find the Jerker HOME)
-		distribDir.importFiles(packer.jarFile(), packer.fatJarFile());
-		distribDir.sub("libs/required").importDirContent(baseDir("build/libs/compile"));
-		distribDir.sub("libs-sources").importDirContent(baseDir("build/libs-sources"))
+		distrib.importFiles(packer.jarFile(), packer.fatJarFile());
+		distrib.sub("libs/required").importDirContent(baseDir("build/libs/compile"));
+		distrib.sub("libs-sources").importDirContent(baseDir("build/libs-sources"))
 		.importFiles(packer.jarSourceFile());
-		distribDir.sub("libs-javadoc").importFiles(this.javadocMaker().zipFile());
-		distribDir.zip().to(distripZipFile, Deflater.BEST_COMPRESSION);
+		distrib.sub("libs-javadoc").importFiles(this.javadocMaker().zipFile());
+		distrib.zip().to(distripZipFile, Deflater.BEST_COMPRESSION);
 		JkLog.done();
 	}
 

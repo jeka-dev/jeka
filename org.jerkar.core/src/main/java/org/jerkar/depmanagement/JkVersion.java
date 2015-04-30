@@ -10,16 +10,16 @@ public final class JkVersion implements Comparable<JkVersion> {
 
 	public static final String DEFAULT_VERSION_RESOURCE_NAME = "version.txt";
 
-	public static JkVersion named(String name) {
+	public static JkVersion ofName(String name) {
 		return new JkVersion(name);
 	}
 
 	public static JkVersion fromResource(Class<?> clazz, String name) {
-		return named(JkUtilsIO.read(clazz.getResource(name)).trim());
+		return ofName(JkUtilsIO.read(clazz.getResource(name)).trim());
 	}
 
 	public static JkVersion fromResource(Class<?> clazz) {
-		return named(JkUtilsIO.read(clazz.getResource(DEFAULT_VERSION_RESOURCE_NAME)).trim());
+		return ofName(JkUtilsIO.read(clazz.getResource(DEFAULT_VERSION_RESOURCE_NAME)).trim());
 	}
 
 	public static JkVersion fromOptionalResourceOrExplicit(Class<?> clazz, String explicit) {
@@ -27,10 +27,10 @@ public final class JkVersion implements Comparable<JkVersion> {
 		if (versionResource != null) {
 			final String version = JkUtilsIO.read(versionResource).trim();
 			if (!JkUtilsString.isBlank(version)) {
-				return JkVersion.named(version);
+				return JkVersion.ofName(version);
 			}
 		}
-		return JkVersion.named(explicit);
+		return JkVersion.ofName(explicit);
 	}
 
 	private final String name;

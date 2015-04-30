@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.jar.Manifest;
 
-import org.jerkar.JkDir;
-import org.jerkar.JkDirSet;
+import org.jerkar.JkFileTree;
+import org.jerkar.JkFileTreeSet;
 import org.jerkar.utils.JkUtilsIO;
 
 /**
@@ -34,14 +34,14 @@ public class JkManifestIO {
 		}
 	}
 
-	public static Manifest readMetaInfManifest(JkDirSet jkDirSet) {
-		for (final JkDir dir : jkDirSet.jkDirs()) {
+	public static Manifest readMetaInfManifest(JkFileTreeSet jkFileTreeSet) {
+		for (final JkFileTree dir : jkFileTreeSet.jkFileTrees()) {
 			final File candidate = dir.file(PATH);
 			if (candidate.exists()) {
 				return read(candidate);
 			}
 		}
-		throw new IllegalArgumentException("No " + PATH + " found in " + jkDirSet);
+		throw new IllegalArgumentException("No " + PATH + " found in " + jkFileTreeSet);
 	}
 
 	public static void writeTo(Manifest manifest, File file) {
@@ -57,7 +57,7 @@ public class JkManifestIO {
 	}
 
 	public static void writeToStandardlocation(Manifest manifest, File baseDir) {
-		writeTo(manifest, JkDir.of(baseDir).file(PATH));
+		writeTo(manifest, JkFileTree.of(baseDir).file(PATH));
 	}
 
 

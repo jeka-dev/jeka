@@ -71,14 +71,14 @@ public final class JkBuildResolver {
 		if (!buildSourceDir.exists()) {
 			return false;
 		}
-		return JkDir.of(buildSourceDir).include("**/*.java").fileCount(false) > 0;
+		return JkFileTree.of(buildSourceDir).include("**/*.java").fileCount(false) > 0;
 	}
 
 	boolean needCompile() {
 		if (!this.hasBuildSource()) {
 			return false;
 		}
-		final JkDir dir = JkDir.of(buildSourceDir);
+		final JkFileTree dir = JkFileTree.of(buildSourceDir);
 		for (final String path : dir.relativePathes()) {
 			if (path.endsWith(".java") ) {
 				final String simpleName;
@@ -116,7 +116,7 @@ public final class JkBuildResolver {
 
 		// If there is a build source
 		if (this.hasBuildSource()) {
-			final JkDir dir = JkDir.of(buildSourceDir);
+			final JkFileTree dir = JkFileTree.of(buildSourceDir);
 			for (final String path : dir.relativePathes()) {
 				if (path.endsWith(".java")) {
 					final Class<?> clazz = classLoader.loadGivenClassSourcePath(path);

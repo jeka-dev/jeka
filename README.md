@@ -53,19 +53,15 @@ as they are supposed to be deducted from conventions.
 ```java
 public class BuildSampleClassic extends JkJavaBuild {
 	
-	@Override  // Optional : needless if you respect naming convention
-	public String projectName() {
-		return "script-samples";
-	}
-	
-	@Override  // Optional : needless if you respect naming convention
-	public String groupName() {
-		return "org.jerkar";
+	@Override
+	// Optional : needless if you respect naming convention
+	public JkProjectId projectId() {
+		return JkProjectId.of("org.jerkar", "script-samples");
 	}
 	
 	@Override   // Optional : needless if you get the version from your SCM or version.txt resource
 	protected JkVersion defaultVersion() {
-		return JkVersion.named("0.1-SNAPSHOT");
+		return JkVersion.ofName("0.1-SNAPSHOT");
 	}
 	
 	@Override  // Optional :  needless if you use only local dependencies
@@ -80,7 +76,7 @@ public class BuildSampleClassic extends JkJavaBuild {
 	}
 }
 ```
-The [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassicExplicit.java)
+[complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassicExplicit.java)
 
 #### Classic build
 ___
@@ -102,7 +98,7 @@ public class BuildSampleClassic extends JkJavaBuild {
 	}	
 }
 ```
-The [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassic.java)
+[complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassic.java)
 
 On the command line, under root project folder :
 - type `jerkar doDefault` => clean, compile, run tests and pack (produce jar and source jar), as mentioned in the `JkJavaBuild#doDefault` method
@@ -131,8 +127,8 @@ It's even faster cause you skip the script compile phase.
 
 #### Parametrized build
 ___
-You can set parameter in the build script itself and add your custom parameters with defaults. 
-The following build define three possible sonar servers to run analysis on. It also the analysis branch.
+You can set parameter in the build script itself and add your own custom parameters.. 
+The following example define three possible sonar servers to run analysis on. It also forces the sonar project branch.
 ````java
 public class BuildSampleSonarParametrized extends JkJavaBuild {
 	
@@ -143,7 +139,7 @@ public class BuildSampleSonarParametrized extends JkJavaBuild {
 	protected void init() {
 		JkBuildPluginSonar sonarPlugin = new JkBuildPluginSonar()
 			.prop(JkSonar.HOST_URL, sonarEnv.url)  // set one of the predefined host
-			.prop(JkSonar.BRANCH, "myBranch");  // set the branch analysis
+			.prop(JkSonar.BRANCH, "myBranch");  // set the project branch
 		this.plugins.activate(sonarPlugin);
 	}
 	
@@ -174,7 +170,7 @@ public class BuildSampleSonarParametrized extends JkJavaBuild {
 	}
 }
 ``` 
-The [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleSonarParametrized.java)
+[complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleSonarParametrized.java)
 The Sonar plugin is activated programatically in the script so it is not required anymore to mention it in the build script.
 So `jerkar` alone performs a clean, compile, test and sonar analysis on the default sonar environment (DEV).
 `jerkar -sonarEnv=PROD`run it upon the the PROD environment.  

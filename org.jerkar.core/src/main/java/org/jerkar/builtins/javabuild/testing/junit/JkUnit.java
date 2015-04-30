@@ -17,7 +17,7 @@ import java.util.Properties;
 
 import org.jerkar.JkClassLoader;
 import org.jerkar.JkClasspath;
-import org.jerkar.JkDirSet;
+import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkException;
 import org.jerkar.JkJavaProcess;
 import org.jerkar.JkLog;
@@ -63,11 +63,11 @@ public final class JkUnit {
 
 	private final List<Runnable> postActions;
 
-	private final JkDirSet classesToTest;
+	private final JkFileTreeSet classesToTest;
 
 	private final boolean breakOnFailure;
 
-	private JkUnit(JkClasspath classpath, JunitReportDetail reportDetail, File reportDir, JkJavaProcess fork, List<Runnable> runnables, JkDirSet testClasses, boolean crashOnFailed) {
+	private JkUnit(JkClasspath classpath, JunitReportDetail reportDetail, File reportDir, JkJavaProcess fork, List<Runnable> runnables, JkFileTreeSet testClasses, boolean crashOnFailed) {
 		this.classpath = classpath;
 		this.reportDetail = reportDetail;
 		this.reportDir = reportDir;
@@ -78,12 +78,12 @@ public final class JkUnit {
 	}
 
 	@SuppressWarnings("unchecked")
-	private JkUnit(JkClasspath classpath, JunitReportDetail reportDetail, File reportDir, JkJavaProcess fork, JkDirSet testClasses, boolean crashOnFailed) {
+	private JkUnit(JkClasspath classpath, JunitReportDetail reportDetail, File reportDir, JkJavaProcess fork, JkFileTreeSet testClasses, boolean crashOnFailed) {
 		this(classpath, reportDetail, reportDir, fork, Collections.EMPTY_LIST, testClasses, crashOnFailed);
 	}
 
 	public static JkUnit ofFork(JkJavaProcess jkJavaProcess) {
-		return new JkUnit(null, JunitReportDetail.NONE, null, jkJavaProcess, JkDirSet.empty(), true);
+		return new JkUnit(null, JunitReportDetail.NONE, null, jkJavaProcess, JkFileTreeSet.empty(), true);
 	}
 
 	public static JkUnit ofClasspath(File binDir, Iterable<File> classpathEntries) {
@@ -91,7 +91,7 @@ public final class JkUnit {
 	}
 
 	public static JkUnit of(JkClasspath classpath) {
-		return new JkUnit(classpath, JunitReportDetail.NONE, null, null, JkDirSet.empty(), true);
+		return new JkUnit(classpath, JunitReportDetail.NONE, null, null, JkFileTreeSet.empty(), true);
 	}
 
 	public JkUnit withReport(JunitReportDetail reportDetail) {
@@ -133,12 +133,12 @@ public final class JkUnit {
 		return new JkUnit(null, reportDetail, reportDir, process, this.classesToTest, this.breakOnFailure);
 	}
 
-	public JkUnit withClassesToTest(JkDirSet classesToTest) {
+	public JkUnit withClassesToTest(JkFileTreeSet classesToTest) {
 		return new JkUnit(this.classpath, reportDetail, reportDir, fork, classesToTest, this.breakOnFailure);
 	}
 
 	public JkUnit withClassesToTest(File ...classDirs) {
-		return new JkUnit(this.classpath, reportDetail, reportDir, fork, JkDirSet.of(classDirs), this.breakOnFailure);
+		return new JkUnit(this.classpath, reportDetail, reportDir, fork, JkFileTreeSet.of(classDirs), this.breakOnFailure);
 	}
 
 	public boolean forked() {
@@ -238,8 +238,8 @@ public final class JkUnit {
 
 	@SuppressWarnings("rawtypes")
 	private static Collection<Class> getJunitTestClassesInClassLoader(
-			JkClassLoader classloader, JkDirSet jkDirSet) {
-		final Iterable<Class<?>> classes = classloader.loadClassesIn(jkDirSet);
+			JkClassLoader classloader, JkFileTreeSet jkFileTreeSet) {
+		final Iterable<Class<?>> classes = classloader.loadClassesIn(jkFileTreeSet);
 		final List<Class> testClasses = new LinkedList<Class>();
 		if (classloader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
 			final Class<Annotation> testAnnotation = classloader.load(JUNIT4_TEST_ANNOTATION_CLASS_NAME);

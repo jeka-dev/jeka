@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.jerkar.JkBuild;
 import org.jerkar.JkClasspath;
-import org.jerkar.JkDir;
-import org.jerkar.JkDirSet;
+import org.jerkar.JkFileTree;
+import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkDoc;
 import org.jerkar.JkFileFilter;
 import org.jerkar.JkJavaCompiler;
@@ -147,14 +147,14 @@ public class JkJavaBuild extends JkBuild {
 	/**
 	 * Returns the location of production source code that has been edited manually (not generated).
 	 */
-	public JkDirSet editedSourceDirs() {
-		return JkDirSet.of(baseDir("src/main/java"));
+	public JkFileTreeSet editedSourceDirs() {
+		return JkFileTreeSet.of(baseDir("src/main/java"));
 	}
 
 	/**
 	 * Returns location of production source code.
 	 */
-	public JkDirSet sourceDirs() {
+	public JkFileTreeSet sourceDirs() {
 		return JkJavaBuildPlugin.applySourceDirs(this.plugins.getActives(),
 				editedSourceDirs().and(generatedSourceDir()));
 	}
@@ -162,15 +162,15 @@ public class JkJavaBuild extends JkBuild {
 	/**
 	 * Returns the location of production resources that has been edited manually (not generated).
 	 */
-	public JkDirSet editedResourceDirs() {
-		return JkDirSet.of(baseDir("src/main/resources"));
+	public JkFileTreeSet editedResourceDirs() {
+		return JkFileTreeSet.of(baseDir("src/main/resources"));
 	}
 
 	/**
 	 * Returns location of production resources.
 	 */
-	public JkDirSet resourceDirs() {
-		final JkDirSet original = sourceDirs().andFilter(RESOURCE_FILTER).and(
+	public JkFileTreeSet resourceDirs() {
+		final JkFileTreeSet original = sourceDirs().andFilter(RESOURCE_FILTER).and(
 				editedResourceDirs()).and(generatedResourceDir());
 		return JkJavaBuildPlugin.applyResourceDirs(this.plugins.getActives(), original);
 	}
@@ -178,16 +178,16 @@ public class JkJavaBuild extends JkBuild {
 	/**
 	 * Returns location of test source code.
 	 */
-	public JkDirSet testSourceDirs() {
-		final JkDirSet original =  JkDirSet.of(baseDir("src/test/java"));
+	public JkFileTreeSet testSourceDirs() {
+		final JkFileTreeSet original =  JkFileTreeSet.of(baseDir("src/test/java"));
 		return JkJavaBuildPlugin.applyTestSourceDirs(this.plugins.getActives(), original);
 	}
 
 	/**
 	 * Returns location of test resources.
 	 */
-	public JkDirSet testResourceDirs() {
-		final JkDirSet original = JkDirSet.of(baseDir("src/test/resources")).and(
+	public JkFileTreeSet testResourceDirs() {
+		final JkFileTreeSet original = JkFileTreeSet.of(baseDir("src/test/resources")).and(
 				testSourceDirs().andFilter(RESOURCE_FILTER));
 		return JkJavaBuildPlugin.applyTestResourceDirs(this.plugins.getActives(), original);
 	}
@@ -296,10 +296,10 @@ public class JkJavaBuild extends JkBuild {
 
 			@Override
 			public void run() {
-				for (final JkDir dir : editedSourceDirs().jkDirs()) {
+				for (final JkFileTree dir : editedSourceDirs().jkFileTrees()) {
 					dir.root().mkdirs();
 				}
-				for (final JkDir dir : testSourceDirs().jkDirs()) {
+				for (final JkFileTree dir : testSourceDirs().jkFileTrees()) {
 					dir.root().mkdirs();
 				}
 			}
@@ -387,11 +387,11 @@ public class JkJavaBuild extends JkBuild {
 		JkResourceProcessor.of(testResourceDirs()).andIfExist(generatedTestResourceDir()).generateTo(testClassDir());
 	}
 
-	protected boolean checkProcessTests(JkDirSet testSourceDirs) {
+	protected boolean checkProcessTests(JkFileTreeSet testSourceDirs) {
 		if (skipTests) {
 			return false;
 		}
-		if (testSourceDirs == null || testSourceDirs.jkDirs().isEmpty()) {
+		if (testSourceDirs == null || testSourceDirs.jkFileTrees().isEmpty()) {
 			JkLog.info("No test source declared. Skip tests.");
 			return false;
 		}
@@ -414,7 +414,7 @@ public class JkJavaBuild extends JkBuild {
 
 	protected JkMavenPublication mavenPublication(boolean includeTests, boolean includeSources) {
 		final JkJavaPacker packer = packer();
-		return JkMavenPublication.of(this.projectName() ,packer.jarFile())
+		return JkMavenPublication.of(this.projectId().name() ,packer.jarFile())
 				.andIf(includeSources, packer.jarSourceFile(), "sources")
 				.andOptional(javadocMaker().zipFile(), "javadoc")
 				.andOptionalIf(includeTests, packer.jarTestFile(), "test")
@@ -465,7 +465,7 @@ public class JkJavaBuild extends JkBuild {
 
 	@Override
 	protected JkDependencies implicitDependencies() {
-		final JkDir libDir = JkDir.of(baseDir(STD_LIB_PATH));
+		final JkFileTree libDir = JkFileTree.of(baseDir(STD_LIB_PATH));
 		if (!libDir.root().exists()) {
 			return super.implicitDependencies();
 		}

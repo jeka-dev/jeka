@@ -93,7 +93,7 @@ public class JkIvyRunner {
 
     public static void testPublishIvy() {
         final JkIvy jkIvy = JkIvy.of(JkRepos.of(ivyRepo()).andMaven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured"));
-        final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup:mymodule"), JkVersion.named("myVersion"));
+        final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup:mymodule"), JkVersion.ofName("myVersion"));
         final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(), COMPILE, JkJavaBuild.TEST);
         final JkDependencies deps = JkDependencies.builder()
                 .on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();
@@ -102,7 +102,7 @@ public class JkIvyRunner {
 
     public static void testPublishMaven() {
         final JkIvy jkIvy = JkIvy.of(JkRepos.of(mavenRepo()).andMaven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured"));
-        final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup2:mymodule2"), JkVersion.named("0.0.1"));
+        final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup2:mymodule2"), JkVersion.ofName("0.0.1"));
         final JkMavenPublication publication = JkMavenPublication.of("mymodule2", sampleJarfile()).and(sampleJarSourcefile(), "source");
         final JkDependencies deps = JkDependencies.builder()
                 .on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();

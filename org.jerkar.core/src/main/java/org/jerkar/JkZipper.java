@@ -44,11 +44,11 @@ public final class JkZipper {
 		return new JkZipper(Arrays.asList( dirs));
 	}
 
-	static JkZipper of(JkDirSet ...jkDirSets) {
+	static JkZipper of(JkFileTreeSet ...jkDirSets) {
 		return new JkZipper(Arrays.asList(jkDirSets));
 	}
 
-	static JkZipper of(JkDir ...jkDirs) {
+	static JkZipper of(JkFileTree ...jkDirs) {
 		return new JkZipper(Arrays.asList(jkDirs));
 	}
 
@@ -96,12 +96,12 @@ public final class JkZipper {
 			if (item instanceof File) {
 				final File file = (File) item;
 				JkUtilsIO.addZipEntry(zos, file, file.getParentFile());
-			} else if (item instanceof JkDir) {
-				final JkDir dirView = (JkDir) item;
+			} else if (item instanceof JkFileTree) {
+				final JkFileTree dirView = (JkFileTree) item;
 				addDirView(zos, dirView);
-			} else if (item instanceof JkDirSet) {
-				final JkDirSet dirViews = (JkDirSet) item;
-				for (final JkDir dirView : dirViews.jkDirs()) {
+			} else if (item instanceof JkFileTreeSet) {
+				final JkFileTreeSet dirViews = (JkFileTreeSet) item;
+				for (final JkFileTree dirView : dirViews.jkFileTrees()) {
 					addDirView(zos, dirView);
 				}
 			} else {
@@ -129,7 +129,7 @@ public final class JkZipper {
 		return new CheckSumer(zipFile);
 	}
 
-	private void addDirView(ZipOutputStream zos, JkDir dirView) {
+	private void addDirView(ZipOutputStream zos, JkFileTree dirView) {
 		if (!dirView.exists()) {
 			return;
 		}

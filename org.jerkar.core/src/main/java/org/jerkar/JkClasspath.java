@@ -125,7 +125,7 @@ public final class JkClasspath implements Iterable<File> {
 				if (!parent.exists()) {
 					JkLog.warn("File " + parent.getAbsolutePath() + " does not exist : classpath entry " + file.getAbsolutePath() + " will be ignored." );
 				} else {
-					result.addAll(JkDir.of(parent).include("*.jar").files(false));
+					result.addAll(JkFileTree.of(parent).include("*.jar").files(false));
 				}
 			} else if (!file.exists()) {
 				throw new IllegalArgumentException("Classpath element " + file.getAbsolutePath() + " does not exist.");
@@ -180,7 +180,7 @@ public final class JkClasspath implements Iterable<File> {
 		final Set<String> result = new HashSet<String>();
 		for (final File classpathEntry : this) {
 			if (classpathEntry.isDirectory()) {
-				result.addAll(JkDir.of(classpathEntry).andFilter(fileFilter).relativePathes());
+				result.addAll(JkFileTree.of(classpathEntry).andFilter(fileFilter).relativePathes());
 			} else {
 				final ZipFile zipFile = JkUtilsIO.newZipFile(classpathEntry);
 				for (final Enumeration<? extends ZipEntry> zipEntries = zipFile.entries(); zipEntries.hasMoreElements(); ) {

@@ -18,7 +18,7 @@ public class BuildSampleOpenSourceJar extends JkJavaBuild {
 	
 	@Override 
 	protected JkVersion defaultVersion() {
-		return JkVersion.named("1.3.1-SNAPSHOT");   
+		return JkVersion.ofName("1.3.1-SNAPSHOT");   
 	}
 	
 	@Override

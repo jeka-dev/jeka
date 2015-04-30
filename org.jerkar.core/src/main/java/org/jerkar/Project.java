@@ -53,7 +53,7 @@ class Project {
 	}
 
 	private void preCompile() {
-		final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir, JkDir.of(resolver.buildSourceDir).include("**/*.java"));
+		final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir, JkFileTree.of(resolver.buildSourceDir).include("**/*.java"));
 		this.buildDependencies = parser.dependencies();
 		this.buildRepos = parser.importRepos().and(buildRepos);
 		this.subProjects = parser.projects();
@@ -124,10 +124,10 @@ class Project {
 		final List<File> extraLibs = new LinkedList<File>();
 		final File localJerkarBuild = new File(this.projectBaseDir,JkBuildResolver.BUILD_LIB_DIR);
 		if (localJerkarBuild.exists()) {
-			extraLibs.addAll(JkDir.of(localJerkarBuild).include("**/*.jar").files(false));
+			extraLibs.addAll(JkFileTree.of(localJerkarBuild).include("**/*.jar").files(false));
 		}
 		if (JkLocator.libExtDir().exists()) {
-			extraLibs.addAll(JkDir.of(JkLocator.libExtDir()).include("**/*.jar").files(false));
+			extraLibs.addAll(JkFileTree.of(JkLocator.libExtDir()).include("**/*.jar").files(false));
 		}
 		return JkPath.of(extraLibs).and(JkLocator.jerkarJarFile(), JkLocator.ivyJarFile()).removeDoubloons();
 	}
@@ -143,7 +143,7 @@ class Project {
 
 	private void compileBuild(JkPath buildPath) {
 		baseBuildCompiler().withClasspath(buildPath).compile();
-		JkDir.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir);
+		JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir);
 	}
 
 	private void launch(JkBuild build, CommandLine commandLine) {
@@ -229,7 +229,7 @@ class Project {
 	}
 
 	private JkJavaCompiler baseBuildCompiler() {
-		final JkDir buildSource = JkDir.of(resolver.buildSourceDir).include("**/*.java").exclude("**/_*");
+		final JkFileTree buildSource = JkFileTree.of(resolver.buildSourceDir).include("**/*.java").exclude("**/_*");
 		if (!resolver.buildClassDir.exists()) {
 			resolver.buildClassDir.mkdirs();
 		}

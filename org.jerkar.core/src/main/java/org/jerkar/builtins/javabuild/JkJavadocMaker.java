@@ -9,8 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.JkClassLoader;
-import org.jerkar.JkDir;
-import org.jerkar.JkDirSet;
+import org.jerkar.JkFileTree;
+import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
 import org.jerkar.utils.JkUtilsFile;
@@ -26,7 +26,7 @@ public final class JkJavadocMaker {
 
 	private static final String JAVADOC_MAIN_CLASS_NAME = "com.sun.tools.javadoc.Main";
 
-	private final JkDirSet srcDirs;
+	private final JkFileTreeSet srcDirs;
 
 	private final String extraArgs;
 
@@ -38,7 +38,7 @@ public final class JkJavadocMaker {
 
 	private final File zipFile;
 
-	private JkJavadocMaker(JkDirSet srcDirs, Class<?> doclet, Iterable<File> classpath, String extraArgs, File outputDir, File zipFile) {
+	private JkJavadocMaker(JkFileTreeSet srcDirs, Class<?> doclet, Iterable<File> classpath, String extraArgs, File outputDir, File zipFile) {
 		this.srcDirs = srcDirs;
 		this.extraArgs = extraArgs;
 		this.doclet = doclet;
@@ -47,12 +47,12 @@ public final class JkJavadocMaker {
 		this.zipFile = zipFile;
 	}
 
-	public static JkJavadocMaker of(JkDirSet sources, File outputDir, File zipFile) {
+	public static JkJavadocMaker of(JkFileTreeSet sources, File outputDir, File zipFile) {
 		return new JkJavadocMaker(sources, null, null, "", outputDir, zipFile);
 	}
 
 	public static JkJavadocMaker of(JkJavaBuild javaBuild, boolean fullName, boolean includeVersion) {
-		String name = fullName ? javaBuild.projectFullName() : javaBuild.projectName();
+		String name = fullName ? javaBuild.projectId().toString(): javaBuild.projectId().toString();
 		if (includeVersion) {
 			name = name + "-" + javaBuild.version().name();
 		}
@@ -62,7 +62,7 @@ public final class JkJavadocMaker {
 	}
 
 
-	public static JkJavadocMaker of(JkDirSet sources, File outputDir) {
+	public static JkJavadocMaker of(JkFileTreeSet sources, File outputDir) {
 		return new JkJavadocMaker(sources, null, null, "", outputDir, null);
 	}
 
@@ -85,7 +85,7 @@ public final class JkJavadocMaker {
 		final String[] args = toArguments(outputDir);
 		execute(doclet, JkLog.infoStream(),JkLog.warnStream(),JkLog.errorStream(), args);
 		if (outputDir.exists() && zipFile != null) {
-			JkDir.of(outputDir).zip().to(zipFile);
+			JkFileTree.of(outputDir).zip().to(zipFile);
 		}
 		JkLog.done();
 	}

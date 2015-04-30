@@ -2,7 +2,7 @@ package org.jerkar.builtins.jee;
 
 import java.io.File;
 
-import org.jerkar.JkDir;
+import org.jerkar.JkFileTree;
 import org.jerkar.JkException;
 import org.jerkar.JkPath;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
@@ -32,14 +32,14 @@ public class JkJeePacker {
 					+ " does not contains WEB-INF" + File.separator + "web.xml file");
 		}
 		final JkPath path = build.depsFor(JkJavaBuild.RUNTIME);
-		final JkDir dir = JkDir.of(warDirDest).importDirContent(webappSrc)
+		final JkFileTree dir = JkFileTree.of(warDirDest).importDirContent(webappSrc)
 				.sub("WEB-INF/classes").importDirContent(build.classDir())
 				.sub("../lib").copyInFiles(path);
 		dir.zip().to(warFileDest);
 	}
 
 	public void ear(Iterable<File> warFiles, File earSrc, File destDir, File destFile) {
-		JkDir.of(destDir).importDirContent(earSrc).copyInFiles(warFiles).zip().to(destFile);
+		JkFileTree.of(destDir).importDirContent(earSrc).copyInFiles(warFiles).zip().to(destFile);
 	}
 
 }

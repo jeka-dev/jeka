@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.Deflater;
 
-import org.jerkar.JkDir;
+import org.jerkar.JkFileTree;
 import org.jerkar.JkLog;
 import org.jerkar.JkZipper;
 
@@ -51,7 +51,7 @@ public class JkJavaPacker implements Cloneable {
 	}
 
 	public String baseName() {
-		final String name = fullName ? build.projectFullName() : build.projectName();
+		final String name = fullName ? build.projectId().toString() : build.projectId().name();
 		if (includeVersion) {
 			return name + "-" + build.version();
 		}
@@ -89,19 +89,19 @@ public class JkJavaPacker implements Cloneable {
 	public void pack() {
 		JkLog.startln("Packaging module");
 		if (doJar) {
-			JkDir.of(build.classDir()).zip().to(jarFile(), compressionLevel).md5If(checkSum);
+			JkFileTree.of(build.classDir()).zip().to(jarFile(), compressionLevel).md5If(checkSum);
 		}
 		if (doSources) {
 			build.sourceDirs().and(build.resourceDirs()).zip().to(jarSourceFile(), compressionLevel);
 		}
-		if (doTest && !build.skipTests && build.testClassDir().exists() && !JkDir.of(build.testClassDir()).files(false).isEmpty()) {
+		if (doTest && !build.skipTests && build.testClassDir().exists() && !JkFileTree.of(build.testClassDir()).files(false).isEmpty()) {
 			JkZipper.of(build.testClassDir()).to(jarTestFile(), compressionLevel);
 		}
 		if (doTest && doSources && !build.testSourceDirs().files(false).isEmpty()) {
 			build.testSourceDirs().and(build.testResourceDirs()).zip().to(jarTestSourceFile(), compressionLevel);
 		}
 		if (doFatJar) {
-			JkDir.of(build.classDir()).zip().merge(build.depsFor(JkJavaBuild.RUNTIME))
+			JkFileTree.of(build.classDir()).zip().merge(build.depsFor(JkJavaBuild.RUNTIME))
 			.to(fatJarFile(), compressionLevel).md5If(checkSum);
 		}
 		for (final Extra action : this.extraActions) {

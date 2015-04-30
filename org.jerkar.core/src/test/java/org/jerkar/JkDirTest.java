@@ -17,10 +17,10 @@ public class JkDirTest {
 		assertTrue(sampleFile.exists());
 		final File sampleFolder = sampleFile.getParentFile().getParentFile();
 
-		JkDir subfolderTxt = JkDir.of(sampleFolder).include("/subfolder/*.txt");
+		JkFileTree subfolderTxt = JkFileTree.of(sampleFolder).include("/subfolder/*.txt");
 		assertEquals(1, subfolderTxt.files(false).size());
 
-		subfolderTxt = JkDir.of(sampleFolder).include("subfolder/*.txt");
+		subfolderTxt = JkFileTree.of(sampleFolder).include("subfolder/*.txt");
 		assertEquals(1, subfolderTxt.files(false).size());
 
 	}

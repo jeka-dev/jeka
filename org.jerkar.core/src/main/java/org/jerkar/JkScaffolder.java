@@ -16,7 +16,7 @@ public class JkScaffolder {
 
 	@SuppressWarnings("unchecked")
 	public static JkScaffolder of(JkBuild build) {
-		return new JkScaffolder(build, build.groupName().replace('.', '/'),
+		return new JkScaffolder(build, build.projectId().group().replace('.', '/'),
 				"JkBuild",
 				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST,
 				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
