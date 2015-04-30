@@ -64,7 +64,7 @@ public final class JkLocator {
 
 	public static File jerkarUserHome() {
 		final File result = new File(System.getProperty("user.home"),".jerkar");
-		if (result.exists()) {
+		if (!result.exists()) {
 			JkLog.info("Create Jerkar user directory : " + result.getPath());
 			result.mkdirs();
 		}

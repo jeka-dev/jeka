@@ -101,12 +101,17 @@ public class BuildSampleClassic extends JkJavaBuild {
 [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassic.java)
 
 On the command line, under root project folder :
-- type `jerkar doDefault` => clean, compile, run tests and pack (produce jar and source jar), as mentioned in the `JkJavaBuild#doDefault` method
-- type `jerkar` => will do exactly the same thing : when no method is specified, `doDefault`is run
-- type `jerkar -fatJar -forkTests` => do the same but also will produce a fat jar 
-(jar file containg all the runtime dependencies) and run unit tests in a forked process.
-- type `jerkar jacoco#` => will do as `jerkar` but activating jacoco plugin so the run will produce 
-a code coverage report usable by tools as SonarQube
+- execute `jerkar doDefault` => invoke the `JkJavaBuild#doDefault` method which lead in clean, compile, compile tests, run tests and pack (produce jar and source jar).
+- type `jerkar` => do the same, the `JkJavaBuild#doDefault` method is invoked when none is specified
+- type `jerkar -fatJar=true -forkTests=true` => do the same but inject the `true` value to `JkJavaBuild#fatJar` and `JkJavaBuild#forkTests` fields. It leads in producing a fat-jar 
+(jar file containg all the runtime dependencies) and running unit tests in a forked process.
+- type `jerkar -fatJar=true -forkTests=true` => do the same, when field values are not mentioned, Jerkar uses a default value (true for boolean fields)
+
+- type `jerkar jacoco#` => will instantiate the [jacoco plugin](org.jerkar.plugins-jacoco/src/main/java/org/jerkar/plugins/jacoco/JkBuildPluginJacoco.java) and bind it to the `BuidSampleClassic` instance. This plugin alter the `JkJavaBuild#unitTest` method 
+in such a way that tests are run with Jacoco to produce a test coverage report.
+- type `jerkar jacoco# -jacoco#produceHtml` => will do the same but also set the `JkBuildPluginJacoco#produceHtml`field to `true`. It leads in producing 
+an html report along the standard jacoco.exec binary report
+
 - type `jerkar doDefault sonar#verify jacoco#` => do the default + execute the method `verify` method located in the `sonar`plugin 
 (class [JkBuildPluginSonar](org.jerkar.plugins-sonar/src/main/java/org/jerkar/plugins/sonar/JkBuildPluginSonar.java)).
 Analysis is launched on a local SonarQube server unless you specify specific Sonar settings. Sonar will leverage of jacoco report.
