@@ -14,7 +14,7 @@ import org.jerkar.plugins.sonar.JkSonar;
  *
  * @author Jerome Angibaud
  */
-public class BuildSampleSonarParametrized extends JkJavaBuild {
+public class SonarParametrizedBuild extends JkJavaBuild {
 	
 	@JkOption("Sonar server environment")
 	protected SonarEnv sonarEnv = SonarEnv.DEV;

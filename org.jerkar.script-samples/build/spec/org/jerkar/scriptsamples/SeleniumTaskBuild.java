@@ -21,7 +21,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
  * @author Jerome Angibaud
  */
 @JkImport("org.seleniumhq.selenium:selenium-java:2.45.0")
-public class BuildSampleSeleniumTask extends JkJavaBuild {
+public class SeleniumTaskBuild extends JkJavaBuild {
 	
 	@Override
 	protected JkDependencies dependencies() {

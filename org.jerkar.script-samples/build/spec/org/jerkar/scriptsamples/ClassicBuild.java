@@ -7,16 +7,16 @@ import static org.jerkar.builtins.javabuild.JkPopularModules.MOCKITO_ALL;
 
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkDependencies;
-import org.jerkar.scriptsamples.BuildSampleClassicExplicit;
+import org.jerkar.scriptsamples.ClassicExplicitBuild;
 
 /**
- * This build is equivalent to {@link BuildSampleClassicExplicit} but removing 
+ * This build is equivalent to {@link ClassicExplicitBuild} but removing 
  * the needless part cause we respect the convention project folder name = groupName.projectName
  * and the version number is taken from resource 'version.txt' (default behavior)
  *
  * @author Jerome Angibaud
  */
-public class BuildSampleClassic extends JkJavaBuild {
+public class ClassicBuild extends JkJavaBuild {
 	
 	@Override  // Optional :  needless if you use only local dependencies
 	protected JkDependencies dependencies() {
@@ -31,7 +31,7 @@ public class BuildSampleClassic extends JkJavaBuild {
 	
 	// Optional : usefull if you want quick run/debug your script in you IDE
 	public static void main(String[] args) {
-		BuildSampleClassic build = new BuildSampleClassic();
+		ClassicBuild build = new ClassicBuild();
 		build.doDefault();
 		build.doc();
 		build.publish();

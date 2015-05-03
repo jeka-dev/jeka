@@ -21,7 +21,7 @@ import org.jerkar.publishing.JkPublishRepos;
  * 
  * @author Jerome Angibaud
  */
-public class BuildSampleClassicExplicit extends JkJavaBuild {
+public class ClassicExplicitBuild extends JkJavaBuild {
 
 	@Override
 	// Optional : needless if you respect naming convention
@@ -63,7 +63,7 @@ public class BuildSampleClassicExplicit extends JkJavaBuild {
 
 	// Optional : usefull if you want quick run/debug your script in you IDE
 	public static void main(String[] args) {
-		BuildSampleClassicExplicit build = new BuildSampleClassicExplicit();
+		ClassicExplicitBuild build = new ClassicExplicitBuild();
 		build.doDefault();
 		build.doc();
 		build.publish();

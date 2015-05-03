@@ -14,7 +14,7 @@ import org.jerkar.publishing.JkMavenPublicationInfo;
  * 
  * @author Jerome Angibaud
  */
-public class BuildSampleOpenSourceJar extends JkJavaBuild {
+public class OpenSourceJarBuild extends JkJavaBuild {
 	
 	@Override 
 	protected JkVersion defaultVersion() {
