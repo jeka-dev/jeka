@@ -156,24 +156,27 @@ class Project {
 		final Class<JkBuildPlugin> baseClass = JkClassLoader.of(build.getClass()).load(JkBuildPlugin.class.getName());
 		final PluginDictionnary<JkBuildPlugin> dictionnary = PluginDictionnary.of(baseClass);
 
-		if (!build.multiProjectDependencies().transitiveProjectBuilds().isEmpty()) {
-			if (!commandLine.getSubProjectMethods().isEmpty()) {
-				JkLog.startHeaded("Executing dependent projects");
-				for (final JkBuild subBuild : build.multiProjectDependencies().transitiveProjectBuilds()) {
-					configurePluginsAndRun(subBuild, commandLine.getSubProjectMethods(),
-							commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
+		if (build instanceof JkBuildDependencySupport) {
+			final JkBuildDependencySupport depBuild = (JkBuildDependencySupport) build;
+			if (!depBuild.multiProjectDependencies().transitiveProjectBuilds().isEmpty()) {
+				if (!commandLine.getSubProjectMethods().isEmpty()) {
+					JkLog.startHeaded("Executing dependent projects");
+					for (final JkBuild subBuild : depBuild.multiProjectDependencies().transitiveProjectBuilds()) {
+						configurePluginsAndRun(subBuild, commandLine.getSubProjectMethods(),
+								commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
 
+					}
+				} else {
+					JkLog.startln("Configuring dependent projects");
+					for (final JkBuild subBuild : depBuild.multiProjectDependencies().transitiveProjectBuilds()) {
+						JkLog.startln("Configuring " + subBuild.baseDir().root().getName());
+						configureProject(subBuild,
+								commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
+						JkLog.done();
+					}
 				}
-			} else {
-				JkLog.startln("Configuring dependent projects");
-				for (final JkBuild subBuild : build.multiProjectDependencies().transitiveProjectBuilds()) {
-					JkLog.startln("Configuring " + subBuild.baseDir().root().getName());
-					configureProject(subBuild,
-							commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
-					JkLog.done();
-				}
+				JkLog.done();
 			}
-			JkLog.done();
 		}
 		configurePluginsAndRun(build, commandLine.getMasterMethods(),
 				commandLine.getMasterPluginSetups(), commandLine.getMasterBuildOptions(), dictionnary);
@@ -254,7 +257,7 @@ class Project {
 	}
 
 	private static JkRepos repos() {
-		final JkBuild build = new JkBuild(); // Create a fake build just to get the download repos.
+		final JkBuildDependencySupport build = new JkBuildDependencySupport(); // Create a fake build just to get the download repos.
 		JkOptions.populateFields(build);
 		return build.downloadRepositories();
 	}

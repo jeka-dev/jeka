@@ -15,12 +15,21 @@ import org.jerkar.utils.JkUtilsIterable;
 public class JkScaffolder {
 
 	@SuppressWarnings("unchecked")
-	public static JkScaffolder of(JkBuild build) {
+	public static JkScaffolder of(JkBuildDependencySupport build) {
 		return new JkScaffolder(build, build.moduleId().group().replace('.', '/'),
 				"JkBuild",
 				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST,
 				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
 	}
+
+	@SuppressWarnings("unchecked")
+	public static JkScaffolder of(JkBuild build) {
+		return new JkScaffolder(build, "defaultpackage",
+				"JkBuild",
+				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST,
+				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+	}
+
 
 	private final JkBuild build;
 

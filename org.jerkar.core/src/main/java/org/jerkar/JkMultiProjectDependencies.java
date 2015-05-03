@@ -19,32 +19,32 @@ import org.jerkar.utils.JkUtilsIterable;
  */
 public final class JkMultiProjectDependencies {
 
-	static JkMultiProjectDependencies of(JkBuild master, List<JkBuild> builds) {
-		return new JkMultiProjectDependencies(master, new ArrayList<JkBuild>(builds));
+	static JkMultiProjectDependencies of(JkBuildDependencySupport master, List<JkBuildDependencySupport> builds) {
+		return new JkMultiProjectDependencies(master, new ArrayList<JkBuildDependencySupport>(builds));
 	}
 
-	private final List<JkBuild> buildDeps;
+	private final List<JkBuildDependencySupport> buildDeps;
 
-	private List<JkBuild> resolvedTransitiveBuilds;
+	private List<JkBuildDependencySupport> resolvedTransitiveBuilds;
 
-	private final JkBuild master;
+	private final JkBuildDependencySupport master;
 
-	private JkMultiProjectDependencies(JkBuild master, List<JkBuild> buildDeps) {
+	private JkMultiProjectDependencies(JkBuildDependencySupport master, List<JkBuildDependencySupport> buildDeps) {
 		super();
 		this.master = master;
 		this.buildDeps = Collections.unmodifiableList(buildDeps);
 	}
 
 	@SuppressWarnings("unchecked")
-	public JkMultiProjectDependencies and(List<JkBuild> builds) {
+	public JkMultiProjectDependencies and(List<JkBuildDependencySupport> builds) {
 		return new JkMultiProjectDependencies(this.master, JkUtilsIterable.concatLists(this.buildDeps, builds));
 	}
 
-	public List<JkBuild> directProjectBuilds() {
+	public List<JkBuildDependencySupport> directProjectBuilds() {
 		return Collections.unmodifiableList(buildDeps);
 	}
 
-	public List<JkBuild> transitiveProjectBuilds() {
+	public List<JkBuildDependencySupport> transitiveProjectBuilds() {
 		if (resolvedTransitiveBuilds == null) {
 			resolvedTransitiveBuilds = resolveTransitiveBuilds(new HashSet<File>());
 		}
@@ -79,9 +79,9 @@ public final class JkMultiProjectDependencies {
 		}
 	}
 
-	private List<JkBuild> resolveTransitiveBuilds(Set<File> files) {
-		final List<JkBuild> result = new LinkedList<JkBuild>();
-		for (final JkBuild build : buildDeps) {
+	private List<JkBuildDependencySupport> resolveTransitiveBuilds(Set<File> files) {
+		final List<JkBuildDependencySupport> result = new LinkedList<JkBuildDependencySupport>();
+		for (final JkBuildDependencySupport build : buildDeps) {
 			final File dir = JkUtilsFile.canonicalFile(build.baseDir().root());
 			if (!files.contains(dir)) {
 				result.addAll(build.multiProjectDependencies().resolveTransitiveBuilds(files));

@@ -3,10 +3,10 @@ package org.jerkar.distrib.all;
 import java.io.File;
 
 import org.jerkar.CoreBuild;
-import org.jerkar.JkBuild;
+import org.jerkar.JkBuildDependencySupport;
+import org.jerkar.JkDoc;
 import org.jerkar.JkFileTree;
 import org.jerkar.JkFileTreeSet;
-import org.jerkar.JkDoc;
 import org.jerkar.JkLog;
 import org.jerkar.JkProject;
 import org.jerkar.JkZipper;
@@ -15,7 +15,7 @@ import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
 
 
-public class DistribAllBuild extends JkBuild {
+public class DistribAllBuild extends JkBuildDependencySupport {
 	
 	@JkProject("../org.jerkar.plugins-sonar")
 	PluginsSonarBuild pluginsSonar;

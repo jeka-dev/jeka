@@ -28,7 +28,7 @@ public abstract class JkBuildPlugin {
 	/**
 	 * Override this method if the plugin need to alter the dependency resolver.
 	 * 
-	 * @see JkBuild#dependencyResolver()
+	 * @see JkBuildDependencySupport#dependencyResolver()
 	 */
 	protected JkDependencyResolver alterDependencyResolver(JkDependencyResolver original) {
 		return original;
@@ -37,7 +37,7 @@ public abstract class JkBuildPlugin {
 	/**
 	 * Override this method if the plugin need to alter the dependencies.
 	 * 
-	 * @see JkBuild#dependencies
+	 * @see JkBuildDependencySupport#dependencies
 	 */
 	protected JkDependencies alterDependencies(JkDependencies original) {
 		return original;

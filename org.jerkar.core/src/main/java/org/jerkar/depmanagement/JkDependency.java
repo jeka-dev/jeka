@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jerkar.JkBuild;
+import org.jerkar.JkBuildDependencySupport;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIterable;
 import org.jerkar.utils.JkUtilsString;
@@ -52,7 +52,7 @@ public abstract class JkDependency {
 		return new JkFilesDependency(Arrays.asList(files));
 	}
 
-	public static JkProjectDependency of(JkBuild build, File...files) {
+	public static JkProjectDependency of(JkBuildDependencySupport build, File...files) {
 		return JkProjectDependency.of(build, JkUtilsIterable.setOf(files));
 	}
 
@@ -81,21 +81,21 @@ public abstract class JkDependency {
 
 	public static final class JkProjectDependency extends JkDependency {
 
-		private final JkBuild projectBuild;
+		private final JkBuildDependencySupport projectBuild;
 
 		private final Set<File> files;
 
-		private JkProjectDependency(JkBuild projectBuild, Set<File> files) {
+		private JkProjectDependency(JkBuildDependencySupport projectBuild, Set<File> files) {
 			super();
 			this.projectBuild = projectBuild;
 			this.files = Collections.unmodifiableSet(files);
 		}
 
-		public static JkProjectDependency of(JkBuild projectBuild, Set<File> files) {
+		public static JkProjectDependency of(JkBuildDependencySupport projectBuild, Set<File> files) {
 			return new JkProjectDependency(projectBuild, new HashSet<File>(files));
 		}
 
-		public JkBuild projectBuild() {
+		public JkBuildDependencySupport projectBuild() {
 			return projectBuild;
 		}
 

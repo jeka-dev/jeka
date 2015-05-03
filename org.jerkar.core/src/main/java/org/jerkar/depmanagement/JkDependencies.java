@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jerkar.JkBuild;
+import org.jerkar.JkBuildDependencySupport;
 import org.jerkar.JkLog;
-import org.jerkar.JkPath;
 import org.jerkar.JkModuleId;
+import org.jerkar.JkPath;
 import org.jerkar.depmanagement.JkDependency.JkFilesDependency;
 import org.jerkar.depmanagement.JkDependency.JkProjectDependency;
 import org.jerkar.depmanagement.JkScopedDependency.ScopeType;
@@ -42,7 +42,7 @@ public class JkDependencies implements Iterable<JkScopedDependency> {
 		return new JkDependencies(list);
 	}
 
-	public static JkDependencies onProject(JkScope scope, JkBuild build, File...files) {
+	public static JkDependencies onProject(JkScope scope, JkBuildDependencySupport build, File...files) {
 		return on(scope, JkDependency.of(build, files));
 	}
 
@@ -112,7 +112,7 @@ public class JkDependencies implements Iterable<JkScopedDependency> {
 	/**
 	 * Returns a clone of this object plus {@link JkScopedDependency}s on the specified project.
 	 */
-	public JkDependencies andProject(JkScope scope, JkBuild project, File ...files) {
+	public JkDependencies andProject(JkScope scope, JkBuildDependencySupport project, File ...files) {
 		final JkScopedDependency scopedDependency = JkScopedDependency.of(JkDependency.of(project, files), scope);
 		return and(scopedDependency);
 	}
@@ -341,8 +341,8 @@ public class JkDependencies implements Iterable<JkScopedDependency> {
 	 * Returns all build included in these dependencies.
 	 * The builds are coming from {@link JkProjectDependency}.
 	 */
-	public List<JkBuild> projectDependencies() {
-		final List<JkBuild> result = new LinkedList<JkBuild>();
+	public List<JkBuildDependencySupport> projectDependencies() {
+		final List<JkBuildDependencySupport> result = new LinkedList<JkBuildDependencySupport>();
 		for (final JkScopedDependency scopedDependency : this.dependencies) {
 			if (scopedDependency.dependency() instanceof JkProjectDependency) {
 				final JkProjectDependency projectDependency = (JkProjectDependency) scopedDependency.dependency();
@@ -451,7 +451,7 @@ public class JkDependencies implements Iterable<JkScopedDependency> {
 			return on(description, true);
 		}
 
-		public ScopeableBuilder onProject(JkBuild projectBuild, File ...files) {
+		public ScopeableBuilder onProject(JkBuildDependencySupport projectBuild, File ...files) {
 			return on(JkProjectDependency.of(projectBuild, JkUtilsIterable.setOf(files)));
 		}
 

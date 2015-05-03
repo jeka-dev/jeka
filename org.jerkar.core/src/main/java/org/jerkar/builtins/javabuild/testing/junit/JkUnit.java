@@ -17,8 +17,9 @@ import java.util.Properties;
 
 import org.jerkar.JkClassLoader;
 import org.jerkar.JkClasspath;
-import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkException;
+import org.jerkar.JkFileTree;
+import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkJavaProcess;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
@@ -86,6 +87,11 @@ public final class JkUnit {
 		return new JkUnit(null, JunitReportDetail.NONE, null, jkJavaProcess, JkFileTreeSet.empty(), true);
 	}
 
+	public static JkUnit ofFork(JkClasspath classpath) {
+		return ofFork(JkJavaProcess.of().withClasspath(classpath));
+	}
+
+
 	public static JkUnit ofClasspath(File binDir, Iterable<File> classpathEntries) {
 		return of(JkClasspath.of(binDir).and(classpathEntries));
 	}
@@ -136,6 +142,11 @@ public final class JkUnit {
 	public JkUnit withClassesToTest(JkFileTreeSet classesToTest) {
 		return new JkUnit(this.classpath, reportDetail, reportDir, fork, classesToTest, this.breakOnFailure);
 	}
+
+	public JkUnit withClassesToTest(JkFileTree classesToTest) {
+		return new JkUnit(this.classpath, reportDetail, reportDir, fork, JkFileTreeSet.of(classesToTest), this.breakOnFailure);
+	}
+
 
 	public JkUnit withClassesToTest(File ...classDirs) {
 		return new JkUnit(this.classpath, reportDetail, reportDir, fork, JkFileTreeSet.of(classDirs), this.breakOnFailure);

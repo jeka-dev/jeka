@@ -4,12 +4,12 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 
-import org.jerkar.JkBuild;
 import org.jerkar.JkClasspath;
-import org.jerkar.JkFileTree;
-import org.jerkar.JkFileTreeSet;
+import org.jerkar.JkBuildDependencySupport;
 import org.jerkar.JkDoc;
 import org.jerkar.JkFileFilter;
+import org.jerkar.JkFileTree;
+import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkJavaCompiler;
 import org.jerkar.JkJavaProcess;
 import org.jerkar.JkLog;
@@ -35,7 +35,7 @@ import org.jerkar.utils.JkUtilsJdk;
  * 
  * @author Jerome Angibaud
  */
-public class JkJavaBuild extends JkBuild {
+public class JkJavaBuild extends JkBuildDependencySupport {
 
 	public static final JkScope PROVIDED = JkScope.of("provided").transitive(false)
 			.descr("Dependencies to compile the project but that should not be embedded in produced artifacts.");

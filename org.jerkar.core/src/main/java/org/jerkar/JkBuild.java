@@ -1,29 +1,15 @@
 package org.jerkar;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependencyResolver;
-import org.jerkar.depmanagement.JkRepo;
-import org.jerkar.depmanagement.JkRepo.JkMavenRepository;
-import org.jerkar.depmanagement.JkRepos;
-import org.jerkar.depmanagement.JkResolutionParameters;
-import org.jerkar.depmanagement.JkScope;
-import org.jerkar.depmanagement.JkScopeMapping;
-import org.jerkar.depmanagement.JkVersion;
-import org.jerkar.depmanagement.JkVersionedModule;
-import org.jerkar.depmanagement.ivy.JkIvy;
-import org.jerkar.publishing.JkPublishRepos;
-import org.jerkar.publishing.JkPublisher;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsReflect;
-import org.jerkar.utils.JkUtilsString;
 import org.jerkar.utils.JkUtilsTime;
 
 /**
@@ -34,56 +20,12 @@ import org.jerkar.utils.JkUtilsTime;
  */
 public class JkBuild {
 
-	/**
-	 * Default path for the non managed dependencies. This path is relative to {@link #baseDir()}.
-	 */
-	protected static final String STD_LIB_PATH = "build/libs";
-
-	// A cache for dependency resolver
-	private JkDependencyResolver cachedResolver;
 
 	private File baseDir = JkUtilsFile.workingDir();
 
 	private final Date buildTime = JkUtilsTime.now();
 
-	// A cache for artifact publisher
-	private JkPublisher cachedPublisher;
-
 	protected final JkBuildPlugins plugins = new JkBuildPlugins(this);
-
-	@JkOption({"Maven or Ivy repositories to download dependency artifacts.",
-	"Prefix the Url with 'ivy:' if it is an Ivy repostory."})
-	protected String downloadRepoUrl = JkMavenRepository.MAVEN_CENTRAL_URL.toString();
-
-	@JkOption({"Usename to connect to the download repository (if needed).",
-	"Null or blank means that the upload repository will be accessed in an anonymous way."})
-	protected String dowloadRepoUsername = null;
-
-	@JkOption({"Password to connect to the download repository (if needed)."})
-	protected String downloadRepoPassword = null;
-
-	@JkOption({"Specify the publish repository if it is different than the download one.",
-	"Prefix the Url with 'ivy:' if it is an Ivy repository."})
-	protected String publishRepoUrl = null;
-
-	@JkOption({"Usename to connect to the publish repository (if needed).",
-	"Null or blank means that the upload repository will be accessed in an anonymous way."})
-	protected String publishRepoUsername = null;
-
-	@JkOption({"Password to connect to the publish repository (if needed)."})
-	protected String publishRepoPassword = null;
-
-	@JkOption("Specify the publish repository for releases if it is different than the one for snapshots.")
-	protected String publishRepoReleaseUrl = null;
-
-	@JkOption("Usename to connect to the publish release repository (if needed).")
-	protected String publishRepoReleaseUsername = null;
-
-	@JkOption("Password to connect to the publish release repository (if needed).")
-	protected String publishRepoReleasePassword = null;
-
-	@JkOption("Version to inject to this build. If 'null' or blank than the version will be the one returned by #defaultVersion()" )
-	protected String forcedVersion = null;
 
 	@JkOption({
 		"Mention if you want to add extra lib in your build path. It can be absolute or relative to the project base dir.",
@@ -91,19 +33,13 @@ public class JkBuild {
 	"Example : -extraCompilePath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
 	protected String extraJerkarPath = null;
 
-	private final JkMultiProjectDependencies explicitMultiProjectDependencies;
 
-	/**
-	 * Other builds (projects) this build depend of.
-	 */
-	private JkMultiProjectDependencies multiProjectDependencies;
 
 	private JkDependencyResolver scriptDependencyResolver;
 
 	protected JkBuild() {
 		JkOptions.populateFields(this);  // The option are also populated here so it's effective even when called from a main method
-		final List<JkBuild> subBuilds = populateMultiProjectBuildField(this);
-		this.explicitMultiProjectDependencies = JkMultiProjectDependencies.of(this, subBuilds);
+
 	}
 
 	void setScriptDependencyResolver(JkDependencyResolver scriptDependencyResolver) {
@@ -135,30 +71,6 @@ public class JkBuild {
 	}
 
 	/**
-	 * The current version for this project. It has to be understood as the 'release version',
-	 * as this version will be used to publish artifacts. <br/>
-	 * it may take format as <code>1.0-SNAPSHOT</code>, <code>trunk-SNAPSHOT</code>, <code>1.2.3-rc1</code>, <code>1.2.3</code>, ...
-	 * This may be injected using the 'version' option, otherwise it takes the value returned by {@link #defaultVersion()}
-	 * If not, it takes the result from {@link #defaultVersion()}
-	 */
-	public final JkVersion version() {
-		if (JkUtilsString.isBlank(this.forcedVersion)) {
-			return defaultVersion();
-		}
-		return JkVersion.ofName(forcedVersion);
-	}
-
-	/**
-	 * Returns the version returned by {@link JkBuild#version()} when not forced.
-	 * 
-	 * @see #version()
-	 */
-	protected JkVersion defaultVersion() {
-		return JkVersion.fromOptionalResourceOrExplicit(getClass(), "1.0-SNAPSHOT");
-
-	}
-
-	/**
 	 * Returns the time-stamp this build has been initiated.
 	 * Default is the time stamp (formatted as 'yyyyMMdd-HHmmss') this build has been instantiated.
 	 */
@@ -166,139 +78,8 @@ public class JkBuild {
 		return JkUtilsTime.timestampSec(buildTime);
 	}
 
-	/**
-	 * Returns identifier for this project.
-	 * This identifier is used to name generated artifacts and by dependency manager.
-	 */
-	public JkModuleId moduleId() {
-		return JkModuleId.of(baseDir().root().getName());
-	}
-
-	/**
-	 * Returns
-	 */
-	protected final JkVersionedModule module() {
-		return JkVersionedModule.of(moduleId(), version());
-	}
-
-	/**
-	 * Returns the parameterized JkIvy instance to use when dealing with managed dependencies.
-	 * If you don't use managed dependencies, this method is never invoked.
-	 */
-	protected JkIvy jkIvy() {
-		return JkIvy.of(publishRepositories(), downloadRepositories());
-	}
-
-	/**
-	 * Returns the download repositories where to retrieve artifacts. It has only a meaning in case of using
-	 * managed dependencies.
-	 */
-	protected JkRepos downloadRepositories() {
-		return JkRepos.of(JkRepo.of(this.downloadRepoUrl)
-				.withOptionalCredentials(this.dowloadRepoUsername, this.downloadRepoPassword));
-	}
-
-	/**
-	 * Returns the repositories where are published artifacts.
-	 */
-	protected JkPublishRepos publishRepositories() {
-		final JkRepo defaultDownloadRepo = JkRepo.ofOptional(downloadRepoUrl, dowloadRepoUsername, downloadRepoPassword);
-		final JkRepo defaultPublishRepo = JkRepo.ofOptional(publishRepoUrl, publishRepoUsername, publishRepoPassword);
-		final JkRepo defaultPublishReleaseRepo = JkRepo.ofOptional(publishRepoReleaseUrl, publishRepoReleaseUsername, publishRepoReleasePassword);
-
-		final JkRepo publishRepo = JkRepo.firstNonNull(defaultPublishRepo, defaultDownloadRepo);
-		final JkRepo releaseRepo = JkRepo.firstNonNull(defaultPublishReleaseRepo, publishRepo);
-
-		return JkPublishRepos.ofSnapshotAndRelease(publishRepo, releaseRepo);
-	}
-
 	protected Date buildTime() {
 		return (Date) buildTime.clone();
-	}
-
-	/**
-	 * Returns the resolved dependencies for the given scope. Depending on the passed
-	 * options, it may be augmented with extra-libs mentioned in options <code>extraXxxxPath</code>.
-	 */
-	public final JkPath depsFor(JkScope ...scopes) {
-		return dependencyResolver().get(scopes);
-	}
-
-	/**
-	 * Returns dependencies on other projects
-	 */
-	public final JkMultiProjectDependencies multiProjectDependencies() {
-		if (multiProjectDependencies == null) {
-			multiProjectDependencies = this.explicitMultiProjectDependencies.and(this.effectiveDependencies().projectDependencies());
-		}
-		return multiProjectDependencies;
-
-	}
-
-	/**
-	 * Returns the dependencies of this module. By default it uses unmanaged dependencies stored
-	 * locally in the project as described by {@link #implicitDependencies()} method.
-	 * If you want to use managed dependencies, you must override this method.
-	 */
-	private JkDependencies effectiveDependencies() {
-		return JkBuildPlugin.applyDependencies(plugins.getActives(),
-				implicitDependencies().and(dependencies().withDefaultScope(this.defaultScope())));
-	}
-
-	protected JkDependencies dependencies() {
-		return JkDependencies.on();
-	}
-
-	/**
-	 * The scope that will be used when a dependency has been declared without scope.
-	 */
-	protected JkScope defaultScope() {
-		return JkScope.BUILD;
-	}
-
-	/**
-	 * Returns the dependencies that does not need to be explicitly declared.
-	 * For example, it can include all jar file located under <code>build/libs</code> directory.
-	 * <p>Normally you don't need to override this method.
-	 */
-	protected JkDependencies implicitDependencies() {
-		return JkDependencies.builder().build();
-	}
-
-	public final JkDependencyResolver dependencyResolver() {
-		if (cachedResolver == null) {
-			JkLog.startln("Setting dependency resolver ");
-			cachedResolver = JkBuildPlugin.applyDependencyResolver(plugins.getActives()
-					, createDependencyResolver());
-			JkLog.done("Resolver set " + cachedResolver);
-		}
-		return cachedResolver;
-	}
-
-	/**
-	 * Returns the base dependency resolver.
-	 */
-	private JkDependencyResolver createDependencyResolver() {
-		final JkDependencies dependencies = effectiveDependencies().and(extraCommandLineDeps());
-		if (dependencies.containsExternalModule()) {
-			return JkDependencyResolver.managed(jkIvy(), dependencies, module(),
-					JkResolutionParameters.of(scopeMapping()));
-		}
-		return JkDependencyResolver.unmanaged(dependencies);
-	}
-
-	/**
-	 * Returns the scope mapping used by the underlying dependency manager.
-	 */
-	protected JkScopeMapping scopeMapping() {
-		return JkScopeMapping.empty();
-	}
-
-	protected JkPublisher publisher() {
-		if (cachedPublisher == null) {
-			cachedPublisher = JkPublisher.usingIvy(jkIvy());
-		}
-		return cachedPublisher;
 	}
 
 	protected JkScaffolder scaffolder() {
@@ -308,26 +89,21 @@ public class JkBuild {
 			public void run() {
 				final File spec = baseDir(JkBuildResolver.BUILD_SOURCE_DIR);
 				spec.mkdirs();
-				final String packageName = moduleId().group().replace('.', '/');
-				new File(spec, packageName).mkdirs();
 			}
 		})
 		.withExtendedClass(JkBuild.class);
-
 	}
 
 	protected JkDependencies extraCommandLineDeps() {
 		return JkDependencies.builder().build();
 	}
 
-	protected final JkClasspath toPath(String pathAsString) {
+	protected final JkPath toPath(String pathAsString) {
 		if (pathAsString == null) {
-			return JkClasspath.of();
+			return JkPath.of();
 		}
-		return JkClasspath.of(JkUtilsFile.toPath(pathAsString, ";", baseDir().root()));
+		return JkPath.of(JkUtilsFile.toPath(pathAsString, ";", baseDir().root()));
 	}
-
-
 
 	/**
 	 * Returns the base directory for this project. All file/directory path are
@@ -453,10 +229,6 @@ public class JkBuild {
 		HelpDisplayer.helpPlugins(this);
 	}
 
-	public JkBuild relativeProject(String relativePath) {
-		return relativeProject(this, null, relativePath);
-	}
-
 	private void invoke(BuildMethod buildMethod, JkBuild from) {
 		if (buildMethod.isMethodPlugin()) {
 			this.plugins.invoke(buildMethod.pluginClass, buildMethod.methodName);
@@ -465,33 +237,9 @@ public class JkBuild {
 		}
 	}
 
-	private static final JkBuild relativeProject(JkBuild mainBuild, Class<? extends JkBuild> clazz, String relativePath) {
-		final File projectDir = mainBuild.baseDir(relativePath);
-		final Project project = new Project(projectDir);
-		final JkBuild build = project.getBuild(clazz);
-		JkOptions.populateFields(build);
-		build.init();
-		return build;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static List<JkBuild> populateMultiProjectBuildField(JkBuild mainBuild) {
-		final List<JkBuild> result = new LinkedList<JkBuild>();
-		final List<Field> fields = JkUtilsReflect.getAllDeclaredField(mainBuild.getClass(), JkProject.class);
-		for (final Field field : fields) {
-			final JkProject jkProject = field.getAnnotation(JkProject.class);
-			final JkBuild subBuild = relativeProject(mainBuild, (Class<? extends JkBuild>) field.getType(),
-					jkProject.value());
-			JkUtilsReflect.setFieldValue(mainBuild, field, subBuild);
-			result.add(subBuild);
-		}
-		return result;
-	}
-
 	public <T extends JkBuildPlugin> T pluginOf(Class<T> pluginClass) {
 		return this.plugins.findInstanceOf(pluginClass);
 	}
-
 
 
 }
