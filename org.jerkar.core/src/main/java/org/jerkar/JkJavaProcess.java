@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.jerkar.utils.JkUtilsIO;
+import org.jerkar.utils.JkUtilsIO.StreamGobbler;
 import org.jerkar.utils.JkUtilsString;
 import org.jerkar.utils.JkUtilsSystem;
-import org.jerkar.utils.JkUtilsIO.StreamGobbler;
 
 /**
  * Offer fluent interface for launching Java processes.
@@ -137,12 +137,18 @@ public final class JkJavaProcess {
 		return this.javaDir.getAbsolutePath()+ File.separator + "java";
 	}
 
-	public void startAndWaitFor(String mainClassName, String ...arguments) {
+	public void runSync(String ...arguments) {
+		runClassSync(null, arguments);
+	}
+
+	public void runClassSync(String mainClassName, String ...arguments) {
 		final List<String> command = new LinkedList<String>();
 		final OptionAndEnv optionAndEnv = optionsAndEnv();
 		command.add(runningJavaCommand());
 		command.addAll(optionAndEnv.options);
-		command.add(mainClassName);
+		if (mainClassName != null) {
+			command.add(mainClassName);
+		}
 		command.addAll(Arrays.asList(arguments));
 		JkLog.startln("Starting java program : " + command.toString());
 		final int result;

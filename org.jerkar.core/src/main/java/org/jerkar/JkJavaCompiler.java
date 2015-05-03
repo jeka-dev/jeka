@@ -208,6 +208,10 @@ public final class JkJavaCompiler {
 		return new JkJavaCompiler(options, newSources, failOnError, fork);
 	}
 
+	public JkJavaCompiler andSourceDir(File dir) {
+		return andSources(JkFileTree.of(dir));
+	}
+
 
 
 	/**

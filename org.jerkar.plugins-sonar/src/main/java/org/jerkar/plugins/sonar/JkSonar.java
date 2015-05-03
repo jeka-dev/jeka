@@ -101,7 +101,7 @@ public final class JkSonar {
             JkLog.info("Sonar analysis skipped.");
         }
         JkLog.startln("Launching Sonar analysis");
-        javaProcess().startAndWaitFor("org.sonar.runner.Main","-e");
+        javaProcess().runClassSync("org.sonar.runner.Main","-e");
         JkLog.done();
     }
 
