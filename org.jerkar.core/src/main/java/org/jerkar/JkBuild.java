@@ -33,8 +33,6 @@ public class JkBuild {
 	"Example : -extraCompilePath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
 	protected String extraJerkarPath = null;
 
-
-
 	private JkDependencyResolver scriptDependencyResolver;
 
 	protected JkBuild() {
@@ -193,7 +191,7 @@ public class JkBuild {
 		return ouputDir().file(relativePath);
 	}
 
-	// ------------ Operations ------------
+	// ------------ Jerkar methods ------------
 
 	@JkDoc("Create the project structure")
 	public final void scaffold() {

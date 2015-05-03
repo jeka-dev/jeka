@@ -61,4 +61,8 @@ public class AntStyleBuild extends JkBuild {
 				.run();
 	}
 	
+	public static void main(String[] args) {
+		new AntStyleBuild().doDefault();
+	}
+	
 }

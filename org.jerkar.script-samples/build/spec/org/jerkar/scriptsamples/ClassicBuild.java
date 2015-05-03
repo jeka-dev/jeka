@@ -7,10 +7,10 @@ import static org.jerkar.builtins.javabuild.JkPopularModules.MOCKITO_ALL;
 
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkDependencies;
-import org.jerkar.scriptsamples.ClassicExplicitBuild;
+import org.jerkar.scriptsamples.MavenStyleBuild;
 
 /**
- * This build is equivalent to {@link ClassicExplicitBuild} but removing 
+ * This build is equivalent to {@link MavenStyleBuild} but removing 
  * the needless part cause we respect the convention project folder name = groupName.projectName
  * and the version number is taken from resource 'version.txt' (default behavior)
  *
@@ -27,14 +27,6 @@ public class ClassicBuild extends JkJavaBuild {
 			.on(JUNIT, "4.11").scope(TEST)
 			.on(MOCKITO_ALL, "1.9.5").scope(TEST)
 		.build();
-	}
-	
-	// Optional : usefull if you want quick run/debug your script in you IDE
-	public static void main(String[] args) {
-		ClassicBuild build = new ClassicBuild();
-		build.doDefault();
-		build.doc();
-		build.publish();
 	}
 	
 }
