@@ -9,7 +9,6 @@ import org.jerkar.JkModuleId;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkRepo;
-import org.jerkar.depmanagement.JkRepo.JkMavenRepository;
 import org.jerkar.depmanagement.JkRepos;
 import org.jerkar.depmanagement.JkVersion;
 import org.jerkar.publishing.JkPublishRepos;
