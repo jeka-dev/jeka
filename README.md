@@ -41,13 +41,15 @@ Jerkar provides what a self respecting modern, enterprise scale, build system sh
 
 Let's assume you have already [installed Jerkar](doc/readme-parts/quick-start.md).
 
-But to start simple, the project [org.jerkar.script-samples](org.jerkar.script-samples) holds some build script [examples](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples). 
-Just know that in Jerkar, build scripts (build classes) are supposed to be stored in `[project root]/build/spec` folder,
-and that Jerkar compile everything under this folder prior to execute the first build class found 
-(you can however specify the executed build class by mentioning `-buildClass=MyClassSimpleName` option in Jerkar command line).
+To start concrete, the project [org.jerkar.script-samples](org.jerkar.script-samples) holds some build script [examples](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples). 
+Just know that in Jerkar, build definitions are plain Java class sources. They are stored in `[project root]/build/def` folder,
+and are compiled on the fly by Jerkar in `[project root]/build/output/def-bin` folder.
 
-To build your project with Jerkar you may need to create a class extending [JkBuild](org.jerkar.core/src/main/java/org/jerkar/JkBuild.java) 
-and write method you want to execute.
+Normally there is a single build definition by project but is possible to have more. To precise a given build definition to run,
+, mention `-buildClass=MyDefinitionSimpleClassName` option in Jerkar command line. 
+
+With Jerkar you can write free form build definition (ala ANT) or inherite 
+
 
 For Java project you may directly extend [JkJavaBuild template](org.jerkar.core/src/main/java/org/jerkar/builtins/javabuild/JkJavaBuild.java) 
 so standard methods are already implemented. All you need is to implement what is specific.

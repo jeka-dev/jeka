@@ -1,6 +1,6 @@
 # How to install Jerkar
 
-1. unzip the [distribution archive](doc/bin/jerkar-distrib.zip) to the directory you want to install Jerkar : let's call it `[Jerkar install dir]`
+1. unzip the [distribution archive](../bin/jerkar-distrib.zip) to the directory you want to install Jerkar : let's call it `[Jerkar install dir]`
 2. make sure that either a valid *JDK* (6 or above) is on your _PATH_ environment variable or that a _JAVA_HOME_ variable is pointing on
 3. add `[Jerkar install dir]` to your _PATH_ environment variable
 4. execute `jerkar` in the command line. You should get an output starting by :
