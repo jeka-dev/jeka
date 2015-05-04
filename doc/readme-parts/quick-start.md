@@ -14,22 +14,21 @@
                                      The 100% Java build tool.
 ```
 
+#### How scaffold a Jerkar project
+1. create a directory named as _groupName.projectName_. You can use only _projectName_ if your project has no group
+2. under this directory, execute `jerkar scaffold`. This generates the project structures.
+3. If you are an Eclipse user, you can execute `jerkar eclipse#generateFiles` to generate `.project` and `.classpath` files.
+
 #### How to setup Jerkar on existing Java project
 1. add the _[Jerkar install dir]/org.jerkar.core-fat.jar_ lib to your project build-path on your IDE and attach the source code (_[Jerkar install dir]/lib-sources_). This jar includes Jerkar core along plugins classes.
 2. create a _build/def_ folder at the base of your project and make it a source folder in your IDE. In Jerkar, all related build stuff (build definition, local 3rd party libs, produced artifacts,...) lies under _*build*_ directory
 3. write the build definition class extending JkJavaBuild in this directory (in whatever package)
-4. if your project respect convention, do not need managed dependencies and don't do any specific thing, you don't even need 2) and 3) points
-5. launch the `org.jerkar.Main` class in your IDE or type `jerkar` in the command line (with the root of your project as working directory)
+4. launch the `org.jerkar.Main` class in your IDE or type `jerkar` in the command line (with the root of your project as working directory)
 
 This will launch the `doDefault` method defined in your build class. Note that this method is declared in the `JkJavaBuild` and invoke in sequence clean, compile, unitTest and pack methods.
 
-If you want to launch several methods of your build, type `jerkar doSomething doSomethingElse`. Jerkar recognizes any public zero-argument method returning `void` as build method.
-Type `jerkar help` to get all the build methods provided by your build class. 
+If your project respect convention, do not need managed dependencies and don't do any specific thing, you don't even need 2) and 3) points
 
-#### How to scaffold a Jerkar project
-1. create a directory named as _groupName.projectName_. You can use only _projectName_ if your project has no group
-2. under this directory, execute `jerkar scaffold`. This generates the project structures.
-3. If you are an Eclipse user, you can execute `jerkar eclipse#generateFiles` to generate `.project`and `.classpath` files.
 
- 
-  
+
+
