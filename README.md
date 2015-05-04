@@ -102,6 +102,7 @@ public class AntStyleBuild extends JkBuild {
 	}
 	
 }```
+
 [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/AntStyleBuild.java)
 
 So now, we can execute Jerkar script the following way :
@@ -125,7 +126,7 @@ This example is an academic script for a illustration purpose. Most these settin
 by following naming convention or setting Jerkar at global level.
 
 ```java
-public class BuildSampleClassic extends JkJavaBuild {
+public class MavenStyleBuild extends JkJavaBuild {
 	
 	@Override
 	// Optional : needless if you respect naming convention
@@ -171,7 +172,7 @@ public class BuildSampleClassic extends JkJavaBuild {
 
 }
 ```
-[complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassicExplicit.java)
+[complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/MavenStyleBuild.java)
 
 
 #### Tiny style build
