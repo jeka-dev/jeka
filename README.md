@@ -207,7 +207,7 @@ From here you can :
 - execute `jerkar doDefault` => invoke the `JkJavaBuild#doDefault` method which lead in clean, compile, compile tests, run tests and pack (produce jar and source jar).
 - execute `jerkar -fatJar=true -forkTests=true` => do the same but inject the `true` value to `JkJavaBuild#fatJar` and `JkJavaBuild#forkTests` fields. It leads in producing a fat-jar 
 (jar file containg all the runtime dependencies) and running unit tests in a forked process.
-- execute `jerkar -fatJar=true -forkTests=true` => do the same, when field values are not mentioned, Jerkar uses a default value (true for boolean fields)
+- execute `jerkar -fatJar -forkTests` => do the same, when field values are not mentioned, Jerkar uses a default value (true for boolean fields)
 
 - execute `jerkar jacoco#` => will instantiate the [jacoco plugin](org.jerkar.plugins-jacoco/src/main/java/org/jerkar/plugins/jacoco/JkBuildPluginJacoco.java) and bind it to the `BuidSampleClassic` instance. This plugin alter the `JkJavaBuild#unitTest` method 
 in such a way that tests are run with Jacoco to produce a test coverage report. '#' is the mark of plugin in Jerkar command line.
