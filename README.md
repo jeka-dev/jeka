@@ -123,9 +123,6 @@ ___
 For Java project you may directly extend [JkJavaBuild template](org.jerkar.core/src/main/java/org/jerkar/builtins/javabuild/JkJavaBuild.java) 
 so standard methods are already implemented. All you need is to implement what is specific.
 
-This example is an academic script for a illustration purpose. Most these settings can be omitted 
-by following naming convention or setting Jerkar at global level.
-
 ```java
 public class MavenStyleBuild extends JkJavaBuild {
 	
@@ -173,14 +170,15 @@ public class MavenStyleBuild extends JkJavaBuild {
 
 }
 ```
-
 [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/MavenStyleBuild.java)
 
+This example is an academic script for a illustration purpose. Most these settings can be omitted 
+by following naming convention or setting Jerkar at global level.
 
 #### Tiny style build
 ___
 If you follow best practices by respecting conventions (project folder named as _groupName_._projectName_ so `org.jerkar.script-samples`)
-and store global settings (as repositories) to shared property files the above script is reduced to :
+and store global settings (as repositories) to central shared place, the above script is reduced to :
 
 ```java
 public class BuildSampleClassic extends JkJavaBuild {
@@ -199,13 +197,7 @@ public class BuildSampleClassic extends JkJavaBuild {
 ```
 [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/BuildSampleClassic.java)
 
-So now, we can execute Jerkar script the following way :
-- write a main method in your script and launch it within your IDE (see complete source code)
-- execute the `org.jerkar.JkMain` method in your IDE but sing the root of your project as working directory. In this mode you
-can pass arguments as you would do with the command line.
-- executing a command line in a shell (or on a build server)  
-
-To execute command line, open a shell and go under the project root directory. From there you can :
+From here you can :
 - execute `jerkar doDefault` => invoke the `JkJavaBuild#doDefault` method which lead in clean, compile, compile tests, run tests and pack (produce jar and source jar).
 - execute `jerkar -fatJar=true -forkTests=true` => do the same but inject the `true` value to `JkJavaBuild#fatJar` and `JkJavaBuild#forkTests` fields. It leads in producing a fat-jar 
 (jar file containg all the runtime dependencies) and running unit tests in a forked process.
