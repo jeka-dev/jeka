@@ -103,10 +103,13 @@ public class AntStyleBuild extends JkBuild {
 	
 }
 ```
-
 [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/AntStyleBuild.java)
 
-So now, we can execute Jerkar script the following way :
+Note that :
+* all zero-arg public method returning `void` are callable by Jerkar
+* the build definition class must extend `org.jerkar.JkBuild`
+
+From this build definition, we can execute Jerkar the following way :
 - write a main method in your script and launch it within your IDE.
 - execute the `org.jerkar.JkMain` method in your IDE but with the root of your project as working directory. In this mode you
 can pass arguments as you would do with the command line.
