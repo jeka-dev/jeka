@@ -50,7 +50,7 @@ Normally there is a single build definition by project but it is possible to hav
 
 With Jerkar you can write free form build definition (ala ANT) or templated ones (ala maven). In the following section, 
 we will illustrate different different approach to use Jerkar. 
-As Jerkar uses a very small set of concept, at the end of this section, you should have well understood most of the Jerkar principal.
+As Jerkar uses a very small set of concept, at the end of this section, you should have well understood most of the Jerkar principles.
 
 #### Ant style build
 ____
