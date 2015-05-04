@@ -172,6 +172,7 @@ public class MavenStyleBuild extends JkJavaBuild {
 
 }
 ```
+
 [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/MavenStyleBuild.java)
 
 
