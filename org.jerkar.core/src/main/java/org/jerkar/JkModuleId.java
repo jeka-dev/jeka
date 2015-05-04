@@ -50,7 +50,7 @@ public final class JkModuleId {
 	}
 
 	public String fullName() {
-		return name + "." + group;
+		return group + "." + name;
 	}
 
 	@Override

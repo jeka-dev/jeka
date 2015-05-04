@@ -14,17 +14,18 @@ import org.jerkar.utils.JkUtilsString;
  */
 public final class JkBuildResolver {
 
-	public static final String BUILD_SOURCE_DIR = "build/spec";
+	public static final String BUILD_OUTPUT_PATH = "build/output";
+
+	public static final String BUILD_DEF_DIR = "build/def";
+
+	public static final String BUILD_DEF_BIN_DIR_NAME = "def-bin";
+
+	public static final String BUILD_DEF_BIN_DIR = BUILD_OUTPUT_PATH + "/" + BUILD_DEF_BIN_DIR_NAME;
 
 	private static final String DEFAULT_JAVA_SOURCE = "src/main/java";
 
 	public static final String BUILD_LIB_DIR = "build/libs/build";
 
-	public static final String BUILD_BIN_DIR_NAME = "build-bin";
-
-	public static final String BUILD_OUTPUT_PATH = "build/output";
-
-	public static final String BUILD_BIN_DIR = BUILD_OUTPUT_PATH + "/" + BUILD_BIN_DIR_NAME;
 
 	private final File baseDir;
 
@@ -39,8 +40,8 @@ public final class JkBuildResolver {
 	JkBuildResolver(File baseDir) {
 		super();
 		this.baseDir = baseDir;
-		this.buildSourceDir = new File(baseDir, BUILD_SOURCE_DIR);
-		this.buildClassDir = new File(baseDir, BUILD_BIN_DIR);
+		this.buildSourceDir = new File(baseDir, BUILD_DEF_DIR);
+		this.buildClassDir = new File(baseDir, BUILD_DEF_BIN_DIR);
 		this.buildlibDir = new File(baseDir, BUILD_LIB_DIR);
 		this.defaultJavaSource = new File(baseDir, DEFAULT_JAVA_SOURCE);
 	}

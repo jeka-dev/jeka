@@ -11,7 +11,7 @@ They just can't use Java to create organization scalable builds. **Jerkar** fill
 
 * power, flexibility and robustness of Java
 * compilation, code-completion and debug facilities provided by your IDE without installing 3rd party plugins/tools
-* lightness, simplicity, speed : in essence, Jerkar engine simply performs method invocations on your build class
+* lightness, simplicity, transparency, speed : in essence, Jerkar engine simply performs method invocations on your build class
 * no extra language or XML soup to master, no required configuration file
 * any Java 3rd party libraries without needing to wrap it in a plugin or a specific component
 * complexity tackling the same way you do for regular code (ie utility classes, SoC, inheritance, composition,...) 
@@ -38,8 +38,8 @@ Jerkar provides what a self respecting modern, enterprise scale, build system sh
 * ability to get information from naming convention and Eclipse files, so in simpler cases you won't need to write script at all (even to test coverage or perform SonarQube analysis) !!!
 
 # How it works ?
-Jerkar builds with itself and this is not a trivial case cause it involves multi-project, distribution crafting, 
-manifest updating and Maven publication. So you may look here to get deeper understanding: [how to build Jerkar](doc/readme-parts/build-jerkar.md) and  See [how to quick start](doc/readme-parts/quick-start.md)
+
+Let's assume you have already installed Jerkar.
 
 But to start simple, the project [org.jerkar.script-samples](org.jerkar.script-samples) holds some build script [examples](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples). 
 Just know that in Jerkar, build scripts (build classes) are supposed to be stored in `[project root]/build/spec` folder,
@@ -213,7 +213,10 @@ The Sonar plugin is activated programatically in the script so it is not require
 So `jerkar` alone performs a clean, compile, test and sonar analysis on the default sonar environment (DEV).
 `jerkar -sonarEnv=PROD`run it upon the the PROD environment.  
 
+# How to build Jerkar ?
 
+Jerkar builds with itself and this is not a trivial case cause it involves multi-project, distribution crafting, 
+manifest updating and Maven publication. So you may look here to get deeper understanding: [how to build Jerkar](doc/readme-parts/build-jerkar.md) and  See [how to quick start](doc/readme-parts/quick-start.md)
 
 # Status
 

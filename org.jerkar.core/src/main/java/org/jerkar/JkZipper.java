@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.zip.Deflater;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -18,16 +19,16 @@ import org.jerkar.utils.JkUtilsIterable;
  */
 public final class JkZipper {
 
-	private final Iterable<? extends Object> itemsToZip;
+	private final List<? extends Object> itemsToZip;
 
-	private final Iterable<File> archivestoMerge;
+	private final List<File> archivestoMerge;
 
-	private JkZipper(Iterable<? extends Object> itemsToZip, Iterable<File> archivestoMerge) {
+	private JkZipper(List<? extends Object> itemsToZip, List<File> archivestoMerge) {
 		this.itemsToZip = itemsToZip;
 		this.archivestoMerge = archivestoMerge;
 	}
 
-	private JkZipper(Iterable<? extends Object> itemsToZip) {
+	private JkZipper(List<? extends Object> itemsToZip) {
 		this.itemsToZip = itemsToZip;
 		this.archivestoMerge = Collections.emptyList();
 	}
@@ -55,7 +56,7 @@ public final class JkZipper {
 
 	@SuppressWarnings("unchecked")
 	public JkZipper merge(Iterable<File> archiveFiles) {
-		return new JkZipper(itemsToZip, JkUtilsIterable.chain(this.archivestoMerge, archiveFiles));
+		return new JkZipper(itemsToZip, JkUtilsIterable.concatLists(this.archivestoMerge, archiveFiles));
 	}
 
 	public JkZipper merge(File... archiveFiles) {

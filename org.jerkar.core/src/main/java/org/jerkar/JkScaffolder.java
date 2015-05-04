@@ -2,6 +2,7 @@ package org.jerkar;
 
 
 import java.io.File;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,7 +69,7 @@ public class JkScaffolder {
 
 
 	public void process() {
-		final File spec = build.baseDir(JkBuildResolver.BUILD_SOURCE_DIR);
+		final File spec = build.baseDir(JkBuildResolver.BUILD_DEF_DIR);
 		spec.mkdirs();
 		final Map<String, String> values = new HashMap<String, String>();
 		values.put("packageName", this.packageName);
@@ -81,8 +82,8 @@ public class JkScaffolder {
 		final File packageDir = new File(spec, packageName);
 		packageDir.mkdirs();
 		final File buildSource = JkUtilsFile.createFileIfNotExist(new File(packageDir,"Build.java"));
-		final File template = JkUtilsFile.fromUrl(JkScaffolder.class.getResource("Build.java_sample"));
-		JkUtilsFile.copyFileReplacingTokens(template, buildSource, values);
+		final URL template = JkScaffolder.class.getResource("Build.java_sample");
+		JkUtilsFile.copyUrlReplacingTokens(template, buildSource, values, JkLog.infoStream());
 		for (final Runnable action : extraActions) {
 			action.run();
 		}

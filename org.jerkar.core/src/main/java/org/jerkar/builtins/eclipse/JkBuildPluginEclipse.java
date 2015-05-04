@@ -4,8 +4,8 @@ import java.io.File;
 import java.util.List;
 
 import org.jerkar.JkBuild;
-import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkDoc;
+import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkOption;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.builtins.javabuild.JkJavaBuildPlugin;
@@ -46,6 +46,10 @@ public class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 			throw e;
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
+		}
+		final File dotProject = this.javaBuild.baseDir(".project");
+		if (!dotProject.exists()) {
+			Project.ofJavaNature(this.javaBuild.moduleId().fullName()).writeTo(dotProject);
 		}
 	}
 

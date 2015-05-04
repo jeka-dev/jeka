@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.zip.Deflater;
 
 import org.jerkar.JkFileTree;
+import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkLog;
 import org.jerkar.JkZipper;
+import org.jerkar.utils.JkUtilsFile;
 
 /**
  * Jar maker for the {@link JkJavaBuild} template. This maker will get information from supplied java builder
@@ -51,7 +53,7 @@ public class JkJavaPacker implements Cloneable {
 	}
 
 	public String baseName() {
-		final String name = fullName ? build.moduleId().toString() : build.moduleId().name();
+		final String name = fullName ? build.moduleId().fullName() : build.moduleId().name();
 		if (includeVersion) {
 			return name + "-" + build.version();
 		}
@@ -88,10 +90,11 @@ public class JkJavaPacker implements Cloneable {
 
 	public void pack() {
 		JkLog.startln("Packaging module");
-		if (doJar) {
+		if (doJar && !JkUtilsFile.isEmpty(build.classDir(), false)) {
 			JkFileTree.of(build.classDir()).zip().to(jarFile(), compressionLevel).md5If(checkSum);
 		}
-		if (doSources) {
+		final JkFileTreeSet sourceAndResources = build.sourceDirs().and(build.resourceDirs());
+		if (doSources && sourceAndResources.countFiles(false) > 0) {
 			build.sourceDirs().and(build.resourceDirs()).zip().to(jarSourceFile(), compressionLevel);
 		}
 		if (doTest && !build.skipTests && build.testClassDir().exists() && !JkFileTree.of(build.testClassDir()).files(false).isEmpty()) {
@@ -109,9 +112,6 @@ public class JkJavaPacker implements Cloneable {
 		}
 		JkLog.done();
 	}
-
-
-
 
 
 	public interface Extra {

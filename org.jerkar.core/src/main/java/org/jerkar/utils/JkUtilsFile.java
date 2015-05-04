@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Writer;
@@ -250,6 +251,8 @@ public final class JkUtilsFile {
 			result = new File(url.toURI());
 		} catch(final URISyntaxException e) {
 			result = new File(url.getPath());
+		} catch(final IllegalArgumentException e) {
+			throw new IllegalArgumentException(url + " : " + e.getMessage(), e);
 		}
 		return result;
 	}
@@ -362,6 +365,10 @@ public final class JkUtilsFile {
 			}
 		}
 		return result;
+	}
+
+	public static boolean isEmpty(File dir, boolean countFolders) {
+		return count(dir, JkFileFilters.acceptAll(), countFolders) == 0;
 	}
 
 	/**
@@ -518,6 +525,49 @@ public final class JkUtilsFile {
 			JkUtilsIO.closeQuietly(replacingReader);
 		}
 	}
+
+	public static void copyUrlReplacingTokens(URL url,  File toFile, Map<String, String> replacements, PrintStream reportStream) {
+		final InputStream is;
+		try {
+			is = url.openStream();
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+		copyStreamReplacingTokens(is, toFile, replacements, reportStream);
+		JkUtilsIO.closeQuietly(is);
+	}
+
+	public static void copyStreamReplacingTokens(InputStream inputStream, File toFile, Map<String, String> replacements, PrintStream reportStream) {
+		final TokenReplacingReader replacingReader = new TokenReplacingReader(new InputStreamReader(inputStream), replacements);
+		if (!toFile.exists()) {
+			try {
+				toFile.createNewFile();
+			} catch (final IOException e) {
+				JkUtilsIO.closeQuietly(replacingReader);
+				throw new RuntimeException(e);
+			}
+		}
+		final Writer writer;
+		try {
+			writer = new FileWriter(toFile);
+		} catch (final IOException e) {
+			JkUtilsIO.closeQuietly(replacingReader);
+			throw new RuntimeException(e);
+		}
+		final char[] buf = new char[1024];
+		int len;
+		try {
+			while ((len = replacingReader.read(buf)) > 0) {
+				writer.write(buf, 0, len);
+			}
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		} finally {
+			JkUtilsIO.closeQuietly(writer);
+			JkUtilsIO.closeQuietly(replacingReader);
+		}
+	}
+
 
 	private static class FilePath {
 
