@@ -1,6 +1,7 @@
 package org.jerkar.distrib.all;
 
 import java.io.File;
+import java.util.zip.Deflater;
 
 import org.jerkar.CoreBuild;
 import org.jerkar.JkBuildDependencySupport;
@@ -55,7 +56,7 @@ public class DistribAllBuild extends JkBuildDependencySupport {
 		JkJavadocMaker.of(sources, javadocAllDir, javadocAllFile).process();
 		
 		JkLog.info("Pack all");
-		dist.zip().to(ouputDir("jerkar-distrib.zip"));
+		dist.zip().to(ouputDir("jerkar-distrib.zip"), Deflater.BEST_COMPRESSION);
 		
 		JkLog.done();
 	}

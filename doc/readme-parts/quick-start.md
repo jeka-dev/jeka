@@ -25,9 +25,7 @@
 3. write the build definition class extending JkJavaBuild in this directory (in whatever package)
 4. launch the `org.jerkar.Main` class in your IDE or type `jerkar` in the command line (with the root of your project as working directory)
 
-This will launch the `doDefault` method defined in your build class. Note that this method is declared in the `JkJavaBuild` and invoke in sequence clean, compile, unitTest and pack methods.
-
-If your project respect conventions, does not need managed dependencies and don't do any specific thing, you can even skip 2) and 3).
+If your project respect conventions, does not need managed dependencies and don't do any specific things, you can even skip 2) and 3).
 
 
 
