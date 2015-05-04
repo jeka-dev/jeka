@@ -54,6 +54,7 @@ As Jerkar uses a very small set of concept, at the end of this section, you shou
 
 #### Ant style build
 ____
+This build definition mimics the [tutorial ANT build script](http://ant.apache.org/manual/tutorial-HelloWorldWithAnt.html) 
 
 ```
 public class AntStyleBuild extends JkBuild {
