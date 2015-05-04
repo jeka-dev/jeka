@@ -21,13 +21,13 @@
 
 #### How to setup Jerkar on existing Java project
 1. add the _[Jerkar install dir]/org.jerkar.core-fat.jar_ lib to your project build-path on your IDE and attach the source code (_[Jerkar install dir]/lib-sources_). This jar includes Jerkar core along plugins classes.
-2. create a _build/def_ folder at the base of your project and make it a source folder in your IDE. In Jerkar, all related build stuff (build definition, local 3rd party libs, produced artifacts,...) lies under _*build*_ directory
+2. create a _build/def_ folder at the base of your project and make it a source folder in your IDE. In Jerkar, all build related stuff (build definition, local 3rd party libs, produced artifacts,...) lies under _[Jerkar install dir]/build_ directory
 3. write the build definition class extending JkJavaBuild in this directory (in whatever package)
 4. launch the `org.jerkar.Main` class in your IDE or type `jerkar` in the command line (with the root of your project as working directory)
 
 This will launch the `doDefault` method defined in your build class. Note that this method is declared in the `JkJavaBuild` and invoke in sequence clean, compile, unitTest and pack methods.
 
-If your project respect convention, do not need managed dependencies and don't do any specific thing, you don't even need 2) and 3) points
+If your project respect conventions, does not need managed dependencies and don't do any specific thing, you can even skip 2) and 3).
 
 
 
