@@ -101,7 +101,8 @@ public class AntStyleBuild extends JkBuild {
 		new AntStyleBuild().doDefault();
 	}
 	
-}```
+}
+```
 
 [complete code source for this build](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples/AntStyleBuild.java)
 
