@@ -48,7 +48,9 @@ and are compiled on the fly by Jerkar in `[project root]/build/output/def-bin` f
 Normally there is a single build definition by project but it is possible to have more. To precise a given build definition to run,
  mention `-buildClass=MyDefinitionSimpleClassName` option in Jerkar command line. 
 
-With Jerkar you can write free form build definition (ala ANT) or templated ones (ala maven).
+With Jerkar you can write free form build definition (ala ANT) or templated ones (ala maven). In the following section, 
+we will illustrate different different approach to use Jerkar. 
+As Jerkar uses a very small set of concept, at the end of this section, you should have well understood most of the Jerkar principal.
 
 #### Ant style build
 ____
