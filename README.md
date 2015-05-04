@@ -39,7 +39,7 @@ Jerkar provides what a self respecting modern, enterprise scale, build system sh
 
 # How it works ?
 
-Let's assume you have already installed Jerkar.
+Let's assume you have already [installed Jerkar](doc/readme-parts/quick-start.md).
 
 But to start simple, the project [org.jerkar.script-samples](org.jerkar.script-samples) holds some build script [examples](org.jerkar.script-samples/build/spec/org/jerkar/scriptsamples). 
 Just know that in Jerkar, build scripts (build classes) are supposed to be stored in `[project root]/build/spec` folder,
