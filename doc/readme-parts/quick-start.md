@@ -1,8 +1,8 @@
 # How to install Jerkar
 
-1. unzip the [distribution archive](doc/bin/jerkar-distrib.zip) to the directory you want to install Jerkar : let's call it _[Jerkar install dir]_
+1. unzip the [distribution archive](doc/bin/jerkar-distrib.zip) to the directory you want to install Jerkar : let's call it `[Jerkar install dir]`
 2. make sure that either a valid *JDK* (6 or above) is on your _PATH_ environment variable or that a _JAVA_HOME_ variable is pointing on
-3. add _[Jerkar install dir]_ to your _PATH_ environment variable
+3. add `[Jerkar install dir]` to your _PATH_ environment variable
 4. execute `jerkar` in the command line. You should get an output starting by :
 ```dos
  _______           _
@@ -20,8 +20,8 @@
 3. If you are an Eclipse user, you can execute `jerkar eclipse#generateFiles` to generate `.project` and `.classpath` files.
 
 #### How to setup Jerkar on existing Java project
-1. add the _[Jerkar install dir]/org.jerkar.core-fat.jar_ lib to your project build-path on your IDE and attach the source code (_[Jerkar install dir]/lib-sources_). This jar includes Jerkar core along plugins classes.
-2. create a _build/def_ folder at the base of your project and make it a source folder in your IDE. In Jerkar, all build related stuff (build definition, local 3rd party libs, produced artifacts,...) lies under _[Jerkar install dir]/build_ directory
+1. add the `Jerkar install dir]/org.jerkar.core-fat.jar lib to your project build-path on your IDE and attach the source code (`[Jerkar install dir]/lib-sources`). This jar includes Jerkar core along plugins classes.
+2. create a `build/def` folder at the base of your project and make it a source folder in your IDE. In Jerkar, all build related stuff (build definition, local 3rd party libs, produced artifacts,...) lies under `[Jerkar install dir]/build` directory
 3. write the build definition class extending JkJavaBuild in this directory (in whatever package)
 4. launch the `org.jerkar.Main` class in your IDE or type `jerkar` in the command line (with the root of your project as working directory)
 
