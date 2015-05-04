@@ -50,6 +50,9 @@ public final class JkModuleId {
 	}
 
 	public String fullName() {
+		if (group.equals(name)) {
+			return name;
+		}
 		return group + "." + name;
 	}
 
