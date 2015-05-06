@@ -1,6 +1,6 @@
 ![Logo of Jerkar](https://github.com/jerkar/jerkar/blob/master/doc/jerkar.png)
 
-Jerkar is a complete **Java** built system ala _Ant_, _Maven_ or _Gradle_ but using **Java only** to describe builds : no XML, no foreign language.
+Jerkar is a complete **Java** built system ala _Ant_, _Maven_, _Gradle_ or _Buildr_ but using **Java only** to describe builds : no XML, no foreign language.
 Breaking a common belief, it makes proof that Java is perfectly suitable in this domain.
 
 It is primarily intended to build project written in Java language but can also be used for any task execution purpose.
