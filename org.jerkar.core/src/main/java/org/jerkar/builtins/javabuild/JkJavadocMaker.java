@@ -13,7 +13,7 @@ import org.jerkar.JkFileTree;
 import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
-import org.jerkar.utils.JkUtilsFile;
+import org.jerkar.JkPath;
 import org.jerkar.utils.JkUtilsJdk;
 import org.jerkar.utils.JkUtilsReflect;
 
@@ -94,7 +94,7 @@ public final class JkJavadocMaker {
 	private String[] toArguments(File outputDir) {
 		final List<String> list = new LinkedList<String>();
 		list.add("-sourcepath");
-		list.add(JkUtilsFile.toPathString(this.srcDirs.roots(), ";"));
+		list.add(JkPath.of(this.srcDirs.roots()).toString());
 		list.add("-d");
 		list.add(outputDir.getAbsolutePath());
 		if (JkOptions.isVerbose()) {
@@ -106,7 +106,7 @@ public final class JkJavadocMaker {
 		list.add(JkUtilsJdk.toolsJar().getPath());
 		if (classpath != null && classpath.iterator().hasNext()) {
 			list.add("-classpath");
-			list.add(JkUtilsFile.toPathString(this.classpath, ";"));
+			list.add(JkPath.of(this.classpath).toString());
 		}
 		if (!this.extraArgs.trim().isEmpty()) {
 			final String[] extraArgs = this.extraArgs.split(" ");

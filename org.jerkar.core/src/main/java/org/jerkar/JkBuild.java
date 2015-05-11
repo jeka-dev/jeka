@@ -100,7 +100,7 @@ public class JkBuild {
 		if (pathAsString == null) {
 			return JkPath.of();
 		}
-		return JkPath.of(JkUtilsFile.toPath(pathAsString, ";", baseDir().root()));
+		return JkPath.of(baseDir().root(), pathAsString);
 	}
 
 	/**

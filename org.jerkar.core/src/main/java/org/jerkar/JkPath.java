@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.utils.JkUtilsIterable;
+import org.jerkar.utils.JkUtilsString;
 
 /**
  * A sequence of file (folder or archive) to be used as a <code>path</code>.<br/>
@@ -32,6 +33,22 @@ public final class JkPath implements Iterable<File> {
 	public static JkPath of(Iterable<File> entries) {
 		final LinkedHashSet<File> files = new LinkedHashSet<File>(JkUtilsIterable.listOf(entries));
 		return new JkPath(files);
+	}
+
+	/**
+	 * Creates a {@link JkPath} from a base directory and string of relative paths separated with a ";".
+	 */
+	public static JkPath of(File baseDir, String relativePathAsString) {
+		final String[] paths = JkUtilsString.split(relativePathAsString, File.pathSeparator);
+		final List<File> result = new LinkedList<File>();
+		for (final String path : paths) {
+			File file = new File(path);
+			if (!file.isAbsolute()) {
+				file = new File(baseDir, path);
+			}
+			result.add(file);
+		}
+		return of(result);
 	}
 
 	/**
@@ -107,6 +124,9 @@ public final class JkPath implements Iterable<File> {
 		return new JkPath(JkUtilsIterable.chain(this.entries, otherFiles));
 	}
 
+	/**
+	 * Returns the file names concatenated with ';'.
+	 */
 	@Override
 	public String toString() {
 		final StringBuilder builder = new StringBuilder();
