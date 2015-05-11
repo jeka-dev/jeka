@@ -15,7 +15,7 @@ import java.util.Set;
 
 public class JkUtilsIterable {
 
-	public static <T> List<T> toList(Iterable<T> it) {
+	public static <T> List<T> listOf(Iterable<T> it) {
 		if (it instanceof List) {
 			return (List<T>) it;
 		}
@@ -27,22 +27,19 @@ public class JkUtilsIterable {
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
-	public static <T> List<T> toGenericList(Iterable<?> it) {
-		if (it instanceof List) {
-			return (List<T>) it;
-		}
-		final List<T> result = new LinkedList<T>();
-		for (final Object t : it) {
-			result.add((T) t);
-
-		}
-		return result;
+	public static <T> List<T> listOf(T... items) {
+		return Arrays.asList(items);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> T[] toArray(Iterable<T> it, Class<T> clazz) {
-		final List<T> list = toList(it);
+	public static <T> List<T> listOfGeneric(Object... items) {
+		return ((List<T>) Arrays.asList(items));
+	}
+
+
+	@SuppressWarnings("unchecked")
+	public static <T> T[] arrayOf(Iterable<T> it, Class<T> clazz) {
+		final List<T> list = listOf(it);
 		final T[] result = (T[]) Array.newInstance(clazz, list.size());
 		int i = 0;
 		for (final T t : it) {
@@ -52,27 +49,6 @@ public class JkUtilsIterable {
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
-	public static <T> T[] toArrayFromNonGeneric(Iterable<?> it, Class<T> clazz) {
-		final List<T> list = toGenericList(it);
-		final T[] result = (T[]) Array.newInstance(clazz, list.size());
-		int i = 0;
-		for (final Object t : it) {
-			result[i] = (T) t;
-			i++;
-		}
-		return result;
-	}
-
-
-	public static <T> List<T> listOf(T... items) {
-		return Arrays.asList(items);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T> List<T> listOfGeneric(Object... items) {
-		return ((List<T>) Arrays.asList(items));
-	}
 
 	public static <T> Set<T> setOf(T... items) {
 		final HashSet<T> result = new HashSet<T>();
@@ -100,13 +76,8 @@ public class JkUtilsIterable {
 		return result;
 	}
 
-
 	public static <T> Iterable<T> chain(Iterable<T> ... iterables) {
 		return chainAll(Arrays.asList(iterables));
-	}
-
-	public static <T> Iterable<T> of(T ...items) {
-		return Arrays.asList(items);
 	}
 
 	public static <T> Iterable<T> chain(T item, Iterable<T> ... iterables) {

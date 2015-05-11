@@ -302,7 +302,7 @@ public final class JkUnit {
 
 	@SuppressWarnings("rawtypes")
 	private static Object createJunit3TestSuite(JkClassLoader classLoader, Iterable<Class> testClasses) {
-		final Class<?>[] classArray = JkUtilsIterable.toArray(testClasses, Class.class);
+		final Class<?>[] classArray = JkUtilsIterable.arrayOf(testClasses, Class.class);
 		final Class<?> testSuiteClass = classLoader.load(JUNIT3_TEST_SUITE_CLASS_NAME);
 		try {
 			final Constructor constructor =  testSuiteClass.getConstructor(classArray.getClass());

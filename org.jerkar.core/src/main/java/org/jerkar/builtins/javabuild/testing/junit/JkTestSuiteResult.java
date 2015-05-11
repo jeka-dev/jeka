@@ -26,7 +26,7 @@ public class JkTestSuiteResult implements Serializable {
 		this.suiteName = suiteName;
 		this.runCount = totaltestCount;
 		this.ignoreCount = ignoreCount;
-		this.testCaseResults = JkUtilsIterable.toList(testCaseResult);
+		this.testCaseResults = JkUtilsIterable.listOf(testCaseResult);
 		this.durationInMilis = durationInMillis;
 	}
 

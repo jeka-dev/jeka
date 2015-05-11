@@ -85,7 +85,7 @@ class Main {
 
 	private static int printAscii(boolean error, String fileName) {
 		final InputStream inputStream = Main.class.getResourceAsStream(fileName);
-		final List<String> lines = JkUtilsIO.readLines(inputStream);
+		final List<String> lines = JkUtilsIO.readAsLines(inputStream);
 		int i = 0;
 		for (final String line: lines) {
 			if (i < line.length()) {

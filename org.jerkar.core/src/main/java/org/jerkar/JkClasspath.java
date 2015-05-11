@@ -162,10 +162,10 @@ public final class JkClasspath implements Iterable<File> {
 			} else {
 				final ZipFile zipFile = JkUtilsIO.newZipFile(file);
 				if (zipFile.getEntry(path) != null) {
-					JkUtilsIO.closeQietly(zipFile);
+					JkUtilsIO.closeQuietly(zipFile);
 					return file;
 				}
-				JkUtilsIO.closeQietly(zipFile);
+				JkUtilsIO.closeQuietly(zipFile);
 			}
 		}
 		return null;
@@ -189,7 +189,7 @@ public final class JkClasspath implements Iterable<File> {
 						result.add(zipEntry.getName());
 					}
 				}
-				JkUtilsIO.closeQietly(zipFile);
+				JkUtilsIO.closeQuietly(zipFile);
 			}
 		}
 		return result;

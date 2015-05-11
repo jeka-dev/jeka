@@ -65,7 +65,7 @@ public abstract class JkDependency {
 		private final List<File> files;
 
 		private JkFilesDependency(Iterable<File> files) {
-			this.files = Collections.unmodifiableList(JkUtilsIterable.toList(files));
+			this.files = Collections.unmodifiableList(JkUtilsIterable.listOf(files));
 		}
 
 		public final List<File> files() {

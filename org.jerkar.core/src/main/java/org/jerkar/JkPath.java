@@ -23,14 +23,14 @@ public final class JkPath implements Iterable<File> {
 
 	private JkPath(Iterable<File> entries) {
 		super();
-		this.entries = Collections.unmodifiableList(JkUtilsIterable.toList(entries));
+		this.entries = Collections.unmodifiableList(JkUtilsIterable.listOf(entries));
 	}
 
 	/**
 	 * Creates a path from a sequence of files.
 	 */
 	public static JkPath of(Iterable<File> entries) {
-		final LinkedHashSet<File> files = new LinkedHashSet<File>(JkUtilsIterable.toList(entries));
+		final LinkedHashSet<File> files = new LinkedHashSet<File>(JkUtilsIterable.listOf(entries));
 		return new JkPath(files);
 	}
 

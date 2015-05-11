@@ -64,7 +64,7 @@ public final class JkRepos implements Iterable<JkRepo> {
 	}
 
 	public JkRepos and(Iterable<JkRepo> jkRepos) {
-		return and(JkUtilsIterable.toArray(jkRepos, JkRepo.class));
+		return and(JkUtilsIterable.arrayOf(jkRepos, JkRepo.class));
 	}
 
 	public JkRepos and(JkRepo ...jkRepoArray) {

@@ -32,7 +32,7 @@ public final class JkFileTreeSet implements Iterable<File> {
 	 * Creates a {@link JkFileTreeSet} from a sequence of {@link JkFileTree}.
 	 */
 	public static final JkFileTreeSet of(Iterable<JkFileTree> dirs) {
-		return new JkFileTreeSet(JkUtilsIterable.toList(dirs));
+		return new JkFileTreeSet(JkUtilsIterable.listOf(dirs));
 	}
 
 	/**

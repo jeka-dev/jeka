@@ -34,6 +34,11 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * Utility class for dealing with Inputs/Outputs.
+ * 
+ * @author Jerome Angibaud
+ */
 public final class JkUtilsIO {
 
 	private JkUtilsIO() {
@@ -72,7 +77,7 @@ public final class JkUtilsIO {
 
 
 	/**
-	 * Close the specified input stream, ignoring any exceptions.
+	 * Closes the specified input stream, ignoring any exceptions.
 	 */
 	public static void closeQuietly(InputStream inputStream) {
 		try {
@@ -83,7 +88,7 @@ public final class JkUtilsIO {
 	}
 
 	/**
-	 * Close the specified writer, ignoring any exceptions.
+	 * Closes the specified writer, ignoring any exceptions.
 	 */
 	public static void closeQuietly(Writer writer) {
 		try {
@@ -94,7 +99,7 @@ public final class JkUtilsIO {
 	}
 
 	/**
-	 * Close the specified reader, ignoring any exceptions.
+	 * Closes the specified reader, ignoring any exceptions.
 	 */
 	public static void closeQuietly(Reader reader) {
 		try {
@@ -104,6 +109,9 @@ public final class JkUtilsIO {
 		}
 	}
 
+	/**
+	 * Same as {@link FileInputStream} constructor but throwing unchecked exceptions.
+	 */
 	public static FileInputStream inputStream(File file) {
 		try {
 			return new FileInputStream(file);
@@ -112,6 +120,9 @@ public final class JkUtilsIO {
 		}
 	}
 
+	/**
+	 * Same as {@link ZipFile#getInputStream(ZipEntry)} but throwing only unchecked exceptions.
+	 */
 	public static InputStream inputStream(ZipFile zipFile, ZipEntry entry) {
 		try {
 			return zipFile.getInputStream(entry);
@@ -122,6 +133,9 @@ public final class JkUtilsIO {
 		}
 	}
 
+	/**
+	 * Same as {@link URL#openStream()} but throwing only unchecked exceptions.
+	 */
 	public static InputStream inputStream(URL file) {
 		try {
 			return file.openStream();
@@ -153,7 +167,7 @@ public final class JkUtilsIO {
 	}
 
 	/**
-	 * Equivalent to {@link InputStream#read()} but without checked exceptions.
+	 * Equivalent to {@link InputStream#read()} but throwing only unchecked exceptions.
 	 */
 	public static int read(InputStream inputStream) {
 		try {
@@ -163,8 +177,11 @@ public final class JkUtilsIO {
 		}
 	}
 
+	/**
+	 * Returns the content of the specified input stream, line by line.
+	 */
 	// TODO encoding ????
-	public static List<String> readLines(InputStream in) {
+	public static List<String> readAsLines(InputStream in) {
 		final List<String> result = new LinkedList<String>();
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(
 				in));
@@ -179,6 +196,9 @@ public final class JkUtilsIO {
 		return result;
 	}
 
+	/**
+	 * Returns the content of the given url as a string.
+	 */
 	public static String read(URL url) {
 		InputStream is;
 		try {
@@ -193,6 +213,9 @@ public final class JkUtilsIO {
 		}
 	}
 
+	/**
+	 * Returns the content of the given input stream as a single string.
+	 */
 	public static String readAsString(InputStream in) {
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(
 				in));
@@ -210,6 +233,9 @@ public final class JkUtilsIO {
 		return out.toString();
 	}
 
+	/**
+	 * Returns the content of the given resource as string if exist. Otherwise returns <code>null</code>.
+	 */
 	public static String readResourceIfExist(String resourcePath) {
 		final InputStream is = JkUtilsFile.class.getClassLoader()
 				.getResourceAsStream(resourcePath);
@@ -231,6 +257,9 @@ public final class JkUtilsIO {
 		}
 	}
 
+	/**
+	 * Creates a {@link ZipOutputStream} from a given file (existing or not).
+	 */
 	public static ZipOutputStream createZipOutputStream(File file,
 			int compressLevel) {
 		try {
@@ -247,6 +276,9 @@ public final class JkUtilsIO {
 
 	}
 
+	/**
+	 * Writes all the entries from a given ZipFile to the specified {@link ZipOutputStream}.
+	 */
 	public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile) {
 		final Set<String> duplicateEntries = new HashSet<String>();
 		final Enumeration<? extends ZipEntry> entries = zipFile.entries();
@@ -344,6 +376,9 @@ public final class JkUtilsIO {
 		}
 	}
 
+	/**
+	 * Same as constructor of {@link ZipFile} but throwing only unchecked exceptions.
+	 */
 	public static ZipFile newZipFile(File file) {
 		try {
 			return new ZipFile(file);
@@ -352,7 +387,10 @@ public final class JkUtilsIO {
 		}
 	}
 
-	public static void closeQietly(ZipFile zipFile) {
+	/**
+	 * Same as {@link ZipFile#close()} but throwing only unchecked exceptions.
+	 */
+	public static void closeQuietly(ZipFile zipFile) {
 		try {
 			zipFile.close();
 		} catch (final IOException e) {
@@ -360,6 +398,11 @@ public final class JkUtilsIO {
 		}
 	}
 
+	/**
+	 * Creates a file from the content of a URL.
+	 * The file is first attempted to be created in Jerkar temp folder, if not success, it
+	 * will be created in the specified <code>secondTryParent</code> folder.
+	 */
 	public static File getFileFromUrl(URL url, File secondTryParent) {
 		final File tempDir = new File(JkUtilsFile.tempDir(), "jerkar");
 		final String name = JkUtilsString.substringAfterLast(url.getPath(), "/");
@@ -380,6 +423,9 @@ public final class JkUtilsIO {
 		}
 	}
 
+	/**
+	 * Copies the content of the given url to the specified file.
+	 */
 	public static void copyUrlToFile(URL url, File file) {
 		final InputStream inputStream;
 		final FileOutputStream fileOutputStream;
@@ -394,6 +440,9 @@ public final class JkUtilsIO {
 		closeQuietly(fileOutputStream);
 	}
 
+	/**
+	 * Copies the content of the given input stream to a specified output stream.
+	 */
 	public static void copy(InputStream in, OutputStream out) {
 		final byte[] buf = new byte[1024];
 		int len;
@@ -408,6 +457,9 @@ public final class JkUtilsIO {
 		closeQuietly(out);
 	}
 
+	/**
+	 * Serializes a given Java object to the specified file.
+	 */
 	public static void serialize(Object object, File file) {
 		try {
 			serialize(object, new FileOutputStream(file));
@@ -416,6 +468,9 @@ public final class JkUtilsIO {
 		}
 	}
 
+	/**
+	 * Serializes a given Java object to the specified output stream.
+	 */
 	public static void serialize(Object object, OutputStream outputStream) {
 		try {
 			final OutputStream buffer = new BufferedOutputStream(outputStream);
@@ -430,7 +485,9 @@ public final class JkUtilsIO {
 		}
 	}
 
-
+	/**
+	 * Deserializes the content of the specified file to a Java object.
+	 */
 	public static Object deserialize(File file) {
 		try {
 			return deserialize(new FileInputStream(file));
@@ -439,10 +496,16 @@ public final class JkUtilsIO {
 		}
 	}
 
+	/**
+	 * Deserializes the content of the specified input stream to a Java object.
+	 */
 	public static Object deserialize(InputStream inputStream) {
 		return deserialize(inputStream, JkUtilsIO.class.getClassLoader());
 	}
 
+	/**
+	 * Deserialises the content of a given input file to a Java object loaded in the specified classloader.
+	 */
 	public static Object deserialize(InputStream inputStream, final ClassLoader classLoader) {
 		final InputStream buffer = new BufferedInputStream(inputStream);
 		ObjectInput input;
@@ -483,6 +546,9 @@ public final class JkUtilsIO {
 		}
 	}
 
+	/**
+	 * Serializes an object from the current classloader and unserializes it in the specified classloader.
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T cloneBySerialization(Object objectToClone, ClassLoader targetClassLoader) {
 		final ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();

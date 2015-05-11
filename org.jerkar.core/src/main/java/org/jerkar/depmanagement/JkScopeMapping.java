@@ -84,11 +84,11 @@ public final class JkScopeMapping {
 		if (result.containsKey(from)) {
 			final Set<JkScope> list = result.get(from);
 			final Set<JkScope> newList = new HashSet<JkScope>(list);
-			newList.addAll(JkUtilsIterable.toList(to));
+			newList.addAll(JkUtilsIterable.listOf(to));
 			result.put(from, Collections.unmodifiableSet(newList));
 		} else {
 			final Set<JkScope> newList = new HashSet<JkScope>();
-			newList.addAll(JkUtilsIterable.toList(to));
+			newList.addAll(JkUtilsIterable.listOf(to));
 			result.put(from, Collections.unmodifiableSet(newList));
 		}
 		return new JkScopeMapping(result);
