@@ -356,7 +356,7 @@ public final class JkUnit {
 				}
 			}
 		}
-		return JkUtilsString.toString(Arrays.asList(result), ".");
+		return JkUtilsString.join(Arrays.asList(result), ".");
 	}
 
 }

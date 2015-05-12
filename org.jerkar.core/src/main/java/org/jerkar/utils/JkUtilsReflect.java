@@ -15,17 +15,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
+/**
+ * Utility class for dealing with reflection
+ * 
+ * @author Jerome Angibaud
+ */
 public final class JkUtilsReflect {
 
-
-
+	/**
+	 * Sets the specified field to accessible if not already done.
+	 */
 	public static void setAccessibleIfNeeded(Field field) {
 		if (!field.isAccessible()) {
 			field.setAccessible(true);
 		}
 	}
 
+	/**
+	 * Same as {@link Field#get(Object)} but throwing only unchecked exceptions.
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T getFieldValue(Object object, Field field) {
 		setAccessibleIfNeeded(field);
@@ -36,6 +44,9 @@ public final class JkUtilsReflect {
 		}
 	}
 
+	/**
+	 * Sets the specified value to the specified filed, setting the field to accessible if not already done.
+	 */
 	public static void setFieldValue(Object object, Field field, Object value) {
 		try {
 			setAccessibleIfNeeded(field);
@@ -45,6 +56,9 @@ public final class JkUtilsReflect {
 		}
 	}
 
+	/**
+	 * Gets the value of the field having the specified name on a given object.
+	 */
 	public static Object getFieldValue(Object object, String fieldName) {
 		try {
 			final Field field = getField(object.getClass(), fieldName);
@@ -61,7 +75,9 @@ public final class JkUtilsReflect {
 		}
 	}
 
-
+	/**
+	 * Gets the field having the specified name on the specified object.
+	 */
 	public static Field getField(Class<?> clazz, String fieldName) {
 		final Field[] fields = clazz.getDeclaredFields();
 		final Field field = getField(fields, fieldName);
@@ -85,6 +101,9 @@ public final class JkUtilsReflect {
 	}
 
 
+	/**
+	 * Instantiates the given class.
+	 */
 	public static <T> T newInstance(Class<T> clazz) {
 		try {
 			final Constructor<T> constructor = clazz.getDeclaredConstructor();
@@ -97,6 +116,9 @@ public final class JkUtilsReflect {
 		}
 	}
 
+	/**
+	 * Invokes the specified method on the given object.
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T invoke(Object target, String methodName) {
 		try {
@@ -107,6 +129,9 @@ public final class JkUtilsReflect {
 		}
 	}
 
+	/**
+	 * Invokes the specified method on the given object.
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T invoke(Object target, Method method) {
 		try {
@@ -124,7 +149,9 @@ public final class JkUtilsReflect {
 		}
 	}
 
-
+	/**
+	 * Invokes the specified method on the given object.
+	 */
 	@SuppressWarnings("unchecked")
 	public static <V> V invoke(Object target, Method method, Object... params) {
 		try {
@@ -142,6 +169,9 @@ public final class JkUtilsReflect {
 		}
 	}
 
+	/**
+	 * Same as {@link Class#getMethod(String, Class...)} but throwing only unchecked exceptions.
+	 */
 	public static Method getMethod(Class<?> clazz, String name, Class<?> ...argTypes) {
 		try {
 			return clazz.getMethod(name, argTypes);
@@ -153,6 +183,10 @@ public final class JkUtilsReflect {
 		}
 	}
 
+	/**
+	 * Returns the method of the given name and argument type on the specified class. If none,
+	 * this method returns <code>null</code>.
+	 */
 	public static Method getMethodOrNull(Class<?> clazz, String name, Class<?> ...argTypes) {
 		try {
 			return clazz.getMethod(name, argTypes);
@@ -163,6 +197,9 @@ public final class JkUtilsReflect {
 		}
 	}
 
+	/**
+	 * Returns the method of the given name and argument type on the specified class.
+	 */
 	public static Method getDeclaredMethod(Class<?> clazz, String name, Class<?> ...argTypes) {
 		try {
 			final Method method = clazz.getDeclaredMethod(name, argTypes);
@@ -175,11 +212,15 @@ public final class JkUtilsReflect {
 		}
 	}
 
-	public static String toString(Class<?>...classes) {
-		return "[" + JkUtilsString.toString(Arrays.asList(classes), ", ") + "]";
+
+	private static String toString(Class<?>...classes) {
+		return "[" + JkUtilsString.join(Arrays.asList(classes), ", ") + "]";
 	}
 
 
+	/**
+	 * Returns whether the specified method signature is declared in the specified class.
+	 */
 	public static boolean isMethodPublicIn(Class<?> clazz, String method, Class<?> ...args) {
 		try {
 			clazz.getMethod(method, args);
@@ -189,6 +230,10 @@ public final class JkUtilsReflect {
 		return true;
 	}
 
+	/**
+	 * Returns the annotation declared on a given method. If no annotation is declared on the method, then
+	 * annotation is searched in parent classes.
+	 */
 	public static <T extends Annotation> T getInheritedAnnotation(Method method, Class<T> annotationClass) {
 		final T result = method.getAnnotation(annotationClass);
 		if (result != null) {
@@ -240,14 +285,26 @@ public final class JkUtilsReflect {
 	}
 
 
+	/**
+	 * Invokes a static method with the specified arguments
+	 * @param clazz The class the method is invoked on.
+	 * @param methodName The method name to invoke
+	 * @param The argument values the method is invoked with.
+	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T invokeStaticMethod(Class<?> clazz, String methodName, Object ...args) {
 		return (T) invokeMethod(null, clazz, methodName, args);
 	}
 
+	/**
+	 * Invokes an instance method with the specified arguments
+	 * @param instance The instance the method is invoked on.
+	 * @param methodName The method name to invoke
+	 * @param The argument values the method is invoked with.
+	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T invokeInstanceMethod(Object target, String methodName, Object ...args) {
-		return (T) invokeMethod(target, null, methodName, args);
+	public static <T> T invokeInstanceMethod(Object instance, String methodName, Object ...args) {
+		return (T) invokeMethod(instance, null, methodName, args);
 	}
 
 	private static Object invokeMethod(Object target, Class<?> clazz, String methodName, Object ...args) {

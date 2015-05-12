@@ -226,7 +226,7 @@ public final class JkJavaCompiler {
 		final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
 
 		JkLog.startln(("Compiling " + javaSourceFiles.size()
-				+ " source files using options : " + JkUtilsString.toString(options, " ")));
+				+ " source files using options : " + JkUtilsString.join(options, " ")));
 		if (javaSourceFiles.isEmpty()) {
 			JkLog.warn("No source to compile");
 			JkLog.done();

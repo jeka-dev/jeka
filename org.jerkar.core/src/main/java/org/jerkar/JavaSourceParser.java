@@ -129,13 +129,21 @@ class JavaSourceParser {
 			}
 			final String context = " parsing @JkImport ";
 			final String between  = extractStringTo(scanner, "(", url, context);
-			if(!JkUtilsString.containsOnly(between, " ", "\n", "\r", "\t")) {
+			if(!containsOnly(between, " ", "\n", "\r", "\t")) {
 				continue;
 			}
 
 			return scanInsideAnnotation(scanner, url, context);
 		}
 		return Collections.EMPTY_LIST;
+	}
+
+	private static boolean containsOnly(String stringToMatch, String ... candidates) {
+		String left = stringToMatch;
+		for (final String candidate : candidates) {
+			left = left.replace(candidate, "");
+		}
+		return left.isEmpty();
 	}
 
 
@@ -151,7 +159,7 @@ class JavaSourceParser {
 			}
 			final String context = " parsing @JkProject ";
 			final String between  = extractStringTo(scanner, "(", url, context);
-			if(!JkUtilsString.containsOnly(between, " ", "\n", "\r", "\t")) {
+			if(!containsOnly(between, " ", "\n", "\r", "\t")) {
 				continue;
 			}
 			result.addAll(scanInsideAnnotation(scanner, url, context));

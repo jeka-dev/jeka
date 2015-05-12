@@ -46,7 +46,7 @@ public class JkScope {
 
 	private JkScope(String name, Set<JkScope> extendedScopes, String description, boolean transitive, boolean isPublic) {
 		super();
-		final String illegal = JkUtilsString.containsAnyOf(name, ",", "->");
+		final String illegal = JkUtilsString.firstMatching(name, ",", "->");
 		if (illegal != null) {
 			throw new IllegalArgumentException("Scope name can't contain '" + illegal + "'");
 		}
