@@ -5,9 +5,6 @@ Breaking a common belief, it makes proof that Java is perfectly suitable in this
 
 See [official web site](http://jerkar.github.io) for more description.
 
-See [how Jerkar adresses Java shortcomings](doc/readme-parts/java-adress-shortcomings.md) 
-
-
 # How to build Jerkar ?
 
 Jerkar builds with itself and this is not a trivial case cause it involves multi-project, distribution crafting, 
