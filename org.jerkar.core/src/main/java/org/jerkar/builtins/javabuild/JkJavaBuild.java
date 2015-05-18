@@ -4,14 +4,13 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 
-import org.jerkar.JkClasspath;
 import org.jerkar.JkBuildDependencySupport;
+import org.jerkar.JkClasspath;
 import org.jerkar.JkDoc;
 import org.jerkar.JkFileFilter;
 import org.jerkar.JkFileTree;
 import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkJavaCompiler;
-import org.jerkar.JkJavaProcess;
 import org.jerkar.JkLog;
 import org.jerkar.JkOption;
 import org.jerkar.JkScaffolder;
@@ -263,10 +262,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 		final JkUnit result = JkUnit.of(classpath)
 				.withReportDir(junitReport)
 				.withReport(this.junitReportDetail)
-				.withClassesToTest(this.testClassDir());
-		if (forkTests) {
-			return result.forkKeepingSameClassPath(JkJavaProcess.of());
-		}
+				.withClassesToTest(this.testClassDir())
+				.forked(forkTests);
 		return result;
 	}
 

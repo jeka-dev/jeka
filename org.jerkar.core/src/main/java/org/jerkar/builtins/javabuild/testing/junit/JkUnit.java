@@ -135,7 +135,7 @@ public final class JkUnit {
 		return result;
 	}
 
-	public JkUnit fork(JkJavaProcess process) {
+	public JkUnit forked(JkJavaProcess process) {
 		return new JkUnit(null, reportDetail, reportDir, process, this.classesToTest, this.breakOnFailure);
 	}
 
@@ -143,9 +143,9 @@ public final class JkUnit {
 	 * Creates an identical JkUnit to this one but specifying the forked mode. If the forked mode is <code>true<code> then the specified
 	 * {@link JkJavaProcess} is used to run the tests..
 	 */
-	public JkUnit fork(boolean fork, JkJavaProcess process) {
+	public JkUnit forked(boolean fork, JkJavaProcess process) {
 		if (fork && !forked()) {
-			return fork(process);
+			return forked(process);
 		}
 		if (!fork && forked()) {
 			return new JkUnit(forkedProcess.classpath(), reportDetail, reportDir, null, this.classesToTest, this.breakOnFailure);
@@ -157,8 +157,8 @@ public final class JkUnit {
 	 * Creates an identical JkUnit to this one but specifying the forked mode. If the forked mode is <code>true<code> then
 	 * default {@link JkJavaProcess} is used to run the tests (java process launched without any option).
 	 */
-	public JkUnit fork(boolean fork) {
-		return fork(fork, JkJavaProcess.of());
+	public JkUnit forked(boolean fork) {
+		return forked(fork, JkJavaProcess.of());
 	}
 
 	public JkUnit withClassesToTest(JkFileTreeSet classesToTest) {
