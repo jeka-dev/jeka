@@ -60,7 +60,7 @@ public final class JkUnit {
 
 	private final File reportDir;
 
-	private final JkJavaProcess fork;
+	private final JkJavaProcess forkedProcess;
 
 	private final List<Runnable> postActions;
 
@@ -72,7 +72,7 @@ public final class JkUnit {
 		this.classpath = classpath;
 		this.reportDetail = reportDetail;
 		this.reportDir = reportDir;
-		this.fork = fork;
+		this.forkedProcess = fork;
 		this.postActions = Collections.unmodifiableList(runnables);
 		this.classesToTest = testClasses;
 		this.breakOnFailure = crashOnFailed;
@@ -101,15 +101,15 @@ public final class JkUnit {
 	}
 
 	public JkUnit withReport(JunitReportDetail reportDetail) {
-		return new JkUnit(this.classpath, reportDetail, reportDir, this.fork, classesToTest, this.breakOnFailure);
+		return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess, classesToTest, this.breakOnFailure);
 	}
 
 	public JkUnit withBreakOnFailure(boolean crashOnFailure) {
-		return new JkUnit(this.classpath, reportDetail, reportDir, this.fork, classesToTest, this.breakOnFailure);
+		return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess, classesToTest, this.breakOnFailure);
 	}
 
 	public JkUnit withReportDir(File reportDir) {
-		return new JkUnit(this.classpath, reportDetail, reportDir, this.fork, classesToTest, this.breakOnFailure);
+		return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess, classesToTest, this.breakOnFailure);
 	}
 
 	public JkUnit forkKeepingSameClassPath(JkJavaProcess process) {
@@ -120,7 +120,7 @@ public final class JkUnit {
 	public JkUnit withPostAction(Runnable runnable) {
 		final List<Runnable> list = new LinkedList<Runnable>(this.postActions);
 		list.add(runnable);
-		return new JkUnit(classpath, reportDetail, reportDir, fork, list,this.classesToTest, this.breakOnFailure);
+		return new JkUnit(classpath, reportDetail, reportDir, forkedProcess, list,this.classesToTest, this.breakOnFailure);
 	}
 
 	public JkUnit enhancedWith(Enhancer enhancer) {
@@ -139,21 +139,43 @@ public final class JkUnit {
 		return new JkUnit(null, reportDetail, reportDir, process, this.classesToTest, this.breakOnFailure);
 	}
 
+	/**
+	 * Creates an identical JkUnit to this one but specifying the forked mode. If the forked mode is <code>true<code> then the specified
+	 * {@link JkJavaProcess} is used to run the tests..
+	 */
+	public JkUnit fork(boolean fork, JkJavaProcess process) {
+		if (fork && !forked()) {
+			return fork(process);
+		}
+		if (!fork && forked()) {
+			return new JkUnit(forkedProcess.classpath(), reportDetail, reportDir, null, this.classesToTest, this.breakOnFailure);
+		}
+		return this;
+	}
+
+	/**
+	 * Creates an identical JkUnit to this one but specifying the forked mode. If the forked mode is <code>true<code> then
+	 * default {@link JkJavaProcess} is used to run the tests (java process launched without any option).
+	 */
+	public JkUnit fork(boolean fork) {
+		return fork(fork, JkJavaProcess.of());
+	}
+
 	public JkUnit withClassesToTest(JkFileTreeSet classesToTest) {
-		return new JkUnit(this.classpath, reportDetail, reportDir, fork, classesToTest, this.breakOnFailure);
+		return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess, classesToTest, this.breakOnFailure);
 	}
 
 	public JkUnit withClassesToTest(JkFileTree classesToTest) {
-		return new JkUnit(this.classpath, reportDetail, reportDir, fork, JkFileTreeSet.of(classesToTest), this.breakOnFailure);
+		return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess, JkFileTreeSet.of(classesToTest), this.breakOnFailure);
 	}
 
 
 	public JkUnit withClassesToTest(File ...classDirs) {
-		return new JkUnit(this.classpath, reportDetail, reportDir, fork, JkFileTreeSet.of(classDirs), this.breakOnFailure);
+		return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess, JkFileTreeSet.of(classDirs), this.breakOnFailure);
 	}
 
 	public boolean forked() {
-		return this.fork != null;
+		return this.forkedProcess != null;
 	}
 
 	public JkClasspath classpath() {
@@ -169,7 +191,7 @@ public final class JkUnit {
 	}
 
 	public JkJavaProcess processFork() {
-		return fork;
+		return forkedProcess;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -190,8 +212,8 @@ public final class JkUnit {
 		final JkTestSuiteResult result;
 
 		if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
-			if (this.fork != null) {
-				result = JUnit4TestLauncher.launchInFork(fork, verbose, reportDetail, classes, reportDir);
+			if (this.forkedProcess != null) {
+				result = JUnit4TestLauncher.launchInFork(forkedProcess, verbose, reportDetail, classes, reportDir);
 			} else {
 				result = JUnit4TestLauncher.launchInClassLoader(classes,  verbose, reportDetail, reportDir);
 			}
@@ -237,7 +259,7 @@ public final class JkUnit {
 		if (classpath != null) {
 			return classpath;
 		}
-		return fork.classpath();
+		return forkedProcess.classpath();
 	}
 
 	@SuppressWarnings("rawtypes")
