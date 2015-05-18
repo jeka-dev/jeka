@@ -54,14 +54,14 @@ public final class JkJavaProcess {
 	 * Initializes a <code>JkJavaProcess</code> using the same JRE then the one currently running.
 	 */
 	public static JkJavaProcess of() {
-		return of(CURRENT_JAVA_DIR);
+		return ofJavaHome(CURRENT_JAVA_DIR);
 	}
 
 	/**
 	 * Initializes a <code>JkJavaProcess</code> using the Java executable located in the specified directory.
 	 */
 	@SuppressWarnings("unchecked")
-	public static JkJavaProcess of(File javaDir) {
+	public static JkJavaProcess ofJavaHome(File javaDir) {
 		return new JkJavaProcess(javaDir, Collections.EMPTY_MAP, JkClasspath.of(),
 				Collections.EMPTY_LIST, Collections.EMPTY_LIST, null, Collections.EMPTY_MAP);
 	}
@@ -102,17 +102,25 @@ public final class JkJavaProcess {
 				this.agents, this.options, workingDir, this.environment);
 	}
 
-	public JkJavaProcess withClasspath(JkClasspath classpath) {
+	public JkJavaProcess withClasspath(Iterable<File> classpath) {
 		if (classpath == null) {
 			throw new IllegalArgumentException("Classpath can't be null.");
 		}
-		return new JkJavaProcess(this.javaDir, this.sytemProperties, classpath,
+		final JkClasspath jkClasspath;
+		if (classpath instanceof JkClasspath) {
+			jkClasspath = (JkClasspath) classpath;
+		} else {
+			jkClasspath = JkClasspath.of(classpath);
+		}
+		return new JkJavaProcess(this.javaDir, this.sytemProperties, jkClasspath,
 				this.agents, this.options, this.workingDir, this.environment);
 	}
 
 	public JkJavaProcess withClasspath(File ...files) {
 		return withClasspath(JkClasspath.of(files));
 	}
+
+
 
 	public JkJavaProcess andClasspath(JkClasspath classpath) {
 		return withClasspath(this.classpath.and(classpath));
@@ -137,17 +145,26 @@ public final class JkJavaProcess {
 		return this.javaDir.getAbsolutePath()+ File.separator + "java";
 	}
 
-	public void runSync(String ...arguments) {
-		runClassSync(null, arguments);
+	public void runJarSync(File jar, String ...arguments) {
+		runClassOrJarSync(null, jar, arguments);
 	}
 
 	public void runClassSync(String mainClassName, String ...arguments) {
+		runClassOrJarSync(mainClassName, null, arguments);
+	}
+
+
+	private void runClassOrJarSync(String mainClassName, File jar, String ...arguments) {
 		final List<String> command = new LinkedList<String>();
 		final OptionAndEnv optionAndEnv = optionsAndEnv();
 		command.add(runningJavaCommand());
 		command.addAll(optionAndEnv.options);
 		if (mainClassName != null) {
 			command.add(mainClassName);
+		}
+		if (jar != null) {
+			command.add("-jar");
+			command.add(jar.getPath());
 		}
 		command.addAll(Arrays.asList(arguments));
 		JkLog.startln("Starting java program : " + command.toString());

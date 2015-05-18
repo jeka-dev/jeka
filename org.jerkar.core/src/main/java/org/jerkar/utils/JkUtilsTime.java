@@ -18,6 +18,13 @@ public class JkUtilsTime {
 	}
 
 	/**
+	 * Returns the current system date as string with the specified format
+	 */
+	public static String  now(String pattern) {
+		return new SimpleDateFormat(pattern).format(now());
+	}
+
+	/**
 	 * Formats the specified date as <code>yyyyMMdd-HHmmss</code>
 	 */
 	public static String timestampSec(Date date) {

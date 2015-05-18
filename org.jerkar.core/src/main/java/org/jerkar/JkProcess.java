@@ -84,7 +84,7 @@ public final class JkProcess {
 	/**
 	 * Starts this defined process and wait for the process has finished prior returning.
 	 */
-	public int startAndWaitFor() {
+	public int runAsync() {
 		final List<String> command = new LinkedList<String>();
 		command.add(this.command);
 		command.addAll(parameters);

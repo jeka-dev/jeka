@@ -89,7 +89,7 @@ public final class JkFileTree implements Iterable<File> {
 		} else {
 			JkUtilsFile.assertDir(destinationDir);
 		}
-		return JkUtilsFile.copyDir(root, destinationDir, filter.toFileFilter(root), true, JkLog.infoStreamIfVerbose());
+		return JkUtilsFile.copyDirContent(root, destinationDir, filter.toFileFilter(root), true, JkLog.infoStreamIfVerbose());
 	}
 
 	public int copyReplacingTokens(File destinationDir, Map<String, String> tokenValues) {
@@ -98,7 +98,7 @@ public final class JkFileTree implements Iterable<File> {
 		} else {
 			JkUtilsFile.assertDir(destinationDir);
 		}
-		return JkUtilsFile.copyDirReplacingTokens(root, destinationDir, filter.toFileFilter(root), true, JkLog.infoStreamIfVerbose(), tokenValues);
+		return JkUtilsFile.copyDirContentReplacingTokens(root, destinationDir, filter.toFileFilter(root), true, JkLog.infoStreamIfVerbose(), tokenValues);
 	}
 
 	/**
@@ -124,7 +124,7 @@ public final class JkFileTree implements Iterable<File> {
 		if (!dirToCopyContent.exists()) {
 			return this;
 		}
-		JkUtilsFile.copyDir(dirToCopyContent, this.root, null, true);
+		JkUtilsFile.copyDirContent(dirToCopyContent, this.root, null, true);
 		return this;
 	}
 
@@ -172,6 +172,13 @@ public final class JkFileTree implements Iterable<File> {
 			pathes.add(JkUtilsFile.getRelativePath(this.root, file));
 		}
 		return pathes;
+	}
+
+	/**
+	 * Returns the relative path of the given file relative to the root of this tree.
+	 */
+	public String relativePath(File file) {
+		return JkUtilsFile.getRelativePath(root, file);
 	}
 
 	/**

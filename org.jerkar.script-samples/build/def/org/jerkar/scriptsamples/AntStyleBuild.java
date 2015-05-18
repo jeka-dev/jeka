@@ -45,7 +45,7 @@ public class AntStyleBuild extends JkBuild {
 	
 	public void run() {
 		jar();
-		JkJavaProcess.of(jarFile).andClasspath(classpath).runSync();
+		JkJavaProcess.ofJavaHome(jarFile).andClasspath(classpath).runJarSync(jarFile);
 	}
 	
 	public void cleanBuild() {

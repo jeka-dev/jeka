@@ -77,13 +77,21 @@ public final class JkUtilsFile {
 		return filePath.relativeTo(basePath).toString();
 	}
 
+	/**
+	 * Same as {@link #copyDirContent(File, File, FileFilter, boolean, PrintStream)} without stream report and
+	 * file filter.
+	 */
+	public static int copyDirContent(File source, File targetDir, boolean copyEmptyDir) {
+		return copyDirContent(source, targetDir, null, copyEmptyDir, null);
+	}
+
 
 	/**
-	 * Same as {@link #copyDir(File, File, FileFilter, boolean, PrintStream)} without stream report.
+	 * Same as {@link #copyDirContent(File, File, FileFilter, boolean, PrintStream)} without stream report.
 	 */
-	public static int copyDir(File source, File targetDir, FileFilter filter,
+	public static int copyDirContent(File source, File targetDir, FileFilter filter,
 			boolean copyEmptyDir) {
-		return copyDir(source, targetDir, filter, copyEmptyDir, null);
+		return copyDirContent(source, targetDir, filter, copyEmptyDir, null);
 	}
 
 	/**
@@ -97,18 +105,18 @@ public final class JkUtilsFile {
 	 * no status is written.
 	 * @return The file copied count.
 	 */
-	public static int copyDir(File source, File targetDir, FileFilter filter,
+	public static int copyDirContent(File source, File targetDir, FileFilter filter,
 			boolean copyEmptyDir, PrintStream reportStream) {
-		return copyDirReplacingTokens(source, targetDir, filter, copyEmptyDir, reportStream, null);
+		return copyDirContentReplacingTokens(source, targetDir, filter, copyEmptyDir, reportStream, null);
 	}
 
 	/**
-	 * Same as {@link #copyDir(File, File, FileFilter, boolean, PrintStream)} but also replacing all
+	 * Same as {@link #copyDirContent(File, File, FileFilter, boolean, PrintStream)} but also replacing all
 	 * token as '${key}' by their respecting value. The replacement is done only if the specified tokenValues
 	 * map contains the according key.
 	 * @param tokenValues a map for replacing token key by value
 	 */
-	public static int copyDirReplacingTokens(File fromDir, File toDir, FileFilter filterArg,
+	public static int copyDirContentReplacingTokens(File fromDir, File toDir, FileFilter filterArg,
 			boolean copyEmptyDir, PrintStream reportStream, Map<String, String> tokenValues) {
 		final FileFilter filter = JkUtilsObject.firstNonNull(filterArg, JkFileFilters.acceptAll());
 		assertDir(fromDir);
@@ -152,7 +160,7 @@ public final class JkUtilsFile {
 				if (filter.accept(child) && copyEmptyDir) {
 					subdir.mkdirs();
 				}
-				final int subCount = copyDirReplacingTokens(child, subdir, filter,
+				final int subCount = copyDirContentReplacingTokens(child, subdir, filter,
 						copyEmptyDir, reportStream, tokenValues);
 				count = count + subCount;
 			}
@@ -194,6 +202,14 @@ public final class JkUtilsFile {
 		final String result = JkUtilsIO.readAsString(fileInputStream);
 		JkUtilsIO.closeQuietly(fileInputStream);
 		return result;
+	}
+
+	/**
+	 * Copies the given file to the specified directory.
+	 */
+	public static void copyFileToDir(File from, File toDir) {
+		final File to = new File(toDir, from.getName());
+		copyFile(from, to, null);
 	}
 
 	/**
@@ -519,7 +535,7 @@ public final class JkUtilsFile {
 	/**
 	 * Copies the content of the specified in file into the specified out file. While coping token ${key}
 	 * are replaced by the value found in the specified replacements map.
-	 * @see #copyDirReplacingTokens(File, File, FileFilter, boolean, PrintStream, Map)
+	 * @see #copyDirContentReplacingTokens(File, File, FileFilter, boolean, PrintStream, Map)
 	 */
 	public static void copyFileReplacingTokens(File in, File out, Map<String, String> replacements) {
 		copyFileReplacingTokens(in, out, replacements, null);
