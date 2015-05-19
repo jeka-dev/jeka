@@ -11,6 +11,13 @@ import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.builtins.javabuild.JkJavaBuildPlugin;
 import org.jerkar.depmanagement.JkDependencies;
 
+/**
+ * Plugin for Eclipse IDE.
+ * Add capabilities for reading/wroting project information as source location and dependencies
+ * directly form the Eclipse files (.project, .classspath).
+ * 
+ * @author Jerome Angibaud
+ */
 @JkDoc({"Add capabilities for getting project information as source location and dependencies "
 		+ "directly form the Eclipse files (.project, .classspath).",
 		" This plugin also features method to genetate eclipse files from build class."

@@ -22,7 +22,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class Project {
+class Project {
 
 	public static Project of(File dotProjectFile) {
 		final Document document = getDotProjectAsDom(dotProjectFile);

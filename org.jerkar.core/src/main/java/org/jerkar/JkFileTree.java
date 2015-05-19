@@ -223,6 +223,7 @@ public final class JkFileTree implements Iterable<File> {
 
 	/**
 	 * Short hand to {@link #andFilter(JkFileFilter)} defining an include Ant pattern filter.
+	 * This will include any file matching at least one of the specified <code>antPatterns</code>.
 	 */
 	public JkFileTree include(String ... antPatterns) {
 		return andFilter(JkFileFilter.include(antPatterns));
@@ -230,6 +231,7 @@ public final class JkFileTree implements Iterable<File> {
 
 	/**
 	 * Short hand to {@link #andFilter(JkFileFilter)} defining an exclude Ant pattern filter.
+	 * This will exclude any file matching at least one of specified <code>antPatterns</code>.
 	 */
 	public JkFileTree exclude(String ... antPatterns) {
 		return andFilter(JkFileFilter.exclude(antPatterns));

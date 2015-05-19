@@ -179,11 +179,11 @@ public abstract class JkFileFilter {
 			for (final AntPattern antPattern : antPatterns) {
 
 				final boolean match = !antPattern.doMatch(relativePath);
-				if (match) {
-					return true;
+				if (!match) {
+					return false;
 				}
 			}
-			return false;
+			return true;
 		}
 
 		@Override
