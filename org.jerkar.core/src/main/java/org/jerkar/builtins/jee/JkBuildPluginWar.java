@@ -40,7 +40,7 @@ public class JkBuildPluginWar extends JkJavaBuildPlugin {
 	}
 
 	@Override
-	protected JkScaffolder enhanceScaffold(JkScaffolder jkScaffolder) {
+	protected JkScaffolder alterScaffold(JkScaffolder jkScaffolder) {
 		final Runnable runnable = new Runnable() {
 
 			@Override

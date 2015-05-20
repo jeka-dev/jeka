@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.jerkar.JkBuild;
 import org.jerkar.JkDoc;
+import org.jerkar.JkException;
 import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkOption;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
@@ -105,6 +106,9 @@ public class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 	private DotClasspath dotClasspath() {
 		if (cachedClasspath == null) {
 			final File dotClasspathFile = new File(javaBuild.baseDir(""), ".classpath");
+			if (!dotClasspathFile.exists()) {
+				throw new JkException(".classpath file not found");
+			}
 			cachedClasspath = DotClasspath.from(dotClasspathFile);
 		}
 		return cachedClasspath;

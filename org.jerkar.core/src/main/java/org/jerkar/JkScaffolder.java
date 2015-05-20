@@ -13,12 +13,18 @@ import java.util.Map;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIterable;
 
+/**
+ * Class for creating project from scratch. Basically the scaffolder creates the directory structure of the
+ * project, but can be added some capabilities by plugins.
+ * 
+ * @author Jerome Angibaud
+ */
 public class JkScaffolder {
 
 	@SuppressWarnings("unchecked")
 	public static JkScaffolder of(JkBuildDependencySupport build) {
-		return new JkScaffolder(build, build.moduleId().group().replace('.', '/'),
-				"JkBuild",
+		final String packageName = build.moduleId().fullName().replace('/', '.').replace("-", ".").toLowerCase();
+		return new JkScaffolder(build, packageName, "JkBuild",
 				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST,
 				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
 	}
@@ -69,8 +75,8 @@ public class JkScaffolder {
 
 
 	public void process() {
-		final File spec = build.baseDir(JkBuildResolver.BUILD_DEF_DIR);
-		spec.mkdirs();
+		final File buildDefDir = build.baseDir(JkBuildResolver.BUILD_DEF_DIR);
+		buildDefDir.mkdirs();
 		final Map<String, String> values = new HashMap<String, String>();
 		values.put("packageName", this.packageName);
 		values.put("extraImports", lines(JkUtilsIterable.withoutDoubloons(this.extraImports),""));
@@ -79,7 +85,7 @@ public class JkScaffolder {
 		values.put("extraInit", lines(this.extraInit,"        "));
 		values.put("extraDependencies", lines(this.extraDependencies,"            ."));
 		values.put("extraMethods", lines(this.extraMethods,"    "));
-		final File packageDir = new File(spec, packageName);
+		final File packageDir = new File(buildDefDir, packageName.replace('.', '/'));
 		packageDir.mkdirs();
 		final File buildSource = JkUtilsFile.createFileIfNotExist(new File(packageDir,"Build.java"));
 		final URL template = JkScaffolder.class.getResource("Build.java_sample");

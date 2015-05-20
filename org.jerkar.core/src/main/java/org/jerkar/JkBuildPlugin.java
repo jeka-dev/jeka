@@ -46,7 +46,7 @@ public abstract class JkBuildPlugin {
 	/**
 	 * Override the method if the plugin need to enhance scaffolding
 	 */
-	protected JkScaffolder enhanceScaffold(JkScaffolder original) {
+	protected JkScaffolder alterScaffold(JkScaffolder original) {
 		return original;
 	}
 
@@ -75,7 +75,7 @@ public abstract class JkBuildPlugin {
 	static JkScaffolder enhanceScafforld(Iterable<? extends JkBuildPlugin> plugins, JkScaffolder scaffolder) {
 		JkScaffolder result = scaffolder;
 		for (final JkBuildPlugin plugin : plugins) {
-			result = plugin.enhanceScaffold(result);
+			result = plugin.alterScaffold(result);
 		}
 		return result;
 	}
