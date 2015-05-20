@@ -23,7 +23,7 @@
 2. under this directory, execute `jerkar scaffold`. This generates the project structures.
 
 <p class="alert alert-success">
-	<strong>Eclipse users : </strong> You can execute <code>jerkar eclipse#generateFiles</code> to generate <small>.project</small> and <small>.classpath</small> files.
+	<strong>Eclipse users : </strong> You can execute <code>jerkar scaffold eclipse#generateFiles</code> altogether to generate <small>.project</small> and <small>.classpath</small> files.
 </p>
 
 ## How to setup Jerkar on existing Java project
