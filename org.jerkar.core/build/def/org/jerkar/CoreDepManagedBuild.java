@@ -8,6 +8,8 @@ import org.jerkar.publishing.JkMavenPublication;
 
 /**
  * Build class for Jerkar itself using managed dependencies.
+ * 
+ * This class is just here for demo purpose, by default Jerkar will use CoreBuild (cause precedence in alphabetic order)
  */
 public class CoreDepManagedBuild extends CoreBuild {
 
