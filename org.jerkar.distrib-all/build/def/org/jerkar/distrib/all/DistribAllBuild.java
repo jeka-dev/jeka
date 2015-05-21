@@ -5,8 +5,8 @@ import java.util.zip.Deflater;
 
 import org.jerkar.CoreBuild;
 import org.jerkar.JkLog;
-import org.jerkar.JkProject;
 import org.jerkar.annotation.JkDoc;
+import org.jerkar.annotation.JkProject;
 import org.jerkar.builtins.javabuild.JkJavadocMaker;
 import org.jerkar.depmanagement.JkBuildDependencySupport;
 import org.jerkar.file.JkFileTree;
