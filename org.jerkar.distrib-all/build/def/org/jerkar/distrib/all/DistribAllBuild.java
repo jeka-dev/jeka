@@ -5,13 +5,13 @@ import java.util.zip.Deflater;
 
 import org.jerkar.CoreBuild;
 import org.jerkar.JkBuildDependencySupport;
-import org.jerkar.JkDoc;
-import org.jerkar.JkFileTree;
-import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkLog;
 import org.jerkar.JkProject;
-import org.jerkar.JkZipper;
+import org.jerkar.annotation.JkDoc;
 import org.jerkar.builtins.javabuild.JkJavadocMaker;
+import org.jerkar.file.JkFileTree;
+import org.jerkar.file.JkFileTreeSet;
+import org.jerkar.file.JkZipper;
 import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
 

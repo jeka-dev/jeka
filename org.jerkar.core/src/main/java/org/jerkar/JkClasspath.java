@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.jerkar.file.JkFileFilter;
+import org.jerkar.file.JkFileTree;
 import org.jerkar.utils.JkUtilsIO;
 import org.jerkar.utils.JkUtilsIterable;
 import org.jerkar.utils.JkUtilsString;

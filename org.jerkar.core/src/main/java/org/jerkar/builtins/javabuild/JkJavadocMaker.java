@@ -9,11 +9,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.JkClassLoader;
-import org.jerkar.JkFileTree;
-import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
-import org.jerkar.JkPath;
+import org.jerkar.file.JkFileTree;
+import org.jerkar.file.JkFileTreeSet;
+import org.jerkar.file.JkPath;
 import org.jerkar.utils.JkUtilsJdk;
 import org.jerkar.utils.JkUtilsReflect;
 

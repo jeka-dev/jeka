@@ -6,8 +6,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.jerkar.annotation.JkDoc;
+import org.jerkar.annotation.JkOption;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependencyResolver;
+import org.jerkar.file.JkFileTree;
+import org.jerkar.file.JkPath;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsTime;

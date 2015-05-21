@@ -4,13 +4,13 @@ import java.io.File;
 
 import org.jerkar.JkBuild;
 import org.jerkar.JkClasspath;
-import org.jerkar.JkFileTree;
 import org.jerkar.JkJavaCompiler;
 import org.jerkar.JkJavaProcess;
-import org.jerkar.JkZipper;
 import org.jerkar.builtins.javabuild.JkManifest;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
+import org.jerkar.file.JkFileTree;
+import org.jerkar.file.JkZipper;
 
 /**
  * Equivalent to http://ant.apache.org/manual/tutorial-HelloWorldWithAnt.html

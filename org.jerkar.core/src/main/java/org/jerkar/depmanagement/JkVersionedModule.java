@@ -2,6 +2,7 @@ package org.jerkar.depmanagement;
 
 import org.jerkar.JkModuleId;
 
+
 /**
  * Identifies a given module in a given version
  * 

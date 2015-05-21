@@ -21,8 +21,6 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.jerkar.JkBuild;
 import org.jerkar.JkBuildResolver;
-import org.jerkar.JkFileTree;
-import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkException;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
@@ -31,6 +29,8 @@ import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.ivy.JkIvy.AttachedArtifacts;
+import org.jerkar.file.JkFileTree;
+import org.jerkar.file.JkFileTreeSet;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsString;
 import org.w3c.dom.Document;

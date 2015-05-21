@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.jar.Manifest;
 
-import org.jerkar.JkFileTree;
-import org.jerkar.JkFileTreeSet;
+import org.jerkar.file.JkFileTree;
+import org.jerkar.file.JkFileTreeSet;
 import org.jerkar.utils.JkUtilsIO;
 
 /**

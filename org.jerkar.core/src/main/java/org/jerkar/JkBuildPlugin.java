@@ -50,13 +50,13 @@ public abstract class JkBuildPlugin {
 		return original;
 	}
 
-	static void applyVerify(Iterable<? extends JkBuildPlugin> plugins) {
+	public static void applyVerify(Iterable<? extends JkBuildPlugin> plugins) {
 		for (final JkBuildPlugin plugin : plugins) {
 			plugin.verify();
 		}
 	}
 
-	static JkDependencyResolver applyDependencyResolver(Iterable<? extends JkBuildPlugin> plugins, JkDependencyResolver original) {
+	public static JkDependencyResolver applyDependencyResolver(Iterable<? extends JkBuildPlugin> plugins, JkDependencyResolver original) {
 		JkDependencyResolver result = original;
 		for (final JkBuildPlugin plugin : plugins) {
 			result = plugin.alterDependencyResolver(original);
@@ -64,7 +64,7 @@ public abstract class JkBuildPlugin {
 		return result;
 	}
 
-	static JkDependencies applyDependencies(Iterable<? extends JkBuildPlugin> plugins, JkDependencies original) {
+	public static JkDependencies applyDependencies(Iterable<? extends JkBuildPlugin> plugins, JkDependencies original) {
 		JkDependencies result = original;
 		for (final JkBuildPlugin plugin : plugins) {
 			result = plugin.alterDependencies(original);
@@ -72,7 +72,7 @@ public abstract class JkBuildPlugin {
 		return result;
 	}
 
-	static JkScaffolder enhanceScafforld(Iterable<? extends JkBuildPlugin> plugins, JkScaffolder scaffolder) {
+	public static JkScaffolder enhanceScafforld(Iterable<? extends JkBuildPlugin> plugins, JkScaffolder scaffolder) {
 		JkScaffolder result = scaffolder;
 		for (final JkBuildPlugin plugin : plugins) {
 			result = plugin.alterScaffold(result);

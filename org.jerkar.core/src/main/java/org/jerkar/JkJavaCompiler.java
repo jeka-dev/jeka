@@ -13,6 +13,8 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
+import org.jerkar.file.JkFileFilter;
+import org.jerkar.file.JkFileTree;
 import org.jerkar.utils.JkUtilsString;
 
 /**

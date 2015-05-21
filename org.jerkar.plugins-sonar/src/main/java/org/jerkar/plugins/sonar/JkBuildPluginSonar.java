@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jerkar.JkBuild;
-import org.jerkar.JkDoc;
 import org.jerkar.JkOptions;
-import org.jerkar.JkPath;
+import org.jerkar.annotation.JkDoc;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.builtins.javabuild.JkJavaBuildPlugin;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
+import org.jerkar.file.JkPath;
 import org.jerkar.utils.JkUtilsFile;
 
 

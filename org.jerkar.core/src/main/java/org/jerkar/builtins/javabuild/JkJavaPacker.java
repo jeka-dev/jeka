@@ -5,10 +5,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.Deflater;
 
-import org.jerkar.JkFileTree;
-import org.jerkar.JkFileTreeSet;
 import org.jerkar.JkLog;
-import org.jerkar.JkZipper;
+import org.jerkar.file.JkFileTree;
+import org.jerkar.file.JkFileTreeSet;
+import org.jerkar.file.JkZipper;
 import org.jerkar.utils.JkUtilsFile;
 
 /**

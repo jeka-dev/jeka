@@ -1,4 +1,4 @@
-package org.jerkar;
+package org.jerkar.file;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -12,7 +12,7 @@ public class JkDirTest {
 
 	@Test
 	public void testFileList() throws Exception {
-		final URL sampleFileUrl = JkDirTest.class.getResource("utils/samplefolder/subfolder/sample.txt");
+		final URL sampleFileUrl = JkDirTest.class.getResource("../utils/samplefolder/subfolder/sample.txt");
 		final File sampleFile = new File(sampleFileUrl.toURI().getPath());
 		assertTrue(sampleFile.exists());
 		final File sampleFolder = sampleFile.getParentFile().getParentFile();

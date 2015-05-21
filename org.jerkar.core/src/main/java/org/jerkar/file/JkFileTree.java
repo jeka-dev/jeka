@@ -1,4 +1,4 @@
-package org.jerkar;
+package org.jerkar.file;
 
 import java.io.File;
 import java.util.Iterator;
@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.jerkar.JkLog;
 import org.jerkar.utils.JkUtilsAssert;
 import org.jerkar.utils.JkUtilsFile;
 

@@ -1,6 +1,6 @@
 package org.jerkar.builtins.eclipse;
 
-import org.jerkar.JkFileTreeSet;
+import org.jerkar.file.JkFileTreeSet;
 
 class Sources {
 

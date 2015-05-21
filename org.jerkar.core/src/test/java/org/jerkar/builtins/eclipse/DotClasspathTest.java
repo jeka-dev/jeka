@@ -7,13 +7,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
-import org.jerkar.JkFileTreeSet;
 import org.jerkar.builtins.eclipse.DotClasspath;
 import org.jerkar.builtins.eclipse.Lib;
 import org.jerkar.builtins.eclipse.ScopeResolverSmart;
 import org.jerkar.builtins.eclipse.Sources;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkDependencies;
+import org.jerkar.file.JkFileTreeSet;
 import org.junit.Test;
 
 public class DotClasspathTest {

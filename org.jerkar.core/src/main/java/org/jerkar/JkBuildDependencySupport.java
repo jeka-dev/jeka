@@ -5,17 +5,19 @@ import java.lang.reflect.Field;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jerkar.annotation.JkOption;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependencyResolver;
 import org.jerkar.depmanagement.JkRepo;
-import org.jerkar.depmanagement.JkRepo.JkMavenRepository;
 import org.jerkar.depmanagement.JkRepos;
 import org.jerkar.depmanagement.JkResolutionParameters;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
 import org.jerkar.depmanagement.JkVersion;
 import org.jerkar.depmanagement.JkVersionedModule;
+import org.jerkar.depmanagement.JkRepo.JkMavenRepository;
 import org.jerkar.depmanagement.ivy.JkIvy;
+import org.jerkar.file.JkPath;
 import org.jerkar.publishing.JkPublishRepos;
 import org.jerkar.publishing.JkPublisher;
 import org.jerkar.utils.JkUtilsReflect;
@@ -80,7 +82,7 @@ public class JkBuildDependencySupport extends JkBuild {
 	 */
 	private JkMultiProjectDependencies multiProjectDependencies;
 
-	protected JkBuildDependencySupport() {
+	public JkBuildDependencySupport() {
 		final List<JkBuildDependencySupport> subBuilds = populateMultiProjectBuildField(this);
 		this.explicitMultiProjectDependencies = JkMultiProjectDependencies.of(this, subBuilds);
 	}

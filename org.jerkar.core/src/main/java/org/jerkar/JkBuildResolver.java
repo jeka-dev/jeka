@@ -4,6 +4,7 @@ import java.io.File;
 import java.lang.reflect.Modifier;
 
 import org.jerkar.builtins.javabuild.JkJavaBuild;
+import org.jerkar.file.JkFileTree;
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;
 

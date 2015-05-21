@@ -1,4 +1,4 @@
-package org.jerkar;
+package org.jerkar.file;
 
 import java.io.File;
 import java.util.Arrays;

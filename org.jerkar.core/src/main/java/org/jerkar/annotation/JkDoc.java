@@ -1,4 +1,4 @@
-package org.jerkar;
+package org.jerkar.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -7,15 +7,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Defines the annotated field as an option, meaning that this field value can be set
- * in the command line while running Jerkar.
+ * Documents the annotated element so that, Jerkar can display some
+ * information when 'help' or 'helpPlugins' are requested.
  * 
  * @author Jerome Angibaud
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Inherited
-public @interface JkOption {
+public @interface JkDoc {
 
 	String[] value();
 

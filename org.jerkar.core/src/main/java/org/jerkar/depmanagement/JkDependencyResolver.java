@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jerkar.JkLog;
-import org.jerkar.JkPath;
 import org.jerkar.depmanagement.ivy.JkIvy;
 import org.jerkar.depmanagement.ivy.JkIvy.AttachedArtifacts;
+import org.jerkar.file.JkPath;
 
 public final class JkDependencyResolver  {
 

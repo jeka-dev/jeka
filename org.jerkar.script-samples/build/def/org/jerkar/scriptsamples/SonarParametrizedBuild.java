@@ -3,7 +3,7 @@ package org.jerkar.scriptsamples;
 import static org.jerkar.builtins.javabuild.JkPopularModules.GUAVA;
 import static org.jerkar.builtins.javabuild.JkPopularModules.JUNIT;
 
-import org.jerkar.JkOption;
+import org.jerkar.annotation.JkOption;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.plugins.sonar.JkBuildPluginSonar;

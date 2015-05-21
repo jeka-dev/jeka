@@ -1,8 +1,8 @@
-package org.jerkar;
+package org.jerkar.file;
 
 import static org.junit.Assert.assertTrue;
 
-import org.jerkar.AntPattern;
+import org.jerkar.file.AntPattern;
 import org.junit.Test;
 
 public class AntPatternTest {

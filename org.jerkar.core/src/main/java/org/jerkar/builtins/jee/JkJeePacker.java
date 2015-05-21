@@ -2,10 +2,10 @@ package org.jerkar.builtins.jee;
 
 import java.io.File;
 
-import org.jerkar.JkFileTree;
 import org.jerkar.JkException;
-import org.jerkar.JkPath;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
+import org.jerkar.file.JkFileTree;
+import org.jerkar.file.JkPath;
 
 /**
  * War and Ear maker for {@link JkJavaBuild}. This maker will get information from supplied java builder

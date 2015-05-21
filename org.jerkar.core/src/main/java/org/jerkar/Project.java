@@ -17,6 +17,8 @@ import org.jerkar.depmanagement.JkRepos;
 import org.jerkar.depmanagement.JkResolutionParameters;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.ivy.JkIvy;
+import org.jerkar.file.JkFileTree;
+import org.jerkar.file.JkPath;
 import org.jerkar.utils.JkUtilsFile;
 
 /**

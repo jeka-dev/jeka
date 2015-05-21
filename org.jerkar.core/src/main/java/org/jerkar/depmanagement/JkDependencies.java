@@ -15,10 +15,10 @@ import java.util.Set;
 import org.jerkar.JkBuildDependencySupport;
 import org.jerkar.JkLog;
 import org.jerkar.JkModuleId;
-import org.jerkar.JkPath;
 import org.jerkar.depmanagement.JkDependency.JkFilesDependency;
 import org.jerkar.depmanagement.JkDependency.JkProjectDependency;
 import org.jerkar.depmanagement.JkScopedDependency.ScopeType;
+import org.jerkar.file.JkPath;
 import org.jerkar.utils.JkUtilsIterable;
 import org.jerkar.utils.JkUtilsTime;
 
