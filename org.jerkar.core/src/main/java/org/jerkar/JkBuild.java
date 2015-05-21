@@ -89,7 +89,7 @@ public class JkBuild {
 
 			@Override
 			public void run() {
-				final File spec = baseDir(JkBuildResolver.BUILD_DEF_DIR);
+				final File spec = baseDir(JkConstants.BUILD_DEF_DIR);
 				spec.mkdirs();
 			}
 		})
@@ -182,7 +182,7 @@ public class JkBuild {
 	 * artifacts are generated.
 	 */
 	public JkFileTree ouputDir() {
-		return baseDir().from(JkBuildResolver.BUILD_OUTPUT_PATH).createIfNotExist();
+		return baseDir().from(JkConstants.BUILD_OUTPUT_PATH).createIfNotExist();
 	}
 
 	/**
@@ -204,7 +204,7 @@ public class JkBuild {
 	@JkDoc("Clean the output directory.")
 	public void clean() {
 		JkLog.start("Cleaning output directory " + ouputDir().root().getPath() );
-		ouputDir().exclude(JkBuildResolver.BUILD_DEF_BIN_DIR_NAME + "/**").deleteAll();
+		ouputDir().exclude(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteAll();
 		JkLog.done();
 	}
 

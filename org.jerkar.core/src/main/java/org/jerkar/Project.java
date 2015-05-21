@@ -40,7 +40,7 @@ class Project {
 
 	private JkPath buildPath;
 
-	private final JkBuildResolver resolver;
+	private final BuildResolver resolver;
 
 	private static final String DOWNLOAD_REPO_URL_OPTION = "downloadRepoUrl";
 
@@ -59,7 +59,7 @@ class Project {
 		this.projectBaseDir = JkUtilsFile.canonicalFile(baseDir);
 		buildRepos = repos();
 		this.buildDependencies = JkDependencies.on();
-		this.resolver = new JkBuildResolver(baseDir);
+		this.resolver = new BuildResolver(baseDir);
 	}
 
 	private void preCompile() {
@@ -132,7 +132,7 @@ class Project {
 
 	private	JkPath localBuildPath() {
 		final List<File> extraLibs = new LinkedList<File>();
-		final File localJerkarBuild = new File(this.projectBaseDir,JkBuildResolver.BUILD_LIB_DIR);
+		final File localJerkarBuild = new File(this.projectBaseDir, JkConstants.BUILD_LIB_DIR);
 		if (localJerkarBuild.exists()) {
 			extraLibs.addAll(JkFileTree.of(localJerkarBuild).include("**/*.jar").files(false));
 		}

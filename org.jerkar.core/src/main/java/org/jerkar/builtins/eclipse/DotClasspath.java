@@ -20,7 +20,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.jerkar.JkBuild;
-import org.jerkar.JkBuildResolver;
+import org.jerkar.JkConstants;
 import org.jerkar.JkException;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
@@ -326,12 +326,12 @@ final class DotClasspath {
 		writer.writeCharacters("\n");
 
 		// Build sources
-		if (build.baseDir(JkBuildResolver.BUILD_DEF_DIR).exists()) {
+		if (build.baseDir(JkConstants.BUILD_DEF_DIR).exists()) {
 			writer.writeCharacters("\t");
 			writer.writeEmptyElement(CLASSPATHENTRY);
 			writer.writeAttribute("kind", "src");
-			writer.writeAttribute("path", JkBuildResolver.BUILD_DEF_DIR);
-			writer.writeAttribute("output", JkBuildResolver.BUILD_DEF_BIN_DIR);
+			writer.writeAttribute("path", JkConstants.BUILD_DEF_DIR);
+			writer.writeAttribute("output", JkConstants.BUILD_DEF_BIN_DIR);
 			writer.writeCharacters("\n");
 		}
 

@@ -13,21 +13,7 @@ import org.jerkar.utils.JkUtilsString;
  * 
  * @author Jerome Angibaud
  */
-public final class JkBuildResolver {
-
-	public static final String BUILD_OUTPUT_PATH = "build/output";
-
-	public static final String BUILD_DEF_DIR = "build/def";
-
-	public static final String BUILD_DEF_BIN_DIR_NAME = "def-bin";
-
-	public static final String BUILD_DEF_BIN_DIR = BUILD_OUTPUT_PATH + "/" + BUILD_DEF_BIN_DIR_NAME;
-
-	private static final String DEFAULT_JAVA_SOURCE = "src/main/java";
-
-	public static final String BUILD_LIB_DIR = "build/libs/build";
-
-	public static final String DEFAULT_METHOD = "doDefault";
+final class BuildResolver {
 
 	private final File baseDir;
 
@@ -39,13 +25,13 @@ public final class JkBuildResolver {
 
 	final File defaultJavaSource;
 
-	JkBuildResolver(File baseDir) {
+	BuildResolver(File baseDir) {
 		super();
 		this.baseDir = baseDir;
-		this.buildSourceDir = new File(baseDir, BUILD_DEF_DIR);
-		this.buildClassDir = new File(baseDir, BUILD_DEF_BIN_DIR);
-		this.buildlibDir = new File(baseDir, BUILD_LIB_DIR);
-		this.defaultJavaSource = new File(baseDir, DEFAULT_JAVA_SOURCE);
+		this.buildSourceDir = new File(baseDir, JkConstants.BUILD_DEF_DIR);
+		this.buildClassDir = new File(baseDir, JkConstants.BUILD_DEF_BIN_DIR);
+		this.buildlibDir = new File(baseDir, JkConstants.BUILD_LIB_DIR);
+		this.defaultJavaSource = new File(baseDir, JkConstants.DEFAULT_JAVA_SOURCE);
 	}
 
 	/**

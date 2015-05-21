@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.jerkar.JkBuild;
 import org.jerkar.JkBuildPlugin;
-import org.jerkar.JkBuildResolver;
+import org.jerkar.JkConstants;
 import org.jerkar.JkLog;
 import org.jerkar.JkProject;
 import org.jerkar.JkScaffolder;
@@ -244,7 +244,7 @@ public class JkBuildDependencySupport extends JkBuild {
 
 			@Override
 			public void run() {
-				final File spec = baseDir(JkBuildResolver.BUILD_DEF_DIR);
+				final File spec = baseDir(JkConstants.BUILD_DEF_DIR);
 				final String packageName = moduleId().group().replace('.', '/');
 				new File(spec, packageName).mkdirs();
 			}

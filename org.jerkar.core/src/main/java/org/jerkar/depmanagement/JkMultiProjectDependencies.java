@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jerkar.JkBuild;
-import org.jerkar.JkBuildResolver;
+import org.jerkar.JkConstants;
 import org.jerkar.JkLog;
 import org.jerkar.JkModelMethod;
 import org.jerkar.utils.JkUtilsFile;
@@ -55,7 +55,7 @@ public final class JkMultiProjectDependencies {
 	}
 
 	public void invokeDoDefaultMethodOnAllSubProjects() {
-		this.executeOnAllTransitive(JkUtilsIterable.listOf(JkModelMethod.normal(JkBuildResolver.DEFAULT_METHOD)));
+		this.executeOnAllTransitive(JkUtilsIterable.listOf(JkModelMethod.normal(JkConstants.DEFAULT_METHOD)));
 	}
 
 	public void invokeOnAllTransitive(String ...methods) {
