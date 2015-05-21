@@ -5,9 +5,9 @@ import static org.jerkar.builtins.javabuild.JkPopularModules.JERSEY_SERVER;
 import static org.jerkar.builtins.javabuild.JkPopularModules.JUNIT;
 import static org.jerkar.builtins.javabuild.JkPopularModules.MOCKITO_ALL;
 
-import org.jerkar.JkModuleId;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkDependencies;
+import org.jerkar.depmanagement.JkModuleId;
 import org.jerkar.depmanagement.JkRepo;
 import org.jerkar.depmanagement.JkRepos;
 import org.jerkar.depmanagement.JkVersion;

@@ -27,6 +27,7 @@ public final class JkBuildResolver {
 
 	public static final String BUILD_LIB_DIR = "build/libs/build";
 
+	public static final String DEFAULT_METHOD = "doDefault";
 
 	private final File baseDir;
 

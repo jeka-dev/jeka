@@ -1,5 +1,6 @@
 package org.jerkar;
 
+import org.jerkar.depmanagement.JkBuildDependencySupport;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependencyResolver;
 

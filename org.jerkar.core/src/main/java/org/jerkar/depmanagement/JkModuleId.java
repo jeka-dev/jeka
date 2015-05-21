@@ -1,4 +1,4 @@
-package org.jerkar;
+package org.jerkar.depmanagement;
 
 import org.jerkar.utils.JkUtilsString;
 

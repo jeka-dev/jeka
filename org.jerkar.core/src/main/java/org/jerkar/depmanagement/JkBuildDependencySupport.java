@@ -1,20 +1,17 @@
-package org.jerkar;
+package org.jerkar.depmanagement;
 
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jerkar.JkBuild;
+import org.jerkar.JkBuildPlugin;
+import org.jerkar.JkBuildResolver;
+import org.jerkar.JkLog;
+import org.jerkar.JkProject;
+import org.jerkar.JkScaffolder;
 import org.jerkar.annotation.JkOption;
-import org.jerkar.depmanagement.JkDependencies;
-import org.jerkar.depmanagement.JkDependencyResolver;
-import org.jerkar.depmanagement.JkRepo;
-import org.jerkar.depmanagement.JkRepos;
-import org.jerkar.depmanagement.JkResolutionParameters;
-import org.jerkar.depmanagement.JkScope;
-import org.jerkar.depmanagement.JkScopeMapping;
-import org.jerkar.depmanagement.JkVersion;
-import org.jerkar.depmanagement.JkVersionedModule;
 import org.jerkar.depmanagement.JkRepo.JkMavenRepository;
 import org.jerkar.depmanagement.ivy.JkIvy;
 import org.jerkar.file.JkPath;
@@ -286,10 +283,8 @@ public class JkBuildDependencySupport extends JkBuild {
 	}
 
 	private static final JkBuildDependencySupport relativeProject(JkBuildDependencySupport mainBuild, Class<? extends JkBuildDependencySupport> clazz, String relativePath) {
-		final File projectDir = mainBuild.baseDir(relativePath);
-		final Project project = new Project(projectDir);
-		final JkBuildDependencySupport build = project.getBuild(clazz);
-		JkOptions.populateFields(build);
+		final JkBuildDependencySupport build = mainBuild.relativeProjectBuild(clazz, relativePath);
+
 		build.init();
 		return build;
 	}

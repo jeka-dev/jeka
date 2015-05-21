@@ -1,6 +1,5 @@
 package org.jerkar.depmanagement;
 
-import org.jerkar.JkModuleId;
 
 
 /**

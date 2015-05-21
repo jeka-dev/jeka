@@ -3,7 +3,6 @@ package org.jerkar.depmanagement;
 import static org.jerkar.builtins.javabuild.JkJavaBuild.COMPILE;
 import static org.jerkar.builtins.javabuild.JkJavaBuild.RUNTIME;
 
-import org.jerkar.JkModuleId;
 import org.jerkar.utils.JkUtilsIterable;
 import org.junit.Assert;
 import org.junit.Test;

@@ -11,8 +11,10 @@ import java.util.Set;
 
 import org.jerkar.CommandLine.JkPluginSetup;
 import org.jerkar.CommandLine.MethodInvocation;
+import org.jerkar.depmanagement.JkBuildDependencySupport;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependencyResolver;
+import org.jerkar.depmanagement.JkRepo;
 import org.jerkar.depmanagement.JkRepos;
 import org.jerkar.depmanagement.JkResolutionParameters;
 import org.jerkar.depmanagement.JkScope;
@@ -39,6 +41,12 @@ class Project {
 	private JkPath buildPath;
 
 	private final JkBuildResolver resolver;
+
+	private static final String DOWNLOAD_REPO_URL_OPTION = "downloadRepoUrl";
+
+	private static final String DOWNLOAD_REPO_USER_NAME_OPTION = "dowloadRepoUsername";
+
+	private static final String DOWNLOAD_REPO_PASSWORD_OPTION = "downloadRepoPassword";
 
 
 	/**
@@ -220,17 +228,17 @@ class Project {
 		}
 	}
 
-	private static List<BuildMethod> toBuildMethods(Iterable<MethodInvocation> invocations, PluginDictionnary<JkBuildPlugin> dictionnary) {
-		final List<BuildMethod> buildMethods = new LinkedList<BuildMethod>();
+	private static List<JkModelMethod> toBuildMethods(Iterable<MethodInvocation> invocations, PluginDictionnary<JkBuildPlugin> dictionnary) {
+		final List<JkModelMethod> jkModelMethods = new LinkedList<JkModelMethod>();
 		for (final MethodInvocation methodInvokation : invocations) {
 			if (methodInvokation.isMethodPlugin()) {
 				final Class<? extends JkBuildPlugin> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName).pluginClass();
-				buildMethods.add(BuildMethod.pluginMethod(clazz, methodInvokation.methodName));
+				jkModelMethods.add(JkModelMethod.pluginMethod(clazz, methodInvokation.methodName));
 			} else {
-				buildMethods.add(BuildMethod.normal(methodInvokation.methodName));
+				jkModelMethods.add(JkModelMethod.normal(methodInvokation.methodName));
 			}
 		}
-		return buildMethods;
+		return jkModelMethods;
 	}
 
 	private JkJavaCompiler baseBuildCompiler() {
@@ -259,9 +267,9 @@ class Project {
 	}
 
 	private static JkRepos repos() {
-		final JkBuildDependencySupport build = new JkBuildDependencySupport(); // Create a fake build just to get the download repos.
-		JkOptions.populateFields(build);
-		return build.downloadRepositories();
+		return JkRepos.of(JkRepo.of(JkOptions.get(DOWNLOAD_REPO_URL_OPTION))
+				.withOptionalCredentials(JkOptions.get(DOWNLOAD_REPO_USER_NAME_OPTION),
+						JkOptions.get(DOWNLOAD_REPO_PASSWORD_OPTION)));
 	}
 
 }

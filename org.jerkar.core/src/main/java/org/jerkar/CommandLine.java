@@ -41,8 +41,6 @@ class CommandLine {
 		return result;
 	}
 
-	static final String DEFAULT_METHOD = "doDefault";
-
 	private Map<String, String> masterBuildOptions;
 
 	private Map<String, String> subProjectBuildOptions;
@@ -73,7 +71,7 @@ class CommandLine {
 			}
 		}
 		if (result.isEmpty() && master) {
-			result.add(MethodInvocation.normal(DEFAULT_METHOD));
+			result.add(MethodInvocation.normal(JkBuildResolver.DEFAULT_METHOD));
 		}
 		return result;
 	}

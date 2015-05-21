@@ -12,9 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jerkar.JkBuildDependencySupport;
 import org.jerkar.JkLog;
-import org.jerkar.JkModuleId;
 import org.jerkar.depmanagement.JkDependency.JkFilesDependency;
 import org.jerkar.depmanagement.JkDependency.JkProjectDependency;
 import org.jerkar.depmanagement.JkScopedDependency.ScopeType;

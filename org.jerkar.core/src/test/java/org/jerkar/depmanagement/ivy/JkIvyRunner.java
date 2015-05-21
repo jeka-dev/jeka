@@ -10,11 +10,11 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jerkar.JkModuleId;
 import org.jerkar.JkOptions;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkDependencies;
+import org.jerkar.depmanagement.JkModuleId;
 import org.jerkar.depmanagement.JkRepo;
 import org.jerkar.depmanagement.JkRepos;
 import org.jerkar.depmanagement.JkResolutionParameters;

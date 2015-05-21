@@ -1,4 +1,4 @@
-package org.jerkar;
+package org.jerkar.depmanagement;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -6,9 +6,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import org.jerkar.JkBuild;
+import org.jerkar.JkBuildResolver;
+import org.jerkar.JkLog;
+import org.jerkar.JkModelMethod;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIterable;
 
@@ -52,32 +55,22 @@ public final class JkMultiProjectDependencies {
 	}
 
 	public void invokeDoDefaultMethodOnAllSubProjects() {
-		this.executeOnAllTransitive(JkUtilsIterable.listOf(BuildMethod.normal(CommandLine.DEFAULT_METHOD)));
+		this.executeOnAllTransitive(JkUtilsIterable.listOf(JkModelMethod.normal(JkBuildResolver.DEFAULT_METHOD)));
 	}
 
 	public void invokeOnAllTransitive(String ...methods) {
-		this.executeOnAllTransitive(BuildMethod.normals(methods));
+		this.executeOnAllTransitive(JkModelMethod.normals(methods));
 	}
 
-	private void executeOnAllTransitive(Iterable<BuildMethod> methods) {
+	private void executeOnAllTransitive(Iterable<JkModelMethod> methods) {
 		JkLog.startln("Invoke " + methods + " on all dependents projects");
 		for (final JkBuild build : transitiveProjectBuilds()) {
-			build.execute(methods, this.master);
+			build.execute(methods, this.master.baseDir().root());
 		}
 		JkLog.done("invoking " + methods + " on all dependents projects");
 	}
 
-	void activatePlugin(Class<? extends JkBuildPlugin> clazz, Map<String, String> options) {
-		for (final JkBuild build : this.transitiveProjectBuilds()) {
-			build.plugins.addActivated(clazz, options);
-		}
-	}
 
-	void configurePlugin(Class<? extends JkBuildPlugin> clazz, Map<String, String> options) {
-		for (final JkBuild build : this.transitiveProjectBuilds()) {
-			build.plugins.addConfigured(clazz, options);
-		}
-	}
 
 	private List<JkBuildDependencySupport> resolveTransitiveBuilds(Set<File> files) {
 		final List<JkBuildDependencySupport> result = new LinkedList<JkBuildDependencySupport>();

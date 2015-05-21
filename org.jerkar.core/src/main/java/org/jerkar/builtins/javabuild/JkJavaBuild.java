@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 
-import org.jerkar.JkBuildDependencySupport;
 import org.jerkar.JkClasspath;
 import org.jerkar.JkJavaCompiler;
 import org.jerkar.JkLog;
@@ -13,6 +12,7 @@ import org.jerkar.annotation.JkDoc;
 import org.jerkar.annotation.JkOption;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
+import org.jerkar.depmanagement.JkBuildDependencySupport;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependency;
 import org.jerkar.depmanagement.JkScope;

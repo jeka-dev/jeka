@@ -129,7 +129,7 @@ public class JkBuild {
 	/**
 	 * Invokes the specified method in this build.
 	 */
-	private final void invoke(String methodName, JkBuild from) {
+	private final void invoke(String methodName, File fromDir) {
 		final Method method;
 		try {
 			method = this.getClass().getMethod(methodName);
@@ -140,8 +140,8 @@ public class JkBuild {
 			return;
 		}
 		final String context;
-		if (from != null) {
-			final String path  = JkUtilsFile.getRelativePath(from.baseDir().root(), this.baseDir)
+		if (fromDir != null) {
+			final String path  = JkUtilsFile.getRelativePath(fromDir, this.baseDir)
 					.replace(File.separator, "/");
 			context = " from project " + path + ", class " + this.getClass().getName();
 		} else {
@@ -157,16 +157,13 @@ public class JkBuild {
 		}
 	}
 
+
 	/**
-	 * Executes specified method for this build.
-	 * 
-	 * @param from If the method is invoked from an external build (multi-projects)
-	 * then you can specify the build from where it is launched in order to have proper logging.
-	 * Can be <code>null</code>.
+	 * Executes the specified methods given the fromDir as working directory.
 	 */
-	final void execute(Iterable<BuildMethod> methods, JkBuild from) {
-		for (final BuildMethod method : methods) {
-			this.invoke(method, from);
+	public void execute(Iterable<JkModelMethod> methods, File fromDir) {
+		for (final JkModelMethod method : methods) {
+			this.invoke(method, fromDir);
 		}
 	}
 
@@ -231,16 +228,33 @@ public class JkBuild {
 		HelpDisplayer.helpPlugins(this);
 	}
 
-	private void invoke(BuildMethod buildMethod, JkBuild from) {
-		if (buildMethod.isMethodPlugin()) {
-			this.plugins.invoke(buildMethod.pluginClass, buildMethod.methodName);
+	/**
+	 * Invokes the specified method in this build but from the w
+	 * @param jkModelMethod
+	 * @param from
+	 */
+	private void invoke(JkModelMethod jkModelMethod, File fromDir) {
+		if (jkModelMethod.isMethodPlugin()) {
+			this.plugins.invoke(jkModelMethod.pluginClass(), jkModelMethod.name());
 		} else {
-			this.invoke(buildMethod.methodName, from);
+			this.invoke(jkModelMethod.name(), fromDir);
 		}
 	}
 
 	public <T extends JkBuildPlugin> T pluginOf(Class<T> pluginClass) {
 		return this.plugins.findInstanceOf(pluginClass);
+	}
+
+	/**
+	 * Creates an instance of <code>JkBuild</code> for the given project and build class.
+	 * The instance field annotated with <code>JkOption</code> are populated as usual.
+	 */
+	protected final <T extends JkBuild> T relativeProjectBuild(Class<T> clazz, String relativePath) {
+		final File projectDir = this.baseDir(relativePath);
+		final Project project = new Project(projectDir);
+		final T result = project.getBuild(clazz);
+		JkOptions.populateFields(result);
+		return result;
 	}
 
 
