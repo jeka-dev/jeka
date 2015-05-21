@@ -33,13 +33,13 @@ public class JkJeePacker {
 		}
 		final JkPath path = build.depsFor(JkJavaBuild.RUNTIME);
 		final JkFileTree dir = JkFileTree.of(warDirDest).importDirContent(webappSrc)
-				.sub("WEB-INF/classes").importDirContent(build.classDir())
-				.sub("../lib").copyInFiles(path);
+				.from("WEB-INF/classes").importDirContent(build.classDir())
+				.from("../lib").importFiles(path);
 		dir.zip().to(warFileDest);
 	}
 
 	public void ear(Iterable<File> warFiles, File earSrc, File destDir, File destFile) {
-		JkFileTree.of(destDir).importDirContent(earSrc).copyInFiles(warFiles).zip().to(destFile);
+		JkFileTree.of(destDir).importDirContent(earSrc).importFiles(warFiles).zip().to(destFile);
 	}
 
 }

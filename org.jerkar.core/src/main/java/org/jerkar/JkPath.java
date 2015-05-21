@@ -36,7 +36,7 @@ public final class JkPath implements Iterable<File> {
 	}
 
 	/**
-	 * Creates a {@link JkPath} from a base directory and string of relative paths separated with a ";".
+	 * Creates a <code>JkPath</code> from a base directory and string of relative paths separated with a ";".
 	 */
 	public static JkPath of(File baseDir, String relativePathAsString) {
 		final String[] paths = JkUtilsString.split(relativePathAsString, File.pathSeparator);
@@ -70,7 +70,11 @@ public final class JkPath implements Iterable<File> {
 		return this;
 	}
 
-	public JkPath removeDoubloons() {
+	/**
+	 * Returns a <code>JkPath</code> identical to this one but without redundant files.
+	 * So if a given file in the sequence exist twice or more, then only the first occurrence is kept.
+	 */
+	public JkPath withoutDoubloons() {
 		final List<File> files = new LinkedList<File>();
 		for (final File file : this) {
 			if (!files.contains(file)) {

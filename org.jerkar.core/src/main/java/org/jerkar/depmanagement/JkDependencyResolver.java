@@ -116,7 +116,7 @@ public final class JkDependencyResolver  {
 		for (final JkScope scope : scopes) {
 			path = path.and(getSingleScope(scope));
 		}
-		return path.removeDoubloons();
+		return path.withoutDoubloons();
 	}
 
 	private final JkPath getSingleScope(JkScope scope) {

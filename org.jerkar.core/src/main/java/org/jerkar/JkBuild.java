@@ -181,7 +181,7 @@ public class JkBuild {
 	 * artifacts are generated.
 	 */
 	public JkFileTree ouputDir() {
-		return baseDir().sub(JkBuildResolver.BUILD_OUTPUT_PATH).createIfNotExist();
+		return baseDir().from(JkBuildResolver.BUILD_OUTPUT_PATH).createIfNotExist();
 	}
 
 	/**

@@ -57,7 +57,7 @@ public final class JkFileTree implements Iterable<File> {
 	 * Creates a {@link JkFileTree} having the default filter and the specified relative path to this root as
 	 * root directory.
 	 */
-	public JkFileTree sub(String relativePath) {
+	public JkFileTree from(String relativePath) {
 		final File newBase = new File(root, relativePath);
 
 		return new JkFileTree(newBase);
@@ -131,7 +131,7 @@ public final class JkFileTree implements Iterable<File> {
 	/**
 	 * Copies the specified files in the root of this directory.
 	 */
-	public JkFileTree copyInFiles(Iterable<File> files) {
+	public JkFileTree importFiles(Iterable<File> files) {
 		createIfNotExist();
 		for (final File file : files) {
 			JkUtilsFile.copyFileToDir(file, this.root, JkLog.infoStreamIfVerbose());

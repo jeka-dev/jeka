@@ -50,10 +50,10 @@ public class CoreBuild extends JerkarBuild {
 
 		// Simpler to put both Jerkar and Jerkar-fat jar at the root (in order to find the Jerker HOME)
 		distrib.importFiles(packer.jarFile(), packer.fatJarFile());
-		distrib.sub("libs/required").importDirContent(baseDir("build/libs/compile"));
-		distrib.sub("libs-sources").importDirContent(baseDir("build/libs-sources"))
+		distrib.from("libs/required").importDirContent(baseDir("build/libs/compile"));
+		distrib.from("libs-sources").importDirContent(baseDir("build/libs-sources"))
 		.importFiles(packer.jarSourceFile());
-		distrib.sub("libs-javadoc").importFiles(this.javadocMaker().zipFile());
+		distrib.from("libs-javadoc").importFiles(this.javadocMaker().zipFile());
 		distrib.zip().to(distripZipFile, Deflater.BEST_COMPRESSION);
 		JkLog.done();
 	}

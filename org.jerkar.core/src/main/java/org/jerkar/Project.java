@@ -129,7 +129,7 @@ class Project {
 		if (JkLocator.libExtDir().exists()) {
 			extraLibs.addAll(JkFileTree.of(JkLocator.libExtDir()).include("**/*.jar").files(false));
 		}
-		return JkPath.of(extraLibs).and(JkLocator.jerkarJarFile(), JkLocator.ivyJarFile()).removeDoubloons();
+		return JkPath.of(extraLibs).and(JkLocator.jerkarJarFile(), JkLocator.ivyJarFile()).withoutDoubloons();
 	}
 
 	private JkPath compileDependentProjects(Set<File> yetCompiledProjects, LinkedHashSet<File> pathEntries) {

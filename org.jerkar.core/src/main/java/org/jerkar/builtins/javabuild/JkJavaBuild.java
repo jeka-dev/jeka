@@ -216,7 +216,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	 * Returns location where the java production classes are compiled.
 	 */
 	public File classDir() {
-		return ouputDir().sub("classes").createIfNotExist().root();
+		return ouputDir().from("classes").createIfNotExist().root();
 	}
 
 	/**
@@ -230,7 +230,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	 * Returns location where the java production classes are compiled.
 	 */
 	public File testClassDir() {
-		return ouputDir().sub("testClasses").createIfNotExist().root();
+		return ouputDir().from("testClasses").createIfNotExist().root();
 	}
 
 	// --------------------------- Configurer -----------------------------
