@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.jerkar.annotation.JkDoc;
 import org.jerkar.annotation.JkOption;
-import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependencyResolver;
 import org.jerkar.file.JkFileTree;
 import org.jerkar.file.JkPath;
@@ -96,9 +95,7 @@ public class JkBuild {
 		.withExtendedClass(JkBuild.class);
 	}
 
-	protected JkDependencies extraCommandLineDeps() {
-		return JkDependencies.builder().build();
-	}
+
 
 	protected final JkPath toPath(String pathAsString) {
 		if (pathAsString == null) {
