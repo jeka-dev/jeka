@@ -31,7 +31,7 @@ public class JkBuildPluginSonar extends JkJavaBuildPlugin {
                 .withBinaries(build.classDir())
                 .withLibraries(libs)
                 .withSources(build.editedSourceDirs().roots())
-                .withTest(build.testSourceDirs().roots())
+                .withTest(build.unitTestSourceDirs().roots())
                 .withProperty(JkSonar.WORKING_DIRECTORY, build.baseDir("build/.sonar").getPath())
                 .withProperty(JkSonar.JUNIT_REPORTS_PATH, JkUtilsFile.getRelativePath(baseDir, new File(build.testReportDir(), "junit")))
                 .withProperty(JkSonar.SUREFIRE_REPORTS_PATH, JkUtilsFile.getRelativePath(baseDir, new File(build.testReportDir(), "junit")))

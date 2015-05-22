@@ -151,6 +151,13 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	}
 
 	/**
+	 * Returns the location of unit test source code that has been edited manually (not generated).
+	 */
+	public JkFileTreeSet editedUnitTestSourceDirs() {
+		return JkFileTreeSet.of(baseDir("src/test/java"));
+	}
+
+	/**
 	 * Returns location of production source code.
 	 */
 	public JkFileTreeSet sourceDirs() {
@@ -177,17 +184,17 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	/**
 	 * Returns location of test source code.
 	 */
-	public JkFileTreeSet testSourceDirs() {
-		final JkFileTreeSet original =  JkFileTreeSet.of(baseDir("src/test/java"));
-		return JkJavaBuildPlugin.applyTestSourceDirs(this.plugins.getActives(), original);
+	public JkFileTreeSet unitTestSourceDirs() {
+		return JkJavaBuildPlugin.applyTestSourceDirs(this.plugins.getActives(),
+				editedUnitTestSourceDirs().and(generatedUnitTestSourceDir()));
 	}
 
 	/**
 	 * Returns location of test resources.
 	 */
-	public JkFileTreeSet testResourceDirs() {
-		final JkFileTreeSet original = JkFileTreeSet.of(baseDir("src/test/resources")).and(
-				testSourceDirs().andFilter(RESOURCE_FILTER));
+	public JkFileTreeSet unitTestResourceDirs() {
+		final JkFileTreeSet original = JkFileTreeSet.of(generatedUnitTestSourceDir()).and(
+				unitTestSourceDirs().andFilter(RESOURCE_FILTER));
 		return JkJavaBuildPlugin.applyTestResourceDirs(this.plugins.getActives(), original);
 	}
 
@@ -196,6 +203,13 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	 */
 	public File generatedSourceDir() {
 		return ouputDir("generated-sources/java");
+	}
+
+	/**
+	 * Returns location of generated unit test sources.
+	 */
+	public File generatedUnitTestSourceDir() {
+		return ouputDir("generated-unitTest-sources/java");
 	}
 
 	/**
@@ -209,7 +223,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	 * Returns location of generated resources for tests.
 	 */
 	public File generatedTestResourceDir() {
-		return ouputDir("generated-test-resources");
+		return ouputDir("generated-unitTest-resources");
 	}
 
 	/**
@@ -245,7 +259,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	public JkJavaCompiler unitTestCompiler() {
 		return JkJavaCompiler.ofOutput(testClassDir())
-				.andSources(testSourceDirs())
+				.andSources(unitTestSourceDirs())
 				.withClasspath(this.depsFor(TEST, PROVIDED).andHead(classDir()))
 				.withSourceVersion(this.sourceJavaVersion())
 				.withTargetVersion(this.targetJavaVersion());
@@ -296,7 +310,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 				for (final JkFileTree dir : editedSourceDirs().jkFileTrees()) {
 					dir.root().mkdirs();
 				}
-				for (final JkFileTree dir : testSourceDirs().jkFileTrees()) {
+				for (final JkFileTree dir : unitTestSourceDirs().jkFileTrees()) {
 					dir.root().mkdirs();
 				}
 			}
@@ -317,11 +331,13 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	@JkDoc("Compile and run all unit tests.")
 	public void unitTest() {
-		if (!checkProcessTests(testSourceDirs())) {
+		this.generateUnitTestSources();
+		if (!checkProcessTests(unitTestSourceDirs())) {
 			return;
 		}
 		JkLog.startln("Process unit tests");
 		unitTestCompiler().compile();
+		generateUnitTestResources();
 		processUnitTestResources();
 		unitTester().run();
 		JkLog.done();
@@ -365,23 +381,47 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	// ----------------------- Overridable sub-methods ---------------------
 
 	/**
-	 * Override this method if you need to
+	 * Override this method if you need to generate some production sources
 	 */
 	protected void generateSources() {
 		// Do nothing by default
 	}
 
-	@JkDoc("Generate files to be taken as resources.  Do nothing by default.")
+	/**
+	 * Override this method if you need to generate some unit test sources.
+	 */
+	protected void generateUnitTestSources() {
+		// Do nothing by default
+	}
+
+	/**
+	 * Override this method if you need to generate some resources.
+	 */
 	protected void generateResources() {
 		// Do nothing by default
 	}
 
+	/**
+	 * Override this method if you need to generate some resources for running unit tests.
+	 */
+	protected void generateUnitTestResources() {
+		// Do nothing by default
+	}
+
+	/**
+	 * Copies the generated sources for production into the class dir. If you want to do special
+	 * processing (as interpolating) you should override this method.
+	 */
 	protected void processResources() {
 		this.resourceProcessor().generateTo(classDir());
 	}
 
+	/**
+	 * Copies the generated resources for test into the test class dir. If you want to do special
+	 * processing (as interpolating) you should override this method.
+	 */
 	protected void processUnitTestResources() {
-		JkResourceProcessor.of(testResourceDirs()).andIfExist(generatedTestResourceDir()).generateTo(testClassDir());
+		JkResourceProcessor.of(unitTestResourceDirs()).andIfExist(generatedTestResourceDir()).generateTo(testClassDir());
 	}
 
 	protected boolean checkProcessTests(JkFileTreeSet testSourceDirs) {
@@ -392,7 +432,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 			JkLog.info("No test source declared. Skip tests.");
 			return false;
 		}
-		if (!testSourceDirs().allExists()) {
+		if (!unitTestSourceDirs().allExists()) {
 			JkLog.info("No existing test source directory found : " + testSourceDirs +". Skip tests.");
 			return false;
 		}
@@ -472,5 +512,47 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 				.usingDefaultScopes(RUNTIME).on(JkDependency.of(libDir.include("runtime/*.jar")))
 				.usingDefaultScopes(TEST).on(JkDependency.of(libDir.include("test/*.jar"))).build();
 	}
+
+	// Lifecycle methods
+
+	/**
+	 * Lifecycle method :{@link #compile()}. As doCompile is the first phase, this is equals to {@link #compile()}
+	 */
+	public final void doCompile() {
+		this.compile();
+	}
+
+	/**
+	 * Lifecycle method : {@link #doCompile} +  {@link #unitTest()}
+	 */
+	public final void doUnitTest() {
+		this.doCompile();
+		this.unitTest();
+	}
+
+	/**
+	 * Lifecycle method : {@link #doUnitTest()} + {@link #pack()}
+	 */
+	public final void doPack() {
+		doUnitTest();
+		pack();
+	}
+
+	/**
+	 * Lifecycle method : {@link #doUnitTest()} + {@link #pack()}
+	 */
+	public final void doVerify() {
+		pack();
+		verify();
+	}
+
+	/**
+	 * Lifecycle method : {@link #doVerify()} + {@link #publish()}
+	 */
+	public final void doPublish() {
+		doVerify();
+		publish();
+	}
+
 
 }

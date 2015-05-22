@@ -100,8 +100,8 @@ public class JkJavaPacker implements Cloneable {
 		if (doTest && !build.skipTests && build.testClassDir().exists() && !JkFileTree.of(build.testClassDir()).files(false).isEmpty()) {
 			JkZipper.of(build.testClassDir()).to(jarTestFile(), compressionLevel);
 		}
-		if (doTest && doSources && !build.testSourceDirs().files(false).isEmpty()) {
-			build.testSourceDirs().and(build.testResourceDirs()).zip().to(jarTestSourceFile(), compressionLevel);
+		if (doTest && doSources && !build.unitTestSourceDirs().files(false).isEmpty()) {
+			build.unitTestSourceDirs().and(build.unitTestResourceDirs()).zip().to(jarTestSourceFile(), compressionLevel);
 		}
 		if (doFatJar) {
 			JkFileTree.of(build.classDir()).zip().merge(build.depsFor(JkJavaBuild.RUNTIME))

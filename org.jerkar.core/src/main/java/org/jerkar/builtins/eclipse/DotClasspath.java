@@ -356,7 +356,7 @@ final class DotClasspath {
 		}
 
 		// Test Sources
-		for (final JkFileTree jkFileTree : build.testResourceDirs().and(build.testResourceDirs())
+		for (final JkFileTree jkFileTree : build.unitTestResourceDirs().and(build.unitTestResourceDirs())
 				.jkFileTrees()) {
 			if (!jkFileTree.root().exists() ) {
 				continue;

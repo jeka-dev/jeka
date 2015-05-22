@@ -205,6 +205,16 @@ public final class JkUtilsFile {
 	}
 
 	/**
+	 * Returns the content of the specified file as a list of string.
+	 */
+	public static List<String> readLines(File file) {
+		final FileInputStream fileInputStream = JkUtilsIO.inputStream(file);
+		final List<String> result = JkUtilsIO.readAsLines(fileInputStream);
+		JkUtilsIO.closeQuietly(fileInputStream);
+		return result;
+	}
+
+	/**
 	 * Copies the given file to the specified directory.
 	 */
 	public static void copyFileToDir(File from, File toDir) {
