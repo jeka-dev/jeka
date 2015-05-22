@@ -101,7 +101,11 @@ public final class JkSonar {
             JkLog.info("Sonar analysis skipped.");
         }
         JkLog.startln("Launching Sonar analysis");
-        javaProcess().runClassSync("org.sonar.runner.Main","-e");
+        if (JkOptions.isVerbose()) {
+        	javaProcess().runClassSync("org.sonar.runner.Main","-e", "-X");
+        } else {
+        	javaProcess().runClassSync("org.sonar.runner.Main","-e");
+        }
         JkLog.done();
     }
 
@@ -135,7 +139,7 @@ public final class JkSonar {
     public JkSonar withProperties(Map<String, String> props) {
     	final Map<String, String> newProps = new HashMap<String, String>(this.params);
     	newProps.putAll(props);
-        return new JkSonar(props, enabled);
+        return new JkSonar(newProps, enabled);
     }
 
 

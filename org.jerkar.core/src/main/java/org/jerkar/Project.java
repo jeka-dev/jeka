@@ -267,6 +267,10 @@ class Project {
 	}
 
 	private static JkRepos repos() {
+		final String downloadRepoUrl = JkOptions.get(DOWNLOAD_REPO_URL_OPTION);
+		if (downloadRepoUrl == null) {
+			return JkRepos.mavenCentral();
+		}
 		return JkRepos.of(JkRepo.of(JkOptions.get(DOWNLOAD_REPO_URL_OPTION))
 				.withOptionalCredentials(JkOptions.get(DOWNLOAD_REPO_USER_NAME_OPTION),
 						JkOptions.get(DOWNLOAD_REPO_PASSWORD_OPTION)));

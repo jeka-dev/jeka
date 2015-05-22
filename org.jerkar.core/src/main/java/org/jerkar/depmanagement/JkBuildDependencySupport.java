@@ -232,8 +232,6 @@ public class JkBuildDependencySupport extends JkBuild {
 		return cachedPublisher;
 	}
 
-
-	@Override
 	protected JkDependencies extraCommandLineDeps() {
 		return JkDependencies.builder().build();
 	}
