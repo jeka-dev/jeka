@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.jerkar.PluginDictionnary.JkPluginDescription;
-import org.jerkar.annotation.JkDoc;
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;
 

@@ -2,7 +2,7 @@ package org.jerkar.plugins.sonar;
 
 import org.jerkar.CoreBuild;
 import org.jerkar.JerkarBuild;
-import org.jerkar.annotation.JkProject;
+import org.jerkar.JkProject;
 import org.jerkar.depmanagement.JkDependencies;
 
 public class PluginsSonarBuild extends JerkarBuild {

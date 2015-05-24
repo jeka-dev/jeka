@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.List;
 
 import org.jerkar.JkBuild;
+import org.jerkar.JkDoc;
 import org.jerkar.JkException;
-import org.jerkar.annotation.JkDoc;
-import org.jerkar.annotation.JkOption;
+import org.jerkar.JkOption;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.builtins.javabuild.JkJavaBuildPlugin;
 import org.jerkar.depmanagement.JkDependencies;

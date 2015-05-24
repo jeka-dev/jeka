@@ -5,11 +5,11 @@ import java.util.Date;
 import java.util.List;
 
 import org.jerkar.JkClasspath;
+import org.jerkar.JkDoc;
 import org.jerkar.JkJavaCompiler;
 import org.jerkar.JkLog;
+import org.jerkar.JkOption;
 import org.jerkar.JkScaffolder;
-import org.jerkar.annotation.JkDoc;
-import org.jerkar.annotation.JkOption;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
 import org.jerkar.depmanagement.JkBuildDependencySupport;

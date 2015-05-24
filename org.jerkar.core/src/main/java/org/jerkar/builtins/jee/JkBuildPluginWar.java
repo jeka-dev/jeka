@@ -5,8 +5,8 @@ import java.io.IOException;
 
 import org.jerkar.JkBuild;
 import org.jerkar.JkLog;
+import org.jerkar.JkOption;
 import org.jerkar.JkScaffolder;
-import org.jerkar.annotation.JkOption;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.builtins.javabuild.JkJavaBuildPlugin;
 import org.jerkar.builtins.javabuild.JkJavaPacker;

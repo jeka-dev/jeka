@@ -1,11 +1,9 @@
-package org.jerkar.annotation;
+package org.jerkar;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.jerkar.JkBuild;
 
 /**
  * Specifies that the annotated element is a build of a another project.

@@ -6,8 +6,8 @@ import static org.jerkar.builtins.javabuild.JkPopularModules.JERSEY_SERVER;
 import static org.jerkar.builtins.javabuild.JkPopularModules.JUNIT;
 import static org.jerkar.builtins.javabuild.JkPopularModules.MOCKITO_ALL;
 
-import org.jerkar.annotation.JkDoc;
-import org.jerkar.annotation.JkImport;
+import org.jerkar.JkDoc;
+import org.jerkar.JkImport;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkDependencies;
 import org.openqa.selenium.WebDriver;

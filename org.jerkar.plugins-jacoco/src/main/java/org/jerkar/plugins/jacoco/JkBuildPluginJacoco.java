@@ -3,8 +3,8 @@ package org.jerkar.plugins.jacoco;
 import java.io.File;
 
 import org.jerkar.JkBuild;
-import org.jerkar.annotation.JkDoc;
-import org.jerkar.annotation.JkOption;
+import org.jerkar.JkDoc;
+import org.jerkar.JkOption;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.builtins.javabuild.JkJavaBuildPlugin;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit;

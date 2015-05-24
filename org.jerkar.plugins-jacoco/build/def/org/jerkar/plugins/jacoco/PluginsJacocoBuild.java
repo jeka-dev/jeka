@@ -2,7 +2,7 @@ package org.jerkar.plugins.jacoco;
 
 import org.jerkar.CoreBuild;
 import org.jerkar.JerkarBuild;
-import org.jerkar.annotation.JkProject;
+import org.jerkar.JkProject;
 import org.jerkar.depmanagement.JkDependencies;
 
 
