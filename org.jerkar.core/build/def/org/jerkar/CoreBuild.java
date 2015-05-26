@@ -46,6 +46,7 @@ public class CoreBuild extends JerkarBuild {
 	private void distrib() {
 		final JkFileTree distrib = JkFileTree.of(distribFolder);
 		JkLog.startln("Creating distrib " + distripZipFile.getPath());
+		distrib.importFiles(baseDir("../LICENSE"));
 		final JkJavaPacker packer = packer();
 		distrib.importDirContent(baseDir("src/main/dist"));
 
