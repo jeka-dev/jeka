@@ -121,6 +121,17 @@ public final class JkUtilsIO {
 	}
 
 	/**
+	 * Same as {@link FileOutputStream} constructor but throwing unchecked exceptions.
+	 */
+	public static FileOutputStream outputStream(File file) {
+		try {
+			return new FileOutputStream(file);
+		} catch (final FileNotFoundException e) {
+			throw new IllegalArgumentException("File " + file + " not found.", e);
+		}
+	}
+
+	/**
 	 * Same as {@link ZipFile#getInputStream(ZipEntry)} but throwing only unchecked exceptions.
 	 */
 	public static InputStream inputStream(ZipFile zipFile, ZipEntry entry) {

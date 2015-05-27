@@ -106,7 +106,7 @@ public final class JkFileTreeSet implements Iterable<File> {
 	 */
 	public int copyTo(File destinationDir) {
 		if (destinationDir.exists()) {
-			JkUtilsFile.assertDir(destinationDir);
+			JkUtilsFile.assertAllDir(destinationDir);
 		} else {
 			destinationDir.mkdirs();
 		}
@@ -129,7 +129,7 @@ public final class JkFileTreeSet implements Iterable<File> {
 	 */
 	public int copyRepacingTokens(File destinationDir, Map<String, String> tokenValues) {
 		if (destinationDir.exists()) {
-			JkUtilsFile.assertDir(destinationDir);
+			JkUtilsFile.assertAllDir(destinationDir);
 		} else {
 			destinationDir.mkdirs();
 		}

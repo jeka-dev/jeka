@@ -88,7 +88,7 @@ public final class JkFileTree implements Iterable<File> {
 		if (!destinationDir.exists()) {
 			destinationDir.mkdirs();
 		} else {
-			JkUtilsFile.assertDir(destinationDir);
+			JkUtilsFile.assertAllDir(destinationDir);
 		}
 		return JkUtilsFile.copyDirContent(root, destinationDir, filter.toFileFilter(root), true, JkLog.infoStreamIfVerbose());
 	}
@@ -97,7 +97,7 @@ public final class JkFileTree implements Iterable<File> {
 		if (!destinationDir.exists()) {
 			destinationDir.mkdirs();
 		} else {
-			JkUtilsFile.assertDir(destinationDir);
+			JkUtilsFile.assertAllDir(destinationDir);
 		}
 		return JkUtilsFile.copyDirContentReplacingTokens(root, destinationDir, filter.toFileFilter(root), true, JkLog.infoStreamIfVerbose(), tokenValues);
 	}
