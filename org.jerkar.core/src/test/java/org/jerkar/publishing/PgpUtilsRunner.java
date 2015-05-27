@@ -8,8 +8,8 @@ public class PgpUtilsRunner {
 
 	public static void main(String[] args) {
 		PgpUtils.sign(PgpUtilsRunner.class.getResourceAsStream("sampleFileToSign.txt"),
-				PgpUtilsRunner.class.getResourceAsStream("keyring.pgp"),
-				JkUtilsIO.outputStream(new File("signature.asm")), "momo".toCharArray(), true);
+				PgpUtilsRunner.class.getResourceAsStream("secring.pgp"),
+				JkUtilsIO.outputStream(new File("signature.asm")), "jerkar".toCharArray(), true);
 	}
 
 
