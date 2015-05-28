@@ -146,55 +146,55 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	/**
 	 * Returns the location of production source code that has been edited manually (not generated).
 	 */
-	public JkFileTreeSet editedSourceDirs() {
+	public JkFileTreeSet editedSources() {
 		return JkFileTreeSet.of(baseDir("src/main/java"));
 	}
 
 	/**
 	 * Returns the location of unit test source code that has been edited manually (not generated).
 	 */
-	public JkFileTreeSet editedUnitTestSourceDirs() {
+	public JkFileTreeSet unitTestEditedSources() {
 		return JkFileTreeSet.of(baseDir("src/test/java"));
 	}
 
 	/**
-	 * Returns location of production source code.
+	 * Returns location of production source code (containing edited + generated sources).
 	 */
-	public JkFileTreeSet sourceDirs() {
+	public JkFileTreeSet sources() {
 		return JkJavaBuildPlugin.applySourceDirs(this.plugins.getActives(),
-				editedSourceDirs().and(generatedSourceDir()));
+				editedSources().and(generatedSourceDir()));
 	}
 
 	/**
 	 * Returns the location of production resources that has been edited manually (not generated).
 	 */
-	public JkFileTreeSet editedResourceDirs() {
+	public JkFileTreeSet editedResources() {
 		return JkFileTreeSet.of(baseDir("src/main/resources"));
 	}
 
 	/**
 	 * Returns location of production resources.
 	 */
-	public JkFileTreeSet resourceDirs() {
-		final JkFileTreeSet original = sourceDirs().andFilter(RESOURCE_FILTER).and(
-				editedResourceDirs()).and(generatedResourceDir());
+	public JkFileTreeSet resources() {
+		final JkFileTreeSet original = sources().andFilter(RESOURCE_FILTER).and(
+				editedResources()).and(generatedResourceDir());
 		return JkJavaBuildPlugin.applyResourceDirs(this.plugins.getActives(), original);
 	}
 
 	/**
 	 * Returns location of test source code.
 	 */
-	public JkFileTreeSet unitTestSourceDirs() {
+	public JkFileTreeSet unitTestSources() {
 		return JkJavaBuildPlugin.applyTestSourceDirs(this.plugins.getActives(),
-				editedUnitTestSourceDirs().and(generatedUnitTestSourceDir()));
+				unitTestEditedSources().and(unitTestGeneratedSourceDir()));
 	}
 
 	/**
 	 * Returns location of test resources.
 	 */
-	public JkFileTreeSet unitTestResourceDirs() {
-		final JkFileTreeSet original = JkFileTreeSet.of(generatedUnitTestSourceDir()).and(
-				unitTestSourceDirs().andFilter(RESOURCE_FILTER));
+	public JkFileTreeSet unitTestResources() {
+		final JkFileTreeSet original = JkFileTreeSet.of(unitTestGeneratedSourceDir()).and(
+				unitTestSources().andFilter(RESOURCE_FILTER));
 		return JkJavaBuildPlugin.applyTestResourceDirs(this.plugins.getActives(), original);
 	}
 
@@ -208,7 +208,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	/**
 	 * Returns location of generated unit test sources.
 	 */
-	public File generatedUnitTestSourceDir() {
+	public File unitTestGeneratedSourceDir() {
 		return ouputDir("generated-unitTest-sources/java");
 	}
 
@@ -251,7 +251,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	public JkJavaCompiler productionCompiler() {
 		return JkJavaCompiler.ofOutput(classDir())
-				.andSources(sourceDirs())
+				.andSources(sources())
 				.withClasspath(depsFor(COMPILE, PROVIDED))
 				.withSourceVersion(this.sourceJavaVersion())
 				.withTargetVersion(this.targetJavaVersion());
@@ -259,7 +259,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	public JkJavaCompiler unitTestCompiler() {
 		return JkJavaCompiler.ofOutput(testClassDir())
-				.andSources(unitTestSourceDirs())
+				.andSources(unitTestSources())
 				.withClasspath(this.depsFor(TEST, PROVIDED).andHead(classDir()))
 				.withSourceVersion(this.sourceJavaVersion())
 				.withTargetVersion(this.targetJavaVersion());
@@ -294,7 +294,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	}
 
 	protected JkResourceProcessor resourceProcessor() {
-		return JkResourceProcessor.of(resourceDirs());
+		return JkResourceProcessor.of(resources());
 	}
 
 	// --------------------------- Callable Methods -----------------------
@@ -307,10 +307,10 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 			@Override
 			public void run() {
-				for (final JkFileTree dir : editedSourceDirs().jkFileTrees()) {
+				for (final JkFileTree dir : editedSources().jkFileTrees()) {
 					dir.root().mkdirs();
 				}
-				for (final JkFileTree dir : unitTestSourceDirs().jkFileTrees()) {
+				for (final JkFileTree dir : unitTestEditedSources().jkFileTrees()) {
 					dir.root().mkdirs();
 				}
 			}
@@ -332,7 +332,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	@JkDoc("Compile and run all unit tests.")
 	public void unitTest() {
 		this.generateUnitTestSources();
-		if (!checkProcessTests(unitTestSourceDirs())) {
+		if (!checkProcessTests(unitTestSources())) {
 			return;
 		}
 		JkLog.startln("Process unit tests");
@@ -421,7 +421,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	 * processing (as interpolating) you should override this method.
 	 */
 	protected void processUnitTestResources() {
-		JkResourceProcessor.of(unitTestResourceDirs()).andIfExist(generatedTestResourceDir()).generateTo(testClassDir());
+		JkResourceProcessor.of(unitTestResources()).andIfExist(generatedTestResourceDir()).generateTo(testClassDir());
 	}
 
 	protected boolean checkProcessTests(JkFileTreeSet testSourceDirs) {
@@ -432,7 +432,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 			JkLog.info("No test source declared. Skip tests.");
 			return false;
 		}
-		if (!unitTestSourceDirs().allExists()) {
+		if (!unitTestSources().allExists()) {
 			JkLog.info("No existing test source directory found : " + testSourceDirs +". Skip tests.");
 			return false;
 		}

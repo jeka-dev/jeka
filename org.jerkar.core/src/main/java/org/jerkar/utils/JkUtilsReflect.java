@@ -134,6 +134,9 @@ public final class JkUtilsReflect {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T invoke(Object target, Method method) {
+		if (!method.isAccessible()) {
+			method.setAccessible(true);
+		}
 		try {
 			return (T) method.invoke(target);
 		} catch(final InvocationTargetException e) {

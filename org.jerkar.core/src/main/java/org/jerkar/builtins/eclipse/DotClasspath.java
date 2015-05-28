@@ -337,7 +337,7 @@ final class DotClasspath {
 
 		// Sources
 		final Set<String> sourcePaths = new HashSet<String>();
-		for (final JkFileTree jkFileTree : build.sourceDirs().and(build.resourceDirs())
+		for (final JkFileTree jkFileTree : build.sources().and(build.resources())
 				.jkFileTrees()) {
 			if (!jkFileTree.root().exists() ) {
 				continue;
@@ -356,7 +356,7 @@ final class DotClasspath {
 		}
 
 		// Test Sources
-		for (final JkFileTree jkFileTree : build.unitTestResourceDirs().and(build.unitTestResourceDirs())
+		for (final JkFileTree jkFileTree : build.unitTestSources().and(build.unitTestResources())
 				.jkFileTrees()) {
 			if (!jkFileTree.root().exists() ) {
 				continue;

@@ -49,8 +49,8 @@ public class DistribAllBuild extends JkBuildDependencySupport {
 			.exclude(fatSource.getName())).to(fatSource);
 		
 		JkLog.info("Create a fat javadoc");
-		JkFileTreeSet sources = this.pluginsJacoco.core.sourceDirs().and(this.pluginsJacoco.sourceDirs())
-				.and(this.pluginsSonar.sourceDirs());
+		JkFileTreeSet sources = this.pluginsJacoco.core.sources().and(this.pluginsJacoco.sources())
+				.and(this.pluginsSonar.sources());
 		File javadocAllDir = this.ouputDir("javadoc-all");
 		File javadocAllFile = dist.file("libs-javadoc/org.jerkar.core-fat-javadoc.jar");
 		JkJavadocMaker.of(sources, javadocAllDir, javadocAllFile).process();

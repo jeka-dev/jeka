@@ -93,15 +93,15 @@ public class JkJavaPacker implements Cloneable {
 		if (doJar && !JkUtilsFile.isEmpty(build.classDir(), false)) {
 			JkFileTree.of(build.classDir()).zip().to(jarFile(), compressionLevel).md5If(checkSum);
 		}
-		final JkFileTreeSet sourceAndResources = build.sourceDirs().and(build.resourceDirs());
+		final JkFileTreeSet sourceAndResources = build.sources().and(build.resources());
 		if (doSources && sourceAndResources.countFiles(false) > 0) {
-			build.sourceDirs().and(build.resourceDirs()).zip().to(jarSourceFile(), compressionLevel);
+			build.sources().and(build.resources()).zip().to(jarSourceFile(), compressionLevel);
 		}
 		if (doTest && !build.skipTests && build.testClassDir().exists() && !JkFileTree.of(build.testClassDir()).files(false).isEmpty()) {
 			JkZipper.of(build.testClassDir()).to(jarTestFile(), compressionLevel);
 		}
-		if (doTest && doSources && !build.unitTestSourceDirs().files(false).isEmpty()) {
-			build.unitTestSourceDirs().and(build.unitTestResourceDirs()).zip().to(jarTestSourceFile(), compressionLevel);
+		if (doTest && doSources && !build.unitTestSources().files(false).isEmpty()) {
+			build.unitTestSources().and(build.unitTestResources()).zip().to(jarTestSourceFile(), compressionLevel);
 		}
 		if (doFatJar) {
 			JkFileTree.of(build.classDir()).zip().merge(build.depsFor(JkJavaBuild.RUNTIME))

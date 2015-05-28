@@ -39,7 +39,7 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
 	/**
 	 * Override this method if the plugin need to alter the source directory to use for compiling.
 	 * 
-	 * @see JkJavaBuild#sourceDirs()
+	 * @see JkJavaBuild#sources()
 	 */
 	protected JkFileTreeSet alterSourceDirs(JkFileTreeSet original) {
 		return original;
@@ -48,7 +48,7 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
 	/**
 	 * Override this method if the plugin need to alter the test source directory to use for compiling.
 	 * 
-	 * @see JkJavaBuild#unitTestSourceDirs()
+	 * @see JkJavaBuild#unitTestSources()
 	 */
 	protected JkFileTreeSet alterTestSourceDirs(JkFileTreeSet original) {
 		return original;
@@ -57,7 +57,7 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
 	/**
 	 * Override this method if the plugin need to alter the resource directory to use for compiling.
 	 * 
-	 * @see JkJavaBuild#resourceDirs()
+	 * @see JkJavaBuild#resources()
 	 */
 	protected JkFileTreeSet alterResourceDirs(JkFileTreeSet original) {
 		return original;
@@ -66,7 +66,7 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
 	/**
 	 * Override this method if the plugin need to alter the test resource directory to use for compiling.
 	 * 
-	 * @see JkJavaBuild#unitTestResourceDirs()
+	 * @see JkJavaBuild#unitTestResources()
 	 */
 	protected JkFileTreeSet alterTestResourceDirs(JkFileTreeSet original) {
 		return original;

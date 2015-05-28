@@ -57,7 +57,7 @@ public final class JkJavadocMaker {
 			name = name + "-" + javaBuild.version().name();
 		}
 		name = name + "-javadoc";
-		return of(javaBuild.sourceDirs(), javaBuild.ouputDir(name), javaBuild.ouputDir(name + ".jar"))
+		return of(javaBuild.sources(), javaBuild.ouputDir(name), javaBuild.ouputDir(name + ".jar"))
 				.withClasspath(javaBuild.depsFor(JkJavaBuild.COMPILE, JkJavaBuild.PROVIDED));
 	}
 
