@@ -1,7 +1,7 @@
 @echo off
 
 @rem Change here the default JVM options 
-if "%JAVA_OPTS%" == "" set "JAVA_OPTS=-Xmx512m -XX:MaxPermSize=512m" 
+if "%JERKAR_OPTS%" == "" set "JERKAR_OPTS=-Xmx512m -XX:MaxPermSize=512m" 
 
 SET JERKAR_HOME=%~dp0
 if "%JAVA_HOME%" == "" set "JAVA_CMD=java" 
@@ -9,7 +9,7 @@ if not "%JAVA_HOME%" == "" set "JAVA_CMD=%JAVA_HOME%\bin\java"
 
 SET LOCAL_BUILD_DIR=
 if exist %cd%\build\libs\build set "LOCAL_BUILD_DIR=build\libs\build\*;"
-set "COMMAND="%JAVA_CMD%" %JAVA_OPTS% -cp "%LOCAL_BUILD_DIR%%JERKAR_HOME%org.jerkar.core.jar;%JERKAR_HOME%libs\required\*;%JERKAR_HOME%libs\ext\*" org.jerkar.Main %*"
+set "COMMAND="%JAVA_CMD%" %JERKAR_OPTS% -cp "%LOCAL_BUILD_DIR%%JERKAR_HOME%org.jerkar.core.jar;%JERKAR_HOME%libs\required\*;%JERKAR_HOME%libs\ext\*" org.jerkar.Main %*"
 if not "%JERKAR_ECHO_CMD%" == "" (
 	@echo on
 	echo %COMMAND%

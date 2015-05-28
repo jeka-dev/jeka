@@ -43,6 +43,7 @@ public class CoreBuild extends JerkarBuild {
 		distrib();
 	}
 
+
 	private void distrib() {
 		final JkFileTree distrib = JkFileTree.of(distribFolder);
 		JkLog.startln("Creating distrib " + distripZipFile.getPath());
@@ -57,6 +58,7 @@ public class CoreBuild extends JerkarBuild {
 		.importFiles(packer.jarSourceFile());
 		distrib.from("libs-javadoc").importFiles(this.javadocMaker().zipFile());
 		distrib.zip().to(distripZipFile, Deflater.BEST_COMPRESSION);
+		signIfNeeded(distripZipFile);
 		JkLog.done();
 	}
 

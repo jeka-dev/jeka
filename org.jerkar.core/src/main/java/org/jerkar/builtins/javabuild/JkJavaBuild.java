@@ -356,8 +356,20 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	}
 
 	@JkDoc("Produce documents for this project (javadoc, Html site, ...)")
-	public void doc() {
+	public void javadoc() {
 		javadocMaker().process();
+		signIfNeeded(javadocMaker().zipFile());
+	}
+
+	/**
+	 * Signs the specified files with PGP if the flag {@link #signArtifacts} is <code>true</code>.
+	 * The signature will detached in the same folder than the signed file and will have the same name
+	 * with the <i>.asc</i> prefix.
+	 */
+	protected final void signIfNeeded(File ...files) {
+		if (signArtifacts) {
+			pgp().sign(pgpSecretKeyPassword, files);
+		}
 	}
 
 

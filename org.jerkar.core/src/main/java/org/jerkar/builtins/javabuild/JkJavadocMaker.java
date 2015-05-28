@@ -66,10 +66,12 @@ public final class JkJavadocMaker {
 		return new JkJavadocMaker(sources, null, null, "", outputDir, null);
 	}
 
+	/**
+	 * Returns the zip file containing all the produced Javadoc.
+	 */
 	public File zipFile() {
 		return zipFile;
 	}
-
 
 
 	public JkJavadocMaker withDoclet(Class<?> doclet) {
