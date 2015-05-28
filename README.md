@@ -25,7 +25,7 @@ Jerkar builds itself. To get Jerkar full distrib built from the Java sources onl
 The documentation is at early stage but the code is yet pretty close to completion for a first release. 
 I mainly need help for further testing, writing documentation, polishing the API... and getting some feedback of course.
 
-# Code guideline
+# Code guidelines
 
 In a nutshell : try to mimick the current style :-)
 * Make a class public only when really needed. If a class is public, it should be prefixed with `Jk` (The goal is to not polute auto-completion in Eclipse).
