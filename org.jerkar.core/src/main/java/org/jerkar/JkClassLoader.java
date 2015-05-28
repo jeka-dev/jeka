@@ -97,29 +97,36 @@ public final class JkClassLoader {
 	/**
 	 * @see #createChild(Iterable).
 	 */
-	public JkClassLoader createChild(File...urls) {
-		return new JkClassLoader(new URLClassLoader(toUrl(Arrays.asList(urls)), this.delegate));
+	public JkClassLoader child(File...entries) {
+		return new JkClassLoader(new URLClassLoader(toUrl(Arrays.asList(entries)), this.delegate));
 	}
 
 	/**
-	 * Creates a class loader, child of this one and having the specified entries.
+	 * Creates a <code>JkClassLoader</code>, child of this one and having the specified entries.
 	 */
-	public JkClassLoader createChild(Iterable<File> urls) {
-		return new JkClassLoader(new URLClassLoader(toUrl(urls), this.delegate));
+	public JkClassLoader child(Iterable<File> entries) {
+		return new JkClassLoader(new URLClassLoader(toUrl(entries), this.delegate));
 	}
 
 	/**
-	 * Creates a class loader having the same parent and the same entries as this one plus the specified entries.
+	 * Creates a <code>JkClassLoader</code> loader having the same parent and the same entries as this one plus the specified entries.
 	 */
-	public JkClassLoader and(Iterable<File> files) {
-		return parent().createChild(this.childClasspath().and(files));
+	public JkClassLoader sibling(Iterable<File> files) {
+		return parent().child(this.childClasspath().and(files));
+	}
+
+	/**
+	 * Creates a {@link JkUrlClassloader} having the same parent and the same entries as this one plus the specified entries.
+	 */
+	public JkUrlClassloader childWithUrl(URL ...entries) {
+		return new JkUrlClassloader(new URLClassLoader(entries, this.delegate));
 	}
 
 	/**
 	 * @see #and(Iterable).
 	 */
 	public JkClassLoader and(File...files) {
-		return and(Arrays.asList(files));
+		return sibling(Arrays.asList(files));
 	}
 
 	/**
@@ -485,6 +492,43 @@ public final class JkClassLoader {
 			return object;
 		}
 		return JkUtilsIO.cloneBySerialization(object, to.classloader());
+	}
+
+
+	/**
+	 * Wrapper around {@link URLClassLoader} allowing {@link URL} as entry.
+	 * 
+	 * @author Jerome Angibaud
+	 */
+	public static final class JkUrlClassloader {
+
+		private final URLClassLoader delegate;
+
+		private JkUrlClassloader(URLClassLoader delegate) {
+			super();
+			this.delegate = delegate;
+		}
+
+		/**
+		 * Load the class having the same name as the specified class.
+		 */
+		public Class<?> load(Class<?> clazz) {
+			return load(clazz.getName());
+		}
+
+		/**
+		 * Same as {@link URLClassLoader#loadClass(String)} but not throwing checked exception.
+		 */
+		public Class<?> load(String className) {
+			try {
+				return this.delegate.loadClass(className);
+			} catch (final ClassNotFoundException e) {
+				throw new IllegalArgumentException("Class " + className + " not found on " + this, e);
+			}
+		}
+
+
+
 	}
 
 

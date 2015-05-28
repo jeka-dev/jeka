@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.zip.Deflater;
 
 import org.jerkar.JkLog;
+import org.jerkar.crypto.pgp.JkPgp;
 import org.jerkar.file.JkFileTree;
 import org.jerkar.file.JkFileTreeSet;
 import org.jerkar.file.JkZipper;
@@ -44,6 +45,11 @@ public class JkJavaPacker implements Cloneable {
 	private boolean doSources = true;
 
 	private boolean doFatJar = false;
+
+	private final JkPgp pgp = null;
+
+	private String pgpSecretKeyPassword;
+
 
 	private List<Extra> extraActions = new LinkedList<Extra>();
 
@@ -110,8 +116,12 @@ public class JkJavaPacker implements Cloneable {
 		for (final Extra action : this.extraActions) {
 			action.process(build);
 		}
+		if (pgp != null) {
+			pgp.sign(this.pgpSecretKeyPassword, jarFile(), jarSourceFile(), jarTestFile(), jarTestSourceFile(), fatJarFile(), javadocFile());
+		}
 		JkLog.done();
 	}
+
 
 
 	public interface Extra {

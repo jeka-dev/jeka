@@ -79,33 +79,39 @@ public final class JkUtilsIO {
 	/**
 	 * Closes the specified input stream, ignoring any exceptions.
 	 */
-	public static void closeQuietly(InputStream inputStream) {
-		try {
-			inputStream.close();
-		} catch (final Exception e) {
-			// Ignored
+	public static void closeQuietly(InputStream ...inputStreams) {
+		for (final InputStream inputStream : inputStreams) {
+			try {
+				inputStream.close();
+			} catch (final Exception e) {
+				// Ignored
+			}
 		}
 	}
 
 	/**
 	 * Closes the specified writer, ignoring any exceptions.
 	 */
-	public static void closeQuietly(Writer writer) {
-		try {
-			writer.close();
-		} catch (final Exception e) {
-			// Ignored
+	public static void closeQuietly(Writer ... writers) {
+		for (final Writer writer : writers) {
+			try {
+				writer.close();
+			} catch (final Exception e) {
+				// Ignored
+			}
 		}
 	}
 
 	/**
 	 * Closes the specified reader, ignoring any exceptions.
 	 */
-	public static void closeQuietly(Reader reader) {
-		try {
-			reader.close();
-		} catch (final Exception e) {
-			// Ignored
+	public static void closeQuietly(Reader ...readers) {
+		for (final Reader reader : readers) {
+			try {
+				reader.close();
+			} catch (final Exception e) {
+				// Ignored
+			}
 		}
 	}
 
@@ -158,22 +164,27 @@ public final class JkUtilsIO {
 	/**
 	 * Close the specified object input, ignoring any exceptions.
 	 */
-	public static void closeQuietly(ObjectInput objectInput) {
-		try {
-			objectInput.close();
-		} catch (final Exception e) {
-			// Ignored
+	public static void closeQuietly(ObjectInput ... objectInputs) {
+		for (final ObjectInput objectInput : objectInputs) {
+			try {
+				objectInput.close();
+			} catch (final Exception e) {
+				// Ignored
+			}
 		}
 	}
+
 
 	/**
 	 * Close the specified output stream, ignoring any exceptions.
 	 */
-	public static void closeQuietly(OutputStream outputStream) {
-		try {
-			outputStream.close();
-		} catch (final Exception e) {
-			// Ignored
+	public static void closeQuietly(OutputStream ... outputStreams) {
+		for(final OutputStream outputStream : outputStreams) {
+			try {
+				outputStream.close();
+			} catch (final Exception e) {
+				// Ignored
+			}
 		}
 	}
 
@@ -260,11 +271,13 @@ public final class JkUtilsIO {
 	 * Equivalent to {@link ZipOutputStream#closeEntry()} but without checked
 	 * exception.
 	 */
-	public static void closeEntry(ZipOutputStream outputStream) {
-		try {
-			outputStream.closeEntry();
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
+	public static void closeEntry(ZipOutputStream ...outputStreams) {
+		for (final ZipOutputStream outputStream : outputStreams) {
+			try {
+				outputStream.closeEntry();
+			} catch (final IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
@@ -401,11 +414,13 @@ public final class JkUtilsIO {
 	/**
 	 * Same as {@link ZipFile#close()} but throwing only unchecked exceptions.
 	 */
-	public static void closeQuietly(ZipFile zipFile) {
-		try {
-			zipFile.close();
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
+	public static void closeQuietly(ZipFile ... zipFiles) {
+		for (final ZipFile zipFile : zipFiles) {
+			try {
+				zipFile.close();
+			} catch (final IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 

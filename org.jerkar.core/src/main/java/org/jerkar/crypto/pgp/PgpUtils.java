@@ -1,4 +1,4 @@
-package org.jerkar.publishing;
+package org.jerkar.crypto.pgp;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.Security;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,27 +15,83 @@ import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.PacketTags;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPPrivateKey;
+import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.openpgp.PGPPublicKeyRingCollection;
 import org.bouncycastle.openpgp.PGPSecretKey;
 import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.bouncycastle.openpgp.PGPSignature;
 import org.bouncycastle.openpgp.PGPSignatureGenerator;
+import org.bouncycastle.openpgp.PGPSignatureList;
 import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.openpgp.operator.KeyFingerPrintCalculator;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIO;
 
 final class PgpUtils {
 
-	public static void sign(File fileToSign, File pgpFile, File signatureFile,
-			char[] pass, boolean armor) {
-		JkUtilsFile.assertAllExist(fileToSign, pgpFile);
+	static {
+		Security.addProvider(new BouncyCastleProvider());
+	}
+
+	public static boolean verify(File fileToVerify, File pubringFile, File signatureFile) {
+		final InputStream streamToVerify = JkUtilsIO.inputStream(fileToVerify);
+		final InputStream signatureStream = JkUtilsIO.inputStream(signatureFile);
+		final InputStream pubringStream = JkUtilsIO.inputStream(pubringFile);
+		try {
+			return verify(streamToVerify, signatureStream, pubringStream);
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		} catch (final PGPException e) {
+			throw new RuntimeException(e);
+		} finally {
+			JkUtilsIO.closeQuietly(streamToVerify, signatureStream, pubringStream);
+		}
+	}
+
+	public static boolean verify(InputStream streamToVerify,
+			InputStream signatureStream, InputStream keyInputStream) throws IOException, PGPException {
+
+		final InputStream sigInputStream = PGPUtil.getDecoderStream(new BufferedInputStream(signatureStream));
+
+		final KeyFingerPrintCalculator fingerPrintCalculator = new JcaKeyFingerprintCalculator();
+		final PGPObjectFactory pgpObjectFactory = new PGPObjectFactory(sigInputStream, fingerPrintCalculator);
+		final PGPSignatureList signatureList;
+		final Object gpgObject = pgpObjectFactory.nextObject();
+		if (gpgObject instanceof PGPCompressedData) {
+			final PGPCompressedData compressedData = (PGPCompressedData) gpgObject;
+			final PGPObjectFactory compressedPgpObjectFactory = new PGPObjectFactory(compressedData.getDataStream(), fingerPrintCalculator);
+			signatureList = (PGPSignatureList) compressedPgpObjectFactory.nextObject();
+		} else {
+			signatureList = (PGPSignatureList) gpgObject;
+		}
+
+		final PGPPublicKeyRingCollection pgpPubRingCollection = new PGPPublicKeyRingCollection(
+				PGPUtil.getDecoderStream(keyInputStream), fingerPrintCalculator);
+		final InputStream bufferedStream = new BufferedInputStream(streamToVerify);
+		final PGPSignature signature = signatureList.get(0);
+		final PGPPublicKey publicKey = pgpPubRingCollection.getPublicKey(signature.getKeyID());
+		signature.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), publicKey);
+		int character;
+		while ((character = bufferedStream.read()) >= 0) {
+			signature.update((byte) character);
+		}
+		return signature.verify();
+	}
+
+	public static void sign(File fileToSign, File secringFile,
+			File signatureFile, char[] pass, boolean armor) {
+		JkUtilsFile.assertAllExist(fileToSign, secringFile);
 		final InputStream toSign = JkUtilsIO.inputStream(fileToSign);
-		final InputStream keyRing = JkUtilsIO.inputStream(pgpFile);
+		final InputStream keyRing = JkUtilsIO.inputStream(secringFile);
 		final FileOutputStream out = JkUtilsIO.outputStream(signatureFile);
 		sign(toSign, keyRing, out, pass, armor);
 		JkUtilsIO.closeQuietly(toSign);
@@ -99,14 +156,10 @@ final class PgpUtils {
 		final KeyFingerPrintCalculator fingerPrintCalculator = new JcaKeyFingerprintCalculator();
 		final InnerPGPObjectFactory pgpFact = new InnerPGPObjectFactory(
 				decodedInput, fingerPrintCalculator);
-		Object obj;
+		PGPSecretKeyRing secKeyRing;
 		final List<PGPSecretKeyRing> result = new LinkedList<PGPSecretKeyRing>();
-		while ((obj = pgpFact.nextObject()) != null) {
-			if (!(obj instanceof PGPSecretKeyRing)) {
-				throw new IllegalArgumentException(obj.getClass().getName()
-						+ " found where PGPSecretKeyRing expected");
-			}
-			final PGPSecretKeyRing pgpSecret = (PGPSecretKeyRing) obj;
+		while ((secKeyRing = pgpFact.nextSecretKey()) != null) {
+			final PGPSecretKeyRing pgpSecret = secKeyRing;
 			result.add(pgpSecret);
 		}
 		return result;
@@ -123,7 +176,7 @@ final class PgpUtils {
 			this.fingerPrintCalculator = fingerPrintCalculator;
 		}
 
-		public Object nextObject() {
+		public PGPSecretKeyRing nextSecretKey() {
 			int tag;
 			try {
 				tag = in.nextPacketTag();

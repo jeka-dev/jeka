@@ -265,7 +265,7 @@ public final class JkUnit {
 	@SuppressWarnings("rawtypes")
 	private Collection<Class> getClassesToTest() {
 		final JkClasspath classpath = this.jkClasspath().andHead(this.classesToTest.roots());
-		final JkClassLoader classLoader = JkClassLoader.system().parent().createChild(classpath).loadAllServices();
+		final JkClassLoader classLoader = JkClassLoader.system().parent().child(classpath).loadAllServices();
 		return getJunitTestClassesInClassLoader(classLoader, this.classesToTest);
 	}
 

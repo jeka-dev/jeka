@@ -29,7 +29,7 @@ public final class JkLocator {
 		for (final File file : JkClassLoader.current().childClasspath()) {
 			try {
 				// TODO not optimized. Should be implemented on the JkClasspath class.
-				JkClassLoader.system().parent().createChild(file).classloader().loadClass(Main.class.getName());
+				JkClassLoader.system().parent().child(file).classloader().loadClass(Main.class.getName());
 				JERKAR_JAR_FILE = file;
 				return file;
 			} catch (final ClassNotFoundException e) {
@@ -45,7 +45,7 @@ public final class JkLocator {
 		}
 		for (final File file : JkClassLoader.current().childClasspath()) {
 			try {
-				JkClassLoader.system().parent().createChild(file).classloader().loadClass(Ivy.class.getName());
+				JkClassLoader.system().parent().child(file).classloader().loadClass(Ivy.class.getName());
 				IVY_JAR_FILE = file;
 				return file;
 			} catch (final ClassNotFoundException e) {

@@ -561,6 +561,9 @@ public final class JkUtilsFile {
 	public static File createFileIfNotExist(File file) {
 		try {
 			if (!file.exists()) {
+				if (file.getParent() != null && !file.getParentFile().exists()) {
+					file.getParentFile().mkdirs();
+				}
 				file.createNewFile();
 			}
 			return file;
