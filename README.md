@@ -1,6 +1,6 @@
 ![Logo of Jerkar](http://jerkar.github.io/img/logo.png)
 
-<strong>Jerkar</strong> is a complete **Java** built system ala _Ant_, _Maven_, _Gradle_ or _Buildr_ but using **pure Java** to describe builds : no XML, no foreign language.
+<strong>Jerkar</strong> is a complete **Java** build system ala _Ant_, _Maven_, _Gradle_ or _Buildr_ but using **pure Java** to describe builds : no XML, no foreign language.
 Breaking a common belief, it makes proof that Java is perfectly suitable in this domain.
 
 See [official web site](http://jerkar.github.io) for more description.
@@ -24,3 +24,10 @@ Jerkar builds itself. To get Jerkar full distrib built from the Java sources onl
 
 The documentation is at early stage but the code is yet pretty close to completion for a first release. 
 I mainly need help for further testing, writing documentation, polishing the API... and getting some feedback of course.
+
+# Code guidelines
+
+In a nutshell : try to mimick the current style :-)
+* Make a class public only when really needed. If a class is public, it should be prefixed with `Jk` (The goal is to not polute auto-completion in Eclipse).
+* Favor immutable objects.
+* Embrace a fluent style API (so stay away from JavaBean coding conventions).
