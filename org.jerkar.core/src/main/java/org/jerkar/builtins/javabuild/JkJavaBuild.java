@@ -363,8 +363,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	/**
 	 * Signs the specified files with PGP if the flag {@link #signArtifacts} is <code>true</code>.
-	 * The signature will detached in the same folder than the signed file and will have the same name
-	 * with the <i>.asc</i> prefix.
+	 * The signature will be detached in the same folder than the signed file and will have the same name
+	 * but with the <i>.asc</i> suffix.
 	 */
 	protected final void signIfNeeded(File ...files) {
 		if (signArtifacts) {

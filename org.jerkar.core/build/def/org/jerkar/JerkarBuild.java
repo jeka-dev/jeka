@@ -25,7 +25,7 @@ public abstract class JerkarBuild extends JkJavaBuild {
 	@Override
 	public void pack() {
 		super.pack();
-		this.javadocMaker().process();
+		javadoc();
 	}
 
 }

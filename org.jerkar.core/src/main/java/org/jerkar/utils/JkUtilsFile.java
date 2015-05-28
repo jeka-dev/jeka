@@ -116,7 +116,7 @@ public final class JkUtilsFile {
 	 *            The directory where will be copied the content
 	 * @param filter
 	 *            Filter to decide which file should be copied or not. If you
-	 *            want to copy everything, use {@link FileFilter#} that always
+	 *            want to copy everything, use {@link FileFilter} that always
 	 *            return <code>true</code>.
 	 * @param copyEmptyDir
 	 *            specify if the empty dirs should be copied as well.
@@ -548,7 +548,7 @@ public final class JkUtilsFile {
 	}
 
 	/**
-	 * Same as {@link File#createTempFile(String, String) but throwing only
+	 * Same as {@link File#createTempFile(String, String)} but throwing only
 	 * unchecked exceptions.
 	 */
 	public static File createTempFile(String prefix, String suffix) {

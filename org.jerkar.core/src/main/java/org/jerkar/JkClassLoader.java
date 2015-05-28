@@ -95,7 +95,7 @@ public final class JkClassLoader {
 	}
 
 	/**
-	 * @see #createChild(Iterable).
+	 * @see #child(Iterable).
 	 */
 	public JkClassLoader child(File...entries) {
 		return new JkClassLoader(new URLClassLoader(toUrl(Arrays.asList(entries)), this.delegate));
@@ -123,9 +123,9 @@ public final class JkClassLoader {
 	}
 
 	/**
-	 * @see #and(Iterable).
+	 * @see #sibling(Iterable).
 	 */
-	public JkClassLoader and(File...files) {
+	public JkClassLoader sibling(File...files) {
 		return sibling(Arrays.asList(files));
 	}
 
@@ -527,12 +527,6 @@ public final class JkClassLoader {
 			}
 		}
 
-
-
 	}
-
-
-
-
 
 }

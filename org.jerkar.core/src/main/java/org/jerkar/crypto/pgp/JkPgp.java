@@ -126,11 +126,17 @@ public final class JkPgp {
 		return result;
 	}
 
+	/**
+	 * Creates a identical {@link JkPgp} but with the specified secret ring key file.
+	 */
 	public JkPgp secretRingKey(File file) {
 		JkUtilsFile.assertAllExist(file);
 		return new JkPgp(pubRing, file);
 	}
 
+	/**
+	 * Creates a identical {@link JkPgp} but with the specified public ring key file.
+	 */
 	public JkPgp publicRingKey(File file) {
 		JkUtilsFile.assertAllExist(file);
 		return new JkPgp(file, secRing);

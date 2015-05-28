@@ -292,7 +292,7 @@ public final class JkUtilsReflect {
 	 * Invokes a static method with the specified arguments
 	 * @param clazz The class the method is invoked on.
 	 * @param methodName The method name to invoke
-	 * @param The argument values the method is invoked with.
+	 * @param args The argument values the method is invoked with.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T invokeStaticMethod(Class<?> clazz, String methodName, Object ...args) {
@@ -303,7 +303,7 @@ public final class JkUtilsReflect {
 	 * Invokes an instance method with the specified arguments
 	 * @param instance The instance the method is invoked on.
 	 * @param methodName The method name to invoke
-	 * @param The argument values the method is invoked with.
+	 * @param args The argument values the method is invoked with.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T invokeInstanceMethod(Object instance, String methodName, Object ...args) {
