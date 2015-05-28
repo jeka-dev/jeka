@@ -27,7 +27,7 @@ I mainly need help for further testing, writing documentation, polishing the API
 
 # Code guideline
 
-In a nutshell, try to mimick the style :-)
+In a nutshell : try to mimick the current style :-)
 * Make a class public only when really needed. If a class is public, it should be prefixed with `Jk` (The goal is to not polute auto-completion in Eclipse).
 * Favor immutable objects.
 * Embrace a fluent style API (so stay away from JavaBean coding conventions).
