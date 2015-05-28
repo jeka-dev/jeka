@@ -9,9 +9,11 @@ import org.jerkar.JkDoc;
 import org.jerkar.JkJavaCompiler;
 import org.jerkar.JkLog;
 import org.jerkar.JkOption;
+import org.jerkar.JkOptions;
 import org.jerkar.JkScaffolder;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
+import org.jerkar.crypto.pgp.JkPgp;
 import org.jerkar.depmanagement.JkBuildDependencySupport;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependency;
@@ -106,6 +108,12 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	@JkOption("When true, produce a fat-jar, meaning a jar embedding all the dependencies.")
 	public boolean fatJar;
+
+	@JkOption("When true, the produced artifacts are signed with PGP.")
+	public boolean signArtifacts;
+
+	@JkOption("Set the password of the secret PGP key, if you want to sign artifacts.")
+	String pgpSecretKeyPassword;
 
 	@Override
 	protected List<Class<Object>> pluginTemplateClasses() {
@@ -291,6 +299,10 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	protected JkJavaPacker createPacker() {
 		return JkJavaPacker.of(this);
+	}
+
+	protected JkPgp pgp() {
+		return JkPgp.of(JkOptions.asMap());
 	}
 
 	protected JkResourceProcessor resourceProcessor() {

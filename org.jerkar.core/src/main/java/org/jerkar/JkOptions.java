@@ -90,6 +90,10 @@ public final class JkOptions {
 		return INSTANCE.freeOptions.get(key);
 	}
 
+	public static Map<String, String> asMap() {
+		return Collections.unmodifiableMap(INSTANCE.freeOptions);
+	}
+
 	public static Map<String, String> getAllStartingWith(String prefix) {
 		final Map<String, String> result = new HashMap<String, String>();
 		for (final String key : INSTANCE.freeOptions.keySet()) {

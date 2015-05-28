@@ -1,9 +1,12 @@
 package org.jerkar.crypto.pgp;
 
 import java.io.File;
+import java.util.Map;
 
 import org.jerkar.JkClassLoader;
+import org.jerkar.JkOptions;
 import org.jerkar.utils.JkUtilsAssert;
+import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsReflect;
 
 /**
@@ -15,6 +18,10 @@ import org.jerkar.utils.JkUtilsReflect;
  */
 public final class JkPgp {
 
+	private static final String PUB_KEYRING = "pgp.pubring";
+
+	private static final String SECRET_KEYRING = "pgp.secring";
+
 	private final File pubRing;
 
 	private final File secRing;
@@ -24,6 +31,30 @@ public final class JkPgp {
 	 */
 	public static JkPgp of(File pubRing, File secRing) {
 		return new JkPgp(pubRing, secRing);
+	}
+
+	public static JkPgp ofDefaultGnuPg() {
+		final File pub = new File(JkUtilsFile.userHome(), "AppData/Roaming/gnupg/pubring.gpg");
+		final File sec = new File(JkUtilsFile.userHome(), "AppData/Roaming/gnupg/secring.gpg");
+		return new JkPgp(pub, sec);
+	}
+
+
+
+	/**
+	 * Creates a JkPgp with values found in {@link JkOptions}
+	 */
+	public static JkPgp of(Map<String, String> option) {
+		JkPgp result = ofDefaultGnuPg();
+		final String pub = option.get(PUB_KEYRING);
+		if (pub != null) {
+			result = result.publicRingKey(new File(pub));
+		}
+		final String sec = option.get(SECRET_KEYRING);
+		if (sec != null) {
+			result = result.secretRingKey(new File(sec));
+		}
+		return result;
 	}
 
 	/**
@@ -60,9 +91,15 @@ public final class JkPgp {
 	 * @param password password of the secret key
 	 */
 	public void sign(File fileToSign, File output, String password) {
+		final char[] pass;
+		if (password == null) {
+			pass = new char[0];
+		} else {
+			pass = password.toCharArray();
+		}
 		JkUtilsAssert.isTrue(secRing != null, "You must supply a secret ring file (as secring.gpg) to sign files");
 		JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "sign",
-				fileToSign, secRing, output, password.toCharArray(), true);
+				fileToSign, secRing, output, pass, true);
 	}
 
 	/**
@@ -84,8 +121,19 @@ public final class JkPgp {
 	 */
 	public boolean verify(File fileToVerify, File signature) {
 		JkUtilsAssert.isTrue(pubRing != null, "You must supply a public ring file (as pubring.gpg) to verify file signatures");
-		return JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "verify",
+		final Boolean result = JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "verify",
 				fileToVerify, pubRing, signature);
+		return result;
+	}
+
+	public JkPgp secretRingKey(File file) {
+		JkUtilsFile.assertAllExist(file);
+		return new JkPgp(pubRing, file);
+	}
+
+	public JkPgp publicRingKey(File file) {
+		JkUtilsFile.assertAllExist(file);
+		return new JkPgp(file, secRing);
 	}
 
 

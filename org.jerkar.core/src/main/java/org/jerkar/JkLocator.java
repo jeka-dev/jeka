@@ -6,6 +6,7 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import org.apache.ivy.Ivy;
+import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsString;
 
 /**
@@ -63,7 +64,7 @@ public final class JkLocator {
 	}
 
 	public static File jerkarUserHome() {
-		final File result = new File(System.getProperty("user.home"),".jerkar");
+		final File result = new File(JkUtilsFile.userHome(),".jerkar");
 		if (!result.exists()) {
 			JkLog.info("Create Jerkar user directory : " + result.getPath());
 			result.mkdirs();

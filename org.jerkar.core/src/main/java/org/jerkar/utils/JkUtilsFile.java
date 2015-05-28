@@ -495,6 +495,10 @@ public final class JkUtilsFile {
 		return new File(System.getProperty("java.io.tmpdir"));
 	}
 
+	public static File userHome() {
+		return new File(System.getProperty("user.home"));
+	}
+
 	public static void writeString(File file, String content, boolean append) {
 		try {
 			if (!file.exists()) {

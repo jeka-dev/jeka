@@ -46,7 +46,7 @@ public class JkJavaPacker implements Cloneable {
 
 	private boolean doFatJar = false;
 
-	private final JkPgp pgp = null;
+	private JkPgp pgp = null;
 
 	private String pgpSecretKeyPassword;
 
@@ -56,6 +56,10 @@ public class JkJavaPacker implements Cloneable {
 	private JkJavaPacker(JkJavaBuild build) {
 		this.build = build;
 		this.doFatJar = build.fatJar;
+		if (build.signArtifacts) {
+			this.pgp = build.pgp();
+			this.pgpSecretKeyPassword = build.pgpSecretKeyPassword;
+		}
 	}
 
 	public String baseName() {
@@ -117,7 +121,9 @@ public class JkJavaPacker implements Cloneable {
 			action.process(build);
 		}
 		if (pgp != null) {
+			JkLog.start("Sign artifacts");
 			pgp.sign(this.pgpSecretKeyPassword, jarFile(), jarSourceFile(), jarTestFile(), jarTestSourceFile(), fatJarFile(), javadocFile());
+			JkLog.done();
 		}
 		JkLog.done();
 	}
@@ -192,6 +198,27 @@ public class JkJavaPacker implements Cloneable {
 		public Builder doFatJar(Boolean doFatJar) {
 			packer.doFatJar = doFatJar;
 			return this;
+		}
+
+		/**
+		 * Tells the packer to sign each produced element.
+		 */
+		public Builder doSign(Boolean doSign, JkPgp pgp, String secretKeyPassword) {
+			if (!doSign) {
+				packer.pgp = null;
+				packer.pgpSecretKeyPassword = null;
+				return this;
+			}
+			packer.pgp = pgp;
+			packer.pgpSecretKeyPassword = secretKeyPassword;
+			return this;
+		}
+
+		/**
+		 * Tells the packer to sign each produced element.
+		 */
+		public Builder doSign(Boolean doSign, File secretRingKey, String secretKeyPassword) {
+			return doSign(doSign, JkPgp.ofSecretRing(secretRingKey), secretKeyPassword);
 		}
 
 		public Builder extraAction(Extra extra) {
