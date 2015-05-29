@@ -64,6 +64,7 @@ public class DistribAllBuild extends JkBuildDependencySupport {
 	@JkDoc("End to end method to construct a distrib.")
 	public void doDefault() {
 		super.doDefault();
+		pluginsJacoco.core.doJavadoc = false;
 		multiProjectDependencies().invokeDoDefaultMethodOnAllSubProjects();
 		distrib();
 	} 

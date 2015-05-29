@@ -6,6 +6,8 @@ import org.jerkar.publishing.JkMavenPublicationInfo;
 
 public abstract class JerkarBuild extends JkJavaBuild {
 
+	public boolean doJavadoc = true;
+
 	@Override
 	public String sourceJavaVersion() {
 		return JkJavaCompiler.V6;
@@ -25,7 +27,9 @@ public abstract class JerkarBuild extends JkJavaBuild {
 	@Override
 	public void pack() {
 		super.pack();
-		javadoc();
+		if (doJavadoc) {
+			javadoc();
+		}
 	}
 
 }
