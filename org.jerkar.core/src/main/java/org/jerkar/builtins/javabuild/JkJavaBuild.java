@@ -110,7 +110,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	public boolean fatJar;
 
 	@JkOption("When true, the produced artifacts are signed with PGP.")
-	public boolean signArtifacts;
+	public boolean signWithPgp;
 
 	@JkOption("Set the password of the secret PGP key, if you want to sign artifacts.")
 	String pgpSecretKeyPassword;
@@ -362,12 +362,12 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	}
 
 	/**
-	 * Signs the specified files with PGP if the flag {@link #signArtifacts} is <code>true</code>.
+	 * Signs the specified files with PGP if the flag {@link #signWithPgp} is <code>true</code>.
 	 * The signature will be detached in the same folder than the signed file and will have the same name
 	 * but with the <i>.asc</i> suffix.
 	 */
 	protected final void signIfNeeded(File ...files) {
-		if (signArtifacts) {
+		if (signWithPgp) {
 			pgp().sign(pgpSecretKeyPassword, files);
 		}
 	}

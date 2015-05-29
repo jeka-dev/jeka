@@ -56,7 +56,7 @@ public class JkJavaPacker implements Cloneable {
 	private JkJavaPacker(JkJavaBuild build) {
 		this.build = build;
 		this.doFatJar = build.fatJar;
-		if (build.signArtifacts) {
+		if (build.signWithPgp) {
 			this.pgp = build.pgp();
 			this.pgpSecretKeyPassword = build.pgpSecretKeyPassword;
 		}

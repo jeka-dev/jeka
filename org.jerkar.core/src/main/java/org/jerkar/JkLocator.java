@@ -63,6 +63,18 @@ public final class JkLocator {
 		return jerkarJarFile().getParentFile();
 	}
 
+	/**
+	 * Returns the temporary directory used by Jerkar. This directory can contains
+	 * caches for example.
+	 */
+	public static File jerkarTempDir() {
+		final File result = new File(jerkarHome(),"temp");
+		if (!result.exists()) {
+			result.mkdirs();
+		}
+		return result;
+	}
+
 	public static File jerkarUserHome() {
 		final File result = new File(JkUtilsFile.userHome(),".jerkar");
 		if (!result.exists()) {
