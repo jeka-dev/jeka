@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Map;
 
 import org.jerkar.JkClassLoader;
-import org.jerkar.JkLocator;
 import org.jerkar.JkOptions;
 import org.jerkar.utils.JkUtilsAssert;
 import org.jerkar.utils.JkUtilsFile;
@@ -23,12 +22,13 @@ public final class JkPgp {
 
 	private static final String SECRET_KEYRING = "pgp.secring";
 
+	private static final String PGPUTILS_CLASS_NAME = "org.jerkar.crypto.pgp.PgpUtils";
+
 	// We don't want to add Bouncycastle in the Jerkar classpath, so we create a specific classloader
 	// just for launching the Bouncy castle methods.
-	private static Class<?> PGPUTILS_CLASS = JkClassLoader.current().childWithParentLast(
-			JkPgp.class.getResource("bouncycastle-all-152.jar"),
-			JkUtilsFile.toUrl(JkLocator.jerkarJarFile())
-			).load(PgpUtils.class.getName());
+	private static Class<?> PGPUTILS_CLASS = JkClassLoader.current().sibling(
+			JkPgp.class.getResource("bouncycastle-all-152.jar")
+			).load(PGPUTILS_CLASS_NAME);
 
 	private final File pubRing;
 
@@ -102,8 +102,6 @@ public final class JkPgp {
 		} else {
 			pass = password.toCharArray();
 		}
-		System.out.println("***************************************");
-		System.out.println(JkClassLoader.of(PGPUTILS_CLASS));
 		JkUtilsAssert.isTrue(secRing != null, "You must supply a secret ring file (as secring.gpg) to sign files");
 		JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "sign",
 				fileToSign, secRing, output, pass, true);

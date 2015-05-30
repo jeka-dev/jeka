@@ -19,7 +19,7 @@ import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependency;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
-import org.jerkar.file.JkFileFilter;
+import org.jerkar.file.JkPathFilter;
 import org.jerkar.file.JkFileTree;
 import org.jerkar.file.JkFileTreeSet;
 import org.jerkar.publishing.JkIvyPublication;
@@ -66,7 +66,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	/**
 	 * Filter to excludes everything in a java source directory which are not resources.
 	 */
-	public static final JkFileFilter RESOURCE_FILTER = JkFileFilter
+	public static final JkPathFilter RESOURCE_FILTER = JkPathFilter
 			.exclude("**/*.java").andExclude("**/package.html")
 			.andExclude("**/doc-files");
 
@@ -319,10 +319,10 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 			@Override
 			public void run() {
-				for (final JkFileTree dir : editedSources().jkFileTrees()) {
+				for (final JkFileTree dir : editedSources().fileTrees()) {
 					dir.root().mkdirs();
 				}
-				for (final JkFileTree dir : unitTestEditedSources().jkFileTrees()) {
+				for (final JkFileTree dir : unitTestEditedSources().fileTrees()) {
 					dir.root().mkdirs();
 				}
 			}
@@ -452,7 +452,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 		if (skipTests) {
 			return false;
 		}
-		if (testSourceDirs == null || testSourceDirs.jkFileTrees().isEmpty()) {
+		if (testSourceDirs == null || testSourceDirs.fileTrees().isEmpty()) {
 			JkLog.info("No test source declared. Skip tests.");
 			return false;
 		}

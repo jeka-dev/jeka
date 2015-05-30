@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.jerkar.file.JkFileFilter;
+import org.jerkar.file.JkPathFilter;
 import org.jerkar.file.JkFileTreeSet;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIO;
@@ -119,38 +119,34 @@ public final class JkClassLoader {
 	/**
 	 * Creates a <code>JkClassLoader</code> loader having the same parent and
 	 * the same entries as this one plus the specified entries.
+	 * URL entries that are not file are transformed to file (created in temp folder).
 	 */
-	public JkClassLoader sibling(Iterable<File> files) {
+	public JkClassLoader sibling(Iterable<Object> urlOrFiles) {
+		return sibling(JkUtilsIterable.arrayOf(urlOrFiles, Object.class));
+	}
+
+	public JkClassLoader sibling(Object... fileOuUrls) {
+		final List<File> files = new LinkedList<File>();
+		for (final Object entry : fileOuUrls) {
+			if (entry instanceof URL) {
+				final URL url = (URL) entry;
+				final String path = url.getFile();
+				final File candidate = new File(path);
+				if (JkUtilsString.isBlank(path) || (!candidate.isFile() && !candidate.isDirectory())) {
+					final File file = JkUtilsIO.getFileFromUrl(url, JkLocator.jerkarTempDir());
+					files.add(file);
+				} else {
+					files.add(candidate);
+				}
+			} else if (entry instanceof File) {
+				files.add((File) entry);
+			} else {
+				new IllegalArgumentException("This methid only accept File and URL, not " + entry.getClass().getName());
+			}
+		}
 		return parent().child(this.childClasspath().and(files));
 	}
 
-	/**
-	 * Creates a parent-last {@link JkClassloader} child of this one. URL entries that are
-	 * not file are transformed to file (created in temp folder).
-	 */
-	public JkClassLoader childWithParentLast(URL... entries) {
-		final List<URL> files = new LinkedList<URL>();
-		for (final URL url : entries) {
-			final String path = url.getFile();
-			final File candidate = new File(path);
-			if (JkUtilsString.isBlank(path) || !candidate.isFile()) {
-				final File file = JkUtilsIO.getFileFromUrl(url, JkLocator.jerkarTempDir());
-				files.add(JkUtilsFile.toUrl(file));
-			} else {
-				files.add(url);
-			}
-		}
-		final ParentLastClassloader classloader = new ParentLastClassloader(
-				files.toArray(new URL[0]), this.delegate);
-		return new JkClassLoader(classloader);
-	}
-
-	/**
-	 * @see #sibling(Iterable).
-	 */
-	public JkClassLoader sibling(File... files) {
-		return sibling(Arrays.asList(files));
-	}
 
 	/**
 	 * Returns the classpath of this classloader without mentioning classpath of
@@ -332,13 +328,13 @@ public final class JkClassLoader {
 
 	/**
 	 * Loads all class having a relative path matching the supplied
-	 * {@link JkFileFilter}. For example, if you want to load all class
+	 * {@link JkPathFilter}. For example, if you want to load all class
 	 * belonging to <code>my.pack</code> or its sub package, then you have to
 	 * supply a filter with an include pattern as
 	 * <code>my/pack/&#42;&#42;/&#42;.class</code>. Note that ending with
 	 * <code>.class</code> is important.
 	 */
-	public Set<Class<?>> loadClasses(JkFileFilter classFileFilter) {
+	public Set<Class<?>> loadClasses(JkPathFilter classFileFilter) {
 		final Set<Class<?>> result = new HashSet<Class<?>>();
 		final Set<String> classFiles = this.fullClasspath().allItemsMatching(
 				classFileFilter);
@@ -355,14 +351,14 @@ public final class JkClassLoader {
 	 * <code>my.pack</code> or its sub package, then you have to supply a the
 	 * following pattern <code>my/pack/&#42;&#42;/&#42;</code>.
 	 * 
-	 * @see JkClassLoader#loadClasses(JkFileFilter)
+	 * @see JkClassLoader#loadClasses(JkPathFilter)
 	 */
 	public Set<Class<?>> loadClasses(String... includingPatterns) {
 		final List<String> patterns = new LinkedList<String>();
 		for (final String pattern : includingPatterns) {
 			patterns.add(pattern + ".class");
 		}
-		return loadClasses(JkFileFilter.include(patterns));
+		return loadClasses(JkPathFilter.include(patterns));
 	}
 
 	/**

@@ -9,12 +9,12 @@ import org.jerkar.utils.JkUtilsFile;
 /**
  * Filter on relative path ala <href a='https://ant.apache.org/manual/Types/patternset.html'>Ant pattern</href>.
  */
-public abstract class JkFileFilter {
+public abstract class JkPathFilter {
 
 	/**
 	 * Filter accepting all.
 	 */
-	public static final JkFileFilter ACCEPT_ALL = new JkFileFilter() {
+	public static final JkPathFilter ACCEPT_ALL = new JkPathFilter() {
 
 		@Override
 		public boolean accept(String relativePath) {
@@ -36,11 +36,11 @@ public abstract class JkFileFilter {
 	/**
 	 * Creates an include filter including the specified and patterns.
 	 */
-	public static JkFileFilter include(String ... antPatterns) {
+	public static JkPathFilter include(String ... antPatterns) {
 		return new IncludeFilter(AntPattern.setOf(antPatterns));
 	}
 
-	public static JkFileFilter include(Iterable<String> antPatterns) {
+	public static JkPathFilter include(Iterable<String> antPatterns) {
 		return new IncludeFilter(AntPattern.setOf(antPatterns));
 	}
 
@@ -48,40 +48,40 @@ public abstract class JkFileFilter {
 	/**
 	 * Creates an include filter excluding the specified and patterns.
 	 */
-	public static JkFileFilter exclude(String ... antPatterns) {
+	public static JkPathFilter exclude(String ... antPatterns) {
 		return new ExcludeFilter(AntPattern.setOf(antPatterns));
 	}
 
 	/**
 	 * Creates a filter made of this one plus the specified include ones.
 	 */
-	public JkFileFilter andInclude(String ... antPatterns) {
+	public JkPathFilter andInclude(String ... antPatterns) {
 		return this.and(include(antPatterns));
 	}
 
 	/**
 	 * Creates a filter made of this one plus the specified exclude ones.
 	 */
-	public JkFileFilter andExclude(String ... antPatterns) {
+	public JkPathFilter andExclude(String ... antPatterns) {
 		return this.and(exclude(antPatterns));
 	}
 
 	/**
 	 * Creates a filter made of this one plus the specified one.
 	 */
-	public JkFileFilter and(JkFileFilter other) {
+	public JkPathFilter and(JkPathFilter other) {
 		return and(this, other);
 	}
 
 	/**
 	 * Creates a filter which is the inverse of this one.
 	 */
-	public JkFileFilter reverse() {
-		return new JkFileFilter() {
+	public JkPathFilter reverse() {
+		return new JkPathFilter() {
 
 			@Override
 			public boolean accept(String relativePath) {
-				return !JkFileFilter.this.accept(relativePath);
+				return !JkPathFilter.this.accept(relativePath);
 			}
 
 		};
@@ -97,13 +97,13 @@ public abstract class JkFileFilter {
 			@Override
 			public boolean accept(File file) {
 				final String relativePath = JkUtilsFile.getRelativePath(baseDir, file).replace(File.separator, "/");
-				return JkFileFilter.this.accept(relativePath);
+				return JkPathFilter.this.accept(relativePath);
 			}
 		};
 	}
 
 
-	private static final class IncludeFilter extends JkFileFilter {
+	private static final class IncludeFilter extends JkPathFilter {
 
 		private final Set<AntPattern> antPatterns;
 
@@ -163,7 +163,7 @@ public abstract class JkFileFilter {
 
 	}
 
-	private static class ExcludeFilter extends JkFileFilter {
+	private static class ExcludeFilter extends JkPathFilter {
 
 
 		private final Set<AntPattern> antPatterns;
@@ -224,9 +224,9 @@ public abstract class JkFileFilter {
 
 	}
 
-	private static JkFileFilter and(final JkFileFilter filter1, final JkFileFilter filter2) {
+	private static JkPathFilter and(final JkPathFilter filter1, final JkPathFilter filter2) {
 
-		return new JkFileFilter() {
+		return new JkPathFilter() {
 
 			@Override
 			public boolean accept(String candidate) {

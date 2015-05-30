@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.jerkar.file.JkFileFilter;
+import org.jerkar.file.JkPathFilter;
 import org.jerkar.file.JkFileTree;
 import org.jerkar.utils.JkUtilsIO;
 import org.jerkar.utils.JkUtilsIterable;
@@ -178,7 +178,7 @@ public final class JkClasspath implements Iterable<File> {
 	 * any resource file.
 	 * The element is expressed with its path relative to its containing entry.
 	 */
-	public Set<String> allItemsMatching(JkFileFilter fileFilter) {
+	public Set<String> allItemsMatching(JkPathFilter fileFilter) {
 		final Set<String> result = new HashSet<String>();
 		for (final File classpathEntry : this) {
 			if (classpathEntry.isDirectory()) {

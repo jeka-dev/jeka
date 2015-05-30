@@ -13,7 +13,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import org.jerkar.file.JkFileFilter;
+import org.jerkar.file.JkPathFilter;
 import org.jerkar.file.JkFileTree;
 import org.jerkar.utils.JkUtilsString;
 
@@ -42,7 +42,7 @@ public final class JkJavaCompiler {
 	public static final String V8 = "8";
 
 	/** Filter to retain only source files */
-	public static final JkFileFilter JAVA_SOURCE_ONLY_FILTER = JkFileFilter
+	public static final JkPathFilter JAVA_SOURCE_ONLY_FILTER = JkPathFilter
 			.include("**/*.java");
 
 	/**

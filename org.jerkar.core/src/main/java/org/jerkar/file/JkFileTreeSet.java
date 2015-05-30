@@ -120,12 +120,7 @@ public final class JkFileTreeSet implements Iterable<File> {
 	}
 
 	/**
-	 * Copies the files contained in this {@link JkFileTreeSet} to the specified directory.
-	 * While copying, tokens located between <code>${</code> and <code>}</code> are replaced by
-	 * the specified value. <br/> For example, <code>my name is ${name}.</code> will be replaced
-	 * by <code>my name is Jerome</code>, if the tokenValues passed as parameter holds an entry
-	 * such <code>name=Jerome</code>.
-	 * 
+	 * See {@link JkFileTree#copyReplacingTokens(File, Map)}
 	 */
 	public int copyRepacingTokens(File destinationDir, Map<String, String> tokenValues) {
 		if (destinationDir.exists()) {
@@ -144,9 +139,9 @@ public final class JkFileTreeSet implements Iterable<File> {
 
 	/**
 	 * Creates a {@link JkFileTree} which is a copy of this {@link JkFileTree} augmented
-	 * with the specified {@link JkFileFilter}
+	 * with the specified {@link JkPathFilter}
 	 */
-	public JkFileTreeSet andFilter(JkFileFilter filter) {
+	public JkFileTreeSet andFilter(JkPathFilter filter) {
 		final List<JkFileTree> list = new LinkedList<JkFileTree>();
 		for (final JkFileTree dirView : this.jkFileTrees) {
 			list.add(dirView.andFilter(filter));
@@ -184,7 +179,7 @@ public final class JkFileTreeSet implements Iterable<File> {
 	/**
 	 * Returns {@link JkFileTree} instances constituting this {@link JkFileTreeSet}.
 	 */
-	public List<JkFileTree> jkFileTrees() {
+	public List<JkFileTree> fileTrees() {
 		return jkFileTrees;
 	}
 

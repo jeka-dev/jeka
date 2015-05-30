@@ -602,10 +602,14 @@ public final class JkUtilsFile {
 
 	/**
 	 * Same as {@link #copyFileReplacingTokens(File, File, Map, PrintStream)}
-	 * but writtying the status in the specified reportStream.
+	 * but writing the status in the specified reportStream.
 	 */
 	public static void copyFileReplacingTokens(File from, File toFile,
 			Map<String, String> replacements, PrintStream reportStream) {
+		if (replacements == null || replacements.isEmpty()) {
+			copyFile(from, toFile, reportStream);
+			return;
+		}
 		if (!from.exists()) {
 			throw new IllegalArgumentException("File " + from.getPath()
 					+ " does not exist.");
@@ -616,14 +620,7 @@ public final class JkUtilsFile {
 		}
 		final TokenReplacingReader replacingReader = new TokenReplacingReader(
 				from, replacements);
-		if (!toFile.exists()) {
-			try {
-				toFile.createNewFile();
-			} catch (final IOException e) {
-				JkUtilsIO.closeQuietly(replacingReader);
-				throw new RuntimeException(e);
-			}
-		}
+		createFileIfNotExist(toFile);
 		final Writer writer;
 		try {
 			writer = new FileWriter(toFile);
@@ -632,7 +629,7 @@ public final class JkUtilsFile {
 			throw new RuntimeException(e);
 		}
 		if (reportStream != null) {
-			reportStream.println("Coping and replacing token from file "
+			reportStream.println("Coping and replacing tokens " + replacements + " from file "
 					+ from.getAbsolutePath() + " to "
 					+ toFile.getAbsolutePath());
 		}

@@ -64,7 +64,7 @@ public class JkManifest {
 	}
 
 	private static Manifest readMetaInfManifest(JkFileTreeSet jkFileTreeSet) {
-		for (final JkFileTree dir : jkFileTreeSet.jkFileTrees()) {
+		for (final JkFileTree dir : jkFileTreeSet.fileTrees()) {
 			final File candidate = dir.file(PATH);
 			if (candidate.exists()) {
 				return read(candidate);

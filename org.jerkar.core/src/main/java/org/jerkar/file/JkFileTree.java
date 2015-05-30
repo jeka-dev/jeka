@@ -31,16 +31,16 @@ public final class JkFileTree implements Iterable<File> {
 
 	private final File root;
 
-	private final JkFileFilter filter;
+	private final JkPathFilter filter;
 
 	private JkFileTree(File rootDir) {
-		this(rootDir, JkFileFilter.ACCEPT_ALL);
+		this(rootDir, JkPathFilter.ACCEPT_ALL);
 	}
 
 	/**
 	 * Creates a {@link JkFileTree} having the specified root directory and filter.
 	 */
-	private JkFileTree(File rootDir, JkFileFilter filter) {
+	private JkFileTree(File rootDir, JkPathFilter filter) {
 		JkUtilsAssert.notNull(rootDir, "Root dir can't be null.");
 		if (filter == null) {
 			throw new IllegalArgumentException("filter can't be null.");
@@ -93,6 +93,11 @@ public final class JkFileTree implements Iterable<File> {
 		return JkUtilsFile.copyDirContent(root, destinationDir, filter.toFileFilter(root), true, JkLog.infoStreamIfVerbose());
 	}
 
+	/**
+	 * Same as {@link #copyTo(File)} but replacing the tokens in <code>${key}</code>
+	 * by their corresponding value in the specified tokenValues.
+	 * If no key match then the token is not replaced.
+	 */
 	public int copyReplacingTokens(File destinationDir, Map<String, String> tokenValues) {
 		if (!destinationDir.exists()) {
 			destinationDir.mkdirs();
@@ -112,7 +117,7 @@ public final class JkFileTree implements Iterable<File> {
 	/**
 	 * Returns the filter defined on this {@link JkFileTree}, never <code>null</code>.
 	 */
-	public JkFileFilter filter() {
+	public JkPathFilter filter() {
 		return filter;
 	}
 
@@ -213,29 +218,29 @@ public final class JkFileTree implements Iterable<File> {
 
 	/**
 	 * Creates a {@link JkFileTree} which is a copy of this {@link JkFileTree} augmented
-	 * with the specified {@link JkFileFilter}
+	 * with the specified {@link JkPathFilter}
 	 */
-	public JkFileTree andFilter(JkFileFilter filter) {
-		if (this.filter == JkFileFilter.ACCEPT_ALL) {
+	public JkFileTree andFilter(JkPathFilter filter) {
+		if (this.filter == JkPathFilter.ACCEPT_ALL) {
 			return new JkFileTree(root, filter);
 		}
 		return new JkFileTree(root, this.filter.and(filter));
 	}
 
 	/**
-	 * Short hand to {@link #andFilter(JkFileFilter)} defining an include Ant pattern filter.
+	 * Short hand to {@link #andFilter(JkPathFilter)} defining an include Ant pattern filter.
 	 * This will include any file matching at least one of the specified <code>antPatterns</code>.
 	 */
 	public JkFileTree include(String ... antPatterns) {
-		return andFilter(JkFileFilter.include(antPatterns));
+		return andFilter(JkPathFilter.include(antPatterns));
 	}
 
 	/**
-	 * Short hand to {@link #andFilter(JkFileFilter)} defining an exclude Ant pattern filter.
+	 * Short hand to {@link #andFilter(JkPathFilter)} defining an exclude Ant pattern filter.
 	 * This will exclude any file matching at least one of specified <code>antPatterns</code>.
 	 */
 	public JkFileTree exclude(String ... antPatterns) {
-		return andFilter(JkFileFilter.exclude(antPatterns));
+		return andFilter(JkPathFilter.exclude(antPatterns));
 	}
 
 	/**

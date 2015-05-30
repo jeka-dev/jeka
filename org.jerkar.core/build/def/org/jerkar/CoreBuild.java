@@ -33,7 +33,8 @@ public class CoreBuild extends JerkarBuild {
 	// Include a time stamped version file as resource.
 	@Override
 	protected JkResourceProcessor resourceProcessor() {
-		return super.resourceProcessor().with("version", version().name() + " - built at - " + buildTimestamp());
+		final String version = version().name() + " - built at - " + buildTimestamp();
+		return super.resourceProcessor().interpolating("META-INF/MANIFEST.MF", "version", version);
 	}
 
 	// Include the making of the distribution into the application packaging.

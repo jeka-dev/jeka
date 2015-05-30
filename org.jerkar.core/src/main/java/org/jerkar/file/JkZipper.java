@@ -103,7 +103,7 @@ public final class JkZipper {
 				addDirView(zos, dirView);
 			} else if (item instanceof JkFileTreeSet) {
 				final JkFileTreeSet dirViews = (JkFileTreeSet) item;
-				for (final JkFileTree dirView : dirViews.jkFileTrees()) {
+				for (final JkFileTree dirView : dirViews.fileTrees()) {
 					addDirView(zos, dirView);
 				}
 			} else {
