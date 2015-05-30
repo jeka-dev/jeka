@@ -276,7 +276,12 @@ public final class JkFileTree implements Iterable<File> {
 		return JkUtilsFile.filesOf(root, filter.toFileFilter(root), includeFolders);
 	}
 
-
+	/**
+	 * Returns a {@link JkFileTreeSet} containing this tree as its single element.
+	 */
+	public JkFileTreeSet asSet() {
+		return JkFileTreeSet.of(this);
+	}
 
 	@Override
 	public Iterator<File> iterator() {
