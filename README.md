@@ -32,3 +32,4 @@ In a nutshell : try to mimick the current style :-)
 * Favor immutable objects.
 * Embrace a fluent style API (so stay away from JavaBean coding conventions).
 * Don't use 3rd party dependencies (Use or enrich JkUtilsXxxxx classes for commons). 
+* Make your code JDK6 complient
