@@ -28,7 +28,7 @@ public final class JkPgp {
 	// just for launching the Bouncy castle methods.
 	private static Class<?> PGPUTILS_CLASS = JkClassLoader.current().sibling(
 			JkPgp.class.getResource("bouncycastle-all-152.jar")
-			).load(PGPUTILS_CLASS_NAME);
+			).printingLoadedClass(System.out).load(PGPUTILS_CLASS_NAME);
 
 	private final File pubRing;
 

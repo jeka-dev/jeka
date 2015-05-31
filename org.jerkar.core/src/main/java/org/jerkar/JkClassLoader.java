@@ -2,6 +2,7 @@ package org.jerkar;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -18,8 +19,8 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.jerkar.file.JkPathFilter;
 import org.jerkar.file.JkFileTreeSet;
+import org.jerkar.file.JkPathFilter;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIO;
 import org.jerkar.utils.JkUtilsIterable;
@@ -125,9 +126,9 @@ public final class JkClassLoader {
 		return sibling(JkUtilsIterable.arrayOf(urlOrFiles, Object.class));
 	}
 
-	public JkClassLoader sibling(Object... fileOuUrls) {
+	public JkClassLoader sibling(Object... fileOrUrls) {
 		final List<File> files = new LinkedList<File>();
-		for (final Object entry : fileOuUrls) {
+		for (final Object entry : fileOrUrls) {
 			if (entry instanceof URL) {
 				final URL url = (URL) entry;
 				final String path = url.getFile();
@@ -159,6 +160,10 @@ public final class JkClassLoader {
 			result.add(new File(url.getFile().replaceAll("%20", " ")));
 		}
 		return JkClasspath.of(result);
+	}
+
+	public JkClassLoader printingLoadedClass(PrintStream printStream) {
+		return new JkClassLoader(new PrintClassLoader(printStream, this.delegate));
 	}
 
 	/**
@@ -435,6 +440,8 @@ public final class JkClassLoader {
 		}
 	}
 
+
+
 	/**
 	 * Invokes a static method on the specified class using the provided
 	 * arguments. <br/>
@@ -560,6 +567,35 @@ public final class JkClassLoader {
 			return object;
 		}
 		return JkUtilsIO.cloneBySerialization(object, to.classloader());
+	}
+
+	private final class PrintClassLoader extends URLClassLoader  {
+
+		private final PrintStream out;
+
+		public PrintClassLoader(PrintStream out,  URLClassLoader parent) {
+			super(new URL[0], parent);
+			this.out = out;
+		}
+
+		@Override
+		protected Class<?> findClass(String name) throws ClassNotFoundException {
+			out.println(name);
+			return super.findClass(name);
+		}
+
+		@Override
+		public URL findResource(String name) {
+			out.println(name);
+			return super.findResource(name);
+		}
+
+		@Override
+		public Class<?> loadClass(String name) throws ClassNotFoundException {
+			out.println(name);
+			return super.loadClass(name);
+		}
+
 	}
 
 }

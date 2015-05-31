@@ -31,7 +31,7 @@ public class JkIvyRunner {
 
 	public static void main(String[] args) {
 		JkOptions.forceVerbose(false);
-		//spring();
+		spring();
 		//jogl();
 		//joglWithSource();
 		//testPublishIvy();
@@ -39,7 +39,7 @@ public class JkIvyRunner {
 	}
 
 	public static void spring() {
-		final JkRepos repos = JkRepos.maven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured").andMavenCentral();
+		final JkRepos repos = JkRepos.mavenCentral().andMavenCentral();
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.springframework", "spring-jdbc", "3.0.+")
 				.mapScope(COMPILE).to("compile", "default")
@@ -53,8 +53,7 @@ public class JkIvyRunner {
 	}
 
 	public static void jogl() {
-		final JkRepos repos = JkRepos.maven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured")
-				.andMavenCentral();
+		final JkRepos repos = JkRepos.mavenCentral().andMavenCentral();
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
 		final Set<JkArtifact> artifacts = JkIvy.of(repos).resolve(deps, COMPILE, JkResolutionParameters.of(defaultMapping()));
@@ -70,8 +69,7 @@ public class JkIvyRunner {
 	}
 
 	public static void joglWithSource() {
-		final JkRepos repos = JkRepos.maven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured")
-				.andMavenCentral();
+		final JkRepos repos = JkRepos.mavenCentral();
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
 		final JkIvy jkIvy = JkIvy.of(repos);
@@ -91,7 +89,7 @@ public class JkIvyRunner {
 	}
 
 	public static void testPublishIvy() {
-		final JkIvy jkIvy = JkIvy.of(JkRepos.of(ivyRepo()).andMaven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured"));
+		final JkIvy jkIvy = JkIvy.of(JkRepos.of(ivyRepo()).andMavenCentral());
 		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup", "mymodule"), JkVersion.ofName("myVersion"));
 		final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(), COMPILE, JkJavaBuild.TEST);
 		final JkDependencies deps = JkDependencies.builder()
@@ -100,7 +98,7 @@ public class JkIvyRunner {
 	}
 
 	public static void testPublishMaven() {
-		final JkIvy jkIvy = JkIvy.of(JkRepos.of(mavenRepo()).andMaven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured"));
+		final JkIvy jkIvy = JkIvy.of(JkRepos.of(mavenRepo()).andMavenCentral());
 		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup2", "mymodule2"), JkVersion.ofName("0.0.1"));
 		final JkMavenPublication publication = JkMavenPublication.of("mymodule2", sampleJarfile()).and(sampleJarSourcefile(), "source");
 		final JkDependencies deps = JkDependencies.builder()
