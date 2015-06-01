@@ -3,6 +3,7 @@ package org.jerkar;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jerkar.utils.JkUtilsReflect;
@@ -11,15 +12,22 @@ class OptionInjector {
 
 	private static final Object UNHANDLED_TYPE = new Object();
 
+	public static void inject(Object target, Map<String, String> props) {
+		final List<Field> fields = optionField(target.getClass());
+		for (final Field field : fields) {
+			inject(target, field, props);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
-	public static void inject(Object target, Field field, Map<String, String> props) {
+	private static void inject(Object target, Field field, Map<String, String> props) {
 		final String name = field.getName();
 		final Class<?> type = field.getType();
 		final boolean present = props.containsKey(name);
 		if (present) {
 			final String stringValue = props.get(name);
 			Object value;
-			if (stringValue == null) {
+			if (stringValue == null ) {
 				value = defaultValue(type);
 			} else {
 				value = parse((Class<Object>) type, stringValue);
@@ -30,7 +38,13 @@ class OptionInjector {
 			}
 			JkUtilsReflect.setFieldValue(target, field, value);
 		} else if (hasKeyStartingWith(name + ".", props)) {
-			inject(JkUtilsReflect.getFieldValue(target, name), field, props);
+			Object value = JkUtilsReflect.getFieldValue(target, field);
+			if (value == null) {
+				value = JkUtilsReflect.newInstance(field.getType());
+				JkUtilsReflect.setFieldValue(target, field, value);
+			}
+			final Map<String, String> subProps = extractKeyStartingWith(name+".", props);
+			inject(value, subProps);
 		}
 
 
@@ -106,7 +120,8 @@ class OptionInjector {
 		return result;
 	}
 
-
-
+	private static List<Field> optionField(Class<?> clazz) {
+		return JkUtilsReflect.getAllDeclaredField(clazz, JkOption.class);
+	}
 
 }
