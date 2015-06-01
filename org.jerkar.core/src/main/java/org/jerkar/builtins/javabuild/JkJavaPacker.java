@@ -40,7 +40,7 @@ public class JkJavaPacker implements Cloneable {
 
 	private boolean doJar = true;
 
-	private boolean doTest = true;
+	private boolean doTest = false;
 
 	private boolean doSources = true;
 
@@ -128,7 +128,9 @@ public class JkJavaPacker implements Cloneable {
 		JkLog.done();
 	}
 
-
+	public JkJavaPacker tests(boolean doTest) {
+		return this.builder().doTest(doTest).build();
+	}
 
 	public interface Extra {
 

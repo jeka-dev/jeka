@@ -27,8 +27,8 @@ public final class JkPgp {
 	// We don't want to add Bouncycastle in the Jerkar classpath, so we create a specific classloader
 	// just for launching the Bouncy castle methods.
 	private static Class<?> PGPUTILS_CLASS = JkClassLoader.current().sibling(
-			JkPgp.class.getResource("bouncycastle-all-152.jar")
-			).printingLoadedClass(System.out).load(PGPUTILS_CLASS_NAME);
+			JkPgp.class.getResource("bouncycastle-pgp-152.jar")
+			).load(PGPUTILS_CLASS_NAME);
 
 	private final File pubRing;
 

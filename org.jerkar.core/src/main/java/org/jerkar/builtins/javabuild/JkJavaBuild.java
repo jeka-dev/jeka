@@ -19,9 +19,9 @@ import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependency;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
-import org.jerkar.file.JkPathFilter;
 import org.jerkar.file.JkFileTree;
 import org.jerkar.file.JkFileTreeSet;
+import org.jerkar.file.JkPathFilter;
 import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
 import org.jerkar.utils.JkUtilsIterable;
@@ -114,6 +114,9 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	@JkOption("Set the password of the secret PGP key, if you want to sign artifacts.")
 	String pgpSecretKeyPassword;
+
+	@JkOption("When true, tests classes and sources are packed in jars")
+	public boolean packTests;
 
 	@Override
 	protected List<Class<Object>> pluginTemplateClasses() {

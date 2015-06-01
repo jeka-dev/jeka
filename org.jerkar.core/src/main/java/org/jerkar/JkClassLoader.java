@@ -2,7 +2,6 @@ package org.jerkar;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -126,6 +125,9 @@ public final class JkClassLoader {
 		return sibling(JkUtilsIterable.arrayOf(urlOrFiles, Object.class));
 	}
 
+	/**
+	 * @see #sibling(Iterable)
+	 */
 	public JkClassLoader sibling(Object... fileOrUrls) {
 		final List<File> files = new LinkedList<File>();
 		for (final Object entry : fileOrUrls) {
@@ -148,6 +150,16 @@ public final class JkClassLoader {
 		return parent().child(this.childClasspath().and(files));
 	}
 
+	/**
+	 * Returns a sibling of this class loader that outputs every
+	 * searched class.
+	 * @see #sibling(Iterable)
+	 */
+	public JkClassLoader printingSearchedClasses(Set<String> searchedClassContainer) {
+		return new JkClassLoader(new TrackingClassLoader(searchedClassContainer,
+				this.childClasspath().asArrayOfUrl(), this.parent().delegate ));
+	}
+
 
 	/**
 	 * Returns the classpath of this classloader without mentioning classpath of
@@ -162,9 +174,7 @@ public final class JkClassLoader {
 		return JkClasspath.of(result);
 	}
 
-	public JkClassLoader printingLoadedClass(PrintStream printStream) {
-		return new JkClassLoader(new PrintClassLoader(printStream, this.delegate));
-	}
+
 
 	/**
 	 * Returns the complete classpath of this classloader.
@@ -569,32 +579,24 @@ public final class JkClassLoader {
 		return JkUtilsIO.cloneBySerialization(object, to.classloader());
 	}
 
-	private final class PrintClassLoader extends URLClassLoader  {
+	// Class loader that keep all the find classes in a given set
+	private final class TrackingClassLoader extends URLClassLoader  {
 
-		private final PrintStream out;
+		private final Set<String> searchedClasses;
 
-		public PrintClassLoader(PrintStream out,  URLClassLoader parent) {
-			super(new URL[0], parent);
-			this.out = out;
+		public TrackingClassLoader(Set<String> searchedClasses, URL[] urls, URLClassLoader parent) {
+			super(urls, parent);
+			this.searchedClasses = searchedClasses;
 		}
 
 		@Override
 		protected Class<?> findClass(String name) throws ClassNotFoundException {
-			out.println(name);
+			searchedClasses.add(name);
 			return super.findClass(name);
 		}
 
-		@Override
-		public URL findResource(String name) {
-			out.println(name);
-			return super.findResource(name);
-		}
 
-		@Override
-		public Class<?> loadClass(String name) throws ClassNotFoundException {
-			out.println(name);
-			return super.loadClass(name);
-		}
+
 
 	}
 

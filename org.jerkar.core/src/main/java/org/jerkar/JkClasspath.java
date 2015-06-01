@@ -1,6 +1,7 @@
 package org.jerkar;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,8 +14,9 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.jerkar.file.JkPathFilter;
 import org.jerkar.file.JkFileTree;
+import org.jerkar.file.JkPathFilter;
+import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIO;
 import org.jerkar.utils.JkUtilsIterable;
 import org.jerkar.utils.JkUtilsString;
@@ -38,6 +40,9 @@ public final class JkClasspath implements Iterable<File> {
 		this.entries = Collections.unmodifiableList(resolveWildCard(entries));
 	}
 
+	/**
+	 * Creates a <code>JkClasspath</code> form specified file entries.
+	 */
 	public static JkClasspath of(Iterable<File> entries) {
 		return new JkClasspath(entries);
 	}
@@ -50,10 +55,17 @@ public final class JkClasspath implements Iterable<File> {
 		return JkClasspath.of(entry).and(otherEntries);
 	}
 
+	/**
+	 * @see #of(Iterable)
+	 */
 	public static JkClasspath of(File...entries) {
 		return JkClasspath.of(Arrays.asList(entries));
 	}
 
+	/**
+	 * Throws an {@link IllegalStateException} if one of the entries making of this classloader
+	 * does not exist.
+	 */
 	public JkClasspath assertAllEntriesExist() {
 		for (final File file : entries) {
 			if (!file.exists()) {
@@ -199,6 +211,19 @@ public final class JkClasspath implements Iterable<File> {
 
 	static String toFilePath(String className) {
 		return className.replace('.', '/').concat(".class");
+	}
+
+	/**
+	 * Returns this classpath as an array of URL.
+	 */
+	public URL[] asArrayOfUrl() {
+		final URL[] result = new URL[this.entries.size()];
+		int i = 0;
+		for (final File file : this.entries) {
+			result[i] = JkUtilsFile.toUrl(file);
+			i++;
+		}
+		return result;
 	}
 
 
