@@ -429,22 +429,31 @@ public final class JkUtilsIO {
 	 * The file is first attempted to be created in Jerkar temp folder, if not success, it
 	 * will be created in the specified <code>secondTryParent</code> folder.
 	 */
-	public static File getFileFromUrl(URL url, File secondTryParent) {
+	public static File getFileFromUrl(URL url, File secondTryParent, PrintStream report) {
 		final File tempDir = new File(JkUtilsFile.tempDir(), "jerkar");
 		final String name = JkUtilsString.substringAfterLast(url.getPath(), "/");
 		final File firstTry = new File(tempDir, name);
 		if (firstTry.exists()) {
+			if (report != null) {
+				report.println("Url " + url.toExternalForm() + " transformed to file by reading existing cached file " + firstTry.getAbsolutePath());
+			}
 			return firstTry;
 		}
 		try {
 			tempDir.mkdirs();
 			firstTry.createNewFile();
+			if (report != null) {
+				report.println("Url " + url.toExternalForm() + " transformed to file by creating file " + firstTry.getAbsolutePath());
+			}
 			copyUrlToFile(url, firstTry);
 			return firstTry;
 		} catch (final Exception e) {
 			secondTryParent.mkdirs();
 			final File secondTry = new File(secondTryParent, name);
 			copyUrlToFile(url, secondTry);
+			if (report != null) {
+				report.println("Url " + url.toExternalForm() + " transformed to file by creating file " + secondTry.getAbsolutePath());
+			}
 			return secondTry;
 		}
 	}

@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.Security;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,7 +14,6 @@ import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.bcpg.PacketTags;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPObjectFactory;
@@ -29,18 +27,21 @@ import org.bouncycastle.openpgp.PGPSignatureGenerator;
 import org.bouncycastle.openpgp.PGPSignatureList;
 import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.openpgp.operator.KeyFingerPrintCalculator;
+import org.bouncycastle.openpgp.operator.PBESecretKeyDecryptor;
+import org.bouncycastle.openpgp.operator.PGPContentSignerBuilder;
+import org.bouncycastle.openpgp.operator.PGPContentVerifierBuilderProvider;
+import org.bouncycastle.openpgp.operator.PGPDigestCalculatorProvider;
+import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
+import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
+import org.bouncycastle.openpgp.operator.bc.BcPGPContentVerifierBuilderProvider;
+import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
-import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
-import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
-import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIO;
 
 final class PgpUtils {
 
-	static {
-		Security.addProvider(new BouncyCastleProvider());
-	}
+	private static final int HASH_ALGO = PGPUtil.SHA1;
 
 	public static boolean verify(File fileToVerify, File pubringFile, File signatureFile) {
 		final InputStream streamToVerify = JkUtilsIO.inputStream(fileToVerify);
@@ -79,7 +80,9 @@ final class PgpUtils {
 		final InputStream bufferedStream = new BufferedInputStream(streamToVerify);
 		final PGPSignature signature = signatureList.get(0);
 		final PGPPublicKey publicKey = pgpPubRingCollection.getPublicKey(signature.getKeyID());
-		signature.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), publicKey);
+
+		final PGPContentVerifierBuilderProvider builderProvider = new BcPGPContentVerifierBuilderProvider();
+		signature.init(builderProvider, publicKey);
 		int character;
 		while ((character = bufferedStream.read()) >= 0) {
 			signature.update((byte) character);
@@ -107,12 +110,16 @@ final class PgpUtils {
 		}
 		final PGPSecretKey pgpSecretKey = readFirstSecretKey(keyRing);
 		try {
-			final PGPPrivateKey pgpPrivKey = pgpSecretKey
-					.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder()
-					.setProvider("BC").build(pass));
+
+			final PGPDigestCalculatorProvider pgpDigestCalculatorProvider = new BcPGPDigestCalculatorProvider();
+			final PBESecretKeyDecryptor secretKeyDecryptor = new BcPBESecretKeyDecryptorBuilder(pgpDigestCalculatorProvider).build(pass);
+			final PGPPrivateKey pgpPrivKey = pgpSecretKey.extractPrivateKey(secretKeyDecryptor);
+
+			final int secretKeyAlgo = pgpSecretKey.getPublicKey().getAlgorithm();
+			final PGPContentSignerBuilder contentSignerBuilder =
+					new BcPGPContentSignerBuilder(secretKeyAlgo, HASH_ALGO);
 			final PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(
-					new JcaPGPContentSignerBuilder(pgpSecretKey.getPublicKey()
-							.getAlgorithm(), PGPUtil.SHA1).setProvider("BC"));
+					contentSignerBuilder);
 			signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
 			final BCPGOutputStream bcpgOut = new BCPGOutputStream(out);
 			final InputStream fileInputStream = new BufferedInputStream(toSign);
