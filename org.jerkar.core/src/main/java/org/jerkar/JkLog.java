@@ -77,7 +77,7 @@ public class JkLog {
 		if (JkOptions.isSilent()) {
 			return;
 		}
-		underlined(message);
+		infoUnderline(message);
 		incOffset();
 		startTimer();
 	}
@@ -89,7 +89,7 @@ public class JkLog {
 		if (JkOptions.isSilent()) {
 			return;
 		}
-		displayHead(message);
+		infoHead(message);
 		incOffset();
 		startTimer();
 	}
@@ -145,13 +145,7 @@ public class JkLog {
 		infoWriter.println(message);
 	}
 
-	public static void underlined(String message) {
-		if (JkOptions.isSilent()) {
-			return;
-		}
-		JkLog.info(message);
-		JkLog.info(JkUtilsString.repeat("-", message.length()));
-	}
+
 
 	/**
 	 * Displays a multi-line message of the specified message followed by specified lines.
@@ -272,7 +266,7 @@ public class JkLog {
 	/**
 	 * Shifts the left margin. All subsequent log will be shifted <code>delta</code> characters to right.
 	 */
-	public static void shift(int delta) {
+	public static void offset(int delta) {
 		infoWriter.offsetLevel += delta;
 		errorWriter.offsetLevel += delta;
 		warnWriter.offsetLevel += delta;
@@ -330,7 +324,15 @@ public class JkLog {
 
 	}
 
-	public static void displayHead(String intro) {
+	/**
+	 * Logs in info stream the specified message enclosed as :
+	 * <pre>
+	 * ------------------
+	 * message to display
+	 * ------------------
+	 * </pre>
+	 */
+	public static void infoHead(String intro) {
 		if (JkOptions.isSilent()) {
 			return;
 		}
@@ -338,6 +340,21 @@ public class JkLog {
 		JkLog.info(JkUtilsString.repeat(pattern, intro.length() ));
 		JkLog.info(intro);
 		JkLog.info(JkUtilsString.repeat(pattern, intro.length() ));
+	}
+
+	/**
+	 * Logs in info stream the specified message enclosed as :
+	 * <pre>
+	 * message to display
+	 * ------------------
+	 * </pre>
+	 */
+	public static void infoUnderline(String message) {
+		if (JkOptions.isSilent()) {
+			return;
+		}
+		JkLog.info(message);
+		JkLog.info(JkUtilsString.repeat("-", message.length()));
 	}
 
 

@@ -98,6 +98,13 @@ class Project {
 		return resolver.resolve(baseClass);
 	}
 
+	public List<Class<?>> getBuildClasses() {
+		if (resolver.needCompile()) {
+			this.compile();
+		}
+		return resolver.resolveBuildClasses();
+	}
+
 	/**
 	 * Pre-compile and compile build classes (if needed) then execute the build of this project.
 	 * 

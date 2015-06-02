@@ -2,6 +2,8 @@ package org.jerkar;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.file.JkFileTree;
@@ -39,6 +41,13 @@ final class BuildResolver {
 	 */
 	JkBuild resolve() {
 		return resolve(null, JkBuild.class);
+	}
+
+	/**
+	 * Resolves the build classes defined in this project
+	 */
+	List<Class<?>> resolveBuildClasses() {
+		return resolveBuildClasses(JkBuild.class);
 	}
 
 	/**
@@ -122,6 +131,26 @@ final class BuildResolver {
 		// If nothing yet found use defaults
 		final JkBuild result = new JkJavaBuild();
 		result.setBaseDir(baseDir);
+		return result;
+	}
+
+	private List<Class<?>> resolveBuildClasses(Class<? extends JkBuild> baseClass) {
+
+		final JkClassLoader classLoader = JkClassLoader.current();
+		final List<Class<?>> result = new LinkedList<Class<?>>();
+
+		// If there is a build source
+		if (this.hasBuildSource()) {
+			final JkFileTree dir = JkFileTree.of(buildSourceDir);
+			for (final String path : dir.relativePathes()) {
+				if (path.endsWith(".java")) {
+					final Class<?> clazz = classLoader.loadGivenClassSourcePath(path);
+					if (baseClass.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers())) {
+						result.add(clazz);
+					}
+				}
+			}
+		}
 		return result;
 	}
 

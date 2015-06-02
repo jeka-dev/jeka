@@ -4,12 +4,10 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.jerkar.utils.JkUtilsFile;
-import org.jerkar.utils.JkUtilsIterable;
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;
 
@@ -184,61 +182,6 @@ public final class JkOptions {
 		}
 		builder.delete(builder.length()-2, builder.length()-1);
 		return builder.toString();
-	}
-
-	/**
-	 * Returns a multi-line text standing for the descriptions of the available options.
-	 */
-	@SuppressWarnings("unchecked")
-	static List<String> help(Class<?> clazz) {
-		return JkUtilsIterable.concatLists(doHelp(JkOptions.class), doHelp(clazz));
-	}
-
-	static List<String> helpClassOnly(Class<?> clazz) {
-		return doHelp(clazz);
-	}
-
-	private static List<String> doHelp(Class<?> clazz) {
-		final List<String> result = new LinkedList<String>();
-		final Object defaultObject = JkUtilsReflect.newInstance(clazz);
-		for (final Field field : optionField(clazz)) {
-			final String name = field.getName();
-			final JkOption annotation = field.getAnnotation(JkOption.class);
-			final Class<?> type = field.getType();
-			final Object defaultValue = JkUtilsReflect.getFieldValue(defaultObject, field);
-			final String string = name + " (" + type.getSimpleName() + ", default="+ stringOrNull(defaultValue) + ") : ";
-			result.add( string + annotation.value()[0] );
-			final String margin = JkUtilsString.repeat(" ", string.length());
-			if (annotation.value().length > 1) {
-				for (int i=1; i < annotation.value().length; i++) {
-					result.add(margin + annotation.value()[i]);
-				}
-			}
-			if (type.isEnum()) {
-				result.add(margin + "Valid values are : " + enumValues(type) + ".");
-			}
-			result.add("");
-		}
-		return result;
-	}
-
-	private static String stringOrNull(Object object) {
-		if (object == null) {
-			return null;
-		}
-		return object.toString();
-	}
-
-	private static String enumValues(Class<?> enumClass) {
-		final Object[] values = enumClass.getEnumConstants();
-		final StringBuilder result = new StringBuilder();
-		for (int i = 0; i < values.length; i++) {
-			result.append(values[i].toString());
-			if (i+1 < values.length) {
-				result.append(", ");
-			}
-		}
-		return result.toString();
 	}
 
 	private static Map<String, String> loadJerkarAndUserProperties() {

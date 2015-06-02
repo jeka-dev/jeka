@@ -310,12 +310,12 @@ public class JkDependencies implements Iterable<JkScopedDependency> {
 					&& scopedDependency.dependency() instanceof JkProjectDependency) {
 				final JkProjectDependency projectDeps = (JkProjectDependency) scopedDependency.dependency();
 				if (projectDeps.hasMissingFilesOrEmptyDirs()) {
-					JkLog.shift(1);
-					JkLog.displayHead("Building depending project " + projectDeps);
+					JkLog.offset(1);
+					JkLog.infoHead("Building depending project " + projectDeps);
 					final long time = System.nanoTime();
 					projectDeps.projectBuild().doDefault();
-					JkLog.displayHead("Project " + projectDeps + " built in " + JkUtilsTime.durationInSeconds(time) +" seconds.");
-					JkLog.shift(-1);
+					JkLog.infoHead("Project " + projectDeps + " built in " + JkUtilsTime.durationInSeconds(time) +" seconds.");
+					JkLog.offset(-1);
 				}
 				final Set<File> missingFiles = projectDeps.missingFilesOrEmptyDirs();
 				if (!missingFiles.isEmpty()) {
