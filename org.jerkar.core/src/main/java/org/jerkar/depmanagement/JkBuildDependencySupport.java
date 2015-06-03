@@ -103,7 +103,7 @@ public class JkBuildDependencySupport extends JkBuild {
 	 * If you don't use managed dependencies, this method is never invoked.
 	 */
 	protected JkIvyResolver jkIvyResolver() {
-		return JkIvyResolver.of(publishRepositories(), downloadRepositories());
+		return JkIvyResolver.of(downloadRepositories());
 	}
 
 	/**
