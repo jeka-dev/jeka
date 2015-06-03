@@ -22,7 +22,8 @@ import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
 import org.jerkar.depmanagement.JkVersion;
 import org.jerkar.depmanagement.JkVersionedModule;
-import org.jerkar.depmanagement.ivy.JkIvy.AttachedArtifacts;
+import org.jerkar.internal.ivy.JkIvyResolver;
+import org.jerkar.internal.ivy.JkIvyResolver.AttachedArtifacts;
 import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
 import org.jerkar.utils.JkUtilsFile;
@@ -45,7 +46,7 @@ public class JkIvyRunner {
 				.mapScope(COMPILE).to("compile", "default")
 				.and(PROVIDED).to("provided")
 				.build();
-		final Set<JkArtifact> artifacts = JkIvy.of(repos).resolve(deps, COMPILE);
+		final Set<JkArtifact> artifacts = JkIvyResolver.of(repos).resolve(deps, COMPILE);
 		for (final JkArtifact artifact : artifacts) {
 			System.out.println(artifact);
 		}
@@ -56,7 +57,7 @@ public class JkIvyRunner {
 		final JkRepos repos = JkRepos.mavenCentral().andMavenCentral();
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
-		final Set<JkArtifact> artifacts = JkIvy.of(repos).resolve(deps, COMPILE, JkResolutionParameters.of(defaultMapping()));
+		final Set<JkArtifact> artifacts = JkIvyResolver.of(repos).resolve(deps, COMPILE, JkResolutionParameters.of(defaultMapping()));
 		for (final JkArtifact artifact : artifacts) {
 			System.out.println(artifact);
 		}
@@ -72,13 +73,13 @@ public class JkIvyRunner {
 		final JkRepos repos = JkRepos.mavenCentral();
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
-		final JkIvy jkIvy = JkIvy.of(repos);
-		final Set<JkArtifact> artifacts = jkIvy.resolve(deps, COMPILE, JkResolutionParameters.of(defaultMapping()));
+		final JkIvyResolver jkIvyResolver = JkIvyResolver.of(repos);
+		final Set<JkArtifact> artifacts = jkIvyResolver.resolve(deps, COMPILE, JkResolutionParameters.of(defaultMapping()));
 		final Set<JkVersionedModule> modules = new HashSet<JkVersionedModule>();
 		for (final JkArtifact artifact : artifacts) {
 			modules.add(artifact.versionedModule());
 		}
-		final AttachedArtifacts result = jkIvy.getArtifacts(modules, JkScope.of("sources"), JkScope.of("javadoc"), JkScope.of("noexist"));
+		final AttachedArtifacts result = jkIvyResolver.getArtifacts(modules, JkScope.of("sources"), JkScope.of("javadoc"), JkScope.of("noexist"));
 		System.out.println(result);
 		final Set<JkArtifact> artifactSet = result.getArtifacts(JkModuleId.of("org.apache.wicket", "wicket-ioc"), JkScope.of("sources"));
 		System.out.println(artifactSet);
@@ -89,21 +90,21 @@ public class JkIvyRunner {
 	}
 
 	public static void testPublishIvy() {
-		final JkIvy jkIvy = JkIvy.of(JkRepos.of(ivyRepo()).andMavenCentral());
+		final JkIvyResolver jkIvyResolver = JkIvyResolver.of(JkRepos.of(ivyRepo()).andMavenCentral());
 		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup", "mymodule"), JkVersion.ofName("myVersion"));
 		final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(), COMPILE, JkJavaBuild.TEST);
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();
-		jkIvy.publishToIvyRepo(versionedModule, ivyPublication,deps, null, null, new Date());
+		jkIvyResolver.publishToIvyRepo(versionedModule, ivyPublication,deps, null, null, new Date());
 	}
 
 	public static void testPublishMaven() {
-		final JkIvy jkIvy = JkIvy.of(JkRepos.of(mavenRepo()).andMavenCentral());
+		final JkIvyResolver jkIvyResolver = JkIvyResolver.of(JkRepos.of(mavenRepo()).andMavenCentral());
 		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup2", "mymodule2"), JkVersion.ofName("0.0.1"));
 		final JkMavenPublication publication = JkMavenPublication.of("mymodule2", sampleJarfile()).and(sampleJarSourcefile(), "source");
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();
-		jkIvy.publishToMavenRepo(versionedModule, publication,deps, new Date());
+		jkIvyResolver.publishToMavenRepo(versionedModule, publication,deps, new Date());
 	}
 
 

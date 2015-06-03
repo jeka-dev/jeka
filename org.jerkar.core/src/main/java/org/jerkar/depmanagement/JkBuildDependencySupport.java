@@ -14,8 +14,9 @@ import org.jerkar.JkOption;
 import org.jerkar.JkProject;
 import org.jerkar.JkScaffolder;
 import org.jerkar.depmanagement.JkRepo.JkMavenRepository;
-import org.jerkar.depmanagement.ivy.JkIvy;
 import org.jerkar.file.JkPath;
+import org.jerkar.internal.ivy.JkIvyPublisher;
+import org.jerkar.internal.ivy.JkIvyResolver;
 import org.jerkar.publishing.JkPublishRepos;
 import org.jerkar.publishing.JkPublisher;
 import org.jerkar.utils.JkUtilsFile;
@@ -98,11 +99,19 @@ public class JkBuildDependencySupport extends JkBuild {
 	}
 
 	/**
-	 * Returns the parameterized JkIvy instance to use when dealing with managed dependencies.
+	 * Returns the parameterized JkIvyResolver instance to use when dealing with managed dependencies.
 	 * If you don't use managed dependencies, this method is never invoked.
 	 */
-	protected JkIvy jkIvy() {
-		return JkIvy.of(publishRepositories(), downloadRepositories());
+	protected JkIvyResolver jkIvyResolver() {
+		return JkIvyResolver.of(publishRepositories(), downloadRepositories());
+	}
+
+	/**
+	 * Returns the parameterized JkIvyPublisher instance to use when dealing with publication.
+	 * If you don't publish artifacts, this method is never invoked.
+	 */
+	protected JkIvyPublisher jkIvyPublisher() {
+		return JkIvyPublisher.of(publishRepositories());
 	}
 
 	/**
@@ -182,7 +191,7 @@ public class JkBuildDependencySupport extends JkBuild {
 	private JkDependencyResolver createDependencyResolver() {
 		final JkDependencies dependencies = effectiveDependencies().and(extraCommandLineDeps());
 		if (dependencies.containsExternalModule()) {
-			return JkDependencyResolver.managed(jkIvy(), dependencies, module(),
+			return JkDependencyResolver.managed(jkIvyResolver(), dependencies, module(),
 					JkResolutionParameters.of(scopeMapping()));
 		}
 		return JkDependencyResolver.unmanaged(dependencies);
@@ -197,7 +206,7 @@ public class JkBuildDependencySupport extends JkBuild {
 
 	protected JkPublisher publisher() {
 		if (cachedPublisher == null) {
-			cachedPublisher = JkPublisher.usingIvy(jkIvy());
+			cachedPublisher = JkPublisher.usingIvy(jkIvyPublisher());
 		}
 		return cachedPublisher;
 	}

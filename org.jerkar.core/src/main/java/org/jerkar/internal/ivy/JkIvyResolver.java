@@ -1,4 +1,4 @@
-package org.jerkar.depmanagement.ivy;
+package org.jerkar.internal.ivy;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +58,7 @@ import org.jerkar.utils.JkUtilsString;
  * 
  * @author Jerome Angibaud
  */
-public final class JkIvy {
+public final class JkIvyResolver {
 
 	private static final JkVersionedModule ANONYMOUS_MODULE = JkVersionedModule.of(
 			JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.ofName("anonymousVersion"));
@@ -67,30 +67,30 @@ public final class JkIvy {
 
 	private final JkPublishRepos publishRepo;
 
-	private JkIvy(Ivy ivy, JkPublishRepos publishRepo) {
+	private JkIvyResolver(Ivy ivy, JkPublishRepos publishRepo) {
 		super();
 		this.ivy = ivy;
 		this.publishRepo = publishRepo;
 		ivy.getLoggerEngine().setDefaultLogger(new MessageLogger());
 	}
 
-	private static JkIvy of(IvySettings ivySettings, JkPublishRepos publishRepos) {
+	private static JkIvyResolver of(IvySettings ivySettings, JkPublishRepos publishRepos) {
 		final Ivy ivy = Ivy.newInstance(ivySettings);
-		return new JkIvy(ivy, publishRepos);
+		return new JkIvyResolver(ivy, publishRepos);
 	}
 
 	/**
 	 * Creates an instance using a single repository (same for resolving and publishing).
 	 */
-	public static JkIvy of(JkRepo repo) {
-		return JkIvy.of(JkRepos.of(repo));
+	public static JkIvyResolver of(JkRepo repo) {
+		return JkIvyResolver.of(JkRepos.of(repo));
 	}
 
 	/**
 	 * Creates an instance using specified repositories for resolving. The publishing
 	 * is done on the first of the specified repository.
 	 */
-	public static JkIvy of(JkRepos repos) {
+	public static JkIvyResolver of(JkRepos repos) {
 		return of(JkPublishRepos.of(repos.iterator().next()), repos);
 	}
 
@@ -108,11 +108,11 @@ public final class JkIvy {
 	 * Creates an instance using specified repository for publishing and
 	 * the specified repositories for resolving.
 	 */
-	public static JkIvy of(JkPublishRepos publishRepos, JkRepos resolveRepos) {
+	public static JkIvyResolver of(JkPublishRepos publishRepos, JkRepos resolveRepos) {
 		return of(ivySettingsOf(publishRepos, resolveRepos), publishRepos);
 	}
 
-	public static JkIvy of() {
+	public static JkIvyResolver of() {
 		return of(JkRepos.mavenCentral());
 	}
 

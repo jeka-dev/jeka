@@ -9,14 +9,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jerkar.JkLog;
-import org.jerkar.depmanagement.ivy.JkIvy;
-import org.jerkar.depmanagement.ivy.JkIvy.AttachedArtifacts;
 import org.jerkar.file.JkPath;
+import org.jerkar.internal.ivy.JkIvyResolver;
+import org.jerkar.internal.ivy.JkIvyResolver.AttachedArtifacts;
 
 public final class JkDependencyResolver  {
 
-	public static JkDependencyResolver managed(JkIvy jkIvy, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
-		return new JkDependencyResolver(jkIvy, dependencies, module, resolutionParameters);
+	public static JkDependencyResolver managed(JkIvyResolver jkIvyResolver, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
+		return new JkDependencyResolver(jkIvyResolver, dependencies, module, resolutionParameters);
 	}
 
 	public static JkDependencyResolver unmanaged(JkDependencies dependencies) {
@@ -29,7 +29,7 @@ public final class JkDependencyResolver  {
 
 	private final Map<JkScope, JkPath> cachedDeps = new HashMap<JkScope, JkPath>();
 
-	private final JkIvy jkIvy;
+	private final JkIvyResolver jkIvyResolver;
 
 	private final JkDependencies dependencies;
 
@@ -38,15 +38,15 @@ public final class JkDependencyResolver  {
 	// Not necessary but nice if present in order to let Ivy hide data efficiently.
 	private final JkVersionedModule module;
 
-	private JkDependencyResolver(JkIvy jkIvy, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
-		this.jkIvy = jkIvy;
+	private JkDependencyResolver(JkIvyResolver jkIvyResolver, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
+		this.jkIvyResolver = jkIvyResolver;
 		this.dependencies = dependencies;
 		this.module = module;
 		this.parameters = resolutionParameters;
 	}
 
 	public boolean isManagedDependencyResolver() {
-		return this.jkIvy != null;
+		return this.jkIvyResolver != null;
 	}
 
 	public JkDependencies declaredDependencies() {
@@ -62,16 +62,16 @@ public final class JkDependencyResolver  {
 		// Add project dependencies
 		result.addAll(this.dependencies.projectDependencies(scope));
 
-		if (jkIvy == null) {
+		if (jkIvyResolver == null) {
 			return result;
 		}
 
 		// Add managed dependencies from Ivy
 		final Set<JkArtifact> artifacts;
 		if (module != null) {
-			artifacts = jkIvy.resolve(module, dependencies, scope, parameters);
+			artifacts = jkIvyResolver.resolve(module, dependencies, scope, parameters);
 		} else {
-			artifacts = jkIvy.resolve(dependencies, scope, parameters);
+			artifacts = jkIvyResolver.resolve(dependencies, scope, parameters);
 		}
 		result.addAll(JkArtifact.localFiles(artifacts));
 		return result;
@@ -81,7 +81,7 @@ public final class JkDependencyResolver  {
 	 * Resolves the managed dependencies (dependencies declared as external module).
 	 */
 	public Set<JkArtifact> resolveManagedDependencies(JkScope ... scopes) {
-		if (jkIvy == null) {
+		if (jkIvyResolver == null) {
 			throw new IllegalStateException("This method cannot be invoked on an unmanaged dependency resolver.");
 		}
 		final Set<JkScope> scopesSet = new HashSet<JkScope>();
@@ -92,9 +92,9 @@ public final class JkDependencyResolver  {
 		final Set<JkArtifact> result = new HashSet<JkArtifact>();
 		for (final JkScope scope : scopesSet) {
 			if (module != null) {
-				result.addAll(jkIvy.resolve(module, dependencies, scope, parameters));
+				result.addAll(jkIvyResolver.resolve(module, dependencies, scope, parameters));
 			} else {
-				result.addAll(jkIvy.resolve(dependencies, scope, parameters));
+				result.addAll(jkIvyResolver.resolve(dependencies, scope, parameters));
 			}
 		}
 		return result;
@@ -104,7 +104,7 @@ public final class JkDependencyResolver  {
 	 * Gets artifacts belonging to the same module as the specified ones but having the specified scopes.
 	 */
 	public AttachedArtifacts getAttachedArtifacts(Set<JkVersionedModule> modules, JkScope ... scopes) {
-		return jkIvy.getArtifacts(modules, scopes);
+		return jkIvyResolver.getArtifacts(modules, scopes);
 	}
 
 

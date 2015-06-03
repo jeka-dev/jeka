@@ -1,4 +1,4 @@
-package org.jerkar.depmanagement.ivy;
+package org.jerkar.internal.ivy;
 
 import java.io.File;
 import java.io.StringWriter;
