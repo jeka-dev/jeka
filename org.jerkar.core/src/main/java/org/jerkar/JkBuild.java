@@ -21,7 +21,6 @@ import org.jerkar.utils.JkUtilsTime;
  */
 public class JkBuild {
 
-
 	private File baseDir = JkUtilsFile.workingDir();
 
 	private final Date buildTime = JkUtilsTime.now();
@@ -29,10 +28,11 @@ public class JkBuild {
 	protected final JkBuildPlugins plugins = new JkBuildPlugins(this);
 
 	@JkOption({
-		"Mention if you want to add extra lib in your build path. It can be absolute or relative to the project base dir.",
-		"These libs will be added to the build path cto compile and run Jerkar scripts.",
-	"Example : -extraCompilePath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
-	protected String extraJerkarPath = null;
+		"Mention if you want to add extra lib in your build path.",
+		"It can be absolute or relative to the project base dir.",
+		"These libs will be added to the build path to compile and run Jerkar build class.",
+	"Example : -extraBuildPath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
+	protected String extraBuildPath;
 
 	private JkDependencyResolver scriptDependencyResolver;
 

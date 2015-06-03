@@ -21,7 +21,7 @@ public class CoreBuild extends JerkarBuild {
 	protected void init() {
 		distripZipFile = ouputDir("jerkar-distrib.zip");
 		distribFolder = ouputDir("jerkar-distrib");
-		this.fatJar = true;
+		this.pack.fatJar = true;
 	}
 
 	// Just to run directly the whole build bypassing the Jerkar bootstrap mechanism.

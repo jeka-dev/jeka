@@ -44,7 +44,7 @@ public class JkBuildPluginSonar extends JkJavaBuildPlugin {
 	@Override
 	public void configure(JkBuild build) {
 		final JkJavaBuild javaBuild = (JkJavaBuild) build;
-		javaBuild.junitReportDetail = JunitReportDetail.FULL;
+		javaBuild.tests.junitReportDetail = JunitReportDetail.FULL;
 	    this.jkSonar = configureSonarFrom(javaBuild).withProperties(properties);
 	}
 	

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.zip.Deflater;
 
 import org.jerkar.JkLog;
+import org.jerkar.JkOptions;
 import org.jerkar.crypto.pgp.JkPgp;
 import org.jerkar.file.JkFileTree;
 import org.jerkar.file.JkFileTreeSet;
@@ -55,10 +56,10 @@ public class JkJavaPacker implements Cloneable {
 
 	private JkJavaPacker(JkJavaBuild build) {
 		this.build = build;
-		this.doFatJar = build.fatJar;
-		if (build.signWithPgp) {
+		this.doFatJar = build.pack.fatJar;
+		if (build.pack.signWithPgp) {
 			this.pgp = build.pgp();
-			this.pgpSecretKeyPassword = build.pgpSecretKeyPassword;
+			this.pgpSecretKeyPassword = JkOptions.get(JkJavaBuild.PGP_PASSWORD_OPTION);
 		}
 	}
 
@@ -107,7 +108,7 @@ public class JkJavaPacker implements Cloneable {
 		if (doSources && sourceAndResources.countFiles(false) > 0) {
 			build.sources().and(build.resources()).zip().to(jarSourceFile(), compressionLevel);
 		}
-		if (doTest && !build.skipTests && build.testClassDir().exists() && !JkFileTree.of(build.testClassDir()).files(false).isEmpty()) {
+		if (doTest && !build.tests.skip && build.testClassDir().exists() && !JkFileTree.of(build.testClassDir()).files(false).isEmpty()) {
 			JkZipper.of(build.testClassDir()).to(jarTestFile(), compressionLevel);
 		}
 		if (doTest && doSources && !build.unitTestSources().files(false).isEmpty()) {

@@ -21,12 +21,12 @@ public final class JkProjectDef {
 
 	private final File rootDir;
 
-	private final List<JkProjectBuildClassDef> buildDef;
+	private final List<JkProjectBuildClassDef> buildDefs;
 
 	private JkProjectDef(File rootDir, List<JkProjectBuildClassDef> buildDef) {
 		super();
 		this.rootDir = rootDir;
-		this.buildDef = Collections.unmodifiableList(buildDef);
+		this.buildDefs = Collections.unmodifiableList(buildDef);
 	}
 
 	/**
@@ -40,6 +40,16 @@ public final class JkProjectDef {
 			classDefs.add(JkProjectBuildClassDef.of(clazz));
 		}
 		return new JkProjectDef(rootDir, classDefs);
+	}
+
+	public void logAvailableBuildClasses() {
+		int i = 0;
+		for (final JkProjectBuildClassDef classDef : this.buildDefs) {
+			final String defaultMessage = (i == 0) ? " (default)" : "";
+			final String desc = classDef.description != null ? classDef.description : "No description available";
+			JkLog.info(classDef.buildClassFullName + defaultMessage + " : " + desc);
+			i++;
+		}
 	}
 
 	/**
@@ -107,7 +117,7 @@ public final class JkProjectDef {
 				if (!hasSubOption(field)) {
 					result.add(new NameAndField(prefix + field.getName(), field, rootClass));
 				} else {
-					final List<NameAndField> subOpts = options(field.getType(), field.getName() + ".", false, rootClass);
+					final List<NameAndField> subOpts = options(field.getType(), prefix + field.getName() + ".", false, rootClass);
 					result.addAll(subOpts);
 				}
 			}
@@ -255,7 +265,7 @@ public final class JkProjectDef {
 				final Class<?> firstClass = JkUtilsReflect.getField(target.getClass(), first).getType();
 				firstObject = JkUtilsReflect.newInstance(firstClass);
 			}
-			final String last = JkUtilsString.substringAfterLast(optName, ".");
+			final String last = JkUtilsString.substringAfterFirst(optName, ".");
 			return value(firstObject, last);
 		}
 

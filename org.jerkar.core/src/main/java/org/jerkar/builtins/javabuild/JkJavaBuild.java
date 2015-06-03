@@ -38,6 +38,9 @@ import org.jerkar.utils.JkUtilsJdk;
  */
 public class JkJavaBuild extends JkBuildDependencySupport {
 
+	/** Option name containing the password for PGP secret key used for signature **/
+	protected static final String PGP_PASSWORD_OPTION = "pgp.secretKeyPassword";
+
 	public static final JkScope PROVIDED = JkScope.of("provided").transitive(false)
 			.descr("Dependencies to compile the project but that should not be embedded in produced artifacts.");
 
@@ -62,7 +65,6 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 			.and(RUNTIME).to("archives(master)", RUNTIME.name())
 			.and(TEST).to("archives(master)", RUNTIME.name(), "test(master)");
 
-
 	/**
 	 * Filter to excludes everything in a java source directory which are not resources.
 	 */
@@ -70,53 +72,18 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 			.exclude("**/*.java").andExclude("**/package.html")
 			.andExclude("**/doc-files");
 
-	@JkOption({
-		"Mention if you want to add extra lib in your 'compile' scope but not in your 'runtime' scope. It can be absolute or relative to the project base dir.",
-		"These libs will be added to the compile path but won't be embedded in war files or fat jars.",
-	"Example : -extraProvidedPath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
-	private String extraProvidedPath;
 
-	@JkOption({
-		"Mention if you want to add extra lib in your 'runtime' scope path. It can be absolute or relative to the project base dir.",
-		"These libs will be added to the runtime path.",
-	"Example : -extraRuntimePath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
-	private String extraRuntimePath;
 
-	@JkOption({
-		"Mention if you want to add extra lib in your 'compile' scope path. It can be absolute or relative to the project base dir.",
-		"These libs will be added to the compile and runtime path.",
-	"Example : -extraCompilePath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
-	private String extraCompilePath;
+	@JkOption("Tests")
+	public JkOptionTest tests = new JkOptionTest();
 
-	@JkOption({
-		"Mention if you want to add extra lib in your 'test' scope path. It can be absolute or relative to the project base dir.",
-		"These libs will be added to the compile and runtime path.",
-	"Example : -extraTestPath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
-	private String extraTestPath;
+	@JkOption("Packaging")
+	public JkOptionPack pack = new JkOptionPack();
 
-	@JkOption("Turn it on to skip tests.")
-	public boolean skipTests;
+	@JkOption({"Inject extra dependencies to the desired scope.",
+	"It can be absolute or relative to the project base dir."})
+	public JkOptionExtaPath extraPath = new JkOptionExtaPath();
 
-	@JkOption("When true, unit tests are run in a forked process.")
-	public boolean forkTests;
-
-	@JkOption({"The more details the longer tests take to be processed.",
-		"BASIC mention the total time elapsed along detail on failed tests.",
-		"FULL detailed report displays additionally the time to run each tests.",
-	"Example : -junitReportDetail=NONE"})
-	public JunitReportDetail junitReportDetail = JunitReportDetail.BASIC;
-
-	@JkOption("When true, produce a fat-jar, meaning a jar embedding all the dependencies.")
-	public boolean fatJar;
-
-	@JkOption("When true, the produced artifacts are signed with PGP.")
-	public boolean signWithPgp;
-
-	@JkOption("Set the password of the secret PGP key, if you want to sign artifacts.")
-	String pgpSecretKeyPassword;
-
-	@JkOption("When true, tests classes and sources are packed in jars")
-	public boolean packTests;
 
 	@Override
 	protected List<Class<Object>> pluginTemplateClasses() {
@@ -132,13 +99,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 		return "UTF-8";
 	}
 
-	/**
-	 * Returns the level of detail, junit report is supposed produced.
-	 * This level is set using by changing the junitReportDetail property.
-	 */
-	public final JunitReportDetail junitReportDetail() {
-		return junitReportDetail;
-	}
+
 
 	/**
 	 * Returns the Java source version for the compiler (as "1.4", 1.6", "7", ...).
@@ -286,9 +247,9 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 		final File junitReport = new File(this.testReportDir(), "junit");
 		final JkUnit result = JkUnit.of(classpath)
 				.withReportDir(junitReport)
-				.withReport(this.junitReportDetail)
+				.withReport(this.tests.junitReportDetail)
 				.withClassesToTest(this.testClassDir())
-				.forked(forkTests);
+				.forked(this.tests.fork);
 		return result;
 	}
 
@@ -365,31 +326,27 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	}
 
 	/**
-	 * Signs the specified files with PGP if the flag {@link #signWithPgp} is <code>true</code>.
+	 * Signs the specified files with PGP if the option <code>pack.signWithPgp</code> is <code>true</code>.
 	 * The signature will be detached in the same folder than the signed file and will have the same name
 	 * but with the <i>.asc</i> suffix.
 	 */
 	protected final void signIfNeeded(File ...files) {
-		if (signWithPgp) {
-			pgp().sign(pgpSecretKeyPassword, files);
+		if (pack.signWithPgp) {
+			pgp().sign(JkOptions.get(PGP_PASSWORD_OPTION), files);
 		}
 	}
 
-
-
-	@JkDoc({	"Create many jar files containing respectively binaries, sources, test binaries and test sources.",
+	@JkDoc({"Create many jar files containing respectively binaries, sources, test binaries and test sources.",
 	"The jar containing the binary is the one that will be used as a depe,dence for other project."})
 	public void pack() {
 		packer().pack();
 	}
 
-	@JkDoc("Compile production code and resources, compile test code and resources, launch the unit tests and create artifacts.")
+	@JkDoc("Method executed by default when none is specified. By default this method equals to #clean + #doPack")
 	@Override
 	public void doDefault() {
 		super.doDefault();
-		compile();
-		unitTest();
-		pack();
+		doPack();
 	}
 
 	@JkDoc({"Publish the produced artifact to the defined repositories. ",
@@ -452,7 +409,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	}
 
 	protected boolean checkProcessTests(JkFileTreeSet testSourceDirs) {
-		if (skipTests) {
+		if (this.tests.skip) {
 			return false;
 		}
 		if (testSourceDirs == null || testSourceDirs.fileTrees().isEmpty()) {
@@ -521,10 +478,10 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	@Override
 	protected JkDependencies extraCommandLineDeps() {
 		return JkDependencies.builder()
-				.usingDefaultScopes(COMPILE).onFiles(toPath(extraCompilePath))
-				.usingDefaultScopes(RUNTIME).onFiles(toPath(extraRuntimePath))
-				.usingDefaultScopes(TEST).onFiles(toPath(extraTestPath))
-				.usingDefaultScopes(PROVIDED).onFiles(toPath(extraProvidedPath)).build();
+				.usingDefaultScopes(COMPILE).onFiles(toPath(extraPath.compile))
+				.usingDefaultScopes(RUNTIME).onFiles(toPath(extraPath.runtime))
+				.usingDefaultScopes(TEST).onFiles(toPath(extraPath.test))
+				.usingDefaultScopes(PROVIDED).onFiles(toPath(extraPath.provided)).build();
 	}
 
 	@Override
@@ -542,43 +499,109 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	// Lifecycle methods
 
-	/**
-	 * Lifecycle method :{@link #compile()}. As doCompile is the first phase, this is equals to {@link #compile()}
-	 */
+	@JkDoc("Lifecycle method :#compile. As doCompile is the first stage, this is equals to #compile")
 	public final void doCompile() {
 		this.compile();
 	}
 
-	/**
-	 * Lifecycle method : {@link #doCompile} +  {@link #unitTest()}
-	 */
+	@JkDoc("Lifecycle method : #doCompile + #unitTest")
 	public final void doUnitTest() {
 		this.doCompile();
 		this.unitTest();
 	}
 
-	/**
-	 * Lifecycle method : {@link #doUnitTest()} + {@link #pack()}
-	 */
+	@JkDoc("Lifecycle method : #doUnitTest + #pack")
 	public final void doPack() {
 		doUnitTest();
 		pack();
 	}
 
-	/**
-	 * Lifecycle method : {@link #doUnitTest()} + {@link #pack()}
-	 */
+	@JkDoc("Lifecycle method : #doUnitTest + #pack")
 	public final void doVerify() {
 		pack();
 		verify();
 	}
 
-	/**
-	 * Lifecycle method : {@link #doVerify()} + {@link #publish()}
-	 */
+	@JkDoc("Lifecycle method : #doVerify + #publish")
 	public final void doPublish() {
 		doVerify();
 		publish();
+	}
+
+	/**
+	 * Options about extra path
+	 */
+	public static class JkOptionExtaPath {
+
+		@JkOption({
+			"provided scope : these libs will be added to the compile path but won't be embedded in war files or fat jars.",
+		"Example : -extraPath.provided=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
+		private String provided;
+
+		@JkOption({
+			"runtime scope : these libs will be added to the runtime path.",
+		"Example : -extraPath.runtime=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
+		private String runtime;
+
+		@JkOption({
+			"compile scope : these libs will be added to the compile and runtime path.",
+		"Example : -extraPath.compile=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
+		private String compile;
+
+		@JkOption({
+			"test scope : these libs will be added to the compile and runtime path.",
+		"Example : -extraPath.test=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
+		private String test;
+
+		public String provided() {
+			return provided;
+		}
+
+		public String runtime() {
+			return runtime;
+		}
+
+		public String compile() {
+			return compile;
+		}
+
+		public String test() {
+			return test;
+		}
+
+	}
+
+	/**
+	 * Options about tests
+	 */
+	public final static class JkOptionTest {
+
+		@JkOption("Turn it on to skip tests.")
+		public boolean skip;
+
+		@JkOption("turn it on to run tests in a forked process.")
+		public boolean fork;
+
+		@JkOption({"The more details the longer tests take to be processed.",
+			"BASIC mention the total time elapsed along detail on failed tests.",
+			"FULL detailed report displays additionally the time to run each tests.",
+		"Example : -junitReportDetail=NONE"})
+		public JunitReportDetail junitReportDetail = JunitReportDetail.BASIC;
+
+
+	}
+
+	public static final class JkOptionPack {
+
+		@JkOption("When true, produce a fat-jar, meaning a jar embedding all the dependencies.")
+		public boolean fatJar;
+
+		@JkOption("When true, the produced artifacts are signed with PGP.")
+		public boolean signWithPgp;
+
+		@JkOption("When true, tests classes and sources are packed in jars")
+		public boolean tests;
+
 	}
 
 

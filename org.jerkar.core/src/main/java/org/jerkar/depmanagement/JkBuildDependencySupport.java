@@ -8,6 +8,7 @@ import java.util.List;
 import org.jerkar.JkBuild;
 import org.jerkar.JkBuildPlugin;
 import org.jerkar.JkConstants;
+import org.jerkar.JkLocator;
 import org.jerkar.JkLog;
 import org.jerkar.JkOption;
 import org.jerkar.JkProject;
@@ -17,6 +18,7 @@ import org.jerkar.depmanagement.ivy.JkIvy;
 import org.jerkar.file.JkPath;
 import org.jerkar.publishing.JkPublishRepos;
 import org.jerkar.publishing.JkPublisher;
+import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;
 
@@ -38,36 +40,8 @@ public class JkBuildDependencySupport extends JkBuild {
 	// A cache for artifact publisher
 	private JkPublisher cachedPublisher;
 
-	@JkOption({"Maven or Ivy repositories to download dependency artifacts.",
-	"Prefix the Url with 'ivy:' if it is an Ivy repostory."})
-	protected String downloadRepoUrl = JkMavenRepository.MAVEN_CENTRAL_URL.toString();
-
-	@JkOption({"Usename to connect to the download repository (if needed).",
-	"Null or blank means that the upload repository will be accessed in an anonymous way."})
-	protected String dowloadRepoUsername = null;
-
-	@JkOption({"Password to connect to the download repository (if needed)."})
-	protected String downloadRepoPassword = null;
-
-	@JkOption({"Specify the publish repository if it is different than the download one.",
-	"Prefix the Url with 'ivy:' if it is an Ivy repository."})
-	protected String publishRepoUrl = null;
-
-	@JkOption({"Usename to connect to the publish repository (if needed).",
-	"Null or blank means that the upload repository will be accessed in an anonymous way."})
-	protected String publishRepoUsername = null;
-
-	@JkOption({"Password to connect to the publish repository (if needed)."})
-	protected String publishRepoPassword = null;
-
-	@JkOption("Specify the publish repository for releases if it is different than the one for snapshots.")
-	protected String publishRepoReleaseUrl = null;
-
-	@JkOption("Usename to connect to the publish release repository (if needed).")
-	protected String publishRepoReleaseUsername = null;
-
-	@JkOption("Password to connect to the publish release repository (if needed).")
-	protected String publishRepoReleasePassword = null;
+	@JkOption("Dependency and publish repositories")
+	protected JkOptionRepos repo = new JkOptionRepos();
 
 	@JkOption("Version to inject to this build. If 'null' or blank than the version will be the one returned by #defaultVersion()" )
 	protected String forcedVersion = null;
@@ -136,24 +110,23 @@ public class JkBuildDependencySupport extends JkBuild {
 	 * managed dependencies.
 	 */
 	protected JkRepos downloadRepositories() {
-		return JkRepos.of(JkRepo.of(this.downloadRepoUrl)
-				.withOptionalCredentials(this.dowloadRepoUsername, this.downloadRepoPassword));
+		return JkRepos.of(JkRepo.of(this.repo.download.url)
+				.withOptionalCredentials(this.repo.download.username, this.repo.download.password));
 	}
 
 	/**
 	 * Returns the repositories where are published artifacts.
 	 */
 	protected JkPublishRepos publishRepositories() {
-		final JkRepo defaultDownloadRepo = JkRepo.ofOptional(downloadRepoUrl, dowloadRepoUsername, downloadRepoPassword);
-		final JkRepo defaultPublishRepo = JkRepo.ofOptional(publishRepoUrl, publishRepoUsername, publishRepoPassword);
-		final JkRepo defaultPublishReleaseRepo = JkRepo.ofOptional(publishRepoReleaseUrl, publishRepoReleaseUsername, publishRepoReleasePassword);
+		final JkRepo defaultDownloadRepo = JkRepo.ofOptional(repo.download.url, repo.download.username, repo.download.password);
+		final JkRepo defaultPublishRepo = JkRepo.ofOptional(repo.publish.url, repo.publish.username, repo.publish.password);
+		final JkRepo defaultPublishReleaseRepo = JkRepo.ofOptional(repo.release.url, repo.release.username, repo.release.password);
 
 		final JkRepo publishRepo = JkRepo.firstNonNull(defaultPublishRepo, defaultDownloadRepo);
 		final JkRepo releaseRepo = JkRepo.firstNonNull(defaultPublishReleaseRepo, publishRepo);
 
 		return JkPublishRepos.ofSnapshotAndRelease(publishRepo, releaseRepo);
 	}
-
 
 	/**
 	 * Returns the resolved dependencies for the given scope. Depending on the passed
@@ -162,8 +135,6 @@ public class JkBuildDependencySupport extends JkBuild {
 	public final JkPath depsFor(JkScope ...scopes) {
 		return dependencyResolver().get(scopes);
 	}
-
-
 
 	/**
 	 * Returns the dependencies of this module. By default it uses unmanaged dependencies stored
@@ -174,7 +145,6 @@ public class JkBuildDependencySupport extends JkBuild {
 		return JkBuildPlugin.applyDependencies(plugins.getActives(),
 				implicitDependencies().and(dependencies().withDefaultScope(this.defaultScope())));
 	}
-
 
 	protected JkDependencies dependencies() {
 		return JkDependencies.on();
@@ -287,6 +257,41 @@ public class JkBuildDependencySupport extends JkBuild {
 		return build;
 	}
 
+	public static final class JkOptionRepos {
 
+		@JkOption("Maven or Ivy repository to download dependency artifacts.")
+		private final JkOptionRepo download = new JkOptionRepo();
+
+		@JkOption("Maven or Ivy repositories to publish artifacts.")
+		private final JkOptionRepo publish;
+
+		@JkOption({"Maven or Ivy repositories to publish released artifacts.",
+		"If this repo is not null, then Jerkar will try to publish snapshot in the publish repo and release in this one."})
+		private final JkOptionRepo release;
+
+		public JkOptionRepos() {
+			publish = new JkOptionRepo();
+			final File defaultPublishDir = new File(JkLocator.jerkarUserHome(), "publish");
+			defaultPublishDir.mkdirs();
+			publish.url = JkUtilsFile.toUrl(defaultPublishDir).toExternalForm();
+			release = publish;
+		}
+
+
+	}
+
+	public static final class JkOptionRepo {
+
+		@JkOption({"Url of the repository : Prefix the Url with 'ivy:' if it is an Ivy repostory."})
+		private String url = JkMavenRepository.MAVEN_CENTRAL_URL.toString();
+
+		@JkOption({"Usename to connect to repository (if needed).",
+		"Null or blank means that the repository will be accessed in an anonymous way."})
+		private final String username = null;
+
+		@JkOption({"Password to connect to the repository (if needed)."})
+		private final String password = null;
+
+	}
 
 }

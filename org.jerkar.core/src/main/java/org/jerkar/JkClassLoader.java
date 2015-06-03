@@ -553,7 +553,7 @@ public final class JkClassLoader {
 		if (this.isDefined(JkLog.class.getName())) {
 			final int offset = JkLog.offset();
 			final Class<?> toClass = this.load(JkLog.class.getName());
-			JkUtilsReflect.invokeStaticMethod(toClass, "shift", offset);
+			JkUtilsReflect.invokeStaticMethod(toClass, "offset", offset);
 		}
 	}
 
