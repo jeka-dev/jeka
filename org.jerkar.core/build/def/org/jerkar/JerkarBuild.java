@@ -1,6 +1,7 @@
 package org.jerkar;
 
 import org.jerkar.builtins.javabuild.JkJavaBuild;
+import org.jerkar.depmanagement.JkVersion;
 import org.jerkar.publishing.JkMavenPublication;
 import org.jerkar.publishing.JkMavenPublicationInfo;
 
@@ -11,6 +12,11 @@ public abstract class JerkarBuild extends JkJavaBuild {
 	@Override
 	public String sourceJavaVersion() {
 		return JkJavaCompiler.V6;
+	}
+
+	@Override
+	protected JkVersion defaultVersion() {
+		return JkVersion.ofName("0.1-SNAPSHOT");
 	}
 
 	@Override

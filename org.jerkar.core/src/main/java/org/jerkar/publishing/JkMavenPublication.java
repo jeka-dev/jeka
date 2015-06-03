@@ -3,7 +3,9 @@ package org.jerkar.publishing;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.jerkar.utils.JkUtilsAssert;
 
@@ -11,10 +13,12 @@ public final class JkMavenPublication {
 
 	@SuppressWarnings("unchecked")
 	public static JkMavenPublication of(String name, File file) {
-		return new JkMavenPublication(name, file, Collections.EMPTY_MAP, null);
+		return new JkMavenPublication(name, file, Collections.EMPTY_MAP, null, Collections.EMPTY_SET);
 	}
 
 	private final Map<String, File> artifacts;
+
+	private final Set<File> extraFiles; // can contains signature or checksum
 
 	private final String artifactName;
 
@@ -22,12 +26,13 @@ public final class JkMavenPublication {
 
 	private final JkMavenPublicationInfo extraInfo;
 
-	private JkMavenPublication(String artifactName, File mainArtifact, Map<String, File> artifacts, JkMavenPublicationInfo extraInfo) {
+	private JkMavenPublication(String artifactName, File mainArtifact, Map<String, File> artifacts, JkMavenPublicationInfo extraInfo, Set<File> extraFiles) {
 		super();
 		this.artifactName = artifactName;
 		this.mainArtifact = mainArtifact;
 		this.artifacts = artifacts;
 		this.extraInfo = extraInfo;
+		this.extraFiles = extraFiles;
 	}
 
 	public JkMavenPublication andIf(boolean condition, File file, String classifier) {
@@ -45,7 +50,7 @@ public final class JkMavenPublication {
 		}
 		final Map<String, File> map = new HashMap<String, File>(artifacts);
 		map.put(classifier, file);
-		return new JkMavenPublication(this.artifactName, mainArtifact, map, this.extraInfo);
+		return new JkMavenPublication(this.artifactName, mainArtifact, map, this.extraInfo, this.extraFiles);
 	}
 
 	/**
@@ -53,7 +58,7 @@ public final class JkMavenPublication {
 	 * to publish on Maven central repository.
 	 */
 	public JkMavenPublication with(JkMavenPublicationInfo extraInfo) {
-		return new JkMavenPublication(this.artifactName, this.mainArtifact, this.artifacts, extraInfo);
+		return new JkMavenPublication(this.artifactName, this.mainArtifact, this.artifacts, extraInfo, extraFiles);
 	}
 
 	public JkMavenPublication andOptional(File file, String classifier) {
@@ -70,12 +75,27 @@ public final class JkMavenPublication {
 		return this;
 	}
 
+	public JkMavenPublication andAllSuffixedWith(String suffix) {
+		final Set<File> files = new HashSet<File>();
+		for (final File file : this.artifacts.values()) {
+			final File suffixedFile = new File(file.getAbsoluteFile() + suffix);
+			if (suffixedFile.exists()) {
+				files.add(suffixedFile);
+			}
+		}
+		return new JkMavenPublication(artifactName, mainArtifact, artifacts, extraInfo, files);
+	}
+
 	public File mainArtifactFile() {
 		return this.mainArtifact;
 	}
 
 	public Map<String, File> extraArtifacts() {
 		return Collections.unmodifiableMap(this.artifacts);
+	}
+
+	public Set<File> extraFiles() {
+		return Collections.unmodifiableSet(this.extraFiles);
 	}
 
 	public String artifactName() {

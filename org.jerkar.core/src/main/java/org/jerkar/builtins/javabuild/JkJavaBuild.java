@@ -26,6 +26,7 @@ import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
 import org.jerkar.utils.JkUtilsIterable;
 import org.jerkar.utils.JkUtilsJdk;
+import org.jerkar.utils.JkUtilsString;
 
 /**
  * Template class to define build on Java project.
@@ -435,11 +436,16 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	protected JkMavenPublication mavenPublication(boolean includeTests, boolean includeSources) {
 		final JkJavaPacker packer = packer();
-		return JkMavenPublication.of(this.moduleId().name() ,packer.jarFile())
+		return JkMavenPublication.of(artifactName(packer.jarFile()) ,packer.jarFile())
 				.andIf(includeSources, packer.jarSourceFile(), "sources")
 				.andOptional(javadocMaker().zipFile(), "javadoc")
 				.andOptionalIf(includeTests, packer.jarTestFile(), "test")
 				.andOptionalIf(includeTests && includeSources, packer.jarTestSourceFile(), "testSources");
+	}
+
+	private static String artifactName(File file) {
+		final String name = file.getName();
+		return name.contains(".") ? JkUtilsString.substringBeforeLast(name, ".") : name;
 	}
 
 	protected JkIvyPublication ivyPublication(boolean includeTests, boolean includeSources) {

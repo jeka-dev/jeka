@@ -392,9 +392,21 @@ public final class JkIvy {
 				throw new RuntimeException(e);
 			}
 		}
+		//		for (final File extraFile : publication.extraFiles()) {
+		//
+		//			final Artifact mavenArtifact = new DefaultArtifact(ivyModuleRevisionId, date, publication.artifactName(), type, extension, extraMap);
+		//
+		//					Translations.toPublishedMavenArtifact(extraFile, publication.artifactName(),
+		//					null, ivyModuleRevisionId, date);
+		//			try {
+		//				resolver.publish(mavenArtifact, extraFile, true);
+		//			} catch (final IOException e) {
+		//				throw new RuntimeException(e);
+		//			}
+		//		}
 		try {
 			final File pomXml = new File(targetDir(), "pom.xml");
-			final Artifact artifact = new DefaultArtifact(ivyModuleRevisionId, date, ivyModuleRevisionId.getName(), "xml", "pom", true);
+			final Artifact artifact = new DefaultArtifact(ivyModuleRevisionId, date, publication.artifactName(), "xml", "pom", true);
 			final PomWriterOptions pomWriterOptions = new PomWriterOptions();
 			File fileToDelete = null;
 			if (publication.extraInfo() != null) {
@@ -413,6 +425,8 @@ public final class JkIvy {
 		}
 		commitOrAbortPublication(resolver);
 	}
+
+
 
 	private ModuleDescriptor createModuleDescriptor(JkVersionedModule jkVersionedModule, JkIvyPublication publication, JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate) {
 		final ModuleRevisionId moduleRevisionId = Translations.toModuleRevisionId(jkVersionedModule);

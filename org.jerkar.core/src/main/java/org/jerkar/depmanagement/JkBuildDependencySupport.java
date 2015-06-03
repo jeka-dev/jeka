@@ -276,8 +276,6 @@ public class JkBuildDependencySupport extends JkBuild {
 			publish.url = JkUtilsFile.toUrl(defaultPublishDir).toExternalForm();
 			release = publish;
 		}
-
-
 	}
 
 	public static final class JkOptionRepo {
