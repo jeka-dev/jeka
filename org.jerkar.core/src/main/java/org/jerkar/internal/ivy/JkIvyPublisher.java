@@ -41,14 +41,15 @@ import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
 import org.jerkar.publishing.JkPublishRepos;
 import org.jerkar.publishing.JkPublishRepos.JkPublishRepo;
+import org.jerkar.publishing.JkPublisher;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsString;
 import org.jerkar.utils.JkUtilsThrowable;
 
 /**
+ * Jerkar users : This class is not part of the public API !!! Please, Use {@link JkPublisher} instead.
  * Ivy wrapper providing high level methods. The API is expressed using Jerkar classes only (mostly free of Ivy classes).
  * 
- * @author Jerome Angibaud
  */
 public final class JkIvyPublisher {
 
