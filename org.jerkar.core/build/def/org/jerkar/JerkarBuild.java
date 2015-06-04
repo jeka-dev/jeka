@@ -1,14 +1,19 @@
 package org.jerkar;
 
 import org.jerkar.builtins.javabuild.JkJavaBuild;
+import org.jerkar.depmanagement.JkRepo.JkMavenRepository;
 import org.jerkar.depmanagement.JkVersion;
 import org.jerkar.publishing.JkMavenPublication;
 import org.jerkar.publishing.JkMavenPublicationInfo;
-import org.jerkar.publishing.JkPublishRepos;
 
 public abstract class JerkarBuild extends JkJavaBuild {
 
 	public boolean doJavadoc = true;
+
+	public JerkarBuild() {
+		this.repo.publish.url = JkMavenRepository.MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL.toExternalForm();
+		this.repo.release.url = JkMavenRepository.MAVEN_OSSRH_PUSH_RELEASE.toExternalForm();
+	}
 
 	@Override
 	public String sourceJavaVersion() {
@@ -39,9 +44,5 @@ public abstract class JerkarBuild extends JkJavaBuild {
 		}
 	}
 
-	@Override
-	protected JkPublishRepos publishRepositories() {
-		return JkPublishRepos.OSSRH;
-	}
 
 }

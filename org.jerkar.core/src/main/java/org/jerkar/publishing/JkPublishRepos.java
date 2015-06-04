@@ -13,8 +13,6 @@ import org.jerkar.utils.JkUtilsIterable;
 
 public final class JkPublishRepos implements Iterable<JkPublishRepo>{
 
-	public static final JkPublishRepos OSSRH = ofSnapshotAndRelease(
-			JkRepo.mavenOssrhPushSnapshotPullAll(), JkRepo.mavenOssrhPushRelease());
 
 	public interface JkPublishFilter {
 
@@ -31,6 +29,12 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>{
 	public static JkPublishRepos of(JkPublishFilter filter, JkRepo ... repo) {
 		final List<JkRepo> list = Arrays.asList(repo);
 		return new JkPublishRepos(toPublishRepo(list, filter));
+	}
+
+	public static JkPublishRepos ossrh(String userName, String password) {
+		return JkPublishRepos.ofSnapshotAndRelease(
+				JkRepo.mavenOssrhPushSnapshotPullAll(userName, password),
+				JkRepo.mavenOssrhPushRelease(userName, password));
 	}
 
 	public static JkPublishRepos maven(JkPublishFilter filter, String ... urls) {

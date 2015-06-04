@@ -260,14 +260,14 @@ public class JkBuildDependencySupport extends JkBuild {
 	public static final class JkOptionRepos {
 
 		@JkOption("Maven or Ivy repository to download dependency artifacts.")
-		private final JkOptionRepo download = new JkOptionRepo();
+		public final JkOptionRepo download = new JkOptionRepo();
 
 		@JkOption("Maven or Ivy repositories to publish artifacts.")
-		private final JkOptionRepo publish;
+		public final JkOptionRepo publish;
 
 		@JkOption({"Maven or Ivy repositories to publish released artifacts.",
 		"If this repo is not null, then Jerkar will try to publish snapshot in the publish repo and release in this one."})
-		private final JkOptionRepo release;
+		public final JkOptionRepo release;
 
 		public JkOptionRepos() {
 			publish = new JkOptionRepo();
@@ -281,14 +281,14 @@ public class JkBuildDependencySupport extends JkBuild {
 	public static final class JkOptionRepo {
 
 		@JkOption({"Url of the repository : Prefix the Url with 'ivy:' if it is an Ivy repostory."})
-		private String url = JkMavenRepository.MAVEN_CENTRAL_URL.toString();
+		public String url = JkMavenRepository.MAVEN_CENTRAL_URL.toString();
 
 		@JkOption({"Usename to connect to repository (if needed).",
 		"Null or blank means that the repository will be accessed in an anonymous way."})
-		private final String username = null;
+		public final String username = null;
 
 		@JkOption({"Password to connect to the repository (if needed)."})
-		private final String password = null;
+		public final String password = null;
 
 	}
 

@@ -41,12 +41,14 @@ public abstract class JkRepo {
 		return maven(JkMavenRepository.MAVEN_CENTRAL_URL.toString());
 	}
 
-	public static JkRepo mavenOssrhPushSnapshotPullAll() {
-		return maven(JkMavenRepository.MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL.toString());
+	public static JkRepo mavenOssrhPushSnapshotPullAll(String jiraId, String jiraPassword) {
+		return maven(JkMavenRepository.MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL.toString())
+				.withCredential(jiraId, jiraPassword);
 	}
 
-	public static JkRepo mavenOssrhPushRelease() {
-		return maven(JkMavenRepository.MAVEN_OSSRH_PUSH_RELEASE.toString());
+	public static JkRepo mavenOssrhPushRelease(String jiraId, String jiraPassword) {
+		return maven(JkMavenRepository.MAVEN_OSSRH_PUSH_RELEASE.toString())
+				.withCredential(jiraId, jiraPassword);
 	}
 
 
