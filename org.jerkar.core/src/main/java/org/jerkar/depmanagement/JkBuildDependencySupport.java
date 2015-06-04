@@ -15,7 +15,6 @@ import org.jerkar.JkProject;
 import org.jerkar.JkScaffolder;
 import org.jerkar.depmanagement.JkRepo.JkMavenRepository;
 import org.jerkar.file.JkPath;
-import org.jerkar.internal.ivy.JkIvyPublisher;
 import org.jerkar.internal.ivy.JkIvyResolver;
 import org.jerkar.publishing.JkPublishRepos;
 import org.jerkar.publishing.JkPublisher;
@@ -104,14 +103,6 @@ public class JkBuildDependencySupport extends JkBuild {
 	 */
 	protected JkIvyResolver jkIvyResolver() {
 		return JkIvyResolver.of(downloadRepositories());
-	}
-
-	/**
-	 * Returns the parameterized JkIvyPublisher instance to use when dealing with publication.
-	 * If you don't publish artifacts, this method is never invoked.
-	 */
-	protected JkIvyPublisher jkIvyPublisher() {
-		return JkIvyPublisher.of(publishRepositories());
 	}
 
 	/**
@@ -206,7 +197,7 @@ public class JkBuildDependencySupport extends JkBuild {
 
 	protected JkPublisher publisher() {
 		if (cachedPublisher == null) {
-			cachedPublisher = JkPublisher.usingIvy(jkIvyPublisher());
+			cachedPublisher = JkPublisher.of(publishRepositories());
 		}
 		return cachedPublisher;
 	}

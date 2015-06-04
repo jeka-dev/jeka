@@ -6,8 +6,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;
@@ -173,6 +175,16 @@ public final class JkProjectDef {
 			}
 			return Arrays.asList(JkUtilsString.split(string, "\n"));
 		}
+
+		public Map<String, String> optionValues(JkBuild build) {
+			final Map<String, String> result = new LinkedHashMap<String, String>();
+			for(final JkProjectBuildOptionDef optionDef : this.optionDefs) {
+				final String name = optionDef.name;
+				final Object value = JkProjectBuildOptionDef.value(build, name);
+				result.put(name, JkUtilsString.toString(value));
+			}
+			return result;
+		}
 	}
 
 	/**
@@ -331,8 +343,6 @@ public final class JkProjectDef {
 		public String toString() {
 			return name + ", from " + rootClass.getName();
 		}
-
-
 
 	}
 

@@ -56,11 +56,11 @@ public final class JkPgp {
 		JkPgp result = ofDefaultGnuPg();
 		final String pub = option.get(PUB_KEYRING);
 		if (pub != null) {
-			result = result.publicRingKey(new File(pub));
+			result = result.publicRing(new File(pub));
 		}
 		final String sec = option.get(SECRET_KEYRING);
 		if (sec != null) {
-			result = result.secretRingKey(new File(sec));
+			result = result.secretRing(new File(sec));
 		}
 		return result;
 	}
@@ -111,14 +111,19 @@ public final class JkPgp {
 	 * Signs the specified files in a detached signature file which will have the same name of
 	 * the signed file plus ".asc" suffix.
 	 */
-	public void sign(String password, File ...filesToSign) {
+	public File[] sign(String password, File ...filesToSign) {
+		final File[] result = new File[filesToSign.length];
+		int i = 0;
 		for (final File file : filesToSign) {
 			if (!file.exists()) {
 				continue;
 			}
 			final File signatureFile = new File(file.getParent(), file.getName() + ".asc");
+			result[i] = signatureFile;
 			sign(file, signatureFile, password);
+			i++;
 		}
+		return result;
 	}
 
 	/**
@@ -134,7 +139,7 @@ public final class JkPgp {
 	/**
 	 * Creates a identical {@link JkPgp} but with the specified secret ring key file.
 	 */
-	public JkPgp secretRingKey(File file) {
+	public JkPgp secretRing(File file) {
 		JkUtilsFile.assertAllExist(file);
 		return new JkPgp(pubRing, file);
 	}
@@ -142,9 +147,23 @@ public final class JkPgp {
 	/**
 	 * Creates a identical {@link JkPgp} but with the specified public ring key file.
 	 */
-	public JkPgp publicRingKey(File file) {
+	public JkPgp publicRing(File file) {
 		JkUtilsFile.assertAllExist(file);
 		return new JkPgp(file, secRing);
+	}
+
+	/**
+	 * Returns the secret ring of this object.
+	 */
+	public File secretRing() {
+		return secRing;
+	}
+
+	/**
+	 * Returns the public ring of this object.
+	 */
+	public File publicRing() {
+		return pubRing;
 	}
 
 

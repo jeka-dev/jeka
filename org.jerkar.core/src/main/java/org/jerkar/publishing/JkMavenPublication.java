@@ -14,12 +14,12 @@ public final class JkMavenPublication {
 
 	@SuppressWarnings("unchecked")
 	public static JkMavenPublication of(String name, File file) {
-		return new JkMavenPublication(name, file, Collections.EMPTY_MAP, null, Collections.EMPTY_SET);
+		return new JkMavenPublication(name, file, Collections.EMPTY_MAP, null, Collections.EMPTY_SET, null, null);
 	}
 
 	private final Map<String, File> artifacts;
 
-	private final Set<String> extraExtension; // can contains signature or checksum
+	private final Set<String> extraExtensions; // can contains signature or checksum
 
 	private final String artifactName;
 
@@ -27,13 +27,21 @@ public final class JkMavenPublication {
 
 	private final JkMavenPublicationInfo extraInfo;
 
-	private JkMavenPublication(String artifactName, File mainArtifact, Map<String, File> artifacts, JkMavenPublicationInfo extraInfo, Set<String> extraFiles) {
+	private final File secretRing;
+
+	private final String secretRingPassword;
+
+	private JkMavenPublication(String artifactName, File mainArtifact,
+			Map<String, File> artifacts, JkMavenPublicationInfo extraInfo, Set<String> extraExtensions,
+			File secretRing, String secretRingPasswsord) {
 		super();
 		this.artifactName = artifactName;
 		this.mainArtifact = mainArtifact;
 		this.artifacts = artifacts;
 		this.extraInfo = extraInfo;
-		this.extraExtension = extraFiles;
+		this.extraExtensions = extraExtensions;
+		this.secretRing = secretRing;
+		this.secretRingPassword = secretRingPasswsord;
 	}
 
 	public JkMavenPublication andIf(boolean condition, File file, String classifier) {
@@ -51,7 +59,7 @@ public final class JkMavenPublication {
 		}
 		final Map<String, File> map = new HashMap<String, File>(artifacts);
 		map.put(classifier, file);
-		return new JkMavenPublication(this.artifactName, mainArtifact, map, this.extraInfo, this.extraExtension);
+		return new JkMavenPublication(this.artifactName, mainArtifact, map, this.extraInfo, this.extraExtensions, null, null);
 	}
 
 	/**
@@ -59,7 +67,7 @@ public final class JkMavenPublication {
 	 * to publish on Maven central repository.
 	 */
 	public JkMavenPublication with(JkMavenPublicationInfo extraInfo) {
-		return new JkMavenPublication(this.artifactName, this.mainArtifact, this.artifacts, extraInfo, extraExtension);
+		return new JkMavenPublication(this.artifactName, this.mainArtifact, this.artifacts, extraInfo, this.extraExtensions, this.secretRing, this.secretRingPassword);
 	}
 
 	public JkMavenPublication andOptional(File file, String classifier) {
@@ -76,10 +84,48 @@ public final class JkMavenPublication {
 		return this;
 	}
 
-	public JkMavenPublication andAllSuffixedWith(String ...suffix) {
-		final Set<String> set = new HashSet<String>(this.extraExtension);
+	/**
+	 * By adding a suffix, you will deploy also all files where name is
+	 * one of the published files + one of the specified suffix.
+	 */
+	public JkMavenPublication andAllFilesSuffixedWith(String ...suffix) {
+		final Set<String> set = new HashSet<String>(extraExtensions);
 		set.addAll(Arrays.asList(suffix));
-		return new JkMavenPublication(artifactName, mainArtifact, artifacts, extraInfo, set);
+		return new JkMavenPublication(artifactName, mainArtifact, artifacts, extraInfo, set, secretRing, secretRingPassword);
+	}
+
+	/**
+	 * Same as #andAllFilesSuffixedWith(String...) but only apply if the specified conditional is <code>true</code>.
+	 * @see #andAllFilesSuffixedWith(String...)
+	 */
+	public JkMavenPublication andAllFilesSuffixedWithIf(boolean condition, String ...suffix) {
+		if (condition) {
+			return andAllFilesSuffixedWith(suffix);
+		}
+		return this;
+	}
+
+	/**
+	 * Returns an identical JkMavenPublication to this one but without any suffixed files.
+	 * @see #andAllFilesSuffixedWith(String...)
+	 * 
+	 */
+	@SuppressWarnings("unchecked")
+	public JkMavenPublication withNoFilesSuffixed() {
+		return new JkMavenPublication(artifactName, mainArtifact, artifacts, extraInfo,
+				Collections.EMPTY_SET, secretRing, secretRingPassword);
+	}
+
+	/**
+	 * Returns an identical JkMavenPublication to this one but holding the specified PGP information./
+	 * This PGP information will be used to sign the pom file to be created.
+	 */
+	public JkMavenPublication withPomPgpSignatureIf(boolean conditional, File secretRing, String secretKeyPassword) {
+		if (conditional) {
+			return new JkMavenPublication(artifactName, mainArtifact, artifacts, extraInfo,
+					extraExtensions, secretRing, secretKeyPassword);
+		}
+		return this;
 	}
 
 	public File mainArtifactFile() {
@@ -92,7 +138,7 @@ public final class JkMavenPublication {
 
 	public Set<File> extraFiles(String classifier) {
 		final Set<File> result = new HashSet<File>();
-		for (final String extension : this.extraExtension) {
+		for (final String extension : this.extraExtensions) {
 			if (classifier == null) {
 				final File file = new File(this.mainArtifact.getPath() + extension);
 				if (file.exists()) {
@@ -120,10 +166,20 @@ public final class JkMavenPublication {
 		return this.extraInfo;
 	}
 
+	public File secretRing() {
+		return this.secretRing;
+	}
+
+	public String secretRingPassword() {
+		return this.secretRingPassword;
+	}
+
 	@Override
 	public String toString() {
 		return artifacts.toString();
 	}
+
+
 
 
 

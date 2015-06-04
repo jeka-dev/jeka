@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -29,6 +30,7 @@ import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.jerkar.JkException;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
+import org.jerkar.crypto.pgp.JkPgp;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkModuleId;
 import org.jerkar.depmanagement.JkScope;
@@ -41,6 +43,7 @@ import org.jerkar.publishing.JkPublishRepos;
 import org.jerkar.publishing.JkPublishRepos.JkPublishRepo;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsString;
+import org.jerkar.utils.JkUtilsThrowable;
 
 /**
  * Ivy wrapper providing high level methods. The API is expressed using Jerkar classes only (mostly free of Ivy classes).
@@ -139,11 +142,11 @@ public final class JkIvyPublisher {
 	}
 
 
-
 	public void publishToMavenRepo(JkVersionedModule versionedModule, JkMavenPublication publication, JkDependencies dependencies, Date deliveryDate) {
 		JkLog.startln("Publishing for Maven");
 		final JkDependencies publishedDependencies = resolveDependencies(versionedModule, dependencies);
-		final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication, publishedDependencies,deliveryDate);
+		final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication,
+				publishedDependencies,deliveryDate);
 
 		publishMavenArtifacts(publication, deliveryDate, moduleDescriptor);
 		JkLog.done();
@@ -216,27 +219,28 @@ public final class JkIvyPublisher {
 		} catch (final IOException e) {
 			throw new IllegalStateException(e);
 		}
-
-		for (final JkIvyPublication.Artifact artifact : publication) {
-			final Artifact ivyArtifact = Translations.toPublishedArtifact(artifact, ivyModuleRevisionId, date);
-			try {
-				resolver.publish(ivyArtifact, artifact.file, true);
-			} catch (final IOException e) {
-				throw new IllegalStateException(e);
-			}
-		}
-
-		// Publish Ivy file
-		final File publishedIvy = this.ivy.getSettings().resolveFile(IvyPatternHelper.substitute(ivyPatternForIvyFiles(),
-				moduleDescriptor.getResolvedModuleRevisionId()));
+		File publishedIvy;
 		try {
+			for (final JkIvyPublication.Artifact artifact : publication) {
+				final Artifact ivyArtifact = Translations.toPublishedArtifact(artifact, ivyModuleRevisionId, date);
+				try {
+					resolver.publish(ivyArtifact, artifact.file, true);
+				} catch (final IOException e) {
+					throw new IllegalStateException(e);
+				}
+			}
+
+			// Publish Ivy file
+			publishedIvy = this.ivy.getSettings().resolveFile(IvyPatternHelper.substitute(ivyPatternForIvyFiles(),
+					moduleDescriptor.getResolvedModuleRevisionId()));
 			final Artifact artifact = MDArtifact.newIvyArtifact(moduleDescriptor);
 			resolver.publish(artifact, publishedIvy, true);
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
+		} catch (final Exception e) {
+			abortPublishTransaction(resolver);
+			throw JkUtilsThrowable.unchecked(e);
 		}
 		try {
-			commitOrAbortPublication(resolver);
+			commitPublication(resolver);
 		} finally {
 			publishedIvy.delete();
 		}
@@ -264,42 +268,34 @@ public final class JkIvyPublisher {
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
-
-		final Artifact mavenMainArtifact = Translations.toPublishedMavenArtifact(publication.mainArtifactFile(), publication.artifactName(),
-				null, ivyModuleRevisionId, date);
 		try {
+			final Artifact mavenMainArtifact = Translations.toPublishedMavenArtifact(publication.mainArtifactFile(), publication.artifactName(),
+					null, ivyModuleRevisionId, date);
 			resolver.publish(mavenMainArtifact, publication.mainArtifactFile(), true);
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
-
-		for (final Map.Entry<String, File> extraArtifact : publication.extraArtifacts().entrySet()) {
-			final String classifier = extraArtifact.getKey();
-			final File file = extraArtifact.getValue();
-			final Artifact mavenArtifact = Translations.toPublishedMavenArtifact(file, publication.artifactName(),
-					classifier, ivyModuleRevisionId, date);
-			try {
-				resolver.publish(mavenArtifact, file, true);
-			} catch (final IOException e) {
-				throw new RuntimeException(e);
+			for (final File file : publication.extraFiles(null)) {
+				final String extension = JkUtilsString.substringAfterLast(file.getPath(), ".");
+				final Artifact extArtifact = withExtension(mavenMainArtifact, mavenMainArtifact.getExt() + "." + extension);
+				resolver.publish(extArtifact, file, true);
 			}
-		}
-		//		for (final File extraFile : publication.extraFiles()) {
-		//
-		//			final Artifact mavenArtifact = new DefaultArtifact(ivyModuleRevisionId, date, publication.artifactName(), type, extension, extraMap);
-		//
-		//					Translations.toPublishedMavenArtifact(extraFile, publication.artifactName(),
-		//					null, ivyModuleRevisionId, date);
-		//			try {
-		//				resolver.publish(mavenArtifact, extraFile, true);
-		//			} catch (final IOException e) {
-		//				throw new RuntimeException(e);
-		//			}
-		//		}
-		try {
+
+			for (final Map.Entry<String, File> extraArtifact : publication.extraArtifacts().entrySet()) {
+				final String classifier = extraArtifact.getKey();
+				final File file = extraArtifact.getValue();
+				final Artifact mavenArtifact = Translations.toPublishedMavenArtifact(file, publication.artifactName(),
+						classifier, ivyModuleRevisionId, date);
+				resolver.publish(mavenArtifact, file, true);
+				for (final File extFile : publication.extraFiles(classifier)) {
+					final String extension = JkUtilsString.substringAfterLast(extFile.getPath(), ".");
+					final Artifact extArtifact = withExtension(mavenArtifact, mavenArtifact.getExt() + "." + extension);
+					resolver.publish(extArtifact, extFile, true);
+				}
+			}
 			final File pomXml = new File(targetDir(), "pom.xml");
 			final Artifact artifact = new DefaultArtifact(ivyModuleRevisionId, date, publication.artifactName(), "xml", "pom", true);
 			final PomWriterOptions pomWriterOptions = new PomWriterOptions();
+
+
+
 			File fileToDelete = null;
 			if (publication.extraInfo() != null) {
 				final File template = PomTemplateGenerator.generateTemplate(publication.extraInfo());
@@ -308,17 +304,42 @@ public final class JkIvyPublisher {
 			}
 
 			PomModuleDescriptorWriter.write(moduleDescriptor, pomXml, pomWriterOptions);
+
+
 			if (fileToDelete != null) {
 				JkUtilsFile.delete(fileToDelete);
 			}
-			resolver.publish(artifact, pomXml,	true);
-		} catch (final IOException e) {
-			throw new IllegalStateException(e);
+			resolver.publish(artifact, pomXml, true);
+
+			// Sign pom if required
+			if (publication.secretRing() != null) {
+				final File pomSign = JkPgp.ofSecretRing(publication.secretRing())
+						.sign(publication.secretRingPassword(), pomXml)[0];
+				final Artifact pomSignArtifact = withExtension(artifact, "pom.asc");
+				resolver.publish(pomSignArtifact, pomSign, true);
+			}
+
+		} catch (final Exception e) {
+			abortPublishTransaction(resolver);
+			throw JkUtilsThrowable.unchecked(e);
 		}
-		commitOrAbortPublication(resolver);
+		commitPublication(resolver);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static Artifact withExtension(Artifact ar, String ext) {
+		return new DefaultArtifact(ar.getModuleRevisionId(), ar.getPublicationDate(),
+				ar.getName(), ar.getType(), ext, ar.getUrl(), new HashMap(ar.getExtraAttributes()));
+	}
 
+	private static void abortPublishTransaction(DependencyResolver resolver) {
+		try {
+			resolver.abortPublishTransaction();
+		} catch (final IOException e) {
+			JkLog.warn("Publish transction hasn't been properly aborted");
+			e.printStackTrace(JkLog.warnStream());
+		}
+	}
 
 	private ModuleDescriptor createModuleDescriptor(JkVersionedModule jkVersionedModule, JkIvyPublication publication, JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate) {
 		final ModuleRevisionId moduleRevisionId = Translations.toModuleRevisionId(jkVersionedModule);
@@ -350,7 +371,7 @@ public final class JkIvyPublisher {
 		try {
 			this.ivy.getDeliverEngine().deliver(moduleRevisionId, moduleRevisionId.getRevision(), ivyPatternForIvyFiles(), deliverOptions);
 		} catch (final Exception e) {
-			throw new RuntimeException(e);
+			throw JkUtilsThrowable.unchecked(e);
 		}
 
 		return moduleDescriptor;
@@ -395,15 +416,11 @@ public final class JkIvyPublisher {
 	}
 
 
-	private static void commitOrAbortPublication(DependencyResolver resolver) {
+	private static void commitPublication(DependencyResolver resolver) {
 		try {
 			resolver.commitPublishTransaction();
 		} catch (final Exception e) {
-			try {
-				resolver.abortPublishTransaction();
-			} catch (final IOException e1) {
-				throw new RuntimeException(e);
-			}
+			throw JkUtilsThrowable.unchecked(e);
 		}
 	}
 

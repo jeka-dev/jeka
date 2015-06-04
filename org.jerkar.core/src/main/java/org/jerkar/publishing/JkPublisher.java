@@ -17,8 +17,8 @@ public final class JkPublisher {
 		this.jkIvy = jkIvy;
 	}
 
-	public static JkPublisher usingIvy(JkIvyPublisher ivy) {
-		return new JkPublisher(ivy);
+	public static JkPublisher of(JkPublishRepos publishRepos) {
+		return new JkPublisher(JkIvyPublisher.of(publishRepos));
 	}
 
 	public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication, JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate) {

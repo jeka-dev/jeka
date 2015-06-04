@@ -248,7 +248,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 		final File junitReport = new File(this.testReportDir(), "junit");
 		final JkUnit result = JkUnit.of(classpath)
 				.withReportDir(junitReport)
-				.withReport(this.tests.junitReportDetail)
+				.withReport(this.tests.report)
 				.withClassesToTest(this.testClassDir())
 				.forked(this.tests.fork);
 		return result;
@@ -346,16 +346,17 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	@JkDoc("Method executed by default when none is specified. By default this method equals to #clean + #doPack")
 	@Override
 	public void doDefault() {
-		super.doDefault();
 		doPack();
 	}
+
 
 	@JkDoc({"Publish the produced artifact to the defined repositories. ",
 	"This can work only if a 'publishable' repository has been defined and the artifact has been generated (pack method)."})
 	public void publish() {
 		final Date date = this.buildTime();
 		if (this.publisher().hasMavenPublishRepo()) {
-			this.publisher().publishMaven(module(), mavenPublication(), dependencyResolver().declaredDependencies(), date);
+			final JkMavenPublication publication = mavenPublication();
+			this.publisher().publishMaven(module(), publication, dependencyResolver().declaredDependencies(), date);
 		}
 		if (this.publisher().hasIvyPublishRepo()) {
 			this.publisher().publishIvy(module(), ivyPublication(), dependencyResolver().declaredDependencies(), COMPILE, SCOPE_MAPPING, date);
@@ -440,7 +441,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 				.andIf(includeSources, packer.jarSourceFile(), "sources")
 				.andOptional(javadocMaker().zipFile(), "javadoc")
 				.andOptionalIf(includeTests, packer.jarTestFile(), "test")
-				.andOptionalIf(includeTests && includeSources, packer.jarTestSourceFile(), "testSources");
+				.andOptionalIf(includeTests && includeSources, packer.jarTestSourceFile(), "testSources")
+				.withPomPgpSignatureIf(pack.signWithPgp, pgp().secretRing(), JkOptions.get(PGP_PASSWORD_OPTION));
 	}
 
 	private static String artifactName(File file) {
@@ -462,7 +464,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	}
 
 	protected JkMavenPublication mavenPublication() {
-		return mavenPublication(includeTestsInPublication(), includeSourcesInPublication());
+		return mavenPublication(includeTestsInPublication(), includeSourcesInPublication())
+				.andAllFilesSuffixedWithIf(pack.signWithPgp, ".asc");
 	}
 
 	protected boolean includeTestsInPublication() {
@@ -507,6 +510,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	@JkDoc("Lifecycle method :#compile. As doCompile is the first stage, this is equals to #compile")
 	public final void doCompile() {
+		this.clean();
 		this.compile();
 	}
 
@@ -524,7 +528,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	@JkDoc("Lifecycle method : #doUnitTest + #pack")
 	public final void doVerify() {
-		pack();
+		doPack();
 		verify();
 	}
 
@@ -591,8 +595,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 		@JkOption({"The more details the longer tests take to be processed.",
 			"BASIC mention the total time elapsed along detail on failed tests.",
 			"FULL detailed report displays additionally the time to run each tests.",
-		"Example : -junitReportDetail=NONE"})
-		public JunitReportDetail junitReportDetail = JunitReportDetail.BASIC;
+		"Example : -report=NONE"})
+		public JunitReportDetail report = JunitReportDetail.BASIC;
 
 
 	}

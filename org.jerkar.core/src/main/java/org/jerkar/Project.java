@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.jerkar.CommandLine.JkPluginSetup;
 import org.jerkar.CommandLine.MethodInvocation;
+import org.jerkar.JkProjectDef.JkProjectBuildClassDef;
 import org.jerkar.depmanagement.JkBuildDependencySupport;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependencyResolver;
@@ -212,10 +213,12 @@ class Project {
 		JkLog.info("Using build class " + build.getClass().getName());
 		configureProject(build, pluginSetups, options, dictionnary);
 		JkLog.info("With activated plugins : " + build.plugins.getActives());
-		JkLog.info("Build options : " + JkOptions.fieldOptionsToString(build));
+		JkLog.info("Build options : " + JkProjectBuildClassDef.of(build.getClass()).optionValues(build));
 		build.execute(toBuildMethods(invokes, dictionnary), null);
 		JkLog.done("Build " + build.baseDir().root().getName());
 	}
+
+
 
 	private static void configureAndActivatePlugins(JkBuild build, Collection<JkPluginSetup> pluginSetups, PluginDictionnary<JkBuildPlugin> dictionnary) {
 		for (final JkPluginSetup pluginSetup : pluginSetups) {

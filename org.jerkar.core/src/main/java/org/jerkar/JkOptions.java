@@ -107,32 +107,7 @@ public final class JkOptions {
 	 * Set the field values according to the target object according the string found in props arguments.
 	 */
 	static void populateFields(Object target, Map<String, String> props) {
-		for (final Field field : optionField(target.getClass())) {
-			final String name = field.getName();
-			final Class<?> type = field.getType();
-			final boolean present = props.containsKey(name);
-			if (present) {
-				String stringValue = props.get(name);
-
-				// Special case for boolean : '-silent' is equivalent to '-silent=true'
-				if ((type.equals(Boolean.class) || type.equals(boolean.class)) && present && stringValue == null) {
-					stringValue = "true";
-				}
-
-				final Object value;
-				if (stringValue == null || stringValue.equals("null")) {
-					value = null;
-				} else {
-					try {
-						value = JkUtilsString.parse(type, stringValue);
-					} catch(final IllegalArgumentException e) {
-						throw new JkException("Option " + name + "=" + stringValue
-								+ " can't be parsed to type " + type.getName() + " : " + e.getMessage());
-					}
-				}
-				JkUtilsReflect.setFieldValue(target, field, value);
-			}
-		}
+		OptionInjector.inject(target, props);
 	}
 
 	static void populateFields(Object build) {
