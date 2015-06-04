@@ -213,7 +213,7 @@ class Project {
 		JkLog.info("Using build class " + build.getClass().getName());
 		configureProject(build, pluginSetups, options, dictionnary);
 		JkLog.info("With activated plugins : " + build.plugins.getActives());
-		JkLog.info("Build options : " + JkProjectBuildClassDef.of(build.getClass()).optionValues(build));
+		JkLog.info("Build options : " + JkOptions.toString(JkProjectBuildClassDef.of(build.getClass()).optionValues(build)));
 		build.execute(toBuildMethods(invokes, dictionnary), null);
 		JkLog.done("Build " + build.baseDir().root().getName());
 	}

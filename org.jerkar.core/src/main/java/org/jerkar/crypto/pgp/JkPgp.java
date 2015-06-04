@@ -8,6 +8,7 @@ import org.jerkar.JkOptions;
 import org.jerkar.utils.JkUtilsAssert;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsReflect;
+import org.jerkar.utils.JkUtilsSystem;
 
 /**
  * Provides method for signing and verify signature with PGP.<p>
@@ -42,8 +43,15 @@ public final class JkPgp {
 	}
 
 	public static JkPgp ofDefaultGnuPg() {
-		final File pub = new File(JkUtilsFile.userHome(), "AppData/Roaming/gnupg/pubring.gpg");
-		final File sec = new File(JkUtilsFile.userHome(), "AppData/Roaming/gnupg/secring.gpg");
+		final File pub;
+		final File sec;
+		if (JkUtilsSystem.IS_WINDOWS) {
+			pub = new File(JkUtilsFile.userHome(), "AppData/Roaming/gnupg/pubring.gpg");
+			sec = new File(JkUtilsFile.userHome(), "AppData/Roaming/gnupg/secring.gpg");
+		} else {
+			pub = new File(JkUtilsFile.userHome(), ".gnupg/pubring.gpg");
+			sec = new File(JkUtilsFile.userHome(), ".gnupg/secring.gpg");
+		}
 		return new JkPgp(pub, sec);
 	}
 

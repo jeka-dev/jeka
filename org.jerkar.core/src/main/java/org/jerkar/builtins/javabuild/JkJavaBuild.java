@@ -509,31 +509,31 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	// Lifecycle methods
 
 	@JkDoc("Lifecycle method :#compile. As doCompile is the first stage, this is equals to #compile")
-	public final void doCompile() {
+	public void doCompile() {
 		this.clean();
 		this.compile();
 	}
 
 	@JkDoc("Lifecycle method : #doCompile + #unitTest")
-	public final void doUnitTest() {
+	public void doUnitTest() {
 		this.doCompile();
 		this.unitTest();
 	}
 
 	@JkDoc("Lifecycle method : #doUnitTest + #pack")
-	public final void doPack() {
+	public void doPack() {
 		doUnitTest();
 		pack();
 	}
 
 	@JkDoc("Lifecycle method : #doUnitTest + #pack")
-	public final void doVerify() {
+	public void doVerify() {
 		doPack();
 		verify();
 	}
 
 	@JkDoc("Lifecycle method : #doVerify + #publish")
-	public final void doPublish() {
+	public void doPublish() {
 		doVerify();
 		publish();
 	}

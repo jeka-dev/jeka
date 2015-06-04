@@ -133,6 +133,9 @@ final class PgpUtils {
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		} catch (final PGPException e) {
+			if (e.getMessage().equals("checksum mismatch at 0 of 20")) {
+				throw new IllegalStateException("Secret key password is probably wrong.", e);
+			}
 			throw new RuntimeException(e);
 		}
 	}

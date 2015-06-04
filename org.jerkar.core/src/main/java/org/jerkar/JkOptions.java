@@ -141,12 +141,22 @@ public final class JkOptions {
 	}
 
 	static String freeFormToString() {
-		if (INSTANCE.freeOptions.isEmpty()) {
+		return toString(INSTANCE.freeOptions);
+	}
+
+	static String toString(Map<String, String> props) {
+		if (props.isEmpty()) {
 			return "none";
 		}
 		final StringBuilder builder = new StringBuilder();
-		for (final Map.Entry<String, String> entry : INSTANCE.freeOptions.entrySet()) {
-			final Object value = entry.getValue();
+		for (final Map.Entry<String, String> entry : props.entrySet()) {
+			final Object value;
+			if (JkUtilsString.firstMatching(entry.getKey().toLowerCase(), "password", "pwd") != null
+					&& entry.getValue() != null) {
+				value = "*****";
+			} else {
+				value = entry.getValue();
+			}
 			if (value != null) {
 				builder.append(entry.getKey()).append("=").append(value);
 			} else {

@@ -10,7 +10,9 @@ public abstract class JerkarBuild extends JkJavaBuild {
 
 	public boolean doJavadoc = true;
 
-	public JerkarBuild() {
+	@Override
+	protected void init() {
+		super.init();
 		this.repo.publish.url = JkMavenRepository.MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL.toExternalForm();
 		this.repo.release.url = JkMavenRepository.MAVEN_OSSRH_PUSH_RELEASE.toExternalForm();
 	}
@@ -44,5 +46,10 @@ public abstract class JerkarBuild extends JkJavaBuild {
 		}
 	}
 
+	@Override
+	public void doPublish() {
+		this.pack.signWithPgp =true;
+		super.doPublish();
+	}
 
 }

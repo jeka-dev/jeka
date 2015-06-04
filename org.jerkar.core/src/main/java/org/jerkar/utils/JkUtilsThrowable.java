@@ -20,4 +20,14 @@ public final class JkUtilsThrowable {
 		return new RuntimeException(e);
 	}
 
+	public static boolean nestedContains(Exception e, Class<Exception> exceptionClass, String message) {
+		if (e.getClass().equals(exceptionClass) && message.equals(e.getMessage())) {
+			return true;
+		}
+		if (e.getCause() == null) {
+			return false;
+		}
+		return nestedContains((Exception) e.getCause(), exceptionClass, message);
+	}
+
 }

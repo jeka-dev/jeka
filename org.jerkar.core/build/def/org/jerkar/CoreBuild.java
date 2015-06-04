@@ -19,6 +19,7 @@ public class CoreBuild extends JerkarBuild {
 
 	@Override
 	protected void init() {
+		super.init();
 		distripZipFile = ouputDir("jerkar-distrib.zip");
 		distribFolder = ouputDir("jerkar-distrib");
 		this.pack.fatJar = true;
