@@ -4,6 +4,7 @@ import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkVersion;
 import org.jerkar.publishing.JkMavenPublication;
 import org.jerkar.publishing.JkMavenPublicationInfo;
+import org.jerkar.publishing.JkPublishRepos;
 
 public abstract class JerkarBuild extends JkJavaBuild {
 
@@ -36,6 +37,11 @@ public abstract class JerkarBuild extends JkJavaBuild {
 		if (doJavadoc) {
 			javadoc();
 		}
+	}
+
+	@Override
+	protected JkPublishRepos publishRepositories() {
+		return JkPublishRepos.OSSRH;
 	}
 
 }

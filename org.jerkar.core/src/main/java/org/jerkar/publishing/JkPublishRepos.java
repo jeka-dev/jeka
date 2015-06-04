@@ -13,6 +13,9 @@ import org.jerkar.utils.JkUtilsIterable;
 
 public final class JkPublishRepos implements Iterable<JkPublishRepo>{
 
+	public static final JkPublishRepos OSSRH = ofSnapshotAndRelease(
+			JkRepo.mavenOssrhPushSnapshotPullAll(), JkRepo.mavenOssrhPushRelease());
+
 	public interface JkPublishFilter {
 
 		boolean accept(JkVersionedModule versionedModule);
@@ -22,6 +25,8 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>{
 	public static JkPublishRepos ofSnapshotAndRelease(JkRepo snapshot, JkRepo optionalRelease) {
 		return JkPublishRepos.of(ACCEPT_SNAPSHOT_ONLY, snapshot).and(ACCEPT_RELEASE_ONLY, optionalRelease);
 	}
+
+
 
 	public static JkPublishRepos of(JkPublishFilter filter, JkRepo ... repo) {
 		final List<JkRepo> list = Arrays.asList(repo);
