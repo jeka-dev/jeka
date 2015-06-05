@@ -58,16 +58,19 @@ public final class JkIvyPublisher {
 
 	private final JkPublishRepos publishRepos;
 
-	private JkIvyPublisher(Ivy ivy, JkPublishRepos publishRepo) {
+	private final File descriptorOutputDir;
+
+	private JkIvyPublisher(Ivy ivy, JkPublishRepos publishRepo, File descriptorOutputDir) {
 		super();
 		this.ivy = ivy;
 		this.publishRepos = publishRepo;
+		this.descriptorOutputDir = descriptorOutputDir;
 		ivy.getLoggerEngine().setDefaultLogger(new MessageLogger());
 	}
 
-	private static JkIvyPublisher of(IvySettings ivySettings, JkPublishRepos publishRepos) {
+	private static JkIvyPublisher of(IvySettings ivySettings, JkPublishRepos publishRepos, File descriptorOutputDir) {
 		final Ivy ivy = Ivy.newInstance(ivySettings);
-		return new JkIvyPublisher(ivy, publishRepos);
+		return new JkIvyPublisher(ivy, publishRepos, descriptorOutputDir);
 	}
 
 	/**
@@ -83,8 +86,8 @@ public final class JkIvyPublisher {
 	 * Creates an instance using specified repository for publishing and
 	 * the specified repositories for resolving.
 	 */
-	public static JkIvyPublisher of(JkPublishRepos publishRepos) {
-		return of(ivySettingsOf(publishRepos), publishRepos);
+	public static JkIvyPublisher of(JkPublishRepos publishRepos, File descriptorOutputDir) {
+		return of(ivySettingsOf(publishRepos), publishRepos, descriptorOutputDir);
 	}
 
 
@@ -271,6 +274,32 @@ public final class JkIvyPublisher {
 			throw new RuntimeException(e);
 		}
 		try {
+			final File pomXml = new File(targetDir(), "pom.xml");
+			final Artifact artifact = new DefaultArtifact(ivyModuleRevisionId, date, publication.artifactName(), "xml", "pom", true);
+			final PomWriterOptions pomWriterOptions = new PomWriterOptions();
+			File fileToDelete = null;
+			if (publication.extraInfo() != null) {
+				final File template = PomTemplateGenerator.generateTemplate(publication.extraInfo());
+				pomWriterOptions.setTemplate(template);
+				fileToDelete = template;
+			}
+			JkLog.info("Creating " + pomXml.getAbsolutePath());
+			PomModuleDescriptorWriter.write(moduleDescriptor, pomXml, pomWriterOptions);
+
+			if (fileToDelete != null) {
+				JkUtilsFile.delete(fileToDelete);
+			}
+			resolver.publish(artifact, pomXml, true);
+
+			// Sign pom if required
+			if (publication.secretRing() != null) {
+				final File pomSign = JkPgp.ofSecretRing(publication.secretRing())
+						.sign(publication.secretRingPassword(), pomXml)[0];
+				final Artifact pomSignArtifact = withExtension(artifact, "pom.asc");
+				resolver.publish(pomSignArtifact, pomSign, true);
+			}
+
+
 			final Artifact mavenMainArtifact = Translations.toPublishedMavenArtifact(publication.mainArtifactFile(), publication.artifactName(),
 					null, ivyModuleRevisionId, date);
 			resolver.publish(mavenMainArtifact, publication.mainArtifactFile(), true);
@@ -292,34 +321,7 @@ public final class JkIvyPublisher {
 					resolver.publish(extArtifact, extFile, true);
 				}
 			}
-			final File pomXml = new File(targetDir(), "pom.xml");
-			final Artifact artifact = new DefaultArtifact(ivyModuleRevisionId, date, publication.artifactName(), "xml", "pom", true);
-			final PomWriterOptions pomWriterOptions = new PomWriterOptions();
 
-
-
-			File fileToDelete = null;
-			if (publication.extraInfo() != null) {
-				final File template = PomTemplateGenerator.generateTemplate(publication.extraInfo());
-				pomWriterOptions.setTemplate(template);
-				fileToDelete = template;
-			}
-
-			PomModuleDescriptorWriter.write(moduleDescriptor, pomXml, pomWriterOptions);
-
-
-			if (fileToDelete != null) {
-				JkUtilsFile.delete(fileToDelete);
-			}
-			resolver.publish(artifact, pomXml, true);
-
-			// Sign pom if required
-			if (publication.secretRing() != null) {
-				final File pomSign = JkPgp.ofSecretRing(publication.secretRing())
-						.sign(publication.secretRingPassword(), pomXml)[0];
-				final Artifact pomSignArtifact = withExtension(artifact, "pom.asc");
-				resolver.publish(pomSignArtifact, pomSign, true);
-			}
 
 		} catch (final Exception e) {
 			abortPublishTransaction(resolver);
@@ -404,7 +406,7 @@ public final class JkIvyPublisher {
 	}
 
 	private String targetDir() {
-		return System.getProperty("java.io.tmpdir");
+		return this.descriptorOutputDir.getAbsolutePath();
 	}
 
 	private static String logLevel() {

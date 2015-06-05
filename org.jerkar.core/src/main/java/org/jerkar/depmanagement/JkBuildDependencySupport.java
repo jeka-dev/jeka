@@ -212,7 +212,7 @@ public class JkBuildDependencySupport extends JkBuild {
 
 	protected JkPublisher publisher() {
 		if (cachedPublisher == null) {
-			cachedPublisher = JkPublisher.of(publishRepositories());
+			cachedPublisher = JkPublisher.of(publishRepositories(), this);
 		}
 		return cachedPublisher;
 	}

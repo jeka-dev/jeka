@@ -13,7 +13,6 @@ import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkModuleId;
 import org.jerkar.depmanagement.JkVersion;
 import org.jerkar.depmanagement.JkVersionedModule;
-import org.jerkar.internal.ivy.JkIvyPublisher;
 import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
 import org.jerkar.publishing.JkPublishRepos;
@@ -28,7 +27,7 @@ public class JkIvyPublisherRunner {
 
 
 	public static void testPublishIvy() {
-		final JkIvyPublisher jkIvyResolver = JkIvyPublisher.of(ivyRepos());
+		final JkIvyPublisher jkIvyResolver = JkIvyPublisher.of(ivyRepos(), new File("build/output/test-out"));
 		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup", "mymodule"), JkVersion.ofName("myVersion"));
 		final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(), COMPILE, JkJavaBuild.TEST);
 		final JkDependencies deps = JkDependencies.builder()
@@ -37,7 +36,7 @@ public class JkIvyPublisherRunner {
 	}
 
 	public static void testPublishMaven() {
-		final JkIvyPublisher jkIvyResolver = JkIvyPublisher.of(mavenRepos());
+		final JkIvyPublisher jkIvyResolver = JkIvyPublisher.of(mavenRepos(), new File("build/output/test-out"));
 		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup2", "mymodule2"), JkVersion.ofName("0.0.1"));
 		final JkMavenPublication publication = JkMavenPublication.of("mymodule2", sampleJarfile()).and(sampleJarSourcefile(), "source");
 		final JkDependencies deps = JkDependencies.builder()

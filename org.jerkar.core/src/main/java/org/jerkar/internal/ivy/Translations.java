@@ -26,6 +26,7 @@ import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.FileSystemResolver;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
+import org.apache.ivy.util.url.CredentialsStore;
 import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkExternalModule;
@@ -176,6 +177,13 @@ final class Translations {
 				result.setUseMavenMetadata(true);
 				result.setRoot(repo.url().toString());
 				result.setUsepoms(true);
+				if (isHttp(repo.url())) {
+					if (!CredentialsStore.INSTANCE.hasCredentials(repo.url().getHost())) {
+						CredentialsStore.INSTANCE.addCredentials(repo.realm(),
+								repo.url().getHost(), repo.userName(), repo.password());
+
+					}
+				};
 				return result;
 			}
 			final FileRepository fileRepo = new FileRepository(new File(repo.url().getPath()));
@@ -203,6 +211,10 @@ final class Translations {
 
 	private static boolean isFileSystem(URL url) {
 		return url.getProtocol().equals("file");
+	}
+
+	private static boolean isHttp(URL url) {
+		return url.getProtocol().equals("http") || url.getProtocol().equals("https");
 	}
 
 	public static void populateIvySettingsWithRepo(IvySettings ivySettings, JkRepos repos) {

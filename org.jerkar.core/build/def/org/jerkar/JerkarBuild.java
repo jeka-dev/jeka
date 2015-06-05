@@ -28,7 +28,7 @@ public abstract class JerkarBuild extends JkJavaBuild {
 				.of("Jerkar", "Build simpler, stronger, faster", "https://github.com/jerkar")
 				.withScm("https://github.com/jerkar/jerkar.git")
 				.andApache2License()
-				.andGitHubDeveloper("djeang", "dgeangdev@yahoo.fr")
+				.andGitHubDeveloper("djeang", "djeangdev@yahoo.fr")
 				);
 	}
 

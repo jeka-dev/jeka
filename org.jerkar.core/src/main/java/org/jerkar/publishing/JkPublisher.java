@@ -2,6 +2,7 @@ package org.jerkar.publishing;
 
 import java.util.Date;
 
+import org.jerkar.JkBuild;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
@@ -17,8 +18,8 @@ public final class JkPublisher {
 		this.jkIvy = jkIvy;
 	}
 
-	public static JkPublisher of(JkPublishRepos publishRepos) {
-		return new JkPublisher(JkIvyPublisher.of(publishRepos));
+	public static JkPublisher of(JkPublishRepos publishRepos, JkBuild build) {
+		return new JkPublisher(JkIvyPublisher.of(publishRepos,  build.ouputDir().root()));
 	}
 
 	public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication, JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate) {

@@ -38,11 +38,11 @@ public abstract class JkRepo {
 	}
 
 	public static JkMavenRepository maven(String url) {
-		return new JkMavenRepository(toUrl(url), null, null);
+		return new JkMavenRepository(toUrl(url), null, null, null);
 	}
 
 	public static JkMavenRepository maven(File file) {
-		return new JkMavenRepository(JkUtilsFile.toUrl(file), null, null);
+		return new JkMavenRepository(JkUtilsFile.toUrl(file), null, null, null);
 	}
 
 	public static JkRepo mavenCentral() {
@@ -51,12 +51,12 @@ public abstract class JkRepo {
 
 	public static JkRepo mavenOssrhPushSnapshotPullAll(String jiraId, String jiraPassword) {
 		return maven(JkMavenRepository.MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL.toString())
-				.withCredential(jiraId, jiraPassword);
+				.withCredential(jiraId, jiraPassword).withRealm("Sonatype Nexus Repository Manager");
 	}
 
 	public static JkRepo mavenOssrhPushRelease(String jiraId, String jiraPassword) {
 		return maven(JkMavenRepository.MAVEN_OSSRH_PUSH_RELEASE.toString())
-				.withCredential(jiraId, jiraPassword);
+				.withCredential(jiraId, jiraPassword).withRealm("Sonatype Nexus Repository Manager");
 	}
 
 	public static JkRepo mavenJCenter() {
@@ -71,7 +71,7 @@ public abstract class JkRepo {
 	}
 
 	public static JkRepo.JkIvyRepository ivy(URL url) {
-		return new JkIvyRepository(url, null, null, null, null);
+		return new JkIvyRepository(url, null, null, null, null, null);
 	}
 
 	public static JkRepo.JkIvyRepository ivy(File file) {
@@ -94,16 +94,23 @@ public abstract class JkRepo {
 
 	private final String userName;
 
+	private final String realm;
+
 	private final String password;
 
-	private JkRepo(URL url, String userName, String password) {
+	private JkRepo(URL url, String realm, String userName, String password) {
 		this.url = url;
+		this.realm = realm;
 		this.userName = userName;
 		this.password = password;
 	}
 
 	public final URL url() {
 		return url;
+	}
+
+	public final String realm() {
+		return realm;
 	}
 
 	public final String userName() {
@@ -124,6 +131,8 @@ public abstract class JkRepo {
 		}
 		return this.withCredential(userName, password);
 	}
+
+	public abstract JkRepo withRealm(String realm);
 
 	public abstract JkRepo withCredential(String username, String password);
 
@@ -172,15 +181,19 @@ public abstract class JkRepo {
 
 	public static final class JkMavenRepository extends JkRepo {
 
-
-
-		private JkMavenRepository(URL url, String userName, String password) {
-			super(url, userName, password);
+		private JkMavenRepository(URL url, String realm, String userName, String password) {
+			super(url, realm, userName, password);
 		}
 
 		@Override
 		public JkRepo withCredential(String username, String password) {
-			return new JkMavenRepository(this.url(), username, password);
+			return new JkMavenRepository(this.url(), this.realm(), username, password);
+		}
+
+
+		@Override
+		public JkRepo withRealm(String realm) {
+			return new JkMavenRepository(this.url(), realm, this.userName(), this.password());
 		}
 
 
@@ -197,18 +210,18 @@ public abstract class JkRepo {
 
 		private static final String DEFAULT_IVY_IVY_PATTERN = "[organisation]/[module]/ivy-[revision].xml";
 
-		private JkIvyRepository(URL url, String username, String password, List<String> artifactPatterns, List<String> ivyPatterns) {
-			super(url, username, password);
+		private JkIvyRepository(URL url, String realm, String username, String password, List<String> artifactPatterns, List<String> ivyPatterns) {
+			super(url,realm, username, password);
 			this.artifactPatterns = artifactPatterns;
 			this.ivyPatterns = ivyPatterns;
 		}
 
 		public JkIvyRepository artifactPatterns(String ...patterns) {
-			return new JkIvyRepository(this.url(), this.userName(), this.password(), Collections.unmodifiableList(Arrays.asList(patterns)), ivyPatterns);
+			return new JkIvyRepository(this.url(),this.realm(),  this.userName(), this.password(), Collections.unmodifiableList(Arrays.asList(patterns)), ivyPatterns);
 		}
 
 		public JkIvyRepository ivyPatterns(String ...patterns) {
-			return new JkIvyRepository(this.url(), this.userName(), this.password(), artifactPatterns, Collections.unmodifiableList(Arrays.asList(patterns)));
+			return new JkIvyRepository(this.url(), this.realm(), this.userName(), this.password(), artifactPatterns, Collections.unmodifiableList(Arrays.asList(patterns)));
 		}
 
 		public List<String> artifactPatterns() {
@@ -227,7 +240,12 @@ public abstract class JkRepo {
 
 		@Override
 		public JkRepo withCredential(String username, String password) {
-			return new JkIvyRepository(this.url(), username, password, this.artifactPatterns, this.ivyPatterns);
+			return new JkIvyRepository(this.url(), this.realm(), username, password, this.artifactPatterns, this.ivyPatterns);
+		}
+
+		@Override
+		public JkRepo withRealm(String realm) {
+			return new JkIvyRepository(this.url(), realm, this.userName(), this.password(), this.artifactPatterns, this.ivyPatterns);
 		}
 	}
 
