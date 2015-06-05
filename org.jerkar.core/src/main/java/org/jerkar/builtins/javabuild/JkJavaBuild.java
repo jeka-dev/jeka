@@ -39,6 +39,8 @@ import org.jerkar.utils.JkUtilsString;
  */
 public class JkJavaBuild extends JkBuildDependencySupport {
 
+	private static final String PACK_WITH_PGP_SIGN_OPTION = "pgp.signWithPgp";
+
 	/** Option name containing the password for PGP secret key used for signature **/
 	protected static final String PGP_PASSWORD_OPTION = "pgp.secretKeyPassword";
 
@@ -356,10 +358,10 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 		final Date date = this.buildTime();
 		if (this.publisher().hasMavenPublishRepo()) {
 			final JkMavenPublication publication = mavenPublication();
-			this.publisher().publishMaven(module(), publication, dependencyResolver().declaredDependencies(), date);
+			this.publisher().publishMaven(versionedModule(), publication, dependencyResolver().declaredDependencies(), date);
 		}
 		if (this.publisher().hasIvyPublishRepo()) {
-			this.publisher().publishIvy(module(), ivyPublication(), dependencyResolver().declaredDependencies(), COMPILE, SCOPE_MAPPING, date);
+			this.publisher().publishIvy(versionedModule(), ivyPublication(), dependencyResolver().declaredDependencies(), COMPILE, SCOPE_MAPPING, date);
 		}
 	}
 
@@ -534,6 +536,11 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	@JkDoc("Lifecycle method : #doVerify + #publish")
 	public void doPublish() {
+		if (publishRepositories().requirePgpSignature(this.versionedModule())
+				&& !JkOptions.containsKey(PACK_WITH_PGP_SIGN_OPTION)) {
+			JkLog.info("You are aptenting to publish on a repository that require PGP signature : turn artifact PGP signature on.");
+			this.pack.signWithPgp = true;
+		}
 		doVerify();
 		publish();
 	}

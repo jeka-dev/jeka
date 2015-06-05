@@ -13,6 +13,14 @@ import org.jerkar.utils.JkUtilsString;
 
 public abstract class JkRepo {
 
+	public static final URL MAVEN_CENTRAL_URL = toUrl("http://repo1.maven.org/maven2");
+
+	public static final URL MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL = toUrl("https://oss.sonatype.org/content/repositories/snapshots/");
+
+	public static final URL MAVEN_OSSRH_PUSH_RELEASE = toUrl("https://oss.sonatype.org/content/repositories/snapshots/");
+
+	public static final URL JCENTERL_URL = toUrl("https://jcenter.bintray.com");
+
 	public static JkRepo ofOptional(String url, String userName, String password) {
 		if (JkUtilsString.isBlank(url)) {
 			return null;
@@ -50,7 +58,6 @@ public abstract class JkRepo {
 		return maven(JkMavenRepository.MAVEN_OSSRH_PUSH_RELEASE.toString())
 				.withCredential(jiraId, jiraPassword);
 	}
-
 
 	public static JkRepo mavenJCenter() {
 		return maven(JkMavenRepository.JCENTERL_URL.toString());
@@ -165,13 +172,7 @@ public abstract class JkRepo {
 
 	public static final class JkMavenRepository extends JkRepo {
 
-		public static final URL MAVEN_CENTRAL_URL = toUrl("http://repo1.maven.org/maven2");
 
-		public static final URL MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL = toUrl("https://oss.sonatype.org/content/repositories/snapshots/");
-
-		public static final URL MAVEN_OSSRH_PUSH_RELEASE = toUrl("https://oss.sonatype.org/content/repositories/snapshots/");
-
-		public static final URL JCENTERL_URL = toUrl("https://jcenter.bintray.com");
 
 		private JkMavenRepository(URL url, String userName, String password) {
 			super(url, userName, password);

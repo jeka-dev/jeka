@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.ivy.Ivy;
@@ -33,14 +34,15 @@ import org.jerkar.JkOptions;
 import org.jerkar.crypto.pgp.JkPgp;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkModuleId;
+import org.jerkar.depmanagement.JkRepo;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
 import org.jerkar.depmanagement.JkVersion;
 import org.jerkar.depmanagement.JkVersionedModule;
 import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
+import org.jerkar.publishing.JkPublishFilter;
 import org.jerkar.publishing.JkPublishRepos;
-import org.jerkar.publishing.JkPublishRepos.JkPublishRepo;
 import org.jerkar.publishing.JkPublisher;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsString;
@@ -49,18 +51,17 @@ import org.jerkar.utils.JkUtilsThrowable;
 /**
  * Jerkar users : This class is not part of the public API !!! Please, Use {@link JkPublisher} instead.
  * Ivy wrapper providing high level methods. The API is expressed using Jerkar classes only (mostly free of Ivy classes).
- * 
  */
 public final class JkIvyPublisher {
 
 	private final Ivy ivy;
 
-	private final JkPublishRepos publishRepo;
+	private final JkPublishRepos publishRepos;
 
 	private JkIvyPublisher(Ivy ivy, JkPublishRepos publishRepo) {
 		super();
 		this.ivy = ivy;
-		this.publishRepo = publishRepo;
+		this.publishRepos = publishRepo;
 		ivy.getLoggerEngine().setDefaultLogger(new MessageLogger());
 	}
 
@@ -201,9 +202,9 @@ public final class JkIvyPublisher {
 	private int publishIvyArtifacts(JkIvyPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
 		int count = 0;
 		for (final DependencyResolver resolver : Translations.publishResolverOf(this.ivy.getSettings())) {
-			final JkPublishRepo publishRepo = this.publishRepo.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
+			final Entry<JkPublishFilter, JkRepo> publishRepo = this.publishRepos.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
 			final JkVersionedModule jkModule = Translations.toJerkarVersionedModule(moduleDescriptor.getModuleRevisionId());
-			if (!isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
+			if (!isMaven(resolver) && publishRepo.getKey().accept(jkModule)) {
 				JkLog.startln("Publishing for repository " + resolver);
 				this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor);
 				JkLog.done();;
@@ -250,9 +251,9 @@ public final class JkIvyPublisher {
 	private int publishMavenArtifacts(JkMavenPublication publication, Date date, DefaultModuleDescriptor moduleDescriptor) {
 		int count = 0;
 		for (final DependencyResolver resolver : Translations.publishResolverOf(this.ivy.getSettings())) {
-			final JkPublishRepo publishRepo = this.publishRepo.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
+			final Entry<JkPublishFilter, JkRepo> publishRepo = this.publishRepos.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
 			final JkVersionedModule jkModule = Translations.toJerkarVersionedModule(moduleDescriptor.getModuleRevisionId());
-			if (isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
+			if (isMaven(resolver) && publishRepo.getKey().accept(jkModule)) {
 				JkLog.startln("Publishing for repository " + resolver);
 				this.publishMavenArtifacts(resolver, publication, date, moduleDescriptor);
 				JkLog.done();

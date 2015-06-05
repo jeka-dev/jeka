@@ -1,170 +1,131 @@
 package org.jerkar.publishing;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.jerkar.depmanagement.JkRepo;
 import org.jerkar.depmanagement.JkVersionedModule;
-import org.jerkar.publishing.JkPublishRepos.JkPublishRepo;
 import org.jerkar.utils.JkUtilsIterable;
 
-public final class JkPublishRepos implements Iterable<JkPublishRepo>{
+/**
+ * Set of repository to publish to. When publishing you may want deploy your artifact on to a repository or another
+ * according some criteria.<br/>
+ * For example, you would like to publish snapshot on a repository and release to another one, so each
+ * repository registered in JkPublishRepos is associated with a filter that determine if it accepts or not
+ * the versionned module to publish.
+ * 
+ * @author Jerome Angibaud
+ */
+public final class JkPublishRepos implements Iterable<Map.Entry<JkPublishFilter, JkRepo>> {
 
-
-	public interface JkPublishFilter {
-
-		boolean accept(JkVersionedModule versionedModule);
-
+	/**
+	 * Creates a JkPublishRepos that publish snaphots on to a specified repository and release on
+	 * another one. You can specify if the repositories require to sign published artifacts.
+	 */
+	public static JkPublishRepos ofSnapshotAndRelease(JkRepo snapshot, boolean snapshotRequirePgpSign, JkRepo optionalRelease, boolean releaseRequirePgpSign) {
+		return JkPublishRepos.of(ACCEPT_SNAPSHOT_ONLY, snapshot, snapshotRequirePgpSign).and(ACCEPT_RELEASE_ONLY, optionalRelease, releaseRequirePgpSign);
 	}
 
+	/**
+	 * Creates a JkPublishRepos that publish snaphots on to a specified repository and release on
+	 * another one. The specified repositories does not require to sign artifacts
+	 */
 	public static JkPublishRepos ofSnapshotAndRelease(JkRepo snapshot, JkRepo optionalRelease) {
-		return JkPublishRepos.of(ACCEPT_SNAPSHOT_ONLY, snapshot).and(ACCEPT_RELEASE_ONLY, optionalRelease);
+		return JkPublishRepos.of(ACCEPT_SNAPSHOT_ONLY, snapshot, false).and(ACCEPT_RELEASE_ONLY, optionalRelease, false);
 	}
 
-
-
-	public static JkPublishRepos of(JkPublishFilter filter, JkRepo ... repo) {
-		final List<JkRepo> list = Arrays.asList(repo);
-		return new JkPublishRepos(toPublishRepo(list, filter));
+	/**
+	 * Creates a JkPublishRepos that publish on the specified repositories when versionedModule matches
+	 * the specified filter.
+	 */
+	public static JkPublishRepos of(JkPublishFilter filter, JkRepo repo, boolean requirePgpSign) {
+		final List<FilteredRepo> list = JkUtilsIterable.listOf(new FilteredRepo(repo, filter, requirePgpSign));
+		return new JkPublishRepos(list);
 	}
 
+	/**
+	 * Creates a JkPublishRepos tailored for <a href="http://central.sonatype.org/">OSSRH</a>
+	 */
 	public static JkPublishRepos ossrh(String userName, String password) {
 		return JkPublishRepos.ofSnapshotAndRelease(
-				JkRepo.mavenOssrhPushSnapshotPullAll(userName, password),
-				JkRepo.mavenOssrhPushRelease(userName, password));
+				JkRepo.mavenOssrhPushSnapshotPullAll(userName, password), true,
+				JkRepo.mavenOssrhPushRelease(userName, password), true);
 	}
 
-	public static JkPublishRepos maven(JkPublishFilter filter, String ... urls) {
+	public static JkPublishRepos maven(JkPublishFilter filter, String url, boolean requirePgpSign) {
 		final List<JkRepo> list = new LinkedList<JkRepo>();
-		for (final String url : urls) {
-			list.add(JkRepo.maven(url));
-		}
-		return new JkPublishRepos(toPublishRepo(list, filter));
+		list.add(JkRepo.maven(url));
+		return new JkPublishRepos(toPublishRepo(list, filter, requirePgpSign));
 	}
 
-	public static JkPublishRepos maven(JkPublishFilter filter, File ... files) {
+	public static JkPublishRepos maven(String url) {
 		final List<JkRepo> list = new LinkedList<JkRepo>();
-		for (final File file : files) {
-			list.add(JkRepo.maven(file));
-		}
-		return new JkPublishRepos(toPublishRepo(list, filter));
+		list.add(JkRepo.maven(url));
+		return new JkPublishRepos(toPublishRepo(list, ACCEPT_ALL, false));
 	}
 
-
-	public static JkPublishRepos ivy(JkPublishFilter filter, File ... files) {
+	public static JkPublishRepos maven(File file) {
 		final List<JkRepo> list = new LinkedList<JkRepo>();
-		for (final File file : files) {
-			list.add(JkRepo.ivy(file));
-		}
-		return new JkPublishRepos(toPublishRepo(list, filter));
+		list.add(JkRepo.maven(file));
+		return new JkPublishRepos(toPublishRepo(list, ACCEPT_ALL, false));
 	}
 
-	public static JkPublishRepos ivy(JkPublishFilter filter, String ... urls) {
+
+	public static JkPublishRepos ivy(File file) {
 		final List<JkRepo> list = new LinkedList<JkRepo>();
-		for (final String url : urls) {
-			list.add(JkRepo.ivy(url));
-		}
-		return new JkPublishRepos(toPublishRepo(list, filter));
+		list.add(JkRepo.ivy(file));
+		return new JkPublishRepos(toPublishRepo(list, ACCEPT_ALL, false));
 	}
 
-	public static JkPublishRepos of(JkRepo ... repos) {
-		return of(ACCEPT_ALL, repos);
+	public static JkPublishRepos ivy(String url) {
+		final List<JkRepo> list = new LinkedList<JkRepo>();
+		list.add(JkRepo.ivy(url));
+		return new JkPublishRepos(toPublishRepo(list, ACCEPT_ALL, false));
 	}
 
-	public static JkPublishRepos maven(String ... urls) {
-		return maven(ACCEPT_ALL, urls);
+
+	public static JkPublishRepos ivy(JkPublishFilter filter, String url, boolean requirePgpSign) {
+		final List<JkRepo> list = new LinkedList<JkRepo>();
+		list.add(JkRepo.ivy(url));
+		return new JkPublishRepos(toPublishRepo(list, filter, requirePgpSign));
 	}
 
-	public static JkPublishRepos maven(File ... files) {
-		return maven(ACCEPT_ALL, files);
-	}
+	private final List<FilteredRepo> repos;
 
-	public static JkPublishRepos ivy(File ... files) {
-		return ivy(ACCEPT_ALL, files);
-	}
-
-	public static JkPublishRepos ivy(String ... urls) {
-		return ivy(ACCEPT_ALL, urls);
-	}
-
-	private final List<JkPublishRepo> repos;
-
-	private JkPublishRepos(List<JkPublishRepo> repos) {
+	private JkPublishRepos(List<FilteredRepo> repos) {
 		super();
 		this.repos = repos;
 	}
 
-	public JkPublishRepos and(JkPublishFilter filter, Iterable<JkRepo> repos) {
-		final List<JkPublishRepo> list = new LinkedList<JkPublishRepos.JkPublishRepo>(this.repos);
-		list.addAll(toPublishRepo(repos, filter));
+	public JkPublishRepos and(JkPublishFilter filter, JkRepo repo, boolean requirePgpSign) {
+		final List<FilteredRepo> list = new LinkedList<FilteredRepo>(this.repos);
+		list.add(new FilteredRepo(repo, filter, requirePgpSign));
 		return new JkPublishRepos(list);
 	}
 
-	public JkPublishRepos and(JkPublishFilter filter, JkRepo ... repos) {
-		return and(JkPublishRepos.of(filter, repos));
-	}
-
-	public JkPublishRepos andMaven(JkPublishFilter filter, String ... urls) {
-		return and(JkPublishRepos.maven(filter, urls));
-	}
-
-	public JkPublishRepos andMaven(JkPublishFilter filter, File ... files) {
-		return and(JkPublishRepos.maven(filter, files));
-	}
-
-	public JkPublishRepos andIvy(JkPublishFilter filter, String ... urls) {
-		return and(JkPublishRepos.ivy(filter, urls));
-	}
-
-	public JkPublishRepos andIvy(JkPublishFilter filter, File ... files) {
-		return and(JkPublishRepos.ivy(filter, files));
-	}
 
 	public JkPublishRepos and(JkPublishRepos other) {
 		@SuppressWarnings("unchecked")
-		final List<JkPublishRepo> list = JkUtilsIterable.concatLists(this.repos, other.repos);
+		final List<FilteredRepo> list = JkUtilsIterable.concatLists(this.repos, other.repos);
 		return new JkPublishRepos(list);
 	}
 
-	public JkPublishRepo getRepoHavingUrl(String url) {
-		for (final JkPublishRepo repo : this) {
-			if (url.equals(repo.repo().url().toExternalForm())) {
-				return repo;
+	public Map.Entry<JkPublishFilter, JkRepo> getRepoHavingUrl(String url) {
+		for (final FilteredRepo repo : this.repos) {
+			if (url.equals(repo.jkRepo.url().toExternalForm())) {
+				return repo.entry();
 			}
 		}
 		return null;
 	}
 
-	public static final class JkPublishRepo {
-
-		private final JkRepo jkRepo;
-
-		private final JkPublishFilter filter;
-
-		private JkPublishRepo(JkRepo jkRepo, JkPublishFilter filter) {
-			super();
-			this.jkRepo = jkRepo;
-			this.filter = filter;
-		}
-
-		public JkRepo repo() {
-			return jkRepo;
-		}
-
-		public JkPublishFilter filter() {
-			return filter;
-		}
-
-	}
-
-	private static List<JkPublishRepo> toPublishRepo(Iterable<JkRepo> repos, JkPublishFilter filter) {
-		final List<JkPublishRepo> result = new LinkedList<JkPublishRepos.JkPublishRepo>();
+	private static List<FilteredRepo> toPublishRepo(Iterable<JkRepo> repos, JkPublishFilter filter, boolean requirePgpSign) {
+		final List<FilteredRepo> result = new LinkedList<FilteredRepo>();
 		for (final JkRepo repo : repos) {
-
-			result.add(new JkPublishRepo(repo, filter));
+			result.add(new FilteredRepo(repo, filter, requirePgpSign));
 		}
 		return result;
 	}
@@ -198,8 +159,62 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>{
 	};
 
 	@Override
-	public Iterator<JkPublishRepo> iterator() {
-		return this.repos.iterator();
+	public Iterator<Map.Entry<JkPublishFilter, JkRepo>> iterator() {
+		final List<Map.Entry<JkPublishFilter, JkRepo>> list = new LinkedList<Map.Entry<JkPublishFilter,JkRepo>>();
+		for (final FilteredRepo filteredRepo : this.repos) {
+			list.add(filteredRepo.entry());
+		}
+		return list.iterator();
+	}
+
+	/**
+	 * Returns <code>true</code> if it is required to sign the artifacts with PGP in order to
+	 * publish the specified version and module.
+	 */
+	public boolean requirePgpSignature(JkVersionedModule versionedModule) {
+		for (final FilteredRepo filteredRepo : this.repos) {
+			if (filteredRepo.filter.accept(versionedModule) && filteredRepo.requirePgpSign) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static final class FilteredRepo {
+
+		private final JkRepo jkRepo;
+
+		private final JkPublishFilter filter;
+
+		private final boolean requirePgpSign;
+
+		public FilteredRepo(JkRepo jkRepo, JkPublishFilter filter, boolean requirePgpSign) {
+			super();
+			this.jkRepo = jkRepo;
+			this.filter = filter;
+			this.requirePgpSign = requirePgpSign;
+		}
+
+		public Map.Entry<JkPublishFilter, JkRepo> entry() {
+			return new Map.Entry<JkPublishFilter, JkRepo>() {
+
+				@Override
+				public JkRepo setValue(JkRepo value) {
+					return null;
+				}
+
+				@Override
+				public JkRepo getValue() {
+					return jkRepo;
+				}
+
+				@Override
+				public JkPublishFilter getKey() {
+					return filter;
+				}
+			};
+		}
+
 	}
 
 

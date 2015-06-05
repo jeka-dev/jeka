@@ -13,12 +13,10 @@ import org.jerkar.JkLog;
 import org.jerkar.JkOption;
 import org.jerkar.JkProject;
 import org.jerkar.JkScaffolder;
-import org.jerkar.depmanagement.JkRepo.JkMavenRepository;
 import org.jerkar.file.JkPath;
 import org.jerkar.internal.ivy.JkIvyResolver;
 import org.jerkar.publishing.JkPublishRepos;
 import org.jerkar.publishing.JkPublisher;
-import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;
 
@@ -91,11 +89,13 @@ public class JkBuildDependencySupport extends JkBuild {
 	}
 
 	/**
-	 * Returns
+	 * Returns moduleId along its version
 	 */
-	protected final JkVersionedModule module() {
+	protected final JkVersionedModule versionedModule() {
 		return JkVersionedModule.of(moduleId(), version());
 	}
+
+
 
 	/**
 	 * Returns the parameterized JkIvyResolver instance to use when dealing with managed dependencies.
@@ -118,6 +118,21 @@ public class JkBuildDependencySupport extends JkBuild {
 	 * Returns the repositories where are published artifacts.
 	 */
 	protected JkPublishRepos publishRepositories() {
+
+		// Find best defaults
+		if (repo.publish.url == null && repo.release.url == null) {
+			JkLog.info("No url specified for publish and release repo : use defaults.");
+			if (repo.publish.username != null && repo.publish.password != null) {
+				JkLog.info("Credential specifified for publish repo : use OSSRH repos.");
+				return JkPublishRepos.ossrh(repo.publish.username, repo.publish.password);
+			} else {
+				final File file = new File(JkLocator.jerkarUserHome(), "maven-publish-dir");
+				JkLog.info("No credential specifified for publish repo : use local filesystem repo." + file.getAbsolutePath());
+				return JkPublishRepos.maven(file);
+			}
+		}
+
+		// One of release or publish url has been specified
 		final JkRepo defaultDownloadRepo = JkRepo.ofOptional(repo.download.url, repo.download.username, repo.download.password);
 		final JkRepo defaultPublishRepo = JkRepo.ofOptional(repo.publish.url, repo.publish.username, repo.publish.password);
 		final JkRepo defaultPublishReleaseRepo = JkRepo.ofOptional(repo.release.url, repo.release.username, repo.release.password);
@@ -125,7 +140,7 @@ public class JkBuildDependencySupport extends JkBuild {
 		final JkRepo publishRepo = JkRepo.firstNonNull(defaultPublishRepo, defaultDownloadRepo);
 		final JkRepo releaseRepo = JkRepo.firstNonNull(defaultPublishReleaseRepo, publishRepo);
 
-		return JkPublishRepos.ofSnapshotAndRelease(publishRepo, releaseRepo);
+		return JkPublishRepos.ofSnapshotAndRelease(publishRepo, false, releaseRepo, false);
 	}
 
 	/**
@@ -182,7 +197,7 @@ public class JkBuildDependencySupport extends JkBuild {
 	private JkDependencyResolver createDependencyResolver() {
 		final JkDependencies dependencies = effectiveDependencies().and(extraCommandLineDeps());
 		if (dependencies.containsExternalModule()) {
-			return JkDependencyResolver.managed(jkIvyResolver(), dependencies, module(),
+			return JkDependencyResolver.managed(jkIvyResolver(), dependencies, versionedModule(),
 					JkResolutionParameters.of(scopeMapping()));
 		}
 		return JkDependencyResolver.unmanaged(dependencies);
@@ -271,24 +286,24 @@ public class JkBuildDependencySupport extends JkBuild {
 
 		public JkOptionRepos() {
 			publish = new JkOptionRepo();
-			final File defaultPublishDir = new File(JkLocator.jerkarUserHome(), "publish");
-			defaultPublishDir.mkdirs();
-			publish.url = JkUtilsFile.toUrl(defaultPublishDir).toExternalForm();
-			release = publish;
+			publish.url = JkRepo.MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL.toExternalForm();
+			release = new JkOptionRepo();
+			release.url = JkRepo.MAVEN_OSSRH_PUSH_RELEASE.toExternalForm();
 		}
+
 	}
 
 	public static final class JkOptionRepo {
 
 		@JkOption({"Url of the repository : Prefix the Url with 'ivy:' if it is an Ivy repostory."})
-		public String url = JkMavenRepository.MAVEN_CENTRAL_URL.toString();
+		public String url;
 
 		@JkOption({"Usename to connect to repository (if needed).",
 		"Null or blank means that the repository will be accessed in an anonymous way."})
-		public final String username = null;
+		public String username;
 
 		@JkOption({"Password to connect to the repository (if needed)."})
-		public final String password = null;
+		public String password;
 
 	}
 

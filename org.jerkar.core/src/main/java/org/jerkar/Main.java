@@ -68,6 +68,19 @@ class Main {
 				}
 			}
 		}
+		final File propFile = new File(JkLocator.jerkarHome(), "system.properties");
+		final Map<String, String> result = new HashMap<String, String>();
+		if (propFile.exists()) {
+			result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
+		}
+		final File userPropFile = new File(JkLocator.jerkarUserHome(), "system.properties");
+		if (userPropFile.exists()) {
+			result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
+		}
+		for (final Map.Entry<String, String> entry : result.entrySet()) {
+			System.setProperty(entry.getKey(), entry.getValue());
+		}
+
 	}
 
 	private static Map<String, String> loadOptionsProperties() {
