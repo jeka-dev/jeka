@@ -1,5 +1,6 @@
 package org.jerkar.publishing;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,7 +10,9 @@ import java.util.List;
  * 
  * @author Jerome Angibaud
  */
-public class JkMavenPublicationInfo {
+public class JkMavenPublicationInfo implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@SuppressWarnings("unchecked")
 	public static JkMavenPublicationInfo of(String projectName, String description, String url) {
@@ -76,7 +79,9 @@ public class JkMavenPublicationInfo {
 	}
 
 
-	public static final class JkScmInfo {
+	public static final class JkScmInfo implements Serializable {
+
+		private static final long serialVersionUID = 1L;
 
 		public final String connection;
 
@@ -94,7 +99,10 @@ public class JkMavenPublicationInfo {
 
 	}
 
-	public static final class JkDeveloperInfo {
+	public static final class JkDeveloperInfo implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
 		public final String name;
 		public final String email;
 		public final String organisation;
@@ -110,7 +118,9 @@ public class JkMavenPublicationInfo {
 
 	}
 
-	public static final class JkLicenseInfo {
+	public static final class JkLicenseInfo implements Serializable {
+
+		private static final long serialVersionUID = 1L;
 		public final String name;
 		public final String url;
 		public JkLicenseInfo(String name, String url) {
@@ -120,7 +130,9 @@ public class JkMavenPublicationInfo {
 		}
 	}
 
-	public static final class JkProjectInfo {
+	public static final class JkProjectInfo implements Serializable {
+
+		private static final long serialVersionUID = 1L;
 
 		public final String name;
 

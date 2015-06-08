@@ -1,5 +1,6 @@
 package org.jerkar.depmanagement;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -12,7 +13,9 @@ import org.jerkar.utils.JkUtilsIterable;
  * A dependency specifying in which scope it should be used. Scopes can be declared as simple scopes
  * or as a scope mapping.
  */
-public final class JkScopedDependency {
+public final class JkScopedDependency implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public static enum ScopeType {
 		SIMPLE, MAPPED, UNSET

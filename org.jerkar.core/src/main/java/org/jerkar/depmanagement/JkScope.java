@@ -1,5 +1,6 @@
 package org.jerkar.depmanagement;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,7 +20,10 @@ import org.jerkar.utils.JkUtilsString;
  * 
  * @author Jerome Angibaud
  */
-public class JkScope {
+public class JkScope implements Serializable {
+
+
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Scope for dependencies needed to compile and run the Java build scripts

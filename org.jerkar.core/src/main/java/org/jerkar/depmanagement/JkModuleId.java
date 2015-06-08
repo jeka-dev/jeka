@@ -1,5 +1,7 @@
 package org.jerkar.depmanagement;
 
+import java.io.Serializable;
+
 import org.jerkar.utils.JkUtilsString;
 
 /**
@@ -8,7 +10,9 @@ import org.jerkar.utils.JkUtilsString;
  * 
  * @author Jerome Angibaud
  */
-public final class JkModuleId {
+public final class JkModuleId implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Creates a project id according the specified group and name.

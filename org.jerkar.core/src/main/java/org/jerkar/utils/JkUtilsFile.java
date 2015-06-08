@@ -595,7 +595,7 @@ public final class JkUtilsFile {
 	 * @see #copyDirContentReplacingTokens(File, File, FileFilter, boolean,
 	 *      PrintStream, Map)
 	 */
-	public static void copyFileReplacingTokens(File in, File out,
+	public static void copyFileWithInterpolation(File in, File out,
 			Map<String, String> replacements) {
 		copyFileReplacingTokens(in, out, replacements, null);
 	}
@@ -652,7 +652,7 @@ public final class JkUtilsFile {
 	 * coping token ${key} are replaced by the value found in the specified
 	 * replacements map.
 	 * 
-	 * @see #copyFileReplacingTokens(File, File, Map)
+	 * @see #copyFileWithInterpolation(File, File, Map)
 	 */
 	public static void copyUrlReplacingTokens(URL url, File toFile,
 			Map<String, String> replacements, PrintStream reportStream) {
@@ -662,7 +662,7 @@ public final class JkUtilsFile {
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
-		copyStreamReplacingTokens(is, toFile, replacements, reportStream);
+		copyStreamWithInterpolation(is, toFile, replacements, reportStream);
 		JkUtilsIO.closeQuietly(is);
 	}
 
@@ -671,9 +671,9 @@ public final class JkUtilsFile {
 	 * While coping token ${key} are replaced by the value found in the
 	 * specified replacements map.
 	 * 
-	 * @see #copyFileReplacingTokens(File, File, Map)
+	 * @see #copyFileWithInterpolation(File, File, Map)
 	 */
-	public static void copyStreamReplacingTokens(InputStream inputStream,
+	public static void copyStreamWithInterpolation(InputStream inputStream,
 			File toFile, Map<String, String> replacements,
 			PrintStream reportStream) {
 		final TokenReplacingReader replacingReader = new TokenReplacingReader(

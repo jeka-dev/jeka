@@ -1,5 +1,6 @@
 package org.jerkar.internal.ivy;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,7 +25,6 @@ import org.jerkar.JkOptions;
 import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkModuleId;
-import org.jerkar.depmanagement.JkRepo;
 import org.jerkar.depmanagement.JkRepos;
 import org.jerkar.depmanagement.JkResolutionParameters;
 import org.jerkar.depmanagement.JkScope;
@@ -57,15 +57,6 @@ public final class JkIvyResolver {
 	}
 
 	/**
-	 * Creates an instance using a single repository (same for resolving and publishing).
-	 */
-	public static JkIvyResolver of(JkRepo repo) {
-		return JkIvyResolver.of(JkRepos.of(repo));
-	}
-
-
-
-	/**
 	 * Creates an <code>IvySettings</code> from the specified repositories.
 	 */
 	private static IvySettings ivySettingsOf(JkRepos resolveRepos) {
@@ -82,9 +73,7 @@ public final class JkIvyResolver {
 		return of(ivySettingsOf(resolveRepos));
 	}
 
-	public static JkIvyResolver of() {
-		return of(JkRepos.mavenCentral());
-	}
+
 
 	private static boolean isMaven(DependencyResolver dependencyResolver) {
 		if (dependencyResolver instanceof ChainResolver) {
@@ -121,11 +110,9 @@ public final class JkIvyResolver {
 		return false;
 	}
 
-	public Set<JkArtifact> resolve(JkDependencies deps, JkScope resolvedScope) {
-		return resolve(ANONYMOUS_MODULE, deps, resolvedScope, JkResolutionParameters.of());
-	}
 
-	public Set<JkArtifact> resolve(JkDependencies deps, JkScope resolvedScope, JkResolutionParameters parameters) {
+
+	public Set<JkArtifact> resolveAnonymous(JkDependencies deps, JkScope resolvedScope, JkResolutionParameters parameters) {
 		return resolve(ANONYMOUS_MODULE, deps, resolvedScope, parameters);
 	}
 
@@ -160,7 +147,7 @@ public final class JkIvyResolver {
 	/**
 	 * Get artifacts of the given modules published for the specified scopes (no transitive resolution).
 	 */
-	public AttachedArtifacts getArtifacts(Iterable<JkVersionedModule> modules, JkScope ...scopes) {
+	public JkAttachedArtifacts getArtifacts(Iterable<JkVersionedModule> modules, JkScope ...scopes) {
 		//final String defaultConf = "default";
 		final DefaultModuleDescriptor moduleDescriptor = Translations.toUnpublished(ANONYMOUS_MODULE);
 		for (final JkScope jkScope : scopes) {
@@ -174,7 +161,7 @@ public final class JkIvyResolver {
 			}
 			moduleDescriptor.addDependency(dependency);
 		}
-		final AttachedArtifacts result = new AttachedArtifacts();
+		final JkAttachedArtifacts result = new JkAttachedArtifacts();
 		final ResolveOptions resolveOptions = new ResolveOptions()
 		.setTransitive(false)
 		.setOutputReport(JkOptions.isVerbose())
@@ -221,11 +208,13 @@ public final class JkIvyResolver {
 
 
 
-	public final class AttachedArtifacts {
+	public final class JkAttachedArtifacts implements Serializable {
+
+		private static final long serialVersionUID = 1L;
 
 		private final Map<JkModuleId, Map<JkScope, Set<JkArtifact>>> map= new HashMap<JkModuleId, Map<JkScope,Set<JkArtifact>>>();
 
-		public AttachedArtifacts() {
+		public JkAttachedArtifacts() {
 			super();
 		}
 

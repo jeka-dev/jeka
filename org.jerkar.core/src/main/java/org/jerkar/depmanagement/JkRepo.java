@@ -1,6 +1,7 @@
 package org.jerkar.depmanagement;
 
 import java.io.File;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -11,7 +12,9 @@ import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIterable;
 import org.jerkar.utils.JkUtilsString;
 
-public abstract class JkRepo {
+public abstract class JkRepo implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public static final URL MAVEN_CENTRAL_URL = toUrl("http://repo1.maven.org/maven2");
 
@@ -181,6 +184,9 @@ public abstract class JkRepo {
 
 	public static final class JkMavenRepository extends JkRepo {
 
+		private static final long serialVersionUID = 1L;
+
+
 		private JkMavenRepository(URL url, String realm, String userName, String password) {
 			super(url, realm, userName, password);
 		}
@@ -201,6 +207,8 @@ public abstract class JkRepo {
 	}
 
 	public static final class JkIvyRepository extends JkRepo {
+
+		private static final long serialVersionUID = 1L;
 
 		private final List<String> artifactPatterns;
 

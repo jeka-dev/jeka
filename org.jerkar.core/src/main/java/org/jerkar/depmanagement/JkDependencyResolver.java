@@ -1,6 +1,7 @@
 package org.jerkar.depmanagement;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -8,15 +9,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jerkar.JkClassLoader;
 import org.jerkar.JkLog;
 import org.jerkar.file.JkPath;
+import org.jerkar.internal.ivy.JkIvyPublisher;
 import org.jerkar.internal.ivy.JkIvyResolver;
-import org.jerkar.internal.ivy.JkIvyResolver.AttachedArtifacts;
+import org.jerkar.internal.ivy.JkIvyResolver.JkAttachedArtifacts;
 
 public final class JkDependencyResolver  {
 
-	public static JkDependencyResolver managed(JkIvyResolver jkIvyResolver, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
-		return new JkDependencyResolver(jkIvyResolver, dependencies, module, resolutionParameters);
+	private static final String IVY_CLASS = "org.jerkar.internal.ivy.JkIvyResolver";
+
+	private static final JkClassLoader IVY_CLASS_LOADER = JkIvyPublisher.CLASSLOADER;
+
+	private static final boolean IN_CLASSLOADER = JkClassLoader.current().isDefined(IVY_CLASS);
+
+	public static JkDependencyResolver managed(JkRepos repos, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
+		final Object ivyResolver;
+		if (!IN_CLASSLOADER) {
+			ivyResolver = IVY_CLASS_LOADER.invokeStaticMethod(false, IVY_CLASS, "of", dependencies, module, resolutionParameters);
+		} else {
+			ivyResolver = JkIvyResolver.of(repos);
+		}
+		return new JkDependencyResolver(ivyResolver, dependencies, module, resolutionParameters);
 	}
 
 	public static JkDependencyResolver unmanaged(JkDependencies dependencies) {
@@ -29,7 +44,7 @@ public final class JkDependencyResolver  {
 
 	private final Map<JkScope, JkPath> cachedDeps = new HashMap<JkScope, JkPath>();
 
-	private final JkIvyResolver jkIvyResolver;
+	private final Object jkIvyResolver;
 
 	private final JkDependencies dependencies;
 
@@ -38,7 +53,7 @@ public final class JkDependencyResolver  {
 	// Not necessary but nice if present in order to let Ivy hide data efficiently.
 	private final JkVersionedModule module;
 
-	private JkDependencyResolver(JkIvyResolver jkIvyResolver, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
+	private JkDependencyResolver(Object jkIvyResolver, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
 		this.jkIvyResolver = jkIvyResolver;
 		this.dependencies = dependencies;
 		this.module = module;
@@ -69,9 +84,21 @@ public final class JkDependencyResolver  {
 		// Add managed dependencies from Ivy
 		final Set<JkArtifact> artifacts;
 		if (module != null) {
-			artifacts = jkIvyResolver.resolve(module, dependencies, scope, parameters);
+			if (!IN_CLASSLOADER) {
+				artifacts = IVY_CLASS_LOADER.invokeInstanceMethod(true, jkIvyResolver, "resolve",
+						module, dependencies, scope, parameters);
+			} else {
+				artifacts = ((JkIvyResolver) jkIvyResolver).resolve(module, dependencies, scope, parameters);
+			}
+
 		} else {
-			artifacts = jkIvyResolver.resolve(dependencies, scope, parameters);
+			if (!IN_CLASSLOADER) {
+				artifacts = IVY_CLASS_LOADER.invokeInstanceMethod(true, jkIvyResolver, "resolveAnonymous",
+						dependencies, scope, parameters);
+			} else {
+				artifacts = ((JkIvyResolver) jkIvyResolver).resolveAnonymous(dependencies, scope, parameters);
+			}
+
 		}
 		result.addAll(JkArtifact.localFiles(artifacts));
 		return result;
@@ -80,6 +107,7 @@ public final class JkDependencyResolver  {
 	/**
 	 * Resolves the managed dependencies (dependencies declared as external module).
 	 */
+	@SuppressWarnings("unchecked")
 	public Set<JkArtifact> resolveManagedDependencies(JkScope ... scopes) {
 		if (jkIvyResolver == null) {
 			throw new IllegalStateException("This method cannot be invoked on an unmanaged dependency resolver.");
@@ -92,9 +120,19 @@ public final class JkDependencyResolver  {
 		final Set<JkArtifact> result = new HashSet<JkArtifact>();
 		for (final JkScope scope : scopesSet) {
 			if (module != null) {
-				result.addAll(jkIvyResolver.resolve(module, dependencies, scope, parameters));
+				if (!IN_CLASSLOADER) {
+					result.addAll((Collection<? extends JkArtifact>) IVY_CLASS_LOADER.invokeInstanceMethod(true, jkIvyResolver,
+							"resolve", module, dependencies, scope, parameters));
+				} else {
+					result.addAll(((JkIvyResolver) jkIvyResolver).resolve(module, dependencies, scope, parameters));
+				}
 			} else {
-				result.addAll(jkIvyResolver.resolve(dependencies, scope, parameters));
+				if (!IN_CLASSLOADER) {
+					result.addAll((Collection<? extends JkArtifact>) IVY_CLASS_LOADER.invokeInstanceMethod(
+							true, jkIvyResolver, "resolve", dependencies, scope, parameters));
+				} else {
+					result.addAll(((JkIvyResolver) jkIvyResolver).resolveAnonymous(dependencies, scope, parameters));
+				}
 			}
 		}
 		return result;
@@ -103,8 +141,11 @@ public final class JkDependencyResolver  {
 	/**
 	 * Gets artifacts belonging to the same module as the specified ones but having the specified scopes.
 	 */
-	public AttachedArtifacts getAttachedArtifacts(Set<JkVersionedModule> modules, JkScope ... scopes) {
-		return jkIvyResolver.getArtifacts(modules, scopes);
+	public JkAttachedArtifacts getAttachedArtifacts(Set<JkVersionedModule> modules, JkScope ... scopes) {
+		if (!IN_CLASSLOADER) {
+			return (JkAttachedArtifacts)  IVY_CLASS_LOADER.invokeInstanceMethod(true, jkIvyResolver, "getArtifacts", modules, scopes);
+		}
+		return ((JkIvyResolver) jkIvyResolver).getArtifacts(modules, scopes);
 	}
 
 

@@ -1,6 +1,7 @@
 package org.jerkar.depmanagement;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,7 +26,9 @@ import org.jerkar.utils.JkUtilsTime;
  * 
  * @author Jerome Angibaud.
  */
-public class JkDependencies implements Iterable<JkScopedDependency> {
+public class JkDependencies implements Iterable<JkScopedDependency>, Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public static JkDependencies on(JkScopedDependency... scopedDependencies) {
 		return new JkDependencies(Arrays.asList(scopedDependencies));

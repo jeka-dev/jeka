@@ -6,6 +6,9 @@ import org.jerkar.publishing.JkMavenPublication;
 import org.jerkar.publishing.JkMavenPublicationInfo;
 import org.jerkar.publishing.JkPublishRepos;
 
+/**
+ * Build settings shared across all Jerkar java projects
+ */
 public abstract class JerkarBuild extends JkJavaBuild {
 
 

@@ -1,6 +1,7 @@
 package org.jerkar.publishing;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,7 +20,9 @@ import org.jerkar.utils.JkUtilsIterable;
  * 
  * @author Jerome Angibaud
  */
-public final class JkPublishRepos implements Iterable<JkPublishRepo> {
+public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Creates a JkPublishRepos that publish snaphots on to a specified repository and release on
@@ -176,7 +179,9 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo> {
 		return false;
 	}
 
-	public static final class JkPublishRepo {
+	public static final class JkPublishRepo implements Serializable {
+
+		private static final long serialVersionUID = 1L;
 
 		private final JkRepo jkRepo;
 

@@ -27,6 +27,7 @@ import org.apache.ivy.plugins.parser.m2.PomWriterOptions;
 import org.apache.ivy.plugins.resolver.AbstractPatternsBasedResolver;
 import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
+import org.jerkar.JkClassLoader;
 import org.jerkar.JkException;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
@@ -51,6 +52,8 @@ import org.jerkar.utils.JkUtilsThrowable;
  * Ivy wrapper providing high level methods. The API is expressed using Jerkar classes only (mostly free of Ivy classes).
  */
 public final class JkIvyPublisher {
+
+	public static final JkClassLoader CLASSLOADER = JkClassLoader.current().siblingWithOptional("ivy-2.4.0.jar");
 
 	private final Ivy ivy;
 

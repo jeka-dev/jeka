@@ -11,6 +11,8 @@ import org.jerkar.utils.JkUtilsString;
  */
 public class JkExternalModule extends JkDependency {
 
+	private static final long serialVersionUID = 1L;
+
 	public static JkExternalModule of(JkModuleId moduleId, JkVersionRange versionRange) {
 		return new JkExternalModule(moduleId, versionRange, null, true);
 	}

@@ -45,7 +45,7 @@ class JUnit4TestLauncher {
 			JkLog.info("Launching test using class loader :");
 			JkLog.info(classloader.toString());
 		}
-		return classloader.invokeStaticMethod(JUnit4TestExecutor.class.getName(), "launchInProcess", classArray, verbose, reportDetail, reportDir);
+		return classloader.invokeStaticMethod(true, JUnit4TestExecutor.class.getName(), "launchInProcess", classArray, verbose, reportDetail, reportDir);
 	}
 
 

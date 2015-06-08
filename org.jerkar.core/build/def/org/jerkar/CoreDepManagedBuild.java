@@ -19,7 +19,8 @@ public class CoreDepManagedBuild extends CoreBuild {
 	protected JkDependencies dependencies() {
 		return JkDependencies.builder()
 				.on("junit:junit:4.11").scope(PROVIDED)
-				.on("org.apache.ivy:ivy:2.4.0-rc1").build();
+				.on("org.apache.ivy:ivy:2.4.0").scope(PROVIDED)
+				.build();
 	}
 
 

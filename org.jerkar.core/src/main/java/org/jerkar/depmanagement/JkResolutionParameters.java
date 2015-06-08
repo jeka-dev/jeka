@@ -1,7 +1,11 @@
 package org.jerkar.depmanagement;
 
+import java.io.Serializable;
 
-public class JkResolutionParameters {
+
+public class JkResolutionParameters implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public static JkResolutionParameters of() {
 		return new JkResolutionParameters(null, null, false);

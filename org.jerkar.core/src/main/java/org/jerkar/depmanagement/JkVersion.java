@@ -1,12 +1,15 @@
 package org.jerkar.depmanagement;
 
+import java.io.Serializable;
 import java.net.URL;
 
 import org.jerkar.utils.JkUtilsAssert;
 import org.jerkar.utils.JkUtilsIO;
 import org.jerkar.utils.JkUtilsString;
 
-public final class JkVersion implements Comparable<JkVersion> {
+public final class JkVersion implements Comparable<JkVersion>, Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public static final String DEFAULT_VERSION_RESOURCE_NAME = "version.txt";
 

@@ -16,8 +16,7 @@ import org.jerkar.depmanagement.JkResolutionParameters;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
 import org.jerkar.depmanagement.JkVersionedModule;
-import org.jerkar.internal.ivy.JkIvyResolver;
-import org.jerkar.internal.ivy.JkIvyResolver.AttachedArtifacts;
+import org.jerkar.internal.ivy.JkIvyResolver.JkAttachedArtifacts;
 
 public class JkIvyResolverRunner {
 
@@ -36,7 +35,7 @@ public class JkIvyResolverRunner {
 				.mapScope(COMPILE).to("compile", "default")
 				.and(PROVIDED).to("provided")
 				.build();
-		final Set<JkArtifact> artifacts = JkIvyResolver.of(repos).resolve(deps, COMPILE);
+		final Set<JkArtifact> artifacts = JkIvyResolver.of(repos).resolveAnonymous(deps, COMPILE, JkResolutionParameters.of());
 		for (final JkArtifact artifact : artifacts) {
 			System.out.println(artifact);
 		}
@@ -47,7 +46,7 @@ public class JkIvyResolverRunner {
 		final JkRepos repos = JkRepos.mavenCentral().andMavenCentral();
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
-		final Set<JkArtifact> artifacts = JkIvyResolver.of(repos).resolve(deps, COMPILE, JkResolutionParameters.of(defaultMapping()));
+		final Set<JkArtifact> artifacts = JkIvyResolver.of(repos).resolveAnonymous(deps, COMPILE, JkResolutionParameters.of(defaultMapping()));
 		for (final JkArtifact artifact : artifacts) {
 			System.out.println(artifact);
 		}
@@ -64,12 +63,12 @@ public class JkIvyResolverRunner {
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
 		final JkIvyResolver jkIvyResolver = JkIvyResolver.of(repos);
-		final Set<JkArtifact> artifacts = jkIvyResolver.resolve(deps, COMPILE, JkResolutionParameters.of(defaultMapping()));
+		final Set<JkArtifact> artifacts = jkIvyResolver.resolveAnonymous(deps, COMPILE, JkResolutionParameters.of(defaultMapping()));
 		final Set<JkVersionedModule> modules = new HashSet<JkVersionedModule>();
 		for (final JkArtifact artifact : artifacts) {
 			modules.add(artifact.versionedModule());
 		}
-		final AttachedArtifacts result = jkIvyResolver.getArtifacts(modules, JkScope.of("sources"), JkScope.of("javadoc"), JkScope.of("noexist"));
+		final JkAttachedArtifacts result = jkIvyResolver.getArtifacts(modules, JkScope.of("sources"), JkScope.of("javadoc"), JkScope.of("noexist"));
 		System.out.println(result);
 		final Set<JkArtifact> artifactSet = result.getArtifacts(JkModuleId.of("org.apache.wicket", "wicket-ioc"), JkScope.of("sources"));
 		System.out.println(artifactSet);

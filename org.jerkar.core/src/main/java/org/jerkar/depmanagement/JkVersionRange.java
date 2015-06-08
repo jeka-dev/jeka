@@ -1,5 +1,7 @@
 package org.jerkar.depmanagement;
 
+import java.io.Serializable;
+
 import org.jerkar.utils.JkUtilsString;
 
 /**
@@ -11,7 +13,9 @@ import org.jerkar.utils.JkUtilsString;
  * 
  * @author Jerome Angibaud
  */
-public final class JkVersionRange {
+public final class JkVersionRange implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Creates a version range from String expression described at : http://ant.apache.org/ivy/history/latest-milestone/ivyfile/dependency.html.

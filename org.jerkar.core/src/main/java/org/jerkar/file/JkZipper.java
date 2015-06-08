@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.Deflater;
 import java.util.zip.ZipFile;
@@ -29,29 +30,31 @@ public final class JkZipper {
 		this.archivestoMerge = archivestoMerge;
 	}
 
-	private JkZipper(List<? extends Object> itemsToZip) {
-		this.itemsToZip = itemsToZip;
-		this.archivestoMerge = Collections.emptyList();
-	}
 
 	/**
 	 * Creates a {@link JkZipper} from an array of directories.
 	 */
 	public static JkZipper of(File ...dirs) {
+		final List<File> archivestoMerges = new LinkedList<File>();
+		final List<Object> items = new LinkedList<Object>();
 		for (final File file : dirs) {
-			if (!file.isDirectory()) {
-				throw new IllegalArgumentException(file.getPath() + " is not a directory.");
+			if (file.isDirectory()) {
+				items.add(file);
+			} else {
+				archivestoMerges.add(file);
 			}
 		}
-		return new JkZipper(Arrays.asList( dirs));
+		return new JkZipper(items, archivestoMerges);
 	}
 
+	@SuppressWarnings("unchecked")
 	static JkZipper of(JkFileTreeSet ...jkDirSets) {
-		return new JkZipper(Arrays.asList(jkDirSets));
+		return new JkZipper(Arrays.asList(jkDirSets), Collections.EMPTY_LIST);
 	}
 
+	@SuppressWarnings("unchecked")
 	static JkZipper of(JkFileTree ...jkDirs) {
-		return new JkZipper(Arrays.asList(jkDirs));
+		return new JkZipper(Arrays.asList(jkDirs), Collections.EMPTY_LIST);
 	}
 
 
@@ -66,29 +69,33 @@ public final class JkZipper {
 
 	/**
 	 * Zips and writes the contain of this archive to disk using {@link Deflater#DEFAULT_COMPRESSION} level.
-	 * This method returns a {@link CheckSumer} to conveniently create digests of the produced zip file.
+	 * This method returns a {@link JkCheckSumer} to conveniently create digests of the produced zip file.
 	 */
-	public CheckSumer to(File zipFile) {
+	public JkCheckSumer to(File zipFile) {
 		JkUtilsFile.createFileIfNotExist(zipFile);
 		return this.to(zipFile, Deflater.DEFAULT_COMPRESSION);
 	}
 
-	public CheckSumer appendTo(File existingARchive) {
-		return this.appendTo(existingARchive, Deflater.DEFAULT_COMPRESSION);
+	public JkCheckSumer appendTo(File existingArchive) {
+		return this.appendTo(existingArchive, Deflater.DEFAULT_COMPRESSION);
 	}
 
-	public CheckSumer appendTo(File existingARchive, int compressionLevel) {
-		final File temp = JkUtilsFile.createTempFile(existingARchive.getName(), "");
-		JkUtilsFile.move(existingARchive, temp);
-		final CheckSumer checkSumer = this.merge(temp).to(existingARchive, compressionLevel);
+	/**
+	 * Append the content of this zipper to the specified archive file. If the specified file
+	 * does not exist, it will be created under the hood.
+	 */
+	public JkCheckSumer appendTo(File archive, int compressionLevel) {
+		final File temp = JkUtilsFile.createTempFile(archive.getName(), "");
+		JkUtilsFile.move(archive, temp);
+		final JkCheckSumer jkCheckSumer = this.merge(temp).to(archive, compressionLevel);
 		temp.delete();
-		return checkSumer;
+		return jkCheckSumer;
 	}
 
 	/**
 	 * As {@link #to(File)} but specifying compression level.
 	 */
-	public CheckSumer to(File zipFile, int compressLevel) {
+	public JkCheckSumer to(File zipFile, int compressLevel) {
 		JkLog.start("Creating zip file : " + zipFile);
 		final ZipOutputStream zos = JkUtilsIO.createZipOutputStream(zipFile, compressLevel);
 		zos.setLevel(compressLevel);
@@ -98,6 +105,9 @@ public final class JkZipper {
 			if (item instanceof File) {
 				final File file = (File) item;
 				JkUtilsIO.addZipEntry(zos, file, file.getParentFile());
+			} else if (item instanceof EntryFile) {
+				final EntryFile entryFile = (EntryFile) item;
+				JkUtilsIO.addZipEntry(zos, entryFile.file, entryFile.path);
 			} else if (item instanceof JkFileTree) {
 				final JkFileTree dirView = (JkFileTree) item;
 				addDirView(zos, dirView);
@@ -128,7 +138,20 @@ public final class JkZipper {
 			throw new RuntimeException(e);
 		}
 		JkLog.done();
-		return new CheckSumer(zipFile);
+		return new JkCheckSumer(zipFile);
+	}
+
+	public JkZipper andEntryName(String entryName, File file) {
+		final List<Object> list = new LinkedList<Object>(this.itemsToZip);
+		list.add(new EntryFile(entryName, file));
+		return new JkZipper(list, archivestoMerge);
+	}
+
+	public JkZipper andEntryPath(String entryPath, File file) {
+		final List<Object> list = new LinkedList<Object>(this.itemsToZip);
+		final String path = entryPath.endsWith("/") ? entryPath + file.getName() : entryPath + "/" + file.getName();
+		list.add(new EntryFile(path, file));
+		return new JkZipper(list, archivestoMerge);
 	}
 
 	private void addDirView(ZipOutputStream zos, JkFileTree dirView) {
@@ -141,23 +164,34 @@ public final class JkZipper {
 		}
 	}
 
+	private static class EntryFile {
+		final String path;
+		final File file;
+
+		public EntryFile(String path, File file) {
+			super();
+			this.path = path;
+			this.file = file;
+		}
+	}
+
 	/**
 	 * Wrapper on <code>File</code> allowing to creates digests on it.
 	 * 
 	 * @author Jerome Angibaud
 	 */
-	public static final class CheckSumer {
+	public static final class JkCheckSumer {
 
 		/**
-		 * Creates an instance of {@link CheckSumer} wrapping the specified file.
+		 * Creates an instance of {@link JkCheckSumer} wrapping the specified file.
 		 */
-		public static CheckSumer of(File file) {
-			return new CheckSumer(file);
+		public static JkCheckSumer of(File file) {
+			return new JkCheckSumer(file);
 		}
 
 		private final File file;
 
-		private CheckSumer(File file) {
+		private JkCheckSumer(File file) {
 			JkUtilsAssert.isTrue(file.isFile(), file.getAbsolutePath() + " is a directory, not a file.");
 			this.file = file;
 		}
@@ -166,7 +200,7 @@ public final class JkZipper {
 		 * Creates an MD5 digest for this wrapped file. The digest file is written in the same directory
 		 * as the digested file and has the same name + '.md5' extension.
 		 */
-		public CheckSumer md5() {
+		public JkCheckSumer md5() {
 			JkLog.start("Creating MD5 file for : " + file);
 			final File parent = file.getParentFile();
 			final String md5 = JkUtilsFile.md5Checksum(file);
@@ -179,7 +213,7 @@ public final class JkZipper {
 		/**
 		 * As {@link #md5()} but allow to pass a flag as parameter to actually process or not the digesting.
 		 */
-		public CheckSumer md5If(boolean process) {
+		public JkCheckSumer md5If(boolean process) {
 			if (!process) {
 				return this;
 			}

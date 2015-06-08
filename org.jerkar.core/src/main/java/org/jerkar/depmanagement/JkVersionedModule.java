@@ -1,5 +1,7 @@
 package org.jerkar.depmanagement;
 
+import java.io.Serializable;
+
 
 
 /**
@@ -7,7 +9,9 @@ package org.jerkar.depmanagement;
  * 
  * @author Jerome Angibaud
  */
-public final class JkVersionedModule {
+public final class JkVersionedModule implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public static JkVersionedModule of(JkModuleId moduleId, JkVersion version) {
 		return new JkVersionedModule(moduleId, version);

@@ -21,7 +21,6 @@ import org.jerkar.depmanagement.JkResolutionParameters;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.file.JkFileTree;
 import org.jerkar.file.JkPath;
-import org.jerkar.internal.ivy.JkIvyResolver;
 import org.jerkar.utils.JkUtilsFile;
 
 /**
@@ -264,8 +263,7 @@ class Project {
 	private JkDependencyResolver getScriptDependencyResolver() {
 		final JkDependencies deps = this.scriptDependencies();
 		if (deps.containsExternalModule()) {
-			final JkIvyResolver ivy = JkIvyResolver.of(this.buildRepos);
-			return JkDependencyResolver.managed(ivy, deps, null, JkResolutionParameters.of());
+			return JkDependencyResolver.managed(this.buildRepos, deps, null, JkResolutionParameters.of());
 		}
 		return JkDependencyResolver.unmanaged(deps);
 	}

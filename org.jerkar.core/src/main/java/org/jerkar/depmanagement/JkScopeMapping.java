@@ -1,5 +1,6 @@
 package org.jerkar.depmanagement;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,9 +12,11 @@ import java.util.Set;
 
 import org.jerkar.utils.JkUtilsIterable;
 
-public final class JkScopeMapping {
+public final class JkScopeMapping implements Serializable {
 
 	// -------- Factory methods ----------------------------
+
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Returns a partially constructed mapping specifying only scope entries and

@@ -11,8 +11,6 @@ public final class JKUtilsTests {
 
 	/**
 	 * Returns a file relative having the specified relative path to {@link #OUTPUR_DIR}
-	 * @param path
-	 * @return
 	 */
 	public static File tempFile(String path) {
 		return new File(OUTPUR_DIR, path);

@@ -1,6 +1,7 @@
 package org.jerkar.publishing;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,7 +11,9 @@ import java.util.Set;
 
 import org.jerkar.utils.JkUtilsAssert;
 
-public final class JkMavenPublication {
+public final class JkMavenPublication implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@SuppressWarnings("unchecked")
 	public static JkMavenPublication of(String name, File file) {

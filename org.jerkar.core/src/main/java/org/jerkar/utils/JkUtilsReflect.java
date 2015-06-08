@@ -321,7 +321,7 @@ public final class JkUtilsReflect {
 			final Object arg = args[i];
 			types[i] = arg.getClass();
 		}
-		final Set<Method> result = findMethodsCompatibleWith(true, canditates, methodName, types);
+		final Set<Method> result = findMethodsCompatibleWith(staticMethod, canditates, methodName, types);
 		if (result.isEmpty()) {
 			throw new IllegalArgumentException("No " + (staticMethod ? "static" : "instance") + " method found on class "
 					+ className + " for method " + methodName + " and param types " + Arrays.toString(types));

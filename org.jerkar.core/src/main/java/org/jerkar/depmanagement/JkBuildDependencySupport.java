@@ -14,7 +14,6 @@ import org.jerkar.JkOption;
 import org.jerkar.JkProject;
 import org.jerkar.JkScaffolder;
 import org.jerkar.file.JkPath;
-import org.jerkar.internal.ivy.JkIvyResolver;
 import org.jerkar.publishing.JkPublishRepos;
 import org.jerkar.publishing.JkPublisher;
 import org.jerkar.utils.JkUtilsReflect;
@@ -93,16 +92,6 @@ public class JkBuildDependencySupport extends JkBuild {
 	 */
 	protected final JkVersionedModule versionedModule() {
 		return JkVersionedModule.of(moduleId(), version());
-	}
-
-
-
-	/**
-	 * Returns the parameterized JkIvyResolver instance to use when dealing with managed dependencies.
-	 * If you don't use managed dependencies, this method is never invoked.
-	 */
-	protected JkIvyResolver jkIvyResolver() {
-		return JkIvyResolver.of(downloadRepositories());
 	}
 
 	/**
@@ -197,7 +186,7 @@ public class JkBuildDependencySupport extends JkBuild {
 	private JkDependencyResolver createDependencyResolver() {
 		final JkDependencies dependencies = effectiveDependencies().and(extraCommandLineDeps());
 		if (dependencies.containsExternalModule()) {
-			return JkDependencyResolver.managed(jkIvyResolver(), dependencies, versionedModule(),
+			return JkDependencyResolver.managed(downloadRepositories(), dependencies, versionedModule(),
 					JkResolutionParameters.of(scopeMapping()));
 		}
 		return JkDependencyResolver.unmanaged(dependencies);

@@ -1,6 +1,7 @@
 package org.jerkar.depmanagement;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,7 +23,9 @@ import org.jerkar.utils.JkUtilsString;
  * 
  * @author Jerome Angibaud
  */
-public abstract class JkDependency {
+public abstract class JkDependency implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public static boolean isGroupNameAndVersion(String candidate) {
 		return JkUtilsString.countOccurence(candidate, ':') == 2;
@@ -61,6 +64,8 @@ public abstract class JkDependency {
 	 */
 	public static final class JkFilesDependency extends JkDependency {
 
+		private static final long serialVersionUID = 1079527121988214989L;
+
 		private final List<File> files;
 
 		private JkFilesDependency(Iterable<File> files) {
@@ -79,6 +84,8 @@ public abstract class JkDependency {
 	}
 
 	public static final class JkProjectDependency extends JkDependency {
+
+		private static final long serialVersionUID = 1L;
 
 		private final JkBuildDependencySupport projectBuild;
 

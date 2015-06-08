@@ -6,6 +6,7 @@ import java.util.zip.Deflater;
 import org.jerkar.builtins.javabuild.JkJavaPacker;
 import org.jerkar.builtins.javabuild.JkResourceProcessor;
 import org.jerkar.file.JkFileTree;
+import org.jerkar.file.JkZipper;
 
 /**
  * Build class for Jerkar itself.
@@ -17,11 +18,18 @@ public class CoreBuild extends JerkarBuild {
 
 	public File distribFolder;
 
+	private File bouncyCastleJar;
+
+	private File ivyJar;
+
+
 	@Override
 	protected void init() {
 		super.init();
 		distripZipFile = ouputDir("jerkar-distrib.zip");
 		distribFolder = ouputDir("jerkar-distrib");
+		bouncyCastleJar = this.baseDir("build/libs/provided/bouncycastle-pgp-152.jar");
+		ivyJar = this.baseDir("build/libs/provided/ivy-2.4.0.jar");
 		this.pack.fatJar = true;
 	}
 
@@ -54,14 +62,21 @@ public class CoreBuild extends JerkarBuild {
 		distrib.importDirContent(baseDir("src/main/dist"));
 
 		// Simpler to put both Jerkar and Jerkar-fat jar at the root (in order to find the Jerker HOME)
-		distrib.importFiles(packer.jarFile(), packer.fatJarFile());
-		distrib.from("libs/required").importDirContent(baseDir("build/libs/compile"));
+		distrib.importFiles(packer.jarFile());
+		addOptionalJarToFatJar(distrib.file("org.jerkar.core-fat.jar"));
+		distrib.from("libs/required").importDirContent(baseDir("build/libs/compile"))
+		.importFiles(bouncyCastleJar, ivyJar);
 		distrib.from("libs-sources").importDirContent(baseDir("build/libs-sources"))
 		.importFiles(packer.jarSourceFile());
 		distrib.from("libs-javadoc").importFiles(this.javadocMaker().zipFile());
 		distrib.zip().to(distripZipFile, Deflater.BEST_COMPRESSION);
 		signIfNeeded(distripZipFile);
 		JkLog.done();
+	}
+
+	private void addOptionalJarToFatJar(File dest) {
+		JkZipper.of(packer().fatJarFile()).andEntryPath("org/jerkar/crypto/pgp", bouncyCastleJar)
+		.andEntryPath("org/jerkar/internal/ivy", ivyJar).to(dest);
 	}
 
 

@@ -30,7 +30,7 @@ import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.file.JkFileTree;
 import org.jerkar.file.JkFileTreeSet;
-import org.jerkar.internal.ivy.JkIvyResolver.AttachedArtifacts;
+import org.jerkar.internal.ivy.JkIvyResolver.JkAttachedArtifacts;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsString;
 import org.w3c.dom.Document;
@@ -446,18 +446,18 @@ final class DotClasspath {
 	private static void writeExternalModuleEntries(JkJavaBuild build,
 			final XMLStreamWriter writer, final Set<JkArtifact> depAsArtifacts)
 					throws XMLStreamException {
-		final AttachedArtifacts attachedArtifacts = build.dependencyResolver().getAttachedArtifacts(
+		final JkAttachedArtifacts jkAttachedArtifacts = build.dependencyResolver().getAttachedArtifacts(
 				JkArtifact.versionedModules(depAsArtifacts), JkJavaBuild.SOURCES, JkJavaBuild.JAVADOC);
 
 		for (final JkArtifact artifact : depAsArtifacts) {
-			final Set<JkArtifact> sourcesArtifacts = attachedArtifacts.getArtifacts(artifact.versionedModule().moduleId(), JkJavaBuild.SOURCES);
+			final Set<JkArtifact> sourcesArtifacts = jkAttachedArtifacts.getArtifacts(artifact.versionedModule().moduleId(), JkJavaBuild.SOURCES);
 			final File source;
 			if (!sourcesArtifacts.isEmpty()) {
 				source = sourcesArtifacts.iterator().next().localFile();
 			} else {
 				source = null;
 			}
-			final Set<JkArtifact> javadocArtifacts = attachedArtifacts.getArtifacts(artifact.versionedModule().moduleId(), JkJavaBuild.JAVADOC);
+			final Set<JkArtifact> javadocArtifacts = jkAttachedArtifacts.getArtifacts(artifact.versionedModule().moduleId(), JkJavaBuild.JAVADOC);
 			final File javadoc;
 			if (!javadocArtifacts.isEmpty()) {
 				javadoc = javadocArtifacts.iterator().next().localFile();

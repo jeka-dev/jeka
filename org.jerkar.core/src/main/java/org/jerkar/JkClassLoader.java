@@ -145,10 +145,29 @@ public final class JkClassLoader {
 			} else if (entry instanceof File) {
 				files.add((File) entry);
 			} else {
-				new IllegalArgumentException("This methid only accept File and URL, not " + entry.getClass().getName());
+				new IllegalArgumentException("This method only accept File and URL, not " + entry.getClass().getName());
 			}
 		}
 		return parent().child(this.childClasspath().and(files));
+	}
+
+	/**
+	 * Same as {@link #sibling(Object...)} but more tolerant about the input.
+	 * If one of the specified entry is not valid, then it is simply ignored.
+	 */
+	public JkClassLoader siblingWithOptional(Object... fileOrUrls) {
+		final List<Object> objects = new LinkedList<Object>();
+		for (final Object entry : fileOrUrls) {
+			if (entry instanceof URL) {
+				objects.add(entry);
+			} else if (entry instanceof File) {
+				final File file = (File) entry;
+				if (file.exists()) {
+					objects.add(file);
+				}
+			}
+		}
+		return sibling(objects);
 	}
 
 	/**
@@ -457,7 +476,7 @@ public final class JkClassLoader {
 	 * Invokes a static method on the specified class using the provided
 	 * arguments. <br/>
 	 * If the argument classes are the same on the current class loader and this
-	 * one then arguments are passed as is, otherwise arguments are serialize in
+	 * one then arguments are passed as is, otherwise arguments are serialized in
 	 * the current class loader and deserialized in this class loader in order
 	 * to be compliant with it. <br/>
 	 * The current thread context class loader is switched to this for the
@@ -465,7 +484,7 @@ public final class JkClassLoader {
 	 * It is then turned back to the former one when the execution is done.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T invokeStaticMethod(String className, String methodName,
+	public <T> T invokeStaticMethod(boolean serializeResult, String className, String methodName,
 			Object... args) {
 		final Class<?> clazz = this.load(className);
 		final Object[] effectiveArgs = new Object[args.length];
@@ -479,8 +498,51 @@ public final class JkClassLoader {
 		try {
 			final Object returned = JkUtilsReflect.invokeStaticMethod(clazz,
 					methodName, effectiveArgs);
-			final T result = (T) traverseClassLoader(returned,
-					JkClassLoader.current());
+			final T result;
+			if (serializeResult) {
+				result = (T) traverseClassLoader(returned,
+						JkClassLoader.current());
+			} else {
+				result = (T) returned;
+			}
+			return result;
+		} finally {
+			Thread.currentThread().setContextClassLoader(currentClassLoader);
+		}
+	}
+
+	/**
+	 * Invokes an instance method on the specified object using the specified
+	 * arguments. <br/>
+	 * If the argument classes are the same on the current class loader and this
+	 * one then arguments are passed as is, otherwise arguments are serialized in
+	 * the current class loader and deserialized in this class loader in order
+	 * to be compliant with it. <br/>
+	 * The current thread context class loader is switched to this for the
+	 * method execution. <br/>
+	 * It is then turned back to the former one when the execution is done.
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T invokeInstanceMethod(boolean serializeResult, Object object, String methodName,
+			Object... args) {
+		final Object[] effectiveArgs = new Object[args.length];
+		for (int i = 0; i < args.length; i++) {
+			effectiveArgs[i] = traverseClassLoader(args[i], this);
+		}
+		offsetJkLog();
+		final ClassLoader currentClassLoader = Thread.currentThread()
+				.getContextClassLoader();
+		Thread.currentThread().setContextClassLoader(delegate);
+		try {
+			final Object returned = JkUtilsReflect.invokeInstanceMethod(object,
+					methodName, effectiveArgs);
+			final T result;
+			if (serializeResult) {
+				result = (T) traverseClassLoader(returned,
+						JkClassLoader.current());
+			} else {
+				result = (T) returned;
+			}
 			return result;
 		} finally {
 			Thread.currentThread().setContextClassLoader(currentClassLoader);

@@ -399,7 +399,22 @@ public final class JkUtilsIO {
 				throw new IllegalStateException(e);
 			}
 			addEntryInputStream(zos, entryName, inputStream);
+			JkUtilsIO.closeQuietly(inputStream);
 		}
+	}
+
+	/**
+	 * Add a zip entry into the provided <code>ZipOutputStream</code>.
+	 */
+	public static void addZipEntry(ZipOutputStream zos, File fileToZip,
+			String enrtyName) {
+		final FileInputStream inputStream;
+		try {
+			inputStream = new FileInputStream(fileToZip);
+		} catch (final FileNotFoundException e) {
+			throw new IllegalStateException(e);
+		}
+		addEntryInputStream(zos, enrtyName, inputStream);
 	}
 
 	/**

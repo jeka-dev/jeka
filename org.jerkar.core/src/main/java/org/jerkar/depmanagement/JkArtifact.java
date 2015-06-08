@@ -1,12 +1,15 @@
 package org.jerkar.depmanagement;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public final class JkArtifact {
+public final class JkArtifact implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public static JkArtifact of(JkVersionedModule versionedModule, File localFile) {
 		return new JkArtifact(versionedModule, localFile);
