@@ -34,6 +34,8 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import org.jerkar.JkLocator;
+
 /**
  * Utility class for dealing with Inputs/Outputs.
  * 
@@ -425,37 +427,26 @@ public final class JkUtilsIO {
 	}
 
 	/**
-	 * Creates a file from the content of a URL.
-	 * The file is first attempted to be created in Jerkar temp folder, if not success, it
-	 * will be created in the specified <code>secondTryParent</code> folder.
+	 * Copies the content of an url in a cache file. The cached file path will be [jerkar user dir]/cache/url-contents/[last segment of the url (after last '/')].
+	 * If the file already exist than the content of the url is not copied and the file is directly returned.
 	 */
-	public static File getFileFromUrl(URL url, File secondTryParent, PrintStream report) {
-		final File tempDir = new File(JkUtilsFile.tempDir(), "jerkar");
+	public static File copyUrlContentToCacheFile(URL url, PrintStream report) {
+		final File tempDir = new File(JkLocator.jerkarUserHome(), "cache/url-contents");
 		final String name = JkUtilsString.substringAfterLast(url.getPath(), "/");
-		final File firstTry = new File(tempDir, name);
-		if (firstTry.exists()) {
+		final File result = new File(tempDir, name);
+		if (result.exists()) {
 			if (report != null) {
-				report.println("Url " + url.toExternalForm() + " transformed to file by reading existing cached file " + firstTry.getAbsolutePath());
+				report.println("Url " + url.toExternalForm() + " transformed to file by reading existing cached file " + result.getAbsolutePath());
 			}
-			return firstTry;
+			return result;
 		}
-		try {
-			tempDir.mkdirs();
-			firstTry.createNewFile();
-			if (report != null) {
-				report.println("Url " + url.toExternalForm() + " transformed to file by creating file " + firstTry.getAbsolutePath());
-			}
-			copyUrlToFile(url, firstTry);
-			return firstTry;
-		} catch (final Exception e) {
-			secondTryParent.mkdirs();
-			final File secondTry = new File(secondTryParent, name);
-			copyUrlToFile(url, secondTry);
-			if (report != null) {
-				report.println("Url " + url.toExternalForm() + " transformed to file by creating file " + secondTry.getAbsolutePath());
-			}
-			return secondTry;
+		tempDir.mkdirs();
+		JkUtilsFile.createFileIfNotExist(result);
+		if (report != null) {
+			report.println("Url " + url.toExternalForm() + " transformed to file by creating file " + result.getAbsolutePath());
 		}
+		copyUrlToFile(url, result);
+		return result;
 	}
 
 	/**

@@ -136,7 +136,7 @@ public final class JkClassLoader {
 				final String path = url.getFile();
 				final File candidate = new File(path);
 				if (JkUtilsString.isBlank(path) || (!candidate.isFile() && !candidate.isDirectory())) {
-					final File file = JkUtilsIO.getFileFromUrl(url, JkLocator.jerkarTempDir(),
+					final File file = JkUtilsIO.copyUrlContentToCacheFile(url,
 							JkLog.infoStreamIfVerbose());
 					files.add(file);
 				} else {

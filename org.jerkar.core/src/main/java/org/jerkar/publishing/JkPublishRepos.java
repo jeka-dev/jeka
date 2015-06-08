@@ -4,10 +4,10 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.jerkar.depmanagement.JkRepo;
 import org.jerkar.depmanagement.JkVersionedModule;
+import org.jerkar.publishing.JkPublishRepos.JkPublishRepo;
 import org.jerkar.utils.JkUtilsIterable;
 
 /**
@@ -19,7 +19,7 @@ import org.jerkar.utils.JkUtilsIterable;
  * 
  * @author Jerome Angibaud
  */
-public final class JkPublishRepos implements Iterable<Map.Entry<JkPublishFilter, JkRepo>> {
+public final class JkPublishRepos implements Iterable<JkPublishRepo> {
 
 	/**
 	 * Creates a JkPublishRepos that publish snaphots on to a specified repository and release on
@@ -42,7 +42,7 @@ public final class JkPublishRepos implements Iterable<Map.Entry<JkPublishFilter,
 	 * the specified filter.
 	 */
 	public static JkPublishRepos of(JkPublishFilter filter, JkRepo repo, boolean requirePgpSign) {
-		final List<FilteredRepo> list = JkUtilsIterable.listOf(new FilteredRepo(repo, filter, requirePgpSign));
+		final List<JkPublishRepo> list = JkUtilsIterable.listOf(new JkPublishRepo(repo, filter, requirePgpSign));
 		return new JkPublishRepos(list);
 	}
 
@@ -93,39 +93,39 @@ public final class JkPublishRepos implements Iterable<Map.Entry<JkPublishFilter,
 		return new JkPublishRepos(toPublishRepo(list, filter, requirePgpSign));
 	}
 
-	private final List<FilteredRepo> repos;
+	private final List<JkPublishRepo> repos;
 
-	private JkPublishRepos(List<FilteredRepo> repos) {
+	private JkPublishRepos(List<JkPublishRepo> repos) {
 		super();
 		this.repos = repos;
 	}
 
 	public JkPublishRepos and(JkPublishFilter filter, JkRepo repo, boolean requirePgpSign) {
-		final List<FilteredRepo> list = new LinkedList<FilteredRepo>(this.repos);
-		list.add(new FilteredRepo(repo, filter, requirePgpSign));
+		final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>(this.repos);
+		list.add(new JkPublishRepo(repo, filter, requirePgpSign));
 		return new JkPublishRepos(list);
 	}
 
 
 	public JkPublishRepos and(JkPublishRepos other) {
 		@SuppressWarnings("unchecked")
-		final List<FilteredRepo> list = JkUtilsIterable.concatLists(this.repos, other.repos);
+		final List<JkPublishRepo> list = JkUtilsIterable.concatLists(this.repos, other.repos);
 		return new JkPublishRepos(list);
 	}
 
-	public Map.Entry<JkPublishFilter, JkRepo> getRepoHavingUrl(String url) {
-		for (final FilteredRepo repo : this.repos) {
+	public JkPublishRepo getRepoHavingUrl(String url) {
+		for (final JkPublishRepo repo : this.repos) {
 			if (url.equals(repo.jkRepo.url().toExternalForm())) {
-				return repo.entry();
+				return repo;
 			}
 		}
 		return null;
 	}
 
-	private static List<FilteredRepo> toPublishRepo(Iterable<JkRepo> repos, JkPublishFilter filter, boolean requirePgpSign) {
-		final List<FilteredRepo> result = new LinkedList<FilteredRepo>();
+	private static List<JkPublishRepo> toPublishRepo(Iterable<JkRepo> repos, JkPublishFilter filter, boolean requirePgpSign) {
+		final List<JkPublishRepo> result = new LinkedList<JkPublishRepo>();
 		for (final JkRepo repo : repos) {
-			result.add(new FilteredRepo(repo, filter, requirePgpSign));
+			result.add(new JkPublishRepo(repo, filter, requirePgpSign));
 		}
 		return result;
 	}
@@ -159,12 +159,8 @@ public final class JkPublishRepos implements Iterable<Map.Entry<JkPublishFilter,
 	};
 
 	@Override
-	public Iterator<Map.Entry<JkPublishFilter, JkRepo>> iterator() {
-		final List<Map.Entry<JkPublishFilter, JkRepo>> list = new LinkedList<Map.Entry<JkPublishFilter,JkRepo>>();
-		for (final FilteredRepo filteredRepo : this.repos) {
-			list.add(filteredRepo.entry());
-		}
-		return list.iterator();
+	public Iterator<JkPublishRepo> iterator() {
+		return this.repos.iterator();
 	}
 
 	/**
@@ -172,15 +168,15 @@ public final class JkPublishRepos implements Iterable<Map.Entry<JkPublishFilter,
 	 * publish the specified version and module.
 	 */
 	public boolean requirePgpSignature(JkVersionedModule versionedModule) {
-		for (final FilteredRepo filteredRepo : this.repos) {
-			if (filteredRepo.filter.accept(versionedModule) && filteredRepo.requirePgpSign) {
+		for (final JkPublishRepo jkPublishRepo : this.repos) {
+			if (jkPublishRepo.filter.accept(versionedModule) && jkPublishRepo.requirePgpSign) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private static final class FilteredRepo {
+	public static final class JkPublishRepo {
 
 		private final JkRepo jkRepo;
 
@@ -188,32 +184,26 @@ public final class JkPublishRepos implements Iterable<Map.Entry<JkPublishFilter,
 
 		private final boolean requirePgpSign;
 
-		public FilteredRepo(JkRepo jkRepo, JkPublishFilter filter, boolean requirePgpSign) {
+		public JkPublishRepo(JkRepo jkRepo, JkPublishFilter filter, boolean requirePgpSign) {
 			super();
 			this.jkRepo = jkRepo;
 			this.filter = filter;
 			this.requirePgpSign = requirePgpSign;
 		}
 
-		public Map.Entry<JkPublishFilter, JkRepo> entry() {
-			return new Map.Entry<JkPublishFilter, JkRepo>() {
-
-				@Override
-				public JkRepo setValue(JkRepo value) {
-					return null;
-				}
-
-				@Override
-				public JkRepo getValue() {
-					return jkRepo;
-				}
-
-				@Override
-				public JkPublishFilter getKey() {
-					return filter;
-				}
-			};
+		public JkRepo repo() {
+			return jkRepo;
 		}
+
+		public JkPublishFilter filter() {
+			return filter;
+		}
+
+		public boolean requirePgpSign() {
+			return requirePgpSign;
+		}
+
+
 
 	}
 

@@ -76,8 +76,8 @@ class PomTemplateGenerator {
 				writer.writeCharacters("\n");
 				writeElement("      ", writer, "name", developer.name);
 				writeElement("      ", writer, "email", developer.email);
-				writeElement("      ", writer, "organisation", developer.organisation);
-				writeElement("      ", writer, "organisationUrl", developer.organisationUrl);
+				writeElement("      ", writer, "organization", developer.organisation);
+				writeElement("      ", writer, "organizationUrl", developer.organisationUrl);
 				writer.writeCharacters("    ");
 				writer.writeEndElement();
 			}

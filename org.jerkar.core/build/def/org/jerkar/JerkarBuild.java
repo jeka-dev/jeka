@@ -8,6 +8,8 @@ import org.jerkar.publishing.JkPublishRepos;
 
 public abstract class JerkarBuild extends JkJavaBuild {
 
+
+	@JkOption("do or skip javadoc")
 	public boolean doJavadoc = true;
 
 
@@ -25,7 +27,7 @@ public abstract class JerkarBuild extends JkJavaBuild {
 	protected JkMavenPublication mavenPublication() {
 		return super.mavenPublication().with(
 				JkMavenPublicationInfo
-				.of("Jerkar", "Build simpler, stronger, faster", "https://github.com/jerkar")
+				.of("Jerkar", "Build simpler, stronger, faster", "http://jerkar.github.io")
 				.withScm("https://github.com/jerkar/jerkar.git")
 				.andApache2License()
 				.andGitHubDeveloper("djeang", "djeangdev@yahoo.fr")

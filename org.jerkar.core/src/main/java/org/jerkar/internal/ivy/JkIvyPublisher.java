@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.ivy.Ivy;
@@ -34,15 +33,14 @@ import org.jerkar.JkOptions;
 import org.jerkar.crypto.pgp.JkPgp;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkModuleId;
-import org.jerkar.depmanagement.JkRepo;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
 import org.jerkar.depmanagement.JkVersion;
 import org.jerkar.depmanagement.JkVersionedModule;
 import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
-import org.jerkar.publishing.JkPublishFilter;
 import org.jerkar.publishing.JkPublishRepos;
+import org.jerkar.publishing.JkPublishRepos.JkPublishRepo;
 import org.jerkar.publishing.JkPublisher;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsString;
@@ -205,9 +203,9 @@ public final class JkIvyPublisher {
 	private int publishIvyArtifacts(JkIvyPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
 		int count = 0;
 		for (final DependencyResolver resolver : Translations.publishResolverOf(this.ivy.getSettings())) {
-			final Entry<JkPublishFilter, JkRepo> publishRepo = this.publishRepos.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
+			final JkPublishRepo publishRepo = this.publishRepos.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
 			final JkVersionedModule jkModule = Translations.toJerkarVersionedModule(moduleDescriptor.getModuleRevisionId());
-			if (!isMaven(resolver) && publishRepo.getKey().accept(jkModule)) {
+			if (!isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
 				JkLog.startln("Publishing for repository " + resolver);
 				this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor);
 				JkLog.done();;
@@ -254,11 +252,11 @@ public final class JkIvyPublisher {
 	private int publishMavenArtifacts(JkMavenPublication publication, Date date, DefaultModuleDescriptor moduleDescriptor) {
 		int count = 0;
 		for (final DependencyResolver resolver : Translations.publishResolverOf(this.ivy.getSettings())) {
-			final Entry<JkPublishFilter, JkRepo> publishRepo = this.publishRepos.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
+			final JkPublishRepo publishRepo = this.publishRepos.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
 			final JkVersionedModule jkModule = Translations.toJerkarVersionedModule(moduleDescriptor.getModuleRevisionId());
-			if (isMaven(resolver) && publishRepo.getKey().accept(jkModule)) {
+			if (isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
 				JkLog.startln("Publishing for repository " + resolver);
-				this.publishMavenArtifacts(resolver, publication, date, moduleDescriptor);
+				this.publishMavenArtifacts(resolver, publication, date, moduleDescriptor, CheckFileFlag.of(publishRepo));
 				JkLog.done();
 				count ++;
 			}
@@ -266,7 +264,7 @@ public final class JkIvyPublisher {
 		return count;
 	}
 
-	private void publishMavenArtifacts(DependencyResolver resolver, JkMavenPublication publication, Date date, DefaultModuleDescriptor moduleDescriptor) {
+	private void publishMavenArtifacts(DependencyResolver resolver, JkMavenPublication publication, Date date, DefaultModuleDescriptor moduleDescriptor, CheckFileFlag flag) {
 		final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
 		try {
 			resolver.beginPublishTransaction(ivyModuleRevisionId, true);
@@ -274,32 +272,6 @@ public final class JkIvyPublisher {
 			throw new RuntimeException(e);
 		}
 		try {
-			final File pomXml = new File(targetDir(), "pom.xml");
-			final Artifact artifact = new DefaultArtifact(ivyModuleRevisionId, date, publication.artifactName(), "xml", "pom", true);
-			final PomWriterOptions pomWriterOptions = new PomWriterOptions();
-			File fileToDelete = null;
-			if (publication.extraInfo() != null) {
-				final File template = PomTemplateGenerator.generateTemplate(publication.extraInfo());
-				pomWriterOptions.setTemplate(template);
-				fileToDelete = template;
-			}
-			JkLog.info("Creating " + pomXml.getAbsolutePath());
-			PomModuleDescriptorWriter.write(moduleDescriptor, pomXml, pomWriterOptions);
-
-			if (fileToDelete != null) {
-				JkUtilsFile.delete(fileToDelete);
-			}
-			resolver.publish(artifact, pomXml, true);
-
-			// Sign pom if required
-			if (publication.secretRing() != null) {
-				final File pomSign = JkPgp.ofSecretRing(publication.secretRing())
-						.sign(publication.secretRingPassword(), pomXml)[0];
-				final Artifact pomSignArtifact = withExtension(artifact, "pom.asc");
-				resolver.publish(pomSignArtifact, pomSign, true);
-			}
-
-
 			final Artifact mavenMainArtifact = Translations.toPublishedMavenArtifact(publication.mainArtifactFile(), publication.artifactName(),
 					null, ivyModuleRevisionId, date);
 			resolver.publish(mavenMainArtifact, publication.mainArtifactFile(), true);
@@ -320,6 +292,35 @@ public final class JkIvyPublisher {
 					final Artifact extArtifact = withExtension(mavenArtifact, mavenArtifact.getExt() + "." + extension);
 					resolver.publish(extArtifact, extFile, true);
 				}
+			}
+
+			final File pomXml = new File(targetDir(), "pom.xml");
+			final String packaging = JkUtilsString.substringAfterLast(publication.mainArtifactFile().getName(),".");
+			final Artifact artifact = new DefaultArtifact(ivyModuleRevisionId, date, publication.artifactName(), "xml", "pom", true);
+			final PomWriterOptions pomWriterOptions = new PomWriterOptions();
+			pomWriterOptions.setArtifactPackaging(packaging);
+			File fileToDelete = null;
+			if (publication.extraInfo() != null) {
+				final File template = PomTemplateGenerator.generateTemplate(publication.extraInfo());
+				pomWriterOptions.setTemplate(template);
+				fileToDelete = template;
+			}
+			JkLog.info("Creating " + pomXml.getAbsolutePath());
+			PomModuleDescriptorWriter.write(moduleDescriptor, pomXml, pomWriterOptions);
+
+			if (fileToDelete != null) {
+				JkUtilsFile.delete(fileToDelete);
+			}
+			resolver.publish(artifact, pomXml, true);
+
+			// Sign pom if required
+			if (publication.secretRing() != null) {
+				final File pomSign = JkPgp.ofSecretRing(publication.secretRing())
+						.sign(publication.secretRingPassword(), pomXml)[0];
+				final Artifact pomSignArtifact = withExtension(artifact, "pom.asc");
+				resolver.publish(pomSignArtifact, pomSign, true);
+			} else if (flag.pgpSignature) {
+				throw new IllegalStateException("This repository require signature but no secret ring was provided with the publication");
 			}
 
 
@@ -425,6 +426,17 @@ public final class JkIvyPublisher {
 			resolver.commitPublishTransaction();
 		} catch (final Exception e) {
 			throw JkUtilsThrowable.unchecked(e);
+		}
+	}
+
+	private static class CheckFileFlag {
+
+		boolean pgpSignature;
+
+		public static CheckFileFlag of(JkPublishRepo publishRepo) {
+			final CheckFileFlag flag = new CheckFileFlag();
+			flag.pgpSignature = publishRepo.requirePgpSign();
+			return flag;
 		}
 	}
 

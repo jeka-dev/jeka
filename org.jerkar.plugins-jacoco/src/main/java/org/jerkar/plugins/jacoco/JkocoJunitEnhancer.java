@@ -32,7 +32,7 @@ public final class JkocoJunitEnhancer implements Enhancer {
 
 	public static JkocoJunitEnhancer of(File destFile, File projectDir) {
 		final URL url = JkBuildPluginJacoco.class.getResource("jacocoagent.jar");
-		final File file = JkUtilsIO.getFileFromUrl(url, new File(projectDir, "/build/output/temp"), JkLog.infoStreamIfVerbose());
+		final File file = JkUtilsIO.copyUrlContentToCacheFile(url, JkLog.infoStreamIfVerbose());
 		return new JkocoJunitEnhancer(file, true, destFile, new LinkedList<String>());
 	}
 

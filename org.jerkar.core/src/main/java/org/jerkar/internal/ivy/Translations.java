@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.ivy.core.module.descriptor.Artifact;
@@ -43,8 +42,8 @@ import org.jerkar.depmanagement.JkVersionRange;
 import org.jerkar.depmanagement.JkVersionedModule;
 import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
-import org.jerkar.publishing.JkPublishFilter;
 import org.jerkar.publishing.JkPublishRepos;
+import org.jerkar.publishing.JkPublishRepos.JkPublishRepo;
 import org.jerkar.utils.JkUtilsIterable;
 import org.jerkar.utils.JkUtilsString;
 
@@ -225,9 +224,9 @@ final class Translations {
 	}
 
 	public static void populateIvySettingsWithPublishRepo(IvySettings ivySettings, JkPublishRepos repos) {
-		for (final Entry<JkPublishFilter, JkRepo> repo : repos) {
-			final DependencyResolver resolver = toResolver(repo.getValue());
-			resolver.setName(PUBLISH_RESOLVER_NAME + repo.getValue().url());
+		for (final JkPublishRepo repo : repos) {
+			final DependencyResolver resolver = toResolver(repo.repo());
+			resolver.setName(PUBLISH_RESOLVER_NAME + repo.repo().url());
 			ivySettings.addResolver(resolver);
 		}
 	}
