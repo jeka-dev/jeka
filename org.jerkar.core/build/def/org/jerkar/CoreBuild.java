@@ -17,18 +17,12 @@ public class CoreBuild extends JerkarBuild {
 
 	public File distribFolder;
 
-	private File bouncyCastleJar;
-
-	private File ivyJar;
-
 
 	@Override
 	protected void init() {
 		super.init();
 		distripZipFile = ouputDir("jerkar-distrib.zip");
 		distribFolder = ouputDir("jerkar-distrib");
-		bouncyCastleJar = this.baseDir("build/libs/provided/bouncycastle-pgp-152.jar");
-		ivyJar = this.baseDir("build/libs/provided/ivy-2.4.0.jar");
 		this.pack.fatJar = true;
 	}
 

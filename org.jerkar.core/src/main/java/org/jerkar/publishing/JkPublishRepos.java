@@ -136,6 +136,8 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 
 	public static final JkPublishFilter ACCEPT_ALL= new JkPublishFilter() {
 
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public boolean accept(JkVersionedModule versionedModule) {
 			return true;
@@ -145,6 +147,8 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 
 	public static final JkPublishFilter ACCEPT_SNAPSHOT_ONLY= new JkPublishFilter() {
 
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public boolean accept(JkVersionedModule versionedModule) {
 			return versionedModule.version().isSnapshot();
@@ -153,6 +157,8 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 	};
 
 	public static final JkPublishFilter ACCEPT_RELEASE_ONLY= new JkPublishFilter() {
+
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public boolean accept(JkVersionedModule versionedModule) {

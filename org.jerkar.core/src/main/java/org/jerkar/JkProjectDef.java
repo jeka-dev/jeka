@@ -21,13 +21,10 @@ import org.jerkar.utils.JkUtilsString;
  */
 public final class JkProjectDef {
 
-	private final File rootDir;
-
 	private final List<JkProjectBuildClassDef> buildDefs;
 
-	private JkProjectDef(File rootDir, List<JkProjectBuildClassDef> buildDef) {
+	private JkProjectDef(List<JkProjectBuildClassDef> buildDef) {
 		super();
-		this.rootDir = rootDir;
 		this.buildDefs = Collections.unmodifiableList(buildDef);
 	}
 
@@ -41,7 +38,7 @@ public final class JkProjectDef {
 		for (final Class<?> clazz : project.getBuildClasses()) {
 			classDefs.add(JkProjectBuildClassDef.of(clazz));
 		}
-		return new JkProjectDef(rootDir, classDefs);
+		return new JkProjectDef(classDefs);
 	}
 
 	public void logAvailableBuildClasses() {

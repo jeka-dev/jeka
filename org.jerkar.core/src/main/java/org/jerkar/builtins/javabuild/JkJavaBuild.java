@@ -39,8 +39,6 @@ import org.jerkar.utils.JkUtilsString;
  */
 public class JkJavaBuild extends JkBuildDependencySupport {
 
-	private static final String PACK_WITH_PGP_SIGN_OPTION = "pgp.signWithPgp";
-
 	/** Option name containing the password for PGP secret key used for signature **/
 	protected static final String PGP_PASSWORD_OPTION = "pgp.secretKeyPassword";
 

@@ -34,8 +34,8 @@ public class JkScope implements Serializable {
 	 * Creates a new {@link JkScope} passing its name.
 	 */
 	@SuppressWarnings("unchecked")
-	public static OptionableScope of(String name) {
-		return new OptionableScope(name, Collections.EMPTY_SET, "", true, true);
+	public static JkOptionableScope of(String name) {
+		return new JkOptionableScope(name, Collections.EMPTY_SET, "", true, true);
 	}
 
 	private final Set<JkScope> extendedScopes;
@@ -165,22 +165,24 @@ public class JkScope implements Serializable {
 	 * 
 	 * @author Jerome Angibaud
 	 */
-	public static class OptionableScope extends JkScope {
+	public static class JkOptionableScope extends JkScope {
 
-		private OptionableScope(String name, Set<JkScope> extendedScopes, String descr, boolean transitive, boolean isPublic) {
+		private static final long serialVersionUID = 1L;
+
+		private JkOptionableScope(String name, Set<JkScope> extendedScopes, String descr, boolean transitive, boolean isPublic) {
 			super(name, extendedScopes, descr, transitive, isPublic);
 		}
 
-		public OptionableScope extending(JkScope ...scopes) {
-			return new OptionableScope(name(), new HashSet<JkScope>(Arrays.asList(scopes)), description(), transitive(), isPublic());
+		public JkOptionableScope extending(JkScope ...scopes) {
+			return new JkOptionableScope(name(), new HashSet<JkScope>(Arrays.asList(scopes)), description(), transitive(), isPublic());
 		}
 
-		public OptionableScope transitive(boolean transitive) {
-			return new OptionableScope(name(), extendedScopes(), description(), transitive, isPublic());
+		public JkOptionableScope transitive(boolean transitive) {
+			return new JkOptionableScope(name(), extendedScopes(), description(), transitive, isPublic());
 		}
 
-		public OptionableScope isPublic(boolean isPublic) {
-			return new OptionableScope(name(), extendedScopes(), description(), transitive(), isPublic);
+		public JkOptionableScope isPublic(boolean isPublic) {
+			return new JkOptionableScope(name(), extendedScopes(), description(), transitive(), isPublic);
 		}
 
 		public JkScope descr(String description) {
