@@ -16,7 +16,7 @@ import org.jerkar.scriptsamples.MavenStyleBuild;
  *
  * @author Jerome Angibaud
  */
-public class ClassicBuild extends JkJavaBuild {
+public class AClassicBuild extends JkJavaBuild {
 	
 	@Override  // Optional :  needless if you use only local dependencies
 	protected JkDependencies dependencies() {

@@ -13,8 +13,8 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import org.jerkar.file.JkPathFilter;
 import org.jerkar.file.JkFileTree;
+import org.jerkar.file.JkPathFilter;
 import org.jerkar.utils.JkUtilsString;
 
 /**
@@ -50,10 +50,11 @@ public final class JkJavaCompiler {
 	 */
 	@SuppressWarnings("unchecked")
 	public static JkJavaCompiler ofOutput(File outputDir) {
-		if (!outputDir.isDirectory()) {
+		if (outputDir.exists() && !outputDir.isDirectory()) {
 			throw new IllegalArgumentException(outputDir.getAbsolutePath()
 					+ " is not a directory.");
 		}
+		outputDir.mkdirs();
 		final List<String> options = new LinkedList<String>();
 		options.add("-d");
 		options.add(outputDir.getAbsolutePath());
