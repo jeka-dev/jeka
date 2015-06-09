@@ -277,23 +277,9 @@ final class IvyPublisher implements JkInternalPublisher {
 			throw new RuntimeException(e);
 		}
 		try {
-			final Artifact mavenMainArtifact = Translations.toPublishedMavenArtifact(publication.mainArtifactFile(), publication.artifactName(),
-					null, ivyModuleRevisionId, date);
-			resolver.publish(mavenMainArtifact, publication.mainArtifactFile(), true);
-			checkProducer.publishChecks(resolver, mavenMainArtifact, publication.mainArtifactFile());
-
-			for (final Map.Entry<String, File> extraArtifact : publication.extraArtifacts().entrySet()) {
-				final String classifier = extraArtifact.getKey();
-				final File file = extraArtifact.getValue();
-				final Artifact mavenArtifact = Translations.toPublishedMavenArtifact(file, publication.artifactName(),
-						classifier, ivyModuleRevisionId, date);
-				resolver.publish(mavenArtifact, file, true);
-				checkProducer.publishChecks(resolver, mavenArtifact, file);
-			}
-
 			final File pomXml = new File(targetDir(), "pom.xml");
 			final String packaging = JkUtilsString.substringAfterLast(publication.mainArtifactFile().getName(),".");
-			final Artifact artifact = new DefaultArtifact(ivyModuleRevisionId, date, publication.artifactName(), "xml", "pom", true);
+			final Artifact artifact = new DefaultArtifact(ivyModuleRevisionId, date, publication.artifactName(), "pom", "pom", true);
 			final PomWriterOptions pomWriterOptions = new PomWriterOptions();
 			pomWriterOptions.setArtifactPackaging(packaging);
 			File fileToDelete = null;
@@ -310,6 +296,22 @@ final class IvyPublisher implements JkInternalPublisher {
 			}
 			resolver.publish(artifact, pomXml, true);
 			checkProducer.publishChecks(resolver, artifact, pomXml);
+
+			final Artifact mavenMainArtifact = Translations.toPublishedMavenArtifact(publication.mainArtifactFile(), publication.artifactName(),
+					null, ivyModuleRevisionId, date);
+			resolver.publish(mavenMainArtifact, publication.mainArtifactFile(), true);
+			checkProducer.publishChecks(resolver, mavenMainArtifact, publication.mainArtifactFile());
+
+			for (final Map.Entry<String, File> extraArtifact : publication.extraArtifacts().entrySet()) {
+				final String classifier = extraArtifact.getKey();
+				final File file = extraArtifact.getValue();
+				final Artifact mavenArtifact = Translations.toPublishedMavenArtifact(file, publication.artifactName(),
+						classifier, ivyModuleRevisionId, date);
+				resolver.publish(mavenArtifact, file, true);
+				checkProducer.publishChecks(resolver, mavenArtifact, file);
+			}
+
+
 		} catch (final Exception e) {
 			abortPublishTransaction(resolver);
 			throw JkUtilsThrowable.unchecked(e);
@@ -427,7 +429,7 @@ final class IvyPublisher implements JkInternalPublisher {
 
 		public void publishChecks(DependencyResolver resolver, Artifact artifact, File file) throws IOException {
 			if (pgpSigner != null) {
-				final String ext = JkUtilsString.substringAfterLast(file.getName(), ".");
+				final String ext = artifact.getExt();
 				final Artifact signArtifact = withExtension(artifact, ext + ".asc");
 
 				final File signedFile = new File(file.getPath()+".asc");
