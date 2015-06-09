@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jerkar.crypto.pgp.JkPgp;
 import org.jerkar.depmanagement.JkRepo;
 import org.jerkar.depmanagement.JkVersionedModule;
 import org.jerkar.publishing.JkPublishRepos.JkPublishRepo;
@@ -28,7 +29,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 	 * Creates a JkPublishRepos that publish snaphots on to a specified repository and release on
 	 * another one. You can specify if the repositories require to sign published artifacts.
 	 */
-	public static JkPublishRepos ofSnapshotAndRelease(JkRepo snapshot, boolean snapshotRequirePgpSign, JkRepo optionalRelease, boolean releaseRequirePgpSign) {
+	public static JkPublishRepos ofSnapshotAndRelease(JkRepo snapshot, JkPgp snapshotRequirePgpSign, JkRepo optionalRelease, JkPgp releaseRequirePgpSign) {
 		return JkPublishRepos.of(ACCEPT_SNAPSHOT_ONLY, snapshot, snapshotRequirePgpSign).and(ACCEPT_RELEASE_ONLY, optionalRelease, releaseRequirePgpSign);
 	}
 
@@ -37,14 +38,14 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 	 * another one. The specified repositories does not require to sign artifacts
 	 */
 	public static JkPublishRepos ofSnapshotAndRelease(JkRepo snapshot, JkRepo optionalRelease) {
-		return JkPublishRepos.of(ACCEPT_SNAPSHOT_ONLY, snapshot, false).and(ACCEPT_RELEASE_ONLY, optionalRelease, false);
+		return JkPublishRepos.of(ACCEPT_SNAPSHOT_ONLY, snapshot, null).and(ACCEPT_RELEASE_ONLY, optionalRelease, null);
 	}
 
 	/**
 	 * Creates a JkPublishRepos that publish on the specified repositories when versionedModule matches
 	 * the specified filter.
 	 */
-	public static JkPublishRepos of(JkPublishFilter filter, JkRepo repo, boolean requirePgpSign) {
+	public static JkPublishRepos of(JkPublishFilter filter, JkRepo repo, JkPgp requirePgpSign) {
 		final List<JkPublishRepo> list = JkUtilsIterable.listOf(new JkPublishRepo(repo, filter, requirePgpSign));
 		return new JkPublishRepos(list);
 	}
@@ -52,13 +53,13 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 	/**
 	 * Creates a JkPublishRepos tailored for <a href="http://central.sonatype.org/">OSSRH</a>
 	 */
-	public static JkPublishRepos ossrh(String userName, String password) {
+	public static JkPublishRepos ossrh(String userName, String password, JkPgp pgp) {
 		return JkPublishRepos.ofSnapshotAndRelease(
-				JkRepo.mavenOssrhPushSnapshotPullAll(userName, password), true,
-				JkRepo.mavenOssrhPushRelease(userName, password), true);
+				JkRepo.mavenOssrhPushSnapshotPullAll(userName, password), pgp,
+				JkRepo.mavenOssrhPushRelease(userName, password), pgp);
 	}
 
-	public static JkPublishRepos maven(JkPublishFilter filter, String url, boolean requirePgpSign) {
+	public static JkPublishRepos maven(JkPublishFilter filter, String url, JkPgp requirePgpSign) {
 		final List<JkRepo> list = new LinkedList<JkRepo>();
 		list.add(JkRepo.maven(url));
 		return new JkPublishRepos(toPublishRepo(list, filter, requirePgpSign));
@@ -67,30 +68,30 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 	public static JkPublishRepos maven(String url) {
 		final List<JkRepo> list = new LinkedList<JkRepo>();
 		list.add(JkRepo.maven(url));
-		return new JkPublishRepos(toPublishRepo(list, ACCEPT_ALL, false));
+		return new JkPublishRepos(toPublishRepo(list, ACCEPT_ALL, null));
 	}
 
 	public static JkPublishRepos maven(File file) {
 		final List<JkRepo> list = new LinkedList<JkRepo>();
 		list.add(JkRepo.maven(file));
-		return new JkPublishRepos(toPublishRepo(list, ACCEPT_ALL, false));
+		return new JkPublishRepos(toPublishRepo(list, ACCEPT_ALL, null));
 	}
 
 
 	public static JkPublishRepos ivy(File file) {
 		final List<JkRepo> list = new LinkedList<JkRepo>();
 		list.add(JkRepo.ivy(file));
-		return new JkPublishRepos(toPublishRepo(list, ACCEPT_ALL, false));
+		return new JkPublishRepos(toPublishRepo(list, ACCEPT_ALL, null));
 	}
 
 	public static JkPublishRepos ivy(String url) {
 		final List<JkRepo> list = new LinkedList<JkRepo>();
 		list.add(JkRepo.ivy(url));
-		return new JkPublishRepos(toPublishRepo(list, ACCEPT_ALL, false));
+		return new JkPublishRepos(toPublishRepo(list, ACCEPT_ALL, null));
 	}
 
 
-	public static JkPublishRepos ivy(JkPublishFilter filter, String url, boolean requirePgpSign) {
+	public static JkPublishRepos ivy(JkPublishFilter filter, String url, JkPgp requirePgpSign) {
 		final List<JkRepo> list = new LinkedList<JkRepo>();
 		list.add(JkRepo.ivy(url));
 		return new JkPublishRepos(toPublishRepo(list, filter, requirePgpSign));
@@ -103,7 +104,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 		this.repos = repos;
 	}
 
-	public JkPublishRepos and(JkPublishFilter filter, JkRepo repo, boolean requirePgpSign) {
+	public JkPublishRepos and(JkPublishFilter filter, JkRepo repo, JkPgp requirePgpSign) {
 		final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>(this.repos);
 		list.add(new JkPublishRepo(repo, filter, requirePgpSign));
 		return new JkPublishRepos(list);
@@ -125,7 +126,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 		return null;
 	}
 
-	private static List<JkPublishRepo> toPublishRepo(Iterable<JkRepo> repos, JkPublishFilter filter, boolean requirePgpSign) {
+	private static List<JkPublishRepo> toPublishRepo(Iterable<JkRepo> repos, JkPublishFilter filter, JkPgp requirePgpSign) {
 		final List<JkPublishRepo> result = new LinkedList<JkPublishRepo>();
 		for (final JkRepo repo : repos) {
 			result.add(new JkPublishRepo(repo, filter, requirePgpSign));
@@ -178,7 +179,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 	 */
 	public boolean requirePgpSignature(JkVersionedModule versionedModule) {
 		for (final JkPublishRepo jkPublishRepo : this.repos) {
-			if (jkPublishRepo.filter.accept(versionedModule) && jkPublishRepo.requirePgpSign) {
+			if (jkPublishRepo.filter.accept(versionedModule) && jkPublishRepo.requirePgpSign != null) {
 				return true;
 			}
 		}
@@ -193,9 +194,9 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 
 		private final JkPublishFilter filter;
 
-		private final boolean requirePgpSign;
+		private final JkPgp requirePgpSign;
 
-		public JkPublishRepo(JkRepo jkRepo, JkPublishFilter filter, boolean requirePgpSign) {
+		public JkPublishRepo(JkRepo jkRepo, JkPublishFilter filter, JkPgp requirePgpSign) {
 			super();
 			this.jkRepo = jkRepo;
 			this.filter = filter;
@@ -210,10 +211,9 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 			return filter;
 		}
 
-		public boolean requirePgpSign() {
+		public JkPgp requirePgpSign() {
 			return requirePgpSign;
 		}
-
 
 
 	}

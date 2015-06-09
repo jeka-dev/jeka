@@ -53,6 +53,8 @@ final class PgpUtils {
 			throw new RuntimeException(e);
 		} catch (final PGPException e) {
 			throw new RuntimeException(e);
+		} catch (final IllegalArgumentException e) {
+			throw new IllegalArgumentException("Error with one of this file : signatureFile = " + signatureFile.getPath());
 		} finally {
 			JkUtilsIO.closeQuietly(streamToVerify, signatureStream, pubringStream);
 		}
@@ -67,6 +69,9 @@ final class PgpUtils {
 		final PGPObjectFactory pgpObjectFactory = new PGPObjectFactory(sigInputStream, fingerPrintCalculator);
 		final PGPSignatureList signatureList;
 		final Object gpgObject = pgpObjectFactory.nextObject();
+		if (gpgObject == null) {
+			throw new IllegalArgumentException("no PGP signature found in " + sigInputStream);
+		}
 		if (gpgObject instanceof PGPCompressedData) {
 			final PGPCompressedData compressedData = (PGPCompressedData) gpgObject;
 			final PGPObjectFactory compressedPgpObjectFactory = new PGPObjectFactory(compressedData.getDataStream(), fingerPrintCalculator);

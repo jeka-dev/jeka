@@ -70,11 +70,11 @@ public class BouncyCastlePgpLibMaketPgpRunner {
 	public void testSignWithBadSignature(Class<?> pgpClass) {
 		final File pubFile = JkUtilsFile.fromUrl(JkPgpTest.class.getResource("pubring.gpg"));
 		final File secringFile = JkUtilsFile.fromUrl(JkPgpTest.class.getResource("secring.gpg"));
-		final JkPgp pgp = JkPgp.of(pubFile, secringFile);
+		final JkPgp pgp = JkPgp.of(pubFile, secringFile, "basPassword");
 		final File signatureFile = JkUtilsFile.createFileIfNotExist(new File(
 				"build/output/test-out/signature-fake.asm"));
 		final File sampleFile = JkUtilsFile.fromUrl(JkPgpTest.class.getResource("sampleFileToSign.txt"));
-		pgp.sign(sampleFile, signatureFile, "badPassword");
+		pgp.sign(sampleFile, signatureFile);
 	}
 
 	private static void sign(File fileToSign, File output, String password, File secRing, Class<?> clazz) {

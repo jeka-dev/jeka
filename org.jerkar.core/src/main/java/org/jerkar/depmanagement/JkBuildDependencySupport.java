@@ -11,8 +11,10 @@ import org.jerkar.JkConstants;
 import org.jerkar.JkLocator;
 import org.jerkar.JkLog;
 import org.jerkar.JkOption;
+import org.jerkar.JkOptions;
 import org.jerkar.JkProject;
 import org.jerkar.JkScaffolder;
+import org.jerkar.crypto.pgp.JkPgp;
 import org.jerkar.file.JkPath;
 import org.jerkar.publishing.JkPublishRepos;
 import org.jerkar.publishing.JkPublisher;
@@ -115,7 +117,7 @@ public class JkBuildDependencySupport extends JkBuild {
 			JkLog.info("No url specified for publish and release repo : use defaults.");
 			if (repo.publish.username != null && repo.publish.password != null) {
 				JkLog.info("Credential specifified for publish repo : use OSSRH repos.");
-				return JkPublishRepos.ossrh(repo.publish.username, repo.publish.password);
+				return JkPublishRepos.ossrh(repo.publish.username, repo.publish.password, pgp());
 			} else {
 				final File file = new File(JkLocator.jerkarUserHome(), "maven-publish-dir");
 				JkLog.info("No credential specifified for publish repo : use local filesystem repo." + file.getAbsolutePath());
@@ -131,7 +133,7 @@ public class JkBuildDependencySupport extends JkBuild {
 		final JkRepo publishRepo = JkRepo.firstNonNull(defaultPublishRepo, defaultDownloadRepo);
 		final JkRepo releaseRepo = JkRepo.firstNonNull(defaultPublishReleaseRepo, publishRepo);
 
-		return JkPublishRepos.ofSnapshotAndRelease(publishRepo, false, releaseRepo, false);
+		return JkPublishRepos.ofSnapshotAndRelease(publishRepo, releaseRepo);
 	}
 
 	/**
@@ -295,6 +297,10 @@ public class JkBuildDependencySupport extends JkBuild {
 		@JkOption({"Password to connect to the repository (if needed)."})
 		public String password;
 
+	}
+
+	public JkPgp pgp() {
+		return JkPgp.of(JkOptions.asMap());
 	}
 
 }

@@ -269,7 +269,7 @@ final class IvyPublisher implements JkInternalPublisher {
 		return count;
 	}
 
-	private void publishMavenArtifacts(DependencyResolver resolver, JkMavenPublication publication, Date date, DefaultModuleDescriptor moduleDescriptor, CheckFileFlag flag) {
+	private void publishMavenArtifacts(DependencyResolver resolver, JkMavenPublication publication, Date date, DefaultModuleDescriptor moduleDescriptor, CheckFileFlag checkProducer) {
 		final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
 		try {
 			resolver.beginPublishTransaction(ivyModuleRevisionId, true);
@@ -280,11 +280,7 @@ final class IvyPublisher implements JkInternalPublisher {
 			final Artifact mavenMainArtifact = Translations.toPublishedMavenArtifact(publication.mainArtifactFile(), publication.artifactName(),
 					null, ivyModuleRevisionId, date);
 			resolver.publish(mavenMainArtifact, publication.mainArtifactFile(), true);
-			for (final File file : publication.extraFiles(null)) {
-				final String extension = JkUtilsString.substringAfterLast(file.getPath(), ".");
-				final Artifact extArtifact = withExtension(mavenMainArtifact, mavenMainArtifact.getExt() + "." + extension);
-				resolver.publish(extArtifact, file, true);
-			}
+			checkProducer.publishChecks(resolver, mavenMainArtifact, publication.mainArtifactFile());
 
 			for (final Map.Entry<String, File> extraArtifact : publication.extraArtifacts().entrySet()) {
 				final String classifier = extraArtifact.getKey();
@@ -292,11 +288,7 @@ final class IvyPublisher implements JkInternalPublisher {
 				final Artifact mavenArtifact = Translations.toPublishedMavenArtifact(file, publication.artifactName(),
 						classifier, ivyModuleRevisionId, date);
 				resolver.publish(mavenArtifact, file, true);
-				for (final File extFile : publication.extraFiles(classifier)) {
-					final String extension = JkUtilsString.substringAfterLast(extFile.getPath(), ".");
-					final Artifact extArtifact = withExtension(mavenArtifact, mavenArtifact.getExt() + "." + extension);
-					resolver.publish(extArtifact, extFile, true);
-				}
+				checkProducer.publishChecks(resolver, mavenArtifact, file);
 			}
 
 			final File pomXml = new File(targetDir(), "pom.xml");
@@ -317,18 +309,7 @@ final class IvyPublisher implements JkInternalPublisher {
 				JkUtilsFile.delete(fileToDelete);
 			}
 			resolver.publish(artifact, pomXml, true);
-
-			// Sign pom if required
-			if (publication.secretRing() != null) {
-				final File pomSign = JkPgp.ofSecretRing(publication.secretRing())
-						.sign(publication.secretRingPassword(), pomXml)[0];
-				final Artifact pomSignArtifact = withExtension(artifact, "pom.asc");
-				resolver.publish(pomSignArtifact, pomSign, true);
-			} else if (flag.pgpSignature) {
-				throw new IllegalStateException("This repository require signature but no secret ring was provided with the publication");
-			}
-
-
+			checkProducer.publishChecks(resolver, artifact, pomXml);
 		} catch (final Exception e) {
 			abortPublishTransaction(resolver);
 			throw JkUtilsThrowable.unchecked(e);
@@ -436,17 +417,27 @@ final class IvyPublisher implements JkInternalPublisher {
 
 	private static class CheckFileFlag {
 
-		boolean pgpSignature;
+		private JkPgp pgpSigner;
 
 		public static CheckFileFlag of(JkPublishRepo publishRepo) {
 			final CheckFileFlag flag = new CheckFileFlag();
-			flag.pgpSignature = publishRepo.requirePgpSign();
+			flag.pgpSigner = publishRepo.requirePgpSign();
 			return flag;
 		}
+
+		public void publishChecks(DependencyResolver resolver, Artifact artifact, File file) throws IOException {
+			if (pgpSigner != null) {
+				final String ext = JkUtilsString.substringAfterLast(file.getName(), ".");
+				final Artifact signArtifact = withExtension(artifact, ext + ".asc");
+
+				final File signedFile = new File(file.getPath()+".asc");
+				if (!signedFile.exists()) {
+					JkLog.info("Signing file " + file.getPath() + " on detached signature " +signedFile.getPath());
+					pgpSigner.sign(file);
+				}
+				resolver.publish(signArtifact, signedFile, true);
+			}
+		}
 	}
-
-
-
-
 
 }

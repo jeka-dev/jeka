@@ -9,11 +9,9 @@ import org.jerkar.JkDoc;
 import org.jerkar.JkJavaCompiler;
 import org.jerkar.JkLog;
 import org.jerkar.JkOption;
-import org.jerkar.JkOptions;
 import org.jerkar.JkScaffolder;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
-import org.jerkar.crypto.pgp.JkPgp;
 import org.jerkar.depmanagement.JkBuildDependencySupport;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependency;
@@ -38,9 +36,6 @@ import org.jerkar.utils.JkUtilsString;
  * @author Jerome Angibaud
  */
 public class JkJavaBuild extends JkBuildDependencySupport {
-
-	/** Option name containing the password for PGP secret key used for signature **/
-	protected static final String PGP_PASSWORD_OPTION = "pgp.secretKeyPassword";
 
 	public static final JkScope PROVIDED = JkScope.of("provided").transitive(false)
 			.descr("Dependencies to compile the project but that should not be embedded in produced artifacts.");
@@ -266,9 +261,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 		return JkJavaPacker.of(this);
 	}
 
-	protected JkPgp pgp() {
-		return JkPgp.of(JkOptions.asMap());
-	}
+
 
 	protected JkResourceProcessor resourceProcessor() {
 		return JkResourceProcessor.of(resources());
@@ -333,7 +326,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	 */
 	protected final void signIfNeeded(File ...files) {
 		if (pack.signWithPgp) {
-			pgp().sign(JkOptions.get(PGP_PASSWORD_OPTION), files);
+			pgp().sign(files);
 		}
 	}
 
@@ -441,8 +434,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 				.andIf(includeSources, packer.jarSourceFile(), "sources")
 				.andOptional(javadocMaker().zipFile(), "javadoc")
 				.andOptionalIf(includeTests, packer.jarTestFile(), "test")
-				.andOptionalIf(includeTests && includeSources, packer.jarTestSourceFile(), "testSources")
-				.withPomPgpSignatureIf(pack.signWithPgp, pgp().secretRing(), JkOptions.get(PGP_PASSWORD_OPTION));
+				.andOptionalIf(includeTests && includeSources, packer.jarTestSourceFile(), "testSources");
 	}
 
 	private static String artifactName(File file) {
@@ -464,8 +456,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	}
 
 	protected JkMavenPublication mavenPublication() {
-		return mavenPublication(includeTestsInPublication(), includeSourcesInPublication())
-				.andAllFilesSuffixedWithIf(pack.signWithPgp, ".asc");
+		return mavenPublication(includeTestsInPublication(), includeSourcesInPublication());
 	}
 
 	protected boolean includeTestsInPublication() {

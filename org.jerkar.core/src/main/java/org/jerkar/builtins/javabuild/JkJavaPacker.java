@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.zip.Deflater;
 
 import org.jerkar.JkLog;
-import org.jerkar.JkOptions;
 import org.jerkar.crypto.pgp.JkPgp;
 import org.jerkar.file.JkFileTree;
 import org.jerkar.file.JkFileTreeSet;
@@ -49,8 +48,6 @@ public class JkJavaPacker implements Cloneable {
 
 	private JkPgp pgp = null;
 
-	private String pgpSecretKeyPassword;
-
 
 	private List<Extra> extraActions = new LinkedList<Extra>();
 
@@ -59,7 +56,6 @@ public class JkJavaPacker implements Cloneable {
 		this.doFatJar = build.pack.fatJar;
 		if (build.pack.signWithPgp) {
 			this.pgp = build.pgp();
-			this.pgpSecretKeyPassword = JkOptions.get(JkJavaBuild.PGP_PASSWORD_OPTION);
 		}
 	}
 
@@ -123,7 +119,7 @@ public class JkJavaPacker implements Cloneable {
 		}
 		if (pgp != null) {
 			JkLog.start("Sign artifacts");
-			pgp.sign(this.pgpSecretKeyPassword, jarFile(), jarSourceFile(), jarTestFile(), jarTestSourceFile(), fatJarFile(), javadocFile());
+			pgp.sign(jarFile(), jarSourceFile(), jarTestFile(), jarTestSourceFile(), fatJarFile(), javadocFile());
 			JkLog.done();
 		}
 		JkLog.done();
@@ -206,14 +202,12 @@ public class JkJavaPacker implements Cloneable {
 		/**
 		 * Tells the packer to sign each produced element.
 		 */
-		public Builder doSign(Boolean doSign, JkPgp pgp, String secretKeyPassword) {
+		public Builder doSign(Boolean doSign, JkPgp pgp) {
 			if (!doSign) {
 				packer.pgp = null;
-				packer.pgpSecretKeyPassword = null;
 				return this;
 			}
 			packer.pgp = pgp;
-			packer.pgpSecretKeyPassword = secretKeyPassword;
 			return this;
 		}
 
@@ -221,7 +215,7 @@ public class JkJavaPacker implements Cloneable {
 		 * Tells the packer to sign each produced element.
 		 */
 		public Builder doSign(Boolean doSign, File secretRingKey, String secretKeyPassword) {
-			return doSign(doSign, JkPgp.ofSecretRing(secretRingKey), secretKeyPassword);
+			return doSign(doSign, JkPgp.ofSecretRing(secretRingKey, secretKeyPassword));
 		}
 
 		public Builder extraAction(Extra extra) {

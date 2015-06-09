@@ -47,7 +47,8 @@ public abstract class JerkarBuild extends JkJavaBuild {
 
 	@Override  // Force to use OSSRH
 	protected JkPublishRepos publishRepositories() {
-		return JkPublishRepos.ossrh(this.repo.publish.username, this.repo.publish.password);
+		return JkPublishRepos.ossrh(JkOptions.get("ossrh.username"),
+				JkOptions.get("ossrh.password"), pgp());
 	}
 
 }

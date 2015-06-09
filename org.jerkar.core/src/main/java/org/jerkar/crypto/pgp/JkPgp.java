@@ -1,6 +1,7 @@
 package org.jerkar.crypto.pgp;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Map;
 
 import org.jerkar.JkClassLoader;
@@ -17,11 +18,15 @@ import org.jerkar.utils.JkUtilsSystem;
  * 
  * @author Jerome Angibaud
  */
-public final class JkPgp {
+public final class JkPgp implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private static final String PUB_KEYRING = "pgp.pubring";
 
 	private static final String SECRET_KEYRING = "pgp.secring";
+
+	private static final String SECRET_KEY_PASSWORD = "pgp.secretKeyPassword";
 
 	private static final String PGPUTILS_CLASS_NAME = "org.jerkar.crypto.pgp.PgpUtils";
 
@@ -35,11 +40,13 @@ public final class JkPgp {
 
 	private final File secRing;
 
+	private final String password;
+
 	/**
 	 * Creates a JkPgp with the specified public and secret ring.
 	 */
-	public static JkPgp of(File pubRing, File secRing) {
-		return new JkPgp(pubRing, secRing);
+	public static JkPgp of(File pubRing, File secRing, String password) {
+		return new JkPgp(pubRing, secRing, password);
 	}
 
 	public static JkPgp ofDefaultGnuPg() {
@@ -52,7 +59,7 @@ public final class JkPgp {
 			pub = new File(JkUtilsFile.userHome(), ".gnupg/pubring.gpg");
 			sec = new File(JkUtilsFile.userHome(), ".gnupg/secring.gpg");
 		}
-		return new JkPgp(pub, sec);
+		return new JkPgp(pub, sec, null);
 	}
 
 
@@ -60,15 +67,18 @@ public final class JkPgp {
 	/**
 	 * Creates a JkPgp with values found in {@link JkOptions}
 	 */
-	public static JkPgp of(Map<String, String> option) {
+	public static JkPgp of(Map<String, String> options) {
 		JkPgp result = ofDefaultGnuPg();
-		final String pub = option.get(PUB_KEYRING);
+		final String pub = options.get(PUB_KEYRING);
 		if (pub != null) {
 			result = result.publicRing(new File(pub));
 		}
-		final String sec = option.get(SECRET_KEYRING);
+		final String sec = options.get(SECRET_KEYRING);
+		final String password = options.get(SECRET_KEY_PASSWORD);
 		if (sec != null) {
-			result = result.secretRing(new File(sec));
+			result = result.secretRing(new File(sec), password);
+		} else {
+			result = result.secretRing(result.secRing, password);
 		}
 		return result;
 	}
@@ -77,23 +87,24 @@ public final class JkPgp {
 	 * Creates a JkPgp with the specified public key ring.
 	 */
 	public static JkPgp ofPublicRing(File pubRing) {
-		return of(pubRing, null);
+		return of(pubRing, null, null);
 	}
 
 	/**
 	 * Creates a JkPgp with the specified secret key ring.
 	 */
-	public static JkPgp ofSecretRing(File secRing) {
-		return of(null, secRing);
+	public static JkPgp ofSecretRing(File secRing, String password) {
+		return of(null, secRing, password);
 	}
 
 
 
 
-	private JkPgp(File pubRing, File secRing) {
+	private JkPgp(File pubRing, File secRing, String password) {
 		super();
 		this.pubRing = pubRing;
 		this.secRing = secRing;
+		this.password = password;
 	}
 
 	/**
@@ -119,7 +130,7 @@ public final class JkPgp {
 	 * Signs the specified files in a detached signature file which will have the same name of
 	 * the signed file plus ".asc" suffix.
 	 */
-	public File[] sign(String password, File ...filesToSign) {
+	public File[] sign(File ...filesToSign) {
 		final File[] result = new File[filesToSign.length];
 		int i = 0;
 		for (final File file : filesToSign) {
@@ -147,9 +158,9 @@ public final class JkPgp {
 	/**
 	 * Creates a identical {@link JkPgp} but with the specified secret ring key file.
 	 */
-	public JkPgp secretRing(File file) {
+	public JkPgp secretRing(File file, String password) {
 		JkUtilsFile.assertAllExist(file);
-		return new JkPgp(pubRing, file);
+		return new JkPgp(pubRing, file, password);
 	}
 
 	/**
@@ -157,7 +168,7 @@ public final class JkPgp {
 	 */
 	public JkPgp publicRing(File file) {
 		JkUtilsFile.assertAllExist(file);
-		return new JkPgp(file, secRing);
+		return new JkPgp(file, secRing, password);
 	}
 
 	/**
