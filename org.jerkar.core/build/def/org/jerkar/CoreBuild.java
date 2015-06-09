@@ -6,7 +6,6 @@ import java.util.zip.Deflater;
 import org.jerkar.builtins.javabuild.JkJavaPacker;
 import org.jerkar.builtins.javabuild.JkResourceProcessor;
 import org.jerkar.file.JkFileTree;
-import org.jerkar.file.JkZipper;
 
 /**
  * Build class for Jerkar itself.
@@ -63,7 +62,6 @@ public class CoreBuild extends JerkarBuild {
 
 		// Simpler to put both Jerkar and Jerkar-fat jar at the root (in order to find the Jerker HOME)
 		distrib.importFiles(packer.jarFile());
-		addOptionalJarToFatJar(distrib.file("org.jerkar.core-fat.jar"));
 		distrib.from("libs/required").importDirContent(baseDir("build/libs/compile"));
 		distrib.from("libs-sources").importDirContent(baseDir("build/libs-sources"))
 		.importFiles(packer.jarSourceFile());
@@ -73,10 +71,7 @@ public class CoreBuild extends JerkarBuild {
 		JkLog.done();
 	}
 
-	private void addOptionalJarToFatJar(File dest) {
-		JkZipper.of(packer().fatJarFile()).andEntryPath("org/jerkar/crypto/pgp", bouncyCastleJar)
-		.andEntryPath("org/jerkar/internal/ivy", ivyJar).to(dest);
-	}
+
 
 
 }

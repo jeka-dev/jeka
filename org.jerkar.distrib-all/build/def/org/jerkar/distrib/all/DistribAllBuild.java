@@ -14,6 +14,7 @@ import org.jerkar.file.JkFileTreeSet;
 import org.jerkar.file.JkZipper;
 import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
+import org.jerkar.utils.JkUtilsFile;
 
 
 public class DistribAllBuild extends JkBuildDependencySupport {
@@ -41,6 +42,7 @@ public class DistribAllBuild extends JkBuildDependencySupport {
 		
 		JkLog.info("Add plugins to the fat jar");
 		File fat = dist.file(core.packer().fatJarFile().getName());
+		JkUtilsFile.copyFile(core.packer().jarFile(), fat);
 		JkZipper.of().merge(ext.include("**/*.jar")).appendTo(fat);
 		
 		JkLog.info("Create a fat source jar");
