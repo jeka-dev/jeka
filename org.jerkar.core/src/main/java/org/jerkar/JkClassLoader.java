@@ -2,12 +2,15 @@ package org.jerkar;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -486,6 +489,9 @@ public final class JkClassLoader {
 	@SuppressWarnings("unchecked")
 	public <T> T invokeStaticMethod(boolean serializeResult, String className, String methodName,
 			Object... args) {
+		if (args == null) {
+			args = new Object[0];
+		}
 		final Class<?> clazz = this.load(className);
 		final Object[] effectiveArgs = new Object[args.length];
 		for (int i = 0; i < args.length; i++) {
@@ -525,6 +531,9 @@ public final class JkClassLoader {
 	@SuppressWarnings("unchecked")
 	public <T> T invokeInstanceMethod(boolean serializeResult, Object object, String methodName,
 			Object... args) {
+		if (args == null) {
+			args = new Object[0];
+		}
 		final Object[] effectiveArgs = new Object[args.length];
 		for (int i = 0; i < args.length; i++) {
 			effectiveArgs[i] = traverseClassLoader(args[i], this);
@@ -633,12 +642,14 @@ public final class JkClassLoader {
 
 		final JkClassLoader from = JkClassLoader.of(object.getClass());
 		final Class<?> toClass = to.load(className);
-		if (from.delegate == null && toClass.getClassLoader() == null) {
+		final boolean container = Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz);
+		if (from.delegate == null && !container) { // Class from JDK
 			return object;
 		}
-		if (from.load(className).equals(toClass)) {
+		if (toClass.equals(object.getClass()) && !container) {
 			return object;
 		}
+
 		return JkUtilsIO.cloneBySerialization(object, to.classloader());
 	}
 
@@ -658,9 +669,34 @@ public final class JkClassLoader {
 			return super.findClass(name);
 		}
 
+	}
 
+	/**
+	 * Creates an instance from the specified class in this classloader and callable from the current class loader.
+	 * Arguments ans result are serialized (if needed) so we keep compatibility between classes.
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T transClassloaderProxy(Class<T> interfaze, String className, String staticMethodFactory, Object...args) {
+		final Object target = this.invokeStaticMethod(false, className, staticMethodFactory, args);
+		return ((T) Proxy.newProxyInstance(JkClassLoader.current().delegate, new Class[] {interfaze}, new TransClassloaderInvokationHandler(target)));
+	}
 
+	private class TransClassloaderInvokationHandler implements InvocationHandler {
+
+		TransClassloaderInvokationHandler(Object target) {
+			super();
+			this.target = target;
+		}
+
+		private final Object target;
+
+		@Override
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			return invokeInstanceMethod(true, target, method.getName(), args);
+
+		}
 
 	}
+
 
 }

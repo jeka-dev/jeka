@@ -24,6 +24,7 @@ class Main {
 		displayIntro();
 		JkLog.info("Java Home : " + System.getProperty("java.home"));
 		JkLog.info("Java Version : " + System.getProperty("java.version")+ ", " + System.getProperty("java.vendor"));
+		JkLog.info("Jerkar User home : " + JkLocator.jerkarUserHome().getAbsolutePath());
 		JkLog.info("Jerkar class path : " + System.getProperty("java.class.path"));
 		JkLog.info("Command line : " + JkUtilsString.join(Arrays.asList(args), " "));
 		final Map<String, String> optionMap = new HashMap<String, String>();

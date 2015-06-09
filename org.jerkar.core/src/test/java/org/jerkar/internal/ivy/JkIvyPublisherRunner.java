@@ -27,21 +27,21 @@ public class JkIvyPublisherRunner {
 
 
 	public static void testPublishIvy() {
-		final JkIvyPublisher jkIvyResolver = JkIvyPublisher.of(ivyRepos(), new File("build/output/test-out"));
+		final IvyPublisher jkIvyResolver = IvyPublisher.of(ivyRepos(), new File("build/output/test-out"));
 		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup", "mymodule"), JkVersion.ofName("myVersion"));
 		final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(), COMPILE, JkJavaBuild.TEST);
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();
-		jkIvyResolver.publishToIvyRepo(versionedModule, ivyPublication,deps, null, null, new Date());
+		jkIvyResolver.publishIvy(versionedModule, ivyPublication,deps, null, null, new Date());
 	}
 
 	public static void testPublishMaven() {
-		final JkIvyPublisher jkIvyResolver = JkIvyPublisher.of(mavenRepos(), new File("build/output/test-out"));
+		final IvyPublisher jkIvyResolver = IvyPublisher.of(mavenRepos(), new File("build/output/test-out"));
 		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup2", "mymodule2"), JkVersion.ofName("0.0.1"));
 		final JkMavenPublication publication = JkMavenPublication.of("mymodule2", sampleJarfile()).and(sampleJarSourcefile(), "source");
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();
-		jkIvyResolver.publishToMavenRepo(versionedModule, publication,deps, new Date());
+		jkIvyResolver.publishMaven(versionedModule, publication,deps, new Date());
 	}
 
 

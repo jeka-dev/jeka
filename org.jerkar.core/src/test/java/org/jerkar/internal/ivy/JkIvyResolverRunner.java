@@ -10,13 +10,14 @@ import org.jerkar.JkOptions;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkDependencies;
+import org.jerkar.depmanagement.JkInternalDepResolver;
 import org.jerkar.depmanagement.JkModuleId;
 import org.jerkar.depmanagement.JkRepos;
 import org.jerkar.depmanagement.JkResolutionParameters;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
 import org.jerkar.depmanagement.JkVersionedModule;
-import org.jerkar.internal.ivy.JkIvyResolver.JkAttachedArtifacts;
+import org.jerkar.internal.ivy.IvyResolver.JkAttachedArtifacts;
 
 public class JkIvyResolverRunner {
 
@@ -35,7 +36,7 @@ public class JkIvyResolverRunner {
 				.mapScope(COMPILE).to("compile", "default")
 				.and(PROVIDED).to("provided")
 				.build();
-		final Set<JkArtifact> artifacts = JkIvyResolver.of(repos).resolveAnonymous(deps, COMPILE, JkResolutionParameters.of());
+		final Set<JkArtifact> artifacts = IvyResolver.of(repos).resolveAnonymous(deps, COMPILE, JkResolutionParameters.of());
 		for (final JkArtifact artifact : artifacts) {
 			System.out.println(artifact);
 		}
@@ -46,7 +47,7 @@ public class JkIvyResolverRunner {
 		final JkRepos repos = JkRepos.mavenCentral().andMavenCentral();
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
-		final Set<JkArtifact> artifacts = JkIvyResolver.of(repos).resolveAnonymous(deps, COMPILE, JkResolutionParameters.of(defaultMapping()));
+		final Set<JkArtifact> artifacts = IvyResolver.of(repos).resolveAnonymous(deps, COMPILE, JkResolutionParameters.of(defaultMapping()));
 		for (final JkArtifact artifact : artifacts) {
 			System.out.println(artifact);
 		}
@@ -62,7 +63,7 @@ public class JkIvyResolverRunner {
 		final JkRepos repos = JkRepos.mavenCentral();
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
-		final JkIvyResolver jkIvyResolver = JkIvyResolver.of(repos);
+		final JkInternalDepResolver jkIvyResolver = IvyResolver.of(repos);
 		final Set<JkArtifact> artifacts = jkIvyResolver.resolveAnonymous(deps, COMPILE, JkResolutionParameters.of(defaultMapping()));
 		final Set<JkVersionedModule> modules = new HashSet<JkVersionedModule>();
 		for (final JkArtifact artifact : artifacts) {

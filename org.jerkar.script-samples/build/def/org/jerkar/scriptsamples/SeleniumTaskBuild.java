@@ -10,8 +10,8 @@ import org.jerkar.JkDoc;
 import org.jerkar.JkImport;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkDependencies;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
+//import org.openqa.selenium.WebDriver;
+//import org.openqa.selenium.firefox.FirefoxDriver;
 
 /**
  * This build demonstrate how to use 3rd party dependencies in your build.
@@ -20,7 +20,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
  * 
  * @author Jerome Angibaud
  */
-@JkImport("org.seleniumhq.selenium:selenium-java:2.45.0")
+// @JkImport("org.seleniumhq.selenium:selenium-java:2.45.0")
 public class SeleniumTaskBuild extends JkJavaBuild {
 	
 	@Override
@@ -37,7 +37,7 @@ public class SeleniumTaskBuild extends JkJavaBuild {
 	
 	@JkDoc("Performs some load test using Selenium")
 	public void seleniumLoadTest() {
-		WebDriver driver = new FirefoxDriver();
+		//WebDriver driver = new FirefoxDriver();
 		// ....
 	}
 	

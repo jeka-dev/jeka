@@ -536,11 +536,6 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	@JkDoc("Lifecycle method : #doVerify + #publish")
 	public void doPublish() {
-		if (publishRepositories().requirePgpSignature(this.versionedModule())
-				&& !JkOptions.containsKey(PACK_WITH_PGP_SIGN_OPTION)) {
-			JkLog.info("You are aptenting to publish on a repository that require PGP signature : turn artifact PGP signature on.");
-			this.pack.signWithPgp = true;
-		}
 		doVerify();
 		publish();
 	}

@@ -5,7 +5,6 @@ import java.net.URL;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import org.apache.ivy.Ivy;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsString;
 
@@ -18,8 +17,6 @@ public final class JkLocator {
 
 	// cache
 	private static File JERKAR_JAR_FILE;
-
-	private static File IVY_JAR_FILE;
 
 	private static String version;
 
@@ -40,21 +37,7 @@ public final class JkLocator {
 		throw new IllegalStateException("Main not found in classpath");
 	}
 
-	public static File ivyJarFile() {
-		if (IVY_JAR_FILE != null) {
-			return IVY_JAR_FILE;
-		}
-		for (final File file : JkClassLoader.current().childClasspath()) {
-			try {
-				JkClassLoader.system().parent().child(file).classloader().loadClass(Ivy.class.getName());
-				IVY_JAR_FILE = file;
-				return file;
-			} catch (final ClassNotFoundException e) {
-				// Class just not there
-			}
-		}
-		throw new IllegalStateException("Ivy not found in classpath");
-	}
+
 
 	/**
 	 * Returns the directory where is installed the running Jerkar instance.

@@ -16,6 +16,7 @@ import org.jerkar.JkScaffolder;
 import org.jerkar.file.JkPath;
 import org.jerkar.publishing.JkPublishRepos;
 import org.jerkar.publishing.JkPublisher;
+import org.jerkar.utils.JkUtilsAssert;
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;
 
@@ -99,6 +100,7 @@ public class JkBuildDependencySupport extends JkBuild {
 	 * managed dependencies.
 	 */
 	protected JkRepos downloadRepositories() {
+		JkUtilsAssert.notNull(this.repo.download.url, "repo.download.url must not be null.");
 		return JkRepos.of(JkRepo.of(this.repo.download.url)
 				.withOptionalCredentials(this.repo.download.username, this.repo.download.password));
 	}
@@ -267,16 +269,15 @@ public class JkBuildDependencySupport extends JkBuild {
 		public final JkOptionRepo download = new JkOptionRepo();
 
 		@JkOption("Maven or Ivy repositories to publish artifacts.")
-		public final JkOptionRepo publish;
+		public final JkOptionRepo publish = new JkOptionRepo();
 
 		@JkOption({"Maven or Ivy repositories to publish released artifacts.",
 		"If this repo is not null, then Jerkar will try to publish snapshot in the publish repo and release in this one."})
-		public final JkOptionRepo release;
+		public final JkOptionRepo release = new JkOptionRepo();
 
 		public JkOptionRepos() {
-			publish = new JkOptionRepo();
+			download.url = JkRepo.MAVEN_CENTRAL_URL.toExternalForm();
 			publish.url = JkRepo.MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL.toExternalForm();
-			release = new JkOptionRepo();
 			release.url = JkRepo.MAVEN_OSSRH_PUSH_RELEASE.toExternalForm();
 		}
 

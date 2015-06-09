@@ -319,7 +319,7 @@ public final class JkUtilsReflect {
 		final Class<?> types[] = new Class<?>[args.length];
 		for (int i = 0; i < args.length; i++) {
 			final Object arg = args[i];
-			types[i] = arg.getClass();
+			types[i] = arg == null ? null : arg.getClass();
 		}
 		final Set<Method> result = findMethodsCompatibleWith(staticMethod, canditates, methodName, types);
 		if (result.isEmpty()) {
@@ -372,6 +372,9 @@ public final class JkUtilsReflect {
 	}
 
 	private static boolean isCompatible(Class<?> type0, Class<?> type1) {
+		if (type1 == null) {
+			return true;
+		}
 		if (type0.getName().equals(type1.getName())) {
 			return true;
 		}
@@ -397,5 +400,6 @@ public final class JkUtilsReflect {
 		PRIMITIVE_TO_WRAPPER.put(void.class, Void.TYPE );
 		PRIMITIVE_TO_WRAPPER.put(short.class, Short.TYPE );
 	}
+
 
 }

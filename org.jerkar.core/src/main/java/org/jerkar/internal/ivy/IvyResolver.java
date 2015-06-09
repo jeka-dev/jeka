@@ -24,6 +24,7 @@ import org.jerkar.JkException;
 import org.jerkar.JkOptions;
 import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkDependencies;
+import org.jerkar.depmanagement.JkInternalDepResolver;
 import org.jerkar.depmanagement.JkModuleId;
 import org.jerkar.depmanagement.JkRepos;
 import org.jerkar.depmanagement.JkResolutionParameters;
@@ -38,22 +39,22 @@ import org.jerkar.publishing.JkPublisher;
  * 
  * @author Jerome Angibaud
  */
-public final class JkIvyResolver {
+public final class IvyResolver implements JkInternalDepResolver {
 
 	private static final JkVersionedModule ANONYMOUS_MODULE = JkVersionedModule.of(
 			JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.ofName("anonymousVersion"));
 
 	private final Ivy ivy;
 
-	private JkIvyResolver(Ivy ivy) {
+	private IvyResolver(Ivy ivy) {
 		super();
 		this.ivy = ivy;
 		ivy.getLoggerEngine().setDefaultLogger(new MessageLogger());
 	}
 
-	private static JkIvyResolver of(IvySettings ivySettings) {
+	private static JkInternalDepResolver of(IvySettings ivySettings) {
 		final Ivy ivy = Ivy.newInstance(ivySettings);
-		return new JkIvyResolver(ivy);
+		return new IvyResolver(ivy);
 	}
 
 	/**
@@ -69,7 +70,7 @@ public final class JkIvyResolver {
 	 * Creates an instance using specified repository for publishing and
 	 * the specified repositories for resolving.
 	 */
-	public static JkIvyResolver of(JkRepos resolveRepos) {
+	public static JkInternalDepResolver of(JkRepos resolveRepos) {
 		return of(ivySettingsOf(resolveRepos));
 	}
 
@@ -92,6 +93,8 @@ public final class JkIvyResolver {
 		throw new IllegalStateException(dependencyResolver.getClass().getName() + " not handled");
 	}
 
+
+	@Override
 	public boolean hasMavenPublishRepo() {
 		for (final DependencyResolver dependencyResolver : Translations.publishResolverOf(this.ivy.getSettings())) {
 			if (isMaven(dependencyResolver)) {
@@ -101,6 +104,7 @@ public final class JkIvyResolver {
 		return false;
 	}
 
+	@Override
 	public boolean hasIvyPublishRepo() {
 		for (final DependencyResolver dependencyResolver : Translations.publishResolverOf(this.ivy.getSettings())) {
 			if (!isMaven(dependencyResolver)) {
@@ -110,14 +114,12 @@ public final class JkIvyResolver {
 		return false;
 	}
 
-
-
+	@Override
 	public Set<JkArtifact> resolveAnonymous(JkDependencies deps, JkScope resolvedScope, JkResolutionParameters parameters) {
 		return resolve(ANONYMOUS_MODULE, deps, resolvedScope, parameters);
 	}
 
-
-
+	@Override
 	public Set<JkArtifact> resolve(JkVersionedModule module, JkDependencies deps, JkScope resolvedScope, JkResolutionParameters parameters) {
 		final DefaultModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(module, deps, parameters.defaultScope(), parameters.defaultMapping());
 
@@ -144,9 +146,7 @@ public final class JkIvyResolver {
 		return result;
 	}
 
-	/**
-	 * Get artifacts of the given modules published for the specified scopes (no transitive resolution).
-	 */
+	@Override
 	public JkAttachedArtifacts getArtifacts(Iterable<JkVersionedModule> modules, JkScope ...scopes) {
 		//final String defaultConf = "default";
 		final DefaultModuleDescriptor moduleDescriptor = Translations.toUnpublished(ANONYMOUS_MODULE);

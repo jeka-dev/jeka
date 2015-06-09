@@ -27,7 +27,6 @@ import org.apache.ivy.plugins.parser.m2.PomWriterOptions;
 import org.apache.ivy.plugins.resolver.AbstractPatternsBasedResolver;
 import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
-import org.jerkar.JkClassLoader;
 import org.jerkar.JkException;
 import org.jerkar.JkLog;
 import org.jerkar.JkOptions;
@@ -38,6 +37,7 @@ import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
 import org.jerkar.depmanagement.JkVersion;
 import org.jerkar.depmanagement.JkVersionedModule;
+import org.jerkar.publishing.JkInternalPublisher;
 import org.jerkar.publishing.JkIvyPublication;
 import org.jerkar.publishing.JkMavenPublication;
 import org.jerkar.publishing.JkPublishRepos;
@@ -51,9 +51,7 @@ import org.jerkar.utils.JkUtilsThrowable;
  * Jerkar users : This class is not part of the public API !!! Please, Use {@link JkPublisher} instead.
  * Ivy wrapper providing high level methods. The API is expressed using Jerkar classes only (mostly free of Ivy classes).
  */
-public final class JkIvyPublisher {
-
-	public static final JkClassLoader CLASSLOADER = JkClassLoader.current().siblingWithOptional("ivy-2.4.0.jar");
+final class IvyPublisher implements JkInternalPublisher {
 
 	private final Ivy ivy;
 
@@ -61,7 +59,7 @@ public final class JkIvyPublisher {
 
 	private final File descriptorOutputDir;
 
-	private JkIvyPublisher(Ivy ivy, JkPublishRepos publishRepo, File descriptorOutputDir) {
+	private IvyPublisher(Ivy ivy, JkPublishRepos publishRepo, File descriptorOutputDir) {
 		super();
 		this.ivy = ivy;
 		this.publishRepos = publishRepo;
@@ -69,9 +67,9 @@ public final class JkIvyPublisher {
 		ivy.getLoggerEngine().setDefaultLogger(new MessageLogger());
 	}
 
-	private static JkIvyPublisher of(IvySettings ivySettings, JkPublishRepos publishRepos, File descriptorOutputDir) {
+	private static IvyPublisher of(IvySettings ivySettings, JkPublishRepos publishRepos, File descriptorOutputDir) {
 		final Ivy ivy = Ivy.newInstance(ivySettings);
-		return new JkIvyPublisher(ivy, publishRepos, descriptorOutputDir);
+		return new IvyPublisher(ivy, publishRepos, descriptorOutputDir);
 	}
 
 	/**
@@ -87,7 +85,7 @@ public final class JkIvyPublisher {
 	 * Creates an instance using specified repository for publishing and
 	 * the specified repositories for resolving.
 	 */
-	public static JkIvyPublisher of(JkPublishRepos publishRepos, File descriptorOutputDir) {
+	public static IvyPublisher of(JkPublishRepos publishRepos, File descriptorOutputDir) {
 		return of(ivySettingsOf(publishRepos), publishRepos, descriptorOutputDir);
 	}
 
@@ -110,6 +108,7 @@ public final class JkIvyPublisher {
 		throw new IllegalStateException(dependencyResolver.getClass().getName() + " not handled");
 	}
 
+	@Override
 	public boolean hasMavenPublishRepo() {
 		for (final DependencyResolver dependencyResolver : Translations.publishResolverOf(this.ivy.getSettings())) {
 			if (isMaven(dependencyResolver)) {
@@ -119,6 +118,7 @@ public final class JkIvyPublisher {
 		return false;
 	}
 
+	@Override
 	public boolean hasIvyPublishRepo() {
 		for (final DependencyResolver dependencyResolver : Translations.publishResolverOf(this.ivy.getSettings())) {
 			if (!isMaven(dependencyResolver)) {
@@ -140,7 +140,8 @@ public final class JkIvyPublisher {
 	 * @param defaultMapping The default scope mapping of the published module
 	 * @param deliveryDate The delivery date.
 	 */
-	public void publishToIvyRepo(JkVersionedModule versionedModule, JkIvyPublication publication, JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate) {
+	@Override
+	public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication, JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate) {
 		JkLog.startln("Publishing for Ivy");
 		final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication, dependencies, defaultScope, defaultMapping, deliveryDate);
 		publishIvyArtifacts(publication, deliveryDate, moduleDescriptor);
@@ -148,7 +149,8 @@ public final class JkIvyPublisher {
 	}
 
 
-	public void publishToMavenRepo(JkVersionedModule versionedModule, JkMavenPublication publication, JkDependencies dependencies, Date deliveryDate) {
+	@Override
+	public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication, JkDependencies dependencies, Date deliveryDate) {
 		JkLog.startln("Publishing for Maven");
 		final JkDependencies publishedDependencies = resolveDependencies(versionedModule, dependencies);
 		final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication,

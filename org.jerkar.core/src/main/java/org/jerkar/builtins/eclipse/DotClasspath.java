@@ -30,7 +30,7 @@ import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.file.JkFileTree;
 import org.jerkar.file.JkFileTreeSet;
-import org.jerkar.internal.ivy.JkIvyResolver.JkAttachedArtifacts;
+import org.jerkar.internal.ivy.IvyResolver.JkAttachedArtifacts;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsString;
 import org.w3c.dom.Document;

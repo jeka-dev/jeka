@@ -1,6 +1,7 @@
 package org.jerkar.depmanagement;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -9,7 +10,9 @@ import java.util.List;
 
 import org.jerkar.utils.JkUtilsIterable;
 
-public final class JkRepos implements Iterable<JkRepo> {
+public final class JkRepos implements Iterable<JkRepo>, Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public static JkRepos of(JkRepo ...jkRepositories) {
 		return new JkRepos(Arrays.asList(jkRepositories));
