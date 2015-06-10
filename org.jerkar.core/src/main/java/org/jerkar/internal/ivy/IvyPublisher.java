@@ -3,6 +3,7 @@ package org.jerkar.internal.ivy;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +47,7 @@ import org.jerkar.publishing.JkPublisher;
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsString;
 import org.jerkar.utils.JkUtilsThrowable;
+import org.jerkar.utils.JkUtilsTime;
 
 /**
  * Jerkar users : This class is not part of the public API !!! Please, Use {@link JkPublisher} instead.
@@ -261,7 +263,8 @@ final class IvyPublisher implements JkInternalPublisher {
 			final JkVersionedModule jkModule = Translations.toJerkarVersionedModule(moduleDescriptor.getModuleRevisionId());
 			if (isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
 				JkLog.startln("Publishing for repository " + resolver);
-				this.publishMavenArtifacts(resolver, publication, date, moduleDescriptor, CheckFileFlag.of(publishRepo));
+				this.publishMavenArtifacts(resolver, publication, date, moduleDescriptor, CheckFileFlag.of(publishRepo),
+						publishRepo.snapshotTimestampPattern());
 				JkLog.done();
 				count ++;
 			}
@@ -269,8 +272,9 @@ final class IvyPublisher implements JkInternalPublisher {
 		return count;
 	}
 
-	private void publishMavenArtifacts(DependencyResolver resolver, JkMavenPublication publication, Date date, DefaultModuleDescriptor moduleDescriptor, CheckFileFlag checkProducer) {
-		final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
+	private void publishMavenArtifacts(DependencyResolver resolver, JkMavenPublication publication, Date date, DefaultModuleDescriptor moduleDescriptor, CheckFileFlag checkProducer, String timestampPattern) {
+		ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
+		ivyModuleRevisionId = withPattern(ivyModuleRevisionId, timestampPattern, JkUtilsTime.now());
 		try {
 			resolver.beginPublishTransaction(ivyModuleRevisionId, true);
 		} catch (final IOException e) {
@@ -317,6 +321,17 @@ final class IvyPublisher implements JkInternalPublisher {
 			throw JkUtilsThrowable.unchecked(e);
 		}
 		commitPublication(resolver);
+	}
+
+	private static ModuleRevisionId withPattern(ModuleRevisionId original, String pattern, Date time) {
+		if (pattern == null) {
+			return original;
+		}
+		if (original.getRevision().contains("-SNAPSHOT")) {
+			final String newRev = original.getRevision().replace("-SNAPSHOT", "-" + new SimpleDateFormat(pattern).format(time));
+			return ModuleRevisionId.newInstance(original, newRev);
+		}
+		return original;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
