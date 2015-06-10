@@ -5,10 +5,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
 
 import org.jerkar.file.JkFileTree;
 import org.jerkar.file.JkFileTreeSet;
+import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIO;
 
 /**
@@ -35,19 +37,24 @@ public class JkManifest {
 	}
 
 	public static JkManifest empty() {
-		return of(new Manifest());
+		final Manifest manifest = new Manifest();
+		manifest.getMainAttributes().putValue(Name.MANIFEST_VERSION.toString(), "1.0");
+		return of(manifest);
+	}
+
+	public JkManifest addMainAttribute(Name key, String value) {
+		this.manifest.getMainAttributes().putValue(key.toString(), value);
+		return this;
 	}
 
 	public JkManifest addMainAttribute(String key, String value) {
-		this.manifest.getMainAttributes().put(key, value);
+		this.manifest.getMainAttributes().putValue(key, value);
 		return this;
 	}
 
 	public JkManifest addMainClass(String value) {
-		return addMainAttribute("main-class", value);
+		return addMainAttribute(Name.MAIN_CLASS, value);
 	}
-
-
 
 	private static Manifest read(File file) {
 		final Manifest manifest = new Manifest();
@@ -74,6 +81,7 @@ public class JkManifest {
 	}
 
 	public void writeTo(File file) {
+		JkUtilsFile.createFileIfNotExist(file);
 		OutputStream outputStream = null;
 		try {
 			outputStream = new FileOutputStream(file);

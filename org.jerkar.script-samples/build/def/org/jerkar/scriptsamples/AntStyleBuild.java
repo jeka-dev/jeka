@@ -10,7 +10,6 @@ import org.jerkar.builtins.javabuild.JkManifest;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
 import org.jerkar.file.JkFileTree;
-import org.jerkar.file.JkZipper;
 
 /**
  * Equivalent to http://ant.apache.org/manual/tutorial-HelloWorldWithAnt.html
@@ -19,17 +18,18 @@ import org.jerkar.file.JkZipper;
  */
 public class AntStyleBuild extends JkBuild {
 	
-	File src = baseDir("src");
-	File buildDir = baseDir("build");
+	File src = baseDir("src/main/java");
+	File buildDir = baseDir("build/output");
 	File classDir = new File(buildDir, "classes");
 	File jarFile = new File(buildDir, "jar/" + this.baseDir().root().getName() + ".jar");
 	String className = "my.mainClass";
-	JkClasspath classpath = JkClasspath.of(baseDir().include("libs/*.jar"));
+	JkClasspath classpath = JkClasspath.of(baseDir().include("libs/**/*.jar"));
 	File reportDir = new File(buildDir, "junitRreport");
 	
 	@Override
 	public void doDefault() {
 		clean();run();
+		
 	}
 	
 	public void compile() {
@@ -39,13 +39,14 @@ public class AntStyleBuild extends JkBuild {
 	
 	public void jar() {
 		compile();
-		JkManifest.empty().addMainClass("my.main.RunClass").writeToStandardLocation(classDir);
-		JkZipper.of(classDir).to(jarFile);
+		JkManifest.empty().addMainClass("org.jerkar.scriptsamples.RunClass").writeToStandardLocation(classDir);
+		JkFileTree.of(classDir).zip().to(jarFile);
 	}	
 	
 	public void run() {
 		jar();
-		JkJavaProcess.ofJavaHome(jarFile).andClasspath(classpath).runJarSync(jarFile);
+		JkJavaProcess.of().withWorkingDir(jarFile.getParentFile())
+			.andClasspath(classpath).runJarSync(jarFile);
 	}
 	
 	public void cleanBuild() {
