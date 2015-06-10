@@ -313,12 +313,12 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 					&& scopedDependency.dependency() instanceof JkProjectDependency) {
 				final JkProjectDependency projectDeps = (JkProjectDependency) scopedDependency.dependency();
 				if (projectDeps.hasMissingFilesOrEmptyDirs()) {
-					JkLog.offset(1);
+					JkLog.delta(1);
 					JkLog.infoHead("Building depending project " + projectDeps);
 					final long time = System.nanoTime();
 					projectDeps.projectBuild().doDefault();
 					JkLog.infoHead("Project " + projectDeps + " built in " + JkUtilsTime.durationInSeconds(time) +" seconds.");
-					JkLog.offset(-1);
+					JkLog.delta(-1);
 				}
 				final Set<File> missingFiles = projectDeps.missingFilesOrEmptyDirs();
 				if (!missingFiles.isEmpty()) {

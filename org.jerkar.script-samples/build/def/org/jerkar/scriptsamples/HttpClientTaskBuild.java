@@ -6,22 +6,19 @@ import static org.jerkar.builtins.javabuild.JkPopularModules.JERSEY_SERVER;
 import static org.jerkar.builtins.javabuild.JkPopularModules.JUNIT;
 import static org.jerkar.builtins.javabuild.JkPopularModules.MOCKITO_ALL;
 
+import org.apache.commons.httpclient.HttpClient;
 import org.jerkar.JkDoc;
 import org.jerkar.JkImport;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkDependencies;
-//import org.openqa.selenium.WebDriver;
-//import org.openqa.selenium.firefox.FirefoxDriver;
 
 /**
  * This build demonstrate how to use 3rd party dependencies in your build.
- * Here we run some selenium test. To run the build and launch selenium test,
- * you can do either 'jerkar doDefault seleniumLoadTest' or 'jerkar doSeleniumLoadTest' 
  * 
  * @author Jerome Angibaud
  */
-// @JkImport("org.seleniumhq.selenium:selenium-java:2.45.0")
-public class SeleniumTaskBuild extends JkJavaBuild {
+@JkImport("commons-httpclient:commons-httpclient:3.1")
+public class HttpClientTaskBuild extends JkJavaBuild {
 	
 	@Override
 	protected JkDependencies dependencies() {
@@ -35,15 +32,14 @@ public class SeleniumTaskBuild extends JkJavaBuild {
 		.build();
 	}
 	
-	@JkDoc("Performs some load test using Selenium")
+	@JkDoc("Performs some load test using http client")
 	public void seleniumLoadTest() {
-		//WebDriver driver = new FirefoxDriver();
+		HttpClient client = new HttpClient();
 		// ....
 	}
 	
-	@JkDoc("Do a complete build then run the selenium load test")
-	public void doSeleniumLoadTest() {
-		doDefault();
+	public void doDefault() {
+		super.doDefault();
 		seleniumLoadTest();
 	}
 	

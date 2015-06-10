@@ -8,8 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.utils.JkUtilsIO;
-import org.jerkar.utils.JkUtilsString;
 import org.jerkar.utils.JkUtilsIO.StreamGobbler;
+import org.jerkar.utils.JkUtilsString;
 
 /**
  * Offers fluent API to define and launch external process.
@@ -26,17 +26,20 @@ public final class JkProcess {
 
 	private final File workingDir;
 
-	private JkProcess(String command, List<String> parameters, File workingDir) {
+	private final boolean failOnError;
+
+	private JkProcess(String command, List<String> parameters, File workingDir, boolean failOnError) {
 		this.command = command;
 		this.parameters = parameters;
 		this.workingDir = workingDir;
+		this.failOnError = failOnError;
 	}
 
 	/**
 	 * Defines a <code>JkProcess</code> using the specified command and parameters.
 	 */
 	public static JkProcess of(String command, String... parameters) {
-		return new JkProcess(command, Arrays.asList(parameters), null);
+		return new JkProcess(command, Arrays.asList(parameters), null, false);
 	}
 
 	/**
@@ -57,19 +60,26 @@ public final class JkProcess {
 		return of(command, parameters);
 	}
 
+	public JkProcess andParameters(String... parameters) {
+		return andParameters(Arrays.asList(parameters));
+	}
 
 	public JkProcess andParameters(Collection<String> parameters) {
 		final List<String> list = new ArrayList<String>(this.parameters);
 		list.addAll(parameters);
-		return new JkProcess(command, list, workingDir);
+		return new JkProcess(command, list, workingDir, failOnError);
 	}
 
 	public JkProcess withParameters(String... parameters) {
-		return new JkProcess(command, Arrays.asList(parameters), workingDir);
+		return new JkProcess(command, Arrays.asList(parameters), workingDir, failOnError);
 	}
 
 	public JkProcess withWorkingDir(File workingDir) {
-		return new JkProcess(command, parameters, workingDir);
+		return new JkProcess(command, parameters, workingDir, failOnError);
+	}
+
+	public JkProcess failOnError(boolean fail) {
+		return new JkProcess(command, parameters, workingDir, fail);
 	}
 
 	private ProcessBuilder processBuilder(List<String> command) {
@@ -84,7 +94,7 @@ public final class JkProcess {
 	/**
 	 * Starts this defined process and wait for the process has finished prior returning.
 	 */
-	public int runAsync() {
+	public int runSync() {
 		final List<String> command = new LinkedList<String>();
 		command.add(this.command);
 		command.addAll(parameters);
@@ -104,6 +114,9 @@ public final class JkProcess {
 			outputStreamGobbler.stop();
 			errorStreamGobbler.stop();
 			result = process.exitValue();
+			if (result != 0 && failOnError) {
+				throw new JkException("The process has returned with error code " + result);
+			}
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}

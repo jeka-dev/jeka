@@ -20,5 +20,29 @@ public final class JkUtilsObject {
 		return object1;
 	}
 
+	/**
+	 * Returns <code>true</true> if both object are <code>null</code> or the two obects are equals.
+	 * Returns <code>false</code> otherwise.
+	 */
+	public static boolean equals(Object object1, Object object2) {
+		if (object1 == null) {
+			if (object2 == null) {
+				return true;
+			}
+			return false;
+		}
+		return object1.equals(object2);
+	}
+
+	/**
+	 * Returns the hash code of the specified object or 0 if it's <code>null</code>.
+	 */
+	public static int hashCode(Object object) {
+		if (object == null) {
+			return 0;
+		}
+		return object.hashCode();
+	}
+
 
 }

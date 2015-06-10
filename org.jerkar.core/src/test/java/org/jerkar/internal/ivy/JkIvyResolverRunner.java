@@ -9,6 +9,7 @@ import java.util.Set;
 import org.jerkar.JkOptions;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkArtifact;
+import org.jerkar.depmanagement.JkAttachedArtifacts;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkInternalDepResolver;
 import org.jerkar.depmanagement.JkModuleId;
@@ -17,7 +18,6 @@ import org.jerkar.depmanagement.JkResolutionParameters;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.depmanagement.JkScopeMapping;
 import org.jerkar.depmanagement.JkVersionedModule;
-import org.jerkar.internal.ivy.IvyResolver.JkAttachedArtifacts;
 
 public class JkIvyResolverRunner {
 

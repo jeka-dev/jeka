@@ -5,8 +5,6 @@ package org.jerkar.depmanagement;
  */
 import java.util.Set;
 
-import org.jerkar.internal.ivy.IvyResolver.JkAttachedArtifacts;
-
 public interface JkInternalDepResolver {
 
 	boolean hasMavenPublishRepo();

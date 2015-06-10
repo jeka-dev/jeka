@@ -39,9 +39,9 @@ class HelpDisplayer {
 				JkLog.info("Explanation : ");
 				JkLog.info(description.explanation());
 			}
-			JkLog.offset(2);
+			JkLog.delta(2);
 			JkProjectBuildClassDef.of(description.pluginClass()).log(false);
-			JkLog.offset(-2);
+			JkLog.delta(-2);
 		}
 		JkLog.nextLine();
 		JkLog.done();

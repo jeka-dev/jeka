@@ -1,15 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="src" path="build/def" output="build/output/def-bin"/>
 	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry kind="src" path="src/test/java"/>
-	<classpathentry kind="src" path="build/def"/>
-	<classpathentry kind="var" path="IVY_CACHE/org.seleniumhq.selenium/selenium-api/jars/selenium-api-2.45.0.jar"/>
+	<classpathentry kind="src" output="build/output/testClasses" path="src/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="var" path="IVY_CACHE/junit/junit/jars/junit-4.11.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.core"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.plugins-jacoco"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.plugins-sonar"/>
-	<classpathentry kind="var" path="IVY_CACHE/org.seleniumhq.selenium/selenium-firefox-driver/jars/selenium-firefox-driver-2.45.0.jar"/>
-	<classpathentry kind="var" path="IVY_CACHE/org.seleniumhq.selenium/selenium-remote-driver/jars/selenium-remote-driver-2.45.0.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="var" path="IVY_CACHE/com.orientechnologies/orientdb-enterprise/jars/orientdb-enterprise-2.0.8.jar" sourcepath="IVY_CACHE/com.orientechnologies/orientdb-enterprise/sources/orientdb-enterprise-2.0.8-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.ivy2/cache/com.orientechnologies/orientdb-enterprise/javadocs/orientdb-enterprise-2.0.8-javadoc.jar"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="IVY_CACHE/com.sun.jersey/jersey-server/jars/jersey-server-1.19.jar" sourcepath="IVY_CACHE/com.sun.jersey/jersey-server/sources/jersey-server-1.19-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.ivy2/cache/com.sun.jersey/jersey-server/javadocs/jersey-server-1.19-javadoc.jar"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="IVY_CACHE/org.hamcrest/hamcrest-core/jars/hamcrest-core-1.3.jar" sourcepath="IVY_CACHE/org.hamcrest/hamcrest-core/sources/hamcrest-core-1.3-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.ivy2/cache/org.hamcrest/hamcrest-core/javadocs/hamcrest-core-1.3-javadoc.jar"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="IVY_CACHE/net.java.dev.jna/jna-platform/jars/jna-platform-4.0.0.jar" sourcepath="IVY_CACHE/net.java.dev.jna/jna-platform/sources/jna-platform-4.0.0-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.ivy2/cache/net.java.dev.jna/jna-platform/javadocs/jna-platform-4.0.0-javadoc.jar"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="IVY_CACHE/org.xerial.snappy/snappy-java/bundles/snappy-java-1.1.0.1.jar" sourcepath="IVY_CACHE/org.xerial.snappy/snappy-java/sources/snappy-java-1.1.0.1-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.ivy2/cache/org.xerial.snappy/snappy-java/javadocs/snappy-java-1.1.0.1-javadoc.jar"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="IVY_CACHE/com.orientechnologies/orientdb-client/jars/orientdb-client-2.0.8.jar" sourcepath="IVY_CACHE/com.orientechnologies/orientdb-client/sources/orientdb-client-2.0.8-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.ivy2/cache/com.orientechnologies/orientdb-client/javadocs/orientdb-client-2.0.8-javadoc.jar"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="IVY_CACHE/javax.servlet/servlet-api/jars/servlet-api-2.5.jar" sourcepath="IVY_CACHE/javax.servlet/servlet-api/sources/servlet-api-2.5-sources.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/net.java.dev.jna/jna/jars/jna-4.0.0.jar" sourcepath="IVY_CACHE/net.java.dev.jna/jna/sources/jna-4.0.0-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.ivy2/cache/net.java.dev.jna/jna/javadocs/jna-4.0.0-javadoc.jar"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="IVY_CACHE/com.google.guava/guava/bundles/guava-18.0.jar" sourcepath="IVY_CACHE/com.google.guava/guava/sources/guava-18.0-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.ivy2/cache/com.google.guava/guava/javadocs/guava-18.0-javadoc.jar"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="IVY_CACHE/org.mockito/mockito-all/jars/mockito-all-1.9.5.jar" sourcepath="IVY_CACHE/org.mockito/mockito-all/sources/mockito-all-1.9.5-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.ivy2/cache/org.mockito/mockito-all/javadocs/mockito-all-1.9.5-javadoc.jar"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="IVY_CACHE/junit/junit/jars/junit-4.11.jar" sourcepath="IVY_CACHE/junit/junit/sources/junit-4.11-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.ivy2/cache/junit/junit/javadocs/junit-4.11-javadoc.jar"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="IVY_CACHE/com.googlecode.concurrentlinkedhashmap/concurrentlinkedhashmap-lru/jars/concurrentlinkedhashmap-lru-1.4.1.jar" sourcepath="IVY_CACHE/com.googlecode.concurrentlinkedhashmap/concurrentlinkedhashmap-lru/sources/concurrentlinkedhashmap-lru-1.4.1-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.ivy2/cache/com.googlecode.concurrentlinkedhashmap/concurrentlinkedhashmap-lru/javadocs/concurrentlinkedhashmap-lru-1.4.1-javadoc.jar"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="IVY_CACHE/com.orientechnologies/orientdb-core/jars/orientdb-core-2.0.8.jar" sourcepath="IVY_CACHE/com.orientechnologies/orientdb-core/sources/orientdb-core-2.0.8-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.ivy2/cache/com.orientechnologies/orientdb-core/javadocs/orientdb-core-2.0.8-javadoc.jar"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="IVY_CACHE/commons-logging/commons-logging/jars/commons-logging-1.0.4.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/commons-codec/commons-codec/jars/commons-codec-1.2.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/commons-httpclient/commons-httpclient/jars/commons-httpclient-3.1.jar"/>
+	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/build/output/dist/libs/ext/org.jerkar.plugins-jacoco.jar" sourcepath="C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/build/output/dist/libs-sources/org.jerkar.plugins-jacoco-sources.jar"/>
+	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/build/output/dist/libs/ext/org.jerkar.plugins-sonar.jar" sourcepath="C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/build/output/dist/libs-sources/org.jerkar.plugins-sonar-sources.jar"/>
+	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/build/output/dist/org.jerkar.core.jar" sourcepath="C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/build/output/dist/libs-sources/org.jerkar.core-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/build/output/dist/libs-javadoc/org.jerkar.core-javadoc.jar"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="build/output/classes"/>
 </classpath>

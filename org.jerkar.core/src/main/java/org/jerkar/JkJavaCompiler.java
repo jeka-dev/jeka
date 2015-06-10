@@ -260,7 +260,7 @@ public final class JkJavaCompiler {
 			sourcePaths.add(file.getAbsolutePath());
 		}
 		final JkProcess jkProcess = this.fork.andParameters(options).andParameters(sourcePaths);
-		final int result = jkProcess.runAsync();
+		final int result = jkProcess.runSync();
 		return (result == 0);
 	}
 

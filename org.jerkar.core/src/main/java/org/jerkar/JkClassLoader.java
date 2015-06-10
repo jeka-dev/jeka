@@ -497,10 +497,10 @@ public final class JkClassLoader {
 		for (int i = 0; i < args.length; i++) {
 			effectiveArgs[i] = traverseClassLoader(args[i], this);
 		}
-		offsetJkLog();
 		final ClassLoader currentClassLoader = Thread.currentThread()
 				.getContextClassLoader();
 		Thread.currentThread().setContextClassLoader(delegate);
+		offsetLog();
 		try {
 			final Object returned = JkUtilsReflect.invokeStaticMethod(clazz,
 					methodName, effectiveArgs);
@@ -538,10 +538,10 @@ public final class JkClassLoader {
 		for (int i = 0; i < args.length; i++) {
 			effectiveArgs[i] = traverseClassLoader(args[i], this);
 		}
-		offsetJkLog();
 		final ClassLoader currentClassLoader = Thread.currentThread()
 				.getContextClassLoader();
 		Thread.currentThread().setContextClassLoader(delegate);
+		offsetLog();
 		try {
 			final Object returned = JkUtilsReflect.invokeInstanceMethod(object,
 					methodName, effectiveArgs);
@@ -620,7 +620,15 @@ public final class JkClassLoader {
 		return this;
 	}
 
-	private void offsetJkLog() {
+	public JkClassLoader copyCurrentOptions() {
+		if (this.isDefined(JkOptions.class.getName())) {
+			final Class<?> toClass = this.load(JkOptions.class.getName());
+			JkUtilsReflect.invokeStaticMethod(toClass, "init", JkOptions.asMap());
+		}
+		return this;
+	}
+
+	public void offsetLog() {
 		if (this.isDefined(JkLog.class.getName())) {
 			final int offset = JkLog.offset();
 			final Class<?> toClass = this.load(JkLog.class.getName());

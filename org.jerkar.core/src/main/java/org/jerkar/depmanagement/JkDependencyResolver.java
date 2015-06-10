@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.jerkar.JkLog;
 import org.jerkar.file.JkPath;
-import org.jerkar.internal.ivy.IvyResolver.JkAttachedArtifacts;
 import org.jerkar.internal.ivy.JkInternalIvy;
 
 public final class JkDependencyResolver  {

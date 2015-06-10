@@ -266,7 +266,7 @@ public class JkLog {
 	/**
 	 * Shifts the left margin. All subsequent log will be shifted <code>delta</code> characters to right.
 	 */
-	public static void offset(int delta) {
+	public static void delta(int delta) {
 		infoWriter.offsetLevel += delta;
 		errorWriter.offsetLevel += delta;
 		warnWriter.offsetLevel += delta;
@@ -277,6 +277,12 @@ public class JkLog {
 	 */
 	public static int offset() {
 		return infoWriter.offsetLevel;
+	}
+
+	static void offset(int offset) {
+		infoWriter.offsetLevel = offset;
+		errorWriter.offsetLevel = offset;
+		warnWriter.offsetLevel = offset;
 	}
 
 

@@ -28,7 +28,7 @@ class JavaSourceParser {
 
 	private static final JkScopeMapping SCOPE_MAPPING = JkScopeMapping.of(JkScope.BUILD).to("default(*)");
 
-	public static JavaSourceParser of(File baseDir, File code) {
+	private static JavaSourceParser of(File baseDir, File code) {
 		return of(baseDir, JkUtilsFile.toUrl(code));
 	}
 
@@ -40,7 +40,7 @@ class JavaSourceParser {
 		return result;
 	}
 
-	public static JavaSourceParser of(File baseDir, URL codeUrl) {
+	static JavaSourceParser of(File baseDir, URL codeUrl) {
 		final InputStream inputStream = JkUtilsIO.inputStream(codeUrl);
 		final String uncomentedCode = removeComments(inputStream);
 		final JkDependencies deps = dependencies(uncomentedCode, baseDir, codeUrl);

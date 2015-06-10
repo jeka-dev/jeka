@@ -69,7 +69,11 @@ public class DistribAllBuild extends JkBuildDependencySupport {
 		pluginsJacoco.core.doJavadoc = false;
 		multiProjectDependencies().invokeDoDefaultMethodOnAllSubProjects();
 		distrib();
-	} 
+	}
+	
+	public void testSamples() {
+		new SampleTester(this.baseDir()).doTest();
+	}
 	
 	
 }
