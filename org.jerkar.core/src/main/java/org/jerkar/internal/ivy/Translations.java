@@ -183,6 +183,8 @@ final class Translations {
 
 					}
 				};
+				result.setChangingPattern("*-SNAPSHOT");
+				result.setCheckmodified(true);
 				return result;
 			}
 			final FileRepository fileRepo = new FileRepository(new File(repo.url().getPath()));
