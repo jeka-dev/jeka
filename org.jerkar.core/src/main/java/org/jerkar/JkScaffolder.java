@@ -27,7 +27,8 @@ public class JkScaffolder {
 		final String packageName = build.moduleId().fullName().replace('/', '.').replace("-", ".").toLowerCase();
 		return new JkScaffolder(build, packageName, "JkBuild",
 				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST,
-				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST,
+				JkBuildDependencySupport.class.getResource("Build.java_sample"));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -35,7 +36,8 @@ public class JkScaffolder {
 		return new JkScaffolder(build, "defaultpackage",
 				"JkBuild",
 				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST,
-				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST,
+				JkBuild.class.getResource("Build.java_sample"));
 	}
 
 
@@ -57,11 +59,13 @@ public class JkScaffolder {
 
 	private final List<Runnable> extraActions;
 
+	private final URL templateClass;
+
 
 	private JkScaffolder(JkBuild build, String packageName, String extendedClass,
 			List<String> extraFields, List<String> extraImports,
 			List<String> extraInit, List<String> extraDependencies,
-			List<String> extraMethods, List<Runnable> extraActions) {
+			List<String> extraMethods, List<Runnable> extraActions, URL templateClass) {
 		super();
 		this.build = build;
 		this.packageName = packageName;
@@ -72,6 +76,7 @@ public class JkScaffolder {
 		this.extraDependencies = extraDependencies;
 		this.extraMethods = extraMethods;
 		this.extraActions = extraActions;
+		this.templateClass = templateClass;
 	}
 
 
@@ -89,8 +94,7 @@ public class JkScaffolder {
 		final File packageDir = new File(buildDefDir, packageName.replace('.', '/'));
 		packageDir.mkdirs();
 		final File buildSource = JkUtilsFile.createFileIfNotExist(new File(packageDir,"Build.java"));
-		final URL template = JkScaffolder.class.getResource("Build.java_sample");
-		JkUtilsFile.copyUrlReplacingTokens(template, buildSource, values, JkLog.infoStream());
+		JkUtilsFile.copyUrlReplacingTokens(templateClass, buildSource, values, JkLog.infoStream());
 		for (final Runnable action : extraActions) {
 			action.run();
 		}
@@ -99,7 +103,7 @@ public class JkScaffolder {
 	@SuppressWarnings("unchecked")
 	public JkScaffolder withExtraAction(Runnable runnable) {
 		return new JkScaffolder(build, packageName, extendedClass, extraFields, extraImports, extraInit,
-				extraDependencies, extraMethods, JkUtilsIterable.concatToList(runnable, extraActions));
+				extraDependencies, extraMethods, JkUtilsIterable.concatToList(runnable, extraActions), this.templateClass);
 	}
 
 	public JkScaffolder withExtendedClass(Class<?> clazz) {
@@ -108,21 +112,21 @@ public class JkScaffolder {
 
 	public JkScaffolder withExtendedClass(String extendedClass) {
 		return new JkScaffolder(build, packageName, extendedClass, extraFields, extraImports, extraInit,
-				extraDependencies, extraMethods, extraActions);
+				extraDependencies, extraMethods, extraActions, this.templateClass);
 	}
 
 	@SuppressWarnings("unchecked")
 	public JkScaffolder withInit(String ...inits) {
 		final List<String> extraInits = JkUtilsIterable.concatLists(this.extraInit, Arrays.asList(inits));
 		return new JkScaffolder(build, packageName, extendedClass, extraFields, extraImports, extraInits,
-				extraDependencies, extraMethods, extraActions);
+				extraDependencies, extraMethods, extraActions, this.templateClass);
 	}
 
 	@SuppressWarnings("unchecked")
 	public JkScaffolder withDependencies(String ...dependencies) {
 		final List<String> extraDeps = JkUtilsIterable.concatLists(this.extraDependencies, Arrays.asList(dependencies));
 		return new JkScaffolder(build, packageName, extendedClass, extraFields, extraImports, extraInit,
-				extraDeps, extraMethods, extraActions);
+				extraDeps, extraMethods, extraActions, this.templateClass);
 	}
 
 
@@ -132,7 +136,7 @@ public class JkScaffolder {
 			imports.add("import " + extra + ";");
 		}
 		return new JkScaffolder(build, packageName, extendedClass, extraFields, imports, extraInit,
-				extraDependencies, extraMethods, extraActions);
+				extraDependencies, extraMethods, extraActions, this.templateClass);
 	}
 
 	public JkScaffolder withImports(Class<?> ...classes) {
