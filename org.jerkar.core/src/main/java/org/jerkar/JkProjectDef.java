@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.jerkar.utils.JkUtilsObject;
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;
 
@@ -178,7 +179,7 @@ public final class JkProjectDef {
 			for(final JkProjectBuildOptionDef optionDef : this.optionDefs) {
 				final String name = optionDef.name;
 				final Object value = JkProjectBuildOptionDef.value(build, name);
-				result.put(name, JkUtilsString.toString(value));
+				result.put(name, JkUtilsObject.toString(value));
 			}
 			return result;
 		}

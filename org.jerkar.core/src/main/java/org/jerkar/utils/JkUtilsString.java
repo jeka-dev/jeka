@@ -198,16 +198,6 @@ public final class JkUtilsString {
 
 	}
 
-	/**
-	 * Null safe for {@link Object#toString()}. If the specified object is <code>null</code> than this method returns "null".
-	 */
-	public static String toString(Object object) {
-		if (object == null) {
-			return "null";
-		}
-		return object.toString();
-	}
-
 	private static final byte[] HEX_CHAR_TABLE = {
 		(byte)'0', (byte)'1', (byte)'2', (byte)'3',
 		(byte)'4', (byte)'5', (byte)'6', (byte)'7',

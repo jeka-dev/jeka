@@ -44,5 +44,15 @@ public final class JkUtilsObject {
 		return object.hashCode();
 	}
 
+	/**
+	 * Null safe for {@link Object#toString()}. If the specified object is <code>null</code> than this method returns "null".
+	 */
+	public static String toString(Object object) {
+		if (object == null) {
+			return "null";
+		}
+		return object.toString();
+	}
+
 
 }

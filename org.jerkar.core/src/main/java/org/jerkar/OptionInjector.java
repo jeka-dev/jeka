@@ -2,21 +2,51 @@ package org.jerkar;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jerkar.utils.JkUtilsReflect;
+import org.jerkar.utils.JkUtilsString;
 
 class OptionInjector {
 
 	private static final Object UNHANDLED_TYPE = new Object();
 
+	public static Map<String, String> injectedFields(Object inspected, Map<String, String> props) {
+		final List<Field> fields = involvedFields(inspected, props);
+
+
+	}
+
 	public static void inject(Object target, Map<String, String> props) {
-		final List<Field> fields = optionField(target.getClass());
+		final List<Field> fields = involvedFields(target, props);
+		//final List<Field> fields = optionField(target.getClass());
 		for (final Field field : fields) {
 			inject(target, field, props);
 		}
+	}
+
+	private static List<Field> involvedFields(Object inspected, Map<String, String> props) {
+		final List<Field> fields = JkUtilsReflect.getAllDeclaredField(inspected.getClass(), true);
+		final Set<String> candidateFields = candidateFields(props);
+		for (final Iterator<Field> it = fields.iterator(); it.hasNext();) {
+			final Field field = it.next();
+			if (!candidateFields.contains(field.getName())) {
+				it.remove();
+			}
+			if (Modifier.isPrivate(field.getModifiers()) && field.getAnnotation(JkDoc.class) == null) {
+				it.remove();
+			}
+			if (Modifier.isStatic(field.getModifiers())) {
+				it.remove();
+			}
+		}
+		return fields;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -47,6 +77,35 @@ class OptionInjector {
 			inject(value, subProps);
 		}
 
+
+	}
+
+	private static void markInjected(Map<String, String> context, String prefix, Object target, Field field, Map<String, String> props) {
+		final String name = field.getName();
+		final Class<?> type = field.getType();
+		final boolean present = props.containsKey(name);
+		if (present) {
+			final String stringValue = props.get(name);
+			Object value;
+			if (stringValue == null ) {
+				value = defaultValue(type);
+			} else {
+				value = parse((Class<Object>) type, stringValue);
+			}
+			if (value == UNHANDLED_TYPE) {
+				throw new IllegalArgumentException("Class " + target.getClass().getName() +", field "
+						+ name +", can't handle type " + type);
+			}
+			context.put(prefix + name, props.get(prefix + name));
+		} else if (hasKeyStartingWith(name + ".", props)) {
+			Object value = JkUtilsReflect.getFieldValue(target, field);
+			if (value == null) {
+				value = JkUtilsReflect.newInstance(field.getType());
+				JkUtilsReflect.setFieldValue(target, field, value);
+			}
+			final Map<String, String> subProps = extractKeyStartingWith(name+".", props);
+			inject(value, subProps);
+		}
 
 	}
 
@@ -122,6 +181,18 @@ class OptionInjector {
 
 	private static List<Field> optionField(Class<?> clazz) {
 		return JkUtilsReflect.getAllDeclaredField(clazz, JkOption.class);
+	}
+
+	private static Set<String> candidateFields(Map<String, String> props) {
+		final Set<String> result = new HashSet<String>();
+		for (final String key : props.keySet()) {
+			if (key.contains(".")) {
+				result.add(JkUtilsString.substringBeforeFirst(key, "."));
+			} else {
+				result.add(key);
+			}
+		}
+		return result;
 	}
 
 }

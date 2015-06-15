@@ -6,9 +6,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.jerkar.utils.JkUtilsFile;
 import org.jerkar.utils.JkUtilsIO;
+import org.jerkar.utils.JkUtilsIterable;
 import org.jerkar.utils.JkUtilsString;
 import org.jerkar.utils.JkUtilsTime;
 
@@ -27,15 +29,18 @@ class Main {
 		JkLog.info("Jerkar User home : " + JkLocator.jerkarUserHome().getAbsolutePath());
 		JkLog.info("Jerkar class path : " + System.getProperty("java.class.path"));
 		JkLog.info("Command line : " + JkUtilsString.join(Arrays.asList(args), " "));
+		final Map<String, String> sysProps = getSpecifiedSystemProps(args);
+		logProps("Specified system properties", sysProps);
+		setSystemProperties(sysProps);
 		final Map<String, String> optionMap = new HashMap<String, String>();
 		optionMap.putAll(loadOptionsProperties());
 		final CommandLine commandLine = CommandLine.of(args);
 		optionMap.putAll(commandLine.getSubProjectBuildOptions());
 		optionMap.putAll(commandLine.getMasterBuildOptions() );
 		JkOptions.init(optionMap);
-		JkLog.info("Using standard options : " + JkOptions.fieldOptionsToString(JkOptions.instance()));
-		JkLog.info("and regular options : " + JkOptions.freeFormToString());
-		defineSystemProps(args);
+		JkLog.info("Standard options : " + JkOptions.standardOptions());
+		logProps("Options", JkOptions.toDisplayedMap(JkOptions.asMap()));
+
 		final File workingDir = JkUtilsFile.workingDir();
 		final Project project = new Project(workingDir);
 		JkLog.nextLine();
@@ -54,23 +59,24 @@ class Main {
 		}
 	}
 
-
-
-	private static void defineSystemProps(String[] args) {
-		for (final String arg : args) {
-			if (arg.startsWith("-D")) {
-				final int equalIndex = arg.indexOf("=");
-				if (equalIndex <= -1) {
-					System.setProperty(arg.substring(2), "");
-				} else {
-					final String name = arg.substring(2, equalIndex);
-					final String value = arg.substring(equalIndex+1);
-					System.setProperty(name, value);
-				}
-			}
+	static void logProps(String message, Map<String, String> props) {
+		if (props.isEmpty()) {
+			JkLog.info(message + " : none.");
+		} else if (props.size() <= 3) {
+			JkLog.info(message + " : " + JkUtilsIterable.toString(props));
+		} else {
+			JkLog.info(message + " : ");
+			JkLog.delta(1);
+			JkLog.info(JkUtilsIterable.toStrings(props));
+			JkLog.delta(-1);
 		}
+	}
+
+
+
+	private static Map<String, String> getSpecifiedSystemProps(String[] args) {
+		final Map<String, String> result = new TreeMap<String, String>();
 		final File propFile = new File(JkLocator.jerkarHome(), "system.properties");
-		final Map<String, String> result = new HashMap<String, String>();
 		if (propFile.exists()) {
 			result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
 		}
@@ -78,10 +84,27 @@ class Main {
 		if (userPropFile.exists()) {
 			result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
 		}
-		for (final Map.Entry<String, String> entry : result.entrySet()) {
+		for (final String arg : args) {
+			if (arg.startsWith("-D")) {
+				final int equalIndex = arg.indexOf("=");
+				if (equalIndex <= -1) {
+					result.put(arg.substring(2), "");
+				} else {
+					final String name = arg.substring(2, equalIndex);
+					final String value = arg.substring(equalIndex+1);
+					result.put(name, value);
+				}
+			}
+		}
+		return result;
+
+
+	}
+
+	private static void setSystemProperties(Map<String, String> props) {
+		for (final Map.Entry<String, String> entry : props.entrySet()) {
 			System.setProperty(entry.getKey(), entry.getValue());
 		}
-
 	}
 
 	private static Map<String, String> loadOptionsProperties() {

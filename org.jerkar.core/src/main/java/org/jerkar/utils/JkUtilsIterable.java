@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -223,6 +224,36 @@ public class JkUtilsIterable {
 			if (!result.contains(item)) {
 				result.add(item);
 			}
+		}
+		return result;
+	}
+
+	/**
+	 * Returns a string representation of the specified map constructed as [key0]=[value0], [key1]=[value1], ...
+	 */
+	@SuppressWarnings("unchecked")
+	public static String toString(Map<?, ?> map) {
+		final StringBuilder builder = new StringBuilder();
+		for(final Iterator<?> it = map.entrySet().iterator(); it.hasNext();) {
+			final Map.Entry<Object, Object> entry = (Entry<Object, Object>) it.next();
+			builder.append(entry.getKey()).append("=");
+			builder.append(JkUtilsObject.toString(entry.getValue()));
+			if (it.hasNext()) {
+				builder.append(", ");
+			}
+		}
+		return builder.toString();
+	}
+
+	/**
+	 * Returns a multi-line string representation of the specified map constructed as [key0]=[value0], [key1]=[value1], ...
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<String> toStrings(Map<?, ?> map) {
+		final List<String> result = new LinkedList<String>();
+		for (final Object name : map.entrySet()) {
+			final Map.Entry<Object, Object> entry = (Entry<Object, Object>) name;
+			result.add(entry.getKey() +  "=" + JkUtilsObject.toString(entry.getValue()));
 		}
 		return result;
 	}

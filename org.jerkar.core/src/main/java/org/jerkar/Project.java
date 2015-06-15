@@ -208,11 +208,13 @@ class Project {
 
 	private static void configurePluginsAndRun(JkBuild build, List<MethodInvocation> invokes,
 			Collection<JkPluginSetup> pluginSetups, Map<String, String> options,  PluginDictionnary<JkBuildPlugin> dictionnary) {
-		JkLog.startHeaded("Executing building for project " + build.baseDir().root().getName());
+		JkLog.startHeaded("Executing build for project " + build.baseDir().root().getName());
 		JkLog.info("Using build class " + build.getClass().getName());
 		configureProject(build, pluginSetups, options, dictionnary);
 		JkLog.info("With activated plugins : " + build.plugins.getActives());
-		JkLog.info("Build options : " + JkOptions.toString(JkProjectBuildClassDef.of(build.getClass()).optionValues(build)));
+		final Map<String,String> optionValues = JkProjectBuildClassDef.of(build.getClass()).optionValues(build);
+		final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(optionValues);
+		Main.logProps("Injected options", displayedOptions);
 		build.execute(toBuildMethods(invokes, dictionnary), null);
 		JkLog.done("Build " + build.baseDir().root().getName());
 	}

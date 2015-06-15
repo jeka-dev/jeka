@@ -6,8 +6,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.jerkar.utils.JkUtilsFile;
+import org.jerkar.utils.JkUtilsObject;
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;
 
@@ -15,7 +17,23 @@ public final class JkOptions {
 
 	private static JkOptions INSTANCE = new JkOptions(loadJerkarAndUserProperties());
 
+	private static final String BUILD_CLASS = "buildClass";
+
+	private static final String VERBOSE = "verbose";
+
+	private static final String SILENT = "silent";
+
+	private final Map<String, String> props = new HashMap<String, String>();
+
 	private static boolean populated;
+
+	private boolean silent;
+
+	private boolean verbose;
+
+	@JkOption({"Set it to the full or short class name, to force the build class to use.",
+	"Example : -buildClass=my.pack.FullBuild or -buildClass=FullBuild ."})
+	private final String buildClass;
 
 	static JkOptions instance() {
 		return INSTANCE;
@@ -25,30 +43,17 @@ public final class JkOptions {
 		if (populated) {
 			throw new IllegalStateException("The init method can be called only once.");
 		}
-		INSTANCE = new JkOptions(options);
+		final Map<String, String> map = new HashMap<String, String>();
+		map.putAll(options);
+		INSTANCE = new JkOptions(map);
 		populated = true;
 	}
 
-	private final Map<String, String> freeOptions = new HashMap<String, String>();
-
-	@JkOption("Set it to true to log more details.")
-	private boolean verbose;
-
-	@JkOption("Set it to true to turn off logs.")
-	private boolean silent;
-
-	@JkOption({"Set it to the full or short class name, to force the build class to use.",
-	"Example : -buildClass=my.pack.FullBuild or -buildClass=FullBuild ."})
-	private String buildClass;
-
 	private JkOptions(Map<String, String> options) {
-
-		// The string form options are stored in a static field of OptionStore class.
-		// The static field is supposed to be populated prior this class is invoked.
-		freeOptions.putAll(options);
-
-		// Field are populated using reflection.
-		populateFields(this, freeOptions);
+		props.putAll(options);
+		this.verbose = JkUtilsObject.firstNonNull(Boolean.getBoolean(options.get(VERBOSE)), false);
+		this.silent = JkUtilsObject.firstNonNull(Boolean.getBoolean(options.get(SILENT)), false);
+		this.buildClass = options.get(BUILD_CLASS);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -56,18 +61,30 @@ public final class JkOptions {
 		this(Collections.EMPTY_MAP);
 	}
 
+	/**
+	 * Changes the 'verbose' option dynamically. Set it to true to log more details.
+	 */
 	public static void forceVerbose(boolean verbose) {
 		INSTANCE.verbose = verbose;
 	}
 
+	/**
+	 * Changes the 'silent' option dynamically. Set it to true to turn off logs.
+	 */
 	public static void forceSilent(boolean silent) {
 		INSTANCE.silent = silent;
 	}
 
+	/**
+	 * Returns if the log is in verbose mode.
+	 */
 	public static boolean isVerbose() {
 		return INSTANCE.verbose;
 	}
 
+	/**
+	 * Returns if the log is turn off.
+	 */
 	public static boolean isSilent() {
 		if (INSTANCE == null) {
 			return false;
@@ -75,28 +92,32 @@ public final class JkOptions {
 		return INSTANCE.silent;
 	}
 
+	static String standardOptions() {
+		return "verbose=" + INSTANCE.verbose + ", silent= "
+				+ INSTANCE.silent + ", buildClass=" + JkUtilsObject.toString(INSTANCE.buildClass);
+	}
+
 	static String buildClass() {
 		return INSTANCE.buildClass;
 	}
 
-
 	public static boolean containsKey(String key) {
-		return INSTANCE.freeOptions.containsKey(key);
+		return INSTANCE.props.containsKey(key);
 	}
 
 	public static String get(String key) {
-		return INSTANCE.freeOptions.get(key);
+		return INSTANCE.props.get(key);
 	}
 
 	public static Map<String, String> asMap() {
-		return Collections.unmodifiableMap(INSTANCE.freeOptions);
+		return Collections.unmodifiableMap(INSTANCE.props);
 	}
 
 	public static Map<String, String> getAllStartingWith(String prefix) {
 		final Map<String, String> result = new HashMap<String, String>();
-		for (final String key : INSTANCE.freeOptions.keySet()) {
+		for (final String key : INSTANCE.props.keySet()) {
 			if (key.startsWith(prefix)) {
-				result.put(key, INSTANCE.freeOptions.get(key));
+				result.put(key, INSTANCE.props.get(key));
 			}
 		}
 		return result;
@@ -111,7 +132,7 @@ public final class JkOptions {
 	}
 
 	static void populateFields(Object build) {
-		populateFields(build, INSTANCE.freeOptions);
+		populateFields(build, INSTANCE.props);
 	}
 
 	private static List<Field> optionField(Class<?> clazz) {
@@ -127,7 +148,7 @@ public final class JkOptions {
 		for (final Field field : optionField(target.getClass())) {
 			hasField = true;
 			final String name = field.getName();
-			final String value = JkUtilsString.toString(JkUtilsReflect.getFieldValue(target, name));
+			final String value = JkUtilsObject.toString(JkUtilsReflect.getFieldValue(target, name));
 			builder.append(name).append("=").append(value).append(", ");
 		}
 		if (hasField) {
@@ -136,33 +157,20 @@ public final class JkOptions {
 		return builder.toString();
 	}
 
-	static String freeFormToString() {
-		return toString(INSTANCE.freeOptions);
-	}
-
-	static String toString(Map<String, String> props) {
-		if (props.isEmpty()) {
-			return "none";
-		}
-		final StringBuilder builder = new StringBuilder();
+	static Map<String, String> toDisplayedMap(Map<String, String> props) {
+		final Map<String, String> result = new TreeMap<String, String>();
 		for (final Map.Entry<String, String> entry : props.entrySet()) {
-			final Object value;
+			final String value;
 			if (JkUtilsString.firstMatching(entry.getKey().toLowerCase(), "password", "pwd") != null
 					&& entry.getValue() != null) {
 				value = "*****";
 			} else {
 				value = entry.getValue();
 			}
-			if (value != null) {
-				builder.append(entry.getKey()).append("=").append(value);
-			} else {
-				builder.append(entry.getKey());
-			}
-			builder.append(", ");
+			result.put(entry.getKey(), value);
 
 		}
-		builder.delete(builder.length()-2, builder.length()-1);
-		return builder.toString();
+		return result;
 	}
 
 	private static Map<String, String> loadJerkarAndUserProperties() {
