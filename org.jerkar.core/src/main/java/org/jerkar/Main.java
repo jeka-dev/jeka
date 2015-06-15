@@ -33,8 +33,8 @@ class Main {
 		optionMap.putAll(commandLine.getSubProjectBuildOptions());
 		optionMap.putAll(commandLine.getMasterBuildOptions() );
 		JkOptions.init(optionMap);
-		JkLog.info("Using global options : " + JkOptions.fieldOptionsToString(JkOptions.instance()));
-		JkLog.info("And free form options : " + JkOptions.freeFormToString());
+		JkLog.info("Using standard options : " + JkOptions.fieldOptionsToString(JkOptions.instance()));
+		JkLog.info("and regular options : " + JkOptions.freeFormToString());
 		defineSystemProps(args);
 		final File workingDir = JkUtilsFile.workingDir();
 		final Project project = new Project(workingDir);
