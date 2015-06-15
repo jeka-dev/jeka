@@ -37,13 +37,6 @@ final class BuildResolver {
 	}
 
 	/**
-	 * Resolves the {@link JkBuild} instance to use on this project.
-	 */
-	JkBuild resolve() {
-		return resolve(null, JkBuild.class);
-	}
-
-	/**
 	 * Resolves the build classes defined in this project
 	 */
 	List<Class<?>> resolveBuildClasses() {
@@ -112,7 +105,7 @@ final class BuildResolver {
 			return build;
 		}
 
-		// If there is a build source
+		// If there is a build file
 		if (this.hasBuildSource()) {
 			final JkFileTree dir = JkFileTree.of(buildSourceDir);
 			for (final String path : dir.relativePathes()) {

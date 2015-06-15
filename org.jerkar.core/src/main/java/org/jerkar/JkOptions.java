@@ -136,10 +136,6 @@ public final class JkOptions {
 		return builder.toString();
 	}
 
-	static boolean hasFieldOptions(Class<?> clazz) {
-		return ! optionField(clazz).isEmpty();
-	}
-
 	static String freeFormToString() {
 		return toString(INSTANCE.freeOptions);
 	}
