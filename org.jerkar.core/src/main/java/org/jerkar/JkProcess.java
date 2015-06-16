@@ -12,7 +12,13 @@ import org.jerkar.utils.JkUtilsIO.StreamGobbler;
 import org.jerkar.utils.JkUtilsString;
 
 /**
- * Offers fluent API to define and launch external process.
+ * Provides fluent API to define and launch external process.<p>
+ * Parameters of the command are passed as array (and not as single
+ * string representing several parameter separated with whitespace).<br/>
+ * So for example, if you want to create a Maven process, then you should write
+ * <pre><code>JkProcess.of("mvn", "clean", "install")</code></pre> instead of
+ * <pre><code>JkProcess.of("mvn", "clean install")</code></pre> or
+ * <pre><code>JkProcess.of("mvn clean install")</code></pre>.
  * 
  * @author Jerome Angibaud
  */
@@ -60,39 +66,64 @@ public final class JkProcess {
 		return of(command, parameters);
 	}
 
+	/**
+	 * Returns a <code>JkProcess</code> identical to this one but with the specified extra parameters.
+	 */
 	public JkProcess andParameters(String... parameters) {
 		return andParameters(Arrays.asList(parameters));
 	}
 
+	/**
+	 * Returns a <code>JkProcess</code> identical to this one but with the specified extra parameters
+	 * if the conditional is <code>true</code>. Returns <code>this</code> otherwise.
+	 */
+	public JkProcess andParametersIf(boolean conditional, String... parameters) {
+		if (conditional) {
+			return andParameters(parameters);
+		}
+		return this;
+	}
+
+	/**
+	 * @see #andParameters(String...)
+	 */
 	public JkProcess andParameters(Collection<String> parameters) {
 		final List<String> list = new ArrayList<String>(this.parameters);
 		list.addAll(parameters);
 		return new JkProcess(command, list, workingDir, failOnError);
 	}
 
+	/**
+	 * Returns a <code>JkProcess</code> identical to this one but with the specified parameters
+	 * in place of this parameters. Contrary to {@link #andParameters(String...)}, this method
+	 * replaces this parameters by the specified ones (not adding).
+	 */
 	public JkProcess withParameters(String... parameters) {
 		return new JkProcess(command, Arrays.asList(parameters), workingDir, failOnError);
 	}
 
+	/**
+	 * Returns a <code>JkProcess</code> identical to this one but using the specified directory
+	 * as the working directory.
+	 */
 	public JkProcess withWorkingDir(File workingDir) {
 		return new JkProcess(command, parameters, workingDir, failOnError);
 	}
 
+	/**
+	 * Returns a <code>JkProcess</code> identical to this one but with the specified behavior
+	 * if the the underlying process does not exit with 0 code.
+	 * In case of fail flag is <code>true</code> and the underlying process exit with a non 0 value,
+	 * the {@link #runSync()} method witll throw a {@link JkException}.
+	 */
 	public JkProcess failOnError(boolean fail) {
 		return new JkProcess(command, parameters, workingDir, fail);
 	}
 
-	private ProcessBuilder processBuilder(List<String> command) {
-		final ProcessBuilder builder = new ProcessBuilder(command);
-		builder.redirectErrorStream(true);
-		if (this.workingDir != null) {
-			builder.directory(workingDir);
-		}
-		return builder;
-	}
 
 	/**
-	 * Starts this defined process and wait for the process has finished prior returning.
+	 * Starts this process and wait for the process has finished prior returning.
+	 * The output of the created process will be redirected on the current output.
 	 */
 	public int runSync() {
 		final List<String> command = new LinkedList<String>();
@@ -122,6 +153,15 @@ public final class JkProcess {
 		}
 		JkLog.done(" process exit with return code : " + result);
 		return result;
+	}
+
+	private ProcessBuilder processBuilder(List<String> command) {
+		final ProcessBuilder builder = new ProcessBuilder(command);
+		builder.redirectErrorStream(true);
+		if (this.workingDir != null) {
+			builder.directory(workingDir);
+		}
+		return builder;
 	}
 
 	private static boolean findTool(File dir, String name) {
