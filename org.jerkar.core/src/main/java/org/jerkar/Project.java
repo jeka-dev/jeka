@@ -11,7 +11,6 @@ import java.util.Set;
 
 import org.jerkar.CommandLine.JkPluginSetup;
 import org.jerkar.CommandLine.MethodInvocation;
-import org.jerkar.JkProjectDef.JkProjectBuildClassDef;
 import org.jerkar.depmanagement.JkBuildDependencySupport;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.depmanagement.JkDependencyResolver;
@@ -164,7 +163,6 @@ class Project {
 	}
 
 	private void launch(JkBuild build, CommandLine commandLine) {
-
 		JkOptions.populateFields(build, commandLine.getMasterBuildOptions());
 		build.setScriptDependencyResolver(getScriptDependencyResolver());
 		build.init();
@@ -209,12 +207,11 @@ class Project {
 	private static void configurePluginsAndRun(JkBuild build, List<MethodInvocation> invokes,
 			Collection<JkPluginSetup> pluginSetups, Map<String, String> options,  PluginDictionnary<JkBuildPlugin> dictionnary) {
 		JkLog.startHeaded("Executing build for project " + build.baseDir().root().getName());
-		JkLog.info("Using build class " + build.getClass().getName());
+		JkLog.info("Build class " + build.getClass().getName());
 		configureProject(build, pluginSetups, options, dictionnary);
-		JkLog.info("With activated plugins : " + build.plugins.getActives());
-		final Map<String,String> optionValues = JkProjectBuildClassDef.of(build.getClass()).optionValues(build);
-		final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(optionValues);
-		Main.logProps("Injected options", displayedOptions);
+		JkLog.info("Activated plugins : " + build.plugins.getActives());
+		final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
+		Main.logProps("Field values", displayedOptions);
 		build.execute(toBuildMethods(invokes, dictionnary), null);
 		JkLog.done("Build " + build.baseDir().root().getName());
 	}

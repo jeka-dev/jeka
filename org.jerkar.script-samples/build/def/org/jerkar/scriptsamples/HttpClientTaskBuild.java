@@ -6,7 +6,11 @@ import static org.jerkar.builtins.javabuild.JkPopularModules.JERSEY_SERVER;
 import static org.jerkar.builtins.javabuild.JkPopularModules.JUNIT;
 import static org.jerkar.builtins.javabuild.JkPopularModules.MOCKITO_ALL;
 
+import java.io.IOException;
+
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.jerkar.JkDoc;
 import org.jerkar.JkImport;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
@@ -33,15 +37,11 @@ public class HttpClientTaskBuild extends JkJavaBuild {
 	}
 	
 	@JkDoc("Performs some load test using http client")
-	public void seleniumLoadTest() {
+	public void seleniumLoadTest() throws HttpException, IOException {
 		HttpClient client = new HttpClient();
+		GetMethod getMethod = new GetMethod("http://my.url");
+		client.executeMethod(getMethod);
 		// ....
 	}
-	
-	public void doDefault() {
-		super.doDefault();
-		seleniumLoadTest();
-	}
-	
 	
 }

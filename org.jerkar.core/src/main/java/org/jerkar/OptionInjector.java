@@ -6,22 +6,18 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;
 
 class OptionInjector {
 
-	private static final Object UNHANDLED_TYPE = new Object();
-
-	public static Map<String, String> injectedFields(Object inspected, Map<String, String> props) {
-		final List<Field> fields = involvedFields(inspected, props);
-
-
-	}
+	private static final String UNHANDLED_TYPE = new String();
 
 	public static void inject(Object target, Map<String, String> props) {
 		final List<Field> fields = involvedFields(target, props);
@@ -34,19 +30,23 @@ class OptionInjector {
 	private static List<Field> involvedFields(Object inspected, Map<String, String> props) {
 		final List<Field> fields = JkUtilsReflect.getAllDeclaredField(inspected.getClass(), true);
 		final Set<String> candidateFields = candidateFields(props);
-		for (final Iterator<Field> it = fields.iterator(); it.hasNext();) {
-			final Field field = it.next();
-			if (!candidateFields.contains(field.getName())) {
-				it.remove();
-			}
-			if (Modifier.isPrivate(field.getModifiers()) && field.getAnnotation(JkDoc.class) == null) {
-				it.remove();
-			}
-			if (Modifier.isStatic(field.getModifiers())) {
-				it.remove();
+		final List<Field> result = new LinkedList<Field>();
+		for (final Field field : fields) {
+			if (candidateFields.contains(field.getName()) && injectable(field)) {
+				result.add(field);
 			}
 		}
-		return fields;
+		return result;
+	}
+
+	private static boolean injectable(Field field) {
+		if (Modifier.isPrivate(field.getModifiers()) && field.getAnnotation(JkDoc.class) == null) {
+			return false;
+		}
+		if (Modifier.isStatic(field.getModifiers())) {
+			return false;
+		}
+		return true;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -77,35 +77,6 @@ class OptionInjector {
 			inject(value, subProps);
 		}
 
-
-	}
-
-	private static void markInjected(Map<String, String> context, String prefix, Object target, Field field, Map<String, String> props) {
-		final String name = field.getName();
-		final Class<?> type = field.getType();
-		final boolean present = props.containsKey(name);
-		if (present) {
-			final String stringValue = props.get(name);
-			Object value;
-			if (stringValue == null ) {
-				value = defaultValue(type);
-			} else {
-				value = parse((Class<Object>) type, stringValue);
-			}
-			if (value == UNHANDLED_TYPE) {
-				throw new IllegalArgumentException("Class " + target.getClass().getName() +", field "
-						+ name +", can't handle type " + type);
-			}
-			context.put(prefix + name, props.get(prefix + name));
-		} else if (hasKeyStartingWith(name + ".", props)) {
-			Object value = JkUtilsReflect.getFieldValue(target, field);
-			if (value == null) {
-				value = JkUtilsReflect.newInstance(field.getType());
-				JkUtilsReflect.setFieldValue(target, field, value);
-			}
-			final Map<String, String> subProps = extractKeyStartingWith(name+".", props);
-			inject(value, subProps);
-		}
 
 	}
 
@@ -157,8 +128,9 @@ class OptionInjector {
 			return Enum.valueOf(enumType, stringValue);
 		}
 		return UNHANDLED_TYPE;
-
 	}
+
+
 
 	private static boolean hasKeyStartingWith(String prefix, Map<String, String> values)  {
 		for (final String string : values.keySet()) {
@@ -179,9 +151,7 @@ class OptionInjector {
 		return result;
 	}
 
-	private static List<Field> optionField(Class<?> clazz) {
-		return JkUtilsReflect.getAllDeclaredField(clazz, JkOption.class);
-	}
+
 
 	private static Set<String> candidateFields(Map<String, String> props) {
 		final Set<String> result = new HashSet<String>();
@@ -194,5 +164,80 @@ class OptionInjector {
 		}
 		return result;
 	}
+
+	// ----------------------------------
+	//  Methods to inspect field values
+	// ----------------------------------
+
+	public static Map<String, String> injectedFields(Object inspected) {
+		return injectedFields("", inspected);
+	}
+
+	private static Map<String, String> injectedFields(String context, Object inspected) {
+		final List<Field> fields = JkUtilsReflect.getAllDeclaredField(inspected.getClass(), true);
+		for (final Iterator<Field> it = fields.iterator(); it.hasNext();) {
+			final Field field = it.next();
+			if (!injectable(field)) {
+				it.remove();
+			}
+		}
+		final Map<String, String> result = new TreeMap<String, String>();
+		for (final Field field : fields) {
+			final Object value = JkUtilsReflect.getFieldValue(inspected, field);
+			final String stringValue = stringValue(value);
+
+			// Composite value
+			if (stringValue == UNHANDLED_TYPE) {
+				final String subContext = context + field.getName() + ".";
+				result.putAll( injectedFields(subContext,  value));
+			} else {
+				result.put(context + field.getName(), stringValue);
+			}
+		}
+		return result;
+	}
+
+	private static String stringValue(Object value) throws IllegalArgumentException {
+		if (value == null) {
+			return "null";
+		}
+		final Class<?> type = value.getClass();
+		if (type.equals(String.class)) {
+			return (String) value;
+		}
+		if (type.equals(Boolean.class) || type.equals(boolean.class)) {
+			return Boolean.toString((Boolean) value);
+		}
+		try {
+			if (type.equals(Integer.class) || type.equals(int.class)) {
+				return Integer.toString((Integer) value);
+			}
+			if (type.equals(Long.class) || type.equals(long.class)) {
+				return Long.toString((Long) value);
+			}
+			if (type.equals(Short.class) || type.equals(short.class)) {
+				return Short.toString((Short) value);
+			}
+			if (type.equals(Byte.class) || type.equals(byte.class)) {
+				return Byte.toString((Byte) value);
+			}
+			if (type.equals(Double.class) || type.equals(double.class)) {
+				return Double.toString((Double) value);
+			}
+			if (type.equals(Float.class) || type.equals(float.class)) {
+				return Float.toString((Float) value);
+			}
+			if (type.equals(File.class)) {
+				return ((File) value).getPath();
+			}
+		} catch (final NumberFormatException e) {
+			throw new IllegalArgumentException(e.getMessage(), e);
+		}
+		if (type.isEnum()) {
+			return value.toString();
+		}
+		return UNHANDLED_TYPE;
+	}
+
 
 }

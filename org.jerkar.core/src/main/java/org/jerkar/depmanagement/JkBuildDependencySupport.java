@@ -8,9 +8,9 @@ import java.util.List;
 import org.jerkar.JkBuild;
 import org.jerkar.JkBuildPlugin;
 import org.jerkar.JkConstants;
+import org.jerkar.JkDoc;
 import org.jerkar.JkLocator;
 import org.jerkar.JkLog;
-import org.jerkar.JkOption;
 import org.jerkar.JkOptions;
 import org.jerkar.JkProject;
 import org.jerkar.JkScaffolder;
@@ -40,10 +40,10 @@ public class JkBuildDependencySupport extends JkBuild {
 	// A cache for artifact publisher
 	private JkPublisher cachedPublisher;
 
-	@JkOption("Dependency and publish repositories")
+	@JkDoc("Dependency and publish repositories")
 	protected JkOptionRepos repo = new JkOptionRepos();
 
-	@JkOption("Version to inject to this build. If 'null' or blank than the version will be the one returned by #defaultVersion()" )
+	@JkDoc("Version to inject to this build. If 'null' or blank than the version will be the one returned by #defaultVersion()" )
 	protected String forcedVersion = null;
 
 	private final JkMultiProjectDependencies explicitMultiProjectDependencies;
@@ -267,13 +267,13 @@ public class JkBuildDependencySupport extends JkBuild {
 
 	public static final class JkOptionRepos {
 
-		@JkOption("Maven or Ivy repository to download dependency artifacts.")
+		@JkDoc("Maven or Ivy repository to download dependency artifacts.")
 		public final JkOptionRepo download = new JkOptionRepo();
 
-		@JkOption("Maven or Ivy repositories to publish artifacts.")
+		@JkDoc("Maven or Ivy repositories to publish artifacts.")
 		public final JkOptionRepo publish = new JkOptionRepo();
 
-		@JkOption({"Maven or Ivy repositories to publish released artifacts.",
+		@JkDoc({"Maven or Ivy repositories to publish released artifacts.",
 		"If this repo is not null, then Jerkar will try to publish snapshot in the publish repo and release in this one."})
 		public final JkOptionRepo release = new JkOptionRepo();
 
@@ -287,14 +287,14 @@ public class JkBuildDependencySupport extends JkBuild {
 
 	public static final class JkOptionRepo {
 
-		@JkOption({"Url of the repository : Prefix the Url with 'ivy:' if it is an Ivy repostory."})
+		@JkDoc({"Url of the repository : Prefix the Url with 'ivy:' if it is an Ivy repostory."})
 		public String url;
 
-		@JkOption({"Usename to connect to repository (if needed).",
+		@JkDoc({"Usename to connect to repository (if needed).",
 		"Null or blank means that the repository will be accessed in an anonymous way."})
 		public String username;
 
-		@JkOption({"Password to connect to the repository (if needed)."})
+		@JkDoc({"Password to connect to the repository (if needed)."})
 		public String password;
 
 	}

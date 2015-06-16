@@ -1,16 +1,14 @@
 package org.jerkar;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.jerkar.utils.JkUtilsFile;
+import org.jerkar.utils.JkUtilsIterable;
 import org.jerkar.utils.JkUtilsObject;
-import org.jerkar.utils.JkUtilsReflect;
 import org.jerkar.utils.JkUtilsString;
 
 public final class JkOptions {
@@ -31,8 +29,6 @@ public final class JkOptions {
 
 	private boolean verbose;
 
-	@JkOption({"Set it to the full or short class name, to force the build class to use.",
-	"Example : -buildClass=my.pack.FullBuild or -buildClass=FullBuild ."})
 	private final String buildClass;
 
 	static JkOptions instance() {
@@ -135,27 +131,6 @@ public final class JkOptions {
 		populateFields(build, INSTANCE.props);
 	}
 
-	private static List<Field> optionField(Class<?> clazz) {
-		return JkUtilsReflect.getAllDeclaredField(clazz, JkOption.class);
-	}
-
-	/**
-	 * Returns a multi-line text standing the current option values.
-	 */
-	static String fieldOptionsToString(Object target) {
-		final StringBuilder builder = new StringBuilder();
-		boolean hasField = false;
-		for (final Field field : optionField(target.getClass())) {
-			hasField = true;
-			final String name = field.getName();
-			final String value = JkUtilsObject.toString(JkUtilsReflect.getFieldValue(target, name));
-			builder.append(name).append("=").append(value).append(", ");
-		}
-		if (hasField) {
-			builder.delete(builder.length()-2, builder.length()-1);
-		}
-		return builder.toString();
-	}
 
 	static Map<String, String> toDisplayedMap(Map<String, String> props) {
 		final Map<String, String> result = new TreeMap<String, String>();
@@ -184,6 +159,11 @@ public final class JkOptions {
 			result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
 		}
 		return result;
+	}
+
+	static String fieldOptionsToString(Object object) {
+		final Map<String, String> map = JkOptions.toDisplayedMap(OptionInjector.injectedFields(object));
+		return JkUtilsIterable.toString(map);
 	}
 
 }

@@ -55,7 +55,7 @@ public class MavenStyleBuild extends JkJavaBuild {
 	@Override
 	protected JkPublishRepos publishRepositories() {
 		return JkPublishRepos.ofSnapshotAndRelease(
-				JkRepo.maven("http://my.snapshot.repo"), 
+				JkRepo.maven("http://my.snapshot.repo"), false, 
 				JkRepo.ivy("http://my.release.repo"));
 	}
 

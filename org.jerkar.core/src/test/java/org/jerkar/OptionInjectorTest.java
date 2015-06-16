@@ -24,20 +24,20 @@ public class OptionInjectorTest {
 
 	private static final class Sample {
 
-		@JkOption("option for a")
+		@JkDoc("option for a")
 		private int a;
 
-		@JkOption("option for b")
+		@JkDoc("option for b")
 		private B b;
 
-		@JkOption("option for c")
+		@JkDoc("option for c")
 		private boolean c;
 
 	}
 
 	private static final class B {
 
-		@JkOption("option for a")
+		@JkDoc("option for a")
 		private String a;
 
 	}

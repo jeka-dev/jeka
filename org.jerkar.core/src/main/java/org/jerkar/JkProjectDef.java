@@ -112,7 +112,7 @@ public final class JkProjectDef {
 
 		private static List<NameAndField> options(Class<?> clazz, String prefix, boolean root, Class<?> rClass) {
 			final List<NameAndField> result = new LinkedList<JkProjectDef.NameAndField>();
-			for (final Field field : JkUtilsReflect.getAllDeclaredField(clazz, JkOption.class)) {
+			for (final Field field : JkUtilsReflect.getAllDeclaredField(clazz, JkDoc.class)) {
 				final Class<?> rootClass = root ? field.getDeclaringClass() : rClass;
 				if (!hasSubOption(field)) {
 					result.add(new NameAndField(prefix + field.getName(), field, rootClass));
@@ -125,7 +125,7 @@ public final class JkProjectDef {
 		}
 
 		private static boolean hasSubOption(Field field) {
-			return !JkUtilsReflect.getAllDeclaredField(field.getType(), JkOption.class).isEmpty();
+			return !JkUtilsReflect.getAllDeclaredField(field.getType(), JkDoc.class).isEmpty();
 		}
 
 		void log(boolean displayFromClass) {
@@ -257,7 +257,7 @@ public final class JkProjectDef {
 			if (instance instanceof JkBuild) {
 				((JkBuild) instance).init();
 			}
-			final JkOption opt = field.getAnnotation(JkOption.class);
+			final JkDoc opt = field.getAnnotation(JkDoc.class);
 			final String descr = opt != null ? JkUtilsString.join(opt.value(), "\n") : null;
 			final Class<?> type = field.getType();
 			final Object defaultValue = value(instance, name);

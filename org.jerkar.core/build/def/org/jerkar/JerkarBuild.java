@@ -12,7 +12,7 @@ import org.jerkar.publishing.JkPublishRepos;
 public abstract class JerkarBuild extends JkJavaBuild {
 
 
-	@JkOption("do or skip javadoc")
+	@JkDoc("do or skip javadoc")
 	public boolean doJavadoc = true;
 
 

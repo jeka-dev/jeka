@@ -27,7 +27,7 @@ public class JkBuild {
 
 	protected final JkBuildPlugins plugins = new JkBuildPlugins(this);
 
-	@JkOption({
+	@JkDoc({
 		"Mention if you want to add extra lib in your build path.",
 		"It can be absolute or relative to the project base dir.",
 		"These libs will be added to the build path to compile and run Jerkar build class.",

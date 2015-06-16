@@ -8,7 +8,6 @@ import org.jerkar.JkClasspath;
 import org.jerkar.JkDoc;
 import org.jerkar.JkJavaCompiler;
 import org.jerkar.JkLog;
-import org.jerkar.JkOption;
 import org.jerkar.JkScaffolder;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
 import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
@@ -70,13 +69,13 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 
 
-	@JkOption("Tests")
+	@JkDoc("Tests")
 	public JkOptionTest tests = new JkOptionTest();
 
-	@JkOption("Packaging")
+	@JkDoc("Packaging")
 	public JkOptionPack pack = new JkOptionPack();
 
-	@JkOption({"Inject extra dependencies to the desired scope.",
+	@JkDoc({"Inject extra dependencies to the desired scope.",
 	"It can be absolute or relative to the project base dir."})
 	public JkOptionExtaPath extraPath = new JkOptionExtaPath();
 
@@ -534,22 +533,22 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	 */
 	public static class JkOptionExtaPath {
 
-		@JkOption({
+		@JkDoc({
 			"provided scope : these libs will be added to the compile path but won't be embedded in war files or fat jars.",
 		"Example : -extraPath.provided=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
 		private String provided;
 
-		@JkOption({
+		@JkDoc({
 			"runtime scope : these libs will be added to the runtime path.",
 		"Example : -extraPath.runtime=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
 		private String runtime;
 
-		@JkOption({
+		@JkDoc({
 			"compile scope : these libs will be added to the compile and runtime path.",
 		"Example : -extraPath.compile=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
 		private String compile;
 
-		@JkOption({
+		@JkDoc({
 			"test scope : these libs will be added to the compile and runtime path.",
 		"Example : -extraPath.test=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
 		private String test;
@@ -577,13 +576,13 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	 */
 	public final static class JkOptionTest {
 
-		@JkOption("Turn it on to skip tests.")
+		@JkDoc("Turn it on to skip tests.")
 		public boolean skip;
 
-		@JkOption("turn it on to run tests in a forked process.")
+		@JkDoc("turn it on to run tests in a forked process.")
 		public boolean fork;
 
-		@JkOption({"The more details the longer tests take to be processed.",
+		@JkDoc({"The more details the longer tests take to be processed.",
 			"BASIC mention the total time elapsed along detail on failed tests.",
 			"FULL detailed report displays additionally the time to run each tests.",
 		"Example : -report=NONE"})
@@ -594,13 +593,13 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	public static final class JkOptionPack {
 
-		@JkOption("When true, produce a fat-jar, meaning a jar embedding all the dependencies.")
+		@JkDoc("When true, produce a fat-jar, meaning a jar embedding all the dependencies.")
 		public boolean fatJar;
 
-		@JkOption("When true, the produced artifacts are signed with PGP.")
+		@JkDoc("When true, the produced artifacts are signed with PGP.")
 		public boolean signWithPgp;
 
-		@JkOption("When true, tests classes and sources are packed in jars")
+		@JkDoc("When true, tests classes and sources are packed in jars")
 		public boolean tests;
 
 	}

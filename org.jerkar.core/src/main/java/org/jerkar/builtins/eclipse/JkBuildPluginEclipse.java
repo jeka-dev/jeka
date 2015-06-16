@@ -6,7 +6,6 @@ import java.util.List;
 import org.jerkar.JkBuild;
 import org.jerkar.JkDoc;
 import org.jerkar.JkException;
-import org.jerkar.JkOption;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.builtins.javabuild.JkJavaBuildPlugin;
 import org.jerkar.depmanagement.JkDependencies;
@@ -35,12 +34,12 @@ public class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 		return (dotClasspathFile.exists() && dotProject.exists());
 	}
 
-	@JkOption({"Flag for resolving dependencies against the eclipse classpath",
+	@JkDoc({"Flag for resolving dependencies against the eclipse classpath",
 		"but trying to segregate test from production code considering path names : ",
 	"if path contains 'test' then this is considered as an entry source for scope 'test'."})
 	public boolean smartScope = true;
 
-	@JkOption({"If not null, this value will be used as the JRE container path when generating .classpath file."})
+	@JkDoc({"If not null, this value will be used as the JRE container path when generating .classpath file."})
 	public String jreContainer = null;
 
 	private DotClasspath cachedClasspath = null;

@@ -3,7 +3,7 @@ package org.jerkar.scriptsamples;
 import static org.jerkar.builtins.javabuild.JkPopularModules.GUAVA;
 import static org.jerkar.builtins.javabuild.JkPopularModules.JUNIT;
 
-import org.jerkar.JkOption;
+import org.jerkar.JkDoc;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkDependencies;
 import org.jerkar.plugins.sonar.JkBuildPluginSonar;
@@ -16,7 +16,7 @@ import org.jerkar.plugins.sonar.JkSonar;
  */
 public class SonarParametrizedBuild extends JkJavaBuild {
 	
-	@JkOption("Sonar server environment")
+	@JkDoc("Sonar server environment")
 	protected SonarEnv sonarEnv = SonarEnv.DEV;
 	
 	@Override

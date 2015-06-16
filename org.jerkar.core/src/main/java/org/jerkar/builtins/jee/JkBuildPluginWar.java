@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.jerkar.JkBuild;
+import org.jerkar.JkDoc;
 import org.jerkar.JkLog;
-import org.jerkar.JkOption;
 import org.jerkar.JkScaffolder;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.builtins.javabuild.JkJavaBuildPlugin;
@@ -17,13 +17,13 @@ public class JkBuildPluginWar extends JkJavaBuildPlugin {
 
 	private JkJavaBuild build;
 
-	@JkOption("Location of the webapp sources (containing WEB-INF dir along static resources).")
+	@JkDoc("Location of the webapp sources (containing WEB-INF dir along static resources).")
 	public String webappSrc = "src/main/webapp";
 
-	@JkOption("True to produce a test jar containing test classes.")
+	@JkDoc("True to produce a test jar containing test classes.")
 	public boolean testJar = false;
 
-	@JkOption("True to produce a regular jar containing classes and resources.")
+	@JkDoc("True to produce a regular jar containing classes and resources.")
 	public boolean regularJar = false;
 
 	@Override
