@@ -13,7 +13,7 @@ import org.jerkar.utils.JkUtilsString;
 
 public final class JkOptions {
 
-	private static JkOptions INSTANCE = new JkOptions(loadJerkarAndUserProperties());
+	private static JkOptions INSTANCE = new JkOptions(loadSystemAndUserOptions());
 
 	private static final String BUILD_CLASS = "buildClass";
 
@@ -148,7 +148,7 @@ public final class JkOptions {
 		return result;
 	}
 
-	private static Map<String, String> loadJerkarAndUserProperties() {
+	private static Map<String, String> loadSystemAndUserOptions() {
 		final File propFile = new File(JkLocator.jerkarHome(), "options.properties");
 		final Map<String, String> result = new HashMap<String, String>();
 		if (propFile.exists()) {

@@ -137,12 +137,12 @@ public final class JkClasspath implements Iterable<File> {
 			if (file.getName().equals(WILD_CARD)) {
 				final File parent = file.getParentFile();
 				if (!parent.exists()) {
-					JkLog.warn("File " + parent.getAbsolutePath() + " does not exist : classpath entry " + file.getAbsolutePath() + " will be ignored." );
+					JkLog.trace("File " + parent.getAbsolutePath() + " does not exist : classpath entry " + file.getAbsolutePath() + " will be ignored." );
 				} else {
 					result.addAll(JkFileTree.of(parent).include("*.jar").files(false));
 				}
 			} else if (!file.exists()) {
-				throw new IllegalArgumentException("Classpath element " + file.getAbsolutePath() + " does not exist.");
+				JkLog.trace("File " + file.getAbsolutePath() + " does not exist : classpath entry " + file.getAbsolutePath() + " will be ignored." );
 			} else if (file.isFile()) {
 				if (!JkUtilsString.endsWithAny(file.getName().toLowerCase(), ".jar", ".zip")) {
 					throw new IllegalArgumentException("Classpath file element " + file.getAbsolutePath() + " is invalid. It must be either a folder either a jar or zip file.");
