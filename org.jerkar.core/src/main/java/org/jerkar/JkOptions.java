@@ -75,6 +75,9 @@ public final class JkOptions {
 	 * Returns if the log is in verbose mode.
 	 */
 	public static boolean isVerbose() {
+		if (INSTANCE == null) {
+			return false;
+		}
 		return INSTANCE.verbose;
 	}
 
