@@ -26,7 +26,7 @@ public class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 
 	static final String OPTION_VAR_PREFIX = "eclipse.var.";
 
-	private JkJavaBuild javaBuild;
+	private JkBuild javaBuild;
 
 	public static boolean candidate(File baseDir) {
 		final File dotClasspathFile = new File(baseDir, ".classpath");
@@ -56,7 +56,7 @@ public class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 		}
 		final File dotProject = this.javaBuild.baseDir(".project");
 		if (!dotProject.exists()) {
-			Project.ofJavaNature(this.javaBuild.moduleId().fullName()).writeTo(dotProject);
+			Project.ofJavaNature(this.javaBuild().moduleId().fullName()).writeTo(dotProject);
 		}
 	}
 
@@ -88,7 +88,7 @@ public class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 	protected JkDependencies alterDependencies(JkDependencies original) {
 		final ScopeResolver scopeResolver = scopeResolver();
 		final List<Lib> libs = dotClasspath().libs(javaBuild.baseDir().root(), scopeResolver);
-		return Lib.toDependencies(this.javaBuild, libs, scopeResolver);
+		return Lib.toDependencies(this.javaBuild(), libs, scopeResolver);
 	}
 
 	private ScopeResolver scopeResolver() {
@@ -115,7 +115,11 @@ public class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 
 	@Override
 	public void configure(JkBuild build) {
-		this.javaBuild = (JkJavaBuild) build;
+		this.javaBuild = build;
+	}
+
+	private JkJavaBuild javaBuild() {
+		return (JkJavaBuild) this.javaBuild;
 	}
 
 }

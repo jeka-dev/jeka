@@ -28,6 +28,7 @@ import org.jerkar.builtins.eclipse.DotClasspath.ClasspathEntry.Kind;
 import org.jerkar.builtins.javabuild.JkJavaBuild;
 import org.jerkar.depmanagement.JkArtifact;
 import org.jerkar.depmanagement.JkAttachedArtifacts;
+import org.jerkar.depmanagement.JkBuildDependencySupport;
 import org.jerkar.depmanagement.JkScope;
 import org.jerkar.file.JkFileTree;
 import org.jerkar.file.JkFileTreeSet;
@@ -316,7 +317,7 @@ final class DotClasspath {
 
 	}
 
-	static void generate(JkJavaBuild build, File outputFile, String jreContainer) throws IOException, XMLStreamException, FactoryConfigurationError {
+	static void generate(JkBuild build, File outputFile, String jreContainer) throws IOException, XMLStreamException, FactoryConfigurationError {
 		final OutputStream fos = new FileOutputStream(outputFile);
 		final XMLStreamWriter writer = XMLOutputFactory.newInstance()
 				.createXMLStreamWriter(fos, ENCODING);
@@ -335,6 +336,81 @@ final class DotClasspath {
 			writer.writeCharacters("\n");
 		}
 
+		// Write entry for JRE container
+		writer.writeCharacters("\t");
+		writer.writeEmptyElement(CLASSPATHENTRY);
+		writer.writeAttribute("kind", "con");
+		final String container;
+		if (jreContainer != null) {
+			container = jreContainer;
+		} else if (build instanceof JkJavaBuild) {
+			final JkJavaBuild javaBuild = (JkJavaBuild) build;
+			container = "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-"
+					+ javaBuild.sourceJavaVersion();
+		} else {
+			container = "org.eclipse.jdt.launching.JRE_CONTAINER";
+		}
+		writer.writeAttribute("path", container);
+		writer.writeCharacters("\n");
+
+
+
+		if (build instanceof JkJavaBuild) {
+			final JkJavaBuild javaBuild = (JkJavaBuild) build;
+			generateJava(javaBuild, writer, jreContainer);
+		}
+
+		// Write entries for file dependencies
+		final List<File> fileDeps = build.scriptDependencyResolver().declaredDependencies().fileDependencies(JkScope.BUILD).entries();
+		writeFileEntries(fileDeps, writer);
+
+		if (build instanceof JkBuildDependencySupport) {
+			final JkBuildDependencySupport buildDependencySupport = (JkBuildDependencySupport) build;
+
+			// Write project
+			for (final JkBuild project : buildDependencySupport.multiProjectDependencies().directProjectBuilds()) {
+				writer.writeCharacters("\t");
+				writer.writeEmptyElement(CLASSPATHENTRY);
+				writer.writeAttribute("kind", "src");
+				writer.writeAttribute("path", "/" + project.baseDir().root().getName());
+				writer.writeCharacters("\n");
+			}
+
+		}
+
+		// Write output
+		writer.writeCharacters("\t");
+		writer.writeEmptyElement(CLASSPATHENTRY);
+		writer.writeAttribute("kind", "output");
+		writer.writeAttribute("path", "bin");
+		writer.writeCharacters("\n");
+		writer.writeEndDocument();
+		writer.flush();
+		writer.close();
+	}
+
+	private static void writeFileEntries(Iterable<File> fileDeps, XMLStreamWriter writer) throws XMLStreamException {
+		for (final File file : fileDeps) {
+			final String name = JkUtilsString.substringBeforeLast(file.getName(), ".jar");
+			File source = new File(file.getParentFile(), name + "-sources.jar");
+			if (!source.exists()) {
+				source = new File(file.getParentFile(), "../../libs-sources/" + name + "-sources.jar");
+			}
+			if (!source.exists()) {
+				source = new File(file.getParentFile(), "libs-sources/" + name + "-sources.jar");
+			}
+			File javadoc =  new File(file.getParentFile(), name + "-javadoc.jar");
+			if (!javadoc.exists()) {
+				javadoc = new File(file.getParentFile(), "../../libs-javadoc/" + name + "-javadoc.jar");
+			}
+			if (!javadoc.exists()) {
+				javadoc = new File(file.getParentFile(), "libs-javadoc/" + name + "-javadoc.jar");
+			}
+			writeClassEntry(writer, file, source, javadoc);
+		}
+	}
+
+	private static void generateJava(JkJavaBuild build, XMLStreamWriter writer, String jreContainer) throws XMLStreamException {
 		// Sources
 		final Set<String> sourcePaths = new HashSet<String>();
 		for (final JkFileTree jkFileTree : build.sources().and(build.resources())
@@ -376,16 +452,6 @@ final class DotClasspath {
 			writer.writeCharacters("\n");
 		}
 
-		// Write entry for JRE container
-		writer.writeCharacters("\t");
-		writer.writeEmptyElement(CLASSPATHENTRY);
-		writer.writeAttribute("kind", "con");
-		final String container = jreContainer != null ? jreContainer
-				: "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-"
-				+ build.sourceJavaVersion();
-		writer.writeAttribute("path", container);
-		writer.writeCharacters("\n");
-
 		// Write entries for external module deps
 		Set<JkArtifact> depAsArtifacts = new HashSet<JkArtifact>();
 		if (build.dependencyResolver().isManagedDependencyResolver()) {
@@ -402,45 +468,7 @@ final class DotClasspath {
 		// Write entries for file dependencies
 		final Set<File> fileDeps = new HashSet<File>(build.dependencyResolver().declaredDependencies()
 				.fileDependencies(JkJavaBuild.TEST, JkJavaBuild.PROVIDED, JkJavaBuild.COMPILE).entries());
-		fileDeps.addAll(build.scriptDependencyResolver().declaredDependencies().fileDependencies(JkScope.BUILD).entries());
-		for (final File file : fileDeps) {
-			final String name = JkUtilsString.substringBeforeLast(file.getName(), ".jar");
-			File source = new File(file.getParentFile(), name + "-sources.jar");
-			if (!source.exists()) {
-				source = new File(file.getParentFile(), "../../libs-sources/" + name + "-sources.jar");
-			}
-			if (!source.exists()) {
-				source = new File(file.getParentFile(), "libs-sources/" + name + "-sources.jar");
-			}
-			File javadoc =  new File(file.getParentFile(), name + "-javadoc.jar");
-			if (!javadoc.exists()) {
-				javadoc = new File(file.getParentFile(), "../../libs-javadoc/" + name + "-javadoc.jar");
-			}
-			if (!javadoc.exists()) {
-				javadoc = new File(file.getParentFile(), "libs-javadoc/" + name + "-javadoc.jar");
-			}
-			writeClassEntry(writer, file, source, javadoc);
-		}
-
-		// Write project
-		for (final JkBuild project : build.multiProjectDependencies().directProjectBuilds()) {
-			writer.writeCharacters("\t");
-			writer.writeEmptyElement(CLASSPATHENTRY);
-			writer.writeAttribute("kind", "src");
-			writer.writeAttribute("path", "/" + project.baseDir().root().getName());
-			writer.writeCharacters("\n");
-		}
-
-		// Write output
-		writer.writeCharacters("\t");
-		writer.writeEmptyElement(CLASSPATHENTRY);
-		writer.writeAttribute("kind", "output");
-		writer.writeAttribute("path", JkUtilsFile.getRelativePath(build.baseDir(""), build.classDir())
-				.replace(File.separator,  "/"));
-		writer.writeCharacters("\n");
-		writer.writeEndDocument();
-		writer.flush();
-		writer.close();
+		writeFileEntries(fileDeps, writer);
 	}
 
 	private static void writeExternalModuleEntries(JkJavaBuild build,
