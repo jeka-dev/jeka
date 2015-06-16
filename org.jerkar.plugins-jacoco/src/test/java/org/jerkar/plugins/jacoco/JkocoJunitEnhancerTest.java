@@ -2,8 +2,8 @@ package org.jerkar.plugins.jacoco;
 
 import java.io.File;
 
-import org.jerkar.JkClasspath;
-import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
+import org.jerkar.api.java.JkClasspath;
+import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.plugins.jacoco.JkocoJunitEnhancer;
 import org.junit.Test;
 

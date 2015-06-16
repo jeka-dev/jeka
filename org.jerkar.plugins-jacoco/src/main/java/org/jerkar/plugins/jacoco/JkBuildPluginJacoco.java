@@ -2,12 +2,12 @@ package org.jerkar.plugins.jacoco;
 
 import java.io.File;
 
-import org.jerkar.JkBuild;
-import org.jerkar.JkDoc;
-import org.jerkar.builtins.javabuild.JkJavaBuild;
-import org.jerkar.builtins.javabuild.JkJavaBuildPlugin;
-import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
-import org.jerkar.builtins.javabuild.testing.junit.JkUnit.Enhancer;
+import org.jerkar.api.java.junit.JkUnit;
+import org.jerkar.api.java.junit.JkUnit.Enhancer;
+import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuildPlugin;
 
 /**
  * Alter the unitTester to be launched with the Jacoco agent. 

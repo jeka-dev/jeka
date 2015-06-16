@@ -1,7 +1,7 @@
 package org.jerkar.distrib.all;
 
-import org.jerkar.JkProcess;
-import org.jerkar.file.JkFileTree;
+import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.system.JkProcess;
 
 public class SampleTester {
 	

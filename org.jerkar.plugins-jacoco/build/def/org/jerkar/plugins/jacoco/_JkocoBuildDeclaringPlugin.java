@@ -1,7 +1,7 @@
 package org.jerkar.plugins.jacoco;
 
 
-import org.jerkar.depmanagement.JkRepos;
+import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.plugins.jacoco.JkBuildPluginJacoco;
 
 /**

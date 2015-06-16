@@ -4,14 +4,14 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jerkar.JkBuild;
-import org.jerkar.JkDoc;
-import org.jerkar.JkOptions;
-import org.jerkar.builtins.javabuild.JkJavaBuild;
-import org.jerkar.builtins.javabuild.JkJavaBuildPlugin;
-import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
-import org.jerkar.file.JkPath;
-import org.jerkar.utils.JkUtilsFile;
+import org.jerkar.api.file.JkPath;
+import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
+import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkOptions;
+import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuildPlugin;
 
 
 @JkDoc({"Add SonarQube capability to a build.",

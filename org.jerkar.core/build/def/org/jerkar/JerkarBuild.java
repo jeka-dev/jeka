@@ -1,10 +1,13 @@
 package org.jerkar;
 
-import org.jerkar.builtins.javabuild.JkJavaBuild;
-import org.jerkar.depmanagement.JkVersion;
-import org.jerkar.publishing.JkMavenPublication;
-import org.jerkar.publishing.JkMavenPublicationInfo;
-import org.jerkar.publishing.JkPublishRepos;
+import org.jerkar.api.depmanagement.JkVersion;
+import org.jerkar.api.java.JkJavaCompiler;
+import org.jerkar.api.publishing.JkMavenPublication;
+import org.jerkar.api.publishing.JkMavenPublicationInfo;
+import org.jerkar.api.publishing.JkPublishRepos;
+import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkOptions;
+import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
 
 /**
  * Build settings shared across all Jerkar java projects

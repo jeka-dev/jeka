@@ -4,17 +4,17 @@ import java.io.File;
 import java.util.zip.Deflater;
 
 import org.jerkar.CoreBuild;
-import org.jerkar.JkDoc;
-import org.jerkar.JkLog;
-import org.jerkar.JkProject;
-import org.jerkar.builtins.javabuild.JkJavadocMaker;
-import org.jerkar.depmanagement.JkBuildDependencySupport;
-import org.jerkar.file.JkFileTree;
-import org.jerkar.file.JkFileTreeSet;
-import org.jerkar.file.JkZipper;
+import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkFileTreeSet;
+import org.jerkar.api.file.JkZipper;
+import org.jerkar.api.java.JkJavadocMaker;
+import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
-import org.jerkar.utils.JkUtilsFile;
+import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkProject;
+import org.jerkar.tool.builtins.templates.dependencysupport.JkBuildDependencySupport;
 
 
 public class DistribAllBuild extends JkBuildDependencySupport {

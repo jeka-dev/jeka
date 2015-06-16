@@ -1,0 +1,24 @@
+package ${packageName};
+
+import org.jerkar.api.depmanagement.JkDependencies;
+${extraImports}
+
+class Build extends ${extendedClass} {
+	
+	@Override
+	protected void init() {
+	    // Add you init code here (if needed)
+${extraInit}
+	}
+	
+	@Override
+	protected JkDependencies dependencies() {
+		return JkDependencies.builder()
+			// Add your dependencies here
+${extraDependencies}
+		.build();
+	}
+	
+	
+
+}

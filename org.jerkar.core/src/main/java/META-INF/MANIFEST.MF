@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
 Created-By: djeangdev@yahoo.fr
-Main-Class: org.jerkar.Main
+Main-Class: org.jerkar.tool.Main
 Version: ${version}

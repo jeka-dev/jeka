@@ -11,15 +11,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.jerkar.JkClassLoader;
-import org.jerkar.JkJavaProcess;
-import org.jerkar.JkLog;
-import org.jerkar.JkOptions;
-import org.jerkar.depmanagement.JkVersion;
-import org.jerkar.utils.JkUtilsAssert;
-import org.jerkar.utils.JkUtilsFile;
-import org.jerkar.utils.JkUtilsIO;
-import org.jerkar.utils.JkUtilsObject;
+import org.jerkar.api.depmanagement.JkVersion;
+import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkJavaProcess;
+import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsAssert;
+import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.JkUtilsObject;
+import org.jerkar.tool.JkOptions;
 
 /**
  * Sonar wrapper class for launching sonar analysis in a convenient way.

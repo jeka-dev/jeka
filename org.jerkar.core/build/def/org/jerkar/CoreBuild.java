@@ -3,9 +3,10 @@ package org.jerkar;
 import java.io.File;
 import java.util.zip.Deflater;
 
-import org.jerkar.builtins.javabuild.JkJavaPacker;
-import org.jerkar.builtins.javabuild.JkResourceProcessor;
-import org.jerkar.file.JkFileTree;
+import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.java.JkResourceProcessor;
+import org.jerkar.api.system.JkLog;
+import org.jerkar.tool.builtins.templates.javabuild.JkJavaPacker;
 
 /**
  * Build class for Jerkar itself.
