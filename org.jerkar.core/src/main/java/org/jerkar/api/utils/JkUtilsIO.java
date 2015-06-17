@@ -34,8 +34,6 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import org.jerkar.tool.JkLocator;
-
 /**
  * Utility class for dealing with Inputs/Outputs.
  * 
@@ -445,17 +443,15 @@ public final class JkUtilsIO {
 	 * Copies the content of an url in a cache file. The cached file path will be [jerkar user dir]/cache/url-contents/[last segment of the url (after last '/')].
 	 * If the file already exist than the content of the url is not copied and the file is directly returned.
 	 */
-	public static File copyUrlContentToCacheFile(URL url, PrintStream report) {
-		final File tempDir = new File(JkLocator.jerkarUserHome(), "cache/url-contents");
+	public static File copyUrlContentToCacheFile(URL url, PrintStream report, File cacheDir) {
 		final String name = JkUtilsString.substringAfterLast(url.getPath(), "/");
-		final File result = new File(tempDir, name);
+		final File result = new File(cacheDir, name);
 		if (result.exists()) {
 			if (report != null) {
 				report.println("Url " + url.toExternalForm() + " transformed to file by reading existing cached file " + result.getAbsolutePath());
 			}
 			return result;
 		}
-		tempDir.mkdirs();
 		JkUtilsFile.createFileIfNotExist(result);
 		if (report != null) {
 			report.println("Url " + url.toExternalForm() + " transformed to file by creating file " + result.getAbsolutePath());

@@ -8,28 +8,15 @@ import java.util.TreeMap;
 
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsString;
 
 public final class JkOptions {
 
 	private static JkOptions INSTANCE = new JkOptions(loadSystemAndUserOptions());
 
-	private static final String BUILD_CLASS = "buildClass";
-
-	private static final String VERBOSE = "verbose";
-
-	private static final String SILENT = "silent";
-
 	private final Map<String, String> props = new HashMap<String, String>();
 
 	private static boolean populated;
-
-	private boolean silent;
-
-	private boolean verbose;
-
-	private final String buildClass;
 
 	static JkOptions instance() {
 		return INSTANCE;
@@ -47,57 +34,11 @@ public final class JkOptions {
 
 	private JkOptions(Map<String, String> options) {
 		props.putAll(options);
-		this.verbose = JkUtilsObject.firstNonNull(Boolean.getBoolean(options.get(VERBOSE)), false);
-		this.silent = JkUtilsObject.firstNonNull(Boolean.getBoolean(options.get(SILENT)), false);
-		this.buildClass = options.get(BUILD_CLASS);
 	}
 
 	@SuppressWarnings("unchecked")
 	private JkOptions() {
 		this(Collections.EMPTY_MAP);
-	}
-
-	/**
-	 * Changes the 'verbose' option dynamically. Set it to true to log more details.
-	 */
-	public static void forceVerbose(boolean verbose) {
-		INSTANCE.verbose = verbose;
-	}
-
-	/**
-	 * Changes the 'silent' option dynamically. Set it to true to turn off logs.
-	 */
-	public static void forceSilent(boolean silent) {
-		INSTANCE.silent = silent;
-	}
-
-	/**
-	 * Returns if the log is in verbose mode.
-	 */
-	public static boolean isVerbose() {
-		if (INSTANCE == null) {
-			return false;
-		}
-		return INSTANCE.verbose;
-	}
-
-	/**
-	 * Returns if the log is turn off.
-	 */
-	public static boolean isSilent() {
-		if (INSTANCE == null) {
-			return false;
-		}
-		return INSTANCE.silent;
-	}
-
-	static String standardOptions() {
-		return "verbose=" + INSTANCE.verbose + ", silent= "
-				+ INSTANCE.silent + ", buildClass=" + JkUtilsObject.toString(INSTANCE.buildClass);
-	}
-
-	static String buildClass() {
-		return INSTANCE.buildClass;
 	}
 
 	public static boolean containsKey(String key) {

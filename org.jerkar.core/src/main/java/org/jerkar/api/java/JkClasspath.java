@@ -34,6 +34,26 @@ public final class JkClasspath implements Iterable<File> {
 
 	private static final String WILD_CARD = "*";
 
+	private static File JERKAR_JAR_FILE;
+
+	public static File jerkarJarFile() {
+		if (JERKAR_JAR_FILE != null) {
+			return JERKAR_JAR_FILE;
+		}
+		for (final File file : JkClassLoader.current().childClasspath()) {
+			try {
+				// TODO not optimized. Should be implemented on the JkClasspath class.
+				JkClassLoader.system().parent().child(file).classloader().loadClass(JkClasspath.class.getName());
+				JERKAR_JAR_FILE = file;
+				return file;
+			} catch (final ClassNotFoundException e) {
+				// Class just not there
+			}
+		}
+		throw new IllegalStateException("Main not found in classpath");
+	}
+
+
 	private final List<File> entries;
 
 	private JkClasspath(Iterable<File> entries) {

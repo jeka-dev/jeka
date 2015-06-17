@@ -4,12 +4,10 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.tool.builtins.templates.dependencysupport.JkBuildDependencySupport;
-import org.jerkar.tool.builtins.templates.dependencysupport.JkProjectDependency;
 
 /**
  * Identifier for a dependency of a project. It can be a either : <ul>
@@ -37,41 +35,37 @@ public abstract class JkDependency implements Serializable {
 		return JkExternalModule.of(groupAndNameAndVersion);
 	}
 
-	public static JkFilesDependency ofFile(File baseDir, String relativePath) {
+	public static JkLocalDependency ofFile(File baseDir, String relativePath) {
 		final File file = new File(relativePath);
 		if (!file.isAbsolute()) {
-			return JkFilesDependency.of(new File(baseDir, relativePath));
+			return JkLocalDependency.of(new File(baseDir, relativePath));
 		}
-		return JkFilesDependency.of(file);
+		return JkLocalDependency.of(file);
 	}
 
-	public static JkFilesDependency of(Iterable<File> files) {
-		return new JkFilesDependency(files);
+	public static JkLocalDependency of(Iterable<File> files) {
+		return new JkLocalDependency(files);
 	}
 
-	public static JkFilesDependency of(File ... files) {
-		return new JkFilesDependency(Arrays.asList(files));
+	public static JkLocalDependency of(File ... files) {
+		return new JkLocalDependency(Arrays.asList(files));
 	}
-
-	public static JkProjectDependency of(JkBuildDependencySupport build, File...files) {
-		return JkProjectDependency.of(build, JkUtilsIterable.setOf(files));
-	}
-
 
 	/**
 	 * A dependency on files located on file system.
 	 */
-	public static final class JkFilesDependency extends JkDependency {
+	public static final class JkLocalDependency extends JkDependency implements JkLocalFileDependency {
 
 		private static final long serialVersionUID = 1079527121988214989L;
 
-		private final List<File> files;
+		private final Set<File> files;
 
-		private JkFilesDependency(Iterable<File> files) {
-			this.files = Collections.unmodifiableList(JkUtilsIterable.listOf(files));
+		private JkLocalDependency(Iterable<File> files) {
+			this.files = Collections.unmodifiableSet(JkUtilsIterable.setOf(files));
 		}
 
-		public final List<File> files() {
+		@Override
+		public final Set<File> files() {
 			return files;
 		}
 
@@ -79,6 +73,12 @@ public abstract class JkDependency implements Serializable {
 		public String toString() {
 			return "Files=" + files.toString();
 		}
+
+	}
+
+	public interface JkLocalFileDependency {
+
+		Set<File> files();
 
 	}
 

@@ -1,5 +1,6 @@
 package org.jerkar.api.publishing;
 
+import java.io.File;
 import java.util.Date;
 
 import org.jerkar.api.depmanagement.JkDependencies;
@@ -8,7 +9,6 @@ import org.jerkar.api.depmanagement.JkScopeMapping;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.internal.ivy.JkInternalIvy;
 import org.jerkar.api.java.JkClassLoader;
-import org.jerkar.tool.JkBuild;
 
 public final class JkPublisher {
 
@@ -23,8 +23,8 @@ public final class JkPublisher {
 		this.ivyPublisher = jkIvyPublisher;
 	}
 
-	public static JkPublisher of(JkPublishRepos publishRepos, JkBuild build) {
-		final JkInternalPublisher ivyPublisher = IVY_CLASS_LOADER.transClassloaderProxy(JkInternalPublisher.class, IVY_PUB_CLASS, "of", publishRepos,  build.ouputDir().root());
+	public static JkPublisher of(JkPublishRepos publishRepos, File outDir) {
+		final JkInternalPublisher ivyPublisher = IVY_CLASS_LOADER.transClassloaderProxy(JkInternalPublisher.class, IVY_PUB_CLASS, "of", publishRepos, outDir);
 		return new JkPublisher(ivyPublisher);
 	}
 

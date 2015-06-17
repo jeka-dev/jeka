@@ -1,10 +1,9 @@
 package org.jerkar.api.depmanagement;
 
-import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.COMPILE;
-import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.RUNTIME;
-import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.TEST;
+import static org.jerkar.api.depmanagement.JkScopedDependencyTest.COMPILE;
+import static org.jerkar.api.depmanagement.JkScopedDependencyTest.RUNTIME;
+import static org.jerkar.api.depmanagement.JkScopedDependencyTest.TEST;
 
-import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.junit.Assert;
 import org.junit.Test;

@@ -1,24 +1,26 @@
 package org.jerkar.api.depmanagement;
 
-import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.COMPILE;
-import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.PROVIDED;
-import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.RUNTIME;
-import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.TEST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jerkar.api.depmanagement.JkDependency;
-import org.jerkar.api.depmanagement.JkExternalModule;
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.depmanagement.JkScopeMapping;
-import org.jerkar.api.depmanagement.JkScopedDependency;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
 import org.junit.Test;
 
 public class JkScopedDependencyTest {
+
+	public static final JkScope PROVIDED = JkScope.of("provided").transitive(false);
+
+	public static final JkScope COMPILE = JkScope.of("compile");
+
+	public static final JkScope RUNTIME = JkScope.of("runtime").extending(COMPILE);
+
+	public static final JkScope TEST = JkScope.of("test").extending(RUNTIME, PROVIDED);
+
+	public static final JkScope SOURCES = JkScope.of("sources").transitive(false);
+
+	public static final JkScope JAVADOC = JkScope.of("javadoc").transitive(false);
 
 
 	@Test
@@ -34,7 +36,7 @@ public class JkScopedDependencyTest {
 		assertTrue(scopedDep.isInvolvedIn(TEST));
 
 		final Set<JkScope> sampleSet = new HashSet<JkScope>();
-		sampleSet.add(JkJavaBuild.PROVIDED);
+		sampleSet.add(PROVIDED);
 		assertEquals(sampleSet, scopedDep.scopeMapping().mappedScopes(RUNTIME));
 
 		boolean failed = false;

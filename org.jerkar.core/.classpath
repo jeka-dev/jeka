@@ -7,5 +7,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="build/libs/provided/bouncycastle-pgp-152.jar"/>
 	<classpathentry kind="lib" path="build/libs/provided/ivy-2.4.0.jar" sourcepath="build/libs-sources/apache-ivy-2.4.0-sources.jar"/>
+	<classpathentry kind="lib" path="build/libs/test/jdepend-2.9.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

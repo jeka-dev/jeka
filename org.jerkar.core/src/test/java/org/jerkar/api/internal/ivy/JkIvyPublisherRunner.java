@@ -11,18 +11,15 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.api.internal.ivy.IvyPublisher;
 import org.jerkar.api.publishing.JkIvyPublication;
 import org.jerkar.api.publishing.JkMavenPublication;
 import org.jerkar.api.publishing.JkPublishRepos;
 import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.tool.JkOptions;
 import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
 
 public class JkIvyPublisherRunner {
 
 	public static void main(String[] args) {
-		JkOptions.forceVerbose(false);
 		testPublishMaven();
 	}
 

@@ -6,7 +6,6 @@ import java.util.LinkedList;
 
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsTime;
-import org.jerkar.tool.JkOptions;
 
 /**
  * Logger shared globally on the classloader. It provides time tracking method and
@@ -26,12 +25,47 @@ public class JkLog {
 
 	private static OffsetStream warnWriter = new OffsetStream(System.err);
 
+	private static boolean silent;
+
+	private static boolean verbose;
+
+	/**
+	 * Set the silent mode to the specified mode.
+	 * @see #silent()
+	 */
+	public static void silent(boolean mode) {
+		silent = mode;
+	}
+
+	/**
+	 * Returns <code>true</code> if the logger is in silent mode. In silent mode, nothing is mogged.
+	 */
+	public static boolean silent() {
+		return silent;
+	}
+
+	/**
+	 * Specifies the verbose mode
+	 * #see {@link #verbose()}
+	 */
+	public static void verbose(boolean flag) {
+		verbose = flag;
+	}
+
+	/**
+	 * Returns true if the log is in verbose mode. In verbose mode the message logged with {@link #trace(String)}
+	 * are actually logged. They are not logged in non-verbose mode.
+	 */
+	public static boolean verbose() {
+		return silent;
+	}
+
 	/**
 	 * Logs a message indicating that a processing has been started. Elipsis are added at the end of the message
 	 * and all subsequent logs will be shift right until {@link #done()} is invoked.
 	 */
 	public static void start(String message) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		infoWriter.print(message +  " ... " );
@@ -40,17 +74,17 @@ public class JkLog {
 	}
 
 	public static PrintStream infoStreamIfVerbose() {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return null;
 		}
-		if (JkOptions.isVerbose()) {
+		if (verbose) {
 			return infoStream();
 		}
 		return null;
 	}
 
 	private static void startTimer() {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		LinkedList<Long> times = START_TIMES.get();
@@ -65,7 +99,7 @@ public class JkLog {
 	 * As {@link #start(String)} but do a carriage return after the start message.
 	 */
 	public static void startln(String message) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		start(message);
@@ -76,7 +110,7 @@ public class JkLog {
 	 * As {@link #startln(String)} but underline the message.
 	 */
 	public static void startUnderlined(String message) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		infoUnderline(message);
@@ -88,7 +122,7 @@ public class JkLog {
 	 * As {@link #startln(String)} but whith header message.
 	 */
 	public static void startHeaded(String message) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		infoHead(message);
@@ -96,11 +130,14 @@ public class JkLog {
 		startTimer();
 	}
 
+	/**
+	 * Logs the specified message if the logger is currently in verbose mode. Do nothing otherwise.
+	 */
 	public static void trace(String message) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
-		if (JkOptions.isVerbose()) {
+		if (verbose) {
 			JkLog.info(message);
 		}
 	}
@@ -123,7 +160,7 @@ public class JkLog {
 	}
 
 	private static void doneMessage(String message) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		decOffset();
@@ -141,7 +178,7 @@ public class JkLog {
 	 * Displays a message at info level.
 	 */
 	public static void info(String message) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		infoWriter.println(message);
@@ -153,7 +190,7 @@ public class JkLog {
 	 * Displays a multi-line message of the specified message followed by specified lines.
 	 */
 	public static void info(String message, Iterable<String> lines) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		infoWriter.print(message);
@@ -166,7 +203,7 @@ public class JkLog {
 	 * Displays multi-line message.
 	 */
 	public static void info(Iterable<String> lines) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		for (final String line : lines) {
@@ -178,7 +215,7 @@ public class JkLog {
 	 * Displays multi-line message.
 	 */
 	public static void info(String ... lines) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		info(Arrays.asList(lines));
@@ -188,7 +225,7 @@ public class JkLog {
 	 * Displays a multi-line message at warn level.
 	 */
 	public static void warn(Iterable<String> lines) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		for (final String line : lines) {
@@ -200,7 +237,7 @@ public class JkLog {
 	 * Displays a message at warn level.
 	 */
 	public static void warn(String message) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		infoWriter.println("WARN : " + message);
@@ -219,14 +256,14 @@ public class JkLog {
 	 * Displays a message at warn level.
 	 */
 	public static void error(String message) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		errorWriter.println(message);
 	}
 
 	public static void error(Iterable<String> lines) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		for (final String line : lines) {
@@ -235,7 +272,7 @@ public class JkLog {
 	}
 
 	public static void nextLine() {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		infoWriter.println();
@@ -341,7 +378,7 @@ public class JkLog {
 	 * </pre>
 	 */
 	public static void infoHead(String intro) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		final String pattern = "-";
@@ -358,7 +395,7 @@ public class JkLog {
 	 * </pre>
 	 */
 	public static void infoUnderline(String message) {
-		if (JkOptions.isSilent()) {
+		if (silent) {
 			return;
 		}
 		JkLog.info(message);

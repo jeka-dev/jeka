@@ -29,7 +29,6 @@ import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.tool.JkOptions;
 
 /**
  * Wrapper around {@link URLClassLoader} offering convenient methods and fluent
@@ -45,6 +44,12 @@ public final class JkClassLoader {
 
 	private static final int JAVA_SUFFIX_LENGTH = ".java".length();
 
+	private static File urlCacheDir = new File(jerkarUserHome(), "cache/url-content");
+
+	static {
+		urlCacheDir.mkdirs();
+	}
+
 	/**
 	 * A {@link FileFilter} accepting only .class files.
 	 */
@@ -55,6 +60,23 @@ public final class JkClassLoader {
 			return (file.isFile() && file.getName().endsWith(CLASS_SUFFIX));
 		}
 	};
+
+	/**
+	 * Set the directory where are cached urls.
+	 * For its internal use, Jerkar may copy the the content of an URL to a file.
+	 * This class manages the central place where those URL are cached.
+	 */
+	public static void urlCacheDir(File dir) {
+		dir.mkdirs();
+		urlCacheDir = dir;
+	}
+
+	/**
+	 * @see #urlCacheDir(File)
+	 */
+	public static File urlCacheDir() {
+		return urlCacheDir;
+	}
 
 	private final URLClassLoader delegate;
 
@@ -142,7 +164,7 @@ public final class JkClassLoader {
 				final File candidate = new File(path);
 				if (JkUtilsString.isBlank(path) || (!candidate.isFile() && !candidate.isDirectory())) {
 					final File file = JkUtilsIO.copyUrlContentToCacheFile(url,
-							JkLog.infoStreamIfVerbose());
+							JkLog.infoStreamIfVerbose(), urlCacheDir);
 					files.add(file);
 				} else {
 					files.add(candidate);
@@ -622,19 +644,13 @@ public final class JkClassLoader {
 		return this;
 	}
 
-	public JkClassLoader copyCurrentOptions() {
-		if (this.isDefined(JkOptions.class.getName())) {
-			final Class<?> toClass = this.load(JkOptions.class.getName());
-			JkUtilsReflect.invokeStaticMethod(toClass, "init", JkOptions.asMap());
-		}
-		return this;
-	}
-
-	public void offsetLog() {
+	private void offsetLog() {
 		if (this.isDefined(JkLog.class.getName())) {
 			final int offset = JkLog.offset();
 			final Class<?> toClass = this.load(JkLog.class.getName());
 			JkUtilsReflect.invokeStaticMethod(toClass, "offset", offset);
+			JkUtilsReflect.invokeStaticMethod(toClass, "verbose", JkLog.verbose());
+			JkUtilsReflect.invokeStaticMethod(toClass, "silent", JkLog.silent());
 		}
 	}
 
@@ -706,6 +722,15 @@ public final class JkClassLoader {
 
 		}
 
+	}
+
+	private static File jerkarUserHome() {
+		final File result = new File(JkUtilsFile.userHome(),".jerkar");
+		if (!result.exists()) {
+			JkLog.info("Create Jerkar user directory : " + result.getPath());
+			result.mkdirs();
+		}
+		return result;
 	}
 
 

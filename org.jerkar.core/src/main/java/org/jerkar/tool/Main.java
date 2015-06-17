@@ -12,6 +12,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsTime;
 
@@ -25,29 +26,23 @@ class Main {
 	public static void main(String[] args) {
 		final long start = System.nanoTime();
 		displayIntro();
+		final LoadResult loadResult = loadOptionsAndSysprops(args);
 		JkLog.info("Java Home : " + System.getProperty("java.home"));
 		JkLog.info("Java Version : " + System.getProperty("java.version")+ ", " + System.getProperty("java.vendor"));
+		JkLog.info("Jerkar home : " + JkLocator.jerkarHome().getAbsolutePath());
 		JkLog.info("Jerkar User home : " + JkLocator.jerkarUserHome().getAbsolutePath());
 		JkLog.info("Jerkar class path : " + System.getProperty("java.class.path"));
 		JkLog.info("Command line : " + JkUtilsString.join(Arrays.asList(args), " "));
-		final Map<String, String> sysProps = getSpecifiedSystemProps(args);
-		logProps("Specified system properties", sysProps);
-		setSystemProperties(sysProps);
-		final Map<String, String> optionMap = new HashMap<String, String>();
-		optionMap.putAll(loadOptionsProperties());
-		final CommandLine commandLine = CommandLine.of(args);
-		optionMap.putAll(commandLine.getSubProjectBuildOptions());
-		optionMap.putAll(commandLine.getMasterBuildOptions() );
-		JkOptions.init(optionMap);
-		JkLog.info("Standard options : " + JkOptions.standardOptions());
+		logProps("Specified system properties", loadResult.sysprops);
+		JkLog.info("Standard options : " + loadResult.standardOptions);
 		logProps("Options", JkOptions.toDisplayedMap(JkOptions.asMap()));
 
 		final File workingDir = JkUtilsFile.workingDir();
 		final Project project = new Project(workingDir);
 		JkLog.nextLine();
 		try {
-			project.execute(commandLine, JkOptions.buildClass());
-			final int lenght = printAscii(false, "succes.ascii");
+			project.execute(loadResult.commandLine, loadResult.standardOptions.buildClass);
+			final int lenght = printAscii(false, "success.ascii");
 			System.out.println(JkUtilsString.repeat(" ", lenght) + "Total build time : "
 					+ JkUtilsTime.durationInSeconds(start) + " seconds.");
 		} catch (final RuntimeException e) {
@@ -58,6 +53,27 @@ class Main {
 					+ JkUtilsTime.durationInSeconds(start) + " seconds.");
 			System.exit(1);
 		}
+	}
+
+	private static LoadResult loadOptionsAndSysprops(String[] args) {
+		final Map<String, String> sysProps = getSpecifiedSystemProps(args);
+		setSystemProperties(sysProps);
+		final Map<String, String> optionMap = new HashMap<String, String>();
+		optionMap.putAll(loadOptionsProperties());
+		final CommandLine commandLine = CommandLine.of(args);
+		optionMap.putAll(commandLine.getSubProjectBuildOptions());
+		optionMap.putAll(commandLine.getMasterBuildOptions() );
+		JkOptions.init(optionMap);
+		final StandardOptions standardOptions = new StandardOptions();
+		JkLog.silent(standardOptions.silent);
+		JkLog.verbose(standardOptions.verbose);
+
+		JkOptions.populateFields(standardOptions);
+		final LoadResult loadResult = new LoadResult();
+		loadResult.sysprops = sysProps;
+		loadResult.commandLine = commandLine;
+		loadResult.standardOptions = standardOptions;
+		return loadResult;
 	}
 
 	static void logProps(String message, Map<String, String> props) {
@@ -149,5 +165,29 @@ class Main {
 	}
 
 	private Main() {}
+
+	private static class StandardOptions {
+
+		boolean verbose;
+
+		boolean silent;
+
+		String buildClass;
+
+		@Override
+		public String toString() {
+			return "buildClass=" + JkUtilsObject.toString(buildClass) + ", verbose=" + verbose + ", silent=" + silent;
+		}
+
+	}
+
+	private static class LoadResult {
+
+		private Map<String, String> sysprops;
+
+		private CommandLine commandLine;
+
+		private StandardOptions standardOptions;
+	}
 
 }

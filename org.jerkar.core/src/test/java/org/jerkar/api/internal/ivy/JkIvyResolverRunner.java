@@ -16,14 +16,11 @@ import org.jerkar.api.depmanagement.JkResolutionParameters;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopeMapping;
 import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.api.internal.ivy.IvyResolver;
-import org.jerkar.tool.JkOptions;
 import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
 
 public class JkIvyResolverRunner {
 
 	public static void main(String[] args) {
-		JkOptions.forceVerbose(false);
 		spring();
 		//jogl();
 		//joglWithSource();

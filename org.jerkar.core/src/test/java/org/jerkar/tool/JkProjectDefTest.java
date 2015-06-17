@@ -1,7 +1,6 @@
 package org.jerkar.tool;
 
-import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkOptions;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.JkProjectDef.JkProjectBuildClassDef;
 import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
 import org.junit.Test;
@@ -11,10 +10,10 @@ public class JkProjectDefTest {
 	@Test
 	public void testCreationAndLog() {
 		final JkProjectBuildClassDef def = JkProjectBuildClassDef.of(MyBuild.class);
-		final boolean silent = JkOptions.isSilent();
-		JkOptions.forceSilent(true);
+		final boolean silent = JkLog.silent();
+		JkLog.silent(true);
 		def.log(true);
-		JkOptions.forceSilent(silent);
+		JkLog.silent(silent);
 	}
 
 

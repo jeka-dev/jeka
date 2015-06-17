@@ -39,14 +39,13 @@ import org.jerkar.api.publishing.JkInternalPublisher;
 import org.jerkar.api.publishing.JkIvyPublication;
 import org.jerkar.api.publishing.JkMavenPublication;
 import org.jerkar.api.publishing.JkPublishRepos;
-import org.jerkar.api.publishing.JkPublisher;
 import org.jerkar.api.publishing.JkPublishRepos.JkPublishRepo;
+import org.jerkar.api.publishing.JkPublisher;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
 import org.jerkar.api.utils.JkUtilsTime;
-import org.jerkar.tool.JkOptions;
 
 /**
  * Jerkar users : This class is not part of the public API !!! Please, Use {@link JkPublisher} instead.
@@ -176,7 +175,7 @@ final class IvyPublisher implements JkInternalPublisher {
 			final ResolveOptions resolveOptions = new ResolveOptions();
 			resolveOptions.setConfs(new String[] {"*"});
 			resolveOptions.setTransitive(false);
-			resolveOptions.setOutputReport(JkOptions.isVerbose());
+			resolveOptions.setOutputReport(JkLog.verbose());
 			resolveOptions.setLog(logLevel());
 			resolveOptions.setRefresh(true);
 			final ResolveReport report;
@@ -413,10 +412,10 @@ final class IvyPublisher implements JkInternalPublisher {
 	}
 
 	private static String logLevel() {
-		if (JkOptions.isSilent()) {
+		if (JkLog.silent()) {
 			return "quiet";
 		}
-		if (JkOptions.isVerbose()) {
+		if (JkLog.verbose()) {
 			return "default";
 		}
 		return "download-only";

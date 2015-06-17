@@ -19,7 +19,6 @@ import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsObject;
-import org.jerkar.tool.JkOptions;
 
 /**
  * Sonar wrapper class for launching sonar analysis in a convenient way.
@@ -83,7 +82,7 @@ public final class JkSonar {
         map.put(PROJECT_NAME, projectName);
         map.put(PROJECT_VERSION, projectVersion.name());
         map.put(WORKING_DIRECTORY, ".sonarTempDir");
-        map.put(VERBOSE, Boolean.toString(JkOptions.isVerbose()));
+        map.put(VERBOSE, Boolean.toString(JkLog.verbose()));
         final Properties properties = System.getProperties();
         for (final Object keyObject : properties.keySet()) {
             final String key= (String) keyObject;
@@ -101,7 +100,7 @@ public final class JkSonar {
             JkLog.info("Sonar analysis skipped.");
         }
         JkLog.startln("Launching Sonar analysis");
-        if (JkOptions.isVerbose()) {
+        if (JkLog.verbose()) {
         	javaProcess().runClassSync("org.sonar.runner.Main","-e", "-X");
         } else {
         	javaProcess().runClassSync("org.sonar.runner.Main","-e");

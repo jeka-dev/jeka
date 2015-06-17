@@ -14,6 +14,7 @@ import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkResolutionParameters;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopeMapping;
+import org.jerkar.api.depmanagement.JkScopedDependency;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPath;
@@ -215,7 +216,7 @@ public class JkBuildDependencySupport extends JkBuild {
 
 	protected JkPublisher publisher() {
 		if (cachedPublisher == null) {
-			cachedPublisher = JkPublisher.of(publishRepositories(), this);
+			cachedPublisher = JkPublisher.of(publishRepositories(), this.ouputDir().root());
 		}
 		return cachedPublisher;
 	}
@@ -244,10 +245,25 @@ public class JkBuildDependencySupport extends JkBuild {
 	 */
 	public final JkMultiProjectDependencies multiProjectDependencies() {
 		if (multiProjectDependencies == null) {
-			multiProjectDependencies = this.explicitMultiProjectDependencies.and(this.effectiveDependencies().projectDependencies());
+			multiProjectDependencies = this.explicitMultiProjectDependencies.and(projectDependencies(this.effectiveDependencies()));
 		}
 		return multiProjectDependencies;
 
+	}
+
+	/**
+	 * Returns all build included in these dependencies.
+	 * The builds are coming from {@link JkProjectDependency}.
+	 */
+	private static List<JkBuildDependencySupport> projectDependencies(JkDependencies dependencies) {
+		final List<JkBuildDependencySupport> result = new LinkedList<JkBuildDependencySupport>();
+		for (final JkScopedDependency scopedDependency : dependencies) {
+			if (scopedDependency.dependency() instanceof JkProjectDependency) {
+				final JkProjectDependency projectDependency = (JkProjectDependency) scopedDependency.dependency();
+				result.add(projectDependency.projectBuild());
+			}
+		}
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -313,6 +329,10 @@ public class JkBuildDependencySupport extends JkBuild {
 
 	public JkPgp pgp() {
 		return JkPgp.of(JkOptions.asMap());
+	}
+
+	protected JkProjectDependency projectFiles(JkBuildDependencySupport build, File...files) {
+		return JkProjectDependency.of(build, files);
 	}
 
 }

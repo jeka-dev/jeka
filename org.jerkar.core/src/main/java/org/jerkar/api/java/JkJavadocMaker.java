@@ -14,7 +14,6 @@ import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsJdk;
 import org.jerkar.api.utils.JkUtilsReflect;
-import org.jerkar.tool.JkOptions;
 
 /**
  * Offers fluent interface for producing Javadoc.
@@ -89,7 +88,7 @@ public final class JkJavadocMaker {
 		list.add(JkPath.of(this.srcDirs.roots()).toString());
 		list.add("-d");
 		list.add(outputDir.getAbsolutePath());
-		if (JkOptions.isVerbose()) {
+		if (JkLog.verbose()) {
 			list.add("-verbose");
 		} else {
 			list.add("-quiet");

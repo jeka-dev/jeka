@@ -18,6 +18,7 @@ import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -84,7 +85,7 @@ class Project {
 		yetCompiledProjects.add(this.projectBaseDir);
 		preCompile();
 		JkLog.startHeaded("Making build classes for project " + this.projectBaseDir.getName());
-		final JkDependencyResolver scriptDepResolver = getScriptDependencyResolver();
+		final JkDependencyResolver scriptDepResolver = getBuildDefDependencyResolver();
 		final JkPath buildPath = scriptDepResolver.get(JkScope.BUILD);
 		path.addAll(buildPath.entries());
 		path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
@@ -148,7 +149,7 @@ class Project {
 		if (JkLocator.libExtDir().exists()) {
 			extraLibs.addAll(JkFileTree.of(JkLocator.libExtDir()).include("**/*.jar").files(false));
 		}
-		return JkPath.of(extraLibs).and(JkLocator.jerkarJarFile()).withoutDoubloons();
+		return JkPath.of(extraLibs).and(JkClasspath.jerkarJarFile()).withoutDoubloons();
 	}
 
 	private JkPath compileDependentProjects(Set<File> yetCompiledProjects, LinkedHashSet<File> pathEntries) {
@@ -167,7 +168,7 @@ class Project {
 
 	private void launch(JkBuild build, CommandLine commandLine) {
 		JkOptions.populateFields(build, commandLine.getMasterBuildOptions());
-		build.setScriptDependencyResolver(getScriptDependencyResolver());
+		build.setScriptDependencyResolver(getBuildDefDependencyResolver());
 		build.init();
 
 		// setup plugins
@@ -262,7 +263,7 @@ class Project {
 				.failOnError(true);
 	}
 
-	private JkDependencyResolver getScriptDependencyResolver() {
+	private JkDependencyResolver getBuildDefDependencyResolver() {
 		final JkDependencies deps = this.scriptDependencies();
 		if (deps.containsExternalModule()) {
 			return JkDependencyResolver.managed(this.buildRepos, deps, null, JkResolutionParameters.of());

@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.java.junit.JkUnit.Enhancer;
@@ -32,7 +33,7 @@ public final class JkocoJunitEnhancer implements Enhancer {
 
 	public static JkocoJunitEnhancer of(File destFile, File projectDir) {
 		final URL url = JkBuildPluginJacoco.class.getResource("jacocoagent.jar");
-		final File file = JkUtilsIO.copyUrlContentToCacheFile(url, JkLog.infoStreamIfVerbose());
+		final File file = JkUtilsIO.copyUrlContentToCacheFile(url, JkLog.infoStreamIfVerbose(),JkClassLoader.urlCacheDir());
 		return new JkocoJunitEnhancer(file, true, destFile, new LinkedList<String>());
 	}
 

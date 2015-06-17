@@ -7,6 +7,7 @@ import java.util.List;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.tool.JkLocator;
+import org.jerkar.tool.builtins.templates.dependencysupport.JkProjectDependency;
 import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
 
 class Lib {
@@ -56,7 +57,8 @@ class Lib {
 
 			} else {  // This is project dependency
 				final JkJavaBuild slaveBuild = (JkJavaBuild) masterBuild.relativeProject(lib.projectRelativePath);
-				builder.onProject(slaveBuild, slaveBuild.packer().jarFile()).scope(lib.scope);
+				final JkProjectDependency projectDependency = JkProjectDependency.of(slaveBuild, slaveBuild.packer().jarFile());
+				builder.on(projectDependency).scope(lib.scope);
 
 				// Get the exported entry as well
 				final JkBuildPluginEclipse pluginEclipse = slaveBuild.pluginOf(JkBuildPluginEclipse.class);

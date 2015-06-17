@@ -24,7 +24,6 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.tool.JkOptions;
 
 /**
  * Convenient class to launch Junit tests.
@@ -206,7 +205,7 @@ public final class JkUnit {
 		final JkClassLoader classLoader = JkClassLoader.of(classes.iterator().next());
 		JkLog.startln("Run JUnit tests");
 
-		final boolean verbose = JkOptions.isVerbose();
+		final boolean verbose = JkLog.verbose();
 
 		final JkTestSuiteResult result;
 
@@ -241,7 +240,7 @@ public final class JkUnit {
 		} else {
 			JkLog.info(result.toStrings(verbose));
 		}
-		if (!JkOptions.isVerbose() && result.failureCount() > 0) {
+		if (!JkLog.verbose() && result.failureCount() > 0) {
 			JkLog.info("Launch Jerkar in verbose mode to display failure stack traces in console.");
 		}
 		if (reportDetail.equals(JunitReportDetail.BASIC)) {

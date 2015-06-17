@@ -5,7 +5,7 @@ import java.net.URL;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsString;
@@ -17,35 +17,13 @@ import org.jerkar.api.utils.JkUtilsString;
  */
 public final class JkLocator {
 
-	// cache
-	private static File JERKAR_JAR_FILE;
-
 	private static String version;
-
-	public static File jerkarJarFile() {
-		if (JERKAR_JAR_FILE != null) {
-			return JERKAR_JAR_FILE;
-		}
-		for (final File file : JkClassLoader.current().childClasspath()) {
-			try {
-				// TODO not optimized. Should be implemented on the JkClasspath class.
-				JkClassLoader.system().parent().child(file).classloader().loadClass(Main.class.getName());
-				JERKAR_JAR_FILE = file;
-				return file;
-			} catch (final ClassNotFoundException e) {
-				// Class just not there
-			}
-		}
-		throw new IllegalStateException("Main not found in classpath");
-	}
-
-
 
 	/**
 	 * Returns the directory where is installed the running Jerkar instance.
 	 */
 	public static File jerkarHome() {
-		return jerkarJarFile().getParentFile();
+		return JkClasspath.jerkarJarFile().getParentFile();
 	}
 
 	/**

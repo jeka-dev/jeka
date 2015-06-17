@@ -1,13 +1,9 @@
 package org.jerkar.api.depmanagement;
 
-import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.COMPILE;
-import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.RUNTIME;
 
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkScopeMapping;
-import org.jerkar.api.depmanagement.JkScopedDependency;
-import org.jerkar.api.depmanagement.JkVersionRange;
+import static org.jerkar.api.depmanagement.JkScopedDependencyTest.COMPILE;
+import static org.jerkar.api.depmanagement.JkScopedDependencyTest.RUNTIME;
+
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.junit.Assert;
 import org.junit.Test;
@@ -45,7 +41,5 @@ public class DependenciesTest {
 				.on("454545:5445:54545")
 				.on("lkll:llljk:poo").build();
 	}
-
-
 
 }

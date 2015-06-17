@@ -62,9 +62,6 @@ public final class JkDependencyResolver  {
 		// Add local, non-managed dependencies
 		result.addAll(this.dependencies.fileDependencies(scope).entries());
 
-		// Add project dependencies
-		result.addAll(this.dependencies.projectDependencies(scope));
-
 		if (internalResolver == null) {
 			return result;
 		}
@@ -79,6 +76,8 @@ public final class JkDependencyResolver  {
 		result.addAll(JkArtifact.localFiles((Iterable<JkArtifact>) artifacts));
 		return result;
 	}
+
+
 
 	/**
 	 * Resolves the managed dependencies (dependencies declared as external module).

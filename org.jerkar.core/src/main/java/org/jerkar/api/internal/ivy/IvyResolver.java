@@ -27,7 +27,7 @@ import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.publishing.JkPublisher;
-import org.jerkar.tool.JkOptions;
+import org.jerkar.api.system.JkLog;
 
 /**
  * Jerkar users : This class is not part of the public API !!! Please, Use {@link JkPublisher} instead.
@@ -122,7 +122,7 @@ public final class IvyResolver implements JkInternalDepResolver {
 		final ResolveOptions resolveOptions = new ResolveOptions();
 		resolveOptions.setConfs(new String[] {resolvedScope.name()});
 		resolveOptions.setTransitive(true);
-		resolveOptions.setOutputReport(JkOptions.isVerbose());
+		resolveOptions.setOutputReport(JkLog.verbose());
 		resolveOptions.setLog(logLevel());
 		resolveOptions.setRefresh(parameters.refreshed());
 		final ResolveReport report;
@@ -160,7 +160,7 @@ public final class IvyResolver implements JkInternalDepResolver {
 		final JkAttachedArtifacts result = new JkAttachedArtifacts();
 		final ResolveOptions resolveOptions = new ResolveOptions()
 		.setTransitive(false)
-		.setOutputReport(JkOptions.isVerbose())
+		.setOutputReport(JkLog.verbose())
 		.setRefresh(false);
 		resolveOptions.setLog(logLevel());
 		for (final JkScope scope : scopes ) {
@@ -184,10 +184,10 @@ public final class IvyResolver implements JkInternalDepResolver {
 
 
 	private static String logLevel() {
-		if (JkOptions.isSilent()) {
+		if (JkLog.silent()) {
 			return "quiet";
 		}
-		if (JkOptions.isVerbose()) {
+		if (JkLog.verbose()) {
 			return "default";
 		}
 		return "download-only";

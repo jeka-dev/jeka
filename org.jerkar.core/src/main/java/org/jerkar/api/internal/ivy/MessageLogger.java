@@ -3,7 +3,6 @@ package org.jerkar.api.internal.ivy;
 import org.apache.ivy.util.AbstractMessageLogger;
 import org.apache.ivy.util.Message;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.tool.JkOptions;
 
 @SuppressWarnings("unchecked")
 class MessageLogger extends AbstractMessageLogger {
@@ -21,12 +20,12 @@ class MessageLogger extends AbstractMessageLogger {
 			JkLog.info(message);
 			break;
 		case Message.MSG_VERBOSE :
-			if (JkOptions.isVerbose()) {
+			if (JkLog.verbose()) {
 				JkLog.info(message);
 			}
 			break;
 		case Message.MSG_DEBUG :
-			if (JkOptions.isVerbose()) {
+			if (JkLog.verbose()) {
 				JkLog.info(message);
 			}
 			break;

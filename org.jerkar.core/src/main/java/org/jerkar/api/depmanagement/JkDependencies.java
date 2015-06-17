@@ -13,14 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jerkar.api.depmanagement.JkDependency.JkFilesDependency;
+import org.jerkar.api.depmanagement.JkDependency.JkLocalDependency;
+import org.jerkar.api.depmanagement.JkDependency.JkLocalFileDependency;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.file.JkPath;
-import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsTime;
-import org.jerkar.tool.builtins.templates.dependencysupport.JkBuildDependencySupport;
-import org.jerkar.tool.builtins.templates.dependencysupport.JkProjectDependency;
 
 /**
  * A set of {@link JkScopedDependency} generally standing for the entire dependencies of a project/module.
@@ -42,10 +39,6 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			list.add(scopedDependency);
 		}
 		return new JkDependencies(list);
-	}
-
-	public static JkDependencies onProject(JkScope scope, JkBuildDependencySupport build, File...files) {
-		return on(scope, JkDependency.of(build, files));
 	}
 
 	private final List<JkScopedDependency> dependencies;
@@ -284,14 +277,14 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	}
 
 	/**
-	 * Returns all files declared as {@link JkFilesDependency} for any of the specified scopes.
+	 * Returns all files declared as {@link JkLocalDependency} for any of the specified scopes.
 	 */
 	public JkPath fileDependencies(JkScope ...scopes) {
 		final LinkedHashSet<File> set = new LinkedHashSet<File>();
 		for (final JkScopedDependency scopedDependency : this.dependencies) {
 			if (scopedDependency.isInvolvedInAnyOf(scopes)
-					&& scopedDependency.dependency() instanceof JkFilesDependency) {
-				final JkFilesDependency fileDeps = (JkFilesDependency) scopedDependency.dependency();
+					&& scopedDependency.dependency() instanceof JkLocalFileDependency) {
+				final JkLocalFileDependency fileDeps = (JkLocalFileDependency) scopedDependency.dependency();
 				set.addAll(fileDeps.files());
 			}
 		}
@@ -299,29 +292,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	}
 
 
-	public List<File> projectDependencies(JkScope jkScope) {
-		final LinkedHashSet<File> set = new LinkedHashSet<File>();
-		for (final JkScopedDependency scopedDependency : this.dependencies) {
-			if (scopedDependency.isInvolvedIn(jkScope)
-					&& scopedDependency.dependency() instanceof JkProjectDependency) {
-				final JkProjectDependency projectDeps = (JkProjectDependency) scopedDependency.dependency();
-				if (projectDeps.hasMissingFilesOrEmptyDirs()) {
-					JkLog.delta(1);
-					JkLog.infoHead("Building depending project " + projectDeps);
-					final long time = System.nanoTime();
-					projectDeps.projectBuild().doDefault();
-					JkLog.infoHead("Project " + projectDeps + " built in " + JkUtilsTime.durationInSeconds(time) +" seconds.");
-					JkLog.delta(-1);
-				}
-				final Set<File> missingFiles = projectDeps.missingFilesOrEmptyDirs();
-				if (!missingFiles.isEmpty()) {
-					throw new IllegalStateException("Project " + projectDeps + " does not generate " + missingFiles);
-				}
-				set.addAll(projectDeps.files());
-			}
-		}
-		return new LinkedList<File>(set);
-	}
+
 
 	private static Map<JkModuleId, JkVersion> toModuleVersionMap(Iterable<JkVersionedModule> resolvedModules) {
 		final Map<JkModuleId, JkVersion> result = new HashMap<JkModuleId, JkVersion>();
@@ -331,20 +302,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		return result;
 	}
 
-	/**
-	 * Returns all build included in these dependencies.
-	 * The builds are coming from {@link JkProjectDependency}.
-	 */
-	public List<JkBuildDependencySupport> projectDependencies() {
-		final List<JkBuildDependencySupport> result = new LinkedList<JkBuildDependencySupport>();
-		for (final JkScopedDependency scopedDependency : this.dependencies) {
-			if (scopedDependency.dependency() instanceof JkProjectDependency) {
-				final JkProjectDependency projectDependency = (JkProjectDependency) scopedDependency.dependency();
-				result.add(projectDependency.projectBuild());
-			}
-		}
-		return result;
-	}
+
 
 
 	public static Builder builder() {
@@ -386,8 +344,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		}
 
 		public ScopeableBuilder on(JkDependency dependency) {
-			if (dependency instanceof JkFilesDependency) {
-				final JkFilesDependency fileDeps = (JkFilesDependency) dependency;
+			if (dependency instanceof JkLocalDependency) {
+				final JkLocalDependency fileDeps = (JkLocalDependency) dependency;
 				if (fileDeps.files().isEmpty()) {
 					return new ScopeableBuilder(this);
 				}
@@ -413,11 +371,11 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		}
 
 		public ScopeableBuilder onFile(File file) {
-			return on(JkFilesDependency.of(JkUtilsIterable.listOf(file)));
+			return on(JkLocalDependency.of(JkUtilsIterable.listOf(file)));
 		}
 
 		public ScopeableBuilder onFiles(Iterable<File> files) {
-			return on(JkFilesDependency.of(files));
+			return on(JkLocalDependency.of(files));
 		}
 
 		public ScopeableBuilder on(JkModuleId module, JkVersionRange version) {
@@ -445,9 +403,9 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			return on(description, true);
 		}
 
-		public ScopeableBuilder onProject(JkBuildDependencySupport projectBuild, File ...files) {
-			return on(JkProjectDependency.of(projectBuild, JkUtilsIterable.setOf(files)));
-		}
+		//		public ScopeableBuilder onProject(JkBuildDependencySupport projectBuild, File ...files) {
+		//			return on(JkProjectDependency.of(projectBuild, JkUtilsIterable.setOf(files)));
+		//		}
 
 		public ScopeableBuilder on(String description, boolean transitive) {
 			return on(JkExternalModule.of(description).transitive(transitive));
