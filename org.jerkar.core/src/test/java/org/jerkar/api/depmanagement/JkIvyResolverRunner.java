@@ -1,4 +1,4 @@
-package org.jerkar.api.internal.ivy;
+package org.jerkar.api.depmanagement;
 
 import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.COMPILE;
 import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.PROVIDED;
@@ -6,10 +6,11 @@ import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.PROVIDED;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jerkar.api.depmanagement.IvyResolver;
 import org.jerkar.api.depmanagement.JkArtifact;
 import org.jerkar.api.depmanagement.JkAttachedArtifacts;
 import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkInternalDepResolver;
+import org.jerkar.api.depmanagement.InternalDepResolver;
 import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkResolutionParameters;
@@ -61,7 +62,7 @@ public class JkIvyResolverRunner {
 		final JkRepos repos = JkRepos.mavenCentral();
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
-		final JkInternalDepResolver jkIvyResolver = IvyResolver.of(repos);
+		final InternalDepResolver jkIvyResolver = IvyResolver.of(repos);
 		final Set<JkArtifact> artifacts = jkIvyResolver.resolveAnonymous(deps, COMPILE, JkResolutionParameters.of(defaultMapping()));
 		final Set<JkVersionedModule> modules = new HashSet<JkVersionedModule>();
 		for (final JkArtifact artifact : artifacts) {

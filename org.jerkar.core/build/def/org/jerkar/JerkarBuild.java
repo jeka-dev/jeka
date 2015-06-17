@@ -1,10 +1,10 @@
 package org.jerkar;
 
+import org.jerkar.api.depmanagement.JkMavenPublication;
+import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
+import org.jerkar.api.depmanagement.JkPublishRepos;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.java.JkJavaCompiler;
-import org.jerkar.api.publishing.JkMavenPublication;
-import org.jerkar.api.publishing.JkMavenPublicationInfo;
-import org.jerkar.api.publishing.JkPublishRepos;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkOptions;
 import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;

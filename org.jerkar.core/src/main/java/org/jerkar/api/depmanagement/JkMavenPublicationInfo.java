@@ -1,4 +1,4 @@
-package org.jerkar.api.publishing;
+package org.jerkar.api.depmanagement;
 
 import java.io.Serializable;
 import java.util.Collections;

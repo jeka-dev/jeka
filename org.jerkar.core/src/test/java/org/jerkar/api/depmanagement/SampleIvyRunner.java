@@ -1,4 +1,4 @@
-package org.jerkar.api.internal.ivy;
+package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.IOException;

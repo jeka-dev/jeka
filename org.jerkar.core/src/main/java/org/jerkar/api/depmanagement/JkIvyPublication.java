@@ -1,12 +1,11 @@
-package org.jerkar.api.publishing;
+package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.publishing.JkIvyPublication.Artifact;
+import org.jerkar.api.depmanagement.JkIvyPublication.Artifact;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 public class JkIvyPublication implements Iterable<Artifact> {

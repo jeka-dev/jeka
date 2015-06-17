@@ -1,4 +1,4 @@
-package org.jerkar.api.internal.ivy;
+package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.net.URL;
@@ -26,24 +26,9 @@ import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.FileSystemResolver;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
 import org.apache.ivy.util.url.CredentialsStore;
-import org.jerkar.api.depmanagement.JkArtifact;
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkExternalModule;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkRepo;
-import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.depmanagement.JkScopeMapping;
-import org.jerkar.api.depmanagement.JkScopedDependency;
-import org.jerkar.api.depmanagement.JkVersion;
-import org.jerkar.api.depmanagement.JkVersionRange;
-import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.depmanagement.JkPublishRepos.JkPublishRepo;
 import org.jerkar.api.depmanagement.JkRepo.JkIvyRepository;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
-import org.jerkar.api.publishing.JkIvyPublication;
-import org.jerkar.api.publishing.JkMavenPublication;
-import org.jerkar.api.publishing.JkPublishRepos;
-import org.jerkar.api.publishing.JkPublishRepos.JkPublishRepo;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 

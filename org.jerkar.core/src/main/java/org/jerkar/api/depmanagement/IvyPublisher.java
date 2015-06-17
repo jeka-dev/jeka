@@ -1,4 +1,4 @@
-package org.jerkar.api.internal.ivy;
+package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,18 +29,7 @@ import org.apache.ivy.plugins.resolver.AbstractPatternsBasedResolver;
 import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.jerkar.api.crypto.pgp.JkPgp;
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.depmanagement.JkScopeMapping;
-import org.jerkar.api.depmanagement.JkVersion;
-import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.api.publishing.JkInternalPublisher;
-import org.jerkar.api.publishing.JkIvyPublication;
-import org.jerkar.api.publishing.JkMavenPublication;
-import org.jerkar.api.publishing.JkPublishRepos;
-import org.jerkar.api.publishing.JkPublishRepos.JkPublishRepo;
-import org.jerkar.api.publishing.JkPublisher;
+import org.jerkar.api.depmanagement.JkPublishRepos.JkPublishRepo;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsString;
@@ -51,7 +40,7 @@ import org.jerkar.api.utils.JkUtilsTime;
  * Jerkar users : This class is not part of the public API !!! Please, Use {@link JkPublisher} instead.
  * Ivy wrapper providing high level methods. The API is expressed using Jerkar classes only (mostly free of Ivy classes).
  */
-final class IvyPublisher implements JkInternalPublisher {
+final class IvyPublisher implements InternalPublisher {
 
 	private final Ivy ivy;
 

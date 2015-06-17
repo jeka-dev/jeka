@@ -24,9 +24,6 @@ public class PackageDependency {
 
 			@Override
 			public boolean accept(String name) {
-				if (name.contains(".internal")) {
-					return false;
-				}
 				return name.startsWith(packageFilter);
 			}
 

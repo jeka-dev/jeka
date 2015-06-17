@@ -1,4 +1,4 @@
-package org.jerkar.api.publishing;
+package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.Serializable;
@@ -7,9 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
-import org.jerkar.api.depmanagement.JkRepo;
-import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.api.publishing.JkPublishRepos.JkPublishRepo;
+import org.jerkar.api.depmanagement.JkPublishRepos.JkPublishRepo;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 /**

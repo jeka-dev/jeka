@@ -1,4 +1,4 @@
-package org.jerkar.api.internal.ivy;
+package org.jerkar.api.depmanagement;
 
 import java.util.HashSet;
 import java.util.List;
@@ -16,17 +16,6 @@ import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.resolver.AbstractPatternsBasedResolver;
 import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
-import org.jerkar.api.depmanagement.JkArtifact;
-import org.jerkar.api.depmanagement.JkAttachedArtifacts;
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkInternalDepResolver;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkResolutionParameters;
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.depmanagement.JkVersion;
-import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.api.publishing.JkPublisher;
 import org.jerkar.api.system.JkLog;
 
 /**
@@ -35,7 +24,7 @@ import org.jerkar.api.system.JkLog;
  * 
  * @author Jerome Angibaud
  */
-public final class IvyResolver implements JkInternalDepResolver {
+public final class IvyResolver implements InternalDepResolver {
 
 	private static final JkVersionedModule ANONYMOUS_MODULE = JkVersionedModule.of(
 			JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.ofName("anonymousVersion"));
@@ -48,7 +37,7 @@ public final class IvyResolver implements JkInternalDepResolver {
 		ivy.getLoggerEngine().setDefaultLogger(new MessageLogger());
 	}
 
-	private static JkInternalDepResolver of(IvySettings ivySettings) {
+	private static InternalDepResolver of(IvySettings ivySettings) {
 		final Ivy ivy = Ivy.newInstance(ivySettings);
 		return new IvyResolver(ivy);
 	}
@@ -66,7 +55,7 @@ public final class IvyResolver implements JkInternalDepResolver {
 	 * Creates an instance using specified repository for publishing and
 	 * the specified repositories for resolving.
 	 */
-	public static JkInternalDepResolver of(JkRepos resolveRepos) {
+	public static InternalDepResolver of(JkRepos resolveRepos) {
 		return of(ivySettingsOf(resolveRepos));
 	}
 

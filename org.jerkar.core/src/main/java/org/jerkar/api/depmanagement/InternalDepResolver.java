@@ -5,7 +5,7 @@ package org.jerkar.api.depmanagement;
  */
 import java.util.Set;
 
-public interface JkInternalDepResolver {
+interface InternalDepResolver {
 
 	boolean hasMavenPublishRepo();
 

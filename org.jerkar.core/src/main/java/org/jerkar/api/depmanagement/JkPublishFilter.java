@@ -1,8 +1,6 @@
-package org.jerkar.api.publishing;
+package org.jerkar.api.depmanagement;
 
 import java.io.Serializable;
-
-import org.jerkar.api.depmanagement.JkVersionedModule;
 
 public interface JkPublishFilter extends Serializable {
 

@@ -1,4 +1,4 @@
-package org.jerkar.api.internal.ivy;
+package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.StringWriter;
@@ -9,11 +9,10 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jerkar.api.publishing.JkMavenPublicationInfo;
-import org.jerkar.api.publishing.JkMavenPublicationInfo.JkDeveloperInfo;
-import org.jerkar.api.publishing.JkMavenPublicationInfo.JkLicenseInfo;
-import org.jerkar.api.publishing.JkMavenPublicationInfo.JkProjectInfo;
-import org.jerkar.api.publishing.JkMavenPublicationInfo.JkScmInfo;
+import org.jerkar.api.depmanagement.JkMavenPublicationInfo.JkDeveloperInfo;
+import org.jerkar.api.depmanagement.JkMavenPublicationInfo.JkLicenseInfo;
+import org.jerkar.api.depmanagement.JkMavenPublicationInfo.JkProjectInfo;
+import org.jerkar.api.depmanagement.JkMavenPublicationInfo.JkScmInfo;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.tool.JkLocator;

@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jerkar.api.file.JkPath;
-import org.jerkar.api.internal.ivy.JkInternalIvy;
 import org.jerkar.api.system.JkLog;
 
 public final class JkDependencyResolver  {
@@ -17,7 +16,7 @@ public final class JkDependencyResolver  {
 	private static final String IVY_CLASS = "org.jerkar.api.internal.ivy.IvyResolver";
 
 	public static JkDependencyResolver managed(JkRepos repos, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
-		final JkInternalDepResolver ivyResolver = JkInternalIvy.CLASSLOADER.transClassloaderProxy(JkInternalDepResolver.class, IVY_CLASS, "of", repos);
+		final InternalDepResolver ivyResolver = InternalIvy.CLASSLOADER.transClassloaderProxy(InternalDepResolver.class, IVY_CLASS, "of", repos);
 		return new JkDependencyResolver(ivyResolver, dependencies, module, resolutionParameters);
 	}
 
@@ -31,7 +30,7 @@ public final class JkDependencyResolver  {
 
 	private final Map<JkScope, JkPath> cachedDeps = new HashMap<JkScope, JkPath>();
 
-	private final JkInternalDepResolver internalResolver;
+	private final InternalDepResolver internalResolver;
 
 	private final JkDependencies dependencies;
 
@@ -40,7 +39,7 @@ public final class JkDependencyResolver  {
 	// Not necessary but nice if present in order to let Ivy hide data efficiently.
 	private final JkVersionedModule module;
 
-	private JkDependencyResolver(JkInternalDepResolver jkIvyResolver, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
+	private JkDependencyResolver(InternalDepResolver jkIvyResolver, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
 		this.internalResolver = jkIvyResolver;
 		this.dependencies = dependencies;
 		this.module = module;

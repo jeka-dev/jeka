@@ -1,4 +1,4 @@
-package org.jerkar.api.internal.ivy;
+package org.jerkar.api.depmanagement;
 
 import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.COMPILE;
 
@@ -7,13 +7,14 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 
+import org.jerkar.api.depmanagement.IvyPublisher;
 import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkIvyPublication;
+import org.jerkar.api.depmanagement.JkMavenPublication;
 import org.jerkar.api.depmanagement.JkModuleId;
+import org.jerkar.api.depmanagement.JkPublishRepos;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.api.publishing.JkIvyPublication;
-import org.jerkar.api.publishing.JkMavenPublication;
-import org.jerkar.api.publishing.JkPublishRepos;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
 

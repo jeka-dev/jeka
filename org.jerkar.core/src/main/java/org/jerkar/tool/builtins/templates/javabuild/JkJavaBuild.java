@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependency;
+import org.jerkar.api.depmanagement.JkIvyPublication;
+import org.jerkar.api.depmanagement.JkMavenPublication;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopeMapping;
 import org.jerkar.api.file.JkFileTree;
@@ -17,8 +19,6 @@ import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
-import org.jerkar.api.publishing.JkIvyPublication;
-import org.jerkar.api.publishing.JkMavenPublication;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsJdk;

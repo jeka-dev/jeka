@@ -1,4 +1,4 @@
-package org.jerkar.api.internal.ivy;
+package org.jerkar.api.depmanagement;
 
 import org.apache.ivy.util.AbstractMessageLogger;
 import org.apache.ivy.util.Message;
