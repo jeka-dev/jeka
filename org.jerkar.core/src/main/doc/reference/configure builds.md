@@ -2,9 +2,9 @@
 
 Jerkar builds are configurable, in the sense that any value required to run the build has not to be hard-coded 
 in the build script. Instead a value can be injected by 3 different means :
-* Environment variable
-* System properties
-* Jerkar options
+* as a environment variable
+* as a system property
+* as a Jerkar option
 
 ### Environment variables
 There is nothing specific to Jerkar. Just set the environment variable as you usually do on your OS and get the value from build using the standard Java `System#getenv` method.
