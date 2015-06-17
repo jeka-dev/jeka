@@ -1,12 +1,13 @@
 package org.jerkar.scriptsamples;
 
-import static org.jerkar.builtins.javabuild.JkPopularModules.*;
+import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
+import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 
-import org.jerkar.builtins.javabuild.JkJavaBuild;
-import org.jerkar.depmanagement.JkDependencies;
-import org.jerkar.depmanagement.JkVersion;
-import org.jerkar.publishing.JkMavenPublication;
-import org.jerkar.publishing.JkMavenPublicationInfo;
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkMavenPublication;
+import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
+import org.jerkar.api.depmanagement.JkVersion;
+import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
 
 /**
  * This build demonstrate how to specified project metadata required to publish on 

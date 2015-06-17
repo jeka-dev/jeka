@@ -1,20 +1,20 @@
 package org.jerkar.scriptsamples;
 
-import static org.jerkar.builtins.javabuild.JkPopularModules.GUAVA;
-import static org.jerkar.builtins.javabuild.JkPopularModules.JAVAX_SERVLET_API;
-import static org.jerkar.builtins.javabuild.JkPopularModules.JERSEY_SERVER;
-import static org.jerkar.builtins.javabuild.JkPopularModules.JUNIT;
-import static org.jerkar.builtins.javabuild.JkPopularModules.MOCKITO_ALL;
+import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
+import static org.jerkar.api.depmanagement.JkPopularModules.JAVAX_SERVLET_API;
+import static org.jerkar.api.depmanagement.JkPopularModules.JERSEY_SERVER;
+import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
+import static org.jerkar.api.depmanagement.JkPopularModules.MOCKITO_ALL;
 
 import java.io.IOException;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.jerkar.JkDoc;
-import org.jerkar.JkImport;
-import org.jerkar.builtins.javabuild.JkJavaBuild;
-import org.jerkar.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkImport;
+import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
 
 /**
  * This build demonstrate how to use 3rd party dependencies in your build.

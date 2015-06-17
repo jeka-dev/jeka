@@ -1,13 +1,13 @@
 package org.jerkar.scriptsamples;
 
-import static org.jerkar.builtins.javabuild.JkPopularModules.GUAVA;
-import static org.jerkar.builtins.javabuild.JkPopularModules.JUNIT;
+import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
+import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 
-import org.jerkar.JkDoc;
-import org.jerkar.builtins.javabuild.JkJavaBuild;
-import org.jerkar.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.plugins.sonar.JkBuildPluginSonar;
 import org.jerkar.plugins.sonar.JkSonar;
+import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
 
 /**
  * This build clean, compile,test launch sonar analyse by default.

@@ -2,14 +2,14 @@ package org.jerkar.scriptsamples;
 
 import java.io.File;
 
-import org.jerkar.JkBuild;
-import org.jerkar.JkClasspath;
-import org.jerkar.JkJavaCompiler;
-import org.jerkar.JkJavaProcess;
-import org.jerkar.builtins.javabuild.JkManifest;
-import org.jerkar.builtins.javabuild.testing.junit.JkUnit;
-import org.jerkar.builtins.javabuild.testing.junit.JkUnit.JunitReportDetail;
-import org.jerkar.file.JkFileTree;
+import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.java.JkClasspath;
+import org.jerkar.api.java.JkJavaCompiler;
+import org.jerkar.api.java.JkJavaProcess;
+import org.jerkar.api.java.JkManifest;
+import org.jerkar.api.java.junit.JkUnit;
+import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
+import org.jerkar.tool.JkBuild;
 
 /**
  * Equivalent to http://ant.apache.org/manual/tutorial-HelloWorldWithAnt.html

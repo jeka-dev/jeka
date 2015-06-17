@@ -1,13 +1,12 @@
 package org.jerkar.scriptsamples;
 
-import static org.jerkar.builtins.javabuild.JkPopularModules.GUAVA;
-import static org.jerkar.builtins.javabuild.JkPopularModules.JERSEY_SERVER;
-import static org.jerkar.builtins.javabuild.JkPopularModules.JUNIT;
-import static org.jerkar.builtins.javabuild.JkPopularModules.MOCKITO_ALL;
+import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
+import static org.jerkar.api.depmanagement.JkPopularModules.JERSEY_SERVER;
+import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
+import static org.jerkar.api.depmanagement.JkPopularModules.MOCKITO_ALL;
 
-import org.jerkar.builtins.javabuild.JkJavaBuild;
-import org.jerkar.depmanagement.JkDependencies;
-import org.jerkar.scriptsamples.MavenStyleBuild;
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
 
 /**
  * This build is equivalent to {@link MavenStyleBuild} but removing 
