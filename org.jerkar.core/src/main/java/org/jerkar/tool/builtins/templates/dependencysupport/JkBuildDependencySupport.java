@@ -236,7 +236,7 @@ public class JkBuildDependencySupport extends JkBuild {
 				new File(spec, packageName).mkdirs();
 			}
 		})
-		.withExtendedClass(JkBuild.class);
+		.withExtendedClass(JkBuildDependencySupport.class);
 
 	}
 

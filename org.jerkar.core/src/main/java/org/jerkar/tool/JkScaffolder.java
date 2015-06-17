@@ -1,6 +1,5 @@
 package org.jerkar.tool;
 
-
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
@@ -32,15 +31,18 @@ public class JkScaffolder {
 				JkBuildDependencySupport.class.getResource("Build.java_sample"));
 	}
 
-	@SuppressWarnings("unchecked")
 	public static JkScaffolder of(JkBuild build) {
+		return of(build, build.getClass().getResource("Build.java_sample"));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static JkScaffolder of(JkBuild build, URL templateResource) {
 		return new JkScaffolder(build, "defaultpackage",
 				"JkBuild",
 				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST,
 				Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST,
-				JkBuild.class.getResource("Build.java_sample"));
+				templateResource);
 	}
-
 
 	private final JkBuild build;
 
