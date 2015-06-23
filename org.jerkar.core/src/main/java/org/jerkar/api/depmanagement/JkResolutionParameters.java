@@ -70,7 +70,7 @@ public class JkResolutionParameters implements Serializable {
 
 	@Override
 	public String toString() {
-		return "default scope : " + defaultScope + ", default mapping : " + defaultMapping;
+		return "default scope : " + defaultScope + ", default mapping : " + defaultMapping + ", refreshed : " + refreshed;
 	}
 
 

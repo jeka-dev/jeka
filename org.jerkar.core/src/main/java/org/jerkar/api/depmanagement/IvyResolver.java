@@ -121,7 +121,7 @@ public final class IvyResolver implements InternalDepResolver {
 			throw new RuntimeException(e1);
 		}
 		if (report.hasError()) {
-			throw new IllegalStateException("Erros while resolving dependencies : " + report.getAllProblemMessages());
+			throw new IllegalStateException("Errors while resolving dependencies : " + report.getAllProblemMessages());
 		}
 		final Set<JkArtifact> result = new HashSet<JkArtifact>();
 		final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
