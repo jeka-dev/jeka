@@ -13,7 +13,7 @@ import org.jerkar.api.system.JkLog;
 
 public final class JkDependencyResolver  {
 
-	private static final String IVY_CLASS = "org.jerkar.api.internal.ivy.IvyResolver";
+	private static final String IVY_CLASS = IvyResolver.class.getName();
 
 	public static JkDependencyResolver managed(JkRepos repos, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
 		final InternalDepResolver ivyResolver = InternalIvy.CLASSLOADER.transClassloaderProxy(InternalDepResolver.class, IVY_CLASS, "of", repos);

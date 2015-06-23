@@ -68,5 +68,10 @@ public class JkResolutionParameters implements Serializable {
 		this.refreshed = refreshed;
 	}
 
+	@Override
+	public String toString() {
+		return "default scope : " + defaultScope + ", default mapping : " + defaultMapping;
+	}
+
 
 }
