@@ -1,4 +1,4 @@
-package org.jerkar.tool.builtins.templates.dependencysupport;
+package org.jerkar.tool;
 
 import java.io.File;
 import java.util.Arrays;

@@ -38,8 +38,6 @@ public class JkBuild {
 	private JkDependencyResolver scriptDependencyResolver;
 
 	protected JkBuild() {
-		JkOptions.populateFields(this);  // The option are also populated here so it's effective even when called from a main method
-
 	}
 
 	void setScriptDependencyResolver(JkDependencyResolver scriptDependencyResolver) {
@@ -241,20 +239,7 @@ public class JkBuild {
 		return this.plugins.findInstanceOf(pluginClass);
 	}
 
-	/*
-	 * This method is implemented here to acces to the non-public class Project.
-	 */
-	/**
-	 * Creates an instance of <code>JkBuild</code> for the given project and build class.
-	 * The instance field annotated with <code>JkOption</code> are populated as usual.
-	 */
-	protected final <T extends JkBuild> T relativeProjectBuild(Class<T> clazz, String relativePath) {
-		final File projectDir = this.baseDir(relativePath);
-		final Project project = new Project(projectDir);
-		final T result = project.getBuild(clazz);
-		JkOptions.populateFields(result);
-		return result;
-	}
+
 
 
 }

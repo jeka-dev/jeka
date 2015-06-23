@@ -24,7 +24,6 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.tool.CommandLine.JkPluginSetup;
 import org.jerkar.tool.CommandLine.MethodInvocation;
-import org.jerkar.tool.builtins.templates.dependencysupport.JkBuildDependencySupport;
 
 /**
  * Buildable project. This class has the responsability to compile the build classes along to run them.<br/>

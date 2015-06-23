@@ -9,7 +9,6 @@ import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
 
 /**
  * A resolver for the {@link JkBuild} to use for a given project.
@@ -123,7 +122,7 @@ final class BuildResolver {
 		}
 
 		// If nothing yet found use defaults
-		final JkBuild result = new JkJavaBuild();
+		final JkBuild result = (JkBuild) JkUtilsReflect.newInstance(JkConstants.DEFAULT_BUILD_CLASS);
 		result.setBaseDir(baseDir);
 		return result;
 	}

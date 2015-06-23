@@ -7,7 +7,7 @@ import java.util.List;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.tool.JkLocator;
-import org.jerkar.tool.builtins.templates.dependencysupport.JkProjectDependency;
+import org.jerkar.tool.JkProjectDependency;
 import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
 
 class Lib {

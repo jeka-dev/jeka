@@ -23,9 +23,9 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsJdk;
 import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.tool.JkBuildDependencySupport;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkScaffolder;
-import org.jerkar.tool.builtins.templates.dependencysupport.JkBuildDependencySupport;
 
 /**
  * Template class to define build on Java project.

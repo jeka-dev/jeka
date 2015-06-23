@@ -1,7 +1,8 @@
-package org.jerkar.tool.builtins.templates.dependencysupport;
+package org.jerkar.tool;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,14 +25,6 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkBuildPlugin;
-import org.jerkar.tool.JkConstants;
-import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkLocator;
-import org.jerkar.tool.JkOptions;
-import org.jerkar.tool.JkProject;
-import org.jerkar.tool.JkScaffolder;
 
 /**
  * Template build definition class providing support for managing dependencies and multi-projects.
@@ -227,7 +220,8 @@ public class JkBuildDependencySupport extends JkBuild {
 
 	@Override
 	protected JkScaffolder scaffolder() {
-		return JkScaffolder.of(this).withExtraAction(new Runnable() {
+		final URL template = JkBuildDependencySupport.class.getResource("DepSupportBuild.java_sample");
+		return JkScaffolder.of(this, template).withExtraAction(new Runnable() {
 
 			@Override
 			public void run() {
@@ -237,7 +231,6 @@ public class JkBuildDependencySupport extends JkBuild {
 			}
 		})
 		.withExtendedClass(JkBuildDependencySupport.class);
-
 	}
 
 	/**
@@ -286,9 +279,20 @@ public class JkBuildDependencySupport extends JkBuild {
 
 	private static final JkBuildDependencySupport relativeProject(JkBuildDependencySupport mainBuild, Class<? extends JkBuildDependencySupport> clazz, String relativePath) {
 		final JkBuildDependencySupport build = mainBuild.relativeProjectBuild(clazz, relativePath);
-
 		build.init();
 		return build;
+	}
+
+	/**
+	 * Creates an instance of <code>JkBuild</code> for the given project and build class.
+	 * The instance field annotated with <code>JkOption</code> are populated as usual.
+	 */
+	private final <T extends JkBuild> T relativeProjectBuild(Class<T> clazz, String relativePath) {
+		final File projectDir = this.baseDir(relativePath);
+		final Project project = new Project(projectDir);
+		final T result = project.getBuild(clazz);
+		JkOptions.populateFields(result);
+		return result;
 	}
 
 

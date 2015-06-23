@@ -12,7 +12,6 @@ import java.util.Map;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.tool.builtins.templates.dependencysupport.JkBuildDependencySupport;
 
 /**
  * Class for creating project from scratch. Basically the scaffolder creates the directory structure of the

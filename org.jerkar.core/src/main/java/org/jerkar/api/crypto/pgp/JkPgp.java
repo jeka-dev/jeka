@@ -9,7 +9,6 @@ import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsSystem;
-import org.jerkar.tool.JkOptions;
 
 /**
  * Provides method for signing and verify signature with PGP.<p>
@@ -65,7 +64,7 @@ public final class JkPgp implements Serializable {
 
 
 	/**
-	 * Creates a JkPgp with values found in {@link JkOptions}
+	 * Creates a JkPgp with key/values map
 	 */
 	public static JkPgp of(Map<String, String> options) {
 		JkPgp result = ofDefaultGnuPg();

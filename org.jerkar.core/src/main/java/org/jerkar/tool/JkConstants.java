@@ -1,5 +1,7 @@
 package org.jerkar.tool;
 
+import org.jerkar.api.java.JkClassLoader;
+
 /**
  * Holds constants about project structures
  */
@@ -12,6 +14,8 @@ public final class JkConstants {
 	static final String BUILD_LIB_DIR = "build/libs/build";
 
 	static final String DEFAULT_JAVA_SOURCE = "src/main/java";
+
+	static final Class<?> DEFAULT_BUILD_CLASS = JkClassLoader.current().load("org.jerkar.tool.template.javabuild.JkJavaBuild");
 
 	/**
 	 * Relative path to the project where the build definition classes will be compiled.

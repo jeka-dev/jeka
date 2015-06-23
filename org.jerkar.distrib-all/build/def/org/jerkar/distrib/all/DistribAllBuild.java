@@ -12,9 +12,9 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
+import org.jerkar.tool.JkBuildDependencySupport;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkProject;
-import org.jerkar.tool.builtins.templates.dependencysupport.JkBuildDependencySupport;
 
 
 public class DistribAllBuild extends JkBuildDependencySupport {

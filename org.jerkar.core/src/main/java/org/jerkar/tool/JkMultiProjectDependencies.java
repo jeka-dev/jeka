@@ -1,4 +1,4 @@
-package org.jerkar.tool.builtins.templates.dependencysupport;
+package org.jerkar.tool;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -11,9 +11,6 @@ import java.util.Set;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkConstants;
-import org.jerkar.tool.JkModelMethod;
 
 /**
  * Holds information about inter-project dependencies in a multi-project context.
