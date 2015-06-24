@@ -32,7 +32,7 @@ import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 
-final class Translations {
+final class IvyTranslations {
 
 	private static final String MAIN_RESOLVER_NAME = "MAIN";
 
@@ -49,7 +49,7 @@ final class Translations {
 
 	private static final String MAVEN_ARTIFACT_PATTERN = "/[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]";
 
-	private Translations() {
+	private IvyTranslations() {
 	}
 
 	public static DefaultModuleDescriptor toPublicationFreeModule(JkVersionedModule module,
@@ -168,7 +168,7 @@ final class Translations {
 
 					}
 				};
-				result.setChangingPattern("*-SNAPSHOT");
+				result.setChangingPattern("\\*-SNAPSHOT");
 				result.setCheckmodified(true);
 				return result;
 			}

@@ -5,7 +5,7 @@ import org.apache.ivy.util.Message;
 import org.jerkar.api.system.JkLog;
 
 @SuppressWarnings("unchecked")
-class MessageLogger extends AbstractMessageLogger {
+class IvyMessageLogger extends AbstractMessageLogger {
 
 	@Override
 	public void log(String message, int level) {
@@ -20,14 +20,10 @@ class MessageLogger extends AbstractMessageLogger {
 			JkLog.info(message);
 			break;
 		case Message.MSG_VERBOSE :
-			if (JkLog.verbose()) {
-				JkLog.info(message);
-			}
+			JkLog.trace(message);
 			break;
 		case Message.MSG_DEBUG :
-			if (JkLog.verbose()) {
-				JkLog.info(message);
-			}
+			JkLog.trace(message);
 			break;
 		default :
 			JkLog.info("["+level+"] " + message);

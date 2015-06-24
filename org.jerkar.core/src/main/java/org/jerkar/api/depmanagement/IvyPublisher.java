@@ -53,7 +53,7 @@ final class IvyPublisher implements InternalPublisher {
 		this.ivy = ivy;
 		this.publishRepos = publishRepo;
 		this.descriptorOutputDir = descriptorOutputDir;
-		ivy.getLoggerEngine().setDefaultLogger(new MessageLogger());
+		ivy.getLoggerEngine().setDefaultLogger(new IvyMessageLogger());
 	}
 
 	private static IvyPublisher of(IvySettings ivySettings, JkPublishRepos publishRepos, File descriptorOutputDir) {
@@ -66,7 +66,7 @@ final class IvyPublisher implements InternalPublisher {
 	 */
 	private static IvySettings ivySettingsOf(JkPublishRepos publishRepos) {
 		final IvySettings ivySettings = new IvySettings();
-		Translations.populateIvySettingsWithPublishRepo(ivySettings, publishRepos);
+		IvyTranslations.populateIvySettingsWithPublishRepo(ivySettings, publishRepos);
 		return ivySettings;
 	}
 
@@ -99,7 +99,7 @@ final class IvyPublisher implements InternalPublisher {
 
 	@Override
 	public boolean hasMavenPublishRepo() {
-		for (final DependencyResolver dependencyResolver : Translations.publishResolverOf(this.ivy.getSettings())) {
+		for (final DependencyResolver dependencyResolver : IvyTranslations.publishResolverOf(this.ivy.getSettings())) {
 			if (isMaven(dependencyResolver)) {
 				return true;
 			}
@@ -109,7 +109,7 @@ final class IvyPublisher implements InternalPublisher {
 
 	@Override
 	public boolean hasIvyPublishRepo() {
-		for (final DependencyResolver dependencyResolver : Translations.publishResolverOf(this.ivy.getSettings())) {
+		for (final DependencyResolver dependencyResolver : IvyTranslations.publishResolverOf(this.ivy.getSettings())) {
 			if (!isMaven(dependencyResolver)) {
 				return true;
 			}
@@ -154,13 +154,13 @@ final class IvyPublisher implements InternalPublisher {
 		if (!dependencies.hasDynamicAndResovableVersions()) {
 			return dependencies;
 		}
-		final ModuleRevisionId moduleRevisionId = Translations.toModuleRevisionId(module);
+		final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(module);
 		final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
 		final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
 		final File cachedPropFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
 		if (!cachedIvyFile.exists() || !cachedPropFile.exists()) {
 			JkLog.start("Cached resolved ivy file not found for " + module + ". Performing a fresh resolve");
-			final ModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(module, dependencies, null, null);
+			final ModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationFreeModule(module, dependencies, null, null);
 			final ResolveOptions resolveOptions = new ResolveOptions();
 			resolveOptions.setConfs(new String[] {"*"});
 			resolveOptions.setTransitive(false);
@@ -190,15 +190,15 @@ final class IvyPublisher implements InternalPublisher {
 			throw new IllegalStateException(e);
 		}
 		final Properties props = JkUtilsFile.readPropertyFile(cachedPropFile);
-		final Map<JkModuleId, JkVersion> resolvedVersions = Translations.toModuleVersionMap(props);
+		final Map<JkModuleId, JkVersion> resolvedVersions = IvyTranslations.toModuleVersionMap(props);
 		return dependencies.resolvedWith(resolvedVersions);
 	}
 
 	private int publishIvyArtifacts(JkIvyPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
 		int count = 0;
-		for (final DependencyResolver resolver : Translations.publishResolverOf(this.ivy.getSettings())) {
-			final JkPublishRepo publishRepo = this.publishRepos.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
-			final JkVersionedModule jkModule = Translations.toJerkarVersionedModule(moduleDescriptor.getModuleRevisionId());
+		for (final DependencyResolver resolver : IvyTranslations.publishResolverOf(this.ivy.getSettings())) {
+			final JkPublishRepo publishRepo = this.publishRepos.getRepoHavingUrl(IvyTranslations.publishResolverUrl(resolver));
+			final JkVersionedModule jkModule = IvyTranslations.toJerkarVersionedModule(moduleDescriptor.getModuleRevisionId());
 			if (!isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
 				JkLog.startln("Publishing for repository " + resolver);
 				this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor);
@@ -219,7 +219,7 @@ final class IvyPublisher implements InternalPublisher {
 		File publishedIvy;
 		try {
 			for (final JkIvyPublication.Artifact artifact : publication) {
-				final Artifact ivyArtifact = Translations.toPublishedArtifact(artifact, ivyModuleRevisionId, date);
+				final Artifact ivyArtifact = IvyTranslations.toPublishedArtifact(artifact, ivyModuleRevisionId, date);
 				try {
 					resolver.publish(ivyArtifact, artifact.file, true);
 				} catch (final IOException e) {
@@ -245,9 +245,9 @@ final class IvyPublisher implements InternalPublisher {
 
 	private int publishMavenArtifacts(JkMavenPublication publication, Date date, DefaultModuleDescriptor moduleDescriptor) {
 		int count = 0;
-		for (final DependencyResolver resolver : Translations.publishResolverOf(this.ivy.getSettings())) {
-			final JkPublishRepo publishRepo = this.publishRepos.getRepoHavingUrl(Translations.publishResolverUrl(resolver));
-			final JkVersionedModule jkModule = Translations.toJerkarVersionedModule(moduleDescriptor.getModuleRevisionId());
+		for (final DependencyResolver resolver : IvyTranslations.publishResolverOf(this.ivy.getSettings())) {
+			final JkPublishRepo publishRepo = this.publishRepos.getRepoHavingUrl(IvyTranslations.publishResolverUrl(resolver));
+			final JkVersionedModule jkModule = IvyTranslations.toJerkarVersionedModule(moduleDescriptor.getModuleRevisionId());
 			if (isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
 				JkLog.startln("Publishing for repository " + resolver);
 				this.publishMavenArtifacts(resolver, publication, date, moduleDescriptor, CheckFileFlag.of(publishRepo),
@@ -288,7 +288,7 @@ final class IvyPublisher implements InternalPublisher {
 			resolver.publish(artifact, pomXml, true);
 			checkProducer.publishChecks(resolver, artifact, pomXml);
 
-			final Artifact mavenMainArtifact = Translations.toPublishedMavenArtifact(publication.mainArtifactFile(), publication.artifactName(),
+			final Artifact mavenMainArtifact = IvyTranslations.toPublishedMavenArtifact(publication.mainArtifactFile(), publication.artifactName(),
 					null, ivyModuleRevisionId, date);
 			resolver.publish(mavenMainArtifact, publication.mainArtifactFile(), true);
 			checkProducer.publishChecks(resolver, mavenMainArtifact, publication.mainArtifactFile());
@@ -296,7 +296,7 @@ final class IvyPublisher implements InternalPublisher {
 			for (final Map.Entry<String, File> extraArtifact : publication.extraArtifacts().entrySet()) {
 				final String classifier = extraArtifact.getKey();
 				final File file = extraArtifact.getValue();
-				final Artifact mavenArtifact = Translations.toPublishedMavenArtifact(file, publication.artifactName(),
+				final Artifact mavenArtifact = IvyTranslations.toPublishedMavenArtifact(file, publication.artifactName(),
 						classifier, ivyModuleRevisionId, date);
 				resolver.publish(mavenArtifact, file, true);
 				checkProducer.publishChecks(resolver, mavenArtifact, file);
@@ -337,14 +337,14 @@ final class IvyPublisher implements InternalPublisher {
 	}
 
 	private ModuleDescriptor createModuleDescriptor(JkVersionedModule jkVersionedModule, JkIvyPublication publication, JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate) {
-		final ModuleRevisionId moduleRevisionId = Translations.toModuleRevisionId(jkVersionedModule);
+		final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(jkVersionedModule);
 
 		// First : update the module ivy cache.
 		final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
 		final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
 		final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
-		final DefaultModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(jkVersionedModule, dependencies, defaultScope, defaultMapping);
-		Translations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
+		final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationFreeModule(jkVersionedModule, dependencies, defaultScope, defaultMapping);
+		IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
 		try {
 			cacheManager.saveResolvedModuleDescriptor(moduleDescriptor);
 		} catch (final Exception e) {
@@ -373,13 +373,13 @@ final class IvyPublisher implements InternalPublisher {
 	}
 
 	private DefaultModuleDescriptor createModuleDescriptor(JkVersionedModule jkVersionedModule, JkMavenPublication publication, JkDependencies resolvedDependencies, Date deliveryDate) {
-		final ModuleRevisionId moduleRevisionId = Translations.toModuleRevisionId(jkVersionedModule);
+		final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(jkVersionedModule);
 		final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
 		final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
 		final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
 
-		final DefaultModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(jkVersionedModule, resolvedDependencies, null, null);
-		Translations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
+		final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationFreeModule(jkVersionedModule, resolvedDependencies, null, null);
+		IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
 
 		try {
 			cacheManager.saveResolvedModuleDescriptor(moduleDescriptor);

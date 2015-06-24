@@ -17,6 +17,7 @@ import org.apache.ivy.plugins.resolver.AbstractPatternsBasedResolver;
 import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsThrowable;
 
 /**
  * Jerkar users : This class is not part of the public API !!! Please, Use {@link JkPublisher} instead.
@@ -34,7 +35,8 @@ public final class IvyResolver implements InternalDepResolver {
 	private IvyResolver(Ivy ivy) {
 		super();
 		this.ivy = ivy;
-		ivy.getLoggerEngine().setDefaultLogger(new MessageLogger());
+		ivy.getLoggerEngine().setDefaultLogger(new IvyMessageLogger());
+		ivy.getLoggerEngine().setShowProgress(JkLog.verbose());
 	}
 
 	private static InternalDepResolver of(IvySettings ivySettings) {
@@ -47,7 +49,7 @@ public final class IvyResolver implements InternalDepResolver {
 	 */
 	private static IvySettings ivySettingsOf(JkRepos resolveRepos) {
 		final IvySettings ivySettings = new IvySettings();
-		Translations.populateIvySettingsWithRepo(ivySettings, resolveRepos);
+		IvyTranslations.populateIvySettingsWithRepo(ivySettings, resolveRepos);
 		return ivySettings;
 	}
 
@@ -81,7 +83,7 @@ public final class IvyResolver implements InternalDepResolver {
 
 	@Override
 	public boolean hasMavenPublishRepo() {
-		for (final DependencyResolver dependencyResolver : Translations.publishResolverOf(this.ivy.getSettings())) {
+		for (final DependencyResolver dependencyResolver : IvyTranslations.publishResolverOf(this.ivy.getSettings())) {
 			if (isMaven(dependencyResolver)) {
 				return true;
 			}
@@ -91,7 +93,7 @@ public final class IvyResolver implements InternalDepResolver {
 
 	@Override
 	public boolean hasIvyPublishRepo() {
-		for (final DependencyResolver dependencyResolver : Translations.publishResolverOf(this.ivy.getSettings())) {
+		for (final DependencyResolver dependencyResolver : IvyTranslations.publishResolverOf(this.ivy.getSettings())) {
 			if (!isMaven(dependencyResolver)) {
 				return true;
 			}
@@ -106,7 +108,7 @@ public final class IvyResolver implements InternalDepResolver {
 
 	@Override
 	public Set<JkArtifact> resolve(JkVersionedModule module, JkDependencies deps, JkScope resolvedScope, JkResolutionParameters parameters) {
-		final DefaultModuleDescriptor moduleDescriptor = Translations.toPublicationFreeModule(module, deps, parameters.defaultScope(), parameters.defaultMapping());
+		final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationFreeModule(module, deps, parameters.defaultScope(), parameters.defaultMapping());
 
 		final ResolveOptions resolveOptions = new ResolveOptions();
 		resolveOptions.setConfs(new String[] {resolvedScope.name()});
@@ -117,10 +119,14 @@ public final class IvyResolver implements InternalDepResolver {
 		final ResolveReport report;
 		try {
 			report = ivy.resolve(moduleDescriptor, resolveOptions);
-		} catch (final Exception e1) {
-			throw new RuntimeException(e1);
+		} catch (final Exception e) {
+			throw JkUtilsThrowable.unchecked(e);
 		}
 		if (report.hasError()) {
+			for (final ArtifactDownloadReport artifactDownloadReport : report.getAllArtifactsReports()) {
+				JkLog.info(artifactDownloadReport.toString());
+			}
+
 			throw new IllegalStateException("Errors while resolving dependencies : " + report.getAllProblemMessages());
 		}
 		final Set<JkArtifact> result = new HashSet<JkArtifact>();
@@ -134,12 +140,12 @@ public final class IvyResolver implements InternalDepResolver {
 	@Override
 	public JkAttachedArtifacts getArtifacts(Iterable<JkVersionedModule> modules, JkScope ...scopes) {
 		//final String defaultConf = "default";
-		final DefaultModuleDescriptor moduleDescriptor = Translations.toUnpublished(ANONYMOUS_MODULE);
+		final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toUnpublished(ANONYMOUS_MODULE);
 		for (final JkScope jkScope : scopes) {
 			moduleDescriptor.addConfiguration(new Configuration(jkScope.name()));
 		}
 		for (final JkVersionedModule module : modules) {
-			final ModuleRevisionId moduleRevisionId = Translations.toModuleRevisionId(module);
+			final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(module);
 			final DefaultDependencyDescriptor dependency = new DefaultDependencyDescriptor(moduleRevisionId, true, false);
 			for (final JkScope scope : scopes) {
 				dependency.addDependencyConfiguration(scope.name(), scope.name());
@@ -153,7 +159,7 @@ public final class IvyResolver implements InternalDepResolver {
 		.setRefresh(false);
 		resolveOptions.setLog(logLevel());
 		for (final JkScope scope : scopes ) {
-			resolveOptions.setConfs(Translations.toConfNames(scope));
+			resolveOptions.setConfs(IvyTranslations.toConfNames(scope));
 			final ResolveReport report;
 			try {
 				report = ivy.resolve(moduleDescriptor, resolveOptions);
@@ -162,7 +168,7 @@ public final class IvyResolver implements InternalDepResolver {
 			}
 			final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
 			for (final ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
-				final JkArtifact artifact = Translations.to(artifactDownloadReport.getArtifact(),
+				final JkArtifact artifact = IvyTranslations.to(artifactDownloadReport.getArtifact(),
 						artifactDownloadReport.getLocalFile());
 				result.add(scope, artifact);
 			}
@@ -177,7 +183,7 @@ public final class IvyResolver implements InternalDepResolver {
 			return "quiet";
 		}
 		if (JkLog.verbose()) {
-			return "default";
+			return "verbose";
 		}
 		return "download-only";
 	}
@@ -185,7 +191,7 @@ public final class IvyResolver implements InternalDepResolver {
 	private static Set<JkArtifact> getArtifacts(String config, ArtifactDownloadReport[] artifactDownloadReports) {
 		final Set<JkArtifact> result = new HashSet<JkArtifact>();
 		for (final ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
-			result.add(Translations.to(artifactDownloadReport.getArtifact(),
+			result.add(IvyTranslations.to(artifactDownloadReport.getArtifact(),
 					artifactDownloadReport.getLocalFile()));
 		}
 		return result;

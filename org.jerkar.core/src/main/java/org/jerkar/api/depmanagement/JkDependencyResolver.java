@@ -16,7 +16,7 @@ public final class JkDependencyResolver  {
 	private static final String IVY_CLASS = IvyResolver.class.getName();
 
 	public static JkDependencyResolver managed(JkRepos repos, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
-		final InternalDepResolver ivyResolver = InternalIvy.CLASSLOADER.transClassloaderProxy(InternalDepResolver.class, IVY_CLASS, "of", repos);
+		final InternalDepResolver ivyResolver = IvyClassloader.CLASSLOADER.transClassloaderProxy(InternalDepResolver.class, IVY_CLASS, "of", repos);
 		return new JkDependencyResolver(ivyResolver, dependencies, module, resolutionParameters);
 	}
 

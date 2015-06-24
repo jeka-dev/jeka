@@ -9,7 +9,7 @@ public final class JkPublisher {
 
 	private static final String IVY_PUB_CLASS = "org.jerkar.api.internal.ivy.IvyPublisher";
 
-	private static final JkClassLoader IVY_CLASS_LOADER = InternalIvy.CLASSLOADER;
+	private static final JkClassLoader IVY_CLASS_LOADER = IvyClassloader.CLASSLOADER;
 
 	private final InternalPublisher ivyPublisher;
 
