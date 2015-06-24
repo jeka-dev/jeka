@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="build/def" output="build/output/def-bin"/>
+	<classpathentry kind="src" output="build/output/def-bin" path="build/def"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="src" output="build/output/testClasses" path="src/test/java"/>
@@ -75,12 +75,8 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="var" path="IVY_CACHE/commons-httpclient/commons-httpclient/jars/commons-httpclient-3.1.jar" sourcepath="IVY_CACHE/commons-httpclient/commons-httpclient/sources/commons-httpclient-3.1-sources.jar"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/build/output/dist/libs/ext/org.jerkar.plugins-jacoco.jar" sourcepath="C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/build/output/dist/libs-sources/org.jerkar.plugins-jacoco-sources.jar"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/build/output/dist/libs/ext/org.jerkar.plugins-sonar.jar" sourcepath="C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/build/output/dist/libs-sources/org.jerkar.plugins-sonar-sources.jar"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/build/output/dist/org.jerkar.core.jar" sourcepath="C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/build/output/dist/libs-sources/org.jerkar.core-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/build/output/dist/libs-javadoc/org.jerkar.core-javadoc.jar"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.plugins-jacoco"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.plugins-sonar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
