@@ -2,14 +2,13 @@ package org.jerkar.tool;
 
 import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.JkProjectDef.JkProjectBuildClassDef;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
 import org.junit.Test;
 
 public class JkProjectDefTest {
 
 	@Test
 	public void testCreationAndLog() {
-		final JkProjectBuildClassDef def = JkProjectBuildClassDef.of(MyBuild.class);
+		final JkProjectBuildClassDef def = JkProjectBuildClassDef.of(new MyBuild());
 		final boolean silent = JkLog.silent();
 		JkLog.silent(true);
 		def.log(true);
@@ -17,7 +16,7 @@ public class JkProjectDefTest {
 	}
 
 
-	static class MyBuild extends JkJavaBuild {
+	static class MyBuild extends JkBuildDependencySupport {
 
 		@JkDoc("This is toto")
 		private boolean toto;

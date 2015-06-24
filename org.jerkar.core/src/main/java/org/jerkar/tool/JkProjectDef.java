@@ -23,32 +23,37 @@ import org.jerkar.api.utils.JkUtilsString;
  */
 public final class JkProjectDef {
 
-	private final List<JkProjectBuildClassDef> buildDefs;
+	private final List<Class<?>> buildClassNames;
 
-	private JkProjectDef(List<JkProjectBuildClassDef> buildDef) {
+	private JkProjectDef(List<Class<?>> buildClassNames) {
 		super();
-		this.buildDefs = Collections.unmodifiableList(buildDef);
+		this.buildClassNames = Collections.unmodifiableList(buildClassNames);
 	}
 
 	/**
 	 * Creates a project definition by giving its root directory.
 	 */
 	public static JkProjectDef of(File rootDir) {
-		final Project project = new Project(rootDir);
-		final List<JkProjectBuildClassDef> classDefs
-		= new LinkedList<JkProjectDef.JkProjectBuildClassDef>();
-		for (final Class<?> clazz : project.getBuildClasses()) {
-			classDefs.add(JkProjectBuildClassDef.of(clazz));
+		final BuildResolver buildResolver = new BuildResolver(rootDir);
+		final List<Class<?>> classDefs = new LinkedList<Class<?>>();
+		for (final Class<?> clazz : buildResolver.resolveBuildClasses()) {
+			classDefs.add(clazz);
 		}
 		return new JkProjectDef(classDefs);
 	}
 
 	public void logAvailableBuildClasses() {
 		int i = 0;
-		for (final JkProjectBuildClassDef classDef : this.buildDefs) {
+		for (final Class<?> classDef : this.buildClassNames) {
 			final String defaultMessage = (i == 0) ? " (default)" : "";
-			final String desc = classDef.description != null ? classDef.description : "No description available";
-			JkLog.info(classDef.buildClassFullName + defaultMessage + " : " + desc);
+			final JkDoc jkDoc = classDef.getAnnotation(JkDoc.class);
+			final String desc;
+			if (jkDoc != null) {
+				desc = JkUtilsString.join(jkDoc.value(), "\n");
+			} else {
+				desc = "No description available";
+			}
+			JkLog.info(classDef.getName() + defaultMessage + " : " + desc);
 			i++;
 		}
 	}
@@ -60,28 +65,20 @@ public final class JkProjectDef {
 	 */
 	public static final class JkProjectBuildClassDef {
 
-		private final String description;
-
-		private final String buildClassFullName;
-
 		private final List<JkProjectBuildMethodDef> methodDefs;
 
 		private final List<JkProjectBuildOptionDef> optionDefs;
 
-		private JkProjectBuildClassDef(String description,
-				String buildClassFullName,
+		private JkProjectBuildClassDef(
 				List<JkProjectBuildMethodDef> methodDefs,
 				List<JkProjectBuildOptionDef> optionDefs) {
 			super();
-			this.description = description;
-			this.buildClassFullName = buildClassFullName;
 			this.methodDefs = Collections.unmodifiableList(methodDefs);
 			this.optionDefs = Collections.unmodifiableList(optionDefs);
 		}
 
-		public static JkProjectBuildClassDef of(Class<?> clazz) {
-			final JkDoc jkDoc = clazz.getAnnotation(JkDoc.class);
-			final String descr = jkDoc != null ? JkUtilsString.join(jkDoc.value(), "\n") : null;
+		public static JkProjectBuildClassDef of(Object build) {
+			final Class<?> clazz = build.getClass();
 			final List<JkProjectBuildMethodDef> methods = new LinkedList<JkProjectDef.JkProjectBuildMethodDef>();
 			for (final Method method : executableMethods(clazz)) {
 				methods.add(JkProjectBuildMethodDef.of(method));
@@ -92,7 +89,7 @@ public final class JkProjectDef {
 				options.add(JkProjectBuildOptionDef.of(clazz, nameAndField.field, nameAndField.rootClass, nameAndField.name));
 			}
 			Collections.sort(options);
-			return new JkProjectBuildClassDef(descr, clazz.getName(), methods, options);
+			return new JkProjectBuildClassDef(methods, options);
 		}
 
 		private static List<Method> executableMethods(Class<?> clazz) {
@@ -159,10 +156,10 @@ public final class JkProjectDef {
 			currentClass = Object.class;
 			for (final JkProjectBuildOptionDef optionDef : this.optionDefs) {
 				JkLog.nextLine();
-				if (!optionDef.declaringClass.equals(currentClass) && displayFromClass) {
-					JkLog.infoUnderline("From " + optionDef.declaringClass.getName());
+				if (!optionDef.jkBuild.getClass().equals(currentClass) && displayFromClass) {
+					JkLog.infoUnderline("From " + optionDef.jkBuild.getClass().getName());
 				}
-				currentClass = optionDef.declaringClass;
+				currentClass = optionDef.jkBuild.getClass();
 				optionDef.log();
 			}
 
@@ -237,24 +234,23 @@ public final class JkProjectDef {
 
 		private final String description;
 
-		private final Class<?> declaringClass;
+		private final Object jkBuild;
 
 		private final Object defaultValue;
 
 		private final Class<?> type;
 
 		private JkProjectBuildOptionDef(String name, String description,
-				Class<?> declaringClass, Object defaultValue, Class<?> type) {
+				Object jkBuild, Object defaultValue, Class<?> type) {
 			super();
 			this.name = name;
 			this.description = description;
-			this.declaringClass = declaringClass;
+			this.jkBuild = jkBuild;
 			this.defaultValue = defaultValue;
 			this.type = type;
 		}
 
-		static JkProjectBuildOptionDef of(Class<?> clazz, Field field, Class<?> declaringClass, String name) {
-			final Object instance = JkUtilsReflect.newInstance(clazz);
+		static JkProjectBuildOptionDef of(Object instance, Field field, Class<?> declaringClass, String name) {
 			if (instance instanceof JkBuild) {
 				((JkBuild) instance).init();
 			}
@@ -262,7 +258,7 @@ public final class JkProjectDef {
 			final String descr = opt != null ? JkUtilsString.join(opt.value(), "\n") : null;
 			final Class<?> type = field.getType();
 			final Object defaultValue = value(instance, name);
-			return new JkProjectBuildOptionDef(name, descr, declaringClass,
+			return new JkProjectBuildOptionDef(name, descr, instance,
 					defaultValue, type);
 		}
 
@@ -282,10 +278,10 @@ public final class JkProjectDef {
 
 		@Override
 		public int compareTo(JkProjectBuildOptionDef other) {
-			if (this.declaringClass.equals(other.declaringClass)) {
+			if (this.jkBuild.getClass().equals(other.jkBuild.getClass())) {
 				return this.name.compareTo(other.name);
 			}
-			if (this.declaringClass.isAssignableFrom(other.declaringClass)) {
+			if (this.jkBuild.getClass().isAssignableFrom(other.jkBuild.getClass())) {
 				return -1;
 			}
 			return 1;

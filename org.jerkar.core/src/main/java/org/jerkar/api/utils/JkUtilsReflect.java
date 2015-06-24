@@ -71,7 +71,7 @@ public final class JkUtilsReflect {
 			}
 			return field.get(object);
 		} catch (final Exception e) {
-			throw new RuntimeException(e);
+			throw JkUtilsThrowable.unchecked(e);
 		}
 	}
 

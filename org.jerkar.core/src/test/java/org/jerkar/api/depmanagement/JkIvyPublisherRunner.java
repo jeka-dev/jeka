@@ -1,22 +1,12 @@
 package org.jerkar.api.depmanagement;
 
-import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.COMPILE;
-
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 
-import org.jerkar.api.depmanagement.IvyPublisher;
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkIvyPublication;
-import org.jerkar.api.depmanagement.JkMavenPublication;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkPublishRepos;
-import org.jerkar.api.depmanagement.JkVersion;
-import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
+
 
 public class JkIvyPublisherRunner {
 
@@ -28,9 +18,9 @@ public class JkIvyPublisherRunner {
 	public static void testPublishIvy() {
 		final IvyPublisher jkIvyResolver = IvyPublisher.of(ivyRepos(), new File("build/output/test-out"));
 		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup", "mymodule"), JkVersion.ofName("myVersion"));
-		final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(), COMPILE, JkJavaBuild.TEST);
+		final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(), JkScopedDependencyTest.COMPILE, JkScopedDependencyTest.TEST);
 		final JkDependencies deps = JkDependencies.builder()
-				.on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();
+				.on("org.springframework", "spring-jdbc", "3.0.+").scope(JkScopedDependencyTest.COMPILE).build();
 		jkIvyResolver.publishIvy(versionedModule, ivyPublication,deps, null, null, new Date());
 	}
 
@@ -39,7 +29,7 @@ public class JkIvyPublisherRunner {
 		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup2", "mymodule2"), JkVersion.ofName("0.0.1"));
 		final JkMavenPublication publication = JkMavenPublication.of("mymodule2", sampleJarfile()).and(sampleJarSourcefile(), "source");
 		final JkDependencies deps = JkDependencies.builder()
-				.on("org.springframework", "spring-jdbc", "3.0.+").scope(COMPILE).build();
+				.on("org.springframework", "spring-jdbc", "3.0.+").scope(JkScopedDependencyTest.COMPILE).build();
 		jkIvyResolver.publishMaven(versionedModule, publication,deps, new Date());
 	}
 

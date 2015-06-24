@@ -1,23 +1,11 @@
 package org.jerkar.api.depmanagement;
 
-import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.COMPILE;
-import static org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild.PROVIDED;
+
+
+import static org.jerkar.api.depmanagement.JkScopedDependencyTest.COMPILE;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import org.jerkar.api.depmanagement.IvyResolver;
-import org.jerkar.api.depmanagement.JkArtifact;
-import org.jerkar.api.depmanagement.JkAttachedArtifacts;
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.InternalDepResolver;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkResolutionParameters;
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.depmanagement.JkScopeMapping;
-import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
 
 public class JkIvyResolverRunner {
 
@@ -33,7 +21,7 @@ public class JkIvyResolverRunner {
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.springframework", "spring-jdbc", "3.0.+")
 				.mapScope(COMPILE).to("compile", "default")
-				.and(PROVIDED).to("provided")
+				.and(JkScopedDependencyTest.PROVIDED).to("provided")
 				.build();
 		final Set<JkArtifact> artifacts = IvyResolver.of(repos).resolveAnonymous(deps, COMPILE, JkResolutionParameters.of());
 		for (final JkArtifact artifact : artifacts) {
@@ -55,7 +43,7 @@ public class JkIvyResolverRunner {
 
 	private static JkScopeMapping defaultMapping() {
 		return JkScopeMapping.of(COMPILE).to("compile", "archive(master)")
-				.and(JkJavaBuild.RUNTIME).to("runtime", "archive(master)");
+				.and(JkScopedDependencyTest.RUNTIME).to("runtime", "archive(master)");
 	}
 
 	public static void joglWithSource() {

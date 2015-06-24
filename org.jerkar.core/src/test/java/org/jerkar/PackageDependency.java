@@ -19,7 +19,7 @@ public class PackageDependency {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testDependencies() throws IOException {
-		final String packageFilter = "org.jerkar.api";
+		final String packageFilter = "org.jerkar";
 		final PackageFilter filter = new PackageFilter() {
 
 			@Override

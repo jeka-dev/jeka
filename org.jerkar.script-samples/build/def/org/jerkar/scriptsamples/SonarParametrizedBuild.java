@@ -4,6 +4,7 @@ import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
 import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 
 import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.plugins.jacoco.JkBuildPluginJacoco;
 import org.jerkar.plugins.sonar.JkBuildPluginSonar;
 import org.jerkar.plugins.sonar.JkSonar;
 import org.jerkar.tool.JkDoc;
@@ -24,6 +25,7 @@ public class SonarParametrizedBuild extends JkJavaBuild {
 		JkBuildPluginSonar sonarPlugin = new JkBuildPluginSonar()
 			.prop(JkSonar.HOST_URL, sonarEnv.url)
 			.prop(JkSonar.BRANCH, "myBranch");
+		JkBuildPluginJacoco pluginJacoco = new JkBuildPluginJacoco();
 		this.plugins.activate(sonarPlugin);
 	}
 	
@@ -37,7 +39,7 @@ public class SonarParametrizedBuild extends JkJavaBuild {
 	
 	@Override
 	public void doDefault() {
-		clean();compile();unitTest();
+		doUnitTest();
 		
 		// Verify method has extension point hooked by sonar plugin
 		// so when sonar plugin is activated, JkBuild#verify 

@@ -219,7 +219,7 @@ public class JkBuild {
 
 	@JkDoc("Display details on all available plugins.")
 	public void helpPlugins() {
-		HelpDisplayer.helpPlugins(this);
+		HelpDisplayer.helpPlugins();
 	}
 
 	/**
