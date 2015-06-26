@@ -86,7 +86,7 @@ public final class JkProjectDef {
 			Collections.sort(methods);
 			final List<JkProjectBuildOptionDef> options = new LinkedList<JkProjectDef.JkProjectBuildOptionDef>();
 			for (final NameAndField nameAndField : options(clazz, "", true, null)) {
-				options.add(JkProjectBuildOptionDef.of(clazz, nameAndField.field, nameAndField.rootClass, nameAndField.name));
+				options.add(JkProjectBuildOptionDef.of(build, nameAndField.field, nameAndField.rootClass, nameAndField.name));
 			}
 			Collections.sort(options);
 			return new JkProjectBuildClassDef(methods, options);
@@ -262,14 +262,14 @@ public final class JkProjectDef {
 					defaultValue, type);
 		}
 
-		private static Object value(Object target, String optName) {
+		private static Object value(Object buildinstance, String optName) {
 			if (!optName.contains(".")) {
-				return JkUtilsReflect.getFieldValue(target, optName);
+				return JkUtilsReflect.getFieldValue(buildinstance, optName);
 			}
 			final String first = JkUtilsString.substringBeforeFirst(optName, ".");
-			Object firstObject = JkUtilsReflect.getFieldValue(target, first);
+			Object firstObject = JkUtilsReflect.getFieldValue(buildinstance, first);
 			if (firstObject == null) {
-				final Class<?> firstClass = JkUtilsReflect.getField(target.getClass(), first).getType();
+				final Class<?> firstClass = JkUtilsReflect.getField(buildinstance.getClass(), first).getType();
 				firstObject = JkUtilsReflect.newInstance(firstClass);
 			}
 			final String last = JkUtilsString.substringAfterFirst(optName, ".");
