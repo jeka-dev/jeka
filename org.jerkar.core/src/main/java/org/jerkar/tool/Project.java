@@ -152,10 +152,11 @@ class Project {
 	}
 
 	private JkPath compileDependentProjects(Set<File> yetCompiledProjects, LinkedHashSet<File> pathEntries) {
-		final JkPath jkPath = JkPath.of();
+		JkPath jkPath = JkPath.of();
 		for (final File file : this.subProjects) {
 			final Project project = new Project(file);
 			project.compile(yetCompiledProjects, pathEntries);
+			jkPath =jkPath.and(file);
 		}
 		return jkPath;
 	}
