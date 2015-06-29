@@ -3,8 +3,10 @@ package org.jerkar.tool;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.JkDependencies;
@@ -23,6 +25,7 @@ import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
+import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
 
@@ -32,6 +35,10 @@ import org.jerkar.api.utils.JkUtilsString;
  * @author Jerome Angibaud
  */
 public class JkBuildDependencySupport extends JkBuild {
+
+	private static final ThreadLocal<Map<SubProjectRef, JkBuild>> SUB_PROJECT_CONTEXT =
+			new ThreadLocal<Map<SubProjectRef, JkBuild>>();
+
 
 	/**
 	 * Default path for the non managed dependencies. This path is relative to {@link #baseDir()}.
@@ -287,11 +294,23 @@ public class JkBuildDependencySupport extends JkBuild {
 	 * Creates an instance of <code>JkBuild</code> for the given project and build class.
 	 * The instance field annotated with <code>JkOption</code> are populated as usual.
 	 */
+	@SuppressWarnings("unchecked")
 	private final <T extends JkBuild> T relativeProjectBuild(Class<T> clazz, String relativePath) {
 		final File projectDir = this.baseDir(relativePath);
+		final SubProjectRef projectRef = new SubProjectRef(projectDir, clazz);
+		Map<SubProjectRef, JkBuild> map = SUB_PROJECT_CONTEXT.get();
+		if (map == null) {
+			map = new HashMap<JkBuildDependencySupport.SubProjectRef, JkBuild>();
+			SUB_PROJECT_CONTEXT.set(map);
+		}
+		final T cachedResult = (T) SUB_PROJECT_CONTEXT.get().get(projectRef);
+		if (cachedResult != null) {
+			return cachedResult;
+		}
 		final Project project = new Project(projectDir);
 		final T result = project.getBuild(clazz);
 		JkOptions.populateFields(result);
+		SUB_PROJECT_CONTEXT.get().put(projectRef, result);
 		return result;
 	}
 
@@ -337,6 +356,64 @@ public class JkBuildDependencySupport extends JkBuild {
 
 	protected JkProjectDependency projectFiles(JkBuildDependencySupport build, File...files) {
 		return JkProjectDependency.of(build, files);
+	}
+
+	private static class SubProjectRef {
+
+		final String canonicalFileName;
+
+		final Class<?> clazz;
+
+		SubProjectRef(File projectDir, Class<?> clazz) {
+			super();
+			this.canonicalFileName = JkUtilsFile.canonicalPath(projectDir);
+			this.clazz = clazz;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime
+					* result
+					+ ((canonicalFileName == null) ? 0 : canonicalFileName
+							.hashCode());
+			result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			final SubProjectRef other = (SubProjectRef) obj;
+			if (canonicalFileName == null) {
+				if (other.canonicalFileName != null) {
+					return false;
+				}
+			} else if (!canonicalFileName.equals(other.canonicalFileName)) {
+				return false;
+			}
+			if (clazz == null) {
+				if (other.clazz != null) {
+					return false;
+				}
+			} else if (!clazz.equals(other.clazz)) {
+				return false;
+			}
+			return true;
+		}
+
+
+
+
 	}
 
 }

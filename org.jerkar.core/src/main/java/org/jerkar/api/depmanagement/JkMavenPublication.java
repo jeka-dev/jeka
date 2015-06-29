@@ -75,12 +75,6 @@ public final class JkMavenPublication implements Serializable {
 		return this;
 	}
 
-
-
-
-
-
-
 	public File mainArtifactFile() {
 		return this.mainArtifact;
 	}
