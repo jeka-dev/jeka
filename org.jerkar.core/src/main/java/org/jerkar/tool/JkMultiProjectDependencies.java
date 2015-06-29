@@ -52,7 +52,7 @@ public final class JkMultiProjectDependencies {
 	}
 
 	public void invokeDoDefaultMethodOnAllSubProjects() {
-		this.executeOnAllTransitive(JkUtilsIterable.listOf(JkModelMethod.normal(JkConstants.DEFAULT_METHOD)));
+		this.invokeOnAllTransitive(JkConstants.DEFAULT_METHOD);
 	}
 
 	public void invokeOnAllTransitive(String ...methods) {
