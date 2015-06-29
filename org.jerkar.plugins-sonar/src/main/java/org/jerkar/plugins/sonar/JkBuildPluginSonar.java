@@ -25,7 +25,7 @@ public class JkBuildPluginSonar extends JkJavaBuildPlugin {
 	public static JkSonar configureSonarFrom(JkJavaBuild build) {
 		final File baseDir = build.baseDir().root();
 		final JkPath libs = build.depsFor(JkJavaBuild.COMPILE, JkJavaBuild.PROVIDED);
-		return JkSonar.of(build.moduleId().fullName(), build.moduleId().name(), build.version())
+		return JkSonar.of(build.moduleId().fullName(), build.moduleId().name(), build.actualVersion())
 				.withProperties(JkOptions.getAllStartingWith("sonar."))
                 .withProjectBaseDir(baseDir) 
                 .withBinaries(build.classDir())

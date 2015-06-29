@@ -47,8 +47,8 @@ public class JkBuildDependencySupport extends JkBuild {
 	@JkDoc("Dependency and publish repositories")
 	protected JkOptionRepos repo = new JkOptionRepos();
 
-	@JkDoc("Version to inject to this build. If 'null' or blank than the version will be the one returned by #defaultVersion()" )
-	protected String forcedVersion = null;
+	@JkDoc("Version to inject to this build. If 'null' or blank than the version will be the one returned by #version()" )
+	protected String version = null;
 
 	private final JkMultiProjectDependencies explicitMultiProjectDependencies;
 
@@ -65,23 +65,23 @@ public class JkBuildDependencySupport extends JkBuild {
 	/**
 	 * The current version for this project. It has to be understood as the 'release version',
 	 * as this version will be used to publish artifacts. <br/>
-	 * it may take format as <code>1.0-SNAPSHOT</code>, <code>trunk-SNAPSHOT</code>, <code>1.2.3-rc1</code>, <code>1.2.3</code>, ...
-	 * This may be injected using the 'version' option, otherwise it takes the value returned by {@link #defaultVersion()}
-	 * If not, it takes the result from {@link #defaultVersion()}
+	 * It may take format as <code>1.0-SNAPSHOT</code>, <code>trunk-SNAPSHOT</code>, <code>1.2.3-rc1</code>, <code>1.2.3</code>, ...
+	 * This may be injected using the 'version' option, otherwise it takes the value returned by {@link #version()}
+	 * If not, it takes the result from {@link #version()}
 	 */
-	public final JkVersion version() {
-		if (JkUtilsString.isBlank(this.forcedVersion)) {
-			return defaultVersion();
+	public final JkVersion actualVersion() {
+		if (JkUtilsString.isBlank(this.version)) {
+			return version();
 		}
-		return JkVersion.ofName(forcedVersion);
+		return JkVersion.ofName(version);
 	}
 
 	/**
-	 * Returns the version returned by {@link JkBuildDependencySupport#version()} when not forced.
+	 * Returns the version returned by {@link JkBuildDependencySupport#actualVersion()} when not forced.
 	 * 
-	 * @see #version()
+	 * @see #actualVersion()
 	 */
-	protected JkVersion defaultVersion() {
+	protected JkVersion version() {
 		return JkVersion.fromOptionalResourceOrExplicit(getClass(), "1.0-SNAPSHOT");
 
 	}
@@ -98,7 +98,7 @@ public class JkBuildDependencySupport extends JkBuild {
 	 * Returns moduleId along its version
 	 */
 	protected final JkVersionedModule versionedModule() {
-		return JkVersionedModule.of(moduleId(), version());
+		return JkVersionedModule.of(moduleId(), actualVersion());
 	}
 
 	/**
