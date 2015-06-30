@@ -60,6 +60,13 @@ public final class JkModuleId implements Serializable {
 		return group + "." + name;
 	}
 
+	/**
+	 * Creates a {@link JkVersionedModule} from this module and the specified version.
+	 */
+	public JkVersionedModule version(String version) {
+		return JkVersionedModule.of(this, JkVersion.ofName(version));
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -2,6 +2,7 @@ package org.jerkar.api.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Utility class to deal with time.
@@ -20,8 +21,17 @@ public class JkUtilsTime {
 	/**
 	 * Returns the current system date as string with the specified format
 	 */
-	public static String  now(String pattern) {
+	public static String now(String pattern) {
 		return new SimpleDateFormat(pattern).format(now());
+	}
+
+	/**
+	 * Returns the current system date as string with the specified format
+	 */
+	public static String nowUtc(String pattern) {
+		final SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+		return dateFormat.format(now());
 	}
 
 	/**
