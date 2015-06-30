@@ -181,18 +181,15 @@ class MavenMetadata {
 		private static class Snapshot {
 			private final String timestamp;
 			private final int buildNumber;
-			private final List<SnapshotVersion> snapshotVersions;
 
 			Snapshot(String timestamp, int buildNumber) {
 				this.buildNumber = buildNumber;
 				this.timestamp = timestamp;
-				this.snapshotVersions = new LinkedList<MavenMetadata.Versioning.SnapshotVersion>();
 			}
 
 			Snapshot(Element element) {
 				this.buildNumber = Integer.parseInt(subValue(element, "buildNumber"));
 				this.timestamp = subValue(element, "timestamp");
-				this.snapshotVersions = new LinkedList<MavenMetadata.Versioning.SnapshotVersion>();
 			}
 
 			void write(XMLStreamWriter writer) throws XMLStreamException {
