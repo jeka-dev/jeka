@@ -7,7 +7,7 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkMavenPublication;
 import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
 import org.jerkar.api.depmanagement.JkVersion;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
  * This build demonstrate how to specified project metadata required to publish on 

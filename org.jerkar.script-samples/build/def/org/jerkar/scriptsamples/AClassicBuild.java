@@ -6,7 +6,7 @@ import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 import static org.jerkar.api.depmanagement.JkPopularModules.MOCKITO_ALL;
 
 import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
  * This build is equivalent to {@link MavenStyleBuild} but removing 

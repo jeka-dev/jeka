@@ -1,10 +1,10 @@
-package org.jerkar.tool.builtins.jee;
+package org.jerkar.tool.builtins.javabuild.jee;
 
 import java.io.File;
 
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 
 /**

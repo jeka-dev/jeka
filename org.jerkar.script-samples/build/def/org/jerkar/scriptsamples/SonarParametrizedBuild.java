@@ -8,7 +8,7 @@ import org.jerkar.plugins.jacoco.JkBuildPluginJacoco;
 import org.jerkar.plugins.sonar.JkBuildPluginSonar;
 import org.jerkar.plugins.sonar.JkSonar;
 import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
  * This build clean, compile,test launch sonar analyse by default.

@@ -5,15 +5,19 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.tool.JkUtilsTool;
 
 
 public class JkIvyPublisherRunner {
 
 	public static void main(String[] args) {
+		JkLog.verbose(true);
+		JkUtilsTool.loadUserSystemProperties();
+		testPublishIvy();
 		testPublishMaven();
 	}
-
 
 	public static void testPublishIvy() {
 		final IvyPublisher jkIvyResolver = IvyPublisher.of(ivyRepos(), new File("build/output/test-out"));
@@ -29,7 +33,7 @@ public class JkIvyPublisherRunner {
 		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup2", "mymodule2"), JkVersion.ofName("0.0.1"));
 		final JkMavenPublication publication = JkMavenPublication.of("mymodule2", sampleJarfile()).and(sampleJarSourcefile(), "source");
 		final JkDependencies deps = JkDependencies.builder()
-				.on("org.springframework", "spring-jdbc", "3.0.+").scope(JkScopedDependencyTest.COMPILE).build();
+				.on("org.springframeworko", "spring-jdbc", "2.0.+").scope(JkScopedDependencyTest.COMPILE).build();
 		jkIvyResolver.publishMaven(versionedModule, publication,deps, new Date());
 	}
 

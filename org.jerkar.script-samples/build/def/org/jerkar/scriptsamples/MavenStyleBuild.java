@@ -11,7 +11,7 @@ import org.jerkar.api.depmanagement.JkPublishRepos;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkVersion;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
  * Build sample for a jar project depending on several external modules. This
@@ -54,9 +54,10 @@ public class MavenStyleBuild extends JkJavaBuild {
 	
 	@Override
 	protected JkPublishRepos publishRepositories() {
-		return JkPublishRepos.ofSnapshotAndRelease(
-				JkRepo.maven("http://my.snapshot.repo"), false, 
-				JkRepo.ivy("http://my.release.repo"));
+		return JkPublishRepos.of(
+				JkRepo.maven("http://my.snapshot.repo").asPublishSnapshotRepo())
+				.and( 
+				JkRepo.ivy("http://my.release.repo").asPublishReleaseRepo());
 	}
 
 }

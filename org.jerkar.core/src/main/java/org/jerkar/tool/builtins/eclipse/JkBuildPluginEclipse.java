@@ -8,8 +8,8 @@ import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkException;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuildPlugin;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
 
 /**
  * Plugin for Eclipse IDE.

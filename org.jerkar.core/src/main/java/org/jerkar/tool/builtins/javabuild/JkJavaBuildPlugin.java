@@ -1,4 +1,4 @@
-package org.jerkar.tool.builtins.templates.javabuild;
+package org.jerkar.tool.builtins.javabuild;
 
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.java.junit.JkUnit;

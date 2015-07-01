@@ -33,7 +33,7 @@ import org.jerkar.tool.JkConstants;
 import org.jerkar.tool.JkException;
 import org.jerkar.tool.JkOptions;
 import org.jerkar.tool.builtins.eclipse.DotClasspath.ClasspathEntry.Kind;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

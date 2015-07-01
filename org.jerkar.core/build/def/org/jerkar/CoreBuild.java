@@ -6,7 +6,7 @@ import java.util.zip.Deflater;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaPacker;
+import org.jerkar.tool.builtins.javabuild.JkJavaPacker;
 
 /**
  * Build class for Jerkar itself.

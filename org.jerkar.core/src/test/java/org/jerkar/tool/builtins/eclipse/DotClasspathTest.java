@@ -13,7 +13,7 @@ import org.jerkar.tool.builtins.eclipse.DotClasspath;
 import org.jerkar.tool.builtins.eclipse.Lib;
 import org.jerkar.tool.builtins.eclipse.ScopeResolverSmart;
 import org.jerkar.tool.builtins.eclipse.Sources;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Test;
 
 public class DotClasspathTest {

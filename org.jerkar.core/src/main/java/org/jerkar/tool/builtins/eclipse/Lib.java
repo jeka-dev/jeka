@@ -8,7 +8,7 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.tool.JkLocator;
 import org.jerkar.tool.JkProjectDependency;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 class Lib {
 

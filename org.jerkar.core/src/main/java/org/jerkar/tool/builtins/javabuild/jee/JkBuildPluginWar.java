@@ -1,4 +1,4 @@
-package org.jerkar.tool.builtins.jee;
+package org.jerkar.tool.builtins.javabuild.jee;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,10 +8,10 @@ import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkScaffolder;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuildPlugin;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaPacker;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaPacker.Extra;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
+import org.jerkar.tool.builtins.javabuild.JkJavaPacker;
+import org.jerkar.tool.builtins.javabuild.JkJavaPacker.Extra;
 
 public class JkBuildPluginWar extends JkJavaBuildPlugin {
 

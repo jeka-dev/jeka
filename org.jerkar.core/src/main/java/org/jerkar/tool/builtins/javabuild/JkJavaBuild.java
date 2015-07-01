@@ -1,4 +1,4 @@
-package org.jerkar.tool.builtins.templates.javabuild;
+package org.jerkar.tool.builtins.javabuild;
 
 import java.io.File;
 import java.util.Date;

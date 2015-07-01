@@ -7,7 +7,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.builtins.eclipse.DotClasspath.ClasspathEntry;
 import org.jerkar.tool.builtins.eclipse.DotClasspath.ClasspathEntry.Kind;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 class ScopeResolverSmart implements ScopeResolver {
 

@@ -14,7 +14,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkImport;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
  * This build demonstrate how to use 3rd party dependencies in your build.

@@ -3,7 +3,6 @@ package org.jerkar.api.depmanagement;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -23,18 +22,14 @@ import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.settings.IvySettings;
-import org.apache.ivy.plugins.parser.m2.PomModuleDescriptorWriter;
-import org.apache.ivy.plugins.parser.m2.PomWriterOptions;
 import org.apache.ivy.plugins.resolver.AbstractPatternsBasedResolver;
 import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.jerkar.api.crypto.pgp.JkPgp;
-import org.jerkar.api.depmanagement.JkPublishRepos.JkPublishRepo;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
-import org.jerkar.api.utils.JkUtilsTime;
 
 /**
  * Jerkar users : This class is not part of the public API !!! Please, Use {@link JkPublisher} instead.
@@ -144,7 +139,6 @@ final class IvyPublisher implements InternalPublisher {
 		final JkDependencies publishedDependencies = resolveDependencies(versionedModule, dependencies);
 		final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication,
 				publishedDependencies,deliveryDate);
-
 		publishMavenArtifacts(publication, deliveryDate, moduleDescriptor);
 		JkLog.done();
 	}
@@ -250,8 +244,9 @@ final class IvyPublisher implements InternalPublisher {
 			final JkVersionedModule jkModule = IvyTranslations.toJerkarVersionedModule(moduleDescriptor.getModuleRevisionId());
 			if (isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
 				JkLog.startln("Publishing for repository " + resolver);
-				this.publishMavenArtifacts(resolver, publication, date, moduleDescriptor, CheckFileFlag.of(publishRepo),
-						publishRepo.snapshotTimestampPattern());
+				final CheckFileFlag checkFileFlag = CheckFileFlag.of(publishRepo);
+				final IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(checkFileFlag, resolver, descriptorOutputDir);
+				ivyPublisherForMaven.publish(moduleDescriptor, publication, date);
 				JkLog.done();
 				count ++;
 			}
@@ -259,67 +254,6 @@ final class IvyPublisher implements InternalPublisher {
 		return count;
 	}
 
-	private void publishMavenArtifacts(DependencyResolver resolver, JkMavenPublication publication, Date date, DefaultModuleDescriptor moduleDescriptor, CheckFileFlag checkProducer, String timestampPattern) {
-		ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
-		ivyModuleRevisionId = withPattern(ivyModuleRevisionId, timestampPattern, JkUtilsTime.now());
-		try {
-			resolver.beginPublishTransaction(ivyModuleRevisionId, true);
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
-		try {
-			final File pomXml = new File(targetDir(), "pom.xml");
-			final String packaging = JkUtilsString.substringAfterLast(publication.mainArtifactFile().getName(),".");
-			final Artifact artifact = new DefaultArtifact(ivyModuleRevisionId, date, publication.artifactName(), "pom", "pom", true);
-			final PomWriterOptions pomWriterOptions = new PomWriterOptions();
-			pomWriterOptions.setArtifactPackaging(packaging);
-			File fileToDelete = null;
-			if (publication.extraInfo() != null) {
-				final File template = PomTemplateGenerator.generateTemplate(publication.extraInfo());
-				pomWriterOptions.setTemplate(template);
-				fileToDelete = template;
-			}
-			JkLog.info("Creating " + pomXml.getAbsolutePath());
-			PomModuleDescriptorWriter.write(moduleDescriptor, pomXml, pomWriterOptions);
-
-			if (fileToDelete != null) {
-				JkUtilsFile.delete(fileToDelete);
-			}
-			resolver.publish(artifact, pomXml, true);
-			checkProducer.publishChecks(resolver, artifact, pomXml);
-
-			final Artifact mavenMainArtifact = IvyTranslations.toPublishedMavenArtifact(publication.mainArtifactFile(), publication.artifactName(),
-					null, ivyModuleRevisionId, date);
-			resolver.publish(mavenMainArtifact, publication.mainArtifactFile(), true);
-			checkProducer.publishChecks(resolver, mavenMainArtifact, publication.mainArtifactFile());
-
-			for (final Map.Entry<String, File> extraArtifact : publication.extraArtifacts().entrySet()) {
-				final String classifier = extraArtifact.getKey();
-				final File file = extraArtifact.getValue();
-				final Artifact mavenArtifact = IvyTranslations.toPublishedMavenArtifact(file, publication.artifactName(),
-						classifier, ivyModuleRevisionId, date);
-				resolver.publish(mavenArtifact, file, true);
-				checkProducer.publishChecks(resolver, mavenArtifact, file);
-			}
-
-
-		} catch (final Exception e) {
-			abortPublishTransaction(resolver);
-			throw JkUtilsThrowable.unchecked(e);
-		}
-		commitPublication(resolver);
-	}
-
-	private static ModuleRevisionId withPattern(ModuleRevisionId original, String pattern, Date time) {
-		if (pattern == null) {
-			return original;
-		}
-		if (original.getRevision().contains("-SNAPSHOT")) {
-			final String newRev = original.getRevision().replace("-SNAPSHOT", "-" + new SimpleDateFormat(pattern).format(time));
-			return ModuleRevisionId.newInstance(original, newRev);
-		}
-		return original;
-	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static Artifact withExtension(Artifact ar, String ext) {
@@ -419,7 +353,7 @@ final class IvyPublisher implements InternalPublisher {
 		}
 	}
 
-	private static class CheckFileFlag {
+	static class CheckFileFlag {
 
 		private JkPgp pgpSigner;
 

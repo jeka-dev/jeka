@@ -144,7 +144,8 @@ public class JkBuildDependencySupport extends JkBuild {
 		final JkRepo publishRepo = JkRepo.firstNonNull(defaultPublishRepo, defaultDownloadRepo);
 		final JkRepo releaseRepo = JkRepo.firstNonNull(defaultPublishReleaseRepo, publishRepo);
 
-		return JkPublishRepos.ofSnapshotAndRelease(publishRepo, false, releaseRepo);
+		return JkPublishRepos.of(publishRepo.asPublishSnapshotRepo())
+				.and(releaseRepo.asPublishReleaseRepo());
 	}
 
 	/**

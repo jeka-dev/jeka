@@ -57,7 +57,7 @@ class Main {
 
 	private static LoadResult loadOptionsAndSysprops(String[] args) {
 		final Map<String, String> sysProps = getSpecifiedSystemProps(args);
-		setSystemProperties(sysProps);
+		JkUtilsTool.setSystemProperties(sysProps);
 		final Map<String, String> optionMap = new HashMap<String, String>();
 		optionMap.putAll(loadOptionsProperties());
 		final CommandLine commandLine = CommandLine.of(args);
@@ -97,10 +97,7 @@ class Main {
 		if (propFile.exists()) {
 			result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
 		}
-		final File userPropFile = new File(JkLocator.jerkarUserHome(), "system.properties");
-		if (userPropFile.exists()) {
-			result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
-		}
+		result.putAll(JkUtilsTool.userSystemProperties());
 		for (final String arg : args) {
 			if (arg.startsWith("-D")) {
 				final int equalIndex = arg.indexOf("=");
@@ -118,11 +115,6 @@ class Main {
 
 	}
 
-	private static void setSystemProperties(Map<String, String> props) {
-		for (final Map.Entry<String, String> entry : props.entrySet()) {
-			System.setProperty(entry.getKey(), entry.getValue());
-		}
-	}
 
 	private static Map<String, String> loadOptionsProperties() {
 		final File propFile = new File(JkLocator.jerkarHome(), "options.properties");

@@ -100,7 +100,4 @@ public final class JkMavenPublication implements Serializable {
 	}
 
 
-
-
-
 }

@@ -7,7 +7,7 @@ import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkOptions;
-import org.jerkar.tool.builtins.templates.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
  * Build settings shared across all Jerkar java projects

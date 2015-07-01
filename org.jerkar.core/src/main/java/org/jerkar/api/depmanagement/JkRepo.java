@@ -66,6 +66,18 @@ public abstract class JkRepo implements Serializable {
 		return maven(JkMavenRepository.JCENTERL_URL.toString());
 	}
 
+	public JkPublishRepo asPublishRepo() {
+		return JkPublishRepo.of(this);
+	}
+
+	public JkPublishRepo asPublishSnapshotRepo() {
+		return JkPublishRepo.ofSnapshot(this);
+	}
+
+	public JkPublishRepo asPublishReleaseRepo() {
+		return JkPublishRepo.ofRelease(this);
+	}
+
 	public static JkRepo of(String url) {
 		if (url.toLowerCase().startsWith("ivy:")) {
 			return JkRepo.ivy(url.substring(4));
@@ -255,6 +267,8 @@ public abstract class JkRepo implements Serializable {
 		public JkRepo withRealm(String realm) {
 			return new JkIvyRepository(this.url(), realm, this.userName(), this.password(), this.artifactPatterns, this.ivyPatterns);
 		}
+
+
 	}
 
 }

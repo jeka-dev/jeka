@@ -3,12 +3,14 @@ package org.jerkar.api.depmanagement;
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.Configuration;
@@ -26,7 +28,6 @@ import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.FileSystemResolver;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
 import org.apache.ivy.util.url.CredentialsStore;
-import org.jerkar.api.depmanagement.JkPublishRepos.JkPublishRepo;
 import org.jerkar.api.depmanagement.JkRepo.JkIvyRepository;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -73,10 +74,10 @@ final class IvyTranslations {
 	 * @param scopedDependency
 	 *            must be of {@link JkExternalModule}
 	 */
-	private static DependencyDescriptor to(JkScopedDependency scopedDependency, JkScope defaultScope,
+	private static DependencyDescriptor toDependencyDescriptor(JkScopedDependency scopedDependency, JkScope defaultScope,
 			JkScopeMapping defaultMapping) {
 		final JkExternalModule externalModule = (JkExternalModule) scopedDependency.dependency();
-		final ModuleRevisionId moduleRevisionId = to(externalModule);
+		final ModuleRevisionId moduleRevisionId = toModuleRevisionId(externalModule);
 		final boolean changing = externalModule.versionRange().definition().endsWith("-SNAPSHOT");
 		final DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null, moduleRevisionId, false,
 				changing, externalModule.transitive());
@@ -130,7 +131,7 @@ final class IvyTranslations {
 		return result;
 	}
 
-	private static ModuleRevisionId to(JkExternalModule externalModule) {
+	private static ModuleRevisionId toModuleRevisionId(JkExternalModule externalModule) {
 		return new ModuleRevisionId(toModuleId(externalModule.moduleId()), toString(externalModule.versionRange()));
 	}
 
@@ -153,7 +154,7 @@ final class IvyTranslations {
 
 	// see
 	// http://www.draconianoverlord.com/2010/07/18/publishing-to-maven-repos-with-ivy.html
-	public static DependencyResolver toResolver(JkRepo repo) {
+	public static DependencyResolver toResolver(JkRepo repo, Set<String> digesterAlgorithms) {
 		if (repo instanceof JkRepo.JkMavenRepository) {
 			if (!isFileSystem(repo.url())) {
 				final IBiblioResolver result = new IBiblioResolver();
@@ -170,6 +171,9 @@ final class IvyTranslations {
 				};
 				result.setChangingPattern("\\*-SNAPSHOT");
 				result.setCheckmodified(true);
+				if (!digesterAlgorithms.isEmpty()) {
+					result.setChecksums(JkUtilsString.join(digesterAlgorithms, ","));
+				}
 				return result;
 			}
 			final FileRepository fileRepo = new FileRepository(new File(repo.url().getPath()));
@@ -177,6 +181,9 @@ final class IvyTranslations {
 			result.setRepository(fileRepo);
 			result.addArtifactPattern(completePattern(repo.url().getPath(), MAVEN_ARTIFACT_PATTERN));
 			result.setM2compatible(true);
+			if (!digesterAlgorithms.isEmpty()) {
+				result.setChecksums(JkUtilsString.join(digesterAlgorithms, ","));
+			}
 			return result;
 		}
 		final JkIvyRepository jkIvyRepo = (JkIvyRepository) repo;
@@ -190,10 +197,15 @@ final class IvyTranslations {
 			for (final String pattern : jkIvyRepo.ivyPatterns()) {
 				result.addIvyPattern(completePattern(repo.url().getPath(), pattern));
 			}
+			if (!digesterAlgorithms.isEmpty()) {
+				result.setChecksums(JkUtilsString.join(digesterAlgorithms, ","));
+			}
 			return result;
 		}
 		throw new IllegalStateException(repo + " not handled by translator.");
 	}
+
+
 
 	private static boolean isFileSystem(URL url) {
 		return url.getProtocol().equals("file");
@@ -212,7 +224,7 @@ final class IvyTranslations {
 
 	public static void populateIvySettingsWithPublishRepo(IvySettings ivySettings, JkPublishRepos repos) {
 		for (final JkPublishRepo repo : repos) {
-			final DependencyResolver resolver = toResolver(repo.repo());
+			final DependencyResolver resolver = toResolver(repo.repo(), repo.digesterAlgorithms());
 			resolver.setName(PUBLISH_RESOLVER_NAME + repo.repo().url());
 			ivySettings.addResolver(resolver);
 		}
@@ -233,10 +245,11 @@ final class IvyTranslations {
 		return resolvers;
 	}
 
+	@SuppressWarnings("unchecked")
 	private static ChainResolver toChainResolver(JkRepos repos) {
 		final ChainResolver chainResolver = new ChainResolver();
 		for (final JkRepo jkRepo : repos) {
-			final DependencyResolver resolver = toResolver(jkRepo);
+			final DependencyResolver resolver = toResolver(jkRepo, Collections.EMPTY_SET);
 			resolver.setName(jkRepo.toString());
 			chainResolver.add(resolver);
 		}
@@ -286,7 +299,7 @@ final class IvyTranslations {
 		// Add dependencies
 		for (final JkScopedDependency scopedDependency : dependencies) {
 			if (scopedDependency.dependency() instanceof JkExternalModule) {
-				final DependencyDescriptor dependencyDescriptor = to(scopedDependency, defaultScope, defaultMapping);
+				final DependencyDescriptor dependencyDescriptor = toDependencyDescriptor(scopedDependency, defaultScope, defaultMapping);
 				moduleDescriptor.addDependency(dependencyDescriptor);
 			}
 		}
