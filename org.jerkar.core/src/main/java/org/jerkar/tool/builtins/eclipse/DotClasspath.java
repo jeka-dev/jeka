@@ -21,7 +21,10 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.jerkar.api.depmanagement.JkArtifact;
 import org.jerkar.api.depmanagement.JkAttachedArtifacts;
+import org.jerkar.api.depmanagement.JkModuleId;
+import org.jerkar.api.depmanagement.JkResolveResult;
 import org.jerkar.api.depmanagement.JkScope;
+import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.system.JkLog;
@@ -453,16 +456,15 @@ final class DotClasspath {
 		}
 
 		// Write entries for external module deps
-		Set<JkArtifact> depAsArtifacts = new HashSet<JkArtifact>();
+		JkResolveResult resolveResult = JkResolveResult.empty();
 		if (build.dependencyResolver().isManagedDependencyResolver()) {
-			depAsArtifacts = build.dependencyResolver().resolveManagedDependencies(JkJavaBuild.RUNTIME,
+			resolveResult = build.dependencyResolver().resolveManagedDependencies(JkJavaBuild.RUNTIME,
 					JkJavaBuild.PROVIDED, JkJavaBuild.TEST);
-			writeExternalModuleEntries(build, writer, depAsArtifacts);
+			writeExternalModuleEntries(build, writer, resolveResult);
 		}
 		if (build.scriptDependencyResolver().isManagedDependencyResolver()) {
-			final Set<JkArtifact> scriptDepArtifacts = build.scriptDependencyResolver().resolveManagedDependencies(JkScope.BUILD);
-			scriptDepArtifacts.removeAll(depAsArtifacts);
-			writeExternalModuleEntries(build, writer, scriptDepArtifacts);
+			final JkResolveResult buildresolve = build.scriptDependencyResolver().resolveManagedDependencies(JkScope.BUILD);
+			writeExternalModuleEntries(build, writer, buildresolve);
 		}
 
 		// Write entries for file dependencies
@@ -472,27 +474,29 @@ final class DotClasspath {
 	}
 
 	private static void writeExternalModuleEntries(JkJavaBuild build,
-			final XMLStreamWriter writer, final Set<JkArtifact> depAsArtifacts)
+			final XMLStreamWriter writer, JkResolveResult resolveResult)
 					throws XMLStreamException {
 		final JkAttachedArtifacts jkAttachedArtifacts = build.dependencyResolver().getAttachedArtifacts(
-				JkArtifact.versionedModules(depAsArtifacts), JkJavaBuild.SOURCES, JkJavaBuild.JAVADOC);
+				new HashSet<JkVersionedModule>(resolveResult.involvedModules()),
+				JkJavaBuild.SOURCES, JkJavaBuild.JAVADOC);
 
-		for (final JkArtifact artifact : depAsArtifacts) {
-			final Set<JkArtifact> sourcesArtifacts = jkAttachedArtifacts.getArtifacts(artifact.versionedModule().moduleId(), JkJavaBuild.SOURCES);
+		for (final JkVersionedModule versionedModule : resolveResult.involvedModules()) {
+			final JkModuleId moduleId = versionedModule.moduleId();
+			final Set<JkArtifact> sourcesArtifacts = jkAttachedArtifacts.getArtifacts(moduleId, JkJavaBuild.SOURCES);
 			final File source;
 			if (!sourcesArtifacts.isEmpty()) {
 				source = sourcesArtifacts.iterator().next().localFile();
 			} else {
 				source = null;
 			}
-			final Set<JkArtifact> javadocArtifacts = jkAttachedArtifacts.getArtifacts(artifact.versionedModule().moduleId(), JkJavaBuild.JAVADOC);
+			final Set<JkArtifact> javadocArtifacts = jkAttachedArtifacts.getArtifacts(moduleId, JkJavaBuild.JAVADOC);
 			final File javadoc;
 			if (!javadocArtifacts.isEmpty()) {
 				javadoc = javadocArtifacts.iterator().next().localFile();
 			} else {
 				javadoc = null;
 			}
-			writeClassEntry(writer, artifact.localFile(), source, javadoc);
+			writeClassEntry(writer, resolveResult.filesOf(moduleId).get(0), source, javadoc);
 		}
 	}
 

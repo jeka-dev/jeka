@@ -347,12 +347,12 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	@JkDoc({"Publish the produced artifact to the defined repositories. ",
 	"This can work only if a 'publishable' repository has been defined and the artifact has been generated (pack method)."})
 	public void publish() {
-		final Date date = this.buildTime();
 		if (this.publisher().hasMavenPublishRepo()) {
 			final JkMavenPublication publication = mavenPublication();
-			this.publisher().publishMaven(versionedModule(), publication, dependencyResolver().declaredDependencies(), date);
+			this.publisher().publishMaven(versionedModule(), publication, dependencyResolver().declaredDependencies());
 		}
 		if (this.publisher().hasIvyPublishRepo()) {
+			final Date date = this.buildTime();
 			this.publisher().publishIvy(versionedModule(), ivyPublication(), dependencyResolver().declaredDependencies(), COMPILE, SCOPE_MAPPING, date);
 		}
 	}

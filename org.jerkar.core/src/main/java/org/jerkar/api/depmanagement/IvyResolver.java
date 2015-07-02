@@ -1,8 +1,7 @@
 package org.jerkar.api.depmanagement;
 
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.module.descriptor.Configuration;
@@ -102,12 +101,12 @@ public final class IvyResolver implements InternalDepResolver {
 	}
 
 	@Override
-	public Set<JkArtifact> resolveAnonymous(JkDependencies deps, JkScope resolvedScope, JkResolutionParameters parameters) {
+	public JkResolveResult resolveAnonymous(JkDependencies deps, JkScope resolvedScope, JkResolutionParameters parameters) {
 		return resolve(ANONYMOUS_MODULE, deps, resolvedScope, parameters);
 	}
 
 	@Override
-	public Set<JkArtifact> resolve(JkVersionedModule module, JkDependencies deps, JkScope resolvedScope, JkResolutionParameters parameters) {
+	public JkResolveResult resolve(JkVersionedModule module, JkDependencies deps, JkScope resolvedScope, JkResolutionParameters parameters) {
 		final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationFreeModule(module, deps, parameters.defaultScope(), parameters.defaultMapping());
 
 		final ResolveOptions resolveOptions = new ResolveOptions();
@@ -129,12 +128,13 @@ public final class IvyResolver implements InternalDepResolver {
 
 			throw new IllegalStateException("Errors while resolving dependencies : " + report.getAllProblemMessages());
 		}
-		final Set<JkArtifact> result = new HashSet<JkArtifact>();
 		final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
+		JkResolveResult resolveResult = JkResolveResult.empty();
 		for (final String conf : resolveOptions.getConfs()) {
-			result.addAll(getArtifacts(conf, artifactDownloadReports));
+			final JkResolveResult confResult = getResolveConf(conf, artifactDownloadReports, deps);
+			resolveResult = resolveResult.and(confResult);
 		}
-		return result;
+		return resolveResult;
 	}
 
 	@Override
@@ -168,8 +168,8 @@ public final class IvyResolver implements InternalDepResolver {
 			}
 			final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
 			for (final ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
-				final JkArtifact artifact = IvyTranslations.to(artifactDownloadReport.getArtifact(),
-						artifactDownloadReport.getLocalFile());
+				final JkVersionedModule versionedModule = IvyTranslations.to(artifactDownloadReport.getArtifact());
+				final JkArtifact artifact = JkArtifact.of(versionedModule, artifactDownloadReport.getLocalFile());
 				result.add(scope, artifact);
 			}
 		}
@@ -188,13 +188,22 @@ public final class IvyResolver implements InternalDepResolver {
 		return "download-only";
 	}
 
-	private static Set<JkArtifact> getArtifacts(String config, ArtifactDownloadReport[] artifactDownloadReports) {
-		final Set<JkArtifact> result = new HashSet<JkArtifact>();
+	private static JkResolveResult getResolveConf(String config, ArtifactDownloadReport[] artifactDownloadReports, JkDependencies deps) {
+		final List<JkArtifact> artifacts = new LinkedList<JkArtifact>();
+		JkVersionProvider versionProvider = JkVersionProvider.empty();
 		for (final ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
-			result.add(IvyTranslations.to(artifactDownloadReport.getArtifact(),
-					artifactDownloadReport.getLocalFile()));
+			final JkVersionedModule versionedModule = IvyTranslations.to(artifactDownloadReport.getArtifact());
+			final JkArtifact artifact = JkArtifact.of(versionedModule, artifactDownloadReport.getLocalFile());
+			artifacts.add(artifact);
+			final JkScopedDependency declaredDep = deps.get(versionedModule.moduleId());
+			if (declaredDep != null && declaredDep.isInvolvedIn(JkScope.of(config))) {
+				final JkExternalModule module = (JkExternalModule) declaredDep.dependency();
+				if (module.versionRange().isDynamicAndResovable()) {
+					versionProvider = versionProvider.and(module.moduleId(), versionedModule.version());
+				}
+			}
 		}
-		return result;
+		return JkResolveResult.of(artifacts, versionProvider);
 	}
 
 

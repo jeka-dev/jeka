@@ -7,14 +7,13 @@ import java.util.Date;
 
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.tool.JkUtilsTool;
 
 
 public class JkIvyPublisherRunner {
 
 	public static void main(String[] args) {
 		JkLog.verbose(true);
-		JkUtilsTool.loadUserSystemProperties();
+		//JkUtilsTool.loadUserSystemProperties();
 		testPublishIvy();
 		testPublishMaven();
 	}
@@ -34,7 +33,7 @@ public class JkIvyPublisherRunner {
 		final JkMavenPublication publication = JkMavenPublication.of("mymodule2", sampleJarfile()).and(sampleJarSourcefile(), "source");
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.springframeworko", "spring-jdbc", "2.0.+").scope(JkScopedDependencyTest.COMPILE).build();
-		jkIvyResolver.publishMaven(versionedModule, publication,deps, new Date());
+		jkIvyResolver.publishMaven(versionedModule, publication, deps);
 	}
 
 

@@ -54,7 +54,6 @@ public final class JkDependencyResolver  {
 		return this.dependencies;
 	}
 
-	@SuppressWarnings("unchecked")
 	private List<File> getDeclaredDependencies(JkScope scope) {
 		final List<File> result = new LinkedList<File>();
 
@@ -66,14 +65,13 @@ public final class JkDependencyResolver  {
 		}
 
 		// Add managed dependencies from Ivy
-		final Set<?> artifacts;
+		final JkResolveResult resolveResult;
 		if (module != null) {
-			artifacts = internalResolver.resolve(module, dependencies, scope, parameters);
+			resolveResult = internalResolver.resolve(module, dependencies, scope, parameters);
 		} else {
-			artifacts = internalResolver.resolveAnonymous(dependencies, scope, parameters);
+			resolveResult = internalResolver.resolveAnonymous(dependencies, scope, parameters);
 		}
-		result.addAll(JkArtifact.localFiles((Iterable<JkArtifact>) artifacts));
-		return result;
+		return resolveResult.localFiles();
 	}
 
 
@@ -81,7 +79,7 @@ public final class JkDependencyResolver  {
 	/**
 	 * Resolves the managed dependencies (dependencies declared as external module).
 	 */
-	public Set<JkArtifact> resolveManagedDependencies(JkScope ... scopes) {
+	public JkResolveResult resolveManagedDependencies(JkScope ... scopes) {
 		if (internalResolver == null) {
 			throw new IllegalStateException("This method cannot be invoked on an unmanaged dependency resolver.");
 		}
@@ -90,15 +88,15 @@ public final class JkDependencyResolver  {
 			scopesSet.add(scope);
 			scopesSet.addAll(scope.ancestorScopes());
 		}
-		final Set<JkArtifact> result = new HashSet<JkArtifact>();
+		JkResolveResult resolveResult = JkResolveResult.empty();
 		for (final JkScope scope : scopesSet) {
 			if (module != null) {
-				result.addAll(internalResolver.resolve(module, dependencies, scope, parameters));
+				resolveResult = resolveResult.and(internalResolver.resolve(module, dependencies, scope, parameters));
 			} else {
-				result.addAll(internalResolver.resolveAnonymous(dependencies, scope, parameters));
+				resolveResult = resolveResult.and(internalResolver.resolveAnonymous(dependencies, scope, parameters));
 			}
 		}
-		return result;
+		return resolveResult;
 	}
 
 	/**

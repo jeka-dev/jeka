@@ -6,7 +6,7 @@ interface InternalPublisher {
 
 	void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication, JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate);
 
-	void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication, JkDependencies dependencies, Date deliveryDate);
+	void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication, JkDependencies dependencies);
 
 	boolean hasMavenPublishRepo();
 

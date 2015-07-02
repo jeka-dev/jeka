@@ -30,6 +30,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
+import org.jerkar.api.utils.JkUtilsTime;
 
 /**
  * Jerkar users : This class is not part of the public API !!! Please, Use {@link JkPublisher} instead.
@@ -134,11 +135,12 @@ final class IvyPublisher implements InternalPublisher {
 
 
 	@Override
-	public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication, JkDependencies dependencies, Date deliveryDate) {
+	public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication, JkDependencies dependencies) {
 		JkLog.startln("Publishing for Maven");
-		final JkDependencies publishedDependencies = resolveDependencies(versionedModule, dependencies);
+		final JkDependencies resolvedDependencies = resolveDependencies(versionedModule, dependencies);
+		final Date deliveryDate = JkUtilsTime.now();
 		final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication,
-				publishedDependencies,deliveryDate);
+				resolvedDependencies,deliveryDate);
 		publishMavenArtifacts(publication, deliveryDate, moduleDescriptor);
 		JkLog.done();
 	}

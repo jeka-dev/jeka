@@ -74,8 +74,7 @@ public final class JkPublishRepo implements Serializable {
 
 	/**
 	 * When <code>true</code> the snapshot version are replaced with a timestamped version (ala Maven 3)
-	 * 
-	 * @see http://stackoverflow.com/questions/4275466/how-do-you-deal-with-maven-3-timestamped-snapshots-efficiently
+	 * See http://stackoverflow.com/questions/4275466/how-do-you-deal-with-maven-3-timestamped-snapshots-efficiently
 	 */
 	public boolean uniqueSnapshot() {
 		return uniqueSnapshot;

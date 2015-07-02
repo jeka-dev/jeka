@@ -256,12 +256,11 @@ final class IvyTranslations {
 		return chainResolver;
 	}
 
-	public static JkArtifact to(Artifact artifact, File localFile) {
+	public static JkVersionedModule to(Artifact artifact) {
 		final JkModuleId moduleId = JkModuleId.of(artifact.getModuleRevisionId().getOrganisation(), artifact
 				.getModuleRevisionId().getName());
-		final JkVersionedModule module = JkVersionedModule.of(moduleId,
+		return JkVersionedModule.of(moduleId,
 				JkVersion.ofName(artifact.getModuleRevisionId().getRevision()));
-		return JkArtifact.of(module, localFile);
 	}
 
 	private static String toIvyExpression(JkScopeMapping scopeMapping) {

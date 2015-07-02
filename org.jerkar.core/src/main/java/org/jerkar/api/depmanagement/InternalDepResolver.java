@@ -3,7 +3,6 @@ package org.jerkar.api.depmanagement;
 /**
  * Not part of the public API.
  */
-import java.util.Set;
 
 interface InternalDepResolver {
 
@@ -11,10 +10,10 @@ interface InternalDepResolver {
 
 	boolean hasIvyPublishRepo();
 
-	Set<JkArtifact> resolveAnonymous(JkDependencies deps,
+	JkResolveResult resolveAnonymous(JkDependencies deps,
 			JkScope resolvedScope, JkResolutionParameters parameters);
 
-	Set<JkArtifact> resolve(JkVersionedModule module, JkDependencies deps,
+	JkResolveResult resolve(JkVersionedModule module, JkDependencies deps,
 			JkScope resolvedScope, JkResolutionParameters parameters);
 
 	/**
