@@ -2,12 +2,9 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.IvyPatternHelper;
@@ -19,16 +16,12 @@ import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.MDArtifact;
 import org.apache.ivy.core.module.descriptor.ModuleDescriptor;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
-import org.apache.ivy.core.report.ResolveReport;
-import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.resolver.AbstractPatternsBasedResolver;
 import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
 import org.jerkar.api.utils.JkUtilsTime;
 
@@ -137,58 +130,14 @@ final class IvyPublisher implements InternalPublisher {
 	@Override
 	public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication, JkDependencies dependencies) {
 		JkLog.startln("Publishing for Maven");
-		final JkDependencies resolvedDependencies = resolveDependencies(versionedModule, dependencies);
+		//final JkDependencies resolvedDependencies = resolveDependencies(versionedModule, dependencies);
 		final Date deliveryDate = JkUtilsTime.now();
 		final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication,
-				resolvedDependencies,deliveryDate);
+				dependencies,deliveryDate);
 		publishMavenArtifacts(publication, deliveryDate, moduleDescriptor);
 		JkLog.done();
 	}
 
-	@SuppressWarnings("unchecked")
-	private JkDependencies resolveDependencies(JkVersionedModule module, JkDependencies dependencies) {
-		if (!dependencies.hasDynamicAndResovableVersions()) {
-			return dependencies;
-		}
-		final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(module);
-		final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
-		final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
-		final File cachedPropFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
-		if (!cachedIvyFile.exists() || !cachedPropFile.exists()) {
-			JkLog.start("Cached resolved ivy file not found for " + module + ". Performing a fresh resolve");
-			final ModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationFreeModule(module, dependencies, null, null);
-			final ResolveOptions resolveOptions = new ResolveOptions();
-			resolveOptions.setConfs(new String[] {"*"});
-			resolveOptions.setTransitive(false);
-			resolveOptions.setOutputReport(JkLog.verbose());
-			resolveOptions.setLog(logLevel());
-			resolveOptions.setRefresh(true);
-			final ResolveReport report;
-			try {
-				report = ivy.resolve(moduleDescriptor, resolveOptions);
-			} catch (final Exception e1) {
-				throw new IllegalStateException(e1);
-			} finally {
-				JkLog.done();
-			}
-			if (report.hasError()) {
-				JkLog.error(report.getAllProblemMessages());
-				cachedIvyFile.delete();
-				throw new IllegalStateException("Error while reloving dependencies : "
-						+ JkUtilsString.join(report.getAllProblemMessages(), ", "));
-			}
-		}
-		try {
-			cacheManager.getResolvedModuleDescriptor(moduleRevisionId);
-		} catch (final ParseException e) {
-			throw new IllegalStateException(e);
-		} catch (final IOException e) {
-			throw new IllegalStateException(e);
-		}
-		final Properties props = JkUtilsFile.readPropertyFile(cachedPropFile);
-		final Map<JkModuleId, JkVersion> resolvedVersions = IvyTranslations.toModuleVersionMap(props);
-		return dependencies.resolvedWith(resolvedVersions);
-	}
 
 	private int publishIvyArtifacts(JkIvyPublication publication, Date date, ModuleDescriptor moduleDescriptor) {
 		int count = 0;
@@ -276,21 +225,21 @@ final class IvyPublisher implements InternalPublisher {
 		final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(jkVersionedModule);
 
 		// First : update the module ivy cache.
-		final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
-		final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
-		final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
+		//final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
+		//final File cachedIvyFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
+		//final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
 		final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationFreeModule(jkVersionedModule, dependencies, defaultScope, defaultMapping);
 		IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
-		try {
-			cacheManager.saveResolvedModuleDescriptor(moduleDescriptor);
+		/*try {
+			/cacheManager.saveResolvedModuleDescriptor(moduleDescriptor);
 		} catch (final Exception e) {
 			cachedIvyFile.delete();
 			propsFile.delete();
 			throw new RuntimeException("Error while creating cache file for " + moduleRevisionId + ". Deleting potentially corrupted cache files.", e);
-		}
+		}*/
 
 		// Second : update the module property cache (by invoking resolution)
-		this.resolveDependencies(jkVersionedModule, dependencies);
+		//this.resolveDependencies(jkVersionedModule, dependencies);
 
 		// Third : invoke the deliver process in order to generate the module ivy file.
 		final DeliverOptions deliverOptions = new DeliverOptions();
@@ -336,15 +285,6 @@ final class IvyPublisher implements InternalPublisher {
 		return this.descriptorOutputDir.getAbsolutePath();
 	}
 
-	private static String logLevel() {
-		if (JkLog.silent()) {
-			return "quiet";
-		}
-		if (JkLog.verbose()) {
-			return "default";
-		}
-		return "download-only";
-	}
 
 
 	private static void commitPublication(DependencyResolver resolver) {
