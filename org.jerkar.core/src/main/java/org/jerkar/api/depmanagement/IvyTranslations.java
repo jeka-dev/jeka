@@ -280,7 +280,7 @@ final class IvyTranslations {
 			JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping) {
 
 		// Add configuration definitions
-		for (final JkScope involvedScope : dependencies.declaredScopes()) {
+		for (final JkScope involvedScope : dependencies.involvedScopes()) {
 			final Configuration configuration = toConfiguration(involvedScope);
 			moduleDescriptor.addConfiguration(configuration);
 		}
@@ -347,13 +347,13 @@ final class IvyTranslations {
 	public static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
 			JkIvyPublication publication, Date publishDate) {
 		for (final JkIvyPublication.Artifact artifact : publication) {
-			for (final JkScope jkScope : artifact.jkScopes) {
+			for (final JkScope jkScope : JkScope.involvedScopes(artifact.jkScopes)) {
 				if (!Arrays.asList(descriptor.getConfigurations()).contains(jkScope.name())) {
 					descriptor.addConfiguration(toConfiguration(jkScope));
 				}
 			}
 			final Artifact ivyArtifact = toPublishedArtifact(artifact, descriptor.getModuleRevisionId(), publishDate);
-			for (final JkScope jkScope : artifact.jkScopes) {
+			for (final JkScope jkScope : JkScope.involvedScopes(artifact.jkScopes)) {
 				descriptor.addArtifact(jkScope.name(), ivyArtifact);
 			}
 		}

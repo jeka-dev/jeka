@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -156,6 +157,14 @@ public class JkScope implements Serializable {
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	public static Set<JkScope> involvedScopes(Iterable<JkScope> scopes) {
+		final Set<JkScope> result = JkUtilsIterable.setOf(scopes);
+		for (final JkScope jkScope : scopes) {
+			result.addAll(jkScope.ancestorScopes());
+		}
+		return result;
 	}
 
 	/**

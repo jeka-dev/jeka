@@ -195,6 +195,10 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		return Collections.unmodifiableSet(result);
 	}
 
+	public Set<JkScope> involvedScopes() {
+		return JkScope.involvedScopes(declaredScopes());
+	}
+
 	/**
 	 * Returns <code>true</code> if this object contains dependency on external module whose rely
 	 * on dynamic version. It can be either dynamic version has defined by Ivy (as "1.3.+", "[1.0, 2.0[" ,...)

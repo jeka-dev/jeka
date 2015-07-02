@@ -9,7 +9,6 @@ import java.util.List;
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.IvyPatternHelper;
 import org.apache.ivy.core.cache.ResolutionCacheManager;
-import org.apache.ivy.core.deliver.DeliverOptions;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.DefaultArtifact;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
@@ -242,6 +241,7 @@ final class IvyPublisher implements InternalPublisher {
 		//this.resolveDependencies(jkVersionedModule, dependencies);
 
 		// Third : invoke the deliver process in order to generate the module ivy file.
+		/*
 		final DeliverOptions deliverOptions = new DeliverOptions();
 		if (publication.status != null) {
 			deliverOptions.setStatus(publication.status.name());
@@ -253,7 +253,7 @@ final class IvyPublisher implements InternalPublisher {
 		} catch (final Exception e) {
 			throw JkUtilsThrowable.unchecked(e);
 		}
-
+		 */
 		return moduleDescriptor;
 	}
 
