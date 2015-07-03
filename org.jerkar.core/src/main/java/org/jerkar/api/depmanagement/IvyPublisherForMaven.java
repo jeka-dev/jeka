@@ -46,8 +46,8 @@ final class IvyPublisherForMaven {
 	 * Publish to maven repositories
 	 */
 	void publish(DefaultModuleDescriptor moduleDescriptor, JkMavenPublication publication, Date date) {
-		ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
-		ivyModuleRevisionId = withPattern(ivyModuleRevisionId, TS_PATTERN, JkUtilsTime.now());
+		final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
+		final ModuleRevisionId tsModuleRevisionId = withPattern(ivyModuleRevisionId, TS_PATTERN, JkUtilsTime.now());
 		try {
 			resolver.beginPublishTransaction(ivyModuleRevisionId, true);
 		} catch (final IOException e) {
