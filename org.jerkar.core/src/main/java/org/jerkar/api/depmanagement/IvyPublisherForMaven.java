@@ -2,7 +2,6 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
@@ -20,14 +19,11 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
-import org.jerkar.api.utils.JkUtilsTime;
 
 /**
  * {@link IvyPublisher} delegates to this class for publishing to Maven repositories.
  */
 final class IvyPublisherForMaven {
-
-	private static final String TS_PATTERN = "yyyyMMdd.HHmmss";
 
 	private final DependencyResolver resolver;
 
@@ -47,7 +43,6 @@ final class IvyPublisherForMaven {
 	 */
 	void publish(DefaultModuleDescriptor moduleDescriptor, JkMavenPublication publication, Date date) {
 		final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
-		final ModuleRevisionId tsModuleRevisionId = withPattern(ivyModuleRevisionId, TS_PATTERN, JkUtilsTime.now());
 		try {
 			resolver.beginPublishTransaction(ivyModuleRevisionId, true);
 		} catch (final IOException e) {
@@ -99,18 +94,6 @@ final class IvyPublisherForMaven {
 		}
 		commitPublication(resolver);
 	}
-
-	private static ModuleRevisionId withPattern(ModuleRevisionId original, String pattern, Date time) {
-		if (pattern == null) {
-			return original;
-		}
-		if (original.getRevision().contains("-SNAPSHOT")) {
-			final String newRev = original.getRevision().replace("-SNAPSHOT", "-" + new SimpleDateFormat(pattern).format(time));
-			return ModuleRevisionId.newInstance(original, newRev);
-		}
-		return original;
-	}
-
 
 	private static void abortPublishTransaction(DependencyResolver resolver) {
 		try {

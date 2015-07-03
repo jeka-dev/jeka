@@ -11,18 +11,18 @@ public final class JkAttachedArtifacts implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Map<JkModuleId, Map<JkScope, Set<JkArtifact>>> map= new HashMap<JkModuleId, Map<JkScope,Set<JkArtifact>>>();
+	private final Map<JkModuleId, Map<JkScope, Set<JkModuleDepFile>>> map= new HashMap<JkModuleId, Map<JkScope,Set<JkModuleDepFile>>>();
 
 	public JkAttachedArtifacts() {
 		super();
 	}
 
-	public Set<JkArtifact> getArtifacts(JkModuleId moduleId, JkScope jkScope) {
-		final Map<JkScope, Set<JkArtifact>> subMap = map.get(moduleId);
+	public Set<JkModuleDepFile> getArtifacts(JkModuleId moduleId, JkScope jkScope) {
+		final Map<JkScope, Set<JkModuleDepFile>> subMap = map.get(moduleId);
 		if (subMap == null) {
 			return Collections.emptySet();
 		}
-		final Set<JkArtifact> artifacts = subMap.get(jkScope);
+		final Set<JkModuleDepFile> artifacts = subMap.get(jkScope);
 		if (artifacts == null) {
 			return Collections.emptySet();
 		}
@@ -30,15 +30,15 @@ public final class JkAttachedArtifacts implements Serializable {
 
 	}
 
-	public void add(JkScope scope, JkArtifact artifact) {
-		Map<JkScope, Set<JkArtifact>> subMap = map.get(artifact.versionedModule().moduleId());
+	public void add(JkScope scope, JkModuleDepFile artifact) {
+		Map<JkScope, Set<JkModuleDepFile>> subMap = map.get(artifact.versionedModule().moduleId());
 		if (subMap == null) {
-			subMap = new HashMap<JkScope, Set<JkArtifact>>();
+			subMap = new HashMap<JkScope, Set<JkModuleDepFile>>();
 			map.put(artifact.versionedModule().moduleId(), subMap);
 		}
-		Set<JkArtifact> subArtifacts = subMap.get(scope);
+		Set<JkModuleDepFile> subArtifacts = subMap.get(scope);
 		if (subArtifacts == null) {
-			subArtifacts = new HashSet<JkArtifact>();
+			subArtifacts = new HashSet<JkModuleDepFile>();
 			subMap.put(scope, subArtifacts);
 		}
 		subArtifacts.add(artifact);

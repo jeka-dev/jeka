@@ -170,7 +170,7 @@ public final class IvyResolver implements InternalDepResolver {
 			final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
 			for (final ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
 				final JkVersionedModule versionedModule = IvyTranslations.to(artifactDownloadReport.getArtifact());
-				final JkArtifact artifact = JkArtifact.of(versionedModule, artifactDownloadReport.getLocalFile());
+				final JkModuleDepFile artifact = JkModuleDepFile.of(versionedModule, artifactDownloadReport.getLocalFile());
 				result.add(scope, artifact);
 			}
 		}
@@ -190,11 +190,11 @@ public final class IvyResolver implements InternalDepResolver {
 	}
 
 	private static JkResolveResult getResolveConf(String config, ArtifactDownloadReport[] artifactDownloadReports, JkDependencies deps) {
-		final List<JkArtifact> artifacts = new LinkedList<JkArtifact>();
+		final List<JkModuleDepFile> artifacts = new LinkedList<JkModuleDepFile>();
 		JkVersionProvider versionProvider = JkVersionProvider.empty();
 		for (final ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
 			final JkVersionedModule versionedModule = IvyTranslations.to(artifactDownloadReport.getArtifact());
-			final JkArtifact artifact = JkArtifact.of(versionedModule, artifactDownloadReport.getLocalFile());
+			final JkModuleDepFile artifact = JkModuleDepFile.of(versionedModule, artifactDownloadReport.getLocalFile());
 			artifacts.add(artifact);
 			final JkScopedDependency declaredDep = deps.get(versionedModule.moduleId());
 			if (declaredDep != null && declaredDep.isInvolvedIn(JkScope.of(config))) {

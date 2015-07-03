@@ -19,7 +19,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jerkar.api.depmanagement.JkArtifact;
+import org.jerkar.api.depmanagement.JkModuleDepFile;
 import org.jerkar.api.depmanagement.JkAttachedArtifacts;
 import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkResolveResult;
@@ -482,14 +482,14 @@ final class DotClasspath {
 
 		for (final JkVersionedModule versionedModule : resolveResult.involvedModules()) {
 			final JkModuleId moduleId = versionedModule.moduleId();
-			final Set<JkArtifact> sourcesArtifacts = jkAttachedArtifacts.getArtifacts(moduleId, JkJavaBuild.SOURCES);
+			final Set<JkModuleDepFile> sourcesArtifacts = jkAttachedArtifacts.getArtifacts(moduleId, JkJavaBuild.SOURCES);
 			final File source;
 			if (!sourcesArtifacts.isEmpty()) {
 				source = sourcesArtifacts.iterator().next().localFile();
 			} else {
 				source = null;
 			}
-			final Set<JkArtifact> javadocArtifacts = jkAttachedArtifacts.getArtifacts(moduleId, JkJavaBuild.JAVADOC);
+			final Set<JkModuleDepFile> javadocArtifacts = jkAttachedArtifacts.getArtifacts(moduleId, JkJavaBuild.JAVADOC);
 			final File javadoc;
 			if (!javadocArtifacts.isEmpty()) {
 				javadoc = javadocArtifacts.iterator().next().localFile();
