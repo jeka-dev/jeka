@@ -513,7 +513,8 @@ public final class JkUtilsFile {
 		}
 	}
 
-	public static String md5Checksum(File file) {
+
+	public static String checksum(File file, String algo) {
 		InputStream fis;
 		try {
 			fis = new FileInputStream(file);
@@ -525,7 +526,7 @@ public final class JkUtilsFile {
 		final byte[] buffer = new byte[1024];
 		MessageDigest complete;
 		try {
-			complete = MessageDigest.getInstance("MD5");
+			complete = MessageDigest.getInstance(algo);
 		} catch (final NoSuchAlgorithmException e) {
 			JkUtilsIO.closeQuietly(fis);
 			throw new RuntimeException(e);
@@ -546,6 +547,7 @@ public final class JkUtilsFile {
 		}
 		return result;
 	}
+
 
 	/**
 	 * Same as {@link File#createTempFile(String, String)} but throwing only

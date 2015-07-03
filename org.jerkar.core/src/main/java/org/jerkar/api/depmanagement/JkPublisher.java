@@ -13,7 +13,7 @@ import org.jerkar.api.java.JkClassLoader;
  */
 public final class JkPublisher {
 
-	private static final String IVY_PUB_CLASS = "org.jerkar.api.internal.ivy.IvyPublisher";
+	private static final String IVY_PUB_CLASS = "org.jerkar.api.depmanagement.IvyPublisher";
 
 	private static final JkClassLoader IVY_CLASS_LOADER = IvyClassloader.CLASSLOADER;
 
@@ -33,8 +33,22 @@ public final class JkPublisher {
 		return new JkPublisher(ivyPublisher);
 	}
 
-	public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication, JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate) {
-		this.ivyPublisher.publishIvy(versionedModule, publication, dependencies, defaultScope, defaultMapping, deliveryDate);
+	/**
+	 * Publishes the specified publication to the Ivy repositories defined in this publisher
+	 * @param versionedModule The module id and version to publish
+	 * @param publication The content of the publication
+	 * @param dependencies The dependencies of the modules (necessary to generate an ivy.xml file)
+	 * @param defaultScope The default scope for the dependencies (necessary to generate an ivy.xml file)
+	 * @param defaultMapping
+	 * @param deliveryDate The delivery date (necessary to generate an ivy.xml file)
+	 * @param resolvedVersion If the dependencies contains dynamic versions (as 1.0.+) then you can
+	 * mention a static version replacement. If none, you can just pass {@link JkVersionProvider#empty()}
+	 */
+	public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
+			JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping,
+			Date deliveryDate, JkVersionProvider resolvedVersion) {
+		this.ivyPublisher.publishIvy(versionedModule, publication, dependencies, defaultScope,
+				defaultMapping, deliveryDate, resolvedVersion);
 	}
 
 	/**

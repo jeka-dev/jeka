@@ -1,8 +1,10 @@
 package org.jerkar.tool.builtins.javabuild;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.Deflater;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
@@ -36,7 +38,7 @@ public class JkJavaPacker implements Cloneable {
 
 	private boolean fullName = true;
 
-	private boolean checkSum = false;
+	private final Set<String> checkSums = new HashSet<String>();
 
 	private boolean doJar = true;
 
@@ -98,7 +100,8 @@ public class JkJavaPacker implements Cloneable {
 	public void pack() {
 		JkLog.startln("Packaging module");
 		if (doJar && !JkUtilsFile.isEmpty(build.classDir(), false)) {
-			JkFileTree.of(build.classDir()).zip().to(jarFile(), compressionLevel).md5If(checkSum);
+			JkFileTree.of(build.classDir()).zip().to(jarFile(), compressionLevel)
+			.md5If(checkSums.contains("MD5")).sha1If(checkSums.contains("SHA-1"));
 		}
 		final JkFileTreeSet sourceAndResources = build.sources().and(build.resources());
 		if (doSources && sourceAndResources.countFiles(false) > 0) {
@@ -112,7 +115,8 @@ public class JkJavaPacker implements Cloneable {
 		}
 		if (doFatJar) {
 			JkFileTree.of(build.classDir()).zip().merge(build.depsFor(JkJavaBuild.RUNTIME))
-			.to(fatJarFile(), compressionLevel).md5If(checkSum);
+			.to(fatJarFile(), compressionLevel)
+			.md5If(checkSums.contains("MD5")).sha1If(checkSums.contains("SHA-1"));
 		}
 		for (final Extra action : this.extraActions) {
 			action.process(build);
@@ -169,12 +173,30 @@ public class JkJavaPacker implements Cloneable {
 		}
 
 		/**
-		 * True to generate MD-5 check sum for archives.
+		 * Generate MD-5 check sum for archives.
 		 */
-		public Builder checkSum(boolean checkSum) {
-			packer.checkSum = checkSum;
+		public Builder md5checksum(boolean checkSum) {
+			if (checkSum) {
+				packer.checkSums.add("MD5");
+			} else {
+				packer.checkSums.remove("MD5");
+			}
 			return this;
 		}
+
+
+		/**
+		 * Generate SHA1 check sum for archives.
+		 */
+		public Builder sha1checksum(boolean checkSum) {
+			if (checkSum) {
+				packer.checkSums.add("SHA-1");
+			} else {
+				packer.checkSums.remove("SHA-1");
+			}
+			return this;
+		}
+
 
 		/**
 		 * True to generate a jar file containing both classes and resources.

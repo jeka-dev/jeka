@@ -19,21 +19,25 @@ public class JkIvyPublisherRunner {
 	}
 
 	public static void testPublishIvy() {
-		final IvyPublisher jkIvyResolver = IvyPublisher.of(ivyRepos(), new File("build/output/test-out"));
+		final IvyPublisher jkIvyResolver = IvyPublisher.of(ivyRepos().withSha1Checksum().withMd5Checksum(), new File("build/output/test-out"));
 		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup", "mymodule"), JkVersion.ofName("myVersion"));
 		final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(), JkScopedDependencyTest.COMPILE, JkScopedDependencyTest.TEST);
+		final JkModuleId spring = JkModuleId.of("org.springframework", "spring-jdbc");
 		final JkDependencies deps = JkDependencies.builder()
-				.on("org.springframework", "spring-jdbc", "3.0.+").scope(JkScopedDependencyTest.COMPILE).build();
-		jkIvyResolver.publishIvy(versionedModule, ivyPublication,deps, null, null, new Date());
+				.on(spring, "3.0.+").scope(JkScopedDependencyTest.COMPILE).build();
+		jkIvyResolver.publishIvy(versionedModule, ivyPublication,deps, null, null,
+				new Date(), JkVersionProvider.of(spring, "3.0.8"));
 	}
 
 	public static void testPublishMaven() {
-		final IvyPublisher jkIvyResolver = IvyPublisher.of(mavenRepos(), new File("build/output/test-out"));
+		final IvyPublisher jkIvyResolver = IvyPublisher.of(mavenRepos().withMd5AndSha1Checksum(), new File("build/output/test-out"));
 		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup2", "mymodule2"), JkVersion.ofName("0.0.1"));
 		final JkMavenPublication publication = JkMavenPublication.of("mymodule2", sampleJarfile()).and(sampleJarSourcefile(), "source");
+		final JkModuleId spring = JkModuleId.of("org.springframework", "spring-jdbc");
 		final JkDependencies deps = JkDependencies.builder()
-				.on("org.springframeworko", "spring-jdbc", "2.0.+").scope(JkScopedDependencyTest.COMPILE).build();
-		jkIvyResolver.publishMaven(versionedModule, publication, deps);
+				.on(spring, "2.0.+").scope(JkScopedDependencyTest.COMPILE).build();
+		final JkVersionProvider versionProvider = JkVersionProvider.of(spring, "2.0.5");
+		jkIvyResolver.publishMaven(versionedModule, publication, deps.resolvedWith(versionProvider));
 	}
 
 

@@ -1,7 +1,6 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.Serializable;
-import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -25,7 +24,7 @@ public final class JkPublishRepo implements Serializable {
 	private final JkPgp requirePgpSign;
 
 	// SHA-1, SHA-256, MD5
-	private final Set<String> digesterAlgorithms;
+	private final Set<String> checksumAlgorithms;
 
 	private final boolean uniqueSnapshot;
 
@@ -51,7 +50,7 @@ public final class JkPublishRepo implements Serializable {
 		this.jkRepo = jkRepo;
 		this.filter = filter;
 		this.requirePgpSign = requirePgpSign;
-		this.digesterAlgorithms = Collections.unmodifiableSet(digesters);
+		this.checksumAlgorithms = Collections.unmodifiableSet(digesters);
 		this.uniqueSnapshot = uniqueSnapshot;
 	}
 
@@ -68,8 +67,8 @@ public final class JkPublishRepo implements Serializable {
 		return requirePgpSign;
 	}
 
-	public Set<String> digesterAlgorithms() {
-		return digesterAlgorithms;
+	public Set<String> checksumAlgorithms() {
+		return checksumAlgorithms;
 	}
 
 	/**
@@ -82,31 +81,46 @@ public final class JkPublishRepo implements Serializable {
 
 
 	public JkPublishRepo withSigner(JkPgp signer) {
-		return new JkPublishRepo(jkRepo, filter, signer, digesterAlgorithms, uniqueSnapshot);
+		return new JkPublishRepo(jkRepo, filter, signer, checksumAlgorithms, uniqueSnapshot);
 	}
 
-	/**
+	/*
 	 * Returns a {@link JkPublishRepo} but adding the specified digester algorithms.
 	 * When adding a digester algorith (as MD5 or SHA-1), all the published artifact will be
 	 * hashed with the specified algorithms and the hashes will be published along the artifacts.
 	 * @param algorithms algorithms name as accepted by {@link MessageDigest} constructor.
 	 */
-	public JkPublishRepo andDigesters(String... algorithms) {
-		final HashSet<String> set = new HashSet<String>(this.digesterAlgorithms);
+	private JkPublishRepo andChecksums(String... algorithms) {
+		final HashSet<String> set = new HashSet<String>(this.checksumAlgorithms);
 		set.addAll(Arrays.asList(algorithms));
 		return new JkPublishRepo(jkRepo, filter, requirePgpSign, set, uniqueSnapshot);
 	}
 
-	public JkPublishRepo andMd5Digesters() {
-		return andDigesters("MD5");
+	/**
+	 * Returns a {@link JkPublishRepo} but adding the MD5 checksum algorithm.
+	 * When adding a checksum algorith (as MD5 or SHA-1), all the published artifact will be
+	 * hashed with the specified algorithms and the hashes will be published along the artifacts.
+	 */
+	public JkPublishRepo andMd5Checksum() {
+		return andChecksums("MD5");
 	}
 
-	public JkPublishRepo andSha1Digesters() {
-		return andDigesters("SHA-1");
+	/**
+	 * Same as {@link #andMd5Checksum()} but with SHA-1 algo
+	 */
+	public JkPublishRepo andSha1Checksum() {
+		return andChecksums("SHA-1");
+	}
+
+	/**
+	 * Convenient combination of {@link #andMd5Checksum()} and {@link #andSha1Checksum()}
+	 */
+	public JkPublishRepo andSha1Md5Checksums() {
+		return andSha1Checksum().andMd5Checksum();
 	}
 
 	public JkPublishRepo withUniqueSnapshot(boolean uniqueSnapShot) {
-		return new JkPublishRepo(jkRepo, filter, requirePgpSign, this.digesterAlgorithms, uniqueSnapShot);
+		return new JkPublishRepo(jkRepo, filter, requirePgpSign, this.checksumAlgorithms, uniqueSnapShot);
 	}
 
 }

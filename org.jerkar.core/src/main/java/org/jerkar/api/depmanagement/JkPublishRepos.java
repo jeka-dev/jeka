@@ -37,11 +37,11 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 	public static JkPublishRepos ossrh(String userName, String password, JkPgp pgp) {
 		final JkPublishRepo snapshot = JkPublishRepo.ofSnapshot(
 				JkRepo.mavenOssrhPushSnapshotPullAll(userName, password))
-				.withSigner(pgp).andSha1Digesters().andMd5Digesters()
+				.withSigner(pgp).andSha1Md5Checksums()
 				.withUniqueSnapshot(true);
 		final JkPublishRepo release = JkPublishRepo.ofRelease(
 				JkRepo.mavenOssrhPushRelease(userName, password))
-				.withSigner(pgp).andSha1Digesters().andMd5Digesters()
+				.withSigner(pgp).andSha1Md5Checksums()
 				.withUniqueSnapshot(true);
 		return JkPublishRepos.of(snapshot).and(release);
 	}
@@ -78,6 +78,35 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 		}
 		return new JkPublishRepos(list);
 	}
+
+
+
+	public JkPublishRepos withSha1Checksum() {
+		final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>();
+		for (final JkPublishRepo publishRepo : this.publishRepos) {
+			list.add(publishRepo.andSha1Checksum());
+		}
+		return new JkPublishRepos(list);
+	}
+
+	public JkPublishRepos withMd5Checksum() {
+		final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>();
+		for (final JkPublishRepo publishRepo : this.publishRepos) {
+			list.add(publishRepo.andMd5Checksum());
+		}
+		return new JkPublishRepos(list);
+	}
+
+	public JkPublishRepos withMd5AndSha1Checksum() {
+		final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>();
+		for (final JkPublishRepo publishRepo : this.publishRepos) {
+			list.add(publishRepo.andSha1Md5Checksums());
+		}
+		return new JkPublishRepos(list);
+	}
+
+
+
 
 
 	public JkPublishRepos and(JkPublishRepos others) {

@@ -20,6 +20,18 @@ public final class JkUtilsThrowable {
 		return new RuntimeException(e);
 	}
 
+	/**
+	 * Same as {@link #unchecked(Exception)} but specifying an error message.
+	 */
+	public static RuntimeException unchecked(Exception e, String message) {
+
+		if (e instanceof RuntimeException) {
+			return (RuntimeException) e;
+		}
+		return new RuntimeException(message, e);
+	}
+
+
 	public static boolean nestedContains(Exception e, Class<Exception> exceptionClass, String message) {
 		if (e.getClass().equals(exceptionClass) && message.equals(e.getMessage())) {
 			return true;
@@ -28,6 +40,17 @@ public final class JkUtilsThrowable {
 			return false;
 		}
 		return nestedContains((Exception) e.getCause(), exceptionClass, message);
+	}
+
+	public static boolean isInCause(Throwable throwable, Class<? extends Throwable> causeClass) {
+		if (causeClass.isAssignableFrom(throwable.getClass())) {
+			return true;
+		}
+		final Throwable cause = throwable.getCause();
+		if (cause == null) {
+			return false;
+		}
+		return isInCause(cause, causeClass);
 	}
 
 }

@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import javax.net.ssl.SSLException;
+
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.DefaultArtifact;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
@@ -43,13 +45,7 @@ final class IvyPublisherForMaven {
 	/**
 	 * Publish to maven repositories
 	 */
-	void publish(DefaultModuleDescriptor moduleDescriptor, JkMavenPublication publication, Date deliveryDate) {
-		JkLog.startln("Publishing for Maven");
-		publishMavenArtifacts(publication, deliveryDate, moduleDescriptor);
-		JkLog.done();
-	}
-
-	private void publishMavenArtifacts(JkMavenPublication publication, Date date, DefaultModuleDescriptor moduleDescriptor) {
+	void publish(DefaultModuleDescriptor moduleDescriptor, JkMavenPublication publication, Date date) {
 		ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
 		ivyModuleRevisionId = withPattern(ivyModuleRevisionId, TS_PATTERN, JkUtilsTime.now());
 		try {
@@ -57,19 +53,20 @@ final class IvyPublisherForMaven {
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
+		final ModuleRevisionId mrId = moduleDescriptor.getModuleRevisionId();
+		final File pomXml = new File(targetDir(), "published-pom-" + mrId.getOrganisation() + "-"
+				+ mrId.getName() + "-" + mrId.getRevision() + ".xml");
+		final String packaging = JkUtilsString.substringAfterLast(publication.mainArtifactFile().getName(),".");
+		final Artifact artifact = new DefaultArtifact(ivyModuleRevisionId, date, publication.artifactName(), "pom", "pom", true);
+		final PomWriterOptions pomWriterOptions = new PomWriterOptions();
+		pomWriterOptions.setArtifactPackaging(packaging);
+		File fileToDelete = null;
+		if (publication.extraInfo() != null) {
+			final File template = PomTemplateGenerator.generateTemplate(publication.extraInfo());
+			pomWriterOptions.setTemplate(template);
+			fileToDelete = template;
+		}
 		try {
-			final File pomXml = new File(targetDir(), "pom.xml");
-			final String packaging = JkUtilsString.substringAfterLast(publication.mainArtifactFile().getName(),".");
-			final Artifact artifact = new DefaultArtifact(ivyModuleRevisionId, date, publication.artifactName(), "pom", "pom", true);
-			final PomWriterOptions pomWriterOptions = new PomWriterOptions();
-			pomWriterOptions.setArtifactPackaging(packaging);
-			File fileToDelete = null;
-			if (publication.extraInfo() != null) {
-				final File template = PomTemplateGenerator.generateTemplate(publication.extraInfo());
-				pomWriterOptions.setTemplate(template);
-				fileToDelete = template;
-			}
-			JkLog.info("Creating " + pomXml.getAbsolutePath());
 			PomModuleDescriptorWriter.write(moduleDescriptor, pomXml, pomWriterOptions);
 
 			if (fileToDelete != null) {
@@ -95,6 +92,9 @@ final class IvyPublisherForMaven {
 
 		} catch (final Exception e) {
 			abortPublishTransaction(resolver);
+			if (JkUtilsThrowable.isInCause(e, SSLException.class)) {
+				throw JkUtilsThrowable.unchecked(e, "Error related to SSH communication with " + resolver);
+			}
 			throw JkUtilsThrowable.unchecked(e);
 		}
 		commitPublication(resolver);

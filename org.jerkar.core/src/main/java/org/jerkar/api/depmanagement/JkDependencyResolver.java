@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsIterable;
 
 public final class JkDependencyResolver  {
 
@@ -28,7 +29,7 @@ public final class JkDependencyResolver  {
 		return new JkDependencyResolver(null, dependencies, null, null);
 	}
 
-	private final Map<JkScope, JkPath> cachedDeps = new HashMap<JkScope, JkPath>();
+	private final Map<JkScope, JkResolveResult> cachedResolveResult = new HashMap<JkScope, JkResolveResult>();
 
 	private final InternalDepResolver internalResolver;
 
@@ -50,38 +51,25 @@ public final class JkDependencyResolver  {
 		return this.internalResolver != null;
 	}
 
+
+
 	public JkDependencies declaredDependencies() {
 		return this.dependencies;
 	}
 
-	private List<File> getDeclaredDependencies(JkScope scope) {
-		final List<File> result = new LinkedList<File>();
-
-		// Add local, non-managed dependencies
-		result.addAll(this.dependencies.fileDependencies(scope).entries());
-
-		if (internalResolver == null) {
-			return result;
-		}
-
-		// Add managed dependencies from Ivy
-		final JkResolveResult resolveResult;
-		if (module != null) {
-			resolveResult = internalResolver.resolve(module, dependencies, scope, parameters);
-		} else {
-			resolveResult = internalResolver.resolveAnonymous(dependencies, scope, parameters);
-		}
-		return resolveResult.localFiles();
+	/**
+	 * @see JkDependencyResolver#resolveManagedDependencies(JkScope...)
+	 */
+	public JkResolveResult resolveManagedDependencies(Iterable<JkScope> scopes) {
+		return resolveManagedDependencies(JkUtilsIterable.arrayOf(scopes, JkScope.class));
 	}
-
-
 
 	/**
 	 * Resolves the managed dependencies (dependencies declared as external module).
 	 */
 	public JkResolveResult resolveManagedDependencies(JkScope ... scopes) {
 		if (internalResolver == null) {
-			throw new IllegalStateException("This method cannot be invoked on an unmanaged dependency resolver.");
+			return JkResolveResult.empty();
 		}
 		final Set<JkScope> scopesSet = new HashSet<JkScope>();
 		for (final JkScope scope : scopes) {
@@ -90,11 +78,7 @@ public final class JkDependencyResolver  {
 		}
 		JkResolveResult resolveResult = JkResolveResult.empty();
 		for (final JkScope scope : scopesSet) {
-			if (module != null) {
-				resolveResult = resolveResult.and(internalResolver.resolve(module, dependencies, scope, parameters));
-			} else {
-				resolveResult = resolveResult.and(internalResolver.resolveAnonymous(dependencies, scope, parameters));
-			}
+			resolveResult = resolveResult.and(getResolveResult(scope));
 		}
 		return resolveResult;
 	}
@@ -119,20 +103,33 @@ public final class JkDependencyResolver  {
 	}
 
 	private final JkPath getSingleScope(JkScope scope) {
-		final JkPath cachedResult = this.cachedDeps.get(scope);
-		if (cachedResult != null) {
-			return cachedResult;
+		final List<File> result = new LinkedList<File>();
+
+		// Add local, non-managed dependencies
+		result.addAll(this.dependencies.fileDependencies(scope).entries());
+		if (internalResolver == null) {
+			return JkPath.of(result);
+		}
+		result.addAll(this.getResolveResult(scope).localFiles());
+		return JkPath.of(result);
+	}
+
+	private JkResolveResult getResolveResult(JkScope scope) {
+		final JkResolveResult result = cachedResolveResult.get(scope);
+		if (result != null) {
+			return result;
 		}
 		JkLog.startln("Resolving dependencies for scope '" + scope.name() + "'");
-		final List<File> list = new LinkedList<File>();
-		for (final JkScope jkScope : scope.ancestorScopes()) {
-			list.addAll(this.getDeclaredDependencies(jkScope));
+		final JkResolveResult resolveResult;
+		if (module != null) {
+			resolveResult = internalResolver.resolve(module, dependencies, scope, parameters);
+		} else {
+			resolveResult = internalResolver.resolveAnonymous(dependencies, scope, parameters);
 		}
-		final JkPath result = JkPath.of(list);
-		JkLog.info(result.entries().size() + " artifacts: " + result);
-		JkLog.done();
-		cachedDeps.put(scope, result);
-		return result;
+		cachedResolveResult.put(scope, resolveResult);
+		JkLog.info(resolveResult.involvedModules().size() + " artifacts: " + resolveResult.involvedModules());
+		JkLog.done("Resolve result = " + resolveResult);
+		return resolveResult;
 	}
 
 	/**

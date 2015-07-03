@@ -166,9 +166,16 @@ public final class JkUtilsReflect {
 				paramTypes[i] = params[i].getClass();
 			}
 			return (V) method.invoke(target, params);
-		} catch (final Exception e) {
-			throw new RuntimeException("Error while invoking " + method + " with params "
-					+ Arrays.toString(params), e);
+		} catch (final InvocationTargetException e) {
+			final Throwable targetEx = e.getTargetException();
+			if (targetEx instanceof Error) {
+				throw (Error) targetEx;
+			}
+			throw JkUtilsThrowable.unchecked((Exception) targetEx);
+		}catch (final Exception e) {
+
+			throw JkUtilsThrowable.unchecked(e, "Error while invoking " + method + " with params "
+					+ Arrays.toString(params));
 		}
 	}
 

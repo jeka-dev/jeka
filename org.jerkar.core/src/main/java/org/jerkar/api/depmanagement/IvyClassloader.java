@@ -4,11 +4,20 @@ import org.jerkar.api.java.JkClassLoader;
 
 public final class IvyClassloader {
 
-	public static final JkClassLoader CLASSLOADER = JkClassLoader.current().sibling(
-			IvyClassloader.class.getResource("ivy-2.4.0.jar"));
+	public static final JkClassLoader CLASSLOADER = classloader();
 
-	public IvyClassloader() {
-		// not instance
+	private IvyClassloader() {
+		// no instance
 	}
+
+
+	private static final JkClassLoader classloader() {
+		if (JkClassLoader.current().isDefined("org.apache.ivy.Ivy")) {
+			return JkClassLoader.current();
+		}
+		return JkClassLoader.current().sibling(
+				IvyClassloader.class.getResource("ivy-2.4.0.jar"));
+	}
+
 
 }

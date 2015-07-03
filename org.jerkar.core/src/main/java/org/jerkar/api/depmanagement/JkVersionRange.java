@@ -49,8 +49,8 @@ public final class JkVersionRange implements Serializable {
 	}
 
 	/**
-	 * Returns <code>true</code> if the definition stands for a fixed version (as 1.4.2) or
-	 * <code>false</code> if it stands for a dynamic one (as 1.4.+, 3.0-SNAPSHOT, [1.0, 2.0[, ...).
+	 * Returns <code>true</code> if the definition stands for dynamic resolvable version (as 1.4.+, [1.0, 2.0[, ...),
+	 * Returns <code>false</code> if the version is static or snapshot (as 1.4.0, 3.1-SNAPSHOT)
 	 */
 	public boolean isDynamicAndResovable() {
 		if (JkUtilsString.endsWithAny(definition, ".+", ")", "]", "[")) {

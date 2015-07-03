@@ -156,6 +156,8 @@ public class JkBuildDependencySupport extends JkBuild {
 		return dependencyResolver().get(scopes);
 	}
 
+
+
 	/**
 	 * Returns the dependencies of this module. By default it uses unmanaged dependencies stored
 	 * locally in the project as described by {@link #implicitDependencies()} method.

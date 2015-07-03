@@ -10,6 +10,7 @@ import org.jerkar.api.depmanagement.JkIvyPublication;
 import org.jerkar.api.depmanagement.JkMavenPublication;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopeMapping;
+import org.jerkar.api.depmanagement.JkVersionProvider;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
@@ -347,15 +348,27 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	@JkDoc({"Publish the produced artifact to the defined repositories. ",
 	"This can work only if a 'publishable' repository has been defined and the artifact has been generated (pack method)."})
 	public void publish() {
+		final JkDependencies dependencies = dependencyResolver().declaredDependencies();
+		final JkVersionProvider resolvedVersions =
+				this.dependencyResolver().resolveManagedDependencies(
+						this.dependencies().involvedScopes()).resolvedVersionProvider();
 		if (this.publisher().hasMavenPublishRepo()) {
 			final JkMavenPublication publication = mavenPublication();
-			this.publisher().publishMaven(versionedModule(), publication, dependencyResolver().declaredDependencies());
+			final JkDependencies deps = version().isSnapshot() ?
+					dependencies.resolvedWith(resolvedVersions) : dependencies;
+					this.publisher().publishMaven(versionedModule(), publication, deps);
 		}
 		if (this.publisher().hasIvyPublishRepo()) {
 			final Date date = this.buildTime();
-			this.publisher().publishIvy(versionedModule(), ivyPublication(), dependencyResolver().declaredDependencies(), COMPILE, SCOPE_MAPPING, date);
+			this.publisher().publishIvy(versionedModule(), ivyPublication(),
+					dependencies, COMPILE, SCOPE_MAPPING,
+					date, resolvedVersions);
 		}
 	}
+
+
+
+
 
 
 	// ----------------------- Overridable sub-methods ---------------------

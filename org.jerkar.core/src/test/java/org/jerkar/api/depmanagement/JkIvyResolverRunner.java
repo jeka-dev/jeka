@@ -18,9 +18,10 @@ public class JkIvyResolverRunner {
 	}
 
 	public static void spring() {
-		final JkRepos repos = JkRepos.mavenCentral().andMavenCentral();
+		final JkRepos repos = JkRepos.maven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured/");
+		//JkRepos repos = JkRepos.mavenCentral();
 		final JkDependencies deps = JkDependencies.builder()
-				.on("org.springframework", "spring-jdbc", "3.0.+")
+				.on("org.springframework", "spring-jdbc", "3.0.+")  // This works on nexus repo
 				.mapScope(COMPILE).to("compile", "default")
 				.and(JkScopedDependencyTest.PROVIDED).to("provided")
 				.build();
@@ -66,8 +67,6 @@ public class JkIvyResolverRunner {
 		final Set<JkArtifact> noExistArtifactSet = result.getArtifacts(JkModuleId.of("org.apache.wicket", "wicket-ioc"), JkScope.of("noexist"));
 		System.out.println(noExistArtifactSet);
 	}
-
-
 
 
 }

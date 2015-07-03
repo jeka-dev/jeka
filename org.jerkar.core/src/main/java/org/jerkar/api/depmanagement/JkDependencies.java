@@ -4,13 +4,11 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.jerkar.api.depmanagement.JkDependency.JkLocalDependency;
@@ -254,22 +252,22 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	 * in the {@link JkVersionedModule}s passed as argument. <br/>
 	 */
 	public JkDependencies resolvedWith(Iterable<JkVersionedModule> resolvedModules) {
-		return resolvedWith(toModuleVersionMap(resolvedModules));
+		return resolvedWith(JkVersionProvider.of(resolvedModules));
 	}
 
 	/**
-	 * @see #toModuleVersionMap(Iterable)
+	 * @see #resolvedWith(Iterable)
 	 */
-	public JkDependencies resolvedWith(Map<JkModuleId, JkVersion> map) {
+	public JkDependencies resolvedWith(JkVersionProvider provider) {
 		JkDependencies result = this;
-		for (final JkModuleId moduleId : map.keySet()) {
+		for (final JkModuleId moduleId : provider.moduleIds()) {
 			final JkScopedDependency scopedDependency = this.get(moduleId);
 			if (scopedDependency == null) {
 				continue;
 			}
 			final JkExternalModule externalModule = (JkExternalModule) scopedDependency.dependency();
 			if (externalModule.versionRange().isDynamicAndResovable()) {
-				final JkVersion resolvedVersion = map.get(moduleId);
+				final JkVersion resolvedVersion = provider.versionOf(moduleId);
 				if (resolvedVersion != null) {
 					final JkExternalModule resolvedModule = externalModule.resolvedTo(resolvedVersion);
 					final JkScopedDependency resolvedScopedDep = scopedDependency.dependency(resolvedModule);
@@ -294,20 +292,6 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		}
 		return JkPath.of(set);
 	}
-
-
-
-
-	private static Map<JkModuleId, JkVersion> toModuleVersionMap(Iterable<JkVersionedModule> resolvedModules) {
-		final Map<JkModuleId, JkVersion> result = new HashMap<JkModuleId, JkVersion>();
-		for (final JkVersionedModule versionedModule : resolvedModules) {
-			result.put(versionedModule.moduleId(), versionedModule.version());
-		}
-		return result;
-	}
-
-
-
 
 	public static Builder builder() {
 		return new Builder(new LinkedList<JkScopedDependency>());
