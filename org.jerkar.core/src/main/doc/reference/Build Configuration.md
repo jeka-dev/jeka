@@ -1,7 +1,7 @@
-## Configure builds
+## Build Configuration
 
 Jerkar builds are configurable, in the sense that any value required to run the build has not to be hard-coded 
-in the build script. Instead a value can be injected by 3 different means :
+in the build script. Instead a value can be injected by 3 different ways :
 * as a environment variable
 * as a system property
 * as a Jerkar option
