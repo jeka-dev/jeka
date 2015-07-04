@@ -37,12 +37,11 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 	public static JkPublishRepos ossrh(String userName, String password, JkPgp pgp) {
 		final JkPublishRepo snapshot = JkPublishRepo.ofSnapshot(
 				JkRepo.mavenOssrhPushSnapshotPullAll(userName, password))
-				.withSigner(pgp).andSha1Md5Checksums()
-				.withUniqueSnapshot(true);
+				.andSha1Md5Checksums()
+				.withUniqueSnapshot(true);  // ignored as unique timestamped snapshot not yet supported
 		final JkPublishRepo release = JkPublishRepo.ofRelease(
 				JkRepo.mavenOssrhPushRelease(userName, password))
-				.withSigner(pgp).andSha1Md5Checksums()
-				.withUniqueSnapshot(true);
+				.withSigner(pgp).andSha1Md5Checksums();
 		return JkPublishRepos.of(snapshot).and(release);
 	}
 
