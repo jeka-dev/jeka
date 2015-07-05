@@ -1,5 +1,3 @@
-package ${packageName};
-
 ${extraImports}
 
 class Build extends ${extendedClass} {
@@ -7,6 +5,7 @@ class Build extends ${extendedClass} {
 	@Override
 	protected void init() {
 	    // Add you init code here (if needed)
+	    // You can remove this method declaration if you don't do anything special at initialization.
 ${extraInit}
 	}
 	

@@ -86,16 +86,13 @@ public class JkScaffolder {
 		final File buildDefDir = build.baseDir(JkConstants.BUILD_DEF_DIR);
 		buildDefDir.mkdirs();
 		final Map<String, String> values = new HashMap<String, String>();
-		values.put("packageName", this.packageName);
 		values.put("extraImports", lines(JkUtilsIterable.withoutDoubloons(this.extraImports),""));
 		values.put("extendedClass", this.extendedClass);
 		values.put("extraFields", lines(this.extraFields,"    "));
 		values.put("extraInit", lines(this.extraInit,"        "));
 		values.put("extraDependencies", lines(this.extraDependencies,"            ."));
 		values.put("extraMethods", lines(this.extraMethods,"    "));
-		final File packageDir = new File(buildDefDir, packageName.replace('.', '/'));
-		packageDir.mkdirs();
-		final File buildSource = JkUtilsFile.createFileIfNotExist(new File(packageDir,"Build.java"));
+		final File buildSource = JkUtilsFile.createFileIfNotExist(new File(buildDefDir,"Build.java"));
 		JkUtilsFile.copyUrlReplacingTokens(templateClass, buildSource, values, JkLog.infoStream());
 		for (final Runnable action : extraActions) {
 			action.run();

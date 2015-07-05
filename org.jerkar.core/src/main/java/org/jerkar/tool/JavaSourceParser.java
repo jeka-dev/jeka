@@ -99,6 +99,13 @@ class JavaSourceParser {
 			if (JkDependency.isGroupNameAndVersion(dependency)) {
 				builder.on(JkDependency.of(dependency));
 			} else {
+				if (dependency.contains(":")) {
+					throw new JkException("Dependency " + dependency + " expressed in @JkImport is malformed, the expected format is groupId:artifactId:version.");
+				}
+				final File file = new File(baseDir, dependency);
+				if (!file.exists()) {
+					throw new JkException("The file " + dependency + " defined as build definition import does not exist.");
+				}
 				builder.on(JkDependency.ofFile(baseDir, dependency));
 			}
 

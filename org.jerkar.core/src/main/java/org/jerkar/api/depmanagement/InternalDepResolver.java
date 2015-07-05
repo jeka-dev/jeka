@@ -6,10 +6,6 @@ package org.jerkar.api.depmanagement;
 
 interface InternalDepResolver {
 
-	boolean hasMavenPublishRepo();
-
-	boolean hasIvyPublishRepo();
-
 	JkResolveResult resolveAnonymous(JkDependencies deps,
 			JkScope resolvedScope, JkResolutionParameters parameters);
 

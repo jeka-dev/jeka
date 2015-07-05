@@ -132,7 +132,7 @@ class Project {
 		}
 	}
 
-	private JkDependencies scriptDependencies() {
+	private JkDependencies buildDefDependencies() {
 		return JkDependencies.builder()
 				.on(buildDependencies)
 				.onFiles(localBuildPath()).scope(JkScope.BUILD)
@@ -264,7 +264,7 @@ class Project {
 	}
 
 	private JkDependencyResolver getBuildDefDependencyResolver() {
-		final JkDependencies deps = this.scriptDependencies();
+		final JkDependencies deps = this.buildDefDependencies();
 		if (deps.containsExternalModule()) {
 			return JkDependencyResolver.managed(this.buildRepos, deps, null, JkResolutionParameters.of());
 		}

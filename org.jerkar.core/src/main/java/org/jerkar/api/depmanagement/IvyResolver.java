@@ -12,9 +12,6 @@ import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.settings.IvySettings;
-import org.apache.ivy.plugins.resolver.AbstractPatternsBasedResolver;
-import org.apache.ivy.plugins.resolver.ChainResolver;
-import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
@@ -24,7 +21,7 @@ import org.jerkar.api.utils.JkUtilsThrowable;
  * 
  * @author Jerome Angibaud
  */
-public final class IvyResolver implements InternalDepResolver {
+final class IvyResolver implements InternalDepResolver {
 
 	private static final JkVersionedModule ANONYMOUS_MODULE = JkVersionedModule.of(
 			JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.ofName("anonymousVersion"));
@@ -60,45 +57,6 @@ public final class IvyResolver implements InternalDepResolver {
 		return of(ivySettingsOf(resolveRepos));
 	}
 
-
-
-	private static boolean isMaven(DependencyResolver dependencyResolver) {
-		if (dependencyResolver instanceof ChainResolver) {
-			final ChainResolver resolver = (ChainResolver) dependencyResolver;
-			@SuppressWarnings("rawtypes")
-			final List list = resolver.getResolvers();
-			if (list.isEmpty()) {
-				return false;
-			}
-			return isMaven((DependencyResolver) list.get(0));
-		}
-		if (dependencyResolver instanceof AbstractPatternsBasedResolver) {
-			final AbstractPatternsBasedResolver resolver = (AbstractPatternsBasedResolver) dependencyResolver;
-			return resolver.isM2compatible();
-		}
-		throw new IllegalStateException(dependencyResolver.getClass().getName() + " not handled");
-	}
-
-
-	@Override
-	public boolean hasMavenPublishRepo() {
-		for (final DependencyResolver dependencyResolver : IvyTranslations.publishResolverOf(this.ivy.getSettings())) {
-			if (isMaven(dependencyResolver)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public boolean hasIvyPublishRepo() {
-		for (final DependencyResolver dependencyResolver : IvyTranslations.publishResolverOf(this.ivy.getSettings())) {
-			if (!isMaven(dependencyResolver)) {
-				return true;
-			}
-		}
-		return false;
-	}
 
 	@Override
 	public JkResolveResult resolveAnonymous(JkDependencies deps, JkScope resolvedScope, JkResolutionParameters parameters) {

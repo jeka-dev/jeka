@@ -106,7 +106,7 @@ public final class JkDependencyResolver  {
 		final List<File> result = new LinkedList<File>();
 
 		// Add local, non-managed dependencies
-		result.addAll(this.dependencies.fileDependencies(scope).entries());
+		result.addAll(this.dependencies.localFileDependencies(scope).entries());
 		if (internalResolver == null) {
 			return JkPath.of(result);
 		}

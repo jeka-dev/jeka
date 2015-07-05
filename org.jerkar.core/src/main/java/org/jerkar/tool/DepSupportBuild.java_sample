@@ -1,5 +1,3 @@
-package ${packageName};
-
 import org.jerkar.api.depmanagement.JkDependencies;
 ${extraImports}
 
@@ -8,6 +6,7 @@ class Build extends ${extendedClass} {
 	@Override
 	protected void init() {
 	    // Add you init code here (if needed)
+	    // You can remove this method declaration if you don't do anything special at initialization.
 ${extraInit}
 	}
 	
@@ -15,6 +14,7 @@ ${extraInit}
 	protected JkDependencies dependencies() {
 		return JkDependencies.builder()
 			// Add your dependencies here
+			// You can remove this method declaration if you don't use managed or external project dependencies
 ${extraDependencies}
 		.build();
 	}

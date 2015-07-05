@@ -19,8 +19,9 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jerkar.api.depmanagement.JkModuleDepFile;
 import org.jerkar.api.depmanagement.JkAttachedArtifacts;
+import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.api.depmanagement.JkModuleDepFile;
 import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkResolveResult;
 import org.jerkar.api.depmanagement.JkScope;
@@ -356,17 +357,16 @@ final class DotClasspath {
 		writer.writeAttribute("path", container);
 		writer.writeCharacters("\n");
 
-
-
 		if (build instanceof JkJavaBuild) {
 			final JkJavaBuild javaBuild = (JkJavaBuild) build;
 			generateJava(javaBuild, writer, jreContainer);
 		}
 
 		// Write entries for file dependencies
-		final List<File> fileDeps = build.scriptDependencyResolver().declaredDependencies().fileDependencies(JkScope.BUILD).entries();
+		final List<File> fileDeps = build.buildDefDependencyResolver().declaredDependencies().localFileDependencies(JkScope.BUILD).entries();
 		writeFileEntries(fileDeps, writer);
 
+		// Write entries for managed dependencies
 		if (build instanceof JkBuildDependencySupport) {
 			final JkBuildDependencySupport buildDependencySupport = (JkBuildDependencySupport) build;
 
@@ -378,7 +378,6 @@ final class DotClasspath {
 				writer.writeAttribute("path", "/" + project.baseDir().root().getName());
 				writer.writeCharacters("\n");
 			}
-
 		}
 
 		// Write output
@@ -460,23 +459,23 @@ final class DotClasspath {
 		if (build.dependencyResolver().isManagedDependencyResolver()) {
 			resolveResult = build.dependencyResolver().resolveManagedDependencies(JkJavaBuild.RUNTIME,
 					JkJavaBuild.PROVIDED, JkJavaBuild.TEST);
-			writeExternalModuleEntries(build, writer, resolveResult);
+			writeExternalModuleEntries(build.dependencyResolver(), writer, resolveResult);
 		}
-		if (build.scriptDependencyResolver().isManagedDependencyResolver()) {
-			final JkResolveResult buildresolve = build.scriptDependencyResolver().resolveManagedDependencies(JkScope.BUILD);
-			writeExternalModuleEntries(build, writer, buildresolve);
+		if (build.buildDefDependencyResolver().isManagedDependencyResolver()) {
+			final JkResolveResult buildresolve = build.buildDefDependencyResolver().resolveManagedDependencies(JkScope.BUILD);
+			writeExternalModuleEntries(build.buildDefDependencyResolver(), writer, buildresolve);
 		}
 
 		// Write entries for file dependencies
 		final Set<File> fileDeps = new HashSet<File>(build.dependencyResolver().declaredDependencies()
-				.fileDependencies(JkJavaBuild.TEST, JkJavaBuild.PROVIDED, JkJavaBuild.COMPILE).entries());
+				.localFileDependencies(JkJavaBuild.TEST, JkJavaBuild.PROVIDED, JkJavaBuild.COMPILE).entries());
 		writeFileEntries(fileDeps, writer);
 	}
 
-	private static void writeExternalModuleEntries(JkJavaBuild build,
+	private static void writeExternalModuleEntries(JkDependencyResolver dependencyResolver,
 			final XMLStreamWriter writer, JkResolveResult resolveResult)
 					throws XMLStreamException {
-		final JkAttachedArtifacts jkAttachedArtifacts = build.dependencyResolver().getAttachedArtifacts(
+		final JkAttachedArtifacts jkAttachedArtifacts = dependencyResolver.getAttachedArtifacts(
 				new HashSet<JkVersionedModule>(resolveResult.involvedModules()),
 				JkJavaBuild.SOURCES, JkJavaBuild.JAVADOC);
 
@@ -508,7 +507,6 @@ final class DotClasspath {
 		} else {
 			writer.writeStartElement(CLASSPATHENTRY);
 		}
-
 		final VarReplacement binReplacement = new VarReplacement(bin);
 		if (binReplacement.replaced) {
 			writer.writeAttribute("kind", "var");

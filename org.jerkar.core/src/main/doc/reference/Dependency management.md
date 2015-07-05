@@ -4,11 +4,11 @@ May the project you are building is standalone : you won't need any library or f
 
 If your project relies on libraries or files coming from other projects then __dependency management__ comes in play.
 
-Jerkar distinguishes 3 types of dependency :
+Jerkar distinguishes 3 types of dependency  (Embodied by the abstract `JkDependency` class) :
 
-* Files belonging or produced by other Jerkar projects
-* Arbitrary files located on the file system
-* Reference to libraries (aka _external module_) hosted in a a binary repository (Ivy or Maven for instance) : this means that Jerkar can consume and resolve transitively any artifact located in a repository as you would with Maven or Ivy.
+* Files belonging or produced by other Jerkar projects (Embodied by `JkProjectDependency` class)
+* Arbitrary files located on the file system (Embodied by `JkLocalDependency` class, the meaning of the name is that these dependencies are generally located within the project)
+* Reference to libraries (Embodied by `JkExternalModule) hosted in a a binary repository (Ivy or Maven for instance) : this means that Jerkar can consume and resolve transitively any artifact located in a repository as you would with Maven or Ivy.
 
 <p class="alert alert-success">
 For the last, Jerkar is using <b>Ivy 2.4.0</b> under the hood. The library is embedded in the Jerkar jar itself and is executed in a dedicated classloader to make the presence of Ivy invisible when you edit code so Ivy classes won't bloat your build path.
@@ -48,5 +48,14 @@ public static final JkScope TEST = JkScope.of("test").extending(RUNTIME, PROVIDE
 
 ### Define dependencies
 
-The entire project dependencies description (dependencies along their respective scopes) stand in a single `JKDependencies` instance. [This class](http://jerkar.github.io/javadoc/latest/org/jerkar/api/depmanagement/JkDependencies.html) provides convenient factories and builder for fluent edition.
+The entire project dependency description (dependencies along their respective scopes) stands in a single `JKDependencies` instance. [This class](http://jerkar.github.io/javadoc/latest/org/jerkar/api/depmanagement/JkDependencies.html) provides convenient factories and builder for fluent edition.
+
+A `JkDependencies` is basically a list of dependencies associated with a scope (`JkScopedDependency`).
+A same dependency can be declared many time in the same `JkDependencies` with different scope.
+
+
+
+
+
+ 
  

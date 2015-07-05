@@ -35,20 +35,20 @@ public class JkBuild {
 	"Example : -extraBuildPath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
 	protected String extraBuildPath;
 
-	private JkDependencyResolver scriptDependencyResolver;
+	private JkDependencyResolver buildDefDependencyResolver;
 
 	protected JkBuild() {
 	}
 
 	void setScriptDependencyResolver(JkDependencyResolver scriptDependencyResolver) {
-		this.scriptDependencyResolver = scriptDependencyResolver;
+		this.buildDefDependencyResolver = scriptDependencyResolver;
 	}
 
 	/**
 	 * Returns the dependency resolver used to compile/run scripts of this project.
 	 */
-	public JkDependencyResolver scriptDependencyResolver() {
-		return this.scriptDependencyResolver;
+	public JkDependencyResolver buildDefDependencyResolver() {
+		return this.buildDefDependencyResolver;
 	}
 
 	/**
