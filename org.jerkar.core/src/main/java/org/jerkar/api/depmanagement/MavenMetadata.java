@@ -95,6 +95,10 @@ class MavenMetadata {
 		this.versioning.snapshotVersions.clear();
 	}
 
+	org.jerkar.api.depmanagement.MavenMetadata.Versioning.Snapshot currentSnapshot() {
+		return this.versioning.snapshot;
+	}
+
 	public void addSnapshotVersion(String extension, String classifier) {
 		final org.jerkar.api.depmanagement.MavenMetadata.Versioning.SnapshotVersion snapshotVersion
 		= new org.jerkar.api.depmanagement.MavenMetadata.Versioning.SnapshotVersion();
@@ -160,7 +164,7 @@ class MavenMetadata {
 	}
 
 
-	private static class Versioning {
+	static class Versioning {
 
 		private Versioning() {
 		}
@@ -266,9 +270,9 @@ class MavenMetadata {
 			writer.writeEndElement();
 		}
 
-		private static class Snapshot {
-			private final String timestamp;
-			private final int buildNumber;
+		static class Snapshot {
+			public final String timestamp;
+			public final int buildNumber;
 
 			Snapshot(String timestamp, int buildNumber) {
 				this.buildNumber = buildNumber;

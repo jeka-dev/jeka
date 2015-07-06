@@ -30,8 +30,8 @@ public class JkIvyPublisherRunner {
 	}
 
 	public static void testPublishMaven() {
-		final IvyPublisher jkIvyResolver = IvyPublisher.of(mavenRepos().withMd5AndSha1Checksum().withUniqueSnapshot(true), new File("build/output/test-out"));
-		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup2", "mymodule2"), JkVersion.ofName("0.0.11-SNAPSHOT"));
+		final IvyPublisher jkIvyResolver = IvyPublisher.of(mavenRepos().withMd5AndSha1Checksum().withUniqueSnapshot(false), new File("build/output/test-out"));
+		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup2", "mymodule2"), JkVersion.ofName("0.0.12-SNAPSHOT"));
 		final JkMavenPublication publication = JkMavenPublication.of(sampleJarfile()).and(sampleJarSourcefile(), "source");
 		final JkModuleId spring = JkModuleId.of("org.springframework", "spring-jdbc");
 		final JkDependencies deps = JkDependencies.builder()
