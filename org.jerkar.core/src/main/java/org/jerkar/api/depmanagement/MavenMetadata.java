@@ -169,7 +169,7 @@ class MavenMetadata {
 		private Versioning() {
 		}
 
-		Versioning(Element element) {
+		private Versioning(Element element) {
 			final NodeList snapNodeList = element.getElementsByTagName("snapshot");
 			if (snapNodeList.getLength() > 0) {
 				this.snapshot = new Snapshot((Element) snapNodeList.item(0));

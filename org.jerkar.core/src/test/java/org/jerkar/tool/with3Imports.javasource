@@ -8,7 +8,7 @@ import org.jerkar.java.testing.junit.JkUnit;
 @JkImportRepo("http://maven.central.repo")
 @JkImport({
 	"com.google:guava:18.0",
-	"../my.jar",
-	"build/lib/extra/mylib.jar, "
+	"toto:titi:12",
+	"foo:bar:6"
 })
 public class FullBuild extends Build {

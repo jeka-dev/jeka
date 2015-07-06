@@ -2,9 +2,9 @@ package org.jerkar.api.depmanagement;
 
 import org.jerkar.api.java.JkClassLoader;
 
-public final class IvyClassloader {
+final class IvyClassloader {
 
-	public static final JkClassLoader CLASSLOADER = classloader();
+	static final JkClassLoader CLASSLOADER = classloader();
 
 	private IvyClassloader() {
 		// no instance

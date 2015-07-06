@@ -20,9 +20,9 @@ public class JkIvyPublication implements Iterable<Artifact> {
 
 	private final Set<Artifact> artifacts;
 
-	public final Status status;
+	private final Status status;
 
-	public final String branch;
+	private final String branch;
 
 	private JkIvyPublication(Set<Artifact> artifacts, Status status, String branch) {
 		super();
@@ -30,6 +30,16 @@ public class JkIvyPublication implements Iterable<Artifact> {
 		this.status = status;
 		this.branch = branch;
 	}
+
+	public Status status() {
+		return status;
+	}
+
+	public String branch() {
+		return branch;
+	}
+
+
 
 	public JkIvyPublication and(File file, String type, JkScope...jkScopes) {
 		final Set<Artifact> artifacts = new HashSet<JkIvyPublication.Artifact>(this.artifacts);

@@ -195,7 +195,7 @@ final class IvyPublisher implements InternalPublisher {
 				JkLog.startln("Publishing for repository " + resolver);
 				final CheckFileFlag checkFileFlag = CheckFileFlag.of(publishRepo);
 				final IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(checkFileFlag, resolver, descriptorOutputDir, publishRepo.uniqueSnapshot());
-				ivyPublisherForMaven.publish2(moduleDescriptor, publication);
+				ivyPublisherForMaven.publish(moduleDescriptor, publication);
 				count ++;
 			}
 		}
@@ -282,7 +282,7 @@ final class IvyPublisher implements InternalPublisher {
 
 		JkPgp pgpSigner;
 
-		public static CheckFileFlag of(JkPublishRepo publishRepo) {
+		private static CheckFileFlag of(JkPublishRepo publishRepo) {
 			final CheckFileFlag flag = new CheckFileFlag();
 			flag.pgpSigner = publishRepo.requirePgpSign();
 			return flag;

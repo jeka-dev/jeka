@@ -5,12 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 
-import javax.net.ssl.SSLException;
-
-import org.apache.ivy.core.module.descriptor.Artifact;
-import org.apache.ivy.core.module.descriptor.DefaultArtifact;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.ModuleDescriptor;
 import org.apache.ivy.core.module.id.ModuleId;
@@ -20,6 +15,7 @@ import org.apache.ivy.plugins.parser.m2.PomWriterOptions;
 import org.apache.ivy.plugins.repository.Repository;
 import org.apache.ivy.plugins.repository.Resource;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
+import org.apache.ivy.plugins.resolver.IBiblioResolver;
 import org.apache.ivy.plugins.resolver.RepositoryResolver;
 import org.apache.ivy.util.ChecksumHelper;
 import org.jerkar.api.depmanagement.IvyPublisher.CheckFileFlag;
@@ -31,7 +27,7 @@ import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
 import org.jerkar.api.utils.JkUtilsTime;
-import org.jerkar.tool.JkException;
+
 
 /**
  * {@link IvyPublisher} delegates to this class for publishing to Maven
@@ -59,60 +55,60 @@ final class IvyPublisherForMaven {
 	/**
 	 * Publish to maven repositories
 	 */
+	//	void publish(DefaultModuleDescriptor moduleDescriptor,
+	//			JkMavenPublication publication) {
+	//		final Date date = JkUtilsTime.now();
+	//		final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor
+	//				.getModuleRevisionId();
+	//		try {
+	//			resolver.beginPublishTransaction(ivyModuleRevisionId, true);
+	//		} catch (final IOException e) {
+	//			throw new RuntimeException(e);
+	//		}
+	//
+	//		final String artifactName = ivyModuleRevisionId.getName();
+	//		final File pomXml = makePom(moduleDescriptor, publication);
+	//
+	//		final Artifact pomArtifact = new DefaultArtifact(ivyModuleRevisionId,
+	//				date, artifactName, "pom", "pom", true);
+	//		try {
+	//			resolver.publish(pomArtifact, pomXml, true);
+	//			checkFileFlag.publishChecks(resolver, pomArtifact, pomXml);
+	//
+	//			final Artifact mavenMainArtifact = IvyTranslations
+	//					.toPublishedMavenArtifact(publication.mainArtifactFiles().get(0),
+	//							artifactName, null,
+	//							ivyModuleRevisionId, date);
+	//			resolver.publish(mavenMainArtifact, publication.mainArtifactFiles().get(0),
+	//					true);
+	//			checkFileFlag.publishChecks(resolver, mavenMainArtifact,
+	//					publication.mainArtifactFiles().get(0));
+	//
+	//			for (final JkClassifiedArtifact classifiedArtifact : publication.classifiedArtifacts()) {
+	//				final String classifier = classifiedArtifact.classifier();
+	//				final File file = classifiedArtifact.file();
+	//				final Artifact mavenArtifact = IvyTranslations
+	//						.toPublishedMavenArtifact(file,
+	//								artifactName, classifier,
+	//								ivyModuleRevisionId, date);
+	//				resolver.publish(mavenArtifact, file, true);
+	//				checkFileFlag.publishChecks(resolver, mavenArtifact, file);
+	//			}
+	//
+	//		} catch (final Exception e) {
+	//			abortPublishTransaction(resolver);
+	//			if (JkUtilsThrowable.isInCause(e, SSLException.class)) {
+	//				throw JkUtilsThrowable.unchecked(e,
+	//						"Error related to SSH communication with " + resolver);
+	//			}
+	//			throw JkUtilsThrowable.unchecked(e);
+	//		}
+	//		commitPublication(resolver);
+	//		updateMetadata(ivyModuleRevisionId.getModuleId(),
+	//				ivyModuleRevisionId.getRevision());
+	//	}
+
 	void publish(DefaultModuleDescriptor moduleDescriptor,
-			JkMavenPublication publication) {
-		final Date date = JkUtilsTime.now();
-		final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor
-				.getModuleRevisionId();
-		try {
-			resolver.beginPublishTransaction(ivyModuleRevisionId, true);
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		}
-
-		final String artifactName = ivyModuleRevisionId.getName();
-		final File pomXml = makePom(moduleDescriptor, publication);
-
-		final Artifact pomArtifact = new DefaultArtifact(ivyModuleRevisionId,
-				date, artifactName, "pom", "pom", true);
-		try {
-			resolver.publish(pomArtifact, pomXml, true);
-			checkFileFlag.publishChecks(resolver, pomArtifact, pomXml);
-
-			final Artifact mavenMainArtifact = IvyTranslations
-					.toPublishedMavenArtifact(publication.mainArtifactFiles().get(0),
-							artifactName, null,
-							ivyModuleRevisionId, date);
-			resolver.publish(mavenMainArtifact, publication.mainArtifactFiles().get(0),
-					true);
-			checkFileFlag.publishChecks(resolver, mavenMainArtifact,
-					publication.mainArtifactFiles().get(0));
-
-			for (final JkClassifiedArtifact classifiedArtifact : publication.classifiedArtifacts()) {
-				final String classifier = classifiedArtifact.classifier();
-				final File file = classifiedArtifact.file();
-				final Artifact mavenArtifact = IvyTranslations
-						.toPublishedMavenArtifact(file,
-								artifactName, classifier,
-								ivyModuleRevisionId, date);
-				resolver.publish(mavenArtifact, file, true);
-				checkFileFlag.publishChecks(resolver, mavenArtifact, file);
-			}
-
-		} catch (final Exception e) {
-			abortPublishTransaction(resolver);
-			if (JkUtilsThrowable.isInCause(e, SSLException.class)) {
-				throw JkUtilsThrowable.unchecked(e,
-						"Error related to SSH communication with " + resolver);
-			}
-			throw JkUtilsThrowable.unchecked(e);
-		}
-		commitPublication(resolver);
-		updateMetadata(ivyModuleRevisionId.getModuleId(),
-				ivyModuleRevisionId.getRevision());
-	}
-
-	void publish2(DefaultModuleDescriptor moduleDescriptor,
 			JkMavenPublication publication) {
 		final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor
 				.getModuleRevisionId();
@@ -152,7 +148,7 @@ final class IvyPublisherForMaven {
 		if (!versionedModule.version().isSnapshot()) {
 			final String existing = checkNotExist(versionedModule, mavenPublication);
 			if (existing != null) {
-				throw new JkException("Artifact " + existing + " already exists on repo.");
+				throw new IllegalArgumentException("Artifact " + existing + " already exists on repo.");
 			}
 		}
 		if (versionedModule.version().isSnapshot() && this.uniqueSnapshot) {
@@ -214,7 +210,7 @@ final class IvyPublisherForMaven {
 		if (!mavenPublication.mainArtifactFiles().isEmpty()) {
 			final String pomDest = destination(versionedModule, "pom", null);
 			if (existOnRepo(pomDest)) {
-				throw new JkException("The main artifact as already exist for " + versionedModule);
+				throw new IllegalArgumentException("The main artifact as already exist for " + versionedModule);
 			}
 			for (final File file : mavenPublication.mainArtifactFiles()) {
 				final String ext = JkUtilsString.substringAfterLast(
@@ -284,10 +280,9 @@ final class IvyPublisherForMaven {
 			String ext, String classifier, String uniqueVersion) {
 		final JkModuleId moduleId = versionedModule.moduleId();
 		final String version = versionedModule.version().name();
-		final StringBuilder result = new StringBuilder(moduleId.group())
-		.append("/").append(moduleId.name()).append("/")
-		.append(version).append("/").append(moduleId.name())
-		.append("-").append(uniqueVersion);
+		final StringBuilder result = new StringBuilder(moduleBasePath(moduleId))
+		.append("/").append(version)
+		.append("/").append(moduleId.name()).append("-").append(uniqueVersion);
 		if (classifier != null) {
 			result.append("-").append(classifier);
 		}
@@ -336,19 +331,22 @@ final class IvyPublisherForMaven {
 	}
 
 	private static String versionMetadataPath(JkVersionedModule module) {
-		return module.moduleId().group() + "/" + module.moduleId().name()
-				+ "/maven-metadata.xml";
+		return moduleBasePath(module.moduleId()) + "/maven-metadata.xml";
+	}
+
+	private static String moduleBasePath(JkModuleId module) {
+		return module.group().replace(".", "/") + "/" + module.name();
 	}
 
 	private static String snapshotMetadataPath(JkVersionedModule module) {
-		return module.moduleId().group() + "/" + module.moduleId().name() + "/"
+		return moduleBasePath(module.moduleId()) + "/"
 				+ module.version().name() + "/maven-metadata.xml";
 	}
 
 	private MavenMetadata loadMavenMedatata(String path) {
 		try {
 			final Resource resource = resolver.getRepository()
-					.getResource(path);
+					.getResource(completePath(path));
 			if (resource.exists()) {
 				final InputStream inputStream = resource.openStream();
 				final MavenMetadata mavenMetadata = MavenMetadata
@@ -366,10 +364,19 @@ final class IvyPublisherForMaven {
 		putAll(source, dest, overwrite, true);
 	}
 
-	private void putAll(File source, String dest, boolean overwrite, boolean signIfneeded) {
+	private String completePath(String path) {
+		if (this.resolver instanceof IBiblioResolver) {
+			final IBiblioResolver iBiblioResolver = (IBiblioResolver) this.resolver;
+			return iBiblioResolver.getRoot() + path;
+		}
+		return path;
+	}
+
+	private void putAll(File source, String destination, boolean overwrite, boolean signIfneeded) {
 		final String[] checksums = this.resolver.getChecksumAlgorithms();
 		final Repository repository = this.resolver.getRepository();
 		try {
+			final String dest = completePath(destination);
 			JkLog.info("publishing to " + dest);
 			repository.put(null, source, dest, overwrite);
 			for (final String algo : checksums) {
@@ -393,14 +400,14 @@ final class IvyPublisherForMaven {
 		}
 	}
 
-	private static void abortPublishTransaction(DependencyResolver resolver) {
-		try {
-			resolver.abortPublishTransaction();
-		} catch (final IOException e) {
-			JkLog.warn("Publish transction hasn't been properly aborted");
-			e.printStackTrace(JkLog.warnStream());
-		}
-	}
+	//	private static void abortPublishTransaction(DependencyResolver resolver) {
+	//		try {
+	//			resolver.abortPublishTransaction();
+	//		} catch (final IOException e) {
+	//			JkLog.warn("Publish transction hasn't been properly aborted");
+	//			e.printStackTrace(JkLog.warnStream());
+	//		}
+	//	}
 
 	private String targetDir() {
 		return this.descriptorOutputDir.getAbsolutePath();

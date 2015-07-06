@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.ivy.core.module.descriptor.Artifact;
@@ -51,7 +50,7 @@ final class IvyTranslations {
 	/**
 	 * Stands for the default configuration for publishing in ivy.
 	 */
-	static final JkScope DEFAULT_CONFIGURATION = JkScope.of("default");
+	private static final JkScope DEFAULT_CONFIGURATION = JkScope.of("default");
 
 	private static final String MAVEN_ARTIFACT_PATTERN = "/[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]";
 
@@ -119,7 +118,7 @@ final class IvyTranslations {
 		return result;
 	}
 
-	public static Configuration toConfiguration(JkScope jkScope) {
+	private static Configuration toConfiguration(JkScope jkScope) {
 		final List<String> extendedScopes = new LinkedList<String>();
 		for (final JkScope parent : jkScope.extendedScopes()) {
 			extendedScopes.add(parent.name());
@@ -164,7 +163,7 @@ final class IvyTranslations {
 
 	// see
 	// http://www.draconianoverlord.com/2010/07/18/publishing-to-maven-repos-with-ivy.html
-	public static DependencyResolver toResolver(JkRepo repo, Set<String> digesterAlgorithms) {
+	private static DependencyResolver toResolver(JkRepo repo, Set<String> digesterAlgorithms) {
 		if (repo instanceof JkRepo.JkMavenRepository) {
 			if (!isFileSystem(repo.url())) {
 				final IBiblioResolver result = new IBiblioResolver();
@@ -424,7 +423,7 @@ final class IvyTranslations {
 		return new DefaultArtifact(moduleId, date, artifactName, type, extension);
 	}
 
-	public static Artifact toPublishedMavenArtifact(File artifact, String artifactName, String classifier, ModuleRevisionId moduleId,
+	private static Artifact toPublishedMavenArtifact(File artifact, String artifactName, String classifier, ModuleRevisionId moduleId,
 			Date date) {
 		final String extension = JkUtilsString.substringAfterLast(artifact.getName(), ".");
 		final String type = extension;
@@ -437,16 +436,5 @@ final class IvyTranslations {
 		return new DefaultArtifact(moduleId, date, artifactName, type, extension, extraMap);
 	}
 
-	public static Map<JkModuleId, JkVersion> toModuleVersionMap(Properties props) {
-		final Map<JkModuleId, JkVersion> result = new HashMap<JkModuleId, JkVersion>();
-		for (final Object depMridObject : props.keySet()) {
-			final String depMridStr = (String) depMridObject;
-			final String[] parts = props.getProperty(depMridStr).split(" ");
-			final ModuleRevisionId decodedMrid = ModuleRevisionId.decode(depMridStr);
-			final JkModuleId jkModuleId = JkModuleId.of(decodedMrid.getOrganisation(), decodedMrid.getName());
-			final JkVersion resolvedOrForcedVersion = JkVersion.ofName(parts[2]);
-			result.put(jkModuleId, resolvedOrForcedVersion);
-		}
-		return result;
-	}
+
 }
