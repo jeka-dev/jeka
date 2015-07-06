@@ -52,62 +52,6 @@ final class IvyPublisherForMaven {
 		this.uniqueSnapshot = uniqueSnapshot;
 	}
 
-	/**
-	 * Publish to maven repositories
-	 */
-	//	void publish(DefaultModuleDescriptor moduleDescriptor,
-	//			JkMavenPublication publication) {
-	//		final Date date = JkUtilsTime.now();
-	//		final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor
-	//				.getModuleRevisionId();
-	//		try {
-	//			resolver.beginPublishTransaction(ivyModuleRevisionId, true);
-	//		} catch (final IOException e) {
-	//			throw new RuntimeException(e);
-	//		}
-	//
-	//		final String artifactName = ivyModuleRevisionId.getName();
-	//		final File pomXml = makePom(moduleDescriptor, publication);
-	//
-	//		final Artifact pomArtifact = new DefaultArtifact(ivyModuleRevisionId,
-	//				date, artifactName, "pom", "pom", true);
-	//		try {
-	//			resolver.publish(pomArtifact, pomXml, true);
-	//			checkFileFlag.publishChecks(resolver, pomArtifact, pomXml);
-	//
-	//			final Artifact mavenMainArtifact = IvyTranslations
-	//					.toPublishedMavenArtifact(publication.mainArtifactFiles().get(0),
-	//							artifactName, null,
-	//							ivyModuleRevisionId, date);
-	//			resolver.publish(mavenMainArtifact, publication.mainArtifactFiles().get(0),
-	//					true);
-	//			checkFileFlag.publishChecks(resolver, mavenMainArtifact,
-	//					publication.mainArtifactFiles().get(0));
-	//
-	//			for (final JkClassifiedArtifact classifiedArtifact : publication.classifiedArtifacts()) {
-	//				final String classifier = classifiedArtifact.classifier();
-	//				final File file = classifiedArtifact.file();
-	//				final Artifact mavenArtifact = IvyTranslations
-	//						.toPublishedMavenArtifact(file,
-	//								artifactName, classifier,
-	//								ivyModuleRevisionId, date);
-	//				resolver.publish(mavenArtifact, file, true);
-	//				checkFileFlag.publishChecks(resolver, mavenArtifact, file);
-	//			}
-	//
-	//		} catch (final Exception e) {
-	//			abortPublishTransaction(resolver);
-	//			if (JkUtilsThrowable.isInCause(e, SSLException.class)) {
-	//				throw JkUtilsThrowable.unchecked(e,
-	//						"Error related to SSH communication with " + resolver);
-	//			}
-	//			throw JkUtilsThrowable.unchecked(e);
-	//		}
-	//		commitPublication(resolver);
-	//		updateMetadata(ivyModuleRevisionId.getModuleId(),
-	//				ivyModuleRevisionId.getRevision());
-	//	}
-
 	void publish(DefaultModuleDescriptor moduleDescriptor,
 			JkMavenPublication publication) {
 		final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor
@@ -131,11 +75,17 @@ final class IvyPublisherForMaven {
 			final Snapshot snap = mavenMetadata.currentSnapshot();
 			version = versionForUniqueSnapshot(versionedModule.version().name(),
 					snap.timestamp, snap.buildNumber);
+			final String pomDest = destination(versionedModule, "pom", null, version);
+			putAll(pomXml, pomDest, true);
+			mavenMetadata.addSnapshotVersion("pom", null);
+			push(mavenMetadata, path);
 		} else {
 			version = versionedModule.version().name();
+			final String pomDest = destination(versionedModule, "pom", null, version);
+			putAll(pomXml, pomDest, true);
 		}
-		final String pomDest = destination(versionedModule, "pom", null, version);
-		putAll(pomXml, pomDest, true);
+
+
 
 		//update maven-metadata
 		updateMetadata(ivyModuleRevisionId.getModuleId(),
@@ -400,14 +350,6 @@ final class IvyPublisherForMaven {
 		}
 	}
 
-	//	private static void abortPublishTransaction(DependencyResolver resolver) {
-	//		try {
-	//			resolver.abortPublishTransaction();
-	//		} catch (final IOException e) {
-	//			JkLog.warn("Publish transction hasn't been properly aborted");
-	//			e.printStackTrace(JkLog.warnStream());
-	//		}
-	//	}
 
 	private String targetDir() {
 		return this.descriptorOutputDir.getAbsolutePath();

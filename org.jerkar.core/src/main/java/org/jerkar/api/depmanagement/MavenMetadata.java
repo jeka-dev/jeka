@@ -12,6 +12,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.jerkar.api.depmanagement.MavenMetadata.Versioning.Snapshot;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
 import org.jerkar.api.utils.JkUtilsTime;
@@ -106,7 +107,8 @@ class MavenMetadata {
 		snapshotVersion.extension = extension;
 		snapshotVersion.updated = this.versioning.lastUpdate;
 		final String version = this.version.replace("-SNAPSHOT", "");
-		snapshotVersion.value = version + "-" + this.versioning.snapshot.timestamp + "-" + this.versioning.snapshot.buildNumber;
+		final Snapshot snapshot = this.versioning.snapshot;
+		snapshotVersion.value = version + "-" + snapshot.timestamp + "-" + snapshot.buildNumber;
 		this.versioning.snapshotVersions.add(snapshotVersion);
 	}
 

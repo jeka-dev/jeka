@@ -26,7 +26,7 @@ public abstract class JerkarBuild extends JkJavaBuild {
 
 	@Override
 	protected JkVersion version() {
-		return JkVersion.ofName("0.1-SNAPSHOT");
+		return JkVersion.ofName("0.1.3-SNAPSHOT");
 	}
 
 	@Override
