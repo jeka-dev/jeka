@@ -28,7 +28,9 @@ import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.FileSystemResolver;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
+import org.apache.ivy.plugins.resolver.RepositoryResolver;
 import org.apache.ivy.util.url.CredentialsStore;
+import org.jerkar.api.depmanagement.JkMavenPublication.JkClassifiedArtifact;
 import org.jerkar.api.depmanagement.JkRepo.JkIvyRepository;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -251,10 +253,10 @@ final class IvyTranslations {
 		return resolver.getName().substring(PUBLISH_RESOLVER_NAME.length());
 	}
 
-	public static List<DependencyResolver> publishResolverOf(IvySettings ivySettings) {
-		final List<DependencyResolver> resolvers = new LinkedList<DependencyResolver>();
+	public static List<RepositoryResolver> publishResolverOf(IvySettings ivySettings) {
+		final List<RepositoryResolver> resolvers = new LinkedList<RepositoryResolver>();
 		for (final Object resolverObject : ivySettings.getResolvers()) {
-			final DependencyResolver resolver = (DependencyResolver) resolverObject;
+			final RepositoryResolver resolver = (RepositoryResolver) resolverObject;
 			if (resolver.getName() != null && resolver.getName().startsWith(PUBLISH_RESOLVER_NAME)) {
 				resolvers.add(resolver);
 			}
@@ -382,15 +384,17 @@ final class IvyTranslations {
 	public static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
 			JkMavenPublication publication, Date publishDate) {
 
-		final Artifact mavenMainArtifact = toPublishedMavenArtifact(publication.mainArtifactFile(), publication.artifactName(),
-				null ,descriptor.getModuleRevisionId(), publishDate);
+		final ModuleRevisionId moduleRevisionId = descriptor.getModuleRevisionId();
+		final String artifactName = moduleRevisionId.getName();
+		final Artifact mavenMainArtifact = toPublishedMavenArtifact(publication.mainArtifactFiles().get(0), artifactName,
+				null ,moduleRevisionId, publishDate);
 		final String mainConf = "default";
 		populateDescriptorWithMavenArtifact(descriptor, mainConf, mavenMainArtifact);
 
-		for (final Map.Entry<String, File> artifactEntry : publication.extraArtifacts().entrySet()) {
-			final File file = artifactEntry.getValue();
-			final String classifier = artifactEntry.getKey();
-			final Artifact mavenArtifact = toPublishedMavenArtifact(file, publication.artifactName(),
+		for (final JkClassifiedArtifact artifactEntry : publication.classifiedArtifacts()) {
+			final File file = artifactEntry.file();
+			final String classifier = artifactEntry.classifier();
+			final Artifact mavenArtifact = toPublishedMavenArtifact(file, artifactName,
 					classifier ,descriptor.getModuleRevisionId(), publishDate);
 			final String conf = classifier;
 			populateDescriptorWithMavenArtifact(descriptor, conf, mavenArtifact);

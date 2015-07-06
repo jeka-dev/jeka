@@ -2,6 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,10 +17,13 @@ import org.jerkar.api.utils.JkUtilsThrowable;
 import org.jerkar.api.utils.JkUtilsTime;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Object representation of the maven-metadata.xml file found in Maven repositories.
+ * Object representation of the maven-metadata.xml file found in Maven repositories for describing
+ * available timestamped snapshot available for a given version.
+ * This is a not used for Maven2 repositories.
  * 
  * @author Jerome Angibaud
  */
@@ -31,6 +35,14 @@ class MavenMetadata {
 		metadata.artifactId = versionedModule.moduleId().name();
 		metadata.modelVersion = "1.1.0";
 		metadata.version = versionedModule.version().name();
+		return metadata;
+	}
+
+	static MavenMetadata of(JkModuleId moduleId) {
+		final MavenMetadata metadata = new MavenMetadata();
+		metadata.groupId = moduleId.group();
+		metadata.artifactId = moduleId.name();
+		metadata.modelVersion = "1.1.0";
 		return metadata;
 	}
 
@@ -64,7 +76,7 @@ class MavenMetadata {
 
 	private String version;
 
-	private Versioning versioning;
+	private Versioning versioning = new Versioning();
 
 	private MavenMetadata() {
 
@@ -94,6 +106,28 @@ class MavenMetadata {
 		this.versioning.snapshotVersions.add(snapshotVersion);
 	}
 
+	public int currentBuildNumber() {
+		return this.versioning.currentBuildNumber();
+	}
+
+
+
+	/*
+	 * see https://support.sonatype.com/entries/23778606-Why-are-the-latest-and-release-tags-in-maven-metadata-xml-not-being-updated-after-deploying-artifact
+	 */
+	public void addVersion(String version) {
+		final String ts = JkUtilsTime.nowUtc("yyyyMMddHHmmss");
+		if (!versioning.versions.contains(version)) {
+			this.versioning.versions.add(version);
+			Collections.sort(this.versioning.versions);
+			versioning.latest = version;  // 'latest' field is intended only for maven-plugins
+			if (!version.endsWith("-SNAPSHOT")) {
+				this.versioning.release = version;
+			}
+		}
+		this.versioning.lastUpdate = ts;
+	}
+
 	void output(OutputStream outputStream) {
 		try {
 			final XMLStreamWriter writer = XMLOutputFactory.newInstance()
@@ -115,9 +149,11 @@ class MavenMetadata {
 		writeElement(writer, "artifactId", artifactId);
 		ln(writer);
 		indent(writer, 2);
-		writeElement(writer, "version", version);
-		ln(writer);
-		indent(writer, 2);
+		if (version != null) {
+			writeElement(writer, "version", version);
+			ln(writer);
+			indent(writer, 2);
+		}
 		this.versioning.write(writer);
 		ln(writer);
 		writer.writeEndElement();
@@ -130,22 +166,48 @@ class MavenMetadata {
 		}
 
 		Versioning(Element element) {
-			this.snapshot = new Snapshot((Element) element.getElementsByTagName("snapshot").item(0));
-			this.snapshotVersions = new LinkedList<SnapshotVersion>();
-			final Element snapshotVersions = (Element) element.getElementsByTagName("snapshotVersions").item(0);
-			final NodeList nodeList = snapshotVersions.getElementsByTagName("snapshotVersion");
-			for (int i=0; i < nodeList.getLength(); i++) {
-				final Element snapshotVersionEl = (Element) nodeList.item(i);
-				this.snapshotVersions.add(new SnapshotVersion(snapshotVersionEl));
+			final NodeList snapNodeList = element.getElementsByTagName("snapshot");
+			if (snapNodeList.getLength() > 0) {
+				this.snapshot = new Snapshot((Element) snapNodeList.item(0));
 			}
+			this.snapshotVersions = new LinkedList<SnapshotVersion>();
+
+			final NodeList versionsNodeList = element.getElementsByTagName("versions");
+			if (versionsNodeList.getLength() > 0) {
+				final Element versions = (Element) element.getElementsByTagName("versions").item(0);
+				final NodeList nodeList = versions.getElementsByTagName("version");
+				for (int i=0; i < nodeList.getLength(); i++) {
+					final Element versionEl = (Element) nodeList.item(i);
+					this.versions.add(versionEl.getTextContent());
+				}
+			}
+
+			final NodeList snapshotVersionsNodeList = element.getElementsByTagName("snapshotVersions");
+			if (snapshotVersionsNodeList.getLength() > 0) {
+				final Element snapshotVersions = (Element) element.getElementsByTagName("snapshotVersions").item(0);
+				final NodeList nodeList = snapshotVersions.getElementsByTagName("snapshotVersion");
+				for (int i=0; i < nodeList.getLength(); i++) {
+					final Element snapshotVersionEl = (Element) nodeList.item(i);
+					this.snapshotVersions.add(new SnapshotVersion(snapshotVersionEl));
+				}
+			}
+			this.latest = subValue(element, "latest");
+			this.release = subValue(element, "release");
 			this.lastUpdate = subValue(element, "lastUpdate");
 		}
 
 		private Snapshot snapshot;
 
+		private String latest;
+
+		private String release;
+
 		private List<SnapshotVersion> snapshotVersions = new LinkedList<MavenMetadata.Versioning.SnapshotVersion>();
 
 		private String lastUpdate;
+
+		private final List<String> versions = new LinkedList<String>();;
+
 
 		private int currentBuildNumber() {
 			if (snapshot == null) {
@@ -156,23 +218,49 @@ class MavenMetadata {
 
 		private void write(XMLStreamWriter writer) throws XMLStreamException {
 			writer.writeStartElement("versioning");
-			ln(writer);
-			indent(writer, 4);
-			snapshot.write(writer);
-			ln(writer);
-			indent(writer, 4);
-			writeElement(writer, "lastUpdate", lastUpdate);
-			ln(writer);
-			indent(writer, 4);
-			writer.writeStartElement("snapshotVersions");
-			for (final SnapshotVersion snapshotVersion : this.snapshotVersions) {
+			if (latest != null) {
 				ln(writer);
-				indent(writer, 6);
-				snapshotVersion.write(writer);
+				indent(writer, 4);
+				writeElement(writer, "latest", latest);
+			}
+			if (snapshot != null) {
+				ln(writer);
+				indent(writer, 4);
+				snapshot.write(writer);
+			}
+			if (release != null) {
+				ln(writer);
+				indent(writer, 4);
+				writeElement(writer, "release", release);
 			}
 			ln(writer);
 			indent(writer, 4);
-			writer.writeEndElement();
+			if (!versions.isEmpty()) {
+				writer.writeStartElement("versions");
+				for (final String version : this.versions) {
+					ln(writer);
+					indent(writer, 6);
+					writeElement(writer, "version", version);
+				}
+				ln(writer);
+				indent(writer, 4);
+				writer.writeEndElement();
+
+			}
+			if (!snapshotVersions.isEmpty()) {
+				writer.writeStartElement("snapshotVersions");
+				for (final SnapshotVersion snapshotVersion : this.snapshotVersions) {
+					ln(writer);
+					indent(writer, 6);
+					snapshotVersion.write(writer);
+				}
+				ln(writer);
+				indent(writer, 4);
+				writer.writeEndElement();
+			}
+			ln(writer);
+			indent(writer, 4);
+			writeElement(writer, "lastUpdate", lastUpdate);
 			ln(writer);
 			indent(writer, 2);
 			writer.writeEndElement();
@@ -250,8 +338,17 @@ class MavenMetadata {
 	}
 
 	private static String subValue(Element el, String subTag) {
-		final Element element = (Element) el.getElementsByTagName(subTag).item(0);
-		return element.getTextContent();
+		final NodeList nodeList = el.getChildNodes();
+		for (int i =0; i < nodeList.getLength(); i++) {
+			final Node node = nodeList.item(i);
+			if (node instanceof Element) {
+				final Element element = (Element) node;
+				if (element.getNodeName().equals(subTag)) {
+					return element.getTextContent();
+				}
+			}
+		}
+		return null;
 	}
 
 	private static void writeElement(XMLStreamWriter writer, String name, String value) throws XMLStreamException {

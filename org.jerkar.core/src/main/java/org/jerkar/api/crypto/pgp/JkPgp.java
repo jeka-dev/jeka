@@ -106,14 +106,8 @@ public final class JkPgp implements Serializable {
 		this.password = password;
 	}
 
-	/**
-	 * Signs the specified file with the first secret key of this key ring. The password is necessary
-	 * if the secret key is protected.
-	 * @param fileToSign The file to sign
-	 * @param output The file where will be written the signature (no need to exist priorly)
-	 * @param password password of the secret key
-	 */
-	public void sign(File fileToSign, File output, String password) {
+
+	void sign(File fileToSign, File output, String password) {
 		final char[] pass;
 		if (password == null) {
 			pass = new char[0];

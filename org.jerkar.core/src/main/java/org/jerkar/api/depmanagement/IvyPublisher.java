@@ -19,6 +19,7 @@ import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.resolver.AbstractPatternsBasedResolver;
 import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
+import org.apache.ivy.plugins.resolver.RepositoryResolver;
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsThrowable;
@@ -134,10 +135,9 @@ final class IvyPublisher implements InternalPublisher {
 	public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
 			JkDependencies dependencies) {
 		JkLog.startln("Publishing for Maven");
-		final Date deliveryDate = JkUtilsTime.now();
 		final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication,
-				dependencies,deliveryDate, JkVersionProvider.empty());
-		publishMavenArtifacts(publication, deliveryDate, moduleDescriptor);
+				dependencies, JkUtilsTime.now(), JkVersionProvider.empty());
+		publishMavenArtifacts(publication,  moduleDescriptor);
 		JkLog.done();
 	}
 
@@ -186,17 +186,16 @@ final class IvyPublisher implements InternalPublisher {
 		updateCache(moduleDescriptor);
 	}
 
-	private int publishMavenArtifacts(JkMavenPublication publication, Date date, DefaultModuleDescriptor moduleDescriptor) {
+	private int publishMavenArtifacts(JkMavenPublication publication, DefaultModuleDescriptor moduleDescriptor) {
 		int count = 0;
-		for (final DependencyResolver resolver : IvyTranslations.publishResolverOf(this.ivy.getSettings())) {
+		for (final RepositoryResolver resolver : IvyTranslations.publishResolverOf(this.ivy.getSettings())) {
 			final JkPublishRepo publishRepo = this.publishRepos.getRepoHavingUrl(IvyTranslations.publishResolverUrl(resolver));
 			final JkVersionedModule jkModule = IvyTranslations.toJerkarVersionedModule(moduleDescriptor.getModuleRevisionId());
 			if (isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
 				JkLog.startln("Publishing for repository " + resolver);
 				final CheckFileFlag checkFileFlag = CheckFileFlag.of(publishRepo);
-				final IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(checkFileFlag, resolver, descriptorOutputDir);
-				ivyPublisherForMaven.publish(moduleDescriptor, publication, date);
-				JkLog.done();
+				final IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(checkFileFlag, resolver, descriptorOutputDir, publishRepo.uniqueSnapshot());
+				ivyPublisherForMaven.publish2(moduleDescriptor, publication);
 				count ++;
 			}
 		}
@@ -281,7 +280,7 @@ final class IvyPublisher implements InternalPublisher {
 
 	static class CheckFileFlag {
 
-		private JkPgp pgpSigner;
+		JkPgp pgpSigner;
 
 		public static CheckFileFlag of(JkPublishRepo publishRepo) {
 			final CheckFileFlag flag = new CheckFileFlag();
@@ -302,6 +301,7 @@ final class IvyPublisher implements InternalPublisher {
 				resolver.publish(signArtifact, signedFile, true);
 			}
 		}
+
 	}
 
 }

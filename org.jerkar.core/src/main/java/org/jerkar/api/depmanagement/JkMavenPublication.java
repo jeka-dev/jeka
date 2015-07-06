@@ -3,35 +3,34 @@ package org.jerkar.api.depmanagement;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.jerkar.api.utils.JkUtilsAssert;
+import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsString;
 
 public final class JkMavenPublication implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	@SuppressWarnings("unchecked")
-	public static JkMavenPublication of(String name, File file) {
-		return new JkMavenPublication(name, file, Collections.EMPTY_MAP, null);
+	public static JkMavenPublication of(File file) {
+		return new JkMavenPublication(JkUtilsIterable.listOf(file), Collections.EMPTY_LIST, null);
 	}
 
-	private final Map<String, File> artifacts;
+	private final List<JkClassifiedArtifact> classifiedArtifacts;
 
-	private final String artifactName;
-
-	private final File mainArtifact;
+	private final List<File> mainArtifacts;  // can't have 2 artifacts with same extension
 
 	private final JkMavenPublicationInfo extraInfo;
 
 
-	private JkMavenPublication(String artifactName, File mainArtifact,
-			Map<String, File> artifacts, JkMavenPublicationInfo extraInfo) {
+	private JkMavenPublication(List<File> mainArtifacts,
+			List<JkClassifiedArtifact> classified, JkMavenPublicationInfo extraInfo) {
 		super();
-		this.artifactName = artifactName;
-		this.mainArtifact = mainArtifact;
-		this.artifacts = artifacts;
+		this.mainArtifacts = mainArtifacts;
+		this.classifiedArtifacts = classified;
 		this.extraInfo = extraInfo;
 	}
 
@@ -43,14 +42,29 @@ public final class JkMavenPublication implements Serializable {
 	}
 
 	public JkMavenPublication and(File file, String classifier) {
-		JkUtilsAssert.isTrue(!classifier.isEmpty(), "classifier cannot be empty");
-		if (artifacts.containsKey(classifier)) {
-			throw new IllegalArgumentException("Can't add artifact with extension/classifier equals to ["
-					+ classifier + "] as this combination is yet present in this publication " + this);
+		JkUtilsAssert.isTrue(!JkUtilsString.isBlank(classifier), "classifier cannot be empty");
+		final String fileExt = JkUtilsString.substringAfterLast(file.getName(), ".");
+		if (JkUtilsString.isBlank(fileExt)) {
+			throw new IllegalArgumentException("the file " + file.getPath() + " must have an extension (as .jar, .zip, ...");
 		}
-		final Map<String, File> map = new HashMap<String, File>(artifacts);
-		map.put(classifier, file);
-		return new JkMavenPublication(this.artifactName, mainArtifact, map, this.extraInfo);
+		if (contains(fileExt, classifier)) {
+			throw new IllegalArgumentException("Can't add artifact with extension/classifier equals to ["+
+					fileExt + "/" + classifier + "] as this combination is yet present in this publication " + this);
+		}
+		final JkClassifiedArtifact artifact = new JkClassifiedArtifact(classifier, file);
+		final List<JkClassifiedArtifact> list = new LinkedList<JkClassifiedArtifact>(this.classifiedArtifacts);
+		list.add(artifact);
+		return new JkMavenPublication(this.mainArtifacts, list, this.extraInfo);
+	}
+
+	private boolean contains(String ext, String classifier) {
+		for (final JkClassifiedArtifact classifiedArtifact : this.classifiedArtifacts) {
+			final String fileExt = JkUtilsString.substringAfterLast(classifiedArtifact.file.getName(), ".");
+			if (classifier.contains(classifiedArtifact.classifier) && fileExt.equals(ext)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -58,7 +72,7 @@ public final class JkMavenPublication implements Serializable {
 	 * to publish on Maven central repository.
 	 */
 	public JkMavenPublication with(JkMavenPublicationInfo extraInfo) {
-		return new JkMavenPublication(this.artifactName, this.mainArtifact, this.artifacts, extraInfo);
+		return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, extraInfo);
 	}
 
 	public JkMavenPublication andOptional(File file, String classifier) {
@@ -75,18 +89,12 @@ public final class JkMavenPublication implements Serializable {
 		return this;
 	}
 
-	public File mainArtifactFile() {
-		return this.mainArtifact;
+	public List<File> mainArtifactFiles() {
+		return Collections.unmodifiableList(this.mainArtifacts);
 	}
 
-	public Map<String, File> extraArtifacts() {
-		return Collections.unmodifiableMap(this.artifacts);
-	}
-
-
-
-	public String artifactName() {
-		return artifactName;
+	public List<JkClassifiedArtifact> classifiedArtifacts() {
+		return Collections.unmodifiableList(classifiedArtifacts);
 	}
 
 	public JkMavenPublicationInfo extraInfo() {
@@ -96,7 +104,36 @@ public final class JkMavenPublication implements Serializable {
 
 	@Override
 	public String toString() {
-		return artifacts.toString();
+		return mainArtifacts.toString() + " / " + classifiedArtifacts.toString();
+	}
+
+	public static class JkClassifiedArtifact {
+		private String classifier;
+		private File file;
+
+		JkClassifiedArtifact(String classifier, File file) {
+			super();
+			this.classifier = classifier;
+			this.file = file;
+		}
+
+		public String classifier() {
+			return classifier;
+		}
+
+		public void setClassifier(String classifier) {
+			this.classifier = classifier;
+		}
+
+		public File file() {
+			return file;
+		}
+
+		public void setFile(File file) {
+			this.file = file;
+		}
+
+
 	}
 
 

@@ -23,7 +23,6 @@ import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsJdk;
-import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.JkBuildDependencySupport;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkScaffolder;
@@ -444,16 +443,11 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	protected JkMavenPublication mavenPublication(boolean includeTests, boolean includeSources) {
 		final JkJavaPacker packer = packer();
-		return JkMavenPublication.of(artifactName(packer.jarFile()) ,packer.jarFile())
+		return JkMavenPublication.of(packer.jarFile())
 				.andIf(includeSources, packer.jarSourceFile(), "sources")
 				.andOptional(javadocMaker().zipFile(), "javadoc")
 				.andOptionalIf(includeTests, packer.jarTestFile(), "test")
 				.andOptionalIf(includeTests && includeSources, packer.jarTestSourceFile(), "testSources");
-	}
-
-	private static String artifactName(File file) {
-		final String name = file.getName();
-		return name.contains(".") ? JkUtilsString.substringBeforeLast(name, ".") : name;
 	}
 
 	protected JkIvyPublication ivyPublication(boolean includeTests, boolean includeSources) {

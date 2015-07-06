@@ -14,8 +14,8 @@ public class JkIvyPublisherRunner {
 	public static void main(String[] args) {
 		JkLog.verbose(true);
 		//JkUtilsTool.loadUserSystemProperties();
-		testPublishIvy();
-		//testPublishMaven();
+		//testPublishIvy();
+		testPublishMaven();
 	}
 
 	public static void testPublishIvy() {
@@ -30,9 +30,9 @@ public class JkIvyPublisherRunner {
 	}
 
 	public static void testPublishMaven() {
-		final IvyPublisher jkIvyResolver = IvyPublisher.of(mavenRepos().withMd5AndSha1Checksum(), new File("build/output/test-out"));
-		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup2", "mymodule2"), JkVersion.ofName("0.0.1"));
-		final JkMavenPublication publication = JkMavenPublication.of("mymodule2", sampleJarfile()).and(sampleJarSourcefile(), "source");
+		final IvyPublisher jkIvyResolver = IvyPublisher.of(mavenRepos().withMd5AndSha1Checksum().withUniqueSnapshot(true), new File("build/output/test-out"));
+		final JkVersionedModule versionedModule = JkVersionedModule.of(JkModuleId.of("mygroup2", "mymodule2"), JkVersion.ofName("0.0.11-SNAPSHOT"));
+		final JkMavenPublication publication = JkMavenPublication.of(sampleJarfile()).and(sampleJarSourcefile(), "source");
 		final JkModuleId spring = JkModuleId.of("org.springframework", "spring-jdbc");
 		final JkDependencies deps = JkDependencies.builder()
 				.on(spring, "2.0.+").scope(JkScopedDependencyTest.COMPILE).build();

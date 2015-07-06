@@ -35,6 +35,14 @@ public final class JkVersionedModule implements Serializable {
 		return version;
 	}
 
+	public JkVersionedModule withVersion(JkVersion version) {
+		return new JkVersionedModule(this.moduleId, version);
+	}
+
+	public JkVersionedModule withVersion(String version) {
+		return new JkVersionedModule(this.moduleId, JkVersion.ofName(version));
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

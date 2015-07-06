@@ -104,6 +104,14 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 		return new JkPublishRepos(list);
 	}
 
+	public JkPublishRepos withUniqueSnapshot(boolean uniqueSnapshot) {
+		final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>();
+		for (final JkPublishRepo publishRepo : this.publishRepos) {
+			list.add(publishRepo.withUniqueSnapshot(uniqueSnapshot));
+		}
+		return new JkPublishRepos(list);
+	}
+
 
 
 
