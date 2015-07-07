@@ -12,7 +12,7 @@ public class PluginsSonarBuild extends JerkarBuild {
 	
 	@Override
 	protected JkDependencies dependencies() {
-		return JkDependencies.on(PROVIDED, core.asBuildDependency(core.packer().jarFile()));
+		return JkDependencies.on(PROVIDED, core.asProjectDependency(core.packer().jarFile()));
 	}	
 
 }

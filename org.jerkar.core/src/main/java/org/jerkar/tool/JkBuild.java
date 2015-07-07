@@ -248,7 +248,7 @@ public class JkBuild {
 	/**
 	 * Returns a {@link JkProjectDependency} on this project and specified files.
 	 */
-	public JkProjectDependency asBuildDependency(File ...files) {
+	public JkProjectDependency asProjectDependency(File ...files) {
 		return BuildDependency.of(this, files);
 	}
 

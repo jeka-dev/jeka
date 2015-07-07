@@ -57,7 +57,7 @@ class Lib {
 
 			} else {  // This is project dependency
 				final JkJavaBuild slaveBuild = (JkJavaBuild) masterBuild.relativeProject(lib.projectRelativePath);
-				final JkProjectDependency projectDependency = slaveBuild.asBuildDependency(slaveBuild.packer().jarFile());
+				final JkProjectDependency projectDependency = slaveBuild.asProjectDependency(slaveBuild.packer().jarFile());
 				builder.on(projectDependency).scope(lib.scope);
 
 				// Get the exported entry as well
