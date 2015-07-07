@@ -490,8 +490,6 @@ public final class JkUtilsIO {
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
-		closeQuietly(in);
-		closeQuietly(out);
 	}
 
 	/**

@@ -1,6 +1,8 @@
 package org.jerkar.api.file;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.Map;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIO;
 
 /**
  * Provides a view on files and sub-folders contained in a given directory. A <code>JkFileTree</code> may
@@ -298,6 +301,22 @@ public final class JkFileTree implements Iterable<File> {
 	@Override
 	public String toString() {
 		return root.getPath() + ":" + filter;
+	}
+
+	/**
+	 * Merges the content of all files to the specified file.
+	 */
+	public JkFileTree mergeTo(File target) {
+		JkUtilsFile.createFileIfNotExist(target);
+		final FileOutputStream outputStream = JkUtilsIO.outputStream(target);
+		for (final File file : this) {
+			final FileInputStream fileInputStream = JkUtilsIO.inputStream(file);
+			JkUtilsIO.copy(fileInputStream, outputStream);
+			JkUtilsIO.closeQuietly(fileInputStream);
+		}
+		JkUtilsIO.closeQuietly(outputStream);
+		return this;
+
 	}
 
 
