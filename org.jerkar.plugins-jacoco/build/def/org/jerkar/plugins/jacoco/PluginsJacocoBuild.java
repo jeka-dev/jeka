@@ -13,11 +13,11 @@ public class PluginsJacocoBuild extends JerkarBuild {
 	
 	@Override
 	protected JkDependencies dependencies() {
-		return JkDependencies
-			.on(PROVIDED, projectFiles(core , core.packer().jarFile()))
-			//.andExternal(TEST, "junit:junit:4.11")
-			.andFiles(TEST, core.baseDir("build/libs/provided/junit-4.11.jar"), 
-					core.baseDir("build/libs/provided/hamcrest-core-1.3.jar"));
+		return JkDependencies.builder()
+			.on(core.asBuildDependency(core.packer().jarFile())).scope(PROVIDED)
+			.on(core.baseDir("build/libs/provided/junit-4.11.jar"), 
+					 core.baseDir("build/libs/provided/hamcrest-core-1.3.jar")).scope(TEST)
+		.build();
 	}
 	
 	public static void main(String[] args) {

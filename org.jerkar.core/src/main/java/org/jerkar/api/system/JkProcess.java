@@ -8,8 +8,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsIO.StreamGobbler;
+import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.api.utils.JkUtilsSystem;
 
 /**
  * Provides fluent API to define and launch external process.<p>
@@ -22,11 +23,12 @@ import org.jerkar.api.utils.JkUtilsIO.StreamGobbler;
  * 
  * @author Jerome Angibaud
  */
-public final class JkProcess {
+public final class JkProcess implements Runnable {
 
 	private static final File CURRENT_JAVA_DIR = new File(System.getProperty("java.home"), "bin");
 
 	private final String command;
+
 
 	private final List<String> parameters;
 
@@ -34,7 +36,7 @@ public final class JkProcess {
 
 	private final boolean failOnError;
 
-	private JkProcess(String command, List<String> parameters, File workingDir, boolean failOnError) {
+	private JkProcess(String command,  List<String> parameters, File workingDir, boolean failOnError) {
 		this.command = command;
 		this.parameters = parameters;
 		this.workingDir = workingDir;
@@ -46,6 +48,14 @@ public final class JkProcess {
 	 */
 	public static JkProcess of(String command, String... parameters) {
 		return new JkProcess(command, Arrays.asList(parameters), null, false);
+	}
+
+	/**
+	 * Defines a <code>JkProcess</code> using the specified command and parameters.
+	 */
+	public static JkProcess of(String windowsCommand, String unixCommand, String... parameters) {
+		final String cmd = JkUtilsSystem.IS_WINDOWS ? windowsCommand : unixCommand;
+		return new JkProcess(cmd, Arrays.asList(parameters), null, false);
 	}
 
 	/**
@@ -178,6 +188,11 @@ public final class JkProcess {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public void run() {
+		this.runSync();
 	}
 
 

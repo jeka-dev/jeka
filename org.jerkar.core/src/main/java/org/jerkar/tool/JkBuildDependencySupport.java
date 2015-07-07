@@ -65,7 +65,7 @@ public class JkBuildDependencySupport extends JkBuild {
 	private JkMultiProjectDependencies multiProjectDependencies;
 
 	public JkBuildDependencySupport() {
-		final List<JkBuildDependencySupport> subBuilds = populateMultiProjectBuildField(this);
+		final List<JkBuild> subBuilds = populateMultiProjectBuildField();
 		this.explicitMultiProjectDependencies = JkMultiProjectDependencies.of(this, subBuilds);
 	}
 
@@ -244,11 +244,11 @@ public class JkBuildDependencySupport extends JkBuild {
 	}
 
 	/**
-	 * Returns dependencies on other projects
+	 * Returns dependencies on other Jerkar builds (potentially on other projects).
 	 */
-	public final JkMultiProjectDependencies multiProjectDependencies() {
+	public final JkMultiProjectDependencies jerkarBuildDependencies() {
 		if (multiProjectDependencies == null) {
-			multiProjectDependencies = this.explicitMultiProjectDependencies.and(projectDependencies(this.effectiveDependencies()));
+			multiProjectDependencies = this.explicitMultiProjectDependencies.and(projectBuildDependencies(this.effectiveDependencies()));
 		}
 		return multiProjectDependencies;
 
@@ -256,13 +256,13 @@ public class JkBuildDependencySupport extends JkBuild {
 
 	/**
 	 * Returns all build included in these dependencies.
-	 * The builds are coming from {@link JkProjectDependency}.
+	 * The builds are coming from {@link BuildDependency}.
 	 */
-	private static List<JkBuildDependencySupport> projectDependencies(JkDependencies dependencies) {
-		final List<JkBuildDependencySupport> result = new LinkedList<JkBuildDependencySupport>();
+	private static List<JkBuild> projectBuildDependencies(JkDependencies dependencies) {
+		final List<JkBuild> result = new LinkedList<JkBuild>();
 		for (final JkScopedDependency scopedDependency : dependencies) {
-			if (scopedDependency.dependency() instanceof JkProjectDependency) {
-				final JkProjectDependency projectDependency = (JkProjectDependency) scopedDependency.dependency();
+			if (scopedDependency.dependency() instanceof BuildDependency) {
+				final BuildDependency projectDependency = (BuildDependency) scopedDependency.dependency();
 				result.add(projectDependency.projectBuild());
 			}
 		}
@@ -270,14 +270,14 @@ public class JkBuildDependencySupport extends JkBuild {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static List<JkBuildDependencySupport> populateMultiProjectBuildField(JkBuildDependencySupport mainBuild) {
-		final List<JkBuildDependencySupport> result = new LinkedList<JkBuildDependencySupport>();
-		final List<Field> fields = JkUtilsReflect.getAllDeclaredField(mainBuild.getClass(), JkProject.class);
+	private List<JkBuild> populateMultiProjectBuildField() {
+		final List<JkBuild> result = new LinkedList<JkBuild>();
+		final List<Field> fields = JkUtilsReflect.getAllDeclaredField(this.getClass(), JkProject.class);
 		for (final Field field : fields) {
 			final JkProject jkProject = field.getAnnotation(JkProject.class);
-			final JkBuildDependencySupport subBuild = relativeProject(mainBuild, (Class<? extends JkBuildDependencySupport>) field.getType(),
+			final JkBuildDependencySupport subBuild = relativeProject(this, (Class<? extends JkBuildDependencySupport>) field.getType(),
 					jkProject.value());
-			JkUtilsReflect.setFieldValue(mainBuild, field, subBuild);
+			JkUtilsReflect.setFieldValue(this, field, subBuild);
 			result.add(subBuild);
 		}
 		return result;
@@ -355,10 +355,6 @@ public class JkBuildDependencySupport extends JkBuild {
 
 	public JkPgp pgp() {
 		return JkPgp.of(JkOptions.asMap());
-	}
-
-	protected JkProjectDependency projectFiles(JkBuildDependencySupport build, File...files) {
-		return JkProjectDependency.of(build, files);
 	}
 
 	private static class SubProjectRef {

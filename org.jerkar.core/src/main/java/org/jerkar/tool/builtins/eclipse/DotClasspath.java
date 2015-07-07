@@ -371,7 +371,7 @@ final class DotClasspath {
 			final JkBuildDependencySupport buildDependencySupport = (JkBuildDependencySupport) build;
 
 			// Write project
-			for (final JkBuild project : buildDependencySupport.multiProjectDependencies().directProjectBuilds()) {
+			for (final JkBuild project : buildDependencySupport.jerkarBuildDependencies().directProjectBuilds()) {
 				writer.writeCharacters("\t");
 				writer.writeEmptyElement(CLASSPATHENTRY);
 				writer.writeAttribute("kind", "src");

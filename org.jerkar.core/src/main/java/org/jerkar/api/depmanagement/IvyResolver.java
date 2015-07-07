@@ -156,7 +156,7 @@ final class IvyResolver implements InternalDepResolver {
 			artifacts.add(artifact);
 			final JkScopedDependency declaredDep = deps.get(versionedModule.moduleId());
 			if (declaredDep != null && declaredDep.isInvolvedIn(JkScope.of(config))) {
-				final JkExternalModule module = (JkExternalModule) declaredDep.dependency();
+				final JkExternalModuleDependency module = (JkExternalModuleDependency) declaredDep.dependency();
 				if (module.versionRange().isDynamicAndResovable()) {
 					versionProvider = versionProvider.and(module.moduleId(), versionedModule.version());
 				}

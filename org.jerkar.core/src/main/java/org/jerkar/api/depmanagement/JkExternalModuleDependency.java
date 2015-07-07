@@ -9,20 +9,24 @@ import org.jerkar.api.utils.JkUtilsString;
  * 
  * @author Djeang
  */
-public class JkExternalModule extends JkDependency {
+public class JkExternalModuleDependency extends JkDependency {
 
 	private static final long serialVersionUID = 1L;
 
-	public static JkExternalModule of(JkModuleId moduleId, JkVersionRange versionRange) {
-		return new JkExternalModule(moduleId, versionRange, null, true);
+	public static boolean isGroupNameAndVersion(String candidate) {
+		return JkUtilsString.countOccurence(candidate, ':') == 2;
 	}
 
-	public static JkExternalModule of(String group, String name, String version) {
+	public static JkExternalModuleDependency of(JkModuleId moduleId, JkVersionRange versionRange) {
+		return new JkExternalModuleDependency(moduleId, versionRange, null, true);
+	}
+
+	public static JkExternalModuleDependency of(String group, String name, String version) {
 		return of (JkModuleId.of(group, name), JkVersionRange.of(version));
 	}
 
 
-	public static JkExternalModule of(String description) {
+	public static JkExternalModuleDependency of(String description) {
 		final String[] strings = JkUtilsString.split(description, ":");
 		if (strings.length != 3) {
 			throw new IllegalArgumentException("Module should be formated as 'groupName:moduleName:version'. Was " + description);
@@ -35,7 +39,7 @@ public class JkExternalModule extends JkDependency {
 	private final String classifier;
 	private final boolean transitive;
 
-	private JkExternalModule(JkModuleId module, JkVersionRange versionRange, String classifier, boolean transitive) {
+	private JkExternalModuleDependency(JkModuleId module, JkVersionRange versionRange, String classifier, boolean transitive) {
 		this.module = module;
 		this.versionRange = versionRange;
 		this.classifier = classifier;
@@ -56,12 +60,12 @@ public class JkExternalModule extends JkDependency {
 		return versionRange;
 	}
 
-	public JkExternalModule transitive(boolean transitive) {
-		return new JkExternalModule(module, versionRange, classifier, transitive);
+	public JkExternalModuleDependency transitive(boolean transitive) {
+		return new JkExternalModuleDependency(module, versionRange, classifier, transitive);
 	}
 
-	public JkExternalModule resolvedTo(JkVersion version) {
-		return new JkExternalModule(module, JkVersionRange.of(version.name()), classifier, transitive);
+	public JkExternalModuleDependency resolvedTo(JkVersion version) {
+		return new JkExternalModuleDependency(module, JkVersionRange.of(version.name()), classifier, transitive);
 	}
 
 

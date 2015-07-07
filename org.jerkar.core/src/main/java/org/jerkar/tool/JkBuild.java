@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.api.depmanagement.JkProjectDependency;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
@@ -237,6 +238,18 @@ public class JkBuild {
 
 	public <T extends JkBuildPlugin> T pluginOf(Class<T> pluginClass) {
 		return this.plugins.findInstanceOf(pluginClass);
+	}
+
+	@Override
+	public String toString() {
+		return this.baseDir.getPath();
+	}
+
+	/**
+	 * Returns a {@link JkProjectDependency} on this project and specified files.
+	 */
+	public JkProjectDependency asBuildDependency(File ...files) {
+		return BuildDependency.of(this, files);
 	}
 
 

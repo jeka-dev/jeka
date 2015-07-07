@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkProjectDependency;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.tool.JkLocator;
-import org.jerkar.tool.JkProjectDependency;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 class Lib {
@@ -53,11 +53,11 @@ class Lib {
 		final JkDependencies.Builder builder = JkDependencies.builder();
 		for (final Lib lib : libs) {
 			if (lib.projectRelativePath == null) {
-				builder.onFile(lib.file).scope(lib.scope);
+				builder.on(lib.file).scope(lib.scope);
 
 			} else {  // This is project dependency
 				final JkJavaBuild slaveBuild = (JkJavaBuild) masterBuild.relativeProject(lib.projectRelativePath);
-				final JkProjectDependency projectDependency = JkProjectDependency.of(slaveBuild, slaveBuild.packer().jarFile());
+				final JkProjectDependency projectDependency = slaveBuild.asBuildDependency(slaveBuild.packer().jarFile());
 				builder.on(projectDependency).scope(lib.scope);
 
 				// Get the exported entry as well

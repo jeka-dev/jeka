@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkDependency;
+import org.jerkar.api.depmanagement.JkFileSystemDependency;
 import org.jerkar.api.depmanagement.JkIvyPublication;
 import org.jerkar.api.depmanagement.JkMavenPublication;
 import org.jerkar.api.depmanagement.JkScope;
@@ -499,10 +499,10 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 			return super.implicitDependencies();
 		}
 		return JkDependencies.builder()
-				.usingDefaultScopes(COMPILE).on(JkDependency.of(libDir.include("*.jar", "compile/*.jar")))
-				.usingDefaultScopes(PROVIDED).on(JkDependency.of(libDir.include("provided/*.jar")))
-				.usingDefaultScopes(RUNTIME).on(JkDependency.of(libDir.include("runtime/*.jar")))
-				.usingDefaultScopes(TEST).on(JkDependency.of(libDir.include("test/*.jar"))).build();
+				.usingDefaultScopes(COMPILE).on(JkFileSystemDependency.of(libDir.include("*.jar", "compile/*.jar")))
+				.usingDefaultScopes(PROVIDED).on(JkFileSystemDependency.of(libDir.include("provided/*.jar")))
+				.usingDefaultScopes(RUNTIME).on(JkFileSystemDependency.of(libDir.include("runtime/*.jar")))
+				.usingDefaultScopes(TEST).on(JkFileSystemDependency.of(libDir.include("test/*.jar"))).build();
 	}
 
 	// Lifecycle methods

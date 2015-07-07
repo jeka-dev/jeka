@@ -77,11 +77,11 @@ final class IvyTranslations {
 
 	/**
 	 * @param scopedDependency
-	 *            must be of {@link JkExternalModule}
+	 *            must be of {@link JkExternalModuleDependency}
 	 */
 	private static DependencyDescriptor toDependencyDescriptor(JkScopedDependency scopedDependency, JkScope defaultScope,
 			JkScopeMapping defaultMapping, JkVersion resolvedVersion) {
-		final JkExternalModule externalModule = (JkExternalModule) scopedDependency.dependency();
+		final JkExternalModuleDependency externalModule = (JkExternalModuleDependency) scopedDependency.dependency();
 		final ModuleRevisionId moduleRevisionId = toModuleRevisionId(externalModule, resolvedVersion);
 		final boolean changing = externalModule.versionRange().definition().endsWith("-SNAPSHOT");
 		final DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null, moduleRevisionId, false,
@@ -136,7 +136,7 @@ final class IvyTranslations {
 		return result;
 	}
 
-	private static ModuleRevisionId toModuleRevisionId(JkExternalModule externalModule, JkVersion resolvedVersion) {
+	private static ModuleRevisionId toModuleRevisionId(JkExternalModuleDependency externalModule, JkVersion resolvedVersion) {
 		final String originalVersion = externalModule.versionRange().definition();
 		if (resolvedVersion == null || resolvedVersion.name().equals(originalVersion)) {
 			return new ModuleRevisionId(toModuleId(externalModule.moduleId()), originalVersion);
@@ -316,8 +316,8 @@ final class IvyTranslations {
 
 		// Add dependencies
 		for (final JkScopedDependency scopedDependency : dependencies) {
-			if (scopedDependency.dependency() instanceof JkExternalModule) {
-				final JkExternalModule externalModule = (JkExternalModule) scopedDependency.dependency();
+			if (scopedDependency.dependency() instanceof JkExternalModuleDependency) {
+				final JkExternalModuleDependency externalModule = (JkExternalModuleDependency) scopedDependency.dependency();
 				final JkVersion resolvedVersion = resolvedVersions.versionOf(externalModule.moduleId());
 				final DependencyDescriptor dependencyDescriptor = toDependencyDescriptor(scopedDependency, defaultScope, defaultMapping, resolvedVersion);
 				moduleDescriptor.addDependency(dependencyDescriptor);

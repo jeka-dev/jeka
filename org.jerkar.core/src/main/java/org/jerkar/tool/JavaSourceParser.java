@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkDependency;
+import org.jerkar.api.depmanagement.JkExternalModuleDependency;
+import org.jerkar.api.depmanagement.JkFileSystemDependency;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopeMapping;
@@ -96,8 +97,8 @@ class JavaSourceParser {
 	private static JkDependencies dependenciesFromImports(File baseDir, List<String> deps) {
 		final JkDependencies.Builder builder = JkDependencies.builder().usingDefaultScopeMapping(SCOPE_MAPPING);
 		for (final String dependency : deps) {
-			if (JkDependency.isGroupNameAndVersion(dependency)) {
-				builder.on(JkDependency.of(dependency));
+			if (JkExternalModuleDependency.isGroupNameAndVersion(dependency)) {
+				builder.on(JkExternalModuleDependency.of(dependency));
 			} else {
 				if (dependency.contains(":")) {
 					throw new JkException("Dependency " + dependency + " expressed in @JkImport is malformed, the expected format is groupId:artifactId:version.");
@@ -106,7 +107,7 @@ class JavaSourceParser {
 				if (!file.exists()) {
 					throw new JkException("The file " + dependency + " defined as build definition import does not exist.");
 				}
-				builder.on(JkDependency.ofFile(baseDir, dependency));
+				builder.on(JkFileSystemDependency.ofFile(baseDir, dependency));
 			}
 
 		}

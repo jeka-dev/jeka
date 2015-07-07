@@ -20,7 +20,7 @@ public class AClassicBuild extends JkJavaBuild {
 	@Override  // Optional :  needless if you use only local dependencies
 	protected JkDependencies dependencies() {
 		return JkDependencies.builder()
-			.on(GUAVA, "18.0")  
+			.on(GUAVA, "18.0").scope(COMPILE)  
 			.on(JERSEY_SERVER, "1.19")
 			.on("com.orientechnologies:orientdb-client:2.0.8")
 			.on(JUNIT, "4.11").scope(TEST)

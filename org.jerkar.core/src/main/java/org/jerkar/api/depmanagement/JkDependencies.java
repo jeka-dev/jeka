@@ -11,8 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.jerkar.api.depmanagement.JkDependency.JkLocalDependency;
-import org.jerkar.api.depmanagement.JkDependency.JkLocalFileDependency;
+import org.jerkar.api.depmanagement.JkDependency.JkFileDependency;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -55,13 +54,14 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
 	/**
 	 * Returns a clone of this object minus the dependencies on the given {@link JkModuleId}.
+	 * This is used to exclude a given module from all scope.
 	 */
 	public JkDependencies without(JkModuleId jkModuleId) {
 		final List<JkScopedDependency> result = new LinkedList<JkScopedDependency>(dependencies);
 		for (final Iterator<JkScopedDependency> it = result.iterator(); it.hasNext();) {
 			final JkDependency dependency = it.next().dependency();
-			if (dependency instanceof JkExternalModule) {
-				final JkExternalModule externalModule = (JkExternalModule) dependency;
+			if (dependency instanceof JkExternalModuleDependency) {
+				final JkExternalModuleDependency externalModule = (JkExternalModuleDependency) dependency;
 				if (externalModule.moduleId().equals(jkModuleId)) {
 					it.remove();
 				}
@@ -70,6 +70,9 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		return new JkDependencies(result);
 	}
 
+	/**
+	 * Returns a clone of this dependencies but replacing the unscoped dependencies with the scoped ones.
+	 */
 	public JkDependencies withDefaultScope(JkScope ...scopes) {
 		final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();
 		for (JkScopedDependency dep : this) {
@@ -98,7 +101,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	 * Returns a clone of this object plus {@link JkScopedDependency}s on the specified file.
 	 */
 	public JkDependencies andFiles(JkScope scope, File ...files) {
-		final JkScopedDependency scopedDependency = JkScopedDependency.of(JkDependency.of(files), scope);
+		final JkScopedDependency scopedDependency = JkScopedDependency.of(JkFileSystemDependency.of(files), scope);
 		return and(scopedDependency);
 	}
 
@@ -107,7 +110,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	 * @param versionedModuleId something like "org.apache:commons:1.4"
 	 */
 	public JkDependencies andExternal(JkScope scope, String versionedModuleId) {
-		final JkDependency dependency = JkDependency.of(versionedModuleId);
+		final JkDependency dependency = JkExternalModuleDependency.of(versionedModuleId);
 		final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scope);
 		return and(scopedDependency);
 	}
@@ -122,11 +125,11 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	}
 
 	/**
-	 * Returns <code>true</code> if this object contains dependencies whose are {@link JkExternalModule}.
+	 * Returns <code>true</code> if this object contains dependencies whose are {@link JkExternalModuleDependency}.
 	 */
 	public boolean containsExternalModule() {
 		for (final JkScopedDependency scopedDependency : dependencies) {
-			if (scopedDependency.dependency() instanceof JkExternalModule) {
+			if (scopedDependency.dependency() instanceof JkExternalModuleDependency) {
 				return true;
 			}
 		}
@@ -168,8 +171,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	public JkScopedDependency get(JkModuleId moduleId) {
 		for (final JkScopedDependency scopedDependency : this) {
 			final JkDependency dependency = scopedDependency.dependency();
-			if (dependency instanceof JkExternalModule) {
-				final JkExternalModule externalModule = (JkExternalModule) dependency;
+			if (dependency instanceof JkExternalModuleDependency) {
+				final JkExternalModuleDependency externalModule = (JkExternalModuleDependency) dependency;
 				if (externalModule.moduleId().equals(moduleId)) {
 					return scopedDependency;
 				}
@@ -204,8 +207,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	 */
 	public boolean hasDynamicVersions() {
 		for (final JkScopedDependency scopedDependency : this) {
-			if (scopedDependency.dependency() instanceof JkExternalModule) {
-				final JkExternalModule externalModule = (JkExternalModule) scopedDependency.dependency();
+			if (scopedDependency.dependency() instanceof JkExternalModuleDependency) {
+				final JkExternalModuleDependency externalModule = (JkExternalModuleDependency) scopedDependency.dependency();
 				final JkVersionRange versionRange = externalModule.versionRange();
 				if (versionRange.isDynamic()) {
 					return true;
@@ -223,8 +226,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	 */
 	public boolean hasDynamicAndResovableVersions() {
 		for (final JkScopedDependency scopedDependency : this) {
-			if (scopedDependency.dependency() instanceof JkExternalModule) {
-				final JkExternalModule externalModule = (JkExternalModule) scopedDependency.dependency();
+			if (scopedDependency.dependency() instanceof JkExternalModuleDependency) {
+				final JkExternalModuleDependency externalModule = (JkExternalModuleDependency) scopedDependency.dependency();
 				final JkVersionRange versionRange = externalModule.versionRange();
 				if (versionRange.isDynamicAndResovable()) {
 					return true;
@@ -265,11 +268,11 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			if (scopedDependency == null) {
 				continue;
 			}
-			final JkExternalModule externalModule = (JkExternalModule) scopedDependency.dependency();
+			final JkExternalModuleDependency externalModule = (JkExternalModuleDependency) scopedDependency.dependency();
 			if (externalModule.versionRange().isDynamicAndResovable()) {
 				final JkVersion resolvedVersion = provider.versionOf(moduleId);
 				if (resolvedVersion != null) {
-					final JkExternalModule resolvedModule = externalModule.resolvedTo(resolvedVersion);
+					final JkExternalModuleDependency resolvedModule = externalModule.resolvedTo(resolvedVersion);
 					final JkScopedDependency resolvedScopedDep = scopedDependency.dependency(resolvedModule);
 					result = result.without(moduleId).and(resolvedScopedDep);
 				}
@@ -279,14 +282,14 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	}
 
 	/**
-	 * Returns all files declared as {@link JkLocalDependency} for any of the specified scopes.
+	 * Returns all files declared as {@link JkFileSystemDependency} for any of the specified scopes.
 	 */
 	public JkPath localFileDependencies(JkScope ...scopes) {
 		final LinkedHashSet<File> set = new LinkedHashSet<File>();
 		for (final JkScopedDependency scopedDependency : this.dependencies) {
 			if (scopedDependency.isInvolvedInAnyOf(scopes)
-					&& scopedDependency.dependency() instanceof JkLocalFileDependency) {
-				final JkLocalFileDependency fileDeps = (JkLocalFileDependency) scopedDependency.dependency();
+					&& scopedDependency.dependency() instanceof JkDependency) {
+				final JkFileDependency fileDeps = (JkFileDependency) scopedDependency.dependency();
 				set.addAll(fileDeps.files());
 			}
 		}
@@ -331,13 +334,29 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			return this;
 		}
 
-		public ScopeableBuilder on(JkDependency dependency) {
-			if (dependency instanceof JkLocalDependency) {
-				final JkLocalDependency fileDeps = (JkLocalDependency) dependency;
+		public JkFluentScopeableBuilder on(JkDependency dependency) {
+			if (dependency instanceof JkFileSystemDependency) {
+				final JkFileSystemDependency fileDeps = (JkFileSystemDependency) dependency;
 				if (fileDeps.files().isEmpty()) {
-					return new ScopeableBuilder(this);
+					return new JkFluentScopeableBuilder(this);
 				}
 			}
+			final JkScopedDependency scopedDependency;
+			if (defaultScopes != null) {
+				scopedDependency = JkScopedDependency.of(dependency, defaultScopes);
+			} else if (defaultMapping != null && dependency instanceof JkExternalModuleDependency) {
+				scopedDependency = JkScopedDependency.of((JkExternalModuleDependency) dependency, defaultMapping);
+			} else {
+				scopedDependency = JkScopedDependency.of(dependency);
+			}
+			dependencies.add(scopedDependency);
+			if (this instanceof JkFluentScopeableBuilder) {
+				return (JkFluentScopeableBuilder) this;
+			}
+			return new JkFluentScopeableBuilder(this);
+		}
+
+		public JkFluentScopeMapableBuilder onExternalModule(JkExternalModuleDependency dependency) {
 			final JkScopedDependency scopedDependency;
 			if (defaultScopes != null) {
 				scopedDependency = JkScopedDependency.of(dependency, defaultScopes);
@@ -347,10 +366,10 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 				scopedDependency = JkScopedDependency.of(dependency);
 			}
 			dependencies.add(scopedDependency);
-			if (this instanceof ScopeableBuilder) {
-				return (ScopeableBuilder) this;
+			if (this instanceof JkFluentScopeMapableBuilder) {
+				return (JkFluentScopeMapableBuilder) this;
 			}
-			return new ScopeableBuilder(this);
+			return new JkFluentScopeMapableBuilder(this);
 		}
 
 		public Builder on(JkScopedDependency dependency) {
@@ -358,45 +377,41 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			return this;
 		}
 
-		public ScopeableBuilder onFile(File file) {
-			return on(JkLocalDependency.of(JkUtilsIterable.listOf(file)));
+		public JkFluentScopeableBuilder on(File ... files) {
+			return on(JkFileSystemDependency.of(Arrays.asList(files)));
 		}
 
-		public ScopeableBuilder onFiles(Iterable<File> files) {
-			return on(JkLocalDependency.of(files));
+		public JkFluentScopeableBuilder onFiles(Iterable<File> files) {
+			return on(JkFileSystemDependency.of(files));
 		}
 
-		public ScopeableBuilder on(JkModuleId module, JkVersionRange version) {
+		public JkFluentScopeMapableBuilder on(JkModuleId module, JkVersionRange version) {
 			return on(module, version, true);
 		}
 
-		public ScopeableBuilder on(JkModuleId module, String version) {
+		public JkFluentScopeMapableBuilder on(JkModuleId module, String version) {
 			return on(module, JkVersionRange.of(version));
 		}
 
 
-		public ScopeableBuilder on(JkModuleId module, JkVersionRange version, boolean transitive) {
-			return on(JkExternalModule.of(module, version).transitive(transitive));
+		public JkFluentScopeMapableBuilder on(JkModuleId module, JkVersionRange version, boolean transitive) {
+			return onExternalModule(JkExternalModuleDependency.of(module, version).transitive(transitive));
 		}
 
-		public ScopeableBuilder on(String organisation, String name, String version) {
+		public JkFluentScopeMapableBuilder on(String organisation, String name, String version) {
 			return on(organisation, name, version, true);
 		}
 
-		public ScopeableBuilder on(String organisation, String name, String version, boolean transitive) {
-			return on(JkExternalModule.of(organisation, name, version).transitive(transitive));
+		public JkFluentScopeMapableBuilder on(String organisation, String name, String version, boolean transitive) {
+			return onExternalModule(JkExternalModuleDependency.of(organisation, name, version).transitive(transitive));
 		}
 
-		public ScopeableBuilder on(String description) {
+		public JkFluentScopeableBuilder on(String description) {
 			return on(description, true);
 		}
 
-		//		public ScopeableBuilder onProject(JkBuildDependencySupport projectBuild, File ...files) {
-		//			return on(JkProjectDependency.of(projectBuild, JkUtilsIterable.setOf(files)));
-		//		}
-
-		public ScopeableBuilder on(String description, boolean transitive) {
-			return on(JkExternalModule.of(description).transitive(transitive));
+		public JkFluentScopeableBuilder on(String description, boolean transitive) {
+			return on(JkExternalModuleDependency.of(description).transitive(transitive));
 		}
 
 		public Builder on(Iterable<JkScopedDependency> dependencies) {
@@ -413,25 +428,20 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			return new JkDependencies(dependencies);
 		}
 
-		public static class ScopeableBuilder extends Builder {
+		public static class JkFluentScopeableBuilder extends Builder {
 
-			private ScopeableBuilder(Builder builder) {
+			protected JkFluentScopeableBuilder(Builder builder) {
 				super(builder.dependencies);
 				this.defaultMapping = builder.defaultMapping;
 				this.defaultScopes = builder.defaultScopes;
 			}
 
-			private ScopeableBuilder(Builder builder, List<JkScopedDependency> current) {
+			private JkFluentScopeableBuilder(Builder builder, List<JkScopedDependency> current) {
 				super(builder.dependencies);
 				this.defaultMapping = builder.defaultMapping;
 				this.defaultScopes = builder.defaultScopes;
 			}
 
-			public Builder scope(JkScopeMapping scopeMapping) {
-				final JkDependency dependency = dependencies.pollLast().dependency();
-				dependencies.add(JkScopedDependency.of(dependency, scopeMapping));
-				return this;
-			}
 
 			public Builder scope(JkScope ... scopes) {
 				final JkDependency dependency = dependencies.pollLast().dependency();
@@ -439,57 +449,75 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 				return this;
 			}
 
-			public AfterMapScopeBuilder mapScope(JkScope ... scopes) {
-				return new AfterMapScopeBuilder(dependencies, JkUtilsIterable.setOf(scopes) );
+		}
+
+		public static final class JkFluentScopeMapableBuilder extends JkFluentScopeableBuilder {
+
+			private JkFluentScopeMapableBuilder(Builder builder) {
+				super(builder);
 			}
 
-			public static class AfterMapScopeBuilder  {
-
-				private final LinkedList<JkScopedDependency> dependencies;
-
-				private final Iterable<JkScope> from;
-
-				private AfterMapScopeBuilder(LinkedList<JkScopedDependency> dependencies, Iterable<JkScope> from) {
-					this.dependencies = dependencies;
-					this.from = from;
-				}
-
-				public AfterToBuilder to(JkScope... jkScopes) {
-					final JkScopedDependency dependency = dependencies.pollLast();
-					final JkScopeMapping mapping;
-					if (dependency.scopeType() == JkScopedDependency.ScopeType.UNSET) {
-						mapping = JkScopeMapping.of(from).to(jkScopes);
-					}  else {
-						mapping = dependency.scopeMapping().and(from).to(jkScopes);
-					}
-					dependencies.add(JkScopedDependency.of(dependency.dependency(), mapping));
-					return new AfterToBuilder(dependencies);
-				}
-
-				public AfterToBuilder to(String... scopeNames) {
-					final JkScope[] scopes = new JkScope[scopeNames.length];
-					for (int i = 0; i < scopeNames.length; i++) {
-						scopes[i] = JkScope.of(scopeNames[i]);
-					}
-					return to(scopes);
-				}
-
+			public Builder scope(JkScopeMapping scopeMapping) {
+				final JkExternalModuleDependency dependency =
+						(JkExternalModuleDependency) dependencies.pollLast().dependency();
+				dependencies.add(JkScopedDependency.of(dependency, scopeMapping));
+				return this;
 			}
 
-			public static class AfterToBuilder extends Builder {
+			public JkFluentAfterMapScopeBuilder mapScope(JkScope ... scopes) {
+				return new JkFluentAfterMapScopeBuilder(dependencies, JkUtilsIterable.setOf(scopes) );
+			}
 
-				private AfterToBuilder(
-						LinkedList<JkScopedDependency> dependencies) {
-					super(dependencies);
+
+		}
+
+		public static class JkFluentAfterMapScopeBuilder  {
+
+			private final LinkedList<JkScopedDependency> dependencies;
+
+			private final Iterable<JkScope> from;
+
+			private JkFluentAfterMapScopeBuilder(LinkedList<JkScopedDependency> dependencies, Iterable<JkScope> from) {
+				this.dependencies = dependencies;
+				this.from = from;
+			}
+
+			public JkFluentAfterToBuilder to(JkScope... jkScopes) {
+				final JkScopedDependency scopedDependency = dependencies.pollLast();
+				final JkScopeMapping mapping;
+				final JkExternalModuleDependency dependency = (JkExternalModuleDependency) scopedDependency.dependency();
+				if (scopedDependency.scopeType() == JkScopedDependency.ScopeType.UNSET) {
+					mapping = JkScopeMapping.of(from).to(jkScopes);
+				}  else {
+					mapping = scopedDependency.scopeMapping().and(from).to(jkScopes);
 				}
+				dependencies.add(JkScopedDependency.of(dependency, mapping));
+				return new JkFluentAfterToBuilder(dependencies);
+			}
 
-				public AfterMapScopeBuilder and(JkScope ...scopes) {
-					return new AfterMapScopeBuilder(dependencies, Arrays.asList(scopes));
+			public JkFluentAfterToBuilder to(String... scopeNames) {
+				final JkScope[] scopes = new JkScope[scopeNames.length];
+				for (int i = 0; i < scopeNames.length; i++) {
+					scopes[i] = JkScope.of(scopeNames[i]);
 				}
-
+				return to(scopes);
 			}
 
 		}
+
+		public static class JkFluentAfterToBuilder extends Builder {
+
+			private JkFluentAfterToBuilder(
+					LinkedList<JkScopedDependency> dependencies) {
+				super(dependencies);
+			}
+
+			public JkFluentAfterMapScopeBuilder and(JkScope ...scopes) {
+				return new JkFluentAfterMapScopeBuilder(dependencies, Arrays.asList(scopes));
+			}
+
+		}
+
 
 	}
 

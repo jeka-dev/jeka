@@ -177,17 +177,17 @@ class Project {
 
 		if (build instanceof JkBuildDependencySupport) {
 			final JkBuildDependencySupport depBuild = (JkBuildDependencySupport) build;
-			if (!depBuild.multiProjectDependencies().transitiveProjectBuilds().isEmpty()) {
+			if (!depBuild.jerkarBuildDependencies().transitiveProjectBuilds().isEmpty()) {
 				if (!commandLine.getSubProjectMethods().isEmpty()) {
 					JkLog.startHeaded("Executing dependent projects");
-					for (final JkBuild subBuild : depBuild.multiProjectDependencies().transitiveProjectBuilds()) {
+					for (final JkBuild subBuild : depBuild.jerkarBuildDependencies().transitiveProjectBuilds()) {
 						configurePluginsAndRun(subBuild, commandLine.getSubProjectMethods(),
 								commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
 
 					}
 				} else {
 					JkLog.startln("Configuring dependent projects");
-					for (final JkBuild subBuild : depBuild.multiProjectDependencies().transitiveProjectBuilds()) {
+					for (final JkBuild subBuild : depBuild.jerkarBuildDependencies().transitiveProjectBuilds()) {
 						JkLog.startln("Configuring " + subBuild.baseDir().root().getName());
 						configureProject(subBuild,
 								commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
