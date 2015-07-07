@@ -31,7 +31,7 @@ public class JkMvn implements Runnable {
 	 * return a new maven command for this working directory. Separate arguments in different strings, don't use white space to separate workds.
 	 * Ex : withCommand("clean", "install", "-U").
 	 */
-	public final JkMvn withCommands(String ... args) {
+	public final JkMvn commands(String ... args) {
 		return new JkMvn(jkProcess.withParameters(args));
 	}
 
@@ -39,20 +39,20 @@ public class JkMvn implements Runnable {
 	 * Short hand for #withCommand("clean", "package").
 	 */
 	public final JkMvn cleanPackage() {
-		return withCommands("clean","package");
+		return commands("clean","package");
 	}
 
 	/**
 	 * Short hand for #withCommand("clean", "install").
 	 */
 	public final JkMvn cleanInstall() {
-		return withCommands("clean","install");
+		return commands("clean","install");
 	}
 
 	/**
 	 * Append a "-U" force update to the list of parameters
 	 */
-	public final JkMvn withForceUpdate(boolean flag) {
+	public final JkMvn forceUpdate(boolean flag) {
 		if (flag) {
 			return new JkMvn(this.jkProcess.andParameters("-U"));
 		}
@@ -62,17 +62,23 @@ public class JkMvn implements Runnable {
 	/**
 	 * Append or remove a "-X" verbose to the list of parameters
 	 */
-	public final JkMvn withVerbose(boolean flag) {
+	public final JkMvn verbose(boolean flag) {
 		if (flag) {
 			return new JkMvn(this.jkProcess.andParameters("-X"));
 		}
 		return new JkMvn(this.jkProcess.minusParameter("-X"));
 	}
 
+	/**
+	 * Returns the underlying process to execute mvn
+	 */
 	public JkProcess asProcess() {
 		return this.jkProcess;
 	}
 
+	/**
+	 * Shorthand for {@link JkProcess#failOnError(boolean)}
+	 */
 	public JkMvn failOnError(boolean flag) {
 		return new JkMvn(this.jkProcess.failOnError(flag));
 	}
