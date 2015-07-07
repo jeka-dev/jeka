@@ -53,7 +53,7 @@ public final class JkProcess implements Runnable {
 	/**
 	 * Defines a <code>JkProcess</code> using the specified command and parameters.
 	 */
-	public static JkProcess of(String windowsCommand, String unixCommand, String... parameters) {
+	public static JkProcess ofWinOrUx(String windowsCommand, String unixCommand, String... parameters) {
 		final String cmd = JkUtilsSystem.IS_WINDOWS ? windowsCommand : unixCommand;
 		return new JkProcess(cmd, Arrays.asList(parameters), null, false);
 	}
@@ -81,6 +81,15 @@ public final class JkProcess implements Runnable {
 	 */
 	public JkProcess andParameters(String... parameters) {
 		return andParameters(Arrays.asList(parameters));
+	}
+
+	/**
+	 * Returns a <code>JkProcess</code> identical to this one but minus the specified parameter.
+	 */
+	public JkProcess minusParameter(String parameter) {
+		final List<String> list = new LinkedList<String>(parameters);
+		list.remove(parameter);
+		return withParameters(list.toArray(new String[0]));
 	}
 
 	/**
