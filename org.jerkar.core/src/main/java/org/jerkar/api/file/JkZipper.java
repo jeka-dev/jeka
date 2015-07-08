@@ -85,7 +85,7 @@ public final class JkZipper {
 	 * does not exist, it will be created under the hood.
 	 */
 	public JkCheckSumer appendTo(File archive, int compressionLevel) {
-		final File temp = JkUtilsFile.createTempFile(archive.getName(), "");
+		final File temp = JkUtilsFile.tempFile(archive.getName(), "");
 		JkUtilsFile.move(archive, temp);
 		final JkCheckSumer jkCheckSumer = this.merge(temp).to(archive, compressionLevel);
 		temp.delete();

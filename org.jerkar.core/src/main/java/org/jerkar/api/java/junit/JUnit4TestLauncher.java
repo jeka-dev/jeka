@@ -18,7 +18,7 @@ class JUnit4TestLauncher {
 	@SuppressWarnings("rawtypes")
 	public static JkTestSuiteResult launchInFork(JkJavaProcess jkJavaProcess, boolean printEachTestOnConsole, JunitReportDetail reportDetail, Iterable<Class> classes, File reportDir) {
 		final List<String> args = new LinkedList<String>();
-		final File file = JkUtilsFile.createTempFile("testResult-", ".ser");
+		final File file = JkUtilsFile.tempFile("testResult-", ".ser");
 		args.add("\""+ file.getAbsolutePath() +"\"");
 		args.add(Boolean.toString(printEachTestOnConsole));
 		args.add(reportDetail.name());

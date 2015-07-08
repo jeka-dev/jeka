@@ -3,6 +3,7 @@ package org.jerkar.api.file;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -309,14 +310,21 @@ public final class JkFileTree implements Iterable<File> {
 	public JkFileTree mergeTo(File target) {
 		JkUtilsFile.createFileIfNotExist(target);
 		final FileOutputStream outputStream = JkUtilsIO.outputStream(target);
+		mergeTo(outputStream);
+		JkUtilsIO.closeQuietly(outputStream);
+		return this;
+	}
+
+	/**
+	 * Merges the content of all files to the specified output.
+	 */
+	public JkFileTree mergeTo(OutputStream outputStream) {
 		for (final File file : this) {
 			final FileInputStream fileInputStream = JkUtilsIO.inputStream(file);
 			JkUtilsIO.copy(fileInputStream, outputStream);
 			JkUtilsIO.closeQuietly(fileInputStream);
 		}
-		JkUtilsIO.closeQuietly(outputStream);
 		return this;
-
 	}
 
 

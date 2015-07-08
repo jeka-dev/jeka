@@ -1,7 +1,9 @@
 ## Build Configuration
+----
 
 Jerkar builds are configurable, in the sense that any value required to run the build has not to be hard-coded 
 in the build script. Instead a value can be injected by 3 different ways :
+
 * as a environment variable
 * as a system property
 * as a Jerkar option
@@ -11,6 +13,7 @@ There is nothing specific to Jerkar. Just set the environment variable as you us
 
 ### System properties
 Jerkar proposes 3 ways to inject system properties :
+
 * By setting the property/value in the `system.properties` file located in the `[Jerkar Home]` directory. 
   Note that if you are running Jerkar in embedded mode, the `[Jerkar Home]/system.properties` file will not be taken in account but [project dir/build/def/build/system.properties].
 * By setting the property/value in the `system.properties` file located in the `[Jerkar User Home]` directory. The Jerkar user home is mentioned at the beginning of all Jerkar process.
@@ -22,6 +25,7 @@ To read system properties from your builds, you can just use the standard method
 
 ### Jerkar options
 Jerkar options are similar to system properties as it stands for a set of key/values. Jerkar proposes 3 ways to inject Jerkar properties :
+
 * By setting the property/value in the `options.properties` file located in the `[Jerkar Home]` directory. 
   Note that if you are running Jerkar in embedded mode, the `[Jerkar Home]/options.properties` file will not be taken in account but [project dir/build/def/build/options.properties].
 * By setting the property/value in the options.properties file located in the `[Jerkar User Home]` directory. The Jerkar user home is mentioned at the beginning of all Jerkar process.
@@ -34,6 +38,7 @@ Note for boolean, when no value is specified, `true` will be used as default.
 #### Standars options
 
 Jerkar predefines some standard options that you can set for any build :
+
 * buildClass : This forces the build class to use. If this option is not null then Jerkar will used the specified class as the build class.
 Note that this can be a simple class as `MyBuildClass` is enough for running `org.my.project.MyBuildClass`. 
 * verbose : when `true` Jerkar will be more verbose at logging at the price of being slower and bloating logs. Default value is `false`.
@@ -59,17 +64,19 @@ To get a precise idea on how types are converted see [this code](https://github.
 
 Composite options are a way to structure your options. Say that you want to configure some server access with url, userName and passwsord,
 you can gather all these information in a object as 
-```
+
+```Java
 class Server {
 	private String url;
 	private String userName;
 	private String password;
-	...
+	// ...
 }
 ```
 
-declare a Server field in your build
-```
+declare a Server field in your build :
+
+```Java
 class MyBuild extends JkBuild {
 	Server deployServer;
 	...
@@ -86,7 +93,9 @@ deployServer.password=myPassword
 If you want your option been displayed when invoking `jerkar help` you need to annotate it with `@JkDoc`.
 
 For example :
-```
+```Java
 @JkDoc("Make the test run in a forked process")
 private boolean forkTests = false;
 ```
+
+<br/>

@@ -33,7 +33,7 @@ class PomTemplateGenerator {
 		}
 		String completeTemplate = firstTemplate.replace(TOKEN, extraXml);
 		completeTemplate = completeTemplate.replace(VERSION_TOKEN, JkInfo.jerkarVersion());
-		final File result = JkUtilsFile.createTempFile("jerkar-pom", ".template");
+		final File result = JkUtilsFile.tempFile("jerkar-pom", ".template");
 		JkUtilsFile.writeString(result, completeTemplate, false);
 		return result;
 	}

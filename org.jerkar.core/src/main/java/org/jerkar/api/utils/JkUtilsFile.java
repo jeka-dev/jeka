@@ -553,12 +553,20 @@ public final class JkUtilsFile {
 	 * Same as {@link File#createTempFile(String, String)} but throwing only
 	 * unchecked exceptions.
 	 */
-	public static File createTempFile(String prefix, String suffix) {
+	public static File tempFile(String prefix, String suffix) {
 		try {
 			return File.createTempFile(prefix, suffix);
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	/**
+	 * Creates a file with the specified name in the system temp folder.
+	 */
+	public static File tempFile(String name) {
+		final File folder = new File(System.getProperty("java.io.tmpdir"));
+		return createFileIfNotExist(new File(folder, name));
 	}
 
 	/**

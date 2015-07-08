@@ -259,7 +259,7 @@ final class IvyPublisherForMaven {
 	}
 
 	private void push(MavenMetadata metadata, String path) {
-		final File file = JkUtilsFile.createTempFile("metadata-", ".xml");
+		final File file = JkUtilsFile.tempFile("metadata-", ".xml");
 		FileOutputStream outputStream;
 		try {
 			outputStream = new FileOutputStream(file);
@@ -330,7 +330,7 @@ final class IvyPublisherForMaven {
 			JkLog.info("publishing to " + dest);
 			repository.put(null, source, dest, overwrite);
 			for (final String algo : checksums) {
-				final File temp = JkUtilsFile.createTempFile("jk-checksum-",
+				final File temp = JkUtilsFile.tempFile("jk-checksum-",
 						algo);
 				final String checkSum = ChecksumHelper.computeAsString(source,
 						algo);

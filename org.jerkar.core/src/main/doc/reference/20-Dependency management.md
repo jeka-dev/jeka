@@ -1,4 +1,5 @@
 ## Dependency Management
+----
 
 May the project you are building is standalone : you won't need any library or file coming from other project to build it. In that case you are not concerned with dependency management so you can skip this section.
 
@@ -11,8 +12,8 @@ So for example if a project _Foo_ has a _dependency_ on _barDep_, this means tha
 
 Jerkar distinguishes 3 types of dependency :
 
-* Files produced by other Jerkar projects (Embodied by `JkProjectDependency` class). These files may be present on file system or not. If they are not present, the external project is built in order to produce the missing files.
 * Arbitrary files located on the file system (Embodied by `JkFileSystemDependency` class,). These files are assumed to be present on the file system when the build is running.
+* Files produced by other Jerkar projects (Embodied by `JkProjectDependency` class). These files may be present on file system or not. If they are not present, the external project is built in order to produce the missing files.
 * Reference to libraries (Embodied by `JkExternalModuleDependency) hosted in a binary repository (Ivy or Maven for instance) : Jerkar can consume and resolve transitively any artifact located in a repository as you would do with Maven or Ivy.
 
 <p class="alert alert-success">
@@ -35,7 +36,7 @@ A scoped dependency is a __dependency__ associated with one or several __scopes_
 
 So practically, you define some scopes then you bind _dependencies_ to these scopes.
 
-```
+```Java
 return JkDependencies.builder()
 			.on(GUAVA, "18.0").scope(COMPILE)  
 			.on(JERSEY_SERVER, "1.19").scope(COMPILE)
@@ -46,7 +47,8 @@ return JkDependencies.builder()
 ```
 
 You can also omit the scope and set it later...
-```
+
+```Java
 JkDependencies deps = JkDependencies.builder()
 			.on(GUAVA, "18.0")
 			.on(JERSEY_SERVER, "1.19")
@@ -57,23 +59,26 @@ JkDependencies deps = JkDependencies.builder()
 ...
 deps = deps.withDefaultScope(COMPILE):
 ```
+
 Look at the [JkDepencies class API](http://jerkar.github.io/javadoc/latest/org/jerkar/api/depmanagement/JkDependencies.html) to get see all possibilities.
+
 
 #### Define scopes
 
 In the examples above, we use the predefined scopes `COMPILE` or `TEST`. These scopes are standard scopes defined on the [JkJavaBuild class](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/src/main/java/org/jerkar/tool/builtins/javabuild/JkJavaBuild.java). 
 So if your build definition class inherit from `JkJavaBuild` template you won't need to create it.  
 
-Nevertheless, it's important to know that scopes can inherit from each other. This mean that if a _scope A_ inherits from _scope B_ then a dependencies declared with _scope B_ will be also considered as declared with _scope A_.
+Nevertheless, it's important to know that scopes can inherit from each other. This means that if a _scope A_ inherits from _scope B_ then a dependencies declared with _scope B_ will be also considered as declared with _scope A_.
 For example, in `JkJavaBuild` scope `TEST` inherits from `RUNTIME` that inherits from `COMPILE` so every dependencies declared with scope `COMPILE` are considered to be declared with scope `RUNTIME` and `TEST` as well.   
 
-Know also that you can declare a scope to not being _transitive_. This means that if you declare an external module dependency on such a scope than the transitive dependencies won't be taken in account.
+Also know that you can declare a scope to not being _transitive_. In this case the external module dependency transitive dependencies won't be taken in account.
+Foe Example, if `A` -> `B` -> `C` and the `A`-> `B` dependency is declared with a non transitive scope, then `A` won't depend from `C`. 
 
 A good practice is to declare __scope__ as java constant (`static final`) as it will be reusable anywhere all over your build definition.
 
 As an example, these are the scopes declared in `JkJavaBuild` :
 
-```
+```Java
 public static final JkScope PROVIDED = JkScope.of("provided").transitive(false)
     .descr("Dependencies to compile the project but that should not be embedded in produced artifacts.");
 
@@ -102,7 +107,7 @@ This stands for files produced by other project builds. It is typically used in 
 The principle is that if the specified file are not found, then the dependee project is built in order to generate the missing files.
 You can create a __project dependency__ from a Jerkar build defined in another project .` doDefault` method will be invoked on that build to generate missing files.
 
-````
+```
 	@JkProject("../foo")          // The external project path relative to the current project root
 	public JkJavaBuild fooBuild;  // This is the build coming from the 'foo' project 
 	
@@ -142,6 +147,9 @@ The whole project dependency description lie in a single instance of `JkDependen
 ```
 
 ```
+
+<br/>
+
 
 
 
