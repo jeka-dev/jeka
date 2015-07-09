@@ -290,4 +290,11 @@ public final class JkUtilsString {
 		return out.toString();
 	}
 
+	public static String elipse(String string, int max) {
+		if (string.length() <= max) {
+			return string;
+		}
+		return string.substring(0, max) + "...";
+	}
+
 }
