@@ -3,7 +3,6 @@ package org.jerkar.api.crypto.pgp;
 import java.io.File;
 import java.io.InputStream;
 
-import org.jerkar.api.crypto.pgp.PgpUtils;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.junit.Test;
@@ -16,7 +15,7 @@ public class PgpUtilsTest {
 				"build/output/test-out/signature.asm"));
 		PgpUtils.sign(sample(),
 				PgpUtilsTest.class.getResourceAsStream("secring.gpg"),
-				JkUtilsIO.outputStream(signatureFile), "jerkar".toCharArray(),
+				JkUtilsIO.outputStream(signatureFile, false), "jerkar".toCharArray(),
 				true);
 
 		final boolean result = PgpUtils.verify(sample(), JkUtilsIO.inputStream(signatureFile),

@@ -3,7 +3,6 @@ package org.jerkar.api.utils;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,7 +15,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -499,12 +497,13 @@ public final class JkUtilsFile {
 		return new File(System.getProperty("user.home"));
 	}
 
+	/**
+	 * Writes the specified content in the the specified file. If append is <code>true</code>
+	 * the content is written at the end of the file.
+	 */
 	public static void writeString(File file, String content, boolean append) {
 		try {
-			if (!file.exists()) {
-				file.getParentFile().mkdirs();
-				file.createNewFile();
-			}
+			createFileIfNotExist(file);
 			final FileWriter fileWriter = new FileWriter(file, append);
 			fileWriter.append(content);
 			fileWriter.close();
@@ -513,39 +512,47 @@ public final class JkUtilsFile {
 		}
 	}
 
+	/**
+	 * Inserts the specified content at the begining of the specified file.
+	 * For such a temp file is create then the original file is replaced by the temp file.
+	 */
+	public static void writeStringAtTop(File file, String content) {
+		createFileIfNotExist(file);
+		final File temp = tempFile("jerkar-copy", "");
+		writeString(temp, content, false);
+		append(temp, file);
+		move(temp, file);
+		temp.delete();
+	}
 
-	public static String checksum(File file, String algo) {
-		InputStream fis;
-		try {
-			fis = new FileInputStream(file);
-		} catch (final FileNotFoundException e) {
-			throw new IllegalArgumentException(file.getPath() + " not found.",
-					e);
-		}
+	/**
+	 * Inserts the appender file at the end of the result file.
+	 */
+	public static void append(File result, File appender) {
+		final OutputStream out = JkUtilsIO.outputStream(result, true);
+		final InputStream in = JkUtilsIO.inputStream(appender);
+		JkUtilsIO.copy(in, out);
+		JkUtilsIO.closeQuietly(in);
+		JkUtilsIO.closeQuietly(out);
+	}
 
-		final byte[] buffer = new byte[1024];
-		MessageDigest complete;
+	public static String checksum(File file, String algorithm) {
+		final InputStream is = JkUtilsIO.inputStream(file);
 		try {
-			complete = MessageDigest.getInstance(algo);
-		} catch (final NoSuchAlgorithmException e) {
-			JkUtilsIO.closeQuietly(fis);
-			throw new RuntimeException(e);
-		}
-		int numRead;
-		do {
-			numRead = JkUtilsIO.read(fis);
-			if (numRead > 0) {
-				complete.update(buffer, 0, numRead);
+			final MessageDigest md = MessageDigest.getInstance(algorithm);
+			md.reset();
+			final byte[] buf = new byte[2048];
+			int len = 0;
+			while ((len = is.read(buf)) != -1) {
+				md.update(buf, 0, len);
 			}
-		} while (numRead != -1);
-		JkUtilsIO.closeQuietly(fis);
-		final byte[] bytes = complete.digest();
-		String result = "";
-		for (final byte element : bytes) {
-			result += Integer.toString((element & 0xff) + 0x100, 16).substring(
-					1);
+			final byte[] bytes = md.digest();
+			return JkUtilsString.toHexString(bytes);
+		} catch (final Exception e) {
+			throw JkUtilsThrowable.unchecked(e);
+		} finally {
+			JkUtilsIO.closeQuietly(is);
 		}
-		return result;
 	}
 
 

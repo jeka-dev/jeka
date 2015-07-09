@@ -309,7 +309,7 @@ public final class JkFileTree implements Iterable<File> {
 	 */
 	public JkFileTree mergeTo(File target) {
 		JkUtilsFile.createFileIfNotExist(target);
-		final FileOutputStream outputStream = JkUtilsIO.outputStream(target);
+		final FileOutputStream outputStream = JkUtilsIO.outputStream(target, true);
 		mergeTo(outputStream);
 		JkUtilsIO.closeQuietly(outputStream);
 		return this;

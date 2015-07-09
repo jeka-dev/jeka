@@ -129,9 +129,9 @@ public final class JkUtilsIO {
 	/**
 	 * Same as {@link FileOutputStream} constructor but throwing unchecked exceptions.
 	 */
-	public static FileOutputStream outputStream(File file) {
+	public static FileOutputStream outputStream(File file, boolean append) {
 		try {
-			return new FileOutputStream(file);
+			return new FileOutputStream(file, append);
 		} catch (final FileNotFoundException e) {
 			throw new IllegalArgumentException("File " + file + " not found.", e);
 		}

@@ -100,7 +100,7 @@ final class PgpUtils {
 		JkUtilsFile.assertAllExist(fileToSign, secringFile);
 		final InputStream toSign = JkUtilsIO.inputStream(fileToSign);
 		final InputStream keyRing = JkUtilsIO.inputStream(secringFile);
-		final FileOutputStream out = JkUtilsIO.outputStream(signatureFile);
+		final FileOutputStream out = JkUtilsIO.outputStream(signatureFile, false);
 		sign(toSign, keyRing, out, pass, armor);
 		JkUtilsIO.closeQuietly(toSign);
 		JkUtilsIO.closeQuietly(keyRing);
