@@ -95,7 +95,7 @@ public final class JkSonar {
 
 
 
-    public void launch() {
+    public void run() {
         if (!enabled) {
             JkLog.info("Sonar analysis skipped.");
         }

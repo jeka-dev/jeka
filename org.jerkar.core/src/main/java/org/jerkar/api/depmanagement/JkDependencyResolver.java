@@ -16,10 +16,20 @@ public final class JkDependencyResolver  {
 
 	private static final String IVY_CLASS = IvyResolver.class.getName();
 
+	/**
+	 * Creates a resolver according the specified parameters.
+	 * 
+	 * @param module The module is needed only to help caching resolution
+	 */
 	public static JkDependencyResolver managed(JkRepos repos, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
 		final InternalDepResolver ivyResolver = IvyClassloader.CLASSLOADER.transClassloaderProxy(InternalDepResolver.class, IVY_CLASS, "of", repos);
 		return new JkDependencyResolver(ivyResolver, dependencies, module, resolutionParameters);
 	}
+
+	public static JkDependencyResolver managed(JkRepos repos, JkDependencies dependencies, JkVersionedModule module) {
+		return managed(repos, dependencies, module, JkResolutionParameters.of());
+	}
+
 
 	public static JkDependencyResolver unmanaged(JkDependencies dependencies) {
 		if (dependencies.containsExternalModule()) {
@@ -50,8 +60,6 @@ public final class JkDependencyResolver  {
 	public boolean isManagedDependencyResolver() {
 		return this.internalResolver != null;
 	}
-
-
 
 	public JkDependencies declaredDependencies() {
 		return this.dependencies;

@@ -51,7 +51,7 @@ public class JkBuildPluginSonar extends JkJavaBuildPlugin {
 	@JkDoc("Launch a Sonar analysis.")
 	@Override
 	public void verify() {
-		jkSonar.launch();
+		jkSonar.run();
 	}
 	
 	public JkBuildPluginSonar prop(String key, String value) {

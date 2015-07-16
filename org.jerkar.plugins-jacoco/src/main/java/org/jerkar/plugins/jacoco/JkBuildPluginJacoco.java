@@ -43,7 +43,7 @@ public class JkBuildPluginJacoco extends JkJavaBuildPlugin {
 		if (html) {
 			throw new IllegalStateException("Sorry, not implemented yet. Please, turn off produceHtml flag.");
 		}
-		return JkocoJunitEnhancer.of(destFile, jkJavaBuild.baseDir().root());
+		return JkocoJunitEnhancer.of(destFile);
 	}
 	
 	public JkBuildPluginJacoco produceHtmlReport(boolean flag) {

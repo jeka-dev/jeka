@@ -11,7 +11,7 @@ public class JkocoJunitEnhancerTest {
 
 	@Test
 	public void test() {
-		JkocoJunitEnhancer.of(new File("."), new File("."))
+		JkocoJunitEnhancer.of(new File("."))
 		.enhance(JkUnit.of(JkClasspath.of()));
 	}
 
