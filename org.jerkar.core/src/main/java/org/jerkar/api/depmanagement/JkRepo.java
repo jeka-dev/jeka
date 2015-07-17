@@ -74,6 +74,10 @@ public abstract class JkRepo implements Serializable {
 		return JkPublishRepo.ofSnapshot(this);
 	}
 
+	public JkRepos asRepos() {
+		return JkRepos.of(this);
+	}
+
 	public JkPublishRepo asPublishReleaseRepo() {
 		return JkPublishRepo.ofRelease(this);
 	}

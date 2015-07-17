@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jerkar.api.file.JkPath;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 public final class JkRepos implements Iterable<JkRepo>, Serializable {
@@ -119,5 +120,22 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
 	public String toString() {
 		return repos.toString();
 	}
+
+	/**
+	 * Retrieve directly the specified external dependency without passing by the Deopendency resolver.
+	 * This is a raw approach involving no caching.
+	 */
+	public JkPath get(JkExternalModuleDependency moduleDependency, boolean transitive) {
+		return JkDependencyResolver.get(this, moduleDependency, transitive);
+	}
+
+	/**
+	 * Short hand for {@link #get(JkExternalModuleDependency, boolean)}
+	 * @param moduleDescription String description as for {@link JkExternalModuleDependency#of(String)}
+	 */
+	public JkPath get(String moduleDescription, boolean transitive) {
+		return get(JkExternalModuleDependency.of(moduleDescription), transitive);
+	}
+
 
 }

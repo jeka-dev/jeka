@@ -16,6 +16,10 @@ public final class JkDependencyResolver  {
 
 	private static final String IVY_CLASS = IvyResolver.class.getName();
 
+	private static final JkScope SINGLE_SCOPE = JkScope.of("JkDependencyResolver.SINGLE");
+
+	private static final JkScope SINGLE_SCOPE_NON_TRANS = JkScope.of("JkDependencyResolver.SINGLE.NON_TRANS").transitive(false);
+
 	/**
 	 * Creates a resolver according the specified parameters.
 	 * 
@@ -37,6 +41,14 @@ public final class JkDependencyResolver  {
 					+ "Use #managed method factory instead.");
 		}
 		return new JkDependencyResolver(null, dependencies, null, null);
+	}
+
+	static JkPath get(JkRepos repos, JkExternalModuleDependency dep, boolean transitive) {
+		final JkScope scope = transitive ? SINGLE_SCOPE : SINGLE_SCOPE_NON_TRANS;
+		final InternalDepResolver resolver = IvyClassloader.CLASSLOADER.transClassloaderProxy(InternalDepResolver.class, IVY_CLASS, "of", repos);
+		final JkScopeMapping scopeMapping = JkScopeMapping.of(scope).to("default");
+		final JkResolveResult result = resolver.resolveAnonymous(JkDependencies.on(scope, dep), scope, JkResolutionParameters.of().withDefault(scopeMapping));
+		return JkPath.of(result.localFiles());
 	}
 
 	private final Map<JkScope, JkResolveResult> cachedResolveResult = new HashMap<JkScope, JkResolveResult>();

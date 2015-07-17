@@ -25,6 +25,10 @@ public class JkExternalModuleDependency extends JkDependency {
 		return of (JkModuleId.of(group, name), JkVersionRange.of(version));
 	}
 
+	/**
+	 * Creates a JkExternalModuleDependency from a formatted string description.
+	 * The expected format is <i>groupName:moduleName:version</i>.
+	 */
 
 	public static JkExternalModuleDependency of(String description) {
 		final String[] strings = JkUtilsString.split(description, ":");

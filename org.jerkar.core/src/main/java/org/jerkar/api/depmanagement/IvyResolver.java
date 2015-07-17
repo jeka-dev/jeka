@@ -1,9 +1,12 @@
 package org.jerkar.api.depmanagement;
 
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.ivy.Ivy;
+import org.apache.ivy.core.cache.ResolutionCacheManager;
 import org.apache.ivy.core.module.descriptor.Configuration;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
@@ -23,8 +26,7 @@ import org.jerkar.api.utils.JkUtilsThrowable;
  */
 final class IvyResolver implements InternalDepResolver {
 
-	private static final JkVersionedModule ANONYMOUS_MODULE = JkVersionedModule.of(
-			JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.ofName("anonymousVersion"));
+	private static final Random RANDOM = new Random();
 
 	private final Ivy ivy;
 
@@ -60,7 +62,10 @@ final class IvyResolver implements InternalDepResolver {
 
 	@Override
 	public JkResolveResult resolveAnonymous(JkDependencies deps, JkScope resolvedScope, JkResolutionParameters parameters) {
-		return resolve(ANONYMOUS_MODULE, deps, resolvedScope, parameters);
+		final JkVersionedModule anonymous = anonymousVersionedModule();
+		final JkResolveResult result = resolve(anonymous, deps, resolvedScope, parameters);
+		deleteResolveCache(anonymous);
+		return result;
 	}
 
 	@Override
@@ -96,10 +101,19 @@ final class IvyResolver implements InternalDepResolver {
 		return resolveResult;
 	}
 
+	private void deleteResolveCache(JkVersionedModule module) {
+		final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
+		final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(module);
+		final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
+		propsFile.delete();
+		final File xmlFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
+		xmlFile.delete();
+	}
+
 	@Override
 	public JkAttachedArtifacts getArtifacts(Iterable<JkVersionedModule> modules, JkScope ...scopes) {
-		//final String defaultConf = "default";
-		final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toUnpublished(ANONYMOUS_MODULE);
+		final JkVersionedModule anonymous = anonymousVersionedModule();
+		final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toUnpublished(anonymous);
 		for (final JkScope jkScope : scopes) {
 			moduleDescriptor.addConfiguration(new Configuration(jkScope.name()));
 		}
@@ -132,6 +146,7 @@ final class IvyResolver implements InternalDepResolver {
 				result.add(scope, artifact);
 			}
 		}
+		deleteResolveCache(anonymous);
 		return result;
 	}
 
@@ -163,6 +178,12 @@ final class IvyResolver implements InternalDepResolver {
 			}
 		}
 		return JkResolveResult.of(artifacts, versionProvider);
+	}
+
+	private static JkVersionedModule anonymousVersionedModule() {
+		final String version = Long.toString(RANDOM.nextLong());
+		return JkVersionedModule.of(
+				JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.ofName(version));
 	}
 
 

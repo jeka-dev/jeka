@@ -92,6 +92,13 @@ public final class JkPath implements Iterable<File> {
 	}
 
 	/**
+	 * Returns the first entry of this path.
+	 */
+	public File first() {
+		return entries.get(0);
+	}
+
+	/**
 	 * Short hand for <code>entries().isEmpty()</code>.
 	 */
 	public boolean isEmpty() {
