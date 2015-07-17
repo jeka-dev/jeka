@@ -24,6 +24,8 @@ public final class JkPublisher {
 		this.ivyPublisher = jkIvyPublisher;
 	}
 
+
+
 	/**
 	 * Creates a {@link JkPublisher} with the specified {@link JkPublishRepo} and output directory.
 	 * The output directory is the place where pom.xml and ivy.xml are generated.
