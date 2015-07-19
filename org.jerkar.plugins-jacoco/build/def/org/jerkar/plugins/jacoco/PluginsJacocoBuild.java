@@ -1,12 +1,12 @@
 package org.jerkar.plugins.jacoco;
 
 import org.jerkar.CoreBuild;
-import org.jerkar.JerkarBuild;
+import org.jerkar.AbstractBuild;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.tool.JkProject;
 
 
-public class PluginsJacocoBuild extends JerkarBuild {
+public class PluginsJacocoBuild extends AbstractBuild {
 	
 	@JkProject("../org.jerkar.core")
 	public CoreBuild core;
@@ -14,7 +14,7 @@ public class PluginsJacocoBuild extends JerkarBuild {
 	@Override
 	protected JkDependencies dependencies() {
 		return JkDependencies.builder()
-			.on(core.asProjectDependency(core.packer().jarFile())).scope(PROVIDED)
+			.on(core.asComputedDependency(core.packer().jarFile())).scope(PROVIDED)
 			.on(core.baseDir("build/libs/provided/junit-4.11.jar"), 
 					 core.baseDir("build/libs/provided/hamcrest-core-1.3.jar")).scope(TEST)
 		.build();

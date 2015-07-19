@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkExternalModuleDependency;
+import org.jerkar.api.depmanagement.JkModuleDependency;
 import org.jerkar.api.depmanagement.JkFileSystemDependency;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkScope;
@@ -97,8 +97,8 @@ class JavaSourceParser {
 	private static JkDependencies dependenciesFromImports(File baseDir, List<String> deps) {
 		final JkDependencies.Builder builder = JkDependencies.builder().usingDefaultScopeMapping(SCOPE_MAPPING);
 		for (final String dependency : deps) {
-			if (JkExternalModuleDependency.isGroupNameAndVersion(dependency)) {
-				builder.on(JkExternalModuleDependency.of(dependency));
+			if (JkModuleDependency.isGroupNameAndVersion(dependency)) {
+				builder.on(JkModuleDependency.of(dependency));
 			} else {
 				if (dependency.contains(":")) {
 					throw new JkException("Dependency " + dependency + " expressed in @JkImport is malformed, the expected format is groupId:artifactId:version.");

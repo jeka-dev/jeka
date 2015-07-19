@@ -12,7 +12,7 @@ import org.jerkar.tool.builtins.javabuild.JkJavaPacker;
  * Build class for Jerkar itself.
  * This build does not rely on any dependence manager.
  */
-public class CoreBuild extends JerkarBuild {
+public class CoreBuild extends AbstractBuild {
 
 	public File distripZipFile;
 

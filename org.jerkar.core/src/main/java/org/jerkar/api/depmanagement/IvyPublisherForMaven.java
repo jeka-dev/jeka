@@ -84,7 +84,9 @@ final class IvyPublisherForMaven {
 			final String pomDest = destination(versionedModule, "pom", null, version);
 			putAll(pomXml, pomDest, true);
 		}
-
+		if (this.descriptorOutputDir == null) {
+			pomXml.delete();
+		}
 
 
 		//update maven-metadata
@@ -131,9 +133,14 @@ final class IvyPublisherForMaven {
 	private File makePom(ModuleDescriptor moduleDescriptor, JkMavenPublication publication) {
 		final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
 		final String artifactName = ivyModuleRevisionId.getName();
-		final File pomXml = new File(targetDir(), "published-pom-"
-				+ ivyModuleRevisionId.getOrganisation() + "-" + artifactName + "-"
-				+ ivyModuleRevisionId.getRevision() + ".xml");
+		final File pomXml;
+		if (this.descriptorOutputDir != null) {
+			pomXml = new File(targetDir(), "published-pom-"
+					+ ivyModuleRevisionId.getOrganisation() + "-" + artifactName + "-"
+					+ ivyModuleRevisionId.getRevision() + ".xml");
+		} else {
+			pomXml = JkUtilsFile.tempFile("published-pom-", ".xml");
+		}
 		final String packaging = JkUtilsString.substringAfterLast(publication
 				.mainArtifactFiles().get(0).getName(), ".");
 		final PomWriterOptions pomWriterOptions = new PomWriterOptions();

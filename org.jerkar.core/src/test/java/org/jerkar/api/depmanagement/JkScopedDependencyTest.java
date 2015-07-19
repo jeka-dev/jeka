@@ -25,7 +25,7 @@ public class JkScopedDependencyTest {
 
 	@Test
 	public void testDepWithScopeMapping() {
-		final JkExternalModuleDependency dep = JkExternalModuleDependency.of("org.hibernate:hibernate-core:3.0.+");
+		final JkModuleDependency dep = JkModuleDependency.of("org.hibernate:hibernate-core:3.0.+");
 		final JkScope aScope = JkScope.of("aScope");
 		final JkScopedDependency scopedDep = JkScopedDependency.of(dep,
 				JkScopeMapping.of(aScope, RUNTIME).to(PROVIDED));
@@ -50,7 +50,7 @@ public class JkScopedDependencyTest {
 
 	@Test
 	public void testWithScope() {
-		final JkExternalModuleDependency dep = JkExternalModuleDependency.of("org.hibernate:hibernate-core:3.0.+");
+		final JkModuleDependency dep = JkModuleDependency.of("org.hibernate:hibernate-core:3.0.+");
 		final JkScopedDependency scopedDep = JkScopedDependency.of(dep, RUNTIME);
 
 		assertTrue(scopedDep.isInvolvedIn(RUNTIME));

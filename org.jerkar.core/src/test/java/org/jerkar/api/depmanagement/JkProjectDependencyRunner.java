@@ -9,7 +9,7 @@ public class JkProjectDependencyRunner {
 	public void test() {
 		final File dir = new File("../../mavenProject");
 		final File jar = new File(dir, "target/mypProduct.jar");
-		final JkProjectDependency dependency = JkProjectDependency.of(JkMvn.of(dir).cleanPackage(), jar);
+		final JkComputedDependency dependency = JkComputedDependency.of(JkMvn.of(dir).cleanPackage(), jar);
 	}
 
 }

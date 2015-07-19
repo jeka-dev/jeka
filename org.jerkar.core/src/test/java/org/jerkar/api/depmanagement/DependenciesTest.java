@@ -4,6 +4,8 @@ package org.jerkar.api.depmanagement;
 import static org.jerkar.api.depmanagement.JkScopedDependencyTest.COMPILE;
 import static org.jerkar.api.depmanagement.JkScopedDependencyTest.RUNTIME;
 
+import java.io.File;
+
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,6 +42,14 @@ public class DependenciesTest {
 		return JkDependencies.builder()
 				.on("454545:5445:54545")
 				.on("lkll:llljk:poo").build();
+	}
+
+	public void onFile() {
+		final File depFile1 = new File("/my/file1.jar");
+		final File depFile2 = new File("/my/file2.zip");
+		JkDependencies.builder()
+		.on(depFile1, depFile2)
+		.build();
 	}
 
 }

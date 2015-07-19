@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.jerkar.api.depmanagement.JkDependency.JkFileDependency;
+import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
@@ -39,6 +40,9 @@ public final class JkFileSystemDependency extends JkFileDependency {
 
 	@Override
 	public final Set<File> files() {
+		for (final File file : files) {
+			JkUtilsAssert.isTrue(file.exists(), "The file " + file.getAbsolutePath() + " does not exist.");
+		}
 		return files;
 	}
 

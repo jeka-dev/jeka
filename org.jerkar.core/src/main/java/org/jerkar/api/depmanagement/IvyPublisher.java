@@ -22,6 +22,7 @@ import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.RepositoryResolver;
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsThrowable;
 import org.jerkar.api.utils.JkUtilsTime;
 
@@ -178,6 +179,9 @@ final class IvyPublisher implements InternalPublisher {
 			final File publishedIvy = createIvyFile(moduleDescriptor);
 			final Artifact artifact = MDArtifact.newIvyArtifact(moduleDescriptor);
 			resolver.publish(artifact, publishedIvy, true);
+			if (this.descriptorOutputDir == null) {
+				publishedIvy.delete();
+			}
 		} catch (final Exception e) {
 			abortPublishTransaction(resolver);
 			throw JkUtilsThrowable.unchecked(e);
@@ -233,8 +237,13 @@ final class IvyPublisher implements InternalPublisher {
 	private File createIvyFile(ModuleDescriptor moduleDescriptor) {
 		try {
 			final ModuleRevisionId mrId = moduleDescriptor.getModuleRevisionId();
-			final File file = new File(this.descriptorOutputDir, "published-ivy-" + mrId.getOrganisation() + "-"
-					+ mrId.getName() + "-" + mrId.getRevision() + ".xml");
+			final File file;
+			if (this.descriptorOutputDir != null) {
+				file = new File(this.descriptorOutputDir, "published-ivy-" + mrId.getOrganisation() + "-"
+						+ mrId.getName() + "-" + mrId.getRevision() + ".xml");
+			} else {
+				file = JkUtilsFile.tempFile("published-ivy-", ".xml");
+			}
 			moduleDescriptor.toIvyFile(file);
 			return file;
 		} catch (final IOException e) {

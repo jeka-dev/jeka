@@ -125,16 +125,16 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
 	 * Retrieve directly the specified external dependency without passing by the Deopendency resolver.
 	 * This is a raw approach involving no caching.
 	 */
-	public JkPath get(JkExternalModuleDependency moduleDependency, boolean transitive) {
+	public JkPath get(JkModuleDependency moduleDependency, boolean transitive) {
 		return JkDependencyResolver.get(this, moduleDependency, transitive);
 	}
 
 	/**
-	 * Short hand for {@link #get(JkExternalModuleDependency, boolean)}
-	 * @param moduleDescription String description as for {@link JkExternalModuleDependency#of(String)}
+	 * Short hand for {@link #get(JkModuleDependency, boolean)}
+	 * @param moduleDescription String description as for {@link JkModuleDependency#of(String)}
 	 */
 	public JkPath get(String moduleDescription, boolean transitive) {
-		return get(JkExternalModuleDependency.of(moduleDescription), transitive);
+		return get(JkModuleDependency.of(moduleDescription), transitive);
 	}
 
 

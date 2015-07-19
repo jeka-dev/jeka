@@ -22,7 +22,7 @@ public final class JkScopedDependency implements Serializable {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static JkScopedDependency of(JkExternalModuleDependency dependency, JkScopeMapping scopeMapping) {
+	public static JkScopedDependency of(JkModuleDependency dependency, JkScopeMapping scopeMapping) {
 		return new JkScopedDependency(dependency, Collections.EMPTY_SET, scopeMapping);
 	}
 

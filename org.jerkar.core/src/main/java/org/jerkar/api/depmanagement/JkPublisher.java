@@ -36,6 +36,15 @@ public final class JkPublisher {
 	}
 
 	/**
+	 * Creates a {@link JkPublisher} with the specified {@link JkPublishRepo}.
+	 * Pom.xml and ivy.xml will be generated in a temporary
+	 *  files then deleted.
+	 */
+	public static JkPublisher of(JkPublishRepos publishRepos) {
+		return of(publishRepos, null);
+	}
+
+	/**
 	 * Publishes the specified publication to the Ivy repositories defined in this publisher
 	 * @param versionedModule The module id and version to publish
 	 * @param publication The content of the publication

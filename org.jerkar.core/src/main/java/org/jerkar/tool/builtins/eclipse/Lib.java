@@ -4,8 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkProjectDependency;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.tool.JkLocator;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
@@ -57,7 +57,7 @@ class Lib {
 
 			} else {  // This is project dependency
 				final JkJavaBuild slaveBuild = (JkJavaBuild) masterBuild.relativeProject(lib.projectRelativePath);
-				final JkProjectDependency projectDependency = slaveBuild.asProjectDependency(slaveBuild.packer().jarFile());
+				final JkComputedDependency projectDependency = slaveBuild.asComputedDependency(slaveBuild.packer().jarFile());
 				builder.on(projectDependency).scope(lib.scope);
 
 				// Get the exported entry as well

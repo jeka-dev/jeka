@@ -9,7 +9,7 @@ import org.jerkar.api.utils.JkUtilsString;
  * 
  * @author Djeang
  */
-public class JkExternalModuleDependency extends JkDependency {
+public class JkModuleDependency extends JkDependency {
 
 	private static final long serialVersionUID = 1L;
 
@@ -17,20 +17,20 @@ public class JkExternalModuleDependency extends JkDependency {
 		return JkUtilsString.countOccurence(candidate, ':') == 2;
 	}
 
-	public static JkExternalModuleDependency of(JkModuleId moduleId, JkVersionRange versionRange) {
-		return new JkExternalModuleDependency(moduleId, versionRange, null, true);
+	public static JkModuleDependency of(JkModuleId moduleId, JkVersionRange versionRange) {
+		return new JkModuleDependency(moduleId, versionRange, null, true);
 	}
 
-	public static JkExternalModuleDependency of(String group, String name, String version) {
+	public static JkModuleDependency of(String group, String name, String version) {
 		return of (JkModuleId.of(group, name), JkVersionRange.of(version));
 	}
 
 	/**
-	 * Creates a JkExternalModuleDependency from a formatted string description.
+	 * Creates a JkModuleDependency from a formatted string description.
 	 * The expected format is <i>groupName:moduleName:version</i>.
 	 */
 
-	public static JkExternalModuleDependency of(String description) {
+	public static JkModuleDependency of(String description) {
 		final String[] strings = JkUtilsString.split(description, ":");
 		if (strings.length != 3) {
 			throw new IllegalArgumentException("Module should be formated as 'groupName:moduleName:version'. Was " + description);
@@ -43,7 +43,7 @@ public class JkExternalModuleDependency extends JkDependency {
 	private final String classifier;
 	private final boolean transitive;
 
-	private JkExternalModuleDependency(JkModuleId module, JkVersionRange versionRange, String classifier, boolean transitive) {
+	private JkModuleDependency(JkModuleId module, JkVersionRange versionRange, String classifier, boolean transitive) {
 		this.module = module;
 		this.versionRange = versionRange;
 		this.classifier = classifier;
@@ -64,12 +64,12 @@ public class JkExternalModuleDependency extends JkDependency {
 		return versionRange;
 	}
 
-	public JkExternalModuleDependency transitive(boolean transitive) {
-		return new JkExternalModuleDependency(module, versionRange, classifier, transitive);
+	public JkModuleDependency transitive(boolean transitive) {
+		return new JkModuleDependency(module, versionRange, classifier, transitive);
 	}
 
-	public JkExternalModuleDependency resolvedTo(JkVersion version) {
-		return new JkExternalModuleDependency(module, JkVersionRange.of(version.name()), classifier, transitive);
+	public JkModuleDependency resolvedTo(JkVersion version) {
+		return new JkModuleDependency(module, JkVersionRange.of(version.name()), classifier, transitive);
 	}
 
 

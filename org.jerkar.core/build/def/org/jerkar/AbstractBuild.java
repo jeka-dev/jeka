@@ -10,9 +10,9 @@ import org.jerkar.tool.JkOptions;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
- * Build settings shared across all Jerkar java projects
+ * Build settings shared across all Jerkar Java projects (core + plugins)
  */
-public abstract class JerkarBuild extends JkJavaBuild {
+public abstract class AbstractBuild extends JkJavaBuild {
 
 
 	@JkDoc("do or skip javadoc")

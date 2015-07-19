@@ -60,8 +60,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		final List<JkScopedDependency> result = new LinkedList<JkScopedDependency>(dependencies);
 		for (final Iterator<JkScopedDependency> it = result.iterator(); it.hasNext();) {
 			final JkDependency dependency = it.next().dependency();
-			if (dependency instanceof JkExternalModuleDependency) {
-				final JkExternalModuleDependency externalModule = (JkExternalModuleDependency) dependency;
+			if (dependency instanceof JkModuleDependency) {
+				final JkModuleDependency externalModule = (JkModuleDependency) dependency;
 				if (externalModule.moduleId().equals(jkModuleId)) {
 					it.remove();
 				}
@@ -110,7 +110,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	 * @param versionedModuleId something like "org.apache:commons:1.4"
 	 */
 	public JkDependencies andExternal(JkScope scope, String versionedModuleId) {
-		final JkDependency dependency = JkExternalModuleDependency.of(versionedModuleId);
+		final JkDependency dependency = JkModuleDependency.of(versionedModuleId);
 		final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scope);
 		return and(scopedDependency);
 	}
@@ -125,11 +125,11 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	}
 
 	/**
-	 * Returns <code>true</code> if this object contains dependencies whose are {@link JkExternalModuleDependency}.
+	 * Returns <code>true</code> if this object contains dependencies whose are {@link JkModuleDependency}.
 	 */
 	public boolean containsExternalModule() {
 		for (final JkScopedDependency scopedDependency : dependencies) {
-			if (scopedDependency.dependency() instanceof JkExternalModuleDependency) {
+			if (scopedDependency.dependency() instanceof JkModuleDependency) {
 				return true;
 			}
 		}
@@ -171,8 +171,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	public JkScopedDependency get(JkModuleId moduleId) {
 		for (final JkScopedDependency scopedDependency : this) {
 			final JkDependency dependency = scopedDependency.dependency();
-			if (dependency instanceof JkExternalModuleDependency) {
-				final JkExternalModuleDependency externalModule = (JkExternalModuleDependency) dependency;
+			if (dependency instanceof JkModuleDependency) {
+				final JkModuleDependency externalModule = (JkModuleDependency) dependency;
 				if (externalModule.moduleId().equals(moduleId)) {
 					return scopedDependency;
 				}
@@ -207,8 +207,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	 */
 	public boolean hasDynamicVersions() {
 		for (final JkScopedDependency scopedDependency : this) {
-			if (scopedDependency.dependency() instanceof JkExternalModuleDependency) {
-				final JkExternalModuleDependency externalModule = (JkExternalModuleDependency) scopedDependency.dependency();
+			if (scopedDependency.dependency() instanceof JkModuleDependency) {
+				final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency.dependency();
 				final JkVersionRange versionRange = externalModule.versionRange();
 				if (versionRange.isDynamic()) {
 					return true;
@@ -226,8 +226,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	 */
 	public boolean hasDynamicAndResovableVersions() {
 		for (final JkScopedDependency scopedDependency : this) {
-			if (scopedDependency.dependency() instanceof JkExternalModuleDependency) {
-				final JkExternalModuleDependency externalModule = (JkExternalModuleDependency) scopedDependency.dependency();
+			if (scopedDependency.dependency() instanceof JkModuleDependency) {
+				final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency.dependency();
 				final JkVersionRange versionRange = externalModule.versionRange();
 				if (versionRange.isDynamicAndResovable()) {
 					return true;
@@ -268,11 +268,11 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			if (scopedDependency == null) {
 				continue;
 			}
-			final JkExternalModuleDependency externalModule = (JkExternalModuleDependency) scopedDependency.dependency();
+			final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency.dependency();
 			if (externalModule.versionRange().isDynamicAndResovable()) {
 				final JkVersion resolvedVersion = provider.versionOf(moduleId);
 				if (resolvedVersion != null) {
-					final JkExternalModuleDependency resolvedModule = externalModule.resolvedTo(resolvedVersion);
+					final JkModuleDependency resolvedModule = externalModule.resolvedTo(resolvedVersion);
 					final JkScopedDependency resolvedScopedDep = scopedDependency.dependency(resolvedModule);
 					result = result.without(moduleId).and(resolvedScopedDep);
 				}
@@ -344,8 +344,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			final JkScopedDependency scopedDependency;
 			if (defaultScopes != null) {
 				scopedDependency = JkScopedDependency.of(dependency, defaultScopes);
-			} else if (defaultMapping != null && dependency instanceof JkExternalModuleDependency) {
-				scopedDependency = JkScopedDependency.of((JkExternalModuleDependency) dependency, defaultMapping);
+			} else if (defaultMapping != null && dependency instanceof JkModuleDependency) {
+				scopedDependency = JkScopedDependency.of((JkModuleDependency) dependency, defaultMapping);
 			} else {
 				scopedDependency = JkScopedDependency.of(dependency);
 			}
@@ -356,7 +356,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			return new JkFluentScopeableBuilder(this);
 		}
 
-		public JkFluentScopeMapableBuilder onExternalModule(JkExternalModuleDependency dependency) {
+		public JkFluentScopeMapableBuilder onExternalModule(JkModuleDependency dependency) {
 			final JkScopedDependency scopedDependency;
 			if (defaultScopes != null) {
 				scopedDependency = JkScopedDependency.of(dependency, defaultScopes);
@@ -395,7 +395,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
 
 		public JkFluentScopeMapableBuilder on(JkModuleId module, JkVersionRange version, boolean transitive) {
-			return onExternalModule(JkExternalModuleDependency.of(module, version).transitive(transitive));
+			return onExternalModule(JkModuleDependency.of(module, version).transitive(transitive));
 		}
 
 		public JkFluentScopeMapableBuilder on(String organisation, String name, String version) {
@@ -403,7 +403,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		}
 
 		public JkFluentScopeMapableBuilder on(String organisation, String name, String version, boolean transitive) {
-			return onExternalModule(JkExternalModuleDependency.of(organisation, name, version).transitive(transitive));
+			return onExternalModule(JkModuleDependency.of(organisation, name, version).transitive(transitive));
 		}
 
 		public JkFluentScopeableBuilder on(String description) {
@@ -411,7 +411,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		}
 
 		public JkFluentScopeableBuilder on(String description, boolean transitive) {
-			return on(JkExternalModuleDependency.of(description).transitive(transitive));
+			return on(JkModuleDependency.of(description).transitive(transitive));
 		}
 
 		public Builder on(Iterable<JkScopedDependency> dependencies) {
@@ -458,8 +458,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			}
 
 			public Builder scope(JkScopeMapping scopeMapping) {
-				final JkExternalModuleDependency dependency =
-						(JkExternalModuleDependency) dependencies.pollLast().dependency();
+				final JkModuleDependency dependency =
+						(JkModuleDependency) dependencies.pollLast().dependency();
 				dependencies.add(JkScopedDependency.of(dependency, scopeMapping));
 				return this;
 			}
@@ -485,7 +485,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			public JkFluentAfterToBuilder to(JkScope... jkScopes) {
 				final JkScopedDependency scopedDependency = dependencies.pollLast();
 				final JkScopeMapping mapping;
-				final JkExternalModuleDependency dependency = (JkExternalModuleDependency) scopedDependency.dependency();
+				final JkModuleDependency dependency = (JkModuleDependency) scopedDependency.dependency();
 				if (scopedDependency.scopeType() == JkScopedDependency.ScopeType.UNSET) {
 					mapping = JkScopeMapping.of(from).to(jkScopes);
 				}  else {

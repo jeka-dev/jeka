@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
-import org.jerkar.api.depmanagement.JkProjectDependency;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
@@ -246,10 +246,18 @@ public class JkBuild {
 	}
 
 	/**
-	 * Returns a {@link JkProjectDependency} on this project and specified files.
+	 * Returns a {@link JkComputedDependency} on this project and specified files.
+	 * The 'doDefault' method will be invoked to compute the dependee files.
 	 */
-	public JkProjectDependency asProjectDependency(File ...files) {
+	public JkComputedDependency asComputedDependency(File ...files) {
 		return BuildDependency.of(this, files);
+	}
+
+	/**
+	 * Returns a {@link JkComputedDependency} on this project and specified files and methods to execute.
+	 */
+	public JkComputedDependency asComputedDependency(String methods, File ...files) {
+		return BuildDependency.of(this, methods, files);
 	}
 
 

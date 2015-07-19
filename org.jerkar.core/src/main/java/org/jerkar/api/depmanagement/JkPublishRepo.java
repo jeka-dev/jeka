@@ -119,6 +119,14 @@ public final class JkPublishRepo implements Serializable {
 		return andSha1Checksum().andMd5Checksum();
 	}
 
+	public JkPublishRepos and(JkPublishRepo repo) {
+		return JkPublishRepos.of(this).and(repo);
+	}
+
+	public JkPublishRepos andRelease(JkRepo repo) {
+		return and(JkPublishRepo.ofRelease(repo));
+	}
+
 	public JkPublishRepo withUniqueSnapshot(boolean uniqueSnapShot) {
 		return new JkPublishRepo(jkRepo, filter, requirePgpSign, this.checksumAlgorithms, uniqueSnapShot);
 	}

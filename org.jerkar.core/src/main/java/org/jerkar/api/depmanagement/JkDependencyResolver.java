@@ -43,7 +43,7 @@ public final class JkDependencyResolver  {
 		return new JkDependencyResolver(null, dependencies, null, null);
 	}
 
-	static JkPath get(JkRepos repos, JkExternalModuleDependency dep, boolean transitive) {
+	static JkPath get(JkRepos repos, JkModuleDependency dep, boolean transitive) {
 		final JkScope scope = transitive ? SINGLE_SCOPE : SINGLE_SCOPE_NON_TRANS;
 		final InternalDepResolver resolver = IvyClassloader.CLASSLOADER.transClassloaderProxy(InternalDepResolver.class, IVY_CLASS, "of", repos);
 		final JkScopeMapping scopeMapping = JkScopeMapping.of(scope).to("default");
