@@ -178,7 +178,11 @@ Here, if _fooJar_ file does not exist the `ant makeJar` command line will be inv
 If the file still does not exist then the build fails.
 
 
-#### Bind dependencies to scope
+##### Dependency on module
+
+This is for declaring a dependency on a module hosted on a _Maven_ or _Ivy_ repository.
+
+### Bind dependencies to scope
 
 The whole project dependency description lie in a single instance of `JkDependencies`. This class offers convenient factory methods and builder to define the dependencies.
 
