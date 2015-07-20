@@ -30,7 +30,7 @@ Scopes can __inherit__ from each other. This means that if a scope _Foo_ inherit
 For instance, in `JkJavaBuild`, scope `TEST` inherits from `RUNTIME` that inherits from `COMPILE` so every dependencies declared with scope `COMPILE` are considered to be declared with scope `RUNTIME` and `TEST` as well.   
 
 By default, scopes are __transitive__. This has only a meaning for __reference to module__. 
-If `A` -> `B` -> `C` and the `A`-> `B` dependency is declared with a __non transitive scope__, then `A` won't depend from `C`. 
+If we have 3 modules having the following dependency scheme : `A` -> `B` -> `C` and the `A`-> `B` dependency is declared with a __non transitive scope__, then `A` won't depend from `C`. 
 
 Projects consuming artifacts coming from Ivy repository can also use `JkScopeMapping` which is more powerfull. This notion maps strictly to the [Ivy configuration](http://ant.apache.org/ivy/history/2.2.0/ivyfile/configurations.html) concept.
   
@@ -38,30 +38,30 @@ Projects consuming artifacts coming from Ivy repository can also use `JkScopeMap
 ### Define dependencies for a project
 
 To define dependencies of a project, you basically define a list of __scoped dependency__ (embodied by `JkScopedDependency`).
-A scoped dependency is a __dependency__ associated with one or several __scopes__.
+A __scoped dependency__ is a __dependency__ associated with one or several __scopes__.
 
-So practically, you define some scopes then you bind _dependencies_ to these scopes.
+So practically, you define some scopes then you bind dependencies to these scopes.
 
 ```Java
 return JkDependencies.builder()
-			.on(GUAVA, "18.0").scope(COMPILE)  
-			.on(JERSEY_SERVER, "1.19").scope(COMPILE)
-			.on("com.orientechnologies:orientdb-client:2.0.8").scope(COMPILE)
-			.on(JUNIT, "4.11").scope(TEST)
-			.on(MOCKITO_ALL, "1.9.5").scope(TEST)
-		.build();
+    .on(GUAVA, "18.0").scope(COMPILE)  
+    .on(JERSEY_SERVER, "1.19").scope(COMPILE)
+    .on("com.orientechnologies:orientdb-client:2.0.8").scope(COMPILE)
+    .on(JUNIT, "4.11").scope(TEST)
+    .on(MOCKITO_ALL, "1.9.5").scope(TEST, ANOTHER_SCOPE)
+.build();
 ```
 
 You can also omit the scope and set it later...
 
 ```Java
 JkDependencies deps = JkDependencies.builder()
-			.on(GUAVA, "18.0")
-			.on(JERSEY_SERVER, "1.19")
-			.on("com.orientechnologies:orientdb-client:2.0.8")
-			.on(JUNIT, "4.11").scope(TEST)
-			.on(MOCKITO_ALL, "1.9.5").scope(TEST)
-		.build();
+    .on(GUAVA, "18.0")
+    .on(JERSEY_SERVER, "1.19")
+    .on("com.orientechnologies:orientdb-client:2.0.8")
+    .on(JUNIT, "4.11").scope(TEST)
+    .on(MOCKITO_ALL, "1.9.5").scope(TEST, ANOTHER_SCOPE)
+.build();
 ...
 deps = deps.withDefaultScope(COMPILE);
 ```
@@ -180,7 +180,10 @@ If the file still does not exist then the build fails.
 
 ##### Dependency on module
 
-This is for declaring a dependency on a module hosted on a _Maven_ or _Ivy_ repository.
+This is for declaring a dependency on module hosted in _Maven_ or _Ivy_ repository.
+
+
+
 
 ### Bind dependencies to scope
 

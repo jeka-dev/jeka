@@ -10,7 +10,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class DependenciesTest {
+public class JkDependenciesTest {
 
 	@Test
 	public void testBuilder() {
@@ -51,5 +51,14 @@ public class DependenciesTest {
 		.on(depFile1, depFile2)
 		.build();
 	}
+
+	public void onModule() {
+		JkDependencies.builder()
+		.on("myGroup:otherModule:2.2.0")
+		.on("myGroup:moduleB:2.3:client") // Get only the the artifacted with "client" classifier
+		.build();
+	}
+
+
 
 }

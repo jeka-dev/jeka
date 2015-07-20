@@ -10,6 +10,10 @@ import java.util.Set;
 
 public class JkIvyResolverRunner {
 
+	static final JkRepos REPOS = JkRepos.maven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured/");
+
+	//private static final JkRepos REPOS = JkRepos.mavenCentral();
+
 	public static void main(String[] args) {
 		spring();
 		//jogl();
@@ -18,7 +22,7 @@ public class JkIvyResolverRunner {
 	}
 
 	public static void spring() {
-		final JkRepos repos = JkRepos.maven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured/");
+		final JkRepos repos = REPOS;
 		//JkRepos repos = JkRepos.mavenCentral();
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.springframework", "spring-jdbc", "3.0.+")  // This works on nexus repo
@@ -67,6 +71,8 @@ public class JkIvyResolverRunner {
 		final Set<JkModuleDepFile> noExistArtifactSet = result.getArtifacts(JkModuleId.of("org.apache.wicket", "wicket-ioc"), JkScope.of("noexist"));
 		System.out.println(noExistArtifactSet);
 	}
+
+
 
 
 }
