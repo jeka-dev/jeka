@@ -11,12 +11,12 @@ Jerkar build are configurable. Build definition classes can retrieve values defi
 There is nothing specific to Jerkar. Just set the environment variable as you usually do on your OS and get the value from build using the standard Java `System#getenv` method.
 
 ### System properties
-Naturally, your build definitions can read system property by using the standard method `System#getProperty`.
+Naturally, your build definitions can read system properties by using the standard method `System#getProperty`.
 
 Jerkar proposes 3 ways to inject system properties :
 
 * By editing ___[Jerkar Home]/system.properties___ file. All properties defined in this property file are injected while creating the Jerkar Java process (via standard option -D). 
-  Note that if you are running Jerkar in embedded mode, the ___[Jerkar Home]/system.properties___ file will not be taken in account but ___[project dir]/build/def/build/system.properties]___.
+  Note that if you are running Jerkar in embedded mode, the ___[Jerkar Home]/system.properties___ file will not be taken in account but ___[project dir]/build/def/build/system.properties___.
 * By editing ___[Jerkar User Home]/system.properties___ file. These properties are injected the same way than for the previous point.
 * By mentioning the property/value in Jerkar __command line__ as `Jerkar doDefault -DmyProperty=myValue`. These properties are injected after the jerkar Java process has been created (via `System#setProperty` method). 
 
