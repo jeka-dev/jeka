@@ -1,13 +1,9 @@
 ## Dependency Management
 ----
 
-May the project you are building is standalone : you won't need any library or file coming from other project to build it. In that case you are not concerned with dependency management so you can skip this section.
-
-If your project relies on libraries or files coming from other projects then __dependency management__ comes in play.
-
 ### What is a dependency ?
 
-In this context, we call a _dependency_ an indication that can be translated to a set of files needed to accomplish certain part of the build. In Jerkar code, the dependency concept is embodied by the abstract `JkDependency` class.
+In this context, we call a __dependency__ an indication that can be translated to a set of files needed to accomplish certain part of the build. In Jerkar code, the dependency concept is embodied by the abstract `JkDependency` class.
 So for example if a project _Foo_ has a __dependency__ _bar_, this means that _Foo_ may need the files indicated by _bar_ for building. 
 
 Jerkar distinguishes 3 types of __dependency__ :
