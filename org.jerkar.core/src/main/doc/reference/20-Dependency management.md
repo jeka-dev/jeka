@@ -100,14 +100,13 @@ You can declare many files for one dependency.
 ```
     final File depFile1 = new File("/my/file1.jar");
 	
-	final File depFile2 = new File("/my/file2.zip");
+    final File depFile2 = new File("/my/file2.zip");
 
-	@Override
-	protected JkDependencies dependencies() {
-		return JkDependencies.builder()
-			.on(depFile1, depFile2)
-		.build();
-	}
+    @Override
+    protected JkDependencies dependencies() {
+        return JkDependencies.builder()
+            .on(depFile1, depFile2).build();
+    }
 		
 ``` 
 
@@ -127,15 +126,14 @@ This mechanism is quite simple yet powerfull as it allows to adress following us
 The generic way is to construct this kind of dependency using a `java.lang.Runnable`.
 
 ```
-	private Runnable computation = new Runnable() {...}; 
+    private Runnable computation = new Runnable() {...}; 
 	
-	File fooFile = new File("../otherproject/target/outpufoo.jar");  // dependency file  
+    File fooFile = new File("../otherproject/target/outpufoo.jar");  // dependency file  
 	
-	@Override
-	protected JkDependencies dependencies() {
-		return JkDependencies.builder()
-			.on(JkComputedDependency.of(computation, fooFile))
-		.build();
+    @Override
+    protected JkDependencies dependencies() {
+    return JkDependencies.builder()
+        .on(JkComputedDependency.of(computation, fooFile)).build();
 	}
 ```
 Here, if the _fooFile_ is absent then the __computation__ will be run prior to retry to find _FooFile_.

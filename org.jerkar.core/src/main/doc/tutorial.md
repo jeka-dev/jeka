@@ -18,22 +18,22 @@
                                      The 100% Java build tool.
 </code></pre>
 <br/>
-## Start a new Java project with Jerkar
+## Create a Java Jerkar project
 
-When starting with a new project you have the choice of creating the project by hand or let Jerkar scaffold it.
+When starting with a new project you have the choice of creating the project by hand or use scaffolding.
 
 ### Create a project by hand
 1. Create a new java project in your IDE : You can follow convention by naming your project as _groupName.projectName_.
 2. Add the _[Jerkar Home]/org.jerkar.core-fat.jar_ lib to your project build-path and attach the source code ( _[Jerkar Home]/lib-sources_ ). This jar includes Jerkar core along plugins classes.
 3. Create a _build/def_ folder at the base of your project and make it a source folder in your IDE. In Jerkar, all build related stuff (build definition, local 3rd party libs, produced artifacts,...) lie in _build_ directory located at the root of your project
 4. Write the build definition class extending `JkJavaBuild` in the _build/def_ folder (in whatever package).
-5. Launch the `org.jerkar.tool.Main` class in your IDE or type `jerkar` in the command line (with the root of your project as working directory).
+
 
 <p class="alert alert-success">
-If your project is <a href="../../tour.html#100conventional">100% conventional</a>, you can even skip steps <strong>2.</strong> and <strong>3.</strong>.
+If your project is <a href="../../tour.html#100conventional">100% conventional</a>, you can skip steps <strong>2, 3 and 4</strong>.
 </p>
 
-### Create a project by scaffolding
+### Use scaffolding
 1. Create a new java project in your IDE
 2. Execute `jerkar scaffold` under the project base directory. This generates the project structures.
 
@@ -42,6 +42,11 @@ If your project is <a href="../../tour.html#100conventional">100% conventional</
 </p>
 
 As Jerkar builds itself, you can have a look at [how Jerkar project is structured](https://github.com/jerkar/jerkar/tree/master/org.jerkar.core).
+
+## Build your project
+
+Launch the `org.jerkar.tool.Main` class in your IDE or type `jerkar` in the command line (with the root of your project as working directory).
+
 
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 

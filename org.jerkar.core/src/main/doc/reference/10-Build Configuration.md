@@ -40,7 +40,7 @@ As for system properties, The __command line__ takes precedence on ___[Jerkar Us
 
 Note for boolean, when no value is specified, `true` will be used as default.
 
-#### Retrieve Jerkar option
+#### Retrieve Jerkar options
 
 You can retrieve string values using the `JkOptions` API providing convenient static methods as `JkOptions#get`, `JkOptions#asMap` or `JkOptions#getAllStartingWith(String prefix)`.
 
@@ -63,10 +63,10 @@ you can gather all these information in a object as
 
 ```Java
 class Server {
-	private String url;
-	private String userName;
-	private String password;
-	// ...
+    private String url;
+    private String userName;
+    private String password;
+    // ...
 }
 ```
 
@@ -74,8 +74,8 @@ declare a Server field in your build :
 
 ```Java
 class MyBuild extends JkBuild {
-	Server deployServer;
-	...
+   Server deployServer;
+   ...
 }
 ```
 Then you can inject the server object using following options :
