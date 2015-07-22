@@ -1,7 +1,7 @@
 # Frequented Asked Questions
 ----------------------------
 
-## Questions about exceptions launched when Jerkar is running
+## Questions about exceptions thrown while Jerkar is running
 
 ### Get Provider org.apache.xerces.jaxp.SAXParserFactoryImpl not found exception. What can i do ?
 
