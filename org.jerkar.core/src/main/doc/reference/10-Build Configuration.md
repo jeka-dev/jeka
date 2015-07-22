@@ -15,13 +15,14 @@ Naturally, your build definitions can read system properties by using the standa
 
 Jerkar proposes 3 ways to inject system properties :
 
-* By editing ___[Jerkar Home]/system.properties___ file. All properties defined in this property file are injected while creating the Jerkar Java process (via standard option -D). 
+* By editing ___[Jerkar Home]/system.properties___ file. 
   Note that if you are running Jerkar in embedded mode, the ___[Jerkar Home]/system.properties___ file will not be taken in account but ___[project dir]/build/def/build/system.properties___.
-* By editing ___[Jerkar User Home]/system.properties___ file. These properties are injected the same way than for the previous point.
-* By mentioning the property/value in Jerkar __command line__ as `Jerkar doDefault -DmyProperty=myValue`. These properties are injected after the jerkar Java process has been created (via `System#setProperty` method). 
+* By editing ___[Jerkar User Home]/system.properties___ file. 
+* By mentioning the property/value in Jerkar __command line__ as `Jerkar doDefault -DmyProperty=myValue`. 
 
 The __command line__ takes precedence on ___[Jerkar User Home]/system.properties___ that in turn, takes precedence on ___[Jerkar Home]/system.properties___.
 
+In every case, defined system properties are injected after the creation of the java process (via `System#setProperty` method).
 
 ### Jerkar options
 
