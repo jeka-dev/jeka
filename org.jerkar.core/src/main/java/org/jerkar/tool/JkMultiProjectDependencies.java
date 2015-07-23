@@ -76,7 +76,7 @@ public final class JkMultiProjectDependencies {
 				if (build instanceof JkBuildDependencySupport) {
 					final JkBuildDependencySupport buildDependencySupport =
 							(JkBuildDependencySupport) build;
-					result.addAll(buildDependencySupport.jerkarBuildDependencies()
+					result.addAll(buildDependencySupport.buildDefDependencies()
 							.resolveTransitiveBuilds(files));
 				}
 				result.add(build);

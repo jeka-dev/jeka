@@ -168,7 +168,7 @@ class Project {
 
 	private void launch(JkBuild build, CommandLine commandLine) {
 		JkOptions.populateFields(build, commandLine.getMasterBuildOptions());
-		build.setScriptDependencyResolver(getBuildDefDependencyResolver());
+		build.setBuildDefDependencyResolver(getBuildDefDependencyResolver());
 		build.init();
 
 		// setup plugins
@@ -177,17 +177,17 @@ class Project {
 
 		if (build instanceof JkBuildDependencySupport) {
 			final JkBuildDependencySupport depBuild = (JkBuildDependencySupport) build;
-			if (!depBuild.jerkarBuildDependencies().transitiveProjectBuilds().isEmpty()) {
+			if (!depBuild.buildDefDependencies().transitiveProjectBuilds().isEmpty()) {
 				if (!commandLine.getSubProjectMethods().isEmpty()) {
 					JkLog.startHeaded("Executing dependent projects");
-					for (final JkBuild subBuild : depBuild.jerkarBuildDependencies().transitiveProjectBuilds()) {
+					for (final JkBuild subBuild : depBuild.buildDefDependencies().transitiveProjectBuilds()) {
 						configurePluginsAndRun(subBuild, commandLine.getSubProjectMethods(),
 								commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
 
 					}
 				} else {
 					JkLog.startln("Configuring dependent projects");
-					for (final JkBuild subBuild : depBuild.jerkarBuildDependencies().transitiveProjectBuilds()) {
+					for (final JkBuild subBuild : depBuild.buildDefDependencies().transitiveProjectBuilds()) {
 						JkLog.startln("Configuring " + subBuild.baseDir().root().getName());
 						configureProject(subBuild,
 								commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);

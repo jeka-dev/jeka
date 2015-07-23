@@ -67,7 +67,7 @@ public class DistribAllBuild extends JkBuildDependencySupport {
 	public void doDefault() {
 		super.doDefault();
 		pluginsJacoco.core.doJavadoc = false;
-		jerkarBuildDependencies().invokeDoDefaultMethodOnAllSubProjects();
+		buildDefDependencies().invokeDoDefaultMethodOnAllSubProjects();
 		distrib();
 	}
 	

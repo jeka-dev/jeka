@@ -57,16 +57,16 @@ public class JkBuildDependencySupport extends JkBuild {
 	@JkDoc("Version to inject to this build. If 'null' or blank than the version will be the one returned by #version()" )
 	protected String version = null;
 
-	private final JkMultiProjectDependencies explicitMultiProjectDependencies;
+	private final JkMultiProjectDependencies annotatedJkProjectDependencies;
 
 	/**
 	 * Other builds (projects) this build depend of.
 	 */
-	private JkMultiProjectDependencies multiProjectDependencies;
+	private JkMultiProjectDependencies buildDefDependencies;
 
 	public JkBuildDependencySupport() {
 		final List<JkBuild> subBuilds = populateMultiProjectBuildField();
-		this.explicitMultiProjectDependencies = JkMultiProjectDependencies.of(this, subBuilds);
+		this.annotatedJkProjectDependencies = JkMultiProjectDependencies.of(this, subBuilds);
 	}
 
 	/**
@@ -246,11 +246,11 @@ public class JkBuildDependencySupport extends JkBuild {
 	/**
 	 * Returns dependencies on other Jerkar builds (potentially on other projects).
 	 */
-	public final JkMultiProjectDependencies jerkarBuildDependencies() {
-		if (multiProjectDependencies == null) {
-			multiProjectDependencies = this.explicitMultiProjectDependencies.and(projectBuildDependencies(this.effectiveDependencies()));
+	public final JkMultiProjectDependencies buildDefDependencies() {
+		if (buildDefDependencies == null) {
+			buildDefDependencies = this.annotatedJkProjectDependencies.and(projectBuildDependencies(this.effectiveDependencies()));
 		}
-		return multiProjectDependencies;
+		return buildDefDependencies;
 
 	}
 

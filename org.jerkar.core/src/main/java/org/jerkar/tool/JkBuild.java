@@ -41,7 +41,7 @@ public class JkBuild {
 	protected JkBuild() {
 	}
 
-	void setScriptDependencyResolver(JkDependencyResolver scriptDependencyResolver) {
+	void setBuildDefDependencyResolver(JkDependencyResolver scriptDependencyResolver) {
 		this.buildDefDependencyResolver = scriptDependencyResolver;
 	}
 
