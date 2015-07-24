@@ -35,7 +35,7 @@ class Main {
 		JkLog.info("Command line : " + JkUtilsString.join(Arrays.asList(args), " "));
 		logProps("Specified system properties", loadResult.sysprops);
 		JkLog.info("Standard options : " + loadResult.standardOptions);
-		logProps("Options", JkOptions.toDisplayedMap(JkOptions.asMap()));
+		logProps("Options", JkOptions.toDisplayedMap(JkOptions.getAll()));
 
 		final File workingDir = JkUtilsFile.workingDir();
 		final Project project = new Project(workingDir);

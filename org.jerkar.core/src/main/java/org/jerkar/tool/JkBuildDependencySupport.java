@@ -354,7 +354,7 @@ public class JkBuildDependencySupport extends JkBuild {
 	}
 
 	public JkPgp pgp() {
-		return JkPgp.of(JkOptions.asMap());
+		return JkPgp.of(JkOptions.getAll());
 	}
 
 	private static class SubProjectRef {

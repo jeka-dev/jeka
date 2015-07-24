@@ -49,7 +49,7 @@ public final class JkOptions {
 		return INSTANCE.props.get(key);
 	}
 
-	public static Map<String, String> asMap() {
+	public static Map<String, String> getAll() {
 		return Collections.unmodifiableMap(INSTANCE.props);
 	}
 

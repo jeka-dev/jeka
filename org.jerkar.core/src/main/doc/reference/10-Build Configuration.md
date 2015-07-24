@@ -43,7 +43,7 @@ Note for boolean, when no value is specified, `true` will be used as default.
 
 #### Retrieve Jerkar options
 
-You can retrieve string values using the `JkOptions` API providing convenient static methods as `JkOptions#get`, `JkOptions#asMap` or `JkOptions#getAllStartingWith(String prefix)`.
+You can retrieve string values using the `JkOptions` API providing convenient static methods as `JkOptions#get`, `JkOptions#getAll` or `JkOptions#getAllStartingWith(String prefix)`.
 
 You can also retrieve options just by __declaring fields in build definition class__. 
 All non private instance fields of the build definition class, are likely to be injected as an option.
