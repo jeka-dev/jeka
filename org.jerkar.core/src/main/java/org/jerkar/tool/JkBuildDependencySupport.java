@@ -57,16 +57,14 @@ public class JkBuildDependencySupport extends JkBuild {
 	@JkDoc("Version to inject to this build. If 'null' or blank than the version will be the one returned by #version()" )
 	protected String version = null;
 
-	private final JkMultiProjectDependencies annotatedJkProjectDependencies;
+	private final JkSlaveBuilds annotatedJkProjectSlaves;
 
-	/**
-	 * Other builds (projects) this build depend of.
-	 */
-	private JkMultiProjectDependencies buildDefDependencies;
+	// all slaves of this build
+	private JkSlaveBuilds slaves;
 
 	public JkBuildDependencySupport() {
-		final List<JkBuild> subBuilds = populateMultiProjectBuildField();
-		this.annotatedJkProjectDependencies = JkMultiProjectDependencies.of(this, subBuilds);
+		final List<JkBuild> subBuilds = populateJkProjectAnnotatedFields();
+		this.annotatedJkProjectSlaves = JkSlaveBuilds.of(this.baseDir().root(), subBuilds);
 	}
 
 	/**
@@ -244,13 +242,13 @@ public class JkBuildDependencySupport extends JkBuild {
 	}
 
 	/**
-	 * Returns dependencies on other Jerkar builds (potentially on other projects).
+	 * Returns slave builds (potentially on other projects).
 	 */
-	public final JkMultiProjectDependencies buildDefDependencies() {
-		if (buildDefDependencies == null) {
-			buildDefDependencies = this.annotatedJkProjectDependencies.and(projectBuildDependencies(this.effectiveDependencies()));
+	public final JkSlaveBuilds slaves() {
+		if (slaves == null) {
+			slaves = this.annotatedJkProjectSlaves.and(projectBuildDependencies(this.effectiveDependencies()));
 		}
-		return buildDefDependencies;
+		return slaves;
 
 	}
 
@@ -270,7 +268,7 @@ public class JkBuildDependencySupport extends JkBuild {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<JkBuild> populateMultiProjectBuildField() {
+	private List<JkBuild> populateJkProjectAnnotatedFields() {
 		final List<JkBuild> result = new LinkedList<JkBuild>();
 		final List<Field> fields = JkUtilsReflect.getAllDeclaredField(this.getClass(), JkProject.class);
 		for (final Field field : fields) {
