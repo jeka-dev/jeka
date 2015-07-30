@@ -35,7 +35,7 @@ It processes as follow :
 1. Parse the command line.
 2. Populate the system properties and Jerkar options from configuration files and command line (see <strong>build configuration</strong>).
 3. Pre-process Java source files located under _[WORKING DIR]/build/def_ directory if any. The preprocessor parses source code to extract content of `@JkImport` and `@JkProject` Java annotations. 
-The `@JkImport` contains the binary dependencies on modules hosted in Maven/Ivy repository (as `@JkImport("commons-httpclient:commons-httpclient:3.1")` while the `@JkProject` contains dependency on build definition classes of an other project (as `@JkProject("../org.jerkar.plugins-jacoco")`).
+The `@JkImport` contains the binary dependencies on modules hosted in Maven/Ivy repository, as `@JkImport("commons-httpclient:commons-httpclient:3.1")`, while `@JkProject` contains dependency on build definition classes of an other project, as `@JkProject("../org.jerkar.plugins-jacoco")`.
 If the project build definition sources contain some `@JkProject` annotations, the dependee project are pre-processed and compiled recursively prior to go next. 
 4. Compile Java source files located under _[WORKING DIR]/build/def_ directory. The compilation is done using classpath constituted in the prevous step.
 5. Instantiate the build class. The build class is the class specified by the `buildClass` option if present. If not, it is the first class implementing `org.jerkar.tool.JkBuild`. If no class implementing `org.jerkar.tool.JkBuild` is found then the `org.jerkar.tool.builtins.javabuild.JkJavaBuild` is instantiated.
@@ -44,8 +44,23 @@ The `buildClass` option can mention a simple name class (class name omitting its
 6. Inject options in build instance fields  (see <strong>build configuration</strong>).
 7. Call the `init()` method on the build instance.
 8. Instantiate and bind plugins.
-9. Invoke methods specified in arguments.
+9. Invoke methods specified in command line arguments.
 
- 
+#### Build definition compilation
+Jerkar compiles the build definition files prior to execute it. The compilation classpath is :
+
+* Java libraries located in _[PROJECT DIR]/build/libs/build_
+* Java libraries located in _[JERKAR HOME]/libs/ext_
+
+But you can augment this classpath with
+
+* Java libraries hosted on a Maven or Ivy repositories
+* Build definition (java sources) of other projects
+
+
+
+Pre-process Java source files located under _[WORKING DIR]/build/def_ directory if any. The preprocessor parses source code to extract content of `@JkImport` and `@JkProject` Java annotations. 
+The `@JkImport` contains the binary dependencies on modules hosted in Maven/Ivy repository, as `@JkImport("commons-httpclient:commons-httpclient:3.1")`, while `@JkProject` contains dependency on build definition classes of an other project, as `@JkProject("../org.jerkar.plugins-jacoco")`.
+If the project build definition sources contain some `@JkProject` annotations, the dependee project are pre-processed and compiled recursively prior to go next.  
 
 <br/>
