@@ -13,8 +13,9 @@ public class JkModuleDependency extends JkDependency {
 
 	private static final long serialVersionUID = 1L;
 
-	public static boolean isGroupNameAndVersion(String candidate) {
-		return JkUtilsString.countOccurence(candidate, ':') == 2;
+	public static boolean isModuleDependencyDescription(String candidate) {
+		final int colonCount = JkUtilsString.countOccurence(candidate, ':');
+		return colonCount == 2 || colonCount == 3;
 	}
 
 	public static JkModuleDependency of(JkModuleId moduleId, JkVersionRange versionRange) {
@@ -27,9 +28,14 @@ public class JkModuleDependency extends JkDependency {
 
 	/**
 	 * Creates a JkModuleDependency from a formatted string description.
-	 * The expected format is <i>groupName:moduleName:version</i>.
+	 * The expected format are :
+	 * <ul>
+	 *   <li>groupName:moduleName:version</li>.
+	 *   <li>groupName:moduleName:version:classifier</li>.
+	 *   <li>groupName:moduleName:version@extension</li>.
+	 *   <li>groupName:moduleName:version:classifier@extension</li>.
+	 * </ul>
 	 */
-
 	public static JkModuleDependency of(String description) {
 		final String ext;
 		if (description.contains("@")) {

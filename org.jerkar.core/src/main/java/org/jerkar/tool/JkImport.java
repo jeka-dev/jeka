@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Specifies the libraries necessary to compile and run the annotated class as a Jerkar build.
  * It can specify library referenced in a repository (as "com.google.guava:guava:18.0")
- * or files relative to the project directory (as "../libs/mylib.jar").
+ * or file pattern relative to the project directory (as "build/libs/** /*.jar").
  * 
  * @author Jérôme Angibaud
  */
@@ -17,7 +17,5 @@ import java.lang.annotation.Target;
 public @interface JkImport {
 
 	String[] value();
-
-	String[] repos() default "";
 
 }

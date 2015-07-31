@@ -6,12 +6,12 @@ This section details what happens behind the cover when Jerkar is run.
 ### Launching Java Process
  
 Jerkar is a pure Java application requiring __JDK 6 or above__. __JDK__ is required and __JRE__ is not sufficient.
-Indeed Jerkar uses the JDK tools for compiling build definitions and generate Javadoc.
+Indeed Jerkar uses the JDK tools to compile build definitions.
 
-For an easy launching of the java process in command line, Jerkar provides native scripts ( _jerkar.bat_ for __Windows__ and _jerkar_ for __Unix__ ).
+To ease launching java process in command line, Jerkar provides native scripts ( _jerkar.bat_ for __Windows__ and _jerkar_ for __Unix__ ).
 These scripts do the following :
 
-1. __Find the java executable path__ : If a `JAVA_HOME` environment variable is defined then it takes this value as `java` path. Otherwise it takes the `java` executable defined in the _PATH_ environment variable if any.
+1. __Find the java executable path__ : If a `JAVA_HOME` environment variable is defined then it takes this value as `java` path. Otherwise it takes the `java` executable defined in the _PATH_ of your OS.
 2. __Get java execution option__ : If an environment variable `JERKAR_OPTS` exists then its value will be passed in the `java`command line parameters, otherwise default `-Xmx512m -XX:MaxPermSize=512m` is passed.
 3. __Set Jerkar classpath__ in the following order :
 	* all jar and zip files found under _[WORKING DIR]/build/libs/build_
@@ -21,46 +21,101 @@ These scripts do the following :
 
 #### Embedded mode
 Note that ___[JERKAR_HOME]/org.jerkar.core.jar___ comes after ___[WORKING_DIR]/build/libs/build/*___ in the classpath.
-This means that if a version of Jerkar (org.jerkar.core-fat.jar) is in this directory, then the build will be processed with this instance of Jerkar and not with the one located in in _[JERKAR HOME]_.
+This means that if a version of Jerkar (org.jerkar.core.jar) is in this directory, the build will be processed with this instance of Jerkar and not with the one located in in _[JERKAR HOME]_.
 
-This is called the __Embedded__ mode. It guarantees that your project will build regardless of the Jerkar version installed on the host machine. 
+This is called the __Embedded__ mode. It guarantees that your project will build regardless of Jerkar version installed on the host machine. 
 This mode allows to build your project even if Jerkar is not installed on the host machine. just execute `java -cp build/libs/build/* org.jerkar.tool.Main` instead of `jerkar`.
 
 ### Jerkar execution
 
-The `org.jerkar.tool.Main#main` is the entry point of Jerkar. It's the method you invoke to launch/debug a Jerkar build within your IDE.
+The `org.jerkar.tool.Main#main` is the entry point of Jerkar. This is the method you invoke to launch or debug a Jerkar build within your IDE.
 
 It processes as follow :
 
 1. Parse the command line.
-2. Populate the system properties and Jerkar options from configuration files and command line (see <strong>build configuration</strong>).
-3. Pre-process Java source files located under _[WORKING DIR]/build/def_ directory if any. The preprocessor parses source code to extract content of `@JkImport` and `@JkProject` Java annotations. 
-The `@JkImport` contains the binary dependencies on modules hosted in Maven/Ivy repository, as `@JkImport("commons-httpclient:commons-httpclient:3.1")`, while `@JkProject` contains dependency on build definition classes of an other project, as `@JkProject("../org.jerkar.plugins-jacoco")`.
-If the project build definition sources contain some `@JkProject` annotations, the dependee project are pre-processed and compiled recursively prior to go next. 
-4. Compile Java source files located under _[WORKING DIR]/build/def_ directory. The compilation is done using classpath constituted in the prevous step.
-5. Instantiate the build class. The build class is the class specified by the `buildClass` option if present. If not, it is the first class implementing `org.jerkar.tool.JkBuild`. If no class implementing `org.jerkar.tool.JkBuild` is found then the `org.jerkar.tool.builtins.javabuild.JkJavaBuild` is instantiated.
+2. Populate system properties and Jerkar options from configuration files and command line (see <strong>build configuration</strong>).
+3. Pre-process and compile build definition files (see <strong>Build Definition Compilation</strong>). 
+4. Instantiate the build class. The build class is the class specified by the `buildClass` option if present. If not, it is the first class implementing `org.jerkar.tool.JkBuild`. If no class implementing `org.jerkar.tool.JkBuild` is found then the `org.jerkar.tool.builtins.javabuild.JkJavaBuild` is instantiated.
 The class scanning processes classes in alphabetic order then subpackage in deep first. This mean that class `MyBuid` will be scanned prior `apackage.ABuild`, and `aa.bb.MyClass` will be scanned prior `ab.OtherClass`.
 The `buildClass` option can mention a simple name class (class name omitting its package). If no class matches the  specified `buildClass` then an exception is thrown.
-6. Inject options in build instance fields  (see <strong>build configuration</strong>).
-7. Call the `init()` method on the build instance.
-8. Instantiate and bind plugins.
-9. Invoke methods specified in command line arguments.
+5. Inject options in build instance fields  (see <strong>build configuration</strong>).
+6. Call the `init()` method on the build instance.
+7. Instantiate and bind plugins.
+8. Invoke methods specified in command line arguments.
 
-#### Build definition compilation
-Jerkar compiles the build definition files prior to execute it. The compilation classpath is :
+#### Build Definition Compilation
+Jerkar compiles the build definition files prior to execute it. The build definition sources are expected to be in _[PROJECT DIR]/build/def_. If this directory does not exist or does not contains java sources, the compilation is skipped.
+Compilation outputs class files in _[PROJECT DIR]/build/output/def-bin_ directory and uses classpath containing :
 
-* Java libraries located in _[PROJECT DIR]/build/libs/build_
-* Java libraries located in _[JERKAR HOME]/libs/ext_
+* Java libraries located in _[PROJECT DIR]/build/libs/build_.
+* Java libraries located in _[JERKAR HOME]/libs/ext_ (not in embedded mode).
 
-But you can augment this classpath with
+You can augment the classpath with :
 
 * Java libraries hosted on a Maven or Ivy repositories
+* Java libraries located on file system.
 * Build definition (java sources) of other projects
 
+The information about the extra lib to add to classpath are located in the build definition files, inside `@JkImport` and `@JkProject` annotation.
+To read this information, build definition files are parsed prior to be compile in order to constitute the classpath.
+
+##### Libraries located on Maven/Ivy Repository 
+To add libraries from Maven/Ivy repository you need to annotate the build definition with `@JkImport`. This annotation takes an array of String as its default parameter so you can specify several dependencies.
+The mentioned dependencies are resolved transitively. 
+
+``` 
+@JkImport(`{"commons-httpclient:commons-httpclient:3.1", "com.google.guava:guava:18.0"})
+public class HttpClientTaskBuild extends JkJavaBuild {`
+...
+```
+
+Url of the maven/ivy repository is given by `downloadRepoUrl` Jerkar option (or it uses Maven Central if this option is not specified).
+If this repository needs credentials, you need to supply it through Jerkar options `dowloadRepoUsername` and `downloadRepoPassword`.
+ 
+If the download repository is an Ivy repo, you have to prefix url with `ivy:` so for example you'll get `ivy:http://my.ivy/repo`.
+
+##### Libraries on file system
+To add library from file system you need to annotate the build definition with `@JkImport`. This annotation takes an array of String as argument so you can specify several dependencies.
+The mentioned dependencies are not resolved transitively. 
+The expected value is a Ant include pattern applied to the project root directory.
 
 
-Pre-process Java source files located under _[WORKING DIR]/build/def_ directory if any. The preprocessor parses source code to extract content of `@JkImport` and `@JkProject` Java annotations. 
-The `@JkImport` contains the binary dependencies on modules hosted in Maven/Ivy repository, as `@JkImport("commons-httpclient:commons-httpclient:3.1")`, while `@JkProject` contains dependency on build definition classes of an other project, as `@JkProject("../org.jerkar.plugins-jacoco")`.
-If the project build definition sources contain some `@JkProject` annotations, the dependee project are pre-processed and compiled recursively prior to go next.  
+``` 
+@JkImport(`{"commons-httpclient:commons-httpclient:3.1", "build/libs/compile/*.jar"})
+public class HttpClientTaskBuild extends JkJavaBuild {`
+...
+```
+
+Thiis will include _commons-httpclient_ and its dependencies in the classpath along all jar file located in _[PROJECT DIR]/build/libs/compile_.
+
+##### Build definitions of other project
+Your build definitions can depends on build definitions of other projects. It is typically the case for multi-project builds. 
+This capability allows to share build elements in a static typed way as the build definitions files can consume classes coming from build definitions of other projects.
+
+`@JkProject` is an annotation that applies on fields instance of `org.jerkar.tool.JkBuild` of its subclasses. This annotation contains the relative path of the consumed project.
+If the project build definition sources contain some `@JkProject` annotations, the build definition files of the consumed project are pre-processed and compiled recursively. 
+The classes and the classpath of the consumed  project are added to the build definition classpath of the consumer project.
+
+```
+public class DistribAllBuild extends JkBuildDependencySupport {
+	
+	@JkProject("../org.jerkar.plugins-sonar")
+	PluginsSonarBuild pluginsSonar;
+	
+	@JkProject("../org.jerkar.plugins-jacoco")
+	PluginsJacocoBuild pluginsJacoco;
+	
+	@JkDoc("Construct a distrib assuming all dependent sub projects are already built.")
+	public void distrib() {
+		
+		JkLog.startln("Creating distribution file");
+		
+		JkLog.info("Copy core distribution localy.");
+		CoreBuild core = pluginsJacoco.core;  // The core project is got by transitivity
+		File distDir = this.ouputDir("dist");
+		JkFileTree dist = JkFileTree.of(distDir).importDirContent(core.distribFolder);
+		...
+```
+
 
 <br/>
