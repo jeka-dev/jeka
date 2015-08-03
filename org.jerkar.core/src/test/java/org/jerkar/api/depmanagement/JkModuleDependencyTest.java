@@ -15,7 +15,7 @@ public class JkModuleDependencyTest {
 
 		final JkModuleDependency dep2 = JkModuleDependency
 				.of("group:name:version:sources@zip");
-		Assert.assertEquals("zip", dep2.extension());
+		Assert.assertEquals("zip", dep2.ext());
 		Assert.assertFalse(dep2.transitive());
 
 	}

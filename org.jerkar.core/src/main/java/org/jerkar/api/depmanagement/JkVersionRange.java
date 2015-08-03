@@ -6,8 +6,8 @@ import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * Expresses a version constraints for a given external modules. It can be an exact version as 1.4.2
- * or a dynamic version as latest.integration.
- * As this tool rely on Ivy to to perform dependency resolution, you can use any syntax accepted by Ivy.
+ * or a dynamic version as [1.0,2.0[.
+ * As this tool relies on Ivy to to perform dependency resolution, you can use any syntax accepted by Ivy.
  * 
  * @see <a href="http://ant.apache.org/ivy/history/latest-milestone/ivyfile/dependency.html">ivy doc</a>
  * 

@@ -1,10 +1,14 @@
 package org.jerkar.tool;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
@@ -23,6 +27,9 @@ import org.jerkar.api.utils.JkUtilsTime;
  */
 public class JkBuild {
 
+	private static final ThreadLocal<Map<SubProjectRef, JkBuild>> SUB_PROJECT_CONTEXT =
+			new ThreadLocal<Map<SubProjectRef, JkBuild>>();
+
 	private File baseDir = JkUtilsFile.workingDir();
 
 	private final Date buildTime = JkUtilsTime.now();
@@ -38,7 +45,11 @@ public class JkBuild {
 
 	private JkDependencyResolver buildDefDependencyResolver;
 
+	private final JkSlaveBuilds annotatedJkProjectSlaves;
+
 	protected JkBuild() {
+		final List<JkBuild> subBuilds = populateJkProjectAnnotatedFields();
+		this.annotatedJkProjectSlaves = JkSlaveBuilds.of(this.baseDir().root(), subBuilds);
 	}
 
 	void setBuildDefDependencyResolver(JkDependencyResolver scriptDependencyResolver) {
@@ -260,7 +271,116 @@ public class JkBuild {
 		return BuildDependency.of(this, methods, files);
 	}
 
+	/**
+	 * Returns slave builds (potentially on other projects).
+	 */
+	public final JkSlaveBuilds slaves() {
+		return this.annotatedJkProjectSlaves;
+	}
 
+
+	@SuppressWarnings("unchecked")
+	private List<JkBuild> populateJkProjectAnnotatedFields() {
+		final List<JkBuild> result = new LinkedList<JkBuild>();
+		final List<Field> fields = JkUtilsReflect.getAllDeclaredField(this.getClass(), JkProject.class);
+		for (final Field field : fields) {
+			final JkProject jkProject = field.getAnnotation(JkProject.class);
+			final JkBuild subBuild = relativeProject(this, (Class<? extends JkBuild>) field.getType(),
+					jkProject.value());
+			JkUtilsReflect.setFieldValue(this, field, subBuild);
+			result.add(subBuild);
+		}
+		return result;
+	}
+
+	public JkBuild relativeProject(String relativePath) {
+		return relativeProject(this, null, relativePath);
+	}
+
+	private static final JkBuild relativeProject(JkBuild mainBuild, Class<? extends JkBuild> clazz, String relativePath) {
+		final JkBuild build = mainBuild.relativeProjectBuild(clazz, relativePath);
+		build.init();
+		return build;
+	}
+
+	/**
+	 * Creates an instance of <code>JkBuild</code> for the given project and build class.
+	 * The instance field annotated with <code>JkOption</code> are populated as usual.
+	 */
+	@SuppressWarnings("unchecked")
+	private final <T extends JkBuild> T relativeProjectBuild(Class<T> clazz, String relativePath) {
+		final File projectDir = this.baseDir(relativePath);
+		final SubProjectRef projectRef = new SubProjectRef(projectDir, clazz);
+		Map<SubProjectRef, JkBuild> map = SUB_PROJECT_CONTEXT.get();
+		if (map == null) {
+			map = new HashMap<SubProjectRef, JkBuild>();
+			SUB_PROJECT_CONTEXT.set(map);
+		}
+		final T cachedResult = (T) SUB_PROJECT_CONTEXT.get().get(projectRef);
+		if (cachedResult != null) {
+			return cachedResult;
+		}
+		final Project project = new Project(projectDir);
+		final T result = project.getBuild(clazz);
+		JkOptions.populateFields(result);
+		SUB_PROJECT_CONTEXT.get().put(projectRef, result);
+		return result;
+	}
+
+	private static class SubProjectRef {
+
+		final String canonicalFileName;
+
+		final Class<?> clazz;
+
+		SubProjectRef(File projectDir, Class<?> clazz) {
+			super();
+			this.canonicalFileName = JkUtilsFile.canonicalPath(projectDir);
+			this.clazz = clazz;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime
+					* result
+					+ ((canonicalFileName == null) ? 0 : canonicalFileName
+							.hashCode());
+			result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			final SubProjectRef other = (SubProjectRef) obj;
+			if (canonicalFileName == null) {
+				if (other.canonicalFileName != null) {
+					return false;
+				}
+			} else if (!canonicalFileName.equals(other.canonicalFileName)) {
+				return false;
+			}
+			if (clazz == null) {
+				if (other.clazz != null) {
+					return false;
+				}
+			} else if (!clazz.equals(other.clazz)) {
+				return false;
+			}
+			return true;
+		}
+
+	}
 
 
 }

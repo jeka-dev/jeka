@@ -18,10 +18,17 @@ public class JkModuleDependency extends JkDependency {
 		return colonCount == 2 || colonCount == 3;
 	}
 
+	/**
+	 * Creates a {@link JkModuleDependency} from its moduleId and <code>JkVersionrange</code>.
+	 */
 	public static JkModuleDependency of(JkModuleId moduleId, JkVersionRange versionRange) {
 		return new JkModuleDependency(moduleId, versionRange, null, true, null);
 	}
 
+	/**
+	 * Creates a {@link JkModuleDependency} from its group, name and version range.
+	 * The version range can be any string accepted by {@link JkVersionRange#of(String)}.
+	 */
 	public static JkModuleDependency of(String group, String name, String version) {
 		return of (JkModuleId.of(group, name), JkVersionRange.of(version));
 	}
@@ -74,8 +81,6 @@ public class JkModuleDependency extends JkDependency {
 		return transitive;
 	}
 
-
-
 	public JkModuleId moduleId() {
 		return module;
 	}
@@ -122,7 +127,7 @@ public class JkModuleDependency extends JkDependency {
 	 * Returns the extension for this module dependency or <code>null</code> if the dependency is done on
 	 * the the default extension.
 	 */
-	public String extension() {
+	public String ext() {
 		return this.extension;
 	}
 

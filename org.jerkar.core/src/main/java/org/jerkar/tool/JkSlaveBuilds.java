@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkScopedDependency;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -35,14 +37,26 @@ public final class JkSlaveBuilds {
 		this.directSlaves = Collections.unmodifiableList(buildDeps);
 	}
 
+	/**
+	 * Returns a {@link JkSlaveBuilds} identical to this one but augmented with specified slave builds.
+	 */
 	@SuppressWarnings("unchecked")
 	public JkSlaveBuilds and(List<JkBuild> slaves) {
 		return new JkSlaveBuilds(this.masterBuildRoot, JkUtilsIterable.concatLists(this.directSlaves, slaves));
 	}
 
+
+	/**
+	 * Returns a {@link JkSlaveBuilds} identical to this one but augmented with the {@link BuildDependency} contained
+	 * in the the specified dependencies.
+	 */
+	public JkSlaveBuilds and(JkDependencies dependencies) {
+		final List<JkBuild> list = projectBuildDependencies(dependencies);
+		return this.and(list);
+	}
+
 	/**
 	 * Returns only the direct slave of this master build.
-	 * @return
 	 */
 	public List<JkBuild> directs() {
 		return Collections.unmodifiableList(directSlaves);
@@ -96,6 +110,17 @@ public final class JkSlaveBuilds {
 				}
 				result.add(build);
 				files.add(dir);
+			}
+		}
+		return result;
+	}
+
+	private static List<JkBuild> projectBuildDependencies(JkDependencies dependencies) {
+		final List<JkBuild> result = new LinkedList<JkBuild>();
+		for (final JkScopedDependency scopedDependency : dependencies) {
+			if (scopedDependency.dependency() instanceof BuildDependency) {
+				final BuildDependency projectDependency = (BuildDependency) scopedDependency.dependency();
+				result.add(projectDependency.projectBuild());
 			}
 		}
 		return result;

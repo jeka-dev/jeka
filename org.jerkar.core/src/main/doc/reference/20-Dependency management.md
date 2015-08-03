@@ -129,7 +129,7 @@ The generic way is to construct this kind of dependency using a `java.lang.Runna
 ```
 private Runnable computation = new Runnable() {...}; 
 	
-File fooFile = new File("../otherproject/target/outpufoo.jar");  // dependency file  
+File fooFile = new File("../otherproject/target/output/foo.jar");  // dependency file  
 	
 @Override
 protected JkDependencies dependencies() {
@@ -148,7 +148,7 @@ public JkJavaBuild fooBuild;  // This is the build coming from the 'foo' project
 @Override
 protected JkDependencies dependencies() {
     return JkDependencies.builder()
-	    .on(fooBuild.asComputedDependency("doPack", fooBuid.packer().jarFile() ))
+	    .on(fooBuild.asComputedDependency("doPack", fooBuild.packer().jarFile() ))
     .build();
 }
 ```
@@ -165,7 +165,7 @@ JkProcess antBuild = JkProcess.of("ant", "makeJar").withWorkingDir(fooDir));
 @Override
 protected JkDependencies dependencies() {
     return JkDependencies.builder()
-        .on(JkProjectDependency.of(antBuild, fooJar))).scope(PROVIDED)  
+        .on(JkProjectDependency.of(antBuild, fooJar)).scope(PROVIDED)  
     .build();
 }
 ```
@@ -173,9 +173,74 @@ Here, if _fooJar_ file does not exist the `ant makeJar` command line will be inv
 If the file still does not exist then the build fails.
 
 
-##### Dependency on module
+##### Dependency on Module
 
-This is for declaring a dependency on module hosted in _Maven_ or _Ivy_ repository.
+This is for declaring a dependency on module hosted in _Maven_ or _Ivy_ repository. Basically you instantiate a `JkModuleDepency` from it's group, name and version.
+
+```
+...	
+@Override  // Optional :  needless if you use only local dependencies
+protected JkDependencies dependencies() {
+    return JkDependencies.builder()
+        .on(GUAVA, "18.0")
+        .on("com.orientechnologies:orientdb-client:2.0.8")
+        .on("my.group:mymodule:0.2-SNAPSHOT")
+	.build();
+}
+...   
+```
+There is many way to indicate the dependee modules, see [Javadoc](http://jerkar.github.io/javadoc/latest/index.html?org/jerkar/api/depmanagement/JkModuleDependency.html) for browsing possibilities. 
+
+Note that a version ending by `-SNAPSHOT` has a special meaning, Jerkar will consider it _changing_ meaning that it won't cache it locally and will 
+download the latest version.  
+
+###### Dependencies on Dynamic Versions
+
+Jerkar allows to specify a version range, for example, the following is legal :
+
+```
+...	
+@Override  
+protected JkDependencies dependencies() {
+    return JkDependencies.builder()
+        .on(GUAVA, "16.+")
+        .on("com.orientechnologies:orientdb-client:[2.0.8, 2.1.0[")
+	.build();
+}
+...   
+```
+As Jerkar relies on Ivy under the hood, you can use any expression mentioned (here) [http://ant.apache.org/ivy/history/latest-milestone/ivyfile/dependency.html].
+
+###### Specifying Maven Classifier and extension of the artifact
+
+If the module repository is a Maven one, you can specify the classifier of the artifact you want to retrieve :
+
+```
+...	
+@Override 
+protected JkDependencies dependencies() {
+    return JkDependencies.builder()
+        .on("my.group:mymodule:1.0.1:jdk15")
+	.build();
+}
+...   
+```
+
+You can also precise the extension of the artifact :
+
+```
+...	
+@Override 
+protected JkDependencies dependencies() {
+    return JkDependencies.builder()
+        .on("my.group:mymodule:1.0.1:jdk15@zip")
+        .on("my.group:otherModule:1.0.15@exe")
+	.build();
+}
+...   
+```
+
+ 
 
 
 
@@ -187,8 +252,6 @@ The whole project dependency description lie in a single instance of `JkDependen
 ```
    
 ```
-
-<br/>
 
 
 

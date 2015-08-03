@@ -1,12 +1,7 @@
 package org.jerkar.tool;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.JkDependencies;
@@ -19,14 +14,11 @@ import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkResolutionParameters;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopeMapping;
-import org.jerkar.api.depmanagement.JkScopedDependency;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -35,10 +27,6 @@ import org.jerkar.api.utils.JkUtilsString;
  * @author Jerome Angibaud
  */
 public class JkBuildDependencySupport extends JkBuild {
-
-	private static final ThreadLocal<Map<SubProjectRef, JkBuild>> SUB_PROJECT_CONTEXT =
-			new ThreadLocal<Map<SubProjectRef, JkBuild>>();
-
 
 	/**
 	 * Default path for the non managed dependencies. This path is relative to {@link #baseDir()}.
@@ -57,14 +45,7 @@ public class JkBuildDependencySupport extends JkBuild {
 	@JkDoc("Version to inject to this build. If 'null' or blank than the version will be the one returned by #version()" )
 	protected String version = null;
 
-	private final JkSlaveBuilds annotatedJkProjectSlaves;
-
-	// all slaves of this build
-	private JkSlaveBuilds slaves;
-
-	public JkBuildDependencySupport() {
-		final List<JkBuild> subBuilds = populateJkProjectAnnotatedFields();
-		this.annotatedJkProjectSlaves = JkSlaveBuilds.of(this.baseDir().root(), subBuilds);
+	protected JkBuildDependencySupport() {
 	}
 
 	/**
@@ -241,81 +222,6 @@ public class JkBuildDependencySupport extends JkBuild {
 		.withExtendedClass(JkBuildDependencySupport.class);
 	}
 
-	/**
-	 * Returns slave builds (potentially on other projects).
-	 */
-	public final JkSlaveBuilds slaves() {
-		if (slaves == null) {
-			slaves = this.annotatedJkProjectSlaves.and(projectBuildDependencies(this.effectiveDependencies()));
-		}
-		return slaves;
-
-	}
-
-	/**
-	 * Returns all build included in these dependencies.
-	 * The builds are coming from {@link BuildDependency}.
-	 */
-	private static List<JkBuild> projectBuildDependencies(JkDependencies dependencies) {
-		final List<JkBuild> result = new LinkedList<JkBuild>();
-		for (final JkScopedDependency scopedDependency : dependencies) {
-			if (scopedDependency.dependency() instanceof BuildDependency) {
-				final BuildDependency projectDependency = (BuildDependency) scopedDependency.dependency();
-				result.add(projectDependency.projectBuild());
-			}
-		}
-		return result;
-	}
-
-	@SuppressWarnings("unchecked")
-	private List<JkBuild> populateJkProjectAnnotatedFields() {
-		final List<JkBuild> result = new LinkedList<JkBuild>();
-		final List<Field> fields = JkUtilsReflect.getAllDeclaredField(this.getClass(), JkProject.class);
-		for (final Field field : fields) {
-			final JkProject jkProject = field.getAnnotation(JkProject.class);
-			final JkBuildDependencySupport subBuild = relativeProject(this, (Class<? extends JkBuildDependencySupport>) field.getType(),
-					jkProject.value());
-			JkUtilsReflect.setFieldValue(this, field, subBuild);
-			result.add(subBuild);
-		}
-		return result;
-	}
-
-	public JkBuild relativeProject(String relativePath) {
-		return relativeProject(this, null, relativePath);
-	}
-
-	private static final JkBuildDependencySupport relativeProject(JkBuildDependencySupport mainBuild, Class<? extends JkBuildDependencySupport> clazz, String relativePath) {
-		final JkBuildDependencySupport build = mainBuild.relativeProjectBuild(clazz, relativePath);
-		build.init();
-		return build;
-	}
-
-	/**
-	 * Creates an instance of <code>JkBuild</code> for the given project and build class.
-	 * The instance field annotated with <code>JkOption</code> are populated as usual.
-	 */
-	@SuppressWarnings("unchecked")
-	private final <T extends JkBuild> T relativeProjectBuild(Class<T> clazz, String relativePath) {
-		final File projectDir = this.baseDir(relativePath);
-		final SubProjectRef projectRef = new SubProjectRef(projectDir, clazz);
-		Map<SubProjectRef, JkBuild> map = SUB_PROJECT_CONTEXT.get();
-		if (map == null) {
-			map = new HashMap<JkBuildDependencySupport.SubProjectRef, JkBuild>();
-			SUB_PROJECT_CONTEXT.set(map);
-		}
-		final T cachedResult = (T) SUB_PROJECT_CONTEXT.get().get(projectRef);
-		if (cachedResult != null) {
-			return cachedResult;
-		}
-		final Project project = new Project(projectDir);
-		final T result = project.getBuild(clazz);
-		JkOptions.populateFields(result);
-		SUB_PROJECT_CONTEXT.get().put(projectRef, result);
-		return result;
-	}
-
-
 
 	public static final class JkOptionRepos {
 
@@ -355,62 +261,5 @@ public class JkBuildDependencySupport extends JkBuild {
 		return JkPgp.of(JkOptions.getAll());
 	}
 
-	private static class SubProjectRef {
-
-		final String canonicalFileName;
-
-		final Class<?> clazz;
-
-		SubProjectRef(File projectDir, Class<?> clazz) {
-			super();
-			this.canonicalFileName = JkUtilsFile.canonicalPath(projectDir);
-			this.clazz = clazz;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime
-					* result
-					+ ((canonicalFileName == null) ? 0 : canonicalFileName
-							.hashCode());
-			result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null) {
-				return false;
-			}
-			if (getClass() != obj.getClass()) {
-				return false;
-			}
-			final SubProjectRef other = (SubProjectRef) obj;
-			if (canonicalFileName == null) {
-				if (other.canonicalFileName != null) {
-					return false;
-				}
-			} else if (!canonicalFileName.equals(other.canonicalFileName)) {
-				return false;
-			}
-			if (clazz == null) {
-				if (other.clazz != null) {
-					return false;
-				}
-			} else if (!clazz.equals(other.clazz)) {
-				return false;
-			}
-			return true;
-		}
-
-
-
-
-	}
 
 }

@@ -174,30 +174,28 @@ class Project {
 		// setup plugins
 		final Class<JkBuildPlugin> baseClass = JkClassLoader.of(build.getClass()).load(JkBuildPlugin.class.getName());
 		final PluginDictionnary<JkBuildPlugin> dictionnary = PluginDictionnary.of(baseClass);
+		final List<JkBuild> slaveBuilds = build.slaves().all();
+		if (!slaveBuilds.isEmpty()) {
+			if (!commandLine.getSubProjectMethods().isEmpty()) {
+				JkLog.startHeaded("Executing slave projects");
+				for (final JkBuild subBuild : slaveBuilds) {
+					configureProjectAndRun(subBuild, commandLine.getSubProjectMethods(),
+							commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
 
-		if (build instanceof JkBuildDependencySupport) {
-			final JkBuildDependencySupport depBuild = (JkBuildDependencySupport) build;
-			if (!depBuild.slaves().all().isEmpty()) {
-				if (!commandLine.getSubProjectMethods().isEmpty()) {
-					JkLog.startHeaded("Executing slave projects");
-					for (final JkBuild subBuild : depBuild.slaves().all()) {
-						configurePluginsAndRun(subBuild, commandLine.getSubProjectMethods(),
-								commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
-
-					}
-				} else {
-					JkLog.startln("Configuring dependent projects");
-					for (final JkBuild subBuild : depBuild.slaves().all()) {
-						JkLog.startln("Configuring " + subBuild.baseDir().root().getName());
-						configureProject(subBuild,
-								commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
-						JkLog.done();
-					}
 				}
-				JkLog.done();
+			} else {
+				JkLog.startln("Configuring slave builds");
+				for (final JkBuild subBuild : slaveBuilds) {
+					JkLog.startln("Configuring " + subBuild.baseDir().root().getName());
+					configureProject(subBuild,
+							commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(), dictionnary);
+					JkLog.done();
+				}
 			}
+			JkLog.done();
 		}
-		configurePluginsAndRun(build, commandLine.getMasterMethods(),
+
+		configureProjectAndRun(build, commandLine.getMasterMethods(),
 				commandLine.getMasterPluginSetups(), commandLine.getMasterBuildOptions(), dictionnary);
 	}
 
@@ -208,7 +206,7 @@ class Project {
 		configureAndActivatePlugins(build, pluginSetups, dictionnary);
 	}
 
-	private static void configurePluginsAndRun(JkBuild build, List<MethodInvocation> invokes,
+	private static void configureProjectAndRun(JkBuild build, List<MethodInvocation> invokes,
 			Collection<JkPluginSetup> pluginSetups, Map<String, String> options,  PluginDictionnary<JkBuildPlugin> dictionnary) {
 		JkLog.startHeaded("Executing build for project " + build.baseDir().root().getName());
 		JkLog.info("Build class " + build.getClass().getName());

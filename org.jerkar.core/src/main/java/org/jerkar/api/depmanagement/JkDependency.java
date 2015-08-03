@@ -19,9 +19,6 @@ public abstract class JkDependency implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-
-
-
 	/**
 	 * Dependencies that can directly provide files without passing by an external medium.
 	 * 

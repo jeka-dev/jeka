@@ -1,5 +1,5 @@
 ## Build Configuration
-----
+----------------------
 
 Jerkar build are configurable. Build definition classes can retrieve values defined at runtime by reading :
 
@@ -107,5 +107,3 @@ For example :
 @JkDoc("Make the test run in a forked process")
 private boolean forkTests = false;
 ```
-
-<br/>
