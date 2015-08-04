@@ -155,15 +155,14 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	 */
 	public JkFileTreeSet unitTestSources() {
 		return JkJavaBuildPlugin.applyTestSourceDirs(this.plugins.getActives(),
-				unitTestEditedSources().and(unitTestGeneratedSourceDir()));
+				unitTestEditedSources());
 	}
 
 	/**
 	 * Returns location of test resources.
 	 */
 	public JkFileTreeSet unitTestResources() {
-		final JkFileTreeSet original = JkFileTreeSet.of(unitTestGeneratedSourceDir()).and(
-				unitTestSources().andFilter(RESOURCE_FILTER));
+		final JkFileTreeSet original = unitTestSources().andFilter(RESOURCE_FILTER);
 		return JkJavaBuildPlugin.applyTestResourceDirs(this.plugins.getActives(), original);
 	}
 
@@ -172,13 +171,6 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	 */
 	public File generatedSourceDir() {
 		return ouputDir("generated-sources/java");
-	}
-
-	/**
-	 * Returns location of generated unit test sources.
-	 */
-	public File unitTestGeneratedSourceDir() {
-		return ouputDir("generated-unitTest-sources/java");
 	}
 
 	/**

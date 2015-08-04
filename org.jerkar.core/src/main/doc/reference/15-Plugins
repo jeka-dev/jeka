@@ -1,0 +1,80 @@
+## Plugins
+----
+
+Jerkar provides a plugable architecture. To be precise, build templates provided with Jerkar (`org.jerkar.tool.JkBuild`, `org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin`) provides methods designed for extension point.
+Methods designed for extension point alter their behavior according plugins activated in the enclosing template.
+
+Example for `JkJavaBuild` 
+
+```
+    /**
+	 * Returns location of production source code (containing edited + generated sources).
+	 */
+	public JkFileTreeSet sources() {
+		return JkJavaBuildPlugin.applySourceDirs(this.plugins.getActives(),
+				editedSources().and(generatedSourceDir()));
+	}
+``` 
+
+And its `JkJavaBuildPlugin` class plugin :
+
+```
+    static JkFileTreeSet applySourceDirs(Iterable<? extends JkBuildPlugin> plugins, JkFileTreeSet original) {
+		JkFileTreeSet result = original;
+		for (final JkBuildPlugin plugin : plugins) {
+			result = ((JkJavaBuildPlugin) plugin).alterSourceDirs(result);
+		}
+		return result;
+	}
+	
+	/**
+	 * Override this method if the plugin need to alter the source directory to use for compiling.
+	 * 
+	 * @see JkJavaBuild#sources()
+	 */
+	protected JkFileTreeSet alterSourceDirs(JkFileTreeSet original) {
+		return original;
+	}
+```
+
+There is 2 ways for binding a plugin to a template : by declaring it inside the build class or by mention it in the command line.
+
+### Declare Plugin in Build Class
+
+The best place to declare plugin is within `#init()` method. Indeed, when this method is invoked, fields and project base directory have been yet set to proper value.
+At this point you can choose either to activate it (mean that the the plugin is always taken in account) or just configure it (in this case the plugin is taken in account only if specified in command line).
+
+To activate a plugin, just invoke `JkBuildPlugins#activate` method passing the instantiated plugin as :
+
+``` 
+@Override
+	protected void init() {
+		JkBuildPluginSonar sonarPlugin = new JkBuildPluginSonar()
+			.prop(JkSonar.HOST_URL, sonarEnv.url)
+			.prop(JkSonar.BRANCH, "myBranch");
+		JkBuildPluginJacoco pluginJacoco = new JkBuildPluginJacoco();
+		this.plugins.activate(sonarPlugin);
+	}
+``` 
+
+Here, the SonarQube plugin is active at each build. When activated, this plugin launches a SonarQube analysis when the `verify` method is invoked on the `JkBuild` instance.
+
+But in this case :
+
+``` 
+@Override
+	protected void init() {
+		JkBuildPluginSonar sonarPlugin = new JkBuildPluginSonar()
+			.prop(JkSonar.HOST_URL, sonarEnv.url)
+			.prop(JkSonar.BRANCH, "myBranch");
+		JkBuildPluginJacoco pluginJacoco = new JkBuildPluginJacoco();
+		this.plugins.configure(sonarPlugin);
+	}
+``` 
+
+the SonarQube plugin is not activated unless you specify `#sonar` in the command line (see below).
+
+### Mention plugin in the Command Line
+
+You can both configure plugin, activate plugin and invoke plugin methods from the command line without declaring anything in the build definition files.
+
