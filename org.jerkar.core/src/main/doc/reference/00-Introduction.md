@@ -7,9 +7,9 @@ This document stands for reference guide and provides details about Jerkar behav
 
 * To get a step-by-step learning guide, please visit [__tutorial__](http://jerkar.github.io/documentation/latest/getting-started.html).
 
-If you are looking for how exactly Jerkar behaves or you want to get a pretty exhaustive list of Jerkar features, you are in the right document.
+If you are looking for how exactly Jerkar behaves or you want to get a pretty exhaustive list of Jerkar features, you are in the right place.
 
-However, a document can not replace a source code or API for exhaustion, so please please consult [__javadoc__](http://jerkar.github.io/javadoc/latest/index.html) or browse [__source code__](https://github.com/jerkar/jerkar/tree/master/org.jerkar.core) to get deeper knowledge. 
+However, a document can not replace a source code or API for exhaustion, so please consult [__javadoc__](http://jerkar.github.io/javadoc/latest/index.html) or browse [__source code__](https://github.com/jerkar/jerkar/tree/master/org.jerkar.core) to get deeper knowledge. 
 
 Also, you're welcome to raise an issue in Git-hub for requesting an improvement on documentation.
 

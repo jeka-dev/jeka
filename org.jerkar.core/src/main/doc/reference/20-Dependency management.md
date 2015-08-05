@@ -21,7 +21,7 @@ For the last, Jerkar is using <b>Ivy 2.4.0</b> under the hood. The library is em
 
 Projects may need dependencies to accomplish certain tasks and needed dependencies may vary according the executed tasks.
 For example, to __compile__ you may need _guava_ library only but to __test__ you'll need _junit_ library as well. 
-To segregate dependencies according their usage, Jerkar uses the notion of __scope__ (embodied by `JkScope` class). This notion is similar to the Maven scope.
+To label dependencies according their usage, Jerkar uses the notion of __scope__ (embodied by `JkScope` class). This notion is similar to the Maven scope.
 
 Scopes can __inherit__ from each other. This means that if a scope _Foo_ inherits from scope _Bar_ then a dependencies declared with scope _Bar_ will be also considered as declared with scope _Foo_.
 For instance, in `JkJavaBuild`, scope `TEST` inherits from `RUNTIME` that inherits from `COMPILE` so every dependencies declared with scope `COMPILE` are considered to be declared with scope `RUNTIME` and `TEST` as well.   
@@ -29,7 +29,7 @@ For instance, in `JkJavaBuild`, scope `TEST` inherits from `RUNTIME` that inheri
 By default, scopes are __transitive__. This has only a meaning for __reference to module__. 
 If we have 3 modules having the following dependency scheme : `A` -> `B` -> `C` and the `A`-> `B` dependency is declared with a __non transitive scope__, then `A` won't depend from `C`. 
 
-Projects consuming artifacts coming from Ivy repository can also use `JkScopeMapping` which is more powerfull. This notion maps strictly to the [Ivy configuration](http://ant.apache.org/ivy/history/2.2.0/ivyfile/configurations.html) concept.
+Projects consuming artifacts coming from Ivy repository can also use `JkScopeMapping` which is more powerful. This notion maps strictly to the [Ivy configuration](http://ant.apache.org/ivy/history/2.2.0/ivyfile/configurations.html) concept.
   
   
 ### Define dependencies for a project
@@ -95,8 +95,7 @@ Now get focus on each type of dependency we can declare.
 
 ##### Dependency on arbitrary files
 
-You just have to mention the path of a file. If the file does not exist at resolution time (when the dependency is actually retrieved) the build fails.
-You can declare many files for one dependency.
+You just have to mention the path of one or several files. If one of the files does not exist at resolution time (when the dependency is actually retrieved), build fails.
 
 ```
     final File depFile1 = new File("/my/file1.jar");
@@ -116,12 +115,12 @@ You can declare many files for one dependency.
 It is typically used for __multi projects builds__ or __multi module__ projects.
 
 The principle is that if the specified files are not found, then the computation is run in order to generate the missing files.
-If some files still missing after the computation run, the build fails (an exception is thrown).
+If some files still missing after the computation has run, the build fails.
 
-This mechanism is quite simple yet powerfull as it allows to adress following use case :
+This mechanism is quite simple yet powerful as it addresses following use case :
 
-* Dependency on files produced by other Jerkar project
-* Dependency on files produced by external project built with any type of techno (Ant, Grunt, Maven, Gradle, SBT, Android SDK, Make, ...)
+* Dependency on files produced by other Jerkar project.
+* Dependency on files produced by external project built with any type of technology (Ant, Grunt, Maven, Gradle, SBT, Android SDK, Make, ...).
 * Dependency on files produced by a method of the main build.   
 
 The generic way is to construct this kind of dependency using a `java.lang.Runnable`.
@@ -139,7 +138,7 @@ return JkDependencies.builder()
 ```
 Here, if the _fooFile_ is absent then the __computation__ will be run prior to retry to find _FooFile_.
 
-Jerkar provides some shortcuts to deal with other Jerkar projects : For this, you can create the dependency directly from the dependee build instance. 
+Jerkar provides some shortcuts to deal with other Jerkar projects : For this, you can create the dependency directly from the slave build instance. 
 
 ```
 @JkProject("../foo")          // The external project path relative to the current project root
@@ -153,7 +152,7 @@ protected JkDependencies dependencies() {
 }
 ```
 Here the method `doPack` of `fooBuild` will be invoked if the specified file does not exist.
-See _Multi Module Project_ to get details how parameters are propagated to dependee builds.
+See _Multi Module Project_ to get details how parameters are propagated to slave builds.
 
 You can also use another kind of project mentioning the command line to run in order to build the project.
  
@@ -169,7 +168,7 @@ protected JkDependencies dependencies() {
     .build();
 }
 ```
-Here, if _fooJar_ file does not exist the `ant makeJar` command line will be invoked prior to retry to find the file.
+Here, if _fooJar_ file does not exist, `ant makeJar` command line is invoked prior to retry to find the file.
 If the file still does not exist then the build fails.
 
 
@@ -179,7 +178,7 @@ This is for declaring a dependency on module hosted in _Maven_ or _Ivy_ reposito
 
 ```
 ...	
-@Override  // Optional :  needless if you use only local dependencies
+@Override  
 protected JkDependencies dependencies() {
     return JkDependencies.builder()
         .on(GUAVA, "18.0")
@@ -189,10 +188,9 @@ protected JkDependencies dependencies() {
 }
 ...   
 ```
-There is many way to indicate the dependee modules, see [Javadoc](http://jerkar.github.io/javadoc/latest/index.html?org/jerkar/api/depmanagement/JkModuleDependency.html) for browsing possibilities. 
+There is many way to indicate a module dependency, see [Javadoc](http://jerkar.github.io/javadoc/latest/index.html?org/jerkar/api/depmanagement/JkModuleDependency.html) for browsing possibilities. 
 
-Note that a version ending by `-SNAPSHOT` has a special meaning, Jerkar will consider it _changing_ meaning that it won't cache it locally and will 
-download the latest version.  
+Note that a version ending by `-SNAPSHOT` has a special meaning : Jerkar will consider it _"changing"_. This means that it won't cache it locally and will download the latest version from repository.  
 
 ###### Dependencies on Dynamic Versions
 
