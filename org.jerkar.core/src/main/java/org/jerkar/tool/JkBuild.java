@@ -278,6 +278,10 @@ public class JkBuild {
 		return this.annotatedJkProjectSlaves;
 	}
 
+	protected final JkSlaveBuilds annotatedJkProjectSlaves() {
+		return this.annotatedJkProjectSlaves;
+	}
+
 
 	@SuppressWarnings("unchecked")
 	private List<JkBuild> populateJkProjectAnnotatedFields() {

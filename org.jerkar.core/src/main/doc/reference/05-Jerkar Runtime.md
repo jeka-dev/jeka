@@ -37,8 +37,8 @@ It processes as follow :
 3. Pre-process and compile build definition files (see <strong>Build Definition Compilation</strong>). 
 4. Instantiate the build class (see <strong>Build Class Instantiation</strong>)
 5. Inject options in build instance fields along the project root directory (see <strong>Build Configuration</strong>).
-6. Call the `init()` method on the build instance. This is the place to set location related variable and to configure plugins. 
-7. Instantiate and configure plugins specified in command line arguments.
+6. Call the `init()` method on the build instance. This is the place to set location related variable and to configure plugins (see <strong>Plugins</strong>). 
+7. Instantiate and configure plugins specified in command line arguments (see <strong>Mention Plugins in the Command Line</strong>).
 8. Invoke methods specified in command line arguments : methods are executed in the order they appear on the command line.
 
 #### Build Definition File Compilation

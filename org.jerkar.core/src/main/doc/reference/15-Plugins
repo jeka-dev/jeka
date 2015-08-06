@@ -78,7 +78,7 @@ protected void init() {
 
 SonarQube plugin is not activated unless you specify `#sonar` in the command line (see below).
 
-### Mention plugin in the Command Line
+### Mention Plugins in the Command Line
 
 You can both configure plugin, activate plugin and invoke plugin methods from the command line without declaring anything in the build definition files.
 
