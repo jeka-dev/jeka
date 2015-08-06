@@ -3,13 +3,13 @@
 
 Jerkar proposes 2 ways to deal with multi-project builds : 
 
-* By using computed dependencies (see <strong>Dependency Managemment / Dependency on files produced by computation </strong>).
-* By defining slave builds. This is what is developed in this section.
+* By using computed dependencies (see <strong>Dependency Managemment</strong>).
+* By defining slave builds. This sections focus on this way.
 
 ### Principle
 
 A build class (master build) declares its slave builds. The slave builds can be triggered individually or all-in-one from the master build.
-The slave builds are not aware they are used as slave. In fact any build can be used as slave.
+The slave builds are not aware they are slave. In fact any build can be used as slave. The relation is uni-directional 
 
 `JkBuild` declare a method `#slaves()` returning the slaves of its instances (embodied as `org.jerkar.tool.JkSlaveBuilds`). Naturally this result is recursive as it contains 
 slaves of the slaves and so on ...
