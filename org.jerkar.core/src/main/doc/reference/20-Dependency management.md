@@ -239,17 +239,69 @@ protected JkDependencies dependencies() {
 ```
 
  
-
-
-
-
-### Bind dependencies to scope
+### Bind Dependencies to Scopes
 
 The whole project dependency description lie in a single instance of `JkDependencies`. This class offers convenient factory methods and builder to define the dependencies.
 
+#### Simple scopes
+
+You can bind any kind of dependency to on one or several scopes as :
+
 ```
-   
+private static final JkScope FOO = JkScope.of("foo"); 
+
+private static final JkScope BAR = JkScope.of("bar"); 
+
+protected JkDependencies dependencies() {
+		return JkDependencies.builder()
+		    .on(file("libs/foo3.jar")).scope(BAR)  
+		    .on(file("libs/foo1.jar")).scope(BAR, FOO)  
+			.on("com.foo:barcomp", "1.19").scope(BAR, FOO)  
+			.on("com.google.guava:guava, "18.0")
+		.build();
+}
 ```
+
+When the dependency is a __module dependency__, transitive resolution comes in play and more subtle concepts appear.
+For resolving __module dependency__ Jerkar uses [__Ivy__](http://ant.apache.org/ivy/) under the cover and scopes are translated to Ivy [_configurations_](http://ant.apache.org/ivy/history/latest-milestone/tutorial/conf.html).
+ 
+So the above module dependencies are translated to Ivy equivalent :
+
+```
+...
+<dependency org="org.foo" name="barcomp" rev="1.19" conf="bar;foo"/>
+<dependency org="com.google.guava" name="guava" rev="18.0"/>
+```
+
+#### Scope Mapping
+
+You can also specify a _scope mapping_ (aka _Ivy configuration mapping_) for __module dependencies__ :
+
+```
+protected JkDependencies dependencies() {
+		return JkDependencies.builder()
+			.on("com.foo:barcomp", "1.19")
+				.mapScope(COMPILE).to(RUNTIME, BAR)
+				.and(FOO, PROVIDED).to("fish", "master(*)")
+		.build();
+}
+```
+So the above module dependencies are translated to Ivy equivalent :
+
+```
+...
+<dependency org="org.foo" name="barcomp" rev="1.19" conf="compile->runtime,bar; foo->fish,master(*); provided->fish,master(*)"/>
+```
+
+
+#### Default Scope and Default Scope Mapping
+
+The way transitive dependencies are actually resolved depends on the `JkDependencyResolver` used for resolution. 
+Indeed you can set _default scope_ and _default scope mapping_ on the resolver. This two settings ends at being translated to respectively _Ivy configuration_ and _Ivy configuration mapping_.
+[This page](http://ant.apache.org/ivy/history/2.2.0/ivyfile/configurations.html) explains how _Ivy configurations_ works.
+
+... TODO : code sample
+
 
 
 

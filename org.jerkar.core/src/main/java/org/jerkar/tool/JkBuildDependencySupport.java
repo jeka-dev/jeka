@@ -214,7 +214,7 @@ public class JkBuildDependencySupport extends JkBuild {
 
 			@Override
 			public void run() {
-				final File spec = baseDir(JkConstants.BUILD_DEF_DIR);
+				final File spec = file(JkConstants.BUILD_DEF_DIR);
 				final String packageName = moduleId().group().replace('.', '/');
 				new File(spec, packageName).mkdirs();
 			}

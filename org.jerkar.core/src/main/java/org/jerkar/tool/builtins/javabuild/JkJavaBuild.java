@@ -116,14 +116,14 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	 * Returns the location of production source code that has been edited manually (not generated).
 	 */
 	public JkFileTreeSet editedSources() {
-		return JkFileTreeSet.of(baseDir("src/main/java"));
+		return JkFileTreeSet.of(file("src/main/java"));
 	}
 
 	/**
 	 * Returns the location of unit test source code that has been edited manually (not generated).
 	 */
 	public JkFileTreeSet unitTestEditedSources() {
-		return JkFileTreeSet.of(baseDir("src/test/java"));
+		return JkFileTreeSet.of(file("src/test/java"));
 	}
 
 	/**
@@ -138,7 +138,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	 * Returns the location of production resources that has been edited manually (not generated).
 	 */
 	public JkFileTreeSet editedResources() {
-		return JkFileTreeSet.of(baseDir("src/main/resources"));
+		return JkFileTreeSet.of(file("src/main/resources"));
 	}
 
 	/**
@@ -486,7 +486,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 	@Override
 	protected JkDependencies implicitDependencies() {
-		final JkFileTree libDir = JkFileTree.of(baseDir(STD_LIB_PATH));
+		final JkFileTree libDir = JkFileTree.of(file(STD_LIB_PATH));
 		if (!libDir.root().exists()) {
 			return super.implicitDependencies();
 		}

@@ -36,7 +36,7 @@ public class JkBuildPluginWar extends JkJavaBuildPlugin {
 	}
 
 	private File webappSrcFile() {
-		return build.baseDir(webappSrc);
+		return build.file(webappSrc);
 	}
 
 	@Override
@@ -78,7 +78,7 @@ public class JkBuildPluginWar extends JkJavaBuildPlugin {
 	}
 
 	private void scaffold() {
-		final File webInf = this.build.baseDir(webappSrc + "/WEB-INF");
+		final File webInf = this.build.file(webappSrc + "/WEB-INF");
 		webInf.mkdirs();
 		try {
 			final File webxml = new File(webInf, "web.xml");

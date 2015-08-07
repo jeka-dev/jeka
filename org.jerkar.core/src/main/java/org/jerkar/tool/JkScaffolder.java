@@ -83,7 +83,7 @@ public class JkScaffolder {
 
 
 	public void process() {
-		final File buildDefDir = build.baseDir(JkConstants.BUILD_DEF_DIR);
+		final File buildDefDir = build.file(JkConstants.BUILD_DEF_DIR);
 		buildDefDir.mkdirs();
 		final Map<String, String> values = new HashMap<String, String>();
 		values.put("extraImports", lines(JkUtilsIterable.withoutDoubloons(this.extraImports),""));

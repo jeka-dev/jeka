@@ -331,7 +331,7 @@ final class DotClasspath {
 		writer.writeCharacters("\n");
 
 		// Build sources
-		if (build.baseDir(JkConstants.BUILD_DEF_DIR).exists()) {
+		if (build.file(JkConstants.BUILD_DEF_DIR).exists()) {
 			writer.writeCharacters("\t");
 			writer.writeEmptyElement(CLASSPATHENTRY);
 			writer.writeAttribute("kind", "src");
@@ -420,7 +420,7 @@ final class DotClasspath {
 			if (!jkFileTree.root().exists() ) {
 				continue;
 			}
-			final String path = JkUtilsFile.getRelativePath(build.baseDir(""), jkFileTree.root())
+			final String path = JkUtilsFile.getRelativePath(build.file(""), jkFileTree.root())
 					.replace(File.separator,  "/");
 			if (sourcePaths.contains(path)) {
 				continue;
@@ -439,7 +439,7 @@ final class DotClasspath {
 			if (!jkFileTree.root().exists() ) {
 				continue;
 			}
-			final String path = JkUtilsFile.getRelativePath(build.baseDir(""), jkFileTree.root())
+			final String path = JkUtilsFile.getRelativePath(build.file(""), jkFileTree.root())
 					.replace(File.separator,  "/");
 			if (sourcePaths.contains(path)) {
 				continue;
@@ -448,7 +448,7 @@ final class DotClasspath {
 			writer.writeCharacters("\t");
 			writer.writeEmptyElement(CLASSPATHENTRY);
 			writer.writeAttribute("kind", "src");
-			writer.writeAttribute("output", JkUtilsFile.getRelativePath(build.baseDir(""),
+			writer.writeAttribute("output", JkUtilsFile.getRelativePath(build.file(""),
 					build.testClassDir()).replace(File.separator, "/"));
 			writer.writeAttribute("path", path);
 			writer.writeCharacters("\n");

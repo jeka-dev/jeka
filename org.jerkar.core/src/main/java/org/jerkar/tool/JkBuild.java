@@ -97,7 +97,7 @@ public class JkBuild {
 
 			@Override
 			public void run() {
-				final File spec = baseDir(JkConstants.BUILD_DEF_DIR);
+				final File spec = file(JkConstants.BUILD_DEF_DIR);
 				spec.mkdirs();
 			}
 		})
@@ -176,7 +176,7 @@ public class JkBuild {
 	/**
 	 * Returns a file located at the specified path relative to the base directory.
 	 */
-	public final File baseDir(String relativePath) {
+	public final File file(String relativePath) {
 		if (relativePath.isEmpty()) {
 			return baseDir().root();
 		}
@@ -313,7 +313,7 @@ public class JkBuild {
 	 */
 	@SuppressWarnings("unchecked")
 	private final <T extends JkBuild> T relativeProjectBuild(Class<T> clazz, String relativePath) {
-		final File projectDir = this.baseDir(relativePath);
+		final File projectDir = this.file(relativePath);
 		final SubProjectRef projectRef = new SubProjectRef(projectDir, clazz);
 		Map<SubProjectRef, JkBuild> map = SUB_PROJECT_CONTEXT.get();
 		if (map == null) {

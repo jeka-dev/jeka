@@ -32,7 +32,7 @@ public class JkBuildPluginSonar extends JkJavaBuildPlugin {
                 .withLibraries(libs)
                 .withSources(build.editedSources().roots())
                 .withTest(build.unitTestSources().roots())
-                .withProperty(JkSonar.WORKING_DIRECTORY, build.baseDir("build/.sonar").getPath())
+                .withProperty(JkSonar.WORKING_DIRECTORY, build.file("build/.sonar").getPath())
                 .withProperty(JkSonar.JUNIT_REPORTS_PATH, JkUtilsFile.getRelativePath(baseDir, new File(build.testReportDir(), "junit")))
                 .withProperty(JkSonar.SUREFIRE_REPORTS_PATH, JkUtilsFile.getRelativePath(baseDir, new File(build.testReportDir(), "junit")))
                 //.withProperty(JkSonar.DYNAMIC_ANALYSIS, "reuseReports")

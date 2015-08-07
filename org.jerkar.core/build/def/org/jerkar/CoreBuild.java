@@ -51,13 +51,13 @@ public class CoreBuild extends AbstractBuild {
 	private void distrib() {
 		final JkFileTree distrib = JkFileTree.of(distribFolder);
 		JkLog.startln("Creating distrib " + distripZipFile.getPath());
-		distrib.importFiles(baseDir("../LICENSE"));
+		distrib.importFiles(file("../LICENSE"));
 		final JkJavaPacker packer = packer();
-		distrib.importDirContent(baseDir("src/main/dist"));
+		distrib.importDirContent(file("src/main/dist"));
 
 		// Simpler to put both Jerkar and Jerkar-fat jar at the root (in order to find the Jerker HOME)
 		distrib.importFiles(packer.jarFile());
-		distrib.from("libs-sources").importDirContent(baseDir("build/libs-sources"))
+		distrib.from("libs-sources").importDirContent(file("build/libs-sources"))
 		.importFiles(packer.jarSourceFile());
 		distrib.from("libs-javadoc").importFiles(this.javadocMaker().zipFile());
 		distrib.zip().to(distripZipFile, Deflater.BEST_COMPRESSION);

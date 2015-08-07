@@ -63,7 +63,7 @@ class Lib {
 				// Get the exported entry as well
 				final JkBuildPluginEclipse pluginEclipse = slaveBuild.pluginOf(JkBuildPluginEclipse.class);
 				if (pluginEclipse != null) {
-					final File dotClasspathFile = slaveBuild.baseDir(".classpath");
+					final File dotClasspathFile = slaveBuild.file(".classpath");
 					final DotClasspath dotClasspath = DotClasspath.from(dotClasspathFile);
 					final List<Lib> sublibs = new ArrayList<Lib>();
 					for (final Lib sublib : dotClasspath.libs(slaveBuild.baseDir().root(), scopeSegregator)) {

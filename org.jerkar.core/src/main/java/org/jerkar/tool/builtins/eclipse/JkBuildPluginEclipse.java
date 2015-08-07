@@ -46,7 +46,7 @@ public class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 
 	@JkDoc("Generates Eclipse .classpath file according project dependencies.")
 	public void generateFiles() {
-		final File dotClasspathFile = this.javaBuild.baseDir(".classpath");
+		final File dotClasspathFile = this.javaBuild.file(".classpath");
 		try {
 			DotClasspath.generate(this.javaBuild, dotClasspathFile, jreContainer);
 		} catch (final RuntimeException e) {
@@ -54,7 +54,7 @@ public class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
-		final File dotProject = this.javaBuild.baseDir(".project");
+		final File dotProject = this.javaBuild.file(".project");
 		if (!dotProject.exists()) {
 			Project.ofJavaNature(this.javaBuild().moduleId().fullName()).writeTo(dotProject);
 		}
@@ -63,25 +63,25 @@ public class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 	@Override
 	public JkFileTreeSet alterSourceDirs(JkFileTreeSet original) {
 		final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
-		return dotClasspath().sourceDirs(javaBuild.baseDir(""), segregator).prodSources;
+		return dotClasspath().sourceDirs(javaBuild.file(""), segregator).prodSources;
 	}
 
 	@Override
 	public JkFileTreeSet alterTestSourceDirs(JkFileTreeSet original) {
 		final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
-		return dotClasspath().sourceDirs(javaBuild.baseDir(""), segregator).testSources;
+		return dotClasspath().sourceDirs(javaBuild.file(""), segregator).testSources;
 	}
 
 	@Override
 	public JkFileTreeSet alterResourceDirs(JkFileTreeSet original) {
 		final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
-		return dotClasspath().sourceDirs(javaBuild.baseDir(""), segregator).prodSources.andFilter(JkJavaBuild.RESOURCE_FILTER);
+		return dotClasspath().sourceDirs(javaBuild.file(""), segregator).prodSources.andFilter(JkJavaBuild.RESOURCE_FILTER);
 	}
 
 	@Override
 	public JkFileTreeSet alterTestResourceDirs(JkFileTreeSet original) {
 		final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
-		return dotClasspath().sourceDirs(javaBuild.baseDir(""), segregator).testSources.andFilter(JkJavaBuild.RESOURCE_FILTER);
+		return dotClasspath().sourceDirs(javaBuild.file(""), segregator).testSources.andFilter(JkJavaBuild.RESOURCE_FILTER);
 	}
 
 	@Override
@@ -104,7 +104,7 @@ public class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 
 	private DotClasspath dotClasspath() {
 		if (cachedClasspath == null) {
-			final File dotClasspathFile = new File(javaBuild.baseDir(""), ".classpath");
+			final File dotClasspathFile = new File(javaBuild.file(""), ".classpath");
 			if (!dotClasspathFile.exists()) {
 				throw new JkException(".classpath file not found");
 			}

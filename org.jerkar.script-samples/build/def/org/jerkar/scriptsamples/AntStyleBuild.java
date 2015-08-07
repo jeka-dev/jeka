@@ -18,8 +18,8 @@ import org.jerkar.tool.JkBuild;
  */
 public class AntStyleBuild extends JkBuild {
 	
-	File src = baseDir("src/main/java");
-	File buildDir = baseDir("build/output");
+	File src = file("src/main/java");
+	File buildDir = file("build/output");
 	File classDir = new File(buildDir, "classes");
 	File jarFile = new File(buildDir, "jar/" + this.baseDir().root().getName() + ".jar");
 	String className = "my.mainClass";
