@@ -22,8 +22,8 @@ Jerkar builds itself. To get Jerkar full distrib built from the Java sources onl
 
 # Status
 
-The documentation is at early stage but the code is yet pretty close to completion for a first release. 
-I mainly need help for further testing, writing documentation, polishing the API... and getting some feedback of course.
+Both documentation and code are pretty close to completion for a first release (expecting 2015 Q4) but the product is currently quite usable.
+I mainly need help for further testing and providing some feedback.
 
 # Code guidelines
 
