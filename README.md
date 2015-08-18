@@ -16,7 +16,7 @@ Jerkar builds itself. To get Jerkar full distrib built from the Java sources onl
 * Create a Java Application run configuration (Run Configuration ... -> Java Application -> new)
     * Make sure that the Runtime JRE is a JDK (6 or above)
     * Choose `org.jerkar.distrib-all` as project
-    * Choose `org.jerkar.Main` as Main class
+    * Choose `org.jerkar.tool.Main` as Main class
 * Run it : It will launch a multi-project build. You will find result for the full distrib in *org.jerkar.distrib-all/build/output* directory 
 
 
