@@ -16,20 +16,20 @@ Jerkar builds itself. To get Jerkar full distrib built from the Java sources onl
 * Create a Java Application run configuration (Run Configuration ... -> Java Application -> new)
     * Make sure that the Runtime JRE is a JDK (6 or above)
     * Choose `org.jerkar.distrib-all` as project
-    * Choose `org.jerkar.Main` as Main class
+    * Choose `org.jerkar.tool.Main` as Main class
 * Run it : It will launch a multi-project build. You will find result for the full distrib in *org.jerkar.distrib-all/build/output* directory 
 
 
 # Status
 
-The documentation is at early stage but the code is yet pretty close to completion for a first release. 
-I mainly need help for further testing, writing documentation, polishing the API... and getting some feedback of course.
+Both documentation and code are close to completion and the product is now quite usable. I am currently writing the documentation along polishing the API. This is the last step prior the first release expected Q4 2015.
+I mainly need help for further testing and providing feedback.
 
 # Code guidelines
 
 In a nutshell : try to mimick the current style :-)
-* Make a class public only when really needed. If a class is public, it should be prefixed with `Jk` (The goal is to not polute auto-completion in Eclipse).
+* Make a class public only when really needed. If a class is public, it should be prefixed with `Jk` (The goal is to not polute auto-completion in IDE when Jerkar is on the build path).
 * Favor immutable objects.
 * Embrace a fluent style API (so stay away from JavaBean coding conventions).
 * Don't use 3rd party dependencies (Use or enrich JkUtilsXxxxx classes for commons). 
-* Make your code JDK6 complient
+* Make your code JDK6 complient (probably switch to JDK 7 soon).
