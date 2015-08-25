@@ -32,12 +32,13 @@ If we have 3 modules having the following dependency scheme : `A` -> `B` -> `C` 
 Projects consuming artifacts coming from Ivy repository can also use `JkScopeMapping` which is more powerful. This notion maps strictly to the [Ivy configuration](http://ant.apache.org/ivy/history/2.2.0/ivyfile/configurations.html) concept.
   
   
-### Define dependencies for a project
+### Define a set of dependencies
 
-To define dependencies of a project, you basically define a list of __scoped dependency__ (embodied by `JkScopedDependency`).
-A __scoped dependency__ is a __dependency__ associated with one or several __scopes__.
+To define a set dependencies (typically the dependencies of the project to build), you basically define a list of __scoped dependency__ (embodied by `JkScopedDependency`). A __scoped dependency__ is a __dependency__ associated with one or several __scopes__.
 
-So practically, you define some scopes then you bind dependencies to these scopes.
+Practically, you define some scopes then you bind dependencies to these scopes.
+
+The set of dependency concept is embodied by `JkDependencies` class. This class provides builder for easier instantiation. 
 
 ```Java
 return JkDependencies.builder()
@@ -62,6 +63,8 @@ JkDependencies deps = JkDependencies.builder()
 ...
 deps = deps.withDefaultScope(COMPILE);
 ```
+
+Instances of `JkDependencies` can be added to each other.
 
 Look at the [JkDepencies class API](http://jerkar.github.io/javadoc/latest/org/jerkar/api/depmanagement/JkDependencies.html) to get see all possibilities.
 
@@ -297,10 +300,9 @@ So the above module dependencies are translated to Ivy equivalent :
 #### Default Scope and Default Scope Mapping
 
 The way transitive dependencies are actually resolved depends on the `JkDependencyResolver` used for resolution. 
-Indeed you can set _default scope_ and _default scope mapping_ on the resolver. This two settings ends at being translated to respectively _Ivy configuration_ and _Ivy configuration mapping_.
+Indeed you can set _default scope_ and _default scope mapping_ on the resolver, through `JkResolutionParameter`. This two settings ends at being translated to respectively _Ivy configuration_ and _Ivy configuration mapping_.
 [This page](http://ant.apache.org/ivy/history/2.2.0/ivyfile/configurations.html) explains how _Ivy configurations_ works.
 
-... TODO : code sample
 
 
 

@@ -11,8 +11,7 @@ Jerkar proposes 2 ways to deal with multi-project builds :
 A build class (master build) declares its slave builds. The slave builds can be triggered individually or all-in-one from the master build.
 The slave builds are not aware they are slave. In fact any build can be used as slave. The relation is uni-directional 
 
-`JkBuild` declare a method `#slaves()` returning the slaves of its instances (embodied as `org.jerkar.tool.JkSlaveBuilds`). Naturally this result is recursive as it contains 
-slaves of the slaves and so on ...
+`JkBuild` declare a method `#slaves()` returning the slaves of its instances (embodied as `org.jerkar.tool.JkSlaveBuilds`). Naturally this result is recursive as it contains slaves of the slaves and so on ...
 
 From this result you can invoke a method for all slaves as `slaves().invokeOnAll("clean")`. The iteration order ensure that an invokation on a build can not be done until all its slaves has been invoked first.  
 
@@ -20,7 +19,7 @@ Also from the command line you can invoke a method or set an option either for t
 
 ### Declare Slave Builds
 
-By default the `#slaves()` methods all the `JkBuild` instance declared as field and annotated with `@JkProject`. You modify this behavior by overriding this method.
+By default the `#slaves()` method returns all the `JkBuild` instance declared as field and annotated with `@JkProject`. You can modify this behavior by overriding this method.
 
 This is an example of how to declare external build with `@JkProject` annotation.
 
@@ -34,8 +33,6 @@ public class DistribAllBuild extends JkBuildDependencySupport {
 	PluginsJacocoBuild pluginsJacoco;
 	
 ```
-
-If you don't override `JkBuild#slaves()` method, the `@JkProject` annotated fields are considered as slaves.
 
 ### Invoke Slave Methods from Master Build Code
 
@@ -56,6 +53,8 @@ If a slave build do not have such a method, the build does not fail but warns it
 When mentioning an option on the command line, only the master build try to inject its corresponding field with the option value.
 
 If you want to inject option field on the slave build as well, just append a `*` at the end of the option declaration as `jerkar aField=myValue*`.
-In this case, for all builds (either master or slaves) `myValue` will be injected on their `aField` field if they have one. 
 
 If a build don't have such field, the injection simply does not happen and the build does not fail.
+
+Note that `JkOptions` class is shared among master and slave builds so slave builds can have access to master options by using its static methods.
+

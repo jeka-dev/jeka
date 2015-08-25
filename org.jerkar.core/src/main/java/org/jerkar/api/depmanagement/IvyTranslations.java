@@ -115,6 +115,7 @@ final class IvyTranslations {
 				result.addDependencyConfiguration(DEFAULT_CONFIGURATION.name(), defaultScope.name());
 			}
 		}
+
 		return result;
 	}
 

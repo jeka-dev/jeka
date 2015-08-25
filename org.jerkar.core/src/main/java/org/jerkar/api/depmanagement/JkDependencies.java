@@ -25,24 +25,29 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
 	private static final long serialVersionUID = 1L;
 
+	@SuppressWarnings("unchecked")
 	public static JkDependencies on(JkScopedDependency... scopedDependencies) {
-		return new JkDependencies(Arrays.asList(scopedDependencies));
+		return new JkDependencies(Arrays.asList(scopedDependencies), Collections.EMPTY_SET);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static JkDependencies on(JkScope scope, JkDependency ... dependencies) {
 		final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();
 		for (final JkDependency dependency : dependencies) {
 			final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scope);
 			list.add(scopedDependency);
 		}
-		return new JkDependencies(list);
+		return new JkDependencies(list, Collections.EMPTY_SET);
 	}
 
 	private final List<JkScopedDependency> dependencies;
 
-	private JkDependencies(List<JkScopedDependency> dependencies) {
+	private final Set<JkDepExclude> depExcludes;
+
+	private JkDependencies(List<JkScopedDependency> dependencies, Set<JkDepExclude> excludes) {
 		super();
-		this.dependencies = Collections.unmodifiableList(new LinkedList<JkScopedDependency>(dependencies));
+		this.dependencies = Collections.unmodifiableList(dependencies);
+		this.depExcludes = Collections.unmodifiableSet(excludes);
 	}
 
 	/**
@@ -56,7 +61,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	 * Returns a clone of this object minus the dependencies on the given {@link JkModuleId}.
 	 * This is used to exclude a given module from all scope.
 	 */
-	public JkDependencies without(JkModuleId jkModuleId) {
+	private JkDependencies without(JkModuleId jkModuleId) {
 		final List<JkScopedDependency> result = new LinkedList<JkScopedDependency>(dependencies);
 		for (final Iterator<JkScopedDependency> it = result.iterator(); it.hasNext();) {
 			final JkDependency dependency = it.next().dependency();
@@ -67,7 +72,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 				}
 			}
 		}
-		return new JkDependencies(result);
+		return new JkDependencies(result, this.depExcludes);
 	}
 
 	/**
@@ -82,7 +87,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			}
 			list.add(dep);
 		}
-		return new JkDependencies(list);
+		return new JkDependencies(list, this.depExcludes);
 	}
 
 	/**
@@ -202,8 +207,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
 	/**
 	 * Returns <code>true</code> if this object contains dependency on external module whose rely
-	 * on dynamic version. It can be either dynamic version has defined by Ivy (as "1.3.+", "[1.0, 2.0[" ,...)
-	 * or snapshot version as defined in Maven (as "1.0-SNAPSHOT).
+	 * on dynamic version. It can be either dynamic version as "1.3.+", "[1.0, 2.0[" ,... or snapshot
+	 * version as defined in Maven (as "1.0-SNAPSHOT).
 	 */
 	public boolean hasDynamicVersions() {
 		for (final JkScopedDependency scopedDependency : this) {
@@ -221,7 +226,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	/**
 	 * Returns <code>true</code> if this object contains dependency on external module whose rely
 	 * on dynamic version that are resolvable (Maven Snapshot versions are dynamic but not resolvable).
-	 * It only stands for dynamic versions has defined by Ivy (as "1.3.+", "[1.0, 2.0[" ,...).
+	 * It only stands for dynamic versions as "1.3.+", "[1.0, 2.0[" ,...
 	 * If so, when resolving, dynamic versions are replaced by fixed resolved ones.
 	 */
 	public boolean hasDynamicAndResovableVersions() {
@@ -304,6 +309,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
 		protected final LinkedList<JkScopedDependency> dependencies;
 
+		protected final Set<JkDepExclude> depExcludes;
+
 		protected Set<JkScope> defaultScopes;
 
 		protected JkScopeMapping defaultMapping;
@@ -311,6 +318,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		protected Builder(LinkedList<JkScopedDependency> dependencies) {
 			super();
 			this.dependencies = dependencies;
+			this.depExcludes = Collections.emptySet();
 		}
 
 		public Builder usingDefaultScopes(JkScope ...scopes) {
@@ -424,8 +432,21 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			return this;
 		}
 
+		public Builder exclude(JkDepExclude exclude) {
+			this.depExcludes.add(exclude);
+			return this;
+		}
+
+		public Builder exclude(String group, String name) {
+			return exclude(JkDepExclude.of(group, name));
+		}
+
+		public Builder exclude(String groupAndName) {
+			return exclude(JkDepExclude.of(groupAndName));
+		}
+
 		public JkDependencies build() {
-			return new JkDependencies(dependencies);
+			return new JkDependencies(dependencies, depExcludes);
 		}
 
 		public static class JkFluentScopeableBuilder extends Builder {

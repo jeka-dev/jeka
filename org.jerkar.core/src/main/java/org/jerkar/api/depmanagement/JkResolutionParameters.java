@@ -2,7 +2,10 @@ package org.jerkar.api.depmanagement;
 
 import java.io.Serializable;
 
-
+/**
+ * Carries some parameters about dependencies resolution.
+ *
+ */
 public class JkResolutionParameters implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -48,14 +51,23 @@ public class JkResolutionParameters implements Serializable {
 		return refreshed;
 	}
 
+	/**
+	 * @see JkResolutionParameters#refreshed()
+	 */
 	public JkResolutionParameters refreshed(boolean refreshed) {
 		return new JkResolutionParameters(defaultScope, defaultMapping, refreshed);
 	}
 
+	/**
+	 * @see #defaultScope()
+	 */
 	public JkResolutionParameters withDefault(JkScope defaultScope) {
 		return new JkResolutionParameters(defaultScope, defaultMapping, refreshed);
 	}
 
+	/**
+	 * @see #defaultMapping()
+	 */
 	public JkResolutionParameters withDefault(JkScopeMapping defaultMapping) {
 		return new JkResolutionParameters(defaultScope, defaultMapping, refreshed);
 	}
