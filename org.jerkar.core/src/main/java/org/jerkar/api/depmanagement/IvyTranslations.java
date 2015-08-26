@@ -17,11 +17,16 @@ import org.apache.ivy.core.module.descriptor.Configuration;
 import org.apache.ivy.core.module.descriptor.Configuration.Visibility;
 import org.apache.ivy.core.module.descriptor.DefaultArtifact;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
+import org.apache.ivy.core.module.descriptor.DefaultExcludeRule;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
+import org.apache.ivy.core.module.descriptor.ExcludeRule;
+import org.apache.ivy.core.module.id.ArtifactId;
 import org.apache.ivy.core.module.id.ModuleId;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.settings.IvySettings;
+import org.apache.ivy.plugins.matcher.ExactPatternMatcher;
+import org.apache.ivy.plugins.matcher.PatternMatcher;
 import org.apache.ivy.plugins.repository.file.FileRepository;
 import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
@@ -115,7 +120,21 @@ final class IvyTranslations {
 				result.addDependencyConfiguration(DEFAULT_CONFIGURATION.name(), defaultScope.name());
 			}
 		}
+		for (final JkDepExclude depExclude : externalModule.excludes()) {
+			final ExcludeRule excludeRule = toExcludeRule(depExclude);
+			result.addExcludeRule("*", excludeRule);
+		}
+		return result;
+	}
 
+	private static DefaultExcludeRule toExcludeRule(JkDepExclude depExclude) {
+		final String type = depExclude.type() == null ? PatternMatcher.ANY_EXPRESSION : depExclude.type();
+		final String ext = depExclude.ext() == null ? PatternMatcher.ANY_EXPRESSION : depExclude.ext();
+		final ArtifactId artifactId = new ArtifactId(toModuleId(depExclude.moduleId()), "*", type, ext);
+		final DefaultExcludeRule result = new DefaultExcludeRule(artifactId, ExactPatternMatcher.INSTANCE, null);
+		for (final JkScope scope : depExclude.getScopes()) {
+			result.addConfiguration(scope.name());
+		}
 		return result;
 	}
 
@@ -325,6 +344,18 @@ final class IvyTranslations {
 			}
 		}
 
+		// Add excludes
+		for (final JkDepExclude exclude : dependencies.excludes()) {
+			final DefaultExcludeRule rule = toExcludeRule(exclude);
+			if (exclude.getScopes().isEmpty()) {
+				for (final JkScope involvedScope : dependencies.involvedScopes()) {
+					rule.addConfiguration(involvedScope.name());
+				}
+			}
+			moduleDescriptor.addExcludeRule(rule);
+
+		}
+
 	}
 
 
@@ -344,7 +375,6 @@ final class IvyTranslations {
 				} else {
 					result = JkScopeMapping.of(defaultScope).to(defaultMapping.mappedScopes(defaultScope));
 				}
-
 			}
 		} else {
 			if (defaultMapping == null) {

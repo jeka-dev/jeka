@@ -146,6 +146,10 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		return dependencies.iterator();
 	}
 
+	public Set<JkDepExclude> excludes() {
+		return this.depExcludes;
+	}
+
 	@Override
 	public String toString() {
 		return dependencies.toString();
@@ -318,7 +322,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		protected Builder(LinkedList<JkScopedDependency> dependencies) {
 			super();
 			this.dependencies = dependencies;
-			this.depExcludes = Collections.emptySet();
+			this.depExcludes = new HashSet<JkDepExclude>();
 		}
 
 		public Builder usingDefaultScopes(JkScope ...scopes) {
@@ -364,7 +368,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			return new JkFluentScopeableBuilder(this);
 		}
 
-		public JkFluentScopeMapableBuilder onExternalModule(JkModuleDependency dependency) {
+		public JkFluentModuleDepBuilder onExternalModule(JkModuleDependency dependency) {
 			final JkScopedDependency scopedDependency;
 			if (defaultScopes != null) {
 				scopedDependency = JkScopedDependency.of(dependency, defaultScopes);
@@ -374,10 +378,10 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 				scopedDependency = JkScopedDependency.of(dependency);
 			}
 			dependencies.add(scopedDependency);
-			if (this instanceof JkFluentScopeMapableBuilder) {
-				return (JkFluentScopeMapableBuilder) this;
+			if (this instanceof JkFluentModuleDepBuilder) {
+				return (JkFluentModuleDepBuilder) this;
 			}
-			return new JkFluentScopeMapableBuilder(this);
+			return new JkFluentModuleDepBuilder(this);
 		}
 
 		public Builder on(JkScopedDependency dependency) {
@@ -393,33 +397,33 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			return on(JkFileSystemDependency.of(files));
 		}
 
-		public JkFluentScopeMapableBuilder on(JkModuleId module, JkVersionRange version) {
+		public JkFluentModuleDepBuilder on(JkModuleId module, JkVersionRange version) {
 			return on(module, version, true);
 		}
 
-		public JkFluentScopeMapableBuilder on(JkModuleId module, String version) {
+		public JkFluentModuleDepBuilder on(JkModuleId module, String version) {
 			return on(module, JkVersionRange.of(version));
 		}
 
 
-		public JkFluentScopeMapableBuilder on(JkModuleId module, JkVersionRange version, boolean transitive) {
+		public JkFluentModuleDepBuilder on(JkModuleId module, JkVersionRange version, boolean transitive) {
 			return onExternalModule(JkModuleDependency.of(module, version).transitive(transitive));
 		}
 
-		public JkFluentScopeMapableBuilder on(String organisation, String name, String version) {
+		public JkFluentModuleDepBuilder on(String organisation, String name, String version) {
 			return on(organisation, name, version, true);
 		}
 
-		public JkFluentScopeMapableBuilder on(String organisation, String name, String version, boolean transitive) {
+		public JkFluentModuleDepBuilder on(String organisation, String name, String version, boolean transitive) {
 			return onExternalModule(JkModuleDependency.of(organisation, name, version).transitive(transitive));
 		}
 
-		public JkFluentScopeableBuilder on(String description) {
-			return on(description, true);
+		public JkFluentModuleDepBuilder on(String description) {
+			return onExternalModule(JkModuleDependency.of(description));
 		}
 
-		public JkFluentScopeableBuilder on(String description, boolean transitive) {
-			return on(JkModuleDependency.of(description).transitive(transitive));
+		public JkFluentModuleDepBuilder on(String description, boolean transitive) {
+			return onExternalModule(JkModuleDependency.of(description).transitive(transitive));
 		}
 
 		public Builder on(Iterable<JkScopedDependency> dependencies) {
@@ -432,17 +436,26 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			return this;
 		}
 
-		public Builder exclude(JkDepExclude exclude) {
+		/**
+		 * Excludes the specified module/artifact from the direct or transitive dependencies.
+		 */
+		public Builder excludeGlobally(JkDepExclude exclude) {
 			this.depExcludes.add(exclude);
 			return this;
 		}
 
-		public Builder exclude(String group, String name) {
-			return exclude(JkDepExclude.of(group, name));
+		/**
+		 * @see #excludeGlobally(JkDepExclude)
+		 */
+		public Builder excludeGlobally(String group, String name) {
+			return excludeGlobally(JkDepExclude.of(group, name));
 		}
 
-		public Builder exclude(String groupAndName) {
-			return exclude(JkDepExclude.of(groupAndName));
+		/**
+		 * @see #excludeGlobally(JkDepExclude)
+		 */
+		public Builder excludeGlobally(String groupAndName) {
+			return excludeGlobally(JkDepExclude.of(groupAndName));
 		}
 
 		public JkDependencies build() {
@@ -472,9 +485,9 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
 		}
 
-		public static final class JkFluentScopeMapableBuilder extends JkFluentScopeableBuilder {
+		public static final class JkFluentModuleDepBuilder extends JkFluentScopeableBuilder {
 
-			private JkFluentScopeMapableBuilder(Builder builder) {
+			private JkFluentModuleDepBuilder(Builder builder) {
 				super(builder);
 			}
 
@@ -487,6 +500,25 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
 			public JkFluentAfterMapScopeBuilder mapScope(JkScope ... scopes) {
 				return new JkFluentAfterMapScopeBuilder(dependencies, JkUtilsIterable.setOf(scopes) );
+			}
+
+			public JkFluentModuleDepBuilder excluding(JkDepExclude depExclude) {
+				final JkScopedDependency scopedDependency = dependencies.pollLast();
+				final JkModuleDependency dependency = (JkModuleDependency) scopedDependency.dependency();
+				dependencies.add(scopedDependency.dependency(dependency.andExclude(depExclude)));
+				return this;
+			}
+
+			public JkFluentModuleDepBuilder excludeLocally(String group, String name) {
+				return excluding(JkDepExclude.of(group, name));
+			}
+
+			public JkFluentModuleDepBuilder excludeLocally(String groupAndName) {
+				return excluding(JkDepExclude.of(groupAndName));
+			}
+
+			public JkFluentModuleDepBuilder excludeLocally(JkModuleId moduleId) {
+				return excludeLocally(moduleId.group(), moduleId.name());
 			}
 
 

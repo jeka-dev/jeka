@@ -8,6 +8,8 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jerkar.api.system.JkLog;
+
 public class JkIvyResolverRunner {
 
 	static final JkRepos REPOS = JkRepos.maven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured/");
@@ -15,7 +17,9 @@ public class JkIvyResolverRunner {
 	//private static final JkRepos REPOS = JkRepos.mavenCentral();
 
 	public static void main(String[] args) {
-		spring();
+		JkLog.verbose(false);
+		//spring();
+		hibernate();
 		//jogl();
 		//joglWithSource();
 		//testPublishIvy();
@@ -28,6 +32,7 @@ public class JkIvyResolverRunner {
 				.on("org.springframework", "spring-jdbc", "3.0.+")  // This works on nexus repo
 				.mapScope(COMPILE).to("compile", "default")
 				.and(JkScopedDependencyTest.PROVIDED).to("provided")
+				.excludeGlobally("org.springframework","spring-core")
 				.build();
 		final JkResolveResult resolveResult = IvyResolver.of(repos).resolveAnonymous(deps, COMPILE, JkResolutionParameters.of());
 		for (final File file : resolveResult.localFiles()) {
@@ -35,6 +40,22 @@ public class JkIvyResolverRunner {
 		}
 		System.out.println(deps.resolvedWith(resolveResult.involvedModules()));
 	}
+
+	public static void hibernate() {
+		final JkDependencies deps = JkDependencies.builder()
+				.on("org.hibernate:hibernate-core:4.3.7.Final")
+				.excludeLocally("org.jboss.logging","*")
+				.excludeLocally("antlr","*")
+				.scope(COMPILE)
+				.excludeGlobally("dom4j","*")
+				.build();
+		final JkResolveResult resolveResult = IvyResolver.of(REPOS).resolveAnonymous(deps, COMPILE, JkResolutionParameters.of());
+		for (final File file : resolveResult.localFiles()) {
+			System.out.println(file.getAbsolutePath());
+		}
+		System.out.println(deps.resolvedWith(resolveResult.involvedModules()));
+	}
+
 
 	public static void jogl() {
 		final JkRepos repos = JkRepos.mavenCentral().andMavenCentral();

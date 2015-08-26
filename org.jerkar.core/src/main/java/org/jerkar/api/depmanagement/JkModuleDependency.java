@@ -1,11 +1,16 @@
 package org.jerkar.api.depmanagement;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * A dependency on an external module. External modules are supposed to be located in a repository.
  * The version range identify which versions are likely to be compatible with the project to build.<br/>
  * For example, <code>org.hibernate:hibernate-core:3.0.+</code> is a legal description for an external module dependency.
+ * <p/>You can also define exclusions on module dependencies so artifact or entire module won't be catch up by the dependency manager.
  * 
  * @author Djeang
  */
@@ -21,8 +26,9 @@ public class JkModuleDependency extends JkDependency {
 	/**
 	 * Creates a {@link JkModuleDependency} from its moduleId and <code>JkVersionrange</code>.
 	 */
+	@SuppressWarnings("unchecked")
 	public static JkModuleDependency of(JkModuleId moduleId, JkVersionRange versionRange) {
-		return new JkModuleDependency(moduleId, versionRange, null, true, null);
+		return new JkModuleDependency(moduleId, versionRange, null, true, null, Collections.EMPTY_LIST);
 	}
 
 	/**
@@ -68,13 +74,16 @@ public class JkModuleDependency extends JkDependency {
 	private final String classifier;
 	private final boolean transitive;
 	private final String extension;
+	private final List<JkDepExclude> excludes;
 
-	private JkModuleDependency(JkModuleId module, JkVersionRange versionRange, String classifier, boolean transitive, String extension) {
+	private JkModuleDependency(JkModuleId module, JkVersionRange versionRange, String classifier,
+			boolean transitive, String extension, List<JkDepExclude> excludes) {
 		this.module = module;
 		this.versionRange = versionRange;
 		this.classifier = classifier;
 		this.transitive = transitive;
 		this.extension = extension;
+		this.excludes = excludes;
 	}
 
 	public boolean transitive() {
@@ -90,14 +99,14 @@ public class JkModuleDependency extends JkDependency {
 	}
 
 	public JkModuleDependency transitive(boolean transitive) {
-		return new JkModuleDependency(module, versionRange, classifier, transitive, extension);
+		return new JkModuleDependency(module, versionRange, classifier, transitive, extension, excludes);
 	}
 
 	/**
 	 * Returns a JkModuleDependency identical to this one but with the specified static version.
 	 */
 	public JkModuleDependency resolvedTo(JkVersion version) {
-		return new JkModuleDependency(module, JkVersionRange.of(version.name()), classifier, transitive, extension);
+		return new JkModuleDependency(module, JkVersionRange.of(version.name()), classifier, transitive, extension, excludes);
 	}
 
 	/**
@@ -105,7 +114,7 @@ public class JkModuleDependency extends JkDependency {
 	 * This has meaning only for Maven module.
 	 */
 	public JkModuleDependency classifier(String classifier) {
-		return new JkModuleDependency(module, versionRange, classifier, transitive, extension);
+		return new JkModuleDependency(module, versionRange, classifier, transitive, extension, excludes);
 	}
 
 	/**
@@ -120,8 +129,19 @@ public class JkModuleDependency extends JkDependency {
 	 * Returns a JkModuleDependency identical to this one but with the specified artifact extension.
 	 */
 	public JkModuleDependency ext(String extension) {
-		return new JkModuleDependency(module, versionRange, classifier, transitive, extension);
+		return new JkModuleDependency(module, versionRange, classifier, transitive, extension, excludes);
 	}
+
+	/**
+	 * Returns a JkModuleDependency identical to this one but adding the specified exclusion.
+	 */
+	public JkModuleDependency andExclude(JkDepExclude depExclude) {
+		final List<JkDepExclude> list = new LinkedList<JkDepExclude>(excludes);
+		list.add(depExclude);
+		return new JkModuleDependency(module, versionRange, classifier,
+				transitive, extension, Collections.unmodifiableList(list));
+	}
+
 
 	/**
 	 * Returns the extension for this module dependency or <code>null</code> if the dependency is done on
@@ -129,6 +149,10 @@ public class JkModuleDependency extends JkDependency {
 	 */
 	public String ext() {
 		return this.extension;
+	}
+
+	public List<JkDepExclude> excludes() {
+		return excludes;
 	}
 
 

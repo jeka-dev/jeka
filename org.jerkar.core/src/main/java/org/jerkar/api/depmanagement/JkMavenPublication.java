@@ -107,6 +107,9 @@ public final class JkMavenPublication implements Serializable {
 		return mainArtifacts.toString() + " / " + classifiedArtifacts.toString();
 	}
 
+	/**
+	 * An artifact with a classifier for Maven repository.
+	 */
 	public static class JkClassifiedArtifact {
 		private String classifier;
 		private File file;
