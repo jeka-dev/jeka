@@ -10,7 +10,7 @@ import java.util.Set;
 
 import org.jerkar.api.system.JkLog;
 
-public class JkIvyResolverRunner {
+public class IvyResolverRunner {
 
 	static final JkRepos REPOS = JkRepos.maven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured/");
 
@@ -34,7 +34,8 @@ public class JkIvyResolverRunner {
 				.and(JkScopedDependencyTest.PROVIDED).to("provided")
 				.excludeGlobally("org.springframework","spring-core")
 				.build();
-		final JkResolveResult resolveResult = IvyResolver.of(repos).resolveAnonymous(deps, COMPILE, JkResolutionParameters.of());
+		final JkResolutionParameters params = JkResolutionParameters.of();
+		final JkResolveResult resolveResult = IvyResolver.of(repos).resolveAnonymous(deps, COMPILE, params);
 		for (final File file : resolveResult.localFiles()) {
 			System.out.println(file.getAbsolutePath());
 		}
@@ -61,7 +62,7 @@ public class JkIvyResolverRunner {
 		final JkRepos repos = JkRepos.mavenCentral().andMavenCentral();
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
-		final JkResolveResult resolveResult = IvyResolver.of(repos).resolveAnonymous(deps, COMPILE, JkResolutionParameters.of(defaultMapping()));
+		final JkResolveResult resolveResult = IvyResolver.of(repos).resolveAnonymous(deps, COMPILE, JkResolutionParameters.of().withDefault(defaultMapping()));
 		for (final File file : resolveResult.localFiles()) {
 			System.out.println(file.getAbsolutePath());
 		}
@@ -78,7 +79,7 @@ public class JkIvyResolverRunner {
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
 		final InternalDepResolver jkIvyResolver = IvyResolver.of(repos);
-		final JkResolveResult resolveResult = jkIvyResolver.resolveAnonymous(deps, COMPILE, JkResolutionParameters.of(defaultMapping()));
+		final JkResolveResult resolveResult = jkIvyResolver.resolveAnonymous(deps, COMPILE, JkResolutionParameters.of().withDefault(defaultMapping()));
 		final Set<JkVersionedModule> modules = new HashSet<JkVersionedModule>();
 		for (final JkVersionedModule versionedModule : resolveResult.involvedModules()) {
 			modules.add(versionedModule);

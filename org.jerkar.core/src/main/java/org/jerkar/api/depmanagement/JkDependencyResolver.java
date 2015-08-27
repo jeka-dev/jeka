@@ -12,6 +12,13 @@ import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
 
+/**
+ * A resolver for a given set of dependency. Each instance of <code>JkDependencyResolver</code> defines the dependencies to resolve, this
+ * means that you must instantiate one for each dependency set you want to resolve. <br/>
+ * Each instance of <code>JkDependencyResolver</code> keep in cache resolution setting so a resolution o a given scope is never computed twice.
+ * 
+ * @author Jerome Angibaud
+ */
 public final class JkDependencyResolver  {
 
 	private static final String IVY_CLASS = IvyResolver.class.getName();
@@ -20,23 +27,39 @@ public final class JkDependencyResolver  {
 
 	private static final JkScope SINGLE_SCOPE_NON_TRANS = JkScope.of("JkDependencyResolver.SINGLE.NON_TRANS").transitive(false);
 
-	/**
-	 * Creates a resolver according the specified parameters.
+	/*
+	 * Creates a dependency resolver relying on a dependency manager. Such a resolver is able to resolve dependencies
+	 * transitively downloading artifacts hosted on Maven or Ivy repository. If you don't have module dependencies (only local dependencies)
+	 * then you'd better use {@link #unmanaged(JkDependencies)} instead.
 	 * 
-	 * @param module The module is needed only to help caching resolution
+	 * @param repos The repositories containing the artifacts
+	 * @param dependencies the dependencies to resolve
+	 * @param module This is needed only to help caching resolution on file system (not only internally to this instance). It cannot be null but if you don't specify it use {@link #managed(JkRepos, JkDependencies)} instead.
+	 * @param resolutionParameters You can alter the resolver behavior through these settings.
 	 */
-	public static JkDependencyResolver managed(JkRepos repos, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
+	private static JkDependencyResolver managed(JkRepos repos, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
+
+		// Ivy Resolver is loaded in a dedicated classloader containing Ivy.
+		// Thus we need to serialize the result to be used in the current class loader.
 		final InternalDepResolver ivyResolver = IvyClassloader.CLASSLOADER.transClassloaderProxy(InternalDepResolver.class, IVY_CLASS, "of", repos);
 		return new JkDependencyResolver(ivyResolver, dependencies, module, resolutionParameters);
 	}
 
-	public static JkDependencyResolver managed(JkRepos repos, JkDependencies dependencies, JkVersionedModule module) {
-		return managed(repos, dependencies, module, JkResolutionParameters.of());
+	/**
+	 * Creates a dependency resolver relying on a dependency manager. Such a resolver is able to resolve dependencies
+	 * transitively downloading artifacts hosted on Maven or Ivy repository. If you don't have module dependencies (only local dependencies)
+	 * then you'd better use {@link #unmanaged(JkDependencies)} instead.
+	 */
+	public static JkDependencyResolver managed(JkRepos repos, JkDependencies dependencies) {
+		return managed(repos, dependencies, null, JkResolutionParameters.of());
 	}
 
-
+	/**
+	 * Creates a dependency manager that does not need to rely on a dependency manager.
+	 * This is a case when you use only local file dependencies.
+	 */
 	public static JkDependencyResolver unmanaged(JkDependencies dependencies) {
-		if (dependencies.containsExternalModule()) {
+		if (dependencies.containsModules()) {
 			throw new IllegalArgumentException("Your dependencies contain a reference to a managed extarnal module."
 					+ "Use #managed method factory instead.");
 		}
@@ -69,30 +92,33 @@ public final class JkDependencyResolver  {
 		this.parameters = resolutionParameters;
 	}
 
-	public boolean isManagedDependencyResolver() {
-		return this.internalResolver != null;
-	}
-
-	public JkDependencies declaredDependencies() {
+	/**
+	 * Returns the dependencies this resolver has been instantiated with.
+	 */
+	public JkDependencies dependenciesToResolve() {
 		return this.dependencies;
 	}
 
 	/**
-	 * @see JkDependencyResolver#resolveManagedDependencies(JkScope...)
+	 * @see JkDependencyResolver#resolve(JkScope...)
 	 */
-	public JkResolveResult resolveManagedDependencies(Iterable<JkScope> scopes) {
-		return resolveManagedDependencies(JkUtilsIterable.arrayOf(scopes, JkScope.class));
+	public JkResolveResult resolve(Iterable<JkScope> scopes) {
+		return resolve(JkUtilsIterable.arrayOf(scopes, JkScope.class));
 	}
 
 	/**
 	 * Resolves the managed dependencies (dependencies declared as external module).
 	 */
-	public JkResolveResult resolveManagedDependencies(JkScope ... scopes) {
+	public JkResolveResult resolve(JkScope ... scopes) {
 		if (internalResolver == null) {
 			return JkResolveResult.empty();
 		}
 		final Set<JkScope> scopesSet = new HashSet<JkScope>();
 		for (final JkScope scope : scopes) {
+			if (!this.dependencies.involvedScopes().contains(scope)) {
+				JkLog.warn("No dependencies declared with scope '" + scope.name() + "'");
+				continue;
+			}
 			scopesSet.add(scope);
 			scopesSet.addAll(scope.ancestorScopes());
 		}
@@ -112,7 +138,7 @@ public final class JkDependencyResolver  {
 
 
 	/**
-	 * Gets the path containing all the artifact files for the specified scopes.
+	 * Gets the path containing all the resolved dependencies as artifact files for the specified scopes.
 	 */
 	public final JkPath get(JkScope ...scopes) {
 		JkPath path = JkPath.of();
@@ -162,6 +188,23 @@ public final class JkDependencyResolver  {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * The underlying dependency manager can cache the resolution on file system for faster result.
+	 * To make this caching possible, you must set the module+version for which the resolution is made.
+	 * This is only relevant for managed dependencies and have no effect for unmanaged dependencies.
+	 */
+	public JkDependencyResolver withModuleHolder(JkVersionedModule versionedModule) {
+		return new JkDependencyResolver(this.internalResolver, dependencies, versionedModule, this.parameters);
+	}
+
+	/**
+	 * You can alter the resolver behavior through these settings.
+	 * his is only relevant for managed dependencies and have no effect for unmanaged dependencies.
+	 */
+	public JkDependencyResolver withParams(JkResolutionParameters params) {
+		return new JkDependencyResolver(this.internalResolver, this.dependencies, this.module, params);
 	}
 
 	@Override

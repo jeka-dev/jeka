@@ -14,7 +14,7 @@ public class JkRepoRunner {
 
 	public static void spring() {
 		final JkModuleDependency dep = JkModuleDependency.of("org.springframework", "spring-jdbc", "3.0.+");
-		System.out.println(JkIvyResolverRunner.REPOS.get(dep, false).entries().size());
+		System.out.println(IvyResolverRunner.REPOS.get(dep, false).entries().size());
 	}
 
 	public static void springClassifier() {

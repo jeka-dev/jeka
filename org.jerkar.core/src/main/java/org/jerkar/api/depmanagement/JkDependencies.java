@@ -132,7 +132,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	/**
 	 * Returns <code>true</code> if this object contains dependencies whose are {@link JkModuleDependency}.
 	 */
-	public boolean containsExternalModule() {
+	public boolean containsModules() {
 		for (final JkScopedDependency scopedDependency : dependencies) {
 			if (scopedDependency.dependency() instanceof JkModuleDependency) {
 				return true;

@@ -363,7 +363,7 @@ final class DotClasspath {
 		}
 
 		// Write entries for file dependencies
-		final List<File> fileDeps = build.buildDefDependencyResolver().declaredDependencies().localFileDependencies(JkScope.BUILD).entries();
+		final List<File> fileDeps = build.buildDefDependencyResolver().dependenciesToResolve().localFileDependencies(JkScope.BUILD).entries();
 		writeFileEntries(fileDeps, writer);
 
 		// Write entries for managed dependencies
@@ -456,18 +456,18 @@ final class DotClasspath {
 
 		// Write entries for external module deps
 		JkResolveResult resolveResult = JkResolveResult.empty();
-		if (build.dependencyResolver().isManagedDependencyResolver()) {
-			resolveResult = build.dependencyResolver().resolveManagedDependencies(JkJavaBuild.RUNTIME,
+		if (build.dependencyResolver().dependenciesToResolve().containsModules()) {
+			resolveResult = build.dependencyResolver().resolve(JkJavaBuild.RUNTIME,
 					JkJavaBuild.PROVIDED, JkJavaBuild.TEST);
 			writeExternalModuleEntries(build.dependencyResolver(), writer, resolveResult);
 		}
-		if (build.buildDefDependencyResolver().isManagedDependencyResolver()) {
-			final JkResolveResult buildresolve = build.buildDefDependencyResolver().resolveManagedDependencies(JkScope.BUILD);
+		if (build.buildDefDependencyResolver().dependenciesToResolve().containsModules()) {
+			final JkResolveResult buildresolve = build.buildDefDependencyResolver().resolve(JkScope.BUILD);
 			writeExternalModuleEntries(build.buildDefDependencyResolver(), writer, buildresolve);
 		}
 
 		// Write entries for file dependencies
-		final Set<File> fileDeps = new HashSet<File>(build.dependencyResolver().declaredDependencies()
+		final Set<File> fileDeps = new HashSet<File>(build.dependencyResolver().dependenciesToResolve()
 				.localFileDependencies(JkJavaBuild.TEST, JkJavaBuild.PROVIDED, JkJavaBuild.COMPILE).entries());
 		writeFileEntries(fileDeps, writer);
 	}

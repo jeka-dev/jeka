@@ -52,25 +52,20 @@ final class IvyTranslations {
 
 	private static final String PUBLISH_RESOLVER_NAME = "publisher:";
 
-	/**
-	 * Stands for the default configuration for publishing in ivy.
-	 */
-	private static final JkScope DEFAULT_CONFIGURATION = JkScope.of("default");
-
 	private static final String MAVEN_ARTIFACT_PATTERN = "/[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]";
 
 	private IvyTranslations() {
 	}
 
 	public static DefaultModuleDescriptor toPublicationFreeModule(JkVersionedModule module,
-			JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping,
+			JkDependencies dependencies,JkScopeMapping defaultMapping,
 			JkVersionProvider resolvedVersions) {
 		final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module.moduleId().group(), module
 				.moduleId().name(), module.version().name());
 		final DefaultModuleDescriptor moduleDescriptor = new DefaultModuleDescriptor(thisModuleRevisionId,
 				"integration", null);
 
-		populateModuleDescriptor(moduleDescriptor, dependencies, defaultScope, defaultMapping, resolvedVersions);
+		populateModuleDescriptor(moduleDescriptor, dependencies,  defaultMapping, resolvedVersions);
 		return moduleDescriptor;
 	}
 
@@ -84,7 +79,7 @@ final class IvyTranslations {
 	 * @param scopedDependency
 	 *            must be of {@link JkModuleDependency}
 	 */
-	private static DependencyDescriptor toDependencyDescriptor(JkScopedDependency scopedDependency, JkScope defaultScope,
+	private static DependencyDescriptor toDependencyDescriptor(JkScopedDependency scopedDependency,
 			JkScopeMapping defaultMapping, JkVersion resolvedVersion) {
 		final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency.dependency();
 		final ModuleRevisionId moduleRevisionId = toModuleRevisionId(externalModule, resolvedVersion);
@@ -95,7 +90,7 @@ final class IvyTranslations {
 		// filling configuration
 		if (scopedDependency.scopeType() == ScopeType.SIMPLE) {
 			for (final JkScope scope : scopedDependency.scopes()) {
-				final JkScopeMapping mapping = resolveSimple(scope, defaultScope, defaultMapping);
+				final JkScopeMapping mapping = resolveSimple(scope, defaultMapping);
 				for (final JkScope fromScope : mapping.entries()) {
 					for (final JkScope mappedScope : mapping.mappedScopes(fromScope)) {
 						result.addDependencyConfiguration(fromScope.name(), mappedScope.name());
@@ -116,8 +111,6 @@ final class IvyTranslations {
 						result.addDependencyConfiguration(entryScope.name(), mappedScope.name());
 					}
 				}
-			} else if (defaultScope != null) {
-				result.addDependencyConfiguration(DEFAULT_CONFIGURATION.name(), defaultScope.name());
 			}
 		}
 		for (final JkDepExclude depExclude : externalModule.excludes()) {
@@ -315,16 +308,13 @@ final class IvyTranslations {
 	}
 
 	private static void populateModuleDescriptor(DefaultModuleDescriptor moduleDescriptor,
-			JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping,
+			JkDependencies dependencies, JkScopeMapping defaultMapping,
 			JkVersionProvider resolvedVersions) {
 
 		// Add configuration definitions
 		for (final JkScope involvedScope : dependencies.involvedScopes()) {
 			final Configuration configuration = toConfiguration(involvedScope);
 			moduleDescriptor.addConfiguration(configuration);
-		}
-		if (defaultScope != null) {
-			moduleDescriptor.setDefaultConf(defaultScope.name());
 		}
 		if (defaultMapping != null) {
 			for (final JkScope scope : defaultMapping.entries()) {
@@ -339,7 +329,7 @@ final class IvyTranslations {
 			if (scopedDependency.dependency() instanceof JkModuleDependency) {
 				final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency.dependency();
 				final JkVersion resolvedVersion = resolvedVersions.versionOf(externalModule.moduleId());
-				final DependencyDescriptor dependencyDescriptor = toDependencyDescriptor(scopedDependency, defaultScope, defaultMapping, resolvedVersion);
+				final DependencyDescriptor dependencyDescriptor = toDependencyDescriptor(scopedDependency, defaultMapping, resolvedVersion);
 				moduleDescriptor.addDependency(dependencyDescriptor);
 			}
 		}
@@ -359,22 +349,13 @@ final class IvyTranslations {
 	}
 
 
-	private static JkScopeMapping resolveSimple(JkScope scope, JkScope defaultScope,
-			JkScopeMapping defaultMapping) {
+	private static JkScopeMapping resolveSimple(JkScope scope, JkScopeMapping defaultMapping) {
 		final JkScopeMapping result;
 		if (scope == null) {
-			if (defaultScope == null) {
-				if (defaultMapping == null) {
-					result = JkScopeMapping.of(JkScope.of("default")).to("default");
-				} else {
-					result = defaultMapping;
-				}
+			if (defaultMapping == null) {
+				result = JkScopeMapping.of(JkScope.of("default")).to("default");
 			} else {
-				if (defaultMapping == null) {
-					result = JkScopeMapping.of(defaultScope).to(defaultScope);
-				} else {
-					result = JkScopeMapping.of(defaultScope).to(defaultMapping.mappedScopes(defaultScope));
-				}
+				result = defaultMapping;
 			}
 		} else {
 			if (defaultMapping == null) {

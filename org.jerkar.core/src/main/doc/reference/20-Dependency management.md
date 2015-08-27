@@ -306,6 +306,12 @@ Indeed you can set _default scope_ and _default scope mapping_ on the resolver, 
 
 
 
+#### Excluding Module from the Dependency Tree
+
+When resolving dependency transitively you may grab unwanted dependencies. To filter them out you can exclude them from the tree using appropriate methods.
+
+
+
 
 
 

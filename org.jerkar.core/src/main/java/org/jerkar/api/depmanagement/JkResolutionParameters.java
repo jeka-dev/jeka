@@ -11,14 +11,14 @@ public class JkResolutionParameters implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static JkResolutionParameters of() {
-		return new JkResolutionParameters(null, null, false);
+		return new JkResolutionParameters(null, false);
 	}
 
-	public static JkResolutionParameters of(JkScopeMapping defaultScopeMapping) {
-		return new JkResolutionParameters(null, defaultScopeMapping, false);
+	public static JkResolutionParameters defaultScopeMapping(JkScopeMapping scopeMapping) {
+		return new JkResolutionParameters(scopeMapping, false);
 	}
 
-	private final JkScope defaultScope;
+
 
 	private final JkScopeMapping defaultMapping;
 
@@ -26,14 +26,6 @@ public class JkResolutionParameters implements Serializable {
 
 
 
-	/**
-	 * Returns the default scope to use for the {@link JkDependencies} to be resolved. <code>null</code> means
-	 * no default scope.
-	 * @see <a href="http://ant.apache.org/ivy/history/2.3.0/ivyfile/configurations.html">Ivy configuration doc</a>
-	 */
-	public JkScope defaultScope() {
-		return defaultScope;
-	}
 
 	/**
 	 * Returns the default scope mapping to use for the {@link JkDependencies} to be resolved. <code>null</code> means
@@ -55,34 +47,26 @@ public class JkResolutionParameters implements Serializable {
 	 * @see JkResolutionParameters#refreshed()
 	 */
 	public JkResolutionParameters refreshed(boolean refreshed) {
-		return new JkResolutionParameters(defaultScope, defaultMapping, refreshed);
-	}
-
-	/**
-	 * @see #defaultScope()
-	 */
-	public JkResolutionParameters withDefault(JkScope defaultScope) {
-		return new JkResolutionParameters(defaultScope, defaultMapping, refreshed);
+		return new JkResolutionParameters(defaultMapping, refreshed);
 	}
 
 	/**
 	 * @see #defaultMapping()
 	 */
 	public JkResolutionParameters withDefault(JkScopeMapping defaultMapping) {
-		return new JkResolutionParameters(defaultScope, defaultMapping, refreshed);
+		return new JkResolutionParameters(defaultMapping, refreshed);
 	}
 
 
-	private JkResolutionParameters(JkScope defaultScope, JkScopeMapping defaultMapping, boolean refreshed) {
+	private JkResolutionParameters(JkScopeMapping defaultMapping, boolean refreshed) {
 		super();
-		this.defaultScope = defaultScope;
 		this.defaultMapping = defaultMapping;
 		this.refreshed = refreshed;
 	}
 
 	@Override
 	public String toString() {
-		return "default scope : " + defaultScope + ", default mapping : " + defaultMapping + ", refreshed : " + refreshed;
+		return "default mapping : " + defaultMapping + ", refreshed : " + refreshed;
 	}
 
 

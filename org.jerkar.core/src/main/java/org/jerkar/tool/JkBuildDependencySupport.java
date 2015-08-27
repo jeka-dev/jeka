@@ -182,9 +182,10 @@ public class JkBuildDependencySupport extends JkBuild {
 	 */
 	private JkDependencyResolver createDependencyResolver() {
 		final JkDependencies dependencies = effectiveDependencies().and(extraCommandLineDeps());
-		if (dependencies.containsExternalModule()) {
-			return JkDependencyResolver.managed(downloadRepositories(), dependencies, versionedModule(),
-					JkResolutionParameters.of(scopeMapping()));
+		if (dependencies.containsModules()) {
+			return JkDependencyResolver.managed(downloadRepositories(), dependencies)
+					.withModuleHolder(versionedModule())
+					.withParams(JkResolutionParameters.of().withDefault(scopeMapping()));
 		}
 		return JkDependencyResolver.unmanaged(dependencies);
 	}

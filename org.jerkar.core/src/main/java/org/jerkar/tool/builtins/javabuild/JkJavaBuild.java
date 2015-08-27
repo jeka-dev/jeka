@@ -339,9 +339,9 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	@JkDoc({"Publish the produced artifact to the defined repositories. ",
 	"This can work only if a 'publishable' repository has been defined and the artifact has been generated (pack method)."})
 	public void publish() {
-		final JkDependencies dependencies = dependencyResolver().declaredDependencies();
+		final JkDependencies dependencies = dependencyResolver().dependenciesToResolve();
 		final JkVersionProvider resolvedVersions =
-				this.dependencyResolver().resolveManagedDependencies(
+				this.dependencyResolver().resolve(
 						this.dependencies().involvedScopes()).resolvedVersionProvider();
 		if (this.publisher().hasMavenPublishRepo()) {
 			final JkMavenPublication publication = mavenPublication();

@@ -115,17 +115,16 @@ final class IvyPublisher implements InternalPublisher {
 	 * @param versionedModule The module/version to publish.
 	 * @param publication The artifacts to publish.
 	 * @param dependencies The dependencies of the published module.
-	 * @param defaultScope The default scope of the published module
 	 * @param defaultMapping The default scope mapping of the published module
 	 * @param deliveryDate The delivery date.
 	 */
 	@Override
 	public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
-			JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping,
+			JkDependencies dependencies, JkScopeMapping defaultMapping,
 			Date deliveryDate, JkVersionProvider resolvedVersions) {
 		JkLog.startln("Publishing for Ivy");
 		final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
-				publication, dependencies, defaultScope, defaultMapping,
+				publication, dependencies, defaultMapping,
 				deliveryDate, resolvedVersions);
 		publishIvyArtifacts(publication, deliveryDate, moduleDescriptor);
 		JkLog.done();
@@ -224,12 +223,12 @@ final class IvyPublisher implements InternalPublisher {
 
 	private ModuleDescriptor createModuleDescriptor(JkVersionedModule jkVersionedModule,
 			JkIvyPublication publication, JkDependencies dependencies,
-			JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate,
+			JkScopeMapping defaultMapping, Date deliveryDate,
 			JkVersionProvider resolvedVersions) {
 
 		final DefaultModuleDescriptor moduleDescriptor =
 				IvyTranslations.toPublicationFreeModule(jkVersionedModule, dependencies,
-						defaultScope, defaultMapping, resolvedVersions);
+						defaultMapping, resolvedVersions);
 		IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
 		return moduleDescriptor;
 	}
@@ -273,7 +272,7 @@ final class IvyPublisher implements InternalPublisher {
 
 		final DefaultModuleDescriptor moduleDescriptor =
 				IvyTranslations.toPublicationFreeModule(jkVersionedModule, resolvedDependencies,
-						null, null, resolvedVersions);
+						null, resolvedVersions);
 		IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
 		return moduleDescriptor;
 	}

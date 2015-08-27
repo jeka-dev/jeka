@@ -49,7 +49,6 @@ public final class JkPublisher {
 	 * @param versionedModule The module id and version to publish
 	 * @param publication The content of the publication
 	 * @param dependencies The dependencies of the modules (necessary to generate an ivy.xml file)
-	 * @param defaultScope The default scope for the dependencies (necessary to generate an ivy.xml file)
 	 * @param defaultMapping
 	 * @param deliveryDate The delivery date (necessary to generate an ivy.xml file)
 	 * @param resolvedVersion If the dependencies contains dynamic versions (as 1.0.+) then you can
@@ -58,7 +57,7 @@ public final class JkPublisher {
 	public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
 			JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping,
 			Date deliveryDate, JkVersionProvider resolvedVersion) {
-		this.ivyPublisher.publishIvy(versionedModule, publication, dependencies, defaultScope,
+		this.ivyPublisher.publishIvy(versionedModule, publication, dependencies,
 				defaultMapping, deliveryDate, resolvedVersion);
 	}
 

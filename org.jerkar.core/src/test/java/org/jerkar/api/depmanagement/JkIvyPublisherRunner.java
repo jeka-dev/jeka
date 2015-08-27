@@ -25,7 +25,7 @@ public class JkIvyPublisherRunner {
 		final JkModuleId spring = JkModuleId.of("org.springframework", "spring-jdbc");
 		final JkDependencies deps = JkDependencies.builder()
 				.on(spring, "3.0.+").scope(JkScopedDependencyTest.COMPILE).build();
-		jkIvyResolver.publishIvy(versionedModule, ivyPublication,deps, null, null,
+		jkIvyResolver.publishIvy(versionedModule, ivyPublication,deps, null,
 				new Date(), JkVersionProvider.of(spring, "3.0.8"));
 	}
 

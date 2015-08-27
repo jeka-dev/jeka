@@ -111,6 +111,10 @@ public class JkScope implements Serializable {
 		return JkScopeMapping.of(this).to(targetScope);
 	}
 
+	public JkScopeMapping mapTo(String targetScope) {
+		return JkScopeMapping.of(this).to(JkScope.of(targetScope));
+	}
+
 	public boolean isInOrIsExtendingAnyOf(Iterable<? extends JkScope> scopes) {
 		for (final JkScope scope : scopes) {
 			if (scope.equals(this) || this.isExtending(scope)) {

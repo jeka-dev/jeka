@@ -13,7 +13,6 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkResolutionParameters;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
@@ -263,8 +262,8 @@ class Project {
 
 	private JkDependencyResolver getBuildDefDependencyResolver() {
 		final JkDependencies deps = this.buildDefDependencies();
-		if (deps.containsExternalModule()) {
-			return JkDependencyResolver.managed(this.buildRepos, deps, null, JkResolutionParameters.of());
+		if (deps.containsModules()) {
+			return JkDependencyResolver.managed(this.buildRepos, deps);
 		}
 		return JkDependencyResolver.unmanaged(deps);
 	}
