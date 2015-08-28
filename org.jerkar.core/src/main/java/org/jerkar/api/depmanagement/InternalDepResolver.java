@@ -9,6 +9,9 @@ interface InternalDepResolver {
 	JkResolveResult resolveAnonymous(JkDependencies deps,
 			JkScope resolvedScope, JkResolutionParameters parameters);
 
+	/**
+	 * @param resolvedScope can be null.
+	 */
 	JkResolveResult resolve(JkVersionedModule module, JkDependencies deps,
 			JkScope resolvedScope, JkResolutionParameters parameters);
 

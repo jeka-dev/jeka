@@ -17,6 +17,8 @@ import org.jerkar.api.utils.JkUtilsIterable;
  * means that you must instantiate one for each dependency set you want to resolve. <br/>
  * Each instance of <code>JkDependencyResolver</code> keep in cache resolution setting so a resolution o a given scope is never computed twice.
  * 
+ * The result of the resolution depends on the parameters you have set on it. See {@link JkResolutionParameters}
+ * 
  * @author Jerome Angibaud
  */
 public final class JkDependencyResolver  {
@@ -27,16 +29,9 @@ public final class JkDependencyResolver  {
 
 	private static final JkScope SINGLE_SCOPE_NON_TRANS = JkScope.of("JkDependencyResolver.SINGLE.NON_TRANS").transitive(false);
 
-	/*
-	 * Creates a dependency resolver relying on a dependency manager. Such a resolver is able to resolve dependencies
-	 * transitively downloading artifacts hosted on Maven or Ivy repository. If you don't have module dependencies (only local dependencies)
-	 * then you'd better use {@link #unmanaged(JkDependencies)} instead.
-	 * 
-	 * @param repos The repositories containing the artifacts
-	 * @param dependencies the dependencies to resolve
-	 * @param module This is needed only to help caching resolution on file system (not only internally to this instance). It cannot be null but if you don't specify it use {@link #managed(JkRepos, JkDependencies)} instead.
-	 * @param resolutionParameters You can alter the resolver behavior through these settings.
-	 */
+	private static final JkScope NULL_SCOPE = JkScope.of("JkDependencyResolver.NULL_SCOPE");
+
+
 	private static JkDependencyResolver managed(JkRepos repos, JkDependencies dependencies, JkVersionedModule module, JkResolutionParameters resolutionParameters) {
 
 		// Ivy Resolver is loaded in a dedicated classloader containing Ivy.
@@ -107,7 +102,8 @@ public final class JkDependencyResolver  {
 	}
 
 	/**
-	 * Resolves the managed dependencies (dependencies declared as external module).
+	 * Resolves the managed dependencies (dependencies declared as external module) for the specified scopes.
+	 * If no scope is specified, then it is resolved for all scopes.
 	 */
 	public JkResolveResult resolve(JkScope ... scopes) {
 		if (internalResolver == null) {
@@ -126,6 +122,9 @@ public final class JkDependencyResolver  {
 		for (final JkScope scope : scopesSet) {
 			resolveResult = resolveResult.and(getResolveResult(scope));
 		}
+		if (scopes.length == 0) {
+			resolveResult = resolveResult.and(getResolveResult(null));
+		}
 		return resolveResult;
 	}
 
@@ -138,9 +137,15 @@ public final class JkDependencyResolver  {
 
 
 	/**
-	 * Gets the path containing all the resolved dependencies as artifact files for the specified scopes.
+	 * Gets the path containing all the resolved dependencies as artifact files for the specified scopes.<p/>
+	 * 
+	 * If no scope is specified then return all file dependencies and the dependencies specified.
+	 * About the managed dependency the same rule than for {@link #resolve(JkScope...)} apply.
 	 */
 	public final JkPath get(JkScope ...scopes) {
+		if (scopes.length == 0) {
+			return getSingleScope(null);
+		}
 		JkPath path = JkPath.of();
 		for (final JkScope scope : scopes) {
 			path = path.and(getSingleScope(scope));
@@ -152,7 +157,11 @@ public final class JkDependencyResolver  {
 		final List<File> result = new LinkedList<File>();
 
 		// Add local, non-managed dependencies
-		result.addAll(this.dependencies.localFileDependencies(scope).entries());
+		if (scope == null) {
+			result.addAll(this.dependencies.allLocalFileDependencies().entries());
+		} else {
+			result.addAll(this.dependencies.localFileDependencies(scope).entries());
+		}
 		if (internalResolver == null) {
 			return JkPath.of(result);
 		}
@@ -161,18 +170,24 @@ public final class JkDependencyResolver  {
 	}
 
 	private JkResolveResult getResolveResult(JkScope scope) {
-		final JkResolveResult result = cachedResolveResult.get(scope);
+		final JkScope cachedScope = scope == null ? NULL_SCOPE : scope;
+		final JkResolveResult result = cachedResolveResult.get(cachedScope);
 		if (result != null) {
 			return result;
 		}
-		JkLog.startln("Resolving dependencies for scope '" + scope.name() + "'");
+		if (scope != null) {
+			JkLog.startln("Resolving dependencies for scope '" + scope.name() + "'");
+		} else {
+			JkLog.startln("Resolving dependencies without scope");
+		}
+
 		final JkResolveResult resolveResult;
 		if (module != null) {
 			resolveResult = internalResolver.resolve(module, dependencies, scope, parameters);
 		} else {
 			resolveResult = internalResolver.resolveAnonymous(dependencies, scope, parameters);
 		}
-		cachedResolveResult.put(scope, resolveResult);
+		cachedResolveResult.put(cachedScope, resolveResult);
 		JkLog.info(resolveResult.involvedModules().size() + " artifacts: " + resolveResult.involvedModules());
 		JkLog.done("Resolve result = " + resolveResult);
 		return resolveResult;

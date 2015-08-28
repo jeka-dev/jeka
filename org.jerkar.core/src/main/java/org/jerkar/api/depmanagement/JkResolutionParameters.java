@@ -3,28 +3,34 @@ package org.jerkar.api.depmanagement;
 import java.io.Serializable;
 
 /**
- * Carries some parameters about dependencies resolution.
- *
+ * CInstances of this class are used to parameter the dependency resolution
  */
 public class JkResolutionParameters implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Creates resolution parameters without default mapping and no dynamic version resolving refresh.
+	 * @see JkResolutionParameters#defaultMapping()
+	 * @see #refreshed()
+	 */
 	public static JkResolutionParameters of() {
 		return new JkResolutionParameters(null, false);
 	}
 
+	/**
+	 * Creates resolution parameters with the specified default scope mapping and no dynamic version resolving refresh.
+	 * @see JkResolutionParameters#defaultMapping()
+	 * @see #refreshed()
+	 */
 	public static JkResolutionParameters defaultScopeMapping(JkScopeMapping scopeMapping) {
 		return new JkResolutionParameters(scopeMapping, false);
 	}
 
 
-
 	private final JkScopeMapping defaultMapping;
 
 	private final boolean refreshed;
-
-
 
 
 	/**
@@ -37,7 +43,7 @@ public class JkResolutionParameters implements Serializable {
 	}
 
 	/**
-	 * Returns <code>true</code> if during the resolution phase, the changing dependencies must be down-loaded.
+	 * Returns <code>true</code> if during the resolution phase, the dynamic version must be resolved as well or the cache can be reused.
 	 */
 	public boolean refreshed() {
 		return refreshed;

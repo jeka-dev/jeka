@@ -57,7 +57,7 @@ final class IvyTranslations {
 	private IvyTranslations() {
 	}
 
-	public static DefaultModuleDescriptor toPublicationFreeModule(JkVersionedModule module,
+	public static DefaultModuleDescriptor toPublicationLessModule(JkVersionedModule module,
 			JkDependencies dependencies,JkScopeMapping defaultMapping,
 			JkVersionProvider resolvedVersions) {
 		final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module.moduleId().group(), module
@@ -343,9 +343,7 @@ final class IvyTranslations {
 				}
 			}
 			moduleDescriptor.addExcludeRule(rule);
-
 		}
-
 	}
 
 

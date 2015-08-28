@@ -227,7 +227,7 @@ final class IvyPublisher implements InternalPublisher {
 			JkVersionProvider resolvedVersions) {
 
 		final DefaultModuleDescriptor moduleDescriptor =
-				IvyTranslations.toPublicationFreeModule(jkVersionedModule, dependencies,
+				IvyTranslations.toPublicationLessModule(jkVersionedModule, dependencies,
 						defaultMapping, resolvedVersions);
 		IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
 		return moduleDescriptor;
@@ -271,7 +271,7 @@ final class IvyPublisher implements InternalPublisher {
 			JkVersionProvider resolvedVersions) {
 
 		final DefaultModuleDescriptor moduleDescriptor =
-				IvyTranslations.toPublicationFreeModule(jkVersionedModule, resolvedDependencies,
+				IvyTranslations.toPublicationLessModule(jkVersionedModule, resolvedDependencies,
 						null, resolvedVersions);
 		IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication, deliveryDate);
 		return moduleDescriptor;

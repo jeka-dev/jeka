@@ -305,6 +305,18 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		return JkPath.of(set);
 	}
 
+	/**
+	 * Returns all files declared as {@link JkFileSystemDependency} whatever its scopes.
+	 */
+	public JkPath allLocalFileDependencies() {
+		final LinkedHashSet<File> set = new LinkedHashSet<File>();
+		for (final JkScopedDependency scopedDependency : this.dependencies) {
+			final JkFileDependency fileDeps = (JkFileDependency) scopedDependency.dependency();
+			set.addAll(fileDeps.files());
+		}
+		return JkPath.of(set);
+	}
+
 	public static Builder builder() {
 		return new Builder(new LinkedList<JkScopedDependency>());
 	}

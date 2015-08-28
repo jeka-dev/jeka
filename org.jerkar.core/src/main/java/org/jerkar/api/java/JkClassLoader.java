@@ -553,7 +553,7 @@ public final class JkClassLoader {
 	 * It is then turned back to the former one when the execution is done.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T invokeInstanceMethod(boolean serializeResult, Object object, String methodName,
+	public <T> T invokeInstanceMethod(boolean serializeResult, Object object, Method method,
 			Object... args) {
 		if (args == null) {
 			args = new Object[0];
@@ -567,8 +567,8 @@ public final class JkClassLoader {
 		Thread.currentThread().setContextClassLoader(delegate);
 		offsetLog();
 		try {
-			final Object returned = JkUtilsReflect.invokeInstanceMethod(object,
-					methodName, effectiveArgs);
+
+			final Object returned = JkUtilsReflect.invoke(object, method, args);
 			final T result;
 			if (serializeResult) {
 				result = (T) traverseClassLoader(returned,
@@ -577,6 +577,8 @@ public final class JkClassLoader {
 				result = (T) returned;
 			}
 			return result;
+		} catch (final IllegalArgumentException e) {
+			throw new RuntimeException(e);
 		} finally {
 			Thread.currentThread().setContextClassLoader(currentClassLoader);
 		}
@@ -718,7 +720,7 @@ public final class JkClassLoader {
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			return invokeInstanceMethod(true, target, method.getName(), args);
+			return invokeInstanceMethod(true, target, JkUtilsReflect.methodWithSameNameAndArgType(method, target.getClass()), args);
 
 		}
 

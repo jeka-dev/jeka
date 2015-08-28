@@ -71,10 +71,11 @@ final class IvyResolver implements InternalDepResolver {
 	@Override
 	public JkResolveResult resolve(JkVersionedModule module, JkDependencies deps,
 			JkScope resolvedScope, JkResolutionParameters parameters) {
-		final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationFreeModule(module, deps, parameters.defaultMapping(), JkVersionProvider.empty());
+		final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(module, deps, parameters.defaultMapping(), JkVersionProvider.empty());
 
+		final String[] confs = resolvedScope == null ? new String[] {"default"} : new String[] {resolvedScope.name()};
 		final ResolveOptions resolveOptions = new ResolveOptions();
-		resolveOptions.setConfs(new String[] {resolvedScope.name()});
+		resolveOptions.setConfs(confs);
 		resolveOptions.setTransitive(true);
 		resolveOptions.setOutputReport(JkLog.verbose());
 		resolveOptions.setLog(logLevel());

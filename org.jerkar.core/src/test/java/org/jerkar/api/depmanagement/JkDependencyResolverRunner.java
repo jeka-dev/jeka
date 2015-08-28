@@ -21,10 +21,10 @@ public class JkDependencyResolverRunner {
 	public static void hibernate() {
 		final JkDependencies deps = JkDependencies.builder()
 				.on("org.hibernate:hibernate-core:4.3.7.Final")
-				.build().withDefaultScope(COMPILE);
+				.build();//.withDefaultScope(COMPILE);
 		final JkResolutionParameters params = JkResolutionParameters.defaultScopeMapping((COMPILE.mapTo("compile(*)")));
-		final JkDependencyResolver resolver = JkDependencyResolver.managed(REPOS, deps).withParams(params);
-		final JkResolveResult resolveResult = resolver.resolve(COMPILE);
+		final JkDependencyResolver resolver = JkDependencyResolver.managed(REPOS, deps);//.withParams(params);
+		final JkResolveResult resolveResult = resolver.resolve();
 		for (final File file : resolveResult.localFiles()) {
 			System.out.println(file.getAbsolutePath());
 		}

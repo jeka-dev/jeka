@@ -32,6 +32,31 @@ public final class JkUtilsReflect {
 	}
 
 	/**
+	 * Returns a method from the target class that has the same name and same argument types then the specified one.
+	 * Argument types are compared on name base to handle different classloaders.
+	 */
+	public static Method methodWithSameNameAndArgType(Method original, Class<?> targetClass) {
+		final ClassLoader classLoader = targetClass.getClassLoader();
+		final int paramLenght = original.getParameterTypes().length;
+		final Class<?>[] targetArgTypes = new Class<?>[paramLenght];
+		for (int i=0; i < paramLenght; i++) {
+			try {
+				targetArgTypes[i] = classLoader.loadClass(original.getParameterTypes()[i].getName());
+			} catch (final ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		try {
+			return targetClass.getMethod(original.getName(), targetArgTypes);
+		} catch (final SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (final NoSuchMethodException e) {
+			throw new RuntimeException("No method '" + original.getName() + "' found on class " + targetClass.getName() + " having param types " + Arrays.asList(targetArgTypes) ,e);
+		}
+
+	}
+
+	/**
 	 * Same as {@link Field#get(Object)} but throwing only unchecked exceptions.
 	 */
 	@SuppressWarnings("unchecked")
@@ -160,10 +185,6 @@ public final class JkUtilsReflect {
 		try {
 			if (!method.isAccessible()) {
 				method.setAccessible(true);
-			}
-			final Class<?>[] paramTypes = new Class<?>[params.length];
-			for (int i = 0; i<params.length; i++) {
-				paramTypes[i] = params[i].getClass();
 			}
 			return (V) method.invoke(target, params);
 		} catch (final InvocationTargetException e) {
