@@ -64,10 +64,11 @@ JkDependencies deps = JkDependencies.builder()
 deps = deps.withDefaultScope(COMPILE);
 ```
 
-Instances of `JkDependencies` can be added to each other.
+If you don't specify scope on a module and you don't set default scope, then at resolution time the dependency will be considerer as binded to every scope. 
 
-Look at the [JkDepencies class API](http://jerkar.github.io/javadoc/latest/org/jerkar/api/depmanagement/JkDependencies.html) to get see all possibilities.
-
+<p class="alert alert-success">
+<b>Note :</b> Instances of <code>JkDependencies</code> can be added to each other. Look at the <a href="http://jerkar.github.io/javadoc/latest/org/jerkar/api/depmanagement/JkDependencies.html">JkDepencies class API</a> for further details.
+</p>
 
 #### Define scopes
 
@@ -94,7 +95,8 @@ public static final JkScope TEST = JkScope.of("test").extending(RUNTIME, PROVIDE
 
 #### Defining individual dependency
 
-Now get focus on each type of dependency we can declare.
+Jerkar can deal with different types of dependency, as simple files located on the filesystem or artifacts located on a Maven/Ivy repositories. 
+This section focus on describing the different types of dependencies Jerkar can handle.
 
 ##### Dependency on arbitrary files
 
@@ -297,7 +299,7 @@ So the above module dependencies are translated to Ivy equivalent :
 ```
 
 
-#### Default Scope and Default Scope Mapping
+#### Default Scope Mapping
 
 The way transitive dependencies are actually resolved depends on the `JkDependencyResolver` used for resolution. 
 Indeed you can set _default scope_ and _default scope mapping_ on the resolver, through `JkResolutionParameter`. This two settings ends at being translated to respectively _Ivy configuration_ and _Ivy configuration mapping_.

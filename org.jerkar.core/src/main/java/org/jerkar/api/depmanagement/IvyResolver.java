@@ -28,6 +28,8 @@ final class IvyResolver implements InternalDepResolver {
 
 	private static final Random RANDOM = new Random();
 
+	private static final String[] IVY_24_ALL_CONF = new String[] {"*(public)"};
+
 	private final Ivy ivy;
 
 	private IvyResolver(Ivy ivy) {
@@ -73,7 +75,8 @@ final class IvyResolver implements InternalDepResolver {
 			JkScope resolvedScope, JkResolutionParameters parameters) {
 		final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(module, deps, parameters.defaultMapping(), JkVersionProvider.empty());
 
-		final String[] confs = resolvedScope == null ? new String[] {"default"} : new String[] {resolvedScope.name()};
+
+		final String[] confs = resolvedScope == null ? IVY_24_ALL_CONF : new String[] {resolvedScope.name()};
 		final ResolveOptions resolveOptions = new ResolveOptions();
 		resolveOptions.setConfs(confs);
 		resolveOptions.setTransitive(true);

@@ -54,6 +54,8 @@ final class IvyTranslations {
 
 	private static final String MAVEN_ARTIFACT_PATTERN = "/[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]";
 
+	private static final Configuration DEFAULT_CONFIGURATION = new Configuration("default");
+
 	private IvyTranslations() {
 	}
 
@@ -73,6 +75,32 @@ final class IvyTranslations {
 		final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module.moduleId().group(), module
 				.moduleId().name(), module.version().name());
 		return new DefaultModuleDescriptor(thisModuleRevisionId, "integration", null);
+	}
+
+	private static DependencyDescriptor toScopelessDependencyDescriptor(JkModuleDependency dependency,
+			JkScopeMapping defaultMapping, JkVersion resolvedVersion, Configuration[] moduleConfigurations) {
+
+		final ModuleRevisionId moduleRevisionId = toModuleRevisionId(dependency, resolvedVersion);
+		final boolean changing = dependency.versionRange().definition().endsWith("-SNAPSHOT");
+		final DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null, moduleRevisionId, false,
+				changing, dependency.transitive());
+
+		// filling configuration
+		if (defaultMapping == null || defaultMapping.entries().isEmpty()) {
+			result.addDependencyConfiguration("*", "*");
+		} else {
+			for (final JkScope entryScope : defaultMapping.entries()) {
+				for (final JkScope mappedScope : defaultMapping.mappedScopes(entryScope)) {
+					result.addDependencyConfiguration(entryScope.name(), mappedScope.name());
+				}
+			}
+		}
+
+		for (final JkDepExclude depExclude : dependency.excludes()) {
+			final ExcludeRule excludeRule = toExcludeRule(depExclude);
+			result.addExcludeRule("*", excludeRule);
+		}
+		return result;
 	}
 
 	/**
@@ -316,6 +344,9 @@ final class IvyTranslations {
 			final Configuration configuration = toConfiguration(involvedScope);
 			moduleDescriptor.addConfiguration(configuration);
 		}
+		if (dependencies.involvedScopes().isEmpty()) {
+			moduleDescriptor.addConfiguration(DEFAULT_CONFIGURATION);
+		}
 		if (defaultMapping != null) {
 			for (final JkScope scope : defaultMapping.entries()) {
 				final Configuration configuration = toConfiguration(scope);
@@ -329,7 +360,14 @@ final class IvyTranslations {
 			if (scopedDependency.dependency() instanceof JkModuleDependency) {
 				final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency.dependency();
 				final JkVersion resolvedVersion = resolvedVersions.versionOf(externalModule.moduleId());
-				final DependencyDescriptor dependencyDescriptor = toDependencyDescriptor(scopedDependency, defaultMapping, resolvedVersion);
+				final DependencyDescriptor dependencyDescriptor;
+				if (scopedDependency.scopeType() == ScopeType.UNSET) {
+					dependencyDescriptor = toScopelessDependencyDescriptor(externalModule, defaultMapping,
+							resolvedVersion, moduleDescriptor.getConfigurations());
+				} else {
+					dependencyDescriptor = toDependencyDescriptor(scopedDependency, defaultMapping, resolvedVersion);
+				}
+
 				moduleDescriptor.addDependency(dependencyDescriptor);
 			}
 		}

@@ -20,7 +20,7 @@ public class JkDependencyResolverRunner {
 
 	public static void hibernate() {
 		final JkDependencies deps = JkDependencies.builder()
-				.on("org.hibernate:hibernate-core:4.3.7.Final")
+				.on("org.hibernate:hibernate-core:4.3.7.Final").excludeLocally("dom4j","dom4j")
 				.build();//.withDefaultScope(COMPILE);
 		final JkResolutionParameters params = JkResolutionParameters.defaultScopeMapping((COMPILE.mapTo("compile(*)")));
 		final JkDependencyResolver resolver = JkDependencyResolver.managed(REPOS, deps);//.withParams(params);
