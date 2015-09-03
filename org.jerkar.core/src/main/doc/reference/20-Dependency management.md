@@ -93,12 +93,11 @@ public static final JkScope TEST = JkScope.of("test").extending(RUNTIME, PROVIDE
 	.descr("Dependencies necessary to compile and run tests."); 
 ```
 
-#### Defining individual dependency
+#### Defining different type of dependencies
 
-Jerkar can deal with different types of dependency, as simple files located on the filesystem or artifacts located on a Maven/Ivy repositories. 
-This section focus on describing the different types of dependencies Jerkar can handle.
+This section describes different types of dependencies Jerkar can handle.
 
-##### Dependency on arbitrary files
+##### Dependencies on local files
 
 You just have to mention the path of one or several files. If one of the files does not exist at resolution time (when the dependency is actually retrieved), build fails.
 
@@ -110,23 +109,23 @@ You just have to mention the path of one or several files. If one of the files d
     @Override
     protected JkDependencies dependencies() {
         return JkDependencies.builder()
-            .on(depFile1, depFile2).build();
+            .on(depFile1, depFile2, file("libs/my.jar")).build();
     }
 		
 ``` 
 
-##### Dependency on files produced by computation
+##### Dependencies on files produced by computation
 
 It is typically used for __multi projects builds__ or __multi module__ projects.
 
 The principle is that if the specified files are not found, then the computation is run in order to generate the missing files.
 If some files still missing after the computation has run, the build fails.
 
-This mechanism is quite simple yet powerful as it addresses following use case :
+This mechanism is quite simple yet powerful as it addresses following use cases :
 
-* Dependency on files produced by other Jerkar project.
-* Dependency on files produced by external project built with any type of technology (Ant, Grunt, Maven, Gradle, SBT, Android SDK, Make, ...).
-* Dependency on files produced by a method of the main build.   
+* Dependencies on files produced by other Jerkar project.
+* Dependencies on files produced by external project built with any type of technology (Ant, Grunt, Maven, Gradle, SBT, Android SDK, Make, ...).
+* Dependencies on files produced by a method of the main build.   
 
 The generic way is to construct this kind of dependency using a `java.lang.Runnable`.
 
@@ -147,7 +146,7 @@ Jerkar provides some shortcuts to deal with other Jerkar projects : For this, yo
 
 ```
 @JkProject("../foo")          // The external project path relative to the current project root
-public JkJavaBuild fooBuild;  // This is the build coming from the 'foo' project 
+public JkJavaBuild fooBuild;  // This build comes from 'foo' project 
 	
 @Override
 protected JkDependencies dependencies() {
@@ -177,7 +176,7 @@ Here, if _fooJar_ file does not exist, `ant makeJar` command line is invoked pri
 If the file still does not exist then the build fails.
 
 
-##### Dependency on Module
+##### Dependencies on Module
 
 This is for declaring a dependency on module hosted in _Maven_ or _Ivy_ repository. Basically you instantiate a `JkModuleDepency` from it's group, name and version.
 

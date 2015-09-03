@@ -11,7 +11,7 @@ Jerkar proposes 2 ways to deal with multi-project builds :
 A build class (master build) declares its slave builds. The slave builds can be triggered individually or all-in-one from the master build.
 The slave builds are not aware they are slave. In fact any build can be used as slave. The relation is uni-directional 
 
-`JkBuild` declare a method `#slaves()` returning the slaves of its instances (embodied as `org.jerkar.tool.JkSlaveBuilds`). Naturally this result is recursive as it contains slaves of the slaves and so on ...
+`JkBuild` defines a method `#slaves()` returning the slaves of its instances (embodied as `org.jerkar.tool.JkSlaveBuilds`). Naturally this result is recursive as it contains slaves of the slaves and so on ...
 
 From this result you can invoke a method for all slaves as `slaves().invokeOnAll("clean")`. The iteration order ensure that an invokation on a build can not be done until all its slaves has been invoked first.  
 
