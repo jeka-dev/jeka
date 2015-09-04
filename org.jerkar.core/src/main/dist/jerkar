@@ -69,10 +69,11 @@ if [ -z "$JERKAR_HOME" ] ; then
 
   saveddir=`pwd`
 
-  JERKAR_HOME=`dirname "$PRG"`/..
+  JERKAR_HOME=`dirname "$PRG"`
 
   # make it fully qualified
   JERKAR_HOME=`cd "$JERKAR_HOME" && pwd`
+  echo "---$JERKAR_HOME"
 
   cd "$saveddir"
 fi
@@ -149,6 +150,12 @@ fi
 JERKAR_CMD_LINE_ARGS="$@"
 export JERKAR_CMD_LINE_ARGS
 
+if [ -d "./build/libs/build" ]; then
+   LOCAL_BUILD_DIR="./build/libs/build/*:"
+else
+   LOCAL_BUILD_DIR=""
+fi
+
 exec "$JAVACMD" \
   $JERKAR_OPTS \
-  -cp "$JERKAR_HOME/libs/ext/*;$JERKAR_HOME/org.jerkar.core-fat.jar" org.jerkar.tool.Main "$@"
+  -cp "$LOCAL_BUILD_DIR$JERKAR_HOME/libs/ext/*:$JERKAR_HOME/org.jerkar.core.jar" org.jerkar.tool.Main "$@"
