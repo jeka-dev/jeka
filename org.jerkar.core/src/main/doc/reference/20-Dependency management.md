@@ -3,7 +3,7 @@
 
 ### What is a dependency ?
 
-In this context, we call a __dependency__ an indication that can be resolved to a file (or a set of file) needed to accomplish certain part of the build.
+In build context, a __dependency__ is an indication that can be resolved to a file (or a set of file) needed to accomplish certain part of the build.
 So for example if a project _Foo_ has a __dependency__ _bar_, this means that _Foo_ may need the files indicated by _bar_ for building. 
 In Jerkar code, the dependency concept is embodied by the abstract `JkDependency` class.
 
@@ -34,7 +34,7 @@ Projects consuming artifacts coming from Ivy repository can also use `JkScopeMap
   
 ### Define a set of dependencies
 
-To define a set dependencies (typically the dependencies of the project to build), you basically define a list of __scoped dependency__ (embodied by `JkScopedDependency`). A __scoped dependency__ is a __dependency__ associated with one or several __scopes__.
+To define a set dependencies (typically the dependencies of the project to build), you basically define a list of __scoped dependency__ (embodied by `JkScopedDependency`). A __scoped dependency__ is a __dependency__ associated with zero, one or several __scopes__.
 
 Practically, you define some scopes then you bind dependencies to these scopes.
 
@@ -63,6 +63,7 @@ JkDependencies deps = JkDependencies.builder()
 ...
 deps = deps.withDefaultScope(COMPILE);
 ```
+Here, both `GUAVA` and `JERSEY_SERVER` will be declared with `COMPILE` scope. 
 
 If you don't specify scope on a module and you don't set default scope, then at resolution time the dependency will be considerer as binded to every scope. 
 
@@ -95,19 +96,17 @@ public static final JkScope TEST = JkScope.of("test").extending(RUNTIME, PROVIDE
 
 #### Defining different type of dependencies
 
-This section describes different types of dependencies Jerkar can handle.
+This section describes how to declare different types of dependencies.
 
 ##### Dependencies on local files
 
 You just have to mention the path of one or several files. If one of the files does not exist at resolution time (when the dependency is actually retrieved), build fails.
 
 ```
-    final File depFile1 = new File("/my/file1.jar");
-	
-    final File depFile2 = new File("/my/file2.zip");
-
     @Override
     protected JkDependencies dependencies() {
+        final File depFile1 = new File("/my/file1.jar");  // file with absolute path
+    	final File depFile2 = file("zips/file2.zip");  // file related to project root dir
         return JkDependencies.builder()
             .on(depFile1, depFile2, file("libs/my.jar")).build();
     }
@@ -301,25 +300,27 @@ So the above module dependencies are translated to Ivy equivalent :
 #### Default Scope Mapping
 
 The way transitive dependencies are actually resolved depends on the `JkDependencyResolver` used for resolution. 
-Indeed you can set _default scope_ and _default scope mapping_ on the resolver, through `JkResolutionParameter`. This two settings ends at being translated to respectively _Ivy configuration_ and _Ivy configuration mapping_.
+Indeed you can set _default scope mapping_ on the resolver, through `JkResolutionParameter`. This setting ends at being translated to respectively _Ivy configuration mapping_.
 [This page](http://ant.apache.org/ivy/history/2.2.0/ivyfile/configurations.html) explains how _Ivy configurations_ works.
-
-
 
 
 #### Excluding Module from the Dependency Tree
 
 When resolving dependency transitively you may grab unwanted dependencies. To filter them out you can exclude them from the tree using appropriate methods.
 
+```
+final JkDependencies deps = JkDependencies.builder()
+    .on("org.springframework:spring-context:4.2.1.RELEASE")
+    .on("org.hibernate:hibernate-core:4.3.7.Final").excludeLocally("dom4j","dom4j")
+    .excludeGlobally("antlr", "antlr")
+    .excludeGlobally("org.jboss.logging", "*").build();
+```
 
+`#excludeLocally` apply only to the module previously declared. So here, _dom4j_ excludes will apply only for _hibernate-core_ dependency. This means that if _dom4j_ is a transitive dependency of _hibernate-core_ then transitive resolution will stop at _dom4j_. If _spring-context_ as a dependency on _dom4j_ (direct or transitive) then the result will include _dom4j_ along its dependencies as it has not been excluded from _spring-context_ dependency.   
 
+`#excludeGlobally` acts on the global result. If any of the declared dependencies have a dependency on _antlr_ then this lib (and its dependencies) won't be part of the result.
 
+<p class="alert alert-success">
+<b>Note :</b> You can use wild-card or regular expressions for both group and artifact name. In this case all matching dependencies will be excluded.
+</p>
 
-
-
-
-
-
-
- 
- 
