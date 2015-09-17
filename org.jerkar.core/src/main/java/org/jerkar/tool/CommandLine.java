@@ -22,7 +22,7 @@ import org.jerkar.api.utils.JkUtilsString;
  * In other words sub-project settings are a subset of master settings.
  * 
  */
-class CommandLine {
+final class CommandLine {
 
 	private static final String ALL_BUILD_SYMBOL = "*";
 

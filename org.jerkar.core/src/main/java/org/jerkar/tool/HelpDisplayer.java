@@ -8,7 +8,7 @@ import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.tool.JkProjectDef.JkProjectBuildClassDef;
 import org.jerkar.tool.PluginDictionnary.JkPluginDescription;
 
-class HelpDisplayer {
+final class HelpDisplayer {
 
 	public static void help(JkBuild build) {
 		JkLog.info("Usage: jerkar [methodA...] [-optionName=value...] [-DsystemPropName=value...]");

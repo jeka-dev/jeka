@@ -10,7 +10,7 @@ import org.jerkar.api.utils.JkUtilsString;
 /**
  * Provides info about Jerkar itself.
  */
-public class JkInfo {
+public final class JkInfo {
 
 	private static String version;
 

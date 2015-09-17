@@ -14,7 +14,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-public class JkUtilsIterable {
+public final class JkUtilsIterable {
 
 	public static <T> List<T> listOf(Iterable<T> it) {
 		if (it instanceof List) {

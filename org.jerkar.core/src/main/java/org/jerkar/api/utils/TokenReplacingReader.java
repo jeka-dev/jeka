@@ -12,7 +12,7 @@ import java.util.Map;
 /*
  *  Kindly borrowed from https://github.com/jjenkov/TokenReplacingReader/blob/master/src/main/java/com/jenkov/io/TokenReplacingReader.java
  */
-class TokenReplacingReader extends Reader {
+final class TokenReplacingReader extends Reader {
 
 	private final PushbackReader pushbackReader;
 	private final Map<String, String> tokenResolver;

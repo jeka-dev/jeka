@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 
-public class JkFileFilters {
+public final class JkFileFilters {
 
 	public static FileFilter endingBy(final String... suffixes) {
 		return new FileFilter() {

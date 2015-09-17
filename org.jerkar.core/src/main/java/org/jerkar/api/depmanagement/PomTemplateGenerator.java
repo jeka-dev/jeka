@@ -17,7 +17,7 @@ import org.jerkar.api.system.JkInfo;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 
-class PomTemplateGenerator {
+final class PomTemplateGenerator {
 
 	private static final String TOKEN = "____jerkar.maven.extraInfo____";
 

@@ -6,7 +6,7 @@ package org.jerkar.tool;
  * 
  * @author Jerome Angibaud
  */
-public class JkException extends RuntimeException {
+public final class JkException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

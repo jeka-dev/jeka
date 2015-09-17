@@ -1,6 +1,6 @@
 package org.jerkar.api.utils;
 
-public class JkUtilsAssert {
+public final class JkUtilsAssert {
 
 	public static void notNull(Object object, String message) {
 		if (object == null) {

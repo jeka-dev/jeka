@@ -3,7 +3,7 @@ package org.jerkar.api.utils;
 import java.io.File;
 import java.io.IOException;
 
-public class JkUtilsJdk {
+public final class JkUtilsJdk {
 
 	public static File toolsJar() {
 		final String jdkLocation = System.getProperty("java.home");

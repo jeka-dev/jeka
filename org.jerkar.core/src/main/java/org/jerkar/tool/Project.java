@@ -29,7 +29,7 @@ import org.jerkar.tool.CommandLine.MethodInvocation;
  * Build class are expected to lie in [project base dir]/build/spec.<br/>
  * Classes having simple name starting by '_' are not compiled.
  */
-class Project {
+final class Project {
 
 	private final File projectBaseDir;
 

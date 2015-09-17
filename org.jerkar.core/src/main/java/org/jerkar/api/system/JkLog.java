@@ -13,7 +13,7 @@ import org.jerkar.api.utils.JkUtilsTime;
  * 
  * @author Jerome Angibaud
  */
-public class JkLog {
+public final class JkLog {
 
 	private static final String INDENT = "    ";
 

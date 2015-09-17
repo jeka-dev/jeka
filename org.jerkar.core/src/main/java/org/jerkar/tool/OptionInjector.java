@@ -15,7 +15,7 @@ import java.util.TreeMap;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
 
-class OptionInjector {
+final class OptionInjector {
 
 	private static final String UNHANDLED_TYPE = new String();
 

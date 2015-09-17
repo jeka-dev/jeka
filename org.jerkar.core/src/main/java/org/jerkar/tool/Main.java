@@ -21,7 +21,7 @@ import org.jerkar.api.utils.JkUtilsTime;
  * 
  * @author Jerome Angibaud
  */
-class Main {
+final class Main {
 
 	public static void main(String[] args) {
 		final long start = System.nanoTime();

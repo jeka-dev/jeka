@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * CInstances of this class are used to parameter the dependency resolution
  */
-public class JkResolutionParameters implements Serializable {
+public final class JkResolutionParameters implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

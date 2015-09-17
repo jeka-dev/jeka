@@ -28,7 +28,7 @@ import org.w3c.dom.NodeList;
  * 
  * @author Jerome Angibaud
  */
-class MavenMetadata {
+final class MavenMetadata {
 
 	static MavenMetadata of(JkVersionedModule versionedModule) {
 		final MavenMetadata metadata = new MavenMetadata();

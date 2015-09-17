@@ -9,7 +9,7 @@ import java.util.TimeZone;
  * 
  * @author Jerome Angibaud
  */
-public class JkUtilsTime {
+public final class JkUtilsTime {
 
 	/**
 	 * Returns the current system date

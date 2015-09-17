@@ -26,7 +26,7 @@ import org.jerkar.api.utils.JkUtilsString;
  * 
  * @author Jerome Angibaud
  */
-class JavaSourceParser {
+final class JavaSourceParser {
 
 	private static final JkScopeMapping SCOPE_MAPPING = JkScopeMapping.of(JkScope.BUILD).to("default(*)");
 

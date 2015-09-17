@@ -23,7 +23,6 @@ import org.jerkar.api.utils.JkUtilsString;
  */
 public class JkScope implements Serializable {
 
-
 	private static final long serialVersionUID = 1L;
 
 	/**

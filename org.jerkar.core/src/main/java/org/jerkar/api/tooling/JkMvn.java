@@ -9,7 +9,7 @@ import org.jerkar.api.system.JkProcess;
  * 
  * @author Jerome Angibaud
  */
-public class JkMvn implements Runnable {
+public final class JkMvn implements Runnable {
 
 	/**
 	 * Creates a Maven command. Separate argument in different string, don't use white space to separate workds.

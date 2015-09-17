@@ -18,7 +18,7 @@ import org.jerkar.api.utils.JkUtilsIO;
  * 
  * @author Jerome Angibaud
  */
-public class JkManifest {
+public final class JkManifest {
 
 	public static final String PATH = "META-INF/MANIFEST.MF";
 

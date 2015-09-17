@@ -8,7 +8,7 @@ import java.util.Set;
 import org.jerkar.api.depmanagement.JkIvyPublication.Artifact;
 import org.jerkar.api.utils.JkUtilsIterable;
 
-public class JkIvyPublication implements Iterable<Artifact> {
+public final class JkIvyPublication implements Iterable<Artifact> {
 
 	public static JkIvyPublication of(File file, String type, JkScope ...jkScopes) {
 		return new JkIvyPublication(new HashSet<JkIvyPublication.Artifact>(), null, null).and(file, type, jkScopes);
