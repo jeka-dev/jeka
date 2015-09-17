@@ -19,6 +19,9 @@ Jerkar builds itself. To get Jerkar full distrib built from the Java sources onl
     * Choose `org.jerkar.tool.Main` as Main class
 * Run it : It will launch a multi-project build. You will find result for the full distrib in *org.jerkar.distrib-all/build/output* directory 
 
+Note that you can do the same using Intellij as the Intellij module definitions (.iml) are stored in git.
+
+
 
 # Status
 
