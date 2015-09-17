@@ -30,7 +30,7 @@ public class CoreBuild extends AbstractBuild {
 	// Just to run directly the whole build bypassing the Jerkar bootstrap mechanism.
 	// Was necessary in first place to build Jerkar with itself.
 	public static void main(String[] args) {
-		new CoreBuild().doDefault();
+		new CoreBuild().initialized().doDefault();
 	}
 
 	// Include a time stamped version file as resource.

@@ -133,6 +133,15 @@ public class JkBuild {
 	}
 
 	/**
+	 * Convenient method to invokes {@link #init()} then returns this instance.
+	 * It is typically used in #main method as <code>new MyBuild().initialized().doDdefault();</code>
+	 */
+	protected final JkBuild initialized() {
+		init();
+		return this;
+	}
+
+	/**
 	 * Invokes the specified method in this build.
 	 */
 	private final void invoke(String methodName, File fromDir) {
