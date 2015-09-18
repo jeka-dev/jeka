@@ -17,7 +17,7 @@ import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkProject;
 
 
-public class DistribAllBuild extends JkBuildDependencySupport {
+class DistribAllBuild extends JkBuildDependencySupport {
 	
 	@JkProject("../org.jerkar.plugins-sonar")
 	PluginsSonarBuild pluginsSonar;

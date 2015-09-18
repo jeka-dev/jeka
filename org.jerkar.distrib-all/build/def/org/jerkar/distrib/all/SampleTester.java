@@ -3,7 +3,7 @@ package org.jerkar.distrib.all;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.system.JkProcess;
 
-public class SampleTester {
+class SampleTester {
 	
 	private final JkFileTree sampleBaseDir;
 
@@ -28,9 +28,5 @@ public class SampleTester {
 			.andParameters(args).failOnError(true)
 			.runSync();
 	}
-	
-	
-	
-	
 
 }
