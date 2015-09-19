@@ -297,7 +297,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		final LinkedHashSet<File> set = new LinkedHashSet<File>();
 		for (final JkScopedDependency scopedDependency : this.dependencies) {
 			if (scopedDependency.isInvolvedInAnyOf(scopes)
-					&& scopedDependency.dependency() instanceof JkDependency) {
+					&& scopedDependency.dependency() instanceof JkFileDependency) {
 				final JkFileDependency fileDeps = (JkFileDependency) scopedDependency.dependency();
 				set.addAll(fileDeps.files());
 			}

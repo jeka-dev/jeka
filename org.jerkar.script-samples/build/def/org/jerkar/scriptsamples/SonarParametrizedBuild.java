@@ -25,8 +25,8 @@ public class SonarParametrizedBuild extends JkJavaBuild {
 		JkBuildPluginSonar sonarPlugin = new JkBuildPluginSonar()
 			.prop(JkSonar.HOST_URL, sonarEnv.url)
 			.prop(JkSonar.BRANCH, "myBranch");
-		JkBuildPluginJacoco pluginJacoco = new JkBuildPluginJacoco();
-		this.plugins.activate(sonarPlugin);
+		JkBuildPluginJacoco jacocoPlugin = new JkBuildPluginJacoco();
+		this.plugins.activate(sonarPlugin, jacocoPlugin);
 	}
 	
 	@Override  

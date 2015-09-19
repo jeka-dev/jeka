@@ -66,7 +66,8 @@
 	</classpathentry>
 	<classpathentry kind="var" path="IVY_CACHE/commons-logging/commons-logging/jars/commons-logging-1.0.4.jar" sourcepath="IVY_CACHE/commons-logging/commons-logging/sources/commons-logging-1.0.4-sources.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.ivy2/cache/commons-logging/commons-logging/javadocs/commons-logging-1.0.4-javadoc.jar"/>
+			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.ivy2/cache/commo
+			ns-logging/commons-logging/javadocs/commons-logging-1.0.4-javadoc.jar"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="var" path="IVY_CACHE/commons-codec/commons-codec/jars/commons-codec-1.2.jar">
