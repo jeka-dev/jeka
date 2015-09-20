@@ -35,6 +35,16 @@ public final class JkPath implements Iterable<File> {
 		return new JkPath(files);
 	}
 
+	public static JkPath currentClasspath() {
+		final List<File> files = new LinkedList<File>();
+		final String classpath = System.getProperty("java.class.path");
+		final String[] classpathEntries = classpath.split(File.pathSeparator);
+		for (final String classpathEntry : classpathEntries) {
+			files.add(new File(classpathEntry));
+		}
+		return JkPath.of(files);
+	}
+
 	/**
 	 * Creates a <code>JkPath</code> from a base directory and string of relative paths separated with a ";".
 	 */

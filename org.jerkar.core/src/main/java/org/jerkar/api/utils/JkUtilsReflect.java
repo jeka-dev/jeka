@@ -39,9 +39,15 @@ public final class JkUtilsReflect {
 		final ClassLoader classLoader = targetClass.getClassLoader();
 		final int paramLenght = original.getParameterTypes().length;
 		final Class<?>[] targetArgTypes = new Class<?>[paramLenght];
+		final Class<?>[] parameterTypes = original.getParameterTypes();
 		for (int i=0; i < paramLenght; i++) {
 			try {
-				targetArgTypes[i] = classLoader.loadClass(original.getParameterTypes()[i].getName());
+				final Class<?> clazz = parameterTypes[i];
+				if (!clazz.isArray()) {
+					targetArgTypes[i] = classLoader.loadClass(parameterTypes[i].getName());
+				} else {
+					targetArgTypes[i] = parameterTypes[i];
+				}
 			} catch (final ClassNotFoundException e) {
 				throw new RuntimeException(e);
 			}
