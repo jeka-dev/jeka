@@ -608,7 +608,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	private static JkJavadocMaker javadocMaker(JkJavaBuild javaBuild, boolean fullName, boolean includeVersion) {
 		String name = fullName ? javaBuild.moduleId().toString(): javaBuild.moduleId().toString();
 		if (includeVersion) {
-			name = name + "-" + javaBuild.actualVersion().name();
+			name = name + "-" + javaBuild.version().name();
 		}
 		name = name + "-javadoc";
 		return JkJavadocMaker.of(javaBuild.sources(), javaBuild.ouputDir(name), javaBuild.ouputDir(name + ".jar"))

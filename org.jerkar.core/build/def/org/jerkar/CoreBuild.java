@@ -36,7 +36,7 @@ public class CoreBuild extends AbstractBuild {
 	// Include a time stamped version file as resource.
 	@Override
 	protected JkResourceProcessor resourceProcessor() {
-		final String version = actualVersion().name() + " - built at - " + buildTimestamp();
+		final String version = version().name() + " - built at - " + buildTimestamp();
 		return super.resourceProcessor().interpolating("META-INF/MANIFEST.MF", "version", version);
 	}
 

@@ -11,7 +11,7 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 /**
  * This build is equivalent to {@link MavenStyleBuild} but removing 
  * the needless part cause we respect the convention project folder name = groupName.projectName
- * and the version number is taken from resource 'version.txt' (default behavior)
+ * and the version number is taken from jerkar.properties (default behavior)
  *
  * @author Jerome Angibaud
  */

@@ -201,6 +201,10 @@ final class Project {
 			Collection<JkPluginSetup> pluginSetups, Map<String, String> options,  PluginDictionnary<JkBuildPlugin> dictionnary) {
 		JkOptions.populateFields(build);
 		JkOptions.populateFields(build, options);
+		final File localProps = build.file(JkConstants.BUILD_DEF_DIR + "/build.properties");
+		if (localProps.exists()) {
+			JkOptions.populateFields(build, JkUtilsFile.readPropertyFileAsMap(localProps));
+		}
 		configureAndActivatePlugins(build, pluginSetups, dictionnary);
 	}
 
