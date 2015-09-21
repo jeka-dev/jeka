@@ -25,7 +25,7 @@ public abstract class AbstractBuild extends JkJavaBuild {
 	}
 
 	@Override
-	protected JkVersion version() {
+	public JkVersion version() {
 		return JkVersion.ofName("0.1.3-SNAPSHOT");
 	}
 

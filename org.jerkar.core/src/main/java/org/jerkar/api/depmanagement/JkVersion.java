@@ -1,7 +1,6 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.Serializable;
-import java.net.URL;
 
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIO;
@@ -25,15 +24,14 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
 		return ofName(JkUtilsIO.read(clazz.getResource(DEFAULT_VERSION_RESOURCE_NAME)).trim());
 	}
 
-	public static JkVersion fromOptionalResourceOrExplicit(Class<?> clazz, String explicit) {
-		final URL versionResource = clazz.getResource(JkVersion.DEFAULT_VERSION_RESOURCE_NAME);
-		if (versionResource != null) {
-			final String version = JkUtilsIO.read(versionResource).trim();
-			if (!JkUtilsString.isBlank(version)) {
-				return JkVersion.ofName(version);
-			}
+	public static JkVersion firstNonNull(String first, String second) {
+		if (!JkUtilsString.isBlank(first)) {
+			return JkVersion.ofName(first);
 		}
-		return JkVersion.ofName(explicit);
+		if (!JkUtilsString.isBlank(second)) {
+			return JkVersion.ofName(second);
+		}
+		throw new IllegalArgumentException("Both first and second can't be null");
 	}
 
 	private final String name;

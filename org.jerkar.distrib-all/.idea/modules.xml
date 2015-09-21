@@ -2,12 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$IVY_CACHE$/UserTemp/I19451/git/jerkar/org.jerkar.core/org.jerkar.core.iml" filepath="$IVY_CACHE$/UserTemp/I19451/git/jerkar/org.jerkar.core/org.jerkar.core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../org.jerkar.core/org.jerkar.core.iml" filepath="$PROJECT_DIR$/../org.jerkar.core/org.jerkar.core.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.jerkar.distrib-all.iml" filepath="$PROJECT_DIR$/org.jerkar.distrib-all.iml" />
-      <module fileurl="file://$IVY_CACHE$/UserTemp/I19451/git/jerkar/org.jerkar.plugins-jacoco/org.jerkar.plugins-jacoco.iml" filepath="$IVY_CACHE$/UserTemp/I19451/git/jerkar/org.jerkar.plugins-jacoco/org.jerkar.plugins-jacoco.iml" />
-      <module fileurl="file://$IVY_CACHE$/UserTemp/I19451/git/jerkar/org.jerkar.plugins-sonar/org.jerkar.plugins-sonar.iml" filepath="$IVY_CACHE$/UserTemp/I19451/git/jerkar/org.jerkar.plugins-sonar/org.jerkar.plugins-sonar.iml" />
-      <module fileurl="file://$IVY_CACHE$/UserTemp/I19451/git/jerkar/org.jerkar.script-samples/org.jerkar.script-samples.iml" filepath="$IVY_CACHE$/UserTemp/I19451/git/jerkar/org.jerkar.script-samples/org.jerkar.script-samples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../org.jerkar.plugins-jacoco/org.jerkar.plugins-jacoco.iml" filepath="$PROJECT_DIR$/../org.jerkar.plugins-jacoco/org.jerkar.plugins-jacoco.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../org.jerkar.plugins-sonar/org.jerkar.plugins-sonar.iml" filepath="$PROJECT_DIR$/../org.jerkar.plugins-sonar/org.jerkar.plugins-sonar.iml" />
     </modules>
   </component>
 </project>
-

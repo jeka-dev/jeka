@@ -17,7 +17,6 @@ import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.java.JkClassLoader;
-import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -51,8 +50,8 @@ final class Project {
 
 
 	/**
-	 * Constructs a project from its base directory and the download repo.
-	 * Download repo is used in case the build classes need some dependencies
+	 * Constructs a project from its base directory and the download repository.
+	 * Download repository is used in case the build classes need some dependencies
 	 * in order to be compiled/run.
 	 */
 	public Project(File baseDir) {
@@ -147,7 +146,7 @@ final class Project {
 		if (JkLocator.libExtDir().exists()) {
 			extraLibs.addAll(JkFileTree.of(JkLocator.libExtDir()).include("**/*.jar").files(false));
 		}
-		return JkPath.of(extraLibs).and(JkClasspath.jerkarJarFile()).withoutDoubloons();
+		return JkPath.currentClasspath().and(extraLibs).withoutDoubloons();
 	}
 
 	private JkPath compileDependentProjects(Set<File> yetCompiledProjects, LinkedHashSet<File> pathEntries) {
@@ -202,6 +201,10 @@ final class Project {
 			Collection<JkPluginSetup> pluginSetups, Map<String, String> options,  PluginDictionnary<JkBuildPlugin> dictionnary) {
 		JkOptions.populateFields(build);
 		JkOptions.populateFields(build, options);
+		final File localProps = build.file(JkConstants.BUILD_DEF_DIR + "/build.properties");
+		if (localProps.exists()) {
+			JkOptions.populateFields(build, JkUtilsFile.readPropertyFileAsMap(localProps));
+		}
 		configureAndActivatePlugins(build, pluginSetups, dictionnary);
 	}
 

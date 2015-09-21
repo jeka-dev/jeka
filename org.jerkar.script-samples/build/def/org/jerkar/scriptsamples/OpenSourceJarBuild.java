@@ -18,7 +18,7 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 public class OpenSourceJarBuild extends JkJavaBuild {
 	
 	@Override 
-	protected JkVersion version() {
+	public JkVersion version() {
 		return JkVersion.ofName("1.3.1-SNAPSHOT");   
 	}
 	

@@ -19,7 +19,6 @@ import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * Template build definition class providing support for managing dependencies and multi-projects.
@@ -55,21 +54,8 @@ public class JkBuildDependencySupport extends JkBuild {
 	 * This may be injected using the 'version' option, otherwise it takes the value returned by {@link #version()}
 	 * If not, it takes the result from {@link #version()}
 	 */
-	public final JkVersion actualVersion() {
-		if (JkUtilsString.isBlank(this.version)) {
-			return version();
-		}
-		return JkVersion.ofName(version);
-	}
-
-	/**
-	 * Returns the version returned by {@link JkBuildDependencySupport#actualVersion()} when not forced.
-	 * 
-	 * @see #actualVersion()
-	 */
-	protected JkVersion version() {
-		return JkVersion.fromOptionalResourceOrExplicit(getClass(), "1.0-SNAPSHOT");
-
+	public JkVersion version() {
+		return JkVersion.firstNonNull(version, "1.0-SNAPSHOT");
 	}
 
 	/**
@@ -84,7 +70,7 @@ public class JkBuildDependencySupport extends JkBuild {
 	 * Returns moduleId along its version
 	 */
 	protected final JkVersionedModule versionedModule() {
-		return JkVersionedModule.of(moduleId(), actualVersion());
+		return JkVersionedModule.of(moduleId(), version());
 	}
 
 	/**
