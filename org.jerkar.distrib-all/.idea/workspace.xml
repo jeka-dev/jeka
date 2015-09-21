@@ -67,7 +67,7 @@
       <file leaf-file-name="org.jerkar.distrib-all.iml" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/org.jerkar.distrib-all.iml">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="33" column="0" selection-start="1345" selection-end="1345" vertical-scroll-proportion="0.0" vertical-offset="561" max-vertical-offset="867">
+            <state line="33" column="0" selection-start="1391" selection-end="1391" vertical-scroll-proportion="0.0" vertical-offset="561" max-vertical-offset="867">
               <folding />
             </state>
           </provider>
@@ -178,12 +178,12 @@
     <property name="MemberChooser.sorted" value="false" />
     <property name="MemberChooser.showClasses" value="true" />
     <property name="MemberChooser.copyJavadoc" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../org.jerkar.core/build/libs/provided/junit-4.11.jar!/" />
+    <property name="last_opened_file_path" value="$IVY_CACHE$/UserTemp/I19451/git/jerkar/org.jerkar.script-samples" />
     <property name="options.lastSelected" value="http.proxy" />
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.searchVisible" value="true" />
-    <property name="project.structure.last.edited" value="Project" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="recentsLimit" value="5" />
@@ -399,7 +399,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/org.jerkar.distrib-all.iml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="33" column="0" selection-start="1345" selection-end="1345" vertical-scroll-proportion="0.0" vertical-offset="561" max-vertical-offset="867">
+        <state line="33" column="0" selection-start="1391" selection-end="1391" vertical-scroll-proportion="0.0" vertical-offset="561" max-vertical-offset="867">
           <folding />
         </state>
       </provider>
