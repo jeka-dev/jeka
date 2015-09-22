@@ -25,6 +25,8 @@ class DistribAllBuild extends JkBuildDependencySupport {
 	@JkProject("../org.jerkar.plugins-jacoco")
 	PluginsJacocoBuild pluginsJacoco;
 	
+	private boolean testSamples = true;
+	
 	@JkDoc("Construct a distrib assuming all dependent sub projects are already built.")
 	public void distrib() {
 		
@@ -69,10 +71,15 @@ class DistribAllBuild extends JkBuildDependencySupport {
 		pluginsJacoco.core.doJavadoc = false;
 		slaves().invokeDoDefaultMethodOnAll();
 		distrib();
+		if (testSamples) {
+			testSamples();
+		}
 	}
 	
 	public void testSamples() {
+		JkLog.startHeaded("Testing Samples");
 		new SampleTester(this.baseDir()).doTest();
+		JkLog.done();
 	}
 	
 	

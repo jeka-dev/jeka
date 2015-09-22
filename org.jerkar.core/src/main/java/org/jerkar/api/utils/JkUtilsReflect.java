@@ -63,6 +63,17 @@ public final class JkUtilsReflect {
 	}
 
 	/**
+	 * Returns an array of the types of specified objects.
+	 */
+	public static Class<?>[] getTypesOf(Object[] params) {
+		final Class<?>[] result = new Class[params.length];
+		for (int i=0; i<params.length; i++) {
+			result[i] = params[i] == null ? null : params[i].getClass();
+		}
+		return result;
+	}
+
+	/**
 	 * Same as {@link Field#get(Object)} but throwing only unchecked exceptions.
 	 */
 	@SuppressWarnings("unchecked")
@@ -199,11 +210,29 @@ public final class JkUtilsReflect {
 				throw (Error) targetEx;
 			}
 			throw JkUtilsThrowable.unchecked((Exception) targetEx);
-		}catch (final Exception e) {
-
+		} catch (final IllegalArgumentException e) {
+			throw new IllegalArgumentException("Expecting " + Arrays.toString(classloaderOf(method.getParameterTypes()))
+					+  " but got " + Arrays.toString(detailedTypesOf(params)));
+		} catch (final Exception e) {
 			throw JkUtilsThrowable.unchecked(e, "Error while invoking " + method + " with params "
 					+ Arrays.toString(params));
 		}
+	}
+
+	private static String[] detailedTypesOf(Object...params) {
+		final String[] result = new String[params.length];
+		for (int i=0; i<params.length; i++) {
+			result[i] = params[i] == null ? null : params[i].getClass().getName() + ":" + params[i].getClass().getClassLoader();
+		}
+		return result;
+	}
+
+	private static String[] classloaderOf(Class<?>...params) {
+		final String[] result = new String[params.length];
+		for (int i=0; i<params.length; i++) {
+			result[i] = params[i] == null ? null :  params[i].getName() + ":" + params[i].getClassLoader().toString();
+		}
+		return result;
 	}
 
 	/**

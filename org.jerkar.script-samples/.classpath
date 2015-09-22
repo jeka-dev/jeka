@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" output="build/output/def-bin" path="build/def"/>
+	<classpathentry kind="src" path="build/def" output="build/output/def-bin"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="src" output="build/output/testClasses" path="src/test/java"/>
@@ -76,13 +76,13 @@
 	</classpathentry>
 	<classpathentry kind="var" path="IVY_CACHE/commons-httpclient/commons-httpclient/jars/commons-httpclient-3.1.jar" sourcepath="IVY_CACHE/commons-httpclient/commons-httpclient/sources/commons-httpclient-3.1-sources.jar"/>
 	<classpathentry kind="lib" path="C:/UserTemp/I19451/software/eclipse-standard-kepler-SR1-win32/plugins/org.junit_4.11.0.v201303080030/junit.jar"/>
+	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.plugins-jacoco/bin"/>
 	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.core/build/libs/provided/ivy-2.4.0.jar"/>
+	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.plugins-sonar/bin"/>
 	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.core/build/libs/provided/bouncycastle-pgp-152.jar"/>
+	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.core/bin"/>
 	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.core/build/libs/test/jdepend-2.9.1.jar"/>
 	<classpathentry kind="lib" path="C:/UserTemp/I19451/software/eclipse-standard-kepler-SR1-win32/plugins/org.hamcrest.core_1.3.0.v201303031735.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.distrib-all"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.core"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.plugins-jacoco"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.plugins-sonar"/>
+	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/bin"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,7 +1,12 @@
 package org.jerkar.distrib.all;
 
+import java.util.Arrays;
+
 import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
+import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.api.utils.JkUtilsSystem;
 
 class SampleTester {
 	
@@ -13,7 +18,7 @@ class SampleTester {
 	}
 	
 	void doTest() {
-		test("HttpClientTaskBuild", "eclipse#generateFiles");
+		test("", "eclipse#generateFiles");
 		test("AClassicBuild");
 		test("AntStyleBuild");
 		test("MavenStyleBuild");
@@ -23,10 +28,13 @@ class SampleTester {
 	}
 	
 	private void test(String className, String ...args) {
-		JkProcess.of("jerkar.bat").withWorkingDir(sampleBaseDir.root())
-			.withParameters("-buildClass="+className)
+		JkLog.startHeaded("Test " + className + " " + Arrays.toString(args));
+		String script = JkUtilsSystem.IS_WINDOWS ? "jerkar.bat" : "jerkar";
+		JkProcess.of(script).withWorkingDir(sampleBaseDir.root())
+			.withParametersIf(!JkUtilsString.isBlank(className), "-buildClass="+className)
 			.andParameters(args).failOnError(true)
 			.runSync();
+		JkLog.done();
 	}
 
 }

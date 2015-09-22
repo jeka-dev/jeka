@@ -122,6 +122,16 @@ public final class JkProcess implements Runnable {
 	}
 
 	/**
+	 * Same as {@link #withParameters(String...)} but only effective if the specified conditional is true.
+	 */
+	public JkProcess withParametersIf(boolean conditional, String... parameters) {
+		if (conditional) {
+			return this.withParameters(parameters);
+		}
+		return this;
+	}
+
+	/**
 	 * Returns a <code>JkProcess</code> identical to this one but using the specified directory
 	 * as the working directory.
 	 */
