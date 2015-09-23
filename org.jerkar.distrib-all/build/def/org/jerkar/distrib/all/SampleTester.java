@@ -30,7 +30,6 @@ class SampleTester {
 		test("MavenStyleBuild");
 		test("OpenSourceJarBuild");
 		test("HttpClientTaskBuild");
-		test("SonarParametrizedBuild");	
 	}
 	
 	private void test(String className, String ...args) {

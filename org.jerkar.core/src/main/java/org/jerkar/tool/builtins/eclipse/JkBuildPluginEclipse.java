@@ -22,11 +22,14 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
 		+ "directly form the Eclipse files (.project, .classspath).",
 		" This plugin also features method to genetate eclipse files from build class."
 })
-public class JkBuildPluginEclipse extends JkJavaBuildPlugin {
+public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 
 	static final String OPTION_VAR_PREFIX = "eclipse.var.";
 
 	private JkBuild javaBuild;
+
+	@JkDoc("Set it to false to not mention javadoc in generated .classpath file.")
+	boolean javadoc = true;
 
 	public static boolean candidate(File baseDir) {
 		final File dotClasspathFile = new File(baseDir, ".classpath");
@@ -48,7 +51,7 @@ public class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 	public void generateFiles() {
 		final File dotClasspathFile = this.javaBuild.file(".classpath");
 		try {
-			DotClasspath.generate(this.javaBuild, dotClasspathFile, jreContainer);
+			DotClasspath.generate(this.javaBuild, dotClasspathFile, jreContainer, javadoc);
 		} catch (final RuntimeException e) {
 			throw e;
 		} catch (final Exception e) {

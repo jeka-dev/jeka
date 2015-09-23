@@ -321,7 +321,7 @@ final class DotClasspath {
 
 	}
 
-	static void generate(JkBuild build, File outputFile, String jreContainer) throws IOException, XMLStreamException, FactoryConfigurationError {
+	static void generate(JkBuild build, File outputFile, String jreContainer, boolean includeJavadoc) throws IOException, XMLStreamException, FactoryConfigurationError {
 		final OutputStream fos = new FileOutputStream(outputFile);
 		final XMLStreamWriter writer = XMLOutputFactory.newInstance()
 				.createXMLStreamWriter(fos, ENCODING);
@@ -359,7 +359,7 @@ final class DotClasspath {
 
 		if (build instanceof JkJavaBuild) {
 			final JkJavaBuild javaBuild = (JkJavaBuild) build;
-			generateJava(javaBuild, writer, jreContainer);
+			generateJava(javaBuild, writer, jreContainer, includeJavadoc);
 		}
 
 		// Write entries for file dependencies
@@ -412,7 +412,7 @@ final class DotClasspath {
 		}
 	}
 
-	private static void generateJava(JkJavaBuild build, XMLStreamWriter writer, String jreContainer) throws XMLStreamException {
+	private static void generateJava(JkJavaBuild build, XMLStreamWriter writer, String jreContainer, boolean includeJavadoc) throws XMLStreamException {
 		// Sources
 		final Set<String> sourcePaths = new HashSet<String>();
 		for (final JkFileTree jkFileTree : build.sources().and(build.resources())
@@ -459,11 +459,11 @@ final class DotClasspath {
 		if (build.dependencyResolver().dependenciesToResolve().containsModules()) {
 			resolveResult = build.dependencyResolver().resolve(JkJavaBuild.RUNTIME,
 					JkJavaBuild.PROVIDED, JkJavaBuild.TEST);
-			writeExternalModuleEntries(build.dependencyResolver(), writer, resolveResult);
+			writeExternalModuleEntries(build.dependencyResolver(), writer, resolveResult, includeJavadoc);
 		}
 		if (build.buildDefDependencyResolver().dependenciesToResolve().containsModules()) {
 			final JkResolveResult buildresolve = build.buildDefDependencyResolver().resolve(JkScope.BUILD);
-			writeExternalModuleEntries(build.buildDefDependencyResolver(), writer, buildresolve);
+			writeExternalModuleEntries(build.buildDefDependencyResolver(), writer, buildresolve, includeJavadoc);
 		}
 
 		// Write entries for file dependencies
@@ -473,7 +473,7 @@ final class DotClasspath {
 	}
 
 	private static void writeExternalModuleEntries(JkDependencyResolver dependencyResolver,
-			final XMLStreamWriter writer, JkResolveResult resolveResult)
+			final XMLStreamWriter writer, JkResolveResult resolveResult, boolean includeJavadoc)
 					throws XMLStreamException {
 		final JkAttachedArtifacts jkAttachedArtifacts = dependencyResolver.getAttachedArtifacts(
 				new HashSet<JkVersionedModule>(resolveResult.involvedModules()),
@@ -490,7 +490,7 @@ final class DotClasspath {
 			}
 			final Set<JkModuleDepFile> javadocArtifacts = jkAttachedArtifacts.getArtifacts(moduleId, JkJavaBuild.JAVADOC);
 			final File javadoc;
-			if (!javadocArtifacts.isEmpty()) {
+			if (!javadocArtifacts.isEmpty() && includeJavadoc) {
 				javadoc = javadocArtifacts.iterator().next().localFile();
 			} else {
 				javadoc = null;

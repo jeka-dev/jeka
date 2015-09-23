@@ -23,7 +23,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
  */
 public final class JkDependencyResolver  {
 
-	private static final String IVY_CLASS = IvyResolver.class.getName();
+	private static final String IVYRESOLVER_CLASS_NAME = IvyResolver.class.getName();
 
 	private static final JkScope SINGLE_SCOPE = JkScope.of("JkDependencyResolver.SINGLE");
 
@@ -36,7 +36,7 @@ public final class JkDependencyResolver  {
 
 		// Ivy Resolver is loaded in a dedicated classloader containing Ivy.
 		// Thus we need to serialize the result to be used in the current class loader.
-		final InternalDepResolver ivyResolver = IvyClassloader.CLASSLOADER.transClassloaderProxy(InternalDepResolver.class, IVY_CLASS, "of", repos);
+		final InternalDepResolver ivyResolver = IvyClassloader.CLASSLOADER.transClassloaderProxy(InternalDepResolver.class, IVYRESOLVER_CLASS_NAME, "of", repos);
 		return new JkDependencyResolver(ivyResolver, dependencies, module, resolutionParameters);
 	}
 
@@ -63,7 +63,7 @@ public final class JkDependencyResolver  {
 
 	static JkPath get(JkRepos repos, JkModuleDependency dep, boolean transitive) {
 		final JkScope scope = transitive ? SINGLE_SCOPE : SINGLE_SCOPE_NON_TRANS;
-		final InternalDepResolver resolver = IvyClassloader.CLASSLOADER.transClassloaderProxy(InternalDepResolver.class, IVY_CLASS, "of", repos);
+		final InternalDepResolver resolver = IvyClassloader.CLASSLOADER.transClassloaderProxy(InternalDepResolver.class, IVYRESOLVER_CLASS_NAME, "of", repos);
 		final JkScopeMapping scopeMapping = JkScopeMapping.of(scope).to("default");
 		final JkResolveResult result = resolver.resolveAnonymous(JkDependencies.on(scope, dep), scope, JkResolutionParameters.of().withDefault(scopeMapping));
 		return JkPath.of(result.localFiles());

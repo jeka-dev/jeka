@@ -31,35 +31,33 @@ public final class JkUtilsReflect {
 		}
 	}
 
+
 	/**
 	 * Returns a method from the target class that has the same name and same argument types then the specified one.
 	 * Argument types are compared on name base to handle different classloaders.
 	 */
 	public static Method methodWithSameNameAndArgType(Method original, Class<?> targetClass) {
-		final ClassLoader classLoader = targetClass.getClassLoader();
-		final int paramLenght = original.getParameterTypes().length;
-		final Class<?>[] targetArgTypes = new Class<?>[paramLenght];
-		final Class<?>[] parameterTypes = original.getParameterTypes();
-		for (int i=0; i < paramLenght; i++) {
-			try {
-				final Class<?> clazz = parameterTypes[i];
-				if (!clazz.isArray()) {
-					targetArgTypes[i] = classLoader.loadClass(parameterTypes[i].getName());
-				} else {
-					targetArgTypes[i] = parameterTypes[i];
+		for (final Method method : targetClass.getMethods()) {
+			if (!method.getName().equals(original.getName())) {
+				continue;
+			}
+			final Class<?>[] originalTypes = method.getParameterTypes();
+			final Class<?>[] types = method.getParameterTypes();
+			if (types.length != originalTypes.length) {
+				continue;
+			}
+			boolean found = false;
+			for (int i = 0; i < originalTypes.length; i++) {
+				if (!originalTypes[i].getName().equals(types[i].getName())) {
+					break;
 				}
-			} catch (final ClassNotFoundException e) {
-				throw new RuntimeException(e);
+				found = true;
+			}
+			if (found) {
+				return method;
 			}
 		}
-		try {
-			return targetClass.getMethod(original.getName(), targetArgTypes);
-		} catch (final SecurityException e) {
-			throw new RuntimeException(e);
-		} catch (final NoSuchMethodException e) {
-			throw new RuntimeException("No method '" + original.getName() + "' found on class " + targetClass.getName() + " having param types " + Arrays.asList(targetArgTypes) ,e);
-		}
-
+		throw new IllegalArgumentException("No method " + original + " found on class " + targetClass.getName());
 	}
 
 	/**
@@ -230,7 +228,8 @@ public final class JkUtilsReflect {
 	private static String[] classloaderOf(Class<?>...params) {
 		final String[] result = new String[params.length];
 		for (int i=0; i<params.length; i++) {
-			result[i] = params[i] == null ? null :  params[i].getName() + ":" + params[i].getClassLoader().toString();
+			final ClassLoader classLoader = params[i].getClassLoader();
+			result[i] = params[i] == null ? null :  params[i].getName() + ":" + classLoader.toString();
 		}
 		return result;
 	}

@@ -568,7 +568,7 @@ public final class JkClassLoader {
 		offsetLog();
 		try {
 
-			final Object returned = JkUtilsReflect.invoke(object, method, args);
+			final Object returned = JkUtilsReflect.invoke(object, method, effectiveArgs);
 			final T result;
 			if (serializeResult) {
 				result = (T) traverseClassLoader(returned,
@@ -720,7 +720,8 @@ public final class JkClassLoader {
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			return invokeInstanceMethod(true, target, JkUtilsReflect.methodWithSameNameAndArgType(method, target.getClass()), args);
+			final Method targetMethod = JkUtilsReflect.methodWithSameNameAndArgType(method, target.getClass());
+			return invokeInstanceMethod(true, target, targetMethod, args);
 
 		}
 
