@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -19,8 +20,6 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.Reader;
-import java.io.Writer;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -32,6 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -77,43 +77,19 @@ public final class JkUtilsIO {
 
 
 	/**
-	 * Closes the specified input stream, ignoring any exceptions.
+	 * Closes the specified closeable object, ignoring any exceptions.
 	 */
-	public static void closeQuietly(InputStream ...inputStreams) {
-		for (final InputStream inputStream : inputStreams) {
+	public static void closeQuietly(Closeable ...closeables) {
+		for (final Closeable closeable : closeables) {
 			try {
-				inputStream.close();
+				closeable.close();
 			} catch (final Exception e) {
 				// Ignored
 			}
 		}
 	}
 
-	/**
-	 * Closes the specified writer, ignoring any exceptions.
-	 */
-	public static void closeQuietly(Writer ... writers) {
-		for (final Writer writer : writers) {
-			try {
-				writer.close();
-			} catch (final Exception e) {
-				// Ignored
-			}
-		}
-	}
 
-	/**
-	 * Closes the specified reader, ignoring any exceptions.
-	 */
-	public static void closeQuietly(Reader ...readers) {
-		for (final Reader reader : readers) {
-			try {
-				reader.close();
-			} catch (final Exception e) {
-				// Ignored
-			}
-		}
-	}
 
 	/**
 	 * Same as {@link FileInputStream} constructor but throwing unchecked exceptions.
@@ -174,19 +150,6 @@ public final class JkUtilsIO {
 		}
 	}
 
-
-	/**
-	 * Close the specified output stream, ignoring any exceptions.
-	 */
-	public static void closeQuietly(OutputStream ... outputStreams) {
-		for(final OutputStream outputStream : outputStreams) {
-			try {
-				outputStream.close();
-			} catch (final Exception e) {
-				// Ignored
-			}
-		}
-	}
 
 	/**
 	 * Equivalent to {@link InputStream#read()} but throwing only unchecked exceptions.
@@ -299,6 +262,46 @@ public final class JkUtilsIO {
 		}
 
 	}
+
+	/**
+	 * Creates a {@link ZipFile} from file without checked exception.
+	 */
+	public static ZipFile asZipFile(File file) {
+		try {
+			return new ZipFile(file);
+		} catch (final Exception e) {
+			throw JkUtilsThrowable.unchecked(e);
+		}
+	}
+
+
+
+	/**
+	 * Reads the specified zip stream and position it at the beginning of the specified entry.
+	 */
+	public static ZipInputStream readZipEntry(InputStream inputStream, String entryName) {
+		final ZipInputStream zipInputStream = new ZipInputStream(inputStream);
+		try {
+			ZipEntry entry = zipInputStream.getNextEntry();
+			boolean found = false;
+			while (entry != null && !found) {
+				if (entry.getName().equals(entryName)) {
+					found = true;
+				} else {
+					entry = zipInputStream.getNextEntry();
+				}
+			}
+			if (!found) {
+				inputStream.close();
+				throw new IllegalArgumentException("Zip " + inputStream + " has no entry " + entryName);
+			}
+			return zipInputStream;
+		} catch (final Exception e) {
+			throw JkUtilsThrowable.unchecked(e);
+		}
+	}
+
+
 
 	/**
 	 * Writes all the entries from a given ZipFile to the specified {@link ZipOutputStream}.

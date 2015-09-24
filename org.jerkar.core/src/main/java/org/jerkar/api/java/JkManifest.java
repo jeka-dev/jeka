@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
@@ -12,6 +13,7 @@ import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.JkUtilsThrowable;
 
 /**
  * Helper class to read and write Manifest from and to file.
@@ -36,6 +38,10 @@ public final class JkManifest {
 		return new JkManifest(read(manifestFile));
 	}
 
+	public static JkManifest of(InputStream inputStream) {
+		return new JkManifest(read(inputStream));
+	}
+
 	public static JkManifest empty() {
 		final Manifest manifest = new Manifest();
 		manifest.getMainAttributes().putValue(Name.MANIFEST_VERSION.toString(), "1.0");
@@ -56,6 +62,10 @@ public final class JkManifest {
 		return addMainAttribute(Name.MAIN_CLASS, value);
 	}
 
+	public String mainAttribute(String key) {
+		return this.manifest().getMainAttributes().getValue(key);
+	}
+
 	private static Manifest read(File file) {
 		final Manifest manifest = new Manifest();
 		FileInputStream is = null;
@@ -67,6 +77,16 @@ public final class JkManifest {
 			throw new RuntimeException(e);
 		} finally {
 			JkUtilsIO.closeQuietly(is);
+		}
+	}
+
+	private static Manifest read(InputStream inputStream) {
+		final Manifest manifest = new Manifest();
+		try {
+			manifest.read(inputStream);
+			return manifest;
+		} catch (final IOException e) {
+			throw JkUtilsThrowable.unchecked(e);
 		}
 	}
 

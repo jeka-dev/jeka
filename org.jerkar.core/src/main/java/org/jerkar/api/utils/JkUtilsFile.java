@@ -831,4 +831,17 @@ public final class JkUtilsFile {
 
 	}
 
+	/**
+	 * Returns a resource as a {@link File}.
+	 * 
+	 * @throws IllegalArgumentException If the specified resource does not exist.
+	 */
+	public static File resourceAsFile(Class<?> clazz, String resourceName) {
+		final URL url = clazz.getResource(resourceName);
+		if (url == null) {
+			throw new IllegalArgumentException("No resource " + resourceName + " found for class " + clazz.getName());
+		}
+		return fromUrl(url);
+	}
+
 }
