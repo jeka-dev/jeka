@@ -47,7 +47,41 @@ As Jerkar builds itself, you can have a look at [how Jerkar project is structure
 
 Launch the `org.jerkar.tool.Main` class in your IDE or type `jerkar` in the command line (with the root of your project as working directory).
 
+## Play with Sample project
 
+To provide an easy hand on experience, you can play with the **org.jerkar.build-samples** project host in [Jerkar Git Repository](https://github.com/jerkar/jerkar.git).
+
+This project contains several build classes all located under *build/def* directory. 
+
+All of these build classes are independent from each other, each one illustrates one way of doing thing in Jerkar. 
+Some of these build class declares dependencies only for illustration purpose, not because the compiled classed actually need it.
+
+1. import **org.jerkar.build-samples** project in your IDE
+   -> Normally the IDE displays error mark cause the build path is not properly set up.
+2. Eclipse users : execute <code>jerkar scaffold eclipse#generateFiles</code> at the root of the project
+   -> This generates the eclipse .classpath file
+  
+
+   
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/> 
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/> 
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/> 
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/> 
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/> 
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
 

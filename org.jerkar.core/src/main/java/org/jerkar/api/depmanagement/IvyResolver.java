@@ -17,6 +17,7 @@ import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.settings.IvySettings;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsThrowable;
+import org.jerkar.tool.JkLocator;
 
 /**
  * Jerkar users : This class is not part of the public API !!! Please, Use {@link JkPublisher} instead.
@@ -41,6 +42,7 @@ final class IvyResolver implements InternalDepResolver {
 
 	private static InternalDepResolver of(IvySettings ivySettings) {
 		final Ivy ivy = Ivy.newInstance(ivySettings);
+		JkLog.info("Repository cache location : " + ivySettings.getDefaultCache().getAbsolutePath());
 		return new IvyResolver(ivy);
 	}
 
@@ -50,6 +52,7 @@ final class IvyResolver implements InternalDepResolver {
 	private static IvySettings ivySettingsOf(JkRepos resolveRepos) {
 		final IvySettings ivySettings = new IvySettings();
 		IvyTranslations.populateIvySettingsWithRepo(ivySettings, resolveRepos);
+		ivySettings.setDefaultCache(JkLocator.jerkarRepositoryCache());
 		return ivySettings;
 	}
 
