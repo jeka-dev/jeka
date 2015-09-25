@@ -60,4 +60,11 @@ public final class JkUtilsTime {
 		return (endNano - startNano)/ 1000000;
 	}
 
+	/**
+	 * Formats the specified date using <code>yyyy-MM-dd HH:mm:ss</code> pattern.
+	 */
+	public static String iso(Date date) {
+		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+	}
+
 }

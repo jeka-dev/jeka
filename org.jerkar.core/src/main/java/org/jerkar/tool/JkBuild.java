@@ -85,7 +85,7 @@ public class JkBuild {
 	 * Default is the time stamp (formatted as 'yyyyMMdd-HHmmss') this build has been instantiated.
 	 */
 	public String buildTimestamp() {
-		return JkUtilsTime.timestampSec(buildTime);
+		return JkUtilsTime.iso(buildTime);
 	}
 
 	protected Date buildTime() {
