@@ -28,6 +28,7 @@ import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
+import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsString;
@@ -541,6 +542,8 @@ final class DotClasspath {
 
 		public VarReplacement(File file) {
 			final Map<String, String> map = JkOptions.getAllStartingWith(JkBuildPluginEclipse.OPTION_VAR_PREFIX);
+			map.put(JkBuildPluginEclipse.OPTION_VAR_PREFIX + "JERKAR_REPO", JkLocator.jerkarRepositoryCache().getAbsolutePath());
+			map.put(JkBuildPluginEclipse.OPTION_VAR_PREFIX + "JERKAR_HOME", JkLocator.jerkarHome().getAbsolutePath());
 			boolean replaced = false;
 			String path = JkUtilsFile.canonicalPath(file).replace(File.separator, "/");
 			for (final Map.Entry<String, String> entry : map.entrySet()) {

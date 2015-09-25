@@ -17,7 +17,37 @@
  \___/|_____)_|   |_| \_)_____|_|
                                      The 100% Java build tool.
 </code></pre>
-<br/>
+
+## Setup Eclipse
+
+To reference Jerkar libraries and project dependencies in the Eclipse, it's better to use _classpath variables_ as the project will be more portable. 
+Moreover, when Jerkar generates _.classpath_ file, variables are used in place of complete path, so you need anyway to set these variables once for all :
+
+1. Open the Eclipse preference window : _Window -> Preferences_
+2. Navigate to the classpath variable panel : _Java -> Build Path -> Classpath Variables_
+3. Add these 2 variables :
+    * `JERKAR_HOME` which point to the same location than _[Jerkar Home]_ 
+    * `JERKAR_REPO` which point to _[User Home]_/.jerkar/cache/repo
+  
+If you have any problem to figure out the last value, just execute `jerkar` from anywhere and it will start logging the relevant information :
+
+```
+ _______    	   _
+(_______)         | |                
+     _ _____  ____| |  _ _____  ____ 
+ _  | | ___ |/ ___) |_/ |____ |/ ___)
+| |_| | ____| |   |  _ (/ ___ | |    
+ \___/|_____)_|   |_| \_)_____|_|
+                                     The 100% Java build tool.
+
+Java Home : C:\UserTemp\I19451\software\jdk1.6.0_24\jre
+Java Version : 1.6.0_24, Sun Microsystems Inc.
+Jerkar Home : C:\software\jerkar                               <-- This is the value for JERKAR_HOME
+Jerkar User Home : C:\users\djeang\.jerkar
+Jerkar Repository Cache : C:\users\djeang\.jerkar\cache\repo   <-- This is the value for JERKAR_REPO
+...
+```
+
 ## Create a Java Jerkar project
 
 When starting with a new project you have the choice of creating the project by hand or use scaffolding.
@@ -38,12 +68,21 @@ If your project is <a href="../../tour.html#100conventional">100% conventional</
 2. Execute `jerkar scaffold` under the project base directory. This generates the project structures.
 
 <p class="alert alert-success">
-	<strong>Eclipse users : </strong> You can execute <code>jerkar scaffold eclipse#generateFiles</code> altogether to generate <small>.project</small> and <small>.classpath</small> files.
+	<strong>Eclipse users : </strong> You can execute <code>jerkar eclipse#generateFiles</code> to generate both <small>.project</small> and <small>.classpath</small> files from the build definition.
 </p>
 
 As Jerkar builds itself, you can have a look at [how Jerkar project is structured](https://github.com/jerkar/jerkar/tree/master/org.jerkar.core).
 
 ## Build your project
+
+You can build your project by using the command line or by launching it through your IDE. Using IDE provides the ability to debug your build in a friendly way, as you would debug regular classes.
+
+### Launch in command line
+
+Open a terminal, set the current directory to the root of your project and execute `jerkar`.
+This will execute ´doDefault´ method of the default build class of your project. If your project has no build class it will execute `JkJavaBuild#doDefault()` provided with Jerkar library.
+
+### Launch 
 
 Launch the `org.jerkar.tool.Main` class in your IDE or type `jerkar` in the command line (with the root of your project as working directory).
 
@@ -55,6 +94,11 @@ This project contains several build classes all located under *build/def* direct
 
 All of these build classes are independent from each other, each one illustrates one way of doing thing in Jerkar. 
 Some of these build class declares dependencies only for illustration purpose, not because the compiled classed actually need it.
+
+<p class="alert alert-success">
+	<strong>Prerequisite for Eclipse user : </strong> 
+	Set the *Windows -> Preference ->  
+</p>
 
 1. import **org.jerkar.build-samples** project in your IDE
    -> Normally the IDE displays error mark cause the build path is not properly set up.

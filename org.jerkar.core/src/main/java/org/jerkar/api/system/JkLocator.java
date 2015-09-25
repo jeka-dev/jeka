@@ -87,7 +87,7 @@ public final class JkLocator {
 		if (!JkUtilsString.isBlank(jerkarCacheOption)) {
 			result = new File(jerkarCacheOption);
 		} else {
-			result = new File(jerkarUserHome(), "repo-cache");
+			result = new File(jerkarUserHome(), "cache/repo");
 		}
 		result.mkdirs();
 		return result;

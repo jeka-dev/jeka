@@ -158,7 +158,7 @@ Java Home : C:\UserTemp\I19451\software\jdk1.6.0_24\jre
 Java Version : 1.6.0_24, Sun Microsystems Inc.
 Jerkar Home : C:\software\jerkar
 Jerkar User Home : C:\users\djeang\.jerkar
-Jerkar Repository Cache : C:\users\djeang\.jerkar\repo-cache
+Jerkar Repository Cache : C:\users\djeang\.jerkar\cache\repo
 ...
 ```
  
