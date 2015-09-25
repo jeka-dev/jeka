@@ -126,3 +126,40 @@ The `buildClass` option can mention a simple name class (class name omitting its
 
 The `org.jerkar.tool.JkBuild` constructor instantiate fields annotated with `@JkProject`. If a project build appears many time in the annotated project tree, a single instance is created then shared.
 
+### Setting paths
+
+#### Specify Jerkar user home
+
+Jerkar uses user directory to store user-specific configuration and cache files, in this document we refer to this directory using [Jerkar User Home].
+By default the this directory is located at _[User Home]/.jerkar_ (_[User Home]_ being the path given by `System.getProperty("user.home");`.
+You can override this setting by defining the `JERKAR_USER_HOME` environment variable.
+You can programatically get this location in your build definition using `JkLocator.jerkarUserHome()`. 
+
+#### Specify the local repository cache
+
+Jerkar uses [Apache Ivy](http://ant.apache.org/ivy/) under the hood to handle module dependencies. Ivy downloads and stores locally artifacts consumed by projects.
+By default the location is _[JERKAR USER HOME]/repo-cache_ but you can redefine it by defining the `JERKAR_REPO` environment variable.
+You can programatically get this location in your build definition using `JkLocator.jerkarRepositoryCache()`.
+
+#### See the effective paths
+
+The Jerkar logs displays the effective path at the very start of the process :
+
+```
+ _______           _                 
+(_______)         | |                
+     _ _____  ____| |  _ _____  ____ 
+ _  | | ___ |/ ___) |_/ |____ |/ ___)
+| |_| | ____| |   |  _ (/ ___ | |    
+ \___/|_____)_|   |_| \_)_____|_|
+                                     The 100% Java build tool.
+
+Java Home : C:\UserTemp\I19451\software\jdk1.6.0_24\jre
+Java Version : 1.6.0_24, Sun Microsystems Inc.
+Jerkar Home : C:\software\jerkar
+Jerkar User Home : C:\users\djeang\.jerkar
+Jerkar Repository Cache : C:\users\djeang\.jerkar\repo-cache
+...
+```
+ 
+  

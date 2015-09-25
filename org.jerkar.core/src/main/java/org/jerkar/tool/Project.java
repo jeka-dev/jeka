@@ -18,6 +18,7 @@ import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkJavaCompiler;
+import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.tool.CommandLine.JkPluginSetup;

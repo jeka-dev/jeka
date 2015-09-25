@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
@@ -29,12 +30,13 @@ final class Main {
 		final LoadResult loadResult = loadOptionsAndSysprops(args);
 		JkLog.info("Java Home : " + System.getProperty("java.home"));
 		JkLog.info("Java Version : " + System.getProperty("java.version")+ ", " + System.getProperty("java.vendor"));
-		JkLog.info("Jerkar home : " + JkLocator.jerkarHome().getAbsolutePath());
-		JkLog.info("Jerkar User home : " + JkLocator.jerkarUserHome().getAbsolutePath());
-		JkLog.info("Jerkar class path : " + System.getProperty("java.class.path"));
+		JkLog.info("Jerkar Home : " + JkLocator.jerkarHome().getAbsolutePath());
+		JkLog.info("Jerkar User Home : " + JkLocator.jerkarUserHome().getAbsolutePath());
+		JkLog.info("Jerkar Repository Cache : " + JkLocator.jerkarRepositoryCache());
+		JkLog.info("Jerkar class-path : " + System.getProperty("java.class.path"));
 		JkLog.info("Command line : " + JkUtilsString.join(Arrays.asList(args), " "));
 		logProps("Specified system properties", loadResult.sysprops);
-		JkLog.info("Standard options : " + loadResult.standardOptions);
+		JkLog.info("Standard Options : " + loadResult.standardOptions);
 		logProps("Options", JkOptions.toDisplayedMap(JkOptions.getAll()));
 
 		final File workingDir = JkUtilsFile.workingDir();

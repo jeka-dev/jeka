@@ -23,12 +23,14 @@ import java.util.zip.ZipFile;
 
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
+import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.api.utils.JkUtilsSystem;
 
 /**
  * Wrapper around {@link URLClassLoader} offering convenient methods and fluent
@@ -44,7 +46,7 @@ public final class JkClassLoader {
 
 	private static final int JAVA_SUFFIX_LENGTH = ".java".length();
 
-	private static File urlCacheDir = new File(jerkarUserHome(), "cache/url-content");
+	private static File urlCacheDir = new File(JkLocator.jerkarUserHome(), "cache/url-content");
 
 	static {
 		urlCacheDir.mkdirs();
@@ -213,12 +215,7 @@ public final class JkClassLoader {
 	 * the parent classloaders.
 	 */
 	public JkClasspath childClasspath() {
-		final List<File> result = new ArrayList<File>(
-				this.delegate.getURLs().length);
-		for (final URL url : this.delegate.getURLs()) {
-			result.add(new File(url.getFile().replaceAll("%20", " ")));
-		}
-		return JkClasspath.of(result);
+		return JkClasspath.of(JkUtilsSystem.classloaderEntries(this.delegate));
 	}
 
 
@@ -727,14 +724,6 @@ public final class JkClassLoader {
 
 	}
 
-	private static File jerkarUserHome() {
-		final File result = new File(JkUtilsFile.userHome(),".jerkar");
-		if (!result.exists()) {
-			JkLog.info("Create Jerkar user directory : " + result.getPath());
-			result.mkdirs();
-		}
-		return result;
-	}
 
 
 }

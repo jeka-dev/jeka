@@ -240,7 +240,6 @@ protected JkDependencies dependencies() {
 }
 ...   
 ```
-
  
 ### Bind Dependencies to Scopes
 
