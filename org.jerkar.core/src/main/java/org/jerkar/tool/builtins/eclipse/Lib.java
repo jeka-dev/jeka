@@ -53,7 +53,7 @@ class Lib {
 		final JkDependencies.Builder builder = JkDependencies.builder();
 		for (final Lib lib : libs) {
 			if (lib.projectRelativePath == null) {
-				builder.on(lib.file).scope(lib.scope);
+				builder.onFiles(lib.file).scope(lib.scope);
 
 			} else {  // This is project dependency
 				final JkJavaBuild slaveBuild = (JkJavaBuild) masterBuild.relativeProject(lib.projectRelativePath);

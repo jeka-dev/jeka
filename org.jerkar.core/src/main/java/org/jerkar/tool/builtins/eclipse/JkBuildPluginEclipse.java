@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.file.JkFileTreeSet;
+import org.jerkar.api.utils.JkUtilsThrowable;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkException;
@@ -52,10 +53,8 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 		final File dotClasspathFile = this.javaBuild.file(".classpath");
 		try {
 			DotClasspath.generate(this.javaBuild, dotClasspathFile, jreContainer, javadoc);
-		} catch (final RuntimeException e) {
-			throw e;
 		} catch (final Exception e) {
-			throw new RuntimeException(e);
+			throw JkUtilsThrowable.unchecked(e);
 		}
 		final File dotProject = this.javaBuild.file(".project");
 		if (!dotProject.exists()) {

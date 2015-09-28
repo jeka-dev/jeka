@@ -17,6 +17,7 @@ import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
@@ -132,22 +133,31 @@ final class Project {
 	}
 
 	private JkDependencies buildDefDependencies() {
-		return JkDependencies.builder()
+		final boolean devMode = JkLocator.jerkarJarFile().isDirectory(); // If true, we assume Jerkar is produced by IDE (development mode)
+		return JkDependencies.builder().usingDefaultScopes(JkScope.BUILD)
 				.on(buildDependencies)
-				.onFiles(localBuildPath()).scope(JkScope.BUILD)
+				.onFiles(localBuildPath())
+				.onFilesIf(devMode, JkClasspath.current())
+				.onFilesIf(!devMode, jerkarLibs())
 				.build();
 	}
 
 	private	JkPath localBuildPath() {
 		final List<File> extraLibs = new LinkedList<File>();
-		final File localJerkarBuild = new File(this.projectBaseDir, JkConstants.BUILD_LIB_DIR);
-		if (localJerkarBuild.exists()) {
-			extraLibs.addAll(JkFileTree.of(localJerkarBuild).include("**/*.jar").files(false));
+		final File localDeflibDir = new File(this.projectBaseDir, JkConstants.BUILD_LIB_DIR);
+		if (localDeflibDir.exists()) {
+			extraLibs.addAll(JkFileTree.of(localDeflibDir).include("**/*.jar").files(false));
 		}
+		return JkPath.of(extraLibs).withoutDoubloons();
+	}
+
+	private static JkPath jerkarLibs() {
+		final List<File> extraLibs = new LinkedList<File>();
 		if (JkLocator.libExtDir().exists()) {
 			extraLibs.addAll(JkFileTree.of(JkLocator.libExtDir()).include("**/*.jar").files(false));
 		}
-		return JkPath.currentClasspath().and(extraLibs).withoutDoubloons();
+		extraLibs.add(JkLocator.jerkarJarFile());
+		return JkPath.of(extraLibs).withoutDoubloons();
 	}
 
 	private JkPath compileDependentProjects(Set<File> yetCompiledProjects, LinkedHashSet<File> pathEntries) {
