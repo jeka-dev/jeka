@@ -1,3 +1,5 @@
-org.jerkar.core.jar contains all the classes needed to run Jerkar (automation tool + build framework).
+org.jerkar.core.jar contains all the classes needed to run Jerkar (automation tool + build framework) and embedded libraries (Ivy and BouncyCastle).
+
+org.jerkar.core-lean.jar contains only classes needed to run Jerkar (automation tool + build framework) but not embedded libraries (Ivy and BouncyCastle).
 
 org.jerkar.core-fat.jar contains org.jerkar.core.jar + the standard plugins (Jacoco and Sonar).

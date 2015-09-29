@@ -77,6 +77,10 @@ public class JkJavaPacker implements Cloneable {
 		return build.ouputDir(baseName() + ".jar");
 	}
 
+	public File jarFile(String classifier) {
+		return build.ouputDir(baseName() + "-" + classifier + ".jar");
+	}
+
 	public File jarSourceFile() {
 		return build.ouputDir(baseName() + "-sources.jar");
 	}
