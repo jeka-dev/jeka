@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry kind="src" path="build/def"/>
+	<classpathentry kind="src" path="build/def" output="build/output/def-bin"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/software/eclipse-standard-kepler-SR1-win32/plugins/org.junit_4.11.0.v201303080030/junit.jar"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.plugins-jacoco/bin"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.core/build/libs/provided/ivy-2.4.0.jar"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.plugins-sonar/bin"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.core/build/libs/provided/bouncycastle-pgp-152.jar"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.core/bin"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.core/build/libs/test/jdepend-2.9.1.jar"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/software/eclipse-standard-kepler-SR1-win32/plugins/org.hamcrest.core_1.3.0.v201303031735.jar"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/bin"/>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="var" path="JERKAR_REPO/ch.qos.logback/logback-classic/jars/logback-classic-1.1.3.jar" sourcepath="JERKAR_REPO/ch.qos.logback/logback-classic/sources/logback-classic-1.1.3-sources.jar"/>
+	<classpathentry kind="var" path="JERKAR_REPO/ch.qos.logback/logback-core/jars/logback-core-1.1.3.jar" sourcepath="JERKAR_REPO/ch.qos.logback/logback-core/sources/logback-core-1.1.3-sources.jar"/>
+	<classpathentry kind="var" path="JERKAR_REPO/org.slf4j/slf4j-api/jars/slf4j-api-1.7.7.jar" sourcepath="JERKAR_REPO/org.slf4j/slf4j-api/sources/slf4j-api-1.7.7-sources.jar"/>
+	<classpathentry kind="lib" path="../org.jerkar.samples/build/output/org.jerkar.samples-fat.jar"/>
+	<classpathentry kind="var" path="JERKAR_HOME/libs/ext/org.jerkar.plugins-jacoco.jar" sourcepath="JERKAR_HOME/libs/ext/../../libs-sources/org.jerkar.plugins-jacoco-sources.jar"/>
+	<classpathentry kind="var" path="JERKAR_HOME/libs/ext/org.jerkar.plugins-sonar.jar" sourcepath="JERKAR_HOME/libs/ext/../../libs-sources/org.jerkar.plugins-sonar-sources.jar"/>
+	<classpathentry kind="var" path="JERKAR_HOME/org.jerkar.core.jar" sourcepath="JERKAR_HOME/libs-sources/org.jerkar.core-sources.jar"/>
+	<classpathentry kind="src" path="/org.jerkar.samples"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

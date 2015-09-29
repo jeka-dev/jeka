@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.tool.JavaSourceParser;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -37,8 +36,8 @@ public class JavaSourceParserTest {
 		final List<File>  projects = JavaSourceParser.of(
 				new File("."), JavaSourceParserTest.class.getResource("with2projectImports.javasource")).projects();
 		Assert.assertEquals(2, projects.size());
-		Assert.assertEquals("org.jerkar.foo", projects.get(0).getName());
-		Assert.assertEquals("org.jerkar.bar", projects.get(1).getName());
+		Assert.assertEquals("org.jerkar.core", projects.get(0).getName());
+		Assert.assertEquals("src", projects.get(1).getName());
 	}
 
 

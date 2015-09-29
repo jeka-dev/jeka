@@ -117,7 +117,11 @@ final class JavaSourceParser {
 	private static List<File> projectDependencies(File baseDir, List<String> deps) {
 		final List<File> projects = new LinkedList<File>();
 		for (final String projectReltivePath : deps) {
-			projects.add(new File(baseDir, projectReltivePath));
+			final File file = new File(baseDir, projectReltivePath);
+			if (!file.exists()) {
+				throw new JkException("Folder " + JkUtilsFile.canonicalPath(file) + " defined as project does not exists.");
+			}
+			projects.add(file);
 		}
 		return projects;
 	}

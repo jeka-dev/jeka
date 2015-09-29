@@ -101,20 +101,27 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	}
 
 
+	/**
+	 * Returns a clone of this object plus {@link JkScopedDependency}s on the specified file.
+	 */
+	public JkDependencies and(JkScope scope, File ...files) {
+		return and(scope, Arrays.asList(files));
+	}
 
 	/**
 	 * Returns a clone of this object plus {@link JkScopedDependency}s on the specified file.
 	 */
-	public JkDependencies andFiles(JkScope scope, File ...files) {
+	public JkDependencies and(JkScope scope, Iterable<File> files) {
 		final JkScopedDependency scopedDependency = JkScopedDependency.of(JkFileSystemDependency.of(files), scope);
 		return and(scopedDependency);
 	}
+
 
 	/**
 	 * Returns a clone of this object plus {@link JkScopedDependency}s on the specified external module.
 	 * @param versionedModuleId something like "org.apache:commons:1.4"
 	 */
-	public JkDependencies andExternal(JkScope scope, String versionedModuleId) {
+	public JkDependencies and(JkScope scope, String versionedModuleId) {
 		final JkDependency dependency = JkModuleDependency.of(versionedModuleId);
 		final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scope);
 		return and(scopedDependency);
@@ -257,6 +264,19 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			list.add(artifact.versionedModule());
 		}
 		return resolvedWith(list);
+	}
+
+	/**
+	 * Returns a set of dependencies that contains all and only module dependencies declared in this object.
+	 */
+	public JkDependencies onlyModules() {
+		final JkDependencies.Builder builder = JkDependencies.builder();
+		for (final JkScopedDependency scopedDependency : this) {
+			if (scopedDependency.dependency() instanceof JkModuleDependency) {
+				builder.on(scopedDependency);
+			}
+		}
+		return builder.build();
 	}
 
 	/**

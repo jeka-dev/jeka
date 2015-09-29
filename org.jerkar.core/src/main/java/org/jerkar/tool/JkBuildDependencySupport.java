@@ -154,6 +154,9 @@ public class JkBuildDependencySupport extends JkBuild {
 		return JkDependencies.builder().build();
 	}
 
+	/**
+	 * Returns the dependency resolver for this build.
+	 */
 	public final JkDependencyResolver dependencyResolver() {
 		if (cachedResolver == null) {
 			JkLog.startln("Setting dependency resolver ");

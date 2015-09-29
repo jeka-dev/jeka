@@ -183,13 +183,13 @@ public final class JkDependencyResolver  {
 
 		final JkResolveResult resolveResult;
 		if (module != null) {
-			resolveResult = internalResolver.resolve(module, dependencies, scope, parameters);
+			resolveResult = internalResolver.resolve(module, dependencies.onlyModules(), scope, parameters);
 		} else {
-			resolveResult = internalResolver.resolveAnonymous(dependencies, scope, parameters);
+			resolveResult = internalResolver.resolveAnonymous(dependencies.onlyModules(), scope, parameters);
 		}
 		cachedResolveResult.put(cachedScope, resolveResult);
 		JkLog.info(resolveResult.involvedModules().size() + " artifacts: " + resolveResult.involvedModules());
-		JkLog.done("Resolve result = " + resolveResult);
+		JkLog.done();
 		return resolveResult;
 	}
 

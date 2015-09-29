@@ -1,6 +1,7 @@
 package org.jerkar.tool;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -25,21 +26,34 @@ final class BuildDependency extends JkComputedDependency {
 
 
 	private BuildDependency(JkBuild projectBuild, List<String> methods, Set<File> files) {
-		super(runnable(projectBuild, methods), files);
+		super(new Invoker(projectBuild, methods), files);
 		this.methods = methods;
 		this.projectBuild = projectBuild;
 	}
 
-	private static Runnable runnable(final JkBuild build, final List<String> methods) {
-		return new Runnable() {
 
-			@Override
-			public void run() {
-				for (final String method : methods) {
-					JkUtilsReflect.invoke(build, method);
-				}
+
+	private static class Invoker implements Runnable, Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		private final JkBuild build;
+
+		private final List<String> methods;
+
+		Invoker(JkBuild build, List<String> methods) {
+			super();
+			this.build = build;
+			this.methods = methods;
+		}
+
+		@Override
+		public void run() {
+			for (final String method : methods) {
+				JkUtilsReflect.invoke(build, method);
 			}
-		};
+		}
+
 	}
 
 	public static BuildDependency of(JkBuild projectBuild, Set<File> files) {

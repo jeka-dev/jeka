@@ -15,32 +15,48 @@ class SampleTester {
 	
 	private final JkFileTree sampleBaseDir;
 	
+	private final JkFileTree sampleDependeeBaseDir;
+	
 	private final JkFileTree out; 
 	
 	private File launchScript;
 	
 	SampleTester(JkFileTree buildDir) {
 		super();
-		this.sampleBaseDir = buildDir.from("../org.jerkar.script-samples");
+		this.sampleBaseDir = buildDir.from("../org.jerkar.samples");
+		this.sampleDependeeBaseDir = buildDir.from("../org.jerkar.samples-dependee");
 		this.out = sampleBaseDir.from("build/output");
 		String scriptName = JkUtilsSystem.IS_WINDOWS ? "jerkar.bat" : "jerkar";
 		launchScript = buildDir.file("build/output/dist/"+scriptName);
 	}
 	
 	void doTest() {
-		test("", "eclipse#generateFiles");
-		test("AClassicBuild");
-		test("AntStyleBuild");
-		test("MavenStyleBuild");
-		test("OpenSourceJarBuild");
-		test("HttpClientTaskBuild");
+		testSamples("", "eclipse#generateFiles");
+		testSamples("AClassicBuild");
+		testSamples("AntStyleBuild");
+		testSamples("MavenStyleBuild");
+		testSamples("OpenSourceJarBuild");
+		testSamples("HttpClientTaskBuild");
 		scaffoldAndEclipse();
+		testDependee("FatJarBuild");
+		testDependee("NormalJarBuild");
 	}
 	
-	private void test(String className, String ...args) {
+	private void testSamples(String className, String ...args) {
 		JkLog.startHeaded("Test " + className + " " + Arrays.toString(args));
 		JkProcess.of(launchScript.getAbsolutePath())
 			.withWorkingDir(sampleBaseDir.root())
+			.withParametersIf(!JkUtilsString.isBlank(className), "-buildClass="+className)
+			.andParameters(args)
+			.failOnError(true)
+			.runSync();
+		JkLog.done();
+	}
+	
+	private void testDependee(String className, String ...args) {
+		JkLog.startHeaded("Test " + className + " " + Arrays.toString(args));
+		JkProcess.of(launchScript.getAbsolutePath())
+			.withWorkingDir(this.sampleDependeeBaseDir.root())
 			.withParametersIf(!JkUtilsString.isBlank(className), "-buildClass="+className)
 			.andParameters(args)
 			.failOnError(true)
