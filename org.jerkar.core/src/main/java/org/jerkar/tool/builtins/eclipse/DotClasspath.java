@@ -343,7 +343,7 @@ final class DotClasspath {
 		writer.writeStartElement("classpath");
 		writer.writeCharacters("\n");
 
-		// Build sources
+		// Build definition sources
 		if (build.file(JkConstants.BUILD_DEF_DIR).exists()) {
 			writer.writeCharacters("\t");
 			writer.writeEmptyElement(CLASSPATHENTRY);
@@ -376,7 +376,7 @@ final class DotClasspath {
 		}
 
 		// Write entries for file dependencies
-		final List<File> fileDeps = build.buildDefDependencyResolver().dependenciesToResolve().localFileDependencies(JkScope.BUILD).entries();
+		final List<File> fileDeps = build.buildDefDependencyResolver().dependenciesToResolve().fileSystemDependencies(JkScope.BUILD).entries();
 		writeFileEntries(fileDeps, writer);
 
 		// Write entries for managed dependencies

@@ -311,13 +311,28 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	}
 
 	/**
-	 * Returns all files declared as {@link JkFileSystemDependency} for any of the specified scopes.
+	 * Returns all files declared as {@link JkFileDependency} for any of the specified scopes.
 	 */
 	public JkPath localFileDependencies(JkScope ...scopes) {
 		final LinkedHashSet<File> set = new LinkedHashSet<File>();
 		for (final JkScopedDependency scopedDependency : this.dependencies) {
 			if (scopedDependency.isInvolvedInAnyOf(scopes)
 					&& scopedDependency.dependency() instanceof JkFileDependency) {
+				final JkFileDependency fileDeps = (JkFileDependency) scopedDependency.dependency();
+				set.addAll(fileDeps.files());
+			}
+		}
+		return JkPath.of(set);
+	}
+
+	/**
+	 * Returns all files declared as {@link JkFileSystemDependency} for any of the specified scopes.
+	 */
+	public JkPath fileSystemDependencies(JkScope ...scopes) {
+		final LinkedHashSet<File> set = new LinkedHashSet<File>();
+		for (final JkScopedDependency scopedDependency : this.dependencies) {
+			if (scopedDependency.isInvolvedInAnyOf(scopes)
+					&& scopedDependency.dependency() instanceof JkFileSystemDependency) {
 				final JkFileDependency fileDeps = (JkFileDependency) scopedDependency.dependency();
 				set.addAll(fileDeps.files());
 			}
