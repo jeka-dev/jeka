@@ -43,11 +43,10 @@ final class IvyPublisher implements InternalPublisher {
 		this.ivy = ivy;
 		this.publishRepos = publishRepo;
 		this.descriptorOutputDir = descriptorOutputDir;
-		ivy.getLoggerEngine().setDefaultLogger(new IvyMessageLogger());
 	}
 
 	private static IvyPublisher of(IvySettings ivySettings, JkPublishRepos publishRepos, File descriptorOutputDir) {
-		final Ivy ivy = Ivy.newInstance(ivySettings);
+		final Ivy ivy = IvyResolver.ivy(ivySettings);
 		return new IvyPublisher(ivy, publishRepos, descriptorOutputDir);
 	}
 
