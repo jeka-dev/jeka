@@ -600,8 +600,11 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 		@JkDoc("When true, the produced artifacts are signed with PGP.")
 		public boolean signWithPgp;
 
-		@JkDoc("When true, tests classes and sources are packed in jars")
+		@JkDoc("When true, tests classes and sources are packed in jars.")
 		public boolean tests;
+
+		@JkDoc("Comma separated list of algorithm to use to produce checksums (ex : 'sha-1,md5').")
+		public String checksums;
 
 	}
 

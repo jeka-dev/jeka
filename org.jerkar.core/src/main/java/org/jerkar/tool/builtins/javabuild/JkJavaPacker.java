@@ -13,6 +13,8 @@ import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkZipper;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * Jar maker for the {@link JkJavaBuild} template. This maker will get information from supplied java builder
@@ -38,7 +40,7 @@ public class JkJavaPacker implements Cloneable {
 
 	private boolean fullName = true;
 
-	private final Set<String> checkSums = new HashSet<String>();
+	private final Set<String> checkSums;
 
 	private boolean doJar = true;
 
@@ -56,6 +58,12 @@ public class JkJavaPacker implements Cloneable {
 	private JkJavaPacker(JkJavaBuild build) {
 		this.build = build;
 		this.doFatJar = build.pack.fatJar;
+		this.doTest = build.pack.tests;
+		if (build.pack.checksums == null) {
+			this.checkSums = new HashSet<String>();
+		} else {
+			this.checkSums = JkUtilsIterable.setOf(JkUtilsString.split(build.pack.checksums.toUpperCase(), ","));
+		}
 		if (build.pack.signWithPgp) {
 			this.pgp = build.pgp();
 		}

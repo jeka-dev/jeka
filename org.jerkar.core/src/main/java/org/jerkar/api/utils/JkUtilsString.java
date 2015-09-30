@@ -79,8 +79,12 @@ public final class JkUtilsString {
 
 	/**
 	 * Splits the specified String into an array by separating by the specified delimiter.
+	 * If <code>str</code> is <code>null</code> then it returns an empty array.
 	 */
 	public static String[] split(String str, String delimiters) {
+		if (str == null) {
+			return new String[0];
+		}
 		final StringTokenizer st = new StringTokenizer(str, delimiters);
 		final List<String> tokens = new ArrayList<String>();
 		while (st.hasMoreTokens()) {

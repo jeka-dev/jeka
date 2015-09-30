@@ -242,7 +242,7 @@ public final class JkZipper {
 			if (!process) {
 				return this;
 			}
-			return md5();
+			return sha1();
 		}
 	}
 
