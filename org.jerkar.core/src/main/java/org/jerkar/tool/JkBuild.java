@@ -162,12 +162,13 @@ public class JkBuild {
 		} else {
 			context = "";
 		}
-		JkLog.startUnderlined("Method : " + methodName + context);
+		JkLog.infoUnderline("Method : " + methodName + context);
+		final long time = System.nanoTime();
 		try {
 			JkUtilsReflect.invoke(this, method);
-			JkLog.done("Method " + methodName + " success.");
+			JkLog.info("Method " + methodName + " success in " + JkUtilsTime.durationInSeconds(time) + " seconds.");
 		} catch (final RuntimeException e) {
-			JkLog.done("Method " + methodName + " failed.");
+			JkLog.info("Method " + methodName + " failed in " + JkUtilsTime.durationInSeconds(time) + " seconds.");
 			throw e;
 		}
 	}

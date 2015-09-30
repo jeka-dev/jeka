@@ -15,7 +15,9 @@ import org.jerkar.api.utils.JkUtilsTime;
  */
 public final class JkLog {
 
-	private static final String INDENT = "|    ";
+	private static final String INDENT = "|  ";
+
+	private static final String TAB = "  ";
 
 	private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<LinkedList<Long>>();
 
@@ -306,9 +308,9 @@ public final class JkLog {
 	 * Shifts the left margin. All subsequent log will be shifted <code>delta</code> characters to right.
 	 */
 	public static void delta(int delta) {
-		infoWriter.offsetLevel += delta;
-		errorWriter.offsetLevel += delta;
-		warnWriter.offsetLevel += delta;
+		infoWriter.tabLevel += delta;
+		errorWriter.tabLevel += delta;
+		warnWriter.tabLevel += delta;
 	}
 
 	/**
@@ -330,6 +332,8 @@ public final class JkLog {
 		private static final String SEPARATOR = System.getProperty("line.separator");
 
 		private int offsetLevel;
+
+		private int tabLevel;
 
 		private boolean beginOfLine;
 
@@ -367,15 +371,18 @@ public final class JkLog {
 		}
 
 		private String getFiller() {
-			if (offsetLevel == 0) {
+			if (offsetLevel == 0 && tabLevel == 0) {
 				return "";
 			}
-			if (offsetLevel == 1) {
+			if (offsetLevel == 1 && tabLevel == 0) {
 				return INDENT;
 			}
-			final StringBuilder result = new StringBuilder(INDENT);
-			for (int i = 1; i < offsetLevel;i++) {
+			final StringBuilder result = new StringBuilder();
+			for (int i = 0; i < offsetLevel;i++) {
 				result.append(INDENT);
+			}
+			for (int i=0; i < tabLevel; i++) {
+				result.append(TAB);
 			}
 			return result.toString();
 		}

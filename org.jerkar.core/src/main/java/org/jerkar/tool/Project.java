@@ -221,14 +221,14 @@ final class Project {
 
 	private static void configureProjectAndRun(JkBuild build, List<MethodInvocation> invokes,
 			Collection<JkPluginSetup> pluginSetups, Map<String, String> options,  PluginDictionnary<JkBuildPlugin> dictionnary) {
-		JkLog.startHeaded("Executing build for project " + build.baseDir().root().getName());
+		JkLog.infoHead("Executing build for project " + build.baseDir().root().getName());
 		JkLog.info("Build class " + build.getClass().getName());
 		configureProject(build, pluginSetups, options, dictionnary);
 		JkLog.info("Activated plugins : " + build.plugins.getActives());
 		final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
 		Main.logProps("Field values", displayedOptions);
 		build.execute(toBuildMethods(invokes, dictionnary), null);
-		JkLog.done("Build " + build.baseDir().root().getName());
+		//JkLog.done("Build " + build.baseDir().root().getName());
 	}
 
 

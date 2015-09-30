@@ -43,25 +43,23 @@ class SampleTester {
 	}
 	
 	private void testSamples(String className, String ...args) {
-		JkLog.startHeaded("Test " + className + " " + Arrays.toString(args));
+		JkLog.infoHead("Test " + className + " " + Arrays.toString(args));
 		JkProcess.of(launchScript.getAbsolutePath())
 			.withWorkingDir(sampleBaseDir.root())
 			.withParametersIf(!JkUtilsString.isBlank(className), "-buildClass="+className)
 			.andParameters(args)
 			.failOnError(true)
 			.runSync();
-		JkLog.done();
 	}
 	
 	private void testDependee(String className, String ...args) {
-		JkLog.startHeaded("Test " + className + " " + Arrays.toString(args));
+		JkLog.infoHead("Test " + className + " " + Arrays.toString(args));
 		JkProcess.of(launchScript.getAbsolutePath())
 			.withWorkingDir(this.sampleDependeeBaseDir.root())
 			.withParametersIf(!JkUtilsString.isBlank(className), "-buildClass="+className)
 			.andParameters(args)
 			.failOnError(true)
 			.runSync();
-		JkLog.done();
 	}
 	
 	private void scaffoldAndEclipse() {
