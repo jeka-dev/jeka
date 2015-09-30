@@ -43,7 +43,7 @@ class SampleTester {
 	}
 	
 	private void testSamples(String className, String ...args) {
-		JkLog.infoHead("Test " + className + " " + Arrays.toString(args));
+		JkLog.infoHeaded("Test " + className + " " + Arrays.toString(args));
 		JkProcess.of(launchScript.getAbsolutePath())
 			.withWorkingDir(sampleBaseDir.root())
 			.withParametersIf(!JkUtilsString.isBlank(className), "-buildClass="+className)
@@ -53,7 +53,7 @@ class SampleTester {
 	}
 	
 	private void testDependee(String className, String ...args) {
-		JkLog.infoHead("Test " + className + " " + Arrays.toString(args));
+		JkLog.infoHeaded("Test " + className + " " + Arrays.toString(args));
 		JkProcess.of(launchScript.getAbsolutePath())
 			.withWorkingDir(this.sampleDependeeBaseDir.root())
 			.withParametersIf(!JkUtilsString.isBlank(className), "-buildClass="+className)
@@ -69,7 +69,7 @@ class SampleTester {
 		scafoldedProject.mkdirs();
 		scaffoldProcess.withParameters("scaffold").runSync(); // scaffold project
 		scaffoldProcess.runSync(); // Build the scaffolded project
-		JkLog.infoUnderline("Test eclipse generation and compile            ");
+		JkLog.infoUnderlined("Test eclipse generation and compile            ");
 		scaffoldProcess.withParameters("eclipse#generateFiles").runSync();
 		scaffoldProcess.withParameters("eclipse#").runSync(); // build usng the .classpath for resolving classpath
 		JkLog.done();

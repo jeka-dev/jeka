@@ -221,7 +221,7 @@ final class Project {
 
 	private static void configureProjectAndRun(JkBuild build, List<MethodInvocation> invokes,
 			Collection<JkPluginSetup> pluginSetups, Map<String, String> options,  PluginDictionnary<JkBuildPlugin> dictionnary) {
-		JkLog.infoHead("Executing build for project " + build.baseDir().root().getName());
+		JkLog.infoHeaded("Executing build for project " + build.baseDir().root().getName());
 		JkLog.info("Build class " + build.getClass().getName());
 		configureProject(build, pluginSetups, options, dictionnary);
 		JkLog.info("Activated plugins : " + build.plugins.getActives());

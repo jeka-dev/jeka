@@ -162,7 +162,7 @@ public class JkBuild {
 		} else {
 			context = "";
 		}
-		JkLog.infoUnderline("Method : " + methodName + context);
+		JkLog.infoUnderlined("Method : " + methodName + context);
 		final long time = System.nanoTime();
 		try {
 			JkUtilsReflect.invoke(this, method);

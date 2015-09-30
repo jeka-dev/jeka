@@ -115,7 +115,7 @@ public final class JkLog {
 		if (silent) {
 			return;
 		}
-		infoUnderline(message);
+		infoUnderlined(message);
 		incOffset();
 		startTimer();
 	}
@@ -127,7 +127,7 @@ public final class JkLog {
 		if (silent) {
 			return;
 		}
-		infoHead(message);
+		infoHeaded(message);
 		incOffset();
 		startTimer();
 	}
@@ -407,7 +407,7 @@ public final class JkLog {
 	 * ------------------
 	 * </pre>
 	 */
-	public static void infoHead(String intro) {
+	public static void infoHeaded(String intro) {
 		if (silent) {
 			return;
 		}
@@ -424,7 +424,7 @@ public final class JkLog {
 	 * ------------------
 	 * </pre>
 	 */
-	public static void infoUnderline(String message) {
+	public static void infoUnderlined(String message) {
 		if (silent) {
 			return;
 		}

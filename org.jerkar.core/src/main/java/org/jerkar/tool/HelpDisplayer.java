@@ -20,7 +20,7 @@ final class HelpDisplayer {
 		//JkLog.nextLine();
 		//JkLog.info("To get details on a specific build class, type 'jerkar help -buildClass=Xxxxxx");
 		//JkLog.nextLine();
-		JkLog.infoUnderline("Help on build class " + build.getClass().getName());
+		JkLog.infoUnderlined("Help on build class " + build.getClass().getName());
 		JkProjectBuildClassDef.of(build).log(true);
 		JkLog.nextLine();
 		JkLog.info("Type 'jerkar helpPlugins' to get help on plugins");
@@ -33,7 +33,7 @@ final class HelpDisplayer {
 				PluginDictionnary.of(JkBuildPlugin.class).getAll();
 		for (final JkPluginDescription<?> description : pluginDescriptions) {
 			JkLog.nextLine();
-			JkLog.infoHead("Plugin  Name : " + description.shortName());
+			JkLog.infoHeaded("Plugin  Name : " + description.shortName());
 			JkLog.info("Full name : " + description.fullName());
 			JkLog.info("Template class : " + description.templateClass().getName());
 			final List<String> explanations = description.explanation();
