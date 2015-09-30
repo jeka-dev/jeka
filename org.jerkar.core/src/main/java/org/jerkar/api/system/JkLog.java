@@ -15,7 +15,7 @@ import org.jerkar.api.utils.JkUtilsTime;
  */
 public final class JkLog {
 
-	private static final String INDENT = "    ";
+	private static final String INDENT = "|    ";
 
 	private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<LinkedList<Long>>();
 
@@ -170,7 +170,7 @@ public final class JkLog {
 					+"Please, use 'done' only to mention that the previous 'start' activity is done.");
 		}
 		final long start = times.poll();
-		infoWriter.println("==> " + message + " in " + JkUtilsTime.durationInSeconds(start) + " seconds.");
+		infoWriter.println(" \\ " + message + " in " + JkUtilsTime.durationInSeconds(start) + " seconds.");
 
 	}
 
@@ -327,17 +327,40 @@ public final class JkLog {
 
 	private static class OffsetStream extends PrintStream {
 
+		private static final String SEPARATOR = System.getProperty("line.separator");
+
 		private int offsetLevel;
+
+		private boolean beginOfLine;
 
 		public OffsetStream(PrintStream delegate) {
 			super(delegate);
 		}
 
 		@Override
+		public void println(String s) {
+			super.println(s);
+			beginOfLine = true;
+		}
+
+		@Override
+		public void println() {
+			super.println();
+			beginOfLine = true;
+		}
+
+		@Override
+		public void print(String s) {
+			super.print(s);
+			beginOfLine = s.endsWith(SEPARATOR);
+		}
+
+
+		@Override
 		public void write(byte[] cbuf, int off, int len)  {
 			final byte[] filler = getFiller().getBytes();
 			final int lenght = filler.length;
-			if (lenght > 0) {
+			if (lenght > 0 && beginOfLine) {
 				super.write(filler,0, lenght);
 			}
 			super.write(cbuf, off, len);
