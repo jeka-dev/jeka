@@ -1,4 +1,0 @@
-- Add options to run on remote sonar instance (need options as host, port, jdbc setting....)
-
-- Add option to choose sonar runner 2.0 instead of 2.4.
-

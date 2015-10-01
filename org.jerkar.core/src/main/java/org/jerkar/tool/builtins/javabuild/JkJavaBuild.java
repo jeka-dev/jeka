@@ -16,6 +16,7 @@ import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompiler;
+import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.java.junit.JkUnit;
@@ -234,11 +235,14 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 		final JkClasspath classpath = JkClasspath.of(this.testClassDir(), this.classDir())
 				.and(this.depsFor(TEST, PROVIDED));
 		final File junitReport = new File(this.testReportDir(), "junit");
-		final JkUnit result = JkUnit.of(classpath)
+		JkUnit result = JkUnit.of(classpath)
 				.withReportDir(junitReport)
 				.withReport(this.tests.report)
-				.withClassesToTest(this.testClassDir())
-				.forked(this.tests.fork);
+				.withClassesToTest(this.testClassDir());
+		if (this.tests.fork) {
+			final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
+			result = result.forked(javaProcess, true);
+		}
 		return result;
 	}
 
@@ -580,8 +584,11 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 		@JkDoc("Turn it on to skip tests.")
 		public boolean skip;
 
-		@JkDoc("turn it on to run tests in a forked process.")
+		@JkDoc("Turn it on to run tests in a forked process.")
 		public boolean fork;
+
+		@JkDoc("Argument passed to the JVM if tests are forked. Example : -Xms2G -Xmx2G")
+		public String jvmOptions;
 
 		@JkDoc({"The more details the longer tests take to be processed.",
 			"BASIC mention the total time elapsed along detail on failed tests.",

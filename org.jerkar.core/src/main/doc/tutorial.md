@@ -120,7 +120,187 @@ To play with sample projects, you should :
 
 By default, when no `-buildClass=Xxxx` is specified, Jerkar takes the first one in alphabetical order. Let's take this class for the following steps.
 
-#### compile, test and package the application.
+#### Getting some help
+
+You can have an exhaustive list of invokable method and possible options for a build by executing `jerkar help` at the root of the project. This leads in such output :
+
+```
+...
+
+Help on build class org.jerkar.samples.AClassicBuild
+----------------------------------------------------
+
+----------------------
+Methods               
+----------------------
+
+From org.jerkar.tool.JkBuild
+----------------------------
+clean : Clean the output directory.
+
+help : Display all available methods defined in this build.
+
+helpPlugins : Display details on all available plugins.
+
+scaffold : Create the project structure
+
+verify : Run checks to verify the package is valid and meets quality criteria.
+
+From org.jerkar.tool.builtins.javabuild.JkJavaBuild
+---------------------------------------------------
+compile : Generate sources and resources, compile production sources and process production resources to the classes directory.
+
+doCompile : Lifecycle method :#compile. As doCompile is the first stage, this is equals to #compile
+
+doDefault : Method executed by default when none is specified. By default this method equals to #clean + #doPack
+
+doPack : Lifecycle method : #doUnitTest + #pack
+
+doPublish : Lifecycle method : #doVerify + #publish
+
+doUnitTest : Lifecycle method : #doCompile + #unitTest
+
+doVerify : Lifecycle method : #doUnitTest + #pack
+
+javadoc : Produce documents for this project (javadoc, Html site, ...)
+
+pack : 
+Create many jar files containing respectively binaries, sources, test binaries and test sources.
+The jar containing the binary is the one that will be used as a depe,dence for other project.
+
+publish : 
+Publish the produced artifact to the defined repositories. 
+This can work only if a 'publishable' repository has been defined and the artifact has been generated (pack method).
+
+unitTest : Compile and run all unit tests.
+
+----------------------
+Options               
+----------------------
+
+From org.jerkar.samples.AClassicBuild
+-------------------------------------
+extraBuildPath : 
+Mention if you want to add extra lib in your build path.
+It can be absolute or relative to the project base dir.
+These libs will be added to the build path to compile and run Jerkar build class.
+Example : -extraBuildPath=C:\libs\mylib.jar;libs/others/**/*.jar
+Type : String
+Default value : null
+
+extraPath.compile : 
+compile scope : these libs will be added to the compile and runtime path.
+Example : -extraPath.compile=C:\libs\mylib.jar;libs/others/**/*.jar
+Type : String
+Default value : null
+
+extraPath.provided : 
+provided scope : these libs will be added to the compile path but won't be embedded in war files or fat jars.
+Example : -extraPath.provided=C:\libs\mylib.jar;libs/others/**/*.jar
+Type : String
+Default value : null
+
+extraPath.runtime : 
+runtime scope : these libs will be added to the runtime path.
+Example : -extraPath.runtime=C:\libs\mylib.jar;libs/others/**/*.jar
+Type : String
+Default value : null
+
+extraPath.test : 
+test scope : these libs will be added to the compile and runtime path.
+Example : -extraPath.test=C:\libs\mylib.jar;libs/others/**/*.jar
+Type : String
+Default value : null
+
+pack.checksums : Comma separated list of algorithm to use to produce checksums (ex : 'sha-1,md5').
+Type : String
+Default value : md5
+
+pack.fatJar : When true, produce a fat-jar, meaning a jar embedding all the dependencies.
+Type : boolean
+Default value : false
+
+pack.signWithPgp : When true, the produced artifacts are signed with PGP.
+Type : boolean
+Default value : false
+
+pack.tests : When true, tests classes and sources are packed in jars.
+Type : boolean
+Default value : false
+
+repo.download.password : Password to connect to the repository (if needed).
+Type : String
+Default value : null
+
+repo.download.url : Url of the repository : Prefix the Url with 'ivy:' if it is an Ivy repostory.
+Type : String
+Default value : http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured
+
+repo.download.username : 
+Usename to connect to repository (if needed).
+Null or blank means that the repository will be accessed in an anonymous way.
+Type : String
+Default value : null
+
+repo.publish.password : Password to connect to the repository (if needed).
+Type : String
+Default value : null
+
+repo.publish.url : Url of the repository : Prefix the Url with 'ivy:' if it is an Ivy repostory.
+Type : String
+Default value : file:///C:/usertemp/i19451/jerkar-maven-repo
+
+repo.publish.username : 
+Usename to connect to repository (if needed).
+Null or blank means that the repository will be accessed in an anonymous way.
+Type : String
+Default value : null
+
+repo.release.password : Password to connect to the repository (if needed).
+Type : String
+Default value : null
+
+repo.release.url : Url of the repository : Prefix the Url with 'ivy:' if it is an Ivy repostory.
+Type : String
+Default value : https://oss.sonatype.org/content/repositories/snapshots/
+
+repo.release.username : 
+Usename to connect to repository (if needed).
+Null or blank means that the repository will be accessed in an anonymous way.
+Type : String
+Default value : null
+
+tests.fork : Turn it on to run tests in a forked process.
+Type : boolean
+Default value : false
+
+tests.jvmOptions : Argument passed to the JVM if tests are forked. Example : -Xms2G -Xmx2G
+Type : String
+Default value : null
+
+tests.report : 
+The more details the longer tests take to be processed.
+BASIC mention the total time elapsed along detail on failed tests.
+FULL detailed report displays additionally the time to run each tests.
+Example : -report=NONE
+Type : Enum of NONE, BASIC, FULL
+Default value : BASIC
+
+tests.skip : Turn it on to skip tests.
+Type : boolean
+Default value : false
+
+version : Version to inject to this build. If 'null' or blank than the version will be the one returned by #version()
+Type : String
+Default value : 1.0.0
+
+Type 'jerkar helpPlugins' to get help on plugins
+
+``` 
+You can also define on which build class you want help on : `jerkar help -buildClass=AntStyleBuild`. 
+
+
+#### Compile, test and package the application.
 
 Just execute `jerkar`. By default, it invoke the `doDefault` method. If you browse code, you'll figure out quite easily that this method actualy does a : `clean`, `compile`, `unitTest` and pack the application.
 
@@ -268,9 +448,9 @@ You can also "hard code" it in the build definition class as :
 public class AClassicBuild extends JkJavaBuild {
 
     {
-      this.pack.tests=true;
-      this.pack.fatJar=true;
-      this.pack.checksums="md5"
+      pack.tests=true;
+      pack.fatJar=true;
+      pack.checksums="md5"
     }
     ...
 ```
@@ -282,20 +462,76 @@ public class AClassicBuild extends JkJavaBuild {
 
     @Override
     protected void init() {
-        this.pack.tests=true;
-        this.pack.fatJar=true;
-        this.pack.checksums="md5"
+        pack.tests=true;
+        pack.fatJar=true;
+        pack.checksums="md5"
+    }
+    ...
+```
+
+or
+
+```
+public class AClassicBuild extends JkJavaBuild {
+
+    public AClassicBuild() {
+        pack.tests=true;
+        pack.fatJar=true;
+        pack.checksums="md5"
     }
     ...
 ```
   
  
-#### Unactivating or forking tests
+#### Unactivating tests
 
 If you want to skip tests, mention _tests.skip_ option such as `jerkar -tests.skip`.
 
-If you want the test run in forked mode, mention _tests.fork_ as `jerkar -tests.fork`.
+#### Forking tests
+
+If you want the test run in forked mode, mention _tests.fork_ as `jerkar -tests.fork` or `jerkar -tests.fork -tests.jvmOptions=-Xms16M -Xmx512`.
+
+#### Generating verbose test report
+
+Jerkar generates standard Junit test reports. You can make report more verbose by mentioning `tests.report=FULL`. Reports are generated in _build/output/test-reports/junit_ folder.
+
+#### Producing a test coverage report
+
+You just have to activate the Jacoco plugin as `jerkar jacoco#`. Reports are generated in _build/output/test-reports/jacoco/jacoco.exec_ file.
+
+### Triggering SonarQube analysis
+
+You just have to activate the Jacoco plugin as `jerkar doVerify sonar#`. By default it triggers on local SonarQube server.
+The sonar properties are already set according the build information (source location, classpath, test location, encoding, ...) but can set [any parameter](http://docs.sonarqube.org/display/SONAR/Analysis+Parameters) by defining it as option.
+
+For example, you can add the following to your [Jerkar User Home]/options.properties
+
+```
+sonar.host.url=http://mySonarServer:8080
+sonar.login=myLogin
+sonar.password=myPassword
+sonar.skipDesign=true
+``` 
+
+You can also "hard code" the settings in the build definition so you don't have to mention any options. See `SonarParametrizedBuild` class.
+
+```
+public class SonarParametrizedBuild extends JkJavaBuild {
+	
+	@Override
+	protected void init() {
+		JkBuildPluginSonar sonarPlugin = new JkBuildPluginSonar()
+			.prop(JkSonar.HOST_URL, "http://mySonarServer:8080" )
+			.prop(JkSonar.BRANCH, "myBranch");
+		JkBuildPluginJacoco jacocoPlugin = new JkBuildPluginJacoco();
+		this.plugins.activate(sonarPlugin, jacocoPlugin);
+	}
+...
+```
+
+With this definition, you only have to execute `jerkar doVerify` to trigger a SonarQube analysis including test coverage.
  
+
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/> 
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/> 
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/> 
