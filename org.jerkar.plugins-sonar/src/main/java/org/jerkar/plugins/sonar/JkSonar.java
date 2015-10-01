@@ -53,7 +53,7 @@ public final class JkSonar {
     public static final String PROJECT_BASE_DIR = "projectBaseDir";
     public static final String SOURCES = "sources";
     public static final String BINARIES = "binaries";
-    public static final String TEST = "test";
+    public static final String TEST = "tests";
     public static final String LIBRARIES = "libraries";
     public static final String SKIP_DESIGN = "skipDesign";
     
