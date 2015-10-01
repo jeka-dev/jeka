@@ -1,8 +1,4 @@
-import javax.swing.text.StyleContext.SmallAttributeSet;
-
 import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.samples.AClassicBuild;
 import org.jerkar.samples.MavenStyleBuild;
 import org.jerkar.tool.JkProject;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;

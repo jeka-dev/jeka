@@ -7,6 +7,7 @@ import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
+import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsSystem;
 import org.jerkar.tool.JkConstants;
@@ -17,7 +18,7 @@ class SampleTester {
 	
 	private final JkFileTree sampleDependeeBaseDir;
 	
-	private final JkFileTree out; 
+	private final JkFileTree output; 
 	
 	private File launchScript;
 	
@@ -25,7 +26,7 @@ class SampleTester {
 		super();
 		this.sampleBaseDir = buildDir.from("../org.jerkar.samples");
 		this.sampleDependeeBaseDir = buildDir.from("../org.jerkar.samples-dependee");
-		this.out = sampleBaseDir.from("build/output");
+		this.output = sampleBaseDir.from("build/output");
 		String scriptName = JkUtilsSystem.IS_WINDOWS ? "jerkar.bat" : "jerkar";
 		launchScript = buildDir.file("build/output/dist/"+scriptName);
 	}
@@ -40,6 +41,7 @@ class SampleTester {
 		scaffoldAndEclipse();
 		testDependee("FatJarBuild");
 		testDependee("NormalJarBuild");
+		testFork();
 	}
 	
 	private void testSamples(String className, String ...args) {
@@ -64,7 +66,7 @@ class SampleTester {
 	
 	private void scaffoldAndEclipse() {
 		JkLog.startHeaded("Test scaffolding");
-		File scafoldedProject = out.file("scaffolded");
+		File scafoldedProject = output.file("scaffolded");
 		JkProcess scaffoldProcess = process().withWorkingDir(scafoldedProject);
 		scafoldedProject.mkdirs();
 		scaffoldProcess.withParameters("scaffold").runSync(); // scaffold project
@@ -78,7 +80,11 @@ class SampleTester {
 	private JkProcess process() {
 		return JkProcess.of(launchScript.getAbsolutePath())
 				.failOnError(true);
-		
+	}
+	
+	private void testFork() {
+		testSamples("", "-tests.fork");
+		JkUtilsAssert.isTrue(output.file("test-reports/junit").exists(), "No test report generated in test fork mode.");
 	}
 
 }

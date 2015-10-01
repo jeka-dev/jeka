@@ -62,7 +62,7 @@ public final class JkocoJunitEnhancer implements Enhancer {
 		if (jkUnit.forked()) {
 			JkJavaProcess process = jkUnit.processFork();
 			process = process.andAgent(destFile, options());
-			return jkUnit.forked(process);
+			return jkUnit.forked(process, false);
 		}
 		final JkJavaProcess process = JkJavaProcess.of().andAgent(agent, options());
 		return jkUnit.forkKeepingSameClassPath(process).withPostAction(new Reporter());
