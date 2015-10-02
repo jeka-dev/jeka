@@ -110,7 +110,10 @@ public final class JkMavenPublication implements Serializable {
 	/**
 	 * An artifact with a classifier for Maven repository.
 	 */
-	public static class JkClassifiedArtifact {
+	public static class JkClassifiedArtifact implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
 		private String classifier;
 		private File file;
 

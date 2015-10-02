@@ -116,7 +116,7 @@ To play with sample projects, you should :
 
 4. Edit code and modify/run some build class to play with Jerkar.    
 
-### Playing with the `AClassicalBuild`
+### Playing with `AClassicalBuild`
 
 By default, when no `-buildClass=Xxxx` is specified, Jerkar takes the first one in alphabetical order. Let's take this class for the following steps.
 
@@ -501,8 +501,9 @@ You just have to activate the Jacoco plugin as `jerkar jacoco#`. Reports are gen
 
 ### Triggering SonarQube analysis
 
-You just have to activate the Jacoco plugin as `jerkar doVerify sonar#`. By default it triggers on local SonarQube server.
-The sonar properties are already set according the build information (source location, classpath, test location, encoding, ...) but can set [any parameter](http://docs.sonarqube.org/display/SONAR/Analysis+Parameters) by defining it as option.
+You just have to activate the Jacoco plugin as `jerkar doVerify sonar#`. By default analysis is triggered on local SonarQube server (http://localhost:9000).
+You can also execute `jerkar doVerify sonar# jacoco#`to trigger an analysis that include unit test coverage.
+The sonar properties are already set according build information (source location, classpath, test location, encoding, ...) but you can set [any parameter](http://docs.sonarqube.org/display/SONAR/Analysis+Parameters) by defining it as option.
 
 For example, you can add the following to your [Jerkar User Home]/options.properties
 

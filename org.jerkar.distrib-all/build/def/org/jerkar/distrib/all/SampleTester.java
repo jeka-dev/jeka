@@ -38,6 +38,7 @@ class SampleTester {
 		testSamples("MavenStyleBuild");
 		testSamples("OpenSourceJarBuild");
 		testSamples("HttpClientTaskBuild");
+		testSamples("", "doPublish");
 		scaffoldAndEclipse();
 		testDependee("FatJarBuild");
 		testDependee("NormalJarBuild");

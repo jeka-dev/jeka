@@ -35,7 +35,6 @@ public class JkBuildPluginSonar extends JkJavaBuildPlugin {
                 .withProperty(JkSonar.WORKING_DIRECTORY, build.file("build/.sonar").getPath())
                 .withProperty(JkSonar.JUNIT_REPORTS_PATH, JkUtilsFile.getRelativePath(baseDir, new File(build.testReportDir(), "junit")))
                 .withProperty(JkSonar.SUREFIRE_REPORTS_PATH, JkUtilsFile.getRelativePath(baseDir, new File(build.testReportDir(), "junit")))
-                //.withProperty(JkSonar.DYNAMIC_ANALYSIS, "reuseReports")
                 .withProperty(JkSonar.JACOCO_REPORTS_PATH, JkUtilsFile.getRelativePath(baseDir, new File(build.testReportDir(), "jacoco/jacoco.exec")));
 	}
 	

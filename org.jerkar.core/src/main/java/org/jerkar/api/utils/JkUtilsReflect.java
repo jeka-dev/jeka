@@ -43,6 +43,9 @@ public final class JkUtilsReflect {
 			}
 			final Class<?>[] originalTypes = method.getParameterTypes();
 			final Class<?>[] types = method.getParameterTypes();
+			if (types.length == 0 && originalTypes.length == 0) {
+				return method;
+			}
 			if (types.length != originalTypes.length) {
 				continue;
 			}
