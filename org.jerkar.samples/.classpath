@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="build/def" output="build/output/def-bin"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="src" output="build/output/testClasses" path="src/test/java"/>
 	<classpathentry kind="var" path="JERKAR_REPO/net.java.dev.jna/jna/jars/jna-4.0.0.jar" sourcepath="JERKAR_REPO/net.java.dev.jna/jna/sources/jna-4.0.0-sources.jar">
