@@ -4,13 +4,11 @@ import java.io.File;
 import java.util.Arrays;
 
 import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsSystem;
-import org.jerkar.tool.JkConstants;
 
 class SampleTester {
 	
