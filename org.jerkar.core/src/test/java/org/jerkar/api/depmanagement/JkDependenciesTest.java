@@ -48,7 +48,7 @@ public class JkDependenciesTest {
 		final File depFile1 = new File("/my/file1.jar");
 		final File depFile2 = new File("/my/file2.zip");
 		JkDependencies.builder()
-		.on(depFile1, depFile2)
+		.onFiles(depFile1, depFile2)
 		.build();
 	}
 

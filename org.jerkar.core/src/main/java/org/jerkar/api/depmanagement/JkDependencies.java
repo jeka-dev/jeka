@@ -101,20 +101,27 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	}
 
 
+	/**
+	 * Returns a clone of this object plus {@link JkScopedDependency}s on the specified file.
+	 */
+	public JkDependencies and(JkScope scope, File ...files) {
+		return and(scope, Arrays.asList(files));
+	}
 
 	/**
 	 * Returns a clone of this object plus {@link JkScopedDependency}s on the specified file.
 	 */
-	public JkDependencies andFiles(JkScope scope, File ...files) {
+	public JkDependencies and(JkScope scope, Iterable<File> files) {
 		final JkScopedDependency scopedDependency = JkScopedDependency.of(JkFileSystemDependency.of(files), scope);
 		return and(scopedDependency);
 	}
+
 
 	/**
 	 * Returns a clone of this object plus {@link JkScopedDependency}s on the specified external module.
 	 * @param versionedModuleId something like "org.apache:commons:1.4"
 	 */
-	public JkDependencies andExternal(JkScope scope, String versionedModuleId) {
+	public JkDependencies and(JkScope scope, String versionedModuleId) {
 		final JkDependency dependency = JkModuleDependency.of(versionedModuleId);
 		final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scope);
 		return and(scopedDependency);
@@ -260,6 +267,19 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	}
 
 	/**
+	 * Returns a set of dependencies that contains all and only module dependencies declared in this object.
+	 */
+	public JkDependencies onlyModules() {
+		final JkDependencies.Builder builder = JkDependencies.builder();
+		for (final JkScopedDependency scopedDependency : this) {
+			if (scopedDependency.dependency() instanceof JkModuleDependency) {
+				builder.on(scopedDependency);
+			}
+		}
+		return builder.build();
+	}
+
+	/**
 	 * Creates a clone of these dependencies replacing the dynamic versions by the static ones specified
 	 * in the {@link JkVersionedModule}s passed as argument. <br/>
 	 */
@@ -291,13 +311,28 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	}
 
 	/**
-	 * Returns all files declared as {@link JkFileSystemDependency} for any of the specified scopes.
+	 * Returns all files declared as {@link JkFileDependency} for any of the specified scopes.
 	 */
 	public JkPath localFileDependencies(JkScope ...scopes) {
 		final LinkedHashSet<File> set = new LinkedHashSet<File>();
 		for (final JkScopedDependency scopedDependency : this.dependencies) {
 			if (scopedDependency.isInvolvedInAnyOf(scopes)
 					&& scopedDependency.dependency() instanceof JkFileDependency) {
+				final JkFileDependency fileDeps = (JkFileDependency) scopedDependency.dependency();
+				set.addAll(fileDeps.files());
+			}
+		}
+		return JkPath.of(set);
+	}
+
+	/**
+	 * Returns all files declared as {@link JkFileSystemDependency} for any of the specified scopes.
+	 */
+	public JkPath fileSystemDependencies(JkScope ...scopes) {
+		final LinkedHashSet<File> set = new LinkedHashSet<File>();
+		for (final JkScopedDependency scopedDependency : this.dependencies) {
+			if (scopedDependency.isInvolvedInAnyOf(scopes)
+					&& scopedDependency.dependency() instanceof JkFileSystemDependency) {
 				final JkFileDependency fileDeps = (JkFileDependency) scopedDependency.dependency();
 				set.addAll(fileDeps.files());
 			}
@@ -401,13 +436,35 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			return this;
 		}
 
-		public JkFluentScopeableBuilder on(File ... files) {
+		/**
+		 * Add the specified files as dependencies.
+		 */
+		public JkFluentScopeableBuilder onFiles(File ... files) {
 			return on(JkFileSystemDependency.of(Arrays.asList(files)));
 		}
 
+		/**
+		 * Same as {@link #onFiles(File...)} but effective only if the specified condition is true.
+		 */
+		public JkFluentScopeableBuilder onFilesIf(boolean condition, File ... files) {
+			return on(JkFileSystemDependency.of(files));
+		}
+
+
+		/**
+		 * Add the specified files as dependencies.
+		 */
 		public JkFluentScopeableBuilder onFiles(Iterable<File> files) {
 			return on(JkFileSystemDependency.of(files));
 		}
+
+		/**
+		 * Same as {@link #onFiles(Iterable)} but effective only if the specified condition is true.
+		 */
+		public JkFluentScopeableBuilder onFilesIf(boolean condition, Iterable<File> files) {
+			return on(JkFileSystemDependency.of(files));
+		}
+
 
 		public JkFluentModuleDepBuilder on(JkModuleId module, JkVersionRange version) {
 			return on(module, version, true);
@@ -490,7 +547,11 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
 
 			public Builder scope(JkScope ... scopes) {
-				final JkDependency dependency = dependencies.pollLast().dependency();
+				final JkScopedDependency lastScopedDep = dependencies.pollLast();
+				if (lastScopedDep == null) {
+					return this;
+				}
+				final JkDependency dependency = lastScopedDep.dependency();
 				dependencies.add(JkScopedDependency.of(dependency, JkUtilsIterable.setOf(scopes)));
 				return this;
 			}

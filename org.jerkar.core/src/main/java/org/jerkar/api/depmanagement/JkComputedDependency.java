@@ -10,7 +10,6 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsTime;
 
 public class JkComputedDependency extends JkFileDependency {
 
@@ -79,12 +78,9 @@ public class JkComputedDependency extends JkFileDependency {
 	@Override
 	public Set<File> files() {
 		if (this.hasMissingFilesOrEmptyDirs()) {
-			JkLog.delta(1);
-			JkLog.infoHead("Building depending project " + this);
-			final long time = System.nanoTime();
+			JkLog.startHeaded("Building depending project " + this);
 			runnable.run();
-			JkLog.infoHead("Project " + this + " built in " + JkUtilsTime.durationInSeconds(time) +" seconds.");
-			JkLog.delta(-1);
+			JkLog.done();
 		}
 		final Set<File> missingFiles = this.missingFilesOrEmptyDirs();
 		if (!missingFiles.isEmpty()) {

@@ -128,7 +128,7 @@ public final class JkProjectDef {
 
 		void log(boolean displayFromClass) {
 			JkLog.nextLine();
-			JkLog.infoHead("Methods               ");
+			JkLog.infoHeaded("Methods               ");
 			if (this.methodDefs.isEmpty()) {
 				JkLog.info("None");
 			}
@@ -136,7 +136,7 @@ public final class JkProjectDef {
 			for (final JkProjectBuildMethodDef methodDef : this.methodDefs) {
 				JkLog.nextLine();
 				if (!methodDef.declaringClass.equals(currentClass) && displayFromClass) {
-					JkLog.infoUnderline("From " + methodDef.declaringClass.getName());
+					JkLog.infoUnderlined("From " + methodDef.declaringClass.getName());
 				}
 				currentClass = methodDef.declaringClass;
 				if (methodDef.description == null) {
@@ -149,7 +149,7 @@ public final class JkProjectDef {
 				}
 			}
 			JkLog.nextLine();
-			JkLog.infoHead("Options               ");
+			JkLog.infoHeaded("Options               ");
 			if (this.optionDefs.isEmpty()) {
 				JkLog.info("None");
 			}
@@ -157,7 +157,7 @@ public final class JkProjectDef {
 			for (final JkProjectBuildOptionDef optionDef : this.optionDefs) {
 				JkLog.nextLine();
 				if (!optionDef.jkBuild.getClass().equals(currentClass) && displayFromClass) {
-					JkLog.infoUnderline("From " + optionDef.jkBuild.getClass().getName());
+					JkLog.infoUnderlined("From " + optionDef.jkBuild.getClass().getName());
 				}
 				currentClass = optionDef.jkBuild.getClass();
 				optionDef.log();

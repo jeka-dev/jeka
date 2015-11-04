@@ -2,7 +2,7 @@ package org.jerkar.api.depmanagement;
 
 
 
-import static org.jerkar.api.depmanagement.JkScopedDependencyTest.COMPILE;
+//import static org.jerkar.api.depmanagement.JkScopedDependencyTest.COMPILE;
 
 import java.io.File;
 
@@ -24,7 +24,7 @@ public class JkDependencyResolverRunner {
 				.excludeGlobally("antlr", "antlr")
 				.excludeGlobally("org.jboss.logging", "*")
 				.build();//.withDefaultScope(COMPILE);
-		final JkResolutionParameters params = JkResolutionParameters.defaultScopeMapping((COMPILE.mapTo("compile(*)")));
+		//final JkResolutionParameters params = JkResolutionParameters.defaultScopeMapping((COMPILE.mapTo("compile(*)")));
 		final JkDependencyResolver resolver = JkDependencyResolver.managed(REPOS, deps);//.withParams(params);
 		final JkResolveResult resolveResult = resolver.resolve();
 		for (final File file : resolveResult.localFiles()) {

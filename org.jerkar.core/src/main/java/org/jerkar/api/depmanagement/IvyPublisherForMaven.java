@@ -190,8 +190,7 @@ final class IvyPublisherForMaven {
 
 	private boolean existOnRepo(String dest) {
 		try {
-			final Resource resource = resolver.getRepository()
-					.getResource(dest);
+			final Resource resource = resolver.getRepository().getResource(dest);
 			return resource.exists();
 		} catch (final IOException e) {
 			throw new RuntimeException(e);

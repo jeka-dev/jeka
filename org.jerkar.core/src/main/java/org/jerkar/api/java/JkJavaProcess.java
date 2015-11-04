@@ -12,9 +12,9 @@ import java.util.Map;
 
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.JkUtilsIO.StreamGobbler;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsSystem;
-import org.jerkar.api.utils.JkUtilsIO.StreamGobbler;
 
 /**
  * Offer fluent interface for launching Java processes.
@@ -96,6 +96,17 @@ public final class JkJavaProcess {
 
 	public JkJavaProcess andOptions(String... options) {
 		return this.andOptions(Arrays.asList(options));
+	}
+
+	/**
+	 * Takes the specified command line as is and add it to the process command line.
+	 * Example of command line is <i>-Xms2G -Xmx2G</i>.
+	 */
+	public JkJavaProcess andCommandLine(String commandLine) {
+		if (JkUtilsString.isBlank(commandLine)) {
+			return this;
+		}
+		return this.andOptions(JkUtilsString.translateCommandline(commandLine));
 	}
 
 	public JkJavaProcess withWorkingDir(File workingDir) {

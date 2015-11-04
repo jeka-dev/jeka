@@ -1,1 +1,0 @@
-test with remote sonar (may add option for config server)

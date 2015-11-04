@@ -53,11 +53,11 @@ class Lib {
 		final JkDependencies.Builder builder = JkDependencies.builder();
 		for (final Lib lib : libs) {
 			if (lib.projectRelativePath == null) {
-				builder.on(lib.file).scope(lib.scope);
+				builder.onFiles(lib.file).scope(lib.scope);
 
 			} else {  // This is project dependency
 				final JkJavaBuild slaveBuild = (JkJavaBuild) masterBuild.relativeProject(lib.projectRelativePath);
-				final JkComputedDependency projectDependency = slaveBuild.asComputedDependency(slaveBuild.packer().jarFile());
+				final JkComputedDependency projectDependency = slaveBuild.asDependency(slaveBuild.packer().jarFile());
 				builder.on(projectDependency).scope(lib.scope);
 
 				// Get the exported entry as well

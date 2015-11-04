@@ -162,12 +162,13 @@ public class JkBuild {
 		} else {
 			context = "";
 		}
-		JkLog.startUnderlined("Method : " + methodName + context);
+		JkLog.infoUnderlined("Method : " + methodName + context);
+		final long time = System.nanoTime();
 		try {
 			JkUtilsReflect.invoke(this, method);
-			JkLog.done("Method " + methodName + " success.");
+			JkLog.info("Method " + methodName + " success in " + JkUtilsTime.durationInSeconds(time) + " seconds.");
 		} catch (final RuntimeException e) {
-			JkLog.done("Method " + methodName + " failed.");
+			JkLog.info("Method " + methodName + " failed in " + JkUtilsTime.durationInSeconds(time) + " seconds.");
 			throw e;
 		}
 	}
@@ -269,14 +270,14 @@ public class JkBuild {
 	 * Returns a {@link JkComputedDependency} on this project and specified files.
 	 * The 'doDefault' method will be invoked to compute the dependee files.
 	 */
-	public JkComputedDependency asComputedDependency(File ...files) {
+	public JkComputedDependency asDependency(File ...files) {
 		return BuildDependency.of(this, files);
 	}
 
 	/**
 	 * Returns a {@link JkComputedDependency} on this project and specified files and methods to execute.
 	 */
-	public JkComputedDependency asComputedDependency(String methods, File ...files) {
+	public JkComputedDependency asDependency(String methods, File ...files) {
 		return BuildDependency.of(this, methods, files);
 	}
 

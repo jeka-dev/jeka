@@ -9,12 +9,14 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPath;
 import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -64,6 +66,27 @@ public final class JkClasspath implements Iterable<File> {
 	public static JkClasspath of(File...entries) {
 		return JkClasspath.of(Arrays.asList(entries));
 	}
+
+	/**
+	 * Returns the current claaspath as given by <code>System.getProperty("java.class.path")</code>.
+	 */
+	public static JkClasspath current() {
+		final List<File> files = new LinkedList<File>();
+		final String classpath = System.getProperty("java.class.path");
+		final String[] classpathEntries = classpath.split(File.pathSeparator);
+		for (final String classpathEntry : classpathEntries) {
+			files.add(new File(classpathEntry));
+		}
+		return JkClasspath.of(files);
+	}
+
+	/**
+	 * Short hand to create a {@link JkPath} from this {@link JkClasspath}.
+	 */
+	public JkPath asPath() {
+		return JkPath.of(this);
+	}
+
 
 	/**
 	 * Throws an {@link IllegalStateException} if one of the entries making of this classloader

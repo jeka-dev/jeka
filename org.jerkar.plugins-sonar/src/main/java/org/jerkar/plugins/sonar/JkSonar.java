@@ -33,7 +33,7 @@ public final class JkSonar {
 
     private static final String RUNNER_LOCAL_PATH = "build/output/temp/" + RUNNER_JAR_NAME_24;
 
-    private static final String SONAR_PREFIX = ".sonar";
+    private static final String SONAR_PREFIX = "sonar.";
     public static final String PROJECT_KEY = "projectKey";
     public static final String PROJECT_NAME = "projectName";
     public static final String PROJECT_VERSION = "projectVersion";
@@ -53,7 +53,7 @@ public final class JkSonar {
     public static final String PROJECT_BASE_DIR = "projectBaseDir";
     public static final String SOURCES = "sources";
     public static final String BINARIES = "binaries";
-    public static final String TEST = "test";
+    public static final String TEST = "tests";
     public static final String LIBRARIES = "libraries";
     public static final String SKIP_DESIGN = "skipDesign";
     
@@ -195,8 +195,13 @@ public final class JkSonar {
         final File projectDir = projectDir();
         while (it.hasNext()) {
         	final File file = it.next();
-        	final String relativePath = JkUtilsFile.getRelativePath(projectDir, file);
-        	result.append(relativePath);
+        	String path;
+        	if (JkUtilsFile.isAncestor(projectDir, file)) {
+        		path = JkUtilsFile.getRelativePath(projectDir, file);
+        	} else {
+        		path = file.getAbsolutePath();
+        	}
+        	result.append(path);
             if (it.hasNext()) {
                 result.append(",");
             }

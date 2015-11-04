@@ -28,14 +28,15 @@ final class Main {
 		final long start = System.nanoTime();
 		displayIntro();
 		final LoadResult loadResult = loadOptionsAndSysprops(args);
+		JkLog.info("Working Directory : " + System.getProperty("user.dir"));
 		JkLog.info("Java Home : " + System.getProperty("java.home"));
 		JkLog.info("Java Version : " + System.getProperty("java.version")+ ", " + System.getProperty("java.vendor"));
 		JkLog.info("Jerkar Home : " + JkLocator.jerkarHome().getAbsolutePath());
 		JkLog.info("Jerkar User Home : " + JkLocator.jerkarUserHome().getAbsolutePath());
 		JkLog.info("Jerkar Repository Cache : " + JkLocator.jerkarRepositoryCache());
-		JkLog.info("Jerkar class-path : " + System.getProperty("java.class.path"));
-		JkLog.info("Command line : " + JkUtilsString.join(Arrays.asList(args), " "));
-		logProps("Specified system properties", loadResult.sysprops);
+		JkLog.info("Jerkar Classpath : " + System.getProperty("java.class.path"));
+		JkLog.info("Command Line : " + JkUtilsString.join(Arrays.asList(args), " "));
+		logProps("Specified System Properties", loadResult.sysprops);
 		JkLog.info("Standard Options : " + loadResult.standardOptions);
 		logProps("Options", JkOptions.toDisplayedMap(JkOptions.getAll()));
 
@@ -113,8 +114,6 @@ final class Main {
 			}
 		}
 		return result;
-
-
 	}
 
 

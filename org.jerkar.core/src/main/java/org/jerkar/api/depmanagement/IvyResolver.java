@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.ivy.Ivy;
+import org.apache.ivy.core.IvyContext;
 import org.apache.ivy.core.cache.ResolutionCacheManager;
 import org.apache.ivy.core.module.descriptor.Configuration;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
@@ -36,13 +37,23 @@ final class IvyResolver implements InternalDepResolver {
 	private IvyResolver(Ivy ivy) {
 		super();
 		this.ivy = ivy;
-		ivy.getLoggerEngine().setDefaultLogger(new IvyMessageLogger());
-		ivy.getLoggerEngine().setShowProgress(JkLog.verbose());
 	}
 
 	private static InternalDepResolver of(IvySettings ivySettings) {
-		final Ivy ivy = Ivy.newInstance(ivySettings);
+		final Ivy ivy = ivy(ivySettings);
 		return new IvyResolver(ivy);
+	}
+
+	static Ivy ivy(IvySettings ivySettings) {
+		final Ivy ivy = new Ivy();
+		ivy.getLoggerEngine().setDefaultLogger(new IvyMessageLogger());
+		ivy.getLoggerEngine().setShowProgress(JkLog.verbose());
+		if (IvyContext.getContext().peekIvy() == null) {
+			IvyContext.getContext().setIvy(ivy);
+		}
+		ivy.setSettings(ivySettings);
+		ivy.bind();
+		return ivy;
 	}
 
 	/**

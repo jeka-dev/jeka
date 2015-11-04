@@ -44,19 +44,26 @@ public class CoreBuild extends AbstractBuild {
 	@Override
 	public void pack() {
 		super.pack();
+		JkFileTree.of(this.classDir()).exclude("**/*.jar").zip().to(packer().jarFile("lean"));
 		distrib();
 	}
 
 
 	private void distrib() {
+
+
 		final JkFileTree distrib = JkFileTree.of(distribFolder);
 		JkLog.startln("Creating distrib " + distripZipFile.getPath());
 		distrib.importFiles(file("../LICENSE"));
 		final JkJavaPacker packer = packer();
 		distrib.importDirContent(file("src/main/dist"));
 
+		// Create lean jar
+
+
 		// Simpler to put both Jerkar and Jerkar-fat jar at the root (in order to find the Jerker HOME)
 		distrib.importFiles(packer.jarFile());
+		distrib.importFiles(packer().jarFile("lean"));
 		distrib.from("libs-sources").importDirContent(file("build/libs-sources"))
 		.importFiles(packer.jarSourceFile());
 		distrib.from("libs-javadoc").importFiles(this.javadocMaker().zipFile());

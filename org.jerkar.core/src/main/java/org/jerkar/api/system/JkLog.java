@@ -15,7 +15,9 @@ import org.jerkar.api.utils.JkUtilsTime;
  */
 public final class JkLog {
 
-	private static final String INDENT = "    ";
+	private static final String INDENT = "|  ";
+
+	private static final String TAB = "  ";
 
 	private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<LinkedList<Long>>();
 
@@ -113,7 +115,7 @@ public final class JkLog {
 		if (silent) {
 			return;
 		}
-		infoUnderline(message);
+		infoUnderlined(message);
 		incOffset();
 		startTimer();
 	}
@@ -125,7 +127,7 @@ public final class JkLog {
 		if (silent) {
 			return;
 		}
-		infoHead(message);
+		infoHeaded(message);
 		incOffset();
 		startTimer();
 	}
@@ -170,7 +172,7 @@ public final class JkLog {
 					+"Please, use 'done' only to mention that the previous 'start' activity is done.");
 		}
 		final long start = times.poll();
-		infoWriter.println("==> " + message + " in " + JkUtilsTime.durationInSeconds(start) + " seconds.");
+		infoWriter.println(" \\ " + message + " in " + JkUtilsTime.durationInSeconds(start) + " seconds.");
 
 	}
 
@@ -306,9 +308,9 @@ public final class JkLog {
 	 * Shifts the left margin. All subsequent log will be shifted <code>delta</code> characters to right.
 	 */
 	public static void delta(int delta) {
-		infoWriter.offsetLevel += delta;
-		errorWriter.offsetLevel += delta;
-		warnWriter.offsetLevel += delta;
+		infoWriter.tabLevel += delta;
+		errorWriter.tabLevel += delta;
+		warnWriter.tabLevel += delta;
 	}
 
 	/**
@@ -327,32 +329,60 @@ public final class JkLog {
 
 	private static class OffsetStream extends PrintStream {
 
+		private static final String SEPARATOR = System.getProperty("line.separator");
+
 		private int offsetLevel;
+
+		private int tabLevel;
+
+		private boolean beginOfLine;
 
 		public OffsetStream(PrintStream delegate) {
 			super(delegate);
 		}
 
 		@Override
+		public void println(String s) {
+			super.println(s);
+			beginOfLine = true;
+		}
+
+		@Override
+		public void println() {
+			super.println();
+			beginOfLine = true;
+		}
+
+		@Override
+		public void print(String s) {
+			super.print(s);
+			beginOfLine = s.endsWith(SEPARATOR);
+		}
+
+
+		@Override
 		public void write(byte[] cbuf, int off, int len)  {
 			final byte[] filler = getFiller().getBytes();
 			final int lenght = filler.length;
-			if (lenght > 0) {
+			if (lenght > 0 && beginOfLine) {
 				super.write(filler,0, lenght);
 			}
 			super.write(cbuf, off, len);
 		}
 
 		private String getFiller() {
-			if (offsetLevel == 0) {
+			if (offsetLevel == 0 && tabLevel == 0) {
 				return "";
 			}
-			if (offsetLevel == 1) {
+			if (offsetLevel == 1 && tabLevel == 0) {
 				return INDENT;
 			}
-			final StringBuilder result = new StringBuilder(INDENT);
-			for (int i = 1; i < offsetLevel;i++) {
+			final StringBuilder result = new StringBuilder();
+			for (int i = 0; i < offsetLevel;i++) {
 				result.append(INDENT);
+			}
+			for (int i=0; i < tabLevel; i++) {
+				result.append(TAB);
 			}
 			return result.toString();
 		}
@@ -377,7 +407,7 @@ public final class JkLog {
 	 * ------------------
 	 * </pre>
 	 */
-	public static void infoHead(String intro) {
+	public static void infoHeaded(String intro) {
 		if (silent) {
 			return;
 		}
@@ -394,7 +424,7 @@ public final class JkLog {
 	 * ------------------
 	 * </pre>
 	 */
-	public static void infoUnderline(String message) {
+	public static void infoUnderlined(String message) {
 		if (silent) {
 			return;
 		}

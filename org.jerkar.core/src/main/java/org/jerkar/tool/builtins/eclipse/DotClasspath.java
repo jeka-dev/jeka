@@ -50,6 +50,10 @@ final class DotClasspath {
 
 	private static final String ENCODING = "UTF-8";
 
+	private static final String JERKAR_HOME = "JERKAR_HOME";
+
+	private static final String JERKAR_REPO = "JERKAR_REPO";
+
 	private final List<ClasspathEntry> classpathentries = new LinkedList<ClasspathEntry>();
 
 	private DotClasspath(List<ClasspathEntry> classpathentries) {
@@ -132,14 +136,22 @@ final class DotClasspath {
 
 			} else if (classpathEntry.kind.equals(ClasspathEntry.Kind.VAR)) {
 				final String var = JkUtilsString.substringBeforeFirst(classpathEntry.path, "/");
-				final String optionName = JkBuildPluginEclipse.OPTION_VAR_PREFIX + var;
-				final String varFile = JkOptions.get(optionName);
-				if (varFile == null) {
-					throw new JkException("No option found with name " + optionName
-							+ ". It is needed in order to build this project as it is mentionned in Eclipse .classpath."
-							+ " Please set this option either in command line as -" + optionName
-							+ "=/absolute/path/for/this/var or in [jerkar_home]/options.properties" );
+				final String varFile;
+				if (JERKAR_HOME.equals(var)) {
+					varFile = JkUtilsFile.canonicalPath(JkLocator.jerkarHome());
+				} else if (JERKAR_REPO.equals(var)){
+					varFile = JkUtilsFile.canonicalPath(JkLocator.jerkarRepositoryCache());
+				} else {
+					final String optionName = JkBuildPluginEclipse.OPTION_VAR_PREFIX + var;
+					varFile = JkOptions.get(optionName);
+					if (varFile == null) {
+						throw new JkException("No option found with name " + optionName
+								+ ". It is needed in order to build this project as it is mentionned in Eclipse .classpath."
+								+ " Please set this option either in command line as -" + optionName
+								+ "=/absolute/path/for/this/var or in [jerkar_home]/options.properties" );
+					}
 				}
+
 				final File file = new File(varFile, JkUtilsString.substringAfterFirst(classpathEntry.path, "/") );
 				if (!file.exists()) {
 					JkLog.warn("Can't find Eclipse classpath entry : " + file.getAbsolutePath());
@@ -331,7 +343,7 @@ final class DotClasspath {
 		writer.writeStartElement("classpath");
 		writer.writeCharacters("\n");
 
-		// Build sources
+		// Build definition sources
 		if (build.file(JkConstants.BUILD_DEF_DIR).exists()) {
 			writer.writeCharacters("\t");
 			writer.writeEmptyElement(CLASSPATHENTRY);
@@ -364,7 +376,7 @@ final class DotClasspath {
 		}
 
 		// Write entries for file dependencies
-		final List<File> fileDeps = build.buildDefDependencyResolver().dependenciesToResolve().localFileDependencies(JkScope.BUILD).entries();
+		final List<File> fileDeps = build.buildDefDependencyResolver().dependenciesToResolve().fileSystemDependencies(JkScope.BUILD).entries();
 		writeFileEntries(fileDeps, writer);
 
 		// Write entries for managed dependencies
@@ -542,8 +554,10 @@ final class DotClasspath {
 
 		public VarReplacement(File file) {
 			final Map<String, String> map = JkOptions.getAllStartingWith(JkBuildPluginEclipse.OPTION_VAR_PREFIX);
-			map.put(JkBuildPluginEclipse.OPTION_VAR_PREFIX + "JERKAR_REPO", JkLocator.jerkarRepositoryCache().getAbsolutePath());
-			map.put(JkBuildPluginEclipse.OPTION_VAR_PREFIX + "JERKAR_HOME", JkLocator.jerkarHome().getAbsolutePath());
+			map.put(JkBuildPluginEclipse.OPTION_VAR_PREFIX + JERKAR_REPO, JkLocator.jerkarRepositoryCache().getAbsolutePath());
+			if (!JkLocator.jerkarJarFile().isDirectory()) {
+				map.put(JkBuildPluginEclipse.OPTION_VAR_PREFIX + JERKAR_HOME, JkLocator.jerkarHome().getAbsolutePath());
+			}
 			boolean replaced = false;
 			String path = JkUtilsFile.canonicalPath(file).replace(File.separator, "/");
 			for (final Map.Entry<String, String> entry : map.entrySet()) {
