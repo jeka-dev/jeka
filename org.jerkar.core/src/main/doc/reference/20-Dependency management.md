@@ -23,7 +23,7 @@ Projects may need dependencies to accomplish certain tasks and needed dependenci
 For example, to __compile__ you may need _guava_ library only but to __test__ you'll need _junit_ library as well. 
 To label dependencies according their usage, Jerkar uses the notion of __scope__ (embodied by `JkScope` class). This notion is similar to the Maven scope.
 
-Scopes can __inherit__ from each other. This means that if a scope _Foo_ inherits from scope _Bar_ then a dependencies declared with scope _Bar_ will be also considered as declared with scope _Foo_.
+A scope can __inherit__ from one or several scopes. This means that if a scope _Foo_ inherits from scope _Bar_ then a dependencies declared with scope _Bar_ will be also considered as declared with scope _Foo_.
 For instance, in `JkJavaBuild`, scope `TEST` inherits from `RUNTIME` that inherits from `COMPILE` so every dependencies declared with scope `COMPILE` are considered to be declared with scope `RUNTIME` and `TEST` as well.   
 
 By default, scopes are __transitive__. This has only a meaning for __reference to module__. 
@@ -214,7 +214,9 @@ As Jerkar relies on Ivy under the hood, you can use any expression mentioned (he
 
 ###### Specifying Maven Classifier and extension of the artifact
 
-If the module repository is a Maven one, you can specify the classifier of the artifact you want to retrieve :
+Maven or Ivy module dependencies need to be downloaded from a binary repository. This could be a managed repository (as _Nexus8 or _Artifactory_), simple file system repo or 
+a combination of any.
+
 
 ```
 ...	
@@ -239,6 +241,33 @@ protected JkDependencies dependencies() {
 	.build();
 }
 ...   
+```
+
+###### Choose the binary repository where to download your dependencies
+
+If use `JkBuildDependencySupport` template, or one of its subclass as `JkBuildJava`, the default is to use the repository mentioned in your JkOptions :
+- `repo.download.url` : the url of the download repository, default is Maven central  :http://repo1.maven.org/maven2`.
+- `repo.download.username` : the username credential to access to the repository (optional). Default is null cause Maven central does not require authentication. 
+- `repo.download.password` : the password credential to access to the repository (optional). Default is null cause Maven central does not require authentication. 
+ 
+If the repository is an Ivy one, you should prefix the url with `ivy:`  as _ivy:/my/shared/drive/repo_
+
+
+```
+repo.download.url=ivy:http://my/ivy/repo
+repo.download.username=myIvyUsername
+repo.download.password=myIvyPassword
+```
+
+You can also define it programmatically for richer and more flexible options:
+
+```
+protected JkPublishRepos publishRepositories() {
+    return JkPublishRepos.of(
+        JkRepo.maven("http://my.snapshot.repo").asPublishSnapshotRepo())
+            .and( 
+        JkRepo.maven("http://my.release.repo").asPublishReleaseRepo());
+}
 ```
  
 ### Bind Dependencies to Scopes

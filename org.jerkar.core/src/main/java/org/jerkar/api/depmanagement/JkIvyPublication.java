@@ -1,6 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -8,7 +9,9 @@ import java.util.Set;
 import org.jerkar.api.depmanagement.JkIvyPublication.Artifact;
 import org.jerkar.api.utils.JkUtilsIterable;
 
-public final class JkIvyPublication implements Iterable<Artifact> {
+public final class JkIvyPublication implements Iterable<Artifact>, Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public static JkIvyPublication of(File file, String type, JkScope ...jkScopes) {
 		return new JkIvyPublication(new HashSet<JkIvyPublication.Artifact>(), null, null).and(file, type, jkScopes);
@@ -108,7 +111,9 @@ public final class JkIvyPublication implements Iterable<Artifact> {
 		return new JkIvyPublication(this.artifacts, this.status, branch);
 	}
 
-	static class Artifact {
+	static class Artifact implements Serializable {
+
+		private static final long serialVersionUID = 1L;
 
 		private Artifact(File file, String type, Set<JkScope> jkScopes) {
 			super();

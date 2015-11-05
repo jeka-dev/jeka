@@ -27,7 +27,7 @@ final class Main {
 	public static void main(String[] args) {
 		final long start = System.nanoTime();
 		displayIntro();
-		final LoadResult loadResult = loadOptionsAndSysprops(args);
+		final LoadResult loadResult = loadOptionsAndSystemProps(args);
 		JkLog.info("Working Directory : " + System.getProperty("user.dir"));
 		JkLog.info("Java Home : " + System.getProperty("java.home"));
 		JkLog.info("Java Version : " + System.getProperty("java.version")+ ", " + System.getProperty("java.vendor"));
@@ -58,7 +58,7 @@ final class Main {
 		}
 	}
 
-	private static LoadResult loadOptionsAndSysprops(String[] args) {
+	private static LoadResult loadOptionsAndSystemProps(String[] args) {
 		final Map<String, String> sysProps = getSpecifiedSystemProps(args);
 		JkUtilsTool.setSystemProperties(sysProps);
 		final Map<String, String> optionMap = new HashMap<String, String>();

@@ -605,6 +605,7 @@ public final class JkUtilsIO {
 		return new StreamGobbler(is, os);
 	}
 
+
 	/**
 	 * Runs a thread copying all data from a stream to a specified writer. The
 	 * thread is started when the instance is created. You have to call

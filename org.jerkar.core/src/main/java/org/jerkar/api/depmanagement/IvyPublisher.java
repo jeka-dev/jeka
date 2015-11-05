@@ -136,8 +136,13 @@ final class IvyPublisher implements InternalPublisher {
 		JkLog.startln("Publishing for Maven");
 		final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule, publication,
 				dependencies, JkUtilsTime.now(), JkVersionProvider.empty());
-		publishMavenArtifacts(publication,  moduleDescriptor);
-		JkLog.done();
+		final int count = publishMavenArtifacts(publication,  moduleDescriptor);
+		if (count <=1) {
+			JkLog.done("Module published in " + count + " repository.");
+		} else {
+			JkLog.done("Module published in " + count + " repositories.");
+		}
+
 	}
 
 

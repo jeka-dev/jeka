@@ -24,6 +24,12 @@ public final class JkPublisher {
 		this.ivyPublisher = jkIvyPublisher;
 	}
 
+	/**
+	 * Creates a {@link JkPublisher} with the specified {@link JkPublishRepo}.
+	 */
+	public static JkPublisher of(JkPublishRepo publishRepo) {
+		return of(JkPublishRepos.of(publishRepo));
+	}
 
 
 	/**

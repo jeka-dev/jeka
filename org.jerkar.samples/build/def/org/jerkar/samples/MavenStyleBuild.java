@@ -48,16 +48,19 @@ public class MavenStyleBuild extends JkJavaBuild {
 	}
 	
 	@Override
+	// Optional : you can omit it if you have set it up as 'repo.download.url' options and you don't 
+	// need repository chaining as below
 	protected JkRepos downloadRepositories() {
 		return JkRepos.of(JkRepo.maven("http://my.repo1"), JkRepo.mavenCentral());
 	}
 	
 	@Override
+	// Optional : you can omit it if you have set it up as 'repo.publish.url' and 'repo.release.url' options 
 	protected JkPublishRepos publishRepositories() {
 		return JkPublishRepos.of(
 				JkRepo.maven("http://my.snapshot.repo").asPublishSnapshotRepo())
 				.and( 
-				JkRepo.ivy("http://my.release.repo").asPublishReleaseRepo());
+				JkRepo.maven("http://my.release.repo").asPublishReleaseRepo());
 	}
 
 }

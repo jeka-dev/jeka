@@ -20,7 +20,7 @@ public abstract class JkRepo implements Serializable {
 
 	public static final URL MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL = toUrl("https://oss.sonatype.org/content/repositories/snapshots/");
 
-	public static final URL MAVEN_OSSRH_PUSH_RELEASE = toUrl("https://oss.sonatype.org/content/repositories/snapshots/");
+	public static final URL MAVEN_OSSRH_PUSH_RELEASE = toUrl("https://oss.sonatype.org/content/repositories/releases/");
 
 	public static final URL JCENTERL_URL = toUrl("https://jcenter.bintray.com");
 
@@ -101,13 +101,11 @@ public abstract class JkRepo implements Serializable {
 		}
 	}
 
-	public static JkRepo.JkIvyRepository ivy(String url) {
-		try {
-			return ivy(new URL(url));
-		} catch (final MalformedURLException e) {
-			throw new IllegalArgumentException(e);
-		}
+	public static JkRepo.JkIvyRepository ivy(String urlOrDir) {
+		return ivy(toUrl(urlOrDir));
 	}
+
+
 
 	private final URL url;
 
@@ -190,11 +188,16 @@ public abstract class JkRepo implements Serializable {
 		return this.getClass().getSimpleName() + "(" + url + ")";
 	}
 
-	private static URL toUrl(String url) {
+	private static URL toUrl(String urlOrDir) {
 		try {
-			return new URL(url);
-		} catch (final MalformedURLException e) {
-			throw new IllegalArgumentException(e);
+			return new URL(urlOrDir);
+		} catch(final MalformedURLException e) {
+			final File file = new File(urlOrDir);
+			if (file.isAbsolute()) {
+				return JkUtilsFile.toUrl(file);
+			} else {
+				throw new IllegalArgumentException("<Malformed url " + urlOrDir, e);
+			}
 		}
 	}
 

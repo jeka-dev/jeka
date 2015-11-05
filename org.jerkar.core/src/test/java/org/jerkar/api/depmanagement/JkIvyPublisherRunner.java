@@ -14,8 +14,8 @@ public class JkIvyPublisherRunner {
 	public static void main(String[] args) {
 		JkLog.verbose(true);
 		//JkUtilsTool.loadUserSystemProperties();
-		//testPublishIvy();
-		testPublishMaven();
+		testPublishIvy();
+		//testPublishMaven();
 	}
 
 	public static void testPublishIvy() {

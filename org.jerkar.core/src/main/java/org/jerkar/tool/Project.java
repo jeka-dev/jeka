@@ -209,13 +209,13 @@ final class Project {
 	}
 
 	private static void configureProject(JkBuild build,
-			Collection<JkPluginSetup> pluginSetups, Map<String, String> options,  PluginDictionnary<JkBuildPlugin> dictionnary) {
+			Collection<JkPluginSetup> pluginSetups, Map<String, String> commandlineOptions,  PluginDictionnary<JkBuildPlugin> dictionnary) {
 		JkOptions.populateFields(build);
-		JkOptions.populateFields(build, options);
 		final File localProps = build.file(JkConstants.BUILD_DEF_DIR + "/build.properties");
 		if (localProps.exists()) {
 			JkOptions.populateFields(build, JkUtilsFile.readPropertyFileAsMap(localProps));
 		}
+		JkOptions.populateFields(build, commandlineOptions);
 		configureAndActivatePlugins(build, pluginSetups, dictionnary);
 	}
 

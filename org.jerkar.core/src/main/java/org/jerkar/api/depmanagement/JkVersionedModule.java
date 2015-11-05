@@ -17,6 +17,28 @@ public final class JkVersionedModule implements Serializable {
 		return new JkVersionedModule(moduleId, version);
 	}
 
+	/**
+	 * Creates a <code>JkVersionedModule</code> from a string formatted as <code>groupId:name</code> and another one standing for the version.
+	 */
+	public static final JkVersionedModule of(String groupAndName, String version) {
+		final String[] items = groupAndName.split(":");
+		if (items.length != 2) {
+			throw new IllegalArgumentException(groupAndName + " does not tespect format groupId:name");
+		}
+		return JkVersionedModule.of(JkModuleId.of(groupAndName), JkVersion.ofName(version));
+	}
+
+	/**
+	 * Creates a <code>JkVersionedModule</code> from a string formatted as <code>groupId:name:version</code>.
+	 */
+	public static final JkVersionedModule of(String description) {
+		final String[] items = description.split(":");
+		if (items.length != 3) {
+			throw new IllegalArgumentException(description + " does not tespect format groupId:name:version");
+		}
+		return JkVersionedModule.of(JkModuleId.of(items[0], items[1]), JkVersion.ofName(items[2]));
+	}
+
 	private final JkModuleId moduleId;
 
 	private final JkVersion version;
