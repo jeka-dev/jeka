@@ -50,6 +50,8 @@ public class JkJavaPacker implements Cloneable {
 
 	private boolean doFatJar = false;
 
+	private boolean doJavadoc = false;
+
 	private JkPgp pgp = null;
 
 
@@ -67,6 +69,7 @@ public class JkJavaPacker implements Cloneable {
 		if (build.pack.signWithPgp) {
 			this.pgp = build.pgp();
 		}
+		this.doJavadoc = build.pack.javadoc;
 	}
 
 	public String baseName() {
@@ -132,6 +135,9 @@ public class JkJavaPacker implements Cloneable {
 		}
 		for (final Extra action : this.extraActions) {
 			action.process(build);
+		}
+		if (doJavadoc) {
+			this.build.javadoc();
 		}
 		if (pgp != null) {
 			JkLog.start("Sign artifacts");

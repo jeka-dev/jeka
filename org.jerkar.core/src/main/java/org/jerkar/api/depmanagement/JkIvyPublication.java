@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.jerkar.api.depmanagement.JkIvyPublication.Artifact;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsString;
 
 public final class JkIvyPublication implements Iterable<Artifact>, Serializable {
 
@@ -42,11 +43,13 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
 		return branch;
 	}
 
-
-
 	public JkIvyPublication and(File file, String type, JkScope...jkScopes) {
+		return and(null, file, type, jkScopes);
+	}
+
+	public JkIvyPublication and(String name, File file, String type, JkScope...jkScopes) {
 		final Set<Artifact> artifacts = new HashSet<JkIvyPublication.Artifact>(this.artifacts);
-		artifacts.add(new Artifact(file, type, JkUtilsIterable.setOf(jkScopes)));
+		artifacts.add(new Artifact(name, file, type, JkUtilsIterable.setOf(jkScopes)));
 		return new JkIvyPublication(artifacts, this.status, this.branch);
 	}
 
@@ -115,11 +118,17 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
 
 		private static final long serialVersionUID = 1L;
 
-		private Artifact(File file, String type, Set<JkScope> jkScopes) {
+		private Artifact(String name, File file, String type, Set<JkScope> jkScopes) {
 			super();
 			this.file = file;
-			this.type = type;
+			final String extension = file.getName().contains(".") ? JkUtilsString.substringAfterLast(file.getName(), ".") : null;
+			if (type == null && extension != null) {
+				this.type = extension;
+			} else {
+				this.type = type;
+			}
 			this.jkScopes = jkScopes;
+			this.name = name;
 		}
 
 		public final File file;
@@ -127,6 +136,8 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
 		public final String type;
 
 		public final Set<JkScope> jkScopes;
+
+		public final String name;
 
 
 

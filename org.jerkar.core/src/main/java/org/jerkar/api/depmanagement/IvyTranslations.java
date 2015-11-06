@@ -32,6 +32,7 @@ import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.FileSystemResolver;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
+import org.apache.ivy.plugins.resolver.IvyRepResolver;
 import org.apache.ivy.plugins.resolver.RepositoryResolver;
 import org.apache.ivy.util.url.CredentialsStore;
 import org.jerkar.api.depmanagement.JkMavenPublication.JkClassifiedArtifact;
@@ -253,6 +254,29 @@ final class IvyTranslations {
 			}
 			return result;
 		}
+		if (repo.url().getProtocol().equals("http")) {
+			final IvyRepResolver result = new IvyRepResolver();
+			result.setIvyroot(repo.url().toString());
+			result.setArtroot(repo.url().toString());
+			result.setArtpattern(IvyRepResolver.DEFAULT_IVYPATTERN);
+			result.setIvypattern(IvyRepResolver.DEFAULT_IVYPATTERN);
+			result.setM2compatible(false);
+			if (isHttp(repo.url())) {
+				if (!CredentialsStore.INSTANCE.hasCredentials(repo.url().getHost())) {
+					CredentialsStore.INSTANCE.addCredentials(repo.realm(),
+							repo.url().getHost(), repo.userName(), repo.password());
+
+				}
+			};
+			result.setChangingPattern("\\*-SNAPSHOT");
+			result.setCheckmodified(true);
+			if (!digesterAlgorithms.isEmpty()) {
+				result.setChecksums(JkUtilsString.join(ivyNameAlgos(digesterAlgorithms), ","));
+			}
+			return result;
+		}
+
+
 		throw new IllegalStateException(repo + " not handled by translator.");
 	}
 
@@ -460,12 +484,11 @@ final class IvyTranslations {
 
 	public static Artifact toPublishedArtifact(JkIvyPublication.Artifact artifact, ModuleRevisionId moduleId,
 			Date date) {
-		String artifactName = artifact.file.getName();
+		final String artifactName = JkUtilsString.isBlank(artifact.name) ? moduleId.getName() : artifact.name;
 		String extension = "";
-		if (artifactName.contains(".")) {
-			extension = JkUtilsString.substringAfterFirst(artifactName, ".");
-			artifactName = JkUtilsString.substringBeforeFirst(artifactName, ".");
-
+		final String fileName = artifact.file.getName();
+		if (fileName.contains(".")) {
+			extension = JkUtilsString.substringAfterLast(fileName, ".");
 		}
 		final String type = artifact.type != null ? artifact.type : extension;
 		return new DefaultArtifact(moduleId, date, artifactName, type, extension);

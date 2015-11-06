@@ -613,6 +613,9 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 		@JkDoc("Comma separated list of algorithm to use to produce checksums (ex : 'sha-1,md5').")
 		public String checksums;
 
+		@JkDoc("When true, javadoc is created and packed in a jar file.")
+		public boolean javadoc;
+
 	}
 
 	private static JkJavadocMaker javadocMaker(JkJavaBuild javaBuild, boolean fullName, boolean includeVersion) {

@@ -1,7 +1,7 @@
 ## Plugins
 ----
 
-Jerkar provides a plugable architecture. To be precise, build templates provided with Jerkar (`org.jerkar.tool.JkBuild`, `org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin`) are plugable.
+Jerkar provides a plugable architecture. To be precise, build templates provided with Jerkar (`org.jerkar.tool.JkBuild`, `org.jerkar.tool.builtins.javabuild.JkJavaBuild`) are plugable.
 They provide methods designed for extension point. Methods designed for extension point alter their behavior according template plugins activated in the enclosing template.
 
 

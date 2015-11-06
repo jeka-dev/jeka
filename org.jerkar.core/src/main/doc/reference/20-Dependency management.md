@@ -269,6 +269,14 @@ protected JkPublishRepos publishRepositories() {
         JkRepo.maven("http://my.release.repo").asPublishReleaseRepo());
 }
 ```
+
+###### What happen behind the hood ?
+
+Jerkar uses [Apache Ivy](http://ant.apache.org/ivy/) under the hood to resolve/fetch module dependencies.
+Ivy is invisible to the user except in some log output.
+The dependencies are downloaded in local cache located at _[JERKAR USER DIR]/cache/repo_.
+You can override this setting by defining the `JERKAR_REPO` environment variable.
+
  
 ### Bind Dependencies to Scopes
 

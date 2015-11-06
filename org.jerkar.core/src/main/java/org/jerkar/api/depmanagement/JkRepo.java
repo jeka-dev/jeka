@@ -70,6 +70,10 @@ public abstract class JkRepo implements Serializable {
 		return JkPublishRepo.of(this);
 	}
 
+	public JkPublishRepos asPublishRepos() {
+		return JkPublishRepos.of(JkPublishRepo.of(this));
+	}
+
 	public JkPublishRepo asPublishSnapshotRepo() {
 		return JkPublishRepo.ofSnapshot(this);
 	}
@@ -102,6 +106,9 @@ public abstract class JkRepo implements Serializable {
 	}
 
 	public static JkRepo.JkIvyRepository ivy(String urlOrDir) {
+		if (urlOrDir.toLowerCase().startsWith("ivy:")) {
+			return JkRepo.ivy(urlOrDir.substring(4));
+		}
 		return ivy(toUrl(urlOrDir));
 	}
 
@@ -147,6 +154,10 @@ public abstract class JkRepo implements Serializable {
 			return this;
 		}
 		return this.withCredential(userName, password);
+	}
+
+	public JkRepos and(JkRepo other) {
+		return JkRepos.of(this, other);
 	}
 
 	public abstract JkRepo withRealm(String realm);
@@ -233,7 +244,7 @@ public abstract class JkRepo implements Serializable {
 
 		private final List<String> ivyPatterns;
 
-		private static final String DEFAULT_IVY_ARTIFACT_PATTERN = "[organisation]/[module]/[type]s/[artifact]-[revision].[ext]";
+		private static final String DEFAULT_IVY_ARTIFACT_PATTERN = "[organisation]/[module]/[type]s/[artifact]-[revision](-[type]).[ext]";
 
 		private static final String DEFAULT_IVY_IVY_PATTERN = "[organisation]/[module]/ivy-[revision].xml";
 
