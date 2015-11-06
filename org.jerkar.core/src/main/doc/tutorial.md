@@ -533,7 +533,7 @@ public class SonarParametrizedBuild extends JkJavaBuild {
 With this definition, you only have to execute `jerkar doVerify` to trigger a SonarQube analysis including test coverage.
  
  
-## Playing with _MavenStyleBuild_ and the others
+### Playing with 'MavenStyleBuild' and the others
 
 A given project can have many Jerkar build definition. 
 Ifyou want to play with this build definition the same way you did for _AClassicalBuild_, just mention `-buildClass=MavenStyleBuild` in the command line.
