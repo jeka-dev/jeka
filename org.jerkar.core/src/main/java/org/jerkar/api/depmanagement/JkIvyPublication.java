@@ -121,12 +121,8 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
 		private Artifact(String name, File file, String type, Set<JkScope> jkScopes) {
 			super();
 			this.file = file;
-			final String extension = file.getName().contains(".") ? JkUtilsString.substringAfterLast(file.getName(), ".") : null;
-			if (type == null && extension != null) {
-				this.type = extension;
-			} else {
-				this.type = type;
-			}
+			this.extension = file.getName().contains(".") ? JkUtilsString.substringAfterLast(file.getName(), ".") : null;
+			this.type = type;
 			this.jkScopes = jkScopes;
 			this.name = name;
 		}
@@ -138,6 +134,8 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
 		public final Set<JkScope> jkScopes;
 
 		public final String name;
+
+		public final String extension;
 
 
 

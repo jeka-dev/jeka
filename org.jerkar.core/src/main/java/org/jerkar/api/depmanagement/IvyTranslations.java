@@ -39,6 +39,7 @@ import org.jerkar.api.depmanagement.JkMavenPublication.JkClassifiedArtifact;
 import org.jerkar.api.depmanagement.JkRepo.JkIvyRepository;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsString;
 
 final class IvyTranslations {
@@ -485,12 +486,8 @@ final class IvyTranslations {
 	public static Artifact toPublishedArtifact(JkIvyPublication.Artifact artifact, ModuleRevisionId moduleId,
 			Date date) {
 		final String artifactName = JkUtilsString.isBlank(artifact.name) ? moduleId.getName() : artifact.name;
-		String extension = "";
-		final String fileName = artifact.file.getName();
-		if (fileName.contains(".")) {
-			extension = JkUtilsString.substringAfterLast(fileName, ".");
-		}
-		final String type = artifact.type != null ? artifact.type : extension;
+		final String extension = JkUtilsObject.firstNonNull(artifact.extension, "");
+		final String type = JkUtilsObject.firstNonNull(artifact.type, extension);
 		return new DefaultArtifact(moduleId, date, artifactName, type, extension);
 	}
 

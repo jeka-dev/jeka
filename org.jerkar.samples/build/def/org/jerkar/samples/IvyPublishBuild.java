@@ -63,7 +63,7 @@ public class IvyPublishBuild extends JkJavaBuild {
 				.and(packer().jarTestFile(), "test", TEST)
 				.and(packer().javadocFile(),"javadoc", JAVADOC)
 				.and(packer().jarSourceFile(), "source", SOURCES)
-				.and(packer().jarTestSourceFile(), "source", SOURCES, TEST);
+				.and(packer().jarTestSourceFile(), "test-source", SOURCES, TEST);
 	}
 
 }
