@@ -5,7 +5,6 @@ import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
 import org.jerkar.api.depmanagement.JkPublishRepos;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.java.JkJavaCompiler;
-import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkOptions;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
@@ -15,8 +14,9 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 public abstract class AbstractBuild extends JkJavaBuild {
 
 
-	@JkDoc("do or skip javadoc")
-	public boolean doJavadoc = true;
+	{
+		this.pack.javadoc = true;
+	}
 
 
 	@Override
@@ -38,14 +38,6 @@ public abstract class AbstractBuild extends JkJavaBuild {
 				.andApache2License()
 				.andGitHubDeveloper("djeang", "djeangdev@yahoo.fr")
 				);
-	}
-
-	@Override
-	public void pack() {
-		super.pack();
-		if (doJavadoc) {
-			javadoc();
-		}
 	}
 
 	@Override  // Force to use OSSRH
