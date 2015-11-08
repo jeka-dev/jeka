@@ -2,6 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import java.io.Serializable;
 
+import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -20,6 +21,8 @@ public final class JkVersionRange implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    public static final JkVersionRange UNSPECIFIED = new JkVersionRange("unspecified");
+
     /**
      * Creates a version range from String expression described at :
      * http://ant.apache.org/ivy/history/latest-milestone/ivyfile/dependency.
@@ -31,8 +34,10 @@ public final class JkVersionRange implements Serializable {
 
     private final String definition;
 
-    private JkVersionRange(String versionRange) {
-	this.definition = versionRange;
+    private JkVersionRange(String definition) {
+	JkUtilsAssert.isTrue(!JkUtilsString.isBlank(definition),
+		"Can't instantatiate a version range with a blank or null definition.");
+	this.definition = definition;
     }
 
     /**
@@ -55,9 +60,17 @@ public final class JkVersionRange implements Serializable {
     }
 
     /**
+     * Returns <code>true</code> if this version range is unspecified.
+     */
+    public boolean isUnspecified() {
+	return this.equals(UNSPECIFIED);
+    }
+
+    /**
      * Returns <code>true</code> if the definition stands for dynamic resolvable
-     * version (as 1.4.+, [1.0, 2.0[, ...), Returns <code>false</code> if the
-     * version is static or snapshot (as 1.4.0, 3.1-SNAPSHOT)
+     * version (as 1.4.+, [1.0, 2.0[, ...).<br/>.
+     * Returns <code>false</code> if the version is static or snapshot (as 1.4.0, 3.1-SNAPSHOT)
+     * A snapshot is not considered as 'resolvable'.
      */
     public boolean isDynamicAndResovable() {
 	if (JkUtilsString.endsWithAny(definition, ".+", ")", "]", "[")) {

@@ -1,18 +1,21 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.Serializable;
+import java.util.Comparator;
 
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * Identifier for project. The identifier will be used to name the generated
  * artifacts and as a moduleId for Maven or Ivy.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkModuleId implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    public final static Comparator<JkModuleId> GROUP_NAME_COMPARATOR = new GroupAndNameComparator();
 
     /**
      * Creates a project id according the specified group and name.
@@ -23,12 +26,17 @@ public final class JkModuleId implements Serializable {
 
     /**
      * Creates a project id according a string supposed to be formatted as
-     * <code>group</code>.<code>name</code>. The last '.' is considered as the
+     * <code>group</code>.<code>name</code> or <code>group</code>:<code>name</code>. The last '.' is considered as the
      * separator between the group and the name. <br/>
      * If there is no '.' then the whole string will serve both for group and
      * name.
      */
     public static JkModuleId of(String groupAndName) {
+	if (groupAndName.contains(":")) {
+	    final String group = JkUtilsString.substringBeforeLast(groupAndName, ":");
+	    final String name = JkUtilsString.substringAfterLast(groupAndName, ":");
+	    return new JkModuleId(group, name);
+	}
 	if (groupAndName.contains(".")) {
 	    final String group = JkUtilsString.substringBeforeLast(groupAndName, ".");
 	    final String name = JkUtilsString.substringAfterLast(groupAndName, ".");
@@ -60,6 +68,13 @@ public final class JkModuleId implements Serializable {
 	    return name;
 	}
 	return group + "." + name;
+    }
+
+    /**
+     * Returns a string formatted as 'group:name'.
+     */
+    public String groupAndName() {
+	return group + ":" + name;
     }
 
     /**
@@ -111,6 +126,20 @@ public final class JkModuleId implements Serializable {
     @Override
     public String toString() {
 	return fullName();
+    }
+
+
+    private static class GroupAndNameComparator implements Comparator<JkModuleId> {
+
+	@Override
+	public int compare(JkModuleId o1, JkModuleId o2) {
+	    if (o1.group.equals(o2.group)) {
+		return o1.name.compareTo(o2.name);
+	    }
+	    return o1.group.compareTo(o2.group);
+	}
+
+
     }
 
 }

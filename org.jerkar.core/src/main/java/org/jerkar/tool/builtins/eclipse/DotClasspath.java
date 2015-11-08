@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -32,6 +30,7 @@ import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.api.utils.JkUtilsXml;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkBuildDependencySupport;
 import org.jerkar.tool.JkConstants;
@@ -61,7 +60,7 @@ final class DotClasspath {
     }
 
     public static DotClasspath from(File dotClasspathFile) {
-	final Document document = getDotClassPathAsDom(dotClasspathFile);
+	final Document document = JkUtilsXml.documentFrom(dotClasspathFile);
 	return from(document);
     }
 
@@ -76,21 +75,7 @@ final class DotClasspath {
 	return new DotClasspath(classpathEntries);
     }
 
-    private static Document getDotClassPathAsDom(File classpathFile) {
-	if (!classpathFile.exists()) {
-	    throw new IllegalStateException(classpathFile.getAbsolutePath() + " file not found.");
-	}
-	final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-	try {
-	    final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-	    Document doc;
-	    doc = dBuilder.parse(classpathFile);
-	    doc.getDocumentElement().normalize();
-	    return doc;
-	} catch (final Exception e) {
-	    throw new RuntimeException("Error while parsing .classpath file : ", e);
-	}
-    }
+
 
     public String outputPath() {
 	for (final ClasspathEntry classpathEntry : classpathentries) {

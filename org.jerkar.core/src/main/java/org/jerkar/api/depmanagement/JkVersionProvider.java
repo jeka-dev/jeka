@@ -10,7 +10,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
  * Association between moduleIds and version.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkVersionProvider implements Serializable {
@@ -33,6 +33,10 @@ public final class JkVersionProvider implements Serializable {
     public static JkVersionProvider of(JkModuleId moduleId, JkVersion version) {
 	final Map<JkModuleId, JkVersion> result = JkUtilsIterable.mapOf(moduleId, version);
 	return new JkVersionProvider(result);
+    }
+
+    public static JkVersionProvider of() {
+	return new JkVersionProvider(new HashMap<JkModuleId, JkVersion>());
     }
 
     public static JkVersionProvider of(Iterable<JkVersionedModule> modules) {
@@ -80,6 +84,10 @@ public final class JkVersionProvider implements Serializable {
 
     public JkVersionProvider and(String moduleId, String version) {
 	return and(JkModuleId.of(moduleId), version);
+    }
+
+    public JkVersionProvider and(String group, String name, String version) {
+	return and(JkModuleId.of(group, name), version);
     }
 
     public Set<JkModuleId> moduleIds() {

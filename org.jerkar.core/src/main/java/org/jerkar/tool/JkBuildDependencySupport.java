@@ -5,6 +5,7 @@ import java.net.URL;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencyExclusions;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkPublishRepos;
@@ -15,6 +16,7 @@ import org.jerkar.api.depmanagement.JkResolutionParameters;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopeMapping;
 import org.jerkar.api.depmanagement.JkVersion;
+import org.jerkar.api.depmanagement.JkVersionProvider;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLocator;
@@ -24,7 +26,7 @@ import org.jerkar.api.utils.JkUtilsAssert;
 /**
  * Template build definition class providing support for managing dependencies
  * and multi-projects.
- * 
+ *
  * @author Jerome Angibaud
  */
 public class JkBuildDependencySupport extends JkBuild {
@@ -138,8 +140,29 @@ public class JkBuildDependencySupport extends JkBuild {
      * dependencies, you must override this method.
      */
     private JkDependencies effectiveDependencies() {
+	final JkDependencies deps = dependencies()
+		.withDefaultScope(this.defaultScope())
+		.resolvedWith(versionProvider())
+		.withExclusions(dependencyExclusions());
 	return JkBuildPlugin.applyDependencies(plugins.getActives(),
-		implicitDependencies().and(dependencies().withDefaultScope(this.defaultScope())));
+		implicitDependencies().and(deps));
+    }
+
+    /**
+     * On {@link #asDependency(File...)} method, you may have declared dependency without mentioning the version (unspecified version)
+     * or specifying a dynamic one (as 1.4+).
+     * The {@link #dependencyResolver()} will use the version provided by this method in order to replace unspecified or dynamic versions.
+     */
+    protected JkVersionProvider versionProvider() {
+	return JkVersionProvider.empty();
+    }
+
+
+    /**
+     * Specify transitive dependencies to exclude when using certain dependencies.
+     */
+    protected JkDependencyExclusions dependencyExclusions() {
+	return JkDependencyExclusions.builder().build();
     }
 
     protected JkDependencies dependencies() {
@@ -231,7 +254,7 @@ public class JkBuildDependencySupport extends JkBuild {
 	public final JkOptionRepo publish = new JkOptionRepo();
 
 	@JkDoc({ "Maven or Ivy repositories to publish released artifacts.",
-		"If this repo is not null, then Jerkar will try to publish snapshot in the publish repo and release in this one." })
+	"If this repo is not null, then Jerkar will try to publish snapshot in the publish repo and release in this one." })
 	public final JkOptionRepo release = new JkOptionRepo();
 
 	public JkOptionRepos() {
@@ -248,7 +271,7 @@ public class JkBuildDependencySupport extends JkBuild {
 	public String url;
 
 	@JkDoc({ "Usename to connect to repository (if needed).",
-		"Null or blank means that the repository will be accessed in an anonymous way." })
+	"Null or blank means that the repository will be accessed in an anonymous way." })
 	public String username;
 
 	@JkDoc({ "Password to connect to the repository (if needed)." })

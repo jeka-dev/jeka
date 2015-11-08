@@ -1,9 +1,13 @@
 package org.jerkar.api.depmanagement;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jerkar.api.utils.JkUtilsAssert;
+import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -15,12 +19,14 @@ import org.jerkar.api.utils.JkUtilsString;
  * <p/>
  * You can also define exclusions on module dependencies so artifact or entire
  * module won't be catch up by the dependency manager.
- * 
- * @author Djeang
+ *
+ * @author Jerome Angibaud
  */
 public final class JkModuleDependency extends JkDependency {
 
     private static final long serialVersionUID = 1L;
+
+    public static final Comparator<JkModuleDependency> GROUP_NAME_COMPARATOR = new NameComparator();
 
     public static boolean isModuleDependencyDescription(String candidate) {
 	final int colonCount = JkUtilsString.countOccurence(candidate, ':');
@@ -86,6 +92,9 @@ public final class JkModuleDependency extends JkDependency {
 
     private JkModuleDependency(JkModuleId module, JkVersionRange versionRange, String classifier, boolean transitive,
 	    String extension, List<JkDepExclude> excludes) {
+	JkUtilsAssert.notNull(module, "Can't instantiate without module");
+	JkUtilsAssert.notNull(module, "Can't instantiate without versionRange");
+	JkUtilsAssert.notNull(module, "Can't instantiate wit null excludes, use empty list instead");
 	this.module = module;
 	this.versionRange = versionRange;
 	this.classifier = classifier;
@@ -108,6 +117,10 @@ public final class JkModuleDependency extends JkDependency {
 
     public JkModuleDependency transitive(boolean transitive) {
 	return new JkModuleDependency(module, versionRange, classifier, transitive, extension, excludes);
+    }
+
+    public boolean hasUnspecifedVersion() {
+	return this.versionRange.isUnspecified();
     }
 
     /**
@@ -147,9 +160,17 @@ public final class JkModuleDependency extends JkDependency {
      * Returns a JkModuleDependency identical to this one but adding the
      * specified exclusion.
      */
-    public JkModuleDependency andExclude(JkDepExclude depExclude) {
+    public JkModuleDependency andExclude(JkDepExclude ... depExcludes) {
+	return andExclude(Arrays.asList(depExcludes));
+    }
+
+    /**
+     * Returns a JkModuleDependency identical to this one but adding the
+     * specified exclusion.
+     */
+    public JkModuleDependency andExclude(Iterable<JkDepExclude> depExcludes) {
 	final List<JkDepExclude> list = new LinkedList<JkDepExclude>(excludes);
-	list.add(depExclude);
+	list.addAll(JkUtilsIterable.listOf(depExcludes));
 	return new JkModuleDependency(module, versionRange, classifier, transitive, extension,
 		Collections.unmodifiableList(list));
     }
@@ -169,6 +190,16 @@ public final class JkModuleDependency extends JkDependency {
     @Override
     public String toString() {
 	return this.getClass().getSimpleName() + "=" + module + ":" + versionRange;
+    }
+
+    private static class NameComparator implements Comparator<JkModuleDependency> {
+
+	@Override
+	public int compare(JkModuleDependency o1, JkModuleDependency o2) {
+	    return JkModuleId.GROUP_NAME_COMPARATOR.compare(o1.moduleId(), o2.moduleId());
+	}
+
+
     }
 
 }

@@ -112,4 +112,6 @@ public final class JkScopedDependency implements Serializable {
 		+ ((scopes == null || scopes.isEmpty()) ? "" : scopes.toString()) + "]";
     }
 
+
+
 }

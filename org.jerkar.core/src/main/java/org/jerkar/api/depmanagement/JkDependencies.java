@@ -14,7 +14,9 @@ import java.util.Set;
 import org.jerkar.api.depmanagement.JkDependency.JkFileDependency;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.file.JkPath;
+import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * A set of {@link JkScopedDependency} generally standing for the entire
@@ -124,7 +126,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     /**
      * Returns a clone of this object plus {@link JkScopedDependency}s on the
      * specified external module.
-     * 
+     *
      * @param versionedModuleId
      *            something like "org.apache:commons:1.4"
      */
@@ -311,17 +313,42 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	    if (scopedDependency == null) {
 		continue;
 	    }
-	    final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency.dependency();
-	    if (externalModule.versionRange().isDynamicAndResovable()) {
+	    final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency.dependency();
+	    if (moduleDependency.versionRange().isDynamicAndResovable() || moduleDependency.hasUnspecifedVersion() ) {
 		final JkVersion resolvedVersion = provider.versionOf(moduleId);
 		if (resolvedVersion != null) {
-		    final JkModuleDependency resolvedModule = externalModule.resolvedTo(resolvedVersion);
+		    final JkModuleDependency resolvedModule = moduleDependency.resolvedTo(resolvedVersion);
 		    final JkScopedDependency resolvedScopedDep = scopedDependency.dependency(resolvedModule);
 		    result = result.without(moduleId).and(resolvedScopedDep);
 		}
 	    }
 	}
 	return result;
+    }
+
+    /**
+     * Create a <code>JkDependencies</code> identical to this one but adding exclusion clause
+     * @param exclusions
+     * @return
+     */
+    public JkDependencies withExclusions(JkDependencyExclusions exclusions) {
+	final List<JkScopedDependency> dependencies = new LinkedList<JkScopedDependency>();
+	for (final JkScopedDependency scopedDependency : this.dependencies) {
+	    if (scopedDependency.dependency() instanceof JkModuleDependency) {
+		final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency.dependency();
+		final List<JkDepExclude> depExcludes = exclusions.get(moduleDependency.moduleId());
+		final JkModuleDependency newDep;
+		if (depExcludes != null) {
+		    newDep = moduleDependency.andExclude(depExcludes);
+		} else {
+		    newDep = moduleDependency;
+		}
+		dependencies.add(scopedDependency.dependency(newDep));
+	    } else {
+		dependencies.add(scopedDependency);
+	    }
+	}
+	return new JkDependencies(dependencies, this.depExcludes);
     }
 
     /**
@@ -660,18 +687,42 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	    }
 
 	}
-
     }
 
-    public String toJavaCode() {
+    /**
+     * Throws a <code>IllegalStateException</code> if one of the module dependencies has an unspecified version.
+     */
+    public JkDependencies assertNoUnspecifiedVersion() {
+	final List<JkModuleDependency> unspecifieds = this.unspecifiedVersionDependencies();
+	JkUtilsAssert.isTrue(unspecifieds.isEmpty(), "Following module does not specify version : " + unspecifieds);
+	return this;
+    }
+
+    private List<JkModuleDependency> unspecifiedVersionDependencies() {
+	final List<JkModuleDependency> result = new LinkedList<JkModuleDependency>();
+	for (final JkModuleDependency moduleDependency : this.moduleDependencies()) {
+	    if (moduleDependency.hasUnspecifedVersion()) {
+		result.add(moduleDependency);
+	    }
+	}
+	return result;
+    }
+
+    /**
+     * Returns the java codes that declare these dependencies.
+     * @formatter:off
+     */
+    public String toJavaCode(int indentCount) {
+	final String indent = JkUtilsString.repeat(" ", indentCount);
 	final StringBuilder builder = new StringBuilder();
 	builder.append("JkDependencies.builder()");
 	for (final JkScopedDependency scopedDependency : this) {
 	    if (scopedDependency.dependency() instanceof JkModuleDependency) {
 		final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.dependency();
-		builder.append("\n.on(\"").append(moduleDep.moduleId().group()).append("\", \"")
-			.append(moduleDep.moduleId().name()).append("\", \"")
-			.append(moduleDep.versionRange().definition()).append("\"");
+		builder
+		.append("\n").append(indent).append(".on(\"").append(moduleDep.moduleId().group()).append("\", \"")
+		.append(moduleDep.moduleId().name()).append("\", \"")
+		.append(moduleDep.versionRange().definition()).append("\"");
 		if (!scopedDependency.scopes().isEmpty()) {
 		    builder.append(", ");
 		    for (final JkScope scope : scopedDependency.scopes()) {
@@ -682,8 +733,19 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		builder.append(")");
 	    }
 	}
-	builder.append("\n.build();");
+	builder.append(".build();");
 	return builder.toString();
     }
+
+    private List<JkModuleDependency> moduleDependencies() {
+	final List<JkModuleDependency> result = new LinkedList<JkModuleDependency>();
+	for (final JkScopedDependency scopedDependency : this) {
+	    if (scopedDependency.dependency() instanceof JkModuleDependency) {
+		result.add((JkModuleDependency) scopedDependency.dependency());
+	    }
+	}
+	return result;
+    }
+
 
 }
