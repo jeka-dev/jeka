@@ -68,7 +68,7 @@ class DistribAllBuild extends JkBuildDependencySupport {
 	@JkDoc("End to end method to construct a distrib.")
 	public void doDefault() {
 		super.doDefault();
-		pluginsJacoco.core.doJavadoc = false;
+		pluginsJacoco.core.pack.javadoc = false;
 		slaves().invokeDoDefaultMethodOnAll();
 		distrib();
 		if (testSamples) {

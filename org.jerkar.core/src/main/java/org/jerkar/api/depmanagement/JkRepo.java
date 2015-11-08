@@ -44,6 +44,10 @@ public abstract class JkRepo implements Serializable {
 		return new JkMavenRepository(toUrl(url), null, null, null);
 	}
 
+	public static JkMavenRepository springIO() {
+		return maven("https://repo.spring.io/repo/");
+	}
+
 	public static JkMavenRepository maven(File file) {
 		return new JkMavenRepository(JkUtilsFile.toUrl(file), null, null, null);
 	}

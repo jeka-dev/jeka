@@ -10,7 +10,7 @@ import org.jerkar.api.utils.JkUtilsTime;
 /**
  * Logger shared globally on the classloader. It provides time tracking method and
  * indentation feature accounting for task/subtask execution.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkLog {
@@ -59,7 +59,7 @@ public final class JkLog {
 	 * are actually logged. They are not logged in non-verbose mode.
 	 */
 	public static boolean verbose() {
-		return silent;
+		return verbose;
 	}
 
 	/**

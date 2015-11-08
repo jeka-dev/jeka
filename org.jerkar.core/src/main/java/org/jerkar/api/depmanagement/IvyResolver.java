@@ -16,6 +16,7 @@ import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.settings.IvySettings;
+import org.apache.ivy.util.url.URLHandlerRegistry;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsThrowable;
@@ -23,7 +24,7 @@ import org.jerkar.api.utils.JkUtilsThrowable;
 /**
  * Jerkar users : This class is not part of the public API !!! Please, Use {@link JkPublisher} instead.
  * Ivy wrapper providing high level methods. The API is expressed using Jerkar classes only (mostly free of Ivy classes).
- * 
+ *
  * @author Jerome Angibaud
  */
 final class IvyResolver implements InternalDepResolver {
@@ -53,6 +54,7 @@ final class IvyResolver implements InternalDepResolver {
 		}
 		ivy.setSettings(ivySettings);
 		ivy.bind();
+		URLHandlerRegistry.setDefault(new IvyFollowRedirectUrlHandler());
 		return ivy;
 	}
 
@@ -144,9 +146,9 @@ final class IvyResolver implements InternalDepResolver {
 		}
 		final JkAttachedArtifacts result = new JkAttachedArtifacts();
 		final ResolveOptions resolveOptions = new ResolveOptions()
-		.setTransitive(false)
-		.setOutputReport(JkLog.verbose())
-		.setRefresh(false);
+				.setTransitive(false)
+				.setOutputReport(JkLog.verbose())
+				.setRefresh(false);
 		resolveOptions.setLog(logLevel());
 		for (final JkScope scope : scopes ) {
 			resolveOptions.setConfs(IvyTranslations.toConfNames(scope));

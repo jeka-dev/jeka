@@ -20,7 +20,7 @@ import org.jerkar.api.utils.JkUtilsSystem;
  * <pre><code>JkProcess.of("mvn", "clean", "install")</code></pre> instead of
  * <pre><code>JkProcess.of("mvn", "clean install")</code></pre> or
  * <pre><code>JkProcess.of("mvn clean install")</code></pre>.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkProcess implements Runnable {
@@ -69,7 +69,7 @@ public final class JkProcess implements Runnable {
 			candidate = new File (CURRENT_JAVA_DIR.getParentFile().getParentFile(), "bin");
 			if (!findTool(candidate, javaTool)) {
 				throw new IllegalArgumentException("No tool " + javaTool + " found neither in " + CURRENT_JAVA_DIR.getAbsolutePath()
-						+ " nor in " + candidate.getAbsolutePath());
+				+ " nor in " + candidate.getAbsolutePath());
 			}
 		}
 		final String command = candidate.getAbsolutePath() + File.separator + javaTool;
@@ -158,7 +158,7 @@ public final class JkProcess implements Runnable {
 		final List<String> command = new LinkedList<String>();
 		command.add(this.command);
 		command.addAll(parameters);
-		JkLog.startln("Starting java program : " + command.toString());
+		JkLog.startln("Starting program : " + command.toString());
 		final int result;
 		try {
 			final ProcessBuilder processBuilder = processBuilder(command);

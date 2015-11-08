@@ -2,21 +2,44 @@ package org.jerkar.api.tooling;
 
 import java.io.File;
 
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkModuleDependency;
+import org.jerkar.api.depmanagement.JkScope;
+import org.jerkar.api.depmanagement.JkScopedDependency;
 import org.jerkar.api.system.JkProcess;
+import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsSystem;
 
 /**
  * Convenioent class wrapping maven process.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkMvn implements Runnable {
+
+	private final static String MVN_CMD = mvnCmd();
+
+	private static String mvnCmd() {
+		if (JkUtilsSystem.IS_WINDOWS) {
+			try {
+				final int result = Runtime.getRuntime().exec("mvn.bat -version").exitValue();
+				if (result == 0) {
+					return "mvn.bat";
+				}
+				return "mvn.cmd";
+			} catch (final Exception e) {
+				return "mvn.cmd";
+			}
+		}
+		return "mvn";
+	}
 
 	/**
 	 * Creates a Maven command. Separate argument in different string, don't use white space to separate workds.
 	 * Ex : JkMvn.of(myFile, "clean", "install", "-U").
 	 */
 	public static final JkMvn of(File workingDir, String ... args) {
-		final JkProcess jkProcess = JkProcess.ofWinOrUx("mvn.bat", "mvn", args).withWorkingDir(workingDir);
+		final JkProcess jkProcess = JkProcess.of(MVN_CMD, args).withWorkingDir(workingDir);
 		return new JkMvn(jkProcess);
 	}
 
@@ -47,6 +70,17 @@ public final class JkMvn implements Runnable {
 	 */
 	public final JkMvn cleanInstall() {
 		return commands("clean","install");
+	}
+
+	/**
+	 * Reads the dependencies of this Maven project
+	 */
+	public JkDependencies readDependencies() {
+		final File file = JkUtilsFile.tempFile("dependency", ".txt");
+		commands("dependency:list", "-DoutputFile="+file.getAbsolutePath()).run();;
+		final JkDependencies result = fromMvnFlatFile(file);
+		file.delete();
+		return result;
 	}
 
 	/**
@@ -87,5 +121,65 @@ public final class JkMvn implements Runnable {
 	public void run() {
 		jkProcess.runSync();
 	}
+
+	/**
+	 * Creates a {@link JkDependencies} from a file describing definition like.
+	 * <pre><code>
+	 * org.springframework:spring-aop:jar:4.2.3.BUILD-SNAPSHOT:compile
+	 * org.yaml:snakeyaml:jar:1.16:runtime
+	 * org.slf4j:log4j-over-slf4j:jar:1.7.12:compile
+	 * org.springframework.boot:spring-boot:jar:1.3.0.BUILD-SNAPSHOT:compile
+	 * org.hamcrest:hamcrest-core:jar:1.3:test
+	 * aopalliance:aopalliance:jar:1.0:compile
+	 * org.springframework:spring-test:jar:4.2.3.BUILD-SNAPSHOT:test
+	 * org.springframework.boot:spring-boot-autoconfigure:jar:1.3.0.BUILD-SNAPSHOT:compile
+	 * ch.qos.logback:logback-core:jar:1.1.3:compile
+	 * org.hamcrest:hamcrest-library:jar:1.3:test
+	 * junit:junit:jar:4.12:test
+	 * org.slf4j:slf4j-api:jar:1.7.12:compile
+	 * </code></pre>
+	 *
+	 * The following format are accepted for each line : <ul>
+	 * <li>group:name:classifier:version:scope (classifier "jar" equals to no classifier)</li>
+	 * <li>group:name:version:scope (no classifier)</li>
+	 * <li>group:name:version (default version is scope)</li>
+	 * </ul>
+	 *
+	 */
+	public static JkDependencies fromMvnFlatFile(File flatFile) {
+		final JkDependencies.Builder builder = JkDependencies.builder();
+		for (final String line : JkUtilsFile.readLines(flatFile)) {
+			final JkScopedDependency scopedDependency = mvnDep(line);
+			if (scopedDependency != null) {
+				builder.on(scopedDependency);
+			}
+		}
+		return builder.build();
+	}
+
+	private static JkScopedDependency mvnDep(String description) {
+		final String[] items = description.trim().split(":");
+		if (items.length == 5) {
+			final String classifier = items[2];
+			final JkScope scope = JkScope.of(items[4]);
+			JkModuleDependency dependency = JkModuleDependency.of(items[0], items[1], items[3]);
+			if (!"jar".equals(classifier)) {
+				dependency = dependency.classifier(classifier);
+			}
+			return JkScopedDependency.of(dependency, scope);
+		}
+		if(items.length == 4) {
+			final JkScope scope = JkScope.of(items[3]);
+			final JkModuleDependency dependency = JkModuleDependency.of(items[0], items[1], items[2]);
+			return JkScopedDependency.of(dependency, scope);
+		}
+		if(items.length == 3) {
+			final JkModuleDependency dependency = JkModuleDependency.of(items[0], items[1], items[2]);
+			return JkScopedDependency.of(dependency);
+		}
+		return null;
+
+	}
+
 
 }

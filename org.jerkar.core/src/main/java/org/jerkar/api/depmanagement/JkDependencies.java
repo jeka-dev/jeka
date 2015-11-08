@@ -18,7 +18,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
  * A set of {@link JkScopedDependency} generally standing for the entire dependencies of a project/module.
- * 
+ *
  * @author Jerome Angibaud.
  */
 public class JkDependencies implements Iterable<JkScopedDependency>, Serializable {
@@ -255,7 +255,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
 	/**
 	 * Convenient method to resolve using {@link JkModuleDepFile}s instead of {@link JkVersionedModule}.
-	 * 
+	 *
 	 * @see #resolvedWith(Iterable)
 	 */
 	public JkDependencies resolvedWithArtifacts(Iterable<JkModuleDepFile> artifacts) {
@@ -483,6 +483,11 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 			return on(organisation, name, version, true);
 		}
 
+		public Builder on(String organisation, String name, String version, JkScope... scopes) {
+			return on(organisation, name, version, true).scope(scopes);
+		}
+
+
 		public JkFluentModuleDepBuilder on(String organisation, String name, String version, boolean transitive) {
 			return onExternalModule(JkModuleDependency.of(organisation, name, version).transitive(transitive));
 		}
@@ -645,6 +650,30 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		}
 
 
+	}
+
+	public String toJavaCode() {
+		final StringBuilder builder = new StringBuilder();
+		builder.append("JkDependencies.builder()");
+		for (final JkScopedDependency scopedDependency : this) {
+			if (scopedDependency.dependency() instanceof JkModuleDependency) {
+				final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.dependency();
+				builder.append("\n.on(\"")
+				.append(moduleDep.moduleId().group()).append("\", \"")
+				.append(moduleDep.moduleId().name()).append("\", \"")
+				.append(moduleDep.versionRange().definition()).append("\"");
+				if (!scopedDependency.scopes().isEmpty()) {
+					builder.append(", ");
+					for (final JkScope scope : scopedDependency.scopes()) {
+						builder.append(scope.name().toUpperCase()).append(", ");
+					}
+					builder.delete(builder.length()-2, builder.length());
+				}
+				builder.append(")");
+			}
+		}
+		builder.append("\n.build();");
+		return builder.toString();
 	}
 
 }
