@@ -19,7 +19,7 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 public class NormalJarBuild extends JkJavaBuild {
 
     /*
-     *  Creates a sample build instance of the 'org.jerkar.samples.samples' project.
+     *  Creates a sample build instance of the 'org.jerkar.samples' project.
      *  The 'samples' project path must be relative to this one.
      *  So in this case, the two project are supposed to lie in the same folder.
      */
