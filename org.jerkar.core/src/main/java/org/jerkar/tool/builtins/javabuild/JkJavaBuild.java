@@ -35,7 +35,7 @@ import org.jerkar.tool.JkScaffolder;
  * set of "standard" scope to define dependencies. You are not forced to use it
  * strictly but it can simplify dependency management to follow a given
  * standard.
- * 
+ *
  * @author Jerome Angibaud
  */
 public class JkJavaBuild extends JkBuildDependencySupport {
@@ -75,7 +75,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     public JkOptionPack pack = new JkOptionPack();
 
     @JkDoc({ "Inject extra dependencies to the desired scope.",
-	    "It can be absolute or relative to the project base dir." })
+    "It can be absolute or relative to the project base dir." })
     public JkOptionExtaPath extraPath = new JkOptionExtaPath();
 
     @Override
@@ -314,7 +314,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     }
 
     @JkDoc({ "Create many jar files containing respectively binaries, sources, test binaries and test sources.",
-	    "The jar containing the binary is the one that will be used as a depe,dence for other project." })
+    "The jar containing the binary is the one that will be used as a depe,dence for other project." })
     public void pack() {
 	packer().pack();
     }
@@ -326,7 +326,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     }
 
     @JkDoc({ "Publish the produced artifact to the defined repositories. ",
-	    "This can work only if a 'publishable' repository has been defined and the artifact has been generated (pack method)." })
+    "This can work only if a 'publishable' repository has been defined and the artifact has been generated (pack method)." })
     public void publish() {
 	final JkDependencies dependencies = dependencyResolver().dependenciesToResolve();
 	final JkVersionProvider resolvedVersions = this.dependencyResolver()
@@ -516,19 +516,19 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     public static class JkOptionExtaPath {
 
 	@JkDoc({ "provided scope : these libs will be added to the compile path but won't be embedded in war files or fat jars.",
-		"Example : -extraPath.provided=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
+	"Example : -extraPath.provided=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
 	private String provided;
 
 	@JkDoc({ "runtime scope : these libs will be added to the runtime path.",
-		"Example : -extraPath.runtime=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
+	"Example : -extraPath.runtime=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
 	private String runtime;
 
 	@JkDoc({ "compile scope : these libs will be added to the compile and runtime path.",
-		"Example : -extraPath.compile=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
+	"Example : -extraPath.compile=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
 	private String compile;
 
 	@JkDoc({ "test scope : these libs will be added to the compile and runtime path.",
-		"Example : -extraPath.test=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
+	"Example : -extraPath.test=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
 	private String test;
 
 	public String provided() {
@@ -564,8 +564,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	public String jvmOptions;
 
 	@JkDoc({ "The more details the longer tests take to be processed.",
-		"BASIC mention the total time elapsed along detail on failed tests.",
-		"FULL detailed report displays additionally the time to run each tests.", "Example : -report=NONE" })
+	    "BASIC mention the total time elapsed along detail on failed tests.",
+	    "FULL detailed report displays additionally the time to run each tests.", "Example : -report=NONE" })
 	public JunitReportDetail report = JunitReportDetail.BASIC;
 
     }

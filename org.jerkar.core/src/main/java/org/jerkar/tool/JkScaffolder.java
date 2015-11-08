@@ -17,7 +17,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
  * Class for creating project from scratch. Basically the scaffolder creates the
  * directory structure of the project, but can be added some capabilities by
  * plugins.
- * 
+ *
  * @author Jerome Angibaud
  */
 public class JkScaffolder {
@@ -78,6 +78,13 @@ public class JkScaffolder {
     }
 
     public void process() {
+	createBuildClass();
+	for (final Runnable action : extraActions) {
+	    action.run();
+	}
+    }
+
+    private void createBuildClass() {
 	final File buildDefDir = build.file(JkConstants.BUILD_DEF_DIR);
 	buildDefDir.mkdirs();
 	final Map<String, String> values = new HashMap<String, String>();
@@ -89,9 +96,7 @@ public class JkScaffolder {
 	values.put("extraMethods", lines(this.extraMethods, "    "));
 	final File buildSource = JkUtilsFile.createFileIfNotExist(new File(buildDefDir, "Build.java"));
 	JkUtilsFile.copyUrlReplacingTokens(templateClass, buildSource, values, JkLog.infoStream());
-	for (final Runnable action : extraActions) {
-	    action.run();
-	}
+
     }
 
     @SuppressWarnings("unchecked")

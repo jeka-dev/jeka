@@ -34,6 +34,7 @@ public final class JkMvn implements Runnable {
 	return "mvn";
     }
 
+
     /**
      * Creates a Maven command. Separate argument in different string, don't use
      * white space to separate workds. Ex : JkMvn.of(myFile, "clean", "install",
@@ -80,7 +81,6 @@ public final class JkMvn implements Runnable {
     public JkDependencies readDependencies() {
 	final File file = JkUtilsFile.tempFile("dependency", ".txt");
 	commands("dependency:list", "-DoutputFile=" + file.getAbsolutePath()).run();
-	;
 	final JkDependencies result = fromMvnFlatFile(file);
 	file.delete();
 	return result;
@@ -107,6 +107,18 @@ public final class JkMvn implements Runnable {
     }
 
     /**
+     * Creates the java code of the Jerkar build class from the effective pom of this Maven Project
+     */
+    public String createBuildClassCode(String packageName, String className) {
+	final File pom = JkUtilsFile.tempFile("effectivepom", ".xml");
+	commands("help:effective-pom", "-Doutput="+ pom.getAbsolutePath()).run();
+	final EffectivePom effectivePom = EffectivePom.of(pom);
+	pom.delete();
+	final CodeWriter codeWriter = new CodeWriter(effectivePom);
+	return codeWriter.wholeClass(packageName, className);
+    }
+
+    /**
      * Returns the underlying process to execute mvn
      */
     public JkProcess asProcess() {
@@ -127,7 +139,7 @@ public final class JkMvn implements Runnable {
 
     /**
      * Creates a {@link JkDependencies} from a file describing definition like.
-     * 
+     *
      * <pre>
      * <code>
      * org.springframework:spring-aop:jar:4.2.3.BUILD-SNAPSHOT:compile

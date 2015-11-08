@@ -11,6 +11,7 @@ import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkVersionProvider;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsString;
 
 /**
  *
@@ -77,6 +78,9 @@ class CodeWriter {
     }
 
     public String packageDeclaration(String packageName) {
+	if (JkUtilsString.isBlank(packageName)) {
+	    return "";
+	}
 	return "package " + packageName + ";";
     }
 
