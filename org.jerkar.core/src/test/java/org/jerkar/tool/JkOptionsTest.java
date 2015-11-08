@@ -4,9 +4,9 @@ import org.junit.Test;
 
 public class JkOptionsTest {
 
-	@Test
-	public void testPopulate() {
+    @Test
+    public void testPopulate() {
 
-	}
+    }
 
 }

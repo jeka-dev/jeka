@@ -9,10 +9,9 @@ import org.junit.Test;
 
 public class JkocoJunitEnhancerTest {
 
-	@Test
-	public void test() {
-		JkocoJunitEnhancer.of(new File("."))
-		.enhance(JkUnit.of(JkClasspath.of()));
-	}
+    @Test
+    public void test() {
+	JkocoJunitEnhancer.of(new File(".")).enhance(JkUnit.of(JkClasspath.of()));
+    }
 
 }

@@ -12,73 +12,69 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 class Lib {
 
-	private static final String CONTAINERS_PATH = "eclipse/containers";
+    private static final String CONTAINERS_PATH = "eclipse/containers";
 
-	static final File CONTAINER_DIR = new File(JkLocator.jerkarHome(), CONTAINERS_PATH);
+    static final File CONTAINER_DIR = new File(JkLocator.jerkarHome(), CONTAINERS_PATH);
 
-	static final File CONTAINER_USER_DIR = new File(JkLocator.jerkarUserHome(), CONTAINERS_PATH);
+    static final File CONTAINER_USER_DIR = new File(JkLocator.jerkarUserHome(), CONTAINERS_PATH);
 
-	public static Lib file(File file, JkScope scope, boolean exported) {
-		return new Lib(file, null, scope, exported);
-	}
+    public static Lib file(File file, JkScope scope, boolean exported) {
+	return new Lib(file, null, scope, exported);
+    }
 
-	public static Lib project(String project, JkScope scope, boolean exported) {
-		return new Lib(null, project, scope, exported);
-	}
+    public static Lib project(String project, JkScope scope, boolean exported) {
+	return new Lib(null, project, scope, exported);
+    }
 
-	public final File file;
+    public final File file;
 
-	public final String projectRelativePath;
+    public final String projectRelativePath;
 
-	public final JkScope scope;
+    public final JkScope scope;
 
-	public final boolean exported;
+    public final boolean exported;
 
-	private Lib(File file, String projectRelativePath, JkScope scope, boolean exported) {
-		super();
-		this.file = file;
-		this.scope = scope;
-		this.projectRelativePath = projectRelativePath;
-		this.exported = exported;
-	}
+    private Lib(File file, String projectRelativePath, JkScope scope, boolean exported) {
+	super();
+	this.file = file;
+	this.scope = scope;
+	this.projectRelativePath = projectRelativePath;
+	this.exported = exported;
+    }
 
+    @Override
+    public String toString() {
+	return scope + ":" + file.getPath();
+    }
 
-	@Override
-	public String toString() {
-		return scope + ":" + file.getPath();
-	}
+    public static JkDependencies toDependencies(JkJavaBuild masterBuild, Iterable<Lib> libs,
+	    ScopeResolver scopeSegregator) {
+	final JkDependencies.Builder builder = JkDependencies.builder();
+	for (final Lib lib : libs) {
+	    if (lib.projectRelativePath == null) {
+		builder.onFiles(lib.file).scope(lib.scope);
 
-	public static JkDependencies toDependencies(JkJavaBuild masterBuild, Iterable<Lib> libs
-			, ScopeResolver scopeSegregator) {
-		final JkDependencies.Builder builder = JkDependencies.builder();
-		for (final Lib lib : libs) {
-			if (lib.projectRelativePath == null) {
-				builder.onFiles(lib.file).scope(lib.scope);
+	    } else { // This is project dependency
+		final JkJavaBuild slaveBuild = (JkJavaBuild) masterBuild.relativeProject(lib.projectRelativePath);
+		final JkComputedDependency projectDependency = slaveBuild.asDependency(slaveBuild.packer().jarFile());
+		builder.on(projectDependency).scope(lib.scope);
 
-			} else {  // This is project dependency
-				final JkJavaBuild slaveBuild = (JkJavaBuild) masterBuild.relativeProject(lib.projectRelativePath);
-				final JkComputedDependency projectDependency = slaveBuild.asDependency(slaveBuild.packer().jarFile());
-				builder.on(projectDependency).scope(lib.scope);
-
-				// Get the exported entry as well
-				final JkBuildPluginEclipse pluginEclipse = slaveBuild.pluginOf(JkBuildPluginEclipse.class);
-				if (pluginEclipse != null) {
-					final File dotClasspathFile = slaveBuild.file(".classpath");
-					final DotClasspath dotClasspath = DotClasspath.from(dotClasspathFile);
-					final List<Lib> sublibs = new ArrayList<Lib>();
-					for (final Lib sublib : dotClasspath.libs(slaveBuild.baseDir().root(), scopeSegregator)) {
-						if (sublib.exported) {
-							sublibs.add(sublib);
-						}
-					}
-					builder.on(Lib.toDependencies(slaveBuild, sublibs, scopeSegregator));
-				}
+		// Get the exported entry as well
+		final JkBuildPluginEclipse pluginEclipse = slaveBuild.pluginOf(JkBuildPluginEclipse.class);
+		if (pluginEclipse != null) {
+		    final File dotClasspathFile = slaveBuild.file(".classpath");
+		    final DotClasspath dotClasspath = DotClasspath.from(dotClasspathFile);
+		    final List<Lib> sublibs = new ArrayList<Lib>();
+		    for (final Lib sublib : dotClasspath.libs(slaveBuild.baseDir().root(), scopeSegregator)) {
+			if (sublib.exported) {
+			    sublibs.add(sublib);
 			}
+		    }
+		    builder.on(Lib.toDependencies(slaveBuild, sublibs, scopeSegregator));
 		}
-		return builder.build();
+	    }
 	}
-
-
-
+	return builder.build();
+    }
 
 }

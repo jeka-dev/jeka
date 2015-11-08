@@ -7,18 +7,18 @@ import org.junit.Test;
 
 public class JkLogTest {
 
-	@Test
-	public void test() {
-		JkLog.verbose(true);
-		assertTrue(JkLog.verbose());
-		JkLog.silent(true);
-		assertTrue(JkLog.silent());
-	}
+    @Test
+    public void test() {
+	JkLog.verbose(true);
+	assertTrue(JkLog.verbose());
+	JkLog.silent(true);
+	assertTrue(JkLog.silent());
+    }
 
-	@After
-	public void resetJkLog() {
-		JkLog.verbose(false);
-		JkLog.silent(false);
-	}
+    @After
+    public void resetJkLog() {
+	JkLog.verbose(false);
+	JkLog.silent(false);
+    }
 
 }

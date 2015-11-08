@@ -14,41 +14,41 @@ import org.jerkar.api.utils.JkUtilsIterable;
  */
 public final class JkFileSystemDependency extends JkFileDependency {
 
-	private static final long serialVersionUID = 1079527121988214989L;
+    private static final long serialVersionUID = 1079527121988214989L;
 
-	private final Set<File> files;
+    private final Set<File> files;
 
-	private JkFileSystemDependency(Iterable<File> files) {
-		this.files = Collections.unmodifiableSet(JkUtilsIterable.setOf(files));
+    private JkFileSystemDependency(Iterable<File> files) {
+	this.files = Collections.unmodifiableSet(JkUtilsIterable.setOf(files));
+    }
+
+    public static JkFileSystemDependency ofFile(File baseDir, String relativePath) {
+	final File file = new File(relativePath);
+	if (!file.isAbsolute()) {
+	    return JkFileSystemDependency.of(new File(baseDir, relativePath));
 	}
+	return JkFileSystemDependency.of(file);
+    }
 
-	public static JkFileSystemDependency ofFile(File baseDir, String relativePath) {
-		final File file = new File(relativePath);
-		if (!file.isAbsolute()) {
-			return JkFileSystemDependency.of(new File(baseDir, relativePath));
-		}
-		return JkFileSystemDependency.of(file);
-	}
+    public static JkFileSystemDependency of(Iterable<File> files) {
+	return new JkFileSystemDependency(files);
+    }
 
-	public static JkFileSystemDependency of(Iterable<File> files) {
-		return new JkFileSystemDependency(files);
-	}
+    public static JkFileSystemDependency of(File... files) {
+	return new JkFileSystemDependency(Arrays.asList(files));
+    }
 
-	public static JkFileSystemDependency of(File ... files) {
-		return new JkFileSystemDependency(Arrays.asList(files));
+    @Override
+    public final Set<File> files() {
+	for (final File file : files) {
+	    JkUtilsAssert.isTrue(file.exists(), "The file " + file.getAbsolutePath() + " does not exist.");
 	}
+	return files;
+    }
 
-	@Override
-	public final Set<File> files() {
-		for (final File file : files) {
-			JkUtilsAssert.isTrue(file.exists(), "The file " + file.getAbsolutePath() + " does not exist.");
-		}
-		return files;
-	}
-
-	@Override
-	public String toString() {
-		return "Files=" + files.toString();
-	}
+    @Override
+    public String toString() {
+	return "Files=" + files.toString();
+    }
 
 }

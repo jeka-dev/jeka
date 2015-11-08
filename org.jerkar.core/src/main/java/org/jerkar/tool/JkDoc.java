@@ -7,16 +7,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Documents the annotated element so that, Jerkar can display some
- * information when 'help' or 'helpPlugins' are requested.
+ * Documents the annotated element so that, Jerkar can display some information
+ * when 'help' or 'helpPlugins' are requested.
  * 
  * @author Jerome Angibaud
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.TYPE, ElementType.FIELD})
+@Target({ ElementType.METHOD, ElementType.TYPE, ElementType.FIELD })
 @Inherited
 public @interface JkDoc {
 
-	String[] value();
+    String[] value();
 
 }

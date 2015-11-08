@@ -22,111 +22,108 @@ import org.jerkar.api.utils.JkUtilsThrowable;
  */
 public final class JkManifest {
 
-	public static final String PATH = "META-INF/MANIFEST.MF";
+    public static final String PATH = "META-INF/MANIFEST.MF";
 
-	private final Manifest manifest;
+    private final Manifest manifest;
 
-	public static JkManifest of(Manifest manifest) {
-		return new JkManifest(manifest);
+    public static JkManifest of(Manifest manifest) {
+	return new JkManifest(manifest);
+    }
+
+    public final JkManifest of(JkFileTreeSet fileTrees) {
+	return of(readMetaInfManifest(fileTrees));
+    }
+
+    public static JkManifest of(File manifestFile) {
+	return new JkManifest(read(manifestFile));
+    }
+
+    public static JkManifest of(InputStream inputStream) {
+	return new JkManifest(read(inputStream));
+    }
+
+    public static JkManifest empty() {
+	final Manifest manifest = new Manifest();
+	manifest.getMainAttributes().putValue(Name.MANIFEST_VERSION.toString(), "1.0");
+	return of(manifest);
+    }
+
+    public JkManifest addMainAttribute(Name key, String value) {
+	this.manifest.getMainAttributes().putValue(key.toString(), value);
+	return this;
+    }
+
+    public JkManifest addMainAttribute(String key, String value) {
+	this.manifest.getMainAttributes().putValue(key, value);
+	return this;
+    }
+
+    public JkManifest addMainClass(String value) {
+	return addMainAttribute(Name.MAIN_CLASS, value);
+    }
+
+    public String mainAttribute(String key) {
+	return this.manifest().getMainAttributes().getValue(key);
+    }
+
+    private static Manifest read(File file) {
+	final Manifest manifest = new Manifest();
+	FileInputStream is = null;
+	try {
+	    is = new FileInputStream(file);
+	    manifest.read(is);
+	    return manifest;
+	} catch (final IOException e) {
+	    throw new RuntimeException(e);
+	} finally {
+	    JkUtilsIO.closeQuietly(is);
 	}
+    }
 
-	public final JkManifest of(JkFileTreeSet fileTrees) {
-		return of(readMetaInfManifest(fileTrees));
+    private static Manifest read(InputStream inputStream) {
+	final Manifest manifest = new Manifest();
+	try {
+	    manifest.read(inputStream);
+	    return manifest;
+	} catch (final IOException e) {
+	    throw JkUtilsThrowable.unchecked(e);
 	}
+    }
 
-	public static JkManifest of(File manifestFile) {
-		return new JkManifest(read(manifestFile));
+    private static Manifest readMetaInfManifest(JkFileTreeSet jkFileTreeSet) {
+	for (final JkFileTree dir : jkFileTreeSet.fileTrees()) {
+	    final File candidate = dir.file(PATH);
+	    if (candidate.exists()) {
+		return read(candidate);
+	    }
 	}
+	throw new IllegalArgumentException("No " + PATH + " found in " + jkFileTreeSet);
+    }
 
-	public static JkManifest of(InputStream inputStream) {
-		return new JkManifest(read(inputStream));
+    public void writeTo(File file) {
+	JkUtilsFile.createFileIfNotExist(file);
+	OutputStream outputStream = null;
+	try {
+	    outputStream = new FileOutputStream(file);
+	    manifest.write(outputStream);
+	} catch (final IOException e) {
+	    throw new RuntimeException(e);
+	} finally {
+	    JkUtilsIO.closeQuietly(outputStream);
 	}
+    }
 
-	public static JkManifest empty() {
-		final Manifest manifest = new Manifest();
-		manifest.getMainAttributes().putValue(Name.MANIFEST_VERSION.toString(), "1.0");
-		return of(manifest);
-	}
+    public void writeToStandardLocation(File classDir) {
+	writeTo(new File(classDir, PATH));
+    }
 
-	public JkManifest addMainAttribute(Name key, String value) {
-		this.manifest.getMainAttributes().putValue(key.toString(), value);
-		return this;
-	}
+    private JkManifest(Manifest manifest) {
+	super();
+	this.manifest = manifest;
+    }
 
-	public JkManifest addMainAttribute(String key, String value) {
-		this.manifest.getMainAttributes().putValue(key, value);
-		return this;
-	}
-
-	public JkManifest addMainClass(String value) {
-		return addMainAttribute(Name.MAIN_CLASS, value);
-	}
-
-	public String mainAttribute(String key) {
-		return this.manifest().getMainAttributes().getValue(key);
-	}
-
-	private static Manifest read(File file) {
-		final Manifest manifest = new Manifest();
-		FileInputStream is = null;
-		try {
-			is = new FileInputStream(file);
-			manifest.read(is);
-			return manifest;
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			JkUtilsIO.closeQuietly(is);
-		}
-	}
-
-	private static Manifest read(InputStream inputStream) {
-		final Manifest manifest = new Manifest();
-		try {
-			manifest.read(inputStream);
-			return manifest;
-		} catch (final IOException e) {
-			throw JkUtilsThrowable.unchecked(e);
-		}
-	}
-
-	private static Manifest readMetaInfManifest(JkFileTreeSet jkFileTreeSet) {
-		for (final JkFileTree dir : jkFileTreeSet.fileTrees()) {
-			final File candidate = dir.file(PATH);
-			if (candidate.exists()) {
-				return read(candidate);
-			}
-		}
-		throw new IllegalArgumentException("No " + PATH + " found in " + jkFileTreeSet);
-	}
-
-	public void writeTo(File file) {
-		JkUtilsFile.createFileIfNotExist(file);
-		OutputStream outputStream = null;
-		try {
-			outputStream = new FileOutputStream(file);
-			manifest.write(outputStream);
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			JkUtilsIO.closeQuietly(outputStream);
-		}
-	}
-
-	public void writeToStandardLocation(File classDir) {
-		writeTo(new File(classDir, PATH));
-	}
-
-	private JkManifest(Manifest manifest) {
-		super();
-		this.manifest = manifest;
-	}
-
-	public Manifest manifest() {
-		return manifest;
-	}
-
-
-
+    public Manifest manifest() {
+	return manifest;
+    }
 
 }

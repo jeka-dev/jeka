@@ -13,80 +13,79 @@ import org.jerkar.api.utils.JkUtilsIterable;
 
 public class JkComputedDependency extends JkFileDependency {
 
-	public static final JkComputedDependency of(final JkProcess process, File ...files) {
-		final Set<File> fileSet = JkUtilsIterable.setOf(files);
-		final Runnable runnable = new Runnable() {
+    public static final JkComputedDependency of(final JkProcess process, File... files) {
+	final Set<File> fileSet = JkUtilsIterable.setOf(files);
+	final Runnable runnable = new Runnable() {
 
-			@Override
-			public void run() {
-				process.runSync();
-			}
-		};
-		return new JkComputedDependency(runnable, fileSet);
+	    @Override
+	    public void run() {
+		process.runSync();
+	    }
+	};
+	return new JkComputedDependency(runnable, fileSet);
+    }
+
+    public static final JkComputedDependency of(File file, final JkJavaProcess process, final String className,
+	    final String... args) {
+	return of(JkUtilsIterable.setOf(file), process, className, args);
+    }
+
+    public static final JkComputedDependency of(Runnable runnable, File... files) {
+	final Set<File> fileSet = JkUtilsIterable.setOf(files);
+	return new JkComputedDependency(runnable, fileSet);
+    }
+
+    public static final JkComputedDependency of(Set<File> files, final JkJavaProcess process, final String className,
+	    final String... args) {
+	final Set<File> fileSet = JkUtilsIterable.setOf(files);
+	final Runnable runnable = new Runnable() {
+
+	    @Override
+	    public void run() {
+		process.runClassSync(className, args);
+	    }
+	};
+	return new JkComputedDependency(runnable, fileSet);
+    }
+
+    private static final long serialVersionUID = 1L;
+
+    private final Runnable runnable;
+
+    private final Set<File> files;
+
+    protected JkComputedDependency(Runnable runnable, Set<File> files) {
+	super();
+	this.runnable = runnable;
+	this.files = files;
+    }
+
+    public final boolean hasMissingFilesOrEmptyDirs() {
+	return !missingFilesOrEmptyDirs().isEmpty();
+    }
+
+    public final Set<File> missingFilesOrEmptyDirs() {
+	final Set<File> files = new HashSet<File>();
+	for (final File file : this.files) {
+	    if (!file.exists() || (file.isDirectory() && JkUtilsFile.filesOf(file, true).isEmpty())) {
+		files.add(file);
+	    }
 	}
+	return files;
+    }
 
-	public static final JkComputedDependency of(File file,  final JkJavaProcess process,
-			final String className, final String ...args) {
-		return of(JkUtilsIterable.setOf(file), process, className, args);
+    @Override
+    public Set<File> files() {
+	if (this.hasMissingFilesOrEmptyDirs()) {
+	    JkLog.startHeaded("Building depending project " + this);
+	    runnable.run();
+	    JkLog.done();
 	}
-
-	public static final JkComputedDependency of(Runnable runnable, File ...files) {
-		final Set<File> fileSet = JkUtilsIterable.setOf(files);
-		return new JkComputedDependency(runnable, fileSet);
+	final Set<File> missingFiles = this.missingFilesOrEmptyDirs();
+	if (!missingFiles.isEmpty()) {
+	    throw new IllegalStateException("Project " + this + " does not generate " + missingFiles);
 	}
-
-
-	public static final JkComputedDependency of(Set<File> files, final JkJavaProcess process,
-			final String className, final String ...args) {
-		final Set<File> fileSet = JkUtilsIterable.setOf(files);
-		final Runnable runnable = new Runnable() {
-
-			@Override
-			public void run() {
-				process.runClassSync(className, args);
-			}
-		};
-		return new JkComputedDependency(runnable, fileSet);
-	}
-
-	private static final long serialVersionUID = 1L;
-
-	private final Runnable runnable;
-
-	private final Set<File> files;
-
-	protected JkComputedDependency(Runnable runnable, Set<File> files) {
-		super();
-		this.runnable = runnable;
-		this.files = files;
-	}
-
-	public final boolean hasMissingFilesOrEmptyDirs() {
-		return !missingFilesOrEmptyDirs().isEmpty();
-	}
-
-	public final Set<File> missingFilesOrEmptyDirs() {
-		final Set<File> files = new HashSet<File>();
-		for (final File file : this.files) {
-			if (!file.exists() || (file.isDirectory() && JkUtilsFile.filesOf(file, true).isEmpty())) {
-				files.add(file);
-			}
-		}
-		return files;
-	}
-
-	@Override
-	public Set<File> files() {
-		if (this.hasMissingFilesOrEmptyDirs()) {
-			JkLog.startHeaded("Building depending project " + this);
-			runnable.run();
-			JkLog.done();
-		}
-		final Set<File> missingFiles = this.missingFilesOrEmptyDirs();
-		if (!missingFiles.isEmpty()) {
-			throw new IllegalStateException("Project " + this + " does not generate " + missingFiles);
-		}
-		return files;
-	}
+	return files;
+    }
 
 }

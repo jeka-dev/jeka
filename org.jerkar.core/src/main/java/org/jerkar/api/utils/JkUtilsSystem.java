@@ -13,10 +13,12 @@ import java.util.List;
  */
 public final class JkUtilsSystem {
 
-    private JkUtilsSystem() {}
+    private JkUtilsSystem() {
+    }
 
     /**
-     * Flag valuing <code>true</code> if the running underlying system is Windows.
+     * Flag valuing <code>true</code> if the running underlying system is
+     * Windows.
      */
     public static final boolean IS_WINDOWS = isWindows();
 
@@ -47,6 +49,5 @@ public final class JkUtilsSystem {
 	    throw JkUtilsThrowable.unchecked(e);
 	}
     }
-
 
 }

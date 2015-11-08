@@ -24,138 +24,134 @@ import org.w3c.dom.NodeList;
 
 class Project {
 
-	public static Project of(File dotProjectFile) {
-		final Document document = getDotProjectAsDom(dotProjectFile);
-		return from(document);
+    public static Project of(File dotProjectFile) {
+	final Document document = getDotProjectAsDom(dotProjectFile);
+	return from(document);
+    }
+
+    public static Project ofJavaNature(String name) {
+	return new Project(name, JkUtilsIterable.setOf("org.eclipse.jdt.core.javanature"));
+    }
+
+    public static Project findProjectNamed(File parent, String projectName) {
+	for (final File file : parent.listFiles()) {
+	    final File dotProject = new File(file, ".project");
+	    if (!(dotProject.exists())) {
+		continue;
+	    }
+	    final Project project = Project.of(dotProject);
+	    if (projectName.equals(project.name)) {
+		return project;
+	    }
 	}
+	return null;
+    }
 
-	public static Project ofJavaNature(String name) {
-		return new Project(name, JkUtilsIterable.setOf("org.eclipse.jdt.core.javanature"));
+    public static Map<String, File> findProjects(File parent) {
+	final Map<String, File> map = new HashMap<String, File>();
+	for (final File file : parent.listFiles()) {
+	    final File dotProject = new File(file, ".project");
+	    if (!(dotProject.exists())) {
+		continue;
+	    }
+	    final Project project = Project.of(dotProject);
+	    map.put(project.name, file);
 	}
+	return map;
+    }
 
-	public static Project findProjectNamed(File parent, String projectName) {
-		for (final File file : parent.listFiles()) {
-			final File dotProject = new File(file, ".project");
-			if (!(dotProject.exists())) {
-				continue;
-			}
-			final Project project = Project.of(dotProject);
-			if (projectName.equals(project.name)) {
-				return project;
-			}
-		}
-		return null;
+    final String name;
+
+    final Set<String> natures;
+
+    public void writeTo(File dotProjectFile) {
+	try {
+	    writeToFile(dotProjectFile);
+	} catch (final FileNotFoundException e) {
+	    throw new RuntimeException(e);
+	} catch (final XMLStreamException e) {
+	    throw new RuntimeException(e);
+	} catch (final FactoryConfigurationError e) {
+	    throw new RuntimeException(e);
 	}
+    }
 
-	public static Map<String, File> findProjects(File parent) {
-		final Map<String, File> map = new HashMap<String, File>();
-		for (final File file : parent.listFiles()) {
-			final File dotProject = new File(file, ".project");
-			if (!(dotProject.exists())) {
-				continue;
-			}
-			final Project project = Project.of(dotProject);
-			map.put(project.name, file);
-		}
-		return map;
+    private void writeToFile(File dotProjectFile)
+	    throws XMLStreamException, FactoryConfigurationError, FileNotFoundException {
+	final OutputStream fos = new FileOutputStream(dotProjectFile);
+	final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(fos, "UTF-8");
+	writer.writeStartDocument("UTF-8", "1.0");
+	writer.writeCharacters("\n");
+	writer.writeStartElement("projectDescription");
+	writer.writeCharacters("\n\t");
+	writer.writeStartElement("name");
+	writer.writeCharacters(name);
+	writer.writeEndElement();
+	writer.writeCharacters("\n\t");
+	writer.writeEmptyElement("comment");
+	writer.writeCharacters("\n\t");
+	writer.writeEmptyElement("projects");
+	writer.writeCharacters("\n\t");
+	writer.writeStartElement("buildSpec");
+	writer.writeCharacters("\n\t\t");
+	writer.writeStartElement("buildCommand");
+	writer.writeCharacters("\n\t\t\t");
+	writer.writeStartElement("name");
+	writer.writeCharacters("org.eclipse.jdt.core.javabuilder");
+	writer.writeEndElement();
+	writer.writeCharacters("\n\t\t\t");
+	writer.writeEmptyElement("arguments");
+	writer.writeCharacters("\n\t\t");
+	writer.writeEndElement();
+	writer.writeCharacters("\n\t");
+	writer.writeEndElement();
+	writer.writeCharacters("\n\t");
+	writer.writeStartElement("natures");
+	for (final String nature : natures) {
+	    writer.writeCharacters("\n\t\t");
+	    writer.writeStartElement("nature");
+	    writer.writeCharacters(nature);
+	    writer.writeEndElement();
 	}
+	writer.writeCharacters("\n\t");
+	writer.writeEndElement();
+	writer.writeCharacters("\n");
+	writer.writeEndElement();
 
-	final String name;
+	writer.flush();
+    }
 
-	final Set<String> natures;
+    private Project(String name, Set<String> natures) {
+	this.name = name;
+	this.natures = Collections.unmodifiableSet(natures);
+    }
 
-	public void writeTo(File dotProjectFile) {
-		try {
-			writeToFile(dotProjectFile);
-		} catch (final FileNotFoundException e) {
-			throw new RuntimeException(e);
-		} catch (final XMLStreamException e) {
-			throw new RuntimeException(e);
-		} catch (final FactoryConfigurationError e) {
-			throw new RuntimeException(e);
-		}
+    private static Project from(Document document) {
+	final NodeList nodeList = document.getElementsByTagName("name");
+	final Node node = nodeList.item(0);
+	final String name = node.getTextContent();
+	final Set<String> natures = new HashSet<String>();
+	final NodeList natureNodes = document.getElementsByTagName("nature");
+	for (int i = 0; i < natureNodes.getLength(); i++) {
+	    natures.add(natureNodes.item(i).getTextContent());
 	}
+	return new Project(name, natures);
+    }
 
-	private void writeToFile(File dotProjectFile) throws XMLStreamException,
-	FactoryConfigurationError, FileNotFoundException {
-		final OutputStream fos = new FileOutputStream(dotProjectFile);
-		final XMLStreamWriter writer = XMLOutputFactory.newInstance()
-				.createXMLStreamWriter(fos, "UTF-8");
-		writer.writeStartDocument("UTF-8", "1.0");
-		writer.writeCharacters("\n");
-		writer.writeStartElement("projectDescription");
-		writer.writeCharacters("\n\t");
-		writer.writeStartElement("name");
-		writer.writeCharacters(name);
-		writer.writeEndElement();
-		writer.writeCharacters("\n\t");
-		writer.writeEmptyElement("comment");
-		writer.writeCharacters("\n\t");
-		writer.writeEmptyElement("projects");
-		writer.writeCharacters("\n\t");
-		writer.writeStartElement("buildSpec");
-		writer.writeCharacters("\n\t\t");
-		writer.writeStartElement("buildCommand");
-		writer.writeCharacters("\n\t\t\t");
-		writer.writeStartElement("name");
-		writer.writeCharacters("org.eclipse.jdt.core.javabuilder");
-		writer.writeEndElement();
-		writer.writeCharacters("\n\t\t\t");
-		writer.writeEmptyElement("arguments");
-		writer.writeCharacters("\n\t\t");
-		writer.writeEndElement();
-		writer.writeCharacters("\n\t");
-		writer.writeEndElement();
-		writer.writeCharacters("\n\t");
-		writer.writeStartElement("natures");
-		for (final String nature : natures) {
-			writer.writeCharacters("\n\t\t");
-			writer.writeStartElement("nature");
-			writer.writeCharacters(nature);
-			writer.writeEndElement();
-		}
-		writer.writeCharacters("\n\t");
-		writer.writeEndElement();
-		writer.writeCharacters("\n");
-		writer.writeEndElement();
-
-		writer.flush();
+    private static Document getDotProjectAsDom(File dotProjectFile) {
+	if (!dotProjectFile.exists()) {
+	    throw new IllegalStateException(dotProjectFile.getAbsolutePath() + " file not found.");
 	}
-
-	private Project(String name, Set<String> natures) {
-		this.name = name;
-		this.natures = Collections.unmodifiableSet(natures);
+	final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+	try {
+	    final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+	    Document doc;
+	    doc = dBuilder.parse(dotProjectFile);
+	    doc.getDocumentElement().normalize();
+	    return doc;
+	} catch (final Exception e) {
+	    throw new RuntimeException("Error while parsing .classpath file : ", e);
 	}
-
-	private static Project from(Document document) {
-		final NodeList nodeList = document.getElementsByTagName("name");
-		final Node node = nodeList.item(0);
-		final String name = node.getTextContent();
-		final Set<String> natures = new HashSet<String>();
-		final NodeList natureNodes = document.getElementsByTagName("nature");
-		for (int i = 0; i < natureNodes.getLength(); i++) {
-			natures.add(natureNodes.item(i).getTextContent());
-		}
-		return new Project(name, natures);
-	}
-
-	private static Document getDotProjectAsDom(File dotProjectFile) {
-		if (!dotProjectFile.exists()) {
-			throw new IllegalStateException(dotProjectFile.getAbsolutePath()
-					+ " file not found.");
-		}
-		final DocumentBuilderFactory dbFactory = DocumentBuilderFactory
-				.newInstance();
-		try {
-			final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			Document doc;
-			doc = dBuilder.parse(dotProjectFile);
-			doc.getDocumentElement().normalize();
-			return doc;
-		} catch (final Exception e) {
-			throw new RuntimeException(
-					"Error while parsing .classpath file : ", e);
-		}
-	}
+    }
 
 }

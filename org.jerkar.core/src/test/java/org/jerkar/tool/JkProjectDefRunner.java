@@ -8,9 +8,9 @@ import org.jerkar.tool.JkProjectDefTest.MyBuild;
  */
 public class JkProjectDefRunner {
 
-	public static void main(String[] args) {
-		final JkProjectBuildClassDef def = JkProjectBuildClassDef.of(new MyBuild());
-		def.log(true);
-	}
+    public static void main(String[] args) {
+	final JkProjectBuildClassDef def = JkProjectBuildClassDef.of(new MyBuild());
+	def.log(true);
+    }
 
 }

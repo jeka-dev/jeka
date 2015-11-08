@@ -115,7 +115,7 @@ You just have to mention the path of one or several files. If one of the files d
 
 ##### Dependencies on files produced by computation
 
-It is typically used for __multi projects builds__ or __multi module__ projects.
+It is typically used for __multi projects builds__ projects.
 
 The principle is that if the specified files are not found, then the computation is run in order to generate the missing files.
 If some files still missing after the computation has run, the build fails.
@@ -214,8 +214,7 @@ As Jerkar relies on Ivy under the hood, you can use any expression mentioned (he
 
 ###### Specifying Maven Classifier and extension of the artifact
 
-Maven or Ivy module dependencies need to be downloaded from a binary repository. This could be a managed repository (as _Nexus8 or _Artifactory_), simple file system repo or 
-a combination of any.
+Maven or Ivy module dependencies need to be downloaded from a binary repository. This could be a managed repository (as _Nexus_ or _Artifactory_), simple file system repo or a combination of any.
 
 
 ```

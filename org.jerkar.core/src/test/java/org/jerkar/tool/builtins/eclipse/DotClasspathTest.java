@@ -18,45 +18,44 @@ import org.junit.Test;
 
 public class DotClasspathTest {
 
-	private static final String SAMPLE_NAME = "classpath";
+    private static final String SAMPLE_NAME = "classpath";
 
-	@Test
-	public void testFromFile() throws URISyntaxException {
-		sample();
-	}
+    @Test
+    public void testFromFile() throws URISyntaxException {
+	sample();
+    }
 
-	@Test
-	public void testSourceDirs() throws URISyntaxException {
-		final JkFileTreeSet dirSet = sample().sourceDirs(structure(), Sources.ALL_PROD).prodSources;
-		assertEquals(2, dirSet.fileTrees().size());
-	}
+    @Test
+    public void testSourceDirs() throws URISyntaxException {
+	final JkFileTreeSet dirSet = sample().sourceDirs(structure(), Sources.ALL_PROD).prodSources;
+	assertEquals(2, dirSet.fileTrees().size());
+    }
 
-	@Test
-	public void testLibs() throws URISyntaxException {
-		final List<Lib> libs = sample().libs(structure(), new ScopeResolverSmart(null));
-		assertEquals(5, libs.size());
-	}
+    @Test
+    public void testLibs() throws URISyntaxException {
+	final List<Lib> libs = sample().libs(structure(), new ScopeResolverSmart(null));
+	assertEquals(5, libs.size());
+    }
 
-	@Test
-	public void testToDependencies() throws URISyntaxException {
-		final List<Lib> libs = sample().libs( structure(), new ScopeResolverSmart(null));
-		assertEquals(5, libs.size());
+    @Test
+    public void testToDependencies() throws URISyntaxException {
+	final List<Lib> libs = sample().libs(structure(), new ScopeResolverSmart(null));
+	assertEquals(5, libs.size());
 
-		final JkDependencies deps = Lib.toDependencies(null, libs, new ScopeResolverSmart(null));
+	final JkDependencies deps = Lib.toDependencies(null, libs, new ScopeResolverSmart(null));
 
+	assertEquals(0, deps.dependenciesDeclaredWith(JkJavaBuild.TEST).size());
+    }
 
-		assertEquals(0, deps.dependenciesDeclaredWith(JkJavaBuild.TEST).size());
-	}
+    private DotClasspath sample() throws URISyntaxException {
+	final URL sampleFileUrl = DotClasspathTest.class.getResource("samplestructure/" + SAMPLE_NAME);
+	final File sampleFile = new File(sampleFileUrl.toURI().getPath());
+	return DotClasspath.from(sampleFile);
+    }
 
-	private DotClasspath sample() throws URISyntaxException {
-		final URL sampleFileUrl = DotClasspathTest.class.getResource("samplestructure/" + SAMPLE_NAME);
-		final File sampleFile = new File(sampleFileUrl.toURI().getPath());
-		return DotClasspath.from(sampleFile);
-	}
-
-	private File structure() throws URISyntaxException {
-		final URL sampleFileUrl = DotClasspathTest.class.getResource("samplestructure/" + SAMPLE_NAME);
-		return new File(sampleFileUrl.toURI().getPath()).getParentFile();
-	}
+    private File structure() throws URISyntaxException {
+	final URL sampleFileUrl = DotClasspathTest.class.getResource("samplestructure/" + SAMPLE_NAME);
+	return new File(sampleFileUrl.toURI().getPath()).getParentFile();
+    }
 
 }

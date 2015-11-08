@@ -6,13 +6,13 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.tool.JkProject;
 
 public class PluginsSonarBuild extends AbstractBuild {
-		
-	@JkProject("../org.jerkar.core")
-	private CoreBuild core;
-	
-	@Override
-	protected JkDependencies dependencies() {
-		return JkDependencies.on(PROVIDED, core.asDependency(core.packer().jarFile()));
-	}	
+
+    @JkProject("../org.jerkar.core")
+    private CoreBuild core;
+
+    @Override
+    protected JkDependencies dependencies() {
+	return JkDependencies.on(PROVIDED, core.asDependency(core.packer().jarFile()));
+    }
 
 }
