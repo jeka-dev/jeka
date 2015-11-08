@@ -5,7 +5,7 @@ This document stands for reference guide and provides details about Jerkar behav
 
 * To have an overall vision of Jerkar, please have a [__tour__](http://jerkar.github.io/tour.html).
 
-* To get a step-by-step learning guide, please visit [__tutorial__](http://jerkar.github.io/documentation/latest/getting-started.html).
+* To get a step-by-step learning guide, please visit [__Getting Started__](http://jerkar.github.io/documentation/latest/getting_started.html).
 
 If you are looking for how exactly Jerkar behaves or you want to get a pretty exhaustive list of Jerkar features, you are in the right place.
 
@@ -17,12 +17,11 @@ Also, you're welcome to raise an issue in Git-hub for requesting an improvement 
 
 These terms are used all over the document, this lexical disambiguates their meanings.
 
-<strong>Build Definition Files :</strong> These are files that define the build for a given project. In Jerkar, those files are Java sources (.java files) located under _[PROJECT DIR]/build/def_ directory. 
-A Jerkar project may contain 0 or many build definition files as a definition file stands for both the main build class and _utilities_ classes.
+<strong>Build Class :</strong> These are files that define build for a given project. In Jerkar, those files are Java sources (.java files) located under _[PROJECT DIR]/build/def_ directory and extending `org.jerkar.tool.JkBuild`. 
+This term can also be use to designate the compiled build class (.class files) as this class is generated transparently by Jerkar.
+In general, there is a single build class by project, but it can have none (if your project embrace conventions strictly) or many if project developers estimates that make sense.   
+_[PROJECT DIR]/build/def_ directory may contain other utilities classes and files consumed by build classes.
   
-<strong>Build Class :</strong> This is the class containing the methods executed by Jerkar when a project is built. 
-The build class may be a class coming the compilation of the build definition files or a _standard_ class coming from Jerkar runtime.   
- 
 <strong>Jerkar Options :</strong> This is a set of key-value used to inject parameters in builds. The options can be mentioned as command line arguments or stored in specific files.
 The section _Build Configuration_ details about Jerkar options.
 

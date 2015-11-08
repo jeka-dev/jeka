@@ -6,7 +6,7 @@ This section details what happens behind the cover when Jerkar is run.
 ### Launching Java Process
  
 Jerkar is a pure Java application requiring __JDK 6 or above__. __JDK__ is required and __JRE__ is not sufficient.
-Indeed Jerkar uses the JDK tools to compile build definition files.
+Indeed Jerkar uses the JDK tools to compile java source files located under _[PROJECT DIR]/build/def_.
 
 To ease launching Java process in command line, Jerkar provides native scripts ( _jerkar.bat_ for __Windows__ and _jerkar_ for __Unix__ ).
 These scripts do the following :
@@ -34,15 +34,15 @@ It processes as follow :
 
 1. Parse the command line.
 2. Populate system properties and Jerkar options from configuration files and command line (see <strong>build configuration</strong>).
-3. Pre-process and compile build definition files (see <strong>Build Definition Compilation</strong>). 
+3. Pre-process and compile java source files located under under _[PROJECT DIR]/build/def_ (see <strong>Build Definition Compilation</strong>). 
 4. Instantiate the build class (see <strong>Build Class Instantiation</strong>)
 5. Inject options in build instance fields along the project root directory (see <strong>Build Configuration</strong>).
 6. Call the `init()` method on the build instance. This is the place to set location related variable and to configure plugins (see <strong>Plugins</strong>). 
 7. Instantiate and configure plugins specified in command line arguments (see <strong>Mention Plugins in the Command Line</strong>).
 8. Invoke methods specified in command line arguments : methods are executed in the order they appear on the command line.
 
-#### Build Definition File Compilation
-Jerkar compiles the build definition files prior to execute it. The build definition files are expected to be in _[PROJECT DIR]/build/def_. If this directory does not exist or does not contains java sources, the compilation is skipped.
+#### Build class Compilation
+Jerkar compiles build class files prior to execute it. Build class files are expected to be in _[PROJECT DIR]/build/def_. If this directory does not exist or does not contains java sources, the compilation is skipped.
 Compilation outputs class files in _[PROJECT DIR]/build/output/def-bin_ directory and uses classpath containing :
 
 * Java libraries located in _[PROJECT DIR]/build/libs/build_.
@@ -54,8 +54,8 @@ You can augment the classpath with :
 * Java libraries located on file system.
 * Build definition (java sources) of other projects
 
-Information about extra lib to add to classpath are located in the build definition files, inside `@JkImport` and `@JkProject` annotation.
-To read this information, build definition files are parsed prior to be compiled in order to extract classpath from source code.
+Information about extra lib to add to classpath are located in the build classes, inside `@JkImport` and `@JkProject` annotation.
+This information is read by parsing java **source** files, prior they are compiled.
 
 ##### Libraries Located on Maven/Ivy Repository 
 To add libraries from Maven/Ivy repository you need to annotate the build definition with `@JkImport`. This annotation takes an array of String as its default parameter so you can specify several dependencies.
@@ -91,8 +91,8 @@ Your build definitions can depends on build definitions of other projects. It is
 This capability allows to share build elements in a static typed way as the build definitions files can consume classes coming from build definitions of other projects.
 
 `@JkProject` is an annotation that applies on fields instance of `org.jerkar.tool.JkBuild` or its subclasses. This annotation contains the relative path of the consumed project.
-If the project build definition sources contain some `@JkProject` annotations, the build definition files of the consumed project are pre-processed and compiled recursively. 
-The classes and the classpath of the consumed  project are added to the build definition classpath of the consumer project.
+If the project build definition sources contain some `@JkProject` annotations, build class of the consumed project are pre-processed and compiled recursively. 
+Classes and classpath of the consumed project are added to the build definition classpath of the consumer project.
 
 ```
 public class DistribAllBuild extends JkBuildDependencySupport {
@@ -116,11 +116,11 @@ public class DistribAllBuild extends JkBuildDependencySupport {
 ```
 
 #### Build Class Instantiation
-Once the build definition files compiled. Jerkar instantiate the build class.
-The build class is specified by the `buildClass` option if present. If not, it is the first class implementing `org.jerkar.tool.JkBuild`. 
+Once build class compiled. Jerkar instantiate the build it.
+Build class is specified by the `buildClass` option if present. If not, it is the first class implementing `org.jerkar.tool.JkBuild`. 
 If no class implementing `org.jerkar.tool.JkBuild` is found then the `org.jerkar.tool.builtins.javabuild.JkJavaBuild` is instantiated.
 
-The class scanning processes classes in alphabetic order then subpackage in deep first. This mean that class `MyBuid` will be scanned prior `apackage.ABuild`, and `aa.bb.MyClass` will be scanned prior `ab.OtherClass`.
+The class scanning processes classes in alphabetic order then sub-package in deep first. This mean that class `MyBuid` will be scanned prior `apackage.ABuild`, and `aa.bb.MyClass` will be scanned prior `ab.OtherClass`.
 
 The `buildClass` option can mention a simple name class (class name omitting its package). If no class matches the  specified `buildClass` then an exception is thrown.
 

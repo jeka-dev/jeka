@@ -104,14 +104,14 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	/**
 	 * Returns a clone of this object plus {@link JkScopedDependency}s on the specified file.
 	 */
-	public JkDependencies and(JkScope scope, File ...files) {
-		return and(scope, Arrays.asList(files));
+	public JkDependencies on(JkScope scope, File ...files) {
+		return on(scope, Arrays.asList(files));
 	}
 
 	/**
 	 * Returns a clone of this object plus {@link JkScopedDependency}s on the specified file.
 	 */
-	public JkDependencies and(JkScope scope, Iterable<File> files) {
+	public JkDependencies on(JkScope scope, Iterable<File> files) {
 		final JkScopedDependency scopedDependency = JkScopedDependency.of(JkFileSystemDependency.of(files), scope);
 		return and(scopedDependency);
 	}
@@ -121,7 +121,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	 * Returns a clone of this object plus {@link JkScopedDependency}s on the specified external module.
 	 * @param versionedModuleId something like "org.apache:commons:1.4"
 	 */
-	public JkDependencies and(JkScope scope, String versionedModuleId) {
+	public JkDependencies on(JkScope scope, String versionedModuleId) {
 		final JkDependency dependency = JkModuleDependency.of(versionedModuleId);
 		final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scope);
 		return and(scopedDependency);

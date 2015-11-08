@@ -22,48 +22,45 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
  * @author Jerome Angibaud
  */
 public class IvyPublishBuild extends JkJavaBuild {
-	
-	{
-		this.pack.tests = true;
-		this.pack.javadoc = true;
-	}
 
-	
-	
-	@Override
-	// Optional : needless if you respect naming convention
-	public JkModuleId moduleId() {
-		return JkModuleId.of("org.jerkar", "script-samples-ivy");
-	}
+    {
+	this.pack.tests = true;
+	this.pack.javadoc = true;
+    }
 
-	@Override
-	public JkDependencies dependencies() {
-		return JkDependencies.builder()
-				.on(GUAVA, "18.0")	
-				.on(JERSEY_SERVER, "1.19").mapScope(RUNTIME, TEST).to(COMPILE)
-				.on("com.orientechnologies:orientdb-client:2.0.8")
-				.on(JUNIT, "4.11").scope(TEST)
-				.on(MOCKITO_ALL, "1.9.5").scope(TEST)
-				.build();
-	}
-	
-	@Override
-	protected JkRepos downloadRepositories() {
-		return JkRepo.ivy(this.repo.publish.url).and(JkRepo.mavenCentral());
-	}
-	
-	@Override 
-	protected JkPublishRepos publishRepositories() {
-		return JkRepo.ivy(this.repo.publish.url).asPublishRepos();
-	}
-	
-	@Override
-	protected JkIvyPublication ivyPublication() {
-		return JkIvyPublication.of(packer().jarFile(), COMPILE)
-				.and(packer().jarTestFile(), "test", TEST)
-				.and(packer().javadocFile(),"javadoc", JAVADOC)
-				.and(packer().jarSourceFile(), "source", SOURCES)
-				.and(packer().jarTestSourceFile(), "test-source", SOURCES, TEST);
-	}
+    @Override
+    // Optional : needless if you respect naming convention
+    public JkModuleId moduleId() {
+	return JkModuleId.of("org.jerkar", "script-samples-ivy");
+    }
+
+    // @formatter:off
+    @Override
+    public JkDependencies dependencies() {
+	return JkDependencies.builder()
+		.on(GUAVA, "18.0").on(JERSEY_SERVER, "1.19").mapScope(RUNTIME, TEST).to(COMPILE)
+		.on("com.orientechnologies:orientdb-client:2.0.8")
+		.on(JUNIT, "4.11").scope(TEST)
+		.on(MOCKITO_ALL, "1.9.5").scope(TEST).build();
+    }
+
+    @Override
+    protected JkRepos downloadRepositories() {
+	return JkRepo.ivy(this.repo.publish.url).and(JkRepo.mavenCentral());
+    }
+
+    @Override
+    protected JkPublishRepos publishRepositories() {
+	return JkRepo.ivy(this.repo.publish.url).asPublishRepos();
+    }
+
+    @Override
+    protected JkIvyPublication ivyPublication() {
+	return JkIvyPublication.of(packer().jarFile(), COMPILE)
+		.and(packer().jarTestFile(), "test", TEST)
+		.and(packer().javadocFile(), "javadoc", JAVADOC)
+		.and(packer().jarSourceFile(), "source", SOURCES)
+		.and(packer().jarTestSourceFile(), "test-source", SOURCES, TEST);
+    }
 
 }
