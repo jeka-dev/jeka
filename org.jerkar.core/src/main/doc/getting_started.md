@@ -533,7 +533,7 @@ With this definition, you only have to execute `jerkar doVerify` to trigger a So
  
 ### Playing with the others build classes
 
-If you want to play with other build definition available in the _samples_ project the same way you did for _AClassicalBuild_, just mention `-buildClass=Xxxxx` in the command line where `Xxxxx` stands for the short or complete name of the build class. So for example, `jerkar -buildClass=AntStyleBuild` is perfectly valid. 
+If you want to play with other build classes available in the _samples_ project the same way you did for _AClassicalBuild_, just mention `-buildClass=Xxxxx` in the command line where `Xxxxx` stands for the short or complete name of the build class. So for example, `jerkar -buildClass=AntStyleBuild` is perfectly valid as `jerkar -buildClass=org.jerkar.samples.AntStyleBuild`. 
 
 ## Play with 'samples-dependee' projectt
 
