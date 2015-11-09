@@ -66,6 +66,10 @@ public final class JkVersionProvider implements Serializable {
 	return this.map.get(moduleId);
     }
 
+    public boolean isEmpty() {
+	return this.map.isEmpty();
+    }
+
     public JkVersionProvider and(JkVersionProvider other) {
 	final Map<JkModuleId, JkVersion> newMap = new HashMap<JkModuleId, JkVersion>(this.map);
 	newMap.putAll(other.map);

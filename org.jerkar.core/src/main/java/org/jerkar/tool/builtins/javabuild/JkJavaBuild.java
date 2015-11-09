@@ -22,11 +22,12 @@ import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
+import org.jerkar.api.tooling.JkMvn;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsJdk;
 import org.jerkar.tool.JkBuildDependencySupport;
 import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkScaffolder;
 
 /**
  * Template class to define build on Java project. This template is flexible
@@ -255,21 +256,35 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     // --------------------------- Callable Methods -----------------------
 
     @Override
-    protected JkScaffolder scaffolder() {
-	final Runnable action = new Runnable() {
-
-	    @Override
-	    public void run() {
-		for (final JkFileTree dir : editedSources().fileTrees()) {
-		    dir.root().mkdirs();
-		}
-		for (final JkFileTree dir : unitTestEditedSources().fileTrees()) {
-		    dir.root().mkdirs();
-		}
-	    }
-	};
-	return super.scaffolder().withExtraAction(action).withExtendedClass(JkJavaBuild.class);
+    public void scaffold() {
+	super.scaffold();
+	for (final JkFileTree dir : editedSources().fileTrees()) {
+	    dir.root().mkdirs();
+	}
+	for (final JkFileTree dir : unitTestEditedSources().fileTrees()) {
+	    dir.root().mkdirs();
+	}
     }
+
+    @Override
+    protected String scaffoldedBuildClassCode() {
+	if (baseDir().file("pom.xml").exists() && JkMvn.INSTALLED) {
+	    JkLog.info("pom.xml detected and Maven installed : try to generate build class from existing pom.");
+	    try {
+		return JkMvn.of(baseDir().root()).createBuildClassCode(null, "Build");
+	    } catch (final RuntimeException e) {
+		e.printStackTrace();
+		JkLog.info("Maven migration failed. Just generate standard build class.");
+	    }
+	}
+	final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
+	codeWriter.extendedClass = "JkJavaBuild";
+	codeWriter.dependencies = JkDependencies.builder().build();
+	codeWriter.imports.clear();
+	codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsFoJkJavaBuild());
+	return codeWriter.wholeClass() + codeWriter.endClass();
+    }
+
 
     @JkDoc("Generate sources and resources, compile production sources and process production resources to the classes directory.")
     public void compile() {

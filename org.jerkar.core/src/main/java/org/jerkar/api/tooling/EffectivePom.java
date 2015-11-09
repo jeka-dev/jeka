@@ -3,11 +3,13 @@ package org.jerkar.api.tooling;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.jerkar.api.depmanagement.JkDepExclude;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyExclusions;
 import org.jerkar.api.depmanagement.JkModuleDependency;
+import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopedDependency;
@@ -138,6 +140,24 @@ class EffectivePom {
 	final String artifactId = JkUtilsXml.directChildText(exclusionEl, "artifactId");
 	return JkDepExclude.of(groupId, artifactId);
 
+    }
+
+    public String jerkarSourceCode() {
+	final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
+	codeWriter.moduleId = JkModuleId.of(groupId(), artifactId());
+	codeWriter.dependencies = dependencies();
+	codeWriter.dependencyExclusions = dependencyExclusion();
+	codeWriter.extendedClass = "JkJavaBuild";
+	codeWriter.imports.clear();
+	codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsFoJkJavaBuild());
+	codeWriter.repos = repos();
+	codeWriter.version = version();
+	codeWriter.versionProvider = versionProvider();
+	final VersionConstanter constanter = VersionConstanter.of(codeWriter.versionProvider);
+	for (final Map.Entry<String, String> entry: constanter.groupToVersion().entrySet()) {
+	    codeWriter.addGroupVersionVariable(entry.getKey(), entry.getValue());
+	}
+	return codeWriter.wholeClass() + codeWriter.endClass();
     }
 
 

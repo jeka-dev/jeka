@@ -5,7 +5,7 @@ import org.jerkar.api.depmanagement.JkDependencyResolver;
 
 /**
  * A plugin base class to extend to alter {@link JkBuild} object.
- * 
+ *
  * @author Jerome Angibaud
  */
 public abstract class JkBuildPlugin {
@@ -26,7 +26,7 @@ public abstract class JkBuildPlugin {
 
     /**
      * Override this method if the plugin need to alter the dependency resolver.
-     * 
+     *
      * @see JkBuildDependencySupport#dependencyResolver()
      */
     protected JkDependencyResolver alterDependencyResolver(JkDependencyResolver original) {
@@ -35,17 +35,10 @@ public abstract class JkBuildPlugin {
 
     /**
      * Override this method if the plugin need to alter the dependencies.
-     * 
+     *
      * @see JkBuildDependencySupport#dependencies
      */
     protected JkDependencies alterDependencies(JkDependencies original) {
-	return original;
-    }
-
-    /**
-     * Override the method if the plugin need to enhance scaffolding
-     */
-    protected JkScaffolder alterScaffold(JkScaffolder original) {
 	return original;
     }
 
@@ -72,13 +65,7 @@ public abstract class JkBuildPlugin {
 	return result;
     }
 
-    public static JkScaffolder enhanceScafforld(Iterable<? extends JkBuildPlugin> plugins, JkScaffolder scaffolder) {
-	JkScaffolder result = scaffolder;
-	for (final JkBuildPlugin plugin : plugins) {
-	    result = plugin.alterScaffold(result);
-	}
-	return result;
-    }
+
 
     @Override
     public String toString() {

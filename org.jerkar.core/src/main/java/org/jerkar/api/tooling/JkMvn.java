@@ -19,19 +19,31 @@ public final class JkMvn implements Runnable {
 
     private final static String MVN_CMD = mvnCmd();
 
+    public static final boolean INSTALLED = MVN_CMD != null;
+
     private static String mvnCmd() {
 	if (JkUtilsSystem.IS_WINDOWS) {
-	    try {
-		final int result = Runtime.getRuntime().exec("mvn.bat -version").exitValue();
-		if (result == 0) {
-		    return "mvn.bat";
-		}
+	    if (exist("mvn.bat")) {
+		return "mvn.bat";
+	    } else if (exist("mvn.cmd")) {
 		return "mvn.cmd";
-	    } catch (final Exception e) {
-		return "mvn.cmd";
+	    } else {
+		return null;
 	    }
 	}
-	return "mvn";
+	if (exist("mvn")) {
+	    return "mvn";
+	}
+	return null;
+    }
+
+    private static boolean exist(String cmd) {
+	try {
+	    final int result = Runtime.getRuntime().exec(cmd +" -version").waitFor();
+	    return result == 0;
+	} catch (final Exception e) {
+	    return false;
+	}
     }
 
 
@@ -41,6 +53,9 @@ public final class JkMvn implements Runnable {
      * "-U").
      */
     public static final JkMvn of(File workingDir, String... args) {
+	if (MVN_CMD == null) {
+	    throw new IllegalStateException("Maven not installed on this machine");
+	}
 	final JkProcess jkProcess = JkProcess.of(MVN_CMD, args).withWorkingDir(workingDir);
 	return new JkMvn(jkProcess);
     }
@@ -114,8 +129,7 @@ public final class JkMvn implements Runnable {
 	commands("help:effective-pom", "-Doutput="+ pom.getAbsolutePath()).run();
 	final EffectivePom effectivePom = EffectivePom.of(pom);
 	pom.delete();
-	final CodeWriter codeWriter = new CodeWriter(effectivePom);
-	return codeWriter.wholeClass(packageName, className);
+	return effectivePom.jerkarSourceCode();
     }
 
     /**

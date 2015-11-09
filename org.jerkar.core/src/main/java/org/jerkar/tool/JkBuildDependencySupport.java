@@ -1,7 +1,6 @@
 package org.jerkar.tool;
 
 import java.io.File;
-import java.net.URL;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.JkDependencies;
@@ -21,6 +20,7 @@ import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
 import org.jerkar.api.utils.JkUtilsAssert;
 
 /**
@@ -232,17 +232,13 @@ public class JkBuildDependencySupport extends JkBuild {
     }
 
     @Override
-    protected JkScaffolder scaffolder() {
-	final URL template = JkBuildDependencySupport.class.getResource("DepSupportBuild.java_sample");
-	return JkScaffolder.of(this, template).withExtraAction(new Runnable() {
-
-	    @Override
-	    public void run() {
-		final File spec = file(JkConstants.BUILD_DEF_DIR);
-		final String packageName = moduleId().group().replace('.', '/');
-		new File(spec, packageName).mkdirs();
-	    }
-	}).withExtendedClass(JkBuildDependencySupport.class);
+    protected String scaffoldedBuildClassCode() {
+	final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
+	codeWriter.extendedClass = "JkBuildDependencySupport";
+	codeWriter.dependencies = JkDependencies.builder().build();
+	codeWriter.imports.clear();
+	codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsFoJkDependencyBuildSupport());
+	return codeWriter.wholeClass() + codeWriter.endClass();
     }
 
     public static final class JkOptionRepos {

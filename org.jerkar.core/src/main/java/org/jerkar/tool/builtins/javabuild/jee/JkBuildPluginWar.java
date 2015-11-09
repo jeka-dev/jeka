@@ -1,13 +1,10 @@
 package org.jerkar.tool.builtins.javabuild.jee;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkScaffolder;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
 import org.jerkar.tool.builtins.javabuild.JkJavaPacker;
@@ -39,20 +36,7 @@ public class JkBuildPluginWar extends JkJavaBuildPlugin {
 	return build.file(webappSrc);
     }
 
-    @Override
-    protected JkScaffolder alterScaffold(JkScaffolder jkScaffolder) {
-	final Runnable runnable = new Runnable() {
 
-	    @Override
-	    public void run() {
-		scaffold();
-	    }
-	};
-	return jkScaffolder.withExtraAction(runnable).withImports(JkJavaBuildPlugin.class, JkBuildPluginWar.class)
-		.withInit("JkBuildPluginWar warPlugin = new JkBuildPluginWar();")
-		.withInit("this.plugins.addActivated(warPlugin);")
-		.withDependencies("on(\"javax.servlet:servlet-api:2.5\").scope(PROVIDED)");
-    }
 
     @Override
     protected JkJavaPacker alterPacker(final JkJavaPacker packer) {
@@ -75,21 +59,5 @@ public class JkBuildPluginWar extends JkJavaBuildPlugin {
 
     }
 
-    private void scaffold() {
-	final File webInf = this.build.file(webappSrc + "/WEB-INF");
-	webInf.mkdirs();
-	try {
-	    final File webxml = new File(webInf, "web.xml");
-	    if (!webxml.exists()) {
-		JkLog.info("Create web.xml");
-		webxml.createNewFile();
-		JkUtilsFile.writeString(webxml,
-			"<web-app xmlns=\"http://java.sun.com/xml/ns/javaee\" version=\"2.5\">\n", true);
-		JkUtilsFile.writeString(webxml, "</web-app>", true);
-	    }
-	} catch (final IOException e) {
-	    throw new RuntimeException(e);
-	}
-    }
 
 }

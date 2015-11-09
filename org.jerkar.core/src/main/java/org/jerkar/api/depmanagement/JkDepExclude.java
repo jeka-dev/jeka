@@ -1,5 +1,6 @@
 package org.jerkar.api.depmanagement;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 
@@ -7,11 +8,13 @@ import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
  * Information about excluding artifacts or whole modules.
- * 
- * 
+ *
+ *
  * @author Jerome Angibaud
  */
-public final class JkDepExclude {
+public final class JkDepExclude implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final JkModuleId moduleId;
 

@@ -15,6 +15,7 @@ import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsTime;
@@ -22,7 +23,7 @@ import org.jerkar.api.utils.JkUtilsTime;
 /**
  * Base class defining commons tasks and utilities necessary for building any
  * kind of project, regardless involved technologies.
- * 
+ *
  * @author Jerome Angibaud
  */
 public class JkBuild {
@@ -36,9 +37,9 @@ public class JkBuild {
     protected final JkBuildPlugins plugins = new JkBuildPlugins(this);
 
     @JkDoc({ "Mention if you want to add extra lib in your build path.",
-	    "It can be absolute or relative to the project base dir.",
-	    "These libs will be added to the build path to compile and run Jerkar build class.",
-	    "Example : -extraBuildPath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
+	"It can be absolute or relative to the project base dir.",
+	"These libs will be added to the build path to compile and run Jerkar build class.",
+    "Example : -extraBuildPath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
     protected String extraBuildPath;
 
     private JkDependencyResolver buildDefDependencyResolver;
@@ -91,16 +92,7 @@ public class JkBuild {
 	return (Date) buildTime.clone();
     }
 
-    protected JkScaffolder scaffolder() {
-	return JkScaffolder.of(this).withExtraAction(new Runnable() {
 
-	    @Override
-	    public void run() {
-		final File spec = file(JkConstants.BUILD_DEF_DIR);
-		spec.mkdirs();
-	    }
-	}).withExtendedClass(JkBuild.class);
-    }
 
     protected final JkPath toPath(String pathAsString) {
 	if (pathAsString == null) {
@@ -207,10 +199,17 @@ public class JkBuild {
     // ------------ Jerkar methods ------------
 
     @JkDoc("Create the project structure")
-    public final void scaffold() {
-	JkScaffolder jkScaffolder = this.scaffolder();
-	jkScaffolder = JkBuildPlugin.enhanceScafforld(this.plugins.getActives(), jkScaffolder);
-	jkScaffolder.process();
+    public void scaffold() {
+	final File def = file(JkConstants.BUILD_DEF_DIR);
+	def.mkdirs();
+	final File buildClass = new File(def, "Build.java");
+	JkUtilsFile.writeString(buildClass, scaffoldedBuildClassCode(), false);
+    }
+
+    protected String scaffoldedBuildClassCode() {
+	final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
+	codeWriter.extendedClass = "JkBuild";
+	return codeWriter.wholeClass() + codeWriter.endClass();
     }
 
     @JkDoc("Clean the output directory.")
@@ -242,7 +241,7 @@ public class JkBuild {
 
     /**
      * Invokes the specified method in this build but from the w
-     * 
+     *
      * @param jkModelMethod
      * @param from
      */

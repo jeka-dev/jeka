@@ -10,30 +10,15 @@ import org.jerkar.api.depmanagement.JkVersionProvider;
 
 class VersionConstanter {
 
-    private final Map<String, String> groupToVersionConstant;
+    private final Map<String, String> groupToVersion;
 
-    private final JkVersionProvider versionProvider;
-
-    private VersionConstanter(Map<String, String> groupToConstant, JkVersionProvider versionProvider) {
+    private VersionConstanter(Map<String, String> groupToVersion) {
 	super();
-	this.groupToVersionConstant = groupToConstant;
-	this.versionProvider = versionProvider;
+	this.groupToVersion = groupToVersion;
     }
 
-    public String versionLiteral(JkModuleId moduleId) {
-	final String constant = groupToVersionConstant.get(moduleId.group());
-	if (constant == null) {
-	    return "\""+versionProvider.versionOf(moduleId).name()+"\"";
-	}
-	return constantName(moduleId.group());
-    }
-
-    public Map<String, String> constantNameValue() {
-	final Map<String, String> result = new HashMap<String, String>();
-	for (final String group : groupToVersionConstant.keySet()) {
-	    result.put(constantName(group), groupToVersionConstant.get(group));
-	}
-	return result;
+    public Map<String, String> groupToVersion() {
+	return groupToVersion;
     }
 
     public static VersionConstanter of(JkVersionProvider jkVersionProvider) {
@@ -57,12 +42,8 @@ class VersionConstanter {
 		electedGroupToVersion.put(group, registeredVersion);
 	    }
 	}
-	return new VersionConstanter(electedGroupToVersion, jkVersionProvider);
+	return new VersionConstanter(electedGroupToVersion);
 
-    }
-
-    private static String constantName(String group) {
-	return group.toUpperCase().replace('.', '_') + "_VERSION";
     }
 
 }
