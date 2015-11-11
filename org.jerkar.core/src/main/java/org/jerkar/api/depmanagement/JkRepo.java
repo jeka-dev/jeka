@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
@@ -45,6 +46,11 @@ public abstract class JkRepo implements Serializable {
 	return new JkMavenRepository(toUrl(url), null, null, null);
     }
 
+    public static JkMavenRepository maven(URL url) {
+	return new JkMavenRepository(url, null, null, null);
+    }
+
+
     public static JkMavenRepository springIO() {
 	return maven("https://repo.spring.io/repo/");
     }
@@ -57,6 +63,15 @@ public abstract class JkRepo implements Serializable {
 	return maven(JkMavenRepository.MAVEN_CENTRAL_URL.toString());
     }
 
+    /**
+     * A maven repository located in Jekkar user Home. You can use it to "deploy" locally.
+     * @return
+     */
+    public static JkRepo mavenLocal() {
+	final File file = new File(JkLocator.jerkarUserHome(), "maven-publish-dir");
+	return JkRepo.maven(file);
+    }
+
     public static JkRepo mavenOssrhPushSnapshotPullAll(String jiraId, String jiraPassword) {
 	return maven(JkMavenRepository.MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL.toString())
 		.withCredential(jiraId, jiraPassword).withRealm("Sonatype Nexus Repository Manager");
@@ -66,6 +81,11 @@ public abstract class JkRepo implements Serializable {
 	return maven(JkMavenRepository.MAVEN_OSSRH_PUSH_RELEASE.toString()).withCredential(jiraId, jiraPassword)
 		.withRealm("Sonatype Nexus Repository Manager");
     }
+
+    public static JkRepo mavenOssrhSnapshotDownload() {
+	return maven(JkMavenRepository.MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL);
+    }
+
 
     public static JkRepo mavenJCenter() {
 	return maven(JkMavenRepository.JCENTERL_URL.toString());

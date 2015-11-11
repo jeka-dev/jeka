@@ -43,6 +43,15 @@ public final class JkModuleDependency extends JkDependency {
     }
 
     /**
+     * Creates a {@link JkModuleDependency} from its moduleId and
+     * <code>JkVersionrange</code>.
+     */
+    @SuppressWarnings("unchecked")
+    public static JkModuleDependency of(JkModuleId moduleId, String versionRange) {
+	return new JkModuleDependency(moduleId, JkVersionRange.of(versionRange), null, true, null, Collections.EMPTY_LIST);
+    }
+
+    /**
      * Creates a {@link JkModuleDependency} from its group, name and version
      * range. The version range can be any string accepted by
      * {@link JkVersionRange#of(String)}.

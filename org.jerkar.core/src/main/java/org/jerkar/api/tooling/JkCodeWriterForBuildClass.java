@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.jerkar.api.depmanagement.JkDepExclude;
 import org.jerkar.api.depmanagement.JkDependencies;
@@ -147,10 +149,12 @@ public class JkCodeWriterForBuildClass {
     private static class Writer {
 
 	public String publicStringFields(Map<String, String> nameToValue) {
+	    final SortedMap<String, String> sortedMap = new TreeMap<String, String>();
+	    sortedMap.putAll(nameToValue);
 	    final StringBuilder builder = new StringBuilder();
-	    for (final String constantName : nameToValue.keySet()) {
+	    for (final String constantName : sortedMap.keySet()) {
 		builder.append("    public String ").append(constantName)
-		.append(" = \"").append(nameToValue.get(constantName))
+		.append(" = \"").append(sortedMap.get(constantName))
 		.append("\";\n\n");
 	    }
 	    return builder.toString();

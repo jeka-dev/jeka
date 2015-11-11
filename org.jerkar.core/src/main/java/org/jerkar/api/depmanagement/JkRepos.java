@@ -76,10 +76,11 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
 	return new JkRepos(list);
     }
 
-    public JkRepos andMaven(String... urls) {
-	final List<JkRepo> list = new LinkedList<JkRepo>(this.repos);
-	list.addAll(maven(urls).repos);
-	return new JkRepos(list);
+    public JkRepos andIf(boolean condition, JkRepo ...repos) {
+	if (condition) {
+	    return and(repos);
+	}
+	return this;
     }
 
     public JkRepos andIvy(File... files) {
@@ -130,7 +131,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
 
     /**
      * Short hand for {@link #get(JkModuleDependency, boolean)}
-     * 
+     *
      * @param moduleDescription
      *            String description as for
      *            {@link JkModuleDependency#of(String)}

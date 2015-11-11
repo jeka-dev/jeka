@@ -18,7 +18,6 @@ import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.depmanagement.JkVersionProvider;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPath;
-import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
 import org.jerkar.api.utils.JkUtilsAssert;
@@ -103,10 +102,10 @@ public class JkBuildDependencySupport extends JkBuild {
 		JkLog.info("Credential specifified for publish repo : use OSSRH repos.");
 		return JkPublishRepos.ossrh(repo.publish.username, repo.publish.password, pgp());
 	    } else {
-		final File file = new File(JkLocator.jerkarUserHome(), "maven-publish-dir");
+		final JkRepo repo = JkRepo.mavenLocal();
 		JkLog.info("No credential specifified for publish repo : use local filesystem repo."
-			+ file.getAbsolutePath());
-		return JkPublishRepos.maven(file);
+			+ repo.url());
+		return JkPublishRepos.of(repo.asPublishRepo());
 	    }
 	}
 

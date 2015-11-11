@@ -2,9 +2,11 @@ package org.jerkar.api.depmanagement;
 
 import java.io.Serializable;
 
+import org.jerkar.api.java.JkManifest;
+
 /**
  * Identifies a given module in a given version
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkVersionedModule implements Serializable {
@@ -106,6 +108,15 @@ public final class JkVersionedModule implements Serializable {
     @Override
     public String toString() {
 	return moduleId + ":" + version;
+    }
+
+    /**
+     * Fills the manifest with <code>implementation</code> info.
+     */
+    public void populateManifest(JkManifest manifest) {
+	manifest.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId().name())
+	.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version().name())
+	.addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR_ID, moduleId().group());
     }
 
 }

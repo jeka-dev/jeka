@@ -36,7 +36,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * Utility class for dealing with Inputs/Outputs.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkUtilsIO {
@@ -73,6 +73,20 @@ public final class JkUtilsIO {
 	}
 	return result;
     }
+
+    @SuppressWarnings("unchecked")
+    public static ZipEntry zipEntryIgnoreCase(ZipFile zipFile, String entryName) {
+	final Enumeration<ZipEntry> en = (Enumeration<ZipEntry>) zipFile.entries();
+	while (en.hasMoreElements()) {
+	    final ZipEntry entry = en.nextElement();
+	    if (entry.getName().equalsIgnoreCase(entryName)) {
+		return entry;
+	    }
+	}
+	return null;
+    }
+
+
 
     /**
      * Closes the specified closeable object, ignoring any exceptions.
@@ -272,15 +286,15 @@ public final class JkUtilsIO {
 
     /**
      * Reads the specified zip stream and position it at the beginning of the
-     * specified entry.
+     * specified entry. The specified entry is case insensitive.
      */
-    public static ZipInputStream readZipEntry(InputStream inputStream, String entryName) {
+    public static ZipInputStream readZipEntry(InputStream inputStream, String caseInsensitiveEntryNAme) {
 	final ZipInputStream zipInputStream = new ZipInputStream(inputStream);
 	try {
 	    ZipEntry entry = zipInputStream.getNextEntry();
 	    boolean found = false;
 	    while (entry != null && !found) {
-		if (entry.getName().equals(entryName)) {
+		if (entry.getName().equalsIgnoreCase(caseInsensitiveEntryNAme)) {
 		    found = true;
 		} else {
 		    entry = zipInputStream.getNextEntry();
@@ -288,11 +302,21 @@ public final class JkUtilsIO {
 	    }
 	    if (!found) {
 		inputStream.close();
-		throw new IllegalArgumentException("Zip " + inputStream + " has no entry " + entryName);
+		throw new IllegalArgumentException("Zip " + inputStream + " has no entry "
+			+ caseInsensitiveEntryNAme);
 	    }
 	    return zipInputStream;
 	} catch (final Exception e) {
 	    throw JkUtilsThrowable.unchecked(e);
+	}
+    }
+
+    public static ZipInputStream readZipEntry(File zipFile, String caseInsensitiveEntryName) {
+	final FileInputStream fileInputStream = inputStream(zipFile);
+	try {
+	    return readZipEntry(fileInputStream, caseInsensitiveEntryName);
+	} finally {
+	    closeQuietly(fileInputStream);
 	}
     }
 

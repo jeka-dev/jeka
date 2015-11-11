@@ -106,12 +106,15 @@ final class IvyPublisherForMaven {
 	    mavenMetadata.updateSnapshot();
 	    push(mavenMetadata, path);
 	    final int buildNumber = mavenMetadata.currentBuildNumber();
+	    final String timestamp = JkUtilsTime.nowUtc("yyyyMMdd.HHmmss");
+	    final String versionUniqueSnapshot = versionForUniqueSnapshot(versionedModule.version().name(), timestamp, buildNumber);
+
 	    for (final File file : mavenPublication.mainArtifactFiles()) {
-		publishUniqueSnapshot(versionedModule, null, file, buildNumber);
+		publishUniqueSnapshot(versionedModule, null, file, versionUniqueSnapshot);
 	    }
 	    for (final JkClassifiedArtifact classifiedArtifact : mavenPublication.classifiedArtifacts()) {
 		publishUniqueSnapshot(versionedModule, classifiedArtifact.classifier(), classifiedArtifact.file(),
-			buildNumber);
+			versionUniqueSnapshot);
 	    }
 	    return mavenMetadata;
 	} else {
@@ -190,12 +193,10 @@ final class IvyPublisherForMaven {
     }
 
     private void publishUniqueSnapshot(JkVersionedModule versionedModule, String classifier, File source,
-	    int buildNumber) {
+	    String versionForUniqueSpshot) {
 
 	final String extension = JkUtilsString.substringAfterLast(source.getName(), ".");
-	final String timestamp = JkUtilsTime.now("yyyyMMdd.HHmmss");
-	final String version = versionForUniqueSnapshot(versionedModule.version().name(), timestamp, buildNumber);
-	final String dest = destination(versionedModule, extension, classifier, version);
+	final String dest = destination(versionedModule, extension, classifier, versionForUniqueSpshot);
 	putAll(source, dest, false);
 	final String path = snapshotMetadataPath(versionedModule);
 	MavenMetadata mavenMetadata = loadMavenMedatata(path);
@@ -235,7 +236,7 @@ final class IvyPublisherForMaven {
     private static String versionForUniqueSnapshot(String version, String timestamp, int buildNumber) {
 	return version.endsWith("-SNAPSHOT")
 		? JkUtilsString.substringBeforeLast(version, "-SNAPSHOT") + "-" + timestamp + "-" + buildNumber
-		: version;
+			: version;
     }
 
     private void updateMetadata(ModuleId moduleId, String version) {

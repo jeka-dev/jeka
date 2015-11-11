@@ -90,6 +90,18 @@ This will execute ´doDefault´ method of the default build class of your projec
 Just launch the `org.jerkar.tool.Main` class in your IDE with the root of your project as working directory. 
 You can also write a `main` method in build class and execute it. 
 
+## Migrate a Maven projet to jerkar.
+
+Prerequisites are :
+
+* Maven is installed on the machine running Jerkar.
+* The project build wiyh maven (at least, `mvn help:effective-pom` should success).
+
+Steps :
+
+1. Execute `jerkar scaffold` at the root folder of the project you want to migrate  (Let's call it [PROJECT DIR]). It generates a build class at _[PROJECT DIR]/buid/def/Build.java_
+2. If you are an eclipse user, execute `jerkar eclipse#generateFiles`. It generates _.project_ and _.classpath_ so the project is now usable in Eclipse.
+
 ## Play with 'samples' project
 
 <p class="alert alert-warning">
@@ -537,8 +549,10 @@ If you want to play with other build classes available in the _samples_ project 
 
 ## Play with 'samples-dependee' projectt
 
-This project illustrates how to handle multi-project builds. You can get it at [Jerkar Git Repository](https://github.com/jerkar/jerkar.git )..This project depends on **org.jerkar.samples** project see previously..
-This project contain two build classes :
+This project illustrates how to handle multi-project builds. You can get it at [Jerkar Git Repository](https://github.com/jerkar/jerkar.git )..
+This project depends on **org.jerkar.samples** project see previously..
+
+This project contain two build classes :
 
 * [`NormalJarBuild`](https://github.com/jerkar/jerkar/blob/master/org.jerkar.samples-dependee/build/def/NormalJarBuild.java) 
 * [`FatJarBuild`](https://github.com/jerkar/jerkar/blob/master/org.jerkar.samples-dependee/build/def/FatJarBuild.java) 

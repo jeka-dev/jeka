@@ -19,10 +19,10 @@ import org.jerkar.api.utils.JkUtilsIterable;
  * resolve. <br/>
  * Each instance of <code>JkDependencyResolver</code> keep in cache resolution
  * setting so a resolution o a given scope is never computed twice.
- * 
+ *
  * The result of the resolution depends on the parameters you have set on it.
  * See {@link JkResolutionParameters}
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkDependencyResolver {
@@ -154,7 +154,7 @@ public final class JkDependencyResolver {
      * Gets the path containing all the resolved dependencies as artifact files
      * for the specified scopes.
      * <p/>
-     * 
+     *
      * If no scope is specified then return all file dependencies and the
      * dependencies specified. About the managed dependency the same rule than
      * for {@link #resolve(JkScope...)} apply.
@@ -240,6 +240,13 @@ public final class JkDependencyResolver {
      */
     public JkDependencyResolver withParams(JkResolutionParameters params) {
 	return new JkDependencyResolver(this.internalResolver, this.dependencies, this.module, params);
+    }
+
+    /**
+     * Returns a dependency resolver identical to this one but with the specified dependencies.
+     */
+    public JkDependencyResolver withDependencies(JkDependencies dependencies) {
+	return new JkDependencyResolver(this.internalResolver, dependencies, module, parameters);
     }
 
     @Override

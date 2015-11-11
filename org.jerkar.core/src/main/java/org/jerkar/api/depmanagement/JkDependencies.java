@@ -33,6 +33,17 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	return new JkDependencies(Arrays.asList(scopedDependencies), Collections.EMPTY_SET);
     }
 
+    /**
+     * Creates a {@link JkDependencies} on the specified module with unspecified version (expected to be resolved
+     * with a version provider).
+     */
+    public static JkDependencies on(JkModuleId moduleId, JkScope...scopes) {
+	final JkModuleDependency moduleDependency = JkModuleDependency.of(moduleId, JkVersionRange.UNSPECIFIED);
+	final JkScopedDependency scopedependency = JkScopedDependency.of(moduleDependency, scopes);
+	return on(scopedependency);
+    }
+
+
     @SuppressWarnings("unchecked")
     public static JkDependencies on(JkScope scope, JkDependency... dependencies) {
 	final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();
@@ -512,6 +523,10 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
 	public JkFluentModuleDepBuilder on(JkModuleId module, JkVersionRange version) {
 	    return on(module, version, true);
+	}
+
+	public JkFluentModuleDepBuilder on(JkModuleId module) {
+	    return on(module, JkVersionRange.UNSPECIFIED);
 	}
 
 	public JkFluentModuleDepBuilder on(JkModuleId module, String version) {
