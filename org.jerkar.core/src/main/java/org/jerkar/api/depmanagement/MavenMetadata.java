@@ -25,17 +25,19 @@ import org.w3c.dom.NodeList;
  * Object representation of the maven-metadata.xml file found in Maven
  * repositories for describing available timestamped snapshot available for a
  * given version. This is a not used for Maven2 repositories.
- * 
+ *
  * @author Jerome Angibaud
  */
 final class MavenMetadata {
 
-    static MavenMetadata of(JkVersionedModule versionedModule) {
+    static MavenMetadata of(JkVersionedModule versionedModule, String timestamp) {
 	final MavenMetadata metadata = new MavenMetadata();
 	metadata.groupId = versionedModule.moduleId().group();
 	metadata.artifactId = versionedModule.moduleId().name();
 	metadata.modelVersion = "1.1.0";
 	metadata.version = versionedModule.version().name();
+	metadata.versioning = new Versioning();
+	metadata.versioning.snapshot = new Snapshot(timestamp, 0);
 	return metadata;
     }
 
@@ -100,7 +102,12 @@ final class MavenMetadata {
 	return this.versioning.snapshot;
     }
 
-    public void addSnapshotVersion(String extension, String classifier) {
+    void setFirstCurrentSnapshot(String timestamp) {
+	final Snapshot snapshot = new Snapshot(timestamp, 1);
+	this.versioning.snapshot = snapshot;
+    }
+
+    void addSnapshotVersion(String extension, String classifier) {
 	final org.jerkar.api.depmanagement.MavenMetadata.Versioning.SnapshotVersion snapshotVersion = new org.jerkar.api.depmanagement.MavenMetadata.Versioning.SnapshotVersion();
 	snapshotVersion.classifier = classifier;
 	snapshotVersion.extension = extension;
@@ -126,7 +133,7 @@ final class MavenMetadata {
 	    this.versioning.versions.add(version);
 	    Collections.sort(this.versioning.versions);
 	    versioning.latest = version; // 'latest' field is intended only for
-					 // maven-plugins
+	    // maven-plugins
 	    if (!version.endsWith("-SNAPSHOT")) {
 		this.versioning.release = version;
 	    }
