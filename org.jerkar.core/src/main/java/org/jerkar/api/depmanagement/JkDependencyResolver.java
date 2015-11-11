@@ -175,7 +175,7 @@ public final class JkDependencyResolver {
 
 	// Add local, non-managed dependencies
 	if (scope == null) {
-	    result.addAll(this.dependencies.allLocalFileDependencies().entries());
+	    result.addAll(this.dependencies.localFileDependencies().entries());
 	} else {
 	    result.addAll(this.dependencies.localFileDependencies(scope).entries());
 	}

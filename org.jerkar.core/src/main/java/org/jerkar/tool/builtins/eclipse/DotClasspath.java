@@ -359,7 +359,7 @@ final class DotClasspath {
 
 	// Write entries for file dependencies
 	final List<File> fileDeps = build.buildDefDependencyResolver().dependenciesToResolve()
-		.fileSystemDependencies(JkScope.BUILD).entries();
+		.fileSystemDependencies().entries();
 	writeFileEntries(fileDeps, writer);
 
 	// Write entries for managed dependencies
@@ -457,7 +457,7 @@ final class DotClasspath {
 	    writeExternalModuleEntries(build.dependencyResolver(), writer, resolveResult, includeJavadoc);
 	}
 	if (build.buildDefDependencyResolver().dependenciesToResolve().containsModules()) {
-	    final JkResolveResult buildresolve = build.buildDefDependencyResolver().resolve(JkScope.BUILD);
+	    final JkResolveResult buildresolve = build.buildDefDependencyResolver().resolve();
 	    writeExternalModuleEntries(build.buildDefDependencyResolver(), writer, buildresolve, includeJavadoc);
 	}
 

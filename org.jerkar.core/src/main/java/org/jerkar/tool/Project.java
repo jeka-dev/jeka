@@ -13,7 +13,6 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.java.JkClassLoader;
@@ -85,8 +84,8 @@ final class Project {
 	yetCompiledProjects.add(this.projectBaseDir);
 	preCompile();
 	JkLog.startHeaded("Making build classes for project " + this.projectBaseDir.getName());
-	final JkDependencyResolver scriptDepResolver = getBuildDefDependencyResolver();
-	final JkPath buildPath = scriptDepResolver.get(JkScope.BUILD);
+	final JkDependencyResolver buildClassDependencyResolver = getBuildDefDependencyResolver();
+	final JkPath buildPath = buildClassDependencyResolver.get();
 	path.addAll(buildPath.entries());
 	path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
 	this.compileBuild(JkPath.of(path));
@@ -111,7 +110,7 @@ final class Project {
     /**
      * Pre-compile and compile build classes (if needed) then execute the build
      * of this project.
-     * 
+     *
      * @param buildClassNameHint
      *            The full or simple class name of the build class to execute.
      *            It can be <code>null</code> or empty.
@@ -137,17 +136,17 @@ final class Project {
 
     private JkDependencies buildDefDependencies() {
 	final boolean devMode = JkLocator.jerkarJarFile().isDirectory(); // If
-									 // true,
-									 // we
-									 // assume
-									 // Jerkar
-									 // is
-									 // produced
-									 // by
-									 // IDE
-									 // (development
-									 // mode)
-	return JkDependencies.builder().usingDefaultScopes(JkScope.BUILD).on(buildDependencies)
+	// true,
+	// we
+	// assume
+	// Jerkar
+	// is
+	// produced
+	// by
+	// IDE
+	// (development
+	// mode)
+	return JkDependencies.builder().on(buildDependencies)
 		.onFiles(localBuildPath()).onFilesIf(devMode, JkClasspath.current()).onFilesIf(!devMode, jerkarLibs())
 		.build();
     }

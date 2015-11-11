@@ -369,8 +369,10 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     public JkPath localFileDependencies(JkScope... scopes) {
 	final LinkedHashSet<File> set = new LinkedHashSet<File>();
 	for (final JkScopedDependency scopedDependency : this.dependencies) {
-	    if (scopedDependency.isInvolvedInAnyOf(scopes)
-		    && scopedDependency.dependency() instanceof JkFileDependency) {
+	    if (! (scopedDependency.dependency() instanceof JkFileDependency)) {
+		continue;
+	    }
+	    if (scopes.length == 0 ||scopedDependency.isInvolvedInAnyOf(scopes) ) {
 		final JkFileDependency fileDeps = (JkFileDependency) scopedDependency.dependency();
 		set.addAll(fileDeps.files());
 	    }
@@ -380,32 +382,23 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
     /**
      * Returns all files declared as {@link JkFileSystemDependency} for any of
-     * the specified scopes.
+     * the specified scopes. If no scopes are specified then it returns all
+     * file system dependencies.
      */
     public JkPath fileSystemDependencies(JkScope... scopes) {
 	final LinkedHashSet<File> set = new LinkedHashSet<File>();
 	for (final JkScopedDependency scopedDependency : this.dependencies) {
-	    if (scopedDependency.isInvolvedInAnyOf(scopes)
-		    && scopedDependency.dependency() instanceof JkFileSystemDependency) {
-		final JkFileDependency fileDeps = (JkFileDependency) scopedDependency.dependency();
+	    if (! (scopedDependency.dependency() instanceof JkFileSystemDependency)) {
+		continue;
+	    }
+	    if (scopes.length == 0 || scopedDependency.isInvolvedInAnyOf(scopes)) {
+		final JkFileSystemDependency fileDeps = (JkFileSystemDependency) scopedDependency.dependency();
 		set.addAll(fileDeps.files());
 	    }
 	}
 	return JkPath.of(set);
     }
 
-    /**
-     * Returns all files declared as {@link JkFileSystemDependency} whatever its
-     * scopes.
-     */
-    public JkPath allLocalFileDependencies() {
-	final LinkedHashSet<File> set = new LinkedHashSet<File>();
-	for (final JkScopedDependency scopedDependency : this.dependencies) {
-	    final JkFileDependency fileDeps = (JkFileDependency) scopedDependency.dependency();
-	    set.addAll(fileDeps.files());
-	}
-	return JkPath.of(set);
-    }
 
     public static Builder builder() {
 	return new Builder(new LinkedList<JkScopedDependency>());

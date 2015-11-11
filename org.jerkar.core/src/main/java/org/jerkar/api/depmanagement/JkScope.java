@@ -17,20 +17,14 @@ import org.jerkar.api.utils.JkUtilsString;
  * diverge. For example, <code>Junit</code> library may only be necessary for
  * testing, so we can declare that
  * <code>Junit</scope> is only necessary for scope <code>TEST</code>.<br/>
- * 
+ *
  * Similar to Maven <code>scope</code> or Ivy <code>configuration</code>.
- * 
+ *
  * @author Jerome Angibaud
  */
 public class JkScope implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Scope for dependencies needed to compile and run the Java build scripts
-     */
-    public static final JkScope BUILD = JkScope.of("build")
-	    .descr("Dependencies needed to compile and run the Java build scripts");
 
     /**
      * Creates a new {@link JkScope} passing its name.
@@ -179,7 +173,7 @@ public class JkScope implements Serializable {
      * <code>scopes</scope> directly from a {@link JkScope} .<br/>
      * Use the {@link #descr(String)} method last as it returns a
      * {@link JkScope}.
-     * 
+     *
      * @author Jerome Angibaud
      */
     public static class JkOptionableScope extends JkScope {

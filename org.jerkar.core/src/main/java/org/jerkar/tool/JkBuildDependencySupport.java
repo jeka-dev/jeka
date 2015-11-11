@@ -139,10 +139,14 @@ public class JkBuildDependencySupport extends JkBuild {
      * dependencies, you must override this method.
      */
     private JkDependencies effectiveDependencies() {
-	final JkDependencies deps = dependencies()
+	JkDependencies deps = dependencies()
 		.withDefaultScope(this.defaultScope())
 		.resolvedWith(versionProvider())
 		.withExclusions(dependencyExclusions());
+	final JkScope defaultcope = this.defaultScope();
+	if (defaultcope != null) {
+	    deps = deps.withDefaultScope(defaultcope);
+	}
 	return JkBuildPlugin.applyDependencies(plugins.getActives(),
 		implicitDependencies().and(deps));
     }
@@ -170,10 +174,11 @@ public class JkBuildDependencySupport extends JkBuild {
 
     /**
      * The scope that will be used when a dependency has been declared without
-     * scope.
+     * scope. It can be returns <code>null</code>, meaning that when no scope is mentioned
+     * then the dependency is always available.
      */
     protected JkScope defaultScope() {
-	return JkScope.BUILD;
+	return null;
     }
 
     /**
