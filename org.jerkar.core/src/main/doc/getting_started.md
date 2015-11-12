@@ -90,6 +90,15 @@ This will execute ´doDefault´ method of the default build class of your projec
 Just launch the `org.jerkar.tool.Main` class in your IDE with the root of your project as working directory. 
 You can also write a `main` method in build class and execute it. 
 
+```
+public static void main(String[] args) {
+		
+	 // This main method will run the 'doDefault' method of 'MyBuild' class. 		
+    JkInit.instanceOf(MyBuild.class, args).doDefault(); 
+}
+
+```
+
 ## Migrate a Maven projet to jerkar.
 
 Prerequisites are :
