@@ -463,7 +463,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	    return new JkFluentScopeableBuilder(this);
 	}
 
-	public JkFluentModuleDepBuilder onExternalModule(JkModuleDependency dependency) {
+	public JkFluentModuleDepBuilder onModule(JkModuleDependency dependency) {
 	    final JkScopedDependency scopedDependency;
 	    if (defaultScopes != null) {
 		scopedDependency = JkScopedDependency.of(dependency, defaultScopes);
@@ -527,7 +527,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	}
 
 	public JkFluentModuleDepBuilder on(JkModuleId module, JkVersionRange version, boolean transitive) {
-	    return onExternalModule(JkModuleDependency.of(module, version).transitive(transitive));
+	    return onModule(JkModuleDependency.of(module, version).transitive(transitive));
 	}
 
 	public JkFluentModuleDepBuilder on(String organisation, String name, String version) {
@@ -539,15 +539,15 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	}
 
 	public JkFluentModuleDepBuilder on(String organisation, String name, String version, boolean transitive) {
-	    return onExternalModule(JkModuleDependency.of(organisation, name, version).transitive(transitive));
+	    return onModule(JkModuleDependency.of(organisation, name, version).transitive(transitive));
 	}
 
 	public JkFluentModuleDepBuilder on(String description) {
-	    return onExternalModule(JkModuleDependency.of(description));
+	    return onModule(JkModuleDependency.of(description));
 	}
 
 	public JkFluentModuleDepBuilder on(String description, boolean transitive) {
-	    return onExternalModule(JkModuleDependency.of(description).transitive(transitive));
+	    return onModule(JkModuleDependency.of(description).transitive(transitive));
 	}
 
 	public Builder on(Iterable<JkScopedDependency> dependencies) {

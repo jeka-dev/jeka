@@ -38,6 +38,7 @@ class JUnit4TestExecutor {
 	    JunitReportDetail reportDetail, File reportDir) {
 	final JUnitCore jUnitCore = new JUnitCore();
 
+
 	if (reportDetail.equals(JunitReportDetail.FULL)) {
 	    jUnitCore.addListener(new JUnitReportListener(reportDir));
 	}

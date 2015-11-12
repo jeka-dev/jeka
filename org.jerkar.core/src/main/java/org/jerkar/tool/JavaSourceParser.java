@@ -91,7 +91,7 @@ final class JavaSourceParser {
 	final JkDependencies.Builder builder = JkDependencies.builder();
 	for (final String dependency : deps) {
 	    if (JkModuleDependency.isModuleDependencyDescription(dependency)) {
-		builder.on(JkModuleDependency.of(dependency));
+		builder.onModule(JkModuleDependency.of(dependency));
 	    } else {
 		if (dependency.contains(":")) {
 		    throw new JkException("Dependency " + dependency
