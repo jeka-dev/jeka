@@ -47,10 +47,10 @@ public class FatJarBuild extends JkJavaBuild {
 		// When fetching the dependencies, if the fat jar file in the 'samples' project is not present,
 		// then a 'sampleBuild' is launched in order to produce it.
 		// The 'sampleBuild' is launched with the 'doDefault' method unless you specify another ones
-		.on(COMPILE, sampleBuild.asDependency(sampleBuild.packer().fatJarFile()))
+		.of(COMPILE, sampleBuild.asDependency(sampleBuild.packer().fatJarFile()))
 		
 		// Extra dependency
-		.on(RUNTIME, "ch.qos.logback:logback-classic:1.+");
+		.and(RUNTIME, "ch.qos.logback:logback-classic:1.+");
     }
 
 }

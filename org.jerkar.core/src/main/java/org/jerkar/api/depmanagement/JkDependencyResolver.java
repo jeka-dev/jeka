@@ -75,7 +75,7 @@ public final class JkDependencyResolver {
 	final InternalDepResolver resolver = IvyClassloader.CLASSLOADER.transClassloaderProxy(InternalDepResolver.class,
 		IVYRESOLVER_CLASS_NAME, "of", repos);
 	final JkScopeMapping scopeMapping = JkScopeMapping.of(scope).to("default");
-	final JkResolveResult result = resolver.resolveAnonymous(JkDependencies.on(scope, dep), scope,
+	final JkResolveResult result = resolver.resolveAnonymous(JkDependencies.of(scope, dep), scope,
 		JkResolutionParameters.of().withDefault(scopeMapping));
 	return JkPath.of(result.localFiles());
     }

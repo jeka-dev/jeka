@@ -57,7 +57,7 @@ final class Project {
 	super();
 	this.projectBaseDir = JkUtilsFile.canonicalFile(baseDir);
 	buildRepos = repos();
-	this.buildDependencies = JkDependencies.on();
+	this.buildDependencies = JkDependencies.of();
 	this.resolver = new BuildResolver(baseDir);
     }
 

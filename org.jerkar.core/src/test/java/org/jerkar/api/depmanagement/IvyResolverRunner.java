@@ -8,6 +8,9 @@ import java.util.Set;
 
 import org.jerkar.api.system.JkLog;
 
+/**
+ * @formatter:off
+ */
 public class IvyResolverRunner {
 
     static final JkRepos REPOS = JkRepos.maven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured/");
@@ -26,12 +29,10 @@ public class IvyResolverRunner {
     public static void spring() {
 	final JkRepos repos = REPOS;
 	// JkRepos repos = JkRepos.mavenCentral();
-	final JkDependencies deps = JkDependencies.builder().on("org.springframework", "spring-jdbc", "3.0.+") // This
-													       // works
-													       // on
-													       // nexus
-													       // repo
-		.mapScope(COMPILE).to("compile", "default").and(JkScopedDependencyTest.PROVIDED).to("provided")
+	final JkDependencies deps = JkDependencies.builder()
+		.on("org.springframework", "spring-jdbc", "3.0.+")
+		.mapScope(COMPILE).to("compile", "default")
+		.and(JkScopedDependencyTest.PROVIDED).to("provided")
 		.excludeGlobally("org.springframework", "spring-core").build();
 	final JkResolutionParameters params = JkResolutionParameters.of();
 	final JkResolveResult resolveResult = IvyResolver.of(repos).resolveAnonymous(deps, COMPILE, params);

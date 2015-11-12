@@ -98,7 +98,7 @@ public class AntStyleBuild extends JkBuild {
 	JkZipper.of(this.src).to(srcZip);
 
 	JkMavenPublication publication = JkMavenPublication.of(jarFile).with(info).and(srcZip, "sources");
-	JkPublisher.of(repo).publishMaven(versionedModule, publication, JkDependencies.on());
+	JkPublisher.of(repo).publishMaven(versionedModule, publication, JkDependencies.of());
     }
 
     public static void main(String[] args) {

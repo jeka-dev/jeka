@@ -34,13 +34,13 @@ public class NormalJarBuild extends JkJavaBuild {
 		// When fetching the dependencies, if the jar file in the 'samples' project is not present,
 		// then a 'sampleBuild' is launched in order to produce it.
 		// The 'sampleBuild' is launched with the 'doDefault' method unless you specify another ones
-		.on(COMPILE, sampleBuild.asDependency(sampleBuild.packer().jarFile())) 
+		.of(COMPILE, sampleBuild.asDependency(sampleBuild.packer().jarFile())) 
 		
 		// Depends on the transitive build defined in the mavenBuildStyle of the 'sample' project
-		.on(COMPILE, sampleBuild.depsFor(COMPILE))
+		.and(sampleBuild.depsFor(COMPILE), COMPILE)
 		
 		// Additional dependency
-		.on(RUNTIME, "ch.qos.logback:logback-classic:1.+");
+		.and("ch.qos.logback:logback-classic", "1.+", RUNTIME);
     }
 
 }

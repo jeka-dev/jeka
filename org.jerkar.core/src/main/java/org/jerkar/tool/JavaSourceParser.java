@@ -29,7 +29,7 @@ final class JavaSourceParser {
     }
 
     public static JavaSourceParser of(File baseDir, Iterable<File> files) {
-	JavaSourceParser result = new JavaSourceParser(JkDependencies.on(), JkRepos.of(), new LinkedList<File>());
+	JavaSourceParser result = new JavaSourceParser(JkDependencies.of(), JkRepos.of(), new LinkedList<File>());
 	for (final File code : files) {
 	    result = result.and(of(baseDir, code));
 	}
@@ -91,7 +91,7 @@ final class JavaSourceParser {
 	final JkDependencies.Builder builder = JkDependencies.builder();
 	for (final String dependency : deps) {
 	    if (JkModuleDependency.isModuleDependencyDescription(dependency)) {
-		builder.onModule(JkModuleDependency.of(dependency));
+		builder.on(JkModuleDependency.of(dependency));
 	    } else {
 		if (dependency.contains(":")) {
 		    throw new JkException("Dependency " + dependency
@@ -101,7 +101,7 @@ final class JavaSourceParser {
 		if (!depFile.exists()) {
 		    throw new JkException("File " + depFile + " mentionned in @JkImport does not exist.");
 		}
-		builder.onFiles(depFile);
+		builder.on(depFile);
 	    }
 
 	}

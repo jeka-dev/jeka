@@ -169,7 +169,7 @@ public class JkBuildDependencySupport extends JkBuild {
     }
 
     protected JkDependencies dependencies() {
-	return JkDependencies.on();
+	return JkDependencies.of();
     }
 
     /**

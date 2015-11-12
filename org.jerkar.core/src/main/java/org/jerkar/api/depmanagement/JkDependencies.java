@@ -29,7 +29,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     private static final long serialVersionUID = 1L;
 
     @SuppressWarnings("unchecked")
-    public static JkDependencies on(JkScopedDependency... scopedDependencies) {
+    public static JkDependencies of(JkScopedDependency... scopedDependencies) {
 	return new JkDependencies(Arrays.asList(scopedDependencies), Collections.EMPTY_SET);
     }
 
@@ -37,15 +37,15 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * Creates a {@link JkDependencies} on the specified module with unspecified version (expected to be resolved
      * with a version provider).
      */
-    public static JkDependencies on(JkModuleId moduleId, JkScope...scopes) {
+    public static JkDependencies of(JkModuleId moduleId, JkScope...scopes) {
 	final JkModuleDependency moduleDependency = JkModuleDependency.of(moduleId, JkVersionRange.UNSPECIFIED);
 	final JkScopedDependency scopedependency = JkScopedDependency.of(moduleDependency, scopes);
-	return on(scopedependency);
+	return of(scopedependency);
     }
 
 
     @SuppressWarnings("unchecked")
-    public static JkDependencies on(JkScope scope, JkDependency... dependencies) {
+    public static JkDependencies of(JkScope scope, JkDependency... dependencies) {
 	final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();
 	for (final JkDependency dependency : dependencies) {
 	    final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scope);
@@ -118,20 +118,39 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
+     * Returns a clone of this object plus the specified
+     * {@link JkScopedDependency}s.
+     */
+    public JkDependencies and(JkScopedDependency ... others) {
+	return and(Arrays.asList(others));
+    }
+
+    /**
+     * Returns a clone of this object plus the specified
+     * {@link JkScopedDependency}s.
+     */
+    public JkDependencies and(String groupAndName, String version, JkScope ...scopes) {
+	final JkModuleDependency dep = JkModuleDependency.of(JkModuleId.of(groupAndName), version);
+	return and(JkScopedDependency.of(dep, scopes));
+    }
+
+
+
+    /**
      * Returns a clone of this object plus {@link JkScopedDependency}s on the
      * specified file.
      */
-    public JkDependencies on(JkScope scope, File... files) {
-	return on(scope, Arrays.asList(files));
+    public JkDependencies and(JkScope scope, File... files) {
+	return and(Arrays.asList(files), scope);
     }
 
     /**
      * Returns a clone of this object plus {@link JkScopedDependency}s on the
      * specified file.
      */
-    public JkDependencies on(JkScope scope, Iterable<File> files) {
-	final JkScopedDependency scopedDependency = JkScopedDependency.of(JkFileSystemDependency.of(files), scope);
-	return and(scopedDependency);
+    public JkDependencies and(Iterable<File> files, JkScope ...scopes) {
+	final JkScopedDependency scopedDependency = JkScopedDependency.of(JkFileSystemDependency.of(files), scopes);
+	return of(scopedDependency);
     }
 
     /**
@@ -141,18 +160,10 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * @param versionedModuleId
      *            something like "org.apache:commons:1.4"
      */
-    public JkDependencies on(JkScope scope, String versionedModuleId) {
+    public JkDependencies and(JkScope scope, String versionedModuleId) {
 	final JkDependency dependency = JkModuleDependency.of(versionedModuleId);
 	final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scope);
-	return and(scopedDependency);
-    }
-
-    /**
-     * Returns a clone of this object plus the specified
-     * {@link JkScopedDependency}s.
-     */
-    public JkDependencies and(JkScopedDependency... others) {
-	return and(Arrays.asList(others));
+	return of(scopedDependency);
     }
 
     /**
@@ -420,6 +431,10 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	    this.depExcludes = new HashSet<JkDepExclude>();
 	}
 
+	/**
+	 * After this declaration, dependencies declared without scope will be set with the
+	 * specified scopes.
+	 */
 	public Builder usingDefaultScopes(JkScope... scopes) {
 	    if (scopes.length == 0) {
 		throw new IllegalArgumentException("You must specify at least one scope.");
@@ -429,19 +444,30 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	    return this;
 	}
 
+	/**
+	 * After this declaration, dependencies declared without scope will be set with the
+	 * specified scope mapping.
+	 */
 	public Builder usingDefaultScopeMapping(JkScopeMapping scopeMapping) {
 	    this.defaultMapping = scopeMapping;
 	    this.defaultScopes = null;
 	    return this;
 	}
 
+	/**
+	 * After this declaration, dependencies declared without scope won't be set
+	 * with any scope or scope mapping.
+	 */
 	public Builder resetDefaultScope() {
 	    defaultScopes = null;
 	    defaultMapping = null;
 	    return this;
 	}
 
-	public JkFluentScopeableBuilder on(JkDependency dependency) {
+	/**
+	 * Adds the specified dependency with the specified scopes to this builder.
+	 */
+	public JkFluentScopeableBuilder on(JkDependency dependency, JkScope ...scopes) {
 	    if (dependency instanceof JkFileSystemDependency) {
 		final JkFileSystemDependency fileDeps = (JkFileSystemDependency) dependency;
 		if (fileDeps.files().isEmpty()) {
@@ -449,12 +475,12 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		}
 	    }
 	    final JkScopedDependency scopedDependency;
-	    if (defaultScopes != null) {
+	    if (scopes.length == 0 && defaultScopes != null) {
 		scopedDependency = JkScopedDependency.of(dependency, defaultScopes);
-	    } else if (defaultMapping != null && dependency instanceof JkModuleDependency) {
+	    } else if (scopes.length == 0 && defaultMapping != null && dependency instanceof JkModuleDependency) {
 		scopedDependency = JkScopedDependency.of((JkModuleDependency) dependency, defaultMapping);
 	    } else {
-		scopedDependency = JkScopedDependency.of(dependency);
+		scopedDependency = JkScopedDependency.of(dependency, scopes);
 	    }
 	    dependencies.add(scopedDependency);
 	    if (this instanceof JkFluentScopeableBuilder) {
@@ -463,14 +489,25 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	    return new JkFluentScopeableBuilder(this);
 	}
 
-	public JkFluentModuleDepBuilder onModule(JkModuleDependency dependency) {
+	/**
+	 * Adds a module dependency on this builder.
+	 */
+	public JkFluentModuleDepBuilder on(JkModuleDependency dependency) {
+	    return on(dependency, new JkScope[0]);
+	}
+
+
+	/**
+	 * Adds a module dependency on this builder.
+	 */
+	public JkFluentModuleDepBuilder on(JkModuleDependency dependency, JkScope ... scopes) {
 	    final JkScopedDependency scopedDependency;
-	    if (defaultScopes != null) {
+	    if (scopes.length == 0 && defaultScopes != null) {
 		scopedDependency = JkScopedDependency.of(dependency, defaultScopes);
-	    } else if (defaultMapping != null) {
+	    } else if (scopes.length == 0 && defaultMapping != null) {
 		scopedDependency = JkScopedDependency.of(dependency, defaultMapping);
 	    } else {
-		scopedDependency = JkScopedDependency.of(dependency);
+		scopedDependency = JkScopedDependency.of(dependency, scopes);
 	    }
 	    dependencies.add(scopedDependency);
 	    if (this instanceof JkFluentModuleDepBuilder) {
@@ -479,6 +516,9 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	    return new JkFluentModuleDepBuilder(this);
 	}
 
+	/**
+	 * Adds the specified scoped dependency to this builder.
+	 */
 	public Builder on(JkScopedDependency dependency) {
 	    this.dependencies.add(dependency);
 	    return this;
@@ -487,69 +527,79 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	/**
 	 * Add the specified files as dependencies.
 	 */
-	public JkFluentScopeableBuilder onFiles(File... files) {
+	public JkFluentScopeableBuilder on(File... files) {
 	    return on(JkFileSystemDependency.of(Arrays.asList(files)));
 	}
 
 	/**
-	 * Same as {@link #onFiles(File...)} but effective only if the specified
+	 * Same as {@link #on(File...)} but effective only if the specified
 	 * condition is true.
 	 */
-	public JkFluentScopeableBuilder onFilesIf(boolean condition, File... files) {
+	public JkFluentScopeableBuilder onIf(boolean condition, File... files) {
 	    return on(JkFileSystemDependency.of(files));
 	}
 
 	/**
 	 * Add the specified files as dependencies.
 	 */
-	public JkFluentScopeableBuilder onFiles(Iterable<File> files) {
-	    return on(JkFileSystemDependency.of(files));
+	public JkFluentScopeableBuilder onFiles(Iterable<File> files, JkScope ... scopes) {
+	    final JkFileSystemDependency dependency = JkFileSystemDependency.of(files);
+	    return on(dependency, scopes);
 	}
 
 	/**
 	 * Same as {@link #onFiles(Iterable)} but effective only if the
 	 * specified condition is true.
 	 */
-	public JkFluentScopeableBuilder onFilesIf(boolean condition, Iterable<File> files) {
-	    return on(JkFileSystemDependency.of(files));
+	public JkFluentScopeableBuilder onFilesIf(boolean condition, Iterable<File> files, JkScope ... scopes) {
+	    if (condition) {
+		return onFiles(files, scopes);
+	    }
+	    if (this instanceof JkFluentScopeableBuilder) {
+		return (JkFluentScopeableBuilder) this;
+	    }
+	    return new JkFluentScopeableBuilder(this);
 	}
 
-	public JkFluentModuleDepBuilder on(JkModuleId module, JkVersionRange version) {
-	    return on(module, version, true);
+	/**
+	 * @see #on(JkModuleDependency, JkScope...)
+	 */
+	public JkFluentModuleDepBuilder on(JkModuleId module, JkVersionRange version, JkScope ...scopes) {
+	    return on(JkModuleDependency.of(module, version), scopes);
 	}
 
-	public JkFluentModuleDepBuilder on(JkModuleId module) {
-	    return on(module, JkVersionRange.UNSPECIFIED);
+	/**
+	 * Adds a module dependency with unspecified version on this builder.
+	 */
+	public JkFluentModuleDepBuilder on(JkModuleId module, JkScope ...scopes) {
+	    return on(JkModuleDependency.of(module, JkVersionRange.UNSPECIFIED), scopes);
 	}
 
-	public JkFluentModuleDepBuilder on(JkModuleId module, String version) {
-	    return on(module, JkVersionRange.of(version));
+
+	/**
+	 * @see #on(JkModuleDependency, JkScope...)
+	 */
+	public JkFluentModuleDepBuilder on(JkModuleId module, String version, JkScope ... scopes) {
+	    return on(module, JkVersionRange.of(version), scopes);
 	}
 
-	public JkFluentModuleDepBuilder on(JkModuleId module, JkVersionRange version, boolean transitive) {
-	    return onModule(JkModuleDependency.of(module, version).transitive(transitive));
+	/**
+	 * @see #on(JkModuleDependency, JkScope...)
+	 */
+	public JkFluentModuleDepBuilder on(String group, String name, String version, JkScope... scopes) {
+	    return on(JkModuleId.of(group, name), version, scopes);
 	}
 
-	public JkFluentModuleDepBuilder on(String organisation, String name, String version) {
-	    return on(organisation, name, version, true);
+	/**
+	 * @see #on(JkModuleDependency, JkScope...)
+	 */
+	public JkFluentModuleDepBuilder on(String description, JkScope... scopes) {
+	    return on(JkModuleDependency.of(description), scopes);
 	}
 
-	public Builder on(String organisation, String name, String version, JkScope... scopes) {
-	    return on(organisation, name, version, true).scope(scopes);
-	}
-
-	public JkFluentModuleDepBuilder on(String organisation, String name, String version, boolean transitive) {
-	    return onModule(JkModuleDependency.of(organisation, name, version).transitive(transitive));
-	}
-
-	public JkFluentModuleDepBuilder on(String description) {
-	    return onModule(JkModuleDependency.of(description));
-	}
-
-	public JkFluentModuleDepBuilder on(String description, boolean transitive) {
-	    return onModule(JkModuleDependency.of(description).transitive(transitive));
-	}
-
+	/**
+	 * Adds the specified scoped dependencies to this builder.
+	 */
 	public Builder on(Iterable<JkScopedDependency> dependencies) {
 	    if (!dependencies.iterator().hasNext()) {
 		return this;
@@ -583,10 +633,17 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	    return excludeGlobally(JkDepExclude.of(groupAndName));
 	}
 
+	/**
+	 * Constructs a {@link JkDependencies} from scoped dependencies declared in this builder.
+	 */
 	public JkDependencies build() {
 	    return new JkDependencies(dependencies, depExcludes);
 	}
 
+	/**
+	 * Returned type after an addition of a {@link JkDependency}. This type allows to chain
+	 * definition of scopes.
+	 */
 	public static class JkFluentScopeableBuilder extends Builder {
 
 	    protected JkFluentScopeableBuilder(Builder builder) {
@@ -601,6 +658,9 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		this.defaultScopes = builder.defaultScopes;
 	    }
 
+	    /**
+	     * Applies a scope mapping to the right previously added dependency on this builder.
+	     */
 	    public Builder scope(JkScope... scopes) {
 		final JkScopedDependency lastScopedDep = dependencies.pollLast();
 		if (lastScopedDep == null) {
@@ -613,43 +673,80 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
 	}
 
+	/**
+	 * Returned type after an addition of a {@link JkModuleDependency}. This type allows to chain
+	 * redefinition of scope, scope mapping, transitivity and exclusions.
+	 */
 	public static final class JkFluentModuleDepBuilder extends JkFluentScopeableBuilder {
 
 	    private JkFluentModuleDepBuilder(Builder builder) {
 		super(builder);
 	    }
 
-	    public Builder scope(JkScopeMapping scopeMapping) {
+	    /**
+	     * Applies a scope to the right previously added dependency on this builder.
+	     */
+	    public JkFluentModuleDepBuilder scope(JkScopeMapping scopeMapping) {
 		final JkModuleDependency dependency = (JkModuleDependency) dependencies.pollLast().dependency();
 		dependencies.add(JkScopedDependency.of(dependency, scopeMapping));
 		return this;
 	    }
 
+	    /**
+	     * Applies a scope mapping to the right previously added dependency on this builder.
+	     */
 	    public JkFluentAfterMapScopeBuilder mapScope(JkScope... scopes) {
 		return new JkFluentAfterMapScopeBuilder(dependencies, JkUtilsIterable.setOf(scopes));
 	    }
 
-	    public JkFluentModuleDepBuilder excluding(JkDepExclude depExclude) {
+	    /**
+	     * Applies specified transitive flag to the right previously added dependency on this builder.
+	     */
+	    public JkFluentModuleDepBuilder transitive(boolean transitive) {
+		final JkScopedDependency scopedDependency = dependencies.pollLast();
+		final JkModuleDependency dependency = (JkModuleDependency) scopedDependency.dependency();
+		dependencies.add(scopedDependency.dependency(dependency.transitive(transitive)));
+		return this;
+	    }
+
+	    /**
+	     * Excludes the specified dependency from the transitive dependencies of the right
+	     * previously added dependency on this builder.
+	     */
+	    public JkFluentModuleDepBuilder excludeLocally(JkDepExclude depExclude) {
 		final JkScopedDependency scopedDependency = dependencies.pollLast();
 		final JkModuleDependency dependency = (JkModuleDependency) scopedDependency.dependency();
 		dependencies.add(scopedDependency.dependency(dependency.andExclude(depExclude)));
 		return this;
 	    }
 
+	    /**
+	     * @see #excludeLocally(JkDepExclude)
+	     */
 	    public JkFluentModuleDepBuilder excludeLocally(String group, String name) {
-		return excluding(JkDepExclude.of(group, name));
+		return excludeLocally(JkDepExclude.of(group, name));
 	    }
 
+	    /**
+	     * @see #excludeLocally(JkDepExclude)
+	     */
 	    public JkFluentModuleDepBuilder excludeLocally(String groupAndName) {
-		return excluding(JkDepExclude.of(groupAndName));
+		return excludeLocally(JkDepExclude.of(groupAndName));
 	    }
 
+	    /**
+	     * @see #excludeLocally(JkDepExclude)
+	     */
 	    public JkFluentModuleDepBuilder excludeLocally(JkModuleId moduleId) {
 		return excludeLocally(moduleId.group(), moduleId.name());
 	    }
 
 	}
 
+	/**
+	 * Type returned after the left part of the scope mapping has been declared. It allows chaining with
+	 * the right part of the mapping.
+	 */
 	public static class JkFluentAfterMapScopeBuilder {
 
 	    private final LinkedList<JkScopedDependency> dependencies;
@@ -661,6 +758,9 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		this.from = from;
 	    }
 
+	    /**
+	     * Defines the right part of the mapping.
+	     */
 	    public JkFluentAfterToBuilder to(JkScope... jkScopes) {
 		final JkScopedDependency scopedDependency = dependencies.pollLast();
 		final JkScopeMapping mapping;
@@ -674,6 +774,9 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 		return new JkFluentAfterToBuilder(dependencies);
 	    }
 
+	    /**
+	     * Defines the right part of the mapping.Specified scope string are internally turned to {@link JkScope}
+	     */
 	    public JkFluentAfterToBuilder to(String... scopeNames) {
 		final JkScope[] scopes = new JkScope[scopeNames.length];
 		for (int i = 0; i < scopeNames.length; i++) {
@@ -684,6 +787,10 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
 	}
 
+	/**
+	 * Type returned after the right side declaration of a scope mapping. It gives the opportunity
+	 * to complete the mapping with another pair of (left->right) mapping.
+	 */
 	public static class JkFluentAfterToBuilder extends Builder {
 
 	    private JkFluentAfterToBuilder(LinkedList<JkScopedDependency> dependencies) {

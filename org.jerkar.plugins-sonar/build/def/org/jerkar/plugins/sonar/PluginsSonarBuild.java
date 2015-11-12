@@ -12,7 +12,7 @@ public class PluginsSonarBuild extends AbstractBuild {
 
     @Override
     protected JkDependencies dependencies() {
-	return JkDependencies.on(PROVIDED, core.asDependency(core.packer().jarFile()));
+	return JkDependencies.of(PROVIDED, core.asDependency(core.packer().jarFile()));
     }
 
 }

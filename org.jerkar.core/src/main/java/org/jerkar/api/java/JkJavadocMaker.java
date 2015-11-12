@@ -72,7 +72,7 @@ public final class JkJavadocMaker {
     public void process() {
 	JkLog.startln("Generating javadoc");
 	final String[] args = toArguments(outputDir);
-	execute(doclet, JkLog.infoStream(), JkLog.warnStream(), JkLog.errorStream(), args);
+	execute(doclet, JkLog.infoStream(), JkLog.infoStream(), JkLog.errorStream(), args);
 	if (outputDir.exists() && zipFile != null) {
 	    JkFileTree.of(outputDir).zip().to(zipFile);
 	}

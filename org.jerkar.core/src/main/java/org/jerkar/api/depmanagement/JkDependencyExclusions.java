@@ -51,13 +51,17 @@ public class JkDependencyExclusions {
 	    return on(moduleId, Arrays.asList(depExcludes));
 	}
 
-	public Builder on(String moduleId, String ... excludedModuleIds) {
-	    final JkModuleId jkModuleId = JkModuleId.of(moduleId);
+	public Builder on(JkModuleId moduleId, String ...excludedModuleIds) {
 	    final List<JkDepExclude> depExcludes = new LinkedList<JkDepExclude>();
 	    for (final String excludeId : excludedModuleIds) {
 		depExcludes.add(JkDepExclude.of(excludeId));
 	    }
-	    return on(jkModuleId, depExcludes);
+	    return on(moduleId, depExcludes);
+	}
+
+
+	public Builder on(String groupAndName, String ... excludedModuleIds) {
+	    return on(JkModuleId.of(groupAndName), excludedModuleIds);
 	}
 
 	public Builder on(JkModuleId moduleId, Iterable<JkDepExclude> depExcludes) {

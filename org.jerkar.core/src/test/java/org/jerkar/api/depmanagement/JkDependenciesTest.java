@@ -9,6 +9,11 @@ import org.jerkar.api.utils.JkUtilsIterable;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * @formatter:off
+ * @author djeang
+ *
+ */
 public class JkDependenciesTest {
 
     @Test
@@ -40,19 +45,11 @@ public class JkDependenciesTest {
     public void onFile() {
 	final File depFile1 = new File("/my/file1.jar");
 	final File depFile2 = new File("/my/file2.zip");
-	JkDependencies.builder().onFiles(depFile1, depFile2).build();
+	JkDependencies.builder().on(depFile1, depFile2).build();
     }
 
     public void onModule() {
-	JkDependencies.builder().on("myGroup:otherModule:2.2.0").on("myGroup:moduleB:2.3:client") // Get
-												  // only
-												  // the
-												  // the
-												  // artifacted
-												  // with
-												  // "client"
-												  // classifier
-		.build();
+	JkDependencies.builder().on("myGroup:otherModule:2.2.0").on("myGroup:moduleB:2.3:client").build();
     }
 
 }

@@ -22,7 +22,7 @@ public class SimpleScopeBuild extends JkJavaBuild {
 	@Override  // Optional :  needless if you use only local dependencies
 	protected JkDependencies dependencies() {
 		return JkDependencies.builder()
-			.onFiles(file("libs/foo.jar")).scope(COMPILE)  
+			.on(file("libs/foo.jar")).scope(COMPILE)  
 			.on(JERSEY_SERVER, "1.19")
 				.mapScope(COMPILE).to(RUNTIME)
 				.and(FOO, PROVIDED).to(BAR, PROVIDED)
