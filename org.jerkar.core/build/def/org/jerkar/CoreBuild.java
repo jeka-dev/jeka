@@ -6,6 +6,7 @@ import java.util.zip.Deflater;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.javabuild.JkJavaPacker;
 
 /**
@@ -30,7 +31,7 @@ public class CoreBuild extends AbstractBuild {
     // mechanism.
     // Was necessary in first place to build Jerkar with itself.
     public static void main(String[] args) {
-	new CoreBuild().initialized().doDefault();
+	JkInit.instanceOf(CoreBuild.class, args).doDefault();
     }
 
     // Include a time stamped version file as resource.

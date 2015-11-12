@@ -14,6 +14,7 @@ import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
 import org.jerkar.tool.JkBuildDependencySupport;
 import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkProject;
 
 class DistribAllBuild extends JkBuildDependencySupport {
@@ -24,7 +25,7 @@ class DistribAllBuild extends JkBuildDependencySupport {
     @JkProject("../org.jerkar.plugins-jacoco")
     PluginsJacocoBuild pluginsJacoco;
 
-    private boolean testSamples = true;
+    public boolean testSamples = false;
 
     @JkDoc("Construct a distrib assuming all dependent sub projects are already built.")
     public void distrib() {
@@ -80,6 +81,10 @@ class DistribAllBuild extends JkBuildDependencySupport {
 	JkLog.startHeaded("Testing Samples");
 	new SampleTester(this.baseDir()).doTest();
 	JkLog.done();
+    }
+    
+    public static void main(String[] args) {
+	JkInit.instanceOf(DistribAllBuild.class, args).doDefault();
     }
 
 }

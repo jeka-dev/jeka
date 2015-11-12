@@ -1,7 +1,6 @@
 package org.jerkar.tool;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -21,7 +20,6 @@ import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.tool.CommandLine.JkPluginSetup;
 import org.jerkar.tool.CommandLine.MethodInvocation;
 
 /**
@@ -115,19 +113,19 @@ final class Project {
      *            The full or simple class name of the build class to execute.
      *            It can be <code>null</code> or empty.
      */
-    public void execute(CommandLine commandLine, String buildClassNameHint) {
+    public void execute(JkInit init) {
 	compile();
 	JkLog.nextLine();
 	final JkClassLoader classLoader = JkClassLoader.current();
 	classLoader.addEntries(this.buildPath);
 	JkLog.info("Setting build execution classpath to : " + classLoader.childClasspath());
-	final JkBuild build = resolver.resolve(buildClassNameHint);
+	final JkBuild build = resolver.resolve(init.buildClassHint());
 	if (build == null) {
 	    throw new JkException("Can't find or guess any build class for project hosted in " + this.projectBaseDir
 		    + " .\nAre you sure this directory is a buildable project ?");
 	}
 	try {
-	    this.launch(build, commandLine);
+	    this.launch(build, init);
 	} catch (final RuntimeException e) {
 	    JkLog.error("Project " + projectBaseDir.getAbsolutePath() + " failed");
 	    throw e;
@@ -184,82 +182,33 @@ final class Project {
 	JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir);
     }
 
-    private void launch(JkBuild build, CommandLine commandLine) {
-	JkOptions.populateFields(build, commandLine.getMasterBuildOptions());
+    private void launch(JkBuild build, JkInit init) {
 	build.setBuildDefDependencyResolver(getBuildDefDependencyResolver());
-	build.init();
+	final PluginDictionnary<JkBuildPlugin> dictionnary = init.initProject(build);
+	final CommandLine commandLine = init.commandLine();
 
-	// setup plugins
-	final Class<JkBuildPlugin> baseClass = JkClassLoader.of(build.getClass()).load(JkBuildPlugin.class.getName());
-	final PluginDictionnary<JkBuildPlugin> dictionnary = PluginDictionnary.of(baseClass);
-	final List<JkBuild> slaveBuilds = build.slaves().all();
-	if (!slaveBuilds.isEmpty()) {
-	    if (!commandLine.getSubProjectMethods().isEmpty()) {
-		JkLog.startHeaded("Executing slave projects");
-		for (final JkBuild subBuild : slaveBuilds) {
-		    configureProjectAndRun(subBuild, commandLine.getSubProjectMethods(),
-			    commandLine.getSubProjectPluginSetups(), commandLine.getSubProjectBuildOptions(),
-			    dictionnary);
-
-		}
-	    } else {
-		JkLog.startln("Configuring slave builds");
-		for (final JkBuild subBuild : slaveBuilds) {
-		    JkLog.startln("Configuring " + subBuild.baseDir().root().getName());
-		    configureProject(subBuild, commandLine.getSubProjectPluginSetups(),
-			    commandLine.getSubProjectBuildOptions(), dictionnary);
-		    JkLog.done();
-		}
+	// Now run projects
+	if (!commandLine.getSubProjectMethods().isEmpty()) {
+	    for (final JkBuild subBuild : build.slaves().all()) {
+		runProject(subBuild, commandLine.getSubProjectMethods(), dictionnary);
 	    }
-	    JkLog.done();
 	}
-
-	configureProjectAndRun(build, commandLine.getMasterMethods(), commandLine.getMasterPluginSetups(),
-		commandLine.getMasterBuildOptions(), dictionnary);
+	runProject(build, commandLine.getMasterMethods(), dictionnary);
     }
 
-    private static void configureProject(JkBuild build, Collection<JkPluginSetup> pluginSetups,
-	    Map<String, String> commandlineOptions, PluginDictionnary<JkBuildPlugin> dictionnary) {
-	JkOptions.populateFields(build);
-	final File localProps = build.file(JkConstants.BUILD_DEF_DIR + "/build.properties");
-	if (localProps.exists()) {
-	    JkOptions.populateFields(build, JkUtilsFile.readPropertyFileAsMap(localProps));
-	}
-	JkOptions.populateFields(build, commandlineOptions);
-	configureAndActivatePlugins(build, pluginSetups, dictionnary);
-    }
 
-    private static void configureProjectAndRun(JkBuild build, List<MethodInvocation> invokes,
-	    Collection<JkPluginSetup> pluginSetups, Map<String, String> options,
+
+    private static void runProject(JkBuild build, List<MethodInvocation> invokes,
 	    PluginDictionnary<JkBuildPlugin> dictionnary) {
 	JkLog.infoHeaded("Executing build for project " + build.baseDir().root().getName());
 	JkLog.info("Build class " + build.getClass().getName());
-	configureProject(build, pluginSetups, options, dictionnary);
 	JkLog.info("Activated plugins : " + build.plugins.getActives());
 	final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
-	Main.logProps("Field values", displayedOptions);
+	JkInit.logProps("Field values", displayedOptions);
 	build.execute(toBuildMethods(invokes, dictionnary), null);
-	// JkLog.done("Build " + build.baseDir().root().getName());
     }
 
-    private static void configureAndActivatePlugins(JkBuild build, Collection<JkPluginSetup> pluginSetups,
-	    PluginDictionnary<JkBuildPlugin> dictionnary) {
-	for (final JkPluginSetup pluginSetup : pluginSetups) {
-	    final Class<? extends JkBuildPlugin> pluginClass = dictionnary.loadByNameOrFail(pluginSetup.pluginName)
-		    .pluginClass();
-	    if (pluginSetup.activated) {
-		JkLog.startln("Activating plugin " + pluginClass.getName());
-		final Object plugin = build.plugins.addActivated(pluginClass, pluginSetup.options);
-		JkLog.done("Activating plugin " + pluginClass.getName() + " with options "
-			+ JkOptions.fieldOptionsToString(plugin));
-	    } else {
-		JkLog.startln("Configuring plugin " + pluginClass.getName());
-		final Object plugin = build.plugins.addConfigured(pluginClass, pluginSetup.options);
-		JkLog.done("Configuring plugin " + pluginClass.getName() + " with options "
-			+ JkOptions.fieldOptionsToString(plugin));
-	    }
-	}
-    }
+
 
     private static List<JkModelMethod> toBuildMethods(Iterable<MethodInvocation> invocations,
 	    PluginDictionnary<JkBuildPlugin> dictionnary) {
