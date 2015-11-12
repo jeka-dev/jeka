@@ -81,7 +81,7 @@ public final class JkManifest {
      * to be found at META-INF/MANIFEST.MF. Returns <code>null</code> if no manifest found.
      */
     public static JkManifest ofArchive(File archive) {
-	final InputStream inputStream = JkUtilsIO.readZipEntry(archive, PATH);
+	final InputStream inputStream = JkUtilsIO.readZipEntryOrNull(archive, PATH);
 	if (inputStream == null) {
 	    return null;
 	}

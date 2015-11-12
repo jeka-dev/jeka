@@ -286,9 +286,22 @@ public final class JkUtilsIO {
 
     /**
      * Reads the specified zip stream and position it at the beginning of the
-     * specified entry. The specified entry is case insensitive.
+     * specified entry. The specified entry is case insensitive. An exception is thrown if no such entry exist.
      */
-    public static ZipInputStream readZipEntry(InputStream inputStream, String caseInsensitiveEntryNAme) {
+    public static ZipInputStream readZipEntry(InputStream inputStream, String caseInsensitiveEntryName) {
+	final ZipInputStream result = readZipEntryOrNull(inputStream, caseInsensitiveEntryName);
+	if (result == null) {
+	    throw new IllegalArgumentException("Zip " + inputStream + " has no entry "
+		    + caseInsensitiveEntryName);
+	}
+	return result;
+    }
+
+    /**
+     * Reads the specified zip stream and position it at the beginning of the
+     * specified entry. The specified entry is case insensitive. It returns <code>null</code> if no such entry exist.
+     */
+    public static ZipInputStream readZipEntryOrNull(InputStream inputStream, String caseInsensitiveEntryNAme) {
 	final ZipInputStream zipInputStream = new ZipInputStream(inputStream);
 	try {
 	    ZipEntry entry = zipInputStream.getNextEntry();
@@ -302,8 +315,7 @@ public final class JkUtilsIO {
 	    }
 	    if (!found) {
 		inputStream.close();
-		throw new IllegalArgumentException("Zip " + inputStream + " has no entry "
-			+ caseInsensitiveEntryNAme);
+		return null;
 	    }
 	    return zipInputStream;
 	} catch (final Exception e) {
@@ -315,6 +327,15 @@ public final class JkUtilsIO {
 	final FileInputStream fileInputStream = inputStream(zipFile);
 	try {
 	    return readZipEntry(fileInputStream, caseInsensitiveEntryName);
+	} finally {
+	    closeQuietly(fileInputStream);
+	}
+    }
+
+    public static ZipInputStream readZipEntryOrNull(File zipFile, String caseInsensitiveEntryName) {
+	final FileInputStream fileInputStream = inputStream(zipFile);
+	try {
+	    return readZipEntryOrNull(fileInputStream, caseInsensitiveEntryName);
 	} finally {
 	    closeQuietly(fileInputStream);
 	}
