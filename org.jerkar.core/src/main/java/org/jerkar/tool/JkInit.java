@@ -56,6 +56,14 @@ public final class JkInit {
 	return build;
     }
 
+    /**
+     * As {@link #instanceOf(Class, String...)} but you can specified the command line using two distinct arrays
+     * that will be concatenated.
+     */
+    public static <T extends JkBuild> T instanceOf(Class<T> clazz, String[] args, String... extraArgs) {
+	return instanceOf(clazz, JkUtilsIterable.concat(args, extraArgs));
+    }
+
     void displayInfo() {
 	JkLog.info("Working Directory : " + System.getProperty("user.dir"));
 	JkLog.info("Java Home : " + System.getProperty("java.home"));

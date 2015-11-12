@@ -17,7 +17,7 @@ import org.jerkar.api.utils.JkUtilsReflect;
 
 /**
  * Offers fluent interface for producing Javadoc.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkJavadocMaker {

@@ -37,6 +37,7 @@ class JUnit4TestExecutor {
     private static JkTestSuiteResult launchInProcess(Class<?>[] classes, boolean printEachTestOnConsole,
 	    JunitReportDetail reportDetail, File reportDir) {
 	final JUnitCore jUnitCore = new JUnitCore();
+
 	if (reportDetail.equals(JunitReportDetail.FULL)) {
 	    jUnitCore.addListener(new JUnitReportListener(reportDir));
 	}
