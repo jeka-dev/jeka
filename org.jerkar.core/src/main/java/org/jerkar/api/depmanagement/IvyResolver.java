@@ -99,6 +99,7 @@ final class IvyResolver implements InternalDepResolver {
 	resolveOptions.setOutputReport(JkLog.verbose());
 	resolveOptions.setLog(logLevel());
 	resolveOptions.setRefresh(parameters.refreshed());
+	resolveOptions.setCheckIfChanged(true);
 	final ResolveReport report;
 	try {
 	    report = ivy.resolve(moduleDescriptor, resolveOptions);

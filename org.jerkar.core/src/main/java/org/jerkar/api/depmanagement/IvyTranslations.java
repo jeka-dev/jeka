@@ -110,11 +110,11 @@ final class IvyTranslations {
      */
     private static DependencyDescriptor toDependencyDescriptor(JkScopedDependency scopedDependency,
 	    JkScopeMapping defaultMapping, JkVersion resolvedVersion) {
-	final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency.dependency();
-	final ModuleRevisionId moduleRevisionId = toModuleRevisionId(externalModule, resolvedVersion);
-	final boolean changing = externalModule.versionRange().definition().endsWith("-SNAPSHOT");
+	final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.dependency();
+	final ModuleRevisionId moduleRevisionId = toModuleRevisionId(moduleDep, resolvedVersion);
+	final boolean changing = moduleDep.versionRange().definition().endsWith("-SNAPSHOT");
 	final DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null, moduleRevisionId, false,
-		changing, externalModule.transitive());
+		changing, moduleDep.transitive());
 
 	// filling configuration
 	if (scopedDependency.scopeType() == ScopeType.SIMPLE) {
@@ -142,7 +142,7 @@ final class IvyTranslations {
 		}
 	    }
 	}
-	for (final JkDepExclude depExclude : externalModule.excludes()) {
+	for (final JkDepExclude depExclude : moduleDep.excludes()) {
 	    final ExcludeRule excludeRule = toExcludeRule(depExclude);
 	    result.addExcludeRule("*", excludeRule);
 	}

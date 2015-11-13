@@ -12,23 +12,23 @@ public final class JkResolutionParameters implements Serializable {
     /**
      * Creates resolution parameters without default mapping and no dynamic
      * version resolving refresh.
-     * 
+     *
      * @see JkResolutionParameters#defaultMapping()
      * @see #refreshed()
      */
     public static JkResolutionParameters of() {
-	return new JkResolutionParameters(null, false);
+	return new JkResolutionParameters(null, true);
     }
 
     /**
      * Creates resolution parameters with the specified default scope mapping
      * and no dynamic version resolving refresh.
-     * 
+     *
      * @see JkResolutionParameters#defaultMapping()
      * @see #refreshed()
      */
     public static JkResolutionParameters defaultScopeMapping(JkScopeMapping scopeMapping) {
-	return new JkResolutionParameters(scopeMapping, false);
+	return new JkResolutionParameters(scopeMapping, true);
     }
 
     private final JkScopeMapping defaultMapping;
@@ -38,7 +38,7 @@ public final class JkResolutionParameters implements Serializable {
     /**
      * Returns the default scope mapping to use for the {@link JkDependencies}
      * to be resolved. <code>null</code> means no default scope mapping.
-     * 
+     *
      * @see <a href=
      *      "http://ant.apache.org/ivy/history/2.3.0/ivyfile/configurations.html">
      *      Ivy configuration doc</a>

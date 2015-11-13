@@ -15,7 +15,6 @@ import javax.xml.stream.XMLStreamWriter;
 import org.jerkar.api.depmanagement.MavenMetadata.Versioning.Snapshot;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
-import org.jerkar.api.utils.JkUtilsTime;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -85,16 +84,15 @@ final class MavenMetadata {
 
     }
 
-    void updateSnapshot() {
+    void updateSnapshot(String timestamp) {
 	if (versioning == null) {
 	    this.versioning = new Versioning();
 	}
 	final int buildNumber = this.versioning.currentBuildNumber() + 1;
-	final String ts = JkUtilsTime.nowUtc("yyyyMMdd.HHmmss");
 	final org.jerkar.api.depmanagement.MavenMetadata.Versioning.Snapshot snapshot = new org.jerkar.api.depmanagement.MavenMetadata.Versioning.Snapshot(
-		ts, buildNumber);
+		timestamp, buildNumber);
 	this.versioning.snapshot = snapshot;
-	this.versioning.lastUpdate = ts.replace(".", "");
+	this.versioning.lastUpdate = timestamp.replace(".", "");
 	this.versioning.snapshotVersions.clear();
     }
 
@@ -127,8 +125,7 @@ final class MavenMetadata {
      * release-tags-in-maven-metadata-xml-not-being-updated-after-deploying-
      * artifact
      */
-    public void addVersion(String version) {
-	final String ts = JkUtilsTime.nowUtc("yyyyMMddHHmmss");
+    public void addVersion(String version, String timestamp) {
 	if (!versioning.versions.contains(version)) {
 	    this.versioning.versions.add(version);
 	    Collections.sort(this.versioning.versions);
@@ -138,7 +135,7 @@ final class MavenMetadata {
 		this.versioning.release = version;
 	    }
 	}
-	this.versioning.lastUpdate = ts;
+	this.versioning.lastUpdate = timestamp;
     }
 
     void output(OutputStream outputStream) {
@@ -373,6 +370,10 @@ final class MavenMetadata {
 
     private static void indent(XMLStreamWriter writer, int deep) throws XMLStreamException {
 	writer.writeCharacters(JkUtilsString.repeat(" ", deep));
+    }
+
+    public String lastUpdateTimestamp() {
+	return this.versioning.lastUpdate;
     }
 
 }

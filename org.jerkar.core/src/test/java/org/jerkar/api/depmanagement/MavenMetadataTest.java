@@ -13,7 +13,7 @@ public class MavenMetadataTest {
     public void testupdateSnapshot() throws UnsupportedEncodingException {
 	final MavenMetadata mavenMetadata = MavenMetadata
 		.of(JkModuleId.of("org.jerkar", "core").version("0.1-SNAPSHOT"),"11111111.222222");
-	mavenMetadata.updateSnapshot();
+	mavenMetadata.updateSnapshot("20151023145532");
 	mavenMetadata.addSnapshotVersion("jar", "source");
 	ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	mavenMetadata.output(outputStream);
@@ -31,7 +31,7 @@ public class MavenMetadataTest {
     @Test
     public void testAddRelease() throws UnsupportedEncodingException {
 	final MavenMetadata mavenMetadata = MavenMetadata.of(JkModuleId.of("org.jerkar", "core"));
-	mavenMetadata.addVersion("1.3.2");
+	mavenMetadata.addVersion("1.3.2", "20151023145532");
 	ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	mavenMetadata.output(outputStream);
 	final String string = outputStream.toString("UTF-8");
@@ -47,7 +47,7 @@ public class MavenMetadataTest {
     @Test
     public void testAddSnapshot() throws UnsupportedEncodingException {
 	final MavenMetadata mavenMetadata = MavenMetadata.of(JkModuleId.of("org.jerkar", "core"));
-	mavenMetadata.addVersion("1.3.2-SNAPSHOT");
+	mavenMetadata.addVersion("1.3.2-SNAPSHOT", "20151023145532");
 	ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	mavenMetadata.output(outputStream);
 	final String string = outputStream.toString("UTF-8");

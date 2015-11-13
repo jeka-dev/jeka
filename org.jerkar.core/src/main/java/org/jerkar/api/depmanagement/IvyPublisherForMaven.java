@@ -86,7 +86,7 @@ final class IvyPublisherForMaven {
 	}
 
 	// update maven-metadata
-	updateMetadata(ivyModuleRevisionId.getModuleId(), ivyModuleRevisionId.getRevision());
+	updateMetadata(ivyModuleRevisionId.getModuleId(), ivyModuleRevisionId.getRevision(), returnedMetaData.lastUpdateTimestamp());
 
 	commitPublication(resolver);
     }
@@ -105,7 +105,7 @@ final class IvyPublisherForMaven {
 	    if (mavenMetadata == null) {
 		mavenMetadata = MavenMetadata.of(versionedModule, timestamp);
 	    }
-	    mavenMetadata.updateSnapshot();
+	    mavenMetadata.updateSnapshot(timestamp);
 	    push(mavenMetadata, path);
 	    final int buildNumber = mavenMetadata.currentBuildNumber();
 
@@ -237,13 +237,13 @@ final class IvyPublisherForMaven {
 			: version;
     }
 
-    private void updateMetadata(ModuleId moduleId, String version) {
+    private void updateMetadata(ModuleId moduleId, String version, String timestamp) {
 	final String path = versionMetadataPath(of(moduleId, version));
 	MavenMetadata mavenMetadata = loadMavenMedatata(path);
 	if (mavenMetadata == null) {
 	    mavenMetadata = MavenMetadata.of(JkModuleId.of(moduleId.getOrganisation(), moduleId.getName()));
 	}
-	mavenMetadata.addVersion(version);
+	mavenMetadata.addVersion(version, timestamp);
 	push(mavenMetadata, path);
     }
 
