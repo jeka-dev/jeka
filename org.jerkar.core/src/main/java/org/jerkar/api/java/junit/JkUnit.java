@@ -27,7 +27,7 @@ import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * Convenient class to launch Junit tests.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkUnit {
@@ -66,8 +66,10 @@ public final class JkUnit {
 
     private final boolean breakOnFailure;
 
+    private final boolean printOutputOnConsole;
+
     private JkUnit(JkClasspath classpath, JunitReportDetail reportDetail, File reportDir, JkJavaProcess fork,
-	    List<Runnable> runnables, JkFileTreeSet testClasses, boolean crashOnFailed) {
+	    List<Runnable> runnables, JkFileTreeSet testClasses, boolean crashOnFailed, boolean printOutputOnConsole) {
 	this.classpath = classpath;
 	this.reportDetail = reportDetail;
 	this.reportDir = reportDir;
@@ -75,16 +77,17 @@ public final class JkUnit {
 	this.postActions = Collections.unmodifiableList(runnables);
 	this.classesToTest = testClasses;
 	this.breakOnFailure = crashOnFailed;
+	this.printOutputOnConsole = printOutputOnConsole;
     }
 
     @SuppressWarnings("unchecked")
     private JkUnit(JkClasspath classpath, JunitReportDetail reportDetail, File reportDir, JkJavaProcess fork,
-	    JkFileTreeSet testClasses, boolean crashOnFailed) {
-	this(classpath, reportDetail, reportDir, fork, Collections.EMPTY_LIST, testClasses, crashOnFailed);
+	    JkFileTreeSet testClasses, boolean crashOnFailed, boolean printOutputOnConsole) {
+	this(classpath, reportDetail, reportDir, fork, Collections.EMPTY_LIST, testClasses, crashOnFailed, printOutputOnConsole);
     }
 
     public static JkUnit ofFork(JkJavaProcess jkJavaProcess) {
-	return new JkUnit(null, JunitReportDetail.NONE, null, jkJavaProcess, JkFileTreeSet.empty(), true);
+	return new JkUnit(null, JunitReportDetail.NONE, null, jkJavaProcess, JkFileTreeSet.empty(), true, true);
     }
 
     public static JkUnit ofFork(JkClasspath classpath) {
@@ -96,34 +99,34 @@ public final class JkUnit {
     }
 
     public static JkUnit of(JkClasspath classpath) {
-	return new JkUnit(classpath, JunitReportDetail.NONE, null, null, JkFileTreeSet.empty(), true);
+	return new JkUnit(classpath, JunitReportDetail.NONE, null, null, JkFileTreeSet.empty(), true, true);
     }
 
     public JkUnit withReport(JunitReportDetail reportDetail) {
 	return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess, classesToTest,
-		this.breakOnFailure);
+		this.breakOnFailure, this.printOutputOnConsole);
     }
 
     public JkUnit withBreakOnFailure(boolean crashOnFailure) {
 	return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess, classesToTest,
-		this.breakOnFailure);
+		this.breakOnFailure, this.printOutputOnConsole);
     }
 
     public JkUnit withReportDir(File reportDir) {
 	return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess, classesToTest,
-		this.breakOnFailure);
+		this.breakOnFailure, this.printOutputOnConsole);
     }
 
     public JkUnit forkKeepingSameClassPath(JkJavaProcess process) {
 	final JkJavaProcess fork = process.withClasspath(jkClasspath());
-	return new JkUnit(null, reportDetail, reportDir, fork, this.classesToTest, this.breakOnFailure);
+	return new JkUnit(null, reportDetail, reportDir, fork, this.classesToTest, this.breakOnFailure, this.printOutputOnConsole);
     }
 
     public JkUnit withPostAction(Runnable runnable) {
 	final List<Runnable> list = new LinkedList<Runnable>(this.postActions);
 	list.add(runnable);
 	return new JkUnit(classpath, reportDetail, reportDir, forkedProcess, list, this.classesToTest,
-		this.breakOnFailure);
+		this.breakOnFailure, this.printOutputOnConsole);
     }
 
     public JkUnit enhancedWith(Enhancer enhancer) {
@@ -146,7 +149,7 @@ public final class JkUnit {
      */
     public JkUnit forked(JkJavaProcess process, boolean appendClasspath) {
 	final JkJavaProcess effectiveProcess = appendClasspath ? process.andClasspath(this.classpath) : process;
-	return new JkUnit(null, reportDetail, reportDir, effectiveProcess, this.classesToTest, this.breakOnFailure);
+	return new JkUnit(null, reportDetail, reportDir, effectiveProcess, this.classesToTest, this.breakOnFailure, this.printOutputOnConsole);
     }
 
     /**
@@ -160,7 +163,7 @@ public final class JkUnit {
 	}
 	if (!fork && forked()) {
 	    return new JkUnit(forkedProcess.classpath(), reportDetail, reportDir, null, this.classesToTest,
-		    this.breakOnFailure);
+		    this.breakOnFailure, this.printOutputOnConsole);
 	}
 	return this;
     }
@@ -175,17 +178,24 @@ public final class JkUnit {
     }
 
     public JkUnit withClassesToTest(JkFileTreeSet classesToTest) {
-	return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess, classesToTest, this.breakOnFailure);
+	return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess, classesToTest, this.breakOnFailure,
+		this.printOutputOnConsole);
     }
+
+    public JkUnit withOutputOnConsole(boolean  outputOnConsole) {
+	return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess, classesToTest,
+		this.breakOnFailure, outputOnConsole);
+    }
+
 
     public JkUnit withClassesToTest(JkFileTree classesToTest) {
 	return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess, JkFileTreeSet.of(classesToTest),
-		this.breakOnFailure);
+		this.breakOnFailure, this.printOutputOnConsole);
     }
 
     public JkUnit withClassesToTest(File... classDirs) {
 	return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess, JkFileTreeSet.of(classDirs),
-		this.breakOnFailure);
+		this.breakOnFailure, this.printOutputOnConsole);
     }
 
     public boolean forked() {
@@ -221,15 +231,13 @@ public final class JkUnit {
 	final JkClassLoader classLoader = JkClassLoader.of(classes.iterator().next());
 	JkLog.startln("Run JUnit tests");
 
-	final boolean verbose = JkLog.verbose();
-
 	final JkTestSuiteResult result;
 
 	if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
 	    if (this.forkedProcess != null) {
-		result = JUnit4TestLauncher.launchInFork(forkedProcess, verbose, reportDetail, classes, reportDir);
+		result = JUnit4TestLauncher.launchInFork(forkedProcess, printOutputOnConsole, reportDetail, classes, reportDir);
 	    } else {
-		result = JUnit4TestLauncher.launchInClassLoader(classes, verbose, reportDetail, reportDir);
+		result = JUnit4TestLauncher.launchInClassLoader(classes, printOutputOnConsole, reportDetail, reportDir);
 	    }
 	} else if (classLoader.isDefined(JUNIT3_RUNNER_CLASS_NAME)) {
 	    final Object suite = createJunit3TestSuite(classLoader, classes);
@@ -247,13 +255,13 @@ public final class JkUnit {
 
 	if (result.failureCount() > 0) {
 	    if (breakOnFailure) {
-		JkLog.error(result.toStrings(verbose));
+		JkLog.error(result.toStrings(JkLog.verbose()));
 		throw new IllegalStateException("Test failed : " + result.toString());
 	    } else {
-		JkLog.warn(result.toStrings(verbose));
+		JkLog.warn(result.toStrings(JkLog.verbose()));
 	    }
 	} else {
-	    JkLog.info(result.toStrings(verbose));
+	    JkLog.info(result.toStrings(JkLog.verbose()));
 	}
 	if (!JkLog.verbose() && result.failureCount() > 0) {
 	    JkLog.info("Launch Jerkar in verbose mode to display failure stack traces in console.");

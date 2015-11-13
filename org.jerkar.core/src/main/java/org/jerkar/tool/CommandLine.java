@@ -9,18 +9,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jerkar.api.depmanagement.JkModuleDependency;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsString;
 
 /*
  * Master and subproject notion are relevant only in a multi-project build.
  * When doing a multiproject build there is always 1 master and many subprojects.
- * 
+ *
  * So here we segregate settings appliable for the master project only from
  * settings appliable everywhere (master + subproject).
- * 
+ *
  * In other words sub-project settings are a subset of master settings.
- * 
+ *
  */
 final class CommandLine {
 
@@ -38,6 +39,7 @@ final class CommandLine {
 	result.subProjectMethods = extractMethods(words, false);
 	result.masterPluginSetups = extractPluginSetup(words, true);
 	result.subProjectPluginSetups = extractPluginSetup(words, false);
+	result.buildDependencies = dependencies(words);
 	return result;
     }
 
@@ -53,14 +55,29 @@ final class CommandLine {
 
     private Collection<JkPluginSetup> subProjectPluginSetups;
 
+    private List<JkModuleDependency> buildDependencies;
+
+
+
     private CommandLine() {
 	super();
+    }
+
+    private static List<JkModuleDependency> dependencies(String[] words) {
+	final List<JkModuleDependency> result = new LinkedList<JkModuleDependency>();
+	for (final String word : words) {
+	    if (word.startsWith("@")) {
+		final String depdef = word.substring(1);
+		result.add(JkModuleDependency.of(depdef));
+	    }
+	}
+	return result;
     }
 
     private static List<MethodInvocation> extractMethods(String[] words, boolean master) {
 	final List<MethodInvocation> result = new LinkedList<MethodInvocation>();
 	for (final String word : words) {
-	    if (!word.startsWith("-") && !word.endsWith(PLUGIN_SYMBOL)
+	    if (!word.startsWith("-") && !word.startsWith("@") && !word.endsWith(PLUGIN_SYMBOL)
 		    && !word.endsWith(PLUGIN_SYMBOL + ALL_BUILD_SYMBOL)) {
 		if (word.endsWith(ALL_BUILD_SYMBOL)) {
 		    final String trunc = JkUtilsString.substringBeforeLast(word, ALL_BUILD_SYMBOL);
@@ -82,13 +99,13 @@ final class CommandLine {
 	    if (word.startsWith("-") && !word.startsWith("-D")) {
 		final int equalIndex = word.indexOf("=");
 		if (equalIndex <= -1) { // no '=' so we just associate the key
-					// with a null value
+		    // with a null value
 		    final String key = word.substring(1);
 		    if (!key.contains(PLUGIN_SYMBOL)) { // if '#' is present
-							// this means that it
-							// concerns plugin
-							// option, not build
-							// options
+			// this means that it
+			// concerns plugin
+			// option, not build
+			// options
 			if (key.endsWith(ALL_BUILD_SYMBOL)) {
 			    result.put(JkUtilsString.substringBeforeLast(key, ALL_BUILD_SYMBOL), null);
 			} else if (master) {
@@ -311,6 +328,10 @@ final class CommandLine {
 
     public void setSubProjectPluginSetups(Collection<JkPluginSetup> subProjectPluginSetups) {
 	this.subProjectPluginSetups = subProjectPluginSetups;
+    }
+
+    public List<JkModuleDependency> dependencies() {
+	return this.buildDependencies;
     }
 
 }

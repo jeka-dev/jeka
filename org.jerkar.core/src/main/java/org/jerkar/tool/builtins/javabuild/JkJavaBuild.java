@@ -234,7 +234,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	    final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
 	    result = result.forked(javaProcess, true);
 	}
-	return result;
+	return result.withOutputOnConsole(this.tests.output || JkLog.verbose());
     }
 
     public JkJavadocMaker javadocMaker() {
@@ -582,6 +582,9 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 	    "BASIC mention the total time elapsed along detail on failed tests.",
 	    "FULL detailed report displays additionally the time to run each tests.", "Example : -report=NONE" })
 	public JunitReportDetail report = JunitReportDetail.BASIC;
+
+	@JkDoc("Turn it on to display System.out and System.err on console while executing tests.")
+	public boolean output;
 
     }
 

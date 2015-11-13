@@ -49,7 +49,7 @@ class JUnit4TestLauncher {
 	    JkLog.info(classloader.toString());
 	}
 	return classloader.invokeStaticMethod(true, JUnit4TestExecutor.class.getName(), "launchInProcess", classArray,
-		verbose, reportDetail, reportDir);
+		verbose, reportDetail, reportDir, true);
     }
 
 }

@@ -19,4 +19,6 @@ public @interface JkImport {
 
     String[] value();
 
+    String[] repo() default {};
+
 }

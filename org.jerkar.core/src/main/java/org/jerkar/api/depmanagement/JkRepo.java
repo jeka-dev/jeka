@@ -33,6 +33,9 @@ public abstract class JkRepo implements Serializable {
 	return of(url).withCredential(userName, password);
     }
 
+
+
+
     public static JkRepo firstNonNull(JkRepo... repos) {
 	for (final JkRepo repo : repos) {
 	    if (repo != null) {

@@ -41,6 +41,17 @@ It processes as follow :
 7. Instantiate and configure plugins specified in command line arguments (see <strong>Mention Plugins in the Command Line</strong>).
 8. Invoke methods specified in command line arguments : methods are executed in the order they appear on the command line.
 
+#### Command Line
+
+Jerkar parse the command line and process each arguments according its pattern :
+
+* Argument starts with `@` : This is an module import clause, the following will be used for adding a module to build class compile & run classpath. For example if the command line contains `@com.google.guava:guava:18.0`, the build class will be compiled with Guava in its classpath and Guava will be also present in the classpath when the build class will be executed. 
+
+* Argument starts with `-` : This is an option declaration. The following is expectedto be formated as _optionName=optionValue_. For example, `-repo.build.url=http://my.repo.milestone/' will inject 'http://my.repo.milestone/' in the 'repo.build.url' Jerkar option.
+
+* in the other cases, argument is considered as a method name to invoke on the build class instance.
+
+
 #### Build class Compilation
 Jerkar compiles build class files prior to execute it. Build class files are expected to be in _[PROJECT DIR]/build/def_. If this directory does not exist or does not contains java sources, the compilation is skipped.
 Compilation outputs class files in _[PROJECT DIR]/build/output/def-bin_ directory and uses classpath containing :
@@ -67,10 +78,12 @@ public class HttpClientTaskBuild extends JkJavaBuild {`
 ...
 ```
 
-Url of the maven/ivy repository is given by `downloadRepoUrl` Jerkar option (or it uses Maven Central if this option is not specified).
-If this repository needs credentials, you need to supply it through Jerkar options `dowloadRepoUsername` and `downloadRepoPassword`.
+Url of the maven/ivy repositories is given by `repo.build.url` Jerkar option. If this option is not set, then it takes the url given by `repo.download.url` option. If the last is nor present as well, it falls back in Maven Central.
+If this repository needs credentials, you need to supply it through Jerkar options `repo.build.username` and `repo.build.password`.
+
+Note that you can define several `repo.build.url` by separating then with coma (as `repo.build.url=http://my.repo1, http://my.repo2.snapshot`).
  
-If the download repository is an Ivy repo, you have to prefix url with `ivy:` so for example you'll get `ivy:http://my.ivy/repo`.
+As for other repo, If the download repository is an Ivy repo, you have to prefix url with `ivy:` so for example you'll get `repo.build.url=ivy:file://my.ivy/repo`.
 
 ##### Libraries on File System
 To add library from file system you need to annotate the build definition with `@JkImport`. This annotation takes an array of String as argument so you can specify several dependencies.
@@ -79,14 +92,14 @@ The expected value is a Ant include pattern applied to the project root director
 
 
 ``` 
-@JkImport(`{"commons-httpclient:commons-httpclient:3.1", "build/libs/compile/*.jar"})
+@JkImport({"commons-httpclient:commons-httpclient:3.1", "build/libs/compile/*.jar"})
 public class HttpClientTaskBuild extends JkJavaBuild {`
 ...
 ```
 
 This will include _commons-httpclient_ and its dependencies in the classpath along all jar file located in _[PROJECT DIR]/build/libs/compile_.
 
-##### Build Definitions of Other Project
+##### Build Definitions of other project
 Your build definitions can depends on build definitions of other projects. It is typically the case for multi-project builds. 
 This capability allows to share build elements in a static typed way as the build definitions files can consume classes coming from build definitions of other projects.
 

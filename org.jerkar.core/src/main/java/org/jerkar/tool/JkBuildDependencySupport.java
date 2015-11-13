@@ -20,7 +20,7 @@ import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
-import org.jerkar.api.utils.JkUtilsAssert;
+import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * Template build definition class providing support for managing dependencies
@@ -85,9 +85,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * only a meaning in case of using managed dependencies.
      */
     protected JkRepos downloadRepositories() {
-	JkUtilsAssert.notNull(this.repo.download.url, "repo.download.url must not be null.");
-	return JkRepos.of(JkRepo.of(this.repo.download.url).withOptionalCredentials(this.repo.download.username,
-		this.repo.download.password));
+	return reposOfOptions("download").andIfEmpty(JkRepo.mavenCentral());
     }
 
     /**
@@ -110,12 +108,9 @@ public class JkBuildDependencySupport extends JkBuild {
 	}
 
 	// One of release or publish url has been specified
-	final JkRepo defaultDownloadRepo = JkRepo.ofOptional(repo.download.url, repo.download.username,
-		repo.download.password);
-	final JkRepo defaultPublishRepo = JkRepo.ofOptional(repo.publish.url, repo.publish.username,
-		repo.publish.password);
-	final JkRepo defaultPublishReleaseRepo = JkRepo.ofOptional(repo.release.url, repo.release.username,
-		repo.release.password);
+	final JkRepo defaultDownloadRepo = repoOfOptions("download");
+	final JkRepo defaultPublishRepo = repoOfOptions("publish");
+	final JkRepo defaultPublishReleaseRepo = repoOfOptions("release");
 
 	final JkRepo publishRepo = JkRepo.firstNonNull(defaultPublishRepo, defaultDownloadRepo);
 	final JkRepo releaseRepo = JkRepo.firstNonNull(defaultPublishReleaseRepo, publishRepo);
@@ -281,6 +276,43 @@ public class JkBuildDependencySupport extends JkBuild {
 
     public JkPgp pgp() {
 	return JkPgp.of(JkOptions.getAll());
+    }
+
+    /**
+     * Creates {@link JkRepo} form Jerkar options. the specified repository name will
+     * be turned to <code>repo.[repoName].url</code>, <code>repo.[repoName].username</code>
+     * and <code>repo.[repoName].password</code> options for creating according repository.
+     */
+    public static JkRepo repoOfOptions(String repoName) {
+	final String url = JkOptions.get("repo." + repoName + "." + "url");
+	if (JkUtilsString.isBlank(url)) {
+	    return null;
+	}
+	final String username = JkOptions.get("repo." + repoName + ".username");
+	final String password = JkOptions.get("repo." + repoName + ".password");
+	return JkRepo.of(url.trim()).withOptionalCredentials(username, password);
+    }
+
+    /**
+     * Creates {@link JkRepos} form Jerkar options. the specified repository name will
+     * be turned to <code>repo.[repoName].url</code>, <code>repo.[repoName].username</code>
+     * and <code>repo.[repoName].password</code> options for creating according repository.
+     *
+     * You can specify severals url by using coma separation in <code>repo.[repoName].url</code> option value.
+     * but the credential will remain the same for all returned repositories.
+     */
+    public static JkRepos reposOfOptions(String repoName) {
+	final String urls = JkOptions.get("repo." + repoName + "." + "url");
+	JkRepos result = JkRepos.of();
+	if (JkUtilsString.isBlank(urls)) {
+	    return result;
+	}
+	final String username = JkOptions.get("repo." + repoName + ".username");
+	final String password = JkOptions.get("repo." + repoName + ".password");
+	for (final String url : urls.split(",")) {
+	    result = result.and(JkRepo.of(url.trim()).withOptionalCredentials(username, password));
+	}
+	return result;
     }
 
 }

@@ -83,6 +83,18 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
 	return this;
     }
 
+    public JkRepos andIfEmpty(JkRepo ...repos) {
+	return andIfEmpty(Arrays.asList(repos));
+    }
+
+    public JkRepos andIfEmpty(Iterable<JkRepo> repos) {
+	if (this.isEmpty()) {
+	    return and(repos);
+	}
+	return this;
+    }
+
+
     public JkRepos andIvy(File... files) {
 	final List<JkRepo> list = new LinkedList<JkRepo>(this.repos);
 	list.addAll(JkRepos.ivy(files).repos);

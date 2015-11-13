@@ -42,12 +42,6 @@ final class Project {
 
     private final BuildResolver resolver;
 
-    private static final String DOWNLOAD_REPO_URL_OPTION = "downloadRepoUrl";
-
-    private static final String DOWNLOAD_REPO_USER_NAME_OPTION = "dowloadRepoUsername";
-
-    private static final String DOWNLOAD_REPO_PASSWORD_OPTION = "downloadRepoPassword";
-
     /**
      * Constructs a project from its base directory and the download repository.
      * Download repository is used in case the build classes need some
@@ -64,7 +58,7 @@ final class Project {
     private void preCompile() {
 	final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir,
 		JkFileTree.of(resolver.buildSourceDir).include("**/*.java"));
-	this.buildDependencies = parser.dependencies();
+	this.buildDependencies = this.buildDependencies.and(parser.dependencies());
 	this.buildRepos = parser.importRepos().and(buildRepos);
 	this.subProjects = parser.projects();
     }
@@ -114,6 +108,7 @@ final class Project {
      *            It can be <code>null</code> or empty.
      */
     public void execute(JkInit init) {
+	this.buildDependencies = this.buildDependencies.andScopeless(init.commandLine().dependencies());
 	compile();
 	JkLog.nextLine();
 	final JkClassLoader classLoader = JkClassLoader.current();
@@ -133,20 +128,12 @@ final class Project {
     }
 
     private JkDependencies buildDefDependencies() {
-	final boolean devMode = JkLocator.jerkarJarFile().isDirectory(); // If
-	// true,
-	// we
-	// assume
-	// Jerkar
-	// is
-	// produced
-	// by
-	// IDE
-	// (development
-	// mode)
-	return JkDependencies.builder().on(buildDependencies)
-		.onFiles(localBuildPath()).onFilesIf(devMode, JkClasspath.current()).onFilesIf(!devMode, jerkarLibs())
-		.build();
+
+	// If true, we assume Jerkar is produced by IDE (development mode)
+	final boolean devMode = JkLocator.jerkarJarFile().isDirectory();
+
+	return JkDependencies.builder().on(buildDependencies).onFiles(localBuildPath())
+		.onFilesIf(devMode, JkClasspath.current()).onFilesIf(!devMode, jerkarLibs()).build();
     }
 
     private JkPath localBuildPath() {
@@ -196,8 +183,6 @@ final class Project {
 	runProject(build, commandLine.getMasterMethods(), dictionnary);
     }
 
-
-
     private static void runProject(JkBuild build, List<MethodInvocation> invokes,
 	    PluginDictionnary<JkBuildPlugin> dictionnary) {
 	JkLog.infoHeaded("Executing build for project " + build.baseDir().root().getName());
@@ -207,8 +192,6 @@ final class Project {
 	JkInit.logProps("Field values", displayedOptions);
 	build.execute(toBuildMethods(invokes, dictionnary), null);
     }
-
-
 
     private static List<JkModelMethod> toBuildMethods(Iterable<MethodInvocation> invocations,
 	    PluginDictionnary<JkBuildPlugin> dictionnary) {
@@ -247,13 +230,8 @@ final class Project {
     }
 
     private static JkRepos repos() {
-	final String downloadRepoUrl = JkOptions.get(DOWNLOAD_REPO_URL_OPTION);
-	if (downloadRepoUrl == null) {
-	    return JkRepos.mavenCentral();
-	}
-	final String userName = JkOptions.get(DOWNLOAD_REPO_USER_NAME_OPTION);
-	final String password = JkOptions.get(DOWNLOAD_REPO_PASSWORD_OPTION);
-	return JkRepo.of(downloadRepoUrl).withOptionalCredentials(userName, password).asRepos();
+	return JkBuildDependencySupport.reposOfOptions("build")
+		.andIfEmpty(JkBuildDependencySupport.reposOfOptions("download")).andIfEmpty(JkRepo.mavenCentral());
     }
 
 }

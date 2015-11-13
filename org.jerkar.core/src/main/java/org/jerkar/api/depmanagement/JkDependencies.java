@@ -121,6 +121,17 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * Returns a clone of this object plus the specified
      * {@link JkScopedDependency}s.
      */
+    public JkDependencies andScopeless(Iterable<? extends JkDependency> others) {
+	if (!others.iterator().hasNext()) {
+	    return this;
+	}
+	return JkDependencies.builder().on(this).onScopeless(others).build();
+    }
+
+    /**
+     * Returns a clone of this object plus the specified
+     * {@link JkScopedDependency}s.
+     */
     public JkDependencies and(JkScopedDependency ... others) {
 	return and(Arrays.asList(others));
     }
@@ -494,6 +505,17 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 	 */
 	public JkFluentModuleDepBuilder on(JkModuleDependency dependency) {
 	    return on(dependency, new JkScope[0]);
+	}
+
+	/**
+	 * Adds module dependencies on this builder without mentioning scope.
+	 */
+	public Builder onScopeless(Iterable<? extends JkDependency> dependencies) {
+	    final List<JkScopedDependency> jkScopedDependencies = new LinkedList<JkScopedDependency>();
+	    for (final JkDependency dependency : dependencies) {
+		jkScopedDependencies.add(JkScopedDependency.of(dependency));
+	    }
+	    return on(jkScopedDependencies);
 	}
 
 

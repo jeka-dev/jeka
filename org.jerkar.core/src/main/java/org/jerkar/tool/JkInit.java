@@ -96,6 +96,7 @@ public final class JkInit {
 	optionMap.putAll(commandLine.getMasterBuildOptions());
 	JkOptions.init(optionMap);
 	final JkInit.StandardOptions standardOptions = new JkInit.StandardOptions();
+	JkOptions.populateFields(standardOptions, optionMap);
 	JkLog.silent(standardOptions.silent);
 	JkLog.verbose(standardOptions.verbose);
 

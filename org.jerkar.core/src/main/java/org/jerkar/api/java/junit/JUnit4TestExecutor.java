@@ -30,12 +30,12 @@ class JUnit4TestExecutor {
 	final JunitReportDetail reportDetail = JunitReportDetail.valueOf(args[2]);
 	final File reportDir = new File(args[3]);
 	final Class<?>[] classes = toClassArray(Arrays.copyOfRange(args, 4, args.length));
-	final JkTestSuiteResult result = launchInProcess(classes, printEachTestInConsole, reportDetail, reportDir);
+	final JkTestSuiteResult result = launchInProcess(classes, printEachTestInConsole, reportDetail, reportDir, false);
 	JkUtilsIO.serialize(result, resultFile);
     }
 
     private static JkTestSuiteResult launchInProcess(Class<?>[] classes, boolean printEachTestOnConsole,
-	    JunitReportDetail reportDetail, File reportDir) {
+	    JunitReportDetail reportDetail, File reportDir, boolean restoreSystemOut) {
 	final JUnitCore jUnitCore = new JUnitCore();
 
 
@@ -57,8 +57,10 @@ class JUnit4TestExecutor {
 	try {
 	    result = jUnitCore.run(classes);
 	} finally {
-	    System.setErr(err);
-	    System.setOut(out);
+	    if (restoreSystemOut) {
+		System.setErr(err);
+		System.setOut(out);
+	    }
 	}
 	final long durationInMillis = JkUtilsTime.durationInMillis(start);
 	return JkTestSuiteResult.fromJunit4Result(properties, "all", result, durationInMillis);
