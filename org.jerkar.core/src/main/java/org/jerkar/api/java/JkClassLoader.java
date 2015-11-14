@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,7 @@ import org.jerkar.api.utils.JkUtilsSystem;
 /**
  * Wrapper around {@link URLClassLoader} offering convenient methods and fluent
  * interface to deal with <code>URLClassLoader</code>.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkClassLoader {
@@ -88,7 +89,7 @@ public final class JkClassLoader {
 
     /**
      * Returns a {@link JkClassLoader} wrapping the current class loader.
-     * 
+     *
      * @see Class#getClassLoader()
      */
     public static JkClassLoader current() {
@@ -97,7 +98,7 @@ public final class JkClassLoader {
 
     /**
      * Returns a {@link JkClassLoader} wrapping the system class loader.
-     * 
+     *
      * @see ClassLoader#getSystemClassLoader()
      */
     public static JkClassLoader system() {
@@ -197,7 +198,7 @@ public final class JkClassLoader {
 
     /**
      * Returns a sibling of this class loader that outputs every searched class.
-     * 
+     *
      * @see #sibling(Iterable)
      */
     public JkClassLoader printingSearchedClasses(Set<String> searchedClassContainer) {
@@ -231,7 +232,7 @@ public final class JkClassLoader {
      * wrapped <code>class loader</code>.<br/>
      * The specified class is supposed to be defined in this class loader,
      * otherwise an {@link IllegalArgumentException} is thrown.
-     * 
+     *
      * @see #loadIfExist(String) #isDefined(String)
      */
     @SuppressWarnings("unchecked")
@@ -297,7 +298,7 @@ public final class JkClassLoader {
      * name. Returns <code>null</code> if no class matches. </br>
      * For example : loadFromNameOrSimpleName("MyClass", null) may return the
      * class my.pack.MyClass.
-     * 
+     *
      * @param name
      *            The full name or the simple name of the class to load
      * @param superClassArg
@@ -336,7 +337,7 @@ public final class JkClassLoader {
      * For example : if you want to load all classes that are defined in folder
      * and not in jar file, you have to provide a <code>FileFilter</code> which
      * includes only directories.
-     * 
+     *
      * @param entryFilter
      *            The classpath entry filter. Can be <code>null</code>.
      */
@@ -389,7 +390,7 @@ public final class JkClassLoader {
      * For example, if you want to load all class belonging to
      * <code>my.pack</code> or its sub package, then you have to supply a the
      * following pattern <code>my/pack/&#42;&#42;/&#42;</code>.
-     * 
+     *
      * @see JkClassLoader#loadClasses(JkPathFilter)
      */
     public Set<Class<?>> loadClasses(String... includingPatterns) {
@@ -403,7 +404,7 @@ public final class JkClassLoader {
     /**
      * Returns all classes of this <code>classloader</code> that are defined
      * inside the provided <code>JkFileTreeSet</code>.
-     * 
+     *
      * @see JkClassLoader#loadClassesInEntries(FileFilter)
      */
     public Set<Class<? extends Object>> loadClassesIn(JkFileTreeSet jkFileTreeSet) {
@@ -415,6 +416,36 @@ public final class JkClassLoader {
 	    }
 	}
 	return result;
+    }
+
+    /**
+     * Returns all classes of this <code>classloader</code> that are defined
+     * inside the provided <code>JkFileTreeSet</code>.
+     *
+     * @see JkClassLoader#loadClassesInEntries(FileFilter)
+     */
+    public Iterator<Class<? extends Object>> iterateClassesIn(JkFileTreeSet jkFileTreeSet) {
+	final Iterator<String> fileNames = jkFileTreeSet.andFilter(JkPathFilter.include("**/*.class"))
+		.relativePathes().iterator();
+	return new Iterator<Class<? extends Object>>() {
+
+	    @Override
+	    public boolean hasNext() {
+		return fileNames.hasNext();
+	    }
+
+	    @Override
+	    public Class<? extends Object> next() {
+		final String className = getAsClassName(fileNames.next());
+		return load(className);
+	    }
+
+	    @Override
+	    public void remove() {
+		throw new IllegalStateException("Not supported");
+
+	    }
+	};
     }
 
     private static URL[] toUrl(Iterable<File> files) {
