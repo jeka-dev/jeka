@@ -254,8 +254,8 @@ public class JkBuildDependencySupport extends JkBuild {
 
 	public JkOptionRepos() {
 	    download.url = JkRepo.MAVEN_CENTRAL_URL.toExternalForm();
-	    publish.url = JkRepo.MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL.toExternalForm();
-	    release.url = JkRepo.MAVEN_OSSRH_PUSH_RELEASE.toExternalForm();
+	    publish.url = JkRepo.MAVEN_OSSRH_DOWNLOAD_AND_DEPLOY_SNAPSHOT.toExternalForm();
+	    release.url = JkRepo.MAVEN_OSSRH_DEPLOY_RELEASE.toExternalForm();
 	}
 
     }

@@ -19,10 +19,14 @@ public abstract class JkRepo implements Serializable {
 
     public static final URL MAVEN_CENTRAL_URL = toUrl("http://repo1.maven.org/maven2");
 
-    public static final URL MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL = toUrl(
+    public static final URL MAVEN_OSSRH_DOWNLOAD_AND_DEPLOY_SNAPSHOT = toUrl(
 	    "https://oss.sonatype.org/content/repositories/snapshots/");
 
-    public static final URL MAVEN_OSSRH_PUSH_RELEASE = toUrl("https://oss.sonatype.org/content/repositories/releases/");
+    public static final URL MAVEN_OSSRH_DOWNLOAD_RELEASE = toUrl("https://oss.sonatype.org/content/repositories/releases/");
+
+    public static final URL MAVEN_OSSRH_DEPLOY_RELEASE = toUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2/");
+
+    public static final URL MAVEN_OSSRH_PUBLIC_DOWNLOAD_RELEASE_AND_SNAPSHOT = toUrl("https://oss.sonatype.org/content/groups/public/");
 
     public static final URL JCENTERL_URL = toUrl("https://jcenter.bintray.com");
 
@@ -71,18 +75,18 @@ public abstract class JkRepo implements Serializable {
 	return JkRepo.maven(file);
     }
 
-    public static JkRepo mavenOssrhPushSnapshotPullAll(String jiraId, String jiraPassword) {
-	return maven(JkMavenRepository.MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL.toString())
+    public static JkRepo mavenOssrhDownloadAndDeploySnapshot(String jiraId, String jiraPassword) {
+	return maven(JkMavenRepository.MAVEN_OSSRH_DOWNLOAD_AND_DEPLOY_SNAPSHOT.toString())
 		.withCredential(jiraId, jiraPassword).withRealm("Sonatype Nexus Repository Manager");
     }
 
-    public static JkRepo mavenOssrhPushRelease(String jiraId, String jiraPassword) {
-	return maven(JkMavenRepository.MAVEN_OSSRH_PUSH_RELEASE.toString()).withCredential(jiraId, jiraPassword)
+    public static JkRepo mavenOssrhDeployRelease(String jiraId, String jiraPassword) {
+	return maven(JkMavenRepository.MAVEN_OSSRH_DEPLOY_RELEASE.toString()).withCredential(jiraId, jiraPassword)
 		.withRealm("Sonatype Nexus Repository Manager");
     }
 
-    public static JkRepo mavenOssrhSnapshotDownload() {
-	return maven(JkMavenRepository.MAVEN_OSSRH_PUSH_SNAPSHOT_AND_PULL);
+    public static JkRepo mavenOssrhPublicDownload() {
+	return maven(JkMavenRepository.MAVEN_OSSRH_PUBLIC_DOWNLOAD_RELEASE_AND_SNAPSHOT);
     }
 
 
