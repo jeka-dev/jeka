@@ -153,11 +153,11 @@ public final class JkDependencyResolver {
     /**
      * Gets the path containing all the resolved dependencies as artifact files
      * for the specified scopes.
-     * <p/>
-     *
+     * <p>
      * If no scope is specified then return all file dependencies and the
      * dependencies specified. About the managed dependency the same rule than
      * for {@link #resolve(JkScope...)} apply.
+     * </p>
      */
     public final JkPath get(JkScope... scopes) {
 	if (scopes.length == 0) {
@@ -211,8 +211,7 @@ public final class JkDependencyResolver {
     }
 
     /**
-     * Returns <code>true<code> if this resolver does not contain any
-     * dependencies.
+     * Returns <code>true</code> if this resolver does not contain any dependencies.
      */
     public boolean isEmpty() {
 	for (final JkScope scope : this.dependencies.declaredScopes()) {

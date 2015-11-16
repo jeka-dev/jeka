@@ -86,7 +86,9 @@ final class IvyPublisherForMaven {
 	}
 
 	// update maven-metadata
-	updateMetadata(ivyModuleRevisionId.getModuleId(), ivyModuleRevisionId.getRevision(), returnedMetaData.lastUpdateTimestamp());
+	if (versionedModule.version().isSnapshot()) {
+	    updateMetadata(ivyModuleRevisionId.getModuleId(), ivyModuleRevisionId.getRevision(), returnedMetaData.lastUpdateTimestamp());
+	}
 
 	commitPublication(resolver);
     }
@@ -129,6 +131,8 @@ final class IvyPublisherForMaven {
 	    return null;
 	}
     }
+
+
 
     private File makePom(ModuleDescriptor moduleDescriptor, JkMavenPublication publication) {
 	final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
@@ -187,7 +191,8 @@ final class IvyPublisherForMaven {
 
     private boolean existOnRepo(String dest) {
 	try {
-	    final Resource resource = resolver.getRepository().getResource(dest);
+	    final String path = completePath(dest);
+	    final Resource resource = resolver.getRepository().getResource(path);
 	    return resource.exists();
 	} catch (final IOException e) {
 	    throw new RuntimeException(e);

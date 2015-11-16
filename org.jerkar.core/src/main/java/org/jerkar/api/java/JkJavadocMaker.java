@@ -12,6 +12,7 @@ import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsJdk;
 import org.jerkar.api.utils.JkUtilsReflect;
 
@@ -72,7 +73,16 @@ public final class JkJavadocMaker {
     public void process() {
 	JkLog.startln("Generating javadoc");
 	final String[] args = toArguments(outputDir);
-	execute(doclet, JkLog.infoStream(), JkLog.infoStream(), JkLog.errorStream(), args);
+	final PrintStream warn;
+	final PrintStream error;
+	if (JkLog.verbose()) {
+	    warn = JkLog.warnStream();
+	    error = JkLog.errorStream();
+	} else {
+	    warn = JkUtilsIO.nopPrintStream();
+	    error = JkUtilsIO.nopPrintStream();
+	}
+	execute(doclet, JkLog.infoStream(), warn, error, args);
 	if (outputDir.exists() && zipFile != null) {
 	    JkFileTree.of(outputDir).zip().to(zipFile);
 	}
