@@ -330,7 +330,7 @@ final class IvyPublisherForMaven {
 	    }
 	    if (this.checkFileFlag.pgpSigner != null && signIfneeded) {
 		final File signed = checkFileFlag.pgpSigner.sign(source)[0];
-		final String signedDest = dest + ".asc";
+		final String signedDest = destination + ".asc";
 		putAll(signed, signedDest, overwrite, false);
 	    }
 	} catch (final IOException e) {
