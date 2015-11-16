@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -85,8 +86,6 @@ public final class JkUtilsIO {
 	}
 	return null;
     }
-
-
 
     /**
      * Closes the specified closeable object, ignoring any exceptions.
@@ -286,20 +285,21 @@ public final class JkUtilsIO {
 
     /**
      * Reads the specified zip stream and position it at the beginning of the
-     * specified entry. The specified entry is case insensitive. An exception is thrown if no such entry exist.
+     * specified entry. The specified entry is case insensitive. An exception is
+     * thrown if no such entry exist.
      */
     public static ZipInputStream readZipEntry(InputStream inputStream, String caseInsensitiveEntryName) {
 	final ZipInputStream result = readZipEntryOrNull(inputStream, caseInsensitiveEntryName);
 	if (result == null) {
-	    throw new IllegalArgumentException("Zip " + inputStream + " has no entry "
-		    + caseInsensitiveEntryName);
+	    throw new IllegalArgumentException("Zip " + inputStream + " has no entry " + caseInsensitiveEntryName);
 	}
 	return result;
     }
 
     /**
      * Reads the specified zip stream and position it at the beginning of the
-     * specified entry. The specified entry is case insensitive. It returns <code>null</code> if no such entry exist.
+     * specified entry. The specified entry is case insensitive. It returns
+     * <code>null</code> if no such entry exist.
      */
     public static ZipInputStream readZipEntryOrNull(InputStream inputStream, String caseInsensitiveEntryNAme) {
 	final ZipInputStream zipInputStream = new ZipInputStream(inputStream);
@@ -346,14 +346,29 @@ public final class JkUtilsIO {
      * {@link ZipOutputStream}.
      */
     public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile) {
+	return mergeZip(zos, zipFile, false);
+    }
+
+    /**
+     * Writes all the entries from a given ZipFile to the specified
+     * {@link ZipOutputStream}.
+     */
+    public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile, boolean storeMethod) {
 	final Set<String> duplicateEntries = new HashSet<String>();
 	final Enumeration<? extends ZipEntry> entries = zipFile.entries();
 	while (entries.hasMoreElements()) {
 	    final ZipEntry e = entries.nextElement();
 	    try {
 		if (!e.isDirectory()) {
-		    final boolean success = addEntryInputStream(zos, e.getName(), zipFile.getInputStream(e));
-		    ;
+		    final boolean success;
+		    if (storeMethod) {
+			final InputStream countInputStream = zipFile.getInputStream(e);
+			final CrcAndSize crcAndSize = new CrcAndSize(countInputStream);
+			countInputStream.close();
+			success = addEntryInputStream(zos, e.getName(), zipFile.getInputStream(e), true, crcAndSize);
+		    } else {
+			success = addEntryInputStream(zos, e.getName(), zipFile.getInputStream(e), false, null);
+		    }
 		    if (!success) {
 			duplicateEntries.add(e.getName());
 		    }
@@ -366,8 +381,12 @@ public final class JkUtilsIO {
 	return duplicateEntries;
     }
 
-    private static boolean addEntryInputStream(ZipOutputStream zos, String entryName, InputStream inputStream) {
+    private static boolean addEntryInputStream(ZipOutputStream zos, String entryName, InputStream inputStream,
+	    boolean storedMethod, CrcAndSize crcAndSize) {
 	final ZipEntry zipEntry = new ZipEntry(entryName);
+	if (storedMethod) {
+	    crcAndSize.setupStoredEntry(zipEntry);
+	}
 	try {
 	    zos.putNextEntry(zipEntry);
 	} catch (final ZipException e) {
@@ -394,8 +413,48 @@ public final class JkUtilsIO {
 	}
     }
 
+    private static class CrcAndSize {
+
+	private static final int BUFFER_SIZE = 32 * 1024;
+
+	private final CRC32 crc = new CRC32();
+
+	private long size;
+
+	CrcAndSize(File file) {
+	    final FileInputStream inputStream = inputStream(file);
+	    try {
+		load(inputStream);
+	    } catch(final IOException e) {
+		JkUtilsThrowable.unchecked(e);
+	    } finally {
+		closeQuietly(inputStream);
+	    }
+	}
+
+	CrcAndSize(InputStream inputStream) throws IOException {
+	    load(inputStream);
+	}
+
+	private void load(InputStream inputStream) throws IOException {
+	    final byte[] buffer = new byte[BUFFER_SIZE];
+	    int bytesRead = -1;
+	    while ((bytesRead = inputStream.read(buffer)) != -1) {
+		this.crc.update(buffer, 0, bytesRead);
+		this.size += bytesRead;
+	    }
+	}
+
+	public void setupStoredEntry(ZipEntry entry) {
+	    entry.setSize(this.size);
+	    entry.setCompressedSize(this.size);
+	    entry.setCrc(this.crc.getValue());
+	    entry.setMethod(ZipEntry.STORED);
+	}
+    }
+
     /**
-     * Add a zip entry into the provided <code>ZipOutputStream</code>. The zip
+     * Adds a zip entry into the provided <code>ZipOutputStream</code>. The zip
      * entry is the part of <code>filePathToZip</code> truncated with the
      * <code>baseFolderPath</code>.
      * <p>
@@ -403,6 +462,18 @@ public final class JkUtilsIO {
      * will be added in archive using <code>my/file/to/zip.txt</code> entry.
      */
     public static void addZipEntry(ZipOutputStream zos, File fileToZip, File baseFolder) {
+	addZipEntry(zos, fileToZip, baseFolder, false);
+    }
+
+    /**
+     * Adds a zip entry into the provided <code>ZipOutputStream</code>. The zip
+     * entry is the part of <code>filePathToZip</code> truncated with the
+     * <code>baseFolderPath</code>.
+     * <p>
+     * So a file or folder <code>c:\my\base\folder\my\file\to\zip.txt</code>
+     * will be added in archive using <code>my/file/to/zip.txt</code> entry.
+     */
+    public static void addZipEntry(ZipOutputStream zos, File fileToZip, File baseFolder, boolean storeMethod) {
 	if (!baseFolder.isDirectory()) {
 	    throw new IllegalArgumentException(baseFolder.getPath() + " is not a directory.");
 	}
@@ -410,7 +481,7 @@ public final class JkUtilsIO {
 	if (fileToZip.isDirectory()) {
 	    final File[] files = fileToZip.listFiles();
 	    for (final File file : files) {
-		addZipEntry(zos, file, baseFolder);
+		addZipEntry(zos, file, baseFolder, storeMethod);
 	    }
 	} else {
 	    final String filePathToZip;
@@ -431,7 +502,12 @@ public final class JkUtilsIO {
 	    } catch (final FileNotFoundException e) {
 		throw new IllegalStateException(e);
 	    }
-	    addEntryInputStream(zos, entryName, inputStream);
+	    if (storeMethod) {
+		final CrcAndSize crcAndSize = new CrcAndSize(fileToZip);
+		addEntryInputStream(zos, entryName, inputStream, true, crcAndSize);
+	    } else {
+		addEntryInputStream(zos, entryName, inputStream, false, null);
+	    }
 	    JkUtilsIO.closeQuietly(inputStream);
 	}
     }
@@ -439,14 +515,19 @@ public final class JkUtilsIO {
     /**
      * Add a zip entry into the provided <code>ZipOutputStream</code>.
      */
-    public static void addZipEntry(ZipOutputStream zos, File fileToZip, String enrtyName) {
+    public static void addZipEntry(ZipOutputStream zos, File fileToZip, String enrtyName, boolean storedMethod) {
 	final FileInputStream inputStream;
 	try {
 	    inputStream = new FileInputStream(fileToZip);
 	} catch (final FileNotFoundException e) {
 	    throw new IllegalStateException(e);
 	}
-	addEntryInputStream(zos, enrtyName, inputStream);
+	if (storedMethod) {
+	    final CrcAndSize crcAndSize = new CrcAndSize(fileToZip);
+	    addEntryInputStream(zos, enrtyName, inputStream, true, crcAndSize);
+	} else {
+	    addEntryInputStream(zos, enrtyName, inputStream, false, null);
+	}
     }
 
     /**

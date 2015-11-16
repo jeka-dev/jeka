@@ -27,13 +27,46 @@ import org.jerkar.api.utils.JkUtilsThrowable;
  */
 public final class JkZipper {
 
+    public enum JkCompressionLevel {
+
+	BEST_COMPRESSION(Deflater.BEST_COMPRESSION),
+	BEST_SPEED(Deflater.BEST_SPEED),
+	DEFAULT_COMPRESSION(Deflater.DEFAULT_COMPRESSION),
+	NO_COMPRESSION(Deflater.NO_COMPRESSION),;
+
+	private final int level;
+
+	private JkCompressionLevel(int level) {
+	    this.level =level;
+	}
+
+    }
+
+    public enum JkCompressionMethod {
+
+	DEFLATED(ZipEntry.DEFLATED),
+	STORED(0);
+
+	private final int method;
+
+	private JkCompressionMethod(int method) {
+	    this.method =method;
+	}
+    }
+
     private final List<? extends Object> itemsToZip;
 
     private final List<File> archivestoMerge;
 
-    private JkZipper(List<? extends Object> itemsToZip, List<File> archivestoMerge) {
+    private final JkCompressionLevel jkCompressionLevel;
+
+    private final JkCompressionMethod jkCompressionMethod;
+
+    private JkZipper(List<? extends Object> itemsToZip, List<File> archivestoMerge, JkCompressionLevel level, JkCompressionMethod method) {
 	this.itemsToZip = itemsToZip;
 	this.archivestoMerge = archivestoMerge;
+	this.jkCompressionLevel = level;
+	this.jkCompressionMethod = method;
     }
 
     /**
@@ -49,22 +82,26 @@ public final class JkZipper {
 		archivestoMerges.add(file);
 	    }
 	}
-	return new JkZipper(items, archivestoMerges);
+	return new JkZipper(items, archivestoMerges,
+		JkCompressionLevel.DEFAULT_COMPRESSION, JkCompressionMethod.DEFLATED);
     }
 
     @SuppressWarnings("unchecked")
     static JkZipper of(JkFileTreeSet... jkDirSets) {
-	return new JkZipper(Arrays.asList(jkDirSets), Collections.EMPTY_LIST);
+	return new JkZipper(Arrays.asList(jkDirSets), Collections.EMPTY_LIST,
+		JkCompressionLevel.DEFAULT_COMPRESSION, JkCompressionMethod.DEFLATED);
     }
 
     @SuppressWarnings("unchecked")
     static JkZipper of(JkFileTree... jkDirs) {
-	return new JkZipper(Arrays.asList(jkDirs), Collections.EMPTY_LIST);
+	return new JkZipper(Arrays.asList(jkDirs), Collections.EMPTY_LIST,
+		JkCompressionLevel.DEFAULT_COMPRESSION, JkCompressionMethod.DEFLATED);
     }
 
     @SuppressWarnings("unchecked")
     public JkZipper merge(Iterable<File> archiveFiles) {
-	return new JkZipper(itemsToZip, JkUtilsIterable.concatLists(this.archivestoMerge, archiveFiles));
+	return new JkZipper(itemsToZip, JkUtilsIterable.concatLists(this.archivestoMerge, archiveFiles),
+		this.jkCompressionLevel, this.jkCompressionMethod);
     }
 
     public JkZipper merge(File... archiveFiles) {
@@ -72,48 +109,43 @@ public final class JkZipper {
     }
 
     /**
-     * Zips and writes the contain of this archive to disk using
-     * {@link Deflater#DEFAULT_COMPRESSION} level. This method returns a
-     * {@link JkCheckSumer} to conveniently create digests of the produced zip
-     * file.
-     */
-    public JkCheckSumer to(File zipFile) {
-	JkUtilsFile.createFileIfNotExist(zipFile);
-	return this.to(zipFile, Deflater.DEFAULT_COMPRESSION);
-    }
-
-    public JkCheckSumer appendTo(File existingArchive) {
-	return this.appendTo(existingArchive, Deflater.DEFAULT_COMPRESSION);
-    }
-
-    /**
      * Append the content of this zipper to the specified archive file. If the
      * specified file does not exist, it will be created under the hood.
      */
-    public JkCheckSumer appendTo(File archive, int compressionLevel) {
+    public JkCheckSumer appendTo(File archive) {
 	final File temp = JkUtilsFile.tempFile(archive.getName(), "");
 	JkUtilsFile.move(archive, temp);
-	final JkCheckSumer jkCheckSumer = this.merge(temp).to(archive, compressionLevel);
+	final JkCheckSumer jkCheckSumer = this.merge(temp).to(archive);
 	temp.delete();
 	return jkCheckSumer;
     }
 
+    public JkZipper with(JkCompressionLevel level) {
+	return new JkZipper(this.itemsToZip, this.archivestoMerge, level, this.jkCompressionMethod);
+    }
+
+    public JkZipper with(JkCompressionMethod method) {
+	return new JkZipper(this.itemsToZip, this.archivestoMerge, this.jkCompressionLevel, method);
+    }
+
+
+
     /**
      * As {@link #to(File)} but specifying compression level.
      */
-    public JkCheckSumer to(File zipFile, int compressLevel) {
+    public JkCheckSumer to(File zipFile) {
 	JkLog.start("Creating zip file : " + zipFile);
-	final ZipOutputStream zos = JkUtilsIO.createZipOutputStream(zipFile, compressLevel);
-	zos.setLevel(compressLevel);
+	final ZipOutputStream zos = JkUtilsIO.createZipOutputStream(zipFile, this.jkCompressionLevel.level);
+	zos.setMethod(this.jkCompressionMethod.method);
 
 	// Adding files to archive
 	for (final Object item : this.itemsToZip) {
 	    if (item instanceof File) {
 		final File file = (File) item;
-		JkUtilsIO.addZipEntry(zos, file, file.getParentFile());
+		JkUtilsIO.addZipEntry(zos, file, file.getParentFile(), storedMethod());
 	    } else if (item instanceof EntryFile) {
 		final EntryFile entryFile = (EntryFile) item;
-		JkUtilsIO.addZipEntry(zos, entryFile.file, entryFile.path);
+		JkUtilsIO.addZipEntry(zos, entryFile.file, entryFile.path, storedMethod());
 	    } else if (item instanceof JkFileTree) {
 		final JkFileTree dirView = (JkFileTree) item;
 		addFileTree(zos, dirView);
@@ -135,24 +167,28 @@ public final class JkZipper {
 	    } catch (final IOException e) {
 		throw new RuntimeException("Error while opening zip file " + archiveToMerge.getPath(), e);
 	    }
-	    JkUtilsIO.mergeZip(zos, file);
+	    JkUtilsIO.mergeZip(zos, file, storedMethod());
 	}
 	JkUtilsIO.closeQuietly(zos);
 	JkLog.done();
 	return new JkCheckSumer(zipFile);
     }
 
+    private boolean storedMethod() {
+	return JkCompressionMethod.STORED.equals(jkCompressionMethod);
+    }
+
     public JkZipper andEntryName(String entryName, File file) {
 	final List<Object> list = new LinkedList<Object>(this.itemsToZip);
 	list.add(new EntryFile(entryName, file));
-	return new JkZipper(list, archivestoMerge);
+	return new JkZipper(list, archivestoMerge, this.jkCompressionLevel, this.jkCompressionMethod);
     }
 
     public JkZipper andEntryPath(String entryPath, File file) {
 	final List<Object> list = new LinkedList<Object>(this.itemsToZip);
 	final String path = entryPath.endsWith("/") ? entryPath + file.getName() : entryPath + "/" + file.getName();
 	list.add(new EntryFile(path, file));
-	return new JkZipper(list, archivestoMerge);
+	return new JkZipper(list, archivestoMerge, this.jkCompressionLevel, this.jkCompressionMethod);
     }
 
     private void addFileTree(ZipOutputStream zos, JkFileTree dirView) {
@@ -161,7 +197,8 @@ public final class JkZipper {
 	}
 	final File base = JkUtilsFile.canonicalFile(dirView.root());
 	for (final File file : dirView) {
-	    JkUtilsIO.addZipEntry(zos, file, base);
+	    JkUtilsIO.addZipEntry(zos, file, base,
+		    JkCompressionMethod.STORED.equals(this.jkCompressionMethod));
 	}
     }
 
@@ -288,5 +325,6 @@ public final class JkZipper {
 	    return sha1();
 	}
     }
+
 
 }

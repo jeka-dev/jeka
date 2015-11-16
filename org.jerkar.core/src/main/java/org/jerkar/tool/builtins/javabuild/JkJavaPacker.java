@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.zip.Deflater;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.file.JkFileTree;
@@ -19,7 +18,7 @@ import org.jerkar.api.utils.JkUtilsString;
 /**
  * Jar maker for the {@link JkJavaBuild} template. This maker will get
  * information from supplied java builder to create relevant jars.
- * 
+ *
  * @author Jerome Angibaud
  */
 public class JkJavaPacker implements Cloneable {
@@ -33,8 +32,6 @@ public class JkJavaPacker implements Cloneable {
     }
 
     private final JkJavaBuild build;
-
-    private int compressionLevel = Deflater.DEFAULT_COMPRESSION;
 
     private boolean includeVersion = false;
 
@@ -114,24 +111,24 @@ public class JkJavaPacker implements Cloneable {
     public void pack() {
 	JkLog.startln("Packaging module");
 	if (doJar && !JkUtilsFile.isEmpty(build.classDir(), false)) {
-	    JkFileTree.of(build.classDir()).zip().to(jarFile(), compressionLevel).md5If(checkSums.contains("MD5"))
-		    .sha1If(checkSums.contains("SHA-1"));
+	    JkFileTree.of(build.classDir()).zip().to(jarFile()).md5If(checkSums.contains("MD5"))
+	    .sha1If(checkSums.contains("SHA-1"));
 	}
 	final JkFileTreeSet sourceAndResources = build.sources().and(build.resources());
 	if (doSources && sourceAndResources.countFiles(false) > 0) {
-	    build.sources().and(build.resources()).zip().to(jarSourceFile(), compressionLevel);
+	    build.sources().and(build.resources()).zip().to(jarSourceFile());
 	}
 	if (doTest && !build.tests.skip && build.testClassDir().exists()
 		&& !JkFileTree.of(build.testClassDir()).files(false).isEmpty()) {
-	    JkZipper.of(build.testClassDir()).to(jarTestFile(), compressionLevel);
+	    JkZipper.of(build.testClassDir()).to(jarTestFile());
 	}
 	if (doTest && doSources && !build.unitTestSources().files(false).isEmpty()) {
-	    build.unitTestSources().and(build.unitTestResources()).zip().to(jarTestSourceFile(), compressionLevel);
+	    build.unitTestSources().and(build.unitTestResources()).zip().to(jarTestSourceFile());
 	}
 	if (doFatJar) {
 	    JkFileTree.of(build.classDir()).zip().merge(build.depsFor(JkJavaBuild.RUNTIME))
-		    .to(fatJarFile(), compressionLevel).md5If(checkSums.contains("MD5"))
-		    .sha1If(checkSums.contains("SHA-1"));
+	    .to(fatJarFile()).md5If(checkSums.contains("MD5"))
+	    .sha1If(checkSums.contains("SHA-1"));
 	}
 	for (final Extra action : this.extraActions) {
 	    action.process(build);
@@ -163,16 +160,6 @@ public class JkJavaPacker implements Cloneable {
 
 	private Builder(JkJavaPacker packer) {
 	    this.packer = packer.clone();
-	}
-
-	/**
-	 * Compression of the archive files. Should be expressed with
-	 * {@link Deflater} constants. Default is
-	 * {@link Deflater#DEFAULT_COMPRESSION}.
-	 */
-	public Builder compressionLevel(int level) {
-	    packer.compressionLevel = level;
-	    return this;
 	}
 
 	/**

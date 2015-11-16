@@ -18,7 +18,7 @@ import org.jerkar.api.utils.JkUtilsSystem;
 
 /**
  * Offer fluent interface for launching Java processes.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkJavaProcess {
@@ -98,6 +98,13 @@ public final class JkJavaProcess {
 		this.environment);
     }
 
+    public JkJavaProcess andOptionsIf(boolean condition, String ... options) {
+	if (condition) {
+	    return andOptions(options);
+	}
+	return this;
+    }
+
     public JkJavaProcess andOptions(String... options) {
 	return this.andOptions(Arrays.asList(options));
     }
@@ -141,6 +148,10 @@ public final class JkJavaProcess {
     }
 
     public JkJavaProcess andClasspath(File... files) {
+	return andClasspath(Arrays.asList(files));
+    }
+
+    public JkJavaProcess andClasspath(Iterable<File> files) {
 	return withClasspath(this.classpath.and(files));
     }
 

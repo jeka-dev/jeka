@@ -1,9 +1,9 @@
 package org.jerkar;
 
 import java.io.File;
-import java.util.zip.Deflater;
 
 import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkZipper.JkCompressionLevel;
 import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.JkInit;
@@ -65,7 +65,7 @@ public class CoreBuild extends AbstractBuild {
 	distrib.importFiles(packer().jarFile("lean"));
 	distrib.from("libs-sources").importDirContent(file("build/libs-sources")).importFiles(packer.jarSourceFile());
 	distrib.from("libs-javadoc").importFiles(this.javadocMaker().zipFile());
-	distrib.zip().to(distripZipFile, Deflater.BEST_COMPRESSION);
+	distrib.zip().with(JkCompressionLevel.BEST_COMPRESSION).to(distripZipFile);
 	signIfNeeded(distripZipFile);
 	JkLog.done();
     }

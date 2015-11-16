@@ -16,14 +16,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.zip.ZipOutputStream;
 
 /**
  * Utility class for dealing with files.
@@ -377,34 +375,7 @@ public final class JkUtilsFile {
 	}
     }
 
-    /**
-     * @see #zipDir(File, int, Iterable)
-     */
-    public static void zipDir(File zipFile, int zipLevel, File... dirs) {
-	zipDir(zipFile, zipLevel, Arrays.asList(dirs));
-    }
 
-    /**
-     * Zips the content of the specified directories into the specified zipFile.
-     * If the specified zip file does not exist, the method will create it.
-     *
-     * @param zipLevel
-     *            the compression level (0-9) as specified in
-     *            {@link ZipOutputStream#setLevel(int)}.
-     */
-    public static void zipDir(File zipFile, int zipLevel, Iterable<File> dirs) {
-
-	final ZipOutputStream zos = JkUtilsIO.createZipOutputStream(zipFile, zipLevel);
-	try {
-	    for (final File dir : dirs) {
-		JkUtilsIO.addZipEntry(zos, dir, dir);
-	    }
-	    zos.close();
-	} catch (final IOException e) {
-	    throw new RuntimeException(e);
-	}
-
-    }
 
     /**
      * Returns all files contained recursively in the specified directory.
@@ -632,7 +603,7 @@ public final class JkUtilsFile {
 	}
 	if (reportStream != null) {
 	    reportStream.println("Coping and replacing tokens " + replacements + " from file " + from.getAbsolutePath()
-		    + " to " + toFile.getAbsolutePath());
+	    + " to " + toFile.getAbsolutePath());
 	}
 	final char[] buf = new char[1024];
 	int len;
