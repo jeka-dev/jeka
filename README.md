@@ -21,18 +21,32 @@ Jerkar builds itself. To get Jerkar full distrib built from the Java sources onl
 
 Note that you can do the same using **Intellij** as Intellij module definitions (.iml) are stored in git. `org.jerkar.distrib-all` contains the project definition (.idea folder).
 
-
-
 # Status
 
-Both documentation and code are close to completion and the product is now quite usable. I am currently writing the documentation along polishing the API. This is the last step prior the first release expected Q4 2015.
-I mainly need help for further testing and providing feedback.
+First release has been delivered. It contains all features a self respecting build tool must have : from compilation to publication features.
+Now we'll plan to deliver new releases at fast pace. You're welcome to push your expectation for next releases. 
 
-# Code guidelines
 
-In a nutshell : try to mimick the current style :-)
+# How to learn Jerkar
+
+Jerkar is expected to have a very fast learning curve for Java developers. You can visit the following page in this order :
+
+* http://jerkar.github.io/tell-me-more.html : introduction to Jerkar. Answer to the question : *What Jerkar is exactly ?*
+* http://jerkar.github.io/tour.html : to give a concrete idea onf how Jerkar is working
+* http://jerkar.github.io/documentation/latest/getting_started.html : to get hand-on experience
+* http://jerkar.github.io/documentation/latest/reference.html : to know the details about Jerkar behavior
+
+
+# How to contribute ?
+
+The most wanted skill on this project is technical writing. The documentation is pretty complete but the style may be improved.  
+So if you fell ok to review/improve some documentation, welcome on board !
+
+If you want contribute to code, 1 rule : try to mimick the current style :-).
+More concretely :
+
 * Make a class public only when really needed. If a class is public, it should be prefixed with `Jk` (The goal is to not polute auto-completion in IDE when Jerkar is on the build path).
 * Favor immutable objects.
 * Embrace a fluent style API (so stay away from JavaBean coding conventions).
 * Don't use 3rd party dependencies (Use or enrich JkUtilsXxxxx classes for commons). 
-* Make your code JDK6 complient (probably switch to JDK 7 soon).
+* Make your code JDK6 complient (probably switch to JDK 7/8 soon).
