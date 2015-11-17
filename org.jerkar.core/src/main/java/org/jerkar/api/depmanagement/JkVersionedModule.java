@@ -1,6 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.Serializable;
+import java.util.jar.Attributes;
 
 import org.jerkar.api.java.JkManifest;
 
@@ -24,7 +25,7 @@ public final class JkVersionedModule implements Serializable {
     public static final JkVersionedModule of(String groupAndName, String version) {
 	final String[] items = groupAndName.split(":");
 	if (items.length != 2) {
-	    throw new IllegalArgumentException(groupAndName + " does not tespect format groupId:name");
+	    throw new IllegalArgumentException(groupAndName + " does not respect format groupId:name");
 	}
 	return JkVersionedModule.of(JkModuleId.of(groupAndName), JkVersion.ofName(version));
     }
@@ -114,9 +115,9 @@ public final class JkVersionedModule implements Serializable {
      * Fills the manifest with <code>implementation</code> info.
      */
     public void populateManifest(JkManifest manifest) {
-	manifest.addMainAttribute(JkManifest.IMPLEMENTATION_TITLE, moduleId().name())
-	.addMainAttribute(JkManifest.IMPLEMENTATION_VERSION, version().name())
-	.addMainAttribute(JkManifest.IMPLEMENTATION_VENDOR_ID, moduleId().group());
+	manifest.addMainAttribute(Attributes.Name.IMPLEMENTATION_TITLE, moduleId().name())
+	.addMainAttribute(Attributes.Name.IMPLEMENTATION_VERSION, version().name())
+	.addMainAttribute(Attributes.Name.IMPLEMENTATION_VENDOR_ID, moduleId().group());
     }
 
 }

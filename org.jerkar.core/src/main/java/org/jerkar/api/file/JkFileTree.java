@@ -66,7 +66,6 @@ public final class JkFileTree implements Iterable<File> {
      */
     public JkFileTree from(String relativePath) {
 	final File newBase = new File(root, relativePath);
-
 	return new JkFileTree(newBase);
     }
 

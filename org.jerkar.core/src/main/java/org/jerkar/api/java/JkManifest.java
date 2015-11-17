@@ -11,8 +11,6 @@ import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
 
-import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsThrowable;
@@ -42,36 +40,46 @@ public final class JkManifest {
     /**
      * The user has created this manifest. Normally system property <code>user.name</code>
      */
-    public static final String BUILT_BY = "Built-By";
-
-    public static final String SPECIFICATION_TITLE = "Specification-Title";
-
-    public static final String SPECIFICATION_VERSION = "Specification-Version";
-
-    public static final String SPECIFICATION_VENDOR = "Specification-Vendor";
-
-    public static final String IMPLEMENTATION_TITLE = "Implementation-Title";
-
-    public static final String IMPLEMENTATION_VERSION = "Implementation-Version";
-
-    public static final String IMPLEMENTATION_VENDOR_ID = "Implementation-Vendor-Id";
-
-    public static final String IMPLEMENTATION_URL = "Implementation-URL";
+    private static final String BUILT_BY = "Built-By";
 
     private final Manifest manifest;
 
+    /**
+     * Creates a JkManifest from the specified {@link Manifest} object.
+     */
     public static JkManifest of(Manifest manifest) {
 	return new JkManifest(manifest);
     }
 
-    public final JkManifest of(JkFileTreeSet fileTrees) {
-	return of(readMetaInfManifest(fileTrees));
-    }
-
+    /**
+     * Creates a <code>JkManifest</code> from the specified file. The file
+     * is supposed to be a manifest file. If the manifest file does not exist,
+     * an {@link IllegalArgumentException} is thrown.
+     */
     public static JkManifest of(File manifestFile) {
+	if (!manifestFile.exists()) {
+	    throw new IllegalArgumentException("Manifest file " + manifestFile.getPath() + " not found.");
+	}
 	return new JkManifest(read(manifestFile));
     }
 
+    /**
+     * Creates a <code>JkManifest</code> from the specified class dir. This method looks
+     * at the META-INF/MANIFEST.MF file inside the specified directory to create the
+     * returned manifest. If no such file is found, an empty manifest is returned.
+     */
+    public static JkManifest ofClassDir(File classDir) {
+	final File manifestFile = new File(classDir, PATH);
+	if (!manifestFile.exists()) {
+	    return JkManifest.empty();
+	}
+	return of(manifestFile);
+    }
+
+    /**
+     * Creates a <code>JkManifest</code> from the specified input stream. The specified stream
+     * is supposed to contains manifest information as present in a manifest file.
+     */
     public static JkManifest of(InputStream inputStream) {
 	return new JkManifest(read(inputStream));
     }
@@ -92,6 +100,9 @@ public final class JkManifest {
 	}
     }
 
+    /**
+     * Returns an empty manifest containing only the "Manifest-Version=1.0" attribute.
+     */
     public static JkManifest empty() {
 	final Manifest manifest = new Manifest();
 	manifest.getMainAttributes().putValue(Name.MANIFEST_VERSION.toString(), "1.0");
@@ -154,7 +165,7 @@ public final class JkManifest {
 	    manifest.read(is);
 	    return manifest;
 	} catch (final IOException e) {
-	    throw new RuntimeException(e);
+	    throw JkUtilsThrowable.unchecked(e);
 	} finally {
 	    JkUtilsIO.closeQuietly(is);
 	}
@@ -168,16 +179,6 @@ public final class JkManifest {
 	} catch (final IOException e) {
 	    throw JkUtilsThrowable.unchecked(e);
 	}
-    }
-
-    private static Manifest readMetaInfManifest(JkFileTreeSet jkFileTreeSet) {
-	for (final JkFileTree dir : jkFileTreeSet.fileTrees()) {
-	    final File candidate = dir.file(PATH);
-	    if (candidate.exists()) {
-		return read(candidate);
-	    }
-	}
-	throw new IllegalArgumentException("No " + PATH + " found in " + jkFileTreeSet);
     }
 
     public void writeTo(File file) {

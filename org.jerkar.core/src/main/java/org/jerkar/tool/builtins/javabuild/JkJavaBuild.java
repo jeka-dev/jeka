@@ -18,6 +18,7 @@ import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.java.JkJavadocMaker;
+import org.jerkar.api.java.JkManifest;
 import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
@@ -491,6 +492,14 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 		.on(JkFileSystemDependency.of(libDir.include("provided/*.jar"))).usingDefaultScopes(RUNTIME)
 		.on(JkFileSystemDependency.of(libDir.include("runtime/*.jar"))).usingDefaultScopes(TEST)
 		.on(JkFileSystemDependency.of(libDir.include("test/*.jar"))).build();
+    }
+
+    /**
+     * Returns the manifest that will be inserted in generated jars. Override it if
+     * you want to add extra info.
+     */
+    protected JkManifest jarManifest() {
+	return JkManifest.of(this.classDir());
     }
 
     // Lifecycle methods
