@@ -20,6 +20,7 @@ import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
+import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -51,18 +52,36 @@ public class JkBuildDependencySupport extends JkBuild {
     protected JkBuildDependencySupport() {
     }
 
+
     /**
-     * The current version for this project. It has to be understood as the
-     * 'release version', as this version will be used to publish artifacts.
-     * <br/>
-     * It may take format as <code>1.0-SNAPSHOT</code>,
-     * <code>trunk-SNAPSHOT</code>, <code>1.2.3-rc1</code>, <code>1.2.3</code>,
-     * ... This may be injected using the 'version' option, otherwise it takes
-     * the value returned by {@link #version()} If not, it takes the result from
-     * {@link #version()}
+     * Override this method to define version programmatically.
+     * This is not necessary the effective version that will be used in end.
+     * Indeed version injected via Jerkar options takes precedence on this one.
+     *
+     * @see JkBuildDependencySupport#effectiveVersion()
      */
-    public JkVersion version() {
-	return JkVersion.firstNonNull(version, "1.0-SNAPSHOT");
+    protected JkVersion version() {
+	return null;
+    }
+
+    /**
+     * Returns the effective version for this project. This value is used to
+     * name and publish artifacts. It may take format as <code>1.0-SNAPSHOT</code>,
+     * <code>trunk-SNAPSHOT</code>, <code>1.2.3-rc1</code>, <code>1.2.3</code>.
+     *
+     * To get the effective version, this method looks in the following order :
+     * <ul>
+     * <li>The version injected by option (with command line argment -version=2.1 for example)</li>
+     * <li>The version returned by the {@link #version()} method</li>
+     * <li>The the hard-coded <code>1.0-SNAPSHOT</code> value</li>
+     * </ul>
+     *
+     */
+    public final JkVersion effectiveVersion() {
+	if (!JkUtilsString.isBlank(version)) {
+	    return JkVersion.ofName(version);
+	}
+	return JkUtilsObject.firstNonNull(version(), JkVersion.ofName("1.0-SNAPSHOT"));
     }
 
     /**
@@ -77,7 +96,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * Returns moduleId along its version
      */
     protected final JkVersionedModule versionedModule() {
-	return JkVersionedModule.of(moduleId(), version());
+	return JkVersionedModule.of(moduleId(), effectiveVersion());
     }
 
     /**

@@ -348,7 +348,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 		.resolve(this.dependencies().involvedScopes()).resolvedVersionProvider();
 	if (this.publisher().hasMavenPublishRepo()) {
 	    final JkMavenPublication publication = mavenPublication();
-	    final JkDependencies deps = version().isSnapshot() ? dependencies.resolvedWith(resolvedVersions)
+	    final JkDependencies deps = effectiveVersion().isSnapshot() ? dependencies.resolvedWith(resolvedVersions)
 		    : dependencies;
 	    this.publisher().publishMaven(versionedModule(), publication, deps);
 	}
@@ -610,7 +610,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     private static JkJavadocMaker javadocMaker(JkJavaBuild javaBuild, boolean fullName, boolean includeVersion) {
 	String name = fullName ? javaBuild.moduleId().toString() : javaBuild.moduleId().toString();
 	if (includeVersion) {
-	    name = name + "-" + javaBuild.version().name();
+	    name = name + "-" + javaBuild.effectiveVersion().name();
 	}
 	name = name + "-javadoc";
 	return JkJavadocMaker.of(javaBuild.sources(), javaBuild.ouputDir(name), javaBuild.ouputDir(name + ".jar"))

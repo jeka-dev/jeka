@@ -2,23 +2,22 @@ package org.jerkar.api.utils;
 
 /**
  * Utility class for dealing with generic Object class instances.
- * 
+ *
  * @author Jerome Angiabud
  */
 public final class JkUtilsObject {
 
     /**
-     * Returns the object1 if object1 is not <code>null</code>, otherwise
-     * returns object2.
+     * Returns the objects of the specified array that is not <code>null</code>. Throw an {@link IllegalArgumentException}
+     * if all array elements are <code>null</code> or the specified array is empty.
      */
-    public static <T> T firstNonNull(T object1, T object2) {
-	if (object1 == null) {
-	    if (object2 == null) {
-		throw new IllegalArgumentException("Both objects can't be null.");
+    public static <T> T firstNonNull(T ...items) {
+	for (final T item : items) {
+	    if (item != null) {
+		return item;
 	    }
-	    return object2;
 	}
-	return object1;
+	throw new IllegalArgumentException("Both objects can't be null.");
     }
 
     /**
