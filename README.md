@@ -27,19 +27,19 @@ First release has been delivered. It contains all features a self respecting bui
 Now we'll plan to deliver new releases at fast pace. You're welcome to push your expectation for next releases. 
 
 
-# How to learn Jerkar
+# Using Jerkar
 
 Jerkar is expected to have a very fast learning curve for Java developers. You can visit the following page in this order :
 
 * http://jerkar.github.io/tell-me-more.html : introduction to Jerkar. Answer to the question : *What Jerkar is exactly ?*
-* http://jerkar.github.io/tour.html : to give a concrete idea onf how Jerkar is working
+* http://jerkar.github.io/tour.html : to give a concrete idea of how Jerkar is working
 * http://jerkar.github.io/documentation/latest/getting_started.html : to get hand-on experience
 * http://jerkar.github.io/documentation/latest/reference.html : to know the details about Jerkar behavior
 
 
 # How to contribute ?
 
-The most wanted skill on this project is technical writing. The documentation is pretty complete but the style may be improved.  
+The most wanted skill on this project is technical writing. The documentation is pretty complete but the style should be improved.  
 So if you fell ok to review/improve some documentation, welcome on board !
 
 If you want contribute to code, 1 rule : try to mimick the current style :-).
