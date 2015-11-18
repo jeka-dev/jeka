@@ -556,7 +556,7 @@ With this definition, you only have to execute `jerkar doVerify` to trigger a So
 
 If you want to play with other build classes available in the _samples_ project the same way you did for _AClassicalBuild_, just mention `-buildClass=Xxxxx` in the command line where `Xxxxx` stands for the short or complete name of the build class. So for example, `jerkar -buildClass=AntStyleBuild` is perfectly valid as `jerkar -buildClass=org.jerkar.samples.AntStyleBuild`. 
 
-## Play with 'samples-dependee' projectt
+## Play with 'samples-dependee' project
 
 This project illustrates how to handle multi-project builds. You can get it at [Jerkar Git Repository](https://github.com/jerkar/jerkar.git )..
 This project depends on **org.jerkar.samples** project see previously..
