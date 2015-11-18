@@ -37,38 +37,47 @@ import org.jerkar.tool.JkDoc;
  * set of "standard" scope to define dependencies. You are not forced to use it
  * strictly but it can simplify dependency management to follow a given
  * standard.
- *
+ * 
  * @author Jerome Angibaud
  */
 public class JkJavaBuild extends JkBuildDependencySupport {
 
-    public static final JkScope PROVIDED = JkScope.of("provided").transitive(false)
-	    .descr("Dependencies to compile the project but that should not be embedded in produced artifacts.");
+    public static final JkScope PROVIDED = JkScope
+            .of("provided")
+            .transitive(false)
+            .descr("Dependencies to compile the project but that should not be embedded in produced artifacts.");
 
-    public static final JkScope COMPILE = JkScope.of("compile").descr("Dependencies to compile the project.");
+    public static final JkScope COMPILE = JkScope.of("compile").descr(
+            "Dependencies to compile the project.");
 
-    public static final JkScope RUNTIME = JkScope.of("runtime").extending(COMPILE)
-	    .descr("Dependencies to embed in produced artifacts (as war or fat jar * files).");
+    public static final JkScope RUNTIME = JkScope
+            .of("runtime")
+            .extending(COMPILE)
+            .descr("Dependencies to embed in produced artifacts (as war or fat jar * files).");
 
-    public static final JkScope TEST = JkScope.of("test").extending(RUNTIME, PROVIDED)
-	    .descr("Dependencies necessary to compile and run tests.");
+    public static final JkScope TEST = JkScope.of("test")
+            .extending(RUNTIME, PROVIDED)
+            .descr("Dependencies necessary to compile and run tests.");
 
-    public static final JkScope SOURCES = JkScope.of("sources").transitive(false)
-	    .descr("Contains the source artefacts");
+    public static final JkScope SOURCES = JkScope.of("sources")
+            .transitive(false).descr("Contains the source artefacts");
 
-    public static final JkScope JAVADOC = JkScope.of("javadoc").transitive(false)
-	    .descr("Contains the javadoc of this project");
+    public static final JkScope JAVADOC = JkScope.of("javadoc")
+            .transitive(false).descr("Contains the javadoc of this project");
 
-    private static final JkScopeMapping SCOPE_MAPPING = JkScopeMapping.of(COMPILE)
-	    .to("archives(master)", COMPILE.name()).and(PROVIDED).to("archives(master)", COMPILE.name()).and(RUNTIME)
-	    .to("archives(master)", RUNTIME.name()).and(TEST).to("archives(master)", RUNTIME.name(), "test(master)");
+    private static final JkScopeMapping SCOPE_MAPPING = JkScopeMapping
+            .of(COMPILE).to("archives(master)", COMPILE.name()).and(PROVIDED)
+            .to("archives(master)", COMPILE.name()).and(RUNTIME)
+            .to("archives(master)", RUNTIME.name()).and(TEST)
+            .to("archives(master)", RUNTIME.name(), "test(master)");
 
     /**
      * Filter to excludes everything in a java source directory which are not
      * resources.
      */
-    public static final JkPathFilter RESOURCE_FILTER = JkPathFilter.exclude("**/*.java").andExclude("**/package.html")
-	    .andExclude("**/doc-files");
+    public static final JkPathFilter RESOURCE_FILTER = JkPathFilter
+            .exclude("**/*.java").andExclude("**/package.html")
+            .andExclude("**/doc-files");
 
     @JkDoc("Tests")
     public JkOptionTest tests = new JkOptionTest();
@@ -82,7 +91,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
     @Override
     protected List<Class<Object>> pluginTemplateClasses() {
-	return JkUtilsIterable.listOfGeneric(JkJavaBuildPlugin.class);
+        return JkUtilsIterable.listOfGeneric(JkJavaBuildPlugin.class);
     }
 
     // --------------------------- Project settings -----------------------
@@ -91,7 +100,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * Returns the encoding of source files for the compiler.
      */
     public String sourceEncoding() {
-	return "UTF-8";
+        return "UTF-8";
     }
 
     /**
@@ -99,7 +108,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * ...).
      */
     public String sourceJavaVersion() {
-	return JkUtilsJdk.runningJavaVersion();
+        return JkUtilsJdk.runningJavaVersion();
     }
 
     /**
@@ -107,7 +116,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * ...).
      */
     public String targetJavaVersion() {
-	return sourceJavaVersion();
+        return sourceJavaVersion();
     }
 
     /**
@@ -115,7 +124,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * manually (not generated).
      */
     public JkFileTreeSet editedSources() {
-	return JkFileTreeSet.of(file("src/main/java"));
+        return JkFileTreeSet.of(file("src/main/java"));
     }
 
     /**
@@ -123,7 +132,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * manually (not generated).
      */
     public JkFileTreeSet unitTestEditedSources() {
-	return JkFileTreeSet.of(file("src/test/java"));
+        return JkFileTreeSet.of(file("src/test/java"));
     }
 
     /**
@@ -131,7 +140,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * sources).
      */
     public JkFileTreeSet sources() {
-	return JkJavaBuildPlugin.applySourceDirs(this.plugins.getActives(), editedSources().and(generatedSourceDir()));
+        return JkJavaBuildPlugin.applySourceDirs(this.plugins.getActives(),
+                editedSources().and(generatedSourceDir()));
     }
 
     /**
@@ -139,182 +149,196 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * manually (not generated).
      */
     public JkFileTreeSet editedResources() {
-	return JkFileTreeSet.of(file("src/main/resources"));
+        return JkFileTreeSet.of(file("src/main/resources"));
     }
 
     /**
      * Returns location of production resources.
      */
     public JkFileTreeSet resources() {
-	final JkFileTreeSet original = sources().andFilter(RESOURCE_FILTER).and(editedResources())
-		.and(generatedResourceDir());
-	return JkJavaBuildPlugin.applyResourceDirs(this.plugins.getActives(), original);
+        final JkFileTreeSet original = sources().andFilter(RESOURCE_FILTER)
+                .and(editedResources()).and(generatedResourceDir());
+        return JkJavaBuildPlugin.applyResourceDirs(this.plugins.getActives(),
+                original);
     }
 
     /**
      * Returns location of test source code.
      */
     public JkFileTreeSet unitTestSources() {
-	return JkJavaBuildPlugin.applyTestSourceDirs(this.plugins.getActives(), unitTestEditedSources());
+        return JkJavaBuildPlugin.applyTestSourceDirs(this.plugins.getActives(),
+                unitTestEditedSources());
     }
 
     /**
      * Returns location of test resources.
      */
     public JkFileTreeSet unitTestResources() {
-	final JkFileTreeSet original = unitTestSources().andFilter(RESOURCE_FILTER);
-	return JkJavaBuildPlugin.applyTestResourceDirs(this.plugins.getActives(), original);
+        final JkFileTreeSet original = unitTestSources().andFilter(
+                RESOURCE_FILTER);
+        return JkJavaBuildPlugin.applyTestResourceDirs(
+                this.plugins.getActives(), original);
     }
 
     /**
      * Returns location of generated sources.
      */
     public File generatedSourceDir() {
-	return ouputDir("generated-sources/java");
+        return ouputDir("generated-sources/java");
     }
 
     /**
      * Returns location of generated resources.
      */
     public File generatedResourceDir() {
-	return ouputDir("generated-resources");
+        return ouputDir("generated-resources");
     }
 
     /**
      * Returns location of generated resources for tests.
      */
     public File generatedTestResourceDir() {
-	return ouputDir("generated-unitTest-resources");
+        return ouputDir("generated-unitTest-resources");
     }
 
     /**
      * Returns location where the java production classes are compiled.
      */
     public File classDir() {
-	return ouputDir().from("classes").createIfNotExist().root();
+        return ouputDir().from("classes").createIfNotExist().root();
     }
 
     /**
      * Returns location where the test reports are written.
      */
     public File testReportDir() {
-	return ouputDir("test-reports");
+        return ouputDir("test-reports");
     }
 
     /**
      * Returns location where the java production classes are compiled.
      */
     public File testClassDir() {
-	return ouputDir().from("testClasses").createIfNotExist().root();
+        return ouputDir().from("testClasses").createIfNotExist().root();
     }
 
     // --------------------------- Configurer -----------------------------
 
     public JkJavaCompiler productionCompiler() {
-	return JkJavaCompiler.ofOutput(classDir()).andSources(sources()).withClasspath(depsFor(COMPILE, PROVIDED))
-		.withSourceVersion(this.sourceJavaVersion()).withTargetVersion(this.targetJavaVersion());
+        return JkJavaCompiler.ofOutput(classDir()).andSources(sources())
+                .withClasspath(depsFor(COMPILE, PROVIDED))
+                .withSourceVersion(this.sourceJavaVersion())
+                .withTargetVersion(this.targetJavaVersion());
     }
 
     public JkJavaCompiler unitTestCompiler() {
-	return JkJavaCompiler.ofOutput(testClassDir()).andSources(unitTestSources())
-		.withClasspath(this.depsFor(TEST, PROVIDED).andHead(classDir()))
-		.withSourceVersion(this.sourceJavaVersion()).withTargetVersion(this.targetJavaVersion());
+        return JkJavaCompiler
+                .ofOutput(testClassDir())
+                .andSources(unitTestSources())
+                .withClasspath(this.depsFor(TEST, PROVIDED).andHead(classDir()))
+                .withSourceVersion(this.sourceJavaVersion())
+                .withTargetVersion(this.targetJavaVersion());
     }
 
     public final JkUnit unitTester() {
-	return JkJavaBuildPlugin.applyUnitTester(plugins.getActives(), createUnitTester());
+        return JkJavaBuildPlugin.applyUnitTester(plugins.getActives(),
+                createUnitTester());
     }
 
     protected JkUnit createUnitTester() {
-	final JkClasspath classpath = JkClasspath.of(this.testClassDir(), this.classDir())
-		.and(this.depsFor(TEST, PROVIDED));
-	final File junitReport = new File(this.testReportDir(), "junit");
-	JkUnit result = JkUnit.of(classpath).withReportDir(junitReport).withReport(this.tests.report)
-		.withClassesToTest(this.testClassDir());
-	if (this.tests.fork) {
-	    final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
-	    result = result.forked(javaProcess, true);
-	}
-	return result.withOutputOnConsole(this.tests.output || JkLog.verbose());
+        final JkClasspath classpath = JkClasspath.of(this.testClassDir(),
+                this.classDir()).and(this.depsFor(TEST, PROVIDED));
+        final File junitReport = new File(this.testReportDir(), "junit");
+        JkUnit result = JkUnit.of(classpath).withReportDir(junitReport)
+                .withReport(this.tests.report)
+                .withClassesToTest(this.testClassDir());
+        if (this.tests.fork) {
+            final JkJavaProcess javaProcess = JkJavaProcess.of()
+                    .andCommandLine(this.tests.jvmOptions);
+            result = result.forked(javaProcess, true);
+        }
+        return result.withOutputOnConsole(this.tests.output || JkLog.verbose());
     }
 
     public JkJavadocMaker javadocMaker() {
-	return javadocMaker(this, true, false);
+        return javadocMaker(this, true, false);
     }
 
     public final JkJavaPacker packer() {
-	return JkJavaBuildPlugin.applyPacker(plugins.getActives(), createPacker());
+        return JkJavaBuildPlugin.applyPacker(plugins.getActives(),
+                createPacker());
     }
 
     protected JkJavaPacker createPacker() {
-	return JkJavaPacker.of(this);
+        return JkJavaPacker.of(this);
     }
 
     protected JkResourceProcessor resourceProcessor() {
-	return JkResourceProcessor.of(resources());
+        return JkResourceProcessor.of(resources());
     }
 
     // --------------------------- Callable Methods -----------------------
 
     @Override
     public void scaffold() {
-	super.scaffold();
-	for (final JkFileTree dir : editedSources().fileTrees()) {
-	    dir.root().mkdirs();
-	}
-	for (final JkFileTree dir : unitTestEditedSources().fileTrees()) {
-	    dir.root().mkdirs();
-	}
+        super.scaffold();
+        for (final JkFileTree dir : editedSources().fileTrees()) {
+            dir.root().mkdirs();
+        }
+        for (final JkFileTree dir : unitTestEditedSources().fileTrees()) {
+            dir.root().mkdirs();
+        }
     }
 
     @Override
     protected String scaffoldedBuildClassCode() {
-	if (baseDir().file("pom.xml").exists() && JkMvn.INSTALLED) {
-	    JkLog.info("pom.xml detected and Maven installed : try to generate build class from existing pom.");
-	    try {
-		return JkMvn.of(baseDir().root()).createBuildClassCode(null, "Build");
-	    } catch (final RuntimeException e) {
-		e.printStackTrace();
-		JkLog.info("Maven migration failed. Just generate standard build class.");
-	    }
-	}
-	final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
-	codeWriter.extendedClass = "JkJavaBuild";
-	codeWriter.dependencies = JkDependencies.builder().build();
-	codeWriter.imports.clear();
-	codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsFoJkJavaBuild());
-	return codeWriter.wholeClass() + codeWriter.endClass();
+        if (baseDir().file("pom.xml").exists() && JkMvn.INSTALLED) {
+            JkLog.info("pom.xml detected and Maven installed : try to generate build class from existing pom.");
+            try {
+                return JkMvn.of(baseDir().root()).createBuildClassCode(null,
+                        "Build");
+            } catch (final RuntimeException e) {
+                e.printStackTrace();
+                JkLog.info("Maven migration failed. Just generate standard build class.");
+            }
+        }
+        final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
+        codeWriter.extendedClass = "JkJavaBuild";
+        codeWriter.dependencies = JkDependencies.builder().build();
+        codeWriter.imports.clear();
+        codeWriter.imports.addAll(JkCodeWriterForBuildClass
+                .importsFoJkJavaBuild());
+        return codeWriter.wholeClass() + codeWriter.endClass();
     }
-
 
     @JkDoc("Generate sources and resources, compile production sources and process production resources to the classes directory.")
     public void compile() {
-	JkLog.startln("Processing production code and resources");
-	generateSources();
-	productionCompiler().compile();
-	generateResources();
-	processResources();
-	JkLog.done();
+        JkLog.startln("Processing production code and resources");
+        generateSources();
+        productionCompiler().compile();
+        generateResources();
+        processResources();
+        JkLog.done();
     }
 
     @JkDoc("Compile and run all unit tests.")
     public void unitTest() {
-	this.generateUnitTestSources();
-	if (!checkProcessTests(unitTestSources())) {
-	    return;
-	}
-	JkLog.startln("Process unit tests");
-	unitTestCompiler().compile();
-	generateUnitTestResources();
-	processUnitTestResources();
-	unitTester().run();
-	JkLog.done();
+        this.generateUnitTestSources();
+        if (!checkProcessTests(unitTestSources())) {
+            return;
+        }
+        JkLog.startln("Process unit tests");
+        unitTestCompiler().compile();
+        generateUnitTestResources();
+        processUnitTestResources();
+        unitTester().run();
+        JkLog.done();
     }
 
     @JkDoc("Produce documents for this project (javadoc, Html site, ...)")
     public void javadoc() {
-	javadocMaker().process();
-	signIfNeeded(javadocMaker().zipFile());
+        javadocMaker().process();
+        signIfNeeded(javadocMaker().zipFile());
     }
 
     /**
@@ -324,40 +348,45 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * name but with the <i>.asc</i> suffix.
      */
     protected final void signIfNeeded(File... files) {
-	if (pack.signWithPgp) {
-	    pgp().sign(files);
-	}
+        if (pack.signWithPgp) {
+            pgp().sign(files);
+        }
     }
 
-    @JkDoc({ "Create many jar files containing respectively binaries, sources, test binaries and test sources.",
+    @JkDoc({
+        "Create many jar files containing respectively binaries, sources, test binaries and test sources.",
     "The jar containing the binary is the one that will be used as a depe,dence for other project." })
     public void pack() {
-	packer().pack();
+        packer().pack();
     }
 
     @JkDoc("Method executed by default when none is specified. By default this method equals to #clean + #doPack")
     @Override
     public void doDefault() {
-	doPack();
+        doPack();
     }
 
-    @JkDoc({ "Publish the produced artifact to the defined repositories. ",
+    @JkDoc({
+        "Publish the produced artifact to the defined repositories. ",
     "This can work only if a 'publishable' repository has been defined and the artifact has been generated (pack method)." })
     public void publish() {
-	final JkDependencies dependencies = dependencyResolver().dependenciesToResolve();
-	final JkVersionProvider resolvedVersions = this.dependencyResolver()
-		.resolve(this.dependencies().involvedScopes()).resolvedVersionProvider();
-	if (this.publisher().hasMavenPublishRepo()) {
-	    final JkMavenPublication publication = mavenPublication();
-	    final JkDependencies deps = effectiveVersion().isSnapshot() ? dependencies.resolvedWith(resolvedVersions)
-		    : dependencies;
-	    this.publisher().publishMaven(versionedModule(), publication, deps);
-	}
-	if (this.publisher().hasIvyPublishRepo()) {
-	    final Date date = this.buildTime();
-	    this.publisher().publishIvy(versionedModule(), ivyPublication(), dependencies, COMPILE, SCOPE_MAPPING, date,
-		    resolvedVersions);
-	}
+        final JkDependencies dependencies = dependencyResolver()
+                .dependenciesToResolve();
+        final JkVersionProvider resolvedVersions = this.dependencyResolver()
+                .resolve(this.dependencies().involvedScopes())
+                .resolvedVersionProvider();
+        if (this.publisher().hasMavenPublishRepo()) {
+            final JkMavenPublication publication = mavenPublication();
+            final JkDependencies deps = effectiveVersion().isSnapshot() ? dependencies
+                    .resolvedWith(resolvedVersions) : dependencies;
+                    this.publisher().publishMaven(versionedModule(), publication, deps);
+        }
+        if (this.publisher().hasIvyPublishRepo()) {
+            final Date date = this.buildTime();
+            this.publisher().publishIvy(versionedModule(), ivyPublication(),
+                    dependencies, COMPILE, SCOPE_MAPPING, date,
+                    resolvedVersions);
+        }
     }
 
     // ----------------------- Overridable sub-methods ---------------------
@@ -366,21 +395,21 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * Override this method if you need to generate some production sources
      */
     protected void generateSources() {
-	// Do nothing by default
+        // Do nothing by default
     }
 
     /**
      * Override this method if you need to generate some unit test sources.
      */
     protected void generateUnitTestSources() {
-	// Do nothing by default
+        // Do nothing by default
     }
 
     /**
      * Override this method if you need to generate some resources.
      */
     protected void generateResources() {
-	// Do nothing by default
+        // Do nothing by default
     }
 
     /**
@@ -388,7 +417,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * unit tests.
      */
     protected void generateUnitTestResources() {
-	// Do nothing by default
+        // Do nothing by default
     }
 
     /**
@@ -397,7 +426,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * method.
      */
     protected void processResources() {
-	this.resourceProcessor().generateTo(classDir());
+        this.resourceProcessor().generateTo(classDir());
     }
 
     /**
@@ -406,132 +435,153 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * method.
      */
     protected void processUnitTestResources() {
-	JkResourceProcessor.of(unitTestResources()).andIfExist(generatedTestResourceDir()).generateTo(testClassDir());
+        JkResourceProcessor.of(unitTestResources())
+        .andIfExist(generatedTestResourceDir())
+        .generateTo(testClassDir());
     }
 
     protected boolean checkProcessTests(JkFileTreeSet testSourceDirs) {
-	if (this.tests.skip) {
-	    return false;
-	}
-	if (testSourceDirs == null || testSourceDirs.fileTrees().isEmpty()) {
-	    JkLog.info("No test source declared. Skip tests.");
-	    return false;
-	}
-	if (!unitTestSources().allExists()) {
-	    JkLog.info("No existing test source directory found : " + testSourceDirs + ". Skip tests.");
-	    return false;
-	}
-	return true;
+        if (this.tests.skip) {
+            return false;
+        }
+        if (testSourceDirs == null || testSourceDirs.fileTrees().isEmpty()) {
+            JkLog.info("No test source declared. Skip tests.");
+            return false;
+        }
+        if (!unitTestSources().allExists()) {
+            JkLog.info("No existing test source directory found : "
+                    + testSourceDirs + ". Skip tests.");
+            return false;
+        }
+        return true;
     }
 
     @Override
     protected JkScopeMapping scopeMapping() {
-	return SCOPE_MAPPING;
+        return SCOPE_MAPPING;
     }
 
     @Override
     protected JkScope defaultScope() {
-	return COMPILE;
+        return COMPILE;
     }
 
-    protected JkMavenPublication mavenPublication(boolean includeTests, boolean includeSources) {
-	final JkJavaPacker packer = packer();
-	return JkMavenPublication.of(packer.jarFile()).andIf(includeSources, packer.jarSourceFile(), "sources")
-		.andOptional(javadocMaker().zipFile(), "javadoc")
-		.andOptionalIf(includeTests, packer.jarTestFile(), "test")
-		.andOptionalIf(includeTests && includeSources, packer.jarTestSourceFile(), "testSources");
+    protected JkMavenPublication mavenPublication(boolean includeTests,
+            boolean includeSources) {
+        final JkJavaPacker packer = packer();
+        return JkMavenPublication
+                .of(packer.jarFile())
+                .andIf(includeSources, packer.jarSourceFile(), "sources")
+                .andOptional(javadocMaker().zipFile(), "javadoc")
+                .andOptionalIf(includeTests, packer.jarTestFile(), "test")
+                .andOptionalIf(includeTests && includeSources,
+                        packer.jarTestSourceFile(), "testSources");
     }
 
-    protected JkIvyPublication ivyPublication(boolean includeTests, boolean includeSources) {
-	final JkJavaPacker packer = packer();
-	return JkIvyPublication.of(packer.jarFile(), COMPILE)
-		.andIf(includeSources, packer.jarSourceFile(), "source", SOURCES)
-		.andOptional(javadocMaker().zipFile(), "javadoc", JAVADOC)
-		.andOptionalIf(includeTests, packer.jarTestFile(), "jar", TEST)
-		.andOptionalIf(includeTests, packer.jarTestSourceFile(), "source", SOURCES);
+    protected JkIvyPublication ivyPublication(boolean includeTests,
+            boolean includeSources) {
+        final JkJavaPacker packer = packer();
+        return JkIvyPublication
+                .of(packer.jarFile(), COMPILE)
+                .andIf(includeSources, packer.jarSourceFile(), "source",
+                        SOURCES)
+                        .andOptional(javadocMaker().zipFile(), "javadoc", JAVADOC)
+                        .andOptionalIf(includeTests, packer.jarTestFile(), "jar", TEST)
+                        .andOptionalIf(includeTests, packer.jarTestSourceFile(),
+                                "source", SOURCES);
     }
 
     protected JkIvyPublication ivyPublication() {
-	return ivyPublication(includeTestsInPublication(), includeSourcesInPublication());
+        return ivyPublication(includeTestsInPublication(),
+                includeSourcesInPublication());
     }
 
     protected JkMavenPublication mavenPublication() {
-	return mavenPublication(includeTestsInPublication(), includeSourcesInPublication());
+        return mavenPublication(includeTestsInPublication(),
+                includeSourcesInPublication());
     }
 
     protected boolean includeTestsInPublication() {
-	return false;
+        return false;
     }
 
     protected boolean includeSourcesInPublication() {
-	return true;
+        return true;
     }
 
     // ------------------------------------
 
     public static void main(String[] args) {
-	new JkJavaBuild().doDefault();
+        new JkJavaBuild().doDefault();
     }
 
     @Override
     protected JkDependencies extraCommandLineDeps() {
-	return JkDependencies.builder().usingDefaultScopes(COMPILE).onFiles(toPath(extraPath.compile))
-		.usingDefaultScopes(RUNTIME).onFiles(toPath(extraPath.runtime)).usingDefaultScopes(TEST)
-		.onFiles(toPath(extraPath.test)).usingDefaultScopes(PROVIDED).onFiles(toPath(extraPath.provided))
-		.build();
+        return JkDependencies.builder().usingDefaultScopes(COMPILE)
+                .onFiles(toPath(extraPath.compile)).usingDefaultScopes(RUNTIME)
+                .onFiles(toPath(extraPath.runtime)).usingDefaultScopes(TEST)
+                .onFiles(toPath(extraPath.test)).usingDefaultScopes(PROVIDED)
+                .onFiles(toPath(extraPath.provided)).build();
     }
 
     @Override
     protected JkDependencies implicitDependencies() {
-	final JkFileTree libDir = JkFileTree.of(file(STD_LIB_PATH));
-	if (!libDir.root().exists()) {
-	    return super.implicitDependencies();
-	}
-	return JkDependencies.builder().usingDefaultScopes(COMPILE)
-		.on(JkFileSystemDependency.of(libDir.include("*.jar", "compile/*.jar"))).usingDefaultScopes(PROVIDED)
-		.on(JkFileSystemDependency.of(libDir.include("provided/*.jar"))).usingDefaultScopes(RUNTIME)
-		.on(JkFileSystemDependency.of(libDir.include("runtime/*.jar"))).usingDefaultScopes(TEST)
-		.on(JkFileSystemDependency.of(libDir.include("test/*.jar"))).build();
+        final JkFileTree libDir = JkFileTree.of(file(STD_LIB_PATH));
+        if (!libDir.root().exists()) {
+            return super.implicitDependencies();
+        }
+        return JkDependencies
+                .builder()
+                .usingDefaultScopes(COMPILE)
+                .on(JkFileSystemDependency.of(libDir.include("*.jar",
+                        "compile/*.jar")))
+                        .usingDefaultScopes(PROVIDED)
+                        .on(JkFileSystemDependency.of(libDir.include("provided/*.jar")))
+                        .usingDefaultScopes(RUNTIME)
+                        .on(JkFileSystemDependency.of(libDir.include("runtime/*.jar")))
+                        .usingDefaultScopes(TEST)
+                        .on(JkFileSystemDependency.of(libDir.include("test/*.jar")))
+                        .build();
     }
 
     /**
-     * Returns the manifest that will be inserted in generated jars. Override it if
-     * you want to add extra info.
+     * Returns the manifest that will be inserted in generated jars. Override it
+     * if you want to add extra info.
      */
     protected JkManifest jarManifest() {
-	return JkManifest.of(this.classDir());
+        return JkManifest.ofClassDir(this.classDir());
     }
 
     // Lifecycle methods
 
     @JkDoc("Lifecycle method :#compile. As doCompile is the first stage, this is equals to #compile")
     public void doCompile() {
-	this.clean();
-	this.compile();
+        this.clean();
+        this.compile();
     }
 
     @JkDoc("Lifecycle method : #doCompile + #unitTest")
     public void doUnitTest() {
-	this.doCompile();
-	this.unitTest();
+        this.doCompile();
+        this.unitTest();
     }
 
     @JkDoc("Lifecycle method : #doUnitTest + #pack")
     public void doPack() {
-	doUnitTest();
-	pack();
+        doUnitTest();
+        pack();
     }
 
     @JkDoc("Lifecycle method : #doUnitTest + #pack")
     public void doVerify() {
-	doPack();
-	verify();
+        doPack();
+        verify();
     }
 
     @JkDoc("Lifecycle method : #doVerify + #publish")
     public void doPublish() {
-	doVerify();
-	publish();
+        doVerify();
+        publish();
     }
 
     /**
@@ -539,37 +589,41 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      */
     public static class JkOptionExtaPath {
 
-	@JkDoc({ "provided scope : these libs will be added to the compile path but won't be embedded in war files or fat jars.",
-	"Example : -extraPath.provided=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
-	private String provided;
+        @JkDoc({
+            "provided scope : these libs will be added to the compile path but won't be embedded in war files or fat jars.",
+        "Example : -extraPath.provided=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
+        private String provided;
 
-	@JkDoc({ "runtime scope : these libs will be added to the runtime path.",
-	"Example : -extraPath.runtime=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
-	private String runtime;
+        @JkDoc({
+            "runtime scope : these libs will be added to the runtime path.",
+        "Example : -extraPath.runtime=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
+        private String runtime;
 
-	@JkDoc({ "compile scope : these libs will be added to the compile and runtime path.",
-	"Example : -extraPath.compile=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
-	private String compile;
+        @JkDoc({
+            "compile scope : these libs will be added to the compile and runtime path.",
+        "Example : -extraPath.compile=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
+        private String compile;
 
-	@JkDoc({ "test scope : these libs will be added to the compile and runtime path.",
-	"Example : -extraPath.test=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
-	private String test;
+        @JkDoc({
+            "test scope : these libs will be added to the compile and runtime path.",
+        "Example : -extraPath.test=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
+        private String test;
 
-	public String provided() {
-	    return provided;
-	}
+        public String provided() {
+            return provided;
+        }
 
-	public String runtime() {
-	    return runtime;
-	}
+        public String runtime() {
+            return runtime;
+        }
 
-	public String compile() {
-	    return compile;
-	}
+        public String compile() {
+            return compile;
+        }
 
-	public String test() {
-	    return test;
-	}
+        public String test() {
+            return test;
+        }
 
     }
 
@@ -578,52 +632,57 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      */
     public final static class JkOptionTest {
 
-	@JkDoc("Turn it on to skip tests.")
-	public boolean skip;
+        @JkDoc("Turn it on to skip tests.")
+        public boolean skip;
 
-	@JkDoc("Turn it on to run tests in a forked process.")
-	public boolean fork;
+        @JkDoc("Turn it on to run tests in a forked process.")
+        public boolean fork;
 
-	@JkDoc("Argument passed to the JVM if tests are forked. Example : -Xms2G -Xmx2G")
-	public String jvmOptions;
+        @JkDoc("Argument passed to the JVM if tests are forked. Example : -Xms2G -Xmx2G")
+        public String jvmOptions;
 
-	@JkDoc({ "The more details the longer tests take to be processed.",
-	    "BASIC mention the total time elapsed along detail on failed tests.",
-	    "FULL detailed report displays additionally the time to run each tests.", "Example : -report=NONE" })
-	public JunitReportDetail report = JunitReportDetail.BASIC;
+        @JkDoc({
+            "The more details the longer tests take to be processed.",
+            "BASIC mention the total time elapsed along detail on failed tests.",
+            "FULL detailed report displays additionally the time to run each tests.",
+        "Example : -report=NONE" })
+        public JunitReportDetail report = JunitReportDetail.BASIC;
 
-	@JkDoc("Turn it on to display System.out and System.err on console while executing tests.")
-	public boolean output;
+        @JkDoc("Turn it on to display System.out and System.err on console while executing tests.")
+        public boolean output;
 
     }
 
     public static final class JkOptionPack {
 
-	@JkDoc("When true, produce a fat-jar, meaning a jar embedding all the dependencies.")
-	public boolean fatJar;
+        @JkDoc("When true, produce a fat-jar, meaning a jar embedding all the dependencies.")
+        public boolean fatJar;
 
-	@JkDoc("When true, the produced artifacts are signed with PGP.")
-	public boolean signWithPgp;
+        @JkDoc("When true, the produced artifacts are signed with PGP.")
+        public boolean signWithPgp;
 
-	@JkDoc("When true, tests classes and sources are packed in jars.")
-	public boolean tests;
+        @JkDoc("When true, tests classes and sources are packed in jars.")
+        public boolean tests;
 
-	@JkDoc("Comma separated list of algorithm to use to produce checksums (ex : 'sha-1,md5').")
-	public String checksums;
+        @JkDoc("Comma separated list of algorithm to use to produce checksums (ex : 'sha-1,md5').")
+        public String checksums;
 
-	@JkDoc("When true, javadoc is created and packed in a jar file.")
-	public boolean javadoc;
+        @JkDoc("When true, javadoc is created and packed in a jar file.")
+        public boolean javadoc;
 
     }
 
-    private static JkJavadocMaker javadocMaker(JkJavaBuild javaBuild, boolean fullName, boolean includeVersion) {
-	String name = fullName ? javaBuild.moduleId().toString() : javaBuild.moduleId().toString();
-	if (includeVersion) {
-	    name = name + "-" + javaBuild.effectiveVersion().name();
-	}
-	name = name + "-javadoc";
-	return JkJavadocMaker.of(javaBuild.sources(), javaBuild.ouputDir(name), javaBuild.ouputDir(name + ".jar"))
-		.withClasspath(javaBuild.depsFor(JkJavaBuild.COMPILE, JkJavaBuild.PROVIDED));
+    private static JkJavadocMaker javadocMaker(JkJavaBuild javaBuild,
+            boolean fullName, boolean includeVersion) {
+        String name = fullName ? javaBuild.moduleId().toString() : javaBuild
+                .moduleId().toString();
+        if (includeVersion) {
+            name = name + "-" + javaBuild.effectiveVersion().name();
+        }
+        name = name + "-javadoc";
+        return JkJavadocMaker.of(javaBuild.sources(), javaBuild.ouputDir(name),
+                javaBuild.ouputDir(name + ".jar")).withClasspath(
+                        javaBuild.depsFor(JkJavaBuild.COMPILE, JkJavaBuild.PROVIDED));
     }
 
 }

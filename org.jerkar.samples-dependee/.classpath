@@ -18,9 +18,7 @@
 			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.jerkar/cache/repo/org.slf4j/slf4j-api/javadocs/slf4j-api-1.7.7-javadoc.jar"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="var" path="JERKAR_HOME/libs/ext/org.jerkar.plugins-jacoco.jar" sourcepath="JERKAR_HOME/libs-sources/org.jerkar.plugins-jacoco-sources.jar"/>
-	<classpathentry kind="var" path="JERKAR_HOME/libs/ext/org.jerkar.plugins-sonar.jar" sourcepath="JERKAR_HOME/libs-sources/org.jerkar.plugins-sonar-sources.jar"/>
-	<classpathentry kind="var" path="JERKAR_HOME/org.jerkar.core.jar" sourcepath="JERKAR_HOME/libs-sources/org.jerkar.core-sources.jar"/>
 	<classpathentry kind="src" path="/org.jerkar.samples"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.core"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
