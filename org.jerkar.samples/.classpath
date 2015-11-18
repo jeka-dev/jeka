@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.core"/>
 	<classpathentry kind="src" output="build/output/def-bin" path="build/def"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="src" output="build/output/testClasses" path="src/test/java"/>
 	<classpathentry kind="var" path="JERKAR_REPO/com.sun.jersey/jersey-server/jars/jersey-server-1.19.jar" sourcepath="JERKAR_REPO/com.sun.jersey/jersey-server/sources/jersey-server-1.19-sources.jar">
