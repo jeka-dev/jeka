@@ -24,39 +24,39 @@ public class JkScopedDependencyTest {
 
     @Test
     public void testDepWithScopeMapping() {
-	final JkModuleDependency dep = JkModuleDependency.of("org.hibernate:hibernate-core:3.0.+");
-	final JkScope aScope = JkScope.of("aScope");
-	final JkScopedDependency scopedDep = JkScopedDependency.of(dep,
-		JkScopeMapping.of(aScope, RUNTIME).to(PROVIDED));
+        final JkModuleDependency dep = JkModuleDependency.of("org.hibernate:hibernate-core:3.0.+");
+        final JkScope aScope = JkScope.of("aScope");
+        final JkScopedDependency scopedDep = JkScopedDependency.of(dep,
+                JkScopeMapping.of(aScope, RUNTIME).to(PROVIDED));
 
-	assertTrue(!scopedDep.isInvolvedIn(COMPILE)); // cause RUNTIME inherits
-						      // from COMPILE
-	assertTrue(scopedDep.isInvolvedIn(RUNTIME));
-	assertTrue(scopedDep.isInvolvedIn(aScope));
-	assertTrue(scopedDep.isInvolvedIn(TEST));
+        assertTrue(!scopedDep.isInvolvedIn(COMPILE)); // cause RUNTIME inherits
+        // from COMPILE
+        assertTrue(scopedDep.isInvolvedIn(RUNTIME));
+        assertTrue(scopedDep.isInvolvedIn(aScope));
+        assertTrue(scopedDep.isInvolvedIn(TEST));
 
-	final Set<JkScope> sampleSet = new HashSet<JkScope>();
-	sampleSet.add(PROVIDED);
-	assertEquals(sampleSet, scopedDep.scopeMapping().mappedScopes(RUNTIME));
+        final Set<JkScope> sampleSet = new HashSet<JkScope>();
+        sampleSet.add(PROVIDED);
+        assertEquals(sampleSet, scopedDep.scopeMapping().mappedScopes(RUNTIME));
 
-	boolean failed = false;
-	try {
-	    scopedDep.scopeMapping().mappedScopes(JkScope.of("notInvolvedScope"));
-	} catch (final IllegalArgumentException e) {
-	    failed = true;
-	}
-	assertTrue(failed);
+        boolean failed = false;
+        try {
+            scopedDep.scopeMapping().mappedScopes(JkScope.of("notInvolvedScope"));
+        } catch (final IllegalArgumentException e) {
+            failed = true;
+        }
+        assertTrue(failed);
     }
 
     @Test
     public void testWithScope() {
-	final JkModuleDependency dep = JkModuleDependency.of("org.hibernate:hibernate-core:3.0.+");
-	final JkScopedDependency scopedDep = JkScopedDependency.of(dep, RUNTIME);
+        final JkModuleDependency dep = JkModuleDependency.of("org.hibernate:hibernate-core:3.0.+");
+        final JkScopedDependency scopedDep = JkScopedDependency.of(dep, RUNTIME);
 
-	assertTrue(scopedDep.isInvolvedIn(RUNTIME));
-	assertTrue(!scopedDep.isInvolvedIn(COMPILE)); // cause RUNTIME inherits
-						      // from COMPILE
-	assertTrue(scopedDep.isInvolvedIn(TEST));
+        assertTrue(scopedDep.isInvolvedIn(RUNTIME));
+        assertTrue(!scopedDep.isInvolvedIn(COMPILE)); // cause RUNTIME inherits
+        // from COMPILE
+        assertTrue(scopedDep.isInvolvedIn(TEST));
 
     }
 

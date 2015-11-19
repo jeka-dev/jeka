@@ -31,7 +31,7 @@ import org.jerkar.api.utils.JkUtilsString;
  * <code>folder</code>.<br/>
  * Non existing files are accepted as valid <code>entry</code>, though they
  * won't contain any classes.
- *
+ * 
  * @author Djeang
  */
 public final class JkClasspath implements Iterable<File> {
@@ -96,7 +96,8 @@ public final class JkClasspath implements Iterable<File> {
     public JkClasspath assertAllEntriesExist() {
         for (final File file : entries) {
             if (!file.exists()) {
-                throw new IllegalStateException("File " + file.getAbsolutePath() + " does not exist.");
+                throw new IllegalStateException("File " + file.getAbsolutePath()
+                        + " does not exist.");
             }
         }
         return this;
@@ -133,7 +134,7 @@ public final class JkClasspath implements Iterable<File> {
     }
 
     /**
-     * @see #and(Iterable).
+     * @see #and(Iterable)
      */
     public JkClasspath and(File... files) {
         return and(JkClasspath.of(files));
@@ -166,8 +167,9 @@ public final class JkClasspath implements Iterable<File> {
             if (file.getName().equals(WILD_CARD)) {
                 final File parent = file.getParentFile();
                 if (!parent.exists()) {
-                    JkLog.trace("File " + parent.getAbsolutePath() + " does not exist : classpath entry "
-                            + file.getAbsolutePath() + " will be ignored.");
+                    JkLog.trace("File " + parent.getAbsolutePath()
+                            + " does not exist : classpath entry " + file.getAbsolutePath()
+                            + " will be ignored.");
                 } else {
                     result.addAll(JkFileTree.of(parent).include("*.jar").files(false));
                 }
@@ -176,8 +178,9 @@ public final class JkClasspath implements Iterable<File> {
                         + file.getAbsolutePath() + " will be ignored.");
             } else if (file.isFile()) {
                 if (!JkUtilsString.endsWithAny(file.getName().toLowerCase(), ".jar", ".zip")) {
-                    throw new IllegalArgumentException("Classpath file element " + file.getAbsolutePath()
-                    + " is invalid. It must be either a folder either a jar or zip file.");
+                    throw new IllegalArgumentException("Classpath file element "
+                            + file.getAbsolutePath()
+                            + " is invalid. It must be either a folder either a jar or zip file.");
                 }
                 result.add(file);
             } else {

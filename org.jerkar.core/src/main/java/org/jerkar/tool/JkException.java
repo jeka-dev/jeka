@@ -11,7 +11,7 @@ public final class JkException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public JkException(String message) {
-	super(message);
+        super(message);
     }
 
 }

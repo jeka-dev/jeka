@@ -43,8 +43,8 @@ final class IvyPublisherForMaven {
 
     private final boolean uniqueSnapshot;
 
-    IvyPublisherForMaven(CheckFileFlag checkFileFlag, RepositoryResolver dependencyResolver, File descriptorOutputDir,
-            boolean uniqueSnapshot) {
+    IvyPublisherForMaven(CheckFileFlag checkFileFlag, RepositoryResolver dependencyResolver,
+            File descriptorOutputDir, boolean uniqueSnapshot) {
         super();
         this.resolver = dependencyResolver;
         this.descriptorOutputDir = descriptorOutputDir;
@@ -61,7 +61,8 @@ final class IvyPublisherForMaven {
         }
 
         // publish artifacts
-        final JkVersionedModule versionedModule = IvyTranslations.toJerkarVersionedModule(ivyModuleRevisionId);
+        final JkVersionedModule versionedModule = IvyTranslations
+                .toJerkarVersionedModule(ivyModuleRevisionId);
         final MavenMetadata returnedMetaData = publish(versionedModule, publication);
 
         // publish pom
@@ -69,9 +70,11 @@ final class IvyPublisherForMaven {
         final String version;
         if (versionedModule.version().isSnapshot() && this.uniqueSnapshot) {
             final String path = snapshotMetadataPath(versionedModule);
-            final MavenMetadata mavenMetadata = JkUtilsObject.firstNonNull(loadMavenMedatata(path), returnedMetaData);
+            final MavenMetadata mavenMetadata = JkUtilsObject.firstNonNull(loadMavenMedatata(path),
+                    returnedMetaData);
             final Snapshot snap = mavenMetadata.currentSnapshot();
-            version = versionForUniqueSnapshot(versionedModule.version().name(), snap.timestamp, snap.buildNumber);
+            version = versionForUniqueSnapshot(versionedModule.version().name(), snap.timestamp,
+                    snap.buildNumber);
             final String pomDest = destination(versionedModule, "pom", null, version);
             putAll(pomXml, pomDest, true);
             mavenMetadata.addSnapshotVersion("pom", null);
@@ -87,17 +90,20 @@ final class IvyPublisherForMaven {
 
         // update maven-metadata
         if (returnedMetaData != null) {
-            updateMetadata(ivyModuleRevisionId.getModuleId(), ivyModuleRevisionId.getRevision(), returnedMetaData.lastUpdateTimestamp());
+            updateMetadata(ivyModuleRevisionId.getModuleId(), ivyModuleRevisionId.getRevision(),
+                    returnedMetaData.lastUpdateTimestamp());
         }
 
         commitPublication(resolver);
     }
 
-    private MavenMetadata publish(JkVersionedModule versionedModule, JkMavenPublication mavenPublication) {
+    private MavenMetadata publish(JkVersionedModule versionedModule,
+            JkMavenPublication mavenPublication) {
         if (!versionedModule.version().isSnapshot()) {
             final String existing = checkNotExist(versionedModule, mavenPublication);
             if (existing != null) {
-                throw new IllegalArgumentException("Artifact " + existing + " already exists on repo.");
+                throw new IllegalArgumentException("Artifact " + existing
+                        + " already exists on repo.");
             }
         }
         if (versionedModule.version().isSnapshot() && this.uniqueSnapshot) {
@@ -111,41 +117,44 @@ final class IvyPublisherForMaven {
             push(mavenMetadata, path);
             final int buildNumber = mavenMetadata.currentBuildNumber();
 
-            final String versionUniqueSnapshot = versionForUniqueSnapshot(versionedModule.version().name(), timestamp, buildNumber);
+            final String versionUniqueSnapshot = versionForUniqueSnapshot(versionedModule.version()
+                    .name(), timestamp, buildNumber);
 
             for (final File file : mavenPublication.mainArtifactFiles()) {
-                publishUniqueSnapshot(versionedModule, null, file, versionUniqueSnapshot, mavenMetadata);
+                publishUniqueSnapshot(versionedModule, null, file, versionUniqueSnapshot,
+                        mavenMetadata);
             }
-            for (final JkClassifiedArtifact classifiedArtifact : mavenPublication.classifiedArtifacts()) {
-                publishUniqueSnapshot(versionedModule, classifiedArtifact.classifier(), classifiedArtifact.file(),
-                        versionUniqueSnapshot, mavenMetadata);
+            for (final JkClassifiedArtifact classifiedArtifact : mavenPublication
+                    .classifiedArtifacts()) {
+                publishUniqueSnapshot(versionedModule, classifiedArtifact.classifier(),
+                        classifiedArtifact.file(), versionUniqueSnapshot, mavenMetadata);
             }
             return mavenMetadata;
         } else {
             for (final File file : mavenPublication.mainArtifactFiles()) {
                 publishNormal(versionedModule, null, file);
             }
-            for (final JkClassifiedArtifact classifiedArtifact : mavenPublication.classifiedArtifacts()) {
-                publishNormal(versionedModule, classifiedArtifact.classifier(), classifiedArtifact.file());
+            for (final JkClassifiedArtifact classifiedArtifact : mavenPublication
+                    .classifiedArtifacts()) {
+                publishNormal(versionedModule, classifiedArtifact.classifier(),
+                        classifiedArtifact.file());
             }
             return null;
         }
     }
-
-
 
     private File makePom(ModuleDescriptor moduleDescriptor, JkMavenPublication publication) {
         final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
         final String artifactName = ivyModuleRevisionId.getName();
         final File pomXml;
         if (this.descriptorOutputDir != null) {
-            pomXml = new File(targetDir(), "published-pom-" + ivyModuleRevisionId.getOrganisation() + "-" + artifactName
-                    + "-" + ivyModuleRevisionId.getRevision() + ".xml");
+            pomXml = new File(targetDir(), "published-pom-" + ivyModuleRevisionId.getOrganisation()
+                    + "-" + artifactName + "-" + ivyModuleRevisionId.getRevision() + ".xml");
         } else {
             pomXml = JkUtilsFile.tempFile("published-pom-", ".xml");
         }
-        final String packaging = JkUtilsString.substringAfterLast(publication.mainArtifactFiles().get(0).getName(),
-                ".");
+        final String packaging = JkUtilsString.substringAfterLast(publication.mainArtifactFiles()
+                .get(0).getName(), ".");
         final PomWriterOptions pomWriterOptions = new PomWriterOptions();
         pomWriterOptions.setArtifactPackaging(packaging);
         File fileToDelete = null;
@@ -165,11 +174,13 @@ final class IvyPublisherForMaven {
         }
     }
 
-    private String checkNotExist(JkVersionedModule versionedModule, JkMavenPublication mavenPublication) {
+    private String checkNotExist(JkVersionedModule versionedModule,
+            JkMavenPublication mavenPublication) {
         if (!mavenPublication.mainArtifactFiles().isEmpty()) {
             final String pomDest = destination(versionedModule, "pom", null);
             if (existOnRepo(pomDest)) {
-                throw new IllegalArgumentException("The main artifact as already exist for " + versionedModule);
+                throw new IllegalArgumentException("The main artifact as already exist for "
+                        + versionedModule);
             }
             for (final File file : mavenPublication.mainArtifactFiles()) {
                 final String ext = JkUtilsString.substringAfterLast(file.getName(), ".");
@@ -180,7 +191,8 @@ final class IvyPublisherForMaven {
             }
         }
         for (final JkClassifiedArtifact classifiedArtifact : mavenPublication.classifiedArtifacts()) {
-            final String ext = JkUtilsString.substringAfterLast(classifiedArtifact.file().getName(), ".");
+            final String ext = JkUtilsString.substringAfterLast(
+                    classifiedArtifact.file().getName(), ".");
             final String dest = destination(versionedModule, ext, classifiedArtifact.classifier());
             if (existOnRepo(dest)) {
                 return dest;
@@ -199,11 +211,12 @@ final class IvyPublisherForMaven {
         }
     }
 
-    private void publishUniqueSnapshot(JkVersionedModule versionedModule, String classifier, File source,
-            String versionForUniqueSpshot, MavenMetadata mavenMetadata) {
+    private void publishUniqueSnapshot(JkVersionedModule versionedModule, String classifier,
+            File source, String versionForUniqueSpshot, MavenMetadata mavenMetadata) {
 
         final String extension = JkUtilsString.substringAfterLast(source.getName(), ".");
-        final String dest = destination(versionedModule, extension, classifier, versionForUniqueSpshot);
+        final String dest = destination(versionedModule, extension, classifier,
+                versionForUniqueSpshot);
         putAll(source, dest, false);
         final String path = snapshotMetadataPath(versionedModule);
         mavenMetadata.addSnapshotVersion(extension, classifier);
@@ -219,16 +232,18 @@ final class IvyPublisherForMaven {
         putAll(source, dest, overwrite);
     }
 
-    private static String destination(JkVersionedModule versionedModule, String ext, String classifier) {
+    private static String destination(JkVersionedModule versionedModule, String ext,
+            String classifier) {
         return destination(versionedModule, ext, classifier, versionedModule.version().name());
     }
 
-    private static String destination(JkVersionedModule versionedModule, String ext, String classifier,
-            String uniqueVersion) {
+    private static String destination(JkVersionedModule versionedModule, String ext,
+            String classifier, String uniqueVersion) {
         final JkModuleId moduleId = versionedModule.moduleId();
         final String version = versionedModule.version().name();
-        final StringBuilder result = new StringBuilder(moduleBasePath(moduleId)).append("/").append(version).append("/")
-                .append(moduleId.name()).append("-").append(uniqueVersion);
+        final StringBuilder result = new StringBuilder(moduleBasePath(moduleId)).append("/")
+                .append(version).append("/").append(moduleId.name()).append("-")
+                .append(uniqueVersion);
         if (classifier != null) {
             result.append("-").append(classifier);
         }
@@ -237,16 +252,16 @@ final class IvyPublisherForMaven {
     }
 
     private static String versionForUniqueSnapshot(String version, String timestamp, int buildNumber) {
-        return version.endsWith("-SNAPSHOT")
-                ? JkUtilsString.substringBeforeLast(version, "-SNAPSHOT") + "-" + timestamp + "-" + buildNumber
-                        : version;
+        return version.endsWith("-SNAPSHOT") ? JkUtilsString.substringBeforeLast(version,
+                "-SNAPSHOT") + "-" + timestamp + "-" + buildNumber : version;
     }
 
     private void updateMetadata(ModuleId moduleId, String version, String timestamp) {
         final String path = versionMetadataPath(of(moduleId, version));
         MavenMetadata mavenMetadata = loadMavenMedatata(path);
         if (mavenMetadata == null) {
-            mavenMetadata = MavenMetadata.of(JkModuleId.of(moduleId.getOrganisation(), moduleId.getName()));
+            mavenMetadata = MavenMetadata.of(JkModuleId.of(moduleId.getOrganisation(),
+                    moduleId.getName()));
         }
         mavenMetadata.addVersion(version, timestamp);
         push(mavenMetadata, path);
@@ -282,7 +297,8 @@ final class IvyPublisherForMaven {
     }
 
     private static String snapshotMetadataPath(JkVersionedModule module) {
-        return moduleBasePath(module.moduleId()) + "/" + module.version().name() + "/maven-metadata.xml";
+        return moduleBasePath(module.moduleId()) + "/" + module.version().name()
+                + "/maven-metadata.xml";
     }
 
     private MavenMetadata loadMavenMedatata(String path) {

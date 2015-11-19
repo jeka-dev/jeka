@@ -2,22 +2,23 @@ package org.jerkar.api.utils;
 
 /**
  * Utility class for dealing with generic Object class instances.
- *
+ * 
  * @author Jerome Angiabud
  */
 public final class JkUtilsObject {
 
     /**
-     * Returns the objects of the specified array that is not <code>null</code>. Throw an {@link IllegalArgumentException}
-     * if all array elements are <code>null</code> or the specified array is empty.
+     * Returns the objects of the specified array that is not <code>null</code>.
+     * Throw an {@link IllegalArgumentException} if all array elements are
+     * <code>null</code> or the specified array is empty.
      */
-    public static <T> T firstNonNull(T ...items) {
-	for (final T item : items) {
-	    if (item != null) {
-		return item;
-	    }
-	}
-	throw new IllegalArgumentException("Both objects can't be null.");
+    public static <T> T firstNonNull(T... items) {
+        for (final T item : items) {
+            if (item != null) {
+                return item;
+            }
+        }
+        throw new IllegalArgumentException("Both objects can't be null.");
     }
 
     /**
@@ -25,13 +26,13 @@ public final class JkUtilsObject {
      * obects are equals. Returns <code>false</code> otherwise.
      */
     public static boolean equals(Object object1, Object object2) {
-	if (object1 == null) {
-	    if (object2 == null) {
-		return true;
-	    }
-	    return false;
-	}
-	return object1.equals(object2);
+        if (object1 == null) {
+            if (object2 == null) {
+                return true;
+            }
+            return false;
+        }
+        return object1.equals(object2);
     }
 
     /**
@@ -39,10 +40,10 @@ public final class JkUtilsObject {
      * <code>null</code>.
      */
     public static int hashCode(Object object) {
-	if (object == null) {
-	    return 0;
-	}
-	return object.hashCode();
+        if (object == null) {
+            return 0;
+        }
+        return object.hashCode();
     }
 
     /**
@@ -50,10 +51,10 @@ public final class JkUtilsObject {
      * <code>null</code> than this method returns "null".
      */
     public static String toString(Object object) {
-	if (object == null) {
-	    return "null";
-	}
-	return object.toString();
+        if (object == null) {
+            return "null";
+        }
+        return object.toString();
     }
 
 }

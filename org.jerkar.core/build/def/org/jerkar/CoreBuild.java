@@ -37,8 +37,7 @@ public class CoreBuild extends AbstractBuild {
 
     @Override
     protected JkManifest jarManifest() {
-        final String version = version().name() + " - built at "
-                + buildTimestamp();
+        final String version = version().name() + " - built at " + buildTimestamp();
         return super.jarManifest().addMainClass("org.jerkar.tool.Main")
                 .addMainAttribute(Name.IMPLEMENTATION_VERSION, version);
     }
@@ -47,8 +46,7 @@ public class CoreBuild extends AbstractBuild {
     @Override
     public void pack() {
         super.pack();
-        JkFileTree.of(this.classDir()).exclude("**/*.jar").zip()
-        .to(packer().jarFile("lean"));
+        JkFileTree.of(this.classDir()).exclude("**/*.jar").zip().to(packer().jarFile("lean"));
         distrib();
     }
 
@@ -66,12 +64,10 @@ public class CoreBuild extends AbstractBuild {
         // to find the Jerker HOME)
         distrib.importFiles(packer.jarFile());
         distrib.importFiles(packer().jarFile("lean"));
-        distrib.from("libs-sources")
-        .importDirContent(file("build/libs-sources"))
-        .importFiles(packer.jarSourceFile());
+        distrib.from("libs-sources").importDirContent(file("build/libs-sources"))
+                .importFiles(packer.jarSourceFile());
         distrib.from("libs-javadoc").importFiles(this.javadocMaker().zipFile());
-        distrib.zip().with(JkCompressionLevel.BEST_COMPRESSION)
-        .to(distripZipFile);
+        distrib.zip().with(JkCompressionLevel.BEST_COMPRESSION).to(distripZipFile);
         signIfNeeded(distripZipFile);
         JkLog.done();
     }

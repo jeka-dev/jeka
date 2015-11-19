@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * Utility class to deal with the underlying system.
- *
+ * 
  * @author Jerome Angibaud
  */
 public final class JkUtilsSystem {
@@ -23,11 +23,11 @@ public final class JkUtilsSystem {
     public static final boolean IS_WINDOWS = isWindows();
 
     private static final boolean isWindows() {
-	final String osName = System.getProperty("os.name");
-	if (osName == null) {
-	    return false;
-	}
-	return osName.startsWith("Windows");
+        final String osName = System.getProperty("os.name");
+        if (osName == null) {
+            return false;
+        }
+        return osName.startsWith("Windows");
     }
 
     /**
@@ -35,19 +35,19 @@ public final class JkUtilsSystem {
      * the parent classloaders.
      */
     public static List<File> classloaderEntries(URLClassLoader classLoader) {
-	final List<File> result = new ArrayList<File>();
-	for (final URL url : classLoader.getURLs()) {
-	    result.add(new File(url.getFile().replaceAll("%20", " ")));
-	}
-	return result;
+        final List<File> result = new ArrayList<File>();
+        for (final URL url : classLoader.getURLs()) {
+            result.add(new File(url.getFile().replaceAll("%20", " ")));
+        }
+        return result;
     }
 
     public static void sleep(long millis) {
-	try {
-	    Thread.sleep(millis);
-	} catch (final InterruptedException e) {
-	    throw JkUtilsThrowable.unchecked(e);
-	}
+        try {
+            Thread.sleep(millis);
+        } catch (final InterruptedException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
     }
 
 }

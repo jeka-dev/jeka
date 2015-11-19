@@ -37,7 +37,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * Utility class for dealing with Inputs/Outputs.
- *
+ * 
  * @author Jerome Angibaud
  */
 public final class JkUtilsIO {
@@ -65,13 +65,10 @@ public final class JkUtilsIO {
         };
     }
 
-
-
     @SuppressWarnings("unchecked")
     public static List<ZipEntry> zipEntries(ZipFile zipFile) {
         final List<ZipEntry> result = new LinkedList<ZipEntry>();
-        final Enumeration<ZipEntry> en = (Enumeration<ZipEntry>) zipFile
-                .entries();
+        final Enumeration<ZipEntry> en = (Enumeration<ZipEntry>) zipFile.entries();
         while (en.hasMoreElements()) {
             result.add(en.nextElement());
         }
@@ -79,10 +76,8 @@ public final class JkUtilsIO {
     }
 
     @SuppressWarnings("unchecked")
-    public static ZipEntry zipEntryIgnoreCase(ZipFile zipFile,
-            String entryName) {
-        final Enumeration<ZipEntry> en = (Enumeration<ZipEntry>) zipFile
-                .entries();
+    public static ZipEntry zipEntryIgnoreCase(ZipFile zipFile, String entryName) {
+        final Enumeration<ZipEntry> en = (Enumeration<ZipEntry>) zipFile.entries();
         while (en.hasMoreElements()) {
             final ZipEntry entry = en.nextElement();
             if (entry.getName().equalsIgnoreCase(entryName)) {
@@ -113,8 +108,7 @@ public final class JkUtilsIO {
         try {
             return new FileInputStream(file);
         } catch (final FileNotFoundException e) {
-            throw new IllegalArgumentException("File " + file + " not found.",
-                    e);
+            throw new IllegalArgumentException("File " + file + " not found.", e);
         }
     }
 
@@ -126,8 +120,7 @@ public final class JkUtilsIO {
         try {
             return new FileOutputStream(file, append);
         } catch (final FileNotFoundException e) {
-            throw new IllegalArgumentException("File " + file + " not found.",
-                    e);
+            throw new IllegalArgumentException("File " + file + " not found.", e);
         }
     }
 
@@ -139,8 +132,7 @@ public final class JkUtilsIO {
         try {
             return zipFile.getInputStream(entry);
         } catch (final FileNotFoundException e) {
-            throw new IllegalArgumentException(
-                    "File " + zipFile + " not found.", e);
+            throw new IllegalArgumentException("File " + zipFile + " not found.", e);
         } catch (final IOException e) {
             throw new RuntimeException("File " + zipFile + " not found.", e);
         }
@@ -188,8 +180,7 @@ public final class JkUtilsIO {
     // TODO encoding ????
     public static List<String> readAsLines(InputStream in) {
         final List<String> result = new LinkedList<String>();
-        final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(in));
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         String line;
         try {
             while ((line = reader.readLine()) != null) {
@@ -222,8 +213,7 @@ public final class JkUtilsIO {
      * Returns the content of the given input stream as a single string.
      */
     public static String readAsString(InputStream in) {
-        final BufferedReader reader = new BufferedReader(
-                new InputStreamReader(in));
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         final StringBuilder out = new StringBuilder();
         final String newLine = System.getProperty("line.separator");
         String line;
@@ -243,8 +233,7 @@ public final class JkUtilsIO {
      * returns <code>null</code>.
      */
     public static String readResourceIfExist(String resourcePath) {
-        final InputStream is = JkUtilsFile.class.getClassLoader()
-                .getResourceAsStream(resourcePath);
+        final InputStream is = JkUtilsFile.class.getClassLoader().getResourceAsStream(resourcePath);
         if (is == null) {
             return null;
         }
@@ -268,12 +257,9 @@ public final class JkUtilsIO {
     /**
      * Creates a {@link ZipOutputStream} from a given file (existing or not).
      */
-    public static ZipOutputStream createZipOutputStream(File file,
-            int compressLevel) {
+    public static ZipOutputStream createZipOutputStream(File file, int compressLevel) {
         try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
+            JkUtilsFile.createFileIfNotExist(file);
             final FileOutputStream fos = new FileOutputStream(file);
             final ZipOutputStream zos = new ZipOutputStream(fos);
             zos.setLevel(compressLevel);
@@ -302,11 +288,10 @@ public final class JkUtilsIO {
      */
     public static ZipInputStream readZipEntry(InputStream inputStream,
             String caseInsensitiveEntryName) {
-        final ZipInputStream result = readZipEntryOrNull(inputStream,
-                caseInsensitiveEntryName);
+        final ZipInputStream result = readZipEntryOrNull(inputStream, caseInsensitiveEntryName);
         if (result == null) {
-            throw new IllegalArgumentException("Zip " + inputStream
-                    + " has no entry " + caseInsensitiveEntryName);
+            throw new IllegalArgumentException("Zip " + inputStream + " has no entry "
+                    + caseInsensitiveEntryName);
         }
         return result;
     }
@@ -323,8 +308,7 @@ public final class JkUtilsIO {
             ZipEntry entry = zipInputStream.getNextEntry();
             boolean found = false;
             while (entry != null && !found) {
-                if (entry.getName()
-                        .equalsIgnoreCase(caseInsensitiveEntryNAme)) {
+                if (entry.getName().equalsIgnoreCase(caseInsensitiveEntryNAme)) {
                     found = true;
                 } else {
                     entry = zipInputStream.getNextEntry();
@@ -340,8 +324,7 @@ public final class JkUtilsIO {
         }
     }
 
-    public static ZipInputStream readZipEntry(File zipFile,
-            String caseInsensitiveEntryName) {
+    public static ZipInputStream readZipEntry(File zipFile, String caseInsensitiveEntryName) {
         final FileInputStream fileInputStream = inputStream(zipFile);
         try {
             return readZipEntry(fileInputStream, caseInsensitiveEntryName);
@@ -350,12 +333,10 @@ public final class JkUtilsIO {
         }
     }
 
-    public static ZipInputStream readZipEntryOrNull(File zipFile,
-            String caseInsensitiveEntryName) {
+    public static ZipInputStream readZipEntryOrNull(File zipFile, String caseInsensitiveEntryName) {
         final FileInputStream fileInputStream = inputStream(zipFile);
         try {
-            return readZipEntryOrNull(fileInputStream,
-                    caseInsensitiveEntryName);
+            return readZipEntryOrNull(fileInputStream, caseInsensitiveEntryName);
         } finally {
             closeQuietly(fileInputStream);
         }
@@ -373,8 +354,7 @@ public final class JkUtilsIO {
      * Writes all the entries from a given ZipFile to the specified
      * {@link ZipOutputStream}.
      */
-    public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile,
-            boolean storeMethod) {
+    public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile, boolean storeMethod) {
         final Set<String> duplicateEntries = new HashSet<String>();
         final Enumeration<? extends ZipEntry> entries = zipFile.entries();
         while (entries.hasMoreElements()) {
@@ -383,33 +363,29 @@ public final class JkUtilsIO {
                 if (!e.isDirectory()) {
                     final boolean success;
                     if (storeMethod) {
-                        final InputStream countInputStream = zipFile
-                                .getInputStream(e);
-                        final CrcAndSize crcAndSize = new CrcAndSize(
-                                countInputStream);
+                        final InputStream countInputStream = zipFile.getInputStream(e);
+                        final CrcAndSize crcAndSize = new CrcAndSize(countInputStream);
                         countInputStream.close();
-                        success = addEntryInputStream(zos, e.getName(),
-                                zipFile.getInputStream(e), true, crcAndSize);
+                        success = addEntryInputStream(zos, e.getName(), zipFile.getInputStream(e),
+                                true, crcAndSize);
                     } else {
-                        success = addEntryInputStream(zos, e.getName(),
-                                zipFile.getInputStream(e), false, null);
+                        success = addEntryInputStream(zos, e.getName(), zipFile.getInputStream(e),
+                                false, null);
                     }
                     if (!success) {
                         duplicateEntries.add(e.getName());
                     }
                 }
             } catch (final IOException e1) {
-                throw new RuntimeException("Error while merging entry "
-                        + e.getName() + " from zip file " + zipFile.getName(),
-                        e1);
+                throw new RuntimeException("Error while merging entry " + e.getName()
+                        + " from zip file " + zipFile.getName(), e1);
             }
         }
         return duplicateEntries;
     }
 
-    private static boolean addEntryInputStream(ZipOutputStream zos,
-            String entryName, InputStream inputStream, boolean storedMethod,
-            CrcAndSize crcAndSize) {
+    private static boolean addEntryInputStream(ZipOutputStream zos, String entryName,
+            InputStream inputStream, boolean storedMethod, CrcAndSize crcAndSize) {
         final ZipEntry zipEntry = new ZipEntry(entryName);
         if (storedMethod) {
             crcAndSize.setupStoredEntry(zipEntry);
@@ -421,12 +397,10 @@ public final class JkUtilsIO {
             // Ignore duplicate entry - no overwriting
             return false;
         } catch (final IOException e) {
-            throw new RuntimeException(
-                    "Error while adding zip entry " + zipEntry, e);
+            throw new RuntimeException("Error while adding zip entry " + zipEntry, e);
         }
         final int buffer = 2048;
-        final BufferedInputStream bufferedInputStream = new BufferedInputStream(
-                inputStream, buffer);
+        final BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream, buffer);
         int count;
         try {
             final byte data[] = new byte[buffer];
@@ -490,8 +464,7 @@ public final class JkUtilsIO {
      * So a file or folder <code>c:\my\base\folder\my\file\to\zip.txt</code>
      * will be added in archive using <code>my/file/to/zip.txt</code> entry.
      */
-    public static void addZipEntry(ZipOutputStream zos, File fileToZip,
-            File baseFolder) {
+    public static void addZipEntry(ZipOutputStream zos, File fileToZip, File baseFolder) {
         addZipEntry(zos, fileToZip, baseFolder, false);
     }
 
@@ -503,11 +476,10 @@ public final class JkUtilsIO {
      * So a file or folder <code>c:\my\base\folder\my\file\to\zip.txt</code>
      * will be added in archive using <code>my/file/to/zip.txt</code> entry.
      */
-    public static void addZipEntry(ZipOutputStream zos, File fileToZip,
-            File baseFolder, boolean storeMethod) {
+    public static void addZipEntry(ZipOutputStream zos, File fileToZip, File baseFolder,
+            boolean storeMethod) {
         if (!baseFolder.isDirectory()) {
-            throw new IllegalArgumentException(
-                    baseFolder.getPath() + " is not a directory.");
+            throw new IllegalArgumentException(baseFolder.getPath() + " is not a directory.");
         }
 
         if (fileToZip.isDirectory()) {
@@ -536,8 +508,7 @@ public final class JkUtilsIO {
             }
             if (storeMethod) {
                 final CrcAndSize crcAndSize = new CrcAndSize(fileToZip);
-                addEntryInputStream(zos, entryName, inputStream, true,
-                        crcAndSize);
+                addEntryInputStream(zos, entryName, inputStream, true, crcAndSize);
             } else {
                 addEntryInputStream(zos, entryName, inputStream, false, null);
             }
@@ -548,8 +519,8 @@ public final class JkUtilsIO {
     /**
      * Add a zip entry into the provided <code>ZipOutputStream</code>.
      */
-    public static void addZipEntry(ZipOutputStream zos, File fileToZip,
-            String enrtyName, boolean storedMethod) {
+    public static void addZipEntry(ZipOutputStream zos, File fileToZip, String enrtyName,
+            boolean storedMethod) {
         final FileInputStream inputStream;
         try {
             inputStream = new FileInputStream(fileToZip);
@@ -563,7 +534,6 @@ public final class JkUtilsIO {
             addEntryInputStream(zos, enrtyName, inputStream, false, null);
         }
     }
-
 
     /**
      * Same as {@link ZipFile#close()} but throwing only unchecked exceptions.
@@ -584,24 +554,21 @@ public final class JkUtilsIO {
      * last '/')]. If the file already exist than the content of the url is not
      * copied and the file is directly returned.
      */
-    public static File copyUrlContentToCacheFile(URL url, PrintStream report,
-            File cacheDir) {
-        final String name = JkUtilsString.substringAfterLast(url.getPath(),
-                "/");
+    public static File copyUrlContentToCacheFile(URL url, PrintStream report, File cacheDir) {
+        final String name = JkUtilsString.substringAfterLast(url.getPath(), "/");
         final File result = new File(cacheDir, name);
         if (result.exists()) {
             if (report != null) {
                 report.println("Url " + url.toExternalForm()
-                + " transformed to file by reading existing cached file "
-                + result.getAbsolutePath());
+                        + " transformed to file by reading existing cached file "
+                        + result.getAbsolutePath());
             }
             return result;
         }
         JkUtilsFile.createFileIfNotExist(result);
         if (report != null) {
-            report.println("Url " + url.toExternalForm()
-            + " transformed to file by creating file "
-            + result.getAbsolutePath());
+            report.println("Url " + url.toExternalForm() + " transformed to file by creating file "
+                    + result.getAbsolutePath());
         }
         copyUrlToFile(url, result);
         return result;
@@ -690,16 +657,15 @@ public final class JkUtilsIO {
      * Deserialises the content of a given input file to a Java object loaded in
      * the specified classloader.
      */
-    public static Object deserialize(InputStream inputStream,
-            final ClassLoader classLoader) {
+    public static Object deserialize(InputStream inputStream, final ClassLoader classLoader) {
         final InputStream buffer = new BufferedInputStream(inputStream);
         ObjectInput input;
         try {
             input = new ObjectInputStream(buffer) {
 
                 @Override
-                protected Class<?> resolveClass(ObjectStreamClass desc)
-                        throws IOException, ClassNotFoundException {
+                protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException,
+                        ClassNotFoundException {
 
                     final String name = desc.getName();
                     try {
@@ -736,8 +702,7 @@ public final class JkUtilsIO {
      * the specified classloader.
      */
     @SuppressWarnings("unchecked")
-    public static <T> T cloneBySerialization(Object objectToClone,
-            ClassLoader targetClassLoader) {
+    public static <T> T cloneBySerialization(Object objectToClone, ClassLoader targetClassLoader) {
         final ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
         serialize(objectToClone, arrayOutputStream);
         final byte[] bytes = arrayOutputStream.toByteArray();
@@ -749,8 +714,7 @@ public final class JkUtilsIO {
      * Returns a thread that write each data read from the specified input
      * stream to the specified output stream.
      */
-    public static StreamGobbler newStreamGobbler(InputStream is,
-            OutputStream os) {
+    public static StreamGobbler newStreamGobbler(InputStream is, OutputStream os) {
         return new StreamGobbler(is, os);
     }
 
@@ -810,8 +774,8 @@ public final class JkUtilsIO {
     }
 
     /* table mapping primitive type names to corresponding class objects */
-    private static final HashMap<String, Class<?>> primClasses = new HashMap<String, Class<?>>(
-            8, 1.0F);
+    private static final HashMap<String, Class<?>> primClasses = new HashMap<String, Class<?>>(8,
+            1.0F);
 
     static {
         primClasses.put("boolean", boolean.class);

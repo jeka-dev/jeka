@@ -61,8 +61,8 @@ public final class JkManifest {
      */
     public static JkManifest of(File manifestFile) {
         if (!manifestFile.exists()) {
-            throw new IllegalArgumentException("Manifest file "
-                    + manifestFile.getPath() + " not found.");
+            throw new IllegalArgumentException("Manifest file " + manifestFile.getPath()
+                    + " not found.");
         }
         return new JkManifest(read(manifestFile));
     }
@@ -96,8 +96,7 @@ public final class JkManifest {
      * if no manifest found.
      */
     public static JkManifest ofArchive(File archive) {
-        final InputStream inputStream = JkUtilsIO.readZipEntryOrNull(archive,
-                PATH);
+        final InputStream inputStream = JkUtilsIO.readZipEntryOrNull(archive, PATH);
         if (inputStream == null) {
             return null;
         }
@@ -114,21 +113,31 @@ public final class JkManifest {
      */
     public static JkManifest empty() {
         final Manifest manifest = new Manifest();
-        manifest.getMainAttributes().putValue(Name.MANIFEST_VERSION.toString(),
-                "1.0");
+        manifest.getMainAttributes().putValue(Name.MANIFEST_VERSION.toString(), "1.0");
         return of(manifest);
     }
 
+    /**
+     * Add the specified attributes in the "main" attributes section.
+     * This method return this object.
+     */
     public JkManifest addMainAttribute(Name key, String value) {
         this.manifest.getMainAttributes().putValue(key.toString(), value);
         return this;
     }
 
+    /**
+     * @see #addMainAttribute(Name, String)
+     */
     public JkManifest addMainAttribute(String key, String value) {
         this.manifest.getMainAttributes().putValue(key, value);
         return this;
     }
 
+    /**
+     * Add the 'Main-Class' attribute to this manifest.
+     * This method returns this object.
+     */
     public JkManifest addMainClass(String value) {
         return addMainAttribute(Name.MAIN_CLASS, value);
     }
@@ -138,11 +147,9 @@ public final class JkManifest {
      * {@link #BUILT_BY} and {@link #BUILD_JDK}
      */
     public JkManifest addContextualInfo() {
-        return addMainAttribute(CREATED_BY, "Jerkar").addMainAttribute(
-                BUILT_BY, System.getProperty("user.name")).addMainAttribute(
-                        BUILD_JDK,
-                        System.getProperty("java.vendor") + " "
-                                + System.getProperty("java.version"));
+        return addMainAttribute(CREATED_BY, "Jerkar").addMainAttribute(BUILT_BY,
+                System.getProperty("user.name")).addMainAttribute(BUILD_JDK,
+                        System.getProperty("java.vendor") + " " + System.getProperty("java.version"));
     }
 
     /**
@@ -151,22 +158,19 @@ public final class JkManifest {
      * manifest if same attribute exist.
      */
     public JkManifest merge(JkManifest other) {
-        final Map<String, Attributes> otherEntryAttributes = other.manifest
-                .getEntries();
+        final Map<String, Attributes> otherEntryAttributes = other.manifest.getEntries();
         for (final String entry : otherEntryAttributes.keySet()) {
             final Attributes otherAttributes = otherEntryAttributes.get(entry);
             final Attributes attributes = this.manifest.getAttributes(entry);
             merge(attributes, otherAttributes);
         }
-        merge(this.manifest.getMainAttributes(),
-                other.manifest.getMainAttributes());
+        merge(this.manifest.getMainAttributes(), other.manifest.getMainAttributes());
         return this;
     }
 
     private static void merge(Attributes attributes, Attributes others) {
         for (final Object key : others.entrySet()) {
-            attributes
-            .putValue(key.toString(), others.getValue(key.toString()));
+            attributes.putValue(key.toString(), others.getValue(key.toString()));
         }
     }
 
@@ -225,7 +229,8 @@ public final class JkManifest {
     }
 
     /**
-     * Writes this manifest at the standard place (META-INF/MANIFEST.MF) of the specified directory.
+     * Writes this manifest at the standard place (META-INF/MANIFEST.MF) of the
+     * specified directory.
      */
     public void writeToStandardLocation(File classDir) {
         writeTo(new File(classDir, PATH));
@@ -244,18 +249,19 @@ public final class JkManifest {
     }
 
     /**
-     * Returns <code>true</code> if this manifest has no entry or has only "Manifest-Version"
-     * entry.
+     * Returns <code>true</code> if this manifest has no entry or has only
+     * "Manifest-Version" entry.
      */
     public boolean isEmpty() {
         final Attributes mainAttributes = manifest.getMainAttributes();
         if (mainAttributes.size() > 1) {
             return false;
         }
-        if (mainAttributes.size() == 1 && !mainAttributes.containsKey(Attributes.Name.MANIFEST_VERSION)) {
+        if (mainAttributes.size() == 1
+                && !mainAttributes.containsKey(Attributes.Name.MANIFEST_VERSION)) {
             return false;
         }
-        return manifest.getEntries().size()  == 0;
+        return manifest.getEntries().size() == 0;
     }
 
 }

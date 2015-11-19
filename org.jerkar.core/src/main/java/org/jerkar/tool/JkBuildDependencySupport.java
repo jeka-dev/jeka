@@ -26,7 +26,7 @@ import org.jerkar.api.utils.JkUtilsString;
 /**
  * Template build definition class providing support for managing dependencies
  * and multi-projects.
- *
+ * 
  * @author Jerome Angibaud
  */
 public class JkBuildDependencySupport extends JkBuild {
@@ -52,36 +52,37 @@ public class JkBuildDependencySupport extends JkBuild {
     protected JkBuildDependencySupport() {
     }
 
-
     /**
-     * Override this method to define version programmatically.
-     * This is not necessary the effective version that will be used in end.
-     * Indeed version injected via Jerkar options takes precedence on this one.
-     *
+     * Override this method to define version programmatically. This is not
+     * necessary the effective version that will be used in end. Indeed version
+     * injected via Jerkar options takes precedence on this one.
+     * 
      * @see JkBuildDependencySupport#effectiveVersion()
      */
     protected JkVersion version() {
-	return null;
+        return null;
     }
 
     /**
      * Returns the effective version for this project. This value is used to
-     * name and publish artifacts. It may take format as <code>1.0-SNAPSHOT</code>,
-     * <code>trunk-SNAPSHOT</code>, <code>1.2.3-rc1</code>, <code>1.2.3</code>.
-     *
+     * name and publish artifacts. It may take format as
+     * <code>1.0-SNAPSHOT</code>, <code>trunk-SNAPSHOT</code>,
+     * <code>1.2.3-rc1</code>, <code>1.2.3</code>.
+     * 
      * To get the effective version, this method looks in the following order :
      * <ul>
-     * <li>The version injected by option (with command line argment -version=2.1 for example)</li>
+     * <li>The version injected by option (with command line argment
+     * -version=2.1 for example)</li>
      * <li>The version returned by the {@link #version()} method</li>
      * <li>The the hard-coded <code>1.0-SNAPSHOT</code> value</li>
      * </ul>
-     *
+     * 
      */
     public final JkVersion effectiveVersion() {
-	if (!JkUtilsString.isBlank(version)) {
-	    return JkVersion.ofName(version);
-	}
-	return JkUtilsObject.firstNonNull(version(), JkVersion.ofName("1.0-SNAPSHOT"));
+        if (!JkUtilsString.isBlank(version)) {
+            return JkVersion.ofName(version);
+        }
+        return JkUtilsObject.firstNonNull(version(), JkVersion.ofName("1.0-SNAPSHOT"));
     }
 
     /**
@@ -89,14 +90,14 @@ public class JkBuildDependencySupport extends JkBuild {
      * generated artifacts and by dependency manager.
      */
     public JkModuleId moduleId() {
-	return JkModuleId.of(baseDir().root().getName());
+        return JkModuleId.of(baseDir().root().getName());
     }
 
     /**
      * Returns moduleId along its version
      */
     protected final JkVersionedModule versionedModule() {
-	return JkVersionedModule.of(moduleId(), effectiveVersion());
+        return JkVersionedModule.of(moduleId(), effectiveVersion());
     }
 
     /**
@@ -104,7 +105,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * only a meaning in case of using managed dependencies.
      */
     protected JkRepos downloadRepositories() {
-	return reposOfOptions("download").andIfEmpty(JkRepo.mavenCentral());
+        return reposOfOptions("download").andIfEmpty(JkRepo.mavenCentral());
     }
 
     /**
@@ -112,29 +113,30 @@ public class JkBuildDependencySupport extends JkBuild {
      */
     protected JkPublishRepos publishRepositories() {
 
-	// Find best defaults
-	if (repo.publish.url == null && repo.release.url == null) {
-	    JkLog.info("No url specified for publish and release repo : use defaults.");
-	    if (repo.publish.username != null && repo.publish.password != null) {
-		JkLog.info("Credential specifified for publish repo : use OSSRH repos.");
-		return JkPublishRepos.ossrh(repo.publish.username, repo.publish.password, pgp());
-	    } else {
-		final JkRepo repo = JkRepo.mavenLocal();
-		JkLog.info("No credential specifified for publish repo : use local filesystem repo."
-			+ repo.url());
-		return JkPublishRepos.of(repo.asPublishRepo());
-	    }
-	}
+        // Find best defaults
+        if (repo.publish.url == null && repo.release.url == null) {
+            JkLog.info("No url specified for publish and release repo : use defaults.");
+            if (repo.publish.username != null && repo.publish.password != null) {
+                JkLog.info("Credential specifified for publish repo : use OSSRH repos.");
+                return JkPublishRepos.ossrh(repo.publish.username, repo.publish.password, pgp());
+            } else {
+                final JkRepo repo = JkRepo.mavenLocal();
+                JkLog.info("No credential specifified for publish repo : use local filesystem repo."
+                        + repo.url());
+                return JkPublishRepos.of(repo.asPublishRepo());
+            }
+        }
 
-	// One of release or publish url has been specified
-	final JkRepo defaultDownloadRepo = repoOfOptions("download");
-	final JkRepo defaultPublishRepo = repoOfOptions("publish");
-	final JkRepo defaultPublishReleaseRepo = repoOfOptions("release");
+        // One of release or publish url has been specified
+        final JkRepo defaultDownloadRepo = repoOfOptions("download");
+        final JkRepo defaultPublishRepo = repoOfOptions("publish");
+        final JkRepo defaultPublishReleaseRepo = repoOfOptions("release");
 
-	final JkRepo publishRepo = JkRepo.firstNonNull(defaultPublishRepo, defaultDownloadRepo);
-	final JkRepo releaseRepo = JkRepo.firstNonNull(defaultPublishReleaseRepo, publishRepo);
+        final JkRepo publishRepo = JkRepo.firstNonNull(defaultPublishRepo, defaultDownloadRepo);
+        final JkRepo releaseRepo = JkRepo.firstNonNull(defaultPublishReleaseRepo, publishRepo);
 
-	return JkPublishRepos.of(publishRepo.asPublishSnapshotRepo()).and(releaseRepo.asPublishReleaseRepo());
+        return JkPublishRepos.of(publishRepo.asPublishSnapshotRepo()).and(
+                releaseRepo.asPublishReleaseRepo());
     }
 
     /**
@@ -143,7 +145,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * <code>extraXxxxPath</code>.
      */
     public final JkPath depsFor(JkScope... scopes) {
-	return dependencyResolver().get(scopes);
+        return dependencyResolver().get(scopes);
     }
 
     /**
@@ -153,46 +155,46 @@ public class JkBuildDependencySupport extends JkBuild {
      * dependencies, you must override this method.
      */
     private JkDependencies effectiveDependencies() {
-	JkDependencies deps = dependencies()
-		.withDefaultScope(this.defaultScope())
-		.resolvedWith(versionProvider())
-		.withExclusions(dependencyExclusions());
-	final JkScope defaultcope = this.defaultScope();
-	if (defaultcope != null) {
-	    deps = deps.withDefaultScope(defaultcope);
-	}
-	return JkBuildPlugin.applyDependencies(plugins.getActives(),
-		implicitDependencies().and(deps));
+        JkDependencies deps = dependencies().withDefaultScope(this.defaultScope())
+                .resolvedWith(versionProvider()).withExclusions(dependencyExclusions());
+        final JkScope defaultcope = this.defaultScope();
+        if (defaultcope != null) {
+            deps = deps.withDefaultScope(defaultcope);
+        }
+        return JkBuildPlugin.applyDependencies(plugins.getActives(),
+                implicitDependencies().and(deps));
     }
 
     /**
-     * On {@link #asDependency(File...)} method, you may have declared dependency without mentioning the version (unspecified version)
-     * or specifying a dynamic one (as 1.4+).
-     * The {@link #dependencyResolver()} will use the version provided by this method in order to replace unspecified or dynamic versions.
+     * On {@link #asDependency(File...)} method, you may have declared
+     * dependency without mentioning the version (unspecified version) or
+     * specifying a dynamic one (as 1.4+). The {@link #dependencyResolver()}
+     * will use the version provided by this method in order to replace
+     * unspecified or dynamic versions.
      */
     protected JkVersionProvider versionProvider() {
-	return JkVersionProvider.empty();
+        return JkVersionProvider.empty();
     }
 
-
     /**
-     * Specify transitive dependencies to exclude when using certain dependencies.
+     * Specify transitive dependencies to exclude when using certain
+     * dependencies.
      */
     protected JkDependencyExclusions dependencyExclusions() {
-	return JkDependencyExclusions.builder().build();
+        return JkDependencyExclusions.builder().build();
     }
 
     protected JkDependencies dependencies() {
-	return JkDependencies.of();
+        return JkDependencies.of();
     }
 
     /**
      * The scope that will be used when a dependency has been declared without
-     * scope. It can be returns <code>null</code>, meaning that when no scope is mentioned
-     * then the dependency is always available.
+     * scope. It can be returns <code>null</code>, meaning that when no scope is
+     * mentioned then the dependency is always available.
      */
     protected JkScope defaultScope() {
-	return null;
+        return null;
     }
 
     /**
@@ -203,135 +205,142 @@ public class JkBuildDependencySupport extends JkBuild {
      * Normally you don't need to override this method.
      */
     protected JkDependencies implicitDependencies() {
-	return JkDependencies.builder().build();
+        return JkDependencies.builder().build();
     }
 
     /**
      * Returns the dependency resolver for this build.
      */
     public final JkDependencyResolver dependencyResolver() {
-	if (cachedResolver == null) {
-	    JkLog.startln("Setting dependency resolver ");
-	    cachedResolver = JkBuildPlugin.applyDependencyResolver(plugins.getActives(), createDependencyResolver());
-	    JkLog.done("Resolver set " + cachedResolver);
-	}
-	return cachedResolver;
+        if (cachedResolver == null) {
+            JkLog.startln("Setting dependency resolver ");
+            cachedResolver = JkBuildPlugin.applyDependencyResolver(plugins.getActives(),
+                    createDependencyResolver());
+            JkLog.done("Resolver set " + cachedResolver);
+        }
+        return cachedResolver;
     }
 
     /**
      * Returns the base dependency resolver.
      */
     private JkDependencyResolver createDependencyResolver() {
-	final JkDependencies dependencies = effectiveDependencies().and(extraCommandLineDeps());
-	if (dependencies.containsModules()) {
-	    return JkDependencyResolver.managed(downloadRepositories(), dependencies)
-		    .withModuleHolder(versionedModule())
-		    .withParams(JkResolutionParameters.of().withDefault(scopeMapping()));
-	}
-	return JkDependencyResolver.unmanaged(dependencies);
+        final JkDependencies dependencies = effectiveDependencies().and(extraCommandLineDeps());
+        if (dependencies.containsModules()) {
+            return JkDependencyResolver.managed(downloadRepositories(), dependencies)
+                    .withModuleHolder(versionedModule())
+                    .withParams(JkResolutionParameters.of().withDefault(scopeMapping()));
+        }
+        return JkDependencyResolver.unmanaged(dependencies);
     }
 
     /**
      * Returns the scope mapping used by the underlying dependency manager.
      */
     protected JkScopeMapping scopeMapping() {
-	return JkScopeMapping.empty();
+        return JkScopeMapping.empty();
     }
 
     protected JkPublisher publisher() {
-	if (cachedPublisher == null) {
-	    cachedPublisher = JkPublisher.of(publishRepositories(), this.ouputDir().root());
-	}
-	return cachedPublisher;
+        if (cachedPublisher == null) {
+            cachedPublisher = JkPublisher.of(publishRepositories(), this.ouputDir().root());
+        }
+        return cachedPublisher;
     }
 
     protected JkDependencies extraCommandLineDeps() {
-	return JkDependencies.builder().build();
+        return JkDependencies.builder().build();
     }
 
     @Override
     protected String scaffoldedBuildClassCode() {
-	final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
-	codeWriter.extendedClass = "JkBuildDependencySupport";
-	codeWriter.dependencies = JkDependencies.builder().build();
-	codeWriter.imports.clear();
-	codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsFoJkDependencyBuildSupport());
-	return codeWriter.wholeClass() + codeWriter.endClass();
+        final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
+        codeWriter.extendedClass = "JkBuildDependencySupport";
+        codeWriter.dependencies = JkDependencies.builder().build();
+        codeWriter.imports.clear();
+        codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsFoJkDependencyBuildSupport());
+        return codeWriter.wholeClass() + codeWriter.endClass();
     }
 
     public static final class JkOptionRepos {
 
-	@JkDoc("Maven or Ivy repository to download dependency artifacts.")
-	public final JkOptionRepo download = new JkOptionRepo();
+        @JkDoc("Maven or Ivy repository to download dependency artifacts.")
+        public final JkOptionRepo download = new JkOptionRepo();
 
-	@JkDoc("Maven or Ivy repositories to publish artifacts.")
-	public final JkOptionRepo publish = new JkOptionRepo();
+        @JkDoc("Maven or Ivy repositories to publish artifacts.")
+        public final JkOptionRepo publish = new JkOptionRepo();
 
-	@JkDoc({ "Maven or Ivy repositories to publish released artifacts.",
-	"If this repo is not null, then Jerkar will try to publish snapshot in the publish repo and release in this one." })
-	public final JkOptionRepo release = new JkOptionRepo();
+        @JkDoc({
+                "Maven or Ivy repositories to publish released artifacts.",
+                "If this repo is not null, then Jerkar will try to publish snapshot in the publish repo and release in this one." })
+        public final JkOptionRepo release = new JkOptionRepo();
 
-	public JkOptionRepos() {
-	    download.url = JkRepo.MAVEN_CENTRAL_URL.toExternalForm();
-	    publish.url = JkRepo.MAVEN_OSSRH_DOWNLOAD_AND_DEPLOY_SNAPSHOT.toExternalForm();
-	    release.url = JkRepo.MAVEN_OSSRH_DEPLOY_RELEASE.toExternalForm();
-	}
+        public JkOptionRepos() {
+            download.url = JkRepo.MAVEN_CENTRAL_URL.toExternalForm();
+            publish.url = JkRepo.MAVEN_OSSRH_DOWNLOAD_AND_DEPLOY_SNAPSHOT.toExternalForm();
+            release.url = JkRepo.MAVEN_OSSRH_DEPLOY_RELEASE.toExternalForm();
+        }
 
     }
 
     public static final class JkOptionRepo {
 
-	@JkDoc({ "Url of the repository : Prefix the Url with 'ivy:' if it is an Ivy repostory." })
-	public String url;
+        @JkDoc({ "Url of the repository : Prefix the Url with 'ivy:' if it is an Ivy repostory." })
+        public String url;
 
-	@JkDoc({ "Usename to connect to repository (if needed).",
-	"Null or blank means that the repository will be accessed in an anonymous way." })
-	public String username;
+        @JkDoc({ "Usename to connect to repository (if needed).",
+                "Null or blank means that the repository will be accessed in an anonymous way." })
+        public String username;
 
-	@JkDoc({ "Password to connect to the repository (if needed)." })
-	public String password;
+        @JkDoc({ "Password to connect to the repository (if needed)." })
+        public String password;
 
     }
 
     public JkPgp pgp() {
-	return JkPgp.of(JkOptions.getAll());
+        return JkPgp.of(JkOptions.getAll());
     }
 
     /**
-     * Creates {@link JkRepo} form Jerkar options. the specified repository name will
-     * be turned to <code>repo.[repoName].url</code>, <code>repo.[repoName].username</code>
-     * and <code>repo.[repoName].password</code> options for creating according repository.
+     * Creates {@link JkRepo} form Jerkar options. the specified repository name
+     * will be turned to <code>repo.[repoName].url</code>,
+     * <code>repo.[repoName].username</code> and
+     * <code>repo.[repoName].password</code> options for creating according
+     * repository.
      */
     public static JkRepo repoOfOptions(String repoName) {
-	final String url = JkOptions.get("repo." + repoName + "." + "url");
-	if (JkUtilsString.isBlank(url)) {
-	    return null;
-	}
-	final String username = JkOptions.get("repo." + repoName + ".username");
-	final String password = JkOptions.get("repo." + repoName + ".password");
-	return JkRepo.of(url.trim()).withOptionalCredentials(username, password);
+        final String url = JkOptions.get("repo." + repoName + "." + "url");
+        if (JkUtilsString.isBlank(url)) {
+            return null;
+        }
+        final String username = JkOptions.get("repo." + repoName + ".username");
+        final String password = JkOptions.get("repo." + repoName + ".password");
+        return JkRepo.of(url.trim()).withOptionalCredentials(username, password);
     }
 
     /**
-     * Creates {@link JkRepos} form Jerkar options. the specified repository name will
-     * be turned to <code>repo.[repoName].url</code>, <code>repo.[repoName].username</code>
-     * and <code>repo.[repoName].password</code> options for creating according repository.
-     *
-     * You can specify severals url by using coma separation in <code>repo.[repoName].url</code> option value.
-     * but the credential will remain the same for all returned repositories.
+     * Creates {@link JkRepos} form Jerkar options. the specified repository
+     * name will be turned to <code>repo.[repoName].url</code>,
+     * <code>repo.[repoName].username</code> and
+     * <code>repo.[repoName].password</code> options for creating according
+     * repository.
+     * 
+     * You can specify severals url by using coma separation in
+     * <code>repo.[repoName].url</code> option value. but the credential will
+     * remain the same for all returned repositories.
      */
     public static JkRepos reposOfOptions(String repoName) {
-	final String urls = JkOptions.get("repo." + repoName + "." + "url");
-	JkRepos result = JkRepos.of();
-	if (JkUtilsString.isBlank(urls)) {
-	    return result;
-	}
-	final String username = JkOptions.get("repo." + repoName + ".username");
-	final String password = JkOptions.get("repo." + repoName + ".password");
-	for (final String url : urls.split(",")) {
-	    result = result.and(JkRepo.of(url.trim()).withOptionalCredentials(username, password));
-	}
-	return result;
+        final String urls = JkOptions.get("repo." + repoName + "." + "url");
+        JkRepos result = JkRepos.of();
+        if (JkUtilsString.isBlank(urls)) {
+            return result;
+        }
+        final String username = JkOptions.get("repo." + repoName + ".username");
+        final String password = JkOptions.get("repo." + repoName + ".password");
+        for (final String url : urls.split(",")) {
+            result = result.and(JkRepo.of(url.trim()).withOptionalCredentials(username, password));
+        }
+        return result;
     }
 
 }

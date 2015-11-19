@@ -36,71 +36,72 @@ class JUnitReportListener extends RunListener {
     private boolean failureFlag;
 
     public JUnitReportListener(File folder) {
-	super();
-	this.folder = folder;
+        super();
+        this.folder = folder;
     }
 
     @Override
     public void testStarted(Description description) throws Exception {
-	final Class<?> clazz = description.getTestClass();
-	if (!clazz.equals(currentClass)) {
-	    dump();
-	    init(clazz);
-	}
-	testTimeNano = System.nanoTime();
-	currentTestName = description.getMethodName();
-	failureFlag = false;
+        final Class<?> clazz = description.getTestClass();
+        if (!clazz.equals(currentClass)) {
+            dump();
+            init(clazz);
+        }
+        testTimeNano = System.nanoTime();
+        currentTestName = description.getMethodName();
+        failureFlag = false;
     }
 
     @Override
     public void testIgnored(Description description) throws Exception {
-	ignoreCount++;
-	final IgnoredCase ignoredCase = new IgnoredCase(currentClass.getName(), currentTestName);
-	this.cases.add(ignoredCase);
+        ignoreCount++;
+        final IgnoredCase ignoredCase = new IgnoredCase(currentClass.getName(), currentTestName);
+        this.cases.add(ignoredCase);
     }
 
     @Override
     public void testFinished(Description description) throws Exception {
-	final float duration = (JkUtilsTime.durationInMillis(testTimeNano)) / 1000f;
-	if (!failureFlag) {
-	    final TestCaseResult result = new TestCaseResult(currentClass.getName(), currentTestName, duration);
-	    cases.add(result);
-	}
+        final float duration = (JkUtilsTime.durationInMillis(testTimeNano)) / 1000f;
+        if (!failureFlag) {
+            final TestCaseResult result = new TestCaseResult(currentClass.getName(),
+                    currentTestName, duration);
+            cases.add(result);
+        }
     }
 
     @Override
     public void testFailure(Failure failure) throws Exception {
-	failureFlag = true;
-	final float duration = (JkUtilsTime.durationInMillis(testTimeNano)) / 1000f;
-	final TestCaseFailure caseFailure = new TestCaseFailure(currentClass.getName(), currentTestName, duration,
-		new ExceptionDescription(failure.getException()));
-	cases.add(caseFailure);
+        failureFlag = true;
+        final float duration = (JkUtilsTime.durationInMillis(testTimeNano)) / 1000f;
+        final TestCaseFailure caseFailure = new TestCaseFailure(currentClass.getName(),
+                currentTestName, duration, new ExceptionDescription(failure.getException()));
+        cases.add(caseFailure);
     }
 
     @Override
     public void testRunFinished(Result result) throws Exception {
-	dump();
+        dump();
     }
 
     private void init(Class<?> clazz) {
-	this.currentClass = clazz;
-	this.properties = new Properties();
-	this.properties.putAll(System.getProperties());
-	this.suiteTimeNano = System.nanoTime();
-	this.cases = new LinkedList<JkTestSuiteResult.TestCaseResult>();
-	this.ignoreCount = 0;
+        this.currentClass = clazz;
+        this.properties = new Properties();
+        this.properties.putAll(System.getProperties());
+        this.suiteTimeNano = System.nanoTime();
+        this.cases = new LinkedList<JkTestSuiteResult.TestCaseResult>();
+        this.ignoreCount = 0;
     }
 
     private void dump() {
-	if (currentClass == null) {
-	    return;
-	}
-	final long duration = JkUtilsTime.durationInMillis(suiteTimeNano);
-	final String suiteName = currentClass.getName();
-	final int count = cases.size();
-	final JkTestSuiteResult result = new JkTestSuiteResult(properties, suiteName, count, ignoreCount, cases,
-		duration);
-	TestReportBuilder.of(result).writeToFileSystem(folder);
+        if (currentClass == null) {
+            return;
+        }
+        final long duration = JkUtilsTime.durationInMillis(suiteTimeNano);
+        final String suiteName = currentClass.getName();
+        final int count = cases.size();
+        final JkTestSuiteResult result = new JkTestSuiteResult(properties, suiteName, count,
+                ignoreCount, cases, duration);
+        TestReportBuilder.of(result).writeToFileSystem(folder);
     }
 
 }

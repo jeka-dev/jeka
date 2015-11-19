@@ -16,8 +16,8 @@ import org.jerkar.api.utils.JkUtilsString;
  * {@link String}. Parameters are stored in a static field so they are available
  * from everywhere. These parameters are consumed by the build definitions but
  * not set here.<br/>
- * To define these values see
- * <a href="http://jerkar.github.io/documentation/latest/reference.html">Jerkar
+ * To define these values see <a
+ * href="http://jerkar.github.io/documentation/latest/reference.html">Jerkar
  * Reference Guide section 3.3</a>
  */
 public final class JkOptions {
@@ -29,26 +29,26 @@ public final class JkOptions {
     private static boolean populated;
 
     static JkOptions instance() {
-	return INSTANCE;
+        return INSTANCE;
     }
 
     static synchronized void init(Map<String, String> options) {
-	if (populated) {
-	    throw new IllegalStateException("The init method can be called only once.");
-	}
-	final Map<String, String> map = new HashMap<String, String>();
-	map.putAll(options);
-	INSTANCE = new JkOptions(map);
-	populated = true;
+        if (populated) {
+            throw new IllegalStateException("The init method can be called only once.");
+        }
+        final Map<String, String> map = new HashMap<String, String>();
+        map.putAll(options);
+        INSTANCE = new JkOptions(map);
+        populated = true;
     }
 
     private JkOptions(Map<String, String> options) {
-	props.putAll(options);
+        props.putAll(options);
     }
 
     @SuppressWarnings("unchecked")
     private JkOptions() {
-	this(Collections.EMPTY_MAP);
+        this(Collections.EMPTY_MAP);
     }
 
     /**
@@ -56,21 +56,21 @@ public final class JkOptions {
      * key.
      */
     public static boolean containsKey(String key) {
-	return INSTANCE.props.containsKey(key);
+        return INSTANCE.props.containsKey(key);
     }
 
     /**
      * Returns the value defined for the specified key.
      */
     public static String get(String key) {
-	return INSTANCE.props.get(key);
+        return INSTANCE.props.get(key);
     }
 
     /**
      * Returns the complete store.
      */
     public static Map<String, String> getAll() {
-	return Collections.unmodifiableMap(INSTANCE.props);
+        return Collections.unmodifiableMap(INSTANCE.props);
     }
 
     /**
@@ -78,13 +78,13 @@ public final class JkOptions {
      * specified prefix.
      */
     public static Map<String, String> getAllStartingWith(String prefix) {
-	final Map<String, String> result = new HashMap<String, String>();
-	for (final String key : INSTANCE.props.keySet()) {
-	    if (key.startsWith(prefix)) {
-		result.put(key, INSTANCE.props.get(key));
-	    }
-	}
-	return result;
+        final Map<String, String> result = new HashMap<String, String>();
+        for (final String key : INSTANCE.props.keySet()) {
+            if (key.startsWith(prefix)) {
+                result.put(key, INSTANCE.props.get(key));
+            }
+        }
+        return result;
     }
 
     /**
@@ -92,45 +92,46 @@ public final class JkOptions {
      * found in props arguments.
      */
     static void populateFields(Object target, Map<String, String> props) {
-	OptionInjector.inject(target, props);
+        OptionInjector.inject(target, props);
     }
 
     static void populateFields(Object build) {
-	populateFields(build, INSTANCE.props);
+        populateFields(build, INSTANCE.props);
     }
 
     static Map<String, String> toDisplayedMap(Map<String, String> props) {
-	final Map<String, String> result = new TreeMap<String, String>();
-	for (final Map.Entry<String, String> entry : props.entrySet()) {
-	    final String value;
-	    if (JkUtilsString.firstMatching(entry.getKey().toLowerCase(), "password", "pwd") != null
-		    && entry.getValue() != null) {
-		value = "*****";
-	    } else {
-		value = entry.getValue();
-	    }
-	    result.put(entry.getKey(), value);
+        final Map<String, String> result = new TreeMap<String, String>();
+        for (final Map.Entry<String, String> entry : props.entrySet()) {
+            final String value;
+            if (JkUtilsString.firstMatching(entry.getKey().toLowerCase(), "password", "pwd") != null
+                    && entry.getValue() != null) {
+                value = "*****";
+            } else {
+                value = entry.getValue();
+            }
+            result.put(entry.getKey(), value);
 
-	}
-	return result;
+        }
+        return result;
     }
 
     private static Map<String, String> loadSystemAndUserOptions() {
-	final File propFile = new File(JkLocator.jerkarHome(), "options.properties");
-	final Map<String, String> result = new HashMap<String, String>();
-	if (propFile.exists()) {
-	    result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
-	}
-	final File userPropFile = new File(JkLocator.jerkarUserHome(), "options.properties");
-	if (userPropFile.exists()) {
-	    result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
-	}
-	return result;
+        final File propFile = new File(JkLocator.jerkarHome(), "options.properties");
+        final Map<String, String> result = new HashMap<String, String>();
+        if (propFile.exists()) {
+            result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
+        }
+        final File userPropFile = new File(JkLocator.jerkarUserHome(), "options.properties");
+        if (userPropFile.exists()) {
+            result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
+        }
+        return result;
     }
 
     static String fieldOptionsToString(Object object) {
-	final Map<String, String> map = JkOptions.toDisplayedMap(OptionInjector.injectedFields(object));
-	return JkUtilsIterable.toString(map);
+        final Map<String, String> map = JkOptions.toDisplayedMap(OptionInjector
+                .injectedFields(object));
+        return JkUtilsIterable.toString(map);
     }
 
 }

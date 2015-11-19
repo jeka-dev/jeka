@@ -8,10 +8,10 @@ class Sources {
 
     public static final TestSegregator SMART = new TestSegregator() {
 
-	@Override
-	public boolean isTest(String path) {
-	    return path.toLowerCase().contains("test");
-	}
+        @Override
+        public boolean isTest(String path) {
+            return path.toLowerCase().contains("test");
+        }
     };
 
     public final JkFileTreeSet prodSources;
@@ -19,23 +19,23 @@ class Sources {
     public final JkFileTreeSet testSources;
 
     public Sources(JkFileTreeSet prodSources, JkFileTreeSet testSources) {
-	super();
-	this.prodSources = prodSources;
-	this.testSources = testSources;
+        super();
+        this.prodSources = prodSources;
+        this.testSources = testSources;
     }
 
     public static interface TestSegregator {
 
-	public boolean isTest(String path);
+        public boolean isTest(String path);
 
     }
 
     private static class NoTests implements TestSegregator {
 
-	@Override
-	public boolean isTest(String path) {
-	    return false;
-	}
+        @Override
+        public boolean isTest(String path) {
+            return false;
+        }
 
     }
 

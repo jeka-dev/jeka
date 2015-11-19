@@ -25,39 +25,37 @@ public class JkBuildPluginWar extends JkJavaBuildPlugin {
 
     @Override
     public void configure(JkBuild build) {
-	this.build = (JkJavaBuild) build;
+        this.build = (JkJavaBuild) build;
     }
 
     public File warFile() {
-	return this.build.ouputDir(build.packer().baseName() + ".war");
+        return this.build.ouputDir(build.packer().baseName() + ".war");
     }
 
     private File webappSrcFile() {
-	return build.file(webappSrc);
+        return build.file(webappSrc);
     }
-
-
 
     @Override
     protected JkJavaPacker alterPacker(final JkJavaPacker packer) {
-	final JkJavaPacker.Builder builder = packer.builder().doJar(regularJar).doTest(testJar).doFatJar(false);
-	if (webappSrcFile().exists()) {
-	    builder.extraAction(new Extra() {
+        final JkJavaPacker.Builder builder = packer.builder().doJar(regularJar).doTest(testJar)
+                .doFatJar(false);
+        if (webappSrcFile().exists()) {
+            builder.extraAction(new Extra() {
 
-		@Override
-		public void process(JkJavaBuild build) {
-		    JkLog.startln("Creating war file");
-		    final File dir = build.ouputDir(packer.baseName() + "-war");
-		    JkJeePacker.of(build).war(webappSrcFile(), dir, warFile());
-		    JkLog.done();
-		}
-	    });
-	} else {
-	    JkLog.warn("No webapp source found at " + webappSrcFile().getPath());
-	}
-	return builder.build();
+                @Override
+                public void process(JkJavaBuild build) {
+                    JkLog.startln("Creating war file");
+                    final File dir = build.ouputDir(packer.baseName() + "-war");
+                    JkJeePacker.of(build).war(webappSrcFile(), dir, warFile());
+                    JkLog.done();
+                }
+            });
+        } else {
+            JkLog.warn("No webapp source found at " + webappSrcFile().getPath());
+        }
+        return builder.build();
 
     }
-
 
 }

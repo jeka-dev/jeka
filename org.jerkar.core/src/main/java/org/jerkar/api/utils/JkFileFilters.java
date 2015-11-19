@@ -7,88 +7,88 @@ import java.io.FilenameFilter;
 public final class JkFileFilters {
 
     public static FileFilter endingBy(final String... suffixes) {
-	return new FileFilter() {
+        return new FileFilter() {
 
-	    @Override
-	    public boolean accept(File file) {
-		for (final String suffix : suffixes) {
-		    if (file.getName().endsWith(suffix)) {
-			return true;
-		    }
-		}
-		return false;
-	    }
-	};
+            @Override
+            public boolean accept(File file) {
+                for (final String suffix : suffixes) {
+                    if (file.getName().endsWith(suffix)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        };
     }
 
     public static FileFilter acceptAll() {
-	return new FileFilter() {
+        return new FileFilter() {
 
-	    @Override
-	    public boolean accept(File pathname) {
-		return true;
-	    }
+            @Override
+            public boolean accept(File pathname) {
+                return true;
+            }
 
-	    @Override
-	    public String toString() {
-		return "Accept-All filter";
-	    }
-	};
+            @Override
+            public String toString() {
+                return "Accept-All filter";
+            }
+        };
     }
 
     public static FileFilter acceptOnly(final File fileToAccept) {
-	return new FileFilter() {
+        return new FileFilter() {
 
-	    @Override
-	    public boolean accept(File pathname) {
-		return pathname.equals(fileToAccept);
-	    }
+            @Override
+            public boolean accept(File pathname) {
+                return pathname.equals(fileToAccept);
+            }
 
-	    @Override
-	    public String toString() {
-		return "Accept only " + fileToAccept.getAbsolutePath();
-	    }
-	};
+            @Override
+            public String toString() {
+                return "Accept only " + fileToAccept.getAbsolutePath();
+            }
+        };
     }
 
     public static FileFilter combine(final FileFilter filter1, final FileFilter filter2) {
-	return new FileFilter() {
+        return new FileFilter() {
 
-	    @Override
-	    public boolean accept(File candidate) {
-		return filter1.accept(candidate) && filter2.accept(candidate);
-	    }
+            @Override
+            public boolean accept(File candidate) {
+                return filter1.accept(candidate) && filter2.accept(candidate);
+            }
 
-	    @Override
-	    public String toString() {
-		return "{" + filter1 + "," + filter2 + "}";
-	    }
-	};
+            @Override
+            public String toString() {
+                return "{" + filter1 + "," + filter2 + "}";
+            }
+        };
     }
 
     public static FilenameFilter reverse(final FilenameFilter filter) {
-	return new FilenameFilter() {
+        return new FilenameFilter() {
 
-	    @Override
-	    public boolean accept(File dir, String name) {
-		return !filter.accept(dir, name);
-	    }
-	};
+            @Override
+            public boolean accept(File dir, String name) {
+                return !filter.accept(dir, name);
+            }
+        };
     }
 
     public static FileFilter reverse(final FileFilter filter) {
-	return new FileFilter() {
+        return new FileFilter() {
 
-	    @Override
-	    public boolean accept(File candidate) {
-		return !filter.accept(candidate);
-	    }
+            @Override
+            public boolean accept(File candidate) {
+                return !filter.accept(candidate);
+            }
 
-	    @Override
-	    public String toString() {
-		return "revert of (" + filter + ")";
-	    }
-	};
+            @Override
+            public String toString() {
+                return "revert of (" + filter + ")";
+            }
+        };
     }
 
 }

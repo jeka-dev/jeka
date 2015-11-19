@@ -71,8 +71,7 @@ public class JkJavaPacker implements Cloneable {
     }
 
     public String baseName() {
-        final String name = fullName ? build.moduleId().fullName() : build
-                .moduleId().name();
+        final String name = fullName ? build.moduleId().fullName() : build.moduleId().name();
         if (includeVersion) {
             return name + "-" + build.effectiveVersion();
         }
@@ -118,12 +117,10 @@ public class JkJavaPacker implements Cloneable {
             if (!manifest.isEmpty()) {
                 manifest.writeToStandardLocation(build.classDir());
             }
-            JkFileTree.of(build.classDir()).zip().to(jarFile())
-            .md5If(checkSums.contains("MD5"))
-            .sha1If(checkSums.contains("SHA-1"));
+            JkFileTree.of(build.classDir()).zip().to(jarFile()).md5If(checkSums.contains("MD5"))
+                    .sha1If(checkSums.contains("SHA-1"));
         }
-        final JkFileTreeSet sourceAndResources = build.sources().and(
-                build.resources());
+        final JkFileTreeSet sourceAndResources = build.sources().and(build.resources());
         if (doSources && sourceAndResources.countFiles(false) > 0) {
             build.sources().and(build.resources()).zip().to(jarSourceFile());
         }
@@ -131,16 +128,13 @@ public class JkJavaPacker implements Cloneable {
                 && !JkFileTree.of(build.testClassDir()).files(false).isEmpty()) {
             JkZipper.of(build.testClassDir()).to(jarTestFile());
         }
-        if (doTest && doSources
-                && !build.unitTestSources().files(false).isEmpty()) {
-            build.unitTestSources().and(build.unitTestResources()).zip()
-            .to(jarTestSourceFile());
+        if (doTest && doSources && !build.unitTestSources().files(false).isEmpty()) {
+            build.unitTestSources().and(build.unitTestResources()).zip().to(jarTestSourceFile());
         }
         if (doFatJar) {
-            JkFileTree.of(build.classDir()).zip()
-            .merge(build.depsFor(JkJavaBuild.RUNTIME)).to(fatJarFile())
-            .md5If(checkSums.contains("MD5"))
-            .sha1If(checkSums.contains("SHA-1"));
+            JkFileTree.of(build.classDir()).zip().merge(build.depsFor(JkJavaBuild.RUNTIME))
+                    .to(fatJarFile()).md5If(checkSums.contains("MD5"))
+                    .sha1If(checkSums.contains("SHA-1"));
         }
         for (final Extra action : this.extraActions) {
             action.process(build);
@@ -150,8 +144,8 @@ public class JkJavaPacker implements Cloneable {
         }
         if (pgp != null) {
             JkLog.start("Sign artifacts");
-            pgp.sign(jarFile(), jarSourceFile(), jarTestFile(),
-                    jarTestSourceFile(), fatJarFile(), javadocFile());
+            pgp.sign(jarFile(), jarSourceFile(), jarTestFile(), jarTestSourceFile(), fatJarFile(),
+                    javadocFile());
             JkLog.done();
         }
         JkLog.done();
@@ -254,10 +248,8 @@ public class JkJavaPacker implements Cloneable {
         /**
          * Tells the packer to sign each produced element.
          */
-        public Builder doSign(Boolean doSign, File secretRingKey,
-                String secretKeyPassword) {
-            return doSign(doSign,
-                    JkPgp.ofSecretRing(secretRingKey, secretKeyPassword));
+        public Builder doSign(Boolean doSign, File secretRingKey, String secretKeyPassword) {
+            return doSign(doSign, JkPgp.ofSecretRing(secretRingKey, secretKeyPassword));
         }
 
         public Builder extraAction(Extra extra) {
@@ -279,8 +271,7 @@ public class JkJavaPacker implements Cloneable {
         } catch (final CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }
-        clone.extraActions = new LinkedList<JkJavaPacker.Extra>(
-                this.extraActions);
+        clone.extraActions = new LinkedList<JkJavaPacker.Extra>(this.extraActions);
         return clone;
     }
 

@@ -10,7 +10,7 @@ import org.jerkar.api.utils.JkUtilsTime;
 /**
  * Logger shared globally on the classloader. It provides time tracking method
  * and indentation feature accounting for task/subtask execution.
- *
+ * 
  * @author Jerome Angibaud
  */
 public final class JkLog {
@@ -37,7 +37,7 @@ public final class JkLog {
      * @see #silent()
      */
     public static void silent(boolean mode) {
-	silent = mode;
+        silent = mode;
     }
 
     /**
@@ -45,14 +45,14 @@ public final class JkLog {
      * mode, nothing is mogged.
      */
     public static boolean silent() {
-	return silent;
+        return silent;
     }
 
     /**
      * Specifies the verbose mode #see {@link #verbose()}
      */
     public static void verbose(boolean flag) {
-	verbose = flag;
+        verbose = flag;
     }
 
     /**
@@ -61,7 +61,7 @@ public final class JkLog {
      * logged in non-verbose mode.
      */
     public static boolean verbose() {
-	return verbose;
+        return verbose;
     }
 
     /**
@@ -70,34 +70,34 @@ public final class JkLog {
      * right until {@link #done()} is invoked.
      */
     public static void start(String message) {
-	if (silent) {
-	    return;
-	}
-	infoWriter.print(message + " ... ");
-	incOffset();
-	startTimer();
+        if (silent) {
+            return;
+        }
+        infoWriter.print(message + " ... ");
+        incOffset();
+        startTimer();
     }
 
     public static PrintStream infoStreamIfVerbose() {
-	if (silent) {
-	    return null;
-	}
-	if (verbose) {
-	    return infoStream();
-	}
-	return null;
+        if (silent) {
+            return null;
+        }
+        if (verbose) {
+            return infoStream();
+        }
+        return null;
     }
 
     private static void startTimer() {
-	if (silent) {
-	    return;
-	}
-	LinkedList<Long> times = START_TIMES.get();
-	if (times == null) {
-	    times = new LinkedList<Long>();
-	    START_TIMES.set(times);
-	}
-	times.push(System.nanoTime());
+        if (silent) {
+            return;
+        }
+        LinkedList<Long> times = START_TIMES.get();
+        if (times == null) {
+            times = new LinkedList<Long>();
+            START_TIMES.set(times);
+        }
+        times.push(System.nanoTime());
     }
 
     /**
@@ -105,35 +105,35 @@ public final class JkLog {
      * message.
      */
     public static void startln(String message) {
-	if (silent) {
-	    return;
-	}
-	start(message);
-	nextLine();
+        if (silent) {
+            return;
+        }
+        start(message);
+        nextLine();
     }
 
     /**
      * As {@link #startln(String)} but underline the message.
      */
     public static void startUnderlined(String message) {
-	if (silent) {
-	    return;
-	}
-	infoUnderlined(message);
-	incOffset();
-	startTimer();
+        if (silent) {
+            return;
+        }
+        infoUnderlined(message);
+        incOffset();
+        startTimer();
     }
 
     /**
      * As {@link #startln(String)} but whith header message.
      */
     public static void startHeaded(String message) {
-	if (silent) {
-	    return;
-	}
-	infoHeaded(message);
-	incOffset();
-	startTimer();
+        if (silent) {
+            return;
+        }
+        infoHeaded(message);
+        incOffset();
+        startTimer();
     }
 
     /**
@@ -141,12 +141,12 @@ public final class JkLog {
      * nothing otherwise.
      */
     public static void trace(String message) {
-	if (silent) {
-	    return;
-	}
-	if (verbose) {
-	    JkLog.info(message);
-	}
+        if (silent) {
+            return;
+        }
+        if (verbose) {
+            JkLog.info(message);
+        }
     }
 
     /**
@@ -156,28 +156,30 @@ public final class JkLog {
      * annihilated.
      */
     public static void done() {
-	doneMessage("Done");
+        doneMessage("Done");
     }
 
     /**
      * As {@link #done()} but adding a tailored message.
      */
     public static void done(String message) {
-	doneMessage("Done : " + message);
+        doneMessage("Done : " + message);
     }
 
     private static void doneMessage(String message) {
-	if (silent) {
-	    return;
-	}
-	decOffset();
-	final LinkedList<Long> times = START_TIMES.get();
-	if (times == null || times.isEmpty()) {
-	    throw new IllegalStateException("This 'done' do no match to any 'start'. "
-		    + "Please, use 'done' only to mention that the previous 'start' activity is done.");
-	}
-	final long start = times.poll();
-	infoWriter.println(" \\ " + message + " in " + JkUtilsTime.durationInSeconds(start) + " seconds.");
+        if (silent) {
+            return;
+        }
+        decOffset();
+        final LinkedList<Long> times = START_TIMES.get();
+        if (times == null || times.isEmpty()) {
+            throw new IllegalStateException(
+                    "This 'done' do no match to any 'start'. "
+                            + "Please, use 'done' only to mention that the previous 'start' activity is done.");
+        }
+        final long start = times.poll();
+        infoWriter.println(" \\ " + message + " in " + JkUtilsTime.durationInSeconds(start)
+                + " seconds.");
 
     }
 
@@ -185,10 +187,10 @@ public final class JkLog {
      * Displays a message at info level.
      */
     public static void info(String message) {
-	if (silent) {
-	    return;
-	}
-	infoWriter.println(message);
+        if (silent) {
+            return;
+        }
+        infoWriter.println(message);
     }
 
     /**
@@ -196,57 +198,57 @@ public final class JkLog {
      * specified lines.
      */
     public static void info(String message, Iterable<String> lines) {
-	if (silent) {
-	    return;
-	}
-	infoWriter.print(message);
-	for (final String line : lines) {
-	    infoWriter.println(line);
-	}
+        if (silent) {
+            return;
+        }
+        infoWriter.print(message);
+        for (final String line : lines) {
+            infoWriter.println(line);
+        }
     }
 
     /**
      * Displays multi-line message.
      */
     public static void info(Iterable<String> lines) {
-	if (silent) {
-	    return;
-	}
-	for (final String line : lines) {
-	    infoWriter.println(line);
-	}
+        if (silent) {
+            return;
+        }
+        for (final String line : lines) {
+            infoWriter.println(line);
+        }
     }
 
     /**
      * Displays multi-line message.
      */
     public static void info(String... lines) {
-	if (silent) {
-	    return;
-	}
-	info(Arrays.asList(lines));
+        if (silent) {
+            return;
+        }
+        info(Arrays.asList(lines));
     }
 
     /**
      * Displays a multi-line message at warn level.
      */
     public static void warn(Iterable<String> lines) {
-	if (silent) {
-	    return;
-	}
-	for (final String line : lines) {
-	    warn(line);
-	}
+        if (silent) {
+            return;
+        }
+        for (final String line : lines) {
+            warn(line);
+        }
     }
 
     /**
      * Displays a message at warn level.
      */
     public static void warn(String message) {
-	if (silent) {
-	    return;
-	}
-	infoWriter.println("WARN : " + message);
+        if (silent) {
+            return;
+        }
+        infoWriter.println("WARN : " + message);
     }
 
     /**
@@ -254,59 +256,59 @@ public final class JkLog {
      * <code>true</code>.
      */
     public static void warnIf(boolean condition, String message) {
-	if (condition) {
-	    warn(message);
-	}
+        if (condition) {
+            warn(message);
+        }
     }
 
     /**
      * Displays a message at warn level.
      */
     public static void error(String message) {
-	if (silent) {
-	    return;
-	}
-	errorWriter.println(message);
+        if (silent) {
+            return;
+        }
+        errorWriter.println(message);
     }
 
     public static void error(Iterable<String> lines) {
-	if (silent) {
-	    return;
-	}
-	for (final String line : lines) {
-	    errorWriter.println(line);
-	}
+        if (silent) {
+            return;
+        }
+        for (final String line : lines) {
+            errorWriter.println(line);
+        }
     }
 
     public static void nextLine() {
-	if (silent) {
-	    return;
-	}
-	infoWriter.println();
+        if (silent) {
+            return;
+        }
+        infoWriter.println();
     }
 
     public static PrintStream infoStream() {
-	return infoWriter;
+        return infoWriter;
     }
 
     public static PrintStream warnStream() {
-	return warnWriter;
+        return warnWriter;
     }
 
     public static PrintStream errorStream() {
-	return errorWriter;
+        return errorWriter;
     }
 
     private static void decOffset() {
-	infoWriter.dec();
-	warnWriter.dec();
-	errorWriter.dec();
+        infoWriter.dec();
+        warnWriter.dec();
+        errorWriter.dec();
     }
 
     private static void incOffset() {
-	infoWriter.inc();
-	warnWriter.inc();
-	errorWriter.inc();
+        infoWriter.inc();
+        warnWriter.inc();
+        errorWriter.inc();
     }
 
     /**
@@ -314,92 +316,92 @@ public final class JkLog {
      * <code>delta</code> characters to right.
      */
     public static void delta(int delta) {
-	infoWriter.tabLevel += delta;
-	errorWriter.tabLevel += delta;
-	warnWriter.tabLevel += delta;
+        infoWriter.tabLevel += delta;
+        errorWriter.tabLevel += delta;
+        warnWriter.tabLevel += delta;
     }
 
     /**
      * Returns the current left margin size in character.
      */
     public static int offset() {
-	return infoWriter.offsetLevel;
+        return infoWriter.offsetLevel;
     }
 
     static void offset(int offset) {
-	infoWriter.offsetLevel = offset;
-	errorWriter.offsetLevel = offset;
-	warnWriter.offsetLevel = offset;
+        infoWriter.offsetLevel = offset;
+        errorWriter.offsetLevel = offset;
+        warnWriter.offsetLevel = offset;
     }
 
     private static class OffsetStream extends PrintStream {
 
-	private static final String SEPARATOR = System.getProperty("line.separator");
+        private static final String SEPARATOR = System.getProperty("line.separator");
 
-	private int offsetLevel;
+        private int offsetLevel;
 
-	private int tabLevel;
+        private int tabLevel;
 
-	private boolean beginOfLine;
+        private boolean beginOfLine;
 
-	public OffsetStream(PrintStream delegate) {
-	    super(delegate);
-	}
+        public OffsetStream(PrintStream delegate) {
+            super(delegate);
+        }
 
-	@Override
-	public void println(String s) {
-	    super.println(s);
-	    beginOfLine = true;
-	}
+        @Override
+        public void println(String s) {
+            super.println(s);
+            beginOfLine = true;
+        }
 
-	@Override
-	public void println() {
-	    super.println();
-	    beginOfLine = true;
-	}
+        @Override
+        public void println() {
+            super.println();
+            beginOfLine = true;
+        }
 
-	@Override
-	public void print(String s) {
-	    super.print(s);
-	    beginOfLine = s.endsWith(SEPARATOR);
-	}
+        @Override
+        public void print(String s) {
+            super.print(s);
+            beginOfLine = s.endsWith(SEPARATOR);
+        }
 
-	@Override
-	public void write(byte[] cbuf, int off, int len) {
-	    final byte[] filler = getFiller().getBytes();
-	    final int lenght = filler.length;
-	    if (lenght > 0 && beginOfLine) {
-		super.write(filler, 0, lenght);
-	    }
-	    super.write(cbuf, off, len);
-	}
+        @Override
+        public void write(byte[] cbuf, int off, int len) {
+            final byte[] filler = getFiller().getBytes();
+            final int lenght = filler.length;
+            if (lenght > 0 && beginOfLine) {
+                super.write(filler, 0, lenght);
+            }
+            super.write(cbuf, off, len);
+        }
 
-	private String getFiller() {
-	    if (offsetLevel == 0 && tabLevel == 0) {
-		return "";
-	    }
-	    if (offsetLevel == 1 && tabLevel == 0) {
-		return INDENT;
-	    }
-	    final StringBuilder result = new StringBuilder();
-	    for (int i = 0; i < offsetLevel; i++) {
-		result.append(INDENT);
-	    }
-	    for (int i = 0; i < tabLevel; i++) {
-		result.append(TAB);
-	    }
-	    return result.toString();
-	}
+        private String getFiller() {
+            if (offsetLevel == 0 && tabLevel == 0) {
+                return "";
+            }
+            if (offsetLevel == 1 && tabLevel == 0) {
+                return INDENT;
+            }
+            final StringBuilder result = new StringBuilder();
+            for (int i = 0; i < offsetLevel; i++) {
+                result.append(INDENT);
+            }
+            for (int i = 0; i < tabLevel; i++) {
+                result.append(TAB);
+            }
+            return result.toString();
+        }
 
-	public void inc() {
-	    offsetLevel++;
-	}
+        public void inc() {
+            offsetLevel++;
+        }
 
-	public void dec() {
-	    if (offsetLevel > 0) {
-		offsetLevel--;
-	    }
-	}
+        public void dec() {
+            if (offsetLevel > 0) {
+                offsetLevel--;
+            }
+        }
 
     }
 
@@ -413,13 +415,13 @@ public final class JkLog {
      * </pre>
      */
     public static void infoHeaded(String intro) {
-	if (silent) {
-	    return;
-	}
-	final String pattern = "-";
-	JkLog.info(JkUtilsString.repeat(pattern, intro.length()));
-	JkLog.info(intro);
-	JkLog.info(JkUtilsString.repeat(pattern, intro.length()));
+        if (silent) {
+            return;
+        }
+        final String pattern = "-";
+        JkLog.info(JkUtilsString.repeat(pattern, intro.length()));
+        JkLog.info(intro);
+        JkLog.info(JkUtilsString.repeat(pattern, intro.length()));
     }
 
     /**
@@ -431,11 +433,11 @@ public final class JkLog {
      * </pre>
      */
     public static void infoUnderlined(String message) {
-	if (silent) {
-	    return;
-	}
-	JkLog.info(message);
-	JkLog.info(JkUtilsString.repeat("-", message.length()));
+        if (silent) {
+            return;
+        }
+        JkLog.info(message);
+        JkLog.info(JkUtilsString.repeat("-", message.length()));
     }
 
 }

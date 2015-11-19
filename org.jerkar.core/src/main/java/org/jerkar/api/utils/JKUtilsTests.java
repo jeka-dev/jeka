@@ -14,11 +14,11 @@ public final class JKUtilsTests {
      * {@link #OUTPUR_DIR}
      */
     public static File tempFile(String path) {
-	return new File(OUTPUR_DIR, path);
+        return new File(OUTPUR_DIR, path);
     }
 
     private JKUtilsTests() {
-	// Can't instantiate
+        // Can't instantiate
     }
 
 }

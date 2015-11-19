@@ -34,9 +34,9 @@ public final class JkResourceProcessor {
     private final Collection<JkInterpolator> interpolators;
 
     private JkResourceProcessor(JkFileTreeSet trees, Collection<JkInterpolator> interpolators) {
-	super();
-	this.resourceTrees = trees;
-	this.interpolators = interpolators;
+        super();
+        this.resourceTrees = trees;
+        this.interpolators = interpolators;
     }
 
     /**
@@ -45,7 +45,7 @@ public final class JkResourceProcessor {
      */
     @SuppressWarnings("unchecked")
     public static JkResourceProcessor of(JkFileTreeSet trees) {
-	return new JkResourceProcessor(trees, Collections.EMPTY_LIST);
+        return new JkResourceProcessor(trees, Collections.EMPTY_LIST);
     }
 
     /**
@@ -53,7 +53,7 @@ public final class JkResourceProcessor {
      * <code>JkFileTree</code> without processing any token replacement.
      */
     public static JkResourceProcessor of(JkFileTree tree) {
-	return of(tree.asSet());
+        return of(tree.asSet());
     }
 
     /**
@@ -61,49 +61,50 @@ public final class JkResourceProcessor {
      * specified output directory along replacing specified tokens.
      */
     public void generateTo(File outputDir) {
-	JkLog.startln("Coping resource files to " + outputDir.getPath());
-	final Set<File> files = new HashSet<File>();
-	for (final JkFileTree resourceTree : this.resourceTrees.fileTrees()) {
-	    if (!resourceTree.root().exists()) {
-		continue;
-	    }
-	    for (final File file : resourceTree) {
-		final String relativePath = resourceTree.relativePath(file);
-		final File out = new File(outputDir, relativePath);
-		final Map<String, String> data = JkInterpolator.interpolateData(relativePath, interpolators);
-		JkUtilsFile.copyFileReplacingTokens(file, out, data, JkLog.infoStreamIfVerbose());
-		files.add(JkUtilsFile.canonicalFile(file));
-	    }
-	}
-	JkLog.done(files.size() + " file(s) copied.");
+        JkLog.startln("Coping resource files to " + outputDir.getPath());
+        final Set<File> files = new HashSet<File>();
+        for (final JkFileTree resourceTree : this.resourceTrees.fileTrees()) {
+            if (!resourceTree.root().exists()) {
+                continue;
+            }
+            for (final File file : resourceTree) {
+                final String relativePath = resourceTree.relativePath(file);
+                final File out = new File(outputDir, relativePath);
+                final Map<String, String> data = JkInterpolator.interpolateData(relativePath,
+                        interpolators);
+                JkUtilsFile.copyFileReplacingTokens(file, out, data, JkLog.infoStreamIfVerbose());
+                files.add(JkUtilsFile.canonicalFile(file));
+            }
+        }
+        JkLog.done(files.size() + " file(s) copied.");
     }
 
     /**
      * @see JkResourceProcessor#and(JkFileTreeSet)
      */
     public JkResourceProcessor and(JkFileTreeSet trees) {
-	return new JkResourceProcessor(this.resourceTrees.and(trees), this.interpolators);
+        return new JkResourceProcessor(this.resourceTrees.and(trees), this.interpolators);
     }
 
     /**
      * @see JkResourceProcessor#and(JkFileTreeSet)
      */
     public JkResourceProcessor and(JkFileTree tree) {
-	return and(tree.asSet());
+        return and(tree.asSet());
     }
 
     /**
      * @see JkResourceProcessor#and(JkFileTreeSet)
      */
     public JkResourceProcessor andIfExist(File... dirs) {
-	return and(JkFileTreeSet.of(dirs));
+        return and(JkFileTreeSet.of(dirs));
     }
 
     /**
      * @see JkResourceProcessor#and(JkFileTreeSet)
      */
     public JkResourceProcessor and(JkFileTree tree, Map<String, String> tokenReplacement) {
-	return and(tree).and(JkInterpolator.of(JkPathFilter.ACCEPT_ALL, tokenReplacement));
+        return and(tree).and(JkInterpolator.of(JkPathFilter.ACCEPT_ALL, tokenReplacement));
     }
 
     /**
@@ -111,9 +112,9 @@ public final class JkResourceProcessor {
      * adding the specified interpolator.
      */
     public JkResourceProcessor and(JkInterpolator interpolator) {
-	final List<JkInterpolator> list = new LinkedList<JkInterpolator>(this.interpolators);
-	list.add(interpolator);
-	return new JkResourceProcessor(this.resourceTrees, list);
+        final List<JkInterpolator> list = new LinkedList<JkInterpolator>(this.interpolators);
+        list.add(interpolator);
+        return new JkResourceProcessor(this.resourceTrees, list);
     }
 
     /**
@@ -121,8 +122,9 @@ public final class JkResourceProcessor {
      * 
      * @see JkInterpolator#of(String, String, String, String...)
      */
-    public JkResourceProcessor interpolating(String includeFilter, String key, String value, String... others) {
-	return and(JkInterpolator.of(includeFilter, key, value, others));
+    public JkResourceProcessor interpolating(String includeFilter, String key, String value,
+            String... others) {
+        return and(JkInterpolator.of(includeFilter, key, value, others));
     }
 
     /**
@@ -131,67 +133,70 @@ public final class JkResourceProcessor {
      */
     public static class JkInterpolator {
 
-	private final Map<String, String> keyValues;
+        private final Map<String, String> keyValues;
 
-	private final JkPathFilter fileFilter;
+        private final JkPathFilter fileFilter;
 
-	private JkInterpolator(JkPathFilter fileFilter, Map<String, String> keyValues) {
-	    super();
-	    this.keyValues = keyValues;
-	    this.fileFilter = fileFilter;
-	}
+        private JkInterpolator(JkPathFilter fileFilter, Map<String, String> keyValues) {
+            super();
+            this.keyValues = keyValues;
+            this.fileFilter = fileFilter;
+        }
 
-	/**
-	 * Creates a <code>JkInterpolator</code> with the specified filter and
-	 * key/values to replace.
-	 */
-	public static JkInterpolator of(JkPathFilter filter, Map<String, String> map) {
-	    return new JkInterpolator(filter, new HashMap<String, String>(map));
-	}
+        /**
+         * Creates a <code>JkInterpolator</code> with the specified filter and
+         * key/values to replace.
+         */
+        public static JkInterpolator of(JkPathFilter filter, Map<String, String> map) {
+            return new JkInterpolator(filter, new HashMap<String, String>(map));
+        }
 
-	/**
-	 * Same as {@link #of(JkPathFilter, Map)} but you can specify key values
-	 * in line.
-	 */
-	public static JkInterpolator of(JkPathFilter filter, String key, String value, String... others) {
-	    return new JkInterpolator(filter, JkUtilsIterable.mapOf(key, value, (Object[]) others));
-	}
+        /**
+         * Same as {@link #of(JkPathFilter, Map)} but you can specify key values
+         * in line.
+         */
+        public static JkInterpolator of(JkPathFilter filter, String key, String value,
+                String... others) {
+            return new JkInterpolator(filter, JkUtilsIterable.mapOf(key, value, (Object[]) others));
+        }
 
-	/**
-	 * Same as {@link #of(JkPathFilter, String, String, String...)} but
-	 * specify an include pattern that will be used as the path filter.
-	 */
-	public static JkInterpolator of(String includeFilter, String key, String value, String... others) {
-	    return of(JkPathFilter.include(includeFilter), key, value, others);
-	}
+        /**
+         * Same as {@link #of(JkPathFilter, String, String, String...)} but
+         * specify an include pattern that will be used as the path filter.
+         */
+        public static JkInterpolator of(String includeFilter, String key, String value,
+                String... others) {
+            return of(JkPathFilter.include(includeFilter), key, value, others);
+        }
 
-	/**
-	 * Same as {@link #of(JkPathFilter, Map)} but you can specify key values
-	 * in line.
-	 */
-	public static JkInterpolator of(String includeFilter, Map<String, String> map) {
-	    return new JkInterpolator(JkPathFilter.include(includeFilter), map);
-	}
+        /**
+         * Same as {@link #of(JkPathFilter, Map)} but you can specify key values
+         * in line.
+         */
+        public static JkInterpolator of(String includeFilter, Map<String, String> map) {
+            return new JkInterpolator(JkPathFilter.include(includeFilter), map);
+        }
 
-	/**
-	 * Returns a copy of this {@link JkInterpolator} but adding key values
-	 * to interpolate
-	 */
-	public JkInterpolator and(String key, String value, String... others) {
-	    final Map<String, String> map = JkUtilsIterable.mapOf(key, value, (Object[]) others);
-	    map.putAll(keyValues);
-	    return new JkInterpolator(this.fileFilter, map);
-	}
+        /**
+         * Returns a copy of this {@link JkInterpolator} but adding key values
+         * to interpolate
+         */
+        public JkInterpolator and(String key, String value, String... others) {
+            final Map<String, String> map = JkUtilsIterable.mapOf(key, value, (Object[]) others);
+            map.putAll(keyValues);
+            return new JkInterpolator(this.fileFilter, map);
+        }
 
-	private static Map<String, String> interpolateData(String path, Iterable<JkInterpolator> interpolators) {
-	    final Map<String, String> result = new HashMap<String, String>();
-	    for (final JkInterpolator interpolator : interpolators) {
-		if (interpolator.fileFilter.accept(path)) {
-		    result.putAll(interpolator.keyValues);
-		}
-	    }
-	    return result;
-	}
+        private static Map<String, String> interpolateData(String path,
+                Iterable<JkInterpolator> interpolators) {
+            final Map<String, String> result = new HashMap<String, String>();
+            for (final JkInterpolator interpolator : interpolators) {
+                if (interpolator.fileFilter.accept(path)) {
+                    result.putAll(interpolator.keyValues);
+                }
+            }
+            return result;
+        }
 
     }
 

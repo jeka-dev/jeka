@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * Jerkar build. It can specify library referenced in a repository (as
  * "com.google.guava:guava:18.0") or file pattern relative to the project
  * directory (as "../lib-folder/mylib.jar").
- *
+ * 
  * @author Jerome Angibaud
  */
 @Retention(RetentionPolicy.SOURCE)

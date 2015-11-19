@@ -19,9 +19,10 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
  * 
  * @author Jerome Angibaud
  */
-@JkDoc({ "Add capabilities for getting project information as source location and dependencies "
-	+ "directly form the Eclipse files (.project, .classspath).",
-	" This plugin also features method to genetate eclipse files from build class." })
+@JkDoc({
+        "Add capabilities for getting project information as source location and dependencies "
+                + "directly form the Eclipse files (.project, .classspath).",
+        " This plugin also features method to genetate eclipse files from build class." })
 public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 
     static final String OPTION_VAR_PREFIX = "eclipse.var.";
@@ -32,14 +33,14 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
     boolean javadoc = true;
 
     public static boolean candidate(File baseDir) {
-	final File dotClasspathFile = new File(baseDir, ".classpath");
-	final File dotProject = new File(baseDir, ".project");
-	return (dotClasspathFile.exists() && dotProject.exists());
+        final File dotClasspathFile = new File(baseDir, ".classpath");
+        final File dotProject = new File(baseDir, ".project");
+        return (dotClasspathFile.exists() && dotProject.exists());
     }
 
     @JkDoc({ "Flag for resolving dependencies against the eclipse classpath",
-	    "but trying to segregate test from production code considering path names : ",
-	    "if path contains 'test' then this is considered as an entry source for scope 'test'." })
+            "but trying to segregate test from production code considering path names : ",
+            "if path contains 'test' then this is considered as an entry source for scope 'test'." })
     public boolean smartScope = true;
 
     @JkDoc({ "If not null, this value will be used as the JRE container path when generating .classpath file." })
@@ -49,80 +50,81 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 
     @JkDoc("Generates Eclipse .classpath file according project dependencies.")
     public void generateFiles() {
-	final File dotClasspathFile = this.javaBuild.file(".classpath");
-	try {
-	    DotClasspath.generate(this.javaBuild, dotClasspathFile, jreContainer, javadoc);
-	} catch (final Exception e) {
-	    throw JkUtilsThrowable.unchecked(e);
-	}
-	final File dotProject = this.javaBuild.file(".project");
-	if (!dotProject.exists()) {
-	    Project.ofJavaNature(this.javaBuild().moduleId().fullName()).writeTo(dotProject);
-	}
+        final File dotClasspathFile = this.javaBuild.file(".classpath");
+        try {
+            DotClasspath.generate(this.javaBuild, dotClasspathFile, jreContainer, javadoc);
+        } catch (final Exception e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
+        final File dotProject = this.javaBuild.file(".project");
+        if (!dotProject.exists()) {
+            Project.ofJavaNature(this.javaBuild().moduleId().fullName()).writeTo(dotProject);
+        }
     }
 
     @Override
     public JkFileTreeSet alterSourceDirs(JkFileTreeSet original) {
-	final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
-	return dotClasspath().sourceDirs(javaBuild.file(""), segregator).prodSources;
+        final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
+        return dotClasspath().sourceDirs(javaBuild.file(""), segregator).prodSources;
     }
 
     @Override
     public JkFileTreeSet alterTestSourceDirs(JkFileTreeSet original) {
-	final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
-	return dotClasspath().sourceDirs(javaBuild.file(""), segregator).testSources;
+        final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
+        return dotClasspath().sourceDirs(javaBuild.file(""), segregator).testSources;
     }
 
     @Override
     public JkFileTreeSet alterResourceDirs(JkFileTreeSet original) {
-	final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
-	return dotClasspath().sourceDirs(javaBuild.file(""), segregator).prodSources
-		.andFilter(JkJavaBuild.RESOURCE_FILTER);
+        final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
+        return dotClasspath().sourceDirs(javaBuild.file(""), segregator).prodSources
+                .andFilter(JkJavaBuild.RESOURCE_FILTER);
     }
 
     @Override
     public JkFileTreeSet alterTestResourceDirs(JkFileTreeSet original) {
-	final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
-	return dotClasspath().sourceDirs(javaBuild.file(""), segregator).testSources
-		.andFilter(JkJavaBuild.RESOURCE_FILTER);
+        final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
+        return dotClasspath().sourceDirs(javaBuild.file(""), segregator).testSources
+                .andFilter(JkJavaBuild.RESOURCE_FILTER);
     }
 
     @Override
     protected JkDependencies alterDependencies(JkDependencies original) {
-	final ScopeResolver scopeResolver = scopeResolver();
-	final List<Lib> libs = dotClasspath().libs(javaBuild.baseDir().root(), scopeResolver);
-	return Lib.toDependencies(this.javaBuild(), libs, scopeResolver);
+        final ScopeResolver scopeResolver = scopeResolver();
+        final List<Lib> libs = dotClasspath().libs(javaBuild.baseDir().root(), scopeResolver);
+        return Lib.toDependencies(this.javaBuild(), libs, scopeResolver);
     }
 
     private ScopeResolver scopeResolver() {
-	if (smartScope) {
-	    if (WstCommonComponent.existIn(javaBuild.baseDir().root())) {
-		final WstCommonComponent wstCommonComponent = WstCommonComponent.of(javaBuild.baseDir().root());
-		return new ScopeResolverSmart(wstCommonComponent);
-	    }
-	    return new ScopeResolverSmart(null);
-	}
-	return new ScopeResolverAllCompile();
+        if (smartScope) {
+            if (WstCommonComponent.existIn(javaBuild.baseDir().root())) {
+                final WstCommonComponent wstCommonComponent = WstCommonComponent.of(javaBuild
+                        .baseDir().root());
+                return new ScopeResolverSmart(wstCommonComponent);
+            }
+            return new ScopeResolverSmart(null);
+        }
+        return new ScopeResolverAllCompile();
     }
 
     private DotClasspath dotClasspath() {
-	if (cachedClasspath == null) {
-	    final File dotClasspathFile = new File(javaBuild.file(""), ".classpath");
-	    if (!dotClasspathFile.exists()) {
-		throw new JkException(".classpath file not found");
-	    }
-	    cachedClasspath = DotClasspath.from(dotClasspathFile);
-	}
-	return cachedClasspath;
+        if (cachedClasspath == null) {
+            final File dotClasspathFile = new File(javaBuild.file(""), ".classpath");
+            if (!dotClasspathFile.exists()) {
+                throw new JkException(".classpath file not found");
+            }
+            cachedClasspath = DotClasspath.from(dotClasspathFile);
+        }
+        return cachedClasspath;
     }
 
     @Override
     public void configure(JkBuild build) {
-	this.javaBuild = build;
+        this.javaBuild = build;
     }
 
     private JkJavaBuild javaBuild() {
-	return (JkJavaBuild) this.javaBuild;
+        return (JkJavaBuild) this.javaBuild;
     }
 
 }

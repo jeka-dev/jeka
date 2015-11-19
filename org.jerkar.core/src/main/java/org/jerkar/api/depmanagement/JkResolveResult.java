@@ -25,15 +25,16 @@ public final class JkResolveResult implements Serializable {
 
     @SuppressWarnings("unchecked")
     public static JkResolveResult empty() {
-	return of(Collections.EMPTY_LIST);
+        return of(Collections.EMPTY_LIST);
     }
 
-    public static JkResolveResult of(List<JkModuleDepFile> artifacts, JkVersionProvider jkVersionProvider) {
-	return new JkResolveResult(artifacts, jkVersionProvider);
+    public static JkResolveResult of(List<JkModuleDepFile> artifacts,
+            JkVersionProvider jkVersionProvider) {
+        return new JkResolveResult(artifacts, jkVersionProvider);
     }
 
     public static JkResolveResult of(List<JkModuleDepFile> artifacts) {
-	return new JkResolveResult(artifacts, JkVersionProvider.empty());
+        return new JkResolveResult(artifacts, JkVersionProvider.empty());
     }
 
     private final List<JkModuleDepFile> jkModuleDepFiles;
@@ -41,46 +42,48 @@ public final class JkResolveResult implements Serializable {
     private final JkVersionProvider jkVersionProvider;
 
     private JkResolveResult(List<JkModuleDepFile> artifacts, JkVersionProvider jkVersionProvider) {
-	super();
-	this.jkModuleDepFiles = artifacts;
-	this.jkVersionProvider = jkVersionProvider;
+        super();
+        this.jkModuleDepFiles = artifacts;
+        this.jkVersionProvider = jkVersionProvider;
     }
 
     public List<File> localFiles() {
-	final List<File> result = new LinkedList<File>();
-	for (final JkModuleDepFile artifact : this.jkModuleDepFiles) {
-	    result.add(artifact.localFile());
-	}
-	return result;
+        final List<File> result = new LinkedList<File>();
+        for (final JkModuleDepFile artifact : this.jkModuleDepFiles) {
+            result.add(artifact.localFile());
+        }
+        return result;
     }
 
     public Set<JkVersionedModule> involvedModules() {
-	final Set<JkVersionedModule> result = new HashSet<JkVersionedModule>();
-	for (final JkModuleDepFile artifact : this.jkModuleDepFiles) {
-	    result.add(artifact.versionedModule());
-	}
-	return result;
+        final Set<JkVersionedModule> result = new HashSet<JkVersionedModule>();
+        for (final JkModuleDepFile artifact : this.jkModuleDepFiles) {
+            result.add(artifact.versionedModule());
+        }
+        return result;
     }
 
     public JkVersionProvider resolvedVersionProvider() {
-	return jkVersionProvider;
+        return jkVersionProvider;
     }
 
     public List<File> filesOf(JkModuleId jkModuleId) {
-	final List<File> result = new LinkedList<File>();
-	for (final JkModuleDepFile artifact : this.jkModuleDepFiles) {
-	    if (jkModuleId.equals(artifact.versionedModule().moduleId())) {
-		result.add(artifact.localFile());
-	    }
-	}
-	return result;
+        final List<File> result = new LinkedList<File>();
+        for (final JkModuleDepFile artifact : this.jkModuleDepFiles) {
+            if (jkModuleId.equals(artifact.versionedModule().moduleId())) {
+                result.add(artifact.localFile());
+            }
+        }
+        return result;
     }
 
     public JkResolveResult and(JkResolveResult other) {
-	final List<JkModuleDepFile> artifacts = new LinkedList<JkModuleDepFile>(this.jkModuleDepFiles);
-	artifacts.addAll(other.jkModuleDepFiles);
-	final JkVersionProvider jkVersionProvider = this.jkVersionProvider.and(other.jkVersionProvider);
-	return new JkResolveResult(artifacts, jkVersionProvider);
+        final List<JkModuleDepFile> artifacts = new LinkedList<JkModuleDepFile>(
+                this.jkModuleDepFiles);
+        artifacts.addAll(other.jkModuleDepFiles);
+        final JkVersionProvider jkVersionProvider = this.jkVersionProvider
+                .and(other.jkVersionProvider);
+        return new JkResolveResult(artifacts, jkVersionProvider);
     }
 
 }

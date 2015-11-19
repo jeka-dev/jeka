@@ -17,19 +17,19 @@ public class JkZipFile implements Closeable {
     private final ZipFile zipFile;
 
     private JkZipFile(ZipFile zipFile) {
-	super();
-	this.zipFile = zipFile;
+        super();
+        this.zipFile = zipFile;
     }
 
     /**
      * @see ZipFile#ZipFile(File)
      */
     public static JkZipFile of(File file) {
-	try {
-	    return new JkZipFile(new ZipFile(file));
-	} catch (final Exception e) {
-	    throw JkUtilsThrowable.unchecked(e);
-	}
+        try {
+            return new JkZipFile(new ZipFile(file));
+        } catch (final Exception e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
     }
 
     /**
@@ -37,24 +37,25 @@ public class JkZipFile implements Closeable {
      * name. If there is no such enntry name, an exception is thrown.
      */
     public InputStream inputStream(String entryName) {
-	try {
-	    final ZipEntry entry = zipFile.getEntry(entryName);
-	    if (entry == null) {
-		throw new IllegalArgumentException("No entry " + entryName + " found in " + zipFile.getName());
-	    }
-	    return zipFile.getInputStream(entry);
-	} catch (final IOException e) {
-	    throw new RuntimeException(e);
-	}
+        try {
+            final ZipEntry entry = zipFile.getEntry(entryName);
+            if (entry == null) {
+                throw new IllegalArgumentException("No entry " + entryName + " found in "
+                        + zipFile.getName());
+            }
+            return zipFile.getInputStream(entry);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void close() {
-	try {
-	    this.zipFile.close();
-	} catch (final IOException e) {
-	    throw new RuntimeException(e);
-	}
+        try {
+            this.zipFile.close();
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

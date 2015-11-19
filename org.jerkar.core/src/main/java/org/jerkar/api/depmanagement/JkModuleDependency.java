@@ -19,7 +19,7 @@ import org.jerkar.api.utils.JkUtilsString;
  * <p/>
  * You can also define exclusions on module dependencies so artifact or entire
  * module won't be catch up by the dependency manager.
- *
+ * 
  * @author Jerome Angibaud
  */
 public final class JkModuleDependency extends JkDependency {
@@ -29,8 +29,8 @@ public final class JkModuleDependency extends JkDependency {
     public static final Comparator<JkModuleDependency> GROUP_NAME_COMPARATOR = new NameComparator();
 
     public static boolean isModuleDependencyDescription(String candidate) {
-	final int colonCount = JkUtilsString.countOccurence(candidate, ':');
-	return colonCount == 2 || colonCount == 3;
+        final int colonCount = JkUtilsString.countOccurence(candidate, ':');
+        return colonCount == 2 || colonCount == 3;
     }
 
     /**
@@ -39,7 +39,8 @@ public final class JkModuleDependency extends JkDependency {
      */
     @SuppressWarnings("unchecked")
     public static JkModuleDependency of(JkModuleId moduleId, JkVersionRange versionRange) {
-	return new JkModuleDependency(moduleId, versionRange, null, true, null, Collections.EMPTY_LIST);
+        return new JkModuleDependency(moduleId, versionRange, null, true, null,
+                Collections.EMPTY_LIST);
     }
 
     /**
@@ -48,7 +49,8 @@ public final class JkModuleDependency extends JkDependency {
      */
     @SuppressWarnings("unchecked")
     public static JkModuleDependency of(JkModuleId moduleId, String versionRange) {
-	return new JkModuleDependency(moduleId, JkVersionRange.of(versionRange), null, true, null, Collections.EMPTY_LIST);
+        return new JkModuleDependency(moduleId, JkVersionRange.of(versionRange), null, true, null,
+                Collections.EMPTY_LIST);
     }
 
     /**
@@ -57,7 +59,7 @@ public final class JkModuleDependency extends JkDependency {
      * {@link JkVersionRange#of(String)}.
      */
     public static JkModuleDependency of(String group, String name, String version) {
-	return of(JkModuleId.of(group, name), JkVersionRange.of(version));
+        return of(JkModuleId.of(group, name), JkVersionRange.of(version));
     }
 
     /**
@@ -71,25 +73,26 @@ public final class JkModuleDependency extends JkDependency {
      * </ul>
      */
     public static JkModuleDependency of(String description) {
-	final String ext;
-	if (description.contains("@")) {
-	    ext = JkUtilsString.substringAfterLast(description, "@");
-	} else {
-	    ext = null;
-	}
-	final String[] strings = JkUtilsString.split(description, ":");
-	if (strings.length != 3 && strings.length != 4) {
-	    throw new IllegalArgumentException(
-		    "Module should be formated as 'groupName:moduleName:version' or 'groupName:moduleName:version:classifier'. Was "
-			    + description);
-	}
-	final JkModuleDependency result = of(strings[0], strings[1], strings[2]).ext(ext).transitive(ext == null);
-	if (strings.length == 3) {
-	    return result;
-	}
-	final String classifier = strings[3];
-	final boolean transitive = classifier == null ? result.transitive : false;
-	return result.classifier(strings[3]).transitive(transitive);
+        final String ext;
+        if (description.contains("@")) {
+            ext = JkUtilsString.substringAfterLast(description, "@");
+        } else {
+            ext = null;
+        }
+        final String[] strings = JkUtilsString.split(description, ":");
+        if (strings.length != 3 && strings.length != 4) {
+            throw new IllegalArgumentException(
+                    "Module should be formated as 'groupName:moduleName:version' or 'groupName:moduleName:version:classifier'. Was "
+                            + description);
+        }
+        final JkModuleDependency result = of(strings[0], strings[1], strings[2]).ext(ext)
+                .transitive(ext == null);
+        if (strings.length == 3) {
+            return result;
+        }
+        final String classifier = strings[3];
+        final boolean transitive = classifier == null ? result.transitive : false;
+        return result.classifier(strings[3]).transitive(transitive);
     }
 
     private final JkModuleId module;
@@ -99,37 +102,39 @@ public final class JkModuleDependency extends JkDependency {
     private final String extension;
     private final List<JkDepExclude> excludes;
 
-    private JkModuleDependency(JkModuleId module, JkVersionRange versionRange, String classifier, boolean transitive,
-	    String extension, List<JkDepExclude> excludes) {
-	JkUtilsAssert.notNull(module, "Can't instantiate without module");
-	JkUtilsAssert.notNull(module, "Can't instantiate without versionRange");
-	JkUtilsAssert.notNull(module, "Can't instantiate wit null excludes, use empty list instead");
-	this.module = module;
-	this.versionRange = versionRange;
-	this.classifier = classifier;
-	this.transitive = transitive;
-	this.extension = extension;
-	this.excludes = excludes;
+    private JkModuleDependency(JkModuleId module, JkVersionRange versionRange, String classifier,
+            boolean transitive, String extension, List<JkDepExclude> excludes) {
+        JkUtilsAssert.notNull(module, "Can't instantiate without module");
+        JkUtilsAssert.notNull(module, "Can't instantiate without versionRange");
+        JkUtilsAssert
+                .notNull(module, "Can't instantiate wit null excludes, use empty list instead");
+        this.module = module;
+        this.versionRange = versionRange;
+        this.classifier = classifier;
+        this.transitive = transitive;
+        this.extension = extension;
+        this.excludes = excludes;
     }
 
     public boolean transitive() {
-	return transitive;
+        return transitive;
     }
 
     public JkModuleId moduleId() {
-	return module;
+        return module;
     }
 
     public JkVersionRange versionRange() {
-	return versionRange;
+        return versionRange;
     }
 
     public JkModuleDependency transitive(boolean transitive) {
-	return new JkModuleDependency(module, versionRange, classifier, transitive, extension, excludes);
+        return new JkModuleDependency(module, versionRange, classifier, transitive, extension,
+                excludes);
     }
 
     public boolean hasUnspecifedVersion() {
-	return this.versionRange.isUnspecified();
+        return this.versionRange.isUnspecified();
     }
 
     /**
@@ -137,8 +142,8 @@ public final class JkModuleDependency extends JkDependency {
      * static version.
      */
     public JkModuleDependency resolvedTo(JkVersion version) {
-	return new JkModuleDependency(module, JkVersionRange.of(version.name()), classifier, transitive, extension,
-		excludes);
+        return new JkModuleDependency(module, JkVersionRange.of(version.name()), classifier,
+                transitive, extension, excludes);
     }
 
     /**
@@ -146,7 +151,8 @@ public final class JkModuleDependency extends JkDependency {
      * classifier. This has meaning only for Maven module.
      */
     public JkModuleDependency classifier(String classifier) {
-	return new JkModuleDependency(module, versionRange, classifier, transitive, extension, excludes);
+        return new JkModuleDependency(module, versionRange, classifier, transitive, extension,
+                excludes);
     }
 
     /**
@@ -154,7 +160,7 @@ public final class JkModuleDependency extends JkDependency {
      * the dependency is done on the main artifact.
      */
     public String classifier() {
-	return this.classifier;
+        return this.classifier;
     }
 
     /**
@@ -162,15 +168,16 @@ public final class JkModuleDependency extends JkDependency {
      * artifact extension.
      */
     public JkModuleDependency ext(String extension) {
-	return new JkModuleDependency(module, versionRange, classifier, transitive, extension, excludes);
+        return new JkModuleDependency(module, versionRange, classifier, transitive, extension,
+                excludes);
     }
 
     /**
      * Returns a JkModuleDependency identical to this one but adding the
      * specified exclusion.
      */
-    public JkModuleDependency andExclude(JkDepExclude ... depExcludes) {
-	return andExclude(Arrays.asList(depExcludes));
+    public JkModuleDependency andExclude(JkDepExclude... depExcludes) {
+        return andExclude(Arrays.asList(depExcludes));
     }
 
     /**
@@ -178,10 +185,10 @@ public final class JkModuleDependency extends JkDependency {
      * specified exclusion.
      */
     public JkModuleDependency andExclude(Iterable<JkDepExclude> depExcludes) {
-	final List<JkDepExclude> list = new LinkedList<JkDepExclude>(excludes);
-	list.addAll(JkUtilsIterable.listOf(depExcludes));
-	return new JkModuleDependency(module, versionRange, classifier, transitive, extension,
-		Collections.unmodifiableList(list));
+        final List<JkDepExclude> list = new LinkedList<JkDepExclude>(excludes);
+        list.addAll(JkUtilsIterable.listOf(depExcludes));
+        return new JkModuleDependency(module, versionRange, classifier, transitive, extension,
+                Collections.unmodifiableList(list));
     }
 
     /**
@@ -189,25 +196,24 @@ public final class JkModuleDependency extends JkDependency {
      * the dependency is done on the the default extension.
      */
     public String ext() {
-	return this.extension;
+        return this.extension;
     }
 
     public List<JkDepExclude> excludes() {
-	return excludes;
+        return excludes;
     }
 
     @Override
     public String toString() {
-	return this.getClass().getSimpleName() + "=" + module + ":" + versionRange;
+        return this.getClass().getSimpleName() + "=" + module + ":" + versionRange;
     }
 
     private static class NameComparator implements Comparator<JkModuleDependency> {
 
-	@Override
-	public int compare(JkModuleDependency o1, JkModuleDependency o2) {
-	    return JkModuleId.GROUP_NAME_COMPARATOR.compare(o1.moduleId(), o2.moduleId());
-	}
-
+        @Override
+        public int compare(JkModuleDependency o1, JkModuleDependency o2) {
+            return JkModuleId.GROUP_NAME_COMPARATOR.compare(o1.moduleId(), o2.moduleId());
+        }
 
     }
 

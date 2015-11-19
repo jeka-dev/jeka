@@ -7,8 +7,7 @@ import java.util.Set;
 /**
  * Identifier for a dependency of a project. It can be a either :
  * <ul>
- * <li>An external module as <code>org.hibernate:hibernate-core:3.0.+</code>,
- * </li>
+ * <li>An external module as <code>org.hibernate:hibernate-core:3.0.+</code>,</li>
  * <li>A project inside a multi-project build,</li>
  * <li>Some files on the file system.</li>
  * </ul>
@@ -29,9 +28,12 @@ public abstract class JkDependency implements Serializable {
      */
     public static abstract class JkFileDependency extends JkDependency {
 
-	private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-	public abstract Set<File> files();
+        /**
+         * Returns files constituting this file dependencies.
+         */
+        public abstract Set<File> files();
 
     }
 

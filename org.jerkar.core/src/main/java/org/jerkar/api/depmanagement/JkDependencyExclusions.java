@@ -12,7 +12,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
  * Holds information about transitive dependencies to exclude.
- *
+ * 
  * @author Jerome Angibaud
  */
 public class JkDependencyExclusions {
@@ -20,71 +20,67 @@ public class JkDependencyExclusions {
     private final Map<JkModuleId, List<JkDepExclude>> exclusions;
 
     private JkDependencyExclusions(Map<JkModuleId, List<JkDepExclude>> exclusions) {
-	super();
-	this.exclusions = Collections.unmodifiableMap(exclusions);
+        super();
+        this.exclusions = Collections.unmodifiableMap(exclusions);
     }
 
     public static Builder builder() {
-	return new Builder();
+        return new Builder();
     }
 
     public Set<JkModuleId> moduleIds() {
-	return this.exclusions.keySet();
+        return this.exclusions.keySet();
     }
 
     public List<JkDepExclude> get(JkModuleId moduleId) {
-	return exclusions.get(moduleId);
+        return exclusions.get(moduleId);
     }
 
     public boolean isEmpty() {
-	return this.exclusions.isEmpty();
+        return this.exclusions.isEmpty();
     }
-
 
     public static class Builder {
 
-	Builder() {}
+        Builder() {
+        }
 
-	private final Map<JkModuleId, List<JkDepExclude>> exclusions = new HashMap<JkModuleId, List<JkDepExclude>>();
+        private final Map<JkModuleId, List<JkDepExclude>> exclusions = new HashMap<JkModuleId, List<JkDepExclude>>();
 
-	public Builder on(JkModuleId moduleId, JkDepExclude ...depExcludes) {
-	    return on(moduleId, Arrays.asList(depExcludes));
-	}
+        public Builder on(JkModuleId moduleId, JkDepExclude... depExcludes) {
+            return on(moduleId, Arrays.asList(depExcludes));
+        }
 
-	public Builder on(JkModuleId moduleId, String ...excludedModuleIds) {
-	    final List<JkDepExclude> depExcludes = new LinkedList<JkDepExclude>();
-	    for (final String excludeId : excludedModuleIds) {
-		depExcludes.add(JkDepExclude.of(excludeId));
-	    }
-	    return on(moduleId, depExcludes);
-	}
+        public Builder on(JkModuleId moduleId, String... excludedModuleIds) {
+            final List<JkDepExclude> depExcludes = new LinkedList<JkDepExclude>();
+            for (final String excludeId : excludedModuleIds) {
+                depExcludes.add(JkDepExclude.of(excludeId));
+            }
+            return on(moduleId, depExcludes);
+        }
 
+        public Builder on(String groupAndName, String... excludedModuleIds) {
+            return on(JkModuleId.of(groupAndName), excludedModuleIds);
+        }
 
-	public Builder on(String groupAndName, String ... excludedModuleIds) {
-	    return on(JkModuleId.of(groupAndName), excludedModuleIds);
-	}
+        public Builder on(JkModuleId moduleId, Iterable<JkDepExclude> depExcludes) {
+            List<JkDepExclude> excludes = exclusions.get(moduleId);
+            if (excludes == null) {
+                excludes = new LinkedList<JkDepExclude>();
+                exclusions.put(moduleId, excludes);
+            }
+            excludes.addAll(JkUtilsIterable.listOf(depExcludes));
+            return this;
+        }
 
-	public Builder on(JkModuleId moduleId, Iterable<JkDepExclude> depExcludes) {
-	    List<JkDepExclude> excludes = exclusions.get(moduleId);
-	    if (excludes == null) {
-		excludes = new LinkedList<JkDepExclude>();
-		exclusions.put(moduleId, excludes);
-	    }
-	    excludes.addAll(JkUtilsIterable.listOf(depExcludes));
-	    return this;
-	}
-
-	public JkDependencyExclusions build() {
-	    final Map<JkModuleId, List<JkDepExclude>> map = new HashMap<JkModuleId, List<JkDepExclude>>();
-	    for (final JkModuleId moduleId : exclusions.keySet()) {
-		map.put(moduleId, Collections.unmodifiableList(exclusions.get(moduleId)));
-	    }
-	    return new JkDependencyExclusions(map);
-	}
-
+        public JkDependencyExclusions build() {
+            final Map<JkModuleId, List<JkDepExclude>> map = new HashMap<JkModuleId, List<JkDepExclude>>();
+            for (final JkModuleId moduleId : exclusions.keySet()) {
+                map.put(moduleId, Collections.unmodifiableList(exclusions.get(moduleId)));
+            }
+            return new JkDependencyExclusions(map);
+        }
 
     }
-
-
 
 }

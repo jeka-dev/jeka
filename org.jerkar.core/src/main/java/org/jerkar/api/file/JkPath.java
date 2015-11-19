@@ -12,8 +12,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * A sequence of file (folder or archive) to be used as a <code>path</code>.
- * <br/>
+ * A sequence of file (folder or archive) to be used as a <code>path</code>. <br/>
  * Each file is called an <code>entry</code>.<br/>
  * Instances of this class are immutable.
  * 
@@ -24,16 +23,16 @@ public final class JkPath implements Iterable<File> {
     private final List<File> entries;
 
     private JkPath(Iterable<File> entries) {
-	super();
-	this.entries = Collections.unmodifiableList(JkUtilsIterable.listOf(entries));
+        super();
+        this.entries = Collections.unmodifiableList(JkUtilsIterable.listOf(entries));
     }
 
     /**
      * Creates a path from a sequence of files.
      */
     public static JkPath of(Iterable<File> entries) {
-	final LinkedHashSet<File> files = new LinkedHashSet<File>(JkUtilsIterable.listOf(entries));
-	return new JkPath(files);
+        final LinkedHashSet<File> files = new LinkedHashSet<File>(JkUtilsIterable.listOf(entries));
+        return new JkPath(files);
     }
 
     /**
@@ -41,23 +40,23 @@ public final class JkPath implements Iterable<File> {
      * relative paths separated with a ";".
      */
     public static JkPath of(File baseDir, String relativePathAsString) {
-	final String[] paths = JkUtilsString.split(relativePathAsString, File.pathSeparator);
-	final List<File> result = new LinkedList<File>();
-	for (final String path : paths) {
-	    File file = new File(path);
-	    if (!file.isAbsolute()) {
-		file = new File(baseDir, path);
-	    }
-	    result.add(file);
-	}
-	return of(result);
+        final String[] paths = JkUtilsString.split(relativePathAsString, File.pathSeparator);
+        final List<File> result = new LinkedList<File>();
+        for (final String path : paths) {
+            File file = new File(path);
+            if (!file.isAbsolute()) {
+                file = new File(baseDir, path);
+            }
+            result.add(file);
+        }
+        return of(result);
     }
 
     /**
      * Creates a path from aa array of files.
      */
     public static JkPath of(File... entries) {
-	return JkPath.of(Arrays.asList(entries));
+        return JkPath.of(Arrays.asList(entries));
     }
 
     /**
@@ -65,12 +64,13 @@ public final class JkPath implements Iterable<File> {
      * exist.
      */
     public JkPath assertAllEntriesExist() throws IllegalStateException {
-	for (final File file : entries) {
-	    if (!file.exists()) {
-		throw new IllegalStateException("File " + file.getAbsolutePath() + " does not exist.");
-	    }
-	}
-	return this;
+        for (final File file : entries) {
+            if (!file.exists()) {
+                throw new IllegalStateException("File " + file.getAbsolutePath()
+                        + " does not exist.");
+            }
+        }
+        return this;
     }
 
     /**
@@ -79,41 +79,41 @@ public final class JkPath implements Iterable<File> {
      * the first occurrence is kept.
      */
     public JkPath withoutDoubloons() {
-	final List<File> files = new LinkedList<File>();
-	for (final File file : this) {
-	    if (!files.contains(file)) {
-		files.add(file);
-	    }
-	}
-	return new JkPath(files);
+        final List<File> files = new LinkedList<File>();
+        for (final File file : this) {
+            if (!files.contains(file)) {
+                files.add(file);
+            }
+        }
+        return new JkPath(files);
     }
 
     /**
      * Returns the sequence of files as a list.
      */
     public List<File> entries() {
-	return entries;
+        return entries;
     }
 
     /**
      * Returns the first entry of this path.
      */
     public File first() {
-	return entries.get(0);
+        return entries.get(0);
     }
 
     /**
      * Short hand for <code>entries().isEmpty()</code>.
      */
     public boolean isEmpty() {
-	return entries.isEmpty();
+        return entries.isEmpty();
     }
 
     /**
      * @see #andHead(Iterable)
      */
     public JkPath andHead(File... entries) {
-	return andHead(JkPath.of(entries));
+        return andHead(JkPath.of(entries));
     }
 
     /**
@@ -122,14 +122,14 @@ public final class JkPath implements Iterable<File> {
      */
     @SuppressWarnings("unchecked")
     public JkPath andHead(Iterable<File> otherEntries) {
-	return new JkPath(JkUtilsIterable.chain(otherEntries, this.entries));
+        return new JkPath(JkUtilsIterable.chain(otherEntries, this.entries));
     }
 
     /**
      * @see #and(Iterable).
      */
     public JkPath and(File... files) {
-	return and(JkPath.of(files));
+        return and(JkPath.of(files));
     }
 
     /**
@@ -138,7 +138,7 @@ public final class JkPath implements Iterable<File> {
      */
     @SuppressWarnings("unchecked")
     public JkPath and(Iterable<File> otherFiles) {
-	return new JkPath(JkUtilsIterable.chain(this.entries, otherFiles));
+        return new JkPath(JkUtilsIterable.chain(this.entries, otherFiles));
     }
 
     /**
@@ -146,19 +146,19 @@ public final class JkPath implements Iterable<File> {
      */
     @Override
     public String toString() {
-	final StringBuilder builder = new StringBuilder();
-	for (final Iterator<File> it = this.iterator(); it.hasNext();) {
-	    builder.append(it.next().getAbsolutePath());
-	    if (it.hasNext()) {
-		builder.append(";");
-	    }
-	}
-	return builder.toString();
+        final StringBuilder builder = new StringBuilder();
+        for (final Iterator<File> it = this.iterator(); it.hasNext();) {
+            builder.append(it.next().getAbsolutePath());
+            if (it.hasNext()) {
+                builder.append(";");
+            }
+        }
+        return builder.toString();
     }
 
     @Override
     public Iterator<File> iterator() {
-	return entries.iterator();
+        return entries.iterator();
     }
 
 }

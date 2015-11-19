@@ -26,58 +26,59 @@ final class BuildDependency extends JkComputedDependency {
     private final List<String> methods;
 
     private BuildDependency(JkBuild projectBuild, List<String> methods, Set<File> files) {
-	super(new Invoker(projectBuild, methods), files);
-	this.methods = methods;
-	this.projectBuild = projectBuild;
+        super(new Invoker(projectBuild, methods), files);
+        this.methods = methods;
+        this.projectBuild = projectBuild;
     }
 
     private static class Invoker implements Runnable, Serializable {
 
-	private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-	private final JkBuild build;
+        private final JkBuild build;
 
-	private final List<String> methods;
+        private final List<String> methods;
 
-	Invoker(JkBuild build, List<String> methods) {
-	    super();
-	    this.build = build;
-	    this.methods = methods;
-	}
+        Invoker(JkBuild build, List<String> methods) {
+            super();
+            this.build = build;
+            this.methods = methods;
+        }
 
-	@Override
-	public void run() {
-	    for (final String method : methods) {
-		JkUtilsReflect.invoke(build, method);
-	    }
-	}
+        @Override
+        public void run() {
+            for (final String method : methods) {
+                JkUtilsReflect.invoke(build, method);
+            }
+        }
 
     }
 
     public static BuildDependency of(JkBuild projectBuild, Set<File> files) {
-	return of(projectBuild, JkConstants.DEFAULT_METHOD, files);
+        return of(projectBuild, JkConstants.DEFAULT_METHOD, files);
     }
 
     public static BuildDependency of(JkBuild projectBuild, String methods, Set<File> files) {
-	final List<String> list = Arrays.asList(JkUtilsString.split(methods, " "));
-	return new BuildDependency(projectBuild, list, new HashSet<File>(files));
+        final List<String> list = Arrays.asList(JkUtilsString.split(methods, " "));
+        return new BuildDependency(projectBuild, list, new HashSet<File>(files));
     }
 
     public static BuildDependency of(JkBuild projectBuild, File... files) {
-	return of(projectBuild, new HashSet<File>(Arrays.asList(files)));
+        return of(projectBuild, new HashSet<File>(Arrays.asList(files)));
     }
 
     public static BuildDependency of(JkBuild projectBuild, String methods, File... files) {
-	return of(projectBuild, methods, new HashSet<File>(Arrays.asList(files)));
+        return of(projectBuild, methods, new HashSet<File>(Arrays.asList(files)));
     }
 
     public JkBuild projectBuild() {
-	return projectBuild;
+        return projectBuild;
     }
 
     @Override
     public String toString() {
-	return projectBuild.toString() + " (" + this.projectBuild.getClass().getName() + " " + methods + ")";
+        return projectBuild.toString() + " (" + this.projectBuild.getClass().getName() + " "
+                + methods + ")";
     }
 
 }

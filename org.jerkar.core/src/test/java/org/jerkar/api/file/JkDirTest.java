@@ -13,16 +13,17 @@ public class JkDirTest {
 
     @Test
     public void testFileList() throws Exception {
-	final URL sampleFileUrl = JkDirTest.class.getResource("../utils/samplefolder/subfolder/sample.txt");
-	final File sampleFile = new File(sampleFileUrl.toURI().getPath());
-	assertTrue(sampleFile.exists());
-	final File sampleFolder = sampleFile.getParentFile().getParentFile();
+        final URL sampleFileUrl = JkDirTest.class
+                .getResource("../utils/samplefolder/subfolder/sample.txt");
+        final File sampleFile = new File(sampleFileUrl.toURI().getPath());
+        assertTrue(sampleFile.exists());
+        final File sampleFolder = sampleFile.getParentFile().getParentFile();
 
-	JkFileTree subfolderTxt = JkFileTree.of(sampleFolder).include("/subfolder/*.txt");
-	assertEquals(1, subfolderTxt.files(false).size());
+        JkFileTree subfolderTxt = JkFileTree.of(sampleFolder).include("/subfolder/*.txt");
+        assertEquals(1, subfolderTxt.files(false).size());
 
-	subfolderTxt = JkFileTree.of(sampleFolder).include("subfolder/*.txt");
-	assertEquals(1, subfolderTxt.files(false).size());
+        subfolderTxt = JkFileTree.of(sampleFolder).include("subfolder/*.txt");
+        assertEquals(1, subfolderTxt.files(false).size());
 
     }
 

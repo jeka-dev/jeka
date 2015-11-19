@@ -9,7 +9,7 @@ import org.jerkar.api.java.JkClassLoader;
  * A class to publish artifacts on repositories. According the nature of the
  * repository (Maven or Ivy) the publisher will also create the necessary
  * metadata (pom.xml, metadata.xml, ivy.xml, checksums, ...).
- *
+ * 
  * @author Jerome Angibaud
  */
 public final class JkPublisher {
@@ -21,15 +21,15 @@ public final class JkPublisher {
     private final InternalPublisher ivyPublisher;
 
     private JkPublisher(InternalPublisher jkIvyPublisher) {
-	super();
-	this.ivyPublisher = jkIvyPublisher;
+        super();
+        this.ivyPublisher = jkIvyPublisher;
     }
 
     /**
      * Creates a {@link JkPublisher} with the specified {@link JkPublishRepo}.
      */
     public static JkPublisher of(JkPublishRepo publishRepo) {
-	return of(JkPublishRepos.of(publishRepo));
+        return of(JkPublishRepos.of(publishRepo));
     }
 
     /**
@@ -38,9 +38,9 @@ public final class JkPublisher {
      * ivy.xml are generated.
      */
     public static JkPublisher of(JkPublishRepos publishRepos, File outDir) {
-	final InternalPublisher ivyPublisher = IVY_CLASS_LOADER.transClassloaderProxy(InternalPublisher.class,
-		IVY_PUB_CLASS, "of", publishRepos, outDir);
-	return new JkPublisher(ivyPublisher);
+        final InternalPublisher ivyPublisher = IVY_CLASS_LOADER.transClassloaderProxy(
+                InternalPublisher.class, IVY_PUB_CLASS, "of", publishRepos, outDir);
+        return new JkPublisher(ivyPublisher);
     }
 
     /**
@@ -48,7 +48,7 @@ public final class JkPublisher {
      * Pom.xml and ivy.xml will be generated in a temporary files then deleted.
      */
     public static JkPublisher of(JkPublishRepos publishRepos) {
-	return of(publishRepos, null);
+        return of(publishRepos, null);
     }
 
     /**
@@ -70,10 +70,11 @@ public final class JkPublisher {
      *            you can mention a static version replacement. If none, you can
      *            just pass {@link JkVersionProvider#empty()}
      */
-    public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication, JkDependencies dependencies,
-	    JkScope defaultScope, JkScopeMapping defaultMapping, Date deliveryDate, JkVersionProvider resolvedVersion) {
-	this.ivyPublisher.publishIvy(versionedModule, publication, dependencies, defaultMapping, deliveryDate,
-		resolvedVersion);
+    public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
+            JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping,
+            Date deliveryDate, JkVersionProvider resolvedVersion) {
+        this.ivyPublisher.publishIvy(versionedModule, publication, dependencies, defaultMapping,
+                deliveryDate, resolvedVersion);
     }
 
     /**
@@ -88,16 +89,16 @@ public final class JkPublisher {
      *            The dependencies to specify in the generated pom file.
      */
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
-	    JkDependencies dependencies) {
-	this.ivyPublisher.publishMaven(versionedModule, publication, dependencies);
+            JkDependencies dependencies) {
+        this.ivyPublisher.publishMaven(versionedModule, publication, dependencies);
     }
 
     public boolean hasMavenPublishRepo() {
-	return this.ivyPublisher.hasMavenPublishRepo();
+        return this.ivyPublisher.hasMavenPublishRepo();
     }
 
     public boolean hasIvyPublishRepo() {
-	return this.ivyPublisher.hasIvyPublishRepo();
+        return this.ivyPublisher.hasIvyPublishRepo();
     }
 
 }

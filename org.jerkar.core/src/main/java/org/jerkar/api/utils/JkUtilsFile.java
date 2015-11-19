@@ -38,8 +38,7 @@ public final class JkUtilsFile {
         assertAllExist(candidates);
         for (final File candidate : candidates) {
             if (!candidate.isDirectory()) {
-                throw new IllegalArgumentException(candidate
-                        + " is not a directory.");
+                throw new IllegalArgumentException(candidate + " is not a directory.");
             }
         }
     }
@@ -51,8 +50,7 @@ public final class JkUtilsFile {
     public static void assertAllExist(File... candidates) {
         for (final File candidate : candidates) {
             if (!candidate.exists()) {
-                throw new IllegalArgumentException(candidate.getPath()
-                        + " does not exist.");
+                throw new IllegalArgumentException(candidate.getPath() + " does not exist.");
             }
         }
     }
@@ -88,8 +86,7 @@ public final class JkUtilsFile {
      * {@link #copyDirContent(File, File, FileFilter, boolean, PrintStream)}
      * without stream report and file filter.
      */
-    public static int copyDirContent(File source, File targetDir,
-            boolean copyEmptyDir) {
+    public static int copyDirContent(File source, File targetDir, boolean copyEmptyDir) {
         return copyDirContent(source, targetDir, null, copyEmptyDir, null);
     }
 
@@ -98,8 +95,8 @@ public final class JkUtilsFile {
      * {@link #copyDirContent(File, File, FileFilter, boolean, PrintStream)}
      * without stream report.
      */
-    public static int copyDirContent(File source, File targetDir,
-            FileFilter filter, boolean copyEmptyDir) {
+    public static int copyDirContent(File source, File targetDir, FileFilter filter,
+            boolean copyEmptyDir) {
         return copyDirContent(source, targetDir, filter, copyEmptyDir, null);
     }
 
@@ -121,10 +118,10 @@ public final class JkUtilsFile {
      *            <code>null</code>, no status is written.
      * @return The file copied count.
      */
-    public static int copyDirContent(File source, File targetDir,
-            FileFilter filter, boolean copyEmptyDir, PrintStream reportStream) {
-        return copyDirContentReplacingTokens(source, targetDir, filter,
-                copyEmptyDir, reportStream, null);
+    public static int copyDirContent(File source, File targetDir, FileFilter filter,
+            boolean copyEmptyDir, PrintStream reportStream) {
+        return copyDirContentReplacingTokens(source, targetDir, filter, copyEmptyDir, reportStream,
+                null);
     }
 
     /**
@@ -137,27 +134,21 @@ public final class JkUtilsFile {
      * @param tokenValues
      *            a map for replacing token key by value
      */
-    public static int copyDirContentReplacingTokens(File fromDir, File toDir,
-            FileFilter filterArg, boolean copyEmptyDir,
-            PrintStream reportStream, Map<String, String> tokenValues) {
-        final FileFilter filter = JkUtilsObject.firstNonNull(filterArg,
-                JkFileFilters.acceptAll());
+    public static int copyDirContentReplacingTokens(File fromDir, File toDir, FileFilter filterArg,
+            boolean copyEmptyDir, PrintStream reportStream, Map<String, String> tokenValues) {
+        final FileFilter filter = JkUtilsObject.firstNonNull(filterArg, JkFileFilters.acceptAll());
         assertAllDir(fromDir);
         if (fromDir.equals(toDir)) {
             throw new IllegalArgumentException(
-                    "Base and destination directory can't be the same : "
-                            + fromDir.getPath());
+                    "Base and destination directory can't be the same : " + fromDir.getPath());
         }
         if (isAncestor(fromDir, toDir) && filter.accept(toDir)) {
-            throw new IllegalArgumentException("Base filtered directory "
-                    + fromDir.getPath() + ":(" + filter
-                    + ") cannot contain destination directory "
-                    + toDir.getPath()
+            throw new IllegalArgumentException("Base filtered directory " + fromDir.getPath()
+                    + ":(" + filter + ") cannot contain destination directory " + toDir.getPath()
                     + ". Narrow filter or change the target directory.");
         }
         if (toDir.isFile()) {
-            throw new IllegalArgumentException(toDir.getPath()
-                    + " is file. Should be directory");
+            throw new IllegalArgumentException(toDir.getPath() + " is file. Should be directory");
         }
 
         if (reportStream != null) {
@@ -172,10 +163,8 @@ public final class JkUtilsFile {
                     if (tokenValues == null || tokenValues.isEmpty()) {
                         copyFile(child, targetFile, reportStream);
                     } else {
-                        final File toFile = new File(toDir,
-                                targetFile.getName());
-                        copyFileReplacingTokens(child, toFile, tokenValues,
-                                reportStream);
+                        final File toFile = new File(toDir, targetFile.getName());
+                        copyFileReplacingTokens(child, toFile, tokenValues, reportStream);
                     }
 
                     count++;
@@ -185,8 +174,8 @@ public final class JkUtilsFile {
                 if (filter.accept(child) && copyEmptyDir) {
                     subdir.mkdirs();
                 }
-                final int subCount = copyDirContentReplacingTokens(child,
-                        subdir, filter, copyEmptyDir, reportStream, tokenValues);
+                final int subCount = copyDirContentReplacingTokens(child, subdir, filter,
+                        copyEmptyDir, reportStream, tokenValues);
                 count = count + subCount;
             }
 
@@ -253,8 +242,7 @@ public final class JkUtilsFile {
      * Copies the given file to the specified directory, writting status on the
      * provided reportStream.
      */
-    public static void copyFileToDir(File from, File toDir,
-            PrintStream reportStream) {
+    public static void copyFileToDir(File from, File toDir, PrintStream reportStream) {
         final File to = new File(toDir, from.getName());
         copyFile(from, to, reportStream);
     }
@@ -269,12 +257,11 @@ public final class JkUtilsFile {
     public static void copyFile(File from, File toFile, PrintStream reportStream) {
         createFileIfNotExist(toFile);
         if (reportStream != null) {
-            reportStream.println("Coping file " + from.getAbsolutePath()
-                    + " to " + toFile.getAbsolutePath());
+            reportStream.println("Coping file " + from.getAbsolutePath() + " to "
+                    + toFile.getAbsolutePath());
         }
         if (!from.exists()) {
-            throw new IllegalArgumentException("File " + from.getPath()
-                    + " does not exist.");
+            throw new IllegalArgumentException("File " + from.getPath() + " does not exist.");
         }
         if (from.isDirectory()) {
             throw new IllegalArgumentException(from.getPath()
@@ -298,8 +285,7 @@ public final class JkUtilsFile {
             in.close();
             out.close();
         } catch (final IOException e) {
-            throw new RuntimeException(
-                    "IO exception occured while copying file " + from.getPath()
+            throw new RuntimeException("IO exception occured while copying file " + from.getPath()
                     + " to " + toFile.getPath(), e);
         }
 
@@ -350,8 +336,7 @@ public final class JkUtilsFile {
      * Returns <code>true</code> if the ancestorCandidate file is an ancestor of
      * the specified childCandidate.
      */
-    public static boolean isAncestor(File ancestorCandidate,
-            File childCandidtate) {
+    public static boolean isAncestor(File ancestorCandidate, File childCandidtate) {
         File parent = childCandidtate;
         while (true) {
             parent = parent.getParentFile();
@@ -404,8 +389,7 @@ public final class JkUtilsFile {
     /**
      * Returns all files contained recursively in the specified directory.
      */
-    public static List<File> filesOf(File dir, FileFilter fileFilter,
-            boolean includeFolders) {
+    public static List<File> filesOf(File dir, FileFilter fileFilter, boolean includeFolders) {
         assertAllDir(dir);
         final List<File> result = new LinkedList<File>();
         for (final File file : dir.listFiles()) {
@@ -432,8 +416,7 @@ public final class JkUtilsFile {
      * Returns count of files contained recursively in the specified directory.
      * If the dir does not exist then it returns 0.
      */
-    public static int count(File dir, FileFilter fileFilter,
-            boolean includeFolders) {
+    public static int count(File dir, FileFilter fileFilter, boolean includeFolders) {
         int result = 0;
         if (!dir.exists()) {
             return 0;
@@ -507,7 +490,8 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Returns the checksum of a specified file. The algorithm may be "SHA-1" or "MD5".
+     * Returns the checksum of a specified file. The algorithm may be "SHA-1" or
+     * "MD5".
      */
     public static String checksum(File file, String algorithm) {
         final InputStream is = JkUtilsIO.inputStream(file);
@@ -571,8 +555,7 @@ public final class JkUtilsFile {
      */
     public static void delete(File file) {
         if (!file.delete()) {
-            throw new RuntimeException("File " + file.getAbsolutePath()
-                    + " can't be deleted.");
+            throw new RuntimeException("File " + file.getAbsolutePath() + " can't be deleted.");
         }
     }
 
@@ -583,8 +566,7 @@ public final class JkUtilsFile {
     public static void deleteDir(File dir) {
         deleteDirContent(dir);
         if (!dir.delete()) {
-            throw new RuntimeException("Directory " + dir.getAbsolutePath()
-                    + " can't be deleted.");
+            throw new RuntimeException("Directory " + dir.getAbsolutePath() + " can't be deleted.");
         }
     }
 
@@ -596,8 +578,7 @@ public final class JkUtilsFile {
      * @see #copyDirContentReplacingTokens(File, File, FileFilter, boolean,
      *      PrintStream, Map)
      */
-    public static void copyFileWithInterpolation(File in, File out,
-            Map<String, String> replacements) {
+    public static void copyFileWithInterpolation(File in, File out, Map<String, String> replacements) {
         copyFileReplacingTokens(in, out, replacements, null);
     }
 
@@ -612,15 +593,13 @@ public final class JkUtilsFile {
             return;
         }
         if (!from.exists()) {
-            throw new IllegalArgumentException("File " + from.getPath()
-                    + " does not exist.");
+            throw new IllegalArgumentException("File " + from.getPath() + " does not exist.");
         }
         if (from.isDirectory()) {
             throw new IllegalArgumentException(from.getPath()
                     + " is a directory. Should be a file.");
         }
-        final TokenReplacingReader replacingReader = new TokenReplacingReader(
-                from, replacements);
+        final TokenReplacingReader replacingReader = new TokenReplacingReader(from, replacements);
         createFileIfNotExist(toFile);
         final Writer writer;
         try {
@@ -630,9 +609,8 @@ public final class JkUtilsFile {
             throw new RuntimeException(e);
         }
         if (reportStream != null) {
-            reportStream.println("Coping and replacing tokens " + replacements
-                    + " from file " + from.getAbsolutePath() + " to "
-                    + toFile.getAbsolutePath());
+            reportStream.println("Coping and replacing tokens " + replacements + " from file "
+                    + from.getAbsolutePath() + " to " + toFile.getAbsolutePath());
         }
         final char[] buf = new char[1024];
         int len;
@@ -674,9 +652,8 @@ public final class JkUtilsFile {
      * 
      * @see #copyFileWithInterpolation(File, File, Map)
      */
-    public static void copyStreamWithInterpolation(InputStream inputStream,
-            File toFile, Map<String, String> replacements,
-            PrintStream reportStream) {
+    public static void copyStreamWithInterpolation(InputStream inputStream, File toFile,
+            Map<String, String> replacements, PrintStream reportStream) {
         final TokenReplacingReader replacingReader = new TokenReplacingReader(
                 new InputStreamReader(inputStream), replacements);
         if (!toFile.exists()) {
@@ -712,11 +689,10 @@ public final class JkUtilsFile {
 
         public static FilePath of(File file) {
             final List<String> elements = new ArrayList<String>();
-            for (File indexFile = file; indexFile != null; indexFile = indexFile
-                    .getParentFile()) {
+            for (File indexFile = file; indexFile != null; indexFile = indexFile.getParentFile()) {
                 if (indexFile.getParent() == null) {
-                    elements.add(JkUtilsString.substringBeforeLast(
-                            indexFile.getPath(), File.separator));
+                    elements.add(JkUtilsString.substringBeforeLast(indexFile.getPath(),
+                            File.separator));
                 } else {
                     elements.add(indexFile.getName());
                 }
@@ -755,14 +731,12 @@ public final class JkUtilsFile {
             // this path is a sub past of the other
             if (common.equals(otherFolder)) {
                 List<String> result = new ArrayList<String>(this.elements);
-                result = result.subList(common.elements.size(),
-                        this.elements.size());
+                result = result.subList(common.elements.size(), this.elements.size());
                 return new FilePath(result);
             }
 
             final List<String> result = new ArrayList<String>();
-            for (int i = common.elements.size(); i < otherFolder.elements
-                    .size(); i++) {
+            for (int i = common.elements.size(); i < otherFolder.elements.size(); i++) {
                 result.add("..");
             }
             result.addAll(this.relativeTo(common).elements);
@@ -786,8 +760,7 @@ public final class JkUtilsFile {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result
-                    + ((elements == null) ? 0 : elements.hashCode());
+            result = prime * result + ((elements == null) ? 0 : elements.hashCode());
             return result;
         }
 
@@ -824,8 +797,8 @@ public final class JkUtilsFile {
     public static File resourceAsFile(Class<?> clazz, String resourceName) {
         final URL url = clazz.getResource(resourceName);
         if (url == null) {
-            throw new IllegalArgumentException("No resource " + resourceName
-                    + " found for class " + clazz.getName());
+            throw new IllegalArgumentException("No resource " + resourceName + " found for class "
+                    + clazz.getName());
         }
         return fromUrl(url);
     }

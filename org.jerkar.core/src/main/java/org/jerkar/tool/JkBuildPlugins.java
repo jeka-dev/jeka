@@ -20,8 +20,8 @@ public final class JkBuildPlugins {
     private final Map<Class<? extends JkBuildPlugin>, JkBuildPlugin> activatedPlugins = new LinkedHashMap<Class<? extends JkBuildPlugin>, JkBuildPlugin>();
 
     JkBuildPlugins(JkBuild holder) {
-	super();
-	this.holder = holder;
+        super();
+        this.holder = holder;
     }
 
     /**
@@ -30,13 +30,13 @@ public final class JkBuildPlugins {
      * point.
      */
     public void activate(JkBuildPlugin... plugins) {
-	for (final JkBuildPlugin plugin : plugins) {
-	    if (!accept(plugin)) {
-		continue;
-	    }
-	    plugin.configure(holder);
-	    activatedPlugins.put(plugin.getClass(), plugin);
-	}
+        for (final JkBuildPlugin plugin : plugins) {
+            if (!accept(plugin)) {
+                continue;
+            }
+            plugin.configure(holder);
+            activatedPlugins.put(plugin.getClass(), plugin);
+        }
     }
 
     /**
@@ -45,84 +45,88 @@ public final class JkBuildPlugins {
      * on the specified instance that method may be invoked on.
      */
     public void configure(JkBuildPlugin plugin) {
-	if (!accept(plugin)) {
-	    return;
-	}
-	plugin.configure(holder);
-	configuredPlugins.put(plugin.getClass(), plugin);
+        if (!accept(plugin)) {
+            return;
+        }
+        plugin.configure(holder);
+        configuredPlugins.put(plugin.getClass(), plugin);
     }
 
-    JkBuildPlugin addActivated(Class<? extends JkBuildPlugin> exactPluginClass, Map<String, String> options) {
-	final JkBuildPlugin plugin = getOrCreate(exactPluginClass);
-	JkOptions.populateFields(plugin, options);
-	activate(plugin);
-	return plugin;
+    JkBuildPlugin addActivated(Class<? extends JkBuildPlugin> exactPluginClass,
+            Map<String, String> options) {
+        final JkBuildPlugin plugin = getOrCreate(exactPluginClass);
+        JkOptions.populateFields(plugin, options);
+        activate(plugin);
+        return plugin;
     }
 
-    JkBuildPlugin addConfigured(Class<? extends JkBuildPlugin> exactPluginClass, Map<String, String> options) {
-	final JkBuildPlugin plugin = getOrCreate(exactPluginClass);
-	JkOptions.populateFields(plugin, options);
-	configure(plugin);
-	return plugin;
+    JkBuildPlugin addConfigured(Class<? extends JkBuildPlugin> exactPluginClass,
+            Map<String, String> options) {
+        final JkBuildPlugin plugin = getOrCreate(exactPluginClass);
+        JkOptions.populateFields(plugin, options);
+        configure(plugin);
+        return plugin;
     }
 
     /**
      * Returns all the activated plugins for the holding plugin.
      */
     public List<JkBuildPlugin> getActives() {
-	return new ArrayList<JkBuildPlugin>(this.activatedPlugins.values());
+        return new ArrayList<JkBuildPlugin>(this.activatedPlugins.values());
     }
 
     List<JkBuildPlugin> getConfiguredPlugins() {
-	return new ArrayList<JkBuildPlugin>(this.configuredPlugins.values());
+        return new ArrayList<JkBuildPlugin>(this.configuredPlugins.values());
     }
 
     void invoke(Class<? extends JkBuildPlugin> exactPluginClass, String method) {
-	if (!JkUtilsReflect.isMethodPublicIn(exactPluginClass, method)) {
-	    throw new JkException("No zero-arg public method found in " + exactPluginClass.getName());
-	}
-	JkBuildPlugin buildPlugin = this.activatedPlugins.get(exactPluginClass);
-	if (buildPlugin == null) {
-	    buildPlugin = this.configuredPlugins.get(exactPluginClass);
-	}
-	if (buildPlugin == null) {
-	    buildPlugin = JkUtilsReflect.newInstance(exactPluginClass);
-	    buildPlugin.configure(holder);
-	}
-	JkLog.startUnderlined("Method " + method + " on plugin " + buildPlugin.getClass().getSimpleName());
-	JkUtilsReflect.invoke(buildPlugin, method);
-	JkLog.done();
+        if (!JkUtilsReflect.isMethodPublicIn(exactPluginClass, method)) {
+            throw new JkException("No zero-arg public method found in "
+                    + exactPluginClass.getName());
+        }
+        JkBuildPlugin buildPlugin = this.activatedPlugins.get(exactPluginClass);
+        if (buildPlugin == null) {
+            buildPlugin = this.configuredPlugins.get(exactPluginClass);
+        }
+        if (buildPlugin == null) {
+            buildPlugin = JkUtilsReflect.newInstance(exactPluginClass);
+            buildPlugin.configure(holder);
+        }
+        JkLog.startUnderlined("Method " + method + " on plugin "
+                + buildPlugin.getClass().getSimpleName());
+        JkUtilsReflect.invoke(buildPlugin, method);
+        JkLog.done();
     }
 
     private boolean accept(JkBuildPlugin plugin) {
-	return plugin.baseBuildClass().isAssignableFrom(holder.getClass());
+        return plugin.baseBuildClass().isAssignableFrom(holder.getClass());
     }
 
     private JkBuildPlugin getOrCreate(Class<? extends JkBuildPlugin> exactPluginClass) {
-	final JkBuildPlugin plugin;
-	if (activatedPlugins.containsKey(exactPluginClass)) {
-	    plugin = activatedPlugins.get(exactPluginClass);
-	} else if (configuredPlugins.containsKey(exactPluginClass)) {
-	    plugin = configuredPlugins.get(exactPluginClass);
-	} else {
-	    plugin = JkUtilsReflect.newInstance(exactPluginClass);
-	}
-	return plugin;
+        final JkBuildPlugin plugin;
+        if (activatedPlugins.containsKey(exactPluginClass)) {
+            plugin = activatedPlugins.get(exactPluginClass);
+        } else if (configuredPlugins.containsKey(exactPluginClass)) {
+            plugin = configuredPlugins.get(exactPluginClass);
+        } else {
+            plugin = JkUtilsReflect.newInstance(exactPluginClass);
+        }
+        return plugin;
     }
 
     @SuppressWarnings("unchecked")
     public <T extends JkBuildPlugin> T findInstanceOf(Class<T> pluginClass) {
-	for (final JkBuildPlugin jkBuildPlugin : this.activatedPlugins.values()) {
-	    if (pluginClass.isAssignableFrom(jkBuildPlugin.getClass())) {
-		return (T) jkBuildPlugin;
-	    }
-	}
-	for (final JkBuildPlugin jkBuildPlugin : this.configuredPlugins.values()) {
-	    if (pluginClass.isAssignableFrom(jkBuildPlugin.getClass())) {
-		return ((T) jkBuildPlugin);
-	    }
-	}
-	return null;
+        for (final JkBuildPlugin jkBuildPlugin : this.activatedPlugins.values()) {
+            if (pluginClass.isAssignableFrom(jkBuildPlugin.getClass())) {
+                return (T) jkBuildPlugin;
+            }
+        }
+        for (final JkBuildPlugin jkBuildPlugin : this.configuredPlugins.values()) {
+            if (pluginClass.isAssignableFrom(jkBuildPlugin.getClass())) {
+                return ((T) jkBuildPlugin);
+            }
+        }
+        return null;
     }
 
 }

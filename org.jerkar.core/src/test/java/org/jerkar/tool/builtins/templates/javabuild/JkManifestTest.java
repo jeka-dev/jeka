@@ -12,12 +12,14 @@ public class JkManifestTest {
 
     @Test
     public void testWriteMainClass() {
-	final File file = JKUtilsTests.tempFile("manifest.mf");
-	final String mainClassName = "org.jerkar.Main";
-	final JkManifest manifest = JkManifest.empty().addMainAttribute(Name.MAIN_CLASS, mainClassName);
-	manifest.writeTo(file);
-	final String readMainClass = JkManifest.of(file).manifest().getMainAttributes().get(Name.MAIN_CLASS).toString();
-	Assert.assertEquals(mainClassName, readMainClass);
+        final File file = JKUtilsTests.tempFile("manifest.mf");
+        final String mainClassName = "org.jerkar.Main";
+        final JkManifest manifest = JkManifest.empty().addMainAttribute(Name.MAIN_CLASS,
+                mainClassName);
+        manifest.writeTo(file);
+        final String readMainClass = JkManifest.of(file).manifest().getMainAttributes()
+                .get(Name.MAIN_CLASS).toString();
+        Assert.assertEquals(mainClassName, readMainClass);
     }
 
 }

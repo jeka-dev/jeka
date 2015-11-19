@@ -17,14 +17,13 @@ import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsSystem;
 
 /**
- * Offer fluent interface for launching Java processes.
- *
+ * Offers fluent interface for launching Java processes.
+ * 
  * @author Jerome Angibaud
  */
 public final class JkJavaProcess {
 
-    private static final File CURRENT_JAVA_DIR = new File(
-            System.getProperty("java.home"), "bin");
+    private static final File CURRENT_JAVA_DIR = new File(System.getProperty("java.home"), "bin");
 
     private final Map<String, String> sytemProperties;
 
@@ -40,9 +39,8 @@ public final class JkJavaProcess {
 
     private final Map<String, String> environment;
 
-    private JkJavaProcess(File javaDir, Map<String, String> sytemProperties,
-            JkClasspath classpath, List<AgentLibAndOption> agents,
-            Collection<String> options, File workingDir,
+    private JkJavaProcess(File javaDir, Map<String, String> sytemProperties, JkClasspath classpath,
+            List<AgentLibAndOption> agents, Collection<String> options, File workingDir,
             Map<String, String> environment) {
         super();
         this.javaDir = javaDir;
@@ -68,9 +66,8 @@ public final class JkJavaProcess {
      */
     @SuppressWarnings("unchecked")
     public static JkJavaProcess ofJavaHome(File javaDir) {
-        return new JkJavaProcess(javaDir, Collections.EMPTY_MAP,
-                JkClasspath.of(), Collections.EMPTY_LIST,
-                Collections.EMPTY_LIST, null, Collections.EMPTY_MAP);
+        return new JkJavaProcess(javaDir, Collections.EMPTY_MAP, JkClasspath.of(),
+                Collections.EMPTY_LIST, Collections.EMPTY_LIST, null, Collections.EMPTY_MAP);
     }
 
     public JkJavaProcess andAgent(File agentLib, String agentOption) {
@@ -78,21 +75,18 @@ public final class JkJavaProcess {
             throw new IllegalArgumentException("agentLib can't be null.");
         }
         if (!agentLib.exists()) {
-            throw new IllegalArgumentException(
-                    "aggentLib " + agentLib.getAbsolutePath() + " not found.");
+            throw new IllegalArgumentException("aggentLib " + agentLib.getAbsolutePath()
+                    + " not found.");
         }
         if (!agentLib.isFile()) {
-            throw new IllegalArgumentException(
-                    "aggentLib " + agentLib.getAbsolutePath()
+            throw new IllegalArgumentException("aggentLib " + agentLib.getAbsolutePath()
                     + " is a directory, should be a file.");
         }
         final List<AgentLibAndOption> list = new ArrayList<JkJavaProcess.AgentLibAndOption>(
                 this.agents);
-        list.add(
-                new AgentLibAndOption(agentLib.getAbsolutePath(), agentOption));
-        return new JkJavaProcess(this.javaDir, this.sytemProperties,
-                this.classpath, list, this.options, this.workingDir,
-                this.environment);
+        list.add(new AgentLibAndOption(agentLib.getAbsolutePath(), agentOption));
+        return new JkJavaProcess(this.javaDir, this.sytemProperties, this.classpath, list,
+                this.options, this.workingDir, this.environment);
     }
 
     public JkJavaProcess andAgent(File agentLib) {
@@ -102,9 +96,8 @@ public final class JkJavaProcess {
     public JkJavaProcess andOptions(Collection<String> options) {
         final List<String> list = new ArrayList<String>(this.options);
         list.addAll(options);
-        return new JkJavaProcess(this.javaDir, this.sytemProperties,
-                this.classpath, this.agents, list, this.workingDir,
-                this.environment);
+        return new JkJavaProcess(this.javaDir, this.sytemProperties, this.classpath, this.agents,
+                list, this.workingDir, this.environment);
     }
 
     public JkJavaProcess andOptionsIf(boolean condition, String... options) {
@@ -130,9 +123,8 @@ public final class JkJavaProcess {
     }
 
     public JkJavaProcess withWorkingDir(File workingDir) {
-        return new JkJavaProcess(this.javaDir, this.sytemProperties,
-                this.classpath, this.agents, this.options, workingDir,
-                this.environment);
+        return new JkJavaProcess(this.javaDir, this.sytemProperties, this.classpath, this.agents,
+                this.options, workingDir, this.environment);
     }
 
     public JkJavaProcess withClasspath(Iterable<File> classpath) {
@@ -145,9 +137,8 @@ public final class JkJavaProcess {
         } else {
             jkClasspath = JkClasspath.of(classpath);
         }
-        return new JkJavaProcess(this.javaDir, this.sytemProperties,
-                jkClasspath, this.agents, this.options, this.workingDir,
-                this.environment);
+        return new JkJavaProcess(this.javaDir, this.sytemProperties, jkClasspath, this.agents,
+                this.options, this.workingDir, this.environment);
     }
 
     public JkJavaProcess withClasspath(File... files) {
@@ -166,8 +157,7 @@ public final class JkJavaProcess {
         return withClasspath(this.classpath.and(files));
     }
 
-    private ProcessBuilder processBuilder(List<String> command,
-            Map<String, String> env) {
+    private ProcessBuilder processBuilder(List<String> command, Map<String, String> env) {
         final ProcessBuilder builder = new ProcessBuilder(command);
         builder.redirectErrorStream(true);
         builder.environment().putAll(env);
@@ -189,8 +179,7 @@ public final class JkJavaProcess {
         runClassOrJarSync(mainClassName, null, arguments);
     }
 
-    private void runClassOrJarSync(String mainClassName, File jar,
-            String... arguments) {
+    private void runClassOrJarSync(String mainClassName, File jar, String... arguments) {
         final List<String> command = new LinkedList<String>();
         final OptionAndEnv optionAndEnv = optionsAndEnv();
         command.add(runningJavaCommand());
@@ -206,12 +195,10 @@ public final class JkJavaProcess {
         JkLog.startln("Starting java program : " + command.toString());
         final int result;
         try {
-            final Process process = processBuilder(command, optionAndEnv.env)
-                    .start();
+            final Process process = processBuilder(command, optionAndEnv.env).start();
 
-            final StreamGobbler outputStreamGobbler = JkUtilsIO
-                    .newStreamGobbler(process.getInputStream(),
-                            JkLog.infoStream());
+            final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
+                    process.getInputStream(), JkLog.infoStream());
             final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
                     process.getErrorStream(), JkLog.warnStream());
             process.waitFor();
@@ -222,8 +209,7 @@ public final class JkJavaProcess {
             throw new RuntimeException(e);
         }
         if (result != 0) {
-            throw new IllegalStateException(
-                    "Process terminated in error : exit value = " + result
+            throw new IllegalStateException("Process terminated in error : exit value = " + result
                     + ".");
         }
         JkLog.done();
@@ -235,8 +221,7 @@ public final class JkJavaProcess {
         if (classpath != null && !classpath.isEmpty()) {
             final String classpathString = classpath.toString();
             if (JkUtilsSystem.IS_WINDOWS && classpathString.length() > 7500) {
-                JkLog.warn(
-                        "classpath too long, classpath will be passed using CLASSPATH env variable.");
+                JkLog.warn("classpath too long, classpath will be passed using CLASSPATH env variable.");
                 env.put("CLASSPATH", classpathString);
             } else {
                 options.add("-cp");
@@ -245,7 +230,7 @@ public final class JkJavaProcess {
         }
         for (final AgentLibAndOption agentLibAndOption : agents) {
             final StringBuilder builder = new StringBuilder("-javaagent:")
-                    .append(agentLibAndOption.lib);
+            .append(agentLibAndOption.lib);
             if (!JkUtilsString.isBlank(agentLibAndOption.options)) {
                 builder.append("=" + agentLibAndOption.options);
             }

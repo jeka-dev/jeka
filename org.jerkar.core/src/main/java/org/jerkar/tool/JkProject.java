@@ -20,6 +20,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface JkProject {
 
+    /** Dependee project relative path */
     String value();
 
 }

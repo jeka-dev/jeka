@@ -52,14 +52,14 @@ public final class JkJavaCompiler {
      */
     @SuppressWarnings("unchecked")
     public static JkJavaCompiler ofOutput(File outputDir) {
-	if (outputDir.exists() && !outputDir.isDirectory()) {
-	    throw new IllegalArgumentException(outputDir.getAbsolutePath() + " is not a directory.");
-	}
-	outputDir.mkdirs();
-	final List<String> options = new LinkedList<String>();
-	options.add("-d");
-	options.add(outputDir.getAbsolutePath());
-	return new JkJavaCompiler(options, Collections.EMPTY_LIST, true, null);
+        if (outputDir.exists() && !outputDir.isDirectory()) {
+            throw new IllegalArgumentException(outputDir.getAbsolutePath() + " is not a directory.");
+        }
+        outputDir.mkdirs();
+        final List<String> options = new LinkedList<String>();
+        options.add("-d");
+        options.add(outputDir.getAbsolutePath());
+        return new JkJavaCompiler(options, Collections.EMPTY_LIST, true, null);
     }
 
     private final List<String> options;
@@ -70,12 +70,13 @@ public final class JkJavaCompiler {
 
     private final JkProcess fork;
 
-    private JkJavaCompiler(List<String> options, List<File> javaSourceFiles, boolean failOnError, JkProcess fork) {
-	super();
-	this.options = options;
-	this.javaSourceFiles = javaSourceFiles;
-	this.failOnError = failOnError;
-	this.fork = fork;
+    private JkJavaCompiler(List<String> options, List<File> javaSourceFiles, boolean failOnError,
+            JkProcess fork) {
+        super();
+        this.options = options;
+        this.javaSourceFiles = javaSourceFiles;
+        this.failOnError = failOnError;
+        this.fork = fork;
     }
 
     /**
@@ -84,7 +85,7 @@ public final class JkJavaCompiler {
      * a compilation error will throw a {@link IllegalStateException}.
      */
     public JkJavaCompiler failOnError(boolean fail) {
-	return new JkJavaCompiler(options, javaSourceFiles, fail, fork);
+        return new JkJavaCompiler(options, javaSourceFiles, fail, fork);
     }
 
     /**
@@ -97,9 +98,9 @@ public final class JkJavaCompiler {
      * space).
      */
     public JkJavaCompiler andOptions(String... options) {
-	final List<String> newOptions = new LinkedList<String>(this.options);
-	newOptions.addAll(Arrays.asList(options));
-	return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork);
+        final List<String> newOptions = new LinkedList<String>(this.options);
+        newOptions.addAll(Arrays.asList(options));
+        return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork);
     }
 
     /**
@@ -109,9 +110,9 @@ public final class JkJavaCompiler {
      * @see #andOptions(String...)
      */
     public JkJavaCompiler withOptions(String... options) {
-	final List<String> newOptions = new LinkedList<String>(this.options);
-	newOptions.addAll(Arrays.asList(options));
-	return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork);
+        final List<String> newOptions = new LinkedList<String>(this.options);
+        newOptions.addAll(Arrays.asList(options));
+        return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork);
     }
 
     /**
@@ -121,10 +122,10 @@ public final class JkJavaCompiler {
      * @see #andOptions(String...)
      */
     public JkJavaCompiler withOptionsIf(boolean condition, String... options) {
-	if (condition) {
-	    return withOptions(options);
-	}
-	return this;
+        if (condition) {
+            return withOptions(options);
+        }
+        return this;
     }
 
     /**
@@ -132,8 +133,8 @@ public final class JkJavaCompiler {
      * classpath.
      */
     public JkJavaCompiler withClasspath(Iterable<File> files) {
-	final String classpath = JkClasspath.of(files).toString();
-	return this.andOptions("-cp", classpath);
+        final String classpath = JkClasspath.of(files).toString();
+        return this.andOptions("-cp", classpath);
     }
 
     /**
@@ -141,7 +142,7 @@ public final class JkJavaCompiler {
      * source version.
      */
     public JkJavaCompiler withSourceVersion(String version) {
-	return andOptions("-source", version);
+        return andOptions("-source", version);
     }
 
     /**
@@ -150,7 +151,7 @@ public final class JkJavaCompiler {
      * default Java 6 mechanism.
      */
     public JkJavaCompiler withAnnotationProcessors(String... annotationProcessorClassNames) {
-	return andOptions("-processor", JkUtilsString.join(annotationProcessorClassNames, ","));
+        return andOptions("-processor", JkUtilsString.join(annotationProcessorClassNames, ","));
     }
 
     /**
@@ -158,7 +159,7 @@ public final class JkJavaCompiler {
      * processing.
      */
     public JkJavaCompiler withoutAnnotationProcessing() {
-	return andOptions("-proc:none");
+        return andOptions("-proc:none");
     }
 
     /**
@@ -166,7 +167,7 @@ public final class JkJavaCompiler {
      * processing (no compilation).
      */
     public JkJavaCompiler withAnnotationProcessingOnly() {
-	return andOptions("-proc:only");
+        return andOptions("-proc:only");
     }
 
     /**
@@ -174,7 +175,7 @@ public final class JkJavaCompiler {
      * version.
      */
     public JkJavaCompiler withTargetVersion(String version) {
-	return andOptions("-target", version);
+        return andOptions("-target", version);
     }
 
     /**
@@ -183,8 +184,8 @@ public final class JkJavaCompiler {
      * {@link JkProcess#ofJavaTool(String, String...)}
      */
     public JkJavaCompiler fork(String... parameters) {
-	return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError,
-		JkProcess.ofJavaTool("javac", parameters));
+        return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError,
+                JkProcess.ofJavaTool("javac", parameters));
     }
 
     /**
@@ -192,12 +193,13 @@ public final class JkJavaCompiler {
      * <code>fork</code> parameter is <code>true</code>.
      */
     public JkJavaCompiler fork(boolean fork, String... parameters) {
-	if (fork) {
-	    return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError,
-		    JkProcess.ofJavaTool("javac"));
-	} else {
-	    return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError, null);
-	}
+        if (fork) {
+            return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles,
+                    failOnError, JkProcess.ofJavaTool("javac"));
+        } else {
+            return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles,
+                    failOnError, null);
+        }
 
     }
 
@@ -210,8 +212,8 @@ public final class JkJavaCompiler {
      *            '/my/speciel/jdk/javac'
      */
     public JkJavaCompiler forkOnCompiler(String executable, String... parameters) {
-	return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError,
-		JkProcess.of(executable, parameters));
+        return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError,
+                JkProcess.of(executable, parameters));
     }
 
     /**
@@ -219,17 +221,20 @@ public final class JkJavaCompiler {
      * files.
      */
     public JkJavaCompiler andSources(Iterable<File> files) {
-	final List<File> newSources = new LinkedList<File>(this.javaSourceFiles);
-	for (final File file : files) {
-	    if (file.getName().toLowerCase().endsWith(".java")) {
-		newSources.add(file);
-	    }
-	}
-	return new JkJavaCompiler(options, newSources, failOnError, fork);
+        final List<File> newSources = new LinkedList<File>(this.javaSourceFiles);
+        for (final File file : files) {
+            if (file.getName().toLowerCase().endsWith(".java")) {
+                newSources.add(file);
+            }
+        }
+        return new JkJavaCompiler(options, newSources, failOnError, fork);
     }
 
+    /**
+     * @see #andSources(Iterable)
+     */
     public JkJavaCompiler andSourceDir(File dir) {
-	return andSources(JkFileTree.of(dir));
+        return andSources(JkFileTree.of(dir));
     }
 
     /**
@@ -241,52 +246,53 @@ public final class JkJavaCompiler {
      *             a compilation error occured and the 'failOnError' flag in on.
      */
     public boolean compile() {
-	final JavaCompiler compiler = getDefaultOrFail();
-	final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
+        final JavaCompiler compiler = getDefaultOrFail();
+        final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null,
+                null);
 
-	JkLog.startln(("Compiling " + javaSourceFiles.size() + " source files using options : "
-		+ JkUtilsString.join(options, " ")));
-	if (javaSourceFiles.isEmpty()) {
-	    JkLog.warn("No source to compile");
-	    JkLog.done();
-	    return true;
-	}
-	final boolean result;
-	if (this.fork == null) {
-	    final Iterable<? extends JavaFileObject> javaFileObjects = fileManager
-		    .getJavaFileObjectsFromFiles(this.javaSourceFiles);
-	    final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.warnStream()), null, null, options,
-		    null, javaFileObjects);
-	    result = task.call();
-	} else {
-	    result = runOnFork();
-	}
-	JkLog.done();
-	if (!result) {
-	    if (failOnError) {
-		throw new IllegalStateException("Compilation failed.");
-	    }
-	    return false;
-	}
-	return true;
+        JkLog.startln(("Compiling " + javaSourceFiles.size() + " source files using options : " + JkUtilsString
+                .join(options, " ")));
+        if (javaSourceFiles.isEmpty()) {
+            JkLog.warn("No source to compile");
+            JkLog.done();
+            return true;
+        }
+        final boolean result;
+        if (this.fork == null) {
+            final Iterable<? extends JavaFileObject> javaFileObjects = fileManager
+                    .getJavaFileObjectsFromFiles(this.javaSourceFiles);
+            final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.warnStream()),
+                    null, null, options, null, javaFileObjects);
+            result = task.call();
+        } else {
+            result = runOnFork();
+        }
+        JkLog.done();
+        if (!result) {
+            if (failOnError) {
+                throw new IllegalStateException("Compilation failed.");
+            }
+            return false;
+        }
+        return true;
     }
 
     private boolean runOnFork() {
-	final List<String> sourcePaths = new LinkedList<String>();
-	for (final File file : javaSourceFiles) {
-	    sourcePaths.add(file.getAbsolutePath());
-	}
-	final JkProcess jkProcess = this.fork.andParameters(options).andParameters(sourcePaths);
-	final int result = jkProcess.runSync();
-	return (result == 0);
+        final List<String> sourcePaths = new LinkedList<String>();
+        for (final File file : javaSourceFiles) {
+            sourcePaths.add(file.getAbsolutePath());
+        }
+        final JkProcess jkProcess = this.fork.andParameters(options).andParameters(sourcePaths);
+        final int result = jkProcess.runSync();
+        return (result == 0);
     }
 
     private static JavaCompiler getDefaultOrFail() {
-	final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-	if (compiler == null) {
-	    throw new IllegalStateException("This plateform does not provide compiler.");
-	}
-	return compiler;
+        final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        if (compiler == null) {
+            throw new IllegalStateException("This plateform does not provide compiler.");
+        }
+        return compiler;
     }
 
 }

@@ -17,9 +17,9 @@ import org.jerkar.api.utils.JkUtilsString;
  * diverge. For example, <code>Junit</code> library may only be necessary for
  * testing, so we can declare that
  * <code>Junit</scope> is only necessary for scope <code>TEST</code>.<br/>
- *
+ * 
  * Similar to Maven <code>scope</code> or Ivy <code>configuration</code>.
- *
+ * 
  * @author Jerome Angibaud
  */
 public class JkScope implements Serializable {
@@ -31,7 +31,7 @@ public class JkScope implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public static JkOptionableScope of(String name) {
-	return new JkOptionableScope(name, Collections.EMPTY_SET, "", true, true);
+        return new JkOptionableScope(name, Collections.EMPTY_SET, "", true, true);
     }
 
     private final Set<JkScope> extendedScopes;
@@ -44,127 +44,137 @@ public class JkScope implements Serializable {
 
     private final boolean isPublic;
 
-    private JkScope(String name, Set<JkScope> extendedScopes, String description, boolean transitive,
-	    boolean isPublic) {
-	super();
-	final String illegal = JkUtilsString.firstMatching(name, ",", "->");
-	if (illegal != null) {
-	    throw new IllegalArgumentException("Scope name can't contain '" + illegal + "'");
-	}
-	this.extendedScopes = Collections.unmodifiableSet(extendedScopes);
-	this.name = name;
-	this.description = description;
-	this.transitive = transitive;
-	this.isPublic = isPublic;
+    private JkScope(String name, Set<JkScope> extendedScopes, String description,
+            boolean transitive, boolean isPublic) {
+        super();
+        final String illegal = JkUtilsString.firstMatching(name, ",", "->");
+        if (illegal != null) {
+            throw new IllegalArgumentException("Scope name can't contain '" + illegal + "'");
+        }
+        this.extendedScopes = Collections.unmodifiableSet(extendedScopes);
+        this.name = name;
+        this.description = description;
+        this.transitive = transitive;
+        this.isPublic = isPublic;
     }
 
+    /**
+     * Returns the name of this scope. Name is used as identifier for scopes.
+     */
     public String name() {
-	return name;
+        return name;
     }
 
+    /**
+     * Human description for the purpose of this scope, can be <code>null</code>.
+     */
     public String description() {
-	return description;
+        return description;
     }
 
+    /**
+     * Scopes that are extended by this one.
+     * 
+     */
     public Set<JkScope> extendedScopes() {
-	return this.extendedScopes;
+        return this.extendedScopes;
     }
 
     public boolean transitive() {
-	return this.transitive;
+        return this.transitive;
     }
 
     public boolean isPublic() {
-	return isPublic;
+        return isPublic;
     }
 
     public List<JkScope> ancestorScopes() {
-	final List<JkScope> list = new LinkedList<JkScope>();
-	list.add(this);
-	for (final JkScope scope : this.extendedScopes) {
-	    for (final JkScope jkScope : scope.ancestorScopes()) {
-		if (!list.contains(jkScope)) {
-		    list.add(jkScope);
-		}
-	    }
-	}
-	return list;
+        final List<JkScope> list = new LinkedList<JkScope>();
+        list.add(this);
+        for (final JkScope scope : this.extendedScopes) {
+            for (final JkScope jkScope : scope.ancestorScopes()) {
+                if (!list.contains(jkScope)) {
+                    list.add(jkScope);
+                }
+            }
+        }
+        return list;
     }
 
     public boolean isExtending(JkScope jkScope) {
-	if (extendedScopes == null || extendedScopes.isEmpty()) {
-	    return false;
-	}
-	for (final JkScope parent : extendedScopes) {
-	    if (parent.equals(jkScope) || parent.isExtending(jkScope)) {
-		return true;
-	    }
-	}
-	return false;
+        if (extendedScopes == null || extendedScopes.isEmpty()) {
+            return false;
+        }
+        for (final JkScope parent : extendedScopes) {
+            if (parent.equals(jkScope) || parent.isExtending(jkScope)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public JkScopeMapping mapTo(JkScope targetScope) {
-	return JkScopeMapping.of(this).to(targetScope);
+        return JkScopeMapping.of(this).to(targetScope);
     }
 
     public JkScopeMapping mapTo(String targetScope) {
-	return JkScopeMapping.of(this).to(JkScope.of(targetScope));
+        return JkScopeMapping.of(this).to(JkScope.of(targetScope));
     }
 
     public boolean isInOrIsExtendingAnyOf(Iterable<? extends JkScope> scopes) {
-	for (final JkScope scope : scopes) {
-	    if (scope.equals(this) || this.isExtending(scope)) {
-		return true;
-	    }
-	}
-	return false;
+        for (final JkScope scope : scopes) {
+            if (scope.equals(this) || this.isExtending(scope)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean isInOrIsExtendingAnyOf(JkScope... scopes) {
-	return isInOrIsExtendingAnyOf(Arrays.asList(scopes));
+        return isInOrIsExtendingAnyOf(Arrays.asList(scopes));
     }
 
     @Override
     public int hashCode() {
-	final int prime = 31;
-	int result = 1;
-	result = prime * result + ((name == null) ? 0 : name.hashCode());
-	return result;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-	if (this == obj) {
-	    return true;
-	}
-	if (obj == null) {
-	    return false;
-	}
-	if (getClass() != obj.getClass()) {
-	    return false;
-	}
-	final JkScope other = (JkScope) obj;
-	if (name == null) {
-	    if (other.name != null) {
-		return false;
-	    }
-	} else if (!name.equals(other.name)) {
-	    return false;
-	}
-	return true;
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final JkScope other = (JkScope) obj;
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public String toString() {
-	return name;
+        return name;
     }
 
     public static Set<JkScope> involvedScopes(Iterable<JkScope> scopes) {
-	final Set<JkScope> result = JkUtilsIterable.setOf(scopes);
-	for (final JkScope jkScope : scopes) {
-	    result.addAll(jkScope.ancestorScopes());
-	}
-	return result;
+        final Set<JkScope> result = JkUtilsIterable.setOf(scopes);
+        for (final JkScope jkScope : scopes) {
+            result.addAll(jkScope.ancestorScopes());
+        }
+        return result;
     }
 
     /**
@@ -173,34 +183,36 @@ public class JkScope implements Serializable {
      * <code>scopes</scope> directly from a {@link JkScope} .<br/>
      * Use the {@link #descr(String)} method last as it returns a
      * {@link JkScope}.
-     *
+     * 
      * @author Jerome Angibaud
      */
     public static class JkOptionableScope extends JkScope {
 
-	private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-	private JkOptionableScope(String name, Set<JkScope> extendedScopes, String descr, boolean transitive,
-		boolean isPublic) {
-	    super(name, extendedScopes, descr, transitive, isPublic);
-	}
+        private JkOptionableScope(String name, Set<JkScope> extendedScopes, String descr,
+                boolean transitive, boolean isPublic) {
+            super(name, extendedScopes, descr, transitive, isPublic);
+        }
 
-	public JkOptionableScope extending(JkScope... scopes) {
-	    return new JkOptionableScope(name(), new HashSet<JkScope>(Arrays.asList(scopes)), description(),
-		    transitive(), isPublic());
-	}
+        public JkOptionableScope extending(JkScope... scopes) {
+            return new JkOptionableScope(name(), new HashSet<JkScope>(Arrays.asList(scopes)),
+                    description(), transitive(), isPublic());
+        }
 
-	public JkOptionableScope transitive(boolean transitive) {
-	    return new JkOptionableScope(name(), extendedScopes(), description(), transitive, isPublic());
-	}
+        public JkOptionableScope transitive(boolean transitive) {
+            return new JkOptionableScope(name(), extendedScopes(), description(), transitive,
+                    isPublic());
+        }
 
-	public JkOptionableScope isPublic(boolean isPublic) {
-	    return new JkOptionableScope(name(), extendedScopes(), description(), transitive(), isPublic);
-	}
+        public JkOptionableScope isPublic(boolean isPublic) {
+            return new JkOptionableScope(name(), extendedScopes(), description(), transitive(),
+                    isPublic);
+        }
 
-	public JkScope descr(String description) {
-	    return new JkScope(name(), extendedScopes(), description, transitive(), isPublic());
-	}
+        public JkScope descr(String description) {
+            return new JkScope(name(), extendedScopes(), description, transitive(), isPublic());
+        }
 
     }
 

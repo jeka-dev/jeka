@@ -22,7 +22,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 public final class JkSlaveBuilds {
 
     static JkSlaveBuilds of(File masterRootDir, List<JkBuild> builds) {
-	return new JkSlaveBuilds(masterRootDir, new ArrayList<JkBuild>(builds));
+        return new JkSlaveBuilds(masterRootDir, new ArrayList<JkBuild>(builds));
     }
 
     private final List<JkBuild> directSlaves;
@@ -32,9 +32,9 @@ public final class JkSlaveBuilds {
     private final File masterBuildRoot;
 
     private JkSlaveBuilds(File masterDir, List<JkBuild> buildDeps) {
-	super();
-	this.masterBuildRoot = masterDir;
-	this.directSlaves = Collections.unmodifiableList(buildDeps);
+        super();
+        this.masterBuildRoot = masterDir;
+        this.directSlaves = Collections.unmodifiableList(buildDeps);
     }
 
     /**
@@ -43,7 +43,8 @@ public final class JkSlaveBuilds {
      */
     @SuppressWarnings("unchecked")
     public JkSlaveBuilds and(List<JkBuild> slaves) {
-	return new JkSlaveBuilds(this.masterBuildRoot, JkUtilsIterable.concatLists(this.directSlaves, slaves));
+        return new JkSlaveBuilds(this.masterBuildRoot, JkUtilsIterable.concatLists(
+                this.directSlaves, slaves));
     }
 
     /**
@@ -51,15 +52,15 @@ public final class JkSlaveBuilds {
      * the {@link BuildDependency} contained in the the specified dependencies.
      */
     public JkSlaveBuilds and(JkDependencies dependencies) {
-	final List<JkBuild> list = projectBuildDependencies(dependencies);
-	return this.and(list);
+        final List<JkBuild> list = projectBuildDependencies(dependencies);
+        return this.and(list);
     }
 
     /**
      * Returns only the direct slave of this master build.
      */
     public List<JkBuild> directs() {
-	return Collections.unmodifiableList(directSlaves);
+        return Collections.unmodifiableList(directSlaves);
     }
 
     /**
@@ -69,59 +70,60 @@ public final class JkSlaveBuilds {
      * 
      */
     public List<JkBuild> all() {
-	if (resolvedTransitiveBuilds == null) {
-	    resolvedTransitiveBuilds = resolveTransitiveBuilds(new HashSet<File>());
-	}
-	return resolvedTransitiveBuilds;
+        if (resolvedTransitiveBuilds == null) {
+            resolvedTransitiveBuilds = resolveTransitiveBuilds(new HashSet<File>());
+        }
+        return resolvedTransitiveBuilds;
     }
 
     /**
      * Execute the <code>doDefault</code> on all slaves.
      */
     public void invokeDoDefaultMethodOnAll() {
-	this.invokeOnAll(JkConstants.DEFAULT_METHOD);
+        this.invokeOnAll(JkConstants.DEFAULT_METHOD);
     }
 
     /**
      * Executes the specified methods on all slaves.
      */
     public void invokeOnAll(String... methods) {
-	this.executeOnAll(JkModelMethod.normals(methods));
+        this.executeOnAll(JkModelMethod.normals(methods));
     }
 
     private void executeOnAll(Iterable<JkModelMethod> methods) {
-	JkLog.startln("Invoke " + methods + " on all dependents projects");
-	for (final JkBuild build : all()) {
-	    build.execute(methods, this.masterBuildRoot);
-	}
-	JkLog.done("invoking " + methods + " on all dependents projects");
+        JkLog.startln("Invoke " + methods + " on all dependents projects");
+        for (final JkBuild build : all()) {
+            build.execute(methods, this.masterBuildRoot);
+        }
+        JkLog.done("invoking " + methods + " on all dependents projects");
     }
 
     private List<JkBuild> resolveTransitiveBuilds(Set<File> files) {
-	final List<JkBuild> result = new LinkedList<JkBuild>();
-	for (final JkBuild build : directSlaves) {
-	    final File dir = JkUtilsFile.canonicalFile(build.baseDir().root());
-	    if (!files.contains(dir)) {
-		if (build instanceof JkBuildDependencySupport) {
-		    final JkBuildDependencySupport buildDependencySupport = (JkBuildDependencySupport) build;
-		    result.addAll(buildDependencySupport.slaves().resolveTransitiveBuilds(files));
-		}
-		result.add(build);
-		files.add(dir);
-	    }
-	}
-	return result;
+        final List<JkBuild> result = new LinkedList<JkBuild>();
+        for (final JkBuild build : directSlaves) {
+            final File dir = JkUtilsFile.canonicalFile(build.baseDir().root());
+            if (!files.contains(dir)) {
+                if (build instanceof JkBuildDependencySupport) {
+                    final JkBuildDependencySupport buildDependencySupport = (JkBuildDependencySupport) build;
+                    result.addAll(buildDependencySupport.slaves().resolveTransitiveBuilds(files));
+                }
+                result.add(build);
+                files.add(dir);
+            }
+        }
+        return result;
     }
 
     private static List<JkBuild> projectBuildDependencies(JkDependencies dependencies) {
-	final List<JkBuild> result = new LinkedList<JkBuild>();
-	for (final JkScopedDependency scopedDependency : dependencies) {
-	    if (scopedDependency.dependency() instanceof BuildDependency) {
-		final BuildDependency projectDependency = (BuildDependency) scopedDependency.dependency();
-		result.add(projectDependency.projectBuild());
-	    }
-	}
-	return result;
+        final List<JkBuild> result = new LinkedList<JkBuild>();
+        for (final JkScopedDependency scopedDependency : dependencies) {
+            if (scopedDependency.dependency() instanceof BuildDependency) {
+                final BuildDependency projectDependency = (BuildDependency) scopedDependency
+                        .dependency();
+                result.add(projectDependency.projectBuild());
+            }
+        }
+        return result;
     }
 
 }

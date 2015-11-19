@@ -13,26 +13,26 @@ import org.jerkar.api.utils.JkUtilsFile;
 public final class JkUtilsTool {
 
     static Map<String, String> userSystemProperties() {
-	final Map<String, String> result = new HashMap<String, String>();
-	final File userPropFile = new File(JkLocator.jerkarUserHome(), "system.properties");
-	if (userPropFile.exists()) {
-	    result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
-	}
-	return result;
+        final Map<String, String> result = new HashMap<String, String>();
+        final File userPropFile = new File(JkLocator.jerkarUserHome(), "system.properties");
+        if (userPropFile.exists()) {
+            result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
+        }
+        return result;
     }
 
     static void setSystemProperties(Map<String, String> props) {
-	for (final Map.Entry<String, String> entry : props.entrySet()) {
-	    System.setProperty(entry.getKey(), entry.getValue());
-	}
+        for (final Map.Entry<String, String> entry : props.entrySet()) {
+            System.setProperty(entry.getKey(), entry.getValue());
+        }
     }
 
     public static void loadUserSystemProperties() {
-	setSystemProperties(userSystemProperties());
+        setSystemProperties(userSystemProperties());
     }
 
     private JkUtilsTool() {
-	// Can't instantiate
+        // Can't instantiate
     }
 
 }

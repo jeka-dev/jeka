@@ -36,7 +36,7 @@ import org.jerkar.api.utils.JkUtilsSystem;
  * </pre>
  * 
  * .
- *
+ * 
  * @author Jerome Angibaud
  */
 public final class JkProcess implements Runnable {
@@ -52,10 +52,10 @@ public final class JkProcess implements Runnable {
     private final boolean failOnError;
 
     private JkProcess(String command, List<String> parameters, File workingDir, boolean failOnError) {
-	this.command = command;
-	this.parameters = parameters;
-	this.workingDir = workingDir;
-	this.failOnError = failOnError;
+        this.command = command;
+        this.parameters = parameters;
+        this.workingDir = workingDir;
+        this.failOnError = failOnError;
     }
 
     /**
@@ -63,16 +63,17 @@ public final class JkProcess implements Runnable {
      * parameters.
      */
     public static JkProcess of(String command, String... parameters) {
-	return new JkProcess(command, Arrays.asList(parameters), null, false);
+        return new JkProcess(command, Arrays.asList(parameters), null, false);
     }
 
     /**
      * Defines a <code>JkProcess</code> using the specified command and
      * parameters.
      */
-    public static JkProcess ofWinOrUx(String windowsCommand, String unixCommand, String... parameters) {
-	final String cmd = JkUtilsSystem.IS_WINDOWS ? windowsCommand : unixCommand;
-	return new JkProcess(cmd, Arrays.asList(parameters), null, false);
+    public static JkProcess ofWinOrUx(String windowsCommand, String unixCommand,
+            String... parameters) {
+        final String cmd = JkUtilsSystem.IS_WINDOWS ? windowsCommand : unixCommand;
+        return new JkProcess(cmd, Arrays.asList(parameters), null, false);
     }
 
     /**
@@ -80,17 +81,18 @@ public final class JkProcess implements Runnable {
      * parameters. An example of JDK tool is 'javac'.
      */
     public static JkProcess ofJavaTool(String javaTool, String... parameters) {
-	File candidate = CURRENT_JAVA_DIR;
-	final boolean exist = findTool(candidate, javaTool);
-	if (!exist) {
-	    candidate = new File(CURRENT_JAVA_DIR.getParentFile().getParentFile(), "bin");
-	    if (!findTool(candidate, javaTool)) {
-		throw new IllegalArgumentException("No tool " + javaTool + " found neither in "
-			+ CURRENT_JAVA_DIR.getAbsolutePath() + " nor in " + candidate.getAbsolutePath());
-	    }
-	}
-	final String command = candidate.getAbsolutePath() + File.separator + javaTool;
-	return of(command, parameters);
+        File candidate = CURRENT_JAVA_DIR;
+        final boolean exist = findTool(candidate, javaTool);
+        if (!exist) {
+            candidate = new File(CURRENT_JAVA_DIR.getParentFile().getParentFile(), "bin");
+            if (!findTool(candidate, javaTool)) {
+                throw new IllegalArgumentException("No tool " + javaTool + " found neither in "
+                        + CURRENT_JAVA_DIR.getAbsolutePath() + " nor in "
+                        + candidate.getAbsolutePath());
+            }
+        }
+        final String command = candidate.getAbsolutePath() + File.separator + javaTool;
+        return of(command, parameters);
     }
 
     /**
@@ -98,7 +100,7 @@ public final class JkProcess implements Runnable {
      * specified extra parameters.
      */
     public JkProcess andParameters(String... parameters) {
-	return andParameters(Arrays.asList(parameters));
+        return andParameters(Arrays.asList(parameters));
     }
 
     /**
@@ -106,9 +108,9 @@ public final class JkProcess implements Runnable {
      * specified parameter.
      */
     public JkProcess minusParameter(String parameter) {
-	final List<String> list = new LinkedList<String>(parameters);
-	list.remove(parameter);
-	return withParameters(list.toArray(new String[0]));
+        final List<String> list = new LinkedList<String>(parameters);
+        list.remove(parameter);
+        return withParameters(list.toArray(new String[0]));
     }
 
     /**
@@ -117,19 +119,19 @@ public final class JkProcess implements Runnable {
      * Returns <code>this</code> otherwise.
      */
     public JkProcess andParametersIf(boolean conditional, String... parameters) {
-	if (conditional) {
-	    return andParameters(parameters);
-	}
-	return this;
+        if (conditional) {
+            return andParameters(parameters);
+        }
+        return this;
     }
 
     /**
      * @see #andParameters(String...)
      */
     public JkProcess andParameters(Collection<String> parameters) {
-	final List<String> list = new ArrayList<String>(this.parameters);
-	list.addAll(parameters);
-	return new JkProcess(command, list, workingDir, failOnError);
+        final List<String> list = new ArrayList<String>(this.parameters);
+        list.addAll(parameters);
+        return new JkProcess(command, list, workingDir, failOnError);
     }
 
     /**
@@ -139,7 +141,7 @@ public final class JkProcess implements Runnable {
      * by the specified ones (not adding).
      */
     public JkProcess withParameters(String... parameters) {
-	return new JkProcess(command, Arrays.asList(parameters), workingDir, failOnError);
+        return new JkProcess(command, Arrays.asList(parameters), workingDir, failOnError);
     }
 
     /**
@@ -147,10 +149,10 @@ public final class JkProcess implements Runnable {
      * specified conditional is true.
      */
     public JkProcess withParametersIf(boolean conditional, String... parameters) {
-	if (conditional) {
-	    return this.withParameters(parameters);
-	}
-	return this;
+        if (conditional) {
+            return this.withParameters(parameters);
+        }
+        return this;
     }
 
     /**
@@ -158,7 +160,7 @@ public final class JkProcess implements Runnable {
      * specified directory as the working directory.
      */
     public JkProcess withWorkingDir(File workingDir) {
-	return new JkProcess(command, parameters, workingDir, failOnError);
+        return new JkProcess(command, parameters, workingDir, failOnError);
     }
 
     /**
@@ -169,7 +171,7 @@ public final class JkProcess implements Runnable {
      * throw a {@link IllegalStateException}.
      */
     public JkProcess failOnError(boolean fail) {
-	return new JkProcess(command, parameters, workingDir, fail);
+        return new JkProcess(command, parameters, workingDir, fail);
     }
 
     /**
@@ -178,63 +180,64 @@ public final class JkProcess implements Runnable {
      * current output.
      */
     public int runSync() {
-	final List<String> command = new LinkedList<String>();
-	command.add(this.command);
-	command.addAll(parameters);
-	JkLog.startln("Starting program : " + command.toString());
-	final int result;
-	try {
-	    final ProcessBuilder processBuilder = processBuilder(command);
-	    if (workingDir != null) {
-		processBuilder.directory(this.workingDir);
-	    }
-	    final Process process = processBuilder.start();
-	    final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(process.getInputStream(),
-		    JkLog.infoStream());
-	    final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(process.getErrorStream(),
-		    JkLog.warnStream());
-	    process.waitFor();
-	    outputStreamGobbler.stop();
-	    errorStreamGobbler.stop();
-	    result = process.exitValue();
-	    if (result != 0 && failOnError) {
-		throw new IllegalStateException("The process has returned with error code " + result);
-	    }
-	} catch (final Exception e) {
-	    throw new RuntimeException(e);
-	}
-	JkLog.done(" process exit with return code : " + result);
-	return result;
+        final List<String> command = new LinkedList<String>();
+        command.add(this.command);
+        command.addAll(parameters);
+        JkLog.startln("Starting program : " + command.toString());
+        final int result;
+        try {
+            final ProcessBuilder processBuilder = processBuilder(command);
+            if (workingDir != null) {
+                processBuilder.directory(this.workingDir);
+            }
+            final Process process = processBuilder.start();
+            final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
+                    process.getInputStream(), JkLog.infoStream());
+            final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
+                    process.getErrorStream(), JkLog.warnStream());
+            process.waitFor();
+            outputStreamGobbler.stop();
+            errorStreamGobbler.stop();
+            result = process.exitValue();
+            if (result != 0 && failOnError) {
+                throw new IllegalStateException("The process has returned with error code "
+                        + result);
+            }
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+        JkLog.done(" process exit with return code : " + result);
+        return result;
     }
 
     private ProcessBuilder processBuilder(List<String> command) {
-	final ProcessBuilder builder = new ProcessBuilder(command);
-	builder.redirectErrorStream(true);
-	if (this.workingDir != null) {
-	    builder.directory(workingDir);
-	}
-	return builder;
+        final ProcessBuilder builder = new ProcessBuilder(command);
+        builder.redirectErrorStream(true);
+        if (this.workingDir != null) {
+            builder.directory(workingDir);
+        }
+        return builder;
     }
 
     private static boolean findTool(File dir, String name) {
-	for (final File file : dir.listFiles()) {
-	    if (file.isDirectory()) {
-		continue;
-	    }
-	    if (file.getName().equals(name)) {
-		return true;
-	    }
-	    final String fileToolName = JkUtilsString.substringBeforeLast(file.getName(), ".");
-	    if (fileToolName.equals(name)) {
-		return true;
-	    }
-	}
-	return false;
+        for (final File file : dir.listFiles()) {
+            if (file.isDirectory()) {
+                continue;
+            }
+            if (file.getName().equals(name)) {
+                return true;
+            }
+            final String fileToolName = JkUtilsString.substringBeforeLast(file.getName(), ".");
+            if (fileToolName.equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public void run() {
-	this.runSync();
+        this.runSync();
     }
 
 }

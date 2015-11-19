@@ -11,13 +11,13 @@ public class JkUtilsIOTest {
 
     @Test
     public void testReadZipEntry() throws Exception {
-	final File file = JkUtilsFile.resourceAsFile(JkUtilsIOTest.class, "toto.zip");
-	final JkZipFile zipFile = JkZipFile.of(file);
-	final InputStream toto1is = zipFile.inputStream("toto1.zip");
-	final InputStream toto2is = JkUtilsIO.readZipEntry(toto1is, "toto2.txt");
-	final String content = JkUtilsIO.readAsString(toto2is);
-	Assert.assertTrue(content.startsWith("toto2content"));
-	JkUtilsIO.closeQuietly(zipFile, toto1is, toto2is);
+        final File file = JkUtilsFile.resourceAsFile(JkUtilsIOTest.class, "toto.zip");
+        final JkZipFile zipFile = JkZipFile.of(file);
+        final InputStream toto1is = zipFile.inputStream("toto1.zip");
+        final InputStream toto2is = JkUtilsIO.readZipEntry(toto1is, "toto2.txt");
+        final String content = JkUtilsIO.readAsString(toto2is);
+        Assert.assertTrue(content.startsWith("toto2content"));
+        JkUtilsIO.closeQuietly(zipFile, toto1is, toto2is);
     }
 
 }
