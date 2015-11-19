@@ -12,6 +12,7 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
+import org.jerkar.api.depmanagement.JkScopeMapping;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.java.JkClassLoader;
@@ -135,7 +136,7 @@ final class Project {
         final boolean devMode = JkLocator.jerkarJarFile().isDirectory();
 
         return JkDependencies.builder()
-                .on(buildDependencies)
+                .on(buildDependencies.withDefaultScopeMapping(JkScopeMapping.ALL_TO_DEFAULT))
                 .onFiles(localBuildPath())
                 .onFilesIf(devMode, JkClasspath.current())
                 .onFilesIf(!devMode, jerkarLibs())

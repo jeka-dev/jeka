@@ -118,7 +118,7 @@ final class IvyResolver implements InternalDepResolver {
         }
         final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
         JkResolveResult resolveResult = JkResolveResult.empty();
-        for (final String conf : resolveOptions.getConfs()) {
+        for (final String conf : resolveOptions.getConfs(moduleDescriptor)) {
             final JkResolveResult confResult = getResolveConf(conf, artifactDownloadReports, deps);
             resolveResult = resolveResult.and(confResult);
         }

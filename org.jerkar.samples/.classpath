@@ -74,7 +74,7 @@
 			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.jerkar/cache/repo/commons-logging/commons-logging/javadocs/commons-logging-1.0.4-javadoc.jar"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="var" path="JERKAR_REPO/commons-httpclient/commons-httpclient/sources/commons-httpclient-3.1-sources.jar" sourcepath="JERKAR_REPO/commons-httpclient/commons-httpclient/sources/commons-httpclient-3.1-sources.jar"/>
+	<classpathentry kind="var" path="JERKAR_REPO/commons-httpclient/commons-httpclient/jars/commons-httpclient-3.1.jar" sourcepath="JERKAR_REPO/commons-httpclient/commons-httpclient/sources/commons-httpclient-3.1-sources.jar"/>
 	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.plugins-jacoco/bin"/>
 	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.plugins-sonar/bin"/>
 	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.core/build/output/def-bin"/>
