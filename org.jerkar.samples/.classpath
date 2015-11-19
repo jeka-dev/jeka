@@ -75,11 +75,8 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="var" path="JERKAR_REPO/commons-httpclient/commons-httpclient/jars/commons-httpclient-3.1.jar" sourcepath="JERKAR_REPO/commons-httpclient/commons-httpclient/sources/commons-httpclient-3.1-sources.jar"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.plugins-jacoco/bin"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.plugins-sonar/bin"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.core/build/output/def-bin"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.core/bin"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.core/build/output/testClasses"/>
-	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.distrib-all/bin"/>
+	<classpathentry kind="var" path="JERKAR_HOME/libs/ext/org.jerkar.plugins-jacoco.jar" sourcepath="JERKAR_HOME/libs/ext/../../libs-sources/org.jerkar.plugins-jacoco-sources.jar"/>
+	<classpathentry kind="var" path="JERKAR_HOME/libs/ext/org.jerkar.plugins-sonar.jar" sourcepath="JERKAR_HOME/libs/ext/../../libs-sources/org.jerkar.plugins-sonar-sources.jar"/>
+	<classpathentry kind="var" path="JERKAR_HOME/org.jerkar.core.jar" sourcepath="JERKAR_HOME/libs-sources/org.jerkar.core-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
