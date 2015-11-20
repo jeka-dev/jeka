@@ -9,10 +9,6 @@ import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.file.JkFileTreeSet;
-import org.jerkar.tool.builtins.eclipse.DotClasspath;
-import org.jerkar.tool.builtins.eclipse.Lib;
-import org.jerkar.tool.builtins.eclipse.ScopeResolverSmart;
-import org.jerkar.tool.builtins.eclipse.Sources;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Test;
 
@@ -47,11 +43,11 @@ public class DotClasspathTest {
         assertEquals(0, deps.dependenciesDeclaredWith(JkJavaBuild.TEST).size());
     }
 
-    private DotClasspath sample() throws URISyntaxException {
+    private DotClasspathModel sample() throws URISyntaxException {
         final URL sampleFileUrl = DotClasspathTest.class.getResource("samplestructure/"
                 + SAMPLE_NAME);
         final File sampleFile = new File(sampleFileUrl.toURI().getPath());
-        return DotClasspath.from(sampleFile);
+        return DotClasspathModel.from(sampleFile);
     }
 
     private File structure() throws URISyntaxException {

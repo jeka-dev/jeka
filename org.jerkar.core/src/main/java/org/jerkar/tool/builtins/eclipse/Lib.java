@@ -61,14 +61,11 @@ class Lib {
                         .packer().jarFile());
                 builder.on(projectDependency).scope(lib.scope);
 
-                // Get the exported entry as well
-                final JkBuildPluginEclipse pluginEclipse = slaveBuild
-                        .pluginOf(JkBuildPluginEclipse.class);
-                if (pluginEclipse != null) {
-                    final File dotClasspathFile = slaveBuild.file(".classpath");
-                    final DotClasspath dotClasspath = DotClasspath.from(dotClasspathFile);
+                final File dotClasspathFile = slaveBuild.file(".classpath");
+                if (dotClasspathFile.exists()) {
+                    final DotClasspathModel dotClasspathModel = DotClasspathModel.from(dotClasspathFile);
                     final List<Lib> sublibs = new ArrayList<Lib>();
-                    for (final Lib sublib : dotClasspath.libs(slaveBuild.baseDir().root(),
+                    for (final Lib sublib : dotClasspathModel.libs(slaveBuild.baseDir().root(),
                             scopeSegregator)) {
                         if (sublib.exported) {
                             sublibs.add(sublib);

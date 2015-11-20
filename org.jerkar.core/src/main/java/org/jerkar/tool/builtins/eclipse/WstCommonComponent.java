@@ -9,8 +9,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.tool.builtins.eclipse.DotClasspath.ClasspathEntry;
-import org.jerkar.tool.builtins.eclipse.DotClasspath.ClasspathEntry.Kind;
+import org.jerkar.tool.builtins.eclipse.DotClasspathModel.ClasspathEntry;
+import org.jerkar.tool.builtins.eclipse.DotClasspathModel.ClasspathEntry.Kind;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
