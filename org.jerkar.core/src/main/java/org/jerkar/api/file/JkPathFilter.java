@@ -41,6 +41,9 @@ public abstract class JkPathFilter {
         return new IncludeFilter(AntPattern.setOf(antPatterns));
     }
 
+    /**
+     * Creates an include filter including the specified and patterns.
+     */
     public static JkPathFilter include(Iterable<String> antPatterns) {
         return new IncludeFilter(AntPattern.setOf(antPatterns));
     }

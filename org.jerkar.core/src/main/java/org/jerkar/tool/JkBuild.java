@@ -34,18 +34,16 @@ public class JkBuild {
 
     private final Date buildTime = JkUtilsTime.now();
 
+    /** attached plugin instances to this build */
     protected final JkBuildPlugins plugins = new JkBuildPlugins(this);
-
-    @JkDoc({ "Mention if you want to add extra lib in your build path.",
-            "It can be absolute or relative to the project base dir.",
-            "These libs will be added to the build path to compile and run Jerkar build class.",
-            "Example : -extraBuildPath=C:\\libs\\mylib.jar;libs/others/**/*.jar" })
-    protected String extraBuildPath;
 
     private JkDependencyResolver buildDefDependencyResolver;
 
     private final JkSlaveBuilds annotatedJkProjectSlaves;
 
+    /**
+     * Constructs a {@link JkBuild}
+     */
     protected JkBuild() {
         final List<JkBuild> subBuilds = populateJkProjectAnnotatedFields();
         this.annotatedJkProjectSlaves = JkSlaveBuilds.of(this.baseDir().root(), subBuilds);
@@ -88,10 +86,16 @@ public class JkBuild {
         return JkUtilsTime.iso(buildTime);
     }
 
+    /**
+     * Returns the time the build was started.
+     */
     protected Date buildTime() {
         return (Date) buildTime.clone();
     }
 
+    /**
+     * Returns the specified relative path to this project as a {@link JkPath} instance.
+     */
     protected final JkPath toPath(String pathAsString) {
         if (pathAsString == null) {
             return JkPath.of();
@@ -190,6 +194,10 @@ public class JkBuild {
 
     // ------------ Jerkar methods ------------
 
+    /**
+     * Creates the project structure (mainly project folder layout, build class code and IDE metadata) at the root
+     * of the current project.
+     */
     @JkDoc("Create the project structure")
     public void scaffold() {
         final File def = file(JkConstants.BUILD_DEF_DIR);
@@ -198,12 +206,16 @@ public class JkBuild {
         JkUtilsFile.writeString(buildClass, scaffoldedBuildClassCode(), false);
     }
 
+    /**
+     * Returns the build class code that will be used while scaffolding (see {@link #scaffold()}
+     */
     protected String scaffoldedBuildClassCode() {
         final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
         codeWriter.extendedClass = "JkBuild";
         return codeWriter.wholeClass() + codeWriter.endClass();
     }
 
+    /** Clean the output directory. */
     @JkDoc("Clean the output directory.")
     public void clean() {
         JkLog.start("Cleaning output directory " + ouputDir().root().getPath());
@@ -211,21 +223,25 @@ public class JkBuild {
         JkLog.done();
     }
 
+    /** Conventional method standing for the default operations to perform. */
     @JkDoc("Conventional method standing for the default operations to perform.")
     public void doDefault() {
         clean();
     }
 
+    /** Run checks to verify the package is valid and meets quality criteria. */
     @JkDoc("Run checks to verify the package is valid and meets quality criteria.")
     public void verify() {
         JkBuildPlugin.applyVerify(this.plugins.getActives());
     }
 
+    /** Display all available methods defined in this build. */
     @JkDoc("Display all available methods defined in this build.")
     public void help() {
         HelpDisplayer.help(this);
     }
 
+    /** Display details on all available plugins. */
     @JkDoc("Display details on all available plugins.")
     public void helpPlugins() {
         HelpDisplayer.helpPlugins();
@@ -245,6 +261,9 @@ public class JkBuild {
         }
     }
 
+    /**
+     * Returns plugins attached to this build and extending the specified class.
+     */
     public <T extends JkBuildPlugin> T pluginOf(Class<T> pluginClass) {
         return this.plugins.findInstanceOf(pluginClass);
     }
@@ -278,6 +297,10 @@ public class JkBuild {
         return this.annotatedJkProjectSlaves;
     }
 
+    /**
+     * Returns the slave project declared with annotation <code>JkProject</code> in this build.
+     * @return
+     */
     protected final JkSlaveBuilds annotatedJkProjectSlaves() {
         return this.annotatedJkProjectSlaves;
     }
@@ -297,6 +320,9 @@ public class JkBuild {
         return result;
     }
 
+    /**
+     * Returns the build of the specified slave project. Slave projects are expressed with relative path to this project.
+     */
     public JkBuild relativeProject(String relativePath) {
         return relativeProject(this, null, relativePath);
     }

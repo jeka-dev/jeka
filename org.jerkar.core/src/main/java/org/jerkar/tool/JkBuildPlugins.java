@@ -114,6 +114,7 @@ public final class JkBuildPlugins {
         return plugin;
     }
 
+
     @SuppressWarnings("unchecked")
     public <T extends JkBuildPlugin> T findInstanceOf(Class<T> pluginClass) {
         for (final JkBuildPlugin jkBuildPlugin : this.activatedPlugins.values()) {

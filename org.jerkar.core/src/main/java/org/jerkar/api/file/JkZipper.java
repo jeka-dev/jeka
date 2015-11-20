@@ -1,8 +1,6 @@
 package org.jerkar.api.file;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,7 +9,6 @@ import java.util.List;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.jerkar.api.system.JkLog;
@@ -19,7 +16,6 @@ import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsThrowable;
 
 /**
  * Defines elements to embed in a zip archive and methods to write archive on
@@ -27,10 +23,20 @@ import org.jerkar.api.utils.JkUtilsThrowable;
  */
 public final class JkZipper {
 
+    /** Specify compression level */
     public enum JkCompressionLevel {
 
-        BEST_COMPRESSION(Deflater.BEST_COMPRESSION), BEST_SPEED(Deflater.BEST_SPEED), DEFAULT_COMPRESSION(
-                Deflater.DEFAULT_COMPRESSION), NO_COMPRESSION(Deflater.NO_COMPRESSION), ;
+        /** See  #Deflater.BEST_COMPRESSION */
+        BEST_COMPRESSION(Deflater.BEST_COMPRESSION),
+
+        /** See  #Deflater.BEST_SPEED */
+        BEST_SPEED(Deflater.BEST_SPEED),
+
+        /** See  #Deflater.DEFAULT_COMPRESSION */
+        DEFAULT_COMPRESSION(Deflater.DEFAULT_COMPRESSION),
+
+        /** See  #Deflater.NO_COMPRESSION */
+        NO_COMPRESSION(Deflater.NO_COMPRESSION), ;
 
         private final int level;
 
@@ -40,9 +46,14 @@ public final class JkZipper {
 
     }
 
+    /** Specify compression method */
     public enum JkCompressionMethod {
 
-        DEFLATED(ZipEntry.DEFLATED), STORED(0);
+        /** See  #ZipEntry.DEFLATED */
+        DEFLATED(ZipEntry.DEFLATED),
+
+        /** Stored, no compression */
+        STORED(0);
 
         private final int method;
 
@@ -96,12 +107,20 @@ public final class JkZipper {
                 JkCompressionLevel.DEFAULT_COMPRESSION, JkCompressionMethod.DEFLATED);
     }
 
+    /**
+     * Returns a {@link JkZipFile} identical to this one but containing also the entries
+     * contained in the specified archive files.
+     */
     @SuppressWarnings("unchecked")
     public JkZipper merge(Iterable<File> archiveFiles) {
         return new JkZipper(itemsToZip, JkUtilsIterable.concatLists(this.archivestoMerge,
                 archiveFiles), this.jkCompressionLevel, this.jkCompressionMethod);
     }
 
+    /**
+     * Returns a {@link JkZipFile} identical to this one but containing also the entries
+     * contained in the specified archive files.
+     */
     public JkZipper merge(File... archiveFiles) {
         return merge(Arrays.asList(archiveFiles));
     }
@@ -118,10 +137,16 @@ public final class JkZipper {
         return jkCheckSumer;
     }
 
+    /**
+     * Returns a {@link JkZipFile} identical to this one but with the specified compression level.
+     */
     public JkZipper with(JkCompressionLevel level) {
         return new JkZipper(this.itemsToZip, this.archivestoMerge, level, this.jkCompressionMethod);
     }
 
+    /**
+     * Returns a {@link JkZipFile} identical to this one but with the specified compression method.
+     */
     public JkZipper with(JkCompressionMethod method) {
         return new JkZipper(this.itemsToZip, this.archivestoMerge, this.jkCompressionLevel, method);
     }
@@ -177,6 +202,9 @@ public final class JkZipper {
         return JkCompressionMethod.STORED.equals(jkCompressionMethod);
     }
 
+    /**
+     * Returns a {@link JkZipFile} identical to this one but containing also the specified entry.
+     */
     public JkZipper andEntryName(String entryName, File file) {
         final List<Object> list = new LinkedList<Object>(this.itemsToZip);
         list.add(new EntryFile(entryName, file));
@@ -184,6 +212,9 @@ public final class JkZipper {
                 this.jkCompressionMethod);
     }
 
+    /**
+     * Returns a {@link JkZipFile} identical to this one but containing also the specified entry.
+     */
     public JkZipper andEntryPath(String entryPath, File file) {
         final List<Object> list = new LinkedList<Object>(this.itemsToZip);
         final String path = entryPath.endsWith("/") ? entryPath + file.getName() : entryPath + "/"
@@ -215,43 +246,7 @@ public final class JkZipper {
         }
     }
 
-    public static void unzip(Iterable<File> zips, File folder) {
-        for (final File zip : zips) {
-            unzip(zip, folder);
-        }
-    }
 
-    public static void unzip(File zip, File folder) {
-        final byte[] buffer = new byte[1024];
-        try {
-            if (!folder.exists()) {
-                folder.mkdirs();
-            }
-            final ZipInputStream zis = new ZipInputStream(new FileInputStream(zip));
-            ZipEntry ze = zis.getNextEntry();
-            while (ze != null) {
-                final String fileName = ze.getName();
-                final File newFile = new File(folder, fileName);
-                if (ze.isDirectory()) {
-                    newFile.mkdirs();
-                } else {
-                    newFile.getParentFile().mkdirs();
-                    newFile.createNewFile();
-                    final FileOutputStream fos = new FileOutputStream(newFile);
-                    int len;
-                    while ((len = zis.read(buffer)) > 0) {
-                        fos.write(buffer, 0, len);
-                    }
-                    fos.close();
-                }
-                ze = zis.getNextEntry();
-            }
-            zis.closeEntry();
-            zis.close();
-        } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
-        }
-    }
 
     /**
      * Wrapper on <code>File</code> allowing to creates digests on it.

@@ -180,7 +180,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     public JkDependencies and(Iterable<File> files, JkScope... scopes) {
         final JkScopedDependency scopedDependency = JkScopedDependency.of(
                 JkFileSystemDependency.of(files), scopes);
-        return of(scopedDependency);
+        return and(scopedDependency);
     }
 
     /**
@@ -193,7 +193,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     public JkDependencies and(JkScope scope, String versionedModuleId) {
         final JkDependency dependency = JkModuleDependency.of(versionedModuleId);
         final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scope);
-        return of(scopedDependency);
+        return and(scopedDependency);
     }
 
     /**

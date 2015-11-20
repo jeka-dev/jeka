@@ -46,9 +46,13 @@ public class JkBuildDependencySupport extends JkBuild {
     @JkDoc("Dependency and publish repositories")
     protected JkOptionRepos repo = new JkOptionRepos();
 
+    /** Version to inject to this build. If 'null' or blank than the version will be the one returned by #version() */
     @JkDoc("Version to inject to this build. If 'null' or blank than the version will be the one returned by #version()")
     protected String version = null;
 
+    /**
+     * Constructs a {@link JkBuildDependencySupport}
+     */
     protected JkBuildDependencySupport() {
     }
 
@@ -184,6 +188,9 @@ public class JkBuildDependencySupport extends JkBuild {
         return JkDependencyExclusions.builder().build();
     }
 
+    /**
+     * Returns the dependencies of this project. By default it is empty.
+     */
     protected JkDependencies dependencies() {
         return JkDependencies.of();
     }
@@ -271,8 +278,8 @@ public class JkBuildDependencySupport extends JkBuild {
         public final JkOptionRepo publish = new JkOptionRepo();
 
         @JkDoc({
-                "Maven or Ivy repositories to publish released artifacts.",
-                "If this repo is not null, then Jerkar will try to publish snapshot in the publish repo and release in this one." })
+            "Maven or Ivy repositories to publish released artifacts.",
+        "If this repo is not null, then Jerkar will try to publish snapshot in the publish repo and release in this one." })
         public final JkOptionRepo release = new JkOptionRepo();
 
         public JkOptionRepos() {
@@ -289,7 +296,7 @@ public class JkBuildDependencySupport extends JkBuild {
         public String url;
 
         @JkDoc({ "Usename to connect to repository (if needed).",
-                "Null or blank means that the repository will be accessed in an anonymous way." })
+        "Null or blank means that the repository will be accessed in an anonymous way." })
         public String username;
 
         @JkDoc({ "Password to connect to the repository (if needed)." })

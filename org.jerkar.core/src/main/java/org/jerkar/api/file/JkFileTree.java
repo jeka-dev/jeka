@@ -147,6 +147,10 @@ public final class JkFileTree implements Iterable<File> {
         return this;
     }
 
+    /**
+     * Copies the specified directories content at the root at this file tree, preserving relative paths.
+     * @return this object.
+     */
     public JkFileTree importDirContent(Iterable<File> dirsToCopyContent) {
         return importDirContent(JkUtilsIterable.arrayOf(dirsToCopyContent, File.class));
     }

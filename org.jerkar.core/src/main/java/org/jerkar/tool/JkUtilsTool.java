@@ -27,6 +27,9 @@ public final class JkUtilsTool {
         }
     }
 
+    /**
+     * Set the properties defined in Jerkar user directory into the system.
+     */
     public static void loadUserSystemProperties() {
         setSystemProperties(userSystemProperties());
     }

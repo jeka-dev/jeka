@@ -504,7 +504,7 @@ public final class JkClassLoader {
 
     /**
      * Returns the first class having a main method from the specified class
-     * directory or Jar
+     * directory or Jar. Returns <code>null</code> if no such class found.
      */
     public static String findMainClass(File classDirOrJar) {
         final JkClassLoader classLoader = JkClassLoader.system().child(classDirOrJar);
@@ -517,8 +517,9 @@ public final class JkClassLoader {
                 return clazz.getName();
             }
         }
-        throw new IllegalStateException("Can't find any class with a main method.");
+        return null;
     }
+
 
     @Override
     public String toString() {

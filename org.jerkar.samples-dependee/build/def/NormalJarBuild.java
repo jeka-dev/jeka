@@ -1,5 +1,6 @@
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.samples.MavenStyleBuild;
+import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkProject;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
@@ -28,19 +29,23 @@ public class NormalJarBuild extends JkJavaBuild {
 
     @Override
     protected JkDependencies dependencies() {
-	return JkDependencies
+    	return JkDependencies
 		
-		// Depends on the jar file produced by the mavenBuildStyle of the 'sample' project
-		// When fetching the dependencies, if the jar file in the 'samples' project is not present,
-		// then a 'sampleBuild' is launched in order to produce it.
-		// The 'sampleBuild' is launched with the 'doDefault' method unless you specify another ones
-		.of(COMPILE, sampleBuild.asDependency(sampleBuild.packer().jarFile())) 
+    		// Depends on the jar file produced by the mavenBuildStyle of the 'sample' project
+		    // When fetching the dependencies, if the jar file in the 'samples' project is not present,
+		    // then a 'sampleBuild' is launched in order to produce it.
+		    // The 'sampleBuild' is launched with the 'doDefault' method unless you specify another ones
+		    .of(COMPILE, sampleBuild.asDependency(sampleBuild.packer().jarFile())) 
 		
-		// Depends on the transitive build defined in the mavenBuildStyle of the 'sample' project
-		.and(sampleBuild.depsFor(COMPILE), COMPILE)
+		    // Depends on the transitive build defined in the mavenBuildStyle of the 'sample' project
+		    .and(sampleBuild.depsFor(COMPILE), COMPILE)
 		
-		// Additional dependency
-		.and(RUNTIME, "ch.qos.logback:logback-classic:1.+");
+		    // Additional dependency
+		    .and(RUNTIME, "ch.qos.logback:logback-classic:1.+");
     }
+    
+    public static void main(String[] args) {
+		JkInit.instanceOf(NormalJarBuild.class, args).doDefault();
+	}
 
 }

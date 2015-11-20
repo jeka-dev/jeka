@@ -19,6 +19,7 @@ public final class JkMvn implements Runnable {
 
     private final static String MVN_CMD = mvnCmd();
 
+    /** Returns <code>true</code> if Maven is installed on the machine running this code. */
     public static final boolean INSTALLED = MVN_CMD != null;
 
     private static String mvnCmd() {

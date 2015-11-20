@@ -24,22 +24,37 @@ public class JkDependencyExclusions {
         this.exclusions = Collections.unmodifiableMap(exclusions);
     }
 
+    /**
+     * Creates a builder for {@link JkDependencyExclusions}.
+     */
     public static Builder builder() {
         return new Builder();
     }
 
+    /**
+     * Returns the modules on which some transitive dependencies are excluded.
+     */
     public Set<JkModuleId> moduleIds() {
         return this.exclusions.keySet();
     }
 
+    /**
+     * Returns the transitive dependency module to exclude from the specified module.
+     */
     public List<JkDepExclude> get(JkModuleId moduleId) {
         return exclusions.get(moduleId);
     }
 
+    /**
+     * Returns <code>true</code> if this object contains no exclusion.
+     */
     public boolean isEmpty() {
         return this.exclusions.isEmpty();
     }
 
+    /**
+     * A builder for {@link JkDependencyExclusions}.
+     */
     public static class Builder {
 
         Builder() {
@@ -47,10 +62,16 @@ public class JkDependencyExclusions {
 
         private final Map<JkModuleId, List<JkDepExclude>> exclusions = new HashMap<JkModuleId, List<JkDepExclude>>();
 
+        /**
+         * Adds specified exclusions on the specified module.
+         */
         public Builder on(JkModuleId moduleId, JkDepExclude... depExcludes) {
             return on(moduleId, Arrays.asList(depExcludes));
         }
 
+        /**
+         * Adds specified exclusions on the specified module.
+         */
         public Builder on(JkModuleId moduleId, String... excludedModuleIds) {
             final List<JkDepExclude> depExcludes = new LinkedList<JkDepExclude>();
             for (final String excludeId : excludedModuleIds) {
@@ -59,10 +80,16 @@ public class JkDependencyExclusions {
             return on(moduleId, depExcludes);
         }
 
+        /**
+         * Adds specified exclusions on the specified module.
+         */
         public Builder on(String groupAndName, String... excludedModuleIds) {
             return on(JkModuleId.of(groupAndName), excludedModuleIds);
         }
 
+        /**
+         * Adds specified exclusions on the specified module.
+         */
         public Builder on(JkModuleId moduleId, Iterable<JkDepExclude> depExcludes) {
             List<JkDepExclude> excludes = exclusions.get(moduleId);
             if (excludes == null) {
@@ -73,6 +100,9 @@ public class JkDependencyExclusions {
             return this;
         }
 
+        /**
+         * Creates a {@link JkDependencyExclusions} based on this builder content.
+         */
         public JkDependencyExclusions build() {
             final Map<JkModuleId, List<JkDepExclude>> map = new HashMap<JkModuleId, List<JkDepExclude>>();
             for (final JkModuleId moduleId : exclusions.keySet()) {

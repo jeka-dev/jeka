@@ -190,7 +190,7 @@ public final class JkProjectDef {
      * @author Jerome Angibaud
      */
     public static final class JkProjectBuildMethodDef implements
-            Comparable<JkProjectBuildMethodDef> {
+    Comparable<JkProjectBuildMethodDef> {
 
         private final String name;
 
@@ -231,7 +231,7 @@ public final class JkProjectDef {
      * @author Jerome Angibaud
      */
     public static final class JkProjectBuildOptionDef implements
-            Comparable<JkProjectBuildOptionDef> {
+    Comparable<JkProjectBuildOptionDef> {
 
         private final String name;
 

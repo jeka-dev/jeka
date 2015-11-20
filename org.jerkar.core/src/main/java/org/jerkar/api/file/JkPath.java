@@ -126,7 +126,7 @@ public final class JkPath implements Iterable<File> {
     }
 
     /**
-     * @see #and(Iterable).
+     * @see #and(Iterable)
      */
     public JkPath and(File... files) {
         return and(JkPath.of(files));
