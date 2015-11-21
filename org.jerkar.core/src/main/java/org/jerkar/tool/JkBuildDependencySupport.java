@@ -26,7 +26,7 @@ import org.jerkar.api.utils.JkUtilsString;
 /**
  * Template build definition class providing support for managing dependencies
  * and multi-projects.
- * 
+ *
  * @author Jerome Angibaud
  */
 public class JkBuildDependencySupport extends JkBuild {
@@ -60,7 +60,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * Override this method to define version programmatically. This is not
      * necessary the effective version that will be used in end. Indeed version
      * injected via Jerkar options takes precedence on this one.
-     * 
+     *
      * @see JkBuildDependencySupport#effectiveVersion()
      */
     protected JkVersion version() {
@@ -72,7 +72,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * name and publish artifacts. It may take format as
      * <code>1.0-SNAPSHOT</code>, <code>trunk-SNAPSHOT</code>,
      * <code>1.2.3-rc1</code>, <code>1.2.3</code>.
-     * 
+     *
      * To get the effective version, this method looks in the following order :
      * <ul>
      * <li>The version injected by option (with command line argment
@@ -80,7 +80,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * <li>The version returned by the {@link #version()} method</li>
      * <li>The the hard-coded <code>1.0-SNAPSHOT</code> value</li>
      * </ul>
-     * 
+     *
      */
     public final JkVersion effectiveVersion() {
         if (!JkUtilsString.isBlank(version)) {
@@ -132,10 +132,9 @@ public class JkBuildDependencySupport extends JkBuild {
         }
 
         // One of release or publish url has been specified
-        final JkRepo defaultDownloadRepo = repoOfOptions("download");
-        final JkRepo defaultPublishRepo = repoOfOptions("publish");
-        final JkRepo defaultPublishReleaseRepo = repoOfOptions("release");
-
+        final JkRepo defaultDownloadRepo = this.repo.download.toRepo();
+        final JkRepo defaultPublishRepo = this.repo.publish.toRepo();
+        final JkRepo defaultPublishReleaseRepo = this.repo.release.toRepo();
         final JkRepo publishRepo = JkRepo.firstNonNull(defaultPublishRepo, defaultDownloadRepo);
         final JkRepo releaseRepo = JkRepo.firstNonNull(defaultPublishReleaseRepo, publishRepo);
 
@@ -265,7 +264,7 @@ public class JkBuildDependencySupport extends JkBuild {
         codeWriter.extendedClass = "JkBuildDependencySupport";
         codeWriter.dependencies = JkDependencies.builder().build();
         codeWriter.imports.clear();
-        codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsFoJkDependencyBuildSupport());
+        codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsForJkDependencyBuildSupport());
         return codeWriter.wholeClass() + codeWriter.endClass();
     }
 
@@ -302,6 +301,14 @@ public class JkBuildDependencySupport extends JkBuild {
         @JkDoc({ "Password to connect to the repository (if needed)." })
         public String password;
 
+        /** Returns the repo configured here or null if the url is null */
+        public JkRepo toRepo() {
+            if (url == null) {
+                return null;
+            }
+            return JkRepo.of(url).withOptionalCredentials(username, password);
+        }
+
     }
 
     public JkPgp pgp() {
@@ -316,7 +323,8 @@ public class JkBuildDependencySupport extends JkBuild {
      * repository.
      */
     public static JkRepo repoOfOptions(String repoName) {
-        final String url = JkOptions.get("repo." + repoName + "." + "url");
+        final String optionName = "repo." + repoName + "." + "url";
+        final String url = JkOptions.get(optionName);
         if (JkUtilsString.isBlank(url)) {
             return null;
         }
@@ -331,7 +339,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * <code>repo.[repoName].username</code> and
      * <code>repo.[repoName].password</code> options for creating according
      * repository.
-     * 
+     *
      * You can specify severals url by using coma separation in
      * <code>repo.[repoName].url</code> option value. but the credential will
      * remain the same for all returned repositories.

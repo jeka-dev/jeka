@@ -341,7 +341,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         codeWriter.extendedClass = "JkJavaBuild";
         codeWriter.dependencies = JkDependencies.builder().build();
         codeWriter.imports.clear();
-        codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsFoJkJavaBuild());
+        codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsForJkJavaBuild());
         return codeWriter.wholeClass() + codeWriter.endClass();
     }
 

@@ -37,7 +37,7 @@ public class JkCodeWriterForBuildClass {
 
     public String extendedClass = "JkBuild";
 
-    public final List<String> imports = importsFoJkBuild();
+    public final List<String> imports = importsForJkBuild();
 
     private final Map<String, String> groupVersionVariableMap = new HashMap<String, String>();
 
@@ -79,20 +79,20 @@ public class JkCodeWriterForBuildClass {
         return builder.append("Version").toString();
     }
 
-    public static List<String> importsFoJkJavaBuild() {
+    public static List<String> importsForJkJavaBuild() {
         final List<String> imports = new LinkedList<String>();
         imports.add("org.jerkar.api.depmanagement.*");
         imports.add("org.jerkar.tool.builtins.javabuild.JkJavaBuild");
         return imports;
     }
 
-    public static List<String> importsFoJkBuild() {
+    public static List<String> importsForJkBuild() {
         final List<String> imports = new LinkedList<String>();
         imports.add("org.jerkar.tool.JkBuild");
         return imports;
     }
 
-    public static List<String> importsFoJkDependencyBuildSupport() {
+    public static List<String> importsForJkDependencyBuildSupport() {
         final List<String> imports = new LinkedList<String>();
         imports.add("org.jerkar.api.depmanagement.*");
         imports.add("org.jerkar.tool.JkDependencyBuildSupport");

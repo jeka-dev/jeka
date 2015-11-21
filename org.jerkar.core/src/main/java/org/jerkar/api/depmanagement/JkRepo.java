@@ -42,7 +42,7 @@ public abstract class JkRepo implements Serializable {
                 return repo;
             }
         }
-        return null;
+        throw new NullPointerException("All repository arguments are null.");
     }
 
     public static JkMavenRepository maven(String url) {
@@ -64,7 +64,7 @@ public abstract class JkRepo implements Serializable {
     /**
      * A maven repository located in Jekkar user Home. You can use it to
      * "deploy" locally.
-     * 
+     *
      * @return
      */
     public static JkRepo mavenLocal() {

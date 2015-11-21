@@ -6,6 +6,7 @@ import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 import static org.jerkar.api.depmanagement.JkPopularModules.MOCKITO_ALL;
 
 import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
@@ -31,6 +32,10 @@ public class AClassicBuild extends JkJavaBuild {
 		.on("com.orientechnologies:orientdb-client:2.0.8")
 		.on(JUNIT, "4.11").scope(TEST)
 		.on(MOCKITO_ALL, "1.9.5").scope(TEST).build();
+    }
+    
+    public static void main(String[] args) {
+	JkInit.instanceOf(AClassicBuild.class, args).doDefault();
     }
 
 }

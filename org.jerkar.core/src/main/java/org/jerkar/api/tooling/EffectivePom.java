@@ -153,7 +153,7 @@ class EffectivePom {
         codeWriter.dependencyExclusions = dependencyExclusion();
         codeWriter.extendedClass = "JkJavaBuild";
         codeWriter.imports.clear();
-        codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsFoJkJavaBuild());
+        codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsForJkJavaBuild());
         codeWriter.repos = repos();
         codeWriter.version = version();
         codeWriter.versionProvider = versionProvider();
