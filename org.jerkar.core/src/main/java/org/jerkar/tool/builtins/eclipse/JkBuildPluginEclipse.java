@@ -47,6 +47,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
             }
             final DotClasspathGenerator generator = new DotClasspathGenerator(build.baseDir().root());
             generator.dependencyResolver = ((JkJavaBuild) build).dependencyResolver();
+            generator.buildDefDependencyResolver = ((JkJavaBuild) build).buildDefDependencyResolver();
             generator.includeJavadoc = true;
             generator.jreContainer = this.jreContainer;
             generator.projectDependencies = depProjects;

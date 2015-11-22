@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,6 +67,9 @@ final class DotClasspathGenerator {
     /** Dependency resolver to fetch module dependencies */
     public JkDependencyResolver dependencyResolver;
 
+    /** Dependency resolver to fetch module dependencies for build classes */
+    public JkDependencyResolver buildDefDependencyResolver;
+
     /** Can be empty but not null */
     public Iterable<File> projectDependencies = JkUtilsIterable.listOf();
 
@@ -83,19 +87,14 @@ final class DotClasspathGenerator {
     /** Generate the .classpath file */
     public void generate() {
         try {
-            generate(projectDir, outputFile, jreContainer, includeJavadoc,
-                    sourceJavaVersion, sources, testSources, testClassDir, dependencyResolver,
-                    projectDependencies);
+            _generate();
         } catch (final Exception e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
 
 
-    static void generate(File projectDir, File outputFile, String jreContainer, boolean includeJavadoc, String sourceJavaVersion,
-            JkFileTreeSet sources, JkFileTreeSet testSources, File testClassDir, JkDependencyResolver dependencyResolver,
-            Iterable<File> projectDependencies)
-                    throws IOException, XMLStreamException, FactoryConfigurationError {
+    void _generate() throws IOException, XMLStreamException, FactoryConfigurationError {
         final OutputStream fos = new FileOutputStream(outputFile);
         final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(fos,
                 ENCODING);
@@ -128,12 +127,13 @@ final class DotClasspathGenerator {
         writer.writeAttribute("path", container);
         writer.writeCharacters("\n");
 
-        generateJava(projectDir, sources, testSources, writer,  jreContainer, includeJavadoc, dependencyResolver, testClassDir);
+        generateJava(projectDir, sources, testSources, writer,  jreContainer, includeJavadoc, dependencyResolver, buildDefDependencyResolver, testClassDir);
 
 
         // Write entries for file dependencies
-        final List<File> fileDeps = dependencyResolver.dependenciesToResolve()
-                .fileSystemDependencies().entries();
+        final List<File> fileDeps = new LinkedList<File>();
+        fileDeps.addAll(dependencyResolver.dependenciesToResolve().fileSystemDependencies().entries());
+        fileDeps.addAll(buildDefDependencyResolver.dependenciesToResolve().localFileDependencies().entries());
         writeFileEntries(fileDeps, writer);
 
         // Write project
@@ -181,7 +181,7 @@ final class DotClasspathGenerator {
     }
 
     private static void generateJava(File projectDir, JkFileTreeSet sources, JkFileTreeSet testSources,  XMLStreamWriter writer,
-            String jreContainer, boolean includeJavadoc, JkDependencyResolver dependencyResolver, File testClassDir) throws XMLStreamException {
+            String jreContainer, boolean includeJavadoc, JkDependencyResolver dependencyResolver, JkDependencyResolver buildDefResolver, File testClassDir) throws XMLStreamException {
         // Sources
         final Set<String> sourcePaths = new HashSet<String>();
         for (final JkFileTree jkFileTree : sources.fileTrees()) {
@@ -231,8 +231,8 @@ final class DotClasspathGenerator {
             writeExternalModuleEntries(dependencyResolver, writer, resolveResult,
                     includeJavadoc);
         }
-        if (dependencyResolver.dependenciesToResolve().containsModules()) {
-            final JkResolveResult buildresolve = dependencyResolver.resolve();
+        if (buildDefResolver.dependenciesToResolve().containsModules()) {
+            final JkResolveResult buildresolve = buildDefResolver.resolve();
             writeExternalModuleEntries(dependencyResolver, writer, buildresolve,
                     includeJavadoc);
         }
