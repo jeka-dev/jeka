@@ -15,7 +15,6 @@ import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsTime;
@@ -23,7 +22,7 @@ import org.jerkar.api.utils.JkUtilsTime;
 /**
  * Base class defining commons tasks and utilities necessary for building any
  * kind of project, regardless involved technologies.
- * 
+ *
  * @author Jerome Angibaud
  */
 public class JkBuild {
@@ -131,7 +130,7 @@ public class JkBuild {
             method = this.getClass().getMethod(methodName);
         } catch (final NoSuchMethodException e) {
             JkLog.warn("No zero-arg method '" + methodName + "' found in class '" + this.getClass()
-                    + "'. Skip.");
+            + "'. Skip.");
             JkLog.warnStream().flush();
             return;
         }
@@ -151,7 +150,7 @@ public class JkBuild {
                     + JkUtilsTime.durationInSeconds(time) + " seconds.");
         } catch (final RuntimeException e) {
             JkLog.info("Method " + methodName + " failed in " + JkUtilsTime.durationInSeconds(time)
-                    + " seconds.");
+            + " seconds.");
             throw e;
         }
     }
@@ -194,25 +193,24 @@ public class JkBuild {
 
     // ------------ Jerkar methods ------------
 
+
+
     /**
      * Creates the project structure (mainly project folder layout, build class code and IDE metadata) at the root
      * of the current project.
      */
     @JkDoc("Create the project structure")
-    public void scaffold() {
-        final File def = file(JkConstants.BUILD_DEF_DIR);
-        def.mkdirs();
-        final File buildClass = new File(def, "Build.java");
-        JkUtilsFile.writeString(buildClass, scaffoldedBuildClassCode(), false);
+    public final void scaffold() {
+        scaffolder().run();
+        JkBuildPlugin.applyScaffold(this.plugins.getActives());
     }
 
     /**
-     * Returns the build class code that will be used while scaffolding (see {@link #scaffold()}
+     * Returns the scaffolder object in charge of doing the scaffolding for this build.
+     * Override this method if you write a template class that need to do custom action for scaffolding.
      */
-    protected String scaffoldedBuildClassCode() {
-        final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
-        codeWriter.extendedClass = "JkBuild";
-        return codeWriter.wholeClass() + codeWriter.endClass();
+    protected JkScaffolder scaffolder() {
+        return new JkScaffolder(this);
     }
 
     /** Clean the output directory. */
@@ -249,7 +247,7 @@ public class JkBuild {
 
     /**
      * Invokes the specified method in this build but from the w
-     * 
+     *
      * @param jkModelMethod
      * @param from
      */

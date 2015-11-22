@@ -17,11 +17,14 @@ import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkVersionProvider;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkBuildDependencySupport;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
  * Provides facilities to create code source for Build class. This is mainly
  * intended for scaffolding or migration purpose.
- * 
+ *
  * @author Jerome Angibaud
  * @formatter:off
  */
@@ -31,28 +34,64 @@ public class JkCodeWriterForBuildClass {
 
     private final Writer writer = new Writer();
 
+    /** The package name of the generated code */
     public String packageName;
 
+    /** The class name of the generated code */
     public String className = "Build";
 
+    /** The extended class. Can be null */
     public String extendedClass = "JkBuild";
 
+    /**
+     * The list of package/class to import.
+     * It can me expressed as "my.pack.MyClass" or "my.pack.*".
+     */
     public final List<String> imports = importsForJkBuild();
+
+    /**
+     * The list of package/class to import.
+     * It can me expressed as "my.pack.MyClass" or "my.pack.*".
+     */
+    public final List<String> staticImports = new LinkedList<String>();
+
+    /**
+     * The list of module/files to add to JkImport class annotation
+     */
+    public final List<String> jkImports = new LinkedList<String>();
 
     private final Map<String, String> groupVersionVariableMap = new HashMap<String, String>();
 
     private final Map<String, String> publicFieldString = new HashMap<String, String>();
 
+    /**
+     * The moduleId declared in the generated build class. Can be null.
+     */
     public JkModuleId moduleId;
 
+    /**
+     * The version declared in the generated build class. Can be null.
+     */
     public String version;
 
+    /**
+     * The dependencies declared in the generated build class.
+     */
     public JkDependencies dependencies;
 
+    /**
+     * The repositories declared in the generated build class.
+     */
     public JkRepos repos;
 
+    /**
+     * The version provider declared in the the generated build class.
+     */
     public JkVersionProvider versionProvider;
 
+    /**
+     * The version dependency exclusions declared in the generated build class.
+     */
     public JkDependencyExclusions dependencyExclusions;
 
     /**
@@ -79,6 +118,10 @@ public class JkCodeWriterForBuildClass {
         return builder.append("Version").toString();
     }
 
+    /**
+     * Returns the java code portion that declares imports for a basic
+     * build class extending {@link JkJavaBuild}
+     */
     public static List<String> importsForJkJavaBuild() {
         final List<String> imports = new LinkedList<String>();
         imports.add("org.jerkar.api.depmanagement.*");
@@ -86,12 +129,20 @@ public class JkCodeWriterForBuildClass {
         return imports;
     }
 
+    /**
+     * Returns the java code portion that declares imports for a basic
+     * build class extending {@link JkBuild}
+     */
     public static List<String> importsForJkBuild() {
         final List<String> imports = new LinkedList<String>();
         imports.add("org.jerkar.tool.JkBuild");
         return imports;
     }
 
+    /**
+     * Returns the java code portion that declares imports for a basic
+     * build class extending {@link JkBuildDependencySupport}
+     */
     public static List<String> importsForJkDependencyBuildSupport() {
         final List<String> imports = new LinkedList<String>();
         imports.add("org.jerkar.api.depmanagement.*");
@@ -99,16 +150,23 @@ public class JkCodeWriterForBuildClass {
         return imports;
     }
 
+    /**
+     * Returns the entire class code except the last "}".
+     */
     public String wholeClass() {
         final StringBuilder builder = new StringBuilder();
         if (!JkUtilsString.isBlank(packageName)) {
             builder.append(writer.packageDeclaration(packageName)).append(LINE_JUMP);
         }
-        builder.append(writer.imports(imports)).append(LINE_JUMP)
-                .append(writer.classDeclaration(className, extendedClass)).append(LINE_JUMP);
+        builder.append(writer.imports(imports)).append(LINE_JUMP);
+        if (!staticImports.isEmpty()) {
+            builder.append(writer.staticImports(staticImports)).append(LINE_JUMP);
+        }
+        builder.append(writer.classDeclaration(this.jkImports, className, extendedClass)).append(LINE_JUMP);
         if (!this.publicFieldString.isEmpty()) {
             builder.append(writer.publicStringFields(publicFieldString)).append(LINE_JUMP);
         }
+
         if (moduleId != null) {
             builder.append(writer.moduleId(moduleId)).append(LINE_JUMP).append(LINE_JUMP);
         }
@@ -125,7 +183,7 @@ public class JkCodeWriterForBuildClass {
         }
         if (versionProvider != null && !versionProvider.isEmpty()) {
             builder.append(writer.versionProvider(versionProvider, groupVersionVariableMap))
-                    .append(LINE_JUMP);
+            .append(LINE_JUMP);
         }
         if (dependencyExclusions != null && !dependencyExclusions.isEmpty()) {
             builder.append(writer.dependencyExclusions(dependencyExclusions)).append(LINE_JUMP);
@@ -133,8 +191,20 @@ public class JkCodeWriterForBuildClass {
         return builder.toString();
     }
 
+    /**
+     * Returns the last "}" that close the class.
+     * @return
+     */
     public String endClass() {
         return writer.endClass();
+    }
+
+    /**
+     * Returns the entire class code.
+     */
+    @Override
+    public String toString() {
+        return wholeClass() + endClass();
     }
 
     private static class Writer {
@@ -145,7 +215,7 @@ public class JkCodeWriterForBuildClass {
             final StringBuilder builder = new StringBuilder();
             for (final String constantName : sortedMap.keySet()) {
                 builder.append("    public String ").append(constantName).append(" = \"")
-                        .append(sortedMap.get(constantName)).append("\";\n\n");
+                .append(sortedMap.get(constantName)).append("\";\n\n");
             }
             return builder.toString();
         }
@@ -167,17 +237,41 @@ public class JkCodeWriterForBuildClass {
             return builder.toString();
         }
 
-        public String classDeclaration(String className, String extendedClass) {
+        public String staticImports(List<String> imports) {
+            final List<String> list = new LinkedList<String>(imports);
+            Collections.sort(list);
+            final StringBuilder builder = new StringBuilder();
+            for (final String item : list) {
+                builder.append("import static ").append(item).append(";\n");
+            }
+            return builder.toString();
+        }
+
+        public String classDeclaration(List<String> jkImports, String className, String extendedClass) {
             final StringBuilder builder = new StringBuilder().append("/**\n")
                     .append(" * Jerkar build class (generated by Jerkar from existing pom).\n")
-                    .append(" * @formatter:off\n").append(" */\n")
-                    .append("public final class " + className + " extends " + extendedClass)
-                    .append(" {").append("\n");
+                    .append(" * @formatter:off\n").append(" */\n");
+            if (!jkImports.isEmpty()) {
+                builder.append(jkImportCode(jkImports)).append("\n");
+            }
+            builder.append("public final class " + className + " extends " + extendedClass)
+            .append(" {").append("\n");
             return builder.toString();
         }
 
         public String endClass() {
             return "}";
+        }
+
+        String jkImportCode(List<String> imports) {
+            final StringBuilder builder = new StringBuilder();
+            builder.append("@JkImport({");
+            for(final String item : imports) {
+                builder.append("\"").append(item).append("\", ");
+            }
+            builder.delete(builder.length()-2, builder.length());
+            builder.append("})");
+            return builder.toString();
         }
 
         public String moduleId(JkModuleId moduleId) {
@@ -231,7 +325,7 @@ public class JkCodeWriterForBuildClass {
             Collections.sort(moduleIds, JkModuleId.GROUP_NAME_COMPARATOR);
             for (final JkModuleId moduleId : moduleIds) {
                 builder.append("\n            .and(\"").append(moduleId.groupAndName())
-                        .append("\", ");
+                .append("\", ");
                 final String constant = groupVersionConstants.get(moduleId.group());
                 if (constant != null) {
                     builder.append(constant);
@@ -258,7 +352,7 @@ public class JkCodeWriterForBuildClass {
                 builder.append("\n            .on(\"").append(moduleId.groupAndName()).append("\"");
                 for (final JkDepExclude depExclude : exclusions.get(moduleId)) {
                     builder.append(", \"").append(depExclude.moduleId().groupAndName())
-                            .append("\"");
+                    .append("\"");
                 }
                 builder.append(")");
             }

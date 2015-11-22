@@ -23,10 +23,18 @@ public abstract class JkBuildPlugin {
     public abstract void configure(JkBuild build);
 
     /**
-     * Override this method if you want your plugin do something while
+     * Override this method if this plugin does something while
      * {@link JkBuild#verify} is invoked.
      */
     protected void verify() {
+        // Do nothing by default
+    }
+
+    /**
+     * Override this method if this plugin does something while {@link JkBuild#scaffold()}
+     * is invoked.
+     */
+    protected void scaffold() {
         // Do nothing by default
     }
 
@@ -71,6 +79,12 @@ public abstract class JkBuildPlugin {
             result = plugin.alterDependencies(original);
         }
         return result;
+    }
+
+    static void applyScaffold(Iterable<? extends JkBuildPlugin> plugins) {
+        for (final JkBuildPlugin plugin : plugins) {
+            plugin.scaffold();
+        }
     }
 
     @Override

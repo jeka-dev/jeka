@@ -259,14 +259,15 @@ public class JkBuildDependencySupport extends JkBuild {
     }
 
     @Override
-    protected String scaffoldedBuildClassCode() {
+    protected JkScaffolder scaffolder() {
         final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
         codeWriter.extendedClass = "JkBuildDependencySupport";
         codeWriter.dependencies = JkDependencies.builder().build();
         codeWriter.imports.clear();
         codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsForJkDependencyBuildSupport());
-        return codeWriter.wholeClass() + codeWriter.endClass();
+        return super.scaffolder().buildClassWriter(codeWriter);
     }
+
 
     /**
      * Options for multi-purpose repositories.

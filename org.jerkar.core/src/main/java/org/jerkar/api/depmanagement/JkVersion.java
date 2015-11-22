@@ -7,11 +7,16 @@ import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
 
+/**
+ * Used to specify a module version.
+ *
+ * @author djeang
+ */
 public final class JkVersion implements Comparable<JkVersion>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String DEFAULT_VERSION_RESOURCE_NAME = "version.txt";
+    private static final String DEFAULT_VERSION_RESOURCE_NAME = "version.txt";
 
     public static JkVersion ofName(String name) {
         return new JkVersion(name);

@@ -32,6 +32,7 @@ import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.JkBuildDependencySupport;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkException;
+import org.jerkar.tool.JkScaffolder;
 
 /**
  * Template class to define build on Java project. This template is flexible
@@ -316,18 +317,26 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     // --------------------------- Callable Methods -----------------------
 
     @Override
-    public void scaffold() {
-        super.scaffold();
-        for (final JkFileTree dir : editedSources().fileTrees()) {
-            dir.root().mkdirs();
-        }
-        for (final JkFileTree dir : unitTestEditedSources().fileTrees()) {
-            dir.root().mkdirs();
-        }
+    protected JkScaffolder scaffolder() {
+        final Runnable addFolder = new Runnable() {
+
+            @Override
+            public void run() {
+                for (final JkFileTree dir : editedSources().fileTrees()) {
+                    dir.root().mkdirs();
+                }
+                for (final JkFileTree dir : unitTestEditedSources().fileTrees()) {
+                    dir.root().mkdirs();
+                }
+            }
+        };
+        return super.scaffolder().buildClassWriter(scaffoldedBuildClassCode()).extraAction(addFolder);
+
     }
 
-    @Override
-    protected String scaffoldedBuildClassCode() {
+
+
+    private String scaffoldedBuildClassCode() {
         if (baseDir().file("pom.xml").exists() && JkMvn.INSTALLED) {
             JkLog.info("pom.xml detected and Maven installed : try to generate build class from existing pom.");
             try {
