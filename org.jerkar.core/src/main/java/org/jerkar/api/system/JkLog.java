@@ -10,7 +10,7 @@ import org.jerkar.api.utils.JkUtilsTime;
 /**
  * Logger shared globally on the classloader. It provides time tracking method
  * and indentation feature accounting for task/subtask execution.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkLog {
@@ -33,7 +33,7 @@ public final class JkLog {
 
     /**
      * Set the silent mode to the specified mode.
-     * 
+     *
      * @see #silent()
      */
     public static void silent(boolean mode) {
@@ -78,6 +78,11 @@ public final class JkLog {
         startTimer();
     }
 
+    /**
+     * Returns the the info strem if the log is currently in verbose mode.
+     * It returns <code>null</code> otherwise.
+     * @return
+     */
     public static PrintStream infoStreamIfVerbose() {
         if (silent) {
             return null;
@@ -179,7 +184,7 @@ public final class JkLog {
         }
         final long start = times.poll();
         infoWriter.println(" \\ " + message + " in " + JkUtilsTime.durationInSeconds(start)
-                + " seconds.");
+        + " seconds.");
 
     }
 
@@ -262,7 +267,7 @@ public final class JkLog {
     }
 
     /**
-     * Displays a message at warn level.
+     * Displays a message at error level.
      */
     public static void error(String message) {
         if (silent) {
@@ -271,6 +276,9 @@ public final class JkLog {
         errorWriter.println(message);
     }
 
+    /**
+     * Displays a message at error level.
+     */
     public static void error(Iterable<String> lines) {
         if (silent) {
             return;
@@ -280,6 +288,9 @@ public final class JkLog {
         }
     }
 
+    /**
+     * Line jump.
+     */
     public static void nextLine() {
         if (silent) {
             return;
@@ -287,14 +298,23 @@ public final class JkLog {
         infoWriter.println();
     }
 
+    /**
+     * Returns the stream for info level.
+     */
     public static PrintStream infoStream() {
         return infoWriter;
     }
 
+    /**
+     * Returns the stream for warn level.
+     */
     public static PrintStream warnStream() {
         return warnWriter;
     }
 
+    /**
+     * Returns the stream for error level.
+     */
     public static PrintStream errorStream() {
         return errorWriter;
     }
@@ -407,7 +427,7 @@ public final class JkLog {
 
     /**
      * Logs in info stream the specified message enclosed as :
-     * 
+     *
      * <pre>
      * ------------------
      * message to display
@@ -426,7 +446,7 @@ public final class JkLog {
 
     /**
      * Logs in info stream the specified message enclosed as :
-     * 
+     *
      * <pre>
      * message to display
      * ------------------

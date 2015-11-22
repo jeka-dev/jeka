@@ -2,7 +2,6 @@ package org.jerkar.tool;
 
 import static org.junit.Assert.assertEquals;
 
-import org.jerkar.tool.CommandLine;
 import org.junit.Test;
 
 public class CommandLineTest {

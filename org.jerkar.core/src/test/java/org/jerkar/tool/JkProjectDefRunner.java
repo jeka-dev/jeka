@@ -1,7 +1,7 @@
 package org.jerkar.tool;
 
-import org.jerkar.tool.JkProjectDef.JkProjectBuildClassDef;
 import org.jerkar.tool.JkProjectDefTest.MyBuild;
+import org.jerkar.tool.ProjectDef.ProjectBuildClassDef;
 
 /**
  * This class helps to elaborate the help output.
@@ -9,7 +9,7 @@ import org.jerkar.tool.JkProjectDefTest.MyBuild;
 public class JkProjectDefRunner {
 
     public static void main(String[] args) {
-        final JkProjectBuildClassDef def = JkProjectBuildClassDef.of(new MyBuild());
+        final ProjectBuildClassDef def = ProjectBuildClassDef.of(new MyBuild());
         def.log(true);
     }
 

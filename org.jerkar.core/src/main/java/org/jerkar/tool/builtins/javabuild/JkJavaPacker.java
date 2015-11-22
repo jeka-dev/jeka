@@ -19,15 +19,21 @@ import org.jerkar.api.utils.JkUtilsString;
 /**
  * Jar maker for the {@link JkJavaBuild} template. This maker will get
  * information from supplied java builder to create relevant jars.
- * 
+ *
  * @author Jerome Angibaud
  */
 public class JkJavaPacker implements Cloneable {
 
+    /**
+     * Creates a {@link JkJavaPacker} for the specified build.
+     */
     public static JkJavaPacker.Builder builder(JkJavaBuild build) {
         return JkJavaPacker.of(build).builder();
     }
 
+    /**
+     * Creates a {@link JkJavaPacker} for the specified java build.
+     */
     public static JkJavaPacker of(JkJavaBuild build) {
         return new JkJavaPacker(build);
     }
@@ -70,6 +76,10 @@ public class JkJavaPacker implements Cloneable {
         this.doJavadoc = build.pack.javadoc;
     }
 
+    /**
+     * Returns the base name for all the generated archives. It generally the full name of the project but it
+     * can include also the vesrion.
+     */
     public String baseName() {
         final String name = fullName ? build.moduleId().fullName() : build.moduleId().name();
         if (includeVersion) {
@@ -78,38 +88,65 @@ public class JkJavaPacker implements Cloneable {
         return name;
     }
 
+    /**
+     * Creates a builder for {@link JkJavaPacker}.
+     */
     public Builder builder() {
         return new JkJavaPacker.Builder(this);
     }
 
+    /**
+     * The jar file that will be generated for the main artifact.
+     */
     public File jarFile() {
         return build.ouputDir(baseName() + ".jar");
     }
 
+    /**
+     * The jar file that will be generated the jar for the specified classifier.
+     */
     public File jarFile(String classifier) {
         return build.ouputDir(baseName() + "-" + classifier + ".jar");
     }
 
+    /**
+     * The jar containing the source files.
+     */
     public File jarSourceFile() {
         return build.ouputDir(baseName() + "-sources.jar");
     }
 
+    /**
+     * The jar containing the test classes.
+     */
     public File jarTestFile() {
         return build.ouputDir(baseName() + "-test.jar");
     }
 
+    /**
+     * The jar containing the test source files.
+     */
     public File jarTestSourceFile() {
         return build.ouputDir(baseName() + "-test-sources.jar");
     }
 
+    /**
+     * The jar standing for the fat jar (aka uber jar)
+     */
     public File fatJarFile() {
         return build.ouputDir(baseName() + "-fat.jar");
     }
 
+    /**
+     * The jar containing the javadoc
+     */
     public File javadocFile() {
         return build.ouputDir(baseName() + "-javadoc.jar");
     }
 
+    /**
+     * Produces all the artifact files.
+     */
     public void pack() {
         JkLog.startln("Packaging module");
         if (doJar && !JkUtilsFile.isEmpty(build.classDir(), false)) {
@@ -118,7 +155,7 @@ public class JkJavaPacker implements Cloneable {
                 manifest.writeToStandardLocation(build.classDir());
             }
             JkFileTree.of(build.classDir()).zip().to(jarFile()).md5If(checkSums.contains("MD5"))
-                    .sha1If(checkSums.contains("SHA-1"));
+            .sha1If(checkSums.contains("SHA-1"));
         }
         final JkFileTreeSet sourceAndResources = build.sources().and(build.resources());
         if (doSources && sourceAndResources.countFiles(false) > 0) {
@@ -133,8 +170,8 @@ public class JkJavaPacker implements Cloneable {
         }
         if (doFatJar) {
             JkFileTree.of(build.classDir()).zip().merge(build.depsFor(JkJavaBuild.RUNTIME))
-                    .to(fatJarFile()).md5If(checkSums.contains("MD5"))
-                    .sha1If(checkSums.contains("SHA-1"));
+            .to(fatJarFile()).md5If(checkSums.contains("MD5"))
+            .sha1If(checkSums.contains("SHA-1"));
         }
         for (final Extra action : this.extraActions) {
             action.process(build);
@@ -151,16 +188,21 @@ public class JkJavaPacker implements Cloneable {
         JkLog.done();
     }
 
-    public JkJavaPacker tests(boolean doTest) {
-        return this.builder().doTest(doTest).build();
-    }
-
+    /**
+     * Extra action that will be processed by the {@link JkJavaBuild#pack} method.
+     */
     public interface Extra {
 
+        /**
+         * Method invoked by the {@link JkJavaBuild#pack} method.
+         */
         public void process(JkJavaBuild build);
 
     }
 
+    /**
+     * A builder for {@link JkJavaBuild}
+     */
     public static class Builder {
 
         private final JkJavaPacker packer;
@@ -211,23 +253,32 @@ public class JkJavaPacker implements Cloneable {
         }
 
         /**
-         * True to generate a jar file containing both classes and resources.
+         * Set <code>true</code> to generate a jar file containing both classes and resources.
          */
         public Builder doJar(boolean doJar) {
             packer.doJar = doJar;
             return this;
         }
 
+        /**
+         * Set <code>true</code> to generate a jar file containing both test classes and test sources.
+         */
         public Builder doTest(Boolean doTest) {
             packer.doTest = doTest;
             return this;
         }
 
+        /**
+         * Set <code>true</code> to generate a jar file containing sources.
+         */
         public Builder doSources(Boolean doSources) {
             packer.doSources = doSources;
             return this;
         }
 
+        /**
+         * Set <code>true</code> to generate a fat jar.
+         */
         public Builder doFatJar(Boolean doFatJar) {
             packer.doFatJar = doFatJar;
             return this;
@@ -252,11 +303,17 @@ public class JkJavaPacker implements Cloneable {
             return doSign(doSign, JkPgp.ofSecretRing(secretRingKey, secretKeyPassword));
         }
 
+        /**
+         * Add an extra action to the packer to be build.
+         */
         public Builder extraAction(Extra extra) {
             packer.extraActions.add(extra);
             return this;
         }
 
+        /**
+         * Builds the packer.
+         */
         public JkJavaPacker build() {
             return packer.clone();
         }

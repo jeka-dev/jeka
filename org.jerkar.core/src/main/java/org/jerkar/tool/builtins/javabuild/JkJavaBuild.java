@@ -40,7 +40,7 @@ import org.jerkar.tool.JkException;
  * set of "standard" scope to define dependencies. You are not forced to use it
  * strictly but it can simplify dependency management to follow a given
  * standard.
- * 
+ *
  * @author Jerome Angibaud
  */
 public class JkJavaBuild extends JkBuildDependencySupport {
@@ -548,15 +548,6 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     // ------------------------------------
 
     @Override
-    protected JkDependencies extraCommandLineDeps() {
-        return JkDependencies.builder().usingDefaultScopes(COMPILE)
-                .onFiles(toPath(extraPath.compile)).usingDefaultScopes(RUNTIME)
-                .onFiles(toPath(extraPath.runtime)).usingDefaultScopes(TEST)
-                .onFiles(toPath(extraPath.test)).usingDefaultScopes(PROVIDED)
-                .onFiles(toPath(extraPath.provided)).build();
-    }
-
-    @Override
     protected JkDependencies implicitDependencies() {
         final JkFileTree libDir = JkFileTree.of(file(STD_LIB_PATH));
         if (!libDir.root().exists()) {
@@ -569,7 +560,13 @@ public class JkJavaBuild extends JkBuildDependencySupport {
                 .usingDefaultScopes(RUNTIME)
                 .on(JkFileSystemDependency.of(libDir.include("runtime/*.jar")))
                 .usingDefaultScopes(TEST)
-                .on(JkFileSystemDependency.of(libDir.include("test/*.jar"))).build();
+                .on(JkFileSystemDependency.of(libDir.include("test/*.jar")))
+                .usingDefaultScopes(COMPILE)
+                .onFiles(toPath(extraPath.compile)).usingDefaultScopes(RUNTIME)
+                .onFiles(toPath(extraPath.runtime)).usingDefaultScopes(TEST)
+                .onFiles(toPath(extraPath.test)).usingDefaultScopes(PROVIDED)
+                .onFiles(toPath(extraPath.provided))
+                .build();
     }
 
     /**

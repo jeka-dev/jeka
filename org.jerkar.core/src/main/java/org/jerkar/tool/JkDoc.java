@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 /**
  * Documents the annotated element so that, Jerkar can display some information
  * when 'help' or 'helpPlugins' are requested.
- * 
+ *
  * @author Jerome Angibaud
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -17,6 +17,9 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface JkDoc {
 
+    /**
+     * The text to display when help is requested.
+     */
     String[] value();
 
 }

@@ -1,14 +1,14 @@
 package org.jerkar.tool;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.tool.JkProjectDef.JkProjectBuildClassDef;
+import org.jerkar.tool.ProjectDef.ProjectBuildClassDef;
 import org.junit.Test;
 
 public class JkProjectDefTest {
 
     @Test
     public void testCreationAndLog() {
-        final JkProjectBuildClassDef def = JkProjectBuildClassDef.of(new MyBuild());
+        final ProjectBuildClassDef def = ProjectBuildClassDef.of(new MyBuild());
         final boolean silent = JkLog.silent();
         JkLog.silent(true);
         def.log(true);

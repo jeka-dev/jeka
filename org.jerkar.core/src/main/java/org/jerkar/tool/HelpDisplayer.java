@@ -5,8 +5,8 @@ import java.util.Set;
 
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsReflect;
-import org.jerkar.tool.JkProjectDef.JkProjectBuildClassDef;
 import org.jerkar.tool.PluginDictionnary.JkPluginDescription;
+import org.jerkar.tool.ProjectDef.ProjectBuildClassDef;
 
 final class HelpDisplayer {
 
@@ -22,7 +22,7 @@ final class HelpDisplayer {
         // help -buildClass=Xxxxxx");
         // JkLog.nextLine();
         JkLog.infoUnderlined("Help on build class " + build.getClass().getName());
-        JkProjectBuildClassDef.of(build).log(true);
+        ProjectBuildClassDef.of(build).log(true);
         JkLog.nextLine();
         JkLog.info("Type 'jerkar helpPlugins' to get help on plugins");
         JkLog.nextLine();
@@ -44,7 +44,7 @@ final class HelpDisplayer {
             }
             JkLog.delta(2);
             final Object object = JkUtilsReflect.newInstance(description.pluginClass());
-            JkProjectBuildClassDef.of(object).log(false);
+            ProjectBuildClassDef.of(object).log(false);
             JkLog.delta(-2);
         }
         JkLog.nextLine();

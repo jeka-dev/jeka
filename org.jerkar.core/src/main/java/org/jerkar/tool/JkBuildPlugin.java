@@ -5,15 +5,21 @@ import org.jerkar.api.depmanagement.JkDependencyResolver;
 
 /**
  * A plugin base class to extend to alter {@link JkBuild} object.
- * 
+ *
  * @author Jerome Angibaud
  */
 public abstract class JkBuildPlugin {
 
+    /**
+     * Returns the class this plugin is made for.
+     */
     public Class<? extends JkBuild> baseBuildClass() {
         return JkBuild.class;
     }
 
+    /**
+     * Configure this plugin according the build instance it is applied on.
+     */
     public abstract void configure(JkBuild build);
 
     /**
@@ -25,8 +31,8 @@ public abstract class JkBuildPlugin {
     }
 
     /**
-     * Override this method if the plugin need to alter the dependency resolver.
-     * 
+     * Override this method if this plugin needs to alter the dependency resolver.
+     *
      * @see JkBuildDependencySupport#dependencyResolver()
      */
     protected JkDependencyResolver alterDependencyResolver(JkDependencyResolver original) {
@@ -35,20 +41,21 @@ public abstract class JkBuildPlugin {
 
     /**
      * Override this method if the plugin need to alter the dependencies.
-     * 
+     *
      * @see JkBuildDependencySupport#dependencies
      */
     protected JkDependencies alterDependencies(JkDependencies original) {
         return original;
     }
 
-    public static void applyVerify(Iterable<? extends JkBuildPlugin> plugins) {
+
+    static void applyVerify(Iterable<? extends JkBuildPlugin> plugins) {
         for (final JkBuildPlugin plugin : plugins) {
             plugin.verify();
         }
     }
 
-    public static JkDependencyResolver applyDependencyResolver(
+    static JkDependencyResolver applyDependencyResolver(
             Iterable<? extends JkBuildPlugin> plugins, JkDependencyResolver original) {
         JkDependencyResolver result = original;
         for (final JkBuildPlugin plugin : plugins) {
@@ -57,7 +64,7 @@ public abstract class JkBuildPlugin {
         return result;
     }
 
-    public static JkDependencies applyDependencies(Iterable<? extends JkBuildPlugin> plugins,
+    static JkDependencies applyDependencies(Iterable<? extends JkBuildPlugin> plugins,
             JkDependencies original) {
         JkDependencies result = original;
         for (final JkBuildPlugin plugin : plugins) {

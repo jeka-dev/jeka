@@ -14,6 +14,9 @@ public final class JkInfo {
 
     private static String version;
 
+    /**
+     * Returns the current Jerkar version.
+     */
     public static String jerkarVersion() {
         if (JkUtilsString.isBlank(version)) {
             final Class<?> clazz = JkInfo.class;

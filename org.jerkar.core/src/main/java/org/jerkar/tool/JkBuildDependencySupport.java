@@ -43,6 +43,7 @@ public class JkBuildDependencySupport extends JkBuild {
     // A cache for artifact publisher
     private JkPublisher cachedPublisher;
 
+    /** Dependency and publish repositories */
     @JkDoc("Dependency and publish repositories")
     protected JkOptionRepos repo = new JkOptionRepos();
 
@@ -231,7 +232,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * Returns the base dependency resolver.
      */
     private JkDependencyResolver createDependencyResolver() {
-        final JkDependencies dependencies = effectiveDependencies().and(extraCommandLineDeps());
+        final JkDependencies dependencies = effectiveDependencies().and(implicitDependencies());
         if (dependencies.containsModules()) {
             return JkDependencyResolver.managed(downloadRepositories(), dependencies)
                     .withModuleHolder(versionedModule())
@@ -247,15 +248,14 @@ public class JkBuildDependencySupport extends JkBuild {
         return JkScopeMapping.empty();
     }
 
+    /**
+     * Returns the publisher used to actually publish artifacts.
+     */
     protected JkPublisher publisher() {
         if (cachedPublisher == null) {
             cachedPublisher = JkPublisher.of(publishRepositories(), this.ouputDir().root());
         }
         return cachedPublisher;
-    }
-
-    protected JkDependencies extraCommandLineDeps() {
-        return JkDependencies.builder().build();
     }
 
     @Override
@@ -268,19 +268,31 @@ public class JkBuildDependencySupport extends JkBuild {
         return codeWriter.wholeClass() + codeWriter.endClass();
     }
 
+    /**
+     * Options for multi-purpose repositories.
+     */
     public static final class JkOptionRepos {
 
+        /** Maven or Ivy repository to download dependency artifacts. */
         @JkDoc("Maven or Ivy repository to download dependency artifacts.")
         public final JkOptionRepo download = new JkOptionRepo();
 
+        /** Maven or Ivy repositories to publish artifacts. */
         @JkDoc("Maven or Ivy repositories to publish artifacts.")
         public final JkOptionRepo publish = new JkOptionRepo();
 
+        /**
+         * Maven or Ivy repositories to publish released artifacts.
+         * If this repository is not null, then Jerkar will try to publish snapshot in the publish repo and release in this one.
+         */
         @JkDoc({
             "Maven or Ivy repositories to publish released artifacts.",
         "If this repo is not null, then Jerkar will try to publish snapshot in the publish repo and release in this one." })
         public final JkOptionRepo release = new JkOptionRepo();
 
+        /**
+         * Constructs a {@link JkOptionRepo} populated with default values
+         */
         public JkOptionRepos() {
             download.url = JkRepo.MAVEN_CENTRAL_URL.toExternalForm();
             publish.url = JkRepo.MAVEN_OSSRH_DOWNLOAD_AND_DEPLOY_SNAPSHOT.toExternalForm();
@@ -289,15 +301,22 @@ public class JkBuildDependencySupport extends JkBuild {
 
     }
 
+    /** Option for a single repository */
     public static final class JkOptionRepo {
 
+        /** Url of the repository : Prefix the Url with 'ivy:' if it is an Ivy repostory. */
         @JkDoc({ "Url of the repository : Prefix the Url with 'ivy:' if it is an Ivy repostory." })
         public String url;
 
-        @JkDoc({ "Usename to connect to repository (if needed).",
+        /**
+         * User name to connect to repository (if needed).
+         * Null or blank means that the repository will be accessed in an anonymous way.
+         */
+        @JkDoc({ "User name to connect to repository (if needed).",
         "Null or blank means that the repository will be accessed in an anonymous way." })
         public String username;
 
+        /** Password to connect to the repository (if needed). */
         @JkDoc({ "Password to connect to the repository (if needed)." })
         public String password;
 
@@ -311,6 +330,9 @@ public class JkBuildDependencySupport extends JkBuild {
 
     }
 
+    /**
+     * Returns the PGP signer used to sign produced artifacts.
+     */
     public JkPgp pgp() {
         return JkPgp.of(JkOptions.getAll());
     }

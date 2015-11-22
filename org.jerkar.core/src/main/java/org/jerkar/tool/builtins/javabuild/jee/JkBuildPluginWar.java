@@ -10,16 +10,22 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
 import org.jerkar.tool.builtins.javabuild.JkJavaPacker;
 import org.jerkar.tool.builtins.javabuild.JkJavaPacker.Extra;
 
+/**
+ * Build class template for application jee web applications (.war).
+ */
 public class JkBuildPluginWar extends JkJavaBuildPlugin {
 
     private JkJavaBuild build;
 
+    /** Location of the webapp sources (containing WEB-INF dir along static resources). */
     @JkDoc("Location of the webapp sources (containing WEB-INF dir along static resources).")
     public String webappSrc = "src/main/webapp";
 
+    /** True to produce a test jar containing test classes. */
     @JkDoc("True to produce a test jar containing test classes.")
     public boolean testJar = false;
 
+    /** True to produce a regular jar containing classes and resources. */
     @JkDoc("True to produce a regular jar containing classes and resources.")
     public boolean regularJar = false;
 
@@ -28,6 +34,9 @@ public class JkBuildPluginWar extends JkJavaBuildPlugin {
         this.build = (JkJavaBuild) build;
     }
 
+    /**
+     * Returns the produced war file.
+     */
     public File warFile() {
         return this.build.ouputDir(build.packer().baseName() + ".war");
     }
@@ -47,7 +56,7 @@ public class JkBuildPluginWar extends JkJavaBuildPlugin {
                 public void process(JkJavaBuild build) {
                     JkLog.startln("Creating war file");
                     final File dir = build.ouputDir(packer.baseName() + "-war");
-                    JkJeePacker.of(build).war(webappSrcFile(), dir, warFile());
+                    JeePacker.of(build).war(webappSrcFile(), dir, warFile());
                     JkLog.done();
                 }
             });

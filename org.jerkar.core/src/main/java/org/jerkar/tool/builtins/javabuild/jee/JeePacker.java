@@ -9,18 +9,18 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 /**
  * War and Ear maker for {@link JkJavaBuild}. This maker will get information
  * from supplied java builder to create relevant jars.
- * 
+ *
  * @author Jerome Angibaud
  */
-public class JkJeePacker {
+class JeePacker {
 
-    public static JkJeePacker of(JkJavaBuild build) {
-        return new JkJeePacker(build);
+    public static JeePacker of(JkJavaBuild build) {
+        return new JeePacker(build);
     }
 
     private final JkJavaBuild build;
 
-    private JkJeePacker(JkJavaBuild build) {
+    private JeePacker(JkJavaBuild build) {
         super();
         this.build = build;
     }
@@ -28,7 +28,7 @@ public class JkJeePacker {
     public void war(File webappSrc, File warDirDest, File warFileDest) {
         if (!new File(webappSrc, "WEB-INF/web.xml").exists()) {
             throw new IllegalStateException("The directory " + webappSrc.getPath()
-                    + " does not contains WEB-INF" + File.separator + "web.xml file");
+            + " does not contains WEB-INF" + File.separator + "web.xml file");
         }
         final JkPath path = build.depsFor(JkJavaBuild.RUNTIME);
         final JkFileTree dir = JkFileTree.of(warDirDest).importDirContent(webappSrc)

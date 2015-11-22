@@ -18,14 +18,14 @@ import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * Defines the build classes defined on a given project.
- * 
+ *
  * @author Jerome Angibaud
  */
-public final class JkProjectDef {
+final class ProjectDef {
 
     private final List<Class<?>> buildClassNames;
 
-    private JkProjectDef(List<Class<?>> buildClassNames) {
+    private ProjectDef(List<Class<?>> buildClassNames) {
         super();
         this.buildClassNames = Collections.unmodifiableList(buildClassNames);
     }
@@ -33,13 +33,13 @@ public final class JkProjectDef {
     /**
      * Creates a project definition by giving its root directory.
      */
-    public static JkProjectDef of(File rootDir) {
+    public static ProjectDef of(File rootDir) {
         final BuildResolver buildResolver = new BuildResolver(rootDir);
         final List<Class<?>> classDefs = new LinkedList<Class<?>>();
         for (final Class<?> clazz : buildResolver.resolveBuildClasses()) {
             classDefs.add(clazz);
         }
-        return new JkProjectDef(classDefs);
+        return new ProjectDef(classDefs);
     }
 
     public void logAvailableBuildClasses() {
@@ -60,36 +60,36 @@ public final class JkProjectDef {
 
     /**
      * Defines methods and options available on a given build class.
-     * 
+     *
      * @author Jerome Angibaud
      */
-    public static final class JkProjectBuildClassDef {
+    static final class ProjectBuildClassDef {
 
         private final List<JkProjectBuildMethodDef> methodDefs;
 
         private final List<JkProjectBuildOptionDef> optionDefs;
 
-        private JkProjectBuildClassDef(List<JkProjectBuildMethodDef> methodDefs,
+        private ProjectBuildClassDef(List<JkProjectBuildMethodDef> methodDefs,
                 List<JkProjectBuildOptionDef> optionDefs) {
             super();
             this.methodDefs = Collections.unmodifiableList(methodDefs);
             this.optionDefs = Collections.unmodifiableList(optionDefs);
         }
 
-        public static JkProjectBuildClassDef of(Object build) {
+        public static ProjectBuildClassDef of(Object build) {
             final Class<?> clazz = build.getClass();
-            final List<JkProjectBuildMethodDef> methods = new LinkedList<JkProjectDef.JkProjectBuildMethodDef>();
+            final List<JkProjectBuildMethodDef> methods = new LinkedList<ProjectDef.JkProjectBuildMethodDef>();
             for (final Method method : executableMethods(clazz)) {
                 methods.add(JkProjectBuildMethodDef.of(method));
             }
             Collections.sort(methods);
-            final List<JkProjectBuildOptionDef> options = new LinkedList<JkProjectDef.JkProjectBuildOptionDef>();
+            final List<JkProjectBuildOptionDef> options = new LinkedList<ProjectDef.JkProjectBuildOptionDef>();
             for (final NameAndField nameAndField : options(clazz, "", true, null)) {
                 options.add(JkProjectBuildOptionDef.of(build, nameAndField.field,
                         nameAndField.rootClass, nameAndField.name));
             }
             Collections.sort(options);
-            return new JkProjectBuildClassDef(methods, options);
+            return new ProjectBuildClassDef(methods, options);
         }
 
         private static List<Method> executableMethods(Class<?> clazz) {
@@ -109,7 +109,7 @@ public final class JkProjectDef {
 
         private static List<NameAndField> options(Class<?> clazz, String prefix, boolean root,
                 Class<?> rClass) {
-            final List<NameAndField> result = new LinkedList<JkProjectDef.NameAndField>();
+            final List<NameAndField> result = new LinkedList<ProjectDef.NameAndField>();
             for (final Field field : JkUtilsReflect.getAllDeclaredField(clazz, JkDoc.class)) {
                 final Class<?> rootClass = root ? field.getDeclaringClass() : rClass;
                 if (!hasSubOption(field)) {
@@ -186,7 +186,7 @@ public final class JkProjectDef {
 
     /**
      * Definition of method in a given class that can be called by Jerkar.
-     * 
+     *
      * @author Jerome Angibaud
      */
     public static final class JkProjectBuildMethodDef implements
@@ -227,7 +227,7 @@ public final class JkProjectDef {
     /**
      * Definition for build option. Build options are fields belonging to a
      * build class.
-     * 
+     *
      * @author Jerome Angibaud
      */
     public static final class JkProjectBuildOptionDef implements
@@ -299,7 +299,7 @@ public final class JkProjectDef {
                 JkLog.info(this.name + " : " + this.description);
             } else {
                 JkLog.info(this.name + " : ");
-                JkLog.info(JkProjectBuildClassDef.toLines(this.description));
+                JkLog.info(ProjectBuildClassDef.toLines(this.description));
             }
             JkLog.info("Type : " + this.type());
             JkLog.info("Default value : " + this.defaultValue);

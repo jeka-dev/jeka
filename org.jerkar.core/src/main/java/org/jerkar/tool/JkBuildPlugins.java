@@ -115,6 +115,9 @@ public final class JkBuildPlugins {
     }
 
 
+    /**
+     * Returns plugin bound to this holder build and extending the specified class.
+     */
     @SuppressWarnings("unchecked")
     public <T extends JkBuildPlugin> T findInstanceOf(Class<T> pluginClass) {
         for (final JkBuildPlugin jkBuildPlugin : this.activatedPlugins.values()) {
