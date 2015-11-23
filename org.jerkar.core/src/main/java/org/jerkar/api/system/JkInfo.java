@@ -46,7 +46,7 @@ public final class JkInfo {
         try {
             manifest = new Manifest(new URL(manifestPath).openStream());
             final Attributes attrs = manifest.getMainAttributes();
-            return attrs.getValue("Version");
+            return attrs.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
