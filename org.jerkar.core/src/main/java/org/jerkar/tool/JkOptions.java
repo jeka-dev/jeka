@@ -42,6 +42,10 @@ public final class JkOptions {
         populated = true;
     }
 
+    static boolean isPopulated() {
+        return populated;
+    }
+
     private JkOptions(Map<String, String> options) {
         props.putAll(options);
     }

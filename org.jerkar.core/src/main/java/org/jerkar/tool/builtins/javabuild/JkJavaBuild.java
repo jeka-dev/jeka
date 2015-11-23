@@ -336,7 +336,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 
 
-    private String scaffoldedBuildClassCode() {
+    private Object scaffoldedBuildClassCode() {
         if (baseDir().file("pom.xml").exists() && JkMvn.INSTALLED) {
             JkLog.info("pom.xml detected and Maven installed : try to generate build class from existing pom.");
             try {
@@ -351,7 +351,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         codeWriter.dependencies = JkDependencies.builder().build();
         codeWriter.imports.clear();
         codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsForJkJavaBuild());
-        return codeWriter.wholeClass() + codeWriter.endClass();
+        return codeWriter;
     }
 
     /** Generate sources and resources, compile production sources and process production resources to the classes directory. */

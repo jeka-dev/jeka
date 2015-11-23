@@ -75,7 +75,8 @@ public class JkCodeWriterForBuildClass {
     public String version;
 
     /**
-     * The dependencies declared in the generated build class.
+     * The dependencies declared in the generated build class. Set it to <code>null</code> to
+     * not generate #dependencies method.
      */
     public JkDependencies dependencies;
 
@@ -93,6 +94,11 @@ public class JkCodeWriterForBuildClass {
      * The version dependency exclusions declared in the generated build class.
      */
     public JkDependencyExclusions dependencyExclusions;
+
+    /** Extra method code to be generated */
+    public List<String> extraMethods = new LinkedList<String>();
+
+
 
     /**
      * When generating versionProvider method, if you want that the all the
@@ -188,6 +194,10 @@ public class JkCodeWriterForBuildClass {
         if (dependencyExclusions != null && !dependencyExclusions.isEmpty()) {
             builder.append(writer.dependencyExclusions(dependencyExclusions)).append(LINE_JUMP);
         }
+        for (final String extraMethod : extraMethods) {
+            builder.append(extraMethod);
+            builder.append(LINE_JUMP);
+        }
         return builder.toString();
     }
 
@@ -276,10 +286,10 @@ public class JkCodeWriterForBuildClass {
 
         public String moduleId(JkModuleId moduleId) {
             return new StringBuilder()
-                    .append("    @Override\n")
-                    .append("    public JkModuleId moduleId() {\n")
-                    .append("        return JkModuleId.of(\"" + moduleId.group() + "\", \""
-                            + moduleId.name() + "\");\n").append("    }").toString();
+            .append("    @Override\n")
+            .append("    public JkModuleId moduleId() {\n")
+            .append("        return JkModuleId.of(\"" + moduleId.group() + "\", \""
+                    + moduleId.name() + "\");\n").append("    }").toString();
         }
 
         public String version(String version) {

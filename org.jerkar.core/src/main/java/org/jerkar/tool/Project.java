@@ -113,21 +113,54 @@ final class Project {
                 .dependencies());
         compile();
         JkLog.nextLine();
-        final JkClassLoader classLoader = JkClassLoader.current();
-        classLoader.addEntries(this.buildPath);
-        JkLog.info("Setting build execution classpath to : " + classLoader.childClasspath());
-        final JkBuild build = resolver.resolve(init.buildClassHint());
-        if (build == null) {
+        final BuildAndPluginDictionnary buidAndDict = getBuildInstance(init);
+        if (buidAndDict == null) {
             throw new JkException("Can't find or guess any build class for project hosted in "
                     + this.projectBaseDir
                     + " .\nAre you sure this directory is a buildable project ?");
         }
         try {
-            this.launch(build, init);
+            this.launch(buidAndDict.build, buidAndDict.dictionnary, init.commandLine());
         } catch (final RuntimeException e) {
             JkLog.error("Project " + projectBaseDir.getAbsolutePath() + " failed");
             throw e;
         }
+    }
+
+    public JkBuild instantiate(JkInit init) {
+        compile();
+        JkLog.nextLine();
+        final BuildAndPluginDictionnary buildAndDict = getBuildInstance(init);
+        if (buildAndDict == null) {
+            return null;
+        }
+        return buildAndDict.build;
+    }
+
+    private BuildAndPluginDictionnary getBuildInstance(JkInit init) {
+        final JkClassLoader classLoader = JkClassLoader.current();
+        classLoader.addEntries(this.buildPath);
+        JkLog.info("Setting build execution classpath to : " + classLoader.childClasspath());
+        final JkBuild build = resolver.resolve(init.buildClassHint());
+        if (build == null) {
+            return null;
+        }
+        try {
+            build.setBuildDefDependencyResolver(getBuildDefDependencyResolver());
+            final PluginDictionnary<JkBuildPlugin> dictionnary = init.initProject(build);
+            final BuildAndPluginDictionnary result = new BuildAndPluginDictionnary();
+            result.build = build;
+            result.dictionnary = dictionnary;
+            return result;
+        } catch (final RuntimeException e) {
+            JkLog.error("Project " + projectBaseDir.getAbsolutePath() + " failed");
+            throw e;
+        }
+    }
+
+    private static class BuildAndPluginDictionnary {
+        JkBuild build;
+        PluginDictionnary<JkBuildPlugin> dictionnary;
     }
 
     private JkDependencies buildDefDependencies() {
@@ -178,10 +211,8 @@ final class Project {
         .copyTo(this.resolver.buildClassDir);
     }
 
-    private void launch(JkBuild build, JkInit init) {
-        build.setBuildDefDependencyResolver(getBuildDefDependencyResolver());
-        final PluginDictionnary<JkBuildPlugin> dictionnary = init.initProject(build);
-        final CommandLine commandLine = init.commandLine();
+    private void launch(JkBuild build, PluginDictionnary<JkBuildPlugin> dictionnary, CommandLine commandLine) {
+
 
         // Now run projects
         if (!commandLine.getSubProjectMethods().isEmpty()) {

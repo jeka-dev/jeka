@@ -40,15 +40,43 @@ public final class JkInit {
     }
 
     /**
+     * Creates an instance of the build class for the specified project. It is
+     * slower than {@link #instanceOf(Class, String...)} cause it needs compilation
+     * prior instantiating the object.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends JkBuild> T instanceOf(File base, String...args) {
+        final JkInit init = JkInit.of(args);
+        init.displayInfo();
+        final Project project = new Project(base);
+        final T result = (T) project.instantiate(init);
+        if (result == null) {
+            throw new JkException("No build class found for project located at : " + base.getPath());
+        }
+        JkLog.info("Build class " + result.getClass().getName());
+        JkLog.info("Activated plugins : " + result.plugins.getActives());
+        return result;
+    }
+
+    /**
      * Creates an instance of the specified build class. the build instance is
      * configured according specified command line arguments and option files
      * found in running environment.
      */
     public static <T extends JkBuild> T instanceOf(Class<T> clazz, String... args) {
+        return instanceOf(clazz, JkUtilsFile.workingDir(), args);
+    }
+
+    /**
+     * Creates an instance of the specified build class. the build instance is
+     * configured according specified command line arguments and option files
+     * found in running environment. The base directory is the specified one.
+     */
+    public static <T extends JkBuild> T instanceOf(Class<T> clazz, File baseDir, String... args) {
         final JkInit init = JkInit.of(args);
         init.displayInfo();
         final T build = JkUtilsReflect.newInstance(clazz);
-        build.setBaseDir(JkUtilsFile.workingDir());
+        build.setBaseDir(baseDir);
         init.initProject(build);
         JkLog.info("Build class " + build.getClass().getName());
         JkLog.info("Activated plugins : " + build.plugins.getActives());
@@ -98,7 +126,9 @@ public final class JkInit {
         final CommandLine commandLine = CommandLine.of(args);
         optionMap.putAll(commandLine.getSubProjectBuildOptions());
         optionMap.putAll(commandLine.getMasterBuildOptions());
-        JkOptions.init(optionMap);
+        if (!JkOptions.isPopulated()) {
+            JkOptions.init(optionMap);
+        }
         final JkInit.StandardOptions standardOptions = new JkInit.StandardOptions();
         JkOptions.populateFields(standardOptions, optionMap);
         JkLog.silent(standardOptions.silent);

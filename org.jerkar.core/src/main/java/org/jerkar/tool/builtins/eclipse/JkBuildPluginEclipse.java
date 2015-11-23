@@ -6,9 +6,11 @@ import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.file.JkFileTreeSet;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkException;
+import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
 
@@ -94,6 +96,22 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
         final ScopeResolver scopeResolver = scopeResolver();
         final List<Lib> libs = dotClasspathModel().libs(build.baseDir().root(), scopeResolver);
         return Lib.toDependencies(this.javaBuild(), libs, scopeResolver);
+    }
+
+    @Override
+    protected void scaffold() {
+        try {
+            JkLog.info("Trying to generate eclispe files");
+            final JkBuild newBuild = JkInit.instanceOf(this.build.baseDir().root());
+            final JkBuildPluginEclipse pluginEclipse = new JkBuildPluginEclipse();
+            pluginEclipse.build = newBuild;
+            pluginEclipse.generateFiles();
+            JkLog.info("Eclipse file generated successfully");
+        } catch (final RuntimeException e) {
+            JkLog.warn("Eclipse files has not been generated duer to a failure");
+            e.printStackTrace(JkLog.warnStream());;
+        }
+
     }
 
     private ScopeResolver scopeResolver() {
