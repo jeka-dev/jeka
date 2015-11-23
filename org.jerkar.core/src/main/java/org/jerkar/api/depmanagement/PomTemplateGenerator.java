@@ -16,6 +16,7 @@ import org.jerkar.api.depmanagement.JkMavenPublicationInfo.JkScmInfo;
 import org.jerkar.api.system.JkInfo;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.JkUtilsObject;
 
 final class PomTemplateGenerator {
 
@@ -33,7 +34,8 @@ final class PomTemplateGenerator {
             throw new RuntimeException(e);
         }
         String completeTemplate = firstTemplate.replace(TOKEN, extraXml);
-        completeTemplate = completeTemplate.replace(VERSION_TOKEN, JkInfo.jerkarVersion());
+        final String jerkarVersion = JkUtilsObject.firstNonNull(JkInfo.jerkarVersion(), "Development version");
+        completeTemplate = completeTemplate.replace(VERSION_TOKEN, jerkarVersion);
         final File result = JkUtilsFile.tempFile("jerkar-pom", ".template");
         JkUtilsFile.writeString(result, completeTemplate, false);
         return result;
