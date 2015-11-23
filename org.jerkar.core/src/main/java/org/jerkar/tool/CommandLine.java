@@ -31,6 +31,8 @@ final class CommandLine {
 
     private static final char PLUGIN_SYMBOL_CHAR = '#';
 
+    private static final String MODULE_SYMBOL_CHAR = "@";
+
     public static CommandLine of(String[] words) {
         final CommandLine result = new CommandLine();
         result.masterBuildOptions = extractOptions(words, true);
@@ -64,7 +66,7 @@ final class CommandLine {
     private static List<JkModuleDependency> dependencies(String[] words) {
         final List<JkModuleDependency> result = new LinkedList<JkModuleDependency>();
         for (final String word : words) {
-            if (word.startsWith("@")) {
+            if (word.startsWith(MODULE_SYMBOL_CHAR)) {
                 final String depdef = word.substring(1);
                 result.add(JkModuleDependency.of(depdef));
             }
