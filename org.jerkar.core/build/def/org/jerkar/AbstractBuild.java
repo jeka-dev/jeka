@@ -24,16 +24,16 @@ public abstract class AbstractBuild extends JkJavaBuild {
 
     @Override
     public JkVersion version() {
-        return JkVersion.ofName("0.3.0-SNAPSHOT");
+        return JkVersion.ofName("0.3.0");
     }
 
     @Override
     protected JkMavenPublication mavenPublication() {
         return super.mavenPublication().with(
                 JkMavenPublicationInfo
-                        .of("Jerkar", "Build simpler, stronger, faster", "http://jerkar.github.io")
-                        .withScm("https://github.com/jerkar/jerkar.git").andApache2License()
-                        .andGitHubDeveloper("djeang", "djeangdev@yahoo.fr"));
+                .of("Jerkar", "Build simpler, stronger, faster", "http://jerkar.github.io")
+                .withScm("https://github.com/jerkar/jerkar.git").andApache2License()
+                .andGitHubDeveloper("djeang", "djeangdev@yahoo.fr"));
     }
 
     @Override
