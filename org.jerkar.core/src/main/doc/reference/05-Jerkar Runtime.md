@@ -47,7 +47,7 @@ Jerkar parse the command line and process each arguments according its pattern :
 
 * Argument starts with `@` : This is an module import clause, the following will be used for adding a module to build class compile & run classpath. For example if the command line contains `@com.google.guava:guava:18.0`, the build class will be compiled with Guava in its classpath and Guava will be also present in the classpath when the build class will be executed. 
 
-* Argument starts with `-` : This is an option declaration. The following is expectedto be formated as _optionName=optionValue_. For example, `-repo.build.url=http://my.repo.milestone/' will inject 'http://my.repo.milestone/' in the 'repo.build.url' Jerkar option.
+* Argument starts with `-` : This is an option declaration. The following is expected to be formated as _optionName=optionValue_. For example, `-repo.build.url=http://my.repo.milestone/' will inject 'http://my.repo.milestone/' in the 'repo.build.url' Jerkar option.
 
 * in the other cases, argument is considered as a method name to invoke on the build class instance.
 
