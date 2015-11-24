@@ -14,6 +14,7 @@ import java.util.jar.Manifest;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsThrowable;
+import org.jerkar.api.utils.JkUtilsZip;
 
 /**
  * Helper class to read and write Manifest from and to file.
@@ -96,7 +97,7 @@ public final class JkManifest {
      * if no manifest found.
      */
     public static JkManifest ofArchive(File archive) {
-        final InputStream inputStream = JkUtilsIO.readZipEntryOrNull(archive, PATH);
+        final InputStream inputStream = JkUtilsZip.readZipEntryOrNull(archive, PATH);
         if (inputStream == null) {
             return null;
         }

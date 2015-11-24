@@ -60,6 +60,19 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         return new JkDependencies(list, Collections.EMPTY_SET);
     }
 
+    /**
+     * Creates a {@link JkDependencies} from the specified scopes and dependencies.
+     */
+    @SuppressWarnings("unchecked")
+    public static JkDependencies of(Iterable<? extends JkDependency> dependencies, JkScope ...scopes) {
+        final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();
+        for (final JkDependency dependency : dependencies) {
+            final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scopes);
+            list.add(scopedDependency);
+        }
+        return new JkDependencies(list, Collections.EMPTY_SET);
+    }
+
     private final List<JkScopedDependency> dependencies;
 
     private final Set<JkDepExclude> depExcludes;

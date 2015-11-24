@@ -1,4 +1,5 @@
 import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.samples.AClassicBuild;
 import org.jerkar.tool.JkProject;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
@@ -21,8 +22,8 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
  * @formatter:off
  */
 public class FatJarBuild extends JkJavaBuild {
-
-    /*
+	
+	/*
      *  Creates a sample build instance of the 'org.jerkar.samples' project.
      *  The 'samples' project path must be relative to this one.
      *  So in this case, the two project are supposed to lie in the same folder.
@@ -32,9 +33,14 @@ public class FatJarBuild extends JkJavaBuild {
 
     @Override
     protected void init() {
-	sampleBuild.pack.fatJar = true; // Tell the dependency build to generate a fat jar 
-	pack.fatJar = true; // Tell this build to generate a fat jar as well
+    	sampleBuild.pack.fatJar = true; // Tell the dependency build to generate a fat jar 
+    	pack.fatJar = true; // Tell this build to generate a fat jar as well
     }
+    
+    @Override
+	public String javaSourceVersion() {
+		return JkJavaCompiler.V7;
+	}
 
     @Override
     protected JkDependencies dependencies() {

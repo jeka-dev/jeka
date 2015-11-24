@@ -16,6 +16,7 @@ import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsZip;
 
 /**
  * Defines elements to embed in a zip archive and methods to write archive on
@@ -156,7 +157,7 @@ public final class JkZipper {
      */
     public JkCheckSumer to(File zipFile) {
         JkLog.start("Creating zip file : " + zipFile);
-        final ZipOutputStream zos = JkUtilsIO.createZipOutputStream(zipFile,
+        final ZipOutputStream zos = JkUtilsZip.createZipOutputStream(zipFile,
                 this.jkCompressionLevel.level);
         zos.setMethod(this.jkCompressionMethod.method);
 
@@ -164,10 +165,10 @@ public final class JkZipper {
         for (final Object item : this.itemsToZip) {
             if (item instanceof File) {
                 final File file = (File) item;
-                JkUtilsIO.addZipEntry(zos, file, file.getParentFile(), storedMethod());
+                JkUtilsZip.addZipEntry(zos, file, file.getParentFile(), storedMethod());
             } else if (item instanceof EntryFile) {
                 final EntryFile entryFile = (EntryFile) item;
-                JkUtilsIO.addZipEntry(zos, entryFile.file, entryFile.path, storedMethod());
+                JkUtilsZip.addZipEntry(zos, entryFile.file, entryFile.path, storedMethod());
             } else if (item instanceof JkFileTree) {
                 final JkFileTree dirView = (JkFileTree) item;
                 addFileTree(zos, dirView);
@@ -191,7 +192,7 @@ public final class JkZipper {
                 throw new RuntimeException("Error while opening zip file "
                         + archiveToMerge.getPath(), e);
             }
-            JkUtilsIO.mergeZip(zos, file, storedMethod());
+            JkUtilsZip.mergeZip(zos, file, storedMethod());
         }
         JkUtilsIO.closeQuietly(zos);
         JkLog.done();
@@ -230,7 +231,7 @@ public final class JkZipper {
         }
         final File base = JkUtilsFile.canonicalFile(dirView.root());
         for (final File file : dirView) {
-            JkUtilsIO.addZipEntry(zos, file, base,
+            JkUtilsZip.addZipEntry(zos, file, base,
                     JkCompressionMethod.STORED.equals(this.jkCompressionMethod));
         }
     }

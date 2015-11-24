@@ -23,6 +23,7 @@ import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.api.utils.JkUtilsZip;
 
 /**
  * A sequence of file to be used as a <code>class path</code>.<br/>
@@ -210,7 +211,7 @@ public final class JkClasspath implements Iterable<File> {
                     return file;
                 }
             } else {
-                final ZipFile zipFile = JkUtilsIO.zipFile(file);
+                final ZipFile zipFile = JkUtilsZip.zipFile(file);
                 if (zipFile.getEntry(path) != null) {
                     JkUtilsIO.closeQuietly(zipFile);
                     return file;
@@ -232,7 +233,7 @@ public final class JkClasspath implements Iterable<File> {
             if (classpathEntry.isDirectory()) {
                 result.addAll(JkFileTree.of(classpathEntry).andFilter(fileFilter).relativePathes());
             } else {
-                final ZipFile zipFile = JkUtilsIO.zipFile(classpathEntry);
+                final ZipFile zipFile = JkUtilsZip.zipFile(classpathEntry);
                 for (final Enumeration<? extends ZipEntry> zipEntries = zipFile.entries(); zipEntries
                         .hasMoreElements();) {
                     final ZipEntry zipEntry = zipEntries.nextElement();

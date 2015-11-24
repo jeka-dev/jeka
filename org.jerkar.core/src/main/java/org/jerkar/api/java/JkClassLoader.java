@@ -34,6 +34,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsSystem;
+import org.jerkar.api.utils.JkUtilsZip;
 
 /**
  * Wrapper around {@link URLClassLoader} offering convenient methods and fluent
@@ -447,7 +448,7 @@ public final class JkClassLoader {
             paths = JkFileTree.of(dirOrJar).andFilter(JkPathFilter.include("**/*.class"))
                     .relativePathes();
         } else {
-            final List<ZipEntry> entries = JkUtilsIO.zipEntries(JkUtilsIO.zipFile(dirOrJar));
+            final List<ZipEntry> entries = JkUtilsZip.zipEntries(JkUtilsZip.zipFile(dirOrJar));
             paths = new LinkedList<String>();
             for (final ZipEntry entry : entries) {
                 if (entry.getName().endsWith(".class")) {
@@ -655,12 +656,12 @@ public final class JkClassLoader {
         for (final File file : this.fullClasspath()) {
             if (file.isFile()) {
                 JkLog.trace("Scanning " + file.getPath() + " for META-INF/services.");
-                final ZipFile zipFile = JkUtilsIO.zipFile(file);
+                final ZipFile zipFile = JkUtilsZip.zipFile(file);
                 final ZipEntry serviceEntry = zipFile.getEntry("META-INF/services");
                 if (serviceEntry == null) {
                     continue;
                 }
-                for (final ZipEntry entry : JkUtilsIO.zipEntries(zipFile)) {
+                for (final ZipEntry entry : JkUtilsZip.zipEntries(zipFile)) {
                     if (entry.getName().startsWith("META-INF/services/")) {
                         final String serviceName = JkUtilsString.substringAfterLast(
                                 entry.getName(), "/");

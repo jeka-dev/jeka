@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependency;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
@@ -39,8 +40,6 @@ final class Project {
 
     private List<File> subProjects = new LinkedList<File>();
 
-    private JkPath buildPath;
-
     private final BuildResolver resolver;
 
     /**
@@ -64,10 +63,11 @@ final class Project {
         this.subProjects = parser.projects();
     }
 
-    private void compile() {
+    // Compiles and returns the runtime classpath
+    private JkPath compile() {
         final LinkedHashSet<File> entries = new LinkedHashSet<File>();
         compile(new HashSet<File>(), entries);
-        this.buildPath = JkPath.of(entries);
+        return JkPath.of(entries).withoutDoubloons();
     }
 
     private void compile(Set<File> yetCompiledProjects, LinkedHashSet<File> path) {
@@ -75,7 +75,7 @@ final class Project {
             return;
         }
         yetCompiledProjects.add(this.projectBaseDir);
-        preCompile();
+        preCompile(); // This enrich dependencies
         JkLog.startHeaded("Making build classes for project " + this.projectBaseDir.getName());
         final JkDependencyResolver buildClassDependencyResolver = getBuildDefDependencyResolver();
         final JkPath buildPath = buildClassDependencyResolver.get();
@@ -111,9 +111,10 @@ final class Project {
     public void execute(JkInit init) {
         this.buildDependencies = this.buildDependencies.andScopeless(init.commandLine()
                 .dependencies());
-        compile();
+        JkPath runtimeClasspath = compile();
+        runtimeClasspath = runtimeClasspath.andHead( pathOf(init.commandLine().dependencies()) );
         JkLog.nextLine();
-        final BuildAndPluginDictionnary buidAndDict = getBuildInstance(init);
+        final BuildAndPluginDictionnary buidAndDict = getBuildInstance(init, runtimeClasspath);
         if (buidAndDict == null) {
             throw new JkException("Can't find or guess any build class for project hosted in "
                     + this.projectBaseDir
@@ -127,19 +128,24 @@ final class Project {
         }
     }
 
+    private JkPath pathOf(List<? extends JkDependency> dependencies) {
+        final JkDependencies deps = JkDependencies.of(dependencies);
+        return JkDependencyResolver.managed(this.buildRepos, deps).get();
+    }
+
     public JkBuild instantiate(JkInit init) {
-        compile();
+        final JkPath runtimePath = compile();
         JkLog.nextLine();
-        final BuildAndPluginDictionnary buildAndDict = getBuildInstance(init);
+        final BuildAndPluginDictionnary buildAndDict = getBuildInstance(init, runtimePath);
         if (buildAndDict == null) {
             return null;
         }
         return buildAndDict.build;
     }
 
-    private BuildAndPluginDictionnary getBuildInstance(JkInit init) {
+    private BuildAndPluginDictionnary getBuildInstance(JkInit init, JkPath runtimePath) {
         final JkClassLoader classLoader = JkClassLoader.current();
-        classLoader.addEntries(this.buildPath);
+        classLoader.addEntries(runtimePath);
         JkLog.info("Setting build execution classpath to : " + classLoader.childClasspath());
         final JkBuild build = resolver.resolve(init.buildClassHint());
         if (build == null) {

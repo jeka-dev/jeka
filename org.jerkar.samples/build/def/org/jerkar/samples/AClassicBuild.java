@@ -6,6 +6,7 @@ import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 import static org.jerkar.api.depmanagement.JkPopularModules.MOCKITO_ALL;
 
 import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
@@ -22,6 +23,11 @@ public class AClassicBuild extends JkJavaBuild {
 
     {
 	pack.checksums = "sha1";
+    }
+    
+    @Override
+    public String javaSourceVersion() {
+        return JkJavaCompiler.V7;
     }
 
     @Override // Optional : needless if you use only local dependencies

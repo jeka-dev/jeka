@@ -122,7 +122,7 @@ final class DotClasspathGenerator {
             container = jreContainer;
         } else {
             container = "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-"
-                    + sourceJavaVersion;
+                    + eclipseJavaVersion(sourceJavaVersion);
         }
         writer.writeAttribute("path", container);
         writer.writeCharacters("\n");
@@ -154,6 +154,16 @@ final class DotClasspathGenerator {
         writer.writeEndDocument();
         writer.flush();
         writer.close();
+    }
+
+    private static String eclipseJavaVersion(String compilerVersion) {
+        if ("7".equals(compilerVersion)) {
+            return "1.7";
+        }
+        if ("8".equals(compilerVersion)) {
+            return "1.8";
+        }
+        return compilerVersion;
     }
 
     private static void writeFileEntries(Iterable<File> fileDeps, XMLStreamWriter writer)

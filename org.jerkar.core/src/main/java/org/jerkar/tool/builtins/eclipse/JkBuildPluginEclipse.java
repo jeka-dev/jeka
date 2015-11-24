@@ -53,7 +53,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
             generator.includeJavadoc = true;
             generator.jreContainer = this.jreContainer;
             generator.projectDependencies = depProjects;
-            generator.sourceJavaVersion = jbuild.sourceJavaVersion();
+            generator.sourceJavaVersion = jbuild.javaSourceVersion();
             generator.sources  = jbuild.sources().and(jbuild.resources());
             generator.testSources  = jbuild.unitTestSources().and(jbuild.unitTestResources());
             generator.testClassDir = jbuild.testClassDir();

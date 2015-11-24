@@ -18,13 +18,13 @@ public abstract class AbstractBuild extends JkJavaBuild {
     }
 
     @Override
-    public String sourceJavaVersion() {
+    public String javaSourceVersion() {
         return JkJavaCompiler.V6;
     }
 
     @Override
     public JkVersion version() {
-        return JkVersion.ofName("0.3.0");
+        return JkVersion.ofName("0.3.0-SNAPSHOT");
     }
 
     @Override
