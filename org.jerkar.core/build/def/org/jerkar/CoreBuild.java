@@ -16,8 +16,9 @@ import org.jerkar.tool.builtins.javabuild.JkJavaPacker;
  */
 public class CoreBuild extends AbstractBuild {
 
-    public File distripZipFile;
+    private File distripZipFile;
 
+    /** The folder where is generated the core distrib */
     public File distribFolder;
 
     @Override
@@ -28,9 +29,7 @@ public class CoreBuild extends AbstractBuild {
         this.pack.fatJar = true;
     }
 
-    // Just to run directly the whole build bypassing the Jerkar bootstrap
-    // mechanism.
-    // Was necessary in first place to build Jerkar with itself.
+    /** Run the doDefault method */
     public static void main(String[] args) {
         JkInit.instanceOf(CoreBuild.class, args).doDefault();
     }
@@ -65,7 +64,7 @@ public class CoreBuild extends AbstractBuild {
         distrib.importFiles(packer.jarFile());
         distrib.importFiles(packer().jarFile("lean"));
         distrib.from("libs-sources").importDirContent(file("build/libs-sources"))
-                .importFiles(packer.jarSourceFile());
+        .importFiles(packer.jarSourceFile());
         distrib.from("libs-javadoc").importFiles(this.javadocMaker().zipFile());
         distrib.zip().with(JkCompressionLevel.BEST_COMPRESSION).to(distripZipFile);
         signIfNeeded(distripZipFile);

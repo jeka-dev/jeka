@@ -101,15 +101,15 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
     @Override
     protected void scaffold() {
         try {
-            JkLog.info("Trying to generate eclispe files");
+            JkLog.start("Trying to generate Eclipse metadata files");
             final JkBuild newBuild = JkInit.instanceOf(this.build.baseDir().root());
             final JkBuildPluginEclipse pluginEclipse = new JkBuildPluginEclipse();
             pluginEclipse.build = newBuild;
             pluginEclipse.generateFiles();
-            JkLog.info("Eclipse file generated successfully");
+            JkLog.done("Eclipse file generated successfully");
         } catch (final RuntimeException e) {
-            JkLog.warn("Eclipse files has not been generated duer to a failure");
-            e.printStackTrace(JkLog.warnStream());;
+            e.printStackTrace(JkLog.warnStream());
+            JkLog.done("Eclipse files has not been generated due to a failure");
         }
 
     }
