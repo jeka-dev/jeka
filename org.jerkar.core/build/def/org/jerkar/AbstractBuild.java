@@ -39,6 +39,9 @@ public abstract class AbstractBuild extends JkJavaBuild {
     @Override
     // Force to use OSSRH
     protected JkPublishRepos publishRepositories() {
+        if (JkOptions.containsKey("jkPublisherUrl")) {
+            return JkPublishRepos.maven(JkOptions.get("jkPublisherUrl"));
+        }
         return JkPublishRepos.ossrh(JkOptions.get("ossrh.username"),
                 JkOptions.get("ossrh.password"), pgp()).withUniqueSnapshot(true);
     }
