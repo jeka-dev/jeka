@@ -193,9 +193,6 @@ final class Project {
 
     private static JkPath jerkarLibs() {
         final List<File> extraLibs = new LinkedList<File>();
-        // if (JkLocator.builtinsDir().exists()) {
-        //    extraLibs.addAll(JkFileTree.of(JkLocator.builtinsDir()).include("**/*.jar").files(false));
-        //}
         extraLibs.add(JkLocator.jerkarJarFile());
         return JkPath.of(extraLibs).withoutDoubloons();
     }
