@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" output="build/output/def-bin" path="build/def"/>
+	<classpathentry kind="src" path="build/def" output="build/output/def-bin"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="var" path="JERKAR_REPO/com.google.guava/guava/bundles/guava-18.0.jar" sourcepath="JERKAR_REPO/com.google.guava/guava/sources/guava-18.0-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/H:/AppData.W7/Sun/.jerkar/cache/repo/com.google.guava/guava/javadocs/guava-18.0-javadoc.jar"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/UserTemp/I19451/git/jerkar/org.jerkar.samples/build/output/org.jerkar.samples-fat.jar"/>
 	<classpathentry kind="var" path="JERKAR_HOME/org.jerkar.core-all.jar" sourcepath="JERKAR_HOME/libs-sources/org.jerkar.core-all-sources.jar"/>
 	<classpathentry kind="src" path="/org.jerkar.samples"/>
-	<classpathentry kind="var" path="JERKAR_REPO/com.google.guava/guava/jars/guava-18.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
