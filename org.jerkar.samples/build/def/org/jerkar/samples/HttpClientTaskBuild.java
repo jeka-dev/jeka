@@ -2,7 +2,6 @@ package org.jerkar.samples;
 
 import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
 import static org.jerkar.api.depmanagement.JkPopularModules.JAVAX_SERVLET_API;
-import static org.jerkar.api.depmanagement.JkPopularModules.JERSEY_SERVER;
 import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 import static org.jerkar.api.depmanagement.JkPopularModules.MOCKITO_ALL;
 
