@@ -103,7 +103,7 @@ final class DotClasspathGenerator {
         writer.writeStartElement("classpath");
         writer.writeCharacters("\n");
 
-        // Build definition sources
+        // Build class sources
         if (new File(projectDir, JkConstants.BUILD_DEF_DIR).exists()) {
             writer.writeCharacters("\t");
             writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
