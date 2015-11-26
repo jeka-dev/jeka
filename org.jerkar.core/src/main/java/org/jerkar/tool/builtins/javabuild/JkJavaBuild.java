@@ -72,11 +72,13 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     public static final JkScope JAVADOC = JkScope.of("javadoc").transitive(false)
             .descr("Contains the javadoc of this project");
 
+    private static final String ARCHIVE_MASTER = "archives(master)";
+
     private static final JkScopeMapping SCOPE_MAPPING = JkScopeMapping
-            .of(COMPILE).to(COMPILE.name() + "(default)")
-            .and(PROVIDED).to(COMPILE.name() + "(default)")
-            .and(RUNTIME).to(RUNTIME.name() + "(default)")
-            .and(TEST).to(RUNTIME.name() + "(default)", TEST.name() + "(default)");
+            .of(COMPILE).to(ARCHIVE_MASTER, COMPILE.name() + "(default)")
+            .and(PROVIDED).to(ARCHIVE_MASTER, COMPILE.name() + "(default)")
+            .and(RUNTIME).to(ARCHIVE_MASTER, RUNTIME.name() + "(default)")
+            .and(TEST).to(ARCHIVE_MASTER, RUNTIME.name() + "(default)", TEST.name() + "(default)");
 
     /**
      * Filter to excludes everything in a java source directory which are not

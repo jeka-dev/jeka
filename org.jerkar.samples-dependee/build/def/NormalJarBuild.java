@@ -41,7 +41,7 @@ public class NormalJarBuild extends JkJavaBuild {
 		    .and(sampleBuild.depsFor(COMPILE), COMPILE)
 		
 		    // Additional dependency
-		    .and(RUNTIME, "ch.qos.logback:logback-classic:1.+");
+		    .and("com.google.guava:guava", "18.0", COMPILE);
     }
     
     public static void main(String[] args) {

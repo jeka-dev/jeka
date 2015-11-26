@@ -1,6 +1,7 @@
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.samples.AClassicBuild;
+import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkProject;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
@@ -56,7 +57,11 @@ public class FatJarBuild extends JkJavaBuild {
 		.of(COMPILE, sampleBuild.asDependency(sampleBuild.packer().fatJarFile()))
 		
 		// Extra dependency
-		.and(RUNTIME, "ch.qos.logback:logback-classic:1.+");
+		.and("com.google.guava:guava", "18.0", PROVIDED);
     }
+    
+    public static void main(String[] args) {
+		JkInit.instanceOf(FatJarBuild.class, args).doDefault();
+	}
 
 }
