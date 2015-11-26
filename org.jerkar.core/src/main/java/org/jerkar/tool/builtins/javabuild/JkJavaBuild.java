@@ -76,7 +76,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
             .of(COMPILE).to(COMPILE.name() + "(default)")
             .and(PROVIDED).to(COMPILE.name() + "(default)")
             .and(RUNTIME).to(RUNTIME.name() + "(default)")
-            .and(TEST).to(RUNTIME.name() + "(default)", "test(default)");
+            .and(TEST).to(RUNTIME.name() + "(default)", TEST.name() + "(default)");
 
     /**
      * Filter to excludes everything in a java source directory which are not
@@ -734,6 +734,17 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         /** When true, javadoc is created and packed in a jar file.*/
         @JkDoc("When true, javadoc is created and packed in a jar file.")
         public boolean javadoc;
+
+        /**
+         * Gives the suffix that will be appended at the end of the 'normal' jar for naming the fat jar.
+         * If the name of the normal jar is <i>mylib.jar</i> and the suffix is <i>uber</i> then the fat jar
+         * file name will be <i>mylib-uber.jar</i>.
+         */
+        @JkDoc({"Gives the suffix that will be appended at the end of the 'normal' jar for naming the fat jar.",
+            "If the name of the normal jar is 'mylib.jar' and the suffix is 'uber' then the fat jar",
+            "file name will be 'mylib-uber.jar'."
+        })
+        public String fatJarSuffix = "fat";
 
     }
 

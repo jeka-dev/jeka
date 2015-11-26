@@ -27,6 +27,7 @@ public class CoreBuild extends AbstractBuild {
         distripZipFile = ouputDir("jerkar-distrib.zip");
         distribFolder = ouputDir("jerkar-distrib");
         this.pack.fatJar = true;
+        this.pack.fatJarSuffix = "all";
     }
 
     /** Run the doDefault method */

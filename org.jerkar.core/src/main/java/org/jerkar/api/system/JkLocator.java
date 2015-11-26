@@ -96,10 +96,10 @@ public final class JkLocator {
     }
 
     /**
-     * Returns the directory where lie optional libraries.
+     * Returns the directory where lie builtins libraries.
      */
-    public static File libExtDir() {
-        return new File(jerkarHome(), "libs/ext");
+    public static File builtinsDir() {
+        return new File(jerkarHome(), "libs/builtins");
     }
 
 }

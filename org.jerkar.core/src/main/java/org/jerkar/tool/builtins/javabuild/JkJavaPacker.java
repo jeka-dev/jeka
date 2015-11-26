@@ -14,6 +14,7 @@ import org.jerkar.api.java.JkManifest;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -56,6 +57,8 @@ public class JkJavaPacker implements Cloneable {
 
     private boolean doJavadoc = false;
 
+    private final String fatJarSuffix;
+
     private JkPgp pgp = null;
 
     private List<Extra> extraActions = new LinkedList<Extra>();
@@ -63,6 +66,7 @@ public class JkJavaPacker implements Cloneable {
     private JkJavaPacker(JkJavaBuild build) {
         this.build = build;
         this.doFatJar = build.pack.fatJar;
+        this.fatJarSuffix = JkUtilsObject.firstNonNull(build.pack.fatJarSuffix, "fat");
         this.doTest = build.pack.tests;
         if (build.pack.checksums == null) {
             this.checkSums = new HashSet<String>();
@@ -134,7 +138,7 @@ public class JkJavaPacker implements Cloneable {
      * The jar standing for the fat jar (aka uber jar)
      */
     public File fatJarFile() {
-        return build.ouputDir(baseName() + "-fat.jar");
+        return build.ouputDir(baseName() + "-" + fatJarSuffix + ".jar");
     }
 
     /**
