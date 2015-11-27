@@ -234,16 +234,15 @@ final class DotClasspathGenerator {
         }
 
         // Write entries for external module deps
-        JkResolveResult resolveResult = JkResolveResult.empty();
         if (dependencyResolver.dependenciesToResolve().containsModules()) {
-            resolveResult = dependencyResolver.resolve(JkJavaBuild.RUNTIME,
+            final JkResolveResult resolveResult = dependencyResolver.resolve(JkJavaBuild.RUNTIME,
                     JkJavaBuild.PROVIDED, JkJavaBuild.TEST);
             writeExternalModuleEntries(dependencyResolver, writer, resolveResult,
                     includeJavadoc);
         }
         if (buildDefResolver.dependenciesToResolve().containsModules()) {
             final JkResolveResult buildresolve = buildDefResolver.resolve();
-            writeExternalModuleEntries(dependencyResolver, writer, buildresolve,
+            writeExternalModuleEntries(buildDefResolver, writer, buildresolve,
                     includeJavadoc);
         }
 
