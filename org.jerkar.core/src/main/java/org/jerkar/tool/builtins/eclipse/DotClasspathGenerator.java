@@ -166,7 +166,7 @@ final class DotClasspathGenerator {
         return compilerVersion;
     }
 
-    private static void writeFileEntries(Iterable<File> fileDeps, XMLStreamWriter writer)
+    private void writeFileEntries(Iterable<File> fileDeps, XMLStreamWriter writer)
             throws XMLStreamException {
         for (final File file : fileDeps) {
             final String name = JkUtilsString.substringBeforeLast(file.getName(), ".jar");
@@ -186,11 +186,11 @@ final class DotClasspathGenerator {
             if (!javadoc.exists()) {
                 javadoc = new File(file.getParentFile(), "libs-javadoc/" + name + "-javadoc.jar");
             }
-            writeClassEntry(writer, file, source, javadoc);
+            writeClasspathEntry(writer, file, source, javadoc);
         }
     }
 
-    private static void generateJava(File projectDir, JkFileTreeSet sources, JkFileTreeSet testSources,  XMLStreamWriter writer,
+    private void generateJava(File projectDir, JkFileTreeSet sources, JkFileTreeSet testSources,  XMLStreamWriter writer,
             String jreContainer, boolean includeJavadoc, JkDependencyResolver dependencyResolver, JkDependencyResolver buildDefResolver, File testClassDir) throws XMLStreamException {
         // Sources
         final Set<String> sourcePaths = new HashSet<String>();
@@ -255,7 +255,7 @@ final class DotClasspathGenerator {
         writeFileEntries(fileDeps, writer);
     }
 
-    private static void writeExternalModuleEntries(JkDependencyResolver dependencyResolver,
+    private void writeExternalModuleEntries(JkDependencyResolver dependencyResolver,
             final XMLStreamWriter writer, JkResolveResult resolveResult, boolean includeJavadoc)
                     throws XMLStreamException {
         final JkAttachedArtifacts jkAttachedArtifacts = dependencyResolver.getAttachedArtifacts(
@@ -280,19 +280,23 @@ final class DotClasspathGenerator {
             } else {
                 javadoc = null;
             }
-            writeClassEntry(writer, resolveResult.filesOf(moduleId).get(0), source, javadoc);
+            writeClasspathEntry(writer, resolveResult.filesOf(moduleId).get(0), source, javadoc);
         }
     }
 
-    private static void writeClassEntry(XMLStreamWriter writer, File bin, File source, File javadoc)
+    private void writeClasspathEntry(XMLStreamWriter writer, File bin, File source, File javadoc)
             throws XMLStreamException {
+        final VarReplacement binReplacement = new VarReplacement(bin);
+        if (binReplacement.skiped) {
+            return;
+        }
         writer.writeCharacters("\t");
         if (javadoc == null || !javadoc.exists()) {
             writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
         } else {
             writer.writeStartElement(DotClasspathModel.CLASSPATHENTRY);
         }
-        final VarReplacement binReplacement = new VarReplacement(bin);
+
         if (binReplacement.replaced) {
             writer.writeAttribute("kind", "var");
         } else {
@@ -319,11 +323,13 @@ final class DotClasspathGenerator {
         writer.writeCharacters("\n");
     }
 
-    private static class VarReplacement {
+    private class VarReplacement {
 
         public final boolean replaced;
 
         public final String path;
+
+        public final boolean skiped;
 
         public VarReplacement(File file) {
             final Map<String, String> map = JkOptions
@@ -336,6 +342,8 @@ final class DotClasspathGenerator {
             }
             boolean replaced = false;
             String path = JkUtilsFile.canonicalPath(file).replace(File.separator, "/");
+
+            // replace with var
             for (final Map.Entry<String, String> entry : map.entrySet()) {
                 final File varDir = new File(entry.getValue());
                 if (JkUtilsFile.isAncestor(varDir, file)) {
@@ -349,10 +357,39 @@ final class DotClasspathGenerator {
                     break;
                 }
             }
+
+            // Replace with relative path
+            if (!replaced) {
+                final String relpPath = toProjectRelativePath(file);
+                if (relpPath != null) {
+                    if (file.getName().toLowerCase().endsWith(".jar")) {
+                        skiped = true;
+                    } else {
+                        skiped = false;
+                        path = relpPath;
+                    }
+                } else {
+                    skiped = false;
+                }
+            } else {
+                skiped = false;
+            }
+
             this.path = path;
             this.replaced = replaced;
         }
 
+    }
+
+    private String toProjectRelativePath(File file) {
+        for (final File projectFile : this.projectDependencies) {
+            if (JkUtilsFile.isAncestor(projectFile, file)) {
+                final String relativePath = JkUtilsFile.getRelativePath(projectFile, projectFile);
+                final Project project = Project.of(new File(projectFile, ".project"));
+                return "/" + project.name + "/" + relativePath;
+            }
+        }
+        return null;
     }
 
 }
