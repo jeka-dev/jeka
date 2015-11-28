@@ -10,10 +10,21 @@ import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 
+/**
+ * Publication specific information to include in POM file in order to be published in a Maven repository.
+ * These information contains : <ul>
+ *   <li>The artifacts to be published (main artifact and artifacts with classifiers)</li>
+ *   <li>Information about describing the project as some public repositories require</li>
+ * </ul>
+ *
+ */
 public final class JkMavenPublication implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates a Maven publication specifying the file to publish as main artifact.
+     */
     @SuppressWarnings("unchecked")
     public static JkMavenPublication of(File file) {
         return new JkMavenPublication(JkUtilsIterable.listOf(file), Collections.EMPTY_LIST, null);
@@ -34,6 +45,10 @@ public final class JkMavenPublication implements Serializable {
         this.extraInfo = extraInfo;
     }
 
+
+    /**
+     * Same as {@link #and(File, String)} but effective only if the specified condition is <code>true</code>.
+     */
     public JkMavenPublication andIf(boolean condition, File file, String classifier) {
         if (condition) {
             return and(file, classifier);
@@ -41,12 +56,15 @@ public final class JkMavenPublication implements Serializable {
         return this;
     }
 
+    /**
+     * Returns a {@link JkMavenPublication} identical to this one but adding a classified artifact.
+     */
     public JkMavenPublication and(File file, String classifier) {
         JkUtilsAssert.isTrue(!JkUtilsString.isBlank(classifier), "classifier cannot be empty");
         final String fileExt = JkUtilsString.substringAfterLast(file.getName(), ".");
         if (JkUtilsString.isBlank(fileExt)) {
             throw new IllegalArgumentException("the file " + file.getPath()
-                    + " must have an extension (as .jar, .zip, ...");
+            + " must have an extension (as .jar, .zip, ...");
         }
         if (contains(fileExt, classifier)) {
             throw new IllegalArgumentException(
@@ -80,6 +98,10 @@ public final class JkMavenPublication implements Serializable {
         return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, extraInfo);
     }
 
+    /**
+     * Same as {@link #and(File, String)} but effective only if the specified file exists.
+     * If not the case, this method returns this object.
+     */
     public JkMavenPublication andOptional(File file, String classifier) {
         if (file.exists()) {
             return and(file, classifier);
@@ -87,6 +109,9 @@ public final class JkMavenPublication implements Serializable {
         return this;
     }
 
+    /**
+     * Same as {@link #andOptional(File, String)} but effective only if the specified condition is <code>true</code>
+     */
     public JkMavenPublication andOptionalIf(boolean conditional, File file, String classifier) {
         if (conditional) {
             return andOptional(file, classifier);
@@ -94,14 +119,17 @@ public final class JkMavenPublication implements Serializable {
         return this;
     }
 
+    /** Files constituting main artifact */
     public List<File> mainArtifactFiles() {
         return Collections.unmodifiableList(this.mainArtifacts);
     }
 
+    /** Files constituting classified artifacts */
     public List<JkClassifiedArtifact> classifiedArtifacts() {
         return Collections.unmodifiableList(classifiedArtifacts);
     }
 
+    /**  */
     public JkMavenPublicationInfo extraInfo() {
         return this.extraInfo;
     }
@@ -118,8 +146,8 @@ public final class JkMavenPublication implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
-        private String classifier;
-        private File file;
+        private final String classifier;
+        private final File file;
 
         JkClassifiedArtifact(String classifier, File file) {
             super();
@@ -127,20 +155,14 @@ public final class JkMavenPublication implements Serializable {
             this.file = file;
         }
 
+        /** Classifier string for this classified artifact */
         public String classifier() {
             return classifier;
         }
 
-        public void setClassifier(String classifier) {
-            this.classifier = classifier;
-        }
-
+        /** File for this classified artifact */
         public File file() {
             return file;
-        }
-
-        public void setFile(File file) {
-            this.file = file;
         }
 
     }
