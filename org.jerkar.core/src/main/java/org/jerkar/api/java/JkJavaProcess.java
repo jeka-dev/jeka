@@ -70,6 +70,10 @@ public final class JkJavaProcess {
                 Collections.EMPTY_LIST, Collections.EMPTY_LIST, null, Collections.EMPTY_MAP);
     }
 
+    /**
+     * Returns a {@link JkJavaProcess} identical to this one but augnmented with the
+     * specified agent library and option.
+     */
     public JkJavaProcess andAgent(File agentLib, String agentOption) {
         if (agentLib == null) {
             throw new IllegalArgumentException("agentLib can't be null.");
@@ -89,10 +93,18 @@ public final class JkJavaProcess {
                 this.options, this.workingDir, this.environment);
     }
 
+    /**
+     * Returns a {@link JkJavaProcess} identical to this one but augnmented with the
+     * specified agent library.
+     */
     public JkJavaProcess andAgent(File agentLib) {
         return andAgent(agentLib, null);
     }
 
+    /**
+     * Returns a {@link JkJavaProcess} identical to this one but with the
+     * specified java options.
+     */
     public JkJavaProcess andOptions(Collection<String> options) {
         final List<String> list = new ArrayList<String>(this.options);
         list.addAll(options);
@@ -100,6 +112,10 @@ public final class JkJavaProcess {
                 list, this.workingDir, this.environment);
     }
 
+    /**
+     * Same as {@link #andOptions(Collection)} but effective only if the specified condition
+     * is <code>true</code>.
+     */
     public JkJavaProcess andOptionsIf(boolean condition, String... options) {
         if (condition) {
             return andOptions(options);
@@ -107,6 +123,9 @@ public final class JkJavaProcess {
         return this;
     }
 
+    /**
+     * Same as {@link #andOptions(Collection)}.
+     */
     public JkJavaProcess andOptions(String... options) {
         return this.andOptions(Arrays.asList(options));
     }
@@ -122,11 +141,19 @@ public final class JkJavaProcess {
         return this.andOptions(JkUtilsString.translateCommandline(commandLine));
     }
 
+    /**
+     * Returns a {@link JkJavaProcess} identical to this one but using the specified
+     * working dir.
+     */
     public JkJavaProcess withWorkingDir(File workingDir) {
         return new JkJavaProcess(this.javaDir, this.sytemProperties, this.classpath, this.agents,
                 this.options, workingDir, this.environment);
     }
 
+    /**
+     * Returns a {@link JkJavaProcess} identical to this one but using the specified
+     * classpath.
+     */
     public JkJavaProcess withClasspath(Iterable<File> classpath) {
         if (classpath == null) {
             throw new IllegalArgumentException("Classpath can't be null.");
@@ -141,18 +168,34 @@ public final class JkJavaProcess {
                 this.options, this.workingDir, this.environment);
     }
 
+    /**
+     * Returns a {@link JkJavaProcess} identical to this one but using the specified
+     * classpath.
+     */
     public JkJavaProcess withClasspath(File... files) {
         return withClasspath(JkClasspath.of(files));
     }
 
+    /**
+     * Returns a {@link JkJavaProcess} identical to this one but augmenting this
+     * classpath with the specified one.
+     */
     public JkJavaProcess andClasspath(JkClasspath classpath) {
         return withClasspath(this.classpath.and(classpath));
     }
 
+    /**
+     * Returns a {@link JkJavaProcess} identical to this one but augmenting this
+     * classpath with the specified one.
+     */
     public JkJavaProcess andClasspath(File... files) {
         return andClasspath(Arrays.asList(files));
     }
 
+    /**
+     * Returns a {@link JkJavaProcess} identical to this one but augmenting this
+     * classpath with the specified one.
+     */
     public JkJavaProcess andClasspath(Iterable<File> files) {
         return withClasspath(this.classpath.and(files));
     }
@@ -171,10 +214,16 @@ public final class JkJavaProcess {
         return this.javaDir.getAbsolutePath() + File.separator + "java";
     }
 
+    /**
+     * Runs the specified jar file and wait for termination.
+     */
     public void runJarSync(File jar, String... arguments) {
         runClassOrJarSync(null, jar, arguments);
     }
 
+    /**
+     * Runs the specified class and wait for termination. The class has to be on this classpath.
+     */
     public void runClassSync(String mainClassName, String... arguments) {
         runClassOrJarSync(mainClassName, null, arguments);
     }
@@ -272,6 +321,10 @@ public final class JkJavaProcess {
         }
     }
 
+    /**
+     * Returns the classpth of this {@link JkJavaProcess}.
+     * @return
+     */
     public JkClasspath classpath() {
         return classpath;
 

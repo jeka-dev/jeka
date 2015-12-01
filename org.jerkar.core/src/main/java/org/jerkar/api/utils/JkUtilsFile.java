@@ -254,6 +254,10 @@ public final class JkUtilsFile {
         copyFile(from, toFile, null);
     }
 
+    /**
+     * Copies the given file to the specified directory printing a report into the specified
+     * report stream.
+     */
     public static void copyFile(File from, File toFile, PrintStream reportStream) {
         createFileIfNotExist(toFile);
         if (reportStream != null) {
@@ -408,6 +412,9 @@ public final class JkUtilsFile {
         return result;
     }
 
+    /**
+     * Returns <code>true</code> if the specified directory is empty.
+     */
     public static boolean isEmpty(File dir, boolean countFolders) {
         return count(dir, JkFileFilters.acceptAll(), countFolders) == 0;
     }
@@ -437,14 +444,24 @@ public final class JkUtilsFile {
         return result;
     }
 
+    /**
+     * Returns the current working directory.
+     */
     public static File workingDir() {
         return JkUtilsFile.canonicalFile(new File("."));
     }
 
+
+    /**
+     * Return the system temp directory as given by system property <i>java.io.tmpdir</i>.
+     */
     public static File tempDir() {
         return new File(System.getProperty("java.io.tmpdir"));
     }
 
+    /**
+     * Return the user directory as given by system property <i>user.home</i>.
+     */
     public static File userHome() {
         return new File(System.getProperty("user.home"));
     }

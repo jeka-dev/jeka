@@ -1,5 +1,8 @@
 package org.jerkar.api.utils;
 
+/**
+ * Utility class for dealing with IO.
+ */
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -356,7 +359,7 @@ public final class JkUtilsIO {
 
                 @Override
                 protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException,
-                        ClassNotFoundException {
+                ClassNotFoundException {
 
                     final String name = desc.getName();
                     try {
@@ -431,7 +434,7 @@ public final class JkUtilsIO {
             return this;
         }
 
-        public static class InnerRunnable implements Runnable {
+        private static class InnerRunnable implements Runnable {
 
             private final InputStream in;
 

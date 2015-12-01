@@ -32,17 +32,25 @@ public final class JkUtilsThrowable {
         return new RuntimeException(message, e);
     }
 
-    public static boolean nestedContains(Exception e, Class<Exception> exceptionClass,
+    /**
+     * Returns <code>true</code> if the specified throwable has the specified cause exception class
+     * along the specified message in its chain.
+     */
+    public static boolean nestedContains(Throwable throwable, Class<Exception> exceptionClass,
             String message) {
-        if (e.getClass().equals(exceptionClass) && message.equals(e.getMessage())) {
+        if (throwable.getClass().equals(exceptionClass) && message.equals(throwable.getMessage())) {
             return true;
         }
-        if (e.getCause() == null) {
+        if (throwable.getCause() == null) {
             return false;
         }
-        return nestedContains((Exception) e.getCause(), exceptionClass, message);
+        return nestedContains(throwable.getCause(), exceptionClass, message);
     }
 
+    /**
+     * Returns <code>true</code> if the specified throwable has the specified cause exception class
+     * in its chain.
+     */
     public static boolean isInCause(Throwable throwable, Class<? extends Throwable> causeClass) {
         if (causeClass.isAssignableFrom(throwable.getClass())) {
             return true;

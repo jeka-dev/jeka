@@ -42,6 +42,9 @@ public final class JkUtilsSystem {
         return result;
     }
 
+    /**
+     * Forces the current thread to sleep the specified amount of milliseconds.
+     */
     public static void sleep(long millis) {
         try {
             Thread.sleep(millis);

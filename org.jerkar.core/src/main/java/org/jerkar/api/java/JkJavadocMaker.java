@@ -47,10 +47,18 @@ public final class JkJavadocMaker {
         this.zipFile = zipFile;
     }
 
+    /**
+     * Creates a {@link JkJavadocMaker} from the specified sources. The result will be outputed in
+     * the specified directory then compacted in the specified zip file.
+     */
     public static JkJavadocMaker of(JkFileTreeSet sources, File outputDir, File zipFile) {
         return new JkJavadocMaker(sources, null, null, "", outputDir, zipFile);
     }
 
+    /**
+     * Creates a {@link JkJavadocMaker} from the specified sources. The result will be outputed in
+     * the specified directory.
+     */
     public static JkJavadocMaker of(JkFileTreeSet sources, File outputDir) {
         return new JkJavadocMaker(sources, null, null, "", outputDir, null);
     }
@@ -62,14 +70,23 @@ public final class JkJavadocMaker {
         return zipFile;
     }
 
+    /**
+     * Returns a {@link JkJavadocMaker} identical to this one but using the specified doclet.
+     */
     public JkJavadocMaker withDoclet(Class<?> doclet) {
         return new JkJavadocMaker(srcDirs, doclet, classpath, extraArgs, outputDir, zipFile);
     }
 
+    /**
+     * Returns a {@link JkJavadocMaker} identical to this one but using the specified classpath.
+     */
     public JkJavadocMaker withClasspath(Iterable<File> classpath) {
         return new JkJavadocMaker(srcDirs, doclet, classpath, extraArgs, outputDir, zipFile);
     }
 
+    /**
+     * Actually processes and creates the javadoc files.
+     */
     public void process() {
         JkLog.startln("Generating javadoc");
         final String[] args = toArguments(outputDir);

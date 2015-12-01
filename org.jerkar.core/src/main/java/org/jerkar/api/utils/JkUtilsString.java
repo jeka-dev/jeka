@@ -147,6 +147,10 @@ public final class JkUtilsString {
         return string.substring(0, index);
     }
 
+    /**
+     * Returns a string made of the the specified pattern repeat the
+     * specified count. So, for example, <code>repeat("##", 3)</code> will return <i>######</i>
+     */
     public static String repeat(String pattern, int count) {
         final StringBuilder builder = new StringBuilder();
         for (int i = 0; i < count; i++) {
@@ -208,8 +212,8 @@ public final class JkUtilsString {
     }
 
     private static final byte[] HEX_CHAR_TABLE = { (byte) '0', (byte) '1', (byte) '2', (byte) '3',
-            (byte) '4', (byte) '5', (byte) '6', (byte) '7', (byte) '8', (byte) '9', (byte) 'a',
-            (byte) 'b', (byte) 'c', (byte) 'd', (byte) 'e', (byte) 'f' };
+        (byte) '4', (byte) '5', (byte) '6', (byte) '7', (byte) '8', (byte) '9', (byte) 'a',
+        (byte) 'b', (byte) 'c', (byte) 'd', (byte) 'e', (byte) 'f' };
 
     /**
      * Returns the hexadecimal for of the given array of bytes.
@@ -300,6 +304,10 @@ public final class JkUtilsString {
         return out.toString();
     }
 
+    /**
+     * Returns the specified string truncated and ending with <i>...</i> if the specified
+     * string is longer than the specified max length. Otherwise the specified string is returned as is.
+     */
     public static String elipse(String string, int max) {
         if (string.length() <= max) {
             return string;

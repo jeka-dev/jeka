@@ -1,9 +1,8 @@
 package org.jerkar.tool.builtins.eclipse;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -95,7 +94,8 @@ final class DotClasspathGenerator {
 
 
     void _generate() throws IOException, XMLStreamException, FactoryConfigurationError {
-        final OutputStream fos = new FileOutputStream(outputFile);
+        // final OutputStream fos = new FileOutputStream(outputFile);
+        final ByteArrayOutputStream fos = new ByteArrayOutputStream();
         final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(fos,
                 ENCODING);
         writer.writeStartDocument(ENCODING, "1.0");
@@ -154,6 +154,9 @@ final class DotClasspathGenerator {
         writer.writeEndDocument();
         writer.flush();
         writer.close();
+
+        outputFile.delete();
+        JkUtilsFile.writeStringAtTop(outputFile, fos.toString(ENCODING));
     }
 
     private static String eclipseJavaVersion(String compilerVersion) {
