@@ -104,7 +104,7 @@ public static void main(String[] args) {
 Prerequisites are :
 
 * Maven is installed on the machine running Jerkar.
-* The project build wiyh maven (at least, `mvn help:effective-pom` should success).
+* The project builds with Maven (at least, `mvn help:effective-pom` should succeed).
 
 Steps :
 
