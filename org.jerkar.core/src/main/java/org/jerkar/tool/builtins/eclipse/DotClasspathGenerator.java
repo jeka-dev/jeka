@@ -392,7 +392,7 @@ final class DotClasspathGenerator {
 
     private String toRelativePath(File file) {
         if (JkUtilsFile.isAncestor(this.projectDir, file)) {
-            return JkUtilsFile.getRelativePath(projectDir, file);
+            return JkUtilsFile.getRelativePath(projectDir, file).replace(File.separatorChar, '/');
         }
         return JkUtilsFile.canonicalPath(file);
     }
