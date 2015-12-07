@@ -1,3 +1,7 @@
+## 0.3.1-SNAPSHOT
+
+* Fix Eclipse .classpath generation (doublon entries for local jar dependencies)
+
 ## 0.3.0
 
 * Add "@" import syntax to import build dependencies from the command line (Usefull for scaffolding projects).

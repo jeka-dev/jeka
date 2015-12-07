@@ -79,7 +79,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * <li>The version injected by option (with command line argment
      * -version=2.1 for example)</li>
      * <li>The version returned by the {@link #version()} method</li>
-     * <li>The the hard-coded <code>1.0-SNAPSHOT</code> value</li>
+     * <li>The the hard-coded <code>trunk-SNAPSHOT</code> value</li>
      * </ul>
      *
      */
@@ -87,7 +87,7 @@ public class JkBuildDependencySupport extends JkBuild {
         if (!JkUtilsString.isBlank(version)) {
             return JkVersion.ofName(version);
         }
-        return JkUtilsObject.firstNonNull(version(), JkVersion.ofName("1.0-SNAPSHOT"));
+        return JkUtilsObject.firstNonNull(version(), JkVersion.ofName("trunk-SNAPSHOT"));
     }
 
     /**
