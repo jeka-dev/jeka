@@ -21,7 +21,7 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
  * @author Jerome Angibaud
  * @fprmatter:off
  */
-@JkImport("commons-httpclient:commons-httpclient:3.1")
+@JkImport({"commons-httpclient:commons-httpclient:3.1"})
 public class HttpClientTaskBuild extends JkJavaBuild {
 
 	@Override

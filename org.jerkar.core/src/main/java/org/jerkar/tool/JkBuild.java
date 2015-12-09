@@ -16,6 +16,7 @@ import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsTime;
 
@@ -130,7 +131,7 @@ public class JkBuild {
             method = this.getClass().getMethod(methodName);
         } catch (final NoSuchMethodException e) {
             JkLog.warn("No zero-arg method '" + methodName + "' found in class '" + this.getClass()
-            + "'. Skip.");
+                    + "'. Skip.");
             JkLog.warnStream().flush();
             return;
         }
@@ -150,7 +151,7 @@ public class JkBuild {
                     + JkUtilsTime.durationInSeconds(time) + " seconds.");
         } catch (final RuntimeException e) {
             JkLog.info("Method " + methodName + " failed in " + JkUtilsTime.durationInSeconds(time)
-            + " seconds.");
+                    + " seconds.");
             throw e;
         }
     }
@@ -269,6 +270,15 @@ public class JkBuild {
     @Override
     public String toString() {
         return this.baseDir.getPath();
+    }
+
+    /**
+     * Returns a {@link JkComputedDependency} on this project and specified
+     * files. The 'doDefault' method will be invoked to compute the dependee
+     * files.
+     */
+    public JkComputedDependency asDependency(Iterable<File> files) {
+        return BuildDependency.of(this, JkUtilsIterable.setOf(files));
     }
 
     /**

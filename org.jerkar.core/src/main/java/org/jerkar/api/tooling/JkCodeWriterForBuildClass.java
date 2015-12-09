@@ -263,7 +263,7 @@ public class JkCodeWriterForBuildClass {
             if (!jkImports.isEmpty()) {
                 builder.append(jkImportCode(jkImports)).append("\n");
             }
-            builder.append("public final class " + className + " extends " + extendedClass)
+            builder.append("class " + className + " extends " + extendedClass)
             .append(" {").append("\n");
             return builder.toString();
         }

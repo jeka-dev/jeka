@@ -1,6 +1,7 @@
 ## 0.3.1-SNAPSHOT
 
 * Fix Eclipse .classpath generation (doublon entries for local jar dependencies)
+* Improve dependency handling between java sub-projects
 
 ## 0.3.0
 

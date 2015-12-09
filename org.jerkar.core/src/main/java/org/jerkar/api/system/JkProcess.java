@@ -240,4 +240,9 @@ public final class JkProcess implements Runnable {
         this.runSync();
     }
 
+    @Override
+    public String toString() {
+        return this.command + " " + JkUtilsString.join(parameters, " ");
+    }
+
 }

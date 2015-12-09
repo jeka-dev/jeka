@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 
+import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkFileSystemDependency;
 import org.jerkar.api.depmanagement.JkIvyPublication;
@@ -335,6 +336,13 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
     }
 
+    /**
+     * Returns a {@link JkComputedDependency} that consist of the jar file produced by this build
+     * plus all of its RUNTIME transitive runtime dependencies.
+     */
+    public JkComputedDependency asJavaDependency() {
+        return this.asDependency(this.depsFor(RUNTIME).andHead(this.packer().jarFile()));
+    }
 
 
     private Object scaffoldedBuildClassCode() {

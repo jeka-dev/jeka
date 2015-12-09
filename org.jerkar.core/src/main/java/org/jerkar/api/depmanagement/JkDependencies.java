@@ -14,6 +14,7 @@ import java.util.Set;
 import org.jerkar.api.depmanagement.JkDependency.JkFileDependency;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.file.JkPath;
+import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
@@ -695,6 +696,21 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             for (final JkScopedDependency dependency : dependencies) {
                 this.dependencies.add(dependency);
             }
+            return this;
+        }
+
+        /**
+         * Adds the specified computed dependency to this builder. If the specified
+         * file is not present then the specified process is launched prior to try
+         * to get the file again.
+         */
+        public Builder on(JkProcess jkProcess, File file, JkScope ...scopes) {
+            if (!dependencies.iterator().hasNext()) {
+                return this;
+            }
+            final JkComputedDependency dependency = JkComputedDependency.of(jkProcess, file);
+            final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scopes);
+            this.dependencies.add(scopedDependency);
             return this;
         }
 
