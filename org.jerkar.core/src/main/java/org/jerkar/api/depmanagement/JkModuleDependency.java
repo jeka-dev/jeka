@@ -26,8 +26,14 @@ public final class JkModuleDependency extends JkDependency {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Comparator for {@link JkModuleDependency} sorting dependency by their group then by their name.
+     */
     public static final Comparator<JkModuleDependency> GROUP_NAME_COMPARATOR = new NameComparator();
 
+    /**
+     * Returns <code>true</code> if the candidate string is a valid module dependency description.
+     */
     public static boolean isModuleDependencyDescription(String candidate) {
         final int colonCount = JkUtilsString.countOccurence(candidate, ':');
         return colonCount == 2 || colonCount == 3;
@@ -107,7 +113,7 @@ public final class JkModuleDependency extends JkDependency {
         JkUtilsAssert.notNull(module, "Can't instantiate without module");
         JkUtilsAssert.notNull(module, "Can't instantiate without versionRange");
         JkUtilsAssert
-                .notNull(module, "Can't instantiate wit null excludes, use empty list instead");
+        .notNull(module, "Can't instantiate wit null excludes, use empty list instead");
         this.module = module;
         this.versionRange = versionRange;
         this.classifier = classifier;
@@ -116,10 +122,17 @@ public final class JkModuleDependency extends JkDependency {
         this.excludes = excludes;
     }
 
+    /**
+     * Returns <code>true</code> if this dependency should be resolved transitively (returning the dependencies
+     * of this dependency recursively).
+     */
     public boolean transitive() {
         return transitive;
     }
 
+    /**
+     * Returns the moduleId of this dependency.
+     */
     public JkModuleId moduleId() {
         return module;
     }
