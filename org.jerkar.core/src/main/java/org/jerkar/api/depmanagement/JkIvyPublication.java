@@ -10,55 +10,75 @@ import org.jerkar.api.depmanagement.JkIvyPublication.Artifact;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 
+/**
+ * Informations required to publish a module in an Ivy repository.
+ * 
+ * @author Jerome Angibaud.
+ */
 public final class JkIvyPublication implements Iterable<Artifact>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates a publication for a single artifact embodied by the specified file and
+     * to published as the specified type and scopes. Here, scopes maps directly to
+     * Ivy configurations (scope = configuration).
+     */
     public static JkIvyPublication of(File file, String type, JkScope... jkScopes) {
-        return new JkIvyPublication(new HashSet<JkIvyPublication.Artifact>(), null, null).and(file,
+        return new JkIvyPublication(new HashSet<JkIvyPublication.Artifact>()).and(file,
                 type, jkScopes);
     }
 
+    /**
+     * Creates a publication for a single artifact embodied by the specified file and
+     * to published for the specified scopes.
+     * @see #of(File, String, JkScope...)
+     */
     public static JkIvyPublication of(File file, JkScope... jkScopes) {
-        return new JkIvyPublication(new HashSet<JkIvyPublication.Artifact>(), null, null).and(file,
+        return new JkIvyPublication(new HashSet<JkIvyPublication.Artifact>()).and(file,
                 jkScopes);
     }
 
     private final Set<Artifact> artifacts;
 
-    private final Status status;
-
-    private final String branch;
-
-    private JkIvyPublication(Set<Artifact> artifacts, Status status, String branch) {
+    private JkIvyPublication(Set<Artifact> artifacts) {
         super();
         this.artifacts = artifacts;
-        this.status = status;
-        this.branch = branch;
     }
 
-    public Status status() {
-        return status;
-    }
-
-    public String branch() {
-        return branch;
-    }
-
+    /**
+     * Returns a {@link JkIvyPublication} identical to this one but adding the specified
+     * artifact.
+     * @see #of(File, String, JkScope...)
+     */
     public JkIvyPublication and(File file, String type, JkScope... jkScopes) {
         return and(null, file, type, jkScopes);
     }
 
+    /**
+     * Returns a {@link JkIvyPublication} identical to this one but adding the specified
+     * artifact and giving it the specified name (otherwise the name it the file name).
+     * @see #of(File, String, JkScope...)
+     */
     public JkIvyPublication and(String name, File file, String type, JkScope... jkScopes) {
         final Set<Artifact> artifacts = new HashSet<JkIvyPublication.Artifact>(this.artifacts);
         artifacts.add(new Artifact(name, file, type, JkUtilsIterable.setOf(jkScopes)));
-        return new JkIvyPublication(artifacts, this.status, this.branch);
+        return new JkIvyPublication(artifacts);
     }
 
+    /**
+     * Returns a {@link JkIvyPublication} identical to this one but adding the specified
+     * artifact.
+     * @see #andIf(boolean, File, String, JkScope...)
+     */
     public JkIvyPublication and(File file, JkScope... jkScopes) {
         return and(file, null, jkScopes);
     }
 
+    /**
+     * Same as {@link #and(File, JkScope...)} but effective only if the specified condition
+     * is <code>true</code>.
+     */
     public JkIvyPublication andIf(boolean condition, File file, JkScope... jkScopes) {
         if (condition) {
             return and(file, jkScopes);
@@ -66,6 +86,10 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
         return this;
     }
 
+    /**
+     * Same as {@link #and(File, String, JkScope...)} but effective only if the specified condition
+     * is <code>true</code>.
+     */
     public JkIvyPublication andIf(boolean condition, File file, String type, JkScope... jkScopes) {
         if (condition) {
             return and(file, type, jkScopes);
@@ -73,6 +97,9 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
         return this;
     }
 
+    /**
+     * Same as {@link #and(File, JkScope...)} but effective only if the specified file exists.
+     */
     public JkIvyPublication andOptional(File file, JkScope... jkScopes) {
         if (file.exists()) {
             return and(file, null, jkScopes);
@@ -80,6 +107,10 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
         return this;
     }
 
+    /**
+     * Same as {@link #and(File, String, JkScope...)} but effective only if the specified file
+     * exists.
+     */
     public JkIvyPublication andOptional(File file, String type, JkScope... jkScopes) {
         if (file.exists()) {
             return and(file, type, jkScopes);
@@ -87,6 +118,9 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
         return this;
     }
 
+    /**
+     * Same as {@link #andOptional(File, JkScope...)} but effective only if the specified condition is true.
+     */
     public JkIvyPublication andOptionalIf(boolean condition, File file, JkScope... jkScopes) {
         if (condition) {
             return andOptional(file, jkScopes);
@@ -94,6 +128,9 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
         return this;
     }
 
+    /**
+     * Same as {@link #andOptional(File, type, JkScope...)} but effective only if the specified condition is true.
+     */
     public JkIvyPublication andOptionalIf(boolean condition, File file, String type,
             JkScope... jkScopes) {
         if (condition) {
@@ -107,14 +144,6 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
         return this.artifacts.iterator();
     }
 
-    public JkIvyPublication status(Status status) {
-        return new JkIvyPublication(this.artifacts, status, this.branch);
-    }
-
-    public JkIvyPublication branch(String branch) {
-        return new JkIvyPublication(this.artifacts, this.status, branch);
-    }
-
     static class Artifact implements Serializable {
 
         private static final long serialVersionUID = 1L;
@@ -124,9 +153,9 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
             this.file = file;
             this.extension = file.getName().contains(".") ? JkUtilsString.substringAfterLast(
                     file.getName(), ".") : null;
-            this.type = type;
-            this.jkScopes = jkScopes;
-            this.name = name;
+                    this.type = type;
+                    this.jkScopes = jkScopes;
+                    this.name = name;
         }
 
         public final File file;

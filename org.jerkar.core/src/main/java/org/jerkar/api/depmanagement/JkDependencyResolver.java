@@ -197,7 +197,7 @@ public final class JkDependencyResolver {
         if (scope != null) {
             JkLog.startln("Resolving dependencies for scope '" + scope.name() + "'");
         } else {
-            JkLog.startln("Resolving dependencies without scope");
+            JkLog.startln("Resolving dependencies");
         }
 
         final JkResolveResult resolveResult;

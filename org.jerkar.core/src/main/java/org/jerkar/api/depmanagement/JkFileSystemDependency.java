@@ -22,6 +22,9 @@ public final class JkFileSystemDependency extends JkFileDependency {
         this.files = Collections.unmodifiableSet(JkUtilsIterable.setOf(files));
     }
 
+    /**
+     * Creates a {@link JkFileSystemDependency} on the specified file.
+     */
     public static JkFileSystemDependency ofFile(File baseDir, String relativePath) {
         final File file = new File(relativePath);
         if (!file.isAbsolute()) {
@@ -30,10 +33,16 @@ public final class JkFileSystemDependency extends JkFileDependency {
         return JkFileSystemDependency.of(file);
     }
 
+    /**
+     * Creates a {@link JkFileSystemDependency} on the specified files.
+     */
     public static JkFileSystemDependency of(Iterable<File> files) {
         return new JkFileSystemDependency(files);
     }
 
+    /**
+     * Creates a {@link JkFileSystemDependency} on the specified files.
+     */
     public static JkFileSystemDependency of(File... files) {
         return new JkFileSystemDependency(Arrays.asList(files));
     }
