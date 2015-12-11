@@ -238,7 +238,7 @@ final class DotClasspathGenerator {
 
         // Write entries for external module deps
         if (dependencyResolver.dependenciesToResolve().containsModules()) {
-            final JkResolveResult resolveResult = dependencyResolver.resolve(JkJavaBuild.RUNTIME,
+            final JkResolveResult resolveResult = dependencyResolver.resolve(JkJavaBuild.COMPILE, JkJavaBuild.RUNTIME,
                     JkJavaBuild.PROVIDED, JkJavaBuild.TEST);
             writeExternalModuleEntries(dependencyResolver, writer, resolveResult,
                     includeJavadoc);

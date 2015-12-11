@@ -2,6 +2,11 @@ package org.jerkar.api.utils;
 
 import java.io.File;
 
+/**
+ * Utility class for testing.
+ * 
+ * @author Jerome Angibaud
+ */
 public final class JKUtilsTests {
 
     /**
