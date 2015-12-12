@@ -39,8 +39,8 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
         final JkPublishRepo snapshot = JkPublishRepo
                 .ofSnapshot(JkRepo.mavenOssrhDownloadAndDeploySnapshot(userName, password))
                 .andSha1Md5Checksums().withUniqueSnapshot(true); // ignored as
-                                                                 // unique
-                                                                 // timestamped
+        // unique
+        // timestamped
         // snapshot not yet supported
         final JkPublishRepo release = JkPublishRepo
                 .ofRelease(JkRepo.mavenOssrhDeployRelease(userName, password)).withSigner(pgp)
@@ -48,18 +48,30 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
         return JkPublishRepos.of(snapshot).and(release);
     }
 
+    /**
+     * Returns a Maven repository for publishing located at the specified URL.
+     */
     public static JkPublishRepos maven(String url) {
         return new JkPublishRepos(JkUtilsIterable.listOf(JkPublishRepo.of(JkRepo.maven(url))));
     }
 
+    /**
+     * Returns a Maven repository for publishing located at the specified file.
+     */
     public static JkPublishRepos maven(File file) {
         return new JkPublishRepos(JkUtilsIterable.listOf(JkPublishRepo.of(JkRepo.maven(file))));
     }
 
+    /**
+     * Returns an Ivy repository for publishing located at the specified file.
+     */
     public static JkPublishRepos ivy(File file) {
         return new JkPublishRepos(JkUtilsIterable.listOf(JkPublishRepo.of(JkRepo.ivy(file))));
     }
 
+    /**
+     * Returns an Ivy repository for publishing located at the specified URL/
+     */
     public static JkPublishRepos ivy(String url) {
         return new JkPublishRepos(JkUtilsIterable.listOf(JkPublishRepo.of(JkRepo.ivy(url))));
     }
@@ -71,6 +83,10 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
         this.publishRepos = repos;
     }
 
+    /**
+     * Returns a {@link JkPublishRepo} identical to this one but with the specified Pgp elements
+     * necessary to sign artifacts.
+     */
     public JkPublishRepos withSigner(JkPgp pgp) {
         final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>();
         for (final JkPublishRepo publishRepo : this.publishRepos) {
@@ -79,6 +95,10 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
         return new JkPublishRepos(list);
     }
 
+    /**
+     * Returns a {@link JkPublishRepo} identical to this one but producing a SHA1 check
+     * sum for all published artifacts and signature.
+     */
     public JkPublishRepos withSha1Checksum() {
         final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>();
         for (final JkPublishRepo publishRepo : this.publishRepos) {
@@ -87,6 +107,10 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
         return new JkPublishRepos(list);
     }
 
+    /**
+     * Returns a {@link JkPublishRepo} identical to this one but producing a MD5 check
+     * sum for all published artifacts and signature.
+     */
     public JkPublishRepos withMd5Checksum() {
         final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>();
         for (final JkPublishRepo publishRepo : this.publishRepos) {
@@ -95,6 +119,10 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
         return new JkPublishRepos(list);
     }
 
+    /**
+     * Returns a {@link JkPublishRepo} identical to this one but producing a SHA1 and MD5 check
+     * sums for all published artifacts and signature.
+     */
     public JkPublishRepos withMd5AndSha1Checksum() {
         final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>();
         for (final JkPublishRepo publishRepo : this.publishRepos) {

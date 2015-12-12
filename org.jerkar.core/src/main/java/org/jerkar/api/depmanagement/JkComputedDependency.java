@@ -39,6 +39,11 @@ public class JkComputedDependency extends JkFileDependency {
             public void run() {
                 process.runSync();
             }
+
+            @Override
+            public String toString() {
+                return process.toString();
+            }
         };
         return new JkComputedDependency(runnable, fileSet);
     }
@@ -127,6 +132,11 @@ public class JkComputedDependency extends JkFileDependency {
                     + missingFiles);
         }
         return files;
+    }
+
+    @Override
+    public String toString() {
+        return this.runnable.toString();
     }
 
 }

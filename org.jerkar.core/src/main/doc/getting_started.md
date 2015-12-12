@@ -16,15 +16,27 @@
 | |_| | ____| |   |  _ (/ ___ | |
  \___/|_____)_|   |_| \_)_____|_|
                                      The 100% Java build tool.
+Java Home : C:\UserTemp\I19451\software\jdk1.6.0_24\jre
+Java Version : 1.6.0_24, Sun Microsystems Inc.
+Jerkar Home : C:\software\jerkar                             
+Jerkar User Home : C:\users\djeang\.jerkar
 </code></pre>
 
-5. The download repository is set to maven central (http://repo1.maven.org/maven2) by default. If you want to use another default, edit _[Jerkar Home]/options.properties_ and add the following property `repo.download.url=http://my.personal/repo`.
-   Note that you can alternatively edit the _[Jerkar User Home]/options.properties_ in place of _[Jerkar Home]/options.properties_. 
 
-## Setup Eclipse
+The default download repository (for fetching dependencies) is set to maven central (http://repo1.maven.org/maven2) by default. If you want to use another default, edit _[Jerkar Home]/options.properties_ and add the following property `repo.download.url=http://my.personal/repo`.
+The Jerkar Home is the one given by the `Jerkar` output as mentioned above (C:\users\djeang\.jerkar).  
 
-To reference Jerkar libraries and project dependencies in the Eclipse, it's better to use _classpath variables_ as the project will be more portable. 
-Moreover, when Jerkar generates _.classpath_ file, variables are used in place of complete path, so you need anyway to set these variables once for all :
+## Setup you IDE
+
+### Setup Eclipse
+
+#### With plugin
+
+An Eclipse plugin for Jerkar exists. You can install it from <i>https://github.com/jerkar/eclipsePlugin4Jerkar</i>.
+
+#### ... or manually
+
+If you don't want to use Plugin for Jerkar (or you can't install it), you can setup Eclipse manually.
 
 1. Open the Eclipse preference window : _Window -> Preferences_
 2. Navigate to the classpath variable panel : _Java -> Build Path -> Classpath Variables_
@@ -51,11 +63,11 @@ Jerkar Repository Cache : C:\users\djeang\.jerkar\cache\repo   <-- This is the v
 ...
 ```
 
-## Create a Java Jerkar project
+## Create a Java project without plugin
 
 When starting with a new project you have the choice of creating the project by hand or use scaffolding.
 
-### Create a project by hand
+### Create the project manually
 1. Create a new java project in your IDE : You can follow convention by naming your project as _groupName.projectName_.
 2. Add the _[Jerkar Home]/org.jerkar.core-fat.jar_ lib to your project build-path and attach the source code ( _[Jerkar Home]/lib-sources_ ). This jar includes Jerkar core along plugins classes.
 3. Create a _build/def_ folder at the base of your project and make it a source folder in your IDE. In Jerkar, all build related stuff (build definition, local 3rd party libs, produced artifacts,...) lie in _build_ directory located at the root of your project
@@ -66,7 +78,7 @@ When starting with a new project you have the choice of creating the project by 
 If your project is <a href="../../tour.html#100conventional">100% conventional</a>, you can skip steps <strong>2, 3 and 4</strong>.
 </p>
 
-### Use scaffolding
+### ... or using scaffolding
 1. Create a new java project in your IDE
 2. Execute `jerkar scaffold` under the project base directory. This generates the project structures.
 
@@ -75,6 +87,13 @@ If your project is <a href="../../tour.html#100conventional">100% conventional</
 </p>
 
 As Jerkar builds itself, you can have a look at [how Jerkar project is structured](https://github.com/jerkar/jerkar/tree/master/org.jerkar.core).
+
+## Create a Java project with Eclipse plugin
+
+1. Create an empty java project as you would do with Eclipse : File -> New -> Java Project
+2. Write click on this project to open contextual menu and click on Jerkar -> Scaffold ->  Classic Java Project
+
+This will create the directory layout for the project along build class and update *.classpath* file.
 
 ## Build your project
 

@@ -2,8 +2,10 @@ package org.jerkar.tool.builtins.javabuild;
 
 import java.io.File;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
+import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkFileSystemDependency;
 import org.jerkar.api.depmanagement.JkIvyPublication;
@@ -26,7 +28,6 @@ import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
 import org.jerkar.api.tooling.JkMvn;
-import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsJdk;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.JkBuildDependencySupport;
@@ -107,9 +108,13 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     @JkDoc("Manifest")
     public final JkManifestOption manifest = new JkManifestOption();
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected List<Class<Object>> pluginTemplateClasses() {
-        return JkUtilsIterable.listOfGeneric(JkJavaBuildPlugin.class);
+        final List<Class<Object>> result = new LinkedList<Class<Object>>();
+        final Class clazz = JkJavaBuildPlugin.class;
+        result.add(clazz);
+        return result;
     }
 
     // --------------------------- Project settings -----------------------
@@ -335,6 +340,13 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
     }
 
+    /**
+     * Returns a {@link JkComputedDependency} that consist of the jar file produced by this build
+     * plus all of its RUNTIME transitive runtime dependencies.
+     */
+    public JkComputedDependency asJavaDependency() {
+        return this.asDependency(this.depsFor(RUNTIME).andHead(this.packer().jarFile()));
+    }
 
 
     private Object scaffoldedBuildClassCode() {

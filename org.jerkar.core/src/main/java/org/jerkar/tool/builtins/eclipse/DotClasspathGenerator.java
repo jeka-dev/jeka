@@ -238,7 +238,7 @@ final class DotClasspathGenerator {
 
         // Write entries for external module deps
         if (dependencyResolver.dependenciesToResolve().containsModules()) {
-            final JkResolveResult resolveResult = dependencyResolver.resolve(JkJavaBuild.RUNTIME,
+            final JkResolveResult resolveResult = dependencyResolver.resolve(JkJavaBuild.COMPILE, JkJavaBuild.RUNTIME,
                     JkJavaBuild.PROVIDED, JkJavaBuild.TEST);
             writeExternalModuleEntries(dependencyResolver, writer, resolveResult,
                     includeJavadoc);
@@ -249,12 +249,7 @@ final class DotClasspathGenerator {
                     includeJavadoc);
         }
 
-        // Write entries for file dependencies
-        final Set<File> fileDeps = new HashSet<File>(dependencyResolver
-                .dependenciesToResolve()
-                .localFileDependencies(JkJavaBuild.TEST, JkJavaBuild.PROVIDED, JkJavaBuild.COMPILE)
-                .entries());
-        writeFileEntries(fileDeps, writer);
+
     }
 
     private void writeExternalModuleEntries(JkDependencyResolver dependencyResolver,
@@ -362,7 +357,7 @@ final class DotClasspathGenerator {
 
             // Replace with relative path
             if (!replaced) {
-                final String relpPath = toProjectRelativePath(file);
+                final String relpPath = toDependendeeProjectRelativePath(file);
                 if (relpPath != null) {
                     if (file.getName().toLowerCase().endsWith(".jar")) {
                         skiped = true;
@@ -371,6 +366,7 @@ final class DotClasspathGenerator {
                         path = relpPath;
                     }
                 } else {
+                    path = toRelativePath(file);
                     skiped = false;
                 }
             } else {
@@ -383,7 +379,7 @@ final class DotClasspathGenerator {
 
     }
 
-    private String toProjectRelativePath(File file) {
+    private String toDependendeeProjectRelativePath(File file) {
         for (final File projectFile : this.projectDependencies) {
             if (JkUtilsFile.isAncestor(projectFile, file)) {
                 final String relativePath = JkUtilsFile.getRelativePath(projectFile, projectFile);
@@ -393,5 +389,15 @@ final class DotClasspathGenerator {
         }
         return null;
     }
+
+    private String toRelativePath(File file) {
+        if (JkUtilsFile.isAncestor(this.projectDir, file)) {
+            return JkUtilsFile.getRelativePath(projectDir, file).replace(File.separatorChar, '/');
+        }
+        return JkUtilsFile.canonicalPath(file);
+    }
+
+
+
 
 }

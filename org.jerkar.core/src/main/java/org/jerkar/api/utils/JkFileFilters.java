@@ -4,8 +4,17 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 
+/**
+ * Utility class serving as factory for creating specific {@link FileFilter}
+ * 
+ * @author Jerome Angibaud
+ */
 public final class JkFileFilters {
 
+    /**
+     * Creates a {@link FileFilter} that accept files having a name
+     * ending with one of the specified suffixes.
+     */
     public static FileFilter endingBy(final String... suffixes) {
         return new FileFilter() {
 
@@ -21,6 +30,9 @@ public final class JkFileFilters {
         };
     }
 
+    /**
+     * Creates a file filter that accept all files.
+     */
     public static FileFilter acceptAll() {
         return new FileFilter() {
 
@@ -36,6 +48,9 @@ public final class JkFileFilters {
         };
     }
 
+    /**
+     * Creates a file filter that accept only the specified file.
+     */
     public static FileFilter acceptOnly(final File fileToAccept) {
         return new FileFilter() {
 
@@ -51,7 +66,10 @@ public final class JkFileFilters {
         };
     }
 
-    public static FileFilter combine(final FileFilter filter1, final FileFilter filter2) {
+    /**
+     * Creates a file filter that accepts file accepted by both specified filters
+     */
+    public static FileFilter and(final FileFilter filter1, final FileFilter filter2) {
         return new FileFilter() {
 
             @Override
@@ -66,6 +84,9 @@ public final class JkFileFilters {
         };
     }
 
+    /**
+     * Creates a fileFilter that accept file rejected by specified filter.
+     */
     public static FilenameFilter reverse(final FilenameFilter filter) {
         return new FilenameFilter() {
 
@@ -76,6 +97,9 @@ public final class JkFileFilters {
         };
     }
 
+    /**
+     * Creates a fileFilter that accept file rejected by specified filter.
+     */
     public static FileFilter reverse(final FileFilter filter) {
         return new FileFilter() {
 

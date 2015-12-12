@@ -16,6 +16,7 @@ import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkScopeMapping;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
+import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompiler;
@@ -26,11 +27,13 @@ import org.jerkar.tool.CommandLine.MethodInvocation;
 
 /**
  * Buildable project. This class has the responsibility to compile the build
- * classes along to run them.<br/>
- * Build class are expected to lie in [project base dir]/build/spec.<br/>
- * Classes having simple name starting by '_' are not compiled.
+ * classes and to run them.<br/>
+ * Build classes are expected to lie in [project base dir]/build/spec.<br/>
+ * Classes having simple name starting by '_' are ignored.
  */
 final class Project {
+
+    private final JkPathFilter BUILD_SOURCE_FILTER = JkPathFilter.include("**/*.java").andExclude("**/*_");
 
     private final File projectBaseDir;
 
@@ -57,7 +60,7 @@ final class Project {
 
     private void preCompile() {
         final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir,
-                JkFileTree.of(resolver.buildSourceDir).include("**/*.java"));
+                JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER));
         this.buildDependencies = this.buildDependencies.and(parser.dependencies());
         this.buildRepos = parser.importRepos().and(buildRepos);
         this.subProjects = parser.projects();
@@ -76,11 +79,13 @@ final class Project {
         }
         yetCompiledProjects.add(this.projectBaseDir);
         preCompile(); // This enrich dependencies
-        JkLog.startHeaded("Making build classes for project " + this.projectBaseDir.getName());
+        JkLog.startHeaded("Compiling build classes for project " + this.projectBaseDir.getName());
+        JkLog.startln("Resolving compilation classpath");
         final JkDependencyResolver buildClassDependencyResolver = getBuildDefDependencyResolver();
         final JkPath buildPath = buildClassDependencyResolver.get();
         path.addAll(buildPath.entries());
         path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
+        JkLog.done();
         this.compileBuild(JkPath.of(path));
         path.add(this.resolver.buildClassDir);
         JkLog.done();
@@ -112,14 +117,20 @@ final class Project {
         this.buildDependencies = this.buildDependencies.andScopeless(init.commandLine()
                 .dependencies());
         JkPath runtimeClasspath = compile();
-        runtimeClasspath = runtimeClasspath.andHead( pathOf(init.commandLine().dependencies()) );
-        JkLog.nextLine();
+        JkLog.startHeaded("Instantiating build class");
+        if (!init.commandLine().dependencies().isEmpty()) {
+            JkLog.startln("Grab dependencies specified in command line");
+            final JkPath cmdPath = pathOf(init.commandLine().dependencies());
+            runtimeClasspath = runtimeClasspath.andHead( cmdPath );
+            JkLog.done("Command line extra path : " + cmdPath);
+        }
         final BuildAndPluginDictionnary buidAndDict = getBuildInstance(init, runtimeClasspath);
         if (buidAndDict == null) {
             throw new JkException("Can't find or guess any build class for project hosted in "
                     + this.projectBaseDir
                     + " .\nAre you sure this directory is a buildable project ?");
         }
+        JkLog.done();
         try {
             this.launch(buidAndDict.build, buidAndDict.dictionnary, init.commandLine());
         } catch (final RuntimeException e) {
@@ -253,8 +264,7 @@ final class Project {
     }
 
     private JkJavaCompiler baseBuildCompiler() {
-        final JkFileTree buildSource = JkFileTree.of(resolver.buildSourceDir).include("**/*.java")
-                .exclude("**/_*");
+        final JkFileTree buildSource = JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER);
         if (!resolver.buildClassDir.exists()) {
             resolver.buildClassDir.mkdirs();
         }

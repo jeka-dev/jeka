@@ -1,7 +1,6 @@
 package org.jerkar.api.utils;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,8 +13,18 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
+/**
+ * Utility class for dealing with {@link Iterable}.
+ * 
+ * @author Jerome Angibaud
+ */
 public final class JkUtilsIterable {
 
+    /**
+     * Returns a list form the the specified {@link Iterable}.
+     * If the specified {@link Iterable} is yet a {@link List} than it
+     * is returned as is, otherwise a brand new {@link List} is created.
+     */
     public static <T> List<T> listOf(Iterable<T> it) {
         if (it instanceof List) {
             return (List<T>) it;
@@ -28,15 +37,16 @@ public final class JkUtilsIterable {
         return result;
     }
 
+    /**
+     * @see #listOf(Iterable)
+     */
     public static <T> List<T> listOf(T... items) {
         return Arrays.asList(items);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> List<T> listOfGeneric(Object... items) {
-        return ((List<T>) Arrays.asList(items));
-    }
-
+    /**
+     * Creates an array of the specified class and populate it with items of the specified {@link Iterable}.
+     */
     @SuppressWarnings("unchecked")
     public static <T> T[] arrayOf(Iterable<T> it, Class<T> clazz) {
         final List<T> list = listOf(it);
@@ -49,12 +59,18 @@ public final class JkUtilsIterable {
         return result;
     }
 
+    /**
+     * Creates a set of specified items.
+     */
     public static <T> Set<T> setOf(T... items) {
         final HashSet<T> result = new HashSet<T>();
         result.addAll(Arrays.asList(items));
         return result;
     }
 
+    /**
+     * Creates a set of specified items.
+     */
     public static <T> Set<T> setOf(Iterable<T> items) {
         final HashSet<T> result = new HashSet<T>();
         for (final T item : items) {
@@ -63,6 +79,10 @@ public final class JkUtilsIterable {
         return result;
     }
 
+    /**
+     * Creates a map of specified key/value. Key value should be declared in sequence as
+     * <code>mapOf(key1, value1, key2, value2,...)</code>
+     */
     @SuppressWarnings("unchecked")
     public static <T, U> Map<T, U> mapOf(T key, U value, Object... others) {
         final Map<T, U> result = new HashMap<T, U>();
@@ -75,19 +95,18 @@ public final class JkUtilsIterable {
         return result;
     }
 
+    /**
+     * Returns an {@link Iterable} iterating on items of specified iterables.
+     * Result is backed by the specified iterables.
+     */
     public static <T> Iterable<T> chain(Iterable<T>... iterables) {
         return chainAll(Arrays.asList(iterables));
     }
 
-    public static <T> Iterable<T> chain(T item, Iterable<T>... iterables) {
-        final List<Iterable<T>> list = new LinkedList<Iterable<T>>();
-        final List<T> single = new ArrayList<T>(3);
-        single.add(item);
-        list.add(single);
-        list.addAll(Arrays.asList(iterables));
-        return chainAll(list);
-    }
 
+    /**
+     * @see JkUtilsIterable#chain(Iterable...)
+     */
     public static <T> Iterable<T> chainAll(Iterable<Iterable<T>> iterables) {
         final List<Iterable<T>> effectiveIterables = removeEmptyIt(iterables);
         if (effectiveIterables.isEmpty()) {
@@ -187,6 +206,10 @@ public final class JkUtilsIterable {
         }
     }
 
+    /**
+     * Returns a list that is a concatenation of the specified lists.
+     * The result is not backed by specified {@link Iterable}.
+     */
     public static <T> List<T> concatLists(Iterable<? extends T>... lists) {
         final List<T> result = new LinkedList<T>();
         for (final Iterable<? extends T> list : lists) {
@@ -197,27 +220,13 @@ public final class JkUtilsIterable {
         return result;
     }
 
-    public static <T> List<T> concatToList(T item, Iterable<? extends T>... lists) {
-        final List<T> result = new LinkedList<T>();
-        result.add(item);
-        result.addAll(concatLists(lists));
-        return result;
-    }
-
+    /**
+     * Creates a {@link Map} and populates it with specified properties.
+     */
     public static Map<String, String> propertiesToMap(Properties properties) {
         final Map<String, String> result = new HashMap<String, String>();
         for (final Object propKey : properties.keySet()) {
             result.put(propKey.toString(), properties.getProperty(propKey.toString()));
-        }
-        return result;
-    }
-
-    public static <T> List<T> withoutDoubloons(List<T> list) {
-        final List<T> result = new LinkedList<T>();
-        for (final T item : list) {
-            if (!result.contains(item)) {
-                result.add(item);
-            }
         }
         return result;
     }
