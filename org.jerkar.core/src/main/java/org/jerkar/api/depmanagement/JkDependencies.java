@@ -21,7 +21,7 @@ import org.jerkar.api.utils.JkUtilsString;
 /**
  * A set of {@link JkScopedDependency} generally standing for the entire
  * dependencies of a project/module.
- * 
+ *
  * @author Jerome Angibaud.
  */
 public class JkDependencies implements Iterable<JkScopedDependency>, Serializable {
@@ -199,7 +199,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     /**
      * Returns a clone of this object plus {@link JkScopedDependency}s on the
      * specified external module.
-     * 
+     *
      * @param versionedModuleId
      *            something like "org.apache:commons:1.4"
      */
@@ -346,7 +346,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     /**
      * Convenient method to resolve using {@link JkModuleDepFile}s instead of
      * {@link JkVersionedModule}.
-     * 
+     *
      * @see #resolvedWith(Iterable)
      */
     public JkDependencies resolvedWithArtifacts(Iterable<JkModuleDepFile> artifacts) {
@@ -410,7 +410,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     /**
      * Create a <code>JkDependencies</code> identical to this one but adding
      * exclusion clause
-     * 
+     *
      * @param exclusions
      * @return
      */
@@ -664,9 +664,25 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         }
 
         /**
+         * Same as {@link #on(JkModuleId, JkScope...)} but effective only if the specified
+         * condition is true.
+         */
+        public JkFluentModuleDepBuilder onIf(boolean condition, JkModuleId module, JkScope... scopes) {
+            return on(JkModuleDependency.of(module, JkVersionRange.UNSPECIFIED), scopes);
+        }
+
+        /**
          * @see #on(JkModuleDependency, JkScope...)
          */
         public JkFluentModuleDepBuilder on(JkModuleId module, String version, JkScope... scopes) {
+            return on(module, JkVersionRange.of(version), scopes);
+        }
+
+        /**
+         * Same as {@link #on(JkModuleId, String, JkScope...)} but effective only if the specified
+         * condition is true.
+         */
+        public JkFluentModuleDepBuilder onIf(JkModuleId module, String version, JkScope... scopes) {
             return on(module, JkVersionRange.of(version), scopes);
         }
 
@@ -933,7 +949,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
     /**
      * Returns the java codes that declare these dependencies.
-     * 
+     *
      * @formatter:off
      */
     public String toJavaCode(int indentCount) {
