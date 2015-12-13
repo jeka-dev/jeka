@@ -101,7 +101,10 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
     @Override
     protected void scaffold() {
         try {
-            JkLog.start("Trying to generate Eclipse metadata files");
+            JkLog.startln("Trying to generate Eclipse metadata files");
+
+            // We create a new build instance to avoid duplication in classpath concerning
+            // elements already present in this classloader
             final JkBuild newBuild = JkInit.instanceOf(this.build.baseDir().root());
             final JkBuildPluginEclipse pluginEclipse = new JkBuildPluginEclipse();
             pluginEclipse.build = newBuild;

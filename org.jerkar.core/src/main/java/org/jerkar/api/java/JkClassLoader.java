@@ -39,7 +39,7 @@ import org.jerkar.api.utils.JkUtilsZip;
 /**
  * Wrapper around {@link URLClassLoader} offering convenient methods and fluent
  * interface to deal with <code>URLClassLoader</code>.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkClassLoader {
@@ -92,7 +92,7 @@ public final class JkClassLoader {
 
     /**
      * Returns a {@link JkClassLoader} wrapping the current class loader.
-     * 
+     *
      * @see Class#getClassLoader()
      */
     public static JkClassLoader current() {
@@ -101,7 +101,7 @@ public final class JkClassLoader {
 
     /**
      * Returns a {@link JkClassLoader} wrapping the system class loader.
-     * 
+     *
      * @see ClassLoader#getSystemClassLoader()
      */
     public static JkClassLoader system() {
@@ -203,7 +203,7 @@ public final class JkClassLoader {
 
     /**
      * Returns a sibling of this class loader that outputs every searched class.
-     * 
+     *
      * @see #sibling(Iterable)
      */
     public JkClassLoader printingSearchedClasses(Set<String> searchedClassContainer) {
@@ -237,7 +237,7 @@ public final class JkClassLoader {
      * wrapped <code>class loader</code>.<br/>
      * The specified class is supposed to be defined in this class loader,
      * otherwise an {@link IllegalArgumentException} is thrown.
-     * 
+     *
      * @see #loadIfExist(String) #isDefined(String)
      */
     @SuppressWarnings("unchecked")
@@ -303,7 +303,7 @@ public final class JkClassLoader {
      * name. Returns <code>null</code> if no class matches. </br> For example :
      * loadFromNameOrSimpleName("MyClass", null) may return the class
      * my.pack.MyClass.
-     * 
+     *
      * @param name
      *            The full name or the simple name of the class to load
      * @param superClassArg
@@ -343,7 +343,7 @@ public final class JkClassLoader {
      * to load all classes that are defined in folder and not in jar file, you
      * have to provide a <code>FileFilter</code> which includes only
      * directories.
-     * 
+     *
      * @param entryFilter
      *            The classpath entry filter. Can be <code>null</code>.
      */
@@ -396,7 +396,7 @@ public final class JkClassLoader {
      * For example, if you want to load all class belonging to
      * <code>my.pack</code> or its sub package, then you have to supply a the
      * following pattern <code>my/pack/&#42;&#42;/&#42;</code>.
-     * 
+     *
      * @see JkClassLoader#loadClasses(JkPathFilter)
      */
     public Set<Class<?>> loadClasses(String... includingPatterns) {
@@ -410,7 +410,7 @@ public final class JkClassLoader {
     /**
      * Returns all classes of this <code>classloader</code> that are defined
      * inside the provided <code>JkFileTreeSet</code>.
-     * 
+     *
      * @see JkClassLoader#loadClassesInEntries(FileFilter)
      */
     public Set<Class<? extends Object>> loadClassesIn(JkFileTreeSet jkFileTreeSet) {
@@ -427,7 +427,7 @@ public final class JkClassLoader {
     /**
      * Returns all classes of this <code>classloader</code> that are defined
      * inside the provided <code>JkFileTreeSet</code>.
-     * 
+     *
      * @see JkClassLoader#loadClassesInEntries(FileFilter)
      */
     public Iterator<Class<? extends Object>> iterateClassesIn(JkFileTreeSet jkFileTreeSet) {
@@ -439,7 +439,7 @@ public final class JkClassLoader {
     /**
      * Returns all classes of this <code>classloader</code> that are defined
      * inside the specified directory.
-     * 
+     *
      * @see JkClassLoader#loadClassesInEntries(FileFilter)
      */
     public Iterator<Class<? extends Object>> iterateClassesIn(File dirOrJar) {
@@ -513,9 +513,11 @@ public final class JkClassLoader {
         while (it.hasNext()) {
             final Class<?> clazz = it.next();
             final Method mainMethod = JkUtilsReflect.getMethodOrNull(clazz, "main", String[].class);
-            final int modifiers = mainMethod.getModifiers();
-            if (mainMethod != null && Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers)) {
-                return clazz.getName();
+            if (mainMethod != null) {
+                final int modifiers = mainMethod.getModifiers();
+                if (Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers)) {
+                    return clazz.getName();
+                }
             }
         }
         return null;
