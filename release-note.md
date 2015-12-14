@@ -1,7 +1,10 @@
 ## 0.3.1-SNAPSHOT
 
-* Fix Eclipse .classpath generation (doublon entries for local jar dependencies)
+* Fix Eclipse .classpath generation (doublon entries for local jar dependencies, exported project dependencies)
 * Improve dependency handling between java sub-projects
+* Fix auto found main class.
+* Add methods on JkDependencies.Builder
+
 
 ## 0.3.0
 

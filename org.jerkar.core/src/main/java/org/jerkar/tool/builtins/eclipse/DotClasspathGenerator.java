@@ -141,6 +141,7 @@ final class DotClasspathGenerator {
             writer.writeCharacters("\t");
             writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
             writer.writeAttribute("kind", "src");
+            writer.writeAttribute("exported", "true");
             writer.writeAttribute("path", "/" + depProjectDir.getName());
             writer.writeCharacters("\n");
         }
