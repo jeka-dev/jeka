@@ -1,4 +1,4 @@
-## 0.3.1-SNAPSHOT
+## 0.3.1
 
 * Fix Eclipse .classpath generation (doublon entries for local jar dependencies, exported project dependencies)
 * Improve dependency handling between java sub-projects
