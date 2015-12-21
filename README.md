@@ -4,7 +4,14 @@
 <strong>Jerkar</strong> is a complete **build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ but using **pure Java** to describe builds : no XML, no foreign language.
 Breaking a common belief, it makes proof that Java is perfectly suitable in this domain.
 
-See [official web site](http://jerkar.github.io/index.html) for more description.
+# How to use Jerkar
+
+Jerkar is expected to have a very fast learning curve for Java developers. You can visit the following page in this order :
+
+* http://jerkar.github.io/tell-me-more.html : introduction to Jerkar. Answer to the question : *What Jerkar is exactly ?*
+* http://jerkar.github.io/tour.html : to give a concrete idea of how Jerkar is working
+* http://jerkar.github.io/documentation/latest/getting_started.html : to get hand-on experience
+* http://jerkar.github.io/documentation/latest/reference.html : to know the details about Jerkar behavior
 
 # How to build Jerkar
 Jerkar is made of following projects :
@@ -32,17 +39,6 @@ Youu can achieve the same using **Intellij** as Intellij module definitions (.im
 
 First release has been delivered. It contains all features a self respecting build tool must have : from compilation to publication features.
 Now we'll plan to deliver new releases at fast pace. You're welcome to push your expectation for next releases. 
-
-
-# Using Jerkar
-
-Jerkar is expected to have a very fast learning curve for Java developers. You can visit the following page in this order :
-
-* http://jerkar.github.io/tell-me-more.html : introduction to Jerkar. Answer to the question : *What Jerkar is exactly ?*
-* http://jerkar.github.io/tour.html : to give a concrete idea of how Jerkar is working
-* http://jerkar.github.io/documentation/latest/getting_started.html : to get hand-on experience
-* http://jerkar.github.io/documentation/latest/reference.html : to know the details about Jerkar behavior
-
 
 # How to contribute ?
 
