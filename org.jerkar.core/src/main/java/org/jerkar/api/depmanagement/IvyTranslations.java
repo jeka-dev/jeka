@@ -193,6 +193,9 @@ final class IvyTranslations {
             return new ModuleRevisionId(toModuleId(externalModule.moduleId()), originalVersion);
         }
         final Map<String, String> extra = JkUtilsIterable.mapOf("revConstraints", originalVersion);
+        if (externalModule.ext() != null) {
+            extra.put("ext", externalModule.ext());
+        }
         return ModuleRevisionId.newInstance(externalModule.moduleId().group(), externalModule
                 .moduleId().name(), resolvedVersion.name(), extra);
 

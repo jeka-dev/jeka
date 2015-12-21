@@ -21,18 +21,27 @@ import org.jerkar.api.utils.JkUtilsXml;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-class EffectivePom {
+/**
+ * Wraps a POM file (Ideally an effective POM file) and provides convenient methods to extract
+ * information from.
+ * 
+ * @author Jerome Angibaud
+ */
+public final class JkPom {
 
     private final Document pomDoc;
 
-    private EffectivePom(Document pomDoc) {
+    private JkPom(Document pomDoc) {
         super();
         this.pomDoc = pomDoc;
     }
 
-    public static EffectivePom of(File file) {
+    /**
+     * Creates a {@link JkPom} from a POM file, ideally an effective POM file.
+     */
+    public static JkPom of(File file) {
         final Document document = JkUtilsXml.documentFrom(file);
-        return new EffectivePom(document);
+        return new JkPom(document);
     }
 
     private Element dependenciesElement() {
@@ -51,22 +60,38 @@ class EffectivePom {
         return pomDoc.getDocumentElement();
     }
 
+    /**
+     * The groupId for this POM.
+     */
     public String groupId() {
         return JkUtilsXml.directChildText(projectEl(), "groupId");
     }
 
+    /**
+     * The artifzctId for this POM.
+     */
     public String artifactId() {
         return JkUtilsXml.directChildText(projectEl(), "artifactId");
     }
 
+    /**
+     * The version for this POM.
+     */
     public String version() {
         return JkUtilsXml.directChildText(projectEl(), "version");
     }
 
+    /**
+     * The dependencies declared in this POM.
+     */
     public JkDependencies dependencies() {
         return dependencies(dependenciesElement());
     }
 
+    /**
+     * The map groupId:ArtifactId -> version provideded by the <code>dependencyManagement</code>
+     * section of this POM.
+     */
     public JkVersionProvider versionProvider() {
         final List<JkVersionedModule> versionedModules = new LinkedList<JkVersionedModule>();
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
@@ -83,6 +108,10 @@ class EffectivePom {
         return JkVersionProvider.of(versionedModules);
     }
 
+    /**
+     * The {@link JkDependencyExclusions} instance provided by the <code>dependencyManagement</code>
+     * section of this POM.
+     */
     public JkDependencyExclusions dependencyExclusion() {
         final JkDependencyExclusions.Builder builder = JkDependencyExclusions.builder();
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
@@ -98,6 +127,9 @@ class EffectivePom {
         return builder.build();
     }
 
+    /**
+     * Repositories declared in this POM.
+     */
     public JkRepos repos() {
         final List<String> urls = new LinkedList<String>();
         for (final Element repositoryEl : JkUtilsXml.directChildren(repositoriesEl(), "repository")) {
@@ -146,6 +178,9 @@ class EffectivePom {
 
     }
 
+    /**
+     * The Jerkar build class source equivalent to this POM.
+     */
     public String jerkarSourceCode() {
         final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
         codeWriter.moduleId = JkModuleId.of(groupId(), artifactId());

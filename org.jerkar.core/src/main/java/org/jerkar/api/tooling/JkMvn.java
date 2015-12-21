@@ -128,9 +128,9 @@ public final class JkMvn implements Runnable {
     public String createBuildClassCode(String packageName, String className) {
         final File pom = JkUtilsFile.tempFile("effectivepom", ".xml");
         commands("help:effective-pom", "-Doutput=" + pom.getAbsolutePath()).run();
-        final EffectivePom effectivePom = EffectivePom.of(pom);
+        final JkPom jkPom = JkPom.of(pom);
         pom.delete();
-        return effectivePom.jerkarSourceCode();
+        return jkPom.jerkarSourceCode();
     }
 
     /**

@@ -15,19 +15,19 @@ public class EffectivePomTest {
     public void test() {
         final URL url = EffectivePomTest.class.getResource("effectivepom.xml");
         final File file = new File(url.getFile());
-        final EffectivePom effectivePom = EffectivePom.of(file);
-        effectivePom.dependencies();
-        effectivePom.artifactId();
-        effectivePom.dependencyExclusion();
-        effectivePom.repos();
+        final JkPom jkPom = JkPom.of(file);
+        jkPom.dependencies();
+        jkPom.artifactId();
+        jkPom.dependencyExclusion();
+        jkPom.repos();
     }
 
     @Test
     public void testJerkarSourceCode() throws IOException {
         final URL url = EffectivePomTest.class.getResource("effectivepom.xml");
         final File file = new File(url.getFile());
-        final EffectivePom effectivePom = EffectivePom.of(file);
-        final String code = effectivePom.jerkarSourceCode();
+        final JkPom jkPom = JkPom.of(file);
+        final String code = jkPom.jerkarSourceCode();
         System.out.println(code);
         final File srcDir = new File("build/output/test-generated-src");
         srcDir.mkdirs();

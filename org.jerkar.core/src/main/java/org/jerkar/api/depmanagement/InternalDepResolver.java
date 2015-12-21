@@ -1,5 +1,6 @@
 package org.jerkar.api.depmanagement;
 
+
 /**
  * Not part of the public API.
  */
@@ -21,5 +22,7 @@ interface InternalDepResolver {
      * transitive resolution).
      */
     JkAttachedArtifacts getArtifacts(Iterable<JkVersionedModule> modules, JkScope... scopes);
+
+
 
 }

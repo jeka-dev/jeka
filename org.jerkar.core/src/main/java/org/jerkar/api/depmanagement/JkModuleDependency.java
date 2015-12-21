@@ -137,15 +137,24 @@ public final class JkModuleDependency extends JkDependency {
         return module;
     }
 
+    /**
+     * Returns the version of the module this dependencies is constrained to.
+     */
     public JkVersionRange versionRange() {
         return versionRange;
     }
 
+    /**
+     * Returns a {@link JkModuleDependency} identical to this one but with the specified 'transitive' property.
+     */
     public JkModuleDependency transitive(boolean transitive) {
         return new JkModuleDependency(module, versionRange, classifier, transitive, extension,
                 excludes);
     }
 
+    /**
+     * Returns <code>true</code> if the version of the module for this dependency is not specified.
+     */
     public boolean hasUnspecifedVersion() {
         return this.versionRange.isUnspecified();
     }
@@ -212,6 +221,9 @@ public final class JkModuleDependency extends JkDependency {
         return this.extension;
     }
 
+    /**
+     * Returns modules to exclude from the transitive chain.
+     */
     public List<JkDepExclude> excludes() {
         return excludes;
     }
