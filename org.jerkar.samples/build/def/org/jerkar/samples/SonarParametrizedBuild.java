@@ -21,8 +21,7 @@ public class SonarParametrizedBuild extends JkJavaBuild {
 	@JkDoc("Sonar server environment")
 	protected SonarEnv sonarEnv = SonarEnv.DEV;
 
-	@Override
-	protected void init() {
+	protected SonarParametrizedBuild() {
 		JkBuildPluginSonar sonarPlugin = new JkBuildPluginSonar().prop(
 				JkSonar.HOST_URL, sonarEnv.url)
 				.prop(JkSonar.BRANCH, "myBranch");

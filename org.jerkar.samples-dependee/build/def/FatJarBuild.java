@@ -32,8 +32,7 @@ public class FatJarBuild extends JkJavaBuild {
     @JkProject("../org.jerkar.samples")
     private AClassicBuild sampleBuild;
 
-    @Override
-    protected void init() {
+    FatJarBuild() {
     	sampleBuild.pack.fatJar = true; // Tell the dependency build to generate a fat jar 
     	pack.fatJar = true; // Tell this build to generate a fat jar as well
     }

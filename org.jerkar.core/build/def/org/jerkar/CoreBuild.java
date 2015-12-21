@@ -16,14 +16,12 @@ import org.jerkar.tool.builtins.javabuild.JkJavaPacker;
  */
 public class CoreBuild extends AbstractBuild {
 
-    private File distripZipFile;
+    private final File distripZipFile;
 
     /** The folder where is generated the core distrib */
     public File distribFolder;
 
-    @Override
-    protected void init() {
-        super.init();
+    CoreBuild() {
         distripZipFile = ouputDir("jerkar-distrib.zip");
         distribFolder = ouputDir("jerkar-distrib");
         this.pack.fatJar = true;

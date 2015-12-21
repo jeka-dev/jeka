@@ -255,9 +255,6 @@ final class ProjectDef {
 
         static JkProjectBuildOptionDef of(Object instance, Field field, Class<?> declaringClass,
                 String name) {
-            if (instance instanceof JkBuild) {
-                ((JkBuild) instance).init();
-            }
             final JkDoc opt = field.getAnnotation(JkDoc.class);
             final String descr = opt != null ? JkUtilsString.join(opt.value(), "\n") : null;
             final Class<?> type = field.getType();

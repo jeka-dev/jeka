@@ -36,10 +36,9 @@ It processes as follow :
 2. Populate system properties and Jerkar options from configuration files and command line (see <strong>build configuration</strong>).
 3. Pre-process and compile java source files located under under _[PROJECT DIR]/build/def_ (see <strong>Build Definition Compilation</strong>). 
 4. Instantiate the build class (see <strong>Build Class Instantiation</strong>)
-5. Inject options in build instance fields along the project root directory (see <strong>Build Configuration</strong>).
-6. Call the `init()` method on the build instance. This is the place to set location related variable and to configure plugins (see <strong>Plugins</strong>). 
-7. Instantiate and configure plugins specified in command line arguments (see <strong>Mention Plugins in the Command Line</strong>).
-8. Invoke methods specified in command line arguments : methods are executed in the order they appear on the command line.
+5. Inject options in build instance fields (see <strong>Build Configuration</strong>).
+6. Instantiate and configure plugins specified in command line arguments (see <strong>Mention Plugins in the Command Line</strong>).
+7. Invoke methods specified in command line arguments : methods are executed in the order they appear on the command line.
 
 #### Command Line
 

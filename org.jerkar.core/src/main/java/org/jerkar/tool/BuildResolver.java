@@ -102,8 +102,13 @@ final class BuildResolver {
             if (clazz == null) {
                 throw new JkException("No build class named " + classNameHint + " found.");
             }
-            final JkBuild build = JkUtilsReflect.newInstance(clazz);
-            build.setBaseDir(this.baseDir);
+            JkBuild.baseDirContext(baseDir);
+            final JkBuild build;
+            try {
+                build = JkUtilsReflect.newInstance(clazz);
+            } finally {
+                JkBuild.baseDirContext(null);
+            }
             return build;
         }
 
@@ -115,8 +120,13 @@ final class BuildResolver {
                     final Class<?> clazz = classLoader.loadGivenClassSourcePath(path);
                     if (baseClass.isAssignableFrom(clazz)
                             && !Modifier.isAbstract(clazz.getModifiers())) {
-                        final JkBuild build = (JkBuild) JkUtilsReflect.newInstance(clazz);
-                        build.setBaseDir(baseDir);
+                        JkBuild.baseDirContext(baseDir);
+                        final JkBuild build;
+                        try {
+                            build = (JkBuild) JkUtilsReflect.newInstance(clazz);
+                        } finally {
+                            JkBuild.baseDirContext(null);
+                        }
                         return build;
                     }
                 }
@@ -125,9 +135,14 @@ final class BuildResolver {
         }
 
         // If nothing yet found use defaults
-        final JkBuild result = (JkBuild) JkUtilsReflect
-                .newInstance(JkConstants.DEFAULT_BUILD_CLASS);
-        result.setBaseDir(baseDir);
+        JkBuild.baseDirContext(baseDir);
+        final JkBuild result;
+        try {
+            result = (JkBuild) JkUtilsReflect
+                    .newInstance(JkConstants.DEFAULT_BUILD_CLASS);
+        } finally {
+            JkBuild.baseDirContext(null);
+        }
         return result;
     }
 

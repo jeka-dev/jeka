@@ -41,11 +41,11 @@ public final class JkInit {
 
     /**
      * Creates an instance of the build class for the specified project. It is
-     * slower than {@link #instanceOf(Class, String...)} cause it needs compilation
-     * prior instantiating the object.
+     * slower than {@link #instanceOf(Class, String...)} cause it needs
+     * compilation prior instantiating the object.
      */
     @SuppressWarnings("unchecked")
-    public static <T extends JkBuild> T instanceOf(File base, String...args) {
+    public static <T extends JkBuild> T instanceOf(File base, String... args) {
         final JkInit init = JkInit.of(args);
         init.displayInfo();
         final Project project = new Project(base);
@@ -75,13 +75,17 @@ public final class JkInit {
     public static <T extends JkBuild> T instanceOf(Class<T> clazz, File baseDir, String... args) {
         final JkInit init = JkInit.of(args);
         init.displayInfo();
-        final T build = JkUtilsReflect.newInstance(clazz);
-        build.setBaseDir(baseDir);
+        JkBuild.baseDirContext(baseDir);
+        final T build;
+        try {
+            build = JkUtilsReflect.newInstance(clazz);
+        } finally {
+            JkBuild.baseDirContext(null);
+        }
         init.initProject(build);
         JkLog.info("Build class " + build.getClass().getName());
         JkLog.info("Activated plugins : " + build.plugins.getActives());
-        final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector
-                .injectedFields(build));
+        final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
         JkInit.logProps("Field values", displayedOptions);
         return build;
     }
@@ -90,16 +94,14 @@ public final class JkInit {
      * As {@link #instanceOf(Class, String...)} but you can specified the
      * command line using two distinct arrays that will be concatenated.
      */
-    public static <T extends JkBuild> T instanceOf(Class<T> clazz, String[] args,
-            String... extraArgs) {
+    public static <T extends JkBuild> T instanceOf(Class<T> clazz, String[] args, String... extraArgs) {
         return instanceOf(clazz, JkUtilsIterable.concat(args, extraArgs));
     }
 
     void displayInfo() {
         JkLog.info("Working Directory : " + System.getProperty("user.dir"));
         JkLog.info("Java Home : " + System.getProperty("java.home"));
-        JkLog.info("Java Version : " + System.getProperty("java.version") + ", "
-                + System.getProperty("java.vendor"));
+        JkLog.info("Java Version : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
         JkLog.info("Jerkar Home : " + JkLocator.jerkarHome().getAbsolutePath());
         JkLog.info("Jerkar User Home : " + JkLocator.jerkarUserHome().getAbsolutePath());
         JkLog.info("Jerkar Repository Cache : " + JkLocator.jerkarRepositoryCache());
@@ -180,11 +182,9 @@ public final class JkInit {
     PluginDictionnary<JkBuildPlugin> initProject(JkBuild build) {
         final CommandLine commandLine = this.loadResult.commandLine;
         JkOptions.populateFields(build, commandLine.getMasterBuildOptions());
-        build.init();
 
         // setup plugins
-        final Class<JkBuildPlugin> baseClass = JkClassLoader.of(build.getClass()).load(
-                JkBuildPlugin.class.getName());
+        final Class<JkBuildPlugin> baseClass = JkClassLoader.of(build.getClass()).load(JkBuildPlugin.class.getName());
         final PluginDictionnary<JkBuildPlugin> dictionnary = PluginDictionnary.of(baseClass);
         final List<JkBuild> slaveBuilds = build.slaves().all();
         if (!slaveBuilds.isEmpty()) {
@@ -196,8 +196,7 @@ public final class JkInit {
             }
             JkLog.done();
         }
-        configureProject(build, commandLine.getMasterPluginSetups(),
-                commandLine.getMasterBuildOptions(), dictionnary);
+        configureProject(build, commandLine.getMasterPluginSetups(), commandLine.getMasterBuildOptions(), dictionnary);
         return dictionnary;
 
     }
@@ -226,11 +225,11 @@ public final class JkInit {
         configureAndActivatePlugins(build, pluginSetups, dictionnary);
     }
 
-    private static void configureAndActivatePlugins(JkBuild build,
-            Collection<JkPluginSetup> pluginSetups, PluginDictionnary<JkBuildPlugin> dictionnary) {
+    private static void configureAndActivatePlugins(JkBuild build, Collection<JkPluginSetup> pluginSetups,
+            PluginDictionnary<JkBuildPlugin> dictionnary) {
         for (final JkPluginSetup pluginSetup : pluginSetups) {
-            final Class<? extends JkBuildPlugin> pluginClass = dictionnary.loadByNameOrFail(
-                    pluginSetup.pluginName).pluginClass();
+            final Class<? extends JkBuildPlugin> pluginClass = dictionnary.loadByNameOrFail(pluginSetup.pluginName)
+                    .pluginClass();
             if (pluginSetup.activated) {
                 JkLog.startln("Activating plugin " + pluginClass.getName());
                 final Object plugin = build.plugins.addActivated(pluginClass, pluginSetup.options);
@@ -265,8 +264,7 @@ public final class JkInit {
 
         @Override
         public String toString() {
-            return "buildClass=" + JkUtilsObject.toString(buildClass) + ", verbose=" + verbose
-                    + ", silent=" + silent;
+            return "buildClass=" + JkUtilsObject.toString(buildClass) + ", verbose=" + verbose + ", silent=" + silent;
         }
 
     }

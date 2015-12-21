@@ -17,6 +17,7 @@ import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsTime;
 
@@ -30,7 +31,13 @@ public class JkBuild {
 
     private static final ThreadLocal<Map<SubProjectRef, JkBuild>> SUB_PROJECT_CONTEXT = new ThreadLocal<Map<SubProjectRef, JkBuild>>();
 
-    private File baseDir = JkUtilsFile.workingDir();
+    private static final ThreadLocal<File> BASE_DIR_CONTEXT = new ThreadLocal<File>();
+
+    static void baseDirContext(File baseDir) {
+        BASE_DIR_CONTEXT.set(baseDir);
+    }
+
+    private final File baseDir;
 
     private final Date buildTime = JkUtilsTime.now();
 
@@ -45,6 +52,8 @@ public class JkBuild {
      * Constructs a {@link JkBuild}
      */
     protected JkBuild() {
+        final File baseDirContext = BASE_DIR_CONTEXT.get();
+        this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, JkUtilsFile.workingDir());
         final List<JkBuild> subBuilds = populateJkProjectAnnotatedFields();
         this.annotatedJkProjectSlaves = JkSlaveBuilds.of(this.baseDir().root(), subBuilds);
     }
@@ -111,16 +120,6 @@ public class JkBuild {
         return JkFileTree.of(baseDir);
     }
 
-    void setBaseDir(File baseDir) {
-        this.baseDir = baseDir;
-    }
-
-    /**
-     * This method is invoked right after the base directory of this builds had
-     * been set, so you can initialize fields safely here.
-     */
-    protected void init() {
-    }
 
     /**
      * Invokes the specified method in this build.
@@ -338,7 +337,6 @@ public class JkBuild {
     private static final JkBuild relativeProject(JkBuild mainBuild, Class<? extends JkBuild> clazz,
             String relativePath) {
         final JkBuild build = mainBuild.relativeProjectBuild(clazz, relativePath);
-        build.init();
         return build;
     }
 
