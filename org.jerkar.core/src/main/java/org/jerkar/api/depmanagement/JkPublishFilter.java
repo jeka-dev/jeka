@@ -10,8 +10,14 @@ import java.io.Serializable;
  */
 public interface JkPublishFilter extends Serializable {
 
+    /**
+     * Returns <code>true</code> if this filter should accept the specified versioned module.
+     */
     boolean accept(JkVersionedModule versionedModule);
 
+    /**
+     * A filter accepting everything.
+     */
     public static final JkPublishFilter ACCEPT_ALL = new JkPublishFilter() {
 
         private static final long serialVersionUID = 1L;
@@ -23,6 +29,9 @@ public interface JkPublishFilter extends Serializable {
 
     };
 
+    /**
+     * A filter accepting only snapshot versioned module.
+     */
     public static final JkPublishFilter ACCEPT_SNAPSHOT_ONLY = new JkPublishFilter() {
 
         private static final long serialVersionUID = 1L;
@@ -34,6 +43,9 @@ public interface JkPublishFilter extends Serializable {
 
     };
 
+    /**
+     * A filter accepting only non-snapshot versioned module.
+     */
     public static final JkPublishFilter ACCEPT_RELEASE_ONLY = new JkPublishFilter() {
 
         private static final long serialVersionUID = 1L;

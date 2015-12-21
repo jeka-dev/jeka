@@ -2,21 +2,19 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 import org.jerkar.api.utils.JkUtilsObject;
 
 /**
- * A file coming from a module dependency
- * 
+ * A file coming from a module dependency.
  */
 public final class JkModuleDepFile implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates a {@link JkModuleDepFile} from the specified versioned module and file.
+     */
     public static JkModuleDepFile of(JkVersionedModule versionedModule, File localFile) {
         return new JkModuleDepFile(versionedModule, localFile);
     }
@@ -31,10 +29,16 @@ public final class JkModuleDepFile implements Serializable {
         this.localFile = localFile;
     }
 
+    /**
+     * Returns the versioned module.
+     */
     public JkVersionedModule versionedModule() {
         return versionedModule;
     }
 
+    /**
+     * Returns the file.
+     */
     public File localFile() {
         return localFile;
     }
@@ -75,20 +79,6 @@ public final class JkModuleDepFile implements Serializable {
                 + "]";
     }
 
-    public static List<File> localFiles(Iterable<JkModuleDepFile> artifacts) {
-        final List<File> result = new LinkedList<File>();
-        for (final JkModuleDepFile artifact : artifacts) {
-            result.add(artifact.localFile);
-        }
-        return result;
-    }
 
-    public static Set<JkVersionedModule> versionedModules(Set<JkModuleDepFile> artifacts) {
-        final Set<JkVersionedModule> result = new HashSet<JkVersionedModule>();
-        for (final JkModuleDepFile artifact : artifacts) {
-            result.add(artifact.versionedModule());
-        }
-        return result;
-    }
 
 }

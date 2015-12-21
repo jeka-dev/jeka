@@ -93,10 +93,16 @@ public final class JkPublisher {
         this.ivyPublisher.publishMaven(versionedModule, publication, dependencies);
     }
 
+    /**
+     * Returns <code>true</code> if this publisher contains Maven reposirories.
+     */
     public boolean hasMavenPublishRepo() {
         return this.ivyPublisher.hasMavenPublishRepo();
     }
 
+    /**
+     * Returns <code>true</code> if this publisher contains Ivy reposirories.
+     */
     public boolean hasIvyPublishRepo() {
         return this.ivyPublisher.hasIvyPublishRepo();
     }

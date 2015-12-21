@@ -8,53 +8,30 @@ import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * Used to specify a module version.
+ * Used to specify a module version. Versions are comparable.
  *
- * @author djeang
+ * @author Jerome Angibaud
  */
 public final class JkVersion implements Comparable<JkVersion>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String DEFAULT_VERSION_RESOURCE_NAME = "version.txt";
-
+    /**
+     * Creates a {@link JkVersion} with the specified name.
+     */
     public static JkVersion ofName(String name) {
         return new JkVersion(name);
     }
 
+    /**
+     * 
+     * @param clazz
+     * @param name
+     * @return
+     */
     public static JkVersion fromResource(Class<?> clazz, String name) {
         final URL url = clazz.getResource(name);
         return ofName(JkUtilsIO.read(url).trim());
-    }
-
-    public static JkVersion fromResourceOrNull(Class<?> clazz, String name) {
-        final URL url = clazz.getResource(name);
-        if (url == null) {
-            return null;
-        }
-        final String versionName = JkUtilsIO.read(url).trim();
-        if (JkUtilsString.isBlank(versionName)) {
-            return null;
-        }
-        return JkVersion.ofName(versionName);
-    }
-
-    public static JkVersion fromResourceOrNull(Class<?> clazz) {
-        return fromResourceOrNull(clazz, DEFAULT_VERSION_RESOURCE_NAME);
-    }
-
-    public static JkVersion fromResource(Class<?> clazz) {
-        return fromResource(clazz, DEFAULT_VERSION_RESOURCE_NAME);
-    }
-
-    public static JkVersion firstNonNull(String first, String second) {
-        if (!JkUtilsString.isBlank(first)) {
-            return JkVersion.ofName(first);
-        }
-        if (!JkUtilsString.isBlank(second)) {
-            return JkVersion.ofName(second);
-        }
-        throw new IllegalArgumentException("Both first and second can't be null");
     }
 
     private final String name;
@@ -66,10 +43,16 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
         this.name = name;
     }
 
+    /**
+     * Returns the name of the version.
+     */
     public String name() {
         return name;
     }
 
+    /**
+     * Returns <code>true</code> if this version stands for a snapshot one.
+     */
     public boolean isSnapshot() {
         return this.name.toLowerCase().endsWith("-snapshot");
     }
@@ -79,6 +62,9 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
         return name.compareTo(other.name);
     }
 
+    /**
+     * Returns <code>true</code> if this version is to be considered superior to the specified one.
+     */
     public boolean isGreaterThan(JkVersion other) {
         return this.compareTo(other) > 0;
     }

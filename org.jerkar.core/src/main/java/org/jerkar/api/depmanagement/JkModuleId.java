@@ -15,6 +15,9 @@ public final class JkModuleId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Comparator sorting by module group first then module name.
+     */
     public final static Comparator<JkModuleId> GROUP_NAME_COMPARATOR = new GroupAndNameComparator();
 
     /**
@@ -56,14 +59,23 @@ public final class JkModuleId implements Serializable {
         this.name = name;
     }
 
+    /**
+     * Group of this module.
+     */
     public String group() {
         return group;
     }
 
+    /**
+     * Name of this module.
+     */
     public String name() {
         return name;
     }
 
+    /**
+     * A concatenation of the group and name of the module as '[group].[name]'.
+     */
     public String fullName() {
         if (group.equals(name)) {
             return name;
@@ -72,7 +84,7 @@ public final class JkModuleId implements Serializable {
     }
 
     /**
-     * Returns a string formatted as 'group:name'.
+     * A concatenation of the group and name of this module as '[group]:[name]'.
      */
     public String groupAndName() {
         return group + ":" + name;
