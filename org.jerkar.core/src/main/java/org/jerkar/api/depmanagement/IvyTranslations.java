@@ -173,7 +173,7 @@ final class IvyTranslations {
         for (final JkScope parent : jkScope.extendedScopes()) {
             extendedScopes.add(parent.name());
         }
-        final Visibility visibility = jkScope.isPublic() ? Visibility.PUBLIC : Visibility.PRIVATE;
+        final Visibility visibility = Visibility.PUBLIC;
         return new Configuration(jkScope.name(), visibility, jkScope.description(),
                 extendedScopes.toArray(new String[0]), jkScope.transitive(), null);
     }
@@ -186,17 +186,17 @@ final class IvyTranslations {
         return result;
     }
 
-    private static ModuleRevisionId toModuleRevisionId(JkModuleDependency externalModule,
+    public static ModuleRevisionId toModuleRevisionId(JkModuleDependency moduleDependency,
             JkVersion resolvedVersion) {
-        final String originalVersion = externalModule.versionRange().definition();
+        final String originalVersion = moduleDependency.versionRange().definition();
         if (resolvedVersion == null || resolvedVersion.name().equals(originalVersion)) {
-            return new ModuleRevisionId(toModuleId(externalModule.moduleId()), originalVersion);
+            return new ModuleRevisionId(toModuleId(moduleDependency.moduleId()), originalVersion);
         }
         final Map<String, String> extra = JkUtilsIterable.mapOf("revConstraints", originalVersion);
-        if (externalModule.ext() != null) {
-            extra.put("ext", externalModule.ext());
+        if (moduleDependency.ext() != null) {
+            extra.put("ext", moduleDependency.ext());
         }
-        return ModuleRevisionId.newInstance(externalModule.moduleId().group(), externalModule
+        return ModuleRevisionId.newInstance(moduleDependency.moduleId().group(), moduleDependency
                 .moduleId().name(), resolvedVersion.name(), extra);
 
     }

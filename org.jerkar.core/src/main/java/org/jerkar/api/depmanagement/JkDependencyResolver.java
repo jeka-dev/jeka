@@ -27,23 +27,11 @@ import org.jerkar.api.utils.JkUtilsIterable;
  */
 public final class JkDependencyResolver {
 
-    private static final String IVYRESOLVER_CLASS_NAME = IvyResolver.class.getName();
-
-    private static final JkScope SINGLE_SCOPE = JkScope.of("JkDependencyResolver.SINGLE");
-
-    private static final JkScope SINGLE_SCOPE_NON_TRANS = JkScope.of(
-            "JkDependencyResolver.SINGLE.NON_TRANS").transitive(false);
-
     private static final JkScope NULL_SCOPE = JkScope.of("JkDependencyResolver.NULL_SCOPE");
 
     private static JkDependencyResolver managed(JkRepos repos, JkDependencies dependencies,
             JkVersionedModule module, JkResolutionParameters resolutionParameters) {
-
-        // Ivy Resolver is loaded in a dedicated classloader containing Ivy.
-        // Thus we need to serialize the result to be used in the current class
-        // loader.
-        final InternalDepResolver ivyResolver = IvyClassloader.CLASSLOADER.transClassloaderProxy(
-                InternalDepResolver.class, IVYRESOLVER_CLASS_NAME, "of", repos);
+        final InternalDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
         return new JkDependencyResolver(ivyResolver, dependencies, module, resolutionParameters);
     }
 
@@ -71,15 +59,15 @@ public final class JkDependencyResolver {
         return new JkDependencyResolver(null, dependencies, null, null);
     }
 
-    static JkPath get(JkRepos repos, JkModuleDependency dep, boolean transitive) {
-        final JkScope scope = transitive ? SINGLE_SCOPE : SINGLE_SCOPE_NON_TRANS;
-        final InternalDepResolver resolver = IvyClassloader.CLASSLOADER.transClassloaderProxy(
-                InternalDepResolver.class, IVYRESOLVER_CLASS_NAME, "of", repos);
-        final JkScopeMapping scopeMapping = JkScopeMapping.of(scope).to("default");
-        final JkResolveResult result = resolver.resolveAnonymous(JkDependencies.of(scope, dep),
-                scope, JkResolutionParameters.of().withDefault(scopeMapping));
-        return JkPath.of(result.localFiles());
-    }
+    //    static JkPath get(JkRepos repos, JkModuleDependency dep, boolean transitive) {
+    //        final JkScope scope = transitive ? SINGLE_SCOPE : SINGLE_SCOPE_NON_TRANS;
+    //        final InternalDepResolver resolver = IvyClassloader.CLASSLOADER.transClassloaderProxy(
+    //                InternalDepResolver.class, IVYRESOLVER_CLASS_NAME, "of", repos);
+    //        final JkScopeMapping scopeMapping = JkScopeMapping.of(scope).to("default");
+    //        final JkResolveResult result = resolver.resolveAnonymous(JkDependencies.of(scope, dep),
+    //                scope, JkResolutionParameters.of().withDefault(scopeMapping));
+    //        return JkPath.of(result.localFiles());
+    //    }
 
     private final Map<JkScope, JkResolveResult> cachedResolveResult = new HashMap<JkScope, JkResolveResult>();
 

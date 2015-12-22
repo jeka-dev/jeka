@@ -10,14 +10,25 @@ import java.util.List;
 
 import org.jerkar.api.utils.JkUtilsIterable;
 
+/**
+ * A set of {@link JkRepo}
+ * 
+ * @author Jerome Angibaud
+ */
 public final class JkRepos implements Iterable<JkRepo>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Crates a {@link JkRepos} from the specified {@link JkRepo}s
+     */
     public static JkRepos of(JkRepo... jkRepositories) {
         return new JkRepos(Arrays.asList(jkRepositories));
     }
 
+    /**
+     * Creates a {@link JkRepos} from Maven repositories having specified urls.
+     */
     public static JkRepos maven(String... urls) {
         final List<JkRepo> list = new LinkedList<JkRepo>();
         for (final String url : urls) {
@@ -26,6 +37,9 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
         return new JkRepos(list);
     }
 
+    /**
+     * Creates a {@link JkRepos} from Maven repositories having specified file roots.
+     */
     public static JkRepos maven(File... files) {
         final List<JkRepo> list = new LinkedList<JkRepo>();
         for (final File file : files) {
@@ -34,6 +48,9 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
         return new JkRepos(list);
     }
 
+    /**
+     * Creates a {@link JkRepos} from Ivy repositories having specified urls.
+     */
     public static JkRepos ivy(String... urls) {
         final List<JkRepo> list = new LinkedList<JkRepo>();
         for (final String url : urls) {
@@ -42,6 +59,9 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
         return new JkRepos(list);
     }
 
+    /**
+     * Creates a {@link JkRepos} from Maven repositories having specified Ivy files.
+     */
     public static JkRepos ivy(File... files) {
         final List<JkRepo> list = new LinkedList<JkRepo>();
         for (final File file : files) {
@@ -50,10 +70,16 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
         return new JkRepos(list);
     }
 
+    /**
+     * Creates a {@link JkRepos} from the single Maven central repository.
+     */
     public static JkRepos mavenCentral() {
         return new JkRepos(JkUtilsIterable.listOf(JkRepo.mavenCentral()));
     }
 
+    /**
+     * Creates a {@link JkRepos} from the single Ivy JCenter repository.
+     */
     public static JkRepos mavenJCenter() {
         return new JkRepos(JkUtilsIterable.listOf(JkRepo.mavenJCenter()));
     }
@@ -65,16 +91,25 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
         this.repos = Collections.unmodifiableList(repos);
     }
 
+    /**
+     * Returns a {@link JkRepos} identical to this one but adding specified {@link JkRepo} on.
+     */
     public JkRepos and(Iterable<JkRepo> jkRepos) {
         return and(JkUtilsIterable.arrayOf(jkRepos, JkRepo.class));
     }
 
+    /**
+     * Returns a {@link JkRepos} identical to this one but adding specified {@link JkRepo} on.
+     */
     public JkRepos and(JkRepo... jkRepoArray) {
         final List<JkRepo> list = new LinkedList<JkRepo>(this.repos);
         list.addAll(Arrays.asList(jkRepoArray));
         return new JkRepos(list);
     }
 
+    /**
+     * Same as {@link #and(JkRepo...)} but only effective if the specified condition is true.
+     */
     public JkRepos andIf(boolean condition, JkRepo... repos) {
         if (condition) {
             return and(repos);
@@ -82,10 +117,16 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
         return this;
     }
 
+    /**
+     * Same as {@link #and(JkRepo...)} but only effective if this one is currently empty.
+     */
     public JkRepos andIfEmpty(JkRepo... repos) {
         return andIfEmpty(Arrays.asList(repos));
     }
 
+    /**
+     * Same as {@link #and(Iterable)} but only effective if this one is currently empty.
+     */
     public JkRepos andIfEmpty(Iterable<JkRepo> repos) {
         if (this.isEmpty()) {
             return and(repos);
@@ -93,30 +134,45 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
         return this;
     }
 
+    /**
+     * Returns a {@link JkRepos} identical to this one but adding Ivy {@link JkRepo} having specified root files.
+     */
     public JkRepos andIvy(File... files) {
         final List<JkRepo> list = new LinkedList<JkRepo>(this.repos);
         list.addAll(JkRepos.ivy(files).repos);
         return new JkRepos(list);
     }
 
+    /**
+     * Returns a {@link JkRepos} identical to this one but adding Maven {@link JkRepo} having specified root files.
+     */
     public JkRepos andMaven(File... files) {
         final List<JkRepo> list = new LinkedList<JkRepo>(this.repos);
         list.addAll(maven(files).repos);
         return new JkRepos(list);
     }
 
+    /**
+     * Returns a {@link JkRepos} identical to this one but adding Maven central repository..
+     */
     public JkRepos andMavenCentral() {
         final List<JkRepo> list = new LinkedList<JkRepo>(this.repos);
         list.add(JkRepo.mavenCentral());
         return new JkRepos(list);
     }
 
+    /**
+     * Returns a {@link JkRepos} identical to this one but adding Ivy Jcennter repository..
+     */
     public JkRepos andMavenJCenter() {
         final List<JkRepo> list = new LinkedList<JkRepo>(this.repos);
         list.add(JkRepo.mavenJCenter());
         return new JkRepos(list);
     }
 
+    /**
+     * Returns <code>true</code> is this {@link JkRepos} does not ontains and {@link JkRepo}.
+     */
     public boolean isEmpty() {
         return this.repos.isEmpty();
     }
@@ -135,7 +191,8 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
      * Retrieve directly the file embodying the specified the external dependency.
      */
     public File get(JkModuleDependency moduleDependency) {
-        return JkDependencyResolver.get(this, moduleDependency);
+        final InternalDepResolver depResolver = InternalDepResolvers.ivy(this);
+        return depResolver.get(moduleDependency);
     }
 
 

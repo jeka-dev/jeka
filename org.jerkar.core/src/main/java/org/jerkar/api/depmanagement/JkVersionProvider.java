@@ -17,24 +17,39 @@ public final class JkVersionProvider implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Returns <code>true</code> if this object provides no versions about any {@link JkModuleId}.
+     */
     @SuppressWarnings("unchecked")
     public static JkVersionProvider empty() {
         return new JkVersionProvider(Collections.EMPTY_MAP);
     }
 
+    /**
+     * @see #of(JkModuleId, JkVersion)
+     */
     public static JkVersionProvider of(String moduleId, String version) {
         return of(JkModuleId.of(moduleId), version);
     }
 
+    /**
+     * @see #of(JkModuleId, JkVersion)
+     */
     public static JkVersionProvider of(JkModuleId moduleId, String version) {
         return of(moduleId, JkVersion.ofName(version));
     }
 
+    /**
+     * Creates a {@link JkVersionProvider} holding a single version providing.
+     */
     public static JkVersionProvider of(JkModuleId moduleId, JkVersion version) {
         final Map<JkModuleId, JkVersion> result = JkUtilsIterable.mapOf(moduleId, version);
         return new JkVersionProvider(result);
     }
 
+    /**
+     * Creates an empty version provider.
+     */
     public static JkVersionProvider of() {
         return new JkVersionProvider(new HashMap<JkModuleId, JkVersion>());
     }

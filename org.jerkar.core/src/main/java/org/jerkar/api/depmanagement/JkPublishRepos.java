@@ -173,7 +173,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
     public boolean requirePgpSignature(JkVersionedModule versionedModule) {
         for (final JkPublishRepo jkPublishRepo : this.publishRepos) {
             if (jkPublishRepo.filter().accept(versionedModule)
-                    && jkPublishRepo.requirePgpSign() != null) {
+                    && jkPublishRepo.pgpSigner() != null) {
                 return true;
             }
         }

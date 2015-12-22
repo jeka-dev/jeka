@@ -310,7 +310,7 @@ final class IvyPublisher implements InternalPublisher {
 
         private static CheckFileFlag of(JkPublishRepo publishRepo) {
             final CheckFileFlag flag = new CheckFileFlag();
-            flag.pgpSigner = publishRepo.requirePgpSign();
+            flag.pgpSigner = publishRepo.pgpSigner();
             return flag;
         }
 

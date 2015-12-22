@@ -21,27 +21,44 @@ public final class JkPublishRepo implements Serializable {
 
     private final JkPublishFilter filter;
 
-    private final JkPgp requirePgpSign;
+    private final JkPgp pgpSigner;
 
     // SHA-1, SHA-256, MD5
     private final Set<String> checksumAlgorithms;
 
     private final boolean uniqueSnapshot;
 
+    /**
+     * Creates a {@link JkPublishRepo} for publishing on the specified {@link JkRepo} when
+     * the specified {@link JkPublishRepo} agree. If the specified filter do not agree to publish
+     * a given {@link JkVersionedModule}, a publish of the disagreed module on this {@link JkPublishRepo}
+     * will result in an no operation (doing nothing).
+     */
     public static JkPublishRepo of(JkRepo jkRepo, JkPublishFilter filter) {
         return new JkPublishRepo(jkRepo, filter, null, new HashSet<String>(), false);
     }
 
+    /**
+     * Creates a {@link JkPublishRepo} for publishing always on the specified {@link JkRepo}.
+     */
     public static JkPublishRepo of(JkRepo jkRepo) {
         return new JkPublishRepo(jkRepo, JkPublishFilter.ACCEPT_ALL, null, new HashSet<String>(),
                 false);
     }
 
+    /**
+     * Creates a {@link JkPublishRepo} for publishing snapshot version on the specified {@link JkRepo}.
+     * Release versions are not publishable on this {@link JkPublishRepos}
+     */
     public static JkPublishRepo ofSnapshot(JkRepo jkRepo) {
         return new JkPublishRepo(jkRepo, JkPublishFilter.ACCEPT_SNAPSHOT_ONLY, null,
                 new HashSet<String>(), false);
     }
 
+    /**
+     * Creates a {@link JkPublishRepo} for publishing non-snapshot version on the specified {@link JkRepo}.
+     * Snapshot versions are not publishable on this {@link JkPublishRepos}
+     */
     public static JkPublishRepo ofRelease(JkRepo jkRepo) {
         return new JkPublishRepo(jkRepo, JkPublishFilter.ACCEPT_RELEASE_ONLY, null,
                 new HashSet<String>(), false);
@@ -52,23 +69,39 @@ public final class JkPublishRepo implements Serializable {
         super();
         this.jkRepo = jkRepo;
         this.filter = filter;
-        this.requirePgpSign = requirePgpSign;
+        this.pgpSigner = requirePgpSign;
         this.checksumAlgorithms = Collections.unmodifiableSet(digesters);
         this.uniqueSnapshot = uniqueSnapshot;
     }
 
+    /**
+     * Returns the underlying {@link JkRepo}.
+     */
     public JkRepo repo() {
         return jkRepo;
     }
 
+    /**
+     * Returns the filter used for this {@link JkPublishRepo}.
+     * Only modules accepted by this filter will pb published on this repo.
+     */
     public JkPublishFilter filter() {
         return filter;
     }
 
-    public JkPgp requirePgpSign() {
-        return requirePgpSign;
+    /**
+     * If this repository requires a artifact PGP signature in order to be published, this method
+     * returns the the {@link JkPgp} signer for signing artifacts to be published.
+     * If no no PGP signer has been defined, this method returns <code>null</code>.
+     */
+    public JkPgp pgpSigner() {
+        return pgpSigner;
     }
 
+    /**
+     * Returns the algorithms used ("sha-1" or "md5") for check summing published artifacts.
+     * If this, repository does not produces checksum, this methods returns an empty set.
+     */
     public Set<String> checksumAlgorithms() {
         return checksumAlgorithms;
     }
@@ -83,6 +116,11 @@ public final class JkPublishRepo implements Serializable {
         return uniqueSnapshot;
     }
 
+    /**
+     * Returns a {@link JkPublishRepo} identical to this one but with the specified Pgp signer.
+     * All artifacts published on the returned repository will be automatically signed with the specified
+     * Pgp signer, if this one is not <code>null<code>.
+     */
     public JkPublishRepo withSigner(JkPgp signer) {
         return new JkPublishRepo(jkRepo, filter, signer, checksumAlgorithms, uniqueSnapshot);
     }
@@ -99,7 +137,7 @@ public final class JkPublishRepo implements Serializable {
     private JkPublishRepo andChecksums(String... algorithms) {
         final HashSet<String> set = new HashSet<String>(this.checksumAlgorithms);
         set.addAll(Arrays.asList(algorithms));
-        return new JkPublishRepo(jkRepo, filter, requirePgpSign, set, uniqueSnapshot);
+        return new JkPublishRepo(jkRepo, filter, pgpSigner, set, uniqueSnapshot);
     }
 
     /**
@@ -120,23 +158,36 @@ public final class JkPublishRepo implements Serializable {
     }
 
     /**
-     * Convenient combination of {@link #andMd5Checksum()} and
-     * {@link #andSha1Checksum()}
+     * Returns a {@link JkPublishRepo} but with sha-1 and md5 check summers.
+     * All published artifact will be check-summed with sha1 and md5.
      */
     public JkPublishRepo andSha1Md5Checksums() {
         return andSha1Checksum().andMd5Checksum();
     }
 
+    /**
+     * Returns a {@link JkPublishRepos} made of this {@link JkPublishRepo} and the specified one.
+     */
     public JkPublishRepos and(JkPublishRepo repo) {
         return JkPublishRepos.of(this).and(repo);
     }
 
+    /**
+     * Returns a {@link JkPublishRepos} made of this {@link JkPublishRepo} and the specified {@link JkRepo}
+     * for artifact having a non-snapshot version.
+     */
     public JkPublishRepos andRelease(JkRepo repo) {
         return and(JkPublishRepo.ofRelease(repo));
     }
 
+    /**
+     * Returns a {@link JkPublishRepo} identical to this one but with the specified <i>uniqueSnapshot</i>
+     * property. When this property is <code>true</code>n artifact deployed on this repository are timestamped so
+     * several artifact from the same snapshot version can coexist in the this repository. <br/>
+     * This is the default behavior for artifact deployed with Maven 3, while this is not the case with Maven 2.
+     */
     public JkPublishRepo withUniqueSnapshot(boolean uniqueSnapShot) {
-        return new JkPublishRepo(jkRepo, filter, requirePgpSign, this.checksumAlgorithms,
+        return new JkPublishRepo(jkRepo, filter, pgpSigner, this.checksumAlgorithms,
                 uniqueSnapShot);
     }
 

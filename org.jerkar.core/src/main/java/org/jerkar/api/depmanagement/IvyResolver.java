@@ -8,17 +8,21 @@ import java.util.Random;
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.IvyContext;
 import org.apache.ivy.core.cache.ResolutionCacheManager;
+import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.module.descriptor.Configuration;
+import org.apache.ivy.core.module.descriptor.DefaultArtifact;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
+import org.apache.ivy.core.resolve.DownloadOptions;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.util.url.URLHandlerRegistry;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
 /**
@@ -213,6 +217,16 @@ final class IvyResolver implements InternalDepResolver {
         final String version = Long.toString(RANDOM.nextLong());
         return JkVersionedModule.of(JkModuleId.of("anonymousGroup", "anonymousName"),
                 JkVersion.ofName(version));
+    }
+
+    @Override
+    public File get(JkModuleDependency dependency) {
+        final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(dependency, null);
+        final boolean metadata = "pom".equalsIgnoreCase(dependency.ext());
+        final String typeAndExt = JkUtilsObject.firstNonNull(dependency.ext(), "jar");
+        final Artifact artifact = new DefaultArtifact(moduleRevisionId, null, dependency.moduleId().name(), typeAndExt, typeAndExt, metadata);
+        final ArtifactDownloadReport report = ivy.getResolveEngine().download(artifact, new DownloadOptions());
+        return report.getLocalFile();
     }
 
 

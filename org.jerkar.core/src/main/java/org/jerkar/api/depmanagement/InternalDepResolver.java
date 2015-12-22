@@ -1,5 +1,7 @@
 package org.jerkar.api.depmanagement;
 
+import java.io.File;
+
 
 /**
  * Not part of the public API.
@@ -23,6 +25,6 @@ interface InternalDepResolver {
      */
     JkAttachedArtifacts getArtifacts(Iterable<JkVersionedModule> modules, JkScope... scopes);
 
-
+    File get(JkModuleDependency dependency);
 
 }

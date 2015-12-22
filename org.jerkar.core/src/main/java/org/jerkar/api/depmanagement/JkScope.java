@@ -31,7 +31,7 @@ public class JkScope implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public static JkOptionableScope of(String name) {
-        return new JkOptionableScope(name, Collections.EMPTY_SET, "", true, true);
+        return new JkOptionableScope(name, Collections.EMPTY_SET, "", true);
     }
 
     private final Set<JkScope> extendedScopes;
@@ -42,10 +42,8 @@ public class JkScope implements Serializable {
 
     private final boolean transitive;
 
-    private final boolean isPublic;
-
     private JkScope(String name, Set<JkScope> extendedScopes, String description,
-            boolean transitive, boolean isPublic) {
+            boolean transitive) {
         super();
         final String illegal = JkUtilsString.firstMatching(name, ",", "->");
         if (illegal != null) {
@@ -55,7 +53,6 @@ public class JkScope implements Serializable {
         this.name = name;
         this.description = description;
         this.transitive = transitive;
-        this.isPublic = isPublic;
     }
 
     /**
@@ -80,14 +77,18 @@ public class JkScope implements Serializable {
         return this.extendedScopes;
     }
 
+    /**
+     * Returns <code>true</code> if the dependencies defined with this scope should be resolved recursively
+     * (meaning returning the dependencies of the dependencies and so on)
+     */
     public boolean transitive() {
         return this.transitive;
     }
 
-    public boolean isPublic() {
-        return isPublic;
-    }
-
+    /**
+     * Returns scopes this scope inherits from. It returns recursively parent scopes, parent of parent scopes
+     * and so on.
+     */
     public List<JkScope> ancestorScopes() {
         final List<JkScope> list = new LinkedList<JkScope>();
         list.add(this);
@@ -191,27 +192,21 @@ public class JkScope implements Serializable {
         private static final long serialVersionUID = 1L;
 
         private JkOptionableScope(String name, Set<JkScope> extendedScopes, String descr,
-                boolean transitive, boolean isPublic) {
-            super(name, extendedScopes, descr, transitive, isPublic);
+                boolean transitive) {
+            super(name, extendedScopes, descr, transitive);
         }
 
         public JkOptionableScope extending(JkScope... scopes) {
             return new JkOptionableScope(name(), new HashSet<JkScope>(Arrays.asList(scopes)),
-                    description(), transitive(), isPublic());
+                    description(), transitive());
         }
 
         public JkOptionableScope transitive(boolean transitive) {
-            return new JkOptionableScope(name(), extendedScopes(), description(), transitive,
-                    isPublic());
-        }
-
-        public JkOptionableScope isPublic(boolean isPublic) {
-            return new JkOptionableScope(name(), extendedScopes(), description(), transitive(),
-                    isPublic);
+            return new JkOptionableScope(name(), extendedScopes(), description(), transitive);
         }
 
         public JkScope descr(String description) {
-            return new JkScope(name(), extendedScopes(), description, transitive(), isPublic());
+            return new JkScope(name(), extendedScopes(), description, transitive());
         }
 
     }

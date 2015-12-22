@@ -1,10 +1,17 @@
 package org.jerkar.api.depmanagement;
 
+@SuppressWarnings("javadoc")
+/**
+ * Constants on popular modules used in Java ecosystem.
+ * 
+ * @author Jerome Angibaud
+ */
 public final class JkPopularModules {
 
     private JkPopularModules() {
         // Unused constructor
     }
+
 
     public static final JkModuleId JAVAX_SERVLET_API = JkModuleId
             .of("javax.servlet", "servlet-api");
