@@ -1,11 +1,16 @@
+## 0.3.2 SNAPSHOT
+
+* Add JkPom class to reason about Maven POM files (retrieving dependencies, dependency management, version, ...)
+* Add method on InternalResolver for fetching directly artifacts, regardless dependency management.
+* Polish on Repository API
+
 ## 0.3.1
 
 * Fix Eclipse .classpath generation (doublon entries for local jar dependencies, exported project dependencies)
 * Improve dependency handling between java sub-projects
 * Fix auto found main class.
 * Add methods on JkDependencies.Builder
-
-
+ 
 ## 0.3.0
 
 * Add "@" import syntax to import build dependencies from the command line (Usefull for scaffolding projects).
