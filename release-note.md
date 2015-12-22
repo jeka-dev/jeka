@@ -1,4 +1,4 @@
-## 0.3.2 SNAPSHOT
+## 0.3.2
 
 * Add JkPom class to reason about Maven POM files (retrieving dependencies, dependency management, version, ...)
 * Add method on InternalResolver for fetching directly artifacts, regardless dependency management.
