@@ -15,7 +15,6 @@ public class JavaSourceParserTest {
     @Test
     public void withOneImport() {
         final URL resource = JavaSourceParserTest.class.getResource("with1import.javasource");
-        System.out.println("------resource:" + resource);
         final JkDependencies dependencies = JavaSourceParser.of(new File("."), resource).dependencies();
         Assert.assertEquals(1, JkUtilsIterable.listOf(dependencies).size());
     }
