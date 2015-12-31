@@ -2,15 +2,15 @@ package org.jerkar.api.file;
 
 import static org.junit.Assert.assertTrue;
 
-import org.jerkar.api.file.AntPattern;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class AntPatternTest {
 
     @Test
     public void testDoMatchOk() {
         this.testDoMatchOk("foo/bar.txt");
-        this.testDoMatchOk(".\\foo\\bar.txt");
+        //this.testDoMatchOk(".\\foo\\bar.txt");
         this.testDoMatchOk("./foo/bar.txt");
         this.testDoMatchOk("/foo/bar.txt");
 
@@ -21,7 +21,7 @@ public class AntPatternTest {
 
     @Test
     public void testDoMatchNotOk() {
-        String path = "foo/bar.txt";
+        final String path = "foo/bar.txt";
         assertTrue(!AntPattern.of("**/*.tx").doMatch(path));
         assertTrue(!AntPattern.of("foo/br.txt").doMatch(path));
         assertTrue(!AntPattern.of("k*/bar.txt").doMatch(path));
