@@ -81,6 +81,7 @@ final class DotClasspathModel {
     public List<Lib> libs(File baseDir, ScopeResolver scopeResolver) {
         final List<Lib> result = new LinkedList<Lib>();
         final Map<String, File> projects = Project.findProjects(baseDir.getParentFile());
+        System.out.println("------projects: " + projects);
         for (final ClasspathEntry classpathEntry : classpathentries) {
 
             if (classpathEntry.kind.equals(ClasspathEntry.Kind.CON)) {
