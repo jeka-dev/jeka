@@ -3,7 +3,7 @@
 	<description>
     This ANT file is here to let Travis build Jerkar (as Jerkar is not supported yet by Travis).
   </description>
-
+ 
 	<property name="bin" location="jerkar-bin" />
 
 	<fileset id="libs" dir="org.jerkar.core/build/libs/provided">
