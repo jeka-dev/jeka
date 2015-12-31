@@ -268,7 +268,7 @@ final class DotClasspathModel {
         public File libAsFile(File baseDir, Map<String, File> projectLocationMap) {
             final String pathInProject;
             final File pathAsFile = new File(path);
-            if (pathAsFile.isAbsolute()) {
+            if (pathAsFile.isAbsolute()  && pathAsFile.exists()) {
                 return pathAsFile;
             }
             if (path.startsWith("/")) {
@@ -276,7 +276,6 @@ final class DotClasspathModel {
                 pathInProject = path.substring(secondSlashIndex + 1);
                 final File otherProjectDir = projectLocation(baseDir.getParentFile(),
                         projectLocationMap);
-                System.out.println("------other project dir:" + otherProjectDir);
                 return new File(otherProjectDir, pathInProject);
             }
             return new File(baseDir, path);
