@@ -81,7 +81,6 @@ final class DotClasspathModel {
     public List<Lib> libs(File baseDir, ScopeResolver scopeResolver) {
         final List<Lib> result = new LinkedList<Lib>();
         final Map<String, File> projects = Project.findProjects(baseDir.getParentFile());
-        System.out.println("------projects: " + projects);
         for (final ClasspathEntry classpathEntry : classpathentries) {
 
             if (classpathEntry.kind.equals(ClasspathEntry.Kind.CON)) {
@@ -277,6 +276,7 @@ final class DotClasspathModel {
                 pathInProject = path.substring(secondSlashIndex + 1);
                 final File otherProjectDir = projectLocation(baseDir.getParentFile(),
                         projectLocationMap);
+                System.out.println("------other project dir:" + otherProjectDir);
                 return new File(otherProjectDir, pathInProject);
             }
             return new File(baseDir, path);
