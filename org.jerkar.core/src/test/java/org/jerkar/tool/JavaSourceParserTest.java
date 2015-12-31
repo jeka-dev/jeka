@@ -1,6 +1,7 @@
 package org.jerkar.tool;
 
 import java.io.File;
+import java.net.URL;
 import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencies;
@@ -8,12 +9,14 @@ import org.jerkar.api.utils.JkUtilsIterable;
 import org.junit.Assert;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class JavaSourceParserTest {
 
     @Test
     public void withOneImport() {
-        final JkDependencies dependencies = JavaSourceParser.of(new File("."),
-                JavaSourceParserTest.class.getResource("with1Import.javasource")).dependencies();
+        final URL resource = JavaSourceParserTest.class.getResource("with1Import.javasource");
+        System.out.println("------resource:" + resource);
+        final JkDependencies dependencies = JavaSourceParser.of(new File("."), resource).dependencies();
         Assert.assertEquals(1, JkUtilsIterable.listOf(dependencies).size());
     }
 
