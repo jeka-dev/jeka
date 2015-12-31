@@ -33,7 +33,7 @@ import org.jerkar.tool.CommandLine.MethodInvocation;
  */
 final class Project {
 
-    private final JkPathFilter BUILD_SOURCE_FILTER = JkPathFilter.include("**/*.java").andExclude("**/*_");
+    private final JkPathFilter BUILD_SOURCE_FILTER = JkPathFilter.include("**/*.java").andExclude("**/_*");
 
     private final File projectBaseDir;
 
