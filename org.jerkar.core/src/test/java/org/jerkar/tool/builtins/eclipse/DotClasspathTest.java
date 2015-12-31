@@ -12,6 +12,8 @@ import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Test;
 
+
+@SuppressWarnings("javadoc")
 public class DotClasspathTest {
 
     private static final String SAMPLE_NAME = "classpath";
@@ -37,6 +39,8 @@ public class DotClasspathTest {
     public void testToDependencies() throws URISyntaxException {
         final List<Lib> libs = sample().libs(structure(), new ScopeResolverSmart(null));
         assertEquals(5, libs.size());
+        System.out.println("structure " + structure().getAbsolutePath());
+        System.out.println("jar1: " + libs.get(0).file.getAbsolutePath());
 
         final JkDependencies deps = Lib.toDependencies(null, libs, new ScopeResolverSmart(null));
 
