@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.system.JkInfo;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -99,6 +100,7 @@ public final class JkInit {
     }
 
     void displayInfo() {
+        JkLog.info("Jerkar Version : " + JkInfo.jerkarVersion());
         JkLog.info("Working Directory : " + System.getProperty("user.dir"));
         JkLog.info("Java Home : " + System.getProperty("java.home"));
         JkLog.info("Java Version : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));

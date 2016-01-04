@@ -14,7 +14,7 @@ These scripts do the following :
 1. __Find the java executable path__ : If a `JAVA_HOME` environment variable is defined then it takes its value as `java` path. Otherwise it takes the `java` executable defined in the _PATH_ of your OS.
 2. __Get java execution option__ : If an environment variable `JERKAR_OPTS` exists then its value is passed to the `java` command line parameters, otherwise default `-Xmx512m -XX:MaxPermSize=512m` is passed.
 3. __Set Jerkar classpath__ in the following order :
-	* all jar and zip files found under _[WORKING DIR]/build/libs/build_
+	* all jar and zip files found under _[WORKING DIR]/build/boot_
 	* all jar and zip files found under _[JERKAR HOME]/libs/ext_
 	* the _[JERKAR_HOME]/org.jerkar.core.jar_ file 
 4. __Run the `org.jerkar.tool.Main` class__ passing the command line argument as is. So if you have typed `jerkar myArg1 myArg2` the `myArg1 myArg2` will be passed as Java command-line arguments.
