@@ -4,6 +4,8 @@
 <strong>Jerkar</strong> is a complete **build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ but using **pure Java** to describe builds : no XML, no foreign language.
 Breaking a common belief, it makes proof that Java is perfectly suitable in this domain.
 
+[![Build Status](https://travis-ci.org/jerkar/jerkar.svg?branch=master)](https://travis-ci.org/jerkar/jerkar)
+
 # How to use Jerkar
 
 Jerkar is expected to have a very fast learning curve for Java developers. You can visit the following page in this order :
@@ -31,7 +33,7 @@ Jerkar builds itself. To get Jerkar full distrib built from the Java sources onl
     * Choose `org.jerkar.tool.Main` as Main class
 * Run it : It will launch a multi-project build. You will find result for the full distrib in *org.jerkar.distrib-all/build/output* directory 
 
-## Build Jerkar from Intellij
+## Build Jerkar from IntelliJ
 
 Youu can achieve the same using **Intellij** as Intellij module definitions (.iml) are stored in git. `org.jerkar.distrib-all` contains the project definition (.idea folder).
 
