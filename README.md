@@ -11,7 +11,7 @@ Breaking a common belief, it makes proof that Java is perfectly suitable in this
 Jerkar is expected to have a very fast learning curve for Java developers. You can visit the following page in this order :
 
 * http://jerkar.github.io/tell-me-more.html : introduction to Jerkar. Answer to the question : *What Jerkar is exactly ?*
-* http://jerkar.github.io/tour.html : to give a concrete idea of how Jerkar is working
+* http://jerkar.github.io/tour.html : to give a concrete idea on how Jerkar is working
 * http://jerkar.github.io/documentation/latest/getting_started.html : to get hand-on experience
 * http://jerkar.github.io/documentation/latest/reference.html : to know the details about Jerkar behavior
 
