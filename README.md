@@ -5,6 +5,7 @@
 Breaking a common belief, it makes proof that Java is perfectly suitable in this domain.
 
 [![Build Status](https://travis-ci.org/jerkar/jerkar.svg?branch=master)](https://travis-ci.org/jerkar/jerkar)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.jawr/jawr-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.jerkar/core)
 
 # How to use Jerkar
 
