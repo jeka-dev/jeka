@@ -1,11 +1,12 @@
+[![Build Status](https://travis-ci.org/jerkar/jerkar.svg?branch=master)](https://travis-ci.org/jerkar/jerkar)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.jerkar/core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.jerkar/core) <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="http://jerkar.github.io/img/logo/PNG-01.png" width='350' height='420' align='middle'/>
 
 <strong>Jerkar</strong> is a complete **build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ but using **pure Java** to describe builds : no XML, no foreign language.
 Breaking a common belief, it makes proof that Java is perfectly suitable in this domain.
 
-[![Build Status](https://travis-ci.org/jerkar/jerkar.svg?branch=master)](https://travis-ci.org/jerkar/jerkar)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.jerkar/core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.jerkar/core)
+
 
 # How to use Jerkar
 
