@@ -37,7 +37,7 @@ Jerkar builds itself. To get Jerkar full distrib built from the Java sources onl
 
 ## Build Jerkar from IntelliJ
 
-Youu can achieve the same using **Intellij** as Intellij module definitions (.iml) are stored in git. `org.jerkar.distrib-all` contains the project definition (.idea folder).
+You can achieve the same using **Intellij** as Intellij module definitions (.iml) are stored in git. `org.jerkar.distrib-all` contains the project definition (.idea folder).
 
 # Status
 
