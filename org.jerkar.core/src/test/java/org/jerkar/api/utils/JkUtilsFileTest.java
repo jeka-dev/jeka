@@ -9,9 +9,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-import org.jerkar.api.utils.JkUtilsFile;
 import org.junit.Test;
 
+
+@SuppressWarnings("javadoc")
 public class JkUtilsFileTest {
 
     @Test
@@ -45,11 +46,11 @@ public class JkUtilsFileTest {
 
     @Test
     public void testRelativePath() throws IOException {
-        final File base = new File("C:\\my\\root\\folder");
-        final File file1 = new File("C:\\my\\root\\folder\\foo\\bar.txt");
-        final File file2 = new File("C:\\my\\root\\foo\\bar.txt");
-        assertEquals("foo\\bar.txt", JkUtilsFile.getRelativePath(base, file1));
-        assertEquals("..\\foo\\bar.txt", JkUtilsFile.getRelativePath(base, file2));
+        final File base = new File("C:/my/root/folder");
+        final File file1 = new File("C:/my/root/folder/foo/bar.txt");
+        final File file2 = new File("C:/my/root/foo/bar.txt");
+        assertEquals("foo" + File.separator + "bar.txt", JkUtilsFile.getRelativePath(base, file1));
+        assertEquals(".." + File.separator + "foo" + File.separator + "bar.txt", JkUtilsFile.getRelativePath(base, file2));
     }
 
 }

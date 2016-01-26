@@ -11,7 +11,7 @@ public final class JkConstants {
 
     static final String BUILD_DEF_BIN_DIR_NAME = "def-bin";
 
-    static final String BUILD_LIB_DIR = "build/libs/build";
+    static final String BUILD_BOOT = "build/boot";
 
     static final String DEFAULT_JAVA_SOURCE = "src/main/java";
 

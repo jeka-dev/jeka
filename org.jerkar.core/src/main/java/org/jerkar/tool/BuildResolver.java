@@ -23,8 +23,6 @@ final class BuildResolver {
 
     final File buildClassDir;
 
-    final File buildlibDir;
-
     final File defaultJavaSource;
 
     BuildResolver(File baseDir) {
@@ -32,7 +30,6 @@ final class BuildResolver {
         this.baseDir = baseDir;
         this.buildSourceDir = new File(baseDir, JkConstants.BUILD_DEF_DIR);
         this.buildClassDir = new File(baseDir, JkConstants.BUILD_DEF_BIN_DIR);
-        this.buildlibDir = new File(baseDir, JkConstants.BUILD_LIB_DIR);
         this.defaultJavaSource = new File(baseDir, JkConstants.DEFAULT_JAVA_SOURCE);
     }
 

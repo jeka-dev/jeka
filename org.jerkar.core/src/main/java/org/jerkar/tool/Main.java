@@ -61,10 +61,6 @@ final class Main {
     private static void displayIntro() {
         final int lenght = printAscii(false, "jerkar.ascii");
         JkLog.info(JkUtilsString.repeat(" ", lenght) + "The 100% Java build tool.");
-        final String version = JkUtilsIO.readResourceIfExist("org/jerkar/version.txt");
-        if (version != null) {
-            JkLog.info(JkUtilsString.repeat(" ", lenght) + "Version : " + version);
-        }
         JkLog.nextLine();
     }
 

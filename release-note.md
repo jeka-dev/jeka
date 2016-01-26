@@ -1,3 +1,8 @@
+## 0.4.0-SNAPSHOT
+
+* "Wrapper" mode (embedding Jerkar jar in the project itself) is achieved by placing jar files in build/boot and not in /build/libs/build anymore.
+* Display running Jerkar version in console. 
+ 
 ## 0.3.2
 
 * Add JkPom class to reason about Maven POM files (retrieving dependencies, dependency management, version, ...)

@@ -12,6 +12,8 @@ import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Test;
 
+
+@SuppressWarnings("javadoc")
 public class DotClasspathTest {
 
     private static final String SAMPLE_NAME = "classpath";

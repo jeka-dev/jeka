@@ -28,13 +28,13 @@ class JeePacker {
     public void war(File webappSrc, File warDirDest, File warFileDest) {
         if (!new File(webappSrc, "WEB-INF/web.xml").exists()) {
             throw new IllegalStateException("The directory " + webappSrc.getPath()
-            + " does not contains WEB-INF" + File.separator + "web.xml file");
+                    + " does not contains WEB-INF" + File.separator + "web.xml file");
         }
         final JkPath path = build.depsFor(JkJavaBuild.RUNTIME);
-        final JkFileTree dir = JkFileTree.of(warDirDest).importDirContent(webappSrc)
-                .from("WEB-INF/classes").importDirContent(build.classDir()).from("../lib")
-                .importFiles(path);
-        dir.zip().to(warFileDest);
+        JkFileTree.of(warDirDest).importDirContent(webappSrc)
+        .from("WEB-INF/classes").importDirContent(build.classDir()).from("../lib")
+        .importFiles(path);
+        JkFileTree.of(warDirDest).zip().to(warFileDest);
     }
 
     public void ear(Iterable<File> warFiles, File earSrc, File destDir, File destFile) {

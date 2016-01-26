@@ -28,12 +28,12 @@ import org.jerkar.tool.CommandLine.MethodInvocation;
 /**
  * Buildable project. This class has the responsibility to compile the build
  * classes and to run them.<br/>
- * Build classes are expected to lie in [project base dir]/build/spec.<br/>
+ * Build classes are expected to lie in [project base dir]/build/def<br/>
  * Classes having simple name starting by '_' are ignored.
  */
 final class Project {
 
-    private final JkPathFilter BUILD_SOURCE_FILTER = JkPathFilter.include("**/*.java").andExclude("**/*_");
+    private final JkPathFilter BUILD_SOURCE_FILTER = JkPathFilter.include("**/*.java").andExclude("**/_*");
 
     private final File projectBaseDir;
 
@@ -195,7 +195,7 @@ final class Project {
 
     private JkPath localBuildPath() {
         final List<File> extraLibs = new LinkedList<File>();
-        final File localDeflibDir = new File(this.projectBaseDir, JkConstants.BUILD_LIB_DIR);
+        final File localDeflibDir = new File(this.projectBaseDir, JkConstants.BUILD_BOOT);
         if (localDeflibDir.exists()) {
             extraLibs.addAll(JkFileTree.of(localDeflibDir).include("**/*.jar").files(false));
         }

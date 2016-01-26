@@ -14,7 +14,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
  * artifact on to a repository or another according some criteria.<br/>
  * For example, you would like to publish snapshot on a repository and release
  * to another one, so each repository registered in JkPublishRepos is associated
- * with a filter that determine if it accepts or not the versionned module to
+ * with a filter that determine if it accepts or not the versioned module to
  * publish.
  * 
  * @author Jerome Angibaud
@@ -131,6 +131,14 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
         return new JkPublishRepos(list);
     }
 
+    /**
+     * Returns a {@link JkPublishRepo} identical to this one but with the specified value
+     * for <i>unique snapshot</i> property.<br/>
+     * When <i>unique snapshot</i> is <code>true</code>, the published artifact versioned with a Snapshot
+     * version, are timestamped so several 'version' on a given snapshot can coexist in the repository.
+     * It is the default behavior for Maven 3 while it was the opposit in Maven 2.
+     * 
+     */
     public JkPublishRepos withUniqueSnapshot(boolean uniqueSnapshot) {
         final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>();
         for (final JkPublishRepo publishRepo : this.publishRepos) {
@@ -139,6 +147,9 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
         return new JkPublishRepos(list);
     }
 
+    /**
+     * Returns a {@link JkPublishRepo} identical to this one but with the additional specified publish repositories.
+     */
     public JkPublishRepos and(JkPublishRepos others) {
         @SuppressWarnings("unchecked")
         final List<JkPublishRepo> list = JkUtilsIterable.concatLists(this.publishRepos,
@@ -146,12 +157,19 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
         return new JkPublishRepos(list);
     }
 
+    /**
+     * Returns a {@link JkPublishRepo} identical to this one but with the additional specified publish repository.
+     */
     public JkPublishRepos and(JkPublishRepo other) {
         final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>(this.publishRepos);
         list.add(other);
         return new JkPublishRepos(list);
     }
 
+    /**
+     * Return the individual repository from this set having the specified url.
+     * Returns <code>null</code> if no such repository found.
+     */
     public JkPublishRepo getRepoHavingUrl(String url) {
         for (final JkPublishRepo repo : this.publishRepos) {
             if (url.equals(repo.repo().url().toExternalForm())) {

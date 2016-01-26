@@ -1,15 +1,19 @@
+[![Build Status](https://travis-ci.org/jerkar/jerkar.svg?branch=master)](https://travis-ci.org/jerkar/jerkar)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.jerkar/core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.jerkar/core) <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="http://jerkar.github.io/img/logo/PNG-01.png" width='350' height='420' align='middle'/>
 
 <strong>Jerkar</strong> is a complete **build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ but using **pure Java** to describe builds : no XML, no foreign language.
 Breaking a common belief, it makes proof that Java is perfectly suitable in this domain.
 
+
+
 # How to use Jerkar
 
 Jerkar is expected to have a very fast learning curve for Java developers. You can visit the following page in this order :
 
 * http://jerkar.github.io/tell-me-more.html : introduction to Jerkar. Answer to the question : *What Jerkar is exactly ?*
-* http://jerkar.github.io/tour.html : to give a concrete idea of how Jerkar is working
+* http://jerkar.github.io/tour.html : to give a concrete idea on how Jerkar is working
 * http://jerkar.github.io/documentation/latest/getting_started.html : to get hand-on experience
 * http://jerkar.github.io/documentation/latest/reference.html : to know the details about Jerkar behavior
 
@@ -31,9 +35,9 @@ Jerkar builds itself. To get Jerkar full distrib built from the Java sources onl
     * Choose `org.jerkar.tool.Main` as Main class
 * Run it : It will launch a multi-project build. You will find result for the full distrib in *org.jerkar.distrib-all/build/output* directory 
 
-## Build Jerkar from Intellij
+## Build Jerkar from IntelliJ
 
-Youu can achieve the same using **Intellij** as Intellij module definitions (.iml) are stored in git. `org.jerkar.distrib-all` contains the project definition (.idea folder).
+You can achieve the same using **Intellij** as Intellij module definitions (.iml) are stored in git. `org.jerkar.distrib-all` contains the project definition (.idea folder).
 
 # Status
 

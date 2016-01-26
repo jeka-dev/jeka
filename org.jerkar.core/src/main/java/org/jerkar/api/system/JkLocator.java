@@ -95,11 +95,5 @@ public final class JkLocator {
         return result;
     }
 
-    /**
-     * Returns the directory where lie builtins libraries.
-     */
-    public static File builtinsDir() {
-        return new File(jerkarHome(), "libs/builtins");
-    }
 
 }

@@ -35,7 +35,10 @@ public class CoreBuild extends AbstractBuild {
 
     @Override
     protected JkManifest jarManifest() {
-        final String version = version().name() + " - built at " + buildTimestamp();
+        String version = version().name();
+        if (version().isSnapshot()) {
+            version = version + " - built at " + buildTimestamp();
+        }
         return super.jarManifest().addMainClass("org.jerkar.tool.Main")
                 .addMainAttribute(Name.IMPLEMENTATION_VERSION, version);
     }
