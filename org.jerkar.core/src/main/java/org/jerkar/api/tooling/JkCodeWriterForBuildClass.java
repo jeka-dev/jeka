@@ -95,7 +95,7 @@ public class JkCodeWriterForBuildClass {
      */
     public JkDependencyExclusions dependencyExclusions;
 
-    /** Extra method code to be generated */
+    /** JkExtraPacking method code to be generated */
     public List<String> extraMethods = new LinkedList<String>();
 
 

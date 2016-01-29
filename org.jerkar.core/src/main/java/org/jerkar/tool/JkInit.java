@@ -184,8 +184,9 @@ public final class JkInit {
     PluginDictionnary<JkBuildPlugin> initProject(JkBuild build) {
         final CommandLine commandLine = this.loadResult.commandLine;
         JkOptions.populateFields(build, commandLine.getMasterBuildOptions());
+        build.init();
 
-        // setup plugins
+        // setup plugins activated in command line
         final Class<JkBuildPlugin> baseClass = JkClassLoader.of(build.getClass()).load(JkBuildPlugin.class.getName());
         final PluginDictionnary<JkBuildPlugin> dictionnary = PluginDictionnary.of(baseClass);
         final List<JkBuild> slaveBuilds = build.slaves().all();

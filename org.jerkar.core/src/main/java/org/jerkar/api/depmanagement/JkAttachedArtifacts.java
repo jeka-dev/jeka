@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Describe the mapping between {@link JkModuleId} and their extra attached artifacts. Extra artifacts are
+ * Describe the mapping between {@link JkModuleId} and their extra attached artifacts. JkExtraPacking artifacts are
  * attached to a module through a scope. This mean that for getting attached artifact you can request a dependency
  * with a scope mapping having a right side matching to the desired files.
  */

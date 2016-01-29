@@ -58,6 +58,14 @@ public class JkBuild {
         this.annotatedJkProjectSlaves = JkSlaveBuilds.of(this.baseDir().root(), subBuilds);
     }
 
+    /**
+     * This method is invoked right after the option values has been injected to instance fields
+     * of this object.
+     */
+    public void init() {
+        // Do nothing by default
+    }
+
     void setBuildDefDependencyResolver(JkDependencyResolver scriptDependencyResolver) {
         this.buildDefDependencyResolver = scriptDependencyResolver;
     }

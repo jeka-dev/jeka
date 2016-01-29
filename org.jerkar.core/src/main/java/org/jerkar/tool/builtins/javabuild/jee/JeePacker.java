@@ -3,8 +3,10 @@ package org.jerkar.tool.builtins.javabuild.jee;
 import java.io.File;
 
 import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaPacker.JkExtraPacking;
 
 /**
  * War and Ear maker for {@link JkJavaBuild}. This maker will get information
@@ -25,7 +27,8 @@ class JeePacker {
         this.build = build;
     }
 
-    public void war(File webappSrc, File warDirDest, File warFileDest) {
+
+    void war(File webappSrc, File warDirDest, JkFileTreeSet extra) {
         if (!new File(webappSrc, "WEB-INF/web.xml").exists()) {
             throw new IllegalStateException("The directory " + webappSrc.getPath()
                     + " does not contains WEB-INF" + File.separator + "web.xml file");
@@ -34,8 +37,21 @@ class JeePacker {
         JkFileTree.of(warDirDest).importDirContent(webappSrc)
         .from("WEB-INF/classes").importDirContent(build.classDir()).from("../lib")
         .importFiles(path);
-        JkFileTree.of(warDirDest).zip().to(warFileDest);
+        extra.copyTo(warDirDest);
+
     }
+
+    JkExtraPacking warExtraPacking(final File webappSrc, final File warDirDest, final JkFileTreeSet extra) {
+        return new JkExtraPacking() {
+
+            @Override
+            public void process(JkJavaBuild build) {
+                war(webappSrc, warDirDest, extra);
+            }
+        };
+    }
+
+
 
     public void ear(Iterable<File> warFiles, File earSrc, File destDir, File destFile) {
         JkFileTree.of(destDir).importDirContent(earSrc).importFiles(warFiles).zip().to(destFile);

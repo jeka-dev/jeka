@@ -175,6 +175,15 @@ public final class JkProcess implements Runnable {
     }
 
     /**
+     * Same as {@link #runSync()} but only effective if the specified condition is <code>true</code>.
+     */
+    public void runSyncIf(boolean condition) {
+        if (condition) {
+            runSync();
+        }
+    }
+
+    /**
      * Starts this process and wait for the process has finished prior
      * returning. The output of the created process will be redirected on the
      * current output.

@@ -97,7 +97,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     public JkOptionPack pack = new JkOptionPack();
 
     /** Options about injected extra dependencies*/
-    @JkDoc("Extra dependencies")
+    @JkDoc("JkExtraPacking dependencies")
     public JkOptionExtaPath extraPath = new JkOptionExtaPath();
 
     /** Options about publication */

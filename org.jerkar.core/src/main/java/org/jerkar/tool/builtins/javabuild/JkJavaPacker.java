@@ -61,7 +61,7 @@ public class JkJavaPacker implements Cloneable {
 
     private JkPgp pgp = null;
 
-    private List<Extra> extraActions = new LinkedList<Extra>();
+    private List<JkExtraPacking> extraActions = new LinkedList<JkExtraPacking>();
 
     private JkJavaPacker(JkJavaBuild build) {
         this.build = build;
@@ -177,7 +177,7 @@ public class JkJavaPacker implements Cloneable {
             .to(fatJarFile()).md5If(checkSums.contains("MD5"))
             .sha1If(checkSums.contains("SHA-1"));
         }
-        for (final Extra action : this.extraActions) {
+        for (final JkExtraPacking action : this.extraActions) {
             action.process(build);
         }
         if (doJavadoc) {
@@ -193,9 +193,9 @@ public class JkJavaPacker implements Cloneable {
     }
 
     /**
-     * Extra action that will be processed by the {@link JkJavaBuild#pack} method.
+     * JkExtraPacking action that will be processed by the {@link JkJavaBuild#pack} method.
      */
-    public interface Extra {
+    public interface JkExtraPacking {
 
         /**
          * Method invoked by the {@link JkJavaBuild#pack} method.
@@ -310,8 +310,8 @@ public class JkJavaPacker implements Cloneable {
         /**
          * Add an extra action to the packer to be build.
          */
-        public Builder extraAction(Extra extra) {
-            packer.extraActions.add(extra);
+        public Builder extraAction(JkExtraPacking jkExtraPacking) {
+            packer.extraActions.add(jkExtraPacking);
             return this;
         }
 
@@ -332,7 +332,7 @@ public class JkJavaPacker implements Cloneable {
         } catch (final CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }
-        clone.extraActions = new LinkedList<JkJavaPacker.Extra>(this.extraActions);
+        clone.extraActions = new LinkedList<JkJavaPacker.JkExtraPacking>(this.extraActions);
         return clone;
     }
 
