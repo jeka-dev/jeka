@@ -10,7 +10,7 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
  * Build settings shared across all Jerkar Java projects (core + plugins)
- */ 
+ */
 public abstract class AbstractBuild extends JkJavaBuild {
 
     {
