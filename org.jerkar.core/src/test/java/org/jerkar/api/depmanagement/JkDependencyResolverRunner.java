@@ -6,6 +6,7 @@ import java.io.File;
 
 import org.jerkar.api.system.JkLog;
 
+@SuppressWarnings("javadoc")
 public class JkDependencyResolverRunner {
 
     static final JkRepos REPOS = IvyResolverRunner.REPOS;

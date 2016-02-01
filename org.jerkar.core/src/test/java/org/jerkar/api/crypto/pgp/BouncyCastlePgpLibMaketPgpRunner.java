@@ -13,7 +13,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
@@ -32,6 +31,7 @@ import org.jerkar.api.utils.JkUtilsString;
  * 
  * @author Jerome Angibaud
  */
+@SuppressWarnings("javadoc")
 public class BouncyCastlePgpLibMaketPgpRunner {
 
     private static final String PGPUTILS_CLASS_NAME = "org.jerkar.api.crypto.pgp.PgpUtils";

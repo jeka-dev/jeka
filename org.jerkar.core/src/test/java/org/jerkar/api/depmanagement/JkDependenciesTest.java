@@ -14,6 +14,7 @@ import org.junit.Test;
  * @author djeang
  * 
  */
+@SuppressWarnings("javadoc")
 public class JkDependenciesTest {
 
     @Test
@@ -50,7 +51,7 @@ public class JkDependenciesTest {
 
     public void onModule() {
         JkDependencies.builder().on("myGroup:otherModule:2.2.0").on("myGroup:moduleB:2.3:client")
-                .build();
+        .build();
     }
 
 }

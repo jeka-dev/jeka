@@ -8,6 +8,7 @@ import java.util.Date;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 
+@SuppressWarnings("javadoc")
 public class JkIvyPublisherRunner {
 
     public static void main(String[] args) {

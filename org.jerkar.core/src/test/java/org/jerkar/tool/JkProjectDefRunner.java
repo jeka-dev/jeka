@@ -6,6 +6,7 @@ import org.jerkar.tool.ProjectDef.ProjectBuildClassDef;
 /**
  * This class helps to elaborate the help output.
  */
+@SuppressWarnings("javadoc")
 public class JkProjectDefRunner {
 
     public static void main(String[] args) {

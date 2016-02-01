@@ -2,11 +2,11 @@ package org.jerkar.tool;
 
 import java.util.Set;
 
-import org.jerkar.tool.PluginDictionnary;
 import org.jerkar.tool.PluginDictionnary.JkPluginDescription;
 import org.junit.Assert;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class JkPluginsTest {
 
     @Test

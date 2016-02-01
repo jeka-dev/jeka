@@ -2,6 +2,7 @@
 
 * "Wrapper" mode (embedding Jerkar jar in the project itself) is achieved by placing jar files in build/boot and not in /build/libs/build anymore.
 * Display running Jerkar version in console. 
+* Cross-compile. The JDK to compile is choosen according declared source version.
  
 ## 0.3.2
 

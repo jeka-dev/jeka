@@ -7,6 +7,7 @@ import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class PgpUtilsTest {
 
     @Test

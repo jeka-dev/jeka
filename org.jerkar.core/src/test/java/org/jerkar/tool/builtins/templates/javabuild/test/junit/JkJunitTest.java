@@ -2,6 +2,7 @@ package org.jerkar.tool.builtins.templates.javabuild.test.junit;
 
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class JkJunitTest {
 
     @Test

@@ -2,10 +2,10 @@ package org.jerkar.api.crypto.pgp;
 
 import java.io.File;
 
-import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class JkPgpTest {
 
     @Test

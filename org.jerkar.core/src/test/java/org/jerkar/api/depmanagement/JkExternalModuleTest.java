@@ -1,11 +1,8 @@
 package org.jerkar.api.depmanagement;
 
-import org.jerkar.api.depmanagement.JkDependency;
-import org.jerkar.api.depmanagement.JkModuleDependency;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkVersionRange;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class JkExternalModuleTest {
 
     @SuppressWarnings("unused")

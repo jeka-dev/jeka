@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.jerkar.api.tooling.JkMvn;
 
+@SuppressWarnings("javadoc")
 public class JkProjectDependencyRunner {
 
     public void test() {

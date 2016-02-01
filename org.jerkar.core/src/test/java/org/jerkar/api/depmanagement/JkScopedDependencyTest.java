@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class JkScopedDependencyTest {
 
     public static final JkScope PROVIDED = JkScope.of("provided").transitive(false);

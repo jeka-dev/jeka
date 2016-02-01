@@ -33,6 +33,7 @@ import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.JkBuildDependencySupport;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkException;
+import org.jerkar.tool.JkOptions;
 import org.jerkar.tool.JkScaffolder;
 
 /**
@@ -250,7 +251,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         return JkJavaCompiler.ofOutput(classDir()).andSources(sources())
                 .withClasspath(depsFor(COMPILE, PROVIDED))
                 .withSourceVersion(this.javaSourceVersion())
-                .withTargetVersion(this.javaTargerVersion());
+                .withTargetVersion(this.javaTargerVersion())
+                .forkedIfNeeded(JkOptions.getAll());
     }
 
     /**
@@ -260,7 +262,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         return JkJavaCompiler.ofOutput(testClassDir()).andSources(unitTestSources())
                 .withClasspath(this.depsFor(TEST, PROVIDED).andHead(classDir()))
                 .withSourceVersion(this.javaSourceVersion())
-                .withTargetVersion(this.javaTargerVersion());
+                .withTargetVersion(this.javaTargerVersion())
+                .forkedIfNeeded(JkOptions.getAll());
     }
 
     /**

@@ -4,6 +4,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.ProjectDef.ProjectBuildClassDef;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class JkProjectDefTest {
 
     @Test

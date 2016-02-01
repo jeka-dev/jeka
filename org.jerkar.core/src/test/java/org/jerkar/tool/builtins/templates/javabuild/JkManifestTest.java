@@ -8,6 +8,7 @@ import org.jerkar.api.utils.JKUtilsTests;
 import org.junit.Assert;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class JkManifestTest {
 
     @Test

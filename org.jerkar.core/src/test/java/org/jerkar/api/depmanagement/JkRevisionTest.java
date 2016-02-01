@@ -2,9 +2,9 @@ package org.jerkar.api.depmanagement;
 
 import static org.junit.Assert.assertTrue;
 
-import org.jerkar.api.depmanagement.JkVersion;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class JkRevisionTest {
 
     @Test

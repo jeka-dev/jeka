@@ -8,6 +8,7 @@ import java.net.URL;
 import org.jerkar.api.java.JkClasspath;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class JkClasspathTest {
 
     @Test

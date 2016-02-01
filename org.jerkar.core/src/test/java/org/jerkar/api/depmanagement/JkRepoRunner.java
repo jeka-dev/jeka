@@ -6,6 +6,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkInit;
 
+@SuppressWarnings("javadoc")
 public class JkRepoRunner {
 
     public static void main(String[] args) {

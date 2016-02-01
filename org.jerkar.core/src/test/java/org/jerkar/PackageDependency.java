@@ -14,6 +14,7 @@ import org.jerkar.api.java.JkClassLoader;
 import org.junit.Assert;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class PackageDependency {
 
     @SuppressWarnings("unchecked")

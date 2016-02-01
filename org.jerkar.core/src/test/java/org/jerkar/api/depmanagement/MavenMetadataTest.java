@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import org.junit.Assert;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class MavenMetadataTest {
 
     @Test

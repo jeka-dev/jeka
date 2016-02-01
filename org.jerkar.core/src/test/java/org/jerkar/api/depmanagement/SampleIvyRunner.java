@@ -16,12 +16,13 @@ import org.apache.ivy.plugins.resolver.IBiblioResolver;
 import org.apache.ivy.util.DefaultMessageLogger;
 import org.apache.ivy.util.Message;
 
+@SuppressWarnings("javadoc")
 public class SampleIvyRunner {
 
     public void retrieve() {
         final IBiblioResolver dependencyResolver = new IBiblioResolver();
         dependencyResolver
-                .setRoot("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured");
+        .setRoot("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured");
         dependencyResolver.setM2compatible(true);
         dependencyResolver.setUseMavenMetadata(true);
         dependencyResolver.setName("nexus"); // Name is necessary to avoid NPE
@@ -68,7 +69,7 @@ public class SampleIvyRunner {
 
         // now resolve
         final ResolveOptions resolveOptions = new ResolveOptions()
-                .setConfs(new String[] { "default" });
+        .setConfs(new String[] { "default" });
         resolveOptions.setTransitive(transitive);
         ResolveReport reportResolver;
         try {
@@ -78,7 +79,7 @@ public class SampleIvyRunner {
         }
         if (reportResolver.hasError()) {
             System.out
-                    .println("*************************************************************************");
+            .println("*************************************************************************");
             System.out.println(reportResolver);
 
             throw new RuntimeException(reportResolver.getAllProblemMessages().toString());
@@ -93,7 +94,7 @@ public class SampleIvyRunner {
         final String filePattern = new File("build/output/downloaded-libs").getAbsolutePath()
                 + "/[artifact](-[classifier]).[ext]";
         final RetrieveOptions retrieveOptions = new RetrieveOptions()
-                .setConfs(new String[] { "default" });
+        .setConfs(new String[] { "default" });
         try {
             ivy.retrieve(moduleDescriptor.getModuleRevisionId(), filePattern, retrieveOptions);
         } catch (final IOException e) {

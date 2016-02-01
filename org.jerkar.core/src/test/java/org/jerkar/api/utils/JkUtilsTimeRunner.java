@@ -1,5 +1,6 @@
 package org.jerkar.api.utils;
 
+@SuppressWarnings("javadoc")
 public class JkUtilsTimeRunner {
 
     public static void main(String[] args) {

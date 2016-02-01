@@ -6,9 +6,9 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.net.URL;
 
-import org.jerkar.api.file.JkFileTree;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class JkDirTest {
 
     @Test

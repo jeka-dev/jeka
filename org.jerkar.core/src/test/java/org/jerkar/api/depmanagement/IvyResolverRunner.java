@@ -11,6 +11,7 @@ import org.jerkar.api.system.JkLog;
 /**
  * @formatter:off
  */
+@SuppressWarnings("javadoc")
 public class IvyResolverRunner {
 
     static final JkRepos REPOS = JkRepos

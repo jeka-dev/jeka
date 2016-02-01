@@ -3,11 +3,10 @@ package org.jerkar.tool;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.OptionInjector;
 import org.junit.Assert;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class OptionInjectorTest {
 
     @Test

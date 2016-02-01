@@ -3,6 +3,7 @@ package org.jerkar.api.depmanagement;
 import org.junit.Assert;
 import org.junit.Test;
 
+@SuppressWarnings("javadoc")
 public class JkModuleIdTest {
 
     @Test

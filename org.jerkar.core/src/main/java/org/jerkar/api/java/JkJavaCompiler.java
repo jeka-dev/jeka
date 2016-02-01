@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaCompiler.CompilationTask;
@@ -59,7 +60,7 @@ public final class JkJavaCompiler {
         final List<String> options = new LinkedList<String>();
         options.add("-d");
         options.add(outputDir.getAbsolutePath());
-        return new JkJavaCompiler(options, Collections.EMPTY_LIST, true, null);
+        return new JkJavaCompiler(options, Collections.EMPTY_LIST, true, null, null);
     }
 
     private final List<String> options;
@@ -70,13 +71,16 @@ public final class JkJavaCompiler {
 
     private final JkProcess fork;
 
+    private String versionCache;
+
     private JkJavaCompiler(List<String> options, List<File> javaSourceFiles, boolean failOnError,
-            JkProcess fork) {
+            JkProcess fork, String versionCache) {
         super();
         this.options = options;
         this.javaSourceFiles = javaSourceFiles;
         this.failOnError = failOnError;
         this.fork = fork;
+        this.versionCache = versionCache;
     }
 
     /**
@@ -85,7 +89,7 @@ public final class JkJavaCompiler {
      * a compilation error will throw a {@link IllegalStateException}.
      */
     public JkJavaCompiler failOnError(boolean fail) {
-        return new JkJavaCompiler(options, javaSourceFiles, fail, fork);
+        return new JkJavaCompiler(options, javaSourceFiles, fail, fork, versionCache);
     }
 
     /**
@@ -100,7 +104,7 @@ public final class JkJavaCompiler {
     public JkJavaCompiler andOptions(String... options) {
         final List<String> newOptions = new LinkedList<String>(this.options);
         newOptions.addAll(Arrays.asList(options));
-        return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork);
+        return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork, versionCache);
     }
 
     /**
@@ -112,7 +116,7 @@ public final class JkJavaCompiler {
     public JkJavaCompiler withOptions(String... options) {
         final List<String> newOptions = new LinkedList<String>(this.options);
         newOptions.addAll(Arrays.asList(options));
-        return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork);
+        return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork, versionCache);
     }
 
     /**
@@ -142,7 +146,9 @@ public final class JkJavaCompiler {
      * source version.
      */
     public JkJavaCompiler withSourceVersion(String version) {
-        return andOptions("-source", version);
+        final JkJavaCompiler result = andOptions("-source", version);
+        result.versionCache = version;
+        return result;
     }
 
     /**
@@ -185,7 +191,7 @@ public final class JkJavaCompiler {
      */
     public JkJavaCompiler fork(String... parameters) {
         return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError,
-                JkProcess.ofJavaTool("javac", parameters));
+                JkProcess.ofJavaTool("javac", parameters), versionCache);
     }
 
     /**
@@ -195,10 +201,10 @@ public final class JkJavaCompiler {
     public JkJavaCompiler fork(boolean fork, String... parameters) {
         if (fork) {
             return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles,
-                    failOnError, JkProcess.ofJavaTool("javac"));
+                    failOnError, JkProcess.ofJavaTool("javac"), versionCache);
         } else {
             return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles,
-                    failOnError, null);
+                    failOnError, null, versionCache);
         }
 
     }
@@ -213,7 +219,7 @@ public final class JkJavaCompiler {
      */
     public JkJavaCompiler forkOnCompiler(String executable, String... parameters) {
         return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError,
-                JkProcess.of(executable, parameters));
+                JkProcess.of(executable, parameters), versionCache);
     }
 
     /**
@@ -227,7 +233,7 @@ public final class JkJavaCompiler {
                 newSources.add(file);
             }
         }
-        return new JkJavaCompiler(options, newSources, failOnError, fork);
+        return new JkJavaCompiler(options, newSources, failOnError, fork, versionCache);
     }
 
     /**
@@ -294,5 +300,64 @@ public final class JkJavaCompiler {
         }
         return compiler;
     }
+
+    static String currentJdkSourceVersion() {
+        final String fullVersion = System.getProperty("java.version");
+        final int firstDot = fullVersion.indexOf(".");
+        final String version;
+        if (firstDot == -1 ) {
+            version = fullVersion;
+        } else {
+            final int secondDot = fullVersion.indexOf(".", firstDot+1);
+            if (secondDot == -1) {
+                version = fullVersion;
+            } else {
+                version = fullVersion.substring(0, secondDot);
+            }
+        }
+        if (version.equals(V1_3) || version.equals(V1_4)) {
+            return version;
+        }
+        String shortVersion;
+        if (firstDot != -1) {
+            shortVersion = version.substring(firstDot+1);
+        } else {
+            shortVersion = version;
+        }
+        return shortVersion;
+    }
+
+    /**
+     * Returns a {@link JkJavaCompiler} identical to this one but within
+     * a forked process with relevant JDK if this specified source version
+     * does not match with the current running JDK. The specified map may include
+     * the JDK location for this source version.
+     * The keys must be formated as "jdk.[source version]". For example, "jdk.1.4" or
+     * "jdk.7". The values must absolute path.
+     */
+    public JkJavaCompiler forkedIfNeeded(Map<String, String> jdkLocations) {
+        if (this.versionCache == null) {
+            return this;
+        }
+        if (this.versionCache.equals(currentJdkSourceVersion())) {
+            JkLog.info("Current JDK matches with source version (" + versionCache + "). Don't fork.");
+            return this;
+        }
+        final String key = "jdk." + versionCache;
+        final String path = jdkLocations.get(key);
+        if (path == null) {
+            JkLog.warn("Current JDK does not match with source version " + versionCache
+                    + ". No exact matching JDK found for this version. Will use the current one which is version "
+                    + currentJdkSourceVersion() + ".");
+            return this;
+        }
+        final String cmd = path + "/bin/javac";
+        JkLog.info("Current JDK does not match with source version (" + versionCache + "). Will use JDK "
+                + path);
+        final JkProcess process = JkProcess.of(cmd);
+        return new JkJavaCompiler(options, javaSourceFiles, failOnError, process, versionCache);
+    }
+
+
 
 }
