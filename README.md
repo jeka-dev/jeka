@@ -14,6 +14,7 @@ Jerkar is expected to have a very fast learning curve for Java developers. You c
 * http://jerkar.github.io/tour.html : to give a concrete idea on how Jerkar is working
 * http://jerkar.github.io/documentation/latest/getting_started.html : to get hand-on experience
 * http://jerkar.github.io/documentation/latest/reference.html : to know the details about Jerkar behavior
+* https://github.com/jerkar/jerkar-examples : Examples of project built with Jerkar.
 
 # How to build Jerkar
 Jerkar is made of following projects :
