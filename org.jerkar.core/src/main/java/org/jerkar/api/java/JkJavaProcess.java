@@ -71,7 +71,7 @@ public final class JkJavaProcess {
     }
 
     /**
-     * Returns a {@link JkJavaProcess} identical to this one but augnmented with the
+     * Returns a {@link JkJavaProcess} identical to this one but augmented with the
      * specified agent library and option.
      */
     public JkJavaProcess andAgent(File agentLib, String agentOption) {
@@ -79,11 +79,11 @@ public final class JkJavaProcess {
             throw new IllegalArgumentException("agentLib can't be null.");
         }
         if (!agentLib.exists()) {
-            throw new IllegalArgumentException("aggentLib " + agentLib.getAbsolutePath()
+            throw new IllegalArgumentException("agentLib " + agentLib.getAbsolutePath()
                     + " not found.");
         }
         if (!agentLib.isFile()) {
-            throw new IllegalArgumentException("aggentLib " + agentLib.getAbsolutePath()
+            throw new IllegalArgumentException("agentLib " + agentLib.getAbsolutePath()
                     + " is a directory, should be a file.");
         }
         final List<AgentLibAndOption> list = new ArrayList<JkJavaProcess.AgentLibAndOption>(

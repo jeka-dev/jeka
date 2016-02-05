@@ -345,7 +345,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
     /**
      * Returns a {@link JkComputedDependency} that consist of the jar file produced by this build
-     * plus all of its RUNTIME transitive runtime dependencies.
+     * plus all of its transitive runtime dependencies.
      */
     public JkComputedDependency asJavaDependency() {
         return this.asDependency(this.depsFor(RUNTIME).andHead(this.packer().jarFile()));
