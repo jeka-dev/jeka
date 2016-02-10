@@ -17,50 +17,67 @@ import org.junit.Test;
 @SuppressWarnings("javadoc")
 public class PackageDependency {
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testDependencies() throws IOException {
-        final String packageFilter = "org.jerkar";
-        final PackageFilter filter = new PackageFilter() {
-
-            @Override
-            public boolean accept(String name) {
-                return name.startsWith(packageFilter);
-            }
-
-        };
-        final JDepend depend = new JDepend(filter);
+        final String packagePrefix = "org.jerkar";
         final File classDir = JkClassLoader.current().fullClasspath()
                 .getEntryContainingClass("org.jerkar.tool.Main");
-        System.out.println(classDir.getAbsolutePath());
-        depend.addDirectory(classDir.getPath());
-        final Collection<JavaPackage> packages = depend.analyze();
-        for (final JavaPackage javaPackage : packages) {
-            if (javaPackage.getName().startsWith(packageFilter)) {
-                Assert.assertFalse("package " + javaPackage.getName() + " involved in cycles : "
-                        + packageCycle(javaPackage), javaPackage.containsCycle());
-            }
-
-        }
-        System.out.println("--------------------" + depend.containsCycles());
-        Assert.assertFalse("package cycles", depend.containsCycles());
+        final String cycle = PackageAnalyser.of(classDir, packagePrefix).cycle();
+        Assert.assertTrue(cycle, cycle == null);
     }
 
-    private static String packageCycle(JavaPackage javaPackage) {
-        final List<JavaPackage> objects = new LinkedList<JavaPackage>();
-        javaPackage.collectCycle(objects);
-        final StringBuilder builder = new StringBuilder();
-        for (final JavaPackage javaPackage2 : objects) {
-            builder.append(javaPackage2.getName()).append(" -> ");
-        }
-        if (builder.length() > 4) {
-            builder.delete(builder.length() - 4, builder.length());
-            System.out.println(builder);
-        } else {
+    public static class PackageAnalyser {
 
+        private final Collection<JavaPackage> packages;
+
+        private PackageAnalyser(Collection<JavaPackage> packages) {
+            this.packages = packages;
         }
 
-        return builder.toString();
+        @SuppressWarnings("unchecked")
+        public static PackageAnalyser of(File classDir, final String packagePrefix) {
+            final PackageFilter filter = new PackageFilter() {
+
+                @Override
+                public boolean accept(String name) {
+                    return name.startsWith(packagePrefix);
+                }
+
+            };
+            final JDepend depend = new JDepend(filter);
+            try {
+                depend.addDirectory(classDir.getPath());
+            } catch (final IOException e) {
+                throw new RuntimeException(e);
+            }
+            final Collection<JavaPackage> packages = depend.analyze();
+            return new PackageAnalyser(packages);
+        }
+
+        public String cycle() {
+            for (final JavaPackage javaPackage : packages) {
+                if (javaPackage.containsCycle()) {
+                    return "package " + javaPackage.getName() + " involved in cycles : "
+                            + cycleAsString(javaPackage);
+                }
+            }
+            return null;
+        }
+
+        private static String cycleAsString(JavaPackage javaPackage) {
+            final List<JavaPackage> objects = new LinkedList<JavaPackage>();
+            javaPackage.collectCycle(objects);
+            final StringBuilder builder = new StringBuilder();
+            for (final JavaPackage javaPackage2 : objects) {
+                builder.append(javaPackage2.getName()).append(" -> ");
+            }
+            if (builder.length() > 4) {
+                builder.delete(builder.length() - 4, builder.length());
+            }
+            return builder.toString();
+        }
+
+
     }
 
 }
