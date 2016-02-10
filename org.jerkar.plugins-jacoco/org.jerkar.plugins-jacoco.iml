@@ -12,10 +12,12 @@
     <orderEntry type="module-library" scope="TEST">
       <library name="junit4">
         <CLASSES>
-          <root url="jar://$APPLICATION_HOME_DIR$/lib/junit-4.11.jar!/" />
+          <root url="jar://$MODULE_DIR$/../org.jerkar.core/build/libs/provided/junit-4.11.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../org.jerkar.core/build/libs-sources/junit-4.11-sources.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module" module-name="org.jerkar.core" />
