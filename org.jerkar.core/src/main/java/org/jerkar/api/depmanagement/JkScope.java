@@ -102,6 +102,9 @@ public class JkScope implements Serializable {
         return list;
     }
 
+    /**
+     * Returns <code>true</code> if this scope extends the specified one.
+     */
     public boolean isExtending(JkScope jkScope) {
         if (extendedScopes == null || extendedScopes.isEmpty()) {
             return false;
@@ -114,14 +117,23 @@ public class JkScope implements Serializable {
         return false;
     }
 
+    /**
+     * Returns a {@link JkScopeMapping} from this {@link JkScope} to the specified one.
+     */
     public JkScopeMapping mapTo(JkScope targetScope) {
         return JkScopeMapping.of(this).to(targetScope);
     }
 
+    /**
+     * Returns a {@link JkScopeMapping} from this {@link JkScope} to the specified one.
+     */
     public JkScopeMapping mapTo(String targetScope) {
         return JkScopeMapping.of(this).to(JkScope.of(targetScope));
     }
 
+    /**
+     * Returns <code>true</code> if this scope is one or is extending any of the specified scopes.
+     */
     public boolean isInOrIsExtendingAnyOf(Iterable<? extends JkScope> scopes) {
         for (final JkScope scope : scopes) {
             if (scope.equals(this) || this.isExtending(scope)) {
@@ -131,6 +143,9 @@ public class JkScope implements Serializable {
         return false;
     }
 
+    /**
+     * @see #isInOrIsExtendingAnyOf(Iterable)
+     */
     public boolean isInOrIsExtendingAnyOf(JkScope... scopes) {
         return isInOrIsExtendingAnyOf(Arrays.asList(scopes));
     }
@@ -170,6 +185,9 @@ public class JkScope implements Serializable {
         return name;
     }
 
+    /**
+     * returns all specified scopes and all of their ancestors.
+     */
     public static Set<JkScope> involvedScopes(Iterable<JkScope> scopes) {
         final Set<JkScope> result = JkUtilsIterable.setOf(scopes);
         for (final JkScope jkScope : scopes) {
@@ -196,15 +214,24 @@ public class JkScope implements Serializable {
             super(name, extendedScopes, descr, transitive);
         }
 
+        /**
+         * Returns a {@link JkOptionableScope} identical to this one but extending the specified scopes.
+         */
         public JkOptionableScope extending(JkScope... scopes) {
             return new JkOptionableScope(name(), new HashSet<JkScope>(Arrays.asList(scopes)),
                     description(), transitive());
         }
 
+        /**
+         * Returns a {@link JkOptionableScope} identical to this one with the specified transitivity.
+         */
         public JkOptionableScope transitive(boolean transitive) {
             return new JkOptionableScope(name(), extendedScopes(), description(), transitive);
         }
 
+        /**
+         * Returns a {@link JkOptionableScope} identical to this one with the specified description.
+         */
         public JkScope descr(String description) {
             return new JkScope(name(), extendedScopes(), description, transitive());
         }

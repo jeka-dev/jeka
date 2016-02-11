@@ -54,6 +54,9 @@ public final class JkVersionProvider implements Serializable {
         return new JkVersionProvider(new HashMap<JkModuleId, JkVersion>());
     }
 
+    /**
+     * Creates a version provider from the specified versioned modules.
+     */
     public static JkVersionProvider of(Iterable<JkVersionedModule> modules) {
         final Map<JkModuleId, JkVersion> result = new HashMap<JkModuleId, JkVersion>();
         for (final JkVersionedModule module : modules) {
@@ -62,6 +65,9 @@ public final class JkVersionProvider implements Serializable {
         return new JkVersionProvider(result);
     }
 
+    /**
+     * Creates a version provider containing versions for all in specified version providers.
+     */
     public static JkVersionProvider mergeOf(Iterable<JkVersionProvider> versionProviders) {
         final Map<JkModuleId, JkVersion> result = new HashMap<JkModuleId, JkVersion>();
         for (final JkVersionProvider versionProvider : versionProviders) {
@@ -77,38 +83,62 @@ public final class JkVersionProvider implements Serializable {
         this.map = map;
     }
 
+    /**
+     * Returns the version to use with specified module.
+     */
     public JkVersion versionOf(JkModuleId moduleId) {
         return this.map.get(moduleId);
     }
 
+    /**
+     * Returns <code>true</code> if this providers is empty.
+     */
     public boolean isEmpty() {
         return this.map.isEmpty();
     }
 
+    /**
+     * Returns a {@link JkVersionProvider} that is a union of this provider and the specified one.
+     */
     public JkVersionProvider and(JkVersionProvider other) {
         final Map<JkModuleId, JkVersion> newMap = new HashMap<JkModuleId, JkVersion>(this.map);
         newMap.putAll(other.map);
         return new JkVersionProvider(newMap);
     }
 
+    /**
+     * Returns a {@link JkVersionProvider} that is the union of this provider and the specified one.
+     */
     public JkVersionProvider and(JkModuleId moduleId, JkVersion version) {
         final Map<JkModuleId, JkVersion> newMap = new HashMap<JkModuleId, JkVersion>(this.map);
         newMap.put(moduleId, version);
         return new JkVersionProvider(newMap);
     }
 
+    /**
+     * @see JkVersionProvider#and(JkModuleId, JkVersion)
+     */
     public JkVersionProvider and(JkModuleId moduleId, String version) {
         return and(moduleId, JkVersion.ofName(version));
     }
 
+    /**
+     * @see JkVersionProvider#and(JkModuleId, JkVersion)
+     */
     public JkVersionProvider and(String moduleId, String version) {
         return and(JkModuleId.of(moduleId), version);
     }
 
+    /**
+     * @see JkVersionProvider#and(JkModuleId, JkVersion)
+     */
     public JkVersionProvider and(String group, String name, String version) {
         return and(JkModuleId.of(group, name), version);
     }
 
+    /**
+     * Returns all modules that this object provides version for.
+     */
     public Set<JkModuleId> moduleIds() {
         return map.keySet();
     }

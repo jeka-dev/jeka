@@ -14,6 +14,9 @@ public final class JkVersionedModule implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates a {@link JkVersionedModule} from the specified module and version.
+     */
     public static JkVersionedModule of(JkModuleId moduleId, JkVersion version) {
         return new JkVersionedModule(moduleId, version);
     }
@@ -54,18 +57,30 @@ public final class JkVersionedModule implements Serializable {
         this.version = version;
     }
 
+    /**
+     * Returns the module.
+     */
     public JkModuleId moduleId() {
         return moduleId;
     }
 
+    /**
+     * Returns the version.
+     */
     public JkVersion version() {
         return version;
     }
 
+    /**
+     * Returns a {@link JkVersionedModule} identical to this one but with the specified version.
+     */
     public JkVersionedModule withVersion(JkVersion version) {
         return new JkVersionedModule(this.moduleId, version);
     }
 
+    /**
+     * @see #withVersion(JkVersion)
+     */
     public JkVersionedModule withVersion(String version) {
         return new JkVersionedModule(this.moduleId, JkVersion.ofName(version));
     }
@@ -118,8 +133,8 @@ public final class JkVersionedModule implements Serializable {
      */
     public void populateManifest(JkManifest manifest) {
         manifest.addMainAttribute(Attributes.Name.IMPLEMENTATION_TITLE, moduleId().name())
-                .addMainAttribute(Attributes.Name.IMPLEMENTATION_VERSION, version().name())
-                .addMainAttribute(Attributes.Name.IMPLEMENTATION_VENDOR_ID, moduleId().group());
+        .addMainAttribute(Attributes.Name.IMPLEMENTATION_VERSION, version().name())
+        .addMainAttribute(Attributes.Name.IMPLEMENTATION_VENDOR_ID, moduleId().group());
     }
 
 }

@@ -23,6 +23,9 @@ public final class JkResolveResult implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates an empty {@link JkResolveResult}
+     */
     @SuppressWarnings("unchecked")
     public static JkResolveResult empty() {
         return of(Collections.EMPTY_LIST);
