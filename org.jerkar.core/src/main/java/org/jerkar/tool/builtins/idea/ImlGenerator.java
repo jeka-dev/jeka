@@ -173,6 +173,26 @@ final class ImlGenerator {
                 writer.writeCharacters("\n");
             }
         }
+        for (final JkFileTree fileTree : this.resources.fileTrees()) {
+            if (fileTree.exists()) {
+                writer.writeCharacters(T3);
+                writer.writeEmptyElement("sourceFolder");
+                final String path = JkUtilsFile.getRelativePath(projectDir, fileTree.root()).replace('\\', '/');
+                writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
+                writer.writeAttribute("type", "java-resource");
+                writer.writeCharacters("\n");
+            }
+        }
+        for (final JkFileTree fileTree : this.testResources.fileTrees()) {
+            if (fileTree.exists()) {
+                writer.writeCharacters(T3);
+                writer.writeEmptyElement("sourceFolder");
+                final String path = JkUtilsFile.getRelativePath(projectDir, fileTree.root()).replace('\\', '/');
+                writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
+                writer.writeAttribute("type", "java-test-resource");
+                writer.writeCharacters("\n");
+            }
+        }
         writer.writeCharacters(T3);
         writer.writeEmptyElement("sourceFolder");
         writer.writeAttribute("url", "file://$MODULE_DIR$/" + JkConstants.BUILD_DEF_DIR);

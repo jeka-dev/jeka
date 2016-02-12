@@ -85,6 +85,9 @@ If your project is <a href="../../tour.html#100conventional">100% conventional</
 <p class="alert alert-success">
 	<strong>Eclipse users : </strong> You can execute <code>jerkar eclipse#generateFiles</code> to generate both <small>.project</small> and <small>.classpath</small> files from the build definition.
 </p>
+<p class="alert alert-success">
+	<strong>IntelliJ Idea users : </strong> You can execute <code>jerkar idea#generateFiles</code> to generate <small>[module].iml</small> file from the build definition.
+</p>
 
 As Jerkar builds itself, you can have a look at [how Jerkar project is structured](https://github.com/jerkar/jerkar/tree/master/org.jerkar.core).
 

@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="628f487f-e633-46f2-8b59-18777733e01d" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../org.jerkar.core/src/main/java/org/jerkar/tool/builtins/idea/ImlGenerator.java" afterPath="$PROJECT_DIR$/../org.jerkar.core/src/main/java/org/jerkar/tool/builtins/idea/ImlGenerator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../org.jerkar.plugins-jacoco/org.jerkar.plugins-jacoco.iml" afterPath="$PROJECT_DIR$/../org.jerkar.plugins-jacoco/org.jerkar.plugins-jacoco.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../org.jerkar.plugins-sonar/org.jerkar.plugins-sonar.iml" afterPath="$PROJECT_DIR$/../org.jerkar.plugins-sonar/org.jerkar.plugins-sonar.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../org.jerkar.samples-dependee/org.jerkar.samples-dependee.iml" afterPath="$PROJECT_DIR$/../org.jerkar.samples-dependee/org.jerkar.samples-dependee.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../org.jerkar.samples/.classpath" afterPath="$PROJECT_DIR$/../org.jerkar.samples/.classpath" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../org.jerkar.samples/org.jerkar.samples.iml" afterPath="$PROJECT_DIR$/../org.jerkar.samples/org.jerkar.samples.iml" />
     </list>
     <ignored path="org.jerkar.distrib-all.iws" />
@@ -72,8 +72,8 @@
       <file leaf-file-name="org.jerkar.samples-dependee.iml" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/../org.jerkar.samples-dependee/org.jerkar.samples-dependee.iml">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.60108304">
-              <caret line="20" column="54" selection-start-line="20" selection-start-column="54" selection-end-line="20" selection-end-column="54" />
+            <state vertical-scroll-proportion="0.5830325">
+              <caret line="19" column="17" selection-start-line="19" selection-start-column="17" selection-end-line="19" selection-end-column="17" />
               <folding />
             </state>
           </provider>
@@ -172,48 +172,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="org.jerkar.samples-dependee" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="org.jerkar.distrib-all" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="org.jerkar.samples-dependee" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="build" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="org.jerkar.distrib-all" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="org.jerkar.samples-dependee" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="build" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="def" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="org.jerkar.distrib-all" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="org.jerkar.samples" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -685,7 +643,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="111" y="40" width="1626" height="1000" extended-state="0" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32988626" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -696,7 +654,7 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24095139" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32988626" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26181355" sideWeight="0.7209653" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26181355" sideWeight="0.7209653" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32949308" sideWeight="0.49744573" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="true" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24968071" sideWeight="0.48868778" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -762,7 +720,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/../org.jerkar.core/src/main/java/org/jerkar/tool/builtins/idea/ImlGenerator.java</url>
-          <line>274</line>
+          <line>294</line>
           <properties />
           <option name="timeStamp" value="3" />
         </line-breakpoint>
@@ -806,7 +764,7 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="false" />
-            <marker date="1455285599424" expanded="true" signature="15096:15389" placeholder="{...}" />
+            <marker date="1455287134677" expanded="true" signature="16173:16466" placeholder="{...}" />
           </folding>
         </state>
       </provider>
@@ -867,7 +825,7 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="false" />
-            <marker date="1455285599424" expanded="true" signature="15096:15389" placeholder="{...}" />
+            <marker date="1455287134677" expanded="true" signature="16173:16466" placeholder="{...}" />
           </folding>
         </state>
       </provider>
@@ -1076,7 +1034,7 @@
           <caret line="264" column="0" selection-start-line="264" selection-start-column="0" selection-end-line="264" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="false" />
-            <marker date="1455285599424" expanded="true" signature="15096:15389" placeholder="{...}" />
+            <marker date="1455287134677" expanded="true" signature="16173:16466" placeholder="{...}" />
           </folding>
         </state>
       </provider>
@@ -1179,8 +1137,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/../org.jerkar.samples-dependee/org.jerkar.samples-dependee.iml">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.60108304">
-          <caret line="20" column="54" selection-start-line="20" selection-start-column="54" selection-end-line="20" selection-end-column="54" />
+        <state vertical-scroll-proportion="0.5830325">
+          <caret line="19" column="17" selection-start-line="19" selection-start-column="17" selection-end-line="19" selection-end-column="17" />
           <folding />
         </state>
       </provider>
@@ -1242,6 +1200,7 @@
             <option name="proportions">
               <list>
                 <option value="0.34252873" />
+                <option value="0.6" />
               </list>
             </option>
           </splitter-proportions>
