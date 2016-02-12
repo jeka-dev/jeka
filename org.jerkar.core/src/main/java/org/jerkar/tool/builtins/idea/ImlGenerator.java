@@ -24,6 +24,7 @@ import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
 import org.jerkar.tool.JkConstants;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
@@ -79,6 +80,8 @@ final class ImlGenerator {
     /** Can be empty but not null */
     public Iterable<File> projectDependencies = JkUtilsIterable.listOf();
 
+    boolean forceJdkVersion;
+
     /**
      * Constructs a {@link ImlGenerator} from the project base directory
      */
@@ -86,7 +89,7 @@ final class ImlGenerator {
         super();
         this.projectDir = projectDir;
 
-        this.outputFile = new File(projectDir, "module.iml");
+        this.outputFile = new File(projectDir, projectDir.getName() + ".iml");
     }
 
     /** Generate the .classpath file */
@@ -107,8 +110,15 @@ final class ImlGenerator {
         writeContent(writer);
         writeJdk(writer);
         writeSourceFolder(writer);
-        writeTestLibs(writer);
+        writeModules(writer);
         writeLibs(writer, JkJavaBuild.COMPILE);
+        writeLibs(writer, JkJavaBuild.PROVIDED);
+        writeLibs(writer, JkJavaBuild.RUNTIME);
+        writeTestLibs(writer);
+        writeLocalLibs(writer, JkJavaBuild.COMPILE);
+        writeLocalLibs(writer, JkJavaBuild.PROVIDED);
+        writeLocalLibs(writer, JkJavaBuild.RUNTIME);
+        writeLocalLibs(writer, JkJavaBuild.TEST);
 
         // Write end document
         writer.writeCharacters(T1);
@@ -176,10 +186,14 @@ final class ImlGenerator {
     private void writeJdk(XMLStreamWriter writer) throws XMLStreamException {
         writer.writeCharacters(T2);
         writer.writeEmptyElement("orderEntry");
-        writer.writeAttribute("type", "jdk");
-        final String jdkVersion = jdkVesion(this.sourceJavaVersion);
-        writer.writeAttribute("jdkName", jdkVersion);
-        writer.writeAttribute("jdkType", "JavaSDK");
+        if (this.forceJdkVersion) {
+            writer.writeAttribute("type", "jdk");
+            final String jdkVersion = jdkVesion(this.sourceJavaVersion);
+            writer.writeAttribute("jdkName", jdkVersion);
+            writer.writeAttribute("jdkType", "JavaSDK");
+        } else {
+            writer.writeAttribute("type", "inheritedJdk");
+        }
         writer.writeCharacters("\n");
     }
 
@@ -189,6 +203,16 @@ final class ImlGenerator {
         writer.writeAttribute("type", "sourceFolder");
         writer.writeAttribute("forTests", "false");
         writer.writeCharacters("\n");
+    }
+
+    private void writeModules(XMLStreamWriter writer) throws XMLStreamException {
+        for (final File depProjectDir : projectDependencies) {
+            writer.writeCharacters(T2);
+            writer.writeEmptyElement("orderEntry");
+            writer.writeAttribute("type", "module");
+            writer.writeAttribute("module-name", depProjectDir.getName());
+            writer.writeCharacters("\n");
+        }
     }
 
     private void writeLibs(XMLStreamWriter writer, JkScope scope) throws XMLStreamException {
@@ -203,13 +227,49 @@ final class ImlGenerator {
         writeLibs(writer, libPaths, "TEST");
     }
 
+    private void writeLocalLibs(XMLStreamWriter writer, JkScope scope) throws XMLStreamException {
+        final List<File> binFiles = new LinkedList<File>();
+        binFiles.addAll(dependencyResolver.dependenciesToResolve().fileSystemDependencies(scope).entries());
+        if (scope.equals(JkJavaBuild.TEST)) {
+            binFiles.addAll(buildDefDependencyResolver.dependenciesToResolve().localFileDependencies().entries());
+        }
+        final List<LibPath> libPaths = new LinkedList<ImlGenerator.LibPath>();
+        for (final File file : binFiles) {
+            final LibPath libPath = new LibPath();
+            libPath.bin = file;
+            final String name = JkUtilsString.substringBeforeLast(file.getName(), ".jar");
+            File source = new File(file.getParentFile(), name + "-sources.jar");
+            if (!source.exists()) {
+                source = new File(file.getParentFile(), "../../libs-sources/" + name + "-sources.jar");
+            }
+            if (!source.exists()) {
+                source = new File(file.getParentFile(), "libs-sources/" + name + "-sources.jar");
+            }
+            File javadoc = new File(file.getParentFile(), name + "-javadoc.jar");
+            if (!javadoc.exists()) {
+                javadoc = new File(file.getParentFile(), "../../libs-javadoc/" + name + "-javadoc.jar");
+            }
+            if (!javadoc.exists()) {
+                javadoc = new File(file.getParentFile(), "libs-javadoc/" + name + "-javadoc.jar");
+            }
+            if (source.exists()) {
+                libPath.source = source;
+            }
+            if (javadoc.exists()) {
+                libPath.javadoc = javadoc;
+            }
+            libPaths.add(libPath);
+        }
+        writeLibs(writer, libPaths, scope.name());
+    }
+
     private void writeLibs(XMLStreamWriter writer, List<LibPath> libPaths, String scopeName) throws XMLStreamException {
         for (final LibPath libPath : libPaths) {
             writer.writeCharacters(T2);
             writer.writeStartElement("orderEntry");
             writer.writeAttribute("type", "module-library");
             if (scopeName != null) {
-                writer.writeAttribute("scope", scopeName);
+                writer.writeAttribute("scope", scopeName.toUpperCase());
             }
             writer.writeCharacters("\n");
             writer.writeCharacters(T3);
@@ -250,12 +310,21 @@ final class ImlGenerator {
                 return "jar://$MODULE_DIR$/" + replacePathWithVar(relPath) + "!/";
             }
             final String path = JkUtilsFile.canonicalPath(file).replace('\\', '/');
-            return "jar://" + replacePathWithVar(replacePathWithVar(path)) +  "!/";
+            return "jar://" + replacePathWithVar(replacePathWithVar(path)) + "!/";
         }
-        throw new IllegalStateException("File type of " + file + " not handled. Only handle jar files.");
+        if (JkUtilsFile.isAncestor(projectDir, file)) {
+            final String relPath = JkUtilsFile.getRelativePath(projectDir, file);
+            return "file://$MODULE_DIR$/" + replacePathWithVar(relPath);
+        }
+        final String path = JkUtilsFile.canonicalPath(file).replace('\\', '/');
+        return "file://" + replacePathWithVar(replacePathWithVar(path));
+
     }
 
     private static List<LibPath> libPaths(JkDependencyResolver dependencyResolver, JkScope... scopes) {
+        if (!dependencyResolver.dependenciesToResolve().containsModules()) {
+            return new LinkedList<ImlGenerator.LibPath>();
+        }
         final JkResolveResult resolveResult = dependencyResolver.resolve(scopes);
         final JkAttachedArtifacts attachedArtifacts = dependencyResolver.getAttachedArtifacts(
                 resolveResult.involvedModules(), JkJavaBuild.SOURCES, JkJavaBuild.JAVADOC);
@@ -297,8 +366,13 @@ final class ImlGenerator {
     }
 
     private static String replacePathWithVar(String path) {
-        final String repo = JkLocator.jerkarRepositoryCache().getAbsolutePath().replace('\\',  '/');
-        return path.replace(repo, "$JERKAR_REPO$");
+        final String repo = JkLocator.jerkarRepositoryCache().getAbsolutePath().replace('\\', '/');
+        final String home = JkLocator.jerkarHome().getAbsolutePath().replace('\\', '/');
+        final String result = path.replace(repo, "$JERKAR_REPO$");
+        if (!result.equals(path)) {
+            return result;
+        }
+        return path.replace(home, "$JERKAR_HOME$");
     }
 
 }
