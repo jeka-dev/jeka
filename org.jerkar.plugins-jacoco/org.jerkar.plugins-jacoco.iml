@@ -20,6 +20,6 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="org.jerkar.core" />
+    <orderEntry type="module" module-name="org.jerkar.core" exported="" />
   </component>
 </module>
