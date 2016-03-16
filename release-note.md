@@ -1,9 +1,9 @@
-## 0.4.0-SNAPSHOT
+## 0.4.0
 
 * Add IntelliJ IDEA plugin for generating iml files (module descriptor).
 * "Wrapper" mode (embedding Jerkar jar in the project itself) is achieved by placing jar files in build/boot and not in /build/libs/build anymore.
 * Display running Jerkar version in console. 
-* Cross-compile. The JDK to compile is choosen according declared source version.
+* Cross-compile. The JDK to compile is chosen according declared source version.
  
 ## 0.3.2
 
