@@ -46,7 +46,7 @@ Now we'll plan to deliver new releases at fast pace. You're welcome to push your
 # Want to contribute ?
 
 Jerkar welcomes contributors. As a new project there's plenty of free rooms to start : You can extends/debug the jerkar project itself but you van also write addin/plugin for integrate better Jerkar with your favorite technology. Don't be intimidated, it's relatively easy and you can provide great added value just by writting very few code. As an example, look at the [Spring Boot addin](https://github.com/jerkar/spring-boot-addin). 
-Also do not hesitate to contact me at djeangdev@yahoo.fr to discuss about what is best to start with.
+Also do not hesitate to contact current contributors to discuss about what is best to start with.
 
 ## Coding rule
 If you contribute to Jerkar Core project, there's only 1 rule : try to mimick the current style :-).
