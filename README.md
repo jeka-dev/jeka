@@ -45,10 +45,10 @@ Now we'll plan to deliver new releases at fast pace. You're welcome to push your
 
 # How to contribute ?
 
-The most wanted skill on this project is technical writing. The documentation is pretty complete but the style should be improved.  
-So if you fell ok to review/improve some documentation, welcome on board !
+Jerkar welcomes contributors. As a new project there's still some free room to start : You can extends/debug the jerkar project itself but you van also write addin/plugin for integrate better Jerkar with your favorite technology. Don't be intimidated, it's relatively easy and you can provide great added value just by writting very few code. As an example, look at the [Spring Boot addin](https://github.com/jerkar/spring-boot-addin). 
 
-If you want contribute to code, 1 rule : try to mimick the current style :-).
+## Coding rule
+If you contribute to Jerkar Core project, there's only 1 rule : try to mimick the current style :-).
 More concretely :
 
 * Make a class public only when really needed. If a class is public, it should be prefixed with `Jk` (The goal is to not polute auto-completion in IDE when Jerkar is on the build path).
