@@ -43,7 +43,7 @@ You can achieve the same using **Intellij** as Intellij module definitions (.iml
 First release has been delivered. It contains all features a self respecting build tool must have : from compilation to publication features.
 Now we'll plan to deliver new releases at fast pace. You're welcome to push your expectation for next releases. 
 
-# How to contribute ?
+# Want to contribute ?
 
 Jerkar welcomes contributors. As a new project there's still some free room to start : You can extends/debug the jerkar project itself but you van also write addin/plugin for integrate better Jerkar with your favorite technology. Don't be intimidated, it's relatively easy and you can provide great added value just by writting very few code. As an example, look at the [Spring Boot addin](https://github.com/jerkar/spring-boot-addin). 
 
