@@ -26,17 +26,28 @@ Jerkar User Home : C:\users\djeang\.jerkar
 The default download repository (for fetching dependencies) is set to maven central (http://repo1.maven.org/maven2) by default. If you want to use another default, edit _[Jerkar Home]/options.properties_ and add the following property `repo.download.url=http://my.personal/repo`.
 The Jerkar Home is the one given by the `Jerkar` output as mentioned above (C:\users\djeang\.jerkar).  
 
-## Setup you IDE
+## Use Jerkar with command line
 
-### Setup Eclipse
+Let's see first how we can use Jerkar using command line only.
 
-#### With plugin
+### Create a project
+1. Create a new folder as root of your new project.
+2. Execute `jerkar scaffold` under the project base directory. This generates the project structures.
 
-An Eclipse plugin for Jerkar exists. You can install it from <i>https://github.com/jerkar/eclipsePlugin4Jerkar</i>.
+It's done.
 
-#### ... or manually
+### Build the project
+1. Edit the Build.java source files under [project root]/build/def folder if needed.
+2. Execute `jerkar` under the project base directory. 
 
-If you don't want to use Plugin for Jerkar (or you can't install it), you can setup Eclipse manually.
+It's done. For more about using command line, please visit [Tour](../../tour.html). 
+
+
+## Use Jerkar with Eclipse (without Jerkar [plugin] (https://github.com/jerkar/eclipsePlugin4Jerkar) )
+
+### Setup Eclipse 
+
+To use Jerkar within Eclipse, you just have to set 2 variables in Order Eclipse find Jerkar binaries and your local repository hosting dependencies.
 
 1. Open the Eclipse preference window : _Window -> Preferences_
 2. Navigate to the classpath variable panel : _Java -> Build Path -> Classpath Variables_
@@ -63,51 +74,12 @@ Jerkar Repository Cache : C:\users\djeang\.jerkar\cache\repo   <-- This is the v
 ...
 ```
 
-## Create a Java project without plugin
+### Configure a Jerkar project
 
-When starting with a new project you have the choice of creating the project by hand or use scaffolding.
+To use Jerkar inside an Eclipse project, you have to add Jerkar lib, build/def folder and project dependencies to the build path.
+Jerkar can do it for you be executing `jerkar eclipse#generateFiles` from project root folder.
 
-### Create the project manually
-1. Create a new java project in your IDE : You can follow convention by naming your project as _groupName.projectName_.
-2. Add the _[Jerkar Home]/org.jerkar.core-fat.jar_ lib to your project build-path and attach the source code ( _[Jerkar Home]/lib-sources_ ). This jar includes Jerkar core along plugins classes.
-3. Create a _build/def_ folder at the base of your project and make it a source folder in your IDE. In Jerkar, all build related stuff (build definition, local 3rd party libs, produced artifacts,...) lie in _build_ directory located at the root of your project
-4. Write the build definition class extending `JkJavaBuild` in the _build/def_ folder (in whatever package).
-
-
-<p class="alert alert-success">
-If your project is <a href="../../tour.html#100conventional">100% conventional</a>, you can skip steps <strong>2, 3 and 4</strong>.
-</p>
-
-### ... or using scaffolding
-1. Create a new java project in your IDE
-2. Execute `jerkar scaffold` under the project base directory. This generates the project structures.
-
-<p class="alert alert-success">
-	<strong>Eclipse users : </strong> You can execute <code>jerkar eclipse#generateFiles</code> to generate both <small>.project</small> and <small>.classpath</small> files from the build definition.
-</p>
-<p class="alert alert-success">
-	<strong>IntelliJ Idea users : </strong> You can execute <code>jerkar idea#generateFiles</code> to generate <small>[module].iml</small> file from the build definition.
-</p>
-
-As Jerkar builds itself, you can have a look at [how Jerkar project is structured](https://github.com/jerkar/jerkar/tree/master/org.jerkar.core).
-
-## Create a Java project with Eclipse plugin
-
-1. Create an empty java project as you would do with Eclipse : File -> New -> Java Project
-2. Write click on this project to open contextual menu and click on Jerkar -> Scaffold ->  Classic Java Project
-
-This will create the directory layout for the project along build class and update *.classpath* file.
-
-## Build your project
-
-You can build your project by using the command line or by launching it through your IDE. Using IDE provides the ability to debug your build in a friendly way, as you would debug regular classes.
-
-### Launch in command line
-
-Open a terminal, set the current directory to the root of your project and execute `jerkar`.
-This will execute ´doDefault´ method of the default build class of your project. If your project has no build class it will execute `JkJavaBuild#doDefault()` provided with Jerkar library.
-
-### Launch in your IDE
+### Launch/Debug from Eclipse
 
 Just launch the `org.jerkar.tool.Main` class in your IDE with the root of your project as working directory. 
 You can also write a `main` method in build class and execute it. 
@@ -121,7 +93,7 @@ public static void main(String[] args) {
 
 ```
 
-## Migrate a Maven projet to jerkar.
+## Migrate projects from Maven to Jerkar
 
 Prerequisites are :
 
@@ -590,7 +562,6 @@ This project contain two build classes :
 
 Both build class code are fully commented to provide self explanation.
 
-  
 
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/> 
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/> 
