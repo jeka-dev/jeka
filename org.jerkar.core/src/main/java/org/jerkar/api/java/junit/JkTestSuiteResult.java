@@ -10,6 +10,10 @@ import java.util.Properties;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsReflect;
 
+/**
+ * A result of a test suite execution. It contains both overall information about suite execution
+ * and details about each test case execution.
+ */
 public class JkTestSuiteResult implements Serializable {
 
     private static final long serialVersionUID = -5353195584286473050L;
@@ -21,7 +25,10 @@ public class JkTestSuiteResult implements Serializable {
     private final long durationInMilis;
     private final Properties systemProperties;
 
-    public JkTestSuiteResult(Properties properties, String suiteName, int totaltestCount,
+    /**
+     * Constructs a test suite execution result according specified information.
+     */
+    JkTestSuiteResult(Properties properties, String suiteName, int totaltestCount,
             int ignoreCount, Iterable<? extends TestCaseResult> testCaseResult,
             long durationInMillis) {
         this.systemProperties = properties;
@@ -33,16 +40,16 @@ public class JkTestSuiteResult implements Serializable {
     }
 
     @SuppressWarnings("unchecked")
-    public static JkTestSuiteResult empty(Properties properties, String name, long durationInMillis) {
+    static JkTestSuiteResult empty(Properties properties, String name, long durationInMillis) {
         return new JkTestSuiteResult(properties, name, 0, 0, Collections.EMPTY_LIST,
                 durationInMillis);
     }
 
-    public List<? extends TestCaseResult> testCaseResults() {
+    List<? extends TestCaseResult> testCaseResults() {
         return testCaseResults;
     }
 
-    public List<TestCaseFailure> failures() {
+    List<TestCaseFailure> failures() {
         final List<TestCaseFailure> result = new LinkedList<JkTestSuiteResult.TestCaseFailure>();
         for (final TestCaseResult caseResult : this.testCaseResults) {
             if (caseResult instanceof TestCaseFailure) {
@@ -52,14 +59,23 @@ public class JkTestSuiteResult implements Serializable {
         return result;
     }
 
+    /**
+     * Returns how many test has been run.
+     */
     public int runCount() {
         return runCount;
     }
 
+    /**
+     * Returns how many test has been ignored.
+     */
     public int ignoreCount() {
         return ignoreCount;
     }
 
+    /**
+     * Returns how many test has failed.
+     */
     public int failureCount() {
         return failures().size();
     }
@@ -254,7 +270,7 @@ public class JkTestSuiteResult implements Serializable {
             }
             if (cause != null) {
                 result.addAll(cause.stackTracesAsStrings("Caused by : " + cause.getClassName()
-                        + ": " + messageOrEmpty(cause.getMessage())));
+                + ": " + messageOrEmpty(cause.getMessage())));
             }
             return result;
         }
