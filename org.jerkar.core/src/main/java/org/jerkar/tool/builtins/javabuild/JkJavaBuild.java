@@ -367,6 +367,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         codeWriter.dependencies = JkDependencies.builder().build();
         codeWriter.imports.clear();
         codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsForJkJavaBuild());
+        codeWriter.staticImports.addAll(JkCodeWriterForBuildClass.staticImportsForJkJavaBuild());
+
         return codeWriter;
     }
 

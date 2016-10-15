@@ -2,6 +2,7 @@ package org.jerkar.api.tooling;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class JkCodeWriterForBuildClass {
     public final List<String> imports = importsForJkBuild();
 
     /**
-     * The list of package/class to import.
+     * The list of package/class to import statically.
      * It can me expressed as "my.pack.MyClass" or "my.pack.*".
      */
     public final List<String> staticImports = new LinkedList<String>();
@@ -129,9 +130,21 @@ public class JkCodeWriterForBuildClass {
      * build class extending {@link JkJavaBuild}
      */
     public static List<String> importsForJkJavaBuild() {
-        final List<String> imports = new LinkedList<String>();
+        final List<String> imports = new LinkedList<String>(importsForJkDependencyBuildSupport());
         imports.add("org.jerkar.api.depmanagement.*");
         imports.add("org.jerkar.tool.builtins.javabuild.JkJavaBuild");
+        imports.remove("org.jerkar.tool.JkBuildDependencySupport");
+        imports.remove("org.jerkar.tool.JkBuild");
+        return imports;
+    }
+
+    /**
+     * Returns the java code portion that declares static imports for a basic
+     * build class extending {@link JkJavaBuild}
+     */
+    public static List<String> staticImportsForJkJavaBuild() {
+        final List<String> imports = new LinkedList<String>();
+        imports.add("org.jerkar.api.depmanagement.JkPopularModules.*");
         return imports;
     }
 
@@ -142,6 +155,7 @@ public class JkCodeWriterForBuildClass {
     public static List<String> importsForJkBuild() {
         final List<String> imports = new LinkedList<String>();
         imports.add("org.jerkar.tool.JkBuild");
+        imports.add("org.jerkar.tool.JkInit");
         return imports;
     }
 
@@ -150,9 +164,10 @@ public class JkCodeWriterForBuildClass {
      * build class extending {@link JkBuildDependencySupport}
      */
     public static List<String> importsForJkDependencyBuildSupport() {
-        final List<String> imports = new LinkedList<String>();
+        final List<String> imports = new LinkedList<String>(importsForJkBuild());
         imports.add("org.jerkar.api.depmanagement.*");
-        imports.add("org.jerkar.tool.JkDependencyBuildSupport");
+        imports.add("org.jerkar.tool.JkBuildDependencySupport");
+        imports.remove("org.jerkar.tool.JkBuild");
         return imports;
     }
 
@@ -198,6 +213,7 @@ public class JkCodeWriterForBuildClass {
             builder.append(extraMethod);
             builder.append(LINE_JUMP);
         }
+        builder.append(writer.mainMethod()).append(LINE_JUMP);
         return builder.toString();
     }
 
@@ -238,7 +254,7 @@ public class JkCodeWriterForBuildClass {
         }
 
         public String imports(List<String> imports) {
-            final List<String> list = new LinkedList<String>(imports);
+            final List<String> list = new LinkedList<String>(new HashSet<String>(imports));
             Collections.sort(list);
             final StringBuilder builder = new StringBuilder();
             for (final String item : list) {
@@ -248,7 +264,7 @@ public class JkCodeWriterForBuildClass {
         }
 
         public String staticImports(List<String> imports) {
-            final List<String> list = new LinkedList<String>(imports);
+            final List<String> list = new LinkedList<String>(new HashSet<String>(imports));
             Collections.sort(list);
             final StringBuilder builder = new StringBuilder();
             for (final String item : list) {
@@ -285,10 +301,10 @@ public class JkCodeWriterForBuildClass {
 
         public String moduleId(JkModuleId moduleId) {
             return new StringBuilder()
-            .append("    @Override\n")
-            .append("    public JkModuleId moduleId() {\n")
-            .append("        return JkModuleId.of(\"" + moduleId.group() + "\", \""
-                    + moduleId.name() + "\");\n").append("    }").toString();
+                    .append("    @Override\n")
+                    .append("    public JkModuleId moduleId() {\n")
+                    .append("        return JkModuleId.of(\"" + moduleId.group() + "\", \""
+                            + moduleId.name() + "\");\n").append("    }").toString();
         }
 
         public String version(String version) {
@@ -303,6 +319,14 @@ public class JkCodeWriterForBuildClass {
                     .append("    public JkDependencies dependencies() {\n")
                     .append("        return ").append(dependencies.toJavaCode(8)).append("\n    }")
                     .append("\n");
+            return builder.toString();
+        }
+
+        public String mainMethod() {
+            final StringBuilder builder = new StringBuilder()
+                    .append("    public static void main(String[] args) {\n")
+                    .append("        JkInit.instanceOf(Build.class, args).doDefault();\n")
+                    .append("    }\n");
             return builder.toString();
         }
 

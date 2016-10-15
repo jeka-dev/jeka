@@ -24,7 +24,7 @@ import org.w3c.dom.Element;
 /**
  * Wraps a POM file (Ideally an effective POM file) and provides convenient methods to extract
  * information from.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkPom {
@@ -189,6 +189,7 @@ public final class JkPom {
         codeWriter.extendedClass = "JkJavaBuild";
         codeWriter.imports.clear();
         codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsForJkJavaBuild());
+        codeWriter.staticImports.addAll(JkCodeWriterForBuildClass.staticImportsForJkJavaBuild());
         codeWriter.repos = repos();
         codeWriter.version = version();
         codeWriter.versionProvider = versionProvider();
