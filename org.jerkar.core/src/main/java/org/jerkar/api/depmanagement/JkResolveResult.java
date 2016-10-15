@@ -31,11 +31,17 @@ public final class JkResolveResult implements Serializable {
         return of(Collections.EMPTY_LIST);
     }
 
+    /**
+     * Creates a dependency resolve result object form a list of module dependency files and a list of resolved versions.
+     */
     public static JkResolveResult of(List<JkModuleDepFile> artifacts,
             JkVersionProvider jkVersionProvider) {
         return new JkResolveResult(artifacts, jkVersionProvider);
     }
 
+    /**
+     * Creates a dependency resolve result object form a list of module dependency files.
+     */
     public static JkResolveResult of(List<JkModuleDepFile> artifacts) {
         return new JkResolveResult(artifacts, JkVersionProvider.empty());
     }
@@ -50,6 +56,9 @@ public final class JkResolveResult implements Serializable {
         this.jkVersionProvider = jkVersionProvider;
     }
 
+    /**
+     * Returns the list of local files standing for this dependencies resolution.
+     */
     public List<File> localFiles() {
         final List<File> result = new LinkedList<File>();
         for (final JkModuleDepFile artifact : this.jkModuleDepFiles) {
@@ -58,6 +67,9 @@ public final class JkResolveResult implements Serializable {
         return result;
     }
 
+    /**
+     * Returns the versioned modules which with this result has been created.
+     */
     public Set<JkVersionedModule> involvedModules() {
         final Set<JkVersionedModule> result = new HashSet<JkVersionedModule>();
         for (final JkModuleDepFile artifact : this.jkModuleDepFiles) {
@@ -66,10 +78,16 @@ public final class JkResolveResult implements Serializable {
         return result;
     }
 
+    /**
+     * Returns the version provider which with this result has been created.
+     */
     public JkVersionProvider resolvedVersionProvider() {
         return jkVersionProvider;
     }
 
+    /**
+     * Returns the local files the specified module turns to.
+     */
     public List<File> filesOf(JkModuleId jkModuleId) {
         final List<File> result = new LinkedList<File>();
         for (final JkModuleDepFile artifact : this.jkModuleDepFiles) {
@@ -80,6 +98,9 @@ public final class JkResolveResult implements Serializable {
         return result;
     }
 
+    /**
+     * Returns a concatenation of this resolve result and the specified one.
+     */
     public JkResolveResult and(JkResolveResult other) {
         final List<JkModuleDepFile> artifacts = new LinkedList<JkModuleDepFile>(
                 this.jkModuleDepFiles);
