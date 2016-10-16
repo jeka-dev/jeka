@@ -108,7 +108,7 @@ final class Project {
     /**
      * Pre-compile and compile build classes (if needed) then execute the build
      * of this project.
-     * 
+     *
      * @param buildClassNameHint
      *            The full or simple class name of the build class to execute.
      *            It can be <code>null</code> or empty.
@@ -286,9 +286,11 @@ final class Project {
     }
 
     private static JkRepos repos() {
-        return JkBuildDependencySupport.reposOfOptions("build")
-                .andIfEmpty(JkBuildDependencySupport.reposOfOptions("download"))
-                .andIfEmpty(JkRepo.mavenCentral());
+        return JkRepo.firstNonNull(
+                JkBuildDependencySupport.repoFromOptions("build"),
+                JkBuildDependencySupport.repoFromOptions("download"),
+                JkRepo.mavenCentral())
+                .and(JkRepo.mavenLocal());
     }
 
 }

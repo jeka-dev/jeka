@@ -12,7 +12,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
  * A set of {@link JkRepo}
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkRepos implements Iterable<JkRepo>, Serializable {
@@ -188,7 +188,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
     }
 
     /**
-     * Retrieve directly the file embodying the specified the external dependency.
+     * Retrieves directly the file embodying the specified the external dependency.
      */
     public File get(JkModuleDependency moduleDependency) {
         final InternalDepResolver depResolver = InternalDepResolvers.ivy(this);

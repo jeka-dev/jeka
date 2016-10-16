@@ -39,7 +39,7 @@ class SampleTester {
         File file = new File("build/output/test-out/mavenrepo");
         testSamples("", "doPublish", "-repo.publish.url=" + file.getAbsolutePath());
         File file2 = new File("build/output/test-out/mavenrepo-release");
-        testSamples("", "doPublish", "-version=1.0", "-repo.release.url=" + file2.getAbsolutePath());
+        testSamples("", "doPublish", "-version=1.0-SNAPSHOT", "-repo.release.url=" + file2.getAbsolutePath());
         File file3 = new File("build/output/test-out/ivyrepo");
         testSamples("", "doPublish", "-repo.publish.url=ivy:" + file3.getAbsolutePath());
         testSamples("IvyPublishBuild", "doPublish", "-repo.publish.url=ivy:" + file3.getAbsolutePath());

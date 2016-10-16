@@ -44,8 +44,8 @@ public class JkBuildDependencySupport extends JkBuild {
     private JkPublisher cachedPublisher;
 
     /** Dependency and publish repositories */
-    @JkDoc("Dependency and publish repositories")
-    protected JkOptionRepos repo = new JkOptionRepos();
+    //@JkDoc("Dependency and publish repositories")
+    //protected JkOptionRepos repo = new JkOptionRepos();
 
     /** Version to inject to this build. If 'null' or blank than the version will be the one returned by #version() */
     @JkDoc("Version to inject to this build. If 'null' or blank than the version will be the one returned by #version()")
@@ -110,37 +110,22 @@ public class JkBuildDependencySupport extends JkBuild {
      * only a meaning in case of using managed dependencies.
      */
     protected JkRepos downloadRepositories() {
-        return reposOfOptions("download").andIfEmpty(JkRepo.mavenCentral());
+        return JkRepo.mavenLocal().and(
+                JkRepo.firstNonNull(repoFromOptions("download"), JkRepo.mavenCentral()));
     }
 
     /**
      * Returns the repositories where are published artifacts.
+     * By default it takes the repository defined in options <code>repo.publish.url</code>,
+     * <code>repo.publish.username</code> and <code>repo.publish.password</code>.<p>
+     * You can select another repository defined in option by setting <code>repo.publishname</code> option.
+     * So you want to select the repository defined as <code>repo.myRepo.url</code> in your options,
+     * set option <code>repo.publishname=myRepo</code>.<p>
+     * If no such repo are defined in options, it takes {@link JkRepo#mavenLocal()} as fallback.
      */
     protected JkPublishRepos publishRepositories() {
-
-        // Find best defaults
-        if (repo.publish.url == null && repo.release.url == null) {
-            JkLog.info("No url specified for publish and release repo : use defaults.");
-            if (repo.publish.username != null && repo.publish.password != null) {
-                JkLog.info("Credential specifified for publish repo : use OSSRH repos.");
-                return JkPublishRepos.ossrh(repo.publish.username, repo.publish.password, pgp());
-            } else {
-                final JkRepo repo = JkRepo.mavenLocal();
-                JkLog.info("No credential specifified for publish repo : use local filesystem repo."
-                        + repo.url());
-                return JkPublishRepos.of(repo.asPublishRepo());
-            }
-        }
-
-        // One of release or publish url has been specified
-        final JkRepo defaultDownloadRepo = this.repo.download.toRepo();
-        final JkRepo defaultPublishRepo = this.repo.publish.toRepo();
-        final JkRepo defaultPublishReleaseRepo = this.repo.release.toRepo();
-        final JkRepo publishRepo = JkRepo.firstNonNull(defaultPublishRepo, defaultDownloadRepo);
-        final JkRepo releaseRepo = JkRepo.firstNonNull(defaultPublishReleaseRepo, publishRepo);
-
-        return JkPublishRepos.of(publishRepo.asPublishSnapshotRepo()).and(
-                releaseRepo.asPublishReleaseRepo());
+        final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("repo.publishname"), "publish");
+        return JkRepo.firstNonNull(repoFromOptions(repoName), JkRepo.mavenLocal()).asPublishRepos();
     }
 
     /**
@@ -268,69 +253,6 @@ public class JkBuildDependencySupport extends JkBuild {
         return super.scaffolder().buildClassWriter(codeWriter);
     }
 
-
-    /**
-     * Options for multi-purpose repositories.
-     */
-    public static final class JkOptionRepos {
-
-        /** Maven or Ivy repository to download dependency artifacts. */
-        @JkDoc("Maven or Ivy repository to download dependency artifacts.")
-        public final JkOptionRepo download = new JkOptionRepo();
-
-        /** Maven or Ivy repositories to publish artifacts. */
-        @JkDoc("Maven or Ivy repositories to publish artifacts.")
-        public final JkOptionRepo publish = new JkOptionRepo();
-
-        /**
-         * Maven or Ivy repositories to publish released artifacts.
-         * If this repository is not null, then Jerkar will try to publish snapshot in the publish repo and release in this one.
-         */
-        @JkDoc({
-            "Maven or Ivy repositories to publish released artifacts.",
-        "If this repo is not null, then Jerkar will try to publish snapshot in the publish repo and release in this one." })
-        public final JkOptionRepo release = new JkOptionRepo();
-
-        /**
-         * Constructs a {@link JkOptionRepo} populated with default values
-         */
-        public JkOptionRepos() {
-            download.url = JkRepo.MAVEN_CENTRAL_URL.toExternalForm();
-            publish.url = JkRepo.MAVEN_OSSRH_DOWNLOAD_AND_DEPLOY_SNAPSHOT.toExternalForm();
-            release.url = JkRepo.MAVEN_OSSRH_DEPLOY_RELEASE.toExternalForm();
-        }
-
-    }
-
-    /** Option for a single repository */
-    public static final class JkOptionRepo {
-
-        /** Url of the repository : Prefix the Url with 'ivy:' if it is an Ivy repostory. */
-        @JkDoc({ "Url of the repository : Prefix the Url with 'ivy:' if it is an Ivy repostory." })
-        public String url;
-
-        /**
-         * User name to connect to repository (if needed).
-         * Null or blank means that the repository will be accessed in an anonymous way.
-         */
-        @JkDoc({ "User name to connect to repository (if needed).",
-        "Null or blank means that the repository will be accessed in an anonymous way." })
-        public String username;
-
-        /** Password to connect to the repository (if needed). */
-        @JkDoc({ "Password to connect to the repository (if needed)." })
-        public String password;
-
-        /** Returns the repo configured here or null if the url is null */
-        public JkRepo toRepo() {
-            if (url == null) {
-                return null;
-            }
-            return JkRepo.of(url).withOptionalCredentials(username, password);
-        }
-
-    }
-
     /**
      * Returns the PGP signer used to sign produced artifacts.
      */
@@ -345,7 +267,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * <code>repo.[repoName].password</code> options for creating according
      * repository.
      */
-    public static JkRepo repoOfOptions(String repoName) {
+    public static JkRepo repoFromOptions(String repoName) {
         final String optionName = "repo." + repoName + "." + "url";
         final String url = JkOptions.get(optionName);
         if (JkUtilsString.isBlank(url)) {
@@ -367,7 +289,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * <code>repo.[repoName].url</code> option value. but the credential will
      * remain the same for all returned repositories.
      */
-    public static JkRepos reposOfOptions(String repoName) {
+    public static JkRepos reposFromOptions(String repoName) {
         final String urls = JkOptions.get("repo." + repoName + "." + "url");
         JkRepos result = JkRepos.of();
         if (JkUtilsString.isBlank(urls)) {

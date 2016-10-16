@@ -46,12 +46,12 @@ public class IvyPublishBuild extends JkJavaBuild {
 
     @Override
     protected JkRepos downloadRepositories() {
-	return JkRepo.ivy(this.repo.publish.url).and(JkRepo.mavenCentral());
+	return JkRepo.ivy(JkRepo.mavenLocal().url()).and(JkRepo.mavenCentral());
     }
 
     @Override
     protected JkPublishRepos publishRepositories() {
-	return JkRepo.ivy(this.repo.publish.url).asPublishRepos();
+	return JkRepo.ivy(JkRepo.mavenLocal().url()).asPublishRepos();
     }
 
     @Override
