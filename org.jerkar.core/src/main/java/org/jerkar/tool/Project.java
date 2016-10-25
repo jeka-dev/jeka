@@ -290,7 +290,7 @@ final class Project {
                 JkBuildDependencySupport.repoFromOptions("build"),
                 JkBuildDependencySupport.repoFromOptions("download"),
                 JkRepo.mavenCentral())
-                .and(JkRepo.mavenLocal());
+                .and(JkBuildDependencySupport.mavenPublishLocal());
     }
 
 }

@@ -59,8 +59,14 @@ public final class JkUnit {
 
     private static final String JUNIT3_TEST_RESULT_CLASS_NAME = "junit.framework.TestResult";
 
+    /**
+     * A interface to implement to enhance test execution. It can be used for test coverage tool for example.
+     */
     public static interface Enhancer {
 
+        /**
+         * Returns a modified Junit launcher from the specified one.
+         */
         JkUnit enhance(JkUnit jkUnit);
 
     }
@@ -102,45 +108,72 @@ public final class JkUnit {
                 crashOnFailed, printOutputOnConsole);
     }
 
+    /**
+     * Returns a launcher forking a process according the specified java process description.
+     */
     public static JkUnit ofFork(JkJavaProcess jkJavaProcess) {
         return new JkUnit(null, JunitReportDetail.NONE, null, jkJavaProcess, JkFileTreeSet.empty(),
                 true, true);
     }
 
+    /**
+     * Returns a launcher forking a process having the specified classpath.
+     */
     public static JkUnit ofFork(JkClasspath classpath) {
         return ofFork(JkJavaProcess.of().withClasspath(classpath));
     }
 
+    /**
+     * Returns a launcher forking a process having the specified class directory and the specified classpath entries.
+     */
     public static JkUnit ofClasspath(File binDir, Iterable<File> classpathEntries) {
         return of(JkClasspath.of(binDir).and(classpathEntries));
     }
 
+    /**
+     * Returns a launcher having the specified classpath.
+     */
     public static JkUnit of(JkClasspath classpath) {
         return new JkUnit(classpath, JunitReportDetail.NONE, null, null, JkFileTreeSet.empty(),
                 true, true);
     }
 
+    /**
+     * Returns a copy of this launcher but with the specified report detail.
+     */
     public JkUnit withReport(JunitReportDetail reportDetail) {
         return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess,
                 classesToTest, this.breakOnFailure, this.printOutputOnConsole);
     }
 
+    /**
+     * Returns a copy of this launcher but that fail fast on the first failure.
+     */
     public JkUnit withBreakOnFailure(boolean crashOnFailure) {
         return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess,
                 classesToTest, this.breakOnFailure, this.printOutputOnConsole);
     }
 
+    /**
+     * Returns a copy of this launcher but with the specified report directory output.
+     */
     public JkUnit withReportDir(File reportDir) {
         return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess,
                 classesToTest, this.breakOnFailure, this.printOutputOnConsole);
     }
 
+    /**
+     * Returns a copy of this launcher but forked.
+     */
     public JkUnit forkKeepingSameClassPath(JkJavaProcess process) {
         final JkJavaProcess fork = process.withClasspath(jkClasspath());
         return new JkUnit(null, reportDetail, reportDir, fork, this.classesToTest,
                 this.breakOnFailure, this.printOutputOnConsole);
     }
 
+    /**
+     * Returns a copy of this launcher but specifying an action to run at the end execution.
+     */
     public JkUnit withPostAction(Runnable runnable) {
         final List<Runnable> list = new LinkedList<Runnable>(this.postActions);
         list.add(runnable);
@@ -148,10 +181,16 @@ public final class JkUnit {
                 this.classesToTest, this.breakOnFailure, this.printOutputOnConsole);
     }
 
+    /**
+     * Returns an enhanced copy of this launcher.
+     */
     public JkUnit enhancedWith(Enhancer enhancer) {
         return enhancer.enhance(this);
     }
 
+    /**
+     * Returns a copy of this launcher enhanced with multiple enhancer.
+     */
     public JkUnit enhancedWith(Iterable<Enhancer> plugins) {
         JkUnit result = this;
         for (final Enhancer plugin : plugins) {
@@ -198,46 +237,76 @@ public final class JkUnit {
         return forked(fork, JkJavaProcess.of(), true);
     }
 
+    /**
+     * Returns an enhanced copy of this launcher but specifying location of classes to test.
+     */
     public JkUnit withClassesToTest(JkFileTreeSet classesToTest) {
         return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess, classesToTest,
                 this.breakOnFailure, this.printOutputOnConsole);
     }
 
+    /**
+     * Returns an enhanced copy of this launcher but specifying if the output should be displayed on console.
+     */
     public JkUnit withOutputOnConsole(boolean outputOnConsole) {
         return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess, classesToTest,
                 this.breakOnFailure, outputOnConsole);
     }
 
+    /**
+     * Returns an enhanced copy of this launcher but specifying location of classes to test.
+     */
     public JkUnit withClassesToTest(JkFileTree classesToTest) {
         return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess,
                 JkFileTreeSet.of(classesToTest), this.breakOnFailure, this.printOutputOnConsole);
     }
 
+    /**
+     * Returns an enhanced copy of this launcher but specifying location of classes to test.
+     */
     public JkUnit withClassesToTest(File... classDirs) {
         return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess,
                 JkFileTreeSet.of(classDirs), this.breakOnFailure, this.printOutputOnConsole);
     }
 
+    /**
+     * Returns <code>true</code> if this launcher is forked.
+     */
     public boolean forked() {
         return this.forkedProcess != null;
     }
 
+    /**
+     * Returns the classpath for this launcher.
+     */
     public JkClasspath classpath() {
         return classpath;
     }
 
+    /**
+     * Returns the report detail level for this launcher.
+     */
     public JunitReportDetail reportDetail() {
         return reportDetail;
     }
 
+    /**
+     * Returns the output report dir.
+     */
     public File reportDir() {
         return reportDir;
     }
 
+    /**
+     * Returns the process description if this launcher is forked.
+     */
     public JkJavaProcess processFork() {
         return forkedProcess;
     }
 
+    /**
+     * Runs the test suite and return the result.
+     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public JkTestSuiteResult run() {
         final Collection<Class> classes = getClassesToTest();

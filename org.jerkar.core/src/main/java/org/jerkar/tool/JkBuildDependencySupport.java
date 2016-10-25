@@ -18,6 +18,7 @@ import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.depmanagement.JkVersionProvider;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPath;
+import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
 import org.jerkar.api.utils.JkUtilsObject;
@@ -42,10 +43,6 @@ public class JkBuildDependencySupport extends JkBuild {
 
     // A cache for artifact publisher
     private JkPublisher cachedPublisher;
-
-    /** Dependency and publish repositories */
-    //@JkDoc("Dependency and publish repositories")
-    //protected JkOptionRepos repo = new JkOptionRepos();
 
     /** Version to inject to this build. If 'null' or blank than the version will be the one returned by #version() */
     @JkDoc("Version to inject to this build. If 'null' or blank than the version will be the one returned by #version()")
@@ -110,7 +107,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * only a meaning in case of using managed dependencies.
      */
     protected JkRepos downloadRepositories() {
-        return JkRepo.mavenLocal().and(
+        return mavenPublishLocal().and(
                 JkRepo.firstNonNull(repoFromOptions("download"), JkRepo.mavenCentral()));
     }
 
@@ -119,13 +116,13 @@ public class JkBuildDependencySupport extends JkBuild {
      * By default it takes the repository defined in options <code>repo.publish.url</code>,
      * <code>repo.publish.username</code> and <code>repo.publish.password</code>.<p>
      * You can select another repository defined in option by setting <code>repo.publishname</code> option.
-     * So you want to select the repository defined as <code>repo.myRepo.url</code> in your options,
+     * So if you want to select the repository defined as <code>repo.myRepo.url</code> in your options,
      * set option <code>repo.publishname=myRepo</code>.<p>
-     * If no such repo are defined in options, it takes {@link JkRepo#mavenLocal()} as fallback.
+     * If no such repo are defined in options, it takes {@link JkRepo#mavenPublishLocal()} as fallback.
      */
     protected JkPublishRepos publishRepositories() {
         final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("repo.publishname"), "publish");
-        return JkRepo.firstNonNull(repoFromOptions(repoName), JkRepo.mavenLocal()).asPublishRepos();
+        return JkRepo.firstNonNull(repoFromOptions(repoName), mavenPublishLocal()).asPublishRepos();
     }
 
     /**
@@ -301,6 +298,15 @@ public class JkBuildDependencySupport extends JkBuild {
             result = result.and(JkRepo.of(url.trim()).withOptionalCredentials(username, password));
         }
         return result;
+    }
+
+    /**
+     * Returns the Maven repository located in Jerkar user Home. You can use it to
+     * "deploy" locally.
+     */
+    public static JkRepo mavenPublishLocal() {
+        final File file = new File(JkLocator.jerkarUserHome(), "maven-publish-dir");
+        return JkRepo.maven(file);
     }
 
 }

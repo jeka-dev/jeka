@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
@@ -98,15 +97,6 @@ public abstract class JkRepo implements Serializable {
      */
     public static JkRepo mavenCentral() {
         return maven(JkMavenRepository.MAVEN_CENTRAL_URL.toString());
-    }
-
-    /**
-     * Returns the Maven repository located in Jerkar user Home. You can use it to
-     * "deploy" locally.
-     */
-    public static JkRepo mavenLocal() {
-        final File file = new File(JkLocator.jerkarUserHome(), "maven-publish-dir");
-        return JkRepo.maven(file);
     }
 
     /**

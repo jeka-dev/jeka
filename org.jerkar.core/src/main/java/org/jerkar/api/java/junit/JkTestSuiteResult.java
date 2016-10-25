@@ -80,10 +80,16 @@ public class JkTestSuiteResult implements Serializable {
         return failures().size();
     }
 
+    /**
+     * Returns the suite name.
+     */
     public String suiteName() {
         return suiteName;
     }
 
+    /**
+     * Returns assertion failed count.
+     */
     public int assertErrorCount() {
         int result = 0;
         for (final TestCaseFailure failure : failures()) {
@@ -94,14 +100,23 @@ public class JkTestSuiteResult implements Serializable {
         return result;
     }
 
+    /**
+     * Returns error count (without counting assertion failures).
+     */
     public int errorCount() {
         return failureCount() - assertErrorCount();
     }
 
+    /**
+     * Returns duration of the suite execution.
+     */
     public long durationInMillis() {
         return durationInMilis;
     }
 
+    /**
+     * Returns a multi line string representation of the suite execution result;
+     */
     public List<String> toStrings(boolean showStackTrace) {
         final List<String> lines = new LinkedList<String>();
         if (failureCount() == 0) {
@@ -132,12 +147,18 @@ public class JkTestSuiteResult implements Serializable {
                 + " ignored. In " + durationInMilis + " milliseconds.";
     }
 
+    /**
+     * A result for a single test case execution in case of success.
+     */
     @SuppressWarnings("serial")
     public static class TestCaseResult implements Serializable {
         private final String className;
         private final String testName;
         private final float durationInSecond;
 
+        /**
+         * Constructs a test case result.
+         */
         public TestCaseResult(String className, String testName, float durationSec) {
             super();
             this.className = className;
@@ -145,36 +166,57 @@ public class JkTestSuiteResult implements Serializable {
             this.durationInSecond = durationSec;
         }
 
+        /**
+         * Returns the class name which the test belong to.
+         */
         public String getClassName() {
             return className;
         }
 
+        /**
+         * Returns the test name (generally the method name);
+         */
         public String getTestName() {
             return testName;
         }
 
+        /**
+         * Returns duration of the suite execution.
+         */
         public float getDurationInSecond() {
             return durationInSecond;
         }
 
     }
 
+    /**
+     * A result for a single test case execution in case of failure.
+     */
     public static class TestCaseFailure extends TestCaseResult implements Serializable {
 
         private static final long serialVersionUID = 7089021299483181605L;
 
         private final ExceptionDescription exceptionDescription;
 
+        /**
+         * Constructs a test case result.
+         */
         public TestCaseFailure(String className, String testName, float duration,
                 ExceptionDescription exception) {
             super(className, testName, duration);
             this.exceptionDescription = exception;
         }
 
+        /**
+         * Returns the description of the failure.
+         */
         public ExceptionDescription getExceptionDescription() {
             return exceptionDescription;
         }
 
+        /**
+         * Returns a multi line string representation of the test case execution result;
+         */
         public List<String> toStrings(boolean withStackTrace) {
             final List<String> result = new LinkedList<String>();
             final String intro = this.getClassName() + "#" + this.getTestName();
@@ -191,10 +233,16 @@ public class JkTestSuiteResult implements Serializable {
 
     }
 
+    /**
+     * A result for a single test case execution in case of ignore.
+     */
     public static class IgnoredCase extends TestCaseResult implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
+        /**
+         * Constructs an ignored test case result.
+         */
         public IgnoredCase(String className, String testName) {
             super(className, testName, 0);
         }
@@ -208,10 +256,16 @@ public class JkTestSuiteResult implements Serializable {
         return " : " + exceptionMessage;
     }
 
+    /**
+     * Returns the system properties in use during the test suite execution.
+     */
     public Properties getSystemProperties() {
         return systemProperties;
     }
 
+    /**
+     * Description of an execption occured during the test suite execution.
+     */
     public static class ExceptionDescription implements Serializable {
 
         private static final long serialVersionUID = -8619868712236132763L;
@@ -222,6 +276,9 @@ public class JkTestSuiteResult implements Serializable {
         private final ExceptionDescription cause;
         private final boolean assertError;
 
+        /**
+         * Constructs an exception description.
+         */
         public ExceptionDescription(Throwable throwable) {
             super();
             this.className = throwable.getClass().getName();
@@ -236,26 +293,44 @@ public class JkTestSuiteResult implements Serializable {
 
         }
 
+        /**
+         * Returns the name of the exception.
+         */
         public String getClassName() {
             return className;
         }
 
+        /**
+         * Returns the message of the exception.
+         */
         public String getMessage() {
             return message;
         }
 
+        /**
+         * Returns the stack trace of the exception.
+         */
         public StackTraceElement[] getStackTrace() {
             return stackTrace;
         }
 
+        /**
+         * Returns the cause of the exception.
+         */
         public ExceptionDescription getCause() {
             return cause;
         }
 
+        /**
+         * Returns either this exception is an assertion failure or not.
+         */
         public boolean isAssertError() {
             return assertError;
         }
 
+        /**
+         * Returns a multi-line representation of the stack trace.
+         */
         public List<String> stackTracesAsStrings() {
             return stackTracesAsStrings(className + ": " + message);
         }
