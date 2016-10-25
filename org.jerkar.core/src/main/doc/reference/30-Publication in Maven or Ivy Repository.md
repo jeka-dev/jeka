@@ -63,57 +63,81 @@ JkPublisher.of(repo).publishMaven(versionedModule, publication, JkDependencies.o
 
 #### Using JkJavaBuild template
 
-When using this template, the effort you must produce to publish artifacts is minimal or zero if you don't need special feature.
+If your build class inherit from _JkBuildJava_ template, the effort you must produce to publish artifacts is minimal or zero if you don't need special feature.
 The prerequisite is to setup _options.properties_ according to your infrastructure.
 
 ##### Using defaults
 
 If you don't specify anything the publication will occurs locally at : _[JERKAR USER HOME]/maven-publish-dir_
 
-If you specify only credential as
+If you specify 
 
 ```
-repo.publish.username=myUsername
-repo.publish.password=myPassword
+repo.publish.url=http://my.repository/location
+repo.publish.username=myUsername (optional)
+repo.publish.password=myPassword (optional)
 ```
 
-Jerkar will use OSSRH public repository : https://oss.sonatype.org/content/repositories/snapshots for snapshots 
-and https://oss.sonatype.org/content/repositories/releases for releases. 
-For more precision about default see [`JkDependencySupport#publishRepositories`](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/src/main/java/org/jerkar/tool/JkBuildDependencySupport.java) method.
+Jerkar will use this repository to publish your all your artifacts (snapshots and releases).
 
-
-##### Using explicit settings
-
-You can set explicit settings at [JERKAR USER DIR]/options.properties level, so every build will leverage from these settings
+If you specify 
 
 ```
-repo.publish.url=https://my.nexus/snaphots
-repo.publish.username=myNexusSnapshotUserName
-repo.publish.password=myNexusSnapshotPassword
-repo.release.url=https://my.nexus/releases
-repo.release.username=myNexusReleaseUserName
-repo.release.password=myNexusReleasePassword
-```
-In this case the snapshot artifacts (those with version's ending with '-SNAPSHOT') will be published on https://my.nexus/snaphots repository while the other will be published in https://my.nexus/releases.
+repo.publish.url=http://my.repository/location
+repo.publish.username=myUsername (optional)
+repo.publish.password=myPassword (optional)
 
-If you mention only 
+repo.publishRelease.url=http://my.repository/release/location
+repo.publishRelease.username=myUsername (optional)
+repo.publishRelease.password=myPassword (optional)
+```
+
+Jerkar will publish snapshots on _http://my.repository/location_ and releases on _http://my.repository/release/location_.
+
+
+##### Using a pool of repositories
+
+You can define a pool of repositories in your options ([JERKAR USER DIR]/options.properties) so that 
+you can refer only to the repository name to point on a repository.
 
 ```
-repo.publish.url=https://my.nexus/all
-repo.publish.username=myNexusSnapshotUserName
-repo.publish.password=myNexusSnapshotPassword
+repo.myRepo1.url=https://my.nexus/repo1
+
+repo.myRepo2.url=https://my.nexus/repo2
+repo.myRepo2.username=usernameRepo2
+repo.myRepo2.password=repo2
+
+repo.myRepo3.url=https://my.nexus/repo3
+repo.myRepo3.username=usernameRepo3
+repo.myRepo3.password=passwordRepo3
 ```
-then everything will be published to https://my.nexus/all.
+
+Then you can mention your publish repositories in option as
+
+```
+repo.publishName=myRepo2   (for snapshots + releases)
+```
+or
+
+```
+repo.publishName=myRepo2   (for snapshots)
+repo.publishReleaseName=myRepo3  (for releases)
+```
+
+or you can override the JKbuildDependencySupport#publishRepositories in your build class as
+
+```
+@Override
+protected JkPublishRepos publishRepositories() {
+    return repoFromOptions("myRepo2").asPublishSnapshotRepo()
+        .andRelease(repoFromOptions("myRepo3"));
+}
+```
+
+In this case the snapshot artifacts (those with version's ending with '-SNAPSHOT') will be published on https://my.nexus/repo2 while the other will be published in https://my.nexus/repo3.
 
 You can also override `publishRepositories``in your build script so you can write your own specific logic to setup and select publish repositories. 
 
-```
-@Override  
-protected JkPublishRepos publishRepositories() {
-    return JkPublishRepos.ossrh(JkOptions.get("ossrh.username"),
-	    JkOptions.get("ossrh.password"), pgp());
-}
-```
 
 ### Publish to a Ivy repository
 
@@ -170,3 +194,34 @@ public class IvyPublishBuild extends JkJavaBuild {
 
 }
 ```
+
+### Publish to a public central repositoty
+
+Publishing to a central repository (as Maven central through OSSRH) generally requires extra information to be passed along indications to sign your artifacts.
+
+```
+    // Extra information mandatory to publish to OSSRH 
+    @Override
+    protected JkMavenPublication mavenPublication() {
+        return super.mavenPublication().with(
+                JkMavenPublicationInfo
+                .of("Jerkar", "Build simpler, stronger, faster", "http://jerkar.github.io")
+                .withScm("https://github.com/jerkar/jerkar.git").andApache2License()
+                .andGitHubDeveloper("djeang", "djeangdev@yahoo.fr"));
+    }
+
+   @Override
+   protected JkPublishRepos publishRepositories() {
+        return JkPublishRepos.ossrh("myOssrhUserName", "myOssrhPassword", pgp());
+   }
+```
+
+OSSRH requires to sign artifact using PGP. For such Jerkar needs a _JkPgp_ object containing everything necessary to sign artifact. 
+By default Jerkar assumes that :
+
+- public ring is located at _[USER HOME]\AppData\Roaming\gnupg\pubring.gpg_ on Windows and at _[USER HOME]/gnupg/pubring.gpg_ on Unix systems
+- secret ring is located at [USER HOME]\AppData\Roaming\gnupg\secring.gpg on Windows and at _[USER HOME]/gnupg/secring.gpg_ on Unix systems
+- secret ring password is provided by option _pgp.secretKeyPassword_
+ 
+Pass your secret key password as an option _pgp.secretKeyPassword=mySecretRingPassword_ when you launch your build or store it in your [JERKAR USER HOME]/options.properties if you consider it is safe enough.
+
