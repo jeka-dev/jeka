@@ -276,14 +276,14 @@ public class JkBuildDependencySupport extends JkBuild {
     }
 
     /**
-     * Creates {@link JkRepos} form Jerkar options. the specified repository
+     * Creates {@link JkRepos} from Jerkar options. The specified repository
      * name will be turned to <code>repo.[repoName].url</code>,
      * <code>repo.[repoName].username</code> and
      * <code>repo.[repoName].password</code> options for creating according
      * repository.
      *
-     * You can specify severals url by using coma separation in
-     * <code>repo.[repoName].url</code> option value. but the credential will
+     * You can specify severals urls by using comma separation in
+     * <code>repo.[repoName].url</code> option value but credential will
      * remain the same for all returned repositories.
      */
     public static JkRepos reposFromOptions(String repoName) {
