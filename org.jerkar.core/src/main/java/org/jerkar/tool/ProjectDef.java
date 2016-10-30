@@ -17,7 +17,7 @@ import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * Defines the build classes defined on a given project.
+ * Defines build classes defined on a given project.
  *
  * @author Jerome Angibaud
  */
@@ -76,7 +76,11 @@ final class ProjectDef {
             this.optionDefs = Collections.unmodifiableList(optionDefs);
         }
 
-        public static ProjectBuildClassDef of(Object build) {
+        List<JkProjectBuildMethodDef> methodDefinitions(){
+            return methodDefs;
+        }
+
+        static ProjectBuildClassDef of(Object build) {
             final Class<?> clazz = build.getClass();
             final List<JkProjectBuildMethodDef> methods = new LinkedList<ProjectDef.JkProjectBuildMethodDef>();
             for (final Method method : executableMethods(clazz)) {
@@ -173,7 +177,7 @@ final class ProjectDef {
             return Arrays.asList(JkUtilsString.split(string, "\n"));
         }
 
-        public Map<String, String> optionValues(JkBuild build) {
+        Map<String, String> optionValues(JkBuild build) {
             final Map<String, String> result = new LinkedHashMap<String, String>();
             for (final JkProjectBuildOptionDef optionDef : this.optionDefs) {
                 final String name = optionDef.name;
@@ -220,6 +224,10 @@ final class ProjectDef {
                 return -1;
             }
             return 1;
+        }
+
+        String serialize() {
+            return name + '|' + description + '|' + declaringClass.getName();
         }
 
     }

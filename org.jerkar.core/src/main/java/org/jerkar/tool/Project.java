@@ -50,7 +50,7 @@ final class Project {
      * Download repository is used in case the build classes need some
      * dependencies in order to be compiled/run.
      */
-    public Project(File baseDir) {
+    Project(File baseDir) {
         super();
         this.projectBaseDir = JkUtilsFile.canonicalFile(baseDir);
         buildRepos = repos();
@@ -91,19 +91,21 @@ final class Project {
         JkLog.done();
     }
 
-    public <T extends JkBuild> T getBuild(Class<T> baseClass) {
+    <T extends JkBuild> T getBuild(Class<T> baseClass) {
         if (resolver.needCompile()) {
             this.compile();
         }
         return resolver.resolve(baseClass);
     }
 
-    public List<Class<?>> getBuildClasses() {
+    List<Class<?>> getBuildClasses() {
         if (resolver.needCompile()) {
             this.compile();
         }
         return resolver.resolveBuildClasses();
     }
+
+
 
     /**
      * Pre-compile and compile build classes (if needed) then execute the build
@@ -113,7 +115,7 @@ final class Project {
      *            The full or simple class name of the build class to execute.
      *            It can be <code>null</code> or empty.
      */
-    public void execute(JkInit init) {
+    void execute(JkInit init) {
         this.buildDependencies = this.buildDependencies.andScopeless(init.commandLine()
                 .dependencies());
         JkPath runtimeClasspath = compile();
@@ -124,15 +126,15 @@ final class Project {
             runtimeClasspath = runtimeClasspath.andHead( cmdPath );
             JkLog.done("Command line extra path : " + cmdPath);
         }
-        final BuildAndPluginDictionnary buidAndDict = getBuildInstance(init, runtimeClasspath);
-        if (buidAndDict == null) {
+        final BuildAndPluginDictionnary buildAndDict = getBuildInstance(init, runtimeClasspath);
+        if (buildAndDict == null) {
             throw new JkException("Can't find or guess any build class for project hosted in "
                     + this.projectBaseDir
                     + " .\nAre you sure this directory is a buildable project ?");
         }
         JkLog.done();
         try {
-            this.launch(buidAndDict.build, buidAndDict.dictionnary, init.commandLine());
+            this.launch(buildAndDict.build, buildAndDict.dictionnary, init.commandLine());
         } catch (final RuntimeException e) {
             JkLog.error("Project " + projectBaseDir.getAbsolutePath() + " failed");
             throw e;
@@ -144,7 +146,7 @@ final class Project {
         return JkDependencyResolver.managed(this.buildRepos, deps).get();
     }
 
-    public JkBuild instantiate(JkInit init) {
+    JkBuild instantiate(JkInit init) {
         final JkPath runtimePath = compile();
         JkLog.nextLine();
         final BuildAndPluginDictionnary buildAndDict = getBuildInstance(init, runtimePath);
@@ -285,7 +287,7 @@ final class Project {
         return this.projectBaseDir.getName();
     }
 
-    private static JkRepos repos() {
+    static JkRepos repos() {
         return JkRepo.firstNonNull(
                 JkBuildDependencySupport.repoFromOptions("build"),
                 JkBuildDependencySupport.repoFromOptions("download"),
