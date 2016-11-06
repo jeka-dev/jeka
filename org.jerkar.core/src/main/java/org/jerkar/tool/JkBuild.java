@@ -138,7 +138,7 @@ public class JkBuild {
             method = this.getClass().getMethod(methodName);
         } catch (final NoSuchMethodException e) {
             JkLog.warn("No zero-arg method '" + methodName + "' found in class '" + this.getClass()
-                    + "'. Skip.");
+            + "'. Skip.");
             JkLog.warnStream().flush();
             return;
         }
@@ -158,7 +158,7 @@ public class JkBuild {
                     + JkUtilsTime.durationInSeconds(time) + " seconds.");
         } catch (final RuntimeException e) {
             JkLog.info("Method " + methodName + " failed in " + JkUtilsTime.durationInSeconds(time)
-                    + " seconds.");
+            + " seconds.");
             throw e;
         }
     }
@@ -207,7 +207,7 @@ public class JkBuild {
      * Creates the project structure (mainly project folder layout, build class code and IDE metadata) at the root
      * of the current project.
      */
-    @JkDoc("Create the project structure")
+    @JkDoc("Creates the project structure")
     public final void scaffold() {
         scaffolder().run();
         JkBuildPlugin.applyScaffold(this.plugins.getActives());
@@ -222,7 +222,7 @@ public class JkBuild {
     }
 
     /** Clean the output directory. */
-    @JkDoc("Clean the output directory.")
+    @JkDoc("Cleans the output directory.")
     public void clean() {
         JkLog.start("Cleaning output directory " + ouputDir().root().getPath());
         ouputDir().exclude(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteAll();
@@ -236,18 +236,18 @@ public class JkBuild {
     }
 
     /** Run checks to verify the package is valid and meets quality criteria. */
-    @JkDoc("Run checks to verify the package is valid and meets quality criteria.")
+    @JkDoc("Runs checks to verify the project is valid and meets quality criteria.")
     public void verify() {
         JkBuildPlugin.applyVerify(this.plugins.getActives());
     }
 
-    /** Display all available methods defined in this build. */
+    /** Displays all available methods defined in this build. */
     @JkDoc("Display all available methods defined in this build.")
     public void help() {
         HelpDisplayer.help(this);
     }
 
-    /** Display details on all available plugins. */
+    /** Displays details on all available plugins. */
     @JkDoc("Display details on all available plugins.")
     public void helpPlugins() {
         HelpDisplayer.helpPlugins();

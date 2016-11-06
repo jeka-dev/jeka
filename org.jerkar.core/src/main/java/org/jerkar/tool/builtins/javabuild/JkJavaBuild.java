@@ -372,8 +372,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         return codeWriter;
     }
 
-    /** Generate sources and resources, compile production sources and process production resources to the classes directory. */
-    @JkDoc("Generate sources and resources, compile production sources and process production resources to the classes directory.")
+    /** Generates sources and resources, compiles production sources and process production resources to the class directory. */
+    @JkDoc("Generates sources and resources, compiles production sources and processes production resources to the class directory.")
     public void compile() {
         JkLog.startln("Processing production code and resources");
         generateSources();
@@ -383,8 +383,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         JkLog.done();
     }
 
-    /** Compile and run all unit tests. */
-    @JkDoc("Compile and run all unit tests.")
+    /** Compiles and runs all unit tests. */
+    @JkDoc("Compiles and runs all unit tests.")
     public void unitTest() {
         this.generateUnitTestSources();
         if (!checkProcessTests(unitTestSources())) {
@@ -398,8 +398,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         JkLog.done();
     }
 
-    /** Produce documents for this project (javadoc, Html site, ...) */
-    @JkDoc("Produce documents for this project (javadoc, Html site, ...)")
+    /** Produces documents for this project (javadoc, Html site, ...) */
+    @JkDoc("Produces documents for this project (javadoc, Html site, ...)")
     public void javadoc() {
         javadocMaker().process();
         signIfNeeded(javadocMaker().zipFile());
@@ -417,9 +417,9 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         }
     }
 
-    /** Create many jar files containing respectively binaries, sources, test binaries and test sources. */
+    /** Creates many jar files containing respectively binaries, sources, test binaries and test sources. */
     @JkDoc({
-        "Create many jar files containing respectively binaries, sources, test binaries and test sources.",
+        "Creates many jar files containing respectively binaries, sources, test binaries and test sources.",
     "The jar containing the binary is the one that will be used as a depe,dence for other project." })
     public void pack() {
         packer().pack();
@@ -432,9 +432,9 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         doPack();
     }
 
-    /** Publish the produced artifact to the defined repositories.  */
+    /** Publishes the produced artifact to the defined repositories.  */
     @JkDoc({
-        "Publish the produced artifact to the defined repositories. ",
+        "Publishes the produced artifact to the defined repositories. ",
     "This can work only if a 'publishable' repository has been defined and the artifact has been generated (pack method)." })
     public void publish() {
         final JkDependencies dependencies = dependencyResolver().dependenciesToResolve();
