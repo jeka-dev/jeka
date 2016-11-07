@@ -52,8 +52,11 @@ To use Jerkar within Eclipse, you just have to set 2 variables in Order Eclipse 
 1. Open the Eclipse preference window : _Window -> Preferences_
 2. Navigate to the classpath variable panel : _Java -> Build Path -> Classpath Variables_
 3. Add these 2 variables :
-    * `JERKAR_HOME` which point to the same location than _[Jerkar Home]_, 
-    * `JERKAR_REPO` which point to _[User Home]/.jerkar/cache/repo_.
+    * `JERKAR_HOME` which point to _[Jerkar Home]_, 
+    * `JERKAR_REPO` which point to _[Jerkar User Home]_/.jerkar/cache/repo_.
+    
+Note : By default _[Jerkar User Home]_ point to _[User Home]_ but can be overrided by defining the environment variable `JERKAR_USER_HOME`. 
+  
   
 If you have any problem to figure out the last value, just execute `jerkar` from anywhere and it will start logging the relevant information :
 
