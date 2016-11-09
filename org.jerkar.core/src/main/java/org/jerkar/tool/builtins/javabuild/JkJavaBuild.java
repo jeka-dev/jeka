@@ -248,7 +248,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * Returns the compiler used to compile production code.
      */
     public JkJavaCompiler productionCompiler() {
-        return JkJavaCompiler.ofOutput(classDir()).andSources(sources())
+        return JkJavaCompiler.outputtingIn(classDir()).andSources(sources())
                 .withClasspath(depsFor(COMPILE, PROVIDED))
                 .withSourceVersion(this.javaSourceVersion())
                 .withTargetVersion(this.javaTargerVersion())
@@ -259,7 +259,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * Returns the compiler used to compile unit tests.
      */
     public JkJavaCompiler unitTestCompiler() {
-        return JkJavaCompiler.ofOutput(testClassDir()).andSources(unitTestSources())
+        return JkJavaCompiler.outputtingIn(testClassDir()).andSources(unitTestSources())
                 .withClasspath(this.depsFor(TEST, PROVIDED).andHead(classDir()))
                 .withSourceVersion(this.javaSourceVersion())
                 .withTargetVersion(this.javaTargerVersion())

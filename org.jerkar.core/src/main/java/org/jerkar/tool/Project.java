@@ -270,7 +270,7 @@ final class Project {
         if (!resolver.buildClassDir.exists()) {
             resolver.buildClassDir.mkdirs();
         }
-        return JkJavaCompiler.ofOutput(resolver.buildClassDir).andSources(buildSource)
+        return JkJavaCompiler.outputtingIn(resolver.buildClassDir).andSources(buildSource)
                 .failOnError(true);
     }
 

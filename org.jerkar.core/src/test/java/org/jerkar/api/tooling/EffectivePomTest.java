@@ -39,7 +39,7 @@ public class EffectivePomTest {
         javaCode.getParentFile().mkdirs();
         javaCode.createNewFile();
         JkUtilsFile.writeString(javaCode, code, false);
-        final boolean success = JkJavaCompiler.ofOutput(binDir).andSourceDir(srcDir)
+        final boolean success = JkJavaCompiler.outputtingIn(binDir).andSourceDir(srcDir)
                 .andOptions("-cp", JkLocator.jerkarJarFile().getPath()).compile();
         Assert.assertTrue("The generated build class does not compile " + javaCode, success);
     }

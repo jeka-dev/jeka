@@ -52,7 +52,7 @@ public final class JkJavaCompiler {
      * directory.
      */
     @SuppressWarnings("unchecked")
-    public static JkJavaCompiler ofOutput(File outputDir) {
+    public static JkJavaCompiler outputtingIn(File outputDir) {
         if (outputDir.exists() && !outputDir.isDirectory()) {
             throw new IllegalArgumentException(outputDir.getAbsolutePath() + " is not a directory.");
         }
