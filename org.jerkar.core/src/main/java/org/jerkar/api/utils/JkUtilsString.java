@@ -10,7 +10,7 @@ import java.util.StringTokenizer;
 
 /**
  * Utility class for dealing with strings.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkUtilsString {
@@ -212,12 +212,12 @@ public final class JkUtilsString {
     }
 
     private static final byte[] HEX_CHAR_TABLE = { (byte) '0', (byte) '1', (byte) '2', (byte) '3',
-        (byte) '4', (byte) '5', (byte) '6', (byte) '7', (byte) '8', (byte) '9', (byte) 'a',
-        (byte) 'b', (byte) 'c', (byte) 'd', (byte) 'e', (byte) 'f' };
+            (byte) '4', (byte) '5', (byte) '6', (byte) '7', (byte) '8', (byte) '9', (byte) 'a',
+            (byte) 'b', (byte) 'c', (byte) 'd', (byte) 'e', (byte) 'f' };
 
     /**
      * Returns the hexadecimal for of the given array of bytes.
-     * 
+     *
      * @throws IllegalArgumentException
      */
     public static String toHexString(byte[] raw) throws IllegalArgumentException {
@@ -377,6 +377,13 @@ public final class JkUtilsString {
             throw new IllegalArgumentException("unbalanced quotes in " + toProcess);
         }
         return result.toArray(new String[result.size()]);
+    }
+
+    /**
+     * Converts the supplied String to a string suitable to be used as a package name.
+     */
+    public static String conformPackageName(String string) {
+        return string.toLowerCase().replace('-', '_');
     }
 
 }

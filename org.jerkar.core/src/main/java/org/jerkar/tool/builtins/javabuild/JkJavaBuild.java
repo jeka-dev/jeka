@@ -333,6 +333,9 @@ public class JkJavaBuild extends JkBuildDependencySupport {
             public void run() {
                 for (final JkFileTree dir : editedSources().fileTrees()) {
                     dir.root().mkdirs();
+                    final String packageName = JkUtilsString.conformPackageName(moduleId().fullName());
+                    final String path = packageName.replace('.', '/');
+                    dir.file(path).mkdirs();
                 }
                 for (final JkFileTree dir : unitTestEditedSources().fileTrees()) {
                     dir.root().mkdirs();
