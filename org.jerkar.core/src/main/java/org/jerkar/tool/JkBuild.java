@@ -1,6 +1,7 @@
 package org.jerkar.tool;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -16,10 +17,14 @@ import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsTime;
+import org.jerkar.api.utils.JkUtilsXml;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Base class defining commons tasks and utilities necessary for building any
@@ -47,6 +52,10 @@ public class JkBuild {
     private JkDependencyResolver buildDefDependencyResolver;
 
     private final JkSlaveBuilds annotatedJkProjectSlaves;
+
+    @JkDoc("Help options")
+    private final JkHelpOptions help = new JkHelpOptions();
+
 
     /**
      * Constructs a {@link JkBuild}
@@ -244,7 +253,23 @@ public class JkBuild {
     /** Displays all available methods defined in this build. */
     @JkDoc("Display all available methods defined in this build.")
     public void help() {
-        HelpDisplayer.help(this);
+        if (help.xml || help.xmlFile != null) {
+            final Document document = JkUtilsXml.createDocument();
+            final Element buildEl = ProjectDef.ProjectBuildClassDef.of(this).toElement(document);
+            document.appendChild(buildEl);
+            if (help.xmlFile == null) {
+                JkUtilsXml.output(document, System.out);
+            } else {
+                JkUtilsFile.createFileIfNotExist(help.xmlFile);
+                final OutputStream os = JkUtilsIO.outputStream(help.xmlFile, false);
+                JkUtilsXml.output(document, os);
+                JkUtilsIO.closeQuietly(os);
+                JkLog.info("Xml help file generated at " + help.xmlFile.getPath());
+            }
+        } else {
+            HelpDisplayer.help(this);
+        }
+
     }
 
     /** Displays details on all available plugins. */
@@ -422,6 +447,26 @@ public class JkBuild {
                 return false;
             }
             return true;
+        }
+
+    }
+
+    /**
+     * Options for help method.
+     */
+    public static final class JkHelpOptions {
+
+        @JkDoc("Output help formatted in XML if true. To be used in conjonction of -silent option to parse the output stream friendly.")
+        private boolean xml;
+
+        @JkDoc("Output help in this xml file. If this option is specified, no need to specify help.xml option.")
+        private File xmlFile;
+
+        /**
+         * Returns true if the help output must be formatted using XML.
+         */
+        public boolean xml() {
+            return xml;
         }
 
     }

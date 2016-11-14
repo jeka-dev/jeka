@@ -20,11 +20,11 @@ These scripts do the following :
 4. __Run the `org.jerkar.tool.Main` class__ passing the command line argument as is. So if you have typed `jerkar myArg1 myArg2` the `myArg1 myArg2` will be passed as Java command-line arguments.
 
 #### Embedded Mode
-Note that ___[JERKAR_HOME]/org.jerkar.core.jar___ comes after ___[WORKING_DIR]/build/libs/build/*___ in the classpath.
+Note that ___[JERKAR_HOME]/org.jerkar.core.jar___ comes after ___[WORKING_DIR]/build/libs/boot/*___ in the classpath.
 This means that if a version of Jerkar (org.jerkar.core.jar) is in this directory, the build will be processed with this instance of Jerkar and not with the one located in in _[JERKAR HOME]_.
 
 This is called the __Embedded__ mode. It guarantees that your project will build regardless of Jerkar version installed on the host machine. 
-This mode allows to build your project even if Jerkar is not installed on the host machine. just execute `java -cp build/libs/build/* org.jerkar.tool.Main` instead of `jerkar`.
+This mode allows to build your project even if Jerkar is not installed on the host machine. just execute `java -cp build/libs/boot/* org.jerkar.tool.Main` instead of `jerkar`.
 
 ### Jerkar Execution
 

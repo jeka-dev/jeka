@@ -14,14 +14,14 @@ import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
  * A mapping from scopes to scopes acting when declaring dependencies. The goal of a scope mapping is to determine :<ul>
- * <li>with which scopes a dependency is declared for</li>
- * <li>for each scope a dependency is declared for, which scopes of this transitive dependencies to retrieve</li>
+ * <li>which scopes a dependency is declared for</li>
+ * <li>for each scope a dependency is declared, which scopes of its transitive dependencies to retrieve</li>
  * </ul>.
- * 
+ *
  * For example, Your component 'A' depends of component 'B' for compiling. You can declare 'A' depends of 'B' with scope 'compile'. <br/>
  * Now imagine that for compiling, 'A' needs also the test class of 'B' along the dependencies 'B' needs for testing. For such, you
  * can declare a scope mapping as 'compile->compile, test'.
- * 
+ *
  * This concept matches strictly with the <i>configuration</i> concept found in Ivy : <a href="http://wrongnotes.blogspot.be/2014/02/simplest-explanation-of-ivy.html">see here.</a>.
  */
 public final class JkScopeMapping implements Serializable {

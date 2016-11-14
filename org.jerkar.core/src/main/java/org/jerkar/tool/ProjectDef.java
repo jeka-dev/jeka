@@ -15,6 +15,8 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Defines build classes defined on a given project.
@@ -76,7 +78,7 @@ final class ProjectDef {
             this.optionDefs = Collections.unmodifiableList(optionDefs);
         }
 
-        List<JkProjectBuildMethodDef> methodDefinitions(){
+        List<JkProjectBuildMethodDef> methodDefinitions() {
             return methodDefs;
         }
 
@@ -89,8 +91,8 @@ final class ProjectDef {
             Collections.sort(methods);
             final List<JkProjectBuildOptionDef> options = new LinkedList<ProjectDef.JkProjectBuildOptionDef>();
             for (final NameAndField nameAndField : options(clazz, "", true, null)) {
-                options.add(JkProjectBuildOptionDef.of(build, nameAndField.field,
-                        nameAndField.rootClass, nameAndField.name));
+                options.add(JkProjectBuildOptionDef.of(build, nameAndField.field, nameAndField.rootClass,
+                        nameAndField.name));
             }
             Collections.sort(options);
             return new ProjectBuildClassDef(methods, options);
@@ -100,8 +102,7 @@ final class ProjectDef {
             final List<Method> result = new LinkedList<Method>();
             for (final Method method : clazz.getMethods()) {
                 final int modifier = method.getModifiers();
-                if (method.getReturnType().equals(void.class)
-                        && method.getParameterTypes().length == 0
+                if (method.getReturnType().equals(void.class) && method.getParameterTypes().length == 0
                         && !JkUtilsReflect.isMethodPublicIn(Object.class, method.getName())
                         && !Modifier.isAbstract(modifier) && !Modifier.isStatic(modifier)) {
                     result.add(method);
@@ -111,16 +112,15 @@ final class ProjectDef {
             return result;
         }
 
-        private static List<NameAndField> options(Class<?> clazz, String prefix, boolean root,
-                Class<?> rClass) {
+        private static List<NameAndField> options(Class<?> clazz, String prefix, boolean root, Class<?> rClass) {
             final List<NameAndField> result = new LinkedList<ProjectDef.NameAndField>();
             for (final Field field : JkUtilsReflect.getAllDeclaredField(clazz, JkDoc.class)) {
                 final Class<?> rootClass = root ? field.getDeclaringClass() : rClass;
                 if (!hasSubOption(field)) {
                     result.add(new NameAndField(prefix + field.getName(), field, rootClass));
                 } else {
-                    final List<NameAndField> subOpts = options(field.getType(),
-                            prefix + field.getName() + ".", false, rootClass);
+                    final List<NameAndField> subOpts = options(field.getType(), prefix + field.getName() + ".", false,
+                            rootClass);
                     result.addAll(subOpts);
                 }
             }
@@ -186,6 +186,23 @@ final class ProjectDef {
             }
             return result;
         }
+
+        Element toElement(Document document) {
+            final Element buildEl = document.createElement("build");
+            final Element methodsEl = document.createElement("methods");
+            buildEl.appendChild(methodsEl);
+            for (final JkProjectBuildMethodDef buildMethodDef : this.methodDefs) {
+                final Element methodEl = buildMethodDef.toXmlElement(document);
+                methodsEl.appendChild(methodEl);
+            }
+            final Element optionsEl = document.createElement("options");
+            buildEl.appendChild(optionsEl);
+            for (final JkProjectBuildOptionDef buildOptionDef : this.optionDefs) {
+                final Element optionEl = buildOptionDef.toElement(document);
+                optionsEl.appendChild(optionEl);
+            }
+            return buildEl;
+        }
     }
 
     /**
@@ -193,8 +210,7 @@ final class ProjectDef {
      *
      * @author Jerome Angibaud
      */
-    public static final class JkProjectBuildMethodDef implements
-    Comparable<JkProjectBuildMethodDef> {
+    public static final class JkProjectBuildMethodDef implements Comparable<JkProjectBuildMethodDef> {
 
         private final String name;
 
@@ -230,6 +246,22 @@ final class ProjectDef {
             return name + '|' + description + '|' + declaringClass.getName();
         }
 
+        Element toXmlElement(Document document) {
+            final Element methodEl = document.createElement("method");
+            final Element nameEl = document.createElement("name");
+            nameEl.setTextContent(this.name);
+            final Element descriptionEl = document.createElement("description");
+            if (description != null) {
+                descriptionEl.appendChild(document.createCDATASection(description));
+            }
+            final Element classEl = document.createElement("declaringClass");
+            classEl.setTextContent(declaringClass.getName());
+            methodEl.appendChild(nameEl);
+            methodEl.appendChild(descriptionEl);
+            methodEl.appendChild(classEl);
+            return methodEl;
+        }
+
     }
 
     /**
@@ -238,8 +270,7 @@ final class ProjectDef {
      *
      * @author Jerome Angibaud
      */
-    public static final class JkProjectBuildOptionDef implements
-    Comparable<JkProjectBuildOptionDef> {
+    public static final class JkProjectBuildOptionDef implements Comparable<JkProjectBuildOptionDef> {
 
         private final String name;
 
@@ -251,8 +282,8 @@ final class ProjectDef {
 
         private final Class<?> type;
 
-        private JkProjectBuildOptionDef(String name, String description, Object jkBuild,
-                Object defaultValue, Class<?> type) {
+        private JkProjectBuildOptionDef(String name, String description, Object jkBuild, Object defaultValue,
+                Class<?> type) {
             super();
             this.name = name;
             this.description = description;
@@ -261,8 +292,7 @@ final class ProjectDef {
             this.type = type;
         }
 
-        static JkProjectBuildOptionDef of(Object instance, Field field, Class<?> declaringClass,
-                String name) {
+        static JkProjectBuildOptionDef of(Object instance, Field field, Class<?> declaringClass, String name) {
             final JkDoc opt = field.getAnnotation(JkDoc.class);
             final String descr = opt != null ? JkUtilsString.join(opt.value(), "\n") : null;
             final Class<?> type = field.getType();
@@ -277,8 +307,7 @@ final class ProjectDef {
             final String first = JkUtilsString.substringBeforeFirst(optName, ".");
             Object firstObject = JkUtilsReflect.getFieldValue(buildinstance, first);
             if (firstObject == null) {
-                final Class<?> firstClass = JkUtilsReflect
-                        .getField(buildinstance.getClass(), first).getType();
+                final Class<?> firstClass = JkUtilsReflect.getField(buildinstance.getClass(), first).getType();
                 firstObject = JkUtilsReflect.newInstance(firstClass);
             }
             final String last = JkUtilsString.substringAfterFirst(optName, ".");
@@ -327,6 +356,29 @@ final class ProjectDef {
                 }
             }
             return result.toString();
+        }
+
+        String defaultValue() {
+            return this.defaultValue == null ? "null" : this.defaultValue.toString();
+        }
+
+        Element toElement(Document document) {
+            final Element optionEl = document.createElement("option");
+            final Element nameEl = document.createElement("name");
+            nameEl.setTextContent(this.name);
+            final Element descriptionEl = document.createElement("description");
+            if (description != null) {
+                descriptionEl.appendChild(document.createCDATASection(this.description));
+            }
+            final Element typeEl = document.createElement("type");
+            typeEl.setTextContent(this.type());
+            final Element defaultValueEl = document.createElement("defaultValue");
+            defaultValueEl.appendChild(document.createCDATASection(this.defaultValue()));
+            optionEl.appendChild(nameEl);
+            optionEl.appendChild(descriptionEl);
+            optionEl.appendChild(typeEl);
+            optionEl.appendChild(defaultValueEl);
+            return optionEl;
         }
 
     }

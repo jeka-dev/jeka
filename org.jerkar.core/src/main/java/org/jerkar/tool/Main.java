@@ -12,15 +12,17 @@ import org.jerkar.api.utils.JkUtilsTime;
 
 /**
  * Main class for launching Jerkar from command line.
- * 
+ *
  * @author Jerome Angibaud
  */
 final class Main {
 
     public static void main(String[] args) {
         final long start = System.nanoTime();
-        displayIntro();
         final JkInit init = JkInit.of(args);
+        if (!JkLog.silent()) {
+            displayIntro();
+        }
         init.displayInfo();
 
         final File workingDir = JkUtilsFile.workingDir();
@@ -28,9 +30,11 @@ final class Main {
         JkLog.nextLine();
         try {
             project.execute(init);
-            final int lenght = printAscii(false, "success.ascii");
-            System.out.println(JkUtilsString.repeat(" ", lenght) + "Total build time : "
-                    + JkUtilsTime.durationInSeconds(start) + " seconds.");
+            if (!JkLog.silent()) {
+                final int lenght = printAscii(false, "success.ascii");
+                System.out.println(JkUtilsString.repeat(" ", lenght) + "Total build time : "
+                        + JkUtilsTime.durationInSeconds(start) + " seconds.");
+            }
         } catch (final RuntimeException e) {
             System.err.println();
             e.printStackTrace(System.err);
