@@ -42,7 +42,8 @@ public abstract class AbstractBuild extends JkJavaBuild {
         if (JkOptions.containsKey("jkPublisherUrl")) {
             return JkPublishRepos.maven(JkOptions.get("jkPublisherUrl"));
         }
-        return JkPublishRepos.ossrh(pgp()).withUniqueSnapshot(true);
+        return JkPublishRepos.ossrh(JkOptions.get("repo.ossrh.username"),
+                JkOptions.get("repo.ossrh.password"), pgp()).withUniqueSnapshot(true);
     }
 
 }

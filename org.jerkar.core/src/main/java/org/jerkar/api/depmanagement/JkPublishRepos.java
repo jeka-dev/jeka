@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.tool.JkOptions;
 
 /**
  * Set of repositories to publish to. When publishing you may want deploy your
@@ -47,14 +46,6 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
                 .ofRelease(JkRepo.mavenOssrhDeployRelease(userName, password)).withSigner(pgp)
                 .andSha1Md5Checksums();
         return JkPublishRepos.of(snapshot).and(release);
-    }
-
-    /**
-     * As {@link #ossrh(String, String, JkPgp)}  but using <i>repo.ossrh.username</i> and <i>repo.ossrh.password</i> options.
-     */
-    public static JkPublishRepos ossrh(JkPgp pgp) {
-        return ossrh(JkOptions.get("repo.ossrh.username"),
-                JkOptions.get("repo.ossrh.password"), pgp);
     }
 
     /**
