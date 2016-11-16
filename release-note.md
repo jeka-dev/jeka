@@ -1,3 +1,11 @@
+## 0.4.5
+
+* Easier repository/credential management
+* Enhanced scaffolding
+* Export build class method description to XML file (tooling purpose)
+* API polish
+* Minor bug fixes
+
 ## 0.4.0
 
 * Add IntelliJ IDEA plugin for generating iml files (module descriptor).
