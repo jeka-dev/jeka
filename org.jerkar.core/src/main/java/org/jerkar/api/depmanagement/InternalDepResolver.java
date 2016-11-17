@@ -10,14 +10,14 @@ import java.io.File;
 interface InternalDepResolver {
 
     JkResolveResult resolveAnonymous(JkDependencies deps, JkScope resolvedScope,
-            JkResolutionParameters parameters);
+            JkResolutionParameters parameters, JkVersionProvider tranditiveVersionOverride);
 
     /**
      * @param resolvedScope
      *            can be null.
      */
     JkResolveResult resolve(JkVersionedModule module, JkDependencies deps, JkScope resolvedScope,
-            JkResolutionParameters parameters);
+            JkResolutionParameters parameters, JkVersionProvider tranditiveVersionOverride);
 
     /**
      * Get artifacts of the given modules published for the specified scopes (no

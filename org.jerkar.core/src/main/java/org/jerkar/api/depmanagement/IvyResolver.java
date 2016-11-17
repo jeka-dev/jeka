@@ -29,7 +29,7 @@ import org.jerkar.api.utils.JkUtilsThrowable;
  * Jerkar users : This class is not part of the public API !!! Please, Use
  * {@link JkPublisher} instead. Ivy wrapper providing high level methods. The
  * API is expressed using Jerkar classes only (mostly free of Ivy classes).
- * 
+ *
  * @author Jerome Angibaud
  */
 final class IvyResolver implements InternalDepResolver {
@@ -83,18 +83,19 @@ final class IvyResolver implements InternalDepResolver {
 
     @Override
     public JkResolveResult resolveAnonymous(JkDependencies deps, JkScope resolvedScope,
-            JkResolutionParameters parameters) {
+            JkResolutionParameters parameters, JkVersionProvider tranditiveVersionOverride) {
         final JkVersionedModule anonymous = anonymousVersionedModule();
-        final JkResolveResult result = resolve(anonymous, deps, resolvedScope, parameters);
+        final JkResolveResult result = resolve(anonymous, deps, resolvedScope, parameters, tranditiveVersionOverride);
         deleteResolveCache(anonymous);
         return result;
     }
 
     @Override
     public JkResolveResult resolve(JkVersionedModule module, JkDependencies deps,
-            JkScope resolvedScope, JkResolutionParameters parameters) {
+            JkScope resolvedScope, JkResolutionParameters parameters, JkVersionProvider tranditiveVersionOverride) {
+
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
-                module, deps, parameters.defaultMapping(), JkVersionProvider.empty());
+                module, deps, parameters.defaultMapping(), tranditiveVersionOverride);
 
         final String[] confs = resolvedScope == null ? IVY_24_ALL_CONF
                 : new String[] { resolvedScope.name() };

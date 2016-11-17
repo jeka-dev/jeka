@@ -218,6 +218,7 @@ public class JkBuildDependencySupport extends JkBuild {
         if (dependencies.containsModules()) {
             return JkDependencyResolver.managed(downloadRepositories(), dependencies)
                     .withModuleHolder(versionedModule())
+                    .withTransitiveVersionOverride(this.versionProvider())
                     .withParams(JkResolutionParameters.of().withDefault(scopeMapping()));
         }
         return JkDependencyResolver.unmanaged(dependencies);

@@ -190,7 +190,7 @@ public final class JkPom {
         codeWriter.imports.clear();
         codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsForJkJavaBuild());
         codeWriter.staticImports.addAll(JkCodeWriterForBuildClass.staticImportsForJkJavaBuild());
-        codeWriter.repos = repos();
+        codeWriter.repos = null;
         codeWriter.version = version();
         codeWriter.versionProvider = versionProvider();
         final VersionConstanter constanter = VersionConstanter.of(codeWriter.versionProvider);

@@ -37,7 +37,7 @@ public class IvyResolverRunner {
                 .excludeGlobally("org.springframework", "spring-core").build();
         final JkResolutionParameters params = JkResolutionParameters.of();
         final JkResolveResult resolveResult = IvyResolver.of(repos).resolveAnonymous(deps, COMPILE,
-                params);
+                params, JkVersionProvider.empty());
         for (final File file : resolveResult.localFiles()) {
             System.out.println(file.getAbsolutePath());
         }
@@ -50,7 +50,7 @@ public class IvyResolverRunner {
                 .excludeLocally("org.jboss.logging", "*").excludeLocally("antlr", "*")
                 .scope(COMPILE).excludeGlobally("dom4j", "*").build();
         final JkResolveResult resolveResult = IvyResolver.of(REPOS).resolveAnonymous(deps, COMPILE,
-                JkResolutionParameters.of());
+                JkResolutionParameters.of(), JkVersionProvider.empty());
         for (final File file : resolveResult.localFiles()) {
             System.out.println(file.getAbsolutePath());
         }
@@ -62,7 +62,7 @@ public class IvyResolverRunner {
         final JkDependencies deps = JkDependencies.builder()
                 .on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
         final JkResolveResult resolveResult = IvyResolver.of(repos).resolveAnonymous(deps, COMPILE,
-                JkResolutionParameters.of().withDefault(defaultMapping()));
+                JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
         for (final File file : resolveResult.localFiles()) {
             System.out.println(file.getAbsolutePath());
         }
@@ -80,7 +80,7 @@ public class IvyResolverRunner {
                 .on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
         final InternalDepResolver jkIvyResolver = IvyResolver.of(repos);
         final JkResolveResult resolveResult = jkIvyResolver.resolveAnonymous(deps, COMPILE,
-                JkResolutionParameters.of().withDefault(defaultMapping()));
+                JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
         final Set<JkVersionedModule> modules = new HashSet<JkVersionedModule>();
         for (final JkVersionedModule versionedModule : resolveResult.involvedModules()) {
             modules.add(versionedModule);

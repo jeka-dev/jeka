@@ -21,10 +21,12 @@ import org.apache.ivy.core.module.descriptor.DefaultExcludeRule;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.ExcludeRule;
+import org.apache.ivy.core.module.descriptor.OverrideDependencyDescriptorMediator;
 import org.apache.ivy.core.module.id.ArtifactId;
 import org.apache.ivy.core.module.id.ModuleId;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.settings.IvySettings;
+import org.apache.ivy.plugins.matcher.ExactOrRegexpPatternMatcher;
 import org.apache.ivy.plugins.matcher.ExactPatternMatcher;
 import org.apache.ivy.plugins.matcher.PatternMatcher;
 import org.apache.ivy.plugins.repository.file.FileRepository;
@@ -421,6 +423,15 @@ final class IvyTranslations {
             }
             moduleDescriptor.addExcludeRule(rule);
         }
+
+        // Add version override for transitive dependency
+        for (final JkModuleId moduleId : resolvedVersions.moduleIds()) {
+            final JkVersion version = resolvedVersions.versionOf(moduleId);
+            moduleDescriptor.addDependencyDescriptorMediator(toModuleId(moduleId),
+                    ExactOrRegexpPatternMatcher.INSTANCE,
+                    new OverrideDependencyDescriptorMediator(null, version.name()));
+        }
+
     }
 
     private static JkScopeMapping resolveSimple(JkScope scope, JkScopeMapping defaultMapping) {
