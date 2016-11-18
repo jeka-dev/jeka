@@ -10,11 +10,11 @@ import org.jerkar.api.utils.JkUtilsString;
  * exact version as 1.4.2 or a dynamic version as [1.0,2.0[. As this tool relies
  * on Ivy to to perform dependency resolution, you can use any syntax accepted
  * by Ivy.
- * 
+ *
  * @see <a href=
  *      "http://ant.apache.org/ivy/history/latest-milestone/ivyfile/dependency.html">
  *      ivy doc</a>
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkVersionRange implements Serializable {
@@ -74,6 +74,9 @@ public final class JkVersionRange implements Serializable {
      * 1.4.0, 3.1-SNAPSHOT) A snapshot is not considered as 'resolvable'.
      */
     public boolean isDynamicAndResovable() {
+        if ("+".equals(definition)) {
+            return true;
+        }
         if (JkUtilsString.endsWithAny(definition, ".+", ")", "]", "[")) {
             return true;
         }
