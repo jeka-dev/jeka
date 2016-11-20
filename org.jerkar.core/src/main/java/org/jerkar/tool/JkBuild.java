@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
@@ -51,6 +52,8 @@ public class JkBuild {
 
     private JkDependencyResolver buildDefDependencyResolver;
 
+    private JkRepos buildRepos;
+
     private final JkSlaveBuilds annotatedJkProjectSlaves;
 
     @JkDoc("Help options")
@@ -79,12 +82,23 @@ public class JkBuild {
         this.buildDefDependencyResolver = scriptDependencyResolver;
     }
 
+    void setBuildRepos(JkRepos buildRepos) {
+        this.buildRepos = buildRepos;
+    }
+
     /**
      * Returns the dependency resolver used to compile/run scripts of this
      * project.
      */
     public JkDependencyResolver buildDefDependencyResolver() {
         return this.buildDefDependencyResolver;
+    }
+
+    /**
+     * Returns the repositories to download dependencies needed at build time.
+     */
+    public JkRepos buildRepos() {
+        return this.buildRepos;
     }
 
     /**

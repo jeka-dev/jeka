@@ -166,7 +166,9 @@ public final class JkDependencyResolver {
         return path.withoutDoubloons();
     }
 
-    private final JkPath getSingleScope(JkScope scope) {
+
+
+    private JkPath getSingleScope(JkScope scope) {
         final List<File> result = new LinkedList<File>();
 
         // Add local, non-managed dependencies

@@ -195,6 +195,21 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
         return depResolver.get(moduleDependency);
     }
 
+    /**
+     * Short hand for {@link #get(JkModuleDependency)}
+     */
+    public File get(JkModuleId moduleId, String version) {
+        return get(JkModuleDependency.of(moduleId, version));
+    }
+
+    /**
+     * Short hand for {@link #get(JkModuleDependency)}
+     */
+    public File get(String moduleGroup, String moduleName, String version) {
+        return get(JkModuleId.of(moduleGroup, moduleName), version);
+    }
+
+
 
 
 }
