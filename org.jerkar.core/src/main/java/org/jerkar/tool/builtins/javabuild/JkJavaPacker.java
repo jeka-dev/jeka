@@ -9,12 +9,12 @@ import java.util.Set;
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
+import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.file.JkZipper;
 import org.jerkar.api.java.JkManifest;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -24,6 +24,11 @@ import org.jerkar.api.utils.JkUtilsString;
  * @author Jerome Angibaud
  */
 public class JkJavaPacker implements Cloneable {
+
+    /**
+     * A filter to exclude signature files from jar
+     */
+    public static final JkPathFilter EXCLUDE_SIGNATURE_FILTER = JkPathFilter.exclude("meta-inf/*.rsa", "meta-inf/*.dsa", "meta-inf/*.sf").caseSensitive(false);
 
     /**
      * Creates a {@link JkJavaPacker} for the specified build.
@@ -59,6 +64,8 @@ public class JkJavaPacker implements Cloneable {
 
     private final String fatJarSuffix;
 
+    private JkPathFilter fatJarEntryFilter = EXCLUDE_SIGNATURE_FILTER;
+
     private JkPgp pgp = null;
 
     private List<JkExtraPacking> extraActions = new LinkedList<JkExtraPacking>();
@@ -66,7 +73,7 @@ public class JkJavaPacker implements Cloneable {
     private JkJavaPacker(JkJavaBuild build) {
         this.build = build;
         this.doFatJar = build.pack.fatJar;
-        this.fatJarSuffix = JkUtilsObject.firstNonNull(build.pack.fatJarSuffix, "fat");
+        this.fatJarSuffix = build.pack.fatJarSuffix;
         this.doTest = build.pack.tests;
         if (build.pack.checksums == null) {
             this.checkSums = new HashSet<String>();
@@ -103,7 +110,8 @@ public class JkJavaPacker implements Cloneable {
      * The jar file that will be generated for the main artifact.
      */
     public File jarFile() {
-        return build.ouputDir(baseName() + ".jar");
+        final String suffix = !JkUtilsString.isBlank(fatJarSuffix) ? "" :  "-original";
+        return build.ouputDir(baseName() + suffix + ".jar");
     }
 
     /**
@@ -138,7 +146,8 @@ public class JkJavaPacker implements Cloneable {
      * The jar standing for the fat jar (aka uber jar)
      */
     public File fatJarFile() {
-        return build.ouputDir(baseName() + "-" + fatJarSuffix + ".jar");
+        final String suffix = JkUtilsString.isBlank(fatJarSuffix) ? "" :  "-" + fatJarSuffix;
+        return build.ouputDir(baseName() + suffix + ".jar");
     }
 
     /**
@@ -174,7 +183,7 @@ public class JkJavaPacker implements Cloneable {
         }
         if (doFatJar) {
             JkFileTree.of(build.classDir()).zip().merge(build.depsFor(JkJavaBuild.RUNTIME))
-            .to(fatJarFile()).md5If(checkSums.contains("MD5"))
+            .to(fatJarFile(), fatJarEntryFilter).md5If(checkSums.contains("MD5"))
             .sha1If(checkSums.contains("SHA-1"));
         }
         for (final JkExtraPacking action : this.extraActions) {
@@ -312,6 +321,15 @@ public class JkJavaPacker implements Cloneable {
          */
         public Builder extraAction(JkExtraPacking jkExtraPacking) {
             packer.extraActions.add(jkExtraPacking);
+            return this;
+        }
+
+        /**
+         * Set a specific filter allowing to exclude some files from the fat jar.
+         * By default "meta-inf/*.rsa", "meta-inf/*.dsa", "meta-inf/*.sf" are excluded.
+         */
+        public Builder fatJarExclusionFilter(JkPathFilter zipEntryFilter) {
+            this.packer.fatJarEntryFilter = zipEntryFilter;
             return this;
         }
 

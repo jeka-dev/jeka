@@ -764,9 +764,12 @@ public class JkJavaBuild extends JkBuildDependencySupport {
          */
         @JkDoc({"Gives the suffix that will be appended at the end of the 'normal' jar for naming the fat jar.",
             "If the name of the normal jar is 'mylib.jar' and the suffix is 'uber' then the fat jar",
-            "file name will be 'mylib-uber.jar'."
+            "file name will be 'mylib-uber.jar'.",
+            "if suffix is null or empty, than fat jar will have a suffix less name and normal jar, will be suffixed by '-original'"
         })
         public String fatJarSuffix = "fat";
+
+
 
     }
 

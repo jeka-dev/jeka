@@ -35,7 +35,7 @@ import org.jerkar.api.utils.JkUtilsString;
  * <code>foo/subfoo/bar.java</code> <br/>
  * See <a href="http://ant.apache.org/manual/dirtasks.html#patterns">Ant Pattern
  * documentation</a>
- * 
+ *
  * <i>
  * <p>
  * Part of this mapping code has been kindly borrowed from <a
@@ -224,11 +224,18 @@ final class AntPattern {
     }
 
     /**
+     * Returns the same ANT pattern but in lower case.
+     */
+    public AntPattern toLowerCase() {
+        return new AntPattern(this.pattern.toLowerCase());
+    }
+
+    /**
      * Tests whether or not a string matches against a pattern. The pattern may
      * contain two special characters:<br>
      * '*' means zero or more characters<br>
      * '?' means one and only one character
-     * 
+     *
      * @param pattern
      *            pattern to match against. Must not be <code>null</code>.
      * @param str

@@ -19,6 +19,8 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+
+
 /**
  * Low level utility method to deal with zip files.
  */
@@ -63,6 +65,14 @@ public final class JkUtilsZip {
             entry.setMethod(ZipEntry.STORED);
         }
     }
+
+    private static final JkZipEntryFilter ACCEPT_ALL = new JkZipEntryFilter() {
+
+        @Override
+        public boolean accept(String entryName) {
+            return true;
+        }
+    };
 
     private JkUtilsZip() {
     }
@@ -167,20 +177,29 @@ public final class JkUtilsZip {
      */
     public static void addZipEntry(ZipOutputStream zos, File fileToZip, File baseFolder,
             boolean storeMethod) {
+        addZipEntry(zos, fileToZip, baseFolder, storeMethod, ACCEPT_ALL);
+    }
+
+    /**
+     * Same as {@link #addZipEntry(ZipOutputStream, File, File, boolean)} but with the possibility to filter
+     * zip entries to excludes somes.
+     */
+    public static void addZipEntry(ZipOutputStream zos, File fileOrFolderToZip, File baseFolder,
+            boolean storeMethod, JkZipEntryFilter filter) {
         if (!baseFolder.isDirectory()) {
             throw new IllegalArgumentException(baseFolder.getPath() + " is not a directory.");
         }
 
-        if (fileToZip.isDirectory()) {
-            final File[] files = fileToZip.listFiles();
+        if (fileOrFolderToZip.isDirectory()) {
+            final File[] files = fileOrFolderToZip.listFiles();
             for (final File file : files) {
-                addZipEntry(zos, file, baseFolder, storeMethod);
+                addZipEntry(zos, file, baseFolder, storeMethod, filter);
             }
         } else {
             final String filePathToZip;
             final int start;
             try {
-                filePathToZip = fileToZip.getCanonicalPath();
+                filePathToZip = fileOrFolderToZip.getCanonicalPath();
                 start = baseFolder.getCanonicalPath().length() + 1;
             } catch (final IOException e1) {
                 throw new IllegalStateException(e1);
@@ -189,6 +208,9 @@ public final class JkUtilsZip {
             final int end = filePathToZip.length();
             String entryName = filePathToZip.substring(start, end);
             entryName = entryName.replace(File.separatorChar, '/');
+            if (!filter.accept(entryName)) {
+                return;
+            }
             final FileInputStream inputStream;
             try {
                 inputStream = new FileInputStream(filePathToZip);
@@ -196,7 +218,7 @@ public final class JkUtilsZip {
                 throw new IllegalStateException(e);
             }
             if (storeMethod) {
-                final CrcAndSize crcAndSize = new CrcAndSize(fileToZip);
+                final CrcAndSize crcAndSize = new CrcAndSize(fileOrFolderToZip);
                 addEntryInputStream(zos, entryName, inputStream, true, crcAndSize);
             } else {
                 addEntryInputStream(zos, entryName, inputStream, false, null);
@@ -205,22 +227,26 @@ public final class JkUtilsZip {
         }
     }
 
+
+
+
+
     /**
      * Add a zip entry into the provided <code>ZipOutputStream</code>.
      */
-    public static void addZipEntry(ZipOutputStream zos, File fileToZip, String enrtyName,
+    public static void addZipEntry(ZipOutputStream zos, File fileOrFolderToZip, String entryName,
             boolean storedMethod) {
         final FileInputStream inputStream;
         try {
-            inputStream = new FileInputStream(fileToZip);
+            inputStream = new FileInputStream(fileOrFolderToZip);
         } catch (final FileNotFoundException e) {
             throw new IllegalStateException(e);
         }
         if (storedMethod) {
-            final CrcAndSize crcAndSize = new CrcAndSize(fileToZip);
-            addEntryInputStream(zos, enrtyName, inputStream, true, crcAndSize);
+            final CrcAndSize crcAndSize = new CrcAndSize(fileOrFolderToZip);
+            addEntryInputStream(zos, entryName, inputStream, true, crcAndSize);
         } else {
-            addEntryInputStream(zos, enrtyName, inputStream, false, null);
+            addEntryInputStream(zos, entryName, inputStream, false, null);
         }
     }
 
@@ -252,7 +278,7 @@ public final class JkUtilsZip {
                 }
             } catch (final IOException e1) {
                 throw new RuntimeException("Error while merging entry " + e.getName()
-                        + " from zip file " + zipFile.getName(), e1);
+                + " from zip file " + zipFile.getName(), e1);
             }
         }
         return duplicateEntries;
@@ -375,5 +401,17 @@ public final class JkUtilsZip {
         } catch (final Exception e) {
             throw JkUtilsThrowable.unchecked(e);
         }
+    }
+
+    /**
+     * Filter on {@link ZipEntry} name
+     */
+    public interface JkZipEntryFilter {
+
+        /**
+         * Returns <code>true</code> if the specified entry name should be accepted.
+         */
+        boolean accept(String entryName);
+
     }
 }

@@ -133,7 +133,7 @@ public final class JkZipper {
     public JkCheckSumer appendTo(File archive) {
         final File temp = JkUtilsFile.tempFile(archive.getName(), "");
         JkUtilsFile.move(archive, temp);
-        final JkCheckSumer jkCheckSumer = this.merge(temp).to(archive);
+        final JkCheckSumer jkCheckSumer = this.merge(temp).to(archive, JkPathFilter.ACCEPT_ALL);
         temp.delete();
         return jkCheckSumer;
     }
@@ -153,9 +153,17 @@ public final class JkZipper {
     }
 
     /**
-     * As {@link #to(File)} but specifying compression level.
+     * Writes this zip definition to the specified file.
      */
     public JkCheckSumer to(File zipFile) {
+        return to(zipFile, JkPathFilter.ACCEPT_ALL);
+    }
+
+
+    /**
+     * Same as {@link #to(File)} but specifying a filter to exclude entries.
+     */
+    public JkCheckSumer to(File zipFile, JkPathFilter entryFilter) {
         JkLog.start("Creating zip file : " + zipFile);
         final ZipOutputStream zos = JkUtilsZip.createZipOutputStream(zipFile,
                 this.jkCompressionLevel.level);
@@ -165,21 +173,23 @@ public final class JkZipper {
         for (final Object item : this.itemsToZip) {
             if (item instanceof File) {
                 final File file = (File) item;
-                JkUtilsZip.addZipEntry(zos, file, file.getParentFile(), storedMethod());
+                JkUtilsZip.addZipEntry(zos, file, file.getParentFile(), storedMethod(), entryFilter.toZipEntryFilter());
             } else if (item instanceof EntryFile) {
                 final EntryFile entryFile = (EntryFile) item;
-                JkUtilsZip.addZipEntry(zos, entryFile.file, entryFile.path, storedMethod());
+                if (entryFilter.accept(((EntryFile) item).path)) {
+                    JkUtilsZip.addZipEntry(zos, entryFile.file, entryFile.path, storedMethod());
+                }
             } else if (item instanceof JkFileTree) {
                 final JkFileTree dirView = (JkFileTree) item;
-                addFileTree(zos, dirView);
+                addFileTree(zos, dirView, entryFilter);
             } else if (item instanceof JkFileTreeSet) {
                 final JkFileTreeSet dirViews = (JkFileTreeSet) item;
                 for (final JkFileTree dirView : dirViews.fileTrees()) {
-                    addFileTree(zos, dirView);
+                    addFileTree(zos, dirView, entryFilter);
                 }
             } else {
                 throw new IllegalStateException("Items of class " + item.getClass()
-                        + " not handled.");
+                + " not handled.");
             }
         }
 
@@ -225,12 +235,12 @@ public final class JkZipper {
                 this.jkCompressionMethod);
     }
 
-    private void addFileTree(ZipOutputStream zos, JkFileTree dirView) {
-        if (!dirView.exists()) {
+    private void addFileTree(ZipOutputStream zos, JkFileTree fileTree, JkPathFilter filter) {
+        if (!fileTree.exists()) {
             return;
         }
-        final File base = JkUtilsFile.canonicalFile(dirView.root());
-        for (final File file : dirView) {
+        final File base = JkUtilsFile.canonicalFile(fileTree.root());
+        for (final File file : fileTree.andFilter(filter)) {
             JkUtilsZip.addZipEntry(zos, file, base,
                     JkCompressionMethod.STORED.equals(this.jkCompressionMethod));
         }
@@ -251,7 +261,7 @@ public final class JkZipper {
 
     /**
      * Wrapper on <code>File</code> allowing to creates digests on it.
-     * 
+     *
      * @author Jerome Angibaud
      */
     public static final class JkCheckSumer {

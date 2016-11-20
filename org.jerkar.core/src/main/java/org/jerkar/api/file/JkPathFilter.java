@@ -5,12 +5,27 @@ import java.io.FileFilter;
 import java.util.Set;
 
 import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsZip.JkZipEntryFilter;
 
 /**
- * Filter on relative path ala <href
- * a='https://ant.apache.org/manual/Types/patternset.html'>Ant pattern</href>.
+ * Filter on relative path ala
+ * <href a='https://ant.apache.org/manual/Types/patternset.html'>Ant
+ * pattern</href>.
  */
 public abstract class JkPathFilter {
+
+    /**
+     * When not case sensitive pattern matching will ignore case.
+     */
+    protected final boolean caseSensitive;
+
+    JkPathFilter(boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
+    }
+
+    JkPathFilter() {
+        this.caseSensitive = true;
+    }
 
     /**
      * Filter accepting all.
@@ -25,6 +40,11 @@ public abstract class JkPathFilter {
         @Override
         public String toString() {
             return "Accept all";
+        }
+
+        @Override
+        public JkPathFilter caseSensitive(boolean caseSensitive) {
+            return this;
         };
 
     };
@@ -35,24 +55,30 @@ public abstract class JkPathFilter {
     public abstract boolean accept(String relativePath);
 
     /**
+     * Returns a filter equivalent to this one but specifying if the matcher
+     * should be case sensitive or not.
+     */
+    public abstract JkPathFilter caseSensitive(boolean caseSensitive);
+
+    /**
      * Creates an include filter including the specified and patterns.
      */
     public static JkPathFilter include(String... antPatterns) {
-        return new IncludeFilter(AntPattern.setOf(antPatterns));
+        return new IncludeFilter(AntPattern.setOf(antPatterns), true);
     }
 
     /**
      * Creates an include filter including the specified and patterns.
      */
     public static JkPathFilter include(Iterable<String> antPatterns) {
-        return new IncludeFilter(AntPattern.setOf(antPatterns));
+        return new IncludeFilter(AntPattern.setOf(antPatterns), true);
     }
 
     /**
      * Creates an include filter excluding the specified and patterns.
      */
     public static JkPathFilter exclude(String... antPatterns) {
-        return new ExcludeFilter(AntPattern.setOf(antPatterns));
+        return new ExcludeFilter(AntPattern.setOf(antPatterns), true);
     }
 
     /**
@@ -73,18 +99,24 @@ public abstract class JkPathFilter {
      * Creates a filter made of this one plus the specified one.
      */
     public JkPathFilter and(JkPathFilter other) {
-        return and(this, other);
+        return new CompoundFilter(this, other);
     }
 
     /**
      * Creates a filter which is the inverse of this one.
      */
     public JkPathFilter reverse() {
-        return new JkPathFilter() {
+
+        return new JkPathFilter(this.caseSensitive) {
 
             @Override
             public boolean accept(String relativePath) {
                 return !JkPathFilter.this.accept(relativePath);
+            }
+
+            @Override
+            public JkPathFilter caseSensitive(boolean caseSensitive) {
+                return this.caseSensitive(caseSensitive);
             }
 
         };
@@ -100,8 +132,7 @@ public abstract class JkPathFilter {
 
             @Override
             public boolean accept(File file) {
-                final String relativePath = JkUtilsFile.getRelativePath(baseDir, file).replace(
-                        File.separator, "/");
+                final String relativePath = JkUtilsFile.getRelativePath(baseDir, file).replace(File.separator, "/");
                 return JkPathFilter.this.accept(relativePath);
             }
         };
@@ -111,8 +142,8 @@ public abstract class JkPathFilter {
 
         private final Set<AntPattern> antPatterns;
 
-        private IncludeFilter(Set<AntPattern> antPatterns) {
-            super();
+        private IncludeFilter(Set<AntPattern> antPatterns, boolean caseSensitive) {
+            super(caseSensitive);
             this.antPatterns = antPatterns;
         }
 
@@ -120,7 +151,8 @@ public abstract class JkPathFilter {
         public boolean accept(String relativePath) {
 
             for (final AntPattern antPattern : antPatterns) {
-                final boolean match = antPattern.doMatch(relativePath);
+                final boolean match = this.caseSensitive ? antPattern.doMatch(relativePath)
+                        : antPattern.toLowerCase().doMatch(relativePath.toLowerCase());
                 if (match) {
                     return true;
                 }
@@ -163,14 +195,19 @@ public abstract class JkPathFilter {
             return true;
         }
 
+        @Override
+        public JkPathFilter caseSensitive(boolean caseSensitive) {
+            return new IncludeFilter(antPatterns, caseSensitive);
+        }
+
     }
 
     private static class ExcludeFilter extends JkPathFilter {
 
         private final Set<AntPattern> antPatterns;
 
-        private ExcludeFilter(Set<AntPattern> antPatterns) {
-            super();
+        private ExcludeFilter(Set<AntPattern> antPatterns, boolean caseSensitive) {
+            super(caseSensitive);
             this.antPatterns = antPatterns;
         }
 
@@ -179,7 +216,8 @@ public abstract class JkPathFilter {
 
             for (final AntPattern antPattern : antPatterns) {
 
-                final boolean match = !antPattern.doMatch(relativePath);
+                final boolean match = this.caseSensitive ? !antPattern.doMatch(relativePath)
+                        : !antPattern.toLowerCase().doMatch(relativePath.toLowerCase());
                 if (!match) {
                     return false;
                 }
@@ -222,22 +260,54 @@ public abstract class JkPathFilter {
             return true;
         }
 
+        @Override
+        public JkPathFilter caseSensitive(boolean caseSensitive) {
+            return new ExcludeFilter(this.antPatterns, caseSensitive);
+        }
+
     }
 
-    private static JkPathFilter and(final JkPathFilter filter1, final JkPathFilter filter2) {
-
-        return new JkPathFilter() {
-
-            @Override
-            public boolean accept(String candidate) {
-                return filter1.accept(candidate) && filter2.accept(candidate);
-            }
+    /**
+     * Returns a {@link JkZipEntryFilter} having the same include/exclude rules
+     * than this object.
+     */
+    public JkZipEntryFilter toZipEntryFilter() {
+        return new JkZipEntryFilter() {
 
             @Override
-            public String toString() {
-                return "{" + filter1 + " & " + filter2 + "}";
+            public boolean accept(String entryName) {
+                return JkPathFilter.this.accept(entryName);
+
             }
         };
+    }
+
+    private static class CompoundFilter extends JkPathFilter {
+
+        private final JkPathFilter filter1;
+
+        private final JkPathFilter filter2;
+
+        CompoundFilter(JkPathFilter filter1, JkPathFilter filter2) {
+            super();
+            this.filter1 = filter1;
+            this.filter2 = filter2;
+        }
+
+        @Override
+        public boolean accept(String candidate) {
+            return filter1.accept(candidate) && filter2.accept(candidate);
+        }
+
+        @Override
+        public String toString() {
+            return "{" + filter1 + " & " + filter2 + "}";
+        }
+
+        @Override
+        public JkPathFilter caseSensitive(boolean caseSensitive) {
+            return new CompoundFilter(filter1.caseSensitive(caseSensitive), filter2.caseSensitive(caseSensitive));
+        }
     }
 
 }
