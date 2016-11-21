@@ -62,7 +62,7 @@ public class JkJavaPacker implements Cloneable {
 
     private boolean doJavadoc = false;
 
-    private final String fatJarSuffix;
+    private String fatJarSuffix = "fat";
 
     private JkPathFilter fatJarEntryFilter = EXCLUDE_SIGNATURE_FILTER;
 
@@ -214,7 +214,7 @@ public class JkJavaPacker implements Cloneable {
     }
 
     /**
-     * A builder for {@link JkJavaBuild}
+     * A builder for {@link JkJavaPacker}
      */
     public static class Builder {
 
@@ -308,6 +308,18 @@ public class JkJavaPacker implements Cloneable {
             packer.pgp = pgp;
             return this;
         }
+
+        /**
+         * Gives the suffix that will be appended at the end of the 'normal' jar for naming the fat jar.
+         * If the name of the normal jar is <i>mylib.jar</i> and the suffix is <i>uber</i> then the fat jar
+         * file name will be <i>mylib-uber.jar</i>.
+         */
+        public Builder fatJJarSuffix(String suffix) {
+            packer.fatJarSuffix = suffix;
+            return this;
+        }
+
+
 
         /**
          * Tells the packer to sign each produced element.
