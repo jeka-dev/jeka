@@ -314,7 +314,7 @@ public class JkJavaPacker implements Cloneable {
          * If the name of the normal jar is <i>mylib.jar</i> and the suffix is <i>uber</i> then the fat jar
          * file name will be <i>mylib-uber.jar</i>.
          */
-        public Builder fatJJarSuffix(String suffix) {
+        public Builder fatJarSuffix(String suffix) {
             packer.fatJarSuffix = suffix;
             return this;
         }
