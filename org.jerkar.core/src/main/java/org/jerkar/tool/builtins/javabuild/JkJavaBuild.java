@@ -93,7 +93,10 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     @JkDoc("Tests")
     public JkOptionTest tests = new JkOptionTest();
 
-    /** Options about packaging jars */
+    /**
+     * Options about packaging jars. This object will be used to populate the default {@link JkJavaPacker} for this build.
+     * You can override this default setting or set more detailed setting overriding {@link #createPacker()} method.
+     */
     @JkDoc("Packaging")
     public JkOptionPack pack = new JkOptionPack();
 
@@ -306,10 +309,10 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     }
 
     /**
-     * Override this method if you want to create a packager that behave a different way than the default one.
-     * This will override setting set through {@link JkOptionPack}.
+     * Override this method if you want to create a packager that behave a different way than the default one.<br/>
+     * This will override setting set through {@link JkOptionPack}.<br/>
      * By providing your own packer, you can be more precise about what you want or not to be produced by the build.
-     * For example you can create checksum files or produces very specific files.
+     * For example you can create checksum files or specify actions producing/modifying files to package.
      */
     protected JkJavaPacker createPacker() {
         return JkJavaPacker.of(this);
