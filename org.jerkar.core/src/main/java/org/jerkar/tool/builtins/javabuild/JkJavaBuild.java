@@ -307,8 +307,9 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
     /**
      * Override this method if you want to create a packager that behave a different way than the default one.
+     * This will override setting set through {@link JkOptionPack}.
      * By providing your own packer, you can be more precise about what you want or not to be produced by the build.
-     * For example you can create checksum files or produces totally project specific files.
+     * For example you can create checksum files or produces very specific files.
      */
     protected JkJavaPacker createPacker() {
         return JkJavaPacker.of(this);
@@ -733,7 +734,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     }
 
     /**
-     * Options about archive packaging
+     * Options about archive packaging.
      */
     public static final class JkOptionPack {
 
