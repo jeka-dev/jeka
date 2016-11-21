@@ -5,5 +5,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.plugins-jacoco"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.plugins-sonar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.plugins-protobuf"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
