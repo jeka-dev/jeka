@@ -10,7 +10,6 @@ import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
-import org.jerkar.api.file.JkZipper;
 import org.jerkar.api.java.JkManifest;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -167,22 +166,22 @@ public class JkJavaPacker implements Cloneable {
             if (!manifest.isEmpty()) {
                 manifest.writeToStandardLocation(build.classDir());
             }
-            JkFileTree.of(build.classDir()).zip().to(jarFile()).md5If(checkSums.contains("MD5"))
+            JkFileTreeSet.of(build.classDir()).and(build.extraJarFiles()).zip().to(jarFile()).md5If(checkSums.contains("MD5"))
             .sha1If(checkSums.contains("SHA-1"));
         }
         final JkFileTreeSet sourceAndResources = build.sources().and(build.resources());
         if (doSources && sourceAndResources.countFiles(false) > 0) {
-            build.sources().and(build.resources()).zip().to(jarSourceFile());
+            build.sources().and(build.resources()).and(build.extraJarFiles()).zip().to(jarSourceFile());
         }
         if (doTest && !build.tests.skip && build.testClassDir().exists()
                 && !JkFileTree.of(build.testClassDir()).files(false).isEmpty()) {
-            JkZipper.of(build.testClassDir()).to(jarTestFile());
+            JkFileTreeSet.of(build.testClassDir()).and(build.extraJarFiles()).zip().to(jarTestFile());
         }
         if (doTest && doSources && !build.unitTestSources().files(false).isEmpty()) {
-            build.unitTestSources().and(build.unitTestResources()).zip().to(jarTestSourceFile());
+            build.unitTestSources().and(build.unitTestResources()).and(build.extraJarFiles()).zip().to(jarTestSourceFile());
         }
         if (doFatJar) {
-            JkFileTree.of(build.classDir()).zip().merge(build.depsFor(JkJavaBuild.RUNTIME))
+            JkFileTreeSet.of(build.classDir()).and(build.extraJarFiles()).zip().merge(build.depsFor(JkJavaBuild.RUNTIME))
             .to(fatJarFile(), fatJarEntryFilter).md5If(checkSums.contains("MD5"))
             .sha1If(checkSums.contains("SHA-1"));
         }
