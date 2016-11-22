@@ -383,6 +383,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     @JkDoc("Generates sources and resources, compiles production sources and processes production resources to the class directory.")
     public void compile() {
         JkLog.startln("Processing production code and resources");
+        JkJavaBuildPlugin.applyPriorCompile(this.plugins.getActives());
         generateSources();
         productionCompiler().compile();
         generateResources();

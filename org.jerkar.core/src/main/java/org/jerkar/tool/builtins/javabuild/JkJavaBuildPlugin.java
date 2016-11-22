@@ -7,7 +7,7 @@ import org.jerkar.tool.JkBuildPlugin;
 
 /**
  * Class to extend to create plugin for {@link JkJavaBuild}.
- * 
+ *
  * @author Jerome Angibaud
  */
 public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
@@ -20,7 +20,7 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
     /**
      * Override this method if the plugin need to alter the JkUnit instance that
      * run tests.
-     * 
+     *
      * @see JkJavaBuild#unitTester()
      */
     protected JkUnit alterUnitTester(JkUnit jkUnit) {
@@ -30,7 +30,7 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
     /**
      * Override this method if the plugin need to alter the packer instance that
      * package the project into jar files.
-     * 
+     *
      * @see JkJavaBuild#packer()
      */
     protected JkJavaPacker alterPacker(JkJavaPacker packer) {
@@ -40,7 +40,7 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
     /**
      * Override this method if the plugin need to alter the source directory to
      * use for compiling.
-     * 
+     *
      * @see JkJavaBuild#sources()
      */
     protected JkFileTreeSet alterSourceDirs(JkFileTreeSet original) {
@@ -50,7 +50,7 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
     /**
      * Override this method if the plugin need to alter the test source
      * directory to use for compiling.
-     * 
+     *
      * @see JkJavaBuild#unitTestSources()
      */
     protected JkFileTreeSet alterTestSourceDirs(JkFileTreeSet original) {
@@ -60,7 +60,7 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
     /**
      * Override this method if the plugin need to alter the resource directory
      * to use for compiling.
-     * 
+     *
      * @see JkJavaBuild#resources()
      */
     protected JkFileTreeSet alterResourceDirs(JkFileTreeSet original) {
@@ -70,11 +70,19 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
     /**
      * Override this method if the plugin need to alter the test resource
      * directory to use for compiling.
-     * 
+     *
      * @see JkJavaBuild#unitTestResources()
      */
     protected JkFileTreeSet alterTestResourceDirs(JkFileTreeSet original) {
         return original;
+    }
+
+    /**
+     * Override this method if you want some action to be executed right before compilation. Typically used
+     * for generate sources.
+     */
+    protected void priorCompile() {
+        // Do nothing by default
     }
 
     static JkJavaPacker applyPacker(Iterable<? extends JkBuildPlugin> plugins, JkJavaPacker original) {
@@ -128,5 +136,12 @@ public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
         }
         return result;
     }
+
+    static void applyPriorCompile(Iterable<? extends JkBuildPlugin> plugins) {
+        for (final JkBuildPlugin plugin : plugins) {
+            ((JkJavaBuildPlugin) plugin).priorCompile();
+        }
+    }
+
 
 }
