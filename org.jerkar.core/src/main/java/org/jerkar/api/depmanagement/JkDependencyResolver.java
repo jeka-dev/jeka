@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jerkar.api.depmanagement.JkDependency.JkFileDependency;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -164,6 +165,45 @@ public final class JkDependencyResolver {
             path = path.and(getSingleScope(scope));
         }
         return path.withoutDoubloons();
+    }
+
+    private JkPath getOrdered(JkScope... scopes) {
+        JkResolveResult resolveResult = null;
+        if (internalResolver != null && this.dependencies.containsModules()) {
+            resolveResult = getResolveResult(scopes);
+        }
+        final List<File> result = new LinkedList<File>();
+        for (final JkScopedDependency scopedDependency : this.dependencies) {
+            if (scopedDependency.isInvolvedInAnyOf(scopes)) {
+                final JkDependency dependency = scopedDependency.dependency();
+                if (dependency instanceof JkFileSystemDependency) {
+                    final JkFileDependency fileDependency = (JkFileDependency) dependency;
+                    result.addAll(fileDependency.files());
+                } else if (dependency instanceof JkModuleDependency) {
+                    final JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
+                    result.addAll(resolveResult.filesOf(moduleDependency.moduleId()));
+                }
+            }
+
+        }
+        if (resolveResult != null) {
+            result.addAll(resolveResult.localFiles());
+        }
+        return JkPath.of(result).withoutDoubloons();
+    }
+
+
+
+
+    private JkResolveResult getResolveResult(JkScope... scopes) {
+        if (scopes.length == 0) {
+            return this.getResolveResult(null, this.transitiveVersionOverride);
+        }
+        JkResolveResult result = JkResolveResult.empty();
+        for (final JkScope scope : scopes) {
+            result = result.and(this.getResolveResult(scope, this.transitiveVersionOverride));
+        }
+        return result;
     }
 
 

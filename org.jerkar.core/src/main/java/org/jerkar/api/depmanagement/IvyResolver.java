@@ -194,14 +194,14 @@ final class IvyResolver implements InternalDepResolver {
 
     private static JkResolveResult getResolveConf(String config,
             ArtifactDownloadReport[] artifactDownloadReports, JkDependencies deps) {
-        final List<JkModuleDepFile> artifacts = new LinkedList<JkModuleDepFile>();
+        final List<JkModuleDepFile> moduleDepFiles = new LinkedList<JkModuleDepFile>();
         JkVersionProvider versionProvider = JkVersionProvider.empty();
         for (final ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
             final JkVersionedModule versionedModule = IvyTranslations.to(artifactDownloadReport
                     .getArtifact());
-            final JkModuleDepFile artifact = JkModuleDepFile.of(versionedModule,
+            final JkModuleDepFile moduleDepFile = JkModuleDepFile.of(versionedModule,
                     artifactDownloadReport.getLocalFile());
-            artifacts.add(artifact);
+            moduleDepFiles.add(moduleDepFile);
             final JkScopedDependency declaredDep = deps.get(versionedModule.moduleId());
             if (declaredDep != null && declaredDep.isInvolvedIn(JkScope.of(config))) {
                 final JkModuleDependency module = (JkModuleDependency) declaredDep.dependency();
@@ -211,7 +211,7 @@ final class IvyResolver implements InternalDepResolver {
                 }
             }
         }
-        return JkResolveResult.of(artifacts, versionProvider);
+        return JkResolveResult.of(moduleDepFiles, versionProvider);
     }
 
     static JkVersionedModule anonymousVersionedModule() {

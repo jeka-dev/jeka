@@ -67,6 +67,8 @@ public final class JkResolveResult implements Serializable {
         return result;
     }
 
+
+
     /**
      * Returns the versioned modules which with this result has been created.
      */

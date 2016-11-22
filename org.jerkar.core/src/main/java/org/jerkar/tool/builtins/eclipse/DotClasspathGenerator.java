@@ -391,5 +391,10 @@ final class DotClasspathGenerator {
     }
 
 
+    private static String toPatternString(List<String> pattern) {
+        return JkUtilsString.join(pattern, "|");
+    }
+
+
 
 }
