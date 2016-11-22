@@ -201,13 +201,6 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     }
 
     /**
-     * Returns location of extra jar files
-     */
-    public JkFileTreeSet extraJarFiles() {
-        return JkFileTreeSet.empty();
-    }
-
-    /**
      * Returns location of generated sources.
      */
     public File generatedSourceDir() {

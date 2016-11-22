@@ -67,6 +67,8 @@ public class JkJavaPacker implements Cloneable {
 
     private JkPgp pgp = null;
 
+    private JkFileTreeSet extraFiles = JkFileTreeSet.empty();
+
     private List<JkExtraPacking> extraActions = new LinkedList<JkExtraPacking>();
 
     private JkJavaPacker(JkJavaBuild build) {
@@ -166,22 +168,22 @@ public class JkJavaPacker implements Cloneable {
             if (!manifest.isEmpty()) {
                 manifest.writeToStandardLocation(build.classDir());
             }
-            JkFileTreeSet.of(build.classDir()).and(build.extraJarFiles()).zip().to(jarFile()).md5If(checkSums.contains("MD5"))
+            JkFileTreeSet.of(build.classDir()).and(extraFiles).zip().to(jarFile()).md5If(checkSums.contains("MD5"))
             .sha1If(checkSums.contains("SHA-1"));
         }
         final JkFileTreeSet sourceAndResources = build.sources().and(build.resources());
         if (doSources && sourceAndResources.countFiles(false) > 0) {
-            build.sources().and(build.resources()).and(build.extraJarFiles()).zip().to(jarSourceFile());
+            build.sources().and(build.resources()).and(extraFiles).zip().to(jarSourceFile());
         }
         if (doTest && !build.tests.skip && build.testClassDir().exists()
                 && !JkFileTree.of(build.testClassDir()).files(false).isEmpty()) {
-            JkFileTreeSet.of(build.testClassDir()).and(build.extraJarFiles()).zip().to(jarTestFile());
+            JkFileTreeSet.of(build.testClassDir()).and(extraFiles).zip().to(jarTestFile());
         }
         if (doTest && doSources && !build.unitTestSources().files(false).isEmpty()) {
-            build.unitTestSources().and(build.unitTestResources()).and(build.extraJarFiles()).zip().to(jarTestSourceFile());
+            build.unitTestSources().and(build.unitTestResources()).and(extraFiles).zip().to(jarTestSourceFile());
         }
         if (doFatJar) {
-            JkFileTreeSet.of(build.classDir()).and(build.extraJarFiles()).zip().merge(build.depsFor(JkJavaBuild.RUNTIME))
+            JkFileTreeSet.of(build.classDir()).and(extraFiles).zip().merge(build.depsFor(JkJavaBuild.RUNTIME))
             .to(fatJarFile(), fatJarEntryFilter).md5If(checkSums.contains("MD5"))
             .sha1If(checkSums.contains("SHA-1"));
         }
@@ -341,6 +343,15 @@ public class JkJavaPacker implements Cloneable {
          */
         public Builder fatJarExclusionFilter(JkPathFilter zipEntryFilter) {
             this.packer.fatJarEntryFilter = zipEntryFilter;
+            return this;
+        }
+
+        /**
+         * Add extra files to jars that aren't required to be on the project classpath.
+         * Useful for licenes, readmes, etc.
+         */
+        public Builder extraFiles(JkFileTreeSet files) {
+            packer.extraFiles = packer.extraFiles.and(files);
             return this;
         }
 
