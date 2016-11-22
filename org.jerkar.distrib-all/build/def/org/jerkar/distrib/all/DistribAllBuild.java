@@ -2,6 +2,7 @@ package org.jerkar.distrib.all;
 
 import java.io.File;
 
+import org.jerkar.AbstractBuild;
 import org.jerkar.CoreBuild;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
@@ -10,11 +11,13 @@ import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
+import org.jerkar.plugins.protobuf.PluginsProtobufBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
 import org.jerkar.tool.JkBuildDependencySupport;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkProject;
+import org.jerkar.tool.builtins.javabuild.JkJavaPacker;
 
 class DistribAllBuild extends JkBuildDependencySupport {
 
@@ -23,6 +26,18 @@ class DistribAllBuild extends JkBuildDependencySupport {
 
     @JkProject("../org.jerkar.plugins-jacoco")
     PluginsJacocoBuild pluginsJacoco;
+    
+    @JkProject("../org.jerkar.plugins-protobuf")
+    PluginsProtobufBuild pluginsProtobuf;
+    
+    AbstractBuild[] plugins = {
+        pluginsSonar,
+        pluginsJacoco,
+        pluginsProtobuf
+    };
+    
+    // The core project is got by transitivity
+    CoreBuild core = pluginsJacoco.core;
 
     public boolean testSamples = false;
 
@@ -32,16 +47,18 @@ class DistribAllBuild extends JkBuildDependencySupport {
         JkLog.startln("Creating distribution file");
 
         JkLog.info("Copy core distribution localy.");
-        CoreBuild core = pluginsJacoco.core; // The core project is got by
-        // transitivity
-        File distDir = this.ouputDir("dist");
-        JkFileTree dist = JkFileTree.of(distDir).importDirContent(core.distribFolder);
+        JkFileTree dist = JkFileTree.of(ouputDir("dist")).importDirContent(core.distribFolder);
 
         JkLog.info("Add plugins to the distribution");
-        JkFileTree ext = dist.from("libs/builtins").importFiles(pluginsSonar.packer().jarFile(),
-                pluginsJacoco.packer().jarFile());
+        JkFileTree ext = dist.from("libs/builtins");
         JkFileTree sourceDir = dist.from("libs-sources");
-        sourceDir.importFiles(pluginsSonar.packer().jarSourceFile(), pluginsJacoco.packer().jarSourceFile());
+        JkFileTreeSet sources = core.sources();
+        for (AbstractBuild plugin : plugins) {
+            JkJavaPacker packer = plugin.packer();
+            ext = ext.importFiles(packer.jarFile());
+            sourceDir = sourceDir.importFiles(packer.jarSourceFile());
+            sources = sources.and(plugin.sources());
+        }
 
         JkLog.info("Add plugins to the fat jar");
         File fat = dist.file(core.packer().fatJarFile().getName());
@@ -53,9 +70,7 @@ class DistribAllBuild extends JkBuildDependencySupport {
         JkZipper.of().merge(sourceDir.include("**.jar", "**.zip").exclude(fatSource.getName())).to(fatSource);
 
         JkLog.info("Create a fat javadoc");
-        JkFileTreeSet sources = this.pluginsJacoco.core.sources().and(this.pluginsJacoco.sources())
-                .and(this.pluginsSonar.sources());
-        File javadocAllDir = this.ouputDir("javadoc-all");
+        File javadocAllDir = ouputDir("javadoc-all");
         File javadocAllFile = dist.file("libs-javadoc/org.jerkar.core-fat-javadoc.jar");
         JkJavadocMaker.of(sources, javadocAllDir, javadocAllFile).process();
 
@@ -64,11 +79,11 @@ class DistribAllBuild extends JkBuildDependencySupport {
 
         JkLog.done();
     }
-
+    
     @JkDoc("End to end method to construct a distrib.")
     public void doDefault() {
         super.doDefault();
-        pluginsJacoco.core.pack.javadoc = false;
+        core.pack.javadoc = false;
         slaves().invokeDoDefaultMethodOnAll();
         distrib();
         if (testSamples) {
