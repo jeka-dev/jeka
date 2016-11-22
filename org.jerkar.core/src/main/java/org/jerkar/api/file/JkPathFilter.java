@@ -2,9 +2,12 @@ package org.jerkar.api.file;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsZip.JkZipEntryFilter;
 
 /**
@@ -45,6 +48,16 @@ public abstract class JkPathFilter {
         @Override
         public JkPathFilter caseSensitive(boolean caseSensitive) {
             return this;
+        }
+
+        @Override
+        public List<String> getIncludePatterns() {
+            return JkUtilsIterable.listOf("**/*");
+        }
+
+        @Override
+        public List<String> getExcludePatterns() {
+            return JkUtilsIterable.listOf();
         };
 
     };
@@ -53,6 +66,16 @@ public abstract class JkPathFilter {
      * Returns if this filter should accept the specified relative path.
      */
     public abstract boolean accept(String relativePath);
+
+    /**
+     * Returns the list of include patterns involved in this filter.
+     */
+    public abstract List<String> getIncludePatterns();
+
+    /**
+     * Returns the list of exclude patterns involved in this filter.
+     */
+    public abstract List<String> getExcludePatterns();
 
     /**
      * Returns a filter equivalent to this one but specifying if the matcher
@@ -96,7 +119,7 @@ public abstract class JkPathFilter {
     }
 
     /**
-     * Creates a filter made of this one plus the specified one.
+     * Creates a filter made of this one plus the specified one. Accepted files will be those matching both filters.
      */
     public JkPathFilter and(JkPathFilter other) {
         return new CompoundFilter(this, other);
@@ -117,6 +140,21 @@ public abstract class JkPathFilter {
             @Override
             public JkPathFilter caseSensitive(boolean caseSensitive) {
                 return this.caseSensitive(caseSensitive);
+            }
+
+            @Override
+            public List<String> getIncludePatterns() {
+                return this.getExcludePatterns();
+            }
+
+            @Override
+            public List<String> getExcludePatterns() {
+                return this.getIncludePatterns();
+            }
+
+            @Override
+            public String toString() {
+                return "Reverse of " + this;
             }
 
         };
@@ -161,38 +199,22 @@ public abstract class JkPathFilter {
         }
 
         @Override
-        public String toString() {
-            return "includes " + antPatterns;
+        public List<String> getExcludePatterns() {
+            return JkUtilsIterable.listOf();
         }
 
         @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((antPatterns == null) ? 0 : antPatterns.hashCode());
+        public List<String> getIncludePatterns() {
+            final List<String> result = new LinkedList<String>();
+            for (final AntPattern antPattern : this.antPatterns) {
+                result.add(antPattern.pattern());
+            }
             return result;
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final IncludeFilter other = (IncludeFilter) obj;
-            if (antPatterns == null) {
-                if (other.antPatterns != null) {
-                    return false;
-                }
-            } else if (!antPatterns.equals(other.antPatterns)) {
-                return false;
-            }
-            return true;
+        public String toString() {
+            return "includes " + antPatterns;
         }
 
         @Override
@@ -230,39 +252,24 @@ public abstract class JkPathFilter {
             return "excludes " + antPatterns;
         }
 
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((antPatterns == null) ? 0 : antPatterns.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final ExcludeFilter other = (ExcludeFilter) obj;
-            if (antPatterns == null) {
-                if (other.antPatterns != null) {
-                    return false;
-                }
-            } else if (!antPatterns.equals(other.antPatterns)) {
-                return false;
-            }
-            return true;
-        }
 
         @Override
         public JkPathFilter caseSensitive(boolean caseSensitive) {
             return new ExcludeFilter(this.antPatterns, caseSensitive);
+        }
+
+        @Override
+        public List<String> getIncludePatterns() {
+            return JkUtilsIterable.listOf();
+        }
+
+        @Override
+        public List<String> getExcludePatterns() {
+            final List<String> result = new LinkedList<String>();
+            for (final AntPattern antPattern : this.antPatterns) {
+                result.add(antPattern.pattern());
+            }
+            return result;
         }
 
     }
@@ -308,6 +315,23 @@ public abstract class JkPathFilter {
         public JkPathFilter caseSensitive(boolean caseSensitive) {
             return new CompoundFilter(filter1.caseSensitive(caseSensitive), filter2.caseSensitive(caseSensitive));
         }
+
+        @Override
+        public List<String> getIncludePatterns() {
+            final List<String> result = new LinkedList<String>();
+            result.addAll(filter1.getIncludePatterns());
+            result.addAll(filter2.getIncludePatterns());
+            return result;
+        }
+
+        @Override
+        public List<String> getExcludePatterns() {
+            final List<String> result = new LinkedList<String>();
+            result.addAll(filter1.getExcludePatterns());
+            result.addAll(filter2.getExcludePatterns());
+            return result;
+        }
+
     }
 
 }

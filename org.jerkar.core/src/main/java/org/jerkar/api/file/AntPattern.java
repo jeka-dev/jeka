@@ -391,6 +391,10 @@ final class AntPattern {
         return pathOrPattern;
     }
 
+    public String pattern() {
+        return this.pattern;
+    }
+
     @Override
     public String toString() {
         return pattern;

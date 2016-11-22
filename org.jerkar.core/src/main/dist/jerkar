@@ -158,4 +158,4 @@ fi
 
 exec "$JAVACMD" \
   $JERKAR_OPTS \
-  -cp "$LOCAL_BUILD_DIR$JERKAR_HOME/libs/ext/*:$JERKAR_HOME/libs/builtins/*:$JERKAR_HOME/org.jerkar.core.jar" org.jerkar.tool.Main "$@"
+  -cp "$LOCAL_BUILD_DIR$JERKAR_HOME/libs/ext/*:$JERKAR_HOME/org.jerkar.core-all.jar" org.jerkar.tool.Main "$@"
