@@ -62,7 +62,7 @@ public class JkScopedDependencyTest {
         assertTrue(!providedDep.isInvolvedIn(RUNTIME));
 
         // TODO fix it
-        //assertTrue(providedDep.isInvolvedIn(COMPILE));
+        assertTrue(providedDep.isInvolvedIn(COMPILE));
 
     }
 

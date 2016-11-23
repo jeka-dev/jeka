@@ -1,6 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import static org.jerkar.api.depmanagement.JkScopedDependencyTest.COMPILE;
+import static org.jerkar.api.depmanagement.JkScopedDependencyTest.PROVIDED;
 import static org.jerkar.api.depmanagement.JkScopedDependencyTest.RUNTIME;
 import static org.jerkar.api.depmanagement.JkScopedDependencyTest.TEST;
 
@@ -18,10 +19,13 @@ public class JkScopeTest {
                 JkScope.of("aScope"))));
         Assert.assertTrue(!COMPILE.isInOrIsExtendingAnyOf(JkUtilsIterable.setOf(TEST)));
         Assert.assertTrue(COMPILE.isInOrIsExtendingAnyOf(JkUtilsIterable.setOf(COMPILE)));
-        Assert.assertTrue(RUNTIME.isInOrIsExtendingAnyOf(JkUtilsIterable.setOf(COMPILE)));
+
         Assert.assertTrue(TEST.isInOrIsExtendingAnyOf(JkUtilsIterable.setOf(COMPILE)));
         Assert.assertTrue(!RUNTIME.isInOrIsExtendingAnyOf(JkUtilsIterable.setOf(JkScope
                 .of("anotherScope"))));
+
+        Assert.assertTrue(RUNTIME.isInOrIsExtendingAnyOf(JkUtilsIterable.setOf(COMPILE)));
+        Assert.assertTrue(PROVIDED.isInOrIsExtendingAnyOf(JkUtilsIterable.setOf(COMPILE)));
     }
 
 }
