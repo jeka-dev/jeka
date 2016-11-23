@@ -16,10 +16,13 @@ import org.jerkar.api.utils.JkUtilsString;
  * we need to compile, test or run the application, the dependencies may
  * diverge. For example, <code>Junit</code> library may only be necessary for
  * testing, so we can declare that
- * <code>Junit</scope> is only necessary for scope <code>TEST</code>.<br/>
- * 
+ * <code>Junit</scope> is only necessary for scope <code>TEST</code>.
+ * <p>
+ * A scope can inherit from one or several scopes. This means that if a scope Foo inherits from scope Bar then a dependencies declared with scope Bar will be also considered as declared with scope Foo.
+ * For instance, in JkJavaBuild, scope TEST inherits from RUNTIME that inherits from COMPILE so every dependencies declared with scope COMPILE are considered to be declared with scope RUNTIME and TEST as well.
+ * <p>
  * Similar to Maven <code>scope</code> or Ivy <code>configuration</code>.
- * 
+ *
  * @author Jerome Angibaud
  */
 public class JkScope implements Serializable {
@@ -71,7 +74,7 @@ public class JkScope implements Serializable {
 
     /**
      * Scopes that are extended by this one.
-     * 
+     *
      */
     public Set<JkScope> extendedScopes() {
         return this.extendedScopes;
@@ -202,7 +205,7 @@ public class JkScope implements Serializable {
      * <code>scopes</scope> directly from a {@link JkScope} .<br/>
      * Use the {@link #descr(String)} method last as it returns a
      * {@link JkScope}.
-     * 
+     *
      * @author Jerome Angibaud
      */
     public static class JkOptionableScope extends JkScope {

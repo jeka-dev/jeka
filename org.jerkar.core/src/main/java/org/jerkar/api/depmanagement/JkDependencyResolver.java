@@ -167,7 +167,9 @@ public final class JkDependencyResolver {
         return path.withoutDoubloons();
     }
 
-    private JkPath getOrdered(JkScope... scopes) {
+    // TODO fix-it
+    // under development replacement for #get(JkScope ... scopes)
+    public JkPath getOrdered(JkScope... scopes) {
         JkResolveResult resolveResult = null;
         if (internalResolver != null && this.dependencies.containsModules()) {
             resolveResult = getResolveResult(scopes);
