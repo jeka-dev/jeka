@@ -13,7 +13,7 @@ public class JkScopedDependencyTest {
 
     public static final JkScope COMPILE = JkScope.of("compile");
 
-    public static final JkScope PROVIDED = JkScope.of("provided").extending(COMPILE).transitive(false);
+    public static final JkScope PROVIDED = JkScope.of("provided").transitive(false);
 
     public static final JkScope RUNTIME = JkScope.of("runtime").extending(COMPILE);
 
@@ -60,10 +60,6 @@ public class JkScopedDependencyTest {
 
         final JkScopedDependency providedDep = JkScopedDependency.of(dep, PROVIDED);
         assertTrue(!providedDep.isInvolvedIn(RUNTIME));
-
-        // TODO fix it
-        //assertTrue(providedDep.isInvolvedIn(COMPILE));
-
     }
 
 
