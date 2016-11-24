@@ -95,17 +95,19 @@ final class JavaSourceParser {
             if (JkModuleDependency.isModuleDependencyDescription(dependency)) {
                 builder.on(JkModuleDependency.of(dependency));
             } else {
-                if (dependency.contains(":")) {
-                    throw new JkException(
-                            "Dependency "
-                                    + dependency
-                                    + " expressed in @JkImport is malformed, the expected format is groupId:artifactId:version.");
+                final File depFile;
+                if (new File(dependency).exists()) {
+                    depFile = new File(dependency);
+                } else {
+                    final File relativeFile = new File(baseDir, dependency);
+                    if (relativeFile.exists()) {
+                        depFile = JkUtilsFile.canonicalFile(relativeFile);
+                    } else {
+                        throw new JkException("File " + dependency
+                                + " mentionned in @JkImport does not exist.");
+                    }
                 }
-                final File depFile = JkUtilsFile.canonicalFile(new File(baseDir, dependency));
-                if (!depFile.exists()) {
-                    throw new JkException("File " + depFile
-                            + " mentionned in @JkImport does not exist.");
-                }
+
                 builder.on(depFile);
             }
 
@@ -119,7 +121,7 @@ final class JavaSourceParser {
             final File file = new File(baseDir, projectReltivePath);
             if (!file.exists()) {
                 throw new JkException("Folder " + JkUtilsFile.canonicalPath(file)
-                        + " defined as project does not exists.");
+                + " defined as project does not exists.");
             }
             projects.add(file);
         }

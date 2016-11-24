@@ -25,7 +25,7 @@ import java.util.Properties;
 
 /**
  * Utility class for dealing with files.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkUtilsFile {
@@ -102,7 +102,7 @@ public final class JkUtilsFile {
 
     /**
      * Copies the source directory content to the target directory.
-     * 
+     *
      * @param source
      *            The directory we want copy the content from.
      * @param targetDir
@@ -130,7 +130,7 @@ public final class JkUtilsFile {
      * also replacing all token as '${key}' by their respecting value. The
      * replacement is done only if the specified tokenValues map contains the
      * according key.
-     * 
+     *
      * @param tokenValues
      *            a map for replacing token key by value
      */
@@ -144,8 +144,8 @@ public final class JkUtilsFile {
         }
         if (isAncestor(fromDir, toDir) && filter.accept(toDir)) {
             throw new IllegalArgumentException("Base filtered directory " + fromDir.getPath()
-                    + ":(" + filter + ") cannot contain destination directory " + toDir.getPath()
-                    + ". Narrow filter or change the target directory.");
+            + ":(" + filter + ") cannot contain destination directory " + toDir.getPath()
+            + ". Narrow filter or change the target directory.");
         }
         if (toDir.isFile()) {
             throw new IllegalArgumentException(toDir.getPath() + " is file. Should be directory");
@@ -290,7 +290,7 @@ public final class JkUtilsFile {
             out.close();
         } catch (final IOException e) {
             throw new RuntimeException("IO exception occured while copying file " + from.getPath()
-                    + " to " + toFile.getPath(), e);
+            + " to " + toFile.getPath(), e);
         }
 
     }
@@ -379,7 +379,7 @@ public final class JkUtilsFile {
         try {
             return file.getCanonicalFile();
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Erreur while getting canonical file of " + file, e);
         }
     }
 
@@ -591,7 +591,7 @@ public final class JkUtilsFile {
      * Copies the content of the specified in file into the specified out file.
      * While coping token ${key} are replaced by the value found in the
      * specified replacements map.
-     * 
+     *
      * @see #copyDirContentReplacingTokens(File, File, FileFilter, boolean,
      *      PrintStream, Map)
      */
@@ -647,7 +647,7 @@ public final class JkUtilsFile {
      * Copies the content of the specified url to the specified file. While
      * coping token ${key} are replaced by the value found in the specified
      * replacements map.
-     * 
+     *
      * @see #copyFileWithInterpolation(File, File, Map)
      */
     public static void copyUrlReplacingTokens(URL url, File toFile,
@@ -666,7 +666,7 @@ public final class JkUtilsFile {
      * Copies the content of the specified input Stream to the specified file.
      * While coping token ${key} are replaced by the value found in the
      * specified replacements map.
-     * 
+     *
      * @see #copyFileWithInterpolation(File, File, Map)
      */
     public static void copyStreamWithInterpolation(InputStream inputStream, File toFile,
@@ -807,7 +807,7 @@ public final class JkUtilsFile {
 
     /**
      * Returns a resource as a {@link File}.
-     * 
+     *
      * @throws IllegalArgumentException
      *             If the specified resource does not exist.
      */
