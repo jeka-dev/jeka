@@ -60,6 +60,7 @@ public class JkScopedDependencyTest {
 
         final JkScopedDependency providedDep = JkScopedDependency.of(dep, PROVIDED);
         assertTrue(!providedDep.isInvolvedIn(RUNTIME));
+
     }
 
 
