@@ -133,7 +133,9 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();
         for (JkScopedDependency dep : this) {
             if (dep.scopeType().equals(ScopeType.UNSET)) {
-                dep = dep.withScopeMapping(scopeMapping);
+                if (dep.dependency() instanceof JkModuleDependency) {
+                    dep = dep.withScopeMapping(scopeMapping);
+                }
             }
             list.add(dep);
         }
