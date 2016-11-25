@@ -178,7 +178,7 @@ public final class JkDependencyResolver {
         for (final JkScopedDependency scopedDependency : this.dependencies) {
             if (scopedDependency.isInvolvedInAnyOf(scopes)) {
                 final JkDependency dependency = scopedDependency.dependency();
-                if (dependency instanceof JkFileSystemDependency) {
+                if (dependency instanceof JkFileDependency) {
                     final JkFileDependency fileDependency = (JkFileDependency) dependency;
                     result.addAll(fileDependency.files());
                 } else if (dependency instanceof JkModuleDependency) {
