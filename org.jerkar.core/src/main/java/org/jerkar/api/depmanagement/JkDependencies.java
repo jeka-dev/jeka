@@ -386,7 +386,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     /**
      * @see #resolvedWith(Iterable)
      */
-    public JkDependencies resolvedWith(JkVersionProvider provider) {
+    public JkDependencies resolvedWithOld(JkVersionProvider provider) {
         JkDependencies result = this;
         for (final JkModuleId moduleId : provider.moduleIds()) {
             final JkScopedDependency scopedDependency = this.get(moduleId);
@@ -413,11 +413,12 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     /**
      * @see #resolvedWith(Iterable)
      */
-    public JkDependencies resolvedWithKeepingOrder(JkVersionProvider provider) {
+    public JkDependencies resolvedWith(JkVersionProvider provider) {
 
         final List<JkScopedDependency> result  = new LinkedList<JkScopedDependency>();
         for (final JkScopedDependency scopedDependency : this) {
             if (! (scopedDependency.dependency() instanceof JkModuleDependency)) {
+                result.add(scopedDependency);
                 continue;
             }
             final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency.dependency();
