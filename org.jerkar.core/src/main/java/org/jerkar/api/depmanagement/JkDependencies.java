@@ -411,6 +411,39 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
+     * @see #resolvedWith(Iterable)
+     */
+    public JkDependencies resolvedWithKeepingOrder(JkVersionProvider provider) {
+
+        final List<JkScopedDependency> result  = new LinkedList<JkScopedDependency>();
+        for (final JkScopedDependency scopedDependency : this) {
+            if (! (scopedDependency.dependency() instanceof JkModuleDependency)) {
+                continue;
+            }
+            final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency.dependency();
+            final JkModuleId moduleId = moduleDependency.moduleId();
+            final JkScopedDependency toAdd;
+            if (moduleDependency.versionRange().isDynamicAndResovable()
+                    || moduleDependency.hasUnspecifedVersion()) {
+                final JkVersion resolvedVersion = provider.versionOf(moduleId);
+                if (resolvedVersion != null) {
+                    final JkModuleDependency resolvedModule = moduleDependency
+                            .resolvedTo(resolvedVersion);
+                    final JkScopedDependency resolvedScopedDep = scopedDependency
+                            .dependency(resolvedModule);
+                    toAdd = resolvedScopedDep;
+                } else {
+                    toAdd = scopedDependency;
+                }
+            } else {
+                toAdd = scopedDependency;
+            }
+            result.add(toAdd);
+        }
+        return new JkDependencies(result, this.depExcludes);
+    }
+
+    /**
      * Create a <code>JkDependencies</code> identical to this one but adding
      * exclusion clause
      *

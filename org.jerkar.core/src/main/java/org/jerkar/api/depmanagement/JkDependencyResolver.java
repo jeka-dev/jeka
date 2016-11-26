@@ -148,15 +148,10 @@ public final class JkDependencyResolver {
     }
 
     /**
-     * Gets the path containing all the resolved dependencies as artifact files
-     * for the specified scopes.
-     * <p>
-     * If no scope is specified then return all file dependencies and the
-     * dependencies specified. About the managed dependency the same rule than
-     * for {@link #resolve(JkScope...)} apply.
-     * </p>
+     * Previous version of {@link #get(JkScope...)}.
+     * Keep it there until confident enough in the new implementation.
      */
-    public final JkPath get(JkScope... scopes) {
+    private final JkPath getUnordered(JkScope... scopes) {
         if (scopes.length == 0) {
             return getSingleScope(null);
         }
@@ -167,16 +162,27 @@ public final class JkDependencyResolver {
         return path.withoutDoubloons();
     }
 
-    // TODO fix-it
-    // under development replacement for #get(JkScope ... scopes)
-    public JkPath getOrdered(JkScope... scopes) {
+    /**
+     * Gets the path containing all the resolved dependencies as artifact files
+     * for the specified scopes.
+     * <p>
+     * If no scope is specified then return all file dependencies and the
+     * dependencies specified. About the managed dependency the same rule than
+     * for {@link #resolve(JkScope...)} apply.
+     * </p>
+     * The result is ordered according the order {@link #dependencies} has been declared.
+     * About ordering of transitive dependencies, they come after the explicit ones and
+     * the dependee of the first explicitly declared dependency come before the dependee
+     * of the second one and so on.
+     */
+    public JkPath get(JkScope... scopes) {
         JkResolveResult resolveResult = null;
         if (internalResolver != null && this.dependencies.containsModules()) {
             resolveResult = getResolveResult(scopes);
         }
         final List<File> result = new LinkedList<File>();
         for (final JkScopedDependency scopedDependency : this.dependencies) {
-            if (scopedDependency.isInvolvedInAnyOf(scopes)) {
+            if (scopedDependency.isInvolvedInAnyOf(scopes) || scopes.length == 0) {
                 final JkDependency dependency = scopedDependency.dependency();
                 if (dependency instanceof JkFileDependency) {
                     final JkFileDependency fileDependency = (JkFileDependency) dependency;
