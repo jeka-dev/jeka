@@ -1,3 +1,11 @@
+## 0.4.6
+
+* Resolved classpath follows dependency declaration order
+* Fat jars now exclude signature files by default
+* Possibility to add arbitrary files in jar produced by JkJavaPacker
+* Add method on JkJavaBuildPlugin to alter source code generation 
+* Bug fixes
+
 ## 0.4.5
 
 * Easier repository/credential management
