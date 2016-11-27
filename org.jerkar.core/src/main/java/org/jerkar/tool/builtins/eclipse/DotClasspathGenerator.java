@@ -14,6 +14,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.jerkar.api.depmanagement.JkAttachedArtifacts;
+import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependency;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
@@ -126,14 +127,9 @@ final class DotClasspathGenerator {
         writeFileEntries(files, writer, paths);
 
         // Write project dependencies
-        for (final File depProjectDir : projectDependencies) {
-            writer.writeCharacters("\t");
-            writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
-            writer.writeAttribute("kind", "src");
-            writer.writeAttribute("exported", "true");
-            writer.writeAttribute("path", "/" + depProjectDir.getName());
-            writer.writeCharacters("\n");
-        }
+        //for (final File depProjectDir : projectDependencies) {
+        //    writeProjectEntry(depProjectDir, writer, paths);
+        //}
 
         // Write output
         writer.writeCharacters("\t");
@@ -157,6 +153,17 @@ final class DotClasspathGenerator {
             return "1.8";
         }
         return compilerVersion;
+    }
+
+    private void writeProjectEntry(File projectDir, XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
+        if (paths.add(projectDir.getAbsolutePath())) {
+            writer.writeCharacters("\t");
+            writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
+            writer.writeAttribute("kind", "src");
+            writer.writeAttribute("exported", "true");
+            writer.writeAttribute("path", "/" + projectDir.getName());
+            writer.writeCharacters("\n");
+        }
     }
 
     private void writeFileEntries(Iterable<File> fileDeps, XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
@@ -282,6 +289,13 @@ final class DotClasspathGenerator {
             } else if (dependency instanceof JkFileSystemDependency) {
                 final JkFileSystemDependency fileSystemDependency = (JkFileSystemDependency) dependency;
                 writeFileEntries(fileSystemDependency.files(), writer, paths);
+            } else if(dependency instanceof JkComputedDependency) {
+                final JkComputedDependency computedDependency = (JkComputedDependency) dependency;
+                for (final File projectRoot : this.projectDependencies) {
+                    if (computedDependency.hasFileWithin(projectRoot)) {
+                        writeProjectEntry(projectRoot, writer, paths);
+                    }
+                }
             }
         }
         writeExternalModuleEntries(attachedArtifacts, writer, resolveResult, paths);

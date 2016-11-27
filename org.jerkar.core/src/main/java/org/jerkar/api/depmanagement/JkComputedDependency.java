@@ -15,15 +15,15 @@ import org.jerkar.api.utils.JkUtilsIterable;
  * Dependency on computed resource. More concretely, this is a file dependency on files that might not
  * be present at the time of the build and that has to be generated. Instances of this class are
  * responsible to generate the missing files. <p>
- * 
+ *
  * Computed dependencies are instantiated by providing files to expect and a {@link Runnable} that
  * generates these files in case one of them misses. <p>
- * 
+ *
  * This is yet simple but quite powerful mechanism, cause the runnable can be anything as Maven or ANT build
  * of another project, a Jerkar build of another project, ... <p>
- * 
+ *
  * This is the way for creating multi-projet (and multi-techno if desired) builds.
- * 
+ *
  */
 public class JkComputedDependency extends JkFileDependency {
 
@@ -117,6 +117,20 @@ public class JkComputedDependency extends JkFileDependency {
             }
         }
         return files;
+    }
+
+    /**
+     * Returns <code>true</code> if one of this file or more is located under or below the specified folder.
+     * @param folder
+     * @return
+     */
+    public final boolean hasFileWithin(File folder) {
+        for (final File file : this.files) {
+            if (JkUtilsFile.isAncestor(folder, file)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
