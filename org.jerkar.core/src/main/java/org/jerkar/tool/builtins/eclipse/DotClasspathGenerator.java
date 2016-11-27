@@ -296,19 +296,17 @@ final class DotClasspathGenerator {
 
     private void writeModuleEntry(JkModuleId moduleId, XMLStreamWriter writer, JkResolveResult resolveResult,
             JkAttachedArtifacts jkAttachedArtifacts, Set<String> paths) throws XMLStreamException {
-        final Set<JkModuleDepFile> sourcesArtifacts = jkAttachedArtifacts.getArtifacts(moduleId, JkJavaBuild.SOURCES);
-        final File source;
-        if (!sourcesArtifacts.isEmpty()) {
-            source = sourcesArtifacts.iterator().next().localFile();
-        } else {
-            source = null;
-        }
-        final Set<JkModuleDepFile> javadocArtifacts = jkAttachedArtifacts.getArtifacts(moduleId, JkJavaBuild.JAVADOC);
-        final File javadoc;
-        if (!javadocArtifacts.isEmpty() && includeJavadoc) {
-            javadoc = javadocArtifacts.iterator().next().localFile();
-        } else {
-            javadoc = null;
+        File source = null;
+        File javadoc = null;
+        if (jkAttachedArtifacts != null) {
+            final Set<JkModuleDepFile> sourcesArtifacts = jkAttachedArtifacts.getArtifacts(moduleId, JkJavaBuild.SOURCES);
+            if (!sourcesArtifacts.isEmpty()) {
+                source = sourcesArtifacts.iterator().next().localFile();
+            }
+            final Set<JkModuleDepFile> javadocArtifacts = jkAttachedArtifacts.getArtifacts(moduleId, JkJavaBuild.JAVADOC);
+            if (!javadocArtifacts.isEmpty() && includeJavadoc) {
+                javadoc = javadocArtifacts.iterator().next().localFile();
+            }
         }
         writeClasspathEntry(writer, resolveResult.filesOf(moduleId).get(0), source, javadoc, paths);
     }
