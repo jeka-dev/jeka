@@ -17,6 +17,7 @@ import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsZip;
+import org.jerkar.api.utils.JkUtilsZip.JkZipEntryFilter;
 
 /**
  * Defines elements to embed in a zip archive and methods to write archive on
@@ -194,6 +195,7 @@ public final class JkZipper {
         }
 
         // Merging archives to this archive
+        final JkZipEntryFilter zipEntryFilter = entryFilter.toZipEntryFilter();
         for (final File archiveToMerge : this.archivestoMerge) {
             final ZipFile file;
             try {
@@ -202,7 +204,7 @@ public final class JkZipper {
                 throw new RuntimeException("Error while opening zip file "
                         + archiveToMerge.getPath(), e);
             }
-            JkUtilsZip.mergeZip(zos, file, storedMethod());
+            JkUtilsZip.mergeZip(zos, file, zipEntryFilter, storedMethod());
         }
         JkUtilsIO.closeQuietly(zos);
         JkLog.done();

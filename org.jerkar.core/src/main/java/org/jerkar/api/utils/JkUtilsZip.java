@@ -255,10 +255,21 @@ public final class JkUtilsZip {
      * {@link ZipOutputStream}.
      */
     public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile, boolean storeMethod) {
+        return mergeZip(zos, zipFile, ACCEPT_ALL, storeMethod);
+    }
+
+    /**
+     * Writes all the entries from a given ZipFile to the specified
+     * {@link ZipOutputStream}.
+     */
+    public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile, JkZipEntryFilter filter, boolean storeMethod) {
         final Set<String> duplicateEntries = new HashSet<String>();
         final Enumeration<? extends ZipEntry> entries = zipFile.entries();
         while (entries.hasMoreElements()) {
             final ZipEntry e = entries.nextElement();
+            if (!filter.accept(e.getName())) {
+                continue;
+            }
             try {
                 if (!e.isDirectory()) {
                     final boolean success;
