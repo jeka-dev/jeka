@@ -210,15 +210,14 @@ final class DotClasspathGenerator {
 
     private void generateJava(XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
 
-        // Sources
         final Set<String> sourcePaths = new HashSet<String>();
 
         // Test Sources
-        for (final JkFileTree jkFileTree : testSources.fileTrees()) {
-            if (!jkFileTree.root().exists()) {
+        for (final JkFileTree fileTree : testSources.fileTrees()) {
+            if (!fileTree.root().exists()) {
                 continue;
             }
-            final String path = JkUtilsFile.getRelativePath(projectDir, jkFileTree.root()).replace(File.separator, "/");
+            final String path = JkUtilsFile.getRelativePath(projectDir, fileTree.root()).replace(File.separator, "/");
             if (sourcePaths.contains(path)) {
                 continue;
             }
@@ -226,18 +225,19 @@ final class DotClasspathGenerator {
             writer.writeCharacters("\t");
             writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
             writer.writeAttribute("kind", "src");
+            writeIncludingExcluding(writer, fileTree);
             writer.writeAttribute("output",
                     JkUtilsFile.getRelativePath(projectDir, testClassDir).replace(File.separator, "/"));
             writer.writeAttribute("path", path);
             writer.writeCharacters("\n");
         }
 
-
-        for (final JkFileTree jkFileTree : sources.fileTrees()) {
-            if (!jkFileTree.root().exists()) {
+        // Sources
+        for (final JkFileTree fileTree : sources.fileTrees()) {
+            if (!fileTree.root().exists()) {
                 continue;
             }
-            final String path = JkUtilsFile.getRelativePath(projectDir, jkFileTree.root()).replace(File.separator, "/");
+            final String path = JkUtilsFile.getRelativePath(projectDir, fileTree.root()).replace(File.separator, "/");
             if (sourcePaths.contains(path)) {
                 continue;
             }
@@ -245,6 +245,7 @@ final class DotClasspathGenerator {
             writer.writeCharacters("\t");
             writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
             writer.writeAttribute("kind", "src");
+            writeIncludingExcluding(writer, fileTree);
             writer.writeAttribute("path", path);
             writer.writeCharacters("\n");
         }
@@ -267,6 +268,17 @@ final class DotClasspathGenerator {
     //            writeExternalModuleEntries(buildDefDependencyResolver, writer, buildresolve);
     //        }
     //    }
+
+    private void writeIncludingExcluding(XMLStreamWriter writer, JkFileTree fileTree) throws XMLStreamException {
+        final String including = toPatternString(fileTree.filter().getIncludePatterns());
+        if (!JkUtilsString.isBlank(including)) {
+            writer.writeAttribute("including", including);
+        }
+        final String excluding = toPatternString(fileTree.filter().getExcludePatterns());
+        if (!JkUtilsString.isBlank(excluding)) {
+            writer.writeAttribute("excluding", excluding);
+        }
+    }
 
     private void writeDependenciesEntries(XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
         final JkResolveResult resolveResult = dependencyResolver.resolve(allScopes())
