@@ -157,7 +157,7 @@ final class IvyPublisher implements InternalPublisher {
             final JkPublishRepo publishRepo = this.publishRepos.getRepoHavingUrl(IvyTranslations
                     .publishResolverUrl(resolver));
             final JkVersionedModule jkModule = IvyTranslations
-                    .toJerkarVersionedModule(moduleDescriptor.getModuleRevisionId());
+                    .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
             if (!isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
                 JkLog.startln("Publishing for repository " + resolver);
                 this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor);
@@ -211,7 +211,7 @@ final class IvyPublisher implements InternalPublisher {
             final JkPublishRepo publishRepo = this.publishRepos.getRepoHavingUrl(IvyTranslations
                     .publishResolverUrl(resolver));
             final JkVersionedModule jkModule = IvyTranslations
-                    .toJerkarVersionedModule(moduleDescriptor.getModuleRevisionId());
+                    .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
             if (isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
                 JkLog.startln("Publishing for repository " + resolver);
                 final CheckFileFlag checkFileFlag = CheckFileFlag.of(publishRepo);

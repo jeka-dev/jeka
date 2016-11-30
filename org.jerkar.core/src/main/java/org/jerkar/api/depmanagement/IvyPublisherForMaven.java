@@ -62,7 +62,7 @@ final class IvyPublisherForMaven {
 
         // publish artifacts
         final JkVersionedModule versionedModule = IvyTranslations
-                .toJerkarVersionedModule(ivyModuleRevisionId);
+                .toJkVersionedModule(ivyModuleRevisionId);
         final MavenMetadata returnedMetaData = publish(versionedModule, publication);
 
         // publish pom

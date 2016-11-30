@@ -62,16 +62,6 @@ public final class JkDependencyResolver {
         return new JkDependencyResolver(null, dependencies, null, null, null);
     }
 
-    //    static JkPath get(JkRepos repos, JkModuleDependency dep, boolean transitive) {
-    //        final JkScope scope = transitive ? SINGLE_SCOPE : SINGLE_SCOPE_NON_TRANS;
-    //        final InternalDepResolver resolver = IvyClassloader.CLASSLOADER.transClassloaderProxy(
-    //                InternalDepResolver.class, IVYRESOLVER_CLASS_NAME, "of", repos);
-    //        final JkScopeMapping scopeMapping = JkScopeMapping.of(scope).to("default");
-    //        final JkResolveResult result = resolver.resolveAnonymous(JkDependencies.of(scope, dep),
-    //                scope, JkResolutionParameters.of().withDefault(scopeMapping));
-    //        return JkPath.of(result.localFiles());
-    //    }
-
     private final Map<JkScope, JkResolveResult> cachedResolveResult = new HashMap<JkScope, JkResolveResult>();
 
     private final InternalDepResolver internalResolver;
@@ -86,10 +76,10 @@ public final class JkDependencyResolver {
 
     private final JkVersionProvider transitiveVersionOverride;
 
-    private JkDependencyResolver(InternalDepResolver jkIvyResolver, JkDependencies dependencies,
+    private JkDependencyResolver(InternalDepResolver internalResolver, JkDependencies dependencies,
             JkVersionedModule module, JkResolutionParameters resolutionParameters,
             JkVersionProvider transitiveVersionOverride) {
-        this.internalResolver = jkIvyResolver;
+        this.internalResolver = internalResolver;
         this.dependencies = dependencies;
         this.module = module;
         this.parameters = resolutionParameters;
@@ -147,7 +137,7 @@ public final class JkDependencyResolver {
         return internalResolver.getArtifacts(modules, scopes);
     }
 
-    /**
+    /*
      * Previous version of {@link #get(JkScope...)}.
      * Keep it there until confident enough in the new implementation.
      */

@@ -1,8 +1,10 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.apache.ivy.Ivy;
@@ -17,6 +19,8 @@ import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.DownloadOptions;
+import org.apache.ivy.core.resolve.IvyNode;
+import org.apache.ivy.core.resolve.IvyNodeCallers.Caller;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.util.url.URLHandlerRegistry;
@@ -91,14 +95,13 @@ final class IvyResolver implements InternalDepResolver {
     }
 
     @Override
-    public JkResolveResult resolve(JkVersionedModule module, JkDependencies deps,
-            JkScope resolvedScope, JkResolutionParameters parameters, JkVersionProvider tranditiveVersionOverride) {
+    public JkResolveResult resolve(JkVersionedModule module, JkDependencies deps, JkScope resolvedScope,
+            JkResolutionParameters parameters, JkVersionProvider tranditiveVersionOverride) {
 
-        final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
-                module, deps, parameters.defaultMapping(), tranditiveVersionOverride);
+        final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(module, deps,
+                parameters.defaultMapping(), tranditiveVersionOverride);
 
-        final String[] confs = resolvedScope == null ? IVY_24_ALL_CONF
-                : new String[] { resolvedScope.name() };
+        final String[] confs = resolvedScope == null ? IVY_24_ALL_CONF : new String[] { resolvedScope.name() };
         final ResolveOptions resolveOptions = new ResolveOptions();
         resolveOptions.setConfs(confs);
         resolveOptions.setTransitive(true);
@@ -113,13 +116,11 @@ final class IvyResolver implements InternalDepResolver {
             throw JkUtilsThrowable.unchecked(e);
         }
         if (report.hasError()) {
-            for (final ArtifactDownloadReport artifactDownloadReport : report
-                    .getAllArtifactsReports()) {
+            for (final ArtifactDownloadReport artifactDownloadReport : report.getAllArtifactsReports()) {
                 JkLog.info(artifactDownloadReport.toString());
             }
 
-            throw new IllegalStateException("Errors while resolving dependencies : "
-                    + report.getAllProblemMessages());
+            throw new IllegalStateException("Errors while resolving dependencies : " + report.getAllProblemMessages());
         }
         final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
         JkResolveResult resolveResult = JkResolveResult.empty();
@@ -131,8 +132,7 @@ final class IvyResolver implements InternalDepResolver {
     }
 
     private void deleteResolveCache(JkVersionedModule module) {
-        final ResolutionCacheManager cacheManager = this.ivy.getSettings()
-                .getResolutionCacheManager();
+        final ResolutionCacheManager cacheManager = this.ivy.getSettings().getResolutionCacheManager();
         final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(module);
         final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleRevisionId);
         propsFile.delete();
@@ -149,16 +149,16 @@ final class IvyResolver implements InternalDepResolver {
         }
         for (final JkVersionedModule module : modules) {
             final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(module);
-            final DefaultDependencyDescriptor dependency = new DefaultDependencyDescriptor(
-                    moduleRevisionId, true, false);
+            final DefaultDependencyDescriptor dependency = new DefaultDependencyDescriptor(moduleRevisionId, true,
+                    false);
             for (final JkScope scope : scopes) {
                 dependency.addDependencyConfiguration(scope.name(), scope.name());
             }
             moduleDescriptor.addDependency(dependency);
         }
         final JkAttachedArtifacts result = new JkAttachedArtifacts();
-        final ResolveOptions resolveOptions = new ResolveOptions().setTransitive(false)
-                .setOutputReport(JkLog.verbose()).setRefresh(false);
+        final ResolveOptions resolveOptions = new ResolveOptions().setTransitive(false).setOutputReport(JkLog.verbose())
+                .setRefresh(false);
         resolveOptions.setLog(logLevel());
         for (final JkScope scope : scopes) {
             resolveOptions.setConfs(IvyTranslations.toConfNames(scope));
@@ -168,11 +168,10 @@ final class IvyResolver implements InternalDepResolver {
             } catch (final Exception e1) {
                 throw new RuntimeException(e1);
             }
-            final ArtifactDownloadReport[] artifactDownloadReports = report
-                    .getAllArtifactsReports();
+            final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
             for (final ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
-                final JkVersionedModule versionedModule = IvyTranslations.to(artifactDownloadReport
-                        .getArtifact());
+                final JkVersionedModule versionedModule = IvyTranslations
+                        .toJkVersionedModule(artifactDownloadReport.getArtifact());
                 final JkModuleDepFile artifact = JkModuleDepFile.of(versionedModule,
                         artifactDownloadReport.getLocalFile());
                 result.add(scope, artifact);
@@ -192,13 +191,13 @@ final class IvyResolver implements InternalDepResolver {
         return "download-only";
     }
 
-    private static JkResolveResult getResolveConf(String config,
-            ArtifactDownloadReport[] artifactDownloadReports, JkDependencies deps) {
+    private static JkResolveResult getResolveConf(String config, ArtifactDownloadReport[] artifactDownloadReports,
+            JkDependencies deps) {
         final List<JkModuleDepFile> moduleDepFiles = new LinkedList<JkModuleDepFile>();
         JkVersionProvider versionProvider = JkVersionProvider.empty();
         for (final ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
-            final JkVersionedModule versionedModule = IvyTranslations.to(artifactDownloadReport
-                    .getArtifact());
+            final JkVersionedModule versionedModule = IvyTranslations
+                    .toJkVersionedModule(artifactDownloadReport.getArtifact());
             final JkModuleDepFile moduleDepFile = JkModuleDepFile.of(versionedModule,
                     artifactDownloadReport.getLocalFile());
             moduleDepFiles.add(moduleDepFile);
@@ -206,8 +205,7 @@ final class IvyResolver implements InternalDepResolver {
             if (declaredDep != null && declaredDep.isInvolvedIn(JkScope.of(config))) {
                 final JkModuleDependency module = (JkModuleDependency) declaredDep.dependency();
                 if (module.versionRange().isDynamicAndResovable()) {
-                    versionProvider = versionProvider.and(module.moduleId(),
-                            versionedModule.version());
+                    versionProvider = versionProvider.and(module.moduleId(), versionedModule.version());
                 }
             }
         }
@@ -216,8 +214,7 @@ final class IvyResolver implements InternalDepResolver {
 
     static JkVersionedModule anonymousVersionedModule() {
         final String version = Long.toString(RANDOM.nextLong());
-        return JkVersionedModule.of(JkModuleId.of("anonymousGroup", "anonymousName"),
-                JkVersion.ofName(version));
+        return JkVersionedModule.of(JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.ofName(version));
     }
 
     @Override
@@ -225,11 +222,41 @@ final class IvyResolver implements InternalDepResolver {
         final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(dependency, null);
         final boolean metadata = "pom".equalsIgnoreCase(dependency.ext());
         final String typeAndExt = JkUtilsObject.firstNonNull(dependency.ext(), "jar");
-        final Artifact artifact = new DefaultArtifact(moduleRevisionId, null, dependency.moduleId().name(), typeAndExt, typeAndExt, metadata);
+        final Artifact artifact = new DefaultArtifact(moduleRevisionId, null, dependency.moduleId().name(), typeAndExt,
+                typeAndExt, metadata);
         final ArtifactDownloadReport report = ivy.getResolveEngine().download(artifact, new DownloadOptions());
         return report.getLocalFile();
     }
 
+    private static class TreeResolver {
 
+        private final Map<JkModuleId, List<JkVersionedModule>> map = new HashMap<JkModuleId, List<JkVersionedModule>>();
+
+        void populate(Iterable<IvyNode> nodes, String confs) {
+            for (final IvyNode node : nodes) {
+                if (node.isEvicted(confs)) {
+                    continue;
+                }
+                final JkVersionedModule currentModule = toJkVersionedModule(node);
+                final Caller[] callers = node.getAllCallers();
+                for (int i = 0; i <= callers.length; i++) {
+                    final Caller caller = callers[i];
+                    final JkVersionedModule parent = IvyTranslations.toJkVersionedModule(caller.getModuleRevisionId());
+                    List<JkVersionedModule> list = map.get(parent.moduleId());
+                    if (list == null) {
+                        list = new LinkedList<JkVersionedModule>();
+                        map.put(parent.moduleId(), list);
+                    }
+                    list.add(currentModule);
+                }
+
+            }
+        }
+
+    }
+
+    private static JkVersionedModule toJkVersionedModule(IvyNode ivyNode) {
+        return IvyTranslations.toJkVersionedModule(ivyNode.getId());
+    }
 
 }

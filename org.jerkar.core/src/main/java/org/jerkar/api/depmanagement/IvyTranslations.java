@@ -25,6 +25,7 @@ import org.apache.ivy.core.module.descriptor.OverrideDependencyDescriptorMediato
 import org.apache.ivy.core.module.id.ArtifactId;
 import org.apache.ivy.core.module.id.ModuleId;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
+import org.apache.ivy.core.resolve.IvyNode;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.matcher.ExactOrRegexpPatternMatcher;
 import org.apache.ivy.plugins.matcher.ExactPatternMatcher;
@@ -212,7 +213,7 @@ final class IvyTranslations {
                 .version().name());
     }
 
-    public static JkVersionedModule toJerkarVersionedModule(ModuleRevisionId moduleRevisionId) {
+    public static JkVersionedModule toJkVersionedModule(ModuleRevisionId moduleRevisionId) {
         return JkVersionedModule.of(
                 JkModuleId.of(moduleRevisionId.getOrganisation(), moduleRevisionId.getName()),
                 JkVersion.ofName(moduleRevisionId.getRevision()));
@@ -353,7 +354,7 @@ final class IvyTranslations {
         return chainResolver;
     }
 
-    public static JkVersionedModule to(Artifact artifact) {
+    public static JkVersionedModule toJkVersionedModule(Artifact artifact) {
         final JkModuleId moduleId = JkModuleId.of(artifact.getModuleRevisionId().getOrganisation(),
                 artifact.getModuleRevisionId().getName());
         return JkVersionedModule.of(moduleId,
@@ -527,6 +528,12 @@ final class IvyTranslations {
             extraMap = JkUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", classifier);
         }
         return new DefaultArtifact(moduleId, date, artifactName, type, extension, extraMap);
+    }
+
+    public static JkDependencyNode toJkDependencyNode(IvyNode ivyNode) {
+        final JkVersionedModule module = toJkVersionedModule(ivyNode.getId());
+        final JkDependencyNode result = new JkDependencyNode(module);
+        return result;
     }
 
 }

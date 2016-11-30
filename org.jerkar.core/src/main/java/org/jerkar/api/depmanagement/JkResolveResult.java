@@ -12,11 +12,11 @@ import java.util.Set;
  * Result of a module dependency resolution for a given scope.<br/>
  * When resolving a module dependencies for a given scope, we expect to get
  * <ul>
- * <li>The list of local file constituting the resolved dependencies (the jar
- * files for instance)</li>
- * <li>The {@link JkVersionProvider} that specify which static version has been
- * taken in account when a module dependency is declared using dynamic versions
- * (as 1.0.+)</li>
+ *   <li>The list of local file constituting the resolved dependencies (the jar
+ *        files for instance)</li>
+ *   <li>The {@link JkVersionProvider} that specify which static version has been
+ *        taken in account when a module dependency is declared using dynamic versions
+ *        (as 1.0.+)</li>
  * </ul>
  */
 public final class JkResolveResult implements Serializable {
