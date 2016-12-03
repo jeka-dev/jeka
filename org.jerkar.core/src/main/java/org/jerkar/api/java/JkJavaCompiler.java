@@ -110,7 +110,7 @@ public final class JkJavaCompiler {
     /**
      * Creates a copy of this {@link JkJavaCompiler} but with the specified
      * options.
-     * 
+     *
      * @see #andOptions(String...)
      */
     public JkJavaCompiler withOptions(String... options) {
@@ -122,7 +122,7 @@ public final class JkJavaCompiler {
     /**
      * Creates a copy of this {@link JkJavaCompiler} but with the specified
      * options under condition.
-     * 
+     *
      * @see #andOptions(String...)
      */
     public JkJavaCompiler withOptionsIf(boolean condition, String... options) {
@@ -212,7 +212,7 @@ public final class JkJavaCompiler {
     /**
      * As {@link #fork(String...)} but specifying the executable for the
      * compiler.
-     * 
+     *
      * @param executable
      *            The executable for the compiler as 'jike' or
      *            '/my/speciel/jdk/javac'
@@ -245,9 +245,9 @@ public final class JkJavaCompiler {
 
     /**
      * Actually compile the source files to the output directory.
-     * 
+     *
      * @return <code>false</code> if a compilation error occurred.
-     * 
+     *
      * @throws if
      *             a compilation error occured and the 'failOnError' flag in on.
      */
@@ -255,9 +255,12 @@ public final class JkJavaCompiler {
         final JavaCompiler compiler = getDefaultOrFail();
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null,
                 null);
-
-        JkLog.startln(("Compiling " + javaSourceFiles.size() + " source files using options : " + JkUtilsString
-                .join(options, " ")));
+        String message = "Compiling " + javaSourceFiles.size() + " source files";
+        if (JkLog.verbose()) {
+            message = message + " using options : " + JkUtilsString
+                    .join(options, " ");
+        }
+        JkLog.startln(message);
         if (javaSourceFiles.isEmpty()) {
             JkLog.warn("No source to compile");
             JkLog.done();
@@ -347,7 +350,7 @@ public final class JkJavaCompiler {
         final String path = jdkLocations.get(key);
         if (path == null) {
             JkLog.warn("Current JDK does not match with source version " + versionCache
-                    + ". No exact matching JDK found for this version. Will use the current one which is version "
+                    + ". No exact matching JDK found for version " + versionCache + ". Will use the current one which is version "
                     + currentJdkSourceVersion() + ".");
             return this;
         }

@@ -105,8 +105,6 @@ final class Project {
         return resolver.resolveBuildClasses();
     }
 
-
-
     /**
      * Pre-compile and compile build classes (if needed) then execute the build
      * of this project.
@@ -116,20 +114,22 @@ final class Project {
      *            It can be <code>null</code> or empty.
      */
     void execute(JkInit init) {
-        this.buildDependencies = this.buildDependencies.andScopeless(init.commandLine()
-                .dependencies());
+        this.buildDependencies = this.buildDependencies.andScopeless(init.commandLine().dependencies());
         JkPath runtimeClasspath = compile();
         JkLog.startHeaded("Instantiating build class");
         if (!init.commandLine().dependencies().isEmpty()) {
             JkLog.startln("Grab dependencies specified in command line");
             final JkPath cmdPath = pathOf(init.commandLine().dependencies());
-            runtimeClasspath = runtimeClasspath.andHead( cmdPath );
-            JkLog.done("Command line extra path : " + cmdPath);
+            runtimeClasspath = runtimeClasspath.andHead(cmdPath);
+            if (JkLog.verbose()) {
+                JkLog.done("Command line extra path : " + cmdPath);
+            } else {
+                JkLog.done();
+            }
         }
         final BuildAndPluginDictionnary buildAndDict = getBuildInstance(init, runtimeClasspath);
         if (buildAndDict == null) {
-            throw new JkException("Can't find or guess any build class for project hosted in "
-                    + this.projectBaseDir
+            throw new JkException("Can't find or guess any build class for project hosted in " + this.projectBaseDir
                     + " .\nAre you sure this directory is a buildable project ?");
         }
         JkLog.done();
@@ -159,7 +159,7 @@ final class Project {
     private BuildAndPluginDictionnary getBuildInstance(JkInit init, JkPath runtimePath) {
         final JkClassLoader classLoader = JkClassLoader.current();
         classLoader.addEntries(runtimePath);
-        JkLog.info("Setting build execution classpath to : " + classLoader.childClasspath());
+        JkLog.trace("Setting build execution classpath to : " + classLoader.childClasspath());
         final JkBuild build = resolver.resolve(init.buildClassHint());
         if (build == null) {
             return null;
@@ -188,11 +188,8 @@ final class Project {
         // If true, we assume Jerkar is produced by IDE (development mode)
         final boolean devMode = JkLocator.jerkarJarFile().isDirectory();
 
-        return JkDependencies.builder()
-                .on(buildDependencies.withDefaultScopeMapping(JkScopeMapping.ALL_TO_DEFAULT))
-                .onFiles(localBuildPath())
-                .onFilesIf(devMode, JkClasspath.current())
-                .onFilesIf(!devMode, jerkarLibs())
+        return JkDependencies.builder().on(buildDependencies.withDefaultScopeMapping(JkScopeMapping.ALL_TO_DEFAULT))
+                .onFiles(localBuildPath()).onFilesIf(devMode, JkClasspath.current()).onFilesIf(!devMode, jerkarLibs())
                 .build();
     }
 
@@ -211,8 +208,7 @@ final class Project {
         return JkPath.of(extraLibs).withoutDoubloons();
     }
 
-    private JkPath compileDependentProjects(Set<File> yetCompiledProjects,
-            LinkedHashSet<File> pathEntries) {
+    private JkPath compileDependentProjects(Set<File> yetCompiledProjects, LinkedHashSet<File> pathEntries) {
         JkPath jkPath = JkPath.of();
         for (final File file : this.subProjects) {
             final Project project = new Project(file);
@@ -224,12 +220,10 @@ final class Project {
 
     private void compileBuild(JkPath buildPath) {
         baseBuildCompiler().withClasspath(buildPath).compile();
-        JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java")
-        .copyTo(this.resolver.buildClassDir);
+        JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir);
     }
 
     private void launch(JkBuild build, PluginDictionnary<JkBuildPlugin> dictionnary, CommandLine commandLine) {
-
 
         // Now run projects
         if (!commandLine.getSubProjectMethods().isEmpty()) {
@@ -243,11 +237,12 @@ final class Project {
     private static void runProject(JkBuild build, List<MethodInvocation> invokes,
             PluginDictionnary<JkBuildPlugin> dictionnary) {
         JkLog.infoHeaded("Executing build for project " + build.baseDir().root().getName());
-        JkLog.info("Build class " + build.getClass().getName());
+        JkLog.info("Build class : " + build.getClass().getName());
         JkLog.info("Activated plugins : " + build.plugins.getActives());
-        final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector
-                .injectedFields(build));
-        JkInit.logProps("Field values", displayedOptions);
+        final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
+        if (JkLog.verbose()) {
+            JkInit.logProps("Field values", displayedOptions);
+        }
         build.execute(toBuildMethods(invokes, dictionnary), null);
     }
 
@@ -256,8 +251,8 @@ final class Project {
         final List<JkModelMethod> jkModelMethods = new LinkedList<JkModelMethod>();
         for (final MethodInvocation methodInvokation : invocations) {
             if (methodInvokation.isMethodPlugin()) {
-                final Class<? extends JkBuildPlugin> clazz = dictionnary.loadByNameOrFail(
-                        methodInvokation.pluginName).pluginClass();
+                final Class<? extends JkBuildPlugin> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName)
+                        .pluginClass();
                 jkModelMethods.add(JkModelMethod.pluginMethod(clazz, methodInvokation.methodName));
             } else {
                 jkModelMethods.add(JkModelMethod.normal(methodInvokation.methodName));
@@ -271,8 +266,7 @@ final class Project {
         if (!resolver.buildClassDir.exists()) {
             resolver.buildClassDir.mkdirs();
         }
-        return JkJavaCompiler.outputtingIn(resolver.buildClassDir).andSources(buildSource)
-                .failOnError(true);
+        return JkJavaCompiler.outputtingIn(resolver.buildClassDir).andSources(buildSource).failOnError(true);
     }
 
     private JkDependencyResolver getBuildDefDependencyResolver() {
@@ -289,10 +283,9 @@ final class Project {
     }
 
     static JkRepos repos() {
-        return JkRepo.firstNonNull(
-                JkBuildDependencySupport.repoFromOptions("build"),
-                JkBuildDependencySupport.repoFromOptions("download"),
-                JkRepo.mavenCentral())
+        return JkRepo
+                .firstNonNull(JkBuildDependencySupport.repoFromOptions("build"),
+                        JkBuildDependencySupport.repoFromOptions("download"), JkRepo.mavenCentral())
                 .and(JkBuildDependencySupport.mavenPublishLocal());
     }
 

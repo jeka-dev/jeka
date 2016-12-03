@@ -38,6 +38,10 @@ public final class JkUtilsString {
         }
         return builder.toString();
     }
+    
+    public static int parseInt(String intString) {
+        return Integer.parseInt(intString);
+    }
 
     /**
      * Returns the specified string but upper-casing its first character.

@@ -141,7 +141,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * Returns the Java target version for the compiler (as "1.4", 1.6", "7", "8", ...).
      * By default it returns the same version as {@link #javaSourceVersion()}.
      */
-    public String javaTargerVersion() {
+    public String javaTargetVersion() {
         return javaSourceVersion();
     }
 
@@ -254,7 +254,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         return JkJavaCompiler.outputtingIn(classDir()).andSources(sources())
                 .withClasspath(depsFor(COMPILE, PROVIDED))
                 .withSourceVersion(this.javaSourceVersion())
-                .withTargetVersion(this.javaTargerVersion())
+                .withTargetVersion(this.javaTargetVersion())
                 .forkedIfNeeded(JkOptions.getAll());
     }
 
@@ -265,7 +265,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         return JkJavaCompiler.outputtingIn(testClassDir()).andSources(unitTestSources())
                 .withClasspath(this.depsFor(TEST, PROVIDED).andHead(classDir()))
                 .withSourceVersion(this.javaSourceVersion())
-                .withTargetVersion(this.javaTargerVersion())
+                .withTargetVersion(this.javaTargetVersion())
                 .forkedIfNeeded(JkOptions.getAll());
     }
 

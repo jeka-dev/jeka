@@ -89,7 +89,8 @@ final class IvyResolver implements InternalDepResolver {
     public JkResolveResult resolveAnonymous(JkDependencies deps, JkScope resolvedScope,
             JkResolutionParameters parameters, JkVersionProvider tranditiveVersionOverride) {
         final JkVersionedModule anonymous = anonymousVersionedModule();
-        final JkResolveResult result = resolve(anonymous, deps, resolvedScope, parameters, tranditiveVersionOverride);
+        final JkResolveResult result = resolve(anonymous, deps, resolvedScope, parameters,
+                tranditiveVersionOverride);
         deleteResolveCache(anonymous);
         return result;
     }
@@ -109,6 +110,9 @@ final class IvyResolver implements InternalDepResolver {
         resolveOptions.setLog(logLevel());
         resolveOptions.setRefresh(parameters.refreshed());
         resolveOptions.setCheckIfChanged(true);
+        if (resolvedScope == null) {   // if scope == null verbose ivy report turns in exception
+            resolveOptions.setOutputReport(false);
+        }
         final ResolveReport report;
         try {
             report = ivy.resolve(moduleDescriptor, resolveOptions);

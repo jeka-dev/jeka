@@ -205,7 +205,11 @@ public class JkBuildDependencySupport extends JkBuild {
             JkLog.startln("Setting dependency resolver ");
             cachedResolver = JkBuildPlugin.applyDependencyResolver(plugins.getActives(),
                     createDependencyResolver());
-            JkLog.done("Resolver set " + cachedResolver);
+            if (JkLog.verbose()) {
+                JkLog.done("Resolver set " + cachedResolver);
+            } else {
+                JkLog.done();
+            }
         }
         return cachedResolver;
     }

@@ -18,7 +18,7 @@ import org.jerkar.api.utils.JkUtilsSystem;
 
 /**
  * Offers fluent interface for launching Java processes.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkJavaProcess {
@@ -80,11 +80,11 @@ public final class JkJavaProcess {
         }
         if (!agentLib.exists()) {
             throw new IllegalArgumentException("agentLib " + agentLib.getAbsolutePath()
-                    + " not found.");
+            + " not found.");
         }
         if (!agentLib.isFile()) {
             throw new IllegalArgumentException("agentLib " + agentLib.getAbsolutePath()
-                    + " is a directory, should be a file.");
+            + " is a directory, should be a file.");
         }
         final List<AgentLibAndOption> list = new ArrayList<JkJavaProcess.AgentLibAndOption>(
                 this.agents);
@@ -241,7 +241,12 @@ public final class JkJavaProcess {
             command.add(jar.getPath());
         }
         command.addAll(Arrays.asList(arguments));
-        JkLog.startln("Starting java program : " + command.toString());
+        JkLog.startln("Starting java program : ");
+        if (JkLog.verbose()) {
+            JkLog.info(command);
+        } else {
+            JkLog.info(runningJavaCommand());
+        }
         final int result;
         try {
             final Process process = processBuilder(command, optionAndEnv.env).start();
@@ -279,7 +284,7 @@ public final class JkJavaProcess {
         }
         for (final AgentLibAndOption agentLibAndOption : agents) {
             final StringBuilder builder = new StringBuilder("-javaagent:")
-            .append(agentLibAndOption.lib);
+                    .append(agentLibAndOption.lib);
             if (!JkUtilsString.isBlank(agentLibAndOption.options)) {
                 builder.append("=" + agentLibAndOption.options);
             }

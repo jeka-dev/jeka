@@ -228,10 +228,11 @@ public final class JkDependencyResolver {
         if (result != null) {
             return result;
         }
+        JkLog.trace("Preparing to resolve dependencies for module " + module);
         if (scope != null) {
             JkLog.startln("Resolving dependencies for scope '" + scope.name() + "'");
         } else {
-            JkLog.startln("Resolving dependencies");
+            JkLog.startln("Resolving dependencies witout specified scope");
         }
 
         final JkResolveResult resolveResult;
@@ -243,8 +244,11 @@ public final class JkDependencyResolver {
                     parameters, transitiveVersionOverride);
         }
         cachedResolveResult.put(cachedScope, resolveResult);
-        JkLog.info(resolveResult.involvedModules().size() + " artifacts: "
-                + resolveResult.involvedModules());
+        if (JkLog.verbose()) {
+            JkLog.info(resolveResult.involvedModules().size() + " artifacts: " + resolveResult.involvedModules());
+        } else {
+            JkLog.info(resolveResult.involvedModules().size() + " artifacts.");
+        }
         JkLog.done();
         return resolveResult;
     }

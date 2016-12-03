@@ -31,6 +31,12 @@ public final class JkUtilsJdk {
     public static String runningJavaVersion() {
         final String fullVersion = System.getProperty("java.version");
         final int index = fullVersion.lastIndexOf(".");
+        final String candidate = fullVersion.substring(0, index);
+        final String plainVersion = JkUtilsString.substringAfterLast(candidate, ".");
+        final int version = Integer.parseInt(plainVersion);
+        if (version >= 7) {
+            return plainVersion;
+        }
         return fullVersion.substring(0, index);
     }
 
