@@ -343,15 +343,16 @@ public final class JkJavaCompiler {
             return this;
         }
         if (this.versionCache.equals(currentJdkSourceVersion())) {
-            JkLog.info("Current JDK matches with source version (" + versionCache + "). Don't fork.");
+            JkLog.info("Current JDK matches with source version (" + versionCache + "). Don't need to fork.");
             return this;
         }
         final String key = "jdk." + versionCache;
         final String path = jdkLocations.get(key);
         if (path == null) {
-            JkLog.warn("Current JDK does not match with source version " + versionCache
-                    + ". No exact matching JDK found for version " + versionCache + ". Will use the current one which is version "
-                    + currentJdkSourceVersion() + ".");
+            JkLog.warn("Current JDK does not match with source version " + versionCache + ".",
+                    " No exact matching JDK found for version " + versionCache + ".",
+                    " Will use the current one which is version " + currentJdkSourceVersion() + ".",
+                    " Pass option -jdk." + versionCache + "=[JDK location] to specify the JDK to use for Java version " + versionCache);
             return this;
         }
         final String cmd = path + "/bin/javac";

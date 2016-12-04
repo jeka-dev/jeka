@@ -56,11 +56,14 @@ final class IvyResolver implements InternalDepResolver {
 
     static Ivy ivy(IvySettings ivySettings) {
         final Ivy ivy = new Ivy();
+        ivy.getLoggerEngine().popLogger();
         ivy.getLoggerEngine().setDefaultLogger(new IvyMessageLogger());
         ivy.getLoggerEngine().setShowProgress(JkLog.verbose());
-        if (IvyContext.getContext().peekIvy() == null) {
-            IvyContext.getContext().setIvy(ivy);
-        }
+        ivy.getLoggerEngine().clearProblems();
+
+        //if (IvyContext.getContext().peekIvy() == null) {
+        IvyContext.getContext().setIvy(ivy);
+        //}
         ivy.setSettings(ivySettings);
         ivy.bind();
         URLHandlerRegistry.setDefault(new IvyFollowRedirectUrlHandler());

@@ -225,6 +225,18 @@ public final class JkLog {
     }
 
     /**
+     * Displays multi-line message truncating lines if exceed the specified length
+     */
+    public static void info(Iterable<String> lines, int maxLength) {
+        if (silent) {
+            return;
+        }
+        for (final String line : lines) {
+            infoWriter.println(JkUtilsString.elipse(line, maxLength));
+        }
+    }
+
+    /**
      * Displays multi-line message.
      */
     public static void info(String... lines) {
@@ -244,6 +256,16 @@ public final class JkLog {
         for (final String line : lines) {
             warn(line);
         }
+    }
+
+    /**
+     * Displays a multi-line message at warn level.
+     */
+    public static void warn(String ... lines) {
+        if (silent) {
+            return;
+        }
+        warn(Arrays.asList(lines));
     }
 
     /**

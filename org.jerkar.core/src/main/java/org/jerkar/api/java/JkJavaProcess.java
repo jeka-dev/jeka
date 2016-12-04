@@ -242,11 +242,7 @@ public final class JkJavaProcess {
         }
         command.addAll(Arrays.asList(arguments));
         JkLog.startln("Starting java program : ");
-        if (JkLog.verbose()) {
-            JkLog.info(command);
-        } else {
-            JkLog.info(runningJavaCommand());
-        }
+        JkLog.info(command, JkLog.verbose() ? -1 : 120);
         final int result;
         try {
             final Process process = processBuilder(command, optionAndEnv.env).start();

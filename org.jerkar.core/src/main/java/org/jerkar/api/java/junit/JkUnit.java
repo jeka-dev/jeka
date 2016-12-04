@@ -318,19 +318,22 @@ public final class JkUnit {
         }
         final long start = System.nanoTime();
         final JkClassLoader classLoader = JkClassLoader.of(classes.iterator().next());
-        JkLog.startln("Run JUnit tests");
+
 
         final JkTestSuiteResult result;
 
         if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
             if (this.forkedProcess != null) {
+                JkLog.startln("Run JUnit tests in forked mode");
                 result = JUnit4TestLauncher.launchInFork(forkedProcess, printOutputOnConsole,
                         reportDetail, classes, reportDir);
             } else {
+                JkLog.startln("Run JUnit tests");
                 result = JUnit4TestLauncher.launchInClassLoader(classes, printOutputOnConsole,
                         reportDetail, reportDir);
             }
         } else if (classLoader.isDefined(JUNIT3_RUNNER_CLASS_NAME)) {
+            JkLog.startln("Run JUnit tests");
             final Object suite = createJunit3TestSuite(classLoader, classes);
             final Class testResultClass = classLoader.load(JUNIT3_TEST_RESULT_CLASS_NAME);
             final Object testResult = JkUtilsReflect.newInstance(testResultClass);

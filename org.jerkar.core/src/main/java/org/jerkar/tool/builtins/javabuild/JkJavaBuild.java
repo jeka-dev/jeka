@@ -10,6 +10,7 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkFileSystemDependency;
 import org.jerkar.api.depmanagement.JkIvyPublication;
 import org.jerkar.api.depmanagement.JkMavenPublication;
+import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopeMapping;
 import org.jerkar.api.depmanagement.JkVersionProvider;
@@ -371,7 +372,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         }
         final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
         codeWriter.extendedClass = "JkJavaBuild";
-        codeWriter.dependencies = JkDependencies.builder().build();
+        codeWriter.dependencies = JkDependencies.builder().on(JkPopularModules.JUNIT, "4.11").scope(TEST).build();
         codeWriter.imports.clear();
         codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsForJkJavaBuild());
         codeWriter.staticImports.addAll(JkCodeWriterForBuildClass.staticImportsForJkJavaBuild());

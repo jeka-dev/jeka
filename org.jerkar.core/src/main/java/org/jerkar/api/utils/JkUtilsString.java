@@ -38,7 +38,7 @@ public final class JkUtilsString {
         }
         return builder.toString();
     }
-    
+
     public static int parseInt(String intString) {
         return Integer.parseInt(intString);
     }
@@ -313,7 +313,7 @@ public final class JkUtilsString {
      * string is longer than the specified max length. Otherwise the specified string is returned as is.
      */
     public static String elipse(String string, int max) {
-        if (string.length() <= max) {
+        if (string.length() <= max || max < 0) {
             return string;
         }
         return string.substring(0, max) + "...";

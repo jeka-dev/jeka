@@ -33,7 +33,7 @@ class IvyMessageLogger extends AbstractMessageLogger {
 
     @Override
     public void rawlog(String msg, int level) {
-        log(msg, level);
+        this.log(msg, level);
     }
 
     @Override
