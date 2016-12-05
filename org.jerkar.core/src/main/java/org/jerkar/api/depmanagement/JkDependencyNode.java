@@ -1,22 +1,23 @@
 package org.jerkar.api.depmanagement;
 
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 
 public class JkDependencyNode {
 
     private final JkVersionedModule module;
 
-    private final List<JkScopedDependency> children = new LinkedList<JkScopedDependency>();
+    private final List<JkDependencyNode> children;
 
-    public JkDependencyNode(JkVersionedModule module) {
+    public JkDependencyNode(JkVersionedModule module, List<JkDependencyNode> children) {
         super();
         this.module = module;
+        this.children = Collections.unmodifiableList(children);
     }
 
-    void addChild(JkScopedDependency dependency) {
-        this.children.add(dependency);
-    }
+
+
+
 
 
 

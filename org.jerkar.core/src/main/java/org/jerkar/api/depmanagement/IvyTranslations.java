@@ -25,7 +25,6 @@ import org.apache.ivy.core.module.descriptor.OverrideDependencyDescriptorMediato
 import org.apache.ivy.core.module.id.ArtifactId;
 import org.apache.ivy.core.module.id.ModuleId;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
-import org.apache.ivy.core.resolve.IvyNode;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.matcher.ExactOrRegexpPatternMatcher;
 import org.apache.ivy.plugins.matcher.ExactPatternMatcher;
@@ -530,10 +529,5 @@ final class IvyTranslations {
         return new DefaultArtifact(moduleId, date, artifactName, type, extension, extraMap);
     }
 
-    public static JkDependencyNode toJkDependencyNode(IvyNode ivyNode) {
-        final JkVersionedModule module = toJkVersionedModule(ivyNode.getId());
-        final JkDependencyNode result = new JkDependencyNode(module);
-        return result;
-    }
 
 }

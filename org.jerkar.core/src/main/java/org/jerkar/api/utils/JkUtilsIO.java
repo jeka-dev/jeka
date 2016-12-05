@@ -34,7 +34,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * Utility class for dealing with Inputs/Outputs.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkUtilsIO {
@@ -68,7 +68,9 @@ public final class JkUtilsIO {
     public static void closeQuietly(Closeable... closeables) {
         for (final Closeable closeable : closeables) {
             try {
-                closeable.close();
+                if (closeable != null) {
+                    closeable.close();
+                }
             } catch (final Exception e) {
                 // Ignored
             }
@@ -253,8 +255,7 @@ public final class JkUtilsIO {
         final File result = new File(cacheDir, name);
         if (result.exists()) {
             if (report != null) {
-                report.println("Url " + url.toExternalForm()
-                        + " transformed to file by reading existing cached file "
+                report.println("Url " + url.toExternalForm() + " transformed to file by reading existing cached file "
                         + result.getAbsolutePath());
             }
             return result;
@@ -358,8 +359,7 @@ public final class JkUtilsIO {
             input = new ObjectInputStream(buffer) {
 
                 @Override
-                protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException,
-                ClassNotFoundException {
+                protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
 
                     final String name = desc.getName();
                     try {
@@ -468,8 +468,7 @@ public final class JkUtilsIO {
     }
 
     /* table mapping primitive type names to corresponding class objects */
-    private static final HashMap<String, Class<?>> primClasses = new HashMap<String, Class<?>>(8,
-            1.0F);
+    private static final HashMap<String, Class<?>> primClasses = new HashMap<String, Class<?>>(8, 1.0F);
 
     static {
         primClasses.put("boolean", boolean.class);

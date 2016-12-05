@@ -237,6 +237,7 @@ final class IvyResolver implements InternalDepResolver {
 
     private static class TreeResolver {
 
+        // parent to childfreen map
         private final Map<JkModuleId, List<JkVersionedModule>> map = new HashMap<JkModuleId, List<JkVersionedModule>>();
 
         void populate(Iterable<IvyNode> nodes, String confs) {
@@ -258,6 +259,19 @@ final class IvyResolver implements InternalDepResolver {
                 }
 
             }
+        }
+
+        JkDependencyNode createNode(JkVersionedModule module) {
+            final JkModuleId moduleId = module.moduleId();
+            if (map.get(moduleId) == null) {
+                return new JkDependencyNode(module, new LinkedList<JkDependencyNode>());
+            }
+            final List<JkDependencyNode> list = new LinkedList<JkDependencyNode>();
+            for (final JkVersionedModule versionedModule : map.get(module)) {
+                final JkDependencyNode child = createNode(versionedModule);
+                list.add(child);
+            }
+            return new JkDependencyNode(module, list);
         }
 
     }
