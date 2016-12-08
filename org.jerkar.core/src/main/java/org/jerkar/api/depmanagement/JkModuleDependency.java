@@ -19,7 +19,7 @@ import org.jerkar.api.utils.JkUtilsString;
  * <p/>
  * You can also define exclusions on module dependencies so artifact or entire
  * module won't be catch up by the dependency manager.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkModuleDependency extends JkDependency {
@@ -40,13 +40,20 @@ public final class JkModuleDependency extends JkDependency {
     }
 
     /**
-     * Creates a {@link JkModuleDependency} from its moduleId and
+     * Creates a {@link JkModuleDependency} from the specified moduleId and
      * <code>JkVersionrange</code>.
      */
     @SuppressWarnings("unchecked")
     public static JkModuleDependency of(JkModuleId moduleId, JkVersionRange versionRange) {
         return new JkModuleDependency(moduleId, versionRange, null, true, null,
                 Collections.EMPTY_LIST);
+    }
+
+    /**
+     * Creates a {@link JkModuleDependency} from the specified versioned module.
+     */
+    public static JkModuleDependency of(JkVersionedModule versionedModule) {
+        return of(versionedModule.moduleId(), versionedModule.version().name());
     }
 
     /**
@@ -230,7 +237,7 @@ public final class JkModuleDependency extends JkDependency {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "=" + module + ":" + versionRange;
+        return module + ":" + versionRange;
     }
 
     private static class NameComparator implements Comparator<JkModuleDependency> {

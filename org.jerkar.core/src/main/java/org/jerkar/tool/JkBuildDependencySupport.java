@@ -5,6 +5,7 @@ import java.io.File;
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyExclusions;
+import org.jerkar.api.depmanagement.JkDependencyNode;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkPublishRepos;
@@ -12,6 +13,7 @@ import org.jerkar.api.depmanagement.JkPublisher;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkResolutionParameters;
+import org.jerkar.api.depmanagement.JkResolveResult;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopeMapping;
 import org.jerkar.api.depmanagement.JkVersion;
@@ -212,6 +214,15 @@ public class JkBuildDependencySupport extends JkBuild {
             }
         }
         return cachedResolver;
+    }
+
+    /**
+     * Display the dependency tree on the console
+     */
+    public final void dependencyTree() {
+        final JkResolveResult resolveResult = this.dependencyResolver().resolve();
+        final JkDependencyNode tree = resolveResult.dependencyTree();
+        JkLog.info(tree.toStrings());
     }
 
     /**

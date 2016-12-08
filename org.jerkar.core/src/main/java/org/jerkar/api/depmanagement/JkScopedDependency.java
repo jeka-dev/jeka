@@ -12,10 +12,10 @@ import org.jerkar.api.utils.JkUtilsIterable;
 /**
  * A dependency along a scope information to specify for wich purpose it should be used.
  * A scoped dependency can be declared either with {@link JkScope}s nor {@link JkScopeMapping}.
- * 
+ *
  * Jerkar uses Ivy under the hood for dependency resolution. Internally {@link JkScope} are turned to Ivy 'configuration'
  * and {@link JkScopeMapping} are turned to Ivy 'configurationMapping'.
- * 
+ *
  * To understand how scope and mapping scope influence resolution, you can visit <a href="http://ant.apache.org/ivy/history/latest-milestone/ivyfile/configurations.html">this page</a>.
  */
 public final class JkScopedDependency implements Serializable {
@@ -189,8 +189,8 @@ public final class JkScopedDependency implements Serializable {
 
     @Override
     public String toString() {
-        return dependency.toString() + "[" + (scopeMapping != null ? scopeMapping.toString() : "")
-                + ((scopes == null || scopes.isEmpty()) ? "" : scopes.toString()) + "]";
+        return dependency.toString() + (scopeMapping != null ? scopeMapping.toString() : "")
+                + ((scopes == null || scopes.isEmpty()) ? "[]" : scopes.toString());
     }
 
 }

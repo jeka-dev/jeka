@@ -107,7 +107,7 @@ public final class JkDependencyResolver {
      */
     public JkResolveResult resolve(JkScope... scopes) {
         if (internalResolver == null) {
-            return JkResolveResult.empty();
+            return JkResolveResult.empty(this.module);
         }
         final Set<JkScope> scopesSet = new HashSet<JkScope>();
         for (final JkScope scope : scopes) {
@@ -118,7 +118,7 @@ public final class JkDependencyResolver {
             scopesSet.add(scope);
             scopesSet.addAll(scope.ancestorScopes());
         }
-        JkResolveResult resolveResult = JkResolveResult.empty();
+        JkResolveResult resolveResult = JkResolveResult.empty(module);
         for (final JkScope scope : scopesSet) {
             resolveResult = resolveResult.and(getResolveResult(scope, this.transitiveVersionOverride));
         }
@@ -197,7 +197,7 @@ public final class JkDependencyResolver {
         if (scopes.length == 0) {
             return this.getResolveResult(null, this.transitiveVersionOverride);
         }
-        JkResolveResult result = JkResolveResult.empty();
+        JkResolveResult result = JkResolveResult.empty(this.module);
         for (final JkScope scope : scopes) {
             result = result.and(this.getResolveResult(scope, this.transitiveVersionOverride));
         }

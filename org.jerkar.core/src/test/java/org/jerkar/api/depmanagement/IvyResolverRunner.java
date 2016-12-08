@@ -1,12 +1,16 @@
 package org.jerkar.api.depmanagement;
 
+import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
+import static org.jerkar.api.depmanagement.JkPopularModules.SPRING_JDBC;
 import static org.jerkar.api.depmanagement.JkScopedDependencyTest.COMPILE;
+import static org.jerkar.api.depmanagement.JkScopedDependencyTest.TEST;
 
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.jerkar.api.system.JkLog;
+import org.jerkar.tool.JkOptions;
 
 /**
  * @formatter:off
@@ -15,17 +19,18 @@ import org.jerkar.api.system.JkLog;
 public class IvyResolverRunner {
 
     static final JkRepos REPOS = JkRepos
-            .maven("http://i-net1102e-prod:8081/nexus/content/groups/bnppf-secured/");
+            .maven(JkOptions.get("repo.download.url"));
 
     // private static final JkRepos REPOS = JkRepos.mavenCentral();
 
     public static void main(String[] args) {
-        JkLog.verbose(false);
-        // spring();
-        hibernate();
+        JkLog.verbose(true);
+        //spring();
+        // hibernate();
         // jogl();
         // joglWithSource();
         // testPublishIvy();
+        springJdbc();
     }
 
     public static void spring() {
@@ -97,6 +102,22 @@ public class IvyResolverRunner {
         final Set<JkModuleDepFile> noExistArtifactSet = result.getArtifacts(
                 JkModuleId.of("org.apache.wicket", "wicket-ioc"), JkScope.of("noexist"));
         System.out.println(noExistArtifactSet);
+    }
+
+    public static void springJdbc() {
+        final JkDependencies deps = JkDependencies.builder()
+                .on(SPRING_JDBC, "5.0.0.M3", COMPILE)
+                .on(JUNIT, "4.12", TEST)
+                .build();
+        //.withDefaultScope(COMPILE);
+        //.withExclusions(JkDependencyExclusions.builder().on(SPRING_JDBC, "commons-logging","commons-logging").build());
+        final InternalDepResolver ivyResolver = IvyResolver.of(REPOS);
+        final JkResolveResult resolveResult1 = ivyResolver.resolveAnonymous(deps, TEST, JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
+        final JkResolveResult resolveResult2 = ivyResolver.resolveAnonymous(deps, COMPILE, JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
+        System.out.println("----------------------------------------------");
+        JkLog.info("------------------------------------------------------");
+
+        JkLog.info(resolveResult1.and(resolveResult2).dependencyTree().toStrings());
     }
 
 }

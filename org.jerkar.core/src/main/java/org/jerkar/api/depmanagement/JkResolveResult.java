@@ -27,33 +27,36 @@ public final class JkResolveResult implements Serializable {
      * Creates an empty {@link JkResolveResult}
      */
     @SuppressWarnings("unchecked")
-    public static JkResolveResult empty() {
-        return of(Collections.EMPTY_LIST);
+    public static JkResolveResult empty(JkVersionedModule versionedModule) {
+        return of(Collections.EMPTY_LIST, new JkDependencyNode(null, new LinkedList<JkDependencyNode>()));
     }
 
     /**
      * Creates a dependency resolve result object form a list of module dependency files and a list of resolved versions.
      */
     public static JkResolveResult of(List<JkModuleDepFile> artifacts,
-            JkVersionProvider jkVersionProvider) {
-        return new JkResolveResult(artifacts, jkVersionProvider);
+            JkVersionProvider jkVersionProvider, JkDependencyNode depTree) {
+        return new JkResolveResult(artifacts, jkVersionProvider, depTree);
     }
 
     /**
      * Creates a dependency resolve result object form a list of module dependency files.
      */
-    public static JkResolveResult of(List<JkModuleDepFile> artifacts) {
-        return new JkResolveResult(artifacts, JkVersionProvider.empty());
+    private static JkResolveResult of(List<JkModuleDepFile> artifacts, JkDependencyNode dependencyTree) {
+        return new JkResolveResult(artifacts, JkVersionProvider.empty(), dependencyTree);
     }
 
     private final List<JkModuleDepFile> jkModuleDepFiles;
 
     private final JkVersionProvider jkVersionProvider;
 
-    private JkResolveResult(List<JkModuleDepFile> artifacts, JkVersionProvider jkVersionProvider) {
+    private final JkDependencyNode depTree;
+
+    private JkResolveResult(List<JkModuleDepFile> artifacts, JkVersionProvider jkVersionProvider, JkDependencyNode depTree) {
         super();
         this.jkModuleDepFiles = artifacts;
         this.jkVersionProvider = jkVersionProvider;
+        this.depTree = depTree;
     }
 
     /**
@@ -109,7 +112,14 @@ public final class JkResolveResult implements Serializable {
         artifacts.addAll(other.jkModuleDepFiles);
         final JkVersionProvider jkVersionProvider = this.jkVersionProvider
                 .and(other.jkVersionProvider);
-        return new JkResolveResult(artifacts, jkVersionProvider);
+        return new JkResolveResult(artifacts, jkVersionProvider, this.depTree.merge(other.depTree));
+    }
+
+    /**
+     * Returns the dependency tree for this dependency resolution.
+     */
+    public JkDependencyNode dependencyTree() {
+        return this.depTree;
     }
 
 }

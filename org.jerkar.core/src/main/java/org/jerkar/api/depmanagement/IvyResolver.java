@@ -2,10 +2,12 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.IvyContext;
@@ -27,6 +29,7 @@ import org.apache.ivy.util.url.URLHandlerRegistry;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsObject;
+import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
 /**
@@ -98,6 +101,7 @@ final class IvyResolver implements InternalDepResolver {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public JkResolveResult resolve(JkVersionedModule module, JkDependencies deps, JkScope resolvedScope,
             JkResolutionParameters parameters, JkVersionProvider tranditiveVersionOverride) {
@@ -130,9 +134,10 @@ final class IvyResolver implements InternalDepResolver {
             throw new IllegalStateException("Errors while resolving dependencies : " + report.getAllProblemMessages());
         }
         final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
-        JkResolveResult resolveResult = JkResolveResult.empty();
-        for (final String conf : resolveOptions.getConfs(moduleDescriptor)) {
-            final JkResolveResult confResult = getResolveConf(conf, artifactDownloadReports, deps);
+        JkResolveResult resolveResult = JkResolveResult.empty(module);
+        final String[] allConfs = resolveOptions.getConfs(moduleDescriptor);
+        for (final String conf : allConfs) {
+            final JkResolveResult confResult = getResolveConf(conf, artifactDownloadReports, deps, report.getDependencies(), module);
             resolveResult = resolveResult.and(confResult);
         }
         return resolveResult;
@@ -199,7 +204,9 @@ final class IvyResolver implements InternalDepResolver {
     }
 
     private static JkResolveResult getResolveConf(String config, ArtifactDownloadReport[] artifactDownloadReports,
-            JkDependencies deps) {
+            JkDependencies deps, List<IvyNode> nodes, JkVersionedModule rootVersionedModule) {
+
+        // Get module dependency files
         final List<JkModuleDepFile> moduleDepFiles = new LinkedList<JkModuleDepFile>();
         JkVersionProvider versionProvider = JkVersionProvider.empty();
         for (final ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
@@ -216,7 +223,15 @@ final class IvyResolver implements InternalDepResolver {
                 }
             }
         }
-        return JkResolveResult.of(moduleDepFiles, versionProvider);
+
+        // Compute dependency tree
+        final TreeResolver treeResolver = new TreeResolver();
+        treeResolver.populate(nodes, config);
+        final JkModuleDependency moduleDependency = JkModuleDependency.of(rootVersionedModule);
+        final JkScopedDependency scopedDependency = JkScopedDependency.of(moduleDependency, toScopes(config));
+        final JkDependencyNode tree = treeResolver.createNode(scopedDependency);
+
+        return JkResolveResult.of(moduleDepFiles, versionProvider, tree);
     }
 
     static JkVersionedModule anonymousVersionedModule() {
@@ -237,8 +252,8 @@ final class IvyResolver implements InternalDepResolver {
 
     private static class TreeResolver {
 
-        // parent to childfreen map
-        private final Map<JkModuleId, List<JkVersionedModule>> map = new HashMap<JkModuleId, List<JkVersionedModule>>();
+        // parent to children map
+        private final Map<JkModuleId, List<JkScopedDependency>> map = new HashMap<JkModuleId, List<JkScopedDependency>>();
 
         void populate(Iterable<IvyNode> nodes, String confs) {
             for (final IvyNode node : nodes) {
@@ -246,38 +261,57 @@ final class IvyResolver implements InternalDepResolver {
                     continue;
                 }
                 final JkVersionedModule currentModule = toJkVersionedModule(node);
+                final JkDependency currentDep = JkModuleDependency.of(currentModule);
+                final Set<JkScope> scopes = IvyTranslations.toJkScopes(node.getRequiredConfigurations());
+                final JkScopedDependency scopedDependency = JkScopedDependency.of(currentDep, scopes);
+
                 final Caller[] callers = node.getAllCallers();
-                for (int i = 0; i <= callers.length; i++) {
-                    final Caller caller = callers[i];
+                for (final Caller caller : callers) {
                     final JkVersionedModule parent = IvyTranslations.toJkVersionedModule(caller.getModuleRevisionId());
-                    List<JkVersionedModule> list = map.get(parent.moduleId());
+                    List<JkScopedDependency> list = map.get(parent.moduleId());
                     if (list == null) {
-                        list = new LinkedList<JkVersionedModule>();
+                        list = new LinkedList<JkScopedDependency>();
                         map.put(parent.moduleId(), list);
                     }
-                    list.add(currentModule);
+                    list.add(scopedDependency);
                 }
 
             }
         }
 
-        JkDependencyNode createNode(JkVersionedModule module) {
-            final JkModuleId moduleId = module.moduleId();
+        JkDependencyNode createNode(JkScopedDependency dep) {
+            final JkModuleDependency moduleDependency = (JkModuleDependency) dep.dependency();
+            final JkModuleId moduleId = moduleDependency.moduleId();
             if (map.get(moduleId) == null) {
-                return new JkDependencyNode(module, new LinkedList<JkDependencyNode>());
+                return new JkDependencyNode(dep, new LinkedList<JkDependencyNode>());
+            }
+            List<JkScopedDependency> modules = map.get(moduleId);
+            if (modules == null) {
+                modules = new LinkedList<JkScopedDependency>();
             }
             final List<JkDependencyNode> list = new LinkedList<JkDependencyNode>();
-            for (final JkVersionedModule versionedModule : map.get(module)) {
+            for (final JkScopedDependency versionedModule : modules) {
                 final JkDependencyNode child = createNode(versionedModule);
                 list.add(child);
             }
-            return new JkDependencyNode(module, list);
+            return new JkDependencyNode(dep, list);
         }
+
+
 
     }
 
     private static JkVersionedModule toJkVersionedModule(IvyNode ivyNode) {
         return IvyTranslations.toJkVersionedModule(ivyNode.getId());
+    }
+
+    private static Set<JkScope> toScopes(String configParam) {
+        final String[] configs = JkUtilsString.split(configParam, ",");
+        final Set<JkScope> result = new HashSet<JkScope>();
+        for (final String config : configs) {
+            result.add(JkScope.of(config.trim()));
+        }
+        return result;
     }
 
 }

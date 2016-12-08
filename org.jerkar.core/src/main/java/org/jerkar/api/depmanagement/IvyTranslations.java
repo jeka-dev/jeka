@@ -529,5 +529,13 @@ final class IvyTranslations {
         return new DefaultArtifact(moduleId, date, artifactName, type, extension, extraMap);
     }
 
+    public static Set<JkScope> toJkScopes(String ...confs) {
+        final Set<JkScope> scopes = new HashSet<JkScope>();
+        for (final String conf : confs) {
+            scopes.add(JkScope.of(conf));
+        }
+        return scopes;
+    }
+
 
 }
