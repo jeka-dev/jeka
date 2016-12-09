@@ -226,7 +226,6 @@ final class IvyResolver implements InternalDepResolver {
 
         // Compute dependency tree
         final JkDependencyNode tree = createTree(nodes, config, rootVersionedModule);
-        System.out.println("------------------ tree form config " + config + " : " + tree);
         return JkResolveResult.of(moduleDepFiles, versionProvider, tree);
     }
 

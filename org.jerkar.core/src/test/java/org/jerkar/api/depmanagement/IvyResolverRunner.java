@@ -113,8 +113,7 @@ public class IvyResolverRunner {
         //.withExclusions(JkDependencyExclusions.builder().on(SPRING_JDBC, "commons-logging","commons-logging").build());
         final InternalDepResolver ivyResolver = IvyResolver.of(REPOS);
         final JkResolveResult resolveResult = ivyResolver.resolveAnonymous(deps, null, JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
-        System.out.println("----------------------------------------------");
-        JkLog.info("------------------------------------------------------");
+
 
         JkLog.info(resolveResult.dependencyTree().toStrings());
     }
