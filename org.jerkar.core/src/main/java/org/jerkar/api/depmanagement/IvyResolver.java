@@ -225,12 +225,8 @@ final class IvyResolver implements InternalDepResolver {
         }
 
         // Compute dependency tree
-        final TreeResolver treeResolver = new TreeResolver();
-        treeResolver.populate(nodes, config);
-        final JkModuleDependency moduleDependency = JkModuleDependency.of(rootVersionedModule);
-        final JkScopedDependency scopedDependency = JkScopedDependency.of(moduleDependency, toScopes(config));
-        final JkDependencyNode tree = treeResolver.createNode(scopedDependency);
-
+        final JkDependencyNode tree = createTree(nodes, config, rootVersionedModule);
+        System.out.println("------------------ tree form config " + config + " : " + tree);
         return JkResolveResult.of(moduleDepFiles, versionProvider, tree);
     }
 
@@ -248,6 +244,14 @@ final class IvyResolver implements InternalDepResolver {
                 typeAndExt, metadata);
         final ArtifactDownloadReport report = ivy.getResolveEngine().download(artifact, new DownloadOptions());
         return report.getLocalFile();
+    }
+
+    private static JkDependencyNode createTree(Iterable<IvyNode> nodes, String config, JkVersionedModule rootVersionedModule) {
+        final TreeResolver treeResolver = new TreeResolver();
+        treeResolver.populate(nodes, config);
+        final JkModuleDependency moduleDependency = JkModuleDependency.of(rootVersionedModule);
+        final JkScopedDependency scopedDependency = JkScopedDependency.of(moduleDependency, toScopes(config));
+        return treeResolver.createNode(scopedDependency);
     }
 
     private static class TreeResolver {
@@ -292,12 +296,26 @@ final class IvyResolver implements InternalDepResolver {
             final List<JkDependencyNode> list = new LinkedList<JkDependencyNode>();
             for (final JkScopedDependency versionedModule : modules) {
                 final JkDependencyNode child = createNode(versionedModule);
-                list.add(child);
+                if (!containsSameModuleId(list, child.root())) {
+                    list.add(child);
+                }
             }
             return new JkDependencyNode(dep, list);
         }
 
+        private static boolean containsSameModuleId(List<JkDependencyNode> dependencies, JkScopedDependency dependency) {
+            for (final JkDependencyNode node : dependencies) {
+                if (moduleId(node.root()).equals(moduleId(dependency))) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
+        private static JkModuleId moduleId(JkScopedDependency scopedDependency) {
+            final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency.dependency();
+            return moduleDependency.moduleId();
+        }
 
     }
 

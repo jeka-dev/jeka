@@ -21,7 +21,7 @@ public class JkDependencyNode implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final JkScopedDependency module;
+    private final JkScopedDependency root;
 
     private final List<JkDependencyNode> children;
 
@@ -31,25 +31,39 @@ public class JkDependencyNode implements Serializable {
      */
     public JkDependencyNode(JkScopedDependency module, List<JkDependencyNode> children) {
         super();
-        this.module = module;
+        this.root = module;
         this.children = Collections.unmodifiableList(children);
     }
+
+    /**
+     * Returns the root module of this dependency node.
+     */
+    public JkScopedDependency root() {
+        return root;
+    }
+
+    /**
+     * Returns the children nodes for this node in the tree structure.
+     */
+    public List<JkDependencyNode> children() {
+        return children;
+    }
+
 
     /**
      * Returns a merge of this dependency node with the specified one. The
      * children of the merged node is a union of the two node children.
      */
     public JkDependencyNode merge(JkDependencyNode other) {
-        System.out.println("---------------------------- merge " + this.module + " with " + other.module);
         final List<JkDependencyNode> list = new LinkedList<JkDependencyNode>(this.children);
         for (final JkDependencyNode otherNodeChild : other.children) {
-            final JkScopedDependency otherScopedDependencyChild = otherNodeChild.module;
+            final JkScopedDependency otherScopedDependencyChild = otherNodeChild.root;
             final JkModuleDependency moduleDependency = (JkModuleDependency) otherScopedDependencyChild.dependency();
             if (!directChildrenContains(moduleDependency.moduleId())) {
                 list.add(otherNodeChild);
             }
         }
-        return new JkDependencyNode(this.module, list);
+        return new JkDependencyNode(this.root, list);
     }
 
     private boolean directChildrenContains(JkModuleId moduleId) {
@@ -72,10 +86,10 @@ public class JkDependencyNode implements Serializable {
     private List<String> toStrings(boolean showRoot, int indentLevel, Set<JkModuleId> expandeds) {
         final List<String> result = new LinkedList<String>();
         if (showRoot) {
-            result.add(JkUtilsString.repeat(INDENT, indentLevel) + this.module);
+            result.add(JkUtilsString.repeat(INDENT, indentLevel) + this.root);
         }
-        if (this.module == null || !expandeds.contains(this.moduleId())) {
-            if (this.module != null) {
+        if (this.root == null || !expandeds.contains(this.moduleId())) {
+            if (this.root != null) {
                 expandeds.add(this.moduleId());
             }
             for (final JkDependencyNode child : children) {
@@ -86,13 +100,13 @@ public class JkDependencyNode implements Serializable {
     }
 
     private JkModuleId moduleId() {
-        final JkModuleDependency moduleDependency = (JkModuleDependency) this.module.dependency();
+        final JkModuleDependency moduleDependency = (JkModuleDependency) this.root.dependency();
         return moduleDependency.moduleId();
     }
 
     @Override
     public String toString() {
-        return this.module + " => " + this.children;
+        return JkUtilsString.join(this.toStrings(), "\n");
     }
 
 }
