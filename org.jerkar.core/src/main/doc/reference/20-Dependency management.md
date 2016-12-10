@@ -359,3 +359,6 @@ final JkDependencies deps = JkDependencies.builder()
 <b>Note :</b> You can use wild-card or regular expressions for both group and artifact name. In this case all matching dependencies will be excluded.
 </p>
 
+### Displaying dependency tree
+
+You can display the resolved dependency tree by running `jerkar showDependencies`. If you want to retrieve it programmatically, the tree structure is obtained using `JkResoveResult#dependencyTree()` which returns a `JkDependencyNode` standing for the dependency tree root.
