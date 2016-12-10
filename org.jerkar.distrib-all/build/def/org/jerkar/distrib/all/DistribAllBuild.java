@@ -26,6 +26,8 @@ class DistribAllBuild extends JkBuildDependencySupport {
 
     public boolean testSamples = false;
 
+    public boolean javadoc = true;
+
     @JkDoc("Construct a distrib assuming all dependent sub projects are already built.")
     public void distrib() {
 
@@ -52,12 +54,14 @@ class DistribAllBuild extends JkBuildDependencySupport {
         File fatSource = sourceDir.file("org.jerkar.core-all-sources.jar");
         JkZipper.of().merge(sourceDir.include("**.jar", "**.zip").exclude(fatSource.getName())).to(fatSource);
 
-        JkLog.info("Create a fat javadoc");
-        JkFileTreeSet sources = this.pluginsJacoco.core.sources().and(this.pluginsJacoco.sources())
-                .and(this.pluginsSonar.sources());
-        File javadocAllDir = this.ouputDir("javadoc-all");
-        File javadocAllFile = dist.file("libs-javadoc/org.jerkar.core-fat-javadoc.jar");
-        JkJavadocMaker.of(sources, javadocAllDir, javadocAllFile).process();
+        if (javadoc) {
+            JkLog.info("Create a fat javadoc");
+            JkFileTreeSet sources = this.pluginsJacoco.core.sources().and(this.pluginsJacoco.sources())
+                    .and(this.pluginsSonar.sources());
+            File javadocAllDir = this.ouputDir("javadoc-all");
+            File javadocAllFile = dist.file("libs-javadoc/org.jerkar.core-fat-javadoc.jar");
+            JkJavadocMaker.of(sources, javadocAllDir, javadocAllFile).process();
+        }
 
         JkLog.info("Pack all");
         dist.zip().to(ouputDir("jerkar-distrib.zip"));

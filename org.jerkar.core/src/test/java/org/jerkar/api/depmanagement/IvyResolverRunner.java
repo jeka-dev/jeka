@@ -1,7 +1,6 @@
 package org.jerkar.api.depmanagement;
 
 import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
-import static org.jerkar.api.depmanagement.JkPopularModules.SPRING_JDBC;
 import static org.jerkar.api.depmanagement.JkScopedDependencyTest.COMPILE;
 import static org.jerkar.api.depmanagement.JkScopedDependencyTest.TEST;
 
@@ -105,14 +104,14 @@ public class IvyResolverRunner {
 
     public static void springJdbc() {
         final JkDependencies deps = JkDependencies.builder()
-                .on(SPRING_JDBC, "+", COMPILE)
+                .on(JkPopularModules.APACHE_COMMONS_DBCP, "+")
                 .on(JUNIT, "+", TEST)
                 .build();
         //.withDefaultScope(COMPILE);
         //.withExclusions(JkDependencyExclusions.builder().on(SPRING_JDBC, "commons-logging","commons-logging").build());
         final InternalDepResolver ivyResolver = IvyResolver.of(REPOS);
         final JkResolveResult resolveResult = ivyResolver.resolveAnonymous(deps, null, JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
-
+        //final JkResolveResult resolveResult = ivyResolver.resolve(JkModuleId.of("popo.popo").version("1"),deps, null, JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
 
         JkLog.info(resolveResult.dependencyTree().toStrings());
     }

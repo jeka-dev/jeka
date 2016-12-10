@@ -28,7 +28,7 @@ This mode allows to build your project even if Jerkar is not installed on the ho
 
 * execute `java -cp build/boot/* org.jerkar.tool.Main` instead of `jerkar`.
 * or copy  ___[JERKAR_HOME]/jerkar.bat___ and ___[JERKAR_HOME]/jerkar___ at the root of your project
-* scaffold a project using `jerkar scaffold -scaffoldEmbed`. This will generate ___jerkarw.bat___ and ___jerkarw___ file at the root of your project along copying  ___[JERKAR_HOME]/org.jerkar.core.jar___ to ___[WORKING_DIR]/build/boot___. So you just have to execute `jerkarw`to run jerkar in embedded mode. 
+* scaffold a project using `jerkar scaffold -scaffoldEmbed`. This will generate ___jerkarw.bat___ and ___jerkarw___ file at the root of your project along copying  ___[JERKAR_HOME]/org.jerkar.core.jar___ to ___[WORKING_DIR]/build/boot___. So you just have to execute `jerkar` to run jerkar in embedded mode. 
 
 
 

@@ -104,7 +104,11 @@ public final class JkInit {
         JkLog.info("Working Directory : " + System.getProperty("user.dir"));
         JkLog.info("Java Home : " + System.getProperty("java.home"));
         JkLog.info("Java Version : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
-        JkLog.info("Jerkar Home : " + JkLocator.jerkarHome().getAbsolutePath());
+        if ( embedded(JkLocator.jerkarHome())) {
+            JkLog.info("Jerkar Home : " + bootDir() + " ( embedded !!! )");
+        } else {
+            JkLog.info("Jerkar Home : " + JkLocator.jerkarHome());
+        }
         JkLog.info("Jerkar User Home : " + JkLocator.jerkarUserHome().getAbsolutePath());
         JkLog.info("Jerkar Repository Cache : " + JkLocator.jerkarRepositoryCache());
         JkLog.info("Jerkar Classpath : " + System.getProperty("java.class.path"));
@@ -245,6 +249,14 @@ public final class JkInit {
                         + JkOptions.fieldOptionsToString(plugin));
             }
         }
+    }
+
+    private static boolean embedded(File jarFolder) {
+        return JkUtilsFile.isSame(bootDir(), jarFolder);
+    }
+
+    private static File bootDir() {
+        return new File("./build/boot");
     }
 
     private static class LoadResult {
