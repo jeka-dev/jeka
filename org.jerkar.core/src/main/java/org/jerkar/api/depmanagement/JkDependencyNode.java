@@ -86,7 +86,8 @@ public class JkDependencyNode implements Serializable {
     private List<String> toStrings(boolean showRoot, int indentLevel, Set<JkModuleId> expandeds) {
         final List<String> result = new LinkedList<String>();
         if (showRoot) {
-            result.add(JkUtilsString.repeat(INDENT, indentLevel) + this.root);
+            final String label = indentLevel == 0 ? this.root.toString() : this.root().dependency().toString();
+            result.add(JkUtilsString.repeat(INDENT, indentLevel) + label);
         }
         if (this.root == null || !expandeds.contains(this.moduleId())) {
             if (this.root != null) {

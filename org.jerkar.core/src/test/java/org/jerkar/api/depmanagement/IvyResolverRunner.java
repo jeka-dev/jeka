@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.tool.JkOptions;
 
 /**
  * @formatter:off
@@ -18,10 +17,10 @@ import org.jerkar.tool.JkOptions;
 @SuppressWarnings("javadoc")
 public class IvyResolverRunner {
 
-    static final JkRepos REPOS = JkRepos
-            .maven(JkOptions.get("repo.download.url"));
+    // static final JkRepos REPOS = JkRepos
+    //         .maven(JkOptions.get("repo.download.url"));
 
-    // private static final JkRepos REPOS = JkRepos.mavenCentral();
+    static final JkRepos REPOS = JkRepos.mavenCentral();
 
     public static void main(String[] args) {
         JkLog.verbose(true);
@@ -106,8 +105,8 @@ public class IvyResolverRunner {
 
     public static void springJdbc() {
         final JkDependencies deps = JkDependencies.builder()
-                .on(SPRING_JDBC, "5.0.0.M3", COMPILE)
-                .on(JUNIT, "4.12", TEST)
+                .on(SPRING_JDBC, "+", COMPILE)
+                .on(JUNIT, "+", TEST)
                 .build();
         //.withDefaultScope(COMPILE);
         //.withExclusions(JkDependencyExclusions.builder().on(SPRING_JDBC, "commons-logging","commons-logging").build());

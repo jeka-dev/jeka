@@ -34,7 +34,7 @@ import org.jerkar.api.utils.JkUtilsThrowable;
 
 /**
  * Jerkar users : This class is not part of the public API !!! Please, Use
- * {@link JkPublisher} instead. Ivy wrapper providing high level methods. The
+ * {@link JkDependencyResolver} instead. Ivy wrapper providing high level methods. The
  * API is expressed using Jerkar classes only (mostly free of Ivy classes).
  *
  * @author Jerome Angibaud
@@ -225,7 +225,7 @@ final class IvyResolver implements InternalDepResolver {
         }
 
         // Compute dependency tree
-        final JkDependencyNode tree = createTree(nodes, config, rootVersionedModule);
+        final JkDependencyNode tree = createTree(nodes, config, rootVersionedModule, versionProvider, deps);
         return JkResolveResult.of(moduleDepFiles, versionProvider, tree);
     }
 
@@ -245,18 +245,27 @@ final class IvyResolver implements InternalDepResolver {
         return report.getLocalFile();
     }
 
-    private static JkDependencyNode createTree(Iterable<IvyNode> nodes, String config, JkVersionedModule rootVersionedModule) {
-        final TreeResolver treeResolver = new TreeResolver();
+    private static JkDependencyNode createTree(Iterable<IvyNode> nodes, String config, JkVersionedModule rootVersionedModule, JkVersionProvider resolvedVersions, JkDependencies deps) {
+        final TreeResolver treeResolver = new TreeResolver(deps, resolvedVersions);
         treeResolver.populate(nodes, config);
         final JkModuleDependency moduleDependency = JkModuleDependency.of(rootVersionedModule);
         final JkScopedDependency scopedDependency = JkScopedDependency.of(moduleDependency, toScopes(config));
-        return treeResolver.createNode(scopedDependency);
+        return treeResolver.createNode(scopedDependency, true);
     }
 
     private static class TreeResolver {
 
         // parent to children map
         private final Map<JkModuleId, List<JkScopedDependency>> map = new HashMap<JkModuleId, List<JkScopedDependency>>();
+
+        private final JkVersionProvider versionProvider;
+
+        private final JkDependencies firstLevelDeps;
+
+        public TreeResolver(JkDependencies deps, JkVersionProvider versionProvider) {
+            this.versionProvider = versionProvider;
+            this.firstLevelDeps = deps;
+        }
 
         void populate(Iterable<IvyNode> nodes, String confs) {
             for (final IvyNode node : nodes) {
@@ -265,7 +274,13 @@ final class IvyResolver implements InternalDepResolver {
                 }
                 final JkVersionedModule currentModule = toJkVersionedModule(node);
                 final JkDependency currentDep = JkModuleDependency.of(currentModule);
-                final Set<JkScope> scopes = IvyTranslations.toJkScopes(node.getRequiredConfigurations());
+                final Set<JkScope> scopes;
+                if (this.firstLevelDeps.get(currentModule.moduleId()) != null) {
+                    scopes = this.firstLevelDeps.get(currentModule.moduleId()).scopes();
+                } else {
+                    scopes = IvyTranslations.toJkScopes(node.getRequiredConfigurations());
+                }
+
                 final JkScopedDependency scopedDependency = JkScopedDependency.of(currentDep, scopes);
 
                 final Caller[] callers = node.getAllCallers();
@@ -282,7 +297,7 @@ final class IvyResolver implements InternalDepResolver {
             }
         }
 
-        JkDependencyNode createNode(JkScopedDependency dep) {
+        JkDependencyNode createNode(JkScopedDependency dep, boolean replaceVersion) {
             final JkModuleDependency moduleDependency = (JkModuleDependency) dep.dependency();
             final JkModuleId moduleId = moduleDependency.moduleId();
             if (map.get(moduleId) == null) {
@@ -292,14 +307,23 @@ final class IvyResolver implements InternalDepResolver {
             if (modules == null) {
                 modules = new LinkedList<JkScopedDependency>();
             }
-            final List<JkDependencyNode> list = new LinkedList<JkDependencyNode>();
-            for (final JkScopedDependency versionedModule : modules) {
-                final JkDependencyNode child = createNode(versionedModule);
-                if (!containsSameModuleId(list, child.root())) {
-                    list.add(child);
+            final List<JkDependencyNode> childNodes = new LinkedList<JkDependencyNode>();
+            for (final JkScopedDependency scopedDep : modules) {
+                final JkScopedDependency childDep;
+                if (replaceVersion) {
+                    childDep = replacedVersion(scopedDep);
+                } else {
+                    childDep = scopedDep;
+                }
+                if (!isVersionResolved(childDep)) {
+                    continue; // If no filter here, result embeds more dependencies than needed.
+                }
+                final JkDependencyNode childNode = createNode(childDep, false);
+                if (!containsSameModuleId(childNodes, childNode.root())) {
+                    childNodes.add(childNode);
                 }
             }
-            return new JkDependencyNode(dep, list);
+            return new JkDependencyNode(dep, childNodes);
         }
 
         private static boolean containsSameModuleId(List<JkDependencyNode> dependencies, JkScopedDependency dependency) {
@@ -314,6 +338,18 @@ final class IvyResolver implements InternalDepResolver {
         private static JkModuleId moduleId(JkScopedDependency scopedDependency) {
             final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency.dependency();
             return moduleDependency.moduleId();
+        }
+
+        private JkScopedDependency replacedVersion(JkScopedDependency scopedDependency) {
+            JkModuleDependency childModule = (JkModuleDependency) scopedDependency.dependency();
+            childModule = childModule.resolvedTo(versionProvider.versionOf(childModule.moduleId()));
+            return scopedDependency.dependency(childModule);
+        }
+
+        private static boolean isVersionResolved(JkScopedDependency scopedDependency) {
+            final JkModuleDependency moduleDep= (JkModuleDependency) scopedDependency.dependency();
+            final boolean dynamicVersion = moduleDep.versionRange().isDynamicAndResovable();
+            return !dynamicVersion;
         }
 
     }

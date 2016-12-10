@@ -168,9 +168,13 @@ public final class JkModuleDependency extends JkDependency {
 
     /**
      * Returns a JkModuleDependency identical to this one but with the specified
-     * static version.
+     * static version. If the specified version is <code>null</code> then returned version is this one.
+     *
      */
     public JkModuleDependency resolvedTo(JkVersion version) {
+        if (version == null) {
+            return this;
+        }
         return new JkModuleDependency(module, JkVersionRange.of(version.name()), classifier,
                 transitive, extension, excludes);
     }

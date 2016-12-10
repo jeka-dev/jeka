@@ -217,11 +217,12 @@ public class JkBuildDependencySupport extends JkBuild {
     }
 
     /**
-     * Display the dependency tree on the console
+     * Displays the resolved dependency tree on the console.
      */
-    public final void dependencyTree() {
+    public final void showDependencies() {
         final JkResolveResult resolveResult = this.dependencyResolver().resolve();
         final JkDependencyNode tree = resolveResult.dependencyTree();
+        JkLog.infoHeaded("Resolved dependencies for " + this.versionedModule());
         JkLog.info(tree.toStrings());
     }
 

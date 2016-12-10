@@ -8,7 +8,7 @@ import org.jerkar.api.utils.JkUtilsString;
 /**
  * Identifier for project. The identifier will be used to name the generated
  * artifacts and as a moduleId for Maven or Ivy.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkModuleId implements Serializable {
@@ -138,7 +138,7 @@ public final class JkModuleId implements Serializable {
 
     @Override
     public String toString() {
-        return fullName();
+        return this.group + ":" + this.name;
     }
 
     private static class GroupAndNameComparator implements Comparator<JkModuleId> {

@@ -781,7 +781,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
     private static JkJavadocMaker javadocMaker(JkJavaBuild javaBuild, boolean fullName,
             boolean includeVersion) {
-        String name = fullName ? javaBuild.moduleId().toString() : javaBuild.moduleId().toString();
+        String name = fullName ? javaBuild.moduleId().fullName() : javaBuild.moduleId().name();
         if (includeVersion) {
             name = name + "-" + javaBuild.effectiveVersion().name();
         }
