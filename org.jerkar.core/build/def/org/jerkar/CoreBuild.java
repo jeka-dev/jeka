@@ -58,6 +58,7 @@ public class CoreBuild extends AbstractBuild {
         distrib.importFiles(file("../LICENSE"));
         final JkJavaPacker packer = packer();
         distrib.importDirContent(file("src/main/dist"));
+        distrib.importDirContent(file("src/main/java/META-INF/bin"));
 
         // Create lean jar
 

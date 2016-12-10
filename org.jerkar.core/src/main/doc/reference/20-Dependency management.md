@@ -361,4 +361,4 @@ final JkDependencies deps = JkDependencies.builder()
 
 ### Displaying dependency tree
 
-You can display the resolved dependency tree by running `jerkar showDependencies`. If you want to retrieve it programmatically, the tree structure is obtained using `JkResoveResult#dependencyTree()` which returns a `JkDependencyNode` standing for the dependency tree root.
+You can display the resolved dependency tree by running `jerkar showDependencies`. If you want to retrieve it programmatically, the tree structure is obtained using `JkDependencyResolver#resolve()` which returns a `JkResolveResult`. In turn, this object contains a `JkDependencyNode` standing for the dependency tree root. 
