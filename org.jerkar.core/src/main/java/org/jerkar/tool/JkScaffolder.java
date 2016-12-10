@@ -4,8 +4,10 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
 import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIO;
 
 /**
  * Object that process scaffolding.
@@ -16,6 +18,8 @@ public final class JkScaffolder {
 
     private Object mainBuildclassWriter;
 
+    private final boolean embed;
+
     private final List<Runnable> extraActions;
 
     JkScaffolder(JkBuild build) {
@@ -23,6 +27,7 @@ public final class JkScaffolder {
         this.build = build;
         this.mainBuildclassWriter = basicScaffoldedBuildClassCode();
         this.extraActions = new LinkedList<Runnable>();
+        this.embed = build.scaffoldEmbed;
     }
 
     /**
@@ -33,6 +38,11 @@ public final class JkScaffolder {
         def.mkdirs();
         final File buildClass = new File(def, "Build.java");
         JkUtilsFile.writeString(buildClass, mainBuildclassWriter.toString(), false);
+        if (embed) {
+            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar.bat"), build.file("jerkarw.bat"));
+            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar"), build.file("jerkarw"));
+            JkUtilsFile.copyFileToDir(JkLocator.jerkarJarFile(), build.file("build/boot"));
+        }
         for (final Runnable runnable : extraActions) {
             runnable.run();
         }

@@ -59,6 +59,8 @@ public class JkBuild {
     @JkDoc("Help options")
     private final JkHelpOptions help = new JkHelpOptions();
 
+    @JkDoc("Embed Jerkar jar along bin script in the project while scaffolding so the project can be run without Jerkar installed.")
+    boolean scaffoldEmbed;
 
     /**
      * Constructs a {@link JkBuild}

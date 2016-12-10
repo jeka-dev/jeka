@@ -137,21 +137,6 @@ public final class JkDependencyResolver {
         return internalResolver.getArtifacts(modules, scopes);
     }
 
-    /*
-     * Previous version of {@link #get(JkScope...)}.
-     * Keep it there until confident enough in the new implementation.
-     */
-    private final JkPath getUnordered(JkScope... scopes) {
-        if (scopes.length == 0) {
-            return getSingleScope(null);
-        }
-        JkPath path = JkPath.of();
-        for (final JkScope scope : scopes) {
-            path = path.and(getSingleScope(scope));
-        }
-        return path.withoutDoubloons();
-    }
-
     /**
      * Gets the path containing all the resolved dependencies as artifact files
      * for the specified scopes.
@@ -204,24 +189,6 @@ public final class JkDependencyResolver {
         return result;
     }
 
-
-
-    private JkPath getSingleScope(JkScope scope) {
-        final List<File> result = new LinkedList<File>();
-
-        // Add local, non-managed dependencies
-        if (scope == null) {
-            result.addAll(this.dependencies.localFileDependencies().entries());
-        } else {
-            result.addAll(this.dependencies.localFileDependencies(scope).entries());
-        }
-        if (internalResolver == null) {
-            return JkPath.of(result);
-        }
-        result.addAll(this.getResolveResult(scope, this.transitiveVersionOverride).localFiles());
-        return JkPath.of(result);
-    }
-
     private JkResolveResult getResolveResult(JkScope scope, JkVersionProvider transitiveVersionOverride) {
         final JkScope cachedScope = scope == null ? NULL_SCOPE : scope;
         final JkResolveResult result = cachedResolveResult.get(cachedScope);
@@ -232,7 +199,7 @@ public final class JkDependencyResolver {
         if (scope != null) {
             JkLog.startln("Resolving dependencies for scope '" + scope.name() + "'");
         } else {
-            JkLog.startln("Resolving dependencies witout specified scope");
+            JkLog.startln("Resolving dependencies without specified scope");
         }
 
         final JkResolveResult resolveResult;
