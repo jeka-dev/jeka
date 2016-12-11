@@ -98,7 +98,6 @@ final class DotClasspathGenerator {
     }
 
     void _generate() throws IOException, XMLStreamException, FactoryConfigurationError {
-        // final OutputStream fos = new FileOutputStream(outputFile);
         final ByteArrayOutputStream fos = new ByteArrayOutputStream();
         final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(fos, ENCODING);
         writer.writeStartDocument(ENCODING, "1.0");
@@ -107,9 +106,6 @@ final class DotClasspathGenerator {
         writer.writeCharacters("\n");
 
         final Set<String> paths = new HashSet<String>();
-        generateJava(writer, paths);
-
-        writeJre(writer);
 
         // Build class sources
         if (new File(projectDir, JkConstants.BUILD_DEF_DIR).exists()) {
@@ -121,15 +117,16 @@ final class DotClasspathGenerator {
             writer.writeCharacters("\n");
         }
 
+        generateSrcAndTestSrc(writer, paths);
+
+        writeJre(writer);
+
+
+
         // Write entries for dependencies located under build/libs
         final Iterable<File> files = buildDefDependencyResolver.dependenciesToResolve().localFileDependencies();
 
         writeFileEntries(files, writer, paths);
-
-        // Write project dependencies
-        //for (final File depProjectDir : projectDependencies) {
-        //    writeProjectEntry(depProjectDir, writer, paths);
-        //}
 
         // Write output
         writer.writeCharacters("\t");
@@ -208,7 +205,7 @@ final class DotClasspathGenerator {
 
     }
 
-    private void generateJava(XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
+    private void generateSrcAndTestSrc(XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
 
         final Set<String> sourcePaths = new HashSet<String>();
 
@@ -256,18 +253,6 @@ final class DotClasspathGenerator {
         writeDependenciesEntries(writer, paths);
 
     }
-
-    //    private void writeDependenciesEntriesOld(XMLStreamWriter writer) throws XMLStreamException {
-    //        if (dependencyResolver.dependenciesToResolve().containsModules()) {
-    //            final JkResolveResult resolveResult = dependencyResolver.resolve(JkJavaBuild.COMPILE, JkJavaBuild.RUNTIME,
-    //                    JkJavaBuild.PROVIDED, JkJavaBuild.TEST);
-    //            writeExternalModuleEntries(dependencyResolver, writer, resolveResult);
-    //        }
-    //        if (buildDefDependencyResolver.dependenciesToResolve().containsModules()) {
-    //            final JkResolveResult buildresolve = buildDefDependencyResolver.resolve();
-    //            writeExternalModuleEntries(buildDefDependencyResolver, writer, buildresolve);
-    //        }
-    //    }
 
     private void writeIncludingExcluding(XMLStreamWriter writer, JkFileTree fileTree) throws XMLStreamException {
         final String including = toPatternString(fileTree.filter().getIncludePatterns());
