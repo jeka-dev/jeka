@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * Utility class to deal with the underlying system.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkUtilsSystem {
@@ -51,6 +51,13 @@ public final class JkUtilsSystem {
         } catch (final InterruptedException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
+    }
+
+    /**
+     * Adds an action to be executed when he JVM shuts down.
+     */
+    public static void addOnExitAction(Runnable runnable) {
+        Runtime.getRuntime().addShutdownHook(new Thread(runnable));
     }
 
 }

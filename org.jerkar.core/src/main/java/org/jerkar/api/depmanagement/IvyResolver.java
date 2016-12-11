@@ -231,7 +231,7 @@ final class IvyResolver implements InternalDepResolver {
 
     static JkVersionedModule anonymousVersionedModule() {
         final String version = Long.toString(RANDOM.nextLong());
-        return JkVersionedModule.of(JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.ofName(version));
+        return JkVersionedModule.of(JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.name(version));
     }
 
     @Override

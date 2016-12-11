@@ -36,7 +36,7 @@ public final class JkVersionProvider implements Serializable {
      * @see #of(JkModuleId, JkVersion)
      */
     public static JkVersionProvider of(JkModuleId moduleId, String version) {
-        return of(moduleId, JkVersion.ofName(version));
+        return of(moduleId, JkVersion.name(version));
     }
 
     /**
@@ -119,7 +119,7 @@ public final class JkVersionProvider implements Serializable {
      * @see JkVersionProvider#and(JkModuleId, JkVersion)
      */
     public JkVersionProvider and(JkModuleId moduleId, String version) {
-        return and(moduleId, JkVersion.ofName(version));
+        return and(moduleId, JkVersion.name(version));
     }
 
     /**

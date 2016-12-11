@@ -206,7 +206,9 @@ public final class JkZipper {
             }
             JkUtilsZip.mergeZip(zos, file, zipEntryFilter, storedMethod());
         }
-        JkUtilsIO.closeQuietly(zos);
+        JkUtilsIO.flush(zos);
+        JkUtilsIO.finish(zos);
+        JkUtilsIO.closeOrFail(zos);
         JkLog.done();
         return new JkCheckSumer(zipFile);
     }

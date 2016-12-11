@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIO.StreamGobbler;
 import org.jerkar.api.utils.JkUtilsString;
@@ -229,19 +230,28 @@ public final class JkJavaProcess {
     }
 
     private void runClassOrJarSync(String mainClassName, File jar, String... arguments) {
+        JkUtilsAssert.isTrue(jar != null || mainClassName != null,
+                "main class name and jar can't be both null while launching a Java process, please set at least one of them.");
         final List<String> command = new LinkedList<String>();
         final OptionAndEnv optionAndEnv = optionsAndEnv();
         command.add(runningJavaCommand());
         command.addAll(optionAndEnv.options);
-        if (mainClassName != null) {
-            command.add(mainClassName);
-        }
+        String execPart = "";
         if (jar != null) {
+            if (!jar.exists()) {
+                throw new IllegalStateException("Executable jar " + jar.getAbsolutePath() + " not found.");
+            }
             command.add("-jar");
             command.add(jar.getPath());
+            execPart = execPart + jar.getPath();
         }
+        if (mainClassName != null) {
+            command.add(mainClassName);
+            execPart = execPart + " " + mainClassName;
+        }
+
         command.addAll(Arrays.asList(arguments));
-        JkLog.startln("Starting java program : ");
+        JkLog.startln("Starting java program : " + execPart);
         JkLog.info(command, JkLog.verbose() ? -1 : 120);
         final int result;
         try {

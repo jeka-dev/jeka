@@ -149,7 +149,7 @@ final class IvyPublisherForMaven {
         final File pomXml;
         if (this.descriptorOutputDir != null) {
             pomXml = new File(targetDir(), "published-pom-" + ivyModuleRevisionId.getOrganisation()
-                    + "-" + artifactName + "-" + ivyModuleRevisionId.getRevision() + ".xml");
+            + "-" + artifactName + "-" + ivyModuleRevisionId.getRevision() + ".xml");
         } else {
             pomXml = JkUtilsFile.tempFile("published-pom-", ".xml");
         }
@@ -285,7 +285,7 @@ final class IvyPublisherForMaven {
 
     private static JkVersionedModule of(ModuleId moduleId, String version) {
         return JkVersionedModule.of(JkModuleId.of(moduleId.getOrganisation(), moduleId.getName()),
-                JkVersion.ofName(version));
+                JkVersion.name(version));
     }
 
     private static String versionMetadataPath(JkVersionedModule module) {

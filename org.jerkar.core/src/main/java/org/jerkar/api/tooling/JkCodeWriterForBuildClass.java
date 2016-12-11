@@ -310,7 +310,7 @@ public class JkCodeWriterForBuildClass {
         public String version(String version) {
             return new StringBuilder().append("    @Override\n")
                     .append("    public JkVersion version() {\n")
-                    .append("        return JkVersion.ofName(\"" + version + "\");\n")
+                    .append("        return JkVersion.name(\"" + version + "\");\n")
                     .append("    }").toString();
         }
 

@@ -102,7 +102,7 @@ public final class JkPom {
                     .dependency();
             final JkVersionedModule versionedModule = JkVersionedModule.of(
                     moduleDependency.moduleId(),
-                    JkVersion.ofName(moduleDependency.versionRange().definition()));
+                    JkVersion.name(moduleDependency.versionRange().definition()));
             versionedModules.add(versionedModule);
         }
         return JkVersionProvider.of(versionedModules);

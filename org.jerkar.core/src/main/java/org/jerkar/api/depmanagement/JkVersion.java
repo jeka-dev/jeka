@@ -18,20 +18,29 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
 
     /**
      * Creates a {@link JkVersion} with the specified name.
+     * @deprecated Use {@link #name()} instead.
      */
+    @Deprecated
     public static JkVersion ofName(String name) {
         return new JkVersion(name);
     }
 
     /**
-     * 
+     * Creates a {@link JkVersion} with the specified name.
+     */
+    public static JkVersion name(String name) {
+        return new JkVersion(name);
+    }
+
+    /**
+     *
      * @param clazz
      * @param name
      * @return
      */
     public static JkVersion fromResource(Class<?> clazz, String name) {
         final URL url = clazz.getResource(name);
-        return ofName(JkUtilsIO.read(url).trim());
+        return name(JkUtilsIO.read(url).trim());
     }
 
     private final String name;

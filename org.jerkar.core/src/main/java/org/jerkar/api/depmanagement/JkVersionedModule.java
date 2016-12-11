@@ -7,7 +7,7 @@ import org.jerkar.api.java.JkManifest;
 
 /**
  * Identifies a given module in a given version
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkVersionedModule implements Serializable {
@@ -31,7 +31,7 @@ public final class JkVersionedModule implements Serializable {
             throw new IllegalArgumentException(groupAndName
                     + " does not respect format groupId:name");
         }
-        return JkVersionedModule.of(JkModuleId.of(groupAndName), JkVersion.ofName(version));
+        return JkVersionedModule.of(JkModuleId.of(groupAndName), JkVersion.name(version));
     }
 
     /**
@@ -44,7 +44,7 @@ public final class JkVersionedModule implements Serializable {
             throw new IllegalArgumentException(description
                     + " does not tespect format groupId:name:version");
         }
-        return JkVersionedModule.of(JkModuleId.of(items[0], items[1]), JkVersion.ofName(items[2]));
+        return JkVersionedModule.of(JkModuleId.of(items[0], items[1]), JkVersion.name(items[2]));
     }
 
     private final JkModuleId moduleId;
@@ -82,7 +82,7 @@ public final class JkVersionedModule implements Serializable {
      * @see #withVersion(JkVersion)
      */
     public JkVersionedModule withVersion(String version) {
-        return new JkVersionedModule(this.moduleId, JkVersion.ofName(version));
+        return new JkVersionedModule(this.moduleId, JkVersion.name(version));
     }
 
     @Override

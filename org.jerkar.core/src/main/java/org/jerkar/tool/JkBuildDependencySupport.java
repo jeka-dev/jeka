@@ -84,9 +84,9 @@ public class JkBuildDependencySupport extends JkBuild {
      */
     public final JkVersion effectiveVersion() {
         if (!JkUtilsString.isBlank(version)) {
-            return JkVersion.ofName(version);
+            return JkVersion.name(version);
         }
-        return JkUtilsObject.firstNonNull(version(), JkVersion.ofName("trunk-SNAPSHOT"));
+        return JkUtilsObject.firstNonNull(version(), JkVersion.name("trunk-SNAPSHOT"));
     }
 
     /**

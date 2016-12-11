@@ -215,7 +215,7 @@ final class IvyTranslations {
     public static JkVersionedModule toJkVersionedModule(ModuleRevisionId moduleRevisionId) {
         return JkVersionedModule.of(
                 JkModuleId.of(moduleRevisionId.getOrganisation(), moduleRevisionId.getName()),
-                JkVersion.ofName(moduleRevisionId.getRevision()));
+                JkVersion.name(moduleRevisionId.getRevision()));
     }
 
     // see
@@ -357,7 +357,7 @@ final class IvyTranslations {
         final JkModuleId moduleId = JkModuleId.of(artifact.getModuleRevisionId().getOrganisation(),
                 artifact.getModuleRevisionId().getName());
         return JkVersionedModule.of(moduleId,
-                JkVersion.ofName(artifact.getModuleRevisionId().getRevision()));
+                JkVersion.name(artifact.getModuleRevisionId().getRevision()));
     }
 
     private static String toIvyExpression(JkScopeMapping scopeMapping) {

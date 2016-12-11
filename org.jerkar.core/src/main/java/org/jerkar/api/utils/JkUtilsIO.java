@@ -78,6 +78,44 @@ public final class JkUtilsIO {
     }
 
     /**
+     * Closes the specified closeable object, ignoring any exceptions.
+     */
+    public static void closeOrFail(Closeable... closeables) {
+        for (final Closeable closeable : closeables) {
+            try {
+                if (closeable != null) {
+                    closeable.close();
+                }
+            } catch (final Exception e) {
+                throw new IllegalStateException("Cannot close " + closeable);
+            }
+        }
+    }
+
+    /**
+     * Finishes the specified zip output stream object, ignoring any exceptions.
+     */
+    public static void finish(ZipOutputStream zipOutputStream) {
+        try {
+            zipOutputStream.finish();
+        } catch (final IOException e) {
+            throw new IllegalStateException("Cannot finish zip output on " + zipOutputStream);
+        }
+    }
+
+    /**
+     * Flushes the specified zip output stream object, ignoring any exceptions.
+     */
+    public static void flush(ZipOutputStream zipOutputStream) {
+        try {
+            zipOutputStream.flush();
+        } catch (final IOException e) {
+            throw new IllegalStateException("Cannot flush zip output on " + zipOutputStream);
+        }
+    }
+
+
+    /**
      * Same as {@link FileInputStream} constructor but throwing unchecked
      * exceptions.
      */
