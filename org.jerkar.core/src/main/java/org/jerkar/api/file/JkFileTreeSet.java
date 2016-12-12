@@ -14,7 +14,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
  * A set of {@link JkFileTree}.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkFileTreeSet implements Iterable<File> {
@@ -220,7 +220,7 @@ public final class JkFileTreeSet implements Iterable<File> {
     /**
      * Returns <code>true</code> if each {@link JkFileTree} constituting this
      * {@link JkFileTreeSet} exist.
-     * 
+     *
      * @see JkFileTree#exists()
      */
     public boolean allExists() {
@@ -235,7 +235,10 @@ public final class JkFileTreeSet implements Iterable<File> {
     /**
      * Returns a the root of all {@link JkFileTree} constituting this
      * {@link JkFileTreeSet}.
+     *
+     * @deprecated use {@link #roots()} instead
      */
+    @Deprecated
     public List<File> rootDirs() {
         final List<File> result = new LinkedList<File>();
         for (final JkFileTree dir : jkFileTrees) {

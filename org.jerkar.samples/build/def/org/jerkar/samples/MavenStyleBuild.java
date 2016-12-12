@@ -33,7 +33,7 @@ public class MavenStyleBuild extends JkJavaBuild {
 	// Optional : needless if you get the version from your SCM or version.txt
 	// resource
 	public JkVersion version() {
-		return JkVersion.ofName("0.3-SNAPSHOT");
+		return JkVersion.name("0.3-SNAPSHOT");
 	}
 
 	@Override

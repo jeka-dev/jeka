@@ -19,7 +19,7 @@ public class OpenSourceJarBuild extends JkJavaBuild {
 	
 	@Override 
 	public JkVersion version() {
-		return JkVersion.ofName("1.3.1-SNAPSHOT");   
+		return JkVersion.name("1.3.1-SNAPSHOT");   
 	}
 	
 	@Override

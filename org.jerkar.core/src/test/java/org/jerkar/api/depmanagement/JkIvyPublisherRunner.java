@@ -22,7 +22,7 @@ public class JkIvyPublisherRunner {
         final IvyPublisher jkIvyResolver = IvyPublisher.of(ivyRepos().withSha1Checksum()
                 .withMd5Checksum(), new File("build/output/test-out"));
         final JkVersionedModule versionedModule = JkVersionedModule.of(
-                JkModuleId.of("mygroup", "mymodule"), JkVersion.ofName("myVersion"));
+                JkModuleId.of("mygroup", "mymodule"), JkVersion.name("myVersion"));
         final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(),
                 JkScopedDependencyTest.COMPILE, JkScopedDependencyTest.TEST);
         final JkModuleId spring = JkModuleId.of("org.springframework", "spring-jdbc");
@@ -36,7 +36,7 @@ public class JkIvyPublisherRunner {
         final IvyPublisher jkIvyPublisher = IvyPublisher.of(mavenRepos().withMd5AndSha1Checksum()
                 .withUniqueSnapshot(false), new File("build/output/test-out"));
         final JkVersionedModule versionedModule = JkVersionedModule.of(
-                JkModuleId.of("mygroup2", "mymodule2"), JkVersion.ofName("0.0.12-SNAPSHOT"));
+                JkModuleId.of("mygroup2", "mymodule2"), JkVersion.name("0.0.12-SNAPSHOT"));
         final JkMavenPublication publication = JkMavenPublication.of(sampleJarfile())
                 .and(sampleJarSourcefile(), "sources").and(sampleJarSourcefile(), "other");
         final JkModuleId spring = JkModuleId.of("org.springframework", "spring-jdbc");
