@@ -1,3 +1,14 @@
+## 0.5.0 (on going)
+
+* Add `showDependencies` on `JkBuildDependencySupport` that display project dependency tree.
+* Add `JkDependencyNode` to explore and reason about dependency trees.
+* Cleaner log output
+* Fix bug related to artifact resolution failure in local repositories
+* Better Eclipse support
+* API polish
+* Minor bug fixes
+ 
+
 ## 0.4.6
 
 * Resolved classpath follows dependency declaration order

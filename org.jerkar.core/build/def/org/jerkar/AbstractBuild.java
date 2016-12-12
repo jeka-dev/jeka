@@ -17,9 +17,6 @@ public abstract class AbstractBuild extends JkJavaBuild {
         this.pack.javadoc = true;
     }
 
-    @SuppressWarnings("javadoc")
-    protected boolean publishLocal;
-
     @Override
     public String javaSourceVersion() {
         return JkJavaCompiler.V6;
@@ -40,11 +37,7 @@ public abstract class AbstractBuild extends JkJavaBuild {
     }
 
     @Override
-    // Force to use OSSRH
     protected JkPublishRepos publishRepositories() {
-        if (publishLocal) {
-            return super.publishRepositories();
-        }
         return JkPublishRepos.ossrh(JkOptions.get("repo.ossrh.username"),
                 JkOptions.get("repo.ossrh.password"), pgp()).withUniqueSnapshot(true);
     }

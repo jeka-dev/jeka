@@ -46,9 +46,16 @@ public class JkBuildDependencySupport extends JkBuild {
     // A cache for artifact publisher
     private JkPublisher cachedPublisher;
 
-    /** Version to inject to this build. If 'null' or blank than the version will be the one returned by #version() */
+    /**
+     * Version to inject to this build. If 'null' or blank than the version will
+     * be the one returned by #version()
+     */
     @JkDoc("Version to inject to this build. If 'null' or blank than the version will be the one returned by #version()")
     protected String version = null;
+
+    /** Options about publication */
+    @JkDoc("Publication")
+    public JkPublishOptions publication = new JkPublishOptions();
 
     /**
      * Constructs a {@link JkBuildDependencySupport}
@@ -109,18 +116,22 @@ public class JkBuildDependencySupport extends JkBuild {
      * only a meaning in case of using managed dependencies.
      */
     protected JkRepos downloadRepositories() {
-        return mavenPublishLocal().and(
-                JkRepo.firstNonNull(repoFromOptions("download"), JkRepo.mavenCentral()));
+        return mavenPublishLocal().and(JkRepo.firstNonNull(repoFromOptions("download"), JkRepo.mavenCentral()));
     }
 
     /**
-     * Returns the repositories where are published artifacts.
-     * By default it takes the repository defined in options <code>repo.publish.url</code>,
-     * <code>repo.publish.username</code> and <code>repo.publish.password</code>.<p>
-     * You can select another repository defined in option by setting <code>repo.publishname</code> option.
-     * So if you want to select the repository defined as <code>repo.myRepo.url</code> in your options,
-     * set option <code>repo.publishname=myRepo</code>.<p>
-     * If no such repo are defined in options, it takes {@link JkRepo#mavenPublishLocal()} as fallback.
+     * Returns the repositories where are published artifacts. By default it
+     * takes the repository defined in options <code>repo.publish.url</code>,
+     * <code>repo.publish.username</code> and <code>repo.publish.password</code>
+     * .
+     * <p>
+     * You can select another repository defined in option by setting
+     * <code>repo.publishname</code> option. So if you want to select the
+     * repository defined as <code>repo.myRepo.url</code> in your options, set
+     * option <code>repo.publishname=myRepo</code>.
+     * <p>
+     * If no such repo are defined in options, it takes
+     * {@link JkRepo#mavenPublishLocal()} as fallback.
      */
     protected JkPublishRepos publishRepositories() {
         final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("repo.publishname"), "publish");
@@ -143,14 +154,13 @@ public class JkBuildDependencySupport extends JkBuild {
      * dependencies, you must override this method.
      */
     private JkDependencies effectiveDependencies() {
-        JkDependencies deps = dependencies().withDefaultScope(this.defaultScope())
-                .resolvedWith(versionProvider()).withExclusions(dependencyExclusions());
+        JkDependencies deps = dependencies().withDefaultScope(this.defaultScope()).resolvedWith(versionProvider())
+                .withExclusions(dependencyExclusions());
         final JkScope defaultcope = this.defaultScope();
         if (defaultcope != null) {
             deps = deps.withDefaultScope(defaultcope);
         }
-        return JkBuildPlugin.applyDependencies(plugins.getActives(),
-                implicitDependencies().and(deps));
+        return JkBuildPlugin.applyDependencies(plugins.getActives(), implicitDependencies().and(deps));
     }
 
     /**
@@ -205,8 +215,7 @@ public class JkBuildDependencySupport extends JkBuild {
     public final JkDependencyResolver dependencyResolver() {
         if (cachedResolver == null) {
             JkLog.startln("Setting dependency resolver ");
-            cachedResolver = JkBuildPlugin.applyDependencyResolver(plugins.getActives(),
-                    createDependencyResolver());
+            cachedResolver = JkBuildPlugin.applyDependencyResolver(plugins.getActives(), createDependencyResolver());
             if (JkLog.verbose()) {
                 JkLog.done("Resolver set " + cachedResolver);
             } else {
@@ -234,8 +243,7 @@ public class JkBuildDependencySupport extends JkBuild {
         final JkDependencies dependencies = effectiveDependencies().and(implicitDependencies());
         if (dependencies.containsModules()) {
             return JkDependencyResolver.managed(downloadRepositories(), dependencies)
-                    .withModuleHolder(versionedModule())
-                    .withTransitiveVersionOverride(this.versionProvider())
+                    .withModuleHolder(versionedModule()).withTransitiveVersionOverride(this.versionProvider())
                     .withParams(JkResolutionParameters.of().withDefault(scopeMapping()));
         }
         return JkDependencyResolver.unmanaged(dependencies);
@@ -253,7 +261,11 @@ public class JkBuildDependencySupport extends JkBuild {
      */
     protected JkPublisher publisher() {
         if (cachedPublisher == null) {
-            cachedPublisher = JkPublisher.of(publishRepositories(), this.ouputDir().root());
+            if (this.publication.local) {
+                cachedPublisher = JkPublisher.of(mavenPublishLocal().asPublishRepo());
+            } else {
+                cachedPublisher = JkPublisher.of(publishRepositories(), this.ouputDir().root());
+            }
         }
         return cachedPublisher;
     }
@@ -301,8 +313,8 @@ public class JkBuildDependencySupport extends JkBuild {
      * repository.
      *
      * You can specify severals urls by using comma separation in
-     * <code>repo.[repoName].url</code> option value but credential will
-     * remain the same for all returned repositories.
+     * <code>repo.[repoName].url</code> option value but credential will remain
+     * the same for all returned repositories.
      */
     public static JkRepos reposFromOptions(String repoName) {
         final String urls = JkOptions.get("repo." + repoName + "." + "url");
@@ -319,12 +331,31 @@ public class JkBuildDependencySupport extends JkBuild {
     }
 
     /**
-     * Returns the Maven repository located in Jerkar user Home. You can use it to
-     * "deploy" locally.
+     * Returns the Maven repository located in Jerkar user Home. You can use it
+     * to "deploy" locally.
      */
     public static JkRepo mavenPublishLocal() {
         final File file = new File(JkLocator.jerkarUserHome(), "maven-publish-dir");
         return JkRepo.maven(file);
+    }
+
+    /**
+     * Options about publications.
+     */
+    public static class JkPublishOptions {
+
+        /** Tell if the sources must be published. Default is true. */
+        @JkDoc("Tell if the sources must be published")
+        public boolean publishSources = true;
+
+        /** Tell if the test classes must be published. Default is false. */
+        @JkDoc("Tell if the test classes must be published")
+        public boolean publishTests = false;
+
+        /** Force to publish in local repository.**/
+        @JkDoc("Force to publish in local repository.")
+        public boolean local = false;
+
     }
 
 }

@@ -105,9 +105,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     @JkDoc("JkExtraPacking dependencies")
     public JkOptionExtaPath extraPath = new JkOptionExtaPath();
 
-    /** Options about publication */
-    @JkDoc("Publication")
-    public JkPublishOptions publication = new JkPublishOptions();
+
 
     /** Options about manifest creation */
     @JkDoc("Manifest")
@@ -121,6 +119,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         result.add(clazz);
         return result;
     }
+
+
 
     // --------------------------- Project settings -----------------------
 
@@ -816,19 +816,6 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     }
 
 
-    /**
-     * Options about publications.
-     */
-    public static class JkPublishOptions {
 
-        /** Tell if the sources must be published. Default is true. */
-        @JkDoc("Tell if the sources must be published")
-        public boolean publishSources = true;
-
-        /** Tell if the test classes must be published. Default is false. */
-        @JkDoc("Tell if the test classes must be published")
-        public boolean publishTests = false;
-
-    }
 
 }

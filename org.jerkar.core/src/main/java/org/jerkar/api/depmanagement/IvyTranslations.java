@@ -220,38 +220,12 @@ final class IvyTranslations {
 
     // see
     // http://www.draconianoverlord.com/2010/07/18/publishing-to-maven-repos-with-ivy.html
-    private static DependencyResolver toResolver(JkRepo repo, Set<String> digesterAlgorithms) {
+    private static DependencyResolver toResolver(JkRepo repo, Set<String> digesterAlgorithms, boolean download) {
         if (repo instanceof JkRepo.JkMavenRepository) {
-            if (!isFileSystem(repo.url())) {
-                final IBiblioResolver result = new IBiblioResolver();
-                result.setM2compatible(true);
-                result.setUseMavenMetadata(true);
-                result.setRoot(repo.url().toString());
-                result.setUsepoms(true);
-                if (isHttp(repo.url())) {
-                    if (!CredentialsStore.INSTANCE.hasCredentials(repo.url().getHost())) {
-                        CredentialsStore.INSTANCE.addCredentials(repo.realm(),
-                                repo.url().getHost(), repo.userName(), repo.password());
-
-                    }
-                }
-                ;
-                result.setChangingPattern("\\*-SNAPSHOT");
-                result.setCheckmodified(true);
-                if (!digesterAlgorithms.isEmpty()) {
-                    result.setChecksums(JkUtilsString.join(ivyNameAlgos(digesterAlgorithms), ","));
-                }
-                return result;
+            if (!isFileSystem(repo.url()) || download) {
+                return ibiblioResolver(repo, digesterAlgorithms);
             }
-            final FileRepository fileRepo = new FileRepository(new File(repo.url().getPath()));
-            final FileSystemResolver result = new FileSystemResolver();
-            result.setRepository(fileRepo);
-            result.addArtifactPattern(completePattern(repo.url().getPath(), MAVEN_ARTIFACT_PATTERN));
-            result.setM2compatible(true);
-            if (!digesterAlgorithms.isEmpty()) {
-                result.setChecksums(JkUtilsString.join(ivyNameAlgos(digesterAlgorithms), ","));
-            }
-            return result;
+            return mavenFileSystemResolver(repo, digesterAlgorithms);
         }
         final JkIvyRepository jkIvyRepo = (JkIvyRepository) repo;
         if (isFileSystem(repo.url())) {
@@ -283,7 +257,6 @@ final class IvyTranslations {
 
                 }
             }
-            ;
             result.setChangingPattern("\\*-SNAPSHOT");
             result.setCheckmodified(true);
             if (!digesterAlgorithms.isEmpty()) {
@@ -293,6 +266,39 @@ final class IvyTranslations {
         }
 
         throw new IllegalStateException(repo + " not handled by translator.");
+    }
+
+    private static IBiblioResolver ibiblioResolver(JkRepo repo, Set<String> digesterAlgorithms) {
+        final IBiblioResolver result = new IBiblioResolver();
+        result.setM2compatible(true);
+        result.setUseMavenMetadata(true);
+        result.setRoot(repo.url().toString());
+        result.setUsepoms(true);
+        if (isHttp(repo.url())) {
+            if (!CredentialsStore.INSTANCE.hasCredentials(repo.url().getHost())) {
+                CredentialsStore.INSTANCE.addCredentials(repo.realm(),
+                        repo.url().getHost(), repo.userName(), repo.password());
+
+            }
+        }
+        result.setChangingPattern("\\*-SNAPSHOT");
+        result.setCheckmodified(true);
+        if (!digesterAlgorithms.isEmpty()) {
+            result.setChecksums(JkUtilsString.join(ivyNameAlgos(digesterAlgorithms), ","));
+        }
+        return result;
+    }
+
+    private static FileSystemResolver mavenFileSystemResolver(JkRepo repo, Set<String> digesterAlgorithms) {
+        final FileRepository fileRepo = new FileRepository(new File(repo.url().getPath()));
+        final FileSystemResolver result = new FileSystemResolver();
+        result.setRepository(fileRepo);
+        result.addArtifactPattern(completePattern(repo.url().getPath(), MAVEN_ARTIFACT_PATTERN));
+        result.setM2compatible(true);
+        if (!digesterAlgorithms.isEmpty()) {
+            result.setChecksums(JkUtilsString.join(ivyNameAlgos(digesterAlgorithms), ","));
+        }
+        return result;
     }
 
     private static Set<String> ivyNameAlgos(Set<String> algos) {
@@ -321,7 +327,7 @@ final class IvyTranslations {
     public static void populateIvySettingsWithPublishRepo(IvySettings ivySettings,
             JkPublishRepos repos) {
         for (final JkPublishRepo repo : repos) {
-            final DependencyResolver resolver = toResolver(repo.repo(), repo.checksumAlgorithms());
+            final DependencyResolver resolver = toResolver(repo.repo(), repo.checksumAlgorithms(), false);
             resolver.setName(PUBLISH_RESOLVER_NAME + repo.repo().url());
             ivySettings.addResolver(resolver);
         }
@@ -346,7 +352,7 @@ final class IvyTranslations {
     private static ChainResolver toChainResolver(JkRepos repos) {
         final ChainResolver chainResolver = new ChainResolver();
         for (final JkRepo jkRepo : repos) {
-            final DependencyResolver resolver = toResolver(jkRepo, Collections.EMPTY_SET);
+            final DependencyResolver resolver = toResolver(jkRepo, Collections.EMPTY_SET, true);
             resolver.setName(jkRepo.toString());
             chainResolver.add(resolver);
         }
