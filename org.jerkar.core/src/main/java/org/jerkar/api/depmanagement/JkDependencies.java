@@ -495,7 +495,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * the specified scopes. If no scopes are specified then it returns all file
      * system dependencies.
      */
-    public JkPath fileSystemDependencies(JkScope... scopes) {
+    public JkPath fileSystemDepsOnly(JkScope... scopes) {
         final LinkedHashSet<File> set = new LinkedHashSet<File>();
         for (final JkScopedDependency scopedDependency : this.dependencies) {
             if (!(scopedDependency.dependency() instanceof JkFileSystemDependency)) {
@@ -991,7 +991,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
     private List<JkModuleDependency> unspecifiedVersionDependencies() {
         final List<JkModuleDependency> result = new LinkedList<JkModuleDependency>();
-        for (final JkModuleDependency moduleDependency : this.moduleDependencies()) {
+        for (final JkModuleDependency moduleDependency : this.extractModuleDependencies()) {
             if (moduleDependency.hasUnspecifedVersion()) {
                 result.add(moduleDependency);
             }
@@ -1030,7 +1030,14 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         return builder.toString();
     }
 
-    private List<JkModuleDependency> moduleDependencies() {
+    /**
+     * Returns all dependencies declared as {@link JkModuleDependency}.
+     */
+    public JkDependencies modulesOnly() {
+        return JkDependencies.of(extractModuleDependencies());
+    }
+
+    private List<JkModuleDependency> extractModuleDependencies() {
         final List<JkModuleDependency> result = new LinkedList<JkModuleDependency>();
         for (final JkScopedDependency scopedDependency : this) {
             if (scopedDependency.dependency() instanceof JkModuleDependency) {

@@ -249,7 +249,7 @@ final class ImlGenerator {
 
     private void writeLocalLibs(XMLStreamWriter writer, JkScope scope) throws XMLStreamException {
         final List<File> binFiles = new LinkedList<File>();
-        binFiles.addAll(dependencyResolver.dependenciesToResolve().fileSystemDependencies(scope).entries());
+        binFiles.addAll(dependencyResolver.dependenciesToResolve().fileSystemDepsOnly(scope).entries());
         if (scope.equals(JkJavaBuild.TEST)) {
             binFiles.addAll(buildDefDependencyResolver.dependenciesToResolve().localFileDependencies().entries());
         }

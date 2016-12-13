@@ -9,7 +9,7 @@ import org.jerkar.api.java.JkClassLoader;
  * A class to publish artifacts on repositories. According the nature of the
  * repository (Maven or Ivy) the publisher will also create the necessary
  * metadata (pom.xml, metadata.xml, ivy.xml, checksums, ...).
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkPublisher {
@@ -54,7 +54,7 @@ public final class JkPublisher {
     /**
      * Publishes the specified publication to the Ivy repositories defined in
      * this publisher
-     * 
+     *
      * @param versionedModule
      *            The module id and version to publish
      * @param publication
@@ -80,7 +80,7 @@ public final class JkPublisher {
     /**
      * Publishes the specified publication on the Maven repositories of this
      * publisher.
-     * 
+     *
      * @param versionedModule
      *            The target moduleId and version for the specified publication
      * @param publication
@@ -90,7 +90,7 @@ public final class JkPublisher {
      */
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
             JkDependencies dependencies) {
-        this.ivyPublisher.publishMaven(versionedModule, publication, dependencies);
+        this.ivyPublisher.publishMaven(versionedModule, publication, dependencies.modulesOnly());
     }
 
     /**
