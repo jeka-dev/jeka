@@ -163,11 +163,11 @@ public class JkJavaPacker implements Cloneable {
      */
     public void pack() {
         JkLog.startln("Packaging module");
+        final JkManifest manifest = build.jarManifest();
+        if (!manifest.isEmpty()) {
+            manifest.writeToStandardLocation(build.classDir());
+        }
         if (doJar && !JkUtilsFile.isEmpty(build.classDir(), false)) {
-            final JkManifest manifest = build.jarManifest();
-            if (!manifest.isEmpty()) {
-                manifest.writeToStandardLocation(build.classDir());
-            }
             JkFileTreeSet.of(build.classDir()).and(extraFilesInJar).zip().to(jarFile()).md5If(checkSums.contains("MD5"))
             .sha1If(checkSums.contains("SHA-1"));
         }
