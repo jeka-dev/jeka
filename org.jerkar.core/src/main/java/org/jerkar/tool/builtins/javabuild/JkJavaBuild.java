@@ -133,6 +133,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
     /**
      * Returns the Java source version for the compiler (as "1.4", 1.6", "7", "8", ...).
+     * You can use constants defined in #JkJavaCompiler.
      */
     public String javaSourceVersion() {
         return JkUtilsJdk.runningJavaVersion();

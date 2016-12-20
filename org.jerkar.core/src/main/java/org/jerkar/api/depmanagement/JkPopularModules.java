@@ -158,4 +158,5 @@ public final class JkPopularModules {
 
     public static final JkModuleId LOMBOK = JkModuleId.of("org.projectlombok", "lombok");
 
+    public static final JkModuleId H2 = JkModuleId.of("com.h2database", "h2");
 }
