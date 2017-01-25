@@ -1,16 +1,5 @@
 package org.jerkar.plugins.sonar;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkJavaProcess;
@@ -20,20 +9,19 @@ import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsObject;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
 /**
  * Sonar wrapper class for launching sonar analysis in a convenient way. This
  * Sonar wrapper is not specific to Java project so can be used for to analyse
  * any kind of project supported by SonarQube.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkSonar {
 
-    private static final String RUNNER_JAR_NAME_24 = "sonar-runner-2.4.jar";
-
-    private static final String RUNNER_LOCAL_PATH = "build/output/temp/" + RUNNER_JAR_NAME_24;
-
-    private static final String SONAR_PREFIX = "sonar.";
     public static final String PROJECT_KEY = "projectKey";
     public static final String PROJECT_NAME = "projectName";
     public static final String PROJECT_VERSION = "projectVersion";
@@ -49,188 +37,190 @@ public final class JkSonar {
     public static final String COVERTURA_REPORTS_PATH = "cobertura.reportPath";
     public static final String CLOVER_REPORTS_PATH = "clover.reportPath";
     public static final String DYNAMIC_ANALYSIS = "dynamicAnalysis";
-
     public static final String PROJECT_BASE_DIR = "projectBaseDir";
     public static final String SOURCES = "sources";
     public static final String BINARIES = "binaries";
     public static final String TEST = "tests";
     public static final String LIBRARIES = "libraries";
     public static final String SKIP_DESIGN = "skipDesign";
-
     public static final String HOST_URL = "host.url";
     public static final String JDBC_URL = "jdbc.url";
     public static final String JDBC_USERNAME = "jdbc.username";
     public static final String JDBC_PASSWORD = "jdbc.password";
-
+    private static final String RUNNER_JAR_NAME_24 = "sonar-runner-2.4.jar";
+    private static final String RUNNER_LOCAL_PATH = "build/output/temp/" + RUNNER_JAR_NAME_24;
+    private static final String SONAR_PREFIX = "sonar.";
     private final Map<String, String> params;
 
     private final boolean enabled;
 
     private JkSonar(Map<String, String> params, boolean enabled) {
-	super();
-	this.params = Collections.unmodifiableMap(params);
-	this.enabled = enabled;
+        super();
+        this.params = Collections.unmodifiableMap(params);
+        this.enabled = enabled;
     }
 
     public static JkSonar of(String projectKey, String projectName, JkVersion projectVersion) {
-	JkUtilsAssert.notNull(projectName, "Project name can't be null.");
-	JkUtilsAssert.notNull(projectKey, "Project key can't be null.");
-	JkUtilsAssert.notNull(projectVersion, "Project version can't be null.");
-	final Map<String, String> map = new HashMap<String, String>();
-	map.put(PROJECT_KEY, projectKey);
-	map.put(PROJECT_NAME, projectName);
-	map.put(PROJECT_VERSION, projectVersion.name());
-	map.put(WORKING_DIRECTORY, ".sonarTempDir");
-	map.put(VERBOSE, Boolean.toString(JkLog.verbose()));
-	final Properties properties = System.getProperties();
-	for (final Object keyObject : properties.keySet()) {
-	    final String key = (String) keyObject;
-	    if (key.startsWith(SONAR_PREFIX)) {
-		map.put(key.substring(SONAR_PREFIX.length()), properties.getProperty(key));
-	    }
-	}
-	return new JkSonar(map, true);
-    }
-
-    public void run() {
-	if (!enabled) {
-	    JkLog.info("Sonar analysis skipped.");
-	}
-	JkLog.startln("Launching Sonar analysis");
-	if (JkLog.verbose()) {
-	    javaProcess().runClassSync("org.sonar.runner.Main", "-e", "-X");
-	} else {
-	    javaProcess().runClassSync("org.sonar.runner.Main", "-e");
-	}
-	JkLog.done();
-    }
-
-    public JkSonar enabled(boolean enabled) {
-	return new JkSonar(this.params, enabled);
-    }
-
-    private JkJavaProcess javaProcess() {
-	final File sonarRunnerJar = JkUtilsObject.firstNonNull(
-		JkClassLoader.current().fullClasspath().getEntryContainingClass("org.sonar.runner.Main"), jarRunner());
-	final JkJavaProcess result = JkJavaProcess.of().withClasspath(sonarRunnerJar).andOptions(toProperties());
-
-	return result;
-    }
-
-    private List<String> toProperties() {
-	final List<String> result = new LinkedList<String>();
-	for (final Map.Entry<String, String> entry : this.params.entrySet()) {
-	    result.add("-Dsonar." + entry.getKey() + "=" + entry.getValue());
-	}
-	return result;
-    }
-
-    public JkSonar withProperty(String key, String value) {
-	return new JkSonar(andParams(key, value), enabled);
-    }
-
-    public JkSonar withProperties(Map<String, String> props) {
-	final Map<String, String> newProps = new HashMap<String, String>(this.params);
-	newProps.putAll(props);
-	return new JkSonar(newProps, enabled);
-    }
-
-    public JkSonar withProjectBaseDir(File baseDir) {
-	return withProperty(PROJECT_BASE_DIR, baseDir.getAbsolutePath());
-    }
-
-    public JkSonar withSources(Iterable<File> files) {
-	return withProperty(SOURCES, toPaths(files));
-    }
-
-    public JkSonar withTest(Iterable<File> files) {
-	return withProperty(TEST, toPaths(files));
-    }
-
-    public JkSonar withBinaries(Iterable<File> files) {
-	return withProperty(BINARIES, toPaths(files));
-    }
-
-    public JkSonar withBinaries(File... files) {
-	return withBinaries(Arrays.asList(files));
-    }
-
-    public JkSonar withLibraries(Iterable<File> files) {
-	return withProperty(LIBRARIES, toPaths(files));
-    }
-
-    public JkSonar withSkipDesign(boolean skip) {
-	return withProperty(SKIP_DESIGN, Boolean.toString(skip));
-    }
-
-    public JkSonar withHostUrl(String url) {
-	return withProperty(HOST_URL, url);
-    }
-
-    public JkSonar withJdbcUrl(String url) {
-	return withProperty(JDBC_URL, url);
-    }
-
-    public JkSonar withJdbcUserName(String userName) {
-	return withProperty(JDBC_USERNAME, userName);
-    }
-
-    public JkSonar withJdbcPassword(String pwd) {
-	return withProperty(JDBC_PASSWORD, pwd);
-    }
-
-    private String toPaths(Iterable<File> files) {
-	final Iterator<File> it = files.iterator();
-	final StringBuilder result = new StringBuilder();
-	final File projectDir = projectDir();
-	while (it.hasNext()) {
-	    final File file = it.next();
-	    String path;
-	    if (JkUtilsFile.isAncestor(projectDir, file)) {
-		path = JkUtilsFile.getRelativePath(projectDir, file);
-	    } else {
-		path = file.getAbsolutePath();
-	    }
-	    result.append(path);
-	    if (it.hasNext()) {
-		result.append(",");
-	    }
-	}
-	return result.toString();
-    }
-
-    private File jarRunner() {
-	final File globalJar = new File(JkUtilsFile.tempDir(), "/jerkar/" + RUNNER_JAR_NAME_24);
-	if (!globalJar.exists()) {
-	    try {
-		return createRunnerJar(JkUtilsFile.tempDir());
-	    } catch (final Exception e) {
-		return createRunnerJar(new File(projectDir(), RUNNER_LOCAL_PATH));
-	    }
-	}
-	return globalJar;
+        JkUtilsAssert.notNull(projectName, "Project name can't be null.");
+        JkUtilsAssert.notNull(projectKey, "Project key can't be null.");
+        JkUtilsAssert.notNull(projectVersion, "Project version can't be null.");
+        final Map<String, String> map = new HashMap<String, String>();
+        map.put(PROJECT_KEY, projectKey);
+        map.put(PROJECT_NAME, projectName);
+        map.put(PROJECT_VERSION, projectVersion.name());
+        map.put(WORKING_DIRECTORY, ".sonarTempDir");
+        map.put(VERBOSE, Boolean.toString(JkLog.verbose()));
+        final Properties properties = System.getProperties();
+        for (final Object keyObject : properties.keySet()) {
+            final String key = (String) keyObject;
+            if (key.startsWith(SONAR_PREFIX)) {
+                map.put(key.substring(SONAR_PREFIX.length()), properties.getProperty(key));
+            }
+        }
+        return new JkSonar(map, true);
     }
 
     private static File createRunnerJar(File parent) {
-	parent.mkdirs();
-	final File file = new File(parent, RUNNER_JAR_NAME_24);
-	try {
-	    file.createNewFile();
-	} catch (final IOException e) {
-	    throw new RuntimeException();
-	}
-	JkUtilsIO.copyUrlToFile(JkSonar.class.getResource(RUNNER_JAR_NAME_24), file);
-	return file;
+        parent.mkdirs();
+        final File file = new File(parent, RUNNER_JAR_NAME_24);
+        try {
+            file.createNewFile();
+        } catch (final IOException e) {
+            throw new RuntimeException();
+        }
+        JkUtilsIO.copyUrlToFile(JkSonar.class.getResource(RUNNER_JAR_NAME_24), file);
+        return file;
+    }
+
+    public void run() {
+        if (!enabled) {
+            JkLog.info("Sonar analysis skipped.");
+        }
+        JkLog.startln("Launching Sonar analysis");
+        if (JkLog.verbose()) {
+            javaProcess().runClassSync("org.sonar.runner.Main", "-e", "-X");
+        } else {
+            javaProcess().runClassSync("org.sonar.runner.Main", "-e");
+        }
+        JkLog.done();
+    }
+
+    public JkSonar enabled(boolean enabled) {
+        return new JkSonar(this.params, enabled);
+    }
+
+    private JkJavaProcess javaProcess() {
+        final File sonarRunnerJar = JkUtilsObject.firstNonNull(
+                JkClassLoader.current().fullClasspath().getEntryContainingClass("org.sonar.runner.Main"),
+                jarRunner());
+        final JkJavaProcess result = JkJavaProcess.of().withClasspath(sonarRunnerJar)
+                .andOptions(toProperties());
+
+        return result;
+    }
+
+    private List<String> toProperties() {
+        final List<String> result = new LinkedList<String>();
+        for (final Map.Entry<String, String> entry : this.params.entrySet()) {
+            result.add("-Dsonar." + entry.getKey() + "=" + entry.getValue());
+        }
+        return result;
+    }
+
+    public JkSonar withProperty(String key, String value) {
+        return new JkSonar(andParams(key, value), enabled);
+    }
+
+    public JkSonar withProperties(Map<String, String> props) {
+        final Map<String, String> newProps = new HashMap<String, String>(this.params);
+        newProps.putAll(props);
+        return new JkSonar(newProps, enabled);
+    }
+
+    public JkSonar withProjectBaseDir(File baseDir) {
+        return withProperty(PROJECT_BASE_DIR, baseDir.getAbsolutePath());
+    }
+
+    public JkSonar withSources(Iterable<File> files) {
+        return withProperty(SOURCES, toPaths(files));
+    }
+
+    public JkSonar withTest(Iterable<File> files) {
+        return withProperty(TEST, toPaths(files));
+    }
+
+    public JkSonar withBinaries(Iterable<File> files) {
+        return withProperty(BINARIES, toPaths(files));
+    }
+
+    public JkSonar withBinaries(File... files) {
+        return withBinaries(Arrays.asList(files));
+    }
+
+    public JkSonar withLibraries(Iterable<File> files) {
+        return withProperty(LIBRARIES, toPaths(files));
+    }
+
+    public JkSonar withSkipDesign(boolean skip) {
+        return withProperty(SKIP_DESIGN, Boolean.toString(skip));
+    }
+
+    public JkSonar withHostUrl(String url) {
+        return withProperty(HOST_URL, url);
+    }
+
+    public JkSonar withJdbcUrl(String url) {
+        return withProperty(JDBC_URL, url);
+    }
+
+    public JkSonar withJdbcUserName(String userName) {
+        return withProperty(JDBC_USERNAME, userName);
+    }
+
+    public JkSonar withJdbcPassword(String pwd) {
+        return withProperty(JDBC_PASSWORD, pwd);
+    }
+
+    private String toPaths(Iterable<File> files) {
+        final Iterator<File> it = files.iterator();
+        final StringBuilder result = new StringBuilder();
+        final File projectDir = projectDir();
+        while (it.hasNext()) {
+            final File file = it.next();
+            String path;
+            if (JkUtilsFile.isAncestor(projectDir, file)) {
+                path = JkUtilsFile.getRelativePath(projectDir, file);
+            } else {
+                path = file.getAbsolutePath();
+            }
+            result.append(path);
+            if (it.hasNext()) {
+                result.append(",");
+            }
+        }
+        return result.toString();
+    }
+
+    private File jarRunner() {
+        final File globalJar = new File(JkUtilsFile.tempDir(), "/jerkar/" + RUNNER_JAR_NAME_24);
+        if (!globalJar.exists()) {
+            try {
+                return createRunnerJar(JkUtilsFile.tempDir());
+            } catch (final Exception e) {
+                return createRunnerJar(new File(projectDir(), RUNNER_LOCAL_PATH));
+            }
+        }
+        return globalJar;
     }
 
     private Map<String, String> andParams(String key, String value) {
-	final Map<String, String> newMap = new HashMap<String, String>(this.params);
-	newMap.put(key, value);
-	return newMap;
+        final Map<String, String> newMap = new HashMap<String, String>(this.params);
+        newMap.put(key, value);
+        return newMap;
     }
 
     private File projectDir() {
-	return new File(this.params.get(PROJECT_BASE_DIR));
+        return new File(this.params.get(PROJECT_BASE_DIR));
     }
 
 }

@@ -9,11 +9,10 @@ package org.jerkar.plugins.jacoco;
 public class _JkocoBuildDeclaringPlugin extends PluginsJacocoBuild {
 
     public static void main(String[] args) {
-	_JkocoBuildDeclaringPlugin build = new _JkocoBuildDeclaringPlugin();
-	build.plugins.activate(new JkBuildPluginJacoco());
-	build.doDefault();
+        _JkocoBuildDeclaringPlugin build = new _JkocoBuildDeclaringPlugin();
+        build.plugins.activate(new JkBuildPluginJacoco());
+        build.doDefault();
     }
 
- 
 
 }

@@ -8,16 +8,16 @@ import org.jerkar.tool.JkProject;
 
 public class PluginsSonarBuild extends AbstractBuild {
 
-	@JkProject("../org.jerkar.core")
+    @JkProject("../org.jerkar.core")
     private CoreBuild core;
+
+    public static void main(String[] args) {
+        JkInit.instanceOf(PluginsSonarBuild.class, args).doDefault();
+    }
 
     @Override
     protected JkDependencies dependencies() {
-	return JkDependencies.of(PROVIDED, core.asDependency(core.packer().jarFile()));
+        return JkDependencies.of(PROVIDED, core.asDependency(core.packer().jarFile()));
     }
-    
-    public static void main(String[] args) {
-		JkInit.instanceOf(PluginsSonarBuild.class, args).doDefault();
-	}
 
 }
