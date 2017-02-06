@@ -1,10 +1,11 @@
-## 0.5.0 (on going)
+## 0.5.0
 
 * Add `showDependencies` on `JkBuildDependencySupport` that display project dependency tree.
 * Add `JkDependencyNode` to explore and reason about dependency trees.
 * Cleaner log output
 * Fix bug related to artifact resolution failure in local repositories
 * Better Eclipse support
+* Possibility to use any JSR199 compiler (as ECJ) instead of Java
 * API polish
 * Minor bug fixes
  
