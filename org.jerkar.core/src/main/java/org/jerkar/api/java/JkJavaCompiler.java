@@ -251,7 +251,7 @@ public final class JkJavaCompiler {
      * Since in-process compilers cannot be run in a forked process, this method disables any
      * previous fork options that may have been set.
      */
-    public JkJavaCompiler andCompiler(JavaCompiler compiler) {
+    public JkJavaCompiler withCompiler(JavaCompiler compiler) {
         // turn off forking
         return new JkJavaCompiler(options, javaSourceFiles, failOnError, null, versionCache, compiler);
     }
