@@ -27,6 +27,23 @@ jdk.7=c:/software/jdk7
 
 As such, if one of your project source code is declared to be in a specific Java version, the relevant JDK version will be used to compile it.
 
+### How can I use Eclipse compiler in Jerkar ?
+
+Jerkar can use any JSR199 Java compiler to compile your Java code. Just set the compiler instance you need as :
+
+```
+import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
+
+@JkImport("org.eclipse.jdt.core.compiler:ecj:4.6.1")
+public class Build extends JkJavaBuild {
+
+	@Override
+	public JkJavaCompiler productionCompiler() {
+		// need to use ECJ to compile this, not javac!
+		return super.productionCompiler().withCompiler(new EclipseCompiler());
+	}
+}
+```
 
 
 
