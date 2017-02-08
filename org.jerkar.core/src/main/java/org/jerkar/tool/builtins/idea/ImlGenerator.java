@@ -12,13 +12,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jerkar.api.depmanagement.JkAttachedArtifacts;
-import org.jerkar.api.depmanagement.JkDependencyResolver;
-import org.jerkar.api.depmanagement.JkModuleDepFile;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkResolveResult;
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.system.JkLocator;
@@ -72,7 +66,7 @@ final class ImlGenerator {
     public JkFileTreeSet testResources = JkFileTreeSet.empty();
 
     /** Dependency resolver to fetch module dependencies */
-    public JkDependencyResolver dependencyResolver;
+    public JkDependencyResolver dependencyResolver = JkDependencyResolver.unmanaged(JkDependencies.of());
 
     /** Dependency resolver to fetch module dependencies for build classes */
     public JkDependencyResolver buildDefDependencyResolver;
@@ -342,7 +336,8 @@ final class ImlGenerator {
     }
 
     private static List<LibPath> libPaths(JkDependencyResolver dependencyResolver, JkScope... scopes) {
-        if (!dependencyResolver.dependenciesToResolve().containsModules()) {
+        JkDependencies depsToResolve = dependencyResolver.dependenciesToResolve();
+        if (!depsToResolve.containsModules()) {
             return new LinkedList<ImlGenerator.LibPath>();
         }
         final JkResolveResult resolveResult = dependencyResolver.resolve(scopes);

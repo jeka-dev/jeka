@@ -15,33 +15,34 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
  */
 public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
 
-    private JkJavaBuild build;
+    private JkBuild build;
 
     @Override
     public void configure(JkBuild build) {
-        this.build = (JkJavaBuild) build;
+        this.build = build;
     }
 
     /** Generates Idea [my-module].iml file */
     @JkDoc("Generates Idea [my-module].iml file")
     public void generateFiles() {
+        final List<File> depProjects = new LinkedList<File>();
+        for (final JkBuild depBuild : build.slaves().directs()) {
+            depProjects.add(depBuild.baseDir().root());
+        }
+        final ImlGenerator generator = new ImlGenerator(build.baseDir().root());
+        generator.buildDefDependencyResolver = build.buildDefDependencyResolver();
+        generator.projectDependencies = depProjects;
         if (this.build instanceof JkJavaBuild) {
-            final JkJavaBuild jbuild = build;
-            final List<File> depProjects = new LinkedList<File>();
-            for (final JkBuild depBuild : build.slaves().directs()) {
-                depProjects.add(depBuild.baseDir().root());
-            }
-            final ImlGenerator generator = new ImlGenerator(build.baseDir().root());
-            generator.dependencyResolver = build.dependencyResolver();
-            generator.buildDefDependencyResolver = build.buildDefDependencyResolver();
+            final JkJavaBuild jbuild = (JkJavaBuild) build;
+            generator.dependencyResolver = jbuild.dependencyResolver();
             generator.includeJavadoc = true;
-            generator.projectDependencies = depProjects;
             generator.sourceJavaVersion = jbuild.javaSourceVersion();
             generator.sources = jbuild.sources();
             generator.testSources = jbuild.unitTestSources();
-            generator.generate();
-            JkLog.info(generator.outputFile.getPath() + " generated.");
+
         }
+        generator.generate();
+        JkLog.info(generator.outputFile.getPath() + " generated.");
     }
 
 
