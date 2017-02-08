@@ -1,17 +1,17 @@
 ## Build Configuration
 ----------------------
 
-Jerkar build are configurable. Build definition classes can retrieve values defined at runtime by reading :
+Jerkar builds are configurable. Build definition classes can retrieve values defined at runtime by reading :
 
-* an environment variable
-* a system property
-* a Jerkar option
+* environment variables
+* system properties
+* Jerkar options
 
 ### Environment variables
-There is nothing specific to Jerkar. Just set the environment variable as you usually do on your OS and get the value from build using the standard Java `System#getenv` method.
+There is nothing specific to Jerkar. Just set the environment variable as you usually do on your OS and get the value from build using the standard `System#getenv` method.
 
 ### System properties
-Naturally, your build definitions can read system properties by using the standard method `System#getProperty`.
+Naturally, your build definitions can read system properties by using the standard `System#getProperty` method.
 
 Jerkar proposes 3 ways to inject system properties :
 
