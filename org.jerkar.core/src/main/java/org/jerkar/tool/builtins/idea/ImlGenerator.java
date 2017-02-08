@@ -225,6 +225,8 @@ final class ImlGenerator {
             writer.writeEmptyElement("orderEntry");
             writer.writeAttribute("type", "module");
             writer.writeAttribute("module-name", depProjectDir.getName());
+            writer.writeAttribute("exported", "");
+            writer.writeAttribute("scope", "TEST");
             writer.writeCharacters("\n");
         }
     }
