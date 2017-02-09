@@ -1,12 +1,7 @@
 package org.jerkar.tool;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependency;
@@ -108,10 +103,6 @@ final class Project {
     /**
      * Pre-compile and compile build classes (if needed) then execute the build
      * of this project.
-     *
-     * @param buildClassNameHint
-     *            The full or simple class name of the build class to execute.
-     *            It can be <code>null</code> or empty.
      */
     void execute(JkInit init) {
         this.buildDependencies = this.buildDependencies.andScopeless(init.commandLine().dependencies());
@@ -210,6 +201,10 @@ final class Project {
 
     private JkPath compileDependentProjects(Set<File> yetCompiledProjects, LinkedHashSet<File> pathEntries) {
         JkPath jkPath = JkPath.of();
+        if (!this.subProjects.isEmpty()) {
+            JkLog.info("Compile build classes of dependent projects : "
+                    + toRelativePaths(this.projectBaseDir, this.subProjects));
+        }
         for (final File file : this.subProjects) {
             final Project project = new Project(file);
             project.compile(yetCompiledProjects, pathEntries);
@@ -287,6 +282,15 @@ final class Project {
                 .firstNonNull(JkBuildDependencySupport.repoFromOptions("build"),
                         JkBuildDependencySupport.repoFromOptions("download"), JkRepo.mavenCentral())
                 .and(JkBuildDependencySupport.mavenPublishLocal());
+    }
+
+    private static List<String> toRelativePaths(File from, List<File> files) {
+        List<String> result = new LinkedList<String>();
+        for (File file : files) {
+            String relPath = JkUtilsFile.getRelativePath(from, file);
+            result.add(relPath);
+        }
+        return result;
     }
 
 }

@@ -17,13 +17,7 @@ import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsObject;
-import org.jerkar.api.utils.JkUtilsReflect;
-import org.jerkar.api.utils.JkUtilsTime;
-import org.jerkar.api.utils.JkUtilsXml;
+import org.jerkar.api.utils.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -113,7 +107,7 @@ public class JkBuild {
 
     /**
      * Set the plugins to activate for this build. This method should be invoked
-     * after the {@link #setBaseDir(File)} method, so plugins can be configured
+     * after the base directory has been set, so plugins can be configured
      * using the proper base dir.
      */
     protected void setPlugins(Iterable<?> plugins) {
@@ -294,12 +288,6 @@ public class JkBuild {
         HelpDisplayer.helpPlugins();
     }
 
-    /**
-     * Invokes the specified method in this build but from the w
-     *
-     * @param jkModelMethod
-     * @param from
-     */
     private void invoke(JkModelMethod jkModelMethod, File fromDir) {
         if (jkModelMethod.isMethodPlugin()) {
             this.plugins.invoke(jkModelMethod.pluginClass(), jkModelMethod.name());

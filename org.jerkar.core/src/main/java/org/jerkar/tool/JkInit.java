@@ -197,9 +197,10 @@ public final class JkInit {
         if (!slaveBuilds.isEmpty()) {
             JkLog.startHeaded("Configure slave projects");
             for (final JkBuild subBuild : slaveBuilds) {
-                JkLog.trace("Configure project " + subBuild);
+                JkLog.startln("Configure project " + build.baseDir().relativePath(subBuild.baseDir().root()));
                 configureProject(subBuild, commandLine.getSubProjectPluginSetups(),
                         commandLine.getSubProjectBuildOptions(), dictionnary);
+                JkLog.done();
             }
             JkLog.done();
         }

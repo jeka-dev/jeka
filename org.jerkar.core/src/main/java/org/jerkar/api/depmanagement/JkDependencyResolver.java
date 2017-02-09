@@ -112,7 +112,7 @@ public final class JkDependencyResolver {
         final Set<JkScope> scopesSet = new HashSet<JkScope>();
         for (final JkScope scope : scopes) {
             if (!this.dependencies.involvedScopes().contains(scope)) {
-                JkLog.warn("No dependencies declared with scope '" + scope.name() + "'");
+                JkLog.info("No dependency declared with scope '" + scope.name() + "'");
                 continue;
             }
             scopesSet.add(scope);

@@ -66,7 +66,7 @@ final class ImlGenerator {
     public JkFileTreeSet testResources = JkFileTreeSet.empty();
 
     /** Dependency resolver to fetch module dependencies */
-    public JkDependencyResolver dependencyResolver = JkDependencyResolver.unmanaged(JkDependencies.of());
+    public JkDependencyResolver dependencyResolver;
 
     /** Dependency resolver to fetch module dependencies for build classes */
     public JkDependencyResolver buildDefDependencyResolver;
