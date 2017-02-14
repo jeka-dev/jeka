@@ -24,7 +24,7 @@ import org.jerkar.tool.CommandLine.MethodInvocation;
  * Buildable project. This class has the responsibility to compile the build
  * classes and to run them.<br/>
  * Build classes are expected to lie in [project base dir]/build/def<br/>
- * Classes having simple name starting by '_' are ignored.
+ * Classes having simple name starting with '_' are ignored.
  */
 final class Project {
 
@@ -176,11 +176,14 @@ final class Project {
 
     private JkDependencies buildDefDependencies() {
 
-        // If true, we assume Jerkar is produced by IDE (development mode)
+        // If true, we assume Jerkar is provided by IDE (development mode)
         final boolean devMode = JkLocator.jerkarJarFile().isDirectory();
 
-        return JkDependencies.builder().on(buildDependencies.withDefaultScopeMapping(JkScopeMapping.ALL_TO_DEFAULT))
-                .onFiles(localBuildPath()).onFilesIf(devMode, JkClasspath.current()).onFilesIf(!devMode, jerkarLibs())
+        return JkDependencies.builder().on(buildDependencies
+                .withDefaultScopeMapping(JkScopeMapping.ALL_TO_DEFAULT))
+                .onFiles(localBuildPath())
+                .onFilesIf(devMode, JkClasspath.current())
+                .onFilesIf(!devMode, jerkarLibs())
                 .build();
     }
 
@@ -277,7 +280,7 @@ final class Project {
         return this.projectBaseDir.getName();
     }
 
-    static JkRepos repos() {
+    private static JkRepos repos() {
         return JkRepo
                 .firstNonNull(JkBuildDependencySupport.repoFromOptions("build"),
                         JkBuildDependencySupport.repoFromOptions("download"), JkRepo.mavenCentral())

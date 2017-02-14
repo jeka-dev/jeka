@@ -20,17 +20,23 @@ These scripts do the following :
 4. __Run the `org.jerkar.tool.Main` class__ passing the command line argument as is. So if you have typed `jerkar myArg1 myArg2` the `myArg1 myArg2` will be passed as Java command-line arguments.
 
 #### Embedded Mode
-Note that ___[JERKAR_HOME]/org.jerkar.core.jar___ comes after ___[WORKING_DIR]/build/boot/*___ in the classpath.
+Note that ___[JERKAR_HOME]/org.jerkar.core-all.jar___ comes after ___[WORKING_DIR]/build/boot/*___ in the classpath.
 This means that if a version of Jerkar (org.jerkar.core.jar) is in this directory, the build will be processed with this instance of Jerkar and not with the one located in in _[JERKAR HOME]_.
 
 This is called the __Embedded__ mode. It guarantees that your project will build regardless of Jerkar version installed on the host machine. 
-This mode allows to build your project even if Jerkar is not installed on the host machine. just can 
+This mode allows to build your project even if Jerkar is not installed on the host machine.
 
-* execute `java -cp build/boot/* org.jerkar.tool.Main` instead of `jerkar`.
-* or copy  ___[JERKAR_HOME]/jerkar.bat___ and ___[JERKAR_HOME]/jerkar___ at the root of your project
-* scaffold a project using `jerkar scaffold -scaffoldEmbed`. This will generate ___jerkarw.bat___ and ___jerkarw___ file at the root of your project along copying  ___[JERKAR_HOME]/org.jerkar.core.jar___ to ___[WORKING_DIR]/build/boot___. So you just have to execute `jerkar` to run jerkar in embedded mode. 
+##### Enable embedded mode
+To enable embedded mode :
+   * Copy ___[JERKAR_HOME]/org.jerkar.core-all.jar___ into ___[PROJECT_DIR]/build/boot/*___ directory.
+   * Copy ___[JERKAR_HOME]/jerkar.bat___ and ___[JERKAR_HOME]/jerkar___ at the root of ___[PROJECT_DIR]___.
 
+You can also achieve this by invoking `jerkar scaffold -scaffoldEmbed`.
+This will generate ___jerkar.bat___ and ___jerkar___ file at the root of ___[PROJECT_DIR]___ and copy  ___[JERKAR_HOME]/org.jerkar.core-all.jar___ to ___[PROJECT_DIR]/build/boot___.
 
+##### Run in embedded mode
+Once a project enables embedded mode, all Jerkar command will run in that mode, there is nothing special to do.
+If you don't want to make in enables by default, remove ___jerkar.bat___ and ___jerkar___ from ___[PROJECT_DIR]___. In this case, to run in embedded mode you need to use`java -cp build/boot/* org.jerkar.tool.Main` instead of `jerkar` in the command line.
 
 ### Jerkar Execution
 
@@ -48,11 +54,11 @@ It processes as follow :
 
 #### Command Line
 
-Jerkar parse the command line and process each arguments according its pattern :
+Jerkar parses the command line and processes each arguments according this pattern :
 
-* Argument starts with `@` : This is an module import clause, the following will be used for adding a module to build class compile & run classpath. For example if the command line contains `@com.google.guava:guava:18.0`, the build class will be compiled with Guava in its classpath and Guava will be also present in the classpath when the build class will be executed. 
+* Argument starts with `@` : This is a module import clause, the following will be used for adding a jar to the build classpath. For example if the command line contains `@org.jerkar:addin-spring-boot:1.3.1`, the build class will be run with the spring-boot-addin on its classpath.
 
-* Argument starts with `-` : This is an option declaration. The following is expected to be formated as _optionName=optionValue_. For example, `-repo.build.url=http://my.repo.milestone/' will inject 'http://my.repo.milestone/' in the 'repo.build.url' Jerkar option.
+* Argument starts with `-` : This is an option declaration. The following is expected to be formatted as _optionName=optionValue_. For example, `-repo.build.url=http://my.repo.milestone/' will inject 'http://my.repo.milestone/' in the 'repo.build.url' Jerkar option.
 
 * in the other cases, argument is considered as a method name to invoke on the build class instance.
 
@@ -62,9 +68,9 @@ Jerkar compiles build class files prior to execute it. Build class files are exp
 Compilation outputs class files in _[PROJECT DIR]/build/output/def-bin_ directory and uses classpath containing :
 
 * Java libraries located in _[PROJECT DIR]/build/libs/build_.
-* Java libraries located in _[JERKAR HOME]/libs/ext_ (not in embedded mode).
+* Java libraries located in _[JERKAR HOME]/libs/ext_.
 
-You can augment the classpath with :
+You can augment classpath with :
 
 * Java libraries hosted on a Maven or Ivy repositories
 * Java libraries located on file system.

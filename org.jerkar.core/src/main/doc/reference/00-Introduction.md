@@ -17,8 +17,13 @@ Also, you're welcome to raise an issue in Git-hub for requesting an improvement 
 
 These terms are used all over the document, this lexical disambiguates their meanings.
 
+__[PROJECT DIR]__ : refers to the root folder of the project to build (the one where you would put pom.xml or build.xml file using ANT or Maven).
+
+__[JERKAR HOME]__ : refers to the folder where is intalled Jerkar. You should find _jerkar.bat_ and _jerkar_ shell files directly under this folder.
+
 <strong>Build Class :</strong> These are files that define build for a given project. In Jerkar, those files are Java sources (.java files) located under _[PROJECT DIR]/build/def_ directory and extending `org.jerkar.tool.JkBuild`. 
 This term can also be use to designate the compiled build class (.class files) as this class is generated transparently by Jerkar.
+
 In general, there is a single build class by project, but it can have none (if your project embrace conventions strictly) or many if project developers estimates that make sense.   
 _[PROJECT DIR]/build/def_ directory may contain other utilities classes and files consumed by build classes.
   

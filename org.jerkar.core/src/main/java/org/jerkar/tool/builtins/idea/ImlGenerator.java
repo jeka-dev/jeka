@@ -45,41 +45,41 @@ final class ImlGenerator {
     private final File projectDir;
 
     /** default to projectDir/.classpath */
-    public final File outputFile;
+    final File outputFile;
 
     /** attach javadoc to the lib dependencies */
-    public boolean includeJavadoc;
+    boolean includeJavadoc;
 
     /** Used to generate JRE container */
-    public String sourceJavaVersion;
+    String sourceJavaVersion;
 
     /** Can be empty but not null */
-    public JkFileTreeSet sources = JkFileTreeSet.empty();
+    JkFileTreeSet sources = JkFileTreeSet.empty();
 
     /** Can be empty but not null */
-    public JkFileTreeSet resources = JkFileTreeSet.empty();
+    private JkFileTreeSet resources = JkFileTreeSet.empty();
 
     /** Can be empty but not null */
-    public JkFileTreeSet testSources = JkFileTreeSet.empty();
+    JkFileTreeSet testSources = JkFileTreeSet.empty();
 
     /** Can be empty but not null */
-    public JkFileTreeSet testResources = JkFileTreeSet.empty();
+    private JkFileTreeSet testResources = JkFileTreeSet.empty();
 
     /** Dependency resolver to fetch module dependencies */
     public JkDependencyResolver dependencyResolver;
 
     /** Dependency resolver to fetch module dependencies for build classes */
-    public JkDependencyResolver buildDefDependencyResolver;
+    JkDependencyResolver buildDefDependencyResolver;
 
     /** Can be empty but not null */
-    public Iterable<File> projectDependencies = JkUtilsIterable.listOf();
+    Iterable<File> projectDependencies = JkUtilsIterable.listOf();
 
-    boolean forceJdkVersion;
+    private boolean forceJdkVersion;
 
     /**
      * Constructs a {@link ImlGenerator} from the project base directory
      */
-    public ImlGenerator(File projectDir) {
+    ImlGenerator(File projectDir) {
         super();
         this.projectDir = projectDir;
 
@@ -101,18 +101,21 @@ final class ImlGenerator {
         final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(fos, ENCODING);
 
         writeHead(writer);
+        writeOutput(writer);
         writeContent(writer);
         writeJdk(writer);
         writeSourceFolder(writer);
         writeModules(writer);
-        writeLibs(writer, JkJavaBuild.COMPILE);
-        writeLibs(writer, JkJavaBuild.PROVIDED);
-        writeLibs(writer, JkJavaBuild.RUNTIME);
-        writeTestLibs(writer);
-        writeLocalLibs(writer, JkJavaBuild.COMPILE);
-        writeLocalLibs(writer, JkJavaBuild.PROVIDED);
-        writeLocalLibs(writer, JkJavaBuild.RUNTIME);
-        writeLocalLibs(writer, JkJavaBuild.TEST);
+        if (this.dependencyResolver != null) {
+            writeLibs(writer, JkJavaBuild.COMPILE);
+            writeLibs(writer, JkJavaBuild.PROVIDED);
+            writeLibs(writer, JkJavaBuild.RUNTIME);
+            writeTestLibs(writer);
+            writeLocalLibs(writer, JkJavaBuild.COMPILE);
+            writeLocalLibs(writer, JkJavaBuild.PROVIDED);
+            writeLocalLibs(writer, JkJavaBuild.RUNTIME);
+            writeLocalLibs(writer, JkJavaBuild.TEST);
+        }
 
         // Write end document
         writer.writeCharacters(T1);
@@ -135,7 +138,18 @@ final class ImlGenerator {
         writer.writeCharacters("\n" + T1);
         writer.writeStartElement("component");
         writer.writeAttribute("name", "NewModuleRootManager");
-        writer.writeAttribute("inherit-compiler-output", "true");
+        writer.writeAttribute("inherit-compiler-output", "false");
+        writer.writeCharacters("\n");
+    }
+
+    private void writeOutput(XMLStreamWriter writer) throws XMLStreamException {
+        writer.writeCharacters(T2);
+        writer.writeEmptyElement("output");
+        writer.writeAttribute("url", "file://$MODULE_DIR$/idea_out/production");
+        writer.writeCharacters("\n");
+        writer.writeCharacters(T2);
+        writer.writeEmptyElement("output-test");
+        writer.writeAttribute("url", "file://$MODULE_DIR$/idea_out/test");
         writer.writeCharacters("\n");
         writer.writeCharacters(T2);
         writer.writeEmptyElement("exclude-output");
