@@ -191,13 +191,18 @@ final class IvyTranslations {
     public static ModuleRevisionId toModuleRevisionId(JkModuleDependency moduleDependency,
             JkVersion resolvedVersion) {
         final String originalVersion = moduleDependency.versionRange().definition();
-        if (resolvedVersion == null || resolvedVersion.name().equals(originalVersion)) {
-            return new ModuleRevisionId(toModuleId(moduleDependency.moduleId()), originalVersion);
-        }
-        final Map<String, String> extra = JkUtilsIterable.mapOf("revConstraints", originalVersion);
+        final Map<String, String> extra = new HashMap<String, String>();
         if (moduleDependency.ext() != null) {
             extra.put("ext", moduleDependency.ext());
         }
+        if (moduleDependency.classifier() != null) {
+            extra.put("classifier", moduleDependency.classifier());
+        }
+        if (resolvedVersion == null || resolvedVersion.name().equals(originalVersion)) {
+            return ModuleRevisionId.newInstance(moduleDependency.moduleId().group(), moduleDependency
+                    .moduleId().name(), originalVersion, extra);
+        }
+        extra.put("revConstraints", originalVersion);
         return ModuleRevisionId.newInstance(moduleDependency.moduleId().group(), moduleDependency
                 .moduleId().name(), resolvedVersion.name(), extra);
 

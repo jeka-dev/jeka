@@ -104,8 +104,7 @@ public final class JkModuleDependency extends JkDependency {
             return result;
         }
         final String classifier = strings[3];
-        final boolean transitive = classifier == null ? result.transitive : false;
-        return result.classifier(strings[3]).transitive(transitive);
+        return result.classifier(strings[3]);
     }
 
     private final JkModuleId module;
@@ -241,7 +240,10 @@ public final class JkModuleDependency extends JkDependency {
 
     @Override
     public String toString() {
-        return module + ":" + versionRange;
+        if (classifier == null) {
+            return module + ":" + versionRange;
+        }
+        return module + ":" + versionRange + ":" + classifier;
     }
 
     private static class NameComparator implements Comparator<JkModuleDependency> {

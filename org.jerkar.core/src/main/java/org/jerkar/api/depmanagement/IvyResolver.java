@@ -239,8 +239,14 @@ final class IvyResolver implements InternalDepResolver {
         final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(dependency, null);
         final boolean metadata = "pom".equalsIgnoreCase(dependency.ext());
         final String typeAndExt = JkUtilsObject.firstNonNull(dependency.ext(), "jar");
-        final Artifact artifact = new DefaultArtifact(moduleRevisionId, null, dependency.moduleId().name(), typeAndExt,
-                typeAndExt, metadata);
+        final DefaultArtifact artifact;
+        if (metadata) {
+            artifact = new DefaultArtifact(moduleRevisionId, null, dependency.moduleId().name(), typeAndExt,
+                    typeAndExt, true);
+        } else {
+            artifact = new DefaultArtifact(moduleRevisionId, null, dependency.moduleId().name(), typeAndExt,
+                    typeAndExt, moduleRevisionId.getExtraAttributes());
+        }
         final ArtifactDownloadReport report = ivy.getResolveEngine().download(artifact, new DownloadOptions());
         return report.getLocalFile();
     }

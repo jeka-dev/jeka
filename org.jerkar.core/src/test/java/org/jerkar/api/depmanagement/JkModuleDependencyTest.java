@@ -11,10 +11,14 @@ public class JkModuleDependencyTest {
         final JkModuleDependency dep = JkModuleDependency.of("group:name:version:sources")
                 .transitive(true).ext("zip");
         Assert.assertEquals("sources", dep.classifier());
+        Assert.assertTrue(dep.transitive());
 
         final JkModuleDependency dep2 = JkModuleDependency.of("group:name:version:sources@zip");
         Assert.assertEquals("zip", dep2.ext());
         Assert.assertFalse(dep2.transitive());
+
+        final JkModuleDependency dep3 = JkModuleDependency.of("group:name:version:sources");
+        Assert.assertTrue(dep3.transitive());
 
     }
 
