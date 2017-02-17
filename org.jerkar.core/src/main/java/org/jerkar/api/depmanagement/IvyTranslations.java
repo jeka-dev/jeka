@@ -12,16 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.ivy.core.module.descriptor.Artifact;
-import org.apache.ivy.core.module.descriptor.Configuration;
+import org.apache.ivy.core.module.descriptor.*;
 import org.apache.ivy.core.module.descriptor.Configuration.Visibility;
-import org.apache.ivy.core.module.descriptor.DefaultArtifact;
-import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
-import org.apache.ivy.core.module.descriptor.DefaultExcludeRule;
-import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
-import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
-import org.apache.ivy.core.module.descriptor.ExcludeRule;
-import org.apache.ivy.core.module.descriptor.OverrideDependencyDescriptorMediator;
 import org.apache.ivy.core.module.id.ArtifactId;
 import org.apache.ivy.core.module.id.ModuleId;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
@@ -60,6 +52,8 @@ final class IvyTranslations {
     private static final String MAVEN_ARTIFACT_PATTERN = "/[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]";
 
     private static final Configuration DEFAULT_CONFIGURATION = new Configuration("default");
+
+    private static final String DEFAULT_EXTENSION = "jar";
 
     private IvyTranslations() {
     }
@@ -115,10 +109,11 @@ final class IvyTranslations {
      */
     private static DependencyDescriptor toDependencyDescriptor(JkScopedDependency scopedDependency,
             JkScopeMapping defaultMapping, JkVersion resolvedVersion) {
+
         final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.dependency();
         final ModuleRevisionId moduleRevisionId = toModuleRevisionId(moduleDep, resolvedVersion);
         final boolean changing = moduleDep.versionRange().definition().endsWith("-SNAPSHOT");
-        final DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null,
+        DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null,
                 moduleRevisionId, false, changing, moduleDep.transitive());
 
         // filling configuration
@@ -152,6 +147,20 @@ final class IvyTranslations {
             final ExcludeRule excludeRule = toExcludeRule(depExclude);
             result.addExcludeRule("*", excludeRule);
         }
+        return result;
+    }
+
+    private static DependencyArtifactDescriptor dependencyArtifactDescriptor(DependencyDescriptor parent, JkModuleDependency moduleDep) {
+        String extension = JkUtilsObject.firstNonNull(moduleDep.ext(), DEFAULT_EXTENSION);
+        Map<String, String> extra = new HashMap<String, String>();
+        DependencyArtifactDescriptor result = new DefaultDependencyArtifactDescriptor(
+                parent,
+                parent.getDependencyId().getName(),
+                extension,
+                extension,
+                null,
+                extra
+                );
         return result;
     }
 
