@@ -77,7 +77,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
     private static final String ARCHIVE_MASTER = "archives(master)";
 
-    private static final JkScopeMapping SCOPE_MAPPING = JkScopeMapping
+    public static final JkScopeMapping DEFAULT_SCOPE_MAPPING = JkScopeMapping
             .of(COMPILE).to(ARCHIVE_MASTER, COMPILE.name() + "(default)")
             .and(PROVIDED).to(ARCHIVE_MASTER, COMPILE.name() + "(default)")
             .and(RUNTIME).to(ARCHIVE_MASTER, RUNTIME.name() + "(default)")
@@ -459,7 +459,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         if (this.publisher().hasIvyPublishRepo()) {
             final Date date = this.buildTime();
             this.publisher().publishIvy(versionedModule(), ivyPublication(), dependencies, COMPILE,
-                    SCOPE_MAPPING, date, resolvedVersions);
+                    DEFAULT_SCOPE_MAPPING, date, resolvedVersions);
         }
     }
 
@@ -533,7 +533,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
     @Override
     protected JkScopeMapping scopeMapping() {
-        return SCOPE_MAPPING;
+        return DEFAULT_SCOPE_MAPPING;
     }
 
     @Override

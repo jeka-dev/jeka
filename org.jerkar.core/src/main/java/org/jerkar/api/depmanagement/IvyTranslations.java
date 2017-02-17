@@ -2,26 +2,10 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import org.apache.ivy.core.module.descriptor.Artifact;
-import org.apache.ivy.core.module.descriptor.Configuration;
+import org.apache.ivy.core.module.descriptor.*;
 import org.apache.ivy.core.module.descriptor.Configuration.Visibility;
-import org.apache.ivy.core.module.descriptor.DefaultArtifact;
-import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
-import org.apache.ivy.core.module.descriptor.DefaultExcludeRule;
-import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
-import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
-import org.apache.ivy.core.module.descriptor.ExcludeRule;
-import org.apache.ivy.core.module.descriptor.OverrideDependencyDescriptorMediator;
 import org.apache.ivy.core.module.id.ArtifactId;
 import org.apache.ivy.core.module.id.ModuleId;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
@@ -61,6 +45,8 @@ final class IvyTranslations {
 
     private static final Configuration DEFAULT_CONFIGURATION = new Configuration("default");
 
+    private static final String DEFAULT_EXTENSION = "jar";
+
     private IvyTranslations() {
     }
 
@@ -82,76 +68,26 @@ final class IvyTranslations {
         return new DefaultModuleDescriptor(thisModuleRevisionId, "integration", null);
     }
 
-    private static DependencyDescriptor toScopelessDependencyDescriptor(
-            JkModuleDependency dependency, JkScopeMapping defaultMapping,
-            JkVersion resolvedVersion, Configuration[] moduleConfigurations) {
-
-        final ModuleRevisionId moduleRevisionId = toModuleRevisionId(dependency, resolvedVersion);
-        final boolean changing = dependency.versionRange().definition().endsWith("-SNAPSHOT");
-        final DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null,
-                moduleRevisionId, false, changing, dependency.transitive());
-
-        // filling configuration
-        if (defaultMapping == null || defaultMapping.entries().isEmpty()) {
-            result.addDependencyConfiguration("*", "*");
-        } else {
-            for (final JkScope entryScope : defaultMapping.entries()) {
-                for (final JkScope mappedScope : defaultMapping.mappedScopes(entryScope)) {
-                    result.addDependencyConfiguration(entryScope.name(), mappedScope.name());
-                }
-            }
+    private static void populateArtifactDependencyIfNeeded(DefaultDependencyDescriptor descriptor, JkScope scope, JkModuleDependency moduleDep) {
+        if (moduleDep.classifier() != null) {
+            descriptor.addDependencyArtifact(scope.name(), dependencyArtifactDescriptor(descriptor, moduleDep));
         }
-
-        for (final JkDepExclude depExclude : dependency.excludes()) {
-            final ExcludeRule excludeRule = toExcludeRule(depExclude);
-            result.addExcludeRule("*", excludeRule);
-        }
-        return result;
     }
 
-    /**
-     * @param scopedDependency
-     *            must be of {@link JkModuleDependency}
-     */
-    private static DependencyDescriptor toDependencyDescriptor(JkScopedDependency scopedDependency,
-            JkScopeMapping defaultMapping, JkVersion resolvedVersion) {
-        final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.dependency();
-        final ModuleRevisionId moduleRevisionId = toModuleRevisionId(moduleDep, resolvedVersion);
-        final boolean changing = moduleDep.versionRange().definition().endsWith("-SNAPSHOT");
-        final DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null,
-                moduleRevisionId, false, changing, moduleDep.transitive());
-
-        // filling configuration
-        if (scopedDependency.scopeType() == ScopeType.SIMPLE) {
-            for (final JkScope scope : scopedDependency.scopes()) {
-                final JkScopeMapping mapping = resolveSimple(scope, defaultMapping);
-                for (final JkScope fromScope : mapping.entries()) {
-                    for (final JkScope mappedScope : mapping.mappedScopes(fromScope)) {
-                        result.addDependencyConfiguration(fromScope.name(), mappedScope.name());
-                    }
-                }
-
-            }
-        } else if (scopedDependency.scopeType() == ScopeType.MAPPED) {
-            for (final JkScope scope : scopedDependency.scopeMapping().entries()) {
-                for (final JkScope mappedScope : scopedDependency.scopeMapping()
-                        .mappedScopes(scope)) {
-                    result.addDependencyConfiguration(scope.name(), mappedScope.name());
-                }
-            }
-        } else {
-            if (defaultMapping != null) {
-                for (final JkScope entryScope : defaultMapping.entries()) {
-                    for (final JkScope mappedScope : defaultMapping.mappedScopes(entryScope)) {
-                        result.addDependencyConfiguration(entryScope.name(), mappedScope.name());
-                    }
-                }
-            }
+    private static DependencyArtifactDescriptor dependencyArtifactDescriptor(DependencyDescriptor parent, JkModuleDependency moduleDep) {
+        String extension = JkUtilsObject.firstNonNull(moduleDep.ext(), DEFAULT_EXTENSION);
+        Map<String, String> extra = new HashMap<String, String>();
+        if (moduleDep.classifier() != null) {
+            extra.put("classifier", moduleDep.classifier());
         }
-        for (final JkDepExclude depExclude : moduleDep.excludes()) {
-            final ExcludeRule excludeRule = toExcludeRule(depExclude);
-            result.addExcludeRule("*", excludeRule);
-        }
+        DependencyArtifactDescriptor result = new DefaultDependencyArtifactDescriptor(
+                parent,
+                parent.getDependencyId().getName(),
+                extension,
+                extension,
+                null,
+                extra
+                );
         return result;
     }
 
@@ -188,23 +124,14 @@ final class IvyTranslations {
         return result;
     }
 
-    public static ModuleRevisionId toModuleRevisionId(JkModuleDependency moduleDependency,
-            JkVersion resolvedVersion) {
-        final String originalVersion = moduleDependency.versionRange().definition();
+    public static ModuleRevisionId toModuleRevisionId(JkModuleId moduleId, JkVersionRange versionRange, JkVersion resolvedVersion) {
+        final String originalVersion = versionRange.definition();
         final Map<String, String> extra = new HashMap<String, String>();
-        if (moduleDependency.ext() != null) {
-            extra.put("ext", moduleDependency.ext());
-        }
-        if (moduleDependency.classifier() != null) {
-            extra.put("classifier", moduleDependency.classifier());
-        }
         if (resolvedVersion == null || resolvedVersion.name().equals(originalVersion)) {
-            return ModuleRevisionId.newInstance(moduleDependency.moduleId().group(), moduleDependency
-                    .moduleId().name(), originalVersion, extra);
+            return ModuleRevisionId.newInstance(moduleId.group(), moduleId.name(), originalVersion, extra);
         }
-        extra.put("revConstraints", originalVersion);
-        return ModuleRevisionId.newInstance(moduleDependency.moduleId().group(), moduleDependency
-                .moduleId().name(), resolvedVersion.name(), extra);
+        return ModuleRevisionId.newInstance(moduleId.group(), moduleId.name(),
+                resolvedVersion.name(), extra);
 
     }
 
@@ -405,26 +332,19 @@ final class IvyTranslations {
         }
 
         // Add dependencies
+        DependenciesContainer dependencyContainer = new DependenciesContainer(defaultMapping);
         for (final JkScopedDependency scopedDependency : dependencies) {
             if (scopedDependency.dependency() instanceof JkModuleDependency) {
-                final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency
-                        .dependency();
-                final JkVersion resolvedVersion = resolvedVersions.versionOf(externalModule
-                        .moduleId());
-                final DependencyDescriptor dependencyDescriptor;
-                if (scopedDependency.scopeType() == ScopeType.UNSET) {
-                    dependencyDescriptor = toScopelessDependencyDescriptor(externalModule,
-                            defaultMapping, resolvedVersion, moduleDescriptor.getConfigurations());
-                } else {
-                    dependencyDescriptor = toDependencyDescriptor(scopedDependency, defaultMapping,
-                            resolvedVersion);
-                }
-
-                moduleDescriptor.addDependency(dependencyDescriptor);
+                final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency.dependency();
+                final JkVersion resolvedVersion = resolvedVersions.versionOf(externalModule.moduleId());
+                dependencyContainer.populate(scopedDependency, resolvedVersion);
             }
         }
+        for (DependencyDescriptor dependencyDescriptor : dependencyContainer.toDependencyDescriptors()) {
+            moduleDescriptor.addDependency(dependencyDescriptor);
+        }
 
-        // Add excludes
+        // -- Add dependency exclusion
         for (final JkDepExclude exclude : dependencies.excludes()) {
             final DefaultExcludeRule rule = toExcludeRule(exclude);
             if (exclude.getScopes().isEmpty()) {
@@ -435,15 +355,15 @@ final class IvyTranslations {
             moduleDescriptor.addExcludeRule(rule);
         }
 
-        // Add version override for transitive dependency
+        // -- Add version override for transitive dependency
         for (final JkModuleId moduleId : resolvedVersions.moduleIds()) {
             final JkVersion version = resolvedVersions.versionOf(moduleId);
             moduleDescriptor.addDependencyDescriptorMediator(toModuleId(moduleId),
                     ExactOrRegexpPatternMatcher.INSTANCE,
                     new OverrideDependencyDescriptorMediator(null, version.name()));
         }
-
     }
+
 
     private static JkScopeMapping resolveSimple(JkScope scope, JkScopeMapping defaultMapping) {
         final JkScopeMapping result;
@@ -466,7 +386,6 @@ final class IvyTranslations {
             }
         }
         return result;
-
     }
 
     private static String completePattern(String url, String pattern) {
@@ -548,5 +467,236 @@ final class IvyTranslations {
         return scopes;
     }
 
+    private static class DependencyDefinition {
+
+        Set<Conf> confs = new HashSet<Conf>();
+
+        JkVersionRange revision;
+
+        List<ArtifactDef> artifacts = new LinkedList<ArtifactDef>();
+
+        boolean includeMainArtifact = false;
+
+        boolean transitive = true;
+
+        List<JkDepExclude> excludes = new LinkedList<JkDepExclude>();
+
+        DependencyDescriptor toDescriptor(JkModuleId moduleId) {
+            final ModuleRevisionId moduleRevisionId = toModuleRevisionId(moduleId, revision, null);
+            final boolean changing = revision.definition().endsWith("-SNAPSHOT");
+            DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null,
+                    moduleRevisionId, false, changing, transitive);
+            for (Conf conf : confs) {
+                result.addDependencyConfiguration(conf.masterConf, conf.depConf);
+            }
+            for (ArtifactDef artifactDef : artifacts) {
+                String extension = JkUtilsObject.firstNonNull(artifactDef.type, DEFAULT_EXTENSION);
+                Map<String, String> extra = new HashMap<String, String>();
+                if (artifactDef.name != null) {
+                    extra.put("classifier", artifactDef.name);
+                }
+                DependencyArtifactDescriptor artifactDescriptor = new DefaultDependencyArtifactDescriptor(
+                        result,
+                        moduleId.name(),
+                        extension,
+                        extension,
+                        null,
+                        extra
+                );
+                if (artifactDef.confs.isEmpty()) {
+                    result.addDependencyArtifact("*", artifactDescriptor);
+                } else {
+                    for (String masterConf : artifactDef.confs) {
+                        result.addDependencyArtifact(masterConf, artifactDescriptor);
+                    }
+                }
+
+            }
+            if (!artifacts.isEmpty() && includeMainArtifact) {
+                DependencyArtifactDescriptor artifactDescriptor = new DefaultDependencyArtifactDescriptor(
+                        result,
+                        moduleId.name(),
+                        DEFAULT_EXTENSION,
+                        DEFAULT_EXTENSION,
+                        null,
+                        new HashMap()
+                );
+                if (confs.isEmpty()) {
+                    result.addDependencyArtifact("*", artifactDescriptor);
+                } else {
+                    for (Conf conf : confs) {
+                        result.addDependencyArtifact(conf.masterConf, artifactDescriptor);
+                    }
+                }
+            }
+            for (JkDepExclude depExclude : excludes) {
+                result.addExcludeRule("*", toExcludeRule(depExclude));
+            }
+            return result;
+
+        }
+
+    }
+
+    private static class DependenciesContainer {
+
+        private final Map<JkModuleId, DependencyDefinition> definitions = new LinkedHashMap<JkModuleId, DependencyDefinition>();
+
+        private final JkScopeMapping defaultMapping;
+
+        DependenciesContainer(JkScopeMapping defaultMapping) {
+            this.defaultMapping = defaultMapping;
+        }
+
+        void populate(JkScopedDependency scopedDependency, JkVersion resolvedVersion) {
+
+            final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.dependency();
+            final JkModuleId moduleId = moduleDep.moduleId();
+            final ModuleRevisionId moduleRevisionId = toModuleRevisionId(moduleDep.moduleId(), moduleDep.versionRange(),
+                    resolvedVersion);
+            boolean mainArtifact = moduleDep.classifier() == null && moduleDep.ext() == null;
+            this.put(moduleId, moduleDep.transitive(), moduleDep.versionRange(), mainArtifact);
+
+            // fill configuration
+            List<Conf> confs = new LinkedList<Conf>();
+            if (scopedDependency.scopeType() == ScopeType.UNSET) {
+                if (defaultMapping == null || defaultMapping.entries().isEmpty()) {
+                    confs.add(new Conf("*", "*"));
+                } else {
+                    for (final JkScope entryScope : defaultMapping.entries()) {
+                        for (final JkScope mappedScope : defaultMapping.mappedScopes(entryScope)) {
+                            confs.add(new Conf(entryScope.name(), mappedScope.name()));
+                        }
+                    }
+                }
+            }
+            else if (scopedDependency.scopeType() == ScopeType.SIMPLE) {
+                for (final JkScope scope : scopedDependency.scopes()) {
+                    final JkScopeMapping mapping = resolveSimple(scope, defaultMapping);
+                    for (final JkScope fromScope : mapping.entries()) {
+                        for (final JkScope mappedScope : mapping.mappedScopes(fromScope)) {
+                            confs.add(new Conf(fromScope.name(), mappedScope.name()));
+                        }
+                    }
+
+                }
+            } else if (scopedDependency.scopeType() == ScopeType.MAPPED) {
+                for (final JkScope scope : scopedDependency.scopeMapping().entries()) {
+                    for (final JkScope mappedScope : scopedDependency.scopeMapping()
+                            .mappedScopes(scope)) {
+                        confs.add(new Conf(scope.name(), mappedScope.name()));
+                    }
+                }
+            } else {
+                if (defaultMapping != null) {
+                    for (final JkScope entryScope : defaultMapping.entries()) {
+                        for (final JkScope mappedScope : defaultMapping.mappedScopes(entryScope)) {
+                            confs.add(new Conf(entryScope.name(), mappedScope.name()));
+                        }
+                    }
+                }
+            }
+            Set<String> masterConfs = new HashSet<String>();
+            for (Conf conf : confs) {
+                this.addConf(moduleId, conf);
+                masterConfs.add(conf.masterConf);
+            }
+            this.addArtifact(moduleId, masterConfs, moduleDep.classifier(), moduleDep.ext());
+
+            boolean mainArtifactFlag = moduleDep.classifier() == null && moduleDep.ext() == null;
+            this.flagAsMainArtifact(moduleId, mainArtifactFlag);
+
+            // fill artifact exclusion
+            for (final JkDepExclude depExclude : moduleDep.excludes()) {
+                this.addExludes(moduleId, depExclude);
+            }
+        }
+
+
+        private void put(JkModuleId moduleId, boolean transitive, JkVersionRange revision, boolean mainArtifact) {
+            DependencyDefinition definition = definitions.get(moduleId);
+            if (definition == null) {
+                definition = new DependencyDefinition();
+                definitions.put(moduleId, definition);
+            }
+            definition.transitive = definition.transitive || transitive;
+            definition.revision = revision;
+            definition.includeMainArtifact = definition.includeMainArtifact || mainArtifact;
+        }
+
+        private void addConf(JkModuleId moduleId, Conf conf) {
+            DependencyDefinition definition = definitions.get(moduleId);
+            definition.confs.add(conf);
+        }
+
+        private void addArtifact(JkModuleId moduleId, Set<String> masterConfs, String classifierName, String ext) {
+            if (classifierName == null && ext == null) {
+                return;
+            }
+            DependencyDefinition definition = definitions.get(moduleId);
+            definition.artifacts.add(new ArtifactDef(masterConfs, classifierName, ext));
+        }
+
+        private void flagAsMainArtifact(JkModuleId moduleId, boolean flag) {
+            DependencyDefinition definition = definitions.get(moduleId);
+            definition.includeMainArtifact = definition.includeMainArtifact || flag;
+        }
+
+        private void addExludes(JkModuleId moduleId, JkDepExclude depExclude) {
+            DependencyDefinition definition = definitions.get(moduleId);
+            definition.excludes.add(depExclude);
+        }
+
+        List<DependencyDescriptor> toDependencyDescriptors() {
+            List<DependencyDescriptor> result = new LinkedList<DependencyDescriptor>();
+            for (JkModuleId moduleId : this.definitions.keySet()) {
+                result.add(this.definitions.get(moduleId).toDescriptor(moduleId));
+            }
+            return result;
+        }
+
+    }
+
+    private static class Conf {
+
+        private final String masterConf;
+        private final String depConf;
+
+        public Conf(String masterConf, String depConf) {
+            this.masterConf = masterConf;
+            this.depConf = depConf;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Conf conf = (Conf) o;
+            if (!masterConf.equals(conf.masterConf)) return false;
+            return depConf.equals(conf.depConf);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = masterConf.hashCode();
+            result = 31 * result + depConf.hashCode();
+            return result;
+        }
+    }
+
+    private static class ArtifactDef {
+
+        final Set<String> confs;
+        String name;
+        String type;
+
+        public ArtifactDef(Set<String> masterConfs, String name, String type) {
+            this.confs = masterConfs;
+            this.name = name;
+            this.type = type;
+        }
+
+
+    }
 
 }
