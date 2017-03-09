@@ -6,7 +6,6 @@
       <module fileurl="file://$PROJECT_DIR$/org.jerkar.distrib-all/org.jerkar.distrib-all.iml" filepath="$PROJECT_DIR$/org.jerkar.distrib-all/org.jerkar.distrib-all.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.jerkar.plugins-jacoco/org.jerkar.plugins-jacoco.iml" filepath="$PROJECT_DIR$/org.jerkar.plugins-jacoco/org.jerkar.plugins-jacoco.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.jerkar.plugins-sonar/org.jerkar.plugins-sonar.iml" filepath="$PROJECT_DIR$/org.jerkar.plugins-sonar/org.jerkar.plugins-sonar.iml" />
-      <module fileurl="file://$PROJECT_DIR$/temp-test/temp-test.iml" filepath="$PROJECT_DIR$/temp-test/temp-test.iml" />
     </modules>
   </component>
 </project>
