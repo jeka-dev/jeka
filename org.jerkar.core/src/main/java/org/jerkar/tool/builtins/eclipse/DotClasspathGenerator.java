@@ -319,7 +319,9 @@ final class DotClasspathGenerator {
                 javadoc = javadocArtifacts.iterator().next().localFile();
             }
         }
-        writeClasspathEntry(writer, resolveResult.filesOf(moduleId).get(0), source, javadoc, paths);
+        for (final File file : resolveResult.filesOf(moduleId)) {
+            writeClasspathEntry(writer, file, source, javadoc, paths);
+        }
     }
 
     private void writeClasspathEntry(XMLStreamWriter writer, File bin, File source, File javadoc, Set<String> paths)
