@@ -212,9 +212,11 @@ public final class JkDependencyResolver {
         }
         cachedResolveResult.put(cachedScope, resolveResult);
         if (JkLog.verbose()) {
-            JkLog.info(resolveResult.involvedModules().size() + " artifacts: " + resolveResult.involvedModules());
+            JkLog.info(resolveResult.involvedModules().size() + " module(s): " + resolveResult.involvedModules());
+            JkLog.info(resolveResult.localFiles().size() + " artifact(s).");
         } else {
-            JkLog.info(resolveResult.involvedModules().size() + " artifacts.");
+            JkLog.info(resolveResult.involvedModules().size() + " module(s) leading to " +
+                    resolveResult.localFiles().size() + " artifact(s).");
         }
         JkLog.done();
         return resolveResult;
