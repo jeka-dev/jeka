@@ -160,6 +160,25 @@ public final class JkUtilsString {
     }
 
     /**
+     * Returns a string containing the quantity and noun. The noun is the plural form if
+     * quantity > 1.
+     */
+    public static String plurialize(int count, String singular, String plurial) {
+        if (count > 1) {
+            return "" + count + " " + plurial;
+        }
+        return "" + count + " " + singular;
+    }
+
+    /**
+     * Returns a string containing the quantity and noun. The noun is the plural form if
+     * quantity > 1. The plurial form is singular form + 's';
+     */
+    public static String plurialize(int count, String singular) {
+        return plurialize(count, singular, singular + 's');
+    }
+
+    /**
      * Create an instance of the specified type from its string value. For now
      * handled types are :
      * <ul>

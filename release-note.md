@@ -1,3 +1,7 @@
+## 0.5.1
+
+* Fix issue #60 related to artifacts with classifier.
+
 ## 0.5.0
 
 * Add `showDependencies` on `JkBuildDependencySupport` that display project dependency tree.

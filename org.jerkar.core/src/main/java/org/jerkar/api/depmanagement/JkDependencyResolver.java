@@ -12,6 +12,9 @@ import org.jerkar.api.depmanagement.JkDependency.JkFileDependency;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsString;
+
+import static  org.jerkar.api.utils.JkUtilsString.*;
 
 /**
  * A resolver for a given set of dependency. Each instance of
@@ -212,11 +215,11 @@ public final class JkDependencyResolver {
         }
         cachedResolveResult.put(cachedScope, resolveResult);
         if (JkLog.verbose()) {
-            JkLog.info(resolveResult.involvedModules().size() + " module(s): " + resolveResult.involvedModules());
-            JkLog.info(resolveResult.localFiles().size() + " artifact(s).");
+            JkLog.info(plurialize(resolveResult.involvedModules().size(), "module") + resolveResult.involvedModules());
+            JkLog.info(plurialize(resolveResult.localFiles().size(), "artifact") + ".");
         } else {
-            JkLog.info(resolveResult.involvedModules().size() + " module(s) leading to " +
-                    resolveResult.localFiles().size() + " artifact(s).");
+            JkLog.info(plurialize(resolveResult.involvedModules().size(), "module") + " leading to " +
+                    plurialize(resolveResult.localFiles().size(),"artifact") + ".");
         }
         JkLog.done();
         return resolveResult;
