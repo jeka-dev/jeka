@@ -1,10 +1,13 @@
 package org.jerkar.tool.builtins.eclipse;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkFileSystemDependency;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.JkBuild;
@@ -36,7 +39,14 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
     @JkDoc({ "If not null, this value will be used as the JRE container path when generating .classpath file." })
     public String jreContainer = null;
 
+    /** Set the JRE container to the Eclipse Standard VM type with the desired name. */
+    public void setStandardJREContainer(String jreName) {
+        jreContainer = "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/" + jreName;
+    }
+
     private DotClasspathModel cachedClasspath = null;
+
+    private final Map<File,File> projectDirsByClassDirs = new HashMap<File,File>();
 
     /** generate eclipse metadata files (as .classpath or .project) */
     @JkDoc("Generates Eclipse .classpath file according project dependencies.")
@@ -57,6 +67,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
             generator.sources  = jbuild.sources().and(jbuild.resources());
             generator.testSources  = jbuild.unitTestSources().and(jbuild.unitTestResources());
             generator.testClassDir = jbuild.testClassDir();
+            generator.projectDirsByClassDirs = this.projectDirsByClassDirs;
             generator.generate();
         }
         final File dotProject = this.build.file(".project");
@@ -149,4 +160,23 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
         return (JkJavaBuild) this.build;
     }
 
+    /**
+     * Create a classpath dependency on a project's class folder, but make the .classpath reference the whole project.
+     * @param projectDir path to the project directory
+     * @param classesSubdir path (relative to projectDir) of the classes dir
+     */
+    public JkFileSystemDependency projectClasses(String projectDir, String classesSubdir) {
+        final File dir = new File(projectDir);
+        return projectClasses(dir, new File(dir, classesSubdir));
+    }
+
+    /**
+     * Create a classpath dependency on a project's class folder, but make the .classpath reference the whole project.
+     * @param projectDir directory of the project
+     * @param classesDir directory of the classes
+     */
+    public JkFileSystemDependency projectClasses(File projectDir, File classesDir) {
+        projectDirsByClassDirs.put(classesDir, projectDir);
+        return JkFileSystemDependency.of(classesDir);
+    }
 }
