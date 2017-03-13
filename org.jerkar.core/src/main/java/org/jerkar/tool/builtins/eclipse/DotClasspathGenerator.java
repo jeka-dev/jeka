@@ -29,10 +29,12 @@ import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.system.JkLocator;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
+import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkConstants;
 import org.jerkar.tool.JkOptions;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
@@ -468,6 +470,40 @@ final class DotClasspathGenerator {
 
     private static String toPatternString(List<String> pattern) {
         return JkUtilsString.join(pattern, "|");
+    }
+
+    /*
+     * If the specified folder is the output folder of an eclipse project than it returns the root of this project,
+     * else otherwise.
+     */
+    private static File getProjectFolderOf(File binaryFolder) {
+
+        File folder = binaryFolder.getParentFile();
+        while (folder != null) {
+            File dotClasspath = new File(folder, ".classpath");
+            if (! dotClasspath.exists()) {
+                folder = folder.getParentFile();
+                continue;
+            }
+            final DotClasspathModel model;
+            try {
+                model = DotClasspathModel.from(dotClasspath);
+            } catch (RuntimeException e) {
+                JkLog.warn("File " + dotClasspath + " can't be parsed. " + binaryFolder
+                        + " dependency won't be considered as the output of an Eclipse project.");
+                JkLog.warn("Cause exception is " + e.getMessage());
+                return null;
+            }
+            File outputFile = new File(model.outputPath());
+            if (!outputFile.isAbsolute()) {
+                outputFile = new File(folder, model.outputPath());
+            }
+            if (JkUtilsFile.isSame(binaryFolder, outputFile)) {
+                return folder;
+            }
+            folder = folder.getParentFile();
+        }
+        return null;
     }
 
 }
