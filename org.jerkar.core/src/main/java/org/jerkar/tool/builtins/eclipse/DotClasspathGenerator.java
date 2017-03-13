@@ -309,12 +309,24 @@ final class DotClasspathGenerator {
     }
 
     private File getProjectDir(Set<File> files) {
+
+        // check the files for explicit project settings
         for (final File file : files) {
-            final File projectDir = projectDirsByClassDirs.get(file);
+            if (projectDirsByClassDirs.containsKey(file)) {
+
+                // project dir explicitly set, always use that, even if null
+                return projectDirsByClassDirs.get(file);
+            }
+        }
+
+        // project dir not specified, try to guess
+        for (final File file : files) {
+            final File projectDir = getProjectFolderOf(file);
             if (projectDir != null) {
                 return projectDir;
             }
         }
+
         return null;
     }
 

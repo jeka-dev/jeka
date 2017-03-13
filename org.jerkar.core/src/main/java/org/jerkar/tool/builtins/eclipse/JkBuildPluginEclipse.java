@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkFileSystemDependency;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.JkBuild;
@@ -161,22 +160,11 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
     }
 
     /**
-     * Create a classpath dependency on a project's class folder, but make the .classpath reference the whole project.
-     * @param projectDir path to the project directory
-     * @param classesSubdir path (relative to projectDir) of the classes dir
-     */
-    public JkFileSystemDependency projectClasses(String projectDir, String classesSubdir) {
-        final File dir = new File(projectDir);
-        return projectClasses(dir, new File(dir, classesSubdir));
-    }
-
-    /**
-     * Create a classpath dependency on a project's class folder, but make the .classpath reference the whole project.
-     * @param projectDir directory of the project
+     * When a file dependency is found at classesDir, make a project reference instead of a class folder reference in the .classpath file.
      * @param classesDir directory of the classes
+     * @param projectDir directory of the project
      */
-    public JkFileSystemDependency projectClasses(File projectDir, File classesDir) {
+    public void addProjectFromClasses(File classesDir, File projectDir) {
         projectDirsByClassDirs.put(classesDir, projectDir);
-        return JkFileSystemDependency.of(classesDir);
     }
 }
