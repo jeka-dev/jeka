@@ -80,6 +80,9 @@ final class DotClasspathGenerator {
     /** Can be empty but not null */
     public Iterable<File> projectDependencies = JkUtilsIterable.listOf();
 
+    /** Map from class dir to project dir */
+    public Map<File,File> projectDirsByClassDirs;
+
     /**
      * Constructs a {@link JkDotClasspathGenerator} from the project base
      * directory
@@ -287,7 +290,12 @@ final class DotClasspathGenerator {
                 writeModuleEntry(moduleDependency.moduleId(), writer, resolveResult, attachedArtifacts, paths);
             } else if (dependency instanceof JkFileSystemDependency) {
                 final JkFileSystemDependency fileSystemDependency = (JkFileSystemDependency) dependency;
-                writeFileEntries(fileSystemDependency.files(), writer, paths);
+                final File projectDir = getProjectDir(fileSystemDependency.files());
+                if (projectDir != null) {
+                    writeProjectEntry(projectDir, writer, paths);
+                } else {
+                    writeFileEntries(fileSystemDependency.files(), writer, paths);
+                }
             } else if(dependency instanceof JkComputedDependency) {
                 final JkComputedDependency computedDependency = (JkComputedDependency) dependency;
                 for (final File projectRoot : this.projectDependencies) {
@@ -298,6 +306,28 @@ final class DotClasspathGenerator {
             }
         }
         writeExternalModuleEntries(attachedArtifacts, writer, resolveResult, paths);
+    }
+
+    private File getProjectDir(Set<File> files) {
+
+        // check the files for explicit project settings
+        for (final File file : files) {
+            if (projectDirsByClassDirs.containsKey(file)) {
+
+                // project dir explicitly set, always use that, even if null
+                return projectDirsByClassDirs.get(file);
+            }
+        }
+
+        // project dir not specified, try to guess
+        for (final File file : files) {
+            final File projectDir = getProjectFolderOf(file);
+            if (projectDir != null) {
+                return projectDir;
+            }
+        }
+
+        return null;
     }
 
     private void writeExternalModuleEntries(JkAttachedArtifacts attachedArtifacts, final XMLStreamWriter writer,
