@@ -45,5 +45,13 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
         JkLog.info(generator.outputFile.getPath() + " generated.");
     }
 
+    @JkDoc("Generates ./idea/modules.xml file")
+    public void generateModulesXml() {
+        File current = build.baseDir().root();
+        Iterable<File> imls = build.baseDir().include("**/*.iml");
+        ModulesXmlGenerator modulesXmlGenerator = new ModulesXmlGenerator(current, imls);
+        modulesXmlGenerator.generate();
+    }
+
 
 }
