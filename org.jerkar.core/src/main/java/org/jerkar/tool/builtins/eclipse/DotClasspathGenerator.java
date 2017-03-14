@@ -84,7 +84,7 @@ final class DotClasspathGenerator {
     public Map<File,File> projectDirsByClassDirs;
 
     /**
-     * Constructs a {@link JkDotClasspathGenerator} from the project base
+     * Constructs a {@link DotClasspathGenerator} from the project base
      * directory
      */
     public DotClasspathGenerator(File projectDir) {
@@ -489,7 +489,9 @@ final class DotClasspathGenerator {
      * else otherwise.
      */
     private static File getProjectFolderOf(File binaryFolder) {
-
+        if (! binaryFolder.isDirectory()) {
+            return null;
+        }
         File folder = binaryFolder.getParentFile();
         while (folder != null) {
             File dotClasspath = new File(folder, ".classpath");
