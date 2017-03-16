@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jerkar.api.system.JkLog;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
  * @formatter:off
@@ -28,7 +29,8 @@ public class IvyResolverRunner {
         // jogl();
         // joglWithSource();
         // testPublishIvy();
-        springJdbc();
+        //springJdbc();
+        sourceAndJavadoc();
     }
 
     public static void spring() {
@@ -114,6 +116,16 @@ public class IvyResolverRunner {
         //final JkResolveResult resolveResult = ivyResolver.resolve(JkModuleId.of("popo.popo").version("1"),deps, null, JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
 
         JkLog.info(resolveResult.dependencyTree().toStrings());
+    }
+
+    public static void sourceAndJavadoc() {
+        final InternalDepResolver ivyResolver = IvyResolver.of(REPOS);
+        JkModuleDependency dep = JkModuleDependency.of(
+                JkPopularModules.GUAVA, "19.0").classifier("javadoco");
+        JkDependencies deps = JkDependencies.builder().on(dep, JkJavaBuild.COMPILE).build();
+        JkResolveResult result = ivyResolver.resolveAnonymous(deps, JkScope.of("*"),
+                JkResolutionParameters.of(), JkVersionProvider.empty());
+        System.out.println(result);
     }
 
 }

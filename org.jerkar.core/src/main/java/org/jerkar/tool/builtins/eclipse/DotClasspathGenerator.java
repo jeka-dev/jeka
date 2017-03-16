@@ -112,7 +112,7 @@ final class DotClasspathGenerator {
 
         final Set<String> paths = new HashSet<String>();
 
-        // Build class sources
+        // Write sources for build classes
         if (new File(projectDir, JkConstants.BUILD_DEF_DIR).exists()) {
             writer.writeCharacters("\t");
             writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
@@ -123,15 +123,13 @@ final class DotClasspathGenerator {
         }
 
         generateSrcAndTestSrc(writer, paths);
-
+        writeDependenciesEntries(writer, paths);
         writeJre(writer);
-
-
 
         // Write entries for dependencies located under build/libs
         final Iterable<File> files = buildDefDependencyResolver.dependenciesToResolve().localFileDependencies();
+        writeFileEntries(writer, files, paths);
 
-        writeFileEntries(files, writer, paths);
 
         // Write output
         writer.writeCharacters("\t");
@@ -139,10 +137,13 @@ final class DotClasspathGenerator {
         writer.writeAttribute("kind", "output");
         writer.writeAttribute("path", "bin");
         writer.writeCharacters("\n");
+
+        // Writer doc footer
         writer.writeEndDocument();
         writer.flush();
         writer.close();
 
+        // Store generated file
         outputFile.delete();
         JkUtilsFile.writeStringAtTop(outputFile, fos.toString(ENCODING));
     }
@@ -168,7 +169,7 @@ final class DotClasspathGenerator {
         }
     }
 
-    private void writeFileEntries(Iterable<File> fileDeps, XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
+    private void writeFileEntries(XMLStreamWriter writer, Iterable<File> fileDeps, Set<String> paths) throws XMLStreamException {
         for (final File file : fileDeps) {
             writeFileEntry(file, writer, paths);
         }
@@ -252,11 +253,6 @@ final class DotClasspathGenerator {
             writer.writeCharacters("\n");
         }
 
-
-
-        // Write entries for dependencies
-        writeDependenciesEntries(writer, paths);
-
     }
 
     private void writeIncludingExcluding(XMLStreamWriter writer, JkFileTree fileTree) throws XMLStreamException {
@@ -271,10 +267,14 @@ final class DotClasspathGenerator {
     }
 
     private void writeDependenciesEntries(XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
+
+        // Get dependency resolution result from both regular dependencies and build dependencies
         final JkResolveResult resolveResult = dependencyResolver.resolve(allScopes())
                 .and(buildDefDependencyResolver.resolve());
         final JkDependencies allDeps = this.dependencyResolver.dependenciesToResolve()
                 .and(this.buildDefDependencyResolver.dependenciesToResolve());
+
+        // Get sources and javadoc of resolved dependencies
         final JkAttachedArtifacts attachedArtifacts;
         if (dependencyResolver.dependenciesToResolve().containsModules()) {
             attachedArtifacts = dependencyResolver.getAttachedArtifacts(
@@ -283,29 +283,31 @@ final class DotClasspathGenerator {
         } else {
             attachedArtifacts = null;
         }
+
+        // Write direct dependencies (maven module + file system lib + computed deps)
         for (final JkScopedDependency scopedDependency : allDeps) {
             final JkDependency dependency = scopedDependency.dependency();
+
+            // Maven dependencies
             if (dependency instanceof JkModuleDependency) {
                 final JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
-                writeModuleEntry(moduleDependency.moduleId(), writer, resolveResult, attachedArtifacts, paths);
-            } else if (dependency instanceof JkFileSystemDependency) {
-                final JkFileSystemDependency fileSystemDependency = (JkFileSystemDependency) dependency;
-                final File projectDir = getProjectDir(fileSystemDependency.files());
+                JkModuleId moduleId = moduleDependency.moduleId();
+                writeModuleEntry(writer, moduleId, resolveResult.filesOf(moduleId), attachedArtifacts, paths);
+
+            // File dependencies (file system + computed)
+            } else if (dependency instanceof JkDependency.JkFileDependency) {
+                final JkDependency.JkFileDependency fileDependency = (JkDependency.JkFileDependency) dependency;
+                final File projectDir = getProjectDir(fileDependency.files());
                 if (projectDir != null) {
                     writeProjectEntry(projectDir, writer, paths);
                 } else {
-                    writeFileEntries(fileSystemDependency.files(), writer, paths);
-                }
-            } else if(dependency instanceof JkComputedDependency) {
-                final JkComputedDependency computedDependency = (JkComputedDependency) dependency;
-                for (final File projectRoot : this.projectDependencies) {
-                    if (computedDependency.hasFileWithin(projectRoot)) {
-                        writeProjectEntry(projectRoot, writer, paths);
-                    }
+                    writeFileEntries(writer, fileDependency.files(), paths);
                 }
             }
         }
-        writeExternalModuleEntries(attachedArtifacts, writer, resolveResult, paths);
+
+        // Write transitive maven dependencies
+        writeExternalModuleEntries(writer, attachedArtifacts, resolveResult, paths);
     }
 
     private File getProjectDir(Set<File> files) {
@@ -330,14 +332,15 @@ final class DotClasspathGenerator {
         return null;
     }
 
-    private void writeExternalModuleEntries(JkAttachedArtifacts attachedArtifacts, final XMLStreamWriter writer,
+    private void writeExternalModuleEntries(final XMLStreamWriter writer, JkAttachedArtifacts attachedArtifacts,
             JkResolveResult resolveResult, Set<String> paths) throws XMLStreamException {
         for (final JkVersionedModule versionedModule : resolveResult.involvedModules()) {
-            writeModuleEntry(versionedModule.moduleId(), writer, resolveResult, attachedArtifacts, paths);
+            JkModuleId moduleId = versionedModule.moduleId();
+            writeModuleEntry(writer, moduleId, resolveResult.filesOf(moduleId), attachedArtifacts, paths);
         }
     }
 
-    private void writeModuleEntry(JkModuleId moduleId, XMLStreamWriter writer, JkResolveResult resolveResult,
+    private void writeModuleEntry(XMLStreamWriter writer,JkModuleId moduleId, Iterable<File> files,
             JkAttachedArtifacts jkAttachedArtifacts, Set<String> paths) throws XMLStreamException {
         File source = null;
         File javadoc = null;
@@ -351,7 +354,7 @@ final class DotClasspathGenerator {
                 javadoc = javadocArtifacts.iterator().next().localFile();
             }
         }
-        for (final File file : resolveResult.filesOf(moduleId)) {
+        for (final File file : files) {
             writeClasspathEntry(writer, file, source, javadoc, paths);
         }
     }

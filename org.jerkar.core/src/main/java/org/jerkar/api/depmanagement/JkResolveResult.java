@@ -70,6 +70,15 @@ public final class JkResolveResult implements Serializable {
         return result;
     }
 
+    public boolean contains(JkModuleId moduleId) {
+        for (JkModuleDepFile moduleDepFile : jkModuleDepFiles) {
+            if (moduleDepFile.versionedModule().moduleId().equals(moduleId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 
     /**
@@ -122,4 +131,8 @@ public final class JkResolveResult implements Serializable {
         return this.depTree;
     }
 
+    @Override
+    public String toString() {
+        return this.jkModuleDepFiles.toString();
+    }
 }
