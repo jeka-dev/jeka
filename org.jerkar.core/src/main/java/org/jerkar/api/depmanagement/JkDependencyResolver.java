@@ -141,6 +141,29 @@ public final class JkDependencyResolver {
     }
 
     /**
+     * Gets artifacts belonging to the same module as the specified ones but
+     * having the specified classifiers.
+     */
+    public JkArtifactsWithClassifier getArtifactsWithClassifier(Iterable<JkVersionedModule> modules,
+                                                    String... classifiers) {
+        JkArtifactsWithClassifier result = new JkArtifactsWithClassifier();
+        JkDependencies.Builder builder = JkDependencies.builder();
+        for (String classifier : classifiers) {
+            for (JkVersionedModule versionedModule : modules) {
+                JkModuleDependency dep = JkModuleDependency.of(versionedModule).classifier(classifier)
+                        .transitive(false);
+                builder.on(dep);
+            }
+            JkResolveResult resolveResult = this.internalResolver.resolveAnonymous(builder.build(),
+                    JkScope.of("*"), JkResolutionParameters.of(), JkVersionProvider.empty() );
+            for (JkModuleDepFile moduleDepFile : resolveResult.moduleFiles()) {
+                result.add(classifier, moduleDepFile);
+            }
+        }
+        return result;
+    }
+
+    /**
      * Gets the path containing all the resolved dependencies as artifact files
      * for the specified scopes.
      * <p>
@@ -152,11 +175,12 @@ public final class JkDependencyResolver {
      * About ordering of transitive dependencies, they come after the explicit ones and
      * the dependee of the first explicitly declared dependency come before the dependee
      * of the second one and so on.
+     * @throws IllegalStateException if the resolution has not been achieved successfully
      */
     public JkPath get(JkScope... scopes) {
         JkResolveResult resolveResult = null;
         if (internalResolver != null && this.dependencies.containsModules()) {
-            resolveResult = getResolveResult(scopes);
+            resolveResult = getResolveResult(scopes).assertNoError();
         }
         final List<File> result = new LinkedList<File>();
         for (final JkScopedDependency scopedDependency : this.dependencies) {

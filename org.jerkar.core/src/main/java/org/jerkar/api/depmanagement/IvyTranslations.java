@@ -298,6 +298,12 @@ final class IvyTranslations {
                 JkVersion.name(artifact.getModuleRevisionId().getRevision()));
     }
 
+    public static JkArtifactDef toJkArtifactDef(MDArtifact artifact) {
+        JkVersionedModule vModule =  toJkVersionedModule(artifact);
+        String classifier = artifact.getAttribute("classifier");
+        return JkArtifactDef.of(vModule, classifier);
+    }
+
     private static String toIvyExpression(JkScopeMapping scopeMapping) {
         final List<String> list = new LinkedList<String>();
         for (final JkScope scope : scopeMapping.entries()) {

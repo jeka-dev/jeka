@@ -5,6 +5,7 @@ package org.jerkar.api.depmanagement;
 import java.io.File;
 
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsIterable;
 
 @SuppressWarnings("javadoc")
 public class JkDependencyResolverRunner {
@@ -13,7 +14,8 @@ public class JkDependencyResolverRunner {
 
     public static void main(String[] args) {
         JkLog.verbose(true);
-        hibernate();
+        //hibernate();
+        classifiers();
     }
 
     public static void hibernate() {
@@ -29,6 +31,18 @@ public class JkDependencyResolverRunner {
             System.out.println(file.getAbsolutePath());
         }
         System.out.println(deps.resolvedWith(resolveResult.involvedModules()));
+    }
+
+    public static void classifiers() {
+        final JkDependencies deps = JkDependencies.builder()
+                .on("org.hibernate:hibernate-core:4.3.7.Final").excludeLocally("dom4j", "dom4j")
+                .excludeGlobally("antlr", "antlr").excludeGlobally("org.jboss.logging", "*")
+                .build();
+        final JkVersionedModule versionedModule = JkVersionedModule.of("org.hibernate:hibernate-core:4.3.7.Final");
+
+        final JkDependencyResolver resolver = JkDependencyResolver.managed(REPOS, deps);
+        final JkArtifactsWithClassifier classifiers = resolver.getArtifactsWithClassifier(JkUtilsIterable.listOf(versionedModule), "sources");
+        System.out.println(classifiers);
     }
 
 }

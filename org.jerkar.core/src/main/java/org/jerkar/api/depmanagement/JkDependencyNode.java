@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -24,6 +25,14 @@ public class JkDependencyNode implements Serializable {
     private final JkScopedDependency root;
 
     private final List<JkDependencyNode> children;
+
+    /**
+     * Constructs a node for the specified versioned module having the specified
+     * direct descendants.
+     */
+    public static JkDependencyNode empty() {
+        return new JkDependencyNode(null, new LinkedList<JkDependencyNode>());
+    }
 
     /**
      * Constructs a node for the specified versioned module having the specified

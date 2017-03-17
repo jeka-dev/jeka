@@ -119,13 +119,15 @@ public class IvyResolverRunner {
     }
 
     public static void sourceAndJavadoc() {
-        final InternalDepResolver ivyResolver = IvyResolver.of(REPOS);
+        final IvyResolver ivyResolver = IvyResolver.of(REPOS);
         JkModuleDependency dep = JkModuleDependency.of(
-                JkPopularModules.GUAVA, "19.0").classifier("javadoco");
+                JkPopularModules.GUAVA, "19.0").classifier("javadoc");
         JkDependencies deps = JkDependencies.builder().on(dep, JkJavaBuild.COMPILE).build();
         JkResolveResult result = ivyResolver.resolveAnonymous(deps, JkScope.of("*"),
                 JkResolutionParameters.of(), JkVersionProvider.empty());
-        System.out.println(result);
+        System.out.println(result.errorReport());
     }
+
+
 
 }

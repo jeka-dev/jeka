@@ -1,5 +1,7 @@
 package org.jerkar.api.depmanagement;
 
+import org.jerkar.api.utils.JkUtilsIterable;
+
 import java.io.File;
 import java.io.Serializable;
 import java.util.Collections;
@@ -35,15 +37,13 @@ public final class JkResolveResult implements Serializable {
      * Creates a dependency resolve result object form a list of module dependency files and a list of resolved versions.
      */
     public static JkResolveResult of(List<JkModuleDepFile> artifacts,
-            JkVersionProvider jkVersionProvider, JkDependencyNode depTree) {
-        return new JkResolveResult(artifacts, jkVersionProvider, depTree);
+            JkVersionProvider jkVersionProvider, JkDependencyNode depTree, JkErrorReport errorReport) {
+        return new JkResolveResult(artifacts, jkVersionProvider, depTree, errorReport);
     }
 
-    /**
-     * Creates a dependency resolve result object form a list of module dependency files.
-     */
+
     private static JkResolveResult of(List<JkModuleDepFile> artifacts, JkDependencyNode dependencyTree) {
-        return new JkResolveResult(artifacts, JkVersionProvider.empty(), dependencyTree);
+        return new JkResolveResult(artifacts, JkVersionProvider.empty(), dependencyTree, JkErrorReport.allFine());
     }
 
     private final List<JkModuleDepFile> jkModuleDepFiles;
@@ -52,11 +52,19 @@ public final class JkResolveResult implements Serializable {
 
     private final JkDependencyNode depTree;
 
-    private JkResolveResult(List<JkModuleDepFile> artifacts, JkVersionProvider jkVersionProvider, JkDependencyNode depTree) {
+    private final JkErrorReport errorReport;
+
+    private JkResolveResult(List<JkModuleDepFile> artifacts, JkVersionProvider jkVersionProvider,
+                            JkDependencyNode depTree, JkErrorReport errorReport) {
         super();
-        this.jkModuleDepFiles = artifacts;
+        this.jkModuleDepFiles = Collections.unmodifiableList(artifacts);
         this.jkVersionProvider = jkVersionProvider;
         this.depTree = depTree;
+        this.errorReport = errorReport;
+    }
+
+    public List<JkModuleDepFile> moduleFiles() {
+        return this.jkModuleDepFiles;
     }
 
     /**
@@ -121,7 +129,8 @@ public final class JkResolveResult implements Serializable {
         artifacts.addAll(other.jkModuleDepFiles);
         final JkVersionProvider jkVersionProvider = this.jkVersionProvider
                 .and(other.jkVersionProvider);
-        return new JkResolveResult(artifacts, jkVersionProvider, this.depTree.merge(other.depTree));
+        return new JkResolveResult(artifacts, jkVersionProvider, this.depTree.merge(other.depTree),
+                this.errorReport.merge(other.errorReport));
     }
 
     /**
@@ -131,8 +140,61 @@ public final class JkResolveResult implements Serializable {
         return this.depTree;
     }
 
+    public JkErrorReport errorReport() {
+        return errorReport;
+    }
+
+    public JkResolveResult assertNoError() {
+        if (this.errorReport.hasErrors) {
+            throw new IllegalStateException("Error in dependency resolution : " + this.errorReport);
+        }
+        return this;
+    }
+
     @Override
     public String toString() {
         return this.jkModuleDepFiles.toString();
+    }
+
+
+
+    public static class JkErrorReport implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        private final List<JkArtifactDef> missingDependencies;
+
+        private final boolean hasErrors;
+
+        static JkErrorReport allFine() {
+            return new JkErrorReport(JkUtilsIterable.<JkArtifactDef>listOf(), false);
+        }
+
+        static JkErrorReport failure(List<JkArtifactDef> missingArtifacts) {
+            return new JkErrorReport(missingArtifacts, true);
+        }
+
+        private JkErrorReport(List<JkArtifactDef> dependencies, boolean hasErrors) {
+            this.missingDependencies = dependencies;
+            this.hasErrors = hasErrors || !this.missingDependencies.isEmpty();
+        }
+
+        public List<JkArtifactDef> missingDependencies() {
+            return missingDependencies;
+        }
+
+        private JkErrorReport merge(JkErrorReport other) {
+            return new JkErrorReport(JkUtilsIterable.concatLists(this.missingDependencies, other.missingDependencies),
+                    this.hasErrors || other.hasErrors);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            if (!missingDependencies.isEmpty()) {
+                sb.append("Missing dependencies : " + missingDependencies);
+            }
+            return sb.toString();
+        }
     }
 }

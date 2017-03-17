@@ -1,24 +1,15 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.IvyContext;
 import org.apache.ivy.core.cache.ResolutionCacheManager;
-import org.apache.ivy.core.module.descriptor.Artifact;
-import org.apache.ivy.core.module.descriptor.Configuration;
-import org.apache.ivy.core.module.descriptor.DefaultArtifact;
-import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
-import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
+import org.apache.ivy.core.module.descriptor.*;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
+import org.apache.ivy.core.report.DownloadStatus;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.DownloadOptions;
 import org.apache.ivy.core.resolve.IvyNode;
@@ -52,7 +43,7 @@ final class IvyResolver implements InternalDepResolver {
         this.ivy = ivy;
     }
 
-    private static InternalDepResolver of(IvySettings ivySettings) {
+    private static IvyResolver of(IvySettings ivySettings) {
         final Ivy ivy = ivy(ivySettings);
         return new IvyResolver(ivy);
     }
@@ -87,7 +78,7 @@ final class IvyResolver implements InternalDepResolver {
      * Creates an instance using specified repository for publishing and the
      * specified repositories for resolving.
      */
-    public static InternalDepResolver of(JkRepos resolveRepos) {
+    public static IvyResolver of(JkRepos resolveRepos) {
         return of(ivySettingsOf(resolveRepos));
     }
 
@@ -104,10 +95,10 @@ final class IvyResolver implements InternalDepResolver {
     @SuppressWarnings("unchecked")
     @Override
     public JkResolveResult resolve(JkVersionedModule module, JkDependencies deps, JkScope resolvedScope,
-            JkResolutionParameters parameters, JkVersionProvider tranditiveVersionOverride) {
+            JkResolutionParameters parameters, JkVersionProvider transitiveVersionOverride) {
 
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(module, deps,
-                parameters.defaultMapping(), tranditiveVersionOverride);
+                parameters.defaultMapping(), transitiveVersionOverride);
 
         final String[] confs = resolvedScope == null ? IVY_24_ALL_CONF : new String[] { resolvedScope.name() };
         final ResolveOptions resolveOptions = new ResolveOptions();
@@ -126,18 +117,19 @@ final class IvyResolver implements InternalDepResolver {
         } catch (final Exception e) {
             throw JkUtilsThrowable.unchecked(e);
         }
+        final JkResolveResult.JkErrorReport errorReport;
         if (report.hasError()) {
-            for (final ArtifactDownloadReport artifactDownloadReport : report.getAllArtifactsReports()) {
-                JkLog.info(artifactDownloadReport.toString());
-            }
-
-            throw new IllegalStateException("Errors while resolving dependencies : " + report.getAllProblemMessages());
+            errorReport = JkResolveResult.JkErrorReport.failure(missingArtifacts(
+                    report.getAllArtifactsReports()));
+        } else {
+            errorReport = JkResolveResult.JkErrorReport.allFine();
         }
         final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
         JkResolveResult resolveResult = JkResolveResult.empty(module);
         final String[] allConfs = resolveOptions.getConfs(moduleDescriptor);
         for (final String conf : allConfs) {
-            final JkResolveResult confResult = getResolveConf(conf, artifactDownloadReports, deps, report.getDependencies(), module);
+            final JkResolveResult confResult = getResolveConf(conf, artifactDownloadReports, deps,
+                    report.getDependencies(), module, errorReport);
             resolveResult = resolveResult.and(confResult);
         }
         return resolveResult;
@@ -204,7 +196,9 @@ final class IvyResolver implements InternalDepResolver {
     }
 
     private static JkResolveResult getResolveConf(String config, ArtifactDownloadReport[] artifactDownloadReports,
-            JkDependencies deps, List<IvyNode> nodes, JkVersionedModule rootVersionedModule) {
+                                                  JkDependencies deps, List<IvyNode> nodes,
+                                                  JkVersionedModule rootVersionedModule,
+                                                  JkResolveResult.JkErrorReport errorReport) {
 
         // Get module dependency files
         final List<JkModuleDepFile> moduleDepFiles = new LinkedList<JkModuleDepFile>();
@@ -226,7 +220,7 @@ final class IvyResolver implements InternalDepResolver {
 
         // Compute dependency tree
         final JkDependencyNode tree = createTree(nodes, config, rootVersionedModule, deps);
-        return JkResolveResult.of(moduleDepFiles, versionProvider, tree);
+        return JkResolveResult.of(moduleDepFiles, versionProvider, tree, errorReport);
     }
 
     static JkVersionedModule anonymousVersionedModule() {
@@ -350,6 +344,19 @@ final class IvyResolver implements InternalDepResolver {
         final Set<JkScope> result = new HashSet<JkScope>();
         for (final String config : configs) {
             result.add(JkScope.of(config.trim()));
+        }
+        return result;
+    }
+
+    private List<JkArtifactDef> missingArtifacts(ArtifactDownloadReport[] artifactDownloadReports) {
+        List<JkArtifactDef> result = new LinkedList<JkArtifactDef>();
+        for (ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
+            if (artifactDownloadReport.getDownloadStatus() == DownloadStatus.FAILED) {
+                if (ArtifactDownloadReport.MISSING_ARTIFACT.equals(artifactDownloadReport.getDownloadDetails())) {
+                    JkArtifactDef artifactDef = IvyTranslations.toJkArtifactDef((MDArtifact) artifactDownloadReport.getArtifact());
+                    result.add(artifactDef);
+                }
+            }
         }
         return result;
     }
