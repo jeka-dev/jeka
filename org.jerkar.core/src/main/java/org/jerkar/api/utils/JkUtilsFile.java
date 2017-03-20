@@ -14,6 +14,11 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -179,6 +184,44 @@ public final class JkUtilsFile {
 
         }
         return count;
+    }
+
+    /**
+     * Copies the source directory content to the target directory, along with filesystem attributes and permissions.
+     *
+     * @param source
+     *            The directory we want copy the content from.
+     * @param targetDir
+     *            The directory where will copy the content to.
+     */
+    public static void copyDirContentAndAttributes(File source, File targetDir) {
+
+        // use the new Java File API so we preserve file attributes (like executable permissions)
+        final Path srcPath = source.toPath();
+        final Path dstPath = targetDir.toPath();
+
+        try {
+            Files.walkFileTree(srcPath, new SimpleFileVisitor<Path>() {
+
+                @Override
+                public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs)
+                        throws IOException {
+                    Files.createDirectories(dstPath.resolve(srcPath.relativize(dir)));
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                        throws IOException {
+                    Files.copy(file, dstPath.resolve(srcPath.relativize(file)));
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+
+        } catch (final IOException ex) {
+            throw new RuntimeException(ex);
+        }
+
     }
 
     /**
