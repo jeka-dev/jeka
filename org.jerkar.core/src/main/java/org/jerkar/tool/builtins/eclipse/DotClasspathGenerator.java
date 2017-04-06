@@ -391,8 +391,11 @@ final class DotClasspathGenerator {
 
         writer.writeAttribute("path", binPath);
         if (source != null && source.exists()) {
-            final VarReplacement sourceReplacement = new VarReplacement(source);
-            writer.writeAttribute("sourcepath", sourceReplacement.path);
+            String srcPath = source.getAbsolutePath();
+            if (!useAbsolutePaths) {
+                srcPath = new VarReplacement(source).path;
+            }
+            writer.writeAttribute("sourcepath", srcPath);
         }
         if (javadoc != null && javadoc.exists()) {
             writer.writeCharacters("\n\t\t");
