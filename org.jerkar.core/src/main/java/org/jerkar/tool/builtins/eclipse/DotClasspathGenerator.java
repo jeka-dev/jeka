@@ -291,7 +291,7 @@ final class DotClasspathGenerator {
         writeExternalModuleEntries(writer, resolveResult, paths, repos);
     }
 
-    private File getProjectDir(Set<File> files) {
+    private File getProjectDir(Iterable<File> files) {
 
         // check the files for explicit project settings
         for (final File file : files) {

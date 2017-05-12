@@ -5,8 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkDoc;
+import org.jerkar.api.system.JkProcess;
+import org.jerkar.tool.*;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
 
@@ -32,9 +32,12 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
         final ImlGenerator generator = new ImlGenerator(build.baseDir().root());
         generator.buildDefDependencyResolver = build.buildDefDependencyResolver();
         generator.projectDependencies = depProjects;
+        if (this.build instanceof JkBuildDependencySupport) {
+            final JkBuildDependencySupport dsbuild = (JkBuildDependencySupport) build;
+            generator.dependencyResolver = dsbuild.dependencyResolver();
+        }
         if (this.build instanceof JkJavaBuild) {
             final JkJavaBuild jbuild = (JkJavaBuild) build;
-            generator.dependencyResolver = jbuild.dependencyResolver();
             generator.includeJavadoc = true;
             generator.sourceJavaVersion = jbuild.javaSourceVersion();
             generator.sources = jbuild.sources();
@@ -46,6 +49,7 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
         JkLog.info(generator.outputFile.getPath() + " generated.");
     }
 
+    /** Generate modules.xml files */
     @JkDoc("Generates ./idea/modules.xml file")
     public void generateModulesXml() {
         File current = build.baseDir().root();
@@ -53,6 +57,21 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
         ModulesXmlGenerator modulesXmlGenerator = new ModulesXmlGenerator(current, imls);
         modulesXmlGenerator.generate();
     }
+
+    @JkDoc("Generates iml files on this folder and its descendant recursively.")
+    public void generateAllIml() {
+        Iterable<File> folders = build.baseDir().include("**/" + JkConstants.BUILD_DEF_DIR).files(true);
+        JkLog.info("Generating iml files on " + folders);
+        for (File folder : folders) {
+            Main.exec(folder.getParentFile().getParentFile(), "idea#generateIml");
+        }
+    }
+
+    public void generateFiles() {
+        generateAllIml();
+        generateModulesXml();
+    }
+
 
 
 }

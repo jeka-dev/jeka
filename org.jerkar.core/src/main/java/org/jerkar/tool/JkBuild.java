@@ -314,7 +314,7 @@ public class JkBuild {
      * files.
      */
     public JkComputedDependency asDependency(Iterable<File> files) {
-        return BuildDependency.of(this, JkUtilsIterable.setOf(files));
+        return BuildDependency.of(this, JkUtilsIterable.listWithoutDuplicateOf(files));
     }
 
     /**

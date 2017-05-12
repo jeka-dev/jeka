@@ -113,11 +113,14 @@ final class ImlGenerator {
         writeContent();
         writeOrderEntrySourceFolder();
         Set<File> allPaths = new HashSet<File>();
-        writeDependencies(this.dependencyResolver, allPaths, false);
-        if (this.buildDefDependencyResolver != null) {
-            writeDependencies(this.buildDefDependencyResolver, allPaths, true);
+        Set<File> allModules = new HashSet<File>();
+        if (this.dependencyResolver != null) {
+            writeDependencies(this.dependencyResolver, allPaths, allModules, false);
         }
-        writeBuildProjectDependencies();
+        if (this.buildDefDependencyResolver != null) {
+            writeDependencies(this.buildDefDependencyResolver, allPaths, allModules, true);
+        }
+        writeBuildProjectDependencies(allModules);
         writeJdk();
         writeFoot();
         outputFile.delete();
@@ -231,19 +234,20 @@ final class ImlGenerator {
         writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
         writer.writeAttribute("isTestSource", "false");
         writer.writeCharacters("\n");
-
-
         writer.writeEndElement();
         writer.writeCharacters("\n");
     }
 
-    private void writeBuildProjectDependencies() throws XMLStreamException {
+    private void writeBuildProjectDependencies(Set<File> allModules) throws XMLStreamException {
         for (File rootFolder : this.projectDependencies) {
-            writeOrderEntryForModule(rootFolder.getName(), "COMPILE");
+            if (!allModules.contains(rootFolder)) {
+                writeOrderEntryForModule(rootFolder.getName(), "COMPILE");
+                allModules.add(rootFolder);
+            }
         }
     }
 
-    private void writeDependencies(JkDependencyResolver resolver, Set<File> allPaths, boolean forceTest) throws XMLStreamException {
+    private void writeDependencies(JkDependencyResolver resolver, Set<File> allPaths, Set<File> allModules,  boolean forceTest) throws XMLStreamException {
 
         // Get dependency resolution result from both regular dependencies and build dependencies
         final JkResolveResult resolveResult = resolver.resolve();
@@ -267,9 +271,12 @@ final class ImlGenerator {
                 // File dependencies (file system + computed)
             } else if (dependency instanceof JkDependency.JkFileDependency) {
                 final JkDependency.JkFileDependency fileDependency = (JkDependency.JkFileDependency) dependency;
-                final File projectDir = getProjectFolderOf(fileDependency.files());
-                if (dependency instanceof JkComputedDependency && projectDir != null) {
-                    writeOrderEntryForModule(projectDir.getName(), ideScope);
+                if (dependency instanceof JkComputedDependency) {
+                    final File projectDir = getProjectFolderOf(fileDependency.files(), this.projectDependencies);
+                    if (projectDir != null && !allModules.contains(projectDir)) {
+                        writeOrderEntryForModule(projectDir.getName(), ideScope);
+                        allModules.add(projectDir);
+                    }
                 }
                 writeFileEntries(writer, fileDependency.files(), paths, ideScope);
 
@@ -277,7 +284,7 @@ final class ImlGenerator {
         }
     }
 
-    private void writeFileEntries(XMLStreamWriter writer, Set<File> files, Set<String> paths, String ideScope) throws XMLStreamException {
+    private void writeFileEntries(XMLStreamWriter writer, Iterable<File> files, Set<String> paths, String ideScope) throws XMLStreamException {
         for (File file : files) {
             LibPath libPath = new LibPath();
             libPath.bin = file;
@@ -588,13 +595,16 @@ final class ImlGenerator {
      * If the specified folder is the output folder of an eclipse project than it returns the root of this project,
      * else otherwise.
      */
-    private static File getProjectFolderOf(Iterable<File> files) {
+    private static File getProjectFolderOf(Iterable<File> files, Iterable<File> projectDependencies) {
         if (!files.iterator().hasNext()) {
             return null;
         }
         File folder = files.iterator().next().getParentFile();
         while (folder != null) {
             if (JkFileTree.of(folder).include("*.iml").fileCount(false) == 1) {
+                return folder;
+            }
+            if (JkUtilsIterable.listOf(projectDependencies).contains(folder)) {
                 return folder;
             }
             folder = folder.getParentFile();

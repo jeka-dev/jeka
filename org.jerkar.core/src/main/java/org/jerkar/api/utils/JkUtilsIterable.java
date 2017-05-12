@@ -1,17 +1,8 @@
 package org.jerkar.api.utils;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
 
 /**
  * Utility class for dealing with {@link Iterable}.
@@ -45,6 +36,21 @@ public final class JkUtilsIterable {
     }
 
     /**
+     * Returns a duplicate free list of the given items
+     */
+    public static <T> List<T> listWithoutDuplicateOf(Iterable<T> items) {
+        final Set<T> set = new HashSet<T>();
+        final LinkedList<T> result = new LinkedList<T>();
+        for (T item : items) {
+            if (!set.contains(item)) {
+                set.add(item);
+                result.add(item);
+            }
+        }
+        return result;
+    }
+
+    /**
      * Creates an array of the specified class and populate it with items of the specified {@link Iterable}.
      */
     @SuppressWarnings("unchecked")
@@ -73,6 +79,17 @@ public final class JkUtilsIterable {
      */
     public static <T> Set<T> setOf(Iterable<T> items) {
         final HashSet<T> result = new HashSet<T>();
+        for (final T item : items) {
+            result.add(item);
+        }
+        return result;
+    }
+
+    /**
+     * Creates a set of specified items.
+     */
+    public static <T> Set<T> linkedHashSetOf(Iterable<T> items) {
+        final LinkedHashSet<T> result = new LinkedHashSet<T>();
         for (final T item : items) {
             result.add(item);
         }

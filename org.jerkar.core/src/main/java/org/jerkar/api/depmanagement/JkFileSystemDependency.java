@@ -3,6 +3,7 @@ package org.jerkar.api.depmanagement;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.jerkar.api.depmanagement.JkDependency.JkFileDependency;
@@ -16,10 +17,10 @@ public final class JkFileSystemDependency extends JkFileDependency {
 
     private static final long serialVersionUID = 1079527121988214989L;
 
-    private final Set<File> files;
+    private final List<File> files;
 
     private JkFileSystemDependency(Iterable<File> files) {
-        this.files = Collections.unmodifiableSet(JkUtilsIterable.setOf(files));
+        this.files = Collections.unmodifiableList(JkUtilsIterable.listWithoutDuplicateOf(files));
     }
 
     /**
@@ -48,7 +49,7 @@ public final class JkFileSystemDependency extends JkFileDependency {
     }
 
     @Override
-    public final Set<File> files() {
+    public final List<File> files() {
         for (final File file : files) {
             JkUtilsAssert.isTrue(file.exists(), "The file " + file.getAbsolutePath()
                     + " does not exist.");

@@ -15,8 +15,11 @@ import org.jerkar.api.utils.JkUtilsTime;
  *
  * @author Jerome Angibaud
  */
-final class Main {
+public final class Main {
 
+    /**
+     * Entry point for Jerkar application when launched from command-line
+     */
     public static void main(String[] args) {
         final long start = System.nanoTime();
         final JkInit init = JkInit.of(args);
@@ -43,6 +46,15 @@ final class Main {
                     + JkUtilsTime.durationInSeconds(start) + " seconds.");
             System.exit(1);
         }
+    }
+
+    /**
+     * Entry point to call Jerkar on a given folder
+     */
+    public static void exec(File projectDir, String... args) {
+        final JkInit init = JkInit.of(args);
+        final Project project = new Project(projectDir);
+        project.execute(init);
     }
 
     private static int printAscii(boolean error, String fileName) {

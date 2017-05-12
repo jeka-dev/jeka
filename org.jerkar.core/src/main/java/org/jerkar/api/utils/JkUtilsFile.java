@@ -301,7 +301,7 @@ public final class JkUtilsFile {
                 if (file.isDirectory()) {
                     deleteDirContent(file);
                 }
-                file.delete();
+                delete(file);
             }
         }
     }

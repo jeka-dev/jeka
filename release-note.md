@@ -3,6 +3,7 @@
 * Fix issue #60 related to artifacts with classifier.
 * Handle Eclipse project to project dependencies while generating .classpath (issue #61)
 * Generate Intellij modules.xml files
+* Take scope into account when generating Intellij iml files
 
 ## 0.5.0
 

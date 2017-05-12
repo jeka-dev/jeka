@@ -2,6 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,7 +34,7 @@ public abstract class JkDependency implements Serializable {
         /**
          * Returns files constituting this file dependencies.
          */
-        public abstract Set<File> files();
+        public abstract List<File> files();
 
     }
 

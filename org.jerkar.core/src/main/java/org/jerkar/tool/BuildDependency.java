@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jerkar.api.depmanagement.JkComputedDependency;
+import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
 
@@ -25,7 +26,7 @@ final class BuildDependency extends JkComputedDependency {
 
     private final List<String> methods;
 
-    private BuildDependency(JkBuild projectBuild, List<String> methods, Set<File> files) {
+    private BuildDependency(JkBuild projectBuild, List<String> methods, List<File> files) {
         super(new Invoker(projectBuild, methods), files);
         this.methods = methods;
         this.projectBuild = projectBuild;
@@ -54,21 +55,21 @@ final class BuildDependency extends JkComputedDependency {
 
     }
 
-    public static BuildDependency of(JkBuild projectBuild, Set<File> files) {
+    public static BuildDependency of(JkBuild projectBuild, List<File> files) {
         return of(projectBuild, JkConstants.DEFAULT_METHOD, files);
     }
 
-    public static BuildDependency of(JkBuild projectBuild, String methods, Set<File> files) {
+    public static BuildDependency of(JkBuild projectBuild, String methods, List<File> files) {
         final List<String> list = Arrays.asList(JkUtilsString.split(methods, " "));
-        return new BuildDependency(projectBuild, list, new HashSet<File>(files));
+        return new BuildDependency(projectBuild, list, JkUtilsIterable.listWithoutDuplicateOf(files));
     }
 
     public static BuildDependency of(JkBuild projectBuild, File... files) {
-        return of(projectBuild, new HashSet<File>(Arrays.asList(files)));
+        return of(projectBuild, Arrays.asList(files));
     }
 
     public static BuildDependency of(JkBuild projectBuild, String methods, File... files) {
-        return of(projectBuild, methods, new HashSet<File>(Arrays.asList(files)));
+        return of(projectBuild, methods, Arrays.asList(files));
     }
 
     public JkBuild projectBuild() {

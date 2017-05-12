@@ -1,7 +1,9 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jerkar.api.depmanagement.JkDependency.JkFileDependency;
@@ -32,7 +34,7 @@ public class JkComputedDependency extends JkFileDependency {
      * generating them.
      */
     public static final JkComputedDependency of(final JkProcess process, File... files) {
-        final Set<File> fileSet = JkUtilsIterable.setOf(files);
+        final List<File> fileSet = JkUtilsIterable.listWithoutDuplicateOf(Arrays.asList(files));
         final Runnable runnable = new Runnable() {
 
             @Override
@@ -53,7 +55,7 @@ public class JkComputedDependency extends JkFileDependency {
      * generating them.
      */
     public static final JkComputedDependency of(Runnable runnable, File... files) {
-        final Set<File> fileSet = JkUtilsIterable.setOf(files);
+        final List<File> fileSet = JkUtilsIterable.listWithoutDuplicateOf(Arrays.asList(files));
         return new JkComputedDependency(runnable, fileSet);
     }
 
@@ -61,9 +63,9 @@ public class JkComputedDependency extends JkFileDependency {
      * Identical to {@link #of(File, JkJavaProcess, String, String...)} but you specified a set of files
      * instead of a single one.
      */
-    public static final JkComputedDependency of(Set<File> files, final JkJavaProcess process,
+    public static final JkComputedDependency of(Iterable<File> files, final JkJavaProcess process,
             final String className, final String... args) {
-        final Set<File> fileSet = JkUtilsIterable.setOf(files);
+        final List<File> fileSet = JkUtilsIterable.listWithoutDuplicateOf(files);
         final Runnable runnable = new Runnable() {
 
             @Override
@@ -87,13 +89,13 @@ public class JkComputedDependency extends JkFileDependency {
 
     private final Runnable runnable;
 
-    private final Set<File> files;
+    private final List<File> files;
 
     /**
      * Constructs a computed dependency from the specified files and the specified {@link Runnable} to run for
      * generating them.
      */
-    protected JkComputedDependency(Runnable runnable, Set<File> files) {
+    protected JkComputedDependency(Runnable runnable, List<File> files) {
         super();
         this.runnable = runnable;
         this.files = files;
@@ -134,7 +136,7 @@ public class JkComputedDependency extends JkFileDependency {
     }
 
     @Override
-    public Set<File> files() {
+    public List<File> files() {
         if (this.hasMissingFilesOrEmptyDirs()) {
             JkLog.startHeaded("Building depending project " + this);
             runnable.run();
