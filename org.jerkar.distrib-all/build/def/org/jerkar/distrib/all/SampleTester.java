@@ -73,10 +73,8 @@ class SampleTester {
         scaffoldProcess.runSync(); // Build the scaffolded project
         JkLog.infoUnderlined("Test eclipse generation and compile            ");
         scaffoldProcess.withParameters("eclipse#generateFiles").runSync();
-        scaffoldProcess.withParameters("eclipse#").runSync(); // build usng the
-        // .classpath for
-        // resolving
-        // classpath
+        scaffoldProcess.withParameters("eclipse#").runSync(); // build using the .classpath for resolving classpath
+        scaffoldProcess.withParameters("idea#generateIml", "idea#generateModulesXml").runSync();
         JkLog.done();
     }
 

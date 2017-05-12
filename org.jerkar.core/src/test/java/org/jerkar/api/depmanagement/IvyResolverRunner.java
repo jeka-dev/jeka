@@ -30,7 +30,8 @@ public class IvyResolverRunner {
         // joglWithSource();
         // testPublishIvy();
         //springJdbc();
-        sourceAndJavadoc();
+        //sourceAndJavadoc();
+        get();
     }
 
     public static void spring() {
@@ -41,7 +42,7 @@ public class IvyResolverRunner {
                 .to("compile", "default").and(JkScopedDependencyTest.PROVIDED).to("provided")
                 .excludeGlobally("org.springframework", "spring-core").build();
         final JkResolutionParameters params = JkResolutionParameters.of();
-        final JkResolveResult resolveResult = IvyResolver.of(repos).resolveAnonymous(deps, COMPILE,
+        final JkResolveResult resolveResult = IvyResolver.of(repos).resolve(null,deps, COMPILE,
                 params, JkVersionProvider.empty());
         for (final File file : resolveResult.localFiles()) {
             System.out.println(file.getAbsolutePath());
@@ -54,7 +55,7 @@ public class IvyResolverRunner {
                 .on("org.hibernate:hibernate-core:4.3.7.Final")
                 .excludeLocally("org.jboss.logging", "*").excludeLocally("antlr", "*")
                 .scope(COMPILE).excludeGlobally("dom4j", "*").build();
-        final JkResolveResult resolveResult = IvyResolver.of(REPOS).resolveAnonymous(deps, COMPILE,
+        final JkResolveResult resolveResult = IvyResolver.of(REPOS).resolve(null,deps, COMPILE,
                 JkResolutionParameters.of(), JkVersionProvider.empty());
         for (final File file : resolveResult.localFiles()) {
             System.out.println(file.getAbsolutePath());
@@ -66,7 +67,7 @@ public class IvyResolverRunner {
         final JkRepos repos = JkRepos.mavenCentral().andMavenCentral();
         final JkDependencies deps = JkDependencies.builder()
                 .on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
-        final JkResolveResult resolveResult = IvyResolver.of(repos).resolveAnonymous(deps, COMPILE,
+        final JkResolveResult resolveResult = IvyResolver.of(repos).resolve(null, deps, COMPILE,
                 JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
         for (final File file : resolveResult.localFiles()) {
             System.out.println(file.getAbsolutePath());
@@ -79,30 +80,7 @@ public class IvyResolverRunner {
                 .and(JkScopedDependencyTest.RUNTIME).to("runtime", "archive(master)");
     }
 
-    public static void joglWithSource() {
-        final JkRepos repos = JkRepos.mavenCentral();
-        final JkDependencies deps = JkDependencies.builder()
-                .on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
-        final InternalDepResolver jkIvyResolver = IvyResolver.of(repos);
-        final JkResolveResult resolveResult = jkIvyResolver.resolveAnonymous(deps, COMPILE,
-                JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
-        final Set<JkVersionedModule> modules = new HashSet<JkVersionedModule>();
-        for (final JkVersionedModule versionedModule : resolveResult.involvedModules()) {
-            modules.add(versionedModule);
-        }
-        final JkAttachedArtifacts result = jkIvyResolver.getArtifacts(modules,
-                JkScope.of("sources"), JkScope.of("javadoc"), JkScope.of("noexist"));
-        System.out.println(result);
-        final Set<JkModuleDepFile> artifactSet = result.getArtifacts(
-                JkModuleId.of("org.apache.wicket", "wicket-ioc"), JkScope.of("sources"));
-        System.out.println(artifactSet);
-        final Set<JkModuleDepFile> javadocArtifactSet = result.getArtifacts(
-                JkModuleId.of("org.apache.wicket", "wicket-ioc"), JkScope.of("javadoc"));
-        System.out.println(javadocArtifactSet);
-        final Set<JkModuleDepFile> noExistArtifactSet = result.getArtifacts(
-                JkModuleId.of("org.apache.wicket", "wicket-ioc"), JkScope.of("noexist"));
-        System.out.println(noExistArtifactSet);
-    }
+
 
     public static void springJdbc() {
         final JkDependencies deps = JkDependencies.builder()
@@ -112,7 +90,7 @@ public class IvyResolverRunner {
         //.withDefaultScope(COMPILE);
         //.withExclusions(JkDependencyExclusions.builder().on(SPRING_JDBC, "commons-logging","commons-logging").build());
         final InternalDepResolver ivyResolver = IvyResolver.of(REPOS);
-        final JkResolveResult resolveResult = ivyResolver.resolveAnonymous(deps, null, JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
+        final JkResolveResult resolveResult = ivyResolver.resolve(null, deps, null, JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
         //final JkResolveResult resolveResult = ivyResolver.resolve(JkModuleId.of("popo.popo").version("1"),deps, null, JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
 
         JkLog.info(resolveResult.dependencyTree().toStrings());
@@ -121,11 +99,19 @@ public class IvyResolverRunner {
     public static void sourceAndJavadoc() {
         final IvyResolver ivyResolver = IvyResolver.of(REPOS);
         JkModuleDependency dep = JkModuleDependency.of(
-                JkPopularModules.GUAVA, "19.0").classifier("javadoc");
+                JkPopularModules.GUAVA, "19.0").classifier("sources");
         JkDependencies deps = JkDependencies.builder().on(dep, JkJavaBuild.COMPILE).build();
-        JkResolveResult result = ivyResolver.resolveAnonymous(deps, JkScope.of("*"),
+        JkResolveResult result = ivyResolver.resolve(null, deps, JkScope.of("*"),
                 JkResolutionParameters.of(), JkVersionProvider.empty());
         System.out.println(result.errorReport());
+    }
+
+    public static void get() {
+        final IvyResolver ivyResolver = IvyResolver.of(REPOS);
+        JkModuleDependency dep = JkModuleDependency.of(
+                JkPopularModules.GUAVA, "19.0").classifier("javadoc");
+        File file = ivyResolver.get(dep);
+        System.out.println(file);
     }
 
 

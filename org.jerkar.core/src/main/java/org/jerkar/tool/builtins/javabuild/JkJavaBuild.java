@@ -244,7 +244,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * Returns location where the java production classes are compiled.
      */
     public File testClassDir() {
-        return ouputDir().from("testClasses").createIfNotExist().root();
+        return ouputDir().from("test-classes").createIfNotExist().root();
     }
 
     // --------------------------- Configurer -----------------------------

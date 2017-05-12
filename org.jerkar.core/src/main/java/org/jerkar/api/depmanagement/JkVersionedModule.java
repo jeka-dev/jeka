@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.jar.Attributes;
 
 import org.jerkar.api.java.JkManifest;
+import org.jerkar.api.utils.JkUtilsAssert;
 
 /**
  * Identifies a given module in a given version
@@ -18,6 +19,7 @@ public final class JkVersionedModule implements Serializable {
      * Creates a {@link JkVersionedModule} from the specified module and version.
      */
     public static JkVersionedModule of(JkModuleId moduleId, JkVersion version) {
+        JkUtilsAssert.notNull(version, "No version specified for " + moduleId);
         return new JkVersionedModule(moduleId, version);
     }
 

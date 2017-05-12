@@ -12,7 +12,6 @@ import org.jerkar.api.depmanagement.JkDependency.JkFileDependency;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsString;
 
 import static  org.jerkar.api.utils.JkUtilsString.*;
 
@@ -31,14 +30,10 @@ import static  org.jerkar.api.utils.JkUtilsString.*;
  */
 public final class JkDependencyResolver {
 
-    private static final JkScope NULL_SCOPE = JkScope.of("JkDependencyResolver.NULL_SCOPE");
+    private static final JkScope NULL_SCOPE;
 
-    private static JkDependencyResolver managed(JkRepos repos, JkDependencies dependencies,
-            JkVersionedModule module, JkResolutionParameters resolutionParameters,
-            JkVersionProvider transitiveVersionOverride) {
-        final InternalDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
-        return new JkDependencyResolver(ivyResolver, dependencies, module, resolutionParameters,
-                transitiveVersionOverride);
+    static {
+        NULL_SCOPE = JkScope.of("JkDependencyResolver.NULL_SCOPE");
     }
 
     /**
@@ -49,7 +44,9 @@ public final class JkDependencyResolver {
      * {@link #unmanaged(JkDependencies)} instead.
      */
     public static JkDependencyResolver managed(JkRepos repos, JkDependencies dependencies) {
-        return managed(repos, dependencies, null, JkResolutionParameters.of(), null);
+        final InternalDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
+        return new JkDependencyResolver(ivyResolver, dependencies, null, null,
+                null, repos);
     }
 
     /**
@@ -62,7 +59,7 @@ public final class JkDependencyResolver {
                     "Your dependencies contain a reference to a managed extarnal module."
                             + "Use #managed method factory instead.");
         }
-        return new JkDependencyResolver(null, dependencies, null, null, null);
+        return new JkDependencyResolver(null, dependencies, null, null, null, JkRepos.of());
     }
 
     private final Map<JkScope, JkResolveResult> cachedResolveResult = new HashMap<JkScope, JkResolveResult>();
@@ -79,14 +76,17 @@ public final class JkDependencyResolver {
 
     private final JkVersionProvider transitiveVersionOverride;
 
+    private final JkRepos repos;
+
     private JkDependencyResolver(InternalDepResolver internalResolver, JkDependencies dependencies,
             JkVersionedModule module, JkResolutionParameters resolutionParameters,
-            JkVersionProvider transitiveVersionOverride) {
+            JkVersionProvider transitiveVersionOverride, JkRepos repos) {
         this.internalResolver = internalResolver;
         this.dependencies = dependencies;
         this.module = module;
         this.parameters = resolutionParameters;
         this.transitiveVersionOverride = transitiveVersionOverride == null ? JkVersionProvider.empty() : transitiveVersionOverride;
+        this.repos = repos;
     }
 
     /**
@@ -132,35 +132,10 @@ public final class JkDependencyResolver {
     }
 
     /**
-     * Gets artifacts belonging to the same module as the specified ones but
-     * having the specified scopes.
+     * Returns the repositories the resolution is made on.
      */
-    public JkAttachedArtifacts getAttachedArtifacts(Set<JkVersionedModule> modules,
-            JkScope... scopes) {
-        return internalResolver.getArtifacts(modules, scopes);
-    }
-
-    /**
-     * Gets artifacts belonging to the same module as the specified ones but
-     * having the specified classifiers.
-     */
-    public JkArtifactsWithClassifier getArtifactsWithClassifier(Iterable<JkVersionedModule> modules,
-                                                    String... classifiers) {
-        JkArtifactsWithClassifier result = new JkArtifactsWithClassifier();
-        JkDependencies.Builder builder = JkDependencies.builder();
-        for (String classifier : classifiers) {
-            for (JkVersionedModule versionedModule : modules) {
-                JkModuleDependency dep = JkModuleDependency.of(versionedModule).classifier(classifier)
-                        .transitive(false);
-                builder.on(dep);
-            }
-            JkResolveResult resolveResult = this.internalResolver.resolveAnonymous(builder.build(),
-                    JkScope.of("*"), JkResolutionParameters.of(), JkVersionProvider.empty() );
-            for (JkModuleDepFile moduleDepFile : resolveResult.moduleFiles()) {
-                result.add(classifier, moduleDepFile);
-            }
-        }
-        return result;
+    public JkRepos repositories() {
+        return this.repos;
     }
 
     /**
@@ -189,7 +164,7 @@ public final class JkDependencyResolver {
                 if (dependency instanceof JkFileDependency) {
                     final JkFileDependency fileDependency = (JkFileDependency) dependency;
                     result.addAll(fileDependency.files());
-                } else if (dependency instanceof JkModuleDependency) {
+                } else if (dependency instanceof JkModuleDependency && resolveResult != null) {
                     final JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
                     result.addAll(resolveResult.filesOf(moduleDependency.moduleId()));
                 }
@@ -234,7 +209,7 @@ public final class JkDependencyResolver {
             resolveResult = internalResolver.resolve(module, dependencies.onlyModules(), scope,
                     parameters, transitiveVersionOverride);
         } else {
-            resolveResult = internalResolver.resolveAnonymous(dependencies.onlyModules(), scope,
+            resolveResult = internalResolver.resolve(null, dependencies.onlyModules(), scope,
                     parameters, transitiveVersionOverride);
         }
         cachedResolveResult.put(cachedScope, resolveResult);
@@ -270,7 +245,7 @@ public final class JkDependencyResolver {
      */
     public JkDependencyResolver withModuleHolder(JkVersionedModule versionedModule) {
         return new JkDependencyResolver(this.internalResolver, dependencies, versionedModule,
-                this.parameters, this.transitiveVersionOverride);
+                this.parameters, this.transitiveVersionOverride, this.repos);
     }
 
     /**
@@ -278,7 +253,7 @@ public final class JkDependencyResolver {
      */
     public JkDependencyResolver withTransitiveVersionOverride(JkVersionProvider transitiveVersionOverride) {
         return new JkDependencyResolver(this.internalResolver, dependencies, this.module,
-                this.parameters, transitiveVersionOverride);
+                this.parameters, transitiveVersionOverride, this.repos);
     }
 
 
@@ -289,15 +264,7 @@ public final class JkDependencyResolver {
      */
     public JkDependencyResolver withParams(JkResolutionParameters params) {
         return new JkDependencyResolver(this.internalResolver, this.dependencies, this.module,
-                params, this.transitiveVersionOverride);
-    }
-
-    /**
-     * Returns a dependency resolver identical to this one but with the
-     * specified dependencies.
-     */
-    public JkDependencyResolver withDependencies(JkDependencies dependencies) {
-        return new JkDependencyResolver(this.internalResolver, dependencies, module, parameters, this.transitiveVersionOverride);
+                params, this.transitiveVersionOverride, this.repos);
     }
 
     @Override

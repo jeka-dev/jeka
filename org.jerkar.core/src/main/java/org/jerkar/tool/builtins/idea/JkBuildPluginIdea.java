@@ -24,7 +24,7 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
 
     /** Generates Idea [my-module].iml file */
     @JkDoc("Generates Idea [my-module].iml file")
-    public void generateFiles() {
+    public void generateIml() {
         final List<File> depProjects = new LinkedList<File>();
         for (final JkBuild depBuild : build.slaves().directs()) {
             depProjects.add(depBuild.baseDir().root());
@@ -39,7 +39,8 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
             generator.sourceJavaVersion = jbuild.javaSourceVersion();
             generator.sources = jbuild.sources();
             generator.testSources = jbuild.unitTestSources();
-
+            generator.outputClassFolder = jbuild.classDir();
+            generator.outputTestClassFolder = jbuild.testClassDir();
         }
         generator.generate();
         JkLog.info(generator.outputFile.getPath() + " generated.");

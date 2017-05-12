@@ -116,10 +116,10 @@ public final class JkModuleDependency extends JkDependency {
 
     private JkModuleDependency(JkModuleId module, JkVersionRange versionRange, String classifier,
             boolean transitive, String extension, List<JkDepExclude> excludes) {
-        JkUtilsAssert.notNull(module, "Can't instantiate without module");
-        JkUtilsAssert.notNull(module, "Can't instantiate without versionRange");
+        JkUtilsAssert.notNull(module, " module dependency can't be instantiated without module");
+        JkUtilsAssert.notNull(versionRange, module + " module dependency can't instantiate without versionRange");
         JkUtilsAssert
-        .notNull(module, "Can't instantiate wit null excludes, use empty list instead");
+        .notNull(excludes, module + " module dependency can't be instantiated with null excludes, use empty list instead");
         this.module = module;
         this.versionRange = versionRange;
         this.classifier = classifier;

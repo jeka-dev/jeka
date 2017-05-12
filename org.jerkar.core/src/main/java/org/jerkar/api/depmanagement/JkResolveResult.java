@@ -87,6 +87,19 @@ public final class JkResolveResult implements Serializable {
         return false;
     }
 
+    public JkVersion versionOf(JkModuleId moduleId) {
+        JkVersion result = this.jkVersionProvider.versionOf(moduleId);
+        if (result != null) {
+            return result;
+        }
+        for (JkModuleDepFile moduleDepFile : this.jkModuleDepFiles) {
+            if (moduleDepFile.versionedModule().moduleId().equals(moduleId)) {
+                return moduleDepFile.versionedModule().version();
+            }
+        }
+        return null;
+    }
+
 
 
     /**

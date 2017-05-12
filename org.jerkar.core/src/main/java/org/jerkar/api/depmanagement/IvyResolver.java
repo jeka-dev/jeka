@@ -82,23 +82,26 @@ final class IvyResolver implements InternalDepResolver {
         return of(ivySettingsOf(resolveRepos));
     }
 
-    @Override
-    public JkResolveResult resolveAnonymous(JkDependencies deps, JkScope resolvedScope,
-            JkResolutionParameters parameters, JkVersionProvider tranditiveVersionOverride) {
-        final JkVersionedModule anonymous = anonymousVersionedModule();
-        final JkResolveResult result = resolve(anonymous, deps, resolvedScope, parameters,
-                tranditiveVersionOverride);
-        deleteResolveCache(anonymous);
-        return result;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
-    public JkResolveResult resolve(JkVersionedModule module, JkDependencies deps, JkScope resolvedScope,
-            JkResolutionParameters parameters, JkVersionProvider transitiveVersionOverride) {
+    public JkResolveResult resolve(JkVersionedModule moduleArg, JkDependencies deps, JkScope resolvedScope,
+            JkResolutionParameters parameters, JkVersionProvider versionProvider) {
 
+        final JkVersionedModule module;
+        if (moduleArg == null) {
+            module = anonymousVersionedModule();
+        } else {
+            module = moduleArg;
+        }
+
+        if (parameters == null) {
+            parameters = JkResolutionParameters.of();
+        }
+        if (versionProvider == null) {
+            versionProvider = JkVersionProvider.empty();
+        }
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(module, deps,
-                parameters.defaultMapping(), transitiveVersionOverride);
+                parameters.defaultMapping(), versionProvider);
 
         final String[] confs = resolvedScope == null ? IVY_24_ALL_CONF : new String[] { resolvedScope.name() };
         final ResolveOptions resolveOptions = new ResolveOptions();
@@ -132,6 +135,9 @@ final class IvyResolver implements InternalDepResolver {
                     report.getDependencies(), module, errorReport);
             resolveResult = resolveResult.and(confResult);
         }
+        if (moduleArg == null) { // remob
+            deleteResolveCache(module);
+        }
         return resolveResult;
     }
 
@@ -142,47 +148,6 @@ final class IvyResolver implements InternalDepResolver {
         propsFile.delete();
         final File xmlFile = cacheManager.getResolvedIvyFileInCache(moduleRevisionId);
         xmlFile.delete();
-    }
-
-    @Override
-    public JkAttachedArtifacts getArtifacts(Iterable<JkVersionedModule> modules, JkScope... scopes) {
-        final JkVersionedModule anonymous = anonymousVersionedModule();
-        final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toUnpublished(anonymous);
-        for (final JkScope jkScope : scopes) {
-            moduleDescriptor.addConfiguration(new Configuration(jkScope.name()));
-        }
-        for (final JkVersionedModule module : modules) {
-            final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(module);
-            final DefaultDependencyDescriptor dependency = new DefaultDependencyDescriptor(moduleRevisionId, true,
-                    false);
-            for (final JkScope scope : scopes) {
-                dependency.addDependencyConfiguration(scope.name(), scope.name());
-            }
-            moduleDescriptor.addDependency(dependency);
-        }
-        final JkAttachedArtifacts result = new JkAttachedArtifacts();
-        final ResolveOptions resolveOptions = new ResolveOptions().setTransitive(false).setOutputReport(JkLog.verbose())
-                .setRefresh(false);
-        resolveOptions.setLog(logLevel());
-        for (final JkScope scope : scopes) {
-            resolveOptions.setConfs(IvyTranslations.toConfNames(scope));
-            final ResolveReport report;
-            try {
-                report = ivy.resolve(moduleDescriptor, resolveOptions);
-            } catch (final Exception e1) {
-                throw new RuntimeException(e1);
-            }
-            final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
-            for (final ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
-                final JkVersionedModule versionedModule = IvyTranslations
-                        .toJkVersionedModule(artifactDownloadReport.getArtifact());
-                final JkModuleDepFile artifact = JkModuleDepFile.of(versionedModule,
-                        artifactDownloadReport.getLocalFile());
-                result.add(scope, artifact);
-            }
-        }
-        deleteResolveCache(anonymous);
-        return result;
     }
 
     private static String logLevel() {
@@ -223,7 +188,7 @@ final class IvyResolver implements InternalDepResolver {
         return JkResolveResult.of(moduleDepFiles, versionProvider, tree, errorReport);
     }
 
-    static JkVersionedModule anonymousVersionedModule() {
+    private static JkVersionedModule anonymousVersionedModule() {
         final String version = Long.toString(RANDOM.nextLong());
         return JkVersionedModule.of(JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.name(version));
     }
@@ -231,11 +196,11 @@ final class IvyResolver implements InternalDepResolver {
     @Override
     public File get(JkModuleDependency dependency) {
         final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(dependency.moduleId(),
-                dependency.versionRange(), null);
-        final boolean metadata = "pom".equalsIgnoreCase(dependency.ext());
+                dependency.versionRange());
+        final boolean isMetadata = "pom".equalsIgnoreCase(dependency.ext());
         final String typeAndExt = JkUtilsObject.firstNonNull(dependency.ext(), "jar");
         final DefaultArtifact artifact;
-        if (metadata) {
+        if (isMetadata) {
             artifact = new DefaultArtifact(moduleRevisionId, null, dependency.moduleId().name(), typeAndExt,
                     typeAndExt, true);
         } else {
@@ -244,7 +209,7 @@ final class IvyResolver implements InternalDepResolver {
                 extra.put("classifier", dependency.classifier());
             }
             artifact = new DefaultArtifact(moduleRevisionId, null, dependency.moduleId().name(), typeAndExt,
-                    typeAndExt, moduleRevisionId.getExtraAttributes());
+                    typeAndExt, extra);
         }
         final ArtifactDownloadReport report = ivy.getResolveEngine().download(artifact, new DownloadOptions());
         return report.getLocalFile();
@@ -255,7 +220,7 @@ final class IvyResolver implements InternalDepResolver {
         treeResolver.populate(nodes, config);
         final JkModuleDependency moduleDependency = JkModuleDependency.of(rootVersionedModule);
         final JkScopedDependency scopedDependency = JkScopedDependency.of(moduleDependency, toScopes(config));
-        return treeResolver.createNode(scopedDependency, true);
+        return treeResolver.createNode(scopedDependency);
     }
 
     private static class TreeResolver {
@@ -265,7 +230,7 @@ final class IvyResolver implements InternalDepResolver {
 
         private final JkDependencies firstLevelDeps;
 
-        public TreeResolver(JkDependencies deps) {
+        TreeResolver(JkDependencies deps) {
             this.firstLevelDeps = deps;
         }
 
@@ -299,7 +264,7 @@ final class IvyResolver implements InternalDepResolver {
             }
         }
 
-        JkDependencyNode createNode(JkScopedDependency dep, boolean replaceVersion) {
+        JkDependencyNode createNode(JkScopedDependency dep) {
             final JkModuleDependency moduleDependency = (JkModuleDependency) dep.dependency();
             final JkModuleId moduleId = moduleDependency.moduleId();
             if (map.get(moduleId) == null) {
@@ -311,7 +276,7 @@ final class IvyResolver implements InternalDepResolver {
             }
             final List<JkDependencyNode> childNodes = new LinkedList<JkDependencyNode>();
             for (final JkScopedDependency scopedDep : modules) {
-                final JkDependencyNode childNode = createNode(scopedDep, false);
+                final JkDependencyNode childNode = createNode(scopedDep);
                 if (!containsSameModuleId(childNodes, childNode.root())) {
                     childNodes.add(childNode);
                 }

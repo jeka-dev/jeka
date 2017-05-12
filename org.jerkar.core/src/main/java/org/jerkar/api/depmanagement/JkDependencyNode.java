@@ -75,6 +75,39 @@ public class JkDependencyNode implements Serializable {
         return new JkDependencyNode(this.root, list);
     }
 
+    /**
+     * Returns all nodes descendant of this one.
+     */
+    public List<JkDependencyNode> descendants() {
+        List<JkDependencyNode> result = new LinkedList<JkDependencyNode>();
+        for (JkDependencyNode child : this.children()) {
+            result.add(child);
+            result.addAll(child.descendants());
+        }
+        return result;
+    }
+
+    /**
+     * For transitive dependencies, this retrieve the original dependency oit coming from. For direct dependency
+     * it returns the dependency itself.
+     * Returns <code>null</code> if the specified moduleId is not part of the tree.
+     */
+    public JkScopedDependency rootAncestor(JkModuleId moduleId) {
+        for (JkDependencyNode node : this.children()) {
+            JkModuleDependency directDep = (JkModuleDependency) node.root().dependency();
+            if (directDep.moduleId().equals(moduleId)) {
+                return node.root();
+            }
+            for (JkDependencyNode descendant : node.descendants()) {
+                JkModuleDependency dep = (JkModuleDependency) descendant.root.dependency();
+                if (dep.moduleId().equals(moduleId)) {
+                    return node.root();
+                }
+            }
+        }
+        return null;
+    }
+
     private boolean directChildrenContains(JkModuleId moduleId) {
         for (final JkDependencyNode dependencyNode : this.children) {
             if (dependencyNode.moduleId().equals(moduleId)) {
@@ -83,6 +116,8 @@ public class JkDependencyNode implements Serializable {
         }
         return false;
     }
+
+
 
     /**
      * Returns a list of lines standing for the representation of this

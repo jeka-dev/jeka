@@ -7,9 +7,9 @@ import org.jerkar.api.java.JkClassLoader;
  */
 public final class JkConstants {
 
-    static final String BUILD_OUTPUT_PATH = "build/output";
+    public static final String BUILD_OUTPUT_PATH = "build/output";
 
-    static final String BUILD_DEF_BIN_DIR_NAME = "def-bin";
+    static final String BUILD_DEF_BIN_DIR_NAME = "build-classes";
 
     static final String BUILD_BOOT = "build/boot";
 

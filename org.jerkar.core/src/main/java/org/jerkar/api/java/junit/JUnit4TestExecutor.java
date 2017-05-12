@@ -15,11 +15,11 @@ import org.jerkar.api.utils.JkUtilsTime;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 
+/**
+ * Class to run test in a separate process.
+ */
 class JUnit4TestExecutor {
 
-    /**
-     * Use this main class to run test in a separate process.
-     */
     public static void main(String[] args) {
         if (args.length == 0) {
             throw new IllegalArgumentException(

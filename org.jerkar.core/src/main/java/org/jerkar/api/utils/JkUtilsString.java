@@ -138,6 +138,7 @@ public final class JkUtilsString {
     /**
      * Returns the substring before the last delimiter of the specified
      * occurrence. The delimiter is not part of the result.
+     * Returns empty string if not found.
      */
     public static String substringBeforeLast(String string, String delimiter) {
         final int index = string.lastIndexOf(delimiter);

@@ -19,6 +19,8 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private InternalDepResolver ivyResolver;
+
     /**
      * Crates a {@link JkRepos} from the specified {@link JkRepo}s
      */
@@ -191,7 +193,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
      * Retrieves directly the file embodying the specified the external dependency.
      */
     public File get(JkModuleDependency moduleDependency) {
-        final InternalDepResolver depResolver = InternalDepResolvers.ivy(this);
+        final InternalDepResolver depResolver = ivyResolver();
         return depResolver.get(moduleDependency);
     }
 
@@ -209,7 +211,11 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
         return get(JkModuleId.of(moduleGroup, moduleName), version);
     }
 
-
-
+    private InternalDepResolver ivyResolver() {
+        if (ivyResolver == null) {
+            ivyResolver = InternalDepResolvers.ivy(this);
+        }
+        return ivyResolver;
+    }
 
 }
