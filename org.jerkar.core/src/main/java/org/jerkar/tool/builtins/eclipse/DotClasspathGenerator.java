@@ -67,6 +67,9 @@ final class DotClasspathGenerator {
     /** Map from class dir to project dir */
     Map<File,File> projectDirsByClassDirs;
 
+    /** Use absolute paths instead of classpath variables */
+    public boolean useAbsolutePaths;
+
     /**
      * Constructs a {@link DotClasspathGenerator} from the project base
      * directory
@@ -338,7 +341,10 @@ final class DotClasspathGenerator {
         if (binReplacement.skiped) {
             return;
         }
-        final String binPath = binReplacement.path;
+        String binPath = bin.getAbsolutePath();
+        if (!useAbsolutePaths) {
+            binPath = binReplacement.path;
+        }
         if (paths.contains(binPath)) {
             return;
         }
@@ -351,7 +357,7 @@ final class DotClasspathGenerator {
             writer.writeStartElement(DotClasspathModel.CLASSPATHENTRY);
         }
 
-        if (binReplacement.replaced) {
+        if (!useAbsolutePaths && binReplacement.replaced) {
             writer.writeAttribute("kind", "var");
         } else {
             writer.writeAttribute("kind", "lib");
@@ -359,8 +365,11 @@ final class DotClasspathGenerator {
 
         writer.writeAttribute("path", binPath);
         if (source != null && source.exists()) {
-            final VarReplacement sourceReplacement = new VarReplacement(source);
-            writer.writeAttribute("sourcepath", sourceReplacement.path);
+            String srcPath = source.getAbsolutePath();
+            if (!useAbsolutePaths) {
+                srcPath = new VarReplacement(source).path;
+            }
+            writer.writeAttribute("sourcepath", srcPath);
         }
         if (mustWriteJavadoc) {
             writer.writeCharacters("\n\t\t");

@@ -43,6 +43,10 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
         jreContainer = "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/" + jreName;
     }
 
+    /** Flag to set whether 'generateFiles' task should use absolute paths instead of classpath variables */
+    @JkDoc({ "Set it to true to use absolute paths in the classpath instead of classpath variables." })
+    public boolean useAbsolutePathsInClasspath = false;
+
     private DotClasspathModel cachedClasspath = null;
 
     private final Map<File,File> projectDirsByClassDirs = new HashMap<File,File>();
@@ -67,6 +71,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
             generator.testSources  = jbuild.unitTestSources().and(jbuild.unitTestResources());
             generator.testClassDir = jbuild.testClassDir();
             generator.projectDirsByClassDirs = this.projectDirsByClassDirs;
+            generator.useAbsolutePaths = this.useAbsolutePathsInClasspath;
             generator.generate();
         }
         final File dotProject = this.build.file(".project");
