@@ -45,10 +45,17 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns the root module of this dependency node.
+     * Returns the root module+scope of this dependency node.
      */
     public JkScopedDependency root() {
         return root;
+    }
+
+    /**
+     * Returns the root module of this dependency node.
+     */
+    public JkModuleDependency rootAsModule() {
+        return (JkModuleDependency) root.dependency();
     }
 
     /**
@@ -56,6 +63,18 @@ public class JkDependencyNode implements Serializable {
      */
     public List<JkDependencyNode> children() {
         return children;
+    }
+
+    /**
+     * Returns the child node having the specified moduleId.
+     */
+    public JkDependencyNode child(JkModuleId moduleId) {
+        for (JkDependencyNode node : children) {
+            if (node.moduleId().equals(moduleId)) {
+                return node;
+            }
+        }
+        return null;
     }
 
 
@@ -88,8 +107,8 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * For transitive dependencies, this retrieve the original dependency oit coming from. For direct dependency
-     * it returns the dependency itself.
+     * For transitive dependencies, this retrieve the original dependency the specified module coming from.
+     * For direct dependency it returns the dependency itself.
      * Returns <code>null</code> if the specified moduleId is not part of the tree.
      */
     public JkScopedDependency rootAncestor(JkModuleId moduleId) {

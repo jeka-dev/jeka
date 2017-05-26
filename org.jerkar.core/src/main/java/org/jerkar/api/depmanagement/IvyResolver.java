@@ -19,6 +19,7 @@ import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.util.url.URLHandlerRegistry;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
@@ -84,8 +85,8 @@ final class IvyResolver implements InternalDepResolver {
 
     @SuppressWarnings("unchecked")
     @Override
-    public JkResolveResult resolve(JkVersionedModule moduleArg, JkDependencies deps, JkScope resolvedScope,
-            JkResolutionParameters parameters, JkVersionProvider versionProvider) {
+    public JkResolveResult resolve(JkVersionedModule moduleArg, JkDependencies deps,
+            JkResolutionParameters parameters, JkVersionProvider versionProvider, JkScope ... resolvedScopes) {
 
         final JkVersionedModule module;
         if (moduleArg == null) {
@@ -103,7 +104,7 @@ final class IvyResolver implements InternalDepResolver {
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(module, deps,
                 parameters.defaultMapping(), versionProvider);
 
-        final String[] confs = resolvedScope == null ? IVY_24_ALL_CONF : new String[] { resolvedScope.name() };
+        final String[] confs = toConfs(deps.declaredScopes(), resolvedScopes);
         final ResolveOptions resolveOptions = new ResolveOptions();
         resolveOptions.setConfs(confs);
         resolveOptions.setTransitive(true);
@@ -111,7 +112,7 @@ final class IvyResolver implements InternalDepResolver {
         resolveOptions.setLog(logLevel());
         resolveOptions.setRefresh(parameters.refreshed());
         resolveOptions.setCheckIfChanged(true);
-        if (resolvedScope == null) {   // if scope == null verbose ivy report turns in exception
+        if (resolvedScopes.length == 0) {   // if no scope, verbose ivy report turns in exception
             resolveOptions.setOutputReport(false);
         }
         final ResolveReport report;
@@ -324,6 +325,20 @@ final class IvyResolver implements InternalDepResolver {
             }
         }
         return result;
+    }
+
+    private String[] toConfs(Set<JkScope> declaredScopes, JkScope ... resolvedScopes) {
+        if (resolvedScopes.length == 0) {
+            return IVY_24_ALL_CONF;
+        }
+        Set<String> result = new HashSet<String>();
+        for (int i = 0; i < resolvedScopes.length; i++) {
+            List<JkScope> scopes = resolvedScopes[i].commonScopes(declaredScopes);
+            for (JkScope scope : scopes) {
+                result.add(scope.name());
+            }
+        }
+        return JkUtilsIterable.arrayOf(result, String.class);
     }
 
 }

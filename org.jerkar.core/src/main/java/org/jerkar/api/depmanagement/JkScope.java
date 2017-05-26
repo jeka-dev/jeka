@@ -1,15 +1,12 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
+
+import javax.xml.ws.handler.MessageContext;
 
 /**
  * Defines a context where is defined dependencies of a given project. According
@@ -103,6 +100,24 @@ public class JkScope implements Serializable {
             }
         }
         return list;
+    }
+
+    /**
+     * Returns this scope or its first ancestors found present in the specified scopes.
+     */
+    public List<JkScope> commonScopes(Collection<JkScope> scopes) {
+        if (scopes.contains(this)) {
+            return JkUtilsIterable.listOf(this);
+        }
+        final List<JkScope> result = new LinkedList<JkScope>();
+        for (final JkScope scope : this.extendedScopes) {
+            if (scopes.contains(scope)) {
+                result.add(scope);
+            } else {
+                result.addAll(scope.commonScopes(scopes));
+            }
+        }
+        return result;
     }
 
     /**

@@ -11,12 +11,12 @@ interface InternalDepResolver {
 
     /**
      * @param  module The resolved module. Only use for caching purpose. Can be <code>null</code>
-     * @param resolvedScope if <code>null</code> it will resolve all scope
+     * @param resolvedScopes scopes to resolve. Generally only one is provided.
      * @param parameters can be null.
      * @param versionProvider can be null.
      */
-    JkResolveResult resolve(JkVersionedModule module, JkDependencies deps, JkScope resolvedScope,
-            JkResolutionParameters parameters, JkVersionProvider versionProvider);
+    JkResolveResult resolve(JkVersionedModule module, JkDependencies deps,
+            JkResolutionParameters parameters, JkVersionProvider versionProvider, JkScope... resolvedScopes);
 
     File get(JkModuleDependency dependency);
 

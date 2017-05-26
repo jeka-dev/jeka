@@ -33,7 +33,7 @@ class DistribAllBuild extends JkBuildDependencySupport {
 
         JkLog.startln("Creating distribution file");
 
-        JkLog.info("Copy core distribution localy.");
+        JkLog.info("Copy core distribution locally.");
         CoreBuild core = pluginsJacoco.core; // The core project is got by
         // transitivity
         File distDir = this.ouputDir("dist");

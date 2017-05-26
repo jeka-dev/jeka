@@ -1,12 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.jerkar.api.depmanagement.JkDependency.JkFileDependency;
 import org.jerkar.api.file.JkPath;
@@ -62,8 +57,6 @@ public final class JkDependencyResolver {
         return new JkDependencyResolver(null, dependencies, null, null, null, JkRepos.of());
     }
 
-    private final Map<JkScope, JkResolveResult> cachedResolveResult = new HashMap<JkScope, JkResolveResult>();
-
     private final InternalDepResolver internalResolver;
 
     private final JkDependencies dependencies;
@@ -112,23 +105,8 @@ public final class JkDependencyResolver {
         if (internalResolver == null) {
             return JkResolveResult.empty(this.module);
         }
-        final Set<JkScope> scopesSet = new HashSet<JkScope>();
-        for (final JkScope scope : scopes) {
-            if (!this.dependencies.involvedScopes().contains(scope)) {
-                JkLog.info("No dependency declared with scope '" + scope.name() + "'");
-                continue;
-            }
-            scopesSet.add(scope);
-            scopesSet.addAll(scope.ancestorScopes());
-        }
-        JkResolveResult resolveResult = JkResolveResult.empty(module);
-        for (final JkScope scope : scopesSet) {
-            resolveResult = resolveResult.and(getResolveResult(scope, this.transitiveVersionOverride));
-        }
-        if (scopes.length == 0) {
-            resolveResult = resolveResult.and(getResolveResult(null, this.transitiveVersionOverride));
-        }
-        return resolveResult;
+        return JkResolveResult.empty(module)
+                .and(getResolveResult(this.transitiveVersionOverride, scopes));
     }
 
     /**
@@ -155,7 +133,7 @@ public final class JkDependencyResolver {
     public JkPath get(JkScope... scopes) {
         JkResolveResult resolveResult = null;
         if (internalResolver != null && this.dependencies.containsModules()) {
-            resolveResult = getResolveResult(scopes).assertNoError();
+            resolveResult = getResolveResult(this.transitiveVersionOverride, scopes).assertNoError();
         }
         final List<File> result = new LinkedList<File>();
         for (final JkScopedDependency scopedDependency : this.dependencies) {
@@ -177,42 +155,13 @@ public final class JkDependencyResolver {
         return JkPath.of(result).withoutDoubloons();
     }
 
+    private JkResolveResult getResolveResult(JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {
 
-
-
-    private JkResolveResult getResolveResult(JkScope... scopes) {
-        if (scopes.length == 0) {
-            return this.getResolveResult(null, this.transitiveVersionOverride);
-        }
-        JkResolveResult result = JkResolveResult.empty(this.module);
-        for (final JkScope scope : scopes) {
-            result = result.and(this.getResolveResult(scope, this.transitiveVersionOverride));
-        }
-        return result;
-    }
-
-    private JkResolveResult getResolveResult(JkScope scope, JkVersionProvider transitiveVersionOverride) {
-        final JkScope cachedScope = scope == null ? NULL_SCOPE : scope;
-        final JkResolveResult result = cachedResolveResult.get(cachedScope);
-        if (result != null) {
-            return result;
-        }
         JkLog.trace("Preparing to resolve dependencies for module " + module);
-        if (scope != null) {
-            JkLog.startln("Resolving dependencies for scope '" + scope.name() + "'");
-        } else {
-            JkLog.startln("Resolving dependencies without specified scope");
-        }
+        JkLog.startln("Resolving dependencies with specified scopes " + Arrays.asList(scopes) + ".");
+        final JkResolveResult resolveResult = internalResolver.resolve(module, dependencies.onlyModules(),
+                    parameters, transitiveVersionOverride, scopes);
 
-        final JkResolveResult resolveResult;
-        if (module != null) {
-            resolveResult = internalResolver.resolve(module, dependencies.onlyModules(), scope,
-                    parameters, transitiveVersionOverride);
-        } else {
-            resolveResult = internalResolver.resolve(null, dependencies.onlyModules(), scope,
-                    parameters, transitiveVersionOverride);
-        }
-        cachedResolveResult.put(cachedScope, resolveResult);
         if (JkLog.verbose()) {
             JkLog.info(plurialize(resolveResult.involvedModules().size(), "module") + resolveResult.involvedModules());
             JkLog.info(plurialize(resolveResult.localFiles().size(), "artifact") + ".");

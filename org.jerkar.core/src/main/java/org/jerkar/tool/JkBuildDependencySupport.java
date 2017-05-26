@@ -230,9 +230,9 @@ public class JkBuildDependencySupport extends JkBuild {
      */
     @JkDoc("Displays the resolved dependency tree on the console.")
     public final void showDependencies() {
+        JkLog.infoHeaded("Resolved dependencies for " + this.versionedModule());
         final JkResolveResult resolveResult = this.dependencyResolver().resolve();
         final JkDependencyNode tree = resolveResult.dependencyTree();
-        JkLog.infoHeaded("Resolved dependencies for " + this.versionedModule());
         JkLog.info(tree.toStrings());
     }
 

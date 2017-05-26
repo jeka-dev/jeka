@@ -42,8 +42,8 @@ public class IvyResolverRunner {
                 .to("compile", "default").and(JkScopedDependencyTest.PROVIDED).to("provided")
                 .excludeGlobally("org.springframework", "spring-core").build();
         final JkResolutionParameters params = JkResolutionParameters.of();
-        final JkResolveResult resolveResult = IvyResolver.of(repos).resolve(null,deps, COMPILE,
-                params, JkVersionProvider.empty());
+        final JkResolveResult resolveResult = IvyResolver.of(repos).resolve(null,deps,
+                params, JkVersionProvider.empty(), COMPILE);
         for (final File file : resolveResult.localFiles()) {
             System.out.println(file.getAbsolutePath());
         }
@@ -55,8 +55,8 @@ public class IvyResolverRunner {
                 .on("org.hibernate:hibernate-core:4.3.7.Final")
                 .excludeLocally("org.jboss.logging", "*").excludeLocally("antlr", "*")
                 .scope(COMPILE).excludeGlobally("dom4j", "*").build();
-        final JkResolveResult resolveResult = IvyResolver.of(REPOS).resolve(null,deps, COMPILE,
-                JkResolutionParameters.of(), JkVersionProvider.empty());
+        final JkResolveResult resolveResult = IvyResolver.of(REPOS).resolve(null,deps,
+                JkResolutionParameters.of(), JkVersionProvider.empty(), COMPILE);
         for (final File file : resolveResult.localFiles()) {
             System.out.println(file.getAbsolutePath());
         }
@@ -67,8 +67,8 @@ public class IvyResolverRunner {
         final JkRepos repos = JkRepos.mavenCentral().andMavenCentral();
         final JkDependencies deps = JkDependencies.builder()
                 .on("org.apache.cocoon.all:cocoon-all:3.0.0-alpha-3").scope(COMPILE).build();
-        final JkResolveResult resolveResult = IvyResolver.of(repos).resolve(null, deps, COMPILE,
-                JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
+        final JkResolveResult resolveResult = IvyResolver.of(repos).resolve(null, deps,
+                JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty(), COMPILE);
         for (final File file : resolveResult.localFiles()) {
             System.out.println(file.getAbsolutePath());
         }
@@ -80,29 +80,13 @@ public class IvyResolverRunner {
                 .and(JkScopedDependencyTest.RUNTIME).to("runtime", "archive(master)");
     }
 
-
-
-    public static void springJdbc() {
-        final JkDependencies deps = JkDependencies.builder()
-                .on(JkPopularModules.APACHE_COMMONS_DBCP, "+")
-                .on(JUNIT, "+", TEST)
-                .build();
-        //.withDefaultScope(COMPILE);
-        //.withExclusions(JkDependencyExclusions.builder().on(SPRING_JDBC, "commons-logging","commons-logging").build());
-        final InternalDepResolver ivyResolver = IvyResolver.of(REPOS);
-        final JkResolveResult resolveResult = ivyResolver.resolve(null, deps, null, JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
-        //final JkResolveResult resolveResult = ivyResolver.resolve(JkModuleId.of("popo.popo").version("1"),deps, null, JkResolutionParameters.of().withDefault(defaultMapping()), JkVersionProvider.empty());
-
-        JkLog.info(resolveResult.dependencyTree().toStrings());
-    }
-
     public static void sourceAndJavadoc() {
         final IvyResolver ivyResolver = IvyResolver.of(REPOS);
         JkModuleDependency dep = JkModuleDependency.of(
                 JkPopularModules.GUAVA, "19.0").classifier("sources");
         JkDependencies deps = JkDependencies.builder().on(dep, JkJavaBuild.COMPILE).build();
-        JkResolveResult result = ivyResolver.resolve(null, deps, JkScope.of("*"),
-                JkResolutionParameters.of(), JkVersionProvider.empty());
+        JkResolveResult result = ivyResolver.resolve(null, deps,
+                JkResolutionParameters.of(), JkVersionProvider.empty(), JkScope.of("*"));
         System.out.println(result.errorReport());
     }
 
@@ -113,7 +97,5 @@ public class IvyResolverRunner {
         File file = ivyResolver.get(dep);
         System.out.println(file);
     }
-
-
 
 }

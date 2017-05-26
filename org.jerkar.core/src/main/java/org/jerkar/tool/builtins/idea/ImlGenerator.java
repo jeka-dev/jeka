@@ -94,7 +94,6 @@ final class ImlGenerator {
     ImlGenerator(File projectDir) {
         super();
         this.projectDir = projectDir;
-
         this.outputFile = new File(projectDir, projectDir.getName() + ".iml");
     }
 
@@ -110,6 +109,7 @@ final class ImlGenerator {
     private void _generate() throws IOException, XMLStreamException, FactoryConfigurationError {
         writeHead();
         writeOutput();
+        writeJdk();
         writeContent();
         writeOrderEntrySourceFolder();
         Set<File> allPaths = new HashSet<File>();
@@ -121,7 +121,7 @@ final class ImlGenerator {
             writeDependencies(this.buildDefDependencyResolver, allPaths, allModules, true);
         }
         writeBuildProjectDependencies(allModules);
-        writeJdk();
+
         writeFoot();
         outputFile.delete();
         JkUtilsFile.writeStringAtTop(outputFile, fos.toString(ENCODING));
@@ -247,29 +247,37 @@ final class ImlGenerator {
         }
     }
 
-    private void writeDependencies(JkDependencyResolver resolver, Set<File> allPaths, Set<File> allModules,  boolean forceTest) throws XMLStreamException {
+    private void writeDependencies(JkDependencyResolver resolver, Set<File> allPaths, Set<File> allModules,
+                                   boolean forceTest) throws XMLStreamException {
 
-        // Get dependency resolution result from both regular dependencies and build dependencies
         final JkResolveResult resolveResult = resolver.resolve();
-
-        // Write direct dependencies  (maven module + file system lib + computed deps)
+        final JkDependencyNode tree = resolveResult.dependencyTree();
         for (final JkScopedDependency scopedDependency : resolver.dependenciesToResolve()) {
             final JkDependency dependency = scopedDependency.dependency();
-            String ideScope = forceTest ? "TEST" : ideScope(scopedDependency.scopes());
 
                 // Maven dependencies
             if (dependency instanceof JkModuleDependency) {
-                final JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
-                final List<LibPath> paths = toLibPath(resolveResult, moduleDependency, resolver.repositories(), ideScope);
-                for (LibPath libPath : paths) {
-                    if (!allPaths.contains(libPath.bin)) {
-                        writeOrderEntryForLib(libPath);
-                        allPaths.add(libPath.bin);
+                List<JkScopedDependency> deps = new LinkedList<JkScopedDependency>();
+                deps.add(scopedDependency);
+                JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
+                    for (JkDependencyNode node : tree.child(moduleDependency.moduleId()).descendants()) {
+                        deps.add(node.root());
+                    }
+                String ideScope = forceTest ? "TEST" : ideScope(scopedDependency.scopes());
+                for (JkScopedDependency dep : deps) {
+                    JkModuleDependency moduleDep = (JkModuleDependency) dep.dependency();
+                    final List<LibPath> paths = toLibPath(resolveResult, moduleDep, resolver.repositories(), ideScope);
+                    for (LibPath libPath : paths) {
+                        if (!allPaths.contains(libPath.bin)) {
+                            writeOrderEntryForLib(libPath);
+                            allPaths.add(libPath.bin);
+                        }
                     }
                 }
 
                 // File dependencies (file system + computed)
             } else if (dependency instanceof JkDependency.JkFileDependency) {
+                String ideScope = forceTest ? "TEST" : ideScope(scopedDependency.scopes());
                 final JkDependency.JkFileDependency fileDependency = (JkDependency.JkFileDependency) dependency;
                 if (dependency instanceof JkComputedDependency) {
                     final File projectDir = getProjectFolderOf(fileDependency.files(), this.projectDependencies);

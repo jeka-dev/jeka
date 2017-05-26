@@ -6,6 +6,7 @@ import java.io.File;
 
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 @SuppressWarnings("javadoc")
 public class JkDependencyResolverRunner {
@@ -14,7 +15,7 @@ public class JkDependencyResolverRunner {
 
     public static void main(String[] args) {
         JkLog.verbose(true);
-        hibernate();
+        spring();
     }
 
     public static void hibernate() {
@@ -30,6 +31,16 @@ public class JkDependencyResolverRunner {
             System.out.println(file.getAbsolutePath());
         }
         System.out.println(deps.resolvedWith(resolveResult.involvedModules()));
+    }
+
+    public static void spring() {
+        final JkDependencies deps = JkDependencies.builder()
+                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").scope(JkJavaBuild.TEST)
+                .build();// .
+        final JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps);
+        final JkResolveResult resolveResult = resolver.resolve(JkJavaBuild.TEST);
+        JkDependencyNode tree = resolveResult.dependencyTree();
+        System.out.println(tree.toStrings());
     }
 
 
