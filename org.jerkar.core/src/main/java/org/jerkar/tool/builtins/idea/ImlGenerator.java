@@ -619,4 +619,31 @@ final class ImlGenerator {
         return null;
     }
 
+    private static class ScopeResultHolder {
+
+        final JkResolveResult compileResult;
+        final JkResolveResult runtimeResult;
+        final JkResolveResult testResult;
+
+        ScopeResultHolder(JkDependencyResolver resolver) {
+            compileResult = resolver.resolve(JkJavaBuild.COMPILE);
+            runtimeResult = resolver.resolve(JkJavaBuild.RUNTIME);
+            testResult = resolver.resolve(JkJavaBuild.TEST);
+        }
+
+        public JkScope scopeOf(JkModuleId moduleId) {
+            if (compileResult.contains(moduleId)) {
+                return JkJavaBuild.COMPILE;
+            }
+            if (runtimeResult.contains(moduleId)) {
+                return JkJavaBuild.RUNTIME;
+            }
+            if (testResult.contains(moduleId)) {
+                return JkJavaBuild.TEST;
+            }
+            return JkJavaBuild.COMPILE;
+        }
+
+    }
+
 }

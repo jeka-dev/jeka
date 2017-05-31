@@ -140,7 +140,7 @@ public class JkDependencyNode implements Serializable {
     private List<String> toStrings(boolean showRoot, int indentLevel, Set<JkModuleId> expandeds) {
         final List<String> result = new LinkedList<String>();
         if (showRoot) {
-            final String label = indentLevel == 0 ? this.scopedDependency.toString() : this.asScopedDependency().dependency().toString();
+            final String label = indentLevel == 0 ? this.scopedDependency.toString() : this.asScopedDependency().toString();
             result.add(JkUtilsString.repeat(INDENT, indentLevel) + label);
         }
         if (this.scopedDependency == null || !expandeds.contains(this.moduleId())) {
@@ -152,6 +152,17 @@ public class JkDependencyNode implements Serializable {
             }
         }
         return result;
+    }
+
+    /**
+     * Returns a complete representation string of the tree.
+     */
+    public String toStringComplete() {
+        StringBuilder builder = new StringBuilder();
+        for (String line: toStrings()) {
+            builder.append(line).append("\n");
+        }
+        return builder.toString();
     }
 
     private JkModuleId moduleId() {

@@ -258,6 +258,7 @@ final class IvyResolver implements InternalDepResolver {
                         JkModuleDependency moduleDependency = JkModuleDependency.of(moduleId, versionRange);
                         scopedDependency = JkScopedDependency.of(moduleDependency, scopes);
                     }
+                    System.out.println(scopedDependency + " -> " + Arrays.asList(node.getRequiredConfigurations()));
                     list.add(scopedDependency);
                 }
 

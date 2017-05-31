@@ -77,6 +77,8 @@ public class ResolverWithScopeMapperIT {
         assertEquals(1, snakeYamlNode.asScopedDependency().scopes().size());
         scopes = snakeYamlNode.asScopedDependency().scopes();
         assertTrue(scopes.contains(RUNTIME));
+
+        System.out.println(tree.toStringComplete());
     }
 
     @Test

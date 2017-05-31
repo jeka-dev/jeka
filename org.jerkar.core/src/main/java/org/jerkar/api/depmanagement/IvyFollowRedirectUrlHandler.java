@@ -43,7 +43,6 @@ class IvyFollowRedirectUrlHandler extends BasicURLHandler {
                     download(new URL(newUrl), dest, l);
                     return;
                 }
-
                 if (!checkStatusCode(src, httpCon)) {
                     throw new IOException("The HTTP response code for " + src
                             + " did not indicate a success." + " See log for more detail.");

@@ -28,7 +28,7 @@ public class HttpClientTaskBuild extends JkJavaBuild {
 	protected JkDependencies dependencies() {
 		return JkDependencies.builder()
 				.on(GUAVA, "18.0")
-				.on(JAVAX_SERVLET_API, "2.5", PROVIDED)
+				.on(JAVAX_SERVLET_API, "3.1.0", PROVIDED)
 				.on(JUNIT, "4.11", TEST)
 				.on(MOCKITO_ALL, "1.9.5", TEST).build();
 	}
