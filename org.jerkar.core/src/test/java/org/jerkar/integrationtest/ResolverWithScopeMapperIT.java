@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import javax.naming.spi.ResolveResult;
 import java.util.List;
+import java.util.Set;
 
 import static org.jerkar.tool.builtins.javabuild.JkJavaBuild.*;
 import static org.junit.Assert.*;
@@ -44,33 +45,38 @@ public class ResolverWithScopeMapperIT {
     }
 
     @Test
-    @Ignore
     public void treeIsCorrect() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
         JkDependencies deps = JkDependencies.builder()
-                .on("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE").scope(COMPILE)
+                .on("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE").scope(COMPILE_AND_RUNTIME)
                 .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").scope(TEST)
                 .on("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0").scope(COMPILE)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
                 .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
-        JkDependencyNode tree = resolver.resolve(JkJavaBuild.RUNTIME).dependencyTree();
+        JkDependencyNode tree = resolver.resolve(JkJavaBuild.TEST).dependencyTree();
         JkScopedDependency root = tree.asScopedDependency();
         assertTrue(root.scopes().isEmpty());
         assertEquals(holder.moduleId(), tree.asModuleDependency().moduleId());
-        //assertEquals(3, tree.children().size());
+        assertEquals(3, tree.children().size());
 
         JkDependencyNode starterwebNode = tree.children().get(0);
         assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"), starterwebNode.asModuleDependency().moduleId());
-        assertEquals(1, starterwebNode.asScopedDependency().scopes().size());
+        assertEquals(2, starterwebNode.asScopedDependency().scopes().size());
         assertTrue(starterwebNode.asScopedDependency().scopes().contains(COMPILE));
+        assertTrue(starterwebNode.asScopedDependency().scopes().contains(RUNTIME));
 
         JkDependencyNode starterNode = starterwebNode.children().get(0);
-        assertEquals(3, starterNode.asScopedDependency().scopes().size());
-        assertTrue(starterNode.asScopedDependency().scopes().contains(COMPILE));
-        assertTrue(starterNode.asScopedDependency().scopes().contains(RUNTIME));
-        assertTrue(starterNode.asScopedDependency().scopes().contains(TEST));
+        assertEquals(2, starterNode.asScopedDependency().scopes().size());
+        Set<JkScope> scopes = starterNode.asScopedDependency().scopes();
+        assertTrue(scopes.contains(COMPILE));
+        assertTrue(scopes.contains(RUNTIME));
+
+        JkDependencyNode snakeYamlNode = starterNode.children().get(4);
+        assertEquals(1, snakeYamlNode.asScopedDependency().scopes().size());
+        scopes = snakeYamlNode.asScopedDependency().scopes();
+        assertTrue(scopes.contains(RUNTIME));
     }
 
     @Test

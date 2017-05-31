@@ -94,7 +94,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns all nodes descendant of this one.
+     * Returns all nodes descendant of this one, deep first.
      */
     public List<JkDependencyNode> descendants() {
         List<JkDependencyNode> result = new LinkedList<JkDependencyNode>();
@@ -106,7 +106,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns node descendant of this one.
+     * Returns first node descendant of this one standing for the specified moduleId, deep first.
      */
     public JkDependencyNode find(JkModuleId moduleId) {
         if (moduleId.equals(this.moduleId())) {
@@ -120,27 +120,6 @@ public class JkDependencyNode implements Serializable {
         return null;
     }
 
-    /**
-     * For transitive dependencies, this retrieve the original dependency the specified module coming from.
-     * For direct dependency it returns the dependency itself.
-     * Returns <code>null</code> if the specified moduleId is not part of the tree.
-     */
-    public JkScopedDependency rootAncestor(JkModuleId moduleId) {
-        for (JkDependencyNode node : this.children()) {
-            JkModuleDependency directDep = (JkModuleDependency) node.asScopedDependency().dependency();
-            if (directDep.moduleId().equals(moduleId)) {
-                return node.asScopedDependency();
-            }
-            for (JkDependencyNode descendant : node.descendants()) {
-                JkModuleDependency dep = (JkModuleDependency) descendant.scopedDependency.dependency();
-                if (dep.moduleId().equals(moduleId)) {
-                    return node.asScopedDependency();
-                }
-            }
-        }
-        return null;
-    }
-
     private boolean directChildrenContains(JkModuleId moduleId) {
         for (final JkDependencyNode dependencyNode : this.children) {
             if (dependencyNode.moduleId().equals(moduleId)) {
@@ -149,8 +128,6 @@ public class JkDependencyNode implements Serializable {
         }
         return false;
     }
-
-
 
     /**
      * Returns a list of lines standing for the representation of this
@@ -184,7 +161,7 @@ public class JkDependencyNode implements Serializable {
 
     @Override
     public String toString() {
-        return this.asModuleDependency().toString();
+        return this.asScopedDependency().toString();
     }
 
 }

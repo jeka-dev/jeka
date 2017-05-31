@@ -13,15 +13,15 @@ public class JkScopedDependencyTest {
 
     public static final JkScope COMPILE = JkScope.of("compile");
 
-    public static final JkScope PROVIDED = JkScope.of("provided").transitive(false);
+    public static final JkScope PROVIDED = JkScope.build("provided").transitive(false).build();
 
-    public static final JkScope RUNTIME = JkScope.of("runtime").extending(COMPILE);
+    public static final JkScope RUNTIME = JkScope.build("runtime").extending(COMPILE).build();
 
-    public static final JkScope TEST = JkScope.of("test").extending(RUNTIME, PROVIDED);
+    public static final JkScope TEST = JkScope.build("test").extending(RUNTIME, PROVIDED).build();
 
-    public static final JkScope SOURCES = JkScope.of("sources").transitive(false);
+    public static final JkScope SOURCES = JkScope.build("sources").transitive(false).build();
 
-    public static final JkScope JAVADOC = JkScope.of("javadoc").transitive(false);
+    public static final JkScope JAVADOC = JkScope.build("javadoc").transitive(false).build();
 
     @Test
     public void testDepWithScopeMapping() {

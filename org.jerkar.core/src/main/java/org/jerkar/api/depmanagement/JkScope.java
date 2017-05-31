@@ -22,16 +22,22 @@ import javax.xml.ws.handler.MessageContext;
  *
  * @author Jerome Angibaud
  */
-public class JkScope implements Serializable {
+public final class JkScope implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Creates a new {@link JkScope} passing its name.
      */
-    @SuppressWarnings("unchecked")
-    public static JkOptionableScope of(String name) {
-        return new JkOptionableScope(name, Collections.EMPTY_SET, "", true);
+    public static JkScope of(String name) {
+        return new JkScope(name, new HashSet<JkScope>(), "", true);
+    }
+
+    /**
+     * Returns a builder to create a scope instance fluently.
+     */
+    public static JkScopeBuilder build(String name) {
+        return new JkScopeBuilder(name);
     }
 
     private final Set<JkScope> extendedScopes;
@@ -223,36 +229,55 @@ public class JkScope implements Serializable {
      *
      * @author Jerome Angibaud
      */
-    public static class JkOptionableScope extends JkScope {
+    public static class JkScopeBuilder {
 
         private static final long serialVersionUID = 1L;
 
-        private JkOptionableScope(String name, Set<JkScope> extendedScopes, String descr,
-                boolean transitive) {
-            super(name, extendedScopes, descr, transitive);
+        private Set<JkScope> extendedScopes = new HashSet<JkScope>();
+
+        private final String name;
+
+        private String description;
+
+        private boolean transitive = true;
+
+        private JkScopeBuilder(String name) {
+            this.name = name;
+            this.extendedScopes = new HashSet<JkScope>();
         }
 
         /**
-         * Returns a {@link JkOptionableScope} identical to this one but extending the specified scopes.
+         * Returns a {@link JkScopeBuilder} identical to this one but extending the specified scopes.
          */
-        public JkOptionableScope extending(JkScope... scopes) {
-            return new JkOptionableScope(name(), new HashSet<JkScope>(Arrays.asList(scopes)),
-                    description(), transitive());
+        public JkScopeBuilder extending(JkScope... scopes) {
+            this.extendedScopes = new HashSet<JkScope>(Arrays.asList(scopes));
+            return this;
         }
 
         /**
-         * Returns a {@link JkOptionableScope} identical to this one with the specified transitivity.
+         * Returns a {@link JkScopeBuilder} identical to this one with the specified transitivity.
          */
-        public JkOptionableScope transitive(boolean transitive) {
-            return new JkOptionableScope(name(), extendedScopes(), description(), transitive);
+        public JkScopeBuilder transitive(boolean transitive) {
+            this.transitive = transitive;
+            return this;
         }
 
         /**
-         * Returns a {@link JkOptionableScope} identical to this one with the specified description.
+         * Returns a {@link JkScopeBuilder} identical to this one with the specified description.
          */
-        public JkScope descr(String description) {
-            return new JkScope(name(), extendedScopes(), description, transitive());
+        public JkScopeBuilder descr(String description) {
+            this.description = description;
+            return this;
         }
+
+        /**
+         * Returns a {@link JkScope} built on this builder attribute.
+         */
+        public JkScope build() {
+            return new JkScope(name, new HashSet<JkScope>(extendedScopes), description, transitive);
+        }
+
+
 
     }
 
