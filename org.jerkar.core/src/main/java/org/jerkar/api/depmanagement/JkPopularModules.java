@@ -12,7 +12,7 @@ public final class JkPopularModules {
         // Unused constructor
     }
 
-    public static final JkModuleId JAVAX_SERVLET_API = JkModuleId.of("javax.servlet", "servlet-api");
+    public static final JkModuleId JAVAX_SERVLET_API = JkModuleId.of("javax.servlet", "javax.servlet-api");
 
     public static final JkModuleId JAVAX_MAIL_API = JkModuleId.of("javax.mail", "javax.mail-api");
 

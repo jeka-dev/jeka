@@ -223,7 +223,7 @@ public class JkBuild {
 
 
     /**
-     * Creates the project structure (mainly project folder layout, build class code and IDE metadata) at the root
+     * Creates the project structure (mainly project folder layout, build class code and IDE metadata) at the asScopedDependency
      * of the current project.
      */
     @JkDoc("Creates the project structure")

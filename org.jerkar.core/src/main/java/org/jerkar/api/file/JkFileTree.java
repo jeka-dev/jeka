@@ -22,7 +22,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
  * 
  * <p>
  * When speaking about files contained in a {@link JkFileTree}, we mean all
- * files contained in its root directory or sub-directories, matching positively
+ * files contained in its asScopedDependency directory or sub-directories, matching positively
  * the filter defined on it.
  * 
  * @author Jerome Angibaud
@@ -30,7 +30,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 public final class JkFileTree implements Iterable<File> {
 
     /**
-     * Creates a {@link JkFileTree} having the specified root directory.
+     * Creates a {@link JkFileTree} having the specified asScopedDependency directory.
      */
     public static JkFileTree of(File rootDir) {
         return new JkFileTree(rootDir);
@@ -45,7 +45,7 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Creates a {@link JkFileTree} having the specified root directory and
+     * Creates a {@link JkFileTree} having the specified asScopedDependency directory and
      * filter.
      */
     private JkFileTree(File rootDir, JkPathFilter filter) {
@@ -62,7 +62,7 @@ public final class JkFileTree implements Iterable<File> {
 
     /**
      * Creates a {@link JkFileTree} having the default filter and the specified
-     * relative path to this root as root directory.
+     * relative path to this asScopedDependency as asScopedDependency directory.
      */
     public JkFileTree from(String relativePath) {
         final File newBase = new File(root, relativePath);
@@ -70,7 +70,7 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Creates the root directory if it does not exist.
+     * Creates the asScopedDependency directory if it does not exist.
      */
     public JkFileTree createIfNotExist() {
         if (!root.exists()) {
@@ -80,7 +80,7 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Returns the file matching for the the given path relative to this root
+     * Returns the file matching for the the given path relative to this asScopedDependency
      * directory.
      */
     public File file(String relativePath) {
@@ -117,7 +117,7 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Returns the root directory.
+     * Returns the asScopedDependency directory.
      */
     public File root() {
         return root;
@@ -132,7 +132,7 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Copies the content of the specified directory in the root of the root of
+     * Copies the content of the specified directory in the asScopedDependency of the asScopedDependency of
      * this directory. If specified directory does not exist then nothing
      * happen.
      */
@@ -148,7 +148,7 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Copies the specified directories content at the root at this file tree, preserving relative paths.
+     * Copies the specified directories content at the asScopedDependency at this file tree, preserving relative paths.
      * @return this object.
      */
     public JkFileTree importDirContent(Iterable<File> dirsToCopyContent) {
@@ -156,7 +156,7 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Copies the specified files in the root of this directory.
+     * Copies the specified files in the asScopedDependency of this directory.
      */
     public JkFileTree importFiles(Iterable<File> files) {
         createIfNotExist();
@@ -167,7 +167,7 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Copies the specified files at the root of this directory. Folder and
+     * Copies the specified files at the asScopedDependency of this directory. Folder and
      * unexisting files are ignored.
      */
     public JkFileTree importFiles(File... filesToCopy) {
@@ -182,7 +182,7 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Returns if the root directory exists. (Short hand for #root.exists()).
+     * Returns if the asScopedDependency directory exists. (Short hand for #asScopedDependency.exists()).
      */
     public boolean exists() {
         return root.exists();
@@ -190,7 +190,7 @@ public final class JkFileTree implements Iterable<File> {
 
     /**
      * Returns path of each files file contained in this {@link JkFileTree}
-     * relative to its root.
+     * relative to its asScopedDependency.
      */
     public List<String> relativePathes() {
         final List<String> pathes = new LinkedList<String>();
@@ -201,7 +201,7 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Returns the relative path of the given file relative to the root of this
+     * Returns the relative path of the given file relative to the asScopedDependency of this
      * tree.
      */
     public String relativePath(File file) {
@@ -216,7 +216,7 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Creates a {@link JkFileTree} having the same root directory as this one
+     * Creates a {@link JkFileTree} having the same asScopedDependency directory as this one
      * but without any filter.
      */
     public JkFileTree noFiltering() {

@@ -25,7 +25,7 @@ public final class JkManifest {
 
     /**
      * The path where generally belongs all manifest past (relative to archive
-     * root)
+     * asScopedDependency)
      */
     public static final String PATH = "META-INF/MANIFEST.MF";
 

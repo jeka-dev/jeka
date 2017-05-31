@@ -131,7 +131,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * option <code>repo.publishname=myRepo</code>.
      * <p>
      * If no such repo are defined in options, it takes
-     * {@link JkRepo#mavenPublishLocal()} as fallback.
+     * {@link #mavenPublishLocal()}  as fallback.
      */
     protected JkPublishRepos publishRepositories() {
         final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("repo.publishname"), "publish");
@@ -156,7 +156,7 @@ public class JkBuildDependencySupport extends JkBuild {
     private JkDependencies effectiveDependencies() {
         JkDependencies deps = dependencies().withDefaultScope(this.defaultScope()).resolvedWith(versionProvider())
                 .withExclusions(dependencyExclusions());
-        final JkScope defaultcope = this.defaultScope();
+        final JkScope[] defaultcope = this.defaultScope();
         if (defaultcope != null) {
             deps = deps.withDefaultScope(defaultcope);
         }
@@ -194,7 +194,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * scope. It can be returns <code>null</code>, meaning that when no scope is
      * mentioned then the dependency is always available.
      */
-    protected JkScope defaultScope() {
+    protected JkScope[] defaultScope() {
         return null;
     }
 

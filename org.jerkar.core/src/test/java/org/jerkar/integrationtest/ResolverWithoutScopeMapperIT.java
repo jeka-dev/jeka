@@ -11,6 +11,8 @@ public class ResolverWithoutScopeMapperIT {
 
     private static final JkRepos REPOS = JkRepos.mavenCentral();
 
+    private static final JkScope MY_SCOPE = JkScope.of("myScope");
+
     @Test
     public void resolveCompile() {
         JkDependencies deps = JkDependencies.builder()

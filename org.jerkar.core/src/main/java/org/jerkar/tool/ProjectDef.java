@@ -33,7 +33,7 @@ final class ProjectDef {
     }
 
     /**
-     * Creates a project definition by giving its root directory.
+     * Creates a project definition by giving its asScopedDependency directory.
      */
     public static ProjectDef of(File rootDir) {
         final BuildResolver buildResolver = new BuildResolver(rootDir);
@@ -388,7 +388,7 @@ final class ProjectDef {
         Field field;
         Class<?> rootClass; // for nested fields, we need the class declaring
 
-        // the root object
+        // the asScopedDependency object
 
         NameAndField(String name, Field field, Class<?> rootClass) {
             super();

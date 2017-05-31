@@ -471,7 +471,7 @@ final class DotClasspathGenerator {
     }
 
     /*
-     * If the specified folder is the output folder of an eclipse project than it returns the root of this project,
+     * If the specified folder is the output folder of an eclipse project than it returns the asScopedDependency of this project,
      * else otherwise.
      */
     private static File getProjectFolderOf(File binaryFolder) {

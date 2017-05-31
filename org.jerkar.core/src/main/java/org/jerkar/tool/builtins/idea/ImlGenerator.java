@@ -17,7 +17,6 @@ import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
@@ -261,7 +260,7 @@ final class ImlGenerator {
                 deps.add(scopedDependency);
                 JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
                     for (JkDependencyNode node : tree.child(moduleDependency.moduleId()).descendants()) {
-                        deps.add(node.root());
+                        deps.add(node.asScopedDependency());
                     }
                 String ideScope = forceTest ? "TEST" : ideScope(scopedDependency.scopes());
                 for (JkScopedDependency dep : deps) {
@@ -480,7 +479,7 @@ final class ImlGenerator {
             writer.writeStartElement(type);
             writer.writeCharacters("\n");
             writer.writeCharacters(T5);
-            writer.writeEmptyElement("root");
+            writer.writeEmptyElement("asScopedDependency");
             writer.writeAttribute("url", ideaPath(this.projectDir, file));
             writer.writeCharacters("\n" + T4);
             writer.writeEndElement();
@@ -600,7 +599,7 @@ final class ImlGenerator {
     }
 
     /*
-     * If the specified folder is the output folder of an eclipse project than it returns the root of this project,
+     * If the specified folder is the output folder of an eclipse project than it returns the asScopedDependency of this project,
      * else otherwise.
      */
     private static File getProjectFolderOf(Iterable<File> files, Iterable<File> projectDependencies) {

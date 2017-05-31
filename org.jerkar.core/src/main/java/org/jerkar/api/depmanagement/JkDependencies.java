@@ -126,10 +126,10 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns a clone of this dependencies but replacing the unscoped
+     * Returpns a clone of this dependencies but replacing the unscoed
      * dependencies with the scoped ones.
      */
-    public JkDependencies withDefaultScopeMapping(JkScopeMapping scopeMapping) {
+    public JkDependencies withDefaultScope(JkScopeMapping scopeMapping) {
         final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();
         for (JkScopedDependency dep : this) {
             if (dep.scopeType().equals(ScopeType.UNSET)) {
@@ -347,14 +347,14 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Convenient method to resolve using {@link JkModuleDepFile}s instead of
+     * Convenient method to resolve using {@link JkModuleArtifact}s instead of
      * {@link JkVersionedModule}.
      *
      * @see #resolvedWith(Iterable)
      */
-    public JkDependencies resolvedWithArtifacts(Iterable<JkModuleDepFile> artifacts) {
+    public JkDependencies resolvedWithArtifacts(Iterable<JkModuleArtifact> artifacts) {
         final List<JkVersionedModule> list = new LinkedList<JkVersionedModule>();
-        for (final JkModuleDepFile artifact : artifacts) {
+        for (final JkModuleArtifact artifact : artifacts) {
             list.add(artifact.versionedModule());
         }
         return resolvedWith(list);

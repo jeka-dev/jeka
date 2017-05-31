@@ -180,7 +180,7 @@ final class Project {
         final boolean devMode = JkLocator.jerkarJarFile().isDirectory();
 
         return JkDependencies.builder().on(buildDependencies
-                .withDefaultScopeMapping(JkScopeMapping.ALL_TO_DEFAULT))
+                .withDefaultScope(JkScopeMapping.ALL_TO_DEFAULT))
                 .onFiles(localBuildPath())
                 .onFilesIf(devMode, JkClasspath.current())
                 .onFilesIf(!devMode, jerkarLibs())

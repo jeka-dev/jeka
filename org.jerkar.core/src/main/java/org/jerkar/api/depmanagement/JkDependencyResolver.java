@@ -103,10 +103,9 @@ public final class JkDependencyResolver {
      */
     public JkResolveResult resolve(JkScope... scopes) {
         if (internalResolver == null) {
-            return JkResolveResult.empty(this.module);
+            return JkResolveResult.empty();
         }
-        return JkResolveResult.empty(module)
-                .and(getResolveResult(this.transitiveVersionOverride, scopes));
+        return getResolveResult(this.transitiveVersionOverride, scopes);
     }
 
     /**

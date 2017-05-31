@@ -166,7 +166,7 @@ public final class JkFileTreeSet implements Iterable<File> {
 
     /**
      * Returns path of each files file contained in this {@link JkFileTreeSet}
-     * relative to the root of their respective {@link JkFileTree}.
+     * relative to the asScopedDependency of their respective {@link JkFileTree}.
      */
     public List<String> relativePathes() {
         final LinkedList<String> result = new LinkedList<String>();
@@ -187,7 +187,7 @@ public final class JkFileTreeSet implements Iterable<File> {
     }
 
     /**
-     * Returns root of each {@link JkFileTree} instances constituting this
+     * Returns asScopedDependency of each {@link JkFileTree} instances constituting this
      * {@link JkFileTreeSet}.
      */
     public List<File> roots() {
@@ -233,7 +233,7 @@ public final class JkFileTreeSet implements Iterable<File> {
     }
 
     /**
-     * Returns a the root of all {@link JkFileTree} constituting this
+     * Returns a the asScopedDependency of all {@link JkFileTree} constituting this
      * {@link JkFileTreeSet}.
      *
      * @deprecated use {@link #roots()} instead

@@ -46,9 +46,9 @@ public class JkUtilsFileTest {
 
     @Test
     public void testRelativePath() throws IOException {
-        final File base = new File("C:/my/root/folder");
-        final File file1 = new File("C:/my/root/folder/foo/bar.txt");
-        final File file2 = new File("C:/my/root/foo/bar.txt");
+        final File base = new File("C:/my/asScopedDependency/folder");
+        final File file1 = new File("C:/my/asScopedDependency/folder/foo/bar.txt");
+        final File file2 = new File("C:/my/asScopedDependency/foo/bar.txt");
         assertEquals("foo" + File.separator + "bar.txt", JkUtilsFile.getRelativePath(base, file1));
         assertEquals(".." + File.separator + "foo" + File.separator + "bar.txt", JkUtilsFile.getRelativePath(base, file2));
     }

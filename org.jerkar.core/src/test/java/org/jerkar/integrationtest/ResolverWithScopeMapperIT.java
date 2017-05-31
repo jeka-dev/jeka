@@ -5,38 +5,117 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import javax.naming.spi.ResolveResult;
+import java.util.List;
+
+import static org.jerkar.tool.builtins.javabuild.JkJavaBuild.*;
+import static org.junit.Assert.*;
 
 public class ResolverWithScopeMapperIT {
 
     private static final JkRepos REPOS = JkRepos.mavenCentral();
 
+    private static final JkScope SCOPE_A = JkScope.of("scopeA");
+
     @Test
-    @Ignore
-    // TODO fixit
-    public void resolveSpringbootTestStarter() {
+    public void resolveWithDefaultScopeMappingOnResolver() {
         JkDependencies deps = JkDependencies.builder()
-                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").scope(JkJavaBuild.TEST)
-                .usingDefaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING)
+                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").scope(TEST)
                 .build();
-        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps);
-        JkResolveResult resolveResult = resolver.resolve(JkJavaBuild.TEST);
+        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
+                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
+        JkResolveResult resolveResult = resolver.resolve(TEST);
         assertEquals(25, resolveResult.moduleFiles().size());
         assertTrue(resolveResult.contains(JkPopularModules.JUNIT));
     }
 
     @Test
-    public void resolveWithDefaultScopeMappingOnResolver() {
+    public void resolveWithSeveralScopes() {
         JkDependencies deps = JkDependencies.builder()
-                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").scope(JkJavaBuild.TEST)
+                .on(JkPopularModules.GUAVA, "19.0").scope(JkJavaBuild.COMPILE)
+                .on(JkPopularModules.JAVAX_SERVLET_API, "3.1.0").scope(JkJavaBuild.PROVIDED)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
                 .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
-        JkResolveResult resolveResult = resolver.resolve(JkJavaBuild.TEST);
-        assertEquals(25, resolveResult.moduleFiles().size());
-        assertTrue(resolveResult.contains(JkPopularModules.JUNIT));
+        JkResolveResult resolveResult = resolver.resolve(JkJavaBuild.COMPILE, JkJavaBuild.PROVIDED);
+        assertTrue(resolveResult.contains(JkPopularModules.JAVAX_SERVLET_API));
+        assertTrue(resolveResult.contains(JkPopularModules.GUAVA));
+        assertEquals(2, resolveResult.moduleFiles().size());
     }
+
+    @Test
+    @Ignore
+    public void treeIsCorrect() {
+        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
+        JkDependencies deps = JkDependencies.builder()
+                .on("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE").scope(COMPILE)
+                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").scope(TEST)
+                .on("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0").scope(COMPILE)
+                .build();
+        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
+                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
+                .withModuleHolder(holder);
+        JkDependencyNode tree = resolver.resolve(JkJavaBuild.RUNTIME).dependencyTree();
+        JkScopedDependency root = tree.asScopedDependency();
+        assertTrue(root.scopes().isEmpty());
+        assertEquals(holder.moduleId(), tree.asModuleDependency().moduleId());
+        //assertEquals(3, tree.children().size());
+
+        JkDependencyNode starterwebNode = tree.children().get(0);
+        assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"), starterwebNode.asModuleDependency().moduleId());
+        assertEquals(1, starterwebNode.asScopedDependency().scopes().size());
+        assertTrue(starterwebNode.asScopedDependency().scopes().contains(COMPILE));
+
+        JkDependencyNode starterNode = starterwebNode.children().get(0);
+        assertEquals(3, starterNode.asScopedDependency().scopes().size());
+        assertTrue(starterNode.asScopedDependency().scopes().contains(COMPILE));
+        assertTrue(starterNode.asScopedDependency().scopes().contains(RUNTIME));
+        assertTrue(starterNode.asScopedDependency().scopes().contains(TEST));
+    }
+
+    @Test
+    public void getRuntimeTransitiveWithRuntime() {
+        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
+        JkDependencies deps = JkDependencies.builder()
+                .on("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE").scope(COMPILE, RUNTIME)
+                .build();
+        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
+                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
+                .withModuleHolder(holder);
+        JkResolveResult resolveResult = resolver.resolve(JkJavaBuild.RUNTIME);
+        boolean snakeyamlHere = resolveResult.contains( JkModuleId.of("org.yaml:snakeyaml"));
+        assertTrue(snakeyamlHere);
+    }
+
+    @Test
+    public void dontGetRuntimeTransitiveWithCompile() {
+        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
+        JkDependencies deps = JkDependencies.builder()
+                .on("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE").scope(COMPILE, RUNTIME)
+                .build();
+        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
+                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
+                .withModuleHolder(holder);
+        JkResolveResult resolveResult = resolver.resolve(JkJavaBuild.COMPILE);
+        boolean snakeyamlHere = resolveResult.contains( JkModuleId.of("org.yaml:snakeyaml"));
+        assertFalse(snakeyamlHere);
+    }
+
+
+    @Test
+    public void treeRootIsCorrectWhenAnonymous() {
+        JkDependencies deps = JkDependencies.builder()
+                .on(JkPopularModules.GUAVA, "19.0").scope(JkJavaBuild.COMPILE)
+                .build();
+        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
+                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
+        JkDependencyNode tree = resolver.resolve().dependencyTree();
+        JkScopedDependency root = tree.asScopedDependency();
+        assertTrue(root.scopes().isEmpty());
+    }
+
+
+
 
 
 
