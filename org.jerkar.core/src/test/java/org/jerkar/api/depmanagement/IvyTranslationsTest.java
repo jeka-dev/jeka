@@ -26,7 +26,7 @@ public class IvyTranslationsTest {
         JkVersionProvider versionProvider = JkVersionProvider.empty();
 
         // handle multiple artifacts properly
-        DefaultModuleDescriptor desc = IvyTranslations.toPublicationLessModule(OWNER, deps(), mapping, versionProvider);
+        DefaultModuleDescriptor desc = IvyTranslations.toPublicationLessModule(OWNER, deps(), mapping, versionProvider, null);
         DependencyDescriptor[] dependencyDescriptors = desc.getDependencies();
         assertEquals(1, dependencyDescriptors.length);
         DependencyDescriptor depDesc = dependencyDescriptors[0];

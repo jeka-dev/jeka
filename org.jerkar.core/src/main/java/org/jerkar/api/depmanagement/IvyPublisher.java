@@ -244,7 +244,7 @@ final class IvyPublisher implements InternalPublisher {
             JkScopeMapping defaultMapping, Date deliveryDate, JkVersionProvider resolvedVersions) {
 
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
-                jkVersionedModule, dependencies, defaultMapping, resolvedVersions);
+                jkVersionedModule, dependencies, defaultMapping, resolvedVersions, ivy.getSettings());
         IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication,
                 deliveryDate);
         return moduleDescriptor;
@@ -290,7 +290,7 @@ final class IvyPublisher implements InternalPublisher {
             JkVersionProvider resolvedVersions) {
 
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
-                jkVersionedModule, resolvedDependencies, null, resolvedVersions);
+                jkVersionedModule, resolvedDependencies, null, resolvedVersions, ivy.getSettings());
         IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication,
                 deliveryDate);
         return moduleDescriptor;

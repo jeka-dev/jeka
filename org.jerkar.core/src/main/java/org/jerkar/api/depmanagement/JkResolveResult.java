@@ -30,14 +30,14 @@ public final class JkResolveResult implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public static JkResolveResult empty() {
-        return of(Collections.EMPTY_LIST, new JkDependencyNode(null, new LinkedList<JkDependencyNode>()));
+        return of(Collections.EMPTY_LIST, JkDependencyNode.empty());
     }
 
     /**
      * Creates a dependency resolve result object form a list of module dependency files and a list of resolved versions.
      */
     public static JkResolveResult of(List<JkModuleArtifact> artifacts,
-            JkVersionProvider jkVersionProvider, JkDependencyNode depTree, JkErrorReport errorReport) {
+                                     JkVersionProvider jkVersionProvider, JkDependencyNode depTree, JkErrorReport errorReport) {
         return new JkResolveResult(artifacts, jkVersionProvider, depTree, errorReport);
     }
 

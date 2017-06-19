@@ -1,6 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.*;
 
@@ -10,6 +11,9 @@ import org.apache.ivy.core.module.id.ArtifactId;
 import org.apache.ivy.core.module.id.ModuleId;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.settings.IvySettings;
+import org.apache.ivy.plugins.conflict.ConflictManager;
+import org.apache.ivy.plugins.conflict.LatestCompatibleConflictManager;
+import org.apache.ivy.plugins.latest.LatestRevisionStrategy;
 import org.apache.ivy.plugins.matcher.ExactOrRegexpPatternMatcher;
 import org.apache.ivy.plugins.matcher.ExactPatternMatcher;
 import org.apache.ivy.plugins.matcher.PatternMatcher;
@@ -26,6 +30,7 @@ import org.jerkar.api.depmanagement.JkRepo.JkIvyRepository;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsObject;
+import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
 
 final class IvyTranslations {
@@ -52,15 +57,17 @@ final class IvyTranslations {
 
     static DefaultModuleDescriptor toPublicationLessModule(JkVersionedModule module,
                                                            JkDependencies dependencies, JkScopeMapping defaultMapping,
-                                                           JkVersionProvider resolvedVersions) {
+                                                           JkVersionProvider resolvedVersions, IvySettings ivySettings) {
         final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module
                 .moduleId().group(), module.moduleId().name(), module.version().name());
-        final DefaultModuleDescriptor moduleDescriptor = new DefaultModuleDescriptor(
+        final DefaultModuleDescriptor result = new DefaultModuleDescriptor(
                 thisModuleRevisionId, "integration", null);
 
-        populateModuleDescriptor(moduleDescriptor, dependencies, defaultMapping, resolvedVersions);
-        return moduleDescriptor;
+        populateModuleDescriptor(result, dependencies, defaultMapping, resolvedVersions, ivySettings);
+        return result;
     }
+
+
 
     private static DefaultExcludeRule toExcludeRule(JkDepExclude depExclude) {
         final String type = depExclude.type() == null ? PatternMatcher.ANY_EXPRESSION : depExclude
@@ -278,7 +285,7 @@ final class IvyTranslations {
 
     private static void populateModuleDescriptor(DefaultModuleDescriptor moduleDescriptor,
             JkDependencies dependencies, JkScopeMapping defaultMapping,
-            JkVersionProvider resolvedVersions) {
+            JkVersionProvider resolvedVersions, IvySettings ivySettings) {
 
         // Add configuration definitions
         for (final JkScope involvedScope : dependencies.involvedScopes()) {
@@ -306,6 +313,10 @@ final class IvyTranslations {
             }
         }
         for (DependencyDescriptor dependencyDescriptor : dependencyContainer.toDependencyDescriptors()) {
+
+            // If we don't set parent, force version on resilution won't work
+            final Field field = JkUtilsReflect.getField(DefaultDependencyDescriptor.class, "parentId");
+            JkUtilsReflect.setFieldValue(dependencyDescriptor, field, moduleDescriptor.getModuleRevisionId());
             moduleDescriptor.addDependency(dependencyDescriptor);
         }
 
@@ -327,6 +338,15 @@ final class IvyTranslations {
                     ExactOrRegexpPatternMatcher.INSTANCE,
                     new OverrideDependencyDescriptorMediator(null, version.name()));
         }
+
+        /* Add conflic manager
+        LatestRevisionStrategy latestRevisionStrategy = new LatestRevisionStrategy();
+        LatestCompatibleConflictManager conflictManager = new LatestCompatibleConflictManager();
+        conflictManager.setSettings(ivySettings);
+        moduleDescriptor.addConflictManager(ModuleId.newInstance("*", "*"),
+                ExactOrRegexpPatternMatcher.INSTANCE, conflictManager);
+        */
+
     }
 
 
@@ -444,11 +464,12 @@ final class IvyTranslations {
 
         List<JkDepExclude> excludes = new LinkedList<JkDepExclude>();
 
-        DependencyDescriptor toDescriptor(JkModuleId moduleId) {
+        DefaultDependencyDescriptor toDescriptor(JkModuleId moduleId) {
             final ModuleRevisionId moduleRevisionId = toModuleRevisionId(moduleId, revision);
             final boolean changing = revision.definition().endsWith("-SNAPSHOT");
+            boolean forceVersion = !revision.isDynamic();
             DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null,
-                    moduleRevisionId, false, changing, transitive);
+                    moduleRevisionId, forceVersion, changing, transitive);
             for (Conf conf : confs) {
                 result.addDependencyConfiguration(conf.masterConf, conf.depConf);
             }

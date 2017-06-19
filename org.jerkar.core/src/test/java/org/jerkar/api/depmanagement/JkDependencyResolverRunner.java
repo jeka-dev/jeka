@@ -5,7 +5,6 @@ package org.jerkar.api.depmanagement;
 import java.io.File;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 @SuppressWarnings("javadoc")

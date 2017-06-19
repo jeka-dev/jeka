@@ -260,7 +260,7 @@ final class ImlGenerator {
                 deps.add(scopedDependency);
                 JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
                     for (JkDependencyNode node : tree.child(moduleDependency.moduleId()).descendants()) {
-                        deps.add(node.asScopedDependency());
+                        //deps.add(node.asScopedDependency());
                     }
                 String ideScope = forceTest ? "TEST" : ideScope(scopedDependency.scopes());
                 for (JkScopedDependency dep : deps) {

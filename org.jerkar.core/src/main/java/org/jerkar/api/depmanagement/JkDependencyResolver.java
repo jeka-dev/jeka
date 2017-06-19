@@ -146,7 +146,6 @@ public final class JkDependencyResolver {
                     result.addAll(resolveResult.filesOf(moduleDependency.moduleId()));
                 }
             }
-
         }
         if (resolveResult != null) {
             result.addAll(resolveResult.localFiles());

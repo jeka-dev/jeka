@@ -1,12 +1,11 @@
 package org.jerkar.integrationtest;
 
 import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.depmanagement.JkDependencyNode.ModuleNodeInfo;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.naming.spi.ResolveResult;
-import java.util.List;
 import java.util.Set;
 
 import static org.jerkar.tool.builtins.javabuild.JkJavaBuild.*;
@@ -30,6 +29,35 @@ public class ResolverWithScopeMapperIT {
         assertTrue(resolveResult.contains(JkPopularModules.JUNIT));
     }
 
+    /*
+     * Spring-boot 1.5.3 has a dependency on spring-core which is higher than 4.0.0.
+     * Nevertheless, if we declare spring-core with version 4.0.0 as direct dependency,
+     * this one should be taken in account, and not the the higher one coming transitive dependency.
+     */
+    @Test
+    public void explicitExactVersionWin() {
+        //JkLog.verbose(true);
+        JkModuleId starterWebModule = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
+        JkModuleId springCoreModule = JkModuleId.of("org.springframework:spring-core");
+        String directCoreVersion = "4.0.0.RELEASE";
+        JkDependencies deps = JkDependencies.builder()
+
+                .on(springCoreModule, directCoreVersion).scope(COMPILE)  // force a version lower than the transitive from starterWeb module
+                .on(starterWebModule, "1.5.3.RELEASE").scope(COMPILE)
+                .build();
+        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
+                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
+        JkResolveResult resolveResult = resolver.resolve(JkJavaBuild.COMPILE);
+        assertEquals(directCoreVersion, resolveResult.versionOf(springCoreModule).name());
+    }
+
+    /*
+     * Spring-boot 1.5.3 has a dependency on spring-core which is higher than 4.0.0.
+     * Nevertheless, if we declare spring-core with version 4.0.0 as direct dependency,
+     * this one should be taken in account, and not the the higher one coming transitive dependency.
+     */
+
+
     @Test
     public void resolveWithSeveralScopes() {
         JkDependencies deps = JkDependencies.builder()
@@ -44,46 +72,11 @@ public class ResolverWithScopeMapperIT {
         assertEquals(2, resolveResult.moduleFiles().size());
     }
 
-    @Test
-    public void treeIsCorrect() {
-        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
-        JkDependencies deps = JkDependencies.builder()
-                .on("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE").scope(COMPILE_AND_RUNTIME)
-                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").scope(TEST)
-                .on("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0").scope(COMPILE)
-                .build();
-        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
-                .withModuleHolder(holder);
-        JkDependencyNode tree = resolver.resolve(JkJavaBuild.TEST).dependencyTree();
-        JkScopedDependency root = tree.asScopedDependency();
-        assertTrue(root.scopes().isEmpty());
-        assertEquals(holder.moduleId(), tree.asModuleDependency().moduleId());
-        assertEquals(3, tree.children().size());
 
-        JkDependencyNode starterwebNode = tree.children().get(0);
-        assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"), starterwebNode.asModuleDependency().moduleId());
-        assertEquals(2, starterwebNode.asScopedDependency().scopes().size());
-        assertTrue(starterwebNode.asScopedDependency().scopes().contains(COMPILE));
-        assertTrue(starterwebNode.asScopedDependency().scopes().contains(RUNTIME));
-
-        JkDependencyNode starterNode = starterwebNode.children().get(0);
-        assertEquals(2, starterNode.asScopedDependency().scopes().size());
-        Set<JkScope> scopes = starterNode.asScopedDependency().scopes();
-        assertTrue(scopes.contains(COMPILE));
-        assertTrue(scopes.contains(RUNTIME));
-
-        JkDependencyNode snakeYamlNode = starterNode.children().get(4);
-        assertEquals(1, snakeYamlNode.asScopedDependency().scopes().size());
-        scopes = snakeYamlNode.asScopedDependency().scopes();
-        assertTrue(scopes.contains(RUNTIME));
-
-        System.out.println(tree.toStringComplete());
-    }
 
     @Test
     public void getRuntimeTransitiveWithRuntime() {
-        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
+        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion2");
         JkDependencies deps = JkDependencies.builder()
                 .on("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE").scope(COMPILE, RUNTIME)
                 .build();
@@ -118,13 +111,7 @@ public class ResolverWithScopeMapperIT {
         JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
                 .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
         JkDependencyNode tree = resolver.resolve().dependencyTree();
-        JkScopedDependency root = tree.asScopedDependency();
-        assertTrue(root.scopes().isEmpty());
+        assertTrue(tree.moduleInfo().declaredScopes().isEmpty());
     }
-
-
-
-
-
 
 }
