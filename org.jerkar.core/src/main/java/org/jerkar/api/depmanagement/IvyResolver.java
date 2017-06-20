@@ -3,10 +3,7 @@ package org.jerkar.api.depmanagement;
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.IvyContext;
 import org.apache.ivy.core.cache.ResolutionCacheManager;
-import org.apache.ivy.core.module.descriptor.DefaultArtifact;
-import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
-import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
-import org.apache.ivy.core.module.descriptor.MDArtifact;
+import org.apache.ivy.core.module.descriptor.*;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.DownloadStatus;
@@ -129,8 +126,9 @@ final class IvyResolver implements InternalDepResolver {
             errorReport = JkResolveResult.JkErrorReport.allFine();
         }
         final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
+        IvyArtifactContainer artifactContainer = IvyArtifactContainer.of(artifactDownloadReports);
         JkResolveResult resolveResult = getResolveConf(artifactDownloadReports, deps,
-                    report.getDependencies(), module, errorReport);
+                    report.getDependencies(), module, errorReport, artifactContainer);
         if (moduleArg == null) {
             deleteResolveCache(module);
         }
@@ -159,7 +157,8 @@ final class IvyResolver implements InternalDepResolver {
     private static JkResolveResult getResolveConf(ArtifactDownloadReport[] artifactDownloadReports,
                                                   JkDependencies deps, List<IvyNode> nodes,
                                                   JkVersionedModule rootVersionedModule,
-                                                  JkResolveResult.JkErrorReport errorReport) {
+                                                  JkResolveResult.JkErrorReport errorReport,
+                                                  IvyArtifactContainer ivyArtifactContainer) {
 
         // Get module dependency files
         final List<JkModuleArtifact> jkArtifacts = new LinkedList<JkModuleArtifact>();
@@ -182,7 +181,7 @@ final class IvyResolver implements InternalDepResolver {
         }
 
         // Compute dependency tree
-        final JkDependencyNode tree = createTree(nodes, rootVersionedModule);
+        final JkDependencyNode tree = createTree(nodes, rootVersionedModule, ivyArtifactContainer);
         return JkResolveResult.of(jkArtifacts, versionProvider, tree, errorReport);
     }
 
@@ -213,11 +212,12 @@ final class IvyResolver implements InternalDepResolver {
         return report.getLocalFile();
     }
 
-    private static JkDependencyNode createTree(Iterable<IvyNode> nodes, JkVersionedModule rootVersionedModule) {
-        final IvyTreeResolver treeResolver = new IvyTreeResolver(nodes);
+    private static JkDependencyNode createTree(Iterable<IvyNode> nodes, JkVersionedModule rootVersionedModule,
+                                               IvyArtifactContainer artifactContainer) {
+        final IvyTreeResolver treeResolver = new IvyTreeResolver(nodes, artifactContainer);
         final ModuleNodeInfo moduleNodeInfo = new ModuleNodeInfo(rootVersionedModule.moduleId(),
                 JkVersionRange.of(rootVersionedModule.version().name()), new HashSet<JkScope>(), new HashSet<JkScope>(),
-                rootVersionedModule.version() );
+                rootVersionedModule.version() , new LinkedList<File>());
         return treeResolver.createNode(moduleNodeInfo);
     }
 
@@ -226,7 +226,7 @@ final class IvyResolver implements InternalDepResolver {
         // parent to children parentChildMap
         private final Map<JkModuleId, List<ModuleNodeInfo>> parentChildMap = new HashMap<JkModuleId, List<ModuleNodeInfo>>();
 
-        IvyTreeResolver(Iterable<IvyNode> nodes) {
+        IvyTreeResolver(Iterable<IvyNode> nodes, IvyArtifactContainer artifactContainer) {
 
 
             for (final IvyNode node : nodes) {
@@ -234,6 +234,17 @@ final class IvyResolver implements InternalDepResolver {
                 final JkDependency currentDep = JkModuleDependency.of(nodeModule);
 
                 final Caller[] callers = node.getAllCallers();
+                final JkModuleId moduleId = JkModuleId.of(node.getId().getOrganisation(), node.getId().getName());
+                final JkVersion resolvedVersion = JkVersion.name(node.getResolvedId().getRevision());
+                final Set<JkScope> rootScopes = IvyTranslations.toJkScopes(node.getRootModuleConfigurations());
+
+                List<File> artifacts;
+                if (!node.isCompletelyEvicted()) {
+                    artifacts = artifactContainer.getArtifacts(moduleId.version(resolvedVersion.name()));
+                } else {
+                    artifacts = new LinkedList<File>();
+                }
+
                 for (final Caller caller : callers) {
                     final DependencyDescriptor dependencyDescriptor = caller.getDependencyDescriptor();
                     final JkVersionedModule parent = IvyTranslations.toJkVersionedModule(caller.getModuleRevisionId());
@@ -245,13 +256,11 @@ final class IvyResolver implements InternalDepResolver {
                     final Set<JkScope> declaredScopes = IvyTranslations.toJkScopes(dependencyDescriptor.getModuleConfigurations());
                     final JkVersionRange versionRange = JkVersionRange.of(dependencyDescriptor
                         .getDynamicConstraintDependencyRevisionId().getRevision());
-                    JkModuleId moduleId = JkModuleId.of(node.getId().getOrganisation(), node.getId().getName());
-                    JkModuleDependency moduleDependency = JkModuleDependency.of(moduleId, versionRange);
-                    final JkVersion resolvedVersion = JkVersion.name(node.getResolvedId().getRevision());
-                    final Set<JkScope> rootScopes = IvyTranslations.toJkScopes(node.getRootModuleConfigurations());
 
-                    ModuleNodeInfo moduleNodeInfo  = new ModuleNodeInfo(moduleId, versionRange, declaredScopes,
-                            rootScopes, resolvedVersion);
+                    final JkModuleDependency moduleDependency = JkModuleDependency.of(moduleId, versionRange);
+
+                    final ModuleNodeInfo moduleNodeInfo  = new ModuleNodeInfo(moduleId, versionRange, declaredScopes,
+                            rootScopes, resolvedVersion, artifacts);
                     if (!containSame(list, moduleId)) {
                         list.add(moduleNodeInfo);
                     }

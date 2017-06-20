@@ -8,7 +8,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.utils.JkUtilsAssert;
+import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -55,6 +57,16 @@ public class JkDependencyNode implements Serializable {
             moduleInfo = new FileNodeInfo(((JkComputedDependency) dependency).files(), true);
         }
         return new JkDependencyNode(moduleInfo, Collections.unmodifiableList(new LinkedList<JkDependencyNode>()));
+    }
+
+    public List<File> allFiles() {
+        List<File> list = new LinkedList<File>();
+        JkUtilsIterable.addAllWithoutDplicate(list, this.nodeInfo.files());
+        list.addAll(this.nodeInfo.files());
+        for (JkDependencyNode child : children) {
+            JkUtilsIterable.addAllWithoutDplicate(list, child.allFiles());
+        }
+        return list;
     }
 
     /**
@@ -213,7 +225,9 @@ public class JkDependencyNode implements Serializable {
         return this.nodeInfo().toString();
     }
 
-    private interface NodeInfo {
+    public interface NodeInfo {
+
+        List<File> files();
 
     }
 
@@ -226,14 +240,16 @@ public class JkDependencyNode implements Serializable {
         private final Set<JkScope> declaredScopes;  // the left conf mapping side in the caller dependency description
         private final Set<JkScope> rootScopes; // scopes fetching this node from root
         private final JkVersion resolvedVersion;
+        private final List<File> artifacts;
 
         public ModuleNodeInfo(JkModuleId moduleId, JkVersionRange declaredVersion, Set<JkScope> declaredScopes,
-                              Set<JkScope> rootScopes, JkVersion resolvedVersion) {
+                              Set<JkScope> rootScopes, JkVersion resolvedVersion, List<File> artifacts) {
             this.moduleId = moduleId;
             this.declaredVersion = declaredVersion;
             this.declaredScopes = declaredScopes;
             this.rootScopes = rootScopes;
             this.resolvedVersion = resolvedVersion;
+            this.artifacts = Collections.unmodifiableList(new LinkedList<File>(artifacts));
         }
 
         public JkModuleId moduleId() {
@@ -264,6 +280,11 @@ public class JkDependencyNode implements Serializable {
         public boolean isEvicted() {
             return resolvedVersion == null;
         }
+
+        @Override
+        public List<File> files() {
+            return artifacts;
+        }
     }
 
     private static final class FileNodeInfo implements Serializable, NodeInfo {
@@ -283,7 +304,8 @@ public class JkDependencyNode implements Serializable {
             return computed;
         }
 
-        public List<File> getFiles() {
+        @Override
+        public List<File> files() {
             return files;
         }
 

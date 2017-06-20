@@ -50,6 +50,14 @@ public final class JkUtilsIterable {
         return result;
     }
 
+    public static <T> void addAllWithoutDplicate(List<T> listWhereElementAreAdded, Iterable<? extends T> items) {
+        for (T item : items) {
+            if (!listWhereElementAreAdded.contains(item)) {
+                listWhereElementAreAdded.add(item);
+            }
+        }
+    }
+
     /**
      * Creates an array of the specified class and populate it with items of the specified {@link Iterable}.
      */

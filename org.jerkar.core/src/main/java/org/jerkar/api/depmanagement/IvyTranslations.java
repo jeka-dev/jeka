@@ -314,7 +314,7 @@ final class IvyTranslations {
         }
         for (DependencyDescriptor dependencyDescriptor : dependencyContainer.toDependencyDescriptors()) {
 
-            // If we don't set parent, force version on resilution won't work
+            // If we don't set parent, force version on resolution won't work
             final Field field = JkUtilsReflect.getField(DefaultDependencyDescriptor.class, "parentId");
             JkUtilsReflect.setFieldValue(dependencyDescriptor, field, moduleDescriptor.getModuleRevisionId());
             moduleDescriptor.addDependency(dependencyDescriptor);
