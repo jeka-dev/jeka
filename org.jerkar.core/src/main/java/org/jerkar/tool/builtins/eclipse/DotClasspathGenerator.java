@@ -318,8 +318,10 @@ final class DotClasspathGenerator {
         for (final JkVersionedModule versionedModule : resolveResult.involvedModules()) {
             JkModuleId moduleId = versionedModule.moduleId();
             JkVersion version = resolveResult.versionOf(moduleId);
-            JkVersionedModule resolvedModule = JkVersionedModule.of(moduleId, version);
-            writeModuleEntry(writer, resolvedModule, resolveResult.filesOf(moduleId), repos, paths);
+            if (version != null) {
+                JkVersionedModule resolvedModule = JkVersionedModule.of(moduleId, version);
+                writeModuleEntry(writer, resolvedModule, resolveResult.filesOf(moduleId), repos, paths);
+            }
         }
     }
 

@@ -133,24 +133,17 @@ public final class JkDependencyResolver {
         JkResolveResult resolveResult = null;
         if (internalResolver != null && this.dependencies.containsModules()) {
             resolveResult = getResolveResult(this.transitiveVersionOverride, scopes).assertNoError();
+            return JkPath.of(resolveResult.dependencyTree().allFiles()).withoutDuplicates();
         }
         final List<File> result = new LinkedList<File>();
         for (final JkScopedDependency scopedDependency : this.dependencies) {
             if (scopedDependency.isInvolvedInAnyOf(scopes) || scopes.length == 0) {
                 final JkDependency dependency = scopedDependency.dependency();
-                if (dependency instanceof JkFileDependency) {
-                    final JkFileDependency fileDependency = (JkFileDependency) dependency;
-                    result.addAll(fileDependency.files());
-                } else if (dependency instanceof JkModuleDependency && resolveResult != null) {
-                    final JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
-                    result.addAll(resolveResult.filesOf(moduleDependency.moduleId()));
-                }
+                final JkFileDependency fileDependency = (JkFileDependency) dependency;
+                result.addAll(fileDependency.files());
             }
         }
-        if (resolveResult != null) {
-            result.addAll(resolveResult.localFiles());
-        }
-        return JkPath.of(result).withoutDoubloons();
+        return JkPath.of(result).withoutDuplicates();
     }
 
     private JkResolveResult getResolveResult(JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {

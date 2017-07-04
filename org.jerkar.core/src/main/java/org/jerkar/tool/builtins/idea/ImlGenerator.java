@@ -41,8 +41,6 @@ final class ImlGenerator {
 
     private static final String T5 = T4 + T1;
 
-    static final String OPTION_VAR_PREFIX = "eclipse.var.";
-
     private final File projectDir;
 
     /** default to projectDir/.classpath */
@@ -79,7 +77,7 @@ final class ImlGenerator {
     /** Can be empty but not null */
     Iterable<File> projectDependencies = JkUtilsIterable.listOf();
 
-    private boolean forceJdkVersion;
+    boolean forceJdkVersion;
 
     private final Set<String> paths = new HashSet<String>();
 
@@ -251,62 +249,53 @@ final class ImlGenerator {
 
         final JkResolveResult resolveResult = resolver.resolve();
         final JkDependencyNode tree = resolveResult.dependencyTree();
-        for (final JkScopedDependency scopedDependency : resolver.dependenciesToResolve()) {
-            final JkDependency dependency = scopedDependency.dependency();
+        for (final JkDependencyNode node : tree.flatten()) {
 
-                // Maven dependencies
-            if (dependency instanceof JkModuleDependency) {
-                List<JkScopedDependency> deps = new LinkedList<JkScopedDependency>();
-                deps.add(scopedDependency);
-                JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
-                    for (JkDependencyNode node : tree.child(moduleDependency.moduleId()).descendants()) {
-                        //deps.add(node.asScopedDependency());
-                    }
-                String ideScope = forceTest ? "TEST" : ideScope(scopedDependency.scopes());
-                for (JkScopedDependency dep : deps) {
-                    JkModuleDependency moduleDep = (JkModuleDependency) dep.dependency();
-                    final List<LibPath> paths = toLibPath(resolveResult, moduleDep, resolver.repositories(), ideScope);
-                    for (LibPath libPath : paths) {
-                        if (!allPaths.contains(libPath.bin)) {
-                            writeOrderEntryForLib(libPath);
-                            allPaths.add(libPath.bin);
-                        }
+            // Maven dependency
+            if (node.isModuleNode()) {
+                String ideScope = forceTest ? "TEST" : ideScope(node.moduleInfo().resolvedScopes());
+                final List<LibPath> paths = toLibPath(node.moduleInfo(), resolver.repositories(), ideScope);
+                for (LibPath libPath : paths) {
+                    if (!allPaths.contains(libPath.bin)) {
+                        writeOrderEntryForLib(libPath);
+                        allPaths.add(libPath.bin);
                     }
                 }
 
                 // File dependencies (file system + computed)
-            } else if (dependency instanceof JkDependency.JkFileDependency) {
-                String ideScope = forceTest ? "TEST" : ideScope(scopedDependency.scopes());
-                final JkDependency.JkFileDependency fileDependency = (JkDependency.JkFileDependency) dependency;
-                if (dependency instanceof JkComputedDependency) {
-                    final File projectDir = getProjectFolderOf(fileDependency.files(), this.projectDependencies);
+            } else {
+                String ideScope = forceTest ? "TEST" : ideScope(node.nodeInfo().declaredScopes());
+                JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.nodeInfo();
+                if (fileNodeInfo.isComputed()) {
+                    final File projectDir = getProjectFolderOf(fileNodeInfo.files(), this.projectDependencies);
                     if (projectDir != null && !allModules.contains(projectDir)) {
                         writeOrderEntryForModule(projectDir.getName(), ideScope);
                         allModules.add(projectDir);
                     }
+                } else {
+                    writeFileEntries(fileNodeInfo.files(), paths, ideScope);
                 }
-                writeFileEntries(writer, fileDependency.files(), paths, ideScope);
-
             }
         }
     }
 
-    private void writeFileEntries(XMLStreamWriter writer, Iterable<File> files, Set<String> paths, String ideScope) throws XMLStreamException {
+    private void writeFileEntries(Iterable<File> files, Set<String> paths, String ideScope) throws XMLStreamException {
         for (File file : files) {
             LibPath libPath = new LibPath();
             libPath.bin = file;
             libPath.scope = ideScope;
             writeOrderEntryForLib(libPath);
+            paths.add(file.getPath());
         }
     }
 
-    private List<LibPath> toLibPath(JkResolveResult resolveResult, JkModuleDependency moduleDependency, JkRepos repos,
+    private List<LibPath> toLibPath(JkDependencyNode.ModuleNodeInfo moduleInfo, JkRepos repos,
                                     String scope) {
         final List<LibPath> result = new LinkedList<LibPath>();
-        final JkModuleId moduleId = moduleDependency.moduleId();
-        final JkVersion version = resolveResult.versionOf(moduleId);
+        final JkModuleId moduleId = moduleInfo.moduleId();
+        final JkVersion version = moduleInfo.resolvedVersion();
         final JkVersionedModule versionedModule = JkVersionedModule.of(moduleId, version);
-        final List<File> files = resolveResult.filesOf(moduleId);
+        final List<File> files = moduleInfo.files();
         for (File file : files) {
             LibPath libPath = new LibPath();
             libPath.bin = file;
@@ -316,31 +305,6 @@ final class ImlGenerator {
             result.add(libPath);
         }
         return result;
-    }
-
-    private List<LibPath> toLibPath(JkDependency.JkFileDependency dependency, String scope) {
-        final List<LibPath> result = new LinkedList<LibPath>();
-        final Iterable<File> files = dependency.files();
-        for (File file : files) {
-            LibPath libPath = new LibPath();
-            libPath.bin = file;
-            libPath.scope = scope;
-            libPath.source = fileWithSuffix(file, "sources");
-            libPath.javadoc = fileWithSuffix(file, "javadoc");
-            result.add(libPath);
-        }
-        return result;
-    }
-
-    private File fileWithSuffix(File file, String suffix) {
-        String fileName = file.getPath();
-        String beforeExtension = JkUtilsString.substringBeforeLast(fileName, ".");
-        if (beforeExtension.equals("")) {
-            File newFile = new File(beforeExtension + suffix);
-            return newFile.exists() ? newFile : null;
-        }
-        File newFile = new File(beforeExtension + suffix + "." + JkUtilsString.substringAfterLast(fileName, "."));
-        return newFile.exists() ? newFile : null;
     }
 
     private static Set<String> toStringScopes(Set<JkScope> scopes) {
@@ -390,52 +354,9 @@ final class ImlGenerator {
         writer.writeCharacters("\n");
     }
 
-    private void writeModules() throws XMLStreamException {
-        for (final File depProjectDir : projectDependencies) {
 
-            writer.writeCharacters(T2);
-            writer.writeEmptyElement("orderEntry");
-            writer.writeAttribute("type", "module");
-            writer.writeAttribute("module-name", depProjectDir.getName());
-            writer.writeAttribute("exported", "");
-            writer.writeAttribute("scope", "TEST");
-            writer.writeCharacters("\n");
-        }
-    }
 
-    private void writeLocalLibs(JkScope scope) throws XMLStreamException {
-        final List<File> binFiles = new LinkedList<File>();
-        binFiles.addAll(dependencyResolver.dependenciesToResolve().fileSystemDepsOnly(scope).entries());
-        if (scope.equals(JkJavaBuild.TEST)) {
-            binFiles.addAll(buildDefDependencyResolver.dependenciesToResolve().localFileDependencies().entries());
-        }
-        for (final File file : binFiles) {
-            final LibPath libPath = new LibPath();
-            libPath.bin = file;
-            final String name = JkUtilsString.substringBeforeLast(file.getName(), ".jar");
-            File source = new File(file.getParentFile(), name + "-sources.jar");
-            if (!source.exists()) {
-                source = new File(file.getParentFile(), "../../libs-sources/" + name + "-sources.jar");
-            }
-            if (!source.exists()) {
-                source = new File(file.getParentFile(), "libs-sources/" + name + "-sources.jar");
-            }
-            File javadoc = new File(file.getParentFile(), name + "-javadoc.jar");
-            if (!javadoc.exists()) {
-                javadoc = new File(file.getParentFile(), "../../libs-javadoc/" + name + "-javadoc.jar");
-            }
-            if (!javadoc.exists()) {
-                javadoc = new File(file.getParentFile(), "libs-javadoc/" + name + "-javadoc.jar");
-            }
-            if (source.exists()) {
-                libPath.source = source;
-            }
-            if (javadoc.exists()) {
-                libPath.javadoc = javadoc;
-            }
-            writeOrderEntryForLib(libPath);
-        }
-    }
+
 
     private void writeOrderEntryForLib(LibPath libPath) throws XMLStreamException {
             writer.writeCharacters(T2);
@@ -506,44 +427,6 @@ final class ImlGenerator {
 
     }
 
-    private static List<LibPath> libPaths(JkDependencyResolver dependencyResolver, JkRepos repos) {
-        JkDependencies depsToResolve = dependencyResolver.dependenciesToResolve();
-        if (!depsToResolve.containsModules()) {
-            return new LinkedList<ImlGenerator.LibPath>();
-        }
-        final JkResolveResult resolveResult = dependencyResolver.resolve();
-        final JkResolveResult compileResolveResult = dependencyResolver.resolve(JkJavaBuild.COMPILE);
-        final JkResolveResult runtimeResolveResult = dependencyResolver.resolve(JkJavaBuild.RUNTIME);
-        final JkResolveResult providedResolveResult = dependencyResolver.resolve(JkJavaBuild.PROVIDED);
-        final JkResolveResult testResolveResult = dependencyResolver.resolve(JkJavaBuild.TEST);
-
-        final List<LibPath> result = new LinkedList<LibPath>();
-        for (final JkVersionedModule versionedModule : resolveResult.involvedModules()) {
-            final LibPath libPath = new LibPath();
-            final JkModuleId moduleId = versionedModule.moduleId();
-            libPath.bin = resolveResult.filesOf(moduleId).get(0);
-            libPath.source = repos.get(JkModuleDependency.of(versionedModule).classifier("sources"));
-            libPath.javadoc = repos.get(JkModuleDependency.of(versionedModule).classifier("javadoc"));
-            libPath.scope = scope(compileResolveResult, runtimeResolveResult, providedResolveResult,
-                    testResolveResult, moduleId);
-            result.add(libPath);
-        }
-        return result;
-    }
-
-    private static String scope(JkResolveResult compile, JkResolveResult runtime, JkResolveResult provided,
-                                JkResolveResult test, JkModuleId moduleId) {
-        if (provided.contains(moduleId)) {
-            return "PROVIDED";
-        }
-        if (compile.contains(moduleId)) {
-            return "COMPILE";
-        }
-        if (runtime.contains(moduleId)) {
-            return "RUNTIME";
-        }
-        return "TEST";
-    }
 
     private static String jdkVesion(String compilerVersion) {
         if ("7".equals(compilerVersion)) {
@@ -617,33 +500,6 @@ final class ImlGenerator {
             folder = folder.getParentFile();
         }
         return null;
-    }
-
-    private static class ScopeResultHolder {
-
-        final JkResolveResult compileResult;
-        final JkResolveResult runtimeResult;
-        final JkResolveResult testResult;
-
-        ScopeResultHolder(JkDependencyResolver resolver) {
-            compileResult = resolver.resolve(JkJavaBuild.COMPILE);
-            runtimeResult = resolver.resolve(JkJavaBuild.RUNTIME);
-            testResult = resolver.resolve(JkJavaBuild.TEST);
-        }
-
-        public JkScope scopeOf(JkModuleId moduleId) {
-            if (compileResult.contains(moduleId)) {
-                return JkJavaBuild.COMPILE;
-            }
-            if (runtimeResult.contains(moduleId)) {
-                return JkJavaBuild.RUNTIME;
-            }
-            if (testResult.contains(moduleId)) {
-                return JkJavaBuild.TEST;
-            }
-            return JkJavaBuild.COMPILE;
-        }
-
     }
 
 }

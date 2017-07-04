@@ -78,7 +78,7 @@ public final class JkPath implements Iterable<File> {
      * files. So if a given file in the sequence exist twice or more, then only
      * the first occurrence is kept.
      */
-    public JkPath withoutDoubloons() {
+    public JkPath withoutDuplicates() {
         final List<File> files = new LinkedList<File>();
         for (final File file : this) {
             if (!files.contains(file)) {

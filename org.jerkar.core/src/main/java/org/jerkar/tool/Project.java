@@ -65,7 +65,7 @@ final class Project {
     private JkPath compile() {
         final LinkedHashSet<File> entries = new LinkedHashSet<File>();
         compile(new HashSet<File>(), entries);
-        return JkPath.of(entries).withoutDoubloons();
+        return JkPath.of(entries).withoutDuplicates();
     }
 
     private void compile(Set<File> yetCompiledProjects, LinkedHashSet<File> path) {
@@ -193,13 +193,13 @@ final class Project {
         if (localDeflibDir.exists()) {
             extraLibs.addAll(JkFileTree.of(localDeflibDir).include("**/*.jar").files(false));
         }
-        return JkPath.of(extraLibs).withoutDoubloons();
+        return JkPath.of(extraLibs).withoutDuplicates();
     }
 
     private static JkPath jerkarLibs() {
         final List<File> extraLibs = new LinkedList<File>();
         extraLibs.add(JkLocator.jerkarJarFile());
-        return JkPath.of(extraLibs).withoutDoubloons();
+        return JkPath.of(extraLibs).withoutDuplicates();
     }
 
     private JkPath compileDependentProjects(Set<File> yetCompiledProjects, LinkedHashSet<File> pathEntries) {

@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 
-import org.jerkar.api.java.JkClasspath;
-import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 
@@ -42,7 +40,7 @@ public class JkDependencyNode implements Serializable {
 
     /**
      * Constructs a node for the specified versioned module having the specified
-     * direct descendants.
+     * direct flatten.
      */
     public static JkDependencyNode ofModuleDep(ModuleNodeInfo moduleNodeInfo, List<JkDependencyNode> children) {;
         return new JkDependencyNode(moduleNodeInfo, Collections.unmodifiableList(children));
@@ -51,9 +49,9 @@ public class JkDependencyNode implements Serializable {
     public static JkDependencyNode ofFileDep(JkDependency.JkFileDependency dependency, Set<JkScope> scopes) {
         final NodeInfo moduleInfo;
         if (dependency instanceof JkFileSystemDependency) {
-            moduleInfo = new FileNodeInfo(((JkFileSystemDependency) dependency).files(), false);
+            moduleInfo = new FileNodeInfo(((JkFileSystemDependency) dependency).files(), scopes, false);
         } else {
-            moduleInfo = new FileNodeInfo(((JkComputedDependency) dependency).files(), true);
+            moduleInfo = new FileNodeInfo(((JkComputedDependency) dependency).files(), scopes, true);
         }
         return new JkDependencyNode(moduleInfo, Collections.unmodifiableList(new LinkedList<JkDependencyNode>()));
     }
@@ -96,7 +94,7 @@ public class JkDependencyNode implements Serializable {
         if (this.nodeInfo instanceof ModuleNodeInfo) {
             return (ModuleNodeInfo) this.nodeInfo;
         }
-        throw new IllegalStateException("The current node is type of " + this.nodeInfo.getClass() + ". It is not related to a module dependency.");
+        throw new IllegalStateException("The current node is type of " + this.nodeInfo.getClass() + " for " + this.nodeInfo + " is not related to a module dependency.");
     }
 
 
@@ -133,7 +131,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns the resolved version for this node and all its descendants.
+     * Returns the resolved version for this node and all its flatten.
      */
     public JkVersionProvider flattenToVersionProvider() {
         return this.resolvedVersions;
@@ -210,11 +208,11 @@ public class JkDependencyNode implements Serializable {
     /**
      * Returns all nodes descendant of this one, deep first.
      */
-    public List<JkDependencyNode> descendants() {
+    public List<JkDependencyNode> flatten() {
         List<JkDependencyNode> result = new LinkedList<JkDependencyNode>();
         for (JkDependencyNode child : this.children()) {
             result.add(child);
-            result.addAll(child.descendants());
+            result.addAll(child.flatten());
         }
         return result;
     }
@@ -226,7 +224,7 @@ public class JkDependencyNode implements Serializable {
         if (moduleId.equals(this.moduleId())) {
             return this;
         }
-        for (JkDependencyNode child : this.descendants()) {
+        for (JkDependencyNode child : this.flatten()) {
             if (moduleId.equals(child.moduleId())) {
                 return child;
             }
@@ -295,6 +293,8 @@ public class JkDependencyNode implements Serializable {
 
         List<File> files();
 
+        Set<JkScope> declaredScopes();
+
     }
 
 
@@ -336,6 +336,10 @@ public class JkDependencyNode implements Serializable {
 
         public Set<JkScope> declaredScopes() {
             return declaredScopes;
+        }
+
+        public Set<JkScope> resolvedScopes() {
+            return rootScopes;
         }
 
         public JkVersion resolvedVersion() {
@@ -397,16 +401,19 @@ public class JkDependencyNode implements Serializable {
         return result;
     }
 
-    private static final class FileNodeInfo implements Serializable, NodeInfo {
+    public static final class FileNodeInfo implements Serializable, NodeInfo {
 
         private static final long serialVersionUID = 1L;
 
         private final List<File> files;
 
+        private final Set<JkScope> scopes;
+
         private final boolean computed;
 
-        public FileNodeInfo(List<File> files, boolean computed) {
-            this.files = files;
+        public FileNodeInfo(List<File> files, Set<JkScope> scopes, boolean computed) {
+            this.files = Collections.unmodifiableList(new LinkedList<File>(files));
+            this.scopes = Collections.unmodifiableSet(new HashSet<JkScope>(scopes));
             this.computed = computed;
         }
 
@@ -417,6 +424,11 @@ public class JkDependencyNode implements Serializable {
         @Override
         public List<File> files() {
             return files;
+        }
+
+        @Override
+        public Set<JkScope> declaredScopes() {
+            return null;
         }
 
         @Override
