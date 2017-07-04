@@ -127,8 +127,8 @@ final class IvyResolver implements InternalDepResolver {
         }
         final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
         IvyArtifactContainer artifactContainer = IvyArtifactContainer.of(artifactDownloadReports);
-        JkResolveResult resolveResult = getResolveConf(artifactDownloadReports, deps,
-                    report.getDependencies(), module, errorReport, artifactContainer);
+        JkResolveResult resolveResult = getResolveConf(report.getDependencies(), module,
+                errorReport, artifactContainer);
         if (moduleArg == null) {
             deleteResolveCache(module);
         }
@@ -154,35 +154,14 @@ final class IvyResolver implements InternalDepResolver {
         return "download-only";
     }
 
-    private static JkResolveResult getResolveConf(ArtifactDownloadReport[] artifactDownloadReports,
-                                                  JkDependencies deps, List<IvyNode> nodes,
+    private static JkResolveResult getResolveConf(List<IvyNode> nodes,
                                                   JkVersionedModule rootVersionedModule,
                                                   JkResolveResult.JkErrorReport errorReport,
                                                   IvyArtifactContainer ivyArtifactContainer) {
 
-        // Get module dependency files
-        final List<JkModuleArtifact> jkArtifacts = new LinkedList<JkModuleArtifact>();
-        JkVersionProvider versionProvider = JkVersionProvider.empty();
-        for (final ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
-            final JkVersionedModule versionedModule = IvyTranslations
-                    .toJkVersionedModule(artifactDownloadReport.getArtifact());
-            final JkModuleArtifact jkArtifact = JkModuleArtifact.of(versionedModule,
-                    artifactDownloadReport.getLocalFile());
-            jkArtifacts.add(jkArtifact);
-
-            // Populate version provider
-            final JkScopedDependency declaredDep = deps.get(versionedModule.moduleId());
-            if (declaredDep != null) {
-                final JkModuleDependency module = (JkModuleDependency) declaredDep.dependency();
-                if (module.versionRange().isDynamicAndResovable()) {
-                    versionProvider = versionProvider.and(module.moduleId(), versionedModule.version());
-                }
-            }
-        }
-
         // Compute dependency tree
         final JkDependencyNode tree = createTree(nodes, rootVersionedModule, ivyArtifactContainer);
-        return JkResolveResult.of(jkArtifacts, versionProvider, tree, errorReport);
+        return JkResolveResult.of(tree, errorReport);
     }
 
     private static JkVersionedModule anonymousVersionedModule() {
@@ -215,10 +194,10 @@ final class IvyResolver implements InternalDepResolver {
     private static JkDependencyNode createTree(Iterable<IvyNode> nodes, JkVersionedModule rootVersionedModule,
                                                IvyArtifactContainer artifactContainer) {
         final IvyTreeResolver treeResolver = new IvyTreeResolver(nodes, artifactContainer);
-        final ModuleNodeInfo moduleNodeInfo = new ModuleNodeInfo(rootVersionedModule.moduleId(),
+        final ModuleNodeInfo treeRootNodeInfo = new ModuleNodeInfo(rootVersionedModule.moduleId(),
                 JkVersionRange.of(rootVersionedModule.version().name()), new HashSet<JkScope>(), new HashSet<JkScope>(),
-                rootVersionedModule.version() , new LinkedList<File>());
-        return treeResolver.createNode(moduleNodeInfo);
+                rootVersionedModule.version() , new LinkedList<File>(), true);
+        return treeResolver.createNode(treeRootNodeInfo);
     }
 
     private static class IvyTreeResolver {
@@ -230,6 +209,9 @@ final class IvyResolver implements InternalDepResolver {
 
 
             for (final IvyNode node : nodes) {
+                if (node.isCompletelyBlacklisted()) {
+                    continue;
+                }
                 final JkVersionedModule nodeModule = toJkVersionedModule(node);
                 final JkDependency currentDep = JkModuleDependency.of(nodeModule);
 

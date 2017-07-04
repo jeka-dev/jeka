@@ -2,11 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.utils.JkUtilsAssert;
@@ -29,9 +25,12 @@ public class JkDependencyNode implements Serializable {
 
     private final List<JkDependencyNode> children;
 
+    private final JkVersionProvider resolvedVersions;
+
     private JkDependencyNode(NodeInfo nodeInfo, List<JkDependencyNode> children) {
         this.nodeInfo = nodeInfo;
         this.children = children;
+        this.resolvedVersions = compute(nodeInfo, children);
     }
 
     /**
@@ -59,10 +58,22 @@ public class JkDependencyNode implements Serializable {
         return new JkDependencyNode(moduleInfo, Collections.unmodifiableList(new LinkedList<JkDependencyNode>()));
     }
 
+    JkDependencyNode mergeNonModules(JkDependencies dependencies, Set<JkScope> scopes) {
+        final List<JkDependencyNode> result = new LinkedList<JkDependencyNode>();
+        final Set<JkDependency.JkFileDependency> addedFileDeps = new HashSet<JkDependency.JkFileDependency>();
+        for (JkDependencyNode node : this.children) {
+            if (node.isModuleNode()) {
+                addFileDepsToTree(dependencies, scopes, result, addedFileDeps, node.moduleId());
+                result.add(node);
+            }
+        }
+        addFileDepsToTree(dependencies, scopes, result, addedFileDeps, null);
+        return new JkDependencyNode(this.nodeInfo,result);
+    }
+
     public List<File> allFiles() {
         List<File> list = new LinkedList<File>();
         JkUtilsIterable.addAllWithoutDplicate(list, this.nodeInfo.files());
-        list.addAll(this.nodeInfo.files());
         for (JkDependencyNode child : children) {
             JkUtilsIterable.addAllWithoutDplicate(list, child.allFiles());
         }
@@ -82,11 +93,13 @@ public class JkDependencyNode implements Serializable {
      * @return
      */
     public ModuleNodeInfo moduleInfo() {
-        if (this.nodeInfo instanceof NodeInfo) {
+        if (this.nodeInfo instanceof ModuleNodeInfo) {
             return (ModuleNodeInfo) this.nodeInfo;
         }
         throw new IllegalStateException("The current node is type of " + this.nodeInfo.getClass() + ". It is not related to a module dependency.");
     }
+
+
 
     /**
      * Returns information relative to this dependency node.
@@ -102,6 +115,42 @@ public class JkDependencyNode implements Serializable {
      */
     public List<JkDependencyNode> children() {
         return children;
+    }
+
+    /**
+     * Returns <code>true</code> if this node or one of its descendant stand for the specified module.
+     * Evicted nodes are not taken in account.
+     */
+    public boolean contains(JkModuleId moduleId) {
+        if (this.isModuleNode() && moduleId.equals(this.moduleInfo().moduleId()) && !this.moduleInfo().isEvicted()) {
+            return true;
+        }
+        for (JkDependencyNode child : this.children) {
+            boolean contains = child.contains(moduleId);
+            if (contains) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns the resolved version for this node and all its descendants.
+     */
+    public JkVersionProvider flattenToVersionProvider() {
+        return this.resolvedVersions;
+    }
+
+    /**
+     * Returns the versioned modules which with this result has been created.
+     */
+    public Set<JkVersionedModule> resolvedModules() {
+        Set<JkVersionedModule> result = new HashSet<JkVersionedModule>();
+        if (this.isModuleNode() && !this.moduleInfo().isEvicted()) {
+            result.add(this.moduleInfo().moduleId.version(this.moduleInfo().resolvedVersion.name()));
+        }
+        for (JkDependencyNode child : this.children) {
+            result.addAll(child.resolvedModules());
+        }
+        return result;
     }
 
     /**
@@ -142,6 +191,20 @@ public class JkDependencyNode implements Serializable {
            }
         }
         return new JkDependencyNode(this.nodeInfo, resultChildren);
+    }
+
+    private static void addFileDepsToTree(JkDependencies dependencies, Set<JkScope> scopes, List<JkDependencyNode> result,
+                                          Set<JkDependency.JkFileDependency> addedFileDeps, JkModuleId moduleId) {
+        for (JkScopedDependency scopedDependency : depsUntilLast(dependencies, moduleId)) {
+            if (scopes.isEmpty() || scopedDependency.isInvolvedInAnyOf(scopes)) {
+                JkDependency.JkFileDependency fileDep = (JkDependency.JkFileDependency) scopedDependency.dependency();
+                if (!addedFileDeps.contains(fileDep)) {
+                    JkDependencyNode fileNode = JkDependencyNode.ofFileDep(fileDep, scopedDependency.scopes());
+                    addedFileDeps.add(fileDep);
+                    result.add(fileNode);
+                }
+            }
+        }
     }
 
     /**
@@ -185,7 +248,10 @@ public class JkDependencyNode implements Serializable {
      * dependency tree.
      */
     public List<String> toStrings() {
-        return this.toStrings(false, -1, new HashSet<JkModuleId>());
+        if (this.isModuleNode()) {
+            return this.toStrings(false, -1, new HashSet<JkModuleId>());
+        }
+        return JkUtilsIterable.listOf(this.moduleInfo().toString());
     }
 
     private List<String> toStrings(boolean showRoot, int indentLevel, Set<JkModuleId> expandeds) {
@@ -194,7 +260,7 @@ public class JkDependencyNode implements Serializable {
             final String label = nodeInfo.toString();
             result.add(JkUtilsString.repeat(INDENT, indentLevel) + label);
         }
-        if (this.nodeInfo == null || !expandeds.contains(this.moduleId())) {
+        if (this.nodeInfo == null || (this.isModuleNode() && !expandeds.contains(this.moduleId()))) {
             if (this.nodeInfo != null) {
                 expandeds.add(this.moduleId());
             }
@@ -231,6 +297,7 @@ public class JkDependencyNode implements Serializable {
 
     }
 
+
     public static final class ModuleNodeInfo implements Serializable, NodeInfo {
 
         private static final long serialVersionUID = 1L;
@@ -241,15 +308,22 @@ public class JkDependencyNode implements Serializable {
         private final Set<JkScope> rootScopes; // scopes fetching this node from root
         private final JkVersion resolvedVersion;
         private final List<File> artifacts;
+        private final boolean treeRoot;
 
         public ModuleNodeInfo(JkModuleId moduleId, JkVersionRange declaredVersion, Set<JkScope> declaredScopes,
                               Set<JkScope> rootScopes, JkVersion resolvedVersion, List<File> artifacts) {
+            this(moduleId, declaredVersion, declaredScopes, rootScopes, resolvedVersion, artifacts, false);
+        }
+
+        ModuleNodeInfo(JkModuleId moduleId, JkVersionRange declaredVersion, Set<JkScope> declaredScopes,
+                              Set<JkScope> rootScopes, JkVersion resolvedVersion, List<File> artifacts, boolean treeRoot) {
             this.moduleId = moduleId;
             this.declaredVersion = declaredVersion;
             this.declaredScopes = declaredScopes;
             this.rootScopes = rootScopes;
             this.resolvedVersion = resolvedVersion;
             this.artifacts = Collections.unmodifiableList(new LinkedList<File>(artifacts));
+            this.treeRoot = treeRoot;
         }
 
         public JkModuleId moduleId() {
@@ -285,6 +359,42 @@ public class JkDependencyNode implements Serializable {
         public List<File> files() {
             return artifacts;
         }
+    }
+
+
+
+    private static List<JkScopedDependency> depsUntilLast(JkDependencies deps, JkModuleId to) {
+        List<JkScopedDependency> result = new LinkedList<JkScopedDependency>();
+        List<JkScopedDependency> partialResult = new LinkedList<JkScopedDependency>();
+        for (JkScopedDependency scopedDependency : deps) {
+            if (scopedDependency.dependency() instanceof JkModuleDependency) {
+                JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency.dependency();
+                if (moduleDependency.moduleId().equals(to)) {
+                      result.addAll(partialResult);
+                      partialResult.clear();
+                }
+            } else if (scopedDependency.dependency() instanceof JkDependency.JkFileDependency) {
+                partialResult.add(scopedDependency);
+            }
+        }
+        if (to == null) {
+            result.addAll(partialResult);
+        }
+        return result;
+    }
+
+    private static JkVersionProvider compute(NodeInfo nodeInfo, List<JkDependencyNode> children) {
+        JkVersionProvider result = JkVersionProvider.empty();
+        if (nodeInfo instanceof ModuleNodeInfo) {
+            ModuleNodeInfo moduleNodeInfo = (ModuleNodeInfo) nodeInfo;
+            if (!moduleNodeInfo.treeRoot && !moduleNodeInfo.isEvicted()) {
+                result = result.and(moduleNodeInfo.moduleId, moduleNodeInfo.resolvedVersion);
+            }
+        }
+        for (JkDependencyNode child : children) {
+            result = result.and(compute(child.nodeInfo(), child.children()));
+        }
+        return result;
     }
 
     private static final class FileNodeInfo implements Serializable, NodeInfo {

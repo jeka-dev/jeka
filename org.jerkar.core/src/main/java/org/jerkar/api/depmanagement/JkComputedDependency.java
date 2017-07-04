@@ -155,4 +155,18 @@ public class JkComputedDependency extends JkFileDependency {
         return this.runnable.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JkComputedDependency that = (JkComputedDependency) o;
+
+        return files.equals(that.files);
+    }
+
+    @Override
+    public int hashCode() {
+        return files.hashCode();
+    }
 }

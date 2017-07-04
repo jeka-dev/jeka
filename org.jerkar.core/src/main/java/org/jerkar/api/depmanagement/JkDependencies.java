@@ -347,20 +347,6 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Convenient method to resolve using {@link JkModuleArtifact}s instead of
-     * {@link JkVersionedModule}.
-     *
-     * @see #resolvedWith(Iterable)
-     */
-    public JkDependencies resolvedWithArtifacts(Iterable<JkModuleArtifact> artifacts) {
-        final List<JkVersionedModule> list = new LinkedList<JkVersionedModule>();
-        for (final JkModuleArtifact artifact : artifacts) {
-            list.add(artifact.versionedModule());
-        }
-        return resolvedWith(list);
-    }
-
-    /**
      * Returns a set of dependencies that contains all and only module
      * dependencies declared in this object.
      */

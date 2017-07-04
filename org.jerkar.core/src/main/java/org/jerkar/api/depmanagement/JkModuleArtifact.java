@@ -8,22 +8,22 @@ import org.jerkar.api.utils.JkUtilsObject;
 /**
  * A file coming from a module dependency.
  */
-public final class JkModuleArtifact implements Serializable {
+final class ModuleArtifact implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates a {@link JkModuleArtifact} from the specified versioned module and file.
+     * Creates a {@link ModuleArtifact} from the specified versioned module and file.
      */
-    public static JkModuleArtifact of(JkVersionedModule versionedModule, File localFile) {
-        return new JkModuleArtifact(versionedModule, localFile);
+    public static ModuleArtifact of(JkVersionedModule versionedModule, File localFile) {
+        return new ModuleArtifact(versionedModule, localFile);
     }
 
     private final JkVersionedModule versionedModule;
 
     private final File localFile;
 
-    private JkModuleArtifact(JkVersionedModule versionedModule, File localFile) {
+    private ModuleArtifact(JkVersionedModule versionedModule, File localFile) {
         super();
         this.versionedModule = versionedModule;
         this.localFile = localFile;
@@ -63,7 +63,7 @@ public final class JkModuleArtifact implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final JkModuleArtifact other = (JkModuleArtifact) obj;
+        final ModuleArtifact other = (ModuleArtifact) obj;
         if (!JkUtilsObject.equals(this.localFile, other.localFile)) {
             return false;
         }

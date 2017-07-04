@@ -4,8 +4,6 @@ import org.jerkar.api.utils.JkUtilsIterable;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -30,118 +28,82 @@ public final class JkResolveResult implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public static JkResolveResult empty() {
-        return of(Collections.EMPTY_LIST, JkDependencyNode.empty());
+        return of(JkDependencyNode.empty());
     }
 
     /**
      * Creates a dependency resolve result object form a list of module dependency files and a list of resolved versions.
      */
-    public static JkResolveResult of(List<JkModuleArtifact> artifacts,
-                                     JkVersionProvider jkVersionProvider, JkDependencyNode depTree, JkErrorReport errorReport) {
-        return new JkResolveResult(artifacts, jkVersionProvider, depTree, errorReport);
+    public static JkResolveResult of(JkDependencyNode depTree, JkErrorReport errorReport) {
+        return new JkResolveResult(depTree, errorReport);
     }
 
 
-    private static JkResolveResult of(List<JkModuleArtifact> artifacts, JkDependencyNode dependencyTree) {
-        return new JkResolveResult(artifacts, JkVersionProvider.empty(), dependencyTree, JkErrorReport.allFine());
+    private static JkResolveResult of(JkDependencyNode dependencyTree) {
+        return new JkResolveResult(dependencyTree, JkErrorReport.allFine());
     }
-
-    private final List<JkModuleArtifact> jkModuleDepFiles;
-
-    private final JkVersionProvider jkVersionProvider;
 
     private final JkDependencyNode depTree;
 
     private final JkErrorReport errorReport;
 
-    private JkResolveResult(List<JkModuleArtifact> artifacts, JkVersionProvider jkVersionProvider,
-                            JkDependencyNode depTree, JkErrorReport errorReport) {
+    private JkResolveResult(JkDependencyNode depTree, JkErrorReport errorReport) {
         super();
-        this.jkModuleDepFiles = Collections.unmodifiableList(artifacts);
-        this.jkVersionProvider = jkVersionProvider;
         this.depTree = depTree;
         this.errorReport = errorReport;
     }
 
-    public List<JkModuleArtifact> moduleFiles() {
-        return this.jkModuleDepFiles;
-    }
-
     /**
-     * Returns the list of local files standing for this dependencies resolution.
+     * Shorthand for <code>dependencyTree.allFiles()</code>
      */
     public List<File> localFiles() {
-        final List<File> result = new LinkedList<File>();
-        for (final JkModuleArtifact artifact : this.jkModuleDepFiles) {
-            result.add(artifact.localFile());
-        }
-        return result;
+        return this.depTree.allFiles();
     }
-
-    public boolean contains(JkModuleId moduleId) {
-        for (JkModuleArtifact moduleDepFile : jkModuleDepFiles) {
-            if (moduleDepFile.versionedModule().moduleId().equals(moduleId)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public JkVersion versionOf(JkModuleId moduleId) {
-        JkVersion result = this.jkVersionProvider.versionOf(moduleId);
-        if (result != null) {
-            return result;
-        }
-        for (JkModuleArtifact moduleDepFile : this.jkModuleDepFiles) {
-            if (moduleDepFile.versionedModule().moduleId().equals(moduleId)) {
-                return moduleDepFile.versionedModule().version();
-            }
-        }
-        return null;
-    }
-
 
     /**
-     * Returns the versioned modules which with this result has been created.
+     * Shorthand for <code>dependencyTree.contains(JkModuleId)</code>
+     */
+    public boolean contains(JkModuleId moduleId) {
+        return this.depTree.contains(moduleId);
+    }
+
+    /**
+     * Shorthand for <code>resolvedVersion.versionOf(JkModuleId)</code>
+     */
+    public JkVersion versionOf(JkModuleId moduleId) {
+        return this.resolvedVersionProvider().versionOf(moduleId);
+    }
+
+    /**
+     * Shorthand for <code>dependencyTree.resolvedModules(JkModuleId)</code>
      */
     public Set<JkVersionedModule> involvedModules() {
-        final Set<JkVersionedModule> result = new HashSet<JkVersionedModule>();
-        for (final JkModuleArtifact artifact : this.jkModuleDepFiles) {
-            result.add(artifact.versionedModule());
-        }
-        return result;
+        return this.depTree.resolvedModules();
     }
 
     /**
-     * Returns the version provider which with this result has been created.
+     * Shorthand for <code>dependencyTree.resolvedVersions(JkModuleId)</code>
      */
     public JkVersionProvider resolvedVersionProvider() {
-        return jkVersionProvider;
+        return this.depTree.flattenToVersionProvider();
     }
 
     /**
      * Returns the local files the specified module turns to.
      */
-    public List<File> filesOf(JkModuleId jkModuleId) {
-        final List<File> result = new LinkedList<File>();
-        for (final JkModuleArtifact artifact : this.jkModuleDepFiles) {
-            if (jkModuleId.equals(artifact.versionedModule().moduleId())) {
-                result.add(artifact.localFile());
-            }
+    public List<File> filesOf(JkModuleId moduleId) {
+        JkDependencyNode dependencyNode = this.depTree.find(moduleId);
+        if (dependencyNode == null) {
+            return new LinkedList<File>();
         }
-        return result;
+        return dependencyNode.moduleInfo().files();
     }
 
     /**
      * Returns a concatenation of this resolve result and the specified one.
      */
     public JkResolveResult and(JkResolveResult other) {
-        final List<JkModuleArtifact> artifacts = new LinkedList<JkModuleArtifact>(
-                this.jkModuleDepFiles);
-        artifacts.addAll(other.jkModuleDepFiles);
-        final JkVersionProvider jkVersionProvider = this.jkVersionProvider
-                .and(other.jkVersionProvider);
-        return new JkResolveResult(artifacts, jkVersionProvider, this.depTree.merge(other.depTree),
+        return new JkResolveResult(this.depTree.merge(other.depTree),
                 this.errorReport.merge(other.errorReport));
     }
 
@@ -165,10 +127,8 @@ public final class JkResolveResult implements Serializable {
 
     @Override
     public String toString() {
-        return this.jkModuleDepFiles.toString();
+        return this.depTree.toString();
     }
-
-
 
     public static class JkErrorReport implements Serializable {
 

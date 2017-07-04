@@ -17,12 +17,6 @@ public final class JkFileSystemDependency extends JkFileDependency {
 
     private static final long serialVersionUID = 1079527121988214989L;
 
-    private final List<File> files;
-
-    private JkFileSystemDependency(Iterable<File> files) {
-        this.files = Collections.unmodifiableList(JkUtilsIterable.listWithoutDuplicateOf(files));
-    }
-
     /**
      * Creates a {@link JkFileSystemDependency} on the specified file.
      */
@@ -48,6 +42,12 @@ public final class JkFileSystemDependency extends JkFileDependency {
         return new JkFileSystemDependency(Arrays.asList(files));
     }
 
+    private final List<File> files;
+
+    private JkFileSystemDependency(Iterable<File> files) {
+        this.files = Collections.unmodifiableList(JkUtilsIterable.listWithoutDuplicateOf(files));
+    }
+
     @Override
     public final List<File> files() {
         for (final File file : files) {
@@ -62,4 +62,16 @@ public final class JkFileSystemDependency extends JkFileDependency {
         return "Files=" + files.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JkFileSystemDependency that = (JkFileSystemDependency) o;
+        return files.equals(that.files);
+    }
+
+    @Override
+    public int hashCode() {
+        return files.hashCode();
+    }
 }

@@ -66,6 +66,12 @@ public class ResolveWithArtifactIT {
         System.out.println("-----");
         System.out.println(JkUtilsString.join(tree.allFiles(), "\n"));
         //assertEquals(resolveResult.localFiles().size(), tree.allFiles().size());
+        System.out.println("-----");
+        for (File file : resolveResult.localFiles()) {
+            if (!tree.allFiles().contains(file)) {
+                System.out.println(file);
+            }
+        }
 
     }
 

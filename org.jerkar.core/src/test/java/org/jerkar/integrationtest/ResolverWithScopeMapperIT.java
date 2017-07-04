@@ -1,12 +1,8 @@
 package org.jerkar.integrationtest;
 
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.depmanagement.JkDependencyNode.ModuleNodeInfo;
-import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Test;
-
-import java.util.Set;
 
 import static org.jerkar.tool.builtins.javabuild.JkJavaBuild.*;
 import static org.junit.Assert.*;
@@ -25,7 +21,7 @@ public class ResolverWithScopeMapperIT {
         JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
                 .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(TEST);
-        assertEquals(25, resolveResult.moduleFiles().size());
+        assertEquals(25, resolveResult.dependencyTree().flattenToVersionProvider().moduleIds().size());
         assertTrue(resolveResult.contains(JkPopularModules.JUNIT));
     }
 
@@ -56,8 +52,6 @@ public class ResolverWithScopeMapperIT {
      * Nevertheless, if we declare spring-core with version 4.0.0 as direct dependency,
      * this one should be taken in account, and not the the higher one coming transitive dependency.
      */
-
-
     @Test
     public void resolveWithSeveralScopes() {
         JkDependencies deps = JkDependencies.builder()
@@ -69,10 +63,8 @@ public class ResolverWithScopeMapperIT {
         JkResolveResult resolveResult = resolver.resolve(JkJavaBuild.COMPILE, JkJavaBuild.PROVIDED);
         assertTrue(resolveResult.contains(JkPopularModules.JAVAX_SERVLET_API));
         assertTrue(resolveResult.contains(JkPopularModules.GUAVA));
-        assertEquals(2, resolveResult.moduleFiles().size());
+        assertEquals(2, resolveResult.dependencyTree().flattenToVersionProvider().moduleIds().size());
     }
-
-
 
     @Test
     public void getRuntimeTransitiveWithRuntime() {
@@ -101,7 +93,6 @@ public class ResolverWithScopeMapperIT {
         boolean snakeyamlHere = resolveResult.contains( JkModuleId.of("org.yaml:snakeyaml"));
         assertFalse(snakeyamlHere);
     }
-
 
     @Test
     public void treeRootIsCorrectWhenAnonymous() {
