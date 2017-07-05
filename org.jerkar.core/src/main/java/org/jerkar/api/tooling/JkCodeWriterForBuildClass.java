@@ -213,6 +213,7 @@ public class JkCodeWriterForBuildClass {
             builder.append(extraMethod);
             builder.append(LINE_JUMP);
         }
+        builder.append(LINE_JUMP);
         builder.append(writer.mainMethod()).append(LINE_JUMP);
         return builder.toString();
     }

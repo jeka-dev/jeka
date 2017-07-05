@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
+import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -29,7 +30,7 @@ public class EffectivePomTest {
         final URL url = EffectivePomTest.class.getResource("effectivepom.xml");
         final File file = new File(url.getFile());
         final JkPom jkPom = JkPom.of(file);
-        final String code = jkPom.jerkarSourceCode();
+        final String code = jkPom.jerkarSourceCode(JkFileTree.of(new File("toto")));
         System.out.println(code);
         final File srcDir = new File("build/output/test-generated-src");
         srcDir.mkdirs();

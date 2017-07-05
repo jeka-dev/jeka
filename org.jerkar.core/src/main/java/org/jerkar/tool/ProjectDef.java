@@ -132,6 +132,10 @@ final class ProjectDef {
         }
 
         void log(boolean displayFromClass) {
+            log(displayFromClass, "");
+        }
+
+        void log(boolean displayFromClass, String methodPrefix) {
             JkLog.nextLine();
             JkLog.infoHeaded("Methods               ");
             if (this.methodDefs.isEmpty()) {
@@ -144,12 +148,13 @@ final class ProjectDef {
                     JkLog.infoUnderlined("From " + methodDef.declaringClass.getName());
                 }
                 currentClass = methodDef.declaringClass;
+                String displayedMethodName = methodPrefix + methodDef.name;
                 if (methodDef.description == null) {
-                    JkLog.info(methodDef.name + " : No description available.");
+                    JkLog.info(displayedMethodName + " : No description available.");
                 } else if (!methodDef.description.contains("\n")) {
-                    JkLog.info(methodDef.name + " : " + methodDef.description);
+                    JkLog.info(displayedMethodName+ " : " + methodDef.description);
                 } else {
-                    JkLog.info(methodDef.name + " : ");
+                    JkLog.info(displayedMethodName + " : ");
                     JkLog.info(toLines(methodDef.description));
                 }
             }
@@ -165,7 +170,7 @@ final class ProjectDef {
                     JkLog.infoUnderlined("From " + optionDef.jkBuild.getClass().getName());
                 }
                 currentClass = optionDef.jkBuild.getClass();
-                optionDef.log();
+                optionDef.log(methodPrefix);
             }
 
         }
@@ -325,14 +330,14 @@ final class ProjectDef {
             return 1;
         }
 
-        void log() {
-
+        void log(String optionPrefix) {
+            String displayedOptionName = optionPrefix + this.name;
             if (this.description == null) {
-                JkLog.info(this.name + " : No description available.");
+                JkLog.info(displayedOptionName + " : No description available.");
             } else if (!this.description.contains("\n")) {
-                JkLog.info(this.name + " : " + this.description);
+                JkLog.info(displayedOptionName + " : " + this.description);
             } else {
-                JkLog.info(this.name + " : ");
+                JkLog.info(displayedOptionName + " : ");
                 JkLog.info(ProjectBuildClassDef.toLines(this.description));
             }
             JkLog.info("Type : " + this.type());

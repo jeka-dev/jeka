@@ -189,13 +189,19 @@ public final class JkProcess implements Runnable {
      * current output.
      */
     public int runSync() {
-        final List<String> command = new LinkedList<String>();
-        command.add(this.command);
-        command.addAll(parameters);
-        JkLog.startln("Starting program : " + command.toString());
+        final List<String> commands = new LinkedList<String>();
+        commands.add(this.command);
+        for (String param : parameters) {
+            if (param.contains(" ")) {
+                commands.add("\""+ param + "\"");
+            } else {
+                commands.add(param);
+            }
+        }
+        JkLog.startln("Starting program : " + commands.toString());
         final int result;
         try {
-            final ProcessBuilder processBuilder = processBuilder(command);
+            final ProcessBuilder processBuilder = processBuilder(commands);
             if (workingDir != null) {
                 processBuilder.directory(this.workingDir);
             }

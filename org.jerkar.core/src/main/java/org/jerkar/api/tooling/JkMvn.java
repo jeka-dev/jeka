@@ -6,6 +6,7 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkModuleDependency;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopedDependency;
+import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsSystem;
@@ -125,12 +126,12 @@ public final class JkMvn implements Runnable {
      * Creates the java code of the Jerkar build class from the effective pom of
      * this Maven Project
      */
-    public String createBuildClassCode(String packageName, String className) {
+    public String createBuildClassCode(String packageName, String className, JkFileTree baseDir) {
         final File pom = JkUtilsFile.tempFile("effectivepom", ".xml");
         commands("help:effective-pom", "-Doutput=" + pom.getAbsolutePath()).run();
         final JkPom jkPom = JkPom.of(pom);
         pom.delete();
-        return jkPom.jerkarSourceCode();
+        return jkPom.jerkarSourceCode(baseDir);
     }
 
     /**

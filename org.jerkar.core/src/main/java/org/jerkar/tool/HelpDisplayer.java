@@ -44,7 +44,7 @@ final class HelpDisplayer {
             }
             JkLog.delta(2);
             final Object object = JkUtilsReflect.newInstance(description.pluginClass());
-            ProjectBuildClassDef.of(object).log(false);
+            ProjectBuildClassDef.of(object).log(false, description.shortName() + "#");
             JkLog.delta(-2);
         }
         JkLog.nextLine();

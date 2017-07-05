@@ -5,17 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jerkar.api.depmanagement.JkDepExclude;
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkDependencyExclusions;
-import org.jerkar.api.depmanagement.JkModuleDependency;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.depmanagement.JkScopedDependency;
-import org.jerkar.api.depmanagement.JkVersion;
-import org.jerkar.api.depmanagement.JkVersionProvider;
-import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsXml;
 import org.w3c.dom.Document;
@@ -94,6 +86,9 @@ public final class JkPom {
      */
     public JkVersionProvider versionProvider() {
         final List<JkVersionedModule> versionedModules = new LinkedList<JkVersionedModule>();
+        if (dependencyManagementEl() == null) {
+            return JkVersionProvider.empty();
+        }
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
                 "dependencies");
         final JkDependencies dependencies = dependencies(dependenciesEl);
@@ -114,6 +109,9 @@ public final class JkPom {
      */
     public JkDependencyExclusions dependencyExclusion() {
         final JkDependencyExclusions.Builder builder = JkDependencyExclusions.builder();
+        if (dependencyManagementEl() == null) {
+            return builder.build();
+        }
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
                 "dependencies");
         final JkDependencies dependencies = dependencies(dependenciesEl);
@@ -132,6 +130,9 @@ public final class JkPom {
      */
     public JkRepos repos() {
         final List<String> urls = new LinkedList<String>();
+        if (repositoriesEl() == null) {
+            return JkRepos.of();
+        }
         for (final Element repositoryEl : JkUtilsXml.directChildren(repositoriesEl(), "repository")) {
             urls.add(JkUtilsXml.directChildText(repositoryEl, "url"));
         }
@@ -181,7 +182,7 @@ public final class JkPom {
     /**
      * The Jerkar build class source equivalent to this POM.
      */
-    public String jerkarSourceCode() {
+    public String jerkarSourceCode(JkFileTree baseDir) {
         final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
         codeWriter.moduleId = JkModuleId.of(groupId(), artifactId());
         codeWriter.dependencies = dependencies();
@@ -193,6 +194,26 @@ public final class JkPom {
         codeWriter.repos = null;
         codeWriter.version = version();
         codeWriter.versionProvider = versionProvider();
+        if (baseDir.file("src/main/resources").exists()) {
+            codeWriter.imports.add(JkFileTreeSet.class.getName());
+            codeWriter.extraMethods.add(
+                    "    // If you move your resources to src/main/java (collocated with java classes code), \n" +
+                    "    // you can remove this method. \n" +
+                    "    @Override\n" +
+                    "    public JkFileTreeSet resources() {\n" +
+                    "        return baseDir().from(\"src/main/resources\").asSet();\n" +
+                    "    }");
+        }
+        if (baseDir.file("src/test/resources").exists()) {
+            codeWriter.imports.add(JkFileTreeSet.class.getName());
+            codeWriter.extraMethods.add(
+                    "    // If you move your test resources to src/test/java (collocated with java classes code), \n" +
+                    "    // you can remove this method.\n" +
+                    "    @Override\n" +
+                    "    public JkFileTreeSet unitTestResources() {\n" +
+                    "        return baseDir().from(\"src/test/resources\").asSet();\n" +
+                    "    }");
+        }
         final VersionConstanter constanter = VersionConstanter.of(codeWriter.versionProvider);
         for (final Map.Entry<String, String> entry : constanter.groupToVersion().entrySet()) {
             codeWriter.addGroupVersionVariable(entry.getKey(), entry.getValue());

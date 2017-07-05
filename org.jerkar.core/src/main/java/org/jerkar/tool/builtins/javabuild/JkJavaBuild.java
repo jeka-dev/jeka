@@ -289,6 +289,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
                 .withClasspath(depsFor(COMPILE, PROVIDED))
                 .withSourceVersion(this.javaSourceVersion())
                 .withTargetVersion(this.javaTargetVersion())
+                .withEncoding(this.sourceEncoding())
                 .forkedIfNeeded(JkOptions.getAll());
     }
 
@@ -300,6 +301,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
                 .withClasspath(this.depsFor(TEST, PROVIDED).andHead(classDir()))
                 .withSourceVersion(this.javaSourceVersion())
                 .withTargetVersion(this.javaTargetVersion())
+                .withEncoding(this.sourceEncoding())
                 .forkedIfNeeded(JkOptions.getAll());
     }
 
@@ -394,16 +396,17 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
 
     private Object scaffoldedBuildClassCode() {
+        final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
         if (baseDir().file("pom.xml").exists() && JkMvn.INSTALLED) {
             JkLog.info("pom.xml detected and Maven installed : try to generate build class from existing pom.");
             try {
-                return JkMvn.of(baseDir().root()).createBuildClassCode(null, "Build");
+                return JkMvn.of(baseDir().root()).createBuildClassCode(null, "Build", baseDir());
             } catch (final RuntimeException e) {
                 e.printStackTrace();
                 JkLog.info("Maven migration failed. Just generate standard build class.");
             }
         }
-        final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
+
         codeWriter.extendedClass = "JkJavaBuild";
         codeWriter.dependencies = JkDependencies.builder().on(JkPopularModules.JUNIT, "4.11").scope(TEST).build();
         codeWriter.imports.clear();

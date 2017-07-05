@@ -55,6 +55,21 @@ public final class JkUtilsString {
     }
 
     /**
+     * Returns the specified string but lower-casing its first character.
+     */
+    public static String uncapitalize(String string) {
+        if (string.isEmpty()) {
+            return string;
+        }
+        if (string.length() == 1) {
+            return string.toLowerCase();
+        }
+        final String first = string.substring(0, 1);
+        final String remaining = string.substring(1);
+        return first.toLowerCase() + remaining;
+    }
+
+    /**
      * Returns the first string out of the specified candidates matching the
      * specified string.
      */

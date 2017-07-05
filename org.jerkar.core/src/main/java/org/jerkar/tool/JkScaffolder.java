@@ -16,6 +16,7 @@ public final class JkScaffolder {
 
     private final JkBuild build;
 
+
     private Object mainBuildclassWriter;
 
     private final boolean embed;

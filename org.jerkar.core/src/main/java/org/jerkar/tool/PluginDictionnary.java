@@ -1,14 +1,7 @@
 package org.jerkar.tool;
 
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.utils.JkUtilsString;
@@ -160,7 +153,7 @@ final class PluginDictionnary<T> {
     @SuppressWarnings("unchecked")
     private static <T> Set<JkPluginDescription<T>> toPluginSet(Class<T> extendingClass,
             Iterable<Class<?>> classes) {
-        final Set<JkPluginDescription<T>> result = new HashSet<PluginDictionnary.JkPluginDescription<T>>();
+        final Set<JkPluginDescription<T>> result = new TreeSet<JkPluginDescription<T>>();
         for (final Class<?> clazz : classes) {
             result.add(new JkPluginDescription<T>(extendingClass, (Class<? extends T>) clazz));
         }
@@ -168,17 +161,17 @@ final class PluginDictionnary<T> {
     }
 
     /**
-     * Give the description of a plugin class as its names, its purpose and its
+     * Give the description of a plugin class as its name, its purpose and its
      * base class.
      * 
      * @author Jerome Angibaud
      * @param <T>
      */
-    public static class JkPluginDescription<T> {
+    public static class JkPluginDescription<T> implements Comparable<JkPluginDescription<T>> {
 
         private static String shortName(Class<?> extendingClass, Class<?> clazz) {
-            return JkUtilsString.substringAfterFirst(clazz.getSimpleName(),
-                    extendingClass.getSimpleName());
+            return JkUtilsString.uncapitalize(JkUtilsString.substringAfterFirst(clazz.getSimpleName(),
+                    extendingClass.getSimpleName()));
         }
 
         private static String longName(Class<?> extendingClass, Class<?> clazz) {
@@ -244,6 +237,10 @@ final class PluginDictionnary<T> {
             return "name=" + this.shortName + "(" + this.fullName + ")";
         }
 
+        @Override
+        public int compareTo(JkPluginDescription<T> o) {
+            return this.shortName.compareTo(o.shortName);
+        }
     }
 
 }

@@ -140,6 +140,9 @@ public final class JkJavaCompiler {
      * classpath.
      */
     public JkJavaCompiler withClasspath(Iterable<File> files) {
+        if (!files.iterator().hasNext()) {
+            return this;
+        }
         final String classpath = JkClasspath.of(files).toString();
         return this.andOptions("-cp", classpath);
     }
@@ -155,12 +158,24 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * Creates a copy of this {@link JkJavaCompiler} but with using the
+     * Creates a copy of this {@link JkJavaCompiler} but using the
      * specified annotation classes instead of using the ones discovered by
      * default Java 6 mechanism.
      */
     public JkJavaCompiler withAnnotationProcessors(String... annotationProcessorClassNames) {
         return andOptions("-processor", JkUtilsString.join(annotationProcessorClassNames, ","));
+    }
+
+    /**
+     * Creates a copy of this {@link JkJavaCompiler} but using the
+     * specified source encoding (e.g. UTF-8). If <code>null</code> is specified,
+     * then default plateform encoding will be used.
+     */
+    public JkJavaCompiler withEncoding(String encoding) {
+        if (encoding == null) {
+            return this;
+        }
+        return andOptions("-encoding", encoding);
     }
 
     /**
@@ -247,7 +262,7 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * Creates a copy of this {@link JkJavaComiler} but with the specified compiler instance.
+     * Creates a copy of this {@link JkJavaCompiler} but with the specified compiler instance.
      * Since in-process compilers cannot be run in a forked process, this method disables any
      * previous fork options that may have been set.
      */

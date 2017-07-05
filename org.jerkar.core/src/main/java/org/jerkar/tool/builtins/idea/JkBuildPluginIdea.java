@@ -67,6 +67,7 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
         }
     }
 
+    @JkDoc(("Shorthand for #generateAllIml + generateModulesXml"))
     public void generateFiles() {
         generateAllIml();
         generateModulesXml();
