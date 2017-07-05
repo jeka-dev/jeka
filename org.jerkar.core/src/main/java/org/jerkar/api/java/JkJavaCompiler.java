@@ -60,7 +60,7 @@ public final class JkJavaCompiler {
         final List<String> options = new LinkedList<String>();
         options.add("-d");
         options.add(outputDir.getAbsolutePath());
-        return new JkJavaCompiler(options, Collections.EMPTY_LIST, true, null, null);
+        return new JkJavaCompiler(options, Collections.EMPTY_LIST, true, null, null, null);
     }
 
     private final List<String> options;
@@ -73,14 +73,17 @@ public final class JkJavaCompiler {
 
     private String versionCache;
 
+    private final JavaCompiler compiler;
+
     private JkJavaCompiler(List<String> options, List<File> javaSourceFiles, boolean failOnError,
-            JkProcess fork, String versionCache) {
+            JkProcess fork, String versionCache, JavaCompiler compiler) {
         super();
         this.options = options;
         this.javaSourceFiles = javaSourceFiles;
         this.failOnError = failOnError;
         this.fork = fork;
         this.versionCache = versionCache;
+        this.compiler = compiler;
     }
 
     /**
@@ -89,7 +92,7 @@ public final class JkJavaCompiler {
      * a compilation error will throw a {@link IllegalStateException}.
      */
     public JkJavaCompiler failOnError(boolean fail) {
-        return new JkJavaCompiler(options, javaSourceFiles, fail, fork, versionCache);
+        return new JkJavaCompiler(options, javaSourceFiles, fail, fork, versionCache, compiler);
     }
 
     /**
@@ -104,7 +107,7 @@ public final class JkJavaCompiler {
     public JkJavaCompiler andOptions(String... options) {
         final List<String> newOptions = new LinkedList<String>(this.options);
         newOptions.addAll(Arrays.asList(options));
-        return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork, versionCache);
+        return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork, versionCache, compiler);
     }
 
     /**
@@ -116,7 +119,7 @@ public final class JkJavaCompiler {
     public JkJavaCompiler withOptions(String... options) {
         final List<String> newOptions = new LinkedList<String>(this.options);
         newOptions.addAll(Arrays.asList(options));
-        return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork, versionCache);
+        return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork, versionCache, compiler);
     }
 
     /**
@@ -191,7 +194,7 @@ public final class JkJavaCompiler {
      */
     public JkJavaCompiler fork(String... parameters) {
         return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError,
-                JkProcess.ofJavaTool("javac", parameters), versionCache);
+                JkProcess.ofJavaTool("javac", parameters), versionCache, compiler);
     }
 
     /**
@@ -201,10 +204,10 @@ public final class JkJavaCompiler {
     public JkJavaCompiler fork(boolean fork, String... parameters) {
         if (fork) {
             return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles,
-                    failOnError, JkProcess.ofJavaTool("javac"), versionCache);
+                    failOnError, JkProcess.ofJavaTool("javac"), versionCache, compiler);
         } else {
             return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles,
-                    failOnError, null, versionCache);
+                    failOnError, null, versionCache, compiler);
         }
 
     }
@@ -219,7 +222,7 @@ public final class JkJavaCompiler {
      */
     public JkJavaCompiler forkOnCompiler(String executable, String... parameters) {
         return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError,
-                JkProcess.of(executable, parameters), versionCache);
+                JkProcess.of(executable, parameters), versionCache, compiler);
     }
 
     /**
@@ -233,7 +236,7 @@ public final class JkJavaCompiler {
                 newSources.add(file);
             }
         }
-        return new JkJavaCompiler(options, newSources, failOnError, fork, versionCache);
+        return new JkJavaCompiler(options, newSources, failOnError, fork, versionCache, compiler);
     }
 
     /**
@@ -241,6 +244,16 @@ public final class JkJavaCompiler {
      */
     public JkJavaCompiler andSourceDir(File dir) {
         return andSources(JkFileTree.of(dir));
+    }
+
+    /**
+     * Creates a copy of this {@link JkJavaComiler} but with the specified compiler instance.
+     * Since in-process compilers cannot be run in a forked process, this method disables any
+     * previous fork options that may have been set.
+     */
+    public JkJavaCompiler withCompiler(JavaCompiler compiler) {
+        // turn off forking
+        return new JkJavaCompiler(options, javaSourceFiles, failOnError, null, versionCache, compiler);
     }
 
     /**
@@ -252,7 +265,7 @@ public final class JkJavaCompiler {
      *             a compilation error occured and the 'failOnError' flag in on.
      */
     public boolean compile() {
-        final JavaCompiler compiler = getDefaultOrFail();
+        final JavaCompiler compiler = this.compiler != null ? this.compiler : getDefaultOrFail();
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null,
                 null);
         String message = "Compiling " + javaSourceFiles.size() + " source files";
@@ -299,7 +312,7 @@ public final class JkJavaCompiler {
     private static JavaCompiler getDefaultOrFail() {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         if (compiler == null) {
-            throw new IllegalStateException("This plateform does not provide compiler.");
+            throw new IllegalStateException("This platform does not provide compiler. Try another JDK or use JkJavaCompiler.andCompiler(JavaCompiler)");
         }
         return compiler;
     }
@@ -359,7 +372,7 @@ public final class JkJavaCompiler {
         JkLog.info("Current JDK does not match with source version (" + versionCache + "). Will use JDK "
                 + path);
         final JkProcess process = JkProcess.of(cmd);
-        return new JkJavaCompiler(options, javaSourceFiles, failOnError, process, versionCache);
+        return new JkJavaCompiler(options, javaSourceFiles, failOnError, process, versionCache, compiler);
     }
 
 
