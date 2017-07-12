@@ -358,7 +358,14 @@ public class JkBuild {
             final JkProject jkProject = field.getAnnotation(JkProject.class);
             final JkBuild subBuild = relativeProject(this,
                     (Class<? extends JkBuild>) field.getType(), jkProject.value());
-            JkUtilsReflect.setFieldValue(this, field, subBuild);
+            try {
+                JkUtilsReflect.setFieldValue(this, field, subBuild);
+            } catch (RuntimeException e) {
+                throw new JkException("Can't inject slave build of class " + subBuild.getClass().getSimpleName()
+                        + " into master build class " + this.getClass() + " on field " + field.getName()
+                        + ".\nYou are probably running build class main method from your IDE"
+                        + ".\nPlease make sure current working dir (" + JkUtilsFile.workingDir() + ") is the root of master project directory.");
+            }
             result.add(subBuild);
         }
         return result;

@@ -19,7 +19,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="org.jerkar.samples" exported="" />
+    <orderEntry type="module" module-name="org.jerkar.samples" />
     <orderEntry type="inheritedJdk" />
   </component>
 </module>

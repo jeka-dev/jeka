@@ -1,5 +1,7 @@
 package org.jerkar.api.utils;
 
+import org.jerkar.tool.JkException;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -155,6 +157,14 @@ public final class JkUtilsReflect {
                 constructor.setAccessible(true);
             }
             return constructor.newInstance();
+        } catch (final InvocationTargetException e) {
+            if (e.getTargetException() instanceof RuntimeException) {
+                throw (RuntimeException) e.getTargetException();
+            } else {
+                throw new RuntimeException(e.getTargetException());
+            }
+        } catch (final RuntimeException e) {
+            throw e;
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
@@ -165,12 +175,13 @@ public final class JkUtilsReflect {
      */
     @SuppressWarnings("unchecked")
     public static <T> T invoke(Object target, String methodName) {
+        final Method method;
         try {
-            final Method method = target.getClass().getMethod(methodName);
-            return (T) method.invoke(target);
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
+             method = target.getClass().getMethod(methodName);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("No method " + methodName + " found on class " + methodName);
         }
+        return invoke(target, method);
     }
 
     /**
