@@ -120,7 +120,8 @@ public final class JkResolveResult implements Serializable {
 
     public JkResolveResult assertNoError() {
         if (this.errorReport.hasErrors) {
-            throw new IllegalStateException("Error in dependency resolution : " + this.errorReport);
+            throw new IllegalStateException("Error in dependency resolution : "
+                    + this.errorReport + "On following tree : \n" + depTree.toStringComplete());
         }
         return this;
     }
@@ -134,37 +135,37 @@ public final class JkResolveResult implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
-        private final List<JkArtifactDef> missingDependencies;
+        private final List<JkModuleDepProblem> moduleProblems;
 
         private final boolean hasErrors;
 
         static JkErrorReport allFine() {
-            return new JkErrorReport(JkUtilsIterable.<JkArtifactDef>listOf(), false);
+            return new JkErrorReport(JkUtilsIterable.<JkModuleDepProblem>listOf(), false);
         }
 
-        static JkErrorReport failure(List<JkArtifactDef> missingArtifacts) {
+        static JkErrorReport failure(List<JkModuleDepProblem> missingArtifacts) {
             return new JkErrorReport(missingArtifacts, true);
         }
 
-        private JkErrorReport(List<JkArtifactDef> dependencies, boolean hasErrors) {
-            this.missingDependencies = dependencies;
-            this.hasErrors = hasErrors || !this.missingDependencies.isEmpty();
+        private JkErrorReport(List<JkModuleDepProblem> dependencies, boolean hasErrors) {
+            this.moduleProblems = dependencies;
+            this.hasErrors = hasErrors || !this.moduleProblems.isEmpty();
         }
 
-        public List<JkArtifactDef> missingDependencies() {
-            return missingDependencies;
+        public List<JkModuleDepProblem> moduleProblems() {
+            return moduleProblems;
         }
 
         private JkErrorReport merge(JkErrorReport other) {
-            return new JkErrorReport(JkUtilsIterable.concatLists(this.missingDependencies, other.missingDependencies),
+            return new JkErrorReport(JkUtilsIterable.concatLists(this.moduleProblems, other.moduleProblems),
                     this.hasErrors || other.hasErrors);
         }
 
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            if (!missingDependencies.isEmpty()) {
-                sb.append("Missing dependencies : " + missingDependencies);
+            if (!moduleProblems.isEmpty()) {
+                sb.append("Errors with dependencies : " + moduleProblems);
             }
             return sb.toString();
         }

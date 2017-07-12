@@ -9,6 +9,7 @@ class IvyMessageLogger extends AbstractMessageLogger {
 
     @Override
     public void log(String message, int level) {
+        message = "[Ivy] " + message.trim();
         switch (level) {
         case Message.MSG_ERR:
             JkLog.error(message);

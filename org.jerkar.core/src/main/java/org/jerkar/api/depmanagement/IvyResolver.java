@@ -6,7 +6,6 @@ import org.apache.ivy.core.cache.ResolutionCacheManager;
 import org.apache.ivy.core.module.descriptor.*;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
-import org.apache.ivy.core.report.DownloadStatus;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.DownloadOptions;
 import org.apache.ivy.core.resolve.IvyNode;
@@ -112,22 +111,22 @@ final class IvyResolver implements InternalDepResolver {
         if (resolvedScopes.length == 0) {   // if no scope, verbose ivy report turns in exception
             resolveOptions.setOutputReport(false);
         }
-        final ResolveReport report;
+        final ResolveReport ivyReport;
         try {
-            report = ivy.resolve(moduleDescriptor, resolveOptions);
+            ivyReport = ivy.resolve(moduleDescriptor, resolveOptions);
         } catch (final Exception e) {
             throw JkUtilsThrowable.unchecked(e);
         }
         final JkResolveResult.JkErrorReport errorReport;
-        if (report.hasError()) {
-            errorReport = JkResolveResult.JkErrorReport.failure(missingArtifacts(
-                    report.getAllArtifactsReports()));
+        if (ivyReport.hasError()) {
+            errorReport = JkResolveResult.JkErrorReport.failure(moduleProblems(
+                    ivyReport.getDependencies()));
         } else {
             errorReport = JkResolveResult.JkErrorReport.allFine();
         }
-        final ArtifactDownloadReport[] artifactDownloadReports = report.getAllArtifactsReports();
+        final ArtifactDownloadReport[] artifactDownloadReports = ivyReport.getAllArtifactsReports();
         IvyArtifactContainer artifactContainer = IvyArtifactContainer.of(artifactDownloadReports);
-        JkResolveResult resolveResult = getResolveConf(report.getDependencies(), module,
+        JkResolveResult resolveResult = getResolveConf(ivyReport.getDependencies(), module,
                 errorReport, artifactContainer);
         if (moduleArg == null) {
             deleteResolveCache(module);
@@ -288,14 +287,18 @@ final class IvyResolver implements InternalDepResolver {
         return IvyTranslations.toJkVersionedModule(ivyNode.getResolvedId());
     }
 
-    private List<JkArtifactDef> missingArtifacts(ArtifactDownloadReport[] artifactDownloadReports) {
-        List<JkArtifactDef> result = new LinkedList<JkArtifactDef>();
-        for (ArtifactDownloadReport artifactDownloadReport : artifactDownloadReports) {
-            if (artifactDownloadReport.getDownloadStatus() == DownloadStatus.FAILED) {
-                if (ArtifactDownloadReport.MISSING_ARTIFACT.equals(artifactDownloadReport.getDownloadDetails())) {
-                    JkArtifactDef artifactDef = IvyTranslations.toJkArtifactDef((MDArtifact) artifactDownloadReport.getArtifact());
-                    result.add(artifactDef);
-                }
+    private List<JkModuleDepProblem> moduleProblems(List<IvyNode> ivyNodes) {
+        final List<JkModuleDepProblem> result = new LinkedList<JkModuleDepProblem>();
+        for (IvyNode ivyNode : ivyNodes) {
+            if (ivyNode.isCompletelyBlacklisted() || ivyNode.isCompletelyEvicted()) {
+                continue;
+            }
+            if (ivyNode.hasProblem()) {
+                final JkModuleId jkModuleId = JkModuleId.of(ivyNode.getModuleId().getOrganisation(), ivyNode.getModuleId().getName());
+                final JkModuleDepProblem problem = JkModuleDepProblem.of(jkModuleId,
+                        ivyNode.getId().getRevision(),
+                        ivyNode.getProblemMessage());
+                result.add(problem);
             }
         }
         return result;
