@@ -4,6 +4,8 @@ import org.jerkar.api.depmanagement.*;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Test;
 
+import java.util.Set;
+
 import static org.jerkar.tool.builtins.javabuild.JkJavaBuild.*;
 import static org.junit.Assert.*;
 
@@ -21,7 +23,8 @@ public class ResolverWithScopeMapperIT {
         JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
                 .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(TEST);
-        assertEquals(25, resolveResult.dependencyTree().flattenToVersionProvider().moduleIds().size());
+        Set<JkModuleId> moduleIds = resolveResult.dependencyTree().flattenToVersionProvider().moduleIds();
+        assertEquals("Wrong modules size " + moduleIds, 25, moduleIds.size());
         assertTrue(resolveResult.contains(JkPopularModules.JUNIT));
     }
 
