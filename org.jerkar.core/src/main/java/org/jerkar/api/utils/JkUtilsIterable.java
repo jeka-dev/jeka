@@ -303,4 +303,25 @@ public final class JkUtilsIterable {
         return c;
     }
 
+    /**
+     * Returns difference between two collections. The result consists in an array of two {@link Set}.
+     * The first one contains the element present in A and absent in B.
+     * The second one contains elements in B but absent in A.
+     */
+    public static <T> Set<T>[] diff(Collection<T> a, Collection<T> b) {
+        HashSet<T> first = new HashSet<T>();
+        HashSet<T> second = new HashSet<T>();
+        for (T item : a) {
+            if (! b.contains(item)) {
+                first.add(item);
+            }
+        }
+        for (T item : b) {
+            if (! a.contains(item)) {
+                second.add(item);
+            }
+        }
+        return new HashSet[] {first, second};
+    }
+
 }
