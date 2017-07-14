@@ -428,7 +428,7 @@ public class JkDependencyNode implements Serializable {
 
         @Override
         public Set<JkScope> declaredScopes() {
-            return null;
+            return scopes;
         }
 
         @Override
