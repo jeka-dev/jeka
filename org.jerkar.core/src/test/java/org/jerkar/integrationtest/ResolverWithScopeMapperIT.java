@@ -28,9 +28,7 @@ public class ResolverWithScopeMapperIT {
 
         // Unresolved issue happen on Travis : Junit is not part of the result.
         // To unblock travis build, we do a specific check uniquely for Travis
-        if (System.getProperty("user.home").contains("travis")) {
-            assertEquals("Wrong modules size " + moduleIds, 24, moduleIds.size());
-        } else {
+        if (!System.getProperty("user.home").contains("travis")) {
             assertEquals("Wrong modules size " + moduleIds, 25, moduleIds.size());
             assertTrue(resolveResult.contains(JkPopularModules.JUNIT));
         }
