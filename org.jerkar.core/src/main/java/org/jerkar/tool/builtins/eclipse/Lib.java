@@ -7,6 +7,7 @@ import java.util.List;
 import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkScope;
+import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
@@ -57,6 +58,14 @@ class Lib {
             } else { // This is project dependency
                 final JkJavaBuild slaveBuild = (JkJavaBuild) masterBuild
                         .relativeProject(lib.projectRelativePath);
+
+                // if the slave build does not have build class, we apply eclipse# plugin
+                JkFileTree def = slaveBuild.baseDir().from("build/def");
+                if (!def.exists() || def.include("**/*.java").fileCount(false) == 0) {
+                    JkBuildPluginEclipse eclipsePlugin = new JkBuildPluginEclipse();
+                    slaveBuild.plugins.activate(eclipsePlugin);
+                }
+
                 final JkComputedDependency projectDependency = slaveBuild.asDependency(slaveBuild
                         .packer().jarFile());
                 builder.on(projectDependency).scope(lib.scope);

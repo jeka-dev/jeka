@@ -42,7 +42,7 @@ public class JkBuild {
     private final Date buildTime = JkUtilsTime.now();
 
     /** attached plugin instances to this build */
-    protected final JkBuildPlugins plugins = new JkBuildPlugins(this);
+    public final JkBuildPlugins plugins = new JkBuildPlugins(this);
 
     private JkDependencyResolver buildDefDependencyResolver;
 

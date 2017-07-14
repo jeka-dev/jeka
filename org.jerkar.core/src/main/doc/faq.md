@@ -40,7 +40,8 @@ public class Build extends JkJavaBuild {
 	@Override
 	public JkJavaCompiler productionCompiler() {
 		// need to use ECJ to compile this, not javac!
-		return super.productionCompiler().withCompiler(new EclipseCompiler());
+		return super.productionCompiler().withCompiler(new EclipseCompiler())
+            .andOptions("-warn:nullDereference,unusedPrivate");  // Now you can use ecj specific options
 	}
 }
 ```
