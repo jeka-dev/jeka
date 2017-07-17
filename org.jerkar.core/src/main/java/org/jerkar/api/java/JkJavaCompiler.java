@@ -8,11 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.tools.JavaCompiler;
+import javax.tools.*;
 import javax.tools.JavaCompiler.CompilationTask;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
 
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPathFilter;
@@ -299,7 +296,7 @@ public final class JkJavaCompiler {
             final Iterable<? extends JavaFileObject> javaFileObjects = fileManager
                     .getJavaFileObjectsFromFiles(this.javaSourceFiles);
             final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.warnStream()),
-                    null, null, options, null, javaFileObjects);
+                    null, new JkDiagnosticListener(), options, null, javaFileObjects);
             result = task.call();
         } else {
             result = runOnFork();
@@ -388,6 +385,19 @@ public final class JkJavaCompiler {
                 + path);
         final JkProcess process = JkProcess.of(cmd);
         return new JkJavaCompiler(options, javaSourceFiles, failOnError, process, versionCache, compiler);
+    }
+
+    private static class JkDiagnosticListener implements DiagnosticListener {
+
+        @Override
+        public void report(Diagnostic diagnostic) {
+            if (!diagnostic.getKind().equals(Diagnostic.Kind.ERROR)) {
+                JkLog.warn(diagnostic.toString());
+            } else {
+                System.out.println(diagnostic);
+            }
+
+        }
     }
 
 

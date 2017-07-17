@@ -236,6 +236,7 @@ final class Project {
             PluginDictionnary<JkBuildPlugin> dictionnary) {
         JkLog.infoHeaded("Executing build for project " + build.baseDir().root().getName());
         JkLog.info("Build class : " + build.getClass().getName());
+        JkLog.info("Base dir : " + build.baseDir().root().getPath());
         JkLog.info("Activated plugins : " + build.plugins.getActives());
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
         if (JkLog.verbose()) {
