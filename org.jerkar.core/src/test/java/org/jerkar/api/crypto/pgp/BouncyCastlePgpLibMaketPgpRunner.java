@@ -46,7 +46,6 @@ public class BouncyCastlePgpLibMaketPgpRunner {
         final List<String> list = new ArrayList<String>(classNames);
         Collections.sort(list);
         JkLog.info(list);
-        System.out.println("*************************");
         removeUnusedClass(new File(jar.getFile()), new File("bouncycastle-pgp-152.jar"), classNames);
     }
 

@@ -286,6 +286,11 @@ final class CommandLine {
         public JkPluginSetup activated() {
             return new JkPluginSetup(pluginName, options, true);
         }
+
+        @Override
+        public String toString() {
+            return pluginName + " : " + options;
+        }
     }
 
     public Map<String, String> getMasterBuildOptions() {

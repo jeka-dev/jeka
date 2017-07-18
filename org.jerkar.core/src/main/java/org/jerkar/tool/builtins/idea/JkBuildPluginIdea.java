@@ -21,7 +21,7 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
         this.build = build;
     }
 
-    @JkDoc("If true, path to cache repository and to Jerkar install will be replaces by $JERKAR_REPO$ and $JERKAR_HOME%")
+    @JkDoc("If true, path to cache repository and to Jerkar install will be replaces by $JERKAR_REPO$ and $JERKAR_HOME$ path variable")
     boolean useVarPath = false;
 
     /** Generates Idea [my-module].iml file */

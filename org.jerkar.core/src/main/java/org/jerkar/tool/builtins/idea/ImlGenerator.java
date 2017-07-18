@@ -427,6 +427,15 @@ final class ImlGenerator {
 
 
     private static String jdkVesion(String compilerVersion) {
+        if ("4".equals(compilerVersion)) {
+            return "1.4";
+        }
+        if ("5".equals(compilerVersion)) {
+            return "1.5";
+        }
+        if ("6".equals(compilerVersion)) {
+            return "1.6";
+        }
         if ("7".equals(compilerVersion)) {
             return "1.7";
         }
