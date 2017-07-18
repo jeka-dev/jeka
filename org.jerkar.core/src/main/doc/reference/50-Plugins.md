@@ -121,9 +121,9 @@ public class MyBuild extends JkJavaBuild {`
 
 For now, Jerkar ships with several plugins out-of-the-box :
  
- * Eclipse : Leverage and generate Eclipse metadata files (included in _org.jerkar.core.jar_).
- * Idea: Generate iml and module.xml files for Intellij.
- * Sonar : Excecutor for SonarQube code analyser (included in _org.jerkar.core-fat.jar_).
+ * Eclipse : Leverages and generates Eclipse metadata files (included in _org.jerkar.core.jar_).
+ * Idea: Generates .iml and module.xml files for Intellij.
+ * Sonar : Executor for SonarQube code analyser (included in _org.jerkar.core-fat.jar_).
  * Jacoco : Test coverage tool (included in _org.jerkar.core-fat.jar_).
 
 You can have a description of plugins available in your classpath by executing `jerkar helpPlugins`.
