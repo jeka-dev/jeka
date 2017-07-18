@@ -302,6 +302,16 @@ public class JkDependencyNode implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
+        static ModuleNodeInfo anonymousRoot() {
+            return new ModuleNodeInfo(JkModuleId.of("anonymousGroup:anonymousName"), JkVersionRange.of("-"),
+                    new HashSet<JkScope>(), new HashSet<JkScope>(), JkVersion.name("-"), new LinkedList<File>());
+        }
+
+        static ModuleNodeInfo root(JkVersionedModule versionedModule) {
+            return new ModuleNodeInfo(versionedModule.moduleId(), JkVersionRange.of("-"),
+                    new HashSet<JkScope>(), new HashSet<JkScope>(), versionedModule.version(), new LinkedList<File>());
+        }
+
         private final JkModuleId moduleId;
         private final JkVersionRange declaredVersion;
         private final Set<JkScope> declaredScopes;  // the left conf mapping side in the caller dependency description
@@ -310,7 +320,7 @@ public class JkDependencyNode implements Serializable {
         private final List<File> artifacts;
         private final boolean treeRoot;
 
-        public ModuleNodeInfo(JkModuleId moduleId, JkVersionRange declaredVersion, Set<JkScope> declaredScopes,
+        ModuleNodeInfo(JkModuleId moduleId, JkVersionRange declaredVersion, Set<JkScope> declaredScopes,
                               Set<JkScope> rootScopes, JkVersion resolvedVersion, List<File> artifacts) {
             this(moduleId, declaredVersion, declaredScopes, rootScopes, resolvedVersion, artifacts, false);
         }

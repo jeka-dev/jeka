@@ -392,7 +392,7 @@ public final class JkJavaCompiler {
         @Override
         public void report(Diagnostic diagnostic) {
             if (!diagnostic.getKind().equals(Diagnostic.Kind.ERROR)) {
-                JkLog.warn(diagnostic.toString());
+                JkLog.info(diagnostic.toString());
             } else {
                 System.out.println(diagnostic);
             }

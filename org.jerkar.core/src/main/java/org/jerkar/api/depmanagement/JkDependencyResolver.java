@@ -103,7 +103,18 @@ public final class JkDependencyResolver {
      */
     public JkResolveResult resolve(JkScope... scopes) {
         if (internalResolver == null) {
-            return JkResolveResult.empty();
+            List<JkDependencyNode> nodes = new LinkedList<JkDependencyNode>();
+            for (JkScopedDependency scopedDependency : dependencies) {
+                nodes.add(JkDependencyNode.ofFileDep((JkFileDependency) scopedDependency.dependency(), scopedDependency.scopes()));
+            }
+            final JkDependencyNode.ModuleNodeInfo info;
+            if (this.module == null) {
+                info = JkDependencyNode.ModuleNodeInfo.anonymousRoot();
+            } else {
+                info = JkDependencyNode.ModuleNodeInfo.root(this.module);
+            }
+            JkDependencyNode root = JkDependencyNode.ofModuleDep(info, nodes);
+            return JkResolveResult.of(root, JkResolveResult.JkErrorReport.allFine());
         }
         return getResolveResult(this.transitiveVersionOverride, scopes);
     }

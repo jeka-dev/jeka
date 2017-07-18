@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.system.JkProcess;
 import org.jerkar.tool.*;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
@@ -22,6 +21,9 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
         this.build = build;
     }
 
+    @JkDoc("If true, path to cache repository and to Jerkar install will be replaces by $JERKAR_REPO$ and $JERKAR_HOME%")
+    boolean useVarPath = false;
+
     /** Generates Idea [my-module].iml file */
     @JkDoc("Generates Idea [my-module].iml file")
     public void generateIml() {
@@ -30,6 +32,7 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
             depProjects.add(depBuild.baseDir().root());
         }
         final ImlGenerator generator = new ImlGenerator(build.baseDir().root());
+        generator.useVarPath = useVarPath;
         generator.buildDefDependencyResolver = build.buildDefDependencyResolver();
         generator.projectDependencies = depProjects;
         if (this.build instanceof JkBuildDependencySupport) {
@@ -40,6 +43,7 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
             final JkJavaBuild jbuild = (JkJavaBuild) build;
             generator.includeJavadoc = true;
             generator.sourceJavaVersion = jbuild.javaSourceVersion();
+            generator.forceJdkVersion = true;
             generator.sources = jbuild.sources();
             generator.testSources = jbuild.unitTestSources();
             generator.outputClassFolder = jbuild.classDir();
@@ -60,10 +64,15 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
 
     @JkDoc("Generates iml files on this folder and its descendant recursively.")
     public void generateAllIml() {
-        Iterable<File> folders = build.baseDir().include("**/" + JkConstants.BUILD_DEF_DIR).files(true);
-        JkLog.info("Generating iml files on " + folders);
+        Iterable<File> folders = build.baseDir()
+                .include("**/" + JkConstants.BUILD_DEF_DIR)
+                .exclude("**/build/output/**")
+                .files(true);
         for (File folder : folders) {
-            Main.exec(folder.getParentFile().getParentFile(), "idea#generateIml");
+            File projectFolder = folder.getParentFile().getParentFile();
+            JkLog.startln("Generating iml file on " + projectFolder);
+            Main.exec(projectFolder, "idea#generateIml");
+            JkLog.done();
         }
     }
 
@@ -72,7 +81,5 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
         generateAllIml();
         generateModulesXml();
     }
-
-
 
 }

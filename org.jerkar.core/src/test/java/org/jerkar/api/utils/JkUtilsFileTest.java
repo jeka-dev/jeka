@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -42,6 +43,21 @@ public class JkUtilsFileTest {
 
         files = JkUtilsFile.filesOf(sampleDir, fileFilter, true);
         assertEquals(1, files.size());
+
+
+    }
+
+    @Test
+    @Ignore // JVM bug test
+    public void testNoNullPointerEx() {
+        final FileFilter fileFilter = new FileFilter() {
+
+            @Override
+            public boolean accept(File pathname) {
+                return !pathname.getName().equals("sample.txt");
+            }
+        };
+        JkUtilsFile.filesOf(new File("c:/users"), fileFilter, true);
     }
 
     @Test

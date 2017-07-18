@@ -61,7 +61,9 @@ public class JkBuild {
      */
     protected JkBuild() {
         final File baseDirContext = BASE_DIR_CONTEXT.get();
+        JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
         this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, JkUtilsFile.workingDir());
+        JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
         final List<JkBuild> subBuilds = populateJkProjectAnnotatedFields();
         this.annotatedJkProjectSlaves = JkSlaveBuilds.of(this.baseDir().root(), subBuilds);
     }
@@ -220,8 +222,6 @@ public class JkBuild {
 
     // ------------ Jerkar methods ------------
 
-
-
     /**
      * Creates the project structure (mainly project folder layout, build class code and IDE metadata) at the asScopedDependency
      * of the current project.
@@ -354,6 +354,7 @@ public class JkBuild {
         final List<JkBuild> result = new LinkedList<JkBuild>();
         final List<Field> fields = JkUtilsReflect.getAllDeclaredField(this.getClass(),
                 JkProject.class);
+
         for (final Field field : fields) {
             final JkProject jkProject = field.getAnnotation(JkProject.class);
             final JkBuild subBuild = relativeProject(this,

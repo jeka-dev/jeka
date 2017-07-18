@@ -71,5 +71,20 @@ public class MergeFileDepIT {
 
     }
 
+    @Test
+    public void flattenOnlyFileDeps() {
+        File dep0File = JkUtilsFile.resourceAsFile(MergeFileDepIT.class, "dep0");
+        File dep1File = JkUtilsFile.resourceAsFile(MergeFileDepIT.class, "dep1");
+        JkDependencies deps = JkDependencies.builder()
+                .on(dep0File).scope(TEST)
+                .on(dep1File).scope(TEST).build();
+        JkDependencyResolver resolver = JkDependencyResolver.unmanaged(deps);
+        JkDependencyNode tree = resolver.resolve().dependencyTree();
+        assertEquals(2, tree.flatten().size());
+        resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps);
+        assertEquals(2, resolver.resolve().dependencyTree().flatten().size());
+
+    }
+
 
 }

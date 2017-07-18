@@ -3,10 +3,7 @@ package org.jerkar.tool.builtins.idea;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLOutputFactory;
@@ -78,6 +75,9 @@ final class ImlGenerator {
     Iterable<File> projectDependencies = JkUtilsIterable.listOf();
 
     boolean forceJdkVersion;
+
+    /* When true, path will be mentioned with $JERKAR_HOME$ and $JERKAR_REPO$ instead of explicit absolute path. */
+    boolean useVarPath;
 
     private final Set<String> paths = new HashSet<String>();
 
@@ -284,6 +284,8 @@ final class ImlGenerator {
             LibPath libPath = new LibPath();
             libPath.bin = file;
             libPath.scope = ideScope;
+            libPath.source = lookForSources(file);
+            libPath.javadoc = lookForJavadoc(file);
             writeOrderEntryForLib(libPath);
             paths.add(file.getPath());
         }
@@ -335,7 +337,7 @@ final class ImlGenerator {
     private void writeJdk() throws XMLStreamException {
         writer.writeCharacters(T2);
         writer.writeEmptyElement("orderEntry");
-        if (this.forceJdkVersion) {
+        if (this.forceJdkVersion  && this.sourceJavaVersion != null) {
             writer.writeAttribute("type", "jdk");
             final String jdkVersion = jdkVesion(this.sourceJavaVersion);
             writer.writeAttribute("jdkName", jdkVersion);
@@ -405,7 +407,7 @@ final class ImlGenerator {
         }
     }
 
-    private static String ideaPath(File projectDir, File file) {
+    private String ideaPath(File projectDir, File file) {
         if (file.getName().toLowerCase().endsWith(".jar")) {
             if (JkUtilsFile.isAncestor(projectDir, file)) {
                 final String relPath = JkUtilsFile.getRelativePath(projectDir, file);
@@ -459,7 +461,10 @@ final class ImlGenerator {
         }
     }
 
-    private static String replacePathWithVar(String path) {
+    private String replacePathWithVar(String path) {
+        if (!useVarPath) {
+            return path;
+        }
         final String repo = JkLocator.jerkarRepositoryCache().getAbsolutePath().replace('\\', '/');
         final String home = JkLocator.jerkarHome().getAbsolutePath().replace('\\', '/');
         final String result = path.replace(repo, "$JERKAR_REPO$");
@@ -494,6 +499,46 @@ final class ImlGenerator {
                 return folder;
             }
             folder = folder.getParentFile();
+        }
+        return null;
+    }
+
+    private File lookForSources(File binary) {
+        String name = binary.getName();
+        String nameWithoutExt = JkUtilsString.substringBeforeLast(name, ".");
+        String ext = JkUtilsString.substringAfterLast(name, ".");
+        String sourceName = nameWithoutExt + "-sources." + ext;
+        List<File> folders = JkUtilsIterable.listOf(
+                binary.getParentFile(),
+                new File(binary.getParentFile().getParentFile().getParentFile(), "libs-sources"),
+                new File(binary.getParentFile().getParentFile(), "libs-sources"),
+                new File(binary.getParentFile(), "libs-sources"));
+        List<String> names = JkUtilsIterable.listOf(sourceName, nameWithoutExt + "-sources.zip");
+        return lookFileHere(folders, names);
+    }
+
+    private File lookForJavadoc(File binary) {
+        String name = binary.getName();
+        String nameWithoutExt = JkUtilsString.substringBeforeLast(name, ".");
+        String ext = JkUtilsString.substringAfterLast(name, ".");
+        String sourceName = nameWithoutExt + "-javadoc." + ext;
+        List<File> folders = JkUtilsIterable.listOf(
+                binary.getParentFile(),
+                new File(binary.getParentFile().getParentFile().getParentFile(), "libs-javadoc"),
+                new File(binary.getParentFile().getParentFile(), "libs-javadoc"),
+                new File(binary.getParentFile(), "libs-javadoc"));
+        List<String> names = JkUtilsIterable.listOf(sourceName, nameWithoutExt + "-javadoc.zip");
+        return lookFileHere(folders, names);
+    }
+
+    private File lookFileHere(Iterable<File> folders, Iterable<String> names) {
+        for (File folder : folders) {
+            for (String name : names) {
+                File candidate = new File(folder, name);
+                if (candidate.exists()) {
+                    return candidate;
+                }
+            }
         }
         return null;
     }

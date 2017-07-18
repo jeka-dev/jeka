@@ -392,7 +392,13 @@ public final class JkUtilsFile {
     public static List<File> filesOf(File dir, FileFilter fileFilter, boolean includeFolders) {
         assertAllDir(dir);
         final List<File> result = new LinkedList<File>();
-        for (final File file : dir.listFiles()) {
+
+        // Windows JVM bug, sometime a file is seen a dir and invoking this method returns a null
+        File[] files = dir.listFiles();
+        if (files == null) {
+            return new LinkedList<File>();
+        }
+        for (final File file : files) {
             if (file.isFile() && !fileFilter.accept(file)) {
                 continue;
             }
