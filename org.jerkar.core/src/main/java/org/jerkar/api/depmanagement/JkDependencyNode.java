@@ -94,7 +94,8 @@ public class JkDependencyNode implements Serializable {
         if (this.nodeInfo instanceof ModuleNodeInfo) {
             return (ModuleNodeInfo) this.nodeInfo;
         }
-        throw new IllegalStateException("The current node is type of " + this.nodeInfo.getClass() + " for " + this.nodeInfo + " is not related to a module dependency.");
+        throw new IllegalStateException("The current node is type of " + this.nodeInfo.getClass().getName()
+                + " (for " + this.nodeInfo + "), so is not a module dependency as expected. Caller must check if type is correct before calling this method.");
     }
 
 
@@ -221,11 +222,11 @@ public class JkDependencyNode implements Serializable {
      * Returns first node descendant of this one standing for the specified moduleId, deep first.
      */
     public JkDependencyNode find(JkModuleId moduleId) {
-        if (moduleId.equals(this.moduleId())) {
+        if (this.isModuleNode() && moduleId.equals(this.moduleId())) {
             return this;
         }
         for (JkDependencyNode child : this.flatten()) {
-            if (moduleId.equals(child.moduleId())) {
+            if (child.isModuleNode() && moduleId.equals(child.moduleId())) {
                 return child;
             }
         }
@@ -234,7 +235,7 @@ public class JkDependencyNode implements Serializable {
 
     private boolean directChildrenContains(JkModuleId moduleId) {
         for (final JkDependencyNode dependencyNode : this.children) {
-            if (dependencyNode.moduleId().equals(moduleId)) {
+            if (dependencyNode.isModuleNode() && dependencyNode.moduleId().equals(moduleId)) {
                 return true;
             }
         }
@@ -296,7 +297,6 @@ public class JkDependencyNode implements Serializable {
         Set<JkScope> declaredScopes();
 
     }
-
 
     public static final class ModuleNodeInfo implements Serializable, NodeInfo {
 
@@ -374,8 +374,6 @@ public class JkDependencyNode implements Serializable {
             return artifacts;
         }
     }
-
-
 
     private static List<JkScopedDependency> depsUntilLast(JkDependencies deps, JkModuleId to) {
         List<JkScopedDependency> result = new LinkedList<JkScopedDependency>();

@@ -54,6 +54,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
     /** generate eclipse metadata files (as .classpath or .project) */
     @JkDoc("Generates Eclipse .classpath file according project dependencies.")
     public void generateFiles() {
+        final File dotProject = this.build.file(".project");
         if (this.build instanceof JkJavaBuild) {
             final JkJavaBuild jbuild = (JkJavaBuild) build;
             final List<File> depProjects = new LinkedList<File>();
@@ -73,10 +74,14 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
             generator.projectDirsByClassDirs = this.projectDirsByClassDirs;
             generator.useAbsolutePaths = this.useAbsolutePathsInClasspath;
             generator.generate();
-        }
-        final File dotProject = this.build.file(".project");
-        if (!dotProject.exists()) {
-            Project.ofJavaNature(this.javaBuild().moduleId().fullName()).writeTo(dotProject);
+
+            if (!dotProject.exists()) {
+                Project.ofJavaNature(this.javaBuild().moduleId().fullName()).writeTo(dotProject);
+            }
+        } else {
+            if (!dotProject.exists()) {
+                Project.ofSimpleNature(this.build.baseDir().root().getName()).writeTo(dotProject);
+            }
         }
     }
 

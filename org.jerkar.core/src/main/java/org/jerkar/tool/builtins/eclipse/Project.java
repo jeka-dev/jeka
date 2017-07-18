@@ -33,6 +33,11 @@ class Project {
         return new Project(name, JkUtilsIterable.setOf("org.eclipse.jdt.core.javanature"));
     }
 
+    public static Project ofSimpleNature(String name) {
+        return new Project(name, new HashSet<String>());
+    }
+
+
     public static Project findProjectNamed(File parent, String projectName) {
         for (final File file : parent.listFiles()) {
             final File dotProject = new File(file, ".project");

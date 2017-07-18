@@ -333,11 +333,11 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Returns <code>true</code> if the ancestorCandidate file is an ancestor of
-     * the specified childCandidate.
+     * Returns <code>true</code> if the ancestor candidate file is an ancestor of
+     * the specified child candidate.
      */
-    public static boolean isAncestor(File ancestorCandidate, File childCandidtate) {
-        File parent = childCandidtate;
+    public static boolean isAncestor(File ancestorCandidate, File childCandidate) {
+        File parent = childCandidate;
         while (true) {
             parent = parent.getParentFile();
             if (parent == null) {

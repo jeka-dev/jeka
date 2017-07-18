@@ -117,6 +117,16 @@ final class DotClasspathGenerator {
         final Iterable<File> files = buildDefDependencyResolver.dependenciesToResolve().localFileDependencies();
         writeFileEntries(writer, files, paths);
 
+        // write entries for project build dependencies
+        for (File projectFile : this.projectDependencies) {
+            writer.writeCharacters("\t");
+            writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
+            writer.writeAttribute("combineaccessrules", "false");
+            writer.writeAttribute("kind", "src");
+            writer.writeAttribute("path", "/" + projectFile.getName());
+            writer.writeCharacters("\n");
+        }
+
 
         // Write output
         writer.writeCharacters("\t");
@@ -453,7 +463,7 @@ final class DotClasspathGenerator {
     private String toDependendeeProjectRelativePath(File file) {
         for (final File projectFile : this.projectDependencies) {
             if (JkUtilsFile.isAncestor(projectFile, file)) {
-                final String relativePath = JkUtilsFile.getRelativePath(projectFile, projectFile);
+                final String relativePath = JkUtilsFile.getRelativePath(projectFile, file);
                 final Project project = Project.of(new File(projectFile, ".project"));
                 return "/" + project.name + "/" + relativePath;
             }
