@@ -1,10 +1,7 @@
 package org.jerkar.tool.builtins.eclipse;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.file.JkFileTreeSet;
@@ -47,10 +44,6 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
     @JkDoc({ "Set it to true to use absolute paths in the classpath instead of classpath variables." })
     public boolean useAbsolutePathsInClasspath = false;
 
-    private DotClasspathModel cachedClasspath = null;
-
-    private final Map<File,File> projectDirsByClassDirs = new HashMap<File,File>();
-
     /** generate eclipse metadata files (as .classpath or .project) */
     @JkDoc("Generates Eclipse .classpath file according project dependencies.")
     public void generateFiles() {
@@ -71,8 +64,9 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
             generator.sources  = jbuild.sources().and(jbuild.resources());
             generator.testSources  = jbuild.unitTestSources().and(jbuild.unitTestResources());
             generator.testClassDir = jbuild.testClassDir();
-            generator.projectDirsByClassDirs = this.projectDirsByClassDirs;
+            generator.fileDependencyToProjectSubstitution = this.fileDependencyToProjectSubstitution;
             generator.useAbsolutePaths = this.useAbsolutePathsInClasspath;
+            generator.projectDependencyToFileSubstitutions = this.projectDependencyToFileSubstitutions;
             generator.generate();
 
             if (!dotProject.exists()) {
@@ -84,6 +78,14 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
             }
         }
     }
+
+    private DotClasspathModel cachedClasspath = null;
+
+    /* see #useProjectDependencyInsteadOfFileFor */
+    private final Map<File,File> fileDependencyToProjectSubstitution = new HashMap<File,File>();
+
+    /* see #useFileDependencyInsteadOfProjectFor */
+    private final Set<File> projectDependencyToFileSubstitutions = new HashSet<File>();
 
     @Override
     public JkFileTreeSet alterSourceDirs(JkFileTreeSet original) {
@@ -134,7 +136,43 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
             e.printStackTrace(JkLog.warnStream());
             JkLog.done("Eclipse files has not been generated due to a failure");
         }
+    }
 
+    /**
+     * If your project has a dependency on file/folder (a jar or a class dir) that is the result of the compilation
+     * of another Eclipse project, then you can generate .classpath in such it has a dependency on the project itself
+     * instead of the file/folder.
+     *
+     * @param projectDir root folder of the project generating the class jar
+     * @param dependencyFile the dependency file your project depends on.
+     */
+    public void useProjectDependencyInsteadOfFileFor(File projectDir, File dependencyFile) {
+        fileDependencyToProjectSubstitution.put(dependencyFile, projectDir);
+    }
+
+    /**
+     * If your project has a dependency on computed dependency from a slave project
+     * (generally declared as <code>.on(slaveBuild.asJavaDependency())</code>), Eclipse will generate a .classpath
+     * with a dependency of slave project. <br/>
+     * If you want Eclipse .classpath uses jar file produced by this project along its transitive dependencies instead
+     * of the project itself, this method will tell Eclipse plugin to use jar file + transitive dependencies for the
+     * specified project
+     *
+     * @param projectDirs root folder of the projects for which you don't want to use Eclipse project dependency.
+     */
+    public void useFileDependencyInsteadOfProjectFor(File ... projectDirs) {
+        for (File projectDir : projectDirs) {
+            projectDependencyToFileSubstitutions.add(projectDir);
+        }
+    }
+
+    /**
+     * Shorthand for {@link #useFileDependencyInsteadOfProjectFor(File...)}
+     */
+    public void useFileDependencyInsteadOfProjectFor(JkJavaBuild ... javaBuilds) {
+        for (JkJavaBuild javaBuild : javaBuilds) {
+            projectDependencyToFileSubstitutions.add(javaBuild.baseDir().root());
+        }
     }
 
     private ScopeResolver scopeResolver() {
@@ -173,8 +211,13 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
      * When a file dependency is found at classesDir, make a project reference instead of a class folder reference in the .classpath file.
      * @param classesDir directory of the classes
      * @param projectDir directory of the project
+     * @deprecated  Use the opposite {@link #useProjectDependencyInsteadOfFileFor(File, File)} instead (be careful arguments are inverted).
      */
+    @Deprecated
     public void addProjectFromClasses(File classesDir, File projectDir) {
-        projectDirsByClassDirs.put(classesDir, projectDir);
+        fileDependencyToProjectSubstitution.put(classesDir, projectDir);
     }
+
+
+
 }

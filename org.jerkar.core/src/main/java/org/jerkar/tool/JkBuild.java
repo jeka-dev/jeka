@@ -314,7 +314,7 @@ public class JkBuild {
      * files.
      */
     public JkComputedDependency asDependency(Iterable<File> files) {
-        return BuildDependency.of(this, JkUtilsIterable.listWithoutDuplicateOf(files));
+        return JkBuildDependency.of(this, JkUtilsIterable.listWithoutDuplicateOf(files));
     }
 
     /**
@@ -323,7 +323,7 @@ public class JkBuild {
      * files.
      */
     public JkComputedDependency asDependency(File... files) {
-        return BuildDependency.of(this, files);
+        return JkBuildDependency.of(this, files);
     }
 
     /**
@@ -331,7 +331,7 @@ public class JkBuild {
      * files and methods to execute.
      */
     public JkComputedDependency asDependency(String methods, File... files) {
-        return BuildDependency.of(this, methods, files);
+        return JkBuildDependency.of(this, methods, files);
     }
 
     /**

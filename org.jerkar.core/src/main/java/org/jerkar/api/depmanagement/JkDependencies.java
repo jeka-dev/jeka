@@ -62,6 +62,14 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
+     * Creates a {@link JkDependencies} from the specified dependency and scopes.
+     */
+    @SuppressWarnings("unchecked")
+    public static JkDependencies of(JkDependency dependency, JkScope ... scopes) {
+        return of(JkScopedDependency.of(dependency, scopes));
+    }
+
+    /**
      * Creates a {@link JkDependencies} from the specified scopes and dependencies.
      */
     @SuppressWarnings("unchecked")
@@ -657,7 +665,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         }
 
         /**
-         * Same as {@link #onFiles(Iterable)} but effective only if the
+         * Same as {@link #onFiles(Iterable, JkScope...)} )} but effective only if the
          * specified condition is true.
          */
         public JkFluentScopeableBuilder onFilesIf(boolean condition, Iterable<File> files,

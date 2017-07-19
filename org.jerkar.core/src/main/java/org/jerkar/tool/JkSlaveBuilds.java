@@ -49,7 +49,7 @@ public final class JkSlaveBuilds {
 
     /**
      * Returns a {@link JkSlaveBuilds} identical to this one but augmented with
-     * the {@link BuildDependency} contained in the the specified dependencies.
+     * the {@link JkBuildDependency} contained in the the specified dependencies.
      */
     public JkSlaveBuilds and(JkDependencies dependencies) {
         final List<JkBuild> list = projectBuildDependencies(dependencies);
@@ -117,8 +117,8 @@ public final class JkSlaveBuilds {
     private static List<JkBuild> projectBuildDependencies(JkDependencies dependencies) {
         final List<JkBuild> result = new LinkedList<JkBuild>();
         for (final JkScopedDependency scopedDependency : dependencies) {
-            if (scopedDependency.dependency() instanceof BuildDependency) {
-                final BuildDependency projectDependency = (BuildDependency) scopedDependency
+            if (scopedDependency.dependency() instanceof JkBuildDependency) {
+                final JkBuildDependency projectDependency = (JkBuildDependency) scopedDependency
                         .dependency();
                 result.add(projectDependency.projectBuild());
             }

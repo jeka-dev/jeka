@@ -19,6 +19,8 @@ import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.*;
+import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkBuildDependency;
 import org.jerkar.tool.JkConstants;
 import org.jerkar.tool.JkOptions;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
@@ -34,40 +36,69 @@ final class DotClasspathGenerator {
 
     private final File projectDir;
 
-    /** default to projectDir/.classpath */
+    /**
+     * default to projectDir/.classpath
+     */
     File outputFile;
 
-    /** optional */
+    /**
+     * optional
+     */
     String jreContainer;
 
-    /** attach javadoc to the lib dependencies */
+    /**
+     * attach javadoc to the lib dependencies
+     */
     boolean includeJavadoc = true;
 
-    /** Used to generate JRE container */
+    /**
+     * Used to generate JRE container
+     */
     String sourceJavaVersion;
 
-    /** Can be empty but not null */
+    /**
+     * Can be empty but not null
+     */
     JkFileTreeSet sources = JkFileTreeSet.empty();
 
-    /** Can be empty but not null */
+    /**
+     * Can be empty but not null
+     */
     JkFileTreeSet testSources = JkFileTreeSet.empty();
 
-    /** Directory where are compiled test classes */
+    /**
+     * Directory where are compiled test classes
+     */
     File testClassDir;
 
-    /** Dependency resolver to fetch module dependencies */
+    /**
+     * Dependency resolver to fetch module dependencies
+     */
     JkDependencyResolver dependencyResolver;
 
-    /** Dependency resolver to fetch module dependencies for build classes */
+    /**
+     * Dependency resolver to fetch module dependencies for build classes
+     */
     JkDependencyResolver buildDefDependencyResolver;
 
-    /** Can be empty but not null */
+    /**
+     * Can be empty but not null
+     */
     Iterable<File> projectDependencies = JkUtilsIterable.listOf();
 
-    /** Map from class dir to project dir */
-    Map<File,File> projectDirsByClassDirs;
+    /**
+     * Map from file to project dir make .classpath depends on a project instead of a file
+     */
+    Map<File, File> fileDependencyToProjectSubstitution;
 
-    /** Use absolute paths instead of classpath variables */
+    /**
+     * projects for which we don't want to use project dependencies
+     **/
+    Set<File> projectDependencyToFileSubstitutions;
+
+    /**
+     * Use absolute paths instead of classpath variables
+     */
     public boolean useAbsolutePaths;
 
     /**
@@ -80,7 +111,9 @@ final class DotClasspathGenerator {
         this.outputFile = new File(projectDir, ".classpath");
     }
 
-    /** Generate the .classpath file */
+    /**
+     * Generate the .classpath file
+     */
     public void generate() {
         try {
             _generate();
@@ -119,10 +152,15 @@ final class DotClasspathGenerator {
 
         // write entries for project build dependencies
         for (File projectFile : this.projectDependencies) {
+            if (paths.contains(projectFile.getPath())) {
+                continue;
+            }
+            paths.add(projectFile.getAbsolutePath());
             writer.writeCharacters("\t");
             writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
             writer.writeAttribute("combineaccessrules", "false");
             writer.writeAttribute("kind", "src");
+            writer.writeAttribute("exported", "true");
             writer.writeAttribute("path", "/" + projectFile.getName());
             writer.writeCharacters("\n");
         }
@@ -146,6 +184,9 @@ final class DotClasspathGenerator {
     }
 
     private static String eclipseJavaVersion(String compilerVersion) {
+        if ("6".equals(compilerVersion)) {
+            return "1.6";
+        }
         if ("7".equals(compilerVersion)) {
             return "1.7";
         }
@@ -284,8 +325,26 @@ final class DotClasspathGenerator {
                 JkVersion version = resolveResult.versionOf(moduleId);
                 JkVersionedModule versionedModule = JkVersionedModule.of(moduleId, version);
                 writeModuleEntry(writer, versionedModule, resolveResult.filesOf(moduleId), repos, paths);
+            }
 
-            // File dependencies (file system + computed)
+            // Computed dependencies
+            else if (dependency instanceof JkComputedDependency) {
+                final JkComputedDependency computedDependency = (JkComputedDependency) dependency;
+                if (computedDependency instanceof JkBuildDependency) {
+                    final JkBuildDependency buildDependency = (JkBuildDependency) dependency;
+                    final JkBuild build = buildDependency.projectBuild();
+                    if (build instanceof JkJavaBuild) {
+                        if (!projectDependencyToFileSubstitutions.contains(build.baseDir().root())) {
+                            writeProjectEntry(build.baseDir().root(), writer, paths);
+                        } else {
+                            writeFileEntries(writer, buildDependency.files(), paths);
+                        }
+                    }
+                } else {
+                    writeFileEntries(writer, computedDependency.files(), paths);
+                }
+
+                // Other file dependencies
             } else if (dependency instanceof JkDependency.JkFileDependency) {
                 final JkDependency.JkFileDependency fileDependency = (JkDependency.JkFileDependency) dependency;
                 final File projectDir = getProjectDir(fileDependency.files());
@@ -301,14 +360,17 @@ final class DotClasspathGenerator {
         writeExternalModuleEntries(writer, resolveResult, paths, repos);
     }
 
+
+
+
     private File getProjectDir(Iterable<File> files) {
 
         // check the files for explicit project settings
         for (final File file : files) {
-            if (projectDirsByClassDirs.containsKey(file)) {
+            if (fileDependencyToProjectSubstitution.containsKey(file)) {
 
                 // project dir explicitly set, always use that, even if null
-                return projectDirsByClassDirs.get(file);
+                return fileDependencyToProjectSubstitution.get(file);
             }
         }
 
@@ -324,7 +386,7 @@ final class DotClasspathGenerator {
     }
 
     private void writeExternalModuleEntries(final XMLStreamWriter writer,
-            JkResolveResult resolveResult, Set<String> paths, JkRepos repos) throws XMLStreamException {
+                                            JkResolveResult resolveResult, Set<String> paths, JkRepos repos) throws XMLStreamException {
         for (final JkVersionedModule versionedModule : resolveResult.involvedModules()) {
             JkModuleId moduleId = versionedModule.moduleId();
             JkVersion version = resolveResult.versionOf(moduleId);
@@ -376,6 +438,7 @@ final class DotClasspathGenerator {
         }
 
         writer.writeAttribute("path", binPath);
+        writer.writeAttribute("exported", "true");
         if (source != null && source.exists()) {
             String srcPath = source.getAbsolutePath();
             if (!useAbsolutePaths) {
@@ -400,7 +463,7 @@ final class DotClasspathGenerator {
     }
 
     private static JkScope[] allScopes() {
-        return new JkScope[] {JkJavaBuild.COMPILE, JkJavaBuild.PROVIDED,
+        return new JkScope[]{JkJavaBuild.COMPILE, JkJavaBuild.PROVIDED,
                 JkJavaBuild.RUNTIME, JkJavaBuild.TEST};
     }
 
@@ -487,13 +550,13 @@ final class DotClasspathGenerator {
      * else otherwise.
      */
     private static File getProjectFolderOf(File binaryFolder) {
-        if (! binaryFolder.isDirectory()) {
+        if (!binaryFolder.isDirectory()) {
             return null;
         }
         File folder = binaryFolder.getParentFile();
         while (folder != null) {
             File dotClasspath = new File(folder, ".classpath");
-            if (! dotClasspath.exists()) {
+            if (!dotClasspath.exists()) {
                 folder = folder.getParentFile();
                 continue;
             }
