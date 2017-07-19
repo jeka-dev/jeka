@@ -94,7 +94,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
         for (File folder : folders) {
             File projectFolder = folder.getParentFile().getParentFile();
             JkLog.startln("Generating Eclipse files on " + projectFolder);
-            Main.exec(projectFolder, "eclipse#generateAll");
+            Main.exec(projectFolder, "eclipse#generateFiles");
             JkLog.done();
         }
     }
