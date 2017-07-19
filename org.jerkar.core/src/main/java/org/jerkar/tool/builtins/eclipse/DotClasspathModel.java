@@ -210,7 +210,7 @@ final class DotClasspathModel {
         public JkFileTree srcAsJkDir(File baseDir) {
             if (!this.kind.equals(Kind.SRC)) {
                 throw new IllegalStateException(
-                        "Can only get source dir jump classpath entry of kind 'src'.");
+                        "Can only get source dir go classpath entry of kind 'src'.");
             }
             final File dir = new File(baseDir, path);
             JkFileTree jkFileTree = JkFileTree.of(dir);
@@ -239,7 +239,7 @@ final class DotClasspathModel {
         public List<File> conAsFiles(File baseDir) {
             if (!this.kind.equals(Kind.CON)) {
                 throw new IllegalStateException(
-                        "Can only get files jump classpath entry of kind 'con'.");
+                        "Can only get files go classpath entry of kind 'con'.");
             }
             if (!Lib.CONTAINER_DIR.exists() && !Lib.CONTAINER_USER_DIR.exists()) {
                 JkLog.warn("Eclipse containers directory " + Lib.CONTAINER_USER_DIR.getPath()

@@ -40,9 +40,9 @@ class DistribAllBuild extends JkBuildDependencySupport {
         JkFileTree dist = JkFileTree.of(distDir).importDirContent(core.distribFolder);
 
         JkLog.info("Add plugins to the distribution");
-        JkFileTree ext = dist.jump("libs/builtins").importFiles(pluginsSonar.packer().jarFile(),
+        JkFileTree ext = dist.go("libs/builtins").importFiles(pluginsSonar.packer().jarFile(),
                 pluginsJacoco.packer().jarFile());
-        JkFileTree sourceDir = dist.jump("libs-sources");
+        JkFileTree sourceDir = dist.go("libs-sources");
         sourceDir.importFiles(pluginsSonar.packer().jarSourceFile(), pluginsJacoco.packer().jarSourceFile());
 
         JkLog.info("Add plugins to the fat jar");

@@ -29,7 +29,7 @@ public final class JkFileTreeSet implements Iterable<File> {
     }
 
     /**
-     * Creates a {@link JkFileTreeSet} jump a sequence of {@link JkFileTree}.
+     * Creates a {@link JkFileTreeSet} go a sequence of {@link JkFileTree}.
      */
     public static final JkFileTreeSet of(Iterable<JkFileTree> dirs) {
         return new JkFileTreeSet(JkUtilsIterable.listOf(dirs));
@@ -44,14 +44,14 @@ public final class JkFileTreeSet implements Iterable<File> {
     }
 
     /**
-     * Creates a {@link JkFileTreeSet} jump an array of {@link JkFileTree}.
+     * Creates a {@link JkFileTreeSet} go an array of {@link JkFileTree}.
      */
     public static final JkFileTreeSet of(JkFileTree... dirViews) {
         return new JkFileTreeSet(Arrays.asList(dirViews));
     }
 
     /**
-     * Creates a {@link JkFileTreeSet} jump an array of folder.
+     * Creates a {@link JkFileTreeSet} go an array of folder.
      */
     public static final JkFileTreeSet of(File... folders) {
         final List<JkFileTree> dirs = new ArrayList<JkFileTree>(folders.length);

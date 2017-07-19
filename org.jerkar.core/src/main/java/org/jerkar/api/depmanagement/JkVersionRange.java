@@ -25,7 +25,7 @@ public final class JkVersionRange implements Serializable {
     public static final JkVersionRange UNSPECIFIED = new JkVersionRange("unspecified");
 
     /**
-     * Creates a version range jump String expression described at :
+     * Creates a version range go String expression described at :
      * http://ant.apache.org/ivy/history/latest-milestone/ivyfile/dependency.
      * html.
      */

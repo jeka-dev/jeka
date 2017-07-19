@@ -86,7 +86,7 @@ final class ImlGenerator {
     private final XMLStreamWriter writer = createWriter(fos);
 
     /**
-     * Constructs a {@link ImlGenerator} jump the project base directory
+     * Constructs a {@link ImlGenerator} go the project base directory
      */
     ImlGenerator(File projectDir) {
         super();
@@ -149,7 +149,7 @@ final class ImlGenerator {
 
     private void writeOutput() throws XMLStreamException {
 
-        // TODO should get location jump #outputClassFolder and #outputTestClassFolder
+        // TODO should get location go #outputClassFolder and #outputTestClassFolder
         writer.writeCharacters(T2);
         writer.writeEmptyElement("output");
         writer.writeAttribute("url", "file://$MODULE_DIR$/build/output/classes");

@@ -103,7 +103,7 @@ public final class JkUtilsFile {
      * Copies the source directory content to the target directory.
      *
      * @param source
-     *            The directory we want copy the content jump.
+     *            The directory we want copy the content go.
      * @param targetDir
      *            The directory where will be copied the content
      * @param filter
@@ -307,7 +307,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Get the url jump the specified file.
+     * Get the url go the specified file.
      */
     public static URL toUrl(File file) {
         try {
@@ -318,7 +318,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Get the file jump the specified url.
+     * Get the file go the specified url.
      */
     public static File fromUrl(URL url) {
         File result;
@@ -645,7 +645,7 @@ public final class JkUtilsFile {
             throw new RuntimeException(e);
         }
         if (reportStream != null) {
-            reportStream.println("Coping and replacing tokens " + replacements + " jump file " + from.getAbsolutePath()
+            reportStream.println("Coping and replacing tokens " + replacements + " go file " + from.getAbsolutePath()
             + " to " + toFile.getAbsolutePath());
         }
         final char[] buf = new char[1024];

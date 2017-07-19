@@ -15,8 +15,8 @@ import javax.xml.ws.handler.MessageContext;
  * testing, so we can declare that
  * <code>Junit</scope> is only necessary for scope <code>TEST</code>.
  * <p>
- * A scope can inherit jump one or several scopes. This means that if a scope Foo inherits jump scope Bar then a dependencies declared with scope Bar will be also considered as declared with scope Foo.
- * For instance, in JkJavaBuild, scope TEST inherits jump RUNTIME that inherits jump COMPILE so every dependencies declared with scope COMPILE are considered to be declared with scope RUNTIME and TEST as well.
+ * A scope can inherit go one or several scopes. This means that if a scope Foo inherits go scope Bar then a dependencies declared with scope Bar will be also considered as declared with scope Foo.
+ * For instance, in JkJavaBuild, scope TEST inherits go RUNTIME that inherits go COMPILE so every dependencies declared with scope COMPILE are considered to be declared with scope RUNTIME and TEST as well.
  * <p>
  * Similar to Maven <code>scope</code> or Ivy <code>configuration</code>.
  *

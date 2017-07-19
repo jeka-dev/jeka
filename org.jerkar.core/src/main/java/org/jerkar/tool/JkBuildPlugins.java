@@ -92,7 +92,7 @@ public final class JkBuildPlugins {
             buildPlugin = JkUtilsReflect.newInstance(exactPluginClass);
             buildPlugin.configure(holder);
         }
-        JkLog.startUnderlined("Method " + method + " jump plugin "
+        JkLog.startUnderlined("Method " + method + " go plugin "
                 + buildPlugin.getClass().getSimpleName());
         JkUtilsReflect.invoke(buildPlugin, method);
         JkLog.done();

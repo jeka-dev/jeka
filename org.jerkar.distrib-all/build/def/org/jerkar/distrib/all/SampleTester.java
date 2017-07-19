@@ -22,15 +22,15 @@ class SampleTester {
 
     SampleTester(JkFileTree buildDir) {
         super();
-        this.sampleBaseDir = buildDir.jump("../org.jerkar.samples");
-        this.sampleDependeeBaseDir = buildDir.jump("../org.jerkar.samples-dependee");
-        this.output = sampleBaseDir.jump("build/output");
+        this.sampleBaseDir = buildDir.go("../org.jerkar.samples");
+        this.sampleDependeeBaseDir = buildDir.go("../org.jerkar.samples-dependee");
+        this.output = sampleBaseDir.go("build/output");
         String scriptName = JkUtilsSystem.IS_WINDOWS ? "jerkar.bat" : "jerkar";
         launchScript = buildDir.file("build/output/dist/" + scriptName);
     }
 
     void doTest() {
-        testSamples("", "eclipse#generateFiles");
+        testSamples("", "eclipse#generateAll");
         testSamples("AClassicBuild");
         testSamples("AntStyleBuild");
         testSamples("MavenStyleBuild");
@@ -72,7 +72,7 @@ class SampleTester {
         // project
         scaffoldProcess.runSync(); // Build the scaffolded project
         JkLog.infoUnderlined("Test eclipse generation and compile            ");
-        scaffoldProcess.withParameters("eclipse#generateFiles").runSync();
+        scaffoldProcess.withParameters("eclipse#generateAll").runSync();
         scaffoldProcess.withParameters("eclipse#").runSync(); // build using the .classpath for resolving classpath
         scaffoldProcess.withParameters("idea#generateIml", "idea#generateModulesXml").runSync();
         JkLog.done();

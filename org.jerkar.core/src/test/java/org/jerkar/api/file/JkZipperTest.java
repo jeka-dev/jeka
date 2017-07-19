@@ -18,7 +18,7 @@ public class JkZipperTest {
         final File dir = new File(url.getFile()).getParentFile();
         final File tempZip = File.createTempFile("oooo", ".zip");
         System.out.println(dir);
-        JkFileTree.of(dir).jump("..").zip().to(tempZip);
+        JkFileTree.of(dir).go("..").zip().to(tempZip);
         Assert.assertTrue("Can't delete " + tempZip, tempZip.delete());
     }
 

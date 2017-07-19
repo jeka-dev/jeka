@@ -64,16 +64,16 @@ public final class JkFileTree implements Iterable<File> {
      * Creates a {@link JkFileTree} having the default filter and the specified
      * relative path to this asScopedDependency as asScopedDependency directory.
      */
-    public JkFileTree jump(String relativePath) {
+    public JkFileTree go(String relativePath) {
         final File newBase = new File(root, relativePath);
         return new JkFileTree(newBase);
     }
 
     /**
-     * @deprecated use {@link #jump(String)} instead
+     * @deprecated use {@link #go(String)} instead
      */
     public JkFileTree from(String relativePath) {
-        return jump(relativePath);
+        return go(relativePath);
     }
 
     /**
@@ -275,7 +275,7 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Deletes each and every files in this tree. Files excluded jump this tree
+     * Deletes each and every files in this tree. Files excluded go this tree
      * are not deleted.
      */
     public JkFileTree deleteAll() {

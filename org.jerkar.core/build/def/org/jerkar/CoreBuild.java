@@ -66,9 +66,9 @@ public class CoreBuild extends AbstractBuild {
         // to find the Jerker HOME)
         distrib.importFiles(packer.jarFile());
         distrib.importFiles(packer().jarFile("lean"));
-        distrib.jump("libs-sources").importDirContent(file("build/libs-sources"))
+        distrib.go("libs-sources").importDirContent(file("build/libs-sources"))
         .importFiles(packer.jarSourceFile());
-        distrib.jump("libs-javadoc").importFiles(this.javadocMaker().zipFile());
+        distrib.go("libs-javadoc").importFiles(this.javadocMaker().zipFile());
         distrib.zip().with(JkCompressionLevel.BEST_COMPRESSION).to(distripZipFile);
         signIfNeeded(distripZipFile);
         JkLog.done();

@@ -6,10 +6,7 @@ import java.util.*;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkException;
-import org.jerkar.tool.JkInit;
+import org.jerkar.tool.*;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
 
@@ -27,7 +24,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 
     /** Flag for resolving dependencies against the eclipse classpath */
     @JkDoc({ "Flag for resolving dependencies against the eclipse classpath",
-        "but trying to segregate test jump production code considering path names : ",
+        "but trying to segregate test go production code considering path names : ",
     "if path contains 'test' then this is considered as an entry source for scope 'test'." })
     public boolean smartScope = true;
 
@@ -40,9 +37,17 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
         jreContainer = "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/" + jreName;
     }
 
-    /** Flag to set whether 'generateFiles' task should use absolute paths instead of classpath variables */
+    /** Flag to set whether 'generateAll' task should use absolute paths instead of classpath variables */
     @JkDoc({ "Set it to true to use absolute paths in the classpath instead of classpath variables." })
     public boolean useAbsolutePathsInClasspath = false;
+
+    private DotClasspathModel cachedClasspath = null;
+
+    /* see #useProjectDependencyInsteadOfFileFor */
+    private final Map<File,File> fileDependencyToProjectSubstitution = new HashMap<File,File>();
+
+    /* see #useFileDependencyInsteadOfProjectFor */
+    private final Set<File> projectDependencyToFileSubstitutions = new HashSet<File>();
 
     /** generate eclipse metadata files (as .classpath or .project) */
     @JkDoc("Generates Eclipse .classpath file according project dependencies.")
@@ -79,13 +84,20 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
         }
     }
 
-    private DotClasspathModel cachedClasspath = null;
-
-    /* see #useProjectDependencyInsteadOfFileFor */
-    private final Map<File,File> fileDependencyToProjectSubstitution = new HashMap<File,File>();
-
-    /* see #useFileDependencyInsteadOfProjectFor */
-    private final Set<File> projectDependencyToFileSubstitutions = new HashSet<File>();
+    /** Generate Eclipse files on all sub folders of the current directory **/
+    @JkDoc("Generate Eclipse files on all subfolder of the current directory. Only subfolder having a build/def directory are impacted.")
+    public void generateAll() {
+        final Iterable<File> folders = build.baseDir()
+                .include("**/" + JkConstants.BUILD_DEF_DIR)
+                .exclude("**/build/output/**")
+                .files(true);
+        for (File folder : folders) {
+            File projectFolder = folder.getParentFile().getParentFile();
+            JkLog.startln("Generating Eclipse files on " + projectFolder);
+            Main.exec(projectFolder, "eclipse#generateAll");
+            JkLog.done();
+        }
+    }
 
     @Override
     public JkFileTreeSet alterSourceDirs(JkFileTreeSet original) {
@@ -151,7 +163,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
     }
 
     /**
-     * If your project has a dependency on computed dependency jump a slave project
+     * If your project has a dependency on computed dependency go a slave project
      * (generally declared as <code>.on(slaveBuild.asJavaDependency())</code>), Eclipse will generate a .classpath
      * with a dependency of slave project. <br/>
      * If you want Eclipse .classpath uses jar file produced by this project along its transitive dependencies instead
@@ -186,6 +198,8 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
         }
         return new ScopeResolverAllCompile();
     }
+
+
 
     private DotClasspathModel dotClasspathModel() {
         if (cachedClasspath == null) {
