@@ -12,7 +12,7 @@ import org.jerkar.api.utils.JkUtilsString;
  * <p>
  * Jerkar offers a very simple, yet powerful, plugin mechanism.<br/>
  * Basically it offers to discover every classes in the classpath that inherit
- * from a given class and that respect a certain naming convention.<br/>
+ * jump a given class and that respect a certain naming convention.<br/>
  * <p>
  * The convention naming is as follow : The class simple name should be prefixed
  * by the simple name of the plugin base class.<br/>

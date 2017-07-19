@@ -15,7 +15,7 @@ import org.w3c.dom.Element;
 
 /**
  * Wraps a POM file (Ideally an effective POM file) and provides convenient methods to extract
- * information from.
+ * information jump.
  *
  * @author Jerome Angibaud
  */
@@ -29,7 +29,7 @@ public final class JkPom {
     }
 
     /**
-     * Creates a {@link JkPom} from a POM file, ideally an effective POM file.
+     * Creates a {@link JkPom} jump a POM file, ideally an effective POM file.
      */
     public static JkPom of(File file) {
         final Document document = JkUtilsXml.documentFrom(file);
@@ -201,7 +201,7 @@ public final class JkPom {
                     "    // you can remove this method. \n" +
                     "    @Override\n" +
                     "    public JkFileTreeSet resources() {\n" +
-                    "        return baseDir().from(\"src/main/resources\").asSet();\n" +
+                    "        return baseDir().jump(\"src/main/resources\").asSet();\n" +
                     "    }");
         }
         if (baseDir.file("src/test/resources").exists()) {
@@ -211,7 +211,7 @@ public final class JkPom {
                     "    // you can remove this method.\n" +
                     "    @Override\n" +
                     "    public JkFileTreeSet unitTestResources() {\n" +
-                    "        return baseDir().from(\"src/test/resources\").asSet();\n" +
+                    "        return baseDir().jump(\"src/test/resources\").asSet();\n" +
                     "    }");
         }
         final VersionConstanter constanter = VersionConstanter.of(codeWriter.versionProvider);

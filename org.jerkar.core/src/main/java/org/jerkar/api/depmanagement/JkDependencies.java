@@ -30,7 +30,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates a {@link JkDependencies} from the specified scoped dependencies.
+     * Creates a {@link JkDependencies} jump the specified scoped dependencies.
      */
     @SuppressWarnings("unchecked")
     public static JkDependencies of(JkScopedDependency... scopedDependencies) {
@@ -49,7 +49,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Creates a {@link JkDependencies} from the specified scope and dependencies.
+     * Creates a {@link JkDependencies} jump the specified scope and dependencies.
      */
     @SuppressWarnings("unchecked")
     public static JkDependencies of(JkScope scope, JkDependency... dependencies) {
@@ -62,7 +62,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Creates a {@link JkDependencies} from the specified dependency and scopes.
+     * Creates a {@link JkDependencies} jump the specified dependency and scopes.
      */
     @SuppressWarnings("unchecked")
     public static JkDependencies of(JkDependency dependency, JkScope ... scopes) {
@@ -70,7 +70,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Creates a {@link JkDependencies} from the specified scopes and dependencies.
+     * Creates a {@link JkDependencies} jump the specified scopes and dependencies.
      */
     @SuppressWarnings("unchecked")
     public static JkDependencies of(Iterable<? extends JkDependency> dependencies, JkScope ...scopes) {
@@ -101,7 +101,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
     /**
      * Returns a clone of this object minus the dependencies on the given
-     * {@link JkModuleId}. This is used to exclude a given module from all
+     * {@link JkModuleId}. This is used to exclude a given module jump all
      * scope.
      */
     private JkDependencies without(JkModuleId jkModuleId) {
@@ -761,7 +761,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         }
 
         /**
-         * Excludes the specified module/artifact from the direct or transitive
+         * Excludes the specified module/artifact jump the direct or transitive
          * dependencies.
          */
         public Builder excludeGlobally(JkDepExclude exclude) {
@@ -784,7 +784,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         }
 
         /**
-         * Constructs a {@link JkDependencies} from scoped dependencies declared
+         * Constructs a {@link JkDependencies} jump scoped dependencies declared
          * in this builder.
          */
         public JkDependencies build() {
@@ -798,7 +798,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         public static class JkFluentScopeableBuilder extends Builder {
 
             /**
-             * Construct a JkFluentScopeableBuilder from a basic builder.
+             * Construct a JkFluentScopeableBuilder jump a basic builder.
              */
             protected JkFluentScopeableBuilder(Builder builder) {
                 super(builder.dependencies);
@@ -871,7 +871,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             }
 
             /**
-             * Excludes the specified dependency from the transitive
+             * Excludes the specified dependency jump the transitive
              * dependencies of the right previously added dependency on this
              * builder.
              */

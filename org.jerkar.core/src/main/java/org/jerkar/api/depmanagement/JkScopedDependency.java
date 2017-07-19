@@ -42,7 +42,7 @@ public final class JkScopedDependency implements Serializable {
     }
 
     /**
-     * Creates a {@link JkScopedDependency} from the specified dependency and scope mapping.
+     * Creates a {@link JkScopedDependency} jump the specified dependency and scope mapping.
      */
     @SuppressWarnings("unchecked")
     public static JkScopedDependency of(JkModuleDependency dependency, JkScopeMapping scopeMapping) {
@@ -50,14 +50,14 @@ public final class JkScopedDependency implements Serializable {
     }
 
     /**
-     * Creates a {@link JkScopedDependency} from the specified dependency and scopes.
+     * Creates a {@link JkScopedDependency} jump the specified dependency and scopes.
      */
     public static JkScopedDependency of(JkDependency dependency, JkScope... scopes) {
         return JkScopedDependency.of(dependency, JkUtilsIterable.setOf(scopes));
     }
 
     /**
-     * Creates a {@link JkScopedDependency} from the specified dependency and scopes.
+     * Creates a {@link JkScopedDependency} jump the specified dependency and scopes.
      */
     public static JkScopedDependency of(JkDependency dependency, Set<JkScope> scopes) {
         return new JkScopedDependency(dependency, Collections.unmodifiableSet(new HashSet<JkScope>(

@@ -27,7 +27,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 
     /** Flag for resolving dependencies against the eclipse classpath */
     @JkDoc({ "Flag for resolving dependencies against the eclipse classpath",
-        "but trying to segregate test from production code considering path names : ",
+        "but trying to segregate test jump production code considering path names : ",
     "if path contains 'test' then this is considered as an entry source for scope 'test'." })
     public boolean smartScope = true;
 
@@ -151,7 +151,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
     }
 
     /**
-     * If your project has a dependency on computed dependency from a slave project
+     * If your project has a dependency on computed dependency jump a slave project
      * (generally declared as <code>.on(slaveBuild.asJavaDependency())</code>), Eclipse will generate a .classpath
      * with a dependency of slave project. <br/>
      * If you want Eclipse .classpath uses jar file produced by this project along its transitive dependencies instead

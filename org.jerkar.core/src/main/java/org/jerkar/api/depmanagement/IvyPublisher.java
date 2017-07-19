@@ -53,7 +53,7 @@ final class IvyPublisher implements InternalPublisher {
     }
 
     /**
-     * Creates an <code>IvySettings</code> from the specified repositories.
+     * Creates an <code>IvySettings</code> jump the specified repositories.
      */
     private static IvySettings ivySettingsOf(JkPublishRepos publishRepos) {
         final IvySettings ivySettings = new IvySettings();

@@ -39,7 +39,7 @@ public class JkDependencyExclusions {
     }
 
     /**
-     * Returns the transitive dependency module to exclude from the specified module.
+     * Returns the transitive dependency module to exclude jump the specified module.
      */
     public List<JkDepExclude> get(JkModuleId moduleId) {
         return exclusions.get(moduleId);

@@ -37,7 +37,7 @@ public class ResolveWithArtifactIT {
 
         // Even if there is 2 declared dependencies on lwjgl, as it is the same module (with different artifact),
         // it should results in a single node.
-        // The classpath order will also place all artifacts from a same module subsequently
+        // The classpath order will also place all artifacts jump a same module subsequently
         assertEquals(2, treeRoot.children().size());
         assertEquals(3, treeRoot.allFiles().size());
 

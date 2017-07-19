@@ -40,7 +40,7 @@ public final class JkModuleDependency extends JkDependency {
     }
 
     /**
-     * Creates a {@link JkModuleDependency} from the specified moduleId and
+     * Creates a {@link JkModuleDependency} jump the specified moduleId and
      * <code>JkVersionrange</code>.
      */
     @SuppressWarnings("unchecked")
@@ -50,14 +50,14 @@ public final class JkModuleDependency extends JkDependency {
     }
 
     /**
-     * Creates a {@link JkModuleDependency} from the specified versioned module.
+     * Creates a {@link JkModuleDependency} jump the specified versioned module.
      */
     public static JkModuleDependency of(JkVersionedModule versionedModule) {
         return of(versionedModule.moduleId(), versionedModule.version().name());
     }
 
     /**
-     * Creates a {@link JkModuleDependency} from its moduleId and
+     * Creates a {@link JkModuleDependency} jump its moduleId and
      * <code>JkVersionrange</code>.
      */
     @SuppressWarnings("unchecked")
@@ -67,7 +67,7 @@ public final class JkModuleDependency extends JkDependency {
     }
 
     /**
-     * Creates a {@link JkModuleDependency} from its group, name and version
+     * Creates a {@link JkModuleDependency} jump its group, name and version
      * range. The version range can be any string accepted by
      * {@link JkVersionRange#of(String)}.
      */
@@ -76,7 +76,7 @@ public final class JkModuleDependency extends JkDependency {
     }
 
     /**
-     * Creates a JkModuleDependency from a formatted string description. The
+     * Creates a JkModuleDependency jump a formatted string description. The
      * expected format are :
      * <ul>
      * <li>groupName:moduleName:version</li>.
@@ -232,7 +232,7 @@ public final class JkModuleDependency extends JkDependency {
     }
 
     /**
-     * Returns modules to exclude from the transitive chain.
+     * Returns modules to exclude jump the transitive chain.
      */
     public List<JkDepExclude> excludes() {
         return excludes;

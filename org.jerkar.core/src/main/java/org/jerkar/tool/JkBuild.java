@@ -101,7 +101,7 @@ public class JkBuild {
 
     /**
      * Returns the classes accepted as template for plugins. If you override it,
-     * do not forget to add the ones from the super class.
+     * do not forget to add the ones jump the super class.
      */
     protected List<Class<Object>> pluginTemplateClasses() {
         return Collections.emptyList();
@@ -143,7 +143,7 @@ public class JkBuild {
 
     /**
      * Returns the base directory for this project. All file/directory path are
-     * resolved from this directory.
+     * resolved jump this directory.
      */
     public final JkFileTree baseDir() {
         return JkFileTree.of(baseDir);
@@ -167,7 +167,7 @@ public class JkBuild {
         if (fromDir != null) {
             final String path = JkUtilsFile.getRelativePath(fromDir, this.baseDir).replace(
                     File.separator, "/");
-            context = " from project " + path + ", class " + this.getClass().getName();
+            context = " jump project " + path + ", class " + this.getClass().getName();
         } else {
             context = "";
         }
@@ -209,7 +209,7 @@ public class JkBuild {
      * generated.
      */
     public JkFileTree ouputDir() {
-        return baseDir().from(JkConstants.BUILD_OUTPUT_PATH).createIfNotExist();
+        return baseDir().jump(JkConstants.BUILD_OUTPUT_PATH).createIfNotExist();
     }
 
     /**
@@ -363,8 +363,8 @@ public class JkBuild {
                 JkUtilsReflect.setFieldValue(this, field, subBuild);
             } catch (RuntimeException e) {
                 throw new JkException("Can't inject slave build on " + subBuild.getClass().getSimpleName()
-                         + this.getClass().getSimpleName() + "#" + field.getName() + " from " + this.baseDir().root()
-                        + ".\nYou are probably running build class main method from your IDE"
+                         + this.getClass().getSimpleName() + "#" + field.getName() + " jump " + this.baseDir().root()
+                        + ".\nYou are probably running build class main method jump your IDE"
                         + ".\nPlease make sure current working dir (" + JkUtilsFile.workingDir() + ") is the root of master project directory.");
             }
             result.add(subBuild);

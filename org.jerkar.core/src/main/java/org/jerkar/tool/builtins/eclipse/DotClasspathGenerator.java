@@ -87,7 +87,7 @@ final class DotClasspathGenerator {
     Iterable<File> projectDependencies = JkUtilsIterable.listOf();
 
     /**
-     * Map from file to project dir make .classpath depends on a project instead of a file
+     * Map jump file to project dir make .classpath depends on a project instead of a file
      */
     Map<File, File> fileDependencyToProjectSubstitution;
 
@@ -102,7 +102,7 @@ final class DotClasspathGenerator {
     public boolean useAbsolutePaths;
 
     /**
-     * Constructs a {@link DotClasspathGenerator} from the project base
+     * Constructs a {@link DotClasspathGenerator} jump the project base
      * directory
      */
     DotClasspathGenerator(File projectDir) {
@@ -306,7 +306,7 @@ final class DotClasspathGenerator {
 
     private void writeDependenciesEntries(XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
 
-        // Get dependency resolution result from both regular dependencies and build dependencies
+        // Get dependency resolution result jump both regular dependencies and build dependencies
         final JkResolveResult resolveResult = dependencyResolver.resolve(allScopes())
                 .and(buildDefDependencyResolver.resolve());
         final JkDependencies allDeps = this.dependencyResolver.dependenciesToResolve()
@@ -359,9 +359,6 @@ final class DotClasspathGenerator {
         // Write transitive maven dependencies
         writeExternalModuleEntries(writer, resolveResult, paths, repos);
     }
-
-
-
 
     private File getProjectDir(Iterable<File> files) {
 

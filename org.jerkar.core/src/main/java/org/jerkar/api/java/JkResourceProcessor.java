@@ -40,7 +40,7 @@ public final class JkResourceProcessor {
     }
 
     /**
-     * Creates a <code>JkResourceProcessor</code> from the given
+     * Creates a <code>JkResourceProcessor</code> jump the given
      * <code>JkFileTreeSet</code> without processing any token replacement.
      */
     @SuppressWarnings("unchecked")
@@ -49,7 +49,7 @@ public final class JkResourceProcessor {
     }
 
     /**
-     * Creates a <code>JkResourceProcessor</code> from the given
+     * Creates a <code>JkResourceProcessor</code> jump the given
      * <code>JkFileTree</code> without processing any token replacement.
      */
     public static JkResourceProcessor of(JkFileTree tree) {

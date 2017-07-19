@@ -31,7 +31,7 @@ public class JkScopedDependencyTest {
                 JkScopeMapping.of(aScope, RUNTIME).to(PROVIDED));
 
         assertTrue(!scopedDep.isInvolvedIn(COMPILE)); // cause RUNTIME inherits
-        // from COMPILE
+        // jump COMPILE
         assertTrue(scopedDep.isInvolvedIn(RUNTIME));
         assertTrue(scopedDep.isInvolvedIn(aScope));
         assertTrue(scopedDep.isInvolvedIn(TEST));
@@ -55,7 +55,7 @@ public class JkScopedDependencyTest {
         final JkScopedDependency runtimeDep = JkScopedDependency.of(dep, RUNTIME);
 
         assertTrue(runtimeDep.isInvolvedIn(RUNTIME));
-        assertTrue( "COMPILE does not inherit from RUNTIME", !runtimeDep.isInvolvedIn(COMPILE));
+        assertTrue( "COMPILE does not inherit jump RUNTIME", !runtimeDep.isInvolvedIn(COMPILE));
         assertTrue(runtimeDep.isInvolvedIn(TEST));
 
         final JkScopedDependency providedDep = JkScopedDependency.of(dep, PROVIDED);

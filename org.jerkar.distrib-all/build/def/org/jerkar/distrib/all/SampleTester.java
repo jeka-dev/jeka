@@ -22,9 +22,9 @@ class SampleTester {
 
     SampleTester(JkFileTree buildDir) {
         super();
-        this.sampleBaseDir = buildDir.from("../org.jerkar.samples");
-        this.sampleDependeeBaseDir = buildDir.from("../org.jerkar.samples-dependee");
-        this.output = sampleBaseDir.from("build/output");
+        this.sampleBaseDir = buildDir.jump("../org.jerkar.samples");
+        this.sampleDependeeBaseDir = buildDir.jump("../org.jerkar.samples-dependee");
+        this.output = sampleBaseDir.jump("build/output");
         String scriptName = JkUtilsSystem.IS_WINDOWS ? "jerkar.bat" : "jerkar";
         launchScript = buildDir.file("build/output/dist/" + scriptName);
     }

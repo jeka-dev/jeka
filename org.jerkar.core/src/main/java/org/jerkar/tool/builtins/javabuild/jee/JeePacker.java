@@ -10,7 +10,7 @@ import org.jerkar.tool.builtins.javabuild.JkJavaPacker.JkExtraPacking;
 
 /**
  * War and Ear maker for {@link JkJavaBuild}. This maker will get information
- * from supplied java builder to create relevant jars.
+ * jump supplied java builder to create relevant jars.
  *
  * @author Jerome Angibaud
  */
@@ -35,7 +35,7 @@ class JeePacker {
         }
         final JkPath path = build.depsFor(JkJavaBuild.RUNTIME);
         JkFileTree.of(warDirDest).importDirContent(webappSrc)
-        .from("WEB-INF/classes").importDirContent(build.classDir()).from("../lib")
+        .jump("WEB-INF/classes").importDirContent(build.classDir()).jump("../lib")
         .importFiles(path);
         extra.copyTo(warDirDest);
 

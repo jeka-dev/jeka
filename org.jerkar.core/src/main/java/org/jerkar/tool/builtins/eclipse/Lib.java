@@ -60,7 +60,7 @@ class Lib {
                         .relativeProject(lib.projectRelativePath);
 
                 // if the slave build does not have build class, we apply eclipse# plugin
-                JkFileTree def = slaveBuild.baseDir().from("build/def");
+                JkFileTree def = slaveBuild.baseDir().jump("build/def");
                 if (!def.exists() || def.include("**/*.java").fileCount(false) == 0) {
                     JkBuildPluginEclipse eclipsePlugin = new JkBuildPluginEclipse();
                     slaveBuild.plugins.activate(eclipsePlugin);

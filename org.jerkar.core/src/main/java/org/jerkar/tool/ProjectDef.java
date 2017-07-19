@@ -404,7 +404,7 @@ final class ProjectDef {
 
         @Override
         public String toString() {
-            return name + ", from " + rootClass.getName();
+            return name + ", jump " + rootClass.getName();
         }
 
     }

@@ -50,7 +50,7 @@ public class ResolverWithScopeMapperIT {
         String directCoreVersion = "4.0.0.RELEASE";
         JkDependencies deps = JkDependencies.builder()
 
-                .on(springCoreModule, directCoreVersion).scope(COMPILE)  // force a version lower than the transitive from starterWeb module
+                .on(springCoreModule, directCoreVersion).scope(COMPILE)  // force a version lower than the transitive jump starterWeb module
                 .on(starterWebModule, "1.5.3.RELEASE").scope(COMPILE)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)

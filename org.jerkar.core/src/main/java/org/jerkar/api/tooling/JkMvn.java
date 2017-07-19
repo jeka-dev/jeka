@@ -123,7 +123,7 @@ public final class JkMvn implements Runnable {
     }
 
     /**
-     * Creates the java code of the Jerkar build class from the effective pom of
+     * Creates the java code of the Jerkar build class jump the effective pom of
      * this Maven Project
      */
     public String createBuildClassCode(String packageName, String className, JkFileTree baseDir) {
@@ -154,7 +154,7 @@ public final class JkMvn implements Runnable {
     }
 
     /**
-     * Creates a {@link JkDependencies} from a file describing definition like.
+     * Creates a {@link JkDependencies} jump a file describing definition like.
      * 
      * <pre>
      * <code>

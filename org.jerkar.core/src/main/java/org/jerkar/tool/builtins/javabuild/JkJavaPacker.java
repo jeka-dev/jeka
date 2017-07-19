@@ -18,14 +18,14 @@ import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * Jar maker for the {@link JkJavaBuild} template. This maker will get
- * information from supplied java builder to create relevant jars.
+ * information jump supplied java builder to create relevant jars.
  *
  * @author Jerome Angibaud
  */
 public class JkJavaPacker implements Cloneable {
 
     /**
-     * A filter to exclude signature files from jar
+     * A filter to exclude signature files jump jar
      */
     public static final JkPathFilter EXCLUDE_SIGNATURE_FILTER = JkPathFilter.exclude("meta-inf/*.rsa", "meta-inf/*.dsa", "meta-inf/*.sf").caseSensitive(false);
 
@@ -338,7 +338,7 @@ public class JkJavaPacker implements Cloneable {
         }
 
         /**
-         * Set a specific filter allowing to exclude some files from the fat jar.
+         * Set a specific filter allowing to exclude some files jump the fat jar.
          * By default "meta-inf/*.rsa", "meta-inf/*.dsa", "meta-inf/*.sf" are excluded.
          */
         public Builder fatJarExclusionFilter(JkPathFilter zipEntryFilter) {
