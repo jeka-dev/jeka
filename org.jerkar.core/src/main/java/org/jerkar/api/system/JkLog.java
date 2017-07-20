@@ -171,6 +171,12 @@ public final class JkLog {
         doneMessage("Done : " + message);
     }
 
+    private static void beginOfLine() {
+        infoWriter.beginOfLine = true;
+        warnWriter.beginOfLine = true;
+        errorWriter.beginOfLine = true;
+    }
+
     private static void doneMessage(String message) {
         if (silent) {
             return;

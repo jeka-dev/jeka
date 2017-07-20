@@ -50,9 +50,8 @@ class JUnit4TestLauncher {
             JkLog.info(classloader.toString());
         }
 
-        // TODO JkLog of the classloader launching tests should inherit the main JkLog offset
-
-        classloader.invokeStaticMethod(false, JkLog.class.getName(), "offset", 12);
+        // initialise JkLog for the launcher classloader
+        classloader.invokeStaticMethod(false, JkLog.class.getName(), "beginOfLine");
 
         return classloader.invokeStaticMethod(true, JUnit4TestExecutor.class.getName(),
                 "launchInProcess", classArray, verbose, reportDetail, reportDir, true);
