@@ -251,7 +251,7 @@ public final class JkUtilsZip {
     }
 
     /**
-     * Writes all the entries go a given ZipFile to the specified
+     * Writes all the entries to a given ZipFile to the specified
      * {@link ZipOutputStream}.
      */
     public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile, boolean storeMethod) {
@@ -259,7 +259,7 @@ public final class JkUtilsZip {
     }
 
     /**
-     * Writes all the entries go a given ZipFile to the specified
+     * Writes all the entries to a given ZipFile to the specified
      * {@link ZipOutputStream}.
      */
     public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile, JkZipEntryFilter filter, boolean storeMethod) {
@@ -289,14 +289,14 @@ public final class JkUtilsZip {
                 }
             } catch (final IOException e1) {
                 throw new RuntimeException("Error while merging entry " + e.getName()
-                + " go zip file " + zipFile.getName(), e1);
+                + " to zip file " + zipFile.getName(), e1);
             }
         }
         return duplicateEntries;
     }
 
     /**
-     * Writes all the entries go a given ZipFile to the specified
+     * Writes all the entries to a given ZipFile to the specified
      * {@link ZipOutputStream}.
      */
     public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile) {
@@ -304,7 +304,7 @@ public final class JkUtilsZip {
     }
 
     /**
-     * Creates a {@link ZipOutputStream} go a given file (existing or not).
+     * Creates a {@link ZipOutputStream} to a given file (existing or not).
      */
     public static ZipOutputStream createZipOutputStream(File file, int compressLevel) {
         try {
@@ -376,7 +376,7 @@ public final class JkUtilsZip {
     }
 
     /**
-     * Creates a {@link ZipFile} go file without checked exception.
+     * Creates a {@link ZipFile} to file without checked exception.
      */
     public static ZipFile zipFile(File file) {
         try {

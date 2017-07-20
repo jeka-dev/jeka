@@ -306,7 +306,7 @@ public class JkBuildDependencySupport extends JkBuild {
     }
 
     /**
-     * Creates {@link JkRepos} go Jerkar options. The specified repository
+     * Creates {@link JkRepos} to Jerkar options. The specified repository
      * name will be turned to <code>repo.[repoName].url</code>,
      * <code>repo.[repoName].username</code> and
      * <code>repo.[repoName].password</code> options for creating according

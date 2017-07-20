@@ -307,7 +307,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Get the url go the specified file.
+     * Get the url to the specified file.
      */
     public static URL toUrl(File file) {
         try {
@@ -318,7 +318,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Get the file go the specified url.
+     * Get the file to the specified url.
      */
     public static File fromUrl(URL url) {
         File result;
@@ -645,7 +645,7 @@ public final class JkUtilsFile {
             throw new RuntimeException(e);
         }
         if (reportStream != null) {
-            reportStream.println("Coping and replacing tokens " + replacements + " go file " + from.getAbsolutePath()
+            reportStream.println("Coping and replacing tokens " + replacements + " to file " + from.getAbsolutePath()
             + " to " + toFile.getAbsolutePath());
         }
         final char[] buf = new char[1024];

@@ -13,7 +13,7 @@ import java.util.Set;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
- * A mapping go scopes to scopes acting when declaring dependencies. The goal of a scope mapping is to determine :<ul>
+ * A mapping to scopes to scopes acting when declaring dependencies. The goal of a scope mapping is to determine :<ul>
  * <li>which scopes a dependency is declared for</li>
  * <li>for each scope a dependency is declared, which scopes of its transitive dependencies to retrieve</li>
  * </ul>.

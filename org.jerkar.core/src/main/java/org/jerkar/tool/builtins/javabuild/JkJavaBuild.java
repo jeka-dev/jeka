@@ -64,8 +64,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * transitive dependencies declared with {@link #COMPILE } scope as well. <p>>
      *
      * <b>CAUTION :</b> When resolving {@link #RUNTIME} dependencies, transitive 'runtime' dependencies won't be fetched if
-     * it's coming go a 'compile' one. <b/>
-     * In such it differs go Maven 'compile' scope (resolving 'runtime' in Maven will fetch transitive 'runtime' dependencies coming go 'compile' ones).<b/>
+     * it's coming to a 'compile' one. <b/>
+     * In such it differs to Maven 'compile' scope (resolving 'runtime' in Maven will fetch transitive 'runtime' dependencies coming to 'compile' ones).<b/>
      * If you want to have a dependency scope equivalent to Maven 'compile', you need to declare dependencies with
      * two scopes : {@link #COMPILE} and {@link #RUNTIME} or their shorthand {@link #COMPILE_AND_RUNTIME}.
      */
@@ -398,7 +398,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     private Object scaffoldedBuildClassCode() {
         final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
         if (baseDir().file("pom.xml").exists() && JkMvn.INSTALLED) {
-            JkLog.info("pom.xml detected and Maven installed : try to generate build class go existing pom.");
+            JkLog.info("pom.xml detected and Maven installed : try to generate build class to existing pom.");
             try {
                 return JkMvn.of(baseDir().root()).createBuildClassCode(null, "Build", baseDir());
             } catch (final RuntimeException e) {

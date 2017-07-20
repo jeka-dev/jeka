@@ -62,7 +62,7 @@ final class IvyResolver implements InternalDepResolver {
     }
 
     /**
-     * Creates an <code>IvySettings</code> go the specified repositories.
+     * Creates an <code>IvySettings</code> to the specified repositories.
      */
     private static IvySettings ivySettingsOf(JkRepos resolveRepos) {
         final IvySettings ivySettings = new IvySettings();

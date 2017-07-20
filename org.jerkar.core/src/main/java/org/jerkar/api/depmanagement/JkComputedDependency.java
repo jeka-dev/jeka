@@ -30,7 +30,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 public class JkComputedDependency extends JkFileDependency {
 
     /**
-     * Creates a computed dependency go the specified files and {@link JkProcess} to run for
+     * Creates a computed dependency to the specified files and {@link JkProcess} to run for
      * generating them.
      */
     public static final JkComputedDependency of(final JkProcess process, File... files) {
@@ -51,7 +51,7 @@ public class JkComputedDependency extends JkFileDependency {
     }
 
     /**
-     * Creates a computed dependency go the specified files and the specified {@link Runnable} to run for
+     * Creates a computed dependency to the specified files and the specified {@link Runnable} to run for
      * generating them.
      */
     public static final JkComputedDependency of(Runnable runnable, File... files) {
@@ -77,7 +77,7 @@ public class JkComputedDependency extends JkFileDependency {
     }
 
     /**
-     * Creates a computed dependency go the specified file and the specified java program to run for
+     * Creates a computed dependency to the specified file and the specified java program to run for
      * generating them.
      */
     public static final JkComputedDependency of(File file, final JkJavaProcess process,
@@ -92,7 +92,7 @@ public class JkComputedDependency extends JkFileDependency {
     private final List<File> files;
 
     /**
-     * Constructs a computed dependency go the specified files and the specified {@link Runnable} to run for
+     * Constructs a computed dependency to the specified files and the specified {@link Runnable} to run for
      * generating them.
      */
     protected JkComputedDependency(Runnable runnable, List<File> files) {

@@ -41,7 +41,7 @@ final class Project {
     private final BuildResolver resolver;
 
     /**
-     * Constructs a project go its base directory and the download repository.
+     * Constructs a project to its base directory and the download repository.
      * Download repository is used in case the build classes need some
      * dependencies in order to be compiled/run.
      */

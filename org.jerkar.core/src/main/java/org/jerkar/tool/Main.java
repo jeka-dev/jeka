@@ -11,14 +11,14 @@ import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsTime;
 
 /**
- * Main class for launching Jerkar go command line.
+ * Main class for launching Jerkar to command line.
  *
  * @author Jerome Angibaud
  */
 public final class Main {
 
     /**
-     * Entry point for Jerkar application when launched go command-line
+     * Entry point for Jerkar application when launched to command-line
      */
     public static void main(String[] args) {
         final long start = System.nanoTime();

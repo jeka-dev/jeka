@@ -28,7 +28,7 @@ public final class JkPath implements Iterable<File> {
     }
 
     /**
-     * Creates a path go a sequence of files.
+     * Creates a path to a sequence of files.
      */
     public static JkPath of(Iterable<File> entries) {
         final LinkedHashSet<File> files = new LinkedHashSet<File>(JkUtilsIterable.listOf(entries));
@@ -36,7 +36,7 @@ public final class JkPath implements Iterable<File> {
     }
 
     /**
-     * Creates a <code>JkPath</code> go a base directory and string of
+     * Creates a <code>JkPath</code> to a base directory and string of
      * relative paths separated with a ";".
      */
     public static JkPath of(File baseDir, String relativePathAsString) {
@@ -53,7 +53,7 @@ public final class JkPath implements Iterable<File> {
     }
 
     /**
-     * Creates a path go aa array of files.
+     * Creates a path to aa array of files.
      */
     public static JkPath of(File... entries) {
         return JkPath.of(Arrays.asList(entries));

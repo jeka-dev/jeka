@@ -430,7 +430,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Serializes an object go the current classloader and unserializes it in
+     * Serializes an object to the current classloader and unserializes it in
      * the specified classloader.
      */
     @SuppressWarnings("unchecked")
@@ -443,7 +443,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Returns a thread that write each data read go the specified input
+     * Returns a thread that write each data read to the specified input
      * stream to the specified output stream.
      */
     public static StreamGobbler newStreamGobbler(InputStream is, OutputStream os) {
@@ -451,7 +451,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Runs a thread copying all data go a stream to a specified writer. The
+     * Runs a thread copying all data to a stream to a specified writer. The
      * thread is started when the instance is created. You have to call
      * {@link #stop()} to stop the thread.
      */

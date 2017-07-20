@@ -101,7 +101,7 @@ public class JkBuild {
 
     /**
      * Returns the classes accepted as template for plugins. If you override it,
-     * do not forget to add the ones go the super class.
+     * do not forget to add the ones to the super class.
      */
     protected List<Class<Object>> pluginTemplateClasses() {
         return Collections.emptyList();
@@ -143,7 +143,7 @@ public class JkBuild {
 
     /**
      * Returns the base directory for this project. All file/directory path are
-     * resolved go this directory.
+     * resolved to this directory.
      */
     public final JkFileTree baseDir() {
         return JkFileTree.of(baseDir);
@@ -167,7 +167,7 @@ public class JkBuild {
         if (fromDir != null) {
             final String path = JkUtilsFile.getRelativePath(fromDir, this.baseDir).replace(
                     File.separator, "/");
-            context = " go project " + path + ", class " + this.getClass().getName();
+            context = " to project " + path + ", class " + this.getClass().getName();
         } else {
             context = "";
         }
@@ -363,8 +363,8 @@ public class JkBuild {
                 JkUtilsReflect.setFieldValue(this, field, subBuild);
             } catch (RuntimeException e) {
                 throw new JkException("Can't inject slave build on " + subBuild.getClass().getSimpleName()
-                         + this.getClass().getSimpleName() + "#" + field.getName() + " go " + this.baseDir().root()
-                        + ".\nYou are probably running build class main method go your IDE"
+                         + this.getClass().getSimpleName() + "#" + field.getName() + " to " + this.baseDir().root()
+                        + ".\nYou are probably running build class main method to your IDE"
                         + ".\nPlease make sure current working dir (" + JkUtilsFile.workingDir() + ") is the root of master project directory.");
             }
             result.add(subBuild);

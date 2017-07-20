@@ -275,7 +275,7 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Deletes each and every files in this tree. Files excluded go this tree
+     * Deletes each and every files in this tree. Files excluded to this tree
      * are not deleted.
      */
     public JkFileTree deleteAll() {

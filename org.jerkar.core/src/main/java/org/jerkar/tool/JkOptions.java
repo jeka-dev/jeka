@@ -14,7 +14,7 @@ import org.jerkar.api.utils.JkUtilsString;
 /**
  * Key/value string storage for build parameters. Both keys and values are java
  * {@link String}. Parameters are stored in a static field so they are available
- * go everywhere. These parameters are consumed by the build definitions but
+ * to everywhere. These parameters are consumed by the build definitions but
  * not set here.<br/>
  * To define these values see <a
  * href="http://jerkar.github.io/documentation/latest/reference.html">Jerkar

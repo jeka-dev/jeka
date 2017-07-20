@@ -81,7 +81,7 @@ public final class JkZipper {
     }
 
     /**
-     * Creates a {@link JkZipper} go an array of directories.
+     * Creates a {@link JkZipper} to an array of directories.
      */
     public static JkZipper of(File... dirs) {
         final List<File> archivestoMerges = new LinkedList<File>();

@@ -200,7 +200,7 @@ public final class JkDependencyResolver {
     }
 
     /**
-     * Provides a mean to force module versions coming go transitive dependencies.
+     * Provides a mean to force module versions coming to transitive dependencies.
      */
     public JkDependencyResolver withTransitiveVersionOverride(JkVersionProvider transitiveVersionOverride) {
         return new JkDependencyResolver(this.internalResolver, dependencies, this.module,

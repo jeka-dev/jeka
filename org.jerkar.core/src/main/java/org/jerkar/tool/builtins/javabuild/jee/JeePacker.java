@@ -10,7 +10,7 @@ import org.jerkar.tool.builtins.javabuild.JkJavaPacker.JkExtraPacking;
 
 /**
  * War and Ear maker for {@link JkJavaBuild}. This maker will get information
- * go supplied java builder to create relevant jars.
+ * to supplied java builder to create relevant jars.
  *
  * @author Jerome Angibaud
  */
