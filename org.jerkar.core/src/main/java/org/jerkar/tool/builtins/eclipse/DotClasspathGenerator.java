@@ -148,7 +148,7 @@ final class DotClasspathGenerator {
 
         // Write entries for dependencies located under build/libs
         final Iterable<File> files = buildDefDependencyResolver.dependenciesToResolve().localFileDependencies();
-        writeFileEntries(writer, files, paths);
+        writeFileEntries(writer, files, paths, true);
 
         // write entries for project build dependencies
         for (File projectFile : this.projectDependencies) {
@@ -207,9 +207,9 @@ final class DotClasspathGenerator {
         }
     }
 
-    private void writeFileEntries(XMLStreamWriter writer, Iterable<File> fileDeps, Set<String> paths) throws XMLStreamException {
+    private void writeFileEntries(XMLStreamWriter writer, Iterable<File> fileDeps, Set<String> paths, boolean skipJarWithinDependeeProjects) throws XMLStreamException {
         for (final File file : fileDeps) {
-            writeFileEntry(file, writer, paths);
+            writeFileEntry(file, skipJarWithinDependeeProjects, writer, paths);
         }
     }
 
@@ -228,7 +228,7 @@ final class DotClasspathGenerator {
         writer.writeCharacters("\n");
     }
 
-    private void writeFileEntry(File file, XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
+    private void writeFileEntry(File file, boolean skipJarWithinDependeeProjects,  XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
 
         final String name = JkUtilsString.substringBeforeLast(file.getName(), ".jar");
         File source = new File(file.getParentFile(), name + "-sources.jar");
@@ -245,7 +245,7 @@ final class DotClasspathGenerator {
         if (!javadoc.exists()) {
             javadoc = new File(file.getParentFile(), "libs-javadoc/" + name + "-javadoc.jar");
         }
-        writeClasspathEntry(writer, file, source, javadoc, paths);
+        writeClasspathEntry(writer, file, source, javadoc, paths, skipJarWithinDependeeProjects);
 
     }
 
@@ -337,11 +337,11 @@ final class DotClasspathGenerator {
                         if (!projectDependencyToFileSubstitutions.contains(build.baseDir().root())) {
                             writeProjectEntry(build.baseDir().root(), writer, paths);
                         } else {
-                            writeFileEntries(writer, buildDependency.files(), paths);
+                            writeFileEntries(writer, buildDependency.files(), paths, false);
                         }
                     }
                 } else {
-                    writeFileEntries(writer, computedDependency.files(), paths);
+                    writeFileEntries(writer, computedDependency.files(), paths, true);
                 }
 
                 // Other file dependencies
@@ -351,7 +351,7 @@ final class DotClasspathGenerator {
                 if (projectDir != null) {
                     writeProjectEntry(projectDir, writer, paths);
                 } else {
-                    writeFileEntries(writer, fileDependency.files(), paths);
+                    writeFileEntries(writer, fileDependency.files(), paths, true);
                 }
             }
         }
@@ -378,7 +378,6 @@ final class DotClasspathGenerator {
                 return projectDir;
             }
         }
-
         return null;
     }
 
@@ -402,13 +401,14 @@ final class DotClasspathGenerator {
             javadoc = repos.get(JkModuleDependency.of(versionedModule).classifier("javadoc"));
         }
         for (final File file : files) {
-            writeClasspathEntry(writer, file, source, javadoc, paths);
+            writeClasspathEntry(writer, file, source, javadoc, paths, true);
         }
     }
 
-    private void writeClasspathEntry(XMLStreamWriter writer, File bin, File source, File javadoc, Set<String> paths)
+    private void writeClasspathEntry(XMLStreamWriter writer, File bin, File source, File javadoc, Set<String> paths,
+                                     boolean skipJarWithinDependeeProjects)
             throws XMLStreamException {
-        final VarReplacement binReplacement = new VarReplacement(bin);
+        final VarReplacement binReplacement = new VarReplacement(bin, skipJarWithinDependeeProjects);
         if (binReplacement.skiped) {
             return;
         }
@@ -439,7 +439,7 @@ final class DotClasspathGenerator {
         if (source != null && source.exists()) {
             String srcPath = source.getAbsolutePath();
             if (!useAbsolutePaths) {
-                srcPath = new VarReplacement(source).path;
+                srcPath = new VarReplacement(source, skipJarWithinDependeeProjects).path;
             }
             writer.writeAttribute("sourcepath", srcPath);
         }
@@ -472,7 +472,7 @@ final class DotClasspathGenerator {
 
         final boolean skiped;
 
-        VarReplacement(File file) {
+        VarReplacement(File file, boolean skipJarWithinDependeeProjects) {
             final Map<String, String> map = JkOptions.getAllStartingWith(DotClasspathGenerator.OPTION_VAR_PREFIX);
             map.put(DotClasspathGenerator.OPTION_VAR_PREFIX + DotClasspathModel.JERKAR_REPO,
                     JkLocator.jerkarRepositoryCache().getAbsolutePath());
@@ -500,7 +500,7 @@ final class DotClasspathGenerator {
             if (!replaced) {
                 final String relpPath = toDependendeeProjectRelativePath(file);
                 if (relpPath != null) {
-                    if (file.getName().toLowerCase().endsWith(".jar")) {
+                    if (skipJarWithinDependeeProjects && file.getName().toLowerCase().endsWith(".jar")) {
                         skiped = true;
                     } else {
                         skiped = false;
