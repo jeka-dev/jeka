@@ -358,4 +358,12 @@ public class JkBuildDependencySupport extends JkBuild {
 
     }
 
+    @Override
+    public String infoString() {
+        StringBuilder builder = new StringBuilder(super.infoString()).append("\n\n");
+        builder.append("module : " + this.moduleId()).append("\n");
+        builder.append("version : " + this.moduleId()).append("\n");
+        builder.append("dependencies : " + this.dependencies());
+        return builder.toString();
+    }
 }

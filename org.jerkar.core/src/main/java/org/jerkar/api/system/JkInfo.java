@@ -8,7 +8,7 @@ import java.util.jar.Manifest;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * Provides info about Jerkar itself.
+ * Provides infoString about Jerkar itself.
  */
 public final class JkInfo {
 

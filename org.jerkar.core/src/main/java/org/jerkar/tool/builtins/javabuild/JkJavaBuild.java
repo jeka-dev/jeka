@@ -643,7 +643,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
     /**
      * Returns the manifest that will be inserted in generated jars. Override it
-     * if you want to add extra info.
+     * if you want to add extra infoString.
      */
     protected JkManifest jarManifest() {
         final JkManifest result = JkManifest.ofClassDir(this.classDir());
@@ -849,6 +849,16 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         boolean isAuto() {
             return AUTO.equals(mainClass);
         }
+    }
+
+    @Override
+    public String infoString() {
+        StringBuilder builder = new StringBuilder(super.infoString()).append("\n\n");
+        builder.append("source dirs : " + this.sources()).append("\n");
+        builder.append("test dirs: " + this.unitTestSources()).append("\n");
+        builder.append("java source version : " + this.javaSourceVersion()).append("\n");
+        builder.append("java target version : " + this.javaTargetVersion());
+        return builder.toString();
     }
 
 

@@ -92,7 +92,7 @@ public final class JkMavenPublication implements Serializable {
 
     /**
      * Returns a new publication based on this one but with the specified
-     * publication extra info required to publish on Maven central repository.
+     * publication extra infoString required to publish on Maven central repository.
      */
     public JkMavenPublication with(JkMavenPublicationInfo extraInfo) {
         return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, extraInfo);

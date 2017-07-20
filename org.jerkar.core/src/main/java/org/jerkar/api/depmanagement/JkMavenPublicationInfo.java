@@ -15,7 +15,7 @@ public final class JkMavenPublicationInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates a publication info specifying the name of the project, its description and its
+     * Creates a publication infoString specifying the name of the project, its description and its
      * site url.
      */
     @SuppressWarnings("unchecked")
@@ -76,7 +76,7 @@ public final class JkMavenPublicationInfo implements Serializable {
     }
 
     /**
-     * Returns a {@link JkMavenPublicationInfo} identical to this one but with the specified SCM info.
+     * Returns a {@link JkMavenPublicationInfo} identical to this one but with the specified SCM infoString.
      */
     public JkMavenPublicationInfo withScm(String connection, String developerConnection, String url) {
         final JkScmInfo scmInfo = new JkScmInfo(connection, developerConnection, url);
@@ -84,7 +84,7 @@ public final class JkMavenPublicationInfo implements Serializable {
     }
 
     /**
-     * Returns a {@link JkMavenPublicationInfo} identical to this one but with the specified SCM info.
+     * Returns a {@link JkMavenPublicationInfo} identical to this one but with the specified SCM infoString.
      */
     public JkMavenPublicationInfo withScm(String connectionUrl) {
         return withScm(connectionUrl, connectionUrl, connectionUrl);

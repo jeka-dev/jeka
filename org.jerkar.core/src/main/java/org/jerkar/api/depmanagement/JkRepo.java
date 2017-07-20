@@ -196,7 +196,7 @@ public abstract class JkRepo implements Serializable {
 
     /**
      * Returns a Ivy repository located at the specified file location or url depending the
-     * specified info stands for a url or a file location.
+     * specified infoString stands for a url or a file location.
      */
     public static JkRepo.JkIvyRepository ivy(String urlOrDir) {
         if (urlOrDir.toLowerCase().startsWith("ivy:")) {

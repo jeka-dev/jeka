@@ -69,6 +69,13 @@ public class JkBuild {
     }
 
     /**
+     * Display meaningful information about this build.
+     */
+    public final void info() {
+        JkLog.info(infoString());
+    }
+
+    /**
      * This method is invoked right after the option values has been injected to instance fields
      * of this object.
      */
@@ -370,6 +377,16 @@ public class JkBuild {
             result.add(subBuild);
         }
         return result;
+    }
+
+    /**
+     * Returns a formatted string providing information about this build definition.
+     */
+    public String infoString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("base directory : " + this.baseDir()).append("\n");
+        builder.append("slave builds : " + this.annotatedJkProjectSlaves().directs());
+        return builder.toString();
     }
 
     /**

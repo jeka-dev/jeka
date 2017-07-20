@@ -18,7 +18,7 @@ final class HelpDisplayer {
         // JkLog.infoUnderline("Build class availbale on this project");
         // JkProjectDef.of(build.baseDir().root()).logAvailableBuildClasses();
         // JkLog.nextLine();
-        // JkLog.info("To get details on a specific build class, type 'jerkar
+        // JkLog.infoString("To get details on a specific build class, type 'jerkar
         // help -buildClass=Xxxxxx");
         // JkLog.nextLine();
         JkLog.infoUnderlined("Help on build class " + build.getClass().getName());

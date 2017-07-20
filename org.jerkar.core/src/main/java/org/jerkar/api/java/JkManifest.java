@@ -144,7 +144,7 @@ public final class JkManifest {
     }
 
     /**
-     * Fills the manifest with contextual info : {@link #CREATED_BY},
+     * Fills the manifest with contextual infoString : {@link #CREATED_BY},
      * {@link #BUILT_BY} and {@link #BUILD_JDK}
      */
     public JkManifest addContextualInfo() {

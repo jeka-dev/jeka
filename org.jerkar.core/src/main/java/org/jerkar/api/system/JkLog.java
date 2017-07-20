@@ -79,7 +79,7 @@ public final class JkLog {
     }
 
     /**
-     * Returns the the info strem if the log is currently in verbose mode.
+     * Returns the the infoString strem if the log is currently in verbose mode.
      * It returns <code>null</code> otherwise.
      * @return
      */
@@ -195,7 +195,7 @@ public final class JkLog {
     }
 
     /**
-     * Displays a message at info level.
+     * Displays a message at infoString level.
      */
     public static void info(String message) {
         if (silent) {
@@ -327,7 +327,7 @@ public final class JkLog {
     }
 
     /**
-     * Returns the stream for info level.
+     * Returns the stream for infoString level.
      */
     public static PrintStream infoStream() {
         return infoWriter;
@@ -454,7 +454,7 @@ public final class JkLog {
     }
 
     /**
-     * Logs in info stream the specified message enclosed as :
+     * Logs in infoString stream the specified message enclosed as :
      *
      * <pre>
      * ------------------
@@ -473,7 +473,7 @@ public final class JkLog {
     }
 
     /**
-     * Logs in info stream the specified message enclosed as :
+     * Logs in infoString stream the specified message enclosed as :
      *
      * <pre>
      * message to display
