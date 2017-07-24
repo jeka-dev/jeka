@@ -150,6 +150,29 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
         }
     }
 
+    @Override
+    protected List<JkBuild> slaves(List<JkBuild> originalSlaves) {
+        List<JkBuild> result = new LinkedList<JkBuild>(originalSlaves);
+        for (String path : dotClasspathModel().projectDependencies()) {
+            String relativePath = ".." + path;
+            File baseDir = build.baseDir().file(relativePath);
+            File dotProject = new File(baseDir, ".project");
+            if (!dotProject.exists()) {
+                JkLog.warn("No .project file found for dependency project " + path + " : skip.");
+                continue;
+            }
+            Project project = Project.of(dotProject);
+            final JkBuild slaveBuild;
+            if (project.hasJavaNature()) {
+                slaveBuild = this.build.relativeProjectBuild(JkJavaBuild.class, relativePath);
+            } else {
+                slaveBuild = this.build.relativeProjectBuild(JkBuild.class, relativePath);
+            }
+            result.add(slaveBuild);
+        }
+        return  result;
+    }
+
     /**
      * If your project has a dependency on file/folder (a jar or a class dir) that is the result of the compilation
      * of another Eclipse project, then you can generate .classpath in such it has a dependency on the project itself

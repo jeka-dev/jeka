@@ -69,7 +69,11 @@ class Project {
 
     final Set<String> natures;
 
-    public void writeTo(File dotProjectFile) {
+    boolean hasJavaNature() {
+        return natures.contains("org.eclipse.jdt.core.javanature");
+    }
+
+    void writeTo(File dotProjectFile) {
         try {
             writeToFile(dotProjectFile);
         } catch (final FileNotFoundException e) {

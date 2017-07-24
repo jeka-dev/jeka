@@ -2,6 +2,10 @@ package org.jerkar.tool;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A plugin base class to extend to alter {@link JkBuild} object.
@@ -36,6 +40,17 @@ public abstract class JkBuildPlugin {
      */
     protected void scaffold() {
         // Do nothing by default
+    }
+
+    /**
+     * Override this method if this plugin add/remove some slave projects. The original slaves
+     * are passed as parameter so plugins are aware of already declared slaves.
+     * Note that you are not supposed to modify the list passed as parameters and that
+     * the returned list is supposed to be the exhaustive list of slave projects, so if the plugin do not remove
+     * any slave from the original list, the returned list should contains the list passed as parameter.
+     */
+    protected List<JkBuild> slaves(List<JkBuild> originalSlaves) {
+        return originalSlaves;
     }
 
     /**
@@ -85,6 +100,14 @@ public abstract class JkBuildPlugin {
         for (final JkBuildPlugin plugin : plugins) {
             plugin.scaffold();
         }
+    }
+
+    static List<JkBuild> applySlaves(Iterable<? extends JkBuildPlugin> plugins, List<JkBuild> originalSlaves) {
+        List<JkBuild> result = originalSlaves;
+        for (final JkBuildPlugin plugin : plugins) {
+            result = plugin.slaves(result);
+        }
+        return result;
     }
 
     @Override
