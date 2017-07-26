@@ -192,11 +192,11 @@ public final class JkProcess implements Runnable {
         final List<String> commands = new LinkedList<String>();
         commands.add(this.command);
         for (String param : parameters) {
-            if (param.contains(" ")) {
-                commands.add("\""+ param + "\"");
-            } else {
+           // if (param.contains(" ")) {
+           //     commands.add("\""+ param + "\"");
+            //} else {
                 commands.add(param);
-            }
+            //}
         }
         JkLog.startln("Starting program : " + commands.toString());
         final int result;
