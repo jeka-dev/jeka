@@ -595,7 +595,10 @@ final class IvyTranslations {
                 definition = new DependencyDefinition();
                 definitions.put(moduleId, definition);
             }
-            definition.transitive = definition.transitive || transitive;
+
+            // if dependency has been declared only once non-transive and once transitive then we consider it has non-transitive
+            definition.transitive = definition.transitive && transitive;
+
             definition.revision = revision;
             definition.includeMainArtifact = definition.includeMainArtifact || mainArtifact;
         }
