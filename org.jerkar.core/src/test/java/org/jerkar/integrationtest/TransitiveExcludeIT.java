@@ -10,6 +10,7 @@ import java.util.Set;
 
 import static org.jerkar.tool.builtins.javabuild.JkJavaBuild.TEST;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -18,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 public class TransitiveExcludeIT {
 
     @Test
-    public void resolveWithDefaultScopeMappingOnResolver() {
+    public void handleNonTransitive() {
 
         JkDependencies deps = JkDependencies.builder()
                 .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").transitive(false)
@@ -29,4 +30,20 @@ public class TransitiveExcludeIT {
         List<JkDependencyNode> nodes = resolveResult.dependencyTree().flatten();
         assertEquals(1, nodes.size());
     }
+
+    @Test
+    public void handleExcludes() {
+        JkDependencies deps = JkDependencies.builder()
+                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE")
+                        .excludeLocally("org.springframework.boot:spring-boot-test")
+                        .excludeLocally("org.springframework.boot:spring-boot-test-autoconfigure")
+                .build();
+        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
+                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
+        JkResolveResult resolveResult = resolver.resolve();
+        List<JkDependencyNode> nodes = resolveResult.dependencyTree().flatten();
+        assertFalse(resolveResult.contains(JkModuleId.of("org.springframework.boot:spring-boot-test")));
+    }
+
+
 }

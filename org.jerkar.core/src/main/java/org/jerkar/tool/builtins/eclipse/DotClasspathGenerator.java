@@ -147,8 +147,10 @@ final class DotClasspathGenerator {
         writeJre(writer);
 
         // Write entries for dependencies located under build/libs
-        final Iterable<File> files = buildDefDependencyResolver.dependenciesToResolve().localFileDependencies();
-        writeFileEntries(writer, files, paths, true);
+        if (buildDefDependencyResolver != null) {
+            final Iterable<File> files = buildDefDependencyResolver.dependenciesToResolve().localFileDependencies();
+            writeFileEntries(writer, files, paths, true);
+        }
 
         // write entries for project build dependencies
         for (File projectFile : this.projectDependencies) {
@@ -307,12 +309,14 @@ final class DotClasspathGenerator {
     private void writeDependenciesEntries(XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
 
         // Get dependency resolution result to both regular dependencies and build dependencies
-        final JkResolveResult resolveResult = dependencyResolver.resolve(allScopes())
-                .and(buildDefDependencyResolver.resolve());
-        final JkDependencies allDeps = this.dependencyResolver.dependenciesToResolve()
-                .and(this.buildDefDependencyResolver.dependenciesToResolve());
-
-        JkRepos repos = dependencyResolver.repositories().and(buildDefDependencyResolver.repositories());
+        JkResolveResult resolveResult = dependencyResolver.resolve(allScopes());
+        JkDependencies allDeps = this.dependencyResolver.dependenciesToResolve();
+        JkRepos repos = dependencyResolver.repositories();
+        if (buildDefDependencyResolver != null) {
+            resolveResult = resolveResult.and(buildDefDependencyResolver.resolve());
+            allDeps = allDeps.and(this.buildDefDependencyResolver.dependenciesToResolve());
+            repos = repos.and(buildDefDependencyResolver.repositories());
+        }
 
         // Write direct dependencies (maven module + file system lib + computed deps)
         for (final JkScopedDependency scopedDependency : allDeps) {

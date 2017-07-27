@@ -356,10 +356,10 @@ public class JkBuild {
             try {
                 JkUtilsReflect.setFieldValue(this, field, subBuild);
             } catch (RuntimeException e) {
-                throw new JkException("Can't inject slave build on " + subBuild.getClass().getSimpleName()
-                         + this.getClass().getSimpleName() + "#" + field.getName() + " to " + this.baseDir().root()
-                        + ".\nYou are probably running build class main method to your IDE"
-                        + ".\nPlease make sure current working dir (" + JkUtilsFile.workingDir() + ") is the root of master project directory.");
+                throw new IllegalStateException("Can't inject slave build instance of type " + subBuild.getClass().getSimpleName()
+                        + " into field " + field.getDeclaringClass().getName()
+                        + "#" + field.getName() + " from directory " + this.baseDir().root()
+                        + ".\nPlease make sure current working dir (" + JkUtilsFile.workingDir() + ") is the root of master project directory.", e);
             }
             result.add(subBuild);
         }
