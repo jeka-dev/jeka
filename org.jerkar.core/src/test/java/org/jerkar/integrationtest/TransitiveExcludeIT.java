@@ -45,5 +45,18 @@ public class TransitiveExcludeIT {
         assertFalse(resolveResult.contains(JkModuleId.of("org.springframework.boot:spring-boot-test")));
     }
 
+    @Test
+    public void handleGlobalExcludes() {
+        JkDependencies deps = JkDependencies.builder()
+                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE")
+                .excludeGlobally("org.springframework.boot:spring-boot-test")
+                .build();
+        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
+                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
+        JkResolveResult resolveResult = resolver.resolve(JkJavaBuild.COMPILE);  // Does not work with empty scopes
+        List<JkDependencyNode> nodes = resolveResult.dependencyTree().flatten();
+        assertFalse(resolveResult.contains(JkModuleId.of("org.springframework.boot:spring-boot-test")));
+    }
+
 
 }

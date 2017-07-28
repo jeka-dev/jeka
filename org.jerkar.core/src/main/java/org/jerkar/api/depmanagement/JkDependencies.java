@@ -359,13 +359,13 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * dependencies declared in this object.
      */
     public JkDependencies onlyModules() {
-        final JkDependencies.Builder builder = JkDependencies.builder();
+        List<JkScopedDependency> deps = new LinkedList<JkScopedDependency>();
         for (final JkScopedDependency scopedDependency : this) {
             if (scopedDependency.dependency() instanceof JkModuleDependency) {
-                builder.on(scopedDependency);
+                deps.add(scopedDependency);
             }
         }
-        return builder.build();
+        return new JkDependencies(deps, excludes());
     }
 
     /**

@@ -317,11 +317,6 @@ final class IvyTranslations {
         // -- Add dependency exclusion
         for (final JkDepExclude exclude : dependencies.excludes()) {
             final DefaultExcludeRule rule = toExcludeRule(exclude);
-            if (exclude.getScopes().isEmpty()) {
-                for (final JkScope involvedScope : dependencies.involvedScopes()) {
-                    rule.addConfiguration(involvedScope.name());
-                }
-            }
             moduleDescriptor.addExcludeRule(rule);
         }
 
