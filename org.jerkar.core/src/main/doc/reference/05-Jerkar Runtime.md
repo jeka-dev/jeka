@@ -28,8 +28,8 @@ This mode allows to build your project even if Jerkar is not installed on the ho
 
 ##### Enable embedded mode
 To enable embedded mode :
-   * Copy ___[JERKAR_HOME]/org.jerkar.core-all.jar___ into ___[PROJECT_DIR]/build/boot/*___ directory.
-   * Copy ___[JERKAR_HOME]/jerkar.bat___ and ___[JERKAR_HOME]/jerkar___ at the root of ___[PROJECT_DIR]___.
+   1. Copy ___[JERKAR_HOME]/org.jerkar.core-all.jar___ into ___[PROJECT_DIR]/build/boot/*___ directory.
+   2. Copy ___[JERKAR_HOME]/jerkar.bat___ and ___[JERKAR_HOME]/jerkar___ at the root of ___[PROJECT_DIR]___.
 
 You can also achieve this by invoking `jerkar scaffold -scaffoldEmbed`.
 This will generate ___jerkar.bat___ and ___jerkar___ file at the root of ___[PROJECT_DIR]___ and copy  ___[JERKAR_HOME]/org.jerkar.core-all.jar___ to ___[PROJECT_DIR]/build/boot___.

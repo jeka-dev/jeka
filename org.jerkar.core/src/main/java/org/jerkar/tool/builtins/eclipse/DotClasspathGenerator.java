@@ -143,7 +143,7 @@ final class DotClasspathGenerator {
         }
 
         generateSrcAndTestSrc(writer);
-        writeDependenciesEntries(writer, paths);
+        writeDependenciesEntries2(writer, paths);
         writeJre(writer);
 
         // Write entries for dependencies located under build/libs
@@ -309,7 +309,7 @@ final class DotClasspathGenerator {
     private void writeDependenciesEntries(XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
 
         // Get dependency resolution result to both regular dependencies and build dependencies
-        JkResolveResult resolveResult = dependencyResolver.resolve(allScopes());
+        JkResolveResult resolveResult = dependencyResolver.resolve();
         JkDependencies allDeps = this.dependencyResolver.dependenciesToResolve();
         JkRepos repos = dependencyResolver.repositories();
         if (buildDefDependencyResolver != null) {
@@ -363,6 +363,41 @@ final class DotClasspathGenerator {
         // Write transitive maven dependencies
         writeExternalModuleEntries(writer, resolveResult, paths, repos);
     }
+
+    private void writeDependenciesEntries2(XMLStreamWriter writer, Set<String> allPaths) throws XMLStreamException {
+        JkResolveResult resolveResult = dependencyResolver.resolve();
+        JkDependencies allDeps = this.dependencyResolver.dependenciesToResolve();
+        JkRepos repos = dependencyResolver.repositories();
+        if (buildDefDependencyResolver != null) {
+            resolveResult = resolveResult.and(buildDefDependencyResolver.resolve());
+            allDeps = allDeps.and(this.buildDefDependencyResolver.dependenciesToResolve());
+            repos = repos.and(buildDefDependencyResolver.repositories());
+        }
+        for (JkDependencyNode node : resolveResult.dependencyTree().flatten()) {
+            // Maven dependency
+            if (node.isModuleNode()) {
+                JkDependencyNode.ModuleNodeInfo moduleNodeInfo = node.moduleInfo();
+                writeModuleEntry(writer,
+                        JkVersionedModule.of(moduleNodeInfo.moduleId(), moduleNodeInfo.resolvedVersion()),
+                        moduleNodeInfo.files(), repos, allPaths);
+
+                // File dependencies (file system + computed)
+            } else {
+                JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.nodeInfo();
+                if (fileNodeInfo.isComputed()) {
+                    final File projectDir = getProjectDir(fileNodeInfo.files());
+                    if (projectDir != null && !allPaths.contains(projectDir.getAbsolutePath())) {
+                        writeProjectEntry(projectDir, writer, allPaths);
+                        allPaths.add(projectDir.getPath());
+                    }
+                } else {
+                    writeFileEntries(writer, node.allFiles(), allPaths, true);
+                }
+            }
+        }
+
+    }
+
 
     private File getProjectDir(Iterable<File> files) {
 
