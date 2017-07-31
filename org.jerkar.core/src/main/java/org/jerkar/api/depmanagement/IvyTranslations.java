@@ -69,7 +69,7 @@ final class IvyTranslations {
 
 
 
-    private static DefaultExcludeRule toExcludeRule(JkDepExclude depExclude) {
+    private static DefaultExcludeRule toExcludeRule(JkDepExclude depExclude, Iterable<String> allRootConfs) {
         final String type = depExclude.type() == null ? PatternMatcher.ANY_EXPRESSION : depExclude
                 .type();
         final String ext = depExclude.ext() == null ? PatternMatcher.ANY_EXPRESSION : depExclude
@@ -80,6 +80,12 @@ final class IvyTranslations {
                 ExactPatternMatcher.INSTANCE, null);
         for (final JkScope scope : depExclude.getScopes()) {
             result.addConfiguration(scope.name());
+        }
+        if (depExclude.getScopes().isEmpty()) {
+            for (String conf : allRootConfs) {
+                result.addConfiguration(conf);
+            }
+
         }
         return result;
     }
@@ -316,7 +322,7 @@ final class IvyTranslations {
 
         // -- Add dependency exclusion
         for (final JkDepExclude exclude : dependencies.excludes()) {
-            final DefaultExcludeRule rule = toExcludeRule(exclude);
+            final DefaultExcludeRule rule = toExcludeRule(exclude, Arrays.asList(moduleDescriptor.getConfigurationsNames()));
             moduleDescriptor.addExcludeRule(rule);
         }
 
@@ -503,7 +509,7 @@ final class IvyTranslations {
                 }
             }
             for (JkDepExclude depExclude : excludes) {
-                result.addExcludeRule("*", toExcludeRule(depExclude));
+                result.addExcludeRule("*", toExcludeRule(depExclude, new LinkedList<String>()));
             }
             return result;
 

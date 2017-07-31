@@ -47,14 +47,31 @@ public class TransitiveExcludeIT {
 
     @Test
     public void handleGlobalExcludes() {
+        JkDepExclude exclude = JkDepExclude.of("org.springframework.boot:spring-boot-test").scopes(JkJavaBuild.COMPILE);
         JkDependencies deps = JkDependencies.builder()
-                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE")
-                .excludeGlobally("org.springframework.boot:spring-boot-test")
+                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").scope(JkJavaBuild.COMPILE)
+                .excludeGlobally(exclude)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
                 .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
-        JkResolveResult resolveResult = resolver.resolve(JkJavaBuild.COMPILE);  // Does not work with empty scopes
-        List<JkDependencyNode> nodes = resolveResult.dependencyTree().flatten();
+        JkResolveResult resolveResult = resolver.resolve(JkJavaBuild.COMPILE);  // works with non empty scopes resolution
+        assertFalse(resolveResult.contains(JkModuleId.of("org.springframework.boot:spring-boot-test")));
+
+        resolveResult = resolver.resolve();  // works also with empty socpes resolution
+        assertFalse(resolveResult.contains(JkModuleId.of("org.springframework.boot:spring-boot-test")));
+
+        // Test with JkDepExclude without scope specified of the exclusion
+
+        exclude = JkDepExclude.of("org.springframework.boot:spring-boot-test");
+        deps = JkDependencies.builder()
+                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").scope(JkJavaBuild.COMPILE)
+                .excludeGlobally(exclude)
+                .build();
+        resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
+                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
+        resolveResult = resolver.resolve();  // works with non empty scopes resolution
+        assertFalse(resolveResult.contains(JkModuleId.of("org.springframework.boot:spring-boot-test")));
+        resolveResult = resolver.resolve();  // works also with empty socpes resolution
         assertFalse(resolveResult.contains(JkModuleId.of("org.springframework.boot:spring-boot-test")));
     }
 
