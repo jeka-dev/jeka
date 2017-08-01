@@ -306,64 +306,6 @@ final class DotClasspathGenerator {
         }
     }
 
-    private void writeDependenciesEntries(XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
-
-        // Get dependency resolution result to both regular dependencies and build dependencies
-        JkResolveResult resolveResult = dependencyResolver.resolve();
-        JkDependencies allDeps = this.dependencyResolver.dependenciesToResolve();
-        JkRepos repos = dependencyResolver.repositories();
-        if (buildDefDependencyResolver != null) {
-            resolveResult = resolveResult.and(buildDefDependencyResolver.resolve());
-            allDeps = allDeps.and(this.buildDefDependencyResolver.dependenciesToResolve());
-            repos = repos.and(buildDefDependencyResolver.repositories());
-        }
-
-        // Write direct dependencies (maven module + file system lib + computed deps)
-        for (final JkScopedDependency scopedDependency : allDeps) {
-            final JkDependency dependency = scopedDependency.dependency();
-
-            // Maven dependencies
-            if (dependency instanceof JkModuleDependency) {
-                final JkModuleDependency moduleDependency = (JkModuleDependency) dependency;
-                JkModuleId moduleId = moduleDependency.moduleId();
-                JkVersion version = resolveResult.versionOf(moduleId);
-                JkVersionedModule versionedModule = JkVersionedModule.of(moduleId, version);
-                writeModuleEntry(writer, versionedModule, resolveResult.filesOf(moduleId), repos, paths);
-            }
-
-            // Computed dependencies
-            else if (dependency instanceof JkComputedDependency) {
-                final JkComputedDependency computedDependency = (JkComputedDependency) dependency;
-                if (computedDependency instanceof JkBuildDependency) {
-                    final JkBuildDependency buildDependency = (JkBuildDependency) dependency;
-                    final JkBuild build = buildDependency.projectBuild();
-                    if (build instanceof JkJavaBuild) {
-                        if (!projectDependencyToFileSubstitutions.contains(build.baseDir().root())) {
-                            writeProjectEntry(build.baseDir().root(), writer, paths);
-                        } else {
-                            writeFileEntries(writer, buildDependency.files(), paths, false);
-                        }
-                    }
-                } else {
-                    writeFileEntries(writer, computedDependency.files(), paths, true);
-                }
-
-                // Other file dependencies
-            } else if (dependency instanceof JkDependency.JkFileDependency) {
-                final JkDependency.JkFileDependency fileDependency = (JkDependency.JkFileDependency) dependency;
-                final File projectDir = getProjectDir(fileDependency.files());
-                if (projectDir != null) {
-                    writeProjectEntry(projectDir, writer, paths);
-                } else {
-                    writeFileEntries(writer, fileDependency.files(), paths, true);
-                }
-            }
-        }
-
-        // Write transitive maven dependencies
-        writeExternalModuleEntries(writer, resolveResult, paths, repos);
-    }
-
     private void writeDependenciesEntries2(XMLStreamWriter writer, Set<String> allPaths) throws XMLStreamException {
         JkResolveResult resolveResult = dependencyResolver.resolve();
         JkDependencies allDeps = this.dependencyResolver.dependenciesToResolve();
@@ -389,6 +331,8 @@ final class DotClasspathGenerator {
                     if (projectDir != null && !allPaths.contains(projectDir.getAbsolutePath())) {
                         writeProjectEntry(projectDir, writer, allPaths);
                         allPaths.add(projectDir.getPath());
+                    } else {
+                        writeFileEntries(writer, node.allFiles(), allPaths, true);
                     }
                 } else {
                     writeFileEntries(writer, node.allFiles(), allPaths, true);

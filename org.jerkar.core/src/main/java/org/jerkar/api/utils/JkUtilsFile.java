@@ -726,8 +726,9 @@ public final class JkUtilsFile {
     private static class FilePath {
 
         public static FilePath of(File file) {
+            File canonicalFile = JkUtilsFile.canonicalFile(file);
             final List<String> elements = new ArrayList<String>();
-            for (File indexFile = file; indexFile != null; indexFile = indexFile.getParentFile()) {
+            for (File indexFile = canonicalFile; indexFile != null; indexFile = indexFile.getParentFile()) {
                 if (indexFile.getParent() == null) {
                     elements.add(JkUtilsString.substringBeforeLast(indexFile.getPath(), File.separator));
                 } else {
