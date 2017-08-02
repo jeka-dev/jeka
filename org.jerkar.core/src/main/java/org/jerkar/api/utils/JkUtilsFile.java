@@ -589,6 +589,16 @@ public final class JkUtilsFile {
     }
 
     /**
+     * Deletes the specified file, throwing a {@link RuntimeException} if the
+     * delete fails but doing nothing if the file does not exist.
+     */
+    public static void deleteIfExist(File file) {
+        if (file.exists() && !file.delete()) {
+            throw new RuntimeException("File " + file.getAbsolutePath() + " can't be deleted.");
+        }
+    }
+
+    /**
      * Deletes the specified dir recursively, throwing a
      * {@link RuntimeException} if the delete fails.
      */

@@ -120,7 +120,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
     /**
      * Returns a clone of this dependencies but replacing the unscoped
-     * dependencies with the scoped ones.
+     * dependencies with the specified ones.
      */
     public JkDependencies withDefaultScope(JkScope... scopes) {
         final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();
@@ -134,8 +134,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returpns a clone of this dependencies but replacing the unscoed
-     * dependencies with the scoped ones.
+     * Returns a clone of this dependencies but replacing the unscoped
+     * dependencies with the specified scope mapping.
      */
     public JkDependencies withDefaultScope(JkScopeMapping scopeMapping) {
         final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();

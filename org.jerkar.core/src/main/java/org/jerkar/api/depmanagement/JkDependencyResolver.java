@@ -189,6 +189,24 @@ public final class JkDependencyResolver {
     }
 
     /**
+     * Creates a duplicate of this object but having the specified dependencies
+     */
+    public JkDependencyResolver withDeps(JkDependencies dependencies) {
+        return new JkDependencyResolver(this.internalResolver, dependencies, this.module,
+                this.parameters, this.transitiveVersionOverride, this.repos);
+    }
+
+    /**
+     * Creates a duplicate of this object but having the specified version provider. By setting a version provider,
+     * you can force the version dependency resolver will fetch while resolving transitive dependencies.
+     */
+    public JkDependencyResolver withVersions(JkVersionProvider versionProvider) {
+        return new JkDependencyResolver(this.internalResolver, this.dependencies, this.module,
+                this.parameters, transitiveVersionOverride, this.repos);
+    }
+
+
+    /**
      * The underlying dependency manager can cache the resolution on file system
      * for faster result. To make this caching possible, you must set the
      * module+version for which the resolution is made. This is only relevant
@@ -207,6 +225,13 @@ public final class JkDependencyResolver {
                 this.parameters, transitiveVersionOverride, this.repos);
     }
 
+    /**
+     * Change the repositories for dependency resolution
+     */
+    public JkDependencyResolver withRepos(JkRepos otherRepos) {
+        return new JkDependencyResolver(this.internalResolver, this.dependencies, this.module,
+                this.parameters, transitiveVersionOverride, otherRepos);
+    }
 
     /**
      * You can alter the resolver behavior through these settings. his is only
@@ -216,6 +241,10 @@ public final class JkDependencyResolver {
     public JkDependencyResolver withParams(JkResolutionParameters params) {
         return new JkDependencyResolver(this.internalResolver, this.dependencies, this.module,
                 params, this.transitiveVersionOverride, this.repos);
+    }
+
+    public JkResolutionParameters params() {
+        return this.parameters;
     }
 
     @Override

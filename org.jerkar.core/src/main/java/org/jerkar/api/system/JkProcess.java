@@ -20,19 +20,19 @@ import org.jerkar.api.utils.JkUtilsSystem;
  * So for example, if you want to create a Maven process, then you should write
  * 
  * <pre>
- * <code>JkProcess.of("mvn", "clean", "install")</code>
+ * <code>JkProcess.of("mvn", "deleteArtifacts", "install")</code>
  * </pre>
  * 
  * instead of
  * 
  * <pre>
- * <code>JkProcess.of("mvn", "clean install")</code>
+ * <code>JkProcess.of("mvn", "deleteArtifacts install")</code>
  * </pre>
  * 
  * or
  * 
  * <pre>
- * <code>JkProcess.of("mvn clean install")</code>
+ * <code>JkProcess.of("mvn deleteArtifacts install")</code>
  * </pre>
  * 
  * .

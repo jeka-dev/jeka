@@ -141,13 +141,17 @@ public class JkDependencyNode implements Serializable {
     /**
      * Returns the versioned modules which with this result has been created.
      */
-    public Set<JkVersionedModule> resolvedModules() {
+    public Set<JkVersionedModule> childModules() {
+        return resolvedModules(true);
+    }
+
+    private Set<JkVersionedModule> resolvedModules(boolean root) {
         Set<JkVersionedModule> result = new HashSet<JkVersionedModule>();
-        if (this.isModuleNode() && !this.moduleInfo().isEvicted()) {
+        if (!root & this.isModuleNode() && !this.moduleInfo().isEvicted()) {
             result.add(this.moduleInfo().moduleId.version(this.moduleInfo().resolvedVersion.name()));
         }
         for (JkDependencyNode child : this.children) {
-            result.addAll(child.resolvedModules());
+            result.addAll(child.resolvedModules(false));
         }
         return result;
     }

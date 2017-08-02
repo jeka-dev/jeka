@@ -140,6 +140,17 @@ public final class JkPgp implements Serializable {
         return result;
     }
 
+    public static File[] drySignatureFiles(File... filesToSign) {
+        final File[] result = new File[filesToSign.length];
+        int i = 0;
+        for (final File file : filesToSign) {
+            final File signatureFile = new File(file.getParent(), file.getName() + ".asc");
+            result[i] = signatureFile;
+            i++;
+        }
+        return result;
+    }
+
     /**
      * Verifies the specified file against the specified signature.
      */

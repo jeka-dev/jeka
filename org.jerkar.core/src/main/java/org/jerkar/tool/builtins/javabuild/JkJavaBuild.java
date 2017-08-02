@@ -138,7 +138,6 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     public JkOptionExtaPath extraPath = new JkOptionExtaPath();
 
 
-
     /** Options about manifest creation */
     @JkDoc("Manifest")
     public final JkManifestOption manifest = new JkManifestOption();
@@ -470,8 +469,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         packer().pack();
     }
 
-    /** Method executed by default when none is specified. By default this method equals to #clean + #doPack" */
-    @JkDoc("Method executed by default when none is specified. By default this method equals to #clean + #doPack")
+    /** Method executed by default when none is specified. By default this method equals to #deleteArtifacts + #doPack" */
+    @JkDoc("Method executed by default when none is specified. By default this method equals to #deleteArtifacts + #doPack")
     @Override
     public void doDefault() {
         doPack();
