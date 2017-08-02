@@ -1,12 +1,14 @@
 package org.jerkar.api.java.build;
 
 import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.file.JkPath;
 import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.utils.JkUtilsFile;
 
 
 import java.io.File;
+import java.util.List;
 
 
 public class JkJavaProject  {
@@ -79,6 +81,14 @@ public class JkJavaProject  {
         return this.module;
     }
 
+    public JkPath asDependencyJars() {
+        return depResolver().resolver().get(JkJavaDepScopes.RUNTIME).andHead(packager.jarFile());
+    }
+
+    public JkJavaProjectDependency asProjectDependency() {
+        return new JkJavaProjectDependency(this);
+    }
+
     // --------------------------- doers -----------------------------
 
 
@@ -145,6 +155,8 @@ public class JkJavaProject  {
         return this.javadocMaker;
     }
 
+
+
     // ---------------------------- build methods -------------------
 
     public void clean() {
@@ -172,4 +184,11 @@ public class JkJavaProject  {
         this.packager.pack();
     }
 
+
+    public void doPack() {
+        clean();
+        compile();
+        test();
+        pack();
+    }
 }
