@@ -7,15 +7,17 @@ import java.io.Serializable;
  */
 public class JkModuleDepProblem implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     static JkModuleDepProblem of(JkModuleId moduleId, String version, String text) {
         return new JkModuleDepProblem(moduleId, JkVersionRange.of(version), text);
     }
 
-    private JkModuleId moduleId;
+    private final JkModuleId moduleId;
 
-    private JkVersionRange versionRange;
+    private final JkVersionRange versionRange;
 
-    private String problemText;
+    private final String problemText;
 
     private JkModuleDepProblem(JkModuleId moduleId, JkVersionRange versionRange, String problemText) {
         this.moduleId = moduleId;
@@ -23,15 +25,24 @@ public class JkModuleDepProblem implements Serializable {
         this.problemText = problemText;
     }
 
-    public JkModuleId getModuleId() {
+    /**
+     * Returns the modueId related to this problem.
+     */
+    public JkModuleId moduleId() {
         return moduleId;
     }
 
-    public JkVersionRange getVersionRange() {
+    /**
+     * Returns the version range for which the problematic module dependency has been declared.
+     */
+    public JkVersionRange versionRange() {
         return versionRange;
     }
 
-    public String getProblemText() {
+    /**
+     * Returns the text explaining this problem.
+     */
+    public String problemText() {
         return problemText;
     }
 

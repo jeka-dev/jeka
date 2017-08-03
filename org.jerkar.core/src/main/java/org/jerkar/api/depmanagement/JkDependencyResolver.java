@@ -1,14 +1,16 @@
 package org.jerkar.api.depmanagement;
 
+import static org.jerkar.api.utils.JkUtilsString.plurialize;
+
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependency.JkFileDependency;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
-
-import static  org.jerkar.api.utils.JkUtilsString.*;
 
 /**
  * A resolver for a given set of dependency. Each instance of
@@ -24,12 +26,6 @@ import static  org.jerkar.api.utils.JkUtilsString.*;
  * @author Jerome Angibaud
  */
 public final class JkDependencyResolver {
-
-    private static final JkScope NULL_SCOPE;
-
-    static {
-        NULL_SCOPE = JkScope.of("JkDependencyResolver.NULL_SCOPE");
-    }
 
     /**
      * Creates a dependency resolver relying on a dependency manager. Such a
@@ -103,8 +99,8 @@ public final class JkDependencyResolver {
      */
     public JkResolveResult resolve(JkScope... scopes) {
         if (internalResolver == null) {
-            List<JkDependencyNode> nodes = new LinkedList<JkDependencyNode>();
-            for (JkScopedDependency scopedDependency : dependencies) {
+            final List<JkDependencyNode> nodes = new LinkedList<JkDependencyNode>();
+            for (final JkScopedDependency scopedDependency : dependencies) {
                 nodes.add(JkDependencyNode.ofFileDep((JkFileDependency) scopedDependency.dependency(), scopedDependency.scopes()));
             }
             final JkDependencyNode.ModuleNodeInfo info;
@@ -113,7 +109,7 @@ public final class JkDependencyResolver {
             } else {
                 info = JkDependencyNode.ModuleNodeInfo.root(this.module);
             }
-            JkDependencyNode root = JkDependencyNode.ofModuleDep(info, nodes);
+            final JkDependencyNode root = JkDependencyNode.ofModuleDep(info, nodes);
             return JkResolveResult.of(root, JkResolveResult.JkErrorReport.allFine());
         }
         return getResolveResult(this.transitiveVersionOverride, scopes);
@@ -161,8 +157,8 @@ public final class JkDependencyResolver {
         JkLog.trace("Preparing to resolve dependencies for module " + module);
         JkLog.startln("Resolving dependencies with specified scopes " + Arrays.asList(scopes) );
         JkResolveResult resolveResult = internalResolver.resolve(module, dependencies.onlyModules(),
-                    parameters, transitiveVersionOverride, scopes);
-        JkDependencyNode mergedNode = resolveResult.dependencyTree().mergeNonModules(dependencies, JkUtilsIterable.setOf(scopes));
+                parameters, transitiveVersionOverride, scopes);
+        final JkDependencyNode mergedNode = resolveResult.dependencyTree().mergeNonModules(dependencies, JkUtilsIterable.setOf(scopes));
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.errorReport());
         if (JkLog.verbose()) {
             JkLog.info(plurialize(resolveResult.involvedModules().size(), "module") + resolveResult.involvedModules());
@@ -243,6 +239,9 @@ public final class JkDependencyResolver {
                 params, this.transitiveVersionOverride, this.repos);
     }
 
+    /**
+     * Returns the parameters of this dependency resolver.
+     */
     public JkResolutionParameters params() {
         return this.parameters;
     }

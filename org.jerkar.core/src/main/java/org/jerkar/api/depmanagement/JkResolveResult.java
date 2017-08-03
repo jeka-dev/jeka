@@ -1,12 +1,12 @@
 package org.jerkar.api.depmanagement;
 
-import org.jerkar.api.utils.JkUtilsIterable;
-
 import java.io.File;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
+import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
  * Result of a module dependency resolution for a given scope.<br/>
@@ -26,7 +26,6 @@ public final class JkResolveResult implements Serializable {
     /**
      * Creates an empty {@link JkResolveResult}
      */
-    @SuppressWarnings("unchecked")
     public static JkResolveResult empty() {
         return of(JkDependencyNode.empty());
     }
@@ -92,7 +91,7 @@ public final class JkResolveResult implements Serializable {
      * Returns the local files the specified module turns to.
      */
     public List<File> filesOf(JkModuleId moduleId) {
-        JkDependencyNode dependencyNode = this.depTree.find(moduleId);
+        final JkDependencyNode dependencyNode = this.depTree.find(moduleId);
         if (dependencyNode == null) {
             return new LinkedList<File>();
         }
@@ -114,10 +113,16 @@ public final class JkResolveResult implements Serializable {
         return this.depTree;
     }
 
+    /**
+     * Returns an error report if the resolution failed.
+     **/
     public JkErrorReport errorReport() {
         return errorReport;
     }
 
+    /**
+     * Asserts that the resolution happened successfully. Throws an {@link IllegalStateException} otherwise.
+     */
     public JkResolveResult assertNoError() {
         if (this.errorReport.hasErrors) {
             throw new IllegalStateException("Error in dependency resolution : "
@@ -131,6 +136,9 @@ public final class JkResolveResult implements Serializable {
         return this.depTree.toString();
     }
 
+    /**
+     *
+     */
     public static class JkErrorReport implements Serializable {
 
         private static final long serialVersionUID = 1L;
@@ -152,10 +160,14 @@ public final class JkResolveResult implements Serializable {
             this.hasErrors = hasErrors || !this.moduleProblems.isEmpty();
         }
 
+        /**
+         * Returns the list of problems.
+         */
         public List<JkModuleDepProblem> moduleProblems() {
             return moduleProblems;
         }
 
+        @SuppressWarnings("unchecked")
         private JkErrorReport merge(JkErrorReport other) {
             return new JkErrorReport(JkUtilsIterable.concatLists(this.moduleProblems, other.moduleProblems),
                     this.hasErrors || other.hasErrors);
@@ -163,7 +175,7 @@ public final class JkResolveResult implements Serializable {
 
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
             if (!moduleProblems.isEmpty()) {
                 sb.append("Errors with dependencies : " + moduleProblems);
             }

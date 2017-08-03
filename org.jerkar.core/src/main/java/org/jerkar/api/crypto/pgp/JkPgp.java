@@ -17,7 +17,7 @@ import org.jerkar.api.utils.JkUtilsSystem;
  * or both. <br/>
  * Note that you need the secret ring for signing and the public ring for
  * verifying.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkPgp implements Serializable {
@@ -140,6 +140,9 @@ public final class JkPgp implements Serializable {
         return result;
     }
 
+    /**
+     * Returns file that are created if a signature occurs on specified files.
+     */
     public static File[] drySignatureFiles(File... filesToSign) {
         final File[] result = new File[filesToSign.length];
         int i = 0;

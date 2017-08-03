@@ -2,10 +2,20 @@ package org.jerkar.api.java;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-import javax.tools.*;
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticListener;
+import javax.tools.JavaCompiler;
 import javax.tools.JavaCompiler.CompilationTask;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
 
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPathFilter;
@@ -56,10 +66,10 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * Returns a base compiler to set some behaviour and parameters on.
+     * Returns a base compiler to set some behavior and parameters on.
      */
     public static JkJavaCompiler base() {
-        return new JkJavaCompiler(new LinkedList<String>(), Collections.EMPTY_LIST, true, null, null, null);
+        return new JkJavaCompiler(new LinkedList<String>(), new LinkedList<File>(), true, null, null, null);
     }
 
     private final List<String> options;
@@ -129,8 +139,8 @@ public final class JkJavaCompiler {
         if (outputDir.exists() && !outputDir.isDirectory()) {
             throw new IllegalArgumentException(outputDir.getAbsolutePath() + " is not a directory.");
         }
-        List<String> newOptions = new LinkedList<String>(this.options);
-        int index = newOptions.indexOf("-d");
+        final List<String> newOptions = new LinkedList<String>(this.options);
+        final int index = newOptions.indexOf("-d");
         if (index >= 0) {
             newOptions.remove(index);
             newOptions.remove(index);
@@ -142,7 +152,7 @@ public final class JkJavaCompiler {
     }
 
     private File getOutputDir() {
-        int index = options.indexOf("-d");
+        final int index = options.indexOf("-d");
         return new File(options.get(index+1));
     }
 
@@ -303,6 +313,7 @@ public final class JkJavaCompiler {
      * @throws if
      *             a compilation error occured and the 'failOnError' flag in on.
      */
+    @SuppressWarnings("unchecked")
     public boolean compile() {
         this.getOutputDir().mkdirs();
         final JavaCompiler compiler = this.compiler != null ? this.compiler : getDefaultOrFail();
@@ -415,6 +426,7 @@ public final class JkJavaCompiler {
         return new JkJavaCompiler(options, javaSourceFiles, failOnError, process, versionCache, compiler);
     }
 
+    @SuppressWarnings("rawtypes")
     private static class JkDiagnosticListener implements DiagnosticListener {
 
         @Override

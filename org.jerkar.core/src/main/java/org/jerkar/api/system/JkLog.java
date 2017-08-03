@@ -171,7 +171,8 @@ public final class JkLog {
         doneMessage("Done : " + message);
     }
 
-    private static void beginOfLine() {
+    // This method is called by reflection when changing classloader
+    static void beginOfLine() {
         infoWriter.beginOfLine = true;
         warnWriter.beginOfLine = true;
         errorWriter.beginOfLine = true;

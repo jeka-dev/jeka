@@ -103,7 +103,6 @@ public final class JkModuleDependency extends JkDependency {
         if (strings.length == 3) {
             return result;
         }
-        final String classifier = strings[3];
         return result.classifier(strings[3]);
     }
 

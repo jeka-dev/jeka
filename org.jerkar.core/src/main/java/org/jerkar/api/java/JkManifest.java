@@ -11,12 +11,16 @@ import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
 
-import org.jerkar.api.utils.*;
+import org.jerkar.api.utils.JkUtilsAssert;
+import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.JkUtilsThrowable;
+import org.jerkar.api.utils.JkUtilsZip;
 
 
 /**
  * Helper class to read and write Manifest from and to file.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkManifest {
@@ -61,7 +65,7 @@ public final class JkManifest {
     public static JkManifest of(File manifestFile) {
         if (!manifestFile.exists()) {
             throw new IllegalArgumentException("Manifest file " + manifestFile.getPath()
-                    + " not found.");
+            + " not found.");
         }
         return new JkManifest(read(manifestFile));
     }
@@ -128,6 +132,9 @@ public final class JkManifest {
         return this;
     }
 
+    /**
+     * Add the main class entry by auto-detecting the class holding the main method.
+     */
     public JkManifest addAutodetectMain(File classDir) {
         final String mainClassName = JkClassLoader.findMainClass(classDir);
         if (mainClassName != null) {
@@ -136,7 +143,7 @@ public final class JkManifest {
             throw new IllegalStateException("No class with main method found.");
         }
         return this;
-}
+    }
 
     /**
      * @see #addMainAttribute(Name, String)

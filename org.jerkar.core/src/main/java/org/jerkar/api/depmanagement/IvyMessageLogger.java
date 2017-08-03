@@ -4,7 +4,6 @@ import org.apache.ivy.util.AbstractMessageLogger;
 import org.apache.ivy.util.Message;
 import org.jerkar.api.system.JkLog;
 
-@SuppressWarnings("unchecked")
 class IvyMessageLogger extends AbstractMessageLogger {
 
     @Override

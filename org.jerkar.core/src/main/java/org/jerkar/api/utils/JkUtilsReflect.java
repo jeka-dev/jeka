@@ -1,7 +1,5 @@
 package org.jerkar.api.utils;
 
-import org.jerkar.tool.JkException;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -19,7 +17,7 @@ import java.util.Set;
 
 /**
  * Utility class for dealing with reflection
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkUtilsReflect {
@@ -173,12 +171,11 @@ public final class JkUtilsReflect {
     /**
      * Invokes the specified method on the given object.
      */
-    @SuppressWarnings("unchecked")
     public static <T> T invoke(Object target, String methodName) {
         final Method method;
         try {
-             method = target.getClass().getMethod(methodName);
-        } catch (NoSuchMethodException e) {
+            method = target.getClass().getMethod(methodName);
+        } catch (final NoSuchMethodException e) {
             throw new IllegalArgumentException("No method " + methodName + " found on class " + methodName);
         }
         return invoke(target, method);
@@ -374,7 +371,7 @@ public final class JkUtilsReflect {
 
     /**
      * Invokes a static method with the specified arguments
-     * 
+     *
      * @param clazz
      *            The class the method is invoked on.
      * @param methodName
@@ -389,7 +386,7 @@ public final class JkUtilsReflect {
 
     /**
      * Invokes an instance method with the specified arguments
-     * 
+     *
      * @param instance
      *            The instance the method is invoked on.
      * @param methodName

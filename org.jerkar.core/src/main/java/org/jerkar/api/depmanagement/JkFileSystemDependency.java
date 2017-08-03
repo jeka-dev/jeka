@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.jerkar.api.depmanagement.JkDependency.JkFileDependency;
 import org.jerkar.api.utils.JkUtilsAssert;
@@ -52,7 +51,7 @@ public final class JkFileSystemDependency extends JkFileDependency {
     public final List<File> files() {
         for (final File file : files) {
             JkUtilsAssert.isTrue(file.exists(), "The file " + file.getAbsolutePath()
-                    + " does not exist.");
+            + " does not exist.");
         }
         return files;
     }
@@ -64,9 +63,13 @@ public final class JkFileSystemDependency extends JkFileDependency {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        JkFileSystemDependency that = (JkFileSystemDependency) o;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final JkFileSystemDependency that = (JkFileSystemDependency) o;
         return files.equals(that.files);
     }
 

@@ -1,12 +1,24 @@
 package org.jerkar.api.utils;
 
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * Utility class for dealing with {@link Iterable}.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkUtilsIterable {
@@ -41,7 +53,7 @@ public final class JkUtilsIterable {
     public static <T> List<T> listWithoutDuplicateOf(Iterable<T> items) {
         final Set<T> set = new HashSet<T>();
         final LinkedList<T> result = new LinkedList<T>();
-        for (T item : items) {
+        for (final T item : items) {
             if (!set.contains(item)) {
                 set.add(item);
                 result.add(item);
@@ -50,10 +62,13 @@ public final class JkUtilsIterable {
         return result;
     }
 
-    public static <T> void addAllWithoutDplicate(List<T> listWhereElementAreAdded, Iterable<? extends T> items) {
-        for (T item : items) {
-            if (!listWhereElementAreAdded.contains(item)) {
-                listWhereElementAreAdded.add(item);
+    /**
+     * Adds items to the specified recipient list. Only item not already present in the recipient list are added.
+     */
+    public static <T> void addAllWithoutDplicate(List<T> recipientList, Iterable<? extends T> items) {
+        for (final T item : items) {
+            if (!recipientList.contains(item)) {
+                recipientList.add(item);
             }
         }
     }
@@ -323,15 +338,16 @@ public final class JkUtilsIterable {
      * The first one contains the element present in A and absent in B.
      * The second one contains elements in B but absent in A.
      */
+    @SuppressWarnings("unchecked")
     public static <T> Set<T>[] diff(Collection<T> a, Collection<T> b) {
-        HashSet<T> first = new HashSet<T>();
-        HashSet<T> second = new HashSet<T>();
-        for (T item : a) {
+        final HashSet<T> first = new HashSet<T>();
+        final HashSet<T> second = new HashSet<T>();
+        for (final T item : a) {
             if (! b.contains(item)) {
                 first.add(item);
             }
         }
-        for (T item : b) {
+        for (final T item : b) {
             if (! a.contains(item)) {
                 second.add(item);
             }

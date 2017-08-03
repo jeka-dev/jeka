@@ -104,7 +104,9 @@ public class JkComputedDependency extends JkFileDependency {
         this.ideProjectBaseDir = ideProjectBaseDir;
     }
 
-
+    /**
+     * Returns a duplicate of this computed dependency but specifying that it can be replaced by a project dependency in a IDE.
+     */
     public JkComputedDependency withIdeProjectBaseDir(File baseDir) {
         return new JkComputedDependency(this.runnable, baseDir, this.files);
     }
@@ -175,10 +177,14 @@ public class JkComputedDependency extends JkFileDependency {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-        JkComputedDependency that = (JkComputedDependency) o;
+        final JkComputedDependency that = (JkComputedDependency) o;
 
         return files.equals(that.files);
     }

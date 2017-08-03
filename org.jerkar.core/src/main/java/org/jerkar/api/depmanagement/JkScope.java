@@ -1,12 +1,16 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
-
-import javax.xml.ws.handler.MessageContext;
 
 /**
  * Defines a context where is defined dependencies of a given project. According
@@ -230,8 +234,6 @@ public final class JkScope implements Serializable {
      * @author Jerome Angibaud
      */
     public static class JkScopeBuilder {
-
-        private static final long serialVersionUID = 1L;
 
         private Set<JkScope> extendedScopes = new HashSet<JkScope>();
 

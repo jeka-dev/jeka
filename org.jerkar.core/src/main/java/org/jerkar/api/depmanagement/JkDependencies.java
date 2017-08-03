@@ -64,7 +64,6 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     /**
      * Creates a {@link JkDependencies} to the specified dependency and scopes.
      */
-    @SuppressWarnings("unchecked")
     public static JkDependencies of(JkDependency dependency, JkScope ... scopes) {
         return of(JkScopedDependency.of(dependency, scopes));
     }
@@ -359,7 +358,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * dependencies declared in this object.
      */
     public JkDependencies onlyModules() {
-        List<JkScopedDependency> deps = new LinkedList<JkScopedDependency>();
+        final List<JkScopedDependency> deps = new LinkedList<JkScopedDependency>();
         for (final JkScopedDependency scopedDependency : this) {
             if (scopedDependency.dependency() instanceof JkModuleDependency) {
                 deps.add(scopedDependency);
