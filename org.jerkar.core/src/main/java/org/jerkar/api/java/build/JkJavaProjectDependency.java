@@ -1,18 +1,20 @@
 package org.jerkar.api.java.build;
 
 import org.jerkar.api.depmanagement.JkComputedDependency;
+
 import java.io.Serializable;
 
 
 /**
  * Created by angibaudj on 02-08-17.
  */
-public class JkJavaProjectDependency extends JkComputedDependency {
+@Deprecated // Experimental !!!!
+public class JkJavaProjectDependency extends JkComputedDependency  {
 
     private JkJavaProject project;
 
     protected JkJavaProjectDependency(JkJavaProject project) {
-        super(new Invoker(project), project.asDependencyJars().entries());
+        super(new Invoker(project), project.structure().baseDir(), project.asDependencyJars().entries());
         this.project = project;
     }
 

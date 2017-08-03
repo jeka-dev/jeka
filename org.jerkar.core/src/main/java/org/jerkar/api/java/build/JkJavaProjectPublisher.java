@@ -4,7 +4,7 @@ import org.jerkar.api.depmanagement.*;
 
 import java.util.Date;
 
-
+@Deprecated // Experimental !!!!
 public class JkJavaProjectPublisher {
 
     public static JkJavaProjectPublisher of(JkJavaProject javaProject) {

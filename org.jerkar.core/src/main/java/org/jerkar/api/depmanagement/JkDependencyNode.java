@@ -47,12 +47,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     public static JkDependencyNode ofFileDep(JkDependency.JkFileDependency dependency, Set<JkScope> scopes) {
-        final NodeInfo moduleInfo;
-        if (dependency instanceof JkFileSystemDependency) {
-            moduleInfo = new FileNodeInfo(((JkFileSystemDependency) dependency).files(), scopes, false);
-        } else {
-            moduleInfo = new FileNodeInfo(((JkComputedDependency) dependency).files(), scopes, true);
-        }
+        final NodeInfo moduleInfo = FileNodeInfo.of(scopes, dependency);
         return new JkDependencyNode(moduleInfo, Collections.unmodifiableList(new LinkedList<JkDependencyNode>()));
     }
 
@@ -180,7 +175,6 @@ public class JkDependencyNode implements Serializable {
         }
         return null;
     }
-
 
     /**
      * Returns a merge of this dependency node with the specified one. The
@@ -344,6 +338,13 @@ public class JkDependencyNode implements Serializable {
             return moduleId;
         }
 
+        /**
+         * Shorthand for {@link #moduleId} + {@link #resolvedVersion()}
+         */
+        public JkVersionedModule resolvedVersionedModule() {
+            return moduleId.version(resolvedVersion.name());
+        }
+
         public JkVersionRange declaredVersion() {
             return declaredVersion;
         }
@@ -417,20 +418,38 @@ public class JkDependencyNode implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
+        public static FileNodeInfo of(Set<JkScope> scopes, JkDependency.JkFileDependency dependency) {
+            if (dependency instanceof JkComputedDependency) {
+                JkComputedDependency computedDependency = (JkComputedDependency) dependency;
+                return new FileNodeInfo(computedDependency.files(), scopes, computedDependency);
+            }
+            return new FileNodeInfo(((JkFileSystemDependency) dependency).files(), scopes, null);
+        }
+
         private final List<File> files;
 
         private final Set<JkScope> scopes;
 
-        private final boolean computed;
+        private final JkComputedDependency computationOrigin;
 
-        public FileNodeInfo(List<File> files, Set<JkScope> scopes, boolean computed) {
+        private FileNodeInfo(List<File> files, Set<JkScope> scopes, JkComputedDependency origin) {
             this.files = Collections.unmodifiableList(new LinkedList<File>(files));
             this.scopes = Collections.unmodifiableSet(new HashSet<JkScope>(scopes));
-            this.computed = computed;
+            this.computationOrigin = origin;
         }
 
+        /**
+         * Returns <code>true</code> if this node come from a computed dependency
+         */
         public boolean isComputed() {
-            return computed;
+            return computationOrigin != null;
+        }
+
+        /**
+         * If this node comes from a computed dependency, it returns computed dependency in question.
+         */
+        public JkComputedDependency computationOrigin() {
+            return computationOrigin;
         }
 
         @Override
@@ -445,7 +464,7 @@ public class JkDependencyNode implements Serializable {
 
         @Override
         public String toString() {
-            return files + (computed ? " (computed)" : "");
+            return files + (isComputed() ? " (computed)" : "");
         }
     }
 

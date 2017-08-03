@@ -255,6 +255,13 @@ public final class JkProcess implements Runnable {
         this.runSync();
     }
 
+    /**
+     * Returns the working directory of this process.
+     */
+    public File workingDir() {
+        return workingDir;
+    }
+
     @Override
     public String toString() {
         return this.command + " " + JkUtilsString.join(parameters, " ");

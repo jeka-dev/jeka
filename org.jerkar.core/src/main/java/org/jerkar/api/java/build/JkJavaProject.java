@@ -2,15 +2,16 @@ package org.jerkar.api.java.build;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPath;
-import org.jerkar.api.java.*;
+import org.jerkar.api.java.JkClasspath;
+import org.jerkar.api.java.JkJavaCompiler;
+import org.jerkar.api.java.JkJavadocMaker;
+import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.utils.JkUtilsFile;
 
-
 import java.io.File;
-import java.util.List;
 
-
+@Deprecated // Experimental !!!!
 public class JkJavaProject  {
 
     public static JkJavaProject of(File baseDir) {

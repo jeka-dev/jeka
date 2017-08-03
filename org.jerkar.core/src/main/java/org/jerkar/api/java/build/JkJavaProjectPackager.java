@@ -16,6 +16,7 @@ import java.util.Set;
 /**
  * Creates different Java archive a project may produce (binary, doc, source, fat jar...)
  */
+@Deprecated // Experimental !!!!
 public class JkJavaProjectPackager implements Cloneable {
 
     /**

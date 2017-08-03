@@ -2,7 +2,7 @@ package org.jerkar.api.java.build;
 
 import org.jerkar.api.depmanagement.*;
 
-
+@Deprecated // Experimental !!!!
 public final class JkJavaProjectDepResolver {
 
     private JkDependencyResolver resolver;

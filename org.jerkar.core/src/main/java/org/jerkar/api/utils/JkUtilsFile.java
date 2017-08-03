@@ -1,16 +1,6 @@
 package org.jerkar.api.utils;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.Writer;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -22,6 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Utility class for dealing with files.
@@ -102,23 +94,18 @@ public final class JkUtilsFile {
     /**
      * Copies the source directory content to the target directory.
      *
-     * @param source
-     *            The directory we want copy the content go.
-     * @param targetDir
-     *            The directory where will be copied the content
-     * @param filter
-     *            Filter to decide which file should be copied or not. If you
-     *            want to copy everything, use {@link FileFilter} that always
-     *            return <code>true</code>.
-     * @param copyEmptyDir
-     *            specify if the empty dirs should be copied as well.
-     * @param reportStream
-     *            The scream where a copy status can be written. If
-     *            <code>null</code>, no status is written.
+     * @param source       The directory we want copy the content go.
+     * @param targetDir    The directory where will be copied the content
+     * @param filter       Filter to decide which file should be copied or not. If you
+     *                     want to copy everything, use {@link FileFilter} that always
+     *                     return <code>true</code>.
+     * @param copyEmptyDir specify if the empty dirs should be copied as well.
+     * @param reportStream The scream where a copy status can be written. If
+     *                     <code>null</code>, no status is written.
      * @return The file copied count.
      */
     public static int copyDirContent(File source, File targetDir, FileFilter filter, boolean copyEmptyDir,
-            PrintStream reportStream) {
+                                     PrintStream reportStream) {
         return copyDirContentReplacingTokens(source, targetDir, filter, copyEmptyDir, reportStream, null);
     }
 
@@ -129,11 +116,10 @@ public final class JkUtilsFile {
      * replacement is done only if the specified tokenValues map contains the
      * according key.
      *
-     * @param tokenValues
-     *            a map for replacing token key by value
+     * @param tokenValues a map for replacing token key by value
      */
     public static int copyDirContentReplacingTokens(File fromDir, File toDir, FileFilter filterArg,
-            boolean copyEmptyDir, PrintStream reportStream, Map<String, String> tokenValues) {
+                                                    boolean copyEmptyDir, PrintStream reportStream, Map<String, String> tokenValues) {
         final FileFilter filter = JkUtilsObject.firstNonNull(filterArg, JkFileFilters.acceptAll());
         assertAllDir(fromDir);
         if (fromDir.equals(toDir)) {
@@ -315,6 +301,13 @@ public final class JkUtilsFile {
         } catch (final MalformedURLException e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    /**
+     * Get the file to the specified url.
+     */
+    public static File toFile(URL url) {
+        return new File(url.getFile());
     }
 
     /**
@@ -623,7 +616,7 @@ public final class JkUtilsFile {
      * specified replacements map.
      *
      * @see #copyDirContentReplacingTokens(File, File, FileFilter, boolean,
-     *      PrintStream, Map)
+     * PrintStream, Map)
      */
     public static void copyFileWithInterpolation(File in, File out, Map<String, String> replacements) {
         copyFileReplacingTokens(in, out, replacements, null);
@@ -634,7 +627,7 @@ public final class JkUtilsFile {
      * but writing the status in the specified reportStream.
      */
     public static void copyFileReplacingTokens(File from, File toFile, Map<String, String> replacements,
-            PrintStream reportStream) {
+                                               PrintStream reportStream) {
         if (replacements == null || replacements.isEmpty()) {
             copyFile(from, toFile, reportStream);
             return;
@@ -656,7 +649,7 @@ public final class JkUtilsFile {
         }
         if (reportStream != null) {
             reportStream.println("Coping and replacing tokens " + replacements + " to file " + from.getAbsolutePath()
-            + " to " + toFile.getAbsolutePath());
+                    + " to " + toFile.getAbsolutePath());
         }
         final char[] buf = new char[1024];
         int len;
@@ -680,7 +673,7 @@ public final class JkUtilsFile {
      * @see #copyFileWithInterpolation(File, File, Map)
      */
     public static void copyUrlReplacingTokens(URL url, File toFile, Map<String, String> replacements,
-            PrintStream reportStream) {
+                                              PrintStream reportStream) {
         final InputStream is;
         try {
             is = url.openStream();
@@ -699,7 +692,7 @@ public final class JkUtilsFile {
      * @see #copyFileWithInterpolation(File, File, Map)
      */
     public static void copyStreamWithInterpolation(InputStream inputStream, File toFile,
-            Map<String, String> replacements, PrintStream reportStream) {
+                                                   Map<String, String> replacements, PrintStream reportStream) {
         final TokenReplacingReader replacingReader = new TokenReplacingReader(new InputStreamReader(inputStream),
                 replacements);
         if (!toFile.exists()) {
@@ -730,7 +723,6 @@ public final class JkUtilsFile {
             JkUtilsIO.closeQuietly(replacingReader);
         }
     }
-
 
 
     private static class FilePath {
@@ -839,8 +831,7 @@ public final class JkUtilsFile {
     /**
      * Returns a resource as a {@link File}.
      *
-     * @throws IllegalArgumentException
-     *             If the specified resource does not exist.
+     * @throws IllegalArgumentException If the specified resource does not exist.
      */
     public static File resourceAsFile(Class<?> clazz, String resourceName) {
         final URL url = clazz.getResource(resourceName);
@@ -849,5 +840,54 @@ public final class JkUtilsFile {
         }
         return fromUrl(url);
     }
+
+    private static final int BUFFER_SIZE = 4096;
+
+    private static void extractFile(ZipInputStream in, File outdir, String name) throws IOException {
+        byte[] buffer = new byte[BUFFER_SIZE];
+        BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(outdir, name)));
+        int count = -1;
+        while ((count = in.read(buffer)) != -1)
+            out.write(buffer, 0, count);
+        out.close();
+    }
+
+    private static void mkdirs(File outdir, String path) {
+        File d = new File(outdir, path);
+        if (!d.exists())
+            d.mkdirs();
+    }
+
+    private static String dirpart(String name) {
+        int s = name.lastIndexOf(File.separatorChar);
+        return s == -1 ? null : name.substring(0, s);
+    }
+
+    /***
+     * Unzip a zip file to the specified folder
+     */
+    public static void unzip(File zipfile, File outdir) {
+        try {
+            ZipInputStream zin = new ZipInputStream(new FileInputStream(zipfile));
+            ZipEntry entry;
+            String name, dir;
+            while ((entry = zin.getNextEntry()) != null) {
+                name = entry.getName();
+                if (entry.isDirectory()) {
+                    mkdirs(outdir, name);
+                    continue;
+                }
+                dir = dirpart(name);
+                if (dir != null) {
+                    mkdirs(outdir, dir);
+                }
+                extractFile(zin, outdir, name);
+            }
+            zin.close();
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
+    }
+
 
 }

@@ -121,6 +121,21 @@ public final class JkUtilsIterable {
     }
 
     /**
+     * Creates a map of specified key/value. Key value should be declared in sequence as
+     * <code>mapOf(key1, value1, key2, value2,...)</code>
+     */
+    @SuppressWarnings("unchecked")
+    public static <T, U> Map<T, U> mapOfAny(Object... others) {
+        final Map<T, U> result = new LinkedHashMap<T, U>();
+        for (int i = 0; i < others.length; i = i + 2) {
+            final T otherKey = (T) others[i];
+            final U otherValue = (U) others[i + 1];
+            result.put(otherKey, otherValue);
+        }
+        return result;
+    }
+
+    /**
      * Returns an {@link Iterable} iterating on items of specified iterables.
      * Result is backed by the specified iterables.
      */

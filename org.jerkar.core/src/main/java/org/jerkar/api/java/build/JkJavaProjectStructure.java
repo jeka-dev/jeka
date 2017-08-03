@@ -10,6 +10,7 @@ import java.io.File;
 /**
  * Created by angibaudj on 01-08-17.
  */
+@Deprecated // Experimental !!!!
 public class JkJavaProjectStructure implements Cloneable {
 
     public static final JkPathFilter RESOURCE_FILTER = JkPathFilter.exclude("**/*.java")
@@ -138,6 +139,13 @@ public class JkJavaProjectStructure implements Cloneable {
         this.generatedSourceDir = move(generatedSourceDir, originalOut, newOutputDir);
         this.generatedTestResourceDir = move(generatedTestResourceDir, originalOut, newOutputDir);
         return this;
+    }
+
+    /**
+     * Same as {@link #relocaliseOutputDir(String)} but expressed with relative path to base dir.
+     */
+    public JkJavaProjectStructure relocaliseOutputDir(String relativePath) {
+        return relocaliseOutputDir(new File(this.baseDir(), relativePath));
     }
 
     /**

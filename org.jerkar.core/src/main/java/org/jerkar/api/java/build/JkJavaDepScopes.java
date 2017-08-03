@@ -4,7 +4,9 @@ import org.jerkar.api.depmanagement.*;
 
 /**
  * Dependency scopes usually used in Java projects
+ *
  */
+@Deprecated // Experimental !!!!
 public final class JkJavaDepScopes {
 
     /**
