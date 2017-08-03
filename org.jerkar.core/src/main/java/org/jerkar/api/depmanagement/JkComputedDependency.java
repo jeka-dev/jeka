@@ -47,7 +47,7 @@ public class JkComputedDependency extends JkFileDependency {
                 return process.toString();
             }
         };
-        return new JkComputedDependency(runnable, fileSet);
+        return new JkComputedDependency(runnable, null, fileSet);
     }
 
     /**
@@ -56,7 +56,7 @@ public class JkComputedDependency extends JkFileDependency {
      */
     public static final JkComputedDependency of(Runnable runnable, File... files) {
         final List<File> fileSet = JkUtilsIterable.listWithoutDuplicateOf(Arrays.asList(files));
-        return new JkComputedDependency(runnable, fileSet);
+        return new JkComputedDependency(runnable, null, fileSet);
     }
 
     /**
@@ -73,7 +73,7 @@ public class JkComputedDependency extends JkFileDependency {
                 process.runClassSync(className, args);
             }
         };
-        return new JkComputedDependency(runnable, fileSet);
+        return new JkComputedDependency(runnable, null, fileSet);
     }
 
     /**
@@ -91,14 +91,22 @@ public class JkComputedDependency extends JkFileDependency {
 
     private final List<File> files;
 
+    private final File ideProjectBaseDir;
+
     /**
      * Constructs a computed dependency to the specified files and the specified {@link Runnable} to run for
      * generating them.
      */
-    protected JkComputedDependency(Runnable runnable, List<File> files) {
+    protected JkComputedDependency(Runnable runnable, File ideProjectBaseDir, List<File> files) {
         super();
         this.runnable = runnable;
         this.files = files;
+        this.ideProjectBaseDir = ideProjectBaseDir;
+    }
+
+
+    public JkComputedDependency withIdeProjectBaseDir(File baseDir) {
+        return new JkComputedDependency(this.runnable, baseDir, this.files);
     }
 
     /**
@@ -107,6 +115,8 @@ public class JkComputedDependency extends JkFileDependency {
     public final boolean hasMissingFilesOrEmptyDirs() {
         return !missingFilesOrEmptyDirs().isEmpty();
     }
+
+
 
     /**
      * Returns the missing files or empty directory for this dependency.
@@ -150,6 +160,14 @@ public class JkComputedDependency extends JkFileDependency {
         return files;
     }
 
+    /**
+     * If the dependency can be represented as a project dependency in a IDE,
+     * this field mentions the root dir of the project.
+     */
+    public File ideProjectBaseDir() {
+        return ideProjectBaseDir;
+    }
+
     @Override
     public String toString() {
         return this.runnable.toString();
@@ -169,4 +187,6 @@ public class JkComputedDependency extends JkFileDependency {
     public int hashCode() {
         return files.hashCode();
     }
+
+
 }

@@ -13,7 +13,6 @@ import java.util.Map;
 
 import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
-import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
@@ -46,8 +45,6 @@ public class JkBuild {
 
     private JkDependencyResolver buildDefDependencyResolver;
 
-    private JkRepos buildRepos;
-
     private final JkSlaveBuilds annotatedJkProjectSlaves;
 
     @JkDoc("Help options")
@@ -59,7 +56,7 @@ public class JkBuild {
     /**
      * Constructs a {@link JkBuild}
      */
-    protected JkBuild() {
+    public JkBuild() {
         final File baseDirContext = BASE_DIR_CONTEXT.get();
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
         this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, JkUtilsFile.workingDir());
@@ -87,23 +84,12 @@ public class JkBuild {
         this.buildDefDependencyResolver = scriptDependencyResolver;
     }
 
-    void setBuildRepos(JkRepos buildRepos) {
-        this.buildRepos = buildRepos;
-    }
-
     /**
      * Returns the dependency resolver used to compile/run scripts of this
      * project.
      */
     public JkDependencyResolver buildDefDependencyResolver() {
         return this.buildDefDependencyResolver;
-    }
-
-    /**
-     * Returns the repositories to download dependencies needed at build time.
-     */
-    public JkRepos buildRepos() {
-        return this.buildRepos;
     }
 
     /**
@@ -160,7 +146,7 @@ public class JkBuild {
     /**
      * Invokes the specified method in this build.
      */
-    private final void invoke(String methodName, File fromDir) {
+    private void invoke(String methodName, File fromDir) {
         final Method method;
         try {
             method = this.getClass().getMethod(methodName);
@@ -320,7 +306,7 @@ public class JkBuild {
      * files. The 'doDefault' method will be invoked to compute the dependee
      * files.
      */
-    public JkComputedDependency asDependency(Iterable<File> files) {
+    protected JkComputedDependency asDependency(Iterable<File> files) {
         return JkBuildDependency.of(this, JkUtilsIterable.listWithoutDuplicateOf(files));
     }
 
@@ -345,12 +331,13 @@ public class JkBuild {
      * Returns slave builds (potentially on other projects).
      */
     public final JkSlaveBuilds slaves() {
-        return this.annotatedJkProjectSlaves;
+        final List<JkBuild> slaveBuilds = JkBuildPlugin.applySlaves(this.plugins.getActives(),
+                this.annotatedJkProjectSlaves.all());
+        return JkSlaveBuilds.of(this.baseDir().root(), slaveBuilds);
     }
 
     /**
      * Returns the slave project declared with annotation <code>JkProject</code> in this build.
-     * @return
      */
     protected final JkSlaveBuilds annotatedJkProjectSlaves() {
         return this.annotatedJkProjectSlaves;
@@ -369,10 +356,10 @@ public class JkBuild {
             try {
                 JkUtilsReflect.setFieldValue(this, field, subBuild);
             } catch (RuntimeException e) {
-                throw new JkException("Can't inject slave build on " + subBuild.getClass().getSimpleName()
-                         + this.getClass().getSimpleName() + "#" + field.getName() + " to " + this.baseDir().root()
-                        + ".\nYou are probably running build class main method to your IDE"
-                        + ".\nPlease make sure current working dir (" + JkUtilsFile.workingDir() + ") is the root of master project directory.");
+                throw new IllegalStateException("Can't inject slave build instance of type " + subBuild.getClass().getSimpleName()
+                        + " into field " + field.getDeclaringClass().getName()
+                        + "#" + field.getName() + " from directory " + this.baseDir().root()
+                        + ".\nPlease make sure current working dir (" + JkUtilsFile.workingDir() + ") is the root of master project directory.", e);
             }
             result.add(subBuild);
         }
@@ -383,10 +370,8 @@ public class JkBuild {
      * Returns a formatted string providing information about this build definition.
      */
     public String infoString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("base directory : " + this.baseDir()).append("\n");
-        builder.append("slave builds : " + this.annotatedJkProjectSlaves().directs());
-        return builder.toString();
+        return "base directory : " + this.baseDir() + "\n"
+                + "slave builds : " + this.annotatedJkProjectSlaves().directs();
     }
 
     /**
@@ -396,10 +381,9 @@ public class JkBuild {
         return relativeProject(this, null, relativePath);
     }
 
-    private static final JkBuild relativeProject(JkBuild mainBuild, Class<? extends JkBuild> clazz,
+    private static JkBuild relativeProject(JkBuild mainBuild, Class<? extends JkBuild> clazz,
             String relativePath) {
-        final JkBuild build = mainBuild.relativeProjectBuild(clazz, relativePath);
-        return build;
+        return mainBuild.relativeProjectBuild(clazz, relativePath);
     }
 
     /**
@@ -408,7 +392,7 @@ public class JkBuild {
      * populated as usual.
      */
     @SuppressWarnings("unchecked")
-    private final <T extends JkBuild> T relativeProjectBuild(Class<T> clazz, String relativePath) {
+    public <T extends JkBuild> T relativeProjectBuild(Class<T> clazz, String relativePath) {
         final File projectDir = this.file(relativePath);
         final SubProjectRef projectRef = new SubProjectRef(projectDir, clazz);
         Map<SubProjectRef, JkBuild> map = SUB_PROJECT_CONTEXT.get();

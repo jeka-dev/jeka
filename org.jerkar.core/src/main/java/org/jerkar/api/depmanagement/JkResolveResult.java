@@ -75,10 +75,10 @@ public final class JkResolveResult implements Serializable {
     }
 
     /**
-     * Shorthand for <code>dependencyTree.resolvedModules(JkModuleId)</code>
+     * Shorthand for <code>dependencyTree.childModules(JkModuleId)</code>
      */
     public Set<JkVersionedModule> involvedModules() {
-        return this.depTree.resolvedModules();
+        return this.depTree.childModules();
     }
 
     /**

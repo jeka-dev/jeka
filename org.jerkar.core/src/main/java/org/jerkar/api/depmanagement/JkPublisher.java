@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Date;
 
 import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.system.JkLocator;
 
 /**
  * A class to publish artifacts on repositories. According the nature of the
@@ -30,6 +31,14 @@ public final class JkPublisher {
      */
     public static JkPublisher of(JkPublishRepo publishRepo) {
         return of(JkPublishRepos.of(publishRepo));
+    }
+
+    /**
+     * Creates a publisher that publish locally under <code></code>[USER HOME]/.jerkar/publish</code> folder.
+     */
+    public static JkPublisher local() {
+        final File file = new File(JkLocator.jerkarUserHome(), "maven-publish-dir");
+        return JkPublisher.of(JkRepo.maven(file).asPublishRepo());
     }
 
     /**

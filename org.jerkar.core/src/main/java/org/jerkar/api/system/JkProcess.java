@@ -20,19 +20,19 @@ import org.jerkar.api.utils.JkUtilsSystem;
  * So for example, if you want to create a Maven process, then you should write
  * 
  * <pre>
- * <code>JkProcess.of("mvn", "clean", "install")</code>
+ * <code>JkProcess.of("mvn", "deleteArtifacts", "install")</code>
  * </pre>
  * 
  * instead of
  * 
  * <pre>
- * <code>JkProcess.of("mvn", "clean install")</code>
+ * <code>JkProcess.of("mvn", "deleteArtifacts install")</code>
  * </pre>
  * 
  * or
  * 
  * <pre>
- * <code>JkProcess.of("mvn clean install")</code>
+ * <code>JkProcess.of("mvn deleteArtifacts install")</code>
  * </pre>
  * 
  * .
@@ -192,11 +192,11 @@ public final class JkProcess implements Runnable {
         final List<String> commands = new LinkedList<String>();
         commands.add(this.command);
         for (String param : parameters) {
-            if (param.contains(" ")) {
-                commands.add("\""+ param + "\"");
-            } else {
+           // if (param.contains(" ")) {
+           //     commands.add("\""+ param + "\"");
+            //} else {
                 commands.add(param);
-            }
+            //}
         }
         JkLog.startln("Starting program : " + commands.toString());
         final int result;
@@ -253,6 +253,13 @@ public final class JkProcess implements Runnable {
     @Override
     public void run() {
         this.runSync();
+    }
+
+    /**
+     * Returns the working directory of this process.
+     */
+    public File workingDir() {
+        return workingDir;
     }
 
     @Override

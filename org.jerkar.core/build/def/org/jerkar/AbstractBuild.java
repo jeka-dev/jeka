@@ -42,4 +42,8 @@ public abstract class AbstractBuild extends JkJavaBuild {
                 JkOptions.get("repo.ossrh.password"), pgp()).withUniqueSnapshot(true);
     }
 
+    @Override
+    public JkJavaCompiler productionCompiler() {
+        return super.productionCompiler().andOptions("-g");
+    }
 }

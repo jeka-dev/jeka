@@ -107,7 +107,7 @@ final class AntPattern {
      */
     public boolean doMatch(String path) {
 
-        // First clean path and pattern to remove leading '/', '.' or '\'
+        // First deleteArtifacts path and pattern to remove leading '/', '.' or '\'
         // characters
         final String normalizedPath = normalize(path);
 

@@ -20,12 +20,16 @@ public final class JkBuildDependency extends JkComputedDependency {
 
     private static final long serialVersionUID = 1L;
 
+    public static JkBuildDependency of(JkBuild projectBuild, List<File> files) {
+        return of(projectBuild, JkConstants.DEFAULT_METHOD, files);
+    }
+
     private final JkBuild projectBuild;
 
     private final List<String> methods;
 
     private JkBuildDependency(JkBuild projectBuild, List<String> methods, List<File> files) {
-        super(new Invoker(projectBuild, methods), files);
+        super(new Invoker(projectBuild, methods), projectBuild.baseDir().root() ,files);
         this.methods = methods;
         this.projectBuild = projectBuild;
     }
@@ -53,9 +57,7 @@ public final class JkBuildDependency extends JkComputedDependency {
 
     }
 
-    public static JkBuildDependency of(JkBuild projectBuild, List<File> files) {
-        return of(projectBuild, JkConstants.DEFAULT_METHOD, files);
-    }
+
 
     public static JkBuildDependency of(JkBuild projectBuild, String methods, List<File> files) {
         final List<String> list = Arrays.asList(JkUtilsString.split(methods, " "));

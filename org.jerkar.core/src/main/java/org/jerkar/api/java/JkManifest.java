@@ -11,10 +11,8 @@ import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
 
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsThrowable;
-import org.jerkar.api.utils.JkUtilsZip;
+import org.jerkar.api.utils.*;
+
 
 /**
  * Helper class to read and write Manifest from and to file.
@@ -82,6 +80,9 @@ public final class JkManifest {
         return of(manifestFile);
     }
 
+
+
+
     /**
      * Creates a <code>JkManifest</code> from the specified input stream. The
      * specified stream is supposed to contains manifest information as present
@@ -126,6 +127,16 @@ public final class JkManifest {
         this.manifest.getMainAttributes().putValue(key.toString(), value);
         return this;
     }
+
+    public JkManifest addAutodetectMain(File classDir) {
+        final String mainClassName = JkClassLoader.findMainClass(classDir);
+        if (mainClassName != null) {
+            this.addMainClass(mainClassName);
+        } else {
+            throw new IllegalStateException("No class with main method found.");
+        }
+        return this;
+}
 
     /**
      * @see #addMainAttribute(Name, String)
@@ -190,6 +201,8 @@ public final class JkManifest {
     }
 
     private static Manifest read(File file) {
+        JkUtilsAssert.isTrue(file.exists(), JkUtilsFile.canonicalPath(file) + " not found.");
+        JkUtilsAssert.isTrue(file.isFile(), JkUtilsFile.canonicalPath(file) + " is directory : need file.");
         final Manifest manifest = new Manifest();
         FileInputStream is = null;
         try {

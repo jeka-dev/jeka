@@ -157,7 +157,6 @@ final class Project {
         }
         try {
             build.setBuildDefDependencyResolver(getBuildDefDependencyResolver());
-            build.setBuildRepos(buildRepos);
             final PluginDictionnary<JkBuildPlugin> dictionnary = init.initProject(build);
             final BuildAndPluginDictionnary result = new BuildAndPluginDictionnary();
             result.build = build;

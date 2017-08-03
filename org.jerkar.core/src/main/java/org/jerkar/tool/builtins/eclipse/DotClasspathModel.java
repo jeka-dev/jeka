@@ -78,6 +78,18 @@ final class DotClasspathModel {
         return new Sources(JkFileTreeSet.of(prods), JkFileTreeSet.of(tests));
     }
 
+    public List<String> projectDependencies() {
+        final List<String> result = new LinkedList<String>();
+        for (final ClasspathEntry classpathEntry : classpathentries) {
+            if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC)) {
+                if (classpathEntry.path.startsWith("/")) {
+                    result.add(classpathEntry.path);
+                }
+            }
+        }
+        return result;
+    }
+
     public List<Lib> libs(File baseDir, ScopeResolver scopeResolver) {
         final List<Lib> result = new LinkedList<Lib>();
         final Map<String, File> projects = Project.findProjects(baseDir.getParentFile());

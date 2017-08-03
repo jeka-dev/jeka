@@ -2,11 +2,7 @@ package org.jerkar.api.java;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.tools.*;
 import javax.tools.JavaCompiler.CompilationTask;
@@ -53,11 +49,17 @@ public final class JkJavaCompiler {
         if (outputDir.exists() && !outputDir.isDirectory()) {
             throw new IllegalArgumentException(outputDir.getAbsolutePath() + " is not a directory.");
         }
-        outputDir.mkdirs();
         final List<String> options = new LinkedList<String>();
         options.add("-d");
         options.add(outputDir.getAbsolutePath());
         return new JkJavaCompiler(options, Collections.EMPTY_LIST, true, null, null, null);
+    }
+
+    /**
+     * Returns a base compiler to set some behaviour and parameters on.
+     */
+    public static JkJavaCompiler base() {
+        return new JkJavaCompiler(new LinkedList<String>(), Collections.EMPTY_LIST, true, null, null, null);
     }
 
     private final List<String> options;
@@ -117,6 +119,31 @@ public final class JkJavaCompiler {
         final List<String> newOptions = new LinkedList<String>(this.options);
         newOptions.addAll(Arrays.asList(options));
         return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork, versionCache, compiler);
+    }
+
+    /**
+     * Creates a copy of this compiler but outputting in the specified directory.
+
+     */
+    public JkJavaCompiler withOutputDir(File outputDir) {
+        if (outputDir.exists() && !outputDir.isDirectory()) {
+            throw new IllegalArgumentException(outputDir.getAbsolutePath() + " is not a directory.");
+        }
+        List<String> newOptions = new LinkedList<String>(this.options);
+        int index = newOptions.indexOf("-d");
+        if (index >= 0) {
+            newOptions.remove(index);
+            newOptions.remove(index);
+        }
+        newOptions.add("-d");
+        newOptions.add(outputDir.getAbsolutePath());
+        return new JkJavaCompiler(newOptions, new ArrayList<File>(this.javaSourceFiles), failOnError,
+                fork, versionCache, compiler);
+    }
+
+    private File getOutputDir() {
+        int index = options.indexOf("-d");
+        return new File(options.get(index+1));
     }
 
     /**
@@ -216,7 +243,7 @@ public final class JkJavaCompiler {
     public JkJavaCompiler fork(boolean fork, String... parameters) {
         if (fork) {
             return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles,
-                    failOnError, JkProcess.ofJavaTool("javac"), versionCache, compiler);
+                    failOnError, JkProcess.ofJavaTool("javac", parameters), versionCache, compiler);
         } else {
             return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles,
                     failOnError, null, versionCache, compiler);
@@ -230,7 +257,7 @@ public final class JkJavaCompiler {
      *
      * @param executable
      *            The executable for the compiler as 'jike' or
-     *            '/my/speciel/jdk/javac'
+     *            '/my/special/jdk/javac'
      */
     public JkJavaCompiler forkOnCompiler(String executable, String... parameters) {
         return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError,
@@ -277,6 +304,7 @@ public final class JkJavaCompiler {
      *             a compilation error occured and the 'failOnError' flag in on.
      */
     public boolean compile() {
+        this.getOutputDir().mkdirs();
         final JavaCompiler compiler = this.compiler != null ? this.compiler : getDefaultOrFail();
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null,
                 null);

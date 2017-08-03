@@ -11,7 +11,7 @@ import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
- * This build clean, compile,test launch sonar analyse by default.
+ * This build deleteArtifacts, compile,test launch sonar analyse by default.
  * 
  * @author Jerome Angibaud
  * @formatter:off

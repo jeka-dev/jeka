@@ -113,4 +113,19 @@ public class ResolveTreeIT {
         assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.resolvedVersion().name());
 
     }
+
+    @Test
+    public void treeplePlayAnd() {
+        JkDependencies deps = JkDependencies.builder()
+                .usingDefaultScopes(JkJavaBuild.COMPILE_AND_RUNTIME)
+                .on("com.googlecode.playn", "playn-core", "1.4")
+                .on("com.threerings", "tripleplay", "1.4").build();
+        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
+                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
+        JkResolveResult resolveResult = resolver.resolve(JkJavaBuild.RUNTIME);
+        JkDependencyNode tree = resolveResult.dependencyTree();
+        System.out.println(tree.toStringComplete());
+        System.out.println(resolveResult.localFiles());
+
+    }
 }

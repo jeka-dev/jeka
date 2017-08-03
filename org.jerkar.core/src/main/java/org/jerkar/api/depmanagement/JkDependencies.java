@@ -120,7 +120,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
     /**
      * Returns a clone of this dependencies but replacing the unscoped
-     * dependencies with the scoped ones.
+     * dependencies with the specified ones.
      */
     public JkDependencies withDefaultScope(JkScope... scopes) {
         final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();
@@ -134,8 +134,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returpns a clone of this dependencies but replacing the unscoed
-     * dependencies with the scoped ones.
+     * Returns a clone of this dependencies but replacing the unscoped
+     * dependencies with the specified scope mapping.
      */
     public JkDependencies withDefaultScope(JkScopeMapping scopeMapping) {
         final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();
@@ -359,13 +359,13 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * dependencies declared in this object.
      */
     public JkDependencies onlyModules() {
-        final JkDependencies.Builder builder = JkDependencies.builder();
+        List<JkScopedDependency> deps = new LinkedList<JkScopedDependency>();
         for (final JkScopedDependency scopedDependency : this) {
             if (scopedDependency.dependency() instanceof JkModuleDependency) {
-                builder.on(scopedDependency);
+                deps.add(scopedDependency);
             }
         }
-        return builder.build();
+        return new JkDependencies(deps, excludes());
     }
 
     /**
@@ -759,6 +759,42 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             this.dependencies.add(scopedDependency);
             return this;
         }
+
+        /**
+         * Same as {@link #on(JkProcess, File, JkScope...)} but you can specify project base dir in order
+         * to generate IDE metadata with dependencies on project rather than the generated files..
+         */
+        public Builder onProject(JkProcess jkProcess, File projectBaseDir, File file, JkScope ...scopes) {
+            if (!dependencies.iterator().hasNext()) {
+                return this;
+            }
+            final JkComputedDependency dependency = JkComputedDependency.of(jkProcess, file)
+                    .withIdeProjectBaseDir(projectBaseDir);
+            final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scopes);
+            this.dependencies.add(scopedDependency);
+            return this;
+        }
+
+        /**
+         * Same as {@link #onProject(JkProcess, File, File, JkScope...)} but it will take the working dir
+         * of the specified process as the ide project base dir. When generating IDE metadata, if
+         * useIdeProjectDep flag is <code>false</code>,
+         * the project dependency won't be taken in account and regular file dependency will apply.
+         */
+        public Builder onProject(JkProcess process, boolean useIdeProjectDep, File file, JkScope ...scopes) {
+            if (!dependencies.iterator().hasNext()) {
+                return this;
+            }
+            JkComputedDependency dependency = JkComputedDependency.of(process, file);
+            if (useIdeProjectDep) {
+                dependency = dependency.withIdeProjectBaseDir(process.workingDir());
+            }
+            final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scopes);
+
+            this.dependencies.add(scopedDependency);
+            return this;
+        }
+
 
         /**
          * Excludes the specified module/artifact to the direct or transitive
