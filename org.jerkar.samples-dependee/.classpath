@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="build/def" output="build/output/build-classes"/>
-	<classpathentry kind="src" including="**/*" path="src/main/java"/>
-	<classpathentry kind="var" path="JERKAR_REPO/com.google.guava/guava/bundles/guava-18.0.jar" exported="true" sourcepath="JERKAR_REPO/com.google.guava/guava/jars/guava-18.0-sources.jar"/>
-	<classpathentry kind="var" path="JERKAR_HOME/org.jerkar.core-all.jar" exported="true" sourcepath="JERKAR_HOME/libs-sources/org.jerkar.core-all-sources.jar"/>
+	<classpathentry kind="src" output="build/output/build-classes" path="build/def"/>
+	<classpathentry including="**/*" kind="src" path="src/main/java"/>
+	<classpathentry exported="true" kind="var" path="JERKAR_REPO/com.google.guava/guava/bundles/guava-18.0.jar" sourcepath="JERKAR_REPO/com.google.guava/guava/jars/guava-18.0-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry combineaccessrules="false" kind="src" exported="true" path="/org.jerkar.samples"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.jerkar.samples"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.jerkar.core"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
