@@ -1,4 +1,4 @@
-package org.jerkar.api.java.build;
+package org.jerkar.api.java.project;
 
 import org.jerkar.api.depmanagement.JkComputedDependency;
 

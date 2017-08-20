@@ -3,8 +3,8 @@ package org.jerkar.samples;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.java.JkJavaCompiler;
-import org.jerkar.api.java.build.JkJavaDepScopes;
-import org.jerkar.api.java.build.JkJavaProject;
+import org.jerkar.api.java.project.JkJavaDepScopes;
+import org.jerkar.api.java.project.JkJavaProject;
 
 import java.io.File;
 

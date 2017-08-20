@@ -1,6 +1,13 @@
-package org.jerkar.api.java.build;
+package org.jerkar.api.java.project;
 
-import org.jerkar.api.depmanagement.*;
+import java.io.File;
+
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.api.depmanagement.JkModuleId;
+import org.jerkar.api.depmanagement.JkRepos;
+import org.jerkar.api.depmanagement.JkResolutionParameters;
+import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompiler;
@@ -8,8 +15,6 @@ import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.utils.JkUtilsFile;
-
-import java.io.File;
 
 @Deprecated // Experimental !!!!
 public class JkJavaProject  {
@@ -30,24 +35,19 @@ public class JkJavaProject  {
 
     private String explicitArtifactName;
 
-    private JkJavaProjectStructure structure;
+    private final JkJavaProjectStructure structure;
 
-    private JkJavaProjectDepResolver javaDeps;
+    private final JkJavaProjectDepResolver javaDeps;
 
     private JkJavaCompiler baseCompiler = JkJavaCompiler.base();
 
-    private JkJavaProjectPackager packager;
+    private final JkJavaProjectPackager packager;
 
-    private JkJavaProjectPublisher publisher;
-
-    private JkJavadocMaker javadocMaker;
 
     private JkJavaProject(JkJavaProjectStructure structure) {
         this.structure = structure;
         this.javaDeps = JkJavaProjectDepResolver.of();
         this.packager = defaultPackager();
-        this.publisher = defaulJavaPublier();
-        this.javadocMaker = defaultJavadocMaker();
     }
 
     // ------------------------------------------ setters ----------------
@@ -95,8 +95,8 @@ public class JkJavaProject  {
 
     private static JkDependencyResolver defaultResolver(JkVersionedModule versionedModule) {
         return JkDependencyResolver.managed(JkRepos.mavenCentral(), JkDependencies.of())
-                        .withModuleHolder(versionedModule)
-                        .withParams(JkResolutionParameters.of().withDefault(JkJavaDepScopes.DEFAULT_SCOPE_MAPPING));
+                .withModuleHolder(versionedModule)
+                .withParams(JkResolutionParameters.of().withDefault(JkJavaDepScopes.DEFAULT_SCOPE_MAPPING));
     }
 
 
@@ -110,10 +110,10 @@ public class JkJavaProject  {
     }
 
     private JkJavadocMaker defaultJavadocMaker() {
-        String name = this.artifactName() + "-javadoc";
+        final String name = this.artifactName() + "-javadoc";
         return JkJavadocMaker.of(structure.sources(), new File(structure.outputDir(), name),
                 new File(structure.outputDir(), name +  ".jar")).withClasspath(
-                javaDeps.resolver().get(JkJavaDepScopes.SCOPES_FOR_COMPILATION));
+                        javaDeps.resolver().get(JkJavaDepScopes.SCOPES_FOR_COMPILATION));
     }
 
     public final JkJavaCompiler baseCompiler() {
@@ -150,10 +150,6 @@ public class JkJavaProject  {
 
     public final JkJavaProjectPackager packager() {
         return this.packager;
-    }
-
-    public final JkJavadocMaker javadocMaker() {
-        return this.javadocMaker;
     }
 
 

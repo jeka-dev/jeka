@@ -1,8 +1,12 @@
-package org.jerkar.api.java.build;
-
-import org.jerkar.api.depmanagement.*;
+package org.jerkar.api.java.project;
 
 import java.util.Date;
+
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkIvyPublication;
+import org.jerkar.api.depmanagement.JkMavenPublication;
+import org.jerkar.api.depmanagement.JkPublisher;
+import org.jerkar.api.depmanagement.JkVersionProvider;
 
 @Deprecated // Experimental !!!!
 public class JkJavaProjectPublisher {
@@ -11,15 +15,15 @@ public class JkJavaProjectPublisher {
         return new JkJavaProjectPublisher(javaProject, JkPublisher.local(), true, true, true);
     }
 
-    private JkJavaProject project;
+    private final JkJavaProject project;
 
     private JkPublisher publisher = JkPublisher.local();
 
-    private boolean publishSources;
+    private final boolean publishSources;
 
-    private boolean publishTests;
+    private final boolean publishTests;
 
-    private boolean publishJavadoc;
+    private final boolean publishJavadoc;
 
     private JkJavaProjectPublisher(JkJavaProject project, JkPublisher publisher, boolean publishSources, boolean publishTests, boolean publishJavadoc) {
         this.project = project;
@@ -37,7 +41,7 @@ public class JkJavaProjectPublisher {
             final JkMavenPublication publication = mavenPublication();
             final JkDependencies deps = project.module().version().isSnapshot() ? dependencies
                     .resolvedWith(resolvedVersions) : dependencies;
-            publisher.publishMaven(project.module(), publication, deps);
+                    publisher.publishMaven(project.module(), publication, deps);
         }
         if (publisher.hasIvyPublishRepo()) {
             final Date date = new Date();
@@ -51,7 +55,7 @@ public class JkJavaProjectPublisher {
         return JkMavenPublication
                 .of(project.packager().jarFile())
                 .andIf(publishSources, project.packager().jarSourceFile(), "sources")
-                .andOptional(project.javadocMaker().zipFile(), "javadoc")
+                // .andOptional(project.javadocMaker().zipFile(), "javadoc")
                 .andOptionalIf(publishTests, project.packager().jarTestFile(), "test")
                 .andOptionalIf(publishTests && publishSources, project.packager().jarTestSourceFile(),
                         "testSources");
@@ -60,7 +64,7 @@ public class JkJavaProjectPublisher {
     private JkIvyPublication ivyPublication() {
         return JkIvyPublication.of(project.packager().jarFile(), JkJavaDepScopes.COMPILE)
                 .andIf(publishSources, project.packager().jarSourceFile(), "source", JkJavaDepScopes.SOURCES)
-                .andOptional(project.javadocMaker().zipFile(), "javadoc", JkJavaDepScopes.JAVADOC)
+                // .andOptional(project.javadocMaker().zipFile(), "javadoc", JkJavaDepScopes.JAVADOC)
                 .andOptionalIf(publishTests, project.packager().jarTestFile(), "jar", JkJavaDepScopes.TEST)
                 .andOptionalIf(publishTests && publishSources, project.packager().jarTestSourceFile(), "source", JkJavaDepScopes.SOURCES);
     }

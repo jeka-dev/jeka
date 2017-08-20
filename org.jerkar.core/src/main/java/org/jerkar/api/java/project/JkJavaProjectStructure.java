@@ -1,15 +1,13 @@
-package org.jerkar.api.java.build;
+package org.jerkar.api.java.project;
+
+import java.io.File;
 
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.utils.JkUtilsFile;
 
-import java.io.File;
 
-/**
- * Created by angibaudj on 01-08-17.
- */
 @Deprecated // Experimental !!!!
 public class JkJavaProjectStructure implements Cloneable {
 
@@ -115,8 +113,8 @@ public class JkJavaProjectStructure implements Cloneable {
      * Re-localise all locations defined under the base directory to the specified new base directory keeping the same relative path.
      */
     public JkJavaProjectStructure relocaliseBaseDir(File newBaseDir) {
-        File originalBase = this.baseDir;
-        File newOutputDir = move(outputDir, originalBase, newBaseDir);
+        final File originalBase = this.baseDir;
+        final File newOutputDir = move(outputDir, originalBase, newBaseDir);
         this.baseDir = newBaseDir;
         this.editedResources = move(editedResources, originalBase, newBaseDir);
         this.editedSources = move(editedSources, originalBase, newBaseDir);
@@ -130,7 +128,7 @@ public class JkJavaProjectStructure implements Cloneable {
      * Re-localise output locations defined under the output directory keeping the same relative path.
      */
     public JkJavaProjectStructure relocaliseOutputDir(File newOutputDir) {
-        File originalOut = this.outputDir;
+        final File originalOut = this.outputDir;
         this.outputDir = newOutputDir;
         this.classDir = move(classDir, originalOut, newOutputDir);
         this.testClassDir = move(testClassDir, originalOut, newOutputDir);
@@ -165,19 +163,19 @@ public class JkJavaProjectStructure implements Cloneable {
         if (!JkUtilsFile.isAncestor(originalBaseDir, original)) {
             return original;
         }
-        String relPath = JkUtilsFile.getRelativePath(originalBaseDir, original);
+        final String relPath = JkUtilsFile.getRelativePath(originalBaseDir, original);
         return new File(newBaseDir, relPath);
     }
 
     private static JkFileTreeSet move(JkFileTreeSet original, File originalBase, File newBase) {
         JkFileTreeSet result = JkFileTreeSet.empty();
-        for (JkFileTree fileTree : original.fileTrees()) {
+        for (final JkFileTree fileTree : original.fileTrees()) {
             if (!JkUtilsFile.isAncestor(originalBase, fileTree.root())) {
                 result = result.and(fileTree);
             } else {
-                String relPath = JkUtilsFile.getRelativePath(originalBase, fileTree.root());
-                File root = new File(newBase, relPath);
-                JkFileTree movedTree = JkFileTree.of(root).andFilter(fileTree.filter());
+                final String relPath = JkUtilsFile.getRelativePath(originalBase, fileTree.root());
+                final File root = new File(newBase, relPath);
+                final JkFileTree movedTree = JkFileTree.of(root).andFilter(fileTree.filter());
                 result = result.and(movedTree);
             }
         }
@@ -393,7 +391,7 @@ public class JkJavaProjectStructure implements Cloneable {
 
     private JkFileTreeSet toTrees(String ... paths) {
         JkFileTreeSet result = JkFileTreeSet.empty();
-        for (String path : paths) {
+        for (final String path : paths) {
             result = result.and(JkFileTree.of(new File(baseDir, path)));
         }
         return result;
@@ -403,7 +401,7 @@ public class JkJavaProjectStructure implements Cloneable {
     public JkJavaProjectStructure clone()  {
         try {
             return (JkJavaProjectStructure) super.clone();
-        } catch (CloneNotSupportedException e) {
+        } catch (final CloneNotSupportedException e) {
             throw new IllegalStateException(e);
         }
     }

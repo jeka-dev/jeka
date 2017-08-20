@@ -2,7 +2,7 @@ package org.jerkar.api.ide.eclipse;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.java.build.JkJavaProjectStructure;
+import org.jerkar.api.java.project.JkJavaProjectStructure;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
