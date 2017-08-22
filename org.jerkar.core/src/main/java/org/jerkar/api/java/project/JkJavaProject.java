@@ -9,6 +9,7 @@ import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkResolutionParameters;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPath;
+import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavadocMaker;
@@ -18,6 +19,9 @@ import org.jerkar.api.utils.JkUtilsFile;
 
 @Deprecated // Experimental !!!!
 public class JkJavaProject  {
+
+    public static final JkPathFilter RESOURCE_FILTER = JkPathFilter.exclude("**/*.java")
+            .andExclude("**/package.html").andExclude("**/doc-files");
 
     public static JkJavaProject of(File baseDir) {
         return new JkJavaProject(JkJavaProjectStructure.classic(baseDir));

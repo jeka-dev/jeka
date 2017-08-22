@@ -30,21 +30,27 @@ import org.jerkar.api.utils.JkUtilsString;
 public final class JkJavaCompiler {
 
     /** Stands for Java version 1.3 */
+    @Deprecated  // Use JkJavaVersion
     public static final String V1_3 = "1.3";
 
     /** Stands for Java version 1.4 */
+    @Deprecated  // Use JkJavaVersion
     public static final String V1_4 = "1.4";
 
     /** Stands for Java version 5 */
+    @Deprecated  // Use JkJavaVersion
     public static final String V5 = "5";
 
     /** Stands for Java version 6 */
+    @Deprecated  // Use JkJavaVersion
     public static final String V6 = "6";
 
     /** Stands for Java version 7 */
+    @Deprecated  // Use JkJavaVersion
     public static final String V7 = "7";
 
     /** Stands for Java version 8 */
+    @Deprecated  // Use JkJavaVersion
     public static final String V8 = "8";
 
     /** Filter to retain only source files */
@@ -182,13 +188,43 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * Creates a copy of this {@link JkJavaCompiler} but with the specified
-     * source version.
+     * @see {@link #withSourceVersion(JkJavaVersion)}
      */
+    @Deprecated
     public JkJavaCompiler withSourceVersion(String version) {
-        final JkJavaCompiler result = andOptions("-source", version);
-        result.versionCache = version;
+        return this.withSourceVersion(JkJavaVersion.name(version));
+    }
+
+    /**
+     * Creates a copy of this {@link JkJavaCompiler} but with the specified
+     * source version. If the specified version is null, this methods returns this object.
+     */
+    public JkJavaCompiler withSourceVersion(JkJavaVersion version) {
+        if (version == null) {
+            return this;
+        }
+        final JkJavaCompiler result = andOptions("-source", version.name());
+        result.versionCache = version.name();
         return result;
+    }
+
+    /**
+     * @see #withTargetVersion(JkJavaVersion)
+     */
+    @Deprecated
+    public JkJavaCompiler withTargetVersion(String version) {
+        return this.withTargetVersion(JkJavaVersion.name(version));
+    }
+
+    /**
+     * Creates a copy of this {@link JkJavaCompiler} but with the target
+     * version. If the specified version is null, this methods returns this object.
+     */
+    public JkJavaCompiler withTargetVersion(JkJavaVersion version) {
+        if (version == null) {
+            return this;
+        }
+        return andOptions("-target", version.name());
     }
 
     /**
@@ -226,14 +262,6 @@ public final class JkJavaCompiler {
      */
     public JkJavaCompiler withAnnotationProcessingOnly() {
         return andOptions("-proc:only");
-    }
-
-    /**
-     * Creates a copy of this {@link JkJavaCompiler} but with the target
-     * version.
-     */
-    public JkJavaCompiler withTargetVersion(String version) {
-        return andOptions("-target", version);
     }
 
     /**

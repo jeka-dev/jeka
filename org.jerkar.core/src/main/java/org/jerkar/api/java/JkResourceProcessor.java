@@ -94,6 +94,13 @@ public final class JkResourceProcessor {
     }
 
     /**
+     * @see JkResourceProcessor#and(JkFileTree)
+     */
+    public JkResourceProcessor and(File dir) {
+        return and(JkFileTree.of(dir));
+    }
+
+    /**
      * @see JkResourceProcessor#and(JkFileTreeSet)
      */
     public JkResourceProcessor andIfExist(File... dirs) {
@@ -116,6 +123,17 @@ public final class JkResourceProcessor {
         list.add(interpolator);
         return new JkResourceProcessor(this.resourceTrees, list);
     }
+
+    /**
+     * Creates a <code>JkResourceProcessor</code> identical at this one but
+     * adding the specified interpolator.
+     */
+    public JkResourceProcessor and(Iterable<JkInterpolator> interpolators) {
+        final List<JkInterpolator> list = new LinkedList<JkInterpolator>(this.interpolators);
+        JkUtilsIterable.addAllWithoutDplicate(list, interpolators);
+        return new JkResourceProcessor(this.resourceTrees, list);
+    }
+
 
     /**
      * Shorthand for {@link #and(JkInterpolator)}.

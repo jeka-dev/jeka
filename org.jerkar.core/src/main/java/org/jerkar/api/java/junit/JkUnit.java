@@ -123,6 +123,7 @@ public final class JkUnit {
         return ofFork(JkJavaProcess.of().withClasspath(classpath));
     }
 
+
     /**
      * Returns a launcher forking a process having the specified class directory and the specified classpath entries.
      */
@@ -135,6 +136,14 @@ public final class JkUnit {
      */
     public static JkUnit of(JkClasspath classpath) {
         return new JkUnit(classpath, JunitReportDetail.NONE, null, null, JkFileTreeSet.empty(),
+                true, true);
+    }
+
+    /**
+     * Returns an empty launcher
+     */
+    public static JkUnit of() {
+        return new JkUnit(JkClasspath.of(), JunitReportDetail.NONE, null, null, JkFileTreeSet.empty(),
                 true, true);
     }
 
@@ -159,6 +168,14 @@ public final class JkUnit {
      */
     public JkUnit withReportDir(File reportDir) {
         return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess,
+                classesToTest, this.breakOnFailure, this.printOutputOnConsole);
+    }
+
+    /**
+     * Returns a copy of this launcher but with the specified report directory output.
+     */
+    public JkUnit withClasspath(JkClasspath classpath) {
+        return new JkUnit(classpath, reportDetail, reportDir, this.forkedProcess,
                 classesToTest, this.breakOnFailure, this.printOutputOnConsole);
     }
 
