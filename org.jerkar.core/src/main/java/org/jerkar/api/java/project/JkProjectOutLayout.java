@@ -16,8 +16,9 @@ public class JkProjectOutLayout {
         final File generatedTestResourceDir = new File(outputDir, "generated-test-resources");
         final File testClassDir = new File(outputDir, "test-classes");
         final File testReportDir = new File(outputDir, "test-reports");
+        final File javadocDir = new File(outputDir, "javadoc");
         return new JkProjectOutLayout(outputDir, generatedSourceDir, generatedResourceDir,
-                generatedTestResourceDir, classDir, testClassDir, testReportDir);
+                generatedTestResourceDir, classDir, testClassDir, testReportDir, javadocDir);
     }
 
 
@@ -47,8 +48,10 @@ public class JkProjectOutLayout {
      */
     private final File testReportDir;
 
+    private final File javadocDir;
+
     private JkProjectOutLayout(File outputDir, File generatedSourceDir, File generatedResourceDir,
-            File generatedTestResourceDir, File classDir, File testClassDir, File testReportDir) {
+            File generatedTestResourceDir, File classDir, File testClassDir, File testReportDir, File javadocDir) {
         super();
         this.outputDir = outputDir;
         this.generatedSourceDir = generatedSourceDir;
@@ -57,6 +60,7 @@ public class JkProjectOutLayout {
         this.classDir = classDir;
         this.testClassDir = testClassDir;
         this.testReportDir = testReportDir;
+        this.javadocDir = javadocDir;
     }
 
     public JkProjectOutLayout withOutputBaseDir(File newOutputDir) {
@@ -68,37 +72,39 @@ public class JkProjectOutLayout {
         final File generatedResourceDir = move(this.generatedResourceDir, originalOut, newOutputDir);
         final File generatedSourceDir = move(this.generatedSourceDir, originalOut, newOutputDir);
         final File generatedTestResourceDir = move(this.generatedTestResourceDir, originalOut, newOutputDir);
-        return new JkProjectOutLayout(outputDir, generatedSourceDir, generatedResourceDir, generatedTestResourceDir, classDir, testClassDir, testReportDir);
+        final File javadocDir = move(this.javadocDir, originalOut, newOutputDir);
+        return new JkProjectOutLayout(outputDir, generatedSourceDir, generatedResourceDir, generatedTestResourceDir,
+                classDir, testClassDir, testReportDir, javadocDir);
     }
 
     public JkProjectOutLayout withGeneratedSourceDir(String path) {
         return new JkProjectOutLayout(this.outputDir, new File(outputDir, path), this.generatedResourceDir, this.generatedTestResourceDir,
-                this.classDir, this.testClassDir, this.testReportDir);
+                this.classDir, this.testClassDir, this.testReportDir, this.javadocDir);
     }
 
     public JkProjectOutLayout withGeneratedResourceDir(String path) {
         return new JkProjectOutLayout(this.outputDir, this.generatedSourceDir, new File(this.outputDir, path), this.generatedTestResourceDir,
-                this.classDir, this.testClassDir, this.testReportDir);
+                this.classDir, this.testClassDir, this.testReportDir, this.javadocDir);
     }
 
     public JkProjectOutLayout withGeneratedTestResourceDir(String path) {
         return new JkProjectOutLayout(this.outputDir, this.generatedSourceDir, this.generatedResourceDir, new File(this.outputDir, path),
-                this.classDir, this.testClassDir, this.testReportDir);
+                this.classDir, this.testClassDir, this.testReportDir, this.javadocDir);
     }
 
     public JkProjectOutLayout withClassDir(String path) {
         return new JkProjectOutLayout(this.outputDir, this.generatedSourceDir, this.generatedResourceDir, this.generatedResourceDir,
-                new File(this.outputDir, path), this.testClassDir, this.testReportDir);
+                new File(this.outputDir, path), this.testClassDir, this.testReportDir, this.javadocDir);
     }
 
     public JkProjectOutLayout withTestClassDir(String path) {
         return new JkProjectOutLayout(this.outputDir, this.generatedSourceDir, this.generatedResourceDir, this.generatedResourceDir,
-                this.classDir, new File(this.outputDir, path), this.testReportDir);
+                this.classDir, new File(this.outputDir, path), this.testReportDir, this.javadocDir);
     }
 
     public JkProjectOutLayout withTestReportDir(String path) {
         return new JkProjectOutLayout(this.outputDir, this.generatedSourceDir, this.generatedResourceDir, this.generatedResourceDir,
-                this.classDir, this.testClassDir, new File(this.outputDir, path));
+                this.classDir, this.testClassDir, new File(this.outputDir, path), this.javadocDir);
     }
 
     /**
@@ -164,6 +170,10 @@ public class JkProjectOutLayout {
      */
     public File generatedTestResourceDir() {
         return generatedTestResourceDir;
+    }
+
+    public File getJavadocDir() {
+        return javadocDir;
     }
 
 }

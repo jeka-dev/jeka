@@ -62,6 +62,10 @@ public class JkJavaProjectDef {
         // Do nothing by default
     }
 
+    public void generateTestResources(Map<String, String> options) {
+        // Do nothing by default
+    }
+
     public void compile(final JkJavaCompiler baseCompiler, JkRepos dependencyRepositories, Map<String, String> options) {
         JkDependencyResolver dependencyResolver = JkDependencyResolver.managed(dependencyRepositories, this.dependencies);
         JkJavaCompiler comp = applyEncodingAndVersion(baseCompiler);
