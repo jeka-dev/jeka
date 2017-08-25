@@ -24,7 +24,7 @@ public class JkDependencyResolverRunner {
                 .build();// .withDefaultScope(COMPILE);
         // final JkResolutionParameters params =
         // JkResolutionParameters.defaultScopeMapping((COMPILE.mapTo("compile(*)")));
-        final JkDependencyResolver resolver = JkDependencyResolver.managed(REPOS);// .withParams(params);
+        final JkDependencyResolver resolver = JkDependencyResolver.of(REPOS);// .withParams(params);
         final JkResolveResult resolveResult = resolver.resolve(deps);
         for (final File file : resolveResult.localFiles()) {
             System.out.println(file.getAbsolutePath());
@@ -36,7 +36,7 @@ public class JkDependencyResolverRunner {
         final JkDependencies deps = JkDependencies.builder()
                 .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").scope(JkJavaBuild.TEST)
                 .build();// .
-        final JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral());
+        final JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral());
         final JkResolveResult resolveResult = resolver.resolve(deps, JkJavaBuild.TEST);
         JkDependencyNode tree = resolveResult.dependencyTree();
         System.out.println(tree.toStrings());

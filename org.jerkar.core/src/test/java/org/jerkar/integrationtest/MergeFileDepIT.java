@@ -7,8 +7,6 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.List;
-import java.util.Set;
 
 import static org.jerkar.tool.builtins.javabuild.JkJavaBuild.*;
 import static org.junit.Assert.*;
@@ -31,7 +29,7 @@ public class MergeFileDepIT {
                 .on("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0").scope(COMPILE)
                 .on(dep2File).scope(COMPILE)
                 .build();
-        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral())
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkDependencyNode tree = resolver.resolve(deps).dependencyTree();
@@ -78,10 +76,10 @@ public class MergeFileDepIT {
         JkDependencies deps = JkDependencies.builder()
                 .on(dep0File).scope(TEST)
                 .on(dep1File).scope(TEST).build();
-        JkDependencyResolver resolver = JkDependencyResolver.unmanaged();
+        JkDependencyResolver resolver = JkDependencyResolver.of();
         JkDependencyNode tree = resolver.resolve(deps).dependencyTree();
         assertEquals(2, tree.flatten().size());
-        resolver = JkDependencyResolver.managed(JkRepos.mavenCentral());
+        resolver = JkDependencyResolver.of(JkRepos.mavenCentral());
         assertEquals(2, resolver.resolve(deps).dependencyTree().flatten().size());
 
     }

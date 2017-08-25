@@ -34,7 +34,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      */
     @SuppressWarnings("unchecked")
     public static JkDependencies of(JkScopedDependency... scopedDependencies) {
-        return new JkDependencies(Arrays.asList(scopedDependencies), Collections.EMPTY_SET);
+        return new JkDependencies(Arrays.asList(scopedDependencies), Collections.EMPTY_SET, JkVersionProvider.of());
     }
 
     /**
@@ -58,7 +58,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scope);
             list.add(scopedDependency);
         }
-        return new JkDependencies(list, Collections.EMPTY_SET);
+        return new JkDependencies(list, Collections.EMPTY_SET, JkVersionProvider.of());
     }
 
     /**
@@ -78,17 +78,20 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scopes);
             list.add(scopedDependency);
         }
-        return new JkDependencies(list, Collections.EMPTY_SET);
+        return new JkDependencies(list, Collections.EMPTY_SET, JkVersionProvider.of());
     }
 
     private final List<JkScopedDependency> dependencies;
 
     private final Set<JkDepExclude> depExcludes;
 
-    private JkDependencies(List<JkScopedDependency> dependencies, Set<JkDepExclude> excludes) {
+    private final JkVersionProvider overridedVersions;
+
+    private JkDependencies(List<JkScopedDependency> dependencies, Set<JkDepExclude> excludes, JkVersionProvider overridedVersions) {
         super();
         this.dependencies = Collections.unmodifiableList(dependencies);
         this.depExcludes = Collections.unmodifiableSet(excludes);
+        this.overridedVersions = overridedVersions;
     }
 
     /**
@@ -114,7 +117,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
                 }
             }
         }
-        return new JkDependencies(result, this.depExcludes);
+        return new JkDependencies(result, this.depExcludes, this.overridedVersions);
     }
 
     /**
@@ -129,7 +132,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             }
             list.add(dep);
         }
-        return new JkDependencies(list, this.depExcludes);
+        return new JkDependencies(list, this.depExcludes, this.overridedVersions);
     }
 
     /**
@@ -146,7 +149,15 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             }
             list.add(dep);
         }
-        return new JkDependencies(list, this.depExcludes);
+        return new JkDependencies(list, this.depExcludes, this.overridedVersions);
+    }
+
+    /**
+     * Returns a clone of this object but using specified version provider to override
+     * versions of transitive dependencies.
+     */
+    public JkDependencies withOvveridedVersions(JkVersionProvider versionProvider) {
+        return new JkDependencies(this.dependencies, this.excludes(), versionProvider);
     }
 
     /**
@@ -239,10 +250,16 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
     /**
      * Returns the dependencies to be excluded to the transitive chain when using this dependency.
-     * @return
      */
     public Set<JkDepExclude> excludes() {
         return this.depExcludes;
+    }
+
+    /**
+     * Returns overided versions for transitive dependencies.
+     */
+    public JkVersionProvider overridedVersions() {
+        return this.overridedVersions;
     }
 
     @Override
@@ -364,7 +381,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
                 deps.add(scopedDependency);
             }
         }
-        return new JkDependencies(deps, excludes());
+        return new JkDependencies(deps, excludes(), this.overridedVersions);
     }
 
     /**
@@ -434,7 +451,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             }
             result.add(toAdd);
         }
-        return new JkDependencies(result, this.depExcludes);
+        return new JkDependencies(result, this.depExcludes, this.overridedVersions);
     }
 
     /**
@@ -462,7 +479,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
                 dependencies.add(scopedDependency);
             }
         }
-        return new JkDependencies(dependencies, this.depExcludes);
+        return new JkDependencies(dependencies, this.depExcludes, this.overridedVersions);
     }
 
     /**
@@ -823,7 +840,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
          * in this builder.
          */
         public JkDependencies build() {
-            return new JkDependencies(dependencies, depExcludes);
+            return new JkDependencies(dependencies, depExcludes, JkVersionProvider.of());
         }
 
         /**

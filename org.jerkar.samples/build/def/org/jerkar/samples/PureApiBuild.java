@@ -29,7 +29,7 @@ public class PureApiBuild {
                 .build());
         javaProject.setSourceAndTargetVersion(JkJavaVersion.V7);
 
-        JkDependencyResolver dependencyResolver = JkDependencyResolver.managed(JkRepos.mavenCentral());
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepos.mavenCentral());
         Map<String, String> options = new HashMap<String, String>();
         JkJavaCompiler compiler = JkJavaCompiler.base();
         JkUnit junit = JkUnit.of();

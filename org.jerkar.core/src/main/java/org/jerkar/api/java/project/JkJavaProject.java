@@ -11,7 +11,6 @@ import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkTestSuiteResult;
 import org.jerkar.api.java.junit.JkUnit;
-import org.jerkar.tool.JkProject;
 
 import java.io.File;
 import java.util.HashMap;
@@ -20,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @Deprecated // Experimental !!!!
-public class JkJavaProject {
+public class JkJavaProject implements JkProjectSettingProvider {
 
     public static final JkPathFilter RESOURCE_FILTER = JkPathFilter.exclude("**/*.java")
             .andExclude("**/package.html").andExclude("**/doc-files");
@@ -28,7 +27,7 @@ public class JkJavaProject {
     public static JkJavaProject of(File baseDir) {
         JkProjectSourceLayout sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir);
         JkProjectOutLayout outLayout = JkProjectOutLayout.classic().withOutputBaseDir(new File(baseDir, "build/output"));
-        return new JkJavaProject(baseDir, sourceLayout, outLayout, JkDependencies.of(), null, null, null);
+        return new JkJavaProject(baseDir, sourceLayout, outLayout, JkDependencies.of(), null, null);
     }
 
     public static JkJavaProject of() {
@@ -43,8 +42,6 @@ public class JkJavaProject {
 
     private JkDependencies dependencies;
 
-    private JkVersionProvider forcedVersions;
-
     private JkJavaVersion sourceVersion;
 
     private JkJavaVersion targetVersion;
@@ -56,13 +53,12 @@ public class JkJavaProject {
     private String encoding = "UTF-8";
 
     public JkJavaProject(File baseDir, JkProjectSourceLayout sourceLayout, JkProjectOutLayout outLayout,
-                            JkDependencies dependencies, JkVersionProvider forcedVersions,
+                            JkDependencies dependencies,
                             JkJavaVersion sourceVersion, JkJavaVersion targetVersion) {
         this.baseDir = baseDir;
         this.sourceLayout = sourceLayout;
         this.outLayout = outLayout;
         this.dependencies = dependencies;
-        this.forcedVersions = forcedVersions;
         this.sourceVersion = sourceVersion;
         this.targetVersion = targetVersion;
     }
@@ -117,7 +113,7 @@ public class JkJavaProject {
     }
 
     public File makeFatFar(JkDependencyResolver baseDependencyResolver, Map<String, String> options) {
-        JkDependencyResolver depResolver = baseDependencyResolver.withTransitiveVersionOverride(this.forcedVersions);
+        JkDependencyResolver depResolver = baseDependencyResolver;
         JkClasspath classpath = JkClasspath.of(depResolver.get(this.dependencies, JkJavaDepScopes.RUNTIME));
         return jarMaker().fatJar(manifest, this.outLayout.classDir(), classpath, JkFileTreeSet.empty());
     }
@@ -170,7 +166,7 @@ public class JkJavaProject {
 
     public JkJavaProjectDependency asDependency() {
         return new JkJavaProjectDependency(this,
-                JkDependencyResolver.managed(JkRepos.mavenCentral()),
+                JkDependencyResolver.of(JkRepos.mavenCentral()),
                 JkJavaCompiler.base(), JkUnit.of(), new HashMap<String, String>());
 
     }
@@ -214,6 +210,7 @@ public class JkJavaProject {
     // ---------------------------- Getters / setters --------------------------------------------
 
 
+    @Override
     public JkProjectSourceLayout getSourceLayout() {
         return sourceLayout;
     }
@@ -222,12 +219,19 @@ public class JkJavaProject {
         return outLayout;
     }
 
-    public JkDependencies dependencies(Map<String, String> options) {
+    @Override
+    public JkDependencies getDependencies(Map<String, String> options) {
         return this.dependencies;
     }
 
-    public JkVersionProvider getForcedVersions() {
-        return forcedVersions;
+    @Override
+    public JkJavaVersion getSourceVersion() {
+        return sourceVersion;
+    }
+
+    @Override
+    public JkJavaVersion getTargetVersion() {
+        return targetVersion;
     }
 
     public JkJavaProject setSourceLayout(JkProjectSourceLayout sourceLayout) {
@@ -260,9 +264,6 @@ public class JkJavaProject {
         this.targetVersion = version;
         return this;
     }
-
-
-
 
     @Override
     public String toString() {

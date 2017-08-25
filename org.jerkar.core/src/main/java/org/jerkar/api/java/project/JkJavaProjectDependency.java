@@ -64,6 +64,6 @@ public class JkJavaProjectDependency extends JkComputedDependency  {
     }
 
     private static JkPath jarAndRuntimeDeps(JkJavaProject project, JkDependencyResolver dependencyResolver, Map<String, String> options) {
-        return JkPath.of(dependencyResolver.get(project.dependencies(options))).andHead(project.getMainJar());
+        return JkPath.of(dependencyResolver.get(project.getDependencies(options))).andHead(project.getMainJar());
     }
 }

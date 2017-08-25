@@ -19,7 +19,7 @@ public class ResolveHandleErrorIT {
         JkDependencies deps = JkDependencies.builder()
                 .on(JkPopularModules.JAVAX_SERVLET_API, "2.5.3").scope(COMPILE_AND_RUNTIME)  // does not exist
                 .build();
-        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral())
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps);

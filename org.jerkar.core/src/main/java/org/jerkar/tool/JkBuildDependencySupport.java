@@ -35,7 +35,7 @@ import org.jerkar.api.utils.JkUtilsString;
 public class JkBuildDependencySupport extends JkBuild {
 
     /**
-     * Default path for the non managed dependencies. This path is relative to
+     * Default path for the non of dependencies. This path is relative to
      * {@link #baseDir()}.
      */
     protected static final String STD_LIB_PATH = "build/libs";
@@ -113,7 +113,7 @@ public class JkBuildDependencySupport extends JkBuild {
 
     /**
      * Returns the download repositories where to retrieve artifacts. It has
-     * only a meaning in case of using managed dependencies.
+     * only a meaning in case of using of dependencies.
      */
     protected JkRepos downloadRepositories() {
         return mavenPublishLocal().and(JkRepo.firstNonNull(repoFromOptions("download"), JkRepo.mavenCentral()));
@@ -240,11 +240,11 @@ public class JkBuildDependencySupport extends JkBuild {
     private JkDependencyResolver createDependencyResolver() {
         final JkDependencies dependencies = effectiveDependencies().and(implicitDependencies());
         if (dependencies.containsModules()) {
-            return JkDependencyResolver.managed(downloadRepositories())
-                    .withModuleHolder(versionedModule()).withTransitiveVersionOverride(this.versionProvider())
+            return JkDependencyResolver.of(downloadRepositories())
+                    .withModuleHolder(versionedModule())
                     .withParams(JkResolutionParameters.of().withDefault(scopeMapping()));
         }
-        return JkDependencyResolver.unmanaged();
+        return JkDependencyResolver.of();
     }
 
     /**

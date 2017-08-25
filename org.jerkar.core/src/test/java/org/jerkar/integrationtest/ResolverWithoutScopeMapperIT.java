@@ -21,7 +21,7 @@ public class ResolverWithoutScopeMapperIT {
         JkDependencies deps = JkDependencies.builder()
                 .on(JkPopularModules.APACHE_COMMONS_DBCP, "1.4").scope(JkJavaBuild.COMPILE)
                 .build();
-        JkDependencyResolver resolver = JkDependencyResolver.managed(REPOS)
+        JkDependencyResolver resolver = JkDependencyResolver.of(REPOS)
                 .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, JkJavaBuild.COMPILE);
         assertTrue(resolveResult.contains(JkModuleId.of("commons-pool")));
@@ -30,7 +30,7 @@ public class ResolverWithoutScopeMapperIT {
         deps = JkDependencies.builder()
                 .on(JkPopularModules.HIBERNATE_CORE, "5.2.10.Final").scope(JkJavaBuild.COMPILE)
                 .build();
-        resolver = JkDependencyResolver.managed(REPOS)
+        resolver = JkDependencyResolver.of(REPOS)
                 .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
         resolveResult = resolver.resolve(deps, JkJavaBuild.COMPILE);
         System.out.println(resolveResult.dependencyTree().toStringComplete());
@@ -42,7 +42,7 @@ public class ResolverWithoutScopeMapperIT {
         JkDependencies deps = JkDependencies.builder()
                 .on(JkPopularModules.APACHE_COMMONS_DBCP, "1.4").scope(JkJavaBuild.COMPILE)
                 .build();
-        JkDependencyResolver resolver = JkDependencyResolver.managed(REPOS)
+        JkDependencyResolver resolver = JkDependencyResolver.of(REPOS)
             .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
 
         // runtime classpath should embed the dependency as well cause 'RUNTIME' scope extends 'COMPILE'
@@ -63,7 +63,7 @@ public class ResolverWithoutScopeMapperIT {
         JkDependencies deps = JkDependencies.builder()
                 .on(JkPopularModules.SPRING_ORM, "4.3.8.RELEASE").mapScope(JkJavaBuild.COMPILE).to("compile", "master", "optional")
                 .build();
-        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral());
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps, JkJavaBuild.COMPILE);
         assertEquals(37, resolveResult.dependencyTree().flattenToVersionProvider().moduleIds().size());
     }
@@ -73,7 +73,7 @@ public class ResolverWithoutScopeMapperIT {
         JkDependencies deps = JkDependencies.builder()
                 .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").mapScope(JkJavaBuild.TEST).to("master", "runtime")
                 .build();
-        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral());
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps, JkJavaBuild.TEST);
         Set<JkModuleId> moduleIds = resolveResult.dependencyTree().flattenToVersionProvider().moduleIds();
 

@@ -28,24 +28,39 @@ import org.jerkar.api.utils.JkUtilsIterable;
 public final class JkDependencyResolver {
 
     /**
-     * Creates a dependency resolver relying on a dependency manager. Such a
-     * resolver is able to resolve dependencies transitively downloading
-     * artifacts hosted on Maven or Ivy repository. If you don't have module
-     * dependencies (only local dependencies) then you'd better use
-     * {@link #unmanaged()} instead.
+     * @Deprecated use {@link #of(JkRepos)} instead
      */
+    @Deprecated
     public static JkDependencyResolver managed(JkRepos repos) {
         final InternalDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
-        return new JkDependencyResolver(ivyResolver,  null, null,
-                null, repos);
+        return new JkDependencyResolver(ivyResolver,  null, null, repos);
     }
 
     /**
-     * Creates a dependency manager that does not need to rely on a dependency
-     * manager. This is a case when you use only local file dependencies.
+     * @Deprecated use {@link #of(JkRepo...)} with empty args instead.
      */
+    @Deprecated
     public static JkDependencyResolver unmanaged() {
-        return new JkDependencyResolver(null, null, null, null, JkRepos.of());
+        return new JkDependencyResolver(null, null, null,  JkRepos.of());
+    }
+
+    /**
+     * Creates a dependency resolver fetching module dependencies in the specified repos. If
+     * the specified JkRepo contains no {@link JkRepo} then the created.
+     */
+    public static JkDependencyResolver of(JkRepos repos) {
+        if (!repos.iterator().hasNext()) {
+            return new JkDependencyResolver(null, null, null, JkRepos.of());
+        }
+        final InternalDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
+        return new JkDependencyResolver(ivyResolver,  null, null, repos);
+    }
+
+    /**
+     * @See {@link #of(JkRepos)}
+     */
+    public static JkDependencyResolver of(JkRepo ... repos) {
+        return of(JkRepos.of(repos));
     }
 
     private final InternalDepResolver internalResolver;
@@ -56,17 +71,13 @@ public final class JkDependencyResolver {
     // efficiently.
     private final JkVersionedModule module;
 
-    private final JkVersionProvider transitiveVersionOverride;
-
     private final JkRepos repos;
 
     private JkDependencyResolver(InternalDepResolver internalResolver,
-            JkVersionedModule module, JkResolutionParameters resolutionParameters,
-            JkVersionProvider transitiveVersionOverride, JkRepos repos) {
+            JkVersionedModule module, JkResolutionParameters resolutionParameters, JkRepos repos) {
         this.internalResolver = internalResolver;
         this.module = module;
         this.parameters = resolutionParameters;
-        this.transitiveVersionOverride = transitiveVersionOverride == null ? JkVersionProvider.empty() : transitiveVersionOverride;
         this.repos = repos;
     }
 
@@ -78,7 +89,7 @@ public final class JkDependencyResolver {
     }
 
     /**
-     * Resolves the managed dependencies (dependencies declared as external
+     * Resolves the of dependencies (dependencies declared as external
      * module) for the specified scopes. If no scope is specified, then it is
      * resolved for all scopes.
      */
@@ -97,7 +108,7 @@ public final class JkDependencyResolver {
             final JkDependencyNode root = JkDependencyNode.ofModuleDep(info, nodes);
             return JkResolveResult.of(root, JkResolveResult.JkErrorReport.allFine());
         }
-        return resolveWithInternalResolver(dependencies, this.transitiveVersionOverride, scopes);
+        return resolveWithInternalResolver(dependencies, dependencies.overridedVersions(), scopes);
     }
 
     /**
@@ -112,7 +123,7 @@ public final class JkDependencyResolver {
      * for the specified scopes.
      * <p>
      * If no scope is specified then return all file dependencies and the
-     * dependencies specified. About the managed dependency the same rule than
+     * dependencies specified. About the of dependency the same rule than
      * for {@link #resolve(JkDependencies, JkScope...)} apply.
      * </p>
      * The result is ordered according the order dependencies has been declared.
@@ -124,7 +135,7 @@ public final class JkDependencyResolver {
     public JkPath get(JkDependencies dependencies, JkScope... scopes) {
         JkResolveResult resolveResult = null;
         if (internalResolver != null && dependencies.containsModules()) {
-            resolveResult = resolveWithInternalResolver(dependencies, this.transitiveVersionOverride, scopes).assertNoError();
+            resolveResult = resolveWithInternalResolver(dependencies, dependencies.overridedVersions(), scopes).assertNoError();
             return JkPath.of(resolveResult.dependencyTree().allFiles()).withoutDuplicates();
         }
         final List<File> result = new LinkedList<File>();
@@ -164,7 +175,7 @@ public final class JkDependencyResolver {
      */
     public JkDependencyResolver withVersions(JkVersionProvider versionProvider) {
         return new JkDependencyResolver(this.internalResolver, this.module,
-                this.parameters, transitiveVersionOverride, this.repos);
+                this.parameters, this.repos);
     }
 
 
@@ -172,19 +183,11 @@ public final class JkDependencyResolver {
      * The underlying dependency manager can cache the resolution on file system
      * for faster result. To make this caching possible, you must set the
      * module+version for which the resolution is made. This is only relevant
-     * for managed dependencies and have no effect for unmanaged dependencies.
+     * for of dependencies and have no effect for of dependencies.
      */
     public JkDependencyResolver withModuleHolder(JkVersionedModule versionedModule) {
         return new JkDependencyResolver(this.internalResolver, versionedModule,
-                this.parameters, this.transitiveVersionOverride, this.repos);
-    }
-
-    /**
-     * Provides a mean to force module versions coming to transitive dependencies.
-     */
-    public JkDependencyResolver withTransitiveVersionOverride(JkVersionProvider transitiveVersionOverride) {
-        return new JkDependencyResolver(this.internalResolver, this.module,
-                this.parameters, transitiveVersionOverride, this.repos);
+                this.parameters, this.repos);
     }
 
     /**
@@ -192,17 +195,17 @@ public final class JkDependencyResolver {
      */
     public JkDependencyResolver withRepos(JkRepos otherRepos) {
         return new JkDependencyResolver(this.internalResolver, this.module,
-                this.parameters, transitiveVersionOverride, otherRepos);
+                this.parameters, otherRepos);
     }
 
     /**
      * You can alter the resolver behavior through these settings. his is only
-     * relevant for managed dependencies and have no effect for unmanaged
+     * relevant for of dependencies and have no effect for of
      * dependencies.
      */
     public JkDependencyResolver withParams(JkResolutionParameters params) {
         return new JkDependencyResolver(this.internalResolver, this.module,
-                params, this.transitiveVersionOverride, this.repos);
+                params, this.repos);
     }
 
     /**
@@ -215,7 +218,7 @@ public final class JkDependencyResolver {
     @Override
     public String toString() {
         if (repos == null) {
-            return "unmanaged depenedncy resolver";
+            return "of depenedncy resolver";
         }
         return repos.toString();
     }

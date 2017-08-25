@@ -134,7 +134,7 @@ final class Project {
 
     private JkPath pathOf(List<? extends JkDependency> dependencies) {
         final JkDependencies deps = JkDependencies.of(dependencies);
-        return JkDependencyResolver.managed(this.buildRepos).get(deps);
+        return JkDependencyResolver.of(this.buildRepos).get(deps);
     }
 
     JkBuild instantiate(JkInit init) {
@@ -270,9 +270,9 @@ final class Project {
     private JkDependencyResolver getBuildDefDependencyResolver() {
         final JkDependencies deps = this.buildDefDependencies();
         if (deps.containsModules()) {
-            return JkDependencyResolver.managed(this.buildRepos);
+            return JkDependencyResolver.of(this.buildRepos);
         }
-        return JkDependencyResolver.unmanaged();
+        return JkDependencyResolver.of();
     }
 
     @Override

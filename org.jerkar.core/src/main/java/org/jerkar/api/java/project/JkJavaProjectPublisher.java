@@ -38,8 +38,8 @@ public class JkJavaProjectPublisher {
     /** Publishes the produced artifact to the defined repositories.  */
     public void publish(JkJavaProject project, JkVersionedModule versionedModule) {
         Map<String, String> options = new HashMap<String, String>();
-        final JkDependencies dependencies = project.dependencies(options);
-        final JkVersionProvider resolvedVersions = project.getForcedVersions();
+        final JkDependencies dependencies = project.getDependencies(options);
+        final JkVersionProvider resolvedVersions = project.getDependencies(options).overridedVersions();
         if (publisher.hasMavenPublishRepo()) {
             final JkMavenPublication publication = mavenPublication(project, versionedModule);
             final JkDependencies deps = versionedModule.version().isSnapshot() ? dependencies

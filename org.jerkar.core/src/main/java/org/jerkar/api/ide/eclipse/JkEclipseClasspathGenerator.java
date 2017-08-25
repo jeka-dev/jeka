@@ -2,6 +2,9 @@ package org.jerkar.api.ide.eclipse;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.java.JkJavaVersion;
+import org.jerkar.api.java.project.JkJavaProject;
+import org.jerkar.api.java.project.JkProjectSettingProvider;
 import org.jerkar.api.java.project.JkProjectSourceLayout;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -47,7 +50,7 @@ public final class JkEclipseClasspathGenerator {
 
     private boolean includeJavadoc = true;
 
-    private String sourceJavaVersion;
+    private JkJavaVersion sourceVersion;
 
     private String jreContainer;
 
@@ -60,6 +63,13 @@ public final class JkEclipseClasspathGenerator {
 
     public JkEclipseClasspathGenerator(JkProjectSourceLayout sourceLayout) {
         this.sourceLayout = sourceLayout;
+    }
+
+    public JkEclipseClasspathGenerator(JkProjectSettingProvider project, JkDependencyResolver resolver, Map<String, String> options) {
+        this.sourceLayout = project.getSourceLayout();
+        this.dependencies = project.getDependencies(options);
+        this.dependencyResolver = resolver;
+        this.sourceVersion = project.getSourceVersion();
     }
 
     // -------------------------- setters ----------------------------
@@ -81,8 +91,8 @@ public final class JkEclipseClasspathGenerator {
         return this;
     }
 
-    public JkEclipseClasspathGenerator setSourceJavaVersion(String sourceJavaVersion) {
-        this.sourceJavaVersion = sourceJavaVersion;
+    public JkEclipseClasspathGenerator setSourceJavaVersion(JkJavaVersion sourceVersion) {
+        this.sourceVersion = sourceVersion;
         return this;
     }
 
@@ -193,17 +203,17 @@ public final class JkEclipseClasspathGenerator {
         writer.writeCharacters("\n");
     }
 
-    private static String eclipseJavaVersion(String compilerVersion) {
-        if ("6".equals(compilerVersion)) {
+    private static String eclipseJavaVersion(JkJavaVersion compilerVersion) {
+        if (JkJavaVersion.V6 == compilerVersion) {
             return "1.6";
         }
-        if ("7".equals(compilerVersion)) {
+        if (JkJavaVersion.V7 == compilerVersion) {
             return "1.7";
         }
-        if ("8".equals(compilerVersion)) {
+        if (JkJavaVersion.V8 == compilerVersion) {
             return "1.8";
         }
-        return compilerVersion;
+        return compilerVersion.name();
     }
 
     private void writeProjectEntryIfNeeded(File projectDir, XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
@@ -228,9 +238,9 @@ public final class JkEclipseClasspathGenerator {
         if (jreContainer != null) {
             container = jreContainer;
         } else {
-            if (eclipseJavaVersion(sourceJavaVersion) != null) {
+            if (sourceVersion != null) {
                 container = "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-"
-                        + eclipseJavaVersion(sourceJavaVersion);
+                        + eclipseJavaVersion(sourceVersion);
             } else {
                 container = "org.eclipse.jdt.launching.JRE_CONTAINER";
             }
@@ -423,5 +433,6 @@ public final class JkEclipseClasspathGenerator {
     private static String toPatternString(List<String> pattern) {
         return JkUtilsString.join(pattern, "|");
     }
+
 
 }
