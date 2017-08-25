@@ -16,8 +16,8 @@ public class JkProjectSourceLayout {
 
 
     /**
-     * Creates a classic Java project structure according specified base and output directory.
-     * All others locations are inferred from these two values.
+     * Creates a Java project source structure according Maven conventions. It differs from Maven in that
+     * non-java files located under src/main/java and src/test/java are also considered as resources.
      */
     public static JkProjectSourceLayout mavenJava() {
         final File baseDir = new File(".");
@@ -25,6 +25,19 @@ public class JkProjectSourceLayout {
         final JkFileTreeSet resources = JkFileTreeSet.of(new File(baseDir, "src/main/resources")).and(sources.andFilter(RESOURCE_FILTER));
         final JkFileTreeSet tests = JkFileTreeSet.of(new File(baseDir,"src/test/java"));
         final JkFileTreeSet testResources = JkFileTreeSet.of(new File(baseDir, "src/test/resources")).and(tests.andFilter(RESOURCE_FILTER));
+        return new JkProjectSourceLayout(baseDir, sources, resources, tests, testResources);
+    }
+
+    /**
+     * Creates a simple Java project structure. Production sources and resources are located under src. Test sources
+     * and resources are located in test.
+     */
+    public static JkProjectSourceLayout simple() {
+        final File baseDir = new File(".");
+        final JkFileTreeSet sources = JkFileTreeSet.of(new File(baseDir,"src"));
+        final JkFileTreeSet resources = sources.andFilter(RESOURCE_FILTER);
+        final JkFileTreeSet tests = JkFileTreeSet.of(new File(baseDir,"test"));
+        final JkFileTreeSet testResources = tests.andFilter(RESOURCE_FILTER);
         return new JkProjectSourceLayout(baseDir, sources, resources, tests, testResources);
     }
 
@@ -80,16 +93,32 @@ public class JkProjectSourceLayout {
         return new JkProjectSourceLayout(this.baseDir, sources, this.resources, this.tests, this.testResources);
     }
 
+    public JkProjectSourceLayout withSources(String relativePath) {
+        return new JkProjectSourceLayout(this.baseDir, root().go(relativePath).asSet(), this.resources, this.tests, this.testResources);
+    }
+
     public JkProjectSourceLayout withResources(JkFileTreeSet resources) {
         return new JkProjectSourceLayout(this.baseDir, this.sources, resources, this.tests, this.testResources);
+    }
+
+    public JkProjectSourceLayout withResources(String relativePath) {
+        return new JkProjectSourceLayout(this.baseDir, this.sources, root().go(relativePath).asSet(), this.tests, this.testResources);
     }
 
     public JkProjectSourceLayout withTests(JkFileTreeSet tests) {
         return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, tests, this.testResources);
     }
 
+    public JkProjectSourceLayout withTests(String relativePath) {
+        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, root().go(relativePath).asSet(), this.testResources);
+    }
+
     public JkProjectSourceLayout withTestResources(JkFileTreeSet testResources) {
         return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, this.tests, testResources);
+    }
+
+    public JkProjectSourceLayout withTestResources(String relativePath) {
+        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, this.tests, root().go(relativePath).asSet());
     }
 
     private static JkFileTreeSet move(JkFileTreeSet original, File originalBase, File newBase) {

@@ -68,8 +68,12 @@ final class ImlGenerator {
     /** Dependency resolver to fetch module dependencies */
     public JkDependencyResolver dependencyResolver;
 
+    public JkDependencies dependencies;
+
     /** Dependency resolver to fetch module dependencies for build classes */
     JkDependencyResolver buildDefDependencyResolver;
+
+    JkDependencies buildDependencies;
 
     /** Can be empty but not null */
     Iterable<File> projectDependencies = JkUtilsIterable.listOf();
@@ -112,10 +116,10 @@ final class ImlGenerator {
         Set<File> allPaths = new HashSet<File>();
         Set<File> allModules = new HashSet<File>();
         if (this.dependencyResolver != null) {
-            writeDependencies(this.dependencyResolver, allPaths, allModules, false);
+            writeDependencies(dependencies, this.dependencyResolver, allPaths, allModules, false);
         }
         if (this.buildDefDependencyResolver != null) {
-            writeDependencies(this.buildDefDependencyResolver, allPaths, allModules, true);
+            writeDependencies(this.buildDependencies, this.buildDefDependencyResolver, allPaths, allModules, true);
         }
         writeBuildProjectDependencies(allModules);
 
@@ -244,10 +248,10 @@ final class ImlGenerator {
         }
     }
 
-    private void writeDependencies(JkDependencyResolver resolver, Set<File> allPaths, Set<File> allModules,
+    private void writeDependencies(JkDependencies dependencies, JkDependencyResolver resolver, Set<File> allPaths, Set<File> allModules,
                                    boolean forceTest) throws XMLStreamException {
 
-        final JkResolveResult resolveResult = resolver.resolve();
+        final JkResolveResult resolveResult = resolver.resolve(dependencies);
         final JkDependencyNode tree = resolveResult.dependencyTree();
         for (final JkDependencyNode node : tree.flatten()) {
 

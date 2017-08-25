@@ -31,10 +31,10 @@ public class MergeFileDepIT {
                 .on("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0").scope(COMPILE)
                 .on(dep2File).scope(COMPILE)
                 .build();
-        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
+        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
-        JkDependencyNode tree = resolver.resolve().dependencyTree();
+        JkDependencyNode tree = resolver.resolve(deps).dependencyTree();
 
         System.out.println(tree.toStringComplete());
 
@@ -60,7 +60,7 @@ public class MergeFileDepIT {
 
         // Now check that file dependencies with Test Scope are not present in compile
 
-        tree = resolver.resolve(JkJavaBuild.COMPILE).dependencyTree();
+        tree = resolver.resolve(deps, JkJavaBuild.COMPILE).dependencyTree();
         System.out.println(tree.toStringComplete());
 
         root = tree.moduleInfo();
@@ -78,11 +78,11 @@ public class MergeFileDepIT {
         JkDependencies deps = JkDependencies.builder()
                 .on(dep0File).scope(TEST)
                 .on(dep1File).scope(TEST).build();
-        JkDependencyResolver resolver = JkDependencyResolver.unmanaged(deps);
-        JkDependencyNode tree = resolver.resolve().dependencyTree();
+        JkDependencyResolver resolver = JkDependencyResolver.unmanaged();
+        JkDependencyNode tree = resolver.resolve(deps).dependencyTree();
         assertEquals(2, tree.flatten().size());
-        resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps);
-        assertEquals(2, resolver.resolve().dependencyTree().flatten().size());
+        resolver = JkDependencyResolver.managed(JkRepos.mavenCentral());
+        assertEquals(2, resolver.resolve(deps).dependencyTree().flatten().size());
 
     }
 

@@ -27,10 +27,10 @@ public class ResolveWithArtifactIT {
                 .on(JkPopularModules.GUAVA, "19.0" )
                 .on("org.lwjgl:lwjgl:3.1.1")
                 .build();
-        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
+        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
-        JkResolveResult resolveResult = resolver.resolve();
+        JkResolveResult resolveResult = resolver.resolve(deps);
         JkDependencyNode treeRoot = resolveResult.dependencyTree();
         System.out.println(resolveResult.localFiles());
         System.out.println(treeRoot.toStringComplete());
@@ -56,10 +56,10 @@ public class ResolveWithArtifactIT {
                 .on("org.springframework.boot:spring-boot-starter-test:1.5.+").scope(TEST)
                 .on("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0").scope(COMPILE)
                 .build();
-        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral(), deps)
+        JkDependencyResolver resolver = JkDependencyResolver.managed(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
-        JkResolveResult resolveResult = resolver.resolve();
+        JkResolveResult resolveResult = resolver.resolve(deps);
         JkDependencyNode tree = resolveResult.dependencyTree();
         System.out.println(tree.toStringComplete());
         System.out.println(JkUtilsString.join(resolveResult.localFiles(), "\n"));

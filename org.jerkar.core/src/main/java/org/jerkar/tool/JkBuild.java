@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jerkar.api.depmanagement.JkComputedDependency;
+import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
@@ -44,6 +45,8 @@ public class JkBuild {
     public final JkBuildPlugins plugins = new JkBuildPlugins(this);
 
     private JkDependencyResolver buildDefDependencyResolver;
+
+    private JkDependencies buildDependencies;
 
     private final JkSlaveBuilds annotatedJkProjectSlaves;
 
@@ -80,7 +83,8 @@ public class JkBuild {
         // Do nothing by default
     }
 
-    void setBuildDefDependencyResolver(JkDependencyResolver scriptDependencyResolver) {
+    void setBuildDefDependencyResolver(JkDependencies buildDependencies, JkDependencyResolver scriptDependencyResolver) {
+        this.buildDependencies = buildDependencies;
         this.buildDefDependencyResolver = scriptDependencyResolver;
     }
 
@@ -90,6 +94,13 @@ public class JkBuild {
      */
     public JkDependencyResolver buildDefDependencyResolver() {
         return this.buildDefDependencyResolver;
+    }
+
+    /**
+     * Dependencies necessary to compile the this build class. It is not the dependencies for building the project.
+     */
+    public JkDependencies buildDependencies() {
+        return buildDependencies;
     }
 
     /**

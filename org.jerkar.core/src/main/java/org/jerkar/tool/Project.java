@@ -77,7 +77,7 @@ final class Project {
         JkLog.startHeaded("Compiling build classes for project " + this.projectBaseDir.getName());
         JkLog.startln("Resolving compilation classpath");
         final JkDependencyResolver buildClassDependencyResolver = getBuildDefDependencyResolver();
-        final JkPath buildPath = buildClassDependencyResolver.get();
+        final JkPath buildPath = buildClassDependencyResolver.get(this.buildDefDependencies());
         path.addAll(buildPath.entries());
         path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
         JkLog.done();
@@ -134,7 +134,7 @@ final class Project {
 
     private JkPath pathOf(List<? extends JkDependency> dependencies) {
         final JkDependencies deps = JkDependencies.of(dependencies);
-        return JkDependencyResolver.managed(this.buildRepos, deps).get();
+        return JkDependencyResolver.managed(this.buildRepos).get(deps);
     }
 
     JkBuild instantiate(JkInit init) {
@@ -156,7 +156,7 @@ final class Project {
             return null;
         }
         try {
-            build.setBuildDefDependencyResolver(getBuildDefDependencyResolver());
+            build.setBuildDefDependencyResolver(this.buildDefDependencies(), getBuildDefDependencyResolver());
             final PluginDictionnary<JkBuildPlugin> dictionnary = init.initProject(build);
             final BuildAndPluginDictionnary result = new BuildAndPluginDictionnary();
             result.build = build;
@@ -270,9 +270,9 @@ final class Project {
     private JkDependencyResolver getBuildDefDependencyResolver() {
         final JkDependencies deps = this.buildDefDependencies();
         if (deps.containsModules()) {
-            return JkDependencyResolver.managed(this.buildRepos, deps);
+            return JkDependencyResolver.managed(this.buildRepos);
         }
-        return JkDependencyResolver.unmanaged(deps);
+        return JkDependencyResolver.unmanaged();
     }
 
     @Override

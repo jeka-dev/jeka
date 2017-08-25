@@ -2,13 +2,13 @@ package org.jerkar.api.ide.eclipse;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.java.project.JkJavaProjectStructure;
+import org.jerkar.api.java.project.JkProjectSourceLayout;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
-import org.jerkar.tool.JkConstants;
+import org.jerkar.tool.JkConstants;;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLOutputFactory;
@@ -29,12 +29,16 @@ public final class JkEclipseClasspathGenerator {
 
     // --------------------- content --------------------------------
 
-    private JkJavaProjectStructure structure;
+    private JkProjectSourceLayout sourceLayout;
 
     private JkDependencyResolver dependencyResolver;
 
+    private JkDependencies dependencies;
+
     // content for build class only
     private JkDependencyResolver buildDefDependencyResolver;
+
+    private JkDependencies buildDependencies;
 
     // content for build class only
     private List<File> slaveProjects = new LinkedList<File>();
@@ -54,20 +58,21 @@ public final class JkEclipseClasspathGenerator {
 
     private boolean hasBuildScript;
 
-    public JkEclipseClasspathGenerator(JkJavaProjectStructure structure) {
-        this.structure = structure;
+    public JkEclipseClasspathGenerator(JkProjectSourceLayout sourceLayout) {
+        this.sourceLayout = sourceLayout;
     }
 
     // -------------------------- setters ----------------------------
 
 
-    public JkEclipseClasspathGenerator setStructure(JkJavaProjectStructure structure) {
-        this.structure = structure;
+    public JkEclipseClasspathGenerator setStructure(JkProjectSourceLayout sourceLayout) {
+        this.sourceLayout = sourceLayout;
         return this;
     }
 
-    public JkEclipseClasspathGenerator setDependencyResolver(JkDependencyResolver dependencyResolver) {
+    public JkEclipseClasspathGenerator setDependencyResolver(JkDependencies dependencies, JkDependencyResolver dependencyResolver) {
         this.dependencyResolver = dependencyResolver;
+        this.dependencies = dependencies;
         return this;
     }
 
@@ -136,7 +141,7 @@ public final class JkEclipseClasspathGenerator {
         final Set<String> paths = new HashSet<String>();
 
         // Write sources for build classes
-        if (hasBuildScript && new File(structure.baseDir(), JkConstants.BUILD_DEF_DIR).exists()) {
+        if (hasBuildScript && new File(sourceLayout.baseDir(), JkConstants.BUILD_DEF_DIR).exists()) {
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "kind", "src",
                     "path", JkConstants.BUILD_DEF_DIR,
@@ -145,13 +150,13 @@ public final class JkEclipseClasspathGenerator {
 
         generateSrcAndTestSrc(writer);
         if (this.dependencyResolver != null) {
-            writeDependenciesEntries(writer, this.dependencyResolver, paths);
+            writeDependenciesEntries(writer, this.dependencies, this.dependencyResolver, paths);
         }
         writeJre(writer);
 
         // add build dependencies
         if (hasBuildScript && buildDefDependencyResolver != null) {
-            final Iterable<File> files = buildDefDependencyResolver.dependenciesToResolve().localFileDependencies();
+            final Iterable<File> files = buildDependencies.localFileDependencies();
             writeFileDepsEntries(writer, files, paths);
         }
 
@@ -260,11 +265,11 @@ public final class JkEclipseClasspathGenerator {
         final Set<String> sourcePaths = new HashSet<String>();
 
         // Test Sources
-        for (final JkFileTree fileTree : structure.testSources().and(structure.testResources()).fileTrees()) {
+        for (final JkFileTree fileTree : sourceLayout.tests().and(sourceLayout.testResources()).fileTrees()) {
             if (!fileTree.root().exists()) {
                 continue;
             }
-            final String path = JkUtilsFile.getRelativePath(structure.baseDir(), fileTree.root()).replace(File.separator, "/");
+            final String path = JkUtilsFile.getRelativePath(sourceLayout.baseDir(), fileTree.root()).replace(File.separator, "/");
             if (sourcePaths.contains(path)) {
                 continue;
             }
@@ -280,11 +285,11 @@ public final class JkEclipseClasspathGenerator {
         }
 
         // Sources
-        for (final JkFileTree fileTree : structure.sources().and(structure.resources()).fileTrees()) {
+        for (final JkFileTree fileTree : sourceLayout.sources().and(sourceLayout.resources()).fileTrees()) {
             if (!fileTree.root().exists()) {
                 continue;
             }
-            final String path = relativePathIfPossible(structure.baseDir(), fileTree.root());
+            final String path = relativePathIfPossible(sourceLayout.baseDir(), fileTree.root());
             if (sourcePaths.contains(path)) {
                 continue;
             }
@@ -317,8 +322,8 @@ public final class JkEclipseClasspathGenerator {
         }
     }
 
-    private void writeDependenciesEntries(XMLStreamWriter writer, JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
-        JkResolveResult resolveResult = resolver.resolve();
+    private void writeDependenciesEntries(XMLStreamWriter writer, JkDependencies dependencies, JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
+        JkResolveResult resolveResult = resolver.resolve(dependencies);
         JkRepos repos = resolver.repositories();
         for (JkDependencyNode node : resolveResult.dependencyTree().flatten()) {
             // Maven dependency

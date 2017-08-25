@@ -1,21 +1,18 @@
 package org.jerkar.api.java.project;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkIvyPublication;
-import org.jerkar.api.depmanagement.JkMavenPublication;
-import org.jerkar.api.depmanagement.JkPublisher;
-import org.jerkar.api.depmanagement.JkVersionProvider;
+import org.jerkar.api.depmanagement.*;
 
 @Deprecated // Experimental !!!!
 public class JkJavaProjectPublisher {
 
-    public static JkJavaProjectPublisher of(JkJavaProject javaProject) {
-        return new JkJavaProjectPublisher(javaProject, JkPublisher.local(), true, true, true);
+    public static JkJavaProjectPublisher of(JkDependencyResolver dependencyResolver) {
+        return new JkJavaProjectPublisher(JkPublisher.local(), true, true, true,
+                dependencyResolver);
     }
-
-    private final JkJavaProject project;
 
     private JkPublisher publisher = JkPublisher.local();
 
@@ -25,48 +22,51 @@ public class JkJavaProjectPublisher {
 
     private final boolean publishJavadoc;
 
-    private JkJavaProjectPublisher(JkJavaProject project, JkPublisher publisher, boolean publishSources, boolean publishTests, boolean publishJavadoc) {
-        this.project = project;
+    private final JkDependencyResolver dependencyResolver;
+
+
+    private JkJavaProjectPublisher(JkPublisher publisher, boolean publishSources,
+                                   boolean publishTests, boolean publishJavadoc,
+                                   JkDependencyResolver dependencyResolver) {
         this.publisher = publisher;
         this.publishSources = publishSources;
         this.publishTests = publishTests;
         this.publishJavadoc = publishJavadoc;
+        this.dependencyResolver = dependencyResolver;
     }
 
     /** Publishes the produced artifact to the defined repositories.  */
-    public void publish() {
-        final JkDependencies dependencies = project.depResolver().resolver().dependenciesToResolve();
-        final JkVersionProvider resolvedVersions = project.depResolver().resolver().resolve().resolvedVersionProvider();
+    public void publish(JkJavaProject project, JkVersionedModule versionedModule) {
+        Map<String, String> options = new HashMap<String, String>();
+        final JkDependencies dependencies = project.dependencies(options);
+        final JkVersionProvider resolvedVersions = project.getForcedVersions();
         if (publisher.hasMavenPublishRepo()) {
-            final JkMavenPublication publication = mavenPublication();
-            final JkDependencies deps = project.module().version().isSnapshot() ? dependencies
+            final JkMavenPublication publication = mavenPublication(project, versionedModule);
+            final JkDependencies deps = versionedModule.version().isSnapshot() ? dependencies
                     .resolvedWith(resolvedVersions) : dependencies;
-                    publisher.publishMaven(project.module(), publication, deps);
+                    publisher.publishMaven(versionedModule, publication, deps);
         }
         if (publisher.hasIvyPublishRepo()) {
             final Date date = new Date();
-            publisher.publishIvy(project.module(), ivyPublication(), dependencies, JkJavaDepScopes.COMPILE,
+            publisher.publishIvy(versionedModule, ivyPublication(project, versionedModule), dependencies, JkJavaDepScopes.COMPILE,
                     JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, date, resolvedVersions);
         }
     }
 
 
-    private JkMavenPublication mavenPublication() {
+    private JkMavenPublication mavenPublication(JkJavaProject project, JkVersionedModule versionedModule) {
         return JkMavenPublication
-                .of(project.packager().jarFile())
-                .andIf(publishSources, project.packager().jarSourceFile(), "sources")
-                // .andOptional(project.javadocMaker().zipFile(), "javadoc")
-                .andOptionalIf(publishTests, project.packager().jarTestFile(), "test")
-                .andOptionalIf(publishTests && publishSources, project.packager().jarTestSourceFile(),
-                        "testSources");
+                .of(project.getMainJar())
+                .andIf(publishSources, project.getJar("sources"), "sources")
+                .andOptional(project.getJar("javadoc"), "javadoc")
+                .andOptionalIf(publishTests, project.getJar("test"), "test");
     }
 
-    private JkIvyPublication ivyPublication() {
-        return JkIvyPublication.of(project.packager().jarFile(), JkJavaDepScopes.COMPILE)
-                .andIf(publishSources, project.packager().jarSourceFile(), "source", JkJavaDepScopes.SOURCES)
+    private JkIvyPublication ivyPublication(JkJavaProject project, JkVersionedModule versionedModule) {
+        return JkIvyPublication.of(project.getMainJar(), JkJavaDepScopes.COMPILE)
+                .andIf(publishSources, project.getJar("sources"), "source", JkJavaDepScopes.SOURCES)
                 // .andOptional(project.javadocMaker().zipFile(), "javadoc", JkJavaDepScopes.JAVADOC)
-                .andOptionalIf(publishTests, project.packager().jarTestFile(), "jar", JkJavaDepScopes.TEST)
-                .andOptionalIf(publishTests && publishSources, project.packager().jarTestSourceFile(), "source", JkJavaDepScopes.SOURCES);
+                .andOptionalIf(publishTests, project.getJar("test"), "jar", JkJavaDepScopes.TEST);
     }
 
 }

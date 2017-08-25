@@ -304,7 +304,7 @@ public final class JkFileTree implements Iterable<File> {
      */
     public List<File> files(boolean includeFolders) {
         if (!root.exists()) {
-            throw new IllegalStateException("Folder " + root.getAbsolutePath() + " does nor exist.");
+            return new LinkedList<File>();
         }
         return JkUtilsFile.filesOf(root, filter.toFileFilter(root), includeFolders);
     }

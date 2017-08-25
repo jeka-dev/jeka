@@ -81,6 +81,12 @@ final class DotClasspathGenerator {
      */
     JkDependencyResolver buildDefDependencyResolver;
 
+    /** dependencies to build the project */
+    JkDependencies dependencies;
+
+    /** dependencies to compile build classes */
+    JkDependencies buildDependencies;
+
     /**
      * Can be empty but not null
      */
@@ -148,7 +154,7 @@ final class DotClasspathGenerator {
 
         // Write entries for dependencies located under build/libs
         if (buildDefDependencyResolver != null) {
-            final Iterable<File> files = buildDefDependencyResolver.dependenciesToResolve().localFileDependencies();
+            final Iterable<File> files = buildDependencies.localFileDependencies();
             writeFileEntries(writer, files, paths, true);
         }
 
@@ -307,12 +313,10 @@ final class DotClasspathGenerator {
     }
 
     private void writeDependenciesEntries2(XMLStreamWriter writer, Set<String> allPaths) throws XMLStreamException {
-        JkResolveResult resolveResult = dependencyResolver.resolve();
-        JkDependencies allDeps = this.dependencyResolver.dependenciesToResolve();
+        JkResolveResult resolveResult = dependencyResolver.resolve(dependencies);
         JkRepos repos = dependencyResolver.repositories();
         if (buildDefDependencyResolver != null) {
-            resolveResult = resolveResult.and(buildDefDependencyResolver.resolve());
-            allDeps = allDeps.and(this.buildDefDependencyResolver.dependenciesToResolve());
+            resolveResult = resolveResult.and(buildDefDependencyResolver.resolve(buildDependencies));
             repos = repos.and(buildDefDependencyResolver.repositories());
         }
         for (JkDependencyNode node : resolveResult.dependencyTree().flatten()) {

@@ -144,16 +144,14 @@ public class JkBuildDependencySupport extends JkBuild {
      * <code>extraXxxxPath</code>.
      */
     public final JkPath depsFor(JkScope... scopes) {
-        return dependencyResolver().get(scopes);
+        return dependencyResolver().get(this.effectiveDependencies(), scopes);
     }
 
     /**
-     * Returns the dependencies of this module. By default it uses unmanaged
-     * dependencies stored locally in the project as described by
-     * {@link #implicitDependencies()} method. If you want to use managed
-     * dependencies, you must override this method.
+     * Returns the dependencies actually used process this build. It sums declared dependencies, local dependencies
+     * and extra dependency added by plugins.
      */
-    private JkDependencies effectiveDependencies() {
+    public final JkDependencies effectiveDependencies() {
         JkDependencies deps = dependencies().withDefaultScope(this.defaultScope()).resolvedWith(versionProvider())
                 .withExclusions(dependencyExclusions());
         final JkScope[] defaultcope = this.defaultScope();
@@ -231,7 +229,7 @@ public class JkBuildDependencySupport extends JkBuild {
     @JkDoc("Displays the resolved dependency tree on the console.")
     public final void showDependencies() {
         JkLog.infoHeaded("Resolved dependencies for " + this.versionedModule());
-        final JkResolveResult resolveResult = this.dependencyResolver().resolve();
+        final JkResolveResult resolveResult = this.dependencyResolver().resolve(this.dependencies());
         final JkDependencyNode tree = resolveResult.dependencyTree();
         JkLog.info(tree.toStrings());
     }
@@ -242,11 +240,11 @@ public class JkBuildDependencySupport extends JkBuild {
     private JkDependencyResolver createDependencyResolver() {
         final JkDependencies dependencies = effectiveDependencies().and(implicitDependencies());
         if (dependencies.containsModules()) {
-            return JkDependencyResolver.managed(downloadRepositories(), dependencies)
+            return JkDependencyResolver.managed(downloadRepositories())
                     .withModuleHolder(versionedModule()).withTransitiveVersionOverride(this.versionProvider())
                     .withParams(JkResolutionParameters.of().withDefault(scopeMapping()));
         }
-        return JkDependencyResolver.unmanaged(dependencies);
+        return JkDependencyResolver.unmanaged();
     }
 
     /**

@@ -21,7 +21,6 @@ public class JkProjectOutLayout {
                 generatedTestResourceDir, classDir, testClassDir, testReportDir, javadocDir);
     }
 
-
     private final File outputDir;
 
     private final File generatedSourceDir;
@@ -129,10 +128,7 @@ public class JkProjectOutLayout {
     }
 
 
-
-
     // --------------------------- Views ---------------------------------
-
 
 
     public final File outputDir() {

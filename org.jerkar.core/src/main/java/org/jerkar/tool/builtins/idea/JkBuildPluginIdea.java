@@ -34,10 +34,12 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
         final ImlGenerator generator = new ImlGenerator(build.baseDir().root());
         generator.useVarPath = useVarPath;
         generator.buildDefDependencyResolver = build.buildDefDependencyResolver();
+        generator.buildDependencies = build.buildDependencies();
         generator.projectDependencies = depProjects;
         if (this.build instanceof JkBuildDependencySupport) {
             final JkBuildDependencySupport dsbuild = (JkBuildDependencySupport) build;
             generator.dependencyResolver = dsbuild.dependencyResolver();
+            generator.dependencies = dsbuild.effectiveDependencies();
         }
         if (this.build instanceof JkJavaBuild) {
             final JkJavaBuild jbuild = (JkJavaBuild) build;

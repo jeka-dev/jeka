@@ -15,7 +15,7 @@ public class PluginsJacocoBuild extends AbstractBuild {
     }
 
     @Override
-    protected JkDependencies dependencies() {
+    public JkDependencies dependencies() {
         return JkDependencies.builder().on(core.asDependency(core.packer().jarFile())).scope(PROVIDED)
                 .on(core.file("build/libs/provided/junit-4.11.jar"),
                         core.file("build/libs/provided/hamcrest-core-1.3.jar"))

@@ -74,6 +74,9 @@ public final class JkJavadocMaker {
      * Returns a {@link JkJavadocMaker} identical to this one but using the specified doclet.
      */
     public JkJavadocMaker withDoclet(Class<?> doclet) {
+        if (doclet == null) {
+            return this;
+        }
         return new JkJavadocMaker(srcDirs, doclet, classpath, extraArgs, outputDir, zipFile);
     }
 
