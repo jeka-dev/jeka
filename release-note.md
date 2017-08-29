@@ -1,9 +1,16 @@
-## Not released yet
+## Ongoing 0.7.O
 
+* Move from jdk6 to jdk8
+* New API to build project base on pure API without needing JkBuild classes
+
+## 0.6.0
+
+* Deep dependency resolution reworking : entirely based on tree leading in a greater accuracy/control.
 * Fix issue #60 related to artifacts with classifier.
 * Handle Eclipse project to project dependencies while generating .classpath (issue #61)
 * Generate Intellij modules.xml files
 * Take scope into account when generating Intellij iml files
+* Many bug fixes
 
 ## 0.5.0
 
