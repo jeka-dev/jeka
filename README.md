@@ -6,6 +6,10 @@
 <strong>Jerkar</strong> is a complete **build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ but using **pure Java** to describe builds : no XML, no foreign language.
 Breaking a common belief, it makes proof that Java is perfectly suitable in this domain.
 
+# News
+ 
+Master version now relies on JDK 8 while 0.6 and prior are relying on JDK 6.
+
 # How to use Jerkar
 
 Jerkar is expected to have a very fast learning curve for Java developers. You can visit the following page in this order :
@@ -57,4 +61,4 @@ More concretely :
 * Favor immutable objects.
 * Embrace a fluent style API (so stay away from JavaBean coding conventions).
 * Don't use 3rd party dependencies (Use or enrich JkUtilsXxxxx classes for commons). 
-* Make your code JDK6 complient (probably switch to JDK 7/8 soon).
+* Jerkar 0.7.x relies on JDK 8
