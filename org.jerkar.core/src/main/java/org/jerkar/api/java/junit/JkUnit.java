@@ -1,6 +1,7 @@
 package org.jerkar.api.java.junit;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -17,10 +18,12 @@ import java.util.Properties;
 
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
+import org.jerkar.api.file.JkPath;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
@@ -138,6 +141,8 @@ public final class JkUnit {
         return new JkUnit(classpath, JunitReportDetail.NONE, null, null, JkFileTreeSet.empty(),
                 true, true);
     }
+
+
 
     /**
      * Returns an empty launcher
@@ -362,12 +367,15 @@ public final class JkUnit {
             final long duration = (end - start) / 1000000;
             result = fromJunit3Result(properties, name, testResult, duration);
         } else {
+            JkUtilsIO.closeQuietly(classLoader.classloader());
             throw new IllegalStateException("No Junit found on test classpath.");
+
         }
 
         if (result.failureCount() > 0) {
             if (breakOnFailure) {
                 JkLog.error(result.toStrings(JkLog.verbose()));
+                JkUtilsIO.closeQuietly(classLoader.classloader());
                 throw new IllegalStateException("Test failed : " + result.toString());
             } else {
                 JkLog.warn(result.toStrings(JkLog.verbose()));
@@ -385,6 +393,7 @@ public final class JkUnit {
             runnable.run(); // NOSONAR
         }
         JkLog.done("Tests run");
+        JkUtilsIO.closeQuietly(classLoader.classloader());
         return result;
     }
 
@@ -400,7 +409,12 @@ public final class JkUnit {
         final JkClasspath classpath = this.jkClasspath().andHead(this.classesToTest.roots());
         final JkClassLoader classLoader = JkClassLoader.system().parent().child(classpath)
                 .loadAllServices();
-        return getJunitTestClassesInClassLoader(classLoader, this.classesToTest);
+        Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, this.classesToTest);
+        if (result.isEmpty()) {
+
+            JkUtilsIO.closeOrFail(classLoader.classloader());
+        }
+        return result;
     }
 
     @SuppressWarnings("rawtypes")

@@ -1,4 +1,4 @@
-package org.jerkar.api.java.project;
+package org.jerkar.api.project;
 
 import java.io.File;
 
@@ -8,7 +8,7 @@ import org.jerkar.api.utils.JkUtilsFile;
 @Deprecated // Experimental !!!!
 public class JkProjectOutLayout {
 
-    public static JkProjectOutLayout classic() {
+    public static JkProjectOutLayout classicJava() {
         final File outputDir = new File(".");
         final File generatedSourceDir = new File(outputDir, "generated-sources/java");
         final File generatedResourceDir = new File(outputDir, "generated-resources");

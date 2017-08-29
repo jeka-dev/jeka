@@ -661,6 +661,7 @@ public final class JkClassLoader {
                 final ZipFile zipFile = JkUtilsZip.zipFile(file);
                 final ZipEntry serviceEntry = zipFile.getEntry("META-INF/services");
                 if (serviceEntry == null) {
+                    JkUtilsIO.closeOrFail(zipFile);
                     continue;
                 }
                 for (final ZipEntry entry : JkUtilsZip.zipEntries(zipFile)) {
@@ -674,6 +675,7 @@ public final class JkClassLoader {
                         }
                     }
                 }
+                JkUtilsIO.closeOrFail(zipFile);
             } else {
                 final File serviceDir = new File(file, "META-INF/services");
                 if (!serviceDir.exists() || !serviceDir.isDirectory()) {

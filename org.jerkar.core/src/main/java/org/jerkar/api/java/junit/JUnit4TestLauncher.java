@@ -1,6 +1,7 @@
 package org.jerkar.api.java.junit;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -52,9 +53,8 @@ class JUnit4TestLauncher {
 
         // initialise JkLog for the launcher classloader
         classloader.invokeStaticMethod(false, JkLog.class.getName(), "beginOfLine");
-
         return classloader.invokeStaticMethod(true, JUnit4TestExecutor.class.getName(),
-                "launchInProcess", classArray, verbose, reportDetail, reportDir, true);
+                    "launchInProcess", classArray, verbose, reportDetail, reportDir, true);
     }
 
 }

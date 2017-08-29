@@ -1,4 +1,4 @@
-package org.jerkar.api.java.project;
+package org.jerkar.api.project;
 
 import java.io.File;
 

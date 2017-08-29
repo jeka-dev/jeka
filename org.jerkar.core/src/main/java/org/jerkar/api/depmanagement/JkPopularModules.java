@@ -75,7 +75,7 @@ public final class JkPopularModules {
 
     public static final JkModuleId SLF4J_JDK14_BINDING = JkModuleId.of("org.slf4j", "slf4j-jdk14");
 
-    public static final JkModuleId LOGBACK_CLASSIC = JkModuleId.of("ch.qos.logback", "logback-classic");
+    public static final JkModuleId LOGBACK_CLASSIC = JkModuleId.of("ch.qos.logback", "logback-classicJava");
 
     public static final JkModuleId LOGBACK_CORE = JkModuleId.of("ch.qos.logback", "logback-core");
 

@@ -3,9 +3,8 @@ package org.jerkar.api.ide.eclipse;
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkJavaVersion;
-import org.jerkar.api.java.project.JkJavaProject;
-import org.jerkar.api.java.project.JkProjectSettingProvider;
-import org.jerkar.api.java.project.JkProjectSourceLayout;
+import org.jerkar.api.project.java.JkJavaProjectDefinition;
+import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -65,9 +64,9 @@ public final class JkEclipseClasspathGenerator {
         this.sourceLayout = sourceLayout;
     }
 
-    public JkEclipseClasspathGenerator(JkProjectSettingProvider project, JkDependencyResolver resolver, Map<String, String> options) {
+    public JkEclipseClasspathGenerator(JkJavaProjectDefinition project, JkDependencyResolver resolver) {
         this.sourceLayout = project.getSourceLayout();
-        this.dependencies = project.getDependencies(options);
+        this.dependencies = project.getDependencies();
         this.dependencyResolver = resolver;
         this.sourceVersion = project.getSourceVersion();
     }

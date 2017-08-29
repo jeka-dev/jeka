@@ -91,7 +91,7 @@ public class JkComputedDependency extends JkFileDependency {
 
     private final List<File> files;
 
-    private final File ideProjectBaseDir;
+    private final File ideProjectBaseDir; // Helps to generate ide metadata
 
     /**
      * Constructs a computed dependency to the specified files and the specified {@link Runnable} to run for

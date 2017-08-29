@@ -1,13 +1,10 @@
-package org.jerkar.api.java.project;
+package org.jerkar.api.project.java;
 
-import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkManifest;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,16 +31,16 @@ public class JkJarMaker {
         if (manifest != null && !manifest.isEmpty()) {
             manifest.writeToStandardLocation(classDir);
         }
-        File jarFile = file(null);
+        File jarFile = jarFile(null);
         JkFileTreeSet.of(classDir).and(extraFiles)
-                    .zip().to(jarFile)
-                    .md5If(checkSums.contains("MD5"))
-                    .sha1If(checkSums.contains("SHA-1"));
+                .zip().to(jarFile)
+                .md5If(checkSums.contains("MD5"))
+                .sha1If(checkSums.contains("SHA-1"));
         return jarFile;
     }
 
     public File testJar(File classDir) {
-        File jarFile = file("test");
+        File jarFile = jarFile("test");
         JkFileTreeSet.of(classDir)
                 .zip().to(jarFile)
                 .md5If(checkSums.contains("MD5"))
@@ -55,7 +52,7 @@ public class JkJarMaker {
         if (manifest != null && !manifest.isEmpty()) {
             manifest.writeToStandardLocation(classDir);
         }
-        File jarFile = file("fat");
+        File jarFile = jarFile("fat");
         JkFileTreeSet.of(classDir).and(extraFiles)
                 .zip().merge(embeddedJars)
                 .to(jarFile).md5If(checkSums.contains("MD5"))
@@ -64,19 +61,21 @@ public class JkJarMaker {
     }
 
     public File jar(JkFileTreeSet fileTreeSet, String suffix) {
-        File file = file(suffix);
+        File file = jarFile(suffix);
         fileTreeSet.zip().to(file);
         return file;
     }
 
-    public File file(String suffix) {
-        if (suffix == null) {
-            return new File(outputDir, baseName + ".jar");
-        }
-        return new File(outputDir, baseName + "-" + suffix + ".jar");
+    public File jarFile(String classifier) {
+        return file(classifier, "jar");
     }
 
-
-
+    public File file(String classifier, String extension) {
+        String extensionString = extension == null ? "" : "." + extension;
+        if (classifier == null) {
+            return new File(outputDir, baseName + extensionString);
+        }
+        return new File(outputDir, baseName + "-" + classifier + extensionString);
+    }
 
 }

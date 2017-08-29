@@ -1,20 +1,19 @@
-package org.jerkar.api.java.project;
+package org.jerkar.api.project.java;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.java.JkJavaVersion;
-
-import java.util.Map;
+import org.jerkar.api.project.JkProjectSourceLayout;
 
 /**
  * Minimal information necessary to generate metadata project file for IDE.
  */
-public interface JkProjectSettingProvider {
+public interface JkJavaProjectDefinition {
 
     default JkProjectSourceLayout getSourceLayout() {
         return JkProjectSourceLayout.mavenJava();
     }
 
-    default JkDependencies getDependencies(Map<String, String> options) {
+    default JkDependencies getDependencies() {
         return JkDependencies.of();
     }
 
