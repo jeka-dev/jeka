@@ -8,6 +8,7 @@ import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
+import org.jerkar.api.project.JkProjectOutLayout;
 import org.jerkar.api.project.java.JkJarProject;
 import org.jerkar.api.project.java.JkJavaCompileVersion;
 
@@ -22,16 +23,18 @@ public class PureApiBuild {
         JkJarProject javaProject = new JkJarProject(new File("."));
 
         // We want to output stuff in another place than build/output
-        javaProject.setOutLayout(javaProject.getOutLayout().withOutputBaseDir(new File("build/output/alt-output")));
-        javaProject.setDependencies(JkDependencies.builder()
-                .on(JkPopularModules.JUNIT, "4.12").scope(JkJavaDepScopes.TEST)
-                .build());
-        javaProject.setCompileVersion(JkJavaCompileVersion.V6);
+        JkProjectOutLayout outLayaout =
+                JkProjectOutLayout.classicJava().withOutputBaseDir("build/output/alt-output");
 
-        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepos.mavenCentral());
-        JkJavaCompiler compiler = JkJavaCompiler.base();
-        JkUnit junit = JkUnit.of();
-        javaProject.getOutLayout().deleteDirs();
+        JkDependencies deps = JkDependencies.builder()
+                .on(JkPopularModules.JUNIT, "4.12").scope(JkJavaDepScopes.TEST)
+                .build();
+
+        javaProject.setOutLayout(outLayaout)
+            .setDependencies(deps)
+            .setCompileVersion(JkJavaCompileVersion.V6);
+
+        javaProject.clean();
         javaProject.doMainJar();
         javaProject.generateJavadoc();
 
