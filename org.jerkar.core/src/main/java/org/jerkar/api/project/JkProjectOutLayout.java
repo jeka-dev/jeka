@@ -62,6 +62,10 @@ public class JkProjectOutLayout {
         this.javadocDir = javadocDir;
     }
 
+    public JkProjectOutLayout withOutputBaseDir(String newOutputDirPath) {
+        return withOutputBaseDir(new File(newOutputDirPath));
+    }
+
     public JkProjectOutLayout withOutputBaseDir(File newOutputDir) {
         final File originalOut = this.outputDir;
         final File outputDir = newOutputDir;
