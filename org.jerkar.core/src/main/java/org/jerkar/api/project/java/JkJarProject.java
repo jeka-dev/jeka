@@ -11,7 +11,8 @@ import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkTestSuiteResult;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.project.*;
-import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.project.JkArtifactFileId.JkArtifactFileIds;
+import org.jerkar.api.utils.JkFileFilters;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -34,16 +35,6 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
 
     public static final JkArtifactFileId TEST_SOURCE_FILE_ID = JkArtifactFileId.of("test-sources", "jar");
 
-    public static JkJarProject of(File baseDir) {
-        JkProjectSourceLayout sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir);
-        JkProjectOutLayout outLayout = JkProjectOutLayout.classicJava().withOutputBaseDir(new File(baseDir, "build/output"));
-        return new JkJarProject(baseDir, sourceLayout, outLayout, JkDependencies.of(), null, null);
-    }
-
-    public static JkJarProject of() {
-        return of(new File("."));
-    }
-
     private final File baseDir;
 
     private String artifactName;
@@ -54,9 +45,7 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
 
     private JkDependencies dependencies;
 
-    private JkJavaVersion sourceVersion;
-
-    private JkJavaVersion targetVersion;
+    private JkJavaCompileVersion compileVersion;
 
     private List<JkResourceProcessor.JkInterpolator> resourceInterpolators = new LinkedList<JkResourceProcessor.JkInterpolator>();
 
@@ -66,71 +55,72 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
 
     private String encoding = "UTF-8";
 
-    public JkJarProject(File baseDir, JkProjectSourceLayout sourceLayout, JkProjectOutLayout outLayout,
-                        JkDependencies dependencies,
-                        JkJavaVersion sourceVersion, JkJavaVersion targetVersion) {
+    private JkFileTreeSet extraFilesToIncludeInFatJar = JkFileTreeSet.empty();
+
+    private boolean commonBuildDone;
+
+    public JkJarProject(File baseDir) {
         this.baseDir = baseDir;
         this.artifactName = this.baseDir.getName();
-        this.sourceLayout = sourceLayout;
-        this.outLayout = outLayout;
-        this.dependencies = dependencies;
-        this.sourceVersion = sourceVersion;
-        this.targetVersion = targetVersion;
+        this.sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir);
+        this.outLayout = JkProjectOutLayout.classicJava().withOutputBaseDir(new File(baseDir, "build/output"));
+        this.dependencies = JkDependencies.ofLocalScoped(new File(baseDir, "build/libs"));
     }
 
-    void clean() {
-        JkUtilsFile.deleteDirContent(this.outLayout.outputDir());
+    public void clean() {
+        commonBuildDone = false;
+        makeContext.getCleaner().accept(this);
     }
 
     public void generateSourcesAndResources() {
-        // Do nothing by default
-    }
-
-    public void generateTestResources() {
-        // Do nothing by default
+        makeContext.getSourceGenerator().accept(this);
+        makeContext.getResourceGenerator().accept(this);
     }
 
     public void compile() {
         JkJavaCompiler comp = applyEncodingAndVersion();
-        comp = applyCompileSource(comp, this.makeContext.dependencyResolver());
+        comp = applyCompileSource(comp, this.makeContext.getDependencyResolver());
+        comp = makeContext.getConfiguredProductionCompiler().apply(comp);
         comp.compile();
+        makeContext.getPostCompiler().accept(this);
     }
 
     public void processResources() {
-        JkResourceProcessor.of(this.sourceLayout.resources())
-                .and(JkFileTree.of(this.outLayout.classDir()).andFilter(RESOURCE_FILTER))
-                .and(this.outLayout.generatedResourceDir())
-                .and(resourceInterpolators)
-                .generateTo(this.outLayout.classDir());
+        makeContext.getResourceProcessor().accept(this);
+    }
+
+    public void generateTestResources() {
+        makeContext.getTestResourceGenerator().accept(this);
     }
 
     public void compileTest() {
         JkJavaCompiler comp = applyEncodingAndVersion();
         comp = applyCompileTest();
+        comp = makeContext.getConfiguredTestCompiler().apply(comp);
         comp.compile();
+        makeContext.getTestPostCompiler().accept(this);
     }
 
     public void processTestResources() {
-        JkResourceProcessor.of(this.sourceLayout.testResources())
-                .and(JkFileTree.of(this.outLayout.testClassDir()).andFilter(RESOURCE_FILTER))
-                .and(this.outLayout.generatedTestResourceDir())
-                .and(resourceInterpolators)
-                .generateTo(this.outLayout.testClassDir());
+        makeContext.getTestResourceProcessor().accept(this);
     }
 
-    public JkTestSuiteResult runTests() {
-        JkUnit juniter = applyJunit();
-        return juniter.run();
+    public JkTestSuiteResult executeTests() {
+        JkUnit juniter = juniter();
+        juniter = makeContext.getConfiguredJuniter().apply(juniter);
+        JkTestSuiteResult result = juniter.run();
+        makeContext.getPostTestRunner().accept(this);
+        return result;
     }
 
     public File packJar() {
         return jarMaker().mainJar(manifest, outLayout.classDir(), JkFileTreeSet.empty());
     }
 
-    public File packFatJar() {
-        JkDependencyResolver depResolver = this.makeContext.dependencyResolver();
+    public File packFatJar(String suffix) {
+        JkDependencyResolver depResolver = this.makeContext.getDependencyResolver();
         JkClasspath classpath = JkClasspath.of(depResolver.get(this.dependencies, JkJavaDepScopes.RUNTIME));
-        return jarMaker().fatJar(manifest, this.outLayout.classDir(), classpath, JkFileTreeSet.empty());
+        return jarMaker().fatJar(manifest, suffix, this.outLayout.classDir(), classpath, this.extraFilesToIncludeInFatJar);
     }
 
     public File packTestJar() {
@@ -139,7 +129,7 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
 
     public File generateJavadoc() {
         JkJavadocMaker maker = JkJavadocMaker.of(this.sourceLayout.sources(), this.outLayout.getJavadocDir())
-                .withDoclet(this.makeContext.javadocDoclet());
+                .withDoclet(this.makeContext.getJavadocDoclet());
         maker.process();
         return this.outLayout.getJavadocDir();
     }
@@ -156,15 +146,28 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
         return jarMaker().jar(JkFileTreeSet.of(outLayout.getJavadocDir()), "javadoc");
     }
 
+    public void runBinaryGenerationPhase() {
+        this.generateSourcesAndResources();
+        this.compile();
+        this.processResources();
+    }
+
+    public void runUnitTestPhase() {
+        this.generateTestResources();
+        this.compileTest();
+        this.processTestResources();
+        this.executeTests();
+    }
+
     protected void commonBuild() {
-        generateSourcesAndResources();
-        compile();
-        generateSourcesAndResources();
-        if (this.makeContext.juniter() != null) {
-            generateTestResources();
-            compileTest();
-            runTests();
+        if (commonBuildDone) {
+            return;
         }
+        runBinaryGenerationPhase();
+        if (this.makeContext.getJuniter() != null) {
+            runUnitTestPhase();
+        }
+        commonBuildDone = true;
     }
 
     public JkArtifactProducerDependency asDependency(JkArtifactFileId artifactId) {
@@ -176,9 +179,8 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
     }
 
     protected JkJavaCompiler applyEncodingAndVersion() {
-        JkJavaVersion source = this.sourceVersion != null ? this.sourceVersion : this.targetVersion;
-        JkJavaVersion target = this.targetVersion != null ? this.targetVersion : this.sourceVersion;
-        return this.makeContext.baseCompiler().withSourceVersion(source).withTargetVersion(target).withEncoding(encoding);
+        return this.makeContext.getBaseCompiler().withSourceVersion(compileVersion.source())
+                .withTargetVersion(compileVersion.target()).withEncoding(encoding);
     }
 
     protected JkJavaCompiler applyCompileSource(JkJavaCompiler baseCompiler, JkDependencyResolver dependencyResolver) {
@@ -193,20 +195,20 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
     }
 
     protected JkJavaCompiler applyCompileTest() {
-        return this.makeContext.baseCompiler()
-                .withClasspath(makeContext.dependencyResolver().get(
+        return this.makeContext.getTestBaseCompiler()
+                .withClasspath(makeContext.getDependencyResolver().get(
                         this.dependencies.withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME),
-                        JkJavaDepScopes.SCOPES_FOR_TEST))
+                        JkJavaDepScopes.SCOPES_FOR_TEST).andHead(this.outLayout.classDir()))
                 .andSources(this.sourceLayout.tests())
                 .withOutputDir(this.outLayout.testClassDir());
     }
 
-    protected JkUnit applyJunit() {
+    protected JkUnit juniter() {
         final JkClasspath classpath = JkClasspath.of(this.outLayout.testClassDir(), this.outLayout.classDir()).and(
-                this.makeContext.dependencyResolver().get(this.dependencies.withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME)
+                this.makeContext.getDependencyResolver().get(this.dependencies.withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME)
                         , JkJavaDepScopes.SCOPES_FOR_TEST));
         final File junitReport = new File(this.outLayout.testReportDir(), "junit");
-        return this.makeContext.juniter().withClassesToTest(this.outLayout.testClassDir())
+        return this.makeContext.getJuniter().withClassesToTest(this.outLayout.testClassDir())
                 .withClasspath(classpath)
                 .withReportDir(junitReport);
     }
@@ -218,8 +220,8 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
     /**
      * Short hand to build main jar artifact.
      */
-    public File produceMainJar() {
-        produceArtifactFile(mainArtifactFileId());
+    public File doMainJar() {
+        this.doArtifactFile(mainArtifactFileId());
         return getArtifactFile(mainArtifactFileId());
     }
 
@@ -229,7 +231,7 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
     }
 
     @Override
-    public void produceArtifactFile(JkArtifactFileId artifactFileId) {
+    public void doArtifactFile(JkArtifactFileId artifactFileId) {
         if (mainArtifactFileId().equals(artifactFileId)) {
             commonBuild();
             packJar();
@@ -239,7 +241,7 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
             packJavadocJar();
         } else if (artifactFileId.equals(FAT_JAR_FILE_ID)) {
             commonBuild();
-            packFatJar();
+            packFatJar(FAT_JAR_FILE_ID.classifier());
         } else if (artifactFileId.equals(TEST_FILE_ID)) {
             commonBuild();
             packTestJar();
@@ -251,7 +253,7 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
     }
 
     @Override
-    public Iterable<JkArtifactFileId> extraArtifactFileIds() {
+    public JkArtifactFileIds extraArtifactFileIds() {
         return SOURCES_FILE_ID
                 .and(JAVADOC_FILE_ID)
                 .and(FAT_JAR_FILE_ID)
@@ -267,10 +269,10 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
     @Override
     public JkPath runtimeDependencies(JkArtifactFileId artifactFileId) {
         if (artifactFileId.equals(mainArtifactFileId())) {
-            return this.makeContext.dependencyResolver().get(
+            return this.makeContext.getDependencyResolver().get(
                     this.dependencies.withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.RUNTIME);
         } else if (artifactFileId.isClassifier("test") && artifactFileId.isExtension("jar")) {
-            return this.makeContext.dependencyResolver().get(
+            return this.makeContext.getDependencyResolver().get(
                     this.dependencies.withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.SCOPES_FOR_TEST);
         } else {
             return JkPath.of();
@@ -279,6 +281,9 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
 
     // ---------------------------- Getters / setters --------------------------------------------
 
+    public JkFileTree root() {
+        return JkFileTree.of(this.baseDir);
+    }
 
     @Override
     public JkProjectSourceLayout getSourceLayout() {
@@ -295,13 +300,8 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
     }
 
     @Override
-    public JkJavaVersion getSourceVersion() {
-        return sourceVersion;
-    }
-
-    @Override
-    public JkJavaVersion getTargetVersion() {
-        return targetVersion;
+    public JkJavaCompileVersion getCompileVersion() {
+        return compileVersion;
     }
 
     public JkJavaProjectMakeContext getMakeContext() {
@@ -332,19 +332,8 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
         return this;
     }
 
-    public JkJarProject setSourceVersion(JkJavaVersion sourceVersion) {
-        this.sourceVersion = sourceVersion;
-        return this;
-    }
-
-    public JkJarProject setTargetVersion(JkJavaVersion targetVersion) {
-        this.targetVersion = targetVersion;
-        return this;
-    }
-
-    public JkJarProject setSourceAndTargetVersion(JkJavaVersion version) {
-        this.sourceVersion = version;
-        this.targetVersion = version;
+    public JkJarProject setCompileVersion(JkJavaCompileVersion compileVersion) {
+        this.compileVersion = compileVersion;
         return this;
     }
 
@@ -353,15 +342,7 @@ public class JkJarProject implements JkJavaProjectDefinition, JkArtifactProducer
         return this;
     }
 
+    public List<JkResourceProcessor.JkInterpolator> getResourceInterpolators() {
+        return resourceInterpolators;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-

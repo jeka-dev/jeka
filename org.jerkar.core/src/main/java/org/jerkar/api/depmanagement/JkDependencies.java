@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.jerkar.api.depmanagement.JkDependency.JkFileDependency;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
+import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsAssert;
@@ -79,6 +80,29 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             list.add(scopedDependency);
         }
         return new JkDependencies(list, Collections.EMPTY_SET, JkVersionProvider.of());
+    }
+
+    /**
+     * Creates a {@link JkDependencies} based on jars located under the specified directory. Jars are
+     * supposed to lie in a directory structure standing for the different scopes they are intended.
+     * So jars needed for compilation are supposed to be in <code>baseDir/compile</code>, jar needed for
+     * test are supposed to be in <code>baseDir/test</code>, ... and so on.
+     */
+    public static JkDependencies ofLocalScoped(File baseDir) {
+        final JkFileTree libDir = JkFileTree.of(baseDir);
+        if (!libDir.root().exists()) {
+            return JkDependencies.of();
+        }
+        return JkDependencies.builder().usingDefaultScopes(JkJavaDepScopes.COMPILE)
+                .usingDefaultScopes(JkJavaDepScopes.COMPILE)
+                .on(JkFileSystemDependency.of(libDir.include("*.jar", "compile/*.jar")))
+                .usingDefaultScopes(JkJavaDepScopes.PROVIDED)
+                .on(JkFileSystemDependency.of(libDir.include("provided/*.jar")))
+                .usingDefaultScopes(JkJavaDepScopes.RUNTIME)
+                .on(JkFileSystemDependency.of(libDir.include("runtime/*.jar")))
+                .usingDefaultScopes(JkJavaDepScopes.TEST)
+                .on(JkFileSystemDependency.of(libDir.include("test/*.jar")))
+                .build();
     }
 
     private final List<JkScopedDependency> dependencies;

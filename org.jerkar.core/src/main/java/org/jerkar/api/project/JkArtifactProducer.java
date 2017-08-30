@@ -1,6 +1,7 @@
 package org.jerkar.api.project;
 
 import org.jerkar.api.file.JkPath;
+import org.jerkar.api.project.JkArtifactFileId.JkArtifactFileIds;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -12,7 +13,7 @@ import java.util.List;
 @Deprecated // Experimental !!!!
 public interface JkArtifactProducer {
 
-    void produceArtifactFile(JkArtifactFileId jkArtifactId);
+    void doArtifactFile(JkArtifactFileId jkArtifactId);
 
     File getArtifactFile(JkArtifactFileId jkArtifactId);
 
@@ -22,14 +23,14 @@ public interface JkArtifactProducer {
         return JkArtifactFileId.of(null, "jar");
     }
 
-    default Iterable<JkArtifactFileId> extraArtifactFileIds() {
-        return new LinkedList<>();
+    default JkArtifactFileIds extraArtifactFileIds() {
+        return JkArtifactFileIds.of();
     }
 
     default void produceAllArtifactFiles() {
-        produceArtifactFile(mainArtifactFileId());
+        doArtifactFile(mainArtifactFileId());
         for (JkArtifactFileId artifactFileId : extraArtifactFileIds()) {
-            produceArtifactFile(artifactFileId);
+            doArtifactFile(artifactFileId);
         }
     }
 

@@ -68,7 +68,7 @@ public final class JkEclipseClasspathGenerator {
         this.sourceLayout = project.getSourceLayout();
         this.dependencies = project.getDependencies();
         this.dependencyResolver = resolver;
-        this.sourceVersion = project.getSourceVersion();
+        this.sourceVersion = project.getCompileVersion().source();
     }
 
     // -------------------------- setters ----------------------------

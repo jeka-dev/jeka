@@ -28,6 +28,9 @@ public final class JkJavaVersion {
     /** Stands for Java version 8 */
     public static final JkJavaVersion V8 = JkJavaVersion.name("8");
 
+    /** Stands for Java version 8 */
+    public static final JkJavaVersion V9 = JkJavaVersion.name("9");
+
     private final String name;
 
     private JkJavaVersion(String name) {

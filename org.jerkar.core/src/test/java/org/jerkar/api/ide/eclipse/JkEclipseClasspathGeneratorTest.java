@@ -28,7 +28,7 @@ public class JkEclipseClasspathGeneratorTest {
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral());
 
         File base = new File(top, "base");
-        JkJarProject baseProject = JkJarProject.of(base);
+        JkJarProject baseProject = new JkJarProject(base);
         baseProject.setSourceLayout(sourceLayout);
         baseProject.setDependencies(JkDependencies.builder().on(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3").build());
         final JkEclipseClasspathGenerator baseGenerator =
@@ -38,10 +38,11 @@ public class JkEclipseClasspathGeneratorTest {
         System.out.println(result0);
 
         final File core = new File(top, "core");
-        final JkJarProject coreProject = JkJarProject.of(core);
+        final JkJarProject coreProject = new JkJarProject(core);
         JkDependencies coreDeps = JkDependencies.of(baseProject.asDependency());
         coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
-        coreProject.setMakeContext(coreProject.getMakeContext().with(JkUnit.of().forked(true)));
+        coreProject.setMakeContext(coreProject.getMakeContext().setJuniter(
+                coreProject.getMakeContext().getJuniter().forked(true)));
         final JkEclipseClasspathGenerator coreGenerator =
                 new JkEclipseClasspathGenerator(coreProject, resolver);
         final String result1 = coreGenerator.generate();

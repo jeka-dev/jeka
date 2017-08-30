@@ -7,7 +7,6 @@ import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.utils.JkUtilsFile;
 
-
 @Deprecated // Experimental !!!!
 public class JkProjectSourceLayout {
 
@@ -179,8 +178,5 @@ public class JkProjectSourceLayout {
     public JkFileTree root() {
         return JkFileTree.of(baseDir);
     }
-
-
-
 
 }

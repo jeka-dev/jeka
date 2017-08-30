@@ -47,7 +47,7 @@ public class JkArtifactProducerDependency extends JkComputedDependency  {
 
         @Override
         public void run() {
-            artifactProducer.produceArtifactFile(artifactId);
+            artifactProducer.doArtifactFile(artifactId);
         }
 
         @Override
