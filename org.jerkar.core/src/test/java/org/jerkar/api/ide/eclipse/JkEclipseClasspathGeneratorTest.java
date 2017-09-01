@@ -6,8 +6,7 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.java.junit.JkUnit;
-import org.jerkar.api.project.java.JkJarProject;
+import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -28,7 +27,7 @@ public class JkEclipseClasspathGeneratorTest {
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral());
 
         File base = new File(top, "base");
-        JkJarProject baseProject = new JkJarProject(base);
+        JkJavaProject baseProject = new JkJavaProject(base);
         baseProject.setSourceLayout(sourceLayout);
         baseProject.setDependencies(JkDependencies.builder().on(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3").build());
         final JkEclipseClasspathGenerator baseGenerator =
@@ -38,7 +37,7 @@ public class JkEclipseClasspathGeneratorTest {
         System.out.println(result0);
 
         final File core = new File(top, "core");
-        final JkJarProject coreProject = new JkJarProject(core);
+        final JkJavaProject coreProject = new JkJavaProject(core);
         JkDependencies coreDeps = JkDependencies.of(baseProject.asDependency());
         coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
         coreProject.setMakeContext(coreProject.getMakeContext().setJuniter(

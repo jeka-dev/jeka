@@ -20,6 +20,7 @@ public class JkBuildPluginJacoco extends JkJavaBuildPlugin {
 
     @JkDoc("true to produce an html report along the binary report")
     private boolean produceHtml;
+
     private Enhancer enhancer;
 
     public static Enhancer enhancer(JkJavaBuild jkJavaBuild, boolean produceHtmlReport) {

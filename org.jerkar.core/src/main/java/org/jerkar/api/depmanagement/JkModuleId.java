@@ -95,7 +95,15 @@ public final class JkModuleId implements Serializable {
      * version.
      */
     public JkVersionedModule version(String version) {
-        return JkVersionedModule.of(this, JkVersion.name(version));
+        return version(JkVersion.name(version));
+    }
+
+    /**
+     * Creates a {@link JkVersionedModule} from this module and the specified
+     * version.
+     */
+    public JkVersionedModule version(JkVersion version) {
+        return JkVersionedModule.of(this, version);
     }
 
     @Override

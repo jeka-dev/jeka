@@ -57,7 +57,7 @@ public class JkArtifactProducerDependency extends JkComputedDependency  {
     }
 
     private static JkPath jarAndRuntimeDeps(JkArtifactProducer producer, JkArtifactFileId artifactId) {
-        return producer.runtimeDependencies(artifactId).andHead(producer.getArtifactFile(artifactId));
+        return producer.runtimeDependencies(artifactId).andHead(producer.artifactFile(artifactId));
     }
 
 }

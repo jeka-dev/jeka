@@ -62,11 +62,11 @@ public class JkProjectOutLayout {
         this.javadocDir = javadocDir;
     }
 
-    public JkProjectOutLayout withOutputBaseDir(String newOutputDirPath) {
-        return withOutputBaseDir(new File(newOutputDirPath));
+    public JkProjectOutLayout withOutputDir(String newOutputDirPath) {
+        return withOutputDir(new File(newOutputDirPath));
     }
 
-    public JkProjectOutLayout withOutputBaseDir(File newOutputDir) {
+    public JkProjectOutLayout withOutputDir(File newOutputDir) {
         final File originalOut = this.outputDir;
         final File outputDir = newOutputDir;
         final File classDir = move(this.classDir, originalOut, newOutputDir);
@@ -137,6 +137,10 @@ public class JkProjectOutLayout {
 
     public final File outputDir() {
         return outputDir;
+    }
+
+    public File outputFile(String relativePath) {
+        return new File(outputDir(), relativePath);
     }
 
     public File classDir() {

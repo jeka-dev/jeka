@@ -2,21 +2,17 @@ package org.jerkar.api.project.java;
 
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.depmanagement.JkRepo;
-import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.utils.JkUtilsFile;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 public class JkJavaProjectMakeContext {
 
-    public static JkJavaProjectMakeContext of() {
-        return new JkJavaProjectMakeContext();
-    }
+    private JkJavaProject project;
 
     private JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.mavenCentral());
 
@@ -33,49 +29,53 @@ public class JkJavaProjectMakeContext {
 
     private UnaryOperator<JkJavaCompiler> configuredProductionCompiler = (compiler) -> {return compiler;};
 
-    private Consumer<JkJarProject> sourceGenerator = (project) -> {};
+    private Runnable sourceGenerator = () -> {};
 
-    private Consumer<JkJarProject> resourceGenerator = (project) -> {};
+    private Runnable resourceGenerator = () -> {};
 
-    private Consumer<JkJarProject> resourceProcessor = (project) -> {
+    private Runnable resourceProcessor = () -> {
         JkResourceProcessor.of(project.getSourceLayout().resources())
                 .and(project.getOutLayout().generatedResourceDir())
                 .and(project.getResourceInterpolators())
                 .generateTo(project.getOutLayout().classDir());
     };
 
-    private Consumer<JkJarProject> postCompiler = (project) -> {};
+    private Runnable postCompilePhase = () -> {};
 
 
     // Test phase -----------------------------------------------------
 
     private UnaryOperator<JkJavaCompiler> configuredTestCompiler = (compiler) -> {return compiler;};
 
-    private UnaryOperator<JkUnit> configuredJuniter = (juniter) -> {return juniter;};
+    private Function<JkUnit, JkUnit> juniterConfigurer = UnaryOperator.identity();
 
-    private Consumer<JkJarProject> testPostCompiler = (project) -> {};
+    private Runnable testPostCompiler = () -> {};
 
-    private Consumer<JkJarProject> testResourceGenerator = (project) -> {};
+    private Runnable testResourceGenerator = () -> {};
 
-    private Consumer<JkJarProject> testResourceProcessor = (project) -> {
+    private Runnable testResourceProcessor = () -> {
         JkResourceProcessor.of(project.getSourceLayout().testResources())
                 .and(project.getOutLayout().generatedTestResourceDir())
                 .and(project.getResourceInterpolators())
                 .generateTo(project.getOutLayout().testClassDir());
     };
 
-    private Consumer<JkJarProject> postTestRunner = (project) -> {};
+    private Runnable postTestPhase = () -> {};
 
 
 
     // Other --------------------------------------------------------------------
 
-    private Consumer<JkJarProject> cleaner = (project) -> {
+    private Runnable cleaner = () -> {
         JkUtilsFile.deleteDirContent(project.getOutLayout().outputDir());
     };
 
+    private Runnable postPack = () -> {};
 
-    public JkJavaProjectMakeContext() {
+    // -------------------------------------------
+
+    public JkJavaProjectMakeContext(JkJavaProject project) {
+        this.project = project;
     }
 
     public JkDependencyResolver getDependencyResolver() {
@@ -141,68 +141,77 @@ public class JkJavaProjectMakeContext {
         return this;
     }
 
-    public UnaryOperator<JkUnit> getConfiguredJuniter() {
-        return configuredJuniter;
+    public Function<JkUnit, JkUnit> getJuniterConfigurer() {
+        return juniterConfigurer;
     }
 
-    public JkJavaProjectMakeContext setConfiguredJuniter(UnaryOperator<JkUnit> configuredJuniter) {
-        this.configuredJuniter = configuredJuniter;
+    public JkJavaProjectMakeContext chainJuniterConfigurer(final Function<JkUnit, JkUnit> configurer) {
+        this.juniterConfigurer = this.juniterConfigurer.andThen(configurer);
         return this;
     }
 
-    public Consumer<JkJarProject> getSourceGenerator() {
+    public Runnable getSourceGenerator() {
         return sourceGenerator;
     }
 
-    public JkJavaProjectMakeContext setSourceGenerator(Consumer<JkJarProject> sourceGenerator) {
+    public JkJavaProjectMakeContext setSourceGenerator(Runnable sourceGenerator) {
         this.sourceGenerator = sourceGenerator;
         return this;
     }
 
-    public Consumer<JkJarProject> getResourceGenerator() {
-        return (Consumer<JkJarProject>) resourceGenerator;
+    public Runnable getResourceGenerator() {
+        return resourceGenerator;
     }
 
-    public JkJavaProjectMakeContext setResourceGenerator(Consumer<JkJarProject> resourceGenerator) {
+    public JkJavaProjectMakeContext setResourceGenerator(Runnable resourceGenerator) {
         this.resourceGenerator = resourceGenerator;
         return this;
     }
 
-    public Consumer<JkJarProject> getTestResourceGenerator() {
+    public Runnable getTestResourceGenerator() {
         return testResourceGenerator;
     }
 
-    public Consumer<JkJarProject> getTestResourceProcessor() {
+    public Runnable getTestResourceProcessor() {
         return testResourceProcessor;
     }
 
-    public JkJavaProjectMakeContext setTestResourceGenerator(Consumer<JkJarProject> testResourceGenerator) {
+    public JkJavaProjectMakeContext setTestResourceGenerator(Runnable testResourceGenerator) {
         this.testResourceGenerator = testResourceGenerator;
         return this;
     }
 
-    public Consumer<JkJarProject> getPostCompiler() {
-        return postCompiler;
-    }
-
-    public JkJavaProjectMakeContext setPostCompiler(Consumer<JkJarProject> postCompiler) {
-        this.postCompiler = postCompiler;
+    public JkJavaProjectMakeContext chainTestResourceGenerator(Runnable testResourceGenerator) {
+        this.testResourceGenerator = chain(this.testResourceProcessor, testResourceGenerator);
         return this;
     }
 
-    public Consumer<JkJarProject> getResourceProcessor() {
+    public Runnable getPostCompilePhase() {
+        return postCompilePhase;
+    }
+
+    public JkJavaProjectMakeContext setPostCompilePhase(Runnable postCompilePhase) {
+        this.postCompilePhase = postCompilePhase;
+        return this;
+    }
+
+    public Runnable getResourceProcessor() {
         return resourceProcessor;
     }
 
-    public Consumer<JkJarProject> getCleaner() {
+    public Runnable getCleaner() {
         return cleaner;
     }
 
-    public Consumer<JkJarProject> getTestPostCompiler() {
+    public Runnable getTestPostCompiler() {
         return testPostCompiler;
     }
 
-    public Consumer<JkJarProject> getPostTestRunner() {
-        return postTestRunner;
+    public Runnable getPostTestPhase() {
+        return postTestPhase;
+    }
+
+    private Runnable chain(Runnable runnable1, Runnable runnable2) {
+        return () -> {runnable1.run(); runnable2.run();};
     }
 }

@@ -165,7 +165,7 @@ public class JkProjectSourceLayout {
      * Returns location of test resources.
      */
     public final JkFileTreeSet testResources() {
-        return tests;
+        return testResources;
     }
 
     public File baseDir() {

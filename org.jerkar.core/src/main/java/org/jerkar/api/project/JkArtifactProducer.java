@@ -4,6 +4,7 @@ import org.jerkar.api.file.JkPath;
 import org.jerkar.api.project.JkArtifactFileId.JkArtifactFileIds;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -15,7 +16,7 @@ public interface JkArtifactProducer {
 
     void doArtifactFile(JkArtifactFileId jkArtifactId);
 
-    File getArtifactFile(JkArtifactFileId jkArtifactId);
+    File artifactFile(JkArtifactFileId jkArtifactId);
 
     JkPath runtimeDependencies(JkArtifactFileId jkArtifactId);
 
@@ -23,22 +24,46 @@ public interface JkArtifactProducer {
         return JkArtifactFileId.of(null, "jar");
     }
 
-    default JkArtifactFileIds extraArtifactFileIds() {
-        return JkArtifactFileIds.of();
+    default Iterable<JkArtifactFileId> artifactFileIds() {
+        return JkArtifactFileIds.of(mainArtifactFileId());
     }
 
-    default void produceAllArtifactFiles() {
-        doArtifactFile(mainArtifactFileId());
-        for (JkArtifactFileId artifactFileId : extraArtifactFileIds()) {
+    default File mainArtifactFile() {
+        return artifactFile(mainArtifactFileId());
+    }
+
+    default List<File> allArtifactFiles() {
+        List<File> result = new LinkedList<>();
+        result.add(artifactFile(mainArtifactFileId()));
+        artifactFileIds().forEach(artifactFileId -> result.add(artifactFile(artifactFileId)));
+        return result;
+    }
+
+    default void doArtifactFiles(Iterable<JkArtifactFileId> artifactFileIds) {
+        for (JkArtifactFileId artifactFileId : artifactFileIds) {
             doArtifactFile(artifactFileId);
         }
     }
 
-    default List<File> getAllArtifactFiles() {
-        List<File> result = new LinkedList<>();
-        result.add(getArtifactFile(mainArtifactFileId()));
-        extraArtifactFileIds().forEach(artifactFileId -> result.add(getArtifactFile(artifactFileId)));
-        return result;
+    default void doArtifactFiles(JkArtifactFileId ... artifactFileIds) {
+        doArtifactFiles(Arrays.asList(artifactFileIds));
+    }
+
+    default void doAllArtifactFiles() {
+        doArtifactFiles(artifactFileIds());
+    }
+
+    default void doArtifactFilesIfNecessary(JkArtifactFileId ... artifactFileIds) {
+        doArtifactFilesIfNecessary(Arrays.asList(artifactFileIds));
+    }
+
+    default void doArtifactFilesIfNecessary(Iterable<JkArtifactFileId> artifactFileIds) {
+        for (JkArtifactFileId artifactFileId : artifactFileIds) {
+            File file = artifactFile(artifactFileId);
+            if (!file.exists()) {
+                doArtifactFile(artifactFileId);
+            }
+        }
     }
 
 

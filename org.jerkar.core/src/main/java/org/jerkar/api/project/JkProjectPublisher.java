@@ -55,10 +55,10 @@ public class JkProjectPublisher {
     }
 
     private JkMavenPublication mavenPublication(JkArtifactProducer artifactProducer, JkVersionedModule versionedModule) {
-        JkMavenPublication result = JkMavenPublication.of(artifactProducer.getArtifactFile(artifactProducer.mainArtifactFileId()));
-        for (JkArtifactFileId extraFileId : artifactProducer.extraArtifactFileIds()) {
+        JkMavenPublication result = JkMavenPublication.of(artifactProducer.artifactFile(artifactProducer.mainArtifactFileId()));
+        for (JkArtifactFileId extraFileId : artifactProducer.artifactFileIds()) {
             if (okForClassifier(extraFileId.classifier())) {
-                File file = artifactProducer.getArtifactFile(extraFileId);
+                File file = artifactProducer.artifactFile(extraFileId);
                 result = result.andOptional(file, extraFileId.classifier());
             }
         }
@@ -66,10 +66,10 @@ public class JkProjectPublisher {
     }
 
     private JkIvyPublication ivyPublication(JkArtifactProducer artifactProducer, JkVersionedModule versionedModule) {
-        JkIvyPublication result =  JkIvyPublication.of(artifactProducer.getArtifactFile(artifactProducer.mainArtifactFileId()), JkJavaDepScopes.COMPILE);
-        for (JkArtifactFileId extraFileId : artifactProducer.extraArtifactFileIds()) {
+        JkIvyPublication result =  JkIvyPublication.of(artifactProducer.artifactFile(artifactProducer.mainArtifactFileId()), JkJavaDepScopes.COMPILE);
+        for (JkArtifactFileId extraFileId : artifactProducer.artifactFileIds()) {
             if (okForClassifier(extraFileId.classifier())) {
-                File file = artifactProducer.getArtifactFile(extraFileId);
+                File file = artifactProducer.artifactFile(extraFileId);
                 result = result.andOptional(file, extraFileId.classifier(), scopeFor(extraFileId.classifier()));
             }
         }
