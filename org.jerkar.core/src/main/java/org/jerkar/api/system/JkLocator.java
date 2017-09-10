@@ -5,6 +5,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsSystem;
 
@@ -41,7 +42,7 @@ public final class JkLocator {
             } catch (final ClassNotFoundException e) {
                 // Class just not there
             } finally {
-                //JkUtilsIO.closeQuietly(classLoader);  // Not allowed with JDK6
+                JkUtilsIO.closeQuietly(classLoader);
             }
         }
         throw new IllegalStateException("Main not found in classpath");
@@ -66,7 +67,7 @@ public final class JkLocator {
     }
 
     /**
-     * Returns the jerkar user directory.
+     * Returns the Jerkar user directory.
      */
     public static File jerkarUserHome() {
         final File result;

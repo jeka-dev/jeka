@@ -2,7 +2,7 @@ package org.jerkar.api.utils;
 
 /**
  * Utility class for dealing with generic Object class instances.
- * 
+ *
  * @author Jerome Angiabud
  */
 public final class JkUtilsObject {
@@ -12,6 +12,7 @@ public final class JkUtilsObject {
      * Throw an {@link IllegalArgumentException} if all array elements are
      * <code>null</code> or the specified array is empty.
      */
+    @SuppressWarnings("unchecked")
     public static <T> T firstNonNull(T... items) {
         for (final T item : items) {
             if (item != null) {

@@ -43,6 +43,7 @@ public final class JkUtilsIterable {
     /**
      * @see #listOf(Iterable)
      */
+    @SuppressWarnings("unchecked")
     public static <T> List<T> listOf(T... items) {
         return Arrays.asList(items);
     }
@@ -91,6 +92,7 @@ public final class JkUtilsIterable {
     /**
      * Creates a set of specified items.
      */
+    @SuppressWarnings("unchecked")
     public static <T> Set<T> setOf(T... items) {
         final HashSet<T> result = new HashSet<T>();
         result.addAll(Arrays.asList(items));
@@ -154,6 +156,7 @@ public final class JkUtilsIterable {
      * Returns an {@link Iterable} iterating on items of specified iterables.
      * Result is backed by the specified iterables.
      */
+    @SuppressWarnings("unchecked")
     public static <T> Iterable<T> chain(Iterable<T>... iterables) {
         return chainAll(Arrays.asList(iterables));
     }
@@ -265,6 +268,7 @@ public final class JkUtilsIterable {
      * Returns a list that is a concatenation of the specified lists.
      * The result is not backed by specified {@link Iterable}.
      */
+    @SuppressWarnings("unchecked")
     public static <T> List<T> concatLists(Iterable<? extends T>... lists) {
         final List<T> result = new LinkedList<T>();
         for (final Iterable<? extends T> list : lists) {
