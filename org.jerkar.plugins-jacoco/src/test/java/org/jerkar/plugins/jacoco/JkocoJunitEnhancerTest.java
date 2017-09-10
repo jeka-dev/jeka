@@ -10,7 +10,7 @@ public class JkocoJunitEnhancerTest {
 
     @Test
     public void test() {
-        JkocoJunitEnhancer.of(new File(".")).enhance(JkUnit.of(JkClasspath.of()));
+        JkocoJunitEnhancer.of(new File(".")).apply(JkUnit.of(JkClasspath.of()));
     }
 
 }

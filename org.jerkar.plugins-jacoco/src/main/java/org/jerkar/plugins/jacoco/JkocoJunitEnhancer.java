@@ -3,7 +3,6 @@ package org.jerkar.plugins.jacoco;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.java.junit.JkUnit;
-import org.jerkar.api.java.junit.JkUnit.Enhancer;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 
@@ -12,8 +11,9 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
-public final class JkocoJunitEnhancer implements Enhancer {
+public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
 
     private final File agent;
 
@@ -54,9 +54,11 @@ public final class JkocoJunitEnhancer implements Enhancer {
     public JkocoJunitEnhancer enabled(boolean enabled) {
         return new JkocoJunitEnhancer(this.agent, enabled, destFile, options);
     }
+    
+    
 
     @Override
-    public JkUnit enhance(JkUnit jkUnit) {
+    public JkUnit apply(JkUnit jkUnit) {
         if (!enabled) {
             return jkUnit;
         }

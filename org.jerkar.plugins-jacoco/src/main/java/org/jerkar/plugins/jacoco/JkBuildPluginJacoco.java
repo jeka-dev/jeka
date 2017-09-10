@@ -1,13 +1,13 @@
 package org.jerkar.plugins.jacoco;
 
 import org.jerkar.api.java.junit.JkUnit;
-import org.jerkar.api.java.junit.JkUnit.Enhancer;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
 
 import java.io.File;
+import java.util.function.UnaryOperator;
 
 /**
  * Alter the unitTester to be launched with the Jacoco agent. It results in
@@ -21,13 +21,13 @@ public class JkBuildPluginJacoco extends JkJavaBuildPlugin {
     @JkDoc("true to produce an html report along the binary report")
     private boolean produceHtml;
 
-    private Enhancer enhancer;
+    private UnaryOperator<JkUnit> enhancer;
 
-    public static Enhancer enhancer(JkJavaBuild jkJavaBuild, boolean produceHtmlReport) {
+    public static UnaryOperator<JkUnit> enhancer(JkJavaBuild jkJavaBuild, boolean produceHtmlReport) {
         return enhancer(jkJavaBuild, jkJavaBuild.baseDir().root(), produceHtmlReport);
     }
 
-    private static Enhancer enhancer(JkJavaBuild jkJavaBuild, File agent, boolean html) {
+    private static UnaryOperator<JkUnit> enhancer(JkJavaBuild jkJavaBuild, File agent, boolean html) {
         final File destFile = new File(jkJavaBuild.testReportDir(), "jacoco/jacoco.exec");
         if (html) {
             throw new IllegalStateException("Sorry, not implemented yet. Please, turn off produceHtml flag.");
@@ -42,7 +42,7 @@ public class JkBuildPluginJacoco extends JkJavaBuildPlugin {
 
     @Override
     public JkUnit alterUnitTester(JkUnit jkUnit) {
-        return this.enhancer.enhance(jkUnit);
+        return this.enhancer.apply(jkUnit);
     }
 
     public JkBuildPluginJacoco produceHtmlReport(boolean flag) {

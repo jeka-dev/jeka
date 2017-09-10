@@ -1,7 +1,6 @@
 package org.jerkar.api.java.junit;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -18,7 +17,6 @@ import java.util.Properties;
 
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
-import org.jerkar.api.file.JkPath;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaProcess;
@@ -65,14 +63,15 @@ public final class JkUnit {
     /**
      * A interface to implement to enhance test execution. It can be used for test coverage tool for example.
      */
-    public static interface Enhancer {
+    //@FunctionalInterface
+    //public static interface Enhancer {
 
-        /**
-         * Returns a modified Junit launcher from the specified one.
-         */
-        JkUnit enhance(JkUnit jkUnit);
+    /**
+     * Returns a modified Junit launcher from the specified one.
+     */
+    //   JkUnit enhance(JkUnit jkUnit);
 
-    }
+    //}
 
     private final JkClasspath classpath;
 
@@ -201,24 +200,6 @@ public final class JkUnit {
         list.add(runnable);
         return new JkUnit(classpath, reportDetail, reportDir, forkedProcess, list,
                 this.classesToTest, this.breakOnFailure, this.printOutputOnConsole);
-    }
-
-    /**
-     * Returns an enhanced copy of this launcher.
-     */
-    public JkUnit enhancedWith(Enhancer enhancer) {
-        return enhancer.enhance(this);
-    }
-
-    /**
-     * Returns a copy of this launcher enhanced with multiple enhancer.
-     */
-    public JkUnit enhancedWith(Iterable<Enhancer> plugins) {
-        JkUnit result = this;
-        for (final Enhancer plugin : plugins) {
-            result = result.enhancedWith(plugin);
-        }
-        return result;
     }
 
     /**
@@ -409,7 +390,7 @@ public final class JkUnit {
         final JkClasspath classpath = this.jkClasspath().andHead(this.classesToTest.roots());
         final JkClassLoader classLoader = JkClassLoader.system().parent().child(classpath)
                 .loadAllServices();
-        Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, this.classesToTest);
+        final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, this.classesToTest);
         if (result.isEmpty()) {
 
             JkUtilsIO.closeOrFail(classLoader.classloader());

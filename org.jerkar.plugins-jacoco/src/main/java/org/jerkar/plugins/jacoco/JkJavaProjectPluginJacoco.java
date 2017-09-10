@@ -16,7 +16,7 @@ public class JkJavaProjectPluginJacoco implements JkJavaProjectPlugin {
     public void accept(JkJavaProject project) {
         JkocoJunitEnhancer junitEnhancer = JkocoJunitEnhancer.of(project.getOutLayout()
                 .outputFile("jacoco/jacoco.exec"));
-        project.getMakeContext().chainJuniterConfigurer((jkUnit -> junitEnhancer.enhance(jkUnit)));
+        project.getMakeContext().chainJuniterConfigurer((jkUnit -> junitEnhancer.apply(jkUnit)));
 
     }
 }
