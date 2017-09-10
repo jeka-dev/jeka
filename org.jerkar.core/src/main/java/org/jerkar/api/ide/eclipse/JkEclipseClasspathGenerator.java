@@ -1,25 +1,37 @@
 package org.jerkar.api.ide.eclipse;
 
-import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.java.JkJavaVersion;
-import org.jerkar.api.project.java.JkJavaProjectDefinition;
-import org.jerkar.api.project.JkProjectSourceLayout;
-import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.api.utils.JkUtilsThrowable;
-import org.jerkar.tool.JkConstants;;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
+
+import org.jerkar.api.depmanagement.JkComputedDependency;
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencyNode;
+import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.api.depmanagement.JkModuleDependency;
+import org.jerkar.api.depmanagement.JkRepos;
+import org.jerkar.api.depmanagement.JkResolveResult;
+import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.java.JkJavaVersion;
+import org.jerkar.api.project.JkProjectSourceLayout;
+import org.jerkar.api.project.java.JkJavaProjectDefinition;
+import org.jerkar.api.system.JkLocator;
+import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.api.utils.JkUtilsThrowable;
+import org.jerkar.tool.JkConstants;
 
 /**
  * Provides method to generate Eclipse .classpath metadata files.
@@ -170,7 +182,7 @@ public final class JkEclipseClasspathGenerator {
         }
 
         // write entries for project slaves
-        for (File projectFile : this.slaveProjects) {
+        for (final File projectFile : this.slaveProjects) {
             if (paths.contains(projectFile.getPath())) {
                 continue;
             }
@@ -196,7 +208,7 @@ public final class JkEclipseClasspathGenerator {
     private static void writeClasspathEl(XMLStreamWriter writer, String... items) throws XMLStreamException {
         final Map<String, String> map = JkUtilsIterable.mapOfAny((Object[]) items);
         writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
-        for (Map.Entry<String, String> entry : map.entrySet()) {
+        for (final Map.Entry<String, String> entry : map.entrySet()) {
             writer.writeAttribute(entry.getKey(), entry.getValue());
         }
         writer.writeCharacters("\n");
@@ -332,22 +344,22 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private void writeDependenciesEntries(XMLStreamWriter writer, JkDependencies dependencies, JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
-        JkResolveResult resolveResult = resolver.resolve(dependencies);
-        JkRepos repos = resolver.repositories();
-        for (JkDependencyNode node : resolveResult.dependencyTree().flatten()) {
+        final JkResolveResult resolveResult = resolver.resolve(dependencies);
+        final JkRepos repos = resolver.repositories();
+        for (final JkDependencyNode node : resolveResult.dependencyTree().flatten()) {
             // Maven dependency
             if (node.isModuleNode()) {
-                JkDependencyNode.ModuleNodeInfo moduleNodeInfo = node.moduleInfo();
+                final JkDependencyNode.ModuleNodeInfo moduleNodeInfo = node.moduleInfo();
                 writeModuleEntry(writer,
                         moduleNodeInfo.resolvedVersionedModule(),
                         moduleNodeInfo.files(), repos, allPaths);
 
                 // File dependencies (file system + computed)
             } else {
-                JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.nodeInfo();
+                final JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.nodeInfo();
                 if (fileNodeInfo.isComputed()) {
-                    JkComputedDependency computedDependency = fileNodeInfo.computationOrigin();
-                    File ideprojectBaseDir = computedDependency.ideProjectBaseDir();
+                    final JkComputedDependency computedDependency = fileNodeInfo.computationOrigin();
+                    final File ideprojectBaseDir = computedDependency.ideProjectBaseDir();
                     if (ideprojectBaseDir != null) {
                         if (!allPaths.contains(ideprojectBaseDir.getAbsolutePath())) {
                             writeProjectEntryIfNeeded(ideprojectBaseDir, writer, allPaths);
@@ -363,8 +375,8 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private void writeModuleEntry(XMLStreamWriter writer, JkVersionedModule versionedModule, Iterable<File> files,
-                                  JkRepos repos, Set<String> paths) throws XMLStreamException {
-        File source = repos.get(JkModuleDependency.of(versionedModule).classifier("sources"));
+            JkRepos repos, Set<String> paths) throws XMLStreamException {
+        final File source = repos.get(JkModuleDependency.of(versionedModule).classifier("sources"));
         File javadoc = null;
         if (source == null || !source.exists()) {
             javadoc = repos.get(JkModuleDependency.of(versionedModule).classifier("javadoc"));
@@ -386,7 +398,7 @@ public final class JkEclipseClasspathGenerator {
             binPath = binPath.replace(File.separator, "/");
         }
         writer.writeCharacters("\t");
-        boolean mustWriteJavadoc = includeJavadoc && javadoc != null
+        final boolean mustWriteJavadoc = includeJavadoc && javadoc != null
                 && javadoc.exists() && (source == null || !source.exists());
         if (!mustWriteJavadoc) {
             writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
