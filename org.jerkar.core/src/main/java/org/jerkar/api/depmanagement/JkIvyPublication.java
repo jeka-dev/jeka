@@ -12,7 +12,7 @@ import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * Informations required to publish a module in an Ivy repository.
- * 
+ *
  * @author Jerome Angibaud.
  */
 public final class JkIvyPublication implements Iterable<Artifact>, Serializable {
@@ -27,6 +27,34 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
     public static JkIvyPublication of(File file, String type, JkScope... jkScopes) {
         return new JkIvyPublication(new HashSet<JkIvyPublication.Artifact>()).and(file,
                 type, jkScopes);
+    }
+
+    /**
+     * Creates an Ivy publication from the specified artifact producer.
+     */
+    public static JkIvyPublication of(JkArtifactProducer artifactProducer) {
+       JkIvyPublication result =  JkIvyPublication.of(artifactProducer.artifactFile(artifactProducer.mainArtifactFileId()), JkJavaDepScopes.COMPILE);
+       for (JkArtifactFileId extraFileId : artifactProducer.artifactFileIds()) {
+            File file = artifactProducer.artifactFile(extraFileId);
+            result = result.andOptional(file, extraFileId.classifier(), scopeFor(extraFileId.classifier()));
+       }
+       return result;
+    }
+
+    private static JkScope scopeFor(String classifier) {
+        if ("sources".equals(classifier)) {
+            return JkJavaDepScopes.SOURCES;
+        }
+        if ("test".equals(classifier)) {
+            return JkJavaDepScopes.TEST;
+        }
+        if ("test-sources".equals(classifier)) {
+            return JkJavaDepScopes.SOURCES;
+        }
+        if ("javadoc".equals(classifier)) {
+            return JkJavaDepScopes.JAVADOC;
+        }
+        return JkScope.of(classifier);
     }
 
     /**

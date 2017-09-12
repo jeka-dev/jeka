@@ -1,16 +1,18 @@
-package org.jerkar.api.project;
-
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+package org.jerkar.api.depmanagement;
 
 /**
- * Created by angibaudj on 29-08-17.
+ * An artifact producer is likely to produce several artifact files (main jar, sources, javadoc, native jars, ...). <br/>
+ * To distinguish them one use the notion of 'classifier' and 'extension'. <br/>
+ * Extension is simply the char sequence at the end of of file to determine its technical type (.exe, .jar, .zip, ...). <br/>
+ * Classifier is to mention the purpose of the file (main artifact, sources, javadoc, uberjar, native lib, ...).
  */
-@Deprecated // Experimental !!!!
-public class JkArtifactFileId {
+public final class JkArtifactFileId {
 
+    /**
+     * Creates an artifact file id with the specified classifier and extension. Both can be <code>null</code>. <br/>
+     * A <code>null</code> or empty classifier generally means the main artifact. <br/>
+     * A <code>extension</code> or empty extension generally means that the file has no extension.<br/>
+     */
     public static JkArtifactFileId of(String classifier, String extension) {
         return new JkArtifactFileId(classifier, extension);
     }
@@ -22,14 +24,23 @@ public class JkArtifactFileId {
         this.extension = extension == null || extension.trim().length() == 0 ? null : extension.trim().toLowerCase();
     }
 
+    /**
+     * Returns the classifier of this object.
+     */
     public String classifier() {
         return classifier;
     }
 
+    /**
+     * Returns the file extension of this object.
+     */
     public String extension() {
         return extension;
     }
 
+    /**
+     * Returns <code>true</code> if any of the specified classifiers is equals to this classifier.
+     */
     public boolean isClassifier(String... classifiers) {
         for (String classifier : classifiers) {
             if (classifier.trim().toLowerCase().equals(this.classifier)) {
@@ -39,6 +50,9 @@ public class JkArtifactFileId {
         return false;
     }
 
+    /**
+     * Returns <code>true</code> if any of the specified extension is equals to this extension.
+     */
     public boolean isExtension(String... extensions) {
         for (String extension : extensions) {
             if (extension.trim().toLowerCase().equals(this.extension)) {
@@ -46,14 +60,6 @@ public class JkArtifactFileId {
             }
         }
         return false;
-    }
-
-    public JkArtifactFileIds and(JkArtifactFileId... ids) {
-        return JkArtifactFileIds.of(this).and(ids);
-    }
-
-    public JkArtifactFileIds and(String classifier, String extension) {
-        return and(JkArtifactFileId.of(classifier, extension));
     }
 
     @Override
@@ -79,31 +85,5 @@ public class JkArtifactFileId {
         return "Classifier='" + classifier + '\'' + ", extension='" + extension + '\'' + '}';
     }
 
-    public static class JkArtifactFileIds implements Iterable<JkArtifactFileId> {
 
-        public static JkArtifactFileIds of(JkArtifactFileId... ids) {
-            return new JkArtifactFileIds(Arrays.asList(ids));
-        }
-
-        private final List<JkArtifactFileId> ids;
-
-        @Override
-        public Iterator<JkArtifactFileId> iterator() {
-            return ids.iterator();
-        }
-
-        private JkArtifactFileIds(List<JkArtifactFileId> ids) {
-            this.ids = ids;
-        }
-
-        public JkArtifactFileIds and(JkArtifactFileId... ids) {
-            List<JkArtifactFileId> jkArtifactIds = new LinkedList(this.ids);
-            jkArtifactIds.addAll(Arrays.asList(ids));
-            return new JkArtifactFileIds(jkArtifactIds);
-        }
-
-        public JkArtifactFileIds and(String classifier, String extension) {
-            return and(JkArtifactFileId.of(classifier, extension));
-        }
-    }
 }

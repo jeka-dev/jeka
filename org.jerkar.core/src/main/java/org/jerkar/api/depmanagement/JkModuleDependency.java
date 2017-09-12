@@ -22,7 +22,7 @@ import org.jerkar.api.utils.JkUtilsString;
  *
  * @author Jerome Angibaud
  */
-public final class JkModuleDependency extends JkDependency {
+public final class JkModuleDependency implements JkDependency {
 
     private static final long serialVersionUID = 1L;
 

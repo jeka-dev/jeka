@@ -30,15 +30,24 @@ public final class JkMavenPublication implements Serializable {
         return new JkMavenPublication(JkUtilsIterable.listOf(file), Collections.EMPTY_LIST, null);
     }
 
-    private final List<JkClassifiedArtifact> classifiedArtifacts;
+    public static JkMavenPublication of(JkArtifactProducer artifactProducer) {
+        JkMavenPublication result = JkMavenPublication.of(artifactProducer.artifactFile(artifactProducer.mainArtifactFileId()));
+        for (JkArtifactFileId extraFileId : artifactProducer.artifactFileIds()) {
+            File file = artifactProducer.artifactFile(extraFileId);
+            result = result.andOptional(file, extraFileId.classifier());
+        }
+        return result;
+    }
+
+    private final List<JkClassifiedFileArtifact> classifiedArtifacts;
 
     private final List<File> mainArtifacts; // can't have 2 artifacts with same
     // extension
 
     private final JkMavenPublicationInfo extraInfo;
 
-    private JkMavenPublication(List<File> mainArtifacts, List<JkClassifiedArtifact> classified,
-            JkMavenPublicationInfo extraInfo) {
+    private JkMavenPublication(List<File> mainArtifacts, List<JkClassifiedFileArtifact> classified,
+                                 JkMavenPublicationInfo extraInfo) {
         super();
         this.mainArtifacts = mainArtifacts;
         this.classifiedArtifacts = classified;
@@ -72,15 +81,15 @@ public final class JkMavenPublication implements Serializable {
                             + classifier
                             + "] as this combination is yet present in this publication " + this);
         }
-        final JkClassifiedArtifact artifact = new JkClassifiedArtifact(classifier, file);
-        final List<JkClassifiedArtifact> list = new LinkedList<JkClassifiedArtifact>(
+        final JkClassifiedFileArtifact artifact = new JkClassifiedFileArtifact(classifier, file);
+        final List<JkClassifiedFileArtifact> list = new LinkedList<JkClassifiedFileArtifact>(
                 this.classifiedArtifacts);
         list.add(artifact);
         return new JkMavenPublication(this.mainArtifacts, list, this.extraInfo);
     }
 
     private boolean contains(String ext, String classifier) {
-        for (final JkClassifiedArtifact classifiedArtifact : this.classifiedArtifacts) {
+        for (final JkClassifiedFileArtifact classifiedArtifact : this.classifiedArtifacts) {
             final String fileExt = JkUtilsString.substringAfterLast(
                     classifiedArtifact.file.getName(), ".");
             if (classifier.contains(classifiedArtifact.classifier) && fileExt.equals(ext)) {
@@ -125,7 +134,7 @@ public final class JkMavenPublication implements Serializable {
     }
 
     /** Files constituting classified artifacts */
-    public List<JkClassifiedArtifact> classifiedArtifacts() {
+    public List<JkClassifiedFileArtifact> classifiedArtifacts() {
         return Collections.unmodifiableList(classifiedArtifacts);
     }
 
@@ -142,14 +151,14 @@ public final class JkMavenPublication implements Serializable {
     /**
      * An artifact with a classifier for Maven repository.
      */
-    public static class JkClassifiedArtifact implements Serializable {
+    public static class JkClassifiedFileArtifact implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
         private final String classifier;
         private final File file;
 
-        JkClassifiedArtifact(String classifier, File file) {
+        JkClassifiedFileArtifact(String classifier, File file) {
             super();
             this.classifier = classifier;
             this.file = file;

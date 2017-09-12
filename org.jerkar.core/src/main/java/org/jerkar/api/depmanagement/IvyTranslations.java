@@ -40,7 +40,7 @@ import org.apache.ivy.plugins.resolver.IBiblioResolver;
 import org.apache.ivy.plugins.resolver.IvyRepResolver;
 import org.apache.ivy.plugins.resolver.RepositoryResolver;
 import org.apache.ivy.util.url.CredentialsStore;
-import org.jerkar.api.depmanagement.JkMavenPublication.JkClassifiedArtifact;
+import org.jerkar.api.depmanagement.JkMavenPublication.JkClassifiedFileArtifact;
 import org.jerkar.api.depmanagement.JkRepo.JkIvyRepository;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -413,7 +413,7 @@ final class IvyTranslations {
         final String mainConf = "default";
         populateDescriptorWithMavenArtifact(descriptor, mainConf, mavenMainArtifact);
 
-        for (final JkClassifiedArtifact artifactEntry : publication.classifiedArtifacts()) {
+        for (final JkClassifiedFileArtifact artifactEntry : publication.classifiedArtifacts()) {
             final File file = artifactEntry.file();
             final String classifier = artifactEntry.classifier();
             final Artifact mavenArtifact = toPublishedMavenArtifact(file, artifactName, classifier,

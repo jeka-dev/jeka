@@ -18,7 +18,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
  * be present at the time of the build and that has to be generated. Instances of this class are
  * responsible to generate the missing files. <p>
  *
- * Computed dependencies are instantiated by providing files to expect and a {@link Runnable} that
+ * Computed dependencies are instantiated by providing expected files and a {@link Runnable} that
  * generates these files in case one of them misses. <p>
  *
  * This is yet simple but quite powerful mechanism, cause the runnable can be anything as Maven or ANT build

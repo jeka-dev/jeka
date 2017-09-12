@@ -19,7 +19,7 @@ import org.apache.ivy.plugins.resolver.IBiblioResolver;
 import org.apache.ivy.plugins.resolver.RepositoryResolver;
 import org.apache.ivy.util.ChecksumHelper;
 import org.jerkar.api.depmanagement.IvyPublisher.CheckFileFlag;
-import org.jerkar.api.depmanagement.JkMavenPublication.JkClassifiedArtifact;
+import org.jerkar.api.depmanagement.JkMavenPublication.JkClassifiedFileArtifact;
 import org.jerkar.api.depmanagement.MavenMetadata.Versioning.Snapshot;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -124,7 +124,7 @@ final class IvyPublisherForMaven {
                 publishUniqueSnapshot(versionedModule, null, file, versionUniqueSnapshot,
                         mavenMetadata);
             }
-            for (final JkClassifiedArtifact classifiedArtifact : mavenPublication
+            for (final JkClassifiedFileArtifact classifiedArtifact : mavenPublication
                     .classifiedArtifacts()) {
                 publishUniqueSnapshot(versionedModule, classifiedArtifact.classifier(),
                         classifiedArtifact.file(), versionUniqueSnapshot, mavenMetadata);
@@ -134,7 +134,7 @@ final class IvyPublisherForMaven {
             for (final File file : mavenPublication.mainArtifactFiles()) {
                 publishNormal(versionedModule, null, file);
             }
-            for (final JkClassifiedArtifact classifiedArtifact : mavenPublication
+            for (final JkClassifiedFileArtifact classifiedArtifact : mavenPublication
                     .classifiedArtifacts()) {
                 publishNormal(versionedModule, classifiedArtifact.classifier(),
                         classifiedArtifact.file());
@@ -190,7 +190,7 @@ final class IvyPublisherForMaven {
                 }
             }
         }
-        for (final JkClassifiedArtifact classifiedArtifact : mavenPublication.classifiedArtifacts()) {
+        for (final JkClassifiedFileArtifact classifiedArtifact : mavenPublication.classifiedArtifacts()) {
             final String ext = JkUtilsString.substringAfterLast(
                     classifiedArtifact.file().getName(), ".");
             final String dest = destination(versionedModule, ext, classifiedArtifact.classifier());

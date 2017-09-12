@@ -109,13 +109,13 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
     private final Set<JkDepExclude> depExcludes;
 
-    private final JkVersionProvider overridedVersions;
+    private final JkVersionProvider explicitVersions;
 
-    private JkDependencies(List<JkScopedDependency> dependencies, Set<JkDepExclude> excludes, JkVersionProvider overridedVersions) {
+    private JkDependencies(List<JkScopedDependency> dependencies, Set<JkDepExclude> excludes, JkVersionProvider explicitVersions) {
         super();
         this.dependencies = Collections.unmodifiableList(dependencies);
         this.depExcludes = Collections.unmodifiableSet(excludes);
-        this.overridedVersions = overridedVersions;
+        this.explicitVersions = explicitVersions;
     }
 
     /**
@@ -141,7 +141,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
                 }
             }
         }
-        return new JkDependencies(result, this.depExcludes, this.overridedVersions);
+        return new JkDependencies(result, this.depExcludes, this.explicitVersions);
     }
 
     /**
@@ -156,7 +156,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             }
             list.add(dep);
         }
-        return new JkDependencies(list, this.depExcludes, this.overridedVersions);
+        return new JkDependencies(list, this.depExcludes, this.explicitVersions);
     }
 
     /**
@@ -173,15 +173,15 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             }
             list.add(dep);
         }
-        return new JkDependencies(list, this.depExcludes, this.overridedVersions);
+        return new JkDependencies(list, this.depExcludes, this.explicitVersions);
     }
 
     /**
      * Returns a clone of this object but using specified version provider to override
      * versions of transitive dependencies.
      */
-    public JkDependencies withOvveridedVersions(JkVersionProvider versionProvider) {
-        return new JkDependencies(this.dependencies, this.excludes(), versionProvider);
+    public JkDependencies withExplicitVersions(JkVersionProvider explicitVersions) {
+        return new JkDependencies(this.dependencies, this.excludes(), explicitVersions);
     }
 
     /**
@@ -196,8 +196,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns a clone of this object plus the specified
-     * {@link JkScopedDependency}s.
+     * Returns a clone of this object plus the specified scoped dependencies.
      */
     public JkDependencies andScopeless(Iterable<? extends JkDependency> others) {
         if (!others.iterator().hasNext()) {
@@ -207,16 +206,14 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns a clone of this object plus the specified
-     * {@link JkScopedDependency}s.
+     * Returns a clone of this object plus the specified scoped dependencies.
      */
     public JkDependencies and(JkScopedDependency... others) {
         return and(Arrays.asList(others));
     }
 
     /**
-     * Returns a clone of this object plus the specified
-     * {@link JkScopedDependency}s.
+     * Returns a clone of this object plus the specified scoped dependencies.
      */
     public JkDependencies and(String groupAndName, String version, JkScope... scopes) {
         final JkModuleDependency dep = JkModuleDependency.of(JkModuleId.of(groupAndName), version);
@@ -280,10 +277,11 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns overided versions for transitive dependencies.
+     * Returns overridden versions for transitive dependencies. Versions present here will
+     * overwrite versions found in transitive dependencies.
      */
-    public JkVersionProvider overridedVersions() {
-        return this.overridedVersions;
+    public JkVersionProvider explicitVersions() {
+        return this.explicitVersions;
     }
 
     @Override
@@ -405,7 +403,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
                 deps.add(scopedDependency);
             }
         }
-        return new JkDependencies(deps, excludes(), this.overridedVersions);
+        return new JkDependencies(deps, excludes(), this.explicitVersions);
     }
 
     /**
@@ -475,7 +473,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             }
             result.add(toAdd);
         }
-        return new JkDependencies(result, this.depExcludes, this.overridedVersions);
+        return new JkDependencies(result, this.depExcludes, this.explicitVersions);
     }
 
     /**
@@ -503,7 +501,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
                 dependencies.add(scopedDependency);
             }
         }
-        return new JkDependencies(dependencies, this.depExcludes, this.overridedVersions);
+        return new JkDependencies(dependencies, this.depExcludes, this.explicitVersions);
     }
 
     /**

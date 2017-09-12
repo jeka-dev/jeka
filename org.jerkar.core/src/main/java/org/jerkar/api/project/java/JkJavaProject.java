@@ -1,5 +1,6 @@
 package org.jerkar.api.project.java;
 
+import org.jerkar.api.file.JkFileSystemLocalizable;
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
@@ -16,7 +17,7 @@ import java.util.*;
 
 
 @Deprecated // Experimental !!!!
-public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProducer {
+public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProducer, JkFileSystemLocalizable {
 
     public static final JkPathFilter RESOURCE_FILTER = JkPathFilter.exclude("**/*.java")
             .andExclude("**/package.html").andExclude("**/doc-files");
@@ -39,7 +40,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     private JkDependencies dependencies;
 
-    private JkJavaCompileVersion compileVersion;
+    private JkJavaCompileVersion compileVersion = JkJavaCompileVersion.V8;
 
     private List<JkResourceProcessor.JkInterpolator> resourceInterpolators = new LinkedList<JkResourceProcessor.JkInterpolator>();
 
@@ -193,14 +194,6 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
         commonBuildDone = true;
     }
 
-    public JkArtifactProducerDependency asDependency(JkArtifactFileId artifactId) {
-        return new JkArtifactProducerDependency(this, artifactId, this.baseDir);
-    }
-
-    public JkArtifactProducerDependency asDependency() {
-        return asDependency(mainArtifactFileId());
-    }
-
     protected JkJavaCompiler applyEncodingAndVersion() {
         return this.makeContext.getBaseCompiler().withSourceVersion(compileVersion.source())
                 .withTargetVersion(compileVersion.target()).withEncoding(encoding);
@@ -293,8 +286,8 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     // ---------------------------- Getters / setters --------------------------------------------
 
-    public JkFileTree root() {
-        return JkFileTree.of(this.baseDir);
+    public File baseDir() {
+        return this.baseDir;
     }
 
     @Override
