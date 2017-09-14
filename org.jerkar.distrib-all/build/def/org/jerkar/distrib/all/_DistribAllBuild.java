@@ -2,12 +2,11 @@ package org.jerkar.distrib.all;
 
 import org.jerkar._CoreBuild;
 import org.jerkar._CoreProject;
-import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkZipper;
 import org.jerkar.api.java.JkJavadocMaker;
-import org.jerkar.api.project.JkArtifactFileId;
+import org.jerkar.api.depmanagement.JkArtifactFileId;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -57,7 +56,7 @@ class _DistribAllBuild extends JkBuild {
         JkZipper.of().merge(sourceDir.include("**.jar", "**.zip").exclude(fatSource.getName())).to(fatSource);
 
         if (javadoc) {
-            JkLog.info("Create a fat javadoc");
+            JkLog.info("Create javadoc");
             JkFileTreeSet sources = this.pluginsJacoco.core.project().getSourceLayout().sources()
                     .and(this.pluginsJacoco.project().getSourceLayout().sources())
                     .and(this.pluginsSonar.project().getSourceLayout().sources());
@@ -75,7 +74,14 @@ class _DistribAllBuild extends JkBuild {
     @JkDoc("End to end method to construct a distrib.")
     public void doDefault() {
         super.doDefault();
-        slaves().invokeDoDefaultMethodOnAll();
+        pluginsJacoco.core.clean();
+        pluginsJacoco.clean();
+        pluginsSonar.clean();
+        pluginsJacoco.core.project().doArtifactFile(_CoreProject.DISTRIB_FILE_ID);
+        pluginsJacoco.project().doMainJar();
+        pluginsSonar.project().doMainJar();
+        //slaves().invokeOnAll("clean");
+       // slaves().invokeDoDefaultMethodOnAll();
         distrib();
         if (testSamples) {
             testSamples();

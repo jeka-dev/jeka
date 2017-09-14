@@ -1,5 +1,6 @@
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.java.JkJavaCompiler;
+import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.samples.AClassicBuild;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkProject;
@@ -39,7 +40,7 @@ public class FatJarBuild extends JkJavaBuild {
     
     @Override
 	public String javaSourceVersion() {
-		return JkJavaCompiler.V7;
+		return JkJavaVersion.V7.name();
 	}
 
     @Override

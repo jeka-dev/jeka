@@ -14,8 +14,9 @@ public class JkJavaCompilerRunner {
         System.out.println(ToolProvider.getSystemJavaCompiler().getSourceVersions());
         final Map<String, String> map = new HashMap<String, String>();
         map.put("jdk.6", "C:\\UserTemp\\I19451\\software\\jdk1.6.0_24");
+
         JkJavaCompiler.outputtingIn(new File("build/output/bin"))
-        .withSourceVersion(JkJavaCompiler.V6)
+        .withOption(JkJavaCompilerSpec.SOURCE_OPTS, JkJavaVersion.V6.name())
         .forkedIfNeeded(map).compile();
     }
 

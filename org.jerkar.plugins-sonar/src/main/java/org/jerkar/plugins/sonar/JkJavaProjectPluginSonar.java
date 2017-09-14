@@ -3,18 +3,13 @@ package org.jerkar.plugins.sonar;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPath;
-import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
-import org.jerkar.api.project.JkProjectOutLayout;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.java.JkJavaProjectPlugin;
 import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkOptions;
-import org.jerkar.tool.JkProject;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
 
 import java.io.File;
 import java.util.HashMap;
@@ -32,7 +27,7 @@ public class JkJavaProjectPluginSonar implements JkJavaProjectPlugin {
     public static JkSonar configureSonarFrom(JkJavaProject project) {
         JkProjectSourceLayout sourceLayout = project.getSourceLayout();
         final File baseDir = sourceLayout.baseDir();
-        final JkPath libs = project.getMakeContext().getDependencyResolver().get(project.getDependencies(),
+        final JkPath libs = project.maker().getDependencyResolver().get(project.getDependencies(),
                 JkJavaBuild.COMPILE, JkJavaBuild.PROVIDED);
         final File testReportDir = project.getOutLayout().testReportDir();
         JkVersionedModule module = project.getVersionedModule();

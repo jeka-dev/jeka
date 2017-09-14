@@ -7,6 +7,7 @@ import static org.jerkar.api.depmanagement.JkPopularModules.MOCKITO_ALL;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.java.JkJavaCompiler;
+import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
@@ -27,7 +28,7 @@ public class AClassicBuild extends JkJavaBuild {
     
     @Override
     public String javaSourceVersion() {
-        return JkJavaCompiler.V7;
+        return JkJavaVersion.V7.name();
     }
 
     @Override // Optional : needless if you use only local dependencies

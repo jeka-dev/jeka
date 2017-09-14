@@ -2,13 +2,10 @@ package org.jerkar.api.project.java;
 
 import org.jerkar.api.file.JkFileSystemLocalizable;
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.java.*;
-import org.jerkar.api.java.junit.JkTestSuiteResult;
-import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.project.*;
 import org.jerkar.api.system.JkLog;
 
@@ -32,7 +29,11 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     private final File baseDir;
 
+    // A project has either a name either a versioned module.
     private String artifactName;
+
+    // A project has either a name either a versioned module.
+    private JkVersionedModule versionedModule;
 
     private JkProjectSourceLayout sourceLayout;
 
@@ -40,23 +41,20 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     private JkDependencies dependencies;
 
-    private JkJavaCompileVersion compileVersion = JkJavaCompileVersion.V8;
+    private JkJavaCompilerSpec compileSpec =
+            JkJavaCompilerSpec.of(JkJavaVersion.V8).withEncoding("UTF-8");
 
     private List<JkResourceProcessor.JkInterpolator> resourceInterpolators = new LinkedList<JkResourceProcessor.JkInterpolator>();
 
     private JkManifest manifest = JkManifest.empty();
 
-    private JkJavaProjectMakeContext makeContext = new JkJavaProjectMakeContext(this);
-
-    private String encoding = "UTF-8";
-
     private JkFileTreeSet extraFilesToIncludeInFatJar = JkFileTreeSet.empty();
+
+    private JkMavenPublicationInfo mavenPublicationInfo;
 
     private Map<JkArtifactFileId, Runnable> artifactProducers = new LinkedHashMap<>();
 
-    private boolean commonBuildDone;
-
-    private JkVersionedModule versionedModule;
+    private JkJavaProjectMaker maker = new JkJavaProjectMaker(this);
 
     public JkJavaProject(File baseDir) {
         this.baseDir = baseDir;
@@ -67,170 +65,38 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
         this.addDefaultArtifactFiles();
     }
 
-    public void clean() {
-        commonBuildDone = false;
-        makeContext.getCleaner().run();
-    }
-
-    public void generateSourcesAndResources() {
-        makeContext.getSourceGenerator().run();
-        makeContext.getResourceGenerator().run();
-    }
-
-    public void compile() {
-        JkJavaCompiler comp = applyEncodingAndVersion();
-        comp = applyCompileSource(comp, this.makeContext.getDependencyResolver());
-        comp = makeContext.getConfiguredProductionCompiler().apply(comp);
-        comp.compile();
-        makeContext.getPostCompilePhase().run();
-    }
-
-    public void processResources() {
-        makeContext.getResourceProcessor().run();
-    }
-
-    public void generateTestResources() {
-        makeContext.getTestResourceGenerator().run();
-    }
-
-    public void compileTest() {
-        JkJavaCompiler comp = applyEncodingAndVersion();
-        comp = applyCompileTest();
-        comp = makeContext.getConfiguredTestCompiler().apply(comp);
-        comp.compile();
-        makeContext.getTestPostCompiler().run();
-    }
-
-    public void processTestResources() {
-        makeContext.getTestResourceProcessor().run();
-    }
-
-    public JkTestSuiteResult executeTests() {
-        JkUnit juniter = juniter();
-        juniter = makeContext.getJuniterConfigurer().apply(juniter);
-        JkTestSuiteResult result = juniter.run();
-        makeContext.getPostTestPhase().run();
-        return result;
-    }
-
     protected void addDefaultArtifactFiles() {
-        this.addArtifactFile(mainArtifactFileId(), () -> {commonBuild(); packMainJar();});
-        this.addArtifactFile(SOURCES_FILE_ID, () -> packSourceJar());
-        this.addArtifactFile(JAVADOC_FILE_ID, () -> {generateJavadoc(); packJavadocJar();});
+        this.addArtifactFile(mainArtifactFileId(), () -> {
+            maker.commonBuild(); this.maker.packMainJar();});
+        this.addArtifactFile(SOURCES_FILE_ID, () -> this.maker.packSourceJar());
+        this.addArtifactFile(JAVADOC_FILE_ID, () -> {this.maker.generateJavadoc(); this.maker.packJavadocJar();});
     }
 
     public JkJavaProject addTestArtifactFiles() {
-        this.addArtifactFile(TEST_FILE_ID, () -> {commonBuild(); packTestJar();});
-        this.addArtifactFile(TEST_SOURCE_FILE_ID, () -> {packTestSourceJar();});
+        this.addArtifactFile(TEST_FILE_ID, () -> {maker.commonBuild(); this.maker.packTestJar();});
+        this.addArtifactFile(TEST_SOURCE_FILE_ID, () -> {this.maker.packTestSourceJar();});
         return this;
     }
 
     public JkJavaProject addFatJarArtifactFile(String classifier) {
         this.addArtifactFile(JkArtifactFileId.of(classifier, "jar"),
-                () -> {commonBuild(); packFatJar(classifier);});
+                () -> {maker.commonBuild(); this.maker.packFatJar(classifier);});
         return this;
     }
 
-    public File packMainJar() {
-        return jarMaker().mainJar(manifest, outLayout.classDir(), JkFileTreeSet.empty());
-    }
 
-    public File packFatJar(String suffix) {
-        JkDependencyResolver depResolver = this.makeContext.getDependencyResolver();
-        JkClasspath classpath = JkClasspath.of(depResolver.get(this.dependencies, JkJavaDepScopes.RUNTIME));
-        return jarMaker().fatJar(manifest, suffix, this.outLayout.classDir(), classpath, this.extraFilesToIncludeInFatJar);
-    }
-
-    public File packTestJar() {
-        return jarMaker().testJar(outLayout.testClassDir());
-    }
-
-    public File generateJavadoc() {
-        JkJavadocMaker maker = JkJavadocMaker.of(this.sourceLayout.sources(), this.outLayout.getJavadocDir())
-                .withDoclet(this.makeContext.getJavadocDoclet());
-        maker.process();
-        return this.outLayout.getJavadocDir();
-    }
-
-    public File packSourceJar() {
-        return jarMaker().jar(sourceLayout.sources().and(sourceLayout.resources()), "sources");
-    }
-
-    public File packTestSourceJar() {
-        return jarMaker().jar(sourceLayout.tests().and(sourceLayout.testResources()), "testSources");
-    }
-
-    public File packJavadocJar() {
-        return jarMaker().jar(JkFileTreeSet.of(outLayout.getJavadocDir()), "javadoc");
-    }
-
-    public void runCompilationPhase() {
-        JkLog.startln("Running compilation phase");
-        this.generateSourcesAndResources();
-        this.compile();
-        this.processResources();
-        JkLog.done();
-    }
-
-    public void runUnitTestPhase() {
-        JkLog.startln("Running unit test phase");
-        this.generateTestResources();
-        this.compileTest();
-        this.processTestResources();
-        this.executeTests();
-        JkLog.done();
-    }
-
-
-
-    protected void commonBuild() {
-        if (commonBuildDone) {
-            return;
-        }
-        runCompilationPhase();
-        if (this.makeContext.getJuniter() != null) {
-            runUnitTestPhase();
-        }
-        commonBuildDone = true;
-    }
 
     protected JkJavaCompiler applyEncodingAndVersion() {
-        return this.makeContext.getBaseCompiler().withSourceVersion(compileVersion.source())
-                .withTargetVersion(compileVersion.target()).withEncoding(encoding);
-    }
-
-    protected JkJavaCompiler applyCompileSource(JkJavaCompiler baseCompiler, JkDependencyResolver dependencyResolver) {
-        JkPath classpath = dependencyResolver.get(
-                this.dependencies.withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME),
-                JkJavaDepScopes.SCOPES_FOR_COMPILATION);
-        return baseCompiler
-                .withClasspath(classpath)
-                .andSources(this.sourceLayout.sources())
-                .andSources(JkFileTree.of(this.outLayout.generatedSourceDir()))
-                .withOutputDir(this.outLayout.classDir());
+        return this.maker.getBaseCompiler().andOptions(this.compileSpec.asOptions());
     }
 
     protected JkJavaCompiler applyCompileTest() {
-        return this.makeContext.getTestBaseCompiler()
-                .withClasspath(makeContext.getDependencyResolver().get(
+        return this.maker.getTestBaseCompiler()
+                .withClasspath(maker.getDependencyResolver().get(
                         this.dependencies.withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME),
                         JkJavaDepScopes.SCOPES_FOR_TEST).andHead(this.outLayout.classDir()))
                 .andSources(this.sourceLayout.tests())
                 .withOutputDir(this.outLayout.testClassDir());
-    }
-
-    protected JkUnit juniter() {
-        final JkClasspath classpath = JkClasspath.of(this.outLayout.testClassDir(), this.outLayout.classDir()).and(
-                this.makeContext.getDependencyResolver().get(this.dependencies.withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME)
-                        , JkJavaDepScopes.SCOPES_FOR_TEST));
-        final File junitReport = new File(this.outLayout.testReportDir(), "junit");
-        return this.makeContext.getJuniter().withClassesToTest(this.outLayout.testClassDir())
-                .withClasspath(classpath)
-                .withReportDir(junitReport);
-    }
-
-    protected JkJarMaker jarMaker() {
-        return JkJarMaker.of(this.outLayout.outputDir(), getArtifactName());
     }
 
     /**
@@ -257,8 +123,6 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
         }
     }
 
-
-
     @Override
     public final Iterable<JkArtifactFileId> artifactFileIds() {
         return this.artifactProducers.keySet();
@@ -266,23 +130,21 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     @Override
     public final File artifactFile(JkArtifactFileId artifactId) {
-        return jarMaker().file(artifactId.classifier(), artifactId.extension());
+        return maker.getJarMaker().file(artifactId.classifier(), artifactId.extension());
     }
 
     @Override
     public JkPath runtimeDependencies(JkArtifactFileId artifactFileId) {
         if (artifactFileId.equals(mainArtifactFileId())) {
-            return this.makeContext.getDependencyResolver().get(
+            return this.maker.getDependencyResolver().get(
                     this.dependencies.withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.RUNTIME);
         } else if (artifactFileId.isClassifier("test") && artifactFileId.isExtension("jar")) {
-            return this.makeContext.getDependencyResolver().get(
+            return this.maker.getDependencyResolver().get(
                     this.dependencies.withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.SCOPES_FOR_TEST);
         } else {
             return JkPath.of();
         }
     }
-
-
 
     // ---------------------------- Getters / setters --------------------------------------------
 
@@ -305,12 +167,12 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
     }
 
     @Override
-    public JkJavaCompileVersion getCompileVersion() {
-        return compileVersion;
+    public JkJavaVersion getTargetVersion() {
+        return this.compileSpec.getTargetVersion();
     }
 
-    public JkJavaProjectMakeContext getMakeContext() {
-        return makeContext;
+    public JkJavaProjectMaker maker() {
+        return maker;
     }
 
     public String getArtifactName() {
@@ -341,13 +203,13 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
         return this;
     }
 
-    public JkJavaProject setCompileVersion(JkJavaCompileVersion compileVersion) {
-        this.compileVersion = compileVersion;
+    public JkJavaProject setCompilerSpecification(JkJavaCompilerSpec compileSpec) {
+        this.compileSpec = compileSpec;
         return this;
     }
 
-    public JkJavaProject setMakeContext(JkJavaProjectMakeContext makeContext) {
-        this.makeContext = makeContext;
+    public JkJavaProject setMaker(JkJavaProjectMaker maker) {
+        this.maker = maker;
         return this;
     }
 
@@ -380,5 +242,36 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     public JkJavaProject setVersionedModule(String groupAndName, String version) {
         return setVersionedModule(JkModuleId.of(groupAndName).version(version));
+    }
+
+    public JkJavaCompilerSpec getCompileSpec() {
+        return compileSpec;
+    }
+
+    public JkJavaProject setCompileSpec(JkJavaCompilerSpec compileSpec) {
+        this.compileSpec = compileSpec;
+        return this;
+    }
+
+    public JkManifest getManifest() {
+        return manifest;
+    }
+
+    public JkJavaProject setManifest(JkManifest manifest) {
+        this.manifest = manifest;
+        return this;
+    }
+
+    public JkFileTreeSet getExtraFilesToIncludeInFatJar() {
+        return extraFilesToIncludeInFatJar;
+    }
+
+    public JkJavaProject setExtraFilesToIncludeInFatJar(JkFileTreeSet extraFilesToIncludeInFatJar) {
+        this.extraFilesToIncludeInFatJar = extraFilesToIncludeInFatJar;
+        return this;
+    }
+
+    public JkMavenPublicationInfo getMavenPublicationInfo() {
+        return mavenPublicationInfo;
     }
 }

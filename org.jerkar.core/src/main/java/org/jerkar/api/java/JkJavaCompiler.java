@@ -2,12 +2,7 @@ package org.jerkar.api.java;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticListener;
@@ -29,53 +24,30 @@ import org.jerkar.api.utils.JkUtilsString;
  */
 public final class JkJavaCompiler {
 
-    /** Stands for Java version 1.3 */
-    @Deprecated  // Use JkJavaVersion
-    public static final String V1_3 = "1.3";
+    private static final String OUTPUR_DIR_OPTS = "-d";
 
-    /** Stands for Java version 1.4 */
-    @Deprecated  // Use JkJavaVersion
-    public static final String V1_4 = "1.4";
+    private static final String CLASSPATH_OPTS = "-cp";
 
-    /** Stands for Java version 5 */
-    @Deprecated  // Use JkJavaVersion
-    public static final String V5 = "5";
-
-    /** Stands for Java version 6 */
-    @Deprecated  // Use JkJavaVersion
-    public static final String V6 = "6";
-
-    /** Stands for Java version 7 */
-    @Deprecated  // Use JkJavaVersion
-    public static final String V7 = "7";
-
-    /** Stands for Java version 8 */
-    @Deprecated  // Use JkJavaVersion
-    public static final String V8 = "8";
 
     /** Filter to retain only source files */
     public static final JkPathFilter JAVA_SOURCE_ONLY_FILTER = JkPathFilter.include("**/*.java");
+
 
     /**
      * Creates a {@link JkJavaCompiler} producing its output in the given
      * directory.
      */
     @SuppressWarnings("unchecked")
-    public static JkJavaCompiler outputtingIn(File outputDir) {
-        if (outputDir.exists() && !outputDir.isDirectory()) {
-            throw new IllegalArgumentException(outputDir.getAbsolutePath() + " is not a directory.");
-        }
-        final List<String> options = new LinkedList<String>();
-        options.add("-d");
-        options.add(outputDir.getAbsolutePath());
-        return new JkJavaCompiler(options, Collections.EMPTY_LIST, true, null, null, null);
-    }
-
-    /**
-     * Returns a base compiler to set some behavior and parameters on.
-     */
     public static JkJavaCompiler base() {
-        return new JkJavaCompiler(new LinkedList<String>(), new LinkedList<File>(), true, null, null, null);
+        return new JkJavaCompiler(Collections.EMPTY_LIST, Collections.EMPTY_LIST, true, null, null);
+    }
+    /**
+     * Creates a {@link JkJavaCompiler} producing its output in the given
+     * directory.
+     */
+    @SuppressWarnings("unchecked")
+    public static JkJavaCompiler outputtingIn(File outputDir) {
+        return base().withOutputDir(outputDir);
     }
 
     private final List<String> options;
@@ -86,29 +58,27 @@ public final class JkJavaCompiler {
 
     private final JkProcess fork;
 
-    private String versionCache;
-
     private final JavaCompiler compiler;
 
     private JkJavaCompiler(List<String> options, List<File> javaSourceFiles, boolean failOnError,
-            JkProcess fork, String versionCache, JavaCompiler compiler) {
+            JkProcess fork, JavaCompiler compiler) {
         super();
         this.options = options;
         this.javaSourceFiles = javaSourceFiles;
         this.failOnError = failOnError;
         this.fork = fork;
-        this.versionCache = versionCache;
         this.compiler = compiler;
     }
 
     /**
      * Creates a copy of this {@link JkJavaCompiler} but with the specified
-     * failed on error parameter. If <code>fail</code> is <code>true</code> then
+     * failed-on-error parameter. If <code>true</code> then
      * a compilation error will throw a {@link IllegalStateException}.
      */
     public JkJavaCompiler failOnError(boolean fail) {
-        return new JkJavaCompiler(options, javaSourceFiles, fail, fork, versionCache, compiler);
+        return new JkJavaCompiler(options, javaSourceFiles, fail, fork, compiler);
     }
+
 
     /**
      * Creates a copy of this {@link JkJavaCompiler} but adding the specified
@@ -122,57 +92,48 @@ public final class JkJavaCompiler {
     public JkJavaCompiler andOptions(String... options) {
         final List<String> newOptions = new LinkedList<String>(this.options);
         newOptions.addAll(Arrays.asList(options));
-        return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork, versionCache, compiler);
+        return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork, compiler);
     }
 
     /**
      * Creates a copy of this {@link JkJavaCompiler} but with the specified
      * options.
-     *
-     * @see #andOptions(String...)
      */
-    public JkJavaCompiler withOptions(String... options) {
+    public JkJavaCompiler andOptions(Collection<String> options) {
         final List<String> newOptions = new LinkedList<String>(this.options);
-        newOptions.addAll(Arrays.asList(options));
-        return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork, versionCache, compiler);
-    }
-
-    /**
-     * Creates a copy of this compiler but outputting in the specified directory.
-
-     */
-    public JkJavaCompiler withOutputDir(File outputDir) {
-        if (outputDir.exists() && !outputDir.isDirectory()) {
-            throw new IllegalArgumentException(outputDir.getAbsolutePath() + " is not a directory.");
-        }
-        final List<String> newOptions = new LinkedList<String>(this.options);
-        final int index = newOptions.indexOf("-d");
-        if (index >= 0) {
-            newOptions.remove(index);
-            newOptions.remove(index);
-        }
-        newOptions.add("-d");
-        newOptions.add(outputDir.getAbsolutePath());
-        return new JkJavaCompiler(newOptions, new ArrayList<File>(this.javaSourceFiles), failOnError,
-                fork, versionCache, compiler);
-    }
-
-    private File getOutputDir() {
-        final int index = options.indexOf("-d");
-        return new File(options.get(index+1));
+        newOptions.addAll(options);
+        return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork, compiler);
     }
 
     /**
      * Creates a copy of this {@link JkJavaCompiler} but with the specified
      * options under condition.
-     *
-     * @see #andOptions(String...)
      */
-    public JkJavaCompiler withOptionsIf(boolean condition, String... options) {
+    public JkJavaCompiler andOptionsIf(boolean condition, String... options) {
         if (condition) {
-            return withOptions(options);
+            return andOptions(options);
         }
         return this;
+    }
+
+    /**
+     * Some options of a compiler are set in a couple of name/value (version, classpath, .....).
+     * So if you want to explicitly set such an option it is desirable to remove current value
+     * instead of adding it at the queue of options.
+     */
+    public JkJavaCompiler withOption(String optionName, String optionValue) {
+        final List<String> newOptions = JkJavaCompilerSpec.addOrReplace(options, optionName, optionValue);
+        return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork, compiler);
+    }
+
+    /**
+     * Creates a copy of this compiler but outputting in the specified directory.
+     */
+    public JkJavaCompiler withOutputDir(File outputDir) {
+        if (outputDir.exists() && !outputDir.isDirectory()) {
+            throw new IllegalArgumentException(outputDir.getAbsolutePath() + " is not a directory.");
+        }
+        return withOption(OUTPUR_DIR_OPTS, outputDir.getAbsolutePath());
     }
 
     /**
@@ -184,85 +145,16 @@ public final class JkJavaCompiler {
             return this;
         }
         final String classpath = JkClasspath.of(files).toString();
-        return this.andOptions("-cp", classpath);
+        return this.withOption(CLASSPATH_OPTS, classpath);
     }
 
-    /**
-     * @see {@link #withSourceVersion(JkJavaVersion)}
-     */
-    @Deprecated
-    public JkJavaCompiler withSourceVersion(String version) {
-        return this.withSourceVersion(JkJavaVersion.name(version));
+    private File getOutputDir() {
+        return new File(JkJavaCompilerSpec.findValueAfter(options, OUTPUR_DIR_OPTS));
     }
 
-    /**
-     * Creates a copy of this {@link JkJavaCompiler} but with the specified
-     * source version. If the specified version is null, this methods returns this object.
-     */
-    public JkJavaCompiler withSourceVersion(JkJavaVersion version) {
-        if (version == null) {
-            return this;
-        }
-        final JkJavaCompiler result = andOptions("-source", version.name());
-        result.versionCache = version.name();
-        return result;
-    }
 
-    /**
-     * @see #withTargetVersion(JkJavaVersion)
-     */
-    @Deprecated
-    public JkJavaCompiler withTargetVersion(String version) {
-        return this.withTargetVersion(JkJavaVersion.name(version));
-    }
 
-    /**
-     * Creates a copy of this {@link JkJavaCompiler} but with the target
-     * version. If the specified version is null, this methods returns this object.
-     */
-    public JkJavaCompiler withTargetVersion(JkJavaVersion version) {
-        if (version == null) {
-            return this;
-        }
-        return andOptions("-target", version.name());
-    }
 
-    /**
-     * Creates a copy of this {@link JkJavaCompiler} but using the
-     * specified annotation classes instead of using the ones discovered by
-     * default Java 6 mechanism.
-     */
-    public JkJavaCompiler withAnnotationProcessors(String... annotationProcessorClassNames) {
-        return andOptions("-processor", JkUtilsString.join(annotationProcessorClassNames, ","));
-    }
-
-    /**
-     * Creates a copy of this {@link JkJavaCompiler} but using the
-     * specified source encoding (e.g. UTF-8). If <code>null</code> is specified,
-     * then default plateform encoding will be used.
-     */
-    public JkJavaCompiler withEncoding(String encoding) {
-        if (encoding == null) {
-            return this;
-        }
-        return andOptions("-encoding", encoding);
-    }
-
-    /**
-     * Creates a copy of this {@link JkJavaCompiler} but without annotation
-     * processing.
-     */
-    public JkJavaCompiler withoutAnnotationProcessing() {
-        return andOptions("-proc:none");
-    }
-
-    /**
-     * Creates a copy of this {@link JkJavaCompiler} but only for annotation
-     * processing (no compilation).
-     */
-    public JkJavaCompiler withAnnotationProcessingOnly() {
-        return andOptions("-proc:only");
-    }
 
     /**
      * Creates a copy of this {@link JkJavaCompiler} but with forking the javac
@@ -271,7 +163,7 @@ public final class JkJavaCompiler {
      */
     public JkJavaCompiler fork(String... parameters) {
         return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError,
-                JkProcess.ofJavaTool("javac", parameters), versionCache, compiler);
+                JkProcess.ofJavaTool("javac", parameters), compiler);
     }
 
     /**
@@ -281,12 +173,11 @@ public final class JkJavaCompiler {
     public JkJavaCompiler fork(boolean fork, String... parameters) {
         if (fork) {
             return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles,
-                    failOnError, JkProcess.ofJavaTool("javac", parameters), versionCache, compiler);
+                    failOnError, JkProcess.ofJavaTool("javac", parameters), compiler);
         } else {
             return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles,
-                    failOnError, null, versionCache, compiler);
+                    failOnError, null, compiler);
         }
-
     }
 
     /**
@@ -299,7 +190,7 @@ public final class JkJavaCompiler {
      */
     public JkJavaCompiler forkOnCompiler(String executable, String... parameters) {
         return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError,
-                JkProcess.of(executable, parameters), versionCache, compiler);
+                JkProcess.of(executable, parameters), compiler);
     }
 
     /**
@@ -313,7 +204,7 @@ public final class JkJavaCompiler {
                 newSources.add(file);
             }
         }
-        return new JkJavaCompiler(options, newSources, failOnError, fork, versionCache, compiler);
+        return new JkJavaCompiler(options, newSources, failOnError, fork, compiler);
     }
 
     /**
@@ -330,7 +221,7 @@ public final class JkJavaCompiler {
      */
     public JkJavaCompiler withCompiler(JavaCompiler compiler) {
         // turn off forking
-        return new JkJavaCompiler(options, javaSourceFiles, failOnError, null, versionCache, compiler);
+        return new JkJavaCompiler(options, javaSourceFiles, failOnError, null, compiler);
     }
 
     /**
@@ -410,7 +301,7 @@ public final class JkJavaCompiler {
                 version = fullVersion.substring(0, secondDot);
             }
         }
-        if (version.equals(V1_3) || version.equals(V1_4)) {
+        if (version.equals(JkJavaVersion.V1_3.name()) || version.equals(JkJavaVersion.V1_4.name())) {
             return version;
         }
         String shortVersion;
@@ -427,14 +318,15 @@ public final class JkJavaCompiler {
      * a forked process with relevant JDK if this specified source version
      * does not match with the current running JDK. The specified map may include
      * the JDK location for this source version.
-     * The keys must be formated as "jdk.[source version]". For example, "jdk.1.4" or
+     * The keys must be formatted as "jdk.[source version]". For example, "jdk.1.4" or
      * "jdk.7". The values must absolute path.
      */
     public JkJavaCompiler forkedIfNeeded(Map<String, String> jdkLocations) {
-        if (this.versionCache == null) {
+        String versionCache = JkJavaCompilerSpec.findValueAfter(this.options, JkJavaCompilerSpec.SOURCE_OPTS);
+        if (versionCache == null) {
             return this;
         }
-        if (this.versionCache.equals(currentJdkSourceVersion())) {
+        if (versionCache.equals(currentJdkSourceVersion())) {
             JkLog.info("Current JDK matches with source version (" + versionCache + "). Don't need to fork.");
             return this;
         }
@@ -451,7 +343,7 @@ public final class JkJavaCompiler {
         JkLog.info("Current JDK does not match with source version (" + versionCache + "). Will use JDK "
                 + path);
         final JkProcess process = JkProcess.of(cmd);
-        return new JkJavaCompiler(options, javaSourceFiles, failOnError, process, versionCache, compiler);
+        return new JkJavaCompiler(options, javaSourceFiles, failOnError, process, compiler);
     }
 
     @SuppressWarnings("rawtypes")

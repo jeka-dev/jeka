@@ -30,10 +30,10 @@ public final class JkMavenPublication implements Serializable {
         return new JkMavenPublication(JkUtilsIterable.listOf(file), Collections.EMPTY_LIST, null);
     }
 
-    public static JkMavenPublication of(JkArtifactProducer artifactProducer) {
-        JkMavenPublication result = JkMavenPublication.of(artifactProducer.artifactFile(artifactProducer.mainArtifactFileId()));
-        for (JkArtifactFileId extraFileId : artifactProducer.artifactFileIds()) {
-            File file = artifactProducer.artifactFile(extraFileId);
+    public static JkMavenPublication of(JkArtifactLocator artifactLocator) {
+        JkMavenPublication result = JkMavenPublication.of(artifactLocator.artifactFile(artifactLocator.mainArtifactFileId()));
+        for (JkArtifactFileId extraFileId : artifactLocator.artifactFileIds()) {
+            File file = artifactLocator.artifactFile(extraFileId);
             result = result.andOptional(file, extraFileId.classifier());
         }
         return result;

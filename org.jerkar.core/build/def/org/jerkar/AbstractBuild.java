@@ -5,6 +5,7 @@ import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
 import org.jerkar.api.depmanagement.JkPublishRepos;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.java.JkJavaCompiler;
+import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.tool.JkOptions;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
@@ -19,7 +20,7 @@ public abstract class AbstractBuild extends JkJavaBuild {
 
     @Override
     public String javaSourceVersion() {
-        return JkJavaCompiler.V8;
+        return JkJavaVersion.V8.name();
     }
 
     @Override

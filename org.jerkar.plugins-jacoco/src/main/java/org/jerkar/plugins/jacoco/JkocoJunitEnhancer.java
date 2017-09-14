@@ -45,7 +45,7 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
     /**
      * Append some options to the returned <code>Jkoco</code>. One option is to
      * be considered as a <code>pair=value</code>.<br/>
-     * Example : <code>withOptions("dumponexit=true", "port=6301");</code>
+     * Example : <code>andOptions("dumponexit=true", "port=6301");</code>
      */
     public JkocoJunitEnhancer withOptions(String... options) {
         return new JkocoJunitEnhancer(agent, enabled, destFile, Arrays.asList(options));

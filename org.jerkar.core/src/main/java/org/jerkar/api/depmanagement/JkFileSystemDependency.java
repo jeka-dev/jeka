@@ -12,7 +12,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 /**
  * A dependency on files located on file system.
  */
-public final class JkFileSystemDependency extends JkFileDependency {
+public final class JkFileSystemDependency implements JkFileDependency {
 
     private static final long serialVersionUID = 1079527121988214989L;
 

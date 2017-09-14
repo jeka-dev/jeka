@@ -103,6 +103,21 @@ public final class JkPublisher {
     }
 
     /**
+     * Publishes all artifact files for the specified artifact producer for the specified versioned module.
+     *
+     * @param versionedModule The target moduleId and version for the specified publication
+     * @param dependencies The dependencies to specify in the generated pom file.
+     * @param extraPublishInfo Extra information about authors, licensing, source control management, ...
+     * @param artifactLocator Object producing artifacts to be deployed. This object is used only to find
+     *               artifact files. If an artifact files is not present, it is not created by this method.
+     */
+    public void publishMaven(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator,
+                             JkDependencies dependencies, JkMavenPublicationInfo extraPublishInfo) {
+        JkMavenPublication publication = JkMavenPublication.of(artifactLocator).with(extraPublishInfo);
+        this.ivyPublisher.publishMaven(versionedModule, publication, dependencies.modulesOnly());
+    }
+
+    /**
      * Returns <code>true</code> if this publisher contains Maven reposirories.
      */
     public boolean hasMavenPublishRepo() {

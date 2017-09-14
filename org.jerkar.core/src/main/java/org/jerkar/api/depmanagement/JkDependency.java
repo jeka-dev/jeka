@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author Jerome Angibaud
  */
-public interface JkDependency {
+public interface JkDependency extends Serializable {
 
     /**
      * Dependencies that can directly provide files without passing by an
@@ -24,14 +24,12 @@ public interface JkDependency {
      *
      * @author Jerome Angibaud
      */
-    abstract class JkFileDependency implements JkDependency {
-
-        private static final long serialVersionUID = 1L;
+    interface JkFileDependency extends JkDependency {
 
         /**
          * Returns files constituting this file dependencies.
          */
-        public abstract List<File> files();
+        List<File> files();
 
     }
 

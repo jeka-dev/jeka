@@ -18,7 +18,7 @@ public class _CoreBuild extends JkJavaJarBuild {
 
     @Override
     public void doDefault() {
-        project().clean();
+        project().maker().runCleanPhase();
         project().doAllArtifactFiles();
     }
 

@@ -27,7 +27,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
  * This is the way for creating multi-projet (and multi-techno if desired) builds.
  *
  */
-public class JkComputedDependency extends JkFileDependency {
+public class JkComputedDependency implements JkFileDependency {
 
     /**
      * Creates a computed dependency to the specified files and {@link JkProcess} to run for

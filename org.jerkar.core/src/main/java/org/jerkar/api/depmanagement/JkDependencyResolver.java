@@ -154,7 +154,8 @@ public final class JkDependencyResolver {
         JkLog.startln("Resolving dependencies with specified scopes " + Arrays.asList(scopes) );
         JkResolveResult resolveResult = internalResolver.resolve(module, dependencies.onlyModules(),
                 parameters, transitiveVersionOverride, scopes);
-        final JkDependencyNode mergedNode = resolveResult.dependencyTree().mergeNonModules(dependencies, JkUtilsIterable.setOf(scopes));
+        final JkDependencyNode mergedNode = resolveResult.dependencyTree().mergeNonModules(dependencies,
+                JkUtilsIterable.setOf(scopes));
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.errorReport());
         if (JkLog.verbose()) {
             JkLog.info(plurialize(resolveResult.involvedModules().size(), "module") + resolveResult.involvedModules());

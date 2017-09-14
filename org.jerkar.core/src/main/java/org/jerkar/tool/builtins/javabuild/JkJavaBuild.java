@@ -17,13 +17,7 @@ import org.jerkar.api.depmanagement.JkVersionProvider;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
-import org.jerkar.api.java.JkClassLoader;
-import org.jerkar.api.java.JkClasspath;
-import org.jerkar.api.java.JkJavaCompiler;
-import org.jerkar.api.java.JkJavaProcess;
-import org.jerkar.api.java.JkJavadocMaker;
-import org.jerkar.api.java.JkManifest;
-import org.jerkar.api.java.JkResourceProcessor;
+import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
 import org.jerkar.api.system.JkLog;
@@ -284,11 +278,12 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * Returns the compiler used to compile production code.
      */
     public JkJavaCompiler productionCompiler() {
+        JkJavaCompilerSpec spec = JkJavaCompilerSpec.of().withEncoding(this.sourceEncoding())
+                .withSourceVersion(JkJavaVersion.name(this.javaSourceVersion()))
+                .withTargetVersion(JkJavaVersion.name(this.javaTargetVersion()));
         return JkJavaCompiler.outputtingIn(classDir()).andSources(sources())
                 .withClasspath(depsFor(COMPILE, PROVIDED))
-                .withSourceVersion(this.javaSourceVersion())
-                .withTargetVersion(this.javaTargetVersion())
-                .withEncoding(this.sourceEncoding())
+                .andOptions(spec.asOptions())
                 .forkedIfNeeded(JkOptions.getAll());
     }
 
@@ -296,11 +291,12 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * Returns the compiler used to compile unit tests.
      */
     public JkJavaCompiler unitTestCompiler() {
+        JkJavaCompilerSpec spec = JkJavaCompilerSpec.of().withEncoding(this.sourceEncoding())
+                .withSourceVersion(JkJavaVersion.name(this.javaSourceVersion()))
+                .withTargetVersion(JkJavaVersion.name(this.javaTargetVersion()));
         return JkJavaCompiler.outputtingIn(testClassDir()).andSources(unitTestSources())
                 .withClasspath(this.depsFor(TEST, PROVIDED).andHead(classDir()))
-                .withSourceVersion(this.javaSourceVersion())
-                .withTargetVersion(this.javaTargetVersion())
-                .withEncoding(this.sourceEncoding())
+                .andOptions(spec.asOptions())
                 .forkedIfNeeded(JkOptions.getAll());
     }
 

@@ -3,8 +3,9 @@ package org.jerkar;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkZipper;
 import org.jerkar.api.depmanagement.JkArtifactFileId;
+import org.jerkar.api.java.JkJavaCompilerSpec;
+import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.api.project.java.JkJavaCompileVersion;
 
 import java.io.File;
 
@@ -21,7 +22,7 @@ public class _CoreProject extends JkJavaProject {
     public _CoreProject(File baseDir) {
         super(baseDir);
         this.setOutLayout(this.getOutLayout().withOutputDir(new File(baseDir, "build/output2")));
-        this.setCompileVersion(JkJavaCompileVersion.V8);
+        this.setCompileSpec(JkJavaCompilerSpec.of(JkJavaVersion.V8));
         this.addArtifactFile(DISTRIB_FILE_ID, this::doDistrib);
         this.distribFolder = new File(this.getOutLayout().outputDir(), "distrib");
     }

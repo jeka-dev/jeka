@@ -73,18 +73,17 @@ public class ResolveTreeIT {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
         JkModuleId moduleId = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
         JkDependencies deps = JkDependencies.builder()
-                .on(moduleId, "1.5.+").scope(TEST)
+                .on(moduleId, "1.4.+").scope(TEST)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkDependencyNode tree = resolver.resolve(deps, JkJavaBuild.TEST).dependencyTree();
-
+        System.out.println(tree.toStrings());
         JkDependencyNode.ModuleNodeInfo moduleNodeInfo = tree.find(moduleId).moduleInfo();
-        assertTrue(moduleNodeInfo.declaredVersion().definition().equals("1.5.+"));
+        assertTrue(moduleNodeInfo.declaredVersion().definition().equals("1.4.+"));
         String resolvedVersionName = moduleNodeInfo.resolvedVersion().name();
-        assertTrue(resolvedVersionName.startsWith("1.5"));
-        assertFalse(JkVersionRange.of(resolvedVersionName).isDynamic());
+        assertEquals("1.4.7.RELEASE", resolvedVersionName);
     }
 
     @Test
@@ -115,7 +114,7 @@ public class ResolveTreeIT {
     }
 
     @Test
-    public void treeplePlayAnd() {
+    public void triplePlayAnd() {
         JkDependencies deps = JkDependencies.builder()
                 .usingDefaultScopes(JkJavaBuild.COMPILE_AND_RUNTIME)
                 .on("com.googlecode.playn", "playn-core", "1.4")

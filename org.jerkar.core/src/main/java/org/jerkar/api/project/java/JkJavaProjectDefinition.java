@@ -17,8 +17,12 @@ public interface JkJavaProjectDefinition {
         return JkDependencies.of();
     }
 
-    default JkJavaCompileVersion getCompileVersion() {
-        return JkJavaCompileVersion.V8;
+    default JkJavaVersion getSourceVersion() {
+        return JkJavaVersion.V8;
+    }
+
+    default JkJavaVersion getTargetVersion() {
+        return getSourceVersion();
     }
 
 }
