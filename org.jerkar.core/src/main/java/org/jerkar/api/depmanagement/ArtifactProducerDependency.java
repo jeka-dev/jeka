@@ -18,7 +18,7 @@ class ArtifactProducerDependency extends JkComputedDependency  {
      */
     ArtifactProducerDependency(JkArtifactProducer artifactProducer,
                                Iterable<JkArtifactFileId> artifactFileIds) {
-        super(() -> artifactProducer.doArtifactFilesIfNecessary(artifactFileIds),
+        super(() -> artifactProducer.makeArtifactFilesIfNecessary(artifactFileIds),
                 baseDir(artifactProducer),
                 jarAndRuntimeDeps(artifactProducer, artifactFileIds));
     }

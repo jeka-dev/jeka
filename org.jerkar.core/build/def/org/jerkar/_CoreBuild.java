@@ -1,6 +1,5 @@
 package org.jerkar;
 
-import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.javabuild.JkJavaJarBuild;
 
@@ -18,8 +17,8 @@ public class _CoreBuild extends JkJavaJarBuild {
 
     @Override
     public void doDefault() {
-        project().maker().runCleanPhase();
-        project().doAllArtifactFiles();
+        project().maker().clean();
+        project().makeAllArtifactFiles();
     }
 
     public static void main(String[] args) {

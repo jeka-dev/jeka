@@ -37,6 +37,18 @@ public class ResolverWithScopeMapperIT {
         }
     }
 
+    @Test
+    public void resolveWithJunit() {
+        JkDependencies deps = JkDependencies.builder()
+                .on(JkPopularModules.JUNIT, "4.12").scope(JkJavaDepScopes.TEST)
+                .build();
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
+                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
+        JkResolveResult resolveResult = resolver.resolve(deps, TEST);
+        Set<JkModuleId> moduleIds = resolveResult.dependencyTree().flattenToVersionProvider().moduleIds();
+        assertEquals("Wrong modules size " + moduleIds, 2, moduleIds.size());
+    }
+
     /*
      * Spring-boot 1.5.3 has a dependency on spring-core which is higher than 4.0.0.
      * Nevertheless, if we declare spring-core with version 4.0.0 as direct dependency,

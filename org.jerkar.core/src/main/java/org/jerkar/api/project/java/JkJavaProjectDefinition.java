@@ -21,8 +21,4 @@ public interface JkJavaProjectDefinition {
         return JkJavaVersion.V8;
     }
 
-    default JkJavaVersion getTargetVersion() {
-        return getSourceVersion();
-    }
-
 }

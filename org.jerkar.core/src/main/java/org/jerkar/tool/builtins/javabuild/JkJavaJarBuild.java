@@ -2,7 +2,6 @@ package org.jerkar.tool.builtins.javabuild;
 
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkProject;
 
 import java.io.File;
 
@@ -24,10 +23,10 @@ public class JkJavaJarBuild extends JkBuild {
 
     @Override
     public void doDefault() {
-        this.project().doMainJar();
+        this.project().makeMainJar();
     }
 
     public void produceAll() {
-        this.project().doAllArtifactFiles();
+        this.project().makeAllArtifactFiles();
     }
 }

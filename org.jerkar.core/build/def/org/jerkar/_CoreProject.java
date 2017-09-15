@@ -29,7 +29,7 @@ public class _CoreProject extends JkJavaProject {
 
     private void doDistrib() {
         File distripZipFile = this.artifactFile(DISTRIB_FILE_ID);
-        this.doArtifactFilesIfNecessary(SOURCES_FILE_ID, JAVADOC_FILE_ID, mainArtifactFileId());
+        this.makeArtifactFilesIfNecessary(SOURCES_FILE_ID, JAVADOC_FILE_ID, mainArtifactFileId());
         final JkFileTree distrib = JkFileTree.of(distribFolder);
         JkFileTree root = JkFileTree.of(this.baseDir());
         distrib.importFiles(root.file("../LICENSE"));

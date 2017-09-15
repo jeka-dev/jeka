@@ -139,8 +139,7 @@ public class JkProjectSourceLayout {
     // --------------------------- Views ---------------------------------
 
     /**
-     * Returns location of production source code (containing edited + generated
-     * sources).
+     * Returns location of production source code (containing only edited sources, not generated sources).
      */
     public final JkFileTreeSet sources() {
         return sources;

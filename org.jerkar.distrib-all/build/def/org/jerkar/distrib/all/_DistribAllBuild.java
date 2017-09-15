@@ -77,9 +77,9 @@ class _DistribAllBuild extends JkBuild {
         pluginsJacoco.core.clean();
         pluginsJacoco.clean();
         pluginsSonar.clean();
-        pluginsJacoco.core.project().doArtifactFile(_CoreProject.DISTRIB_FILE_ID);
-        pluginsJacoco.project().doMainJar();
-        pluginsSonar.project().doMainJar();
+        pluginsJacoco.core.project().makeArtifactFile(_CoreProject.DISTRIB_FILE_ID);
+        pluginsJacoco.project().makeMainJar();
+        pluginsSonar.project().makeMainJar();
         //slaves().invokeOnAll("clean");
        // slaves().invokeDoDefaultMethodOnAll();
         distrib();
