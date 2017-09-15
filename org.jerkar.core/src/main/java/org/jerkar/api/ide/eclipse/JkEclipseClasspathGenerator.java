@@ -14,17 +14,11 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jerkar.api.depmanagement.JkComputedDependency;
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkDependencyNode;
-import org.jerkar.api.depmanagement.JkDependencyResolver;
-import org.jerkar.api.depmanagement.JkModuleDependency;
-import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkResolveResult;
-import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
+import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.java.JkJavaProjectDefinition;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -72,15 +66,20 @@ public final class JkEclipseClasspathGenerator {
 
     private boolean hasBuildScript;
 
-    public JkEclipseClasspathGenerator(JkProjectSourceLayout sourceLayout) {
+    public JkEclipseClasspathGenerator(JkProjectSourceLayout sourceLayout, JkDependencies dependencies,
+                                       JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
         this.sourceLayout = sourceLayout;
+        this.dependencies = dependencies;
+        this.dependencyResolver = resolver;
+        this.sourceVersion = sourceVersion;
     }
 
     public JkEclipseClasspathGenerator(JkJavaProjectDefinition project, JkDependencyResolver resolver) {
-        this.sourceLayout = project.getSourceLayout();
-        this.dependencies = project.getDependencies();
-        this.dependencyResolver = resolver;
-        this.sourceVersion = project.getSourceVersion();
+        this(project.getSourceLayout(), project.getDependencies(), resolver, project.getSourceVersion());
+    }
+
+    public JkEclipseClasspathGenerator(JkJavaProject javaProject) {
+        this(javaProject, javaProject.maker().getDependencyResolver());
     }
 
     // -------------------------- setters ----------------------------
@@ -88,12 +87,6 @@ public final class JkEclipseClasspathGenerator {
 
     public JkEclipseClasspathGenerator setStructure(JkProjectSourceLayout sourceLayout) {
         this.sourceLayout = sourceLayout;
-        return this;
-    }
-
-    public JkEclipseClasspathGenerator setDependencyResolver(JkDependencies dependencies, JkDependencyResolver dependencyResolver) {
-        this.dependencyResolver = dependencyResolver;
-        this.dependencies = dependencies;
         return this;
     }
 

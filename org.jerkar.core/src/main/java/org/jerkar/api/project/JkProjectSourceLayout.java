@@ -7,7 +7,10 @@ import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.utils.JkUtilsFile;
 
-@Deprecated // Experimental !!!!
+/**
+ * Describe a project layout about the source parts. Generated sources/resources are not
+ * considered as source part since it is generated (so part of the output).
+ */
 public class JkProjectSourceLayout {
 
     public static final JkPathFilter RESOURCE_FILTER = JkPathFilter.exclude("**/*.java")
