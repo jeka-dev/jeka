@@ -3,9 +3,7 @@ package org.jerkar.api.ide.eclipse;
 import java.io.File;
 
 import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.depmanagement.JkPopularModules;
-import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.JkProjectSourceLayout;
@@ -25,7 +23,6 @@ public class JkEclipseClasspathGeneratorTest {
 
         JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
                 .withResources("res").withTestResources("res-test");
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral());
 
         File base = new File(top, "base");
         JkJavaProject baseProject = new JkJavaProject(base);
