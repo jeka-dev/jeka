@@ -69,9 +69,9 @@ public class JkDependencyNode implements Serializable {
 
     public List<File> allFiles() {
         final List<File> list = new LinkedList<File>();
-        JkUtilsIterable.addAllWithoutDplicate(list, this.nodeInfo.files());
+        JkUtilsIterable.addAllWithoutDuplicate(list, this.nodeInfo.files());
         for (final JkDependencyNode child : children) {
-            JkUtilsIterable.addAllWithoutDplicate(list, child.allFiles());
+            JkUtilsIterable.addAllWithoutDuplicate(list, child.allFiles());
         }
         return list;
     }

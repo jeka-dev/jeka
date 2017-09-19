@@ -66,7 +66,7 @@ public final class JkUtilsIterable {
     /**
      * Adds items to the specified recipient list. Only item not already present in the recipient list are added.
      */
-    public static <T> void addAllWithoutDplicate(List<T> recipientList, Iterable<? extends T> items) {
+    public static <T> void addAllWithoutDuplicate(Collection<T> recipientList, Iterable<? extends T> items) {
         for (final T item : items) {
             if (!recipientList.contains(item)) {
                 recipientList.add(item);

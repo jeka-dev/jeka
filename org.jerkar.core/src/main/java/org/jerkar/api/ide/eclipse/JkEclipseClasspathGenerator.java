@@ -352,10 +352,10 @@ public final class JkEclipseClasspathGenerator {
                 final JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.nodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final JkComputedDependency computedDependency = fileNodeInfo.computationOrigin();
-                    final File ideprojectBaseDir = computedDependency.ideProjectBaseDir();
-                    if (ideprojectBaseDir != null) {
-                        if (!allPaths.contains(ideprojectBaseDir.getAbsolutePath())) {
-                            writeProjectEntryIfNeeded(ideprojectBaseDir, writer, allPaths);
+                    final File ideProjectBaseDir = computedDependency.ideProjectBaseDir();
+                    if (ideProjectBaseDir != null) {
+                        if (!allPaths.contains(ideProjectBaseDir.getAbsolutePath())) {
+                            writeProjectEntryIfNeeded(ideProjectBaseDir, writer, allPaths);
                         }
                     } else {
                         writeFileDepsEntries(writer, node.allFiles(), allPaths);

@@ -1,10 +1,8 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Supplier;
 
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.system.JkLog;
@@ -28,6 +26,8 @@ import org.jerkar.api.utils.JkUtilsIterable;
  */
 public class JkComputedDependency implements JkFileDependency {
 
+    private static final Supplier<Iterable<File>> EMPTY_SUPPLIER = () -> new LinkedList<>();
+
     /**
      * Creates a computed dependency to the specified files and {@link JkProcess} to run for
      * generating them.
@@ -46,7 +46,7 @@ public class JkComputedDependency implements JkFileDependency {
                 return process.toString();
             }
         };
-        return new JkComputedDependency(runnable, null, fileSet);
+        return new JkComputedDependency(runnable, null, fileSet, EMPTY_SUPPLIER);
     }
 
     /**
@@ -55,7 +55,7 @@ public class JkComputedDependency implements JkFileDependency {
      */
     public static final JkComputedDependency of(Runnable runnable, File... files) {
         final List<File> fileSet = JkUtilsIterable.listWithoutDuplicateOf(Arrays.asList(files));
-        return new JkComputedDependency(runnable, null, fileSet);
+        return new JkComputedDependency(runnable, null, fileSet, EMPTY_SUPPLIER);
     }
 
     /**
@@ -72,7 +72,7 @@ public class JkComputedDependency implements JkFileDependency {
                 process.runClassSync(className, args);
             }
         };
-        return new JkComputedDependency(runnable, null, fileSet);
+        return new JkComputedDependency(runnable, null, fileSet, EMPTY_SUPPLIER);
     }
 
     /**
@@ -90,24 +90,43 @@ public class JkComputedDependency implements JkFileDependency {
 
     private final List<File> files;
 
+    private final Supplier<Iterable<File>> extraFileSupplier;
+
     private final File ideProjectBaseDir; // Helps to generate ide metadata
 
     /**
      * Constructs a computed dependency to the specified files and the specified {@link Runnable} to run for
      * generating them.
      */
-    protected JkComputedDependency(Runnable runnable, File ideProjectBaseDir, List<File> files) {
+    protected JkComputedDependency(Runnable runnable, File ideProjectBaseDir, List<File> files, Supplier<Iterable<File>> extraFileSupplier)  {
         super();
         this.runnable = runnable;
         this.files = files;
         this.ideProjectBaseDir = ideProjectBaseDir;
+        this.extraFileSupplier = extraFileSupplier;
+    }
+
+    /**
+     * Constructs a computed dependency to the specified files and the specified {@link Runnable} to run for
+     * generating them.
+     */
+    protected JkComputedDependency(Runnable runnable, File ideProjectBaseDir, List<File> files)  {
+        this(runnable, ideProjectBaseDir, files, EMPTY_SUPPLIER);
     }
 
     /**
      * Returns a duplicate of this computed dependency but specifying that it can be replaced by a project dependency in a IDE.
      */
     public JkComputedDependency withIdeProjectBaseDir(File baseDir) {
-        return new JkComputedDependency(this.runnable, baseDir, this.files);
+        return new JkComputedDependency(this.runnable, baseDir, this.files, EMPTY_SUPPLIER);
+    }
+
+    /**
+     * Returns a duplicate of this computed dependency but with specified extra files supplier. The supplier
+     * will provide additional existing files constituting this dependency.
+     */
+    public JkComputedDependency withIdeProjectBaseDir(Supplier<Iterable<File>> extraFileSupplier) {
+        return new JkComputedDependency(this.runnable, this.ideProjectBaseDir, this.files, extraFileSupplier);
     }
 
     /**
@@ -123,7 +142,7 @@ public class JkComputedDependency implements JkFileDependency {
      * Returns the missing files or empty directory for this dependency.
      */
     public final Set<File> missingFilesOrEmptyDirs() {
-        final Set<File> files = new HashSet<File>();
+        final Set<File> files = new LinkedHashSet<>();
         for (final File file : this.files) {
             if (!file.exists() || (file.isDirectory() && JkUtilsFile.filesOf(file, true).isEmpty())) {
                 files.add(file);
@@ -158,7 +177,7 @@ public class JkComputedDependency implements JkFileDependency {
             throw new IllegalStateException("Project " + this + " does not generate "
                     + missingFiles);
         }
-        return files;
+        return JkUtilsIterable.concatLists(files, this.extraFileSupplier.get());
     }
 
     /**

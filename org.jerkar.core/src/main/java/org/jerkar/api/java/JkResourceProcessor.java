@@ -130,7 +130,7 @@ public final class JkResourceProcessor {
      */
     public JkResourceProcessor and(Iterable<JkInterpolator> interpolators) {
         final List<JkInterpolator> list = new LinkedList<JkInterpolator>(this.interpolators);
-        JkUtilsIterable.addAllWithoutDplicate(list, interpolators);
+        JkUtilsIterable.addAllWithoutDuplicate(list, interpolators);
         return new JkResourceProcessor(this.resourceTrees, list);
     }
 

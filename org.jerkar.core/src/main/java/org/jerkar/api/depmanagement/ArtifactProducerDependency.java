@@ -22,15 +22,22 @@ class ArtifactProducerDependency extends JkComputedDependency  {
                                Iterable<JkArtifactFileId> artifactFileIds) {
         super(() -> artifactProducer.makeArtifactFilesIfNecessary(artifactFileIds),
                 baseDir(artifactProducer),
-                jarAndRuntimeDeps(artifactProducer, artifactFileIds));
+                jars(artifactProducer, artifactFileIds), () -> runtimeDeps(artifactProducer, artifactFileIds));
         this.artifactProducer = artifactProducer;
     }
 
-    private static List<File> jarAndRuntimeDeps(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
+    private static List<File> jars(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
         JkPath result = JkPath.of();
         for (JkArtifactFileId artifactFileId : artifactIds) {
-            result = result.and( producer.runtimeDependencies(artifactFileId)
-                    .andHead(producer.artifactFile(artifactFileId)));
+            result = result.and( producer.artifactFile(artifactFileId));
+        }
+        return result.withoutDuplicates().entries();
+    }
+
+    private static List<File> runtimeDeps(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
+        JkPath result = JkPath.of();
+        for (JkArtifactFileId artifactFileId : artifactIds) {
+            result = result.and( producer.runtimeDependencies(artifactFileId));
         }
         return result.withoutDuplicates().entries();
     }

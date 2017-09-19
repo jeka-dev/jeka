@@ -45,10 +45,12 @@ public class JkJavaProjectTest {
         desktopProject.makeAllArtifactFiles();
 
 
-       // Desktop.getDesktop().open(desktop);
+        // Desktop.getDesktop().open(desktop);
 
 
-        JkUtilsFile.deleteDir(top);
+        try {
+            JkUtilsFile.deleteDir(top);
+        } catch (RuntimeException e) {};
     }
 
     private static File unzipToDir(String zipName) {
