@@ -45,7 +45,7 @@ public class JkJavaProjectTest {
         desktopProject.makeAllArtifactFiles();
 
 
-        Desktop.getDesktop().open(desktop);
+       // Desktop.getDesktop().open(desktop);
 
 
         JkUtilsFile.deleteDir(top);
