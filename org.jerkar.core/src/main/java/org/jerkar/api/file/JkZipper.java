@@ -1,6 +1,7 @@
 package org.jerkar.api.file;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -200,6 +201,9 @@ public final class JkZipper {
             final ZipFile file;
             try {
                 file = new ZipFile(archiveToMerge);
+            } catch (final FileNotFoundException e) {
+                throw new RuntimeException("File  "
+                        + archiveToMerge.getPath() + " does not exist.", e);
             } catch (final IOException e) {
                 throw new RuntimeException("Error while opening zip file "
                         + archiveToMerge.getPath(), e);

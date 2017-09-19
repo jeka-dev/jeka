@@ -1,9 +1,12 @@
 package org.jerkar.api.project.java;
 
 import org.jerkar.api.depmanagement.JkArtifactFileId;
+import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkZipper;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJarMaker;
+import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsZip;
 
 import java.io.File;
 
@@ -47,8 +50,12 @@ public final class JkJavaProjectPackager {
     }
 
     public File javadocJar() {
+        File javadocDir = project.getOutLayout().getJavadocDir();
+        if (!javadocDir.exists()) {
+            throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.getPath() + " : can't create javadoc jar. Please, generate Javadoc prior to package it in jar.");
+        }
         File result = project.artifactFile(JkJavaProject.JAVADOC_FILE_ID);
-        JkZipper.of(project.getOutLayout().getJavadocDir()).to(result);
+        JkFileTree.of(javadocDir).zip().to(result);
         return  result;
     }
 

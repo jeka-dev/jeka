@@ -88,7 +88,7 @@ public interface JkArtifactProducer extends JkArtifactLocator {
     default JkComputedDependency asDependency(Iterable<JkArtifactFileId> artifactFileIds) {
         final Iterable<JkArtifactFileId> fileIds = artifactFileIds.iterator().hasNext() ? artifactFileIds
                 : JkUtilsIterable.listOf(mainArtifactFileId());
-        return new ArtifactProducerDependency(this, artifactFileIds);
+        return new ArtifactProducerDependency(this, fileIds);
     }
 
     /**

@@ -27,7 +27,7 @@ public final class JkJavadocMaker {
 
     private final JkFileTreeSet srcDirs;
 
-    private final String extraArgs;
+    private final List<String> extraArgs;
 
     private final Class<?> doclet;
 
@@ -38,7 +38,7 @@ public final class JkJavadocMaker {
     private final File zipFile;
 
     private JkJavadocMaker(JkFileTreeSet srcDirs, Class<?> doclet, Iterable<File> classpath,
-            String extraArgs, File outputDir, File zipFile) {
+            List<String> extraArgs, File outputDir, File zipFile) {
         this.srcDirs = srcDirs;
         this.extraArgs = extraArgs;
         this.doclet = doclet;
@@ -52,7 +52,7 @@ public final class JkJavadocMaker {
      * the specified directory then compacted in the specified zip file.
      */
     public static JkJavadocMaker of(JkFileTreeSet sources, File outputDir, File zipFile) {
-        return new JkJavadocMaker(sources, null, null, "", outputDir, zipFile);
+        return new JkJavadocMaker(sources, null, null, new LinkedList<>(), outputDir, zipFile);
     }
 
     /**
@@ -60,7 +60,7 @@ public final class JkJavadocMaker {
      * the specified directory.
      */
     public static JkJavadocMaker of(JkFileTreeSet sources, File outputDir) {
-        return new JkJavadocMaker(sources, null, null, "", outputDir, null);
+        return new JkJavadocMaker(sources, null, null, new LinkedList<>(), outputDir, null);
     }
 
     /**
@@ -81,6 +81,22 @@ public final class JkJavadocMaker {
     }
 
     /**
+     * Returns a {@link JkJavadocMaker} identical to this one but using the specified options (-classpath , -exclude, -subpackages, ...).
+     */
+    public JkJavadocMaker andOptions(String ... options) {
+        return andOptions(Arrays.asList(options));
+    }
+
+    /**
+     * Returns a {@link JkJavadocMaker} identical to this one but using the specified options (-classpath , -exclude, -subpackages, ...).
+     */
+    public JkJavadocMaker andOptions(List<String> options) {
+        List<String> list = new LinkedList<>(this.extraArgs);
+        list.addAll(options);
+        return new JkJavadocMaker(srcDirs, doclet, classpath, list, outputDir, zipFile);
+    }
+
+    /**
      * Returns a {@link JkJavadocMaker} identical to this one but using the specified classpath.
      */
     public JkJavadocMaker withClasspath(Iterable<File> classpath) {
@@ -92,6 +108,11 @@ public final class JkJavadocMaker {
      */
     public void process() {
         JkLog.startln("Generating javadoc");
+        if (this.srcDirs.hasNoExistingRoot()) {
+            JkLog.warn("No sources found in " + this.srcDirs);
+            JkLog.done();
+            return;
+        }
         final String[] args = toArguments(outputDir);
         final PrintStream warn;
         final PrintStream error;
@@ -102,6 +123,7 @@ public final class JkJavadocMaker {
             warn = JkUtilsIO.nopPrintStream();
             error = JkUtilsIO.nopPrintStream();
         }
+        outputDir.mkdirs();
         execute(doclet, JkLog.infoStream(), warn, error, args);
         if (outputDir.exists() && zipFile != null) {
             JkFileTree.of(outputDir).zip().to(zipFile);
@@ -126,10 +148,7 @@ public final class JkJavadocMaker {
             list.add("-classpath");
             list.add(JkPath.of(this.classpath).toString());
         }
-        if (!this.extraArgs.trim().isEmpty()) {
-            final String[] extraArgs = this.extraArgs.split(" ");
-            list.addAll(Arrays.asList(extraArgs));
-        }
+        list.addAll(extraArgs);
 
         for (final File sourceFile : this.srcDirs.files(false)) {
             if (sourceFile.getPath().endsWith(".java")) {

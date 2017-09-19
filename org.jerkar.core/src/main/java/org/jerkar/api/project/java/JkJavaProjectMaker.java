@@ -12,16 +12,17 @@ import org.jerkar.api.utils.JkUtilsFile;
 
 import java.io.File;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Beware : Experimental !!!!!!!!!!!!!!!!!!!!!!!
  * The API is likely to change subsequently.
- *
+ * <p>
  * Object responsible to build (to make) a java project. It provides methods to perform common build
  * task (compile, test, javadoc, package to jar).
  * All defined task are extensible so you can modify/improve the build behavior.
- *
  */
 public class JkJavaProjectMaker {
 
@@ -36,7 +37,7 @@ public class JkJavaProjectMaker {
 
     private JkUnit juniter = JkUnit.of().withOutputOnConsole(false);
 
-    private Class<?> javadocDoclet = null;
+    private List<String> javadocOptions = new LinkedList<>();
 
     private JkPublisher publisher = JkPublisher.local();
 
@@ -69,10 +70,15 @@ public class JkJavaProjectMaker {
         if (!status.compileDone) {
             compile();
         }
-        JkJavadocMaker maker = JkJavadocMaker.of(project.getSourceLayout().sources(), project.getOutLayout().getJavadocDir())
-                .withDoclet(this.getJavadocDoclet());
-        maker.process();
+        JkJavadocMaker.of(project.getSourceLayout().sources(), project.getOutLayout().getJavadocDir())
+                .withClasspath(depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
+                .andOptions(this.javadocOptions).process();
         status.javadocGenerated = true;
+    }
+
+    public JkPath depsFor(JkScope... scopes) {
+        final JkDependencies deps = project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME);
+        return dependencyResolver.get(deps, scopes);
     }
 
 
@@ -96,23 +102,21 @@ public class JkJavaProjectMaker {
 
     public final JkRunnables resourceGenerator = JkRunnables.noOp();
 
-    public final JkRunnables resourceProcessor = JkRunnables.of( () -> {
+    public final JkRunnables resourceProcessor = JkRunnables.of(() -> {
         JkResourceProcessor.of(project.getSourceLayout().resources())
                 .and(project.getOutLayout().generatedResourceDir())
                 .and(project.getResourceInterpolators())
                 .generateTo(project.getOutLayout().classDir());
     });
 
-    public final JkRunnables compiler = JkRunnables.of( () -> {
+    public final JkRunnables compiler = JkRunnables.of(() -> {
         JkJavaCompiler comp = baseCompiler.andOptions(project.getCompileSpec().asOptions());
         comp = applyCompileSource(comp);
         comp.compile();
     });
 
     private JkJavaCompiler applyCompileSource(JkJavaCompiler baseCompiler) {
-        JkPath classpath = dependencyResolver.get(
-                project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME),
-                JkJavaDepScopes.SCOPES_FOR_COMPILATION);
+        JkPath classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
         return baseCompiler
                 .withClasspath(classpath)
                 .andSources(project.getSourceLayout().sources())
@@ -120,7 +124,8 @@ public class JkJavaProjectMaker {
                 .withOutputDir(project.getOutLayout().classDir());
     }
 
-    public final JkRunnables afterCompile = JkRunnables.of(() -> {});
+    public final JkRunnables afterCompile = JkRunnables.of(() -> {
+    });
 
     public JkJavaProjectMaker compile() {
         JkLog.startln("Compiling");
@@ -137,9 +142,11 @@ public class JkJavaProjectMaker {
 
     // Test  -----------------------------------------------------
 
-    public final JkRunnables beforeTest = JkRunnables.of(() -> {});
+    public final JkRunnables beforeTest = JkRunnables.of(() -> {
+    });
 
-    public final JkRunnables testResourceGenerator = JkRunnables.of(() -> {});
+    public final JkRunnables testResourceGenerator = JkRunnables.of(() -> {
+    });
 
     public final JkRunnables testResourceProcessor = JkRunnables.of(() -> {
         JkResourceProcessor.of(project.getSourceLayout().testResources())
@@ -180,10 +187,16 @@ public class JkJavaProjectMaker {
     });
 
 
-    public final JkRunnables afterTest = JkRunnables.of(() -> {});
+    public final JkRunnables afterTest = JkRunnables.of(() -> {
+    });
 
     public JkJavaProjectMaker test() {
         JkLog.startln("Running unit tests");
+        if (this.project.getSourceLayout().tests().countFiles(false) == 0) {
+            JkLog.info("No unit test found in : " + this.project.getSourceLayout().tests());
+            JkLog.done();
+            return this;
+        }
         if (!this.status.compileDone) {
             compile();
         }
@@ -200,7 +213,8 @@ public class JkJavaProjectMaker {
 
     // Package --------------------------------------------------------------------
 
-    public final JkRunnables beforePackage = JkRunnables.of(() -> {});
+    public final JkRunnables beforePackage = JkRunnables.of(() -> {
+    });
 
     public File makeArtifactFile(JkArtifactFileId artifactFileId) {
         if (artifactProducers.containsKey(artifactFileId)) {
@@ -217,7 +231,7 @@ public class JkJavaProjectMaker {
         final String namePart;
         if (project.getVersionedModule() != null) {
             namePart = fileName(project.getVersionedModule());
-        }  else if (project.getArtifactName() != null) {
+        } else if (project.getArtifactName() != null) {
             namePart = project.getArtifactName();
         } else {
             namePart = project.baseDir().getName();
@@ -249,7 +263,8 @@ public class JkJavaProjectMaker {
         return this.artifactProducers.containsKey(artifactFileId);
     }
 
-    public final JkRunnables afterPackage = JkRunnables.of(() -> {});
+    public final JkRunnables afterPackage = JkRunnables.of(() -> {
+    });
 
     public JkJavaProjectMaker pack() {
         beforePackage.run();
@@ -350,12 +365,12 @@ public class JkJavaProjectMaker {
         return this;
     }
 
-    public Class<?> getJavadocDoclet() {
-        return javadocDoclet;
+    public List<String> getJavadocOptions() {
+        return this.javadocOptions;
     }
 
-    public JkJavaProjectMaker setJavadocDoclet(Class<?> javadocDoclet) {
-        this.javadocDoclet = javadocDoclet;
+    public JkJavaProjectMaker setJavadocOptions(List<String> options) {
+        this.javadocOptions = options;
         return this;
     }
 

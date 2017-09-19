@@ -12,12 +12,9 @@ public class JkJavaCompilerRunner {
     public static void main(String[] args) {
         System.out.println(JkJavaCompiler.currentJdkSourceVersion());
         System.out.println(ToolProvider.getSystemJavaCompiler().getSourceVersions());
-        final Map<String, String> map = new HashMap<String, String>();
-        map.put("jdk.6", "C:\\UserTemp\\I19451\\software\\jdk1.6.0_24");
 
         JkJavaCompiler.outputtingIn(new File("build/output/bin"))
-        .withOption(JkJavaCompilerSpec.SOURCE_OPTS, JkJavaVersion.V6.name())
-        .forkedIfNeeded(map).compile();
+        .withOption(JkJavaCompilerSpec.SOURCE_OPTS, JkJavaVersion.V6.name()).compile();
     }
 
 }

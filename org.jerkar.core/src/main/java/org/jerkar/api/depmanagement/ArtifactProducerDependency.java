@@ -12,6 +12,8 @@ import java.util.List;
  */
 class ArtifactProducerDependency extends JkComputedDependency  {
 
+    private final JkArtifactProducer artifactProducer;
+
     /*
      * Constructs a {@link ArtifactProducerDependency} from an artifact producer and the artifact file id
      * one is interested on.
@@ -21,6 +23,7 @@ class ArtifactProducerDependency extends JkComputedDependency  {
         super(() -> artifactProducer.makeArtifactFilesIfNecessary(artifactFileIds),
                 baseDir(artifactProducer),
                 jarAndRuntimeDeps(artifactProducer, artifactFileIds));
+        this.artifactProducer = artifactProducer;
     }
 
     private static List<File> jarAndRuntimeDeps(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
@@ -39,4 +42,8 @@ class ArtifactProducerDependency extends JkComputedDependency  {
         return null;
     }
 
+    @Override
+    public String toString() {
+        return this.artifactProducer.toString();
+    }
 }

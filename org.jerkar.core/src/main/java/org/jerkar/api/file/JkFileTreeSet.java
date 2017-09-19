@@ -199,6 +199,18 @@ public final class JkFileTreeSet implements Iterable<File> {
     }
 
     /**
+     * Returns <code>true</code> if no tree of this object has an existing root.
+     */
+    public boolean hasNoExistingRoot() {
+        for (final JkFileTree dirView : jkFileTrees) {
+            if (dirView.root().exists()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Returns the number of files contained in this {@link JkFileTreeSet}.
      */
     public int countFiles(boolean includeFolder) {
