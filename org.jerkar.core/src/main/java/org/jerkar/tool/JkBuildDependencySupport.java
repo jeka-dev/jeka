@@ -316,7 +316,7 @@ public class JkBuildDependencySupport extends JkBuild {
      */
     public static JkRepos reposFromOptions(String repoName) {
         final String urls = JkOptions.get("repo." + repoName + "." + "url");
-        JkRepos result = JkRepos.of();
+        JkRepos result = JkRepos.empty();
         if (JkUtilsString.isBlank(urls)) {
             return result;
         }

@@ -131,12 +131,12 @@ public final class JkPom {
     public JkRepos repos() {
         final List<String> urls = new LinkedList<String>();
         if (repositoriesEl() == null) {
-            return JkRepos.of();
+            return JkRepos.empty();
         }
         for (final Element repositoryEl : JkUtilsXml.directChildren(repositoriesEl(), "repository")) {
             urls.add(JkUtilsXml.directChildText(repositoryEl, "url"));
         }
-        return JkRepos.maven(JkUtilsIterable.arrayOf(urls, String.class));
+        return JkRepos.of(JkUtilsIterable.arrayOf(urls, String.class));
     }
 
     private JkDependencies dependencies(Element dependenciesEl) {

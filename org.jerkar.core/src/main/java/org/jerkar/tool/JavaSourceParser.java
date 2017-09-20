@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkModuleDependency;
+import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
@@ -29,7 +30,7 @@ final class JavaSourceParser {
     }
 
     public static JavaSourceParser of(File baseDir, Iterable<File> files) {
-        JavaSourceParser result = new JavaSourceParser(JkDependencies.of(), JkRepos.of(),
+        JavaSourceParser result = new JavaSourceParser(JkDependencies.of(), JkRepos.empty(),
                 new LinkedList<File>());
         for (final File code : files) {
             result = result.and(of(baseDir, code));
@@ -42,7 +43,7 @@ final class JavaSourceParser {
         final String uncomentedCode = removeComments(inputStream);
         final JkDependencies deps = dependencies(uncomentedCode, baseDir, codeUrl);
         final List<File> projects = projects(uncomentedCode, baseDir, codeUrl);
-        final JavaSourceParser result = new JavaSourceParser(deps, JkRepos.of(), projects);
+        final JavaSourceParser result = new JavaSourceParser(deps, repos(uncomentedCode, codeUrl), projects);
         JkUtilsIO.closeQuietly(inputStream);
         return result;
     }
@@ -64,7 +65,7 @@ final class JavaSourceParser {
     private JavaSourceParser and(JavaSourceParser other) {
         return new JavaSourceParser(this.dependencies.and(other.dependencies),
                 this.importRepos.and(other.importRepos), JkUtilsIterable.concatLists(
-                        this.dependecyProjects, other.dependecyProjects));
+                this.dependecyProjects, other.dependecyProjects));
     }
 
     public JkDependencies dependencies() {
@@ -80,12 +81,17 @@ final class JavaSourceParser {
     }
 
     private static JkDependencies dependencies(String code, File baseDir, URL url) {
-        final List<String> deps = jkImports(code, url);
+        final List<String> deps = stringsInJkImport(code, url);
         return dependenciesFromImports(baseDir, deps);
     }
 
+    private static JkRepos repos(String code, URL url) {
+        final List<String> repoUrls = stringsInAnnotation(code, JkImportRepo.class, url);
+        return JkRepos.of(repoUrls);
+    }
+
     private static List<File> projects(String code, File baseDir, URL url) {
-        final List<String> deps = jkProjects(code, url);
+        final List<String> deps = jkImportBuild(code, url);
         return projectDependencies(baseDir, deps);
     }
 
@@ -121,19 +127,24 @@ final class JavaSourceParser {
             final File file = new File(baseDir, projectReltivePath);
             if (!file.exists()) {
                 throw new JkException("Folder " + JkUtilsFile.canonicalPath(file)
-                + " defined as project does not exists.");
+                        + " defined as project does not exists.");
             }
             projects.add(file);
         }
         return projects;
     }
 
+    private static List<String> stringsInJkImport(String code, URL url) {
+        return stringsInAnnotation(code, JkImport.class, url);
+    }
+
     @SuppressWarnings("unchecked")
-    private static List<String> jkImports(String code, URL url) {
+    private static List<String> stringsInAnnotation(String code, Class<?> annotationClass, URL url) {
         final Scanner scanner = new Scanner(code);
         scanner.useDelimiter("");
+        List<String> result = new LinkedList<>();
         while (scanner.hasNext()) {
-            final String jkImportWord = scanner.findInLine("@JkImport");
+            final String jkImportWord = scanner.findInLine("@" + annotationClass.getSimpleName());
             if (jkImportWord == null) {
                 final String nextLine = scanner.nextLine();
                 if (removeQuotes(nextLine).contains("class ")) {
@@ -141,16 +152,16 @@ final class JavaSourceParser {
                 }
                 continue;
             }
-            final String context = " parsing @JkImport ";
+            final String context = " parsing @" + annotationClass.getSimpleName();
             final String between = extractStringTo(scanner, "(", url, context);
             if (!containsOnly(between, " ", "\n", "\r", "\t")) {
                 continue;
             }
-
-            return scanInsideAnnotation(scanner, url, context);
+            result.addAll(scanInsideAnnotation(scanner, url, context));
         }
-        return Collections.EMPTY_LIST;
+        return result;
     }
+
 
     private static boolean containsOnly(String stringToMatch, String... candidates) {
         String left = stringToMatch;
@@ -160,24 +171,8 @@ final class JavaSourceParser {
         return left.isEmpty();
     }
 
-    private static List<String> jkProjects(String code, URL url) {
-        final Scanner scanner = new Scanner(code);
-        scanner.useDelimiter("");
-        final List<String> result = new LinkedList<String>();
-        while (scanner.hasNext()) {
-            final String jkImportWord = scanner.findInLine("@" + JkImportBuild.class.getSimpleName());
-            if (jkImportWord == null) {
-                scanner.nextLine();
-                continue;
-            }
-            final String context = " parsing @" + JkImportBuild.class.getSimpleName();
-            final String between = extractStringTo(scanner, "(", url, context);
-            if (!containsOnly(between, " ", "\n", "\r", "\t")) {
-                continue;
-            }
-            result.addAll(scanInsideAnnotation(scanner, url, context));
-        }
-        return result;
+    private static List<String> jkImportBuild(String code, URL url) {
+        return stringsInAnnotation(code, JkImportBuild.class, url);
     }
 
     @SuppressWarnings("unchecked")
@@ -272,7 +267,7 @@ final class JavaSourceParser {
                 }
             }
         }
-        throw new IllegalStateException("No matching " + delimiter + " found" + context + "in "
+        throw new IllegalStateException("No matching " + delimiter + " found" + context + " in "
                 + url + ". " + all.toString());
     }
 
@@ -307,6 +302,7 @@ final class JavaSourceParser {
         final int outsideComment = 0;
         final int insideLineComment = 1;
         final int insideblockComment = 2;
+        boolean insideStringLiteral = false;
 
         // we want to have at least one new line in the result if the block is
         // not inline.
@@ -320,40 +316,48 @@ final class JavaSourceParser {
         while (scanner.hasNext()) {
             final String character = scanner.next();
             switch (currentState) {
-            case outsideComment:
-                if (character.equals("/") && scanner.hasNext()) {
-                    final String c2 = scanner.next();
-                    if (c2.equals("/")) {
-                        currentState = insideLineComment;
-                    } else if (c2.equals("*")) {
-                        currentState = insideblockComment_noNewLineYet;
+                case outsideComment:
+                    if (insideStringLiteral) {
+                        if (character.equals("\"")) {
+                            insideStringLiteral = false;
+                        }
+                        endResult.append(character);
+                    } else if (character.equals("/") && scanner.hasNext()) {
+                        final String c2 = scanner.next();
+                        if (c2.equals("/")) {
+                            currentState = insideLineComment;
+                        } else if (c2.equals("*")) {
+                            currentState = insideblockComment_noNewLineYet;
+                        } else {
+                            endResult.append(character).append(c2);
+                        }
+                    } else if (character.equals("\"")) {
+                        insideStringLiteral = true;
+                        endResult.append(character);
                     } else {
-                        endResult.append(character).append(c2);
+                        endResult.append(character);
                     }
-                } else {
-                    endResult.append(character);
-                }
-                break;
-            case insideLineComment:
-                if (character.equals("\n")) {
-                    currentState = outsideComment;
-                    endResult.append("\n");
-                }
-                break;
-            case insideblockComment_noNewLineYet:
-                if (character.equals("\n")) {
-                    endResult.append("\n");
-                    currentState = insideblockComment;
-                }
-            case insideblockComment:
-                while (character.equals("*") && scanner.hasNext()) {
-                    final String c2 = scanner.next();
-                    if (c2.equals("/")) {
+                    break;
+                case insideLineComment:
+                    if (character.equals("\n")) {
                         currentState = outsideComment;
-                        break;
+                        endResult.append("\n");
                     }
+                    break;
+                case insideblockComment_noNewLineYet:
+                    if (character.equals("\n")) {
+                        endResult.append("\n");
+                        currentState = insideblockComment;
+                    }
+                case insideblockComment:
+                    while (character.equals("*") && scanner.hasNext()) {
+                        final String c2 = scanner.next();
+                        if (c2.equals("/")) {
+                            currentState = outsideComment;
+                            break;
+                        }
 
-                }
+                    }
             }
         }
         scanner.close();

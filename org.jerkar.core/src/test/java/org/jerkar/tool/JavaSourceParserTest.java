@@ -21,9 +21,20 @@ public class JavaSourceParserTest {
 
     @Test
     public void with3Imports() {
-        final JkDependencies dependencies = JavaSourceParser.of(new File("."),
-                JavaSourceParserTest.class.getResource("with3Imports.javasource")).dependencies();
+        JavaSourceParser parser = JavaSourceParser.of(new File("."),
+                JavaSourceParserTest.class.getResource("with3Imports.javasource"));
+        final JkDependencies dependencies = parser.dependencies();
         Assert.assertEquals(3, JkUtilsIterable.listOf(dependencies).size());
+        Assert.assertEquals(1, JkUtilsIterable.listOf(parser.importRepos()).size());
+    }
+
+    @Test
+    public void with3MultiAnnoImports() {
+        JavaSourceParser parser = JavaSourceParser.of(new File("."),
+                JavaSourceParserTest.class.getResource("with3MultiImports.javasource"));
+        final JkDependencies dependencies = parser.dependencies();
+        Assert.assertEquals(3, JkUtilsIterable.listOf(dependencies).size());
+        Assert.assertEquals(2, JkUtilsIterable.listOf(parser.importRepos()).size());
     }
 
     @Test

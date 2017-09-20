@@ -1,9 +1,6 @@
 package org.jerkar.tool;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Specifies the libraries necessary to compile and run the annotated class as a
@@ -15,16 +12,18 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
+@Repeatable(JkImport.JkImports.class)
 public @interface JkImport {
 
     /**
      * The dependency to import. It can be a module dependency (as "com.google.guava:guava:18.0", "../lib-folder.mylib.jar").
      */
-    String[] value();
+    String value();
 
-    /**
-     * The repository where are located the dependencies, if it is a distinct repository than the defaults one.
-     */
-    String[] repo() default {};
+
+    @Target(ElementType.TYPE)
+    @interface JkImports {
+        JkImport[] value();
+    }
 
 }

@@ -41,7 +41,7 @@ public final class JkDependencyResolver {
      */
     @Deprecated
     public static JkDependencyResolver unmanaged() {
-        return new JkDependencyResolver(null, null, null,  JkRepos.of());
+        return new JkDependencyResolver(null, null, null,  JkRepos.empty());
     }
 
     /**
@@ -50,7 +50,7 @@ public final class JkDependencyResolver {
      */
     public static JkDependencyResolver of(JkRepos repos) {
         if (!repos.iterator().hasNext()) {
-            return new JkDependencyResolver(null, null, null, JkRepos.of());
+            return new JkDependencyResolver(null, null, null, JkRepos.empty());
         }
         final InternalDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
         return new JkDependencyResolver(ivyResolver,  null, null, repos);

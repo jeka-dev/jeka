@@ -10,7 +10,6 @@ import org.jerkar.api.utils.JkUtilsIterable;
 /**
  * Tututututtutt
  */
-
 public class DepManagedBuild extends Build {
 
 	public static final JkScope DISTRIB = JkScope.of("distrib").descr("Contains Jerkar distribution zip file");

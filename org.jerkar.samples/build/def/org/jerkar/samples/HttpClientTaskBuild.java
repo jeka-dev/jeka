@@ -6,13 +6,16 @@ import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 import static org.jerkar.api.depmanagement.JkPopularModules.MOCKITO_ALL;
 
 import java.io.IOException;
+import java.util.Objects;
 
+import com.google.common.base.MoreObjects;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkImport;
+import org.jerkar.tool.JkImportRepo;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
@@ -21,7 +24,8 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
  * @author Jerome Angibaud
  * @fprmatter:off
  */
-@JkImport({"commons-httpclient:commons-httpclient:3.1"})
+@JkImport("commons-httpclient:commons-httpclient:3.1")
+@JkImport("com.google.guava:guava:21.0")
 public class HttpClientTaskBuild extends JkJavaBuild {
 
 	@Override
@@ -38,6 +42,7 @@ public class HttpClientTaskBuild extends JkJavaBuild {
 		HttpClient client = new HttpClient();
 		GetMethod getMethod = new GetMethod("http://my.url");
 		client.executeMethod(getMethod);
+		client = MoreObjects.firstNonNull(client, client); // senseless but just to illustrate we can use Guava
 		// ....
 	}
 

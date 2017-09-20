@@ -29,14 +29,28 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
     }
 
     /**
-     * Creates a {@link JkRepos} from Maven repositories having specified urls.
+     * Crates an empty {@link JkRepos}
      */
-    public static JkRepos maven(String... urls) {
+    public static JkRepos empty() {
+        return new JkRepos(new LinkedList<>());
+    }
+
+    /**
+     * Crates a {@link JkRepos} from the specified {@link JkRepo}s
+     */
+    public static JkRepos of(List<String> urls) {
         final List<JkRepo> list = new LinkedList<JkRepo>();
         for (final String url : urls) {
-            list.add(JkRepo.maven(url));
+            list.add(JkRepo.of(url));
         }
         return new JkRepos(list);
+    }
+
+    /**
+     * Crates a {@link JkRepos} from the specified {@link JkRepo}s
+     */
+    public static JkRepos of(String ... urls) {
+        return of(Arrays.asList(urls));
     }
 
     /**
