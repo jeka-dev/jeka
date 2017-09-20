@@ -3,12 +3,12 @@ package org.jerkar.plugins.sonar;
 import org.jerkar.AbstractBuild;
 import org.jerkar.CoreBuild;
 import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.tool.JkImportBuild;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.JkProject;
 
 public class PluginsSonarBuild extends AbstractBuild {
 
-    @JkProject("../org.jerkar.core")
+    @JkImportBuild("../org.jerkar.core")
     private CoreBuild core;
 
     public static void main(String[] args) {

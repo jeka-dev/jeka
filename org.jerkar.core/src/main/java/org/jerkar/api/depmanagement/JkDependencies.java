@@ -11,7 +11,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.jerkar.api.depmanagement.JkFileDependency;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
@@ -36,6 +35,12 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     @SuppressWarnings("unchecked")
     public static JkDependencies of(JkScopedDependency... scopedDependencies) {
         return new JkDependencies(Arrays.asList(scopedDependencies), Collections.EMPTY_SET, JkVersionProvider.of());
+    }
+
+    public static JkDependencies of(JkArtifactProducer artifactProducer, JkArtifactFileId ... artifactFileIds) {
+        final ArtifactProducerDependency dependency = new ArtifactProducerDependency(artifactProducer, artifactFileIds);
+        final JkScopedDependency scopedependency = JkScopedDependency.of(dependency);
+        return of(scopedependency);
     }
 
     /**
@@ -802,7 +807,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
          * Same as {@link #on(JkProcess, File, JkScope...)} but you can specify project base dir in order
          * to generate IDE metadata with dependencies on project rather than the generated files..
          */
-        public Builder onProject(JkProcess jkProcess, File projectBaseDir, File file, JkScope ...scopes) {
+        public Builder on(JkProcess jkProcess, File projectBaseDir, File file, JkScope ...scopes) {
             if (!dependencies.iterator().hasNext()) {
                 return this;
             }
@@ -814,12 +819,12 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         }
 
         /**
-         * Same as {@link #onProject(JkProcess, File, File, JkScope...)} but it will take the working dir
+         * Same as {@link #on(JkProcess, File, File, JkScope...)} but it will take the working dir
          * of the specified process as the ide project base dir. When generating IDE metadata, if
          * useIdeProjectDep flag is <code>false</code>,
          * the project dependency won't be taken in account and regular file dependency will apply.
          */
-        public Builder onProject(JkProcess process, boolean useIdeProjectDep, File file, JkScope ...scopes) {
+        public Builder on(JkProcess process, boolean useIdeProjectDep, File file, JkScope ...scopes) {
             if (!dependencies.iterator().hasNext()) {
                 return this;
             }
@@ -831,6 +836,17 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
             this.dependencies.add(scopedDependency);
             return this;
+        }
+
+        /**
+         * Adds a dependency on the specified artifact producer.
+         */
+        public JkFluentScopeableBuilder on(JkArtifactProducer artifactProducer, JkArtifactFileId ... artifactFileIds) {
+            ArtifactProducerDependency dependency = new ArtifactProducerDependency(artifactProducer,
+                    Arrays.asList(artifactFileIds));
+            JkScopedDependency scopedDependency = JkScopedDependency.of(dependency);
+            this.dependencies.add(scopedDependency);
+            return new JkFluentScopeableBuilder(this);
         }
 
 

@@ -13,15 +13,15 @@ import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
 import org.jerkar.tool.JkBuildDependencySupport;
 import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkImportBuild;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.JkProject;
 
 class DistribAllBuild extends JkBuildDependencySupport {
 
-    @JkProject("../org.jerkar.plugins-sonar")
+    @JkImportBuild("../org.jerkar.plugins-sonar")
     PluginsSonarBuild pluginsSonar;
 
-    @JkProject("../org.jerkar.plugins-jacoco")
+    @JkImportBuild("../org.jerkar.plugins-jacoco")
     PluginsJacocoBuild pluginsJacoco;
 
     public boolean testSamples = false;

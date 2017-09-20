@@ -6,7 +6,7 @@ import org.jerkar.tool.JkBuild;
 import java.io.File;
 
 @Deprecated // experimental
-public class JkJavaJarBuild extends JkBuild {
+public class JkJavaProjectBuild extends JkBuild {
 
     private JkJavaProject project;
 

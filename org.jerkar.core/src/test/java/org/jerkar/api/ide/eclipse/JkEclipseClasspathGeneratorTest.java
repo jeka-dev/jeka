@@ -36,7 +36,7 @@ public class JkEclipseClasspathGeneratorTest {
 
         final File core = new File(top, "core");
         final JkJavaProject coreProject = new JkJavaProject(core);
-        JkDependencies coreDeps = JkDependencies.of(baseProject.asDependency());
+        JkDependencies coreDeps = JkDependencies.of(baseProject);
         coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
         coreProject.maker().setJuniter(
                 coreProject.maker().getJuniter().forked(true));
@@ -47,7 +47,7 @@ public class JkEclipseClasspathGeneratorTest {
         System.out.println(result1);
 
         final File desktop = new File(top, "desktop");
-        final JkDependencies deps = JkDependencies.builder().on(coreProject.asDependency()).build();
+        final JkDependencies deps = JkDependencies.of(coreProject);
         final JkEclipseClasspathGenerator desktopGenerator =
                 new JkEclipseClasspathGenerator(sourceLayout.withBaseDir(desktop), deps,
                         coreProject.maker().getDependencyResolver(), JkJavaVersion.V8);

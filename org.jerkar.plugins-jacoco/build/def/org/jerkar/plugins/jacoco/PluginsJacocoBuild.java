@@ -3,11 +3,11 @@ package org.jerkar.plugins.jacoco;
 import org.jerkar.AbstractBuild;
 import org.jerkar.CoreBuild;
 import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.tool.JkProject;
+import org.jerkar.tool.JkImportBuild;
 
 public class PluginsJacocoBuild extends AbstractBuild {
 
-    @JkProject("../org.jerkar.core")
+    @JkImportBuild("../org.jerkar.core")
     public CoreBuild core;
 
     public static void main(String[] args) {

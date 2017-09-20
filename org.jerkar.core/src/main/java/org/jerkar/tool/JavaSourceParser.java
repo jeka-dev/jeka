@@ -170,7 +170,7 @@ final class JavaSourceParser {
                 scanner.nextLine();
                 continue;
             }
-            final String context = " parsing @JkProject ";
+            final String context = " parsing @JkImportBuild ";
             final String between = extractStringTo(scanner, "(", url, context);
             if (!containsOnly(between, " ", "\n", "\r", "\t")) {
                 continue;

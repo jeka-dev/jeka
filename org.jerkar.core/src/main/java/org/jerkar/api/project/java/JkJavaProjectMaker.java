@@ -87,9 +87,10 @@ public class JkJavaProjectMaker {
     }
 
     public JkPath depsFor(JkScope... scopes) {
-        final JkDependencies deps = project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME);
-        return dependencyResolver.get(deps, scopes);
+        return dependencyResolver.get(project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME),
+                scopes);
     }
+
 
 
     // Clean -----------------------------------------------
@@ -172,19 +173,16 @@ public class JkJavaProjectMaker {
     });
 
     private JkJavaCompiler applyTestCompileSource(JkJavaCompiler baseCompiler) {
-        JkPath classpath = dependencyResolver.get(
-                project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME),
-                JkJavaDepScopes.SCOPES_FOR_TEST).andHead(project.getOutLayout().classDir());
+        JkPath classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andHead(project.getOutLayout().classDir());
         return baseCompiler
                 .withClasspath(classpath)
                 .andSources(project.getSourceLayout().tests())
-                .withOutputDir(project.getOutLayout().classDir());
+                .withOutputDir(project.getOutLayout().testClassDir());
     }
 
     protected JkUnit juniter() {
-        final JkClasspath classpath = JkClasspath.of(project.getOutLayout().testClassDir(), project.getOutLayout().classDir()).and(
-                this.dependencyResolver.get(project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME)
-                        , JkJavaDepScopes.SCOPES_FOR_TEST));
+        final JkClasspath classpath = JkClasspath.of(project.getOutLayout().testClassDir(), project.getOutLayout().classDir())
+                .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
         final File junitReport = new File(project.getOutLayout().testReportDir(), "junit");
         return this.getJuniter().withClassesToTest(project.getOutLayout().testClassDir())
                 .withClasspath(classpath)

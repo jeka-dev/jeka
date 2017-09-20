@@ -81,22 +81,4 @@ public interface JkArtifactProducer extends JkArtifactLocator {
         }
     }
 
-    /**
-     * Returns this artifacts producer as a form of dependency. If the specified artifact file ids are
-     * empty, the dependency is made on the main artifact file id.
-     */
-    default JkComputedDependency asDependency(Iterable<JkArtifactFileId> artifactFileIds) {
-        final Iterable<JkArtifactFileId> fileIds = artifactFileIds.iterator().hasNext() ? artifactFileIds
-                : JkUtilsIterable.listOf(mainArtifactFileId());
-        return new ArtifactProducerDependency(this, fileIds);
-    }
-
-    /**
-     * Returns this artifacts producer as a form of dependency. If no artifact file ids is specified,
-     * the dependency is made on the main artifact file id.
-     */
-    default JkComputedDependency asDependency(JkArtifactFileId ... artifactFileIds) {
-        return asDependency(Arrays.asList(artifactFileIds));
-    }
-
 }

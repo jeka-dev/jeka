@@ -4,14 +4,12 @@ import org.jerkar.api.depmanagement.*;
 
 /**
  * Dependency scopes usually used in Java projects
- *
  */
-@Deprecated // Experimental !!!!
 public final class JkJavaDepScopes {
 
     /**
      * A dependency declared with this scope will be available at compile time but won't be part of the packaged
-     * product (similar to Maven scope 'provided'.
+     * product (similar to Maven scope 'provided').
      */
     public static final JkScope PROVIDED = JkScope.build("provided")
             .transitive(false)
@@ -77,7 +75,6 @@ public final class JkJavaDepScopes {
             .and(PROVIDED).to(ARCHIVE_MASTER, COMPILE.name() + "(default)")
             .and(RUNTIME).to(ARCHIVE_MASTER, RUNTIME.name() + "(default)")
             .and(TEST).to(ARCHIVE_MASTER, RUNTIME.name() + "(default)", TEST.name() + "(default)");
-
 
 
     /**

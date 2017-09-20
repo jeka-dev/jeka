@@ -10,7 +10,7 @@ import org.jerkar.api.depmanagement.JkArtifactFileId;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.plugins.jacoco._PluginsJacocoBuild;
+import org.jerkar.plugins.jacoco.V07PluginsJacocoBuild;
 import org.jerkar.plugins.sonar._PluginsSonarBuild;
 import org.jerkar.tool.*;
 
@@ -18,11 +18,11 @@ import java.io.File;
 
 class _DistribAllBuild extends JkBuild {
 
-    @JkProject("../org.jerkar.plugins-sonar")
+    @JkImportBuild("../org.jerkar.plugins-sonar")
     _PluginsSonarBuild pluginsSonar;
 
-    @JkProject("../org.jerkar.plugins-jacoco")
-    _PluginsJacocoBuild pluginsJacoco;
+    @JkImportBuild("../org.jerkar.plugins-jacoco")
+    V07PluginsJacocoBuild pluginsJacoco;
 
     public boolean testSamples = false;
 

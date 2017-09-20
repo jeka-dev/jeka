@@ -2,8 +2,10 @@ package org.jerkar.api.depmanagement;
 
 import org.jerkar.api.file.JkFileSystemLocalizable;
 import org.jerkar.api.file.JkPath;
+import org.jerkar.api.utils.JkUtilsIterable;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -26,7 +28,19 @@ class ArtifactProducerDependency extends JkComputedDependency  {
         this.artifactProducer = artifactProducer;
     }
 
+    /*
+     * Constructs a {@link ArtifactProducerDependency} from an artifact producer and the artifact file id
+     * one is interested on.
+     */
+    ArtifactProducerDependency(JkArtifactProducer artifactProducer,
+                               JkArtifactFileId ... artifactFileIds) {
+        this(artifactProducer, Arrays.asList(artifactFileIds));
+    }
+
     private static List<File> jars(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
+        if (!artifactIds.iterator().hasNext()) {
+            return JkUtilsIterable.listOf(producer.mainArtifactFile());
+        }
         JkPath result = JkPath.of();
         for (JkArtifactFileId artifactFileId : artifactIds) {
             result = result.and( producer.artifactFile(artifactFileId));

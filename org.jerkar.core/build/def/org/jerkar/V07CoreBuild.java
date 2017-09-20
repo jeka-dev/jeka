@@ -7,12 +7,11 @@ import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkPublishRepos;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkZipper;
-import org.jerkar.api.java.JkJavaCompilerSpec;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkOptions;
-import org.jerkar.tool.builtins.javabuild.JkJavaJarBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 
 import java.io.File;
 
@@ -22,7 +21,7 @@ import static org.jerkar.api.project.java.JkJavaProject.SOURCES_FILE_ID;
 /**
  * Build script for Jerkar 0.7 using new features
  */
-public class V07CoreBuild extends JkJavaJarBuild {
+public class V07CoreBuild extends JkJavaProjectBuild {
 
     public static JkArtifactFileId DISTRIB_FILE_ID = JkArtifactFileId.of("distrib", "zip");
 

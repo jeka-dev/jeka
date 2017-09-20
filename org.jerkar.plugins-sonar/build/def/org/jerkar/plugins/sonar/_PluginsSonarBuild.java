@@ -4,17 +4,17 @@ package org.jerkar.plugins.sonar;
 import org.jerkar.V07CoreBuild;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.tool.JkImportBuild;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.JkProject;
-import org.jerkar.tool.builtins.javabuild.JkJavaJarBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 
 import java.io.File;
 
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
 
-public class _PluginsSonarBuild extends JkJavaJarBuild {
+public class _PluginsSonarBuild extends JkJavaProjectBuild {
 
-    @JkProject("../org.jerkar.core")
+    @JkImportBuild("../org.jerkar.core")
     private V07CoreBuild core;
 
     @Override

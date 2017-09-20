@@ -348,7 +348,7 @@ public class JkBuild {
     }
 
     /**
-     * Returns the slave project declared with annotation <code>JkProject</code> in this build.
+     * Returns the slave project declared with annotation <code>JkImportBuild</code> in this build.
      */
     protected final JkSlaveBuilds annotatedJkProjectSlaves() {
         return this.annotatedJkProjectSlaves;
@@ -358,10 +358,10 @@ public class JkBuild {
     private List<JkBuild> populateJkProjectAnnotatedFields() {
         final List<JkBuild> result = new LinkedList<JkBuild>();
         final List<Field> fields = JkUtilsReflect.getAllDeclaredField(this.getClass(),
-                JkProject.class);
+                JkImportBuild.class);
 
         for (final Field field : fields) {
-            final JkProject jkProject = field.getAnnotation(JkProject.class);
+            final JkImportBuild jkProject = field.getAnnotation(JkImportBuild.class);
             final JkBuild subBuild = relativeProject(this,
                     (Class<? extends JkBuild>) field.getType(), jkProject.value());
             try {
@@ -370,7 +370,7 @@ public class JkBuild {
                 throw new IllegalStateException("Can't inject slave build instance of type " + subBuild.getClass().getSimpleName()
                         + " into field " + field.getDeclaringClass().getName()
                         + "#" + field.getName() + " from directory " + this.baseDir().root()
-                        + ".\nPlease make sure current working dir (" + JkUtilsFile.workingDir() + ") is the root of master project directory.", e);
+                        + ".\nPlease make sure current working dir (" + JkUtilsFile.workingDir() + ") is the root of this project.", e);
             }
             result.add(subBuild);
         }

@@ -31,7 +31,7 @@ public class JkJavaProjectTest {
 
         final File core = new File(top, "core");
         final JkJavaProject coreProject = new JkJavaProject(core);
-        JkDependencies coreDeps = JkDependencies.of(baseProject.asDependency());
+        JkDependencies coreDeps = JkDependencies.of(baseProject);
         coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
         coreProject.maker().setJuniter(
                 coreProject.maker().getJuniter().forked(true));
@@ -39,7 +39,7 @@ public class JkJavaProjectTest {
         final File desktop = new File(top, "desktop");
         final JkJavaProject desktopProject = new JkJavaProject(desktop);
         desktopProject.setSourceLayout(sourceLayout);
-        final JkDependencies deps = JkDependencies.builder().on(coreProject.asDependency()).build();
+        final JkDependencies deps = JkDependencies.builder().on(coreProject).build();
         desktopProject.setDependencies(deps);
         desktopProject.addFatJarArtifactFile("fat");
         desktopProject.makeAllArtifactFiles();
