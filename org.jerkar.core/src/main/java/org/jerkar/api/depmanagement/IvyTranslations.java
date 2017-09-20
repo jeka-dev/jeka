@@ -3,6 +3,7 @@ package org.jerkar.api.depmanagement;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -388,7 +389,7 @@ final class IvyTranslations {
     }
 
     static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
-            JkIvyPublication publication, Date publishDate) {
+            JkIvyPublication publication, Instant publishDate) {
         for (final JkIvyPublication.Artifact artifact : publication) {
             for (final JkScope jkScope : JkScope.involvedScopes(artifact.jkScopes)) {
                 if (!Arrays.asList(descriptor.getConfigurations()).contains(jkScope.name())) {
@@ -404,7 +405,7 @@ final class IvyTranslations {
     }
 
     static void populateModuleDescriptorWithPublication(DefaultModuleDescriptor descriptor,
-            JkMavenPublication publication, Date publishDate) {
+            JkMavenPublication publication, Instant publishDate) {
 
         final ModuleRevisionId moduleRevisionId = descriptor.getModuleRevisionId();
         final String artifactName = moduleRevisionId.getName();
@@ -432,16 +433,16 @@ final class IvyTranslations {
     }
 
     static Artifact toPublishedArtifact(JkIvyPublication.Artifact artifact,
-            ModuleRevisionId moduleId, Date date) {
+            ModuleRevisionId moduleId, Instant date) {
         final String artifactName = JkUtilsString.isBlank(artifact.name) ? moduleId.getName()
                 : artifact.name;
         final String extension = JkUtilsObject.firstNonNull(artifact.extension, "");
         final String type = JkUtilsObject.firstNonNull(artifact.type, extension);
-        return new DefaultArtifact(moduleId, date, artifactName, type, extension);
+        return new DefaultArtifact(moduleId, new Date(date.toEpochMilli()), artifactName, type, extension);
     }
 
     private static Artifact toPublishedMavenArtifact(File artifact, String artifactName,
-            String classifier, ModuleRevisionId moduleId, Date date) {
+            String classifier, ModuleRevisionId moduleId, Instant date) {
         final String extension = JkUtilsString.substringAfterLast(artifact.getName(), ".");
         final Map<String, String> extraMap;
         if (classifier == null) {
@@ -449,7 +450,7 @@ final class IvyTranslations {
         } else {
             extraMap = JkUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", classifier);
         }
-        return new DefaultArtifact(moduleId, date, artifactName, extension, extension, extraMap);
+        return new DefaultArtifact(moduleId, new Date(date.toEpochMilli()), artifactName, extension, extension, extraMap);
     }
 
     static Set<JkScope> toJkScopes(String... confs) {

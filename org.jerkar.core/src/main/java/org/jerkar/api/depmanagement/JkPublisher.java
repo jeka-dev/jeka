@@ -1,6 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.Date;
 
 import org.jerkar.api.java.JkClassLoader;
@@ -79,8 +80,8 @@ public final class JkPublisher {
      *            just pass {@link JkVersionProvider#empty()}
      */
     public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
-            JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping,
-            Date deliveryDate, JkVersionProvider resolvedVersion) {
+                           JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping,
+                           Instant deliveryDate, JkVersionProvider resolvedVersion) {
         this.ivyPublisher.publishIvy(versionedModule, publication, dependencies, defaultMapping,
                 deliveryDate, resolvedVersion);
     }

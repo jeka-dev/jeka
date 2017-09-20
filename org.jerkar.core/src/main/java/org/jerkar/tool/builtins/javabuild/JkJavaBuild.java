@@ -487,9 +487,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
                     this.publisher().publishMaven(versionedModule(), publication, deps);
         }
         if (this.publisher().hasIvyPublishRepo()) {
-            final Date date = this.buildTime();
             this.publisher().publishIvy(versionedModule(), ivyPublication(), dependencies, COMPILE,
-                    DEFAULT_SCOPE_MAPPING, date, resolvedVersions);
+                    DEFAULT_SCOPE_MAPPING, buildTime(), resolvedVersions);
         }
     }
 

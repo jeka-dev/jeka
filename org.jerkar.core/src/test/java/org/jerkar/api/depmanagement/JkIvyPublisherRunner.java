@@ -3,6 +3,7 @@ package org.jerkar.api.depmanagement;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.Instant;
 import java.util.Date;
 
 import org.jerkar.api.system.JkLog;
@@ -28,7 +29,7 @@ public class JkIvyPublisherRunner {
         final JkModuleId spring = JkModuleId.of("org.springframework", "spring-jdbc");
         final JkDependencies deps = JkDependencies.builder().on(spring, "3.0.+")
                 .scope(JkScopedDependencyTest.COMPILE).build();
-        jkIvyResolver.publishIvy(versionedModule, ivyPublication, deps, null, new Date(),
+        jkIvyResolver.publishIvy(versionedModule, ivyPublication, deps, null, Instant.now(),
                 JkVersionProvider.of(spring, "3.0.8"));
     }
 

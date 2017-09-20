@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,7 +40,7 @@ public class JkBuild {
 
     private final File baseDir;
 
-    private final Date buildTime = JkUtilsTime.now();
+    private final Instant buildTime = Instant.now();
 
     /** attached plugin instances to this build */
     public final JkBuildPlugins plugins = new JkBuildPlugins(this);
@@ -120,19 +121,12 @@ public class JkBuild {
         // Do nothing as no plugin extension as been defined at this level.
     }
 
-    /**
-     * Returns the time-stamp this build has been initiated. Default is the time
-     * stamp (formatted as 'yyyyMMdd-HHmmss') this build has been instantiated.
-     */
-    public String buildTimestamp() {
-        return JkUtilsTime.iso(buildTime);
-    }
 
     /**
      * Returns the time the build was started.
      */
-    protected Date buildTime() {
-        return (Date) buildTime.clone();
+    protected Instant buildTime() {
+        return buildTime;
     }
 
     /**
