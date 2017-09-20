@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Beware : Experimental !!!!!!!!!!!!!!!!!!!!!!!
@@ -39,7 +40,7 @@ public class JkJavaProjectMaker {
 
     private List<String> javadocOptions = new LinkedList<>();
 
-    private JkPublisher publisher = JkPublisher.local();
+    private JkPublishRepos publishRepos = JkPublishRepos.local();
 
     public boolean runTests = true;
 
@@ -48,6 +49,15 @@ public class JkJavaProjectMaker {
     private Map<JkArtifactFileId, Runnable> artifactProducers = new LinkedHashMap<>();
 
     private final JkJavaProjectPackager packager;
+
+    private Supplier<String> artifactFileNameSupplier = () -> {
+        if (project.getVersionedModule() != null) {
+            return fileName(project.getVersionedModule());
+        } else if (project.getArtifactName() != null) {
+            return project.getArtifactName();
+        }
+        return project.baseDir().getName();
+    };
 
     // commons ------------------------
 
@@ -228,14 +238,7 @@ public class JkJavaProjectMaker {
     }
 
     File getArtifactFile(JkArtifactFileId artifactId) {
-        final String namePart;
-        if (project.getVersionedModule() != null) {
-            namePart = fileName(project.getVersionedModule());
-        } else if (project.getArtifactName() != null) {
-            namePart = project.getArtifactName();
-        } else {
-            namePart = project.baseDir().getName();
-        }
+        final String namePart = artifactFileNameSupplier.get();
         String classifier = artifactId.classifier() == null ? "" : "-" + artifactId.classifier();
         String extension = artifactId.extension() == null ? "" : "." + artifactId.extension();
         return new File(project.getOutLayout().outputDir(), namePart + classifier + extension);
@@ -277,8 +280,9 @@ public class JkJavaProjectMaker {
 
     // ----------------------- publish
 
-    public JkJavaProjectMaker runPublishPhase() {
-        this.getPublisher().publishMaven(project.getVersionedModule(), project, project.getDependencies(), project.getMavenPublicationInfo());
+    public JkJavaProjectMaker publish() {
+        JkPublisher.of(this.publishRepos, project.getOutLayout().outputDir())
+                .publishMaven(project.getVersionedModule(), project, project.getDependencies(), project.getMavenPublicationInfo());
         return this;
     }
 
@@ -356,12 +360,12 @@ public class JkJavaProjectMaker {
         return this;
     }
 
-    public JkPublisher getPublisher() {
-        return this.publisher;
+    public JkPublishRepos getPublishRepos() {
+        return this.publishRepos;
     }
 
-    public JkJavaProjectMaker setPublisher(JkPublisher publisher) {
-        this.publisher = publisher;
+    public JkJavaProjectMaker setPublishRepos(JkPublishRepos publishRepos) {
+        this.publishRepos = publishRepos;
         return this;
     }
 
@@ -371,6 +375,15 @@ public class JkJavaProjectMaker {
 
     public JkJavaProjectMaker setJavadocOptions(List<String> options) {
         this.javadocOptions = options;
+        return this;
+    }
+
+    public Supplier<String> getArtifactFileNameSupplier() {
+        return artifactFileNameSupplier;
+    }
+
+    public JkJavaProjectMaker setArtifactFileNameSupplier(Supplier<String> artifactFileNameSupplier) {
+        this.artifactFileNameSupplier = artifactFileNameSupplier;
         return this;
     }
 

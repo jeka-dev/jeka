@@ -5,6 +5,7 @@ import java.io.File;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
+import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.utils.JkUtilsFile;
 
 /**
@@ -69,7 +70,6 @@ public class JkProjectSourceLayout {
      */
     private final JkFileTreeSet testResources;
 
-
     private JkProjectSourceLayout(File baseDir, JkFileTreeSet sources, JkFileTreeSet resources, JkFileTreeSet tests, JkFileTreeSet testResources) {
         super();
         this.baseDir = baseDir;
@@ -78,7 +78,6 @@ public class JkProjectSourceLayout {
         this.resources = resources;
         this.testResources = testResources;
     }
-
 
     /**
      * Re-localise all locations defined under the base directory to the specified new base directory keeping the same relative path.

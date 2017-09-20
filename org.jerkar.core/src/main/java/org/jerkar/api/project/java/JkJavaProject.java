@@ -277,4 +277,9 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
     public JkMavenPublicationInfo getMavenPublicationInfo() {
         return mavenPublicationInfo;
     }
+
+    public JkJavaProject setMavenPublicationInfo(JkMavenPublicationInfo mavenPublicationInfo) {
+        this.mavenPublicationInfo = mavenPublicationInfo;
+        return this;
+    }
 }

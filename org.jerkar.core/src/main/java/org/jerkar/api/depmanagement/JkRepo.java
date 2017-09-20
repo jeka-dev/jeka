@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
@@ -50,7 +51,7 @@ public abstract class JkRepo implements Serializable {
     public static final URL JCENTERL_URL = toUrl("https://jcenter.bintray.com");
 
     /**
-     * Returns a repository or <code>null</code> according the url is <code>null</code> or not.
+     * Creates a repository or <code>null</code> according the url is <code>null</code> or not.
      */
     public static JkRepo ofOptional(String url, String userName, String password) {
         if (JkUtilsString.isBlank(url)) {
@@ -72,35 +73,35 @@ public abstract class JkRepo implements Serializable {
     }
 
     /**
-     * Returns Maven repository having the specified url.
+     * Creates Maven repository having the specified url.
      */
     public static JkMavenRepository maven(String url) {
         return new JkMavenRepository(toUrl(url), null, null, null);
     }
 
     /**
-     * Returns Maven repository having the specified url.
+     * Creates Maven repository having the specified url.
      */
     public static JkMavenRepository maven(URL url) {
         return new JkMavenRepository(url, null, null, null);
     }
 
     /**
-     * Returns a Maven repository having the specified file root location.
+     * Creates a Maven repository having the specified file root location.
      */
     public static JkMavenRepository maven(File file) {
         return new JkMavenRepository(JkUtilsFile.toUrl(file), null, null, null);
     }
 
     /**
-     * Returns the Maven central repository.
+     * Creates the Maven central repository.
      */
     public static JkRepo mavenCentral() {
         return maven(JkMavenRepository.MAVEN_CENTRAL_URL.toString());
     }
 
     /**
-     * Returns an OSSRH repository for both deploying snapshot and download artifacts.
+     * Creates an OSSRH repository for both deploying snapshot and download artifacts.
      */
     public static JkRepo mavenOssrhDownloadAndDeploySnapshot(String jiraId, String jiraPassword) {
         return maven(JkMavenRepository.MAVEN_OSSRH_DOWNLOAD_AND_DEPLOY_SNAPSHOT.toString())
@@ -109,7 +110,7 @@ public abstract class JkRepo implements Serializable {
     }
 
     /**
-     * Returns an OSSRH repository for deploying released artifacts.
+     * Creates an OSSRH repository for deploying released artifacts.
      */
     public static JkRepo mavenOssrhDeployRelease(String jiraId, String jiraPassword) {
         return maven(JkMavenRepository.MAVEN_OSSRH_DEPLOY_RELEASE.toString()).withCredential(
@@ -117,14 +118,14 @@ public abstract class JkRepo implements Serializable {
     }
 
     /**
-     * Returns a OSSRH repository for downloading both snapshot and released artifacts.
+     * Creates a OSSRH repository for downloading both snapshot and released artifacts.
      */
     public static JkRepo mavenOssrhPublicDownload() {
         return maven(JkMavenRepository.MAVEN_OSSRH_PUBLIC_DOWNLOAD_RELEASE_AND_SNAPSHOT);
     }
 
     /**
-     * Returns a JCenter repository.
+     * Creates a JCenter repository.
      */
     public static JkRepo mavenJCenter() {
         return maven(JkMavenRepository.JCENTERL_URL.toString());
@@ -166,7 +167,7 @@ public abstract class JkRepo implements Serializable {
     }
 
     /**
-     * Returns a repository having the specified url. If the repository is an Ivy repository
+     * Creates a repository having the specified url. If the repository is an Ivy repository
      * than the url should start with <code>ivy:</code> as <code>ivy:http://myrepolocation</code>.
      */
     public static JkRepo of(String url) {
@@ -177,14 +178,14 @@ public abstract class JkRepo implements Serializable {
     }
 
     /**
-     * Returns a Ivy repository located at the specified url.
+     * Creates a Ivy repository located at the specified url.
      */
     public static JkRepo.JkIvyRepository ivy(URL url) {
         return new JkIvyRepository(url, null, null, null, null, null);
     }
 
     /**
-     * Returns a Ivy repository located at the specified file location.
+     * Creates a Ivy repository located at the specified file location.
      */
     public static JkRepo.JkIvyRepository ivy(File file) {
         try {
@@ -195,7 +196,7 @@ public abstract class JkRepo implements Serializable {
     }
 
     /**
-     * Returns a Ivy repository located at the specified file location or url depending the
+     * Creates a Ivy repository located at the specified file location or url depending the
      * specified infoString stands for a url or a file location.
      */
     public static JkRepo.JkIvyRepository ivy(String urlOrDir) {

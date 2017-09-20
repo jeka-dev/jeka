@@ -1,6 +1,6 @@
 package org.jerkar.plugins.jacoco;
 
-import org.jerkar._CoreBuild;
+import org.jerkar.V07CoreBuild;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkProject;
@@ -14,7 +14,7 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 public class _PluginsJacocoBuild extends JkJavaJarBuild {
 
     @JkProject("../org.jerkar.core")
-    public _CoreBuild core;
+    public V07CoreBuild core;
 
     @Override
     protected JkJavaProject createProject(File baseDir) {

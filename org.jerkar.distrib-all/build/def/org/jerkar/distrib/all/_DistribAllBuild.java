@@ -1,6 +1,6 @@
 package org.jerkar.distrib.all;
 
-import org.jerkar._CoreBuild;
+import org.jerkar.V07CoreBuild;
 import org.jerkar._CoreProject;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
@@ -34,7 +34,7 @@ class _DistribAllBuild extends JkBuild {
         JkLog.startln("Creating distribution file");
 
         JkLog.info("Copy core distribution locally.");
-        _CoreBuild core = pluginsJacoco.core; // The core project is got by transitivity
+        V07CoreBuild core = pluginsJacoco.core; // The core project is got by transitivity
         File distDir = this.ouputDir("dist");
         _CoreProject coreProject = (_CoreProject) core.project();
         JkFileTree dist = JkFileTree.of(distDir).importDirContent(coreProject.distribFolder);

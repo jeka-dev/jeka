@@ -117,6 +117,7 @@ public final class JkPgp implements Serializable {
         }
         JkUtilsAssert.isTrue(secRing != null,
                 "You must supply a secret ring file (as secring.gpg) to sign files");
+        JkUtilsFile.assertAllExist(secRing);
         JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "sign", fileToSign, secRing, output,
                 pass, true);
     }
@@ -160,6 +161,7 @@ public final class JkPgp implements Serializable {
     public boolean verify(File fileToVerify, File signature) {
         JkUtilsAssert.isTrue(pubRing != null,
                 "You must supply a public ring file (as pubring.gpg) to verify file signatures");
+        JkUtilsFile.assertAllExist(publicRing());
         final Boolean result = JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "verify",
                 fileToVerify, pubRing, signature);
         return result;
@@ -170,7 +172,6 @@ public final class JkPgp implements Serializable {
      * file.
      */
     public JkPgp secretRing(File file, String password) {
-        JkUtilsFile.assertAllExist(file);
         return new JkPgp(pubRing, file, password);
     }
 
@@ -179,7 +180,6 @@ public final class JkPgp implements Serializable {
      * file.
      */
     public JkPgp publicRing(File file) {
-        JkUtilsFile.assertAllExist(file);
         return new JkPgp(file, secRing, password);
     }
 

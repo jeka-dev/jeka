@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
+import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
@@ -22,6 +23,14 @@ import org.jerkar.api.utils.JkUtilsIterable;
 public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    /**
+     * Creates a repository for publishing locally under <code></code>[USER HOME]/.jerkar/publish</code> folder.
+     */
+    public static JkPublishRepos local() {
+        final File file = new File(JkLocator.jerkarUserHome(), "maven-publish-dir");
+        return JkRepo.maven(file).asPublishRepos();
+    }
 
     /**
      * Creates a JkPublishRepos that publish on the specified repositories.
