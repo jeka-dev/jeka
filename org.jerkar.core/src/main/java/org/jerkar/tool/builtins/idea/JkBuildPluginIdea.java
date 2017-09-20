@@ -28,7 +28,7 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
     @JkDoc("Generates Idea [my-module].iml file")
     public void generateIml() {
         final List<File> depProjects = new LinkedList<File>();
-        for (final JkBuild depBuild : build.slaves().directs()) {
+        for (final JkBuild depBuild : build.importedBuilds().directs()) {
             depProjects.add(depBuild.baseDir().root());
         }
         final ImlGenerator generator = new ImlGenerator(build.baseDir().root());

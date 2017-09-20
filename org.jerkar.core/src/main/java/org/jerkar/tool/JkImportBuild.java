@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Specifies that the annotated element is a build of a another project. This
- * annotated element is supposed to be a {@link JkBuild} or its subclasses. The
+ * annotated element is supposed to be a {@link JkBuild} or instance of a subclass. The
  * expected value is the referenced project path relative to the project the
  * annotated element belong. <br/>
  * So for example if there is a project FooA and and a project FooB belonging to

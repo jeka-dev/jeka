@@ -1,25 +1,27 @@
 package org.jerkar.distrib.all;
 
 import org.jerkar.V07CoreBuild;
-import org.jerkar._CoreProject;
+import org.jerkar.api.depmanagement.JkArtifactFileId;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkZipper;
 import org.jerkar.api.java.JkJavadocMaker;
-import org.jerkar.api.depmanagement.JkArtifactFileId;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.plugins.jacoco.V07PluginsJacocoBuild;
-import org.jerkar.plugins.sonar._PluginsSonarBuild;
-import org.jerkar.tool.*;
+import org.jerkar.plugins.sonar.V07PluginsSonarBuild;
+import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkImportBuild;
+import org.jerkar.tool.JkInit;
 
 import java.io.File;
 
-class _DistribAllBuild extends JkBuild {
+class V07DistribAllBuild extends JkBuild {
 
     @JkImportBuild("../org.jerkar.plugins-sonar")
-    _PluginsSonarBuild pluginsSonar;
+    V07PluginsSonarBuild pluginsSonar;
 
     @JkImportBuild("../org.jerkar.plugins-jacoco")
     V07PluginsJacocoBuild pluginsJacoco;
@@ -36,8 +38,8 @@ class _DistribAllBuild extends JkBuild {
         JkLog.info("Copy core distribution locally.");
         V07CoreBuild core = pluginsJacoco.core; // The core project is got by transitivity
         File distDir = this.ouputDir("dist");
-        _CoreProject coreProject = (_CoreProject) core.project();
-        JkFileTree dist = JkFileTree.of(distDir).importDirContent(coreProject.distribFolder);
+        JkJavaProject coreProject = core.project();
+        JkFileTree dist = JkFileTree.of(distDir).importDirContent(core.distribFolder);
 
         JkLog.info("Add plugins to the distribution");
         JkFileTree ext = dist.go("libs/builtins").importFiles(pluginsSonar.project().mainArtifactFile(),
@@ -77,11 +79,11 @@ class _DistribAllBuild extends JkBuild {
         pluginsJacoco.core.clean();
         pluginsJacoco.clean();
         pluginsSonar.clean();
-        pluginsJacoco.core.project().makeArtifactFile(_CoreProject.DISTRIB_FILE_ID);
+        pluginsJacoco.core.project().makeArtifactFile(V07CoreBuild.DISTRIB_FILE_ID);
         pluginsJacoco.project().makeMainJar();
         pluginsSonar.project().makeMainJar();
-        //slaves().invokeOnAll("clean");
-       // slaves().invokeDoDefaultMethodOnAll();
+        importedBuilds().invokeOnAll("clean");
+        importedBuilds().invokeDoDefaultMethodOnAll();
         distrib();
         if (testSamples) {
             testSamples();
@@ -95,7 +97,7 @@ class _DistribAllBuild extends JkBuild {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(_DistribAllBuild.class, args).doDefault();
+        JkInit.instanceOf(V07DistribAllBuild.class, args).doDefault();
     }
 
 }

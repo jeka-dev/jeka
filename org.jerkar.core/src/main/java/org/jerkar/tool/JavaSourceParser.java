@@ -165,12 +165,12 @@ final class JavaSourceParser {
         scanner.useDelimiter("");
         final List<String> result = new LinkedList<String>();
         while (scanner.hasNext()) {
-            final String jkImportWord = scanner.findInLine("@JkProject");
+            final String jkImportWord = scanner.findInLine("@" + JkImportBuild.class.getSimpleName());
             if (jkImportWord == null) {
                 scanner.nextLine();
                 continue;
             }
-            final String context = " parsing @JkImportBuild ";
+            final String context = " parsing @" + JkImportBuild.class.getSimpleName();
             final String between = extractStringTo(scanner, "(", url, context);
             if (!containsOnly(between, " ", "\n", "\r", "\t")) {
                 continue;

@@ -19,6 +19,7 @@ public class V07PluginsJacocoBuild extends JkJavaProjectBuild {
     @Override
     protected JkJavaProject createProject(File baseDir) {
         JkJavaProject project = new JkJavaProject(baseDir);
+        V07CoreBuild.apply(project, "plugins-jacoco");
         project.setDependencies(JkDependencies.builder()
                 .on(core.project()).scope(PROVIDED)
                 .on(core.file("build/libs/provided/junit-4.11.jar")).scope(TEST)

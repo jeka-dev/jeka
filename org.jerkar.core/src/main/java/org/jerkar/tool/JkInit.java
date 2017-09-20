@@ -193,7 +193,7 @@ public final class JkInit {
         // setup plugins activated in command line
         final Class<JkBuildPlugin> baseClass = JkClassLoader.of(build.getClass()).load(JkBuildPlugin.class.getName());
         final PluginDictionnary<JkBuildPlugin> dictionnary = PluginDictionnary.of(baseClass);
-        final List<JkBuild> slaveBuilds = build.slaves().all();
+        final List<JkBuild> slaveBuilds = build.importedBuilds().all();
         if (!slaveBuilds.isEmpty()) {
             JkLog.startHeaded("Configure slave projects");
             for (final JkBuild subBuild : slaveBuilds) {

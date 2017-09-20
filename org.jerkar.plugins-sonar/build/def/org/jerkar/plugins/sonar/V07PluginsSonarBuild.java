@@ -1,6 +1,5 @@
 package org.jerkar.plugins.sonar;
 
-
 import org.jerkar.V07CoreBuild;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.project.java.JkJavaProject;
@@ -12,7 +11,7 @@ import java.io.File;
 
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
 
-public class _PluginsSonarBuild extends JkJavaProjectBuild {
+public class V07PluginsSonarBuild extends JkJavaProjectBuild {
 
     @JkImportBuild("../org.jerkar.core")
     private V07CoreBuild core;
@@ -20,12 +19,15 @@ public class _PluginsSonarBuild extends JkJavaProjectBuild {
     @Override
     protected JkJavaProject createProject(File baseDir) {
         JkJavaProject project = new JkJavaProject(baseDir);
-        project.setDependencies(JkDependencies.of(PROVIDED, core.project().asDependency()));
+        V07CoreBuild.apply(project, "plugins-sonar");
+        project.setDependencies(JkDependencies.builder()
+                .on(core.project()).scope(PROVIDED)
+                .build());
         return project;
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(_PluginsSonarBuild.class, args).doDefault();
+        JkInit.instanceOf(V07PluginsSonarBuild.class, args).doDefault();
     }
 
 }

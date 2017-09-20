@@ -36,7 +36,7 @@ final class Project {
 
     private JkRepos buildRepos;
 
-    private List<File> subProjects = new LinkedList<File>();
+    private List<File> rootsOfImportedBuilds = new LinkedList<File>();
 
     private final BuildResolver resolver;
 
@@ -58,7 +58,7 @@ final class Project {
                 JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER));
         this.buildDependencies = this.buildDependencies.and(parser.dependencies());
         this.buildRepos = parser.importRepos().and(buildRepos);
-        this.subProjects = parser.projects();
+        this.rootsOfImportedBuilds = parser.projects();
     }
 
     // Compiles and returns the runtime classpath
@@ -203,11 +203,11 @@ final class Project {
 
     private JkPath compileDependentProjects(Set<File> yetCompiledProjects, LinkedHashSet<File> pathEntries) {
         JkPath jkPath = JkPath.of();
-        if (!this.subProjects.isEmpty()) {
+        if (!this.rootsOfImportedBuilds.isEmpty()) {
             JkLog.info("Compile build classes of dependent projects : "
-                    + toRelativePaths(this.projectBaseDir, this.subProjects));
+                    + toRelativePaths(this.projectBaseDir, this.rootsOfImportedBuilds));
         }
-        for (final File file : this.subProjects) {
+        for (final File file : this.rootsOfImportedBuilds) {
             final Project project = new Project(file);
             project.compile(yetCompiledProjects, pathEntries);
             jkPath = jkPath.and(file);
@@ -224,7 +224,7 @@ final class Project {
 
         // Now run projects
         if (!commandLine.getSubProjectMethods().isEmpty()) {
-            for (final JkBuild subBuild : build.slaves().all()) {
+            for (final JkBuild subBuild : build.importedBuilds().all()) {
                 runProject(subBuild, commandLine.getSubProjectMethods(), dictionnary);
             }
         }

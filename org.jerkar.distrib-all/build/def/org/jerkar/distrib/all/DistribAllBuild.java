@@ -73,7 +73,7 @@ class DistribAllBuild extends JkBuildDependencySupport {
     public void doDefault() {
         super.doDefault();
         pluginsJacoco.core.pack.javadoc = false;
-        slaves().invokeDoDefaultMethodOnAll();
+        importedBuilds().invokeDoDefaultMethodOnAll();
         distrib();
         if (testSamples) {
             testSamples();

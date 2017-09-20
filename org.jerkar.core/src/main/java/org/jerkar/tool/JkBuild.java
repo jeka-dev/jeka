@@ -48,7 +48,7 @@ public class JkBuild {
 
     private JkDependencies buildDependencies;
 
-    private final JkSlaveBuilds annotatedJkProjectSlaves;
+    private final JkImportedBuilds annotatedJkImportBuild;
 
     @JkDoc("Help options")
     private final JkHelpOptions help = new JkHelpOptions();
@@ -65,7 +65,7 @@ public class JkBuild {
         this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, JkUtilsFile.workingDir());
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
         final List<JkBuild> subBuilds = populateJkProjectAnnotatedFields();
-        this.annotatedJkProjectSlaves = JkSlaveBuilds.of(this.baseDir().root(), subBuilds);
+        this.annotatedJkImportBuild = JkImportedBuilds.of(this.baseDir().root(), subBuilds);
     }
 
     /**
@@ -339,19 +339,19 @@ public class JkBuild {
     }
 
     /**
-     * Returns slave builds (potentially on other projects).
+     * Returns imported builds.
      */
-    public final JkSlaveBuilds slaves() {
-        final List<JkBuild> slaveBuilds = JkBuildPlugin.applySlaves(this.plugins.getActives(),
-                this.annotatedJkProjectSlaves.all());
-        return JkSlaveBuilds.of(this.baseDir().root(), slaveBuilds);
+    public final JkImportedBuilds importedBuilds() {
+        final List<JkBuild> importedBuilds = JkBuildPlugin.applyPluginsToImportedBuilds(this.plugins.getActives(),
+                this.annotatedJkImportBuild.all());
+        return JkImportedBuilds.of(this.baseDir().root(), importedBuilds);
     }
 
     /**
-     * Returns the slave project declared with annotation <code>JkImportBuild</code> in this build.
+     * Returns the imported build declared with annotation <code>JkImportBuild</code> in this build.
      */
-    protected final JkSlaveBuilds annotatedJkProjectSlaves() {
-        return this.annotatedJkProjectSlaves;
+    protected final JkImportedBuilds annotatedJkProjectSlaves() {
+        return this.annotatedJkImportBuild;
     }
 
     @SuppressWarnings("unchecked")

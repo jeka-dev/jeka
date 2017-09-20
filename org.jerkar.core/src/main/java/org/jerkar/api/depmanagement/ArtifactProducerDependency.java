@@ -20,12 +20,12 @@ class ArtifactProducerDependency extends JkComputedDependency  {
      * Constructs a {@link ArtifactProducerDependency} from an artifact producer and the artifact file id
      * one is interested on.
      */
-    ArtifactProducerDependency(JkArtifactProducer artifactProducer,
-                               Iterable<JkArtifactFileId> artifactFileIds) {
-        super(() -> artifactProducer.makeArtifactFilesIfNecessary(artifactFileIds),
-                baseDir(artifactProducer),
-                jars(artifactProducer, artifactFileIds), () -> runtimeDeps(artifactProducer, artifactFileIds));
-        this.artifactProducer = artifactProducer;
+    ArtifactProducerDependency(JkArtifactProducer producer,
+                               Iterable<JkArtifactFileId> fileIds) {
+        super(() -> producer.makeArtifactFilesIfNecessary(artifacts(producer, fileIds)),
+                baseDir(producer),
+                jars(producer, artifacts(producer, fileIds)), () -> runtimeDeps(producer, artifacts(producer, fileIds)));
+        this.artifactProducer = producer;
     }
 
     /*
@@ -37,10 +37,14 @@ class ArtifactProducerDependency extends JkComputedDependency  {
         this(artifactProducer, Arrays.asList(artifactFileIds));
     }
 
-    private static List<File> jars(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
-        if (!artifactIds.iterator().hasNext()) {
-            return JkUtilsIterable.listOf(producer.mainArtifactFile());
+    private static Iterable<JkArtifactFileId> artifacts(JkArtifactProducer artifactProducer, Iterable<JkArtifactFileId> artifactFileIds) {
+        if (!artifactFileIds.iterator().hasNext()) {
+            return JkUtilsIterable.listOf(artifactProducer.mainArtifactFileId());
         }
+        return artifactFileIds;
+    }
+
+    private static List<File> jars(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
         JkPath result = JkPath.of();
         for (JkArtifactFileId artifactFileId : artifactIds) {
             result = result.and( producer.artifactFile(artifactFileId));

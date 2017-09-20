@@ -56,7 +56,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
         if (this.build instanceof JkJavaBuild) {
             final JkJavaBuild jbuild = (JkJavaBuild) build;
             final List<File> depProjects = new LinkedList<File>();
-            for (final JkBuild depBuild : build.slaves().directs()) {
+            for (final JkBuild depBuild : build.importedBuilds().directs()) {
                 depProjects.add(depBuild.baseDir().root());
             }
             final DotClasspathGenerator generator = new DotClasspathGenerator(build.baseDir().root());

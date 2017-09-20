@@ -43,8 +43,8 @@ public abstract class JkBuildPlugin {
     }
 
     /**
-     * Override this method if this plugin add/remove some slave projects. The original slaves
-     * are passed as parameter so plugins are aware of already declared slaves.
+     * Override this method if this plugin add/remove some slave projects. The original importedBuilds
+     * are passed as parameter so plugins are aware of already declared importedBuilds.
      * Note that you are not supposed to modify the list passed as parameters and that
      * the returned list is supposed to be the exhaustive list of slave projects, so if the plugin do not remove
      * any slave from the original list, the returned list should contains the list passed as parameter.
@@ -102,8 +102,8 @@ public abstract class JkBuildPlugin {
         }
     }
 
-    static List<JkBuild> applySlaves(Iterable<? extends JkBuildPlugin> plugins, List<JkBuild> originalSlaves) {
-        List<JkBuild> result = originalSlaves;
+    static List<JkBuild> applyPluginsToImportedBuilds(Iterable<? extends JkBuildPlugin> plugins, List<JkBuild> importedBuilds) {
+        List<JkBuild> result = importedBuilds;
         for (final JkBuildPlugin plugin : plugins) {
             result = plugin.slaves(result);
         }

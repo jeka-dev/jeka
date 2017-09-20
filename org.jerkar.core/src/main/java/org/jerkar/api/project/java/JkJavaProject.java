@@ -154,7 +154,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     @Override
     public String toString() {
-        return this.baseDir.getName();
+        return "project " + this.baseDir.getName();
     }
 
     // ---------------------------- Getters / setters --------------------------------------------

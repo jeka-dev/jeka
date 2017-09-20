@@ -174,7 +174,7 @@ public final class JkEclipseClasspathGenerator {
             writeFileDepsEntries(writer, files, paths);
         }
 
-        // write entries for project slaves
+        // write entries for project importedBuilds
         for (final File projectFile : this.slaveProjects) {
             if (paths.contains(projectFile.getPath())) {
                 continue;

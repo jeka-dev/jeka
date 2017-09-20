@@ -168,20 +168,19 @@ public class JkComputedDependency implements JkFileDependency {
     @Override
     public List<File> files() {
         if (this.hasMissingFilesOrEmptyDirs()) {
-            JkLog.startHeaded("Building depending project " + this);
+            JkLog.startHeaded("Building dependency : " + this);
             runnable.run();
             JkLog.done();
         }
         final Set<File> missingFiles = this.missingFilesOrEmptyDirs();
         if (!missingFiles.isEmpty()) {
-            throw new IllegalStateException("Project " + this + " does not generate "
-                    + missingFiles);
+            throw new IllegalStateException(this + " didn't generate " + missingFiles);
         }
         return JkUtilsIterable.concatLists(files, this.extraFileSupplier.get());
     }
 
     /**
-     * If the dependency can be represented as a project dependency in a IDE,
+     * If this dependency can be represented as a project dependency in a IDE,
      * this field mentions the root dir of the project.
      */
     public File ideProjectBaseDir() {
