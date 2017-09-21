@@ -8,14 +8,13 @@ import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.utils.JkUtilsFile;
 
 /**
- * Describe a project layout about the source parts. Generated sources/resources are not
+ * Describes a project layout about the source parts. Generated sources/resources are not
  * considered as source part since it is generated (so part of the output).
  */
 public class JkProjectSourceLayout {
 
-    public static final JkPathFilter RESOURCE_FILTER = JkPathFilter.exclude("**/*.java")
+    private static final JkPathFilter RESOURCE_FILTER = JkPathFilter.exclude("**/*.java")
             .andExclude("**/package.html").andExclude("**/doc-files");
-
 
     /**
      * Creates a Java project source structure according Maven conventions. It differs from Maven in that

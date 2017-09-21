@@ -1,16 +1,11 @@
-package org.jerkar.tool.builtins.eclipse;
+package org.jerkar.api.ide.eclipse;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.system.JkLocator;
-import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
+
 
 class Lib {
 
@@ -49,7 +44,7 @@ class Lib {
         return scope + ":" + file.getPath();
     }
 
-    public static JkDependencies toDependencies(JkBuild masterBuild, Iterable<Lib> libs,
+    public static JkDependencies toDependencies(/*JkBuild*/ Object masterBuild, Iterable<Lib> libs,
             ScopeResolver scopeSegregator) {
         final JkDependencies.Builder builder = JkDependencies.builder();
         for (final Lib lib : libs) {
@@ -57,15 +52,9 @@ class Lib {
                 builder.on(lib.file).scope(lib.scope);
 
             } else { // This is build import
-                final JkJavaBuild importedBuild = (JkJavaBuild) masterBuild
+                /*    final JkJavaBuild importedBuild = (JkJavaBuild) masterBuild
                         .createImportedBuild(lib.projectRelativePath);
 
-                // if the imported build does not have build class, we apply eclipse# plugin
-                final JkFileTree def = importedBuild.baseTree().go("build/def");
-                if (!def.exists() || def.include("**/*.java").fileCount(false) == 0) {
-                    final JkBuildPluginEclipse eclipsePlugin = new JkBuildPluginEclipse();
-                    importedBuild.plugins.activate(eclipsePlugin);
-                }
 
                 final JkComputedDependency projectDependency = importedBuild.asDependency(importedBuild
                         .packer().jarFile());
@@ -82,7 +71,8 @@ class Lib {
                         }
                     }
                     builder.on(Lib.toDependencies(importedBuild, sublibs, scopeSegregator));
-                }
+
+                }  */
             }
         }
         return builder.build();

@@ -2,7 +2,12 @@ package org.jerkar.tool;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependency;

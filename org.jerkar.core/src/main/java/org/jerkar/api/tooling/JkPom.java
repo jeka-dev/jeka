@@ -5,7 +5,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.depmanagement.JkDepExclude;
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencyExclusions;
+import org.jerkar.api.depmanagement.JkModuleDependency;
+import org.jerkar.api.depmanagement.JkModuleId;
+import org.jerkar.api.depmanagement.JkRepos;
+import org.jerkar.api.depmanagement.JkScope;
+import org.jerkar.api.depmanagement.JkScopedDependency;
+import org.jerkar.api.depmanagement.JkVersion;
+import org.jerkar.api.depmanagement.JkVersionProvider;
+import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.utils.JkUtilsIterable;

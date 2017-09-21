@@ -1,9 +1,9 @@
 package org.jerkar.tool;
 
+import java.util.List;
+
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
-
-import java.util.List;
 
 /**
  * A plugin base class to extend to alter {@link JkBuild} object.

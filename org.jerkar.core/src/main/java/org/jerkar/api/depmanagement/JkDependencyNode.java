@@ -46,7 +46,7 @@ public class JkDependencyNode implements Serializable {
      * direct flatten.
      */
     public static JkDependencyNode ofModuleDep(ModuleNodeInfo moduleNodeInfo, List<JkDependencyNode> children) {
-    return new JkDependencyNode(moduleNodeInfo, Collections.unmodifiableList(children));
+        return new JkDependencyNode(moduleNodeInfo, Collections.unmodifiableList(children));
     }
 
     public static JkDependencyNode ofFileDep(JkFileDependency dependency, Set<JkScope> scopes) {
@@ -67,6 +67,9 @@ public class JkDependencyNode implements Serializable {
         return new JkDependencyNode(this.nodeInfo,result);
     }
 
+    /**
+     * Returns all files resulting of this dependency node (this node itself plus all descendants).
+     */
     public List<File> allFiles() {
         final List<File> list = new LinkedList<>();
         JkUtilsIterable.addAllWithoutDuplicate(list, this.nodeInfo.files());

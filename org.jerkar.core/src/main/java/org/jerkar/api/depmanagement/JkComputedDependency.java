@@ -1,7 +1,11 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import org.jerkar.api.java.JkJavaProcess;
@@ -157,6 +161,7 @@ public class JkComputedDependency implements JkFileDependency {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<File> files() {
         if (this.hasMissingFilesOrEmptyDirs()) {

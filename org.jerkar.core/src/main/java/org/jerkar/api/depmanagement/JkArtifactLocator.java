@@ -1,10 +1,10 @@
 package org.jerkar.api.depmanagement;
 
-import org.jerkar.api.utils.JkUtilsIterable;
-
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
  * Defines methods for enumerating artifacts files likely to be produced by an object.

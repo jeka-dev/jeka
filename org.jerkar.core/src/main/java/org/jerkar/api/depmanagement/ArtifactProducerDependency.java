@@ -1,18 +1,20 @@
 package org.jerkar.api.depmanagement;
 
-import org.jerkar.api.file.JkFileSystemLocalizable;
-import org.jerkar.api.file.JkPath;
-import org.jerkar.api.utils.JkUtilsIterable;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+
+import org.jerkar.api.file.JkFileSystemLocalizable;
+import org.jerkar.api.file.JkPath;
+import org.jerkar.api.utils.JkUtilsIterable;
 
 
 /*
  * A dependency on a given artifact file id of a given {@link JkArtifactProducer}
  */
 class ArtifactProducerDependency extends JkComputedDependency  {
+
+    private static final long serialVersionUID = 1L;
 
     private final JkArtifactProducer artifactProducer;
 
@@ -21,7 +23,7 @@ class ArtifactProducerDependency extends JkComputedDependency  {
      * one is interested on.
      */
     ArtifactProducerDependency(JkArtifactProducer producer,
-                               Iterable<JkArtifactFileId> fileIds) {
+            Iterable<JkArtifactFileId> fileIds) {
         super(() -> producer.makeArtifactFilesIfNecessary(artifacts(producer, fileIds)),
                 baseDir(producer),
                 jars(producer, artifacts(producer, fileIds)), () -> runtimeDeps(producer, artifacts(producer, fileIds)));
@@ -33,7 +35,7 @@ class ArtifactProducerDependency extends JkComputedDependency  {
      * one is interested on.
      */
     ArtifactProducerDependency(JkArtifactProducer artifactProducer,
-                               JkArtifactFileId ... artifactFileIds) {
+            JkArtifactFileId ... artifactFileIds) {
         this(artifactProducer, Arrays.asList(artifactFileIds));
     }
 
@@ -46,7 +48,7 @@ class ArtifactProducerDependency extends JkComputedDependency  {
 
     private static List<File> jars(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
         JkPath result = JkPath.of();
-        for (JkArtifactFileId artifactFileId : artifactIds) {
+        for (final JkArtifactFileId artifactFileId : artifactIds) {
             result = result.and( producer.artifactFile(artifactFileId));
         }
         return result.withoutDuplicates().entries();
@@ -54,7 +56,7 @@ class ArtifactProducerDependency extends JkComputedDependency  {
 
     private static List<File> runtimeDeps(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
         JkPath result = JkPath.of();
-        for (JkArtifactFileId artifactFileId : artifactIds) {
+        for (final JkArtifactFileId artifactFileId : artifactIds) {
             result = result.and( producer.runtimeDependencies(artifactFileId));
         }
         return result.withoutDuplicates().entries();

@@ -14,7 +14,14 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.depmanagement.JkComputedDependency;
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencyNode;
+import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.api.depmanagement.JkModuleDependency;
+import org.jerkar.api.depmanagement.JkRepos;
+import org.jerkar.api.depmanagement.JkResolveResult;
+import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;

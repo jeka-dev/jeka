@@ -1,11 +1,11 @@
 package org.jerkar.api.project.java;
 
+import java.io.File;
+
 import org.jerkar.api.depmanagement.JkArtifactFileId;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJarMaker;
-
-import java.io.File;
 
 /**
  * Creates jar and others elements of a java project.

@@ -1,9 +1,14 @@
 package org.jerkar.api.java;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
-
-import java.util.*;
 
 /**
  * Stands for a compilation settings as source and target version, encoding, annotation processing

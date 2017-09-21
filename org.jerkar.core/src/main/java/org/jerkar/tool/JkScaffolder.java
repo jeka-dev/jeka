@@ -1,8 +1,6 @@
 package org.jerkar.tool;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.function.Supplier;
 
 import org.jerkar.api.file.JkFileTree;

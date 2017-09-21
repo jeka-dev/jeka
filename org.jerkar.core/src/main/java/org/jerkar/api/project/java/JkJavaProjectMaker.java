@@ -1,21 +1,32 @@
 package org.jerkar.api.project.java;
 
-import org.jerkar.api.depmanagement.*;
-import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkPath;
-import org.jerkar.api.function.JkRunnables;
-import org.jerkar.api.java.*;
-import org.jerkar.api.java.junit.JkTestSuiteResult;
-import org.jerkar.api.java.junit.JkUnit;
-import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
-
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+
+import org.jerkar.api.depmanagement.JkArtifactFileId;
+import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.api.depmanagement.JkJavaDepScopes;
+import org.jerkar.api.depmanagement.JkPublishRepos;
+import org.jerkar.api.depmanagement.JkPublisher;
+import org.jerkar.api.depmanagement.JkRepo;
+import org.jerkar.api.depmanagement.JkResolutionParameters;
+import org.jerkar.api.depmanagement.JkScope;
+import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPath;
+import org.jerkar.api.function.JkRunnables;
+import org.jerkar.api.java.JkClasspath;
+import org.jerkar.api.java.JkJavaCompiler;
+import org.jerkar.api.java.JkJavadocMaker;
+import org.jerkar.api.java.JkResourceProcessor;
+import org.jerkar.api.java.junit.JkTestSuiteResult;
+import org.jerkar.api.java.junit.JkUnit;
+import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsFile;
 
 /**
  * Beware : Experimental !!!!!!!!!!!!!!!!!!!!!!!

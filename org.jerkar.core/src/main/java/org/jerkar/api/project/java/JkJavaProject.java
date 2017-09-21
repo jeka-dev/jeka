@@ -1,15 +1,26 @@
 package org.jerkar.api.project.java;
 
+import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.jerkar.api.depmanagement.JkArtifactFileId;
+import org.jerkar.api.depmanagement.JkArtifactProducer;
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkJavaDepScopes;
+import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
+import org.jerkar.api.depmanagement.JkModuleId;
+import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileSystemLocalizable;
-import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.file.JkPathFilter;
-import org.jerkar.api.java.*;
-import org.jerkar.api.project.*;
-
-import java.io.File;
-import java.util.*;
+import org.jerkar.api.java.JkJavaCompilerSpec;
+import org.jerkar.api.java.JkJavaVersion;
+import org.jerkar.api.java.JkManifest;
+import org.jerkar.api.java.JkResourceProcessor;
+import org.jerkar.api.project.JkProjectOutLayout;
+import org.jerkar.api.project.JkProjectSourceLayout;
 
 /**
  * Beware : Experimental !!!!!!!!!!!!!!!!!!!!!!!

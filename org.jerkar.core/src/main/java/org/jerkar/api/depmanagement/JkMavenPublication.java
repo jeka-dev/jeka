@@ -30,10 +30,13 @@ public final class JkMavenPublication implements Serializable {
         return new JkMavenPublication(JkUtilsIterable.listOf(file), Collections.EMPTY_LIST, null);
     }
 
+    /**
+     * Creates a Maven publication to publish all artifacts referenced in the specified artifact locator.
+     */
     public static JkMavenPublication of(JkArtifactLocator artifactLocator) {
         JkMavenPublication result = JkMavenPublication.of(artifactLocator.artifactFile(artifactLocator.mainArtifactFileId()));
-        for (JkArtifactFileId extraFileId : artifactLocator.artifactFileIds()) {
-            File file = artifactLocator.artifactFile(extraFileId);
+        for (final JkArtifactFileId extraFileId : artifactLocator.artifactFileIds()) {
+            final File file = artifactLocator.artifactFile(extraFileId);
             result = result.andOptional(file, extraFileId.classifier());
         }
         return result;
@@ -47,7 +50,7 @@ public final class JkMavenPublication implements Serializable {
     private final JkMavenPublicationInfo extraInfo;
 
     private JkMavenPublication(List<File> mainArtifacts, List<JkClassifiedFileArtifact> classified,
-                                 JkMavenPublicationInfo extraInfo) {
+            JkMavenPublicationInfo extraInfo) {
         super();
         this.mainArtifacts = mainArtifacts;
         this.classifiedArtifacts = classified;

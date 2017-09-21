@@ -1,10 +1,10 @@
 package org.jerkar.api.java;
 
+import java.io.File;
+
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.file.JkZipper;
-
-import java.io.File;
 
 /**
  * Utilities class to produce Jar files with conventional naming

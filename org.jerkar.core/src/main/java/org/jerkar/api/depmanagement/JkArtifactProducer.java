@@ -1,9 +1,9 @@
 package org.jerkar.api.depmanagement;
 
-import org.jerkar.api.file.JkPath;
-
 import java.io.File;
 import java.util.Arrays;
+
+import org.jerkar.api.file.JkPath;
 
 
 /**

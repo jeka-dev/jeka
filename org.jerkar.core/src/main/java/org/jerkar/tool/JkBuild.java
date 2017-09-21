@@ -1,19 +1,28 @@
 package org.jerkar.tool;
 
+import java.io.File;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.*;
+import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsObject;
+import org.jerkar.api.utils.JkUtilsReflect;
+import org.jerkar.api.utils.JkUtilsXml;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.io.File;
-import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.time.Instant;
-import java.util.*;
 
 /**
  * Base class defining commons tasks and utilities necessary for building any

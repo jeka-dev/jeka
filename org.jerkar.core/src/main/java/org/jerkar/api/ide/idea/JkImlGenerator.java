@@ -1,6 +1,28 @@
 package org.jerkar.api.ide.idea;
 
-import org.jerkar.api.depmanagement.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencyNode;
+import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.api.depmanagement.JkModuleDependency;
+import org.jerkar.api.depmanagement.JkModuleId;
+import org.jerkar.api.depmanagement.JkRepos;
+import org.jerkar.api.depmanagement.JkResolveResult;
+import org.jerkar.api.depmanagement.JkScope;
+import org.jerkar.api.depmanagement.JkVersion;
+import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
@@ -12,18 +34,6 @@ import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
 import org.jerkar.tool.JkConstants;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
-
-import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Provides method to generate and read Eclipse metadata files.
@@ -44,15 +54,9 @@ final class JkImlGenerator {
 
     private JkProjectSourceLayout sourceLayout;
 
-    /** attach javadoc to the lib dependencies */
-    private boolean includeJavadoc;
-
     /** Used to generate JRE container */
     private JkJavaVersion sourceJavaVersion;
 
-    private File outputClassFolder;
-
-    private File outputTestClassFolder;
 
     /** Dependency resolver to fetch module dependencies */
     private JkDependencyResolver dependencyResolver;
@@ -80,7 +84,7 @@ final class JkImlGenerator {
      * Constructs a {@link JkImlGenerator} to the project base directory
      */
     public JkImlGenerator(JkProjectSourceLayout sourceLayout, JkDependencies dependencies,
-                          JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
+            JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
         super();
         this.sourceLayout = sourceLayout;
         this.dependencies = dependencies;
@@ -109,8 +113,8 @@ final class JkImlGenerator {
         writeJdk();
         writeContent();
         writeOrderEntrySourceFolder();
-        Set<File> allPaths = new HashSet<>();
-        Set<File> allModules = new HashSet<>();
+        final Set<File> allPaths = new HashSet<>();
+        final Set<File> allModules = new HashSet<>();
         if (this.dependencyResolver != null) {
             writeDependencies(dependencies, this.dependencyResolver, allPaths, allModules, false);
         }
@@ -178,7 +182,7 @@ final class JkImlGenerator {
         writer.writeCharacters(T2);
 
         // Write test sources
-        File projectDir = this.sourceLayout.baseDir();
+        final File projectDir = this.sourceLayout.baseDir();
         for (final JkFileTree fileTree : this.sourceLayout.tests().fileTrees()) {
             if (fileTree.exists()) {
                 writer.writeCharacters(T3);
@@ -239,7 +243,7 @@ final class JkImlGenerator {
     }
 
     private void writeBuildProjectDependencies(Set<File> allModules) throws XMLStreamException {
-        for (File rootFolder : this.importedBuildProjects) {
+        for (final File rootFolder : this.importedBuildProjects) {
             if (!allModules.contains(rootFolder)) {
                 writeOrderEntryForModule(rootFolder.getName(), "COMPILE");
                 allModules.add(rootFolder);
@@ -248,7 +252,7 @@ final class JkImlGenerator {
     }
 
     private void writeDependencies(JkDependencies dependencies, JkDependencyResolver resolver, Set<File> allPaths, Set<File> allModules,
-                                   boolean forceTest) throws XMLStreamException {
+            boolean forceTest) throws XMLStreamException {
 
         final JkResolveResult resolveResult = resolver.resolve(dependencies);
         final JkDependencyNode tree = resolveResult.dependencyTree();
@@ -256,9 +260,9 @@ final class JkImlGenerator {
 
             // Maven dependency
             if (node.isModuleNode()) {
-                String ideScope = forceTest ? "TEST" : ideScope(node.moduleInfo().resolvedScopes());
+                final String ideScope = forceTest ? "TEST" : ideScope(node.moduleInfo().resolvedScopes());
                 final List<LibPath> paths = toLibPath(node.moduleInfo(), resolver.repositories(), ideScope);
-                for (LibPath libPath : paths) {
+                for (final LibPath libPath : paths) {
                     if (!allPaths.contains(libPath.bin)) {
                         writeOrderEntryForLib(libPath);
                         allPaths.add(libPath.bin);
@@ -267,8 +271,8 @@ final class JkImlGenerator {
 
                 // File dependencies (file system + computed)
             } else {
-                String ideScope = forceTest ? "TEST" : ideScope(node.nodeInfo().declaredScopes());
-                JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.nodeInfo();
+                final String ideScope = forceTest ? "TEST" : ideScope(node.nodeInfo().declaredScopes());
+                final JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.nodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final File projectDir = fileNodeInfo.computationOrigin().ideProjectBaseDir();
                     if (projectDir != null && !allModules.contains(projectDir)) {
@@ -283,8 +287,8 @@ final class JkImlGenerator {
     }
 
     private void writeFileEntries(Iterable<File> files, Set<String> paths, String ideScope) throws XMLStreamException {
-        for (File file : files) {
-            LibPath libPath = new LibPath();
+        for (final File file : files) {
+            final LibPath libPath = new LibPath();
             libPath.bin = file;
             libPath.scope = ideScope;
             libPath.source = lookForSources(file);
@@ -295,14 +299,14 @@ final class JkImlGenerator {
     }
 
     private List<LibPath> toLibPath(JkDependencyNode.ModuleNodeInfo moduleInfo, JkRepos repos,
-                                    String scope) {
+            String scope) {
         final List<LibPath> result = new LinkedList<>();
         final JkModuleId moduleId = moduleInfo.moduleId();
         final JkVersion version = moduleInfo.resolvedVersion();
         final JkVersionedModule versionedModule = JkVersionedModule.of(moduleId, version);
         final List<File> files = moduleInfo.files();
-        for (File file : files) {
-            LibPath libPath = new LibPath();
+        for (final File file : files) {
+            final LibPath libPath = new LibPath();
             libPath.bin = file;
             libPath.scope = scope;
             libPath.source = repos.get(JkModuleDependency.of(versionedModule).classifier("sources"));
@@ -313,15 +317,15 @@ final class JkImlGenerator {
     }
 
     private static Set<String> toStringScopes(Set<JkScope> scopes) {
-        Set<String> result = new HashSet<>();
-        for (JkScope scope : scopes) {
+        final Set<String> result = new HashSet<>();
+        for (final JkScope scope : scopes) {
             result.add(scope.name());
         }
         return result;
     }
 
     private static String ideScope(Set<JkScope> scopesArg) {
-        Set<String> scopes = toStringScopes(scopesArg);
+        final Set<String> scopes = toStringScopes(scopesArg);
         if (scopes.contains(JkJavaBuild.COMPILE.name())) {
             return "COMPILE";
         }
@@ -360,27 +364,27 @@ final class JkImlGenerator {
     }
 
     private void writeOrderEntryForLib(LibPath libPath) throws XMLStreamException {
-            writer.writeCharacters(T2);
-            writer.writeStartElement("orderEntry");
-            writer.writeAttribute("type", "module-library");
-            if (libPath.scope != null) {
-                writer.writeAttribute("scope", libPath.scope);
-            }
-            writer.writeAttribute("exported", "");
-            writer.writeCharacters("\n");
-            writer.writeCharacters(T3);
-            writer.writeStartElement("library");
-            writer.writeCharacters("\n");
-            writeLibType("CLASSES", libPath.bin);
-            writer.writeCharacters("\n");
-            writeLibType("JAVADOC", libPath.javadoc);
-            writer.writeCharacters("\n");
-            writeLibType("SOURCES", libPath.source);
-            writer.writeCharacters("\n" + T3);
-            writer.writeEndElement();
-            writer.writeCharacters("\n" + T2);
-            writer.writeEndElement();
-            writer.writeCharacters("\n");
+        writer.writeCharacters(T2);
+        writer.writeStartElement("orderEntry");
+        writer.writeAttribute("type", "module-library");
+        if (libPath.scope != null) {
+            writer.writeAttribute("scope", libPath.scope);
+        }
+        writer.writeAttribute("exported", "");
+        writer.writeCharacters("\n");
+        writer.writeCharacters(T3);
+        writer.writeStartElement("library");
+        writer.writeCharacters("\n");
+        writeLibType("CLASSES", libPath.bin);
+        writer.writeCharacters("\n");
+        writeLibType("JAVADOC", libPath.javadoc);
+        writer.writeCharacters("\n");
+        writeLibType("SOURCES", libPath.source);
+        writer.writeCharacters("\n" + T3);
+        writer.writeEndElement();
+        writer.writeCharacters("\n" + T2);
+        writer.writeEndElement();
+        writer.writeCharacters("\n");
     }
 
     private void writeOrderEntryForModule(String ideaModuleName, String scope) throws XMLStreamException {
@@ -459,10 +463,14 @@ final class JkImlGenerator {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
-            LibPath libPath = (LibPath) o;
+            final LibPath libPath = (LibPath) o;
 
             return bin.equals(libPath.bin);
         }
@@ -489,7 +497,7 @@ final class JkImlGenerator {
     private static XMLStreamWriter createWriter(ByteArrayOutputStream fos) {
         try {
             return XMLOutputFactory.newInstance().createXMLStreamWriter(fos, ENCODING);
-        } catch (XMLStreamException e) {
+        } catch (final XMLStreamException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -516,37 +524,37 @@ final class JkImlGenerator {
     }
 
     private File lookForSources(File binary) {
-        String name = binary.getName();
-        String nameWithoutExt = JkUtilsString.substringBeforeLast(name, ".");
-        String ext = JkUtilsString.substringAfterLast(name, ".");
-        String sourceName = nameWithoutExt + "-sources." + ext;
-        List<File> folders = JkUtilsIterable.listOf(
+        final String name = binary.getName();
+        final String nameWithoutExt = JkUtilsString.substringBeforeLast(name, ".");
+        final String ext = JkUtilsString.substringAfterLast(name, ".");
+        final String sourceName = nameWithoutExt + "-sources." + ext;
+        final List<File> folders = JkUtilsIterable.listOf(
                 binary.getParentFile(),
                 new File(binary.getParentFile().getParentFile().getParentFile(), "libs-sources"),
                 new File(binary.getParentFile().getParentFile(), "libs-sources"),
                 new File(binary.getParentFile(), "libs-sources"));
-        List<String> names = JkUtilsIterable.listOf(sourceName, nameWithoutExt + "-sources.zip");
+        final List<String> names = JkUtilsIterable.listOf(sourceName, nameWithoutExt + "-sources.zip");
         return lookFileHere(folders, names);
     }
 
     private File lookForJavadoc(File binary) {
-        String name = binary.getName();
-        String nameWithoutExt = JkUtilsString.substringBeforeLast(name, ".");
-        String ext = JkUtilsString.substringAfterLast(name, ".");
-        String sourceName = nameWithoutExt + "-javadoc." + ext;
-        List<File> folders = JkUtilsIterable.listOf(
+        final String name = binary.getName();
+        final String nameWithoutExt = JkUtilsString.substringBeforeLast(name, ".");
+        final String ext = JkUtilsString.substringAfterLast(name, ".");
+        final String sourceName = nameWithoutExt + "-javadoc." + ext;
+        final List<File> folders = JkUtilsIterable.listOf(
                 binary.getParentFile(),
                 new File(binary.getParentFile().getParentFile().getParentFile(), "libs-javadoc"),
                 new File(binary.getParentFile().getParentFile(), "libs-javadoc"),
                 new File(binary.getParentFile(), "libs-javadoc"));
-        List<String> names = JkUtilsIterable.listOf(sourceName, nameWithoutExt + "-javadoc.zip");
+        final List<String> names = JkUtilsIterable.listOf(sourceName, nameWithoutExt + "-javadoc.zip");
         return lookFileHere(folders, names);
     }
 
     private File lookFileHere(Iterable<File> folders, Iterable<String> names) {
-        for (File folder : folders) {
-            for (String name : names) {
-                File candidate = new File(folder, name);
+        for (final File folder : folders) {
+            for (final String name : names) {
+                final File candidate = new File(folder, name);
                 if (candidate.exists()) {
                     return candidate;
                 }
@@ -563,23 +571,8 @@ final class JkImlGenerator {
         return this;
     }
 
-    public JkImlGenerator setIncludeJavadoc(boolean includeJavadoc) {
-        this.includeJavadoc = includeJavadoc;
-        return this;
-    }
-
     public JkImlGenerator setSourceJavaVersion(JkJavaVersion sourceJavaVersion) {
         this.sourceJavaVersion = sourceJavaVersion;
-        return this;
-    }
-
-    public JkImlGenerator setOutputClassFolder(File outputClassFolder) {
-        this.outputClassFolder = outputClassFolder;
-        return this;
-    }
-
-    public JkImlGenerator setOutputTestClassFolder(File outputTestClassFolder) {
-        this.outputTestClassFolder = outputTestClassFolder;
         return this;
     }
 
@@ -596,7 +589,7 @@ final class JkImlGenerator {
 
     public JkImlGenerator setBuildDependencies(JkDependencyResolver buildDependencyResolver, JkDependencies dependencies) {
         this.buildDependencyResolver = buildDependencyResolver;
-        this.buildDependencies = buildDependencies;
+        this.buildDependencies = dependencies;
         return this;
     }
 

@@ -3,14 +3,26 @@ package org.jerkar.tool.builtins.idea;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencyNode;
+import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.api.depmanagement.JkModuleDependency;
+import org.jerkar.api.depmanagement.JkModuleId;
+import org.jerkar.api.depmanagement.JkRepos;
+import org.jerkar.api.depmanagement.JkResolveResult;
+import org.jerkar.api.depmanagement.JkScope;
+import org.jerkar.api.depmanagement.JkVersion;
+import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.system.JkLocator;

@@ -1,15 +1,16 @@
 package org.jerkar.tool.builtins.idea;
 
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsThrowable;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+
+import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsThrowable;
 
 /**
  * Created by angibaudj on 14-03-17.

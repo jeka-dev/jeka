@@ -2,8 +2,14 @@ package org.jerkar.api.java;
 
 import org.jerkar.api.utils.JkUtilsAssert;
 
+/**
+ * Java specification version
+ */
 public final class JkJavaVersion {
 
+    /**
+     * Creates a Java specification version from the specified name.
+     */
     public static JkJavaVersion name(String value) {
         JkUtilsAssert.notNull(value, "version name can't be null. Use 7, 8, ...");
         return new JkJavaVersion(value);
@@ -36,16 +42,23 @@ public final class JkJavaVersion {
         this.name = name;
     }
 
+    /**
+     * Returns literal of this version.
+     */
     public String name() {
         return name;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-        JkJavaVersion that = (JkJavaVersion) o;
+        final JkJavaVersion that = (JkJavaVersion) o;
 
         return name.equals(that.name);
     }

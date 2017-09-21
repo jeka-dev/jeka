@@ -5,7 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.tool.*;
+import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkBuildDependencySupport;
+import org.jerkar.tool.JkConstants;
+import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.Main;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
 

@@ -1,12 +1,23 @@
 package org.jerkar.tool.builtins.eclipse;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.tool.*;
+import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkConstants;
+import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkException;
+import org.jerkar.tool.JkInit;
+import org.jerkar.tool.Main;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
 

@@ -5,7 +5,10 @@ import java.io.File;
 import org.jerkar.api.utils.JkUtilsFile;
 
 
-@Deprecated // Experimental !!!!
+// Experimental !!!!
+/**
+ * Folder layout for a project output.
+ */
 public class JkProjectOutLayout {
 
     public static JkProjectOutLayout classicJava() {

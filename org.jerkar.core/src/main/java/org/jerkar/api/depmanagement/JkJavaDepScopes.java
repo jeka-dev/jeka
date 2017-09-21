@@ -1,7 +1,5 @@
 package org.jerkar.api.depmanagement;
 
-import org.jerkar.api.depmanagement.*;
-
 /**
  * Dependency scopes usually used in Java projects
  */

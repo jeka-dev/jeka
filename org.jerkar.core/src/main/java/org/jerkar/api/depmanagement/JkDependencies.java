@@ -37,6 +37,9 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         return new JkDependencies(Arrays.asList(scopedDependencies), Collections.EMPTY_SET, JkVersionProvider.of());
     }
 
+    /**
+     * Creates a {@link JkDependencies} to the specified artifact producer
+     */
     public static JkDependencies of(JkArtifactProducer artifactProducer, JkArtifactFileId ... artifactFileIds) {
         final ArtifactProducerDependency dependency = new ArtifactProducerDependency(artifactProducer, artifactFileIds);
         final JkScopedDependency scopedependency = JkScopedDependency.of(dependency);
@@ -838,9 +841,9 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
          * Adds a dependency on the specified artifact producer.
          */
         public JkFluentScopeableBuilder on(JkArtifactProducer artifactProducer, JkArtifactFileId ... artifactFileIds) {
-            ArtifactProducerDependency dependency = new ArtifactProducerDependency(artifactProducer,
+            final ArtifactProducerDependency dependency = new ArtifactProducerDependency(artifactProducer,
                     Arrays.asList(artifactFileIds));
-            JkScopedDependency scopedDependency = JkScopedDependency.of(dependency);
+            final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency);
             this.dependencies.add(scopedDependency);
             return new JkFluentScopeableBuilder(this);
         }

@@ -1,10 +1,10 @@
 package org.jerkar.tool.builtins.javabuild;
 
+import java.io.File;
+
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkBuild;
-
-import java.io.File;
 
 // experimental
 public class JkJavaProjectBuild extends JkBuild {
