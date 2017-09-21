@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 import org.jerkar.api.depmanagement.JkDepExclude;
 import org.jerkar.api.depmanagement.JkDependencies;
@@ -29,7 +30,7 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
  * @author Jerome Angibaud
  * @formatter:off
  */
-public class JkCodeWriterForBuildClass {
+public class JkCodeWriterForBuildClass implements Supplier<String> {
 
     private static final String LINE_JUMP = "\n";
 
@@ -232,6 +233,11 @@ public class JkCodeWriterForBuildClass {
     @Override
     public String toString() {
         return wholeClass() + endClass();
+    }
+
+    @Override
+    public String get() {
+        return toString();
     }
 
     private static class Writer {

@@ -36,7 +36,7 @@ public class JkBuildDependencySupport extends JkBuild {
 
     /**
      * Default path for the non of dependencies. This path is relative to
-     * {@link #baseDir()}.
+     * {@link #baseTree()}.
      */
     protected static final String STD_LIB_PATH = "build/libs";
 
@@ -101,7 +101,7 @@ public class JkBuildDependencySupport extends JkBuild {
      * generated artifacts and by dependency manager.
      */
     public JkModuleId moduleId() {
-        return JkModuleId.of(baseDir().root().getName());
+        return JkModuleId.of(baseTree().root().getName());
     }
 
     /**
@@ -262,14 +262,14 @@ public class JkBuildDependencySupport extends JkBuild {
             if (this.publication.local) {
                 cachedPublisher = JkPublisher.of(mavenPublishLocal().asPublishRepo());
             } else {
-                cachedPublisher = JkPublisher.of(publishRepositories(), this.ouputDir().root());
+                cachedPublisher = JkPublisher.of(publishRepositories(), this.ouputTree().root());
             }
         }
         return cachedPublisher;
     }
 
     @Override
-    protected JkScaffolder scaffolder() {
+    public JkScaffolder scaffolder() {
         final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
         codeWriter.extendedClass = "JkBuildDependencySupport";
         codeWriter.dependencies = JkDependencies.builder().build();

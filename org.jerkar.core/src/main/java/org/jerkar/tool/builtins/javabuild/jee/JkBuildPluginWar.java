@@ -10,7 +10,6 @@ import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
 import org.jerkar.tool.builtins.javabuild.JkJavaPacker;
-import org.jerkar.tool.builtins.javabuild.JkJavaPacker.JkExtraPacking;
 
 /**
  * Build class template for application jee web applications (.war).
@@ -42,7 +41,7 @@ public class JkBuildPluginWar extends JkJavaBuildPlugin {
      * Returns the produced war file.
      */
     public File warFile() {
-        return this.build.ouputDir(build.packer().baseName() + ".war");
+        return this.build.ouputFile(build.packer().baseName() + ".war");
     }
 
     private File webappSrcFile() {
@@ -56,7 +55,7 @@ public class JkBuildPluginWar extends JkJavaBuildPlugin {
         if (webappSrcFile().exists()) {
             builder.extraAction(build -> {
                 JkLog.startln("Creating war file");
-                final File dir = build.ouputDir(packer.baseName() + "-war");
+                final File dir = build.ouputFile(packer.baseName() + "-war");
                 JeePacker.of(build).war(webappSrcFile(), dir, importedStaticResources);
                 JkFileTree.of(dir).zip().to(warFile());
                 JkLog.done();

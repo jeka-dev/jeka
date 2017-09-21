@@ -16,11 +16,11 @@ import org.jerkar.api.utils.JkUtilsString;
  * 
  * @author Jerome Angibaud
  */
-public final class JkBuildDependency extends JkComputedDependency {
+final class BuildDependency extends JkComputedDependency {
 
     private static final long serialVersionUID = 1L;
 
-    public static JkBuildDependency of(JkBuild projectBuild, List<File> files) {
+    public static BuildDependency of(JkBuild projectBuild, List<File> files) {
         return of(projectBuild, JkConstants.DEFAULT_METHOD, files);
     }
 
@@ -28,8 +28,8 @@ public final class JkBuildDependency extends JkComputedDependency {
 
     private final List<String> methods;
 
-    private JkBuildDependency(JkBuild projectBuild, List<String> methods, List<File> files) {
-        super(new Invoker(projectBuild, methods), projectBuild.baseDir().root() ,files);
+    private BuildDependency(JkBuild projectBuild, List<String> methods, List<File> files) {
+        super(new Invoker(projectBuild, methods), projectBuild.baseTree().root() ,files);
         this.methods = methods;
         this.projectBuild = projectBuild;
     }
@@ -59,16 +59,16 @@ public final class JkBuildDependency extends JkComputedDependency {
 
 
 
-    public static JkBuildDependency of(JkBuild projectBuild, String methods, List<File> files) {
+    public static BuildDependency of(JkBuild projectBuild, String methods, List<File> files) {
         final List<String> list = Arrays.asList(JkUtilsString.split(methods, " "));
-        return new JkBuildDependency(projectBuild, list, JkUtilsIterable.listWithoutDuplicateOf(files));
+        return new BuildDependency(projectBuild, list, JkUtilsIterable.listWithoutDuplicateOf(files));
     }
 
-    public static JkBuildDependency of(JkBuild projectBuild, File... files) {
+    public static BuildDependency of(JkBuild projectBuild, File... files) {
         return of(projectBuild, Arrays.asList(files));
     }
 
-    public static JkBuildDependency of(JkBuild projectBuild, String methods, File... files) {
+    public static BuildDependency of(JkBuild projectBuild, String methods, File... files) {
         return of(projectBuild, methods, Arrays.asList(files));
     }
 

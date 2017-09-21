@@ -9,6 +9,7 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.system.JkLocator;
+import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 class Lib {
@@ -48,8 +49,8 @@ class Lib {
         return scope + ":" + file.getPath();
     }
 
-    public static JkDependencies toDependencies(JkJavaBuild masterBuild, Iterable<Lib> libs,
-            ScopeResolver scopeSegregator) {
+    public static JkDependencies toDependencies(JkBuild masterBuild, Iterable<Lib> libs,
+                                                ScopeResolver scopeSegregator) {
         final JkDependencies.Builder builder = JkDependencies.builder();
         for (final Lib lib : libs) {
             if (lib.projectRelativePath == null) {
@@ -57,10 +58,10 @@ class Lib {
 
             } else { // This is project dependency
                 final JkJavaBuild slaveBuild = (JkJavaBuild) masterBuild
-                        .relativeProject(lib.projectRelativePath);
+                        .createImportedBuild(lib.projectRelativePath);
 
                 // if the slave build does not have build class, we apply eclipse# plugin
-                JkFileTree def = slaveBuild.baseDir().go("build/def");
+                JkFileTree def = slaveBuild.baseTree().go("build/def");
                 if (!def.exists() || def.include("**/*.java").fileCount(false) == 0) {
                     JkBuildPluginEclipse eclipsePlugin = new JkBuildPluginEclipse();
                     slaveBuild.plugins.activate(eclipsePlugin);
@@ -74,7 +75,7 @@ class Lib {
                 if (dotClasspathFile.exists()) {
                     final DotClasspathModel dotClasspathModel = DotClasspathModel.from(dotClasspathFile);
                     final List<Lib> sublibs = new ArrayList<>();
-                    for (final Lib sublib : dotClasspathModel.libs(slaveBuild.baseDir().root(),
+                    for (final Lib sublib : dotClasspathModel.libs(slaveBuild.baseTree().root(),
                             scopeSegregator)) {
                         if (sublib.exported) {
                             sublibs.add(sublib);

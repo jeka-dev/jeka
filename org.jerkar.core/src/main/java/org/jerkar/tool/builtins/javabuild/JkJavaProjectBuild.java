@@ -1,26 +1,25 @@
 package org.jerkar.tool.builtins.javabuild;
 
+import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.tool.JkBuild;
 
 import java.io.File;
 
-@Deprecated // experimental
+// experimental
 public class JkJavaProjectBuild extends JkBuild {
 
     private JkJavaProject project;
 
     public final JkJavaProject project() {
         if (project == null) {
-            project = createProject(this.baseDir().root());
+            project = createProject(this.baseTree().root());
         }
         return project;
     }
 
     protected JkJavaProject createProject(File baseDir) {
-        return new JkJavaProject(this.baseDir().root());
+        return new JkJavaProject(this.baseTree().root());
     }
 
     @Override
@@ -28,20 +27,14 @@ public class JkJavaProjectBuild extends JkBuild {
         this.project().makeMainJar();
     }
 
+    @Override
+    public JkFileTree ouputTree() {
+        return JkFileTree.of(this.project().getOutLayout().outputDir());
+    }
+
     public void produceAll() {
         this.project().makeAllArtifactFiles();
     }
 
-    @Override
-    public void clean() {
-        super.clean();
-        File projectOutDir = this.project().getOutLayout().outputDir();
-        if (!JkUtilsFile.isSame(ouputDir().root(), projectOutDir)) {
-            JkLog.start("Cleaning output directory " + projectOutDir);
-            project().maker().clean();
-            JkLog.done();
-        }
 
-
-    }
 }

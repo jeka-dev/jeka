@@ -29,10 +29,10 @@ public final class Main {
         init.displayInfo();
 
         final File workingDir = JkUtilsFile.workingDir();
-        final Project project = new Project(workingDir);
+        final Engine engine = new Engine(workingDir);
         JkLog.nextLine();
         try {
-            project.execute(init);
+            engine.execute(init);
             if (!JkLog.silent()) {
                 final int lenght = printAscii(false, "success.ascii");
                 System.out.println(JkUtilsString.repeat(" ", lenght) + "Total build time : "
@@ -53,8 +53,8 @@ public final class Main {
      */
     public static void exec(File projectDir, String... args) {
         final JkInit init = JkInit.of(args);
-        final Project project = new Project(projectDir);
-        project.execute(init);
+        final Engine engine = new Engine(projectDir);
+        engine.execute(init);
     }
 
     private static int printAscii(boolean error, String fileName) {

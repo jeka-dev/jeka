@@ -49,10 +49,10 @@ public final class JkInit {
     public static <T extends JkBuild> T instanceOf(File base, String... args) {
         final JkInit init = JkInit.of(args);
         init.displayInfo();
-        final Project project = new Project(base);
-        final T result = (T) project.instantiate(init);
+        final Engine engine = new Engine(base);
+        final T result = (T) engine.instantiate(init);
         if (result == null) {
-            throw new JkException("No build class found for project located at : " + base.getPath());
+            throw new JkException("No build class found for engine located at : " + base.getPath());
         }
         JkLog.info("Build class " + result.getClass().getName());
         JkLog.info("Activated plugins : " + result.plugins.getActives());
@@ -199,7 +199,7 @@ public final class JkInit {
         if (!importedBuilds.isEmpty()) {
             JkLog.startHeaded("Configure imported builds");
             for (final JkBuild subBuild : importedBuilds) {
-                JkLog.startln("Configure build " + build.baseDir().relativePath(subBuild.baseDir().root()));
+                JkLog.startln("Configure build " + build.baseTree().relativePath(subBuild.baseTree().root()));
                 configureBuild(subBuild, commandLine.getSubProjectPluginSetups(),
                         commandLine.getSubProjectBuildOptions(), dictionnary);
                 JkLog.done();

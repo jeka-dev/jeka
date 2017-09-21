@@ -30,7 +30,7 @@ import org.jerkar.tool.JkConstants;
 /**
  * Provides method to generate Eclipse .classpath metadata files.
  */
-@Deprecated // Experimental !!!!
+// Experimental !!!!
 public final class JkEclipseClasspathGenerator {
 
     private static final String ENCODING = "UTF-8";
@@ -44,12 +44,12 @@ public final class JkEclipseClasspathGenerator {
     private JkDependencies dependencies;
 
     // content for build class only
-    private JkDependencyResolver buildDefDependencyResolver;
+    private JkDependencyResolver buildDependencyResolver;
 
     private JkDependencies buildDependencies;
 
     // content for build class only
-    private List<File> slaveProjects = new LinkedList<>();
+    private List<File> importedBuildProjects = new LinkedList<>();
 
     // --------------------- options --------------------------------
 
@@ -118,16 +118,18 @@ public final class JkEclipseClasspathGenerator {
     /**
      * If the build script depends on build script located in another projects, you must add those projects here.
      */
-    public JkEclipseClasspathGenerator setSlaveProjects(List<File> slaveProjects) {
-        this.slaveProjects = slaveProjects;
+    public JkEclipseClasspathGenerator setImportedBuildProjects(List<File> importedBuildProjects) {
+        this.importedBuildProjects = importedBuildProjects;
         return this;
     }
 
     /**
      * If the build script depends on external libraries, you must set the resolver of this dependencies here.
      */
-    public JkEclipseClasspathGenerator setBuildDefDependencyResolver(JkDependencyResolver buildDefDependencyResolver) {
-        this.buildDefDependencyResolver = buildDefDependencyResolver;
+    public JkEclipseClasspathGenerator setBuildDependencyResolver(JkDependencyResolver buildDependencyResolver,
+                                                                  JkDependencies buildDependencies) {
+        this.buildDependencyResolver = buildDependencyResolver;
+        this.buildDependencies = buildDependencies;
         return this;
     }
 
@@ -169,13 +171,13 @@ public final class JkEclipseClasspathGenerator {
         writeJre(writer);
 
         // add build dependencies
-        if (hasBuildScript && buildDefDependencyResolver != null) {
+        if (hasBuildScript && buildDependencyResolver != null) {
             final Iterable<File> files = buildDependencies.localFileDependencies();
             writeFileDepsEntries(writer, files, paths);
         }
 
         // write entries for project importedBuilds
-        for (final File projectFile : this.slaveProjects) {
+        for (final File projectFile : this.importedBuildProjects) {
             if (paths.contains(projectFile.getPath())) {
                 continue;
             }
@@ -293,7 +295,7 @@ public final class JkEclipseClasspathGenerator {
             writer.writeAttribute("kind", "src");
             writeIncludingExcluding(writer, fileTree);
             //writer.writeAttribute("output",
-            //        relativePathIfPossible(structure.baseDir(), structure.testClassDir()));
+            //        relativePathIfPossible(structure.baseDirAsTree(), structure.testClassDir()));
             writer.writeAttribute("path", path);
             writer.writeCharacters("\n");
         }

@@ -1,25 +1,19 @@
 package org.jerkar.tool;
 
-import java.io.File;
-import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.time.Instant;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkPath;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.io.File;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.time.Instant;
+import java.util.*;
 
 /**
  * Base class defining commons tasks and utilities necessary for building any
@@ -29,7 +23,7 @@ import org.w3c.dom.Element;
  */
 public class JkBuild {
 
-    private static final ThreadLocal<Map<SubProjectRef, JkBuild>> SUB_PROJECT_CONTEXT = new ThreadLocal<>();
+    private static final ThreadLocal<Map<ImportedBuildRef, JkBuild>> IMPORTED_BUILD_CONTEXT = new ThreadLocal<>();
 
     private static final ThreadLocal<File> BASE_DIR_CONTEXT = new ThreadLocal<>();
 
@@ -48,13 +42,20 @@ public class JkBuild {
 
     private JkDependencies buildDependencies;
 
-    private final JkImportedBuilds annotatedJkImportBuild;
+    private final JkImportedBuilds importedBuilds;
+
+    private JkScaffolder scaffolder;
+
+    // ------------------ options --------------------------------------------------------
+
 
     @JkDoc("Help options")
     private final JkHelpOptions help = new JkHelpOptions();
 
     @JkDoc("Embed Jerkar jar along bin script in the project while scaffolding so the project can be run without Jerkar installed.")
     boolean scaffoldEmbed;
+
+    // --------------------------- constructs ----------------------------------
 
     /**
      * Constructs a {@link JkBuild}
@@ -64,16 +65,10 @@ public class JkBuild {
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
         this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, JkUtilsFile.workingDir());
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
-        final List<JkBuild> subBuilds = populateJkProjectAnnotatedFields();
-        this.annotatedJkImportBuild = JkImportedBuilds.of(this.baseDir().root(), subBuilds);
+        final List<JkBuild> directImportedBuilds = getDirectImportedBuilds();
+        this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), directImportedBuilds);
     }
 
-    /**
-     * Display meaningful information about this build.
-     */
-    public final void info() {
-        JkLog.info(infoString());
-    }
 
     /**
      * This method is invoked right after the option values has been injected to instance fields
@@ -82,6 +77,69 @@ public class JkBuild {
     public void init() {
         // Do nothing by default
     }
+
+    // -------------------------------- basic functionalities ---------------------------------------
+
+    /**
+     * Returns the time the build was started.
+     */
+    protected Instant buildTime() {
+        return buildTime;
+    }
+
+    /**
+     * Returns the base directory for this project. All file/directory path are
+     * resolved to this directory.
+     */
+    public final JkFileTree baseTree() {
+        return JkFileTree.of(baseDir);
+    }
+
+    /**
+     * Short-hand for <code>baseTree().file(relativePath)</code>.
+     */
+    public final File file(String relativePath) {
+        if (relativePath.isEmpty()) {
+            return baseTree().root();
+        }
+        return baseTree().file(relativePath);
+    }
+
+    /**
+     * The output directory where all the final and intermediate artifacts are
+     * generated.
+     */
+    public JkFileTree ouputTree() {
+        return baseTree().go(JkConstants.BUILD_OUTPUT_PATH).createIfNotExist();
+    }
+
+    /**
+     * Short-hand for <code>ouputTree().file(relativePath)</code>.
+     */
+    public File ouputFile(String relativePath) {
+        return ouputTree().file(relativePath);
+    }
+
+    /**
+     * Returns a formatted string providing information about this build definition.
+     */
+    public String infoString() {
+        return "base directory : " + this.baseTree() + "\n"
+                + "imported builds : " + this.importedBuilds.directs();
+    }
+
+    /**
+     * Returns the scaffolder object in charge of doing the scaffolding for this build.
+     * Override this method if you write a template class that need to do custom action for scaffolding.
+     */
+    public JkScaffolder scaffolder() {
+        if (this.scaffolder == null) {
+            this.scaffolder = new JkScaffolder(this.baseDir, this.scaffoldEmbed);
+        }
+        return this.scaffolder;
+    }
+
+    // ------------------------------ build dependencies ---------------------------------------------
 
     void setBuildDefDependencyResolver(JkDependencies buildDependencies, JkDependencyResolver scriptDependencyResolver) {
         this.buildDependencies = buildDependencies;
@@ -92,7 +150,7 @@ public class JkBuild {
      * Returns the dependency resolver used to compile/run scripts of this
      * project.
      */
-    public JkDependencyResolver buildDefDependencyResolver() {
+    public JkDependencyResolver buildDependencyResolver() {
         return this.buildDefDependencyResolver;
     }
 
@@ -102,6 +160,8 @@ public class JkBuild {
     public JkDependencies buildDependencies() {
         return buildDependencies;
     }
+
+    // --------------------------- plugins ----------------------------------------------------
 
     /**
      * Returns the classes accepted as template for plugins. If you override it,
@@ -121,102 +181,13 @@ public class JkBuild {
     }
 
     /**
-     * Returns the time the build was started.
+     * Returns plugins attached to this build and extending the specified class.
      */
-    protected Instant buildTime() {
-        return buildTime;
+    public <T extends JkBuildPlugin> T pluginOf(Class<T> pluginClass) {
+        return this.plugins.findInstanceOf(pluginClass);
     }
 
-    /**
-     * Returns the specified relative path to this project as a {@link JkPath} instance.
-     */
-    protected final JkPath toPath(String pathAsString) {
-        if (pathAsString == null) {
-            return JkPath.of();
-        }
-        return JkPath.of(baseDir().root(), pathAsString);
-    }
-
-    /**
-     * Returns the base directory for this project. All file/directory path are
-     * resolved to this directory.
-     */
-    public final JkFileTree baseDir() {
-        return JkFileTree.of(baseDir);
-    }
-
-
-    /**
-     * Invokes the specified method in this build.
-     */
-    private void invoke(String methodName, File fromDir) {
-        final Method method;
-        try {
-            method = this.getClass().getMethod(methodName);
-        } catch (final NoSuchMethodException e) {
-            JkLog.warn("No zero-arg method '" + methodName + "' found in class '" + this.getClass()
-            + "'. Skip.");
-            JkLog.warnStream().flush();
-            return;
-        }
-        final String context;
-        if (fromDir != null) {
-            final String path = JkUtilsFile.getRelativePath(fromDir, this.baseDir).replace(
-                    File.separator, "/");
-            context = " to project " + path + ", class " + this.getClass().getName();
-        } else {
-            context = "";
-        }
-        JkLog.infoUnderlined("Method : " + methodName + context);
-        final long time = System.nanoTime();
-        try {
-            JkUtilsReflect.invoke(this, method);
-            JkLog.info("Method " + methodName + " success in "
-                    + JkUtilsTime.durationInSeconds(time) + " seconds.");
-        } catch (final RuntimeException e) {
-            JkLog.info("Method " + methodName + " failed in " + JkUtilsTime.durationInSeconds(time)
-            + " seconds.");
-            throw e;
-        }
-    }
-
-    /**
-     * Executes the specified methods given the fromDir as working directory.
-     */
-    public void execute(Iterable<JkModelMethod> methods, File fromDir) {
-        for (final JkModelMethod method : methods) {
-            this.invoke(method, fromDir);
-        }
-    }
-
-    /**
-     * Returns a file located at the specified path relative to the base
-     * directory.
-     */
-    public final File file(String relativePath) {
-        if (relativePath.isEmpty()) {
-            return baseDir().root();
-        }
-        return baseDir().file(relativePath);
-    }
-
-    /**
-     * The output directory where all the final and intermediate artifacts are
-     * generated.
-     */
-    public JkFileTree ouputDir() {
-        return baseDir().go(JkConstants.BUILD_OUTPUT_PATH).createIfNotExist();
-    }
-
-    /**
-     * Returns the file located at the specified path relative to the output
-     * directory.
-     */
-    public File ouputDir(String relativePath) {
-        return ouputDir().file(relativePath);
-    }
-
-    // ------------ Jerkar methods ------------
+    // ------------------------------ Command line methods ---------------------------------------------------
 
     /**
      * Creates the project structure (mainly project folder layout, build class code and IDE metadata) at the asScopedDependency
@@ -228,19 +199,12 @@ public class JkBuild {
         JkBuildPlugin.applyScaffold(this.plugins.getActives());
     }
 
-    /**
-     * Returns the scaffolder object in charge of doing the scaffolding for this build.
-     * Override this method if you write a template class that need to do custom action for scaffolding.
-     */
-    protected JkScaffolder scaffolder() {
-        return new JkScaffolder(this);
-    }
 
     /** Clean the output directory. */
     @JkDoc("Cleans the output directory.")
     public void clean() {
-        JkLog.start("Cleaning output directory " + ouputDir().root().getPath());
-        ouputDir().exclude(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteAll();
+        JkLog.start("Cleaning output directory " + ouputTree().root().getPath());
+        ouputTree().exclude(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteAll();
         JkLog.done();
     }
 
@@ -257,7 +221,7 @@ public class JkBuild {
     }
 
     /** Displays all available methods defined in this build. */
-    @JkDoc("Display all available methods defined in this build.")
+    @JkDoc("Displays all available methods defined in this build.")
     public void help() {
         if (help.xml || help.xmlFile != null) {
             final Document document = JkUtilsXml.createDocument();
@@ -279,30 +243,19 @@ public class JkBuild {
     }
 
     /** Displays details on all available plugins. */
-    @JkDoc("Display details on all available plugins.")
+    @JkDoc("Displays details on all available plugins.")
     public void helpPlugins() {
         HelpDisplayer.helpPlugins();
     }
 
-    private void invoke(JkModelMethod jkModelMethod, File fromDir) {
-        if (jkModelMethod.isMethodPlugin()) {
-            this.plugins.invoke(jkModelMethod.pluginClass(), jkModelMethod.name());
-        } else {
-            this.invoke(jkModelMethod.name(), fromDir);
-        }
+    /** Displays meaningful information about this build. */
+    @JkDoc("Displays meaningful information about this build.")
+    public final void info() {
+        JkLog.info(infoString());
     }
 
-    /**
-     * Returns plugins attached to this build and extending the specified class.
-     */
-    public <T extends JkBuildPlugin> T pluginOf(Class<T> pluginClass) {
-        return this.plugins.findInstanceOf(pluginClass);
-    }
 
-    @Override
-    public String toString() {
-        return this.baseDir.getPath();
-    }
+   // ----------------------------- being a dependency ---------------------------------------
 
     /**
      * Returns a {@link JkComputedDependency} on this project and specified
@@ -310,7 +263,7 @@ public class JkBuild {
      * files.
      */
     protected JkComputedDependency asDependency(Iterable<File> files) {
-        return JkBuildDependency.of(this, JkUtilsIterable.listWithoutDuplicateOf(files));
+        return BuildDependency.of(this, JkUtilsIterable.listWithoutDuplicateOf(files));
     }
 
     /**
@@ -319,7 +272,7 @@ public class JkBuild {
      * files.
      */
     public JkComputedDependency asDependency(File... files) {
-        return JkBuildDependency.of(this, files);
+        return BuildDependency.of(this, files);
     }
 
     /**
@@ -327,34 +280,29 @@ public class JkBuild {
      * files and methods to execute.
      */
     public JkComputedDependency asDependency(String methods, File... files) {
-        return JkBuildDependency.of(this, methods, files);
+        return BuildDependency.of(this, methods, files);
     }
+
+    // ----------------------------- Imported builds -------------------------------------------------
 
     /**
      * Returns imported builds with plugins applied on.
      */
     public final JkImportedBuilds importedBuilds() {
         final List<JkBuild> importedBuilds = JkBuildPlugin.applyPluginsToImportedBuilds(this.plugins.getActives(),
-                this.annotatedJkImportBuild.all());
-        return JkImportedBuilds.of(this.baseDir().root(), importedBuilds);
-    }
-
-    /**
-     * Returns the imported build declared with annotation <code>JkImportBuild</code> in this build.
-     */
-    protected final JkImportedBuilds annotatedJkImportedBuilds() {
-        return this.annotatedJkImportBuild;
+                this.importedBuilds.all());
+        return JkImportedBuilds.of(this.baseTree().root(), importedBuilds);
     }
 
     @SuppressWarnings("unchecked")
-    private List<JkBuild> populateJkProjectAnnotatedFields() {
+    private List<JkBuild> getDirectImportedBuilds() {
         final List<JkBuild> result = new LinkedList<>();
         final List<Field> fields = JkUtilsReflect.getAllDeclaredField(this.getClass(),
                 JkImportBuild.class);
 
         for (final Field field : fields) {
             final JkImportBuild jkProject = field.getAnnotation(JkImportBuild.class);
-            final JkBuild subBuild = relativeProject(this,
+            final JkBuild subBuild = createImportedBuild(
                     (Class<? extends JkBuild>) field.getType(), jkProject.value());
             try {
                 JkUtilsReflect.setFieldValue(this, field, subBuild);
@@ -365,7 +313,7 @@ public class JkBuild {
                 }
                 throw new IllegalStateException("Can't inject slave build instance of type " + subBuild.getClass().getSimpleName()
                         + " into field " + field.getDeclaringClass().getName()
-                        + "#" + field.getName() + " from directory " + this.baseDir().root()
+                        + "#" + field.getName() + " from directory " + this.baseTree().root()
                         + "\nBuild class is located in " + currentClassBaseDir.getAbsolutePath()
                         + " while working dir is " + JkUtilsFile.workingDir()
                         + ".\nPlease set working dir to " + currentClassBaseDir.getPath(), e);
@@ -376,23 +324,10 @@ public class JkBuild {
     }
 
     /**
-     * Returns a formatted string providing information about this build definition.
-     */
-    public String infoString() {
-        return "base directory : " + this.baseDir() + "\n"
-                + "slave builds : " + this.annotatedJkImportedBuilds().directs();
-    }
-
-    /**
      * Returns the build of the specified slave project. Slave projects are expressed with relative path to this project.
      */
-    public JkBuild relativeProject(String relativePath) {
-        return relativeProject(this, null, relativePath);
-    }
-
-    private static JkBuild relativeProject(JkBuild mainBuild, Class<? extends JkBuild> clazz,
-            String relativePath) {
-        return mainBuild.relativeProjectBuild(clazz, relativePath);
+    public JkBuild createImportedBuild(String relativePath) {
+        return this.createImportedBuild(null, relativePath);
     }
 
     /**
@@ -401,77 +336,63 @@ public class JkBuild {
      * populated as usual.
      */
     @SuppressWarnings("unchecked")
-    public <T extends JkBuild> T relativeProjectBuild(Class<T> clazz, String relativePath) {
+    public <T extends JkBuild> T createImportedBuild(Class<T> clazz, String relativePath) {
         final File projectDir = this.file(relativePath);
-        final SubProjectRef projectRef = new SubProjectRef(projectDir, clazz);
-        Map<SubProjectRef, JkBuild> map = SUB_PROJECT_CONTEXT.get();
+        final ImportedBuildRef projectRef = new ImportedBuildRef(projectDir, clazz);
+        Map<ImportedBuildRef, JkBuild> map = IMPORTED_BUILD_CONTEXT.get();
         if (map == null) {
             map = new HashMap<>();
-            SUB_PROJECT_CONTEXT.set(map);
+            IMPORTED_BUILD_CONTEXT.set(map);
         }
-        final T cachedResult = (T) SUB_PROJECT_CONTEXT.get().get(projectRef);
+        final T cachedResult = (T) IMPORTED_BUILD_CONTEXT.get().get(projectRef);
         if (cachedResult != null) {
             return cachedResult;
         }
-        final Project project = new Project(projectDir);
-        final T result = project.getBuild(clazz);
+        final Engine engine = new Engine(projectDir);
+        final T result = engine.getBuild(clazz);
         JkOptions.populateFields(result);
-        SUB_PROJECT_CONTEXT.get().put(projectRef, result);
+        IMPORTED_BUILD_CONTEXT.get().put(projectRef, result);
         return result;
     }
 
-    private static class SubProjectRef {
+    private static class ImportedBuildRef {
 
         final String canonicalFileName;
 
         final Class<?> clazz;
 
-        SubProjectRef(File projectDir, Class<?> clazz) {
+        ImportedBuildRef(File projectDir, Class<?> clazz) {
             super();
             this.canonicalFileName = JkUtilsFile.canonicalPath(projectDir);
             this.clazz = clazz;
         }
 
         @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result
-                    + ((canonicalFileName == null) ? 0 : canonicalFileName.hashCode());
-            result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
-            return result;
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ImportedBuildRef that = (ImportedBuildRef) o;
+
+            if (!canonicalFileName.equals(that.canonicalFileName)) return false;
+            return clazz.equals(that.clazz);
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final SubProjectRef other = (SubProjectRef) obj;
-            if (canonicalFileName == null) {
-                if (other.canonicalFileName != null) {
-                    return false;
-                }
-            } else if (!canonicalFileName.equals(other.canonicalFileName)) {
-                return false;
-            }
-            if (clazz == null) {
-                if (other.clazz != null) {
-                    return false;
-                }
-            } else if (!clazz.equals(other.clazz)) {
-                return false;
-            }
-            return true;
+        public int hashCode() {
+            int result = canonicalFileName.hashCode();
+            result = 31 * result + clazz.hashCode();
+            return result;
         }
-
     }
+
+    // -----------------------------------------------------------------------------------
+
+    @Override
+    public String toString() {
+        return this.baseDir.getPath();
+    }
+
 
     /**
      * Options for help method.

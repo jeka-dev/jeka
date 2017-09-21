@@ -90,8 +90,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     /**
      * Creates a {@link JkDependencies} based on jars located under the specified directory. Jars are
      * supposed to lie in a directory structure standing for the different scopes they are intended.
-     * So jars needed for compilation are supposed to be in <code>baseDir/compile</code>, jar needed for
-     * test are supposed to be in <code>baseDir/test</code> and so on.
+     * So jars needed for compilation are supposed to be in <code>baseTree/compile</code>, jar needed for
+     * test are supposed to be in <code>baseTree/test</code> and so on.
      */
     public static JkDependencies ofLocalScoped(File baseDir) {
         final JkFileTree libDir = JkFileTree.of(baseDir);

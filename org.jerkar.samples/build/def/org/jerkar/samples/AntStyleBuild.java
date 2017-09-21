@@ -32,8 +32,8 @@ public class AntStyleBuild extends JkBuild {
 	File src = file("src/main/java");
 	File buildDir = file("build/output");
 	File classDir = new File(buildDir, "classes");
-	File jarFile = new File(buildDir, "jar/" + this.baseDir().root().getName() + ".jar");
-	JkClasspath classpath = JkClasspath.of(baseDir().include("libs/**/*.jar"));
+	File jarFile = new File(buildDir, "jar/" + this.baseTree().root().getName() + ".jar");
+	JkClasspath classpath = JkClasspath.of(baseTree().include("libs/**/*.jar"));
 	File reportDir = new File(buildDir, "junitRreport");
 
 	@Override
@@ -105,7 +105,7 @@ public class AntStyleBuild extends JkBuild {
 				.andGitHubDeveloper("myName", "myName@provider.com");
 
 		// Optional : if you want publish sources
-		File srcZip = ouputDir("src.zip");
+		File srcZip = ouputFile("src.zip");
 		JkZipper.of(this.src).to(srcZip);
 
 		JkMavenPublication publication = JkMavenPublication.of(jarFile)

@@ -24,7 +24,7 @@ public class JkBuildPluginJacoco extends JkJavaBuildPlugin {
     private UnaryOperator<JkUnit> enhancer;
 
     public static UnaryOperator<JkUnit> enhancer(JkJavaBuild jkJavaBuild, boolean produceHtmlReport) {
-        return enhancer(jkJavaBuild, jkJavaBuild.baseDir().root(), produceHtmlReport);
+        return enhancer(jkJavaBuild, jkJavaBuild.baseTree().root(), produceHtmlReport);
     }
 
     private static UnaryOperator<JkUnit> enhancer(JkJavaBuild jkJavaBuild, File agent, boolean html) {

@@ -3,7 +3,10 @@ package org.jerkar.tool;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
+import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -14,39 +17,35 @@ import org.jerkar.api.utils.JkUtilsIO;
  */
 public final class JkScaffolder {
 
-    private final JkBuild build;
+    private final JkFileTree baseTree;
 
-
-    private Object mainBuildclassWriter;
+    private Supplier<String> mainBuildclassWriter;
 
     private final boolean embed;
 
-    private final List<Runnable> extraActions;
+    public final JkRunnables extraActions = JkRunnables.noOp();
 
-    JkScaffolder(JkBuild build) {
+    JkScaffolder(File baseDir, boolean embed) {
         super();
-        this.build = build;
+        this.baseTree = JkFileTree.of(baseDir);
         this.mainBuildclassWriter = basicScaffoldedBuildClassCode();
-        this.extraActions = new LinkedList<>();
-        this.embed = build.scaffoldEmbed;
+        this.embed = embed;
     }
 
     /**
      * Runs the scaffolding.
      */
     public void run() {
-        final File def = build.file(JkConstants.BUILD_DEF_DIR);
+        final File def = baseTree.file(JkConstants.BUILD_DEF_DIR);
         def.mkdirs();
         final File buildClass = new File(def, "Build.java");
-        JkUtilsFile.writeString(buildClass, mainBuildclassWriter.toString(), false);
+        JkUtilsFile.writeString(buildClass, mainBuildclassWriter.get(), false);
         if (embed) {
-            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar.bat"), build.file("jerkar.bat"));
-            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar"), build.file("jerkar"));
-            JkUtilsFile.copyFileToDir(JkLocator.jerkarJarFile(), build.file("build/boot"));
+            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar.bat"), baseTree.file("jerkar.bat"));
+            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar"), baseTree.file("jerkar"));
+            JkUtilsFile.copyFileToDir(JkLocator.jerkarJarFile(), baseTree.file("build/boot"));
         }
-        for (final Runnable runnable : extraActions) {
-            runnable.run();
-        }
+        extraActions.run();
     }
 
     private static JkCodeWriterForBuildClass basicScaffoldedBuildClassCode() {
@@ -61,7 +60,7 @@ public final class JkScaffolder {
      * generate code.
      * Generally we use an instance of {@link JkCodeWriterForBuildClass}
      */
-    public JkScaffolder buildClassWriter(Object codeWriter) {
+    public JkScaffolder buildClassWriter(Supplier<String> codeWriter) {
         this.mainBuildclassWriter = codeWriter;
         return this;
     }
@@ -72,14 +71,6 @@ public final class JkScaffolder {
     @SuppressWarnings("unchecked")
     public <T> T buildClassCodeWriter() {
         return (T) this.mainBuildclassWriter;
-    }
-
-    /**
-     * Adds an extra action to be processed while scaffolding.
-     */
-    public JkScaffolder extraAction(Runnable runnable) {
-        this.extraActions.add(runnable);
-        return this;
     }
 
 

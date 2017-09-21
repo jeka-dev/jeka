@@ -201,7 +201,7 @@ public final class JkPom {
                     "    // you can remove this method. \n" +
                     "    @Override\n" +
                     "    public JkFileTreeSet resources() {\n" +
-                    "        return baseDir().jump(\"src/main/resources\").asSet();\n" +
+                    "        return baseDirAsTree().jump(\"src/main/resources\").asSet();\n" +
                     "    }");
         }
         if (baseDir.file("src/test/resources").exists()) {
@@ -211,7 +211,7 @@ public final class JkPom {
                     "    // you can remove this method.\n" +
                     "    @Override\n" +
                     "    public JkFileTreeSet unitTestResources() {\n" +
-                    "        return baseDir().jump(\"src/test/resources\").asSet();\n" +
+                    "        return baseDirAsTree().jump(\"src/test/resources\").asSet();\n" +
                     "    }");
         }
         final VersionConstanter constanter = VersionConstanter.of(codeWriter.versionProvider);

@@ -38,8 +38,9 @@ public class JkRunnables implements Runnable {
      * Chains this underlying {@link Runnable} with the specified one. The specified runnable will
      * be executed at the end.
      */
-    public JkRunnables chain(Runnable runnable) {
-        this.runnable = () -> {this.runnable.run(); runnable.run();};
+    public JkRunnables chain(Runnable chainedRunnable) {
+        final Runnable oldRunnable = this.runnable;
+        this.runnable = () -> {oldRunnable.run(); chainedRunnable.run();};
         return this;
     }
 
@@ -47,8 +48,9 @@ public class JkRunnables implements Runnable {
      * Chains this specified {@link Runnable} with the underlying one. The specified runnable will
      * be executed at the begining.
      */
-    public JkRunnables chainAtBegining(Runnable runnable) {
-        this.runnable = () -> {this.runnable.run(); runnable.run();};
+    public JkRunnables chainAtBegining(Runnable chainedRunnable) {
+        final Runnable oldRunnable = this.runnable;
+        this.runnable = () -> {oldRunnable.run(); chainedRunnable.run();};
         return this;
     }
 

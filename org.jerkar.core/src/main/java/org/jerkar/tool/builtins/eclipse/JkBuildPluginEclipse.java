@@ -57,12 +57,12 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
             final JkJavaBuild jbuild = (JkJavaBuild) build;
             final List<File> depProjects = new LinkedList<>();
             for (final JkBuild depBuild : build.importedBuilds().directs()) {
-                depProjects.add(depBuild.baseDir().root());
+                depProjects.add(depBuild.baseTree().root());
             }
-            final DotClasspathGenerator generator = new DotClasspathGenerator(build.baseDir().root());
+            final DotClasspathGenerator generator = new DotClasspathGenerator(build.baseTree().root());
             generator.dependencyResolver = ((JkJavaBuild) build).dependencyResolver();
             generator.dependencies = ((JkJavaBuild) build).effectiveDependencies();
-            generator.buildDefDependencyResolver = build.buildDefDependencyResolver();
+            generator.buildDefDependencyResolver = build.buildDependencyResolver();
             generator.buildDependencies = build.buildDependencies();
             generator.includeJavadoc = true;
             generator.jreContainer = this.jreContainer;
@@ -81,7 +81,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
             }
         } else {
             if (!dotProject.exists()) {
-                Project.ofSimpleNature(this.build.baseDir().root().getName()).writeTo(dotProject);
+                Project.ofSimpleNature(this.build.baseTree().root().getName()).writeTo(dotProject);
             }
         }
     }
@@ -89,7 +89,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
     /** Generate Eclipse files on all sub folders of the current directory **/
     @JkDoc("Generate Eclipse files on all subfolder of the current directory. Only subfolder having a build/def directory are impacted.")
     public void generateAll() {
-        final Iterable<File> folders = build.baseDir()
+        final Iterable<File> folders = build.baseTree()
                 .include("**/" + JkConstants.BUILD_DEF_DIR)
                 .exclude("**/build/output/**")
                 .files(true);
@@ -130,7 +130,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
     @Override
     protected JkDependencies alterDependencies(JkDependencies original) {
         final ScopeResolver scopeResolver = scopeResolver();
-        final List<Lib> libs = dotClasspathModel().libs(build.baseDir().root(), scopeResolver);
+        final List<Lib> libs = dotClasspathModel().libs(build.baseTree().root(), scopeResolver);
         return Lib.toDependencies(this.javaBuild(), libs, scopeResolver);
     }
 
@@ -141,7 +141,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 
             // We create a new build instance to avoid duplication in classpath concerning
             // elements already present in this classloader
-            final JkBuild newBuild = JkInit.instanceOf(this.build.baseDir().root());
+            final JkBuild newBuild = JkInit.instanceOf(this.build.baseTree().root());
             final JkBuildPluginEclipse pluginEclipse = new JkBuildPluginEclipse();
             pluginEclipse.build = newBuild;
             pluginEclipse.generateFiles();
@@ -157,7 +157,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
         List<JkBuild> result = new LinkedList<>(originalSlaves);
         for (String path : dotClasspathModel().projectDependencies()) {
             String relativePath = ".." + path;
-            File baseDir = build.baseDir().file(relativePath);
+            File baseDir = build.baseTree().file(relativePath);
             File dotProject = new File(baseDir, ".project");
             if (!dotProject.exists()) {
                 JkLog.warn("No .project file found for dependency project " + path + " : skip.");
@@ -166,9 +166,9 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
             Project project = Project.of(dotProject);
             final JkBuild slaveBuild;
             if (project.hasJavaNature()) {
-                slaveBuild = this.build.relativeProjectBuild(JkJavaBuild.class, relativePath);
+                slaveBuild = this.build.createImportedBuild(JkJavaBuild.class, relativePath);
             } else {
-                slaveBuild = this.build.relativeProjectBuild(JkBuild.class, relativePath);
+                slaveBuild = this.build.createImportedBuild(JkBuild.class, relativePath);
             }
             result.add(slaveBuild);
         }
@@ -206,15 +206,15 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
      */
     public void useFileDependencyInsteadOfProjectFor(JkJavaBuild ... javaBuilds) {
         for (JkJavaBuild javaBuild : javaBuilds) {
-            projectDependencyToFileSubstitutions.add(javaBuild.baseDir().root());
+            projectDependencyToFileSubstitutions.add(javaBuild.baseTree().root());
         }
     }
 
     private ScopeResolver scopeResolver() {
         if (smartScope) {
-            if (WstCommonComponent.existIn(build.baseDir().root())) {
+            if (WstCommonComponent.existIn(build.baseTree().root())) {
                 final WstCommonComponent wstCommonComponent = WstCommonComponent.of(build
-                        .baseDir().root());
+                        .baseTree().root());
                 return new ScopeResolverSmart(wstCommonComponent);
             }
             return new ScopeResolverSmart(null);

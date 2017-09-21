@@ -29,11 +29,11 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
     public void generateIml() {
         final List<File> depProjects = new LinkedList<>();
         for (final JkBuild depBuild : build.importedBuilds().directs()) {
-            depProjects.add(depBuild.baseDir().root());
+            depProjects.add(depBuild.baseTree().root());
         }
-        final ImlGenerator generator = new ImlGenerator(build.baseDir().root());
+        final ImlGenerator generator = new ImlGenerator(build.baseTree().root());
         generator.useVarPath = useVarPath;
-        generator.buildDefDependencyResolver = build.buildDefDependencyResolver();
+        generator.buildDefDependencyResolver = build.buildDependencyResolver();
         generator.buildDependencies = build.buildDependencies();
         generator.projectDependencies = depProjects;
         if (this.build instanceof JkBuildDependencySupport) {
@@ -58,15 +58,15 @@ public final class JkBuildPluginIdea extends JkJavaBuildPlugin {
     /** Generate modules.xml files */
     @JkDoc("Generates ./idea/modules.xml file")
     public void generateModulesXml() {
-        File current = build.baseDir().root();
-        Iterable<File> imls = build.baseDir().include("**/*.iml");
+        File current = build.baseTree().root();
+        Iterable<File> imls = build.baseTree().include("**/*.iml");
         ModulesXmlGenerator modulesXmlGenerator = new ModulesXmlGenerator(current, imls);
         modulesXmlGenerator.generate();
     }
 
     @JkDoc("Generates iml files on this folder and its descendant recursively.")
     public void generateAllIml() {
-        Iterable<File> folders = build.baseDir()
+        Iterable<File> folders = build.baseTree()
                 .include("**/" + JkConstants.BUILD_DEF_DIR)
                 .exclude("**/build/output/**")
                 .files(true);

@@ -112,35 +112,35 @@ public class JkJavaPacker implements Cloneable {
      */
     public File jarFile() {
         final String suffix = !JkUtilsString.isBlank(fatJarSuffix) ? "" :  "-original";
-        return build.ouputDir(baseName() + suffix + ".jar");
+        return build.ouputFile(baseName() + suffix + ".jar");
     }
 
     /**
      * The jar file that will be generated the jar for the specified classifier.
      */
     public File jarFile(String classifier) {
-        return build.ouputDir(baseName() + "-" + classifier + ".jar");
+        return build.ouputFile(baseName() + "-" + classifier + ".jar");
     }
 
     /**
      * The jar containing the source files.
      */
     public File jarSourceFile() {
-        return build.ouputDir(baseName() + "-sources.jar");
+        return build.ouputFile(baseName() + "-sources.jar");
     }
 
     /**
      * The jar containing the test classes.
      */
     public File jarTestFile() {
-        return build.ouputDir(baseName() + "-test.jar");
+        return build.ouputFile(baseName() + "-test.jar");
     }
 
     /**
      * The jar containing the test source files.
      */
     public File jarTestSourceFile() {
-        return build.ouputDir(baseName() + "-test-sources.jar");
+        return build.ouputFile(baseName() + "-test-sources.jar");
     }
 
     /**
@@ -148,14 +148,14 @@ public class JkJavaPacker implements Cloneable {
      */
     public File fatJarFile() {
         final String suffix = JkUtilsString.isBlank(fatJarSuffix) ? "" :  "-" + fatJarSuffix;
-        return build.ouputDir(baseName() + suffix + ".jar");
+        return build.ouputFile(baseName() + suffix + ".jar");
     }
 
     /**
      * The jar containing the javadoc
      */
     public File javadocFile() {
-        return build.ouputDir(baseName() + "-javadoc.jar");
+        return build.ouputFile(baseName() + "-javadoc.jar");
     }
 
     /**

@@ -3,6 +3,7 @@ package org.jerkar.tool.builtins.javabuild;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencies;
@@ -15,6 +16,7 @@ import org.jerkar.api.depmanagement.JkScopeMapping;
 import org.jerkar.api.depmanagement.JkVersionProvider;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
+import org.jerkar.api.file.JkPath;
 import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkUnit;
@@ -233,42 +235,42 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * Returns location of generated sources.
      */
     public File generatedSourceDir() {
-        return ouputDir("generated-sources/java");
+        return ouputFile("generated-sources/java");
     }
 
     /**
      * Returns location of generated resources.
      */
     public File generatedResourceDir() {
-        return ouputDir("generated-resources");
+        return ouputFile("generated-resources");
     }
 
     /**
      * Returns location of generated resources for tests.
      */
     public File generatedTestResourceDir() {
-        return ouputDir("generated-unitTest-resources");
+        return ouputFile("generated-unitTest-resources");
     }
 
     /**
      * Returns location where the java production classes are compiled.
      */
     public File classDir() {
-        return ouputDir().go("classes").createIfNotExist().root();
+        return ouputTree().go("classes").createIfNotExist().root();
     }
 
     /**
      * Returns location where the test reports are written.
      */
     public File testReportDir() {
-        return ouputDir("test-reports");
+        return ouputFile("test-reports");
     }
 
     /**
      * Returns location where the java production classes are compiled.
      */
     public File testClassDir() {
-        return ouputDir().go("test-classes").createIfNotExist().root();
+        return ouputTree().go("test-classes").createIfNotExist().root();
     }
 
     // --------------------------- Configurer -----------------------------
@@ -360,7 +362,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     // --------------------------- Callable Methods -----------------------
 
     @Override
-    protected JkScaffolder scaffolder() {
+    public JkScaffolder scaffolder() {
         final Runnable addFolder = () -> {
             for (final JkFileTree dir : editedSources().fileTrees()) {
                 dir.root().mkdirs();
@@ -372,8 +374,10 @@ public class JkJavaBuild extends JkBuildDependencySupport {
                 dir.root().mkdirs();
             }
         };
-        return super.scaffolder().buildClassWriter(scaffoldedBuildClassCode()).extraAction(addFolder);
-
+        scaffoldedBuildClassCode();
+        super.scaffolder().buildClassWriter(scaffoldedBuildClassCode());
+        super.scaffolder().extraActions.chain(addFolder);
+        return super.scaffolder();
     }
 
     /**
@@ -385,12 +389,12 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     }
 
 
-    private Object scaffoldedBuildClassCode() {
+    private Supplier<String> scaffoldedBuildClassCode() {
         final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
-        if (baseDir().file("pom.xml").exists() && JkMvn.INSTALLED) {
+        if (baseTree().file("pom.xml").exists() && JkMvn.INSTALLED) {
             JkLog.info("pom.xml detected and Maven installed : try to generate build class to existing pom.");
             try {
-                return JkMvn.of(baseDir().root()).createBuildClassCode(null, "Build", baseDir());
+                return () -> JkMvn.of(baseTree().root()).createBuildClassCode(null, "Build", baseTree());
             } catch (final RuntimeException e) {
                 e.printStackTrace();
                 JkLog.info("Maven migration failed. Just generate standard build class.");
@@ -631,6 +635,16 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     }
 
     /**
+     * Returns the specified relative path to this project as a {@link JkPath} instance.
+     */
+    protected final JkPath toPath(String pathAsString) {
+        if (pathAsString == null) {
+            return JkPath.of();
+        }
+        return JkPath.of(baseTree().root(), pathAsString);
+    }
+
+    /**
      * Returns the manifest that will be inserted in generated jars. Override it
      * if you want to add extra infoString.
      */
@@ -811,8 +825,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
             name = name + "-" + javaBuild.effectiveVersion().name();
         }
         name = name + "-javadoc";
-        return JkJavadocMaker.of(javaBuild.sources(), javaBuild.ouputDir(name),
-                javaBuild.ouputDir(name + ".jar")).withClasspath(
+        return JkJavadocMaker.of(javaBuild.sources(), javaBuild.ouputFile(name),
+                javaBuild.ouputFile(name + ".jar")).withClasspath(
                         javaBuild.depsFor(JkJavaBuild.COMPILE, JkJavaBuild.PROVIDED));
     }
 

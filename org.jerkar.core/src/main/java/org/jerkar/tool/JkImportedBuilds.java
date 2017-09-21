@@ -1,7 +1,5 @@
 package org.jerkar.tool;
 
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkScopedDependency;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
 
@@ -41,14 +39,7 @@ public final class JkImportedBuilds {
                 this.directImports, slaves));
     }
 
-    /**
-     * Returns a {@link JkImportedBuilds} identical to this one but augmented with
-     * the {@link JkBuildDependency} contained in the the specified dependencies.
-     */
-    public JkImportedBuilds and(JkDependencies dependencies) {
-        final List<JkBuild> list = projectBuildDependencies(dependencies);
-        return this.and(list);
-    }
+
 
     /**
      * Returns only the direct slave of this master build.
@@ -86,7 +77,7 @@ public final class JkImportedBuilds {
     private List<JkBuild> resolveTransitiveBuilds(Set<File> files) {
         final List<JkBuild> result = new LinkedList<>();
         for (final JkBuild build : directImports) {
-            final File dir = JkUtilsFile.canonicalFile(build.baseDir().root());
+            final File dir = JkUtilsFile.canonicalFile(build.baseTree().root());
             if (!files.contains(dir)) {
                 result.addAll(build.importedBuilds().resolveTransitiveBuilds(files));
                 result.add(build);
@@ -95,19 +86,5 @@ public final class JkImportedBuilds {
         }
         return result;
     }
-
-    private static List<JkBuild> projectBuildDependencies(JkDependencies dependencies) {
-        final List<JkBuild> result = new LinkedList<>();
-        for (final JkScopedDependency scopedDependency : dependencies) {
-            if (scopedDependency.dependency() instanceof JkBuildDependency) {
-                final JkBuildDependency projectDependency = (JkBuildDependency) scopedDependency
-                        .dependency();
-                result.add(projectDependency.projectBuild());
-            }
-        }
-        return result;
-    }
-
-
 
 }

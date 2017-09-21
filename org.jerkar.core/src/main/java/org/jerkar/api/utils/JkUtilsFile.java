@@ -423,6 +423,9 @@ public final class JkUtilsFile {
         if (!dir.exists()) {
             return 0;
         }
+        if (dir.listFiles() == null) {
+            return 0;
+        }
         for (final File file : dir.listFiles()) {
             if (file.isFile() && !fileFilter.accept(file)) {
                 continue;

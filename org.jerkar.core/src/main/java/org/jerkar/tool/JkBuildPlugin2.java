@@ -13,6 +13,9 @@ public abstract class JkBuildPlugin2<T extends JkBuild> {
         return build;
     }
 
+    /**
+     * Modify the enclosed build instance ( {@link #build()}) in accordance of what this plugin is supposed to do.
+     */
     protected abstract void apply();
 
 }
