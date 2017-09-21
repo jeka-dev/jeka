@@ -6,7 +6,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -120,7 +119,6 @@ public class JkBuild {
     protected void setPlugins(Iterable<?> plugins) {
         // Do nothing as no plugin extension as been defined at this level.
     }
-
 
     /**
      * Returns the time the build was started.
@@ -333,7 +331,7 @@ public class JkBuild {
     }
 
     /**
-     * Returns imported builds.
+     * Returns imported builds with plugins applied on.
      */
     public final JkImportedBuilds importedBuilds() {
         final List<JkBuild> importedBuilds = JkBuildPlugin.applyPluginsToImportedBuilds(this.plugins.getActives(),
@@ -344,7 +342,7 @@ public class JkBuild {
     /**
      * Returns the imported build declared with annotation <code>JkImportBuild</code> in this build.
      */
-    protected final JkImportedBuilds annotatedJkProjectSlaves() {
+    protected final JkImportedBuilds annotatedJkImportedBuilds() {
         return this.annotatedJkImportBuild;
     }
 
@@ -361,10 +359,17 @@ public class JkBuild {
             try {
                 JkUtilsReflect.setFieldValue(this, field, subBuild);
             } catch (RuntimeException e) {
+                final File currentClassFile = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
+                File currentClassBaseDir = currentClassFile;
+                while (!new File(currentClassBaseDir, "build/def").exists() && currentClassBaseDir != null) {
+                    currentClassBaseDir = currentClassBaseDir.getParentFile();
+                }
                 throw new IllegalStateException("Can't inject slave build instance of type " + subBuild.getClass().getSimpleName()
                         + " into field " + field.getDeclaringClass().getName()
                         + "#" + field.getName() + " from directory " + this.baseDir().root()
-                        + ".\nPlease make sure current working dir (" + JkUtilsFile.workingDir() + ") is the root of this project.", e);
+                        + "\nBuild class is located in " + currentClassBaseDir.getAbsolutePath()
+                        + " while working dir is " + JkUtilsFile.workingDir()
+                        + ".\nPlease set working dir to " + currentClassBaseDir.getPath(), e);
             }
             result.add(subBuild);
         }
@@ -376,7 +381,7 @@ public class JkBuild {
      */
     public String infoString() {
         return "base directory : " + this.baseDir() + "\n"
-                + "slave builds : " + this.annotatedJkProjectSlaves().directs();
+                + "slave builds : " + this.annotatedJkImportedBuilds().directs();
     }
 
     /**

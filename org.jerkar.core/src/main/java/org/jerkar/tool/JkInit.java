@@ -87,7 +87,9 @@ public final class JkInit {
         JkLog.info("Build class " + build.getClass().getName());
         JkLog.info("Activated plugins : " + build.plugins.getActives());
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
-        JkInit.logProps("Field values", displayedOptions);
+        if (JkLog.verbose()) {
+            JkInit.logProps("Field values", displayedOptions);
+        }
         return build;
     }
 
@@ -193,18 +195,18 @@ public final class JkInit {
         // setup plugins activated in command line
         final Class<JkBuildPlugin> baseClass = JkClassLoader.of(build.getClass()).load(JkBuildPlugin.class.getName());
         final PluginDictionnary<JkBuildPlugin> dictionnary = PluginDictionnary.of(baseClass);
-        final List<JkBuild> slaveBuilds = build.importedBuilds().all();
-        if (!slaveBuilds.isEmpty()) {
-            JkLog.startHeaded("Configure slave projects");
-            for (final JkBuild subBuild : slaveBuilds) {
-                JkLog.startln("Configure project " + build.baseDir().relativePath(subBuild.baseDir().root()));
-                configureProject(subBuild, commandLine.getSubProjectPluginSetups(),
+        final List<JkBuild> importedBuilds = build.importedBuilds().all();
+        if (!importedBuilds.isEmpty()) {
+            JkLog.startHeaded("Configure imported builds");
+            for (final JkBuild subBuild : importedBuilds) {
+                JkLog.startln("Configure build " + build.baseDir().relativePath(subBuild.baseDir().root()));
+                configureBuild(subBuild, commandLine.getSubProjectPluginSetups(),
                         commandLine.getSubProjectBuildOptions(), dictionnary);
                 JkLog.done();
             }
             JkLog.done();
         }
-        configureProject(build, commandLine.getMasterPluginSetups(), commandLine.getMasterBuildOptions(), dictionnary);
+        configureBuild(build, commandLine.getMasterPluginSetups(), commandLine.getMasterBuildOptions(), dictionnary);
         return dictionnary;
 
     }
@@ -222,8 +224,8 @@ public final class JkInit {
         return result;
     }
 
-    private static void configureProject(JkBuild build, Collection<JkPluginSetup> pluginSetups,
-            Map<String, String> commandlineOptions, PluginDictionnary<JkBuildPlugin> dictionnary) {
+    private static void configureBuild(JkBuild build, Collection<JkPluginSetup> pluginSetups,
+                                       Map<String, String> commandlineOptions, PluginDictionnary<JkBuildPlugin> dictionnary) {
         JkOptions.populateFields(build);
         final File localProps = build.file(JkConstants.BUILD_DEF_DIR + "/build.properties");
         if (localProps.exists()) {

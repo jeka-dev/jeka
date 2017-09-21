@@ -1,6 +1,8 @@
 package org.jerkar.tool.builtins.javabuild;
 
 import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.tool.JkBuild;
 
 import java.io.File;
@@ -28,5 +30,18 @@ public class JkJavaProjectBuild extends JkBuild {
 
     public void produceAll() {
         this.project().makeAllArtifactFiles();
+    }
+
+    @Override
+    public void clean() {
+        super.clean();
+        File projectOutDir = this.project().getOutLayout().outputDir();
+        if (!JkUtilsFile.isSame(ouputDir().root(), projectOutDir)) {
+            JkLog.start("Cleaning output directory " + projectOutDir);
+            project().maker().clean();
+            JkLog.done();
+        }
+
+
     }
 }

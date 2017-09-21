@@ -10,16 +10,10 @@
       <excludeFolder url="file://$MODULE_DIR$/build/output" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library" exported="" scope="TEST">
-      <library>
-        <CLASSES>
-          <root url="jar://$JERKAR_HOME$/org.jerkar.core-all.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
     <orderEntry type="module" module-name="org.jerkar.samples" />
     <orderEntry type="inheritedJdk" />
+    <orderEntry type="module" module-name="org.jerkar.core" />
+    <orderEntry type="module" module-name="org.jerkar.plugins-jacoco" />
+    <orderEntry type="module" module-name="org.jerkar.plugins-sonar" />
   </component>
 </module>

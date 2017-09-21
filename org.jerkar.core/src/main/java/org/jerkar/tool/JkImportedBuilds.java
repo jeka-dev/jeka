@@ -1,18 +1,12 @@
 package org.jerkar.tool;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkScopedDependency;
-import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
+
+import java.io.File;
+import java.util.*;
 
 /**
  * Defines importedBuilds of a given master build.
@@ -22,7 +16,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 public final class JkImportedBuilds {
 
     static JkImportedBuilds of(File masterRootDir, List<JkBuild> builds) {
-        return new JkImportedBuilds(masterRootDir, new ArrayList<JkBuild>(builds));
+        return new JkImportedBuilds(masterRootDir, new ArrayList<>(builds));
     }
 
     private final List<JkBuild> directImports;
@@ -71,42 +65,30 @@ public final class JkImportedBuilds {
      */
     public List<JkBuild> all() {
         if (transitiveImports == null) {
-            transitiveImports = resolveTransitiveBuilds(new HashSet<File>());
+            transitiveImports = resolveTransitiveBuilds(new HashSet<>());
         }
         return transitiveImports;
     }
 
     /**
-     * Execute the <code>doDefault</code> on all importedBuilds.
+     * Same as {@link #all()} but only returns builds instance of the specified class or its subclasses.
      */
-    public void invokeDoDefaultMethodOnAll() {
-        this.invokeOnAll(JkConstants.DEFAULT_METHOD);
-    }
-
-    /**
-     * Executes the specified methods on all importedBuilds.
-     */
-    public void invokeOnAll(String... methods) {
-        this.executeOnAll(JkModelMethod.normals(methods));
-    }
-
-    private void executeOnAll(Iterable<JkModelMethod> methods) {
-        JkLog.startln("Invoke " + methods + " on all dependents projects");
-        for (final JkBuild build : all()) {
-            build.execute(methods, this.masterBuildRoot);
+    public <T extends JkBuild> List<T> allOf(Class<T> ofClass) {
+        List<T> result = new LinkedList<>();
+        for (JkBuild build : all()) {
+            if (ofClass.isAssignableFrom(build.getClass())) {
+                result.add((T) build);
+            }
         }
-        JkLog.done("invoking " + methods + " on all dependents projects");
+        return result;
     }
 
     private List<JkBuild> resolveTransitiveBuilds(Set<File> files) {
-        final List<JkBuild> result = new LinkedList<JkBuild>();
+        final List<JkBuild> result = new LinkedList<>();
         for (final JkBuild build : directImports) {
             final File dir = JkUtilsFile.canonicalFile(build.baseDir().root());
             if (!files.contains(dir)) {
-                if (build instanceof JkBuildDependencySupport) {
-                    final JkBuildDependencySupport buildDependencySupport = (JkBuildDependencySupport) build;
-                    result.addAll(buildDependencySupport.importedBuilds().resolveTransitiveBuilds(files));
-                }
+                result.addAll(build.importedBuilds().resolveTransitiveBuilds(files));
                 result.add(build);
                 files.add(dir);
             }
@@ -115,7 +97,7 @@ public final class JkImportedBuilds {
     }
 
     private static List<JkBuild> projectBuildDependencies(JkDependencies dependencies) {
-        final List<JkBuild> result = new LinkedList<JkBuild>();
+        final List<JkBuild> result = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : dependencies) {
             if (scopedDependency.dependency() instanceof JkBuildDependency) {
                 final JkBuildDependency projectDependency = (JkBuildDependency) scopedDependency

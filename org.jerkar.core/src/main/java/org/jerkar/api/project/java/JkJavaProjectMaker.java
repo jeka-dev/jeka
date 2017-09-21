@@ -77,9 +77,6 @@ public class JkJavaProjectMaker {
     }
 
     public void generateJavadoc() {
-        if (!status.compileDone) {
-            compile();
-        }
         JkJavadocMaker.of(project.getSourceLayout().sources(), project.getOutLayout().getJavadocDir())
                 .withClasspath(depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
                 .andOptions(this.javadocOptions).process();
@@ -227,7 +224,7 @@ public class JkJavaProjectMaker {
     public File makeArtifactFile(JkArtifactFileId artifactFileId) {
         if (artifactProducers.containsKey(artifactFileId)) {
             JkLog.startln("Producing artifact file " + getArtifactFile(artifactFileId).getName());
-            artifactProducers.get(artifactFileId).run();
+            this.artifactProducers.get(artifactFileId).run();
             JkLog.done();
             return getArtifactFile(artifactFileId);
         } else {
@@ -292,9 +289,9 @@ public class JkJavaProjectMaker {
     }
 
     public File makeSourceJar() {
-        if (!status.compileDone) {
+        if (!status.sourceGenerated) {
             this.sourceGenerator.run();
-            status.compileDone = true;
+            status.sourceGenerated = true;
         }
         return packager.sourceJar();
     }
@@ -386,12 +383,14 @@ public class JkJavaProjectMaker {
     }
 
     private static class Status {
+        private boolean sourceGenerated = false;
         private boolean compileDone = false;
         private boolean unitTestDone = false;
         private boolean packagingDone = false;
         private boolean javadocGenerated = false;
 
         void reset() {
+            sourceGenerated = false;
             compileDone = false;
             unitTestDone = false;
             packagingDone = false;
