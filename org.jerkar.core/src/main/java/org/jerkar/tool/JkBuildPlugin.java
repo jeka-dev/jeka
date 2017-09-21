@@ -2,9 +2,7 @@ package org.jerkar.tool;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**

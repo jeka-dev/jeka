@@ -11,10 +11,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
-import org.jerkar.tool.JkBuildDependencySupport;
-import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkImportBuild;
-import org.jerkar.tool.JkInit;
+import org.jerkar.tool.*;
 
 class DistribAllBuild extends JkBuildDependencySupport {
 
@@ -73,7 +70,7 @@ class DistribAllBuild extends JkBuildDependencySupport {
     public void doDefault() {
         super.doDefault();
         pluginsJacoco.core.pack.javadoc = false;
-        importedBuilds().all().forEach((build) -> build.doDefault());
+        importedBuilds().all().forEach(JkBuild::doDefault);
         distrib();
         if (testSamples) {
             testSamples();

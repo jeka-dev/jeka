@@ -36,7 +36,7 @@ public class JkScopedDependencyTest {
         assertTrue(scopedDep.isInvolvedIn(aScope));
         assertTrue(scopedDep.isInvolvedIn(TEST));
 
-        final Set<JkScope> sampleSet = new HashSet<JkScope>();
+        final Set<JkScope> sampleSet = new HashSet<>();
         sampleSet.add(PROVIDED);
         assertEquals(sampleSet, scopedDep.scopeMapping().mappedScopes(RUNTIME));
 

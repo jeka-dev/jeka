@@ -8,9 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.jerkar.tool.builtins.javabuild.JkJavaBuild.*;
-import static org.jerkar.tool.builtins.javabuild.JkJavaBuild.COMPILE;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**

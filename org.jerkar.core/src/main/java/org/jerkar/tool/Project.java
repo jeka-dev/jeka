@@ -36,7 +36,7 @@ final class Project {
 
     private JkRepos buildRepos;
 
-    private List<File> rootsOfImportedBuilds = new LinkedList<File>();
+    private List<File> rootsOfImportedBuilds = new LinkedList<>();
 
     private final BuildResolver resolver;
 
@@ -63,8 +63,8 @@ final class Project {
 
     // Compiles and returns the runtime classpath
     private JkPath compile() {
-        final LinkedHashSet<File> entries = new LinkedHashSet<File>();
-        compile(new HashSet<File>(), entries);
+        final LinkedHashSet<File> entries = new LinkedHashSet<>();
+        compile(new HashSet<>(), entries);
         return JkPath.of(entries).withoutDuplicates();
     }
 
@@ -187,7 +187,7 @@ final class Project {
     }
 
     private JkPath localBuildPath() {
-        final List<File> extraLibs = new LinkedList<File>();
+        final List<File> extraLibs = new LinkedList<>();
         final File localDeflibDir = new File(this.projectBaseDir, JkConstants.BUILD_BOOT);
         if (localDeflibDir.exists()) {
             extraLibs.addAll(JkFileTree.of(localDeflibDir).include("**/*.jar").files(false));
@@ -196,7 +196,7 @@ final class Project {
     }
 
     private static JkPath jerkarLibs() {
-        final List<File> extraLibs = new LinkedList<File>();
+        final List<File> extraLibs = new LinkedList<>();
         extraLibs.add(JkLocator.jerkarJarFile());
         return JkPath.of(extraLibs).withoutDuplicates();
     }
@@ -246,7 +246,7 @@ final class Project {
 
     private static List<JkModelMethod> toBuildMethods(Iterable<MethodInvocation> invocations,
             PluginDictionnary<JkBuildPlugin> dictionnary) {
-        final List<JkModelMethod> jkModelMethods = new LinkedList<JkModelMethod>();
+        final List<JkModelMethod> jkModelMethods = new LinkedList<>();
         for (final MethodInvocation methodInvokation : invocations) {
             if (methodInvokation.isMethodPlugin()) {
                 final Class<? extends JkBuildPlugin> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName)
@@ -288,7 +288,7 @@ final class Project {
     }
 
     private static List<String> toRelativePaths(File from, List<File> files) {
-        List<String> result = new LinkedList<String>();
+        List<String> result = new LinkedList<>();
         for (File file : files) {
             String relPath = JkUtilsFile.getRelativePath(from, file);
             result.add(relPath);

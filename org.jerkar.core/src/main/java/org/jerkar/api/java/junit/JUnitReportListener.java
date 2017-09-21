@@ -88,7 +88,7 @@ class JUnitReportListener extends RunListener {
         this.properties = new Properties();
         this.properties.putAll(System.getProperties());
         this.suiteTimeNano = System.nanoTime();
-        this.cases = new LinkedList<JkTestSuiteResult.TestCaseResult>();
+        this.cases = new LinkedList<>();
         this.ignoreCount = 0;
     }
 

@@ -83,11 +83,8 @@ public final class JkVersionRange implements Serializable {
         if (definition.startsWith("latest.")) {
             return true;
         }
-        if (JkUtilsString.startsWithAny(definition, "[", "]", "(")
-                && JkUtilsString.endsWithAny(definition, ")", "]", "[")) {
-            return true;
-        }
-        return false;
+        return JkUtilsString.startsWithAny(definition, "[", "]", "(")
+                && JkUtilsString.endsWithAny(definition, ")", "]", "[");
     }
 
     @Override

@@ -93,7 +93,7 @@ public final class JkResolveResult implements Serializable {
     public List<File> filesOf(JkModuleId moduleId) {
         final JkDependencyNode dependencyNode = this.depTree.find(moduleId);
         if (dependencyNode == null) {
-            return new LinkedList<File>();
+            return new LinkedList<>();
         }
         return dependencyNode.moduleInfo().files();
     }
@@ -148,7 +148,7 @@ public final class JkResolveResult implements Serializable {
         private final boolean hasErrors;
 
         static JkErrorReport allFine() {
-            return new JkErrorReport(JkUtilsIterable.<JkModuleDepProblem>listOf(), false);
+            return new JkErrorReport(JkUtilsIterable.listOf(), false);
         }
 
         static JkErrorReport failure(List<JkModuleDepProblem> missingArtifacts) {
@@ -177,7 +177,7 @@ public final class JkResolveResult implements Serializable {
         public String toString() {
             final StringBuilder sb = new StringBuilder();
             if (!moduleProblems.isEmpty()) {
-                sb.append("Errors with dependencies : " + moduleProblems);
+                sb.append("Errors with dependencies : ").append(moduleProblems);
             }
             return sb.toString();
         }

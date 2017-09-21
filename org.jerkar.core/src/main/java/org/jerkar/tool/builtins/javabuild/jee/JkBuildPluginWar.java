@@ -54,16 +54,12 @@ public class JkBuildPluginWar extends JkJavaBuildPlugin {
         final JkJavaPacker.Builder builder = packer.builder().doJar(regularJar).doTest(testJar)
                 .doFatJar(false);
         if (webappSrcFile().exists()) {
-            builder.extraAction(new JkExtraPacking() {
-
-                @Override
-                public void process(JkJavaBuild build) {
-                    JkLog.startln("Creating war file");
-                    final File dir = build.ouputDir(packer.baseName() + "-war");
-                    JeePacker.of(build).war(webappSrcFile(), dir, importedStaticResources);
-                    JkFileTree.of(dir).zip().to(warFile());
-                    JkLog.done();
-                }
+            builder.extraAction(build -> {
+                JkLog.startln("Creating war file");
+                final File dir = build.ouputDir(packer.baseName() + "-war");
+                JeePacker.of(build).war(webappSrcFile(), dir, importedStaticResources);
+                JkFileTree.of(dir).zip().to(warFile());
+                JkLog.done();
             });
         } else {
             JkLog.warn("No webapp source found at " + webappSrcFile().getPath());

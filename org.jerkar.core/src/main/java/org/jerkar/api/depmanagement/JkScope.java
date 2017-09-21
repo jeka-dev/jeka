@@ -34,7 +34,7 @@ public final class JkScope implements Serializable {
      * Creates a new {@link JkScope} passing its name.
      */
     public static JkScope of(String name) {
-        return new JkScope(name, new HashSet<JkScope>(), "", true);
+        return new JkScope(name, new HashSet<>(), "", true);
     }
 
     /**
@@ -100,7 +100,7 @@ public final class JkScope implements Serializable {
      * and so on.
      */
     public List<JkScope> ancestorScopes() {
-        final List<JkScope> list = new LinkedList<JkScope>();
+        final List<JkScope> list = new LinkedList<>();
         list.add(this);
         for (final JkScope scope : this.extendedScopes) {
             for (final JkScope jkScope : scope.ancestorScopes()) {
@@ -119,7 +119,7 @@ public final class JkScope implements Serializable {
         if (scopes.contains(this)) {
             return JkUtilsIterable.listOf(this);
         }
-        final List<JkScope> result = new LinkedList<JkScope>();
+        final List<JkScope> result = new LinkedList<>();
         for (final JkScope scope : this.extendedScopes) {
             if (scopes.contains(scope)) {
                 result.add(scope);
@@ -235,7 +235,7 @@ public final class JkScope implements Serializable {
      */
     public static class JkScopeBuilder {
 
-        private Set<JkScope> extendedScopes = new HashSet<JkScope>();
+        private Set<JkScope> extendedScopes = new HashSet<>();
 
         private final String name;
 
@@ -245,14 +245,14 @@ public final class JkScope implements Serializable {
 
         private JkScopeBuilder(String name) {
             this.name = name;
-            this.extendedScopes = new HashSet<JkScope>();
+            this.extendedScopes = new HashSet<>();
         }
 
         /**
          * Returns a {@link JkScopeBuilder} identical to this one but extending the specified scopes.
          */
         public JkScopeBuilder extending(JkScope... scopes) {
-            this.extendedScopes = new HashSet<JkScope>(Arrays.asList(scopes));
+            this.extendedScopes = new HashSet<>(Arrays.asList(scopes));
             return this;
         }
 
@@ -276,7 +276,7 @@ public final class JkScope implements Serializable {
          * Returns a {@link JkScope} built on this builder attribute.
          */
         public JkScope build() {
-            return new JkScope(name, new HashSet<JkScope>(extendedScopes), description, transitive);
+            return new JkScope(name, new HashSet<>(extendedScopes), description, transitive);
         }
 
 

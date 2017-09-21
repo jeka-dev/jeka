@@ -27,7 +27,7 @@ public final class JkScaffolder {
         super();
         this.build = build;
         this.mainBuildclassWriter = basicScaffoldedBuildClassCode();
-        this.extraActions = new LinkedList<Runnable>();
+        this.extraActions = new LinkedList<>();
         this.embed = build.scaffoldEmbed;
     }
 

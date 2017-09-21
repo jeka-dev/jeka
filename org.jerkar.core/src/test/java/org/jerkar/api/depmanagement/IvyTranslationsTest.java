@@ -1,10 +1,8 @@
 package org.jerkar.api.depmanagement;
 
-import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyArtifactDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
-import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Test;
@@ -18,7 +16,7 @@ import static org.junit.Assert.*;
  */
 public class IvyTranslationsTest {
 
-    private static final  JkVersionedModule OWNER = JkVersionedModule.of("ownerGroup:ownerName:ownerVersion");;
+    private static final  JkVersionedModule OWNER = JkVersionedModule.of("ownerGroup:ownerName:ownerVersion");
 
     @Test
     public void toPublicationLessModule() throws Exception {
@@ -48,8 +46,7 @@ public class IvyTranslationsTest {
     }
 
     private DependencyArtifactDescriptor findArtifactIn(DependencyArtifactDescriptor[] artifactDescs, String classsifier) {
-        for (int i = 0; i < artifactDescs.length; i++) {
-            DependencyArtifactDescriptor item = artifactDescs[i];
+        for (DependencyArtifactDescriptor item : artifactDescs) {
             if (JkUtilsObject.equals(item.getAttribute("classifier"), classsifier)) {
                 return item;
             }

@@ -200,7 +200,7 @@ public final class JkFileTree implements Iterable<File> {
      * relative to its asScopedDependency.
      */
     public List<String> relativePathes() {
-        final List<String> pathes = new LinkedList<String>();
+        final List<String> pathes = new LinkedList<>();
         for (final File file : this) {
             pathes.add(JkUtilsFile.getRelativePath(this.root, file));
         }
@@ -304,7 +304,7 @@ public final class JkFileTree implements Iterable<File> {
      */
     public List<File> files(boolean includeFolders) {
         if (!root.exists()) {
-            return new LinkedList<File>();
+            return new LinkedList<>();
         }
         return JkUtilsFile.filesOf(root, filter.toFileFilter(root), includeFolders);
     }

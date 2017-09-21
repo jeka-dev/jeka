@@ -2,15 +2,11 @@ package org.jerkar.api.project.java;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkPopularModules;
-import org.jerkar.api.ide.eclipse.JkEclipseClasspathGenerator;
-import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import java.awt.*;
 import java.io.File;
 
 
@@ -50,7 +46,9 @@ public class JkJavaProjectTest {
 
         try {
             JkUtilsFile.deleteDir(top);
-        } catch (RuntimeException e) {};
+        } catch (RuntimeException e) {
+            // do nothing
+        }
     }
 
     private static File unzipToDir(String zipName) {

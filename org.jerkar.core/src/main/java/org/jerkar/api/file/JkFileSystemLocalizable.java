@@ -1,6 +1,5 @@
 package org.jerkar.api.file;
 
-import javax.xml.ws.Provider;
 import java.io.File;
 
 /**

@@ -87,7 +87,7 @@ public final class JkJavaProcess {
             throw new IllegalArgumentException("agentLib " + agentLib.getAbsolutePath()
             + " is a directory, should be a file.");
         }
-        final List<AgentLibAndOption> list = new ArrayList<JkJavaProcess.AgentLibAndOption>(
+        final List<AgentLibAndOption> list = new ArrayList<>(
                 this.agents);
         list.add(new AgentLibAndOption(agentLib.getAbsolutePath(), agentOption));
         return new JkJavaProcess(this.javaDir, this.sytemProperties, this.classpath, list,
@@ -107,7 +107,7 @@ public final class JkJavaProcess {
      * specified java options.
      */
     public JkJavaProcess andOptions(Collection<String> options) {
-        final List<String> list = new ArrayList<String>(this.options);
+        final List<String> list = new ArrayList<>(this.options);
         list.addAll(options);
         return new JkJavaProcess(this.javaDir, this.sytemProperties, this.classpath, this.agents,
                 list, this.workingDir, this.environment);
@@ -232,7 +232,7 @@ public final class JkJavaProcess {
     private void runClassOrJarSync(String mainClassName, File jar, String... arguments) {
         JkUtilsAssert.isTrue(jar != null || mainClassName != null,
                 "main class name and jar can't be both null while launching a Java process, please set at least one of them.");
-        final List<String> command = new LinkedList<String>();
+        final List<String> command = new LinkedList<>();
         final OptionAndEnv optionAndEnv = optionsAndEnv();
         command.add(runningJavaCommand());
         command.addAll(optionAndEnv.options);
@@ -276,8 +276,8 @@ public final class JkJavaProcess {
     }
 
     private OptionAndEnv optionsAndEnv() {
-        final List<String> options = new LinkedList<String>();
-        final Map<String, String> env = new HashMap<String, String>();
+        final List<String> options = new LinkedList<>();
+        final Map<String, String> env = new HashMap<>();
         if (classpath != null && !classpath.isEmpty()) {
             final String classpathString = classpath.toString();
             if (JkUtilsSystem.IS_WINDOWS && classpathString.length() > 7500) {
@@ -292,7 +292,7 @@ public final class JkJavaProcess {
             final StringBuilder builder = new StringBuilder("-javaagent:")
                     .append(agentLibAndOption.lib);
             if (!JkUtilsString.isBlank(agentLibAndOption.options)) {
-                builder.append("=" + agentLibAndOption.options);
+                builder.append("=").append(agentLibAndOption.options);
             }
             options.add(builder.toString());
         }
@@ -300,9 +300,7 @@ public final class JkJavaProcess {
             final String value = this.sytemProperties.get(key);
             options.add("-D" + key + "=" + value);
         }
-        for (final String option : this.options) {
-            options.add(option);
-        }
+        options.addAll(this.options);
         return new OptionAndEnv(options, env);
     }
 

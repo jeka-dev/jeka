@@ -59,7 +59,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      */
     @SuppressWarnings("unchecked")
     public static JkDependencies of(JkScope scope, JkDependency... dependencies) {
-        final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();
+        final List<JkScopedDependency> list = new LinkedList<>();
         for (final JkDependency dependency : dependencies) {
             final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scope);
             list.add(scopedDependency);
@@ -79,7 +79,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      */
     @SuppressWarnings("unchecked")
     public static JkDependencies of(Iterable<? extends JkDependency> dependencies, JkScope ...scopes) {
-        final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();
+        final List<JkScopedDependency> list = new LinkedList<>();
         for (final JkDependency dependency : dependencies) {
             final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, scopes);
             list.add(scopedDependency);
@@ -136,7 +136,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * scope.
      */
     private JkDependencies without(JkModuleId jkModuleId) {
-        final List<JkScopedDependency> result = new LinkedList<JkScopedDependency>(dependencies);
+        final List<JkScopedDependency> result = new LinkedList<>(dependencies);
         for (final Iterator<JkScopedDependency> it = result.iterator(); it.hasNext();) {
             final JkDependency dependency = it.next().dependency();
             if (dependency instanceof JkModuleDependency) {
@@ -154,7 +154,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * dependencies with the specified ones.
      */
     public JkDependencies withDefaultScope(JkScope... scopes) {
-        final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();
+        final List<JkScopedDependency> list = new LinkedList<>();
         for (JkScopedDependency dep : this) {
             if (dep.scopeType().equals(ScopeType.UNSET)) {
                 dep = dep.withScopes(scopes);
@@ -169,7 +169,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * dependencies with the specified scope mapping.
      */
     public JkDependencies withDefaultScope(JkScopeMapping scopeMapping) {
-        final List<JkScopedDependency> list = new LinkedList<JkScopedDependency>();
+        final List<JkScopedDependency> list = new LinkedList<>();
         for (JkScopedDependency dep : this) {
             if (dep.scopeType().equals(ScopeType.UNSET)) {
                 if (dep.dependency() instanceof JkModuleDependency) {
@@ -299,7 +299,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * {@link JkScope}.
      */
     public Set<JkDependency> dependenciesDeclaredWith(JkScope scope) {
-        final Set<JkDependency> dependencies = new HashSet<JkDependency>();
+        final Set<JkDependency> dependencies = new HashSet<>();
         for (final JkScopedDependency scopedDependency : this) {
 
             if (scopedDependency.scopeType().equals(ScopeType.SIMPLE)
@@ -336,7 +336,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * Returns the set of scopes involved in these dependencies.
      */
     public Set<JkScope> declaredScopes() {
-        final Set<JkScope> result = new HashSet<JkScope>();
+        final Set<JkScope> result = new HashSet<>();
         for (final JkScopedDependency dep : this.dependencies) {
             if (dep.scopeType() == ScopeType.MAPPED) {
                 result.addAll(dep.scopeMapping().entries());
@@ -402,7 +402,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * dependencies declared in this object.
      */
     public JkDependencies onlyModules() {
-        final List<JkScopedDependency> deps = new LinkedList<JkScopedDependency>();
+        final List<JkScopedDependency> deps = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : this) {
             if (scopedDependency.dependency() instanceof JkModuleDependency) {
                 deps.add(scopedDependency);
@@ -452,7 +452,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      */
     public JkDependencies resolvedWith(JkVersionProvider provider) {
 
-        final List<JkScopedDependency> result  = new LinkedList<JkScopedDependency>();
+        final List<JkScopedDependency> result  = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : this) {
             if (! (scopedDependency.dependency() instanceof JkModuleDependency)) {
                 result.add(scopedDependency);
@@ -467,9 +467,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
                 if (resolvedVersion != null) {
                     final JkModuleDependency resolvedModule = moduleDependency
                             .resolvedTo(resolvedVersion);
-                    final JkScopedDependency resolvedScopedDep = scopedDependency
+                    toAdd = scopedDependency
                             .dependency(resolvedModule);
-                    toAdd = resolvedScopedDep;
                 } else {
                     toAdd = scopedDependency;
                 }
@@ -483,13 +482,10 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
     /**
      * Create a <code>JkDependencies</code> identical to this one but adding
-     * exclusion clause
-     *
-     * @param exclusions
-     * @return
+     * exclusion clause.
      */
     public JkDependencies withExclusions(JkDependencyExclusions exclusions) {
-        final List<JkScopedDependency> dependencies = new LinkedList<JkScopedDependency>();
+        final List<JkScopedDependency> dependencies = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : this.dependencies) {
             if (scopedDependency.dependency() instanceof JkModuleDependency) {
                 final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
@@ -514,7 +510,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * specified scopes.
      */
     public JkPath localFileDependencies(JkScope... scopes) {
-        final LinkedHashSet<File> set = new LinkedHashSet<File>();
+        final LinkedHashSet<File> set = new LinkedHashSet<>();
         for (final JkScopedDependency scopedDependency : this.dependencies) {
             if (!(scopedDependency.dependency() instanceof JkFileDependency)) {
                 continue;
@@ -533,7 +529,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * system dependencies.
      */
     public JkPath fileSystemDepsOnly(JkScope... scopes) {
-        final LinkedHashSet<File> set = new LinkedHashSet<File>();
+        final LinkedHashSet<File> set = new LinkedHashSet<>();
         for (final JkScopedDependency scopedDependency : this.dependencies) {
             if (!(scopedDependency.dependency() instanceof JkFileSystemDependency)) {
                 continue;
@@ -551,7 +547,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * Creates a Builder for {@link JkDependencies}
      */
     public static Builder builder() {
-        return new Builder(new LinkedList<JkScopedDependency>());
+        return new Builder(new LinkedList<>());
     }
 
     /** Builder for <code>JkDependencies</code> */
@@ -575,7 +571,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         protected Builder(LinkedList<JkScopedDependency> dependencies) {
             super();
             this.dependencies = dependencies;
-            this.depExcludes = new HashSet<JkDepExclude>();
+            this.depExcludes = new HashSet<>();
         }
 
         /**
@@ -650,7 +646,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
          * Adds module dependencies on this builder without mentioning scope.
          */
         public Builder onScopeless(Iterable<? extends JkDependency> dependencies) {
-            final List<JkScopedDependency> jkScopedDependencies = new LinkedList<JkScopedDependency>();
+            final List<JkScopedDependency> jkScopedDependencies = new LinkedList<>();
             for (final JkDependency dependency : dependencies) {
                 jkScopedDependencies.add(JkScopedDependency.of(dependency));
             }
@@ -1074,7 +1070,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     private List<JkModuleDependency> unspecifiedVersionDependencies() {
-        final List<JkModuleDependency> result = new LinkedList<JkModuleDependency>();
+        final List<JkModuleDependency> result = new LinkedList<>();
         for (final JkModuleDependency moduleDependency : this.extractModuleDependencies()) {
             if (moduleDependency.hasUnspecifedVersion()) {
                 result.add(moduleDependency);
@@ -1122,7 +1118,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     private List<JkModuleDependency> extractModuleDependencies() {
-        final List<JkModuleDependency> result = new LinkedList<JkModuleDependency>();
+        final List<JkModuleDependency> result = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : this) {
             if (scopedDependency.dependency() instanceof JkModuleDependency) {
                 result.add((JkModuleDependency) scopedDependency.dependency());

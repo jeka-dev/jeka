@@ -25,7 +25,7 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
      * Ivy configurations (scope = configuration).
      */
     public static JkIvyPublication of(File file, String type, JkScope... jkScopes) {
-        return new JkIvyPublication(new HashSet<JkIvyPublication.Artifact>()).and(file,
+        return new JkIvyPublication(new HashSet<>()).and(file,
                 type, jkScopes);
     }
 
@@ -63,7 +63,7 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
      * @see #of(File, String, JkScope...)
      */
     public static JkIvyPublication of(File file, JkScope... jkScopes) {
-        return new JkIvyPublication(new HashSet<JkIvyPublication.Artifact>()).and(file,
+        return new JkIvyPublication(new HashSet<>()).and(file,
                 jkScopes);
     }
 
@@ -89,7 +89,7 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
      * @see #of(File, String, JkScope...)
      */
     public JkIvyPublication and(String name, File file, String type, JkScope... jkScopes) {
-        final Set<Artifact> artifacts = new HashSet<JkIvyPublication.Artifact>(this.artifacts);
+        final Set<Artifact> artifacts = new HashSet<>(this.artifacts);
         artifacts.add(new Artifact(name, file, type, JkUtilsIterable.setOf(jkScopes)));
         return new JkIvyPublication(artifacts);
     }

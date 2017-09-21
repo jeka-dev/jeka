@@ -1,7 +1,6 @@
 package org.jerkar.api.depmanagement;
 
 import java.time.Instant;
-import java.util.Date;
 
 interface InternalPublisher {
 

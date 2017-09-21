@@ -91,9 +91,7 @@ final class MavenMetadata {
             this.versioning = new Versioning();
         }
         final int buildNumber = this.versioning.currentBuildNumber() + 1;
-        final org.jerkar.api.depmanagement.MavenMetadata.Versioning.Snapshot snapshot = new org.jerkar.api.depmanagement.MavenMetadata.Versioning.Snapshot(
-                timestamp, buildNumber);
-        this.versioning.snapshot = snapshot;
+        this.versioning.snapshot = new Snapshot(timestamp, buildNumber);
         this.versioning.lastUpdate = timestamp.replace(".", "");
         this.versioning.snapshotVersions.clear();
     }
@@ -103,8 +101,7 @@ final class MavenMetadata {
     }
 
     void setFirstCurrentSnapshot(String timestamp) {
-        final Snapshot snapshot = new Snapshot(timestamp, 1);
-        this.versioning.snapshot = snapshot;
+        this.versioning.snapshot = new Snapshot(timestamp, 1);
     }
 
     void addSnapshotVersion(String extension, String classifier) {
@@ -181,7 +178,7 @@ final class MavenMetadata {
             if (snapNodeList.getLength() > 0) {
                 this.snapshot = new Snapshot((Element) snapNodeList.item(0));
             }
-            this.snapshotVersions = new LinkedList<SnapshotVersion>();
+            this.snapshotVersions = new LinkedList<>();
 
             final NodeList versionsNodeList = element.getElementsByTagName("versions");
             if (versionsNodeList.getLength() > 0) {
@@ -215,11 +212,11 @@ final class MavenMetadata {
 
         private String release;
 
-        private List<SnapshotVersion> snapshotVersions = new LinkedList<MavenMetadata.Versioning.SnapshotVersion>();
+        private List<SnapshotVersion> snapshotVersions = new LinkedList<>();
 
         private String lastUpdate;
 
-        private final List<String> versions = new LinkedList<String>();;
+        private final List<String> versions = new LinkedList<>();
 
         private int currentBuildNumber() {
             if (snapshot == null) {

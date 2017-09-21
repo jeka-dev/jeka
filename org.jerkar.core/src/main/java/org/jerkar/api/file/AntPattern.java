@@ -90,7 +90,7 @@ final class AntPattern {
     }
 
     public static Set<AntPattern> setOf(Iterable<String> patterns) {
-        final Set<AntPattern> result = new HashSet<AntPattern>();
+        final Set<AntPattern> result = new HashSet<>();
         for (final String pattern : patterns) {
             result.add(AntPattern.of(pattern));
         }
@@ -135,8 +135,7 @@ final class AntPattern {
         if (pathIdxStart > pathIdxEnd) {
             // Path is exhausted, only match if rest of pattern is * or **'s
             if (pattIdxStart > pattIdxEnd) {
-                return (pattern.endsWith(PATH_SEPARATOR) ? normalizedPath.endsWith(PATH_SEPARATOR)
-                        : !normalizedPath.endsWith(PATH_SEPARATOR));
+                return (pattern.endsWith(PATH_SEPARATOR) == normalizedPath.endsWith(PATH_SEPARATOR));
             }
             if (pattIdxStart == pattIdxEnd && pattDirs[pattIdxStart].equals("*")
                     && normalizedPath.endsWith(PATH_SEPARATOR)) {

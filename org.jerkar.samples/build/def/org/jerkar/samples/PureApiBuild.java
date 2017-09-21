@@ -9,8 +9,6 @@ import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkInit;
 
-import java.io.File;
-
 /**
  * This should be run with org.jerkar.samples as workinf dir.
  */

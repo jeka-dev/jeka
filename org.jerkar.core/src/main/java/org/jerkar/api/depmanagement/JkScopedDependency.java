@@ -29,7 +29,7 @@ public final class JkScopedDependency implements Serializable {
      * <li>UNSET means that the scoped dependency has been declared with no scope and no scope mapping.</li>
      * </ul>
      */
-    public static enum ScopeType {
+    public enum ScopeType {
 
         /** scoped dependency is declared with 1 or several {@link JkScope} */
         SIMPLE,
@@ -60,7 +60,7 @@ public final class JkScopedDependency implements Serializable {
      * Creates a {@link JkScopedDependency} to the specified dependency and scopes.
      */
     public static JkScopedDependency of(JkDependency dependency, Set<JkScope> scopes) {
-        return new JkScopedDependency(dependency, Collections.unmodifiableSet(new HashSet<JkScope>(
+        return new JkScopedDependency(dependency, Collections.unmodifiableSet(new HashSet<>(
                 scopes)), null);
     }
 

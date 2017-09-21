@@ -82,7 +82,7 @@ public final class JkMavenPublication implements Serializable {
                             + "] as this combination is yet present in this publication " + this);
         }
         final JkClassifiedFileArtifact artifact = new JkClassifiedFileArtifact(classifier, file);
-        final List<JkClassifiedFileArtifact> list = new LinkedList<JkClassifiedFileArtifact>(
+        final List<JkClassifiedFileArtifact> list = new LinkedList<>(
                 this.classifiedArtifacts);
         list.add(artifact);
         return new JkMavenPublication(this.mainArtifacts, list, this.extraInfo);

@@ -20,7 +20,7 @@ class JUnit4TestLauncher {
     public static JkTestSuiteResult launchInFork(JkJavaProcess jkJavaProcess,
             boolean printEachTestOnConsole, JunitReportDetail reportDetail,
             Iterable<Class> classes, File reportDir) {
-        final List<String> args = new LinkedList<String>();
+        final List<String> args = new LinkedList<>();
         final File file = JkUtilsFile.tempFile("testResult-", ".ser");
         args.add("\"" + file.getAbsolutePath() + "\"");
         args.add(Boolean.toString(printEachTestOnConsole));
@@ -35,10 +35,9 @@ class JUnit4TestLauncher {
         return (JkTestSuiteResult) JkUtilsIO.deserialize(file);
     }
 
-    @SuppressWarnings("rawtypes")
+
     /**
-     * @param classes
-     *            Non-empty <code>Iterable</code>.
+     * @param classes Non-empty <code>Iterable</code>.
      */
     public static JkTestSuiteResult launchInClassLoader(Iterable<Class> classes, boolean verbose,
             JunitReportDetail reportDetail, File reportDir) {

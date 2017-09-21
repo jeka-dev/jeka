@@ -31,7 +31,7 @@ final class JavaSourceParser {
 
     public static JavaSourceParser of(File baseDir, Iterable<File> files) {
         JavaSourceParser result = new JavaSourceParser(JkDependencies.of(), JkRepos.empty(),
-                new LinkedList<File>());
+                new LinkedList<>());
         for (final File code : files) {
             result = result.and(of(baseDir, code));
         }
@@ -122,7 +122,7 @@ final class JavaSourceParser {
     }
 
     private static List<File> projectDependencies(File baseDir, List<String> deps) {
-        final List<File> projects = new LinkedList<File>();
+        final List<File> projects = new LinkedList<>();
         for (final String projectReltivePath : deps) {
             final File file = new File(baseDir, projectReltivePath);
             if (!file.exists()) {
@@ -206,7 +206,7 @@ final class JavaSourceParser {
         innerScanner.useDelimiter("");
         final String braced = extractStringTo(innerScanner, "}", url, context);
         final List<String> elements = splitIgnoringQuotes(braced, ',');
-        final List<String> result = new LinkedList<String>();
+        final List<String> result = new LinkedList<>();
         for (final String element : elements) {
             result.add(withoutQuotes(element));
         }
@@ -219,7 +219,7 @@ final class JavaSourceParser {
     }
 
     private static List<String> splitIgnoringQuotes(String input, char delimiter) {
-        final List<String> result = new LinkedList<String>();
+        final List<String> result = new LinkedList<>();
         int start = 0;
         boolean inQuotes = false;
         for (int current = 0; current < input.length(); current++) {
@@ -257,13 +257,17 @@ final class JavaSourceParser {
             } else if (escaping) {
                 escaping = false;
             } else { // in quote
-                if (character.equals("\\")) {
-                    escaping = true;
-                } else if (character.equals("\"")) {
-                    inQuote = false;
-                    builder.append(character);
-                } else {
-                    builder.append(character);
+                switch (character) {
+                    case "\\":
+                        escaping = true;
+                        break;
+                    case "\"":
+                        inQuote = false;
+                        builder.append(character);
+                        break;
+                    default:
+                        builder.append(character);
+                        break;
                 }
             }
         }
@@ -324,12 +328,16 @@ final class JavaSourceParser {
                         endResult.append(character);
                     } else if (character.equals("/") && scanner.hasNext()) {
                         final String c2 = scanner.next();
-                        if (c2.equals("/")) {
-                            currentState = insideLineComment;
-                        } else if (c2.equals("*")) {
-                            currentState = insideblockComment_noNewLineYet;
-                        } else {
-                            endResult.append(character).append(c2);
+                        switch (c2) {
+                            case "/":
+                                currentState = insideLineComment;
+                                break;
+                            case "*":
+                                currentState = insideblockComment_noNewLineYet;
+                                break;
+                            default:
+                                endResult.append(character).append(c2);
+                                break;
                         }
                     } else if (character.equals("\"")) {
                         insideStringLiteral = true;

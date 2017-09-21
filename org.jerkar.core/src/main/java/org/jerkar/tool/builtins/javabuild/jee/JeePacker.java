@@ -42,13 +42,7 @@ class JeePacker {
     }
 
     JkExtraPacking warExtraPacking(final File webappSrc, final File warDirDest, final JkFileTreeSet extra) {
-        return new JkExtraPacking() {
-
-            @Override
-            public void process(JkJavaBuild build) {
-                war(webappSrc, warDirDest, extra);
-            }
-        };
+        return build -> war(webappSrc, warDirDest, extra);
     }
 
 

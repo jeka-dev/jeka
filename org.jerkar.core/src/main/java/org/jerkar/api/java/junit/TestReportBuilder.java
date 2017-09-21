@@ -46,14 +46,14 @@ final class TestReportBuilder {
     }
 
     private void writeTxtFile(File txtFile) {
-        final StringBuilder builder = new StringBuilder(TEXT_HEAD).append("\n")
-                .append("Test set: ").append(result.suiteName()).append("\n").append(TEXT_HEAD)
-                .append("\n").append("Tests run: ").append(result.runCount()).append(", ")
-                .append("Failures: ").append(result.assertErrorCount()).append(", ")
-                .append("Errors: ").append(result.errorCount()).append(", ").append("Skipped: ")
-                .append(result.ignoreCount()).append(", ").append("Time elapsed: ")
-                .append(result.durationInMillis() / 1000f).append(" sec");
-        JkUtilsFile.writeString(txtFile, builder.toString(), false);
+        String builder = TEXT_HEAD + "\n" +
+                "Test set: " + result.suiteName() + "\n" + TEXT_HEAD +
+                "\n" + "Tests run: " + result.runCount() + ", " +
+                "Failures: " + result.assertErrorCount() + ", " +
+                "Errors: " + result.errorCount() + ", " + "Skipped: " +
+                result.ignoreCount() + ", " + "Time elapsed: " +
+                result.durationInMillis() / 1000f + " sec";
+        JkUtilsFile.writeString(txtFile, builder, false);
     }
 
     private void writeXmlFile(File xmlFile) throws XMLStreamException, IOException {

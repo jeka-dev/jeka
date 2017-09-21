@@ -14,7 +14,7 @@ import java.util.Map;
  */
 class IvyArtifactContainer {
 
-    private final Map<JkVersionedModule, List<File>> map = new HashMap<JkVersionedModule, List<File>>();
+    private final Map<JkVersionedModule, List<File>> map = new HashMap<>();
 
     static IvyArtifactContainer of(ArtifactDownloadReport[] artifactDownloadReports) {
         IvyArtifactContainer result = new IvyArtifactContainer();
@@ -26,18 +26,14 @@ class IvyArtifactContainer {
 
     private void put(ModuleRevisionId moduleRevisionId, File file) {
         JkVersionedModule versionedModule = IvyTranslations.toJkVersionedModule(moduleRevisionId);
-        List<File> files = map.get(versionedModule);
-        if (files == null) {
-            files = new LinkedList<File>();
-            map.put(versionedModule, files);
-        }
+        List<File> files = map.computeIfAbsent(versionedModule, k -> new LinkedList<>());
         files.add(file);
     }
 
     List<File> getArtifacts(JkVersionedModule versionedModule) {
         List<File> result = map.get(versionedModule);
         if (result == null) {
-            return new LinkedList<File>();
+            return new LinkedList<>();
         }
         return result;
     }

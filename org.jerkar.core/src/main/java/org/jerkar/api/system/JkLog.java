@@ -19,7 +19,7 @@ public final class JkLog {
 
     private static final String TAB = "  ";
 
-    private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<LinkedList<Long>>();
+    private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<>();
 
     private static OffsetStream infoWriter = new OffsetStream(System.out);
 
@@ -99,7 +99,7 @@ public final class JkLog {
         }
         LinkedList<Long> times = START_TIMES.get();
         if (times == null) {
-            times = new LinkedList<Long>();
+            times = new LinkedList<>();
             START_TIMES.set(times);
         }
         times.push(System.nanoTime());

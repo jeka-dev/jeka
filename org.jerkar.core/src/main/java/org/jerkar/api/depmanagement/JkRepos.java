@@ -39,7 +39,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
      * Crates a {@link JkRepos} from the specified {@link JkRepo}s
      */
     public static JkRepos of(List<String> urls) {
-        final List<JkRepo> list = new LinkedList<JkRepo>();
+        final List<JkRepo> list = new LinkedList<>();
         for (final String url : urls) {
             list.add(JkRepo.of(url));
         }
@@ -57,7 +57,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
      * Creates a {@link JkRepos} from Maven repositories having specified file roots.
      */
     public static JkRepos maven(File... files) {
-        final List<JkRepo> list = new LinkedList<JkRepo>();
+        final List<JkRepo> list = new LinkedList<>();
         for (final File file : files) {
             list.add(JkRepo.maven(file));
         }
@@ -68,7 +68,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
      * Creates a {@link JkRepos} from Ivy repositories having specified urls.
      */
     public static JkRepos ivy(String... urls) {
-        final List<JkRepo> list = new LinkedList<JkRepo>();
+        final List<JkRepo> list = new LinkedList<>();
         for (final String url : urls) {
             list.add(JkRepo.ivy(url));
         }
@@ -79,7 +79,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
      * Creates a {@link JkRepos} from Maven repositories having specified Ivy files.
      */
     public static JkRepos ivy(File... files) {
-        final List<JkRepo> list = new LinkedList<JkRepo>();
+        final List<JkRepo> list = new LinkedList<>();
         for (final File file : files) {
             list.add(JkRepo.ivy(file));
         }
@@ -118,7 +118,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
      * Returns a {@link JkRepos} identical to this one but adding specified {@link JkRepo} on.
      */
     public JkRepos and(JkRepo... jkRepoArray) {
-        final List<JkRepo> list = new LinkedList<JkRepo>(this.repos);
+        final List<JkRepo> list = new LinkedList<>(this.repos);
         list.addAll(Arrays.asList(jkRepoArray));
         return new JkRepos(list);
     }
@@ -154,7 +154,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
      * Returns a {@link JkRepos} identical to this one but adding Ivy {@link JkRepo} having specified root files.
      */
     public JkRepos andIvy(File... files) {
-        final List<JkRepo> list = new LinkedList<JkRepo>(this.repos);
+        final List<JkRepo> list = new LinkedList<>(this.repos);
         list.addAll(JkRepos.ivy(files).repos);
         return new JkRepos(list);
     }
@@ -163,7 +163,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
      * Returns a {@link JkRepos} identical to this one but adding Maven {@link JkRepo} having specified root files.
      */
     public JkRepos andMaven(File... files) {
-        final List<JkRepo> list = new LinkedList<JkRepo>(this.repos);
+        final List<JkRepo> list = new LinkedList<>(this.repos);
         list.addAll(maven(files).repos);
         return new JkRepos(list);
     }
@@ -172,7 +172,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
      * Returns a {@link JkRepos} identical to this one but adding Maven central repository..
      */
     public JkRepos andMavenCentral() {
-        final List<JkRepo> list = new LinkedList<JkRepo>(this.repos);
+        final List<JkRepo> list = new LinkedList<>(this.repos);
         list.add(JkRepo.mavenCentral());
         return new JkRepos(list);
     }
@@ -181,7 +181,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
      * Returns a {@link JkRepos} identical to this one but adding Ivy Jcennter repository..
      */
     public JkRepos andMavenJCenter() {
-        final List<JkRepo> list = new LinkedList<JkRepo>(this.repos);
+        final List<JkRepo> list = new LinkedList<>(this.repos);
         list.add(JkRepo.mavenJCenter());
         return new JkRepos(list);
     }

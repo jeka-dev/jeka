@@ -73,7 +73,7 @@ class Lib {
                 final File dotClasspathFile = slaveBuild.file(".classpath");
                 if (dotClasspathFile.exists()) {
                     final DotClasspathModel dotClasspathModel = DotClasspathModel.from(dotClasspathFile);
-                    final List<Lib> sublibs = new ArrayList<Lib>();
+                    final List<Lib> sublibs = new ArrayList<>();
                     for (final Lib sublib : dotClasspathModel.libs(slaveBuild.baseDir().root(),
                             scopeSegregator)) {
                         if (sublib.exported) {

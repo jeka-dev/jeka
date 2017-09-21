@@ -108,7 +108,7 @@ public final class JkProcess implements Runnable {
      * specified parameter.
      */
     public JkProcess minusParameter(String parameter) {
-        final List<String> list = new LinkedList<String>(parameters);
+        final List<String> list = new LinkedList<>(parameters);
         list.remove(parameter);
         return withParameters(list.toArray(new String[0]));
     }
@@ -129,7 +129,7 @@ public final class JkProcess implements Runnable {
      * @see #andParameters(String...)
      */
     public JkProcess andParameters(Collection<String> parameters) {
-        final List<String> list = new ArrayList<String>(this.parameters);
+        final List<String> list = new ArrayList<>(this.parameters);
         list.addAll(parameters);
         return new JkProcess(command, list, workingDir, failOnError);
     }
@@ -189,15 +189,13 @@ public final class JkProcess implements Runnable {
      * current output.
      */
     public int runSync() {
-        final List<String> commands = new LinkedList<String>();
+        final List<String> commands = new LinkedList<>();
         commands.add(this.command);
-        for (String param : parameters) {
-           // if (param.contains(" ")) {
-           //     commands.add("\""+ param + "\"");
-            //} else {
-                commands.add(param);
-            //}
-        }
+        // if (param.contains(" ")) {
+        //     commands.add("\""+ param + "\"");
+        //} else {
+        //}
+        commands.addAll(parameters);
         JkLog.startln("Starting program : " + commands.toString());
         final int result;
         try {

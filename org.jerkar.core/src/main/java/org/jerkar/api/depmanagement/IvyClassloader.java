@@ -10,7 +10,7 @@ final class IvyClassloader {
         // no instance
     }
 
-    private static final JkClassLoader classloader() {
+    private static JkClassLoader classloader() {
         if (JkClassLoader.current().isDefined("org.apache.ivy.Ivy")) {
             return JkClassLoader.current();
         }

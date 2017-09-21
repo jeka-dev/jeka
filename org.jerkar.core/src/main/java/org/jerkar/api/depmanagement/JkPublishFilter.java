@@ -8,6 +8,7 @@ import java.io.Serializable;
  * 
  * @author Jerome Angibaud
  */
+@FunctionalInterface
 public interface JkPublishFilter extends Serializable {
 
     /**
@@ -18,42 +19,15 @@ public interface JkPublishFilter extends Serializable {
     /**
      * A filter accepting everything.
      */
-    public static final JkPublishFilter ACCEPT_ALL = new JkPublishFilter() {
-
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public boolean accept(JkVersionedModule versionedModule) {
-            return true;
-        }
-
-    };
+    JkPublishFilter ACCEPT_ALL = (JkPublishFilter) versionedModule -> true;
 
     /**
      * A filter accepting only snapshot versioned module.
      */
-    public static final JkPublishFilter ACCEPT_SNAPSHOT_ONLY = new JkPublishFilter() {
-
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public boolean accept(JkVersionedModule versionedModule) {
-            return versionedModule.version().isSnapshot();
-        }
-
-    };
+    JkPublishFilter ACCEPT_SNAPSHOT_ONLY = (JkPublishFilter) versionedModule -> versionedModule.version().isSnapshot();
 
     /**
      * A filter accepting only non-snapshot versioned module.
      */
-    public static final JkPublishFilter ACCEPT_RELEASE_ONLY = new JkPublishFilter() {
-
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public boolean accept(JkVersionedModule versionedModule) {
-            return !versionedModule.version().isSnapshot();
-        }
-
-    };
+    JkPublishFilter ACCEPT_RELEASE_ONLY = (JkPublishFilter) versionedModule -> !versionedModule.version().isSnapshot();
 }

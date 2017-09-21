@@ -136,7 +136,7 @@ public final class JkUtilsFile {
         }
 
         if (reportStream != null) {
-            reportStream.append("Coping content of " + fromDir.getPath());
+            reportStream.append("Coping content of ").append(fromDir.getPath());
         }
         final File[] children = fromDir.listFiles();
         int count = 0;
@@ -384,12 +384,12 @@ public final class JkUtilsFile {
      */
     public static List<File> filesOf(File dir, FileFilter fileFilter, boolean includeFolders) {
         assertAllDir(dir);
-        final List<File> result = new LinkedList<File>();
+        final List<File> result = new LinkedList<>();
 
         // Windows JVM bug, sometime a file is seen a dir and invoking this method returns a null
         File[] files = dir.listFiles();
         if (files == null) {
-            return new LinkedList<File>();
+            return new LinkedList<>();
         }
         for (final File file : files) {
             if (file.isFile() && !fileFilter.accept(file)) {
@@ -729,7 +729,7 @@ public final class JkUtilsFile {
 
         public static FilePath of(File file) {
             File canonicalFile = JkUtilsFile.canonicalFile(file);
-            final List<String> elements = new ArrayList<String>();
+            final List<String> elements = new ArrayList<>();
             for (File indexFile = canonicalFile; indexFile != null; indexFile = indexFile.getParentFile()) {
                 if (indexFile.getParent() == null) {
                     elements.add(JkUtilsString.substringBeforeLast(indexFile.getPath(), File.separator));
@@ -749,7 +749,7 @@ public final class JkUtilsFile {
         }
 
         private FilePath common(FilePath other) {
-            final List<String> result = new LinkedList<String>();
+            final List<String> result = new LinkedList<>();
             for (int i = 0; i < elements.size(); i++) {
                 if (i >= other.elements.size()) {
                     break;
@@ -770,12 +770,12 @@ public final class JkUtilsFile {
 
             // this path is a sub past of the other
             if (common.equals(otherFolder)) {
-                List<String> result = new ArrayList<String>(this.elements);
+                List<String> result = new ArrayList<>(this.elements);
                 result = result.subList(common.elements.size(), this.elements.size());
                 return new FilePath(result);
             }
 
-            final List<String> result = new ArrayList<String>();
+            final List<String> result = new ArrayList<>();
             for (int i = common.elements.size(); i < otherFolder.elements.size(); i++) {
                 result.add("..");
             }

@@ -13,7 +13,7 @@ import org.jerkar.api.utils.JkUtilsFile;
 public final class JkUtilsTool {
 
     static Map<String, String> userSystemProperties() {
-        final Map<String, String> result = new HashMap<String, String>();
+        final Map<String, String> result = new HashMap<>();
         final File userPropFile = new File(JkLocator.jerkarUserHome(), "system.properties");
         if (userPropFile.exists()) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));

@@ -66,13 +66,7 @@ public final class JkUtilsZip {
         }
     }
 
-    private static final JkZipEntryFilter ACCEPT_ALL = new JkZipEntryFilter() {
-
-        @Override
-        public boolean accept(String entryName) {
-            return true;
-        }
-    };
+    private static final JkZipEntryFilter ACCEPT_ALL = entryName -> true;
 
     private JkUtilsZip() {
     }
@@ -263,7 +257,7 @@ public final class JkUtilsZip {
      * {@link ZipOutputStream}.
      */
     public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile, JkZipEntryFilter filter, boolean storeMethod) {
-        final Set<String> duplicateEntries = new HashSet<String>();
+        final Set<String> duplicateEntries = new HashSet<>();
         final Enumeration<? extends ZipEntry> entries = zipFile.entries();
         while (entries.hasMoreElements()) {
             final ZipEntry e = entries.nextElement();
@@ -352,7 +346,7 @@ public final class JkUtilsZip {
      */
     @SuppressWarnings("unchecked")
     public static List<ZipEntry> zipEntries(ZipFile zipFile) {
-        final List<ZipEntry> result = new LinkedList<ZipEntry>();
+        final List<ZipEntry> result = new LinkedList<>();
         final Enumeration<ZipEntry> en = (Enumeration<ZipEntry>) zipFile.entries();
         while (en.hasMoreElements()) {
             result.add(en.nextElement());

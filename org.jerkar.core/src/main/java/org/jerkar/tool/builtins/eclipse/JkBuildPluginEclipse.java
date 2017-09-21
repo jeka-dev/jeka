@@ -44,10 +44,10 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
     private DotClasspathModel cachedClasspath = null;
 
     /* see #useProjectDependencyInsteadOfFileFor */
-    private final Map<File,File> fileDependencyToProjectSubstitution = new HashMap<File,File>();
+    private final Map<File,File> fileDependencyToProjectSubstitution = new HashMap<>();
 
     /* see #useFileDependencyInsteadOfProjectFor */
-    private final Set<File> projectDependencyToFileSubstitutions = new HashSet<File>();
+    private final Set<File> projectDependencyToFileSubstitutions = new HashSet<>();
 
     /** generate eclipse metadata files (as .classpath or .project) */
     @JkDoc("Generates Eclipse .classpath file according project dependencies.")
@@ -55,7 +55,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
         final File dotProject = this.build.file(".project");
         if (this.build instanceof JkJavaBuild) {
             final JkJavaBuild jbuild = (JkJavaBuild) build;
-            final List<File> depProjects = new LinkedList<File>();
+            final List<File> depProjects = new LinkedList<>();
             for (final JkBuild depBuild : build.importedBuilds().directs()) {
                 depProjects.add(depBuild.baseDir().root());
             }
@@ -154,7 +154,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
 
     @Override
     protected List<JkBuild> slaves(List<JkBuild> originalSlaves) {
-        List<JkBuild> result = new LinkedList<JkBuild>(originalSlaves);
+        List<JkBuild> result = new LinkedList<>(originalSlaves);
         for (String path : dotClasspathModel().projectDependencies()) {
             String relativePath = ".." + path;
             File baseDir = build.baseDir().file(relativePath);
@@ -198,9 +198,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
      * @param projectDirs root folder of the projects for which you don't want to use Eclipse project dependency.
      */
     public void useFileDependencyInsteadOfProjectFor(File ... projectDirs) {
-        for (File projectDir : projectDirs) {
-            projectDependencyToFileSubstitutions.add(projectDir);
-        }
+        Collections.addAll(projectDependencyToFileSubstitutions, projectDirs);
     }
 
     /**

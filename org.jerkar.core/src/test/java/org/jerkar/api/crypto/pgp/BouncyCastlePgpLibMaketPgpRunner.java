@@ -38,12 +38,12 @@ public class BouncyCastlePgpLibMaketPgpRunner {
 
     public static void main(String[] args) throws Exception {
         final URL jar = JkPgp.class.getResource("bouncycastle-all-152.jar");
-        final Set<String> classNames = new HashSet<String>();
+        final Set<String> classNames = new HashSet<>();
         final Class<?> PGPUTILS_CLASS = JkClassLoader.current().sibling(jar)
                 .printingSearchedClasses(classNames).load(PGPUTILS_CLASS_NAME);
         testSignAndVerify(PGPUTILS_CLASS);
 
-        final List<String> list = new ArrayList<String>(classNames);
+        final List<String> list = new ArrayList<>(classNames);
         Collections.sort(list);
         JkLog.info(list);
         removeUnusedClass(new File(jar.getFile()), new File("bouncycastle-pgp-152.jar"), classNames);

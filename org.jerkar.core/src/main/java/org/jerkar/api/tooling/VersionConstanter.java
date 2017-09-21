@@ -22,9 +22,9 @@ class VersionConstanter {
     }
 
     public static VersionConstanter of(JkVersionProvider jkVersionProvider) {
-        final Map<String, String> electedGroupToVersion = new HashMap<String, String>();
-        final Map<String, String> groupToVersion = new HashMap<String, String>();
-        final Set<String> dismissedGroups = new HashSet<String>();
+        final Map<String, String> electedGroupToVersion = new HashMap<>();
+        final Map<String, String> groupToVersion = new HashMap<>();
+        final Set<String> dismissedGroups = new HashSet<>();
         for (final JkModuleId moduleId : jkVersionProvider.moduleIds()) {
             final String group = moduleId.group();
             if (dismissedGroups.contains(group)) {

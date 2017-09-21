@@ -32,7 +32,7 @@ final class DotClasspathModel {
 
     static final String JERKAR_REPO = "JERKAR_REPO";
 
-    private final List<ClasspathEntry> classpathentries = new LinkedList<ClasspathEntry>();
+    private final List<ClasspathEntry> classpathentries = new LinkedList<>();
 
     private DotClasspathModel(List<ClasspathEntry> classpathentries) {
         this.classpathentries.addAll(classpathentries);
@@ -45,7 +45,7 @@ final class DotClasspathModel {
 
     private static DotClasspathModel from(Document document) {
         final NodeList nodeList = document.getElementsByTagName(CLASSPATHENTRY);
-        final List<ClasspathEntry> classpathEntries = new LinkedList<ClasspathEntry>();
+        final List<ClasspathEntry> classpathEntries = new LinkedList<>();
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node node = nodeList.item(i);
             final Element element = (Element) node;
@@ -64,8 +64,8 @@ final class DotClasspathModel {
     }
 
     public Sources sourceDirs(File baseDir, Sources.TestSegregator segregator) {
-        final List<JkFileTree> prods = new LinkedList<JkFileTree>();
-        final List<JkFileTree> tests = new LinkedList<JkFileTree>();
+        final List<JkFileTree> prods = new LinkedList<>();
+        final List<JkFileTree> tests = new LinkedList<>();
         for (final ClasspathEntry classpathEntry : classpathentries) {
             if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC) && !classpathEntry.isOptional()) {
                 if (segregator.isTest(classpathEntry.path)) {
@@ -79,7 +79,7 @@ final class DotClasspathModel {
     }
 
     public List<String> projectDependencies() {
-        final List<String> result = new LinkedList<String>();
+        final List<String> result = new LinkedList<>();
         for (final ClasspathEntry classpathEntry : classpathentries) {
             if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC)) {
                 if (classpathEntry.path.startsWith("/")) {
@@ -91,7 +91,7 @@ final class DotClasspathModel {
     }
 
     public List<Lib> libs(File baseDir, ScopeResolver scopeResolver) {
-        final List<Lib> result = new LinkedList<Lib>();
+        final List<Lib> result = new LinkedList<>();
         final Map<String, File> projects = Project.findProjects(baseDir.getParentFile());
         for (final ClasspathEntry classpathEntry : classpathentries) {
 
@@ -170,7 +170,7 @@ final class DotClasspathModel {
 
         private final String including;
 
-        private final Map<String, String> attributes = new HashMap<String, String>();
+        private final Map<String, String> attributes = new HashMap<>();
 
         public ClasspathEntry(Kind kind, String path, String excluding, String including,
                 boolean exported) {
@@ -270,10 +270,8 @@ final class DotClasspathModel {
                 }
             }
             final JkFileTree dirView = JkFileTree.of(conFolder).include("**/*.jar");
-            final List<File> result = new LinkedList<File>();
-            for (final File file : dirView.files(false)) {
-                result.add(file);
-            }
+            final List<File> result = new LinkedList<>();
+            result.addAll(dirView.files(false));
             return result;
         }
 

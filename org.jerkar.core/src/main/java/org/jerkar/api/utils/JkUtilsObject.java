@@ -28,10 +28,7 @@ public final class JkUtilsObject {
      */
     public static boolean equals(Object object1, Object object2) {
         if (object1 == null) {
-            if (object2 == null) {
-                return true;
-            }
-            return false;
+            return object2 == null;
         }
         return object1.equals(object2);
     }

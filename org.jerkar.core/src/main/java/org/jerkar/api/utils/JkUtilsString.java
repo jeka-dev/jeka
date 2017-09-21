@@ -106,7 +106,7 @@ public final class JkUtilsString {
             return new String[0];
         }
         final StringTokenizer st = new StringTokenizer(str, delimiters);
-        final List<String> tokens = new ArrayList<String>();
+        final List<String> tokens = new ArrayList<>();
         while (st.hasMoreTokens()) {
             final String token = st.nextToken();
             tokens.add(token);
@@ -365,7 +365,7 @@ public final class JkUtilsString {
         final int inDoubleQuote = 2;
         int state = normal;
         final StringTokenizer tok = new StringTokenizer(toProcess, "\"\' ", true);
-        final ArrayList<String> result = new ArrayList<String>();
+        final ArrayList<String> result = new ArrayList<>();
         final StringBuilder current = new StringBuilder();
         boolean lastTokenHasBeenQuoted = false;
 

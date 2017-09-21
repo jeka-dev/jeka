@@ -84,7 +84,7 @@ public final class JkUtilsXml {
      * Returns specified element direct child node elements.
      */
     public static List<Element> directChildren(Element parent, String childName) {
-        final List<Element> result = new LinkedList<Element>();
+        final List<Element> result = new LinkedList<>();
         final NodeList nodeList = parent.getChildNodes();
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node node = nodeList.item(i);

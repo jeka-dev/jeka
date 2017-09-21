@@ -32,7 +32,7 @@ public final class JkUtilsIterable {
         if (it instanceof List) {
             return (List<T>) it;
         }
-        final List<T> result = new LinkedList<T>();
+        final List<T> result = new LinkedList<>();
         for (final T t : it) {
             result.add(t);
 
@@ -52,8 +52,8 @@ public final class JkUtilsIterable {
      * Returns a duplicate free list of the given items
      */
     public static <T> List<T> listWithoutDuplicateOf(Iterable<T> items) {
-        final Set<T> set = new HashSet<T>();
-        final LinkedList<T> result = new LinkedList<T>();
+        final Set<T> set = new HashSet<>();
+        final LinkedList<T> result = new LinkedList<>();
         for (final T item : items) {
             if (!set.contains(item)) {
                 set.add(item);
@@ -94,7 +94,7 @@ public final class JkUtilsIterable {
      */
     @SuppressWarnings("unchecked")
     public static <T> Set<T> setOf(T... items) {
-        final HashSet<T> result = new HashSet<T>();
+        final HashSet<T> result = new HashSet<>();
         result.addAll(Arrays.asList(items));
         return result;
     }
@@ -103,7 +103,7 @@ public final class JkUtilsIterable {
      * Creates a set of specified items.
      */
     public static <T> Set<T> setOf(Iterable<T> items) {
-        final HashSet<T> result = new HashSet<T>();
+        final HashSet<T> result = new HashSet<>();
         for (final T item : items) {
             result.add(item);
         }
@@ -114,7 +114,7 @@ public final class JkUtilsIterable {
      * Creates a set of specified items.
      */
     public static <T> Set<T> linkedHashSetOf(Iterable<T> items) {
-        final LinkedHashSet<T> result = new LinkedHashSet<T>();
+        final LinkedHashSet<T> result = new LinkedHashSet<>();
         for (final T item : items) {
             result.add(item);
         }
@@ -127,7 +127,7 @@ public final class JkUtilsIterable {
      */
     @SuppressWarnings("unchecked")
     public static <T, U> Map<T, U> mapOf(T key, U value, Object... others) {
-        final Map<T, U> result = new HashMap<T, U>();
+        final Map<T, U> result = new HashMap<>();
         result.put(key, value);
         for (int i = 0; i < others.length; i = i + 2) {
             final T otherKey = (T) others[i];
@@ -143,7 +143,7 @@ public final class JkUtilsIterable {
      */
     @SuppressWarnings("unchecked")
     public static <T, U> Map<T, U> mapOfAny(Object... others) {
-        final Map<T, U> result = new LinkedHashMap<T, U>();
+        final Map<T, U> result = new LinkedHashMap<>();
         for (int i = 0; i < others.length; i = i + 2) {
             final T otherKey = (T) others[i];
             final U otherValue = (U) others[i + 1];
@@ -173,11 +173,11 @@ public final class JkUtilsIterable {
         if (effectiveIterables.size() == 1) {
             return effectiveIterables.get(0);
         }
-        return new ChainedIterable<T>(effectiveIterables);
+        return new ChainedIterable<>(effectiveIterables);
     }
 
     private static <T> List<Iterable<T>> removeEmptyIt(Iterable<Iterable<T>> iterables) {
-        final List<Iterable<T>> result = new LinkedList<Iterable<T>>();
+        final List<Iterable<T>> result = new LinkedList<>();
         for (final Iterable<T> iterable : iterables) {
             if (iterable.iterator().hasNext()) {
                 result.add(iterable);
@@ -197,11 +197,11 @@ public final class JkUtilsIterable {
 
         @Override
         public Iterator<T> iterator() {
-            final List<Iterator<T>> iterators = new LinkedList<Iterator<T>>();
+            final List<Iterator<T>> iterators = new LinkedList<>();
             for (final Iterable<T> iterable : iterables) {
                 iterators.add(iterable.iterator());
             }
-            return new ChainedIterator<T>(iterators);
+            return new ChainedIterator<>(iterators);
         }
 
     }
@@ -270,7 +270,7 @@ public final class JkUtilsIterable {
      */
     @SuppressWarnings("unchecked")
     public static <T> List<T> concatLists(Iterable<? extends T>... lists) {
-        final List<T> result = new LinkedList<T>();
+        final List<T> result = new LinkedList<>();
         for (final Iterable<? extends T> list : lists) {
             for (final T item : list) {
                 result.add(item);
@@ -283,7 +283,7 @@ public final class JkUtilsIterable {
      * Creates a {@link Map} and populates it with specified properties.
      */
     public static Map<String, String> propertiesToMap(Properties properties) {
-        final Map<String, String> result = new HashMap<String, String>();
+        final Map<String, String> result = new HashMap<>();
         for (final Object propKey : properties.keySet()) {
             result.put(propKey.toString(), properties.getProperty(propKey.toString()));
         }
@@ -314,7 +314,7 @@ public final class JkUtilsIterable {
      */
     @SuppressWarnings("unchecked")
     public static List<String> toStrings(Map<?, ?> map) {
-        final List<String> result = new LinkedList<String>();
+        final List<String> result = new LinkedList<>();
         for (final Object name : map.entrySet()) {
             final Map.Entry<Object, Object> entry = (Entry<Object, Object>) name;
             result.add(entry.getKey() + "=" + JkUtilsObject.toString(entry.getValue()));
@@ -344,8 +344,8 @@ public final class JkUtilsIterable {
      */
     @SuppressWarnings("unchecked")
     public static <T> Set<T>[] diff(Collection<T> a, Collection<T> b) {
-        final HashSet<T> first = new HashSet<T>();
-        final HashSet<T> second = new HashSet<T>();
+        final HashSet<T> first = new HashSet<>();
+        final HashSet<T> second = new HashSet<>();
         for (final T item : a) {
             if (! b.contains(item)) {
                 first.add(item);

@@ -108,14 +108,14 @@ public final class JkScopeMapping implements Serializable {
     }
 
     private JkScopeMapping andFromTo(JkScope from, Iterable<JkScope> to) {
-        final Map<JkScope, Set<JkScope>> result = new HashMap<JkScope, Set<JkScope>>(map);
+        final Map<JkScope, Set<JkScope>> result = new HashMap<>(map);
         if (result.containsKey(from)) {
             final Set<JkScope> list = result.get(from);
-            final Set<JkScope> newList = new HashSet<JkScope>(list);
+            final Set<JkScope> newList = new HashSet<>(list);
             newList.addAll(JkUtilsIterable.listOf(to));
             result.put(from, Collections.unmodifiableSet(newList));
         } else {
-            final Set<JkScope> newList = new HashSet<JkScope>();
+            final Set<JkScope> newList = new HashSet<>();
             newList.addAll(JkUtilsIterable.listOf(to));
             result.put(from, Collections.unmodifiableSet(newList));
         }
@@ -146,7 +146,7 @@ public final class JkScopeMapping implements Serializable {
      * on right side.
      */
     public Set<JkScope> declaredScopes() {
-        final Set<JkScope> result = new HashSet<JkScope>();
+        final Set<JkScope> result = new HashSet<>();
         result.addAll(entries());
         for (final JkScope scope : entries()) {
             result.addAll(this.map.get(scope));
@@ -186,7 +186,7 @@ public final class JkScopeMapping implements Serializable {
          * Similar to {@link #to(JkScope...)} but allow raw string as parameter
          */
         public JkScopeMapping to(String... targets) {
-            final List<JkScope> list = new LinkedList<JkScope>();
+            final List<JkScope> list = new LinkedList<>();
             for (final String target : targets) {
                 list.add(JkScope.of(target));
             }

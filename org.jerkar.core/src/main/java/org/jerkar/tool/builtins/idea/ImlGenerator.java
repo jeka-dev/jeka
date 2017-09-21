@@ -83,7 +83,7 @@ final class ImlGenerator {
     /* When true, path will be mentioned with $JERKAR_HOME$ and $JERKAR_REPO$ instead of explicit absolute path. */
     boolean useVarPath;
 
-    private final Set<String> paths = new HashSet<String>();
+    private final Set<String> paths = new HashSet<>();
 
     private final ByteArrayOutputStream fos = new ByteArrayOutputStream();
 
@@ -113,8 +113,8 @@ final class ImlGenerator {
         writeJdk();
         writeContent();
         writeOrderEntrySourceFolder();
-        Set<File> allPaths = new HashSet<File>();
-        Set<File> allModules = new HashSet<File>();
+        Set<File> allPaths = new HashSet<>();
+        Set<File> allModules = new HashSet<>();
         if (this.dependencyResolver != null) {
             writeDependencies(dependencies, this.dependencyResolver, allPaths, allModules, false);
         }
@@ -297,7 +297,7 @@ final class ImlGenerator {
 
     private List<LibPath> toLibPath(JkDependencyNode.ModuleNodeInfo moduleInfo, JkRepos repos,
                                     String scope) {
-        final List<LibPath> result = new LinkedList<LibPath>();
+        final List<LibPath> result = new LinkedList<>();
         final JkModuleId moduleId = moduleInfo.moduleId();
         final JkVersion version = moduleInfo.resolvedVersion();
         final JkVersionedModule versionedModule = JkVersionedModule.of(moduleId, version);
@@ -314,7 +314,7 @@ final class ImlGenerator {
     }
 
     private static Set<String> toStringScopes(Set<JkScope> scopes) {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         for (JkScope scope : scopes) {
             result.add(scope.name());
         }

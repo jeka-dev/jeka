@@ -23,7 +23,7 @@ public final class JkJavaCompilerSpec {
      * Returns a specification with specified source and target version.
      */
     public static JkJavaCompilerSpec of(JkJavaVersion version) {
-        return new JkJavaCompilerSpec(new LinkedList<String>()).withSourceAndTargetVersion(version);
+        return new JkJavaCompilerSpec(new LinkedList<>()).withSourceAndTargetVersion(version);
     }
 
     /**
@@ -97,7 +97,7 @@ public final class JkJavaCompilerSpec {
      * options.
      */
     public JkJavaCompilerSpec andOptions(List<String> options) {
-        final List<String> newOptions = new LinkedList<String>(this.options);
+        final List<String> newOptions = new LinkedList<>(this.options);
         newOptions.addAll(options);
         return new JkJavaCompilerSpec(newOptions);
     }

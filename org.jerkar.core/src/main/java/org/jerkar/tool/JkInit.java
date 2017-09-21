@@ -131,7 +131,7 @@ public final class JkInit {
     private static LoadResult loadOptionsAndSystemProps(String[] args) {
         final Map<String, String> sysProps = getSpecifiedSystemProps(args);
         JkUtilsTool.setSystemProperties(sysProps);
-        final Map<String, String> optionMap = new HashMap<String, String>();
+        final Map<String, String> optionMap = new HashMap<>();
         optionMap.putAll(loadOptionsProperties());
         final CommandLine commandLine = CommandLine.of(args);
         optionMap.putAll(commandLine.getSubProjectBuildOptions());
@@ -166,7 +166,7 @@ public final class JkInit {
     }
 
     private static Map<String, String> getSpecifiedSystemProps(String[] args) {
-        final Map<String, String> result = new TreeMap<String, String>();
+        final Map<String, String> result = new TreeMap<>();
         final File propFile = new File(JkLocator.jerkarHome(), "system.properties");
         if (propFile.exists()) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
@@ -213,7 +213,7 @@ public final class JkInit {
 
     private static Map<String, String> loadOptionsProperties() {
         final File propFile = new File(JkLocator.jerkarHome(), "options.properties");
-        final Map<String, String> result = new HashMap<String, String>();
+        final Map<String, String> result = new HashMap<>();
         if (propFile.exists()) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
         }

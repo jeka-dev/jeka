@@ -69,7 +69,7 @@ class JUnit4TestExecutor {
     }
 
     private static Class<?>[] toClassArray(String[] classNames) {
-        final List<Class<?>> classes = new ArrayList<Class<?>>();
+        final List<Class<?>> classes = new ArrayList<>();
         for (final String each : classNames) {
             try {
                 classes.add(Class.forName(each));

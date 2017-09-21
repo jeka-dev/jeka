@@ -19,8 +19,6 @@ import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.*;
-import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkBuildDependency;
 import org.jerkar.tool.JkConstants;
 import org.jerkar.tool.JkOptions;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
@@ -136,7 +134,7 @@ final class DotClasspathGenerator {
         writer.writeStartElement("classpath");
         writer.writeCharacters("\n");
 
-        final Set<String> paths = new HashSet<String>();
+        final Set<String> paths = new HashSet<>();
 
         // Write sources for build classes
         if (new File(projectDir, JkConstants.BUILD_DEF_DIR).exists()) {
@@ -259,7 +257,7 @@ final class DotClasspathGenerator {
 
     private void generateSrcAndTestSrc(XMLStreamWriter writer) throws XMLStreamException {
 
-        final Set<String> sourcePaths = new HashSet<String>();
+        final Set<String> sourcePaths = new HashSet<>();
 
         // Test Sources
         for (final JkFileTree fileTree : testSources.fileTrees()) {

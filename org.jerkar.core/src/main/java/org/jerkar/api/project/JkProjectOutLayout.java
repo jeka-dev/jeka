@@ -68,7 +68,6 @@ public class JkProjectOutLayout {
 
     public JkProjectOutLayout withOutputDir(File newOutputDir) {
         final File originalOut = this.outputDir;
-        final File outputDir = newOutputDir;
         final File classDir = move(this.classDir, originalOut, newOutputDir);
         final File testClassDir = move(this.testClassDir, originalOut, newOutputDir);
         final File testReportDir = move(this.testReportDir, originalOut, newOutputDir);
@@ -76,7 +75,7 @@ public class JkProjectOutLayout {
         final File generatedSourceDir = move(this.generatedSourceDir, originalOut, newOutputDir);
         final File generatedTestResourceDir = move(this.generatedTestResourceDir, originalOut, newOutputDir);
         final File javadocDir = move(this.javadocDir, originalOut, newOutputDir);
-        return new JkProjectOutLayout(outputDir, generatedSourceDir, generatedResourceDir, generatedTestResourceDir,
+        return new JkProjectOutLayout(newOutputDir, generatedSourceDir, generatedResourceDir, generatedTestResourceDir,
                 classDir, testClassDir, testReportDir, javadocDir);
     }
 

@@ -17,7 +17,7 @@ import org.jerkar.api.utils.JkUtilsString;
 
 final class OptionInjector {
 
-    private static final String UNHANDLED_TYPE = new String();
+    private static final String UNHANDLED_TYPE = "";
 
     public static void inject(Object target, Map<String, String> props) {
         final List<Field> fields = involvedFields(target, props);
@@ -30,7 +30,7 @@ final class OptionInjector {
     private static List<Field> involvedFields(Object inspected, Map<String, String> props) {
         final List<Field> fields = JkUtilsReflect.getAllDeclaredField(inspected.getClass(), true);
         final Set<String> candidateFields = candidateFields(props);
-        final List<Field> result = new LinkedList<Field>();
+        final List<Field> result = new LinkedList<>();
         for (final Field field : fields) {
             if (candidateFields.contains(field.getName()) && injectable(field)) {
                 result.add(field);
@@ -43,10 +43,7 @@ final class OptionInjector {
         if (Modifier.isPrivate(field.getModifiers()) && field.getAnnotation(JkDoc.class) == null) {
             return false;
         }
-        if (Modifier.isStatic(field.getModifiers())) {
-            return false;
-        }
-        return true;
+        return !Modifier.isStatic(field.getModifiers());
     }
 
     @SuppressWarnings("unchecked")
@@ -140,7 +137,7 @@ final class OptionInjector {
 
     private static Map<String, String> extractKeyStartingWith(String prefix,
             Map<String, String> values) {
-        final Map<String, String> result = new HashMap<String, String>();
+        final Map<String, String> result = new HashMap<>();
         for (final String string : values.keySet()) {
             if (string.startsWith(prefix)) {
                 result.put(string.substring(prefix.length()), values.get(string));
@@ -150,7 +147,7 @@ final class OptionInjector {
     }
 
     private static Set<String> candidateFields(Map<String, String> props) {
-        final Set<String> result = new HashSet<String>();
+        final Set<String> result = new HashSet<>();
         for (final String key : props.keySet()) {
             if (key.contains(".")) {
                 result.add(JkUtilsString.substringBeforeFirst(key, "."));
@@ -171,13 +168,8 @@ final class OptionInjector {
 
     private static Map<String, String> injectedFields(String context, Object inspected) {
         final List<Field> fields = JkUtilsReflect.getAllDeclaredField(inspected.getClass(), true);
-        for (final Iterator<Field> it = fields.iterator(); it.hasNext();) {
-            final Field field = it.next();
-            if (!injectable(field)) {
-                it.remove();
-            }
-        }
-        final Map<String, String> result = new TreeMap<String, String>();
+        fields.removeIf(field -> !injectable(field));
+        final Map<String, String> result = new TreeMap<>();
         for (final Field field : fields) {
             final Object value = JkUtilsReflect.getFieldValue(inspected, field);
             final String stringValue = stringValue(value);

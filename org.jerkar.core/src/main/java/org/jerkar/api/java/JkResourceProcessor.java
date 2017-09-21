@@ -62,7 +62,7 @@ public final class JkResourceProcessor {
      */
     public void generateTo(File outputDir) {
         JkLog.startln("Coping resource files to " + outputDir.getPath());
-        final Set<File> files = new HashSet<File>();
+        final Set<File> files = new HashSet<>();
         for (final JkFileTree resourceTree : this.resourceTrees.fileTrees()) {
             if (!resourceTree.root().exists()) {
                 continue;
@@ -119,7 +119,7 @@ public final class JkResourceProcessor {
      * adding the specified interpolator.
      */
     public JkResourceProcessor and(JkInterpolator interpolator) {
-        final List<JkInterpolator> list = new LinkedList<JkInterpolator>(this.interpolators);
+        final List<JkInterpolator> list = new LinkedList<>(this.interpolators);
         list.add(interpolator);
         return new JkResourceProcessor(this.resourceTrees, list);
     }
@@ -129,7 +129,7 @@ public final class JkResourceProcessor {
      * adding the specified interpolator.
      */
     public JkResourceProcessor and(Iterable<JkInterpolator> interpolators) {
-        final List<JkInterpolator> list = new LinkedList<JkInterpolator>(this.interpolators);
+        final List<JkInterpolator> list = new LinkedList<>(this.interpolators);
         JkUtilsIterable.addAllWithoutDuplicate(list, interpolators);
         return new JkResourceProcessor(this.resourceTrees, list);
     }
@@ -166,7 +166,7 @@ public final class JkResourceProcessor {
          * key/values to replace.
          */
         public static JkInterpolator of(JkPathFilter filter, Map<String, String> map) {
-            return new JkInterpolator(filter, new HashMap<String, String>(map));
+            return new JkInterpolator(filter, new HashMap<>(map));
         }
 
         /**
@@ -207,7 +207,7 @@ public final class JkResourceProcessor {
 
         private static Map<String, String> interpolateData(String path,
                 Iterable<JkInterpolator> interpolators) {
-            final Map<String, String> result = new HashMap<String, String>();
+            final Map<String, String> result = new HashMap<>();
             for (final JkInterpolator interpolator : interpolators) {
                 if (interpolator.fileFilter.accept(path)) {
                     result.putAll(interpolator.keyValues);

@@ -29,7 +29,7 @@ import org.jerkar.api.utils.JkUtilsString;
  */
 final class PluginDictionnary<T> {
 
-    private static final Map<Class<?>, Set<Class<?>>> CACHE = new HashMap<Class<?>, Set<Class<?>>>();
+    private static final Map<Class<?>, Set<Class<?>>> CACHE = new HashMap<>();
 
     /**
      * Creates a {@link PluginDictionnary} for the specified extension points.
@@ -37,7 +37,7 @@ final class PluginDictionnary<T> {
      * specified extension point in the parameter templateClass.
      */
     public static <T> PluginDictionnary<T> of(Class<T> templateClass) {
-        final PluginDictionnary<T> result = new PluginDictionnary<T>(templateClass);
+        final PluginDictionnary<T> result = new PluginDictionnary<>(templateClass);
         if (CACHE.containsKey(templateClass)) {
             final Set<Class<?>> pluginClasses = CACHE.get(templateClass);
             result.plugins = toPluginSet(templateClass, pluginClasses);
@@ -133,13 +133,13 @@ final class PluginDictionnary<T> {
         if (pluginClass == null) {
             return null;
         }
-        return new JkPluginDescription<T>(templateClass, pluginClass);
+        return new JkPluginDescription<>(templateClass, pluginClass);
     }
 
     private static <T> Set<JkPluginDescription<T>> loadPlugins(Class<T> templateClass,
             String... patterns) {
         final Set<Class<?>> matchingClasses = JkClassLoader.of(templateClass).loadClasses(patterns);
-        final Set<Class<?>> result = new HashSet<Class<?>>();
+        final Set<Class<?>> result = new HashSet<>();
         for (final Class<?> candidate : matchingClasses) {
             if (templateClass.isAssignableFrom(candidate)
                     && !Modifier.isAbstract(candidate.getModifiers())
@@ -153,9 +153,9 @@ final class PluginDictionnary<T> {
     @SuppressWarnings("unchecked")
     private static <T> Set<JkPluginDescription<T>> toPluginSet(Class<T> extendingClass,
             Iterable<Class<?>> classes) {
-        final Set<JkPluginDescription<T>> result = new TreeSet<JkPluginDescription<T>>();
+        final Set<JkPluginDescription<T>> result = new TreeSet<>();
         for (final Class<?> clazz : classes) {
-            result.add(new JkPluginDescription<T>(extendingClass, (Class<? extends T>) clazz));
+            result.add(new JkPluginDescription<>(extendingClass, (Class<? extends T>) clazz));
         }
         return result;
     }
@@ -184,7 +184,7 @@ final class PluginDictionnary<T> {
          * instance class and the ones declared in its super classes.
          */
         public static List<JkPluginDescription<?>> declaredAsField(JkBuild hostingInstance) {
-            final List<JkPluginDescription<?>> result = new LinkedList<JkPluginDescription<?>>();
+            final List<JkPluginDescription<?>> result = new LinkedList<>();
             final List<Class<Object>> templateClasses = hostingInstance.pluginTemplateClasses();
             for (final Class<Object> clazz : templateClasses) {
                 final PluginDictionnary<Object> plugins = PluginDictionnary.of(clazz);

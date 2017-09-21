@@ -5,7 +5,6 @@ import java.io.File;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
-import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.utils.JkUtilsFile;
 
 /**

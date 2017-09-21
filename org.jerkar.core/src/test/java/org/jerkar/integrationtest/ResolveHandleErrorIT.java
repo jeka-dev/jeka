@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import static org.jerkar.tool.builtins.javabuild.JkJavaBuild.*;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Created by angibaudj on 19-06-17.

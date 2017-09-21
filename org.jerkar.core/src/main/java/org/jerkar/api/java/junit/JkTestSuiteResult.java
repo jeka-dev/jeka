@@ -50,7 +50,7 @@ public class JkTestSuiteResult implements Serializable {
     }
 
     List<TestCaseFailure> failures() {
-        final List<TestCaseFailure> result = new LinkedList<JkTestSuiteResult.TestCaseFailure>();
+        final List<TestCaseFailure> result = new LinkedList<>();
         for (final TestCaseResult caseResult : this.testCaseResults) {
             if (caseResult instanceof TestCaseFailure) {
                 result.add((TestCaseFailure) caseResult);
@@ -118,7 +118,7 @@ public class JkTestSuiteResult implements Serializable {
      * Returns a multi line string representation of the suite execution result;
      */
     public List<String> toStrings(boolean showStackTrace) {
-        final List<String> lines = new LinkedList<String>();
+        final List<String> lines = new LinkedList<>();
         if (failureCount() == 0) {
             lines.add(toString());
         } else {
@@ -218,7 +218,7 @@ public class JkTestSuiteResult implements Serializable {
          * Returns a multi line string representation of the test case execution result;
          */
         public List<String> toStrings(boolean withStackTrace) {
-            final List<String> result = new LinkedList<String>();
+            final List<String> result = new LinkedList<>();
             final String intro = this.getClassName() + "#" + this.getTestName();
 
             if (withStackTrace) {
@@ -336,7 +336,7 @@ public class JkTestSuiteResult implements Serializable {
         }
 
         private List<String> stackTracesAsStrings(String prefix) {
-            final List<String> result = new LinkedList<String>();
+            final List<String> result = new LinkedList<>();
             if (prefix != null) {
                 result.add(prefix);
             }
@@ -357,7 +357,7 @@ public class JkTestSuiteResult implements Serializable {
         final Integer runCount = JkUtilsReflect.invoke(result, "getRunCount");
         final Integer ignoreCount = JkUtilsReflect.invoke(result, "getIgnoreCount");
         final List<Object> junitFailures = JkUtilsReflect.invoke(result, "getFailures");
-        final List<JkTestSuiteResult.TestCaseFailure> failures = new ArrayList<JkTestSuiteResult.TestCaseFailure>(
+        final List<JkTestSuiteResult.TestCaseFailure> failures = new ArrayList<>(
                 junitFailures.size());
         for (final Object junitFailure : junitFailures) {
             failures.add(fromJunit4Failure(junitFailure));

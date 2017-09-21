@@ -1,7 +1,6 @@
 package org.jerkar.tool.builtins.javabuild;
 
 import java.io.File;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -139,7 +138,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected List<Class<Object>> pluginTemplateClasses() {
-        final List<Class<Object>> result = new LinkedList<Class<Object>>();
+        final List<Class<Object>> result = new LinkedList<>();
         final Class clazz = JkJavaBuildPlugin.class;
         result.add(clazz);
         return result;
@@ -362,19 +361,15 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
     @Override
     protected JkScaffolder scaffolder() {
-        final Runnable addFolder = new Runnable() {
-
-            @Override
-            public void run() {
-                for (final JkFileTree dir : editedSources().fileTrees()) {
-                    dir.root().mkdirs();
-                    final String packageName = JkUtilsString.conformPackageName(moduleId().fullName());
-                    final String path = packageName.replace('.', '/');
-                    dir.file(path).mkdirs();
-                }
-                for (final JkFileTree dir : unitTestEditedSources().fileTrees()) {
-                    dir.root().mkdirs();
-                }
+        final Runnable addFolder = () -> {
+            for (final JkFileTree dir : editedSources().fileTrees()) {
+                dir.root().mkdirs();
+                final String packageName = JkUtilsString.conformPackageName(moduleId().fullName());
+                final String path = packageName.replace('.', '/');
+                dir.file(path).mkdirs();
+            }
+            for (final JkFileTree dir : unitTestEditedSources().fileTrees()) {
+                dir.root().mkdirs();
             }
         };
         return super.scaffolder().buildClassWriter(scaffoldedBuildClassCode()).extraAction(addFolder);
@@ -847,12 +842,12 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
     @Override
     public String infoString() {
-        StringBuilder builder = new StringBuilder(super.infoString()).append("\n\n");
-        builder.append("source dirs : " + this.sources()).append("\n");
-        builder.append("test dirs: " + this.unitTestSources()).append("\n");
-        builder.append("java source version : " + this.javaSourceVersion()).append("\n");
-        builder.append("java target version : " + this.javaTargetVersion());
-        return builder.toString();
+        String builder = super.infoString() + "\n\n" +
+                "source dirs : " + this.sources() + "\n" +
+                "test dirs: " + this.unitTestSources() + "\n" +
+                "java source version : " + this.javaSourceVersion() + "\n" +
+                "java target version : " + this.javaTargetVersion();
+        return builder;
     }
 
 

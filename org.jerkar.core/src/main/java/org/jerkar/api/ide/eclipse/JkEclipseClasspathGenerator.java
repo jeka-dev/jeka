@@ -49,7 +49,7 @@ public final class JkEclipseClasspathGenerator {
     private JkDependencies buildDependencies;
 
     // content for build class only
-    private List<File> slaveProjects = new LinkedList<File>();
+    private List<File> slaveProjects = new LinkedList<>();
 
     // --------------------- options --------------------------------
 
@@ -152,7 +152,7 @@ public final class JkEclipseClasspathGenerator {
         writer.writeStartElement("classpath");
         writer.writeCharacters("\n");
 
-        final Set<String> paths = new HashSet<String>();
+        final Set<String> paths = new HashSet<>();
 
         // Write sources for build classes
         if (hasBuildScript && new File(sourceLayout.baseDir(), JkConstants.BUILD_DEF_DIR).exists()) {
@@ -276,7 +276,7 @@ public final class JkEclipseClasspathGenerator {
 
     private void generateSrcAndTestSrc(XMLStreamWriter writer) throws XMLStreamException {
 
-        final Set<String> sourcePaths = new HashSet<String>();
+        final Set<String> sourcePaths = new HashSet<>();
 
         // Test Sources
         for (final JkFileTree fileTree : sourceLayout.tests().and(sourceLayout.testResources()).fileTrees()) {

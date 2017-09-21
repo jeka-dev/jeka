@@ -1,8 +1,6 @@
 package org.jerkar.api.java;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.tools.ToolProvider;
 

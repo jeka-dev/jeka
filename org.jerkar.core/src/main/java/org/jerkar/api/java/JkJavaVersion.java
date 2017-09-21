@@ -1,6 +1,5 @@
 package org.jerkar.api.java;
 
-import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.utils.JkUtilsAssert;
 
 public final class JkJavaVersion {

@@ -42,7 +42,6 @@ class JUnitConsoleListener extends RunListener {
     @Override
     public void testFailure(Failure failure) throws Exception {
         failure.getException().printStackTrace(JkLog.infoStream());
-        ;
     }
 
 }

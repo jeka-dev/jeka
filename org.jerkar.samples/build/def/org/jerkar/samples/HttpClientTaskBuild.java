@@ -6,7 +6,6 @@ import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 import static org.jerkar.api.depmanagement.JkPopularModules.MOCKITO_ALL;
 
 import java.io.IOException;
-import java.util.Objects;
 
 import com.google.common.base.MoreObjects;
 import org.apache.commons.httpclient.HttpClient;
@@ -15,14 +14,13 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkImport;
-import org.jerkar.tool.JkImportRepo;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
  * This build demonstrates how to use 3rd party dependencies in your build.
  * 
  * @author Jerome Angibaud
- * @fprmatter:off
+ * @formatter:off
  */
 @JkImport("commons-httpclient:commons-httpclient:3.1")
 @JkImport("com.google.guava:guava:21.0")
@@ -38,7 +36,7 @@ public class HttpClientTaskBuild extends JkJavaBuild {
 	}
 
 	@JkDoc("Performs some load test using http client")
-	public void seleniumLoadTest() throws HttpException, IOException {
+	public void seleniumLoadTest() throws IOException {
 		HttpClient client = new HttpClient();
 		GetMethod getMethod = new GetMethod("http://my.url");
 		client.executeMethod(getMethod);

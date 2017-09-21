@@ -54,7 +54,7 @@ public final class JkFileTreeSet implements Iterable<File> {
      * Creates a {@link JkFileTreeSet} to an array of folder.
      */
     public static final JkFileTreeSet of(File... folders) {
-        final List<JkFileTree> dirs = new ArrayList<JkFileTree>(folders.length);
+        final List<JkFileTree> dirs = new ArrayList<>(folders.length);
         for (final File folder : folders) {
             dirs.add(JkFileTree.of(folder));
         }
@@ -67,7 +67,7 @@ public final class JkFileTreeSet implements Iterable<File> {
      * parameter.
      */
     public final JkFileTreeSet and(JkFileTree... dirViews) {
-        final List<JkFileTree> list = new LinkedList<JkFileTree>(this.jkFileTrees);
+        final List<JkFileTree> list = new LinkedList<>(this.jkFileTrees);
         list.addAll(Arrays.asList(dirViews));
         return new JkFileTreeSet(list);
     }
@@ -77,7 +77,7 @@ public final class JkFileTreeSet implements Iterable<File> {
      * {@link JkFileTreeSet} and the folder array passed as parameter.
      */
     public final JkFileTreeSet and(File... folders) {
-        final List<JkFileTree> dirs = new ArrayList<JkFileTree>(folders.length);
+        final List<JkFileTree> dirs = new ArrayList<>(folders.length);
         for (final File folder : folders) {
             dirs.add(JkFileTree.of(folder));
         }
@@ -90,7 +90,7 @@ public final class JkFileTreeSet implements Iterable<File> {
      * parameter.
      */
     public final JkFileTreeSet and(JkFileTreeSet... otherDirSets) {
-        final List<JkFileTree> list = new LinkedList<JkFileTree>(this.jkFileTrees);
+        final List<JkFileTree> list = new LinkedList<>(this.jkFileTrees);
         for (final JkFileTreeSet otherDirSet : otherDirSets) {
             list.addAll(otherDirSet.jkFileTrees);
         }
@@ -144,7 +144,7 @@ public final class JkFileTreeSet implements Iterable<File> {
      * augmented with the specified {@link JkPathFilter}
      */
     public JkFileTreeSet andFilter(JkPathFilter filter) {
-        final List<JkFileTree> list = new LinkedList<JkFileTree>();
+        final List<JkFileTree> list = new LinkedList<>();
         for (final JkFileTree dirView : this.jkFileTrees) {
             list.add(dirView.andFilter(filter));
         }
@@ -155,7 +155,7 @@ public final class JkFileTreeSet implements Iterable<File> {
      * Returns files contained in this {@link JkFileTreeSet} as a list of file.
      */
     public List<File> files(boolean includeFolders) {
-        final LinkedList<File> result = new LinkedList<File>();
+        final LinkedList<File> result = new LinkedList<>();
         for (final JkFileTree dirView : this.jkFileTrees) {
             if (dirView.root().exists()) {
                 result.addAll(dirView.files(includeFolders));
@@ -169,7 +169,7 @@ public final class JkFileTreeSet implements Iterable<File> {
      * relative to the asScopedDependency of their respective {@link JkFileTree}.
      */
     public List<String> relativePathes() {
-        final LinkedList<String> result = new LinkedList<String>();
+        final LinkedList<String> result = new LinkedList<>();
         for (final JkFileTree dir : this.jkFileTrees) {
             if (dir.root().exists()) {
                 result.addAll(dir.relativePathes());
@@ -191,7 +191,7 @@ public final class JkFileTreeSet implements Iterable<File> {
      * {@link JkFileTreeSet}.
      */
     public List<File> roots() {
-        final List<File> result = new LinkedList<File>();
+        final List<File> result = new LinkedList<>();
         for (final JkFileTree dirView : jkFileTrees) {
             result.add(dirView.root());
         }
@@ -252,7 +252,7 @@ public final class JkFileTreeSet implements Iterable<File> {
      */
     @Deprecated
     public List<File> rootDirs() {
-        final List<File> result = new LinkedList<File>();
+        final List<File> result = new LinkedList<>();
         for (final JkFileTree dir : jkFileTrees) {
             result.add(dir.root());
         }

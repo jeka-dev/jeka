@@ -31,7 +31,7 @@ public final class JkPath implements Iterable<File> {
      * Creates a path to a sequence of files.
      */
     public static JkPath of(Iterable<File> entries) {
-        final LinkedHashSet<File> files = new LinkedHashSet<File>(JkUtilsIterable.listOf(entries));
+        final LinkedHashSet<File> files = new LinkedHashSet<>(JkUtilsIterable.listOf(entries));
         return new JkPath(files);
     }
 
@@ -41,7 +41,7 @@ public final class JkPath implements Iterable<File> {
      */
     public static JkPath of(File baseDir, String relativePathAsString) {
         final String[] paths = JkUtilsString.split(relativePathAsString, File.pathSeparator);
-        final List<File> result = new LinkedList<File>();
+        final List<File> result = new LinkedList<>();
         for (final String path : paths) {
             File file = new File(path);
             if (!file.isAbsolute()) {
@@ -79,7 +79,7 @@ public final class JkPath implements Iterable<File> {
      * the first occurrence is kept.
      */
     public JkPath withoutDuplicates() {
-        final List<File> files = new LinkedList<File>();
+        final List<File> files = new LinkedList<>();
         for (final File file : this) {
             if (!files.contains(file)) {
                 files.add(file);

@@ -26,7 +26,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
  */
 public class JkComputedDependency implements JkFileDependency {
 
-    private static final Supplier<Iterable<File>> EMPTY_SUPPLIER = () -> new LinkedList<>();
+    private static final Supplier<Iterable<File>> EMPTY_SUPPLIER = LinkedList::new;
 
     /**
      * Creates a computed dependency to the specified files and {@link JkProcess} to run for
@@ -65,13 +65,7 @@ public class JkComputedDependency implements JkFileDependency {
     public static final JkComputedDependency of(Iterable<File> files, final JkJavaProcess process,
             final String className, final String... args) {
         final List<File> fileSet = JkUtilsIterable.listWithoutDuplicateOf(files);
-        final Runnable runnable = new Runnable() {
-
-            @Override
-            public void run() {
-                process.runClassSync(className, args);
-            }
-        };
+        final Runnable runnable = () -> process.runClassSync(className, args);
         return new JkComputedDependency(runnable, null, fileSet, EMPTY_SUPPLIER);
     }
 
@@ -153,8 +147,6 @@ public class JkComputedDependency implements JkFileDependency {
 
     /**
      * Returns <code>true</code> if one of this file or more is located under or below the specified folder.
-     * @param folder
-     * @return
      */
     public final boolean hasFileWithin(File folder) {
         for (final File file : this.files) {

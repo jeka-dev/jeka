@@ -58,7 +58,7 @@ public abstract class JkPathFilter {
         @Override
         public List<String> getExcludePatterns() {
             return JkUtilsIterable.listOf();
-        };
+        }
 
     };
 
@@ -166,13 +166,9 @@ public abstract class JkPathFilter {
      * absolute.
      */
     public FileFilter toFileFilter(final File baseDir) {
-        return new FileFilter() {
-
-            @Override
-            public boolean accept(File file) {
-                final String relativePath = JkUtilsFile.getRelativePath(baseDir, file).replace(File.separator, "/");
-                return JkPathFilter.this.accept(relativePath);
-            }
+        return file -> {
+            final String relativePath = JkUtilsFile.getRelativePath(baseDir, file).replace(File.separator, "/");
+            return JkPathFilter.this.accept(relativePath);
         };
     }
 
@@ -205,7 +201,7 @@ public abstract class JkPathFilter {
 
         @Override
         public List<String> getIncludePatterns() {
-            final List<String> result = new LinkedList<String>();
+            final List<String> result = new LinkedList<>();
             for (final AntPattern antPattern : this.antPatterns) {
                 result.add(antPattern.pattern());
             }
@@ -265,7 +261,7 @@ public abstract class JkPathFilter {
 
         @Override
         public List<String> getExcludePatterns() {
-            final List<String> result = new LinkedList<String>();
+            final List<String> result = new LinkedList<>();
             for (final AntPattern antPattern : this.antPatterns) {
                 result.add(antPattern.pattern());
             }
@@ -279,14 +275,7 @@ public abstract class JkPathFilter {
      * than this object.
      */
     public JkZipEntryFilter toZipEntryFilter() {
-        return new JkZipEntryFilter() {
-
-            @Override
-            public boolean accept(String entryName) {
-                return JkPathFilter.this.accept(entryName);
-
-            }
-        };
+        return entryName -> JkPathFilter.this.accept(entryName);
     }
 
     private static class CompoundFilter extends JkPathFilter {
@@ -318,7 +307,7 @@ public abstract class JkPathFilter {
 
         @Override
         public List<String> getIncludePatterns() {
-            final List<String> result = new LinkedList<String>();
+            final List<String> result = new LinkedList<>();
             result.addAll(filter1.getIncludePatterns());
             result.addAll(filter2.getIncludePatterns());
             return result;
@@ -326,7 +315,7 @@ public abstract class JkPathFilter {
 
         @Override
         public List<String> getExcludePatterns() {
-            final List<String> result = new LinkedList<String>();
+            final List<String> result = new LinkedList<>();
             result.addAll(filter1.getExcludePatterns());
             result.addAll(filter2.getExcludePatterns());
             return result;

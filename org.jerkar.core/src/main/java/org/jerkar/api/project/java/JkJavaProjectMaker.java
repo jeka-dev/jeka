@@ -92,9 +92,8 @@ public class JkJavaProjectMaker {
 
     // Clean -----------------------------------------------
 
-    public final JkRunnables cleaner = JkRunnables.of(() -> {
-        JkUtilsFile.deleteDirContent(project.getOutLayout().outputDir());
-    });
+    public final JkRunnables cleaner = JkRunnables.of(
+            () -> JkUtilsFile.deleteDirContent(project.getOutLayout().outputDir()));
 
     public JkJavaProjectMaker clean() {
         status.reset();
@@ -110,12 +109,10 @@ public class JkJavaProjectMaker {
 
     public final JkRunnables resourceGenerator = JkRunnables.noOp();
 
-    public final JkRunnables resourceProcessor = JkRunnables.of(() -> {
-        JkResourceProcessor.of(project.getSourceLayout().resources())
-                .and(project.getOutLayout().generatedResourceDir())
-                .and(project.getResourceInterpolators())
-                .generateTo(project.getOutLayout().classDir());
-    });
+    public final JkRunnables resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().resources())
+            .and(project.getOutLayout().generatedResourceDir())
+            .and(project.getResourceInterpolators())
+            .generateTo(project.getOutLayout().classDir()));
 
     public final JkRunnables compiler = JkRunnables.of(() -> {
         JkJavaCompiler comp = baseCompiler.andOptions(project.getCompileSpec().asOptions());
@@ -156,12 +153,10 @@ public class JkJavaProjectMaker {
     public final JkRunnables testResourceGenerator = JkRunnables.of(() -> {
     });
 
-    public final JkRunnables testResourceProcessor = JkRunnables.of(() -> {
-        JkResourceProcessor.of(project.getSourceLayout().testResources())
-                .and(project.getOutLayout().generatedTestResourceDir())
-                .and(project.getResourceInterpolators())
-                .generateTo(project.getOutLayout().testClassDir());
-    });
+    public final JkRunnables testResourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().testResources())
+            .and(project.getOutLayout().generatedTestResourceDir())
+            .and(project.getResourceInterpolators())
+            .generateTo(project.getOutLayout().testClassDir()));
 
     public final JkRunnables testCompiler = JkRunnables.of(() -> {
         JkJavaCompiler comp = testBaseCompiler.andOptions(this.project.getCompileSpec().asOptions());

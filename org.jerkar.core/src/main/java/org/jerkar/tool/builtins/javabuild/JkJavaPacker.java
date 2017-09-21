@@ -69,7 +69,7 @@ public class JkJavaPacker implements Cloneable {
 
     private JkFileTreeSet extraFilesInJar = JkFileTreeSet.empty();
 
-    private List<JkExtraPacking> extraActions = new LinkedList<JkExtraPacking>();
+    private List<JkExtraPacking> extraActions = new LinkedList<>();
 
     private JkJavaPacker(JkJavaBuild build) {
         this.build = build;
@@ -77,7 +77,7 @@ public class JkJavaPacker implements Cloneable {
         this.fatJarSuffix = build.pack.fatJarSuffix;
         this.doTest = build.pack.tests;
         if (build.pack.checksums == null) {
-            this.checkSums = new HashSet<String>();
+            this.checkSums = new HashSet<>();
         } else {
             this.checkSums = JkUtilsIterable.setOf(JkUtilsString.split(
                     build.pack.checksums.toUpperCase(), ","));
@@ -210,7 +210,7 @@ public class JkJavaPacker implements Cloneable {
         /**
          * Method invoked by the {@link JkJavaBuild#pack} method.
          */
-        public void process(JkJavaBuild build);
+        void process(JkJavaBuild build);
 
     }
 
@@ -372,7 +372,7 @@ public class JkJavaPacker implements Cloneable {
         } catch (final CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }
-        clone.extraActions = new LinkedList<JkJavaPacker.JkExtraPacking>(this.extraActions);
+        clone.extraActions = new LinkedList<>(this.extraActions);
         return clone;
     }
 

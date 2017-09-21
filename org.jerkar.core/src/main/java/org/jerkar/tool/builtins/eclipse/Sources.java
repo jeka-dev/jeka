@@ -6,13 +6,7 @@ class Sources {
 
     public static final TestSegregator ALL_PROD = new NoTests();
 
-    public static final TestSegregator SMART = new TestSegregator() {
-
-        @Override
-        public boolean isTest(String path) {
-            return path.toLowerCase().contains("test");
-        }
-    };
+    public static final TestSegregator SMART = path -> path.toLowerCase().contains("test");
 
     public final JkFileTreeSet prodSources;
 
@@ -24,9 +18,9 @@ class Sources {
         this.testSources = testSources;
     }
 
-    public static interface TestSegregator {
+    public interface TestSegregator {
 
-        public boolean isTest(String path);
+        boolean isTest(String path);
 
     }
 

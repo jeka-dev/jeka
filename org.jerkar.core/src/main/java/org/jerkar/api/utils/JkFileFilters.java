@@ -16,17 +16,13 @@ public final class JkFileFilters {
      * ending with one of the specified suffixes.
      */
     public static FileFilter endingBy(final String... suffixes) {
-        return new FileFilter() {
-
-            @Override
-            public boolean accept(File file) {
-                for (final String suffix : suffixes) {
-                    if (file.getName().endsWith(suffix)) {
-                        return true;
-                    }
+        return file -> {
+            for (final String suffix : suffixes) {
+                if (file.getName().endsWith(suffix)) {
+                    return true;
                 }
-                return false;
             }
+            return false;
         };
     }
 
@@ -88,13 +84,7 @@ public final class JkFileFilters {
      * Creates a fileFilter that accept file rejected by specified filter.
      */
     public static FilenameFilter reverse(final FilenameFilter filter) {
-        return new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String name) {
-                return !filter.accept(dir, name);
-            }
-        };
+        return (dir, name) -> !filter.accept(dir, name);
     }
 
     /**

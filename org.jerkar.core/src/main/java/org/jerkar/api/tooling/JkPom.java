@@ -85,7 +85,7 @@ public final class JkPom {
      * section of this POM.
      */
     public JkVersionProvider versionProvider() {
-        final List<JkVersionedModule> versionedModules = new LinkedList<JkVersionedModule>();
+        final List<JkVersionedModule> versionedModules = new LinkedList<>();
         if (dependencyManagementEl() == null) {
             return JkVersionProvider.empty();
         }
@@ -129,7 +129,7 @@ public final class JkPom {
      * Repositories declared in this POM.
      */
     public JkRepos repos() {
-        final List<String> urls = new LinkedList<String>();
+        final List<String> urls = new LinkedList<>();
         if (repositoriesEl() == null) {
             return JkRepos.empty();
         }

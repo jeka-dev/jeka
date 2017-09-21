@@ -1,8 +1,5 @@
 package org.jerkar.api.utils;
 
-/**
- * Utility class for dealing with IO.
- */
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -194,7 +191,7 @@ public final class JkUtilsIO {
      */
     // TODO encoding ????
     public static List<String> readAsLines(InputStream in) {
-        final List<String> result = new LinkedList<String>();
+        final List<String> result = new LinkedList<>();
         final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         String line;
         try {
@@ -357,11 +354,8 @@ public final class JkUtilsIO {
     public static void serialize(Object object, OutputStream outputStream) {
         try {
             final OutputStream buffer = new BufferedOutputStream(outputStream);
-            final ObjectOutput output = new ObjectOutputStream(buffer);
-            try {
+            try (ObjectOutput output = new ObjectOutputStream(buffer)) {
                 output.writeObject(object);
-            } finally {
-                output.close();
             }
         } catch (final IOException e) {
             throw new RuntimeException(e);
@@ -420,9 +414,7 @@ public final class JkUtilsIO {
         }
         try {
             return input.readObject();
-        } catch (final ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (final IOException e) {
+        } catch (final ClassNotFoundException | IOException e) {
             throw new RuntimeException(e);
         } finally {
             closeQuietly(input);
@@ -506,7 +498,7 @@ public final class JkUtilsIO {
     }
 
     /* table mapping primitive type names to corresponding class objects */
-    private static final HashMap<String, Class<?>> primClasses = new HashMap<String, Class<?>>(8, 1.0F);
+    private static final HashMap<String, Class<?>> primClasses = new HashMap<>(8, 1.0F);
 
     static {
         primClasses.put("boolean", boolean.class);

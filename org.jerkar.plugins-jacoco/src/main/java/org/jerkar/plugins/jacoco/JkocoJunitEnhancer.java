@@ -28,14 +28,14 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
         this.agent = agent;
         this.enabled = enabled;
         this.destFile = destFile;
-        this.options = new LinkedList<String>();
+        this.options = new LinkedList<>();
     }
 
     public static JkocoJunitEnhancer of(File destFile) {
         final URL url = JkBuildPluginJacoco.class.getResource("jacocoagent.jar");
         final File file = JkUtilsIO.copyUrlContentToCacheFile(url, JkLog.infoStreamIfVerbose(),
                 JkClassLoader.urlCacheDir());
-        return new JkocoJunitEnhancer(file, true, destFile, new LinkedList<String>());
+        return new JkocoJunitEnhancer(file, true, destFile, new LinkedList<>());
     }
 
     public JkocoJunitEnhancer withAgent(File jacocoagent) {

@@ -1,13 +1,11 @@
 package org.jerkar.api.system;
 
 import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsSystem;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Created by angibaudj on 25-07-17.

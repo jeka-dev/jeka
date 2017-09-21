@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.time.Instant;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -25,7 +24,6 @@ import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsThrowable;
-import org.jerkar.api.utils.JkUtilsTime;
 
 /**
  * Jerkar users : This class is not part of the public API !!! Please, Use
@@ -163,7 +161,6 @@ final class IvyPublisher implements InternalPublisher {
                 JkLog.startln("Publishing for repository " + resolver);
                 this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor);
                 JkLog.done();
-                ;
                 count++;
             }
         }
@@ -263,9 +260,7 @@ final class IvyPublisher implements InternalPublisher {
             }
             moduleDescriptor.toIvyFile(file);
             return file;
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        } catch (final ParseException e) {
+        } catch (final IOException | ParseException e) {
             throw new RuntimeException(e);
         }
 
@@ -279,9 +274,7 @@ final class IvyPublisher implements InternalPublisher {
             final File propsFile = cacheManager.getResolvedIvyPropertiesInCache(moduleDescriptor
                     .getModuleRevisionId());
             propsFile.delete();
-        } catch (final ParseException e) {
-            throw new RuntimeException(e);
-        } catch (final IOException e) {
+        } catch (final ParseException | IOException e) {
             throw new RuntimeException(e);
         }
     }

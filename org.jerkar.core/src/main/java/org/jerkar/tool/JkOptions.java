@@ -24,7 +24,7 @@ public final class JkOptions {
 
     private static JkOptions INSTANCE = new JkOptions(loadSystemAndUserOptions());
 
-    private final Map<String, String> props = new HashMap<String, String>();
+    private final Map<String, String> props = new HashMap<>();
 
     private static boolean populated;
 
@@ -36,7 +36,7 @@ public final class JkOptions {
         if (populated) {
             throw new IllegalStateException("The init method can be called only once.");
         }
-        final Map<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new HashMap<>();
         map.putAll(options);
         INSTANCE = new JkOptions(map);
         populated = true;
@@ -82,7 +82,7 @@ public final class JkOptions {
      * specified prefix.
      */
     public static Map<String, String> getAllStartingWith(String prefix) {
-        final Map<String, String> result = new HashMap<String, String>();
+        final Map<String, String> result = new HashMap<>();
         for (final String key : INSTANCE.props.keySet()) {
             if (key.startsWith(prefix)) {
                 result.put(key, INSTANCE.props.get(key));
@@ -104,7 +104,7 @@ public final class JkOptions {
     }
 
     static Map<String, String> toDisplayedMap(Map<String, String> props) {
-        final Map<String, String> result = new TreeMap<String, String>();
+        final Map<String, String> result = new TreeMap<>();
         for (final Map.Entry<String, String> entry : props.entrySet()) {
             final String value;
             if (JkUtilsString.firstMatching(entry.getKey().toLowerCase(), "password", "pwd") != null
@@ -121,7 +121,7 @@ public final class JkOptions {
 
     private static Map<String, String> loadSystemAndUserOptions() {
         final File propFile = new File(JkLocator.jerkarHome(), "options.properties");
-        final Map<String, String> result = new HashMap<String, String>();
+        final Map<String, String> result = new HashMap<>();
         if (propFile.exists()) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
         }

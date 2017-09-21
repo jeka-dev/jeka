@@ -60,7 +60,7 @@ public class JkDependencyExclusions {
         Builder() {
         }
 
-        private final Map<JkModuleId, List<JkDepExclude>> exclusions = new HashMap<JkModuleId, List<JkDepExclude>>();
+        private final Map<JkModuleId, List<JkDepExclude>> exclusions = new HashMap<>();
 
         /**
          * Adds specified exclusions on the specified module.
@@ -73,7 +73,7 @@ public class JkDependencyExclusions {
          * Adds specified exclusions on the specified module.
          */
         public Builder on(JkModuleId moduleId, String... excludedModuleIds) {
-            final List<JkDepExclude> depExcludes = new LinkedList<JkDepExclude>();
+            final List<JkDepExclude> depExcludes = new LinkedList<>();
             for (final String excludeId : excludedModuleIds) {
                 depExcludes.add(JkDepExclude.of(excludeId));
             }
@@ -91,11 +91,7 @@ public class JkDependencyExclusions {
          * Adds specified exclusions on the specified module.
          */
         public Builder on(JkModuleId moduleId, Iterable<JkDepExclude> depExcludes) {
-            List<JkDepExclude> excludes = exclusions.get(moduleId);
-            if (excludes == null) {
-                excludes = new LinkedList<JkDepExclude>();
-                exclusions.put(moduleId, excludes);
-            }
+            List<JkDepExclude> excludes = exclusions.computeIfAbsent(moduleId, k -> new LinkedList<>());
             excludes.addAll(JkUtilsIterable.listOf(depExcludes));
             return this;
         }
@@ -104,7 +100,7 @@ public class JkDependencyExclusions {
          * Creates a {@link JkDependencyExclusions} based on this builder content.
          */
         public JkDependencyExclusions build() {
-            final Map<JkModuleId, List<JkDepExclude>> map = new HashMap<JkModuleId, List<JkDepExclude>>();
+            final Map<JkModuleId, List<JkDepExclude>> map = new HashMap<>();
             for (final JkModuleId moduleId : exclusions.keySet()) {
                 map.put(moduleId, Collections.unmodifiableList(exclusions.get(moduleId)));
             }

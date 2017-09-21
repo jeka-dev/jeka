@@ -19,7 +19,7 @@ import java.util.Map;
         "For example you can launch the build whith '-sonar.host.url=http://myserver/..' to specify the SonarQube server url."})
 public class JkBuildPluginSonar extends JkJavaBuildPlugin {
 
-    private final Map<String, String> properties = new HashMap<String, String>();
+    private final Map<String, String> properties = new HashMap<>();
     private JkSonar jkSonar;
 
     public static JkSonar configureSonarFrom(JkJavaBuild build) {

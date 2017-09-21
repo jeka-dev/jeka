@@ -43,7 +43,7 @@ public final class JkZipper {
 
         private final int level;
 
-        private JkCompressionLevel(int level) {
+        JkCompressionLevel(int level) {
             this.level = level;
         }
 
@@ -60,12 +60,12 @@ public final class JkZipper {
 
         private final int method;
 
-        private JkCompressionMethod(int method) {
+        JkCompressionMethod(int method) {
             this.method = method;
         }
     }
 
-    private final List<? extends Object> itemsToZip;
+    private final List<?> itemsToZip;
 
     private final List<File> archivestoMerge;
 
@@ -73,7 +73,7 @@ public final class JkZipper {
 
     private final JkCompressionMethod jkCompressionMethod;
 
-    private JkZipper(List<? extends Object> itemsToZip, List<File> archivestoMerge,
+    private JkZipper(List<?> itemsToZip, List<File> archivestoMerge,
             JkCompressionLevel level, JkCompressionMethod method) {
         this.itemsToZip = itemsToZip;
         this.archivestoMerge = archivestoMerge;
@@ -85,8 +85,8 @@ public final class JkZipper {
      * Creates a {@link JkZipper} to an array of directories.
      */
     public static JkZipper of(File... dirs) {
-        final List<File> archivestoMerges = new LinkedList<File>();
-        final List<Object> items = new LinkedList<Object>();
+        final List<File> archivestoMerges = new LinkedList<>();
+        final List<Object> items = new LinkedList<>();
         for (final File file : dirs) {
             if (file.isDirectory()) {
                 items.add(file);
@@ -225,7 +225,7 @@ public final class JkZipper {
      * Returns a {@link JkZipFile} identical to this one but containing also the specified entry.
      */
     public JkZipper andEntryName(String entryName, File file) {
-        final List<Object> list = new LinkedList<Object>(this.itemsToZip);
+        final List<Object> list = new LinkedList<>(this.itemsToZip);
         list.add(new EntryFile(entryName, file));
         return new JkZipper(list, archivestoMerge, this.jkCompressionLevel,
                 this.jkCompressionMethod);
@@ -235,7 +235,7 @@ public final class JkZipper {
      * Returns a {@link JkZipFile} identical to this one but containing also the specified entry.
      */
     public JkZipper andEntryPath(String entryPath, File file) {
-        final List<Object> list = new LinkedList<Object>(this.itemsToZip);
+        final List<Object> list = new LinkedList<>(this.itemsToZip);
         final String path = entryPath.endsWith("/") ? entryPath + file.getName() : entryPath + "/"
                 + file.getName();
         list.add(new EntryFile(path, file));

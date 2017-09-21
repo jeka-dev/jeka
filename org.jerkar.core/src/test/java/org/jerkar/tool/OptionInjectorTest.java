@@ -11,7 +11,7 @@ public class OptionInjectorTest {
 
     @Test
     public void test() {
-        final Map<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new HashMap<>();
         map.put("a", "1");
         map.put("b.a", "toto");
         map.put("b.nonExistingField", "bar");

@@ -74,7 +74,7 @@ public final class JkClasspath implements Iterable<File> {
      * <code>System.getProperty("java.class.path")</code>.
      */
     public static JkClasspath current() {
-        final List<File> files = new LinkedList<File>();
+        final List<File> files = new LinkedList<>();
         final String classpath = System.getProperty("java.class.path");
         final String[] classpathEntries = classpath.split(File.pathSeparator);
         for (final String classpathEntry : classpathEntries) {
@@ -163,7 +163,7 @@ public final class JkClasspath implements Iterable<File> {
     }
 
     private static List<File> resolveWildCard(Iterable<File> files) {
-        final LinkedHashSet<File> result = new LinkedHashSet<File>();
+        final LinkedHashSet<File> result = new LinkedHashSet<>();
         for (final File file : files) {
             if (file.getName().equals(WILD_CARD)) {
                 final File parent = file.getParentFile();
@@ -188,7 +188,7 @@ public final class JkClasspath implements Iterable<File> {
                 result.add(file);
             }
         }
-        return new ArrayList<File>(result);
+        return new ArrayList<>(result);
     }
 
     /**
@@ -228,7 +228,7 @@ public final class JkClasspath implements Iterable<File> {
      * relative to its containing entry.
      */
     public Set<String> allItemsMatching(JkPathFilter fileFilter) {
-        final Set<String> result = new HashSet<String>();
+        final Set<String> result = new HashSet<>();
         for (final File classpathEntry : this) {
             if (classpathEntry.isDirectory()) {
                 result.addAll(JkFileTree.of(classpathEntry).andFilter(fileFilter).relativePathes());

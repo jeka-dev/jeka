@@ -22,7 +22,7 @@ public final class JkUtilsSystem {
      */
     public static final boolean IS_WINDOWS = isWindows();
 
-    private static final boolean isWindows() {
+    private static boolean isWindows() {
         final String osName = System.getProperty("os.name");
         if (osName == null) {
             return false;
@@ -35,7 +35,7 @@ public final class JkUtilsSystem {
      * the parent classloaders.
      */
     public static List<File> classloaderEntries(URLClassLoader classLoader) {
-        final List<File> result = new ArrayList<File>();
+        final List<File> result = new ArrayList<>();
         for (final URL url : classLoader.getURLs()) {
             result.add(new File(url.getFile().replaceAll("%20", " ")));
         }

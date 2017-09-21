@@ -67,10 +67,7 @@ final class ModuleArtifact implements Serializable {
         if (!JkUtilsObject.equals(this.localFile, other.localFile)) {
             return false;
         }
-        if (!versionedModule.equals(other.versionedModule)) {
-            return false;
-        }
-        return true;
+        return versionedModule.equals(other.versionedModule);
     }
 
     @Override

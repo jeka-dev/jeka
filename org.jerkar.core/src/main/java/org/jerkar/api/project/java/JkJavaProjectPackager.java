@@ -2,11 +2,8 @@ package org.jerkar.api.project.java;
 
 import org.jerkar.api.depmanagement.JkArtifactFileId;
 import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkZipper;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJarMaker;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsZip;
 
 import java.io.File;
 

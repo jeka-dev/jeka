@@ -7,7 +7,6 @@ import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.JkProjectSourceLayout;
-import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.junit.Ignore;
 import org.junit.Test;

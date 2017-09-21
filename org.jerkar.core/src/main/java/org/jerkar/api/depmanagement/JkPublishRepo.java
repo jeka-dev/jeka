@@ -35,14 +35,14 @@ public final class JkPublishRepo implements Serializable {
      * will result in an no operation (doing nothing).
      */
     public static JkPublishRepo of(JkRepo jkRepo, JkPublishFilter filter) {
-        return new JkPublishRepo(jkRepo, filter, null, new HashSet<String>(), false);
+        return new JkPublishRepo(jkRepo, filter, null, new HashSet<>(), false);
     }
 
     /**
      * Creates a {@link JkPublishRepo} for publishing always on the specified {@link JkRepo}.
      */
     public static JkPublishRepo of(JkRepo jkRepo) {
-        return new JkPublishRepo(jkRepo, JkPublishFilter.ACCEPT_ALL, null, new HashSet<String>(),
+        return new JkPublishRepo(jkRepo, JkPublishFilter.ACCEPT_ALL, null, new HashSet<>(),
                 false);
     }
 
@@ -52,7 +52,7 @@ public final class JkPublishRepo implements Serializable {
      */
     public static JkPublishRepo ofSnapshot(JkRepo jkRepo) {
         return new JkPublishRepo(jkRepo, JkPublishFilter.ACCEPT_SNAPSHOT_ONLY, null,
-                new HashSet<String>(), false);
+                new HashSet<>(), false);
     }
 
     /**
@@ -61,7 +61,7 @@ public final class JkPublishRepo implements Serializable {
      */
     public static JkPublishRepo ofRelease(JkRepo jkRepo) {
         return new JkPublishRepo(jkRepo, JkPublishFilter.ACCEPT_RELEASE_ONLY, null,
-                new HashSet<String>(), false);
+                new HashSet<>(), false);
     }
 
     private JkPublishRepo(JkRepo jkRepo, JkPublishFilter filter, JkPgp requirePgpSign,
@@ -135,7 +135,7 @@ public final class JkPublishRepo implements Serializable {
      * constructor.
      */
     private JkPublishRepo andChecksums(String... algorithms) {
-        final HashSet<String> set = new HashSet<String>(this.checksumAlgorithms);
+        final HashSet<String> set = new HashSet<>(this.checksumAlgorithms);
         set.addAll(Arrays.asList(algorithms));
         return new JkPublishRepo(jkRepo, filter, pgpSigner, set, uniqueSnapshot);
     }

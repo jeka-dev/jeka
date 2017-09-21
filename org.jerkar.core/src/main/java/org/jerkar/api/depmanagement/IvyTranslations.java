@@ -107,7 +107,7 @@ final class IvyTranslations {
     }
 
     private static Configuration toConfiguration(JkScope jkScope) {
-        final List<String> extendedScopes = new LinkedList<String>();
+        final List<String> extendedScopes = new LinkedList<>();
         for (final JkScope parent : jkScope.extendedScopes()) {
             extendedScopes.add(parent.name());
         }
@@ -119,7 +119,7 @@ final class IvyTranslations {
 
     static ModuleRevisionId toModuleRevisionId(JkModuleId moduleId, JkVersionRange versionRange) {
         final String originalVersion = versionRange.definition();
-        final Map<String, String> extra = new HashMap<String, String>();
+        final Map<String, String> extra = new HashMap<>();
         return ModuleRevisionId.newInstance(moduleId.group(), moduleId.name(), originalVersion, extra);
     }
 
@@ -222,7 +222,7 @@ final class IvyTranslations {
     }
 
     private static Set<String> ivyNameAlgos(Set<String> algos) {
-        final Set<String> result = new HashSet<String>();
+        final Set<String> result = new HashSet<>();
         for (final String algo : algos) {
             result.add(ALGOS.get(algo));
         }
@@ -258,7 +258,7 @@ final class IvyTranslations {
     }
 
     static List<RepositoryResolver> publishResolverOf(IvySettings ivySettings) {
-        final List<RepositoryResolver> resolvers = new LinkedList<RepositoryResolver>();
+        final List<RepositoryResolver> resolvers = new LinkedList<>();
         for (final Object resolverObject : ivySettings.getResolvers()) {
             final RepositoryResolver resolver = (RepositoryResolver) resolverObject;
             if (resolver.getName() != null && resolver.getName().startsWith(PUBLISH_RESOLVER_NAME)) {
@@ -287,9 +287,9 @@ final class IvyTranslations {
     }
 
     private static String toIvyExpression(JkScopeMapping scopeMapping) {
-        final List<String> list = new LinkedList<String>();
+        final List<String> list = new LinkedList<>();
         for (final JkScope scope : scopeMapping.entries()) {
-            final List<String> targets = new LinkedList<String>();
+            final List<String> targets = new LinkedList<>();
             for (final JkScope target : scopeMapping.mappedScopes(scope)) {
                 targets.add(target.name());
             }
@@ -446,7 +446,7 @@ final class IvyTranslations {
         final String extension = JkUtilsString.substringAfterLast(artifact.getName(), ".");
         final Map<String, String> extraMap;
         if (classifier == null) {
-            extraMap = new HashMap<String, String>();
+            extraMap = new HashMap<>();
         } else {
             extraMap = JkUtilsIterable.mapOf(EXTRA_PREFIX + ":classifier", classifier);
         }
@@ -454,7 +454,7 @@ final class IvyTranslations {
     }
 
     static Set<JkScope> toJkScopes(String... confs) {
-        final Set<JkScope> scopes = new HashSet<JkScope>();
+        final Set<JkScope> scopes = new HashSet<>();
         for (final String conf : confs) {
             scopes.add(JkScope.of(conf));
         }
@@ -463,17 +463,17 @@ final class IvyTranslations {
 
     private static class DependencyDefinition {
 
-        Set<Conf> confs = new HashSet<Conf>();
+        Set<Conf> confs = new HashSet<>();
 
         JkVersionRange revision;
 
-        List<ArtifactDef> artifacts = new LinkedList<ArtifactDef>();
+        List<ArtifactDef> artifacts = new LinkedList<>();
 
         boolean includeMainArtifact = false;
 
         boolean transitive = true;
 
-        List<JkDepExclude> excludes = new LinkedList<JkDepExclude>();
+        List<JkDepExclude> excludes = new LinkedList<>();
 
         @SuppressWarnings("rawtypes")
         DefaultDependencyDescriptor toDescriptor(JkModuleId moduleId) {
@@ -487,7 +487,7 @@ final class IvyTranslations {
             }
             for (final ArtifactDef artifactDef : artifacts) {
                 final String extension = JkUtilsObject.firstNonNull(artifactDef.type, DEFAULT_EXTENSION);
-                final Map<String, String> extra = new HashMap<String, String>();
+                final Map<String, String> extra = new HashMap<>();
                 if (artifactDef.name != null) {
                     extra.put("classifier", artifactDef.name);
                 }
@@ -526,7 +526,7 @@ final class IvyTranslations {
                 }
             }
             for (final JkDepExclude depExclude : excludes) {
-                result.addExcludeRule("*", toExcludeRule(depExclude, new LinkedList<String>()));
+                result.addExcludeRule("*", toExcludeRule(depExclude, new LinkedList<>()));
             }
             return result;
 
@@ -536,7 +536,7 @@ final class IvyTranslations {
 
     private static class DependenciesContainer {
 
-        private final Map<JkModuleId, DependencyDefinition> definitions = new LinkedHashMap<JkModuleId, DependencyDefinition>();
+        private final Map<JkModuleId, DependencyDefinition> definitions = new LinkedHashMap<>();
 
         private final JkScopeMapping defaultMapping;
 
@@ -552,7 +552,7 @@ final class IvyTranslations {
             this.put(moduleId, moduleDep.transitive(), moduleDep.versionRange(), mainArtifact);
 
             // fill configuration
-            final List<Conf> confs = new LinkedList<Conf>();
+            final List<Conf> confs = new LinkedList<>();
             if (scopedDependency.scopeType() == ScopeType.UNSET) {
                 if (defaultMapping == null || defaultMapping.entries().isEmpty()) {
                     confs.add(new Conf("*", "*"));
@@ -590,7 +590,7 @@ final class IvyTranslations {
                     }
                 }
             }
-            final Set<String> masterConfs = new HashSet<String>();
+            final Set<String> masterConfs = new HashSet<>();
             for (final Conf conf : confs) {
                 this.addConf(moduleId, conf);
                 masterConfs.add(conf.masterConf);
@@ -608,11 +608,7 @@ final class IvyTranslations {
 
 
         private void put(JkModuleId moduleId, boolean transitive, JkVersionRange revision, boolean mainArtifact) {
-            DependencyDefinition definition = definitions.get(moduleId);
-            if (definition == null) {
-                definition = new DependencyDefinition();
-                definitions.put(moduleId, definition);
-            }
+            DependencyDefinition definition = definitions.computeIfAbsent(moduleId, k -> new DependencyDefinition());
 
             // if dependency has been declared only once non-transive and once transitive then we consider it has non-transitive
             definition.transitive = definition.transitive && transitive;
@@ -645,7 +641,7 @@ final class IvyTranslations {
         }
 
         List<DependencyDescriptor> toDependencyDescriptors() {
-            final List<DependencyDescriptor> result = new LinkedList<DependencyDescriptor>();
+            final List<DependencyDescriptor> result = new LinkedList<>();
             for (final JkModuleId moduleId : this.definitions.keySet()) {
                 result.add(this.definitions.get(moduleId).toDescriptor(moduleId));
             }

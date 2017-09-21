@@ -132,7 +132,7 @@ public final class JkJavadocMaker {
     }
 
     private String[] toArguments(File outputDir) {
-        final List<String> list = new LinkedList<String>();
+        final List<String> list = new LinkedList<>();
         list.add("-sourcepath");
         list.add(JkPath.of(this.srcDirs.roots()).toString());
         list.add("-d");
@@ -168,7 +168,7 @@ public final class JkJavadocMaker {
         JkUtilsReflect.newInstance(mainClass);
         final Method method = JkUtilsReflect.getMethod(mainClass, "execute", String.class,
                 PrintWriter.class, PrintWriter.class, PrintWriter.class, String.class,
-                new String[0].getClass());
+                String[].class);
         JkUtilsReflect.invoke(null, method, "Javadoc", new PrintWriter(errorStream),
                 new PrintWriter(warnStream), new PrintWriter(normalStream), docletString, args);
     }

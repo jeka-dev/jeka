@@ -79,7 +79,7 @@ class WstCommonComponent {
 
     private static List<ClasspathEntry> from(File projectDir, Document document) {
         final NodeList nodeList = document.getElementsByTagName("dependent-module");
-        final List<ClasspathEntry> result = new LinkedList<ClasspathEntry>();
+        final List<ClasspathEntry> result = new LinkedList<>();
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node node = nodeList.item(i);
             final Element element = (Element) node;

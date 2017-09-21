@@ -15,9 +15,9 @@ public final class JkBuildPlugins {
 
     private final JkBuild holder;
 
-    private final Map<Class<? extends JkBuildPlugin>, JkBuildPlugin> configuredPlugins = new LinkedHashMap<Class<? extends JkBuildPlugin>, JkBuildPlugin>();
+    private final Map<Class<? extends JkBuildPlugin>, JkBuildPlugin> configuredPlugins = new LinkedHashMap<>();
 
-    private final Map<Class<? extends JkBuildPlugin>, JkBuildPlugin> activatedPlugins = new LinkedHashMap<Class<? extends JkBuildPlugin>, JkBuildPlugin>();
+    private final Map<Class<? extends JkBuildPlugin>, JkBuildPlugin> activatedPlugins = new LinkedHashMap<>();
 
     JkBuildPlugins(JkBuild holder) {
         super();
@@ -72,11 +72,11 @@ public final class JkBuildPlugins {
      * Returns all the activated plugins for the holding plugin.
      */
     public List<JkBuildPlugin> getActives() {
-        return new ArrayList<JkBuildPlugin>(this.activatedPlugins.values());
+        return new ArrayList<>(this.activatedPlugins.values());
     }
 
     List<JkBuildPlugin> getConfiguredPlugins() {
-        return new ArrayList<JkBuildPlugin>(this.configuredPlugins.values());
+        return new ArrayList<>(this.configuredPlugins.values());
     }
 
     void invoke(Class<? extends JkBuildPlugin> exactPluginClass, String method) {

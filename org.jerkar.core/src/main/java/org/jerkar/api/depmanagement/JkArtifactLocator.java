@@ -1,10 +1,8 @@
 package org.jerkar.api.depmanagement;
 
-import org.jerkar.api.file.JkPath;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 

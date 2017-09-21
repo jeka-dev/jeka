@@ -146,7 +146,7 @@ final class BuildResolver {
     private List<Class<?>> resolveBuildClasses(Class<? extends JkBuild> baseClass) {
 
         final JkClassLoader classLoader = JkClassLoader.current();
-        final List<Class<?>> result = new LinkedList<Class<?>>();
+        final List<Class<?>> result = new LinkedList<>();
 
         // If there is a build source
         if (this.hasBuildSource()) {

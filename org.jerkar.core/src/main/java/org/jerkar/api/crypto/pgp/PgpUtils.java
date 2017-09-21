@@ -49,9 +49,7 @@ final class PgpUtils {
         final InputStream pubringStream = JkUtilsIO.inputStream(pubringFile);
         try {
             return verify(streamToVerify, signatureStream, pubringStream);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        } catch (final PGPException e) {
+        } catch (final IOException | PGPException e) {
             throw new RuntimeException(e);
         } catch (final IllegalArgumentException e) {
             throw new IllegalArgumentException("Error with one of this file : signatureFile = "
@@ -175,10 +173,9 @@ final class PgpUtils {
         final InnerPGPObjectFactory pgpFact = new InnerPGPObjectFactory(decodedInput,
                 fingerPrintCalculator);
         PGPSecretKeyRing secKeyRing;
-        final List<PGPSecretKeyRing> result = new LinkedList<PGPSecretKeyRing>();
+        final List<PGPSecretKeyRing> result = new LinkedList<>();
         while ((secKeyRing = pgpFact.nextSecretKey()) != null) {
-            final PGPSecretKeyRing pgpSecret = secKeyRing;
-            result.add(pgpSecret);
+            result.add(secKeyRing);
         }
         return result;
     }

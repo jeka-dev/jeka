@@ -2,7 +2,6 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.time.Instant;
-import java.util.Date;
 
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.system.JkLocator;

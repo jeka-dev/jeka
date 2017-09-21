@@ -97,7 +97,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
      * necessary to sign artifacts.
      */
     public JkPublishRepos withSigner(JkPgp pgp) {
-        final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>();
+        final List<JkPublishRepo> list = new LinkedList<>();
         for (final JkPublishRepo publishRepo : this.publishRepos) {
             list.add(publishRepo.withSigner(pgp));
         }
@@ -109,7 +109,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
      * sum for all published artifacts and signature.
      */
     public JkPublishRepos withSha1Checksum() {
-        final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>();
+        final List<JkPublishRepo> list = new LinkedList<>();
         for (final JkPublishRepo publishRepo : this.publishRepos) {
             list.add(publishRepo.andSha1Checksum());
         }
@@ -121,7 +121,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
      * sum for all published artifacts and signature.
      */
     public JkPublishRepos withMd5Checksum() {
-        final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>();
+        final List<JkPublishRepo> list = new LinkedList<>();
         for (final JkPublishRepo publishRepo : this.publishRepos) {
             list.add(publishRepo.andMd5Checksum());
         }
@@ -133,7 +133,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
      * sums for all published artifacts and signature.
      */
     public JkPublishRepos withMd5AndSha1Checksum() {
-        final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>();
+        final List<JkPublishRepo> list = new LinkedList<>();
         for (final JkPublishRepo publishRepo : this.publishRepos) {
             list.add(publishRepo.andSha1Md5Checksums());
         }
@@ -149,7 +149,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
      *
      */
     public JkPublishRepos withUniqueSnapshot(boolean uniqueSnapshot) {
-        final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>();
+        final List<JkPublishRepo> list = new LinkedList<>();
         for (final JkPublishRepo publishRepo : this.publishRepos) {
             list.add(publishRepo.withUniqueSnapshot(uniqueSnapshot));
         }
@@ -170,7 +170,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
      * Returns a {@link JkPublishRepo} identical to this one but with the additional specified publish repository.
      */
     public JkPublishRepos and(JkPublishRepo other) {
-        final List<JkPublishRepo> list = new LinkedList<JkPublishRepo>(this.publishRepos);
+        final List<JkPublishRepo> list = new LinkedList<>(this.publishRepos);
         list.add(other);
         return new JkPublishRepos(list);
     }

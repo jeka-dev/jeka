@@ -274,8 +274,6 @@ final class IvyPublisherForMaven {
             outputStream = new FileOutputStream(file);
             metadata.output(outputStream);
             outputStream.flush();
-        } catch (final FileNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }

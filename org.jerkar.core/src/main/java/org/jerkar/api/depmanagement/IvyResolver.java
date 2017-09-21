@@ -187,7 +187,7 @@ final class IvyResolver implements InternalDepResolver {
             artifact = new DefaultArtifact(moduleRevisionId, null, dependency.moduleId().name(), typeAndExt,
                     typeAndExt, true);
         } else {
-            final Map<String, String> extra = new HashMap<String, String>();
+            final Map<String, String> extra = new HashMap<>();
             if (dependency.classifier() != null) {
                 extra.put("classifier", dependency.classifier());
             }
@@ -202,15 +202,15 @@ final class IvyResolver implements InternalDepResolver {
             IvyArtifactContainer artifactContainer) {
         final IvyTreeResolver treeResolver = new IvyTreeResolver(nodes, artifactContainer);
         final ModuleNodeInfo treeRootNodeInfo = new ModuleNodeInfo(rootVersionedModule.moduleId(),
-                JkVersionRange.of(rootVersionedModule.version().name()), new HashSet<JkScope>(), new HashSet<JkScope>(),
-                rootVersionedModule.version() , new LinkedList<File>(), true);
+                JkVersionRange.of(rootVersionedModule.version().name()), new HashSet<>(), new HashSet<>(),
+                rootVersionedModule.version() , new LinkedList<>(), true);
         return treeResolver.createNode(treeRootNodeInfo);
     }
 
     private static class IvyTreeResolver {
 
         // parent to children parentChildMap
-        private final Map<JkModuleId, List<ModuleNodeInfo>> parentChildMap = new HashMap<JkModuleId, List<ModuleNodeInfo>>();
+        private final Map<JkModuleId, List<ModuleNodeInfo>> parentChildMap = new HashMap<>();
 
         IvyTreeResolver(Iterable<IvyNode> nodes, IvyArtifactContainer artifactContainer) {
 
@@ -229,17 +229,13 @@ final class IvyResolver implements InternalDepResolver {
                 if (!node.isCompletelyEvicted()) {
                     artifacts = artifactContainer.getArtifacts(moduleId.version(resolvedVersion.name()));
                 } else {
-                    artifacts = new LinkedList<File>();
+                    artifacts = new LinkedList<>();
                 }
 
                 for (final Caller caller : callers) {
                     final DependencyDescriptor dependencyDescriptor = caller.getDependencyDescriptor();
                     final JkVersionedModule parent = IvyTranslations.toJkVersionedModule(caller.getModuleRevisionId());
-                    List<ModuleNodeInfo> list = parentChildMap.get(parent.moduleId());
-                    if (list == null) {
-                        list = new LinkedList<ModuleNodeInfo>();
-                        parentChildMap.put(parent.moduleId(), list);
-                    }
+                    List<ModuleNodeInfo> list = parentChildMap.computeIfAbsent(parent.moduleId(), k -> new LinkedList<>());
                     final Set<JkScope> declaredScopes = IvyTranslations.toJkScopes(dependencyDescriptor.getModuleConfigurations());
                     final JkVersionRange versionRange = JkVersionRange.of(dependencyDescriptor
                             .getDynamicConstraintDependencyRevisionId().getRevision());
@@ -264,14 +260,14 @@ final class IvyResolver implements InternalDepResolver {
 
         JkDependencyNode createNode(ModuleNodeInfo holder) {
             if (parentChildMap.get(holder.moduleId()) == null || holder.isEvicted()) {
-                return JkDependencyNode.ofModuleDep(holder, new LinkedList<JkDependencyNode>());
+                return JkDependencyNode.ofModuleDep(holder, new LinkedList<>());
             }
 
             List<ModuleNodeInfo> moduleNodeInfos = parentChildMap.get(holder.moduleId());
             if (moduleNodeInfos == null) {
-                moduleNodeInfos = new LinkedList<ModuleNodeInfo>();
+                moduleNodeInfos = new LinkedList<>();
             }
-            final List<JkDependencyNode> childNodes = new LinkedList<JkDependencyNode>();
+            final List<JkDependencyNode> childNodes = new LinkedList<>();
             for (final ModuleNodeInfo moduleNodeInfo : moduleNodeInfos) {
                 final JkDependencyNode childNode = createNode(moduleNodeInfo);
                 childNodes.add(childNode);
@@ -283,7 +279,7 @@ final class IvyResolver implements InternalDepResolver {
 
 
     private List<JkModuleDepProblem> moduleProblems(List<IvyNode> ivyNodes) {
-        final List<JkModuleDepProblem> result = new LinkedList<JkModuleDepProblem>();
+        final List<JkModuleDepProblem> result = new LinkedList<>();
         for (final IvyNode ivyNode : ivyNodes) {
             if (ivyNode.isCompletelyBlacklisted() || ivyNode.isCompletelyEvicted()) {
                 continue;
@@ -303,7 +299,7 @@ final class IvyResolver implements InternalDepResolver {
         if (resolvedScopes.length == 0) {
             return IVY_24_ALL_CONF;
         }
-        final Set<String> result = new HashSet<String>();
+        final Set<String> result = new HashSet<>();
         for (final JkScope resolvedScope : resolvedScopes) {
             final List<JkScope> scopes = resolvedScope.commonScopes(declaredScopes);
             for (final JkScope scope : scopes) {

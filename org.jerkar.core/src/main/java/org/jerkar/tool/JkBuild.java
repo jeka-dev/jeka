@@ -29,9 +29,9 @@ import org.w3c.dom.Element;
  */
 public class JkBuild {
 
-    private static final ThreadLocal<Map<SubProjectRef, JkBuild>> SUB_PROJECT_CONTEXT = new ThreadLocal<Map<SubProjectRef, JkBuild>>();
+    private static final ThreadLocal<Map<SubProjectRef, JkBuild>> SUB_PROJECT_CONTEXT = new ThreadLocal<>();
 
-    private static final ThreadLocal<File> BASE_DIR_CONTEXT = new ThreadLocal<File>();
+    private static final ThreadLocal<File> BASE_DIR_CONTEXT = new ThreadLocal<>();
 
     static void baseDirContext(File baseDir) {
         BASE_DIR_CONTEXT.set(baseDir);
@@ -348,7 +348,7 @@ public class JkBuild {
 
     @SuppressWarnings("unchecked")
     private List<JkBuild> populateJkProjectAnnotatedFields() {
-        final List<JkBuild> result = new LinkedList<JkBuild>();
+        final List<JkBuild> result = new LinkedList<>();
         final List<Field> fields = JkUtilsReflect.getAllDeclaredField(this.getClass(),
                 JkImportBuild.class);
 
@@ -359,8 +359,7 @@ public class JkBuild {
             try {
                 JkUtilsReflect.setFieldValue(this, field, subBuild);
             } catch (RuntimeException e) {
-                final File currentClassFile = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
-                File currentClassBaseDir = currentClassFile;
+                File currentClassBaseDir = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
                 while (!new File(currentClassBaseDir, "build/def").exists() && currentClassBaseDir != null) {
                     currentClassBaseDir = currentClassBaseDir.getParentFile();
                 }
@@ -407,7 +406,7 @@ public class JkBuild {
         final SubProjectRef projectRef = new SubProjectRef(projectDir, clazz);
         Map<SubProjectRef, JkBuild> map = SUB_PROJECT_CONTEXT.get();
         if (map == null) {
-            map = new HashMap<SubProjectRef, JkBuild>();
+            map = new HashMap<>();
             SUB_PROJECT_CONTEXT.set(map);
         }
         final T cachedResult = (T) SUB_PROJECT_CONTEXT.get().get(projectRef);

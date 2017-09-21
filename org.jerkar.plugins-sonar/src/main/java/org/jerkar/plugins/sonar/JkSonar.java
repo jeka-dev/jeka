@@ -64,7 +64,7 @@ public final class JkSonar {
         JkUtilsAssert.notNull(projectName, "Project name can't be null.");
         JkUtilsAssert.notNull(projectKey, "Project key can't be null.");
         JkUtilsAssert.notNull(projectVersion, "Project version can't be null.");
-        final Map<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new HashMap<>();
         map.put(PROJECT_KEY, projectKey);
         map.put(PROJECT_NAME, projectName);
         map.put(PROJECT_VERSION, projectVersion.name());
@@ -113,14 +113,13 @@ public final class JkSonar {
         final File sonarRunnerJar = JkUtilsObject.firstNonNull(
                 JkClassLoader.current().fullClasspath().getEntryContainingClass("org.sonar.runner.Main"),
                 jarRunner());
-        final JkJavaProcess result = JkJavaProcess.of().withClasspath(sonarRunnerJar)
-                .andOptions(toProperties());
 
-        return result;
+        return JkJavaProcess.of().withClasspath(sonarRunnerJar)
+                .andOptions(toProperties());
     }
 
     private List<String> toProperties() {
-        final List<String> result = new LinkedList<String>();
+        final List<String> result = new LinkedList<>();
         for (final Map.Entry<String, String> entry : this.params.entrySet()) {
             result.add("-Dsonar." + entry.getKey() + "=" + entry.getValue());
         }
@@ -132,7 +131,7 @@ public final class JkSonar {
     }
 
     public JkSonar withProperties(Map<String, String> props) {
-        final Map<String, String> newProps = new HashMap<String, String>(this.params);
+        final Map<String, String> newProps = new HashMap<>(this.params);
         newProps.putAll(props);
         return new JkSonar(newProps, enabled);
     }
@@ -214,7 +213,7 @@ public final class JkSonar {
     }
 
     private Map<String, String> andParams(String key, String value) {
-        final Map<String, String> newMap = new HashMap<String, String>(this.params);
+        final Map<String, String> newMap = new HashMap<>(this.params);
         newMap.put(key, value);
         return newMap;
     }

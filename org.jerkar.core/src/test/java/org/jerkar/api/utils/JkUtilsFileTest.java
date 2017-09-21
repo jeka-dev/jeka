@@ -30,13 +30,7 @@ public class JkUtilsFileTest {
         files = JkUtilsFile.filesOf(sampleDir, true);
         assertEquals(2, files.size());
 
-        final FileFilter fileFilter = new FileFilter() {
-
-            @Override
-            public boolean accept(File pathname) {
-                return !pathname.getName().equals("sample.txt");
-            }
-        };
+        final FileFilter fileFilter = pathname -> !pathname.getName().equals("sample.txt");
 
         files = JkUtilsFile.filesOf(sampleDir, fileFilter, false);
         assertEquals(0, files.size());
@@ -50,13 +44,7 @@ public class JkUtilsFileTest {
     @Test
     @Ignore // JVM bug test
     public void testNoNullPointerEx() {
-        final FileFilter fileFilter = new FileFilter() {
-
-            @Override
-            public boolean accept(File pathname) {
-                return !pathname.getName().equals("sample.txt");
-            }
-        };
+        final FileFilter fileFilter = pathname -> !pathname.getName().equals("sample.txt");
         JkUtilsFile.filesOf(new File("c:/users"), fileFilter, true);
     }
 

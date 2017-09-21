@@ -216,7 +216,7 @@ public final class JkModuleDependency implements JkDependency {
      * specified exclusion.
      */
     public JkModuleDependency andExclude(Iterable<JkDepExclude> depExcludes) {
-        final List<JkDepExclude> list = new LinkedList<JkDepExclude>(excludes);
+        final List<JkDepExclude> list = new LinkedList<>(excludes);
         list.addAll(JkUtilsIterable.listOf(depExcludes));
         return new JkModuleDependency(module, versionRange, classifier, transitive, extension,
                 Collections.unmodifiableList(list));

@@ -15,7 +15,6 @@ import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkImportBuild;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 
 import java.io.File;
 
@@ -77,8 +76,7 @@ class V07DistribAllBuild extends JkBuild {
     @JkDoc("End to end method to construct a distrib.")
     public void doDefault() {
         super.doDefault();
-        this.importedBuilds().all().forEach((build) -> build.clean());
-        JkLog.info("Building projects jar");
+        this.importedBuilds().all().forEach(JkBuild::clean);
         pluginsJacoco.core.project().makeArtifactFile(V07CoreBuild.DISTRIB_FILE_ID);
         pluginsJacoco.project().makeMainJar();
         pluginsSonar.project().makeMainJar();

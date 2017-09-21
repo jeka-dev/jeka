@@ -4,7 +4,6 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Instant;
-import java.util.Date;
 
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;

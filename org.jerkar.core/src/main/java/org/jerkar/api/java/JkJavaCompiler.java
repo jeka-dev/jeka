@@ -94,7 +94,7 @@ public final class JkJavaCompiler {
      * space).
      */
     public JkJavaCompiler andOptions(String... options) {
-        final List<String> newOptions = new LinkedList<String>(this.options);
+        final List<String> newOptions = new LinkedList<>(this.options);
         newOptions.addAll(Arrays.asList(options));
         return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork, compiler, compilerBinRepo);
     }
@@ -104,7 +104,7 @@ public final class JkJavaCompiler {
      * options.
      */
     public JkJavaCompiler andOptions(Collection<String> options) {
-        final List<String> newOptions = new LinkedList<String>(this.options);
+        final List<String> newOptions = new LinkedList<>(this.options);
         newOptions.addAll(options);
         return new JkJavaCompiler(newOptions, javaSourceFiles, failOnError, fork, compiler, compilerBinRepo);
     }
@@ -163,7 +163,7 @@ public final class JkJavaCompiler {
      * {@link JkProcess#ofJavaTool(String, String...)}
      */
     public JkJavaCompiler fork(String... parameters) {
-        return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError,
+        return new JkJavaCompiler(new LinkedList<>(options), javaSourceFiles, failOnError,
                 JkProcess.ofJavaTool("javac", parameters), compiler, compilerBinRepo);
     }
 
@@ -173,10 +173,10 @@ public final class JkJavaCompiler {
      */
     public JkJavaCompiler fork(boolean fork, String... parameters) {
         if (fork) {
-            return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles,
+            return new JkJavaCompiler(new LinkedList<>(options), javaSourceFiles,
                     failOnError, JkProcess.ofJavaTool("javac", parameters), compiler, compilerBinRepo);
         } else {
-            return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles,
+            return new JkJavaCompiler(new LinkedList<>(options), javaSourceFiles,
                     failOnError, null, compiler, compilerBinRepo);
         }
     }
@@ -190,7 +190,7 @@ public final class JkJavaCompiler {
      *            '/my/special/jdk/javac'
      */
     public JkJavaCompiler forkOnCompiler(String executable, String... parameters) {
-        return new JkJavaCompiler(new LinkedList<String>(options), javaSourceFiles, failOnError,
+        return new JkJavaCompiler(new LinkedList<>(options), javaSourceFiles, failOnError,
                 JkProcess.of(executable, parameters), compiler, compilerBinRepo);
     }
 
@@ -199,7 +199,7 @@ public final class JkJavaCompiler {
      * files.
      */
     public JkJavaCompiler andSources(Iterable<File> files) {
-        final List<File> newSources = new LinkedList<File>(this.javaSourceFiles);
+        final List<File> newSources = new LinkedList<>(this.javaSourceFiles);
         for (final File file : files) {
             if (file.getName().toLowerCase().endsWith(".java")) {
                 newSources.add(file);
@@ -286,7 +286,7 @@ public final class JkJavaCompiler {
     }
 
     private boolean runOnFork() {
-        final List<String> sourcePaths = new LinkedList<String>();
+        final List<String> sourcePaths = new LinkedList<>();
         for (final File file : javaSourceFiles) {
             sourcePaths.add(file.getAbsolutePath());
         }

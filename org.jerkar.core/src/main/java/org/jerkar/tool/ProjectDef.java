@@ -37,10 +37,8 @@ final class ProjectDef {
      */
     public static ProjectDef of(File rootDir) {
         final BuildResolver buildResolver = new BuildResolver(rootDir);
-        final List<Class<?>> classDefs = new LinkedList<Class<?>>();
-        for (final Class<?> clazz : buildResolver.resolveBuildClasses()) {
-            classDefs.add(clazz);
-        }
+        final List<Class<?>> classDefs = new LinkedList<>();
+        classDefs.addAll(buildResolver.resolveBuildClasses());
         return new ProjectDef(classDefs);
     }
 
@@ -84,12 +82,12 @@ final class ProjectDef {
 
         static ProjectBuildClassDef of(Object build) {
             final Class<?> clazz = build.getClass();
-            final List<JkProjectBuildMethodDef> methods = new LinkedList<ProjectDef.JkProjectBuildMethodDef>();
+            final List<JkProjectBuildMethodDef> methods = new LinkedList<>();
             for (final Method method : executableMethods(clazz)) {
                 methods.add(JkProjectBuildMethodDef.of(method));
             }
             Collections.sort(methods);
-            final List<JkProjectBuildOptionDef> options = new LinkedList<ProjectDef.JkProjectBuildOptionDef>();
+            final List<JkProjectBuildOptionDef> options = new LinkedList<>();
             for (final NameAndField nameAndField : options(clazz, "", true, null)) {
                 options.add(JkProjectBuildOptionDef.of(build, nameAndField.field, nameAndField.rootClass,
                         nameAndField.name));
@@ -99,7 +97,7 @@ final class ProjectDef {
         }
 
         private static List<Method> executableMethods(Class<?> clazz) {
-            final List<Method> result = new LinkedList<Method>();
+            final List<Method> result = new LinkedList<>();
             for (final Method method : clazz.getMethods()) {
                 final int modifier = method.getModifiers();
                 if (method.getReturnType().equals(void.class) && method.getParameterTypes().length == 0
@@ -113,7 +111,7 @@ final class ProjectDef {
         }
 
         private static List<NameAndField> options(Class<?> clazz, String prefix, boolean root, Class<?> rClass) {
-            final List<NameAndField> result = new LinkedList<ProjectDef.NameAndField>();
+            final List<NameAndField> result = new LinkedList<>();
             for (final Field field : JkUtilsReflect.getAllDeclaredField(clazz, JkDoc.class)) {
                 final Class<?> rootClass = root ? field.getDeclaringClass() : rClass;
                 if (!hasSubOption(field)) {
@@ -183,7 +181,7 @@ final class ProjectDef {
         }
 
         Map<String, String> optionValues(JkBuild build) {
-            final Map<String, String> result = new LinkedHashMap<String, String>();
+            final Map<String, String> result = new LinkedHashMap<>();
             for (final JkProjectBuildOptionDef optionDef : this.optionDefs) {
                 final String name = optionDef.name;
                 final Object value = JkProjectBuildOptionDef.value(build, name);

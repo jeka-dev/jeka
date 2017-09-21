@@ -51,7 +51,7 @@ public final  class JkMavenPublicationInfo implements Serializable {
      * developer.
      */
     public JkMavenPublicationInfo andDeveloper(JkDeveloperInfo developerInfo) {
-        final List<JkDeveloperInfo> list = new LinkedList<JkMavenPublicationInfo.JkDeveloperInfo>(
+        final List<JkDeveloperInfo> list = new LinkedList<>(
                 this.devs);
         list.add(developerInfo);
         return new JkMavenPublicationInfo(this.project, this.scm,
@@ -94,7 +94,7 @@ public final  class JkMavenPublicationInfo implements Serializable {
      * Returns a {@link JkMavenPublicationInfo} identical to this one but adding the specifyied license.
      */
     public JkMavenPublicationInfo andLicense(String name, String url) {
-        final List<JkLicenseInfo> list = new LinkedList<JkLicenseInfo>(this.licenses);
+        final List<JkLicenseInfo> list = new LinkedList<>(this.licenses);
         list.add(new JkLicenseInfo(name, url));
         return new JkMavenPublicationInfo(this.project, this.scm, this.devs,
                 Collections.unmodifiableList(list));

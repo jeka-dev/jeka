@@ -24,7 +24,7 @@ public final class JkModelMethod {
      * Creates a list of build method reference defined on the build class.
      */
     public static List<JkModelMethod> normals(String... names) {
-        final List<JkModelMethod> result = new LinkedList<JkModelMethod>();
+        final List<JkModelMethod> result = new LinkedList<>();
         for (final String name : names) {
             result.add(JkModelMethod.normal(name));
         }

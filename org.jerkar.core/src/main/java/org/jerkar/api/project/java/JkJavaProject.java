@@ -69,7 +69,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
     private JkJavaCompilerSpec compileSpec =
             JkJavaCompilerSpec.of(JkJavaVersion.V8).withEncoding("UTF-8");
 
-    private List<JkResourceProcessor.JkInterpolator> resourceInterpolators = new LinkedList<JkResourceProcessor.JkInterpolator>();
+    private List<JkResourceProcessor.JkInterpolator> resourceInterpolators = new LinkedList<>();
 
     private JkManifest manifest = JkManifest.empty();
 
@@ -197,7 +197,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     public JkJavaProject setOutLayout(JkProjectOutLayout outLayout) {
         if (outLayout.outputDir().isAbsolute()) {
-            this.outLayout = outLayout;;
+            this.outLayout = outLayout;
         } else {
             this.outLayout = outLayout.withOutputDir(new File(this.baseDir, outLayout.outputDir().getPath()));
         }

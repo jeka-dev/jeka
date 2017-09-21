@@ -54,16 +54,16 @@ public class JkCodeWriterForBuildClass {
      * The list of package/class to import statically.
      * It can me expressed as "my.pack.MyClass" or "my.pack.*".
      */
-    public final List<String> staticImports = new LinkedList<String>();
+    public final List<String> staticImports = new LinkedList<>();
 
     /**
      * The list of module/files to add to JkImport class annotation
      */
-    public final List<String> jkImports = new LinkedList<String>();
+    public final List<String> jkImports = new LinkedList<>();
 
-    private final Map<String, String> groupVersionVariableMap = new HashMap<String, String>();
+    private final Map<String, String> groupVersionVariableMap = new HashMap<>();
 
-    private final Map<String, String> publicFieldString = new HashMap<String, String>();
+    private final Map<String, String> publicFieldString = new HashMap<>();
 
     /**
      * The moduleId declared in the generated build class. Can be null.
@@ -97,7 +97,7 @@ public class JkCodeWriterForBuildClass {
     public JkDependencyExclusions dependencyExclusions;
 
     /** JkExtraPacking method code to be generated */
-    public List<String> extraMethods = new LinkedList<String>();
+    public List<String> extraMethods = new LinkedList<>();
 
 
 
@@ -130,7 +130,7 @@ public class JkCodeWriterForBuildClass {
      * build class extending {@link JkJavaBuild}
      */
     public static List<String> importsForJkJavaBuild() {
-        final List<String> imports = new LinkedList<String>(importsForJkDependencyBuildSupport());
+        final List<String> imports = new LinkedList<>(importsForJkDependencyBuildSupport());
         imports.add("org.jerkar.api.depmanagement.*");
         imports.add("org.jerkar.tool.builtins.javabuild.JkJavaBuild");
         imports.remove("org.jerkar.tool.JkBuildDependencySupport");
@@ -143,7 +143,7 @@ public class JkCodeWriterForBuildClass {
      * build class extending {@link JkJavaBuild}
      */
     public static List<String> staticImportsForJkJavaBuild() {
-        final List<String> imports = new LinkedList<String>();
+        final List<String> imports = new LinkedList<>();
         imports.add("org.jerkar.api.depmanagement.JkPopularModules.*");
         return imports;
     }
@@ -153,7 +153,7 @@ public class JkCodeWriterForBuildClass {
      * build class extending {@link JkBuild}
      */
     public static List<String> importsForJkBuild() {
-        final List<String> imports = new LinkedList<String>();
+        final List<String> imports = new LinkedList<>();
         imports.add("org.jerkar.tool.JkBuild");
         imports.add("org.jerkar.tool.JkInit");
         return imports;
@@ -164,7 +164,7 @@ public class JkCodeWriterForBuildClass {
      * build class extending {@link JkBuildDependencySupport}
      */
     public static List<String> importsForJkDependencyBuildSupport() {
-        final List<String> imports = new LinkedList<String>(importsForJkBuild());
+        final List<String> imports = new LinkedList<>(importsForJkBuild());
         imports.add("org.jerkar.api.depmanagement.*");
         imports.add("org.jerkar.tool.JkBuildDependencySupport");
         imports.remove("org.jerkar.tool.JkBuild");
@@ -237,7 +237,7 @@ public class JkCodeWriterForBuildClass {
     private static class Writer {
 
         public String publicStringFields(Map<String, String> nameToValue) {
-            final SortedMap<String, String> sortedMap = new TreeMap<String, String>();
+            final SortedMap<String, String> sortedMap = new TreeMap<>();
             sortedMap.putAll(nameToValue);
             final StringBuilder builder = new StringBuilder();
             for (final String constantName : sortedMap.keySet()) {
@@ -255,7 +255,7 @@ public class JkCodeWriterForBuildClass {
         }
 
         public String imports(List<String> imports) {
-            final List<String> list = new LinkedList<String>(new HashSet<String>(imports));
+            final List<String> list = new LinkedList<>(new HashSet<>(imports));
             Collections.sort(list);
             final StringBuilder builder = new StringBuilder();
             for (final String item : list) {
@@ -265,7 +265,7 @@ public class JkCodeWriterForBuildClass {
         }
 
         public String staticImports(List<String> imports) {
-            final List<String> list = new LinkedList<String>(new HashSet<String>(imports));
+            final List<String> list = new LinkedList<>(new HashSet<>(imports));
             Collections.sort(list);
             final StringBuilder builder = new StringBuilder();
             for (final String item : list) {
@@ -280,7 +280,7 @@ public class JkCodeWriterForBuildClass {
             if (!jkImports.isEmpty()) {
                 builder.append(jkImportCode(jkImports)).append("\n");
             }
-            builder.append("class " + className + " extends " + extendedClass)
+            builder.append("class ").append(className).append(" extends ").append(extendedClass)
             .append(" {").append("\n");
             return builder.toString();
         }
@@ -301,34 +301,29 @@ public class JkCodeWriterForBuildClass {
         }
 
         public String moduleId(JkModuleId moduleId) {
-            return new StringBuilder()
-                    .append("    @Override\n")
-                    .append("    public JkModuleId moduleId() {\n")
-                    .append("        return JkModuleId.of(\"" + moduleId.group() + "\", \""
-                            + moduleId.name() + "\");\n").append("    }").toString();
+            return "    @Override\n" +
+                    "    public JkModuleId moduleId() {\n" + "        return JkModuleId.of(\"" + moduleId.group() + "\", \"" + moduleId.name() + "\");\n" + "    }";
         }
 
         public String version(String version) {
-            return new StringBuilder().append("    @Override\n")
-                    .append("    public JkVersion version() {\n")
-                    .append("        return JkVersion.name(\"" + version + "\");\n")
-                    .append("    }").toString();
+            return "    @Override\n" +
+                    "    public JkVersion version() {\n" + "        return JkVersion.name(\"" + version + "\");\n" +
+                    "    }";
         }
 
         public String dependencies(JkDependencies dependencies) {
-            final StringBuilder builder = new StringBuilder().append("    @Override\n")
-                    .append("    public JkDependencies dependencies() {\n")
-                    .append("        return ").append(dependencies.toJavaCode(8)).append("\n    }")
-                    .append("\n");
-            return builder.toString();
+            String builder = "    @Override\n" +
+                    "    public JkDependencies dependencies() {\n" +
+                    "        return " + dependencies.toJavaCode(8) + "\n    }" +
+                    "\n";
+            return builder;
         }
 
         public String mainMethod() {
-            final StringBuilder builder = new StringBuilder()
-                    .append("    public static void main(String[] args) {\n")
-                    .append("        JkInit.instanceOf(Build.class, args).doDefault();\n")
-                    .append("    }\n");
-            return builder.toString();
+            String builder = "    public static void main(String[] args) {\n" +
+                    "        JkInit.instanceOf(Build.class, args).doDefault();\n" +
+                    "    }\n";
+            return builder;
         }
 
         public String downloadRepositories(JkRepos repos) {
@@ -356,7 +351,7 @@ public class JkCodeWriterForBuildClass {
                     .append("    public JkVersionProvider versionProvider() {\n")
                     .append("        return JkVersionProvider.of()");
             final List<JkModuleId> moduleIds = JkUtilsIterable.listOf(versionProvider.moduleIds());
-            Collections.sort(moduleIds, JkModuleId.GROUP_NAME_COMPARATOR);
+            moduleIds.sort(JkModuleId.GROUP_NAME_COMPARATOR);
             for (final JkModuleId moduleId : moduleIds) {
                 builder.append("\n            .and(\"").append(moduleId.groupAndName())
                 .append("\", ");
@@ -381,7 +376,7 @@ public class JkCodeWriterForBuildClass {
                     .append("    public JkDependencyExclusions dependencyExclusions() {\n")
                     .append("        return JkDependencyExclusions.builder()");
             final List<JkModuleId> moduleIds = JkUtilsIterable.listOf(exclusions.moduleIds());
-            Collections.sort(moduleIds, JkModuleId.GROUP_NAME_COMPARATOR);
+            moduleIds.sort(JkModuleId.GROUP_NAME_COMPARATOR);
             for (final JkModuleId moduleId : moduleIds) {
                 builder.append("\n            .on(\"").append(moduleId.groupAndName()).append("\"");
                 for (final JkDepExclude depExclude : exclusions.get(moduleId)) {

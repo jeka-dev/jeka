@@ -34,7 +34,7 @@ class Project {
     }
 
     public static Project ofSimpleNature(String name) {
-        return new Project(name, new HashSet<String>());
+        return new Project(name, new HashSet<>());
     }
 
 
@@ -53,7 +53,7 @@ class Project {
     }
 
     public static Map<String, File> findProjects(File parent) {
-        final Map<String, File> map = new HashMap<String, File>();
+        final Map<String, File> map = new HashMap<>();
         for (final File file : parent.listFiles()) {
             final File dotProject = new File(file, ".project");
             if (!(dotProject.exists())) {
@@ -76,11 +76,7 @@ class Project {
     void writeTo(File dotProjectFile) {
         try {
             writeToFile(dotProjectFile);
-        } catch (final FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (final XMLStreamException e) {
-            throw new RuntimeException(e);
-        } catch (final FactoryConfigurationError e) {
+        } catch (final FileNotFoundException | FactoryConfigurationError | XMLStreamException e) {
             throw new RuntimeException(e);
         }
     }
@@ -140,7 +136,7 @@ class Project {
         final NodeList nodeList = document.getElementsByTagName("name");
         final Node node = nodeList.item(0);
         final String name = node.getTextContent();
-        final Set<String> natures = new HashSet<String>();
+        final Set<String> natures = new HashSet<>();
         final NodeList natureNodes = document.getElementsByTagName("nature");
         for (int i = 0; i < natureNodes.getLength(); i++) {
             natures.add(natureNodes.item(i).getTextContent());

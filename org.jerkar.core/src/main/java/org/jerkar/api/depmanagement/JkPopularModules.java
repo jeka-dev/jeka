@@ -1,6 +1,5 @@
 package org.jerkar.api.depmanagement;
 
-@SuppressWarnings("javadoc")
 /**
  * Constants on popular modules used in Java ecosystem.
  *

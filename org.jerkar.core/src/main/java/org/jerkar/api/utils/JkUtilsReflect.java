@@ -6,14 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Utility class for dealing with reflection
@@ -339,7 +332,7 @@ public final class JkUtilsReflect {
      */
     public static List<Field> getAllDeclaredField(Class<?> clazz,
             Class<? extends Annotation> annotationClass) {
-        final List<Field> result = new LinkedList<Field>();
+        final List<Field> result = new LinkedList<>();
         for (final Field field : clazz.getDeclaredFields()) {
             final Object option = field.getAnnotation(annotationClass);
             if (option != null) {
@@ -358,10 +351,8 @@ public final class JkUtilsReflect {
      * super classes.
      */
     public static List<Field> getAllDeclaredField(Class<?> clazz, boolean includeSuperClass) {
-        final List<Field> result = new LinkedList<Field>();
-        for (final Field field : clazz.getDeclaredFields()) {
-            result.add(field);
-        }
+        final List<Field> result = new LinkedList<>();
+        Collections.addAll(result, clazz.getDeclaredFields());
         final Class<?> superClass = clazz.getSuperclass();
         if (superClass != null && includeSuperClass) {
             result.addAll(getAllDeclaredField(superClass, true));
@@ -404,7 +395,7 @@ public final class JkUtilsReflect {
         final boolean staticMethod = target == null;
         final Class<?> effectiveClass = clazz == null ? target.getClass() : clazz;
         final String className = effectiveClass.getName();
-        final Set<Method> canditates = new HashSet<Method>(Arrays.asList(effectiveClass
+        final Set<Method> canditates = new HashSet<>(Arrays.asList(effectiveClass
                 .getMethods()));
         canditates.addAll(Arrays.asList(effectiveClass.getDeclaredMethods()));
         final Class<?> types[] = new Class<?>[args.length];
@@ -430,7 +421,7 @@ public final class JkUtilsReflect {
 
     private static Set<Method> findMethodsCompatibleWith(boolean staticMethod, Set<Method> methods,
             String methodName, Class<?>[] argTypes) {
-        final Set<Method> list = new HashSet<Method>(methods);
+        final Set<Method> list = new HashSet<>(methods);
         for (final Iterator<Method> it = list.iterator(); it.hasNext();) {
             final Method method = it.next();
             if (!methodName.equals(method.getName())) {
@@ -448,7 +439,6 @@ public final class JkUtilsReflect {
             }
             if (!isMethodArgCompatible(method, argTypes)) {
                 it.remove();
-                continue;
             }
 
         }
@@ -480,7 +470,7 @@ public final class JkUtilsReflect {
         return type0.isAssignableFrom(type1);
     }
 
-    private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = new HashMap<Class<?>, Class<?>>();
+    private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = new HashMap<>();
 
     static {
         PRIMITIVE_TO_WRAPPER.put(int.class, Integer.class);

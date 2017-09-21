@@ -59,13 +59,7 @@ public final class JkClassLoader {
     /**
      * A {@link FileFilter} accepting only .class files.
      */
-    public static final FileFilter CLASS_FILE_FILTER = new FileFilter() {
-
-        @Override
-        public boolean accept(File file) {
-            return (file.isFile() && file.getName().endsWith(CLASS_SUFFIX));
-        }
-    };
+    public static final FileFilter CLASS_FILE_FILTER = file -> (file.isFile() && file.getName().endsWith(CLASS_SUFFIX));
 
     /**
      * Set the directory where are cached urls. For its internal use, Jerkar may
@@ -158,7 +152,7 @@ public final class JkClassLoader {
      * @see #sibling(Iterable)
      */
     public JkClassLoader sibling(Object... fileOrUrls) {
-        final List<File> files = new LinkedList<File>();
+        final List<File> files = new LinkedList<>();
         for (final Object entry : fileOrUrls) {
             if (entry instanceof URL) {
                 final URL url = (URL) entry;
@@ -187,7 +181,7 @@ public final class JkClassLoader {
      * one of the specified entry is not valid, then it is simply ignored.
      */
     public JkClassLoader siblingWithOptional(Object... fileOrUrls) {
-        final List<Object> objects = new LinkedList<Object>();
+        final List<Object> objects = new LinkedList<>();
         for (final Object entry : fileOrUrls) {
             if (entry instanceof URL) {
                 objects.add(entry);
@@ -241,7 +235,7 @@ public final class JkClassLoader {
      * @see #loadIfExist(String) #isDefined(String)
      */
     @SuppressWarnings("unchecked")
-    public <T extends Object> Class<T> load(String className) {
+    public <T> Class<T> load(String className) {
         try {
             return (Class<T>) delegate.loadClass(className);
         } catch (final ClassNotFoundException e) {
@@ -255,7 +249,7 @@ public final class JkClassLoader {
      * will load the class <code>mypack1.subpack.MyClass</code>. Return
      * <code>null</code> if no such class exist.
      */
-    public <T extends Object> Class<T> loadGivenClassSourcePathIfExist(String classSourcePath) {
+    public <T> Class<T> loadGivenClassSourcePathIfExist(String classSourcePath) {
         final String className = classSourcePath.replace('/', '.').replace('\\', '.')
                 .substring(0, classSourcePath.length() - JAVA_SUFFIX_LENGTH);
         return loadIfExist(className);
@@ -266,7 +260,7 @@ public final class JkClassLoader {
      * <code>loadGivenSourcePath("mypack1/subpack/MyClass.java")
      * will load the class <code>mypack1.subpack.MyClass</code>.
      */
-    public <T extends Object> Class<T> loadGivenClassSourcePath(String classSourcePath) {
+    public <T> Class<T> loadGivenClassSourcePath(String classSourcePath) {
         final String className = classSourcePath.replace('/', '.').replace('\\', '.')
                 .substring(0, classSourcePath.length() - JAVA_SUFFIX_LENGTH);
         return load(className);
@@ -277,7 +271,7 @@ public final class JkClassLoader {
      * no such class is defined in this <code>class loader</code>.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Object> Class<T> loadIfExist(String className) {
+    public <T> Class<T> loadIfExist(String className) {
         try {
             return (Class<T>) delegate.loadClass(className);
         } catch (final ClassNotFoundException e) { // NOSONAR
@@ -347,9 +341,9 @@ public final class JkClassLoader {
      * @param entryFilter
      *            The classpath entry filter. Can be <code>null</code>.
      */
-    public Set<Class<? extends Object>> loadClassesInEntries(FileFilter entryFilter) {
-        final List<File> classfiles = new LinkedList<File>();
-        final Map<File, File> file2Entry = new HashMap<File, File>();
+    public Set<Class<?>> loadClassesInEntries(FileFilter entryFilter) {
+        final List<File> classfiles = new LinkedList<>();
+        final Map<File, File> file2Entry = new HashMap<>();
         for (final File file : childClasspath()) {
             if (entryFilter == null || entryFilter.accept(file) && file.isDirectory()) {
                 final List<File> files = JkUtilsFile.filesOf(file, CLASS_FILE_FILTER, false);
@@ -357,7 +351,7 @@ public final class JkClassLoader {
                 JkUtilsIterable.putMultiEntry(file2Entry, files, file);
             }
         }
-        final Set<Class<?>> result = new HashSet<Class<?>>();
+        final Set<Class<?>> result = new HashSet<>();
         for (final File file : classfiles) {
             final File entry = file2Entry.get(file);
             final String relativeName = JkUtilsFile.getRelativePath(entry, file);
@@ -382,7 +376,7 @@ public final class JkClassLoader {
      * <code>.class</code> is important.
      */
     public Set<Class<?>> loadClasses(JkPathFilter classFileFilter) {
-        final Set<Class<?>> result = new HashSet<Class<?>>();
+        final Set<Class<?>> result = new HashSet<>();
         final Set<String> classFiles = this.fullClasspath().allItemsMatching(classFileFilter);
         for (final String classFile : classFiles) {
             final String className = getAsClassName(classFile);
@@ -400,7 +394,7 @@ public final class JkClassLoader {
      * @see JkClassLoader#loadClasses(JkPathFilter)
      */
     public Set<Class<?>> loadClasses(String... includingPatterns) {
-        final List<String> patterns = new LinkedList<String>();
+        final List<String> patterns = new LinkedList<>();
         for (final String pattern : includingPatterns) {
             patterns.add(pattern + ".class");
         }
@@ -413,8 +407,8 @@ public final class JkClassLoader {
      *
      * @see JkClassLoader#loadClassesInEntries(FileFilter)
      */
-    public Set<Class<? extends Object>> loadClassesIn(JkFileTreeSet jkFileTreeSet) {
-        final Set<Class<?>> result = new HashSet<Class<?>>();
+    public Set<Class<?>> loadClassesIn(JkFileTreeSet jkFileTreeSet) {
+        final Set<Class<?>> result = new HashSet<>();
         for (final String path : jkFileTreeSet.relativePathes()) {
             if (path.endsWith(".class")) {
                 final String className = getAsClassName(path);
@@ -430,7 +424,7 @@ public final class JkClassLoader {
      *
      * @see JkClassLoader#loadClassesInEntries(FileFilter)
      */
-    public Iterator<Class<? extends Object>> iterateClassesIn(JkFileTreeSet jkFileTreeSet) {
+    public Iterator<Class<?>> iterateClassesIn(JkFileTreeSet jkFileTreeSet) {
         final List<String> fileNames = jkFileTreeSet.andFilter(JkPathFilter.include("**/*.class"))
                 .relativePathes();
         return classIterator(fileNames);
@@ -442,14 +436,14 @@ public final class JkClassLoader {
      *
      * @see JkClassLoader#loadClassesInEntries(FileFilter)
      */
-    public Iterator<Class<? extends Object>> iterateClassesIn(File dirOrJar) {
+    public Iterator<Class<?>> iterateClassesIn(File dirOrJar) {
         final List<String> paths;
         if (dirOrJar.isDirectory()) {
             paths = JkFileTree.of(dirOrJar).andFilter(JkPathFilter.include("**/*.class"))
                     .relativePathes();
         } else {
             final List<ZipEntry> entries = JkUtilsZip.zipEntries(JkUtilsZip.zipFile(dirOrJar));
-            paths = new LinkedList<String>();
+            paths = new LinkedList<>();
             for (final ZipEntry entry : entries) {
                 if (entry.getName().endsWith(".class")) {
                     paths.add(entry.getName());
@@ -459,9 +453,9 @@ public final class JkClassLoader {
         return classIterator(paths);
     }
 
-    private Iterator<Class<? extends Object>> classIterator(final Iterable<String> fileNameIt) {
+    private Iterator<Class<?>> classIterator(final Iterable<String> fileNameIt) {
         final Iterator<String> it = fileNameIt.iterator();
-        return new Iterator<Class<? extends Object>>() {
+        return new Iterator<Class<?>>() {
 
             @Override
             public boolean hasNext() {
@@ -469,7 +463,7 @@ public final class JkClassLoader {
             }
 
             @Override
-            public Class<? extends Object> next() {
+            public Class<?> next() {
                 final String className = getAsClassName(it.next());
                 return load(className);
             }
@@ -483,7 +477,7 @@ public final class JkClassLoader {
     }
 
     private static URL[] toUrl(Iterable<File> files) {
-        final List<URL> urls = new ArrayList<URL>();
+        final List<URL> urls = new ArrayList<>();
         for (final File file : files) {
             try {
                 urls.add(file.toURI().toURL());
@@ -530,7 +524,7 @@ public final class JkClassLoader {
         builder.append(delegate.getClass().getName());
         if (delegate instanceof URLClassLoader) {
             for (final URL url : delegate.getURLs()) {
-                builder.append("\n  " + url);
+                builder.append("\n  ").append(url);
             }
         }
         if (delegate.getParent() != null) {
@@ -654,7 +648,7 @@ public final class JkClassLoader {
      * dynamically some service providers to the classpath.
      */
     public JkClassLoader loadAllServices() {
-        final Set<Class<?>> serviceClasses = new HashSet<Class<?>>();
+        final Set<Class<?>> serviceClasses = new HashSet<>();
         for (final File file : this.fullClasspath()) {
             if (file.isFile()) {
                 JkLog.trace("Scanning " + file.getPath() + " for META-INF/services.");

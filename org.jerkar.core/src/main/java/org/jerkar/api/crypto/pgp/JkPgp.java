@@ -162,9 +162,8 @@ public final class JkPgp implements Serializable {
         JkUtilsAssert.isTrue(pubRing != null,
                 "You must supply a public ring file (as pubring.gpg) to verify file signatures");
         JkUtilsFile.assertAllExist(publicRing());
-        final Boolean result = JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "verify",
+        return JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "verify",
                 fileToVerify, pubRing, signature);
-        return result;
     }
 
     /**

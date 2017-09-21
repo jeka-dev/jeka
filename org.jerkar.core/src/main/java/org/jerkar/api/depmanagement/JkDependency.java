@@ -1,8 +1,6 @@
 package org.jerkar.api.depmanagement;
 
-import java.io.File;
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Marker interface for a dependency. It can be a either :

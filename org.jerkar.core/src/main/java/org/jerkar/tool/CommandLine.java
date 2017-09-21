@@ -64,7 +64,7 @@ final class CommandLine {
     }
 
     private static List<JkModuleDependency> dependencies(String[] words) {
-        final List<JkModuleDependency> result = new LinkedList<JkModuleDependency>();
+        final List<JkModuleDependency> result = new LinkedList<>();
         for (final String word : words) {
             if (word.startsWith(MODULE_SYMBOL_CHAR)) {
                 final String depdef = word.substring(1);
@@ -75,7 +75,7 @@ final class CommandLine {
     }
 
     private static List<MethodInvocation> extractMethods(String[] words, boolean master) {
-        final List<MethodInvocation> result = new LinkedList<MethodInvocation>();
+        final List<MethodInvocation> result = new LinkedList<>();
         for (final String word : words) {
             if (!word.startsWith("-") && !word.startsWith("@") && !word.endsWith(PLUGIN_SYMBOL)
                     && !word.endsWith(PLUGIN_SYMBOL + ALL_BUILD_SYMBOL)) {
@@ -94,7 +94,7 @@ final class CommandLine {
     }
 
     private static Map<String, String> extractOptions(String[] words, boolean master) {
-        final Map<String, String> result = new HashMap<String, String>();
+        final Map<String, String> result = new HashMap<>();
         for (final String word : words) {
             if (word.startsWith("-") && !word.startsWith("-D")) {
                 final int equalIndex = word.indexOf("=");
@@ -132,7 +132,7 @@ final class CommandLine {
     }
 
     private static Collection<JkPluginSetup> extractPluginSetup(String words[], boolean master) {
-        final Map<String, JkPluginSetup> setups = new HashMap<String, JkPluginSetup>();
+        final Map<String, JkPluginSetup> setups = new HashMap<>();
         for (String word : words) {
             if (!word.endsWith(ALL_BUILD_SYMBOL) && !master) {
                 continue;
@@ -156,11 +156,7 @@ final class CommandLine {
             } else if (isPluginOption(word)) {
                 final String pluginName = JkUtilsString.substringBeforeFirst(word, PLUGIN_SYMBOL)
                         .substring(1);
-                JkPluginSetup setup = setups.get(pluginName);
-                if (setup == null) {
-                    setup = JkPluginSetup.of(pluginName, false);
-                    setups.put(pluginName, setup);
-                }
+                JkPluginSetup setup = setups.computeIfAbsent(pluginName, n -> JkPluginSetup.of(n, false));
                 final int equalIndex = word.indexOf("=");
                 if (equalIndex <= -1) {
                     final String key = JkUtilsString.substringAfterFirst(word, PLUGIN_SYMBOL);
@@ -242,7 +238,7 @@ final class CommandLine {
     public static class JkPluginSetup {
 
         public static Set<String> names(Iterable<JkPluginSetup> setups) {
-            final Set<String> result = new HashSet<String>();
+            final Set<String> result = new HashSet<>();
             for (final JkPluginSetup setup : setups) {
                 result.add(setup.pluginName);
             }
@@ -278,7 +274,7 @@ final class CommandLine {
         }
 
         public JkPluginSetup with(String key, String value) {
-            final Map<String, String> map = new HashMap<String, String>(options);
+            final Map<String, String> map = new HashMap<>(options);
             map.put(key, value);
             return new JkPluginSetup(pluginName, map, activated);
         }
