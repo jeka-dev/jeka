@@ -24,10 +24,12 @@ public interface JkPublishFilter extends Serializable {
     /**
      * A filter accepting only snapshot versioned module.
      */
-    JkPublishFilter ACCEPT_SNAPSHOT_ONLY = (JkPublishFilter) versionedModule -> versionedModule.version().isSnapshot();
+    JkPublishFilter ACCEPT_SNAPSHOT_ONLY =
+            (JkPublishFilter) versionedModule -> versionedModule.version().isSnapshot();
 
     /**
      * A filter accepting only non-snapshot versioned module.
      */
-    JkPublishFilter ACCEPT_RELEASE_ONLY = (JkPublishFilter) versionedModule -> !versionedModule.version().isSnapshot();
+    JkPublishFilter ACCEPT_RELEASE_ONLY =
+            (JkPublishFilter) versionedModule -> !versionedModule.version().isSnapshot();
 }
