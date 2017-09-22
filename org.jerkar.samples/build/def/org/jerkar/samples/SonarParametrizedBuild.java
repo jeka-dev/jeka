@@ -42,7 +42,7 @@ public class SonarParametrizedBuild extends JkJavaBuild {
 		// Verify method has extension point hooked by sonar plugin
 		// so when sonar plugin is activated, JkBuild#verify
 		// launch the #verfy method on all activated plugins
-		verify();
+
 	}
 
 	public enum SonarEnv {
