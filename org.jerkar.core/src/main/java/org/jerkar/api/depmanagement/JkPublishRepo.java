@@ -1,5 +1,6 @@
 package org.jerkar.api.depmanagement;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,6 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
+import org.jerkar.api.system.JkLocator;
 
 /**
  * Stands for a repository for deploying artifacts.
@@ -44,6 +46,14 @@ public final class JkPublishRepo implements Serializable {
     public static JkPublishRepo of(JkRepo jkRepo) {
         return new JkPublishRepo(jkRepo, JkPublishFilter.ACCEPT_ALL, null, new HashSet<>(),
                 false);
+    }
+
+    /**
+     * Creates a repository for publishing locally under <code></code>[USER HOME]/.jerkar/publish</code> folder.
+     */
+    public static JkPublishRepo local() {
+        final File file = new File(JkLocator.jerkarUserHome(), "maven-publish-dir");
+        return JkRepo.maven(file).asPublishRepo();
     }
 
     /**

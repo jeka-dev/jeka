@@ -141,11 +141,15 @@ public class JkBuild {
      * Returns the scaffolder object in charge of doing the scaffolding for this build.
      * Override this method if you write a template class that need to do custom action for scaffolding.
      */
-    public JkScaffolder scaffolder() {
+    public final JkScaffolder scaffolder() {
         if (this.scaffolder == null) {
-            this.scaffolder = new JkScaffolder(this.baseDir, this.scaffoldEmbed);
+            this.scaffolder = createScaffolder();
         }
         return this.scaffolder;
+    }
+
+    protected JkScaffolder createScaffolder() {
+        return new JkScaffolder(this.baseDir, this.scaffoldEmbed);
     }
 
     // ------------------------------ build dependencies ---------------------------------------------
@@ -221,12 +225,6 @@ public class JkBuild {
     @JkDoc("Conventional method standing for the default operations to perform.")
     public void doDefault() {
         clean();
-    }
-
-    /** Run checks to verify the package is valid and meets quality criteria. */
-    @JkDoc("Runs checks to verify the project is valid and meets quality criteria.")
-    public void verify() {
-        JkBuildPlugin.applyVerify(this.plugins.getActives());
     }
 
     /** Displays all available methods defined in this build. */
@@ -401,7 +399,6 @@ public class JkBuild {
     public String toString() {
         return this.baseDir.getPath();
     }
-
 
     /**
      * Options for help method.

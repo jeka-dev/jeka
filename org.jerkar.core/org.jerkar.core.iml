@@ -8,8 +8,10 @@
       <sourceFolder url="file://$MODULE_DIR$/build/def" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/bin" />
       <excludeFolder url="file://$MODULE_DIR$/build/output" />
       <excludeFolder url="file://$MODULE_DIR$/idea-output" />
+      <excludeFolder url="file://$MODULE_DIR$/output" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library" exported="" scope="PROVIDED">

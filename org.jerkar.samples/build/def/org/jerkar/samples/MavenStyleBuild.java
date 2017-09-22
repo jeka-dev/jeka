@@ -37,7 +37,7 @@ public class MavenStyleBuild extends JkJavaBuild {
 	}
 
 	@Override
-	// Optional : needless if you use only local dependencies
+	// Optional : needless if you use only publishLocally dependencies
 	public JkDependencies dependencies() {
 		return JkDependencies.builder()
 				.on(GUAVA, "18.0")	// Popular modules are available as Java constant

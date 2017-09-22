@@ -1,25 +1,36 @@
 package org.jerkar.plugins.jacoco;
 
-import org.jerkar.AbstractBuild;
 import org.jerkar.CoreBuild;
 import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkImportBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 
-public class PluginsJacocoBuild extends AbstractBuild {
+import java.io.File;
+
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
+
+public class PluginsJacocoBuild extends JkJavaProjectBuild {
 
     @JkImportBuild("../org.jerkar.core")
     public CoreBuild core;
 
-    public static void main(String[] args) {
-        new PluginsJacocoBuild().doDefault();
+    @Override
+    protected JkJavaProject createProject(File baseDir) {
+        JkJavaProject project = new JkJavaProject(baseDir);
+        CoreBuild.applyCommons(project, "plugins-jacoco");
+        project.setDependencies(JkDependencies.builder()
+                .on(core.project()).scope(PROVIDED)
+                .on(core.file("build/libs/provided/junit-4.11.jar")).scope(TEST)
+                .on(core.file("build/libs/provided/hamcrest-core-1.3.jar")).scope(TEST)
+                .build());
+        return project;
     }
 
-    @Override
-    public JkDependencies dependencies() {
-        return JkDependencies.builder().on(core.asDependency(core.packer().jarFile())).scope(PROVIDED)
-                .on(core.file("build/libs/provided/junit-4.11.jar"),
-                        core.file("build/libs/provided/hamcrest-core-1.3.jar"))
-                .scope(TEST).build();
+
+    public static void main(String[] args) {
+        new PluginsJacocoBuild().doDefault();
     }
 
 }

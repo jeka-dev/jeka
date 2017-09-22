@@ -6,7 +6,7 @@ package org.jerkar.plugins.jacoco;
  * project. That's why its name start with '_' (java source starting with '_'
  * are not compiled by Jerkar).
  */
-public class _JkocoBuildDeclaringPlugin extends PluginsJacocoBuild {
+public class _JkocoBuildDeclaringPlugin extends OldPluginsJacocoBuild {
 
     public static void main(String[] args) {
         _JkocoBuildDeclaringPlugin build = new _JkocoBuildDeclaringPlugin();

@@ -19,7 +19,7 @@ public class SimpleScopeBuild extends JkJavaBuild {
 	
 	private static final JkScope BAR = JkScope.of("bar"); 
 	
-	@Override  // Optional :  needless if you use only local dependencies
+	@Override  // Optional :  needless if you use only publishLocally dependencies
 	protected JkDependencies dependencies() {
 		return JkDependencies.builder()
 			.on(file("libs/foo.jar")).scope(COMPILE)  

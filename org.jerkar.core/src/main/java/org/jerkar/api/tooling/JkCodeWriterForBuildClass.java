@@ -17,11 +17,12 @@ import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkVersionProvider;
+import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkBuildDependencySupport;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
+
+
 
 /**
  * Provides facilities to create code source for Build class. This is mainly
@@ -80,7 +81,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
      * The dependencies declared in the generated build class. Set it to <code>null</code> to
      * not generate #dependencies method.
      */
-    public JkDependencies dependencies;
+    public JkDependencies dependencies = JkDependencies.builder().build();
 
     /**
      * The repositories declared in the generated build class.
@@ -128,7 +129,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
 
     /**
      * Returns the java code portion that declares imports for a basic
-     * build class extending {@link JkJavaBuild}
+     * build class extending JkJavaBuild
      */
     public static List<String> importsForJkJavaBuild() {
         final List<String> imports = new LinkedList<>(importsForJkDependencyBuildSupport());
@@ -141,7 +142,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
 
     /**
      * Returns the java code portion that declares static imports for a basic
-     * build class extending {@link JkJavaBuild}
+     * build class extending
      */
     public static List<String> staticImportsForJkJavaBuild() {
         final List<String> imports = new LinkedList<>();
@@ -162,13 +163,25 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
 
     /**
      * Returns the java code portion that declares imports for a basic
-     * build class extending {@link JkBuildDependencySupport}
+     * build class extending
      */
+    @Deprecated
     public static List<String> importsForJkDependencyBuildSupport() {
         final List<String> imports = new LinkedList<>(importsForJkBuild());
         imports.add("org.jerkar.api.depmanagement.*");
         imports.add("org.jerkar.tool.JkBuildDependencySupport");
         imports.remove("org.jerkar.tool.JkBuild");
+        return imports;
+    }
+
+    /**
+     * Returns the java code portion that declares imports for a basic
+     * build class extending {@link org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild}
+     */
+    public static List<String> importsForJkJavaProjectBuild() {
+        final List<String> imports = new LinkedList<>(importsForJkBuild());
+        imports.add(JkJavaProject.class.getName());
+        imports.add("org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild");
         return imports;
     }
 

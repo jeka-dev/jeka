@@ -10,6 +10,7 @@ import org.jerkar.tool.JkBuildPlugin;
  *
  * @author Jerome Angibaud
  */
+@Deprecated
 public abstract class JkJavaBuildPlugin extends JkBuildPlugin {
 
     @Override

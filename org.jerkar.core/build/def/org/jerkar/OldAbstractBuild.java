@@ -1,0 +1,50 @@
+package org.jerkar;
+
+import org.jerkar.api.depmanagement.JkMavenPublication;
+import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
+import org.jerkar.api.depmanagement.JkPublishRepos;
+import org.jerkar.api.depmanagement.JkVersion;
+import org.jerkar.api.java.JkJavaCompiler;
+import org.jerkar.api.java.JkJavaVersion;
+import org.jerkar.tool.JkOptions;
+import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
+
+/**
+ * Build settings shared across all Jerkar Java projects (core + plugins)
+ */
+public abstract class OldAbstractBuild extends JkJavaBuild {
+
+    {
+        this.pack.javadoc = true;
+    }
+
+    @Override
+    public String javaSourceVersion() {
+        return JkJavaVersion.V8.name();
+    }
+
+    @Override
+    public JkVersion version() {
+        return JkVersion.name("0.7.0-SNAPSHOT");
+    }
+
+    @Override
+    protected JkMavenPublication mavenPublication() {
+        return super.mavenPublication().with(
+                JkMavenPublicationInfo
+                .of("Jerkar", "Build simpler, stronger, faster", "http://jerkar.github.io")
+                .withScm("https://github.com/jerkar/jerkar.git").andApache2License()
+                .andGitHubDeveloper("djeang", "djeangdev@yahoo.fr"));
+    }
+
+    @Override
+    protected JkPublishRepos publishRepositories() {
+        return JkPublishRepos.ossrh(JkOptions.get("repo.ossrh.username"),
+                JkOptions.get("repo.ossrh.password"), pgp()).withUniqueSnapshot(true);
+    }
+
+    @Override
+    public JkJavaCompiler productionCompiler() {
+        return super.productionCompiler().andOptions("-g");
+    }
+}

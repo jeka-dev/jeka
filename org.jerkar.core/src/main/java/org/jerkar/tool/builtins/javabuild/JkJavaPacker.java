@@ -22,6 +22,7 @@ import org.jerkar.api.utils.JkUtilsString;
  *
  * @author Jerome Angibaud
  */
+@Deprecated
 public class JkJavaPacker implements Cloneable {
 
     /**

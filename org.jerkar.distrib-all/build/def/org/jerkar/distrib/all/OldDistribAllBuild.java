@@ -2,24 +2,24 @@ package org.jerkar.distrib.all;
 
 import java.io.File;
 
-import org.jerkar.CoreBuild;
+import org.jerkar.OldCoreBuild;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkZipper;
 import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
-import org.jerkar.plugins.sonar.PluginsSonarBuild;
+import org.jerkar.plugins.jacoco.OldPluginsJacocoBuild;
+import org.jerkar.plugins.sonar.OldPluginsSonarBuild;
 import org.jerkar.tool.*;
 
 class OldDistribAllBuild extends JkBuildDependencySupport {
 
     @JkImportBuild("../org.jerkar.plugins-sonar")
-    PluginsSonarBuild pluginsSonar;
+    OldPluginsSonarBuild pluginsSonar;
 
     @JkImportBuild("../org.jerkar.plugins-jacoco")
-    PluginsJacocoBuild pluginsJacoco;
+    OldPluginsJacocoBuild pluginsJacoco;
 
     public boolean testSamples = false;
 
@@ -31,7 +31,7 @@ class OldDistribAllBuild extends JkBuildDependencySupport {
         JkLog.startln("Creating distribution file");
 
         JkLog.info("Copy core distribution locally.");
-        CoreBuild core = pluginsJacoco.core; // The core project is got by
+        OldCoreBuild core = pluginsJacoco.core; // The core project is got by
         // transitivity
         File distDir = this.ouputFile("dist");
         JkFileTree dist = JkFileTree.of(distDir).importDirContent(core.distribFolder);

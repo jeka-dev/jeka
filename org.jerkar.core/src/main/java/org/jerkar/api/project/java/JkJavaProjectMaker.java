@@ -1,10 +1,7 @@
 package org.jerkar.api.project.java;
 
 import java.io.File;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 import org.jerkar.api.depmanagement.JkArtifactFileId;
@@ -60,6 +57,8 @@ public class JkJavaProjectMaker {
     private Map<JkArtifactFileId, Runnable> artifactProducers = new LinkedHashMap<>();
 
     private final JkJavaProjectPackager packager;
+
+    private final Set<JkArtifactFileId> artifactFileIdsToNotPublish = new LinkedHashSet<>();
 
     private Supplier<String> artifactFileNameSupplier = () -> {
         if (project.getVersionedModule() != null) {
@@ -283,7 +282,8 @@ public class JkJavaProjectMaker {
 
     public JkJavaProjectMaker publish() {
         JkPublisher.of(this.publishRepos, project.getOutLayout().outputDir())
-                .publishMaven(project.getVersionedModule(), project, project.getDependencies(), project.getMavenPublicationInfo());
+                .publishMaven(project.getVersionedModule(), project, artifactFileIdsToNotPublish,
+                        project.getDependencies(), project.getMavenPublicationInfo());
         return this;
     }
 
@@ -387,6 +387,11 @@ public class JkJavaProjectMaker {
         this.artifactFileNameSupplier = artifactFileNameSupplier;
         return this;
     }
+
+    public Set<JkArtifactFileId> getArtifactFileIdsToNotPublish() {
+        return artifactFileIdsToNotPublish;
+    }
+
 
     private static class Status {
         private boolean sourceGenerated = false;

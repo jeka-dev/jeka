@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -33,11 +34,14 @@ public final class JkMavenPublication implements Serializable {
     /**
      * Creates a Maven publication to publish all artifacts referenced in the specified artifact locator.
      */
-    public static JkMavenPublication of(JkArtifactLocator artifactLocator) {
+    public static JkMavenPublication of(JkArtifactLocator artifactLocator, Set<JkArtifactFileId> excludedArtifacts) {
         JkMavenPublication result = JkMavenPublication.of(artifactLocator.artifactFile(artifactLocator.mainArtifactFileId()));
-        for (final JkArtifactFileId extraFileId : artifactLocator.artifactFileIds()) {
-            final File file = artifactLocator.artifactFile(extraFileId);
-            result = result.andOptional(file, extraFileId.classifier());
+        for (final JkArtifactFileId artifactFileId : artifactLocator.artifactFileIds()) {
+            if (excludedArtifacts.contains(artifactFileId)) {
+                continue;
+            }
+            final File file = artifactLocator.artifactFile(artifactFileId);
+            result = result.andOptional(file, artifactFileId.classifier());
         }
         return result;
     }

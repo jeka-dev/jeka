@@ -1,10 +1,14 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsObject;
+import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * Defines methods for enumerating artifacts files likely to be produced by an object.
@@ -47,6 +51,19 @@ public interface JkArtifactLocator {
         List<File> result = new LinkedList<>();
         result.add(artifactFile(mainArtifactFileId()));
         artifactFileIds().forEach(artifactFileId -> result.add(artifactFile(artifactFileId)));
+        return result;
+    }
+
+    /**
+     * Returns the arifact file ids having the specified classifier.
+     */
+    default Set<JkArtifactFileId> artifactsFileIdsWithClassifier(String ... classifiers) {
+        final Set<JkArtifactFileId> result = new LinkedHashSet<>();
+        artifactFileIds().forEach((fid) -> {
+            if (JkUtilsString.equalsAny(fid.classifier(), classifiers)) {
+                result.add(fid);
+            }
+        });
         return result;
     }
 

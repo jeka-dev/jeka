@@ -30,7 +30,9 @@ import org.jerkar.api.utils.JkUtilsString;
  * Template build definition class providing support for managing dependencies
  * and multi-projects.
  *
+ *
  * @author Jerome Angibaud
+ * @deprecated  Replaced by {@link org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild}
  */
 public class JkBuildDependencySupport extends JkBuild {
 
@@ -55,7 +57,7 @@ public class JkBuildDependencySupport extends JkBuild {
 
     /** Options about publication */
     @JkDoc("Publication")
-    public JkPublishOptions publication = new JkPublishOptions();
+    public JkCommonOptions.JkRepoOptions publication = new JkCommonOptions.JkRepoOptions();
 
     /**
      * Constructs a {@link JkBuildDependencySupport}
@@ -148,7 +150,7 @@ public class JkBuildDependencySupport extends JkBuild {
     }
 
     /**
-     * Returns the dependencies actually used process this build. It sums declared dependencies, local dependencies
+     * Returns the dependencies actually used process this build. It sums declared dependencies, publishLocally dependencies
      * and extra dependency added by plugins.
      */
     public final JkDependencies effectiveDependencies() {
@@ -259,7 +261,7 @@ public class JkBuildDependencySupport extends JkBuild {
      */
     protected JkPublisher publisher() {
         if (cachedPublisher == null) {
-            if (this.publication.local) {
+            if (this.publication.publishLocally) {
                 cachedPublisher = JkPublisher.of(mavenPublishLocal().asPublishRepo());
             } else {
                 cachedPublisher = JkPublisher.of(publishRepositories(), this.ouputTree().root());
@@ -269,7 +271,7 @@ public class JkBuildDependencySupport extends JkBuild {
     }
 
     @Override
-    public JkScaffolder scaffolder() {
+    public JkScaffolder createScaffolder() {
         final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
         codeWriter.extendedClass = "JkBuildDependencySupport";
         codeWriter.dependencies = JkDependencies.builder().build();
@@ -335,25 +337,6 @@ public class JkBuildDependencySupport extends JkBuild {
     public static JkRepo mavenPublishLocal() {
         final File file = new File(JkLocator.jerkarUserHome(), "maven-publish-dir");
         return JkRepo.maven(file);
-    }
-
-    /**
-     * Options about publications.
-     */
-    public static class JkPublishOptions {
-
-        /** Tell if the sources must be published. Default is true. */
-        @JkDoc("Tell if the sources must be published")
-        public boolean publishSources = true;
-
-        /** Tell if the test classes must be published. Default is false. */
-        @JkDoc("Tell if the test classes must be published")
-        public boolean publishTests = false;
-
-        /** Force to publish in local repository.**/
-        @JkDoc("Force to publish in local repository.")
-        public boolean local = false;
-
     }
 
     @Override

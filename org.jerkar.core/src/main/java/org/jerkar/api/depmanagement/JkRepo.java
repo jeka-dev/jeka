@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
@@ -37,7 +38,7 @@ public abstract class JkRepo implements Serializable {
     /**
      * URL of the OSSRH repository for deploying released artifacts.
      */
-    public static final URL MAVEN_OSSRH_DEPLOY_RELEASE = toUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2/");
+    public static final URL MAVEN_OSSRH_DEPLOY_RELEASE = toUrl("https://oss.sonatype.org/service/publishLocally/staging/deploy/maven2/");
 
     /**
      * URL of the OSSRH repository for downloading both snapshot and released artifacts.
@@ -58,6 +59,8 @@ public abstract class JkRepo implements Serializable {
         }
         return of(url).withCredential(userName, password);
     }
+
+
 
     /**
      * Returns the first repository not <code>null</code> from the specified ones.

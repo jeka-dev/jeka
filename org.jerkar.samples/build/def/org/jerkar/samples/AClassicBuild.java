@@ -30,7 +30,7 @@ public class AClassicBuild extends JkJavaBuild {
         return JkJavaVersion.V7.name();
     }
 
-    @Override // Optional : needless if you use only local dependencies
+    @Override // Optional : needless if you use only publishLocally dependencies
     protected JkDependencies dependencies() {
 	return JkDependencies.builder()
 		.on(GUAVA, "18.0").scope(COMPILE)

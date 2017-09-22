@@ -5,6 +5,6 @@ import org.jerkar.tool.JkInit;
 class RunDistribAndBlackboxTests {
 
     public static void main(String[] args) {
-        JkInit.instanceOf(OldDistribAllBuild.class, args, "-testSamples=true").doDefault();
+        JkInit.instanceOf(DistribAllBuild.class, args, "-testSamples=true").doDefault();
     }
 }

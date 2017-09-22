@@ -49,7 +49,10 @@ import org.jerkar.tool.JkScaffolder;
  * standard.
  *
  * @author Jerome Angibaud
+ *
+ * @deprecated Replaced by {@link JkJavaProjectBuild}
  */
+@Deprecated
 public class JkJavaBuild extends JkBuildDependencySupport {
 
     /**
@@ -370,7 +373,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     // --------------------------- Callable Methods -----------------------
 
     @Override
-    public JkScaffolder scaffolder() {
+    public JkScaffolder createScaffolder() {
         final Runnable addFolder = () -> {
             for (final JkFileTree dir : editedSources().fileTrees()) {
                 dir.root().mkdirs();
@@ -701,7 +704,6 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     @JkDoc("Lifecycle method : #doUnitTest + #pack")
     public void doVerify() {
         doPack();
-        verify();
     }
 
     /** Lifecycle method : #doVerify + #publish */

@@ -2,6 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.time.Instant;
+import java.util.Set;
 
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.system.JkLocator;
@@ -111,8 +112,9 @@ public final class JkPublisher {
      *               artifact files. If an artifact files is not present, it is not created by this method.
      */
     public void publishMaven(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator,
+                             Set<JkArtifactFileId> excludedArtifacts,
                              JkDependencies dependencies, JkMavenPublicationInfo extraPublishInfo) {
-        JkMavenPublication publication = JkMavenPublication.of(artifactLocator).with(extraPublishInfo);
+        JkMavenPublication publication = JkMavenPublication.of(artifactLocator, excludedArtifacts).with(extraPublishInfo);
         this.ivyPublisher.publishMaven(versionedModule, publication, dependencies.modulesOnly());
     }
 

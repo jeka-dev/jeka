@@ -277,11 +277,21 @@ public final class JkUtilsString {
      */
     public static boolean equalsAny(String stringToMatch, String... candidates) {
         for (final String candidate : candidates) {
-            if (stringToMatch.equals(candidate)) {
+            if (equals(stringToMatch, candidate)) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Null safe equals
+     **/
+    public static boolean equals(String string1, String string2) {
+        if (string1 == null) {
+            return string2 == null;
+        }
+        return string1.equals(string2);
     }
 
     /**

@@ -1,6 +1,6 @@
 package org.jerkar.distrib.all;
 
-import org.jerkar.V07CoreBuild;
+import org.jerkar.CoreBuild;
 import org.jerkar.api.depmanagement.JkArtifactFileId;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
@@ -9,8 +9,8 @@ import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.plugins.jacoco.V07PluginsJacocoBuild;
-import org.jerkar.plugins.sonar.V07PluginsSonarBuild;
+import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
+import org.jerkar.plugins.sonar.PluginsSonarBuild;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkImportBuild;
@@ -21,10 +21,10 @@ import java.io.File;
 class DistribAllBuild extends JkBuild {
 
     @JkImportBuild("../org.jerkar.plugins-sonar")
-    V07PluginsSonarBuild pluginsSonar;
+    PluginsSonarBuild pluginsSonar;
 
     @JkImportBuild("../org.jerkar.plugins-jacoco")
-    V07PluginsJacocoBuild pluginsJacoco;
+    PluginsJacocoBuild pluginsJacoco;
 
     public boolean testSamples = false;
 
@@ -36,7 +36,7 @@ class DistribAllBuild extends JkBuild {
         JkLog.startln("Creating distribution file");
 
         JkLog.info("Copy core distribution locally.");
-        V07CoreBuild core = pluginsJacoco.core; // The core project is got by transitivity
+        CoreBuild core = pluginsJacoco.core; // The core project is got by transitivity
         File distDir = this.ouputFile("dist");
         JkJavaProject coreProject = core.project();
         JkFileTree dist = JkFileTree.of(distDir).importDirContent(core.distribFolder);
@@ -77,7 +77,7 @@ class DistribAllBuild extends JkBuild {
     public void doDefault() {
         super.doDefault();
         this.importedBuilds().all().forEach(JkBuild::clean);
-        pluginsJacoco.core.project().makeArtifactFile(V07CoreBuild.DISTRIB_FILE_ID);
+        pluginsJacoco.core.project().makeArtifactFile(CoreBuild.DISTRIB_FILE_ID);
         pluginsJacoco.project().makeMainJar();
         pluginsSonar.project().makeMainJar();
         distrib();

@@ -10,6 +10,7 @@ import org.jerkar.api.depmanagement.JkDependencyResolver;
  *
  * @author Jerome Angibaud
  */
+@Deprecated
 public abstract class JkBuildPlugin {
 
     /**
