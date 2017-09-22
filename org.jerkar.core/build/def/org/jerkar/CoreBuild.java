@@ -62,7 +62,7 @@ public class CoreBuild extends AbstractBuild {
 
         // Create lean jar
 
-        // Simpler to put both Jerkar and Jerkar-fat jar at the root (in order
+        // Simpler to put both Jerkar and Jerkar-fat jar at the baseTree (in order
         // to find the Jerker HOME)
         distrib.importFiles(packer.jarFile());
         distrib.importFiles(packer().jarFile("lean"));

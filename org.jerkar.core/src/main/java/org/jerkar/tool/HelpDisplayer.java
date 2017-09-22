@@ -16,7 +16,7 @@ final class HelpDisplayer {
         JkLog.info("Ex: jerkar javadoc compile -verbose=true -other=xxx -DmyProp=Xxxx");
         JkLog.nextLine();
         // JkLog.infoUnderline("Build class availbale on this project");
-        // JkProjectDef.of(build.baseDir().root()).logAvailableBuildClasses();
+        // JkProjectDef.of(build.baseDir().baseTree()).logAvailableBuildClasses();
         // JkLog.nextLine();
         // JkLog.infoString("To get details on a specific build class, type 'jerkar
         // help -buildClass=Xxxxxx");

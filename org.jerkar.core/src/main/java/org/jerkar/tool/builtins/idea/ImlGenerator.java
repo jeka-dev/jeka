@@ -414,7 +414,7 @@ final class ImlGenerator {
             writer.writeStartElement(type);
             writer.writeCharacters("\n");
             writer.writeCharacters(T5);
-            writer.writeEmptyElement("root");
+            writer.writeEmptyElement("baseTree");
             writer.writeAttribute("url", ideaPath(this.projectDir, file));
             writer.writeCharacters("\n" + T4);
             writer.writeEndElement();

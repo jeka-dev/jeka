@@ -2,6 +2,7 @@ package org.jerkar.api.utils;
 
 import java.io.File;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 /**
  * Utilities methods to ease XML api of the JDK
@@ -59,6 +61,22 @@ public final class JkUtilsXml {
             return doc;
         } catch (final Exception e) {
             throw new RuntimeException("Error while parsing file " + documentFile.getPath(), e);
+        }
+    }
+
+    /**
+     * Creates a document from the specified xml string.
+     */
+    public static Document documentFrom(String xml) {
+        final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        try {
+            final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc;
+            doc = dBuilder.parse(new InputSource(new StringReader(xml)));
+            doc.getDocumentElement().normalize();
+            return doc;
+        } catch (final Exception e) {
+            throw new RuntimeException("Error while parsing xml \n" + xml, e);
         }
     }
 

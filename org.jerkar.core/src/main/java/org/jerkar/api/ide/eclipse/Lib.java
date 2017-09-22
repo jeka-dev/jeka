@@ -4,7 +4,9 @@ import java.io.File;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkScope;
+import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLocator;
+import org.jerkar.api.utils.JkUtilsFile;
 
 
 class Lib {
@@ -44,35 +46,18 @@ class Lib {
         return scope + ":" + file.getPath();
     }
 
-    public static JkDependencies toDependencies(/*JkBuild*/ Object masterBuild, Iterable<Lib> libs,
-            ScopeResolver scopeSegregator) {
+    public static JkDependencies toDependencies(File parentDir, Iterable<Lib> libs,
+            ScopeResolver scopeSegregator, JkEclipseClasspathApplier applier) {
         final JkDependencies.Builder builder = JkDependencies.builder();
         for (final Lib lib : libs) {
             if (lib.projectRelativePath == null) {
                 builder.on(lib.file).scope(lib.scope);
 
-            } else { // This is build import
-                /*    final JkJavaBuild importedBuild = (JkJavaBuild) masterBuild
-                        .createImportedBuild(lib.projectRelativePath);
-
-
-                final JkComputedDependency projectDependency = importedBuild.asDependency(importedBuild
-                        .packer().jarFile());
-                builder.on(projectDependency).scope(lib.scope);
-
-                final File dotClasspathFile = importedBuild.file(".classpath");
-                if (dotClasspathFile.exists()) {
-                    final DotClasspathModel dotClasspathModel = DotClasspathModel.from(dotClasspathFile);
-                    final List<Lib> sublibs = new ArrayList<>();
-                    for (final Lib sublib : dotClasspathModel.libs(importedBuild.baseTree().root(),
-                            scopeSegregator)) {
-                        if (sublib.exported) {
-                            sublibs.add(sublib);
-                        }
-                    }
-                    builder.on(Lib.toDependencies(importedBuild, sublibs, scopeSegregator));
-
-                }  */
+            } else { // This is a dependency on an eclipse project
+                File projectDir = JkUtilsFile.canonicalFile(new File(parentDir, lib.projectRelativePath));
+                final JkJavaProject project = new JkJavaProject(projectDir);
+                applier.apply(project);
+                builder.on(project).scope(lib.scope);
             }
         }
         return builder.build();

@@ -38,7 +38,7 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 /**
  * Provides method to generate and read Eclipse metadata files.
  */
-final class JkImlGenerator {
+public final class JkImlGenerator {
 
     private static final String ENCODING = "UTF-8";
 
@@ -405,7 +405,7 @@ final class JkImlGenerator {
             writer.writeStartElement(type);
             writer.writeCharacters("\n");
             writer.writeCharacters(T5);
-            writer.writeEmptyElement("root");
+            writer.writeEmptyElement("baseTree");
             writer.writeAttribute("url", ideaPath(this.sourceLayout.baseDir(), file));
             writer.writeCharacters("\n" + T4);
             writer.writeEndElement();
@@ -576,13 +576,8 @@ final class JkImlGenerator {
         return this;
     }
 
-
-    public JkImlGenerator setDependencyResolver(JkDependencyResolver dependencyResolver) {
+    public JkImlGenerator setDependencies(JkDependencyResolver dependencyResolver, JkDependencies dependencies) {
         this.dependencyResolver = dependencyResolver;
-        return this;
-    }
-
-    public JkImlGenerator setDependencies(JkDependencies dependencies) {
         this.dependencies = dependencies;
         return this;
     }

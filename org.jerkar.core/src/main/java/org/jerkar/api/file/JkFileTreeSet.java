@@ -199,7 +199,7 @@ public final class JkFileTreeSet implements Iterable<File> {
     }
 
     /**
-     * Returns <code>true</code> if no tree of this object has an existing root.
+     * Returns <code>true</code> if no tree of this object has an existing baseTree.
      */
     public boolean hasNoExistingRoot() {
         for (final JkFileTree dirView : jkFileTrees) {

@@ -151,7 +151,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
     }
 
     /**
-     * Returns a {@link JkRepos} identical to this one but adding Ivy {@link JkRepo} having specified root files.
+     * Returns a {@link JkRepos} identical to this one but adding Ivy {@link JkRepo} having specified baseTree files.
      */
     public JkRepos andIvy(File... files) {
         final List<JkRepo> list = new LinkedList<>(this.repos);
@@ -160,7 +160,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
     }
 
     /**
-     * Returns a {@link JkRepos} identical to this one but adding Maven {@link JkRepo} having specified root files.
+     * Returns a {@link JkRepos} identical to this one but adding Maven {@link JkRepo} having specified baseTree files.
      */
     public JkRepos andMaven(File... files) {
         final List<JkRepo> list = new LinkedList<>(this.repos);

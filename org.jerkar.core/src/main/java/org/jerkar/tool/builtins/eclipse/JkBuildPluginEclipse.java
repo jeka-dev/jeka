@@ -191,7 +191,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
      * of another Eclipse project, then you can generate .classpath in such it has a dependency on the project itself
      * instead of the file/folder.
      *
-     * @param projectDir root folder of the project generating the class jar
+     * @param projectDir baseTree folder of the project generating the class jar
      * @param dependencyFile the dependency file your project depends on.
      */
     public void useProjectDependencyInsteadOfFileFor(File projectDir, File dependencyFile) {
@@ -206,7 +206,7 @@ public final class JkBuildPluginEclipse extends JkJavaBuildPlugin {
      * of the project itself, this method will tell Eclipse plugin to use jar file + transitive dependencies for the
      * specified project
      *
-     * @param projectDirs root folder of the projects for which you don't want to use Eclipse project dependency.
+     * @param projectDirs baseTree folder of the projects for which you don't want to use Eclipse project dependency.
      */
     public void useFileDependencyInsteadOfProjectFor(File ... projectDirs) {
         Collections.addAll(projectDependencyToFileSubstitutions, projectDirs);

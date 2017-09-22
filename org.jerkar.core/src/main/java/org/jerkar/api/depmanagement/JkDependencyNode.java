@@ -320,7 +320,7 @@ public class JkDependencyNode implements Serializable {
         private final JkModuleId moduleId;
         private final JkVersionRange declaredVersion;
         private final Set<JkScope> declaredScopes;  // the left conf mapping side in the caller dependency description
-        private final Set<JkScope> rootScopes; // scopes fetching this node to root
+        private final Set<JkScope> rootScopes; // scopes fetching this node to baseTree
         private final JkVersion resolvedVersion;
         private final List<File> artifacts;
         private final boolean treeRoot;

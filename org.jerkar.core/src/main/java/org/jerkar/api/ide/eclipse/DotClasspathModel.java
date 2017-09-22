@@ -40,12 +40,12 @@ final class DotClasspathModel {
         this.classpathentries.addAll(classpathentries);
     }
 
-    public static DotClasspathModel from(File dotClasspathFile) {
+    static DotClasspathModel from(File dotClasspathFile) {
         final Document document = JkUtilsXml.documentFrom(dotClasspathFile);
         return from(document);
     }
 
-    private static DotClasspathModel from(Document document) {
+    static DotClasspathModel from(Document document) {
         final NodeList nodeList = document.getElementsByTagName(CLASSPATHENTRY);
         final List<ClasspathEntry> classpathEntries = new LinkedList<>();
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -56,7 +56,12 @@ final class DotClasspathModel {
         return new DotClasspathModel(classpathEntries);
     }
 
-    public String outputPath() {
+    static DotClasspathModel from(String dotClasspathString) {
+        Document document = JkUtilsXml.documentFrom(dotClasspathString);
+        return from(document);
+    }
+
+    String outputPath() {
         for (final ClasspathEntry classpathEntry : classpathentries) {
             if (classpathEntry.kind.equals(ClasspathEntry.Kind.OUTPUT)) {
                 return classpathEntry.path;
@@ -143,8 +148,7 @@ final class DotClasspathModel {
 
             } else if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC)) {
                 if (classpathEntry.isProjectSrc(baseDir.getParentFile(), projects)) {
-                    final String projectPath = classpathEntry
-                            .projectRelativePath(baseDir, projects);
+                    final String projectPath = classpathEntry.projectRelativePath(baseDir, projects);
                     result.add(Lib.project(projectPath, JkJavaBuild.COMPILE,
                             classpathEntry.exported));
                 }

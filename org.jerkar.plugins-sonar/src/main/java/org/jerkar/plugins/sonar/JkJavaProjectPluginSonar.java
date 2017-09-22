@@ -40,7 +40,7 @@ public class JkJavaProjectPluginSonar implements JkJavaProjectPlugin {
                 .withBinaries(project.getOutLayout().classDir()).withLibraries(libs)
                 .withSources(sourceLayout.sources().roots())
                 .withTest(sourceLayout.tests().roots())
-                .withProperty(JkSonar.WORKING_DIRECTORY, sourceLayout.root().file("build/.sonar").getPath())
+                .withProperty(JkSonar.WORKING_DIRECTORY, sourceLayout.baseTree().file("build/.sonar").getPath())
                 .withProperty(JkSonar.JUNIT_REPORTS_PATH,
                         JkUtilsFile.getRelativePath(baseDir, new File(testReportDir, "junit")))
                 .withProperty(JkSonar.SUREFIRE_REPORTS_PATH,

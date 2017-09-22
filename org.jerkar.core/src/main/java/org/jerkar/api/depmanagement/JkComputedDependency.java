@@ -178,7 +178,7 @@ public class JkComputedDependency implements JkFileDependency {
 
     /**
      * If this dependency can be represented as a project dependency in a IDE,
-     * this field mentions the root dir of the project.
+     * this field mentions the baseTree dir of the project.
      */
     public File ideProjectBaseDir() {
         return ideProjectBaseDir;

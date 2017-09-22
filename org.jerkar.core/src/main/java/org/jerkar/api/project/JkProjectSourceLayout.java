@@ -93,7 +93,7 @@ public class JkProjectSourceLayout {
     }
 
     public JkProjectSourceLayout withSources(String relativePath) {
-        return new JkProjectSourceLayout(this.baseDir, root().go(relativePath).asSet(), this.resources, this.tests, this.testResources);
+        return new JkProjectSourceLayout(this.baseDir, baseTree().go(relativePath).asSet(), this.resources, this.tests, this.testResources);
     }
 
     public JkProjectSourceLayout withResources(JkFileTreeSet resources) {
@@ -101,7 +101,7 @@ public class JkProjectSourceLayout {
     }
 
     public JkProjectSourceLayout withResources(String relativePath) {
-        return new JkProjectSourceLayout(this.baseDir, this.sources, root().go(relativePath).asSet(), this.tests, this.testResources);
+        return new JkProjectSourceLayout(this.baseDir, this.sources, baseTree().go(relativePath).asSet(), this.tests, this.testResources);
     }
 
     public JkProjectSourceLayout withTests(JkFileTreeSet tests) {
@@ -109,7 +109,7 @@ public class JkProjectSourceLayout {
     }
 
     public JkProjectSourceLayout withTests(String relativePath) {
-        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, root().go(relativePath).asSet(), this.testResources);
+        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, baseTree().go(relativePath).asSet(), this.testResources);
     }
 
     public JkProjectSourceLayout withTestResources(JkFileTreeSet testResources) {
@@ -117,7 +117,7 @@ public class JkProjectSourceLayout {
     }
 
     public JkProjectSourceLayout withTestResources(String relativePath) {
-        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, this.tests, root().go(relativePath).asSet());
+        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, this.tests, baseTree().go(relativePath).asSet());
     }
 
     private static JkFileTreeSet move(JkFileTreeSet original, File originalBase, File newBase) {
@@ -174,8 +174,33 @@ public class JkProjectSourceLayout {
     /**
      * Returns base directory as a {@link JkFileTree}.
      */
-    public JkFileTree root() {
+    public JkFileTree baseTree() {
         return JkFileTree.of(baseDir);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JkProjectSourceLayout that = (JkProjectSourceLayout) o;
+
+        if (!baseDir.equals(that.baseDir)) return false;
+        if (!sources.equals(that.sources)) return false;
+        if (!tests.equals(that.tests)) return false;
+        if (!resources.equals(that.resources)) return false;
+        return testResources.equals(that.testResources);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = baseDir.hashCode();
+        result = 31 * result + sources.hashCode();
+        result = 31 * result + tests.hashCode();
+        result = 31 * result + resources.hashCode();
+        result = 31 * result + testResources.hashCode();
+        return result;
+    }
+
 
 }

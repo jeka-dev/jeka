@@ -17,6 +17,8 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -125,6 +127,8 @@ class Project {
         writer.writeEndElement();
 
         writer.flush();
+        writer.close();
+        JkUtilsIO.closeQuietly(fos);
     }
 
     private Project(String name, Set<String> natures) {

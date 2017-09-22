@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.sun.java.accessibility.util.EventID;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
@@ -127,10 +128,10 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns <code>true</code> if this object contains no dependency.
+     * Returns the unmodifiable list list of scoped dependencies for this object.
      */
-    public boolean isEmpty() {
-        return dependencies.isEmpty();
+    public List<JkScopedDependency> list() {
+        return this.dependencies;
     }
 
     /**

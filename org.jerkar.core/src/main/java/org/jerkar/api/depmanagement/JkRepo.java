@@ -86,7 +86,7 @@ public abstract class JkRepo implements Serializable {
     }
 
     /**
-     * Creates a Maven repository having the specified file root location.
+     * Creates a Maven repository having the specified file baseTree location.
      */
     public static JkMavenRepository maven(File file) {
         return new JkMavenRepository(JkUtilsFile.toUrl(file), null, null, null);
