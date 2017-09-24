@@ -32,7 +32,7 @@ public final class JkJavaCompilerSpec {
     }
 
     /**
-     * Returns a specification accoriduing the specified raw string options.
+     * Returns a specification according the specified raw string options.
      */
     public static JkJavaCompilerSpec of() {
         return new JkJavaCompilerSpec(new ArrayList<>(0));
@@ -40,7 +40,7 @@ public final class JkJavaCompilerSpec {
 
 
     /**
-     * Returns a specification accoriduing the specified raw string options.
+     * Returns a specification according the specified raw string options.
      */
     public static JkJavaCompilerSpec of(List<String> options) {
         return new JkJavaCompilerSpec(options);
@@ -65,7 +65,7 @@ public final class JkJavaCompilerSpec {
     }
 
     public JkJavaVersion getSourceVersion() {
-        String rawResult = getNextValue(SOURCE_OPTS);
+        final String rawResult = getNextValue(SOURCE_OPTS);
         if (rawResult == null) {
             return null;
         }
@@ -73,7 +73,7 @@ public final class JkJavaCompilerSpec {
     }
 
     public JkJavaVersion getTargetVersion() {
-        String rawResult = getNextValue(TARGET_OPTS);
+        final String rawResult = getNextValue(TARGET_OPTS);
         if (rawResult == null) {
             return null;
         }
@@ -195,9 +195,9 @@ public final class JkJavaCompilerSpec {
     }
 
     static String findValueAfter(Iterable<String> options, String optionName) {
-        Iterator<String> it = options.iterator();
+        final Iterator<String> it = options.iterator();
         while (it.hasNext()) {
-            String optionItem = it.next();
+            final String optionItem = it.next();
             if (optionItem.equals(optionName) && it.hasNext()) {
                 return it.next();
             }
@@ -206,8 +206,8 @@ public final class JkJavaCompilerSpec {
     }
 
     static List<String> addOrReplace(Iterable<String> options, String optionName, String value) {
-        List<String> result = JkUtilsIterable.concatLists(options);
-        int index = result.indexOf(optionName);
+        final List<String> result = JkUtilsIterable.concatLists(options);
+        final int index = result.indexOf(optionName);
         if (index > 0) {
             result.remove(index);
             if (index < result.size()) {

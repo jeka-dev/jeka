@@ -1,26 +1,37 @@
 package org.jerkar.api.project.java;
 
 import java.io.File;
-import java.util.*;
+import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
+import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.JkArtifactFileId;
+import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.api.depmanagement.JkIvyPublication;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.depmanagement.JkPublishRepos;
 import org.jerkar.api.depmanagement.JkPublisher;
 import org.jerkar.api.depmanagement.JkRepo;
+import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkResolutionParameters;
 import org.jerkar.api.depmanagement.JkScope;
+import org.jerkar.api.depmanagement.JkVersionProvider;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
+import org.jerkar.api.file.JkZipper.JkCheckSumer;
 import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.java.JkResourceProcessor;
-import org.jerkar.api.java.junit.JkTestSuiteResult;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -35,7 +46,7 @@ import org.jerkar.api.utils.JkUtilsFile;
  */
 public class JkJavaProjectMaker {
 
-    private JkJavaProject project;
+    private final JkJavaProject project;
 
     private JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.mavenCentral())
             .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaDepScopes.DEFAULT_SCOPE_MAPPING));
@@ -50,30 +61,53 @@ public class JkJavaProjectMaker {
 
     private JkPublishRepos publishRepos = JkPublishRepos.local();
 
-    public boolean runTests = true;
+    private boolean skipTests = false;
 
     private final Status status = new Status();
 
-    private Map<JkArtifactFileId, Runnable> artifactProducers = new LinkedHashMap<>();
+    private final Map<JkArtifactFileId, Runnable> artifactProducers = new LinkedHashMap<>();
 
     private final JkJavaProjectPackager packager;
 
     private final Set<JkArtifactFileId> artifactFileIdsToNotPublish = new LinkedHashSet<>();
 
-    private Supplier<String> artifactFileNameSupplier = () -> {
-        if (project.getVersionedModule() != null) {
-            return fileName(project.getVersionedModule());
-        } else if (project.getArtifactName() != null) {
-            return project.getArtifactName();
-        }
-        return project.baseDir().getName();
-    };
+    private Supplier<String> artifactFileNameSupplier;
+
+    private JkPgp pgpSigner;
 
     // commons ------------------------
 
-    JkJavaProjectMaker(JkJavaProject project) {
+    public JkJavaProjectMaker(JkJavaProject project) {
         this.project = project;
         this.packager = JkJavaProjectPackager.of(project);
+        this.cleaner = JkRunnables.of(
+                () -> JkUtilsFile.deleteDirContent(project.getOutLayout().outputDir()));
+        this.resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().resources())
+                .and(project.getOutLayout().generatedResourceDir())
+                .and(project.getResourceInterpolators())
+                .generateTo(project.getOutLayout().classDir()));
+        this.compiler = JkRunnables.of(() -> {
+            JkJavaCompiler comp = baseCompiler.andOptions(project.getCompileSpec().asOptions());
+            comp = applyCompileSource(comp);
+            comp.compile();
+        });
+        testResourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().testResources())
+                .and(project.getOutLayout().generatedTestResourceDir())
+                .and(project.getResourceInterpolators())
+                .generateTo(project.getOutLayout().testClassDir()));
+        testCompiler = JkRunnables.of(() -> {
+            JkJavaCompiler comp = testBaseCompiler.andOptions(this.project.getCompileSpec().asOptions());
+            comp = applyTestCompileSource(comp);
+            comp.compile();
+        });
+        artifactFileNameSupplier = () -> {
+            if (project.getVersionedModule() != null) {
+                return fileName(project.getVersionedModule());
+            } else if (project.getArtifactName() != null) {
+                return project.getArtifactName();
+            }
+            return project.baseDir().getName();
+        };
     }
 
 
@@ -81,29 +115,31 @@ public class JkJavaProjectMaker {
         if (!status.compileDone) {
             compile();
         }
-        if (runTests && !status.unitTestDone) {
+        if (!skipTests && !status.unitTestDone) {
             test();
         }
     }
 
     public void generateJavadoc() {
         JkJavadocMaker.of(project.getSourceLayout().sources(), project.getOutLayout().getJavadocDir())
-                .withClasspath(depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
-                .andOptions(this.javadocOptions).process();
+        .withClasspath(depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
+        .andOptions(this.javadocOptions).process();
         status.javadocGenerated = true;
     }
 
     public JkPath depsFor(JkScope... scopes) {
-        return dependencyResolver.get(project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME),
-                scopes);
+        return dependencyResolver.get(getDefaultedDependencies(), scopes);
+    }
+
+    public JkDependencies getDefaultedDependencies() {
+        return project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME);
     }
 
 
 
     // Clean -----------------------------------------------
 
-    public final JkRunnables cleaner = JkRunnables.of(
-            () -> JkUtilsFile.deleteDirContent(project.getOutLayout().outputDir()));
+    public final JkRunnables cleaner;
 
     public JkJavaProjectMaker clean() {
         status.reset();
@@ -119,19 +155,12 @@ public class JkJavaProjectMaker {
 
     public final JkRunnables resourceGenerator = JkRunnables.noOp();
 
-    public final JkRunnables resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().resources())
-            .and(project.getOutLayout().generatedResourceDir())
-            .and(project.getResourceInterpolators())
-            .generateTo(project.getOutLayout().classDir()));
+    public final JkRunnables resourceProcessor;
 
-    public final JkRunnables compiler = JkRunnables.of(() -> {
-        JkJavaCompiler comp = baseCompiler.andOptions(project.getCompileSpec().asOptions());
-        comp = applyCompileSource(comp);
-        comp.compile();
-    });
+    public final JkRunnables compiler;
 
     private JkJavaCompiler applyCompileSource(JkJavaCompiler baseCompiler) {
-        JkPath classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
+        final JkPath classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
         return baseCompiler
                 .withClasspath(classpath)
                 .andSources(project.getSourceLayout().sources())
@@ -163,19 +192,12 @@ public class JkJavaProjectMaker {
     public final JkRunnables testResourceGenerator = JkRunnables.of(() -> {
     });
 
-    public final JkRunnables testResourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().testResources())
-            .and(project.getOutLayout().generatedTestResourceDir())
-            .and(project.getResourceInterpolators())
-            .generateTo(project.getOutLayout().testClassDir()));
+    public final JkRunnables testResourceProcessor;
 
-    public final JkRunnables testCompiler = JkRunnables.of(() -> {
-        JkJavaCompiler comp = testBaseCompiler.andOptions(this.project.getCompileSpec().asOptions());
-        comp = applyTestCompileSource(comp);
-        comp.compile();
-    });
+    public final JkRunnables testCompiler;
 
     private JkJavaCompiler applyTestCompileSource(JkJavaCompiler baseCompiler) {
-        JkPath classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andHead(project.getOutLayout().classDir());
+        final JkPath classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andHead(project.getOutLayout().classDir());
         return baseCompiler
                 .withClasspath(classpath)
                 .andSources(project.getSourceLayout().tests())
@@ -186,16 +208,12 @@ public class JkJavaProjectMaker {
         final JkClasspath classpath = JkClasspath.of(project.getOutLayout().testClassDir(), project.getOutLayout().classDir())
                 .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
         final File junitReport = new File(project.getOutLayout().testReportDir(), "junit");
-        return this.getJuniter().withClassesToTest(project.getOutLayout().testClassDir())
+        return this.juniter.withClassesToTest(project.getOutLayout().testClassDir())
                 .withClasspath(classpath)
                 .withReportDir(junitReport);
     }
 
-    public final JkRunnables testExecutor = JkRunnables.of(() -> {
-        JkUnit juniter = juniter();
-        JkTestSuiteResult result = juniter.run();
-    });
-
+    public final JkRunnables testExecutor = JkRunnables.of(() -> juniter().run());
 
     public final JkRunnables afterTest = JkRunnables.of(() -> {
     });
@@ -221,7 +239,7 @@ public class JkJavaProjectMaker {
         return this;
     }
 
-    // Package --------------------------------------------------------------------
+    // Pack --------------------------------------------------------------------
 
     public final JkRunnables beforePackage = JkRunnables.of(() -> {
     });
@@ -233,14 +251,14 @@ public class JkJavaProjectMaker {
             JkLog.done();
             return getArtifactFile(artifactFileId);
         } else {
-            throw new IllegalArgumentException("No artifact with classifier/extension " + artifactFileId + " is defined on project " + this);
+            throw new IllegalArgumentException("No artifact with classifier/extension " + artifactFileId + " is defined on project " + this.project);
         }
     }
 
     File getArtifactFile(JkArtifactFileId artifactId) {
         final String namePart = artifactFileNameSupplier.get();
-        String classifier = artifactId.classifier() == null ? "" : "-" + artifactId.classifier();
-        String extension = artifactId.extension() == null ? "" : "." + artifactId.extension();
+        final String classifier = artifactId.classifier() == null ? "" : "-" + artifactId.classifier();
+        final String extension = artifactId.extension() == null ? "" : "." + artifactId.extension();
         return new File(project.getOutLayout().outputDir(), namePart + classifier + extension);
     }
 
@@ -278,12 +296,46 @@ public class JkJavaProjectMaker {
         return this;
     }
 
+    public void checksum(String ...algorithms) {
+        this.project.allArtifactFiles().forEach((file) -> JkCheckSumer.of(file).makeSumFiles(file, algorithms));
+    }
+
+    public void signArtifactFiles(JkPgp pgp) {
+        this.project.allArtifactFiles().forEach((file) -> pgp.sign(file));
+    }
+
     // ----------------------- publish
 
     public JkJavaProjectMaker publish() {
+        final JkPublisher publisher = JkPublisher.of(this.publishRepos);
+        if (publisher.hasMavenPublishRepo()) {
+            publishMaven();
+        }
+        if (publisher.hasIvyPublishRepo()) {
+            publishIvy();
+        }
+        return this;
+    }
+
+    public JkJavaProjectMaker publishMaven() {
         JkPublisher.of(this.publishRepos, project.getOutLayout().outputDir())
-                .publishMaven(project.getVersionedModule(), project, artifactFileIdsToNotPublish,
-                        project.getDependencies(), project.getMavenPublicationInfo());
+        .publishMaven(project.getVersionedModule(), project, artifactFileIdsToNotPublish,
+                this.getDefaultedDependencies(), project.getMavenPublicationInfo());
+        return this;
+    }
+
+    public JkJavaProjectMaker publishIvy() {
+        final JkDependencies dependencies = getDefaultedDependencies();
+        final JkIvyPublication publication = JkIvyPublication.of(project.mainArtifactFile(), JkJavaDepScopes.COMPILE)
+                .andOptional(project.artifactFile(JkJavaProject.SOURCES_FILE_ID), JkJavaDepScopes.SOURCES)
+                .andOptional(project.artifactFile(JkJavaProject.JAVADOC_FILE_ID), JkJavaDepScopes.JAVADOC)
+                .andOptional(project.artifactFile(JkJavaProject.TEST_FILE_ID), JkJavaDepScopes.TEST)
+                .andOptional(project.artifactFile(JkJavaProject.TEST_SOURCE_FILE_ID), JkJavaDepScopes.SOURCES);
+        final JkVersionProvider resolvedVersions = this.dependencyResolver
+                .resolve(dependencies, dependencies.involvedScopes()).resolvedVersionProvider();
+        JkPublisher.of(this.publishRepos, project.getOutLayout().outputDir())
+        .publishIvy(project.getVersionedModule(), publication, dependencies,
+                JkJavaDepScopes.COMPILE, JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
         return this;
     }
 
@@ -331,6 +383,11 @@ public class JkJavaProjectMaker {
 
     public JkJavaProjectMaker setDependencyResolver(JkDependencyResolver dependencyResolver) {
         this.dependencyResolver = dependencyResolver;
+        return this;
+    }
+
+    public JkJavaProjectMaker setDownloadRepos(JkRepos repos) {
+        this.dependencyResolver = this.dependencyResolver.withRepos(repos);
         return this;
     }
 
@@ -391,6 +448,16 @@ public class JkJavaProjectMaker {
     public Set<JkArtifactFileId> getArtifactFileIdsToNotPublish() {
         return artifactFileIdsToNotPublish;
     }
+
+    public boolean isTestSkipped() {
+        return skipTests;
+    }
+
+    public void setSkipTests(boolean skipTests) {
+        this.skipTests = skipTests;
+    }
+
+
 
 
     private static class Status {

@@ -1,34 +1,35 @@
 package org.jerkar.samples;
 
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.COMPILE;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.RUNTIME;
 import static org.jerkar.api.depmanagement.JkPopularModules.JERSEY_SERVER;
+
+import java.io.File;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
+import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 
 /**
- * This build is equivalent to {@link MavenStyleBuild} but removing 
- * the needless part cause we respect the convention project folder name = groupName.projectName
- * and the version number is taken jump resource 'version.txt' (default behavior)
- *
- * @author Jerome Angibaud
+ * This build illustrate how one can use other dependency scopes then the standard ones.
  */
-public class SimpleScopeBuild extends JkJavaBuild {
+public class SimpleScopeBuild extends JkJavaProjectBuild {
 	
-	private static final JkScope FOO = JkScope.of("foo"); 
+    private static final JkScope FOO = JkScope.of("foo"); 
 	
-	private static final JkScope BAR = JkScope.of("bar"); 
+    private static final JkScope BAR = JkScope.of("bar"); 
 	
-	@Override  // Optional :  needless if you use only publishLocally dependencies
-	protected JkDependencies dependencies() {
-		return JkDependencies.builder()
-			.on(file("libs/foo.jar")).scope(COMPILE)  
-			.on(JERSEY_SERVER, "1.19")
-				.mapScope(COMPILE).to(RUNTIME)
-				.and(FOO, PROVIDED).to(BAR, PROVIDED)
+    protected JkJavaProject createProject(File baseDir) {
+	JkDependencies deps = JkDependencies.builder()
+	        .on(file("libs/foo.jar"))  
+		.on(JERSEY_SERVER, "1.19")
+		    .mapScope(COMPILE).to(RUNTIME)
+		    .and(FOO, PROVIDED).to(BAR, PROVIDED)
 		.build();
-	}
-	
-	
-	
+	return new JkJavaProject(baseDir).setDependencies(deps);
+    }	
 }
+	
+

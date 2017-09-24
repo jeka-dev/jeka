@@ -8,7 +8,6 @@ import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkException;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
  * Provides methods to modify a given {@link JkJavaProject} in order it reflects a given .classpath file.
@@ -47,9 +46,9 @@ public class JkEclipseClasspathApplier {
         final JkFileTreeSet sources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources;
         final JkFileTreeSet testSources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources;
         final JkFileTreeSet resources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources
-                .andFilter(JkJavaBuild.RESOURCE_FILTER);
+                .andFilter(JkProjectSourceLayout.JAVA_RESOURCE_FILTER);
         final JkFileTreeSet testResources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources
-                .andFilter(JkJavaBuild.RESOURCE_FILTER);
+                .andFilter(JkProjectSourceLayout.JAVA_RESOURCE_FILTER);
 
         final ScopeResolver scopeResolver = scopeResolver(baseDir);
         final List<Lib> libs = dotClasspathModel.libs(baseDir, scopeResolver);

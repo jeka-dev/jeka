@@ -1,8 +1,11 @@
+import java.io.File;
+
 import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.java.JkJavaVersion;
+import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.samples.MavenStyleBuild;
 import org.jerkar.tool.JkImportBuild;
-import org.jerkar.tool.JkInit;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 
 /**
  * Simple build demonstrating how Jerkar can handle multi-project build.
@@ -17,7 +20,7 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
  * 
  * @formatter:off
  */
-public class NormalJarBuild extends JkJavaBuild {
+public class NormalJarBuild extends JkJavaProjectBuild {
 
     /*
      *  Creates a sample build instance of the 'org.jerkar.samples' project.
@@ -28,24 +31,10 @@ public class NormalJarBuild extends JkJavaBuild {
     private MavenStyleBuild sampleBuild;  
 
     @Override
-    protected JkDependencies dependencies() {
-    	return JkDependencies
-		
-    		// Depends on the jar file produced by the mavenBuildStyle of the 'sample' project
-		    // When fetching the dependencies, if the jar file in the 'samples' project is not present,
-		    // then a 'sampleBuild' is launched in order to produce it.
-		    // The 'sampleBuild' is launched with the 'doDefault' method unless you specify another ones
-		    .of(COMPILE, sampleBuild.asDependency(sampleBuild.packer().jarFile())) 
-		
-		    // Depends on the transitive build defined in the mavenBuildStyle of the 'sample' project
-		    .and(sampleBuild.depsFor(COMPILE), COMPILE)
-		
-		    // Additional dependency
-		    .and("com.google.guava:guava", "18.0", COMPILE);
+    protected JkJavaProject createProject(File baseDir) {
+        return new JkJavaProject(baseDir)
+                .setDependencies(JkDependencies.of(sampleBuild.project()))
+                .setSourceVersion(JkJavaVersion.V7);
     }
-    
-    public static void main(String[] args) {
-		JkInit.instanceOf(NormalJarBuild.class, args).doDefault();
-	}
 
 }

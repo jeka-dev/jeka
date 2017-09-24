@@ -18,7 +18,7 @@ import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 /**
  * Plugin to generate Eclipse meta data files from a JkJavaProjectBuild
  */
-public final class JkBuildPlugin2Eclipse extends JkBuildPlugin2<JkBuild> {
+public final class JkBuildPlugin2Eclipse implements JkBuildPlugin2<JkBuild> {
 
     @JkDoc("Set it to false to not mention javadoc in generated .classpath file.")
     boolean javadoc = true;
@@ -37,13 +37,6 @@ public final class JkBuildPlugin2Eclipse extends JkBuildPlugin2<JkBuild> {
     @JkDoc({ "Set it to true to use absolute paths in the classpath instead of classpath variables." })
     public boolean useVarPath = false;
 
-    /**
-     * Constructs a {@link JkBuildPlugin2Eclipse}
-     * @param build
-     */
-    protected JkBuildPlugin2Eclipse(JkBuild build) {
-        super(build);
-    }
 
     // ------------------------- setters ----------------------------
 
@@ -55,23 +48,23 @@ public final class JkBuildPlugin2Eclipse extends JkBuildPlugin2<JkBuild> {
     // ------------------------ plugin methods ----------------------
 
     @Override
-    protected void apply() {
-        build().scaffolder().extraActions.chain(this::generateFiles);  // If this plugin is activated while scaffolding, we want Eclipse metada file be generated.
+    public void apply(final JkBuild build) {
+        build.scaffolder().extraActions.chain(()-> this.generateFiles(build));  // If this plugin is activated while scaffolding, we want Eclipse metada file be generated.
     }
 
     /** generate eclipse metadata files (as .classpath or .project) */
     @JkDoc("Generates Eclipse .classpath file according project dependencies.")
-    public void generateFiles() {
-        final File dotProject = build().file(".project");
-        if (build() instanceof JkJavaProjectBuild) {
-            final JkJavaProjectBuild javaProjectBuild = (JkJavaProjectBuild) build();
+    public void generateFiles(JkBuild build) {
+        final File dotProject = build.file(".project");
+        if (build instanceof JkJavaProjectBuild) {
+            final JkJavaProjectBuild javaProjectBuild = (JkJavaProjectBuild) build;
             final JkJavaProject javaProject = javaProjectBuild.project();
             final List<File> importedBuildProjects = new LinkedList<>();
-            for (final JkBuild depBuild : build().importedBuilds().directs()) {
+            for (final JkBuild depBuild : build.importedBuilds().directs()) {
                 importedBuildProjects.add(depBuild.baseTree().root());
             }
             final JkEclipseClasspathGenerator classpathGenerator = new JkEclipseClasspathGenerator(javaProject);
-            classpathGenerator.setBuildDependencyResolver(build().buildDependencyResolver(), build().buildDependencies());
+            classpathGenerator.setBuildDependencyResolver(build.buildDependencyResolver(), build.buildDependencies());
             classpathGenerator.setIncludeJavadoc(true);
             classpathGenerator.setJreContainer(this.jreContainer);
             classpathGenerator.setImportedBuildProjects(importedBuildProjects);
@@ -79,23 +72,23 @@ public final class JkBuildPlugin2Eclipse extends JkBuildPlugin2<JkBuild> {
             // generator.fileDependencyToProjectSubstitution = this.fileDependencyToProjectSubstitution;
             // generator.projectDependencyToFileSubstitutions = this.projectDependencyToFileSubstitutions;
             final String result = classpathGenerator.generate();
-            final File dotClasspath = build().file(".classpath");
+            final File dotClasspath = build.file(".classpath");
             JkUtilsFile.writeString(dotClasspath, result, false);
 
             if (!dotProject.exists()) {
-                Project.ofJavaNature(build().baseTree().root().getName()).writeTo(dotProject);
+                Project.ofJavaNature(build.baseTree().root().getName()).writeTo(dotProject);
             }
         } else {
             if (!dotProject.exists()) {
-                Project.ofSimpleNature(build().baseTree().root().getName()).writeTo(dotProject);
+                Project.ofSimpleNature(build.baseTree().root().getName()).writeTo(dotProject);
             }
         }
     }
 
     /** Generate Eclipse files on all sub folders of the current directory **/
     @JkDoc("Generate Eclipse files on all subfolder of the current directory. Only subfolder having a build/def directory are impacted.")
-    public void generateAll() {
-        final Iterable<File> folders = build().baseTree()
+    public void generateAll(JkBuild build) {
+        final Iterable<File> folders = build.baseTree()
                 .include("**/" + JkConstants.BUILD_DEF_DIR)
                 .exclude("**/build/output/**")
                 .files(true);

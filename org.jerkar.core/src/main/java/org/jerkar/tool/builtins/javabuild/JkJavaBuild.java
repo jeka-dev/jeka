@@ -28,7 +28,6 @@ import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.java.JkManifest;
 import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.java.junit.JkUnit;
-import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
 import org.jerkar.api.tooling.JkMvn;
@@ -130,7 +129,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
     /** Options about tests */
     @JkDoc("Tests")
-    public JkOptionTest tests = new JkOptionTest();
+    public JkTestOptions tests = new JkTestOptions();
 
     /**
      * Options about packaging jars. This object will be used to populate the default {@link JkJavaPacker} for this build.
@@ -205,8 +204,9 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * sources).
      */
     public JkFileTreeSet sources() {
-        return JkJavaBuildPlugin.applySourceDirs(this.plugins.getActives(),
-                editedSources().and(generatedSourceDir()));
+        return editedSources().and(generatedSourceDir());
+        //return JkJavaBuildPlugin.applySourceDirs(this.plugins.getActivated(),
+        //        editedSources().and(generatedSourceDir()));
     }
 
     /**
@@ -223,15 +223,17 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     public JkFileTreeSet resources() {
         final JkFileTreeSet original = sources().andFilter(RESOURCE_FILTER).and(editedResources())
                 .and(generatedResourceDir());
-        return JkJavaBuildPlugin.applyResourceDirs(this.plugins.getActives(), original);
+        return original;
+        //return JkJavaBuildPlugin.applyResourceDirs(this.plugins.getActivated(), original);
     }
 
     /**
      * Returns location of test source code.
      */
     public JkFileTreeSet unitTestSources() {
-        return JkJavaBuildPlugin.applyTestSourceDirs(this.plugins.getActives(),
-                unitTestEditedSources());
+        return unitTestEditedSources();
+        // return JkJavaBuildPlugin.applyTestSourceDirs(this.plugins.getActivated(),
+        //        unitTestEditedSources());
     }
 
     /**
@@ -239,7 +241,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      */
     public JkFileTreeSet unitTestResources() {
         final JkFileTreeSet original = unitTestSources().andFilter(RESOURCE_FILTER);
-        return JkJavaBuildPlugin.applyTestResourceDirs(this.plugins.getActives(), original);
+        return original;
+        //return JkJavaBuildPlugin.applyTestResourceDirs(this.plugins.getActivated(), original);
     }
 
     /**
@@ -290,7 +293,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * Returns the compiler used to compile production code.
      */
     public JkJavaCompiler productionCompiler() {
-        JkJavaCompilerSpec spec = JkJavaCompilerSpec.of().withEncoding(this.sourceEncoding())
+        final JkJavaCompilerSpec spec = JkJavaCompilerSpec.of().withEncoding(this.sourceEncoding())
                 .withSourceVersion(JkJavaVersion.name(this.javaSourceVersion()))
                 .withTargetVersion(JkJavaVersion.name(this.javaTargetVersion()));
         return JkJavaCompiler.outputtingIn(classDir()).andSources(sources())
@@ -303,7 +306,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * Returns the compiler used to compile unit tests.
      */
     public JkJavaCompiler unitTestCompiler() {
-        JkJavaCompilerSpec spec = JkJavaCompilerSpec.of().withEncoding(this.sourceEncoding())
+        final JkJavaCompilerSpec spec = JkJavaCompilerSpec.of().withEncoding(this.sourceEncoding())
                 .withSourceVersion(JkJavaVersion.name(this.javaSourceVersion()))
                 .withTargetVersion(JkJavaVersion.name(this.javaTargetVersion()));
         return JkJavaCompiler.outputtingIn(testClassDir()).andSources(unitTestSources())
@@ -316,7 +319,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * Returns the object used to process unit tests.
      */
     public final JkUnit unitTester() {
-        return JkJavaBuildPlugin.applyUnitTester(plugins.getActives(), createUnitTester());
+        return createUnitTester();
+        //return JkJavaBuildPlugin.applyUnitTester(plugins.getActivated(), createUnitTester());
     }
 
     /**
@@ -348,7 +352,8 @@ public class JkJavaBuild extends JkBuildDependencySupport {
      * Returns the object that produces deliverable files (jar, war, sources, zip, folder, ...) for this project.
      */
     public final JkJavaPacker packer() {
-        return JkJavaBuildPlugin.applyPacker(plugins.getActives(), createPacker());
+        return createPacker();
+        // return JkJavaBuildPlugin.applyPacker(plugins.getActivated(), createPacker());
     }
 
     /**
@@ -425,7 +430,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     @JkDoc("Generates sources and resources, compiles production sources and processes production resources to the class directory.")
     public void compile() {
         JkLog.startln("Processing production code and resources");
-        JkJavaBuildPlugin.applyPriorCompile(this.plugins.getActives());
+        //  JkJavaBuildPlugin.applyPriorCompile(this.plugins.getActivated());
         generateSources();
         productionCompiler().compile();
         generateResources();
@@ -758,36 +763,6 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     }
 
     /**
-     * Options about tests
-     */
-    public final static class JkOptionTest {
-
-        /** Turn it on to skip tests. */
-        @JkDoc("Turn it on to skip tests.")
-        public boolean skip;
-
-        /** Turn it on to run tests in a forked process. */
-        @JkDoc("Turn it on to run tests in a forked process.")
-        public boolean fork;
-
-        /** Argument passed to the JVM if tests are forked. Example : -Xms2G -Xmx2G */
-        @JkDoc("Argument passed to the JVM if tests are forked. Example : -Xms2G -Xmx2G")
-        public String jvmOptions;
-
-        /** Detail level for the test report */
-        @JkDoc({ "The more details the longer tests take to be processed.",
-            "BASIC mention the total time elapsed along detail on failed tests.",
-            "FULL detailed report displays additionally the time to run each tests.",
-        "Example : -report=NONE" })
-        public JunitReportDetail report = JunitReportDetail.BASIC;
-
-        /** Turn it on to display System.out and System.err on console while executing tests.*/
-        @JkDoc("Turn it on to display System.out and System.err on console while executing tests.")
-        public boolean output;
-
-    }
-
-    /**
      * Options about archive packaging.
      */
     public static final class JkOptionPack {
@@ -866,7 +841,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
 
     @Override
     public String infoString() {
-        String builder = super.infoString() + "\n\n" +
+        final String builder = super.infoString() + "\n\n" +
                 "source dirs : " + this.sources() + "\n" +
                 "test dirs: " + this.unitTestSources() + "\n" +
                 "java source version : " + this.javaSourceVersion() + "\n" +

@@ -8,7 +8,7 @@ import org.jerkar.api.utils.JkUtilsAssert;
 /**
  * Reference to a build method (callable Jerkar from command line). A build
  * method can be defined on a build class or on a plug-in.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkModelMethod {
@@ -34,14 +34,14 @@ public final class JkModelMethod {
     /**
      * Creates a build method reference that is defined on a plugin.
      */
-    public static JkModelMethod pluginMethod(Class<? extends JkBuildPlugin> pluginClass,
+    public static JkModelMethod pluginMethod(Class<? extends JkBuildPlugin2<?>> pluginClass,
             String methodName) {
         return new JkModelMethod(methodName, pluginClass);
     }
 
     private final String methodName;
 
-    private final Class<? extends JkBuildPlugin> pluginClass;
+    private final Class<? extends JkBuildPlugin2<?>> pluginClass;
 
     /**
      * Returns the name of the method.
@@ -54,11 +54,11 @@ public final class JkModelMethod {
      * Returns the plugin on which this method is defined. Returns
      * <code>null</code> if defined on a build class.
      */
-    public Class<? extends JkBuildPlugin> pluginClass() {
+    public Class<? extends JkBuildPlugin2<?>> pluginClass() {
         return pluginClass;
     }
 
-    private JkModelMethod(String methodName, Class<? extends JkBuildPlugin> pluginClass) {
+    private JkModelMethod(String methodName, Class<? extends JkBuildPlugin2<?>> pluginClass) {
         super();
         JkUtilsAssert.isTrue(methodName != null && !methodName.isEmpty(),
                 "PluginName can' t be null or empty");

@@ -97,11 +97,18 @@ public class JkBuild {
     }
 
     /**
-     * Returns the base directory for this project. All file/directory path are
+     * Returns the base directory tree for this project. All file/directory path are
      * resolved to this directory.
      */
     public final JkFileTree baseTree() {
         return JkFileTree.of(baseDir);
+    }
+
+    /**
+     * Returns the base directory for this project.
+     */
+    public final File baseDir() {
+        return baseDir;
     }
 
     /**
@@ -193,12 +200,7 @@ public class JkBuild {
         // Do nothing as no plugin extension as been defined at this level.
     }
 
-    /**
-     * Returns plugins attached to this build and extending the specified class.
-     */
-    public <T extends JkBuildPlugin> T pluginOf(Class<T> pluginClass) {
-        return this.plugins.findInstanceOf(pluginClass);
-    }
+
 
     // ------------------------------ Command line methods ---------------------------------------------------
 
@@ -209,7 +211,7 @@ public class JkBuild {
     @JkDoc("Creates the project structure")
     public final void scaffold() {
         scaffolder().run();
-        JkBuildPlugin.applyScaffold(this.plugins.getActives());
+        //  JkBuildPlugin.applyScaffold(this.plugins.getActivated());
     }
 
 
@@ -262,7 +264,7 @@ public class JkBuild {
     }
 
 
-   // ----------------------------- being a dependency ---------------------------------------
+    // ----------------------------- being a dependency ---------------------------------------
 
     /**
      * Returns a {@link JkComputedDependency} on this project and specified
@@ -296,9 +298,7 @@ public class JkBuild {
      * Returns imported builds with plugins applied on.
      */
     public final JkImportedBuilds importedBuilds() {
-        final List<JkBuild> importedBuilds = JkBuildPlugin.applyPluginsToImportedBuilds(this.plugins.getActives(),
-                this.importedBuilds.all());
-        return JkImportedBuilds.of(this.baseTree().root(), importedBuilds);
+        return importedBuilds;
     }
 
     @SuppressWarnings("unchecked")
@@ -313,7 +313,7 @@ public class JkBuild {
                     (Class<? extends JkBuild>) field.getType(), jkProject.value());
             try {
                 JkUtilsReflect.setFieldValue(this, field, subBuild);
-            } catch (RuntimeException e) {
+            } catch (final RuntimeException e) {
                 File currentClassBaseDir = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
                 while (!new File(currentClassBaseDir, "build/def").exists() && currentClassBaseDir != null) {
                     currentClassBaseDir = currentClassBaseDir.getParentFile();
@@ -376,12 +376,18 @@ public class JkBuild {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
-            ImportedBuildRef that = (ImportedBuildRef) o;
+            final ImportedBuildRef that = (ImportedBuildRef) o;
 
-            if (!canonicalFileName.equals(that.canonicalFileName)) return false;
+            if (!canonicalFileName.equals(that.canonicalFileName)) {
+                return false;
+            }
             return clazz.equals(that.clazz);
         }
 

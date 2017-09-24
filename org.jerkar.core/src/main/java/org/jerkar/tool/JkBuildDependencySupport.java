@@ -34,6 +34,7 @@ import org.jerkar.api.utils.JkUtilsString;
  * @author Jerome Angibaud
  * @deprecated  Replaced by {@link org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild}
  */
+@Deprecated
 public class JkBuildDependencySupport extends JkBuild {
 
     /**
@@ -57,7 +58,7 @@ public class JkBuildDependencySupport extends JkBuild {
 
     /** Options about publication */
     @JkDoc("Publication")
-    public JkCommonOptions.JkRepoOptions publication = new JkCommonOptions.JkRepoOptions();
+    public JkRepoOptions publication = new JkRepoOptions();
 
     /**
      * Constructs a {@link JkBuildDependencySupport}
@@ -160,7 +161,8 @@ public class JkBuildDependencySupport extends JkBuild {
         if (defaultcope != null) {
             deps = deps.withDefaultScope(defaultcope);
         }
-        return JkBuildPlugin.applyDependencies(plugins.getActives(), implicitDependencies().and(deps));
+        //return JkBuildPlugin.applyDependencies(plugins.getActivated(), implicitDependencies().and(deps));
+        return deps;
     }
 
     /**
@@ -215,7 +217,7 @@ public class JkBuildDependencySupport extends JkBuild {
     public final JkDependencyResolver dependencyResolver() {
         if (cachedResolver == null) {
             JkLog.startln("Setting dependency resolver ");
-            cachedResolver = JkBuildPlugin.applyDependencyResolver(plugins.getActives(), createDependencyResolver());
+            // cachedResolver = JkBuildPlugin.applyDependencyResolver(plugins.getApplied(), createDependencyResolver());
             if (JkLog.verbose()) {
                 JkLog.done("Resolver set " + cachedResolver);
             } else {
@@ -341,7 +343,7 @@ public class JkBuildDependencySupport extends JkBuild {
 
     @Override
     public String infoString() {
-        String builder = super.infoString() + "\n\n" +
+        final String builder = super.infoString() + "\n\n" +
                 "module : " + this.moduleId() + "\n" +
                 "version : " + this.moduleId() + "\n" +
                 "dependencies : " + this.dependencies();

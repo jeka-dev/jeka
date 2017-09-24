@@ -295,14 +295,8 @@ public final class JkZipper {
          * written in the same directory as the digested file and has the same
          * name + '.md5' extension.
          */
-        public JkCheckSumer md5() {
-            JkLog.start("Creating MD5 file for : " + file);
-            final File parent = file.getParentFile();
-            final String md5 = JkUtilsFile.checksum(file, "MD5");
-            final String fileName = file.getName() + ".md5";
-            JkUtilsFile.writeString(new File(parent, fileName), md5, false);
-            JkLog.done();
-            return this;
+        public JkCheckSumer makeMd5File() {
+            return makeSumFiles(file, "md5");
         }
 
         /**
@@ -310,13 +304,24 @@ public final class JkZipper {
          * written in the same directory as the digested file and has the same
          * name + '.sha1' extension.
          */
-        public JkCheckSumer sha1() {
-            JkLog.start("Creating SHA-1 file for : " + file);
-            final File parent = file.getParentFile();
-            final String sha1 = JkUtilsFile.checksum(file, "SHA-1");
-            final String fileName = file.getName() + ".sha1";
-            JkUtilsFile.writeString(new File(parent, fileName), sha1, false);
-            JkLog.done();
+        public JkCheckSumer makeSha1File() {
+            return makeSumFiles(file, "sha1");
+        }
+
+        /**
+         * Creates a digest for this wrapped file. The digest file is
+         * written in the same directory as the digested file and has the same
+         * name + algorithm name extension.
+         */
+        public JkCheckSumer makeSumFiles(File file, String ...algorithms) {
+            for (final String algorithm : algorithms) {
+                JkLog.start("Creating check sum with algorithm " +  algorithm + " for file : " + file);
+                final File parent = file.getParentFile();
+                final String checksum = JkUtilsFile.checksum(file, algorithm);
+                final String fileName = file.getName() + "." + algorithm.toLowerCase();
+                JkUtilsFile.writeString(new File(parent, fileName), checksum, false);
+                JkLog.done("File " + fileName + " created");
+            }
             return this;
         }
 
@@ -324,22 +329,24 @@ public final class JkZipper {
          * As {@link #md5()} but allow to pass a flag as parameter to actually
          * process or not the digesting.
          */
+        @Deprecated
         public JkCheckSumer md5If(boolean process) {
             if (!process) {
                 return this;
             }
-            return md5();
+            return makeMd5File();
         }
 
         /**
          * As {@link #sha1()} but allow to pass a flag as parameter to actually
          * process or not the digesting.
          */
+        @Deprecated
         public JkCheckSumer sha1If(boolean process) {
             if (!process) {
                 return this;
             }
-            return sha1();
+            return makeSha1File();
         }
     }
 

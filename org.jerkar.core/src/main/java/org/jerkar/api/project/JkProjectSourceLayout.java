@@ -13,7 +13,10 @@ import org.jerkar.api.utils.JkUtilsFile;
  */
 public class JkProjectSourceLayout {
 
-    private static final JkPathFilter RESOURCE_FILTER = JkPathFilter.exclude("**/*.java")
+    /**
+     * Filter to consider as resources everything but java source stuff.
+     */
+    public static final JkPathFilter JAVA_RESOURCE_FILTER = JkPathFilter.exclude("**/*.java")
             .andExclude("**/package.html").andExclude("**/doc-files");
 
     /**
@@ -23,9 +26,9 @@ public class JkProjectSourceLayout {
     public static JkProjectSourceLayout mavenJava() {
         final File baseDir = new File(".");
         final JkFileTreeSet sources = JkFileTreeSet.of(new File(baseDir,"src/main/java"));
-        final JkFileTreeSet resources = JkFileTreeSet.of(new File(baseDir, "src/main/resources")).and(sources.andFilter(RESOURCE_FILTER));
+        final JkFileTreeSet resources = JkFileTreeSet.of(new File(baseDir, "src/main/resources")).and(sources.andFilter(JAVA_RESOURCE_FILTER));
         final JkFileTreeSet tests = JkFileTreeSet.of(new File(baseDir,"src/test/java"));
-        final JkFileTreeSet testResources = JkFileTreeSet.of(new File(baseDir, "src/test/resources")).and(tests.andFilter(RESOURCE_FILTER));
+        final JkFileTreeSet testResources = JkFileTreeSet.of(new File(baseDir, "src/test/resources")).and(tests.andFilter(JAVA_RESOURCE_FILTER));
         return new JkProjectSourceLayout(baseDir, sources, resources, tests, testResources);
     }
 
@@ -36,9 +39,9 @@ public class JkProjectSourceLayout {
     public static JkProjectSourceLayout simple() {
         final File baseDir = new File(".");
         final JkFileTreeSet sources = JkFileTreeSet.of(new File(baseDir,"src"));
-        final JkFileTreeSet resources = sources.andFilter(RESOURCE_FILTER);
+        final JkFileTreeSet resources = sources.andFilter(JAVA_RESOURCE_FILTER);
         final JkFileTreeSet tests = JkFileTreeSet.of(new File(baseDir,"test"));
-        final JkFileTreeSet testResources = tests.andFilter(RESOURCE_FILTER);
+        final JkFileTreeSet testResources = tests.andFilter(JAVA_RESOURCE_FILTER);
         return new JkProjectSourceLayout(baseDir, sources, resources, tests, testResources);
     }
 
@@ -180,15 +183,27 @@ public class JkProjectSourceLayout {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-        JkProjectSourceLayout that = (JkProjectSourceLayout) o;
+        final JkProjectSourceLayout that = (JkProjectSourceLayout) o;
 
-        if (!baseDir.equals(that.baseDir)) return false;
-        if (!sources.equals(that.sources)) return false;
-        if (!tests.equals(that.tests)) return false;
-        if (!resources.equals(that.resources)) return false;
+        if (!baseDir.equals(that.baseDir)) {
+            return false;
+        }
+        if (!sources.equals(that.sources)) {
+            return false;
+        }
+        if (!tests.equals(that.tests)) {
+            return false;
+        }
+        if (!resources.equals(that.resources)) {
+            return false;
+        }
         return testResources.equals(that.testResources);
     }
 

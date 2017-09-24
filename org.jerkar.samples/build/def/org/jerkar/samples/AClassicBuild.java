@@ -1,14 +1,14 @@
 package org.jerkar.samples;
 
-import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
-import static org.jerkar.api.depmanagement.JkPopularModules.JERSEY_SERVER;
-import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
-import static org.jerkar.api.depmanagement.JkPopularModules.MOCKITO_ALL;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
+
+import java.io.File;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.java.JkJavaVersion;
+import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 
 /**
  * This build is equivalent to {@link MavenStyleBuild} but removing the needless
@@ -19,29 +19,36 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
  * @author Jerome Angibaud
  * @formatter:off
  */
-public class AClassicBuild extends JkJavaBuild {
+public class AClassicBuild extends JkJavaProjectBuild {
 
     {
 	pack.checksums = "sha1";
+	pack.tests = true;
+	pack.javadoc = true;
     }
     
     @Override
-    public String javaSourceVersion() {
-        return JkJavaVersion.V7.name();
-    }
-
-    @Override // Optional : needless if you use only publishLocally dependencies
-    protected JkDependencies dependencies() {
-	return JkDependencies.builder()
-		.on(GUAVA, "18.0").scope(COMPILE)
-		.on(JERSEY_SERVER, "1.19")
-		.on("com.orientechnologies:orientdb-client:2.0.8")
-		.on(JUNIT, "4.11").scope(TEST)
-		.on(MOCKITO_ALL, "1.9.5").scope(TEST).build();
+    protected JkJavaProject createProject(File baseDir) {
+        JkDependencies dependencies = JkDependencies.builder()
+            .on("com.google.guava:guava:18.0")
+            .on("com.sun.jersey:jersey-server:1.19")
+            .on("com.orientechnologies:orientdb-client:2.0.8")
+            .on("junit:junit:4.11", TEST)
+            .on("org.mockito:mockito-all:1.9.5", TEST).build();
+        return new JkJavaProject(this.baseDir())
+                .setSourceVersion(JkJavaVersion.V7)
+                .setDependencies(dependencies).addFatJarArtifactFile("fat");
     }
     
     public static void main(String[] args) {
 	JkInit.instanceOf(AClassicBuild.class, args).doDefault();
     }
+    
+    @Override
+    public void doDefault() {
+        project().makeAllArtifactFiles();
+    }
+
+   
 
 }

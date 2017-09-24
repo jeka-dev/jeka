@@ -13,7 +13,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
  * Defines importedBuilds of a given master build.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkImportedBuilds {
@@ -44,8 +44,6 @@ public final class JkImportedBuilds {
                 this.directImports, slaves));
     }
 
-
-
     /**
      * Returns only the direct slave of this master build.
      */
@@ -57,7 +55,7 @@ public final class JkImportedBuilds {
      * Returns direct and transitive importedBuilds. Transitive importedBuilds are resolved by
      * invoking recursively <code>JkBuildDependencySupport#importedBuilds()</code> on
      * direct importedBuilds.
-     * 
+     *
      */
     public List<JkBuild> all() {
         if (transitiveImports == null) {
@@ -70,8 +68,8 @@ public final class JkImportedBuilds {
      * Same as {@link #all()} but only returns builds instance of the specified class or its subclasses.
      */
     public <T extends JkBuild> List<T> allOf(Class<T> ofClass) {
-        List<T> result = new LinkedList<>();
-        for (JkBuild build : all()) {
+        final List<T> result = new LinkedList<>();
+        for (final JkBuild build : all()) {
             if (ofClass.isAssignableFrom(build.getClass())) {
                 result.add((T) build);
             }

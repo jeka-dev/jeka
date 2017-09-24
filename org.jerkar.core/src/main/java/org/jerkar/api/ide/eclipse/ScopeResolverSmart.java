@@ -1,5 +1,10 @@
 package org.jerkar.api.ide.eclipse;
 
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.COMPILE;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.RUNTIME;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
+
 import java.io.File;
 
 import org.jerkar.api.depmanagement.JkScope;
@@ -7,7 +12,6 @@ import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry;
 import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry.Kind;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 class ScopeResolverSmart implements ScopeResolver {
 
@@ -24,10 +28,10 @@ class ScopeResolverSmart implements ScopeResolver {
         if (wstCommonComponent != null) {
             final ClasspathEntry classpathEntry = ClasspathEntry.of(kind, path);
             if (!wstCommonComponent.contains(classpathEntry)) {
-                if (scope.isInOrIsExtendingAnyOf(JkJavaBuild.COMPILE)) {
+                if (scope.isInOrIsExtendingAnyOf(COMPILE)) {
                     JkLog.trace(path + " not found as module in " + WstCommonComponent.FILE
                             + " : turn scope to 'provided'.");
-                    scope = JkJavaBuild.PROVIDED;
+                    scope = PROVIDED;
                 }
             }
         }
@@ -36,35 +40,35 @@ class ScopeResolverSmart implements ScopeResolver {
 
     private JkScope scopeOfLibAccordingLocation(File libFile) {
         final String parent = libFile.getParentFile().getName();
-        if (parent.equalsIgnoreCase(JkJavaBuild.COMPILE.name())) {
-            return JkJavaBuild.COMPILE;
+        if (parent.equalsIgnoreCase(COMPILE.name())) {
+            return COMPILE;
         }
-        if (parent.equalsIgnoreCase(JkJavaBuild.TEST.name())) {
-            return JkJavaBuild.TEST;
+        if (parent.equalsIgnoreCase(TEST.name())) {
+            return TEST;
         }
-        if (parent.equalsIgnoreCase(JkJavaBuild.PROVIDED.name())) {
-            return JkJavaBuild.PROVIDED;
+        if (parent.equalsIgnoreCase(PROVIDED.name())) {
+            return PROVIDED;
         }
-        if (parent.equalsIgnoreCase(JkJavaBuild.RUNTIME.name())) {
-            return JkJavaBuild.RUNTIME;
+        if (parent.equalsIgnoreCase(RUNTIME.name())) {
+            return RUNTIME;
         }
         final String path = libFile.getPath();
         final String name = path.contains("/") ? JkUtilsString.substringAfterLast(path, "/") : path;
         if (name.toLowerCase().contains("junit")) {
-            return JkJavaBuild.TEST;
+            return TEST;
         }
         if (name.toLowerCase().contains("lombok")) {
-            return JkJavaBuild.PROVIDED;
+            return PROVIDED;
         }
-        return JkJavaBuild.COMPILE;
+        return COMPILE;
     }
 
     @Override
     public JkScope scopeOfCon(String path) {
         if (path.contains("org.eclipse.jdt.junit.JUNIT_CONTAINER")) {
-            return JkJavaBuild.TEST;
+            return TEST;
         }
-        return JkJavaBuild.COMPILE;
+        return COMPILE;
     }
 
 }

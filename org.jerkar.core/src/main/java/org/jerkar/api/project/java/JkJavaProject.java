@@ -80,7 +80,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
     private JkJavaCompilerSpec compileSpec =
             JkJavaCompilerSpec.of(JkJavaVersion.V8).withEncoding("UTF-8");
 
-    private List<JkResourceProcessor.JkInterpolator> resourceInterpolators = new LinkedList<>();
+    private final List<JkResourceProcessor.JkInterpolator> resourceInterpolators = new LinkedList<>();
 
     private JkManifest manifest = JkManifest.empty();
 
@@ -170,6 +170,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     // ---------------------------- Getters / setters --------------------------------------------
 
+    @Override
     public File baseDir() {
         return this.baseDir;
     }
@@ -291,6 +292,13 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     public JkJavaProject setMavenPublicationInfo(JkMavenPublicationInfo mavenPublicationInfo) {
         this.mavenPublicationInfo = mavenPublicationInfo;
+        return this;
+    }
+
+    public JkJavaProject removeArtifactFile(JkArtifactFileId ... artifactFileIds) {
+        for (final JkArtifactFileId artifactFileId : artifactFileIds) {
+            this.maker.removeArtifactFile(artifactFileId);
+        }
         return this;
     }
 }

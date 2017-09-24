@@ -170,6 +170,29 @@ public final class JkUtilsReflect {
     }
 
     /**
+     * Instantiates the given class.
+     */
+    public static <T> T newInstance(Class<T> clazz, Class<?> parameterType, Object parameter) {
+        try {
+            final Constructor<T> constructor = clazz.getDeclaredConstructor(parameterType);
+            if (!constructor.isAccessible()) {
+                constructor.setAccessible(true);
+            }
+            return constructor.newInstance(parameter);
+        } catch (final InvocationTargetException e) {
+            if (e.getTargetException() instanceof RuntimeException) {
+                throw (RuntimeException) e.getTargetException();
+            } else {
+                throw new RuntimeException(e.getTargetException());
+            }
+        } catch (final RuntimeException e) {
+            throw e;
+        } catch (final Exception e) {
+            throw new RuntimeException("No constructor found with parameter of type " + parameterType.getName(), e);
+        }
+    }
+
+    /**
      * Invokes the specified method on the given object.
      */
     public static <T> T invoke(Object target, String methodName) {
@@ -311,6 +334,9 @@ public final class JkUtilsReflect {
         }
         return true;
     }
+
+
+
 
     /**
      * Returns the annotation declared on a given method. If no annotation is

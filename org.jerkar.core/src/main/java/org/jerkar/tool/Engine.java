@@ -12,6 +12,7 @@ import java.util.Set;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependency;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.api.depmanagement.JkPublishRepo;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkScopeMapping;
@@ -163,7 +164,7 @@ final class Engine {
         }
         try {
             build.setBuildDefDependencyResolver(this.buildDefDependencies(), getBuildDefDependencyResolver());
-            final PluginDictionnary<JkBuildPlugin> dictionnary = init.initProject(build);
+            final PluginDictionnary<JkBuildPlugin2<?>> dictionnary = init.initProject(build);
             final BuildAndPluginDictionnary result = new BuildAndPluginDictionnary();
             result.build = build;
             result.dictionnary = dictionnary;
@@ -176,7 +177,7 @@ final class Engine {
 
     private static class BuildAndPluginDictionnary {
         JkBuild build;
-        PluginDictionnary<JkBuildPlugin> dictionnary;
+        PluginDictionnary<JkBuildPlugin2<?>> dictionnary;
     }
 
     private JkDependencies buildDefDependencies() {
@@ -226,7 +227,7 @@ final class Engine {
         JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir);
     }
 
-    private void launch(JkBuild build, PluginDictionnary<JkBuildPlugin> dictionnary, CommandLine commandLine) {
+    private void launch(JkBuild build, PluginDictionnary<JkBuildPlugin2<?>> dictionnary, CommandLine commandLine) {
 
         // Now run projects
         if (!commandLine.getSubProjectMethods().isEmpty()) {
@@ -238,11 +239,11 @@ final class Engine {
     }
 
     private static void runProject(JkBuild build, List<MethodInvocation> invokes,
-            PluginDictionnary<JkBuildPlugin> dictionnary) {
+            PluginDictionnary<JkBuildPlugin2<?>> dictionnary) {
         JkLog.infoHeaded("Executing build for project " + build.baseTree().root().getName());
         JkLog.info("Build class : " + build.getClass().getName());
         JkLog.info("Base dir : " + build.baseTree().root().getPath());
-        JkLog.info("Activated plugins : " + build.plugins.getActives());
+        JkLog.info("Activated plugins : ????");
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
         if (JkLog.verbose()) {
             JkInit.logProps("Field values", displayedOptions);
@@ -276,7 +277,7 @@ final class Engine {
             method = build.getClass().getMethod(methodName);
         } catch (final NoSuchMethodException e) {
             JkLog.warn("No zero-arg method '" + methodName + "' found in class '" + build.getClass()
-                    + "'. Skip.");
+            + "'. Skip.");
             JkLog.warnStream().flush();
             return;
         }
@@ -296,17 +297,17 @@ final class Engine {
                     + JkUtilsTime.durationInSeconds(time) + " seconds.");
         } catch (final RuntimeException e) {
             JkLog.info("Method " + methodName + " failed in " + JkUtilsTime.durationInSeconds(time)
-                    + " seconds.");
+            + " seconds.");
             throw e;
         }
     }
 
     private static List<JkModelMethod> toBuildMethods(Iterable<MethodInvocation> invocations,
-            PluginDictionnary<JkBuildPlugin> dictionnary) {
+            PluginDictionnary<JkBuildPlugin2<?>> dictionnary) {
         final List<JkModelMethod> jkModelMethods = new LinkedList<>();
         for (final MethodInvocation methodInvokation : invocations) {
             if (methodInvokation.isMethodPlugin()) {
-                final Class<? extends JkBuildPlugin> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName)
+                final Class<? extends JkBuildPlugin2<?>> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName)
                         .pluginClass();
                 jkModelMethods.add(JkModelMethod.pluginMethod(clazz, methodInvokation.methodName));
             } else {
@@ -339,15 +340,15 @@ final class Engine {
 
     private static JkRepos repos() {
         return JkRepo
-                .firstNonNull(JkBuildDependencySupport.repoFromOptions("build"),
-                        JkBuildDependencySupport.repoFromOptions("download"), JkRepo.mavenCentral())
-                .and(JkBuildDependencySupport.mavenPublishLocal());
+                .firstNonNull(JkRepoOptions.repoFromOptions("build"),
+                        JkRepoOptions.repoFromOptions("download"), JkRepo.mavenCentral())
+                .and(JkPublishRepo.local().repo());
     }
 
     private static List<String> toRelativePaths(File from, List<File> files) {
-        List<String> result = new LinkedList<>();
-        for (File file : files) {
-            String relPath = JkUtilsFile.getRelativePath(from, file);
+        final List<String> result = new LinkedList<>();
+        for (final File file : files) {
+            final String relPath = JkUtilsFile.getRelativePath(from, file);
             result.add(relPath);
         }
         return result;

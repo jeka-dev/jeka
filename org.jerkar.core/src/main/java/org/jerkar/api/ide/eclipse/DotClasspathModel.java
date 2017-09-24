@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
@@ -18,7 +19,6 @@ import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsXml;
 import org.jerkar.tool.JkException;
 import org.jerkar.tool.JkOptions;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -57,7 +57,7 @@ final class DotClasspathModel {
     }
 
     static DotClasspathModel from(String dotClasspathString) {
-        Document document = JkUtilsXml.documentFrom(dotClasspathString);
+        final Document document = JkUtilsXml.documentFrom(dotClasspathString);
         return from(document);
     }
 
@@ -149,7 +149,7 @@ final class DotClasspathModel {
             } else if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC)) {
                 if (classpathEntry.isProjectSrc(baseDir.getParentFile(), projects)) {
                     final String projectPath = classpathEntry.projectRelativePath(baseDir, projects);
-                    result.add(Lib.project(projectPath, JkJavaBuild.COMPILE,
+                    result.add(Lib.project(projectPath, JkJavaDepScopes.COMPILE,
                             classpathEntry.exported));
                 }
 

@@ -44,11 +44,11 @@ public final class JkEclipseClasspathGenerator {
 
     // --------------------- content --------------------------------
 
-    private JkProjectSourceLayout sourceLayout;
+    private final JkProjectSourceLayout sourceLayout;
 
-    private JkDependencyResolver dependencyResolver;
+    private final JkDependencyResolver dependencyResolver;
 
-    private JkDependencies dependencies;
+    private final JkDependencies dependencies;
 
     // content for build class only
     private JkDependencyResolver buildDependencyResolver;
@@ -62,7 +62,7 @@ public final class JkEclipseClasspathGenerator {
 
     private boolean includeJavadoc = true;
 
-    private JkJavaVersion sourceVersion;
+    private final JkJavaVersion sourceVersion;
 
     private String jreContainer;
 
@@ -73,50 +73,63 @@ public final class JkEclipseClasspathGenerator {
 
     private boolean hasBuildScript;
 
+    /**
+     * Constructs a {@link JkEclipseClasspathGenerator}.
+     */
     public JkEclipseClasspathGenerator(JkProjectSourceLayout sourceLayout, JkDependencies dependencies,
-                                       JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
+            JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
         this.sourceLayout = sourceLayout;
         this.dependencies = dependencies;
         this.dependencyResolver = resolver;
         this.sourceVersion = sourceVersion;
     }
 
+    /**
+     * Constructs a {@link JkEclipseClasspathGenerator}.
+     */
     public JkEclipseClasspathGenerator(JkJavaProjectDefinition project, JkDependencyResolver resolver) {
         this(project.getSourceLayout(), project.getDependencies(), resolver, project.getSourceVersion());
     }
 
+    /**
+     * Constructs a {@link JkEclipseClasspathGenerator}.
+     */
     public JkEclipseClasspathGenerator(JkJavaProject javaProject) {
         this(javaProject, javaProject.maker().getDependencyResolver());
     }
 
+
     // -------------------------- setters ----------------------------
 
 
-    public JkEclipseClasspathGenerator setStructure(JkProjectSourceLayout sourceLayout) {
-        this.sourceLayout = sourceLayout;
-        return this;
-    }
-
+    /**
+     * Set whether or not generated .classpath file should contains javadoc link for libraries.
+     */
     public JkEclipseClasspathGenerator setIncludeJavadoc(boolean includeJavadoc) {
         this.includeJavadoc = includeJavadoc;
         return this;
     }
 
-    public JkEclipseClasspathGenerator setSourceJavaVersion(JkJavaVersion sourceVersion) {
-        this.sourceVersion = sourceVersion;
-        return this;
-    }
-
+    /**
+     * Specifies the exact string to use as jre container.
+     */
     public JkEclipseClasspathGenerator setJreContainer(String jreContainer) {
         this.jreContainer = jreContainer;
         return this;
     }
 
+    /**
+     * If <code>true</code> dependencies path will use JERKAR_HOME and JERKAR_REPO classpath variable instead of absolute paths.
+     */
     public JkEclipseClasspathGenerator setUsePathVariables(boolean usePathVariables) {
         this.usePathVariables = usePathVariables;
         return this;
     }
 
+    /**
+     * If <code>true</code> a dependency on Jerkar will be included and <code>build/def</code> directory will
+     * be included as source.
+     */
     public JkEclipseClasspathGenerator setHasBuildScript(boolean hasBuildScript) {
         this.hasBuildScript = hasBuildScript;
         return this;
@@ -134,7 +147,7 @@ public final class JkEclipseClasspathGenerator {
      * If the build script depends on external libraries, you must set the resolver of this dependencies here.
      */
     public JkEclipseClasspathGenerator setBuildDependencyResolver(JkDependencyResolver buildDependencyResolver,
-                                                                  JkDependencies buildDependencies) {
+            JkDependencies buildDependencies) {
         this.buildDependencyResolver = buildDependencyResolver;
         this.buildDependencies = buildDependencies;
         return this;

@@ -2,29 +2,43 @@ package org.jerkar.tool.builtins.javabuild;
 
 import java.io.File;
 
-import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.depmanagement.JkDependencyNode;
+import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.api.depmanagement.JkJavaDepScopes;
+import org.jerkar.api.depmanagement.JkPublishRepo;
+import org.jerkar.api.depmanagement.JkPublishRepos;
+import org.jerkar.api.depmanagement.JkRepos;
+import org.jerkar.api.depmanagement.JkResolveResult;
 import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkCommonOptions;
 import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkRepoOptions;
 import org.jerkar.tool.JkScaffolder;
 
 /**
  * Build for {@link JkJavaProject}
  */
-public class JkJavaProjectBuild extends JkBuild {
+@SuppressWarnings("javadoc")
+public abstract class JkJavaProjectBuild extends JkBuild {
 
     // ------------------------------ options ------------------------------------
 
     @JkDoc("Override version defined in JkJavaProject. No effect if null or blank.")
-    private String version = null;
+    protected final String version = null;
 
     @JkDoc("Publication")
-    private final JkCommonOptions.JkRepoOptions repos = new JkCommonOptions.JkRepoOptions();
+    protected final JkRepoOptions repos = new JkRepoOptions();
+
+    @JkDoc("Packing")
+    protected final JkJavaPackOptions pack = new JkJavaPackOptions();
+
+    @JkDoc("Tests")
+    protected final JkTestOptions tests = new JkTestOptions();
 
     // -------------------------------------------------------------------------------
 
@@ -32,35 +46,76 @@ public class JkJavaProjectBuild extends JkBuild {
 
     public final JkJavaProject project() {
         if (project == null) {
-            project = createProject(this.baseTree().root());
-            if (project.getVersionedModule() != null && !JkUtilsString.isBlank(version)) {
-                project.setVersionedModule(project().getVersionedModule().withVersion(version));
-                if (!repos.publishSources) {
-                    project.maker().getArtifactFileIdsToNotPublish().addAll(project.artifactsFileIdsWithClassifier("sources"));
-                }
-                if (!repos.publishTests) {
-                    project.maker().getArtifactFileIdsToNotPublish().addAll(project.artifactsFileIdsWithClassifier("test"));
-                }
-                JkPublishRepos optionPublishRepos = repos.publishRepositories();
-                if (optionPublishRepos != null) {
-                    project.maker().setPublishRepos(optionPublishRepos);
-                }
-                if (repos.signPublishedArtifacts) {
-                    project.maker().setPublishRepos(project().maker().getPublishRepos().withSigner(repos.pgpSigner()));
-                }
-                JkRepos optionDownloadRepos = repos.downloadRepositories();
-                if (!optionDownloadRepos.isEmpty()) {
-                    JkDependencyResolver resolver = project.maker().getDependencyResolver();
-                    resolver = resolver.withRepos(optionDownloadRepos.and(JkPublishRepo.local().repo())); // always look in local repo
-                    project.maker().setDependencyResolver(resolver);
-                }
-            }
+            project = createProject(this.baseDir());
+            applyOptions(project);
+            setupPlugins();
         }
         return project;
     }
 
-    protected JkJavaProject createProject(File baseDir) {
-        return new JkJavaProject(this.baseTree().root());
+    protected abstract JkJavaProject createProject(File baseDir);
+
+    protected void setupPlugins() {
+        // Do nothing by default
+    }
+
+    private void applyOptions(JkJavaProject project) {
+        if (project.getVersionedModule() != null && !JkUtilsString.isBlank(version)) {
+            project.setVersionedModule(project().getVersionedModule().withVersion(version));
+        }
+        if (!repos.publishSources) {
+            project.maker().getArtifactFileIdsToNotPublish().addAll(project.artifactsFileIdsWithClassifier("sources"));
+        }
+        if (!repos.publishTests) {
+            project.maker().getArtifactFileIdsToNotPublish().addAll(project.artifactsFileIdsWithClassifier("test"));
+        }
+        final JkPublishRepos optionPublishRepos = repos.publishRepositories();
+        if (optionPublishRepos != null) {
+            project.maker().setPublishRepos(optionPublishRepos);
+        }
+        if (repos.signPublishedArtifacts) {
+            project.maker().setPublishRepos(project().maker().getPublishRepos().withSigner(repos.pgpSigner()));
+        }
+        final JkRepos optionDownloadRepos = repos.downloadRepositories();
+        if (!optionDownloadRepos.isEmpty()) {
+            JkDependencyResolver resolver = project.maker().getDependencyResolver();
+            resolver = resolver.withRepos(optionDownloadRepos.and(JkPublishRepo.local().repo())); // always look in local repo
+            project.maker().setDependencyResolver(resolver);
+        }
+        if (pack.javadoc != null && pack.javadoc) {
+            project.removeArtifactFile(JkJavaProject.JAVADOC_FILE_ID);
+        } else if (pack.javadoc != null && !pack.javadoc) {
+            project.addArtifactFile(JkJavaProject.JAVADOC_FILE_ID, project.maker()::makeJavadocJar);
+        }
+        if (pack.tests != null && pack.tests) {
+            project.removeArtifactFile(JkJavaProject.TEST_FILE_ID, JkJavaProject.TEST_SOURCE_FILE_ID);
+        } else if (pack.tests != null && !pack.tests) {
+            project.addArtifactFile(JkJavaProject.TEST_FILE_ID, project.maker()::makeTestJar);
+        }
+        if (pack.checksums().length > 0) {
+            project.maker().afterPackage.chain(() -> project.maker().checksum(pack.checksums()));
+        }
+        if (pack.signWithPgp) {
+            project.maker().afterPackage.chain(() -> project.maker().signArtifactFiles(repos.pgpSigner()));
+        }
+        if (tests.fork != null) {
+            project.maker().setJuniter(project.maker().getJuniter().forked(tests.fork));
+        }
+        if (tests.skip != null) {
+            project.maker().setSkipTests(tests.skip);
+        }
+        if (tests.output != null) {
+            project.maker().setJuniter(project.maker().getJuniter().withOutputOnConsole(tests.output));
+        }
+        if (tests.fork != null && tests.fork && tests.jvmOptions != null) {
+            final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
+            project.maker().setJuniter(project.maker().getJuniter().forked(javaProcess, true));
+        }
+        if (tests.report != null) {
+            project.maker().setJuniter(project.maker().getJuniter().withReport(tests.report));
+        }
+
+
     }
 
     @Override

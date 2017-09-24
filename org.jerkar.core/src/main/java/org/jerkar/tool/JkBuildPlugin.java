@@ -77,14 +77,6 @@ public abstract class JkBuildPlugin {
         }
     }
 
-    static JkDependencyResolver applyDependencyResolver(
-            Iterable<? extends JkBuildPlugin> plugins, JkDependencyResolver original) {
-        JkDependencyResolver result = original;
-        for (final JkBuildPlugin plugin : plugins) {
-            result = plugin.alterDependencyResolver(original);
-        }
-        return result;
-    }
 
     static JkDependencies applyDependencies(Iterable<? extends JkBuildPlugin> plugins,
             JkDependencies original) {
@@ -101,13 +93,7 @@ public abstract class JkBuildPlugin {
         }
     }
 
-    static List<JkBuild> applyPluginsToImportedBuilds(Iterable<? extends JkBuildPlugin> plugins, List<JkBuild> importedBuilds) {
-        List<JkBuild> result = importedBuilds;
-        for (final JkBuildPlugin plugin : plugins) {
-            result = plugin.slaves(result);
-        }
-        return result;
-    }
+
 
     @Override
     public String toString() {

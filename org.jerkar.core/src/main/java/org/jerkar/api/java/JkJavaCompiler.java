@@ -52,7 +52,6 @@ public final class JkJavaCompiler {
      * Creates a {@link JkJavaCompiler} producing its output in the given
      * directory.
      */
-    @SuppressWarnings("unchecked")
     public static JkJavaCompiler outputtingIn(File outputDir) {
         return base().withOutputDir(outputDir);
     }
@@ -159,7 +158,7 @@ public final class JkJavaCompiler {
     }
 
     private File getOutputDir() {
-        String path = JkJavaCompilerSpec.findValueAfter(options, OUTPUR_DIR_OPTS);
+        final String path = JkJavaCompilerSpec.findValueAfter(options, OUTPUR_DIR_OPTS);
         return path == null ? null : new File(path);
     }
 
@@ -237,7 +236,7 @@ public final class JkJavaCompiler {
      * compile source.
      */
     public JkJavaCompiler withJavacBin(JkJavaVersion version, File javacBin) {
-        HashMap<JkJavaVersion, File> map = new HashMap<>(this.compilerBinRepo);
+        final HashMap<JkJavaVersion, File> map = new HashMap<>(this.compilerBinRepo);
         map.put(version, javacBin);
         return new JkJavaCompiler(options, javaSourceFiles, failOnError, fork, compiler, map);
     }
@@ -252,7 +251,7 @@ public final class JkJavaCompiler {
      */
     @SuppressWarnings("unchecked")
     public boolean compile() {
-        File outputDir = this.getOutputDir();
+        final File outputDir = this.getOutputDir();
         if (outputDir == null) {
             throw new IllegalStateException("Output dir option (-d) has not been specified on the compiler. Specified options : " + options);
         }
@@ -344,7 +343,7 @@ public final class JkJavaCompiler {
      * "jdk.7". The values must absolute path.
      */
     public JkJavaCompiler forkedIfNeeded(Map<String, String> jdkLocations) {
-        String versionCache = JkJavaCompilerSpec.findValueAfter(this.options, JkJavaCompilerSpec.SOURCE_OPTS);
+        final String versionCache = JkJavaCompilerSpec.findValueAfter(this.options, JkJavaCompilerSpec.SOURCE_OPTS);
         if (versionCache == null) {
             return this;
         }

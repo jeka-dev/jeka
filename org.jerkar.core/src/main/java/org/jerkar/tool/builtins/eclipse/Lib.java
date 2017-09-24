@@ -63,8 +63,8 @@ class Lib {
                 // if the imported build does not have build class, we apply eclipse# plugin
                 final JkFileTree def = importedBuild.baseTree().go("build/def");
                 if (!def.exists() || def.include("**/*.java").fileCount(false) == 0) {
-                    final JkBuildPluginEclipse eclipsePlugin = new JkBuildPluginEclipse();
-                    importedBuild.plugins.activate(eclipsePlugin);
+                    final JkBuildPlugin2EclipseBase eclipsePlugin = new JkBuildPlugin2EclipseBase();
+                    eclipsePlugin.apply(importedBuild);
                 }
 
                 final JkComputedDependency projectDependency = importedBuild.asDependency(importedBuild

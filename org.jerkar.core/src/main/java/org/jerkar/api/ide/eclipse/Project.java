@@ -17,7 +17,6 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.w3c.dom.Document;
@@ -84,7 +83,7 @@ class Project {
     }
 
     private void writeToFile(File dotProjectFile) throws XMLStreamException,
-            FactoryConfigurationError, FileNotFoundException {
+    FactoryConfigurationError, FileNotFoundException {
         final OutputStream fos = new FileOutputStream(dotProjectFile);
         final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(fos,
                 "UTF-8");

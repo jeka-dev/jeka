@@ -115,6 +115,25 @@ public final class JkUtilsString {
     }
 
     /**
+     * Splits the specified String into an array by separating by the specified
+     * delimiter. Items are trimmed to eliminate blank spaces. If <code>str</code> is <code>null</code> then it returns an
+     * empty array.
+     */
+    public static String[] splitTrimed(String str, String delimiters) {
+        if (str == null) {
+            return new String[0];
+        }
+        final StringTokenizer st = new StringTokenizer(str, delimiters);
+        final List<String> tokens = new ArrayList<>();
+        while (st.hasMoreTokens()) {
+            final String token = st.nextToken();
+            tokens.add(token.trim());
+        }
+        return tokens.toArray(new String[tokens.size()]);
+    }
+
+
+    /**
      * Returns the substring after the last delimiter of the specified
      * occurrence. The delimiter is not part of the result.
      */

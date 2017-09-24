@@ -42,8 +42,7 @@ class SampleTester {
         testSamples("", "doPublish", "-version=1.0-SNAPSHOT", "-repo.release.url=" + file2.getAbsolutePath());
         File file3 = new File("build/output/test-out/ivyrepo");
         testSamples("", "doPublish", "-repo.publish.url=ivy:" + file3.getAbsolutePath());
-        testSamples("IvyPublishBuild", "doPublish", "-repo.publish.url=ivy:" + file3.getAbsolutePath());
-        scaffoldAndEclipse();
+        // scaffoldAndEclipse();   // TODO
         testDependee("FatJarBuild");
         testDependee("NormalJarBuild");
         testFork();

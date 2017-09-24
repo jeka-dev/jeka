@@ -38,7 +38,6 @@ class DistribAllBuild extends JkBuild {
         JkLog.info("Copy core distribution locally.");
         CoreBuild core = pluginsJacoco.core; // The core project is got by transitivity
         File distDir = this.ouputFile("dist");
-        JkJavaProject coreProject = core.project();
         JkFileTree dist = JkFileTree.of(distDir).importDirContent(core.distribFolder);
 
         JkLog.info("Add plugins to the distribution");
@@ -93,7 +92,7 @@ class DistribAllBuild extends JkBuild {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(DistribAllBuild.class, args).doDefault();
+        JkInit.instanceOf(DistribAllBuild.class, "-testSamples=true").doDefault();
     }
 
 }

@@ -20,11 +20,15 @@ import java.lang.annotation.Target;
 public @interface JkImport {
 
     /**
-     * The dependency to import. It can be a module dependency (as "com.google.guava:guava:18.0", "../lib-folder.mylib.jar").
+     * The dependency to import. It can be a module dependency (as "com.google.guava:guava:18.0")
+     * or a file dependency (as "../lib-folder.mylib.jar").
      */
     String value();
 
 
+    /**
+     * Repeatable container.
+     */
     @Target(ElementType.TYPE)
     @interface JkImports {
         JkImport[] value();

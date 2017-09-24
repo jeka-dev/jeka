@@ -1,9 +1,14 @@
+import java.io.File;
+
+import org.jerkar.api.depmanagement.JkArtifactFileId;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.java.JkJavaVersion;
+import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.samples.AClassicBuild;
 import org.jerkar.tool.JkImportBuild;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
+import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 
 /**
  * Simple build demonstrating of how Jerkar can handle multi-project build.
@@ -22,45 +27,21 @@ import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
  * 
  * @formatter:off
  */
-public class FatJarBuild extends JkJavaBuild {
-	
-    /*
-     *  Creates a sample build instance of the 'org.jerkar.samples' project.
-     *  The 'samples' project path must be relative to this one.
-     *  So in this case, the two project are supposed to lie in the same folder.
-     */
+public class FatJarBuild extends JkJavaProjectBuild {
+    
     @JkImportBuild("../org.jerkar.samples")
     private AClassicBuild sampleBuild;
-
-    FatJarBuild() {
-    	sampleBuild.pack.fatJar = true; // Tell the dependency build to generate a fat jar 
-    	pack.fatJar = true; // Tell this build to generate a fat jar as well
-    }
     
     @Override
-	public String javaSourceVersion() {
-		return JkJavaVersion.V7.name();
-	}
-
-    @Override
-    protected JkDependencies dependencies() {
-
-	// Tell this project depends of the fat jar produced by 'AClassicBuild'
-	// from project '../org.jerkar.samples'
-	return JkDependencies
-		
-		// Depends on the fat jar file produced by the mavenBuildStyle of the 'sample' project
-		// When fetching the dependencies, if the fat jar file in the 'samples' project is not present,
-		// then a 'sampleBuild' is launched in order to produce it.
-		// The 'sampleBuild' is launched with the 'doDefault' method unless you specify another ones
-		.of(COMPILE, sampleBuild.asDependency(sampleBuild.packer().fatJarFile()))
-		
-		// Extra dependency
-		.and("com.google.guava:guava", "18.0", PROVIDED);
-    }
+    protected JkJavaProject createProject(File baseDir) {
+        return new JkJavaProject(baseDir)
+                .setDependencies(JkDependencies.of(sampleBuild.project(), JkArtifactFileId.of("fat", "jar")))
+                .setSourceVersion(JkJavaVersion.V7);
+    } 
     
     public static void main(String[] args) {
 		JkInit.instanceOf(FatJarBuild.class, args).doDefault();
 	}
 
+   
 }
