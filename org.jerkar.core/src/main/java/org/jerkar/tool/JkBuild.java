@@ -87,7 +87,7 @@ public class JkBuild {
         // Do nothing by default
     }
 
-    // -------------------------------- basic functionalities ---------------------------------------
+    // -------------------------------- basic functions ---------------------------------------
 
     /**
      * Returns the time the build was started.
@@ -200,8 +200,6 @@ public class JkBuild {
         // Do nothing as no plugin extension as been defined at this level.
     }
 
-
-
     // ------------------------------ Command line methods ---------------------------------------------------
 
     /**
@@ -213,7 +211,6 @@ public class JkBuild {
         scaffolder().run();
         //  JkBuildPlugin.applyScaffold(this.plugins.getActivated());
     }
-
 
     /** Clean the output directory. */
     @JkDoc("Cleans the output directory.")
@@ -248,7 +245,6 @@ public class JkBuild {
         } else {
             HelpDisplayer.help(this);
         }
-
     }
 
     /** Displays details on all available plugins. */
@@ -262,7 +258,6 @@ public class JkBuild {
     public final void info() {
         JkLog.info(infoString());
     }
-
 
     // ----------------------------- being a dependency ---------------------------------------
 

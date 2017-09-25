@@ -68,7 +68,7 @@ public class AntStyleBuild extends JkBuild {
 
     public void junit() {
         jar();
-        JkUnit.ofFork(classpath.and(jarFile))
+        JkUnit.of(classpath.and(jarFile)).forked()
         .withClassesToTest(JkFileTree.of(classDir).include("**/*Test.class"))
         .withReportDir(reportDir)
         .withReport(JunitReportDetail.FULL)

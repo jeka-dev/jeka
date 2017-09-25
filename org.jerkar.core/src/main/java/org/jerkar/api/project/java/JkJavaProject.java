@@ -217,6 +217,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
     }
 
     public JkJavaProject setDependencies(JkDependencies dependencies) {
+        this.maker.cleanDepChache();
         this.dependencies = dependencies;
         return this;
     }
@@ -233,11 +234,6 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     public JkJavaProject setSourceVersion(JkJavaVersion version ) {
         this.compileSpec = compileSpec.withSourceAndTargetVersion(version);
-        return this;
-    }
-
-    public JkJavaProject setMaker(JkJavaProjectMaker maker) {
-        this.maker = maker;
         return this;
     }
 

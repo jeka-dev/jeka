@@ -98,8 +98,11 @@ public abstract class JkJavaProjectBuild extends JkBuild {
         if (pack.signWithPgp) {
             project.maker().afterPackage.chain(() -> project.maker().signArtifactFiles(repos.pgpSigner()));
         }
-        if (tests.fork != null) {
-            project.maker().setJuniter(project.maker().getJuniter().forked(tests.fork));
+        if (tests.fork != null && tests.fork) {
+            final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
+            project.maker().setJuniter(project.maker().getJuniter().forked(javaProcess));
+        } else if (tests.fork != null && !tests.fork){
+            project.maker().setJuniter(project.maker().getJuniter().forked(false));
         }
         if (tests.skip != null) {
             project.maker().setSkipTests(tests.skip);
@@ -107,20 +110,15 @@ public abstract class JkJavaProjectBuild extends JkBuild {
         if (tests.output != null) {
             project.maker().setJuniter(project.maker().getJuniter().withOutputOnConsole(tests.output));
         }
-        if (tests.fork != null && tests.fork && tests.jvmOptions != null) {
-            final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
-            project.maker().setJuniter(project.maker().getJuniter().forked(javaProcess, true));
-        }
         if (tests.report != null) {
             project.maker().setJuniter(project.maker().getJuniter().withReport(tests.report));
         }
-
-
     }
 
     @Override
     public void doDefault() {
-        this.project().makeMainJar();
+        this.project().maker().clean();
+        this.project().makeAllArtifactFiles();
     }
 
     @Override

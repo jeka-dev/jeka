@@ -22,9 +22,9 @@ import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 public class AClassicBuild extends JkJavaProjectBuild {
 
     {
-	pack.checksums = "sha1";
-	pack.tests = true;
-	pack.javadoc = true;
+	    pack.checksums = "sha1";
+	    pack.tests = true;
+	    pack.javadoc = true;
     }
     
     @Override
@@ -37,18 +37,12 @@ public class AClassicBuild extends JkJavaProjectBuild {
             .on("org.mockito:mockito-all:1.9.5", TEST).build();
         return new JkJavaProject(this.baseDir())
                 .setSourceVersion(JkJavaVersion.V7)
-                .setDependencies(dependencies).addFatJarArtifactFile("fat");
+                .setDependencies(dependencies)
+                .addFatJarArtifactFile("fat");
     }
     
     public static void main(String[] args) {
 	JkInit.instanceOf(AClassicBuild.class, args).doDefault();
     }
-    
-    @Override
-    public void doDefault() {
-        project().makeAllArtifactFiles();
-    }
-
-   
 
 }

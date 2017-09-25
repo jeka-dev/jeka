@@ -81,7 +81,7 @@ final class Engine {
         }
         yetCompiledProjects.add(this.projectBaseDir);
         preCompile(); // This enrich dependencies
-        JkLog.startHeaded("Compiling build classes for project " + this.projectBaseDir.getName());
+        JkLog.startln("Compiling build classes for project " + this.projectBaseDir.getName());
         JkLog.startln("Resolving compilation classpath");
         final JkDependencyResolver buildClassDependencyResolver = getBuildDefDependencyResolver();
         final JkPath buildPath = buildClassDependencyResolver.get(this.buildDefDependencies());
@@ -113,8 +113,8 @@ final class Engine {
      */
     void execute(JkInit init) {
         this.buildDependencies = this.buildDependencies.andScopeless(init.commandLine().dependencies());
+        JkLog.startHeaded("Compiling and instantiating build class");
         JkPath runtimeClasspath = compile();
-        JkLog.startHeaded("Instantiating build class");
         if (!init.commandLine().dependencies().isEmpty()) {
             JkLog.startln("Grab dependencies specified in command line");
             final JkPath cmdPath = pathOf(init.commandLine().dependencies());
@@ -125,6 +125,7 @@ final class Engine {
                 JkLog.done();
             }
         }
+        JkLog.info("Instantiating and configuring build class");
         final BuildAndPluginDictionnary buildAndDict = getBuildInstance(init, runtimeClasspath);
         if (buildAndDict == null) {
             throw new JkException("Can't find or guess any build class for project hosted in " + this.projectBaseDir

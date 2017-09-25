@@ -1,6 +1,5 @@
 package org.jerkar.api.ide.eclipse;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.util.List;
 
@@ -8,13 +7,10 @@ import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.depmanagement.JkScopedDependency;
-import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.JkProjectSourceLayout;
-import org.jerkar.api.utils.JkFileFilters;
 import org.jerkar.api.utils.JkUtilsFile;
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 

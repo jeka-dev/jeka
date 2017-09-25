@@ -1,7 +1,7 @@
 @echo off
 
 @rem Change here the default JVM options 
-if "%JERKAR_OPTS%" == "" set "JERKAR_OPTS=-Xmx512m -XX:MaxPermSize=512m" 
+@rem SET JERKAR_OPTS == ""
 
 SET JERKAR_HOME=%~dp0
 if "%JAVA_HOME%" == "" set "JAVA_CMD=java" 

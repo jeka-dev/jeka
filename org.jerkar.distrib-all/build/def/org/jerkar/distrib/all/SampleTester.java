@@ -30,7 +30,6 @@ class SampleTester {
     }
 
     void doTest() {
-        testSamples("", "eclipse#generateAll");
         testSamples("AClassicBuild");
         testSamples("AntStyleBuild");
         testSamples("MavenStyleBuild");
@@ -44,6 +43,7 @@ class SampleTester {
         testSamples("", "doPublish", "-repo.publish.url=ivy:" + file3.getAbsolutePath());
         // scaffoldAndEclipse();   // TODO
         testDependee("FatJarBuild");
+        testSamples("", "eclipse#generateAll");
         testDependee("NormalJarBuild");
         testFork();
     }

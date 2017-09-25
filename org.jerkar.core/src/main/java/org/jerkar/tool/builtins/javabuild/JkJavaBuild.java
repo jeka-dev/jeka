@@ -336,7 +336,7 @@ public class JkJavaBuild extends JkBuildDependencySupport {
         if (this.tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(
                     this.tests.jvmOptions);
-            result = result.forked(javaProcess, true);
+            result = result.forked(javaProcess);
         }
         return result.withOutputOnConsole(this.tests.output || JkLog.verbose());
     }

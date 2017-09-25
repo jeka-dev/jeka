@@ -54,21 +54,19 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
     public JkocoJunitEnhancer enabled(boolean enabled) {
         return new JkocoJunitEnhancer(this.agent, enabled, destFile, options);
     }
-    
-    
 
     @Override
     public JkUnit apply(JkUnit jkUnit) {
         if (!enabled) {
             return jkUnit;
         }
-        if (jkUnit.forked()) {
-            JkJavaProcess process = jkUnit.processFork();
+        if (jkUnit.isForked()) {
+            JkJavaProcess process = jkUnit.forkedProcess();
             process = process.andAgent(destFile, options());
-            return jkUnit.forked(process, false);
+            return jkUnit.forked(process);
         }
         final JkJavaProcess process = JkJavaProcess.of().andAgent(agent, options());
-        return jkUnit.forkKeepingSameClassPath(process).withPostAction(new Reporter());
+        return jkUnit.forked(process).withPostAction(new Reporter());
     }
 
     private String options() {

@@ -111,26 +111,11 @@ public final class JkUnit {
     }
 
     /**
-     * Returns a launcher forking a process according the specified java process description.
+     * Returns an empty junit launcher launcher without classpath set on.
      */
-    public static JkUnit ofFork(JkJavaProcess jkJavaProcess) {
-        return new JkUnit(null, JunitReportDetail.NONE, null, jkJavaProcess, JkFileTreeSet.empty(),
+    public static JkUnit of() {
+        return new JkUnit(JkClasspath.of(), JunitReportDetail.NONE, null, null, JkFileTreeSet.empty(),
                 true, true);
-    }
-
-    /**
-     * Returns a launcher forking a process having the specified classpath.
-     */
-    public static JkUnit ofFork(JkClasspath classpath) {
-        return ofFork(JkJavaProcess.of().withClasspath(classpath));
-    }
-
-
-    /**
-     * Returns a launcher forking a process having the specified class directory and the specified classpath entries.
-     */
-    public static JkUnit ofClasspath(File binDir, Iterable<File> classpathEntries) {
-        return of(JkClasspath.of(binDir).and(classpathEntries));
     }
 
     /**
@@ -141,28 +126,10 @@ public final class JkUnit {
                 true, true);
     }
 
-
-
-    /**
-     * Returns an empty launcher
-     */
-    public static JkUnit of() {
-        return new JkUnit(JkClasspath.of(), JunitReportDetail.NONE, null, null, JkFileTreeSet.empty(),
-                true, true);
-    }
-
     /**
      * Returns a copy of this launcher but with the specified report detail.
      */
     public JkUnit withReport(JunitReportDetail reportDetail) {
-        return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess,
-                classesToTest, this.breakOnFailure, this.printOutputOnConsole);
-    }
-
-    /**
-     * Returns a copy of this launcher but that fail fast on the first failure.
-     */
-    public JkUnit withBreakOnFailure(boolean crashOnFailure) {
         return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess,
                 classesToTest, this.breakOnFailure, this.printOutputOnConsole);
     }
@@ -176,7 +143,15 @@ public final class JkUnit {
     }
 
     /**
-     * Returns a copy of this launcher but with the specified report directory output.
+     * Returns a copy of this launcher but that fail fast on the first failure.
+     */
+    public JkUnit withBreakOnFailure(boolean crashOnFailure) {
+        return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess,
+                classesToTest, this.breakOnFailure, this.printOutputOnConsole);
+    }
+
+    /**
+     * Returns a copy of this launcher but with the specified classpath to run the tests.
      */
     public JkUnit withClasspath(JkClasspath classpath) {
         return new JkUnit(classpath, reportDetail, reportDir, this.forkedProcess,
@@ -184,16 +159,7 @@ public final class JkUnit {
     }
 
     /**
-     * Returns a copy of this launcher but forked.
-     */
-    public JkUnit forkKeepingSameClassPath(JkJavaProcess process) {
-        final JkJavaProcess fork = process.withClasspath(jkClasspath());
-        return new JkUnit(null, reportDetail, reportDir, fork, this.classesToTest,
-                this.breakOnFailure, this.printOutputOnConsole);
-    }
-
-    /**
-     * Returns a copy of this launcher but specifying an action to run at the end execution.
+     * Returns a copy of this launcher but specifying an action to run at the end of execution.
      */
     public JkUnit withPostAction(Runnable runnable) {
         final List<Runnable> list = new LinkedList<>(this.postActions);
@@ -208,10 +174,8 @@ public final class JkUnit {
      * already defined in this object is appended to the specified process
      * classpath.
      */
-    public JkUnit forked(JkJavaProcess process, boolean appendClasspath) {
-        final JkJavaProcess effectiveProcess = appendClasspath ? process
-                .andClasspath(this.classpath) : process;
-                return new JkUnit(null, reportDetail, reportDir, effectiveProcess, this.classesToTest,
+    public JkUnit forked(JkJavaProcess process) {
+        return new JkUnit(this.classpath, reportDetail, reportDir, process, this.classesToTest,
                         this.breakOnFailure, this.printOutputOnConsole);
     }
 
@@ -220,15 +184,22 @@ public final class JkUnit {
      * If the forked mode is <code>true<code> then the specified
      * {@link JkJavaProcess} is used to run the tests..
      */
-    public JkUnit forked(boolean fork, JkJavaProcess process, boolean appendClasspath) {
-        if (fork && !forked()) {
-            return forked(process, appendClasspath);
+    public JkUnit forked(boolean fork, JkJavaProcess process) {
+        if (fork && !isForked()) {
+            return forked(process);
         }
-        if (!fork && forked()) {
+        if (!fork && isForked()) {
             return new JkUnit(forkedProcess.classpath(), reportDetail, reportDir, null,
                     this.classesToTest, this.breakOnFailure, this.printOutputOnConsole);
         }
         return this;
+    }
+
+    /**
+     * Short-hand to #forked(true)
+     */
+    public JkUnit forked() {
+        return forked(true);
     }
 
     /**
@@ -237,7 +208,7 @@ public final class JkUnit {
      * is used to run the tests (java process launched without any option).
      */
     public JkUnit forked(boolean fork) {
-        return forked(fork, JkJavaProcess.of(), true);
+        return forked(fork, JkJavaProcess.of());
     }
 
     /**
@@ -275,7 +246,7 @@ public final class JkUnit {
     /**
      * Returns <code>true</code> if this launcher is forked.
      */
-    public boolean forked() {
+    public boolean isForked() {
         return this.forkedProcess != null;
     }
 
@@ -303,7 +274,7 @@ public final class JkUnit {
     /**
      * Returns the process description if this launcher is forked.
      */
-    public JkJavaProcess processFork() {
+    public JkJavaProcess forkedProcess() {
         return forkedProcess;
     }
 
@@ -328,7 +299,8 @@ public final class JkUnit {
         if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
             if (this.forkedProcess != null) {
                 JkLog.startln("Run JUnit tests in forked mode");
-                result = JUnit4TestLauncher.launchInFork(forkedProcess, printOutputOnConsole,
+                result = JUnit4TestLauncher.launchInFork(forkedProcess.withClasspath(this.classpath),
+                        printOutputOnConsole,
                         reportDetail, classes, reportDir);
             } else {
                 JkLog.startln("Run JUnit tests");
@@ -378,21 +350,13 @@ public final class JkUnit {
         return result;
     }
 
-    private JkClasspath jkClasspath() {
-        if (classpath != null) {
-            return classpath;
-        }
-        return forkedProcess.classpath();
-    }
-
     @SuppressWarnings("rawtypes")
     private Collection<Class> getClassesToTest() {
-        final JkClasspath classpath = this.jkClasspath().andHead(this.classesToTest.roots());
+        final JkClasspath classpath = this.classpath.andHead(this.classesToTest.roots());
         final JkClassLoader classLoader = JkClassLoader.system().parent().child(classpath)
                 .loadAllServices();
         final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, this.classesToTest);
         if (result.isEmpty()) {
-
             JkUtilsIO.closeOrFail(classLoader.classloader());
         }
         return result;

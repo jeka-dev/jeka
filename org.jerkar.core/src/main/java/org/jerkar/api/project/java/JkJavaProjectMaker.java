@@ -2,28 +2,11 @@ package org.jerkar.api.project.java;
 
 import java.io.File;
 import java.time.Instant;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
-import org.jerkar.api.depmanagement.JkArtifactFileId;
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkDependencyResolver;
-import org.jerkar.api.depmanagement.JkIvyPublication;
-import org.jerkar.api.depmanagement.JkJavaDepScopes;
-import org.jerkar.api.depmanagement.JkPublishRepos;
-import org.jerkar.api.depmanagement.JkPublisher;
-import org.jerkar.api.depmanagement.JkRepo;
-import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkResolutionParameters;
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.depmanagement.JkVersionProvider;
-import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPath;
 import org.jerkar.api.file.JkZipper.JkCheckSumer;
@@ -55,7 +38,7 @@ public class JkJavaProjectMaker {
 
     private JkJavaCompiler testBaseCompiler = JkJavaCompiler.base();
 
-    private JkUnit juniter = JkUnit.of().withOutputOnConsole(false);
+    private JkUnit juniter = JkUnit.of().withOutputOnConsole(false).withReport(JkUnit.JunitReportDetail.BASIC);
 
     private List<String> javadocOptions = new LinkedList<>();
 
@@ -75,9 +58,11 @@ public class JkJavaProjectMaker {
 
     private JkPgp pgpSigner;
 
+    private Map<Set<JkScope>, JkPath> depCache = new HashMap<>();
+
     // commons ------------------------
 
-    public JkJavaProjectMaker(JkJavaProject project) {
+    JkJavaProjectMaker(JkJavaProject project) {
         this.project = project;
         this.packager = JkJavaProjectPackager.of(project);
         this.cleaner = JkRunnables.of(
@@ -128,14 +113,18 @@ public class JkJavaProjectMaker {
     }
 
     public JkPath depsFor(JkScope... scopes) {
-        return dependencyResolver.get(getDefaultedDependencies(), scopes);
+        final Set<JkScope> scopeSet = new HashSet<>(Arrays.asList(scopes));
+        return this.depCache.computeIfAbsent(scopeSet,
+                scopes1 -> this.dependencyResolver.get(getDefaultedDependencies(), scopes ));
     }
 
     public JkDependencies getDefaultedDependencies() {
         return project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME);
     }
 
-
+    void cleanDepChache() {
+        this.depCache.clear();
+    }
 
     // Clean -----------------------------------------------
 
@@ -456,9 +445,6 @@ public class JkJavaProjectMaker {
     public void setSkipTests(boolean skipTests) {
         this.skipTests = skipTests;
     }
-
-
-
 
     private static class Status {
         private boolean sourceGenerated = false;

@@ -17,7 +17,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 class JUnit4TestLauncher {
 
     @SuppressWarnings("rawtypes")
-    public static JkTestSuiteResult launchInFork(JkJavaProcess jkJavaProcess,
+    public static JkTestSuiteResult launchInFork(JkJavaProcess javaProcess,
             boolean printEachTestOnConsole, JunitReportDetail reportDetail,
             Iterable<Class> classes, File reportDir) {
         final List<String> args = new LinkedList<>();
@@ -30,7 +30,7 @@ class JUnit4TestLauncher {
             args.add(clazz.getName());
         }
         final JkJavaProcess process;
-        process = jkJavaProcess.andClasspath(JkClasspath.of(JkLocator.jerkarJarFile()));
+        process = javaProcess.andClasspath(JkClasspath.of(JkLocator.jerkarJarFile()));
         process.runClassSync(JUnit4TestExecutor.class.getName(), args.toArray(new String[0]));
         return (JkTestSuiteResult) JkUtilsIO.deserialize(file);
     }

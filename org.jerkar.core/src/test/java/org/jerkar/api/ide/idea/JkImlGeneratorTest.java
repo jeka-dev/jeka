@@ -2,7 +2,6 @@ package org.jerkar.api.ide.idea;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkPopularModules;
-import org.jerkar.api.ide.eclipse.JkEclipseClasspathGenerator;
 import org.jerkar.api.ide.eclipse.JkEclipseClasspathGeneratorTest;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
@@ -13,8 +12,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
-
-import static org.junit.Assert.*;
 
 /**
  * Created by angibaudj on 21-09-17.
