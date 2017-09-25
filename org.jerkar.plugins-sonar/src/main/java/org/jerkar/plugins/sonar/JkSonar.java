@@ -40,6 +40,7 @@ public final class JkSonar {
     public static final String PROJECT_BASE_DIR = "projectBaseDir";
     public static final String SOURCES = "sources";
     public static final String BINARIES = "binaries";
+    public static final String JAVA_BINARIES = "java.binaries";
     public static final String TEST = "tests";
     public static final String LIBRARIES = "libraries";
     public static final String SKIP_DESIGN = "skipDesign";
@@ -149,7 +150,8 @@ public final class JkSonar {
     }
 
     public JkSonar withBinaries(Iterable<File> files) {
-        return withProperty(BINARIES, toPaths(files));
+        String path = toPaths(files);
+        return withProperty(BINARIES, path).withProperty(JAVA_BINARIES, path);
     }
 
     public JkSonar withBinaries(File... files) {

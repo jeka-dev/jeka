@@ -30,13 +30,12 @@ public class CoreBuild extends JkJavaProjectBuild {
     public File distribFolder;
 
     @Override
-    protected JkJavaProject createProject(File baseDir) {
-        final JkJavaProject project = new JkJavaProject(baseDir);
+    protected JkJavaProject createProject(JkJavaProject project) {
         applyCommons(project, "core");
         project.addArtifactFile(DISTRIB_FILE_ID, this::doDistrib);
         project.addArtifactFile(JAVADOC_FILE_ID, () -> project.maker().makeJavadocJar());
         this.distribFolder = new File(project.getOutLayout().outputDir(), "distrib");
-        return  project;
+        return project;
     }
 
     @Override

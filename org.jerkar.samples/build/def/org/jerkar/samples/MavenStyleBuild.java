@@ -26,8 +26,8 @@ import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 public class MavenStyleBuild extends JkJavaProjectBuild {
 
     @Override
-    protected JkJavaProject createProject(File baseDir) {
-        JkJavaProject project = new JkJavaProject(baseDir)
+    protected JkJavaProject createProject(JkJavaProject suggest) {
+        JkJavaProject project = new JkJavaProject(this.baseDir())
                 .setVersionedModule("org.jerkar:script-samples", "0.3-SNAPSHOT")
                 .setDependencies(dependencies());
         project.maker().setDownloadRepos(JkRepos.of(JkRepo.maven("http://my.repo1"), JkRepo.mavenCentral()));

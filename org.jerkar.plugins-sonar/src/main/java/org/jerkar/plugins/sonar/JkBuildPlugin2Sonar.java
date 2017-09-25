@@ -24,9 +24,6 @@ import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 public class JkBuildPlugin2Sonar implements JkBuildPlugin2<JkJavaProjectBuild> {
 
     private final Map<String, String> properties = new HashMap<>();
-    
-    private JkSonar jkSonar;
-    
 
     public static JkSonar configureSonarFrom(JkJavaProject project) {
         final JkProjectSourceLayout sourceLayout = project.getSourceLayout();
@@ -41,7 +38,8 @@ public class JkBuildPlugin2Sonar implements JkBuildPlugin2<JkJavaProjectBuild> {
         return JkSonar
                 .of(fullName, name, version)
                 .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)
-                .withBinaries(project.getOutLayout().classDir()).withLibraries(libs)
+                .withBinaries(project.getOutLayout().classDir())
+                .withLibraries(libs)
                 .withSources(sourceLayout.sources().roots())
                 .withTest(sourceLayout.tests().roots())
                 .withProperty(JkSonar.WORKING_DIRECTORY, sourceLayout.baseTree().file("build/.sonar").getPath())
@@ -55,8 +53,10 @@ public class JkBuildPlugin2Sonar implements JkBuildPlugin2<JkJavaProjectBuild> {
     }
 
     @JkDoc("Launch a Sonar analysis.")
-    public void verify() {
-        jkSonar.run();
+    public void verify(JkBuild build) {
+        if (build instanceof JkJavaProjectBuild) {
+            configureSonarFrom(((JkJavaProjectBuild) build).project()).run();
+        }
     }
 
     public JkBuildPlugin2Sonar prop(String key, String value) {
@@ -67,7 +67,6 @@ public class JkBuildPlugin2Sonar implements JkBuildPlugin2<JkJavaProjectBuild> {
     @Override
     public void apply(JkBuild build) {
         // do nothing
-        
     }
 
 }

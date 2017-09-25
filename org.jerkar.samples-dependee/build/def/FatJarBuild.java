@@ -33,8 +33,8 @@ public class FatJarBuild extends JkJavaProjectBuild {
     private AClassicBuild sampleBuild;
     
     @Override
-    protected JkJavaProject createProject(File baseDir) {
-        return new JkJavaProject(baseDir)
+    protected JkJavaProject createProject(JkJavaProject project) {
+        return project
                 .setDependencies(JkDependencies.of(sampleBuild.project(), JkArtifactFileId.of("fat", "jar")))
                 .setSourceVersion(JkJavaVersion.V7);
     } 

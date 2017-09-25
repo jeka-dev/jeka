@@ -46,14 +46,15 @@ public abstract class JkJavaProjectBuild extends JkBuild {
 
     public final JkJavaProject project() {
         if (project == null) {
-            project = createProject(this.baseDir());
+            JkJavaProject suggest = new JkJavaProject(this.baseDir());
+            project = createProject(suggest);
             applyOptions(project);
             setupPlugins();
         }
         return project;
     }
 
-    protected abstract JkJavaProject createProject(File baseDir);
+    protected abstract JkJavaProject createProject(JkJavaProject suggest);
 
     protected void setupPlugins() {
         // Do nothing by default

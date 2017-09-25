@@ -16,20 +16,18 @@ import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
  * This build illustrate how one can use other dependency scopes then the standard ones.
  */
 public class SimpleScopeBuild extends JkJavaProjectBuild {
-	
-    private static final JkScope FOO = JkScope.of("foo"); 
-	
-    private static final JkScope BAR = JkScope.of("bar"); 
-	
-    protected JkJavaProject createProject(File baseDir) {
-	JkDependencies deps = JkDependencies.builder()
-	        .on(file("libs/foo.jar"))  
-		.on(JERSEY_SERVER, "1.19")
-		    .mapScope(COMPILE).to(RUNTIME)
-		    .and(FOO, PROVIDED).to(BAR, PROVIDED)
-		.build();
-	return new JkJavaProject(baseDir).setDependencies(deps);
-    }	
+
+    private static final JkScope FOO = JkScope.of("foo");
+
+    private static final JkScope BAR = JkScope.of("bar");
+
+    protected JkJavaProject createProject(JkJavaProject project) {
+        return project.setDependencies(JkDependencies.builder()
+                .on(file("libs/foo.jar"))
+                .on(JERSEY_SERVER, "1.19")
+                    .mapScope(COMPILE).to(RUNTIME)
+                    .and(FOO, PROVIDED).to(BAR, PROVIDED).build());
+    }
 }
-	
+
 

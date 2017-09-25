@@ -28,21 +28,21 @@ public class AClassicBuild extends JkJavaProjectBuild {
     }
     
     @Override
-    protected JkJavaProject createProject(File baseDir) {
+    protected JkJavaProject createProject(JkJavaProject project) {
         JkDependencies dependencies = JkDependencies.builder()
             .on("com.google.guava:guava:18.0")
             .on("com.sun.jersey:jersey-server:1.19")
             .on("com.orientechnologies:orientdb-client:2.0.8")
             .on("junit:junit:4.11", TEST)
             .on("org.mockito:mockito-all:1.9.5", TEST).build();
-        return new JkJavaProject(this.baseDir())
+        return project
                 .setSourceVersion(JkJavaVersion.V7)
                 .setDependencies(dependencies)
                 .addFatJarArtifactFile("fat");
     }
     
     public static void main(String[] args) {
-	JkInit.instanceOf(AClassicBuild.class, args).doDefault();
+	    JkInit.instanceOf(AClassicBuild.class, args).doDefault();
     }
 
 }
