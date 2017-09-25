@@ -37,7 +37,6 @@ import org.jerkar.tool.JkConstants;
 /**
  * Provides method to generate Eclipse .classpath metadata files.
  */
-// Experimental !!!!
 public final class JkEclipseClasspathGenerator {
 
     private static final String ENCODING = "UTF-8";
@@ -71,7 +70,7 @@ public final class JkEclipseClasspathGenerator {
      */
     private boolean usePathVariables;
 
-    private boolean hasBuildScript;
+
 
     /**
      * Constructs a {@link JkEclipseClasspathGenerator}.
@@ -82,6 +81,7 @@ public final class JkEclipseClasspathGenerator {
         this.dependencies = dependencies;
         this.dependencyResolver = resolver;
         this.sourceVersion = sourceVersion;
+
     }
 
     /**
@@ -96,6 +96,10 @@ public final class JkEclipseClasspathGenerator {
      */
     public JkEclipseClasspathGenerator(JkJavaProject javaProject) {
         this(javaProject, javaProject.maker().getDependencyResolver());
+    }
+
+    private boolean hasBuildDef() {
+        return new File(this.sourceLayout.baseDir(), JkConstants.BUILD_DEF_DIR).exists();
     }
 
 
@@ -123,15 +127,6 @@ public final class JkEclipseClasspathGenerator {
      */
     public JkEclipseClasspathGenerator setUsePathVariables(boolean usePathVariables) {
         this.usePathVariables = usePathVariables;
-        return this;
-    }
-
-    /**
-     * If <code>true</code> a dependency on Jerkar will be included and <code>build/def</code> directory will
-     * be included as source.
-     */
-    public JkEclipseClasspathGenerator setHasBuildScript(boolean hasBuildScript) {
-        this.hasBuildScript = hasBuildScript;
         return this;
     }
 
@@ -177,11 +172,11 @@ public final class JkEclipseClasspathGenerator {
         final Set<String> paths = new HashSet<>();
 
         // Write sources for build classes
-        if (hasBuildScript && new File(sourceLayout.baseDir(), JkConstants.BUILD_DEF_DIR).exists()) {
+        if (hasBuildDef() && new File(sourceLayout.baseDir(), JkConstants.BUILD_DEF_DIR).exists()) {
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "kind", "src",
-                    "path", JkConstants.BUILD_DEF_DIR,
-                    "output", JkConstants.BUILD_DEF_BIN_DIR);
+                    "including", "**/*",
+                    "path", JkConstants.BUILD_DEF_DIR);
         }
 
         generateSrcAndTestSrc(writer);
@@ -191,7 +186,7 @@ public final class JkEclipseClasspathGenerator {
         writeJre(writer);
 
         // add build dependencies
-        if (hasBuildScript && buildDependencyResolver != null) {
+        if (hasBuildDef() && buildDependencyResolver != null) {
             final Iterable<File> files = buildDependencies.localFileDependencies();
             writeFileDepsEntries(writer, files, paths);
         }
@@ -459,6 +454,5 @@ public final class JkEclipseClasspathGenerator {
     private static String toPatternString(List<String> pattern) {
         return JkUtilsString.join(pattern, "|");
     }
-
 
 }

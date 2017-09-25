@@ -30,7 +30,7 @@ import org.jerkar.api.utils.JkUtilsString;
  */
 public final class JkJavaCompiler {
 
-    private static final String OUTPUR_DIR_OPTS = "-d";
+    private static final String OUTPUT_DIR_OPTS = "-d";
 
     private static final String CLASSPATH_OPTS = "-cp";
 
@@ -88,7 +88,6 @@ public final class JkJavaCompiler {
         return new JkJavaCompiler(options, javaSourceFiles, fail, fork, compiler, compilerBinRepo);
     }
 
-
     /**
      * Creates a copy of this {@link JkJavaCompiler} but adding the specified
      * options. Options are option you pass in javac command line as
@@ -142,7 +141,7 @@ public final class JkJavaCompiler {
         if (outputDir.exists() && !outputDir.isDirectory()) {
             throw new IllegalArgumentException(outputDir.getAbsolutePath() + " is not a directory.");
         }
-        return withOption(OUTPUR_DIR_OPTS, outputDir.getAbsolutePath());
+        return withOption(OUTPUT_DIR_OPTS, outputDir.getAbsolutePath());
     }
 
     /**
@@ -158,7 +157,7 @@ public final class JkJavaCompiler {
     }
 
     private File getOutputDir() {
-        final String path = JkJavaCompilerSpec.findValueAfter(options, OUTPUR_DIR_OPTS);
+        final String path = JkJavaCompilerSpec.findValueAfter(options, OUTPUT_DIR_OPTS);
         return path == null ? null : new File(path);
     }
 
