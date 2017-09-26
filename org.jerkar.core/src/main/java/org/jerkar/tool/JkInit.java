@@ -187,14 +187,14 @@ public final class JkInit {
         return result;
     }
 
-    PluginDictionnary<JkBuildPlugin2<?>> initProject(JkBuild build) {
+    PluginDictionnary initProject(JkBuild build) {
         final CommandLine commandLine = this.loadResult.commandLine;
         JkOptions.populateFields(build, commandLine.getMasterBuildOptions());
         build.init();
 
         // setup plugins activated in command line
-        final Class<JkBuildPlugin2<?>> baseClass = JkClassLoader.of(build.getClass()).load(JkBuildPlugin2.class.getName());
-        final PluginDictionnary<JkBuildPlugin2<?>> dictionnary = PluginDictionnary.of(baseClass);
+        final Class<JkBuildPlugin2> baseClass = JkClassLoader.of(build.getClass()).load(JkBuildPlugin2.class.getName());
+        final PluginDictionnary dictionnary = new PluginDictionnary();
         final List<JkBuild> importedBuilds = build.importedBuilds().all();
         if (!importedBuilds.isEmpty()) {
             JkLog.startHeaded("Configure imported builds");
@@ -225,7 +225,7 @@ public final class JkInit {
     }
 
     private static void configureBuild(JkBuild build, Collection<JkPluginSetup> pluginSetups,
-            Map<String, String> commandlineOptions, PluginDictionnary<JkBuildPlugin2<?>> dictionnary) {
+            Map<String, String> commandlineOptions, PluginDictionnary dictionnary) {
         JkOptions.populateFields(build);
         final File localProps = build.file(JkConstants.BUILD_DEF_DIR + "/build.properties");
         if (localProps.exists()) {
@@ -236,12 +236,12 @@ public final class JkInit {
     }
 
     private static void configureAndActivatePlugins(JkBuild build, Collection<JkPluginSetup> pluginSetups,
-            PluginDictionnary<JkBuildPlugin2<?>> dictionnary) {
+            PluginDictionnary dictionnary) {
         for (final JkPluginSetup pluginSetup : pluginSetups) {
-            final Class<? extends JkBuildPlugin2<?>> pluginClass = dictionnary.loadByNameOrFail(pluginSetup.pluginName)
+            final Class<? extends JkBuildPlugin2> pluginClass = dictionnary.loadByNameOrFail(pluginSetup.pluginName)
                     .pluginClass();
             JkLog.startln("Configuring plugin " + pluginClass.getName());
-            final JkBuildPlugin2<? extends JkBuild> plugin = build.plugins.register(pluginClass, pluginSetup.options);
+            final JkBuildPlugin2 plugin = build.plugins().getOrCreate(pluginClass, pluginSetup.options);
             JkLog.done("Configuring plugin " + pluginClass.getName() + " with options "
                     + JkOptions.fieldOptionsToString(plugin));
             if (pluginSetup.activated) {

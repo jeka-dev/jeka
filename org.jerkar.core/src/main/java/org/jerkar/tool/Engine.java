@@ -165,7 +165,7 @@ final class Engine {
         }
         try {
             build.setBuildDefDependencyResolver(this.buildDefDependencies(), getBuildDefDependencyResolver());
-            final PluginDictionnary<JkBuildPlugin2<?>> dictionnary = init.initProject(build);
+            final PluginDictionnary dictionnary = init.initProject(build);
             final BuildAndPluginDictionnary result = new BuildAndPluginDictionnary();
             result.build = build;
             result.dictionnary = dictionnary;
@@ -178,7 +178,7 @@ final class Engine {
 
     private static class BuildAndPluginDictionnary {
         JkBuild build;
-        PluginDictionnary<JkBuildPlugin2<?>> dictionnary;
+        PluginDictionnary dictionnary;
     }
 
     private JkDependencies buildDefDependencies() {
@@ -228,7 +228,7 @@ final class Engine {
         JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir);
     }
 
-    private void launch(JkBuild build, PluginDictionnary<JkBuildPlugin2<?>> dictionnary, CommandLine commandLine) {
+    private void launch(JkBuild build, PluginDictionnary dictionnary, CommandLine commandLine) {
 
         // Now run projects
         if (!commandLine.getSubProjectMethods().isEmpty()) {
@@ -240,7 +240,7 @@ final class Engine {
     }
 
     private static void runProject(JkBuild build, List<MethodInvocation> invokes,
-            PluginDictionnary<JkBuildPlugin2<?>> dictionnary) {
+            PluginDictionnary dictionnary) {
         JkLog.infoHeaded("Executing build for project " + build.baseTree().root().getName());
         JkLog.info("Build class : " + build.getClass().getName());
         JkLog.info("Base dir : " + build.baseTree().root().getPath());
@@ -255,17 +255,18 @@ final class Engine {
     /**
      * Executes the specified methods given the fromDir as working directory.
      */
-    private static void execute(JkBuild build, Iterable<JkModelMethod> methods, File fromDir) {
-        for (final JkModelMethod method : methods) {
+    private static void execute(JkBuild build, Iterable<BuildMethod> methods, File fromDir) {
+        for (final BuildMethod method : methods) {
             invoke(build, method, fromDir);
         }
     }
 
-    private static void invoke(JkBuild build, JkModelMethod jkModelMethod, File fromDir) {
-        if (jkModelMethod.isMethodPlugin()) {
-            build.plugins.invoke(jkModelMethod.pluginClass(), jkModelMethod.name());
+    private static void invoke(JkBuild build, BuildMethod modelMethod, File fromDir) {
+        if (modelMethod.isMethodPlugin()) {
+            JkBuildPlugin2 plugin = build.plugins().get(modelMethod.pluginClass());
+            build.plugins().invoke(plugin, modelMethod.name());
         } else {
-            invoke(build, jkModelMethod.name(), fromDir);
+            invoke(build, modelMethod.name(), fromDir);
         }
     }
 
@@ -303,19 +304,19 @@ final class Engine {
         }
     }
 
-    private static List<JkModelMethod> toBuildMethods(Iterable<MethodInvocation> invocations,
-            PluginDictionnary<JkBuildPlugin2<?>> dictionnary) {
-        final List<JkModelMethod> jkModelMethods = new LinkedList<>();
+    private static List<BuildMethod> toBuildMethods(Iterable<MethodInvocation> invocations,
+                                                    PluginDictionnary dictionnary) {
+        final List<BuildMethod> buildMethods = new LinkedList<>();
         for (final MethodInvocation methodInvokation : invocations) {
             if (methodInvokation.isMethodPlugin()) {
-                final Class<? extends JkBuildPlugin2<?>> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName)
+                final Class<? extends JkBuildPlugin2> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName)
                         .pluginClass();
-                jkModelMethods.add(JkModelMethod.pluginMethod(clazz, methodInvokation.methodName));
+                buildMethods.add(BuildMethod.pluginMethod(clazz, methodInvokation.methodName));
             } else {
-                jkModelMethods.add(JkModelMethod.normal(methodInvokation.methodName));
+                buildMethods.add(BuildMethod.normal(methodInvokation.methodName));
             }
         }
-        return jkModelMethods;
+        return buildMethods;
     }
 
     private JkJavaCompiler baseBuildCompiler() {

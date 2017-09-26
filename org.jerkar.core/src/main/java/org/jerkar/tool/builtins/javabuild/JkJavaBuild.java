@@ -148,7 +148,6 @@ public class JkJavaBuild extends JkBuildDependencySupport {
     public final JkManifestOption manifest = new JkManifestOption();
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Override
     protected List<Class<Object>> pluginTemplateClasses() {
         final List<Class<Object>> result = new LinkedList<>();
         final Class clazz = JkJavaBuildPlugin.class;

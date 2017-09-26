@@ -21,7 +21,7 @@ import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
         "The ananlysis is performed when the 'verify' method is invoked.",
         "To parameterize this plugin just set the relevant sonar properies as options.",
         "For example you can launch the build whith '-sonar.host.url=http://myserver/..' to specify the SonarQube server url."})
-public class JkBuildPlugin2Sonar implements JkBuildPlugin2<JkJavaProjectBuild> {
+public class JkBuildPlugin2Sonar implements JkBuildPlugin2 {
 
     private final Map<String, String> properties = new HashMap<>();
 

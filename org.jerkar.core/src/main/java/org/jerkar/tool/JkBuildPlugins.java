@@ -1,11 +1,7 @@
 package org.jerkar.tool;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsReflect;
@@ -17,49 +13,34 @@ public final class JkBuildPlugins {
 
     private final JkBuild holder;
 
-    private final List<JkBuildPlugin2<?>> registeredPlugins = new LinkedList<>();
+    private final List<JkBuildPlugin2> configuredPlugins = new LinkedList<>();
 
     JkBuildPlugins(JkBuild holder) {
         super();
         this.holder = holder;
     }
 
-    JkBuildPlugin2<? extends JkBuild> register(Class<? extends JkBuildPlugin2<?>> exactPluginClass, Map<String, String> options) {
-        final JkBuildPlugin2<?> plugin = getOrCreate(exactPluginClass);
-        JkOptions.populateFields(plugin, options);
-        return plugin;
+    public void configure(JkBuildPlugin2 plugin) {
+        configuredPlugins.add(plugin);
     }
 
-    List<JkBuildPlugin2<?>> getRegistered() {
-        return Collections.unmodifiableList(registeredPlugins);
+    public <T extends JkBuildPlugin2> T get(Class<T> pluginClass) {
+        return getOrCreate(pluginClass, new HashMap<String, String>());
     }
 
-    public void activate(JkBuild build) {
-        registeredPlugins.forEach((plugin) -> plugin.apply(holder));
-    }
-
-
-    void invoke(Class<? extends JkBuildPlugin2<?>> pluginClass, String methodName) {
-        if (!JkUtilsReflect.isMethodPublicIn(pluginClass, methodName, JkBuild.class)) {
-            throw new JkException("No zero-arg public method found in "
-                    + pluginClass.getName());
-        }
-        final JkBuildPlugin2<?> plugin = this.getOrCreate(pluginClass);
+    void invoke(JkBuildPlugin2 plugin, String methodName) {
         JkLog.startUnderlined("Method " + methodName + " to plugin " + plugin.getClass().getSimpleName());
-        final Method method = JkUtilsReflect.getMethod(pluginClass, methodName, JkBuild.class);
+        final Method method = JkUtilsReflect.getMethod(plugin.getClass(), methodName, JkBuild.class);
         JkUtilsReflect.invoke(plugin, method, this.holder);
         JkLog.done();
     }
 
-    private JkBuildPlugin2<?> getOrCreate(Class<? extends JkBuildPlugin2<?>> exactPluginClass) {
-        final Optional<JkBuildPlugin2<?>> optPlugin = this.registeredPlugins.stream().filter(
-                (item) -> item.getClass().equals(exactPluginClass)).findFirst();
-        if (optPlugin.isPresent()) {
-            return optPlugin.get();
-        }
-        return JkUtilsReflect.newInstance(exactPluginClass);
+    <T extends JkBuildPlugin2> T getOrCreate(Class<T> pluginClass, Map<String, String> options) {
+        final Optional<T> optPlugin = (Optional<T>) this.configuredPlugins.stream().filter(
+                (item) -> item.getClass().equals(pluginClass)).findFirst();
+        final T plugin = optPlugin.orElse(JkUtilsReflect.newInstance(pluginClass));
+        JkOptions.populateFields(plugin, options);
+        return plugin;
     }
-
-
 
 }

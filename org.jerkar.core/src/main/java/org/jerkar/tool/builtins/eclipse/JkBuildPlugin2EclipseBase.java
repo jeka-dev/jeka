@@ -11,7 +11,7 @@ import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
  * Plugin to use Eclipse .classpath file as build definition. When this plugin is activated the .classpath
  * file is used over project setting set in the build class.
  */
-public final class JkBuildPlugin2EclipseBase implements JkBuildPlugin2<JkJavaProjectBuild> {
+public final class JkBuildPlugin2EclipseBase implements JkBuildPlugin2 {
 
     static final String OPTION_VAR_PREFIX = "eclipse.var.";
 

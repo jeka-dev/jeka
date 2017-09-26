@@ -30,13 +30,11 @@ final class HelpDisplayer {
 
     public static void helpPlugins() {
         JkLog.startln("Looking for plugins");
-        final Set<JkPluginDescription<JkBuildPlugin>> pluginDescriptions = PluginDictionnary.of(
-                JkBuildPlugin.class).getAll();
-        for (final JkPluginDescription<?> description : pluginDescriptions) {
+        final Set<JkPluginDescription> pluginDescriptions = new PluginDictionnary().getAll();
+        for (final JkPluginDescription description : pluginDescriptions) {
             JkLog.nextLine();
             JkLog.infoHeaded("Plugin  Name : " + description.shortName());
             JkLog.info("Full name : " + description.fullName());
-            JkLog.info("Template class : " + description.templateClass().getName());
             final List<String> explanations = description.explanation();
             if (!explanations.isEmpty()) {
                 JkLog.info("Explanation : ");

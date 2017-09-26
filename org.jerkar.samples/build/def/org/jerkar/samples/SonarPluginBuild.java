@@ -9,6 +9,8 @@ import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.plugins.jacoco.JkBuildPlugin2Jacoco;
 import org.jerkar.plugins.sonar.JkBuildPlugin2Sonar;
 import org.jerkar.plugins.sonar.JkSonar;
+import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkBuildPlugin2;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
@@ -20,8 +22,6 @@ public class SonarPluginBuild extends JkJavaProjectBuild {
 
     @JkDoc("Sonar server environment")
     protected SonarEnv sonarEnv = SonarEnv.DEV;
-
-    JkBuildPlugin2Sonar pluginSonar;
     
     @Override
     protected JkJavaProject createProject(JkJavaProject project) {
@@ -33,18 +33,14 @@ public class SonarPluginBuild extends JkJavaProjectBuild {
     }
 
     @Override
-    protected void setupPlugins() {
-        new JkBuildPlugin2Jacoco().apply(this);
-        pluginSonar = new JkBuildPlugin2Sonar()
-           //     .prop(JkSonar.HOST_URL, sonarEnv.url)
-                .prop(JkSonar.BRANCH, "myBranch");
-        pluginSonar.apply(this);
+    public void init() {
+        this.plugins().configure(new JkBuildPlugin2Sonar()
+                //     .prop(JkSonar.HOST_URL, sonarEnv.url)
+                .prop(JkSonar.BRANCH, "myBranch"));
     }
 
-    public void doSonar() {
-        clean();
-        this.project().maker().test();
-        pluginSonar.verify(this);
+    public void runSonar() {
+        this.plugins().get(JkBuildPlugin2Sonar.class).verify(this);
     }
 
     enum SonarEnv {
@@ -61,7 +57,7 @@ public class SonarPluginBuild extends JkJavaProjectBuild {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(SonarPluginBuild.class, args).doSonar();
+        JkInit.instanceOf(SonarPluginBuild.class, args).runSonar();
     }
 
 }

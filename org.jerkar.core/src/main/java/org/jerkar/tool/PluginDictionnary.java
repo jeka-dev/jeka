@@ -15,8 +15,7 @@ import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * Contains the Plugin description for all concrete plugin classes extending a
- * given base class.
+ * Contains description for all concrete plugins in current classpath.
  * <p>
  * Jerkar offers a very simple, yet powerful, plugin mechanism.<br/>
  * Basically it offers to discover every classes in the classpath that inherit
@@ -28,47 +27,22 @@ import org.jerkar.api.utils.JkUtilsString;
  * <code>or.jerkar.java.build.JkBuildPlugin</code> class must be named
  * 'my.package.JkJavaBuildPluginXxxxx.class' to be discovered :Xxxxx will be its
  * short name, while my.package.JkJavaBuildPluginXxxxx will be its full name.
- * 
- * @param <T>
  *            The plugin base class.
  * @author Jerome Angibaud
  * 
  * @see {@link JkPluginDescription}
  */
-final class PluginDictionnary<T> {
+final class PluginDictionnary {
 
-    private static final Map<Class<?>, Set<Class<?>>> CACHE = new HashMap<>();
-
-    /**
-     * Creates a {@link PluginDictionnary} for the specified extension points.
-     * That means, this instance will refer to all plugin extending the
-     * specified extension point in the parameter templateClass.
-     */
-    public static <T> PluginDictionnary<T> of(Class<T> templateClass) {
-        final PluginDictionnary<T> result = new PluginDictionnary<>(templateClass);
-        if (CACHE.containsKey(templateClass)) {
-            final Set<Class<?>> pluginClasses = CACHE.get(templateClass);
-            result.plugins = toPluginSet(templateClass, pluginClasses);
-        }
-        return result;
-    }
-
-    private Set<JkPluginDescription<T>> plugins;
-
-    private final Class<T> templateClass;
-
-    private PluginDictionnary(Class<T> extendingClass) {
-        super();
-        this.templateClass = extendingClass;
-    }
+    private Set<JkPluginDescription> plugins;
 
     /**
      * Returns all the plugins present in classpath for this template class.
      */
-    public Set<JkPluginDescription<T>> getAll() {
+    Set<JkPluginDescription> getAll() {
         if (plugins == null) {
             synchronized (this) {
-                final Set<JkPluginDescription<T>> result = loadAllPlugins(templateClass);
+                final Set<JkPluginDescription> result = loadAllPlugins();
                 this.plugins = Collections.unmodifiableSet(result);
             }
         }
@@ -82,48 +56,47 @@ final class PluginDictionnary<T> {
      * "myPluging" or "MyPlugin" is equal. If not found, returns
      * <code>null</code>.
      */
-    public JkPluginDescription<T> loadByName(String name) {
+    JkPluginDescription loadByName(String name) {
         if (!name.contains(".")) {
-            final JkPluginDescription<T> result = loadPluginHavingShortName(templateClass,
+            final JkPluginDescription result = loadPluginHavingShortName(
                     JkUtilsString.capitalize(name));
             if (result != null) {
                 return result;
             }
         }
-        return loadPluginsHavingLongName(templateClass, name);
+        return loadPluginsHavingLongName(name);
     }
 
-    public JkPluginDescription<T> loadByNameOrFail(String name) {
-        final JkPluginDescription<T> result = loadByName(name);
+    public JkPluginDescription loadByNameOrFail(String name) {
+        final JkPluginDescription result = loadByName(name);
         if (result == null) {
             throw new IllegalArgumentException("No class found having name "
-                    + simpleClassName(templateClass, name) + " for plugin '" + name + "'.");
+                    + simpleClassName(name) + " for plugin '" + name + "'.");
         }
         return result;
     }
 
-    private static String simpleClassName(Class<?> templateClass, String pluginName) {
-        return templateClass.getSimpleName() + JkUtilsString.capitalize(pluginName);
+    private static String simpleClassName(String pluginName) {
+        return JkBuildPlugin2.class.getSimpleName() + JkUtilsString.capitalize(pluginName);
     }
 
     @Override
     public String toString() {
         if (this.plugins == null) {
-            return "Not loaded (template class = " + this.templateClass + ")";
+            return "Not loaded.";
         }
         return this.plugins.toString();
     }
 
-    private static <T> Set<JkPluginDescription<T>> loadAllPlugins(Class<T> templateClass) {
-        final String nameSuffix = templateClass.getSimpleName();
-        return loadPlugins(templateClass, "**/" + nameSuffix + "*", "**/*$" + nameSuffix + "*");
+    private static <T> Set<JkPluginDescription> loadAllPlugins() {
+        final String nameSuffix = JkBuildPlugin2.class.getSimpleName();
+        return loadPlugins( "**/" + nameSuffix + "*", "**/*$" + nameSuffix + "*");
     }
 
-    private static <T> JkPluginDescription<T> loadPluginHavingShortName(Class<T> templateClass,
-            String shortName) {
-        final String simpleName = simpleClassName(templateClass, shortName);
-        final Set<JkPluginDescription<T>> set = loadPlugins(templateClass, "**/" + simpleName);
-        set.addAll(loadPlugins(templateClass, "**/*$" + simpleName));
+    private static JkPluginDescription loadPluginHavingShortName(String shortName) {
+        final String simpleName = simpleClassName(shortName);
+        final Set<JkPluginDescription> set = loadPlugins( "**/" + simpleName);
+        set.addAll(loadPlugins( "**/*$" + simpleName));
         if (set.size() > 1) {
             throw new JkException("Several plugin have the same short name : '" + shortName
                     + "'. Please disambiguate with using plugin long name (full class name)."
@@ -135,35 +108,25 @@ final class PluginDictionnary<T> {
         return set.iterator().next();
     }
 
-    private static <T> JkPluginDescription<T> loadPluginsHavingLongName(Class<T> templateClass,
-            String longName) {
-        final Class<? extends T> pluginClass = JkClassLoader.current().loadIfExist(longName);
+    private static JkPluginDescription loadPluginsHavingLongName(String longName) {
+        final Class<? extends JkBuildPlugin2> pluginClass = JkClassLoader.current().loadIfExist(longName);
         if (pluginClass == null) {
             return null;
         }
-        return new JkPluginDescription<>(templateClass, pluginClass);
+        return new JkPluginDescription(pluginClass);
     }
 
-    private static <T> Set<JkPluginDescription<T>> loadPlugins(Class<T> templateClass,
-            String... patterns) {
-        final Set<Class<?>> matchingClasses = JkClassLoader.of(templateClass).loadClasses(patterns);
+    private static Set<JkPluginDescription> loadPlugins(String... patterns) {
+        final Set<Class<?>> matchingClasses = JkClassLoader.of(JkBuildPlugin2.class).loadClasses(patterns);
         final Set<Class<?>> result = new HashSet<>();
-        for (final Class<?> candidate : matchingClasses) {
-            if (templateClass.isAssignableFrom(candidate)
-                    && !Modifier.isAbstract(candidate.getModifiers())
-                    && !candidate.equals(templateClass)) {
-                result.add(candidate);
-            }
-        }
-        return toPluginSet(templateClass, result);
+        return toPluginSet(matchingClasses);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> Set<JkPluginDescription<T>> toPluginSet(Class<T> extendingClass,
-            Iterable<Class<?>> classes) {
-        final Set<JkPluginDescription<T>> result = new TreeSet<>();
+    private static Set<JkPluginDescription> toPluginSet(Iterable<Class<?>> classes) {
+        final Set<JkPluginDescription> result = new TreeSet<>();
         for (final Class<?> clazz : classes) {
-            result.add(new JkPluginDescription<>(extendingClass, (Class<? extends T>) clazz));
+            result.add(new JkPluginDescription((Class<? extends JkBuildPlugin2>) clazz));
         }
         return result;
     }
@@ -173,47 +136,28 @@ final class PluginDictionnary<T> {
      * base class.
      * 
      * @author Jerome Angibaud
-     * @param <T>
      */
-    public static class JkPluginDescription<T> implements Comparable<JkPluginDescription<T>> {
+    static class JkPluginDescription implements Comparable<JkPluginDescription> {
 
-        private static String shortName(Class<?> extendingClass, Class<?> clazz) {
-            return JkUtilsString.uncapitalize(JkUtilsString.substringAfterFirst(clazz.getSimpleName(),
-                    extendingClass.getSimpleName()));
+        private static String shortName(Class<?> clazz) {
+            return JkUtilsString.uncapitalize(JkUtilsString.substringAfterFirst(JkBuildPlugin2.class.getSimpleName(),
+                    clazz.getSimpleName()));
         }
 
-        private static String longName(Class<?> extendingClass, Class<?> clazz) {
+        private static String longName(Class<?> clazz) {
             return clazz.getName();
-        }
-
-        /**
-         * Returns all <code>JkPlugins</code> instances declared as field in the
-         * specified instance. It includes fields declared in the specified
-         * instance class and the ones declared in its super classes.
-         */
-        public static List<JkPluginDescription<?>> declaredAsField(JkBuild hostingInstance) {
-            final List<JkPluginDescription<?>> result = new LinkedList<>();
-            final List<Class<Object>> templateClasses = hostingInstance.pluginTemplateClasses();
-            for (final Class<Object> clazz : templateClasses) {
-                final PluginDictionnary<Object> plugins = PluginDictionnary.of(clazz);
-                result.addAll(plugins.getAll());
-            }
-            return result;
         }
 
         private final String shortName;
 
         private final String fullName;
 
-        private final Class<T> templateClass;
+        private final Class<? extends JkBuildPlugin2> clazz;
 
-        private final Class<? extends T> clazz;
-
-        public JkPluginDescription(Class<T> templateClass, Class<? extends T> clazz) {
+        public JkPluginDescription(Class<? extends JkBuildPlugin2> clazz) {
             super();
-            this.templateClass = templateClass;
-            this.shortName = shortName(templateClass, clazz);
-            this.fullName = longName(templateClass, clazz);
+            this.shortName = shortName(clazz);
+            this.fullName = longName(clazz);
             this.clazz = clazz;
         }
 
@@ -225,11 +169,7 @@ final class PluginDictionnary<T> {
             return this.fullName;
         }
 
-        public Class<T> templateClass() {
-            return templateClass;
-        }
-
-        public Class<? extends T> pluginClass() {
+        public Class<? extends JkBuildPlugin2> pluginClass() {
             return clazz;
         }
 
@@ -246,7 +186,7 @@ final class PluginDictionnary<T> {
         }
 
         @Override
-        public int compareTo(JkPluginDescription<T> o) {
+        public int compareTo(JkPluginDescription o) {
             return this.shortName.compareTo(o.shortName);
         }
     }

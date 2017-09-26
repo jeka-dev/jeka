@@ -44,8 +44,7 @@ public class JkBuild {
 
     private final Instant buildTime = Instant.now();
 
-    /** attached plugin instances to this build */
-    public final JkBuildPlugins plugins = new JkBuildPlugins(this);
+    private final JkBuildPlugins plugins = new JkBuildPlugins(this);
 
     private JkDependencyResolver buildDefDependencyResolver;
 
@@ -83,7 +82,7 @@ public class JkBuild {
      * This method is invoked right after the option values has been injected to instance fields
      * of this object.
      */
-    public void init() {
+    protected void init() {
         // Do nothing by default
     }
 
@@ -159,6 +158,10 @@ public class JkBuild {
         return new JkScaffolder(this.baseDir, this.scaffoldEmbed);
     }
 
+    protected JkBuildPlugins plugins() {
+        return this.plugins;
+    }
+
     // ------------------------------ build dependencies ---------------------------------------------
 
     void setBuildDefDependencyResolver(JkDependencies buildDependencies, JkDependencyResolver scriptDependencyResolver) {
@@ -179,25 +182,6 @@ public class JkBuild {
      */
     public JkDependencies buildDependencies() {
         return buildDependencies;
-    }
-
-    // --------------------------- plugins ----------------------------------------------------
-
-    /**
-     * Returns the classes accepted as template for plugins. If you override it,
-     * do not forget to add the ones to the super class.
-     */
-    protected List<Class<Object>> pluginTemplateClasses() {
-        return Collections.emptyList();
-    }
-
-    /**
-     * Set the plugins to activate for this build. This method should be invoked
-     * after the base directory has been set, so plugins can be configured
-     * using the proper base dir.
-     */
-    protected void setPlugins(Iterable<?> plugins) {
-        // Do nothing as no plugin extension as been defined at this level.
     }
 
     // ------------------------------ Command line methods ---------------------------------------------------

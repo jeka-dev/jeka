@@ -11,13 +11,15 @@ import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
  *
  * @author Jerome Angibaud
  */
-public class JkBuildPlugin2Jacoco implements JkBuildPlugin2<JkJavaProjectBuild> {
-    
+public class JkBuildPlugin2Jacoco implements JkBuildPlugin2 {
 
     @Override
     public void apply(JkBuild build) {
-        JkJavaProject project = ((JkJavaProjectBuild) build).project();
-        JkocoJunitEnhancer junitEnhancer = JkocoJunitEnhancer.of(project.getOutLayout()
+        if (! (build instanceof JkJavaProjectBuild)) {
+            return;
+        }
+        final JkJavaProject project = ((JkJavaProjectBuild) build).project();
+        final JkocoJunitEnhancer junitEnhancer = JkocoJunitEnhancer.of(project.getOutLayout()
               .outputFile("jacoco/jacoco.exec"));
         project.maker().setJuniter( junitEnhancer.apply( project.maker().getJuniter()) );
     }

@@ -149,5 +149,4 @@ public abstract class JkJavaProjectBuild extends JkBuild {
         final JkDependencyNode tree = resolveResult.dependencyTree();
         JkLog.info(tree.toStrings());
     }
-
 }

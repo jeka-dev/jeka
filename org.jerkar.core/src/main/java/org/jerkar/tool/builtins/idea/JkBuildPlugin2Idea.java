@@ -18,7 +18,7 @@ import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 /**
  * Provides method to generate and read Eclipse metadata files.
  */
-public final class JkBuildPlugin2Idea implements JkBuildPlugin2<JkJavaProjectBuild> {
+public final class JkBuildPlugin2Idea implements JkBuildPlugin2 {
 
 
     @JkDoc("If true, path to cache repository and to Jerkar install will be replaces by $JERKAR_REPO$ and $JERKAR_HOME$ path variable")

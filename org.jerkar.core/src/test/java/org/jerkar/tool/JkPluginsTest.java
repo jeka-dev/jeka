@@ -11,8 +11,8 @@ public class JkPluginsTest {
 
     @Test
     public void testPluginsLoading() {
-        final PluginDictionnary<PluginBase> plugins = PluginDictionnary.of(PluginBase.class);
-        final Set<JkPluginDescription<PluginBase>> pluginSet = plugins.getAll();
+        final PluginDictionnary plugins = new PluginDictionnary();
+        final Set<JkPluginDescription> pluginSet = plugins.getAll();
         Assert.assertEquals(1, pluginSet.size());
     }
 

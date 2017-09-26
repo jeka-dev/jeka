@@ -18,16 +18,10 @@ import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 /**
  * Plugin to generate Eclipse meta data files from a JkJavaProjectBuild
  */
-public final class JkBuildPlugin2Eclipse implements JkBuildPlugin2<JkBuild> {
+public final class JkBuildPlugin2Eclipse implements JkBuildPlugin2 {
 
     @JkDoc("Set it to false to not mention javadoc in generated .classpath file.")
     boolean javadoc = true;
-
-    /** Flag for resolving dependencies against the eclipse classpath */
-    @JkDoc({ "Flag for resolving dependencies against the eclipse classpath",
-        "but trying to segregate test to production code considering path names : ",
-    "if path contains 'test' then this is considered as an entry source for scope 'test'." })
-    public boolean smartScope = true;
 
     /** If not null, this value will be used as the JRE container path when generating .classpath file.*/
     @JkDoc({ "If not null, this value will be used as the JRE container path when generating .classpath file." })
