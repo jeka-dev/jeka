@@ -5,12 +5,10 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.RUNTIME;
 import static org.jerkar.api.depmanagement.JkPopularModules.JERSEY_SERVER;
 
-import java.io.File;
-
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
+import org.jerkar.tool.JkJavaProjectBuild;
 
 /**
  * This build illustrate how one can use other dependency scopes then the standard ones.

@@ -1,14 +1,14 @@
 package org.jerkar.samples;
 
+import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
+import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
+
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.plugins.jacoco.JkBuildPluginJacoco;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
-
-import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
-import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
+import org.jerkar.tool.JkJavaProjectBuild;
 
 /**
  * This build deleteArtifacts, compile,test launch sonar analyse by default.

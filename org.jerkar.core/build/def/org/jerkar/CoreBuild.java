@@ -16,8 +16,8 @@ import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkInit;
+import org.jerkar.tool.JkJavaProjectBuild;
 import org.jerkar.tool.JkOptions;
-import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 
 /**
  * Build script for Jerkar 0.7 using new features

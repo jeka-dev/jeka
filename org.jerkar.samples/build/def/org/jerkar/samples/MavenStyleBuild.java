@@ -6,14 +6,12 @@ import static org.jerkar.api.depmanagement.JkPopularModules.JERSEY_SERVER;
 import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 import static org.jerkar.api.depmanagement.JkPopularModules.MOCKITO_ALL;
 
-import java.io.File;
-
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkPublishRepos;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
+import org.jerkar.tool.JkJavaProjectBuild;
 
 /**
  * Build sample for a jar project depending on several external modules. This

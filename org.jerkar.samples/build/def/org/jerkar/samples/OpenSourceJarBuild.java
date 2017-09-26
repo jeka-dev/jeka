@@ -4,12 +4,10 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
 import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 
-import java.io.File;
-
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
+import org.jerkar.tool.JkJavaProjectBuild;
 
 /**
  * This build demonstrate how to specified project metadata required to publish on 

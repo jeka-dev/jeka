@@ -7,7 +7,6 @@ import static org.jerkar.api.depmanagement.JkPopularModules.JAVAX_SERVLET_API;
 import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 import static org.jerkar.api.depmanagement.JkPopularModules.MOCKITO_ALL;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -16,7 +15,7 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkImport;
-import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
+import org.jerkar.tool.JkJavaProjectBuild;
 
 import com.google.common.base.MoreObjects;
 

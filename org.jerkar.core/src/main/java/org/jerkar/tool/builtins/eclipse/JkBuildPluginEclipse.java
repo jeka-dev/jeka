@@ -13,8 +13,8 @@ import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkBuildPlugin;
 import org.jerkar.tool.JkConstants;
 import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkJavaProjectBuild;
 import org.jerkar.tool.Main;
-import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 
 @JkDoc("Generates Eclipse meta data files from a JkJavaProjectBuild")
 public final class JkBuildPluginEclipse implements JkBuildPlugin {

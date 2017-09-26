@@ -19,9 +19,6 @@ import org.jerkar.api.utils.JkUtilsString;
  * testing, so we can declare that
  * <code>Junit</scope> is only necessary for scope <code>TEST</code>.
  * <p>
- * A scope can inherit to one or several scopes. This means that if a scope Foo inherits to scope Bar then a dependencies declared with scope Bar will be also considered as declared with scope Foo.
- * For instance, in JkJavaBuild, scope TEST inherits to RUNTIME that inherits to COMPILE so every dependencies declared with scope COMPILE are considered to be declared with scope RUNTIME and TEST as well.
- * <p>
  * Similar to Maven <code>scope</code> or Ivy <code>configuration</code>.
  *
  * @author Jerome Angibaud

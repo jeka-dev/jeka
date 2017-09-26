@@ -1,6 +1,6 @@
 package org.jerkar.tool;
 
-import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.project.java.JkJavaProject;
 
 /**
  * Holds constants about project structures
@@ -15,8 +15,7 @@ public final class JkConstants {
 
     static final String DEFAULT_JAVA_SOURCE = "src/main/java";
 
-    static final Class<?> DEFAULT_BUILD_CLASS = JkClassLoader.current().load(
-            "org.jerkar.tool.builtins.javabuild.JkJavaBuild");
+    static final Class<?> DEFAULT_BUILD_CLASS = DefaultBuildClass.class;
 
     /**
      * Relative path to the project where the build definition classes will be
@@ -33,5 +32,14 @@ public final class JkConstants {
      * The default method to be invoked when none is specified.
      */
     public static final String DEFAULT_METHOD = "doDefault";
+
+    private static class DefaultBuildClass extends JkJavaProjectBuild {
+
+        @Override
+        protected JkJavaProject createProject(JkJavaProject suggest) {
+            return suggest;
+        }
+
+    }
 
 }

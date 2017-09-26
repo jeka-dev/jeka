@@ -197,7 +197,7 @@ public final class JkPom {
         codeWriter.moduleId = JkModuleId.of(groupId(), artifactId());
         codeWriter.dependencies = dependencies();
         codeWriter.dependencyExclusions = dependencyExclusion();
-        codeWriter.extendedClass = "JkJavaBuild";
+        codeWriter.extendedClass = "JkJavaProjectBuild";
         codeWriter.imports.clear();
         codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsForJkJavaBuild());
         codeWriter.staticImports.addAll(JkCodeWriterForBuildClass.staticImportsForJkJavaBuild());
@@ -208,20 +208,20 @@ public final class JkPom {
             codeWriter.imports.add(JkFileTreeSet.class.getName());
             codeWriter.extraMethods.add(
                     "    // If you move your resources to src/main/java (collocated with java classes code), \n" +
-                    "    // you can remove this method. \n" +
-                    "    @Override\n" +
-                    "    public JkFileTreeSet resources() {\n" +
-                    "        return baseDirAsTree().jump(\"src/main/resources\").asSet();\n" +
+                            "    // you can remove this method. \n" +
+                            "    @Override\n" +
+                            "    public JkFileTreeSet resources() {\n" +
+                            "        return baseDirAsTree().jump(\"src/main/resources\").asSet();\n" +
                     "    }");
         }
         if (baseDir.file("src/test/resources").exists()) {
             codeWriter.imports.add(JkFileTreeSet.class.getName());
             codeWriter.extraMethods.add(
                     "    // If you move your test resources to src/test/java (collocated with java classes code), \n" +
-                    "    // you can remove this method.\n" +
-                    "    @Override\n" +
-                    "    public JkFileTreeSet unitTestResources() {\n" +
-                    "        return baseDirAsTree().jump(\"src/test/resources\").asSet();\n" +
+                            "    // you can remove this method.\n" +
+                            "    @Override\n" +
+                            "    public JkFileTreeSet unitTestResources() {\n" +
+                            "        return baseDirAsTree().jump(\"src/test/resources\").asSet();\n" +
                     "    }");
         }
         final VersionConstanter constanter = VersionConstanter.of(codeWriter.versionProvider);

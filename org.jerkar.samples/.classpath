@@ -16,6 +16,14 @@
 	<classpathentry kind="lib" path="C:/Users/djeang/.jerkar/cache/repo/org.hamcrest/hamcrest-core/jars/hamcrest-core-1.3.jar" exported="true" sourcepath="C:/Users/djeang/.jerkar/cache/repo/org.hamcrest/hamcrest-core/jars/hamcrest-core-1.3-sources.jar"/>
 	<classpathentry kind="lib" path="C:/Users/djeang/.jerkar/cache/repo/org.mockito/mockito-all/jars/mockito-all-1.9.5.jar" exported="true" sourcepath="C:/Users/djeang/.jerkar/cache/repo/org.mockito/mockito-all/jars/mockito-all-1.9.5-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="C:/Users/djeang/.jerkar/cache/repo/commons-httpclient/commons-httpclient/jars/commons-httpclient-3.1.jar" exported="true" sourcepath="C:/Users/djeang/.jerkar/cache/repo/commons-httpclient/commons-httpclient/jars/commons-httpclient-3.1-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/djeang/.jerkar/cache/repo/commons-logging/commons-logging/jars/commons-logging-1.0.4.jar" exported="true" sourcepath="C:/Users/djeang/.jerkar/cache/repo/commons-logging/commons-logging/jars/commons-logging-1.0.4-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/djeang/.jerkar/cache/repo/commons-codec/commons-codec/jars/commons-codec-1.2.jar" exported="true">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/djeang/.jerkar/cache/repo/commons-codec/commons-codec/jars/commons-codec-1.2-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/djeang/.jerkar/cache/repo/com.google.guava/guava/bundles/guava-21.0.jar" exported="true"/>
 	<classpathentry kind="lib" path="C:/Users/djeang/git/jerkar/org.jerkar.distrib-all/build/output/dist/org.jerkar.core-all.jar" exported="true" sourcepath="C:/Users/djeang/git/jerkar/org.jerkar.distrib-all/build/output/dist/libs-sources/org.jerkar.core-all-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

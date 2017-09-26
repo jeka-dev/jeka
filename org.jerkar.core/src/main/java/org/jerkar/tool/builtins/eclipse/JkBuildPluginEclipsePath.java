@@ -5,7 +5,7 @@ import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkBuildPlugin;
 import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
+import org.jerkar.tool.JkJavaProjectBuild;
 
 @JkDoc("Plugin to use Eclipse .classpath file as build definition. When this plugin is activated the .classpath file " +
         "is used over project setting set in the build class.")

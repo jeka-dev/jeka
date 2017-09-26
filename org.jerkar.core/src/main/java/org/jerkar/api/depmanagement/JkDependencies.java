@@ -304,9 +304,9 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         for (final JkScopedDependency scopedDependency : this) {
             if ((scopedDependency.scopeType().equals(ScopeType.SIMPLE)
                     && scopedDependency.scopes().contains(scope))
-                ||
+                    ||
                     (scopedDependency.scopeType().equals(ScopeType.MAPPED)
-                    && scopedDependency.scopeMapping().entries().contains(scope))) {
+                            && scopedDependency.scopeMapping().entries().contains(scope))) {
                 depList.add(scopedDependency.dependency());
             }
 
@@ -420,32 +420,6 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         return resolvedWith(JkVersionProvider.of(resolvedModules));
     }
 
-    /**
-     * @see #resolvedWith(Iterable)
-     */
-    public JkDependencies resolvedWithOld(JkVersionProvider provider) {
-        JkDependencies result = this;
-        for (final JkModuleId moduleId : provider.moduleIds()) {
-            final JkScopedDependency scopedDependency = this.get(moduleId);
-            if (scopedDependency == null) {
-                continue;
-            }
-            final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
-                    .dependency();
-            if (moduleDependency.versionRange().isDynamicAndResovable()
-                    || moduleDependency.hasUnspecifedVersion()) {
-                final JkVersion resolvedVersion = provider.versionOf(moduleId);
-                if (resolvedVersion != null) {
-                    final JkModuleDependency resolvedModule = moduleDependency
-                            .resolvedTo(resolvedVersion);
-                    final JkScopedDependency resolvedScopedDep = scopedDependency
-                            .dependency(resolvedModule);
-                    result = result.without(moduleId).and(resolvedScopedDep);
-                }
-            }
-        }
-        return result;
-    }
 
     /**
      * @see #resolvedWith(Iterable)

@@ -10,7 +10,7 @@ import org.jerkar.plugins.sonar.JkBuildPluginSonar;
 import org.jerkar.plugins.sonar.JkSonar;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
+import org.jerkar.tool.JkJavaProjectBuild;
 
 /**
  * This build deleteArtifacts, compile,test launch sonar analyse by default.

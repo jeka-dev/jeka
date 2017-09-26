@@ -12,8 +12,8 @@ import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkBuildPlugin;
 import org.jerkar.tool.JkConstants;
 import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkJavaProjectBuild;
 import org.jerkar.tool.Main;
-import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 
 @JkDoc("Provides method to generate Idea Intellij metadata files.")
 public final class JkBuildPluginIdea implements JkBuildPlugin {

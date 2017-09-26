@@ -1,8 +1,8 @@
 package org.jerkar.samples;
 
 import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
+import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectOutLayout;
 import org.jerkar.api.project.java.JkJavaProject;

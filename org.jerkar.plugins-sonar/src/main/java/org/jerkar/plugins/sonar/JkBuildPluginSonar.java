@@ -15,8 +15,8 @@ import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkBuildPlugin;
 import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkJavaProjectBuild;
 import org.jerkar.tool.JkOptions;
-import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 
 @JkDoc({"Add SonarQube capability to a build.",
         "The ananlysis is performed when the 'run' method is invoked.",

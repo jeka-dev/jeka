@@ -176,7 +176,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
 
     /**
      * Returns the java code portion that declares imports for a basic
-     * build class extending {@link org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild}
+     * build class extending {@link org.jerkar.tool.JkJavaProjectBuild}
      */
     public static List<String> importsForJkJavaProjectBuild() {
         final List<String> imports = new LinkedList<>(importsForJkBuild());

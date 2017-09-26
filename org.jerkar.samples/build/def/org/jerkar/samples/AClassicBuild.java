@@ -2,13 +2,13 @@ package org.jerkar.samples;
 
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 
-import java.io.File;
-
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
+import org.jerkar.tool.JkJavaProjectBuild;
+
+
 
 /**
  * This build is equivalent to {@link MavenStyleBuild} but removing the needless
@@ -22,9 +22,9 @@ import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 public class AClassicBuild extends JkJavaProjectBuild {
 
     {
-	    pack.checksums = "sha1";
-	    pack.tests = true;
-	    pack.javadoc = true;
+	pack.checksums = "sha1";
+	pack.tests = true;
+	pack.javadoc = true;
     }
     
     @Override

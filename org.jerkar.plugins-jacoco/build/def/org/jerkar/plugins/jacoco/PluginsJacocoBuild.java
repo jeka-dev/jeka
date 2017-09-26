@@ -5,7 +5,7 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkImportBuild;
-import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
+import org.jerkar.tool.JkJavaProjectBuild;
 
 import java.io.File;
 

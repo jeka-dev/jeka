@@ -1,5 +1,8 @@
 package org.jerkar.api.ide.eclipse;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.List;
 
@@ -8,13 +11,11 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.depmanagement.JkScopedDependency;
 import org.jerkar.api.java.JkJavaVersion;
-import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.JkProjectSourceLayout;
+import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 
 public class JkEclipseClasspathGeneratorTest {
@@ -23,24 +24,26 @@ public class JkEclipseClasspathGeneratorTest {
     @Ignore
     public void generate() throws Exception {
         final File top = unzipToDir("sample-multi-scriptless.zip");
-       // JkLog.silent(true);
+        // JkLog.silent(true);
 
-        JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
+        final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
                 .withResources("res").withTestResources("res-test");
 
-        File base = new File(top, "base");
-        JkJavaProject baseProject = new JkJavaProject(base);
+        final File base = new File(top, "base");
+        final JkJavaProject baseProject = new JkJavaProject(base);
         baseProject.setSourceLayout(sourceLayout);
         baseProject.setDependencies(JkDependencies.builder().on(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3").build());
         final JkEclipseClasspathGenerator baseGenerator =
                 new JkEclipseClasspathGenerator(baseProject);
+        baseGenerator.setBuildDependencyResolver(baseProject.maker().getDependencyResolver(),
+                JkDependencies.builder().on(JkPopularModules.GUAVA, "21.0").build());
         final String baseClasspath = baseGenerator.generate();
         System.out.println("\nbase .classpath");
         System.out.println(baseClasspath);
 
         final File core = new File(top, "core");
         final JkJavaProject coreProject = new JkJavaProject(core);
-        JkDependencies coreDeps = JkDependencies.of(baseProject);
+        final JkDependencies coreDeps = JkDependencies.of(baseProject);
         coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
         coreProject.maker().setJuniter(
                 coreProject.maker().getJuniter().forked(true));
@@ -67,30 +70,30 @@ public class JkEclipseClasspathGeneratorTest {
 
         // ----------------- Now,  try to applyCommons generated .classpath to projects and compare if it matches
 
-        JkEclipseClasspathApplier classpathApplier = new JkEclipseClasspathApplier(false);
+        final JkEclipseClasspathApplier classpathApplier = new JkEclipseClasspathApplier(false);
 
-        JkJavaProject baseProject2 = new JkJavaProject(base);
+        final JkJavaProject baseProject2 = new JkJavaProject(base);
         JkUtilsFile.writeString(new File(base, ".classpath"), baseClasspath, false);
         JkEclipseProject.ofJavaNature("base").writeTo(new File(base, ".project"));
         classpathApplier.apply(baseProject2);
-        JkProjectSourceLayout base2Layout = baseProject2.getSourceLayout();
-        JkProjectSourceLayout baseLayout = baseProject.getSourceLayout();
+        final JkProjectSourceLayout base2Layout = baseProject2.getSourceLayout();
+        final JkProjectSourceLayout baseLayout = baseProject.getSourceLayout();
         assertEquals(baseLayout.baseDir(), base2Layout.baseDir());
-        List<File> srcFiles = base2Layout.sources().files(false);
+        final List<File> srcFiles = base2Layout.sources().files(false);
         assertEquals(2, srcFiles.size());
         assertEquals("Base.java", srcFiles.get(0).getName());
-        List<File> resFiles = base2Layout.resources().files(false);
+        final List<File> resFiles = base2Layout.resources().files(false);
         assertEquals(1, resFiles.size());
         assertEquals("base.txt", resFiles.get(0).getName());
         assertEquals(4, baseProject2.getDependencies().list().size());
 
-        JkJavaProject coreProject2 = new JkJavaProject(core);
+        final JkJavaProject coreProject2 = new JkJavaProject(core);
         JkUtilsFile.writeString(new File(core, ".classpath"), coreClasspath, false);
         JkEclipseProject.ofJavaNature("core").writeTo(new File(core, ".project"));
         classpathApplier.apply(coreProject2);
-        List<JkScopedDependency> coreDeps2 = coreProject2.getDependencies().list();
+        final List<JkScopedDependency> coreDeps2 = coreProject2.getDependencies().list();
         assertEquals(1, coreDeps2.size());
-        JkComputedDependency baseProjectDep = (JkComputedDependency) coreDeps2.get(0).dependency();
+        final JkComputedDependency baseProjectDep = (JkComputedDependency) coreDeps2.get(0).dependency();
         assertTrue(JkUtilsFile.isSame(base, baseProjectDep.ideProjectBaseDir()));
 
         //Desktop.getDesktop().open(top);
