@@ -34,6 +34,7 @@ public interface JkArtifactProducer extends JkArtifactLocator {
     /**
      * Returns the main artifact file.
      */
+    @Override
     default File mainArtifactFile() {
         return artifactFile(mainArtifactFileId());
     }

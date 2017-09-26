@@ -13,16 +13,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkDependencyNode;
-import org.jerkar.api.depmanagement.JkDependencyResolver;
-import org.jerkar.api.depmanagement.JkModuleDependency;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkResolveResult;
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.depmanagement.JkVersion;
-import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
@@ -33,7 +24,6 @@ import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
 import org.jerkar.tool.JkConstants;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 
 /**
  * Provides method to generate and read Eclipse metadata files.
@@ -326,16 +316,16 @@ public final class JkImlGenerator {
 
     private static String ideScope(Set<JkScope> scopesArg) {
         final Set<String> scopes = toStringScopes(scopesArg);
-        if (scopes.contains(JkJavaBuild.COMPILE.name())) {
+        if (scopes.contains(JkJavaDepScopes.COMPILE.name())) {
             return "COMPILE";
         }
-        if (scopes.contains(JkJavaBuild.PROVIDED.name())) {
+        if (scopes.contains(JkJavaDepScopes.PROVIDED.name())) {
             return "PROVIDED";
         }
-        if (scopes.contains(JkJavaBuild.RUNTIME.name())) {
+        if (scopes.contains(JkJavaDepScopes.RUNTIME.name())) {
             return "RUNTIME";
         }
-        if (scopes.contains(JkJavaBuild.TEST.name())) {
+        if (scopes.contains(JkJavaDepScopes.TEST.name())) {
             return "TEST";
         }
         return "COMPILE";

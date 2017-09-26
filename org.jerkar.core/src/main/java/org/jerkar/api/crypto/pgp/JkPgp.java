@@ -28,22 +28,16 @@ public final class JkPgp implements Serializable {
 
     private static final String SECRET_KEYRING = "pgp.secring";
 
-    private static final String SECRET_KEY_PASSWORD = "pgp.secretKeyPassword";
+    private static final String SECRET_KEY_PASS_WORD_PROPERTY = "pgp.secretKeyPassword";
 
     private static final String PGPUTILS_CLASS_NAME = "org.jerkar.api.crypto.pgp.PgpUtils";
 
     // We don't want to add Bouncycastle in the Jerkar classpath, so we create a
     // specific classloader
     // just for launching the Bouncy castle methods.
-    private static Class<?> PGPUTILS_CLASS = JkClassLoader.current()
+    private static final Class<?> PGPUTILS_CLASS = JkClassLoader.current()
             .siblingWithOptional(JkPgp.class.getResource("bouncycastle-pgp-152.jar"))
             .load(PGPUTILS_CLASS_NAME);
-
-    private final File pubRing;
-
-    private final File secRing;
-
-    private final String password;
 
     /**
      * Creates a {@link JkPgp} with the specified public and secret ring.
@@ -78,7 +72,7 @@ public final class JkPgp implements Serializable {
             result = result.publicRing(new File(pub));
         }
         final String sec = options.get(SECRET_KEYRING);
-        final String password = options.get(SECRET_KEY_PASSWORD);
+        final String password = options.get(SECRET_KEY_PASS_WORD_PROPERTY);
         if (sec != null) {
             result = result.secretRing(new File(sec), password);
         } else {
@@ -100,6 +94,12 @@ public final class JkPgp implements Serializable {
     public static JkPgp ofSecretRing(File secRing, String password) {
         return of(null, secRing, password);
     }
+
+    private final File pubRing;
+
+    private final File secRing;
+
+    private final String password;
 
     private JkPgp(File pubRing, File secRing, String password) {
         super();

@@ -33,7 +33,7 @@ public final class JkSonar {
     public static final String WORKING_DIRECTORY = "working.directory";
     public static final String JUNIT_REPORTS_PATH = "junit.reportsPath";
     public static final String SUREFIRE_REPORTS_PATH = "surefire.reportsPath";
-    public static final String JACOCO_REPORTS_PATH = "jacoco.reportPath";
+    public static final String JACOCO_REPORTS_PATHS = "jacoco.reportPaths";
     public static final String COVERTURA_REPORTS_PATH = "cobertura.reportPath";
     public static final String CLOVER_REPORTS_PATH = "clover.reportPath";
     public static final String DYNAMIC_ANALYSIS = "dynamicAnalysis";
@@ -62,9 +62,9 @@ public final class JkSonar {
     }
 
     public static JkSonar of(String projectKey, String projectName, JkVersion projectVersion) {
-        JkUtilsAssert.notNull(projectName, "Project name can't be null.");
-        JkUtilsAssert.notNull(projectKey, "Project key can't be null.");
-        JkUtilsAssert.notNull(projectVersion, "Project version can't be null.");
+        JkUtilsAssert.notNull(projectName, "JkEclipseProject name can't be null.");
+        JkUtilsAssert.notNull(projectKey, "JkEclipseProject key can't be null.");
+        JkUtilsAssert.notNull(projectVersion, "JkEclipseProject version can't be null.");
         final Map<String, String> map = new HashMap<>();
         map.put(PROJECT_KEY, projectKey);
         map.put(PROJECT_NAME, projectName);

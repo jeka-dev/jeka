@@ -119,11 +119,7 @@ public class JkTestSuiteResult implements Serializable {
      */
     public List<String> toStrings(boolean showStackTrace) {
         final List<String> lines = new LinkedList<>();
-        if (failureCount() == 0) {
-            lines.add(toString());
-        } else {
-            lines.add(toString());
-        }
+        lines.add(toString());
         int i = 0;
         for (final TestCaseResult testCaseResult : this.testCaseResults) {
             if (testCaseResult instanceof TestCaseFailure) {
@@ -136,7 +132,6 @@ public class JkTestSuiteResult implements Serializable {
                 }
                 i++;
             }
-
         }
         return lines;
     }

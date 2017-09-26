@@ -1,13 +1,11 @@
 package org.jerkar.api.system;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.api.utils.JkUtilsSystem;
+import org.jerkar.api.utils.*;
 
 /**
  * Provides location related to the running Jerkar instance.
@@ -32,17 +30,15 @@ public final class JkLocator {
         for (final File file : JkUtilsSystem.classloaderEntries((URLClassLoader) JkLocator.class
                 .getClassLoader())) {
             final URL url = JkUtilsFile.toUrl(file);
-            URLClassLoader classLoader = null;
-            try {
-                classLoader = new URLClassLoader(new URL[] { url }, ClassLoader
-                        .getSystemClassLoader().getParent());
+
+            try ( URLClassLoader classLoader =  new URLClassLoader(new URL[] { url }, ClassLoader.getSystemClassLoader().getParent())) {
                 classLoader.loadClass(JkLocator.class.getName());
                 JERKAR_JAR_FILE = file;
                 return file;
             } catch (final ClassNotFoundException e) {
                 // Class just not there
-            } finally {
-                JkUtilsIO.closeQuietly(classLoader);
+            } catch (IOException e) {
+                throw JkUtilsThrowable.unchecked(e);
             }
         }
         throw new IllegalStateException("Main not found in classpath");

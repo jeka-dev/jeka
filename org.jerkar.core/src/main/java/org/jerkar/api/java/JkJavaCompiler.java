@@ -254,7 +254,7 @@ public final class JkJavaCompiler {
         if (outputDir == null) {
             throw new IllegalStateException("Output dir option (-d) has not been specified on the compiler. Specified options : " + options);
         }
-        this.getOutputDir().mkdirs();
+        outputDir.mkdirs();
         final JavaCompiler compiler = this.compiler != null ? this.compiler : getDefaultOrFail();
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null,
                 null);

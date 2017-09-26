@@ -3,6 +3,7 @@ package org.jerkar.plugins.sonar;
 import org.jerkar.CoreBuild;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkImportBuild;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;

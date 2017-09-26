@@ -2,13 +2,12 @@ package org.jerkar.integrationtest;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Test;
 
 import java.io.File;
 import java.util.List;
 
-import static org.jerkar.tool.builtins.javabuild.JkJavaBuild.*;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 import static org.junit.Assert.*;
 
 /**
@@ -20,13 +19,13 @@ public class ResolveWithArtifactIT {
     public void artifactsAreHandled() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
         JkDependencies deps = JkDependencies.builder()
-                .usingDefaultScopes(JkJavaBuild.COMPILE)
+                .usingDefaultScopes(COMPILE)
                 .on("org.lwjgl:lwjgl:3.1.1:natives-linux")
                 .on(JkPopularModules.GUAVA, "19.0" )
                 .on("org.lwjgl:lwjgl:3.1.1")
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps);
         JkDependencyNode treeRoot = resolveResult.dependencyTree();
@@ -55,7 +54,7 @@ public class ResolveWithArtifactIT {
                 .on("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0").scope(COMPILE)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps);
         JkDependencyNode tree = resolveResult.dependencyTree();

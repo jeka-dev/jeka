@@ -2,12 +2,11 @@ package org.jerkar.integrationtest;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.utils.JkUtilsSystem;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Test;
 
 import java.util.Set;
 
-import static org.jerkar.tool.builtins.javabuild.JkJavaBuild.*;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 import static org.junit.Assert.*;
 
 public class ResolverWithScopeMapperIT {
@@ -23,7 +22,7 @@ public class ResolverWithScopeMapperIT {
                 .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").scope(TEST)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, TEST);
         Set<JkModuleId> moduleIds = resolveResult.dependencyTree().flattenToVersionProvider().moduleIds();
 
@@ -43,7 +42,7 @@ public class ResolverWithScopeMapperIT {
                 .on(JkPopularModules.JUNIT, "4.12").scope(JkJavaDepScopes.TEST)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, TEST);
         Set<JkModuleId> moduleIds = resolveResult.dependencyTree().flattenToVersionProvider().moduleIds();
         assertEquals("Wrong modules size " + moduleIds, 2, moduleIds.size());
@@ -66,8 +65,8 @@ public class ResolverWithScopeMapperIT {
                 .on(starterWebModule, "1.5.3.RELEASE").scope(COMPILE)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
-        JkResolveResult resolveResult = resolver.resolve(deps, JkJavaBuild.COMPILE);
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
+        JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
         assertEquals(directCoreVersion, resolveResult.versionOf(springCoreModule).name());
     }
 
@@ -79,12 +78,12 @@ public class ResolverWithScopeMapperIT {
     @Test
     public void resolveWithSeveralScopes() {
         JkDependencies deps = JkDependencies.builder()
-                .on(JkPopularModules.GUAVA, "19.0").scope(JkJavaBuild.COMPILE)
-                .on(JkPopularModules.JAVAX_SERVLET_API, "3.1.0").scope(JkJavaBuild.PROVIDED)
+                .on(JkPopularModules.GUAVA, "19.0").scope(COMPILE)
+                .on(JkPopularModules.JAVAX_SERVLET_API, "3.1.0").scope(PROVIDED)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
-        JkResolveResult resolveResult = resolver.resolve(deps, JkJavaBuild.COMPILE, JkJavaBuild.PROVIDED);
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
+        JkResolveResult resolveResult = resolver.resolve(deps, COMPILE, PROVIDED);
         assertTrue(resolveResult.contains(JkPopularModules.JAVAX_SERVLET_API));
         assertTrue(resolveResult.contains(JkPopularModules.GUAVA));
         assertEquals(2, resolveResult.dependencyTree().flattenToVersionProvider().moduleIds().size());
@@ -97,9 +96,9 @@ public class ResolverWithScopeMapperIT {
                 .on("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE").scope(COMPILE, RUNTIME)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
-        JkResolveResult resolveResult = resolver.resolve(deps, JkJavaBuild.RUNTIME);
+        JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
         boolean snakeyamlHere = resolveResult.contains( JkModuleId.of("org.yaml:snakeyaml"));
         assertTrue(snakeyamlHere);
     }
@@ -111,9 +110,9 @@ public class ResolverWithScopeMapperIT {
                 .on("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE").scope(COMPILE, RUNTIME)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
-        JkResolveResult resolveResult = resolver.resolve(deps, JkJavaBuild.COMPILE);
+        JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
         boolean snakeyamlHere = resolveResult.contains( JkModuleId.of("org.yaml:snakeyaml"));
         assertFalse(snakeyamlHere);
     }
@@ -121,10 +120,10 @@ public class ResolverWithScopeMapperIT {
     @Test
     public void treeRootIsCorrectWhenAnonymous() {
         JkDependencies deps = JkDependencies.builder()
-                .on(JkPopularModules.GUAVA, "19.0").scope(JkJavaBuild.COMPILE)
+                .on(JkPopularModules.GUAVA, "19.0").scope(COMPILE)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
         JkDependencyNode tree = resolver.resolve(deps).dependencyTree();
         assertTrue(tree.moduleInfo().declaredScopes().isEmpty());
     }

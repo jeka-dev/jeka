@@ -1,10 +1,9 @@
 package org.jerkar.integrationtest;
 
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Test;
 
-import static org.jerkar.tool.builtins.javabuild.JkJavaBuild.*;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -19,7 +18,7 @@ public class ResolveHandleErrorIT {
                 .on(JkPopularModules.JAVAX_SERVLET_API, "2.5.3").scope(COMPILE_AND_RUNTIME)  // does not exist
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps);
         JkResolveResult.JkErrorReport errorReport = resolveResult.errorReport();

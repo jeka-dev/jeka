@@ -2,13 +2,13 @@ package org.jerkar.integrationtest;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.utils.JkUtilsSystem;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Test;
 
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 
 public class ResolverWithoutScopeMapperIT {
 
@@ -19,20 +19,20 @@ public class ResolverWithoutScopeMapperIT {
     @Test
     public void resolveCompile() {
         JkDependencies deps = JkDependencies.builder()
-                .on(JkPopularModules.APACHE_COMMONS_DBCP, "1.4").scope(JkJavaBuild.COMPILE)
+                .on(JkPopularModules.APACHE_COMMONS_DBCP, "1.4").scope(COMPILE)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(REPOS)
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
-        JkResolveResult resolveResult = resolver.resolve(deps, JkJavaBuild.COMPILE);
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
+        JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
         assertTrue(resolveResult.contains(JkModuleId.of("commons-pool")));
         assertEquals(2, resolveResult.dependencyTree().flattenToVersionProvider().moduleIds().size());
 
         deps = JkDependencies.builder()
-                .on(JkPopularModules.HIBERNATE_CORE, "5.2.10.Final").scope(JkJavaBuild.COMPILE)
+                .on(JkPopularModules.HIBERNATE_CORE, "5.2.10.Final").scope(COMPILE)
                 .build();
         resolver = JkDependencyResolver.of(REPOS)
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
-        resolveResult = resolver.resolve(deps, JkJavaBuild.COMPILE);
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
+        resolveResult = resolver.resolve(deps, COMPILE);
         System.out.println(resolveResult.dependencyTree().toStringComplete());
         assertEquals(10, resolveResult.dependencyTree().flattenToVersionProvider().moduleIds().size());
     }
@@ -40,19 +40,19 @@ public class ResolverWithoutScopeMapperIT {
     @Test
     public void resolveInheritedScopes() {
         JkDependencies deps = JkDependencies.builder()
-                .on(JkPopularModules.APACHE_COMMONS_DBCP, "1.4").scope(JkJavaBuild.COMPILE)
+                .on(JkPopularModules.APACHE_COMMONS_DBCP, "1.4").scope(COMPILE)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(REPOS)
-            .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
+            .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
 
         // runtime classpath should embed the dependency as well cause 'RUNTIME' scope extends 'COMPILE'
-        JkResolveResult resolveResult = resolver.resolve(deps, JkJavaBuild.RUNTIME);
+        JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
         assertEquals(2, resolveResult.dependencyTree().flattenToVersionProvider().moduleIds().size());
         assertTrue(resolveResult.contains(JkModuleId.of("commons-pool")));
         assertTrue(resolveResult.contains(JkModuleId.of("commons-dbcp")));
 
         // test classpath should embed the dependency as well
-        resolveResult = resolver.resolve(deps, JkJavaBuild.TEST);
+        resolveResult = resolver.resolve(deps, TEST);
         assertTrue(resolveResult.contains(JkModuleId.of("commons-pool")));
         assertTrue(resolveResult.contains(JkModuleId.of("commons-dbcp")));
         assertEquals(2, resolveResult.dependencyTree().flattenToVersionProvider().moduleIds().size());
@@ -61,20 +61,20 @@ public class ResolverWithoutScopeMapperIT {
     @Test
     public void resolveWithOptionals() {
         JkDependencies deps = JkDependencies.builder()
-                .on(JkPopularModules.SPRING_ORM, "4.3.8.RELEASE").mapScope(JkJavaBuild.COMPILE).to("compile", "master", "optional")
+                .on(JkPopularModules.SPRING_ORM, "4.3.8.RELEASE").mapScope(COMPILE).to("compile", "master", "optional")
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral());
-        JkResolveResult resolveResult = resolver.resolve(deps, JkJavaBuild.COMPILE);
+        JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
         assertEquals(37, resolveResult.dependencyTree().flattenToVersionProvider().moduleIds().size());
     }
 
     @Test
     public void resolveSpringbootTestStarter() {
         JkDependencies deps = JkDependencies.builder()
-                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").mapScope(JkJavaBuild.TEST).to("master", "runtime")
+                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").mapScope(TEST).to("master", "runtime")
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral());
-        JkResolveResult resolveResult = resolver.resolve(deps, JkJavaBuild.TEST);
+        JkResolveResult resolveResult = resolver.resolve(deps, TEST);
         Set<JkModuleId> moduleIds = resolveResult.dependencyTree().flattenToVersionProvider().moduleIds();
 
         // Unresolved issue happen on Travis : Junit is not part of the result.

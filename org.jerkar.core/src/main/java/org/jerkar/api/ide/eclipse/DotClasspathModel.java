@@ -99,7 +99,7 @@ final class DotClasspathModel {
 
     public List<Lib> libs(File baseDir, ScopeResolver scopeResolver) {
         final List<Lib> result = new LinkedList<>();
-        final Map<String, File> projects = Project.findProjects(baseDir.getParentFile());
+        final Map<String, File> projects = JkEclipseProject.findProjects(baseDir.getParentFile());
         for (final ClasspathEntry classpathEntry : classpathentries) {
 
             if (classpathEntry.kind.equals(ClasspathEntry.Kind.CON)) {
@@ -316,7 +316,7 @@ final class DotClasspathModel {
             }
             final File otherProjectDir = projectLocationMap.get(projectName);
             if (otherProjectDir == null) {
-                throw new IllegalStateException("Project " + projectName + " not found in "
+                throw new IllegalStateException("JkEclipseProject " + projectName + " not found in "
                         + parent.getPath());
             }
             return otherProjectDir;

@@ -208,16 +208,10 @@ public final class JkUtilsIO {
      * Returns the content of the given url as a string.
      */
     public static String read(URL url) {
-        InputStream is;
-        try {
-            is = url.openStream();
+        try (InputStream is =  url.openStream()){
+            return readAsString(is);
         } catch (final IOException e) {
             throw new RuntimeException(e);
-        }
-        try {
-            return readAsString(is);
-        } finally {
-            closeQuietly(is);
         }
     }
 
@@ -308,17 +302,12 @@ public final class JkUtilsIO {
      * Copies the content of the given url to the specified file.
      */
     public static void copyUrlToFile(URL url, File file) {
-        final InputStream inputStream;
-        final FileOutputStream fileOutputStream;
-        try {
-            inputStream = url.openStream();
-            fileOutputStream = new FileOutputStream(file);
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file);
+                final InputStream inputStream = url.openStream()){
+            copy(inputStream, fileOutputStream);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
-        copy(inputStream, fileOutputStream);
-        closeQuietly(inputStream);
-        closeQuietly(fileOutputStream);
     }
 
     /**
@@ -385,10 +374,8 @@ public final class JkUtilsIO {
      * the specified classloader.
      */
     public static Object deserialize(InputStream inputStream, final ClassLoader classLoader) {
-        final InputStream buffer = new BufferedInputStream(inputStream);
-        ObjectInput input;
-        try {
-            input = new ObjectInputStream(buffer) {
+        try (final InputStream buffer = new BufferedInputStream(inputStream)) {
+            final ObjectInput input = new ObjectInputStream(buffer) {
 
                 @Override
                 protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
@@ -408,16 +395,9 @@ public final class JkUtilsIO {
                 }
 
             };
-        } catch (final IOException e) {
-            closeQuietly(buffer);
-            throw new RuntimeException(e);
-        }
-        try {
             return input.readObject();
-        } catch (final ClassNotFoundException | IOException e) {
+        } catch (final IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
-        } finally {
-            closeQuietly(input);
         }
     }
 

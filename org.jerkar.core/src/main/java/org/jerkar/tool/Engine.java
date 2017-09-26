@@ -244,7 +244,6 @@ final class Engine {
         JkLog.infoHeaded("Executing build for project " + build.baseTree().root().getName());
         JkLog.info("Build class : " + build.getClass().getName());
         JkLog.info("Base dir : " + build.baseTree().root().getPath());
-        JkLog.info("Activated plugins : ????");
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
         if (JkLog.verbose()) {
             JkInit.logProps("Field values", displayedOptions);
@@ -263,7 +262,7 @@ final class Engine {
 
     private static void invoke(JkBuild build, BuildMethod modelMethod, File fromDir) {
         if (modelMethod.isMethodPlugin()) {
-            JkBuildPlugin2 plugin = build.plugins().get(modelMethod.pluginClass());
+            JkBuildPlugin plugin = build.plugins().get(modelMethod.pluginClass());
             build.plugins().invoke(plugin, modelMethod.name());
         } else {
             invoke(build, modelMethod.name(), fromDir);
@@ -309,7 +308,7 @@ final class Engine {
         final List<BuildMethod> buildMethods = new LinkedList<>();
         for (final MethodInvocation methodInvokation : invocations) {
             if (methodInvokation.isMethodPlugin()) {
-                final Class<? extends JkBuildPlugin2> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName)
+                final Class<? extends JkBuildPlugin> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName)
                         .pluginClass();
                 buildMethods.add(BuildMethod.pluginMethod(clazz, methodInvokation.methodName));
             } else {

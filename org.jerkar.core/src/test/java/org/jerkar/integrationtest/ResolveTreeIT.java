@@ -1,13 +1,12 @@
 package org.jerkar.integrationtest;
 
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.Set;
 
-import static org.jerkar.tool.builtins.javabuild.JkJavaBuild.*;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -25,7 +24,7 @@ public class ResolveTreeIT {
                 .on("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0").scope(COMPILE)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkDependencyNode tree = resolver.resolve(deps).dependencyTree();
 
@@ -74,9 +73,9 @@ public class ResolveTreeIT {
                 .on(moduleId, "1.4.+").scope(TEST)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
-        JkDependencyNode tree = resolver.resolve(deps, JkJavaBuild.TEST).dependencyTree();
+        JkDependencyNode tree = resolver.resolve(deps, TEST).dependencyTree();
         System.out.println(tree.toStrings());
         JkDependencyNode.ModuleNodeInfo moduleNodeInfo = tree.find(moduleId).moduleInfo();
         assertTrue(moduleNodeInfo.declaredVersion().definition().equals("1.4.+"));
@@ -94,8 +93,8 @@ public class ResolveTreeIT {
                 .on(springCoreModule, directCoreVersion).scope(COMPILE)  // force a version lower than the transitive above
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
-        JkResolveResult resolveResult = resolver.resolve(deps, JkJavaBuild.COMPILE);
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
+        JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
         JkDependencyNode tree = resolveResult.dependencyTree();
 
         JkDependencyNode bootNode = tree.children().get(0);
@@ -114,12 +113,12 @@ public class ResolveTreeIT {
     @Test
     public void triplePlayAnd() {
         JkDependencies deps = JkDependencies.builder()
-                .usingDefaultScopes(JkJavaBuild.COMPILE_AND_RUNTIME)
+                .usingDefaultScopes(COMPILE_AND_RUNTIME)
                 .on("com.googlecode.playn", "playn-core", "1.4")
                 .on("com.threerings", "tripleplay", "1.4").build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
-        JkResolveResult resolveResult = resolver.resolve(deps, JkJavaBuild.RUNTIME);
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
+        JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
         JkDependencyNode tree = resolveResult.dependencyTree();
         System.out.println(tree.toStringComplete());
         System.out.println(resolveResult.localFiles());

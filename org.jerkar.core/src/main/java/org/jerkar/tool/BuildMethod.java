@@ -34,14 +34,14 @@ final class BuildMethod {
     /**
      * Creates a build method reference that is defined on a plugin.
      */
-    public static BuildMethod pluginMethod(Class<? extends JkBuildPlugin2> pluginClass,
+    public static BuildMethod pluginMethod(Class<? extends JkBuildPlugin> pluginClass,
                                            String methodName) {
         return new BuildMethod(methodName, pluginClass);
     }
 
     private final String methodName;
 
-    private final Class<? extends JkBuildPlugin2> pluginClass;
+    private final Class<? extends JkBuildPlugin> pluginClass;
 
     /**
      * Returns the name of the method.
@@ -54,11 +54,11 @@ final class BuildMethod {
      * Returns the plugin on which this method is defined. Returns
      * <code>null</code> if defined on a build class.
      */
-    public Class<? extends JkBuildPlugin2> pluginClass() {
+    public Class<? extends JkBuildPlugin> pluginClass() {
         return pluginClass;
     }
 
-    private BuildMethod(String methodName, Class<? extends JkBuildPlugin2> pluginClass) {
+    private BuildMethod(String methodName, Class<? extends JkBuildPlugin> pluginClass) {
         super();
         JkUtilsAssert.isTrue(methodName != null && !methodName.isEmpty(),
                 "PluginName can' t be null or empty");

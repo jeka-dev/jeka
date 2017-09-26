@@ -1,103 +1,47 @@
 package org.jerkar.tool;
 
-import java.util.List;
-
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkDependencyResolver;
-
 /**
- * A plugin base class to extend to alter {@link JkBuild} object.
+ * Plugin for {@link JkBuild}.
  *
- * @author Jerome Angibaud
+ * A Jerkar Plugin is a piece of code that can be hooked to {@link JkBuild} instance at runtime.<br/>
+ *
+ * A plugin defines two kinds of hook :
+ * <ul>
+ *     <li>code that modify the {@link JkBuild} instance on which this plugin is applied (code located in {@link #apply(JkBuild)} method)</li>
+ *     <li>code that is exposed as a JkBuild method (code located in any public method taking a #JkBuild as its single argument)</code></li>
+ * </ul>
+ *
+ * To hook a plugin at runtime, you have to invoke Jerkar with argument <i>pluginName#</i> followed by the method name. For
+ * exemple command line <code>jerkar sonarQube#run</code> will invoke the <code>run(JkBuild)</code> method of plugin class JkBuildPluginSonarQube.<br/>
+ * For <code>apply</code> method, one can use <code>jerkar myPlugin#</code> short-hand instead of <code>jerkar myPlugin#apply</code>.
+ * <p>
+ * All plugin class must be named as <code>JkBuildPluginXxxxxx</code> where xxxxxx stands for the plugin name. This
+ * is necessary in order to find plugin class from its name in the classpath.
+ * <p>
+ * A plugin can be configured at runtime by injecting data in its instance fields by passing argument <i>pluginName#</i>
+ * followed by the field name. For example <code>jerkar eclise#generatefiles -eclipse#useVarPath=true</code>.
+ *
+ * <h5>Configuration</h5>
+ * One may need to configure a plugin in the build class itself in order to no mention the configuration in the
+ * command line each time it is invoked. For such build class writer has to instantiate and configure programmatically
+ * in the build class then register it by invoking JkBuild#register(JkBuildPlugin) method.
+ *
+ * <h5>Documentation</h5>
+ * It's highly recommended to annotate plugin class, fields and methods with @{@link JkDoc} annotation in order to
+ * provide self documentation.
+ *
+ * <h5>When to write plugins or not ?</h5>
+ * It makes sense to write plugins for code that will be invoked only time to time. For example for generating IDE
+ * metadata files, launch a sugarQube analysis or perform test coverage measures.<br/>
+ * If a feature is supposed to be permanently used to produce artifacts (as source code generation) it is senseless
+ * as it has to be present programmatically in build class.
+ *
  */
-@Deprecated
-public abstract class JkBuildPlugin {
+public interface JkBuildPlugin {
 
     /**
-     * Returns the class this plugin is made for.
+     * Modify the specified instance in accordance with what this plugin is supposed to do.
      */
-    public Class<? extends JkBuild> baseBuildClass() {
-        return JkBuild.class;
-    }
-
-    /**
-     * Configure this plugin according the build instance it is applied on.
-     */
-    public abstract void configure(JkBuild build);
-
-    /**
-     * Override this method if this plugin does something while
-     * {@link JkBuild#verify} is invoked.
-     */
-    protected void verify() {
-        // Do nothing by default
-    }
-
-    /**
-     * Override this method if this plugin does something while {@link JkBuild#scaffold()}
-     * is invoked.
-     */
-    protected void scaffold() {
-        // Do nothing by default
-    }
-
-    /**
-     * Override this method if this plugin add/remove some slave projects. The original importedBuilds
-     * are passed as parameter so plugins are aware of already declared importedBuilds.
-     * Note that you are not supposed to modify the list passed as parameters and that
-     * the returned list is supposed to be the exhaustive list of slave projects, so if the plugin do not remove
-     * any slave from the original list, the returned list should contains the list passed as parameter.
-     */
-    protected List<JkBuild> slaves(List<JkBuild> originalSlaves) {
-        return originalSlaves;
-    }
-
-    /**
-     * Override this method if this plugin needs to alter the dependency resolver.
-     *
-     * @see JkBuildDependencySupport#dependencyResolver()
-     */
-    protected JkDependencyResolver alterDependencyResolver(JkDependencyResolver original) {
-        return original;
-    }
-
-    /**
-     * Override this method if the plugin need to alter the dependencies.
-     *
-     * @see JkBuildDependencySupport#dependencies
-     */
-    protected JkDependencies alterDependencies(JkDependencies original) {
-        return original;
-    }
-
-
-    static void applyVerify(Iterable<? extends JkBuildPlugin> plugins) {
-        for (final JkBuildPlugin plugin : plugins) {
-            plugin.verify();
-        }
-    }
-
-
-    static JkDependencies applyDependencies(Iterable<? extends JkBuildPlugin> plugins,
-            JkDependencies original) {
-        JkDependencies result = original;
-        for (final JkBuildPlugin plugin : plugins) {
-            result = plugin.alterDependencies(original);
-        }
-        return result;
-    }
-
-    static void applyScaffold(Iterable<? extends JkBuildPlugin> plugins) {
-        for (final JkBuildPlugin plugin : plugins) {
-            plugin.scaffold();
-        }
-    }
-
-
-
-    @Override
-    public String toString() {
-        return this.getClass().getSimpleName() + " : " + JkOptions.fieldOptionsToString(this);
-    }
+    void apply(JkBuild build);
 
 }

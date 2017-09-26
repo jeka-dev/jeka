@@ -101,8 +101,8 @@ public class JkDependencyExclusions {
          */
         public JkDependencyExclusions build() {
             final Map<JkModuleId, List<JkDepExclude>> map = new HashMap<>();
-            for (final JkModuleId moduleId : exclusions.keySet()) {
-                map.put(moduleId, Collections.unmodifiableList(exclusions.get(moduleId)));
+            for (final Map.Entry<JkModuleId, List<JkDepExclude>> entry : exclusions.entrySet()) {
+                map.put(entry.getKey(), Collections.unmodifiableList(entry.getValue()));
             }
             return new JkDependencyExclusions(map);
         }

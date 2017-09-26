@@ -84,9 +84,6 @@ public final class JkManifest {
         return of(manifestFile);
     }
 
-
-
-
     /**
      * Creates a <code>JkManifest</code> from the specified input stream. The
      * specified stream is supposed to contains manifest information as present
@@ -102,14 +99,13 @@ public final class JkManifest {
      * if no manifest found.
      */
     public static JkManifest ofArchive(File archive) {
-        final InputStream inputStream = JkUtilsZip.readZipEntryOrNull(archive, PATH);
-        if (inputStream == null) {
-            return null;
-        }
-        try {
+        try (final InputStream inputStream = JkUtilsZip.readZipEntryOrNull(archive, PATH)) {
+            if (inputStream == null) {
+                return null;
+            }
             return JkManifest.of(inputStream);
-        } finally {
-            JkUtilsIO.closeQuietly(inputStream);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
         }
     }
 
@@ -211,15 +207,12 @@ public final class JkManifest {
         JkUtilsAssert.isTrue(file.exists(), JkUtilsFile.canonicalPath(file) + " not found.");
         JkUtilsAssert.isTrue(file.isFile(), JkUtilsFile.canonicalPath(file) + " is directory : need file.");
         final Manifest manifest = new Manifest();
-        FileInputStream is = null;
-        try {
-            is = new FileInputStream(file);
+
+        try (FileInputStream is = new FileInputStream(file)){
             manifest.read(is);
             return manifest;
         } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
-        } finally {
-            JkUtilsIO.closeQuietly(is);
         }
     }
 
@@ -238,14 +231,10 @@ public final class JkManifest {
      */
     public void writeTo(File file) {
         JkUtilsFile.createFileIfNotExist(file);
-        OutputStream outputStream = null;
-        try {
-            outputStream = new FileOutputStream(file);
+        try (OutputStream outputStream = new FileOutputStream(file)){
             manifest.write(outputStream);
         } catch (final IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            JkUtilsIO.closeQuietly(outputStream);
         }
     }
 

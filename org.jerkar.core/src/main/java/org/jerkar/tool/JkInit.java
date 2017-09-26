@@ -55,7 +55,6 @@ public final class JkInit {
             throw new JkException("No build class found for engine located at : " + base.getPath());
         }
         JkLog.info("Build class " + result.getClass().getName());
-        JkLog.info("Activated plugins : ???"); // TODO
         return result;
     }
 
@@ -85,7 +84,6 @@ public final class JkInit {
         }
         init.initProject(build);
         JkLog.info("Build class " + build.getClass().getName());
-        JkLog.info("Activated plugins : ?????");  // TODO
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
         if (JkLog.verbose()) {
             JkInit.logProps("Field values", displayedOptions);
@@ -193,7 +191,7 @@ public final class JkInit {
         build.init();
 
         // setup plugins activated in command line
-        final Class<JkBuildPlugin2> baseClass = JkClassLoader.of(build.getClass()).load(JkBuildPlugin2.class.getName());
+        final Class<JkBuildPlugin> baseClass = JkClassLoader.of(build.getClass()).load(JkBuildPlugin.class.getName());
         final PluginDictionnary dictionnary = new PluginDictionnary();
         final List<JkBuild> importedBuilds = build.importedBuilds().all();
         if (!importedBuilds.isEmpty()) {
@@ -238,10 +236,10 @@ public final class JkInit {
     private static void configureAndActivatePlugins(JkBuild build, Collection<JkPluginSetup> pluginSetups,
             PluginDictionnary dictionnary) {
         for (final JkPluginSetup pluginSetup : pluginSetups) {
-            final Class<? extends JkBuildPlugin2> pluginClass = dictionnary.loadByNameOrFail(pluginSetup.pluginName)
+            final Class<? extends JkBuildPlugin> pluginClass = dictionnary.loadByNameOrFail(pluginSetup.pluginName)
                     .pluginClass();
             JkLog.startln("Configuring plugin " + pluginClass.getName());
-            final JkBuildPlugin2 plugin = build.plugins().getOrCreate(pluginClass, pluginSetup.options);
+            final JkBuildPlugin plugin = build.plugins().getOrCreate(pluginClass, pluginSetup.options);
             JkLog.done("Configuring plugin " + pluginClass.getName() + " with options "
                     + JkOptions.fieldOptionsToString(plugin));
             if (pluginSetup.activated) {

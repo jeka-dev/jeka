@@ -1,6 +1,7 @@
 package org.jerkar.tool;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
@@ -11,10 +12,7 @@ import java.util.Scanner;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkModuleDependency;
 import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.api.utils.*;
 
 /*
  * Without doubt, the most crappy code of this project.
@@ -38,13 +36,14 @@ final class JavaSourceParser {
     }
 
     static JavaSourceParser of(File baseDir, URL codeUrl) {
-        final InputStream inputStream = JkUtilsIO.inputStream(codeUrl);
-        final String uncomentedCode = removeComments(inputStream);
-        final JkDependencies deps = dependencies(uncomentedCode, baseDir, codeUrl);
-        final List<File> projects = projects(uncomentedCode, baseDir, codeUrl);
-        final JavaSourceParser result = new JavaSourceParser(deps, repos(uncomentedCode, codeUrl), projects);
-        JkUtilsIO.closeQuietly(inputStream);
-        return result;
+        try (final InputStream inputStream = JkUtilsIO.inputStream(codeUrl)) {
+            final String uncomentedCode = removeComments(inputStream);
+            final JkDependencies deps = dependencies(uncomentedCode, baseDir, codeUrl);
+            final List<File> projects = projects(uncomentedCode, baseDir, codeUrl);
+            return new JavaSourceParser(deps, repos(uncomentedCode, codeUrl), projects);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
     }
 
     private final JkDependencies dependencies;
@@ -139,24 +138,26 @@ final class JavaSourceParser {
 
     @SuppressWarnings("unchecked")
     private static List<String> stringsInAnnotation(String code, Class<?> annotationClass, URL url) {
-        final Scanner scanner = new Scanner(code);
-        scanner.useDelimiter("");
-        List<String> result = new LinkedList<>();
-        while (scanner.hasNext()) {
-            final String jkImportWord = scanner.findInLine("@" + annotationClass.getSimpleName());
-            if (jkImportWord == null) {
-                final String nextLine = scanner.nextLine();
-                if (removeQuotes(nextLine).contains("class ")) {
-                    return Collections.EMPTY_LIST;
+        final List<String> result = new LinkedList<>();
+        try (final Scanner scanner = new Scanner(code)){
+            scanner.useDelimiter("");
+
+            while (scanner.hasNext()) {
+                final String jkImportWord = scanner.findInLine("@" + annotationClass.getSimpleName());
+                if (jkImportWord == null) {
+                    final String nextLine = scanner.nextLine();
+                    if (removeQuotes(nextLine).contains("class ")) {
+                        return Collections.EMPTY_LIST;
+                    }
+                    continue;
                 }
-                continue;
+                final String context = " parsing @" + annotationClass.getSimpleName();
+                final String between = extractStringTo(scanner, "(", url, context);
+                if (!containsOnly(between, " ", "\n", "\r", "\t")) {
+                    continue;
+                }
+                result.addAll(scanInsideAnnotation(scanner, url, context));
             }
-            final String context = " parsing @" + annotationClass.getSimpleName();
-            final String between = extractStringTo(scanner, "(", url, context);
-            if (!containsOnly(between, " ", "\n", "\r", "\t")) {
-                continue;
-            }
-            result.addAll(scanInsideAnnotation(scanner, url, context));
         }
         return result;
     }

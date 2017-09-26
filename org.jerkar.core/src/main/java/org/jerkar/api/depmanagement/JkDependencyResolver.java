@@ -27,23 +27,6 @@ import org.jerkar.api.utils.JkUtilsIterable;
 public final class JkDependencyResolver {
 
     /**
-     * @Deprecated use {@link #of(JkRepos)} instead
-     */
-    @Deprecated
-    public static JkDependencyResolver managed(JkRepos repos) {
-        final InternalDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
-        return new JkDependencyResolver(ivyResolver,  null, null, repos);
-    }
-
-    /**
-     * @Deprecated use {@link #of(JkRepo...)} with empty args instead.
-     */
-    @Deprecated
-    public static JkDependencyResolver unmanaged() {
-        return new JkDependencyResolver(null, null, null,  JkRepos.empty());
-    }
-
-    /**
      * Creates a dependency resolver fetching module dependencies in the specified repos. If
      * the specified JkRepo contains no {@link JkRepo} then the created.
      */
@@ -166,18 +149,6 @@ public final class JkDependencyResolver {
         JkLog.done();
         return resolveResult;
     }
-
-
-
-    /**
-     * Creates a duplicate of this object but having the specified version provider. By setting a version provider,
-     * you can force the version dependency resolver will fetch while resolving transitive dependencies.
-     */
-    public JkDependencyResolver withVersions(JkVersionProvider versionProvider) {
-        return new JkDependencyResolver(this.internalResolver, this.module,
-                this.parameters, this.repos);
-    }
-
 
     /**
      * The underlying dependency manager can cache the resolution on file system

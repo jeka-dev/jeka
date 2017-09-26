@@ -7,7 +7,6 @@ import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.samples.AClassicBuild;
 import org.jerkar.tool.JkImportBuild;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 
 /**

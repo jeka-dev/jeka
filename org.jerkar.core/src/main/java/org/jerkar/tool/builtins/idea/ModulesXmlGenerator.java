@@ -12,9 +12,6 @@ import javax.xml.stream.XMLStreamWriter;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
-/**
- * Created by angibaudj on 14-03-17.
- */
 class ModulesXmlGenerator {
 
     private static final String ENCODING = "UTF-8";

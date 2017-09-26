@@ -35,13 +35,10 @@ public final class JkUtilsZip {
         private long size;
 
         CrcAndSize(File file) {
-            final FileInputStream inputStream = JkUtilsIO.inputStream(file);
-            try {
+            try (final FileInputStream inputStream = JkUtilsIO.inputStream(file)){
                 load(inputStream);
             } catch (final IOException e) {
                 JkUtilsThrowable.unchecked(e);
-            } finally {
-                JkUtilsIO.closeQuietly(inputStream);
             }
         }
 
@@ -87,11 +84,10 @@ public final class JkUtilsZip {
      */
     public static void unzip(File zip, File directory) {
         final byte[] buffer = new byte[1024];
-        try {
+        try (final ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))){
             if (!directory.exists()) {
                 directory.mkdirs();
             }
-            final ZipInputStream zis = new ZipInputStream(new FileInputStream(zip));
             ZipEntry ze = zis.getNextEntry();
             while (ze != null) {
                 final String fileName = ze.getName();
@@ -101,12 +97,12 @@ public final class JkUtilsZip {
                 } else {
                     newFile.getParentFile().mkdirs();
                     newFile.createNewFile();
-                    final FileOutputStream fos = new FileOutputStream(newFile);
-                    int len;
-                    while ((len = zis.read(buffer)) > 0) {
-                        fos.write(buffer, 0, len);
+                    try (final FileOutputStream fos = new FileOutputStream(newFile)) {
+                        int len;
+                        while ((len = zis.read(buffer)) > 0) {
+                            fos.write(buffer, 0, len);
+                        }
                     }
-                    fos.close();
                 }
                 ze = zis.getNextEntry();
             }
@@ -205,19 +201,16 @@ public final class JkUtilsZip {
             if (!filter.accept(entryName)) {
                 return;
             }
-            final FileInputStream inputStream;
-            try {
-                inputStream = new FileInputStream(filePathToZip);
-            } catch (final FileNotFoundException e) {
-                throw new IllegalStateException(e);
+            try (final FileInputStream inputStream = new FileInputStream(filePathToZip)){
+                if (storeMethod) {
+                    final CrcAndSize crcAndSize = new CrcAndSize(fileOrFolderToZip);
+                    addEntryInputStream(zos, entryName, inputStream, true, crcAndSize);
+                } else {
+                    addEntryInputStream(zos, entryName, inputStream, false, null);
+                }
+            } catch (final IOException e) {
+                throw JkUtilsThrowable.unchecked(e);
             }
-            if (storeMethod) {
-                final CrcAndSize crcAndSize = new CrcAndSize(fileOrFolderToZip);
-                addEntryInputStream(zos, entryName, inputStream, true, crcAndSize);
-            } else {
-                addEntryInputStream(zos, entryName, inputStream, false, null);
-            }
-            JkUtilsIO.closeQuietly(inputStream);
         }
     }
 
@@ -298,22 +291,6 @@ public final class JkUtilsZip {
     }
 
     /**
-     * Creates a {@link ZipOutputStream} to a given file (existing or not).
-     */
-    public static ZipOutputStream createZipOutputStream(File file, int compressLevel) {
-        try {
-            JkUtilsFile.createFileIfNotExist(file);
-            final FileOutputStream fos = new FileOutputStream(file);
-            final ZipOutputStream zos = new ZipOutputStream(fos);
-            zos.setLevel(compressLevel);
-            return zos;
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    /**
      * Reads the specified zip stream and position it at the beginning of the
      * specified entry. The specified entry is case insensitive. An exception is
      * thrown if no such entry exist.
@@ -329,15 +306,14 @@ public final class JkUtilsZip {
     }
 
     /**
-     * As {@link #readZipEntry(File, String)} but returns <code>null</code> instead of throwing an exception
+     * As {@link #readZipEntry(InputStream, String)} )} but returns <code>null</code> instead of throwing an exception
      * if no such entry exist.
      */
     public static ZipInputStream readZipEntryOrNull(File zipFile, String caseInsensitiveEntryName) {
-        final FileInputStream fileInputStream = JkUtilsIO.inputStream(zipFile);
-        try {
+        try (final FileInputStream fileInputStream = JkUtilsIO.inputStream(zipFile)) {
             return readZipEntryOrNull(fileInputStream, caseInsensitiveEntryName);
-        } finally {
-            JkUtilsIO.closeQuietly(fileInputStream);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
         }
     }
 
@@ -419,4 +395,5 @@ public final class JkUtilsZip {
         boolean accept(String entryName);
 
     }
+
 }

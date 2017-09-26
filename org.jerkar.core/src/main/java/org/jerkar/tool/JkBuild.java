@@ -1,6 +1,7 @@
 package org.jerkar.tool;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.time.Instant;
@@ -15,12 +16,7 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsObject;
-import org.jerkar.api.utils.JkUtilsReflect;
-import org.jerkar.api.utils.JkUtilsXml;
+import org.jerkar.api.utils.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -221,9 +217,11 @@ public class JkBuild {
                 JkUtilsXml.output(document, System.out);
             } else {
                 JkUtilsFile.createFileIfNotExist(help.xmlFile);
-                final OutputStream os = JkUtilsIO.outputStream(help.xmlFile, false);
-                JkUtilsXml.output(document, os);
-                JkUtilsIO.closeQuietly(os);
+                try (final OutputStream os = JkUtilsIO.outputStream(help.xmlFile, false)) {
+                    JkUtilsXml.output(document, os);
+                } catch (IOException e) {
+                    throw JkUtilsThrowable.unchecked(e);
+                }
                 JkLog.info("Xml help file generated at " + help.xmlFile.getPath());
             }
         } else {
@@ -296,6 +294,12 @@ public class JkBuild {
                 File currentClassBaseDir = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
                 while (!new File(currentClassBaseDir, "build/def").exists() && currentClassBaseDir != null) {
                     currentClassBaseDir = currentClassBaseDir.getParentFile();
+                }
+                if (currentClassBaseDir == null) {
+                    throw new IllegalStateException("Can't inject slave build instance of type " + subBuild.getClass().getSimpleName()
+                            + " into field " + field.getDeclaringClass().getName()
+                            + "#" + field.getName() + " from directory " + this.baseTree().root()
+                            + " while working dir is " + JkUtilsFile.workingDir());
                 }
                 throw new IllegalStateException("Can't inject slave build instance of type " + subBuild.getClass().getSimpleName()
                         + " into field " + field.getDeclaringClass().getName()

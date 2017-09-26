@@ -6,11 +6,8 @@ import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.plugins.jacoco.JkBuildPlugin2Jacoco;
-import org.jerkar.plugins.sonar.JkBuildPlugin2Sonar;
+import org.jerkar.plugins.sonar.JkBuildPluginSonar;
 import org.jerkar.plugins.sonar.JkSonar;
-import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkBuildPlugin2;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
@@ -34,13 +31,13 @@ public class SonarPluginBuild extends JkJavaProjectBuild {
 
     @Override
     public void init() {
-        this.plugins().configure(new JkBuildPlugin2Sonar()
+        this.plugins().configure(new JkBuildPluginSonar()
                 //     .prop(JkSonar.HOST_URL, sonarEnv.url)
                 .prop(JkSonar.BRANCH, "myBranch"));
     }
 
     public void runSonar() {
-        this.plugins().get(JkBuildPlugin2Sonar.class).verify(this);
+        this.plugins().get(JkBuildPluginSonar.class).run(this);
     }
 
     enum SonarEnv {

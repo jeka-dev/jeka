@@ -149,7 +149,7 @@ public class JkDependencyNode implements Serializable {
 
     private Set<JkVersionedModule> resolvedModules(boolean root) {
         final Set<JkVersionedModule> result = new HashSet<>();
-        if (!root & this.isModuleNode() && !this.moduleInfo().isEvicted()) {
+        if (!root && this.isModuleNode() && !this.moduleInfo().isEvicted()) {
             result.add(this.moduleInfo().moduleId.version(this.moduleInfo().resolvedVersion.name()));
         }
         for (final JkDependencyNode child : this.children) {
@@ -295,7 +295,7 @@ public class JkDependencyNode implements Serializable {
         return this.nodeInfo().toString();
     }
 
-    public interface NodeInfo {
+    public interface NodeInfo extends Serializable {
 
         List<File> files();
 

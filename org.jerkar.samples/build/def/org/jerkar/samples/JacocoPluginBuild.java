@@ -3,14 +3,9 @@ package org.jerkar.samples;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.plugins.jacoco.JkBuildPlugin2Jacoco;
-import org.jerkar.plugins.sonar.JkBuildPlugin2Sonar;
-import org.jerkar.plugins.sonar.JkSonar;
-import org.jerkar.tool.JkDoc;
+import org.jerkar.plugins.jacoco.JkBuildPluginJacoco;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
-
-import java.io.File;
 
 import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
 import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
@@ -30,7 +25,7 @@ public class JacocoPluginBuild extends JkJavaProjectBuild {
 
     @Override
     protected void setupPlugins() {
-        new JkBuildPlugin2Jacoco().apply(this);
+        new JkBuildPluginJacoco().apply(this);
     }
 
     public static void main(String[] args) {

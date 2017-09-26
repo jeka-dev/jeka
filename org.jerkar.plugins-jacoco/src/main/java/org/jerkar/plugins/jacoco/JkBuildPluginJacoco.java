@@ -1,53 +1,24 @@
 package org.jerkar.plugins.jacoco;
 
-import org.jerkar.api.java.junit.JkUnit;
+import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkBuildPlugin;
 import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuildPlugin;
+import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 
-import java.io.File;
-import java.util.function.UnaryOperator;
+@JkDoc("Modify JkJavaProject in order it runs unit tests with Jacoco agent coverage test tool. " +
+        "It results is production of a coverage report file.")
+public class JkBuildPluginJacoco implements JkBuildPlugin {
 
-/**
- * Alter the unitTester to be launched with the Jacoco agent. It results in
- * producing a jacoco.exec test coverage report file.
- *
- * @author Jerome Angibaud
- */
-@JkDoc("Performs Jacoco code coverage analysing while junit is running.")
-public class JkBuildPluginJacoco extends JkJavaBuildPlugin {
-
-    @JkDoc("true to produce an html report along the binary report")
-    private boolean produceHtml;
-
-    private UnaryOperator<JkUnit> enhancer;
-
-    public static UnaryOperator<JkUnit> enhancer(JkJavaBuild jkJavaBuild, boolean produceHtmlReport) {
-        return enhancer(jkJavaBuild, jkJavaBuild.baseTree().root(), produceHtmlReport);
-    }
-
-    private static UnaryOperator<JkUnit> enhancer(JkJavaBuild jkJavaBuild, File agent, boolean html) {
-        final File destFile = new File(jkJavaBuild.testReportDir(), "jacoco/jacoco.exec");
-        if (html) {
-            throw new IllegalStateException("Sorry, not implemented yet. Please, turn off produceHtml flag.");
+    @Override
+    public void apply(JkBuild build) {
+        if (! (build instanceof JkJavaProjectBuild)) {
+            return;
         }
-        return JkocoJunitEnhancer.of(destFile);
+        final JkJavaProject project = ((JkJavaProjectBuild) build).project();
+        final JkocoJunitEnhancer junitEnhancer = JkocoJunitEnhancer.of(project.getOutLayout()
+              .outputFile("jacoco/jacoco.exec"));
+        project.maker().setJuniter( junitEnhancer.apply( project.maker().getJuniter()) );
     }
-
-    @Override
-    public void configure(JkBuild jkJavaBuild) {
-        this.enhancer = enhancer((JkJavaBuild) jkJavaBuild, produceHtml);
-    }
-
-    @Override
-    public JkUnit alterUnitTester(JkUnit jkUnit) {
-        return this.enhancer.apply(jkUnit);
-    }
-
-    public JkBuildPluginJacoco produceHtmlReport(boolean flag) {
-        this.produceHtml = flag;
-        return this;
-    }
-
+    
 }

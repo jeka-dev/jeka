@@ -268,15 +268,13 @@ final class IvyPublisherForMaven {
 
     private void push(MavenMetadata metadata, String path) {
         final File file = JkUtilsFile.tempFile("metadata-", ".xml");
-        FileOutputStream outputStream;
-        try {
-            outputStream = new FileOutputStream(file);
+
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
             metadata.output(outputStream);
             outputStream.flush();
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw JkUtilsThrowable.unchecked(e);
         }
-        JkUtilsIO.closeQuietly(outputStream);
         putAll(file, path, true);
     }
 

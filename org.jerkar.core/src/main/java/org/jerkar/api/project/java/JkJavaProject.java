@@ -30,7 +30,7 @@ import org.jerkar.api.project.JkProjectSourceLayout;
  * <ul>
  *     <li>Contains Java source files to be compiled</li>
  *     <li>All Java sources file (prod + test) are wriiten against the same Java version and encoding</li>
- *     <li>Project may contain unit tests</li>
+ *     <li>JkEclipseProject may contain unit tests</li>
  *     <li>It can depends on any accepted dependencies (Maven module, other project, files on fs, ...)</li>
  *
  *     <li>It produces a jar a source jar and a javadoc jar</li>
@@ -113,7 +113,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
     }
 
     /**
-     * Project will produces one artifact file for test binaries and one for test sources.
+     * JkEclipseProject will produces one artifact file for test binaries and one for test sources.
      */
     public JkJavaProject addTestArtifactFiles() {
         this.maker.addArtifactFile(TEST_FILE_ID, () -> this.maker.makeTestJar());
@@ -123,7 +123,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     /**
      * Convenient method.
-     * Project will produces one artifact file for fat jar having the specified name.
+     * JkEclipseProject will produces one artifact file for fat jar having the specified name.
      */
     public JkJavaProject addFatJarArtifactFile(String classifier) {
         this.maker().addArtifactFile(JkArtifactFileId.of(classifier, "jar"),

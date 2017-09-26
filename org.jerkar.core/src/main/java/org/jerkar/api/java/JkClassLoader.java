@@ -169,7 +169,7 @@ public final class JkClassLoader {
             } else if (entry instanceof File) {
                 files.add((File) entry);
             } else {
-                new IllegalArgumentException("This method only accept File and URL, not "
+                throw new IllegalArgumentException("This method only accept File and URL, not "
                         + entry.getClass().getName());
             }
         }
@@ -322,7 +322,7 @@ public final class JkClassLoader {
             final Set<Class<?>> classes = loadClasses("**/" + name);
             for (final Class<?> clazz : classes) {
                 if (clazz.getSimpleName().equals(name) && superClass == null
-                        || superClass.isAssignableFrom(clazz)) {
+                        || superClass != null && superClass.isAssignableFrom(clazz)) {
                     return (Class<? extends T>) clazz;
 
                 }

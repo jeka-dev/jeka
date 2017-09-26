@@ -71,7 +71,7 @@ public class JkEclipseClasspathGeneratorTest {
 
         JkJavaProject baseProject2 = new JkJavaProject(base);
         JkUtilsFile.writeString(new File(base, ".classpath"), baseClasspath, false);
-        Project.ofJavaNature("base").writeTo(new File(base, ".project"));
+        JkEclipseProject.ofJavaNature("base").writeTo(new File(base, ".project"));
         classpathApplier.apply(baseProject2);
         JkProjectSourceLayout base2Layout = baseProject2.getSourceLayout();
         JkProjectSourceLayout baseLayout = baseProject.getSourceLayout();
@@ -86,7 +86,7 @@ public class JkEclipseClasspathGeneratorTest {
 
         JkJavaProject coreProject2 = new JkJavaProject(core);
         JkUtilsFile.writeString(new File(core, ".classpath"), coreClasspath, false);
-        Project.ofJavaNature("core").writeTo(new File(core, ".project"));
+        JkEclipseProject.ofJavaNature("core").writeTo(new File(core, ".project"));
         classpathApplier.apply(coreProject2);
         List<JkScopedDependency> coreDeps2 = coreProject2.getDependencies().list();
         assertEquals(1, coreDeps2.size());

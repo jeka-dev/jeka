@@ -38,24 +38,23 @@ import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.JkUtilsThrowable;
 
 final class PgpUtils {
 
     private static final int HASH_ALGO = PGPUtil.SHA1;
 
     public static boolean verify(File fileToVerify, File pubringFile, File signatureFile) {
-        final InputStream streamToVerify = JkUtilsIO.inputStream(fileToVerify);
-        final InputStream signatureStream = JkUtilsIO.inputStream(signatureFile);
-        final InputStream pubringStream = JkUtilsIO.inputStream(pubringFile);
-        try {
+
+        try (final InputStream streamToVerify = JkUtilsIO.inputStream(fileToVerify);
+             final InputStream signatureStream = JkUtilsIO.inputStream(signatureFile);
+             final InputStream pubringStream = JkUtilsIO.inputStream(pubringFile)) {
             return verify(streamToVerify, signatureStream, pubringStream);
         } catch (final IOException | PGPException e) {
-            throw new RuntimeException(e);
+            throw JkUtilsThrowable.unchecked(e);
         } catch (final IllegalArgumentException e) {
             throw new IllegalArgumentException("Error with one of this file : signatureFile = "
                     + signatureFile.getPath());
-        } finally {
-            JkUtilsIO.closeQuietly(streamToVerify, signatureStream, pubringStream);
         }
     }
 
@@ -100,13 +99,15 @@ final class PgpUtils {
     public static void sign(File fileToSign, File secringFile, File signatureFile, char[] pass,
             boolean armor) {
         JkUtilsFile.assertAllExist(fileToSign, secringFile);
-        final InputStream toSign = JkUtilsIO.inputStream(fileToSign);
-        final InputStream keyRing = JkUtilsIO.inputStream(secringFile);
-        final FileOutputStream out = JkUtilsIO.outputStream(signatureFile, false);
-        sign(toSign, keyRing, out, pass, armor);
-        JkUtilsIO.closeQuietly(toSign);
-        JkUtilsIO.closeQuietly(keyRing);
-        JkUtilsIO.closeQuietly(out);
+        try (final InputStream toSign = JkUtilsIO.inputStream(fileToSign);
+            final InputStream keyRing = JkUtilsIO.inputStream(secringFile);
+            final FileOutputStream out = JkUtilsIO.outputStream(signatureFile, false)) {
+
+            sign(toSign, keyRing, out, pass, armor);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
+
     }
 
     public static void sign(InputStream toSign, InputStream keyRing, OutputStream out, char[] pass,
@@ -139,12 +140,12 @@ final class PgpUtils {
             signatureGenerator.generate().encode(bcpgOut);
             out.close();
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw JkUtilsThrowable.unchecked(e);
         } catch (final PGPException e) {
             if (e.getMessage().equals("checksum mismatch at 0 of 20")) {
                 throw new IllegalStateException("Secret key password is probably wrong.", e);
             }
-            throw new RuntimeException(e);
+            throw JkUtilsThrowable.unchecked(e);
         }
     }
 
@@ -167,7 +168,7 @@ final class PgpUtils {
         try {
             decodedInput = PGPUtil.getDecoderStream(inputStream);
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw JkUtilsThrowable.unchecked(e);
         }
         final KeyFingerPrintCalculator fingerPrintCalculator = new JcaKeyFingerprintCalculator();
         final InnerPGPObjectFactory pgpFact = new InnerPGPObjectFactory(decodedInput,
@@ -195,7 +196,7 @@ final class PgpUtils {
             try {
                 tag = in.nextPacketTag();
             } catch (final IOException e1) {
-                throw new RuntimeException(e1);
+                throw JkUtilsThrowable.unchecked(e1);
             }
             if (tag == -1) {
                 return null;
@@ -203,9 +204,9 @@ final class PgpUtils {
                 try {
                     return new PGPSecretKeyRing(in, fingerPrintCalculator);
                 } catch (final PGPException e) {
-                    throw new RuntimeException("can't create secret key object: " + e);
+                    throw JkUtilsThrowable.unchecked(e, "Can't create secret key object.");
                 } catch (final IOException e) {
-                    throw new RuntimeException(e);
+                    throw JkUtilsThrowable.unchecked(e);
                 }
             } else {
                 throw new IllegalArgumentException(
@@ -214,6 +215,10 @@ final class PgpUtils {
             }
         }
 
+    }
+
+    private PgpUtils() {
+        // Do nothing
     }
 
 }

@@ -1,19 +1,13 @@
 package org.jerkar.api.file;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.*;
 
 /**
  * Provides a view on files and sub-folders contained in a given directory. A
@@ -339,9 +333,11 @@ public final class JkFileTree implements Iterable<File> {
      */
     public JkFileTree mergeTo(File target) {
         JkUtilsFile.createFileIfNotExist(target);
-        final FileOutputStream outputStream = JkUtilsIO.outputStream(target, true);
-        mergeTo(outputStream);
-        JkUtilsIO.closeQuietly(outputStream);
+        try (final FileOutputStream outputStream = JkUtilsIO.outputStream(target, true)) {
+            mergeTo(outputStream);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
         return this;
     }
 
@@ -350,9 +346,11 @@ public final class JkFileTree implements Iterable<File> {
      */
     public JkFileTree mergeTo(OutputStream outputStream) {
         for (final File file : this) {
-            final FileInputStream fileInputStream = JkUtilsIO.inputStream(file);
-            JkUtilsIO.copy(fileInputStream, outputStream);
-            JkUtilsIO.closeQuietly(fileInputStream);
+            try (final FileInputStream fileInputStream = JkUtilsIO.inputStream(file)) {
+                JkUtilsIO.copy(fileInputStream, outputStream);
+            } catch (IOException e) {
+                throw JkUtilsThrowable.unchecked(e);
+            }
         }
         return this;
     }

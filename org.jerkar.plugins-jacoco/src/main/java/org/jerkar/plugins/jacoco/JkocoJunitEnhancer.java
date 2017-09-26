@@ -13,6 +13,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
+/**
+ * Enhancer to configure JkUnit such it performs Jacoco code coverage while it runs unit tests.
+ */
 public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
 
     private final File agent;

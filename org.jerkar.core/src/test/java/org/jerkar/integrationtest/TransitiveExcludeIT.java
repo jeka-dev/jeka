@@ -1,13 +1,13 @@
 package org.jerkar.integrationtest;
 
 import org.jerkar.api.depmanagement.*;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Test;
 
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 
 /**
  * Created by angibaudj on 27-07-17.
@@ -21,7 +21,7 @@ public class TransitiveExcludeIT {
                 .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").transitive(false)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps);
         List<JkDependencyNode> nodes = resolveResult.dependencyTree().flatten();
         assertEquals(1, nodes.size());
@@ -35,7 +35,7 @@ public class TransitiveExcludeIT {
                         .excludeLocally("org.springframework.boot:spring-boot-test-autoconfigure")
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps);
         List<JkDependencyNode> nodes = resolveResult.dependencyTree().flatten();
         assertFalse(resolveResult.contains(JkModuleId.of("org.springframework.boot:spring-boot-test")));
@@ -43,14 +43,14 @@ public class TransitiveExcludeIT {
 
     @Test
     public void handleGlobalExcludes() {
-        JkDepExclude exclude = JkDepExclude.of("org.springframework.boot:spring-boot-test").scopes(JkJavaBuild.COMPILE);
+        JkDepExclude exclude = JkDepExclude.of("org.springframework.boot:spring-boot-test").scopes(COMPILE);
         JkDependencies deps = JkDependencies.builder()
-                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").scope(JkJavaBuild.COMPILE)
+                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").scope(COMPILE)
                 .excludeGlobally(exclude)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
-        JkResolveResult resolveResult = resolver.resolve(deps, JkJavaBuild.COMPILE);  // works with non empty scopes resolution
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
+        JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);  // works with non empty scopes resolution
         assertFalse(resolveResult.contains(JkModuleId.of("org.springframework.boot:spring-boot-test")));
 
         resolveResult = resolver.resolve(deps);  // works also with empty socpes resolution
@@ -60,11 +60,11 @@ public class TransitiveExcludeIT {
 
         exclude = JkDepExclude.of("org.springframework.boot:spring-boot-test");
         deps = JkDependencies.builder()
-                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").scope(JkJavaBuild.COMPILE)
+                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").scope(COMPILE)
                 .excludeGlobally(exclude)
                 .build();
         resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING));
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
         resolveResult = resolver.resolve(deps);  // works with non empty scopes resolution
         assertFalse(resolveResult.contains(JkModuleId.of("org.springframework.boot:spring-boot-test")));
         resolveResult = resolver.resolve(deps);  // works also with empty socpes resolution

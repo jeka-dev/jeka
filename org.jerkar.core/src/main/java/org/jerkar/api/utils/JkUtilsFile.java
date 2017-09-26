@@ -184,14 +184,10 @@ public final class JkUtilsFile {
      */
     public static Properties readPropertyFile(File propertyfile) {
         final Properties props = new Properties();
-        FileInputStream fileInputStream = null;
-        try {
-            fileInputStream = new FileInputStream(propertyfile);
+        try (FileInputStream fileInputStream = new FileInputStream(propertyfile)){
             props.load(fileInputStream);
         } catch (final Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            JkUtilsIO.closeQuietly(fileInputStream);
+            throw JkUtilsThrowable.unchecked(e);
         }
         return props;
     }
@@ -209,20 +205,22 @@ public final class JkUtilsFile {
      * Returns the content of the specified file as a string.
      */
     public static String read(File file) {
-        final FileInputStream fileInputStream = JkUtilsIO.inputStream(file);
-        final String result = JkUtilsIO.readAsString(fileInputStream);
-        JkUtilsIO.closeQuietly(fileInputStream);
-        return result;
+        try (final FileInputStream fileInputStream = JkUtilsIO.inputStream(file)) {
+            return JkUtilsIO.readAsString(fileInputStream);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
     }
 
     /**
      * Returns the content of the specified file as a list of string.
      */
     public static List<String> readLines(File file) {
-        final FileInputStream fileInputStream = JkUtilsIO.inputStream(file);
-        final List<String> result = JkUtilsIO.readAsLines(fileInputStream);
-        JkUtilsIO.closeQuietly(fileInputStream);
-        return result;
+        try (final FileInputStream fileInputStream = JkUtilsIO.inputStream(file)) {
+            return JkUtilsIO.readAsLines(fileInputStream);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
     }
 
     /**
@@ -264,23 +262,21 @@ public final class JkUtilsFile {
         if (from.isDirectory()) {
             throw new IllegalArgumentException(from.getPath() + " is a directory. Should be a file.");
         }
-        try {
-            final InputStream in = new FileInputStream(from);
+        try (final InputStream in = new FileInputStream(from); final OutputStream out = new FileOutputStream(toFile)){
+
             if (!toFile.getParentFile().exists()) {
                 toFile.getParentFile().mkdirs();
             }
             if (!toFile.exists()) {
                 toFile.createNewFile();
             }
-            final OutputStream out = new FileOutputStream(toFile);
+
 
             final byte[] buf = new byte[1024];
             int len;
             while ((len = in.read(buf)) > 0) {
                 out.write(buf, 0, len);
             }
-            in.close();
-            out.close();
         } catch (final IOException e) {
             throw new RuntimeException(
                     "IO exception occured while copying file " + from.getPath() + " to " + toFile.getPath(), e);
@@ -482,9 +478,9 @@ public final class JkUtilsFile {
     public static void writeString(File file, String content, boolean append) {
         try {
             createFileIfNotExist(file);
-            final FileWriter fileWriter = new FileWriter(file, append);
-            fileWriter.append(content);
-            fileWriter.close();
+            try (final FileWriter fileWriter = new FileWriter(file, append)) {
+                fileWriter.append(content);
+            }
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
@@ -508,11 +504,14 @@ public final class JkUtilsFile {
      * Inserts the appender file at the end of the result file.
      */
     public static void append(File result, File appender) {
-        final OutputStream out = JkUtilsIO.outputStream(result, true);
-        final InputStream in = JkUtilsIO.inputStream(appender);
-        JkUtilsIO.copy(in, out);
-        JkUtilsIO.closeQuietly(in);
-        JkUtilsIO.closeQuietly(out);
+        try (
+            final OutputStream out = JkUtilsIO.outputStream(result, true);
+            final InputStream in = JkUtilsIO.inputStream(appender)) {
+            JkUtilsIO.copy(in, out);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
+
     }
 
     /**
@@ -520,8 +519,7 @@ public final class JkUtilsFile {
      * "MD5".
      */
     public static String checksum(File file, String algorithm) {
-        final InputStream is = JkUtilsIO.inputStream(file);
-        try {
+        try (final InputStream is = JkUtilsIO.inputStream(file)) {
             final MessageDigest md = MessageDigest.getInstance(algorithm);
             md.reset();
             final byte[] buf = new byte[2048];
@@ -533,8 +531,6 @@ public final class JkUtilsFile {
             return JkUtilsString.toHexString(bytes);
         } catch (final Exception e) {
             throw JkUtilsThrowable.unchecked(e);
-        } finally {
-            JkUtilsIO.closeQuietly(is);
         }
     }
 
@@ -652,31 +648,24 @@ public final class JkUtilsFile {
         if (from.isDirectory()) {
             throw new IllegalArgumentException(from.getPath() + " is a directory. Should be a file.");
         }
-        final TokenReplacingReader replacingReader = new TokenReplacingReader(from, replacements);
-        createFileIfNotExist(toFile);
-        final Writer writer;
-        try {
-            writer = new FileWriter(toFile);
-        } catch (final IOException e) {
-            JkUtilsIO.closeQuietly(replacingReader);
-            throw new RuntimeException(e);
-        }
         if (reportStream != null) {
             reportStream.println("Coping and replacing tokens " + replacements + " to file " + from.getAbsolutePath()
                     + " to " + toFile.getAbsolutePath());
         }
-        final char[] buf = new char[1024];
-        int len;
-        try {
+        createFileIfNotExist(toFile);
+        try (
+        final TokenReplacingReader replacingReader = new TokenReplacingReader(from, replacements);
+        final Writer writer = new FileWriter(toFile) ) {
+            final char[] buf = new char[1024];
+            int len;
+
             while ((len = replacingReader.read(buf)) > 0) {
                 writer.write(buf, 0, len);
             }
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            JkUtilsIO.closeQuietly(writer);
-            JkUtilsIO.closeQuietly(replacingReader);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
         }
+
     }
 
     /**
@@ -688,14 +677,11 @@ public final class JkUtilsFile {
      */
     public static void copyUrlReplacingTokens(URL url, File toFile, Map<String, String> replacements,
                                               PrintStream reportStream) {
-        final InputStream is;
-        try {
-            is = url.openStream();
+        try (InputStream is = url.openStream()){
+            copyStreamWithInterpolation(is, toFile, replacements, reportStream);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
-        copyStreamWithInterpolation(is, toFile, replacements, reportStream);
-        JkUtilsIO.closeQuietly(is);
     }
 
     /**
@@ -707,34 +693,25 @@ public final class JkUtilsFile {
      */
     public static void copyStreamWithInterpolation(InputStream inputStream, File toFile,
                                                    Map<String, String> replacements, PrintStream reportStream) {
-        final TokenReplacingReader replacingReader = new TokenReplacingReader(new InputStreamReader(inputStream),
-                replacements);
         if (!toFile.exists()) {
             try {
                 toFile.createNewFile();
             } catch (final IOException e) {
-                JkUtilsIO.closeQuietly(replacingReader);
-                throw new RuntimeException(e);
+                throw JkUtilsThrowable.unchecked(e);
             }
         }
-        final Writer writer;
-        try {
-            writer = new FileWriter(toFile);
-        } catch (final IOException e) {
-            JkUtilsIO.closeQuietly(replacingReader);
-            throw new RuntimeException(e);
-        }
-        final char[] buf = new char[1024];
-        int len;
-        try {
+        try( TokenReplacingReader replacingReader = new TokenReplacingReader(
+                new InputStreamReader(inputStream), replacements);
+             final Writer writer = new FileWriter(toFile)) {
+
+            final char[] buf = new char[1024];
+            int len;
             while ((len = replacingReader.read(buf)) > 0) {
                 writer.write(buf, 0, len);
             }
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            JkUtilsIO.closeQuietly(writer);
-            JkUtilsIO.closeQuietly(replacingReader);
+
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
         }
     }
 
@@ -859,11 +836,12 @@ public final class JkUtilsFile {
 
     private static void extractFile(ZipInputStream in, File outdir, String name) throws IOException {
         byte[] buffer = new byte[BUFFER_SIZE];
-        BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(outdir, name)));
-        int count = -1;
-        while ((count = in.read(buffer)) != -1)
-            out.write(buffer, 0, count);
-        out.close();
+        try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(outdir, name)))) {
+            int count = -1;
+            while((count =in.read(buffer))!=-1) {
+                out.write(buffer, 0, count);
+            }
+        }
     }
 
     private static void mkdirs(File outdir, String path) {
@@ -881,8 +859,8 @@ public final class JkUtilsFile {
      * Unzip a zip file to the specified folder
      */
     public static void unzip(File zipfile, File outdir) {
-        try {
-            ZipInputStream zin = new ZipInputStream(new FileInputStream(zipfile));
+        try (ZipInputStream zin = new ZipInputStream(new FileInputStream(zipfile))){
+
             ZipEntry entry;
             String name, dir;
             while ((entry = zin.getNextEntry()) != null) {

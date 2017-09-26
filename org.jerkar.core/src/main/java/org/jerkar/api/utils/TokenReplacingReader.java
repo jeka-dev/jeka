@@ -64,9 +64,7 @@ final class TokenReplacingReader extends Reader {
             data = this.pushbackReader.read();
         }
         this.tokenValue = this.resolveToken(this.tokenNameBuffer.toString());
-        if (this.tokenValue == null) {
-            this.tokenValue = "${" + this.tokenNameBuffer.toString() + "}";
-        }
+        this.tokenValue = "${" + this.tokenNameBuffer.toString() + "}";
         if (this.tokenValue.length() == 0) {
             return read();
         }

@@ -43,17 +43,6 @@ public final class JkUtilsSystem {
     }
 
     /**
-     * Forces the current thread to sleep the specified amount of milliseconds.
-     */
-    public static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (final InterruptedException e) {
-            throw JkUtilsThrowable.unchecked(e);
-        }
-    }
-
-    /**
      * Adds an action to be executed when he JVM shuts down.
      */
     public static void addOnExitAction(Runnable runnable) {

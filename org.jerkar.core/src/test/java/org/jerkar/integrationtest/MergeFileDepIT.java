@@ -3,12 +3,11 @@ package org.jerkar.integrationtest;
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.tool.builtins.javabuild.JkJavaBuild;
 import org.junit.Test;
 
 import java.io.File;
 
-import static org.jerkar.tool.builtins.javabuild.JkJavaBuild.*;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 import static org.junit.Assert.*;
 
 /**
@@ -30,7 +29,7 @@ public class MergeFileDepIT {
                 .on(dep2File).scope(COMPILE)
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
-                .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaBuild.DEFAULT_SCOPE_MAPPING))
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkDependencyNode tree = resolver.resolve(deps).dependencyTree();
 
@@ -58,7 +57,7 @@ public class MergeFileDepIT {
 
         // Now check that file dependencies with Test Scope are not present in compile
 
-        tree = resolver.resolve(deps, JkJavaBuild.COMPILE).dependencyTree();
+        tree = resolver.resolve(deps, COMPILE).dependencyTree();
         System.out.println(tree.toStringComplete());
 
         root = tree.moduleInfo();

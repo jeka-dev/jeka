@@ -124,7 +124,7 @@ public final class JkMvn implements Runnable {
 
     /**
      * Creates the java code of the Jerkar build class jump the effective pom of
-     * this Maven Project
+     * this Maven JkEclipseProject
      */
     public String createBuildClassCode(String packageName, String className, JkFileTree baseDir) {
         final File pom = JkUtilsFile.tempFile("effectivepom", ".xml");

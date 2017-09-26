@@ -2,6 +2,7 @@ package org.jerkar.api.file;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,11 +14,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsZip;
+import org.jerkar.api.utils.*;
 import org.jerkar.api.utils.JkUtilsZip.JkZipEntryFilter;
 
 /**
@@ -167,52 +164,56 @@ public final class JkZipper {
      */
     public JkCheckSumer to(File zipFile, JkPathFilter entryFilter) {
         JkLog.start("Creating zip file : " + zipFile);
-        final ZipOutputStream zos = JkUtilsZip.createZipOutputStream(zipFile,
-                this.jkCompressionLevel.level);
-        zos.setMethod(this.jkCompressionMethod.method);
+        JkUtilsFile.createFileIfNotExist(zipFile);
+        try (final FileOutputStream fos = new FileOutputStream(zipFile);
+             final ZipOutputStream zos =  new ZipOutputStream(fos)) {
+            zos.setLevel(this.jkCompressionLevel.level);
+            zos.setMethod(this.jkCompressionMethod.method);
 
-        // Adding files to archive
-        for (final Object item : this.itemsToZip) {
-            if (item instanceof File) {
-                final File file = (File) item;
-                JkUtilsZip.addZipEntry(zos, file, file.getParentFile(), storedMethod(), entryFilter.toZipEntryFilter());
-            } else if (item instanceof EntryFile) {
-                final EntryFile entryFile = (EntryFile) item;
-                if (entryFilter.accept(((EntryFile) item).path)) {
-                    JkUtilsZip.addZipEntry(zos, entryFile.file, entryFile.path, storedMethod());
-                }
-            } else if (item instanceof JkFileTree) {
-                final JkFileTree dirView = (JkFileTree) item;
-                addFileTree(zos, dirView, entryFilter);
-            } else if (item instanceof JkFileTreeSet) {
-                final JkFileTreeSet dirViews = (JkFileTreeSet) item;
-                for (final JkFileTree dirView : dirViews.fileTrees()) {
+            // Adding files to archive
+            for (final Object item : this.itemsToZip) {
+                if (item instanceof File) {
+                    final File file = (File) item;
+                    JkUtilsZip.addZipEntry(zos, file, file.getParentFile(), storedMethod(), entryFilter.toZipEntryFilter());
+                } else if (item instanceof EntryFile) {
+                    final EntryFile entryFile = (EntryFile) item;
+                    if (entryFilter.accept(((EntryFile) item).path)) {
+                        JkUtilsZip.addZipEntry(zos, entryFile.file, entryFile.path, storedMethod());
+                    }
+                } else if (item instanceof JkFileTree) {
+                    final JkFileTree dirView = (JkFileTree) item;
                     addFileTree(zos, dirView, entryFilter);
+                } else if (item instanceof JkFileTreeSet) {
+                    final JkFileTreeSet dirViews = (JkFileTreeSet) item;
+                    for (final JkFileTree dirView : dirViews.fileTrees()) {
+                        addFileTree(zos, dirView, entryFilter);
+                    }
+                } else {
+                    throw new IllegalStateException("Items of class " + item.getClass()
+                            + " not handled.");
                 }
-            } else {
-                throw new IllegalStateException("Items of class " + item.getClass()
-                + " not handled.");
             }
-        }
 
-        // Merging archives to this archive
-        final JkZipEntryFilter zipEntryFilter = entryFilter.toZipEntryFilter();
-        for (final File archiveToMerge : this.archivestoMerge) {
-            final ZipFile file;
-            try {
-                file = new ZipFile(archiveToMerge);
-            } catch (final FileNotFoundException e) {
-                throw new RuntimeException("File  "
-                        + archiveToMerge.getPath() + " does not exist.", e);
-            } catch (final IOException e) {
-                throw new RuntimeException("Error while opening zip file "
-                        + archiveToMerge.getPath(), e);
+            // Merging archives to this archive
+            final JkZipEntryFilter zipEntryFilter = entryFilter.toZipEntryFilter();
+            for (final File archiveToMerge : this.archivestoMerge) {
+                final ZipFile file;
+                try {
+                    file = new ZipFile(archiveToMerge);
+                } catch (final FileNotFoundException e) {
+                    throw new RuntimeException("File  "
+                            + archiveToMerge.getPath() + " does not exist.", e);
+                } catch (final IOException e) {
+                    throw new RuntimeException("Error while opening zip file "
+                            + archiveToMerge.getPath(), e);
+                }
+                JkUtilsZip.mergeZip(zos, file, zipEntryFilter, storedMethod());
             }
-            JkUtilsZip.mergeZip(zos, file, zipEntryFilter, storedMethod());
+            JkUtilsIO.flush(zos);
+            JkUtilsIO.finish(zos);
+        } catch (IOException e) {
+            JkUtilsThrowable.unchecked(e);
         }
-        JkUtilsIO.flush(zos);
-        JkUtilsIO.finish(zos);
-        JkUtilsIO.closeOrFail(zos);
         JkLog.done();
         return new JkCheckSumer(zipFile);
     }
@@ -325,29 +326,6 @@ public final class JkZipper {
             return this;
         }
 
-        /**
-         * As {@link #md5()} but allow to pass a flag as parameter to actually
-         * process or not the digesting.
-         */
-        @Deprecated
-        public JkCheckSumer md5If(boolean process) {
-            if (!process) {
-                return this;
-            }
-            return makeMd5File();
-        }
-
-        /**
-         * As {@link #sha1()} but allow to pass a flag as parameter to actually
-         * process or not the digesting.
-         */
-        @Deprecated
-        public JkCheckSumer sha1If(boolean process) {
-            if (!process) {
-                return this;
-            }
-            return makeSha1File();
-        }
     }
 
 }
