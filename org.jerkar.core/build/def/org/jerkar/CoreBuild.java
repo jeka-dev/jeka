@@ -12,6 +12,7 @@ import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkPublishRepos;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkZipper;
+import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkInit;
@@ -32,6 +33,7 @@ public class CoreBuild extends JkJavaProjectBuild {
     @Override
     protected JkJavaProject createProject(JkJavaProject project) {
         applyCommons(project, "core");
+        project.maker().setBaseCompiler(JkJavaCompiler.base().fork(true));
         project.addArtifactFile(DISTRIB_FILE_ID, this::doDistrib);
         project.addArtifactFile(JAVADOC_FILE_ID, () -> project.maker().makeJavadocJar());
         this.distribFolder = new File(project.getOutLayout().outputDir(), "distrib");

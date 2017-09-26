@@ -16,7 +16,7 @@ import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.Main;
 import org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild;
 
-@JkDoc("Plugin to generate Eclipse meta data files from a JkJavaProjectBuild")
+@JkDoc("Generates Eclipse meta data files from a JkJavaProjectBuild")
 public final class JkBuildPluginEclipse implements JkBuildPlugin {
 
     @JkDoc("Set it to false to not mention javadoc in generated .classpath file.")
