@@ -33,11 +33,6 @@ public class CoreBuild extends JkJavaProjectBuild {
     @Override
     protected JkJavaProject createProject(JkJavaProject project) {
         applyCommons(project, "core");
-
-        // Fork to avoid compile failure bug on github/travis
-        project.maker().setBaseCompiler(JkJavaCompiler.base().fork(true));
-        project.maker().setTestBaseCompiler(JkJavaCompiler.base().fork(true));
-
         project.addArtifactFile(DISTRIB_FILE_ID, this::doDistrib);
         project.addArtifactFile(JAVADOC_FILE_ID, () -> project.maker().makeJavadocJar());
         this.distribFolder = new File(project.getOutLayout().outputDir(), "distrib");
@@ -74,6 +69,11 @@ public class CoreBuild extends JkJavaProjectBuild {
     // build methods shared with other modules from org.jerkar
 
     public static void applyCommons(JkJavaProject project, String moduleName) {
+
+        // Fork to avoid compile failure bug on github/travis
+        project.maker().setBaseCompiler(JkJavaCompiler.base().fork(true));
+        project.maker().setTestBaseCompiler(JkJavaCompiler.base().fork(true));
+
         project.setVersionedModule(JkModuleId.of("org.jerkar", moduleName).version(VERSION));
         project.maker().setArtifactFileNameSupplier(() -> project.getVersionedModule().moduleId().fullName());
         project.setSourceVersion(JkJavaVersion.V8);
