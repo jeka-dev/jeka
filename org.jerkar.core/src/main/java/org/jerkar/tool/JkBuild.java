@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,7 +15,13 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.*;
+import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsObject;
+import org.jerkar.api.utils.JkUtilsReflect;
+import org.jerkar.api.utils.JkUtilsThrowable;
+import org.jerkar.api.utils.JkUtilsXml;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -135,7 +140,7 @@ public class JkBuild {
      * Returns a formatted string providing information about this build definition.
      */
     public String infoString() {
-        return "base directory : " + this.baseTree() + "\n"
+        return "base directory : " + this.baseDir + "\n"
                 + "imported builds : " + this.importedBuilds.directs();
     }
 
@@ -219,7 +224,7 @@ public class JkBuild {
                 JkUtilsFile.createFileIfNotExist(help.xmlFile);
                 try (final OutputStream os = JkUtilsIO.outputStream(help.xmlFile, false)) {
                     JkUtilsXml.output(document, os);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw JkUtilsThrowable.unchecked(e);
                 }
                 JkLog.info("Xml help file generated at " + help.xmlFile.getPath());

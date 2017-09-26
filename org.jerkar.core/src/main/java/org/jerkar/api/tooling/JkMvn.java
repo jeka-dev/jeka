@@ -12,8 +12,8 @@ import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsSystem;
 
 /**
- * Convenioent class wrapping maven process.
- * 
+ * Convenient class wrapping maven process.
+ *
  * @author Jerome Angibaud
  */
 public final class JkMvn implements Runnable {
@@ -155,7 +155,7 @@ public final class JkMvn implements Runnable {
 
     /**
      * Creates a {@link JkDependencies} jump a file describing definition like.
-     * 
+     *
      * <pre>
      * <code>
      * org.springframework:spring-aop:jar:4.2.3.BUILD-SNAPSHOT:compile
@@ -172,7 +172,7 @@ public final class JkMvn implements Runnable {
      * org.slf4j:slf4j-api:jar:1.7.12:compile
      * </code>
      * </pre>
-     * 
+     *
      * The following format are accepted for each line :
      * <ul>
      * <li>group:name:classifier:version:scope (classifier "jar" equals to no
@@ -180,7 +180,7 @@ public final class JkMvn implements Runnable {
      * <li>group:name:version:scope (no classifier)</li>
      * <li>group:name:version (default version is scope)</li>
      * </ul>
-     * 
+     *
      */
     public static JkDependencies fromMvnFlatFile(File flatFile) {
         final JkDependencies.Builder builder = JkDependencies.builder();
