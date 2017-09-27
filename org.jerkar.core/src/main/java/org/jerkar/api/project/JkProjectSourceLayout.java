@@ -1,6 +1,7 @@
 package org.jerkar.api.project;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
@@ -172,6 +173,10 @@ public class JkProjectSourceLayout {
 
     public File baseDir() {
         return baseDir;
+    }
+
+    public Path basePath() {
+        return baseDir.toPath();
     }
 
     /**

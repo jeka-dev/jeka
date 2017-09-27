@@ -1,6 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -182,6 +183,13 @@ public class JkComputedDependency implements JkFileDependency {
      */
     public File ideProjectBaseDir() {
         return ideProjectBaseDir;
+    }
+
+    public Path ideProjectBasePath() {
+        if (ideProjectBaseDir == null) {
+            return null;
+        }
+        return ideProjectBaseDir.toPath();
     }
 
     @Override

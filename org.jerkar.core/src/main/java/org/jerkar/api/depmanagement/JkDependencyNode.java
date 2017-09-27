@@ -2,11 +2,13 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
@@ -386,6 +388,10 @@ public class JkDependencyNode implements Serializable {
         public List<File> files() {
             return artifacts;
         }
+
+        public List<Path> paths() {
+            return artifacts.stream().map(file -> file.toPath()).collect(Collectors.toList());
+        }
     }
 
     private static List<JkScopedDependency> depsUntilLast(JkDependencies deps, JkModuleId to) {
@@ -461,8 +467,13 @@ public class JkDependencyNode implements Serializable {
         }
 
         @Override
+        @Deprecated
         public List<File> files() {
             return files;
+        }
+
+        public List<Path> paths() {
+            return files.stream().map(file -> file.toPath()).collect(Collectors.toList());
         }
 
         @Override

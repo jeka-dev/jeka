@@ -75,7 +75,7 @@ public final class JkInit {
     public static <T extends JkBuild> T instanceOf(Class<T> clazz, File baseDir, String... args) {
         final JkInit init = JkInit.of(args);
         init.displayInfo();
-        JkBuild.baseDirContext(baseDir);
+        JkBuild.baseDirContext(baseDir.toPath());
         final T build;
         try {
             build = JkUtilsReflect.newInstance(clazz);

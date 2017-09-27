@@ -101,7 +101,7 @@ final class BuildResolver {
             if (clazz == null) {
                 throw new JkException("No build class named " + classNameHint + " found.");
             }
-            JkBuild.baseDirContext(baseDir.toFile());
+            JkBuild.baseDirContext(baseDir);
             final JkBuild build;
             try {
                 build = JkUtilsReflect.newInstance(clazz);
@@ -119,7 +119,7 @@ final class BuildResolver {
                     final Class<?> clazz = classLoader.loadGivenClassSourcePath(path);
                     if (baseClass.isAssignableFrom(clazz)
                             && !Modifier.isAbstract(clazz.getModifiers())) {
-                        JkBuild.baseDirContext(baseDir.toFile());
+                        JkBuild.baseDirContext(baseDir);
                         final JkBuild build;
                         try {
                             build = (JkBuild) JkUtilsReflect.newInstance(clazz);
@@ -134,7 +134,7 @@ final class BuildResolver {
         }
 
         // If nothing yet found use defaults
-        JkBuild.baseDirContext(baseDir.toFile());
+        JkBuild.baseDirContext(baseDir);
         final JkBuild result;
         try {
             result = (JkBuild) JkUtilsReflect

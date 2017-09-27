@@ -19,7 +19,6 @@ import java.io.File;
 public class JkImlGeneratorTest {
 
     @Test
-    @Ignore
     public void generate() throws Exception {
         final File top = unzipToDir("sample-multi-scriptless.zip");
         JkLog.silent(true);

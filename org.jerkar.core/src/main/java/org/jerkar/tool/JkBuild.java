@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -35,13 +37,13 @@ public class JkBuild {
 
     private static final ThreadLocal<Map<ImportedBuildRef, JkBuild>> IMPORTED_BUILD_CONTEXT = new ThreadLocal<>();
 
-    private static final ThreadLocal<File> BASE_DIR_CONTEXT = new ThreadLocal<>();
+    private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
 
-    static void baseDirContext(File baseDir) {
+    static void baseDirContext(Path baseDir) {
         BASE_DIR_CONTEXT.set(baseDir);
     }
 
-    private final File baseDir;
+    private final Path baseDir;
 
     private final Instant buildTime = Instant.now();
 
@@ -70,9 +72,9 @@ public class JkBuild {
      * Constructs a {@link JkBuild}
      */
     public JkBuild() {
-        final File baseDirContext = BASE_DIR_CONTEXT.get();
+        final Path baseDirContext = BASE_DIR_CONTEXT.get();
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
-        this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, JkUtilsFile.workingDir());
+        this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get(""));
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
         final List<JkBuild> directImportedBuilds = getDirectImportedBuilds();
         this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), directImportedBuilds);
@@ -107,18 +109,32 @@ public class JkBuild {
     /**
      * Returns the base directory for this project.
      */
+    @Deprecated
     public final File baseDir() {
+        return baseDir.toFile();
+    }
+
+    /**
+     * Returns the base directory for this project.
+     */
+    public final Path basePath() {
         return baseDir;
     }
 
     /**
      * Short-hand for <code>baseTree().file(relativePath)</code>.
      */
+    @Deprecated
     public final File file(String relativePath) {
         if (relativePath.isEmpty()) {
             return baseTree().root();
         }
         return baseTree().file(relativePath);
+    }
+
+    @Deprecated
+    public final Path path(String relativePath) {
+        return baseDir.resolve(relativePath);
     }
 
     /**
@@ -134,6 +150,13 @@ public class JkBuild {
      */
     public File ouputFile(String relativePath) {
         return ouputTree().file(relativePath);
+    }
+
+    /**
+     * Short-hand for <code>ouputTree().file(relativePath)</code>.
+     */
+    public Path ouputPath(String relativePath) {
+        return ouputTree().file(relativePath).toPath();
     }
 
     /**
@@ -156,7 +179,7 @@ public class JkBuild {
     }
 
     protected JkScaffolder createScaffolder() {
-        return new JkScaffolder(this.baseDir, this.scaffoldEmbed);
+        return new JkScaffolder(this.baseDir.toFile(), this.scaffoldEmbed);
     }
 
     protected JkBuildPlugins plugins() {
@@ -391,7 +414,7 @@ public class JkBuild {
 
     @Override
     public String toString() {
-        return this.baseDir.getPath();
+        return this.baseDir.toString();
     }
 
     /**

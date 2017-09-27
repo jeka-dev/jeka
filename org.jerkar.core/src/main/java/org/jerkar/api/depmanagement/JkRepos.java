@@ -2,6 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -206,10 +207,16 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
     /**
      * Retrieves directly the file embodying the specified the external dependency.
      */
+    @Deprecated
     public File get(JkModuleDependency moduleDependency) {
         final InternalDepResolver depResolver = ivyResolver();
         return depResolver.get(moduleDependency);
     }
+
+    public Path getPath(JkModuleDependency moduleDependency) {
+        return get(moduleDependency).toPath();
+    }
+
 
     /**
      * Short hand for {@link #get(JkModuleDependency)}

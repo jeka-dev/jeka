@@ -22,6 +22,22 @@ public class JkUtilsPath {
         // Do nothing
     }
 
+    public static void deleteFile(Path path) {
+        try {
+            Files.delete(path);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
+    }
+
+    public static void write(Path path, byte[] bytes, OpenOption ... options) {
+        try {
+            Files.write(path, bytes, options);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
+    }
+
     public static DirectoryStream<Path> newDirectoryStream(Path root, DirectoryStream.Filter<Path> filter) {
         try {
             return Files.newDirectoryStream(root, filter);

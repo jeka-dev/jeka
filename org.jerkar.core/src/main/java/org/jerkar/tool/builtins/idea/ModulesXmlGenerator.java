@@ -1,8 +1,8 @@
 package org.jerkar.tool.builtins.idea;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLOutputFactory;
@@ -10,6 +10,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
 class ModulesXmlGenerator {
@@ -24,16 +25,16 @@ class ModulesXmlGenerator {
 
     private static final String T4 = T3 + T1;
 
-    private final Iterable<File> imlFiles;
+    private final Iterable<Path> imlFiles;
 
-    private final File projectDir;
+    private final Path projectDir;
 
-    private final File outputFile;
+    private final Path outputFile;
 
-    public ModulesXmlGenerator(File projectDir, Iterable<File> imlFiles) {
+    public ModulesXmlGenerator(Path projectDir, Iterable<Path> imlFiles) {
         this.imlFiles = imlFiles;
         this.projectDir = projectDir;
-        this.outputFile = new File(projectDir,".idea/modules.xml");
+        this.outputFile = projectDir.resolve(".idea/modules.xml");
     }
 
     public void generate() {
@@ -57,7 +58,7 @@ class ModulesXmlGenerator {
         writer.writeCharacters("\n" + T2);
         writer.writeStartElement("modules");
         writer.writeCharacters("\n");
-        for (File iml : imlFiles) {
+        for (Path iml : imlFiles) {
             String path = path(iml);
             writer.writeCharacters(T3);
             writer.writeEmptyElement("module");
@@ -72,12 +73,12 @@ class ModulesXmlGenerator {
         writer.writeEndDocument();
         writer.flush();
         writer.close();
-        outputFile.delete();
-        JkUtilsFile.writeStringAtTop(outputFile, fos.toString(ENCODING));
+        JkUtilsPath.deleteFile(outputFile);
+        JkUtilsFile.writeStringAtTop(outputFile.toFile(), fos.toString(ENCODING));
     }
 
-    private String path(File iml) {
-        String relPath = JkUtilsFile.getRelativePath(this.projectDir, iml);
+    private String path(Path iml) {
+        String relPath = iml.relativize(projectDir).toString();
         return "$PROJECT_DIR$/" + relPath;
     }
 

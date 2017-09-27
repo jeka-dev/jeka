@@ -1,8 +1,10 @@
 package org.jerkar.api.ide.idea;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
+
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,7 +61,7 @@ public final class JkImlGenerator {
     private JkDependencies buildDependencies;
 
     /** Can be empty but not null */
-    private Iterable<File> importedBuildProjects = JkUtilsIterable.listOf();
+    private Iterable<Path> importedBuildProjects = JkUtilsIterable.listOf();
 
     private boolean forceJdkVersion;
 
@@ -103,8 +105,8 @@ public final class JkImlGenerator {
         writeJdk();
         writeContent();
         writeOrderEntrySourceFolder();
-        final Set<File> allPaths = new HashSet<>();
-        final Set<File> allModules = new HashSet<>();
+        final Set<Path> allPaths = new HashSet<>();
+        final Set<Path> allModules = new HashSet<>();
         if (this.dependencyResolver != null) {
             writeDependencies(dependencies, this.dependencyResolver, allPaths, allModules, false);
         }
@@ -172,12 +174,13 @@ public final class JkImlGenerator {
         writer.writeCharacters(T2);
 
         // Write test sources
-        final File projectDir = this.sourceLayout.baseDir();
+        final Path projectDir = this.sourceLayout.basePath();
         for (final JkFileTree fileTree : this.sourceLayout.tests().fileTrees()) {
             if (fileTree.exists()) {
                 writer.writeCharacters(T3);
                 writer.writeEmptyElement("sourceFolder");
-                final String path = JkUtilsFile.getRelativePath(projectDir, fileTree.root()).replace('\\', '/');
+
+                final String path =  fileTree.rootPath().relativize(projectDir).toString().replace('\\', '/');
                 writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
                 writer.writeAttribute("isTestSource", "true");
                 writer.writeCharacters("\n");
@@ -189,7 +192,7 @@ public final class JkImlGenerator {
             if (fileTree.exists()) {
                 writer.writeCharacters(T3);
                 writer.writeEmptyElement("sourceFolder");
-                final String path = JkUtilsFile.getRelativePath(projectDir, fileTree.root()).replace('\\', '/');
+                final String path = fileTree.rootPath().relativize(projectDir).toString().replace('\\', '/');
                 writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
                 writer.writeAttribute("type", "java-test-resource");
                 writer.writeCharacters("\n");
@@ -202,7 +205,7 @@ public final class JkImlGenerator {
             if (fileTree.exists()) {
                 writer.writeCharacters(T3);
                 writer.writeEmptyElement("sourceFolder");
-                final String path = JkUtilsFile.getRelativePath(projectDir, fileTree.root()).replace('\\', '/');
+                final String path = fileTree.rootPath().relativize(projectDir).toString().replace('\\', '/');
                 writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
                 writer.writeAttribute("isTestSource", "false");
                 writer.writeCharacters("\n");
@@ -214,7 +217,7 @@ public final class JkImlGenerator {
             if (fileTree.exists()) {
                 writer.writeCharacters(T3);
                 writer.writeEmptyElement("sourceFolder");
-                final String path = JkUtilsFile.getRelativePath(projectDir, fileTree.root()).replace('\\', '/');
+                final String path = fileTree.rootPath().relativize(projectDir).toString().replace('\\', '/');
                 writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
                 writer.writeAttribute("type", "java-resource");
                 writer.writeCharacters("\n");
@@ -232,16 +235,16 @@ public final class JkImlGenerator {
         writer.writeCharacters("\n");
     }
 
-    private void writeBuildProjectDependencies(Set<File> allModules) throws XMLStreamException {
-        for (final File rootFolder : this.importedBuildProjects) {
+    private void writeBuildProjectDependencies(Set<Path> allModules) throws XMLStreamException {
+        for (final Path rootFolder : this.importedBuildProjects) {
             if (!allModules.contains(rootFolder)) {
-                writeOrderEntryForModule(rootFolder.getName(), "COMPILE");
+                writeOrderEntryForModule(rootFolder.getFileName().toString(), "COMPILE");
                 allModules.add(rootFolder);
             }
         }
     }
 
-    private void writeDependencies(JkDependencies dependencies, JkDependencyResolver resolver, Set<File> allPaths, Set<File> allModules,
+    private void writeDependencies(JkDependencies dependencies, JkDependencyResolver resolver, Set<Path> allPaths, Set<Path> allModules,
             boolean forceTest) throws XMLStreamException {
 
         final JkResolveResult resolveResult = resolver.resolve(dependencies);
@@ -264,27 +267,27 @@ public final class JkImlGenerator {
                 final String ideScope = forceTest ? "TEST" : ideScope(node.nodeInfo().declaredScopes());
                 final JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.nodeInfo();
                 if (fileNodeInfo.isComputed()) {
-                    final File projectDir = fileNodeInfo.computationOrigin().ideProjectBaseDir();
+                    final Path projectDir = fileNodeInfo.computationOrigin().ideProjectBasePath();
                     if (projectDir != null && !allModules.contains(projectDir)) {
-                        writeOrderEntryForModule(projectDir.getName(), ideScope);
+                        writeOrderEntryForModule(projectDir.getFileName().toString(), ideScope);
                         allModules.add(projectDir);
                     }
                 } else {
-                    writeFileEntries(fileNodeInfo.files(), paths, ideScope);
+                    writeFileEntries(fileNodeInfo.paths(), paths, ideScope);
                 }
             }
         }
     }
 
-    private void writeFileEntries(Iterable<File> files, Set<String> paths, String ideScope) throws XMLStreamException {
-        for (final File file : files) {
+    private void writeFileEntries(Iterable<Path> files, Set<String> paths, String ideScope) throws XMLStreamException {
+        for (final Path file : files) {
             final LibPath libPath = new LibPath();
             libPath.bin = file;
             libPath.scope = ideScope;
             libPath.source = lookForSources(file);
             libPath.javadoc = lookForJavadoc(file);
             writeOrderEntryForLib(libPath);
-            paths.add(file.getPath());
+            paths.add(file.toString());
         }
     }
 
@@ -294,13 +297,13 @@ public final class JkImlGenerator {
         final JkModuleId moduleId = moduleInfo.moduleId();
         final JkVersion version = moduleInfo.resolvedVersion();
         final JkVersionedModule versionedModule = JkVersionedModule.of(moduleId, version);
-        final List<File> files = moduleInfo.files();
-        for (final File file : files) {
+        final List<Path> files = moduleInfo.paths();
+        for (final Path file : files) {
             final LibPath libPath = new LibPath();
             libPath.bin = file;
             libPath.scope = scope;
-            libPath.source = repos.get(JkModuleDependency.of(versionedModule).classifier("sources"));
-            libPath.javadoc = repos.get(JkModuleDependency.of(versionedModule).classifier("javadoc"));
+            libPath.source = repos.getPath(JkModuleDependency.of(versionedModule).classifier("sources"));
+            libPath.javadoc = repos.getPath(JkModuleDependency.of(versionedModule).classifier("javadoc"));
             result.add(libPath);
         }
         return result;
@@ -389,14 +392,14 @@ public final class JkImlGenerator {
         writer.writeCharacters("\n");
     }
 
-    private void writeLibType(String type, File file) throws XMLStreamException {
+    private void writeLibType(String type, Path file) throws XMLStreamException {
         writer.writeCharacters(T4);
         if (file != null) {
             writer.writeStartElement(type);
             writer.writeCharacters("\n");
             writer.writeCharacters(T5);
             writer.writeEmptyElement("baseTree");
-            writer.writeAttribute("url", ideaPath(this.sourceLayout.baseDir(), file));
+            writer.writeAttribute("url", ideaPath(this.sourceLayout.basePath(), file));
             writer.writeCharacters("\n" + T4);
             writer.writeEndElement();
         } else {
@@ -404,20 +407,20 @@ public final class JkImlGenerator {
         }
     }
 
-    private String ideaPath(File projectDir, File file) {
-        if (file.getName().toLowerCase().endsWith(".jar")) {
-            if (JkUtilsFile.isAncestor(projectDir, file)) {
-                final String relPath = JkUtilsFile.getRelativePath(projectDir, file);
+    private String ideaPath(Path projectDir, Path file) {
+        if (file.getFileName().toString().toLowerCase().endsWith(".jar")) {
+            if (file.startsWith(projectDir)) {
+                final String relPath = file.relativize(projectDir).toString();
                 return "jar://$MODULE_DIR$/" + replacePathWithVar(relPath) + "!/";
             }
-            final String path = JkUtilsFile.canonicalPath(file).replace('\\', '/');
-            return "jar://" + replacePathWithVar(replacePathWithVar(path)) + "!/";
+            final String path = file.normalize().toAbsolutePath().toString().replace('\\', '/');
+            return "jar://" + replacePathWithVar(path) + "!/";
         }
-        if (JkUtilsFile.isAncestor(projectDir, file)) {
-            final String relPath = JkUtilsFile.getRelativePath(projectDir, file);
+        if (file.startsWith(projectDir)) {
+            final String relPath = file.relativize(projectDir).toString();
             return "file://$MODULE_DIR$/" + replacePathWithVar(relPath);
         }
-        final String path = JkUtilsFile.canonicalPath(file).replace('\\', '/');
+        final String path = file.normalize().toAbsolutePath().toString().replace('\\', '/');
         return "file://" + replacePathWithVar(replacePathWithVar(path));
 
     }
@@ -446,9 +449,9 @@ public final class JkImlGenerator {
     }
 
     private static class LibPath {
-        File bin;
-        File source;
-        File javadoc;
+        Path bin;
+        Path source;
+        Path javadoc;
         String scope;
 
         @Override
@@ -496,11 +499,11 @@ public final class JkImlGenerator {
      * If the specified folder is the output folder of an eclipse project than it returns the asScopedDependency of this project,
      * else otherwise.
      */
-    private static File getProjectFolderOf(Iterable<File> files, Iterable<File> projectDependencies) {
+    private static Path getProjectFolderOf(Iterable<Path> files, Iterable<Path> projectDependencies) {
         if (!files.iterator().hasNext()) {
             return null;
         }
-        File folder = files.iterator().next().getParentFile();
+        Path folder = files.iterator().next().getParent();
         while (folder != null) {
             if (JkFileTree.of(folder).include("*.iml").fileCount(false) == 1) {
                 return folder;
@@ -508,44 +511,43 @@ public final class JkImlGenerator {
             if (JkUtilsIterable.listOf(projectDependencies).contains(folder)) {
                 return folder;
             }
-            folder = folder.getParentFile();
+            folder = folder.getParent();
         }
         return null;
     }
 
-    private File lookForSources(File binary) {
-        final String name = binary.getName();
+    private Path lookForSources(Path binary) {
+        final String name = binary.getFileName().toString();
         final String nameWithoutExt = JkUtilsString.substringBeforeLast(name, ".");
         final String ext = JkUtilsString.substringAfterLast(name, ".");
         final String sourceName = nameWithoutExt + "-sources." + ext;
-        final List<File> folders = JkUtilsIterable.listOf(
-                binary.getParentFile(),
-                new File(binary.getParentFile().getParentFile().getParentFile(), "libs-sources"),
-                new File(binary.getParentFile().getParentFile(), "libs-sources"),
-                new File(binary.getParentFile(), "libs-sources"));
+        final List<Path> folders = JkUtilsIterable.listOf(binary.getParent(),
+                binary.getParent().getParent().getParent().resolve("libs-sources"),
+                binary.getParent().getParent().resolve("libs-sources"),
+                binary.getParent().resolve("libs-sources"));
         final List<String> names = JkUtilsIterable.listOf(sourceName, nameWithoutExt + "-sources.zip");
         return lookFileHere(folders, names);
     }
 
-    private File lookForJavadoc(File binary) {
-        final String name = binary.getName();
+    private Path lookForJavadoc(Path binary) {
+        final String name = binary.getFileName().toString();
         final String nameWithoutExt = JkUtilsString.substringBeforeLast(name, ".");
         final String ext = JkUtilsString.substringAfterLast(name, ".");
         final String sourceName = nameWithoutExt + "-javadoc." + ext;
-        final List<File> folders = JkUtilsIterable.listOf(
-                binary.getParentFile(),
-                new File(binary.getParentFile().getParentFile().getParentFile(), "libs-javadoc"),
-                new File(binary.getParentFile().getParentFile(), "libs-javadoc"),
-                new File(binary.getParentFile(), "libs-javadoc"));
+        final List<Path> folders = JkUtilsIterable.listOf(
+                binary.getParent(),
+                binary.getParent().getParent().getParent().resolve("libs-javadoc"),
+                binary.getParent().getParent().resolve("libs-javadoc"),
+                binary.getParent().resolve("libs-javadoc"));
         final List<String> names = JkUtilsIterable.listOf(sourceName, nameWithoutExt + "-javadoc.zip");
         return lookFileHere(folders, names);
     }
 
-    private File lookFileHere(Iterable<File> folders, Iterable<String> names) {
-        for (final File folder : folders) {
+    private Path lookFileHere(Iterable<Path> folders, Iterable<String> names) {
+        for (final Path folder : folders) {
             for (final String name : names) {
-                final File candidate = new File(folder, name);
-                if (candidate.exists()) {
+                final Path candidate = folder.resolve(name);
+                if (Files.exists(candidate)) {
                     return candidate;
                 }
             }
@@ -578,7 +580,7 @@ public final class JkImlGenerator {
         return this;
     }
 
-    public JkImlGenerator setImportedBuildProjects(Iterable<File> importedBuildProjects) {
+    public JkImlGenerator setImportedBuildProjects(Iterable<Path> importedBuildProjects) {
         this.importedBuildProjects = importedBuildProjects;
         return this;
     }

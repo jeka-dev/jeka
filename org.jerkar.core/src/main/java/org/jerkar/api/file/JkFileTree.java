@@ -135,6 +135,13 @@ public final class JkFileTree implements Iterable<File> {
         return root;
     }
 
+    public Path rootPath() {
+        if (root == null) {
+            return null;
+        }
+        return root.toPath();
+    }
+
     /**
      * Returns the filter defined on this {@link JkFileTree}, never
      * <code>null</code>.
