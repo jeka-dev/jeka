@@ -49,13 +49,6 @@ public interface JkArtifactProducer extends JkArtifactLocator {
     }
 
     /**
-     * Same as {@link #makeArtifactFile(JkArtifactFileId)}.
-     */
-    default void makeArtifactFiles(JkArtifactFileId ... artifactFileIds) {
-        makeArtifactFiles(Arrays.asList(artifactFileIds));
-    }
-
-    /**
      * Produces all the artifact files for this producer.
      */
     default void makeAllArtifactFiles() {

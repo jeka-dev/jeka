@@ -269,34 +269,6 @@ public class JkBuild {
         JkLog.info(infoString());
     }
 
-    // ----------------------------- being a dependency ---------------------------------------
-
-    /**
-     * Returns a {@link JkComputedDependency} on this project and specified
-     * files. The 'doDefault' method will be invoked to compute the dependee
-     * files.
-     */
-    protected JkComputedDependency asDependency(Iterable<File> files) {
-        return BuildDependency.of(this, JkUtilsIterable.listWithoutDuplicateOf(files));
-    }
-
-    /**
-     * Returns a {@link JkComputedDependency} on this project and specified
-     * files. The 'doDefault' method will be invoked to compute the dependee
-     * files.
-     */
-    public JkComputedDependency asDependency(File... files) {
-        return BuildDependency.of(this, files);
-    }
-
-    /**
-     * Returns a {@link JkComputedDependency} on this project and specified
-     * files and methods to execute.
-     */
-    public JkComputedDependency asDependency(String methods, File... files) {
-        return BuildDependency.of(this, methods, files);
-    }
-
     // ----------------------------- Imported builds -------------------------------------------------
 
     /**
@@ -339,13 +311,6 @@ public class JkBuild {
             result.add(subBuild);
         }
         return result;
-    }
-
-    /**
-     * Returns the build of the specified slave project. Slave projects are expressed with relative path to this project.
-     */
-    public JkBuild createImportedBuild(String relativePath) {
-        return this.createImportedBuild(null, relativePath);
     }
 
     /**

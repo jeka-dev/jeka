@@ -79,7 +79,7 @@ final class IvyTranslations {
         final DefaultModuleDescriptor result = new DefaultModuleDescriptor(
                 thisModuleRevisionId, "integration", null);
 
-        populateModuleDescriptor(result, dependencies, defaultMapping, resolvedVersions, ivySettings);
+        populateModuleDescriptor(result, dependencies, defaultMapping, resolvedVersions);
         return result;
     }
 
@@ -279,13 +279,6 @@ final class IvyTranslations {
         return chainResolver;
     }
 
-    static JkVersionedModule toJkVersionedModule(Artifact artifact) {
-        final JkModuleId moduleId = JkModuleId.of(artifact.getModuleRevisionId().getOrganisation(),
-                artifact.getModuleRevisionId().getName());
-        return JkVersionedModule.of(moduleId,
-                JkVersion.name(artifact.getModuleRevisionId().getRevision()));
-    }
-
     private static String toIvyExpression(JkScopeMapping scopeMapping) {
         final List<String> list = new LinkedList<>();
         for (final JkScope scope : scopeMapping.entries()) {
@@ -300,8 +293,8 @@ final class IvyTranslations {
     }
 
     private static void populateModuleDescriptor(DefaultModuleDescriptor moduleDescriptor,
-            JkDependencies dependencies, JkScopeMapping defaultMapping,
-            JkVersionProvider resolvedVersions, IvySettings ivySettings) {
+                                                 JkDependencies dependencies, JkScopeMapping defaultMapping,
+                                                 JkVersionProvider resolvedVersions) {
 
         // Add configuration definitions
         for (final JkScope involvedScope : dependencies.involvedScopes()) {
