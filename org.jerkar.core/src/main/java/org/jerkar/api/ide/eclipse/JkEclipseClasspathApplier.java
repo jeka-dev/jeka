@@ -39,23 +39,23 @@ public class JkEclipseClasspathApplier {
         if (!Files.exists(dotClasspathFile)) {
             throw new JkException(".classpath file not found in " + javaProject.getSourceLayout().baseDir());
         }
-        apply(javaProject, DotClasspathModel.from(dotClasspathFile.toFile()));
+        apply(javaProject, DotClasspathModel.from(dotClasspathFile));
     }
 
     private void apply(JkJavaProject javaProject, DotClasspathModel dotClasspathModel) {
         final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
         final Path baseDir = javaProject.getSourceLayout().baseDir().toPath();
-        final JkFileTreeSet sources = dotClasspathModel.sourceDirs(baseDir.toFile(), segregator).prodSources;
-        final JkFileTreeSet testSources = dotClasspathModel.sourceDirs(baseDir.toFile(), segregator).testSources;
-        final JkFileTreeSet resources = dotClasspathModel.sourceDirs(baseDir.toFile(), segregator).prodSources
+        final JkFileTreeSet sources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources;
+        final JkFileTreeSet testSources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources;
+        final JkFileTreeSet resources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources
                 .andFilter(JkProjectSourceLayout.JAVA_RESOURCE_FILTER);
-        final JkFileTreeSet testResources = dotClasspathModel.sourceDirs(baseDir.toFile(), segregator).testSources
+        final JkFileTreeSet testResources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources
                 .andFilter(JkProjectSourceLayout.JAVA_RESOURCE_FILTER);
 
         final ScopeResolver scopeResolver = scopeResolver(baseDir);
-        final List<Lib> libs = dotClasspathModel.libs(baseDir.toFile(), scopeResolver);
+        final List<Lib> libs = dotClasspathModel.libs(baseDir, scopeResolver);
         final JkDependencies dependencies = Lib.toDependencies(/*build*/
-                javaProject.getSourceLayout().baseDir(), libs, scopeResolver, this);
+                javaProject.getSourceLayout().baseDir().toPath(), libs, scopeResolver, this);
 
         JkProjectSourceLayout sourceLayout = javaProject.getSourceLayout();
         sourceLayout = sourceLayout.withSources(sources).withResources(resources)

@@ -1,11 +1,14 @@
 package org.jerkar.api.ide.eclipse;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -16,6 +19,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsThrowable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -54,6 +58,7 @@ public final class JkEclipseProject {
         return null;
     }
 
+    @Deprecated
     public static Map<String, File> findProjects(File parent) {
         final Map<String, File> map = new HashMap<>();
         for (final File file : parent.listFiles()) {
@@ -62,6 +67,19 @@ public final class JkEclipseProject {
                 continue;
             }
             final JkEclipseProject project = JkEclipseProject.of(dotProject);
+            map.put(project.name, file);
+        }
+        return map;
+    }
+
+    public static Map<String, Path> findProjectPath(Path parent) {
+        final Map<String, Path> map = new HashMap<>();
+        for (final Path file : JkUtilsPath.listDirectChildren(parent)) {
+            final Path dotProject = file.resolve(".project");
+            if (!Files.exists(dotProject)) {
+                continue;
+            }
+            final JkEclipseProject project = JkEclipseProject.of(dotProject.toFile());
             map.put(project.name, file);
         }
         return map;

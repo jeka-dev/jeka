@@ -3,6 +3,7 @@ package org.jerkar.api.ide.eclipse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.awt.*;
 import java.io.File;
 import java.util.List;
 
@@ -21,7 +22,6 @@ import org.junit.Test;
 public class JkEclipseClasspathGeneratorTest {
 
     @Test
-    @Ignore
     public void generate() throws Exception {
         final File top = unzipToDir("sample-multi-scriptless.zip");
         // JkLog.silent(true);
@@ -85,7 +85,7 @@ public class JkEclipseClasspathGeneratorTest {
         final List<File> resFiles = base2Layout.resources().files(false);
         assertEquals(1, resFiles.size());
         assertEquals("base.txt", resFiles.get(0).getName());
-        assertEquals(4, baseProject2.getDependencies().list().size());
+        assertEquals(5, baseProject2.getDependencies().list().size());
 
         final JkJavaProject coreProject2 = new JkJavaProject(core);
         JkUtilsFile.writeString(new File(core, ".classpath"), coreClasspath, false);
@@ -95,8 +95,6 @@ public class JkEclipseClasspathGeneratorTest {
         assertEquals(1, coreDeps2.size());
         final JkComputedDependency baseProjectDep = (JkComputedDependency) coreDeps2.get(0).dependency();
         assertTrue(JkUtilsFile.isSame(base, baseProjectDep.ideProjectBaseDir()));
-
-        //Desktop.getDesktop().open(top);
 
         JkUtilsFile.deleteDir(top);
     }

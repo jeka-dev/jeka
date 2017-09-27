@@ -1,10 +1,16 @@
 package org.jerkar.api.utils;
 
+import com.sun.java.swing.plaf.windows.WindowsTreeUI;
+
 import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
+import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Utility class providing convenient methods to deal with {@link java.nio.file.Path}.
@@ -19,6 +25,14 @@ public class JkUtilsPath {
     public static DirectoryStream<Path> newDirectoryStream(Path root, DirectoryStream.Filter<Path> filter) {
         try {
             return Files.newDirectoryStream(root, filter);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
+    }
+
+    public static List<Path> listDirectChildren(Path path) {
+        try (Stream stream = Files.list(path)) {
+            return (List<Path>) stream.collect(Collectors.toList());
         } catch (IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }

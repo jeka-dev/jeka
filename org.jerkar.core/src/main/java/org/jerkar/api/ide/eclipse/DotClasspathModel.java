@@ -1,6 +1,8 @@
 package org.jerkar.api.ide.eclipse;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -40,8 +42,8 @@ final class DotClasspathModel {
         this.classpathentries.addAll(classpathentries);
     }
 
-    static DotClasspathModel from(File dotClasspathFile) {
-        final Document document = JkUtilsXml.documentFrom(dotClasspathFile);
+    static DotClasspathModel from(Path dotClasspathFile) {
+        final Document document = JkUtilsXml.documentFrom(dotClasspathFile.toFile());
         return from(document);
     }
 
@@ -70,7 +72,7 @@ final class DotClasspathModel {
         return null;
     }
 
-    public Sources sourceDirs(File baseDir, Sources.TestSegregator segregator) {
+    public Sources sourceDirs(Path baseDir, Sources.TestSegregator segregator) {
         final List<JkFileTree> prods = new LinkedList<>();
         final List<JkFileTree> tests = new LinkedList<>();
         for (final ClasspathEntry classpathEntry : classpathentries) {
@@ -97,9 +99,9 @@ final class DotClasspathModel {
         return result;
     }
 
-    public List<Lib> libs(File baseDir, ScopeResolver scopeResolver) {
+    public List<Lib> libs(Path baseDir, ScopeResolver scopeResolver) {
         final List<Lib> result = new LinkedList<>();
-        final Map<String, File> projects = JkEclipseProject.findProjects(baseDir.getParentFile());
+        final Map<String, Path> projects = JkEclipseProject.findProjectPath(baseDir.getParent());
         for (final ClasspathEntry classpathEntry : classpathentries) {
 
             if (classpathEntry.kind.equals(ClasspathEntry.Kind.CON)) {
@@ -107,7 +109,7 @@ final class DotClasspathModel {
                 if (classpathEntry.path.startsWith(ClasspathEntry.JRE_CONTAINER_PREFIX)) {
                     continue;
                 }
-                for (final File file : classpathEntry.conAsFiles(baseDir)) {
+                for (final Path file : classpathEntry.conAsFiles(baseDir)) {
                     result.add(Lib.file(file, scope, classpathEntry.exported));
                 }
 
@@ -138,16 +140,16 @@ final class DotClasspathModel {
                     }
                 }
 
-                final File file = new File(varFile, JkUtilsString.substringAfterFirst(
+                final Path file = Paths.get(varFile).resolve(JkUtilsString.substringAfterFirst(
                         classpathEntry.path, "/"));
-                if (!file.exists()) {
-                    JkLog.warn("Can't find Eclipse classpath entry : " + file.getAbsolutePath());
+                if (!Files.exists(file)) {
+                    JkLog.warn("Can't find Eclipse classpath entry : " + file.toAbsolutePath());
                 }
                 final JkScope scope = scopeResolver.scopeOfLib(Kind.VAR, classpathEntry.path);
                 result.add(Lib.file(file, scope, classpathEntry.exported));
 
             } else if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC)) {
-                if (classpathEntry.isProjectSrc(baseDir.getParentFile(), projects)) {
+                if (classpathEntry.isProjectSrc(baseDir.getParent(), projects)) {
                     final String projectPath = classpathEntry.projectRelativePath(baseDir, projects);
                     result.add(Lib.project(projectPath, JkJavaDepScopes.COMPILE,
                             classpathEntry.exported));
@@ -225,12 +227,12 @@ final class DotClasspathModel {
             return result;
         }
 
-        public JkFileTree srcAsJkDir(File baseDir) {
+        public JkFileTree srcAsJkDir(Path baseDir) {
             if (!this.kind.equals(Kind.SRC)) {
                 throw new IllegalStateException(
                         "Can only get source dir to classpath entry of kind 'src'.");
             }
-            final File dir = new File(baseDir, path);
+            final Path dir = baseDir.resolve(path);
             JkFileTree jkFileTree = JkFileTree.of(dir);
             if (!excluding.isEmpty()) {
                 final String[] patterns = excluding.split("\\|");
@@ -254,59 +256,59 @@ final class DotClasspathModel {
             return this.path.equals(other.path);
         }
 
-        public List<File> conAsFiles(File baseDir) {
+        public List<Path> conAsFiles(Path baseDir) {
             if (!this.kind.equals(Kind.CON)) {
                 throw new IllegalStateException(
                         "Can only get files to classpath entry of kind 'con'.");
             }
-            if (!Lib.CONTAINER_DIR.exists() && !Lib.CONTAINER_USER_DIR.exists()) {
-                JkLog.warn("Eclipse containers directory " + Lib.CONTAINER_USER_DIR.getPath()
-                + " or  " + Lib.CONTAINER_DIR.getPath() + " does not exists... Ignore");
+            if (!Files.exists(Lib.CONTAINER_DIR) && !Files.exists(Lib.CONTAINER_USER_DIR)) {
+                JkLog.warn("Eclipse containers directory " + Lib.CONTAINER_USER_DIR
+                + " or  " + Lib.CONTAINER_DIR + " does not exists... Ignore");
                 return Collections.emptyList();
             }
             final String folderName = path.replace('/', '_').replace('\\', '_');
-            File conFolder = new File(Lib.CONTAINER_USER_DIR, folderName);
-            if (!conFolder.exists()) {
-                conFolder = new File(Lib.CONTAINER_DIR, folderName);
-                if (!conFolder.exists()) {
-                    JkLog.warn("Eclipse containers directory " + conFolder.getPath() + " or "
-                            + new File(Lib.CONTAINER_USER_DIR, folderName).getPath()
+            Path conFolder = Lib.CONTAINER_USER_DIR.resolve(folderName);
+            if (!Files.exists(conFolder)) {
+                conFolder = Lib.CONTAINER_DIR.resolve(folderName);
+                if (!Files.exists(conFolder)) {
+                    JkLog.warn("Eclipse containers directory " + conFolder + " or "
+                            + Lib.CONTAINER_USER_DIR.resolve(folderName)
                             + "  do not exists... ignogre.");
                     return Collections.emptyList();
                 }
             }
             final JkFileTree dirView = JkFileTree.of(conFolder).include("**/*.jar");
-            final List<File> result = new LinkedList<>();
-            result.addAll(dirView.files(false));
+            final List<Path> result = new LinkedList<>();
+            result.addAll(dirView.paths(false));
             return result;
         }
 
-        public File libAsFile(File baseDir, Map<String, File> projectLocationMap) {
+        public Path libAsFile(Path baseDir, Map<String, Path> projectLocationMap) {
             final String pathInProject;
-            final File pathAsFile = new File(path);
-            if (pathAsFile.isAbsolute()  && pathAsFile.exists()) {
+            final Path pathAsFile = Paths.get(path);
+            if (pathAsFile.isAbsolute() && Files.exists(pathAsFile)) {
                 return pathAsFile;
             }
             if (path.startsWith("/")) {
                 final int secondSlashIndex = path.indexOf("/", 1);
                 pathInProject = path.substring(secondSlashIndex + 1);
-                final File otherProjectDir = projectLocation(baseDir.getParentFile(),
+                final Path otherProjectDir = projectLocation(baseDir.getParent(),
                         projectLocationMap);
-                return new File(otherProjectDir, pathInProject);
+                return otherProjectDir.resolve(pathInProject);
             }
-            return new File(baseDir, path);
+            return baseDir.resolve(path);
         }
 
-        public boolean isProjectSrc(File parent, Map<String, File> projectLocationMap) {
+        public boolean isProjectSrc(Path parent, Map<String, Path> projectLocationMap) {
             return path.startsWith("/");
         }
 
-        public String projectRelativePath(File baseDir, Map<String, File> projectLocationMap) {
-            final File projectDir = projectLocation(baseDir.getParentFile(), projectLocationMap);
-            return "../" + projectDir.getName();
+        public String projectRelativePath(Path baseDir, Map<String, Path> projectLocationMap) {
+            final Path projectDir = projectLocation(baseDir.getParent(), projectLocationMap);
+            return baseDir.relativize(projectDir).toString();
         }
 
-        private File projectLocation(File parent, Map<String, File> projectLocationMap) {
+        private Path projectLocation(Path parent, Map<String, Path> projectLocationMap) {
             final int secondSlashIndex = path.indexOf("/", 1);
             final String projectName;
             if (secondSlashIndex == -1) {
@@ -314,10 +316,10 @@ final class DotClasspathModel {
             } else {
                 projectName = path.substring(1, secondSlashIndex);
             }
-            final File otherProjectDir = projectLocationMap.get(projectName);
+            final Path otherProjectDir = projectLocationMap.get(projectName);
             if (otherProjectDir == null) {
                 throw new IllegalStateException("JkEclipseProject " + projectName + " not found in "
-                        + parent.getPath());
+                        + parent);
             }
             return otherProjectDir;
         }

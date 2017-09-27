@@ -5,13 +5,16 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.RUNTIME;
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 
-import java.io.File;
+//import java.io.File;
 
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry;
 import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry.Kind;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsString;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 class ScopeResolverSmart implements ScopeResolver {
 
@@ -24,7 +27,7 @@ class ScopeResolverSmart implements ScopeResolver {
 
     @Override
     public JkScope scopeOfLib(Kind kind, String path) {
-        JkScope scope = scopeOfLibAccordingLocation(new File(path));
+        JkScope scope = scopeOfLibAccordingLocation(Paths.get(path));
         if (wstCommonComponent != null) {
             final ClasspathEntry classpathEntry = ClasspathEntry.of(kind, path);
             if (!wstCommonComponent.contains(classpathEntry)) {
@@ -38,8 +41,8 @@ class ScopeResolverSmart implements ScopeResolver {
         return scope;
     }
 
-    private JkScope scopeOfLibAccordingLocation(File libFile) {
-        final String parent = libFile.getParentFile().getName();
+    private JkScope scopeOfLibAccordingLocation(Path libFile) {
+        final String parent = libFile.getParent().getFileName().toString();
         if (parent.equalsIgnoreCase(COMPILE.name())) {
             return COMPILE;
         }
@@ -52,7 +55,7 @@ class ScopeResolverSmart implements ScopeResolver {
         if (parent.equalsIgnoreCase(RUNTIME.name())) {
             return RUNTIME;
         }
-        final String path = libFile.getPath();
+        final String path = libFile.toString();
         final String name = path.contains("/") ? JkUtilsString.substringAfterLast(path, "/") : path;
         if (name.toLowerCase().contains("junit")) {
             return TEST;

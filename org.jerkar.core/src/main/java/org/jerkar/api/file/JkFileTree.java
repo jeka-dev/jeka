@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.*;
@@ -277,6 +278,17 @@ public final class JkFileTree implements Iterable<File> {
             return new LinkedList<>();
         }
         return JkUtilsFile.filesOf(root, filter.toFileFilter(root), includeFolders);
+    }
+
+    /**
+     * Returns the file contained in this {@link JkFileTree}.
+     */
+    public List<Path> paths(boolean includeFolders) {
+        if (!root.exists()) {
+            return new LinkedList<>();
+        }
+        return JkUtilsFile.filesOf(root, filter.toFileFilter(root), includeFolders)
+                .stream().map(file -> file.toPath()).collect(Collectors.toList());
     }
 
     /**
