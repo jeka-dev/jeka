@@ -1,6 +1,8 @@
 package org.jerkar.api.ide.eclipse;
 
-import java.io.File;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencies;
@@ -33,25 +35,25 @@ public class JkEclipseClasspathApplier {
      * Modifies the specified javaProject in a way it reflects its eclipse .classpath file.
      */
     public void apply(JkJavaProject javaProject) {
-        final File dotClasspathFile = new File(javaProject.getSourceLayout().baseDir(), ".classpath");
-        if (!dotClasspathFile.exists()) {
+        final Path dotClasspathFile =javaProject.getSourceLayout().baseDir().toPath().resolve(".classpath");
+        if (!Files.exists(dotClasspathFile)) {
             throw new JkException(".classpath file not found in " + javaProject.getSourceLayout().baseDir());
         }
-        apply(javaProject, DotClasspathModel.from(dotClasspathFile));
+        apply(javaProject, DotClasspathModel.from(dotClasspathFile.toFile()));
     }
 
     private void apply(JkJavaProject javaProject, DotClasspathModel dotClasspathModel) {
         final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
-        final File baseDir = javaProject.getSourceLayout().baseDir();
-        final JkFileTreeSet sources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources;
-        final JkFileTreeSet testSources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources;
-        final JkFileTreeSet resources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources
+        final Path baseDir = javaProject.getSourceLayout().baseDir().toPath();
+        final JkFileTreeSet sources = dotClasspathModel.sourceDirs(baseDir.toFile(), segregator).prodSources;
+        final JkFileTreeSet testSources = dotClasspathModel.sourceDirs(baseDir.toFile(), segregator).testSources;
+        final JkFileTreeSet resources = dotClasspathModel.sourceDirs(baseDir.toFile(), segregator).prodSources
                 .andFilter(JkProjectSourceLayout.JAVA_RESOURCE_FILTER);
-        final JkFileTreeSet testResources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources
+        final JkFileTreeSet testResources = dotClasspathModel.sourceDirs(baseDir.toFile(), segregator).testSources
                 .andFilter(JkProjectSourceLayout.JAVA_RESOURCE_FILTER);
 
         final ScopeResolver scopeResolver = scopeResolver(baseDir);
-        final List<Lib> libs = dotClasspathModel.libs(baseDir, scopeResolver);
+        final List<Lib> libs = dotClasspathModel.libs(baseDir.toFile(), scopeResolver);
         final JkDependencies dependencies = Lib.toDependencies(/*build*/
                 javaProject.getSourceLayout().baseDir(), libs, scopeResolver, this);
 
@@ -62,7 +64,7 @@ public class JkEclipseClasspathApplier {
         javaProject.setDependencies(dependencies);
     }
 
-    private ScopeResolver scopeResolver(File baseDir) {
+    private ScopeResolver scopeResolver(Path baseDir) {
         if (smartScope) {
             if (WstCommonComponent.existIn(baseDir)) {
                 final WstCommonComponent wstCommonComponent = WstCommonComponent.of(baseDir);

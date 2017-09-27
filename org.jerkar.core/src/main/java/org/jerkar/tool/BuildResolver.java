@@ -2,6 +2,8 @@ package org.jerkar.tool;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,20 +19,20 @@ import org.jerkar.api.utils.JkUtilsString;
  */
 final class BuildResolver {
 
-    private final File baseDir;
+    private final Path baseDir;
 
-    final File buildSourceDir;
+    final Path buildSourceDir;
 
-    final File buildClassDir;
+    final Path buildClassDir;
 
-    final File defaultJavaSource;
+    final Path defaultJavaSource;
 
-    BuildResolver(File baseDir) {
+    BuildResolver(Path baseDir) {
         super();
         this.baseDir = baseDir;
-        this.buildSourceDir = new File(baseDir, JkConstants.BUILD_DEF_DIR);
-        this.buildClassDir = new File(baseDir, JkConstants.BUILD_DEF_BIN_DIR);
-        this.defaultJavaSource = new File(baseDir, JkConstants.DEFAULT_JAVA_SOURCE);
+        this.buildSourceDir = baseDir.resolve(JkConstants.BUILD_DEF_DIR);
+        this.buildClassDir = baseDir.resolve(JkConstants.BUILD_DEF_BIN_DIR);
+        this.defaultJavaSource = baseDir.resolve(JkConstants.DEFAULT_JAVA_SOURCE);
     }
 
     /**
@@ -56,7 +58,7 @@ final class BuildResolver {
     }
 
     boolean hasBuildSource() {
-        if (!buildSourceDir.exists()) {
+        if (!Files.exists(buildSourceDir)) {
             return false;
         }
         return JkFileTree.of(buildSourceDir).include("**/*.java").fileCount(false) > 0;
@@ -99,7 +101,7 @@ final class BuildResolver {
             if (clazz == null) {
                 throw new JkException("No build class named " + classNameHint + " found.");
             }
-            JkBuild.baseDirContext(baseDir);
+            JkBuild.baseDirContext(baseDir.toFile());
             final JkBuild build;
             try {
                 build = JkUtilsReflect.newInstance(clazz);
@@ -117,7 +119,7 @@ final class BuildResolver {
                     final Class<?> clazz = classLoader.loadGivenClassSourcePath(path);
                     if (baseClass.isAssignableFrom(clazz)
                             && !Modifier.isAbstract(clazz.getModifiers())) {
-                        JkBuild.baseDirContext(baseDir);
+                        JkBuild.baseDirContext(baseDir.toFile());
                         final JkBuild build;
                         try {
                             build = (JkBuild) JkUtilsReflect.newInstance(clazz);
@@ -132,7 +134,7 @@ final class BuildResolver {
         }
 
         // If nothing yet found use defaults
-        JkBuild.baseDirContext(baseDir);
+        JkBuild.baseDirContext(baseDir.toFile());
         final JkBuild result;
         try {
             result = (JkBuild) JkUtilsReflect

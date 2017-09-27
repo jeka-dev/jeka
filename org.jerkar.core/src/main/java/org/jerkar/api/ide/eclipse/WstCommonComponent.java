@@ -1,6 +1,8 @@
 package org.jerkar.api.ide.eclipse;
 
-import java.io.File;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +26,7 @@ class WstCommonComponent {
 
     private static final String LIB_PREFIX = "module:/classpath/lib/";
 
-    public static final WstCommonComponent of(File projectDir) {
+    public static final WstCommonComponent of(Path projectDir) {
         return new WstCommonComponent(parse(projectDir));
     }
 
@@ -47,29 +49,29 @@ class WstCommonComponent {
         return false;
     }
 
-    public static final boolean existIn(File projectDir) {
-        return componentFile(projectDir).exists();
+    public static final boolean existIn(Path projectDir) {
+        return Files.exists(componentFile(projectDir));
     }
 
-    private static File componentFile(File projectDir) {
-        return new File(projectDir, FILE);
+    private static Path componentFile(Path projectDir) {
+        return projectDir.resolve(FILE);
     }
 
-    private static List<ClasspathEntry> parse(File projectDir) {
-        final File file = componentFile(projectDir);
-        if (!file.exists()) {
+    private static List<ClasspathEntry> parse(Path projectDir) {
+        final Path file = componentFile(projectDir);
+        if (!Files.exists(file)) {
             throw new IllegalStateException("Can't find " + FILE);
         }
         final Document document = getFileAsDom(file);
         return from(projectDir, document);
     }
 
-    private static Document getFileAsDom(File file) {
+    private static Document getFileAsDom(Path file) {
         final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         try {
             final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc;
-            doc = dBuilder.parse(file);
+            doc = dBuilder.parse(file.toFile());
             doc.getDocumentElement().normalize();
             return doc;
         } catch (final Exception e) {
@@ -77,7 +79,7 @@ class WstCommonComponent {
         }
     }
 
-    private static List<ClasspathEntry> from(File projectDir, Document document) {
+    private static List<ClasspathEntry> from(Path projectDir, Document document) {
         final NodeList nodeList = document.getElementsByTagName("dependent-module");
         final List<ClasspathEntry> result = new LinkedList<>();
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -92,7 +94,7 @@ class WstCommonComponent {
         return result;
     }
 
-    private static ClasspathEntry handleToFile(File projectDir, String handle) {
+    private static ClasspathEntry handleToFile(Path projectDir, String handle) {
         final ClasspathEntry result;
         if (handle.startsWith(VAR_PREFIX)) {
             final String rest = handle.substring(VAR_PREFIX.length());

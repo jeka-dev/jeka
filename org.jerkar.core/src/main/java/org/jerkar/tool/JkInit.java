@@ -49,7 +49,7 @@ public final class JkInit {
     public static <T extends JkBuild> T instanceOf(File base, String... args) {
         final JkInit init = JkInit.of(args);
         init.displayInfo();
-        final Engine engine = new Engine(base);
+        final Engine engine = new Engine(base.toPath());
         final T result = (T) engine.instantiate(init);
         if (result == null) {
             throw new JkException("No build class found for engine located at : " + base.getPath());

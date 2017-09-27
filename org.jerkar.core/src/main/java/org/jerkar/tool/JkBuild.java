@@ -343,7 +343,7 @@ public class JkBuild {
         if (cachedResult != null) {
             return cachedResult;
         }
-        final Engine engine = new Engine(projectDir);
+        final Engine engine = new Engine(projectDir.toPath());
         final T result = engine.getBuild(clazz);
         JkOptions.populateFields(result);
         IMPORTED_BUILD_CONTEXT.get().put(projectRef, result);

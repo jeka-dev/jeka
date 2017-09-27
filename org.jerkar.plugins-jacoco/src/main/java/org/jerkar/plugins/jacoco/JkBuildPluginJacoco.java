@@ -10,6 +10,11 @@ import org.jerkar.tool.JkJavaProjectBuild;
         "It results is production of a coverage report file.")
 public class JkBuildPluginJacoco implements JkBuildPlugin {
 
+    /**
+     * Relative location to the output folder of the generated jacoco report file
+     */
+    public static final String OUTPUT_RELATIVE_PATH = "jacoco/jacoco.exec";
+
     @Override
     public void apply(JkBuild build) {
         if (! (build instanceof JkJavaProjectBuild)) {
@@ -17,7 +22,7 @@ public class JkBuildPluginJacoco implements JkBuildPlugin {
         }
         final JkJavaProject project = ((JkJavaProjectBuild) build).project();
         final JkocoJunitEnhancer junitEnhancer = JkocoJunitEnhancer.of(project.getOutLayout()
-              .outputFile("jacoco/jacoco.exec"));
+              .outputFile(OUTPUT_RELATIVE_PATH));
         project.maker().setJuniter( junitEnhancer.apply( project.maker().getJuniter()) );
     }
     

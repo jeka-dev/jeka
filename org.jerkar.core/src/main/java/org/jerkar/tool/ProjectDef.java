@@ -36,7 +36,7 @@ final class ProjectDef {
      * Creates a project definition by giving its asScopedDependency directory.
      */
     public static ProjectDef of(File rootDir) {
-        final BuildResolver buildResolver = new BuildResolver(rootDir);
+        final BuildResolver buildResolver = new BuildResolver(rootDir.toPath());
         final List<Class<?>> classDefs = new LinkedList<>();
         classDefs.addAll(buildResolver.resolveBuildClasses());
         return new ProjectDef(classDefs);

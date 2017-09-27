@@ -1,6 +1,8 @@
 package org.jerkar.api.file;
 
 import java.io.File;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;

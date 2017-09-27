@@ -2,6 +2,8 @@ package org.jerkar.tool;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -25,6 +27,7 @@ import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsTime;
 import org.jerkar.tool.CommandLine.MethodInvocation;
@@ -52,9 +55,9 @@ final class Engine {
     /**
      * Constructs an engine for specified base directory .
      */
-    Engine(File baseDir) {
+    Engine(Path baseDir) {
         super();
-        this.projectBaseDir = JkUtilsFile.canonicalFile(baseDir);
+        this.projectBaseDir = JkUtilsFile.canonicalFile(baseDir.toFile());
         buildRepos = repos();
         this.buildDependencies = JkDependencies.of();
         this.resolver = new BuildResolver(baseDir);
@@ -89,7 +92,7 @@ final class Engine {
         path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
         JkLog.done();
         this.compileBuild(JkPath.of(path));
-        path.add(this.resolver.buildClassDir);
+        path.add(this.resolver.buildClassDir.toFile());
         JkLog.done();
     }
 
@@ -216,7 +219,7 @@ final class Engine {
                     + toRelativePaths(this.projectBaseDir, this.rootsOfImportedBuilds));
         }
         for (final File file : this.rootsOfImportedBuilds) {
-            final Engine engine = new Engine(file);
+            final Engine engine = new Engine(file.toPath());
             engine.compile(yetCompiledProjects, pathEntries);
             jkPath = jkPath.and(file);
         }
@@ -225,7 +228,7 @@ final class Engine {
 
     private void compileBuild(JkPath buildPath) {
         baseBuildCompiler().withClasspath(buildPath).compile();
-        JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir);
+        JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir.toFile());
     }
 
     private void launch(JkBuild build, PluginDictionnary dictionnary, CommandLine commandLine) {
@@ -320,10 +323,8 @@ final class Engine {
 
     private JkJavaCompiler baseBuildCompiler() {
         final JkFileTree buildSource = JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER);
-        if (!resolver.buildClassDir.exists()) {
-            resolver.buildClassDir.mkdirs();
-        }
-        return JkJavaCompiler.outputtingIn(resolver.buildClassDir).andSources(buildSource).failOnError(true);
+        JkUtilsPath.createDir(resolver.buildClassDir);
+        return JkJavaCompiler.outputtingIn(resolver.buildClassDir.toFile()).andSources(buildSource).failOnError(true);
     }
 
     private JkDependencyResolver getBuildDefDependencyResolver() {

@@ -29,7 +29,7 @@ public final class Main {
         init.displayInfo();
 
         final File workingDir = JkUtilsFile.workingDir();
-        final Engine engine = new Engine(workingDir);
+        final Engine engine = new Engine(workingDir.toPath());
         JkLog.nextLine();
         try {
             engine.execute(init);
@@ -53,7 +53,7 @@ public final class Main {
      */
     public static void exec(File projectDir, String... args) {
         final JkInit init = JkInit.of(args);
-        final Engine engine = new Engine(projectDir);
+        final Engine engine = new Engine(projectDir.toPath());
         engine.execute(init);
     }
 

@@ -1,6 +1,7 @@
 package org.jerkar.api.file;
 
 import java.io.*;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,9 +27,18 @@ public final class JkFileTree implements Iterable<File> {
     /**
      * Creates a {@link JkFileTree} having the specified asScopedDependency directory.
      */
+    @Deprecated
     public static JkFileTree of(File rootDir) {
         return new JkFileTree(rootDir);
     }
+
+    /**
+     * Creates a {@link JkFileTree} having the specified root directory.
+     */
+    public static JkFileTree of(Path rootDir) {
+        return new JkFileTree(rootDir.toFile());
+    }
+
 
     private final File root;
 
@@ -149,14 +159,6 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Copies the specified directories content at the asScopedDependency at this file tree, preserving relative paths.
-     * @return this object.
-     */
-    public JkFileTree importDirContent(Iterable<File> dirsToCopyContent) {
-        return importDirContent(JkUtilsIterable.arrayOf(dirsToCopyContent, File.class));
-    }
-
-    /**
      * Copies the specified files in the asScopedDependency of this directory.
      */
     public JkFileTree importFiles(Iterable<File> files) {
@@ -216,25 +218,6 @@ public final class JkFileTree implements Iterable<File> {
         return JkZipper.of(this);
     }
 
-    /**
-     * Creates a {@link JkFileTree} having the same asScopedDependency directory as this one
-     * but without any filter.
-     */
-    public JkFileTree noFiltering() {
-        return new JkFileTree(root);
-    }
-
-    /**
-     * Returns if this file is contained in this {@link JkFileTree}.
-     */
-    public boolean contains(File file) {
-        if (!this.isAncestorOf(file)) {
-            return false;
-        }
-        final String relativePath = JkUtilsFile.getRelativePath(root, file);
-        return this.filter.accept(relativePath);
-    }
-
     private boolean isAncestorOf(File file) {
         return JkUtilsFile.isAncestor(root, file);
     }
@@ -285,13 +268,6 @@ public final class JkFileTree implements Iterable<File> {
         return this;
     }
 
-    /**
-     * Returns a {@link JkFileTreeSet} made of this {@link JkFileTree} and the
-     * specified one.
-     */
-    public JkFileTreeSet and(JkFileTree dirView) {
-        return JkFileTreeSet.of(this, dirView);
-    }
 
     /**
      * Returns the file contained in this {@link JkFileTree}.
@@ -326,19 +302,6 @@ public final class JkFileTree implements Iterable<File> {
     @Override
     public String toString() {
         return root.getPath() + ":" + filter;
-    }
-
-    /**
-     * Merges the content of all files to the specified file.
-     */
-    public JkFileTree mergeTo(File target) {
-        JkUtilsFile.createFileIfNotExist(target);
-        try (final FileOutputStream outputStream = JkUtilsIO.outputStream(target, true)) {
-            mergeTo(outputStream);
-        } catch (IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
-        }
-        return this;
     }
 
     /**
