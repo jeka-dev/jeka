@@ -13,14 +13,14 @@ import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkBuildPlugin;
+import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.JkConstants;
 import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkJavaProjectBuild;
 import org.jerkar.tool.Main;
+import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 @JkDoc("Generates Eclipse meta data files from a JkJavaProjectBuild")
-public final class JkBuildPluginEclipse implements JkBuildPlugin {
+public final class JkPluginEclipse implements JkPlugin {
 
     @JkDoc("Set it to false to not mention javadoc in generated .classpath file.")
     boolean javadoc = true;

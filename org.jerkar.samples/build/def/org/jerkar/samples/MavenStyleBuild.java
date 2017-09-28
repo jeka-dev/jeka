@@ -11,7 +11,7 @@ import org.jerkar.api.depmanagement.JkPublishRepos;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.tool.JkJavaProjectBuild;
+import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
  * Build sample for a jar project depending on several external modules. This

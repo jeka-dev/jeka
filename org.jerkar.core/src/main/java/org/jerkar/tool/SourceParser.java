@@ -22,14 +22,14 @@ import org.jerkar.api.utils.*;
  *
  * @author Jerome Angibaud
  */
-final class JavaSourceParser {
+final class SourceParser {
 
-    private static JavaSourceParser of(Path baseDir, Path code) {
+    private static SourceParser of(Path baseDir, Path code) {
         return of(baseDir, JkUtilsPath.toUrl(code));
     }
 
-    public static JavaSourceParser of(Path baseDir, Iterable<Path>  files) {
-        JavaSourceParser result = new JavaSourceParser(JkDependencies.of(), JkRepos.empty(),
+    public static SourceParser of(Path baseDir, Iterable<Path>  files) {
+        SourceParser result = new SourceParser(JkDependencies.of(), JkRepos.empty(),
                 new LinkedList<>());
         for (final Path code : files) {
             result = result.and(of(baseDir, code));
@@ -37,12 +37,12 @@ final class JavaSourceParser {
         return result;
     }
 
-    static JavaSourceParser of(Path baseDir, URL codeUrl) {
+    static SourceParser of(Path baseDir, URL codeUrl) {
         try (final InputStream inputStream = JkUtilsIO.inputStream(codeUrl)) {
             final String uncomentedCode = removeComments(inputStream);
             final JkDependencies deps = dependencies(uncomentedCode, baseDir, codeUrl);
             final List<Path>  projects = projects(uncomentedCode, baseDir, codeUrl);
-            return new JavaSourceParser(deps, repos(uncomentedCode, codeUrl), projects);
+            return new SourceParser(deps, repos(uncomentedCode, codeUrl), projects);
         } catch (IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
@@ -54,7 +54,7 @@ final class JavaSourceParser {
 
     private final List<Path>  dependecyProjects;
 
-    private JavaSourceParser(JkDependencies deps, JkRepos repos, List<Path>  dependencyProjects) {
+    private SourceParser(JkDependencies deps, JkRepos repos, List<Path>  dependencyProjects) {
         super();
         this.dependencies = deps;
         this.importRepos = repos;
@@ -62,8 +62,8 @@ final class JavaSourceParser {
     }
 
     @SuppressWarnings("unchecked")
-    private JavaSourceParser and(JavaSourceParser other) {
-        return new JavaSourceParser(this.dependencies.and(other.dependencies),
+    private SourceParser and(SourceParser other) {
+        return new SourceParser(this.dependencies.and(other.dependencies),
                 this.importRepos.and(other.importRepos), JkUtilsIterable.concatLists(
                 this.dependecyProjects, other.dependecyProjects));
     }

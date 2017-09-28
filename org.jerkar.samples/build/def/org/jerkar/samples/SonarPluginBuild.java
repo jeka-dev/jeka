@@ -6,11 +6,11 @@ import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.plugins.sonar.JkBuildPluginSonar;
+import org.jerkar.plugins.sonar.JkPluginSonar;
 import org.jerkar.plugins.sonar.JkSonar;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.JkJavaProjectBuild;
+import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
  * This build deleteArtifacts, compile,test launch sonar analyse by default.
@@ -31,13 +31,13 @@ public class SonarPluginBuild extends JkJavaProjectBuild {
 
     @Override
     public void init() {
-        this.plugins().configure(new JkBuildPluginSonar()
+        this.plugins().configure(new JkPluginSonar()
                 //     .prop(JkSonar.HOST_URL, sonarEnv.url)
                 .prop(JkSonar.BRANCH, "myBranch"));
     }
 
     public void runSonar() {
-        this.plugins().get(JkBuildPluginSonar.class).run(this);
+        this.plugins().get(JkPluginSonar.class).run(this);
     }
 
     enum SonarEnv {

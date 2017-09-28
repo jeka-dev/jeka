@@ -1,6 +1,7 @@
-package org.jerkar.tool;
+package org.jerkar.tool.builtins.java;
 
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
+import org.jerkar.tool.JkDoc;
 
 /**
  * Options about tests

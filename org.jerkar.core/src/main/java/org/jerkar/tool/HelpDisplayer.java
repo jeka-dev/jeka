@@ -1,26 +1,29 @@
 package org.jerkar.tool;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsReflect;
+import org.jerkar.api.utils.JkUtilsThrowable;
+import org.jerkar.api.utils.JkUtilsXml;
 import org.jerkar.tool.PluginDictionnary.JkPluginDescription;
 import org.jerkar.tool.ProjectDef.ProjectBuildClassDef;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 final class HelpDisplayer {
 
-    public static void help(JkBuild build) {
+    static void help(JkBuild build) {
         JkLog.info("Usage: jerkar [methodA...] [-optionName=value...] [-DsystemPropName=value...]");
         JkLog.info("When no method specified, then 'doDefault' method is processed.");
         JkLog.info("Ex: jerkar javadoc compile -verbose=true -other=xxx -DmyProp=Xxxx");
         JkLog.nextLine();
-        // JkLog.infoUnderline("Build class availbale on this project");
-        // JkProjectDef.of(build.baseDir().baseTree()).logAvailableBuildClasses();
-        // JkLog.nextLine();
-        // JkLog.infoString("To get details on a specific build class, type 'jerkar
-        // help -buildClass=Xxxxxx");
-        // JkLog.nextLine();
         JkLog.infoUnderlined("Help on build class " + build.getClass().getName());
         ProjectBuildClassDef.of(build).log(true);
         JkLog.nextLine();
@@ -28,7 +31,24 @@ final class HelpDisplayer {
         JkLog.nextLine();
     }
 
-    public static void helpPlugins() {
+    static void help(JkBuild build, Path xmlFile) {
+        final Document document = JkUtilsXml.createDocument();
+        final Element buildEl = ProjectDef.ProjectBuildClassDef.of(build).toElement(document);
+        document.appendChild(buildEl);
+        if (xmlFile == null) {
+            JkUtilsXml.output(document, System.out);
+        } else {
+            JkUtilsPath.createFile(xmlFile);
+            try (final OutputStream os = Files.newOutputStream(xmlFile)) {
+                JkUtilsXml.output(document, os);
+            } catch (final IOException e) {
+                throw JkUtilsThrowable.unchecked(e);
+            }
+            JkLog.info("Xml help file generated at " + xmlFile);
+        }
+    }
+
+    static void helpPlugins() {
         JkLog.startln("Looking for plugins");
         final Set<JkPluginDescription> pluginDescriptions = new PluginDictionnary().getAll();
         for (final JkPluginDescription description : pluginDescriptions) {

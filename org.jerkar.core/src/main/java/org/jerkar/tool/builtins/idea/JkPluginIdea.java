@@ -12,14 +12,14 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkBuildPlugin;
+import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.JkConstants;
 import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkJavaProjectBuild;
 import org.jerkar.tool.Main;
+import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 @JkDoc("Provides method to generate Idea Intellij metadata files.")
-public final class JkBuildPluginIdea implements JkBuildPlugin {
+public final class JkPluginIdea implements JkPlugin {
 
 
     @JkDoc("If true, path to cache repository and to Jerkar install will be replaces by $JERKAR_REPO$ and $JERKAR_HOME$ path variable")

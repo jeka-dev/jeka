@@ -1,12 +1,16 @@
 package org.jerkar.tool;
 
 import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
  * Holds constants about project structures
  */
 public final class JkConstants {
 
+    /**
+     * Relative path to the project base directory where output files are generated.
+     */
     public static final String BUILD_OUTPUT_PATH = "build/output";
 
     static final String BUILD_DEF_BIN_DIR_NAME = "build-classes";

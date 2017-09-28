@@ -5,7 +5,7 @@ import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.samples.MavenStyleBuild;
 import org.jerkar.tool.JkImportBuild;
-import org.jerkar.tool.JkJavaProjectBuild;
+import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
  * Simple build demonstrating how Jerkar can handle multi-project build.

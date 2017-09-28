@@ -13,16 +13,16 @@ import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkBuildPlugin;
+import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkJavaProjectBuild;
 import org.jerkar.tool.JkOptions;
+import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 @JkDoc({"Add SonarQube capability to a build.",
         "The ananlysis is performed when the 'run' method is invoked.",
         "To parameterize this plugin just set the relevant sonar properies as options.",
         "For example you can launch the build whith '-sonar.host.url=http://myserver/..' to specify the SonarQube server url."})
-public class JkBuildPluginSonar implements JkBuildPlugin {
+public class JkPluginSonar implements JkPlugin {
 
     private final Map<String, String> properties = new HashMap<>();
 
@@ -62,7 +62,7 @@ public class JkBuildPluginSonar implements JkBuildPlugin {
         }
     }
 
-    public JkBuildPluginSonar prop(String key, String value) {
+    public JkPluginSonar prop(String key, String value) {
         this.properties.put(key, value);
         return this;
     }

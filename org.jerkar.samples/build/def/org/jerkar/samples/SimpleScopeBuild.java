@@ -8,7 +8,7 @@ import static org.jerkar.api.depmanagement.JkPopularModules.JERSEY_SERVER;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.tool.JkJavaProjectBuild;
+import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
  * This build illustrate how one can use other dependency scopes then the standard ones.
@@ -21,7 +21,7 @@ public class SimpleScopeBuild extends JkJavaProjectBuild {
 
     protected JkJavaProject createProject(JkJavaProject project) {
         return project.setDependencies(JkDependencies.builder()
-                .on(file("libs/foo.jar"))
+                .on(baseDir().resolve("libs/foo.jar"))
                 .on(JERSEY_SERVER, "1.19")
                     .mapScope(COMPILE).to(RUNTIME)
                     .and(FOO, PROVIDED).to(BAR, PROVIDED).build());

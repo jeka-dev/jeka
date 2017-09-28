@@ -63,7 +63,7 @@ final class Engine {
     }
 
     private void preCompile() {
-        final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir,
+        final SourceParser parser = SourceParser.of(this.projectBaseDir,
                 JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER).paths(false));
         this.buildDependencies = this.buildDependencies.and(parser.dependencies());
         this.buildRepos = parser.importRepos().and(buildRepos);
@@ -264,7 +264,7 @@ final class Engine {
 
     private static void invoke(JkBuild build, BuildMethod modelMethod, Path fromDir) {
         if (modelMethod.isMethodPlugin()) {
-            JkBuildPlugin plugin = build.plugins().get(modelMethod.pluginClass());
+            JkPlugin plugin = build.plugins().get(modelMethod.pluginClass());
             build.plugins().invoke(plugin, modelMethod.name());
         } else {
             invoke(build, modelMethod.name(), fromDir);
@@ -310,7 +310,7 @@ final class Engine {
         final List<BuildMethod> buildMethods = new LinkedList<>();
         for (final MethodInvocation methodInvokation : invocations) {
             if (methodInvokation.isMethodPlugin()) {
-                final Class<? extends JkBuildPlugin> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName)
+                final Class<? extends JkPlugin> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName)
                         .pluginClass();
                 buildMethods.add(BuildMethod.pluginMethod(clazz, methodInvokation.methodName));
             } else {

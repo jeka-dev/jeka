@@ -1,6 +1,7 @@
-package org.jerkar.tool;
+package org.jerkar.tool.builtins.java;
 
 import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.tool.JkDoc;
 
 /**
  * Standard options for packaging java projects.

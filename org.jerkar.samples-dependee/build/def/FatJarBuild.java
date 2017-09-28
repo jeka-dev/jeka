@@ -7,7 +7,7 @@ import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.samples.AClassicBuild;
 import org.jerkar.tool.JkImportBuild;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.JkJavaProjectBuild;
+import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
  * Simple build demonstrating of how Jerkar can handle multi-project build.

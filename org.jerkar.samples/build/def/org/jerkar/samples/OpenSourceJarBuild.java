@@ -7,7 +7,7 @@ import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.tool.JkJavaProjectBuild;
+import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
  * This build demonstrate how to specified project metadata required to publish on 

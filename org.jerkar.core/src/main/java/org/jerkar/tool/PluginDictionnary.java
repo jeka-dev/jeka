@@ -73,7 +73,7 @@ final class PluginDictionnary {
     }
 
     private static String simpleClassName(String pluginName) {
-        return JkBuildPlugin.class.getSimpleName() + JkUtilsString.capitalize(pluginName);
+        return JkPlugin.class.getSimpleName() + JkUtilsString.capitalize(pluginName);
     }
 
     @Override
@@ -85,7 +85,7 @@ final class PluginDictionnary {
     }
 
     private static <T> Set<JkPluginDescription> loadAllPlugins() {
-        final String nameSuffix = JkBuildPlugin.class.getSimpleName();
+        final String nameSuffix = JkPlugin.class.getSimpleName();
         return loadPlugins( "**/" + nameSuffix + "*", "**/*$" + nameSuffix + "*");
     }
 
@@ -105,7 +105,7 @@ final class PluginDictionnary {
     }
 
     private static JkPluginDescription loadPluginsHavingLongName(String longName) {
-        final Class<? extends JkBuildPlugin> pluginClass = JkClassLoader.current().loadIfExist(longName);
+        final Class<? extends JkPlugin> pluginClass = JkClassLoader.current().loadIfExist(longName);
         if (pluginClass == null) {
             return null;
         }
@@ -113,7 +113,7 @@ final class PluginDictionnary {
     }
 
     private static Set<JkPluginDescription> loadPlugins(String... patterns) {
-        final Set<Class<?>> matchingClasses = JkClassLoader.of(JkBuildPlugin.class).loadClasses(patterns);
+        final Set<Class<?>> matchingClasses = JkClassLoader.of(JkPlugin.class).loadClasses(patterns);
         final Set<Class<?>> result = new HashSet<>();
         return toPluginSet(matchingClasses);
     }
@@ -122,7 +122,7 @@ final class PluginDictionnary {
     private static Set<JkPluginDescription> toPluginSet(Iterable<Class<?>> classes) {
         final Set<JkPluginDescription> result = new TreeSet<>();
         for (final Class<?> clazz : classes) {
-            result.add(new JkPluginDescription((Class<? extends JkBuildPlugin>) clazz));
+            result.add(new JkPluginDescription((Class<? extends JkPlugin>) clazz));
         }
         return result;
     }
@@ -136,7 +136,7 @@ final class PluginDictionnary {
     static class JkPluginDescription implements Comparable<JkPluginDescription> {
 
         private static String shortName(Class<?> clazz) {
-            return JkUtilsString.uncapitalize(JkUtilsString.substringAfterFirst(JkBuildPlugin.class.getSimpleName(),
+            return JkUtilsString.uncapitalize(JkUtilsString.substringAfterFirst(JkPlugin.class.getSimpleName(),
                     clazz.getSimpleName()));
         }
 
@@ -148,9 +148,9 @@ final class PluginDictionnary {
 
         private final String fullName;
 
-        private final Class<? extends JkBuildPlugin> clazz;
+        private final Class<? extends JkPlugin> clazz;
 
-        public JkPluginDescription(Class<? extends JkBuildPlugin> clazz) {
+        public JkPluginDescription(Class<? extends JkPlugin> clazz) {
             super();
             this.shortName = shortName(clazz);
             this.fullName = longName(clazz);
@@ -165,7 +165,7 @@ final class PluginDictionnary {
             return this.fullName;
         }
 
-        public Class<? extends JkBuildPlugin> pluginClass() {
+        public Class<? extends JkPlugin> pluginClass() {
             return clazz;
         }
 

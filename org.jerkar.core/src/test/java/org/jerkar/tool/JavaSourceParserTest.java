@@ -17,13 +17,13 @@ public class JavaSourceParserTest {
     @Test
     public void withOneImport() {
         final URL resource = JavaSourceParserTest.class.getResource("with1import.javasource");
-        final JkDependencies dependencies = JavaSourceParser.of(Paths.get(""), resource).dependencies();
+        final JkDependencies dependencies = SourceParser.of(Paths.get(""), resource).dependencies();
         Assert.assertEquals(1, JkUtilsIterable.listOf(dependencies).size());
     }
 
     @Test
     public void with3Imports() {
-        JavaSourceParser parser = JavaSourceParser.of(Paths.get(""),
+        SourceParser parser = SourceParser.of(Paths.get(""),
                 JavaSourceParserTest.class.getResource("with3Imports.javasource"));
         final JkDependencies dependencies = parser.dependencies();
         Assert.assertEquals(3, JkUtilsIterable.listOf(dependencies).size());
@@ -32,7 +32,7 @@ public class JavaSourceParserTest {
 
     @Test
     public void with3MultiAnnoImports() {
-        JavaSourceParser parser = JavaSourceParser.of(Paths.get(""),
+        SourceParser parser = SourceParser.of(Paths.get(""),
                 JavaSourceParserTest.class.getResource("with3MultiImports.javasource"));
         final JkDependencies dependencies = parser.dependencies();
         Assert.assertEquals(3, JkUtilsIterable.listOf(dependencies).size());
@@ -41,14 +41,14 @@ public class JavaSourceParserTest {
 
     @Test
     public void withoutImport() {
-        final JkDependencies dependencies = JavaSourceParser.of(Paths.get(""),
+        final JkDependencies dependencies = SourceParser.of(Paths.get(""),
                 JavaSourceParserTest.class.getResource("withoutImport.javasource")).dependencies();
         Assert.assertEquals(0, JkUtilsIterable.listOf(dependencies).size());
     }
 
     @Test
     public void with2ProjectImports() {
-        final List<Path> projects = JavaSourceParser.of(Paths.get(""),
+        final List<Path> projects = SourceParser.of(Paths.get(""),
                 JavaSourceParserTest.class.getResource("with2projectImports.javasource"))
                 .projects();
         Assert.assertEquals(2, projects.size());

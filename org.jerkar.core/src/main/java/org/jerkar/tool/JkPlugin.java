@@ -15,7 +15,7 @@ package org.jerkar.tool;
  * exemple command line <code>jerkar sonarQube#run</code> will invoke the <code>run(JkBuild)</code> method of plugin class JkBuildPluginSonarQube.<br/>
  * For <code>apply</code> method, one can use <code>jerkar myPlugin#</code> short-hand instead of <code>jerkar myPlugin#apply</code>.
  * <p>
- * All plugin class must be named as <code>JkBuildPluginXxxxxx</code> where xxxxxx stands for the plugin name. This
+ * All plugin class must be named as <code>JkPluginXxxxxx</code> where xxxxxx stands for the plugin name. This
  * is necessary in order to find plugin class from its name in the classpath.
  * <p>
  * A plugin can be configured at runtime by injecting data in its instance fields by passing argument <i>pluginName#</i>
@@ -24,7 +24,7 @@ package org.jerkar.tool;
  * <h5>Configuration</h5>
  * One may need to configure a plugin in the build class itself in order to no mention the configuration in the
  * command line each time it is invoked. For such build class writer has to instantiate and configure programmatically
- * in the build class then register it by invoking JkBuild#register(JkBuildPlugin) method.
+ * in the build class then register it by invoking JkBuild#register(JkPlugin) method.
  *
  * <h5>Documentation</h5>
  * It's highly recommended to annotate plugin class, fields and methods with @{@link JkDoc} annotation in order to
@@ -37,7 +37,7 @@ package org.jerkar.tool;
  * as it has to be present programmatically in build class.
  *
  */
-public interface JkBuildPlugin {
+public interface JkPlugin {
 
     /**
      * Modify the specified instance in accordance with what this plugin is supposed to do.

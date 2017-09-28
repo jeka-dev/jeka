@@ -15,7 +15,12 @@ import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.system.JkInfo;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.*;
+import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsObject;
+import org.jerkar.api.utils.JkUtilsPath;
+import org.jerkar.api.utils.JkUtilsReflect;
+import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.CommandLine.JkPluginSetup;
 
 /**
@@ -127,7 +132,7 @@ public final class JkInit {
 
     private static LoadResult loadOptionsAndSystemProps(String[] args) {
         final Map<String, String> sysProps = getSpecifiedSystemProps(args);
-        JkUtilsTool.setSystemProperties(sysProps);
+        setSystemProperties(sysProps);
         final Map<String, String> optionMap = new HashMap<>();
         optionMap.putAll(loadOptionsProperties());
         final CommandLine commandLine = CommandLine.of(args);
@@ -168,7 +173,7 @@ public final class JkInit {
         if (Files.exists(propFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
         }
-        result.putAll(JkUtilsTool.userSystemProperties());
+        result.putAll(userSystemProperties());
         for (final String arg : args) {
             if (arg.startsWith("-D")) {
                 final int equalIndex = arg.indexOf("=");
@@ -190,7 +195,7 @@ public final class JkInit {
         build.init();
 
         // setup plugins activated in command line
-        final Class<JkBuildPlugin> baseClass = JkClassLoader.of(build.getClass()).load(JkBuildPlugin.class.getName());
+        final Class<JkPlugin> baseClass = JkClassLoader.of(build.getClass()).load(JkPlugin.class.getName());
         final PluginDictionnary dictionnary = new PluginDictionnary();
         final List<JkBuild> importedBuilds = build.importedBuilds().all();
         if (!importedBuilds.isEmpty()) {
@@ -224,7 +229,7 @@ public final class JkInit {
     private static void configureBuild(JkBuild build, Collection<JkPluginSetup> pluginSetups,
             Map<String, String> commandlineOptions, PluginDictionnary dictionnary) {
         JkOptions.populateFields(build);
-        final Path localProps = build.path(JkConstants.BUILD_DEF_DIR + "/build.properties");
+        final Path localProps = build.outputDir().resolve(JkConstants.BUILD_DEF_DIR + "/build.properties");
         if (Files.exists(localProps)) {
             JkOptions.populateFields(build, JkUtilsFile.readPropertyFileAsMap(localProps.toFile()));
         }
@@ -235,10 +240,10 @@ public final class JkInit {
     private static void configureAndActivatePlugins(JkBuild build, Collection<JkPluginSetup> pluginSetups,
             PluginDictionnary dictionnary) {
         for (final JkPluginSetup pluginSetup : pluginSetups) {
-            final Class<? extends JkBuildPlugin> pluginClass = dictionnary.loadByNameOrFail(pluginSetup.pluginName)
+            final Class<? extends JkPlugin> pluginClass = dictionnary.loadByNameOrFail(pluginSetup.pluginName)
                     .pluginClass();
             JkLog.startln("Configuring plugin " + pluginClass.getName());
-            final JkBuildPlugin plugin = build.plugins().getOrCreate(pluginClass, pluginSetup.options);
+            final JkPlugin plugin = build.plugins().getOrCreate(pluginClass, pluginSetup.options);
             JkLog.done("Configuring plugin " + pluginClass.getName() + " with options "
                     + JkOptions.fieldOptionsToString(plugin));
             if (pluginSetup.activated) {
@@ -257,6 +262,21 @@ public final class JkInit {
 
     private static Path bootDir() {
         return Paths.get("./build/boot");
+    }
+
+    private static Map<String, String> userSystemProperties() {
+        final Map<String, String> result = new HashMap<>();
+        final Path userPropFile = JkLocator.jerkarUserHomeDir().resolve("system.properties");
+        if (Files.exists(userPropFile)) {
+            result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
+        }
+        return result;
+    }
+
+    private static void setSystemProperties(Map<String, String> props) {
+        for (final Map.Entry<String, String> entry : props.entrySet()) {
+            System.setProperty(entry.getKey(), entry.getValue());
+        }
     }
 
     private static class LoadResult {

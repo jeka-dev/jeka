@@ -2,13 +2,13 @@ package org.jerkar.plugins.jacoco;
 
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkBuildPlugin;
+import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkJavaProjectBuild;
+import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 @JkDoc("Modify JkJavaProject in order it runs unit tests with Jacoco agent coverage test tool. " +
         "It results is production of a coverage report file.")
-public class JkBuildPluginJacoco implements JkBuildPlugin {
+public class JkPluginJacoco implements JkPlugin {
 
     /**
      * Relative location to the output folder of the generated jacoco report file
