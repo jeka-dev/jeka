@@ -1,6 +1,9 @@
 package org.jerkar.tool.builtins.eclipse;
 
-import java.io.File;
+
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -8,7 +11,7 @@ import org.jerkar.api.ide.eclipse.JkEclipseClasspathGenerator;
 import org.jerkar.api.ide.eclipse.JkEclipseProject;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkBuildPlugin;
 import org.jerkar.tool.JkConstants;
@@ -47,13 +50,13 @@ public final class JkBuildPluginEclipse implements JkBuildPlugin {
 
     @JkDoc("Generates Eclipse .classpath file according project dependencies.")
     public void generateFiles(JkBuild build) {
-        final File dotProject = build.file(".project");
+        final Path dotProject = build.baseDir().resolve(".project");
         if (build instanceof JkJavaProjectBuild) {
             final JkJavaProjectBuild javaProjectBuild = (JkJavaProjectBuild) build;
             final JkJavaProject javaProject = javaProjectBuild.project();
-            final List<File> importedBuildProjects = new LinkedList<>();
+            final List<Path> importedBuildProjects = new LinkedList<>();
             for (final JkBuild depBuild : build.importedBuilds().directs()) {
-                importedBuildProjects.add(depBuild.baseTree().root());
+                importedBuildProjects.add(depBuild.baseTree().rootPath());
             }
             final JkEclipseClasspathGenerator classpathGenerator = new JkEclipseClasspathGenerator(javaProject);
             classpathGenerator.setBuildDependencyResolver(build.buildDependencyResolver(), build.buildDependencies());
@@ -64,14 +67,14 @@ public final class JkBuildPluginEclipse implements JkBuildPlugin {
             // generator.fileDependencyToProjectSubstitution = this.fileDependencyToProjectSubstitution;
             // generator.projectDependencyToFileSubstitutions = this.projectDependencyToFileSubstitutions;
             final String result = classpathGenerator.generate();
-            final File dotClasspath = build.file(".classpath");
-            JkUtilsFile.writeString(dotClasspath, result, false);
+            final Path dotClasspath = build.baseDir().resolve(".classpath");
+            JkUtilsPath.write(dotClasspath, result.getBytes(Charset.forName("UTF-8")));
 
-            if (!dotProject.exists()) {
+            if (!Files.exists(dotProject)) {
                 JkEclipseProject.ofJavaNature(build.baseTree().root().getName()).writeTo(dotProject);
             }
         } else {
-            if (!dotProject.exists()) {
+            if (!Files.exists(dotProject)) {
                 JkEclipseProject.ofSimpleNature(build.baseTree().root().getName()).writeTo(dotProject);
             }
         }
@@ -79,12 +82,12 @@ public final class JkBuildPluginEclipse implements JkBuildPlugin {
 
     @JkDoc("Generate Eclipse files on all subfolder of the current directory. Only subfolder having a build/def directory are impacted.")
     public void generateAll(JkBuild build) {
-        final Iterable<File> folders = build.baseTree()
+        final Iterable<Path> folders = build.baseTree()
                 .include("**/" + JkConstants.BUILD_DEF_DIR)
                 .exclude("**/build/output/**")
-                .files(true);
-        for (final File folder : folders) {
-            final File projectFolder = folder.getParentFile().getParentFile();
+                .paths(true);
+        for (final Path folder : folders) {
+            final Path projectFolder = folder.getParent().getParent();
             JkLog.startln("Generating Eclipse files on " + projectFolder);
             Main.exec(projectFolder, "eclipse#generateFiles");
             JkLog.done();

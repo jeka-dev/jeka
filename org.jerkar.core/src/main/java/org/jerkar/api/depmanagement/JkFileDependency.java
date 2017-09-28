@@ -1,6 +1,9 @@
 package org.jerkar.api.depmanagement;
 
+import org.jerkar.api.utils.JkUtilsPath;
+
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -13,5 +16,10 @@ public interface JkFileDependency extends JkDependency {
     /**
      * Returns files constituting this file dependencies.
      */
-    List<File> files();
+    @Deprecated
+    default List<File> files() {
+        return JkUtilsPath.filesOf(paths());
+    }
+
+    List<Path> paths();
 }

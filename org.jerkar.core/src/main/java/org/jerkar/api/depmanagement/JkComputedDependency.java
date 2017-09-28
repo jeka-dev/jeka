@@ -14,6 +14,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
 
 /**
  * Dependency on computed resource. More concretely, this is a file dependency on files that might not
@@ -175,6 +176,11 @@ public class JkComputedDependency implements JkFileDependency {
             throw new IllegalStateException(this + " didn't generate " + missingFiles);
         }
         return JkUtilsIterable.concatLists(files, this.extraFileSupplier.get());
+    }
+
+    @Override
+    public List<Path> paths() {
+        return JkUtilsPath.pathsOf(this.files());
     }
 
     /**

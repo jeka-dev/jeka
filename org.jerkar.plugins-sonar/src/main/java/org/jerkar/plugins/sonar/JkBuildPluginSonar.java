@@ -7,7 +7,7 @@ import java.util.Map;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.api.file.JkPath;
+import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
@@ -29,7 +29,7 @@ public class JkBuildPluginSonar implements JkBuildPlugin {
     public static JkSonar configureSonarFrom(JkJavaProject project) {
         final JkProjectSourceLayout sourceLayout = project.getSourceLayout();
         final File baseDir = sourceLayout.baseDir();
-        final JkPath libs = project.maker().getDependencyResolver().get(project.getDependencies(),
+        final JkPathSequence libs = project.maker().getDependencyResolver().get(project.getDependencies(),
                 JkJavaDepScopes.RUNTIME, JkJavaDepScopes.PROVIDED);
         final File testReportDir = project.getOutLayout().testReportDir();
         final JkVersionedModule module = project.getVersionedModule();

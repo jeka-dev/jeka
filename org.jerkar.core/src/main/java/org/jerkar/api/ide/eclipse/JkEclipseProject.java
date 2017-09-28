@@ -93,7 +93,16 @@ public final class JkEclipseProject {
         return natures.contains("org.eclipse.jdt.core.javanature");
     }
 
+    @Deprecated
     public void writeTo(File dotProjectFile) {
+        try {
+            writeToFile(dotProjectFile.toPath());
+        } catch (final FileNotFoundException | FactoryConfigurationError | XMLStreamException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void writeTo(Path dotProjectFile) {
         try {
             writeToFile(dotProjectFile);
         } catch (final FileNotFoundException | FactoryConfigurationError | XMLStreamException e) {
@@ -101,9 +110,9 @@ public final class JkEclipseProject {
         }
     }
 
-    private void writeToFile(File dotProjectFile) throws XMLStreamException,
+    private void writeToFile(Path dotProjectFile) throws XMLStreamException,
     FactoryConfigurationError, FileNotFoundException {
-        try(OutputStream fos = new FileOutputStream(dotProjectFile)) {
+        try(OutputStream fos = Files.newOutputStream(dotProjectFile)) {
 
             final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(fos,
                     "UTF-8");

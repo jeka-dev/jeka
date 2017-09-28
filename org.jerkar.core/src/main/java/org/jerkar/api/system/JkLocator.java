@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.jerkar.api.utils.*;
 
@@ -45,10 +48,24 @@ public final class JkLocator {
     }
 
     /**
+     * Returns the Jerkar jar file currently used in the running process.
+     */
+    public static Path jerkarJarPath() {
+        return jerkarJarFile().toPath();
+    }
+
+    /**
      * Returns the directory where is installed the running Jerkar instance.
      */
     public static File jerkarHome() {
         return jerkarJarFile().getParentFile();
+    }
+
+    /**
+     * Returns the directory where is installed the running Jerkar instance.
+     */
+    public static Path jerkarHomePath() {
+        return jerkarJarFile().getAbsoluteFile().toPath().getParent();
     }
 
     /**
@@ -76,6 +93,24 @@ public final class JkLocator {
         if (!result.exists()) {
             JkLog.info("Create Jerkar user directory : " + result.getPath());
             result.mkdirs();
+        }
+        return result;
+    }
+
+    /**
+     * Returns the Jerkar user directory.
+     */
+    public static Path jerkarUserHomePath() {
+        final Path result;
+        final String env = System.getenv(JK_USER_HOM_ENV_NAME);
+        if (!JkUtilsString.isBlank(env)) {
+            result = Paths.get(env);
+        } else {
+            result = JkUtilsFile.userHomePath().resolve(".jerkar");
+        }
+        if (!Files.exists(result)) {
+            JkLog.info("Create Jerkar user directory : " + result);
+            JkUtilsPath.createDirectories(result);
         }
         return result;
     }

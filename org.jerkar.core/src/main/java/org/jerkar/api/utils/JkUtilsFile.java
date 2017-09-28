@@ -15,6 +15,9 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -183,8 +186,16 @@ public final class JkUtilsFile {
      * {@link Properties} object.
      */
     public static Properties readPropertyFile(File propertyfile) {
+        return readPropertyFile(propertyfile.toPath());
+    }
+
+    /**
+     * Returns the content of the specified property file as a
+     * {@link Properties} object.
+     */
+    public static Properties readPropertyFile(Path propertyfile) {
         final Properties props = new Properties();
-        try (FileInputStream fileInputStream = new FileInputStream(propertyfile)){
+        try (InputStream fileInputStream = Files.newInputStream(propertyfile)){
             props.load(fileInputStream);
         } catch (final Exception e) {
             throw JkUtilsThrowable.unchecked(e);
@@ -197,6 +208,11 @@ public final class JkUtilsFile {
      * object.
      */
     public static Map<String, String> readPropertyFileAsMap(File propertyfile) {
+        final Properties properties = readPropertyFile(propertyfile);
+        return JkUtilsIterable.propertiesToMap(properties);
+    }
+
+    public static Map<String, String> readPropertyFileAsMap(Path propertyfile) {
         final Properties properties = readPropertyFile(propertyfile);
         return JkUtilsIterable.propertiesToMap(properties);
     }
@@ -470,6 +486,14 @@ public final class JkUtilsFile {
     public static File userHome() {
         return new File(System.getProperty("user.home"));
     }
+
+    /**
+     * Return the user directory as given by system property <i>user.home</i>.
+     */
+    public static Path userHomePath() {
+        return Paths.get(System.getProperty("user.home"));
+    }
+
 
     /**
      * Writes the specified content in the the specified file. If append is

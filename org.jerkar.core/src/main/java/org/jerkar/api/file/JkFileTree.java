@@ -1,6 +1,7 @@
 package org.jerkar.api.file;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -70,15 +71,8 @@ public final class JkFileTree implements Iterable<File> {
      * relative path to this asScopedDependency as asScopedDependency directory.
      */
     public JkFileTree go(String relativePath) {
-        final File newBase = new File(root, relativePath);
-        return new JkFileTree(newBase);
-    }
-
-    /**
-     * @deprecated use {@link #go(String)} instead
-     */
-    public JkFileTree from(String relativePath) {
-        return go(relativePath);
+        Path path = root.toPath().resolve(relativePath);
+        return JkFileTree.of(path);
     }
 
     /**
@@ -97,6 +91,17 @@ public final class JkFileTree implements Iterable<File> {
      */
     public File file(String relativePath) {
         return JkUtilsFile.canonicalFile(new File(root, relativePath));
+    }
+
+    /**
+     * Copies files contained in this {@link JkFileTree} to the specified
+     * directory.
+     */
+    public int copyTo(Path destinationDir) {
+        if (!Files.exists(destinationDir)) {
+            JkUtilsPath.createDirectories(destinationDir);
+        }
+        return JkUtilsPath.copyDirContent(root.toPath(), destinationDir);
     }
 
     /**

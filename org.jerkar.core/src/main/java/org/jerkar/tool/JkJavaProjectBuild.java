@@ -1,7 +1,5 @@
 package org.jerkar.tool;
 
-import java.io.File;
-
 import org.jerkar.api.depmanagement.JkDependencyNode;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;

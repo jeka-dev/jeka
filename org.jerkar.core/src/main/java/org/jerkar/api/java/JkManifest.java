@@ -6,16 +6,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
 
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsThrowable;
-import org.jerkar.api.utils.JkUtilsZip;
+import org.jerkar.api.utils.*;
 
 
 /**
@@ -230,8 +228,12 @@ public final class JkManifest {
      * Writes this manifest to the specified file.
      */
     public void writeTo(File file) {
-        JkUtilsFile.createFileIfNotExist(file);
-        try (OutputStream outputStream = new FileOutputStream(file)){
+        writeTo(file.getAbsoluteFile().toPath());
+    }
+
+    public void writeTo(Path file) {
+        JkUtilsPath.createFileSafely(file);
+        try (OutputStream outputStream = Files.newOutputStream(file)) {
             manifest.write(outputStream);
         } catch (final IOException e) {
             throw new RuntimeException(e);
@@ -244,6 +246,14 @@ public final class JkManifest {
      */
     public void writeToStandardLocation(File classDir) {
         writeTo(new File(classDir, PATH));
+    }
+
+    /**
+     * Writes this manifest at the standard place (META-INF/MANIFEST.MF) of the
+     * specified directory.
+     */
+    public void writeToStandardLocation(Path classDir) {
+        writeTo(classDir.resolve(PATH));
     }
 
     private JkManifest(Manifest manifest) {

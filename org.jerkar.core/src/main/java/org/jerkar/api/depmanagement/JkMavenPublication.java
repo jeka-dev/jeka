@@ -2,6 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Set;
 
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -28,7 +30,15 @@ public final class JkMavenPublication implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public static JkMavenPublication of(File file) {
-        return new JkMavenPublication(JkUtilsIterable.listOf(file), Collections.EMPTY_LIST, null);
+        return new JkMavenPublication(JkUtilsIterable.listOf(file), Collections.emptyList(), null);
+    }
+
+    /**
+     * Creates a Maven publication specifying the file to publish as main artifact.
+     */
+    public static JkMavenPublication of(Path file) {
+        return new JkMavenPublication(JkUtilsPath.filesOf(JkUtilsIterable.listOf(file)),
+                Collections.emptyList(), null);
     }
 
     /**
@@ -93,6 +103,13 @@ public final class JkMavenPublication implements Serializable {
                 this.classifiedArtifacts);
         list.add(artifact);
         return new JkMavenPublication(this.mainArtifacts, list, this.extraInfo);
+    }
+
+    /**
+     * Returns a {@link JkMavenPublication} identical to this one but adding a classified artifact.
+     */
+    public JkMavenPublication and(Path file, String classifier) {
+        return and(file.toFile(), classifier);
     }
 
     private boolean contains(String ext, String classifier) {

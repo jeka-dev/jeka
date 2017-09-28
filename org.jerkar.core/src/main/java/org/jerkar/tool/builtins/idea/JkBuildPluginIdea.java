@@ -66,7 +66,7 @@ public final class JkBuildPluginIdea implements JkBuildPlugin {
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
             JkLog.startln("Generating iml file on " + projectFolder);
-            Main.exec(projectFolder.toFile(), "idea#generateIml");
+            Main.exec(projectFolder, "idea#generateIml");
             JkLog.done();
         }
     }

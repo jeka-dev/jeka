@@ -1,7 +1,7 @@
 package org.jerkar.tool;
 
-import java.io.File;
 import java.lang.reflect.Method;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
@@ -19,14 +19,13 @@ import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkScopeMapping;
 import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkPath;
+import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsTime;
@@ -42,13 +41,13 @@ final class Engine {
 
     private final JkPathFilter BUILD_SOURCE_FILTER = JkPathFilter.include("**/*.java").andExclude("**/_*");
 
-    private final File projectBaseDir;
+    private final Path projectBaseDir;
 
     private JkDependencies buildDependencies;
 
     private JkRepos buildRepos;
 
-    private List<File> rootsOfImportedBuilds = new LinkedList<>();
+    private List<Path>  rootsOfImportedBuilds = new LinkedList<>();
 
     private final BuildResolver resolver;
 
@@ -57,7 +56,7 @@ final class Engine {
      */
     Engine(Path baseDir) {
         super();
-        this.projectBaseDir = JkUtilsFile.canonicalFile(baseDir.toFile());
+        this.projectBaseDir = baseDir.normalize();
         buildRepos = repos();
         this.buildDependencies = JkDependencies.of();
         this.resolver = new BuildResolver(baseDir);
@@ -65,34 +64,34 @@ final class Engine {
 
     private void preCompile() {
         final JavaSourceParser parser = JavaSourceParser.of(this.projectBaseDir,
-                JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER));
+                JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER).paths(false));
         this.buildDependencies = this.buildDependencies.and(parser.dependencies());
         this.buildRepos = parser.importRepos().and(buildRepos);
         this.rootsOfImportedBuilds = parser.projects();
     }
 
     // Compiles and returns the runtime classpath
-    private JkPath compile() {
-        final LinkedHashSet<File> entries = new LinkedHashSet<>();
+    private JkPathSequence compile() {
+        final LinkedHashSet<Path> entries = new LinkedHashSet<>();
         compile(new HashSet<>(), entries);
-        return JkPath.of(entries).withoutDuplicates();
+        return JkPathSequence.ofPath(entries).withoutDuplicates();
     }
 
-    private void compile(Set<File> yetCompiledProjects, LinkedHashSet<File> path) {
+    private void compile(Set<Path>  yetCompiledProjects, LinkedHashSet<Path>  path) {
         if (!this.resolver.hasBuildSource() || yetCompiledProjects.contains(this.projectBaseDir)) {
             return;
         }
         yetCompiledProjects.add(this.projectBaseDir);
         preCompile(); // This enrich dependencies
-        JkLog.startln("Compiling build classes for project " + this.projectBaseDir.getName());
+        JkLog.startln("Compiling build classes for project " + this.projectBaseDir.getFileName().toString());
         JkLog.startln("Resolving compilation classpath");
         final JkDependencyResolver buildClassDependencyResolver = getBuildDefDependencyResolver();
-        final JkPath buildPath = buildClassDependencyResolver.get(this.buildDefDependencies());
-        path.addAll(buildPath.entries());
-        path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
+        final JkPathSequence buildPath = buildClassDependencyResolver.get(this.buildDefDependencies());
+        path.addAll(buildPath.pathEntries());
+        path.addAll(compileDependentProjects(yetCompiledProjects, path).pathEntries());
         JkLog.done();
-        this.compileBuild(JkPath.of(path));
-        path.add(this.resolver.buildClassDir.toFile());
+        this.compileBuild(JkPathSequence.ofPath(path));
+        path.add(this.resolver.buildClassDir);
         JkLog.done();
     }
 
@@ -117,10 +116,10 @@ final class Engine {
     void execute(JkInit init) {
         this.buildDependencies = this.buildDependencies.andScopeless(init.commandLine().dependencies());
         JkLog.startHeaded("Compiling and instantiating build class");
-        JkPath runtimeClasspath = compile();
+        JkPathSequence runtimeClasspath = compile();
         if (!init.commandLine().dependencies().isEmpty()) {
             JkLog.startln("Grab dependencies specified in command line");
-            final JkPath cmdPath = pathOf(init.commandLine().dependencies());
+            final JkPathSequence cmdPath = pathOf(init.commandLine().dependencies());
             runtimeClasspath = runtimeClasspath.andHead(cmdPath);
             if (JkLog.verbose()) {
                 JkLog.done("Command line extra path : " + cmdPath);
@@ -138,18 +137,18 @@ final class Engine {
         try {
             this.launch(buildAndDict.build, buildAndDict.dictionnary, init.commandLine());
         } catch (final RuntimeException e) {
-            JkLog.error("Engine " + projectBaseDir.getAbsolutePath() + " failed");
+            JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
         }
     }
 
-    private JkPath pathOf(List<? extends JkDependency> dependencies) {
+    private JkPathSequence pathOf(List<? extends JkDependency> dependencies) {
         final JkDependencies deps = JkDependencies.of(dependencies);
         return JkDependencyResolver.of(this.buildRepos).get(deps);
     }
 
     JkBuild instantiate(JkInit init) {
-        final JkPath runtimePath = compile();
+        final JkPathSequence runtimePath = compile();
         JkLog.nextLine();
         final BuildAndPluginDictionnary buildAndDict = getBuildInstance(init, runtimePath);
         if (buildAndDict == null) {
@@ -158,7 +157,7 @@ final class Engine {
         return buildAndDict.build;
     }
 
-    private BuildAndPluginDictionnary getBuildInstance(JkInit init, JkPath runtimePath) {
+    private BuildAndPluginDictionnary getBuildInstance(JkInit init, JkPathSequence runtimePath) {
         final JkClassLoader classLoader = JkClassLoader.current();
         classLoader.addEntries(runtimePath);
         JkLog.trace("Setting build execution classpath to : " + classLoader.childClasspath());
@@ -174,7 +173,7 @@ final class Engine {
             result.dictionnary = dictionnary;
             return result;
         } catch (final RuntimeException e) {
-            JkLog.error("Engine " + projectBaseDir.getAbsolutePath() + " failed");
+            JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
         }
     }
@@ -197,36 +196,36 @@ final class Engine {
                 .build();
     }
 
-    private JkPath localBuildPath() {
-        final List<File> extraLibs = new LinkedList<>();
-        final File localDeflibDir = new File(this.projectBaseDir, JkConstants.BUILD_BOOT);
-        if (localDeflibDir.exists()) {
-            extraLibs.addAll(JkFileTree.of(localDeflibDir).include("**/*.jar").files(false));
+    private JkPathSequence localBuildPath() {
+        final List<Path>  extraLibs = new LinkedList<>();
+        final Path localDeflibDir = this.projectBaseDir.resolve(JkConstants.BUILD_BOOT);
+        if (Files.exists(localDeflibDir)) {
+            extraLibs.addAll(JkFileTree.of(localDeflibDir).include("**/*.jar").paths(false));
         }
-        return JkPath.of(extraLibs).withoutDuplicates();
+        return JkPathSequence.ofPath(extraLibs).withoutDuplicates();
     }
 
-    private static JkPath jerkarLibs() {
-        final List<File> extraLibs = new LinkedList<>();
-        extraLibs.add(JkLocator.jerkarJarFile());
-        return JkPath.of(extraLibs).withoutDuplicates();
+    private static JkPathSequence jerkarLibs() {
+        final List<Path>  extraLibs = new LinkedList<>();
+        extraLibs.add(JkLocator.jerkarJarPath());
+        return JkPathSequence.ofPath(extraLibs).withoutDuplicates();
     }
 
-    private JkPath compileDependentProjects(Set<File> yetCompiledProjects, LinkedHashSet<File> pathEntries) {
-        JkPath jkPath = JkPath.of();
+    private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
+        JkPathSequence pathSequence = JkPathSequence.ofPath();
         if (!this.rootsOfImportedBuilds.isEmpty()) {
             JkLog.info("Compile build classes of dependent projects : "
                     + toRelativePaths(this.projectBaseDir, this.rootsOfImportedBuilds));
         }
-        for (final File file : this.rootsOfImportedBuilds) {
-            final Engine engine = new Engine(file.toPath());
+        for (final Path file : this.rootsOfImportedBuilds) {
+            final Engine engine = new Engine(file);
             engine.compile(yetCompiledProjects, pathEntries);
-            jkPath = jkPath.and(file);
+            pathSequence = pathSequence.and(file);
         }
-        return jkPath;
+        return pathSequence;
     }
 
-    private void compileBuild(JkPath buildPath) {
+    private void compileBuild(JkPathSequence buildPath) {
         baseBuildCompiler().withClasspath(buildPath).compile();
         JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir.toFile());
     }
@@ -257,13 +256,13 @@ final class Engine {
     /**
      * Executes the specified methods given the fromDir as working directory.
      */
-    private static void execute(JkBuild build, Iterable<BuildMethod> methods, File fromDir) {
+    private static void execute(JkBuild build, Iterable<BuildMethod> methods, Path fromDir) {
         for (final BuildMethod method : methods) {
             invoke(build, method, fromDir);
         }
     }
 
-    private static void invoke(JkBuild build, BuildMethod modelMethod, File fromDir) {
+    private static void invoke(JkBuild build, BuildMethod modelMethod, Path fromDir) {
         if (modelMethod.isMethodPlugin()) {
             JkBuildPlugin plugin = build.plugins().get(modelMethod.pluginClass());
             build.plugins().invoke(plugin, modelMethod.name());
@@ -275,7 +274,7 @@ final class Engine {
     /**
      * Invokes the specified method in this build.
      */
-    private static void invoke(JkBuild build, String methodName, File fromDir) {
+    private static void invoke(JkBuild build, String methodName, Path fromDir) {
         final Method method;
         try {
             method = build.getClass().getMethod(methodName);
@@ -287,8 +286,8 @@ final class Engine {
         }
         final String context;
         if (fromDir != null) {
-            final String path = JkUtilsFile.getRelativePath(fromDir, build.baseTree().root()).replace(
-                    File.separator, "/");
+            final String path = fromDir.relativize(build.baseTree().rootPath()).toString().replace(
+                    FileSystems.getDefault().getSeparator(), "/");
             context = " to project " + path + ", class " + build.getClass().getName();
         } else {
             context = "";
@@ -323,7 +322,7 @@ final class Engine {
 
     private JkJavaCompiler baseBuildCompiler() {
         final JkFileTree buildSource = JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER);
-        JkUtilsPath.createDir(resolver.buildClassDir);
+        JkUtilsPath.createDirectories(resolver.buildClassDir);
         return JkJavaCompiler.outputtingIn(resolver.buildClassDir.toFile()).andSources(buildSource).failOnError(true);
     }
 
@@ -337,7 +336,7 @@ final class Engine {
 
     @Override
     public String toString() {
-        return this.projectBaseDir.getName();
+        return this.projectBaseDir.getFileName().toString();
     }
 
     private static JkRepos repos() {
@@ -347,10 +346,10 @@ final class Engine {
                 .and(JkPublishRepo.local().repo());
     }
 
-    private static List<String> toRelativePaths(File from, List<File> files) {
+    private static List<String> toRelativePaths(Path from, List<Path>  files) {
         final List<String> result = new LinkedList<>();
-        for (final File file : files) {
-            final String relPath = JkUtilsFile.getRelativePath(from, file);
+        for (final Path file : files) {
+            final String relPath = from.relativize(file).toString();
             result.add(relPath);
         }
         return result;

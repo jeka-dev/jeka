@@ -1,6 +1,7 @@
 package org.jerkar.api.project.java;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileSystemLocalizable;
 import org.jerkar.api.file.JkFileTreeSet;
-import org.jerkar.api.file.JkPath;
+import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.java.JkJavaCompilerSpec;
 import org.jerkar.api.java.JkJavaVersion;
@@ -99,6 +100,11 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
         this.addDefaultArtifactFiles();
     }
 
+    public JkJavaProject(Path baseDir) {
+        this(baseDir.toFile());
+    }
+
+
     // ----------- artifact management --------------------------------------
 
     protected void addDefaultArtifactFiles() {
@@ -149,7 +155,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
     }
 
     @Override
-    public JkPath runtimeDependencies(JkArtifactFileId artifactFileId) {
+    public JkPathSequence runtimeDependencies(JkArtifactFileId artifactFileId) {
         if (artifactFileId.equals(mainArtifactFileId())) {
             return this.maker.getDependencyResolver().get(
                     this.dependencies.withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.RUNTIME);
@@ -157,7 +163,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
             return this.maker.getDependencyResolver().get(
                     this.dependencies.withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.SCOPES_FOR_TEST);
         } else {
-            return JkPath.of();
+            return JkPathSequence.of();
         }
     }
 

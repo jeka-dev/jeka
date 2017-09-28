@@ -3,6 +3,8 @@ package org.jerkar.tool;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -111,9 +113,7 @@ final class OptionInjector {
             if (type.equals(Float.class) || type.equals(float.class)) {
                 return Float.valueOf(stringValue);
             }
-            if (type.equals(File.class)) {
-                return new File(stringValue);
-            }
+
         } catch (final NumberFormatException e) {
             throw new IllegalArgumentException(e.getMessage(), e);
         }
@@ -121,6 +121,12 @@ final class OptionInjector {
             @SuppressWarnings("rawtypes")
             final Class enumType = type;
             return Enum.valueOf(enumType, stringValue);
+        }
+        if (type.equals(File.class)) {
+            return new File(stringValue);
+        }
+        if (type.equals(Path.class)) {
+            return Paths.get(stringValue);
         }
         return UNHANDLED_TYPE;
     }

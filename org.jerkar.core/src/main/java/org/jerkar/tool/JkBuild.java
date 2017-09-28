@@ -1,31 +1,23 @@
 package org.jerkar.tool;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsObject;
-import org.jerkar.api.utils.JkUtilsReflect;
-import org.jerkar.api.utils.JkUtilsThrowable;
-import org.jerkar.api.utils.JkUtilsXml;
+import org.jerkar.api.utils.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Base class defining commons tasks and utilities necessary for building any
@@ -44,8 +36,6 @@ public class JkBuild {
     }
 
     private final Path baseDir;
-
-    private final Instant buildTime = Instant.now();
 
     private final JkBuildPlugins plugins = new JkBuildPlugins(this);
 
@@ -77,7 +67,7 @@ public class JkBuild {
         this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get(""));
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
         final List<JkBuild> directImportedBuilds = getDirectImportedBuilds();
-        this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), directImportedBuilds);
+        this.importedBuilds = JkImportedBuilds.of(this.baseTree().rootPath(), directImportedBuilds);
     }
 
 
@@ -91,12 +81,6 @@ public class JkBuild {
 
     // -------------------------------- basic functions ---------------------------------------
 
-    /**
-     * Returns the time the build was started.
-     */
-    protected Instant buildTime() {
-        return buildTime;
-    }
 
     /**
      * Returns the base directory tree for this project. All file/directory path are
@@ -109,27 +93,26 @@ public class JkBuild {
     /**
      * Returns the base directory for this project.
      */
-    @Deprecated
-    public final File baseDir() {
-        return baseDir.toFile();
+    public final Path baseDir() {
+        return baseDir;
     }
 
     /**
-     * Returns the base directory for this project.
+     * Returns the output directory where are supposed to be generated output files.
      */
-    public final Path basePath() {
-        return baseDir;
+    public final Path outPath() {
+        return baseDir.resolve(JkConstants.BUILD_OUTPUT_PATH);
     }
 
     /**
      * Short-hand for <code>baseTree().file(relativePath)</code>.
      */
     @Deprecated
-    public final File file(String relativePath) {
+    public final Path file(String relativePath) {
         if (relativePath.isEmpty()) {
-            return baseTree().root();
+            return baseTree().rootPath();
         }
-        return baseTree().file(relativePath);
+        return baseTree().rootPath().resolve(relativePath);
     }
 
     @Deprecated
@@ -146,17 +129,11 @@ public class JkBuild {
     }
 
     /**
-     * Short-hand for <code>ouputTree().file(relativePath)</code>.
+     * The output directory where all the final and intermediate artifacts are
+     * generated.
      */
-    public File ouputFile(String relativePath) {
-        return ouputTree().file(relativePath);
-    }
-
-    /**
-     * Short-hand for <code>ouputTree().file(relativePath)</code>.
-     */
-    public Path ouputPath(String relativePath) {
-        return ouputTree().file(relativePath).toPath();
+    public Path ouput() {
+        return ouputTree().rootPath().toAbsolutePath().normalize();
     }
 
     /**
@@ -179,7 +156,7 @@ public class JkBuild {
     }
 
     protected JkScaffolder createScaffolder() {
-        return new JkScaffolder(this.baseDir.toFile(), this.scaffoldEmbed);
+        return new JkScaffolder(this.baseDir, this.scaffoldEmbed);
     }
 
     protected JkBuildPlugins plugins() {
@@ -223,7 +200,7 @@ public class JkBuild {
     /** Clean the output directory. */
     @JkDoc("Cleans the output directory.")
     public void clean() {
-        JkLog.start("Cleaning output directory " + ouputTree().root().getPath());
+        JkLog.start("Cleaning output directory " + ouput());
         ouputTree().exclude(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteAll();
         JkLog.done();
     }
@@ -244,13 +221,13 @@ public class JkBuild {
             if (help.xmlFile == null) {
                 JkUtilsXml.output(document, System.out);
             } else {
-                JkUtilsFile.createFileIfNotExist(help.xmlFile);
-                try (final OutputStream os = JkUtilsIO.outputStream(help.xmlFile, false)) {
+                JkUtilsPath.createFile(help.xmlFile);
+                try (final OutputStream os = Files.newOutputStream(help.xmlFile)) {
                     JkUtilsXml.output(document, os);
                 } catch (final IOException e) {
                     throw JkUtilsThrowable.unchecked(e);
                 }
-                JkLog.info("Xml help file generated at " + help.xmlFile.getPath());
+                JkLog.info("Xml help file generated at " + help.xmlFile);
             }
         } else {
             HelpDisplayer.help(this);
@@ -291,9 +268,9 @@ public class JkBuild {
             try {
                 JkUtilsReflect.setFieldValue(this, field, subBuild);
             } catch (final RuntimeException e) {
-                File currentClassBaseDir = new File(this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
-                while (!new File(currentClassBaseDir, "build/def").exists() && currentClassBaseDir != null) {
-                    currentClassBaseDir = currentClassBaseDir.getParentFile();
+                Path currentClassBaseDir = Paths.get(this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
+                while (!Files.exists(currentClassBaseDir.resolve("build/def")) && currentClassBaseDir != null) {
+                    currentClassBaseDir = currentClassBaseDir.getParent();
                 }
                 if (currentClassBaseDir == null) {
                     throw new IllegalStateException("Can't inject slave build instance of type " + subBuild.getClass().getSimpleName()
@@ -304,9 +281,9 @@ public class JkBuild {
                 throw new IllegalStateException("Can't inject slave build instance of type " + subBuild.getClass().getSimpleName()
                         + " into field " + field.getDeclaringClass().getName()
                         + "#" + field.getName() + " from directory " + this.baseTree().root()
-                        + "\nBuild class is located in " + currentClassBaseDir.getAbsolutePath()
+                        + "\nBuild class is located in " + currentClassBaseDir
                         + " while working dir is " + JkUtilsFile.workingDir()
-                        + ".\nPlease set working dir to " + currentClassBaseDir.getPath(), e);
+                        + ".\nPlease set working dir to " + currentClassBaseDir, e);
             }
             result.add(subBuild);
         }
@@ -320,7 +297,7 @@ public class JkBuild {
      */
     @SuppressWarnings("unchecked")
     public <T extends JkBuild> T createImportedBuild(Class<T> clazz, String relativePath) {
-        final File projectDir = this.file(relativePath);
+        final Path projectDir = this.file(relativePath);
         final ImportedBuildRef projectRef = new ImportedBuildRef(projectDir, clazz);
         Map<ImportedBuildRef, JkBuild> map = IMPORTED_BUILD_CONTEXT.get();
         if (map == null) {
@@ -331,7 +308,7 @@ public class JkBuild {
         if (cachedResult != null) {
             return cachedResult;
         }
-        final Engine engine = new Engine(projectDir.toPath());
+        final Engine engine = new Engine(projectDir);
         final T result = engine.getBuild(clazz);
         JkOptions.populateFields(result);
         IMPORTED_BUILD_CONTEXT.get().put(projectRef, result);
@@ -344,9 +321,9 @@ public class JkBuild {
 
         final Class<?> clazz;
 
-        ImportedBuildRef(File projectDir, Class<?> clazz) {
+        ImportedBuildRef(Path projectDir, Class<?> clazz) {
             super();
-            this.canonicalFileName = JkUtilsFile.canonicalPath(projectDir);
+            this.canonicalFileName = projectDir.normalize().toAbsolutePath().toString();
             this.clazz = clazz;
         }
 
@@ -391,7 +368,7 @@ public class JkBuild {
         private boolean xml;
 
         @JkDoc("Output help in this xml file. If this option is specified, no need to specify help.xml option.")
-        private File xmlFile;
+        private Path xmlFile;
 
         /**
          * Returns true if the help output must be formatted using XML.

@@ -2,6 +2,7 @@ package org.jerkar.api.java;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,6 +23,8 @@ import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
+import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -54,6 +57,14 @@ public final class JkJavaCompiler {
      */
     public static JkJavaCompiler outputtingIn(File outputDir) {
         return base().withOutputDir(outputDir);
+    }
+
+    /**
+     * Creates a {@link JkJavaCompiler} producing its output in the given
+     * directory.
+     */
+    public static JkJavaCompiler outputtingIn(Path outputDir) {
+        return outputtingIn(outputDir.toFile());
     }
 
     private final List<String> options;
@@ -220,6 +231,13 @@ public final class JkJavaCompiler {
     }
 
     /**
+     * @see #andSources(Iterable)
+     */
+    public JkJavaCompiler andSourceDir(Path dir) {
+        return andSourceDir(dir.toFile());
+    }
+
+    /**
      * Creates a copy of this {@link JkJavaCompiler} but with the specified compiler instance.
      * Since in-process compilers cannot be run in a forked process, this method disables any
      * previous fork options that may have been set.
@@ -258,7 +276,7 @@ public final class JkJavaCompiler {
         final JavaCompiler compiler = this.compiler != null ? this.compiler : getDefaultOrFail();
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null,
                 null);
-        String message = "Compiling " + javaSourceFiles.size() + " source files";
+        String message = "Compiling " + javaSourceFiles.size() + " source files to " + JkUtilsFile.canonicalPath(outputDir);
         if (JkLog.verbose()) {
             message = message + " using options : " + JkUtilsString
                     .join(options, " ");
@@ -282,7 +300,7 @@ public final class JkJavaCompiler {
         JkLog.done();
         if (!result) {
             if (failOnError) {
-                throw new IllegalStateException("Compilation failed.");
+                throw new IllegalStateException("Compilation failed with options " + this.options);
             }
             return false;
         }

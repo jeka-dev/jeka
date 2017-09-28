@@ -2,6 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -13,7 +14,7 @@ import java.util.Set;
 
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkPath;
+import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -483,7 +484,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * Returns all files declared as {@link JkFileDependency} for any of the
      * specified scopes.
      */
-    public JkPath localFileDependencies(JkScope... scopes) {
+    public JkPathSequence localFileDependencies(JkScope... scopes) {
         final LinkedHashSet<File> set = new LinkedHashSet<>();
         for (final JkScopedDependency scopedDependency : this.dependencies) {
             if (!(scopedDependency.dependency() instanceof JkFileDependency)) {
@@ -494,7 +495,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
                 set.addAll(fileDeps.files());
             }
         }
-        return JkPath.of(set);
+        return JkPathSequence.of(set);
     }
 
     /**
@@ -502,7 +503,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * the specified scopes. If no scopes are specified then it returns all file
      * system dependencies.
      */
-    public JkPath fileSystemDepsOnly(JkScope... scopes) {
+    public JkPathSequence fileSystemDepsOnly(JkScope... scopes) {
         final LinkedHashSet<File> set = new LinkedHashSet<>();
         for (final JkScopedDependency scopedDependency : this.dependencies) {
             if (!(scopedDependency.dependency() instanceof JkFileSystemDependency)) {
@@ -514,7 +515,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
                 set.addAll(fileDeps.files());
             }
         }
-        return JkPath.of(set);
+        return JkPathSequence.of(set);
     }
 
     /**
@@ -659,6 +660,13 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
          */
         public JkFluentScopeableBuilder on(File... files) {
             return on(JkFileSystemDependency.of(Arrays.asList(files)));
+        }
+
+        /**
+         * Add the specified files as dependencies.
+         */
+        public JkFluentScopeableBuilder on(Path... files) {
+            return on(JkFileSystemDependency.ofPaths(Arrays.asList(files)));
         }
 
         /**

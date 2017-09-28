@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkPath;
+import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.file.JkZipper.JkCheckSumer;
 import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.JkClasspath;
@@ -58,7 +58,7 @@ public class JkJavaProjectMaker {
 
     private JkPgp pgpSigner;
 
-    private Map<Set<JkScope>, JkPath> depCache = new HashMap<>();
+    private Map<Set<JkScope>, JkPathSequence> depCache = new HashMap<>();
 
     // commons ------------------------
 
@@ -112,7 +112,7 @@ public class JkJavaProjectMaker {
         status.javadocGenerated = true;
     }
 
-    public JkPath depsFor(JkScope... scopes) {
+    public JkPathSequence depsFor(JkScope... scopes) {
         final Set<JkScope> scopeSet = new HashSet<>(Arrays.asList(scopes));
         return this.depCache.computeIfAbsent(scopeSet,
                 scopes1 -> this.dependencyResolver.get(getDefaultedDependencies(), scopes ));
@@ -149,7 +149,7 @@ public class JkJavaProjectMaker {
     public final JkRunnables compiler;
 
     private JkJavaCompiler applyCompileSource(JkJavaCompiler baseCompiler) {
-        final JkPath classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
+        final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
         return baseCompiler
                 .withClasspath(classpath)
                 .andSources(project.getSourceLayout().sources())
@@ -186,7 +186,7 @@ public class JkJavaProjectMaker {
     public final JkRunnables testCompiler;
 
     private JkJavaCompiler applyTestCompileSource(JkJavaCompiler baseCompiler) {
-        final JkPath classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andHead(project.getOutLayout().classDir());
+        final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andHead(project.getOutLayout().classDir());
         return baseCompiler
                 .withClasspath(classpath)
                 .andSources(project.getSourceLayout().tests())

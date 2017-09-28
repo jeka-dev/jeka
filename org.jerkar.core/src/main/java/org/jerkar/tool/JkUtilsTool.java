@@ -1,6 +1,7 @@
 package org.jerkar.tool;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,8 +15,8 @@ public final class JkUtilsTool {
 
     static Map<String, String> userSystemProperties() {
         final Map<String, String> result = new HashMap<>();
-        final File userPropFile = new File(JkLocator.jerkarUserHome(), "system.properties");
-        if (userPropFile.exists()) {
+        final Path userPropFile = JkLocator.jerkarUserHomePath().resolve("system.properties");
+        if (Files.exists(userPropFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
         }
         return result;

@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
-import org.jerkar.api.file.JkPath;
+import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsJdk;
@@ -134,7 +134,7 @@ public final class JkJavadocMaker {
     private String[] toArguments(File outputDir) {
         final List<String> list = new LinkedList<>();
         list.add("-sourcepath");
-        list.add(JkPath.of(this.srcDirs.roots()).toString());
+        list.add(JkPathSequence.of(this.srcDirs.roots()).toString());
         list.add("-d");
         list.add(outputDir.getAbsolutePath());
         if (JkLog.verbose()) {
@@ -146,7 +146,7 @@ public final class JkJavadocMaker {
         list.add(JkUtilsJdk.toolsJar().getPath());
         if (classpath != null && classpath.iterator().hasNext()) {
             list.add("-classpath");
-            list.add(JkPath.of(this.classpath).toString());
+            list.add(JkPathSequence.of(this.classpath).toString());
         }
         list.addAll(extraArgs);
 

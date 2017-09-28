@@ -1,14 +1,14 @@
 package org.jerkar.api.utils;
 
-import com.sun.java.swing.plaf.windows.WindowsTreeUI;
-
-import java.io.FileFilter;
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -16,12 +16,42 @@ import java.util.stream.Stream;
  * Utility class providing convenient methods to deal with {@link java.nio.file.Path}.
  * Mainly for wrapping checked exceptions and handle safely null parameters.
  */
-public class JkUtilsPath {
+public final class JkUtilsPath {
 
     private JkUtilsPath() {
         // Do nothing
     }
 
+    public static List<File> filesOf(Iterable<Path> paths) {
+        List<File> result = new LinkedList<>();
+        for (Path path : paths) {
+            result.add(path.toFile());
+        }
+        return result;
+    }
+
+    public static List<Path> pathsOf(Iterable<File> files) {
+        List<Path> result = new LinkedList<>();
+        for (File file : files) {
+            result.add(file.toPath());
+        }
+        return result;
+    }
+
+    /**
+     * Delegates to Files{@link #isSameFile(Path, Path)}
+     */
+    public static boolean isSameFile(Path path1, Path path2) {
+        try {
+            return Files.isSameFile(path1, path2);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
+    }
+
+    /**
+     * Delegates to Files{@link #deleteFile(Path)}
+     */
     public static void deleteFile(Path path) {
         try {
             Files.delete(path);
@@ -30,6 +60,39 @@ public class JkUtilsPath {
         }
     }
 
+    /**
+     * Delegates to {@link Files#createFile(Path, FileAttribute[])}s
+     */
+    public static void createFile(Path path, FileAttribute<?>... attrs) {
+        try {
+            Files.createFile(path, attrs);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
+    }
+
+    /**
+     * Delegates to {@link Files#createFile(Path, FileAttribute[])} but checking first
+     * if the specified file does not already exist. If so, do nothing, else creates
+     * parent directories if needed prior creating the file.
+     */
+    public static void createFileSafely(Path path, FileAttribute<?>... attrs) {
+        if (Files.exists(path)) {
+            return;
+        }
+        try {
+            if (path.getParent() != null) {
+                Files.createDirectories(path.getParent());
+            }
+            Files.createFile(path, attrs);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
+    }
+
+    /**
+     * Delegates to Files{@link #write(Path, byte[], OpenOption...)}
+     */
     public static void write(Path path, byte[] bytes, OpenOption ... options) {
         try {
             Files.write(path, bytes, options);
@@ -57,7 +120,7 @@ public class JkUtilsPath {
     /**
      * Delegates to {@link Files#createDirectories(Path, FileAttribute[])} wrapping checked exception.
      */
-    public static void createDir(Path path, FileAttribute<?>... attrs) {
+    public static void createDirectories(Path path, FileAttribute<?>... attrs) {
         try {
             Files.createDirectories(path, attrs);
         } catch (IOException e) {
@@ -77,13 +140,24 @@ public class JkUtilsPath {
     }
 
     /**
+     * Get the url to the specified path.
+     */
+    public static URL toUrl(Path path) {
+        try {
+            return path.toUri().toURL();
+        } catch (final MalformedURLException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
      * Copies the content of the source directory into the target directory. The root of source directory is
      * not created as an entry of the target directory.
      * @return the copied file count.
      */
     public static int copyDirContent(Path sourceDir, Path targetDir, CopyOption ... copyOptions)  {
         CopyDirVisitor visitor = new CopyDirVisitor(sourceDir, targetDir, copyOptions);
-        createDir(targetDir);
+        createDirectories(targetDir);
         try {
             Files.walkFileTree(sourceDir, visitor);
         } catch (IOException e) {
@@ -121,6 +195,8 @@ public class JkUtilsPath {
             return FileVisitResult.CONTINUE;
         }
     }
+
+
 
 
 }

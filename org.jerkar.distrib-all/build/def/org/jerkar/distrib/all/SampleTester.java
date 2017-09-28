@@ -50,8 +50,8 @@ class SampleTester {
 
     private void testSamples(String className, String... args) {
         JkLog.infoHeaded("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(launchScript.getAbsolutePath()).withWorkingDir(sampleBaseDir.root())
-                .withParametersIf(!JkUtilsString.isBlank(className), "-buildClass=" + className).andParameters(args)
+        JkProcess.of(launchScript.getAbsolutePath()).withWorkingDir(sampleBaseDir.rootPath().toAbsolutePath().normalize().toFile())
+                .withParametersIf(!JkUtilsString.isBlank(className), "-verbose=true -buildClass=" + className).andParameters(args)
                 .failOnError(true).runSync();
     }
 

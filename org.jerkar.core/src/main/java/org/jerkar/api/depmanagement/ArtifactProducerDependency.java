@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jerkar.api.file.JkFileSystemLocalizable;
-import org.jerkar.api.file.JkPath;
+import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 
@@ -47,7 +47,7 @@ class ArtifactProducerDependency extends JkComputedDependency  {
     }
 
     private static List<File> jars(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
-        JkPath result = JkPath.of();
+        JkPathSequence result = JkPathSequence.of();
         for (final JkArtifactFileId artifactFileId : artifactIds) {
             result = result.and( producer.artifactFile(artifactFileId));
         }
@@ -55,7 +55,7 @@ class ArtifactProducerDependency extends JkComputedDependency  {
     }
 
     private static List<File> runtimeDeps(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
-        JkPath result = JkPath.of();
+        JkPathSequence result = JkPathSequence.of();
         for (final JkArtifactFileId artifactFileId : artifactIds) {
             result = result.and( producer.runtimeDependencies(artifactFileId));
         }

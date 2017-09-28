@@ -1,6 +1,7 @@
 package org.jerkar.samples;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.JkDependencies;
@@ -29,12 +30,12 @@ import org.jerkar.tool.JkInit;
  */
 public class AntStyleBuild extends JkBuild {
 
-    File src = file("src/main/java");
-    File buildDir = file("build/output");
-    File classDir = new File(buildDir, "classes");
-    File jarFile = new File(buildDir, "jar/" + this.baseTree().root().getName() + ".jar");
+    Path src = baseDir().resolve("src/main/java");
+    Path buildDir = baseDir().resolve("build/output");
+    Path classDir = ouput().resolve("classes");
+    Path jarFile = ouput().resolve("jar/" + this.baseTree().root().getName() + ".jar");
     JkClasspath classpath = JkClasspath.of(baseTree().include("libs/**/*.jar"));
-    File reportDir = new File(buildDir, "junitRreport");
+    Path reportDir =buildDir.resolve("junitRreport");
 
     @Override
     public void doDefault() {
@@ -56,7 +57,7 @@ public class AntStyleBuild extends JkBuild {
 
     public void run() {
         jar();
-        JkJavaProcess.of().withWorkingDir(jarFile.getParentFile())
+        JkJavaProcess.of().withWorkingDir(jarFile.getParent())
         .andClasspath(classpath)
         .runJarSync(jarFile);
     }
@@ -87,7 +88,7 @@ public class AntStyleBuild extends JkBuild {
     protected String pgpPassword = "mypPgpPassword";
 
     public void publish() {
-        JkPgp pgp = JkPgp.ofSecretRing(new File(pgpPrivateRingFile), pgpPassword);
+        JkPgp pgp = JkPgp.ofSecretRing(Paths.get(pgpPrivateRingFile), pgpPassword);
         JkPublishRepo repo = JkRepo.maven(publishRepo)
                 .withCredential("myRepoUserName", "myRepoPassword")
                 .asPublishRepo().withUniqueSnapshot(false).withSigner(pgp)
@@ -104,8 +105,8 @@ public class AntStyleBuild extends JkBuild {
                 .andGitHubDeveloper("myName", "myName@provider.com");
 
         // Optional : if you want publish sources
-        File srcZip = ouputFile("src.zip");
-        JkZipper.of(this.src).to(srcZip);
+        Path srcZip = ouput().resolve("src.zip");
+        JkZipper.ofPath(this.src).to(srcZip);
 
         JkMavenPublication publication = JkMavenPublication.of(jarFile)
                 .with(info).and(srcZip, "sources");

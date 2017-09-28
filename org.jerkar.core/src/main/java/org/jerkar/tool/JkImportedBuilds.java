@@ -1,6 +1,6 @@
 package org.jerkar.tool;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,7 +18,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
  */
 public final class JkImportedBuilds {
 
-    static JkImportedBuilds of(File masterRootDir, List<JkBuild> builds) {
+    static JkImportedBuilds of(Path masterRootDir, List<JkBuild> builds) {
         return new JkImportedBuilds(masterRootDir, new ArrayList<>(builds));
     }
 
@@ -26,9 +26,9 @@ public final class JkImportedBuilds {
 
     private List<JkBuild> transitiveImports;
 
-    private final File masterBuildRoot;
+    private final Path masterBuildRoot;
 
-    private JkImportedBuilds(File masterDir, List<JkBuild> buildDeps) {
+    private JkImportedBuilds(Path masterDir, List<JkBuild> buildDeps) {
         super();
         this.masterBuildRoot = masterDir;
         this.directImports = Collections.unmodifiableList(buildDeps);
@@ -77,10 +77,10 @@ public final class JkImportedBuilds {
         return result;
     }
 
-    private List<JkBuild> resolveTransitiveBuilds(Set<File> files) {
+    private List<JkBuild> resolveTransitiveBuilds(Set<Path> files) {
         final List<JkBuild> result = new LinkedList<>();
         for (final JkBuild build : directImports) {
-            final File dir = JkUtilsFile.canonicalFile(build.baseTree().root());
+            final Path dir = build.baseDir();
             if (!files.contains(dir)) {
                 result.addAll(build.importedBuilds().resolveTransitiveBuilds(files));
                 result.add(build);

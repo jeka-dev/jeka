@@ -3,6 +3,7 @@ package org.jerkar.api.ide.eclipse;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -55,7 +56,7 @@ public final class JkEclipseClasspathGenerator {
     private JkDependencies buildDependencies;
 
     // content for build class only
-    private List<File> importedBuildProjects = new LinkedList<>();
+    private List<Path> importedBuildProjects = new LinkedList<>();
 
     // --------------------- options --------------------------------
 
@@ -133,7 +134,7 @@ public final class JkEclipseClasspathGenerator {
     /**
      * If the build script depends on build script located in another projects, you must add those projects here.
      */
-    public JkEclipseClasspathGenerator setImportedBuildProjects(List<File> importedBuildProjects) {
+    public JkEclipseClasspathGenerator setImportedBuildProjects(List<Path> importedBuildProjects) {
         this.importedBuildProjects = importedBuildProjects;
         return this;
     }
@@ -192,14 +193,14 @@ public final class JkEclipseClasspathGenerator {
         }
 
         // write entries for project importedBuilds
-        for (final File projectFile : this.importedBuildProjects) {
-            if (paths.contains(projectFile.getPath())) {
+        for (final Path projectFile : this.importedBuildProjects) {
+            if (paths.contains(projectFile)) {
                 continue;
             }
-            paths.add(projectFile.getAbsolutePath());
+            paths.add(projectFile.toAbsolutePath().toString());
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "combineaccessrules", "false", "kind", "src", "exported", "true",
-                    "path", "/" + projectFile.getName());
+                    "path", "/" + projectFile.getFileName().toString());
         }
 
         // Write output

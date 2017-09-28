@@ -2,6 +2,7 @@ package org.jerkar.api.java;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,14 +17,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkPath;
+import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.api.utils.JkUtilsZip;
+import org.jerkar.api.utils.*;
 
 /**
  * A sequence of file to be used as a <code>class path</code>.<br/>
@@ -84,10 +81,10 @@ public final class JkClasspath implements Iterable<File> {
     }
 
     /**
-     * Short hand to create a {@link JkPath} from this {@link JkClasspath}.
+     * Short hand to create a {@link JkPathSequence} from this {@link JkClasspath}.
      */
-    public JkPath asPath() {
-        return JkPath.of(this);
+    public JkPathSequence asPath() {
+        return JkPathSequence.of(this);
     }
 
     /**
@@ -139,6 +136,11 @@ public final class JkClasspath implements Iterable<File> {
      */
     public JkClasspath and(File... files) {
         return and(JkClasspath.of(files));
+    }
+
+    public JkClasspath and(Path... files) {
+        List<Path> paths = Arrays.asList(files);
+        return and(JkUtilsPath.filesOf(paths));
     }
 
     /**

@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jerkar.api.file.JkPath;
+import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
 
@@ -114,11 +114,11 @@ public final class JkDependencyResolver {
      * of the second one and so on.
      * @throws IllegalStateException if the resolution has not been achieved successfully
      */
-    public JkPath get(JkDependencies dependencies, JkScope... scopes) {
+    public JkPathSequence get(JkDependencies dependencies, JkScope... scopes) {
         JkResolveResult resolveResult = null;
         if (internalResolver != null && dependencies.containsModules()) {
             resolveResult = resolveWithInternalResolver(dependencies, dependencies.explicitVersions(), scopes).assertNoError();
-            return JkPath.of(resolveResult.dependencyTree().allFiles()).withoutDuplicates();
+            return JkPathSequence.of(resolveResult.dependencyTree().allFiles()).withoutDuplicates();
         }
         final List<File> result = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : dependencies) {
@@ -128,7 +128,7 @@ public final class JkDependencyResolver {
                 result.addAll(fileDependency.files());
             }
         }
-        return JkPath.of(result).withoutDuplicates();
+        return JkPathSequence.of(result).withoutDuplicates();
     }
 
     private JkResolveResult resolveWithInternalResolver(JkDependencies dependencies, JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {

@@ -1,6 +1,7 @@
 package org.jerkar.api.java;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -153,6 +154,14 @@ public final class JkJavaProcess {
 
     /**
      * Returns a {@link JkJavaProcess} identical to this one but using the specified
+     * working dir.
+     */
+    public JkJavaProcess withWorkingDir(Path workingDir) {
+        return withWorkingDir(workingDir.toFile());
+    }
+
+    /**
+     * Returns a {@link JkJavaProcess} identical to this one but using the specified
      * classpath.
      */
     public JkJavaProcess withClasspath(Iterable<File> classpath) {
@@ -220,6 +229,10 @@ public final class JkJavaProcess {
      */
     public void runJarSync(File jar, String... arguments) {
         runClassOrJarSync(null, jar, arguments);
+    }
+
+    public void runJarSync(Path jar, String... arguments) {
+        runClassOrJarSync(null, jar.toFile(), arguments);
     }
 
     /**

@@ -5,6 +5,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -141,6 +142,15 @@ public final class JkUnit {
         return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess,
                 classesToTest, this.breakOnFailure, this.printOutputOnConsole);
     }
+
+    /**
+     * Returns a copy of this launcher but with the specified report directory output.
+     */
+    public JkUnit withReportDir(Path reportDir) {
+        return new JkUnit(this.classpath, reportDetail, reportDir.toFile(), this.forkedProcess,
+                classesToTest, this.breakOnFailure, this.printOutputOnConsole);
+    }
+
 
     /**
      * Returns a copy of this launcher but that fail fast on the first failure.

@@ -1,6 +1,8 @@
 package org.jerkar.tool;
 
-import java.io.File;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -120,13 +122,13 @@ public final class JkOptions {
     }
 
     private static Map<String, String> loadSystemAndUserOptions() {
-        final File propFile = new File(JkLocator.jerkarHome(), "options.properties");
+        final Path propFile = JkLocator.jerkarHomePath().resolve("options.properties");
         final Map<String, String> result = new HashMap<>();
-        if (propFile.exists()) {
+        if (Files.exists(propFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
         }
-        final File userPropFile = new File(JkLocator.jerkarUserHome(), "options.properties");
-        if (userPropFile.exists()) {
+        final Path userPropFile = JkLocator.jerkarUserHomePath().resolve("options.properties");
+        if (Files.exists(userPropFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
         }
         return result;

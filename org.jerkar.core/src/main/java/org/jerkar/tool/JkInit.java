@@ -1,6 +1,9 @@
 package org.jerkar.tool;
 
-import java.io.File;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,11 +15,7 @@ import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.system.JkInfo;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsObject;
-import org.jerkar.api.utils.JkUtilsReflect;
-import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.api.utils.*;
 import org.jerkar.tool.CommandLine.JkPluginSetup;
 
 /**
@@ -46,13 +45,13 @@ public final class JkInit {
      * compilation prior instantiating the object.
      */
     @SuppressWarnings("unchecked")
-    public static <T extends JkBuild> T instanceOf(File base, String... args) {
+    public static <T extends JkBuild> T instanceOf(Path base, String... args) {
         final JkInit init = JkInit.of(args);
         init.displayInfo();
-        final Engine engine = new Engine(base.toPath());
+        final Engine engine = new Engine(base);
         final T result = (T) engine.instantiate(init);
         if (result == null) {
-            throw new JkException("No build class found for engine located at : " + base.getPath());
+            throw new JkException("No build class found for engine located at : " + base);
         }
         JkLog.info("Build class " + result.getClass().getName());
         return result;
@@ -64,7 +63,7 @@ public final class JkInit {
      * found in running environment.
      */
     public static <T extends JkBuild> T instanceOf(Class<T> clazz, String... args) {
-        return instanceOf(clazz, JkUtilsFile.workingDir(), args);
+        return instanceOf(clazz, Paths.get(""), args);
     }
 
     /**
@@ -72,10 +71,10 @@ public final class JkInit {
      * configured according specified command line arguments and option files
      * found in running environment. The base directory is the specified one.
      */
-    public static <T extends JkBuild> T instanceOf(Class<T> clazz, File baseDir, String... args) {
+    public static <T extends JkBuild> T instanceOf(Class<T> clazz, Path baseDir, String... args) {
         final JkInit init = JkInit.of(args);
         init.displayInfo();
-        JkBuild.baseDirContext(baseDir.toPath());
+        JkBuild.baseDirContext(baseDir);
         final T build;
         try {
             build = JkUtilsReflect.newInstance(clazz);
@@ -104,7 +103,7 @@ public final class JkInit {
         JkLog.info("Working Directory : " + System.getProperty("user.dir"));
         JkLog.info("Java Home : " + System.getProperty("java.home"));
         JkLog.info("Java Version : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
-        if ( embedded(JkLocator.jerkarHome())) {
+        if ( embedded(JkLocator.jerkarHomePath())) {
             JkLog.info("Jerkar Home : " + bootDir() + " ( embedded !!! )");
         } else {
             JkLog.info("Jerkar Home : " + JkLocator.jerkarHome());
@@ -165,8 +164,8 @@ public final class JkInit {
 
     private static Map<String, String> getSpecifiedSystemProps(String[] args) {
         final Map<String, String> result = new TreeMap<>();
-        final File propFile = new File(JkLocator.jerkarHome(), "system.properties");
-        if (propFile.exists()) {
+        final Path propFile = JkLocator.jerkarHomePath().resolve("system.properties");
+        if (Files.exists(propFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
         }
         result.putAll(JkUtilsTool.userSystemProperties());
@@ -210,13 +209,13 @@ public final class JkInit {
     }
 
     private static Map<String, String> loadOptionsProperties() {
-        final File propFile = new File(JkLocator.jerkarHome(), "options.properties");
+        final Path propFile = JkLocator.jerkarHomePath().resolve("options.properties");
         final Map<String, String> result = new HashMap<>();
-        if (propFile.exists()) {
+        if (Files.exists(propFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
         }
-        final File userPropFile = new File(JkLocator.jerkarUserHome(), "options.properties");
-        if (userPropFile.exists()) {
+        final Path userPropFile = JkLocator.jerkarUserHomePath().resolve("options.properties");
+        if (Files.exists(userPropFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
         }
         return result;
@@ -225,9 +224,9 @@ public final class JkInit {
     private static void configureBuild(JkBuild build, Collection<JkPluginSetup> pluginSetups,
             Map<String, String> commandlineOptions, PluginDictionnary dictionnary) {
         JkOptions.populateFields(build);
-        final File localProps = build.file(JkConstants.BUILD_DEF_DIR + "/build.properties");
-        if (localProps.exists()) {
-            JkOptions.populateFields(build, JkUtilsFile.readPropertyFileAsMap(localProps));
+        final Path localProps = build.path(JkConstants.BUILD_DEF_DIR + "/build.properties");
+        if (Files.exists(localProps)) {
+            JkOptions.populateFields(build, JkUtilsFile.readPropertyFileAsMap(localProps.toFile()));
         }
         JkOptions.populateFields(build, commandlineOptions);
         configureAndActivatePlugins(build, pluginSetups, dictionnary);
@@ -249,12 +248,15 @@ public final class JkInit {
         }
     }
 
-    private static boolean embedded(File jarFolder) {
-        return JkUtilsFile.isSame(bootDir(), jarFolder);
+    private static boolean embedded(Path jarFolder) {
+        if (!Files.exists(bootDir())) {
+            return false;
+        }
+        return JkUtilsPath.isSameFile(bootDir(), jarFolder);
     }
 
-    private static File bootDir() {
-        return new File("./build/boot");
+    private static Path bootDir() {
+        return Paths.get("./build/boot");
     }
 
     private static class LoadResult {

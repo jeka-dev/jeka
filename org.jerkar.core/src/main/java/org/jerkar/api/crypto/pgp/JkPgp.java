@@ -2,6 +2,7 @@ package org.jerkar.api.crypto.pgp;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.Map;
 
 import org.jerkar.api.java.JkClassLoader;
@@ -93,6 +94,13 @@ public final class JkPgp implements Serializable {
      */
     public static JkPgp ofSecretRing(File secRing, String password) {
         return of(null, secRing, password);
+    }
+
+    /**
+     * Creates a JkPgp with the specified secret key ring.
+     */
+    public static JkPgp ofSecretRing(Path secRing, String password) {
+        return of(null, secRing.toFile(), password);
     }
 
     private final File pubRing;

@@ -1,9 +1,11 @@
 package org.jerkar.tool;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,24 +24,24 @@ import org.jerkar.api.utils.*;
  */
 final class JavaSourceParser {
 
-    private static JavaSourceParser of(File baseDir, File code) {
-        return of(baseDir, JkUtilsFile.toUrl(code));
+    private static JavaSourceParser of(Path baseDir, Path code) {
+        return of(baseDir, JkUtilsPath.toUrl(code));
     }
 
-    public static JavaSourceParser of(File baseDir, Iterable<File> files) {
+    public static JavaSourceParser of(Path baseDir, Iterable<Path>  files) {
         JavaSourceParser result = new JavaSourceParser(JkDependencies.of(), JkRepos.empty(),
                 new LinkedList<>());
-        for (final File code : files) {
+        for (final Path code : files) {
             result = result.and(of(baseDir, code));
         }
         return result;
     }
 
-    static JavaSourceParser of(File baseDir, URL codeUrl) {
+    static JavaSourceParser of(Path baseDir, URL codeUrl) {
         try (final InputStream inputStream = JkUtilsIO.inputStream(codeUrl)) {
             final String uncomentedCode = removeComments(inputStream);
             final JkDependencies deps = dependencies(uncomentedCode, baseDir, codeUrl);
-            final List<File> projects = projects(uncomentedCode, baseDir, codeUrl);
+            final List<Path>  projects = projects(uncomentedCode, baseDir, codeUrl);
             return new JavaSourceParser(deps, repos(uncomentedCode, codeUrl), projects);
         } catch (IOException e) {
             throw JkUtilsThrowable.unchecked(e);
@@ -50,9 +52,9 @@ final class JavaSourceParser {
 
     private final JkRepos importRepos;
 
-    private final List<File> dependecyProjects;
+    private final List<Path>  dependecyProjects;
 
-    private JavaSourceParser(JkDependencies deps, JkRepos repos, List<File> dependencyProjects) {
+    private JavaSourceParser(JkDependencies deps, JkRepos repos, List<Path>  dependencyProjects) {
         super();
         this.dependencies = deps;
         this.importRepos = repos;
@@ -74,11 +76,11 @@ final class JavaSourceParser {
         return this.importRepos;
     }
 
-    public List<File> projects() {
+    public List<Path>  projects() {
         return this.dependecyProjects;
     }
 
-    private static JkDependencies dependencies(String code, File baseDir, URL url) {
+    private static JkDependencies dependencies(String code, Path baseDir, URL url) {
         final List<String> deps = stringsInJkImport(code, url);
         return dependenciesFromImports(baseDir, deps);
     }
@@ -88,24 +90,22 @@ final class JavaSourceParser {
         return JkRepos.of(repoUrls);
     }
 
-    private static List<File> projects(String code, File baseDir, URL url) {
+    private static List<Path>  projects(String code, Path baseDir, URL url) {
         final List<String> deps = jkImportBuild(code, url);
         return projectDependencies(baseDir, deps);
     }
 
-    private static JkDependencies dependenciesFromImports(File baseDir, List<String> deps) {
+    private static JkDependencies dependenciesFromImports(Path baseDir, List<String> deps) {
         final JkDependencies.Builder builder = JkDependencies.builder();
         for (final String dependency : deps) {
             if (JkModuleDependency.isModuleDependencyDescription(dependency)) {
                 builder.on(JkModuleDependency.of(dependency));
             } else {
-                final File depFile;
-                if (new File(dependency).exists()) {
-                    depFile = new File(dependency);
-                } else {
-                    final File relativeFile = new File(baseDir, dependency);
-                    if (relativeFile.exists()) {
-                        depFile = JkUtilsFile.canonicalFile(relativeFile);
+                Path depFile = Paths.get(dependency);
+                if (!Files.exists(depFile)) {
+                    final Path relativeFile = baseDir.resolve(dependency);
+                    if (Files.exists(relativeFile)) {
+                        depFile = relativeFile.normalize();
                     } else {
                         throw new JkException("File " + dependency
                                 + " mentionned in @JkImport does not exist.");
@@ -119,13 +119,12 @@ final class JavaSourceParser {
         return builder.build();
     }
 
-    private static List<File> projectDependencies(File baseDir, List<String> deps) {
-        final List<File> projects = new LinkedList<>();
+    private static List<Path>  projectDependencies(Path baseDir, List<String> deps) {
+        final List<Path>  projects = new LinkedList<>();
         for (final String projectReltivePath : deps) {
-            final File file = new File(baseDir, projectReltivePath);
-            if (!file.exists()) {
-                throw new JkException("Folder " + JkUtilsFile.canonicalPath(file)
-                        + " defined as project does not exists.");
+            final Path file = baseDir.resolve(projectReltivePath);
+            if (!Files.exists(file)) {
+                throw new JkException("Folder " + file + " defined as project does not exists.");
             }
             projects.add(file);
         }

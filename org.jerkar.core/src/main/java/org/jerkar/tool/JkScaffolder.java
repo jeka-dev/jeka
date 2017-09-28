@@ -1,6 +1,7 @@
 package org.jerkar.tool;
 
-import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 import org.jerkar.api.file.JkFileTree;
@@ -9,6 +10,7 @@ import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.JkUtilsPath;
 
 /**
  * Object that process scaffolding.
@@ -23,7 +25,7 @@ public final class JkScaffolder {
 
     public final JkRunnables extraActions = JkRunnables.noOp();
 
-    JkScaffolder(File baseDir, boolean embed) {
+    JkScaffolder(Path baseDir, boolean embed) {
         super();
         this.baseTree = JkFileTree.of(baseDir);
         this.mainBuildclassWriter = basicScaffoldedBuildClassCode();
@@ -34,10 +36,10 @@ public final class JkScaffolder {
      * Runs the scaffolding.
      */
     public void run() {
-        final File def = baseTree.file(JkConstants.BUILD_DEF_DIR);
-        def.mkdirs();
-        final File buildClass = new File(def, "Build.java");
-        JkUtilsFile.writeString(buildClass, mainBuildclassWriter.get(), false);
+        final Path def = baseTree.rootPath().resolve(JkConstants.BUILD_DEF_DIR);
+        JkUtilsPath.createDirectories(def);
+        final Path buildClass = def.resolve("Build.java");
+        JkUtilsPath.write(buildClass, mainBuildclassWriter.get().getBytes(Charset.forName("UTF-8")));
         if (embed) {
             JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar.bat"), baseTree.file("jerkar.bat"));
             JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar"), baseTree.file("jerkar"));

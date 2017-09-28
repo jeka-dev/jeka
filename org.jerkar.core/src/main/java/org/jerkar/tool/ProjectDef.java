@@ -1,9 +1,9 @@
 package org.jerkar.tool;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -35,8 +35,8 @@ final class ProjectDef {
     /**
      * Creates a project definition by giving its asScopedDependency directory.
      */
-    public static ProjectDef of(File rootDir) {
-        final BuildResolver buildResolver = new BuildResolver(rootDir.toPath());
+    public static ProjectDef of(Path rootDir) {
+        final BuildResolver buildResolver = new BuildResolver(rootDir);
         final List<Class<?>> classDefs = new LinkedList<>();
         classDefs.addAll(buildResolver.resolveBuildClasses());
         return new ProjectDef(classDefs);

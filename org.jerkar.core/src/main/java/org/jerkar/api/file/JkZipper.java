@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -95,6 +97,20 @@ public final class JkZipper {
                 JkCompressionMethod.DEFLATED);
     }
 
+    public static JkZipper ofPath(Path... dirs) {
+        final List<Path> archivestoMerges = new LinkedList<>();
+        final List<Object> items = new LinkedList<>();
+        for (final Path file : dirs) {
+            if (Files.isDirectory(file)) {
+                items.add(file);
+            } else {
+                archivestoMerges.add(file);
+            }
+        }
+        return new JkZipper(items, JkUtilsPath.filesOf(archivestoMerges), JkCompressionLevel.DEFAULT_COMPRESSION,
+                JkCompressionMethod.DEFLATED);
+    }
+
     @SuppressWarnings("unchecked")
     static JkZipper of(JkFileTreeSet... jkDirSets) {
         return new JkZipper(Arrays.asList(jkDirSets), Collections.EMPTY_LIST,
@@ -158,12 +174,17 @@ public final class JkZipper {
         return to(zipFile, JkPathFilter.ACCEPT_ALL);
     }
 
+    public JkCheckSumer to(Path zipFile) {
+        return to(zipFile.toFile());
+    }
+
+
 
     /**
      * Same as {@link #to(File)} but specifying a filter to exclude entries.
      */
     public JkCheckSumer to(File zipFile, JkPathFilter entryFilter) {
-        JkLog.start("Creating zip file : " + zipFile);
+        JkLog.start("Creating zip file : " + JkUtilsFile.canonicalPath(zipFile));
         JkUtilsFile.createFileIfNotExist(zipFile);
         try (final FileOutputStream fos = new FileOutputStream(zipFile);
              final ZipOutputStream zos =  new ZipOutputStream(fos)) {

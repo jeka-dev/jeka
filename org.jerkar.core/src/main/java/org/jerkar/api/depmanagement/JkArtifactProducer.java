@@ -3,7 +3,7 @@ package org.jerkar.api.depmanagement;
 import java.io.File;
 import java.util.Arrays;
 
-import org.jerkar.api.file.JkPath;
+import org.jerkar.api.file.JkPathSequence;
 
 
 /**
@@ -21,7 +21,7 @@ public interface JkArtifactProducer extends JkArtifactLocator {
      * Returns the runtime dependencies of the specified artifact file. This is usefull to use the artifact file as
      * a transitive dependency.
      */
-    JkPath runtimeDependencies(JkArtifactFileId jkArtifactId);
+    JkPathSequence runtimeDependencies(JkArtifactFileId jkArtifactId);
 
     /**
      * Short hand to produce the main artifact file and returns the result.

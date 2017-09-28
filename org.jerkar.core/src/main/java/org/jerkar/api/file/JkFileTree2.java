@@ -2,7 +2,6 @@ package org.jerkar.api.file;
 
 import org.jerkar.api.utils.*;
 
-import java.io.*;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -65,7 +64,7 @@ final class JkFileTree2 implements Iterable<Path>  {
      * Creates the root directory if it does not exist.
      */
     public JkFileTree2 createIfNotExist() {
-        JkUtilsPath.createDir(root);
+        JkUtilsPath.createDirectories(root);
         return this;
     }
 

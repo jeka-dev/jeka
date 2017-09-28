@@ -1,7 +1,8 @@
 package org.jerkar.tool;
 
-import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.jerkar.api.system.JkLog;
@@ -28,8 +29,8 @@ public final class Main {
         }
         init.displayInfo();
 
-        final File workingDir = JkUtilsFile.workingDir();
-        final Engine engine = new Engine(workingDir.toPath());
+        final Path workingDir = Paths.get("");
+        final Engine engine = new Engine(workingDir);
         JkLog.nextLine();
         try {
             engine.execute(init);
@@ -51,9 +52,9 @@ public final class Main {
     /**
      * Entry point to call Jerkar on a given folder
      */
-    public static void exec(File projectDir, String... args) {
+    public static void exec(Path projectDir, String... args) {
         final JkInit init = JkInit.of(args);
-        final Engine engine = new Engine(projectDir.toPath());
+        final Engine engine = new Engine(projectDir);
         engine.execute(init);
     }
 
