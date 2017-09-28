@@ -13,9 +13,9 @@ import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkOptions;
+import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 @JkDoc({"Add SonarQube capability to a build.",

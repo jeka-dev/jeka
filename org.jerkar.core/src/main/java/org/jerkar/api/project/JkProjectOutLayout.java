@@ -1,6 +1,7 @@
 package org.jerkar.api.project;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.jerkar.api.utils.JkUtilsFile;
 
@@ -139,6 +140,10 @@ public class JkProjectOutLayout {
 
     public final File outputDir() {
         return outputDir;
+    }
+
+    public final Path outputPath() {
+        return outputDir.toPath();
     }
 
     public File outputFile(String relativePath) {

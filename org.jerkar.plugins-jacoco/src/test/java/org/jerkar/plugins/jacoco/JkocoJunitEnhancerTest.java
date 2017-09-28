@@ -1,10 +1,10 @@
 package org.jerkar.plugins.jacoco;
 
+import java.io.File;
+
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.junit.JkUnit;
 import org.junit.Test;
-
-import java.io.File;
 
 public class JkocoJunitEnhancerTest {
 

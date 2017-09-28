@@ -2,11 +2,31 @@ package org.jerkar.api.project.java;
 
 import java.io.File;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
-import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.depmanagement.JkArtifactFileId;
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.api.depmanagement.JkIvyPublication;
+import org.jerkar.api.depmanagement.JkJavaDepScopes;
+import org.jerkar.api.depmanagement.JkPublishRepos;
+import org.jerkar.api.depmanagement.JkPublisher;
+import org.jerkar.api.depmanagement.JkRepo;
+import org.jerkar.api.depmanagement.JkRepos;
+import org.jerkar.api.depmanagement.JkResolutionParameters;
+import org.jerkar.api.depmanagement.JkScope;
+import org.jerkar.api.depmanagement.JkVersionProvider;
+import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.file.JkZipper.JkCheckSumer;
@@ -58,7 +78,7 @@ public class JkJavaProjectMaker {
 
     private JkPgp pgpSigner;
 
-    private Map<Set<JkScope>, JkPathSequence> depCache = new HashMap<>();
+    private final Map<Set<JkScope>, JkPathSequence> depCache = new HashMap<>();
 
     // commons ------------------------
 
@@ -324,7 +344,7 @@ public class JkJavaProjectMaker {
                 .resolve(dependencies, dependencies.involvedScopes()).resolvedVersionProvider();
         JkPublisher.of(this.publishRepos, project.getOutLayout().outputDir())
         .publishIvy(project.getVersionedModule(), publication, dependencies,
-                JkJavaDepScopes.COMPILE, JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
+                JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
         return this;
     }
 

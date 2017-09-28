@@ -1,15 +1,18 @@
 package org.jerkar.api.depmanagement;
 
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.COMPILE;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.DEFAULT_SCOPE_MAPPING;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.RUNTIME;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.Arrays;
+
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyArtifactDescriptor;
 import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
 import org.jerkar.api.utils.JkUtilsObject;
 import org.junit.Test;
-
-import java.util.Arrays;
-
-import static org.junit.Assert.*;
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 
 /**
  * Created by angibaudj on 08-03-17.
@@ -20,19 +23,19 @@ public class IvyTranslationsTest {
 
     @Test
     public void toPublicationLessModule() throws Exception {
-        JkScopeMapping mapping = DEFAULT_SCOPE_MAPPING;
-        JkVersionProvider versionProvider = JkVersionProvider.empty();
+        final JkScopeMapping mapping = DEFAULT_SCOPE_MAPPING;
+        final JkVersionProvider versionProvider = JkVersionProvider.empty();
 
         // handle multiple artifacts properly
-        DefaultModuleDescriptor desc = IvyTranslations.toPublicationLessModule(OWNER, deps(), mapping, versionProvider, null);
-        DependencyDescriptor[] dependencyDescriptors = desc.getDependencies();
+        final DefaultModuleDescriptor desc = IvyTranslations.toPublicationLessModule(OWNER, deps(), mapping, versionProvider);
+        final DependencyDescriptor[] dependencyDescriptors = desc.getDependencies();
         assertEquals(1, dependencyDescriptors.length);
-        DependencyDescriptor depDesc = dependencyDescriptors[0];
-        DependencyArtifactDescriptor[] artifactDescs = depDesc.getAllDependencyArtifacts();
+        final DependencyDescriptor depDesc = dependencyDescriptors[0];
+        final DependencyArtifactDescriptor[] artifactDescs = depDesc.getAllDependencyArtifacts();
         assertEquals(2, artifactDescs.length);
-        DependencyArtifactDescriptor mainArt = findArtifactIn(artifactDescs, null);
+        final DependencyArtifactDescriptor mainArt = findArtifactIn(artifactDescs, null);
         assertNotNull(mainArt);
-        DependencyArtifactDescriptor linuxArt = findArtifactIn(artifactDescs, "linux");
+        final DependencyArtifactDescriptor linuxArt = findArtifactIn(artifactDescs, "linux");
         assertNotNull(linuxArt);
         System.out.println(Arrays.asList(linuxArt.getConfigurations()));
 
@@ -46,7 +49,7 @@ public class IvyTranslationsTest {
     }
 
     private DependencyArtifactDescriptor findArtifactIn(DependencyArtifactDescriptor[] artifactDescs, String classsifier) {
-        for (DependencyArtifactDescriptor item : artifactDescs) {
+        for (final DependencyArtifactDescriptor item : artifactDescs) {
             if (JkUtilsObject.equals(item.getAttribute("classifier"), classsifier)) {
                 return item;
             }

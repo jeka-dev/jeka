@@ -1,7 +1,6 @@
 package org.jerkar.tool.builtins.idea;
 
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,12 +8,11 @@ import java.util.List;
 import org.jerkar.api.ide.idea.JkImlGenerator;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.JkConstants;
 import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.Main;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 

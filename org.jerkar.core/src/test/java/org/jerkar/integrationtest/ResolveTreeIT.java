@@ -1,14 +1,26 @@
 package org.jerkar.integrationtest;
 
-import org.jerkar.api.depmanagement.*;
-import org.junit.Test;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.COMPILE;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.COMPILE_AND_RUNTIME;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.DEFAULT_SCOPE_MAPPING;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.RUNTIME;
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Set;
 
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencyNode;
+import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.api.depmanagement.JkModuleId;
+import org.jerkar.api.depmanagement.JkRepos;
+import org.jerkar.api.depmanagement.JkResolutionParameters;
+import org.jerkar.api.depmanagement.JkResolveResult;
+import org.jerkar.api.depmanagement.JkScope;
+import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.junit.Test;
 
 /**
  * Created by angibaudj on 19-06-17.

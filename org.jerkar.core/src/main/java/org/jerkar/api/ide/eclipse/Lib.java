@@ -1,11 +1,11 @@
 package org.jerkar.api.ide.eclipse;
 
+import java.nio.file.Path;
+
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLocator;
-
-import java.nio.file.Path;
 
 
 class Lib {
@@ -45,15 +45,14 @@ class Lib {
         return scope + ":" + file == null ? projectRelativePath : file.toString();
     }
 
-    public static JkDependencies toDependencies(Path parentDir, Iterable<Lib> libs,
-            ScopeResolver scopeSegregator, JkEclipseClasspathApplier applier) {
+    public static JkDependencies toDependencies(Path parentDir, Iterable<Lib> libs, JkEclipseClasspathApplier applier) {
         final JkDependencies.Builder builder = JkDependencies.builder();
         for (final Lib lib : libs) {
             if (lib.projectRelativePath == null) {
                 builder.on(lib.file.toFile()).scope(lib.scope);
 
             } else { // This is a dependency on an eclipse project
-                Path projectDir = parentDir.resolve(lib.projectRelativePath);
+                final Path projectDir = parentDir.resolve(lib.projectRelativePath);
                 final JkJavaProject project = new JkJavaProject(projectDir.toFile());
                 applier.apply(project);
                 builder.on(project).scope(lib.scope);

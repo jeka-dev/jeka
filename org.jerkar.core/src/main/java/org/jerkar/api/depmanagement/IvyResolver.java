@@ -106,7 +106,7 @@ final class IvyResolver implements InternalDepResolver {
             versionProvider = JkVersionProvider.empty();
         }
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(module, deps,
-                parameters.defaultMapping(), versionProvider, ivy.getSettings());
+                parameters.defaultMapping(), versionProvider);
 
         final String[] confs = toConfs(deps.declaredScopes(), resolvedScopes);
         final ResolveOptions resolveOptions = new ResolveOptions();
@@ -235,7 +235,7 @@ final class IvyResolver implements InternalDepResolver {
                 for (final Caller caller : callers) {
                     final DependencyDescriptor dependencyDescriptor = caller.getDependencyDescriptor();
                     final JkVersionedModule parent = IvyTranslations.toJkVersionedModule(caller.getModuleRevisionId());
-                    List<ModuleNodeInfo> list = parentChildMap.computeIfAbsent(parent.moduleId(), k -> new LinkedList<>());
+                    final List<ModuleNodeInfo> list = parentChildMap.computeIfAbsent(parent.moduleId(), k -> new LinkedList<>());
                     final Set<JkScope> declaredScopes = IvyTranslations.toJkScopes(dependencyDescriptor.getModuleConfigurations());
                     final JkVersionRange versionRange = JkVersionRange.of(dependencyDescriptor
                             .getDynamicConstraintDependencyRevisionId().getRevision());

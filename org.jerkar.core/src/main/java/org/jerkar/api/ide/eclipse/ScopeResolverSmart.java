@@ -5,6 +5,9 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.RUNTIME;
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 //import java.io.File;
 
 import org.jerkar.api.depmanagement.JkScope;
@@ -12,9 +15,6 @@ import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry;
 import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry.Kind;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsString;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 class ScopeResolverSmart implements ScopeResolver {
 

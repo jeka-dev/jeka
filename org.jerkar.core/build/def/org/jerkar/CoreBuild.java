@@ -4,6 +4,7 @@ import static org.jerkar.api.project.java.JkJavaProject.JAVADOC_FILE_ID;
 import static org.jerkar.api.project.java.JkJavaProject.SOURCES_FILE_ID;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.JkArtifactFileId;
@@ -28,14 +29,14 @@ public class CoreBuild extends JkJavaProjectBuild {
 
     private static final String VERSION = "0.7-SNAPSHOT";
 
-    public File distribFolder;
+    public Path distribFolder;
 
     @Override
     protected JkJavaProject createProject(JkJavaProject project) {
         applyCommons(project, "core");
         project.addArtifactFile(DISTRIB_FILE_ID, this::doDistrib);
         project.addArtifactFile(JAVADOC_FILE_ID, () -> project.maker().makeJavadocJar());
-        this.distribFolder = new File(project.getOutLayout().outputDir(), "distrib");
+        this.distribFolder = project.getOutLayout().outputPath().resolve("distrib");
         return project;
     }
 
@@ -50,7 +51,7 @@ public class CoreBuild extends JkJavaProjectBuild {
         final File distripZipFile = project.artifactFile(DISTRIB_FILE_ID);
         project.makeArtifactFilesIfNecessary(SOURCES_FILE_ID, JAVADOC_FILE_ID, project.mainArtifactFileId());
         final JkFileTree distrib = JkFileTree.of(distribFolder);
-        final JkFileTree root = JkFileTree.of(project.baseDir());
+        final JkFileTree root = JkFileTree.of(project.basePath());
         distrib.importFiles(root.file("../LICENSE"));
         distrib.importDirContent(root.file("src/main/dist"));
         distrib.importDirContent(root.file("src/main/java/META-INF/bin"));

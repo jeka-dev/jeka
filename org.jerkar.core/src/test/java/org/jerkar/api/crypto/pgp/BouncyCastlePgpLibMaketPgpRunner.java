@@ -24,11 +24,11 @@ import org.jerkar.api.utils.JkUtilsString;
  * Jerkar uses BouncyCastle to perform PGP task. The bouncyCastle is embedded in
  * the Jerkar jar (to not pollute classpath and ease distribution) so want to
  * make as small as possible.
- * 
+ *
  * To achieve this, we run the needed methods in a classloader keeping track of
  * the really used class then we create a new bouncyCastle lib without the
  * unnecessary classes.
- * 
+ *
  * @author Jerome Angibaud
  */
 @SuppressWarnings("javadoc")
@@ -67,7 +67,7 @@ public class BouncyCastlePgpLibMaketPgpRunner {
 
     }
 
-    public void testSignWithBadSignature(Class<?> pgpClass) {
+    public void testSignWithBadSignature() {
         final File pubFile = JkUtilsFile.fromUrl(JkPgpTest.class.getResource("pubring.gpg"));
         final File secringFile = JkUtilsFile.fromUrl(JkPgpTest.class.getResource("secring.gpg"));
         final JkPgp pgp = JkPgp.of(pubFile, secringFile, "basPassword");

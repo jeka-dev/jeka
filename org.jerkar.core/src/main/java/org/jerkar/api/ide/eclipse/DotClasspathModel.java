@@ -108,7 +108,7 @@ final class DotClasspathModel {
                 if (classpathEntry.path.startsWith(ClasspathEntry.JRE_CONTAINER_PREFIX)) {
                     continue;
                 }
-                for (final Path file : classpathEntry.conAsFiles(baseDir)) {
+                for (final Path file : classpathEntry.conAsFiles()) {
                     result.add(Lib.file(file, scope, classpathEntry.exported));
                 }
 
@@ -148,7 +148,7 @@ final class DotClasspathModel {
                 result.add(Lib.file(file, scope, classpathEntry.exported));
 
             } else if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC)) {
-                if (classpathEntry.isProjectSrc(baseDir.getParent(), projects)) {
+                if (classpathEntry.isProjectSrc()) {
                     final String projectPath = classpathEntry.projectRelativePath(baseDir, projects);
                     result.add(Lib.project(projectPath, JkJavaDepScopes.COMPILE,
                             classpathEntry.exported));
@@ -255,14 +255,14 @@ final class DotClasspathModel {
             return this.path.equals(other.path);
         }
 
-        public List<Path> conAsFiles(Path baseDir) {
+        public List<Path> conAsFiles() {
             if (!this.kind.equals(Kind.CON)) {
                 throw new IllegalStateException(
                         "Can only get files to classpath entry of kind 'con'.");
             }
             if (!Files.exists(Lib.CONTAINER_DIR) && !Files.exists(Lib.CONTAINER_USER_DIR)) {
                 JkLog.warn("Eclipse containers directory " + Lib.CONTAINER_USER_DIR
-                + " or  " + Lib.CONTAINER_DIR + " does not exists... Ignore");
+                        + " or  " + Lib.CONTAINER_DIR + " does not exists... Ignore");
                 return Collections.emptyList();
             }
             final String folderName = path.replace('/', '_').replace('\\', '_');
@@ -298,7 +298,7 @@ final class DotClasspathModel {
             return baseDir.resolve(path);
         }
 
-        public boolean isProjectSrc(Path parent, Map<String, Path> projectLocationMap) {
+        public boolean isProjectSrc() {
             return path.startsWith("/");
         }
 

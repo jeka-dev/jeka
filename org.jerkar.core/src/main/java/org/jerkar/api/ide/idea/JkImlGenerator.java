@@ -1,7 +1,6 @@
 package org.jerkar.api.ide.idea;
 
 import java.io.ByteArrayOutputStream;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,7 +14,17 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencyNode;
+import org.jerkar.api.depmanagement.JkDependencyResolver;
+import org.jerkar.api.depmanagement.JkJavaDepScopes;
+import org.jerkar.api.depmanagement.JkModuleDependency;
+import org.jerkar.api.depmanagement.JkModuleId;
+import org.jerkar.api.depmanagement.JkRepos;
+import org.jerkar.api.depmanagement.JkResolveResult;
+import org.jerkar.api.depmanagement.JkScope;
+import org.jerkar.api.depmanagement.JkVersion;
+import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
@@ -75,7 +84,7 @@ public final class JkImlGenerator {
      * Constructs a {@link JkImlGenerator} to the project base directory
      */
     public JkImlGenerator(JkProjectSourceLayout sourceLayout, JkDependencies dependencies,
-            JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
+            JkDependencyResolver resolver) {
         super();
         this.sourceLayout = sourceLayout;
         this.dependencies = dependencies;
@@ -84,7 +93,7 @@ public final class JkImlGenerator {
 
     public JkImlGenerator(JkJavaProject javaProject) {
         this(javaProject.getSourceLayout(), javaProject.getDependencies(),
-                javaProject.maker().getDependencyResolver(), javaProject.getSourceVersion());
+                javaProject.maker().getDependencyResolver());
     }
 
     /** Generate the .classpath file */

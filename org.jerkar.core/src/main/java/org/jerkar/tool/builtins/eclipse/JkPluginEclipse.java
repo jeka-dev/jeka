@@ -13,9 +13,9 @@ import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.JkConstants;
 import org.jerkar.tool.JkDoc;
+import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.Main;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 

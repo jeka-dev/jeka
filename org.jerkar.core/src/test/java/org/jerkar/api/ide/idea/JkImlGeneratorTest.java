@@ -1,17 +1,15 @@
 package org.jerkar.api.ide.idea;
 
+import java.io.File;
+
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.ide.eclipse.JkEclipseClasspathGeneratorTest;
-import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import java.io.File;
 
 /**
  * Created by angibaudj on 21-09-17.
@@ -23,11 +21,11 @@ public class JkImlGeneratorTest {
         final File top = unzipToDir("sample-multi-scriptless.zip");
         JkLog.silent(true);
 
-        JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
+        final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
                 .withResources("res").withTestResources("res-test");
 
-        File base = new File(top, "base");
-        JkJavaProject baseProject = new JkJavaProject(base);
+        final File base = new File(top, "base");
+        final JkJavaProject baseProject = new JkJavaProject(base);
         baseProject.setSourceLayout(sourceLayout);
         baseProject.setDependencies(JkDependencies.builder().on(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3").build());
         final JkImlGenerator baseGenerator = new JkImlGenerator(baseProject);
@@ -37,7 +35,7 @@ public class JkImlGeneratorTest {
 
         final File core = new File(top, "core");
         final JkJavaProject coreProject = new JkJavaProject(core);
-        JkDependencies coreDeps = JkDependencies.of(baseProject);
+        final JkDependencies coreDeps = JkDependencies.of(baseProject);
         coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
         coreProject.maker().setJuniter(
                 coreProject.maker().getJuniter().forked(true));
@@ -50,7 +48,7 @@ public class JkImlGeneratorTest {
         final JkDependencies deps = JkDependencies.of(coreProject);
         final JkImlGenerator desktopGenerator =
                 new JkImlGenerator(sourceLayout.withBaseDir(desktop), deps,
-                        coreProject.maker().getDependencyResolver(), JkJavaVersion.V8);
+                        coreProject.maker().getDependencyResolver());
         final String result2 = desktopGenerator.generate();
 
         System.out.println("\ndesktop .classpath");

@@ -1,19 +1,13 @@
 package org.jerkar.api.utils;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 
 @SuppressWarnings("javadoc")
@@ -23,11 +17,18 @@ public class JkUtilsPathTest {
     public void testCopyDir() throws Exception {
         final URL sampleFileUrl = JkUtilsPathTest.class
                 .getResource("samplefolder/subfolder/sample.txt");
-        Path source = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
-        Path target = Files.createTempDirectory("copydirtest");
+        final Path source = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
+        final Path target = Files.createTempDirectory("copydirtest");
         JkUtilsPath.copyDirContent(source, target);
         System.out.println(target);
         assertTrue(Files.exists(target.resolve("subfolder/sample.txt")));
+
+        final Path subfolder = Paths.get(sampleFileUrl.toURI()).getParent();
+        final Path target2 = Files.createTempDirectory("copydirtest");
+        JkUtilsPath.copyDirContent(subfolder, target2);
+        System.out.println(target2);
+        assertTrue(Files.exists(target2.resolve("sample.txt")));
+
 
 
     }

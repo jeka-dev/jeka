@@ -80,7 +80,7 @@ public final class JkPublisher {
      *            just pass {@link JkVersionProvider#empty()}
      */
     public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
-                           JkDependencies dependencies, JkScope defaultScope, JkScopeMapping defaultMapping,
+                           JkDependencies dependencies, JkScopeMapping defaultMapping,
                            Instant deliveryDate, JkVersionProvider resolvedVersion) {
         this.ivyPublisher.publishIvy(versionedModule, publication, dependencies, defaultMapping,
                 deliveryDate, resolvedVersion);

@@ -17,10 +17,15 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.file.JkPathFilter;
+import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.*;
+import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
+import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.api.utils.JkUtilsZip;
 
 /**
  * A sequence of file to be used as a <code>class path</code>.<br/>

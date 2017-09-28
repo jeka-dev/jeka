@@ -157,7 +157,7 @@ public final class JkUnit {
      */
     public JkUnit withBreakOnFailure(boolean crashOnFailure) {
         return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess,
-                classesToTest, this.breakOnFailure, this.printOutputOnConsole);
+                classesToTest, crashOnFailure, this.printOutputOnConsole);
     }
 
     /**
@@ -186,7 +186,7 @@ public final class JkUnit {
      */
     public JkUnit forked(JkJavaProcess process) {
         return new JkUnit(this.classpath, reportDetail, reportDir, process, this.classesToTest,
-                        this.breakOnFailure, this.printOutputOnConsole);
+                this.breakOnFailure, this.printOutputOnConsole);
     }
 
     /**

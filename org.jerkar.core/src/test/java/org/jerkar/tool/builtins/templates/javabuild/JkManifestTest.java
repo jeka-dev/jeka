@@ -1,7 +1,6 @@
 package org.jerkar.tool.builtins.templates.javabuild;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.jar.Attributes.Name;
 
 import org.jerkar.api.java.JkManifest;

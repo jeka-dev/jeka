@@ -14,8 +14,8 @@ import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileSystemLocalizable;
 import org.jerkar.api.file.JkFileTreeSet;
-import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.file.JkPathFilter;
+import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.java.JkJavaCompilerSpec;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.JkManifest;
@@ -89,7 +89,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     private JkMavenPublicationInfo mavenPublicationInfo;
 
-    private JkJavaProjectMaker maker = new JkJavaProjectMaker(this);
+    private final JkJavaProjectMaker maker = new JkJavaProjectMaker(this);
 
     public JkJavaProject(File baseDir) {
         this.baseDir = baseDir;
@@ -180,6 +180,11 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
     public File baseDir() {
         return this.baseDir;
     }
+
+    public Path basePath() {
+        return this.baseDir.toPath();
+    }
+
 
     @Override
     public JkProjectSourceLayout getSourceLayout() {

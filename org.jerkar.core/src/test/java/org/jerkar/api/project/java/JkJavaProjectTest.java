@@ -1,13 +1,13 @@
 package org.jerkar.api.project.java;
 
+import java.io.File;
+
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.junit.Test;
-
-import java.io.File;
 
 
 public class JkJavaProjectTest {

@@ -3,7 +3,6 @@ package org.jerkar.api.ide.eclipse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.awt.*;
 import java.io.File;
 import java.util.List;
 
@@ -15,7 +14,6 @@ import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.utils.JkUtilsFile;
-import org.junit.Ignore;
 import org.junit.Test;
 
 

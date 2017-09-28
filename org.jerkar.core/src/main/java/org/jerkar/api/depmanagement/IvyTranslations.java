@@ -73,7 +73,7 @@ final class IvyTranslations {
 
     static DefaultModuleDescriptor toPublicationLessModule(JkVersionedModule module,
             JkDependencies dependencies, JkScopeMapping defaultMapping,
-            JkVersionProvider resolvedVersions, IvySettings ivySettings) {
+            JkVersionProvider resolvedVersions) {
         final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module
                 .moduleId().group(), module.moduleId().name(), module.version().name());
         final DefaultModuleDescriptor result = new DefaultModuleDescriptor(
@@ -293,8 +293,8 @@ final class IvyTranslations {
     }
 
     private static void populateModuleDescriptor(DefaultModuleDescriptor moduleDescriptor,
-                                                 JkDependencies dependencies, JkScopeMapping defaultMapping,
-                                                 JkVersionProvider resolvedVersions) {
+            JkDependencies dependencies, JkScopeMapping defaultMapping,
+            JkVersionProvider resolvedVersions) {
 
         // Add configuration definitions
         for (final JkScope involvedScope : dependencies.involvedScopes()) {
@@ -317,8 +317,7 @@ final class IvyTranslations {
         for (final JkScopedDependency scopedDependency : dependencies) {
             if (scopedDependency.dependency() instanceof JkModuleDependency) {
                 final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency.dependency();
-                final JkVersion resolvedVersion = resolvedVersions.versionOf(externalModule.moduleId());
-                dependencyContainer.populate(scopedDependency, resolvedVersion);
+                dependencyContainer.populate(scopedDependency);
             }
         }
         for (final DependencyDescriptor dependencyDescriptor : dependencyContainer.toDependencyDescriptors()) {
@@ -537,7 +536,7 @@ final class IvyTranslations {
             this.defaultMapping = defaultMapping;
         }
 
-        void populate(JkScopedDependency scopedDependency, JkVersion resolvedVersion) {
+        void populate(JkScopedDependency scopedDependency) {
 
             final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.dependency();
             final JkModuleId moduleId = moduleDep.moduleId();
@@ -601,7 +600,7 @@ final class IvyTranslations {
 
 
         private void put(JkModuleId moduleId, boolean transitive, JkVersionRange revision, boolean mainArtifact) {
-            DependencyDefinition definition = definitions.computeIfAbsent(moduleId, k -> new DependencyDefinition());
+            final DependencyDefinition definition = definitions.computeIfAbsent(moduleId, k -> new DependencyDefinition());
 
             // if dependency has been declared only once non-transive and once transitive then we consider it has non-transitive
             definition.transitive = definition.transitive && transitive;

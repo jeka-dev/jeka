@@ -1,5 +1,7 @@
 package org.jerkar.api.tooling;
 
+import java.nio.file.Path;
+
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkModuleDependency;
 import org.jerkar.api.depmanagement.JkScope;
@@ -8,8 +10,6 @@ import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsSystem;
-
-import java.nio.file.Path;
 
 /**
  * Convenient class wrapping maven process.
@@ -126,7 +126,7 @@ public final class JkMvn implements Runnable {
      * Creates the java code of the Jerkar build class jump the effective pom of
      * this Maven JkEclipseProject
      */
-    public String createBuildClassCode(String packageName, String className, JkFileTree baseDir) {
+    public String createBuildClassCode(JkFileTree baseDir) {
         final Path pom = JkUtilsPath.createTempFile("effectivepom", ".xml");
         commands("help:effective-pom", "-Doutput=" + pom.toAbsolutePath().normalize().toString()).run();
         final JkPom jkPom = JkPom.of(pom);

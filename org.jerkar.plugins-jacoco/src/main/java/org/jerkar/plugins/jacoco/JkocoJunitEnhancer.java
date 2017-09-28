@@ -1,17 +1,16 @@
 package org.jerkar.plugins.jacoco;
 
+import java.io.File;
+import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.UnaryOperator;
+
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
-
-import java.io.File;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.UnaryOperator;
 
 /**
  * Enhancer to configure JkUnit such it performs Jacoco code coverage while it runs unit tests.
@@ -26,7 +25,7 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
 
     private final List<String> options;
 
-    private JkocoJunitEnhancer(File agent, boolean enabled, File destFile, List<String> options) {
+    private JkocoJunitEnhancer(File agent, boolean enabled, File destFile) {
         super();
         this.agent = agent;
         this.enabled = enabled;
@@ -38,24 +37,15 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
         final URL url = JkPluginJacoco.class.getResource("jacocoagent.jar");
         final File file = JkUtilsIO.copyUrlContentToCacheFile(url, JkLog.infoStreamIfVerbose(),
                 JkClassLoader.urlCacheDir());
-        return new JkocoJunitEnhancer(file, true, destFile, new LinkedList<>());
+        return new JkocoJunitEnhancer(file, true, destFile);
     }
 
     public JkocoJunitEnhancer withAgent(File jacocoagent) {
-        return new JkocoJunitEnhancer(jacocoagent, enabled, destFile, options);
-    }
-
-    /**
-     * Append some options to the returned <code>Jkoco</code>. One option is to
-     * be considered as a <code>pair=value</code>.<br/>
-     * Example : <code>andOptions("dumponexit=true", "port=6301");</code>
-     */
-    public JkocoJunitEnhancer withOptions(String... options) {
-        return new JkocoJunitEnhancer(agent, enabled, destFile, Arrays.asList(options));
+        return new JkocoJunitEnhancer(jacocoagent, enabled, destFile);
     }
 
     public JkocoJunitEnhancer enabled(boolean enabled) {
-        return new JkocoJunitEnhancer(this.agent, enabled, destFile, options);
+        return new JkocoJunitEnhancer(this.agent, enabled, destFile);
     }
 
     @Override

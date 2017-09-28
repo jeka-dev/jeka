@@ -89,7 +89,7 @@ final class ProjectDef {
             Collections.sort(methods);
             final List<JkProjectBuildOptionDef> options = new LinkedList<>();
             for (final NameAndField nameAndField : options(clazz, "", true, null)) {
-                options.add(JkProjectBuildOptionDef.of(build, nameAndField.field, nameAndField.rootClass,
+                options.add(JkProjectBuildOptionDef.of(build, nameAndField.field,
                         nameAndField.name));
             }
             Collections.sort(options);
@@ -146,7 +146,7 @@ final class ProjectDef {
                     JkLog.infoUnderlined("From " + methodDef.declaringClass.getName());
                 }
                 currentClass = methodDef.declaringClass;
-                String displayedMethodName = methodPrefix + methodDef.name;
+                final String displayedMethodName = methodPrefix + methodDef.name;
                 if (methodDef.description == null) {
                     JkLog.info(displayedMethodName + " : No description available.");
                 } else if (!methodDef.description.contains("\n")) {
@@ -295,7 +295,7 @@ final class ProjectDef {
             this.type = type;
         }
 
-        static JkProjectBuildOptionDef of(Object instance, Field field, Class<?> declaringClass, String name) {
+        static JkProjectBuildOptionDef of(Object instance, Field field, String name) {
             final JkDoc opt = field.getAnnotation(JkDoc.class);
             final String descr = opt != null ? JkUtilsString.join(opt.value(), "\n") : null;
             final Class<?> type = field.getType();
@@ -329,7 +329,7 @@ final class ProjectDef {
         }
 
         void log(String optionPrefix) {
-            String displayedOptionName = optionPrefix + this.name;
+            final String displayedOptionName = optionPrefix + this.name;
             if (this.description == null) {
                 JkLog.info(displayedOptionName + " : No description available.");
             } else if (!this.description.contains("\n")) {

@@ -1,8 +1,12 @@
 package org.jerkar.api.file;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,18 +14,22 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.*;
+import org.jerkar.api.utils.JkUtilsAssert;
+import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.JkUtilsPath;
+import org.jerkar.api.utils.JkUtilsThrowable;
 
 /**
  * Provides a view on files and sub-folders contained in a given directory. A
  * <code>JkFileTree</code> may have some include/exclude filters to include only
  * or exclude some files based on ANT pattern matching. <br/>
- * 
+ *
  * <p>
  * When speaking about files contained in a {@link JkFileTree}, we mean all
  * files contained in its asScopedDependency directory or sub-directories, matching positively
  * the filter defined on it.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkFileTree implements Iterable<File> {
@@ -71,7 +79,7 @@ public final class JkFileTree implements Iterable<File> {
      * relative path to this asScopedDependency as asScopedDependency directory.
      */
     public JkFileTree go(String relativePath) {
-        Path path = root.toPath().resolve(relativePath);
+        final Path path = root.toPath().resolve(relativePath);
         return JkFileTree.of(path);
     }
 
@@ -164,9 +172,26 @@ public final class JkFileTree implements Iterable<File> {
         for (final File dirToCopyContent : dirsToCopyContent) {
             createIfNotExist();
             if (!dirToCopyContent.exists()) {
-                return this;
+                continue;
             }
             JkUtilsFile.copyDirContent(dirToCopyContent, this.root, null, true);
+        }
+        return this;
+    }
+
+    /**
+     * Copies the content of the specified directory in the asScopedDependency of the asScopedDependency of
+     * this directory. If specified directory does not exist then nothing
+     * happen.
+     */
+    // Bug !!!! Some files are not copied
+    public JkFileTree importDirContent(Path... dirsToCopyContent) {
+        for (final Path dirToCopyContent : dirsToCopyContent) {
+            createIfNotExist();
+            if (!Files.exists(dirToCopyContent)) {
+                continue;
+            }
+            JkUtilsPath.copy(dirToCopyContent, this.rootPath(), StandardCopyOption.REPLACE_EXISTING);
         }
         return this;
     }
@@ -335,7 +360,7 @@ public final class JkFileTree implements Iterable<File> {
         for (final File file : this) {
             try (final FileInputStream fileInputStream = JkUtilsIO.inputStream(file)) {
                 JkUtilsIO.copy(fileInputStream, outputStream);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw JkUtilsThrowable.unchecked(e);
             }
         }

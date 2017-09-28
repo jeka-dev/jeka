@@ -1,16 +1,13 @@
 package org.jerkar.plugins.sonar;
 
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
+
 import org.jerkar.CoreBuild;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkImportBuild;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
-
-import java.io.File;
-
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
 
 public class PluginsSonarBuild extends JkJavaProjectBuild {
 

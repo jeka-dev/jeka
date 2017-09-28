@@ -63,7 +63,7 @@ class WstCommonComponent {
             throw new IllegalStateException("Can't find " + FILE);
         }
         final Document document = getFileAsDom(file);
-        return from(projectDir, document);
+        return from(document);
     }
 
     private static Document getFileAsDom(Path file) {
@@ -79,14 +79,14 @@ class WstCommonComponent {
         }
     }
 
-    private static List<ClasspathEntry> from(Path projectDir, Document document) {
+    private static List<ClasspathEntry> from(Document document) {
         final NodeList nodeList = document.getElementsByTagName("dependent-module");
         final List<ClasspathEntry> result = new LinkedList<>();
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node node = nodeList.item(i);
             final Element element = (Element) node;
             final String handle = element.getAttribute("handle");
-            final ClasspathEntry entry = handleToFile(projectDir, handle);
+            final ClasspathEntry entry = handleToFile(handle);
             if (entry != null) {
                 result.add(entry);
             }
@@ -94,7 +94,7 @@ class WstCommonComponent {
         return result;
     }
 
-    private static ClasspathEntry handleToFile(Path projectDir, String handle) {
+    private static ClasspathEntry handleToFile(String handle) {
         final ClasspathEntry result;
         if (handle.startsWith(VAR_PREFIX)) {
             final String rest = handle.substring(VAR_PREFIX.length());

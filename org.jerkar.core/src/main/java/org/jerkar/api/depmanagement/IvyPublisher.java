@@ -110,7 +110,7 @@ final class IvyPublisher implements InternalPublisher {
     /**
      * Publish the specified module. Dependencies, default scopes and mapping
      * are necessary in order to generate the ivy.xml file.
-     * 
+     *
      * @param versionedModule
      *            The module/version to publish.
      * @param publication
@@ -242,7 +242,7 @@ final class IvyPublisher implements InternalPublisher {
             JkScopeMapping defaultMapping, Instant deliveryDate, JkVersionProvider resolvedVersions) {
 
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
-                jkVersionedModule, dependencies, defaultMapping, resolvedVersions, ivy.getSettings());
+                jkVersionedModule, dependencies, defaultMapping, resolvedVersions);
         IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication,
                 deliveryDate);
         return moduleDescriptor;
@@ -254,7 +254,7 @@ final class IvyPublisher implements InternalPublisher {
             final File file;
             if (this.descriptorOutputDir != null) {
                 file = new File(this.descriptorOutputDir, "published-ivy-" + mrId.getOrganisation()
-                        + "-" + mrId.getName() + "-" + mrId.getRevision() + ".xml");
+                + "-" + mrId.getName() + "-" + mrId.getRevision() + ".xml");
             } else {
                 file = JkUtilsFile.tempFile("published-ivy-", ".xml");
             }
@@ -284,7 +284,7 @@ final class IvyPublisher implements InternalPublisher {
             JkVersionProvider resolvedVersions) {
 
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
-                jkVersionedModule, resolvedDependencies, null, resolvedVersions, ivy.getSettings());
+                jkVersionedModule, resolvedDependencies, null, resolvedVersions);
         IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication,
                 deliveryDate);
         return moduleDescriptor;

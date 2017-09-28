@@ -1,22 +1,27 @@
 package org.jerkar.api.file;
 
-import org.jerkar.api.utils.*;
-
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.jerkar.api.utils.JkUtilsAssert;
+import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
 
 /**
  * Provides a view on files and sub-folders contained in a given directory. A
  * <code>JkFileTree</code> may have some include/exclude filters to include only
  * or exclude some files based on ANT pattern matching. <br/>
- * 
+ *
  * <p>
  * When speaking about files contained in a {@link JkFileTree2}, we mean all
  * files contained in its root directory or sub-directories, matching positively
  * the filter defined on it.
- * 
+ *
  * @author Jerome Angibaud
  */
 final class JkFileTree2 implements Iterable<Path>  {
@@ -143,7 +148,7 @@ final class JkFileTree2 implements Iterable<Path>  {
 
             @Override
             public boolean accept(Path path) {
-                Path relativePath = path.relativize(root);
+                final Path relativePath = path.relativize(root);
                 return JkFileTree2.this.filter.accept(relativePath.toString());
             }
         };
@@ -160,11 +165,11 @@ final class JkFileTree2 implements Iterable<Path>  {
      * Returns the file contained in this {@link JkFileTree}.
      */
     @Deprecated  // use Stream
-    public List<Path> files(boolean includeFolders) {
+    public List<Path> files() {
         if (!exists()) {
             return new LinkedList<>();
         }
-        List<Path> result = new LinkedList<>();
+        final List<Path> result = new LinkedList<>();
         stream().forEach(item -> result.add(item));
         return result;
     }
@@ -175,7 +180,7 @@ final class JkFileTree2 implements Iterable<Path>  {
 
     @Override
     public Iterator<Path> iterator() {
-        return files(false).iterator();
+        return files().iterator();
     }
 
 
@@ -215,7 +220,7 @@ final class JkFileTree2 implements Iterable<Path>  {
         return new JkFileTree2(root, this.filter.and(filter));
     }
 
-   /**
+    /**
 
     public String relativePath(File file) {
         return JkUtilsFile.getRelativePath(root, file);
@@ -294,7 +299,7 @@ final class JkFileTree2 implements Iterable<Path>  {
         }
         return this;
     }
-*/
+     */
 
 
 }

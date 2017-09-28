@@ -119,7 +119,7 @@ public final class JkUtilsFile {
      * @return The file copied count.
      */
     public static int copyDirContent(File source, File targetDir, FileFilter filter, boolean copyEmptyDir,
-                                     PrintStream reportStream) {
+            PrintStream reportStream) {
         return copyDirContentReplacingTokens(source, targetDir, filter, copyEmptyDir, reportStream, null);
     }
 
@@ -133,7 +133,7 @@ public final class JkUtilsFile {
      * @param tokenValues a map for replacing token key by value
      */
     public static int copyDirContentReplacingTokens(File fromDir, File toDir, FileFilter filterArg,
-                                                    boolean copyEmptyDir, PrintStream reportStream, Map<String, String> tokenValues) {
+            boolean copyEmptyDir, PrintStream reportStream, Map<String, String> tokenValues) {
         final FileFilter filter = JkUtilsObject.firstNonNull(filterArg, JkFileFilters.acceptAll());
         assertAllDir(fromDir);
         if (fromDir.equals(toDir)) {
@@ -223,7 +223,7 @@ public final class JkUtilsFile {
     public static String read(File file) {
         try (final FileInputStream fileInputStream = JkUtilsIO.inputStream(file)) {
             return JkUtilsIO.readAsString(fileInputStream);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -234,7 +234,7 @@ public final class JkUtilsFile {
     public static List<String> readLines(File file) {
         try (final FileInputStream fileInputStream = JkUtilsIO.inputStream(file)) {
             return JkUtilsIO.readAsLines(fileInputStream);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -410,7 +410,7 @@ public final class JkUtilsFile {
         final List<File> result = new LinkedList<>();
 
         // Windows JVM bug, sometime a file is seen a dir and invoking this method returns a null
-        File[] files = dir.listFiles();
+        final File[] files = dir.listFiles();
         if (files == null) {
             return new LinkedList<>();
         }
@@ -529,10 +529,10 @@ public final class JkUtilsFile {
      */
     public static void append(File result, File appender) {
         try (
-            final OutputStream out = JkUtilsIO.outputStream(result, true);
-            final InputStream in = JkUtilsIO.inputStream(appender)) {
+                final OutputStream out = JkUtilsIO.outputStream(result, true);
+                final InputStream in = JkUtilsIO.inputStream(appender)) {
             JkUtilsIO.copy(in, out);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
 
@@ -661,7 +661,7 @@ public final class JkUtilsFile {
      * but writing the status in the specified reportStream.
      */
     public static void copyFileReplacingTokens(File from, File toFile, Map<String, String> replacements,
-                                               PrintStream reportStream) {
+            PrintStream reportStream) {
         if (replacements == null || replacements.isEmpty()) {
             copyFile(from, toFile, reportStream);
             return;
@@ -674,19 +674,19 @@ public final class JkUtilsFile {
         }
         if (reportStream != null) {
             reportStream.println("Coping and replacing tokens " + replacements + " to file " + from.getAbsolutePath()
-                    + " to " + toFile.getAbsolutePath());
+            + " to " + toFile.getAbsolutePath());
         }
         createFileIfNotExist(toFile);
         try (
-        final TokenReplacingReader replacingReader = new TokenReplacingReader(from, replacements);
-        final Writer writer = new FileWriter(toFile) ) {
+                final TokenReplacingReader replacingReader = new TokenReplacingReader(from, replacements);
+                final Writer writer = new FileWriter(toFile) ) {
             final char[] buf = new char[1024];
             int len;
 
             while ((len = replacingReader.read(buf)) > 0) {
                 writer.write(buf, 0, len);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
 
@@ -699,10 +699,9 @@ public final class JkUtilsFile {
      *
      * @see #copyFileWithInterpolation(File, File, Map)
      */
-    public static void copyUrlReplacingTokens(URL url, File toFile, Map<String, String> replacements,
-                                              PrintStream reportStream) {
+    public static void copyUrlReplacingTokens(URL url, File toFile, Map<String, String> replacements) {
         try (InputStream is = url.openStream()){
-            copyStreamWithInterpolation(is, toFile, replacements, reportStream);
+            copyStreamWithInterpolation(is, toFile, replacements);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
@@ -716,7 +715,7 @@ public final class JkUtilsFile {
      * @see #copyFileWithInterpolation(File, File, Map)
      */
     public static void copyStreamWithInterpolation(InputStream inputStream, File toFile,
-                                                   Map<String, String> replacements, PrintStream reportStream) {
+            Map<String, String> replacements) {
         if (!toFile.exists()) {
             try {
                 toFile.createNewFile();
@@ -726,7 +725,7 @@ public final class JkUtilsFile {
         }
         try( TokenReplacingReader replacingReader = new TokenReplacingReader(
                 new InputStreamReader(inputStream), replacements);
-             final Writer writer = new FileWriter(toFile)) {
+                final Writer writer = new FileWriter(toFile)) {
 
             final char[] buf = new char[1024];
             int len;
@@ -734,7 +733,7 @@ public final class JkUtilsFile {
                 writer.write(buf, 0, len);
             }
 
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -743,7 +742,7 @@ public final class JkUtilsFile {
     private static class FilePath {
 
         public static FilePath of(File file) {
-            File canonicalFile = JkUtilsFile.canonicalFile(file);
+            final File canonicalFile = JkUtilsFile.canonicalFile(file);
             final List<String> elements = new ArrayList<>();
             for (File indexFile = canonicalFile; indexFile != null; indexFile = indexFile.getParentFile()) {
                 if (indexFile.getParent() == null) {
@@ -859,7 +858,7 @@ public final class JkUtilsFile {
     private static final int BUFFER_SIZE = 4096;
 
     private static void extractFile(ZipInputStream in, File outdir, String name) throws IOException {
-        byte[] buffer = new byte[BUFFER_SIZE];
+        final byte[] buffer = new byte[BUFFER_SIZE];
         try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(outdir, name)))) {
             int count = -1;
             while((count =in.read(buffer))!=-1) {
@@ -869,13 +868,14 @@ public final class JkUtilsFile {
     }
 
     private static void mkdirs(File outdir, String path) {
-        File d = new File(outdir, path);
-        if (!d.exists())
+        final File d = new File(outdir, path);
+        if (!d.exists()) {
             d.mkdirs();
+        }
     }
 
     private static String dirpart(String name) {
-        int s = name.lastIndexOf(File.separatorChar);
+        final int s = name.lastIndexOf(File.separatorChar);
         return s == -1 ? null : name.substring(0, s);
     }
 
@@ -900,7 +900,7 @@ public final class JkUtilsFile {
                 extractFile(zin, outdir, name);
             }
             zin.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
