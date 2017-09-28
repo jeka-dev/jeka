@@ -13,7 +13,7 @@ class Lib {
 
     private static final String CONTAINERS_PATH = "eclipse/containers";
 
-    static final Path CONTAINER_DIR = JkLocator.jerkarHome().toPath().resolve(CONTAINERS_PATH);
+    static final Path CONTAINER_DIR = JkLocator.jerkarHomePath().resolve(CONTAINERS_PATH);
 
     static final Path CONTAINER_USER_DIR = JkLocator.jerkarUserHome().toPath().resolve(CONTAINERS_PATH);
 

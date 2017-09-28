@@ -1,6 +1,7 @@
 package org.jerkar.distrib.all;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 import org.jerkar.api.file.JkFileTree;
@@ -18,7 +19,7 @@ class SampleTester {
 
     private final JkFileTree output;
 
-    private File launchScript;
+    private Path launchScript;
 
     SampleTester(JkFileTree buildDir) {
         super();
@@ -26,7 +27,7 @@ class SampleTester {
         this.sampleDependeeBaseDir = buildDir.go("../org.jerkar.samples-dependee");
         this.output = sampleBaseDir.go("build/output");
         String scriptName = JkUtilsSystem.IS_WINDOWS ? "jerkar.bat" : "jerkar";
-        launchScript = buildDir.file("build/output/dist/" + scriptName);
+        launchScript = buildDir.rootPath().resolve("build/output/dist/" + scriptName);
     }
 
     void doTest() {
@@ -50,14 +51,14 @@ class SampleTester {
 
     private void testSamples(String className, String... args) {
         JkLog.infoHeaded("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(launchScript.getAbsolutePath()).withWorkingDir(sampleBaseDir.rootPath().toAbsolutePath().normalize().toFile())
+        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(sampleBaseDir.rootPath().toAbsolutePath().normalize().toFile())
                 .withParametersIf(!JkUtilsString.isBlank(className), "-verbose=true -buildClass=" + className).andParameters(args)
                 .failOnError(true).runSync();
     }
 
     private void testDependee(String className, String... args) {
         JkLog.infoHeaded("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(launchScript.getAbsolutePath()).withWorkingDir(this.sampleDependeeBaseDir.root())
+        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependeeBaseDir.root())
                 .withParametersIf(!JkUtilsString.isBlank(className), "-buildClass=" + className).andParameters(args)
                 .failOnError(true).runSync();
     }
@@ -78,7 +79,7 @@ class SampleTester {
     }
 
     private JkProcess process() {
-        return JkProcess.of(launchScript.getAbsolutePath()).failOnError(true);
+        return JkProcess.of(launchScript.toAbsolutePath().toString()).failOnError(true);
     }
 
     private void testFork() {

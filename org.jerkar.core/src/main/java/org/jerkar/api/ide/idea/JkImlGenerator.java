@@ -479,7 +479,7 @@ public final class JkImlGenerator {
             return path;
         }
         final String repo = JkLocator.jerkarRepositoryCache().getAbsolutePath().replace('\\', '/');
-        final String home = JkLocator.jerkarHome().getAbsolutePath().replace('\\', '/');
+        final String home = JkLocator.jerkarHomePath().toAbsolutePath().normalize().toString().replace('\\', '/');
         final String result = path.replace(repo, "$JERKAR_REPO$");
         if (!result.equals(path)) {
             return result;

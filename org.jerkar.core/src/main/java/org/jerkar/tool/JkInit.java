@@ -106,7 +106,7 @@ public final class JkInit {
         if ( embedded(JkLocator.jerkarHomePath())) {
             JkLog.info("Jerkar Home : " + bootDir() + " ( embedded !!! )");
         } else {
-            JkLog.info("Jerkar Home : " + JkLocator.jerkarHome());
+            JkLog.info("Jerkar Home : " + JkLocator.jerkarHomePath());
         }
         JkLog.info("Jerkar User Home : " + JkLocator.jerkarUserHome().getAbsolutePath());
         JkLog.info("Jerkar Repository Cache : " + JkLocator.jerkarRepositoryCache());

@@ -57,7 +57,7 @@ public final class JkLocator {
     /**
      * Returns the directory where is installed the running Jerkar instance.
      */
-    public static File jerkarHome() {
+    private static File jerkarHome() {
         return jerkarJarFile().getParentFile();
     }
 
