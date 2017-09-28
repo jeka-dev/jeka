@@ -49,7 +49,7 @@ public final class JkJavaProjectPackager {
     public File javadocJar() {
         File javadocDir = project.getOutLayout().getJavadocDir();
         if (!javadocDir.exists()) {
-            throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.getPath() + " : can't create javadoc jar. Please, generate Javadoc prior to package it in jar.");
+            throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.getAbsolutePath() + " : can't create javadoc jar. Please, generate Javadoc prior to package it in jar.");
         }
         File result = project.artifactFile(JkJavaProject.JAVADOC_FILE_ID);
         JkFileTree.of(javadocDir).zip().to(result);

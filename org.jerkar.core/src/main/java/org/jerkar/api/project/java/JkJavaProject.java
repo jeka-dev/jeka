@@ -101,7 +101,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
     }
 
     public JkJavaProject(Path baseDir) {
-        this(baseDir.toFile());
+        this(baseDir.toAbsolutePath().normalize().toFile());
     }
 
 
