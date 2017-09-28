@@ -16,7 +16,6 @@ import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry.Kind;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsXml;
 import org.jerkar.tool.JkException;
@@ -123,9 +122,9 @@ final class DotClasspathModel {
                 final String var = JkUtilsString.substringBeforeFirst(classpathEntry.path, "/");
                 final String varFile;
                 if (JERKAR_HOME.equals(var)) {
-                    varFile = JkLocator.jerkarHomePath().toAbsolutePath().normalize().toString();
+                    varFile = JkLocator.jerkarHomeDir().toAbsolutePath().normalize().toString();
                 } else if (JERKAR_REPO.equals(var)) {
-                    varFile = JkUtilsFile.canonicalPath(JkLocator.jerkarRepositoryCache());
+                    varFile = JkLocator.jerkarRepositoryCache().normalize().toString();
                 } else {
                     final String optionName = OPTION_VAR_PREFIX + var;
                     varFile = JkOptions.get(optionName);

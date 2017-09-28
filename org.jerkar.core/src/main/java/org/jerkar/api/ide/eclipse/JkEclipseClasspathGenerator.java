@@ -404,7 +404,7 @@ public final class JkEclipseClasspathGenerator {
             return;
         }
         if (usePathVariables) {
-            binPath = DotClasspathModel.JERKAR_REPO + "/" + toRelativePath(JkLocator.jerkarRepositoryCache(), bin);
+            binPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.jerkarRepositoryCache().resolve(bin.toPath()).toString();
         } else {
             binPath = binPath.replace(File.separator, "/");
         }
@@ -422,7 +422,7 @@ public final class JkEclipseClasspathGenerator {
         if (source != null && source.exists()) {
             String srcPath = source.getAbsolutePath();
             if (usePathVariables) {
-                srcPath = DotClasspathModel.JERKAR_REPO + "/" + toRelativePath(JkLocator.jerkarRepositoryCache(), source);
+                srcPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.jerkarRepositoryCache().resolve(source.toPath()).toString();
             } else {
                 srcPath = srcPath.replace(File.separator, "/");
             }

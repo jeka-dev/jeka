@@ -186,7 +186,7 @@ final class Engine {
     private JkDependencies buildDefDependencies() {
 
         // If true, we assume Jerkar is provided by IDE (development mode)
-        final boolean devMode = JkLocator.jerkarJarFile().isDirectory();
+        final boolean devMode = Files.isDirectory(JkLocator.jerkarJarPath());
 
         return JkDependencies.builder().on(buildDependencies
                 .withDefaultScope(JkScopeMapping.ALL_TO_DEFAULT))

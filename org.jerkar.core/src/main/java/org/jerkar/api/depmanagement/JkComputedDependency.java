@@ -65,6 +65,15 @@ public class JkComputedDependency implements JkFileDependency {
     }
 
     /**
+     * Creates a computed dependency to the specified files and the specified {@link Runnable} to run for
+     * generating them.
+     */
+    public static final JkComputedDependency of(Runnable runnable, Path... files) {
+        final List<File> fileSet = JkUtilsIterable.listWithoutDuplicateOf(JkUtilsPath.filesOf(Arrays.asList(files)));
+        return new JkComputedDependency(runnable, null, fileSet, EMPTY_SUPPLIER);
+    }
+
+    /**
      * Identical to {@link #of(File, JkJavaProcess, String, String...)} but you specified a set of files
      * instead of a single one.
      */
@@ -112,6 +121,13 @@ public class JkComputedDependency implements JkFileDependency {
      */
     protected JkComputedDependency(Runnable runnable, File ideProjectBaseDir, List<File> files)  {
         this(runnable, ideProjectBaseDir, files, EMPTY_SUPPLIER);
+    }
+
+    /**
+     * Returns a duplicate of this computed dependency but specifying that it can be replaced by a project dependency in a IDE.
+     */
+    public JkComputedDependency withIdeProjectBaseDir(Path baseDir) {
+        return new JkComputedDependency(this.runnable, baseDir.toFile(), this.files, EMPTY_SUPPLIER);
     }
 
     /**

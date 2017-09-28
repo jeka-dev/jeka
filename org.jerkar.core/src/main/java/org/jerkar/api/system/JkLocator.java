@@ -1,10 +1,8 @@
 package org.jerkar.api.system;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -21,18 +19,18 @@ public final class JkLocator {
 
     private final static String JK_REPOSITORY_CACHE_ENV_NAME = "JERKAR_REPO";
 
-    private static File JERKAR_JAR_FILE;
+    private static Path JERKAR_JAR_FILE;
 
     /**
-     * Returns the Jerkar jar file currently used in the running process.
+     * Returns the Jerkar jar file currently used in the running process. It can be a folder in the classes
+     * are not packaged in jar.
      */
-    public static File jerkarJarFile() {
+    public static Path jerkarJarPath() {
         if (JERKAR_JAR_FILE != null) {
             return JERKAR_JAR_FILE;
         }
-        for (final File file : JkUtilsSystem.classloaderEntries((URLClassLoader) JkLocator.class
-                .getClassLoader())) {
-            final URL url = JkUtilsFile.toUrl(file);
+        for (final Path file : JkUtilsSystem.classloaderEntries((URLClassLoader) JkLocator.class.getClassLoader())) {
+            final URL url = JkUtilsPath.toUrl(file);
 
             try ( URLClassLoader classLoader =  new URLClassLoader(new URL[] { url }, ClassLoader.getSystemClassLoader().getParent())) {
                 classLoader.loadClass(JkLocator.class.getName());
@@ -48,85 +46,40 @@ public final class JkLocator {
     }
 
     /**
-     * Returns the Jerkar jar file currently used in the running process.
-     */
-    public static Path jerkarJarPath() {
-        return jerkarJarFile().toPath();
-    }
-
-    /**
      * Returns the directory where is installed the running Jerkar instance.
      */
-    private static File jerkarHome() {
-        return jerkarJarFile().getParentFile();
+    public static Path jerkarHomeDir() {
+        return jerkarJarPath().getParent();
     }
 
-    /**
-     * Returns the directory where is installed the running Jerkar instance.
-     */
-    public static Path jerkarHomePath() {
-        return jerkarJarFile().getAbsoluteFile().toPath().getParent();
-    }
-
-    /**
-     * Returns the temporary directory used by Jerkar for its internal use.
-     */
-    public static File jerkarTempDir() {
-        final File result = new File(jerkarUserHome(), "temp");
-        if (!result.exists()) {
-            result.mkdirs();
-        }
-        return result;
-    }
 
     /**
      * Returns the Jerkar user directory.
      */
-    public static File jerkarUserHome() {
-        final File result;
-        final String env = System.getenv(JK_USER_HOM_ENV_NAME);
-        if (!JkUtilsString.isBlank(env)) {
-            result = new File(env);
-        } else {
-            result = new File(JkUtilsFile.userHome(), ".jerkar");
-        }
-        if (!result.exists()) {
-            JkLog.info("Create Jerkar user directory : " + result.getPath());
-            result.mkdirs();
-        }
-        return result;
-    }
-
-    /**
-     * Returns the Jerkar user directory.
-     */
-    public static Path jerkarUserHomePath() {
+    public static Path jerkarUserHomeDir() {
         final Path result;
         final String env = System.getenv(JK_USER_HOM_ENV_NAME);
         if (!JkUtilsString.isBlank(env)) {
             result = Paths.get(env);
         } else {
-            result = JkUtilsFile.userHomePath().resolve(".jerkar");
+            result = Paths.get(System.getProperty("user.home")).resolve(".jerkar");
         }
-        if (!Files.exists(result)) {
-            JkLog.info("Create Jerkar user directory : " + result);
-            JkUtilsPath.createDirectories(result);
-        }
+        JkUtilsPath.createFileSafely(result);
         return result;
     }
 
     /**
      * Returns the location of the artifact repository cache.
      */
-    public static File jerkarRepositoryCache() {
+    public static Path jerkarRepositoryCache() {
         final String jerkarCacheOption = System.getenv(JK_REPOSITORY_CACHE_ENV_NAME);
-        final File result;
+        final Path result;
         if (!JkUtilsString.isBlank(jerkarCacheOption)) {
-            result = new File(jerkarCacheOption);
+            result = Paths.get(jerkarCacheOption);
         } else {
-            result = new File(jerkarUserHome(), "cache/repo");
+            result = jerkarUserHomeDir().resolve("cache/repo");
         }
-        result.mkdirs();
+        JkUtilsPath.createDirectories(result);
         return result;
     }
 

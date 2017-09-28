@@ -1,6 +1,8 @@
 package org.jerkar.api.system;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,6 +11,7 @@ import java.util.List;
 
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIO.StreamGobbler;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsSystem;
 
@@ -41,17 +44,17 @@ import org.jerkar.api.utils.JkUtilsSystem;
  */
 public final class JkProcess implements Runnable {
 
-    private static final File CURRENT_JAVA_DIR = new File(System.getProperty("java.home"), "bin");
+    private static final Path CURRENT_JAVA_DIR = Paths.get(System.getProperty("java.home")).resolve("bin");
 
     private final String command;
 
     private final List<String> parameters;
 
-    private final File workingDir;
+    private final Path workingDir;
 
     private final boolean failOnError;
 
-    private JkProcess(String command, List<String> parameters, File workingDir, boolean failOnError) {
+    private JkProcess(String command, List<String> parameters, Path workingDir, boolean failOnError) {
         this.command = command;
         this.parameters = parameters;
         this.workingDir = workingDir;
@@ -81,17 +84,17 @@ public final class JkProcess implements Runnable {
      * parameters. An example of JDK tool is 'javac'.
      */
     public static JkProcess ofJavaTool(String javaTool, String... parameters) {
-        File candidate = CURRENT_JAVA_DIR;
+        Path candidate = CURRENT_JAVA_DIR;
         final boolean exist = findTool(candidate, javaTool);
         if (!exist) {
-            candidate = new File(CURRENT_JAVA_DIR.getParentFile().getParentFile(), "bin");
+            candidate = CURRENT_JAVA_DIR.getParent().getParent().resolve("bin");
             if (!findTool(candidate, javaTool)) {
                 throw new IllegalArgumentException("No tool " + javaTool + " found neither in "
-                        + CURRENT_JAVA_DIR.getAbsolutePath() + " nor in "
-                        + candidate.getAbsolutePath());
+                        + CURRENT_JAVA_DIR + " nor in "
+                        + candidate);
             }
         }
-        final String command = candidate.getAbsolutePath() + File.separator + javaTool;
+        final String command = candidate.toAbsolutePath().normalize().resolve(javaTool).toString();
         return of(command, parameters);
     }
 
@@ -159,7 +162,7 @@ public final class JkProcess implements Runnable {
      * Returns a <code>JkProcess</code> identical to this one but using the
      * specified directory as the working directory.
      */
-    public JkProcess withWorkingDir(File workingDir) {
+    public JkProcess withWorkingDir(Path workingDir) {
         return new JkProcess(command, parameters, workingDir, failOnError);
     }
 
@@ -201,7 +204,7 @@ public final class JkProcess implements Runnable {
         try {
             final ProcessBuilder processBuilder = processBuilder(commands);
             if (workingDir != null) {
-                processBuilder.directory(this.workingDir);
+                processBuilder.directory(this.workingDir.toAbsolutePath().normalize().toFile());
             }
             final Process process = processBuilder.start();
             final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
@@ -227,20 +230,20 @@ public final class JkProcess implements Runnable {
         final ProcessBuilder builder = new ProcessBuilder(command);
         builder.redirectErrorStream(true);
         if (this.workingDir != null) {
-            builder.directory(workingDir);
+            builder.directory(workingDir.toAbsolutePath().normalize().toFile());
         }
         return builder;
     }
 
-    private static boolean findTool(File dir, String name) {
-        for (final File file : dir.listFiles()) {
-            if (file.isDirectory()) {
+    private static boolean findTool(Path dir, String name) {
+        for (final Path file : JkUtilsPath.listDirectChildren(dir)) {
+            if (Files.isDirectory(file)) {
                 continue;
             }
-            if (file.getName().equals(name)) {
+            if (file.getFileName().toString().equals(name)) {
                 return true;
             }
-            final String fileToolName = JkUtilsString.substringBeforeLast(file.getName(), ".");
+            final String fileToolName = JkUtilsString.substringBeforeLast(file.getFileName().toString(), ".");
             if (fileToolName.equals(name)) {
                 return true;
             }
@@ -256,7 +259,7 @@ public final class JkProcess implements Runnable {
     /**
      * Returns the working directory of this process.
      */
-    public File workingDir() {
+    public Path workingDir() {
         return workingDir;
     }
 

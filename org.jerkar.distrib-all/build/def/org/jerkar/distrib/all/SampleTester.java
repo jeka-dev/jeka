@@ -8,6 +8,7 @@ import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsAssert;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsSystem;
 
@@ -51,23 +52,23 @@ class SampleTester {
 
     private void testSamples(String className, String... args) {
         JkLog.infoHeaded("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(sampleBaseDir.rootPath().toAbsolutePath().normalize().toFile())
+        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(sampleBaseDir.rootPath().toAbsolutePath().normalize())
                 .withParametersIf(!JkUtilsString.isBlank(className), "-verbose=true -buildClass=" + className).andParameters(args)
                 .failOnError(true).runSync();
     }
 
     private void testDependee(String className, String... args) {
         JkLog.infoHeaded("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependeeBaseDir.root())
+        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependeeBaseDir.rootPath())
                 .withParametersIf(!JkUtilsString.isBlank(className), "-buildClass=" + className).andParameters(args)
                 .failOnError(true).runSync();
     }
 
     private void scaffoldAndEclipse() {
         JkLog.startHeaded("Test scaffolding");
-        File scafoldedProject = output.file("scaffolded");
+        Path scafoldedProject = output.rootPath().resolve("scaffolded");
         JkProcess scaffoldProcess = process().withWorkingDir(scafoldedProject);
-        scafoldedProject.mkdirs();
+        JkUtilsPath.createDirectories(scafoldedProject);
         scaffoldProcess.withParameters("scaffold").runSync(); // scaffold
         // project
         scaffoldProcess.runSync(); // Build the scaffolded project

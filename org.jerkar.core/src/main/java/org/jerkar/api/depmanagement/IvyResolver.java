@@ -75,7 +75,7 @@ final class IvyResolver implements InternalDepResolver {
     private static IvySettings ivySettingsOf(JkRepos resolveRepos) {
         final IvySettings ivySettings = new IvySettings();
         IvyTranslations.populateIvySettingsWithRepo(ivySettings, resolveRepos);
-        ivySettings.setDefaultCache(JkLocator.jerkarRepositoryCache());
+        ivySettings.setDefaultCache(JkLocator.jerkarRepositoryCache().toFile());
         return ivySettings;
     }
 

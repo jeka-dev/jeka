@@ -38,7 +38,7 @@ public final class JkPublisher {
      * Creates a publisher that publish locally under <code></code>[USER HOME]/.jerkar/publish</code> folder.
      */
     public static JkPublisher local() {
-        final File file = new File(JkLocator.jerkarUserHome(), "maven-publish-dir");
+        final File file = new File(JkLocator.jerkarUserHomeDir().toFile(), "maven-publish-dir");
         return JkPublisher.of(JkRepo.maven(file).asPublishRepo());
     }
 

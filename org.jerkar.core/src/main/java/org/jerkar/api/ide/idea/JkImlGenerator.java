@@ -21,7 +21,6 @@ import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
@@ -478,8 +477,8 @@ public final class JkImlGenerator {
         if (!useVarPath) {
             return path;
         }
-        final String repo = JkLocator.jerkarRepositoryCache().getAbsolutePath().replace('\\', '/');
-        final String home = JkLocator.jerkarHomePath().toAbsolutePath().normalize().toString().replace('\\', '/');
+        final String repo = JkLocator.jerkarRepositoryCache().toAbsolutePath().normalize().toString().replace('\\', '/');
+        final String home = JkLocator.jerkarHomeDir().toAbsolutePath().normalize().toString().replace('\\', '/');
         final String result = path.replace(repo, "$JERKAR_REPO$");
         if (!result.equals(path)) {
             return result;

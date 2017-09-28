@@ -2,7 +2,10 @@ package org.jerkar.api.tooling;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkJavaCompiler;
@@ -15,9 +18,9 @@ import org.junit.Test;
 public class EffectivePomTest {
 
     @Test
-    public void test() {
+    public void test() throws URISyntaxException {
         final URL url = EffectivePomTest.class.getResource("effectivepom.xml");
-        final File file = new File(url.getFile());
+        final Path file = Paths.get(url.toURI());
         final JkPom jkPom = JkPom.of(file);
         jkPom.dependencies();
         jkPom.artifactId();
@@ -26,9 +29,9 @@ public class EffectivePomTest {
     }
 
     // Compilation fails for obscure reason (stack overflow)
-    public void testJerkarSourceCode() throws IOException {
+    public void testJerkarSourceCode() throws IOException, URISyntaxException {
         final URL url = EffectivePomTest.class.getResource("effectivepom.xml");
-        final File file = new File(url.getFile());
+        final Path file = Paths.get(url.toURI());
         final JkPom jkPom = JkPom.of(file);
         final String code = jkPom.jerkarSourceCode(JkFileTree.of(new File("toto")));
         System.out.println(code);
@@ -41,7 +44,7 @@ public class EffectivePomTest {
         javaCode.createNewFile();
         JkUtilsFile.writeString(javaCode, code, false);
         final boolean success = JkJavaCompiler.outputtingIn(binDir).andSourceDir(srcDir)
-                .andOptions("-cp", JkLocator.jerkarJarFile().getPath()).compile();
+                .andOptions("-cp", JkLocator.jerkarJarPath().toAbsolutePath().normalize().toString()).compile();
         Assert.assertTrue("The generated build class does not compile " + javaCode, success);
     }
 

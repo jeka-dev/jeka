@@ -103,12 +103,12 @@ public final class JkInit {
         JkLog.info("Working Directory : " + System.getProperty("user.dir"));
         JkLog.info("Java Home : " + System.getProperty("java.home"));
         JkLog.info("Java Version : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
-        if ( embedded(JkLocator.jerkarHomePath())) {
+        if ( embedded(JkLocator.jerkarHomeDir())) {
             JkLog.info("Jerkar Home : " + bootDir() + " ( embedded !!! )");
         } else {
-            JkLog.info("Jerkar Home : " + JkLocator.jerkarHomePath());
+            JkLog.info("Jerkar Home : " + JkLocator.jerkarHomeDir());
         }
-        JkLog.info("Jerkar User Home : " + JkLocator.jerkarUserHome().getAbsolutePath());
+        JkLog.info("Jerkar User Home : " + JkLocator.jerkarUserHomeDir().toAbsolutePath().normalize());
         JkLog.info("Jerkar Repository Cache : " + JkLocator.jerkarRepositoryCache());
         JkLog.info("Jerkar Classpath : " + System.getProperty("java.class.path"));
         JkLog.info("Command Line : " + JkUtilsString.join(Arrays.asList(args), " "));
@@ -164,7 +164,7 @@ public final class JkInit {
 
     private static Map<String, String> getSpecifiedSystemProps(String[] args) {
         final Map<String, String> result = new TreeMap<>();
-        final Path propFile = JkLocator.jerkarHomePath().resolve("system.properties");
+        final Path propFile = JkLocator.jerkarHomeDir().resolve("system.properties");
         if (Files.exists(propFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
         }
@@ -209,12 +209,12 @@ public final class JkInit {
     }
 
     private static Map<String, String> loadOptionsProperties() {
-        final Path propFile = JkLocator.jerkarHomePath().resolve("options.properties");
+        final Path propFile = JkLocator.jerkarHomeDir().resolve("options.properties");
         final Map<String, String> result = new HashMap<>();
         if (Files.exists(propFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
         }
-        final Path userPropFile = JkLocator.jerkarUserHomePath().resolve("options.properties");
+        final Path userPropFile = JkLocator.jerkarUserHomeDir().resolve("options.properties");
         if (Files.exists(userPropFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
         }

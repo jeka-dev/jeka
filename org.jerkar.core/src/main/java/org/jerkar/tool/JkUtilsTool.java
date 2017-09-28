@@ -15,7 +15,7 @@ public final class JkUtilsTool {
 
     static Map<String, String> userSystemProperties() {
         final Map<String, String> result = new HashMap<>();
-        final Path userPropFile = JkLocator.jerkarUserHomePath().resolve("system.properties");
+        final Path userPropFile = JkLocator.jerkarUserHomeDir().resolve("system.properties");
         if (Files.exists(userPropFile)) {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
         }

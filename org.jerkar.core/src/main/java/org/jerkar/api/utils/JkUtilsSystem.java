@@ -1,8 +1,11 @@
 package org.jerkar.api.utils;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,10 +37,25 @@ public final class JkUtilsSystem {
      * Returns the classpath of this classloader without mentioning classpath of
      * the parent classloaders.
      */
-    public static List<File> classloaderEntries(URLClassLoader classLoader) {
-        final List<File> result = new ArrayList<>();
+    public static List<Path> classloaderEntries(URLClassLoader classLoader) {
+        final List<Path> result = new ArrayList<>();
         for (final URL url : classLoader.getURLs()) {
-            result.add(new File(url.getFile().replaceAll("%20", " ")));
+            String pathName = null;
+            try {
+                pathName = url.toURI().getPath().replaceAll("%20", " ").trim();
+            } catch (URISyntaxException e) {
+                throw JkUtilsThrowable.unchecked(e);
+            }
+            String fileName = new File(pathName).getAbsolutePath();  // Paths.get() fails at interpreting /c:/local.....
+            if (fileName.endsWith("*")) {
+                String parent = JkUtilsString.substringBeforeLast(fileName, "/*");
+                JkUtilsPath.listDirectChildren(Paths.get(parent)).stream()
+                        .filter(item -> item.toString().toLowerCase().endsWith(".jar"))
+                        .forEach(item -> result.add(item));
+                continue;
+            }
+
+            result.add(Paths.get(fileName));
         }
         return result;
     }

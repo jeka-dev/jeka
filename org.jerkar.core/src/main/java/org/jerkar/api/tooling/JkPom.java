@@ -1,6 +1,6 @@
 package org.jerkar.api.tooling;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +41,7 @@ public final class JkPom {
     /**
      * Creates a {@link JkPom} jump a POM file, ideally an effective POM file.
      */
-    public static JkPom of(File file) {
+    public static JkPom of(Path file) {
         final Document document = JkUtilsXml.documentFrom(file);
         return new JkPom(document);
     }

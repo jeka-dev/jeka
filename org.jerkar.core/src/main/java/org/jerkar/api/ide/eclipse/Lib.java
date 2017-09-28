@@ -4,7 +4,6 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.utils.JkUtilsFile;
 
 import java.nio.file.Path;
 
@@ -13,9 +12,9 @@ class Lib {
 
     private static final String CONTAINERS_PATH = "eclipse/containers";
 
-    static final Path CONTAINER_DIR = JkLocator.jerkarHomePath().resolve(CONTAINERS_PATH);
+    static final Path CONTAINER_DIR = JkLocator.jerkarHomeDir().resolve(CONTAINERS_PATH);
 
-    static final Path CONTAINER_USER_DIR = JkLocator.jerkarUserHome().toPath().resolve(CONTAINERS_PATH);
+    static final Path CONTAINER_USER_DIR = JkLocator.jerkarUserHomeDir().resolve(CONTAINERS_PATH);
 
     public static Lib file(Path file, JkScope scope, boolean exported) {
         return new Lib(file, null, scope, exported);

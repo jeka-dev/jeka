@@ -50,6 +50,28 @@ public final class JkUtilsPath {
     }
 
     /**
+     * Delegates to {@link Files#createTempFile(String, String, FileAttribute[])}
+     */
+    public static Path createTempFile(String prefix, String extension, FileAttribute ... fileAttributes) {
+        try {
+            return Files.createTempFile(prefix, extension, fileAttributes);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
+    }
+
+    /**
+     * Delegates to {@link Files#readAllLines(Path)}
+     */
+    public static List<String> readAllLines(Path path) {
+        try {
+            return Files.readAllLines(path);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
+    }
+
+    /**
      * Delegates to Files{@link #deleteFile(Path)}
      */
     public static void deleteFile(Path path) {

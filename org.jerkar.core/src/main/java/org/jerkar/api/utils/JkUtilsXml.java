@@ -3,6 +3,8 @@ package org.jerkar.api.utils;
 import java.io.File;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -61,6 +63,22 @@ public final class JkUtilsXml {
             return doc;
         } catch (final Exception e) {
             throw new RuntimeException("Error while parsing file " + documentFile.getPath(), e);
+        }
+    }
+
+    public static Document documentFrom(Path documentFile) {
+        if (!Files.exists(documentFile)) {
+            throw new IllegalStateException(documentFile.toAbsolutePath().normalize() + " file not found.");
+        }
+        final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        try {
+            final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc;
+            doc = dBuilder.parse(documentFile.toFile());
+            doc.getDocumentElement().normalize();
+            return doc;
+        } catch (final Exception e) {
+            throw new RuntimeException("Error while parsing file " + documentFile, e);
         }
     }
 

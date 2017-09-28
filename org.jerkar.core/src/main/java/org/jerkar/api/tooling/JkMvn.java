@@ -1,15 +1,15 @@
 package org.jerkar.api.tooling;
 
-import java.io.File;
-
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkModuleDependency;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopedDependency;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.system.JkProcess;
-import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsSystem;
+
+import java.nio.file.Path;
 
 /**
  * Convenient class wrapping maven process.
@@ -53,7 +53,7 @@ public final class JkMvn implements Runnable {
      * white space to separate workds. Ex : JkMvn.of(myFile, "deleteArtifacts", "install",
      * "-U").
      */
-    public static final JkMvn of(File workingDir, String... args) {
+    public static final JkMvn of(Path workingDir, String... args) {
         if (MVN_CMD == null) {
             throw new IllegalStateException("Maven not installed on this machine");
         }
@@ -95,10 +95,10 @@ public final class JkMvn implements Runnable {
      * Reads the dependencies of this Maven project
      */
     public JkDependencies readDependencies() {
-        final File file = JkUtilsFile.tempFile("dependency", ".txt");
-        commands("dependency:list", "-DoutputFile=" + file.getAbsolutePath()).run();
+        final Path file = JkUtilsPath.createTempFile("dependency", ".txt");
+        commands("dependency:list", "-DoutputFile=" + file).run();
         final JkDependencies result = fromMvnFlatFile(file);
-        file.delete();
+        JkUtilsPath.deleteFile(file);
         return result;
     }
 
@@ -127,10 +127,10 @@ public final class JkMvn implements Runnable {
      * this Maven JkEclipseProject
      */
     public String createBuildClassCode(String packageName, String className, JkFileTree baseDir) {
-        final File pom = JkUtilsFile.tempFile("effectivepom", ".xml");
-        commands("help:effective-pom", "-Doutput=" + pom.getAbsolutePath()).run();
+        final Path pom = JkUtilsPath.createTempFile("effectivepom", ".xml");
+        commands("help:effective-pom", "-Doutput=" + pom.toAbsolutePath().normalize().toString()).run();
         final JkPom jkPom = JkPom.of(pom);
-        pom.delete();
+        JkUtilsPath.deleteFile(pom);
         return jkPom.jerkarSourceCode(baseDir);
     }
 
@@ -182,9 +182,9 @@ public final class JkMvn implements Runnable {
      * </ul>
      *
      */
-    public static JkDependencies fromMvnFlatFile(File flatFile) {
+    public static JkDependencies fromMvnFlatFile(Path flatFile) {
         final JkDependencies.Builder builder = JkDependencies.builder();
-        for (final String line : JkUtilsFile.readLines(flatFile)) {
+        for (final String line : JkUtilsPath.readAllLines(flatFile)) {
             final JkScopedDependency scopedDependency = mvnDep(line);
             if (scopedDependency != null) {
                 builder.on(scopedDependency);

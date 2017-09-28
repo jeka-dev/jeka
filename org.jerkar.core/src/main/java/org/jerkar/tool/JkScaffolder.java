@@ -43,7 +43,7 @@ public final class JkScaffolder {
         if (embed) {
             JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar.bat"), baseTree.file("jerkar.bat"));
             JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar"), baseTree.file("jerkar"));
-            JkUtilsFile.copyFileToDir(JkLocator.jerkarJarFile(), baseTree.file("build/boot"));
+            JkUtilsFile.copyFileToDir(JkLocator.jerkarJarPath().toFile(), baseTree.file("build/boot"));
         }
         extraActions.run();
     }
