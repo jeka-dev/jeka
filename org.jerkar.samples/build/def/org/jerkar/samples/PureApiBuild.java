@@ -15,7 +15,7 @@ import org.jerkar.tool.JkInit;
 public class PureApiBuild extends JkBuild {
 
     public void doDefault() {
-        JkJavaProject javaProject = new JkJavaProject(this.baseTree().root());
+        JkJavaProject javaProject = new JkJavaProject(this.baseDir());
 
         javaProject.setArtifactName("pure-api-build-project");
 

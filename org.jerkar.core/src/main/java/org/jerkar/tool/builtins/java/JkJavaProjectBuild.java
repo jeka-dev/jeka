@@ -44,15 +44,21 @@ public abstract class JkJavaProjectBuild extends JkBuild {
 
     public final JkJavaProject project() {
         if (project == null) {
-            JkJavaProject suggest = new JkJavaProject(this.baseDir());
-            project = createProject(suggest);
+            project = createProject();
             applyOptions(project);
             setupPlugins();
         }
         return project;
     }
 
-    protected abstract JkJavaProject createProject(JkJavaProject suggest);
+    protected abstract JkJavaProject createProject();
+
+    /**
+     * Provides a default project usable in {@link #createProject()} method
+     */
+    protected JkJavaProject defaultProject() {
+        return new JkJavaProject(this.baseDir());
+    }
 
     protected void setupPlugins() {
         // Do nothing by default

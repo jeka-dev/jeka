@@ -24,7 +24,7 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 public class MavenStyleBuild extends JkJavaProjectBuild {
 
     @Override
-    protected JkJavaProject createProject(JkJavaProject suggest) {
+    protected JkJavaProject createProject() {
         JkJavaProject project = new JkJavaProject(this.baseDir())
                 .setVersionedModule("org.jerkar:script-samples", "0.3-SNAPSHOT")
                 .setDependencies(dependencies());

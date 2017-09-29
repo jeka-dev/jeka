@@ -21,8 +21,8 @@ public class SonarPluginBuild extends JkJavaProjectBuild {
     protected SonarEnv sonarEnv = SonarEnv.DEV;
     
     @Override
-    protected JkJavaProject createProject(JkJavaProject project) {
-        return project
+    protected JkJavaProject createProject() {
+        return defaultProject()
                 .setVersionedModule("org.jerkar:samples", "0.1")
                 .setDependencies(JkDependencies.builder()
                 .on(GUAVA, "18.0")

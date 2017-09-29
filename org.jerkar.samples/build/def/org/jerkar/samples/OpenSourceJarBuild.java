@@ -18,7 +18,7 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 public class OpenSourceJarBuild extends JkJavaProjectBuild {
 
     @Override
-    protected JkJavaProject createProject(JkJavaProject project) {
+    protected JkJavaProject createProject() {
         JkDependencies deps = JkDependencies.builder()
                 .on(GUAVA, "18.0") 
                 .on(JUNIT, "4.11", TEST).build();
@@ -29,7 +29,7 @@ public class OpenSourceJarBuild extends JkJavaProjectBuild {
                 .andApache2License()
                 .andGitHubDeveloper("djeang", "dgeangdev@yahoo.fr");
         
-        return project
+        return defaultProject()
                 .setVersionedModule("org.jerkar:sample-open-source", "1.3.1-SNAPSHOT")
                 .setDependencies(deps)
                 .setMavenPublicationInfo(info);

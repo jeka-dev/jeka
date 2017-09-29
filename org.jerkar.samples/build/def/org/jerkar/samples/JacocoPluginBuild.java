@@ -16,8 +16,8 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 public class JacocoPluginBuild extends JkJavaProjectBuild {
     
     @Override
-    protected JkJavaProject createProject(JkJavaProject project) {
-        return project
+    protected JkJavaProject createProject() {
+        return defaultProject()
                 .setDependencies(JkDependencies.builder()
                 .on(GUAVA, "18.0")
                 .on(JUNIT, "4.11", JkJavaDepScopes.TEST).build());

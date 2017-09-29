@@ -30,8 +30,8 @@ import com.google.common.base.MoreObjects;
 public class HttpClientTaskBuild extends JkJavaProjectBuild {
     
     @Override
-    protected JkJavaProject createProject(JkJavaProject project) {
-        return project.setDependencies(dependencies());
+    protected JkJavaProject createProject() {
+        return defaultProject().setDependencies(dependencies());
     }
 
 
