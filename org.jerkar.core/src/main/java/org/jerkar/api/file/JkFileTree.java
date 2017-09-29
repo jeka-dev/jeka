@@ -38,14 +38,14 @@ public final class JkFileTree implements Iterable<File> {
      */
     @Deprecated
     public static JkFileTree of(File rootDir) {
-        return new JkFileTree(rootDir);
+        return new JkFileTree(rootDir.toPath());
     }
 
     /**
      * Creates a {@link JkFileTree} having the specified root directory.
      */
     public static JkFileTree of(Path rootDir) {
-        return new JkFileTree(rootDir.toFile());
+        return new JkFileTree(rootDir);
     }
 
 
@@ -53,23 +53,15 @@ public final class JkFileTree implements Iterable<File> {
 
     private final JkPathFilter filter;
 
-    private JkFileTree(File rootDir) {
+    private JkFileTree(Path rootDir) {
         this(rootDir, JkPathFilter.ACCEPT_ALL);
     }
 
-    /**
-     * Creates a {@link JkFileTree} having the specified asScopedDependency directory and
-     * filter.
-     */
-    private JkFileTree(File rootDir, JkPathFilter filter) {
+    private JkFileTree(Path rootDir, JkPathFilter filter) {
         JkUtilsAssert.notNull(rootDir, "Root dir can't be null.");
-        if (filter == null) {
-            throw new IllegalArgumentException("filter can't be null.");
-        }
-        if (rootDir.exists() && !rootDir.isDirectory()) {
-            throw new IllegalArgumentException(rootDir + " is not a directory.");
-        }
-        this.root = rootDir.toPath();
+        JkUtilsAssert.notNull(filter, "filter can't be null.");
+        JkUtilsAssert.isTrue(!Files.exists(rootDir) || Files.isDirectory(rootDir), rootDir + " is not a directory.");
+        this.root = rootDir;
         this.filter = filter;
     }
 
@@ -248,17 +240,15 @@ public final class JkFileTree implements Iterable<File> {
         return JkZipper.of(this);
     }
 
-
-
     /**
      * Creates a {@link JkFileTree} which is a copy of this {@link JkFileTree}
      * augmented with the specified {@link JkPathFilter}
      */
     public JkFileTree andFilter(JkPathFilter filter) {
         if (this.filter == JkPathFilter.ACCEPT_ALL) {
-            return new JkFileTree(root.toFile(), filter);
+            return new JkFileTree(root, filter);
         }
-        return new JkFileTree(root.toFile(), this.filter.and(filter));
+        return new JkFileTree(root, this.filter.and(filter));
     }
 
     /**
