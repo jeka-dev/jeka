@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,7 +27,7 @@ import org.jerkar.api.utils.JkUtilsThrowable;
  *
  * <p>
  * When speaking about files contained in a {@link JkFileTree}, we mean all
- * files contained in its asScopedDependency directory or sub-directories, matching positively
+ * files contained in its root directory or sub-directories, matching positively
  * the filter defined on it.
  *
  * @author Jerome Angibaud
@@ -34,7 +35,7 @@ import org.jerkar.api.utils.JkUtilsThrowable;
 public final class JkFileTree implements Iterable<File> {
 
     /**
-     * Creates a {@link JkFileTree} having the specified asScopedDependency directory.
+     * Creates a {@link JkFileTree} having the specified root directory.
      */
     @Deprecated
     public static JkFileTree of(File rootDir) {
@@ -66,7 +67,7 @@ public final class JkFileTree implements Iterable<File> {
 
     /**
      * Creates a {@link JkFileTree} having the default filter and the specified
-     * relative path to this asScopedDependency as asScopedDependency directory.
+     * relative path to this root as root directory.
      */
     public JkFileTree go(String relativePath) {
         final Path path = root.resolve(relativePath);
@@ -74,11 +75,11 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Creates the asScopedDependency directory if it does not exist.
+     * Creates the root directory if it does not exist.
      */
     public JkFileTree createIfNotExist() {
         if (!Files.exists(root)) {
-            root.toFile().mkdirs();
+            JkUtilsPath.createDirectories(root);
         }
         return this;
     }
@@ -88,7 +89,7 @@ public final class JkFileTree implements Iterable<File> {
      * directory.
      */
     public File file(String relativePath) {
-        return JkUtilsFile.canonicalFile(new File(root.toFile(), relativePath));
+        return root.resolve(relativePath).toFile();
     }
 
     /**
@@ -103,8 +104,7 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Copies files contained in this {@link JkFileTree} to the specified
-     * directory.
+     * Copies files contained in this {@link JkFileTree} to the specified directory.
      */
     public int copyTo(File destinationDir) {
         if (!destinationDir.exists()) {
@@ -132,22 +132,21 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Returns the asScopedDependency directory.
+     * Returns the root directory.
      */
     public File root() {
-        if (root == null) {
-            return null;
-        }
         return root.toFile();
     }
 
+    /**
+     * Returns the root directory.
+     */
     public Path rootPath() {
         return root;
     }
 
     /**
-     * Returns the filter defined on this {@link JkFileTree}, never
-     * <code>null</code>.
+     * Returns the filter defined on this {@link JkFileTree}, never <code>null</code>.
      */
     public JkPathFilter filter() {
         return filter;
@@ -209,7 +208,7 @@ public final class JkFileTree implements Iterable<File> {
      * Returns if the asScopedDependency directory exists. (Short hand for #asScopedDependency.exists()).
      */
     public boolean exists() {
-        return root.toFile().exists();
+        return Files.exists(root);
     }
 
     /**
@@ -291,7 +290,7 @@ public final class JkFileTree implements Iterable<File> {
      */
     public List<File> files(boolean includeFolders) {
         if (!root.toFile().exists()) {
-            return new LinkedList<>();
+            return Collections.emptyList();
         }
         return JkUtilsFile.filesOf(root.toFile(), filter.toFileFilter(root.toFile()), includeFolders);
     }
@@ -329,7 +328,7 @@ public final class JkFileTree implements Iterable<File> {
 
     @Override
     public String toString() {
-        return root.toFile().getPath() + ":" + filter;
+        return root + ":" + filter;
     }
 
     /**
