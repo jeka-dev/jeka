@@ -40,8 +40,8 @@ public final class JkConstants {
     private static class DefaultBuildClass extends JkJavaProjectBuild {
 
         @Override
-        protected JkJavaProject createProject(JkJavaProject suggest) {
-            return suggest;
+        protected JkJavaProject createProject() {
+            return defaultProject();
         }
 
     }

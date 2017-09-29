@@ -32,7 +32,8 @@ public class CoreBuild extends JkJavaProjectBuild {
     public Path distribFolder;
 
     @Override
-    protected JkJavaProject createProject(JkJavaProject project) {
+    protected JkJavaProject createProject() {
+        final JkJavaProject project = defaultProject();
         applyCommons(project, "core");
         project.addArtifactFile(DISTRIB_FILE_ID, this::doDistrib);
         project.addArtifactFile(JAVADOC_FILE_ID, () -> project.maker().makeJavadocJar());
