@@ -23,6 +23,8 @@ public class JkUtilsPathTest {
         JkUtilsPath.copyDirContent(source, target, StandardCopyOption.REPLACE_EXISTING);
         System.out.println(target);
         assertTrue(Files.exists(target.resolve("subfolder/sample.txt")));
+        assertTrue(Files.exists(target.resolve("emptyfolder")));
+        assertTrue(Files.isDirectory(target.resolve("emptyfolder")));
 
         final Path subfolder = Paths.get(sampleFileUrl.toURI()).getParent();
         final Path target2 = Files.createTempDirectory("copydirtest");

@@ -4,14 +4,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
@@ -84,6 +87,10 @@ public final class JkFileTree implements Iterable<File> {
         return this;
     }
 
+    public Stream<Path> stream(FileVisitOption ...options) {
+        return JkUtilsPath.walk(root, options);
+    }
+
     /**
      * Returns the file matching for the the given path relative to this asScopedDependency
      * directory.
@@ -100,20 +107,14 @@ public final class JkFileTree implements Iterable<File> {
         if (!Files.exists(destinationDir)) {
             JkUtilsPath.createDirectories(destinationDir);
         }
-        return JkUtilsPath.copyDirContent(root, destinationDir);
+        return JkUtilsPath.copyDirContent(root, destinationDir, StandardCopyOption.REPLACE_EXISTING);
     }
 
     /**
      * Copies files contained in this {@link JkFileTree} to the specified directory.
      */
     public int copyTo(File destinationDir) {
-        if (!destinationDir.exists()) {
-            destinationDir.mkdirs();
-        } else {
-            JkUtilsFile.assertAllDir(destinationDir);
-        }
-        return JkUtilsFile.copyDirContent(root.toFile(), destinationDir, filter.toFileFilter(root.toFile()), true,
-                JkLog.infoStreamIfVerbose());
+        return copyTo(destinationDir.toPath());
     }
 
     /**

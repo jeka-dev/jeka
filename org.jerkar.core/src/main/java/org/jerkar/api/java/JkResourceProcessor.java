@@ -1,14 +1,15 @@
 package org.jerkar.api.java;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
@@ -16,6 +17,7 @@ import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
 
 /**
  * This processor basically copies some resource files to a target folder
@@ -24,7 +26,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
  * values.<br/>
  * The processor is constructed using a list of <code>JkDirSets</code> and for
  * each of them, we can associate a map of token to replace.<br/>
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkResourceProcessor {
@@ -62,21 +64,25 @@ public final class JkResourceProcessor {
      */
     public void generateTo(File outputDir) {
         JkLog.startln("Coping resource files to " + outputDir.getPath());
-        final Set<File> files = new HashSet<>();
+        final AtomicInteger count = new AtomicInteger(0);
         for (final JkFileTree resourceTree : this.resourceTrees.fileTrees()) {
-            if (!resourceTree.root().exists()) {
+            if (!resourceTree.exists()) {
                 continue;
             }
-            for (final File file : resourceTree) {
-                final String relativePath = resourceTree.relativePath(file);
-                final File out = new File(outputDir, relativePath);
-                final Map<String, String> data = JkInterpolator.interpolateData(relativePath,
+            resourceTree.stream().forEach(path -> {
+                final Path relativePath = resourceTree.rootPath().relativize(path);
+                final Path out = outputDir.toPath().resolve(relativePath);
+                final Map<String, String> data = JkInterpolator.interpolateData(relativePath.toString(),
                         interpolators);
-                JkUtilsFile.copyFileReplacingTokens(file, out, data, JkLog.infoStreamIfVerbose());
-                files.add(JkUtilsFile.canonicalFile(file));
-            }
+                if (Files.isDirectory(path)) {
+                    JkUtilsPath.createDirectories(out);
+                } else {
+                    JkUtilsFile.copyFileReplacingTokens(path.toFile(), out.toFile(), data, JkLog.infoStreamIfVerbose());
+                    count.incrementAndGet();
+                }
+            });
         }
-        JkLog.done(files.size() + " file(s) copied.");
+        JkLog.done(count.intValue() + " file(s) copied.");
     }
 
     /**
@@ -137,7 +143,7 @@ public final class JkResourceProcessor {
 
     /**
      * Shorthand for {@link #and(JkInterpolator)}.
-     * 
+     *
      * @see JkInterpolator#of(String, String, String, String...)
      */
     public JkResourceProcessor interpolating(String includeFilter, String key, String value,

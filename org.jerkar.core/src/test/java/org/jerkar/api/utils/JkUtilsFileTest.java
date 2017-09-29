@@ -28,7 +28,7 @@ public class JkUtilsFileTest {
         assertEquals(1, files.size());
 
         files = JkUtilsFile.filesOf(sampleDir, true);
-        assertEquals(2, files.size());
+        assertEquals(3, files.size());
 
         final FileFilter fileFilter = pathname -> !pathname.getName().equals("sample.txt");
 
@@ -36,7 +36,7 @@ public class JkUtilsFileTest {
         assertEquals(0, files.size());
 
         files = JkUtilsFile.filesOf(sampleDir, fileFilter, true);
-        assertEquals(1, files.size());
+        assertEquals(2, files.size());
 
 
     }
