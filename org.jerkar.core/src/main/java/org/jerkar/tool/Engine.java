@@ -246,9 +246,9 @@ final class Engine {
 
     private static void runProject(JkBuild build, List<MethodInvocation> invokes,
             PluginDictionnary dictionnary) {
-        JkLog.infoHeaded("Executing build for project " + build.baseTree().root().getName());
+        JkLog.infoHeaded("Executing build for project " + build.baseTree().rootDir().getName());
         JkLog.info("Build class : " + build.getClass().getName());
-        JkLog.info("Base dir : " + build.baseTree().root().getPath());
+        JkLog.info("Base dir : " + build.baseTree().rootDir().getPath());
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
         if (JkLog.verbose()) {
             JkInit.logProps("Field values", displayedOptions);
@@ -289,7 +289,7 @@ final class Engine {
         }
         final String context;
         if (fromDir != null) {
-            final String path = fromDir.relativize(build.baseTree().rootPath()).toString().replace(
+            final String path = fromDir.relativize(build.baseTree().root()).toString().replace(
                     FileSystems.getDefault().getSeparator(), "/");
             context = " to project " + path + ", class " + build.getClass().getName();
         } else {

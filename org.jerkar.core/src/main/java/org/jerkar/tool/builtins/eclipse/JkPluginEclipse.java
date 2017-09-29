@@ -56,7 +56,7 @@ public final class JkPluginEclipse implements JkPlugin {
             final JkJavaProject javaProject = javaProjectBuild.project();
             final List<Path> importedBuildProjects = new LinkedList<>();
             for (final JkBuild depBuild : build.importedBuilds().directs()) {
-                importedBuildProjects.add(depBuild.baseTree().rootPath());
+                importedBuildProjects.add(depBuild.baseTree().root());
             }
             final JkEclipseClasspathGenerator classpathGenerator = new JkEclipseClasspathGenerator(javaProject);
             classpathGenerator.setBuildDependencyResolver(build.buildDependencyResolver(), build.buildDependencies());
@@ -71,11 +71,11 @@ public final class JkPluginEclipse implements JkPlugin {
             JkUtilsPath.write(dotClasspath, result.getBytes(Charset.forName("UTF-8")));
 
             if (!Files.exists(dotProject)) {
-                JkEclipseProject.ofJavaNature(build.baseTree().root().getName()).writeTo(dotProject);
+                JkEclipseProject.ofJavaNature(build.baseTree().rootDir().getName()).writeTo(dotProject);
             }
         } else {
             if (!Files.exists(dotProject)) {
-                JkEclipseProject.ofSimpleNature(build.baseTree().root().getName()).writeTo(dotProject);
+                JkEclipseProject.ofSimpleNature(build.baseTree().rootDir().getName()).writeTo(dotProject);
             }
         }
     }

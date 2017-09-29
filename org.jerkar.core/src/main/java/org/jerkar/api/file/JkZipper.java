@@ -160,6 +160,14 @@ public final class JkZipper {
     }
 
     /**
+     * Append the content of this zipper to the specified archive file. If the
+     * specified file does not exist, it will be created under the hood.
+     */
+    public JkCheckSumer appendTo(Path archive) {
+        return appendTo(archive.toFile());
+    }
+
+    /**
      * Returns a {@link JkZipFile} identical to this one but with the specified compression level.
      */
     public JkZipper with(JkCompressionLevel level) {
@@ -193,7 +201,7 @@ public final class JkZipper {
         JkLog.start("Creating zip file : " + JkUtilsFile.canonicalPath(zipFile));
         JkUtilsFile.createFileIfNotExist(zipFile);
         try (final FileOutputStream fos = new FileOutputStream(zipFile);
-             final ZipOutputStream zos =  new ZipOutputStream(fos)) {
+                final ZipOutputStream zos =  new ZipOutputStream(fos)) {
             zos.setLevel(this.jkCompressionLevel.level);
             zos.setMethod(this.jkCompressionMethod.method);
 
@@ -217,7 +225,7 @@ public final class JkZipper {
                     }
                 } else {
                     throw new IllegalStateException("Items of class " + item.getClass()
-                            + " not handled.");
+                    + " not handled.");
                 }
             }
 
@@ -238,7 +246,7 @@ public final class JkZipper {
             }
             JkUtilsIO.flush(zos);
             JkUtilsIO.finish(zos);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             JkUtilsThrowable.unchecked(e);
         }
         JkLog.done();
@@ -275,7 +283,7 @@ public final class JkZipper {
         if (!fileTree.exists()) {
             return;
         }
-        final File base = JkUtilsFile.canonicalFile(fileTree.root());
+        final File base = JkUtilsFile.canonicalFile(fileTree.rootDir());
         for (final File file : fileTree.andFilter(filter)) {
             JkUtilsZip.addZipEntry(zos, file, base,
                     JkCompressionMethod.STORED.equals(this.jkCompressionMethod));

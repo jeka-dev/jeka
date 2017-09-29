@@ -70,7 +70,7 @@ public final class JkResourceProcessor {
                 continue;
             }
             resourceTree.stream().forEach(path -> {
-                final Path relativePath = resourceTree.rootPath().relativize(path);
+                final Path relativePath = resourceTree.root().relativize(path);
                 final Path out = outputDir.toPath().resolve(relativePath);
                 final Map<String, String> data = JkInterpolator.interpolateData(relativePath.toString(),
                         interpolators);

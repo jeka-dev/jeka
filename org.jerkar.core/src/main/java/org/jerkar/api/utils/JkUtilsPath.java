@@ -4,7 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.CopyOption;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.LinkedList;
@@ -23,15 +31,15 @@ public final class JkUtilsPath {
     }
 
     public static List<File> filesOf(Iterable<Path> paths) {
-        List<File> result = new LinkedList<>();
-        for (Path path : paths) {
+        final List<File> result = new LinkedList<>();
+        for (final Path path : paths) {
             result.add(path.toFile());
         }
         return result;
     }
 
     public static File[] filesOf(Path ... paths) {
-        File[] result = new File[paths.length];
+        final File[] result = new File[paths.length];
         for (int i = 0; i<paths.length; i++) {
             result[i] = paths[i].toFile();
         }
@@ -39,7 +47,7 @@ public final class JkUtilsPath {
     }
 
     public static Path[] pathsOf(File ... files) {
-        Path[] result = new Path[files.length];
+        final Path[] result = new Path[files.length];
         for (int i = 0; i<files.length; i++) {
             result[i] = files[i].toPath();
         }
@@ -47,8 +55,8 @@ public final class JkUtilsPath {
     }
 
     public static List<Path> pathsOf(Iterable<File> files) {
-        List<Path> result = new LinkedList<>();
-        for (File file : files) {
+        final List<Path> result = new LinkedList<>();
+        for (final File file : files) {
             result.add(file.toPath());
         }
         return result;
@@ -60,7 +68,7 @@ public final class JkUtilsPath {
     public static boolean isSameFile(Path path1, Path path2) {
         try {
             return Files.isSameFile(path1, path2);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -71,7 +79,7 @@ public final class JkUtilsPath {
     public static Path createTempFile(String prefix, String extension, FileAttribute ... fileAttributes) {
         try {
             return Files.createTempFile(prefix, extension, fileAttributes);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -82,7 +90,7 @@ public final class JkUtilsPath {
     public static List<String> readAllLines(Path path) {
         try {
             return Files.readAllLines(path);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -93,7 +101,7 @@ public final class JkUtilsPath {
     public static void deleteFile(Path path) {
         try {
             Files.delete(path);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -104,7 +112,7 @@ public final class JkUtilsPath {
     public static void createFile(Path path, FileAttribute<?>... attrs) {
         try {
             Files.createFile(path, attrs);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -123,7 +131,7 @@ public final class JkUtilsPath {
                 Files.createDirectories(path.getParent());
             }
             Files.createFile(path, attrs);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -134,7 +142,7 @@ public final class JkUtilsPath {
     public static void write(Path path, byte[] bytes, OpenOption ... options) {
         try {
             Files.write(path, bytes, options);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -142,7 +150,7 @@ public final class JkUtilsPath {
     public static DirectoryStream<Path> newDirectoryStream(Path root, DirectoryStream.Filter<Path> filter) {
         try {
             return Files.newDirectoryStream(root, filter);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -150,7 +158,7 @@ public final class JkUtilsPath {
     public static List<Path> listDirectChildren(Path path) {
         try (Stream stream = Files.list(path)) {
             return (List<Path>) stream.collect(Collectors.toList());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -161,7 +169,7 @@ public final class JkUtilsPath {
     public static void createDirectories(Path path, FileAttribute<?>... attrs) {
         try {
             Files.createDirectories(path, attrs);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -172,7 +180,7 @@ public final class JkUtilsPath {
     public static void copy(Path source, Path target, CopyOption ...copyOptions) {
         try {
             Files.copy(source, target, copyOptions);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -191,7 +199,15 @@ public final class JkUtilsPath {
     public static Stream<Path> walk(Path path, FileVisitOption ...options) {
         try {
             return Files.walk(path, options);
-        } catch (IOException e) {
+        } catch (final IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
+    }
+
+    public static void walkFileTree(Path path, FileVisitor<Path> visitor) {
+        try {
+            Files.walkFileTree(path, visitor);
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
@@ -202,11 +218,11 @@ public final class JkUtilsPath {
      * @return the copied file count.
      */
     public static int copyDirContent(Path sourceDir, Path targetDir, CopyOption ... copyOptions)  {
-        CopyDirVisitor visitor = new CopyDirVisitor(sourceDir, targetDir, copyOptions);
+        final CopyDirVisitor visitor = new CopyDirVisitor(sourceDir, targetDir, copyOptions);
         createDirectories(targetDir);
         try {
             Files.walkFileTree(sourceDir, visitor);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
         return visitor.count;
@@ -229,7 +245,7 @@ public final class JkUtilsPath {
 
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-            Path targetPath = toPath.resolve(fromPath.relativize(dir));
+            final Path targetPath = toPath.resolve(fromPath.relativize(dir));
             Files.createDirectories(targetPath);
             return FileVisitResult.CONTINUE;
         }
@@ -241,8 +257,5 @@ public final class JkUtilsPath {
             return FileVisitResult.CONTINUE;
         }
     }
-
-
-
 
 }

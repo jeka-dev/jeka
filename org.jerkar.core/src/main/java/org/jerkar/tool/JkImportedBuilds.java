@@ -116,7 +116,7 @@ public final class JkImportedBuilds {
                 if (currentClassBaseDir == null) {
                     throw new IllegalStateException("Can't inject slave build instance of type " + subBuild.getClass().getSimpleName()
                             + " into field " + field.getDeclaringClass().getName()
-                            + "#" + field.getName() + " from directory " + build.baseTree().root()
+                            + "#" + field.getName() + " from directory " + build.baseTree().rootDir()
                             + " while working dir is " + JkUtilsFile.workingDir());
                 }
                 throw new IllegalStateException("Can't inject slave build instance of type " + subBuild.getClass().getSimpleName()

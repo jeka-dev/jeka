@@ -36,7 +36,6 @@ public class CoreBuild extends JkJavaProjectBuild {
         final JkJavaProject project = defaultProject();
         applyCommons(project, "core");
         project.addArtifactFile(DISTRIB_FILE_ID, this::doDistrib);
-        project.addArtifactFile(JAVADOC_FILE_ID, () -> project.maker().makeJavadocJar());
         this.distribFolder = project.getOutLayout().outputPath().resolve("distrib");
         return project;
     }
@@ -53,14 +52,14 @@ public class CoreBuild extends JkJavaProjectBuild {
         project.makeArtifactFilesIfNecessary(SOURCES_FILE_ID, JAVADOC_FILE_ID, project.mainArtifactFileId());
         final JkFileTree distrib = JkFileTree.of(distribFolder);
         final JkFileTree root = JkFileTree.of(project.basePath());
-        distrib.importFiles(root.file("../LICENSE"));
-        distrib.importDirContent(root.file("src/main/dist"));
-        distrib.importDirContent(root.file("src/main/java/META-INF/bin"));
-        distrib.importFiles(project.artifactFile(project.mainArtifactFileId()));
+        distrib.importFile(baseDir().getParent().resolve("LICENSE"));
+        distrib.importDirContent(baseDir().resolve("src/main/dist"));
+        distrib.importDirContent(baseDir().resolve("src/main/java/META-INF/bin"));
+        distrib.importFile(project.artifactFile(project.mainArtifactFileId()).toPath());
         distrib.go("libs-sources")
-        .importFiles(root.go("build/libs-sources").include("apache-ivy*.jar"))
-        .importFiles(project.artifactFile(SOURCES_FILE_ID));
-        distrib.go("libs-javadoc").importFiles(project.artifactFile(JAVADOC_FILE_ID));
+        .importFiles(root.go("build/libs-sources").include("apache-ivy*.jar").paths(false))
+        .importFile(project.artifactFile(SOURCES_FILE_ID).toPath());
+        distrib.go("libs-javadoc").importFile(project.artifactFile(JAVADOC_FILE_ID).toPath());
         distrib.zip().with(JkZipper.JkCompressionLevel.BEST_COMPRESSION).to(distripZipFile);
     }
 
@@ -69,7 +68,6 @@ public class CoreBuild extends JkJavaProjectBuild {
     }
 
     // build methods shared with other modules from org.jerkar
-
     public static void applyCommons(JkJavaProject project, String moduleName) {
 
         // Fork to avoid compile failure bug on github/travis

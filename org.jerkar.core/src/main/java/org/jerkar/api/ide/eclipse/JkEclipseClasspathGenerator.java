@@ -298,10 +298,10 @@ public final class JkEclipseClasspathGenerator {
 
         // Test Sources
         for (final JkFileTree fileTree : sourceLayout.tests().and(sourceLayout.testResources()).fileTrees()) {
-            if (!fileTree.root().exists()) {
+            if (!fileTree.rootDir().exists()) {
                 continue;
             }
-            final String path = JkUtilsFile.getRelativePath(sourceLayout.baseDir(), fileTree.root()).replace(File.separator, "/");
+            final String path = JkUtilsFile.getRelativePath(sourceLayout.baseDir(), fileTree.rootDir()).replace(File.separator, "/");
             if (sourcePaths.contains(path)) {
                 continue;
             }
@@ -318,10 +318,10 @@ public final class JkEclipseClasspathGenerator {
 
         // Sources
         for (final JkFileTree fileTree : sourceLayout.sources().and(sourceLayout.resources()).fileTrees()) {
-            if (!fileTree.root().exists()) {
+            if (!fileTree.rootDir().exists()) {
                 continue;
             }
-            final String path = relativePathIfPossible(sourceLayout.baseDir(), fileTree.root());
+            final String path = relativePathIfPossible(sourceLayout.baseDir(), fileTree.rootDir());
             if (sourcePaths.contains(path)) {
                 continue;
             }

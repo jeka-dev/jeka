@@ -201,7 +201,7 @@ public final class JkInit {
         if (!importedBuilds.isEmpty()) {
             JkLog.startHeaded("Configure imported builds");
             for (final JkBuild subBuild : importedBuilds) {
-                JkLog.startln("Configure build " + build.baseTree().relativePath(subBuild.baseTree().root()));
+                JkLog.startln("Configure build " + build.baseDir().relativize(subBuild.baseDir()));
                 configureBuild(subBuild, commandLine.getSubProjectPluginSetups(),
                         commandLine.getSubProjectBuildOptions(), dictionnary);
                 JkLog.done();

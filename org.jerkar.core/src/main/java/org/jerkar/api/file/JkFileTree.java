@@ -5,18 +5,19 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
@@ -69,6 +70,88 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
+     * Returns the root directory.
+     */
+    public Path root() {
+        return root;
+    }
+
+
+    /**
+     * Returns the filter defined on this {@link JkFileTree}, never <code>null</code>.
+     */
+    public JkPathFilter filter() {
+        return filter;
+    }
+
+    // ------------------------- check exists --------------------------------------
+
+    /**
+     * Returns if the asScopedDependency directory exists. (Short hand for #asScopedDependency.exists()).
+     */
+    public boolean exists() {
+        return Files.exists(root);
+    }
+
+    private JkFileTree createIfNotExist() {
+        if (!Files.exists(root)) {
+            JkUtilsPath.createDirectories(root);
+        }
+        return this;
+    }
+
+
+    // ----------------------- iterate over files ---------------------------------------------------
+
+    public Stream<Path> stream(FileVisitOption ...options) {
+        return JkUtilsPath.walk(root, options)
+                .filter(path -> this.filter.accept(root.relativize(path)));
+    }
+
+    @Override
+    public Iterator<File> iterator() {
+        return files(false).iterator();
+    }
+
+    /**
+     * Returns the file contained in this {@link JkFileTree}.
+     */
+    public List<Path> paths(boolean includeDirs) {
+        return stream().filter(path -> !Files.isDirectory(path) || includeDirs).collect(Collectors.toList());
+    }
+
+    /**
+     * Returns path of each files file contained in this {@link JkFileTree}
+     * relative to its asScopedDependency.
+     */
+    public List<String> relativePathes() {
+        final List<String> pathes = new LinkedList<>();
+        for (final File file : this) {
+            pathes.add(JkUtilsFile.getRelativePath(this.root.toFile(), file));
+        }
+        return pathes;
+    }
+
+    /**
+     * Returns the file contained in this {@link JkFileTree}.
+     */
+    public List<File> files(boolean includeFolders) {
+        if (!root.toFile().exists()) {
+            return Collections.emptyList();
+        }
+        return JkUtilsFile.filesOf(root.toFile(), filter.toFileFilter(root.toFile()), includeFolders);
+    }
+
+    // ---------------------- Navigate -----------------------------------------------------------
+
+    /**
+     * Returns the root directory.
+     */
+    public File rootDir() {
+        return root.toFile();
+    }
+
+    /**
      * Creates a {@link JkFileTree} having the default filter and the specified
      * relative path to this root as root directory.
      */
@@ -78,26 +161,13 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Creates the root directory if it does not exist.
+     * Returns path relative to this root of the specified relative path.
      */
-    public JkFileTree createIfNotExist() {
-        if (!Files.exists(root)) {
-            JkUtilsPath.createDirectories(root);
-        }
-        return this;
+    public Path get(String relativePath) {
+        return root.resolve(relativePath);
     }
 
-    public Stream<Path> stream(FileVisitOption ...options) {
-        return JkUtilsPath.walk(root, options);
-    }
-
-    /**
-     * Returns the file matching for the the given path relative to this asScopedDependency
-     * directory.
-     */
-    public File file(String relativePath) {
-        return root.resolve(relativePath).toFile();
-    }
+    // ----------------------- Write ----------------------------------------------------------------
 
     /**
      * Copies files contained in this {@link JkFileTree} to the specified
@@ -118,118 +188,42 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     /**
-     * Same as {@link #copyTo(File)} but replacing the tokens in
-     * <code>${key}</code> by their corresponding value in the specified
-     * tokenValues. If no key match then the token is not replaced.
+     * Copies the content of the specified directory at the root of this tree.
+     * Specified directories to copy might not exist.
      */
-    public int copyReplacingTokens(File destinationDir, Map<String, String> tokenValues) {
-        if (!destinationDir.exists()) {
-            destinationDir.mkdirs();
-        } else {
-            JkUtilsFile.assertAllDir(destinationDir);
-        }
-        return JkUtilsFile.copyDirContentReplacingTokens(root.toFile(), destinationDir,
-                filter.toFileFilter(root.toFile()), true, JkLog.infoStreamIfVerbose(), tokenValues);
-    }
-
-    /**
-     * Returns the root directory.
-     */
-    public File root() {
-        return root.toFile();
-    }
-
-    /**
-     * Returns the root directory.
-     */
-    public Path rootPath() {
-        return root;
-    }
-
-    /**
-     * Returns the filter defined on this {@link JkFileTree}, never <code>null</code>.
-     */
-    public JkPathFilter filter() {
-        return filter;
-    }
-
-    /**
-     * Copies the content of the specified directory in the asScopedDependency of the asScopedDependency of
-     * this directory. If specified directory does not exist then nothing
-     * happen.
-     */
-    public JkFileTree importDirContent(File... dirsToCopyContent) {
-        for (final File dirToCopyContent : dirsToCopyContent) {
-            createIfNotExist();
-            if (!dirToCopyContent.exists()) {
+    public JkFileTree importDirContent(Path... dirsToCopy) {
+        createIfNotExist();
+        for (final Path dirToCopy : dirsToCopy) {
+            if (!Files.exists(dirToCopy)) {
                 continue;
             }
-            JkUtilsFile.copyDirContent(dirToCopyContent, this.root.toFile(), null, true);
+            JkUtilsPath.copyDirContent(dirToCopy, root, StandardCopyOption.REPLACE_EXISTING);
         }
         return this;
     }
 
     /**
-     * Copies the content of the specified directory in the asScopedDependency of the asScopedDependency of
-     * this directory. If specified directory does not exist then nothing
-     * happen.
+     * Copies the specified files at the root of this tree
      */
-    // Bug !!!! Some files are not copied
-    public JkFileTree importDirContent(Path... dirsToCopyContent) {
-        return importDirContent(JkUtilsPath.filesOf(dirsToCopyContent));
-    }
-
-    /**
-     * Copies the specified files in the asScopedDependency of this directory.
-     */
-    public JkFileTree importFiles(Iterable<File> files) {
+    public JkFileTree importFiles(Iterable<Path> files) {
         createIfNotExist();
-        for (final File file : files) {
-            JkUtilsFile.copyFileToDir(file, this.root.toFile(), JkLog.infoStreamIfVerbose());
+        for (final Path file : files) {
+            JkUtilsPath.copy(file, root.resolve(file.getFileName()), StandardCopyOption.REPLACE_EXISTING);
         }
         return this;
     }
 
     /**
-     * Copies the specified files at the asScopedDependency of this directory. Folder and
-     * unexisting files are ignored.
+     * Copies the specified files at the root of this tree
      */
-    public JkFileTree importFiles(File... filesToCopy) {
+    // WARN : importFiles(Iterable<Path>) is invoked when calling #importFiles with a single parameters
+    // so it has been renamed with distinct name
+    public JkFileTree importFile(Path... files) {
         createIfNotExist();
-        for (final File file : filesToCopy) {
-            if (file.exists() && !file.isDirectory()) {
-                JkUtilsFile.copyFile(file, this.file(file.getName()));
-            }
-
+        for (final Path file : files) {
+            JkUtilsPath.copy(file, root.resolve(file.getFileName()), StandardCopyOption.REPLACE_EXISTING);
         }
         return this;
-    }
-
-    /**
-     * Returns if the asScopedDependency directory exists. (Short hand for #asScopedDependency.exists()).
-     */
-    public boolean exists() {
-        return Files.exists(root);
-    }
-
-    /**
-     * Returns path of each files file contained in this {@link JkFileTree}
-     * relative to its asScopedDependency.
-     */
-    public List<String> relativePathes() {
-        final List<String> pathes = new LinkedList<>();
-        for (final File file : this) {
-            pathes.add(JkUtilsFile.getRelativePath(this.root.toFile(), file));
-        }
-        return pathes;
-    }
-
-    /**
-     * Returns the relative path of the given file relative to the asScopedDependency of this
-     * tree.
-     */
-    public String relativePath(File file) {
-        return JkUtilsFile.getRelativePath(root.toFile(), file);
     }
 
     /**
@@ -238,6 +232,50 @@ public final class JkFileTree implements Iterable<File> {
     public JkZipper zip() {
         return JkZipper.of(this);
     }
+
+    /**
+     * Merges the content of all files to the specified output.
+     */
+    public JkFileTree mergeTo(OutputStream outputStream) {
+        for (final File file : this) {
+            try (final FileInputStream fileInputStream = JkUtilsIO.inputStream(file)) {
+                JkUtilsIO.copy(fileInputStream, outputStream);
+            } catch (final IOException e) {
+                throw JkUtilsThrowable.unchecked(e);
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Deletes each and every files in this tree. Files excluded to this tree
+     * are not deleted.
+     */
+    public JkFileTree deleteAll() {
+        JkUtilsPath.walkFileTree(root, new SimpleFileVisitor<Path>() {
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                return visit(file);
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                return visit(dir);
+            }
+
+            private FileVisitResult visit(Path path) {
+                if (!JkUtilsPath.isSameFile(root, path) && filter.accept(path)) {
+                    JkUtilsPath.deleteFile(path);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+        });
+        return this;
+    }
+
+    // ------------------------- Filter ----------------------------------------------
 
     /**
      * Creates a {@link JkFileTree} which is a copy of this {@link JkFileTree}
@@ -259,6 +297,7 @@ public final class JkFileTree implements Iterable<File> {
         return andFilter(JkPathFilter.include(antPatterns));
     }
 
+
     /**
      * Short hand to {@link #andFilter(JkPathFilter)} defining an exclude Ant
      * pattern filter. This will exclude any file matching at least one of
@@ -268,44 +307,15 @@ public final class JkFileTree implements Iterable<File> {
         return andFilter(JkPathFilter.exclude(antPatterns));
     }
 
-    /**
-     * Deletes each and every files in this tree. Files excluded to this tree
-     * are not deleted.
-     */
-    public JkFileTree deleteAll() {
-        final List<File> files = this.files(true);
-        for (final File file : files) {
-            if (file.exists()) {
-                if (file.isDirectory()) {
-                    JkUtilsFile.deleteDirContent(file);
-                }
-                JkUtilsFile.delete(file);
-            }
-        }
-        return this;
-    }
-
+    // ------------------------ Misc ---------------------------------------
 
     /**
-     * Returns the file contained in this {@link JkFileTree}.
+     * Returns the file count contained in this {@link JkFileTree}.
      */
-    public List<File> files(boolean includeFolders) {
-        if (!root.toFile().exists()) {
-            return Collections.emptyList();
-        }
-        return JkUtilsFile.filesOf(root.toFile(), filter.toFileFilter(root.toFile()), includeFolders);
+    public int fileCount(boolean includeFolder) {
+        return JkUtilsFile.count(root.toFile(), filter.toFileFilter(root.toFile()), includeFolder);
     }
 
-    /**
-     * Returns the file contained in this {@link JkFileTree}.
-     */
-    public List<Path> paths(boolean includeFolders) {
-        if (!exists()) {
-            return new LinkedList<>();
-        }
-        return JkUtilsFile.filesOf(root.toFile(), filter.toFileFilter(root.toFile()), includeFolders)
-                .stream().map(file -> file.toPath()).collect(Collectors.toList());
-    }
 
     /**
      * Returns a {@link JkFileTreeSet} containing this tree as its single
@@ -316,34 +326,8 @@ public final class JkFileTree implements Iterable<File> {
     }
 
     @Override
-    public Iterator<File> iterator() {
-        return files(false).iterator();
-    }
-
-    /**
-     * Returns the file count contained in this {@link JkFileTree}.
-     */
-    public int fileCount(boolean includeFolder) {
-        return JkUtilsFile.count(root.toFile(), filter.toFileFilter(root.toFile()), includeFolder);
-    }
-
-    @Override
     public String toString() {
         return root + ":" + filter;
-    }
-
-    /**
-     * Merges the content of all files to the specified output.
-     */
-    public JkFileTree mergeTo(OutputStream outputStream) {
-        for (final File file : this) {
-            try (final FileInputStream fileInputStream = JkUtilsIO.inputStream(file)) {
-                JkUtilsIO.copy(fileInputStream, outputStream);
-            } catch (final IOException e) {
-                throw JkUtilsThrowable.unchecked(e);
-            }
-        }
-        return this;
     }
 
 }

@@ -30,7 +30,7 @@ public final class JkPluginIdea implements JkPlugin {
         final JkImlGenerator generator = new JkImlGenerator(project);
         final List<Path> depProjects = new LinkedList<>();
         for (final JkBuild depBuild : build.importedBuilds().directs()) {
-            depProjects.add(depBuild.baseTree().rootPath());
+            depProjects.add(depBuild.baseTree().root());
         }
         generator.setUseVarPath(useVarPath);
         generator.setBuildDependencies(build.buildDependencyResolver(), build.buildDependencies());
@@ -49,7 +49,7 @@ public final class JkPluginIdea implements JkPlugin {
     /** Generate modules.xml files */
     @JkDoc("Generates ./idea/modules.xml file")
     public void generateModulesXml(JkBuild build) {
-        final Path current = build.baseTree().rootPath();
+        final Path current = build.baseTree().root();
         final Iterable<Path> imls = build.baseTree().include("**/*.iml").paths(false);
         final ModulesXmlGenerator modulesXmlGenerator = new ModulesXmlGenerator(current, imls);
         modulesXmlGenerator.generate();

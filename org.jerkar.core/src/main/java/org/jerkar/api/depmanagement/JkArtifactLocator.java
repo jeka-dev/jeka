@@ -47,7 +47,7 @@ public interface JkArtifactLocator {
      * Returns all artifact files likely to be produced by this artifact producer.
      */
     default List<File> allArtifactFiles() {
-        List<File> result = new LinkedList<>();
+        final List<File> result = new LinkedList<>();
         result.add(artifactFile(mainArtifactFileId()));
         artifactFileIds().forEach(artifactFileId -> result.add(artifactFile(artifactFileId)));
         return result;

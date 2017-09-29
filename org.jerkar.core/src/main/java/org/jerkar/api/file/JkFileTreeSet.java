@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -122,24 +121,6 @@ public final class JkFileTreeSet implements Iterable<File> {
     }
 
     /**
-     * See {@link JkFileTree#copyReplacingTokens(File, Map)}
-     */
-    public int copyRepacingTokens(File destinationDir, Map<String, String> tokenValues) {
-        if (destinationDir.exists()) {
-            JkUtilsFile.assertAllDir(destinationDir);
-        } else {
-            destinationDir.mkdirs();
-        }
-        int count = 0;
-        for (final JkFileTree dir : jkFileTrees) {
-            if (dir.exists()) {
-                count += dir.copyReplacingTokens(destinationDir, tokenValues);
-            }
-        }
-        return count;
-    }
-
-    /**
      * Creates a {@link JkFileTree} which is a copy of this {@link JkFileTree}
      * augmented with the specified {@link JkPathFilter}
      */
@@ -157,7 +138,7 @@ public final class JkFileTreeSet implements Iterable<File> {
     public List<File> files(boolean includeFolders) {
         final LinkedList<File> result = new LinkedList<>();
         for (final JkFileTree dirView : this.jkFileTrees) {
-            if (dirView.root().exists()) {
+            if (dirView.rootDir().exists()) {
                 result.addAll(dirView.files(includeFolders));
             }
         }
@@ -171,7 +152,7 @@ public final class JkFileTreeSet implements Iterable<File> {
     public List<String> relativePathes() {
         final LinkedList<String> result = new LinkedList<>();
         for (final JkFileTree dir : this.jkFileTrees) {
-            if (dir.root().exists()) {
+            if (dir.rootDir().exists()) {
                 result.addAll(dir.relativePathes());
             }
         }
@@ -193,7 +174,7 @@ public final class JkFileTreeSet implements Iterable<File> {
     public List<File> roots() {
         final List<File> result = new LinkedList<>();
         for (final JkFileTree dirView : jkFileTrees) {
-            result.add(dirView.root());
+            result.add(dirView.rootDir());
         }
         return result;
     }
@@ -203,7 +184,7 @@ public final class JkFileTreeSet implements Iterable<File> {
      */
     public boolean hasNoExistingRoot() {
         for (final JkFileTree dirView : jkFileTrees) {
-            if (dirView.root().exists()) {
+            if (dirView.rootDir().exists()) {
                 return false;
             }
         }
@@ -254,7 +235,7 @@ public final class JkFileTreeSet implements Iterable<File> {
     public List<File> rootDirs() {
         final List<File> result = new LinkedList<>();
         for (final JkFileTree dir : jkFileTrees) {
-            result.add(dir.root());
+            result.add(dir.rootDir());
         }
         return result;
     }

@@ -188,7 +188,7 @@ public final class JkImlGenerator {
                 writer.writeCharacters(T3);
                 writer.writeEmptyElement("sourceFolder");
 
-                final String path =  fileTree.rootPath().relativize(projectDir).toString().replace('\\', '/');
+                final String path =  fileTree.root().relativize(projectDir).toString().replace('\\', '/');
                 writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
                 writer.writeAttribute("isTestSource", "true");
                 writer.writeCharacters("\n");
@@ -200,7 +200,7 @@ public final class JkImlGenerator {
             if (fileTree.exists()) {
                 writer.writeCharacters(T3);
                 writer.writeEmptyElement("sourceFolder");
-                final String path = fileTree.rootPath().relativize(projectDir).toString().replace('\\', '/');
+                final String path = fileTree.root().relativize(projectDir).toString().replace('\\', '/');
                 writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
                 writer.writeAttribute("type", "java-test-resource");
                 writer.writeCharacters("\n");
@@ -213,7 +213,7 @@ public final class JkImlGenerator {
             if (fileTree.exists()) {
                 writer.writeCharacters(T3);
                 writer.writeEmptyElement("sourceFolder");
-                final String path = fileTree.rootPath().relativize(projectDir).toString().replace('\\', '/');
+                final String path = fileTree.root().relativize(projectDir).toString().replace('\\', '/');
                 writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
                 writer.writeAttribute("isTestSource", "false");
                 writer.writeCharacters("\n");
@@ -225,7 +225,7 @@ public final class JkImlGenerator {
             if (fileTree.exists()) {
                 writer.writeCharacters(T3);
                 writer.writeEmptyElement("sourceFolder");
-                final String path = fileTree.rootPath().relativize(projectDir).toString().replace('\\', '/');
+                final String path = fileTree.root().relativize(projectDir).toString().replace('\\', '/');
                 writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
                 writer.writeAttribute("type", "java-resource");
                 writer.writeCharacters("\n");

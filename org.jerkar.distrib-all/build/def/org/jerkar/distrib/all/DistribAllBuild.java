@@ -9,6 +9,7 @@ import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
 import org.jerkar.tool.JkBuild;
@@ -18,6 +19,7 @@ import org.jerkar.tool.JkInit;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 class DistribAllBuild extends JkBuild {
 
@@ -42,20 +44,22 @@ class DistribAllBuild extends JkBuild {
         JkFileTree dist = JkFileTree.of(distDir).importDirContent(core.distribFolder);
 
         JkLog.info("Add plugins to the distribution");
-        JkFileTree ext = dist.go("libs/builtins").importFiles(pluginsSonar.project().mainArtifactFile(),
-                pluginsJacoco.project().mainArtifactFile());
+        JkFileTree ext = dist.go("libs/builtins").importFile(
+                pluginsSonar.project().mainArtifactFile().toPath(),
+                pluginsJacoco.project().mainArtifactFile().toPath());
         JkFileTree sourceDir = dist.go("libs-sources");
-        sourceDir.importFiles(pluginsSonar.project().artifactFile(JkJavaProject.SOURCES_FILE_ID),
-                pluginsJacoco.project().artifactFile(JkJavaProject.SOURCES_FILE_ID));
+        sourceDir.importFile(
+                pluginsSonar.project().artifactFile(JkJavaProject.SOURCES_FILE_ID).toPath(),
+                pluginsJacoco.project().artifactFile(JkJavaProject.SOURCES_FILE_ID).toPath());
 
         JkLog.info("Add plugins to the fat jar");
-        File fat = dist.file(core.project().artifactFile(JkArtifactFileId.of("all", "jar")).getName());
-        JkUtilsFile.copyFile(core.project().mainArtifactFile(), fat);
+        Path fat = dist.get(core.project().artifactFile(JkArtifactFileId.of("all", "jar")).getName());
+        JkUtilsPath.copy(core.project().mainArtifactFile().toPath(), fat, StandardCopyOption.REPLACE_EXISTING);
         JkZipper.of().merge(ext.include("**/*.jar")).appendTo(fat);
 
         JkLog.info("Create a fat source jar");
-        File fatSource = sourceDir.file("org.jerkar.core-all-sources.jar");
-        JkZipper.of().merge(sourceDir.include("**.jar", "**.zip").exclude(fatSource.getName())).to(fatSource);
+        Path fatSource = sourceDir.get("org.jerkar.core-all-sources.jar");
+        JkZipper.of().merge(sourceDir.include("**.jar", "**.zip").exclude(fatSource.getFileName().toString())).to(fatSource);
 
         if (javadoc) {
             JkLog.info("Create javadoc");
@@ -63,8 +67,8 @@ class DistribAllBuild extends JkBuild {
                     .and(this.pluginsJacoco.project().getSourceLayout().sources())
                     .and(this.pluginsSonar.project().getSourceLayout().sources());
             Path javadocAllDir = this.outputDir().resolve("javadoc-all");
-            File javadocAllFile = dist.file("libs-javadoc/org.jerkar.core-fat-javadoc.jar");
-            JkJavadocMaker.of(sources, javadocAllDir.toFile(), javadocAllFile).process();
+            Path javadocAllFile = dist.root().resolve("libs-javadoc/org.jerkar.core-fat-javadoc.jar");
+            JkJavadocMaker.of(sources, javadocAllDir.toFile(), javadocAllFile.toFile()).process();
         }
 
         JkLog.info("Pack all");
@@ -77,8 +81,8 @@ class DistribAllBuild extends JkBuild {
     public void doDefault() {
         this.importedBuilds().all().forEach(JkBuild::clean);
         pluginsJacoco.core.project().makeArtifactFile(CoreBuild.DISTRIB_FILE_ID);
-        pluginsJacoco.project().makeMainJar();
-        pluginsSonar.project().makeMainJar();
+        pluginsJacoco.project().makeAllArtifactFiles();
+        pluginsSonar.project().makeAllArtifactFiles();
         distrib();
         if (testSamples) {
             testSamples();

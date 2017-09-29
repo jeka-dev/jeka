@@ -62,7 +62,7 @@ public class JkBuild {
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
         this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get("").toAbsolutePath());
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
-        this.importedBuilds = JkImportedBuilds.of(this.baseTree().rootPath(), this);
+        this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), this);
     }
 
 

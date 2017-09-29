@@ -36,14 +36,14 @@ public final class JkScaffolder {
      * Runs the scaffolding.
      */
     public void run() {
-        final Path def = baseTree.rootPath().resolve(JkConstants.BUILD_DEF_DIR);
+        final Path def = baseTree.root().resolve(JkConstants.BUILD_DEF_DIR);
         JkUtilsPath.createDirectories(def);
         final Path buildClass = def.resolve("Build.java");
         JkUtilsPath.write(buildClass, mainBuildclassWriter.get().getBytes(Charset.forName("UTF-8")));
         if (embed) {
-            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar.bat"), baseTree.file("jerkar.bat"));
-            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar"), baseTree.file("jerkar"));
-            JkUtilsFile.copyFileToDir(JkLocator.jerkarJarPath().toFile(), baseTree.file("build/boot"));
+            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar.bat"), baseTree.root().resolve("jerkar.bat").toFile());
+            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar"), baseTree.root().resolve("jerkar").toFile());
+            JkUtilsFile.copyFileToDir(JkLocator.jerkarJarPath().toFile(), baseTree.root().resolve("build/boot").toFile());
         }
         extraActions.run();
     }

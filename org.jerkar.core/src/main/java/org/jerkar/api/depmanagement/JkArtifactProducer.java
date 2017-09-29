@@ -43,7 +43,7 @@ public interface JkArtifactProducer extends JkArtifactLocator {
      * Produces all the artifact files for the specified artifact file ids.
      */
     default void makeArtifactFiles(Iterable<JkArtifactFileId> artifactFileIds) {
-        for (JkArtifactFileId artifactFileId : artifactFileIds) {
+        for (final JkArtifactFileId artifactFileId : artifactFileIds) {
             makeArtifactFile(artifactFileId);
         }
     }
@@ -66,8 +66,8 @@ public interface JkArtifactProducer extends JkArtifactLocator {
      * Same as {@link #makeArtifactFile(JkArtifactFileId)}
      */
     default void makeArtifactFilesIfNecessary(Iterable<JkArtifactFileId> artifactFileIds) {
-        for (JkArtifactFileId artifactFileId : artifactFileIds) {
-            File file = artifactFile(artifactFileId);
+        for (final JkArtifactFileId artifactFileId : artifactFileIds) {
+            final File file = artifactFile(artifactFileId);
             if (!file.exists()) {
                 makeArtifactFile(artifactFileId);
             }

@@ -28,7 +28,7 @@ class SampleTester {
         this.sampleDependeeBaseDir = buildDir.go("../org.jerkar.samples-dependee");
         this.output = sampleBaseDir.go("build/output");
         String scriptName = JkUtilsSystem.IS_WINDOWS ? "jerkar.bat" : "jerkar";
-        launchScript = buildDir.rootPath().resolve("build/output/dist/" + scriptName);
+        launchScript = buildDir.root().resolve("build/output/dist/" + scriptName);
     }
 
     void doTest() {
@@ -52,21 +52,21 @@ class SampleTester {
 
     private void testSamples(String className, String... args) {
         JkLog.infoHeaded("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(sampleBaseDir.rootPath().toAbsolutePath().normalize())
+        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(sampleBaseDir.root().toAbsolutePath().normalize())
                 .withParametersIf(!JkUtilsString.isBlank(className), "-verbose=true -buildClass=" + className).andParameters(args)
                 .failOnError(true).runSync();
     }
 
     private void testDependee(String className, String... args) {
         JkLog.infoHeaded("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependeeBaseDir.rootPath())
+        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependeeBaseDir.root())
                 .withParametersIf(!JkUtilsString.isBlank(className), "-buildClass=" + className).andParameters(args)
                 .failOnError(true).runSync();
     }
 
     private void scaffoldAndEclipse() {
         JkLog.startHeaded("Test scaffolding");
-        Path scafoldedProject = output.rootPath().resolve("scaffolded");
+        Path scafoldedProject = output.root().resolve("scaffolded");
         JkProcess scaffoldProcess = process().withWorkingDir(scafoldedProject);
         JkUtilsPath.createDirectories(scafoldedProject);
         scaffoldProcess.withParameters("scaffold").runSync(); // scaffold
@@ -85,7 +85,7 @@ class SampleTester {
 
     private void testFork() {
         testSamples("", "-tests.fork");
-        JkUtilsAssert.isTrue(output.file("test-reports/junit").exists(), "No test report generated in test fork mode.");
+        JkUtilsAssert.isTrue(output.go("test-reports/junit").exists(), "No test report generated in test fork mode.");
     }
 
 }

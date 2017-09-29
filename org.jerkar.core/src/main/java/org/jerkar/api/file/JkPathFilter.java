@@ -2,6 +2,7 @@ package org.jerkar.api.file;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -66,6 +67,10 @@ public abstract class JkPathFilter {
      * Returns if this filter should accept the specified relative path.
      */
     public abstract boolean accept(String relativePath);
+
+    public boolean accept(Path path) {
+        return accept(path.toString());
+    }
 
     /**
      * Returns the list of include patterns involved in this filter.
