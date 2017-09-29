@@ -48,7 +48,6 @@ public final class JkFileTree implements Iterable<File> {
         return new JkFileTree(rootDir);
     }
 
-
     private final Path root;
 
     private final JkPathFilter filter;
