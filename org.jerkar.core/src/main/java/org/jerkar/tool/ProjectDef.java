@@ -32,16 +32,6 @@ final class ProjectDef {
         this.buildClassNames = Collections.unmodifiableList(buildClassNames);
     }
 
-    /**
-     * Creates a project definition by giving its asScopedDependency directory.
-     */
-    public static ProjectDef of(Path rootDir) {
-        final BuildResolver buildResolver = new BuildResolver(rootDir);
-        final List<Class<?>> classDefs = new LinkedList<>();
-        classDefs.addAll(buildResolver.resolveBuildClasses());
-        return new ProjectDef(classDefs);
-    }
-
     public void logAvailableBuildClasses() {
         int i = 0;
         for (final Class<?> classDef : this.buildClassNames) {

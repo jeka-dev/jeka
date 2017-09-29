@@ -26,6 +26,7 @@ import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsTime;
@@ -56,6 +57,8 @@ final class Engine {
      */
     Engine(Path baseDir) {
         super();
+        JkUtilsAssert.isTrue(baseDir.isAbsolute(), baseDir + " is not absolute.");
+        JkUtilsAssert.isTrue(Files.isDirectory(baseDir), baseDir + " is not directory.");
         this.projectBaseDir = baseDir.normalize();
         buildRepos = repos();
         this.buildDependencies = JkDependencies.of();
@@ -218,7 +221,7 @@ final class Engine {
                     + toRelativePaths(this.projectBaseDir, this.rootsOfImportedBuilds));
         }
         for (final Path file : this.rootsOfImportedBuilds) {
-            final Engine engine = new Engine(file);
+            final Engine engine = new Engine(file.toAbsolutePath().normalize());
             engine.compile(yetCompiledProjects, pathEntries);
             pathSequence = pathSequence.and(file);
         }

@@ -28,7 +28,7 @@ public final class Main {
         }
         init.displayInfo();
 
-        final Path workingDir = Paths.get("");
+        final Path workingDir = Paths.get("").toAbsolutePath();
         final Engine engine = new Engine(workingDir);
         JkLog.nextLine();
         try {

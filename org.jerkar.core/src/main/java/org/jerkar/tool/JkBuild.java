@@ -1,5 +1,6 @@
 package org.jerkar.tool;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -7,6 +8,7 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsObject;
 
 /**
@@ -20,10 +22,12 @@ public class JkBuild {
     private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
 
     static void baseDirContext(Path baseDir) {
-        if (baseDir != null) {
-            BASE_DIR_CONTEXT.set(baseDir.toAbsolutePath().normalize());
-        } else {
+        if (baseDir == null) {
             BASE_DIR_CONTEXT.set(null);
+        } else {
+            JkUtilsAssert.isTrue(baseDir.isAbsolute(), baseDir + " is not absolute");
+            JkUtilsAssert.isTrue(Files.isDirectory(baseDir), baseDir + " is not a directory.");
+            BASE_DIR_CONTEXT.set(baseDir.toAbsolutePath().normalize());
         }
     }
 
@@ -56,7 +60,7 @@ public class JkBuild {
     public JkBuild() {
         final Path baseDirContext = BASE_DIR_CONTEXT.get();
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
-        this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get("").toAbsolutePath().normalize());
+        this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get("").toAbsolutePath());
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
         this.importedBuilds = JkImportedBuilds.of(this.baseTree().rootPath(), this);
     }

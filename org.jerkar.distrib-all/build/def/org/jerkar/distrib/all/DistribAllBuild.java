@@ -39,7 +39,7 @@ class DistribAllBuild extends JkBuild {
         JkLog.info("Copy core distribution locally.");
         CoreBuild core = pluginsJacoco.core; // The core project is got by transitivity
         Path distDir = this.outputDir().resolve("dist");
-        JkFileTree dist = JkFileTree.of(distDir).importDirContent(core.distribFolder.toFile());
+        JkFileTree dist = JkFileTree.of(distDir).importDirContent(core.distribFolder);
 
         JkLog.info("Add plugins to the distribution");
         JkFileTree ext = dist.go("libs/builtins").importFiles(pluginsSonar.project().mainArtifactFile(),
@@ -75,7 +75,6 @@ class DistribAllBuild extends JkBuild {
 
     @JkDoc("End to end method to construct a distrib.")
     public void doDefault() {
-        super.doDefault();
         this.importedBuilds().all().forEach(JkBuild::clean);
         pluginsJacoco.core.project().makeArtifactFile(CoreBuild.DISTRIB_FILE_ID);
         pluginsJacoco.project().makeMainJar();

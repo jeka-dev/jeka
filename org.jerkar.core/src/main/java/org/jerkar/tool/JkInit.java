@@ -53,7 +53,7 @@ public final class JkInit {
     public static <T extends JkBuild> T instanceOf(Path base, String... args) {
         final JkInit init = JkInit.of(args);
         init.displayInfo();
-        final Engine engine = new Engine(base);
+        final Engine engine = new Engine(base.toAbsolutePath().normalize());
         final T result = (T) engine.instantiate(init);
         if (result == null) {
             throw new JkException("No build class found for engine located at : " + base);
@@ -68,7 +68,7 @@ public final class JkInit {
      * found in running environment.
      */
     public static <T extends JkBuild> T instanceOf(Class<T> clazz, String... args) {
-        return instanceOf(clazz, Paths.get(""), args);
+        return instanceOf(clazz, Paths.get("").toAbsolutePath(), args);
     }
 
     /**

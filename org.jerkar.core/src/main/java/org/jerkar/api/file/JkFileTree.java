@@ -186,14 +186,7 @@ public final class JkFileTree implements Iterable<File> {
      */
     // Bug !!!! Some files are not copied
     public JkFileTree importDirContent(Path... dirsToCopyContent) {
-        for (final Path dirToCopyContent : dirsToCopyContent) {
-            createIfNotExist();
-            if (!Files.exists(dirToCopyContent)) {
-                continue;
-            }
-            JkUtilsPath.copy(dirToCopyContent, this.rootPath(), StandardCopyOption.REPLACE_EXISTING);
-        }
-        return this;
+        return importDirContent(JkUtilsPath.filesOf(dirsToCopyContent));
     }
 
     /**

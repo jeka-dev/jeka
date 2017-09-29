@@ -4,13 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.CopyOption;
-import java.nio.file.DirectoryStream;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.LinkedList;
@@ -32,6 +26,22 @@ public final class JkUtilsPath {
         List<File> result = new LinkedList<>();
         for (Path path : paths) {
             result.add(path.toFile());
+        }
+        return result;
+    }
+
+    public static File[] filesOf(Path ... paths) {
+        File[] result = new File[paths.length];
+        for (int i = 0; i<paths.length; i++) {
+            result[i] = paths[i].toFile();
+        }
+        return result;
+    }
+
+    public static Path[] pathsOf(File ... files) {
+        Path[] result = new Path[files.length];
+        for (int i = 0; i<files.length; i++) {
+            result[i] = files[i].toPath();
         }
         return result;
     }
@@ -175,6 +185,14 @@ public final class JkUtilsPath {
             return path.toUri().toURL();
         } catch (final MalformedURLException e) {
             throw new IllegalArgumentException(e);
+        }
+    }
+
+    public static Stream<Path> walk(Path path, FileVisitOption ...options) {
+        try {
+            return Files.walk(path, options);
+        } catch (IOException e) {
+            throw JkUtilsThrowable.unchecked(e);
         }
     }
 
