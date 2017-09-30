@@ -226,7 +226,7 @@ public final class JkJavaCompiler {
      * @see #andSources(Iterable)
      */
     public JkJavaCompiler andSourceDir(File dir) {
-        return andSources(JkFileTree.of(dir));
+        return andSources(JkFileTree.of(dir).files(false));
     }
 
     /**

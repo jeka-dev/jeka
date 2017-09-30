@@ -55,11 +55,11 @@ class DistribAllBuild extends JkBuild {
         JkLog.info("Add plugins to the fat jar");
         Path fat = dist.get(core.project().artifactFile(JkArtifactFileId.of("all", "jar")).getName());
         JkUtilsPath.copy(core.project().mainArtifactFile().toPath(), fat, StandardCopyOption.REPLACE_EXISTING);
-        JkZipper.of().merge(ext.include("**/*.jar")).appendTo(fat);
+        JkZipper.of().merge(ext.include("**/*.jar").files(false)).appendTo(fat);
 
         JkLog.info("Create a fat source jar");
         Path fatSource = sourceDir.get("org.jerkar.core-all-sources.jar");
-        JkZipper.of().merge(sourceDir.include("**.jar", "**.zip").exclude(fatSource.getFileName().toString())).to(fatSource);
+        JkZipper.of().merge(sourceDir.include("**.jar", "**.zip").exclude(fatSource.getFileName().toString()).files(false)).to(fatSource);
 
         if (javadoc) {
             JkLog.info("Create javadoc");

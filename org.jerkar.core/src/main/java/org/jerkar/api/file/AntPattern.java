@@ -85,11 +85,11 @@ final class AntPattern {
         this.pattern = normalize(pattern);
     }
 
-    public static AntPattern of(String pattern) {
+    static AntPattern of(String pattern) {
         return new AntPattern(pattern);
     }
 
-    public static Set<AntPattern> setOf(Iterable<String> patterns) {
+    static Set<AntPattern> setOf(Iterable<String> patterns) {
         final Set<AntPattern> result = new HashSet<>();
         for (final String pattern : patterns) {
             result.add(AntPattern.of(pattern));
@@ -97,7 +97,7 @@ final class AntPattern {
         return result;
     }
 
-    public static Set<AntPattern> setOf(String... patterns) {
+    static Set<AntPattern> setOf(String... patterns) {
         return setOf(Arrays.asList(patterns));
     }
 
@@ -105,7 +105,7 @@ final class AntPattern {
      * Matches the given <code>path</code> against the given
      * <code>pattern</code>.
      */
-    public boolean doMatch(String path) {
+    boolean doMatch(String path) {
 
         // First deleteArtifacts path and pattern to remove leading '/', '.' or '\'
         // characters

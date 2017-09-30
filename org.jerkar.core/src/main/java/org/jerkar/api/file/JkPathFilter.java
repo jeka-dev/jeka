@@ -3,6 +3,7 @@ package org.jerkar.api.file;
 import java.io.File;
 import java.io.FileFilter;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -16,7 +17,7 @@ import org.jerkar.api.utils.JkUtilsZip.JkZipEntryFilter;
  * <href a='https://ant.apache.org/manual/Types/patternset.html'>Ant
  * pattern</href>.
  */
-public abstract class JkPathFilter {
+public abstract class JkPathFilter implements PathMatcher {
 
     /**
      * When not case sensitive pattern matching will ignore case.
@@ -32,43 +33,12 @@ public abstract class JkPathFilter {
     }
 
     /**
-     * Filter accepting all.
-     */
-    public static final JkPathFilter ACCEPT_ALL = new JkPathFilter() {
-
-        @Override
-        public boolean accept(String relativePath) {
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return "Accept all";
-        }
-
-        @Override
-        public JkPathFilter caseSensitive(boolean caseSensitive) {
-            return this;
-        }
-
-        @Override
-        public List<String> getIncludePatterns() {
-            return JkUtilsIterable.listOf("**/*");
-        }
-
-        @Override
-        public List<String> getExcludePatterns() {
-            return JkUtilsIterable.listOf();
-        }
-
-    };
-
-    /**
      * Returns if this filter should accept the specified relative path.
      */
     public abstract boolean accept(String relativePath);
 
-    public boolean accept(Path path) {
+    @Override
+    public boolean matches(Path path) {
         return accept(path.toString());
     }
 
@@ -131,6 +101,61 @@ public abstract class JkPathFilter {
     }
 
     /**
+     * Creates a {@link FileFilter} base on this relative path filter and the
+     * specified base directory on which relative path are transformed to
+     * absolute.
+     */
+    public FileFilter toFileFilter(final File baseDir) {
+        return file -> {
+            final String relativePath = JkUtilsFile.getRelativePath(baseDir, file).replace(File.separator, "/");
+            return JkPathFilter.this.accept(relativePath);
+        };
+    }
+
+    /**
+     * Returns a {@link JkZipEntryFilter} having the same include/exclude rules
+     * than this object.
+     */
+    public JkZipEntryFilter toZipEntryFilter() {
+        return entryName -> JkPathFilter.this.accept(entryName);
+    }
+
+
+    /**
+     * Filter accepting all.
+     */
+    public static final JkPathFilter ACCEPT_ALL = new JkPathFilter() {
+
+        @Override
+        public boolean accept(String relativePath) {
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "Accept all";
+        }
+
+        @Override
+        public JkPathFilter caseSensitive(boolean caseSensitive) {
+            return this;
+        }
+
+        @Override
+        public List<String> getIncludePatterns() {
+            return JkUtilsIterable.listOf("**/*");
+        }
+
+        @Override
+        public List<String> getExcludePatterns() {
+            return JkUtilsIterable.listOf();
+        }
+
+    };
+
+
+
+    /**
      * Creates a filter which is the inverse of this one.
      */
     public JkPathFilter reverse() {
@@ -165,17 +190,6 @@ public abstract class JkPathFilter {
         };
     }
 
-    /**
-     * Creates a {@link FileFilter} base on this relative path filter and the
-     * specified base directory on which relative path are transformed to
-     * absolute.
-     */
-    public FileFilter toFileFilter(final File baseDir) {
-        return file -> {
-            final String relativePath = JkUtilsFile.getRelativePath(baseDir, file).replace(File.separator, "/");
-            return JkPathFilter.this.accept(relativePath);
-        };
-    }
 
     private static final class IncludeFilter extends JkPathFilter {
 
@@ -273,14 +287,6 @@ public abstract class JkPathFilter {
             return result;
         }
 
-    }
-
-    /**
-     * Returns a {@link JkZipEntryFilter} having the same include/exclude rules
-     * than this object.
-     */
-    public JkZipEntryFilter toZipEntryFilter() {
-        return entryName -> JkPathFilter.this.accept(entryName);
     }
 
     private static class CompoundFilter extends JkPathFilter {

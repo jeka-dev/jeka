@@ -5,6 +5,7 @@ import static org.jerkar.api.project.java.JkJavaProject.SOURCES_FILE_ID;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.JkArtifactFileId;
@@ -51,13 +52,13 @@ public class CoreBuild extends JkJavaProjectBuild {
         final File distripZipFile = project.artifactFile(DISTRIB_FILE_ID);
         project.makeArtifactFilesIfNecessary(SOURCES_FILE_ID, JAVADOC_FILE_ID, project.mainArtifactFileId());
         final JkFileTree distrib = JkFileTree.of(distribFolder);
-        final JkFileTree root = JkFileTree.of(project.basePath());
         distrib.importFile(baseDir().getParent().resolve("LICENSE"));
         distrib.importDirContent(baseDir().resolve("src/main/dist"));
         distrib.importDirContent(baseDir().resolve("src/main/java/META-INF/bin"));
         distrib.importFile(project.artifactFile(project.mainArtifactFileId()).toPath());
+        final List<Path> ivySourceLibs = baseTree().go("build/libs-sources").include("apache-ivy*.jar").allPaths();
         distrib.go("libs-sources")
-        .importFiles(root.go("build/libs-sources").include("apache-ivy*.jar").paths(false))
+        .importFiles(ivySourceLibs)
         .importFile(project.artifactFile(SOURCES_FILE_ID).toPath());
         distrib.go("libs-javadoc").importFile(project.artifactFile(JAVADOC_FILE_ID).toPath());
         distrib.zip().with(JkZipper.JkCompressionLevel.BEST_COMPRESSION).to(distripZipFile);

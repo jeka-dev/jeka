@@ -36,7 +36,7 @@ import org.jerkar.api.utils.JkUtilsThrowable;
  *
  * @author Jerome Angibaud
  */
-public final class JkFileTree implements Iterable<File> {
+public final class JkFileTree  {
 
     /**
      * Creates a {@link JkFileTree} having the specified root directory.
@@ -105,18 +105,29 @@ public final class JkFileTree implements Iterable<File> {
 
     public Stream<Path> stream(FileVisitOption ...options) {
         return JkUtilsPath.walk(root, options)
-                .filter(path -> this.filter.accept(root.relativize(path)));
+                .filter(path -> this.filter.matches(root.relativize(path)));
     }
 
-    @Override
-    public Iterator<File> iterator() {
+
+    private  Iterator<File> iterator() {
         return files(false).iterator();
     }
 
     /**
      * Returns the file contained in this {@link JkFileTree}.
      */
-    public List<Path> paths(boolean includeDirs) {
+    public List<Path> allPaths() {
+        return allPath(false);
+    }
+
+    /**
+     * Returns the file contained in this {@link JkFileTree}.
+     */
+    public List<Path> allPathsIncludingDirectories() {
+        return allPath(true);
+    }
+
+    private List<Path> allPath(boolean includeDirs) {
         return stream().filter(path -> !Files.isDirectory(path) || includeDirs).collect(Collectors.toList());
     }
 
@@ -126,7 +137,7 @@ public final class JkFileTree implements Iterable<File> {
      */
     public List<String> relativePathes() {
         final List<String> pathes = new LinkedList<>();
-        for (final File file : this) {
+        for (final File file : this.files(false)) {
             pathes.add(JkUtilsFile.getRelativePath(this.root.toFile(), file));
         }
         return pathes;
@@ -237,7 +248,7 @@ public final class JkFileTree implements Iterable<File> {
      * Merges the content of all files to the specified output.
      */
     public JkFileTree mergeTo(OutputStream outputStream) {
-        for (final File file : this) {
+        for (final File file : this.files(false)) {
             try (final FileInputStream fileInputStream = JkUtilsIO.inputStream(file)) {
                 JkUtilsIO.copy(fileInputStream, outputStream);
             } catch (final IOException e) {
@@ -265,7 +276,7 @@ public final class JkFileTree implements Iterable<File> {
             }
 
             private FileVisitResult visit(Path path) {
-                if (!JkUtilsPath.isSameFile(root, path) && filter.accept(path)) {
+                if (!JkUtilsPath.isSameFile(root, path) && filter.matches(path)) {
                     JkUtilsPath.deleteFile(path);
                 }
                 return FileVisitResult.CONTINUE;

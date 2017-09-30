@@ -67,7 +67,7 @@ final class Engine {
 
     private void preCompile() {
         final SourceParser parser = SourceParser.of(this.projectBaseDir,
-                JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER).paths(false));
+                JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER).allPaths());
         this.buildDependencies = this.buildDependencies.and(parser.dependencies());
         this.buildRepos = parser.importRepos().and(buildRepos);
         this.rootsOfImportedBuilds = parser.projects();
@@ -203,7 +203,7 @@ final class Engine {
         final List<Path>  extraLibs = new LinkedList<>();
         final Path localDeflibDir = this.projectBaseDir.resolve(JkConstants.BUILD_BOOT);
         if (Files.exists(localDeflibDir)) {
-            extraLibs.addAll(JkFileTree.of(localDeflibDir).include("**/*.jar").paths(false));
+            extraLibs.addAll(JkFileTree.of(localDeflibDir).include("**/*.jar").allPaths());
         }
         return JkPathSequence.ofPath(extraLibs).withoutDuplicates();
     }
@@ -267,7 +267,7 @@ final class Engine {
 
     private static void invoke(JkBuild build, BuildMethod modelMethod, Path fromDir) {
         if (modelMethod.isMethodPlugin()) {
-            JkPlugin plugin = build.plugins().get(modelMethod.pluginClass());
+            final JkPlugin plugin = build.plugins().get(modelMethod.pluginClass());
             build.plugins().invoke(plugin, modelMethod.name());
         } else {
             invoke(build, modelMethod.name(), fromDir);
@@ -309,7 +309,7 @@ final class Engine {
     }
 
     private static List<BuildMethod> toBuildMethods(Iterable<MethodInvocation> invocations,
-                                                    PluginDictionnary dictionnary) {
+            PluginDictionnary dictionnary) {
         final List<BuildMethod> buildMethods = new LinkedList<>();
         for (final MethodInvocation methodInvokation : invocations) {
             if (methodInvokation.isMethodPlugin()) {
@@ -326,7 +326,7 @@ final class Engine {
     private JkJavaCompiler baseBuildCompiler() {
         final JkFileTree buildSource = JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER);
         JkUtilsPath.createDirectories(resolver.buildClassDir);
-        return JkJavaCompiler.outputtingIn(resolver.buildClassDir.toFile()).andSources(buildSource).failOnError(true);
+        return JkJavaCompiler.outputtingIn(resolver.buildClassDir.toFile()).andSources(buildSource.files(false)).failOnError(true);
     }
 
     private JkDependencyResolver getBuildDefDependencyResolver() {

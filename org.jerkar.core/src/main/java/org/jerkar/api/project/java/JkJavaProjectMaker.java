@@ -173,7 +173,7 @@ public class JkJavaProjectMaker {
         return baseCompiler
                 .withClasspath(classpath)
                 .andSources(project.getSourceLayout().sources())
-                .andSources(JkFileTree.of(project.getOutLayout().generatedSourceDir()))
+                .andSources(JkFileTree.of(project.getOutLayout().generatedSourceDir()).files(false))
                 .withOutputDir(project.getOutLayout().classDir());
     }
 

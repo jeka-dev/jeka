@@ -284,7 +284,7 @@ public final class JkZipper {
             return;
         }
         final File base = JkUtilsFile.canonicalFile(fileTree.rootDir());
-        for (final File file : fileTree.andFilter(filter)) {
+        for (final File file : fileTree.andFilter(filter).files(false)) {
             JkUtilsZip.addZipEntry(zos, file, base,
                     JkCompressionMethod.STORED.equals(this.jkCompressionMethod));
         }

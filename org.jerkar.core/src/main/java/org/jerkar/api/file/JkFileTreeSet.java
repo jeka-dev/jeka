@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
@@ -65,9 +64,9 @@ public final class JkFileTreeSet implements Iterable<File> {
      * {@link JkFileTreeSet} and the {@link JkFileTree} array passed as
      * parameter.
      */
-    public final JkFileTreeSet and(JkFileTree... dirViews) {
+    public final JkFileTreeSet and(JkFileTree... trees) {
         final List<JkFileTree> list = new LinkedList<>(this.jkFileTrees);
-        list.addAll(Arrays.asList(dirViews));
+        list.addAll(Arrays.asList(trees));
         return new JkFileTreeSet(list);
     }
 
@@ -101,24 +100,6 @@ public final class JkFileTreeSet implements Iterable<File> {
         return files(false).iterator();
     }
 
-    /**
-     * Copies the files contained in this {@link JkFileTreeSet} to the specified
-     * directory.
-     */
-    public int copyTo(File destinationDir) {
-        if (destinationDir.exists()) {
-            JkUtilsFile.assertAllDir(destinationDir);
-        } else {
-            destinationDir.mkdirs();
-        }
-        int count = 0;
-        for (final JkFileTree dir : jkFileTrees) {
-            if (dir.exists()) {
-                count += dir.copyTo(destinationDir);
-            }
-        }
-        return count;
-    }
 
     /**
      * Creates a {@link JkFileTree} which is a copy of this {@link JkFileTree}
@@ -180,7 +161,7 @@ public final class JkFileTreeSet implements Iterable<File> {
     }
 
     /**
-     * Returns <code>true</code> if no tree of this object has an existing baseTree.
+     * Returns <code>true</code> if no tree of this set has an existing baseTree.
      */
     public boolean hasNoExistingRoot() {
         for (final JkFileTree dirView : jkFileTrees) {
@@ -210,35 +191,8 @@ public final class JkFileTreeSet implements Iterable<File> {
         return JkZipper.of(this);
     }
 
-    /**
-     * Returns <code>true</code> if each {@link JkFileTree} constituting this
-     * {@link JkFileTreeSet} exist.
-     *
-     * @see JkFileTree#exists()
-     */
-    public boolean allExists() {
-        for (final JkFileTree jkFileTree : this.jkFileTrees) {
-            if (jkFileTree.exists()) {
-                return true;
-            }
-        }
-        return false;
-    }
 
-    /**
-     * Returns a the asScopedDependency of all {@link JkFileTree} constituting this
-     * {@link JkFileTreeSet}.
-     *
-     * @deprecated use {@link #roots()} instead
-     */
-    @Deprecated
-    public List<File> rootDirs() {
-        final List<File> result = new LinkedList<>();
-        for (final JkFileTree dir : jkFileTrees) {
-            result.add(dir.rootDir());
-        }
-        return result;
-    }
+
 
     @Override
     public String toString() {
