@@ -1,7 +1,9 @@
 ## Ongoing 0.7.O
 
 * Move from jdk6 to jdk8
-* New API to build project base on pure API without needing JkBuild classes
+* Completely new build API based on Java8 lambdas
+* Completely new file API based on Java7 nio
+* Removed legacy API (no backward compatibility with Jerkar 0.6.x)
 
 ## 0.6.0
 
