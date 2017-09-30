@@ -1,6 +1,7 @@
 package org.jerkar.api.file;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -126,15 +127,16 @@ public final class JkFileTreeSet implements Iterable<File> {
         return result;
     }
 
+
     /**
      * Returns path of each files file contained in this {@link JkFileTreeSet}
      * relative to the asScopedDependency of their respective {@link JkFileTree}.
      */
-    public List<String> relativePathes() {
-        final LinkedList<String> result = new LinkedList<>();
+    public List<Path> allRelativePaths() {
+        final LinkedList<Path> result = new LinkedList<>();
         for (final JkFileTree dir : this.jkFileTrees) {
             if (dir.rootDir().exists()) {
-                result.addAll(dir.relativePathes());
+                result.addAll(dir.allRelativePaths());
             }
         }
         return result;

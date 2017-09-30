@@ -14,7 +14,7 @@ import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * A resolver for the {@link JkBuild} to use for a given project.
- * 
+ *
  * @author Jerome Angibaud
  */
 final class BuildResolver {
@@ -69,19 +69,20 @@ final class BuildResolver {
             return false;
         }
         final JkFileTree dir = JkFileTree.of(buildSourceDir);
-        for (final String path : dir.relativePathes()) {
-            if (path.endsWith(".java")) {
+        for (final Path path : dir.allRelativePaths()) {
+            final String pathName = path.toString();
+            if (pathName.endsWith(".java")) {
                 final String simpleName;
-                if (path.contains(File.pathSeparator)) {
-                    simpleName = JkUtilsString.substringAfterLast(path, File.separator);
+                if (pathName.contains(File.pathSeparator)) {
+                    simpleName = JkUtilsString.substringAfterLast(pathName, File.separator);
                 } else {
-                    simpleName = path;
+                    simpleName = pathName;
                 }
                 if (simpleName.startsWith("_")) {
                     continue;
                 }
                 final Class<?> clazz = JkClassLoader.current()
-                        .loadGivenClassSourcePathIfExist(path);
+                        .loadGivenClassSourcePathIfExist(pathName);
                 if (clazz == null) {
                     return true;
                 }
@@ -114,7 +115,7 @@ final class BuildResolver {
         // If there is a build file
         if (this.hasBuildSource()) {
             final JkFileTree dir = JkFileTree.of(buildSourceDir);
-            for (final String path : dir.relativePathes()) {
+            for (final String path : dir.relativePaths()) {
                 if (path.endsWith(".java")) {
                     final Class<?> clazz = classLoader.loadGivenClassSourcePath(path);
                     if (baseClass.isAssignableFrom(clazz)
@@ -153,7 +154,7 @@ final class BuildResolver {
         // If there is a build source
         if (this.hasBuildSource()) {
             final JkFileTree dir = JkFileTree.of(buildSourceDir);
-            for (final String path : dir.relativePathes()) {
+            for (final String path : dir.relativePaths()) {
                 if (path.endsWith(".java")) {
                     final Class<?> clazz = classLoader.loadGivenClassSourcePath(path);
                     if (baseClass.isAssignableFrom(clazz)

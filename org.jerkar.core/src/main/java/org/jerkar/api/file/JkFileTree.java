@@ -12,7 +12,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,6 +54,8 @@ public final class JkFileTree  {
 
     private final Path root;
 
+    private final JkPathMatcher matcher;
+
     private final JkPathFilter filter;
 
     private JkFileTree(Path rootDir) {
@@ -63,10 +64,11 @@ public final class JkFileTree  {
 
     private JkFileTree(Path rootDir, JkPathFilter filter) {
         JkUtilsAssert.notNull(rootDir, "Root dir can't be null.");
-        JkUtilsAssert.notNull(filter, "filter can't be null.");
+        JkUtilsAssert.notNull(filter, "ilter can't be null.");
         JkUtilsAssert.isTrue(!Files.exists(rootDir) || Files.isDirectory(rootDir), rootDir + " is not a directory.");
         this.root = rootDir;
         this.filter = filter;
+        this.matcher = JkPathMatcher.of(filter);
     }
 
     /**
@@ -104,38 +106,42 @@ public final class JkFileTree  {
     // ----------------------- iterate over files ---------------------------------------------------
 
     public Stream<Path> stream(FileVisitOption ...options) {
-        return JkUtilsPath.walk(root, options)
-                .filter(path -> this.filter.matches(root.relativize(path)));
-    }
-
-
-    private  Iterator<File> iterator() {
-        return files(false).iterator();
+        return JkUtilsPath.walk(root, options).filter(matcher);
     }
 
     /**
-     * Returns the file contained in this {@link JkFileTree}.
+     * Returns absolute path of all files contained in this {@link JkFileTree}.
+     * Result does not contains directory entries.
+     */
+    public List<Path> allRelativePaths() {
+        return stream()
+                .filter(JkPathMatcher.noDirectory())
+                .map(path -> root.relativize(path))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns absolute path of all files contained in this {@link JkFileTree}.
+     * Result does not contains directory entries.
      */
     public List<Path> allPaths() {
-        return allPath(false);
+        return stream().filter(JkPathMatcher.noDirectory()).collect(Collectors.toList());
     }
 
     /**
      * Returns the file contained in this {@link JkFileTree}.
      */
     public List<Path> allPathsIncludingDirectories() {
-        return allPath(true);
+        return stream().collect(Collectors.toList());
     }
 
-    private List<Path> allPath(boolean includeDirs) {
-        return stream().filter(path -> !Files.isDirectory(path) || includeDirs).collect(Collectors.toList());
-    }
+
 
     /**
      * Returns path of each files file contained in this {@link JkFileTree}
      * relative to its asScopedDependency.
      */
-    public List<String> relativePathes() {
+    public List<String> relativePaths() {
         final List<String> pathes = new LinkedList<>();
         for (final File file : this.files(false)) {
             pathes.add(JkUtilsFile.getRelativePath(this.root.toFile(), file));

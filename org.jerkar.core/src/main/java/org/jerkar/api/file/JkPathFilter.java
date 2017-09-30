@@ -7,6 +7,7 @@ import java.nio.file.PathMatcher;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -17,7 +18,7 @@ import org.jerkar.api.utils.JkUtilsZip.JkZipEntryFilter;
  * <href a='https://ant.apache.org/manual/Types/patternset.html'>Ant
  * pattern</href>.
  */
-public abstract class JkPathFilter implements PathMatcher {
+public abstract class JkPathFilter implements PathMatcher, Predicate<Path> {
 
     /**
      * When not case sensitive pattern matching will ignore case.
@@ -40,6 +41,11 @@ public abstract class JkPathFilter implements PathMatcher {
     @Override
     public boolean matches(Path path) {
         return accept(path.toString());
+    }
+
+    @Override
+    public boolean test(Path path) {
+        return matches(path);
     }
 
     /**

@@ -9,6 +9,8 @@ import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -376,11 +379,11 @@ public final class JkClassLoader {
      * <code>my/pack/&#42;&#42;/&#42;.class</code>. Note that ending with
      * <code>.class</code> is important.
      */
-    public Set<Class<?>> loadClasses(JkPathFilter classFileFilter) {
+    private Set<Class<?>> loadClasses(JkPathFilter classFileFilter) {
         final Set<Class<?>> result = new HashSet<>();
-        final Set<String> classFiles = this.fullClasspath().allItemsMatching(classFileFilter);
-        for (final String classFile : classFiles) {
-            final String className = getAsClassName(classFile);
+        final Set<Path> classFiles = this.fullClasspath().allItemsMatching(classFileFilter);
+        for (final Path classFile : classFiles) {
+            final String className = getAsClassName(classFile.toString());
             result.add(this.load(className));
         }
         return result;
@@ -410,9 +413,9 @@ public final class JkClassLoader {
      */
     public Set<Class<?>> loadClassesIn(JkFileTreeSet jkFileTreeSet) {
         final Set<Class<?>> result = new HashSet<>();
-        for (final String path : jkFileTreeSet.relativePathes()) {
-            if (path.endsWith(".class")) {
-                final String className = getAsClassName(path);
+        for (final Path path : jkFileTreeSet.allRelativePaths()) {
+            if (path.toString().endsWith(".class")) {
+                final String className = getAsClassName(path.toString());
                 result.add(this.load(className));
             }
         }
@@ -426,9 +429,9 @@ public final class JkClassLoader {
      * @see JkClassLoader#loadClassesInEntries(FileFilter)
      */
     public Iterator<Class<?>> iterateClassesIn(JkFileTreeSet jkFileTreeSet) {
-        final List<String> fileNames = jkFileTreeSet.andFilter(JkPathFilter.include("**/*.class"))
-                .relativePathes();
-        return classIterator(fileNames);
+        final List<Path> fileNames = jkFileTreeSet.andFilter(JkPathFilter.include("**/*.class"))
+                .allRelativePaths();
+        return classIterator(fileNames.stream().map(path -> path.toString()).collect(Collectors.toList()));
     }
 
     /**
@@ -437,21 +440,21 @@ public final class JkClassLoader {
      *
      * @see JkClassLoader#loadClassesInEntries(FileFilter)
      */
-    public Iterator<Class<?>> iterateClassesIn(File dirOrJar) {
-        final List<String> paths;
+    private Iterator<Class<?>> iterateClassesIn(File dirOrJar) {
+        final List<Path> paths;
         if (dirOrJar.isDirectory()) {
             paths = JkFileTree.of(dirOrJar).andFilter(JkPathFilter.include("**/*.class"))
-                    .relativePathes();
+                    .allRelativePaths();
         } else {
             final List<ZipEntry> entries = JkUtilsZip.zipEntries(JkUtilsZip.zipFile(dirOrJar));
             paths = new LinkedList<>();
             for (final ZipEntry entry : entries) {
                 if (entry.getName().endsWith(".class")) {
-                    paths.add(entry.getName());
+                    paths.add(Paths.get(entry.getName()));
                 }
             }
         }
-        return classIterator(paths);
+        return classIterator(paths.stream().map(path -> path.toString()).collect(Collectors.toList()));
     }
 
     private Iterator<Class<?>> classIterator(final Iterable<String> fileNameIt) {
@@ -502,7 +505,7 @@ public final class JkClassLoader {
      * Returns the first class having a main method from the specified class
      * directory or Jar. Returns <code>null</code> if no such class found.
      */
-    public static String findMainClass(File classDirOrJar) {
+    static String findMainClass(File classDirOrJar) {
         final JkClassLoader classLoader = JkClassLoader.system().child(classDirOrJar);
         final Iterator<Class<?>> it = classLoader.iterateClassesIn(classDirOrJar);
         while (it.hasNext()) {

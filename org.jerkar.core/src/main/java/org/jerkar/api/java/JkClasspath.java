@@ -3,6 +3,7 @@ package org.jerkar.api.java;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,7 +35,7 @@ import org.jerkar.api.utils.JkUtilsZip;
  * <code>folder</code>.<br/>
  * Non existing files are accepted as valid <code>entry</code>, though they
  * won't contain any classes.
- * 
+ *
  * @author Djeang
  */
 public final class JkClasspath implements Iterable<File> {
@@ -100,7 +101,7 @@ public final class JkClasspath implements Iterable<File> {
         for (final File file : entries) {
             if (!file.exists()) {
                 throw new IllegalStateException("File " + file.getAbsolutePath()
-                        + " does not exist.");
+                + " does not exist.");
             }
         }
         return this;
@@ -144,7 +145,7 @@ public final class JkClasspath implements Iterable<File> {
     }
 
     public JkClasspath and(Path... files) {
-        List<Path> paths = Arrays.asList(files);
+        final List<Path> paths = Arrays.asList(files);
         return and(JkUtilsPath.filesOf(paths));
     }
 
@@ -176,8 +177,8 @@ public final class JkClasspath implements Iterable<File> {
                 final File parent = file.getParentFile();
                 if (!parent.exists()) {
                     JkLog.trace("File " + parent.getAbsolutePath()
-                            + " does not exist : classpath entry " + file.getAbsolutePath()
-                            + " will be ignored.");
+                    + " does not exist : classpath entry " + file.getAbsolutePath()
+                    + " will be ignored.");
                 } else {
                     result.addAll(JkFileTree.of(parent).include("*.jar").files(false));
                 }
@@ -234,18 +235,18 @@ public final class JkClasspath implements Iterable<File> {
      * class file or any resource file. The element is expressed with its path
      * relative to its containing entry.
      */
-    public Set<String> allItemsMatching(JkPathFilter fileFilter) {
-        final Set<String> result = new HashSet<>();
+    Set<Path> allItemsMatching(JkPathFilter fileFilter) {
+        final Set<Path> result = new HashSet<>();
         for (final File classpathEntry : this) {
             if (classpathEntry.isDirectory()) {
-                result.addAll(JkFileTree.of(classpathEntry).andFilter(fileFilter).relativePathes());
+                result.addAll(JkFileTree.of(classpathEntry).andFilter(fileFilter).allRelativePaths());
             } else {
                 final ZipFile zipFile = JkUtilsZip.zipFile(classpathEntry);
                 for (final Enumeration<? extends ZipEntry> zipEntries = zipFile.entries(); zipEntries
                         .hasMoreElements();) {
                     final ZipEntry zipEntry = zipEntries.nextElement();
                     if (fileFilter.accept(zipEntry.getName())) {
-                        result.add(zipEntry.getName());
+                        result.add(Paths.get(zipEntry.getName()));
                     }
                 }
                 JkUtilsIO.closeQuietly(zipFile);
