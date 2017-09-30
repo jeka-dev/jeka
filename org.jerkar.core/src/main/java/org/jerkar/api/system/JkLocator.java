@@ -3,6 +3,7 @@ package org.jerkar.api.system;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -41,7 +42,7 @@ public final class JkLocator {
                 return file;
             } catch (final ClassNotFoundException e) {
                 // Class just not there
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw JkUtilsThrowable.unchecked(e);
             }
         }
@@ -67,7 +68,10 @@ public final class JkLocator {
         } else {
             result = Paths.get(System.getProperty("user.home")).resolve(".jerkar");
         }
-        JkUtilsPath.createFileSafely(result);
+        if (Files.exists(result) && Files.isRegularFile(result)) {
+            JkUtilsPath.deleteFile(result);
+        }
+        JkUtilsPath.createDirectories(result);
         return result;
     }
 
