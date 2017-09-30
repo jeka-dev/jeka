@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.List;
 
 import org.junit.Ignore;
@@ -20,9 +21,11 @@ public class JkUtilsFileTest {
     public void testFileOf() throws Exception {
         final URL sampleFileUrl = JkUtilsFileTest.class
                 .getResource("samplefolder/subfolder/sample.txt");
+
         final File sampleFile = new File(sampleFileUrl.toURI().getPath());
         assertTrue(sampleFile.exists());
         final File sampleDir = sampleFile.getParentFile().getParentFile();
+        Files.createDirectories(sampleDir.toPath().resolve("emptyfolder"));
 
         List<File> files = JkUtilsFile.filesOf(sampleDir, false);
         assertEquals(1, files.size());

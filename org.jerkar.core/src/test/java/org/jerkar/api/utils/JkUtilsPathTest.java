@@ -19,6 +19,7 @@ public class JkUtilsPathTest {
         final URL sampleFileUrl = JkUtilsPathTest.class
                 .getResource("samplefolder/subfolder/sample.txt");
         final Path source = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
+        Files.createDirectories(source.resolve("emptyfolder"));   // git won't copy empty dir
         final Path target = Files.createTempDirectory("copydirtest");
         JkUtilsPath.copyDirContent(source, target, StandardCopyOption.REPLACE_EXISTING);
         System.out.println(target);
