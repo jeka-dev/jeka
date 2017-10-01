@@ -54,8 +54,6 @@ public final class JkFileTree  {
 
     private final Path root;
 
-    private final JkPathMatcher matcher;
-
     private final JkPathFilter filter;
 
     private JkFileTree(Path rootDir) {
@@ -68,7 +66,6 @@ public final class JkFileTree  {
         JkUtilsAssert.isTrue(!Files.exists(rootDir) || Files.isDirectory(rootDir), rootDir + " is not a directory.");
         this.root = rootDir;
         this.filter = filter;
-        this.matcher = JkPathMatcher.of(filter);
     }
 
     /**
@@ -109,7 +106,8 @@ public final class JkFileTree  {
         if(!exists()) {
             return new LinkedList<Path>().stream();
         }
-        return JkUtilsPath.walk(root, options).filter(matcher);
+        final JkPathMatcher matcher = JkPathMatcher.of(filter);
+        return JkUtilsPath.walk(root, options).filter(path -> matcher.matches(root.relativize(path)));
     }
 
     /**

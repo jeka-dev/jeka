@@ -55,10 +55,7 @@ public final class JkPathMatcher implements PathMatcher, Predicate<Path> {
 
     @Override
     public boolean matches(Path path) {
-        if (linked != null) {
-            return linked.matches(path) && matcher.matches(path);
-        }
-        return matcher.matches(path);
+        return linked != null ? linked.matches(path) && matcher.matches(path) : matcher.matches(path);
     }
 
     public JkPathMatcher and(PathMatcher matcher) {
