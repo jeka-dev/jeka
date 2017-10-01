@@ -252,14 +252,17 @@ public final class JkUtilsPath {
 
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-            final Path targetPath = toPath.resolve(fromPath.relativize(dir));
-            Files.createDirectories(targetPath);
+            final Path sourceRelativePath = fromPath.relativize(dir);
+            final Path relativePath = toPath.getFileSystem().getPath(toPath.toString(), sourceRelativePath.toString());
+            Files.createDirectories(relativePath);
             return FileVisitResult.CONTINUE;
         }
 
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-            Files.copy(file, toPath.resolve(fromPath.relativize(file)), options);
+            final String relativePath = fromPath.relativize(file).toString();
+            final Path target = toPath.getFileSystem().getPath(toPath.toString(), relativePath); // necessary to deal with both regular file system and zip
+            Files.copy(file, target , options);
             count ++;
             return FileVisitResult.CONTINUE;
         }

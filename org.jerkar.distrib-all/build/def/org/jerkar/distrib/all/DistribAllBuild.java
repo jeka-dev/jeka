@@ -1,5 +1,6 @@
 package org.jerkar.distrib.all;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
@@ -32,7 +33,7 @@ class DistribAllBuild extends JkBuild {
     public boolean javadoc = true;
 
     @JkDoc("Construct a distrib assuming all dependent sub projects are already built.")
-    public void distrib() {
+    public void distrib() throws Exception {
 
         JkLog.startln("Creating distribution file");
 
@@ -54,11 +55,13 @@ class DistribAllBuild extends JkBuild {
         Path fat = dist.get(core.project().artifactFile(JkArtifactFileId.of("all", "jar")).getName());
         JkUtilsPath.copy(core.project().mainArtifactFile().toPath(), fat, StandardCopyOption.REPLACE_EXISTING);
         JkZipper.of().mergePath(ext.include("**/*.jar").filesOnly()).appendTo(fat);
-
+        //JkFileTree.ofZip(fat).importTree(ext.include("**/*.jar")).root().getFileSystem().close();;
+        
         JkLog.info("Create a fat source jar");
         Path fatSource = sourceDir.get("org.jerkar.core-all-sources.jar");
         JkZipper.of().mergePath(sourceDir.include("**.jar", "**.zip").exclude(fatSource.getFileName().toString()).filesOnly()).to(fatSource);
-
+        //JkFileTree.ofZip(fatSource).importTree(sourceDir.include("**.jar", "**.zip").exclude(fatSource.getFileName().toString())).root().getFileSystem().close();
+        
         if (javadoc) {
             JkLog.info("Create javadoc");
             JkFileTreeSet sources = this.pluginsJacoco.core.project().getSourceLayout().sources()

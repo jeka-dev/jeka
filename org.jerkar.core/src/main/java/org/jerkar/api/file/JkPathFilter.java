@@ -18,6 +18,7 @@ import org.jerkar.api.utils.JkUtilsZip.JkZipEntryFilter;
  * <href a='https://ant.apache.org/manual/Types/patternset.html'>Ant
  * pattern</href>.
  */
+@Deprecated
 public abstract class JkPathFilter implements PathMatcher, Predicate<Path> {
 
     /**

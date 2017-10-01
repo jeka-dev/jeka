@@ -3,6 +3,7 @@ package org.jerkar.api.file;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Desktop;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,6 +45,29 @@ public class JkFileTreeTest {
 
         final JkFileTree tree = JkFileTree.of(Paths.get(sampleFileUrl.toURI()).getParent().getParent());
         System.out.println(tree.filesOnlyRelative());
+    }
+
+    @Test
+    public void testZipOf() throws Exception {
+        final URL sampleFileUrl = JkUtilsPathTest.class
+                .getResource("samplefolder/subfolder/sample.txt");
+        final Path source = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
+        Files.createDirectories(source.resolve("emptyfolder"));   // git won't copy empty dir
+
+        final Path zipFile = Files.createTempFile("sample", ".zip");
+        Files.delete(zipFile);
+        final JkFileTree zipTree = JkFileTree.ofZip(zipFile);
+        zipTree.importDirContent(source);
+        zipTree.root().getFileSystem().close();
+
+
+        System.out.println(zipFile);
+        Desktop.getDesktop().open(zipFile.getParent().toFile());
+
+        final Path sampleTxt = JkFileTree.ofZip(zipFile).root().resolve("subfolder/sample.txt");
+        assertTrue(Files.exists(sampleTxt));
+
+
     }
 
 }
