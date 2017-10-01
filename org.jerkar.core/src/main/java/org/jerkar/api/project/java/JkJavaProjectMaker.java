@@ -172,8 +172,8 @@ public class JkJavaProjectMaker {
         final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
         return baseCompiler
                 .withClasspath(classpath)
-                .andSources(project.getSourceLayout().sources())
-                .andSources(JkFileTree.of(project.getOutLayout().generatedSourceDir()).files(false))
+                .andSources(project.getSourceLayout().sources().filesOnly())
+                .andSources(JkFileTree.of(project.getOutLayout().generatedSourceDir()).filesOnly())
                 .withOutputDir(project.getOutLayout().classDir());
     }
 
@@ -209,7 +209,7 @@ public class JkJavaProjectMaker {
         final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andHead(project.getOutLayout().classDir());
         return baseCompiler
                 .withClasspath(classpath)
-                .andSources(project.getSourceLayout().tests())
+                .andSources(project.getSourceLayout().tests().filesOnly())
                 .withOutputDir(project.getOutLayout().testClassDir());
     }
 

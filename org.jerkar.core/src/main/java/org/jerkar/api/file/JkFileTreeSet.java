@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,7 +15,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
  *
  * @author Jerome Angibaud
  */
-public final class JkFileTreeSet implements Iterable<File> {
+public final class JkFileTreeSet {
 
     private final List<JkFileTree> jkFileTrees;
 
@@ -96,10 +95,7 @@ public final class JkFileTreeSet implements Iterable<File> {
         return new JkFileTreeSet(list);
     }
 
-    @Override
-    public Iterator<File> iterator() {
-        return files(false).iterator();
-    }
+
 
 
     /**
@@ -127,6 +123,19 @@ public final class JkFileTreeSet implements Iterable<File> {
         return result;
     }
 
+    /**
+     * Returns files contained in this {@link JkFileTreeSet} as a list of file.
+     */
+    public List<Path> filesOnly() {
+        final LinkedList<Path> result = new LinkedList<>();
+        for (final JkFileTree dirView : this.jkFileTrees) {
+            if (dirView.rootDir().exists()) {
+                result.addAll(dirView.filesOnly());
+            }
+        }
+        return result;
+    }
+
 
     /**
      * Returns path of each files file contained in this {@link JkFileTreeSet}
@@ -136,7 +145,7 @@ public final class JkFileTreeSet implements Iterable<File> {
         final LinkedList<Path> result = new LinkedList<>();
         for (final JkFileTree dir : this.jkFileTrees) {
             if (dir.rootDir().exists()) {
-                result.addAll(dir.allRelativePaths());
+                result.addAll(dir.filesOnlyRelative());
             }
         }
         return result;

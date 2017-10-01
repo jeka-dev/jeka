@@ -69,7 +69,7 @@ final class BuildResolver {
             return false;
         }
         final JkFileTree dir = JkFileTree.of(buildSourceDir);
-        for (final Path path : dir.allRelativePaths()) {
+        for (final Path path : dir.filesOnlyRelative()) {
             final String pathName = path.toString();
             if (pathName.endsWith(".java")) {
                 final String simpleName;
@@ -115,7 +115,7 @@ final class BuildResolver {
         // If there is a build file
         if (this.hasBuildSource()) {
             final JkFileTree dir = JkFileTree.of(buildSourceDir);
-            for (final Path path : dir.allRelativePaths()) {
+            for (final Path path : dir.filesOnlyRelative()) {
                 if (path.toString().endsWith(".java")) {
                     final Class<?> clazz = classLoader.loadGivenClassSourcePath(path.toString());
                     if (baseClass.isAssignableFrom(clazz)
@@ -154,7 +154,7 @@ final class BuildResolver {
         // If there is a build source
         if (this.hasBuildSource()) {
             final JkFileTree dir = JkFileTree.of(buildSourceDir);
-            for (final Path path : dir.allRelativePaths()) {
+            for (final Path path : dir.filesOnlyRelative()) {
                 if (path.toString().endsWith(".java")) {
                     final Class<?> clazz = classLoader.loadGivenClassSourcePath(path.toString());
                     if (baseClass.isAssignableFrom(clazz)

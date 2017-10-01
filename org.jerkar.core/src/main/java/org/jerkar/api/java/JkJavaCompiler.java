@@ -212,7 +212,8 @@ public final class JkJavaCompiler {
      * Creates a copy of this {@link JkJavaCompiler} but adding specified source
      * files.
      */
-    public JkJavaCompiler andSources(Iterable<File> files) {
+    @Deprecated  // use andSources
+    public JkJavaCompiler andSourcesFiles(Iterable<File> files) {
         final List<File> newSources = new LinkedList<>(this.javaSourceFiles);
         for (final File file : files) {
             if (file.getName().toLowerCase().endsWith(".java")) {
@@ -223,14 +224,29 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * @see #andSources(Iterable)
+     * Creates a copy of this {@link JkJavaCompiler} but adding specified source
+     * files.
      */
-    public JkJavaCompiler andSourceDir(File dir) {
-        return andSources(JkFileTree.of(dir).files(false));
+    public JkJavaCompiler andSources(Iterable<Path> files) {
+        final List<File> newSources = new LinkedList<>(this.javaSourceFiles);
+        for (final Path file : files) {
+            if (file.getFileName().toString().toLowerCase().endsWith(".java")) {
+                newSources.add(file.toFile());
+            }
+        }
+        return new JkJavaCompiler(options, newSources, failOnError, fork, compiler, compilerBinRepo);
     }
 
     /**
-     * @see #andSources(Iterable)
+     * @see #andSourcesFiles(Iterable)
+     */
+    public JkJavaCompiler andSourceDir(File dir) {
+        return andSources(JkFileTree.of(dir).filesOnly());
+    }
+
+
+    /**
+     * @see #andSourcesFiles(Iterable)
      */
     public JkJavaCompiler andSourceDir(Path dir) {
         return andSourceDir(dir.toFile());

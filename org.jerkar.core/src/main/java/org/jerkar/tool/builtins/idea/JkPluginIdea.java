@@ -50,7 +50,7 @@ public final class JkPluginIdea implements JkPlugin {
     @JkDoc("Generates ./idea/modules.xml file")
     public void generateModulesXml(JkBuild build) {
         final Path current = build.baseTree().root();
-        final Iterable<Path> imls = build.baseTree().include("**/*.iml").allPaths();
+        final Iterable<Path> imls = build.baseTree().include("**/*.iml").filesOnly();
         final ModulesXmlGenerator modulesXmlGenerator = new ModulesXmlGenerator(current, imls);
         modulesXmlGenerator.generate();
     }
@@ -60,7 +60,7 @@ public final class JkPluginIdea implements JkPlugin {
         final Iterable<Path> folders = build.baseTree()
                 .include("**/" + JkConstants.BUILD_DEF_DIR)
                 .exclude("**/build/output/**")
-                .allPathsIncludingDirectories();
+                .filesAndDirs();
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
             JkLog.startln("Generating iml file on " + projectFolder);

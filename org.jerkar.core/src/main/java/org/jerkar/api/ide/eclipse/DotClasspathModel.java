@@ -278,7 +278,7 @@ final class DotClasspathModel {
             }
             final JkFileTree dirView = JkFileTree.of(conFolder).include("**/*.jar");
             final List<Path> result = new LinkedList<>();
-            result.addAll(dirView.allPaths());
+            result.addAll(dirView.filesOnly());
             return result;
         }
 

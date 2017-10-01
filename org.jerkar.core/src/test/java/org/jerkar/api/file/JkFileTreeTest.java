@@ -38,7 +38,7 @@ public class JkFileTreeTest {
         Files.createDirectories(source.resolve("emptyfolder"));   // git won't copy empty dir
 
         final JkFileTree tree = JkFileTree.of(Paths.get(sampleFileUrl.toURI()).getParent().getParent());
-        System.out.println(tree.allRelativePaths());
+        System.out.println(tree.filesOnlyRelative());
     }
 
 }

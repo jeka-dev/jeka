@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.jerkar.api.depmanagement.JkComputedDependency;
@@ -77,9 +78,9 @@ public class JkEclipseClasspathGeneratorTest {
         final JkProjectSourceLayout base2Layout = baseProject2.getSourceLayout();
         final JkProjectSourceLayout baseLayout = baseProject.getSourceLayout();
         assertEquals(baseLayout.baseDir(), base2Layout.baseDir());
-        final List<File> srcFiles = base2Layout.sources().files(false);
+        final List<Path> srcFiles = base2Layout.sources().filesOnly();
         assertEquals(2, srcFiles.size());
-        assertEquals("Base.java", srcFiles.get(0).getName());
+        assertEquals("Base.java", srcFiles.get(0).getFileName().toString());
         final List<File> resFiles = base2Layout.resources().files(false);
         assertEquals(1, resFiles.size());
         assertEquals("base.txt", resFiles.get(0).getName());

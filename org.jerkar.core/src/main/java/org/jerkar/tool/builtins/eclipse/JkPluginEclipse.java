@@ -85,7 +85,7 @@ public final class JkPluginEclipse implements JkPlugin {
         final Iterable<Path> folders = build.baseTree()
                 .include("**/" + JkConstants.BUILD_DEF_DIR)
                 .exclude("**/build/output/**")
-                .allPathsIncludingDirectories();
+                .filesAndDirs();
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
             JkLog.startln("Generating Eclipse files on " + projectFolder);

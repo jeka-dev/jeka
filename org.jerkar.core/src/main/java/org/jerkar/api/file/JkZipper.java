@@ -143,6 +143,17 @@ public final class JkZipper {
      * Returns a {@link JkZipFile} identical to this one but containing also the entries
      * contained in the specified archive files.
      */
+    @SuppressWarnings("unchecked")
+    public JkZipper mergePath(Iterable<Path> archiveFiles) {
+        return new JkZipper(itemsToZip, JkUtilsIterable.concatLists(this.archivestoMerge,
+                JkUtilsPath.filesOf(archiveFiles)), this.jkCompressionLevel, this.jkCompressionMethod);
+    }
+
+
+    /**
+     * Returns a {@link JkZipFile} identical to this one but containing also the entries
+     * contained in the specified archive files.
+     */
     public JkZipper merge(File... archiveFiles) {
         return merge(Arrays.asList(archiveFiles));
     }
@@ -284,8 +295,8 @@ public final class JkZipper {
             return;
         }
         final File base = JkUtilsFile.canonicalFile(fileTree.rootDir());
-        for (final File file : fileTree.andFilter(filter).files(false)) {
-            JkUtilsZip.addZipEntry(zos, file, base,
+        for (final Path file : fileTree.andFilter(filter).filesOnly()) {
+            JkUtilsZip.addZipEntry(zos, file.toFile(), base,
                     JkCompressionMethod.STORED.equals(this.jkCompressionMethod));
         }
     }

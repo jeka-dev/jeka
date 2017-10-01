@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +19,7 @@ import org.jerkar.api.utils.JkUtilsReflect;
 
 /**
  * Offers fluent interface for producing Javadoc.
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkJavadocMaker {
@@ -91,7 +92,7 @@ public final class JkJavadocMaker {
      * Returns a {@link JkJavadocMaker} identical to this one but using the specified options (-classpath , -exclude, -subpackages, ...).
      */
     public JkJavadocMaker andOptions(List<String> options) {
-        List<String> list = new LinkedList<>(this.extraArgs);
+        final List<String> list = new LinkedList<>(this.extraArgs);
         list.addAll(options);
         return new JkJavadocMaker(srcDirs, doclet, classpath, list, outputDir, zipFile);
     }
@@ -150,9 +151,9 @@ public final class JkJavadocMaker {
         }
         list.addAll(extraArgs);
 
-        for (final File sourceFile : this.srcDirs.files(false)) {
-            if (sourceFile.getPath().endsWith(".java")) {
-                list.add(sourceFile.getAbsolutePath());
+        for (final Path sourceFile : this.srcDirs.filesOnly()) {
+            if (sourceFile.getFileName().toString().endsWith(".java")) {
+                list.add(sourceFile.toString());
             }
 
         }

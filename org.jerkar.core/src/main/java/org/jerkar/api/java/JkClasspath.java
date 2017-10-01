@@ -57,6 +57,13 @@ public final class JkClasspath implements Iterable<File> {
     }
 
     /**
+     * Creates a <code>JkClasspath</code> form specified file entries.
+     */
+    public static JkClasspath ofPath(Iterable<Path> entries) {
+        return new JkClasspath(JkUtilsPath.filesOf(entries));
+    }
+
+    /**
      * Convenient method to create a <code>JkClassLoader</code> from a given
      * entry plus an sequence of other ones. This scheme is often used for
      * launching some test suites.
@@ -239,7 +246,7 @@ public final class JkClasspath implements Iterable<File> {
         final Set<Path> result = new HashSet<>();
         for (final File classpathEntry : this) {
             if (classpathEntry.isDirectory()) {
-                result.addAll(JkFileTree.of(classpathEntry).andFilter(fileFilter).allRelativePaths());
+                result.addAll(JkFileTree.of(classpathEntry).andFilter(fileFilter).filesOnlyRelative());
             } else {
                 final ZipFile zipFile = JkUtilsZip.zipFile(classpathEntry);
                 for (final Enumeration<? extends ZipEntry> zipEntries = zipFile.entries(); zipEntries

@@ -12,6 +12,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -105,6 +106,9 @@ public final class JkFileTree  {
     // ----------------------- iterate over files ---------------------------------------------------
 
     public Stream<Path> stream(FileVisitOption ...options) {
+        if(!exists()) {
+            return new LinkedList<Path>().stream();
+        }
         return JkUtilsPath.walk(root, options).filter(matcher);
     }
 
@@ -112,7 +116,7 @@ public final class JkFileTree  {
      * Returns absolute path of all files contained in this {@link JkFileTree}.
      * Result does not contains directory entries.
      */
-    public List<Path> allRelativePaths() {
+    public List<Path> filesOnlyRelative() {
         return stream()
                 .filter(JkPathMatcher.noDirectory())
                 .map(path -> root.relativize(path))
@@ -123,14 +127,14 @@ public final class JkFileTree  {
      * Returns absolute path of all files contained in this {@link JkFileTree}.
      * Result does not contains directory entries.
      */
-    public List<Path> allPaths() {
+    public List<Path> filesOnly() {
         return stream().filter(JkPathMatcher.noDirectory()).collect(Collectors.toList());
     }
 
     /**
      * Returns the file contained in this {@link JkFileTree}.
      */
-    public List<Path> allPathsIncludingDirectories() {
+    public List<Path> filesAndDirs() {
         return stream().collect(Collectors.toList());
     }
 
