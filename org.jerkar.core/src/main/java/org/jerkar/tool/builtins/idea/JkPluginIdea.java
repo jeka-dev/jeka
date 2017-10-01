@@ -4,6 +4,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jerkar.api.ide.idea.JkImlGenerator;
 import org.jerkar.api.project.java.JkJavaProject;
@@ -60,7 +61,7 @@ public final class JkPluginIdea implements JkPlugin {
         final Iterable<Path> folders = build.baseTree()
                 .include("**/" + JkConstants.BUILD_DEF_DIR)
                 .exclude("**/build/output/**")
-                .filesAndDirs();
+                .stream().collect(Collectors.toList());
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
             JkLog.startln("Generating iml file on " + projectFolder);

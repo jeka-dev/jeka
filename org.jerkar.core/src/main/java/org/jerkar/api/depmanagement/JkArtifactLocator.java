@@ -1,6 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +20,14 @@ public interface JkArtifactLocator {
      * to only returns the file reference and not generate it.
      */
     File artifactFile(JkArtifactFileId jkArtifactId);
+
+    /**
+     * Returns file system path where is supposed to be produced the specified artifact file id. This method is supposed
+     * to only returns the file reference and not generate it.
+     */
+    default Path artifactPath(JkArtifactFileId jkArtifactId) {
+        return artifactFile(jkArtifactId).toPath();
+    }
 
     /**
      * Returns the main artifact file id for this producer. By default it returns a artifact file id with no

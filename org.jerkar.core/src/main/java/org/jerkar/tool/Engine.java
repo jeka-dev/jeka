@@ -230,7 +230,7 @@ final class Engine {
 
     private void compileBuild(JkPathSequence buildPath) {
         baseBuildCompiler().withClasspath(buildPath).compile();
-        JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir.toFile());
+        JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir);
     }
 
     private void launch(JkBuild build, PluginDictionnary dictionnary, CommandLine commandLine) {

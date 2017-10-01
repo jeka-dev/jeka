@@ -117,7 +117,7 @@ public final class JkFileTreeSet {
     public List<Path> filesOnly() {
         final LinkedList<Path> result = new LinkedList<>();
         for (final JkFileTree dirView : this.jkFileTrees) {
-            if (dirView.rootDir().exists()) {
+            if (dirView.exists()) {
                 result.addAll(dirView.filesOnly());
             }
         }

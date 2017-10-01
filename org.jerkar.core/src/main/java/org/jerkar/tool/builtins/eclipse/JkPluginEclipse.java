@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jerkar.api.ide.eclipse.JkEclipseClasspathGenerator;
 import org.jerkar.api.ide.eclipse.JkEclipseProject;
@@ -85,7 +86,7 @@ public final class JkPluginEclipse implements JkPlugin {
         final Iterable<Path> folders = build.baseTree()
                 .include("**/" + JkConstants.BUILD_DEF_DIR)
                 .exclude("**/build/output/**")
-                .filesAndDirs();
+                .stream().collect(Collectors.toList());
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
             JkLog.startln("Generating Eclipse files on " + projectFolder);

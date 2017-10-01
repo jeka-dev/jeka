@@ -101,6 +101,10 @@ public final class JkFileTree  {
 
     // ----------------------- iterate over files ---------------------------------------------------
 
+    /**
+     * Returns a path stream on child path of this tree root and matching its filter. Returned paths are resolved against
+     * this tree root. This means if this tree root is absolute then streamed paths are absolute as well.
+     */
     public Stream<Path> stream(FileVisitOption ...options) {
         if(!exists()) {
             return new LinkedList<Path>().stream();
@@ -127,14 +131,6 @@ public final class JkFileTree  {
     public List<Path> filesOnly() {
         return stream().filter(JkPathMatcher.noDirectory()).collect(Collectors.toList());
     }
-
-    /**
-     * Returns the file contained in this {@link JkFileTree}.
-     */
-    public List<Path> filesAndDirs() {
-        return stream().collect(Collectors.toList());
-    }
-
 
 
     // ---------------------- Navigate -----------------------------------------------------------
@@ -173,13 +169,6 @@ public final class JkFileTree  {
             JkUtilsPath.createDirectories(destinationDir);
         }
         return JkUtilsPath.copyDirContent(root, destinationDir, StandardCopyOption.REPLACE_EXISTING);
-    }
-
-    /**
-     * Copies files contained in this {@link JkFileTree} to the specified directory.
-     */
-    public int copyTo(File destinationDir) {
-        return copyTo(destinationDir.toPath());
     }
 
     /**

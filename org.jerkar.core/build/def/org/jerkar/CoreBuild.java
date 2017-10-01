@@ -59,7 +59,7 @@ public class CoreBuild extends JkJavaProjectBuild {
         final List<Path> ivySourceLibs = baseTree().go("build/libs-sources").include("apache-ivy*.jar").filesOnly();
         distrib.go("libs-sources")
         .importFiles(ivySourceLibs)
-        .importFile(project.artifactFile(SOURCES_FILE_ID).toPath());
+        .importFile(project.artifactPath(SOURCES_FILE_ID));
         distrib.go("libs-javadoc").importFile(project.artifactFile(JAVADOC_FILE_ID).toPath());
         distrib.zip().with(JkZipper.JkCompressionLevel.BEST_COMPRESSION).to(distripZipFile);
     }
