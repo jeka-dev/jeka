@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -136,15 +135,7 @@ public final class JkFileTree  {
         return stream().collect(Collectors.toList());
     }
 
-    /**
-     * Returns the file contained in this {@link JkFileTree}.
-     */
-    public List<File> files(boolean includeFolders) {
-        if (!root.toFile().exists()) {
-            return Collections.emptyList();
-        }
-        return JkUtilsFile.filesOf(root.toFile(), filter.toFileFilter(root.toFile()), includeFolders);
-    }
+
 
     // ---------------------- Navigate -----------------------------------------------------------
 

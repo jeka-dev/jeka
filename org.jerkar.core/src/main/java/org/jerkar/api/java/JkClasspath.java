@@ -187,7 +187,7 @@ public final class JkClasspath implements Iterable<File> {
                     + " does not exist : classpath entry " + file.getAbsolutePath()
                     + " will be ignored.");
                 } else {
-                    result.addAll(JkFileTree.of(parent).include("*.jar").files(false));
+                    result.addAll(JkUtilsPath.filesOf( JkFileTree.of(parent).include("*.jar").filesOnly()));
                 }
             } else if (!file.exists()) {
                 JkLog.trace("File " + file.getAbsolutePath() + " does not exist : classpath entry "

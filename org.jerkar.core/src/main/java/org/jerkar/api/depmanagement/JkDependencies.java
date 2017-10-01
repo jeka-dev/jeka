@@ -104,13 +104,13 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         }
         return JkDependencies.builder().usingDefaultScopes(JkJavaDepScopes.COMPILE)
                 .usingDefaultScopes(JkJavaDepScopes.COMPILE)
-                .on(JkFileSystemDependency.of(libDir.include("*.jar", "compile/*.jar").files(false)))
+                .on(JkFileSystemDependency.ofPaths(libDir.include("*.jar", "compile/*.jar").filesOnly()))
                 .usingDefaultScopes(JkJavaDepScopes.PROVIDED)
-                .on(JkFileSystemDependency.of(libDir.include("provided/*.jar").files(false)))
+                .on(JkFileSystemDependency.ofPaths(libDir.include("provided/*.jar").filesOnly()))
                 .usingDefaultScopes(JkJavaDepScopes.RUNTIME)
-                .on(JkFileSystemDependency.of(libDir.include("runtime/*.jar").files(false)))
+                .on(JkFileSystemDependency.ofPaths(libDir.include("runtime/*.jar").filesOnly()))
                 .usingDefaultScopes(JkJavaDepScopes.TEST)
-                .on(JkFileSystemDependency.of(libDir.include("test/*.jar").files(false)))
+                .on(JkFileSystemDependency.ofPaths(libDir.include("test/*.jar").filesOnly()))
                 .build();
     }
 
