@@ -132,7 +132,7 @@ public class JkProjectSourceLayout {
             } else {
                 final String relPath = JkUtilsFile.getRelativePath(originalBase, fileTree.root().toFile());
                 final File root = new File(newBase, relPath);
-                final JkFileTree movedTree = JkFileTree.of(root).andFilter(fileTree.filter());
+                final JkFileTree movedTree = JkFileTree.of(root).andMatcher(fileTree.matcher());
                 result = result.and(movedTree);
             }
         }

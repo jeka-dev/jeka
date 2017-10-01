@@ -229,7 +229,7 @@ public class JkJavaProjectMaker {
 
     public JkJavaProjectMaker test() {
         JkLog.startln("Running unit tests");
-        if (this.project.getSourceLayout().tests().countFiles(false) == 0) {
+        if (this.project.getSourceLayout().tests().count(0, false) == 0) {
             JkLog.info("No unit test found in : " + this.project.getSourceLayout().tests());
             JkLog.done();
             return this;

@@ -344,11 +344,11 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private void writeIncludingExcluding(XMLStreamWriter writer, JkFileTree fileTree) throws XMLStreamException {
-        final String including = toPatternString(fileTree.filter().getIncludePatterns());
+        final String including = toPatternString(fileTree.matcher().getIncludePatterns());
         if (!JkUtilsString.isBlank(including)) {
             writer.writeAttribute("including", including);
         }
-        final String excluding = toPatternString(fileTree.filter().getExcludePatterns());
+        final String excluding = toPatternString(fileTree.matcher().getExcludePatterns());
         if (!JkUtilsString.isBlank(excluding)) {
             writer.writeAttribute("excluding", excluding);
         }

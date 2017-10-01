@@ -220,11 +220,18 @@ public final class JkUtilsPath {
     public static int copyDirContent(Path sourceDir, Path targetDir, CopyOption ... copyOptions)  {
         final CopyDirVisitor visitor = new CopyDirVisitor(sourceDir, targetDir, copyOptions);
         createDirectories(targetDir);
-        try {
-            Files.walkFileTree(sourceDir, visitor);
-        } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
-        }
+        walkFileTree(sourceDir, visitor);
+        return visitor.count;
+    }
+
+    /**
+     * Returns the file count contained in the specified directory (recursively) to concurrence to specified max count.
+     * If the effective count is greater than max count, returns <code>max + 1</code>.
+     * This method is designed to stop file traversal as soon as count is greater than max.
+     */
+    public static int childrenCount(Path dir, int max, boolean includeDirectories)  {
+        final CountFileVisitor visitor = new CountFileVisitor(dir, max, includeDirectories);
+        walkFileTree(dir, visitor);
         return visitor.count;
     }
 
@@ -254,6 +261,41 @@ public final class JkUtilsPath {
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
             Files.copy(file, toPath.resolve(fromPath.relativize(file)), options);
             count ++;
+            return FileVisitResult.CONTINUE;
+        }
+    }
+
+    private static class CountFileVisitor extends SimpleFileVisitor<Path> {
+
+        private final Path fromPath;
+        private final boolean includeDirectories;
+        private final int countMax;
+        private int count;
+
+
+        CountFileVisitor(Path fromPath, int countMax , boolean includeDirectories) {
+            this.fromPath = fromPath;
+            this.countMax = countMax;
+            this.includeDirectories = includeDirectories;
+        }
+
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+            if (includeDirectories && !fromPath.equals(dir)) {
+                count ++;
+            }
+            if (count > countMax) {
+                return FileVisitResult.TERMINATE;
+            }
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            count ++;
+            if (count > countMax) {
+                return FileVisitResult.TERMINATE;
+            }
             return FileVisitResult.CONTINUE;
         }
     }

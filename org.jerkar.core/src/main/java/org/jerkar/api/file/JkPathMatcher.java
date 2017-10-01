@@ -6,6 +6,8 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -56,6 +58,16 @@ public final class JkPathMatcher implements PathMatcher, Predicate<Path> {
     @Override
     public boolean matches(Path path) {
         return linked != null ? linked.matches(path) && matcher.matches(path) : matcher.matches(path);
+    }
+
+    public List<String> getIncludePatterns() {
+        final List<String> result = new LinkedList<>();
+        return result; // TODO
+    }
+
+    public List<String> getExcludePatterns() {
+        final List<String> result = new LinkedList<>();
+        return result; // TODO
     }
 
     public JkPathMatcher and(PathMatcher matcher) {

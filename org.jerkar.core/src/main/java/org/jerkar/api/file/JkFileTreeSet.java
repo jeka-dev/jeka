@@ -172,12 +172,12 @@ public final class JkFileTreeSet {
     }
 
     /**
-     * Returns the number of files contained in this {@link JkFileTreeSet}.
+     * See {@link JkFileTree#count(int, boolean)}
      */
-    public int countFiles(boolean includeFolder) {
+    public int count(int max, boolean includeFolder) {
         int result = 0;
         for (final JkFileTree dirView : jkFileTrees) {
-            result += dirView.fileCount(includeFolder);
+            result += dirView.count(max - result, includeFolder);
         }
         return result;
     }

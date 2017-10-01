@@ -8,6 +8,7 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -17,7 +18,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsThrowable;
@@ -53,18 +53,18 @@ public final class JkFileTree  {
 
     private final Path root;
 
-    private final JkPathFilter filter;
+    private final JkPathMatcher filter;
 
     private JkFileTree(Path rootDir) {
-        this(rootDir, JkPathFilter.ACCEPT_ALL);
+        this(rootDir, JkPathMatcher.of(path -> true));
     }
 
-    private JkFileTree(Path rootDir, JkPathFilter filter) {
+    private JkFileTree(Path rootDir, JkPathMatcher matcher) {
         JkUtilsAssert.notNull(rootDir, "Root dir can't be null.");
-        JkUtilsAssert.notNull(filter, "ilter can't be null.");
+        JkUtilsAssert.notNull(matcher, "Matchercan't be null");
         JkUtilsAssert.isTrue(!Files.exists(rootDir) || Files.isDirectory(rootDir), rootDir + " is not a directory.");
         this.root = rootDir;
-        this.filter = filter;
+        this.filter = matcher;
     }
 
     /**
@@ -74,11 +74,10 @@ public final class JkFileTree  {
         return root;
     }
 
-
     /**
      * Returns the filter defined on this {@link JkFileTree}, never <code>null</code>.
      */
-    public JkPathFilter filter() {
+    public JkPathMatcher matcher() {
         return filter;
     }
 
@@ -258,10 +257,17 @@ public final class JkFileTree  {
      * augmented with the specified {@link JkPathFilter}
      */
     public JkFileTree andFilter(JkPathFilter filter) {
-        if (this.filter == JkPathFilter.ACCEPT_ALL) {
-            return new JkFileTree(root, filter);
-        }
-        return new JkFileTree(root, this.filter.and(filter));
+        final PathMatcher pathMatcher = filter;
+        return new JkFileTree(root, this.filter.and(pathMatcher));
+    }
+
+
+    /**
+     * Creates a {@link JkFileTree} which is a copy of this {@link JkFileTree}
+     * augmented with the specified {@link JkPathFilter}
+     */
+    public JkFileTree andMatcher(PathMatcher pathMatcher) {
+        return new JkFileTree(root, this.filter.and(pathMatcher));
     }
 
     /**
@@ -286,10 +292,15 @@ public final class JkFileTree  {
     // ------------------------ Misc ---------------------------------------
 
     /**
-     * Returns the file count contained in this {@link JkFileTree}.
+     * Returns the file count contained in this {@link JkFileTree} to concurrence to specified max count.
+     * If the effective count is greater than max count, returns <code>max + 1</code>.
+     * This method is designed to stop file traversal as soon as count is greater than max.
      */
-    public int fileCount(boolean includeFolder) {
-        return JkUtilsFile.count(root.toFile(), filter.toFileFilter(root.toFile()), includeFolder);
+    public int count(int max, boolean includeDirectories) {
+        if (!exists()) {
+            return 0;
+        }
+        return JkUtilsPath.childrenCount(root, max, includeDirectories);
     }
 
 

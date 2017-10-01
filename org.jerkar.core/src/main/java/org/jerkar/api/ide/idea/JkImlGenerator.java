@@ -513,7 +513,7 @@ public final class JkImlGenerator {
         }
         Path folder = files.iterator().next().getParent();
         while (folder != null) {
-            if (JkFileTree.of(folder).include("*.iml").fileCount(false) == 1) {
+            if (JkFileTree.of(folder).include("*.iml").count(1, false) == 1) {
                 return folder;
             }
             if (JkUtilsIterable.listOf(projectDependencies).contains(folder)) {
