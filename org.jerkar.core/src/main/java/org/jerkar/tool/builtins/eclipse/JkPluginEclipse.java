@@ -72,11 +72,11 @@ public final class JkPluginEclipse implements JkPlugin {
             JkUtilsPath.write(dotClasspath, result.getBytes(Charset.forName("UTF-8")));
 
             if (!Files.exists(dotProject)) {
-                JkEclipseProject.ofJavaNature(build.baseTree().rootDir().getName()).writeTo(dotProject);
+                JkEclipseProject.ofJavaNature(build.baseTree().root().getFileName().toString()).writeTo(dotProject);
             }
         } else {
             if (!Files.exists(dotProject)) {
-                JkEclipseProject.ofSimpleNature(build.baseTree().rootDir().getName()).writeTo(dotProject);
+                JkEclipseProject.ofSimpleNature(build.baseTree().root().getFileName().toString()).writeTo(dotProject);
             }
         }
     }

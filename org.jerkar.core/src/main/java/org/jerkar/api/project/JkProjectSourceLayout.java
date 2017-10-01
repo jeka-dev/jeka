@@ -127,7 +127,7 @@ public class JkProjectSourceLayout {
     private static JkFileTreeSet move(JkFileTreeSet original, File originalBase, File newBase) {
         JkFileTreeSet result = JkFileTreeSet.empty();
         for (final JkFileTree fileTree : original.fileTrees()) {
-            if (!JkUtilsFile.isAncestor(originalBase, fileTree.rootDir())) {
+            if (!JkUtilsFile.isAncestor(originalBase, fileTree.root().toFile())) {
                 result = result.and(fileTree);
             } else {
                 final String relPath = JkUtilsFile.getRelativePath(originalBase, fileTree.rootDir());

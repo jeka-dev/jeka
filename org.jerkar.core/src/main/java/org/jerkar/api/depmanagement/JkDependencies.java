@@ -99,7 +99,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      */
     public static JkDependencies ofLocalScoped(File baseDir) {
         final JkFileTree libDir = JkFileTree.of(baseDir);
-        if (!libDir.rootDir().exists()) {
+        if (!libDir.exists()) {
             return JkDependencies.of();
         }
         return JkDependencies.builder().usingDefaultScopes(JkJavaDepScopes.COMPILE)

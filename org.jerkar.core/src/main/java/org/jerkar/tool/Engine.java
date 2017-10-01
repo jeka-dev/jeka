@@ -246,9 +246,9 @@ final class Engine {
 
     private static void runProject(JkBuild build, List<MethodInvocation> invokes,
             PluginDictionnary dictionnary) {
-        JkLog.infoHeaded("Executing build for project " + build.baseTree().rootDir().getName());
+        JkLog.infoHeaded("Executing build for project " + build.baseTree().root().getFileName().toString());
         JkLog.info("Build class : " + build.getClass().getName());
-        JkLog.info("Base dir : " + build.baseTree().rootDir().getPath());
+        JkLog.info("Base dir : " + build.baseDir());
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
         if (JkLog.verbose()) {
             JkInit.logProps("Field values", displayedOptions);

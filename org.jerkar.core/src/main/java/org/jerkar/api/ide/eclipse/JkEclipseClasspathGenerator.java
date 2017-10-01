@@ -298,7 +298,7 @@ public final class JkEclipseClasspathGenerator {
 
         // Test Sources
         for (final JkFileTree fileTree : sourceLayout.tests().and(sourceLayout.testResources()).fileTrees()) {
-            if (!fileTree.rootDir().exists()) {
+            if (!fileTree.exists()) {
                 continue;
             }
             final String path = JkUtilsFile.getRelativePath(sourceLayout.baseDir(), fileTree.rootDir()).replace(File.separator, "/");

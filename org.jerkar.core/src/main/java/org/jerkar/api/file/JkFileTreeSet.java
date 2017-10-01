@@ -132,7 +132,7 @@ public final class JkFileTreeSet {
     public List<Path> allRelativePaths() {
         final LinkedList<Path> result = new LinkedList<>();
         for (final JkFileTree dir : this.jkFileTrees) {
-            if (dir.rootDir().exists()) {
+            if (dir.exists()) {
                 result.addAll(dir.filesOnlyRelative());
             }
         }
@@ -153,8 +153,8 @@ public final class JkFileTreeSet {
      */
     public List<File> roots() {
         final List<File> result = new LinkedList<>();
-        for (final JkFileTree dirView : jkFileTrees) {
-            result.add(dirView.rootDir());
+        for (final JkFileTree tree : jkFileTrees) {
+            result.add(tree.root().toFile());
         }
         return result;
     }
@@ -163,8 +163,8 @@ public final class JkFileTreeSet {
      * Returns <code>true</code> if no tree of this set has an existing baseTree.
      */
     public boolean hasNoExistingRoot() {
-        for (final JkFileTree dirView : jkFileTrees) {
-            if (dirView.rootDir().exists()) {
+        for (final JkFileTree tree : jkFileTrees) {
+            if (tree.exists()) {
                 return false;
             }
         }
