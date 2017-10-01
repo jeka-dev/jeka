@@ -1,5 +1,8 @@
 package org.jerkar.distrib.all;
 
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+
 import org.jerkar.CoreBuild;
 import org.jerkar.api.depmanagement.JkArtifactFileId;
 import org.jerkar.api.file.JkFileTree;
@@ -8,7 +11,6 @@ import org.jerkar.api.file.JkZipper;
 import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
@@ -16,10 +18,6 @@ import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkImportBuild;
 import org.jerkar.tool.JkInit;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 
 class DistribAllBuild extends JkBuild {
 
@@ -78,7 +76,7 @@ class DistribAllBuild extends JkBuild {
     }
 
     @JkDoc("End to end method to construct a distrib.")
-    public void doDefault() {
+    public void doDefault() throws Exception {
         this.importedBuilds().all().forEach(JkBuild::clean);
         pluginsJacoco.core.project().makeArtifactFile(CoreBuild.DISTRIB_FILE_ID);
         pluginsJacoco.project().makeAllArtifactFiles();
@@ -89,13 +87,15 @@ class DistribAllBuild extends JkBuild {
         }
     }
 
-    public void testSamples() {
+    public void testSamples() throws Exception {
         JkLog.startHeaded("Testing Samples");
-        new SampleTester(this.baseTree()).doTest();
+        SampleTester sampleTester = new SampleTester(this.baseTree());
+        sampleTester.restoreEclipseClasspathFile = true;
+        sampleTester.doTest();
         JkLog.done();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         JkInit.instanceOf(DistribAllBuild.class, "-testSamples=true").doDefault();
     }
 

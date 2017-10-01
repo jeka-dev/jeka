@@ -12,7 +12,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -133,20 +132,6 @@ public final class JkFileTree  {
      */
     public List<Path> allPathsIncludingDirectories() {
         return stream().collect(Collectors.toList());
-    }
-
-
-
-    /**
-     * Returns path of each files file contained in this {@link JkFileTree}
-     * relative to its asScopedDependency.
-     */
-    public List<String> relativePaths() {
-        final List<String> pathes = new LinkedList<>();
-        for (final File file : this.files(false)) {
-            pathes.add(JkUtilsFile.getRelativePath(this.root.toFile(), file));
-        }
-        return pathes;
     }
 
     /**

@@ -115,9 +115,9 @@ final class BuildResolver {
         // If there is a build file
         if (this.hasBuildSource()) {
             final JkFileTree dir = JkFileTree.of(buildSourceDir);
-            for (final String path : dir.relativePaths()) {
-                if (path.endsWith(".java")) {
-                    final Class<?> clazz = classLoader.loadGivenClassSourcePath(path);
+            for (final Path path : dir.allRelativePaths()) {
+                if (path.toString().endsWith(".java")) {
+                    final Class<?> clazz = classLoader.loadGivenClassSourcePath(path.toString());
                     if (baseClass.isAssignableFrom(clazz)
                             && !Modifier.isAbstract(clazz.getModifiers())) {
                         JkBuild.baseDirContext(baseDir);
@@ -154,9 +154,9 @@ final class BuildResolver {
         // If there is a build source
         if (this.hasBuildSource()) {
             final JkFileTree dir = JkFileTree.of(buildSourceDir);
-            for (final String path : dir.relativePaths()) {
-                if (path.endsWith(".java")) {
-                    final Class<?> clazz = classLoader.loadGivenClassSourcePath(path);
+            for (final Path path : dir.allRelativePaths()) {
+                if (path.toString().endsWith(".java")) {
+                    final Class<?> clazz = classLoader.loadGivenClassSourcePath(path.toString());
                     if (baseClass.isAssignableFrom(clazz)
                             && !Modifier.isAbstract(clazz.getModifiers())) {
                         result.add(clazz);

@@ -8,7 +8,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import org.jerkar.api.utils.JkUtilsPathTest;
 import org.junit.Test;
@@ -39,8 +38,6 @@ public class JkFileTreeTest {
         Files.createDirectories(source.resolve("emptyfolder"));   // git won't copy empty dir
 
         final JkFileTree tree = JkFileTree.of(Paths.get(sampleFileUrl.toURI()).getParent().getParent());
-        final List<String> result = tree.relativePaths();
-        System.out.println(result);
         System.out.println(tree.allRelativePaths());
     }
 

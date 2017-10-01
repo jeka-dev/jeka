@@ -184,9 +184,10 @@ public class JkBuild {
         JkLog.done();
     }
 
-    /** Conventional method standing for the default operations to perform. */
+    /** Conventional method standing for the default operations to perform.
+     * @throws Exception */
     @JkDoc("Conventional method standing for the default operations to perform.")
-    public void doDefault() {
+    public void doDefault() throws Exception {
         clean();
     }
 

@@ -1,7 +1,11 @@
 package org.jerkar.distrib.all;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 
 import org.jerkar.api.file.JkFileTree;
@@ -21,6 +25,8 @@ class SampleTester {
     private final JkFileTree output;
 
     private Path launchScript;
+    
+    boolean restoreEclipseClasspathFile;
 
     SampleTester(JkFileTree buildDir) {
         super();
@@ -31,7 +37,7 @@ class SampleTester {
         launchScript = buildDir.root().resolve("build/output/dist/" + scriptName);
     }
 
-    void doTest() {
+    void doTest() throws Exception {
         testSamples("AClassicBuild");
         testSamples("AntStyleBuild");
         testSamples("MavenStyleBuild");
@@ -45,7 +51,15 @@ class SampleTester {
         testSamples("", "doPublish", "-repo.publish.url=ivy:" + file3.getAbsolutePath());
         // scaffoldAndEclipse();   // TODO
         testDependee("FatJarBuild");
+        Path classpathFile = sampleBaseDir.get(".classpath");
+        Path classpathFile2 = sampleBaseDir.get(".classpath2");
+        Files.copy(classpathFile, classpathFile2);
         testSamples("", "eclipse#generateAll");
+        if (restoreEclipseClasspathFile) {
+            Files.move(classpathFile2, classpathFile, StandardCopyOption.REPLACE_EXISTING);
+        } else {
+            Files.delete(classpathFile2);
+        }
         testDependee("NormalJarBuild");
         testFork();
     }
