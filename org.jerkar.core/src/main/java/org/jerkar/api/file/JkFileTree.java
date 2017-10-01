@@ -1,8 +1,8 @@
 package org.jerkar.api.file;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
@@ -243,8 +243,8 @@ public final class JkFileTree  {
      * Merges the content of all files to the specified output.
      */
     public JkFileTree mergeTo(OutputStream outputStream) {
-        for (final File file : this.files(false)) {
-            try (final FileInputStream fileInputStream = JkUtilsIO.inputStream(file)) {
+        for (final Path file : this.filesOnly()) {
+            try (final InputStream fileInputStream = Files.newInputStream(file)) {
                 JkUtilsIO.copy(fileInputStream, outputStream);
             } catch (final IOException e) {
                 throw JkUtilsThrowable.unchecked(e);

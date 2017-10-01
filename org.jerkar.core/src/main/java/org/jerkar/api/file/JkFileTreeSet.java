@@ -110,18 +110,6 @@ public final class JkFileTreeSet {
         return new JkFileTreeSet(list);
     }
 
-    /**
-     * Returns files contained in this {@link JkFileTreeSet} as a list of file.
-     */
-    public List<File> files(boolean includeFolders) {
-        final LinkedList<File> result = new LinkedList<>();
-        for (final JkFileTree dirView : this.jkFileTrees) {
-            if (dirView.rootDir().exists()) {
-                result.addAll(dirView.files(includeFolders));
-            }
-        }
-        return result;
-    }
 
     /**
      * Returns files contained in this {@link JkFileTreeSet} as a list of file.

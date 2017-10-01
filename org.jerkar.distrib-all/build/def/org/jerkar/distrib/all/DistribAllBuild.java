@@ -57,7 +57,7 @@ class DistribAllBuild extends JkBuild {
 
         JkLog.info("Create a fat source jar");
         Path fatSource = sourceDir.get("org.jerkar.core-all-sources.jar");
-        JkZipper.of().merge(sourceDir.include("**.jar", "**.zip").exclude(fatSource.getFileName().toString()).files(false)).to(fatSource);
+        JkZipper.of().mergePath(sourceDir.include("**.jar", "**.zip").exclude(fatSource.getFileName().toString()).filesOnly()).to(fatSource);
 
         if (javadoc) {
             JkLog.info("Create javadoc");
