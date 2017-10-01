@@ -136,13 +136,6 @@ public final class JkFileTree  {
     // ---------------------- Navigate -----------------------------------------------------------
 
     /**
-     * Returns the root directory.
-     */
-    public File rootDir() {
-        return root.toFile();
-    }
-
-    /**
      * Creates a {@link JkFileTree} having the default filter and the specified
      * relative path to this root as root directory.
      */
@@ -232,8 +225,7 @@ public final class JkFileTree  {
     }
 
     /**
-     * Deletes each and every files in this tree. Files excluded to this tree
-     * are not deleted.
+     * Deletes each and every files in this tree except the root and files not matching this tree filter.
      */
     public JkFileTree deleteAll() {
         JkUtilsPath.walkFileTree(root, new SimpleFileVisitor<Path>() {

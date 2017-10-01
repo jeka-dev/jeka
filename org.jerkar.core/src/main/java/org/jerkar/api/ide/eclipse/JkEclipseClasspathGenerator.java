@@ -318,10 +318,10 @@ public final class JkEclipseClasspathGenerator {
 
         // Sources
         for (final JkFileTree fileTree : sourceLayout.sources().and(sourceLayout.resources()).fileTrees()) {
-            if (!fileTree.rootDir().exists()) {
+            if (!fileTree.exists()) {
                 continue;
             }
-            final String path = relativePathIfPossible(sourceLayout.baseDir(), fileTree.rootDir());
+            final String path = relativePathIfPossible(sourceLayout.baseDir(), fileTree.root().toFile());
             if (sourcePaths.contains(path)) {
                 continue;
             }
