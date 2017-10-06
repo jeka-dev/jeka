@@ -52,7 +52,7 @@ public class AntStyleBuild extends JkBuild {
     public void jar() {
         compile();
         JkManifest.empty().addMainClass("org.jerkar.samples.RunClass").writeToStandardLocation(classDir);
-        JkFileTree.of(classDir).zip().to(jarFile);
+        JkFileTree.of(classDir).zipTo(jarFile);
     }
 
     public void run() {

@@ -3,7 +3,6 @@ package org.jerkar;
 import static org.jerkar.api.project.java.JkJavaProject.JAVADOC_FILE_ID;
 import static org.jerkar.api.project.java.JkJavaProject.SOURCES_FILE_ID;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -13,7 +12,6 @@ import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
 import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkPublishRepos;
 import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkZipper;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
@@ -49,19 +47,19 @@ public class CoreBuild extends JkJavaProjectBuild {
 
     private void doDistrib() {
         final JkJavaProject project = this.project();
-        final File distripZipFile = project.artifactFile(DISTRIB_FILE_ID);
         project.makeArtifactFilesIfNecessary(SOURCES_FILE_ID, JAVADOC_FILE_ID, project.mainArtifactFileId());
         final JkFileTree distrib = JkFileTree.of(distribFolder);
         distrib.importFile(baseDir().getParent().resolve("LICENSE"));
-        distrib.importDirContent(baseDir().resolve("src/main/dist"));
-        distrib.importDirContent(baseDir().resolve("src/main/java/META-INF/bin"));
+        distrib.importContent(baseDir().resolve("src/main/dist"));
+        distrib.importContent(baseDir().resolve("src/main/java/META-INF/bin"));
         distrib.importFile(project.artifactFile(project.mainArtifactFileId()).toPath());
         final List<Path> ivySourceLibs = baseTree().go("build/libs-sources").include("apache-ivy*.jar").filesOnly();
         distrib.go("libs-sources")
         .importFiles(ivySourceLibs)
         .importFile(project.artifactPath(SOURCES_FILE_ID));
         distrib.go("libs-javadoc").importFile(project.artifactFile(JAVADOC_FILE_ID).toPath());
-        distrib.zip().with(JkZipper.JkCompressionLevel.BEST_COMPRESSION).to(distripZipFile);
+        final Path distripZipFile = project.artifactFile(DISTRIB_FILE_ID).toPath();
+        distrib.zipTo(distripZipFile);
     }
 
     public static void main(String[] args) {

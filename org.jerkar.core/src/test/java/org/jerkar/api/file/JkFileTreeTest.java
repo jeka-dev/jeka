@@ -4,11 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.Desktop;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsPathTest;
 import org.junit.Test;
 
@@ -48,26 +50,27 @@ public class JkFileTreeTest {
     }
 
     @Test
-    public void testZipOf() throws Exception {
+    public void testZipTo() throws Exception {
+        Path zip = Files.createTempFile("filetree", ".zip");
+        Files.delete(zip);
+        JkFileTree.of(sampleDir()).zipTo(zip);
+        Path zipRoot = JkUtilsPath.zipRoot(zip);
+        assertTrue(Files.exists(zipRoot.resolve("subfolder/sample.txt")));
+        zipRoot.getFileSystem().close();
+
+        // Test overwrite
+        JkFileTree.of(sampleDir()).zipTo(zip);
+    }
+
+    private static Path sampleDir() throws Exception {
         final URL sampleFileUrl = JkUtilsPathTest.class
                 .getResource("samplefolder/subfolder/sample.txt");
         final Path source = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
         Files.createDirectories(source.resolve("emptyfolder"));   // git won't copy empty dir
-
-        final Path zipFile = Files.createTempFile("sample", ".zip");
-        Files.delete(zipFile);
-        final JkFileTree zipTree = JkFileTree.ofZip(zipFile);
-        zipTree.importDirContent(source);
-        zipTree.root().getFileSystem().close();
-
-
-        System.out.println(zipFile);
-        Desktop.getDesktop().open(zipFile.getParent().toFile());
-
-        final Path sampleTxt = JkFileTree.ofZip(zipFile).root().resolve("subfolder/sample.txt");
-        assertTrue(Files.exists(sampleTxt));
-
-
+        final Path sampleFile = Paths.get(sampleFileUrl.toURI());
+        assertTrue(Files.exists(sampleFile));
+        return sampleFile.getParent().getParent();
     }
+
 
 }

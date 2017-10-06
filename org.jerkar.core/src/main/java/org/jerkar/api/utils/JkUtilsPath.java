@@ -3,22 +3,17 @@ package org.jerkar.api.utils;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
-import java.nio.file.CopyOption;
-import java.nio.file.DirectoryStream;
-import java.nio.file.FileVisitOption;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipError;
 
 /**
  * Utility class providing convenient methods to deal with {@link java.nio.file.Path}.
@@ -28,6 +23,18 @@ public final class JkUtilsPath {
 
     private JkUtilsPath() {
         // Do nothing
+    }
+
+    public static Path zipRoot(Path zipFile) {
+        final URI uri = URI.create("jar:file:" + zipFile.toUri().getPath());
+        final Map<String, String> env = JkUtilsIterable.mapOf("create",  "true");
+        FileSystem fileSystem;
+        try {
+            fileSystem = FileSystems.newFileSystem(uri, env);
+        } catch (final IOException | ZipError e) {
+            throw JkUtilsThrowable.unchecked(e, "Error while opening zip archive " + zipFile);
+        }
+        return fileSystem.getPath("/");
     }
 
     public static List<File> filesOf(Iterable<Path> paths) {

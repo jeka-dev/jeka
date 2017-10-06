@@ -2,25 +2,17 @@ package org.jerkar.api.file;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitOption;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
@@ -53,23 +45,6 @@ public final class JkFileTree  {
         return new JkFileTree(rootDir);
     }
 
-    /**
-     * Creates a {@link JkFileTree} having the specified root directory.
-     */
-    public static JkFileTree ofZip(Path path) {
-        final URI uri = URI.create("jar:file:" + path.toUri().getPath());
-        final Map<String, String> env = JkUtilsIterable.mapOf("create",  "true");
-        FileSystem fileSystem;
-        try {
-            fileSystem = FileSystems.newFileSystem(uri, env);
-        } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
-        }
-        final Path zipPath = fileSystem.getPath("/");
-        return new JkFileTree(zipPath);
-    }
-
-
     private final Path root;
 
     private final JkPathMatcher filter;
@@ -100,6 +75,20 @@ public final class JkFileTree  {
         return filter;
     }
 
+    // ------------------------------- functional ---------------------------------
+
+    private final Predicate<Path> excludeRootFilter() {
+        return path -> !path.equals(root);
+    }
+
+    private final Consumer<Path> importer() {
+        return path -> JkUtilsPath.copy(path, root.resolve(path.getFileName()));
+    }
+
+    private final Function<Path, Path> relativePathFunction() {
+        return path ->  root.relativize(path);
+    }
+
     // ------------------------- check exists --------------------------------------
 
     /**
@@ -128,7 +117,8 @@ public final class JkFileTree  {
             return new LinkedList<Path>().stream();
         }
         final JkPathMatcher matcher = JkPathMatcher.of(filter);
-        return JkUtilsPath.walk(root, options).filter(path -> matcher.matches(root.relativize(path)));
+        return JkUtilsPath.walk(root, options)
+                .filter(path -> matcher.matches(root.relativize(path)));
     }
 
     /**
@@ -136,10 +126,7 @@ public final class JkFileTree  {
      * Result does not contains directory entries.
      */
     public List<Path> filesOnlyRelative() {
-        return stream()
-                .filter(JkPathMatcher.noDirectory())
-                .map(path -> root.relativize(path))
-                .collect(Collectors.toList());
+        return stream().filter(JkPathMatcher.noDirectory()).map(relativePathFunction()).collect(Collectors.toList());
     }
 
     /**
@@ -176,7 +163,7 @@ public final class JkFileTree  {
      * Copies the content of the specified directory at the root of this tree.
      * Specified directories to copy might not exist.
      */
-    public JkFileTree importDirContent(Path... dirsToCopy) {
+    public JkFileTree importContent(Path... dirsToCopy) {
         createIfNotExist();
         for (final Path dirToCopy : dirsToCopy) {
             if (!Files.exists(dirToCopy)) {
@@ -197,17 +184,6 @@ public final class JkFileTree  {
         }
         return this;
     }
-
-    /**
-     * Copies the specified files at the root of this tree
-     */
-    public JkFileTree importTree(JkFileTree tree) {
-        createIfNotExist();
-        tree.stream().forEach(path ->
-        JkUtilsPath.copy(path, root.resolve(tree.root.relativize(path).toString()), StandardCopyOption.REPLACE_EXISTING));
-        return this;
-    }
-
 
     /**
      * Copies the specified files at the root of this tree
@@ -252,10 +228,25 @@ public final class JkFileTree  {
     // ----------------------- Write out ----------------------------------------------------------------
 
     /**
-     * Returns a {@link JkZipper} of this {@link JkFileTree}.
+     * Zip the content of this tree to the specified destination file. If the specified destination file
+     * already exist, the content of this tree is appended to the existing archive, overriding existing file
      */
-    public JkZipper zip() {
-        return JkZipper.of(this);
+    public JkFileTree zipTo(Path destination) {
+        if (destination.getParent() != null) {
+            JkUtilsPath.createDirectories(destination.getParent());
+        }
+        Path zipRootEntry = JkUtilsPath.zipRoot(destination);
+        try (FileSystem fileSystem = zipRootEntry.getFileSystem()) {
+            this.stream().filter(excludeRootFilter()).forEach(path -> {
+                Path zipEntry = zipRootEntry.resolve(root.relativize(path).toString());
+                if (!Files.exists(zipEntry) || !Files.isDirectory(zipEntry)) {
+                    JkUtilsPath.copy(path, zipEntry, StandardCopyOption.REPLACE_EXISTING);
+                }
+            });
+        } catch (IOException e) {
+           JkUtilsThrowable.unchecked(e);
+        }
+        return this;
     }
 
     /**

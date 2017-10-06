@@ -127,7 +127,7 @@ public final class JkJavadocMaker {
         outputDir.mkdirs();
         execute(doclet, JkLog.infoStream(), warn, error, args);
         if (outputDir.exists() && zipFile != null) {
-            JkFileTree.of(outputDir).zip().to(zipFile);
+            JkFileTree.of(outputDir).zipTo(zipFile.toPath());
         }
         JkLog.done();
     }

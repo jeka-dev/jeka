@@ -1,6 +1,5 @@
 package org.jerkar.distrib.all;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
@@ -40,7 +39,7 @@ class DistribAllBuild extends JkBuild {
         JkLog.info("Copy core distribution locally.");
         CoreBuild core = pluginsJacoco.core; // The core project is got by transitivity
         Path distDir = this.outputDir().resolve("dist");
-        JkFileTree dist = JkFileTree.of(distDir).importDirContent(core.distribFolder);
+        JkFileTree dist = JkFileTree.of(distDir).importContent(core.distribFolder);
 
         JkLog.info("Add plugins to the distribution");
         JkFileTree ext = dist.go("libs/builtins").importFile(
@@ -55,12 +54,19 @@ class DistribAllBuild extends JkBuild {
         Path fat = dist.get(core.project().artifactFile(JkArtifactFileId.of("all", "jar")).getName());
         JkUtilsPath.copy(core.project().mainArtifactFile().toPath(), fat, StandardCopyOption.REPLACE_EXISTING);
         JkZipper.of().mergePath(ext.include("**/*.jar").filesOnly()).appendTo(fat);
-        //JkFileTree.ofZip(fat).importTree(ext.include("**/*.jar")).root().getFileSystem().close();;
+
+        //Path fat2 = Paths.get(fat.toString() + "-2.jar");
+        //JkUtilsPath.copy(core.project().mainArtifactFile().toPath(), fat2, StandardCopyOption.REPLACE_EXISTING);
+        //ext.include("**/*.jar").zipTo(fat2);
+
         
         JkLog.info("Create a fat source jar");
         Path fatSource = sourceDir.get("org.jerkar.core-all-sources.jar");
         JkZipper.of().mergePath(sourceDir.include("**.jar", "**.zip").exclude(fatSource.getFileName().toString()).filesOnly()).to(fatSource);
-        //JkFileTree.ofZip(fatSource).importTree(sourceDir.include("**.jar", "**.zip").exclude(fatSource.getFileName().toString())).root().getFileSystem().close();
+
+        //Path fatsource2 = Paths.get(fatSource.toString() + "-2.jar");
+        //sourceDir.include("**.jar", "**.zip").exclude(fatsource2.getFileName().toString()).zipTo(fatsource2);
+
         
         if (javadoc) {
             JkLog.info("Create javadoc");
@@ -73,7 +79,7 @@ class DistribAllBuild extends JkBuild {
         }
 
         JkLog.info("Pack all");
-        dist.zip().to(outputDir().resolve("jerkar-distrib.zip").toFile());
+        dist.zipTo(outputDir().resolve("jerkar-distrib.zip"));
 
         JkLog.done();
     }
