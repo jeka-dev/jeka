@@ -2,6 +2,7 @@ package org.jerkar.api.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -27,11 +28,13 @@ public final class JkUtilsPath {
 
     public static Path zipRoot(Path zipFile) {
         final URI uri = URI.create("jar:file:" + zipFile.toUri().getPath());
-        final Map<String, String> env = JkUtilsIterable.mapOf("create",  "true");
+        final Map<String, String> env = JkUtilsIterable.mapOf("create", "true");
         FileSystem fileSystem;
         try {
             fileSystem = FileSystems.newFileSystem(uri, env);
-        } catch (final IOException | ZipError e) {
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        } catch(ZipError e) {
             throw JkUtilsThrowable.unchecked(e, "Error while opening zip archive " + zipFile);
         }
         return fileSystem.getPath("/");
@@ -76,7 +79,7 @@ public final class JkUtilsPath {
         try {
             return Files.isSameFile(path1, path2);
         } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -87,7 +90,7 @@ public final class JkUtilsPath {
         try {
             return Files.createTempFile(prefix, extension, fileAttributes);
         } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -98,7 +101,7 @@ public final class JkUtilsPath {
         try {
             return Files.readAllLines(path);
         } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -109,7 +112,7 @@ public final class JkUtilsPath {
         try {
             Files.delete(path);
         } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -120,7 +123,7 @@ public final class JkUtilsPath {
         try {
             Files.createFile(path, attrs);
         } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -139,7 +142,7 @@ public final class JkUtilsPath {
             }
             Files.createFile(path, attrs);
         } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -150,7 +153,7 @@ public final class JkUtilsPath {
         try {
             Files.write(path, bytes, options);
         } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -158,7 +161,7 @@ public final class JkUtilsPath {
         try {
             return Files.newDirectoryStream(root, filter);
         } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -166,7 +169,7 @@ public final class JkUtilsPath {
         try (Stream stream = Files.list(path)) {
             return (List<Path>) stream.collect(Collectors.toList());
         } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -177,7 +180,7 @@ public final class JkUtilsPath {
         try {
             Files.createDirectories(path, attrs);
         } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -188,7 +191,7 @@ public final class JkUtilsPath {
         try {
             Files.copy(source, target, copyOptions);
         } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -207,7 +210,7 @@ public final class JkUtilsPath {
         try {
             return Files.walk(path, options);
         } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -215,7 +218,7 @@ public final class JkUtilsPath {
         try {
             Files.walkFileTree(path, visitor);
         } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
+            throw new UncheckedIOException(e);
         }
     }
 

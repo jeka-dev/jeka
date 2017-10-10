@@ -2,6 +2,7 @@ package org.jerkar.api.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.LinkedList;
@@ -14,7 +15,6 @@ import java.util.stream.Stream;
 
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.api.utils.JkUtilsThrowable;
 
 /**
  * Provides a view on files and sub-folders contained in a given directory. A
@@ -244,7 +244,7 @@ public final class JkFileTree  {
                 }
             });
         } catch (IOException e) {
-           JkUtilsThrowable.unchecked(e);
+           throw new UncheckedIOException(e);
         }
         return this;
     }
