@@ -1,6 +1,7 @@
 package org.jerkar.api.project.java;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -86,20 +87,20 @@ public class JkJavaProjectMaker {
         this.project = project;
         this.packager = JkJavaProjectPackager.of(project);
         this.cleaner = JkRunnables.of(
-                () -> JkUtilsFile.deleteDirContent(project.getOutLayout().outputDir()));
+                () -> JkFileTree.of(project.getOutLayout().outputPath()).deleteAll());
         this.resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().resources())
-                .and(project.getOutLayout().generatedResourceDir())
+                .and(project.getOutLayout().generatedResourceDir().toFile())
                 .and(project.getResourceInterpolators())
-                .generateTo(project.getOutLayout().classDir()));
+                .generateTo(project.getOutLayout().classDir().toFile()));
         this.compiler = JkRunnables.of(() -> {
             JkJavaCompiler comp = baseCompiler.andOptions(project.getCompileSpec().asOptions());
             comp = applyCompileSource(comp);
             comp.compile();
         });
         testResourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().testResources())
-                .and(project.getOutLayout().generatedTestResourceDir())
+                .and(project.getOutLayout().generatedTestResourceDir().toFile())
                 .and(project.getResourceInterpolators())
-                .generateTo(project.getOutLayout().testClassDir()));
+                .generateTo(project.getOutLayout().testClassDir().toFile()));
         testCompiler = JkRunnables.of(() -> {
             JkJavaCompiler comp = testBaseCompiler.andOptions(this.project.getCompileSpec().asOptions());
             comp = applyTestCompileSource(comp);
@@ -111,7 +112,7 @@ public class JkJavaProjectMaker {
             } else if (project.getArtifactName() != null) {
                 return project.getArtifactName();
             }
-            return project.baseDir().getName();
+            return project.baseDir().getFileName().toString();
         };
     }
 
@@ -214,10 +215,11 @@ public class JkJavaProjectMaker {
     }
 
     protected JkUnit juniter() {
-        final JkClasspath classpath = JkClasspath.of(project.getOutLayout().testClassDir(), project.getOutLayout().classDir())
+        final JkClasspath classpath = JkClasspath.ofPath(project.getOutLayout().testClassDir())
+                .and(project.getOutLayout().classDir())
                 .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
-        final File junitReport = new File(project.getOutLayout().testReportDir(), "junit");
-        return this.juniter.withClassesToTest(project.getOutLayout().testClassDir().toPath())
+        final Path junitReport = project.getOutLayout().testReportDir().resolve("junit");
+        return this.juniter.withClassesToTest(project.getOutLayout().testClassDir())
                 .withClasspath(classpath)
                 .withReportDir(junitReport);
     }
@@ -253,9 +255,9 @@ public class JkJavaProjectMaker {
     public final JkRunnables beforePackage = JkRunnables.of(() -> {
     });
 
-    public File makeArtifactFile(JkArtifactFileId artifactFileId) {
+    public Path makeArtifactFile(JkArtifactFileId artifactFileId) {
         if (artifactProducers.containsKey(artifactFileId)) {
-            JkLog.startln("Producing artifact file " + getArtifactFile(artifactFileId).getName());
+            JkLog.startln("Producing artifact file " + getArtifactFile(artifactFileId).getFileName());
             this.artifactProducers.get(artifactFileId).run();
             JkLog.done();
             return getArtifactFile(artifactFileId);
@@ -264,11 +266,11 @@ public class JkJavaProjectMaker {
         }
     }
 
-    File getArtifactFile(JkArtifactFileId artifactId) {
+    Path getArtifactFile(JkArtifactFileId artifactId) {
         final String namePart = artifactFileNameSupplier.get();
         final String classifier = artifactId.classifier() == null ? "" : "-" + artifactId.classifier();
         final String extension = artifactId.extension() == null ? "" : "." + artifactId.extension();
-        return new File(project.getOutLayout().outputDir(), namePart + classifier + extension);
+        return project.getOutLayout().outputPath().resolve(namePart + classifier + extension);
     }
 
     protected String fileName(JkVersionedModule versionedModule) {
@@ -306,11 +308,11 @@ public class JkJavaProjectMaker {
     }
 
     public void checksum(String ...algorithms) {
-        this.project.allArtifactFiles().forEach((file) -> JkCheckSumer.of(file.toPath()).makeSumFiles(file.toPath(), algorithms));
+        this.project.allArtifactPaths().forEach((file) -> JkCheckSumer.of(file).makeSumFiles(file, algorithms));
     }
 
     public void signArtifactFiles(JkPgp pgp) {
-        this.project.allArtifactFiles().forEach((file) -> pgp.sign(file));
+        this.project.allArtifactPaths().forEach((file) -> pgp.sign(file.toFile()));
     }
 
     // ----------------------- publish
@@ -327,7 +329,7 @@ public class JkJavaProjectMaker {
     }
 
     public JkJavaProjectMaker publishMaven() {
-        JkPublisher.of(this.publishRepos, project.getOutLayout().outputDir())
+        JkPublisher.of(this.publishRepos, project.getOutLayout().outputPath())
         .publishMaven(project.getVersionedModule(), project, artifactFileIdsToNotPublish,
                 this.getDefaultedDependencies(), project.getMavenPublicationInfo());
         return this;
@@ -335,14 +337,14 @@ public class JkJavaProjectMaker {
 
     public JkJavaProjectMaker publishIvy() {
         final JkDependencies dependencies = getDefaultedDependencies();
-        final JkIvyPublication publication = JkIvyPublication.of(project.mainArtifactFile(), JkJavaDepScopes.COMPILE)
-                .andOptional(project.artifactFile(JkJavaProject.SOURCES_FILE_ID), JkJavaDepScopes.SOURCES)
-                .andOptional(project.artifactFile(JkJavaProject.JAVADOC_FILE_ID), JkJavaDepScopes.JAVADOC)
-                .andOptional(project.artifactFile(JkJavaProject.TEST_FILE_ID), JkJavaDepScopes.TEST)
-                .andOptional(project.artifactFile(JkJavaProject.TEST_SOURCE_FILE_ID), JkJavaDepScopes.SOURCES);
+        final JkIvyPublication publication = JkIvyPublication.of(project.mainArtifactPath(), JkJavaDepScopes.COMPILE)
+                .andOptional(project.artifactPath(JkJavaProject.SOURCES_FILE_ID), JkJavaDepScopes.SOURCES)
+                .andOptional(project.artifactPath(JkJavaProject.JAVADOC_FILE_ID), JkJavaDepScopes.JAVADOC)
+                .andOptional(project.artifactPath(JkJavaProject.TEST_FILE_ID), JkJavaDepScopes.TEST)
+                .andOptional(project.artifactPath(JkJavaProject.TEST_SOURCE_FILE_ID), JkJavaDepScopes.SOURCES);
         final JkVersionProvider resolvedVersions = this.dependencyResolver
                 .resolve(dependencies, dependencies.involvedScopes()).resolvedVersionProvider();
-        JkPublisher.of(this.publishRepos, project.getOutLayout().outputDir())
+        JkPublisher.of(this.publishRepos, project.getOutLayout().outputPath())
         .publishIvy(project.getVersionedModule(), publication, dependencies,
                 JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
         return this;
@@ -350,12 +352,12 @@ public class JkJavaProjectMaker {
 
     // ---------------------- from scratch
 
-    public File makeBinJar() {
+    public Path makeBinJar() {
         compileAndTestIfNeeded();
         return packager.mainJar();
     }
 
-    public File makeSourceJar() {
+    public Path makeSourceJar() {
         if (!status.sourceGenerated) {
             this.sourceGenerator.run();
             status.sourceGenerated = true;
@@ -363,14 +365,14 @@ public class JkJavaProjectMaker {
         return packager.sourceJar();
     }
 
-    public File makeJavadocJar() {
+    public Path makeJavadocJar() {
         if (!status.javadocGenerated) {
             generateJavadoc();
         }
         return packager.javadocJar();
     }
 
-    public File makeTestJar() {
+    public Path makeTestJar() {
         compileAndTestIfNeeded();
         if (!status.unitTestDone) {
             test();

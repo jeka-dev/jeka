@@ -49,7 +49,7 @@ class ArtifactProducerDependency extends JkComputedDependency  {
     private static List<File> jars(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
         JkPathSequence result = JkPathSequence.ofPath();
         for (final JkArtifactFileId artifactFileId : artifactIds) {
-            result = result.and( producer.artifactFile(artifactFileId));
+            result = result.and( producer.artifactPath(artifactFileId));
         }
         return result.withoutDuplicates().entries();
     }
@@ -64,7 +64,7 @@ class ArtifactProducerDependency extends JkComputedDependency  {
 
     private static File baseDir(JkArtifactProducer artifactProducer) {
         if (artifactProducer instanceof JkFileSystemLocalizable) {
-            return ((JkFileSystemLocalizable) artifactProducer).baseDir();
+            return ((JkFileSystemLocalizable) artifactProducer).baseDir().toFile();
         }
         return null;
     }

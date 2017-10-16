@@ -42,15 +42,16 @@ class DistribAllBuild extends JkBuild {
 
         JkLog.info("Add plugins to the distribution");
         JkFileTree ext = dist.go("libs/builtins").importFile(
-                pluginsSonar.project().mainArtifactFile().toPath(),
-                pluginsJacoco.project().mainArtifactFile().toPath());
+                pluginsSonar.project().mainArtifactPath(),
+                pluginsJacoco.project().mainArtifactPath());
         JkFileTree sourceDir = dist.go("libs-sources");
         sourceDir.importFile(
-                pluginsSonar.project().artifactFile(JkJavaProject.SOURCES_FILE_ID).toPath(),
-                pluginsJacoco.project().artifactFile(JkJavaProject.SOURCES_FILE_ID).toPath());
+                pluginsSonar.project().artifactPath(JkJavaProject.SOURCES_FILE_ID),
+                pluginsJacoco.project().artifactPath(JkJavaProject.SOURCES_FILE_ID));
 
         JkLog.info("Add plugins to the fat jar");
-        Path fat = dist.get(core.project().artifactFile(JkArtifactFileId.of("all", "jar")).getName());
+        Path fat = dist.get(core.project().artifactPath(JkArtifactFileId.of("all", "jar"))
+                .getFileName().toString());
         Files.copy(core.project().mainArtifactPath(), fat, StandardCopyOption.REPLACE_EXISTING);
         ext.include("**/*.jar").stream().map(path -> JkFileTree.ofZip(path)).forEach(tree -> tree.zipTo(fat));
 

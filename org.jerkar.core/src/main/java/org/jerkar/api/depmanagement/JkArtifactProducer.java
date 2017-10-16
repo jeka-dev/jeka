@@ -1,6 +1,8 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 import org.jerkar.api.file.JkPathSequence;
@@ -26,9 +28,9 @@ public interface JkArtifactProducer extends JkArtifactLocator {
     /**
      * Short hand to produce the main artifact file and returns the result.
      */
-    default File makeMainJar() {
+    default Path makeMainJar() {
         this.makeArtifactFile(mainArtifactFileId());
-        return artifactFile(mainArtifactFileId());
+        return artifactPath(mainArtifactFileId());
     }
 
 
@@ -60,8 +62,8 @@ public interface JkArtifactProducer extends JkArtifactLocator {
      */
     default void makeArtifactFilesIfNecessary(Iterable<JkArtifactFileId> artifactFileIds) {
         for (final JkArtifactFileId artifactFileId : artifactFileIds) {
-            final File file = artifactFile(artifactFileId);
-            if (!file.exists()) {
+            final Path path = artifactPath(artifactFileId);
+            if (!Files.exists(path)) {
                 makeArtifactFile(artifactFileId);
             }
         }

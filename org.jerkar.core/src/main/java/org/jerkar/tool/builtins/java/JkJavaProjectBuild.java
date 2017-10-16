@@ -128,7 +128,7 @@ public abstract class JkJavaProjectBuild extends JkBuild {
 
     @Override
     public JkFileTree ouputTree() {
-        return JkFileTree.of(this.project().getOutLayout().outputDir());
+        return JkFileTree.of(this.project().getOutLayout().outputPath());
     }
 
     @Override

@@ -1,7 +1,8 @@
 package org.jerkar.plugins.jacoco;
 
-import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -17,15 +18,15 @@ import org.jerkar.api.utils.JkUtilsIO;
  */
 public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
 
-    private final File agent;
+    private final Path agent;
 
     private final boolean enabled;
 
-    private final File destFile;
+    private final Path destFile;
 
     private final List<String> options;
 
-    private JkocoJunitEnhancer(File agent, boolean enabled, File destFile) {
+    private JkocoJunitEnhancer(Path agent, boolean enabled, Path destFile) {
         super();
         this.agent = agent;
         this.enabled = enabled;
@@ -33,14 +34,14 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
         this.options = new LinkedList<>();
     }
 
-    public static JkocoJunitEnhancer of(File destFile) {
+    public static JkocoJunitEnhancer of(Path destFile) {
         final URL url = JkPluginJacoco.class.getResource("jacocoagent.jar");
-        final File file = JkUtilsIO.copyUrlContentToCacheFile(url, JkLog.infoStreamIfVerbose(),
-                JkClassLoader.urlCacheDir());
+        final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, JkLog.infoStreamIfVerbose(),
+                JkClassLoader.urlCacheDir()).toPath();
         return new JkocoJunitEnhancer(file, true, destFile);
     }
 
-    public JkocoJunitEnhancer withAgent(File jacocoagent) {
+    public JkocoJunitEnhancer withAgent(Path jacocoagent) {
         return new JkocoJunitEnhancer(jacocoagent, enabled, destFile);
     }
 
@@ -55,17 +56,17 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
         }
         if (jkUnit.isForked()) {
             JkJavaProcess process = jkUnit.forkedProcess();
-            process = process.andAgent(destFile, options());
+            process = process.andAgent(destFile.toFile(), options());
             return jkUnit.forked(process);
         }
-        final JkJavaProcess process = JkJavaProcess.of().andAgent(agent, options());
+        final JkJavaProcess process = JkJavaProcess.of().andAgent(agent.toFile(), options());
         return jkUnit.forked(process).withPostAction(new Reporter());
     }
 
     private String options() {
         final StringBuilder builder = new StringBuilder();
-        builder.append("destfile=").append(destFile.getAbsolutePath());
-        if (destFile.exists()) {
+        builder.append("destfile=").append(destFile.toAbsolutePath());
+        if (Files.exists(destFile)) {
             builder.append(",append=true");
         }
         for (final String option : options) {
@@ -79,7 +80,7 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
         @Override
         public void run() {
             if (enabled) {
-                JkLog.info("Jacoco report created at " + destFile.getAbsolutePath());
+                JkLog.info("Jacoco report created at " + destFile.toAbsolutePath());
             }
 
         }

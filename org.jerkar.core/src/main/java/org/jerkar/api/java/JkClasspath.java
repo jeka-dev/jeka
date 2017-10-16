@@ -59,8 +59,24 @@ public final class JkClasspath implements Iterable<File> {
     /**
      * Creates a <code>JkClasspath</code> form specified file entries.
      */
-    public static JkClasspath ofPath(Iterable<Path> entries) {
+    public static JkClasspath ofPaths(Iterable<Path> entries) {
         return new JkClasspath(JkUtilsPath.toFiles(entries));
+    }
+
+
+    public static JkClasspath ofPath(Path path) {
+        return new JkClasspath(JkUtilsIterable.listOf(path.toFile()));
+    }
+
+
+    /**
+     * Convenient method to create a <code>JkClassLoader</code> from a given
+     * entry plus an sequence of other ones. This scheme is often used for
+     * launching some test suites.
+     */
+    @Deprecated
+    public static JkClasspath of(File entry, Iterable<File> otherEntries) {
+        return JkClasspath.of(entry).and(otherEntries);
     }
 
     /**
@@ -68,8 +84,9 @@ public final class JkClasspath implements Iterable<File> {
      * entry plus an sequence of other ones. This scheme is often used for
      * launching some test suites.
      */
-    public static JkClasspath of(File entry, Iterable<File> otherEntries) {
-        return JkClasspath.of(entry).and(otherEntries);
+    @Deprecated
+    public static JkClasspath of(Path entry, Iterable<Path> otherEntries) {
+        return JkClasspath.ofPath(entry).andHeadPath(otherEntries);
     }
 
     /**
@@ -159,6 +176,7 @@ public final class JkClasspath implements Iterable<File> {
     public JkClasspath and(File... files) {
         return and(JkClasspath.of(files));
     }
+
 
     public JkClasspath and(Path... files) {
         final List<Path> paths = Arrays.asList(files);

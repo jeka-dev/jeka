@@ -113,11 +113,22 @@ public final class JkUtilsPath {
     }
 
     /**
-     * Delegates to Files{@link #deleteFile(Path)}
+     * Delegates to Files{@link #delete(Path)}
      */
     public static void deleteFile(Path path) {
         try {
             Files.delete(path);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Delegates to Files{@link #deleteIfExists(Path)}
+     */
+    public static void deleteIfExists(Path path) {
+        try {
+            Files.deleteIfExists(path);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }

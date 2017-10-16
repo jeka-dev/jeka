@@ -1,9 +1,11 @@
 package org.jerkar.api.project.java;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkPopularModules;
+import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -14,25 +16,25 @@ public class JkJavaProjectTest {
 
     @Test
     public void generate() throws Exception {
-        final File top = unzipToDir("sample-multi-scriptless.zip");
+        final Path top = unzipToDir("sample-multi-scriptless.zip").toPath();
         JkLog.silent(false);
 
         JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
                 .withResources("res").withTestResources("res-test");
 
-        File base = new File(top, "base");
+        Path base = top.resolve("base");
         JkJavaProject baseProject = new JkJavaProject(base);
         baseProject.setSourceLayout(sourceLayout);
         baseProject.setDependencies(JkDependencies.builder().on(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3").build());
 
-        final File core = new File(top, "core");
+        final Path core = top.resolve("core");
         final JkJavaProject coreProject = new JkJavaProject(core);
         JkDependencies coreDeps = JkDependencies.of(baseProject);
         coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
         coreProject.maker().setJuniter(
                 coreProject.maker().getJuniter().forked(true));
 
-        final File desktop = new File(top, "desktop");
+        final Path desktop = top.resolve("desktop");
         final JkJavaProject desktopProject = new JkJavaProject(desktop);
         desktopProject.setSourceLayout(sourceLayout);
         final JkDependencies deps = JkDependencies.builder().on(coreProject).build();
@@ -42,13 +44,7 @@ public class JkJavaProjectTest {
 
 
         // Desktop.getDesktop().open(desktop);
-
-
-        try {
-            JkUtilsFile.deleteDir(top);
-        } catch (RuntimeException e) {
-            // do nothing
-        }
+        JkFileTree.of(top).deleteAll();
     }
 
     private static File unzipToDir(String zipName) {

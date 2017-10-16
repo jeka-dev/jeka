@@ -2,6 +2,7 @@ package org.jerkar.api.java;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
@@ -153,6 +154,17 @@ public final class JkJavaCompiler {
         }
         return withOption(OUTPUT_DIR_OPTS, outputDir.getAbsolutePath());
     }
+
+    /**
+     * Creates a copy of this compiler but outputting in the specified directory.
+     */
+    public JkJavaCompiler withOutputDir(Path outputDir) {
+        if (Files.exists(outputDir) && !Files.isDirectory(outputDir)) {
+            throw new IllegalArgumentException(outputDir.toAbsolutePath() + " is not a directory.");
+        }
+        return withOption(OUTPUT_DIR_OPTS, outputDir.toAbsolutePath().toString());
+    }
+
 
     /**
      * Creates a copy of this {@link JkJavaCompiler} but with the specified

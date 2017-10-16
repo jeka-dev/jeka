@@ -1,6 +1,5 @@
 package org.jerkar.api.project.java;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,7 +63,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     public static final JkArtifactFileId TEST_SOURCE_FILE_ID = JkArtifactFileId.of("test-sources", "jar");
 
-    private final File baseDir;
+    private final Path baseDir;
 
     // A project has either a name either a versioned module.
     private String artifactName;
@@ -91,18 +90,17 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     private final JkJavaProjectMaker maker = new JkJavaProjectMaker(this);
 
-    public JkJavaProject(File baseDir) {
+    public JkJavaProject(Path baseDir) {
+        baseDir = baseDir.toAbsolutePath().normalize();
         this.baseDir = baseDir;
-        this.artifactName = this.baseDir.getName();
-        this.sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir.toPath());
-        this.outLayout = JkProjectOutLayout.classicJava().withOutputDir(new File(baseDir, "build/output"));
-        this.dependencies = JkDependencies.ofLocalScoped(new File(baseDir, "build/libs"));
+        this.artifactName = this.baseDir.getFileName().toString();
+        this.sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir);
+        this.outLayout = JkProjectOutLayout.classicJava().withOutputDir(baseDir.resolve("build/output"));
+        this.dependencies = JkDependencies.ofLocalScoped(baseDir.resolve("build/libs").toFile());
         this.addDefaultArtifactFiles();
     }
 
-    public JkJavaProject(Path baseDir) {
-        this(baseDir.toAbsolutePath().normalize().toFile());
-    }
+
 
 
     // ----------- artifact management --------------------------------------
@@ -145,7 +143,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
     }
 
     @Override
-    public File artifactFile(JkArtifactFileId artifactId) {
+    public Path artifactPath(JkArtifactFileId artifactId) {
         return maker.getArtifactFile(artifactId);
     }
 
@@ -171,20 +169,15 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     @Override
     public String toString() {
-        return "project " + this.baseDir.getName();
+        return "project " + this.baseDir.getFileName();
     }
 
     // ---------------------------- Getters / setters --------------------------------------------
 
     @Override
-    public File baseDir() {
+    public Path baseDir() {
         return this.baseDir;
     }
-
-    public Path basePath() {
-        return this.baseDir.toPath();
-    }
-
 
     @Override
     public JkProjectSourceLayout getSourceLayout() {
@@ -214,15 +207,15 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
     }
 
     public JkJavaProject setSourceLayout(JkProjectSourceLayout sourceLayout) {
-        this.sourceLayout = sourceLayout.withBaseDir(this.baseDir.toPath());
+        this.sourceLayout = sourceLayout.withBaseDir(this.baseDir);
         return this;
     }
 
     public JkJavaProject setOutLayout(JkProjectOutLayout outLayout) {
-        if (outLayout.outputDir().isAbsolute()) {
+        if (outLayout.outputPath().isAbsolute()) {
             this.outLayout = outLayout;
         } else {
-            this.outLayout = outLayout.withOutputDir(new File(this.baseDir, outLayout.outputDir().getPath()));
+            this.outLayout = outLayout.withOutputDir(this.baseDir.resolve(outLayout.outputPath()));
         }
         return this;
     }

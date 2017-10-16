@@ -1,6 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Set;
 
@@ -54,10 +55,21 @@ public final class JkPublisher {
     }
 
     /**
+     * Creates a {@link JkPublisher} with the specified {@link JkPublishRepo}
+     * and output directory. The output directory is the place where pom.xml and
+     * ivy.xml are generated.
+     */
+    public static JkPublisher of(JkPublishRepos publishRepos, Path outDir) {
+        final InternalPublisher ivyPublisher = IVY_CLASS_LOADER.transClassloaderProxy(
+                InternalPublisher.class, IVY_PUB_CLASS, "of", publishRepos, outDir.toFile());
+        return new JkPublisher(ivyPublisher);
+    }
+
+    /**
      * Creates a {@link JkPublisher} with the specified {@link JkPublishRepo}.
      */
     public static JkPublisher of(JkPublishRepos publishRepos) {
-        return of(publishRepos, null);
+        return of(publishRepos, (Path) null);
     }
 
     /**

@@ -15,19 +15,12 @@ import org.jerkar.api.utils.JkUtilsString;
  */
 public interface JkArtifactLocator {
 
-    /**
-     * Returns the file on file system that stands for the specified artifact file id. This method is supposed
-     * to only returns the file reference and not generate it.
-     */
-    File artifactFile(JkArtifactFileId jkArtifactId);
 
     /**
      * Returns file system path where is supposed to be produced the specified artifact file id. This method is supposed
      * to only returns the file reference and not generate it.
      */
-    default Path artifactPath(JkArtifactFileId jkArtifactId) {
-        return artifactFile(jkArtifactId).toPath();
-    }
+    Path artifactPath(JkArtifactFileId jkArtifactId);
 
     /**
      * Returns the main artifact file id for this producer. By default it returns a artifact file id with no
@@ -46,26 +39,19 @@ public interface JkArtifactLocator {
     }
 
     /**
-     * Returns the main artifact file.
-     */
-    default File mainArtifactFile() {
-        return artifactFile(mainArtifactFileId());
-    }
-
-    /**
      * Returns the main artifact path.
      */
     default Path mainArtifactPath() {
-        return mainArtifactFile().toPath();
+        return artifactPath(mainArtifactFileId());
     }
 
     /**
      * Returns all artifact files likely to be produced by this artifact producer.
      */
-    default List<File> allArtifactFiles() {
-        final List<File> result = new LinkedList<>();
-        result.add(artifactFile(mainArtifactFileId()));
-        artifactFileIds().forEach(artifactFileId -> result.add(artifactFile(artifactFileId)));
+    default List<Path> allArtifactPaths() {
+        final List<Path> result = new LinkedList<>();
+        result.add(artifactPath(mainArtifactFileId()));
+        artifactFileIds().forEach(artifactFileId -> result.add(artifactPath(artifactFileId)));
         return result;
     }
 

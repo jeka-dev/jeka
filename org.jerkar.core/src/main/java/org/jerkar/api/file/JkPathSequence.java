@@ -39,6 +39,7 @@ public final class JkPathSequence implements Iterable<File> {
         return new JkPathSequence(JkUtilsPath.toPaths(entries));
     }
 
+
     /**
      * Creates a path to a sequence of files.
      */
@@ -150,6 +151,14 @@ public final class JkPathSequence implements Iterable<File> {
     public JkPathSequence andHead(File... entries) {
         return andHead(JkPathSequence.of(entries));
     }
+
+    /**
+     * @see #andHead(Iterable)
+     */
+    public JkPathSequence andHead(Path... entries) {
+        return andHead(JkPathSequence.ofPath(entries));
+    }
+
 
     /**
      * Returns a <code>JkPathSequence</code> made of, in the order, the specified

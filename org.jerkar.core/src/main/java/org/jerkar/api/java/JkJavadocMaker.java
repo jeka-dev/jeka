@@ -65,6 +65,15 @@ public final class JkJavadocMaker {
     }
 
     /**
+     * Creates a {@link JkJavadocMaker} from the specified sources. The result will be outputed in
+     * the specified directory.
+     */
+    public static JkJavadocMaker of(JkFileTreeSet sources, Path outputDir) {
+        return new JkJavadocMaker(sources, null, null, new LinkedList<>(), outputDir.toFile(), null);
+    }
+
+
+    /**
      * Returns the zip file containing all the produced Javadoc.
      */
     public File zipFile() {

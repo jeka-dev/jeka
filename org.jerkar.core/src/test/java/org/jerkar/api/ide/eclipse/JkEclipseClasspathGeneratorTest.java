@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -11,6 +14,7 @@ import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.depmanagement.JkScopedDependency;
+import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
@@ -22,13 +26,13 @@ public class JkEclipseClasspathGeneratorTest {
 
     @Test
     public void generate() throws Exception {
-        final File top = unzipToDir("sample-multi-scriptless.zip");
+        final Path top = unzipToDir("sample-multi-scriptless.zip").toPath();
         // JkLog.silent(true);
 
         final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
                 .withResources("res").withTestResources("res-test");
 
-        final File base = new File(top, "base");
+        final Path base = top.resolve("base");
         final JkJavaProject baseProject = new JkJavaProject(base);
         baseProject.setSourceLayout(sourceLayout);
         baseProject.setDependencies(JkDependencies.builder().on(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3").build());
@@ -40,7 +44,7 @@ public class JkEclipseClasspathGeneratorTest {
         System.out.println("\nbase .classpath");
         System.out.println(baseClasspath);
 
-        final File core = new File(top, "core");
+        final Path core = top.resolve("core");
         final JkJavaProject coreProject = new JkJavaProject(core);
         final JkDependencies coreDeps = JkDependencies.of(baseProject);
         coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
@@ -52,10 +56,10 @@ public class JkEclipseClasspathGeneratorTest {
         System.out.println("\ncore .classpath");
         System.out.println(coreClasspath);
 
-        final File desktop = new File(top, "desktop");
+        final Path desktop = top.resolve("desktop");
         final JkDependencies deps = JkDependencies.of(coreProject);
         final JkEclipseClasspathGenerator desktopGenerator =
-                new JkEclipseClasspathGenerator(sourceLayout.withBaseDir(desktop.toPath()), deps,
+                new JkEclipseClasspathGenerator(sourceLayout.withBaseDir(desktop), deps,
                         coreProject.maker().getDependencyResolver(), JkJavaVersion.V8);
         final String result2 = desktopGenerator.generate();
 
@@ -72,8 +76,10 @@ public class JkEclipseClasspathGeneratorTest {
         final JkEclipseClasspathApplier classpathApplier = new JkEclipseClasspathApplier(false);
 
         final JkJavaProject baseProject2 = new JkJavaProject(base);
-        JkUtilsFile.writeString(new File(base, ".classpath"), baseClasspath, false);
-        JkEclipseProject.ofJavaNature("base").writeTo(new File(base, ".project"));
+        Files.deleteIfExists(base.resolve(".classpath"));
+        Files.write(base.resolve(".classpath"), baseClasspath.getBytes(Charset.forName("UTF-8")));
+        //JkUtilsFile.writeString(new File(base, ".classpath"), baseClasspath, false);
+        JkEclipseProject.ofJavaNature("base").writeTo(base.resolve(".project"));
         classpathApplier.apply(baseProject2);
         final JkProjectSourceLayout base2Layout = baseProject2.getSourceLayout();
         final JkProjectSourceLayout baseLayout = baseProject.getSourceLayout();
@@ -87,15 +93,17 @@ public class JkEclipseClasspathGeneratorTest {
         assertEquals(5, baseProject2.getDependencies().list().size());
 
         final JkJavaProject coreProject2 = new JkJavaProject(core);
-        JkUtilsFile.writeString(new File(core, ".classpath"), coreClasspath, false);
-        JkEclipseProject.ofJavaNature("core").writeTo(new File(core, ".project"));
+
+        Files.write(core.resolve(".classpath"), coreClasspath.getBytes(Charset.forName("utf-8")));
+        //JkUtilsFile.writeString(new File(core, ".classpath"), coreClasspath, false);
+        JkEclipseProject.ofJavaNature("core").writeTo(core.resolve(".project"));
         classpathApplier.apply(coreProject2);
         final List<JkScopedDependency> coreDeps2 = coreProject2.getDependencies().list();
         assertEquals(1, coreDeps2.size());
         final JkComputedDependency baseProjectDep = (JkComputedDependency) coreDeps2.get(0).dependency();
-        assertTrue(JkUtilsFile.isSame(base, baseProjectDep.ideProjectBaseDir()));
+        assertEquals(base, baseProjectDep.ideProjectBaseDir().toPath());
 
-        JkUtilsFile.deleteDir(top);
+        JkFileTree.of(top).deleteAll();
     }
 
     private static File unzipToDir(String zipName) {

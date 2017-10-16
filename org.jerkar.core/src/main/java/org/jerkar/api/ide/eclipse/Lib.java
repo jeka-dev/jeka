@@ -53,7 +53,7 @@ class Lib {
 
             } else { // This is a dependency on an eclipse project
                 final Path projectDir = parentDir.resolve(lib.projectRelativePath);
-                final JkJavaProject project = new JkJavaProject(projectDir.toFile());
+                final JkJavaProject project = new JkJavaProject(projectDir);
                 applier.apply(project);
                 builder.on(project).scope(lib.scope);
             }

@@ -1,6 +1,7 @@
 package org.jerkar.api.project.java;
 
-import java.io.File;
+
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.jerkar.api.depmanagement.JkArtifactFileId;
@@ -24,50 +25,51 @@ public final class JkJavaProjectPackager {
         this.project = project;
     }
 
-    public File mainJar() {
+    public Path mainJar() {
         Path result = project.mainArtifactPath();
-        JkJarMaker.jar(result, project.getManifest(), project.getOutLayout().classDir().toPath(), project.getExtraFilesToIncludeInJar());
-        return result.toFile();
+        JkJarMaker.jar(result, project.getManifest(), project.getOutLayout().classDir(), project.getExtraFilesToIncludeInJar());
+        return result;
     }
 
     /**
      * @param classifier Can be <code>null</code>, id so the fat jar will stands for the main artifact file.
      */
-    public File fatJar(String classifier) {
+    public Path fatJar(String classifier) {
         JkClasspath classpath = JkClasspath.of(project.runtimeDependencies(project.mainArtifactFileId()));
         JkArtifactFileId artifactFileId = JkArtifactFileId.of(classifier, "jar");
         Path result = project.artifactPath(artifactFileId);
-        JkJarMaker.fatJar(result, project.getManifest(), project.getOutLayout().classDir().toPath(),
+        JkJarMaker.fatJar(result, project.getManifest(), project.getOutLayout().classDir(),
                 project.getExtraFilesToIncludeInJar(), JkUtilsPath.toPaths(classpath.entries()));
-        return result.toFile();
+        return result;
     }
 
-    public File sourceJar() {
+    public Path sourceJar() {
         Path result = project.artifactPath(JkJavaProject.SOURCES_FILE_ID);
-        project.getSourceLayout().sources().and(project.getOutLayout().generatedSourceDir().toPath()).zipTo(result);
-        return result.toFile();
+        project.getSourceLayout().sources().and(project.getOutLayout().generatedSourceDir()).zipTo(result);
+        return result;
     }
 
-    public File javadocJar() {
-        File javadocDir = project.getOutLayout().getJavadocDir();
-        if (!javadocDir.exists()) {
-            throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.getAbsolutePath() + " : can't create javadoc jar. Please, generate Javadoc prior to package it in jar.");
+    public Path javadocJar() {
+        Path javadocDir = project.getOutLayout().getJavadocDir();
+        if (!Files.exists(javadocDir)) {
+            throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.toAbsolutePath()
+                    + " : can't create javadoc jar. Please, generate Javadoc prior to package it in jar.");
         }
-        File result = project.artifactFile(JkJavaProject.JAVADOC_FILE_ID);
-        JkFileTree.of(javadocDir.toPath()).zipTo(result.toPath());
+        Path result = project.artifactPath(JkJavaProject.JAVADOC_FILE_ID);
+        JkFileTree.of(javadocDir).zipTo(result);
         return  result;
     }
 
-    public File testJar() {
+    public Path testJar() {
         Path result = project.artifactPath(JkJavaProject.TEST_FILE_ID);
-        JkJarMaker.jar(result, project.getManifest(), project.getOutLayout().testClassDir().toPath(),  null);
-        return result.toFile();
+        JkJarMaker.jar(result, project.getManifest(), project.getOutLayout().testClassDir(),  null);
+        return result;
     }
 
-    public File testSourceJar() {
+    public Path testSourceJar() {
         Path result = project.artifactPath(JkJavaProject.SOURCES_FILE_ID);
         project.getSourceLayout().tests().zipTo(result);
-        return result.toFile();
+        return result;
     }
 
 }

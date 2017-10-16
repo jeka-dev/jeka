@@ -2,6 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -25,13 +26,7 @@ public final class JkMavenPublication implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Creates a Maven publication specifying the file to publish as main artifact.
-     */
-    @SuppressWarnings("unchecked")
-    public static JkMavenPublication of(File file) {
-        return new JkMavenPublication(JkUtilsIterable.listOf(file), Collections.emptyList(), null);
-    }
+
 
     /**
      * Creates a Maven publication specifying the file to publish as main artifact.
@@ -45,12 +40,12 @@ public final class JkMavenPublication implements Serializable {
      * Creates a Maven publication to publish all artifacts referenced in the specified artifact locator.
      */
     public static JkMavenPublication of(JkArtifactLocator artifactLocator, Set<JkArtifactFileId> excludedArtifacts) {
-        JkMavenPublication result = JkMavenPublication.of(artifactLocator.artifactFile(artifactLocator.mainArtifactFileId()));
+        JkMavenPublication result = JkMavenPublication.of(artifactLocator.artifactPath(artifactLocator.mainArtifactFileId()));
         for (final JkArtifactFileId artifactFileId : artifactLocator.artifactFileIds()) {
             if (excludedArtifacts.contains(artifactFileId)) {
                 continue;
             }
-            final File file = artifactLocator.artifactFile(artifactFileId);
+            final Path file = artifactLocator.artifactPath(artifactFileId);
             result = result.andOptional(file, artifactFileId.classifier());
         }
         return result;
@@ -135,17 +130,17 @@ public final class JkMavenPublication implements Serializable {
      * Same as {@link #and(File, String)} but effective only if the specified file exists.
      * If not the case, this method returns this object.
      */
-    public JkMavenPublication andOptional(File file, String classifier) {
-        if (file.exists()) {
+    public JkMavenPublication andOptional(Path file, String classifier) {
+        if (Files.exists(file)) {
             return and(file, classifier);
         }
         return this;
     }
 
     /**
-     * Same as {@link #andOptional(File, String)} but effective only if the specified condition is <code>true</code>
+     * Same as {@link #andOptional(Path, String)}  but effective only if the specified condition is <code>true</code>
      */
-    public JkMavenPublication andOptionalIf(boolean conditional, File file, String classifier) {
+    public JkMavenPublication andOptionalIf(boolean conditional, Path file, String classifier) {
         if (conditional) {
             return andOptional(file, classifier);
         }

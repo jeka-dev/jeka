@@ -242,7 +242,7 @@ public final class JkClassLoader {
     public <T> Class<T> load(String className) {
         try {
             return (Class<T>) delegate.loadClass(className);
-        } catch (final ClassNotFoundException e) {
+        } catch (final ClassNotFoundException | NoClassDefFoundError e) {
             throw new IllegalArgumentException("Class " + className + " not found on " + this, e);
         }
     }

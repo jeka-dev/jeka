@@ -1,9 +1,11 @@
 package org.jerkar.api.ide.idea;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkPopularModules;
+import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.ide.eclipse.JkEclipseClasspathGeneratorTest;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
@@ -18,13 +20,13 @@ public class JkImlGeneratorTest {
 
     @Test
     public void generate() throws Exception {
-        final File top = unzipToDir("sample-multi-scriptless.zip");
+        final Path top = unzipToDir("sample-multi-scriptless.zip").toPath();
         JkLog.silent(true);
 
         final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
                 .withResources("res").withTestResources("res-test");
 
-        final File base = new File(top, "base");
+        final Path base = top.resolve("base");
         final JkJavaProject baseProject = new JkJavaProject(base);
         baseProject.setSourceLayout(sourceLayout);
         baseProject.setDependencies(JkDependencies.builder().on(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3").build());
@@ -33,7 +35,7 @@ public class JkImlGeneratorTest {
         System.out.println("\nbase .classpath");
         System.out.println(result0);
 
-        final File core = new File(top, "core");
+        final Path core = top.resolve("core");
         final JkJavaProject coreProject = new JkJavaProject(core);
         final JkDependencies coreDeps = JkDependencies.of(baseProject);
         coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
@@ -44,10 +46,10 @@ public class JkImlGeneratorTest {
         System.out.println("\ncore .classpath");
         System.out.println(result1);
 
-        final File desktop = new File(top, "desktop");
+        final Path desktop = top.resolve("desktop");
         final JkDependencies deps = JkDependencies.of(coreProject);
         final JkImlGenerator desktopGenerator =
-                new JkImlGenerator(sourceLayout.withBaseDir(desktop.toPath()), deps,
+                new JkImlGenerator(sourceLayout.withBaseDir(desktop), deps,
                         coreProject.maker().getDependencyResolver());
         final String result2 = desktopGenerator.generate();
 
@@ -59,7 +61,7 @@ public class JkImlGeneratorTest {
         desktopProject.setDependencies(deps);
         desktopProject.makeAllArtifactFiles();
 
-        JkUtilsFile.deleteDir(top);
+        JkFileTree.of(top).deleteAll();
     }
 
     private static File unzipToDir(String zipName) {

@@ -180,7 +180,7 @@ final class IvyPublisher implements InternalPublisher {
                 final Artifact ivyArtifact = IvyTranslations.toPublishedArtifact(artifact,
                         ivyModuleRevisionId, date);
                 try {
-                    resolver.publish(ivyArtifact, artifact.file, true);
+                    resolver.publish(ivyArtifact, artifact.file.toFile(), true);
                 } catch (final IOException e) {
                     throw new IllegalStateException(e);
                 }

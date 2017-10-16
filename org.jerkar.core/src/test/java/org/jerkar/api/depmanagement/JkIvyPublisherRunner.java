@@ -3,6 +3,8 @@ package org.jerkar.api.depmanagement;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 
 import org.jerkar.api.system.JkLog;
@@ -47,10 +49,10 @@ public class JkIvyPublisherRunner {
                 deps.resolvedWith(versionProvider));
     }
 
-    private static File sampleJarfile() {
+    private static Path sampleJarfile() {
         final URL url = JkIvyPublisherRunner.class.getResource("myArtifactSample.jar");
         try {
-            return new File(url.toURI().getPath());
+            return Paths.get(url.toURI());
         } catch (final URISyntaxException e) {
             throw new RuntimeException(e);
         }
