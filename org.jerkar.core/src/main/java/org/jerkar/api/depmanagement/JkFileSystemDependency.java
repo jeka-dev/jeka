@@ -35,7 +35,7 @@ public final class JkFileSystemDependency implements JkFileDependency {
      */
     @Deprecated
     public static JkFileSystemDependency of(Iterable<File> files) {
-        return new JkFileSystemDependency(JkUtilsPath.pathsOf(files));
+        return new JkFileSystemDependency(JkUtilsPath.toPaths(files));
     }
 
     /**
@@ -50,7 +50,7 @@ public final class JkFileSystemDependency implements JkFileDependency {
      */
     public static JkFileSystemDependency of(File... files) {
         return new JkFileSystemDependency(
-                JkUtilsPath.pathsOf(Arrays.asList(files)));
+                JkUtilsPath.toPaths(Arrays.asList(files)));
     }
 
     private final List<Path> files;

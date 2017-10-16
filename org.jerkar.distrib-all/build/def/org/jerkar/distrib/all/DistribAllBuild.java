@@ -1,6 +1,8 @@
 package org.jerkar.distrib.all;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 import org.jerkar.CoreBuild;
@@ -52,22 +54,14 @@ class DistribAllBuild extends JkBuild {
 
         JkLog.info("Add plugins to the fat jar");
         Path fat = dist.get(core.project().artifactFile(JkArtifactFileId.of("all", "jar")).getName());
-        JkUtilsPath.copy(core.project().mainArtifactFile().toPath(), fat, StandardCopyOption.REPLACE_EXISTING);
-        JkZipper.of().mergePath(ext.include("**/*.jar").filesOnly()).appendTo(fat);
+        Files.copy(core.project().mainArtifactPath(), fat, StandardCopyOption.REPLACE_EXISTING);
+        ext.include("**/*.jar").stream().map(path -> JkFileTree.ofZip(path)).forEach(tree -> tree.zipTo(fat));
 
-        //Path fat2 = Paths.get(fat.toString() + "-2.jar");
-        //JkUtilsPath.copy(core.project().mainArtifactFile().toPath(), fat2, StandardCopyOption.REPLACE_EXISTING);
-        //ext.include("**/*.jar").zipTo(fat2);
-
-        
         JkLog.info("Create a fat source jar");
         Path fatSource = sourceDir.get("org.jerkar.core-all-sources.jar");
-        JkZipper.of().mergePath(sourceDir.include("**.jar", "**.zip").exclude(fatSource.getFileName().toString()).filesOnly()).to(fatSource);
+        sourceDir.include("**.jar", "**.zip").exclude(fatSource.getFileName().toString()).stream()
+                .map(path -> JkFileTree.ofZip(path)).forEach(tree -> tree.zipTo(fatSource));
 
-        //Path fatsource2 = Paths.get(fatSource.toString() + "-2.jar");
-        //sourceDir.include("**.jar", "**.zip").exclude(fatsource2.getFileName().toString()).zipTo(fatsource2);
-
-        
         if (javadoc) {
             JkLog.info("Create javadoc");
             JkFileTreeSet sources = this.pluginsJacoco.core.project().getSourceLayout().sources()
@@ -86,6 +80,7 @@ class DistribAllBuild extends JkBuild {
 
     @JkDoc("End to end method to construct a distrib.")
     public void doDefault() throws Exception {
+        clean();
         this.importedBuilds().all().forEach(JkBuild::clean);
         pluginsJacoco.core.project().makeArtifactFile(CoreBuild.DISTRIB_FILE_ID);
         pluginsJacoco.project().makeAllArtifactFiles();

@@ -18,7 +18,7 @@ public interface JkFileDependency extends JkDependency {
      */
     @Deprecated
     default List<File> files() {
-        return JkUtilsPath.filesOf(paths());
+        return JkUtilsPath.toFiles(paths());
     }
 
     List<Path> paths();

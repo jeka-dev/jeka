@@ -32,17 +32,6 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
         return new JkVersion(name);
     }
 
-    /**
-     *
-     * @param clazz
-     * @param name
-     * @return
-     */
-    public static JkVersion fromResource(Class<?> clazz, String name) {
-        final URL url = clazz.getResource(name);
-        return name(JkUtilsIO.read(url).trim());
-    }
-
     private final String name;
 
     private JkVersion(String name) {

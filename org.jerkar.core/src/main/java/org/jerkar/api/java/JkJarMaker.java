@@ -5,6 +5,7 @@ import java.io.File;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.file.JkZipper;
+import org.jerkar.api.utils.JkUtilsPath;
 
 /**
  * Utilities class to produce Jar files with conventional naming
@@ -33,7 +34,7 @@ public final class JkJarMaker {
             manifest.writeToStandardLocation(classDir);
         }
         JkFileTreeSet treeSet = extraFiles == null ? JkFileTreeSet.empty() : extraFiles;
-        JkFileTreeSet.of(classDir).and(treeSet).zip().to(resultFile);
+        JkFileTreeSet.of(classDir).and(treeSet).zipTo(resultFile.toPath());
     }
 
     /**
@@ -51,7 +52,10 @@ public final class JkJarMaker {
         if (manifest != null && !manifest.isEmpty()) {
             manifest.writeToStandardLocation(classDir);
         }
+
         JkFileTreeSet.of(classDir).and(extraFiles).zip().merge(otherJars).to(resultFile, EXCLUDE_SIGNATURE_FILTER);
+        JkFileTreeSet.of(classDir).and(extraFiles).andZip(JkUtilsPath.toPaths());
+
     }
 
     /**

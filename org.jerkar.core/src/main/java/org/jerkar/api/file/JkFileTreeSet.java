@@ -72,6 +72,23 @@ public final class JkFileTreeSet {
 
     /**
      * Creates a {@link JkFileTreeSet} which is a concatenation of this
+     * {@link JkFileTreeSet} and zip files passed as parameter.
+     */
+    public final JkFileTreeSet andZip(Iterable<Path> zips) {
+        final List<JkFileTree> list = new LinkedList<>(this.jkFileTrees);
+        zips.forEach(zip -> list.add(JkFileTree.ofZip(zip)));
+        return new JkFileTreeSet(list);
+    }
+
+    /**
+     * @see #andZip(Iterable)
+     */
+    public final JkFileTreeSet andZip(Path... zips) {
+        return andZip(Arrays.asList(zips));
+    }
+
+    /**
+     * Creates a {@link JkFileTreeSet} which is a concatenation of this
      * {@link JkFileTreeSet} and the folder array passed as parameter.
      */
     public final JkFileTreeSet and(File... folders) {
@@ -188,6 +205,11 @@ public final class JkFileTreeSet {
      */
     public JkZipper zip() {
         return JkZipper.of(this);
+    }
+
+    public JkFileTreeSet zipTo(Path dir) {
+        this.jkFileTrees.forEach(tree -> tree.zipTo(dir));
+        return this;
     }
 
 

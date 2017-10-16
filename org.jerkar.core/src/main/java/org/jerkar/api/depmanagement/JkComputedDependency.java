@@ -69,7 +69,7 @@ public class JkComputedDependency implements JkFileDependency {
      * generating them.
      */
     public static final JkComputedDependency of(Runnable runnable, Path... files) {
-        final List<File> fileSet = JkUtilsIterable.listWithoutDuplicateOf(JkUtilsPath.filesOf(Arrays.asList(files)));
+        final List<File> fileSet = JkUtilsIterable.listWithoutDuplicateOf(JkUtilsPath.toFiles(Arrays.asList(files)));
         return new JkComputedDependency(runnable, null, fileSet, EMPTY_SUPPLIER);
     }
 
@@ -116,14 +116,6 @@ public class JkComputedDependency implements JkFileDependency {
     }
 
     /**
-     * Constructs a computed dependency to the specified files and the specified {@link Runnable} to run for
-     * generating them.
-     */
-    protected JkComputedDependency(Runnable runnable, File ideProjectBaseDir, List<File> files)  {
-        this(runnable, ideProjectBaseDir, files, EMPTY_SUPPLIER);
-    }
-
-    /**
      * Returns a duplicate of this computed dependency but specifying that it can be replaced by a project dependency in a IDE.
      */
     public JkComputedDependency withIdeProjectBaseDir(Path baseDir) {
@@ -135,14 +127,6 @@ public class JkComputedDependency implements JkFileDependency {
      */
     public JkComputedDependency withIdeProjectBaseDir(File baseDir) {
         return new JkComputedDependency(this.runnable, baseDir, this.files, EMPTY_SUPPLIER);
-    }
-
-    /**
-     * Returns a duplicate of this computed dependency but with specified extra files supplier. The supplier
-     * will provide additional existing files constituting this dependency.
-     */
-    public JkComputedDependency withIdeProjectBaseDir(Supplier<Iterable<File>> extraFileSupplier) {
-        return new JkComputedDependency(this.runnable, this.ideProjectBaseDir, this.files, extraFileSupplier);
     }
 
     /**
@@ -167,18 +151,6 @@ public class JkComputedDependency implements JkFileDependency {
         return files;
     }
 
-    /**
-     * Returns <code>true</code> if one of this file or more is located under or below the specified folder.
-     */
-    public final boolean hasFileWithin(File folder) {
-        for (final File file : this.files) {
-            if (JkUtilsFile.isAncestor(folder, file)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public List<File> files() {
@@ -196,7 +168,7 @@ public class JkComputedDependency implements JkFileDependency {
 
     @Override
     public List<Path> paths() {
-        return JkUtilsPath.pathsOf(this.files());
+        return JkUtilsPath.toPaths(this.files());
     }
 
     /**

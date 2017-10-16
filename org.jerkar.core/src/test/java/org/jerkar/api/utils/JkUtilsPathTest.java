@@ -21,7 +21,7 @@ public class JkUtilsPathTest {
         final Path source = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
         Files.createDirectories(source.resolve("emptyfolder"));   // git won't copy empty dir
         final Path target = Files.createTempDirectory("copydirtest");
-        JkUtilsPath.copyDirContent(source, target, StandardCopyOption.REPLACE_EXISTING);
+        JkUtilsPath.copyDirContent(source, target, path -> true, StandardCopyOption.REPLACE_EXISTING);
         System.out.println(target);
         assertTrue(Files.exists(target.resolve("subfolder/sample.txt")));
         assertTrue(Files.exists(target.resolve("emptyfolder")));
@@ -29,7 +29,7 @@ public class JkUtilsPathTest {
 
         final Path subfolder = Paths.get(sampleFileUrl.toURI()).getParent();
         final Path target2 = Files.createTempDirectory("copydirtest");
-        JkUtilsPath.copyDirContent(subfolder, target2, StandardCopyOption.REPLACE_EXISTING);
+        JkUtilsPath.copyDirContent(subfolder, target2, path -> true, StandardCopyOption.REPLACE_EXISTING);
         System.out.println(target2);
         assertTrue(Files.exists(target2.resolve("sample.txt")));
 

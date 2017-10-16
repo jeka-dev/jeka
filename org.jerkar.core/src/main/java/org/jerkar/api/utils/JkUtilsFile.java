@@ -90,15 +90,6 @@ public final class JkUtilsFile {
     /**
      * Same as
      * {@link #copyDirContent(File, File, FileFilter, boolean, PrintStream)}
-     * without stream report and file filter.
-     */
-    public static int copyDirContent(File source, File targetDir, boolean copyEmptyDir) {
-        return copyDirContent(source, targetDir, null, copyEmptyDir, null);
-    }
-
-    /**
-     * Same as
-     * {@link #copyDirContent(File, File, FileFilter, boolean, PrintStream)}
      * without stream report.
      */
     public static int copyDirContent(File source, File targetDir, FileFilter filter, boolean copyEmptyDir) {

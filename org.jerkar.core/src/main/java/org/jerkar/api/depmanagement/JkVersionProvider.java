@@ -65,17 +65,6 @@ public final class JkVersionProvider implements Serializable {
         return new JkVersionProvider(result);
     }
 
-    /**
-     * Creates a version provider containing versions for all in specified version providers.
-     */
-    public static JkVersionProvider mergeOf(Iterable<JkVersionProvider> versionProviders) {
-        final Map<JkModuleId, JkVersion> result = new HashMap<>();
-        for (final JkVersionProvider versionProvider : versionProviders) {
-            result.putAll(versionProvider.map);
-        }
-        return new JkVersionProvider(result);
-    }
-
     private final Map<JkModuleId, JkVersion> map;
 
     private JkVersionProvider(Map<JkModuleId, JkVersion> map) {

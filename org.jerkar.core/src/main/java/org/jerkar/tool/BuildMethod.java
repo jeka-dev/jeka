@@ -21,17 +21,6 @@ final class BuildMethod {
     }
 
     /**
-     * Creates a list of build method reference defined on the build class.
-     */
-    public static List<BuildMethod> normals(String... names) {
-        final List<BuildMethod> result = new LinkedList<>();
-        for (final String name : names) {
-            result.add(BuildMethod.normal(name));
-        }
-        return result;
-    }
-
-    /**
      * Creates a build method reference that is defined on a plugin.
      */
     public static BuildMethod pluginMethod(Class<? extends JkPlugin> pluginClass,

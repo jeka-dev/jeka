@@ -1,6 +1,7 @@
 package org.jerkar.api.project.java;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.jerkar.api.depmanagement.JkArtifactFileId;
 import org.jerkar.api.file.JkFileTree;
@@ -41,9 +42,9 @@ public final class JkJavaProjectPackager {
     }
 
     public File sourceJar() {
-        File result = project.artifactFile(JkJavaProject.SOURCES_FILE_ID);
-        project.getSourceLayout().sources().and(project.getOutLayout().generatedSourceDir()).zip().to(result);
-        return result;
+        Path result = project.artifactPath(JkJavaProject.SOURCES_FILE_ID);
+        project.getSourceLayout().sources().and(project.getOutLayout().generatedSourceDir()).zipTo(result);
+        return result.toFile();
     }
 
     public File javadocJar() {
@@ -63,9 +64,9 @@ public final class JkJavaProjectPackager {
     }
 
     public File testSourceJar() {
-        File result = project.artifactFile(JkJavaProject.SOURCES_FILE_ID);
-        project.getSourceLayout().tests().zip().to(result);
-        return result;
+        Path result = project.artifactPath(JkJavaProject.SOURCES_FILE_ID);
+        project.getSourceLayout().tests().zipTo(result);
+        return result.toFile();
     }
 
 }

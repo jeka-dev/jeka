@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
@@ -68,51 +67,6 @@ public final class JkUtilsZip {
     private JkUtilsZip() {
     }
 
-    /**
-     * Unzip the specified zip files into the specified directory. If the
-     * specified directory doen snot exist, it is created.
-     */
-    public static void unzip(Iterable<File> zips, File folder) {
-        for (final File zip : zips) {
-            unzip(zip, folder);
-        }
-    }
-
-    /**
-     * Unzip the specified zip file into the specified directory. If the
-     * specified directory doen snot exist, it is created.
-     */
-    public static void unzip(File zip, File directory) {
-        final byte[] buffer = new byte[1024];
-        try (final ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))){
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
-            ZipEntry ze = zis.getNextEntry();
-            while (ze != null) {
-                final String fileName = ze.getName();
-                final File newFile = new File(directory, fileName);
-                if (ze.isDirectory()) {
-                    newFile.mkdirs();
-                } else {
-                    newFile.getParentFile().mkdirs();
-                    newFile.createNewFile();
-                    try (final FileOutputStream fos = new FileOutputStream(newFile)) {
-                        int len;
-                        while ((len = zis.read(buffer)) > 0) {
-                            fos.write(buffer, 0, len);
-                        }
-                    }
-                }
-                ze = zis.getNextEntry();
-            }
-            zis.closeEntry();
-            zis.close();
-        } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
-        }
-    }
-
     private static boolean addEntryInputStream(ZipOutputStream zos, String entryName,
             InputStream inputStream, boolean storedMethod, CrcAndSize crcAndSize) {
         final ZipEntry zipEntry = new ZipEntry(entryName);
@@ -143,18 +97,6 @@ public final class JkUtilsZip {
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * Adds a zip entry into the provided <code>ZipOutputStream</code>. The zip
-     * entry is the part of <code>filePathToZip</code> truncated with the
-     * <code>baseFolderPath</code>.
-     * <p>
-     * So a file or folder <code>c:\my\base\folder\my\file\to\zip.txt</code>
-     * will be added in archive using <code>my/file/to/zip.txt</code> entry.
-     */
-    public static void addZipEntry(ZipOutputStream zos, File fileToZip, File baseFolder) {
-        addZipEntry(zos, fileToZip, baseFolder, false);
     }
 
     /**
@@ -283,14 +225,6 @@ public final class JkUtilsZip {
     }
 
     /**
-     * Writes all the entries to a given ZipFile to the specified
-     * {@link ZipOutputStream}.
-     */
-    public static Set<String> mergeZip(ZipOutputStream zos, ZipFile zipFile) {
-        return mergeZip(zos, zipFile, false);
-    }
-
-    /**
      * Reads the specified zip stream and position it at the beginning of the
      * specified entry. The specified entry is case insensitive. An exception is
      * thrown if no such entry exist.
@@ -328,21 +262,6 @@ public final class JkUtilsZip {
             result.add(en.nextElement());
         }
         return result;
-    }
-
-    /**
-     * Returns the zip entry havinbf a name equals ignoring case to the specified one.
-     */
-    @SuppressWarnings("unchecked")
-    public static ZipEntry zipEntryIgnoreCase(ZipFile zipFile, String entryName) {
-        final Enumeration<ZipEntry> en = (Enumeration<ZipEntry>) zipFile.entries();
-        while (en.hasMoreElements()) {
-            final ZipEntry entry = en.nextElement();
-            if (entry.getName().equalsIgnoreCase(entryName)) {
-                return entry;
-            }
-        }
-        return null;
     }
 
     /**

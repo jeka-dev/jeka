@@ -34,17 +34,8 @@ public final class JkZipper {
     /** Specify compression level */
     public enum JkCompressionLevel {
 
-        /** See  #Deflater.BEST_COMPRESSION */
-        BEST_COMPRESSION(Deflater.BEST_COMPRESSION),
-
-        /** See  #Deflater.BEST_SPEED */
-        BEST_SPEED(Deflater.BEST_SPEED),
-
         /** See  #Deflater.DEFAULT_COMPRESSION */
-        DEFAULT_COMPRESSION(Deflater.DEFAULT_COMPRESSION),
-
-        /** See  #Deflater.NO_COMPRESSION */
-        NO_COMPRESSION(Deflater.NO_COMPRESSION), ;
+        DEFAULT_COMPRESSION(Deflater.DEFAULT_COMPRESSION),;
 
         private final int level;
 
@@ -113,7 +104,7 @@ public final class JkZipper {
                 archivestoMerges.add(file);
             }
         }
-        return new JkZipper(items, JkUtilsPath.filesOf(archivestoMerges), JkCompressionLevel.DEFAULT_COMPRESSION,
+        return new JkZipper(items, JkUtilsPath.toFiles(archivestoMerges), JkCompressionLevel.DEFAULT_COMPRESSION,
                 JkCompressionMethod.DEFLATED);
     }
 
@@ -139,16 +130,6 @@ public final class JkZipper {
                 archiveFiles), this.jkCompressionLevel, this.jkCompressionMethod);
     }
 
-    /**
-     * Returns a {@link JkZipFile} identical to this one but containing also the entries
-     * contained in the specified archive files.
-     */
-    @SuppressWarnings("unchecked")
-    public JkZipper mergePath(Iterable<Path> archiveFiles) {
-        return new JkZipper(itemsToZip, JkUtilsIterable.concatLists(this.archivestoMerge,
-                JkUtilsPath.filesOf(archiveFiles)), this.jkCompressionLevel, this.jkCompressionMethod);
-    }
-
 
     /**
      * Returns a {@link JkZipFile} identical to this one but containing also the entries
@@ -156,26 +137,6 @@ public final class JkZipper {
      */
     public JkZipper merge(File... archiveFiles) {
         return merge(Arrays.asList(archiveFiles));
-    }
-
-    /**
-     * Append the content of this zipper to the specified archive file. If the
-     * specified file does not exist, it will be created under the hood.
-     */
-    public JkCheckSumer appendTo(File archive) {
-        final File temp = JkUtilsFile.tempFile(archive.getName(), "");
-        JkUtilsFile.move(archive, temp);
-        final JkCheckSumer jkCheckSumer = this.merge(temp).to(archive, JkPathFilter.ACCEPT_ALL);
-        temp.delete();
-        return jkCheckSumer;
-    }
-
-    /**
-     * Append the content of this zipper to the specified archive file. If the
-     * specified file does not exist, it will be created under the hood.
-     */
-    public JkCheckSumer appendTo(Path archive) {
-        return appendTo(archive.toFile());
     }
 
     /**
@@ -268,28 +229,6 @@ public final class JkZipper {
         return JkCompressionMethod.STORED.equals(jkCompressionMethod);
     }
 
-    /**
-     * Returns a {@link JkZipFile} identical to this one but containing also the specified entry.
-     */
-    public JkZipper andEntryName(String entryName, File file) {
-        final List<Object> list = new LinkedList<>(this.itemsToZip);
-        list.add(new EntryFile(entryName, file));
-        return new JkZipper(list, archivestoMerge, this.jkCompressionLevel,
-                this.jkCompressionMethod);
-    }
-
-    /**
-     * Returns a {@link JkZipFile} identical to this one but containing also the specified entry.
-     */
-    public JkZipper andEntryPath(String entryPath, File file) {
-        final List<Object> list = new LinkedList<>(this.itemsToZip);
-        final String path = entryPath.endsWith("/") ? entryPath + file.getName() : entryPath + "/"
-                + file.getName();
-        list.add(new EntryFile(path, file));
-        return new JkZipper(list, archivestoMerge, this.jkCompressionLevel,
-                this.jkCompressionMethod);
-    }
-
     private void addFileTree(ZipOutputStream zos, JkFileTree fileTree, JkPathFilter filter) {
         if (!fileTree.exists()) {
             return;
@@ -335,24 +274,6 @@ public final class JkZipper {
             JkUtilsAssert.isTrue(file.isFile(), file.getAbsolutePath()
                     + " is a directory, not a file.");
             this.file = file;
-        }
-
-        /**
-         * Creates an MD5 digest for this wrapped file. The digest file is
-         * written in the same directory as the digested file and has the same
-         * name + '.md5' extension.
-         */
-        public JkCheckSumer makeMd5File() {
-            return makeSumFiles(file, "md5");
-        }
-
-        /**
-         * Creates an SHA-1 digest for this wrapped file. The digest file is
-         * written in the same directory as the digested file and has the same
-         * name + '.sha1' extension.
-         */
-        public JkCheckSumer makeSha1File() {
-            return makeSumFiles(file, "sha1");
         }
 
         /**

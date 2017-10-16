@@ -31,13 +31,6 @@ public interface JkArtifactProducer extends JkArtifactLocator {
         return artifactFile(mainArtifactFileId());
     }
 
-    /**
-     * Returns the main artifact file.
-     */
-    @Override
-    default File mainArtifactFile() {
-        return artifactFile(mainArtifactFileId());
-    }
 
     /**
      * Produces all the artifact files for the specified artifact file ids.

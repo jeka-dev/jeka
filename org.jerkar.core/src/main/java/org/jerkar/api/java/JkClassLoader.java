@@ -214,7 +214,7 @@ public final class JkClassLoader {
      * the parent classloaders.
      */
     public JkClasspath childClasspath() {
-        return JkClasspath.of(JkUtilsPath.filesOf(JkUtilsSystem.classloaderEntries(this.delegate)));
+        return JkClasspath.of(JkUtilsPath.toFiles(JkUtilsSystem.classloaderEntries(this.delegate)));
     }
 
     /**

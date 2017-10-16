@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -103,13 +104,6 @@ final class Engine {
             this.compile();
         }
         return resolver.resolve(baseClass);
-    }
-
-    List<Class<?>> getBuildClasses() {
-        if (resolver.needCompile()) {
-            this.compile();
-        }
-        return resolver.resolveBuildClasses();
     }
 
     /**
@@ -230,7 +224,8 @@ final class Engine {
 
     private void compileBuild(JkPathSequence buildPath) {
         baseBuildCompiler().withClasspath(buildPath).compile();
-        JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir);
+        JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir,
+                StandardCopyOption.REPLACE_EXISTING);
     }
 
     private void launch(JkBuild build, PluginDictionnary dictionnary, CommandLine commandLine) {

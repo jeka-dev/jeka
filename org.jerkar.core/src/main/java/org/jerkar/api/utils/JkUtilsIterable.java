@@ -111,17 +111,6 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Creates a set of specified items.
-     */
-    public static <T> Set<T> linkedHashSetOf(Iterable<T> items) {
-        final LinkedHashSet<T> result = new LinkedHashSet<>();
-        for (final T item : items) {
-            result.add(item);
-        }
-        return result;
-    }
-
-    /**
      * Creates a map of specified key/value. Key value should be declared in sequence as
      * <code>mapOf(key1, value1, key2, value2,...)</code>
      */
@@ -335,28 +324,6 @@ public final class JkUtilsIterable {
         System.arraycopy(b, 0, c, aLen, bLen);
 
         return c;
-    }
-
-    /**
-     * Returns difference between two collections. The result consists in an array of two {@link Set}.
-     * The first one contains the element present in A and absent in B.
-     * The second one contains elements in B but absent in A.
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> Set<T>[] diff(Collection<T> a, Collection<T> b) {
-        final HashSet<T> first = new HashSet<>();
-        final HashSet<T> second = new HashSet<>();
-        for (final T item : a) {
-            if (! b.contains(item)) {
-                first.add(item);
-            }
-        }
-        for (final T item : b) {
-            if (! a.contains(item)) {
-                second.add(item);
-            }
-        }
-        return new HashSet[] {first, second};
     }
 
 }

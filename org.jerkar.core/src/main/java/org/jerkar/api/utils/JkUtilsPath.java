@@ -1,5 +1,7 @@
 package org.jerkar.api.utils;
 
+import javafx.scene.shape.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -7,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.*;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.LinkedList;
@@ -31,7 +34,11 @@ public final class JkUtilsPath {
         final Map<String, String> env = JkUtilsIterable.mapOf("create", "true");
         FileSystem fileSystem;
         try {
-            fileSystem = FileSystems.newFileSystem(uri, env);
+            try {
+                fileSystem = FileSystems.getFileSystem(uri);
+            } catch (FileSystemNotFoundException e) {
+                fileSystem = FileSystems.newFileSystem(uri, env);
+            }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } catch(ZipError e) {
@@ -40,7 +47,7 @@ public final class JkUtilsPath {
         return fileSystem.getPath("/");
     }
 
-    public static List<File> filesOf(Iterable<Path> paths) {
+    public static List<File> toFiles(Iterable<Path> paths) {
         final List<File> result = new LinkedList<>();
         for (final Path path : paths) {
             result.add(path.toFile());
@@ -48,7 +55,7 @@ public final class JkUtilsPath {
         return result;
     }
 
-    public static File[] filesOf(Path ... paths) {
+    public static File[] toFiles(Path ... paths) {
         final File[] result = new File[paths.length];
         for (int i = 0; i<paths.length; i++) {
             result[i] = paths[i].toFile();
@@ -56,7 +63,7 @@ public final class JkUtilsPath {
         return result;
     }
 
-    public static Path[] pathsOf(File ... files) {
+    public static Path[] toPaths(File ... files) {
         final Path[] result = new Path[files.length];
         for (int i = 0; i<files.length; i++) {
             result[i] = files[i].toPath();
@@ -64,7 +71,7 @@ public final class JkUtilsPath {
         return result;
     }
 
-    public static List<Path> pathsOf(Iterable<File> files) {
+    public static List<Path> toPaths(Iterable<File> files) {
         final List<Path> result = new LinkedList<>();
         for (final File file : files) {
             result.add(file.toPath());
@@ -227,8 +234,8 @@ public final class JkUtilsPath {
      * not created as an entry of the target directory.
      * @return the copied file count.
      */
-    public static int copyDirContent(Path sourceDir, Path targetDir, CopyOption ... copyOptions)  {
-        final CopyDirVisitor visitor = new CopyDirVisitor(sourceDir, targetDir, copyOptions);
+    public static int copyDirContent(Path sourceDir, Path targetDir, PathMatcher pathMatcher, CopyOption ... copyOptions)  {
+        final CopyDirVisitor visitor = new CopyDirVisitor(sourceDir, targetDir, pathMatcher, copyOptions);
         createDirectories(targetDir);
         walkFileTree(sourceDir, visitor);
         return visitor.count;
@@ -249,19 +256,24 @@ public final class JkUtilsPath {
 
         int count;
 
-        CopyDirVisitor(Path fromPath, Path toPath, CopyOption ... options) {
+        CopyDirVisitor(Path fromPath, Path toPath, PathMatcher pathMatcher, CopyOption ... options) {
             this.fromPath = fromPath;
             this.toPath = toPath;
             this.options = options;
+            this.pathMatcher = pathMatcher;
         }
 
         private final Path fromPath;
         private final Path toPath;
+        private final PathMatcher pathMatcher;
         private final CopyOption[] options;
 
 
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+            if (!pathMatcher.matches(dir)) {
+                return FileVisitResult.CONTINUE;
+            }
             final Path sourceRelativePath = fromPath.relativize(dir);
             final Path relativePath = toPath.getFileSystem().getPath(toPath.toString(), sourceRelativePath.toString());
             Files.createDirectories(relativePath);
@@ -270,6 +282,9 @@ public final class JkUtilsPath {
 
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            if (!pathMatcher.matches(file)) {
+                return FileVisitResult.CONTINUE;
+            }
             final String relativePath = fromPath.relativize(file).toString();
             final Path target = toPath.getFileSystem().getPath(toPath.toString(), relativePath); // necessary to deal with both regular file system and zip
             Files.copy(file, target , options);

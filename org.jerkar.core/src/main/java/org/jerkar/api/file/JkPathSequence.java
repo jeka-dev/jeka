@@ -36,7 +36,7 @@ public final class JkPathSequence implements Iterable<File> {
      */
     @Deprecated
     public static JkPathSequence of(Iterable<File> entries) {
-        return new JkPathSequence(JkUtilsPath.pathsOf(entries));
+        return new JkPathSequence(JkUtilsPath.toPaths(entries));
     }
 
     /**
@@ -120,7 +120,7 @@ public final class JkPathSequence implements Iterable<File> {
      */
     @Deprecated
     public List<File> entries() {
-        return JkUtilsPath.filesOf(entries);
+        return JkUtilsPath.toFiles(entries);
     }
 
     /**
@@ -157,7 +157,7 @@ public final class JkPathSequence implements Iterable<File> {
      */
     @SuppressWarnings("unchecked")
     public JkPathSequence andHead(Iterable<File> otherEntries) {
-        return new JkPathSequence(JkUtilsIterable.chain(JkUtilsPath.pathsOf(otherEntries), this.entries));
+        return new JkPathSequence(JkUtilsIterable.chain(JkUtilsPath.toPaths(otherEntries), this.entries));
     }
 
     /**
@@ -186,7 +186,7 @@ public final class JkPathSequence implements Iterable<File> {
      */
     @SuppressWarnings("unchecked")
     public JkPathSequence and(Iterable<File> otherFiles) {
-        return new JkPathSequence(JkUtilsIterable.chain(this.entries, JkUtilsPath.pathsOf(otherFiles)));
+        return new JkPathSequence(JkUtilsIterable.chain(this.entries, JkUtilsPath.toPaths(otherFiles)));
     }
 
     /**
@@ -215,7 +215,7 @@ public final class JkPathSequence implements Iterable<File> {
 
     @Override
     public Iterator<File> iterator() {
-        return JkUtilsPath.filesOf(entries).iterator();
+        return JkUtilsPath.toFiles(entries).iterator();
     }
 
 }

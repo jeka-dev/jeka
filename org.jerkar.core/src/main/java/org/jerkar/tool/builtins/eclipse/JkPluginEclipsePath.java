@@ -26,7 +26,7 @@ public final class JkPluginEclipsePath implements JkPlugin {
             final JkJavaProject project = ((JkJavaProjectBuild) build).project();
             final JkEclipseClasspathApplier classpathApplier = new JkEclipseClasspathApplier(smartScope);
             classpathApplier.apply(project);
-        };
+        }
     }
 
 }

@@ -331,18 +331,16 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
         }
 
         public String dependencies(JkDependencies dependencies) {
-            String builder = "    @Override\n" +
+            return "    @Override\n" +
                     "    public JkDependencies dependencies() {\n" +
                     "        return " + dependencies.toJavaCode(8) + "\n    }" +
                     "\n";
-            return builder;
         }
 
         public String mainMethod() {
-            String builder = "    public static void main(String[] args) {\n" +
+            return "    public static void main(String[] args) {\n" +
                     "        JkInit.instanceOf(Build.class, args).doDefault();\n" +
                     "    }\n";
-            return builder;
         }
 
         public String downloadRepositories(JkRepos repos) {

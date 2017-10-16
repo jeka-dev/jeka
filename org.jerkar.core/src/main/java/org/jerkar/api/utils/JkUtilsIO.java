@@ -137,20 +137,6 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Same as {@link ZipFile#getInputStream(ZipEntry)} but throwing only
-     * unchecked exceptions.
-     */
-    public static InputStream inputStream(ZipFile zipFile, ZipEntry entry) {
-        try {
-            return zipFile.getInputStream(entry);
-        } catch (final FileNotFoundException e) {
-            throw new IllegalArgumentException("File " + zipFile + " not found.", e);
-        } catch (final IOException e) {
-            throw new RuntimeException("File " + zipFile + " not found.", e);
-        }
-    }
-
-    /**
      * Same as {@link URL#openStream()} but throwing only unchecked exceptions.
      */
     public static InputStream inputStream(URL file) {
@@ -158,19 +144,6 @@ public final class JkUtilsIO {
             return file.openStream();
         } catch (final IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Close the specified object input, ignoring any exceptions.
-     */
-    public static void closeQuietly(ObjectInput... objectInputs) {
-        for (final ObjectInput objectInput : objectInputs) {
-            try {
-                objectInput.close();
-            } catch (final Exception e) {
-                // Ignored
-            }
         }
     }
 
@@ -232,32 +205,6 @@ public final class JkUtilsIO {
             throw new RuntimeException(e);
         }
         return out.toString();
-    }
-
-    /**
-     * Returns the content of the given resource as string if exist. Otherwise
-     * returns <code>null</code>.
-     */
-    public static String readResourceIfExist(String resourcePath) {
-        final InputStream is = JkUtilsFile.class.getClassLoader().getResourceAsStream(resourcePath);
-        if (is == null) {
-            return null;
-        }
-        return readAsString(is);
-    }
-
-    /**
-     * Equivalent to {@link ZipOutputStream#closeEntry()} but without checked
-     * exception.
-     */
-    public static void closeEntry(ZipOutputStream... outputStreams) {
-        for (final ZipOutputStream outputStream : outputStreams) {
-            try {
-                outputStream.closeEntry();
-            } catch (final IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     /**

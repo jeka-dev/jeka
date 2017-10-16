@@ -53,6 +53,13 @@ public interface JkArtifactLocator {
     }
 
     /**
+     * Returns the main artifact path.
+     */
+    default Path mainArtifactPath() {
+        return mainArtifactFile().toPath();
+    }
+
+    /**
      * Returns all artifact files likely to be produced by this artifact producer.
      */
     default List<File> allArtifactFiles() {

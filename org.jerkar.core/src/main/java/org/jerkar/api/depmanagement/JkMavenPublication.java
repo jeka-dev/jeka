@@ -37,7 +37,7 @@ public final class JkMavenPublication implements Serializable {
      * Creates a Maven publication specifying the file to publish as main artifact.
      */
     public static JkMavenPublication of(Path file) {
-        return new JkMavenPublication(JkUtilsPath.filesOf(JkUtilsIterable.listOf(file)),
+        return new JkMavenPublication(JkUtilsPath.toFiles(JkUtilsIterable.listOf(file)),
                 Collections.emptyList(), null);
     }
 

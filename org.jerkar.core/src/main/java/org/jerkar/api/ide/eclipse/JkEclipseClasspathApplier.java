@@ -27,10 +27,6 @@ public class JkEclipseClasspathApplier {
         this.smartScope = smartScope;
     }
 
-    void apply(JkJavaProject javaProject, String classpathXml) {
-        apply(javaProject, DotClasspathModel.from(classpathXml));
-    }
-
     /**
      * Modifies the specified javaProject in a way it reflects its eclipse .classpath file.
      */

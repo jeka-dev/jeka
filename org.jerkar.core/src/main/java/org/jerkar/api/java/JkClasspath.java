@@ -60,7 +60,7 @@ public final class JkClasspath implements Iterable<File> {
      * Creates a <code>JkClasspath</code> form specified file entries.
      */
     public static JkClasspath ofPath(Iterable<Path> entries) {
-        return new JkClasspath(JkUtilsPath.filesOf(entries));
+        return new JkClasspath(JkUtilsPath.toFiles(entries));
     }
 
     /**
@@ -153,7 +153,7 @@ public final class JkClasspath implements Iterable<File> {
 
     public JkClasspath and(Path... files) {
         final List<Path> paths = Arrays.asList(files);
-        return and(JkUtilsPath.filesOf(paths));
+        return and(JkUtilsPath.toFiles(paths));
     }
 
     /**
@@ -187,7 +187,7 @@ public final class JkClasspath implements Iterable<File> {
                     + " does not exist : classpath entry " + file.getAbsolutePath()
                     + " will be ignored.");
                 } else {
-                    result.addAll(JkUtilsPath.filesOf( JkFileTree.of(parent).include("*.jar").filesOnly()));
+                    result.addAll(JkUtilsPath.toFiles( JkFileTree.of(parent).include("*.jar").filesOnly()));
                 }
             } else if (!file.exists()) {
                 JkLog.trace("File " + file.getAbsolutePath() + " does not exist : classpath entry "

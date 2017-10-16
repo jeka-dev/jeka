@@ -45,20 +45,6 @@ public final class JkEclipseProject {
     }
 
 
-    public static JkEclipseProject findProjectNamed(File parent, String projectName) {
-        for (final File file : parent.listFiles()) {
-            final File dotProject = new File(file, ".project");
-            if (!(dotProject.exists())) {
-                continue;
-            }
-            final JkEclipseProject project = JkEclipseProject.of(dotProject);
-            if (projectName.equals(project.name)) {
-                return project;
-            }
-        }
-        return null;
-    }
-
     @Deprecated
     public static Map<String, File> findProjects(File parent) {
         final Map<String, File> map = new HashMap<>();

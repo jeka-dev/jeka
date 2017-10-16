@@ -445,13 +445,6 @@ public final class JkEclipseClasspathGenerator {
     }
 
 
-    private static String toRelativePath(File base, File file) {
-        if (JkUtilsFile.isAncestor(base, file)) {
-            return JkUtilsFile.getRelativePath(base, file).replace(File.separatorChar, '/');
-        }
-        return JkUtilsFile.canonicalPath(file);
-    }
-
     private static String toPatternString(List<String> pattern) {
         return JkUtilsString.join(pattern, "|");
     }
