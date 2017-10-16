@@ -533,8 +533,8 @@ public final class JkUtilsFile {
      * Returns the checksum of a specified file. The algorithm may be "SHA-1" or
      * "MD5".
      */
-    public static String checksum(File file, String algorithm) {
-        try (final InputStream is = JkUtilsIO.inputStream(file)) {
+    public static String checksum(Path file, String algorithm) {
+        try (final InputStream is = Files.newInputStream(file)) {
             final MessageDigest md = MessageDigest.getInstance(algorithm);
             md.reset();
             final byte[] buf = new byte[2048];

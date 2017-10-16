@@ -7,6 +7,7 @@ import org.jerkar.api.depmanagement.JkArtifactFileId;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJarMaker;
+import org.jerkar.api.utils.JkUtilsPath;
 
 /**
  * Creates jar and others elements of a java project.
@@ -24,9 +25,9 @@ public final class JkJavaProjectPackager {
     }
 
     public File mainJar() {
-        File result = project.mainArtifactFile();
-        JkJarMaker.jar(result, project.getManifest(), project.getOutLayout().classDir(), project.getExtraFilesToIncludeInJar());
-        return result;
+        Path result = project.mainArtifactPath();
+        JkJarMaker.jar(result, project.getManifest(), project.getOutLayout().classDir().toPath(), project.getExtraFilesToIncludeInJar());
+        return result.toFile();
     }
 
     /**
@@ -35,15 +36,15 @@ public final class JkJavaProjectPackager {
     public File fatJar(String classifier) {
         JkClasspath classpath = JkClasspath.of(project.runtimeDependencies(project.mainArtifactFileId()));
         JkArtifactFileId artifactFileId = JkArtifactFileId.of(classifier, "jar");
-        File result = project.artifactFile(artifactFileId);
-        JkJarMaker.fatJar(result, project.getManifest(), project.getOutLayout().classDir(),
-                project.getExtraFilesToIncludeInJar(), classpath);
-        return result;
+        Path result = project.artifactPath(artifactFileId);
+        JkJarMaker.fatJar(result, project.getManifest(), project.getOutLayout().classDir().toPath(),
+                project.getExtraFilesToIncludeInJar(), JkUtilsPath.toPaths(classpath.entries()));
+        return result.toFile();
     }
 
     public File sourceJar() {
         Path result = project.artifactPath(JkJavaProject.SOURCES_FILE_ID);
-        project.getSourceLayout().sources().and(project.getOutLayout().generatedSourceDir()).zipTo(result);
+        project.getSourceLayout().sources().and(project.getOutLayout().generatedSourceDir().toPath()).zipTo(result);
         return result.toFile();
     }
 
@@ -58,9 +59,9 @@ public final class JkJavaProjectPackager {
     }
 
     public File testJar() {
-        File result = project.artifactFile(JkJavaProject.TEST_FILE_ID);
-        JkJarMaker.jar(result, project.getManifest(), project.getOutLayout().testClassDir(),  null);
-        return result;
+        Path result = project.artifactPath(JkJavaProject.TEST_FILE_ID);
+        JkJarMaker.jar(result, project.getManifest(), project.getOutLayout().testClassDir().toPath(),  null);
+        return result.toFile();
     }
 
     public File testSourceJar() {

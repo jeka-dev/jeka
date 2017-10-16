@@ -145,6 +145,15 @@ public final class JkClasspath implements Iterable<File> {
     }
 
     /**
+     * Returns a <code>JkClasspath</code> made of, in the order, the specified
+     * entries plus the entries of this one.
+     */
+    @SuppressWarnings("unchecked")
+    public JkClasspath andHeadPath(Iterable<Path> otherEntries) {
+        return new JkClasspath(JkUtilsIterable.chain(JkUtilsPath.toFiles(otherEntries), this.entries));
+    }
+
+    /**
      * @see #and(Iterable)
      */
     public JkClasspath and(File... files) {

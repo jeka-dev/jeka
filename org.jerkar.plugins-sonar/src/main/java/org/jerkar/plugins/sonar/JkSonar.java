@@ -2,6 +2,7 @@ package org.jerkar.plugins.sonar;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,10 +16,7 @@ import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsObject;
+import org.jerkar.api.utils.*;
 
 /**
  * Sonar wrapper class for launching sonar analysis in a convenient way. This
@@ -152,8 +150,16 @@ public final class JkSonar {
         return withProperty(SOURCES, toPaths(files));
     }
 
+    public JkSonar withSourcesPath(Iterable<Path> files) {
+        return withProperty(SOURCES, toPaths(JkUtilsPath.toFiles(files)));
+    }
+
     public JkSonar withTest(Iterable<File> files) {
         return withProperty(TEST, toPaths(files));
+    }
+
+    public JkSonar withTestPath(Iterable<Path> files) {
+        return withProperty(TEST, toPaths(JkUtilsPath.toFiles(files)));
     }
 
     public JkSonar withBinaries(Iterable<File> files) {

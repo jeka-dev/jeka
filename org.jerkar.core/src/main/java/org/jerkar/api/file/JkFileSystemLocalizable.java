@@ -1,6 +1,7 @@
 package org.jerkar.api.file;
 
 import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Provides an information about its localisation on the file system.

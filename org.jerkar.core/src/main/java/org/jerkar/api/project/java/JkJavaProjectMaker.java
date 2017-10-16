@@ -29,7 +29,7 @@ import org.jerkar.api.depmanagement.JkVersionProvider;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPathSequence;
-import org.jerkar.api.file.JkZipper.JkCheckSumer;
+import org.jerkar.api.file.JkCheckSumer;
 import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompiler;
@@ -38,7 +38,6 @@ import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsPath;
 
 /**
  * Beware : Experimental !!!!!!!!!!!!!!!!!!!!!!!
@@ -218,7 +217,7 @@ public class JkJavaProjectMaker {
         final JkClasspath classpath = JkClasspath.of(project.getOutLayout().testClassDir(), project.getOutLayout().classDir())
                 .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
         final File junitReport = new File(project.getOutLayout().testReportDir(), "junit");
-        return this.juniter.withClassesToTest(project.getOutLayout().testClassDir())
+        return this.juniter.withClassesToTest(project.getOutLayout().testClassDir().toPath())
                 .withClasspath(classpath)
                 .withReportDir(junitReport);
     }
@@ -307,7 +306,7 @@ public class JkJavaProjectMaker {
     }
 
     public void checksum(String ...algorithms) {
-        this.project.allArtifactFiles().forEach((file) -> JkCheckSumer.of(file).makeSumFiles(file, algorithms));
+        this.project.allArtifactFiles().forEach((file) -> JkCheckSumer.of(file.toPath()).makeSumFiles(file.toPath(), algorithms));
     }
 
     public void signArtifactFiles(JkPgp pgp) {

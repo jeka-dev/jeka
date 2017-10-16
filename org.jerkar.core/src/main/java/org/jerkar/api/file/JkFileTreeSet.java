@@ -1,6 +1,5 @@
 package org.jerkar.api.file;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +26,7 @@ public final class JkFileTreeSet {
     }
 
     /**
-     * Creates a {@link JkFileTreeSet} to a sequence of {@link JkFileTree}.
+     * Creates a {@link JkFileTreeSet} from an iterable of {@link JkFileTree}.
      */
     public static final JkFileTreeSet of(Iterable<JkFileTree> dirs) {
         return new JkFileTreeSet(JkUtilsIterable.listOf(dirs));
@@ -36,9 +35,8 @@ public final class JkFileTreeSet {
     /**
      * Creates an empty {@link JkFileTreeSet}.
      */
-    @SuppressWarnings("unchecked")
     public static final JkFileTreeSet empty() {
-        return new JkFileTreeSet(Collections.EMPTY_LIST);
+        return new JkFileTreeSet(Collections.emptyList());
     }
 
     /**
@@ -51,17 +49,6 @@ public final class JkFileTreeSet {
     /**
      * Creates a {@link JkFileTreeSet} to an array of folder.
      */
-    public static final JkFileTreeSet of(File... folders) {
-        final List<JkFileTree> dirs = new ArrayList<>(folders.length);
-        for (final File folder : folders) {
-            dirs.add(JkFileTree.of(folder));
-        }
-        return new JkFileTreeSet(dirs);
-    }
-
-    /**
-     * Creates a {@link JkFileTreeSet} to an array of folder.
-     */
     public static final JkFileTreeSet of(Path... folders) {
         final List<JkFileTree> dirs = new ArrayList<>(folders.length);
         for (final Path folder : folders) {
@@ -69,6 +56,8 @@ public final class JkFileTreeSet {
         }
         return new JkFileTreeSet(dirs);
     }
+
+    // -------------------------- additional elements in set ----------------------------------
 
     /**
      * Creates a {@link JkFileTreeSet} which is a concatenation of this
@@ -102,9 +91,9 @@ public final class JkFileTreeSet {
      * Creates a {@link JkFileTreeSet} which is a concatenation of this
      * {@link JkFileTreeSet} and the folder array passed as parameter.
      */
-    public final JkFileTreeSet and(File... folders) {
+    public final JkFileTreeSet and(Path... folders) {
         final List<JkFileTree> dirs = new ArrayList<>(folders.length);
-        for (final File folder : folders) {
+        for (final Path folder : folders) {
             dirs.add(JkFileTree.of(folder));
         }
         return this.and(dirs.toArray(new JkFileTree[folders.length]));
@@ -123,6 +112,8 @@ public final class JkFileTreeSet {
         return new JkFileTreeSet(list);
     }
 
+    // ------------------------ additional filters -------------------------------------------
+
     /**
      * Creates a {@link JkFileTree} which is a copy of this {@link JkFileTree}
      * augmented with the specified {@link JkPathFilter}
@@ -134,6 +125,8 @@ public final class JkFileTreeSet {
         }
         return new JkFileTreeSet(list);
     }
+
+    // ---------------------------- iterate over files -----------------------------------
 
     /**
      * Returns a concatenation of {@link #files()} for all tree involved in this set.
@@ -161,9 +154,18 @@ public final class JkFileTreeSet {
         return result;
     }
 
+    // ----------------------- write out ---------------------------------------------
+
+    public JkFileTreeSet zipTo(Path dir) {
+        this.jkFileTrees.forEach(tree -> tree.zipTo(dir));
+        return this;
+    }
+
+
+    // -------------------------------------- iterates over trees ----------------------
+
     /**
-     * Returns {@link JkFileTree} instances constituting this
-     * {@link JkFileTreeSet}.
+     * Returns {@link JkFileTree} instances constituting this {@link JkFileTreeSet}.
      */
     public List<JkFileTree> fileTrees() {
         return jkFileTrees;
@@ -173,13 +175,15 @@ public final class JkFileTreeSet {
      * Returns asScopedDependency of each {@link JkFileTree} instances constituting this
      * {@link JkFileTreeSet}.
      */
-    public List<File> roots() {
-        final List<File> result = new LinkedList<>();
+    public List<Path> rootFiles() {
+        final List<Path> result = new LinkedList<>();
         for (final JkFileTree tree : jkFileTrees) {
-            result.add(tree.root().toFile());
+            result.add(tree.rootFile());
         }
         return result;
     }
+
+    // ------------------ Misc -----------------------------------------
 
     /**
      * Returns <code>true</code> if no tree of this set has an existing baseTree.
@@ -212,10 +216,6 @@ public final class JkFileTreeSet {
         return new JkFileTreeSet(list);
     }
 
-    public JkFileTreeSet zipTo(Path dir) {
-        this.jkFileTrees.forEach(tree -> tree.zipTo(dir));
-        return this;
-    }
 
     @Override
     public String toString() {

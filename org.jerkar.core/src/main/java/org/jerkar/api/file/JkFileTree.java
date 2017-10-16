@@ -78,6 +78,14 @@ public final class JkFileTree  {
     }
 
     /**
+     * Returns root of this tree if this tree is a directory tree and returns zip file if this
+     * tree is a zip tree.
+     */
+    public Path rootFile() {
+        return  root.rootFile();
+    }
+
+    /**
      * Returns the filter defined on this {@link JkFileTree}, never <code>null</code>.
      */
     public JkPathMatcher matcher() {
@@ -447,6 +455,13 @@ public final class JkFileTree  {
                 return this;
             }
             return new RootHolder(null, path.resolve(root));
+        }
+
+        Path rootFile() {
+            if (isZip()) {
+                return this.zipFile;
+            }
+            return this.root;
         }
 
     }

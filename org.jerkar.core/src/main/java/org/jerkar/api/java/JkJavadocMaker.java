@@ -135,7 +135,7 @@ public final class JkJavadocMaker {
     private String[] toArguments(File outputDir) {
         final List<String> list = new LinkedList<>();
         list.add("-sourcepath");
-        list.add(JkPathSequence.of(this.srcDirs.roots()).toString());
+        list.add(JkPathSequence.ofPath(this.srcDirs.rootFiles()).toString());
         list.add("-d");
         list.add(outputDir.getAbsolutePath());
         if (JkLog.verbose()) {

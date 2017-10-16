@@ -1,11 +1,9 @@
 package org.jerkar.api.java;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
-import org.jerkar.api.file.JkZipper;
-import org.jerkar.api.utils.JkUtilsPath;
 
 /**
  * Utilities class to produce Jar files with conventional naming
@@ -29,12 +27,12 @@ public final class JkJarMaker {
      * @param manifest Can be <code>null</code>.
      * @param extraFiles Extra files to embed in jar. Can be empty or <code>null</code>.
      */
-    public static void jar(File resultFile, JkManifest manifest, File classDir, JkFileTreeSet extraFiles) {
+    public static void jar(Path resultFile, JkManifest manifest, Path classDir, JkFileTreeSet extraFiles) {
         if (manifest != null && !manifest.isEmpty()) {
             manifest.writeToStandardLocation(classDir);
         }
         JkFileTreeSet treeSet = extraFiles == null ? JkFileTreeSet.empty() : extraFiles;
-        JkFileTreeSet.of(classDir).and(treeSet).zipTo(resultFile.toPath());
+        JkFileTreeSet.of(classDir).and(treeSet).zipTo(resultFile);
     }
 
     /**
@@ -47,29 +45,16 @@ public final class JkJarMaker {
      * @param extraFiles Extra files to embed in jar. Can be empty or <code>null</code>.
      * @param otherJars content of other jar to merge with the original jar
      */
-    public static void fatJar(File resultFile, JkManifest manifest, File classDir,
-                              JkFileTreeSet extraFiles, Iterable<File> otherJars) {
+    public static void fatJar(Path resultFile, JkManifest manifest, Path classDir,
+                              JkFileTreeSet extraFiles, Iterable<Path> otherJars) {
         if (manifest != null && !manifest.isEmpty()) {
             manifest.writeToStandardLocation(classDir);
         }
 
         //JkFileTreeSet.of(classDir).and(extraFiles).zip().merge(otherJars).to(resultFile, EXCLUDE_SIGNATURE_FILTER);
-        JkFileTreeSet.of(classDir).and(extraFiles).andZip(JkUtilsPath.toPaths(otherJars))
-                .andFilter(EXCLUDE_SIGNATURE_FILTER).zipTo(resultFile.toPath());
+        JkFileTreeSet.of(classDir).and(extraFiles).andZip(otherJars)
+                .andFilter(EXCLUDE_SIGNATURE_FILTER).zipTo(resultFile);
 
     }
-
-    /**
-     * Creates a fat jar file according specified parameters. Fat jar file including the content of other jars.
-     * The result jar does not contains other jars as zip entry but content of the other jars is merged with the content
-     * of original jar.
-     * @param originalJar the original Jar to create a fat jar from
-     * @param otherJars content of other jar to merge with the original jar
-     */
-    public static void fatJar(File resultFile, File originalJar, Iterable<File> otherJars) {
-        JkZipper.of(originalJar).merge(otherJars).to(resultFile, EXCLUDE_SIGNATURE_FILTER);
-    }
-
-
 
 }

@@ -12,7 +12,6 @@ import org.jerkar.api.depmanagement.JkPublisher;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkZipper;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaProcess;
@@ -106,7 +105,7 @@ public class AntStyleBuild extends JkBuild {
 
         // Optional : if you want publish sources
         Path srcZip = outputDir().resolve("src.zip");
-        JkZipper.ofPath(this.src).to(srcZip);
+        JkFileTree.of(srcZip).zipTo(srcZip);
 
         JkMavenPublication publication = JkMavenPublication.of(jarFile)
                 .with(info).and(srcZip, "sources");

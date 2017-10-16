@@ -248,7 +248,7 @@ public final class JkUnit {
     /**
      * Returns an enhanced copy of this launcher but specifying location of classes to test.
      */
-    public JkUnit withClassesToTest(File... classDirs) {
+    public JkUnit withClassesToTest(Path... classDirs) {
         return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess,
                 JkFileTreeSet.of(classDirs), this.breakOnFailure, this.printOutputOnConsole);
     }
@@ -362,7 +362,7 @@ public final class JkUnit {
 
     @SuppressWarnings("rawtypes")
     private Collection<Class> getClassesToTest() {
-        final JkClasspath classpath = this.classpath.andHead(this.classesToTest.roots());
+        final JkClasspath classpath = this.classpath.andHeadPath(this.classesToTest.rootFiles());
         final JkClassLoader classLoader = JkClassLoader.system().parent().child(classpath)
                 .loadAllServices();
         final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, this.classesToTest);

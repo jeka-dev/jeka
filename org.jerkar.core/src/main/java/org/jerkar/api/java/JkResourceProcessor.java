@@ -109,13 +109,6 @@ public final class JkResourceProcessor {
     /**
      * @see JkResourceProcessor#and(JkFileTreeSet)
      */
-    public JkResourceProcessor andIfExist(File... dirs) {
-        return and(JkFileTreeSet.of(dirs));
-    }
-
-    /**
-     * @see JkResourceProcessor#and(JkFileTreeSet)
-     */
     public JkResourceProcessor and(JkFileTree tree, Map<String, String> tokenReplacement) {
         return and(tree).and(JkInterpolator.of(JkPathFilter.ACCEPT_ALL, tokenReplacement));
     }
