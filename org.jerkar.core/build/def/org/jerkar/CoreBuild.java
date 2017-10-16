@@ -50,13 +50,13 @@ public class CoreBuild extends JkJavaProjectBuild {
         project.makeArtifactFilesIfNecessary(SOURCES_FILE_ID, JAVADOC_FILE_ID, project.mainArtifactFileId());
         final JkFileTree distrib = JkFileTree.of(distribFolder);
         distrib.importFile(baseDir().getParent().resolve("LICENSE"));
-        distrib.importContent(baseDir().resolve("src/main/dist"));
-        distrib.importContent(baseDir().resolve("src/main/java/META-INF/bin"));
+        distrib.importDir(baseDir().resolve("src/main/dist"));
+        distrib.importDir(baseDir().resolve("src/main/java/META-INF/bin"));
         distrib.importFile(project.artifactFile(project.mainArtifactFileId()).toPath());
-        final List<Path> ivySourceLibs = baseTree().go("build/libs-sources").include("apache-ivy*.jar").filesOnly();
+        final List<Path> ivySourceLibs = baseTree().go("build/libs-sources").include("apache-ivy*.jar").files();
         distrib.go("libs-sources")
-        .importFiles(ivySourceLibs)
-        .importFile(project.artifactPath(SOURCES_FILE_ID));
+            .importFiles(ivySourceLibs)
+            .importFile(project.artifactPath(SOURCES_FILE_ID));
         distrib.go("libs-javadoc").importFile(project.artifactFile(JAVADOC_FILE_ID).toPath());
         final Path distripZipFile = project.artifactFile(DISTRIB_FILE_ID).toPath();
         distrib.zipTo(distripZipFile);

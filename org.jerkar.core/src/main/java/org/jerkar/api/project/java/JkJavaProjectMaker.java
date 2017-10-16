@@ -38,6 +38,7 @@ import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsPath;
 
 /**
  * Beware : Experimental !!!!!!!!!!!!!!!!!!!!!!!
@@ -127,8 +128,8 @@ public class JkJavaProjectMaker {
 
     public void generateJavadoc() {
         JkJavadocMaker.of(project.getSourceLayout().sources(), project.getOutLayout().getJavadocDir())
-        .withClasspath(depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
-        .andOptions(this.javadocOptions).process();
+                .withClasspath(depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
+                .andOptions(this.javadocOptions).process();
         status.javadocGenerated = true;
     }
 
@@ -172,8 +173,8 @@ public class JkJavaProjectMaker {
         final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
         return baseCompiler
                 .withClasspath(classpath)
-                .andSources(project.getSourceLayout().sources().filesOnly())
-                .andSources(JkFileTree.of(project.getOutLayout().generatedSourceDir()).filesOnly())
+                .andSources(project.getSourceLayout().sources().files())
+                .andSources(JkFileTree.of(project.getOutLayout().generatedSourceDir()).files())
                 .withOutputDir(project.getOutLayout().classDir());
     }
 
@@ -209,7 +210,7 @@ public class JkJavaProjectMaker {
         final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andHead(project.getOutLayout().classDir());
         return baseCompiler
                 .withClasspath(classpath)
-                .andSources(project.getSourceLayout().tests().filesOnly())
+                .andSources(project.getSourceLayout().tests().files())
                 .withOutputDir(project.getOutLayout().testClassDir());
     }
 

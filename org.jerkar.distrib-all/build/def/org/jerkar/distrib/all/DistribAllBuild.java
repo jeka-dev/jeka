@@ -2,18 +2,15 @@ package org.jerkar.distrib.all;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 import org.jerkar.CoreBuild;
 import org.jerkar.api.depmanagement.JkArtifactFileId;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
-import org.jerkar.api.file.JkZipper;
 import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
 import org.jerkar.tool.JkBuild;
@@ -41,7 +38,7 @@ class DistribAllBuild extends JkBuild {
         JkLog.info("Copy core distribution locally.");
         CoreBuild core = pluginsJacoco.core; // The core project is got by transitivity
         Path distDir = this.outputDir().resolve("dist");
-        JkFileTree dist = JkFileTree.of(distDir).importContent(core.distribFolder);
+        JkFileTree dist = JkFileTree.of(distDir).importDir(core.distribFolder);
 
         JkLog.info("Add plugins to the distribution");
         JkFileTree ext = dist.go("libs/builtins").importFile(

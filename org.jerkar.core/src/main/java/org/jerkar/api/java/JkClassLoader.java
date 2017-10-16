@@ -413,7 +413,7 @@ public final class JkClassLoader {
      */
     public Set<Class<?>> loadClassesIn(JkFileTreeSet jkFileTreeSet) {
         final Set<Class<?>> result = new HashSet<>();
-        for (final Path path : jkFileTreeSet.allRelativePaths()) {
+        for (final Path path : jkFileTreeSet.relativeFiles()) {
             if (path.toString().endsWith(".class")) {
                 final String className = getAsClassName(path.toString());
                 result.add(this.load(className));
@@ -430,7 +430,7 @@ public final class JkClassLoader {
      */
     public Iterator<Class<?>> iterateClassesIn(JkFileTreeSet jkFileTreeSet) {
         final List<Path> fileNames = jkFileTreeSet.andFilter(JkPathFilter.include("**/*.class"))
-                .allRelativePaths();
+                .relativeFiles();
         return classIterator(fileNames.stream().map(path -> path.toString()).collect(Collectors.toList()));
     }
 
@@ -444,7 +444,7 @@ public final class JkClassLoader {
         final List<Path> paths;
         if (dirOrJar.isDirectory()) {
             paths = JkFileTree.of(dirOrJar).andFilter(JkPathFilter.include("**/*.class"))
-                    .filesOnlyRelative();
+                    .relativeFiles();
         } else {
             final List<ZipEntry> entries = JkUtilsZip.zipEntries(JkUtilsZip.zipFile(dirOrJar));
             paths = new LinkedList<>();

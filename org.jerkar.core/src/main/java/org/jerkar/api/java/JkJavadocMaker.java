@@ -151,7 +151,7 @@ public final class JkJavadocMaker {
         }
         list.addAll(extraArgs);
 
-        for (final Path sourceFile : this.srcDirs.filesOnly()) {
+        for (final Path sourceFile : this.srcDirs.files()) {
             if (sourceFile.getFileName().toString().endsWith(".java")) {
                 list.add(sourceFile.toString());
             }

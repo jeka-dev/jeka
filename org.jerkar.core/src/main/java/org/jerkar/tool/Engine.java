@@ -68,7 +68,7 @@ final class Engine {
 
     private void preCompile() {
         final SourceParser parser = SourceParser.of(this.projectBaseDir,
-                JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER).filesOnly());
+                JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER).files());
         this.buildDependencies = this.buildDependencies.and(parser.dependencies());
         this.buildRepos = parser.importRepos().and(buildRepos);
         this.rootsOfImportedBuilds = parser.projects();
@@ -197,7 +197,7 @@ final class Engine {
         final List<Path>  extraLibs = new LinkedList<>();
         final Path localDeflibDir = this.projectBaseDir.resolve(JkConstants.BUILD_BOOT);
         if (Files.exists(localDeflibDir)) {
-            extraLibs.addAll(JkFileTree.of(localDeflibDir).include("**/*.jar").filesOnly());
+            extraLibs.addAll(JkFileTree.of(localDeflibDir).include("**/*.jar").files());
         }
         return JkPathSequence.ofPath(extraLibs).withoutDuplicates();
     }
@@ -321,7 +321,7 @@ final class Engine {
     private JkJavaCompiler baseBuildCompiler() {
         final JkFileTree buildSource = JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER);
         JkUtilsPath.createDirectories(resolver.buildClassDir);
-        return JkJavaCompiler.outputtingIn(resolver.buildClassDir.toFile()).andSources(buildSource.filesOnly()).failOnError(true);
+        return JkJavaCompiler.outputtingIn(resolver.buildClassDir.toFile()).andSources(buildSource.files()).failOnError(true);
     }
 
     private JkDependencyResolver getBuildDefDependencyResolver() {

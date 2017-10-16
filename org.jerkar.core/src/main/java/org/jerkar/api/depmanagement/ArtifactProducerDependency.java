@@ -47,7 +47,7 @@ class ArtifactProducerDependency extends JkComputedDependency  {
     }
 
     private static List<File> jars(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
-        JkPathSequence result = JkPathSequence.of();
+        JkPathSequence result = JkPathSequence.ofPath();
         for (final JkArtifactFileId artifactFileId : artifactIds) {
             result = result.and( producer.artifactFile(artifactFileId));
         }
@@ -55,7 +55,7 @@ class ArtifactProducerDependency extends JkComputedDependency  {
     }
 
     private static List<File> runtimeDeps(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
-        JkPathSequence result = JkPathSequence.of();
+        JkPathSequence result = JkPathSequence.ofPath();
         for (final JkArtifactFileId artifactFileId : artifactIds) {
             result = result.and( producer.runtimeDependencies(artifactFileId));
         }

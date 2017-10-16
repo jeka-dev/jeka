@@ -53,8 +53,9 @@ public final class JkJarMaker {
             manifest.writeToStandardLocation(classDir);
         }
 
-        JkFileTreeSet.of(classDir).and(extraFiles).zip().merge(otherJars).to(resultFile, EXCLUDE_SIGNATURE_FILTER);
-        JkFileTreeSet.of(classDir).and(extraFiles).andZip(JkUtilsPath.toPaths());
+        //JkFileTreeSet.of(classDir).and(extraFiles).zip().merge(otherJars).to(resultFile, EXCLUDE_SIGNATURE_FILTER);
+        JkFileTreeSet.of(classDir).and(extraFiles).andZip(JkUtilsPath.toPaths(otherJars))
+                .andFilter(EXCLUDE_SIGNATURE_FILTER).zipTo(resultFile.toPath());
 
     }
 

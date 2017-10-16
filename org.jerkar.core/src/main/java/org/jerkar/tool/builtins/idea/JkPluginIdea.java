@@ -51,7 +51,7 @@ public final class JkPluginIdea implements JkPlugin {
     @JkDoc("Generates ./idea/modules.xml file")
     public void generateModulesXml(JkBuild build) {
         final Path current = build.baseTree().root();
-        final Iterable<Path> imls = build.baseTree().include("**/*.iml").filesOnly();
+        final Iterable<Path> imls = build.baseTree().include("**/*.iml").files();
         final ModulesXmlGenerator modulesXmlGenerator = new ModulesXmlGenerator(current, imls);
         modulesXmlGenerator.generate();
     }

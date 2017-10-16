@@ -112,45 +112,39 @@ public final class JkFileTreeSet {
         return new JkFileTreeSet(list);
     }
 
-
-
-
     /**
      * Creates a {@link JkFileTree} which is a copy of this {@link JkFileTree}
      * augmented with the specified {@link JkPathFilter}
      */
     public JkFileTreeSet andFilter(JkPathFilter filter) {
         final List<JkFileTree> list = new LinkedList<>();
-        for (final JkFileTree dirView : this.jkFileTrees) {
-            list.add(dirView.andFilter(filter));
+        for (final JkFileTree tree : this.jkFileTrees) {
+            list.add(tree.andFilter(filter));
         }
         return new JkFileTreeSet(list);
     }
 
-
     /**
-     * Returns files contained in this {@link JkFileTreeSet} as a list of file.
+     * Returns a concatenation of {@link #files()} for all tree involved in this set.
      */
-    public List<Path> filesOnly() {
+    public List<Path> files() {
         final LinkedList<Path> result = new LinkedList<>();
         for (final JkFileTree dirView : this.jkFileTrees) {
             if (dirView.exists()) {
-                result.addAll(dirView.filesOnly());
+                result.addAll(dirView.files());
             }
         }
         return result;
     }
 
-
     /**
-     * Returns path of each files file contained in this {@link JkFileTreeSet}
-     * relative to the asScopedDependency of their respective {@link JkFileTree}.
+     * Returns a concatenation of {@link #relativeFiles()} ()} for all tree involved in this set.
      */
-    public List<Path> allRelativePaths() {
+    public List<Path> relativeFiles() {
         final LinkedList<Path> result = new LinkedList<>();
         for (final JkFileTree dir : this.jkFileTrees) {
             if (dir.exists()) {
-                result.addAll(dir.filesOnlyRelative());
+                result.addAll(dir.relativeFiles());
             }
         }
         return result;
@@ -199,21 +193,10 @@ public final class JkFileTreeSet {
         return result;
     }
 
-    /**
-     * Returns a {@link JkZipper} made of the files contained in this
-     * {@link JkFileTreeSet}.
-     */
-    public JkZipper zip() {
-        return JkZipper.of(this);
-    }
-
     public JkFileTreeSet zipTo(Path dir) {
         this.jkFileTrees.forEach(tree -> tree.zipTo(dir));
         return this;
     }
-
-
-
 
     @Override
     public String toString() {

@@ -29,6 +29,7 @@ import org.jerkar.api.utils.JkUtilsZip.JkZipEntryFilter;
  * Defines elements to embed in a zip archive and methods to write archive on
  * disk.
  */
+@Deprecated
 public final class JkZipper {
 
     /** Specify compression level */
@@ -114,12 +115,6 @@ public final class JkZipper {
                 JkCompressionLevel.DEFAULT_COMPRESSION, JkCompressionMethod.DEFLATED);
     }
 
-    @SuppressWarnings("unchecked")
-    static JkZipper of(JkFileTree... jkDirs) {
-        return new JkZipper(Arrays.asList(jkDirs), Collections.EMPTY_LIST,
-                JkCompressionLevel.DEFAULT_COMPRESSION, JkCompressionMethod.DEFLATED);
-    }
-
     /**
      * Returns a {@link JkZipFile} identical to this one but containing also the entries
      * contained in the specified archive files.
@@ -130,14 +125,6 @@ public final class JkZipper {
                 archiveFiles), this.jkCompressionLevel, this.jkCompressionMethod);
     }
 
-
-    /**
-     * Returns a {@link JkZipFile} identical to this one but containing also the entries
-     * contained in the specified archive files.
-     */
-    public JkZipper merge(File... archiveFiles) {
-        return merge(Arrays.asList(archiveFiles));
-    }
 
     /**
      * Returns a {@link JkZipFile} identical to this one but with the specified compression level.
@@ -156,7 +143,7 @@ public final class JkZipper {
     /**
      * Writes this zip definition to the specified file.
      */
-    public JkCheckSumer to(File zipFile) {
+    private JkCheckSumer to(File zipFile) {
         return to(zipFile, JkPathFilter.ACCEPT_ALL);
     }
 
@@ -209,7 +196,7 @@ public final class JkZipper {
                     file = new ZipFile(archiveToMerge);
                 } catch (final FileNotFoundException e) {
                     throw new RuntimeException("File  "
-                            + archiveToMerge.getPath() + " does not exist.", e);
+                            + archiveToMerge.getPath() + " does not exists.", e);
                 } catch (final IOException e) {
                     throw new RuntimeException("Error while opening zip file "
                             + archiveToMerge.getPath(), e);
@@ -234,7 +221,7 @@ public final class JkZipper {
             return;
         }
         final File base = JkUtilsFile.canonicalFile(fileTree.root().toFile());
-        for (final Path file : fileTree.andFilter(filter).filesOnly()) {
+        for (final Path file : fileTree.andFilter(filter).files()) {
             JkUtilsZip.addZipEntry(zos, file.toFile(), base,
                     JkCompressionMethod.STORED.equals(this.jkCompressionMethod));
         }
