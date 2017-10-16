@@ -40,8 +40,8 @@ public final class JkPluginIdea implements JkPlugin {
         generator.setSourceJavaVersion(project.getSourceVersion());
         generator.setForceJdkVersion(true);
         final String xml = generator.generate();
-        final Path imlFile = project.getSourceLayout().basePath().resolve(
-                project.getSourceLayout().basePath().getFileName().toString() + ".iml");
+        final Path imlFile = project.getSourceLayout().baseDir().resolve(
+                project.getSourceLayout().baseDir().getFileName().toString() + ".iml");
         JkUtilsPath.deleteFile(imlFile);
         JkUtilsPath.write(imlFile, xml.getBytes(Charset.forName("UTF-8")));
         JkLog.info(imlFile + " generated.");

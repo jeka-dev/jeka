@@ -47,7 +47,7 @@ public class JkImlGeneratorTest {
         final File desktop = new File(top, "desktop");
         final JkDependencies deps = JkDependencies.of(coreProject);
         final JkImlGenerator desktopGenerator =
-                new JkImlGenerator(sourceLayout.withBaseDir(desktop), deps,
+                new JkImlGenerator(sourceLayout.withBaseDir(desktop.toPath()), deps,
                         coreProject.maker().getDependencyResolver());
         final String result2 = desktopGenerator.generate();
 

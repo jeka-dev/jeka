@@ -84,7 +84,7 @@ public final class JkImlGenerator {
      * Constructs a {@link JkImlGenerator} to the project base directory
      */
     public JkImlGenerator(JkProjectSourceLayout sourceLayout, JkDependencies dependencies,
-            JkDependencyResolver resolver) {
+                          JkDependencyResolver resolver) {
         super();
         this.sourceLayout = sourceLayout;
         this.dependencies = dependencies;
@@ -182,7 +182,7 @@ public final class JkImlGenerator {
         writer.writeCharacters(T2);
 
         // Write test sources
-        final Path projectDir = this.sourceLayout.basePath();
+        final Path projectDir = this.sourceLayout.baseDir();
         for (final JkFileTree fileTree : this.sourceLayout.tests().fileTrees()) {
             if (fileTree.exists()) {
                 writer.writeCharacters(T3);
@@ -407,7 +407,7 @@ public final class JkImlGenerator {
             writer.writeCharacters("\n");
             writer.writeCharacters(T5);
             writer.writeEmptyElement("baseTree");
-            writer.writeAttribute("url", ideaPath(this.sourceLayout.basePath(), file));
+            writer.writeAttribute("url", ideaPath(this.sourceLayout.baseDir(), file));
             writer.writeCharacters("\n" + T4);
             writer.writeEndElement();
         } else {

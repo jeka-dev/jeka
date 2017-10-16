@@ -94,7 +94,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
     public JkJavaProject(File baseDir) {
         this.baseDir = baseDir;
         this.artifactName = this.baseDir.getName();
-        this.sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir);
+        this.sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir.toPath());
         this.outLayout = JkProjectOutLayout.classicJava().withOutputDir(new File(baseDir, "build/output"));
         this.dependencies = JkDependencies.ofLocalScoped(new File(baseDir, "build/libs"));
         this.addDefaultArtifactFiles();
@@ -214,7 +214,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
     }
 
     public JkJavaProject setSourceLayout(JkProjectSourceLayout sourceLayout) {
-        this.sourceLayout = sourceLayout.withBaseDir(this.baseDir);
+        this.sourceLayout = sourceLayout.withBaseDir(this.baseDir.toPath());
         return this;
     }
 

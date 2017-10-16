@@ -1,12 +1,11 @@
 package org.jerkar.api.project;
 
-import java.io.File;
-import java.nio.file.Path;
-
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
-import org.jerkar.api.utils.JkUtilsFile;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Describes a project layout about the source parts. Generated sources/resources are not
@@ -25,11 +24,12 @@ public class JkProjectSourceLayout {
      * non-java files located under src/main/java and src/test/java are also considered as resources.
      */
     public static JkProjectSourceLayout mavenJava() {
-        final File baseDir = new File(".");
-        final JkFileTreeSet sources = JkFileTreeSet.of(new File(baseDir,"src/main/java"));
-        final JkFileTreeSet resources = JkFileTreeSet.of(new File(baseDir, "src/main/resources")).and(sources.andFilter(JAVA_RESOURCE_FILTER));
-        final JkFileTreeSet tests = JkFileTreeSet.of(new File(baseDir,"src/test/java"));
-        final JkFileTreeSet testResources = JkFileTreeSet.of(new File(baseDir, "src/test/resources")).and(tests.andFilter(JAVA_RESOURCE_FILTER));
+        final Path baseDir = Paths.get(".");
+        final JkFileTreeSet sources = JkFileTreeSet.of(baseDir.resolve("src/main/java"));
+        final JkFileTreeSet resources = JkFileTreeSet.of(baseDir.resolve("src/main/resources"))
+                .and(sources.andFilter(JAVA_RESOURCE_FILTER));
+        final JkFileTreeSet tests = JkFileTreeSet.of(baseDir.resolve("src/test/java"));
+        final JkFileTreeSet testResources = JkFileTreeSet.of(baseDir.resolve("src/test/resources")).and(tests.andFilter(JAVA_RESOURCE_FILTER));
         return new JkProjectSourceLayout(baseDir, sources, resources, tests, testResources);
     }
 
@@ -38,16 +38,16 @@ public class JkProjectSourceLayout {
      * and resources are located in test.
      */
     public static JkProjectSourceLayout simple() {
-        final File baseDir = new File(".");
-        final JkFileTreeSet sources = JkFileTreeSet.of(new File(baseDir,"src"));
+        final Path baseDir = Paths.get(".");
+        final JkFileTreeSet sources = JkFileTreeSet.of(baseDir.resolve("src"));
         final JkFileTreeSet resources = sources.andFilter(JAVA_RESOURCE_FILTER);
-        final JkFileTreeSet tests = JkFileTreeSet.of(new File(baseDir,"test"));
+        final JkFileTreeSet tests = JkFileTreeSet.of(baseDir.resolve("test"));
         final JkFileTreeSet testResources = tests.andFilter(JAVA_RESOURCE_FILTER);
         return new JkProjectSourceLayout(baseDir, sources, resources, tests, testResources);
     }
 
 
-    private final File baseDir;
+    private final Path baseDir;
 
     /**
      * Returns the location of production source code that has been edited
@@ -72,7 +72,8 @@ public class JkProjectSourceLayout {
      */
     private final JkFileTreeSet testResources;
 
-    private JkProjectSourceLayout(File baseDir, JkFileTreeSet sources, JkFileTreeSet resources, JkFileTreeSet tests, JkFileTreeSet testResources) {
+    private JkProjectSourceLayout(Path baseDir, JkFileTreeSet sources, JkFileTreeSet resources,
+                                  JkFileTreeSet tests, JkFileTreeSet testResources) {
         super();
         this.baseDir = baseDir;
         this.sources = sources;
@@ -84,12 +85,9 @@ public class JkProjectSourceLayout {
     /**
      * Re-localise all locations defined under the base directory to the specified new base directory keeping the same relative path.
      */
-    public JkProjectSourceLayout withBaseDir(File newBaseDir) {
+    public JkProjectSourceLayout withBaseDir(Path newBaseDir) {
         return new JkProjectSourceLayout(newBaseDir,
-                move(sources, baseDir, newBaseDir),
-                move(resources, baseDir, newBaseDir),
-                move(tests, baseDir, newBaseDir),
-                move(testResources, baseDir, newBaseDir));
+                sources, resources, tests, testResources);
     }
 
     public JkProjectSourceLayout withSources(JkFileTreeSet sources) {
@@ -124,21 +122,6 @@ public class JkProjectSourceLayout {
         return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, this.tests, baseTree().go(relativePath).asSet());
     }
 
-    private static JkFileTreeSet move(JkFileTreeSet original, File originalBase, File newBase) {
-        JkFileTreeSet result = JkFileTreeSet.empty();
-        for (final JkFileTree fileTree : original.fileTrees()) {
-            if (!JkUtilsFile.isAncestor(originalBase, fileTree.root().toFile())) {
-                result = result.and(fileTree);
-            } else {
-                final String relPath = JkUtilsFile.getRelativePath(originalBase, fileTree.root().toFile());
-                final File root = new File(newBase, relPath);
-                final JkFileTree movedTree = JkFileTree.of(root).andMatcher(fileTree.matcher());
-                result = result.and(movedTree);
-            }
-        }
-        return result;
-    }
-
 
     // --------------------------- Views ---------------------------------
 
@@ -146,14 +129,14 @@ public class JkProjectSourceLayout {
      * Returns location of production source code (containing only edited sources, not generated sources).
      */
     public final JkFileTreeSet sources() {
-        return sources;
+        return sources.resolve(this.baseDir);
     }
 
     /**
      * Returns location of production resources.
      */
     public final JkFileTreeSet resources() {
-        return resources;
+        return resources.resolve(this.baseDir);
     }
 
     /**
@@ -161,23 +144,20 @@ public class JkProjectSourceLayout {
      * sources).
      */
     public final JkFileTreeSet tests() {
-        return tests;
+        return tests.resolve(this.baseDir);
     }
 
     /**
      * Returns location of test resources.
      */
     public final JkFileTreeSet testResources() {
-        return testResources;
+        return testResources.resolve(this.baseDir);
     }
 
-    public File baseDir() {
+    public Path baseDir() {
         return baseDir;
     }
 
-    public Path basePath() {
-        return baseDir.toPath();
-    }
 
     /**
      * Returns base directory as a {@link JkFileTree}.

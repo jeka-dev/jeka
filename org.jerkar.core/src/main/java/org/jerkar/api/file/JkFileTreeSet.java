@@ -60,6 +60,17 @@ public final class JkFileTreeSet {
     }
 
     /**
+     * Creates a {@link JkFileTreeSet} to an array of folder.
+     */
+    public static final JkFileTreeSet of(Path... folders) {
+        final List<JkFileTree> dirs = new ArrayList<>(folders.length);
+        for (final Path folder : folders) {
+            dirs.add(JkFileTree.of(folder));
+        }
+        return new JkFileTreeSet(dirs);
+    }
+
+    /**
      * Creates a {@link JkFileTreeSet} which is a concatenation of this
      * {@link JkFileTreeSet} and the {@link JkFileTree} array passed as
      * parameter.
@@ -191,6 +202,14 @@ public final class JkFileTreeSet {
             result += dirView.count(max - result, includeFolder);
         }
         return result;
+    }
+
+    public JkFileTreeSet resolve(Path path) {
+        List<JkFileTree> list = new LinkedList<>();
+        for (JkFileTree tree : jkFileTrees) {
+            list.add(tree.resolve(path));
+        }
+        return new JkFileTreeSet(list);
     }
 
     public JkFileTreeSet zipTo(Path dir) {

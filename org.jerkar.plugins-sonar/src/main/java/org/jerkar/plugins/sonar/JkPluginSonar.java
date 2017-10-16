@@ -1,6 +1,7 @@
 package org.jerkar.plugins.sonar;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class JkPluginSonar implements JkPlugin {
 
     public static JkSonar configureSonarFrom(JkJavaProject project) {
         final JkProjectSourceLayout sourceLayout = project.getSourceLayout();
-        final File baseDir = sourceLayout.baseDir();
+        final Path baseDir = sourceLayout.baseDir();
         final JkPathSequence libs = project.maker().getDependencyResolver().get(project.getDependencies(),
                 JkJavaDepScopes.RUNTIME, JkJavaDepScopes.PROVIDED);
         final File testReportDir = project.getOutLayout().testReportDir();
@@ -38,19 +39,19 @@ public class JkPluginSonar implements JkPlugin {
         final JkVersion version = module != null ? module.version() : JkVersion.name("");
         return JkSonar
                 .of(fullName, name, version)
-                .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)
+                .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir.toFile())
                 .withBinaries(project.getOutLayout().classDir())
                 .withLibraries(libs)
                 .withSources(sourceLayout.sources().roots())
                 .withTest(sourceLayout.tests().roots())
-                .withProperty(JkSonar.WORKING_DIRECTORY, sourceLayout.basePath().resolve("build/.sonar").toString())
+                .withProperty(JkSonar.WORKING_DIRECTORY, sourceLayout.baseDir().resolve("build/.sonar").toString())
                 .withProperty(JkSonar.JUNIT_REPORTS_PATH,
-                        JkUtilsFile.getRelativePath(baseDir, new File(testReportDir, "junit")))
+                        JkUtilsFile.getRelativePath(baseDir.toFile(), new File(testReportDir, "junit")))
                 .withProperty(JkSonar.SUREFIRE_REPORTS_PATH,
-                        JkUtilsFile.getRelativePath(baseDir, new File(testReportDir, "junit")))
+                        JkUtilsFile.getRelativePath(baseDir.toFile(), new File(testReportDir, "junit")))
                 .withProperty(JkSonar.JACOCO_REPORTS_PATHS,
                         JkUtilsFile
-                                .getRelativePath(baseDir, project.getOutLayout().outputFile("jacoco/jacoco.exec")));
+                                .getRelativePath(baseDir.toFile(), project.getOutLayout().outputFile("jacoco/jacoco.exec")));
     }
 
     @JkDoc("Launch a Sonar analysis")

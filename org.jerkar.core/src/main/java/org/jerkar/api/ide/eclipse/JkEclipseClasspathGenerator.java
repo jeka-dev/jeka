@@ -77,7 +77,7 @@ public final class JkEclipseClasspathGenerator {
      * Constructs a {@link JkEclipseClasspathGenerator}.
      */
     public JkEclipseClasspathGenerator(JkProjectSourceLayout sourceLayout, JkDependencies dependencies,
-            JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
+                                       JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
         this.sourceLayout = sourceLayout;
         this.dependencies = dependencies;
         this.dependencyResolver = resolver;
@@ -100,7 +100,7 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private boolean hasBuildDef() {
-        return new File(this.sourceLayout.baseDir(), JkConstants.BUILD_DEF_DIR).exists();
+        return new File(this.sourceLayout.baseDir().toFile(), JkConstants.BUILD_DEF_DIR).exists();
     }
 
 
@@ -173,7 +173,7 @@ public final class JkEclipseClasspathGenerator {
         final Set<String> paths = new HashSet<>();
 
         // Write sources for build classes
-        if (hasBuildDef() && new File(sourceLayout.baseDir(), JkConstants.BUILD_DEF_DIR).exists()) {
+        if (hasBuildDef() && new File(sourceLayout.baseDir().toFile(), JkConstants.BUILD_DEF_DIR).exists()) {
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "kind", "src",
                     "including", "**/*",
@@ -301,7 +301,7 @@ public final class JkEclipseClasspathGenerator {
             if (!fileTree.exists()) {
                 continue;
             }
-            final String path = sourceLayout.basePath().relativize(fileTree.root()).toString().replace(File.separator, "/");
+            final String path = sourceLayout.baseDir().relativize(fileTree.root()).toString().replace(File.separator, "/");
             if (sourcePaths.contains(path)) {
                 continue;
             }
@@ -321,7 +321,7 @@ public final class JkEclipseClasspathGenerator {
             if (!fileTree.exists()) {
                 continue;
             }
-            final String path = relativePathIfPossible(sourceLayout.baseDir(), fileTree.root().toFile());
+            final String path = relativePathIfPossible(sourceLayout.baseDir().toFile(), fileTree.root().toFile());
             if (sourcePaths.contains(path)) {
                 continue;
             }

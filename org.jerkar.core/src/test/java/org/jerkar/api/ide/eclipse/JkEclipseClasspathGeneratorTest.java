@@ -55,7 +55,7 @@ public class JkEclipseClasspathGeneratorTest {
         final File desktop = new File(top, "desktop");
         final JkDependencies deps = JkDependencies.of(coreProject);
         final JkEclipseClasspathGenerator desktopGenerator =
-                new JkEclipseClasspathGenerator(sourceLayout.withBaseDir(desktop), deps,
+                new JkEclipseClasspathGenerator(sourceLayout.withBaseDir(desktop.toPath()), deps,
                         coreProject.maker().getDependencyResolver(), JkJavaVersion.V8);
         final String result2 = desktopGenerator.generate();
 

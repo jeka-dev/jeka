@@ -31,7 +31,7 @@ public class JkEclipseClasspathApplier {
      * Modifies the specified javaProject in a way it reflects its eclipse .classpath file.
      */
     public void apply(JkJavaProject javaProject) {
-        final Path dotClasspathFile =javaProject.getSourceLayout().baseDir().toPath().resolve(".classpath");
+        final Path dotClasspathFile =javaProject.getSourceLayout().baseDir().resolve(".classpath");
         if (!Files.exists(dotClasspathFile)) {
             throw new JkException(".classpath file not found in " + javaProject.getSourceLayout().baseDir());
         }
@@ -40,7 +40,7 @@ public class JkEclipseClasspathApplier {
 
     private void apply(JkJavaProject javaProject, DotClasspathModel dotClasspathModel) {
         final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
-        final Path baseDir = javaProject.getSourceLayout().baseDir().toPath();
+        final Path baseDir = javaProject.getSourceLayout().baseDir();
         final JkFileTreeSet sources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources;
         final JkFileTreeSet testSources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources;
         final JkFileTreeSet resources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources
@@ -51,7 +51,7 @@ public class JkEclipseClasspathApplier {
         final ScopeResolver scopeResolver = scopeResolver(baseDir);
         final List<Lib> libs = dotClasspathModel.libs(baseDir, scopeResolver);
         final JkDependencies dependencies = Lib.toDependencies(/*build*/
-                javaProject.getSourceLayout().baseDir().toPath(), libs, this);
+                javaProject.getSourceLayout().baseDir(), libs, this);
 
         JkProjectSourceLayout sourceLayout = javaProject.getSourceLayout();
         sourceLayout = sourceLayout.withSources(sources).withResources(resources)

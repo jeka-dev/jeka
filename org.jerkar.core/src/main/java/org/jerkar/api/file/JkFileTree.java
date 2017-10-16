@@ -337,6 +337,15 @@ public final class JkFileTree  {
         return JkUtilsPath.childrenCount(root(), max, includeDirectories);
     }
 
+    /**
+     * If the root of this tree is absolute then this method returns this tree.
+     * If the root of this tree is relative then this method returns a tree having a root
+     * resolved from the specified path to this root.
+     */
+    public JkFileTree resolve(Path path) {
+        return new JkFileTree(root.resolve(path), this.filter);
+    }
+
 
     /**
      * Returns a {@link JkFileTreeSet} containing this tree as its single
@@ -431,6 +440,13 @@ public final class JkFileTree  {
                     throw new UncheckedIOException(e);
                 }
             }
+        }
+
+        RootHolder resolve(Path path) {
+            if (isZip()) {
+                return this;
+            }
+            return new RootHolder(null, path.resolve(root));
         }
 
     }
