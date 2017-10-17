@@ -12,7 +12,7 @@ Breaking a common belief, it makes proof that Java is perfectly suitable in this
 Master version now relies on JDK 8 while 0.6 and prior are relying on JDK 6.
 In order to leverage new features bring by these versions, **Jerkar is deeply reworked**. <br/>
 Also, to avoid bloating API with legacy stuff, Jerkar 0.7 won't be compatible with Jerkar 0.6 (you can still run current builds using embedded mode). 
-We expecpt from this move a much cleaner and polished API for a more intuitive product.
+We expect from this move a much cleaner and polished API for a more intuitive product.
 
 # How to use Jerkar
 
