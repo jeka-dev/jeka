@@ -1,5 +1,6 @@
 package org.jerkar.api.java;
 
+
 import java.io.File;
 import java.io.FileFilter;
 import java.lang.reflect.InvocationHandler;
@@ -7,10 +8,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,6 +30,7 @@ import java.util.zip.ZipFile;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
+
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -54,31 +56,32 @@ public final class JkClassLoader {
 
     private static final int JAVA_SUFFIX_LENGTH = ".java".length();
 
-    private static File urlCacheDir = new File(JkLocator.jerkarUserHomeDir().toFile(), "cache/url-content");
+    private static Path urlCacheDir = JkLocator.jerkarUserHomeDir().resolve("cache/url-content");
 
     static {
-        urlCacheDir.mkdirs();
+        JkUtilsPath.createDirectories(urlCacheDir);
     }
 
     /**
      * A {@link FileFilter} accepting only .class files.
      */
-    public static final FileFilter CLASS_FILE_FILTER = file -> (file.isFile() && file.getName().endsWith(CLASS_SUFFIX));
+    public static final PathMatcher CLASS_FILE_FILTER = file -> (Files.isRegularFile(file)
+            && file.getFileName().toString().endsWith(CLASS_SUFFIX));
 
     /**
      * Set the directory where are cached urls. For its internal use, Jerkar may
      * copy the the content of an URL to a file. This class manages the central
      * place where those URL are cached.
      */
-    public static void urlCacheDir(File dir) {
-        dir.mkdirs();
+    public static void urlCacheDir(Path dir) {
+        JkUtilsPath.createDirectories(dir);
         urlCacheDir = dir;
     }
 
     /**
-     * @see #urlCacheDir(File)
+     * @see #urlCacheDir(Path)
      */
-    public static File urlCacheDir() {
+    public static Path urlCacheDir() {
         return urlCacheDir;
     }
 
@@ -131,7 +134,7 @@ public final class JkClassLoader {
     /**
      * @see #child(Iterable)
      */
-    public JkClassLoader child(File... entries) {
+    public JkClassLoader child(Path... entries) {
         return new JkClassLoader(new URLClassLoader(toUrl(Arrays.asList(entries)), this.delegate));
     }
 
@@ -139,7 +142,7 @@ public final class JkClassLoader {
      * Creates a <code>JkClassLoader</code>, child of this one and having the
      * specified entries.
      */
-    public JkClassLoader child(Iterable<File> entries) {
+    public JkClassLoader child(Iterable<Path> entries) {
         return new JkClassLoader(new URLClassLoader(toUrl(entries), this.delegate));
     }
 
@@ -156,7 +159,7 @@ public final class JkClassLoader {
      * @see #sibling(Iterable)
      */
     public JkClassLoader sibling(Object... fileOrUrls) {
-        final List<File> files = new LinkedList<>();
+        final List<Path> files = new LinkedList<>();
         for (final Object entry : fileOrUrls) {
             if (entry instanceof URL) {
                 final URL url = (URL) entry;
@@ -165,19 +168,22 @@ public final class JkClassLoader {
                 if (JkUtilsString.isBlank(path)
                         || (!candidate.isFile() && !candidate.isDirectory())) {
                     final File file = JkUtilsIO.copyUrlContentToCacheFile(url,
-                            JkLog.infoStreamIfVerbose(), urlCacheDir);
-                    files.add(file);
+                            JkLog.infoStreamIfVerbose(), urlCacheDir.toFile());
+                    files.add(file.toPath());
                 } else {
-                    files.add(candidate);
+                    files.add(candidate.toPath());
                 }
             } else if (entry instanceof File) {
-                files.add((File) entry);
-            } else {
+                files.add(((File) entry).toPath());
+            } else if (entry instanceof Path)  {
+                files.add((Path) entry);
+            }
+            else {
                 throw new IllegalArgumentException("This method only accept File and URL, not "
                         + entry.getClass().getName());
             }
         }
-        return parent().child(this.childClasspath().and(files));
+        return parent().child(this.childClasspath().and(files).entries());
     }
 
     /**
@@ -189,9 +195,9 @@ public final class JkClassLoader {
         for (final Object entry : fileOrUrls) {
             if (entry instanceof URL) {
                 objects.add(entry);
-            } else if (entry instanceof File) {
-                final File file = (File) entry;
-                if (file.exists()) {
+            } else if (entry instanceof Path) {
+                final Path file = (Path) entry;
+                if (Files.exists(file)) {
                     objects.add(file);
                 }
             }
@@ -214,7 +220,7 @@ public final class JkClassLoader {
      * the parent classloaders.
      */
     public JkClasspath childClasspath() {
-        return JkClasspath.of(JkUtilsPath.toFiles(JkUtilsSystem.classloaderEntries(this.delegate)));
+        return JkClasspath.of(JkUtilsSystem.classloaderEntries(this.delegate));
     }
 
     /**
@@ -225,9 +231,9 @@ public final class JkClassLoader {
         if (this.delegate.getParent() != null) {
             classpath = this.parent().fullClasspath();
         } else {
-            classpath = JkClasspath.of();
+            classpath = JkClasspath.ofPath();
         }
-        return classpath.and(childClasspath());
+        return classpath.and(childClasspath().entries());
     }
 
     /**
@@ -345,20 +351,20 @@ public final class JkClassLoader {
      * @param entryFilter
      *            The classpath entry filter. Can be <code>null</code>.
      */
-    public Set<Class<?>> loadClassesInEntries(FileFilter entryFilter) {
-        final List<File> classfiles = new LinkedList<>();
-        final Map<File, File> file2Entry = new HashMap<>();
-        for (final File file : childClasspath()) {
-            if (entryFilter == null || entryFilter.accept(file) && file.isDirectory()) {
-                final List<File> files = JkUtilsFile.filesOf(file, CLASS_FILE_FILTER, false);
+    public Set<Class<?>> loadClassesInEntries(PathMatcher entryFilter) {
+        final List<Path> classfiles = new LinkedList<>();
+        final Map<Path, Path> file2Entry = new HashMap<>();
+        for (final Path file : childClasspath().entries()) {
+            if (entryFilter == null || entryFilter.matches(file) && Files.isDirectory(file)) {
+                final List<Path> files = JkFileTree.of(file).andMatcher(CLASS_FILE_FILTER).files();
                 classfiles.addAll(files);
                 JkUtilsIterable.putMultiEntry(file2Entry, files, file);
             }
         }
         final Set<Class<?>> result = new HashSet<>();
-        for (final File file : classfiles) {
-            final File entry = file2Entry.get(file);
-            final String relativeName = JkUtilsFile.getRelativePath(entry, file);
+        for (final Path file : classfiles) {
+            final Path entry = file2Entry.get(file);
+            final String relativeName = entry.relativize(file).toString();
             final String className = getAsClassName(relativeName);
             Class<?> clazz;
             try {
@@ -409,7 +415,7 @@ public final class JkClassLoader {
      * Returns all classes of this <code>classloader</code> that are defined
      * inside the provided <code>JkFileTreeSet</code>.
      *
-     * @see JkClassLoader#loadClassesInEntries(FileFilter)
+     * @see JkClassLoader#loadClassesInEntries(PathMatcher)
      */
     public Set<Class<?>> loadClassesIn(JkFileTreeSet jkFileTreeSet) {
         final Set<Class<?>> result = new HashSet<>();
@@ -426,7 +432,7 @@ public final class JkClassLoader {
      * Returns all classes of this <code>classloader</code> that are defined
      * inside the provided <code>JkFileTreeSet</code>.
      *
-     * @see JkClassLoader#loadClassesInEntries(FileFilter)
+     * @see JkClassLoader#loadClassesInEntries(PathMatcher)
      */
     public Iterator<Class<?>> iterateClassesIn(JkFileTreeSet jkFileTreeSet) {
         final List<Path> fileNames = jkFileTreeSet.andFilter(JkPathFilter.include("**/*.class"))
@@ -438,15 +444,15 @@ public final class JkClassLoader {
      * Returns all classes of this <code>classloader</code> that are defined
      * inside the specified directory.
      *
-     * @see JkClassLoader#loadClassesInEntries(FileFilter)
+     * @see JkClassLoader#loadClassesInEntries(PathMatcher)
      */
-    private Iterator<Class<?>> iterateClassesIn(File dirOrJar) {
+    private Iterator<Class<?>> iterateClassesIn(Path dirOrJar) {
         final List<Path> paths;
-        if (dirOrJar.isDirectory()) {
+        if (Files.isDirectory(dirOrJar)) {
             paths = JkFileTree.of(dirOrJar).andFilter(JkPathFilter.include("**/*.class"))
                     .relativeFiles();
         } else {
-            final List<ZipEntry> entries = JkUtilsZip.zipEntries(JkUtilsZip.zipFile(dirOrJar));
+            final List<ZipEntry> entries = JkUtilsZip.zipEntries(JkUtilsZip.zipFile(dirOrJar.toFile()));
             paths = new LinkedList<>();
             for (final ZipEntry entry : entries) {
                 if (entry.getName().endsWith(".class")) {
@@ -480,13 +486,13 @@ public final class JkClassLoader {
         };
     }
 
-    private static URL[] toUrl(Iterable<File> files) {
+    private static URL[] toUrl(Iterable<Path> files) {
         final List<URL> urls = new ArrayList<>();
-        for (final File file : files) {
+        for (final Path file : files) {
             try {
-                urls.add(file.toURI().toURL());
+                urls.add(file.toUri().toURL());
             } catch (final MalformedURLException e) {
-                throw new IllegalArgumentException(file.getPath() + " is not convertible to URL");
+                throw new IllegalArgumentException(file + " is not convertible to URL");
             }
         }
         return urls.toArray(new URL[0]);
@@ -505,7 +511,7 @@ public final class JkClassLoader {
      * Returns the first class having a main method from the specified class
      * directory or Jar. Returns <code>null</code> if no such class found.
      */
-    static String findMainClass(File classDirOrJar) {
+    static String findMainClass(Path classDirOrJar) {
         final JkClassLoader classLoader = JkClassLoader.system().child(classDirOrJar);
         final Iterator<Class<?>> it = classLoader.iterateClassesIn(classDirOrJar);
         while (it.hasNext()) {
@@ -541,17 +547,17 @@ public final class JkClassLoader {
      * Add a new entry to this class loader. WARN : This method has side effect
      * on this class loader : use it with caution !
      */
-    public void addEntry(File entry) {
+    public void addEntry(Path entry) {
         final Method method = JkUtilsReflect.getDeclaredMethod(URLClassLoader.class, "addURL",
                 URL.class);
-        JkUtilsReflect.invoke(this.delegate, method, JkUtilsFile.toUrl(entry));
+        JkUtilsReflect.invoke(this.delegate, method, JkUtilsPath.toUrl(entry));
     }
 
     /**
-     * Same as {@link #addEntry(File)} but for several entries.
+     * Same as {@link #addEntry(Path)} but for several entries.
      */
-    public void addEntries(Iterable<File> entries) {
-        for (final File file : entries) {
+    public void addEntries(Collection<Path> entries) {
+        for (final Path file : entries) {
             addEntry(file);
         }
     }
@@ -653,10 +659,10 @@ public final class JkClassLoader {
      */
     public JkClassLoader loadAllServices() {
         final Set<Class<?>> serviceClasses = new HashSet<>();
-        for (final File file : this.fullClasspath()) {
-            if (file.isFile()) {
-                JkLog.trace("Scanning " + file.getPath() + " for META-INF/services.");
-                final ZipFile zipFile = JkUtilsZip.zipFile(file);
+        for (final Path file : this.fullClasspath().entries()) {
+            if (Files.isRegularFile(file)) {
+                JkLog.trace("Scanning " + file+ " for META-INF/services.");
+                final ZipFile zipFile = JkUtilsZip.zipFile(file.toFile());
                 final ZipEntry serviceEntry = zipFile.getEntry("META-INF/services");
                 if (serviceEntry == null) {
                     JkUtilsIO.closeOrFail(zipFile);
@@ -675,16 +681,16 @@ public final class JkClassLoader {
                 }
                 JkUtilsIO.closeOrFail(zipFile);
             } else {
-                final File serviceDir = new File(file, "META-INF/services");
-                if (!serviceDir.exists() || !serviceDir.isDirectory()) {
+                final Path serviceDir = file.resolve("META-INF/services");
+                if (!Files.exists(serviceDir) || !Files.isDirectory(serviceDir)) {
                     continue;
                 }
-                for (final File candidate : serviceDir.listFiles()) {
-                    final Class<?> serviceClass = this.loadIfExist(candidate.getName());
+                JkUtilsPath.walk(serviceDir, 1).forEach(candidate-> {
+                    final Class<?> serviceClass = this.loadIfExist(candidate.getFileName().toString());
                     if (serviceClass != null) {
                         serviceClasses.add(serviceClass);
                     }
-                }
+                });
 
             }
         }

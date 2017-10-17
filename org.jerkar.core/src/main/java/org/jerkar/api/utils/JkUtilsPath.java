@@ -113,7 +113,7 @@ public final class JkUtilsPath {
     }
 
     /**
-     * Delegates to Files{@link #delete(Path)}
+     * Delegates to Files{@link #deleteFile(Path)}
      */
     public static void deleteFile(Path path) {
         try {
@@ -227,6 +227,14 @@ public final class JkUtilsPath {
     public static Stream<Path> walk(Path path, FileVisitOption ...options) {
         try {
             return Files.walk(path, options);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static Stream<Path> walk(Path path, int deep, FileVisitOption ...options) {
+        try {
+            return Files.walk(path, deep, options);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }

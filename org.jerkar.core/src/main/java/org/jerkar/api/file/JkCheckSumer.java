@@ -38,7 +38,7 @@ public final class JkCheckSumer {
      * written in the same directory as the digested file and has the same
      * name + algorithm name extension.
      */
-    public JkCheckSumer makeSumFiles(Path file, String ...algorithms) {
+    public JkCheckSumer digest(String ...algorithms) {
         for (final String algorithm : algorithms) {
             JkLog.start("Creating check sum with algorithm " +  algorithm + " for file : " + file);
             final Path parent = file.getParent();

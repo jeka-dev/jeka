@@ -318,7 +318,7 @@ final class IvyPublisher implements InternalPublisher {
                 if (!signedFile.exists()) {
                     JkLog.info("Signing file " + file.getPath() + " on detached signature "
                             + signedFile.getPath());
-                    pgpSigner.sign(file);
+                    pgpSigner.sign(file.toPath());
                 }
                 resolver.publish(signArtifact, signedFile, true);
             }

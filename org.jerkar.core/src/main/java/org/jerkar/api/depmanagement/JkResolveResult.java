@@ -1,7 +1,7 @@
 package org.jerkar.api.depmanagement;
 
-import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -55,7 +55,7 @@ public final class JkResolveResult implements Serializable {
     /**
      * Shorthand for <code>dependencyTree.allFiles()</code>
      */
-    public List<File> localFiles() {
+    public List<Path> localFiles() {
         return this.depTree.allFiles();
     }
 
@@ -90,7 +90,7 @@ public final class JkResolveResult implements Serializable {
     /**
      * Returns the publishLocally files the specified module turns to.
      */
-    public List<File> filesOf(JkModuleId moduleId) {
+    public List<Path> filesOf(JkModuleId moduleId) {
         final JkDependencyNode dependencyNode = this.depTree.find(moduleId);
         if (dependencyNode == null) {
             return new LinkedList<>();

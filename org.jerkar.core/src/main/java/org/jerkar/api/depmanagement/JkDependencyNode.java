@@ -1,6 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -72,8 +74,8 @@ public class JkDependencyNode implements Serializable {
     /**
      * Returns all files resulting of this dependency node (this node itself plus all descendants).
      */
-    public List<File> allFiles() {
-        final List<File> list = new LinkedList<>();
+    public List<Path> allFiles() {
+        final List<Path> list = new LinkedList<>();
         JkUtilsIterable.addAllWithoutDuplicate(list, this.nodeInfo.files());
         for (final JkDependencyNode child : children) {
             JkUtilsIterable.addAllWithoutDuplicate(list, child.allFiles());
@@ -299,7 +301,7 @@ public class JkDependencyNode implements Serializable {
 
     public interface NodeInfo extends Serializable {
 
-        List<File> files();
+        List<Path> files();
 
         Set<JkScope> declaredScopes();
 
@@ -324,22 +326,22 @@ public class JkDependencyNode implements Serializable {
         private final Set<JkScope> declaredScopes;  // the left conf mapping side in the caller dependency description
         private final Set<JkScope> rootScopes; // scopes fetching this node to baseTree
         private final JkVersion resolvedVersion;
-        private final List<File> artifacts;
+        private final List<File> artifacts; // Path is not serializable
         private final boolean treeRoot;
 
         ModuleNodeInfo(JkModuleId moduleId, JkVersionRange declaredVersion, Set<JkScope> declaredScopes,
-                Set<JkScope> rootScopes, JkVersion resolvedVersion, List<File> artifacts) {
+                Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
             this(moduleId, declaredVersion, declaredScopes, rootScopes, resolvedVersion, artifacts, false);
         }
 
         ModuleNodeInfo(JkModuleId moduleId, JkVersionRange declaredVersion, Set<JkScope> declaredScopes,
-                Set<JkScope> rootScopes, JkVersion resolvedVersion, List<File> artifacts, boolean treeRoot) {
+                Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts, boolean treeRoot) {
             this.moduleId = moduleId;
             this.declaredVersion = declaredVersion;
             this.declaredScopes = declaredScopes;
             this.rootScopes = rootScopes;
             this.resolvedVersion = resolvedVersion;
-            this.artifacts = Collections.unmodifiableList(new LinkedList<>(artifacts));
+            this.artifacts = Collections.unmodifiableList(new LinkedList<>(JkUtilsPath.toFiles(artifacts)));
             this.treeRoot = treeRoot;
         }
 
@@ -385,8 +387,8 @@ public class JkDependencyNode implements Serializable {
         }
 
         @Override
-        public List<File> files() {
-            return artifacts;
+        public List<Path> files() {
+            return JkUtilsPath.toPaths(artifacts);
         }
 
         public List<Path> paths() {
@@ -435,19 +437,20 @@ public class JkDependencyNode implements Serializable {
         public static FileNodeInfo of(Set<JkScope> scopes, JkFileDependency dependency) {
             if (dependency instanceof JkComputedDependency) {
                 final JkComputedDependency computedDependency = (JkComputedDependency) dependency;
-                return new FileNodeInfo(computedDependency.files(), scopes, computedDependency);
+                return new FileNodeInfo(computedDependency.paths(), scopes, computedDependency);
             }
-            return new FileNodeInfo(dependency.files(), scopes, null);
+            return new FileNodeInfo(dependency.paths() ,scopes, null);
         }
 
-        private final List<File> files;
+        // for serialization
+        private List<File> files;
 
         private final Set<JkScope> scopes;
 
         private final JkComputedDependency computationOrigin;
 
-        private FileNodeInfo(List<File> files, Set<JkScope> scopes, JkComputedDependency origin) {
-            this.files = Collections.unmodifiableList(new LinkedList<>(files));
+        private FileNodeInfo(List<Path> files, Set<JkScope> scopes, JkComputedDependency origin) {
+            this.files = Collections.unmodifiableList(new LinkedList<>(JkUtilsPath.toFiles(files)));
             this.scopes = Collections.unmodifiableSet(new HashSet<>(scopes));
             this.computationOrigin = origin;
         }
@@ -468,8 +471,8 @@ public class JkDependencyNode implements Serializable {
 
         @Override
         @Deprecated
-        public List<File> files() {
-            return files;
+        public List<Path> files() {
+            return JkUtilsPath.toPaths(files);
         }
 
         public List<Path> paths() {

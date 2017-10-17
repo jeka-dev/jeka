@@ -43,7 +43,7 @@ public final class JkPathSequence implements Iterable<File> {
     /**
      * Creates a path to a sequence of files.
      */
-    public static JkPathSequence ofPath(Iterable<Path> entries) {
+    public static JkPathSequence ofPaths(Iterable<Path> entries) {
         final LinkedHashSet<Path> files = new LinkedHashSet<>(JkUtilsIterable.listOf(entries));
         return new JkPathSequence(files);
     }
@@ -70,7 +70,7 @@ public final class JkPathSequence implements Iterable<File> {
             }
             result.add(file);
         }
-        return ofPath(result);
+        return ofPaths(result);
     }
 
     /**
@@ -83,8 +83,8 @@ public final class JkPathSequence implements Iterable<File> {
     /**
      * Creates a path to aa array of files.
      */
-    public static JkPathSequence ofPath(Path... entries) {
-        return JkPathSequence.ofPath(Arrays.asList(entries));
+    public static JkPathSequence ofPaths(Path... entries) {
+        return JkPathSequence.ofPaths(Arrays.asList(entries));
     }
 
 
@@ -156,7 +156,7 @@ public final class JkPathSequence implements Iterable<File> {
      * @see #andHead(Iterable)
      */
     public JkPathSequence andHead(Path... entries) {
-        return andHead(JkPathSequence.ofPath(entries));
+        return andHead(JkPathSequence.ofPaths(entries));
     }
 
 
@@ -186,7 +186,7 @@ public final class JkPathSequence implements Iterable<File> {
     }
 
     public JkPathSequence and(Path... files) {
-        return and(JkPathSequence.ofPath(files));
+        return and(JkPathSequence.ofPaths(files));
     }
 
     /**

@@ -3,7 +3,11 @@ package org.jerkar.api.crypto.pgp;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -67,14 +71,13 @@ public class BouncyCastlePgpLibMaketPgpRunner {
 
     }
 
-    public void testSignWithBadSignature() {
-        final File pubFile = JkUtilsFile.fromUrl(JkPgpTest.class.getResource("pubring.gpg"));
-        final File secringFile = JkUtilsFile.fromUrl(JkPgpTest.class.getResource("secring.gpg"));
+    public void testSignWithBadSignature() throws Exception {
+        final Path pubFile = Paths.get(JkPgpTest.class.getResource("pubring.gpg").toURI());
+        final Path secringFile = Paths.get(JkPgpTest.class.getResource("secring.gpg").toURI());
         final JkPgp pgp = JkPgp.of(pubFile, secringFile, "basPassword");
-        final File signatureFile = JkUtilsFile.createFileIfNotExist(new File(
+        final Path signatureFile = Files.createFile(Paths.get(
                 "build/output/test-out/signature-fake.asm"));
-        final File sampleFile = JkUtilsFile.fromUrl(JkPgpTest.class
-                .getResource("sampleFileToSign.txt"));
+        final Path sampleFile = Paths.get(JkPgpTest.class.getResource("sampleFileToSign.txt").toURI());
         pgp.sign(sampleFile, signatureFile);
     }
 

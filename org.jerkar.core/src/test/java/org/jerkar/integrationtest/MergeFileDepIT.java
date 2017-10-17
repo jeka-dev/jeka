@@ -8,6 +8,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyNode;
@@ -26,11 +31,11 @@ import org.junit.Test;
 public class MergeFileDepIT {
 
     @Test
-    public void treeIsCorrectAfterFileDepInsert() {
+    public void treeIsCorrectAfterFileDepInsert() throws URISyntaxException {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
-        File dep0File = JkUtilsFile.resourceAsFile(MergeFileDepIT.class, "dep0");
-        File dep1File = JkUtilsFile.resourceAsFile(MergeFileDepIT.class, "dep1");
-        File dep2File = JkUtilsFile.resourceAsFile(MergeFileDepIT.class, "dep2");
+        Path dep0File = Paths.get(MergeFileDepIT.class.getResource("dep0").toURI());
+        Path dep1File = Paths.get(MergeFileDepIT.class.getResource( "dep1").toURI());
+        Path dep2File = Paths.get(MergeFileDepIT.class.getResource( "dep2").toURI());
         JkDependencies deps = JkDependencies.builder()
                 .on(dep0File).scope(TEST)
                 .on("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE").scope(COMPILE_AND_RUNTIME)
@@ -51,19 +56,25 @@ public class MergeFileDepIT {
         assertEquals(5, tree.children().size());
 
         JkDependencyNode file0Node = tree.children().get(0);
-        assertEquals(JkUtilsIterable.listOf(dep0File), file0Node.allFiles());
+        List<Path> expected = new LinkedList<>();
+        expected.add(dep0File);
+        assertEquals(expected, file0Node.allFiles());
 
         JkDependencyNode starterwebNode = tree.children().get(1);
         assertEquals(JkModuleId.of("org.springframework.boot:spring-boot-starter-web"), starterwebNode.moduleInfo().moduleId());
 
         JkDependencyNode file1Node = tree.children().get(2);
-        assertEquals(JkUtilsIterable.listOf(dep1File), file1Node.allFiles());
+        List<Path> expected1 = new LinkedList<>();
+        expected1.add(dep1File);
+        assertEquals(expected1, file1Node.allFiles());
 
         JkDependencyNode jsonRpcNode = tree.children().get(3);
         assertEquals(JkModuleId.of("com.github.briandilley.jsonrpc4j:jsonrpc4j"), jsonRpcNode.moduleInfo().moduleId());
 
         JkDependencyNode file2Node = tree.children().get(4);
-        assertEquals(JkUtilsIterable.listOf(dep2File), file2Node.allFiles());
+        List<Path> expected2 = new LinkedList<>();
+        expected2.add(dep2File);
+        assertEquals(expected2, file2Node.allFiles());
 
         // Now check that file dependencies with Test Scope are not present in compile
 

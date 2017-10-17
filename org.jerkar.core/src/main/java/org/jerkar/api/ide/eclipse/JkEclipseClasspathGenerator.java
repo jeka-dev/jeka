@@ -29,10 +29,7 @@ import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.java.JkJavaProjectDefinition;
 import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.api.utils.JkUtilsThrowable;
+import org.jerkar.api.utils.*;
 import org.jerkar.tool.JkConstants;
 
 /**
@@ -189,7 +186,7 @@ public final class JkEclipseClasspathGenerator {
         // add build dependencies
         if (hasBuildDef() && buildDependencyResolver != null) {
             final Iterable<File> files = buildDependencyResolver.get(buildDependencies);
-            writeFileDepsEntries(writer, files, paths);
+            writeFileDepsEntries(writer, JkUtilsPath.toPaths(files), paths);
         }
 
         // write entries for project importedBuilds
@@ -238,17 +235,17 @@ public final class JkEclipseClasspathGenerator {
         return compilerVersion.name();
     }
 
-    private void writeProjectEntryIfNeeded(File projectDir, XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
-        if (paths.add(projectDir.getAbsolutePath())) {
+    private void writeProjectEntryIfNeeded(Path projectDir, XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
+        if (paths.add(projectDir.toAbsolutePath().toString())) {
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "kind", "src", "exported", "true",
-                    "path", "/" + projectDir.getName());
+                    "path", "/" + projectDir.getFileName().toString());
         }
     }
 
-    private void writeFileDepsEntries(XMLStreamWriter writer, Iterable<File> fileDeps, Set<String> paths) throws XMLStreamException {
-        for (final File file : fileDeps) {
-            writeClasspathEl(file, writer, paths);
+    private void writeFileDepsEntries(XMLStreamWriter writer, Iterable<Path> fileDeps, Set<String> paths) throws XMLStreamException {
+        for (final Path file : fileDeps) {
+            writeClasspathEl(file.toFile(), writer, paths);
         }
     }
 
@@ -370,9 +367,9 @@ public final class JkEclipseClasspathGenerator {
                 final JkDependencyNode.FileNodeInfo fileNodeInfo = (JkDependencyNode.FileNodeInfo) node.nodeInfo();
                 if (fileNodeInfo.isComputed()) {
                     final JkComputedDependency computedDependency = fileNodeInfo.computationOrigin();
-                    final File ideProjectBaseDir = computedDependency.ideProjectBaseDir();
+                    final Path ideProjectBaseDir = computedDependency.ideProjectBaseDir();
                     if (ideProjectBaseDir != null) {
-                        if (!allPaths.contains(ideProjectBaseDir.getAbsolutePath())) {
+                        if (!allPaths.contains(ideProjectBaseDir.toAbsolutePath().toString())) {
                             writeProjectEntryIfNeeded(ideProjectBaseDir, writer, allPaths);
                         }
                     } else {
@@ -385,15 +382,15 @@ public final class JkEclipseClasspathGenerator {
         }
     }
 
-    private void writeModuleEntry(XMLStreamWriter writer, JkVersionedModule versionedModule, Iterable<File> files,
+    private void writeModuleEntry(XMLStreamWriter writer, JkVersionedModule versionedModule, Iterable<Path> files,
             JkRepos repos, Set<String> paths) throws XMLStreamException {
         final File source = repos.get(JkModuleDependency.of(versionedModule).classifier("sources"));
         File javadoc = null;
         if (source == null || !source.exists()) {
             javadoc = repos.get(JkModuleDependency.of(versionedModule).classifier("javadoc"));
         }
-        for (final File file : files) {
-            writeClasspathEl(writer, file, source, javadoc, paths);
+        for (final Path file : files) {
+            writeClasspathEl(writer, file.toFile(), source, javadoc, paths);
         }
     }
 

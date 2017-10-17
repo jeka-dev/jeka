@@ -2,7 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import static org.jerkar.api.utils.JkUtilsString.plurialize;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -118,17 +118,17 @@ public final class JkDependencyResolver {
         JkResolveResult resolveResult = null;
         if (internalResolver != null && dependencies.containsModules()) {
             resolveResult = resolveWithInternalResolver(dependencies, dependencies.explicitVersions(), scopes).assertNoError();
-            return JkPathSequence.of(resolveResult.dependencyTree().allFiles()).withoutDuplicates();
+            return JkPathSequence.ofPaths(resolveResult.dependencyTree().allFiles()).withoutDuplicates();
         }
-        final List<File> result = new LinkedList<>();
+        final List<Path> result = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : dependencies) {
             if (scopedDependency.isInvolvedInAnyOf(scopes) || scopes.length == 0) {
                 final JkDependency dependency = scopedDependency.dependency();
                 final JkFileDependency fileDependency = (JkFileDependency) dependency;
-                result.addAll(fileDependency.files());
+                result.addAll(fileDependency.paths());
             }
         }
-        return JkPathSequence.of(result).withoutDuplicates();
+        return JkPathSequence.ofPaths(result).withoutDuplicates();
     }
 
     private JkResolveResult resolveWithInternalResolver(JkDependencies dependencies, JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {

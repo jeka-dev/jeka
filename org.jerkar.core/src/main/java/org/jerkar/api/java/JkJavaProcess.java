@@ -1,7 +1,8 @@
 package org.jerkar.api.java;
 
-import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,11 +26,11 @@ import org.jerkar.api.utils.JkUtilsSystem;
  */
 public final class JkJavaProcess {
 
-    private static final File CURRENT_JAVA_DIR = new File(System.getProperty("java.home"), "bin");
+    private static final Path CURRENT_JAVA_DIR = Paths.get(System.getProperty("java.home")).resolve("bin");
 
     private final Map<String, String> sytemProperties;
 
-    private final File javaDir;
+    private final Path javaDir;
 
     private final JkClasspath classpath;
 
@@ -37,12 +38,12 @@ public final class JkJavaProcess {
 
     private final Collection<String> options;
 
-    private final File workingDir;
+    private final Path workingDir;
 
     private final Map<String, String> environment;
 
-    private JkJavaProcess(File javaDir, Map<String, String> sytemProperties, JkClasspath classpath,
-            List<AgentLibAndOption> agents, Collection<String> options, File workingDir,
+    private JkJavaProcess(Path javaDir, Map<String, String> sytemProperties, JkClasspath classpath,
+            List<AgentLibAndOption> agents, Collection<String> options, Path workingDir,
             Map<String, String> environment) {
         super();
         this.javaDir = javaDir;
@@ -67,8 +68,8 @@ public final class JkJavaProcess {
      * located in the specified directory.
      */
     @SuppressWarnings("unchecked")
-    public static JkJavaProcess ofJavaHome(File javaDir) {
-        return new JkJavaProcess(javaDir, Collections.EMPTY_MAP, JkClasspath.of(),
+    public static JkJavaProcess ofJavaHome(Path javaDir) {
+        return new JkJavaProcess(javaDir, Collections.EMPTY_MAP, JkClasspath.ofPath(),
                 Collections.EMPTY_LIST, Collections.EMPTY_LIST, null, Collections.EMPTY_MAP);
     }
 
@@ -76,21 +77,19 @@ public final class JkJavaProcess {
      * Returns a {@link JkJavaProcess} identical to this one but augmented with the
      * specified agent library and option.
      */
-    public JkJavaProcess andAgent(File agentLib, String agentOption) {
+    public JkJavaProcess andAgent(Path agentLib, String agentOption) {
         if (agentLib == null) {
             throw new IllegalArgumentException("agentLib can't be null.");
         }
-        if (!agentLib.exists()) {
-            throw new IllegalArgumentException("agentLib " + agentLib.getAbsolutePath()
-            + " not found.");
+        if (!Files.exists(agentLib)) {
+            throw new IllegalArgumentException("agentLib " + agentLib + " not found.");
         }
-        if (!agentLib.isFile()) {
-            throw new IllegalArgumentException("agentLib " + agentLib.getAbsolutePath()
-            + " is a directory, should be a file.");
+        if (!Files.isRegularFile(agentLib)) {
+            throw new IllegalArgumentException("agentLib " + agentLib + " is a directory, should be a file.");
         }
         final List<AgentLibAndOption> list = new ArrayList<>(
                 this.agents);
-        list.add(new AgentLibAndOption(agentLib.getAbsolutePath(), agentOption));
+        list.add(new AgentLibAndOption(agentLib.toAbsolutePath().toString(), agentOption));
         return new JkJavaProcess(this.javaDir, this.sytemProperties, this.classpath, list,
                 this.options, this.workingDir, this.environment);
     }
@@ -99,7 +98,7 @@ public final class JkJavaProcess {
      * Returns a {@link JkJavaProcess} identical to this one but augnmented with the
      * specified agent library.
      */
-    public JkJavaProcess andAgent(File agentLib) {
+    public JkJavaProcess andAgent(Path agentLib) {
         return andAgent(agentLib, null);
     }
 
@@ -147,33 +146,20 @@ public final class JkJavaProcess {
      * Returns a {@link JkJavaProcess} identical to this one but using the specified
      * working dir.
      */
-    public JkJavaProcess withWorkingDir(File workingDir) {
+    public JkJavaProcess withWorkingDir(Path workingDir) {
         return new JkJavaProcess(this.javaDir, this.sytemProperties, this.classpath, this.agents,
                 this.options, workingDir, this.environment);
     }
 
     /**
      * Returns a {@link JkJavaProcess} identical to this one but using the specified
-     * working dir.
-     */
-    public JkJavaProcess withWorkingDir(Path workingDir) {
-        return withWorkingDir(workingDir.toFile());
-    }
-
-    /**
-     * Returns a {@link JkJavaProcess} identical to this one but using the specified
      * classpath.
      */
-    public JkJavaProcess withClasspath(Iterable<File> classpath) {
+    public JkJavaProcess withClasspath(Collection<Path> classpath) {
         if (classpath == null) {
             throw new IllegalArgumentException("Classpath can't be null.");
         }
-        final JkClasspath jkClasspath;
-        if (classpath instanceof JkClasspath) {
-            jkClasspath = (JkClasspath) classpath;
-        } else {
-            jkClasspath = JkClasspath.of(classpath);
-        }
+        final JkClasspath jkClasspath = JkClasspath.ofPaths(classpath);
         return new JkJavaProcess(this.javaDir, this.sytemProperties, jkClasspath, this.agents,
                 this.options, this.workingDir, this.environment);
     }
@@ -182,8 +168,8 @@ public final class JkJavaProcess {
      * Returns a {@link JkJavaProcess} identical to this one but using the specified
      * classpath.
      */
-    public JkJavaProcess withClasspath(File... files) {
-        return withClasspath(JkClasspath.of(files));
+    public JkJavaProcess withClasspath(Path... files) {
+        return withClasspath(JkClasspath.ofPath(files).entries());
     }
 
     /**
@@ -191,48 +177,27 @@ public final class JkJavaProcess {
      * classpath with the specified one.
      */
     public JkJavaProcess andClasspath(JkClasspath classpath) {
-        return withClasspath(this.classpath.and(classpath));
+        return withClasspath(this.classpath.and(classpath.entries()).entries());
     }
 
-    /**
-     * Returns a {@link JkJavaProcess} identical to this one but augmenting this
-     * classpath with the specified one.
-     */
-    public JkJavaProcess andClasspath(File... files) {
-        return andClasspath(Arrays.asList(files));
-    }
 
-    /**
-     * Returns a {@link JkJavaProcess} identical to this one but augmenting this
-     * classpath with the specified one.
-     */
-    public JkJavaProcess andClasspath(Iterable<File> files) {
-        return withClasspath(this.classpath.and(files));
-    }
 
     private ProcessBuilder processBuilder(List<String> command, Map<String, String> env) {
         final ProcessBuilder builder = new ProcessBuilder(command);
         builder.redirectErrorStream(true);
         builder.environment().putAll(env);
         if (this.workingDir != null) {
-            builder.directory(workingDir);
+            builder.directory(workingDir.toFile());
         }
         return builder;
     }
 
     private String runningJavaCommand() {
-        return this.javaDir.getAbsolutePath() + File.separator + "java";
-    }
-
-    /**
-     * Runs the specified jar file and wait for termination.
-     */
-    public void runJarSync(File jar, String... arguments) {
-        runClassOrJarSync(null, jar, arguments);
+        return this.javaDir.toAbsolutePath()+ this.javaDir.getFileSystem().getSeparator() + "java";
     }
 
     public void runJarSync(Path jar, String... arguments) {
-        runClassOrJarSync(null, jar.toFile(), arguments);
+        runClassOrJarSync(null, jar, arguments);
     }
 
     /**
@@ -242,7 +207,7 @@ public final class JkJavaProcess {
         runClassOrJarSync(mainClassName, null, arguments);
     }
 
-    private void runClassOrJarSync(String mainClassName, File jar, String... arguments) {
+    private void runClassOrJarSync(String mainClassName, Path jar, String... arguments) {
         JkUtilsAssert.isTrue(jar != null || mainClassName != null,
                 "main class name and jar can't be both null while launching a Java process, please set at least one of them.");
         final List<String> command = new LinkedList<>();
@@ -251,12 +216,12 @@ public final class JkJavaProcess {
         command.addAll(optionAndEnv.options);
         String execPart = "";
         if (jar != null) {
-            if (!jar.exists()) {
-                throw new IllegalStateException("Executable jar " + jar.getAbsolutePath() + " not found.");
+            if (!Files.exists(jar)) {
+                throw new IllegalStateException("Executable jar " + jar + " not found.");
             }
             command.add("-jar");
-            command.add(jar.getPath());
-            execPart = execPart + jar.getPath();
+            command.add(jar.toString());
+            execPart = execPart + jar.toString();
         }
         if (mainClassName != null) {
             command.add(mainClassName);

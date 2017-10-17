@@ -1,6 +1,5 @@
 package org.jerkar.api.depmanagement;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -19,38 +18,10 @@ public final class JkFileSystemDependency implements JkFileDependency {
     private static final long serialVersionUID = 1079527121988214989L;
 
     /**
-     * Creates a {@link JkFileSystemDependency} on the specified file.
-     */
-    @Deprecated
-    public static JkFileSystemDependency ofFile(File baseDir, String relativePath) {
-        final File file = new File(relativePath);
-        if (!file.isAbsolute()) {
-            return JkFileSystemDependency.of(new File(baseDir, relativePath));
-        }
-        return JkFileSystemDependency.of(file);
-    }
-
-    /**
-     * Creates a {@link JkFileSystemDependency} on the specified files.
-     */
-    @Deprecated
-    public static JkFileSystemDependency of(Iterable<File> files) {
-        return new JkFileSystemDependency(JkUtilsPath.toPaths(files));
-    }
-
-    /**
      * Creates a {@link JkFileSystemDependency} on the specified files.
      */
     public static JkFileSystemDependency ofPaths(Iterable<Path> files) {
         return new JkFileSystemDependency(files);
-    }
-
-    /**
-     * Creates a {@link JkFileSystemDependency} on the specified files.
-     */
-    public static JkFileSystemDependency of(File... files) {
-        return new JkFileSystemDependency(
-                JkUtilsPath.toPaths(Arrays.asList(files)));
     }
 
     private final List<Path> files;

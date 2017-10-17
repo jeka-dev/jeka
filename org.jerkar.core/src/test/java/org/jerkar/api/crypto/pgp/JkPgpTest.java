@@ -1,6 +1,10 @@
 package org.jerkar.api.crypto.pgp;
 
 import java.io.File;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.jerkar.api.utils.JkUtilsFile;
 import org.junit.Test;
@@ -9,28 +13,30 @@ import org.junit.Test;
 public class JkPgpTest {
 
     @Test
-    public void testSignAndVerify() {
-        final File pubFile = JkUtilsFile.fromUrl(JkPgpTest.class.getResource("pubring.gpg"));
-        final File secringFile = JkUtilsFile.fromUrl(JkPgpTest.class.getResource("secring.gpg"));
+    public void testSignAndVerify() throws Exception {
+        final Path pubFile = Paths.get(JkPgpTest.class.getResource("pubring.gpg").toURI());
+        final Path secringFile = Paths.get(JkPgpTest.class.getResource("secring.gpg").toURI());
         final JkPgp pgp = JkPgp.of(pubFile, secringFile, "jerkar");
-        final File signatureFile = JkUtilsFile.createFileIfNotExist(new File(
-                "build/output/test-out/signature.asm"));
-        final File sampleFile = JkUtilsFile.fromUrl(JkPgpTest.class
-                .getResource("sampleFileToSign.txt"));
+        final Path signatureFile = Paths.get("build/output/test-out/signature.asm");
+        if (!Files.exists(signatureFile)) {
+            Files.createDirectories(signatureFile.getParent());
+            Files.createFile(signatureFile);
+        }
+        final Path sampleFile = Paths.get(JkPgpTest.class.getResource("sampleFileToSign.txt").toURI());
         pgp.sign(sampleFile, signatureFile);
-        // final boolean result = pgp.verify(sampleFile, signatureFile);
-        // Assert.assertTrue(result);
     }
 
     @Test(expected = RuntimeException.class)
-    public void testSignWithBadSignature() {
-        final File pubFile = JkUtilsFile.fromUrl(JkPgpTest.class.getResource("pubring.gpg"));
-        final File secringFile = JkUtilsFile.fromUrl(JkPgpTest.class.getResource("secring.gpg"));
+    public void testSignWithBadSignature() throws Exception {
+        final Path pubFile = Paths.get(JkPgpTest.class.getResource("pubring.gpg").toURI());
+        final Path secringFile = Paths.get(JkPgpTest.class.getResource("secring.gpg").toURI());
         final JkPgp pgp = JkPgp.of(pubFile, secringFile, "badPassword");
-        final File signatureFile = JkUtilsFile.createFileIfNotExist(new File(
-                "build/output/test-out/signature-fake.asm"));
-        final File sampleFile = JkUtilsFile.fromUrl(JkPgpTest.class
-                .getResource("sampleFileToSign.txt"));
+        final Path signatureFile = Paths.get("build/output/test-out/signature-fake.asm");
+        if (!Files.exists(signatureFile)) {
+            Files.createDirectories(signatureFile.getParent());
+            Files.createFile(signatureFile);
+        }
+        final Path sampleFile = Paths.get(JkPgpTest.class.getResource("sampleFileToSign.txt").toURI());
         pgp.sign(sampleFile, signatureFile, "badPassword");
     }
 

@@ -1,6 +1,7 @@
 package org.jerkar.api.depmanagement;
 
-import java.io.File;
+
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,24 +15,24 @@ import org.apache.ivy.core.report.ArtifactDownloadReport;
  */
 class IvyArtifactContainer {
 
-    private final Map<JkVersionedModule, List<File>> map = new HashMap<>();
+    private final Map<JkVersionedModule, List<Path>> map = new HashMap<>();
 
     static IvyArtifactContainer of(ArtifactDownloadReport[] artifactDownloadReports) {
         IvyArtifactContainer result = new IvyArtifactContainer();
         for (ArtifactDownloadReport report : artifactDownloadReports) {
-            result.put(report.getArtifact().getModuleRevisionId(), report.getLocalFile());
+            result.put(report.getArtifact().getModuleRevisionId(), report.getLocalFile().toPath());
         }
         return result;
     }
 
-    private void put(ModuleRevisionId moduleRevisionId, File file) {
+    private void put(ModuleRevisionId moduleRevisionId, Path file) {
         JkVersionedModule versionedModule = IvyTranslations.toJkVersionedModule(moduleRevisionId);
-        List<File> files = map.computeIfAbsent(versionedModule, k -> new LinkedList<>());
+        List<Path> files = map.computeIfAbsent(versionedModule, k -> new LinkedList<>());
         files.add(file);
     }
 
-    List<File> getArtifacts(JkVersionedModule versionedModule) {
-        List<File> result = map.get(versionedModule);
+    List<Path> getArtifacts(JkVersionedModule versionedModule) {
+        List<Path> result = map.get(versionedModule);
         if (result == null) {
             return new LinkedList<>();
         }

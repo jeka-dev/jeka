@@ -114,10 +114,10 @@ public final class JkSonar {
 
     private JkJavaProcess javaProcess() {
         final Path sonarRunnerJar = JkUtilsObject.firstNonNull(
-                JkClassLoader.current().fullClasspath().getEntryContainingClass("org.sonar.runner.Main").toPath(),
+                JkClassLoader.current().fullClasspath().getEntryContainingClass("org.sonar.runner.Main"),
                 jarRunner());
 
-        return JkJavaProcess.of().withClasspath(sonarRunnerJar.toFile())
+        return JkJavaProcess.of().withClasspath(sonarRunnerJar)
                 .andOptions(toProperties());
     }
 

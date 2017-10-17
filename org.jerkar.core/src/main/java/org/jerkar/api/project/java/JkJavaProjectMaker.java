@@ -214,7 +214,7 @@ public class JkJavaProjectMaker {
     private JkUnit juniter() {
         final JkClasspath classpath = JkClasspath.ofPath(project.getOutLayout().testClassDir())
                 .and(project.getOutLayout().classDir())
-                .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
+                .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).pathEntries());
         final Path junitReport = project.getOutLayout().testReportDir().resolve("junit");
         return this.juniter.withReportDir(junitReport);
     }
@@ -222,7 +222,7 @@ public class JkJavaProjectMaker {
     private JkJavaTestSpec testSpec() {
         final JkClasspath classpath = JkClasspath.ofPath(project.getOutLayout().testClassDir())
                 .and(project.getOutLayout().classDir())
-                .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
+                .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).pathEntries());
         return JkJavaTestSpec.of(classpath, JkFileTreeSet.of(project.getOutLayout().testClassDir()));
     }
 
@@ -310,11 +310,11 @@ public class JkJavaProjectMaker {
     }
 
     public void checksum(String ...algorithms) {
-        this.project.allArtifactPaths().forEach((file) -> JkCheckSumer.of(file).makeSumFiles(file, algorithms));
+        this.project.allArtifactPaths().forEach((file) -> JkCheckSumer.of(file).digest(algorithms));
     }
 
     public void signArtifactFiles(JkPgp pgp) {
-        this.project.allArtifactPaths().forEach((file) -> pgp.sign(file.toFile()));
+        this.project.allArtifactPaths().forEach((file) -> pgp.sign(file));
     }
 
     // ----------------------- publish

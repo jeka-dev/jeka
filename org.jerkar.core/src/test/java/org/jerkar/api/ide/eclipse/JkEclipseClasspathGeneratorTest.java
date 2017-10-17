@@ -101,7 +101,7 @@ public class JkEclipseClasspathGeneratorTest {
         final List<JkScopedDependency> coreDeps2 = coreProject2.getDependencies().list();
         assertEquals(1, coreDeps2.size());
         final JkComputedDependency baseProjectDep = (JkComputedDependency) coreDeps2.get(0).dependency();
-        assertEquals(base, baseProjectDep.ideProjectBaseDir().toPath());
+        assertEquals(base, baseProjectDep.ideProjectBaseDir());
 
         JkFileTree.of(top).deleteAll();
     }

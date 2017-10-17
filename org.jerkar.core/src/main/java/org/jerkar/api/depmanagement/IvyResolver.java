@@ -1,6 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -225,7 +226,7 @@ final class IvyResolver implements InternalDepResolver {
                 final JkVersion resolvedVersion = JkVersion.name(node.getResolvedId().getRevision());
                 final Set<JkScope> rootScopes = IvyTranslations.toJkScopes(node.getRootModuleConfigurations());
 
-                List<File> artifacts;
+                List<Path> artifacts;
                 if (!node.isCompletelyEvicted()) {
                     artifacts = artifactContainer.getArtifacts(moduleId.version(resolvedVersion.name()));
                 } else {

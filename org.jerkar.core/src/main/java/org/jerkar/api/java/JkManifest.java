@@ -132,7 +132,7 @@ public final class JkManifest {
     /**
      * Add the main class entry by auto-detecting the class holding the main method.
      */
-    public JkManifest addAutodetectMain(File classDir) {
+    public JkManifest addAutodetectMain(Path classDir) {
         final String mainClassName = JkClassLoader.findMainClass(classDir);
         if (mainClassName != null) {
             this.addMainClass(mainClassName);

@@ -3,14 +3,7 @@ package org.jerkar.api.depmanagement;
 import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.file.JkFileTree;
@@ -18,6 +11,7 @@ import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -241,7 +235,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      */
     public JkDependencies and(Iterable<File> files, JkScope... scopes) {
         final JkScopedDependency scopedDependency = JkScopedDependency.of(
-                JkFileSystemDependency.of(files), scopes);
+                JkFileSystemDependency.ofPaths(JkUtilsPath.toPaths(files)), scopes);
         return and(scopedDependency);
     }
 
@@ -485,17 +479,17 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * specified scopes.
      */
     public JkPathSequence localFileDependencies(JkScope... scopes) {
-        final LinkedHashSet<File> set = new LinkedHashSet<>();
+        final LinkedHashSet<Path> set = new LinkedHashSet<>();
         for (final JkScopedDependency scopedDependency : this.dependencies) {
             if (!(scopedDependency.dependency() instanceof JkFileDependency)) {
                 continue;
             }
             if (scopes.length == 0 || scopedDependency.isInvolvedInAnyOf(scopes)) {
                 final JkFileDependency fileDeps = (JkFileDependency) scopedDependency.dependency();
-                set.addAll(fileDeps.files());
+                set.addAll(fileDeps.paths());
             }
         }
-        return JkPathSequence.of(set);
+        return JkPathSequence.ofPaths(set);
     }
 
     /**
@@ -504,7 +498,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * system dependencies.
      */
     public JkPathSequence fileSystemDepsOnly(JkScope... scopes) {
-        final LinkedHashSet<File> set = new LinkedHashSet<>();
+        final LinkedHashSet<Path> set = new LinkedHashSet<>();
         for (final JkScopedDependency scopedDependency : this.dependencies) {
             if (!(scopedDependency.dependency() instanceof JkFileSystemDependency)) {
                 continue;
@@ -512,10 +506,10 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             if (scopes.length == 0 || scopedDependency.isInvolvedInAnyOf(scopes)) {
                 final JkFileSystemDependency fileDeps = (JkFileSystemDependency) scopedDependency
                         .dependency();
-                set.addAll(fileDeps.files());
+                set.addAll(fileDeps.paths());
             }
         }
-        return JkPathSequence.of(set);
+        return JkPathSequence.ofPaths(set);
     }
 
     /**
@@ -589,7 +583,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         public JkFluentScopeableBuilder on(JkDependency dependency, JkScope... scopes) {
             if (dependency instanceof JkFileSystemDependency) {
                 final JkFileSystemDependency fileDeps = (JkFileSystemDependency) dependency;
-                if (fileDeps.files().isEmpty()) {
+                if (fileDeps.paths().isEmpty()) {
                     return new JkFluentScopeableBuilder(this);
                 }
             }
@@ -659,7 +653,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
          * Add the specified files as dependencies.
          */
         public JkFluentScopeableBuilder on(File... files) {
-            return on(JkFileSystemDependency.of(Arrays.asList(files)));
+            return on(JkUtilsPath.toPaths(files));
         }
 
         /**
@@ -672,17 +666,16 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         /**
          * Add the specified files as dependencies.
          */
-        public JkFluentScopeableBuilder onFiles(Iterable<File> files, JkScope... scopes) {
-            final JkFileSystemDependency dependency = JkFileSystemDependency.of(files);
+        public JkFluentScopeableBuilder onFiles(Collection<Path> files, JkScope... scopes) {
+            final JkFileSystemDependency dependency = JkFileSystemDependency.ofPaths(files);
             return on(dependency, scopes);
         }
 
         /**
-         * Same as {@link #onFiles(Iterable, JkScope...)} )} but effective only if the
+         * Same as {@link #onFiles(Collection, JkScope...)} )} but effective only if the
          * specified condition is true.
          */
-        public JkFluentScopeableBuilder onFilesIf(boolean condition, Iterable<File> files,
-                JkScope... scopes) {
+        public JkFluentScopeableBuilder onFilesIf(boolean condition, Collection<Path> files, JkScope... scopes) {
             if (condition) {
                 return onFiles(files, scopes);
             }
@@ -747,7 +740,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
          * file is not present then the specified process is launched prior to try
          * to get the file again.
          */
-        public Builder on(JkProcess jkProcess, File file, JkScope ...scopes) {
+        public Builder on(JkProcess jkProcess, Path file, JkScope ...scopes) {
             if (!dependencies.iterator().hasNext()) {
                 return this;
             }
@@ -758,10 +751,10 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         }
 
         /**
-         * Same as {@link #on(JkProcess, File, JkScope...)} but you can specify project base dir in order
+         * Same as {@link #on(JkProcess, Path, JkScope...)} but you can specify project base dir in order
          * to generate IDE metadata with dependencies on project rather than the generated files..
          */
-        public Builder on(JkProcess jkProcess, File projectBaseDir, File file, JkScope ...scopes) {
+        public Builder on(JkProcess jkProcess, Path projectBaseDir, Path file, JkScope ...scopes) {
             if (!dependencies.iterator().hasNext()) {
                 return this;
             }
@@ -773,12 +766,12 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         }
 
         /**
-         * Same as {@link #on(JkProcess, File, File, JkScope...)} but it will take the working dir
+         * Same as {@link #on(JkProcess, Path, Path, JkScope...)} but it will take the working dir
          * of the specified process as the ide project base dir. When generating IDE metadata, if
          * useIdeProjectDep flag is <code>false</code>,
          * the project dependency won't be taken in account and regular file dependency will apply.
          */
-        public Builder on(JkProcess process, boolean useIdeProjectDep, File file, JkScope ...scopes) {
+        public Builder on(JkProcess process, boolean useIdeProjectDep, Path file, JkScope ...scopes) {
             if (!dependencies.iterator().hasNext()) {
                 return this;
             }

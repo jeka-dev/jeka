@@ -79,7 +79,7 @@ final class Engine {
     private JkPathSequence compile() {
         final LinkedHashSet<Path> entries = new LinkedHashSet<>();
         compile(new HashSet<>(), entries);
-        return JkPathSequence.ofPath(entries).withoutDuplicates();
+        return JkPathSequence.ofPaths(entries).withoutDuplicates();
     }
 
     private void compile(Set<Path>  yetCompiledProjects, LinkedHashSet<Path>  path) {
@@ -95,7 +95,7 @@ final class Engine {
         path.addAll(buildPath.pathEntries());
         path.addAll(compileDependentProjects(yetCompiledProjects, path).pathEntries());
         JkLog.done();
-        this.compileBuild(JkPathSequence.ofPath(path));
+        this.compileBuild(JkPathSequence.ofPaths(path));
         path.add(this.resolver.buildClassDir);
         JkLog.done();
     }
@@ -157,7 +157,7 @@ final class Engine {
 
     private BuildAndPluginDictionnary getBuildInstance(JkInit init, JkPathSequence runtimePath) {
         final JkClassLoader classLoader = JkClassLoader.current();
-        classLoader.addEntries(runtimePath);
+        classLoader.addEntries(runtimePath.pathEntries());
         JkLog.trace("Setting build execution classpath to : " + classLoader.childClasspath());
         final JkBuild build = resolver.resolve(init.buildClassHint());
         if (build == null) {
@@ -188,9 +188,9 @@ final class Engine {
 
         return JkDependencies.builder().on(buildDependencies
                 .withDefaultScope(JkScopeMapping.ALL_TO_DEFAULT))
-                .onFiles(localBuildPath())
-                .onFilesIf(devMode, JkClasspath.current())
-                .onFilesIf(!devMode, jerkarLibs())
+                .onFiles(localBuildPath().pathEntries())
+                .onFilesIf(devMode, JkClasspath.current().asPath().pathEntries())
+                .onFilesIf(!devMode, jerkarLibs().pathEntries())
                 .build();
     }
 
@@ -200,17 +200,17 @@ final class Engine {
         if (Files.exists(localDeflibDir)) {
             extraLibs.addAll(JkFileTree.of(localDeflibDir).include("**/*.jar").files());
         }
-        return JkPathSequence.ofPath(extraLibs).withoutDuplicates();
+        return JkPathSequence.ofPaths(extraLibs).withoutDuplicates();
     }
 
     private static JkPathSequence jerkarLibs() {
         final List<Path>  extraLibs = new LinkedList<>();
         extraLibs.add(JkLocator.jerkarJarPath());
-        return JkPathSequence.ofPath(extraLibs).withoutDuplicates();
+        return JkPathSequence.ofPaths(extraLibs).withoutDuplicates();
     }
 
     private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
-        JkPathSequence pathSequence = JkPathSequence.ofPath();
+        JkPathSequence pathSequence = JkPathSequence.ofPaths();
         if (!this.rootsOfImportedBuilds.isEmpty()) {
             JkLog.info("Compile build classes of dependent projects : "
                     + toRelativePaths(this.projectBaseDir, this.rootsOfImportedBuilds));

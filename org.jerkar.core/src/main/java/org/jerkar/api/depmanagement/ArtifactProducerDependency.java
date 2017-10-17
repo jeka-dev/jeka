@@ -1,6 +1,6 @@
 package org.jerkar.api.depmanagement;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
@@ -46,25 +46,25 @@ class ArtifactProducerDependency extends JkComputedDependency  {
         return artifactFileIds;
     }
 
-    private static List<File> jars(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
-        JkPathSequence result = JkPathSequence.ofPath();
+    private static List<Path> jars(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
+        JkPathSequence result = JkPathSequence.ofPaths();
         for (final JkArtifactFileId artifactFileId : artifactIds) {
             result = result.and( producer.artifactPath(artifactFileId));
         }
-        return result.withoutDuplicates().entries();
+        return result.withoutDuplicates().pathEntries();
     }
 
-    private static List<File> runtimeDeps(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
-        JkPathSequence result = JkPathSequence.ofPath();
+    private static List<Path> runtimeDeps(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
+        JkPathSequence result = JkPathSequence.ofPaths();
         for (final JkArtifactFileId artifactFileId : artifactIds) {
             result = result.and( producer.runtimeDependencies(artifactFileId));
         }
-        return result.withoutDuplicates().entries();
+        return result.withoutDuplicates().pathEntries();
     }
 
-    private static File baseDir(JkArtifactProducer artifactProducer) {
+    private static Path baseDir(JkArtifactProducer artifactProducer) {
         if (artifactProducer instanceof JkFileSystemLocalizable) {
-            return ((JkFileSystemLocalizable) artifactProducer).baseDir().toFile();
+            return ((JkFileSystemLocalizable) artifactProducer).baseDir();
         }
         return null;
     }

@@ -7,6 +7,7 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencies;
@@ -49,7 +50,7 @@ public class ResolveWithArtifactIT {
         assertEquals(3, treeRoot.allFiles().size());
 
         JkDependencyNode lwjglNode = treeRoot.children().get(0);
-        List<File> lwjglFiles = lwjglNode.nodeInfo().files();
+        List<Path> lwjglFiles = lwjglNode.nodeInfo().files();
         System.out.println(lwjglFiles);
         assertEquals(2, lwjglFiles.size());
 
@@ -74,7 +75,7 @@ public class ResolveWithArtifactIT {
         System.out.println(JkUtilsString.join(tree.allFiles(), "\n"));
         //assertEquals(resolveResult.localFiles().size(), tree.allFiles().size());
         System.out.println("-----");
-        for (File file : resolveResult.localFiles()) {
+        for (Path file : resolveResult.localFiles()) {
             if (!tree.allFiles().contains(file)) {
                 System.out.println(file);
             }

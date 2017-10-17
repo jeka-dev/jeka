@@ -1,19 +1,12 @@
 package org.jerkar.api.java;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -21,10 +14,8 @@ import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsPath;
+
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsZip;
 
@@ -38,74 +29,47 @@ import org.jerkar.api.utils.JkUtilsZip;
  *
  * @author Djeang
  */
-public final class JkClasspath implements Iterable<File> {
+public final class JkClasspath {
 
     private static final String WILD_CARD = "*";
 
-    private final List<File> entries;
+    private static final String PATH_SEPARATOR = System.getProperty("path.separator");
 
-    private JkClasspath(Iterable<File> entries) {
-        super();
+    private final List<Path> entries;
+
+    private JkClasspath(Collection<Path> entries) {
         this.entries = Collections.unmodifiableList(resolveWildCard(entries));
     }
 
     /**
      * Creates a <code>JkClasspath</code> form specified file entries.
      */
-    public static JkClasspath of(Iterable<File> entries) {
+    public static JkClasspath of(Collection<Path> entries) {
         return new JkClasspath(entries);
     }
 
     /**
      * Creates a <code>JkClasspath</code> form specified file entries.
      */
-    public static JkClasspath ofPaths(Iterable<Path> entries) {
-        return new JkClasspath(JkUtilsPath.toFiles(entries));
+    public static JkClasspath ofPaths(Collection<Path> entries) {
+        return new JkClasspath(entries);
     }
 
-
-    public static JkClasspath ofPath(Path path) {
-        return new JkClasspath(JkUtilsIterable.listOf(path.toFile()));
+    public static JkClasspath ofPath(Path ... paths) {
+        return ofPaths(Arrays.asList(paths));
     }
 
-
-    /**
-     * Convenient method to create a <code>JkClassLoader</code> from a given
-     * entry plus an sequence of other ones. This scheme is often used for
-     * launching some test suites.
-     */
-    @Deprecated
-    public static JkClasspath of(File entry, Iterable<File> otherEntries) {
-        return JkClasspath.of(entry).and(otherEntries);
-    }
-
-    /**
-     * Convenient method to create a <code>JkClassLoader</code> from a given
-     * entry plus an sequence of other ones. This scheme is often used for
-     * launching some test suites.
-     */
-    @Deprecated
-    public static JkClasspath of(Path entry, Iterable<Path> otherEntries) {
-        return JkClasspath.ofPath(entry).andHeadPath(otherEntries);
-    }
-
-    /**
-     * @see #of(Iterable)
-     */
-    public static JkClasspath of(File... entries) {
-        return JkClasspath.of(Arrays.asList(entries));
-    }
 
     /**
      * Returns the current claaspath as given by
      * <code>System.getProperty("java.class.path")</code>.
      */
     public static JkClasspath current() {
-        final List<File> files = new LinkedList<>();
+        final List<Path> files = new LinkedList<>();
         final String classpath = System.getProperty("java.class.path");
-        final String[] classpathEntries = classpath.split(File.pathSeparator);
+        final String[] classpathEntries = classpath.split(PATH_SEPARATOR);
         for (final String classpathEntry : classpathEntries) {
-            files.add(new File(classpathEntry));
+            files.addAll(resolveWildCard(classpathEntry));
         }
         return JkClasspath.of(files);
     }
@@ -114,7 +78,7 @@ public final class JkClasspath implements Iterable<File> {
      * Short hand to create a {@link JkPathSequence} from this {@link JkClasspath}.
      */
     public JkPathSequence asPath() {
-        return JkPathSequence.of(this);
+        return JkPathSequence.ofPaths(this.entries);
     }
 
     /**
@@ -122,10 +86,9 @@ public final class JkClasspath implements Iterable<File> {
      * this classloader does not exist.
      */
     public JkClasspath assertAllEntriesExist() {
-        for (final File file : entries) {
-            if (!file.exists()) {
-                throw new IllegalStateException("File " + file.getAbsolutePath()
-                + " does not exist.");
+        for (final Path file : entries) {
+            if (!Files.exists(file)) {
+                throw new IllegalStateException("File " + file + " does not exist.");
             }
         }
         return this;
@@ -134,7 +97,7 @@ public final class JkClasspath implements Iterable<File> {
     /**
      * Returns each entries making this <code>classpath</code>.
      */
-    public List<File> entries() {
+    public List<Path> entries() {
         return entries;
     }
 
@@ -146,83 +109,62 @@ public final class JkClasspath implements Iterable<File> {
     }
 
     /**
-     * @see #andHead(Iterable)
-     */
-    public JkClasspath andHead(File... entries) {
-        return andHead(JkClasspath.of(entries));
-    }
-
-    /**
      * Returns a <code>JkClasspath</code> made of, in the order, the specified
      * entries plus the entries of this one.
      */
     @SuppressWarnings("unchecked")
-    public JkClasspath andHead(Iterable<File> otherEntries) {
-        return new JkClasspath(JkUtilsIterable.chain(otherEntries, this.entries));
+    public JkClasspath andHeadPath(Collection<Path> otherEntries) {
+        LinkedList<Path> paths = new LinkedList<>(otherEntries);
+        paths.addAll(this.entries);
+        return new JkClasspath(paths);
     }
 
-    /**
-     * Returns a <code>JkClasspath</code> made of, in the order, the specified
-     * entries plus the entries of this one.
-     */
-    @SuppressWarnings("unchecked")
-    public JkClasspath andHeadPath(Iterable<Path> otherEntries) {
-        return new JkClasspath(JkUtilsIterable.chain(JkUtilsPath.toFiles(otherEntries), this.entries));
-    }
-
-    /**
-     * @see #and(Iterable)
-     */
-    public JkClasspath and(File... files) {
-        return and(JkClasspath.of(files));
-    }
-
-
-    public JkClasspath and(Path... files) {
-        final List<Path> paths = Arrays.asList(files);
-        return and(JkUtilsPath.toFiles(paths));
-    }
 
     /**
      * Returns a <code>JkClasspath</code> made of, in the order, the entries of
      * this one plus the specified ones.
      */
-    @SuppressWarnings("unchecked")
-    public JkClasspath and(Iterable<File> otherFiles) {
-        return new JkClasspath(JkUtilsIterable.chain(this.entries, otherFiles));
+    public JkClasspath and(Collection<Path> otherFiles) {
+        List<Path> paths = new LinkedList<>(this.entries);
+        paths.addAll(otherFiles);
+        return new JkClasspath(paths);
+    }
+
+    public JkClasspath and(Path ... paths) {
+        return and(Arrays.asList(paths));
     }
 
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        for (final Iterator<File> it = this.iterator(); it.hasNext();) {
-            builder.append(it.next().getAbsolutePath());
+        for (final Iterator<Path> it = this.entries.iterator(); it.hasNext();) {
+            builder.append(it.next().toAbsolutePath().toString());
             if (it.hasNext()) {
-                builder.append(File.pathSeparator);
+                builder.append(PATH_SEPARATOR);
             }
         }
         return builder.toString();
     }
 
-    private static List<File> resolveWildCard(Iterable<File> files) {
-        final LinkedHashSet<File> result = new LinkedHashSet<>();
-        for (final File file : files) {
-            if (file.getName().equals(WILD_CARD)) {
-                final File parent = file.getParentFile();
-                if (!parent.exists()) {
-                    JkLog.trace("File " + parent.getAbsolutePath()
-                    + " does not exist : classpath entry " + file.getAbsolutePath()
+    private static List<Path> resolveWildCard(Collection<Path> files) {
+        final LinkedHashSet<Path> result = new LinkedHashSet<>();
+        for (final Path file : files) {
+            if (file.getFileName().toString().equals(WILD_CARD)) {
+                final Path parent = file.getParent();
+                if (!Files.exists(parent)) {
+                    JkLog.trace("File " + parent
+                    + " does not exist : classpath entry " + file
                     + " will be ignored.");
                 } else {
-                    result.addAll(JkUtilsPath.toFiles( JkFileTree.of(parent).include("*.jar").files()));
+                    result.addAll(JkFileTree.of(parent).include("*.jar").files());
                 }
-            } else if (!file.exists()) {
-                JkLog.trace("File " + file.getAbsolutePath() + " does not exist : classpath entry "
-                        + file.getAbsolutePath() + " will be ignored.");
-            } else if (file.isFile()) {
-                if (!JkUtilsString.endsWithAny(file.getName().toLowerCase(), ".jar", ".zip")) {
+            } else if (!Files.exists(file)) {
+                JkLog.trace("File " + file + " does not exist : classpath entry "
+                        + file + " will be ignored.");
+            } else if (Files.isRegularFile(file)) {
+                if (!JkUtilsString.endsWithAny(file.getFileName().toString().toLowerCase(), ".jar", ".zip")) {
                     throw new IllegalArgumentException("Classpath file element "
-                            + file.getAbsolutePath()
+                            + file.toAbsolutePath().toString()
                             + " is invalid. It must be either a folder either a jar or zip file.");
                 }
                 result.add(file);
@@ -233,27 +175,37 @@ public final class JkClasspath implements Iterable<File> {
         return new ArrayList<>(result);
     }
 
-    /**
-     * Iterator over the entries.
-     */
-    @Override
-    public Iterator<File> iterator() {
-        return entries.iterator();
+    private static List<Path> resolveWildCard(String candidatePath) {
+        List<Path> result = new LinkedList<>();
+        if (candidatePath.endsWith(WILD_CARD)) {
+            File file = new File(candidatePath);
+            final Path parent = file.getParentFile().toPath();
+            if (!Files.exists(parent)) {
+                JkLog.trace("File " + parent
+                        + " does not exist : classpath entry " + file
+                        + " will be ignored.");
+            } else {
+                result.addAll(JkFileTree.of(parent).include("*.jar").files());
+            }
+        } else {
+            result.add(Paths.get(candidatePath));
+        }
+        return result;
     }
 
     /**
      * Returns the first entry of this <code>classpath</code> containing the
      * given class.
      */
-    public File getEntryContainingClass(String className) {
+    public Path getEntryContainingClass(String className) {
         final String path = toFilePath(className);
-        for (final File file : this) {
-            if (file.isDirectory()) {
-                if (new File(file, path).exists()) {
+        for (final Path file : entries) {
+            if (Files.isDirectory(file)) {
+                if (Files.exists(file.resolve(path))) {
                     return file;
                 }
             } else {
-                final ZipFile zipFile = JkUtilsZip.zipFile(file);
+                final ZipFile zipFile = JkUtilsZip.zipFile(file.toFile());
                 if (zipFile.getEntry(path) != null) {
                     JkUtilsIO.closeQuietly(zipFile);
                     return file;
@@ -271,11 +223,11 @@ public final class JkClasspath implements Iterable<File> {
      */
     Set<Path> allItemsMatching(JkPathFilter fileFilter) {
         final Set<Path> result = new HashSet<>();
-        for (final File classpathEntry : this) {
-            if (classpathEntry.isDirectory()) {
+        for (final Path classpathEntry : this.entries) {
+            if (Files.isDirectory(classpathEntry)) {
                 result.addAll(JkFileTree.of(classpathEntry).andFilter(fileFilter).relativeFiles());
             } else {
-                final ZipFile zipFile = JkUtilsZip.zipFile(classpathEntry);
+                final ZipFile zipFile = JkUtilsZip.zipFile(classpathEntry.toFile());
                 for (final Enumeration<? extends ZipEntry> zipEntries = zipFile.entries(); zipEntries
                         .hasMoreElements();) {
                     final ZipEntry zipEntry = zipEntries.nextElement();
@@ -299,8 +251,12 @@ public final class JkClasspath implements Iterable<File> {
     public URL[] asArrayOfUrl() {
         final URL[] result = new URL[this.entries.size()];
         int i = 0;
-        for (final File file : this.entries) {
-            result[i] = JkUtilsFile.toUrl(file);
+        for (final Path file : this.entries) {
+            try {
+                result[i] = file.toUri().toURL();
+            } catch (MalformedURLException e) {
+                throw new IllegalStateException(file + " can't be transformed to url", e);
+            }
             i++;
         }
         return result;

@@ -1,8 +1,9 @@
 package org.jerkar.api.crypto.pgp;
 
-import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import org.jerkar.api.java.JkClassLoader;
@@ -33,9 +34,10 @@ public final class JkPgp implements Serializable {
 
     private static final String PGPUTILS_CLASS_NAME = "org.jerkar.api.crypto.pgp.PgpUtils";
 
+    private static final Path USER_HOME = Paths.get(System.getProperty("user.home"));
+
     // We don't want to add Bouncycastle in the Jerkar classpath, so we create a
-    // specific classloader
-    // just for launching the Bouncy castle methods.
+    // specific classloader just for launching the Bouncy castle methods.
     private static final Class<?> PGPUTILS_CLASS = JkClassLoader.current()
             .siblingWithOptional(JkPgp.class.getResource("bouncycastle-pgp-152.jar"))
             .load(PGPUTILS_CLASS_NAME);
@@ -43,7 +45,7 @@ public final class JkPgp implements Serializable {
     /**
      * Creates a {@link JkPgp} with the specified public and secret ring.
      */
-    public static JkPgp of(File pubRing, File secRing, String password) {
+    public static JkPgp of(Path pubRing, Path secRing, String password) {
         return new JkPgp(pubRing, secRing, password);
     }
 
@@ -51,14 +53,14 @@ public final class JkPgp implements Serializable {
      * Creates a {@link JkPgp} with default GnuPgp file location.
      */
     public static JkPgp ofDefaultGnuPg() {
-        final File pub;
-        final File sec;
+        final Path pub;
+        final Path sec;
         if (JkUtilsSystem.IS_WINDOWS) {
-            pub = new File(JkUtilsFile.userHome(), "AppData/Roaming/gnupg/pubring.gpg");
-            sec = new File(JkUtilsFile.userHome(), "AppData/Roaming/gnupg/secring.gpg");
+            pub = USER_HOME.resolve("AppData/Roaming/gnupg/pubring.gpg");
+            sec = USER_HOME.resolve("AppData/Roaming/gnupg/secring.gpg");
         } else {
-            pub = new File(JkUtilsFile.userHome(), ".gnupg/pubring.gpg");
-            sec = new File(JkUtilsFile.userHome(), ".gnupg/secring.gpg");
+            pub = USER_HOME.resolve(".gnupg/pubring.gpg");
+            sec = USER_HOME.resolve(".gnupg/secring.gpg");
         }
         return new JkPgp(pub, sec, null);
     }
@@ -70,12 +72,12 @@ public final class JkPgp implements Serializable {
         JkPgp result = ofDefaultGnuPg();
         final String pub = options.get(PUB_KEYRING);
         if (pub != null) {
-            result = result.publicRing(new File(pub));
+            result = result.publicRing(Paths.get(pub));
         }
         final String sec = options.get(SECRET_KEYRING);
         final String password = options.get(SECRET_KEY_PASS_WORD_PROPERTY);
         if (sec != null) {
-            result = result.secretRing(new File(sec), password);
+            result = result.secretRing(Paths.get(sec), password);
         } else {
             result = result.secretRing(result.secRing, password);
         }
@@ -85,38 +87,32 @@ public final class JkPgp implements Serializable {
     /**
      * Creates a JkPgp with the specified public key ring.
      */
-    public static JkPgp ofPublicRing(File pubRing) {
+    public static JkPgp ofPublicRing(Path pubRing) {
         return of(pubRing, null, null);
     }
 
     /**
      * Creates a JkPgp with the specified secret key ring.
      */
-    public static JkPgp ofSecretRing(File secRing, String password) {
+    public static JkPgp ofSecretRing(Path secRing, String password) {
         return of(null, secRing, password);
     }
 
-    /**
-     * Creates a JkPgp with the specified secret key ring.
-     */
-    public static JkPgp ofSecretRing(Path secRing, String password) {
-        return of(null, secRing.toFile(), password);
-    }
 
-    private final File pubRing;
+    private final Path pubRing;
 
-    private final File secRing;
+    private final Path secRing;
 
     private final String password;
 
-    private JkPgp(File pubRing, File secRing, String password) {
+    private JkPgp(Path pubRing, Path secRing, String password) {
         super();
         this.pubRing = pubRing;
         this.secRing = secRing;
         this.password = password;
     }
 
-    void sign(File fileToSign, File output, String password) {
+    void sign(Path fileToSign, Path output, String password) {
         final char[] pass;
         if (password == null) {
             pass = new char[0];
@@ -125,23 +121,25 @@ public final class JkPgp implements Serializable {
         }
         JkUtilsAssert.isTrue(secRing != null,
                 "You must supply a secret ring file (as secring.gpg) to sign files");
-        JkUtilsFile.assertAllExist(secRing);
-        JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "sign", fileToSign, secRing, output,
-                pass, true);
+        if (!Files.exists(secretRing())) {
+            throw new IllegalStateException("Specified secret ring file not found.");
+        }
+        JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "sign", fileToSign.toFile(),
+                secRing.toFile(), output.toFile(), pass, true);
     }
 
     /**
      * Signs the specified files in a detached signature file which will have
      * the same name of the signed file plus ".asc" suffix.
      */
-    public File[] sign(File... filesToSign) {
-        final File[] result = new File[filesToSign.length];
+    public Path[] sign(Path... filesToSign) {
+        final Path[] result = new Path[filesToSign.length];
         int i = 0;
-        for (final File file : filesToSign) {
-            if (!file.exists()) {
+        for (final Path file : filesToSign) {
+            if (!Files.exists(file)) {
                 continue;
             }
-            final File signatureFile = new File(file.getParent(), file.getName() + ".asc");
+            final Path signatureFile = file.getParent().resolve(file.getFileName().toString() + ".asc");
             result[i] = signatureFile;
             sign(file, signatureFile, password);
             i++;
@@ -152,11 +150,11 @@ public final class JkPgp implements Serializable {
     /**
      * Returns file that are created if a signature occurs on specified files.
      */
-    public static File[] drySignatureFiles(File... filesToSign) {
-        final File[] result = new File[filesToSign.length];
+    public static Path[] drySignatureFiles(Path... filesToSign) {
+        final Path[] result = new Path[filesToSign.length];
         int i = 0;
-        for (final File file : filesToSign) {
-            final File signatureFile = new File(file.getParent(), file.getName() + ".asc");
+        for (final Path file : filesToSign) {
+            final Path signatureFile = file.getParent().resolve(file.getFileName().toString() + ".asc");
             result[i] = signatureFile;
             i++;
         }
@@ -166,19 +164,20 @@ public final class JkPgp implements Serializable {
     /**
      * Verifies the specified file against the specified signature.
      */
-    public boolean verify(File fileToVerify, File signature) {
+    public boolean verify(Path fileToVerify, Path signature) {
         JkUtilsAssert.isTrue(pubRing != null,
                 "You must supply a public ring file (as pubring.gpg) to verify file signatures");
-        JkUtilsFile.assertAllExist(publicRing());
-        return JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "verify",
-                fileToVerify, pubRing, signature);
+        if (!Files.exists(publicRing())) {
+            throw new IllegalStateException("Specified public ring file " + publicRing() + " not found.");
+        }
+        return JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "verify", fileToVerify, pubRing, signature);
     }
 
     /**
      * Creates a identical {@link JkPgp} but with the specified secret ring key
      * file.
      */
-    public JkPgp secretRing(File file, String password) {
+    public JkPgp secretRing(Path file, String password) {
         return new JkPgp(pubRing, file, password);
     }
 
@@ -186,21 +185,21 @@ public final class JkPgp implements Serializable {
      * Creates a identical {@link JkPgp} but with the specified public ring key
      * file.
      */
-    public JkPgp publicRing(File file) {
+    public JkPgp publicRing(Path file) {
         return new JkPgp(file, secRing, password);
     }
 
     /**
      * Returns the secret ring of this object.
      */
-    public File secretRing() {
+    public Path secretRing() {
         return secRing;
     }
 
     /**
      * Returns the public ring of this object.
      */
-    public File publicRing() {
+    public Path publicRing() {
         return pubRing;
     }
 

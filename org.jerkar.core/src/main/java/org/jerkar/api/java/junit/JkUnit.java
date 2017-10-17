@@ -241,7 +241,7 @@ public final class JkUnit {
         if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
             if (this.forkedProcess != null) {
                 JkLog.startln("Run JUnit tests in forked mode");
-                result = JUnit4TestLauncher.launchInFork(forkedProcess.withClasspath(testSpec.classpath()),
+                result = JUnit4TestLauncher.launchInFork(forkedProcess.withClasspath(testSpec.classpath().entries()),
                         printOutputOnConsole,
                         reportDetail, classes, reportDir);
             } else {
@@ -295,7 +295,7 @@ public final class JkUnit {
     @SuppressWarnings("rawtypes")
     private Collection<Class> getClassesToTest(JkJavaTestSpec testSpec) {
         final JkClasspath classpath = testSpec.classpath().andHeadPath(testSpec.classesToTest().rootFiles());
-        final JkClassLoader classLoader = JkClassLoader.system().parent().child(classpath)
+        final JkClassLoader classLoader = JkClassLoader.system().parent().child(classpath.entries())
                 .loadAllServices();
         final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, testSpec.classesToTest());
         if (result.isEmpty()) {

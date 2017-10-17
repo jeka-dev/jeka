@@ -37,7 +37,7 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
     public static JkocoJunitEnhancer of(Path destFile) {
         final URL url = JkPluginJacoco.class.getResource("jacocoagent.jar");
         final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, JkLog.infoStreamIfVerbose(),
-                JkClassLoader.urlCacheDir()).toPath();
+                JkClassLoader.urlCacheDir().toFile()).toPath();
         return new JkocoJunitEnhancer(file, true, destFile);
     }
 
@@ -56,10 +56,10 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
         }
         if (jkUnit.isForked()) {
             JkJavaProcess process = jkUnit.forkedProcess();
-            process = process.andAgent(destFile.toFile(), options());
+            process = process.andAgent(destFile, options());
             return jkUnit.forked(process);
         }
-        final JkJavaProcess process = JkJavaProcess.of().andAgent(agent.toFile(), options());
+        final JkJavaProcess process = JkJavaProcess.of().andAgent(agent, options());
         return jkUnit.forked(process).withPostAction(new Reporter());
     }
 
