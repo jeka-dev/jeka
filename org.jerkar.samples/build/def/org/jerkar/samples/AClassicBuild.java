@@ -8,8 +8,6 @@ import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
-
-
 /**
  * This build is equivalent to {@link MavenStyleBuild} but removing the needless
  * part cause we respect the convention project folder name =
@@ -22,9 +20,9 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 public class AClassicBuild extends JkJavaProjectBuild {
 
     {
-	pack.checksums = "sha1";
-	pack.tests = true;
-	pack.javadoc = true;
+	    pack.checksums = "sha1";
+	    pack.tests = true;
+	    pack.javadoc = true;
     }
     
     @Override

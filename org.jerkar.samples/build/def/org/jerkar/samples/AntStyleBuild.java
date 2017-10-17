@@ -13,6 +13,7 @@ import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.*;
+import org.jerkar.api.java.junit.JkJavaTestSpec;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
 import org.jerkar.tool.JkBuild;
@@ -67,11 +68,12 @@ public class AntStyleBuild extends JkBuild {
 
     public void junit() {
         jar();
-        JkUnit.of(classpath.and(jarFile)).forked()
-        .withClassesToTest(JkFileTree.of(classDir).include("**/*Test.class"))
+        JkUnit.of().forked()
         .withReportDir(reportDir)
         .withReport(JunitReportDetail.FULL)
-        .run();
+        .run(JkJavaTestSpec.of(
+                classpath.and(jarFile),
+                JkFileTree.of(classDir).include("**/*Test.class") ));
     }
 
     /*

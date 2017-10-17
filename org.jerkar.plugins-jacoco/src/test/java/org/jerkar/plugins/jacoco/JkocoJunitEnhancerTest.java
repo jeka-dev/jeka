@@ -11,7 +11,7 @@ public class JkocoJunitEnhancerTest {
 
     @Test
     public void test() {
-        JkocoJunitEnhancer.of(Paths.get("")).apply(JkUnit.of(JkClasspath.of()));
+        JkocoJunitEnhancer.of(Paths.get("")).apply(JkUnit.of());
     }
 
 }

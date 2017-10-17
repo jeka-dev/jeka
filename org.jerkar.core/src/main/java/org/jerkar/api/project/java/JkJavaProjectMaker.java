@@ -28,10 +28,12 @@ import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkVersionProvider;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.file.JkCheckSumer;
 import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.*;
+import org.jerkar.api.java.junit.JkJavaTestSpec;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.system.JkLog;
 
@@ -209,17 +211,22 @@ public class JkJavaProjectMaker {
                 .setOutputDir(project.getOutLayout().testClassDir());
     }
 
-    protected JkUnit juniter() {
+    private JkUnit juniter() {
         final JkClasspath classpath = JkClasspath.ofPath(project.getOutLayout().testClassDir())
                 .and(project.getOutLayout().classDir())
                 .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
         final Path junitReport = project.getOutLayout().testReportDir().resolve("junit");
-        return this.juniter.withClassesToTest(project.getOutLayout().testClassDir())
-                .withClasspath(classpath)
-                .withReportDir(junitReport);
+        return this.juniter.withReportDir(junitReport);
     }
 
-    public final JkRunnables testExecutor = JkRunnables.of(() -> juniter().run());
+    private JkJavaTestSpec testSpec() {
+        final JkClasspath classpath = JkClasspath.ofPath(project.getOutLayout().testClassDir())
+                .and(project.getOutLayout().classDir())
+                .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
+        return JkJavaTestSpec.of(classpath, JkFileTreeSet.of(project.getOutLayout().testClassDir()));
+    }
+
+    public final JkRunnables testExecutor = JkRunnables.of(() -> juniter().run(testSpec()));
 
     public final JkRunnables afterTest = JkRunnables.of(() -> {
     });

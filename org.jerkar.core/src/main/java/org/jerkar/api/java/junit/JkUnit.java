@@ -61,21 +61,6 @@ public final class JkUnit {
 
     private static final String JUNIT3_TEST_RESULT_CLASS_NAME = "junit.framework.TestResult";
 
-    /*
-     * A interface to implement to enhance test execution. It can be used for test coverage tool for example.
-     */
-    //@FunctionalInterface
-    //public static interface Enhancer {
-
-    /**
-     * Returns a modified Junit launcher from the specified one.
-     */
-    //   JkUnit enhance(JkUnit jkUnit);
-
-    //}
-
-    private final JkClasspath classpath;
-
     private final JunitReportDetail reportDetail;
 
     private final File reportDir;
@@ -84,30 +69,26 @@ public final class JkUnit {
 
     private final List<Runnable> postActions;
 
-    private final JkFileTreeSet classesToTest;
-
     private final boolean breakOnFailure;
 
     private final boolean printOutputOnConsole;
 
-    private JkUnit(JkClasspath classpath, JunitReportDetail reportDetail, File reportDir,
-            JkJavaProcess fork, List<Runnable> runnables, JkFileTreeSet testClasses,
+    private JkUnit(JunitReportDetail reportDetail, File reportDir,
+            JkJavaProcess fork, List<Runnable> runnables,
             boolean crashOnFailed, boolean printOutputOnConsole) {
-        this.classpath = classpath;
         this.reportDetail = reportDetail;
         this.reportDir = reportDir;
         this.forkedProcess = fork;
         this.postActions = Collections.unmodifiableList(runnables);
-        this.classesToTest = testClasses;
         this.breakOnFailure = crashOnFailed;
         this.printOutputOnConsole = printOutputOnConsole;
     }
 
     @SuppressWarnings("unchecked")
-    private JkUnit(JkClasspath classpath, JunitReportDetail reportDetail, File reportDir,
-            JkJavaProcess fork, JkFileTreeSet testClasses, boolean crashOnFailed,
+    private JkUnit(JunitReportDetail reportDetail, File reportDir,
+            JkJavaProcess fork, boolean crashOnFailed,
             boolean printOutputOnConsole) {
-        this(classpath, reportDetail, reportDir, fork, Collections.EMPTY_LIST, testClasses,
+        this(reportDetail, reportDir, fork, Collections.EMPTY_LIST,
                 crashOnFailed, printOutputOnConsole);
     }
 
@@ -115,57 +96,41 @@ public final class JkUnit {
      * Returns an empty junit launcher launcher without classpath set on.
      */
     public static JkUnit of() {
-        return new JkUnit(JkClasspath.of(), JunitReportDetail.NONE, null, null, JkFileTreeSet.empty(),
+        return new JkUnit(JunitReportDetail.NONE, null, null,
                 true, true);
     }
 
-    /**
-     * Returns a launcher having the specified classpath.
-     */
-    public static JkUnit of(JkClasspath classpath) {
-        return new JkUnit(classpath, JunitReportDetail.NONE, null, null, JkFileTreeSet.empty(),
-                true, true);
-    }
 
     /**
      * Returns a copy of this launcher but with the specified report detail.
      */
     public JkUnit withReport(JunitReportDetail reportDetail) {
-        return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess,
-                classesToTest, this.breakOnFailure, this.printOutputOnConsole);
+        return new JkUnit(reportDetail, reportDir, this.forkedProcess,
+                this.breakOnFailure, this.printOutputOnConsole);
     }
 
     /**
      * Returns a copy of this launcher but with the specified report directory output.
      */
     public JkUnit withReportDir(File reportDir) {
-        return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess,
-                classesToTest, this.breakOnFailure, this.printOutputOnConsole);
+        return new JkUnit(reportDetail, reportDir, this.forkedProcess,
+                this.breakOnFailure, this.printOutputOnConsole);
     }
 
     /**
      * Returns a copy of this launcher but with the specified report directory output.
      */
     public JkUnit withReportDir(Path reportDir) {
-        return new JkUnit(this.classpath, reportDetail, reportDir.toFile(), this.forkedProcess,
-                classesToTest, this.breakOnFailure, this.printOutputOnConsole);
+        return new JkUnit(reportDetail, reportDir.toFile(), this.forkedProcess,
+                this.breakOnFailure, this.printOutputOnConsole);
     }
-
 
     /**
      * Returns a copy of this launcher but that fail fast on the first failure.
      */
     public JkUnit withBreakOnFailure(boolean crashOnFailure) {
-        return new JkUnit(this.classpath, reportDetail, reportDir, this.forkedProcess,
-                classesToTest, crashOnFailure, this.printOutputOnConsole);
-    }
-
-    /**
-     * Returns a copy of this launcher but with the specified classpath to run the tests.
-     */
-    public JkUnit withClasspath(JkClasspath classpath) {
-        return new JkUnit(classpath, reportDetail, reportDir, this.forkedProcess,
-                classesToTest, this.breakOnFailure, this.printOutputOnConsole);
+        return new JkUnit(reportDetail, reportDir, this.forkedProcess,
+                crashOnFailure, this.printOutputOnConsole);
     }
 
     /**
@@ -174,8 +139,8 @@ public final class JkUnit {
     public JkUnit withPostAction(Runnable runnable) {
         final List<Runnable> list = new LinkedList<>(this.postActions);
         list.add(runnable);
-        return new JkUnit(classpath, reportDetail, reportDir, forkedProcess, list,
-                this.classesToTest, this.breakOnFailure, this.printOutputOnConsole);
+        return new JkUnit(reportDetail, reportDir, forkedProcess, list,
+                this.breakOnFailure, this.printOutputOnConsole);
     }
 
     /**
@@ -185,8 +150,7 @@ public final class JkUnit {
      * classpath.
      */
     public JkUnit forked(JkJavaProcess process) {
-        return new JkUnit(this.classpath, reportDetail, reportDir, process, this.classesToTest,
-                this.breakOnFailure, this.printOutputOnConsole);
+        return new JkUnit(reportDetail, reportDir, process, this.breakOnFailure, this.printOutputOnConsole);
     }
 
     /**
@@ -199,8 +163,8 @@ public final class JkUnit {
             return forked(process);
         }
         if (!fork && isForked()) {
-            return new JkUnit(forkedProcess.classpath(), reportDetail, reportDir, null,
-                    this.classesToTest, this.breakOnFailure, this.printOutputOnConsole);
+            return new JkUnit(reportDetail, reportDir, null,
+                    this.breakOnFailure, this.printOutputOnConsole);
         }
         return this;
     }
@@ -222,35 +186,10 @@ public final class JkUnit {
     }
 
     /**
-     * Returns an enhanced copy of this launcher but specifying location of classes to test.
-     */
-    public JkUnit withClassesToTest(JkFileTreeSet classesToTest) {
-        return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess, classesToTest,
-                this.breakOnFailure, this.printOutputOnConsole);
-    }
-
-    /**
      * Returns an enhanced copy of this launcher but specifying if the output should be displayed on console.
      */
     public JkUnit withOutputOnConsole(boolean outputOnConsole) {
-        return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess, classesToTest,
-                this.breakOnFailure, outputOnConsole);
-    }
-
-    /**
-     * Returns an enhanced copy of this launcher but specifying location of classes to test.
-     */
-    public JkUnit withClassesToTest(JkFileTree classesToTest) {
-        return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess,
-                JkFileTreeSet.of(classesToTest), this.breakOnFailure, this.printOutputOnConsole);
-    }
-
-    /**
-     * Returns an enhanced copy of this launcher but specifying location of classes to test.
-     */
-    public JkUnit withClassesToTest(Path... classDirs) {
-        return new JkUnit(this.classpath, reportDetail, reportDir, forkedProcess,
-                JkFileTreeSet.of(classDirs), this.breakOnFailure, this.printOutputOnConsole);
+        return new JkUnit(reportDetail, reportDir, forkedProcess, breakOnFailure, outputOnConsole);
     }
 
     /**
@@ -258,13 +197,6 @@ public final class JkUnit {
      */
     public boolean isForked() {
         return this.forkedProcess != null;
-    }
-
-    /**
-     * Returns the classpath for this launcher.
-     */
-    public JkClasspath classpath() {
-        return classpath;
     }
 
     /**
@@ -292,8 +224,8 @@ public final class JkUnit {
      * Runs the test suite and return the result.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public JkTestSuiteResult run() {
-        final Collection<Class> classes = getClassesToTest();
+    public JkTestSuiteResult run(JkJavaTestSpec testSpec) {
+        final Collection<Class> classes = getClassesToTest(testSpec);
         final String name = getSuiteName(classes);
 
         if (!classes.iterator().hasNext()) {
@@ -309,7 +241,7 @@ public final class JkUnit {
         if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
             if (this.forkedProcess != null) {
                 JkLog.startln("Run JUnit tests in forked mode");
-                result = JUnit4TestLauncher.launchInFork(forkedProcess.withClasspath(this.classpath),
+                result = JUnit4TestLauncher.launchInFork(forkedProcess.withClasspath(testSpec.classpath()),
                         printOutputOnConsole,
                         reportDetail, classes, reportDir);
             } else {
@@ -361,11 +293,11 @@ public final class JkUnit {
     }
 
     @SuppressWarnings("rawtypes")
-    private Collection<Class> getClassesToTest() {
-        final JkClasspath classpath = this.classpath.andHeadPath(this.classesToTest.rootFiles());
+    private Collection<Class> getClassesToTest(JkJavaTestSpec testSpec) {
+        final JkClasspath classpath = testSpec.classpath().andHeadPath(testSpec.classesToTest().rootFiles());
         final JkClassLoader classLoader = JkClassLoader.system().parent().child(classpath)
                 .loadAllServices();
-        final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, this.classesToTest);
+        final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, testSpec.classesToTest());
         if (result.isEmpty()) {
             JkUtilsIO.closeOrFail(classLoader.classloader());
         }
