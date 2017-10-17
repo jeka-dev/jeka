@@ -4,10 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -35,16 +37,18 @@ public class EffectivePomTest {
         final JkPom jkPom = JkPom.of(file);
         final String code = jkPom.jerkarSourceCode(JkFileTree.of(new File("toto")));
         System.out.println(code);
-        final File srcDir = new File("build/output/test-generated-src");
-        srcDir.mkdirs();
-        final File binDir = new File("build/output/test-generated-bin");
-        binDir.mkdirs();
-        final File javaCode = new File(srcDir, "Build.java");
+        final Path srcDir = Paths.get("build/output/test-generated-src");
+        Files.createDirectories(srcDir);
+        final Path binDir = Paths.get("build/output/test-generated-bin");
+        Files.createDirectories(binDir);
+        final File javaCode = new File(srcDir.toFile(), "Build.java");
         javaCode.getParentFile().mkdirs();
         javaCode.createNewFile();
         JkUtilsFile.writeString(javaCode, code, false);
-        final boolean success = JkJavaCompiler.outputtingIn(binDir).andSourceDir(srcDir)
-                .andOptions("-cp", JkLocator.jerkarJarPath().toAbsolutePath().normalize().toString()).compile();
+        final boolean success = JkJavaCompiler.base().compile( new JkJavaCompileSpec()
+                .setOutputDir(binDir)
+                .addSources(srcDir)
+                .setOption("-cp", JkLocator.jerkarJarPath().toAbsolutePath().normalize().toString()));
         Assert.assertTrue("The generated build class does not compile " + javaCode, success);
     }
 

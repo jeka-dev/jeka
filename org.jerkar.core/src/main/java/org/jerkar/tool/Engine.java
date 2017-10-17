@@ -24,6 +24,7 @@ import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkClasspath;
+import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
@@ -223,7 +224,8 @@ final class Engine {
     }
 
     private void compileBuild(JkPathSequence buildPath) {
-        baseBuildCompiler().withClasspath(buildPath).compile();
+        JkJavaCompileSpec compileSpec = buildCompileSpec().setClasspath(buildPath.pathEntries());
+        JkJavaCompiler.base().compile(compileSpec);
         JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir,
                 StandardCopyOption.REPLACE_EXISTING);
     }
@@ -318,10 +320,11 @@ final class Engine {
         return buildMethods;
     }
 
-    private JkJavaCompiler baseBuildCompiler() {
+    private JkJavaCompileSpec buildCompileSpec() {
         final JkFileTree buildSource = JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER);
         JkUtilsPath.createDirectories(resolver.buildClassDir);
-        return JkJavaCompiler.outputtingIn(resolver.buildClassDir.toFile()).andSources(buildSource.files()).failOnError(true);
+        return new JkJavaCompileSpec().setOutputDir(resolver.buildClassDir)
+                .addSources(buildSource.files());
     }
 
     private JkDependencyResolver getBuildDefDependencyResolver() {

@@ -12,10 +12,7 @@ import org.jerkar.api.depmanagement.JkPublisher;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.java.JkClasspath;
-import org.jerkar.api.java.JkJavaCompiler;
-import org.jerkar.api.java.JkJavaProcess;
-import org.jerkar.api.java.JkManifest;
+import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
 import org.jerkar.tool.JkBuild;
@@ -43,8 +40,10 @@ public class AntStyleBuild extends JkBuild {
     }
 
     public void compile() {
-        JkJavaCompiler.outputtingIn(classDir).withClasspath(classpath)
-        .andSourceDir(src).compile();
+        JkJavaCompiler.base().compile(new JkJavaCompileSpec()
+                .setOutputDir(classDir)
+                .setClasspath(classpath.asPath().pathEntries())
+                .addSources(src));
         JkFileTree.of(src).exclude("**/*.java").copyTo(classDir);
     }
 

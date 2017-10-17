@@ -1,6 +1,7 @@
 package org.jerkar.api.java;
 
 import java.io.File;
+import java.nio.file.Paths;
 
 import javax.tools.ToolProvider;
 
@@ -11,8 +12,9 @@ public class JkJavaCompilerRunner {
         System.out.println(JkJavaCompiler.currentJdkSourceVersion());
         System.out.println(ToolProvider.getSystemJavaCompiler().getSourceVersions());
 
-        JkJavaCompiler.outputtingIn(new File("build/output/bin"))
-        .withOption(JkJavaCompilerSpec.SOURCE_OPTS, JkJavaVersion.V6.name()).compile();
+        JkJavaCompiler.base().compile(new JkJavaCompileSpec()
+                .setOutputDir(Paths.get("build/output/bin"))
+                .setOption(JkJavaCompileSpec.SOURCE_OPTS, JkJavaVersion.V6.name()));
     }
 
 }

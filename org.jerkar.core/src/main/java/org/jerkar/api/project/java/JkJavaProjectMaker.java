@@ -1,6 +1,5 @@
 package org.jerkar.api.project.java;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Arrays;
@@ -32,13 +31,9 @@ import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.file.JkCheckSumer;
 import org.jerkar.api.function.JkRunnables;
-import org.jerkar.api.java.JkClasspath;
-import org.jerkar.api.java.JkJavaCompiler;
-import org.jerkar.api.java.JkJavadocMaker;
-import org.jerkar.api.java.JkResourceProcessor;
+import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
 
 /**
  * Beware : Experimental !!!!!!!!!!!!!!!!!!!!!!!
@@ -93,18 +88,16 @@ public class JkJavaProjectMaker {
                 .and(project.getResourceInterpolators())
                 .generateTo(project.getOutLayout().classDir().toFile()));
         this.compiler = JkRunnables.of(() -> {
-            JkJavaCompiler comp = baseCompiler.andOptions(project.getCompileSpec().asOptions());
-            comp = applyCompileSource(comp);
-            comp.compile();
+            JkJavaCompileSpec compileSpec = compileSourceSpec();
+            baseCompiler.compile(compileSpec);
         });
         testResourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().testResources())
                 .and(project.getOutLayout().generatedTestResourceDir().toFile())
                 .and(project.getResourceInterpolators())
                 .generateTo(project.getOutLayout().testClassDir().toFile()));
         testCompiler = JkRunnables.of(() -> {
-            JkJavaCompiler comp = testBaseCompiler.andOptions(this.project.getCompileSpec().asOptions());
-            comp = applyTestCompileSource(comp);
-            comp.compile();
+            JkJavaCompileSpec testCompileSpec = testCompileSpec();
+            testBaseCompiler.compile(testCompileSpec);
         });
         artifactFileNameSupplier = () -> {
             if (project.getVersionedModule() != null) {
@@ -169,13 +162,14 @@ public class JkJavaProjectMaker {
 
     public final JkRunnables compiler;
 
-    private JkJavaCompiler applyCompileSource(JkJavaCompiler baseCompiler) {
+    private JkJavaCompileSpec compileSourceSpec() {
+        JkJavaCompileSpec result = project.getCompileSpec().copy();
         final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
-        return baseCompiler
-                .withClasspath(classpath)
-                .andSources(project.getSourceLayout().sources().files())
-                .andSources(JkFileTree.of(project.getOutLayout().generatedSourceDir()).files())
-                .withOutputDir(project.getOutLayout().classDir());
+        return result
+                .setClasspath(classpath.pathEntries())
+                .addSources(project.getSourceLayout().sources().files())
+                .addSources(JkFileTree.of(project.getOutLayout().generatedSourceDir()).files())
+                .setOutputDir(project.getOutLayout().classDir());
     }
 
     public final JkRunnables afterCompile = JkRunnables.of(() -> {
@@ -206,12 +200,13 @@ public class JkJavaProjectMaker {
 
     public final JkRunnables testCompiler;
 
-    private JkJavaCompiler applyTestCompileSource(JkJavaCompiler baseCompiler) {
+    private JkJavaCompileSpec testCompileSpec() {
+        JkJavaCompileSpec result = project.getCompileSpec().copy();
         final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andHead(project.getOutLayout().classDir());
-        return baseCompiler
-                .withClasspath(classpath)
-                .andSources(project.getSourceLayout().tests().files())
-                .withOutputDir(project.getOutLayout().testClassDir());
+        return result
+                .setClasspath(classpath.pathEntries())
+                .addSources(project.getSourceLayout().tests().files())
+                .setOutputDir(project.getOutLayout().testClassDir());
     }
 
     protected JkUnit juniter() {

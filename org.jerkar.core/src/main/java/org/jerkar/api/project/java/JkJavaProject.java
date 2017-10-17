@@ -15,7 +15,7 @@ import org.jerkar.api.file.JkFileSystemLocalizable;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.file.JkPathSequence;
-import org.jerkar.api.java.JkJavaCompilerSpec;
+import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.JkManifest;
 import org.jerkar.api.java.JkResourceProcessor;
@@ -77,8 +77,8 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     private JkDependencies dependencies;
 
-    private JkJavaCompilerSpec compileSpec =
-            JkJavaCompilerSpec.of(JkJavaVersion.V8).withEncoding("UTF-8");
+    private JkJavaCompileSpec compileSpec =
+            new JkJavaCompileSpec().setSourceAndTargetVersion(JkJavaVersion.V8).setEncoding("UTF-8");
 
     private final List<JkResourceProcessor.JkInterpolator> resourceInterpolators = new LinkedList<>();
 
@@ -226,18 +226,13 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
         return this;
     }
 
-    public JkJavaProject setCompilerSpecification(JkJavaCompilerSpec compileSpec) {
-        this.compileSpec = compileSpec;
-        return this;
-    }
-
     public JkJavaProject setSourceEncoding(String encoding) {
-        this.compileSpec = compileSpec.withEncoding(encoding);
+        this.compileSpec.setEncoding(encoding);
         return this;
     }
 
     public JkJavaProject setSourceVersion(JkJavaVersion version ) {
-        this.compileSpec = compileSpec.withSourceAndTargetVersion(version);
+        compileSpec.setSourceAndTargetVersion(version);
         return this;
     }
 
@@ -259,11 +254,11 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
         return setVersionedModule(JkModuleId.of(groupAndName).version(version));
     }
 
-    public JkJavaCompilerSpec getCompileSpec() {
+    public JkJavaCompileSpec getCompileSpec() {
         return compileSpec;
     }
 
-    public JkJavaProject setCompileSpec(JkJavaCompilerSpec compileSpec) {
+    public JkJavaProject setCompileSpec(JkJavaCompileSpec compileSpec) {
         this.compileSpec = compileSpec;
         return this;
     }
