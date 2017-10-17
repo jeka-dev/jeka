@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsJdk;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsReflect;
 
 /**
@@ -114,6 +116,13 @@ public final class JkJavadocMaker {
     }
 
     /**
+     * Returns a {@link JkJavadocMaker} identical to this one but using the specified classpath.
+     */
+    public JkJavadocMaker withClasspathPath(Collection<Path> classpath) {
+        return new JkJavadocMaker(srcDirs, doclet, JkUtilsPath.toFiles(classpath), extraArgs, outputDir, zipFile);
+    }
+
+    /**
      * Actually processes and creates the javadoc files.
      */
     public void process() {
@@ -144,7 +153,7 @@ public final class JkJavadocMaker {
     private String[] toArguments(File outputDir) {
         final List<String> list = new LinkedList<>();
         list.add("-sourcepath");
-        list.add(JkPathSequence.ofPaths(this.srcDirs.rootFiles()).toString());
+        list.add(JkPathSequence.of(this.srcDirs.rootFiles()).toString());
         list.add("-d");
         list.add(outputDir.getAbsolutePath());
         if (JkLog.verbose()) {
@@ -156,7 +165,7 @@ public final class JkJavadocMaker {
         list.add(JkUtilsJdk.toolsJar().toString());
         if (classpath != null && classpath.iterator().hasNext()) {
             list.add("-classpath");
-            list.add(JkPathSequence.of(this.classpath).toString());
+            list.add(JkPathSequence.of(JkUtilsPath.toPaths(this.classpath)).toString());
         }
         list.addAll(extraArgs);
 

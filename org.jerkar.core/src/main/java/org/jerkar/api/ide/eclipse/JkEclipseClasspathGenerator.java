@@ -185,8 +185,8 @@ public final class JkEclipseClasspathGenerator {
 
         // add build dependencies
         if (hasBuildDef() && buildDependencyResolver != null) {
-            final Iterable<File> files = buildDependencyResolver.get(buildDependencies);
-            writeFileDepsEntries(writer, JkUtilsPath.toPaths(files), paths);
+            final Iterable<Path> files = buildDependencyResolver.get(buildDependencies).entries();
+            writeFileDepsEntries(writer, files, paths);
         }
 
         // write entries for project importedBuilds

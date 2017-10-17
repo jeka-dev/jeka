@@ -78,7 +78,7 @@ public final class JkClasspath {
      * Short hand to create a {@link JkPathSequence} from this {@link JkClasspath}.
      */
     public JkPathSequence asPath() {
-        return JkPathSequence.ofPaths(this.entries);
+        return JkPathSequence.of(this.entries);
     }
 
     /**

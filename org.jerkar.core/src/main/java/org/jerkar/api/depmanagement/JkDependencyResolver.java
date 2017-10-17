@@ -118,7 +118,7 @@ public final class JkDependencyResolver {
         JkResolveResult resolveResult = null;
         if (internalResolver != null && dependencies.containsModules()) {
             resolveResult = resolveWithInternalResolver(dependencies, dependencies.explicitVersions(), scopes).assertNoError();
-            return JkPathSequence.ofPaths(resolveResult.dependencyTree().allFiles()).withoutDuplicates();
+            return JkPathSequence.of(resolveResult.dependencyTree().allFiles()).withoutDuplicates();
         }
         final List<Path> result = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : dependencies) {
@@ -128,7 +128,7 @@ public final class JkDependencyResolver {
                 result.addAll(fileDependency.paths());
             }
         }
-        return JkPathSequence.ofPaths(result).withoutDuplicates();
+        return JkPathSequence.of(result).withoutDuplicates();
     }
 
     private JkResolveResult resolveWithInternalResolver(JkDependencies dependencies, JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {

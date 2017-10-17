@@ -1,6 +1,5 @@
 package org.jerkar.plugins.sonar;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +11,6 @@ import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkOptions;
@@ -41,7 +39,7 @@ public class JkPluginSonar implements JkPlugin {
                 .of(fullName, name, version)
                 .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)
                 .withBinaries(project.getOutLayout().classDir())
-                .withLibraries(libs.pathEntries())
+                .withLibraries(libs.entries())
                 .withSourcesPath(sourceLayout.sources().rootFiles())
                 .withTestPath(sourceLayout.tests().rootFiles())
                 .withProperty(JkSonar.WORKING_DIRECTORY, sourceLayout.baseDir().resolve("build/.sonar").toString())

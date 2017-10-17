@@ -4,15 +4,9 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -22,11 +16,11 @@ import org.jerkar.api.utils.JkUtilsString;
  * 
  * @author Djeang
  */
-public final class JkPathSequence implements Iterable<File> {
+public final class JkPathSequence {
 
     private final List<Path> entries;
 
-    private JkPathSequence(Iterable<Path> entries) {
+    private JkPathSequence(Collection<Path> entries) {
         super();
         this.entries = Collections.unmodifiableList(JkUtilsIterable.listOf(entries));
     }
@@ -34,26 +28,9 @@ public final class JkPathSequence implements Iterable<File> {
     /**
      * Creates a path to a sequence of files.
      */
-    @Deprecated
-    public static JkPathSequence of(Iterable<File> entries) {
-        return new JkPathSequence(JkUtilsPath.toPaths(entries));
-    }
-
-
-    /**
-     * Creates a path to a sequence of files.
-     */
-    public static JkPathSequence ofPaths(Iterable<Path> entries) {
+    public static JkPathSequence of(Collection<Path> entries) {
         final LinkedHashSet<Path> files = new LinkedHashSet<>(JkUtilsIterable.listOf(entries));
         return new JkPathSequence(files);
-    }
-
-    /**
-     * Creates a <code>JkPathSequence</code> to a base directory and string of
-     * relative paths separated with a ";".
-     */
-    public static JkPathSequence of(File baseDir, String relativePathAsString) {
-        return of(baseDir.toPath(), relativePathAsString);
     }
 
     /**
@@ -70,23 +47,15 @@ public final class JkPathSequence implements Iterable<File> {
             }
             result.add(file);
         }
-        return ofPaths(result);
+        return of(result);
     }
 
     /**
      * Creates a path to aa array of files.
      */
-    public static JkPathSequence of(File... entries) {
+    public static JkPathSequence of(Path... entries) {
         return JkPathSequence.of(Arrays.asList(entries));
     }
-
-    /**
-     * Creates a path to aa array of files.
-     */
-    public static JkPathSequence ofPaths(Path... entries) {
-        return JkPathSequence.ofPaths(Arrays.asList(entries));
-    }
-
 
     /**
      * Throws an {@link IllegalStateException} if at least one entry does not
@@ -119,15 +88,7 @@ public final class JkPathSequence implements Iterable<File> {
     /**
      * Returns the sequence of files as a list.
      */
-    @Deprecated
-    public List<File> entries() {
-        return JkUtilsPath.toFiles(entries);
-    }
-
-    /**
-     * Returns the sequence of files as a list.
-     */
-    public List<Path> pathEntries() {
+    public List<Path> entries() {
         return entries;
     }
 
@@ -146,27 +107,10 @@ public final class JkPathSequence implements Iterable<File> {
     }
 
     /**
-     * @see #andHead(Iterable)
-     */
-    public JkPathSequence andHead(File... entries) {
-        return andHead(JkPathSequence.of(entries));
-    }
-
-    /**
-     * @see #andHead(Iterable)
+     * @see #andHead(Collection)
      */
     public JkPathSequence andHead(Path... entries) {
-        return andHead(JkPathSequence.ofPaths(entries));
-    }
-
-
-    /**
-     * Returns a <code>JkPathSequence</code> made of, in the order, the specified
-     * entries plus the entries of this one.
-     */
-    @SuppressWarnings("unchecked")
-    public JkPathSequence andHead(Iterable<File> otherEntries) {
-        return new JkPathSequence(JkUtilsIterable.chain(JkUtilsPath.toPaths(otherEntries), this.entries));
+        return andHead(Arrays.asList(entries));
     }
 
     /**
@@ -174,19 +118,14 @@ public final class JkPathSequence implements Iterable<File> {
      * entries plus the entries of this one.
      */
     @SuppressWarnings("unchecked")
-    public JkPathSequence andHeadPath(Iterable<Path> otherEntries) {
-        return new JkPathSequence(JkUtilsIterable.chain(otherEntries, this.entries));
-    }
-
-    /**
-     * @see #and(Iterable)
-     */
-    public JkPathSequence and(File... files) {
-        return and(JkPathSequence.of(files));
+    public JkPathSequence andHead(Collection<Path> otherEntries) {
+        List<Path> list = new LinkedList<>(otherEntries);
+        list.addAll(entries);
+        return new JkPathSequence(list);
     }
 
     public JkPathSequence and(Path... files) {
-        return and(JkPathSequence.ofPaths(files));
+        return andPath(Arrays.asList(files));
     }
 
     /**
@@ -194,17 +133,10 @@ public final class JkPathSequence implements Iterable<File> {
      * one plus the specified ones.
      */
     @SuppressWarnings("unchecked")
-    public JkPathSequence and(Iterable<File> otherFiles) {
-        return new JkPathSequence(JkUtilsIterable.chain(this.entries, JkUtilsPath.toPaths(otherFiles)));
-    }
-
-    /**
-     * Returns a <code>JkPathSequence</code> made of, in the order, the entries of this
-     * one plus the specified ones.
-     */
-    @SuppressWarnings("unchecked")
-    public JkPathSequence andPath(Iterable<Path> otherFiles) {
-        return new JkPathSequence(JkUtilsIterable.chain(this.entries, otherFiles));
+    public JkPathSequence andPath(Collection<Path> otherEntries) {
+        List<Path> list = new LinkedList<>(entries);
+        list.addAll(otherEntries);
+        return new JkPathSequence(list);
     }
 
     /**
@@ -213,8 +145,8 @@ public final class JkPathSequence implements Iterable<File> {
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        for (final Iterator<File> it = this.iterator(); it.hasNext();) {
-            builder.append(it.next().getAbsolutePath());
+        for (final Iterator<Path> it = this.entries.iterator(); it.hasNext();) {
+            builder.append(it.next().toAbsolutePath().toString());
             if (it.hasNext()) {
                 builder.append(";");
             }
@@ -222,9 +154,5 @@ public final class JkPathSequence implements Iterable<File> {
         return builder.toString();
     }
 
-    @Override
-    public Iterator<File> iterator() {
-        return JkUtilsPath.toFiles(entries).iterator();
-    }
 
 }

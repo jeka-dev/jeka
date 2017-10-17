@@ -489,7 +489,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
                 set.addAll(fileDeps.paths());
             }
         }
-        return JkPathSequence.ofPaths(set);
+        return JkPathSequence.of(set);
     }
 
     /**
@@ -509,7 +509,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
                 set.addAll(fileDeps.paths());
             }
         }
-        return JkPathSequence.ofPaths(set);
+        return JkPathSequence.of(set);
     }
 
     /**

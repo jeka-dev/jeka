@@ -79,7 +79,7 @@ final class Engine {
     private JkPathSequence compile() {
         final LinkedHashSet<Path> entries = new LinkedHashSet<>();
         compile(new HashSet<>(), entries);
-        return JkPathSequence.ofPaths(entries).withoutDuplicates();
+        return JkPathSequence.of(entries).withoutDuplicates();
     }
 
     private void compile(Set<Path>  yetCompiledProjects, LinkedHashSet<Path>  path) {
@@ -92,10 +92,10 @@ final class Engine {
         JkLog.startln("Resolving compilation classpath");
         final JkDependencyResolver buildClassDependencyResolver = getBuildDefDependencyResolver();
         final JkPathSequence buildPath = buildClassDependencyResolver.get(this.buildDefDependencies());
-        path.addAll(buildPath.pathEntries());
-        path.addAll(compileDependentProjects(yetCompiledProjects, path).pathEntries());
+        path.addAll(buildPath.entries());
+        path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
         JkLog.done();
-        this.compileBuild(JkPathSequence.ofPaths(path));
+        this.compileBuild(JkPathSequence.of(path));
         path.add(this.resolver.buildClassDir);
         JkLog.done();
     }
@@ -118,7 +118,7 @@ final class Engine {
         if (!init.commandLine().dependencies().isEmpty()) {
             JkLog.startln("Grab dependencies specified in command line");
             final JkPathSequence cmdPath = pathOf(init.commandLine().dependencies());
-            runtimeClasspath = runtimeClasspath.andHead(cmdPath);
+            runtimeClasspath = runtimeClasspath.andHead(cmdPath.entries());
             if (JkLog.verbose()) {
                 JkLog.done("Command line extra path : " + cmdPath);
             } else {
@@ -157,7 +157,7 @@ final class Engine {
 
     private BuildAndPluginDictionnary getBuildInstance(JkInit init, JkPathSequence runtimePath) {
         final JkClassLoader classLoader = JkClassLoader.current();
-        classLoader.addEntries(runtimePath.pathEntries());
+        classLoader.addEntries(runtimePath.entries());
         JkLog.trace("Setting build execution classpath to : " + classLoader.childClasspath());
         final JkBuild build = resolver.resolve(init.buildClassHint());
         if (build == null) {
@@ -188,9 +188,9 @@ final class Engine {
 
         return JkDependencies.builder().on(buildDependencies
                 .withDefaultScope(JkScopeMapping.ALL_TO_DEFAULT))
-                .onFiles(localBuildPath().pathEntries())
-                .onFilesIf(devMode, JkClasspath.current().asPath().pathEntries())
-                .onFilesIf(!devMode, jerkarLibs().pathEntries())
+                .onFiles(localBuildPath().entries())
+                .onFilesIf(devMode, JkClasspath.current().asPath().entries())
+                .onFilesIf(!devMode, jerkarLibs().entries())
                 .build();
     }
 
@@ -200,17 +200,17 @@ final class Engine {
         if (Files.exists(localDeflibDir)) {
             extraLibs.addAll(JkFileTree.of(localDeflibDir).include("**/*.jar").files());
         }
-        return JkPathSequence.ofPaths(extraLibs).withoutDuplicates();
+        return JkPathSequence.of(extraLibs).withoutDuplicates();
     }
 
     private static JkPathSequence jerkarLibs() {
         final List<Path>  extraLibs = new LinkedList<>();
         extraLibs.add(JkLocator.jerkarJarPath());
-        return JkPathSequence.ofPaths(extraLibs).withoutDuplicates();
+        return JkPathSequence.of(extraLibs).withoutDuplicates();
     }
 
     private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
-        JkPathSequence pathSequence = JkPathSequence.ofPaths();
+        JkPathSequence pathSequence = JkPathSequence.of();
         if (!this.rootsOfImportedBuilds.isEmpty()) {
             JkLog.info("Compile build classes of dependent projects : "
                     + toRelativePaths(this.projectBaseDir, this.rootsOfImportedBuilds));
@@ -224,7 +224,7 @@ final class Engine {
     }
 
     private void compileBuild(JkPathSequence buildPath) {
-        JkJavaCompileSpec compileSpec = buildCompileSpec().setClasspath(buildPath.pathEntries());
+        JkJavaCompileSpec compileSpec = buildCompileSpec().setClasspath(buildPath.entries());
         JkJavaCompiler.base().compile(compileSpec);
         JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir,
                 StandardCopyOption.REPLACE_EXISTING);

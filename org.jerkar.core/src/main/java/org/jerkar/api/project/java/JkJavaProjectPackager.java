@@ -8,7 +8,6 @@ import org.jerkar.api.depmanagement.JkArtifactFileId;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJarMaker;
-import org.jerkar.api.utils.JkUtilsPath;
 
 /**
  * Creates jar and others elements of a java project.
@@ -35,7 +34,7 @@ public final class JkJavaProjectPackager {
      * @param classifier Can be <code>null</code>, id so the fat jar will stands for the main artifact file.
      */
     public Path fatJar(String classifier) {
-        JkClasspath classpath = JkClasspath.ofPaths(project.runtimeDependencies(project.mainArtifactFileId()).pathEntries());
+        JkClasspath classpath = JkClasspath.ofPaths(project.runtimeDependencies(project.mainArtifactFileId()).entries());
         JkArtifactFileId artifactFileId = JkArtifactFileId.of(classifier, "jar");
         Path result = project.artifactPath(artifactFileId);
         JkJarMaker.fatJar(result, project.getManifest(), project.getOutLayout().classDir(),

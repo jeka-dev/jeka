@@ -123,7 +123,7 @@ public class JkJavaProjectMaker {
 
     public void generateJavadoc() {
         JkJavadocMaker.of(project.getSourceLayout().sources(), project.getOutLayout().getJavadocDir())
-                .withClasspath(depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
+                .withClasspathPath(depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION).entries())
                 .andOptions(this.javadocOptions).process();
         status.javadocGenerated = true;
     }
@@ -168,7 +168,7 @@ public class JkJavaProjectMaker {
         JkJavaCompileSpec result = project.getCompileSpec().copy();
         final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
         return result
-                .setClasspath(classpath.pathEntries())
+                .setClasspath(classpath.entries())
                 .addSources(project.getSourceLayout().sources().files())
                 .addSources(JkFileTree.of(project.getOutLayout().generatedSourceDir()).files())
                 .setOutputDir(project.getOutLayout().classDir());
@@ -206,7 +206,7 @@ public class JkJavaProjectMaker {
         JkJavaCompileSpec result = project.getCompileSpec().copy();
         final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andHead(project.getOutLayout().classDir());
         return result
-                .setClasspath(classpath.pathEntries())
+                .setClasspath(classpath.entries())
                 .addSources(project.getSourceLayout().tests().files())
                 .setOutputDir(project.getOutLayout().testClassDir());
     }
@@ -214,7 +214,7 @@ public class JkJavaProjectMaker {
     private JkUnit juniter() {
         final JkClasspath classpath = JkClasspath.ofPath(project.getOutLayout().testClassDir())
                 .and(project.getOutLayout().classDir())
-                .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).pathEntries());
+                .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).entries());
         final Path junitReport = project.getOutLayout().testReportDir().resolve("junit");
         return this.juniter.withReportDir(junitReport);
     }
@@ -222,7 +222,7 @@ public class JkJavaProjectMaker {
     private JkJavaTestSpec testSpec() {
         final JkClasspath classpath = JkClasspath.ofPath(project.getOutLayout().testClassDir())
                 .and(project.getOutLayout().classDir())
-                .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).pathEntries());
+                .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).entries());
         return JkJavaTestSpec.of(classpath, JkFileTreeSet.of(project.getOutLayout().testClassDir()));
     }
 
