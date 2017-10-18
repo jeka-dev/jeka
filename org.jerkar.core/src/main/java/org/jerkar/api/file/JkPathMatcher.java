@@ -74,6 +74,10 @@ public final class JkPathMatcher implements PathMatcher, Predicate<Path> {
         return new JkPathMatcher(this, matcher);
     }
 
+    public JkPathMatcher andExclude(String pattern) {
+        return this.and((PathMatcher) JkPathMatcher.exclude(pattern));
+    }
+
     private static class Reverse implements PathMatcher  {
 
         private final PathMatcher matcher;
@@ -84,7 +88,7 @@ public final class JkPathMatcher implements PathMatcher, Predicate<Path> {
 
         @Override
         public boolean matches(Path path) {
-            return !matches(path);
+            return !matcher.matches(path);
         }
 
     }

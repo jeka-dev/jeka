@@ -1,6 +1,7 @@
 package org.jerkar.api.file;
 
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -124,6 +125,18 @@ public final class JkFileTreeSet {
         final List<JkFileTree> list = new LinkedList<>();
         for (final JkFileTree tree : this.jkFileTrees) {
             list.add(tree.andFilter(filter));
+        }
+        return new JkFileTreeSet(list);
+    }
+
+    /**
+     * Creates a {@link JkFileTree} which is a copy ofMany this {@link JkFileTree}
+     * augmented with the specified {@link JkPathMatcher}
+     */
+    public JkFileTreeSet andFilter(PathMatcher matcher) {
+        final List<JkFileTree> list = new LinkedList<>();
+        for (final JkFileTree tree : this.jkFileTrees) {
+            list.add(tree.andMatcher(matcher));
         }
         return new JkFileTreeSet(list);
     }

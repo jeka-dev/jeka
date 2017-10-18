@@ -52,9 +52,6 @@ import org.jerkar.api.project.JkProjectSourceLayout;
  */
 public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProducer, JkFileSystemLocalizable {
 
-    public static final JkPathFilter RESOURCE_FILTER = JkPathFilter.exclude("**/*.java")
-            .andExclude("**/package.html").andExclude("**/doc-files");
-
     public static final JkArtifactFileId SOURCES_FILE_ID = JkArtifactFileId.of("sources", "jar");
 
     public static final JkArtifactFileId JAVADOC_FILE_ID = JkArtifactFileId.of("javadoc", "jar");

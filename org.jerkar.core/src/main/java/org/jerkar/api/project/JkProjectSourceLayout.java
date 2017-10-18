@@ -3,8 +3,10 @@ package org.jerkar.api.project;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
+import org.jerkar.api.file.JkPathMatcher;
 
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 
 /**
@@ -20,6 +22,12 @@ public class JkProjectSourceLayout {
             .andExclude("**/package.html").andExclude("**/doc-files");
 
     /**
+     * Filter to consider as resources everything but java source stuff.
+     */
+    public static final PathMatcher JAVA_RESOURCE_MATCHER = JkPathMatcher.exclude("**/*.java")
+            .andExclude("**/package.html").andExclude("**/doc-files");
+
+    /**
      * Creates a Java project source structure according Maven conventions. It differs from Maven in that
      * non-java files located under src/main/java and src/test/java are also considered as resources.
      */
@@ -27,9 +35,9 @@ public class JkProjectSourceLayout {
         final Path baseDir = Paths.get(".");
         final JkFileTreeSet sources = JkFileTreeSet.of(baseDir.resolve("src/main/java"));
         final JkFileTreeSet resources = JkFileTreeSet.of(baseDir.resolve("src/main/resources"))
-                .and(sources.andFilter(JAVA_RESOURCE_FILTER));
+                .and(sources.andFilter(JAVA_RESOURCE_MATCHER));
         final JkFileTreeSet tests = JkFileTreeSet.of(baseDir.resolve("src/test/java"));
-        final JkFileTreeSet testResources = JkFileTreeSet.of(baseDir.resolve("src/test/resources")).and(tests.andFilter(JAVA_RESOURCE_FILTER));
+        final JkFileTreeSet testResources = JkFileTreeSet.of(baseDir.resolve("src/test/resources")).and(tests.andFilter(JAVA_RESOURCE_MATCHER));
         return new JkProjectSourceLayout(baseDir, sources, resources, tests, testResources);
     }
 
@@ -40,9 +48,9 @@ public class JkProjectSourceLayout {
     public static JkProjectSourceLayout simple() {
         final Path baseDir = Paths.get(".");
         final JkFileTreeSet sources = JkFileTreeSet.of(baseDir.resolve("src"));
-        final JkFileTreeSet resources = sources.andFilter(JAVA_RESOURCE_FILTER);
+        final JkFileTreeSet resources = sources.andFilter(JAVA_RESOURCE_MATCHER);
         final JkFileTreeSet tests = JkFileTreeSet.of(baseDir.resolve("test"));
-        final JkFileTreeSet testResources = tests.andFilter(JAVA_RESOURCE_FILTER);
+        final JkFileTreeSet testResources = tests.andFilter(JAVA_RESOURCE_MATCHER);
         return new JkProjectSourceLayout(baseDir, sources, resources, tests, testResources);
     }
 
