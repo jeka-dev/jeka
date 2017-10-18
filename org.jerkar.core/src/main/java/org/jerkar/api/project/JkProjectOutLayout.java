@@ -31,7 +31,7 @@ public class JkProjectOutLayout {
     private final Path generatedSourceDir;
 
     /**
-     * Returns location of generated resources.
+     * Returns location ofMany generated resources.
      */
     private final Path generatedResourceDir;
 
@@ -112,12 +112,12 @@ public class JkProjectOutLayout {
      * but not the outputDir.
      */
     public void deleteDirs() {
-        JkFileTree.of(this.classDir).deleteAll();
-        JkFileTree.of(this.testClassDir).deleteAll();
-        JkFileTree.of(this.testReportDir).deleteAll();
-        JkFileTree.of(this.generatedResourceDir).deleteAll();
-        JkFileTree.of(this.generatedSourceDir).deleteAll();
-        JkFileTree.of(this.generatedTestResourceDir).deleteAll();
+        JkFileTree.of(this.classDir).deleteContent();
+        JkFileTree.of(this.testClassDir).deleteContent();
+        JkFileTree.of(this.testReportDir).deleteContent();
+        JkFileTree.of(this.generatedResourceDir).deleteContent();
+        JkFileTree.of(this.generatedSourceDir).deleteContent();
+        JkFileTree.of(this.generatedTestResourceDir).deleteContent();
     }
 
 
@@ -146,21 +146,21 @@ public class JkProjectOutLayout {
     }
 
     /**
-     * Returns location of generated sources.
+     * Returns location ofMany generated sources.
      */
     public Path generatedSourceDir() {
         return outputDir.resolve(generatedSourceDir);
     }
 
     /**
-     * Returns location of generated resources.
+     * Returns location ofMany generated resources.
      */
     public Path generatedResourceDir() {
         return outputDir.resolve(generatedResourceDir);
     }
 
     /**
-     * Returns location of generated resources for tests.
+     * Returns location ofMany generated resources for tests.
      */
     public Path generatedTestResourceDir() {
         return outputDir.resolve(generatedTestResourceDir);

@@ -38,7 +38,7 @@ class DistribAllBuild extends JkBuild {
         JkLog.info("Copy core distribution locally.");
         CoreBuild core = pluginsJacoco.core; // The core project is got by transitivity
         Path distDir = this.outputDir().resolve("dist");
-        JkFileTree dist = JkFileTree.of(distDir).importDir(core.distribFolder);
+        JkFileTree dist = JkFileTree.of(distDir).importContent(core.distribFolder);
 
         JkLog.info("Add plugins to the distribution");
         JkFileTree ext = dist.go("libs/builtins").importFile(

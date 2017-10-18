@@ -1,12 +1,12 @@
 package org.jerkar.api.file;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -16,9 +16,11 @@ import org.jerkar.api.utils.JkUtilsString;
  * 
  * @author Djeang
  */
-public final class JkPathSequence {
+public final class JkPathSequence implements Iterable<Path> {
 
     private final List<Path> entries;
+
+    // ----- Constructors & factory methods --------------------------------
 
     private JkPathSequence(Collection<Path> entries) {
         super();
@@ -28,8 +30,10 @@ public final class JkPathSequence {
     /**
      * Creates a path to a sequence of files.
      */
-    public static JkPathSequence of(Collection<Path> entries) {
-        final LinkedHashSet<Path> files = new LinkedHashSet<>(JkUtilsIterable.listOf(entries));
+    public static JkPathSequence ofMany(Iterable<Path> entries) {
+        Iterable<Path> paths = JkUtilsPath.disambiguate(entries);
+        final LinkedHashSet<Path> files = new LinkedHashSet<>();
+        paths.forEach(path -> files.add(path));
         return new JkPathSequence(files);
     }
 
@@ -47,28 +51,18 @@ public final class JkPathSequence {
             }
             result.add(file);
         }
-        return of(result);
+        return ofMany(result);
     }
 
     /**
-     * Creates a path to aa array of files.
+     * Creates a <code>JkPathSequence</code> form specified entries
      */
     public static JkPathSequence of(Path... entries) {
-        return JkPathSequence.of(Arrays.asList(entries));
+        return JkPathSequence.ofMany(Arrays.asList(entries));
     }
 
-    /**
-     * Throws an {@link IllegalStateException} if at least one entry does not
-     * exist.
-     */
-    public JkPathSequence assertAllEntriesExist() throws IllegalStateException {
-        for (final Path file : entries) {
-            if (!Files.exists(file)) {
-                throw new IllegalStateException("File " + file + " does not exist.");
-            }
-        }
-        return this;
-    }
+
+    // --------------------------- cleaning ----------------------------------------
 
     /**
      * Returns a <code>JkPathSequence</code> identical to this one but without redundant
@@ -85,47 +79,47 @@ public final class JkPathSequence {
         return new JkPathSequence(files);
     }
 
+    // -------------------------- iterate -----------------------------------------
+
     /**
-     * Returns the sequence of files as a list.
+     * Returns the sequence ofMany files as a list.
      */
     public List<Path> entries() {
         return entries;
     }
 
-    /**
-     * Returns the first entry of this path.
-     */
-    public File first() {
-        return entries.get(0).toFile();
+    @Override
+    public Iterator<Path> iterator() {
+        return entries.iterator();
     }
 
-    /**
-     * Short hand for <code>entries().isEmpty()</code>.
-     */
-    public boolean isEmpty() {
-        return entries.isEmpty();
-    }
+    // ------------------------------ withers and adders ------------------------------------
 
     /**
-     * @see #andHead(Collection)
+     * @see #andManyFirst(Iterable)
      */
-    public JkPathSequence andHead(Path... entries) {
-        return andHead(Arrays.asList(entries));
+    public JkPathSequence andFirst(Path... entries) {
+        return andManyFirst(Arrays.asList(entries));
     }
 
     /**
      * Returns a <code>JkPathSequence</code> made of, in the order, the specified
-     * entries plus the entries of this one.
+     * entries plus the entries ofM this one.
      */
     @SuppressWarnings("unchecked")
-    public JkPathSequence andHead(Collection<Path> otherEntries) {
-        List<Path> list = new LinkedList<>(otherEntries);
+    public JkPathSequence andManyFirst(Iterable<Path> otherEntries) {
+        Iterable<Path> paths = JkUtilsPath.disambiguate(otherEntries);
+        List<Path> list = new LinkedList<>();
+        paths.forEach(path -> list.add(path));
         list.addAll(entries);
         return new JkPathSequence(list);
     }
 
+    /**
+     * @see #andMany(Iterable)
+     */
     public JkPathSequence and(Path... files) {
-        return andPath(Arrays.asList(files));
+        return andMany(Arrays.asList(files));
     }
 
     /**
@@ -133,11 +127,14 @@ public final class JkPathSequence {
      * one plus the specified ones.
      */
     @SuppressWarnings("unchecked")
-    public JkPathSequence andPath(Collection<Path> otherEntries) {
-        List<Path> list = new LinkedList<>(entries);
-        list.addAll(otherEntries);
+    public JkPathSequence andMany(Iterable<Path> otherEntries) {
+        Iterable<Path> paths = JkUtilsPath.disambiguate(otherEntries);
+        final List<Path> list = new LinkedList<>(entries);
+        paths.forEach(path -> list.add(path));
         return new JkPathSequence(list);
     }
+
+    // --------------- Canonical methods ------------------------------------------
 
     /**
      * Returns the file names concatenated with ';'.
@@ -154,5 +151,18 @@ public final class JkPathSequence {
         return builder.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        JkPathSequence paths = (JkPathSequence) o;
+
+        return entries.equals(paths.entries);
+    }
+
+    @Override
+    public int hashCode() {
+        return entries.hashCode();
+    }
 }

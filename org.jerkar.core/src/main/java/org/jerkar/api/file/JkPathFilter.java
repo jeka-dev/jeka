@@ -50,12 +50,12 @@ public abstract class JkPathFilter implements PathMatcher, Predicate<Path> {
     }
 
     /**
-     * Returns the list of include patterns involved in this filter.
+     * Returns the list ofMany include patterns involved in this filter.
      */
     public abstract List<String> getIncludePatterns();
 
     /**
-     * Returns the list of exclude patterns involved in this filter.
+     * Returns the list ofMany exclude patterns involved in this filter.
      */
     public abstract List<String> getExcludePatterns();
 
@@ -87,21 +87,21 @@ public abstract class JkPathFilter implements PathMatcher, Predicate<Path> {
     }
 
     /**
-     * Creates a filter made of this one plus the specified include ones.
+     * Creates a filter made ofMany this one plus the specified include ones.
      */
     public JkPathFilter andInclude(String... antPatterns) {
         return this.and(include(antPatterns));
     }
 
     /**
-     * Creates a filter made of this one plus the specified exclude ones.
+     * Creates a filter made ofMany this one plus the specified exclude ones.
      */
     public JkPathFilter andExclude(String... antPatterns) {
         return this.and(exclude(antPatterns));
     }
 
     /**
-     * Creates a filter made of this one plus the specified one. Accepted files will be those matching both filters.
+     * Creates a filter made ofMany this one plus the specified one. Accepted files will be those matching both filters.
      */
     public JkPathFilter and(JkPathFilter other) {
         return new CompoundFilter(this, other);
@@ -163,7 +163,7 @@ public abstract class JkPathFilter implements PathMatcher, Predicate<Path> {
 
 
     /**
-     * Creates a filter which is the inverse of this one.
+     * Creates a filter which is the inverse ofMany this one.
      */
     public JkPathFilter reverse() {
 
@@ -191,7 +191,7 @@ public abstract class JkPathFilter implements PathMatcher, Predicate<Path> {
 
             @Override
             public String toString() {
-                return "Reverse of " + this;
+                return "Reverse ofMany " + this;
             }
 
         };

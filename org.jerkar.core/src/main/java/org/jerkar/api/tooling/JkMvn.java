@@ -50,7 +50,7 @@ public final class JkMvn implements Runnable {
 
     /**
      * Creates a Maven command. Separate argument in different string, don't use
-     * white space to separate workds. Ex : JkMvn.of(myFile, "deleteArtifacts", "install",
+     * white space to separate workds. Ex : JkMvn.ofMany(myFile, "deleteArtifacts", "install",
      * "-U").
      */
     public static final JkMvn of(Path workingDir, String... args) {
@@ -92,7 +92,7 @@ public final class JkMvn implements Runnable {
     }
 
     /**
-     * Reads the dependencies of this Maven project
+     * Reads the dependencies ofMany this Maven project
      */
     public JkDependencies readDependencies() {
         final Path file = JkUtilsPath.createTempFile("dependency", ".txt");
@@ -103,7 +103,7 @@ public final class JkMvn implements Runnable {
     }
 
     /**
-     * Append a "-U" force update to the list of parameters
+     * Append a "-U" force update to the list ofMany parameters
      */
     public final JkMvn forceUpdate(boolean flag) {
         if (flag) {
@@ -113,7 +113,7 @@ public final class JkMvn implements Runnable {
     }
 
     /**
-     * Append or remove a "-X" verbose to the list of parameters
+     * Append or remove a "-X" verbose to the list ofMany parameters
      */
     public final JkMvn verbose(boolean flag) {
         if (flag) {
@@ -123,7 +123,7 @@ public final class JkMvn implements Runnable {
     }
 
     /**
-     * Creates the java code of the Jerkar build class jump the effective pom of
+     * Creates the java code ofMany the Jerkar build class jump the effective pom ofMany
      * this Maven JkEclipseProject
      */
     public String createBuildClassCode(JkFileTree baseDir) {

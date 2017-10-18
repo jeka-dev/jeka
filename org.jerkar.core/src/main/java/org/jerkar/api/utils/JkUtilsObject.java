@@ -8,7 +8,7 @@ package org.jerkar.api.utils;
 public final class JkUtilsObject {
 
     /**
-     * Returns the objects of the specified array that is not <code>null</code>.
+     * Returns the objects ofMany the specified array that is not <code>null</code>.
      * Throw an {@link IllegalArgumentException} if all array elements are
      * <code>null</code> or the specified array is empty.
      */
@@ -34,7 +34,7 @@ public final class JkUtilsObject {
     }
 
     /**
-     * Returns the hash code of the specified object or 0 if it's
+     * Returns the hash code ofMany the specified object or 0 if it's
      * <code>null</code>.
      */
     public static int hashCode(Object object) {

@@ -160,7 +160,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Returns the content of the specified input stream, line by line.
+     * Returns the content ofMany the specified input stream, line by line.
      */
     // TODO encoding ????
     public static List<String> readAsLines(InputStream in) {
@@ -178,7 +178,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Returns the content of the given url as a string.
+     * Returns the content ofMany the given url as a string.
      */
     public static String read(URL url) {
         try (InputStream is =  url.openStream()){
@@ -189,7 +189,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Returns the content of the given input stream as a single string.
+     * Returns the content ofMany the given input stream as a single string.
      */
     public static String readAsString(InputStream in) {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -221,9 +221,9 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Copies the content of an url in a cache file. The cached file path will
-     * be [jerkar user dir]/cache/url-contents/[last segment of the url (after
-     * last '/')]. If the file already exist than the content of the url is not
+     * Copies the content ofMany an url in a cache file. The cached file path will
+     * be [jerkar user dir]/cache/url-contents/[last segment ofMany the url (after
+     * last '/')]. If the file already exist than the content ofMany the url is not
      * copied and the file is directly returned.
      */
     public static File copyUrlContentToCacheFile(URL url, PrintStream report, File cacheDir) {
@@ -246,7 +246,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Copies the content of the given url to the specified file.
+     * Copies the content ofMany the given url to the specified file.
      */
     public static void copyUrlToFile(URL url, File file) {
         try (FileOutputStream fileOutputStream = new FileOutputStream(file);
@@ -258,7 +258,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Copies the content of the given input stream to a specified output
+     * Copies the content ofMany the given input stream to a specified output
      * stream.
      */
     public static void copy(InputStream in, OutputStream out) {
@@ -299,7 +299,7 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Deserializes the content of the specified file to a Java object.
+     * Deserializes the content ofMany the specified file to a Java object.
      */
     public static Object deserialize(File file) {
         try {
@@ -310,14 +310,14 @@ public final class JkUtilsIO {
     }
 
     /**
-     * Deserializes the content of the specified input stream to a Java object.
+     * Deserializes the content ofMany the specified input stream to a Java object.
      */
     public static Object deserialize(InputStream inputStream) {
         return deserialize(inputStream, JkUtilsIO.class.getClassLoader());
     }
 
     /**
-     * Deserialises the content of a given input file to a Java object loaded in
+     * Deserialises the content ofMany a given input file to a Java object loaded in
      * the specified classloader.
      */
     public static Object deserialize(InputStream inputStream, final ClassLoader classLoader) {

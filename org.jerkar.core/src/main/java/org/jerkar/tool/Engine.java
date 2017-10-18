@@ -35,7 +35,7 @@ import org.jerkar.api.utils.JkUtilsTime;
 import org.jerkar.tool.CommandLine.MethodInvocation;
 
 /**
- * Engine having responsibility of compiling build classes, instantiate/configure build instances
+ * Engine having responsibility ofMany compiling build classes, instantiate/configure build instances
  * and run them.<br/>
  * Build classes are expected to lie in [project base dir]/build/def <br/>
  * Classes having simple name starting with '_' are ignored.
@@ -79,7 +79,7 @@ final class Engine {
     private JkPathSequence compile() {
         final LinkedHashSet<Path> entries = new LinkedHashSet<>();
         compile(new HashSet<>(), entries);
-        return JkPathSequence.of(entries).withoutDuplicates();
+        return JkPathSequence.ofMany(entries).withoutDuplicates();
     }
 
     private void compile(Set<Path>  yetCompiledProjects, LinkedHashSet<Path>  path) {
@@ -95,7 +95,7 @@ final class Engine {
         path.addAll(buildPath.entries());
         path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
         JkLog.done();
-        this.compileBuild(JkPathSequence.of(path));
+        this.compileBuild(JkPathSequence.ofMany(path));
         path.add(this.resolver.buildClassDir);
         JkLog.done();
     }
@@ -109,7 +109,7 @@ final class Engine {
 
     /**
      * Pre-compile and compile build classes (if needed) then execute the build
-     * of this project.
+     * ofMany this project.
      */
     void execute(JkInit init) {
         this.buildDependencies = this.buildDependencies.andScopeless(init.commandLine().dependencies());
@@ -118,7 +118,7 @@ final class Engine {
         if (!init.commandLine().dependencies().isEmpty()) {
             JkLog.startln("Grab dependencies specified in command line");
             final JkPathSequence cmdPath = pathOf(init.commandLine().dependencies());
-            runtimeClasspath = runtimeClasspath.andHead(cmdPath.entries());
+            runtimeClasspath = runtimeClasspath.andManyFirst(cmdPath.entries());
             if (JkLog.verbose()) {
                 JkLog.done("Command line extra path : " + cmdPath);
             } else {
@@ -200,19 +200,19 @@ final class Engine {
         if (Files.exists(localDeflibDir)) {
             extraLibs.addAll(JkFileTree.of(localDeflibDir).include("**/*.jar").files());
         }
-        return JkPathSequence.of(extraLibs).withoutDuplicates();
+        return JkPathSequence.ofMany(extraLibs).withoutDuplicates();
     }
 
     private static JkPathSequence jerkarLibs() {
         final List<Path>  extraLibs = new LinkedList<>();
         extraLibs.add(JkLocator.jerkarJarPath());
-        return JkPathSequence.of(extraLibs).withoutDuplicates();
+        return JkPathSequence.ofMany(extraLibs).withoutDuplicates();
     }
 
     private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
         JkPathSequence pathSequence = JkPathSequence.of();
         if (!this.rootsOfImportedBuilds.isEmpty()) {
-            JkLog.info("Compile build classes of dependent projects : "
+            JkLog.info("Compile build classes ofMany dependent projects : "
                     + toRelativePaths(this.projectBaseDir, this.rootsOfImportedBuilds));
         }
         for (final Path file : this.rootsOfImportedBuilds) {

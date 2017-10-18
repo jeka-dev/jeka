@@ -44,7 +44,7 @@ public class JkJavaProjectTest {
 
 
         // Desktop.getDesktop().open(desktop);
-        JkFileTree.of(top).deleteAll();
+        JkFileTree.of(top).deleteRoot();
     }
 
     private static File unzipToDir(String zipName) {

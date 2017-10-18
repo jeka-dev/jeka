@@ -27,7 +27,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Memory model of Eclipse .project file.
+ * Memory model ofMany Eclipse .project file.
  */
 public final class JkEclipseProject {
 

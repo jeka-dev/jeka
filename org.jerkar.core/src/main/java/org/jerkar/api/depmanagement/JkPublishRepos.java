@@ -11,7 +11,7 @@ import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
- * Set of repositories to publish to. When publishing you may want deploy your
+ * Set ofMany repositories to publish to. When publishing you may want deploy your
  * artifact on to a repository or another according some criteria.<br/>
  * For example, you would like to publish snapshot on a repository and release
  * to another one, so each repository registered in JkPublishRepos is associated

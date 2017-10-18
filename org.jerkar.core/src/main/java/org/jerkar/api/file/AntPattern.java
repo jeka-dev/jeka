@@ -38,7 +38,7 @@ import org.jerkar.api.utils.JkUtilsString;
  *
  * <i>
  * <p>
- * Part of this mapping code has been kindly borrowed from <a
+ * Part ofMany this mapping code has been kindly borrowed from <a
  * href="http://ant.apache.org">Apache Ant</a> and <a
  * href="https://github.com/spring-projects/spring-framework">Spring
  * Framework</a></i>
@@ -133,7 +133,7 @@ final class AntPattern {
         }
 
         if (pathIdxStart > pathIdxEnd) {
-            // Path is exhausted, only match if rest of pattern is * or **'s
+            // Path is exhausted, only match if rest ofMany pattern is * or **'s
             if (pattIdxStart > pattIdxEnd) {
                 return (pattern.endsWith(PATH_SEPARATOR) == normalizedPath.endsWith(PATH_SEPARATOR));
             }

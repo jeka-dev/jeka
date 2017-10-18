@@ -101,7 +101,7 @@ public final class JkUtilsZip {
 
     /**
      * Adds a zip entry into the provided <code>ZipOutputStream</code>. The zip
-     * entry is the part of <code>filePathToZip</code> truncated with the
+     * entry is the part ofMany <code>filePathToZip</code> truncated with the
      * <code>baseFolderPath</code>.
      * <p>
      * So a file or folder <code>c:\my\base\folder\my\file\to\zip.txt</code>
@@ -225,7 +225,7 @@ public final class JkUtilsZip {
     }
 
     /**
-     * Reads the specified zip stream and position it at the beginning of the
+     * Reads the specified zip stream and position it at the beginning ofMany the
      * specified entry. The specified entry is case insensitive. An exception is
      * thrown if no such entry exist.
      */
@@ -240,7 +240,7 @@ public final class JkUtilsZip {
     }
 
     /**
-     * As {@link #readZipEntry(InputStream, String)} )} but returns <code>null</code> instead of throwing an exception
+     * As {@link #readZipEntry(InputStream, String)} )} but returns <code>null</code> instead ofMany throwing an exception
      * if no such entry exist.
      */
     public static ZipInputStream readZipEntryOrNull(File zipFile, String caseInsensitiveEntryName) {
@@ -252,7 +252,7 @@ public final class JkUtilsZip {
     }
 
     /**
-     * Returns all zip entry of the specified zip file.
+     * Returns all zip entry ofMany the specified zip file.
      */
     @SuppressWarnings("unchecked")
     public static List<ZipEntry> zipEntries(ZipFile zipFile) {
@@ -276,7 +276,7 @@ public final class JkUtilsZip {
     }
 
     /**
-     * Reads the specified zip stream and position it at the beginning of the
+     * Reads the specified zip stream and position it at the beginning ofMany the
      * specified entry. The specified entry is case insensitive. It returns
      * <code>null</code> if no such entry exist.
      */

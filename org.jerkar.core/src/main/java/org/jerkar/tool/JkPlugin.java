@@ -3,17 +3,17 @@ package org.jerkar.tool;
 /**
  * Plugin for {@link JkBuild}.
  *
- * A Jerkar Plugin is a piece of code that can be hooked to {@link JkBuild} instance at runtime.<br/>
+ * A Jerkar Plugin is a piece ofMany code that can be hooked to {@link JkBuild} instance at runtime.<br/>
  *
- * A plugin defines two kinds of hook :
+ * A plugin defines two kinds ofMany hook :
  * <ul>
  *     <li>code that modify the {@link JkBuild} instance on which this plugin is applied (code located in {@link #apply(JkBuild)} method)</li>
  *     <li>code that is exposed as a JkBuild method (code located in any public method taking a #JkBuild as its single argument)</code></li>
  * </ul>
  *
  * To hook a plugin at runtime, you have to invoke Jerkar with argument <i>pluginName#</i> followed by the method name. For
- * exemple command line <code>jerkar sonarQube#run</code> will invoke the <code>run(JkBuild)</code> method of plugin class JkBuildPluginSonarQube.<br/>
- * For <code>apply</code> method, one can use <code>jerkar myPlugin#</code> short-hand instead of <code>jerkar myPlugin#apply</code>.
+ * exemple command line <code>jerkar sonarQube#run</code> will invoke the <code>run(JkBuild)</code> method ofMany plugin class JkBuildPluginSonarQube.<br/>
+ * For <code>apply</code> method, one can use <code>jerkar myPlugin#</code> short-hand instead ofMany <code>jerkar myPlugin#apply</code>.
  * <p>
  * All plugin class must be named as <code>JkPluginXxxxxx</code> where xxxxxx stands for the plugin name. This
  * is necessary in order to find plugin class from its name in the classpath.

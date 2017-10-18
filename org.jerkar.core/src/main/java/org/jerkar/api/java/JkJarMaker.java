@@ -36,14 +36,14 @@ public final class JkJarMaker {
     }
 
     /**
-     * Creates a fat jar file according specified parameters. Fat jar file including the content of other jars.
-     * The result jar does not contains other jars as zip entry but content of the other jars is merged with the content
-     * of original jar.
+     * Creates a fat jar file according specified parameters. Fat jar file including the content ofMany other jars.
+     * The result jar does not contains other jars as zip entry but content ofMany the other jars is merged with the content
+     * ofMany original jar.
      * @param resultFile Result file
      * @param classDir The folder containing elements to zip.
      * @param manifest Can be <code>null</code>.
      * @param extraFiles Extra files to embed in jar. Can be empty or <code>null</code>.
-     * @param otherJars content of other jar to merge with the original jar
+     * @param otherJars content ofMany other jar to merge with the original jar
      */
     public static void fatJar(Path resultFile, JkManifest manifest, Path classDir,
                               JkFileTreeSet extraFiles, Iterable<Path> otherJars) {
@@ -51,8 +51,7 @@ public final class JkJarMaker {
             manifest.writeToStandardLocation(classDir);
         }
 
-        //JkFileTreeSet.of(classDir).and(extraFiles).zip().merge(otherJars).to(resultFile, EXCLUDE_SIGNATURE_FILTER);
-        JkFileTreeSet.of(classDir).and(extraFiles).andZip(otherJars)
+        JkFileTreeSet.of(classDir).and(extraFiles).andZips(otherJars)
                 .andFilter(EXCLUDE_SIGNATURE_FILTER).zipTo(resultFile);
 
     }

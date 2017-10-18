@@ -12,14 +12,14 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
- * A resolver for a given set of dependency. Each instance of
+ * A resolver for a given set ofMany dependency. Each instance ofMany
  * <code>JkDependencyResolver</code> defines the dependencies to resolve, this
  * means that you must instantiate one for each dependency set you want to
  * resolve. <br/>
- * Each instance of <code>JkDependencyResolver</code> keep in cache resolution
+ * Each instance ofMany <code>JkDependencyResolver</code> keep in cache resolution
  * setting so a resolution o a given scope is never computed twice.
  *
- * The result of the resolution depends on the parameters you have set on it.
+ * The result ofMany the resolution depends on the parameters you have set on it.
  * See {@link JkResolutionParameters}
  *
  * @author Jerome Angibaud
@@ -71,7 +71,7 @@ public final class JkDependencyResolver {
     }
 
     /**
-     * Resolves the of dependencies (dependencies declared as external
+     * Resolves the ofMany dependencies (dependencies declared as external
      * module) for the specified scopes. If no scope is specified, then it is
      * resolved for all scopes.
      */
@@ -105,20 +105,20 @@ public final class JkDependencyResolver {
      * for the specified scopes.
      * <p>
      * If no scope is specified then return all file dependencies and the
-     * dependencies specified. About the of dependency the same rule than
+     * dependencies specified. About the ofMany dependency the same rule than
      * for {@link #resolve(JkDependencies, JkScope...)} apply.
      * </p>
      * The result is ordered according the order dependencies has been declared.
-     * About ordering of transitive dependencies, they come after the explicit ones and
-     * the dependee of the first explicitly declared dependency come before the dependee
-     * of the second one and so on.
+     * About ordering ofMany transitive dependencies, they come after the explicit ones and
+     * the dependee ofMany the first explicitly declared dependency come before the dependee
+     * ofMany the second one and so on.
      * @throws IllegalStateException if the resolution has not been achieved successfully
      */
     public JkPathSequence get(JkDependencies dependencies, JkScope... scopes) {
         JkResolveResult resolveResult = null;
         if (internalResolver != null && dependencies.containsModules()) {
             resolveResult = resolveWithInternalResolver(dependencies, dependencies.explicitVersions(), scopes).assertNoError();
-            return JkPathSequence.of(resolveResult.dependencyTree().allFiles()).withoutDuplicates();
+            return JkPathSequence.ofMany(resolveResult.dependencyTree().allFiles()).withoutDuplicates();
         }
         final List<Path> result = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : dependencies) {
@@ -128,7 +128,7 @@ public final class JkDependencyResolver {
                 result.addAll(fileDependency.paths());
             }
         }
-        return JkPathSequence.of(result).withoutDuplicates();
+        return JkPathSequence.ofMany(result).withoutDuplicates();
     }
 
     private JkResolveResult resolveWithInternalResolver(JkDependencies dependencies, JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {
@@ -154,7 +154,7 @@ public final class JkDependencyResolver {
      * The underlying dependency manager can cache the resolution on file system
      * for faster result. To make this caching possible, you must set the
      * module+version for which the resolution is made. This is only relevant
-     * for of dependencies and have no effect for of dependencies.
+     * for ofMany dependencies and have no effect for ofMany dependencies.
      */
     public JkDependencyResolver withModuleHolder(JkVersionedModule versionedModule) {
         return new JkDependencyResolver(this.internalResolver, versionedModule,
@@ -171,7 +171,7 @@ public final class JkDependencyResolver {
 
     /**
      * You can alter the resolver behavior through these settings. his is only
-     * relevant for of dependencies and have no effect for of
+     * relevant for ofMany dependencies and have no effect for ofMany
      * dependencies.
      */
     public JkDependencyResolver withParams(JkResolutionParameters params) {
@@ -180,7 +180,7 @@ public final class JkDependencyResolver {
     }
 
     /**
-     * Returns the parameters of this dependency resolver.
+     * Returns the parameters ofMany this dependency resolver.
      */
     public JkResolutionParameters params() {
         return this.parameters;
@@ -189,7 +189,7 @@ public final class JkDependencyResolver {
     @Override
     public String toString() {
         if (repos == null) {
-            return "of depenedncy resolver";
+            return "ofMany depenedncy resolver";
         }
         return repos.toString();
     }

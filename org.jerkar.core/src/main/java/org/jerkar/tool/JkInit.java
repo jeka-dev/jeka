@@ -45,7 +45,7 @@ public final class JkInit {
     }
 
     /**
-     * Creates an instance of the build class for the specified project. It is
+     * Creates an instance ofMany the build class for the specified project. It is
      * slower than {@link #instanceOf(Class, String...)} cause it needs
      * compilation prior instantiating the object.
      */
@@ -63,7 +63,7 @@ public final class JkInit {
     }
 
     /**
-     * Creates an instance of the specified build class. the build instance is
+     * Creates an instance ofMany the specified build class. the build instance is
      * configured according specified command line arguments and option files
      * found in running environment.
      */
@@ -72,7 +72,7 @@ public final class JkInit {
     }
 
     /**
-     * Creates an instance of the specified build class. the build instance is
+     * Creates an instance ofMany the specified build class. the build instance is
      * configured according specified command line arguments and option files
      * found in running environment. The base directory is the specified one.
      */

@@ -129,21 +129,21 @@ public final class JkModuleDependency implements JkDependency {
 
     /**
      * Returns <code>true</code> if this dependency should be resolved transitively (returning the dependencies
-     * of this dependency recursively).
+     * ofMany this dependency recursively).
      */
     public boolean transitive() {
         return transitive;
     }
 
     /**
-     * Returns the moduleId of this dependency.
+     * Returns the moduleId ofMany this dependency.
      */
     public JkModuleId moduleId() {
         return module;
     }
 
     /**
-     * Returns the version of the module this dependencies is constrained to.
+     * Returns the version ofMany the module this dependencies is constrained to.
      */
     public JkVersionRange versionRange() {
         return versionRange;
@@ -158,7 +158,7 @@ public final class JkModuleDependency implements JkDependency {
     }
 
     /**
-     * Returns <code>true</code> if the version of the module for this dependency is not specified.
+     * Returns <code>true</code> if the version ofMany the module for this dependency is not specified.
      */
     public boolean hasUnspecifedVersion() {
         return this.versionRange.isUnspecified();

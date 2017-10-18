@@ -8,9 +8,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
 
 /**
- * A set of {@link JkFileTree}.
+ * A set ofMany {@link JkFileTree}.
  *
  * @author Jerome Angibaud
  */
@@ -26,7 +27,7 @@ public final class JkFileTreeSet {
     }
 
     /**
-     * Creates a {@link JkFileTreeSet} from an iterable of {@link JkFileTree}.
+     * Creates a {@link JkFileTreeSet} from an iterable ofMany {@link JkFileTree}.
      */
     public static final JkFileTreeSet of(Iterable<JkFileTree> dirs) {
         return new JkFileTreeSet(JkUtilsIterable.listOf(dirs));
@@ -42,12 +43,12 @@ public final class JkFileTreeSet {
     /**
      * Creates a {@link JkFileTreeSet} to an array of {@link JkFileTree}.
      */
-    public static final JkFileTreeSet of(JkFileTree... dirViews) {
-        return new JkFileTreeSet(Arrays.asList(dirViews));
+    public static final JkFileTreeSet of(JkFileTree... trees) {
+        return new JkFileTreeSet(Arrays.asList(trees));
     }
 
     /**
-     * Creates a {@link JkFileTreeSet} to an array of folder.
+     * Creates a {@link JkFileTreeSet} to an array ofMany folder.
      */
     public static final JkFileTreeSet of(Path... folders) {
         final List<JkFileTree> dirs = new ArrayList<>(folders.length);
@@ -60,7 +61,7 @@ public final class JkFileTreeSet {
     // -------------------------- additional elements in set ----------------------------------
 
     /**
-     * Creates a {@link JkFileTreeSet} which is a concatenation of this
+     * Creates a {@link JkFileTreeSet} which is a concatenation ofMany this
      * {@link JkFileTreeSet} and the {@link JkFileTree} array passed as
      * parameter.
      */
@@ -71,24 +72,25 @@ public final class JkFileTreeSet {
     }
 
     /**
-     * Creates a {@link JkFileTreeSet} which is a concatenation of this
+     * Creates a {@link JkFileTreeSet} which is a concatenation ofMany this
      * {@link JkFileTreeSet} and zip files passed as parameter.
      */
-    public final JkFileTreeSet andZip(Iterable<Path> zips) {
+    public final JkFileTreeSet andZips(Iterable<Path> zipFiles) {
+        Iterable<Path> paths = JkUtilsPath.disambiguate(zipFiles);
         final List<JkFileTree> list = new LinkedList<>(this.jkFileTrees);
-        zips.forEach(zip -> list.add(JkFileTree.ofZip(zip)));
+        paths.forEach(zipFile -> list.add(JkFileTree.ofZip(zipFile)));
         return new JkFileTreeSet(list);
     }
 
     /**
-     * @see #andZip(Iterable)
+     * @see #andZips(Iterable)
      */
     public final JkFileTreeSet andZip(Path... zips) {
-        return andZip(Arrays.asList(zips));
+        return andZips(Arrays.asList(zips));
     }
 
     /**
-     * Creates a {@link JkFileTreeSet} which is a concatenation of this
+     * Creates a {@link JkFileTreeSet} which is a concatenation ofMany this
      * {@link JkFileTreeSet} and the folder array passed as parameter.
      */
     public final JkFileTreeSet and(Path... folders) {
@@ -100,7 +102,7 @@ public final class JkFileTreeSet {
     }
 
     /**
-     * Creates a {@link JkFileTreeSet} which is a concatenation of this
+     * Creates a {@link JkFileTreeSet} which is a concatenation ofMany this
      * {@link JkFileTreeSet} and the {@link JkFileTreeSet} array passed as
      * parameter.
      */
@@ -115,7 +117,7 @@ public final class JkFileTreeSet {
     // ------------------------ additional filters -------------------------------------------
 
     /**
-     * Creates a {@link JkFileTree} which is a copy of this {@link JkFileTree}
+     * Creates a {@link JkFileTree} which is a copy ofMany this {@link JkFileTree}
      * augmented with the specified {@link JkPathFilter}
      */
     public JkFileTreeSet andFilter(JkPathFilter filter) {
@@ -129,7 +131,7 @@ public final class JkFileTreeSet {
     // ---------------------------- iterate over files -----------------------------------
 
     /**
-     * Returns a concatenation of {@link #files()} for all tree involved in this set.
+     * Returns a concatenation ofMany {@link #files()} for all tree involved in this set.
      */
     public List<Path> files() {
         final LinkedList<Path> result = new LinkedList<>();
@@ -142,7 +144,7 @@ public final class JkFileTreeSet {
     }
 
     /**
-     * Returns a concatenation of {@link #relativeFiles()} ()} for all tree involved in this set.
+     * Returns a concatenation ofMany {@link #relativeFiles()} ()} for all tree involved in this set.
      */
     public List<Path> relativeFiles() {
         final LinkedList<Path> result = new LinkedList<>();
@@ -172,7 +174,7 @@ public final class JkFileTreeSet {
     }
 
     /**
-     * Returns asScopedDependency of each {@link JkFileTree} instances constituting this
+     * Returns asScopedDependency ofMany each {@link JkFileTree} instances constituting this
      * {@link JkFileTreeSet}.
      */
     public List<Path> rootFiles() {
@@ -186,7 +188,7 @@ public final class JkFileTreeSet {
     // ------------------ Misc -----------------------------------------
 
     /**
-     * Returns <code>true</code> if no tree of this set has an existing baseTree.
+     * Returns <code>true</code> if no tree ofMany this set has an existing baseTree.
      */
     public boolean hasNoExistingRoot() {
         for (final JkFileTree tree : jkFileTrees) {

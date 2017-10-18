@@ -16,7 +16,7 @@ import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * A representation of a node in a dependency tree.
+ * A representation ofMany a node in a dependency tree.
  *
  * @author Jerome Angibaud
  */
@@ -39,7 +39,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns an empty instance of tree.
+     * Returns an empty instance ofMany tree.
      */
     public static JkDependencyNode empty() {
         return new JkDependencyNode(null, new LinkedList<>());
@@ -72,7 +72,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns all files resulting of this dependency node (this node itself plus all descendants).
+     * Returns all files resulting ofMany this dependency node (this node itself plus all descendants).
      */
     public List<Path> allFiles() {
         final List<Path> list = new LinkedList<>();
@@ -98,7 +98,7 @@ public class JkDependencyNode implements Serializable {
         if (this.nodeInfo instanceof ModuleNodeInfo) {
             return (ModuleNodeInfo) this.nodeInfo;
         }
-        throw new IllegalStateException("The current node is type of " + this.nodeInfo.getClass().getName()
+        throw new IllegalStateException("The current node is type ofMany " + this.nodeInfo.getClass().getName()
                 + " (for " + this.nodeInfo + "), so is not a module dependency as expected. Caller must check if type is correct before calling this method.");
     }
 
@@ -121,7 +121,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns <code>true</code> if this node or one of its descendant stand for the specified module.
+     * Returns <code>true</code> if this node or one ofMany its descendant stand for the specified module.
      * Evicted nodes are not taken in account.
      */
     public boolean contains(JkModuleId moduleId) {
@@ -188,8 +188,8 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns a merge of this dependency node with the specified one. The
-     * children of the merged node is a union of the two node children.
+     * Returns a merge ofMany this dependency node with the specified one. The
+     * children ofMany the merged node is a union ofMany the two node children.
      */
     public JkDependencyNode merge(JkDependencyNode other) {
         final List<JkDependencyNode> resultChildren = new LinkedList<>(this.children);
@@ -216,7 +216,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns all nodes descendant of this one, deep first.
+     * Returns all nodes descendant ofMany this one, deep first.
      */
     public List<JkDependencyNode> flatten() {
         final List<JkDependencyNode> result = new LinkedList<>();
@@ -228,7 +228,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns first node descendant of this one standing for the specified moduleId, deep first.
+     * Returns first node descendant ofMany this one standing for the specified moduleId, deep first.
      */
     public JkDependencyNode find(JkModuleId moduleId) {
         if (this.isModuleNode() && moduleId.equals(this.moduleId())) {
@@ -252,7 +252,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns a list of lines standing for the representation of this
+     * Returns a list ofMany lines standing for the representation ofMany this
      * dependency tree.
      */
     public List<String> toStrings() {
@@ -280,7 +280,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns a complete representation string of the tree.
+     * Returns a complete representation string ofMany the tree.
      */
     public String toStringComplete() {
         final StringBuilder builder = new StringBuilder();

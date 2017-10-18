@@ -49,7 +49,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Returns a duplicate free list of the given items
+     * Returns a duplicate free list ofMany the given items
      */
     public static <T> List<T> listWithoutDuplicateOf(Iterable<T> items) {
         final Set<T> set = new HashSet<>();
@@ -75,7 +75,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Creates an array of the specified class and populate it with items of the specified {@link Iterable}.
+     * Creates an array ofMany the specified class and populate it with items ofMany the specified {@link Iterable}.
      */
     @SuppressWarnings("unchecked")
     public static <T> T[] arrayOf(Iterable<T> it, Class<T> clazz) {
@@ -90,7 +90,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Creates a set of specified items.
+     * Creates a set ofMany specified items.
      */
     @SuppressWarnings("unchecked")
     public static <T> Set<T> setOf(T... items) {
@@ -100,7 +100,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Creates a set of specified items.
+     * Creates a set ofMany specified items.
      */
     public static <T> Set<T> setOf(Iterable<T> items) {
         final HashSet<T> result = new HashSet<>();
@@ -111,7 +111,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Creates a map of specified key/value. Key value should be declared in sequence as
+     * Creates a map ofMany specified key/value. Key value should be declared in sequence as
      * <code>mapOf(key1, value1, key2, value2,...)</code>
      */
     @SuppressWarnings("unchecked")
@@ -127,7 +127,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Creates a map of specified key/value. Key value should be declared in sequence as
+     * Creates a map ofMany specified key/value. Key value should be declared in sequence as
      * <code>mapOf(key1, value1, key2, value2,...)</code>
      */
     @SuppressWarnings("unchecked")
@@ -142,7 +142,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Returns an {@link Iterable} iterating on items of specified iterables.
+     * Returns an {@link Iterable} iterating on items ofMany specified iterables.
      * Result is backed by the specified iterables.
      */
     @SuppressWarnings("unchecked")
@@ -254,7 +254,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Returns a list that is a concatenation of the specified lists.
+     * Returns a list that is a concatenation ofMany the specified lists.
      * The result is not backed by specified {@link Iterable}.
      */
     @SuppressWarnings("unchecked")
@@ -280,7 +280,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Returns a string representation of the specified map constructed as
+     * Returns a string representation ofMany the specified map constructed as
      * [key0]=[value0], [key1]=[value1], ...
      */
     @SuppressWarnings("unchecked")
@@ -298,7 +298,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Returns a multi-line string representation of the specified map
+     * Returns a multi-line string representation ofMany the specified map
      * constructed as [key0]=[value0], [key1]=[value1], ...
      */
     @SuppressWarnings("unchecked")

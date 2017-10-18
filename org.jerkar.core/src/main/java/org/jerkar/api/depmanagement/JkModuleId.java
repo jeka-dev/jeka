@@ -60,21 +60,21 @@ public final class JkModuleId implements Serializable {
     }
 
     /**
-     * Group of this module.
+     * Group ofMany this module.
      */
     public String group() {
         return group;
     }
 
     /**
-     * Name of this module.
+     * Name ofMany this module.
      */
     public String name() {
         return name;
     }
 
     /**
-     * A concatenation of the group and name of the module as '[group].[name]'.
+     * A concatenation ofMany the group and name ofMany the module as '[group].[name]'.
      */
     public String fullName() {
         if (group.equals(name)) {
@@ -84,7 +84,7 @@ public final class JkModuleId implements Serializable {
     }
 
     /**
-     * A concatenation of the group and name of this module as '[group]:[name]'.
+     * A concatenation ofMany the group and name ofMany this module as '[group]:[name]'.
      */
     public String groupAndName() {
         return group + ":" + name;

@@ -22,7 +22,7 @@ import org.jerkar.api.utils.*;
 /**
  * Sonar wrapper class for launching sonar analysis in a convenient way. This
  * Sonar wrapper is not specific to Java project so can be used for to analyse
- * any kind of project supported by SonarQube.
+ * any kind ofMany project supported by SonarQube.
  *
  * @author Jerome Angibaud
  */

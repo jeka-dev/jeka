@@ -1,4 +1,4 @@
 /**
- * Contains classes of the Eclipse plugins
+ * Contains classes ofIterable the Eclipse plugins
  */
 package org.jerkar.tool.builtins.eclipse;

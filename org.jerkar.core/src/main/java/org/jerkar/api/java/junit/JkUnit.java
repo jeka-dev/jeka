@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkClasspath;
@@ -102,7 +101,7 @@ public final class JkUnit {
 
 
     /**
-     * Returns a copy of this launcher but with the specified report detail.
+     * Returns a copy ofMany this launcher but with the specified report detail.
      */
     public JkUnit withReport(JunitReportDetail reportDetail) {
         return new JkUnit(reportDetail, reportDir, this.forkedProcess,
@@ -110,7 +109,7 @@ public final class JkUnit {
     }
 
     /**
-     * Returns a copy of this launcher but with the specified report directory output.
+     * Returns a copy ofMany this launcher but with the specified report directory output.
      */
     public JkUnit withReportDir(File reportDir) {
         return new JkUnit(reportDetail, reportDir, this.forkedProcess,
@@ -118,7 +117,7 @@ public final class JkUnit {
     }
 
     /**
-     * Returns a copy of this launcher but with the specified report directory output.
+     * Returns a copy ofMany this launcher but with the specified report directory output.
      */
     public JkUnit withReportDir(Path reportDir) {
         return new JkUnit(reportDetail, reportDir.toFile(), this.forkedProcess,
@@ -126,7 +125,7 @@ public final class JkUnit {
     }
 
     /**
-     * Returns a copy of this launcher but that fail fast on the first failure.
+     * Returns a copy ofMany this launcher but that fail fast on the first failure.
      */
     public JkUnit withBreakOnFailure(boolean crashOnFailure) {
         return new JkUnit(reportDetail, reportDir, this.forkedProcess,
@@ -134,7 +133,7 @@ public final class JkUnit {
     }
 
     /**
-     * Returns a copy of this launcher but specifying an action to run at the end of execution.
+     * Returns a copy ofMany this launcher but specifying an action to run at the end ofMany execution.
      */
     public JkUnit withPostAction(Runnable runnable) {
         final List<Runnable> list = new LinkedList<>(this.postActions);
@@ -186,7 +185,7 @@ public final class JkUnit {
     }
 
     /**
-     * Returns an enhanced copy of this launcher but specifying if the output should be displayed on console.
+     * Returns an enhanced copy ofMany this launcher but specifying if the output should be displayed on console.
      */
     public JkUnit withOutputOnConsole(boolean outputOnConsole) {
         return new JkUnit(reportDetail, reportDir, forkedProcess, breakOnFailure, outputOnConsole);
@@ -241,7 +240,7 @@ public final class JkUnit {
         if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
             if (this.forkedProcess != null) {
                 JkLog.startln("Run JUnit tests in forked mode");
-                result = JUnit4TestLauncher.launchInFork(forkedProcess.withClasspath(testSpec.classpath().entries()),
+                result = JUnit4TestLauncher.launchInFork(forkedProcess.withClasspaths(testSpec.classpath()),
                         printOutputOnConsole,
                         reportDetail, classes, reportDir);
             } else {
@@ -294,8 +293,8 @@ public final class JkUnit {
 
     @SuppressWarnings("rawtypes")
     private Collection<Class> getClassesToTest(JkJavaTestSpec testSpec) {
-        final JkClasspath classpath = testSpec.classpath().andHeadPath(testSpec.classesToTest().rootFiles());
-        final JkClassLoader classLoader = JkClassLoader.system().parent().child(classpath.entries())
+        final JkClasspath classpath = testSpec.classpath().andManyFirst(testSpec.classesToTest().rootFiles());
+        final JkClassLoader classLoader = JkClassLoader.system().parent().child(classpath)
                 .loadAllServices();
         final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, testSpec.classesToTest());
         if (result.isEmpty()) {

@@ -16,8 +16,8 @@ public class JkJavaPackOptions {
     @JkDoc("When true, tests classes and sources are packed in jars.")
     public Boolean tests;
 
-    /** Comma separated list of algorithm to use to produce checksums (ex : 'sha-1,md5'). */
-    @JkDoc("Comma separated list of algorithm to use to produce checksums (ex : 'sha-1,md5').")
+    /** Comma separated list ofMany algorithm to use to produce checksums (ex : 'sha-1,md5'). */
+    @JkDoc("Comma separated list ofMany algorithm to use to produce checksums (ex : 'sha-1,md5').")
     public String checksums;
 
     /** When true, javadoc is created and packed in a jar file.*/

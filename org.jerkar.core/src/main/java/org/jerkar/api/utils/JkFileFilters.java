@@ -13,7 +13,7 @@ public final class JkFileFilters {
 
     /**
      * Creates a {@link FileFilter} that accept files having a name
-     * ending with one of the specified suffixes.
+     * ending with one ofMany the specified suffixes.
      */
     public static FileFilter endingBy(final String... suffixes) {
         return file -> {
@@ -100,7 +100,7 @@ public final class JkFileFilters {
 
             @Override
             public String toString() {
-                return "revert of (" + filter + ")";
+                return "revert ofMany (" + filter + ")";
             }
         };
     }

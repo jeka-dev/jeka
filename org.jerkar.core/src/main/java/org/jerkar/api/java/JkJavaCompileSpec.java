@@ -36,7 +36,7 @@ public final class JkJavaCompileSpec {
     }
 
     /**
-     * Returns the specifications as a list of string directly usable in the {@link JkJavaCompiler} except
+     * Returns the specifications as a list ofMany string directly usable in the {@link JkJavaCompiler} except
      * sourcepath
      */
     public List<String> getOptions() {
@@ -73,7 +73,7 @@ public final class JkJavaCompileSpec {
     }
 
     /**
-     * Sets the version of source code accepted.
+     * Sets the version ofMany source code accepted.
      */
     public JkJavaCompileSpec setSourceVersion(JkJavaVersion version) {
         if (version == null) {
@@ -107,7 +107,7 @@ public final class JkJavaCompileSpec {
     }
 
     /**
-     * Creates a copy of this {@link JkJavaCompileSpec} but using the
+     * Creates a copy ofMany this {@link JkJavaCompileSpec} but using the
      * specified source encoding (e.g. UTF-8). If <code>null</code> is specified,
      * then default plateform encoding will be used.
      */
@@ -121,7 +121,7 @@ public final class JkJavaCompileSpec {
     // ----------------- source files -----------------------------------------
 
     /**
-     * Adds specified source files to the set of java sources to compile.
+     * Adds specified source files to the set ofMany java sources to compile.
      **/
     public JkJavaCompileSpec addSources(Collection<Path> files) {
         for (final Path file : files) {
@@ -149,11 +149,11 @@ public final class JkJavaCompileSpec {
     // ------------------ classpath --------------------------------
 
     /**
-     * Creates a copy of this {@link JkJavaCompiler} but with the specified
+     * Creates a copy ofMany this {@link JkJavaCompiler} but with the specified
      * classpath.
      */
-    public JkJavaCompileSpec setClasspath(Collection<Path> files) {
-        final String classpath = JkClasspath.ofPaths(files).toString();
+    public JkJavaCompileSpec setClasspath(Iterable<Path> files) {
+        final String classpath = JkClasspath.ofMany(files).toString();
         return this.setOption(CLASSPATH_OPTS, classpath);
     }
 
@@ -180,9 +180,9 @@ public final class JkJavaCompileSpec {
     }
 
     /**
-     * Some options of a compiler are set in a couple of name/value (version, classpath, .....).
+     * Some options ofMany a compiler are set in a couple ofMany name/value (version, classpath, .....).
      * So if you want to explicitly set such an option it is desirable to remove current value
-     * instead of adding it at the queue of options. This method does this for you.
+     * instead ofMany adding it at the queue ofMany options. This method does this for you.
      */
     public JkJavaCompileSpec setOption(String optionName, String optionValue) {
         addOrReplace(optionName, optionValue);
@@ -192,7 +192,7 @@ public final class JkJavaCompileSpec {
     // --------------------------- Annotation processing -----------------------------------
 
     /**
-     * Sets specified annotation classes instead of using the ones discovered by default Java 6 mechanism.
+     * Sets specified annotation classes instead ofMany using the ones discovered by default Java 6 mechanism.
      */
     public JkJavaCompileSpec setAnnotationProcessors(String... annotationProcessorClassNames) {
         return setOption(PROCESSOR_OPTS, JkUtilsString.join(annotationProcessorClassNames, ","));

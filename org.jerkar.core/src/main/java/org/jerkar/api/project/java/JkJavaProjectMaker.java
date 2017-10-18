@@ -84,7 +84,7 @@ public class JkJavaProjectMaker {
         this.project = project;
         this.packager = JkJavaProjectPackager.of(project);
         this.cleaner = JkRunnables.of(
-                () -> JkFileTree.of(project.getOutLayout().outputPath()).deleteAll());
+                () -> JkFileTree.of(project.getOutLayout().outputPath()).deleteContent());
         this.resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().resources())
                 .and(project.getOutLayout().generatedResourceDir().toFile())
                 .and(project.getResourceInterpolators())
@@ -204,25 +204,25 @@ public class JkJavaProjectMaker {
 
     private JkJavaCompileSpec testCompileSpec() {
         JkJavaCompileSpec result = project.getCompileSpec().copy();
-        final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andHead(project.getOutLayout().classDir());
+        final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andFirst(project.getOutLayout().classDir());
         return result
-                .setClasspath(classpath.entries())
+                .setClasspath(classpath)
                 .addSources(project.getSourceLayout().tests().files())
                 .setOutputDir(project.getOutLayout().testClassDir());
     }
 
     private JkUnit juniter() {
-        final JkClasspath classpath = JkClasspath.ofPath(project.getOutLayout().testClassDir())
+        final JkClasspath classpath = JkClasspath.of(project.getOutLayout().testClassDir())
                 .and(project.getOutLayout().classDir())
-                .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).entries());
+                .andMany(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
         final Path junitReport = project.getOutLayout().testReportDir().resolve("junit");
         return this.juniter.withReportDir(junitReport);
     }
 
     private JkJavaTestSpec testSpec() {
-        final JkClasspath classpath = JkClasspath.ofPath(project.getOutLayout().testClassDir())
+        final JkClasspath classpath = JkClasspath.of(project.getOutLayout().testClassDir())
                 .and(project.getOutLayout().classDir())
-                .and(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).entries());
+                .andMany(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).entries());
         return JkJavaTestSpec.of(classpath, JkFileTreeSet.of(project.getOutLayout().testClassDir()));
     }
 

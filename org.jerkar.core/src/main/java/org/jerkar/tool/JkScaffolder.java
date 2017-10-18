@@ -56,9 +56,9 @@ public final class JkScaffolder {
 
     /**
      * Sets the the code writer to use to write build class code.
-     * The #toString method of the specified code writer will be used to
+     * The #toString method ofMany the specified code writer will be used to
      * generate code.
-     * Generally we use an instance of {@link JkCodeWriterForBuildClass}
+     * Generally we use an instance ofMany {@link JkCodeWriterForBuildClass}
      */
     public JkScaffolder buildClassWriter(Supplier<String> codeWriter) {
         this.mainBuildclassWriter = codeWriter;
@@ -66,7 +66,7 @@ public final class JkScaffolder {
     }
 
     /**
-     * Returns the build class code writer of this scaffolder.
+     * Returns the build class code writer ofMany this scaffolder.
      */
     @SuppressWarnings("unchecked")
     public <T> T buildClassCodeWriter() {

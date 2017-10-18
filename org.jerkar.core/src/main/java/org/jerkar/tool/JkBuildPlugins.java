@@ -11,7 +11,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsReflect;
 
 /**
- * Set of plugins configured or activated in a {@link JkBuild}.
+ * Set ofMany plugins configured or activated in a {@link JkBuild}.
  */
 public final class JkBuildPlugins {
 

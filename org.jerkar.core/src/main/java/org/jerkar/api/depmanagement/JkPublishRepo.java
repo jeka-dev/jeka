@@ -33,7 +33,7 @@ public final class JkPublishRepo implements Serializable {
     /**
      * Creates a {@link JkPublishRepo} for publishing on the specified {@link JkRepo} when
      * the specified {@link JkPublishRepo} agree. If the specified filter do not agree to publish
-     * a given {@link JkVersionedModule}, a publish of the disagreed module on this {@link JkPublishRepo}
+     * a given {@link JkVersionedModule}, a publish ofMany the disagreed module on this {@link JkPublishRepo}
      * will result in an no operation (doing nothing).
      */
     public static JkPublishRepo of(JkRepo jkRepo, JkPublishFilter filter) {
@@ -176,14 +176,14 @@ public final class JkPublishRepo implements Serializable {
     }
 
     /**
-     * Returns a {@link JkPublishRepos} made of this {@link JkPublishRepo} and the specified one.
+     * Returns a {@link JkPublishRepos} made ofMany this {@link JkPublishRepo} and the specified one.
      */
     public JkPublishRepos and(JkPublishRepo repo) {
         return JkPublishRepos.of(this).and(repo);
     }
 
     /**
-     * Returns a {@link JkPublishRepos} made of this {@link JkPublishRepo} and the specified {@link JkRepo}
+     * Returns a {@link JkPublishRepos} made ofMany this {@link JkPublishRepo} and the specified {@link JkRepo}
      * for artifact having a non-snapshot version.
      */
     public JkPublishRepos andRelease(JkRepo repo) {

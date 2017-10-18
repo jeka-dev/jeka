@@ -53,7 +53,7 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * Creates a copy of this {@link JkJavaCompiler} but with the specified
+     * Creates a copy ofMany this {@link JkJavaCompiler} but with the specified
      * failed-on-error parameter. If <code>true</code> then
      * a compilation error will throw a {@link IllegalStateException}.
      */
@@ -63,7 +63,7 @@ public final class JkJavaCompiler {
 
 
     /**
-     * Creates a copy of this {@link JkJavaCompiler} but with forking the javac
+     * Creates a copy ofMany this {@link JkJavaCompiler} but with forking the javac
      * process. The javac process is created using specified argument defined in
      * {@link JkProcess#ofJavaTool(String, String...)}
      */
@@ -96,7 +96,7 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * Creates a copy of this {@link JkJavaCompiler} but with the specified compiler instance.
+     * Creates a copy ofMany this {@link JkJavaCompiler} but with the specified compiler instance.
      * Since in-process compilers cannot be run in a forked process, this method disables any
      * previous fork options that may have been set.
      */
@@ -105,7 +105,7 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * Creates a copy of this {@link JkJavaCompiler} but adding an external java compiler for
+     * Creates a copy ofMany this {@link JkJavaCompiler} but adding an external java compiler for
      * the specified source version. The compiler will try to get compliant compiler to
      * compile source.
      */

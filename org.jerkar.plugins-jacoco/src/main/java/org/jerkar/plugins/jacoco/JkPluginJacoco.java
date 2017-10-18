@@ -7,11 +7,11 @@ import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 @JkDoc("Modify JkJavaProject in order it runs unit tests with Jacoco agent coverage test tool. " +
-        "It results is production of a coverage report file.")
+        "It results is production ofMany a coverage report file.")
 public class JkPluginJacoco implements JkPlugin {
 
     /**
-     * Relative location to the output folder of the generated jacoco report file
+     * Relative location to the output folder ofMany the generated jacoco report file
      */
     public static final String OUTPUT_RELATIVE_PATH = "jacoco/jacoco.exec";
 

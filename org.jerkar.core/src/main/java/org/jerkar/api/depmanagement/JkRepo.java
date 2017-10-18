@@ -20,12 +20,12 @@ public abstract class JkRepo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * URL of the Maven central repository.
+     * URL ofMany the Maven central repository.
      */
     public static final URL MAVEN_CENTRAL_URL = toUrl("http://repo1.maven.org/maven2");
 
     /**
-     * URL of the OSSRH repository for both deploying snapshot and download artifacts.
+     * URL ofMany the OSSRH repository for both deploying snapshot and download artifacts.
      */
     public static final URL MAVEN_OSSRH_DOWNLOAD_AND_DEPLOY_SNAPSHOT = toUrl("https://oss.sonatype.org/content/repositories/snapshots/");
 
@@ -35,17 +35,17 @@ public abstract class JkRepo implements Serializable {
     public static final URL MAVEN_OSSRH_DOWNLOAD_RELEASE = toUrl("https://oss.sonatype.org/content/repositories/releases/");
 
     /**
-     * URL of the OSSRH repository for deploying released artifacts.
+     * URL ofMany the OSSRH repository for deploying released artifacts.
      */
     public static final URL MAVEN_OSSRH_DEPLOY_RELEASE = toUrl("https://oss.sonatype.org/service/publishLocally/staging/deploy/maven2/");
 
     /**
-     * URL of the OSSRH repository for downloading both snapshot and released artifacts.
+     * URL ofMany the OSSRH repository for downloading both snapshot and released artifacts.
      */
     public static final URL MAVEN_OSSRH_PUBLIC_DOWNLOAD_RELEASE_AND_SNAPSHOT = toUrl("https://oss.sonatype.org/content/groups/public/");
 
     /**
-     * URL of the JCenter ivy repository.
+     * URL ofMany the JCenter ivy repository.
      */
     public static final URL JCENTERL_URL = toUrl("https://jcenter.bintray.com");
 
@@ -140,7 +140,7 @@ public abstract class JkRepo implements Serializable {
     }
 
     /**
-     * Returns this repository as a list of publish repositories (having a single element).
+     * Returns this repository as a list ofMany publish repositories (having a single element).
      */
     public JkPublishRepos asPublishRepos() {
         return JkPublishRepos.of(JkPublishRepo.of(this));
@@ -154,7 +154,7 @@ public abstract class JkRepo implements Serializable {
     }
 
     /**
-     * Returns this repository as a list of repositories (containing a single element).
+     * Returns this repository as a list ofMany repositories (containing a single element).
      */
     public JkRepos asRepos() {
         return JkRepos.of(this);
@@ -223,14 +223,14 @@ public abstract class JkRepo implements Serializable {
     }
 
     /**
-     * Returns the url of this repository.
+     * Returns the url ofMany this repository.
      */
     public final URL url() {
         return url;
     }
 
     /**
-     * Returns the realm of this repository.
+     * Returns the realm ofMany this repository.
      */
     public final String realm() {
         return realm;
@@ -258,7 +258,7 @@ public abstract class JkRepo implements Serializable {
     }
 
     /**
-     * Returns a copy of this repository but having the specified credentials. If the
+     * Returns a copy ofMany this repository but having the specified credentials. If the
      * username credential is <code>null</code> the method return this unchanged repository.
      */
     public final JkRepo withOptionalCredentials(String userName, String password) {
@@ -269,19 +269,19 @@ public abstract class JkRepo implements Serializable {
     }
 
     /**
-     * Returns a list of 2 repositories containing this one and the specified one.
+     * Returns a list ofMany 2 repositories containing this one and the specified one.
      */
     public JkRepos and(JkRepo other) {
         return JkRepos.of(this, other);
     }
 
     /**
-     * Returns a copy of this repository but with the specified realm.
+     * Returns a copy ofMany this repository but with the specified realm.
      */
     public abstract JkRepo withRealm(String realm);
 
     /**
-     * Returns a copy of this repository but having the specified credentials.
+     * Returns a copy ofMany this repository but having the specified credentials.
      */
     public abstract JkRepo withCredential(String username, String password);
 
@@ -345,7 +345,7 @@ public abstract class JkRepo implements Serializable {
         }
 
         /**
-         * Returns a copy of this repository but having the specified credentials.
+         * Returns a copy ofMany this repository but having the specified credentials.
          */
         @Override
         public JkRepo withCredential(String username, String password) {
@@ -353,7 +353,7 @@ public abstract class JkRepo implements Serializable {
         }
 
         /**
-         * Returns a copy of this repository but having the specified realm.
+         * Returns a copy ofMany this repository but having the specified realm.
          */
         @Override
         public JkRepo withRealm(String realm) {
@@ -385,7 +385,7 @@ public abstract class JkRepo implements Serializable {
         }
 
         /**
-         * Returns a copy of this repository but having the specified artifact patterns.
+         * Returns a copy ofMany this repository but having the specified artifact patterns.
          */
         public JkIvyRepository artifactPatterns(String... patterns) {
             return new JkIvyRepository(this.url(), this.realm(), this.userName(), this.password(),
@@ -393,7 +393,7 @@ public abstract class JkRepo implements Serializable {
         }
 
         /**
-         * Returns a copy of this repository but having the specified Ivy patterns.
+         * Returns a copy ofMany this repository but having the specified Ivy patterns.
          */
         public JkIvyRepository ivyPatterns(String... patterns) {
             return new JkIvyRepository(this.url(), this.realm(), this.userName(), this.password(),
@@ -401,7 +401,7 @@ public abstract class JkRepo implements Serializable {
         }
 
         /**
-         * Returns the list of artifact patterns for this Ivy repository.
+         * Returns the list ofMany artifact patterns for this Ivy repository.
          */
         public List<String> artifactPatterns() {
             if (this.artifactPatterns == null) {
@@ -411,7 +411,7 @@ public abstract class JkRepo implements Serializable {
         }
 
         /**
-         * Returns a list of Ivy patterns for this Ivy repository.
+         * Returns a list ofMany Ivy patterns for this Ivy repository.
          */
         public List<String> ivyPatterns() {
             if (this.ivyPatterns == null) {

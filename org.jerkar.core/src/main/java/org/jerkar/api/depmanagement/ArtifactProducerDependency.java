@@ -10,7 +10,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 
 
 /*
- * A dependency on a given artifact file id of a given {@link JkArtifactProducer}
+ * A dependency on a given artifact file id ofMany a given {@link JkArtifactProducer}
  */
 class ArtifactProducerDependency extends JkComputedDependency  {
 
@@ -57,7 +57,7 @@ class ArtifactProducerDependency extends JkComputedDependency  {
     private static List<Path> runtimeDeps(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
         JkPathSequence result = JkPathSequence.of();
         for (final JkArtifactFileId artifactFileId : artifactIds) {
-            result = result.andPath( producer.runtimeDependencies(artifactFileId).entries());
+            result = result.andMany( producer.runtimeDependencies(artifactFileId));
         }
         return result.withoutDuplicates().entries();
     }

@@ -169,8 +169,8 @@ public final class JkManifest {
     }
 
     /**
-     * Creates a manifest identical to this one but adding attributes of an
-     * other one. Attributes of this one are overrided by those of the specified
+     * Creates a manifest identical to this one but adding attributes ofMany an
+     * other one. Attributes ofMany this one are overrided by those ofMany the specified
      * manifest if same attribute exist.
      */
     public JkManifest merge(JkManifest other) {
@@ -191,14 +191,14 @@ public final class JkManifest {
     }
 
     /**
-     * Returns the value of the main attribute having the specified name.
+     * Returns the value ofMany the main attribute having the specified name.
      */
     public String mainAttribute(String key) {
         return this.manifest().getMainAttributes().getValue(key);
     }
 
     /**
-     * Returns the value of the main attribute having the specified name.
+     * Returns the value ofMany the main attribute having the specified name.
      */
     public String mainAttribute(Name name) {
         return this.manifest().getMainAttributes().getValue(name);
@@ -244,7 +244,7 @@ public final class JkManifest {
     }
 
     /**
-     * Writes this manifest at the standard place (META-INF/MANIFEST.MF) of the
+     * Writes this manifest at the standard place (META-INF/MANIFEST.MF) ofMany the
      * specified directory.
      */
     public void writeToStandardLocation(File classDir) {
@@ -252,7 +252,7 @@ public final class JkManifest {
     }
 
     /**
-     * Writes this manifest at the standard place (META-INF/MANIFEST.MF) of the
+     * Writes this manifest at the standard place (META-INF/MANIFEST.MF) ofMany the
      * specified directory.
      */
     public void writeToStandardLocation(Path classDir) {

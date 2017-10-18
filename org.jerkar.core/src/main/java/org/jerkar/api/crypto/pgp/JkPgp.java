@@ -130,7 +130,7 @@ public final class JkPgp implements Serializable {
 
     /**
      * Signs the specified files in a detached signature file which will have
-     * the same name of the signed file plus ".asc" suffix.
+     * the same name ofMany the signed file plus ".asc" suffix.
      */
     public Path[] sign(Path... filesToSign) {
         final Path[] result = new Path[filesToSign.length];
@@ -190,14 +190,14 @@ public final class JkPgp implements Serializable {
     }
 
     /**
-     * Returns the secret ring of this object.
+     * Returns the secret ring ofMany this object.
      */
     public Path secretRing() {
         return secRing;
     }
 
     /**
-     * Returns the public ring of this object.
+     * Returns the public ring ofMany this object.
      */
     public Path publicRing() {
         return pubRing;

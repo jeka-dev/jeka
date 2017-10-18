@@ -18,7 +18,7 @@ import org.jerkar.api.utils.JkUtilsString;
  * to a given class and that respect a certain naming convention.<br/>
  * <p>
  * The convention naming is as follow : The class simple name should be prefixed
- * by the simple name of the plugin base class.<br/>
+ * by the simple name ofMany the plugin base class.<br/>
  * For example, a plugin class for
  * <code>or.jerkar.java.build.JkBuildPlugin</code> class must be named
  * 'my.package.JkJavaBuildPluginXxxxx.class' to be discovered :Xxxxx will be its
@@ -128,7 +128,7 @@ final class PluginDictionnary {
     }
 
     /**
-     * Give the description of a plugin class as its name, its purpose and its
+     * Give the description ofMany a plugin class as its name, its purpose and its
      * base class.
      * 
      * @author Jerome Angibaud

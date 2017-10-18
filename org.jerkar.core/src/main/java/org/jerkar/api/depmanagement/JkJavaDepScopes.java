@@ -6,7 +6,7 @@ package org.jerkar.api.depmanagement;
 public final class JkJavaDepScopes {
 
     /**
-     * A dependency declared with this scope will be available at compile time but won't be part of the packaged
+     * A dependency declared with this scope will be available at compile time but won't be part ofMany the packaged
      * product (similar to Maven scope 'provided').
      */
     public static final JkScope PROVIDED = JkScope.build("provided")
@@ -32,7 +32,7 @@ public final class JkJavaDepScopes {
      * A dependency declared with this scope will be present in the classpath for packaging or running the module.<b/>
      * If it is a library, dependencies will be included in the fat jar.<b/>
      * If it is a war, dependencies will be included in war file. <b/>
-     * If it is a main application, dependencies will be part of the runtime classpath.<p>
+     * If it is a main application, dependencies will be part ofMany the runtime classpath.<p>
      *
      * A dependency resolution made with this scope will fetch dependencies declared with {@link #COMPILE} or {@link #RUNTIME}
      * plus their transitive dependencies declared with {@link #COMPILE } or {@link #RUNTIME}.
@@ -55,7 +55,7 @@ public final class JkJavaDepScopes {
 
     /** This scope is used for publication purpose */
     public static final JkScope JAVADOC = JkScope.build("javadoc").transitive(false)
-            .descr("Contains the javadoc of this project").build();
+            .descr("Contains the javadoc ofMany this project").build();
 
     /**
      * Shorthand to declare both COMPILE and RUNTIME scope at once. This is the default scope for dependencies.

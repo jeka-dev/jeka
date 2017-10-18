@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.*;
@@ -33,7 +32,6 @@ import org.jerkar.api.file.JkPathFilter;
 
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsPath;
@@ -70,7 +68,7 @@ public final class JkClassLoader {
 
     /**
      * Set the directory where are cached urls. For its internal use, Jerkar may
-     * copy the the content of an URL to a file. This class manages the central
+     * copy the the content ofMany an URL to a file. This class manages the central
      * place where those URL are cached.
      */
     public static void urlCacheDir(Path dir) {
@@ -125,7 +123,7 @@ public final class JkClassLoader {
     }
 
     /**
-     * Returns the class loader parent of this one.
+     * Returns the class loader parent ofMany this one.
      */
     public JkClassLoader parent() {
         return new JkClassLoader((URLClassLoader) this.delegate.getParent());
@@ -139,7 +137,7 @@ public final class JkClassLoader {
     }
 
     /**
-     * Creates a <code>JkClassLoader</code>, child of this one and having the
+     * Creates a <code>JkClassLoader</code>, child ofMany this one and having the
      * specified entries.
      */
     public JkClassLoader child(Iterable<Path> entries) {
@@ -183,12 +181,12 @@ public final class JkClassLoader {
                         + entry.getClass().getName());
             }
         }
-        return parent().child(this.childClasspath().and(files).entries());
+        return parent().child(this.childClasspath().andMany(files));
     }
 
     /**
      * Same as {@link #sibling(Object...)} but more tolerant about the input. If
-     * one of the specified entry is not valid, then it is simply ignored.
+     * one ofMany the specified entry is not valid, then it is simply ignored.
      */
     public JkClassLoader siblingWithOptional(Object... fileOrUrls) {
         final List<Object> objects = new LinkedList<>();
@@ -206,7 +204,7 @@ public final class JkClassLoader {
     }
 
     /**
-     * Returns a sibling of this class loader that outputs every searched class.
+     * Returns a sibling ofMany this class loader that outputs every searched class.
      *
      * @see #sibling(Iterable)
      */
@@ -216,28 +214,28 @@ public final class JkClassLoader {
     }
 
     /**
-     * Returns the classpath of this classloader without mentioning classpath of
+     * Returns the classpath ofMany this classloader without mentioning classpath ofMany
      * the parent classloaders.
      */
     public JkClasspath childClasspath() {
-        return JkClasspath.of(JkUtilsSystem.classloaderEntries(this.delegate));
+        return JkClasspath.ofMany(JkUtilsSystem.classloaderEntries(this.delegate));
     }
 
     /**
-     * Returns the complete classpath of this classloader.
+     * Returns the complete classpath ofMany this classloader.
      */
     public JkClasspath fullClasspath() {
         final JkClasspath classpath;
         if (this.delegate.getParent() != null) {
             classpath = this.parent().fullClasspath();
         } else {
-            classpath = JkClasspath.ofPath();
+            classpath = JkClasspath.of();
         }
-        return classpath.and(childClasspath().entries());
+        return classpath.andMany(childClasspath());
     }
 
     /**
-     * Delegates the call to {@link ClassLoader#loadClass(String)} of this
+     * Delegates the call to {@link ClassLoader#loadClass(String)} ofMany this
      * wrapped <code>class loader</code>.<br/>
      * The specified class is supposed to be defined in this class loader,
      * otherwise an {@link IllegalArgumentException} is thrown.
@@ -249,7 +247,7 @@ public final class JkClassLoader {
         try {
             return (Class<T>) delegate.loadClass(className);
         } catch (final ClassNotFoundException | NoClassDefFoundError e) {
-            throw new IllegalArgumentException("Class " + className + " not found on " + this, e);
+            throw new IllegalArgumentException("Fail at loading class " + className + " on " + this, e);
         }
     }
 
@@ -309,10 +307,10 @@ public final class JkClassLoader {
      * my.pack.MyClass.
      *
      * @param name
-     *            The full name or the simple name of the class to load
+     *            The full name or the simple name ofMany the class to load
      * @param superClassArg
      *            If not null, the search is narrowed to classes/interfaces
-     *            children of this class/interface.
+     *            children ofMany this class/interface.
      * @return The loaded class or <code>null</code>.
      */
     @SuppressWarnings("unchecked")
@@ -342,7 +340,7 @@ public final class JkClassLoader {
     }
 
     /**
-     * Returns all classes of this <code>classloader</code> that are defined in
+     * Returns all classes ofMany this <code>classloader</code> that are defined in
      * entries matching the specified fileFilter.</br> For example : if you want
      * to load all classes that are defined in folder and not in jar file, you
      * have to provide a <code>FileFilter</code> which includes only
@@ -354,7 +352,7 @@ public final class JkClassLoader {
     public Set<Class<?>> loadClassesInEntries(PathMatcher entryFilter) {
         final List<Path> classfiles = new LinkedList<>();
         final Map<Path, Path> file2Entry = new HashMap<>();
-        for (final Path file : childClasspath().entries()) {
+        for (final Path file : childClasspath()) {
             if (entryFilter == null || entryFilter.matches(file) && Files.isDirectory(file)) {
                 final List<Path> files = JkFileTree.of(file).andMatcher(CLASS_FILE_FILTER).files();
                 classfiles.addAll(files);
@@ -412,7 +410,7 @@ public final class JkClassLoader {
     }
 
     /**
-     * Returns all classes of this <code>classloader</code> that are defined
+     * Returns all classes ofMany this <code>classloader</code> that are defined
      * inside the provided <code>JkFileTreeSet</code>.
      *
      * @see JkClassLoader#loadClassesInEntries(PathMatcher)
@@ -429,7 +427,7 @@ public final class JkClassLoader {
     }
 
     /**
-     * Returns all classes of this <code>classloader</code> that are defined
+     * Returns all classes ofMany this <code>classloader</code> that are defined
      * inside the provided <code>JkFileTreeSet</code>.
      *
      * @see JkClassLoader#loadClassesInEntries(PathMatcher)
@@ -441,7 +439,7 @@ public final class JkClassLoader {
     }
 
     /**
-     * Returns all classes of this <code>classloader</code> that are defined
+     * Returns all classes ofMany this <code>classloader</code> that are defined
      * inside the specified directory.
      *
      * @see JkClassLoader#loadClassesInEntries(PathMatcher)
@@ -644,7 +642,7 @@ public final class JkClassLoader {
     }
 
     /**
-     * Creates an instance of the class having the specified name in this class
+     * Creates an instance ofMany the class having the specified name in this class
      * loader.
      */
     @SuppressWarnings("unchecked")
@@ -659,7 +657,7 @@ public final class JkClassLoader {
      */
     public JkClassLoader loadAllServices() {
         final Set<Class<?>> serviceClasses = new HashSet<>();
-        for (final Path file : this.fullClasspath().entries()) {
+        for (final Path file : this.fullClasspath()) {
             if (Files.isRegularFile(file)) {
                 JkLog.trace("Scanning " + file+ " for META-INF/services.");
                 final ZipFile zipFile = JkUtilsZip.zipFile(file.toFile());

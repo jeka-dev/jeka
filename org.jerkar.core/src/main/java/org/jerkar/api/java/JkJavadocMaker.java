@@ -153,7 +153,7 @@ public final class JkJavadocMaker {
     private String[] toArguments(File outputDir) {
         final List<String> list = new LinkedList<>();
         list.add("-sourcepath");
-        list.add(JkPathSequence.of(this.srcDirs.rootFiles()).toString());
+        list.add(JkPathSequence.ofMany(this.srcDirs.rootFiles()).toString());
         list.add("-d");
         list.add(outputDir.getAbsolutePath());
         if (JkLog.verbose()) {
@@ -165,7 +165,7 @@ public final class JkJavadocMaker {
         list.add(JkUtilsJdk.toolsJar().toString());
         if (classpath != null && classpath.iterator().hasNext()) {
             list.add("-classpath");
-            list.add(JkPathSequence.of(JkUtilsPath.toPaths(this.classpath)).toString());
+            list.add(JkPathSequence.ofMany(JkUtilsPath.toPaths(this.classpath)).toString());
         }
         list.addAll(extraArgs);
 
@@ -200,7 +200,7 @@ public final class JkJavadocMaker {
             mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
             if (mainClass == null) {
                 throw new RuntimeException(
-                        "It seems that you are running a JRE instead of a JDK, please run Jerkar using a JDK.");
+                        "It seems that you are running a JRE instead ofMany a JDK, please run Jerkar using a JDK.");
             }
         }
         return mainClass;

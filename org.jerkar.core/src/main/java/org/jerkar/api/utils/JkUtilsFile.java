@@ -37,7 +37,7 @@ import java.util.zip.ZipInputStream;
 public final class JkUtilsFile {
 
     /**
-     * Throws an {@link IllegalArgumentException} if one of the specified file
+     * Throws an {@link IllegalArgumentException} if one ofMany the specified file
      * is not a directory or does not exist.
      */
     public static void assertAllDir(File... candidates) {
@@ -50,7 +50,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Throws an {@link IllegalArgumentException} if one of the specified file
+     * Throws an {@link IllegalArgumentException} if one ofMany the specified file
      * or directory does not exist.
      */
     public static void assertAllExist(File... candidates) {
@@ -77,8 +77,8 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Returns the relative path of the specified file relative to the specified
-     * base directory. File argument must be a child of the base directory
+     * Returns the relative path ofMany the specified file relative to the specified
+     * base directory. File argument must be a child ofMany the base directory
      * otherwise method throw an {@link IllegalArgumentException}.
      */
     public static String getRelativePath(File baseDir, File file) {
@@ -141,7 +141,7 @@ public final class JkUtilsFile {
         }
 
         if (reportStream != null) {
-            reportStream.append("Coping content of ").append(fromDir.getPath());
+            reportStream.append("Coping content ofMany ").append(fromDir.getPath());
         }
         final File[] children = fromDir.listFiles();
         int count = 0;
@@ -173,7 +173,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Returns the content of the specified property file as a
+     * Returns the content ofMany the specified property file as a
      * {@link Properties} object.
      */
     public static Properties readPropertyFile(File propertyfile) {
@@ -181,7 +181,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Returns the content of the specified property file as a
+     * Returns the content ofMany the specified property file as a
      * {@link Properties} object.
      */
     public static Properties readPropertyFile(Path propertyfile) {
@@ -195,7 +195,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Returns the content of the specified property file as a {@link Map}
+     * Returns the content ofMany the specified property file as a {@link Map}
      * object.
      */
     public static Map<String, String> readPropertyFileAsMap(File propertyfile) {
@@ -209,7 +209,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Returns the content of the specified file as a string.
+     * Returns the content ofMany the specified file as a string.
      */
     public static String read(File file) {
         try (final FileInputStream fileInputStream = JkUtilsIO.inputStream(file)) {
@@ -220,7 +220,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Returns the content of the specified file as a list of string.
+     * Returns the content ofMany the specified file as a list ofMany string.
      */
     public static List<String> readLines(File file) {
         try (final FileInputStream fileInputStream = JkUtilsIO.inputStream(file)) {
@@ -292,7 +292,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Fully delete the content of he specified directory.
+     * Fully delete the content ofMany he specified directory.
      */
     public static void deleteDirContent(File dir) {
         final File[] files = dir.listFiles();
@@ -340,7 +340,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Returns <code>true</code> if the ancestor candidate file is an ancestor of
+     * Returns <code>true</code> if the ancestor candidate file is an ancestor ofMany
      * the specified child candidate.
      */
     public static boolean isAncestor(File ancestorCandidate, File childCandidate) {
@@ -365,7 +365,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * A 'checked exception free' version of {@link File#getCanonicalPath()}.
+     * A 'checked exception free' version ofMany {@link File#getCanonicalPath()}.
      */
     public static String canonicalPath(File file) {
         try {
@@ -376,13 +376,13 @@ public final class JkUtilsFile {
     }
 
     /**
-     * A 'checked exception free' version of {@link File#getCanonicalFile()}.
+     * A 'checked exception free' version ofMany {@link File#getCanonicalFile()}.
      */
     public static File canonicalFile(File file) {
         try {
             return file.getCanonicalFile();
         } catch (final IOException e) {
-            throw new RuntimeException("Erreur while getting canonical file of " + file, e);
+            throw new RuntimeException("Erreur while getting canonical file ofMany " + file, e);
         }
     }
 
@@ -429,7 +429,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Returns count of files contained recursively in the specified directory.
+     * Returns count ofMany files contained recursively in the specified directory.
      * If the dir does not exist then it returns 0.
      */
     public static int count(File dir, FileFilter fileFilter, boolean includeFolders) {
@@ -488,7 +488,7 @@ public final class JkUtilsFile {
 
     /**
      * Writes the specified content in the the specified file. If append is
-     * <code>true</code> the content is written at the end of the file.
+     * <code>true</code> the content is written at the end ofMany the file.
      */
     public static void writeString(File file, String content, boolean append) {
         try {
@@ -502,7 +502,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Inserts the specified content at the begining of the specified file. For
+     * Inserts the specified content at the begining ofMany the specified file. For
      * such a temp file is create then the original file is replaced by the temp
      * file.
      */
@@ -516,7 +516,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Inserts the appender file at the end of the result file.
+     * Inserts the appender file at the end ofMany the result file.
      */
     public static void append(File result, File appender) {
         try (
@@ -530,7 +530,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Returns the checksum of a specified file. The algorithm may be "SHA-1" or
+     * Returns the checksum ofMany a specified file. The algorithm may be "SHA-1" or
      * "MD5".
      */
     public static String checksum(Path file, String algorithm) {
@@ -636,7 +636,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Copies the content of the specified in file into the specified out file.
+     * Copies the content ofMany the specified in file into the specified out file.
      * While coping token ${key} are replaced by the value found in the
      * specified replacements map.
      *
@@ -684,7 +684,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Copies the content of the specified url to the specified file. While
+     * Copies the content ofMany the specified url to the specified file. While
      * coping token ${key} are replaced by the value found in the specified
      * replacements map.
      *
@@ -699,7 +699,7 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Copies the content of the specified input Stream to the specified file.
+     * Copies the content ofMany the specified input Stream to the specified file.
      * While coping token ${key} are replaced by the value found in the
      * specified replacements map.
      *
@@ -773,7 +773,7 @@ public final class JkUtilsFile {
         public FilePath relativeTo(FilePath otherFolder) {
             final FilePath common = this.common(otherFolder);
 
-            // this path is a sub past of the other
+            // this path is a sub past ofMany the other
             if (common.equals(otherFolder)) {
                 List<String> result = new ArrayList<>(this.elements);
                 result = result.subList(common.elements.size(), this.elements.size());

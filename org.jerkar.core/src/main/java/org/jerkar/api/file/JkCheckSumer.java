@@ -19,7 +19,7 @@ import java.nio.file.Path;
 public final class JkCheckSumer {
 
     /**
-     * Creates an instance of {@link JkCheckSumer} wrapping the specified
+     * Creates an instance ofMany {@link JkCheckSumer} wrapping the specified
      * file.
      */
     public static JkCheckSumer of(Path file) {

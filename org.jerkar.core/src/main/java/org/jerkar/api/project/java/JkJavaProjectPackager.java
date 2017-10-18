@@ -10,7 +10,7 @@ import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJarMaker;
 
 /**
- * Creates jar and others elements of a java project.
+ * Creates jar and others elements ofMany a java project.
  */
 public final class JkJavaProjectPackager {
 
@@ -34,11 +34,11 @@ public final class JkJavaProjectPackager {
      * @param classifier Can be <code>null</code>, id so the fat jar will stands for the main artifact file.
      */
     public Path fatJar(String classifier) {
-        JkClasspath classpath = JkClasspath.ofPaths(project.runtimeDependencies(project.mainArtifactFileId()).entries());
+        JkClasspath classpath = JkClasspath.ofMany(project.runtimeDependencies(project.mainArtifactFileId()).entries());
         JkArtifactFileId artifactFileId = JkArtifactFileId.of(classifier, "jar");
         Path result = project.artifactPath(artifactFileId);
         JkJarMaker.fatJar(result, project.getManifest(), project.getOutLayout().classDir(),
-                project.getExtraFilesToIncludeInJar(), classpath.entries());
+                project.getExtraFilesToIncludeInJar(), classpath);
         return result;
     }
 

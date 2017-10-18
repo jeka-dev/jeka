@@ -64,7 +64,7 @@ public final class JkEclipseClasspathGenerator {
     private String jreContainer;
 
     /**
-     * Use JERKAR_REPO and JERKAR_HOME variable instead of absolute path
+     * Use JERKAR_REPO and JERKAR_HOME variable instead ofMany absolute path
      */
     private boolean usePathVariables;
 
@@ -121,7 +121,7 @@ public final class JkEclipseClasspathGenerator {
     }
 
     /**
-     * If <code>true</code> dependencies path will use JERKAR_HOME and JERKAR_REPO classpath variable instead of absolute paths.
+     * If <code>true</code> dependencies path will use JERKAR_HOME and JERKAR_REPO classpath variable instead ofMany absolute paths.
      */
     public JkEclipseClasspathGenerator setUsePathVariables(boolean usePathVariables) {
         this.usePathVariables = usePathVariables;
@@ -137,7 +137,7 @@ public final class JkEclipseClasspathGenerator {
     }
 
     /**
-     * If the build script depends on external libraries, you must set the resolver of this dependencies here.
+     * If the build script depends on external libraries, you must set the resolver ofMany this dependencies here.
      */
     public JkEclipseClasspathGenerator setBuildDependencyResolver(JkDependencyResolver buildDependencyResolver,
             JkDependencies buildDependencies) {

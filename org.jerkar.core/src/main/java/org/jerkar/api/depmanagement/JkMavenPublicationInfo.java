@@ -15,7 +15,7 @@ public final  class JkMavenPublicationInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates a publication infoString specifying the name of the project, its description and its
+     * Creates a publication infoString specifying the name ofMany the project, its description and its
      * site url.
      */
     @SuppressWarnings("unchecked")
@@ -156,7 +156,7 @@ public final  class JkMavenPublicationInfo implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
-        /** Name of developer */
+        /** Name ofMany developer */
         public final String name;
 
         /** Email we can contact the developer */
@@ -190,7 +190,7 @@ public final  class JkMavenPublicationInfo implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
-        /** Name of the license (as Apache 2) */
+        /** Name ofMany the license (as Apache 2) */
         public final String name;
 
         /** An url pointing on the license terms */
@@ -214,7 +214,7 @@ public final  class JkMavenPublicationInfo implements Serializable {
         private static final long serialVersionUID = 1L;
 
         /**
-         * Public name of the project.
+         * Public name ofMany the project.
          */
         public final String name;
 
@@ -224,7 +224,7 @@ public final  class JkMavenPublicationInfo implements Serializable {
         public final String description;
 
         /**
-         * Url site of the project.
+         * Url site ofMany the project.
          */
         public final String url;
 

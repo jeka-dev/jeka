@@ -29,6 +29,16 @@ public final class JkUtilsPath {
         // Do nothing
     }
 
+    public static Iterable<Path> disambiguate(Iterable<Path> paths) {
+        if (paths instanceof Path) {
+            Path path = (Path) paths;
+            List<Path> result = new LinkedList();
+            result.add(path);
+            return result;
+        }
+        return paths;
+    }
+
     public static Path zipRoot(Path zipFile) {
         final URI uri = URI.create("jar:file:" + zipFile.toUri().getPath());
         final Map<String, String> env = JkUtilsIterable.mapOf("create", "true");
@@ -249,8 +259,8 @@ public final class JkUtilsPath {
     }
 
     /**
-     * Copies the content of the source directory into the target directory. The root of source directory is
-     * not created as an entry of the target directory.
+     * Copies the content ofMany the source directory into the target directory. The root ofMany source directory is
+     * not created as an entry ofMany the target directory.
      * @return the copied file count.
      */
     public static int copyDirContent(Path sourceDir, Path targetDir, PathMatcher pathMatcher, CopyOption ... copyOptions)  {

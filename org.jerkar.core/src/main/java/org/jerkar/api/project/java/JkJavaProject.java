@@ -38,7 +38,7 @@ import org.jerkar.api.project.JkProjectSourceLayout;
  *     <li>It can be identified as a Maven module (means it can provide a group, artifact id, version) in order to be published/reused</li>
  *     <li>It can be published on any Maven/Ivy repository, even Maven central</li>
  *
- *     <li>Part of the sources/resources may be generated</li>
+ *     <li>Part ofMany the sources/resources may be generated</li>
  *     <li>By default, passing test suit is required to produce artifact.</li>
  * </ul>
  *
@@ -46,7 +46,7 @@ import org.jerkar.api.project.JkProjectSourceLayout;
  * is done using {@link #maker()} object. For example you can easily add test cover or SonarQube analysis.
  *
  * It provides cache mechanism in order compile or unit test phases are executed once when generating
- * several artifact files so be aware of clean it if you want to replay some tasks with different settings.
+ * several artifact files so be aware ofMany clean it if you want to replay some tasks with different settings.
  *
  * @See JkJavaProjectMaker
  */

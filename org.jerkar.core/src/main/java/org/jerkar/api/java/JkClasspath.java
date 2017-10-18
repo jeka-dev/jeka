@@ -16,11 +16,12 @@ import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsZip;
 
 /**
- * A sequence of file to be used as a <code>class path</code>.<br/>
+ * A sequence ofMany file to be used as a <code>class path</code>.<br/>
  * Each file is called an <code>entry</code>.<br/>
  * Each entry is supposed to be either a <code>jar</code> file either a
  * <code>folder</code>.<br/>
@@ -29,36 +30,33 @@ import org.jerkar.api.utils.JkUtilsZip;
  *
  * @author Djeang
  */
-public final class JkClasspath {
+public final class JkClasspath implements Iterable<Path> {
 
     private static final String WILD_CARD = "*";
 
     private static final String PATH_SEPARATOR = System.getProperty("path.separator");
 
     private final List<Path> entries;
+    
+    // ------------------- constructor && factory methods
 
-    private JkClasspath(Collection<Path> entries) {
+    private JkClasspath(Iterable<Path> entries) {
         this.entries = Collections.unmodifiableList(resolveWildCard(entries));
     }
 
     /**
      * Creates a <code>JkClasspath</code> form specified file entries.
      */
-    public static JkClasspath of(Collection<Path> entries) {
-        return new JkClasspath(entries);
+    public static JkClasspath ofMany(Iterable<Path> entries) {
+        return new JkClasspath(JkUtilsPath.disambiguate(entries));
     }
 
     /**
      * Creates a <code>JkClasspath</code> form specified file entries.
      */
-    public static JkClasspath ofPaths(Collection<Path> entries) {
-        return new JkClasspath(entries);
+    public static JkClasspath of(Path ... paths) {
+        return ofMany(Arrays.asList(paths));
     }
-
-    public static JkClasspath ofPath(Path ... paths) {
-        return ofPaths(Arrays.asList(paths));
-    }
-
 
     /**
      * Returns the current claaspath as given by
@@ -71,27 +69,16 @@ public final class JkClasspath {
         for (final String classpathEntry : classpathEntries) {
             files.addAll(resolveWildCard(classpathEntry));
         }
-        return JkClasspath.of(files);
+        return JkClasspath.ofMany(files);
     }
+    
+    // --------------------------------- Iterate -----------------------------
 
     /**
      * Short hand to create a {@link JkPathSequence} from this {@link JkClasspath}.
      */
     public JkPathSequence asPath() {
-        return JkPathSequence.of(this.entries);
-    }
-
-    /**
-     * Throws an {@link IllegalStateException} if one of the entries making of
-     * this classloader does not exist.
-     */
-    public JkClasspath assertAllEntriesExist() {
-        for (final Path file : entries) {
-            if (!Files.exists(file)) {
-                throw new IllegalStateException("File " + file + " does not exist.");
-            }
-        }
-        return this;
+        return JkPathSequence.ofMany(this.entries);
     }
 
     /**
@@ -101,100 +88,30 @@ public final class JkClasspath {
         return entries;
     }
 
-    /**
-     * Short hand for <code>entries().isEmpty()</code>.
-     */
-    public boolean isEmpty() {
-        return entries.isEmpty();
-    }
-
-    /**
-     * Returns a <code>JkClasspath</code> made of, in the order, the specified
-     * entries plus the entries of this one.
-     */
-    @SuppressWarnings("unchecked")
-    public JkClasspath andHeadPath(Collection<Path> otherEntries) {
-        LinkedList<Path> paths = new LinkedList<>(otherEntries);
-        paths.addAll(this.entries);
-        return new JkClasspath(paths);
-    }
-
-
-    /**
-     * Returns a <code>JkClasspath</code> made of, in the order, the entries of
-     * this one plus the specified ones.
-     */
-    public JkClasspath and(Collection<Path> otherFiles) {
-        List<Path> paths = new LinkedList<>(this.entries);
-        paths.addAll(otherFiles);
-        return new JkClasspath(paths);
-    }
-
-    public JkClasspath and(Path ... paths) {
-        return and(Arrays.asList(paths));
-    }
-
     @Override
-    public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        for (final Iterator<Path> it = this.entries.iterator(); it.hasNext();) {
-            builder.append(it.next().toAbsolutePath().toString());
-            if (it.hasNext()) {
-                builder.append(PATH_SEPARATOR);
-            }
-        }
-        return builder.toString();
+    public Iterator<Path> iterator() {
+        return entries.iterator();
     }
 
-    private static List<Path> resolveWildCard(Collection<Path> files) {
-        final LinkedHashSet<Path> result = new LinkedHashSet<>();
-        for (final Path file : files) {
-            if (file.getFileName().toString().equals(WILD_CARD)) {
-                final Path parent = file.getParent();
-                if (!Files.exists(parent)) {
-                    JkLog.trace("File " + parent
-                    + " does not exist : classpath entry " + file
-                    + " will be ignored.");
-                } else {
-                    result.addAll(JkFileTree.of(parent).include("*.jar").files());
-                }
-            } else if (!Files.exists(file)) {
-                JkLog.trace("File " + file + " does not exist : classpath entry "
-                        + file + " will be ignored.");
-            } else if (Files.isRegularFile(file)) {
-                if (!JkUtilsString.endsWithAny(file.getFileName().toString().toLowerCase(), ".jar", ".zip")) {
-                    throw new IllegalArgumentException("Classpath file element "
-                            + file.toAbsolutePath().toString()
-                            + " is invalid. It must be either a folder either a jar or zip file.");
-                }
-                result.add(file);
-            } else {
-                result.add(file);
+    /**
+     * Returns this classpath as an array ofMany URL.
+     */
+    public URL[] asArrayOfUrl() {
+        final URL[] result = new URL[this.entries.size()];
+        int i = 0;
+        for (final Path file : this.entries) {
+            try {
+                result[i] = file.toUri().toURL();
+            } catch (MalformedURLException e) {
+                throw new IllegalStateException(file + " can't be transformed to url", e);
             }
-        }
-        return new ArrayList<>(result);
-    }
-
-    private static List<Path> resolveWildCard(String candidatePath) {
-        List<Path> result = new LinkedList<>();
-        if (candidatePath.endsWith(WILD_CARD)) {
-            File file = new File(candidatePath);
-            final Path parent = file.getParentFile().toPath();
-            if (!Files.exists(parent)) {
-                JkLog.trace("File " + parent
-                        + " does not exist : classpath entry " + file
-                        + " will be ignored.");
-            } else {
-                result.addAll(JkFileTree.of(parent).include("*.jar").files());
-            }
-        } else {
-            result.add(Paths.get(candidatePath));
+            i++;
         }
         return result;
     }
 
     /**
-     * Returns the first entry of this <code>classpath</code> containing the
+     * Returns the first entry ofMany this <code>classpath</code> containing the
      * given class.
      */
     public Path getEntryContainingClass(String className) {
@@ -241,25 +158,127 @@ public final class JkClasspath {
         return result;
     }
 
-    static String toFilePath(String className) {
-        return className.replace('.', '/').concat(".class");
+   // ------------------------------ wither, adder --------------------------------------------
+
+    /**
+     * Returns a <code>JkClasspath</code> made ofMany, in the order, the specified
+     * entries plus the entries ofMany this one.
+     */
+    @SuppressWarnings("unchecked")
+    public JkClasspath andManyFirst(Iterable<Path> otherEntries) {
+        Iterable<Path> paths = JkUtilsPath.disambiguate(otherEntries);
+        final LinkedList<Path> list = new LinkedList<>();
+        paths.forEach(path -> list.add(path));
+        list.addAll(this.entries);
+        return new JkClasspath(list);
     }
 
     /**
-     * Returns this classpath as an array of URL.
+     * Returns a <code>JkClasspath</code> made ofMany, in the order, the entries ofMany
+     * this one plus the specified ones.
      */
-    public URL[] asArrayOfUrl() {
-        final URL[] result = new URL[this.entries.size()];
-        int i = 0;
-        for (final Path file : this.entries) {
-            try {
-                result[i] = file.toUri().toURL();
-            } catch (MalformedURLException e) {
-                throw new IllegalStateException(file + " can't be transformed to url", e);
+    public JkClasspath andMany(Iterable<Path> otherEntries) {
+        Iterable<Path> paths = JkUtilsPath.disambiguate(otherEntries);
+        final List<Path> list = new LinkedList<>(this.entries);
+        paths.forEach(path -> list.add(path));
+        return new JkClasspath(list);
+    }
+
+    /**
+     * See {@link #andMany(Iterable)}
+     */
+    public JkClasspath and(Path ... paths) {
+        return andMany(Arrays.asList(paths));
+    }
+
+    /**
+     * See {@link #andManyFirst(Iterable)}
+     */
+    public JkClasspath andFirst(Path ... paths) {
+        return andMany(Arrays.asList(paths));
+    }
+    
+    // ------------------------- canonical methods --------------------------------------
+    
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        for (final Iterator<Path> it = this.entries.iterator(); it.hasNext();) {
+            builder.append(it.next().toAbsolutePath().toString());
+            if (it.hasNext()) {
+                builder.append(PATH_SEPARATOR);
             }
-            i++;
+        }
+        return builder.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JkClasspath classpath = (JkClasspath) o;
+
+        return entries.equals(classpath.entries);
+    }
+
+    @Override
+    public int hashCode() {
+        return entries.hashCode();
+    }
+    
+    // ----------------- privates 
+
+    private static List<Path> resolveWildCard(Iterable<Path> files) {
+        final LinkedHashSet<Path> result = new LinkedHashSet<>();
+        for (final Path file : files) {
+            if (file.getFileName().toString().equals(WILD_CARD)) {
+                final Path parent = file.getParent();
+                if (!Files.exists(parent)) {
+                    JkLog.trace("File " + parent
+                            + " does not exist : classpath entry " + file
+                            + " will be ignored.");
+                } else {
+                    result.addAll(JkFileTree.of(parent).include("*.jar").files());
+                }
+            } else if (!Files.exists(file)) {
+                JkLog.trace("File " + file + " does not exist : classpath entry "
+                        + file + " will be ignored.");
+            } else if (Files.isRegularFile(file)) {
+                if (!JkUtilsString.endsWithAny(file.getFileName().toString().toLowerCase(), ".jar", ".zip")) {
+                    throw new IllegalArgumentException("Classpath file element "
+                            + file.toAbsolutePath().toString()
+                            + " is invalid. It must be either a folder either a jar or zip file.");
+                }
+                result.add(file);
+            } else {
+                result.add(file);
+            }
+        }
+        return new ArrayList<>(result);
+    }
+
+    private static List<Path> resolveWildCard(String candidatePath) {
+        List<Path> result = new LinkedList<>();
+        if (candidatePath.endsWith(WILD_CARD)) {
+            File file = new File(candidatePath);
+            final Path parent = file.getParentFile().toPath();
+            if (!Files.exists(parent)) {
+                JkLog.trace("File " + parent
+                        + " does not exist : classpath entry " + file
+                        + " will be ignored.");
+            } else {
+                result.addAll(JkFileTree.of(parent).include("*.jar").files());
+            }
+        } else {
+            result.add(Paths.get(candidatePath));
         }
         return result;
     }
+
+    private static String toFilePath(String className) {
+        return className.replace('.', '/').concat(".class");
+    }
+
 
 }

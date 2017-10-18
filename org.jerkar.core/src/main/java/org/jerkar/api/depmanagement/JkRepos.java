@@ -12,7 +12,7 @@ import java.util.List;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
- * A set of {@link JkRepo}
+ * A set ofMany {@link JkRepo}
  *
  * @author Jerome Angibaud
  */

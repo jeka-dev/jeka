@@ -87,7 +87,7 @@ public final class JkVersionProvider implements Serializable {
     }
 
     /**
-     * Returns a {@link JkVersionProvider} that is a union of this provider and the specified one.
+     * Returns a {@link JkVersionProvider} that is a union ofMany this provider and the specified one.
      */
     public JkVersionProvider and(JkVersionProvider other) {
         final Map<JkModuleId, JkVersion> newMap = new HashMap<>(this.map);
@@ -96,7 +96,7 @@ public final class JkVersionProvider implements Serializable {
     }
 
     /**
-     * Returns a {@link JkVersionProvider} that is the union of this provider and the specified one.
+     * Returns a {@link JkVersionProvider} that is the union ofMany this provider and the specified one.
      */
     public JkVersionProvider and(JkModuleId moduleId, JkVersion version) {
         final Map<JkModuleId, JkVersion> newMap = new HashMap<>(this.map);

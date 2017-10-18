@@ -33,7 +33,7 @@ public final class JkDepExclude implements Serializable {
     }
 
     /**
-     * Creates an exclusion of the specified module.
+     * Creates an exclusion ofMany the specified module.
      */
     @SuppressWarnings("unchecked")
     public static JkDepExclude of(JkModuleId moduleId) {
@@ -41,14 +41,14 @@ public final class JkDepExclude implements Serializable {
     }
 
     /**
-     * Creates an exclusion of the specified module.
+     * Creates an exclusion ofMany the specified module.
      */
     public static JkDepExclude of(String group, String name) {
         return of(JkModuleId.of(group, name));
     }
 
     /**
-     * Creates an exclusion of the specified module.
+     * Creates an exclusion ofMany the specified module.
      */
     public static JkDepExclude of(String groupAndName) {
         return of(JkModuleId.of(groupAndName));
@@ -75,7 +75,7 @@ public final class JkDepExclude implements Serializable {
     /**
      * Returns a exclusion identical to this one but narrowed to the specified scopes.
      * When some scopes are defined, the exclusion is effective only if the dependency
-     * likely to hold the module to exclude is declared with one of the specified scopes.
+     * likely to hold the module to exclude is declared with one ofMany the specified scopes.
      */
     public JkDepExclude scopes(JkScope... scopes) {
         return new JkDepExclude(moduleId, type, ext, JkUtilsIterable.setOf(scopes));
@@ -89,7 +89,7 @@ public final class JkDepExclude implements Serializable {
     }
 
     /**
-     * Returns the type of the artifact file to exclude.
+     * Returns the type ofMany the artifact file to exclude.
      * @see #type(String)
      */
     public String type() {

@@ -61,7 +61,7 @@ public class JkImlGeneratorTest {
         desktopProject.setDependencies(deps);
         desktopProject.makeAllArtifactFiles();
 
-        JkFileTree.of(top).deleteAll();
+        JkFileTree.of(top).deleteContent();
     }
 
     private static File unzipToDir(String zipName) {

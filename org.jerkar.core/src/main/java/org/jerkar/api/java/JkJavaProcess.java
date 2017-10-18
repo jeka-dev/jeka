@@ -69,7 +69,7 @@ public final class JkJavaProcess {
      */
     @SuppressWarnings("unchecked")
     public static JkJavaProcess ofJavaHome(Path javaDir) {
-        return new JkJavaProcess(javaDir, Collections.EMPTY_MAP, JkClasspath.ofPath(),
+        return new JkJavaProcess(javaDir, Collections.EMPTY_MAP, JkClasspath.of(),
                 Collections.EMPTY_LIST, Collections.EMPTY_LIST, null, Collections.EMPTY_MAP);
     }
 
@@ -133,7 +133,7 @@ public final class JkJavaProcess {
 
     /**
      * Takes the specified command line as is and add it to the process command
-     * line. Example of command line is <i>-Xms2G -Xmx2G</i>.
+     * line. Example ofMany command line is <i>-Xms2G -Xmx2G</i>.
      */
     public JkJavaProcess andCommandLine(String commandLine) {
         if (JkUtilsString.isBlank(commandLine)) {
@@ -155,11 +155,11 @@ public final class JkJavaProcess {
      * Returns a {@link JkJavaProcess} identical to this one but using the specified
      * classpath.
      */
-    public JkJavaProcess withClasspath(Collection<Path> classpath) {
+    public JkJavaProcess withClasspaths(Iterable<Path> classpath) {
         if (classpath == null) {
             throw new IllegalArgumentException("Classpath can't be null.");
         }
-        final JkClasspath jkClasspath = JkClasspath.ofPaths(classpath);
+        final JkClasspath jkClasspath = JkClasspath.ofMany(classpath);
         return new JkJavaProcess(this.javaDir, this.sytemProperties, jkClasspath, this.agents,
                 this.options, this.workingDir, this.environment);
     }
@@ -169,7 +169,7 @@ public final class JkJavaProcess {
      * classpath.
      */
     public JkJavaProcess withClasspath(Path... files) {
-        return withClasspath(JkClasspath.ofPath(files).entries());
+        return withClasspaths(JkClasspath.of(files).entries());
     }
 
     /**
@@ -177,7 +177,7 @@ public final class JkJavaProcess {
      * classpath with the specified one.
      */
     public JkJavaProcess andClasspath(JkClasspath classpath) {
-        return withClasspath(this.classpath.and(classpath.entries()).entries());
+        return withClasspaths(this.classpath.andMany(classpath.entries()).entries());
     }
 
 
@@ -209,7 +209,7 @@ public final class JkJavaProcess {
 
     private void runClassOrJarSync(String mainClassName, Path jar, String... arguments) {
         JkUtilsAssert.isTrue(jar != null || mainClassName != null,
-                "main class name and jar can't be both null while launching a Java process, please set at least one of them.");
+                "main class name and jar can't be both null while launching a Java process, please set at least one ofMany them.");
         final List<String> command = new LinkedList<>();
         final OptionAndEnv optionAndEnv = optionsAndEnv();
         command.add(runningJavaCommand());
@@ -256,7 +256,7 @@ public final class JkJavaProcess {
     private OptionAndEnv optionsAndEnv() {
         final List<String> options = new LinkedList<>();
         final Map<String, String> env = new HashMap<>();
-        if (classpath != null && !classpath.isEmpty()) {
+        if (classpath != null && !classpath.entries().isEmpty()) {
             final String classpathString = classpath.toString();
             if (JkUtilsSystem.IS_WINDOWS && classpathString.length() > 7500) {
                 JkLog.warn("classpath too long, classpath will be passed using CLASSPATH env variable.");
@@ -309,7 +309,7 @@ public final class JkJavaProcess {
     }
 
     /**
-     * Returns the classpth of this {@link JkJavaProcess}.
+     * Returns the classpth ofMany this {@link JkJavaProcess}.
      * @return
      */
     public JkClasspath classpath() {

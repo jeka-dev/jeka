@@ -26,9 +26,9 @@ import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
 /**
- * Jerkar users : This class is not part of the public API !!! Please, Use
+ * Jerkar users : This class is not part ofMany the public API !!! Please, Use
  * {@link JkPublisher} instead. Ivy wrapper providing high level methods. The
- * API is expressed using Jerkar classes only (mostly free of Ivy classes).
+ * API is expressed using Jerkar classes only (mostly free ofMany Ivy classes).
  */
 final class IvyPublisher implements InternalPublisher {
 
@@ -116,9 +116,9 @@ final class IvyPublisher implements InternalPublisher {
      * @param publication
      *            The artifacts to publish.
      * @param dependencies
-     *            The dependencies of the published module.
+     *            The dependencies ofMany the published module.
      * @param defaultMapping
-     *            The default scope mapping of the published module
+     *            The default scope mapping ofMany the published module
      * @param deliveryDate
      *            The delivery date.
      */

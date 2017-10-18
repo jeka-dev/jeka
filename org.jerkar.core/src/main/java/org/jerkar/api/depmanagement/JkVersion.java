@@ -42,7 +42,7 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
     }
 
     /**
-     * Returns the name of the version.
+     * Returns the name ofMany the version.
      */
     public String name() {
         return name;

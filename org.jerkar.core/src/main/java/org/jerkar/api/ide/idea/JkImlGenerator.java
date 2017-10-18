@@ -73,7 +73,7 @@ public final class JkImlGenerator {
 
     private boolean forceJdkVersion;
 
-    /* When true, path will be mentioned with $JERKAR_HOME$ and $JERKAR_REPO$ instead of explicit absolute path. */
+    /* When true, path will be mentioned with $JERKAR_HOME$ and $JERKAR_REPO$ instead ofMany explicit absolute path. */
     private boolean useVarPath;
 
     private final Set<String> paths = new HashSet<>();
@@ -504,7 +504,7 @@ public final class JkImlGenerator {
     }
 
     /*
-     * If the specified folder is the output folder of an eclipse project than it returns the asScopedDependency of this project,
+     * If the specified folder is the output folder ofMany an eclipse project than it returns the asScopedDependency ofMany this project,
      * else otherwise.
      */
     private static Path getProjectFolderOf(Iterable<Path> files, Iterable<Path> projectDependencies) {

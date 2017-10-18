@@ -4,7 +4,7 @@ import java.io.File;
 
 
 /**
- * Not part of the public API.
+ * Not part ofMany the public API.
  */
 
 interface InternalDepResolver {

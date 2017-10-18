@@ -15,7 +15,7 @@ public final class JkUtilsJdk {
     }
 
     /**
-     * Returns the tool library file of the running JDK.
+     * Returns the tool library file ofMany the running JDK.
      */
     public static Path toolsJar() {
         final String jdkLocation = System.getProperty("java.home");
@@ -24,7 +24,7 @@ public final class JkUtilsJdk {
     }
 
     /**
-     * Returns the version of the running JDK.
+     * Returns the version ofMany the running JDK.
      */
     public static String runningJavaVersion() {
         final String fullVersion = System.getProperty("java.version");

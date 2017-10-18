@@ -29,7 +29,7 @@ import org.jerkar.api.utils.JkUtilsString;
  * the Jerkar jar (to not pollute classpath and ease distribution) so want to
  * make as small as possible.
  *
- * To achieve this, we run the needed methods in a classloader keeping track of
+ * To achieve this, we run the needed methods in a classloader keeping track ofMany
  * the really used class then we create a new bouncyCastle lib without the
  * unnecessary classes.
  *

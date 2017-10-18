@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -103,7 +102,7 @@ public class JkEclipseClasspathGeneratorTest {
         final JkComputedDependency baseProjectDep = (JkComputedDependency) coreDeps2.get(0).dependency();
         assertEquals(base, baseProjectDep.ideProjectBaseDir());
 
-        JkFileTree.of(top).deleteAll();
+        JkFileTree.of(top).deleteContent();
     }
 
     private static File unzipToDir(String zipName) {

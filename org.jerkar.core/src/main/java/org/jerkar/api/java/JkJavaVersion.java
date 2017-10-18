@@ -43,7 +43,7 @@ public final class JkJavaVersion {
     }
 
     /**
-     * Returns literal of this version.
+     * Returns literal ofMany this version.
      */
     public String name() {
         return name;

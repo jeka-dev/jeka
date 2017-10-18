@@ -1,4 +1,4 @@
 /**
- * Contains core classes of Jerkar automation tool.
+ * Contains core classes ofMany Jerkar automation tool.
  */
 package org.jerkar.tool;

@@ -24,8 +24,8 @@ import org.jerkar.api.utils.JkUtilsPath;
  * (generally the class folder). It can also proceed to token replacement, i.e
  * replacing strings between <code>${</code> and <code>}</code> by a specified
  * values.<br/>
- * The processor is constructed using a list of <code>JkDirSets</code> and for
- * each of them, we can associate a map of token to replace.<br/>
+ * The processor is constructed using a list ofMany <code>JkDirSets</code> and for
+ * each ofMany them, we can associate a map ofMany token to replace.<br/>
  *
  * @author Jerome Angibaud
  */
@@ -195,7 +195,7 @@ public final class JkResourceProcessor {
         }
 
         /**
-         * Returns a copy of this {@link JkInterpolator} but adding key values
+         * Returns a copy ofMany this {@link JkInterpolator} but adding key values
          * to interpolate
          */
         public JkInterpolator and(String key, String value, String... others) {

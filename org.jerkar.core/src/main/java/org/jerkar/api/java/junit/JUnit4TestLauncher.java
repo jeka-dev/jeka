@@ -30,7 +30,7 @@ class JUnit4TestLauncher {
             args.add(clazz.getName());
         }
         final JkJavaProcess process;
-        process = javaProcess.andClasspath(JkClasspath.ofPath(JkLocator.jerkarJarPath()));
+        process = javaProcess.andClasspath(JkClasspath.of(JkLocator.jerkarJarPath()));
         process.runClassSync(JUnit4TestExecutor.class.getName(), args.toArray(new String[0]));
         return (JkTestSuiteResult) JkUtilsIO.deserialize(file);
     }

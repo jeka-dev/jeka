@@ -21,7 +21,7 @@ import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
 /*
- * Without doubt, the most crappy code of this project.
+ * Without doubt, the most crappy code ofMany this project.
  * The important point is that we achieve parsing without using any dependencies : just the JDK.
  *
  * @author Jerome Angibaud
