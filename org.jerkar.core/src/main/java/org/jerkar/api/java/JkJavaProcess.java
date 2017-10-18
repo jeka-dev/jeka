@@ -169,7 +169,7 @@ public final class JkJavaProcess {
      * classpath.
      */
     public JkJavaProcess withClasspath(Path... files) {
-        return withClasspaths(JkClasspath.of(files).entries());
+        return withClasspaths(JkClasspath.of(files));
     }
 
     /**
@@ -177,7 +177,7 @@ public final class JkJavaProcess {
      * classpath with the specified one.
      */
     public JkJavaProcess andClasspath(JkClasspath classpath) {
-        return withClasspaths(this.classpath.andMany(classpath.entries()).entries());
+        return withClasspaths(this.classpath.andMany(classpath));
     }
 
 
