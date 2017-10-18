@@ -19,7 +19,7 @@ public final class JkPathMatcher implements PathMatcher, Predicate<Path> {
         return new JkPathMatcher(null, path -> !Files.isDirectory(path, linkOptions));
     }
 
-    private static JkPathMatcher include(String ... globPattern) {
+    public static JkPathMatcher include(String ... globPattern) {
         return include(Arrays.asList(globPattern));
     }
 
@@ -57,7 +57,9 @@ public final class JkPathMatcher implements PathMatcher, Predicate<Path> {
 
     @Override
     public boolean matches(Path path) {
-        return linked != null ? linked.matches(path) && matcher.matches(path) : matcher.matches(path);
+        Path normalizedPath = path.normalize();
+        return linked != null ? linked.matches(normalizedPath) && matcher.matches(normalizedPath)
+                : matcher.matches(normalizedPath);
     }
 
     public List<String> getIncludePatterns() {
@@ -94,7 +96,7 @@ public final class JkPathMatcher implements PathMatcher, Predicate<Path> {
     }
 
     private static PathMatcher globMatcher(String pattern) {
-        return FileSystems.getDefault().getPathMatcher("glob: " + pattern);
+        return FileSystems.getDefault().getPathMatcher("glob:" + pattern);
     }
 
 
