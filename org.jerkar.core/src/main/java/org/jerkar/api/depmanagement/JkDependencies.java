@@ -666,18 +666,18 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         /**
          * Add the specified files as dependencies.
          */
-        public JkFluentScopeableBuilder onFiles(Collection<Path> files, JkScope... scopes) {
-            final JkFileSystemDependency dependency = JkFileSystemDependency.ofPaths(files);
+        public JkFluentScopeableBuilder onFiles(Iterable<Path> files, JkScope... scopes) {
+            final JkFileSystemDependency dependency = JkFileSystemDependency.ofPaths(JkUtilsPath.disambiguate(files));
             return on(dependency, scopes);
         }
 
         /**
-         * Same as {@link #onFiles(Collection, JkScope...)} )} but effective only if the
+         * Same as {@link #onFiles(Iterable, JkScope...)} )} but effective only if the
          * specified condition is true.
          */
-        public JkFluentScopeableBuilder onFilesIf(boolean condition, Collection<Path> files, JkScope... scopes) {
+        public JkFluentScopeableBuilder onFilesIf(boolean condition, Iterable<Path> files, JkScope... scopes) {
             if (condition) {
-                return onFiles(files, scopes);
+                return onFiles(JkUtilsPath.disambiguate(files), scopes);
             }
             if (this instanceof JkFluentScopeableBuilder) {
                 return (JkFluentScopeableBuilder) this;

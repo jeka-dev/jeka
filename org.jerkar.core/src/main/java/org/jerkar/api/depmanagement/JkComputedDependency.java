@@ -1,16 +1,17 @@
 package org.jerkar.api.depmanagement;
 
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.function.Supplier;
-
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.function.Supplier;
 
 
 /**
@@ -29,7 +30,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
  */
 public class JkComputedDependency implements JkFileDependency {
 
-    private static final Supplier<Collection<Path>> EMPTY_SUPPLIER = LinkedList::new;
+    private static final Supplier<Iterable<Path>> EMPTY_SUPPLIER = LinkedList::new;
 
     /**
      * Creates a computed dependency to the specified files and {@link JkProcess} to run for
@@ -68,7 +69,7 @@ public class JkComputedDependency implements JkFileDependency {
      */
     public static final JkComputedDependency of(Iterable<Path> files, final JkJavaProcess process,
             final String className, final String... args) {
-        final List<Path> fileSet = JkUtilsIterable.listWithoutDuplicateOf(files);
+        final List<Path> fileSet = JkUtilsIterable.listWithoutDuplicateOf(JkUtilsPath.disambiguate(files));
         final Runnable runnable = () -> process.runClassSync(className, args);
         return new JkComputedDependency(runnable, null, fileSet, EMPTY_SUPPLIER);
     }
@@ -86,9 +87,9 @@ public class JkComputedDependency implements JkFileDependency {
 
     private final Runnable runnable;
 
-    private final List<Path> files;
+    private final Iterable<Path> files;
 
-    private final Supplier<Collection<Path>> extraFileSupplier;
+    private final Supplier<Iterable<Path>> extraFileSupplier;
 
     private final Path ideProjectBaseDir; // Helps to generate ide metadata
 
@@ -96,7 +97,7 @@ public class JkComputedDependency implements JkFileDependency {
      * Constructs a computed dependency to the specified files and the specified {@link Runnable} to run for
      * generating them.
      */
-    protected JkComputedDependency(Runnable runnable, Path ideProjectBaseDir, List<Path> files, Supplier<Collection<Path>> extraFileSupplier)  {
+    protected JkComputedDependency(Runnable runnable, Path ideProjectBaseDir, Iterable<Path> files, Supplier<Iterable<Path>> extraFileSupplier)  {
         super();
         this.runnable = runnable;
         this.files = files;
@@ -143,8 +144,9 @@ public class JkComputedDependency implements JkFileDependency {
         if (!missingFiles.isEmpty()) {
             throw new IllegalStateException(this + " didn't generate " + missingFiles);
         }
-        List<Path> result = new LinkedList<>(files);
-        result.addAll(extraFileSupplier.get());
+        List<Path> result = new LinkedList<>();
+        files.forEach(path -> result.add(path));
+        extraFileSupplier.get().forEach(path -> result.add(path));
         return result;
     }
 

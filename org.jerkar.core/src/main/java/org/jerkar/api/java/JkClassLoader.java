@@ -554,8 +554,8 @@ public final class JkClassLoader {
     /**
      * Same as {@link #addEntry(Path)} but for several entries.
      */
-    public void addEntries(Collection<Path> entries) {
-        for (final Path file : entries) {
+    public void addEntries(Iterable<Path> entries) {
+        for (final Path file : JkUtilsPath.disambiguate(entries)) {
             addEntry(file);
         }
     }

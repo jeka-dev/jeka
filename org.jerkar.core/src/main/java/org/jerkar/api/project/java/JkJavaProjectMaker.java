@@ -168,7 +168,7 @@ public class JkJavaProjectMaker {
         JkJavaCompileSpec result = project.getCompileSpec().copy();
         final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
         return result
-                .setClasspath(classpath.entries())
+                .setClasspath(classpath)
                 .addSources(project.getSourceLayout().sources().files())
                 .addSources(JkFileTree.of(project.getOutLayout().generatedSourceDir()).files())
                 .setOutputDir(project.getOutLayout().classDir());
@@ -222,7 +222,7 @@ public class JkJavaProjectMaker {
     private JkJavaTestSpec testSpec() {
         final JkClasspath classpath = JkClasspath.of(project.getOutLayout().testClassDir())
                 .and(project.getOutLayout().classDir())
-                .andMany(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).entries());
+                .andMany(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
         return JkJavaTestSpec.of(classpath, JkFileTreeSet.of(project.getOutLayout().testClassDir()));
     }
 

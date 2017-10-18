@@ -75,13 +75,6 @@ public final class JkClasspath implements Iterable<Path> {
     // --------------------------------- Iterate -----------------------------
 
     /**
-     * Short hand to create a {@link JkPathSequence} from this {@link JkClasspath}.
-     */
-    public JkPathSequence asPath() {
-        return JkPathSequence.ofMany(this.entries);
-    }
-
-    /**
      * Returns each entries making this <code>classpath</code>.
      */
     public List<Path> entries() {

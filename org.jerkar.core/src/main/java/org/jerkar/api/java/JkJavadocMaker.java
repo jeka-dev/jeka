@@ -118,8 +118,9 @@ public final class JkJavadocMaker {
     /**
      * Returns a {@link JkJavadocMaker} identical to this one but using the specified classpath.
      */
-    public JkJavadocMaker withClasspathPath(Collection<Path> classpath) {
-        return new JkJavadocMaker(srcDirs, doclet, JkUtilsPath.toFiles(classpath), extraArgs, outputDir, zipFile);
+    public JkJavadocMaker withClasspathPath(Iterable<Path> classpath) {
+        return new JkJavadocMaker(srcDirs, doclet, JkUtilsPath.toFiles(JkUtilsPath.disambiguate(classpath)),
+                extraArgs, outputDir, zipFile);
     }
 
     /**

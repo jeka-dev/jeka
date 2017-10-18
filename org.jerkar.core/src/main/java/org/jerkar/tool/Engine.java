@@ -118,7 +118,7 @@ final class Engine {
         if (!init.commandLine().dependencies().isEmpty()) {
             JkLog.startln("Grab dependencies specified in command line");
             final JkPathSequence cmdPath = pathOf(init.commandLine().dependencies());
-            runtimeClasspath = runtimeClasspath.andManyFirst(cmdPath.entries());
+            runtimeClasspath = runtimeClasspath.andManyFirst(cmdPath);
             if (JkLog.verbose()) {
                 JkLog.done("Command line extra path : " + cmdPath);
             } else {
@@ -157,7 +157,7 @@ final class Engine {
 
     private BuildAndPluginDictionnary getBuildInstance(JkInit init, JkPathSequence runtimePath) {
         final JkClassLoader classLoader = JkClassLoader.current();
-        classLoader.addEntries(runtimePath.entries());
+        classLoader.addEntries(runtimePath);
         JkLog.trace("Setting build execution classpath to : " + classLoader.childClasspath());
         final JkBuild build = resolver.resolve(init.buildClassHint());
         if (build == null) {
@@ -188,9 +188,9 @@ final class Engine {
 
         return JkDependencies.builder().on(buildDependencies
                 .withDefaultScope(JkScopeMapping.ALL_TO_DEFAULT))
-                .onFiles(localBuildPath().entries())
-                .onFilesIf(devMode, JkClasspath.current().asPath().entries())
-                .onFilesIf(!devMode, jerkarLibs().entries())
+                .onFiles(localBuildPath())
+                .onFilesIf(devMode, JkClasspath.current())
+                .onFilesIf(!devMode, jerkarLibs())
                 .build();
     }
 
@@ -224,7 +224,7 @@ final class Engine {
     }
 
     private void compileBuild(JkPathSequence buildPath) {
-        JkJavaCompileSpec compileSpec = buildCompileSpec().setClasspath(buildPath.entries());
+        JkJavaCompileSpec compileSpec = buildCompileSpec().setClasspath(buildPath);
         JkJavaCompiler.base().compile(compileSpec);
         JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir,
                 StandardCopyOption.REPLACE_EXISTING);
