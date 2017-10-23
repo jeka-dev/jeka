@@ -355,7 +355,7 @@ public final class JkFileTree  {
      * specified <code>antPatterns</code>.
      */
     public JkFileTree exclude(String... antPatterns) {
-        return andFilter(JkPathFilter.exclude(antPatterns));
+        return andMatcher(JkPathMatcher.notIn(antPatterns));
     }
 
     // ------------------------ Misc ---------------------------------------
