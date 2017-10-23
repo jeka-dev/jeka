@@ -13,53 +13,62 @@ import java.util.function.Predicate;
 /**
  * A collection ofMany PathMatcher commonly used.
  */
-public final class JkPathMatcher implements PathMatcher, Predicate<Path> {
+public final class JkPathMatcher implements PathMatcher {
+
+    // --------------------- Factory methods ------------------------------------------------
 
     public static JkPathMatcher noDirectory(LinkOption...linkOptions) {
-        return new JkPathMatcher(null, path -> !Files.isDirectory(path, linkOptions));
+        return new JkPathMatcher(path -> !Files.isDirectory(path, linkOptions));
     }
 
-    public static JkPathMatcher include(String ... globPattern) {
-        return include(Arrays.asList(globPattern));
+    public static JkPathMatcher in(String ... globPattern) {
+        return in(Arrays.asList(globPattern));
     }
 
-    public static JkPathMatcher include(Iterable<String> globPatterns) {
-        JkPathMatcher result = null;
+    public static JkPathMatcher in(Iterable<String> globPatterns) {
+        PathMatcher result = empty();
         for (final String pattern : globPatterns) {
-            result = new JkPathMatcher(result, globMatcher(pattern));
+            result = new OrMatcher(result, globMatcher(pattern));
         }
-        return result != null ? result : JkPathMatcher.of(path -> true);
+        return new JkPathMatcher(result);
+    }
+
+    public static JkPathMatcher in(PathMatcher matcher) {
+        return new JkPathMatcher(matcher);
+    }
+
+    public static JkPathMatcher notIn(String ... globPatterns) {
+        return notIn(Arrays.asList(globPatterns));
+    }
+
+    public static JkPathMatcher notIn(Iterable<String> globPatterns) {
+        PathMatcher result = path -> true;
+        for (final String pattern : globPatterns) {
+            result = new AndMatcher(result, path -> !globMatcher(pattern).matches(path));
+        }
+        return new JkPathMatcher(result);
     }
 
 
-    public static JkPathMatcher exclude(String globPattern) {
-        final PathMatcher pathMatcher = globMatcher(globPattern);
-        return new JkPathMatcher(null, new Reverse(pathMatcher));
-    }
+    // ---------------------------- fields and constructors
 
-    public static JkPathMatcher of(Predicate<Path> predicate) {
-        return new JkPathMatcher(null, path -> predicate.test(path));
-    }
+
 
     private final PathMatcher matcher;
 
-    private final PathMatcher linked;
-
-    private JkPathMatcher(PathMatcher linked, PathMatcher matcher) {
-        this.linked = linked;
+    private JkPathMatcher(PathMatcher matcher) {
         this.matcher = matcher;
     }
 
-    @Override
-    public final boolean test(Path path) {
-        return matches(path);
+    public Predicate<Path> asPredicate() {
+        return path -> matcher.matches(path);
     }
+
+    // ------------------------- check methods ---------------------------
 
     @Override
     public boolean matches(Path path) {
-        Path normalizedPath = path.normalize();
-        return linked != null ? linked.matches(normalizedPath) && matcher.matches(normalizedPath)
-                : matcher.matches(normalizedPath);
+        return matcher.matches(path);
     }
 
     public List<String> getIncludePatterns() {
@@ -72,12 +81,18 @@ public final class JkPathMatcher implements PathMatcher, Predicate<Path> {
         return result; // TODO
     }
 
-    public JkPathMatcher and(PathMatcher matcher) {
-        return new JkPathMatcher(this, matcher);
+    // ---------------------------- adders ---------------------------------------
+
+    public JkPathMatcher and(PathMatcher other) {
+        return new JkPathMatcher(new AndMatcher(this.matcher, other));
     }
 
-    public JkPathMatcher andExclude(String pattern) {
-        return this.and((PathMatcher) JkPathMatcher.exclude(pattern));
+    public JkPathMatcher or(PathMatcher other) {
+        return new JkPathMatcher(new AndMatcher(this.matcher, other));
+    }
+
+    public JkPathMatcher andNot(String pattern) {
+        return this.and(JkPathMatcher.notIn(pattern));
     }
 
     private static class Reverse implements PathMatcher  {
@@ -95,11 +110,46 @@ public final class JkPathMatcher implements PathMatcher, Predicate<Path> {
 
     }
 
+    // --------------------------------------------- matcher
+
+    private static PathMatcher empty() {
+        return path -> false;
+    }
+
     private static PathMatcher globMatcher(String pattern) {
         return FileSystems.getDefault().getPathMatcher("glob:" + pattern);
     }
 
+    private static class AndMatcher implements PathMatcher {
 
+        private final PathMatcher pathMatcher1;
+        private final PathMatcher pathMatcher2;
 
+        public AndMatcher(PathMatcher pathMatcher1, PathMatcher pathMatcher2) {
+            this.pathMatcher1 = pathMatcher1;
+            this.pathMatcher2 = pathMatcher2;
+        }
+
+        @Override
+        public boolean matches(Path path) {
+            return pathMatcher1.matches(path) && pathMatcher2.matches(path);
+        }
+    }
+
+    private static class OrMatcher implements PathMatcher {
+
+        private final PathMatcher pathMatcher1;
+        private final PathMatcher pathMatcher2;
+
+        public OrMatcher(PathMatcher pathMatcher1, PathMatcher pathMatcher2) {
+            this.pathMatcher1 = pathMatcher1;
+            this.pathMatcher2 = pathMatcher2;
+        }
+
+        @Override
+        public boolean matches(Path path) {
+            return pathMatcher1.matches(path) || pathMatcher2.matches(path);
+        }
+    }
 
 }
