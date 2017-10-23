@@ -24,8 +24,8 @@ public class JkProjectSourceLayout {
     /**
      * Filter to consider as resources everything but java source stuff.
      */
-    public static final PathMatcher JAVA_RESOURCE_MATCHER = JkPathMatcher.exclude("**/*.java")
-            .andExclude("**/package.html").andExclude("**/doc-files");
+    public static final PathMatcher JAVA_RESOURCE_MATCHER = JkPathMatcher.notIn("**/*.java")
+            .andNot("**/package.html").andNot("**/doc-files");
 
     /**
      * Creates a Java project source structure according Maven conventions. It differs from Maven in that

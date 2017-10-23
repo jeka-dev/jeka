@@ -57,7 +57,7 @@ public final class JkFileTree  {
     private final JkPathMatcher filter;
 
     private JkFileTree(Path rootDir, boolean zip) {
-        this(rootDir, JkPathMatcher.of(path -> true), zip);
+        this(rootDir, JkPathMatcher.in(path -> true), zip);
     }
 
     private JkFileTree(Path rootDirOrArchive, JkPathMatcher matcher, boolean zipFile) {
@@ -131,7 +131,7 @@ public final class JkFileTree  {
         if(!exists()) {
             return new LinkedList<Path>().stream();
         }
-        final JkPathMatcher matcher = JkPathMatcher.of(filter);
+        final JkPathMatcher matcher = JkPathMatcher.in(filter);
         return JkUtilsPath.walk(root(), options)
                 .filter(path -> matcher.matches(root().relativize(path))).onClose(() -> rootHolder.closeIfNeeded());
     }
@@ -141,7 +141,7 @@ public final class JkFileTree  {
      */
     public List<Path> relativeFiles() {
         try(Stream<Path> stream = stream()) {
-            return stream.filter(JkPathMatcher.noDirectory()).map(relativePathFunction()).collect(Collectors.toList());
+            return stream.filter(JkPathMatcher.noDirectory().asPredicate()).map(relativePathFunction()).collect(Collectors.toList());
         }
     }
 
@@ -151,7 +151,7 @@ public final class JkFileTree  {
      */
     public List<Path> files() {
         try (Stream<Path> stream = stream()) {
-            return stream.filter(JkPathMatcher.noDirectory()).collect(Collectors.toList());
+            return stream.filter(JkPathMatcher.noDirectory().asPredicate()).collect(Collectors.toList());
         }
     }
 
