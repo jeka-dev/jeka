@@ -61,7 +61,7 @@ final class BuildResolver {
         if (!Files.exists(buildSourceDir)) {
             return false;
         }
-        return JkFileTree.of(buildSourceDir).include("**/*.java").count(0, false) > 0;
+        return JkFileTree.of(buildSourceDir).accept("**.java", "*.java").count(0, false) > 0;
     }
 
     boolean needCompile() {

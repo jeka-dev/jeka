@@ -52,11 +52,11 @@ class DistribAllBuild extends JkBuild {
         Path fat = dist.get(core.project().artifactPath(JkArtifactFileId.of("all", "jar"))
                 .getFileName().toString());
         Files.copy(core.project().mainArtifactPath(), fat, StandardCopyOption.REPLACE_EXISTING);
-        ext.include("**/*.jar").stream().map(path -> JkFileTree.ofZip(path)).forEach(tree -> tree.zipTo(fat));
+        ext.accept("**.jar").stream().map(path -> JkFileTree.ofZip(path)).forEach(tree -> tree.zipTo(fat));
 
         JkLog.info("Create a fat source jar");
         Path fatSource = sourceDir.get("org.jerkar.core-all-sources.jar");
-        sourceDir.include("**.jar", "**.zip").exclude(fatSource.getFileName().toString()).stream()
+        sourceDir.accept("**.jar", "**.zip").exclude(fatSource.getFileName().toString()).stream()
                 .map(path -> JkFileTree.ofZip(path)).forEach(tree -> tree.zipTo(fatSource));
 
         if (javadoc) {

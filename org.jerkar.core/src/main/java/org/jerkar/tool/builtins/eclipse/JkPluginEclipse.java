@@ -84,7 +84,7 @@ public final class JkPluginEclipse implements JkPlugin {
     @JkDoc("Generate Eclipse files on all subfolder ofMany the current directory. Only subfolder having a build/def directory are impacted.")
     public void generateAll(JkBuild build) {
         final Iterable<Path> folders = build.baseTree()
-                .include("**/" + JkConstants.BUILD_DEF_DIR)
+                .accept("**/" + JkConstants.BUILD_DEF_DIR, JkConstants.BUILD_DEF_DIR)
                 .exclude("**/build/output/**")
                 .stream().collect(Collectors.toList());
         for (final Path folder : folders) {

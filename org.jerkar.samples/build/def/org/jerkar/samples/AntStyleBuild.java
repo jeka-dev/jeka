@@ -73,7 +73,7 @@ public class AntStyleBuild extends JkBuild {
         .withReport(JunitReportDetail.FULL)
         .run(JkJavaTestSpec.of(
                 classpath.andMany(jarFile),
-                JkFileTree.of(classDir).include("**/*Test.class") ));
+                JkFileTree.of(classDir).accept("**/*Test.class", "*Test.class") ));
     }
 
     /*

@@ -328,8 +328,13 @@ public final class JkFileTree  {
      * pattern filter. This will include any file matching at least one ofMany the
      * specified <code>antPatterns</code>.
      */
+    @Deprecated
     public JkFileTree include(String... antPatterns) {
         return andFilter(JkPathFilter.include(antPatterns));
+    }
+
+    public JkFileTree accept(String... globPatterns) {
+        return andMatcher(JkPathMatcher.accept(globPatterns));
     }
 
 

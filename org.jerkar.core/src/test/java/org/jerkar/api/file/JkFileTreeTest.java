@@ -32,11 +32,11 @@ public class JkFileTreeTest {
 
         System.out.println(JkFileTree.of(sampleFolder).relativeFiles());
 
-        final JkFileTree subfolderTxt1 = JkFileTree.of(sampleFolder).include("/subfolder/*.txt");
+        final JkFileTree subfolderTxt1 = JkFileTree.of(sampleFolder).accept("subfolder/*.txt");
         assertEquals(1, subfolderTxt1.files().size());
         System.out.println(subfolderTxt1);
 
-        final JkFileTree subfolderTxt2 = JkFileTree.of(sampleFolder).include("subfolder/*.txt");
+        final JkFileTree subfolderTxt2 = JkFileTree.of(sampleFolder).accept("subfolder/*.txt");
         assertEquals(1, subfolderTxt2.files().size());
     }
 

@@ -202,7 +202,7 @@ final class Engine {
         final List<Path>  extraLibs = new LinkedList<>();
         final Path localDeflibDir = this.projectBaseDir.resolve(JkConstants.BUILD_BOOT);
         if (Files.exists(localDeflibDir)) {
-            extraLibs.addAll(JkFileTree.of(localDeflibDir).include("**/*.jar").files());
+            extraLibs.addAll(JkFileTree.of(localDeflibDir).accept("**.jar").files());
         }
         return JkPathSequence.ofMany(extraLibs).withoutDuplicates();
     }
