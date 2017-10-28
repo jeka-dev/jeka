@@ -1,6 +1,5 @@
 package org.jerkar.api.file;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.nio.file.FileSystems;
@@ -15,29 +14,45 @@ import static org.junit.Assert.assertTrue;
 public class JkPathMatcherTest {
 
     @Test
-    public void testDoMatchOk() {
+    public void testAccept() {
         this.testDoMatchOk("foo/bar.txt");
         this.testDoMatchOk("./foo/bar.txt");
 
-        assertTrue(JkPathMatcher.in("**/*.java").matches(Paths.get("foo/subfoo/bar.java")));
-        assertTrue(JkPathMatcher.in("com/**", "com").matches(Paths.get("com")));
-        assertTrue(!JkPathMatcher.in("com/**/*").matches(Paths.get("com")));
-    }
+        assertTrue(JkPathMatcher.accept("**/*.java").matches(Paths.get("foo/subfoo/bar.java")));
+        assertTrue(JkPathMatcher.accept("**.java").matches(Paths.get("Bar.java")));
+        assertTrue(JkPathMatcher.accept("**.java").matches(Paths.get("foo/Bar.java")));
+        assertTrue(JkPathMatcher.accept("*.java").matches(Paths.get("Bar.java")));
+        assertTrue(JkPathMatcher.accept("com/**", "com").matches(Paths.get("com")));
+        assertTrue(!JkPathMatcher.accept("com/**/*").matches(Paths.get("com")));
 
-    @Test
-    public void testNotIn() {
-        assertTrue(JkPathMatcher.notIn("org/**", "com/**").matches(Paths.get("foo/subfoo/bar.java")));
-        assertFalse(JkPathMatcher.notIn("org/**", "com/**").matches(Paths.get("com/subfoo/bar.java")));
-        assertFalse(JkPathMatcher.notIn("org/**", "com/**").matches(Paths.get("org/subfoo/bar.java")));
-    }
-
-    @Test
-    public void testDoMatchNotOk() {
         final String pathString = "foo/bar.txt";
         Path path = Paths.get(pathString);
-        assertTrue(!JkPathMatcher.in("**/*.tx").matches(path));
-        assertTrue(!JkPathMatcher.in("foo/br.txt").matches(path));
-        assertTrue(!JkPathMatcher.in("k*/bar.txt").matches(path));
+        assertTrue(!JkPathMatcher.accept("**/*.tx").matches(path));
+        assertTrue(!JkPathMatcher.accept("foo/br.txt").matches(path));
+        assertTrue(!JkPathMatcher.accept("k*/bar.txt").matches(path));
+        assertTrue(!JkPathMatcher.accept("*.java").matches(Paths.get("foo/Bar.java")));
+    }
+
+    @Test
+    public void testRefuse() {
+
+        assertTrue(JkPathMatcher.refuse("org/**", "com/**").matches(Paths.get("foo/subfoo/bar.java")));
+        assertFalse(JkPathMatcher.refuse("org/**", "com/**").matches(Paths.get("com/subfoo/bar.java")));
+        assertFalse(JkPathMatcher.refuse("org/**", "com/**").matches(Paths.get("org/subfoo/bar.java")));
+
+        assertFalse(JkPathMatcher.refuse("**/_*").matches(Paths.get("foo/subfoo/_Bar.java")));
+        assertFalse(JkPathMatcher.refuse("**/_*", "_*").matches(Paths.get("_Bar.java")));
+    }
+
+    @Test
+    public void testAndRefuse() {
+        assertTrue(JkPathMatcher.accept("**/*.java").andRefuse("**/_*")
+                .matches(Paths.get("foo/subfoo/Bar.java")));
+
+        Path path = Paths.get("C:/samples/sample-dependee/AClassicBuild.java");
+        assertTrue(JkPathMatcher.accept("**/*.java").andRefuse("**/_*").matches(path));
+
+
     }
 
     private void testDoMatchOk(String pathString) {
@@ -47,16 +62,16 @@ public class JkPathMatcherTest {
 
         PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/*.txt");
         assertTrue(matcher.matches(path));
-        assertTrue(pathString, JkPathMatcher.in("**/*.txt").matches(path));
+        assertTrue(pathString, JkPathMatcher.accept("**/*.txt").matches(path));
 
         matcher = FileSystems.getDefault().getPathMatcher("glob:foo/bar.txt");
         assertTrue(pathString , matcher.matches(path));
-        assertTrue(pathString, JkPathMatcher.in("foo/bar.txt").matches(path));
+        assertTrue(pathString, JkPathMatcher.accept("foo/bar.txt").matches(path));
 
-        assertTrue(JkPathMatcher.in("foo/b?r.txt").matches(path));
-        assertTrue(JkPathMatcher.in("f*/bar.txt").matches(path));
-        assertTrue(JkPathMatcher.in("*/bar.txt").matches(path));
-        assertTrue(JkPathMatcher.in("**").matches(path));
+        assertTrue(JkPathMatcher.accept("foo/b?r.txt").matches(path));
+        assertTrue(JkPathMatcher.accept("f*/bar.txt").matches(path));
+        assertTrue(JkPathMatcher.accept("*/bar.txt").matches(path));
+        assertTrue(JkPathMatcher.accept("**").matches(path));
     }
 
 }

@@ -118,7 +118,7 @@ public final class JkFileTreeSet {
     // ------------------------ additional filters -------------------------------------------
 
     /**
-     * Creates a {@link JkFileTree} which is a copy ofMany this {@link JkFileTree}
+     * Creates a {@link JkFileTree} which is a copy of this {@link JkFileTree}
      * augmented with the specified {@link JkPathFilter}
      */
     public JkFileTreeSet andFilter(JkPathFilter filter) {
@@ -130,7 +130,7 @@ public final class JkFileTreeSet {
     }
 
     /**
-     * Creates a {@link JkFileTree} which is a copy ofMany this {@link JkFileTree}
+     * Creates a {@link JkFileTree} which is a copy of this {@link JkFileTree}
      * augmented with the specified {@link JkPathMatcher}
      */
     public JkFileTreeSet andFilter(PathMatcher matcher) {
@@ -193,7 +193,7 @@ public final class JkFileTreeSet {
     public List<Path> rootFiles() {
         final List<Path> result = new LinkedList<>();
         for (final JkFileTree tree : jkFileTrees) {
-            result.add(tree.rootFile());
+            result.add(tree.rootDirOrZipFile());
         }
         return result;
     }

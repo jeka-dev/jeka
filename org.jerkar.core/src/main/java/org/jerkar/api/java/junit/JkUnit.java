@@ -278,7 +278,7 @@ public final class JkUnit {
             JkLog.info(result.toStrings(JkLog.verbose()));
         }
         if (!JkLog.verbose() && result.failureCount() > 0) {
-            JkLog.info("Launch Jerkar in verbose mode to display failure stack traces in console.");
+            JkLog.info("Launch Jerkar in verbose mode to display failure stack traces accept console.");
         }
         if (reportDetail.equals(JunitReportDetail.BASIC)) {
             TestReportBuilder.of(result).writeToFileSystem(reportDir);

@@ -361,7 +361,7 @@ public final class JkUtilsReflect {
     }
 
     /**
-     * Returns all fields declared in the class passed as argument or in its
+     * Returns all fields declared in the class passed as argument or accept its
      * super classes annotated with the supplied annotation.
      */
     public static List<Field> getAllDeclaredField(Class<?> clazz,
@@ -381,7 +381,7 @@ public final class JkUtilsReflect {
     }
 
     /**
-     * Returns all fields declared in the class passed as argument or in its
+     * Returns all fields declared in the class passed as argument or accept its
      * super classes.
      */
     public static List<Field> getAllDeclaredField(Class<?> clazz, boolean includeSuperClass) {

@@ -1,8 +1,6 @@
 package org.jerkar.distrib.all;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -30,9 +28,9 @@ class SampleTester {
 
     SampleTester(JkFileTree buildDir) {
         super();
-        this.sampleBaseDir = buildDir.go("../org.jerkar.samples");
-        this.sampleDependeeBaseDir = buildDir.go("../org.jerkar.samples-dependee");
-        this.output = sampleBaseDir.go("build/output");
+        this.sampleBaseDir = buildDir.goTo("../org.jerkar.samples");
+        this.sampleDependeeBaseDir = buildDir.goTo("../org.jerkar.samples-dependee");
+        this.output = sampleBaseDir.goTo("build/output");
         String scriptName = JkUtilsSystem.IS_WINDOWS ? "jerkar.bat" : "jerkar";
         launchScript = buildDir.root().resolve("build/output/dist/" + scriptName);
     }
@@ -99,7 +97,7 @@ class SampleTester {
 
     private void testFork() {
         testSamples("", "-tests.fork");
-        JkUtilsAssert.isTrue(output.go("test-reports/junit").exists(), "No test report generated in test fork mode.");
+        JkUtilsAssert.isTrue(output.goTo("test-reports/junit").exists(), "No test report generated in test fork mode.");
     }
 
 }

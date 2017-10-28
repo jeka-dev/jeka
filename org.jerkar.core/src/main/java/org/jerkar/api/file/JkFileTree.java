@@ -13,17 +13,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsPath;
 
 /**
- * Provides a view on files and sub-folders contained in a given directory. A
+ * Provides a view on files and sub-folders contained in a given directory or zip file. A
  * <code>JkFileTree</code> may have some include/exclude filters to include only
- * or exclude some files based on ANT pattern matching. <br/>
- *
- * <p>
+ * or exclude specified files.<br/>
  * When speaking about files contained in a {@link JkFileTree}, we mean all
- * files contained in its rootHolder directory or sub-directories, matching positively
+ * files contained in its root directory or sub-directories, matching positively
  * the filter defined on it.
  *
  * @author Jerome Angibaud
@@ -31,7 +28,7 @@ import org.jerkar.api.utils.JkUtilsPath;
 public final class JkFileTree  {
 
     /**
-     * Creates a {@link JkFileTree} having the specified rootHolder directory.
+     * Creates a {@link JkFileTree} having the specified root directory.
      */
     @Deprecated
     public static JkFileTree of(File rootDir) {
@@ -39,14 +36,14 @@ public final class JkFileTree  {
     }
 
     /**
-     * Creates a {@link JkFileTree} having the specified rootHolder directory.
+     * Creates a {@link JkFileTree} having the specified root directory.
      */
     public static JkFileTree of(Path rootDir) {
         return new JkFileTree(rootDir, false);
     }
 
     /**
-     * Creates a {@link JkFileTree} having the specified rootHolder directory.
+     * Creates a {@link JkFileTree} having the specified root directory.
      */
     public static JkFileTree ofZip(Path zipFile) {
         return new JkFileTree(zipFile.toAbsolutePath(), true);
@@ -57,7 +54,7 @@ public final class JkFileTree  {
     private final JkPathMatcher filter;
 
     private JkFileTree(Path rootDir, boolean zip) {
-        this(rootDir, JkPathMatcher.in(path -> true), zip);
+        this(rootDir, JkPathMatcher.of(path -> true), zip);
     }
 
     private JkFileTree(Path rootDirOrArchive, JkPathMatcher matcher, boolean zipFile) {
@@ -71,7 +68,7 @@ public final class JkFileTree  {
     }
 
     /**
-     * Returns the rootHolder directory. In case ofMany zip archive it returns an directory entry
+     * Returns the root directory. In case of zip archive it returns a directory entry
      * within the zip archive.
      */
     public Path root() {
@@ -79,10 +76,10 @@ public final class JkFileTree  {
     }
 
     /**
-     * Returns rootHolder ofMany this tree if this tree is a directory tree and returns zip file if this
+     * Returns root of this tree if this tree is a directory tree and returns zip file if this
      * tree is a zip tree.
      */
-    public Path rootFile() {
+    public Path rootDirOrZipFile() {
         return  rootHolder.rootFile();
     }
 
@@ -106,7 +103,7 @@ public final class JkFileTree  {
     // ------------------------- check exists --------------------------------------
 
     /**
-     * Returns <code>true</code> if the rootHolder directory exists.
+     * Returns <code>true</code> if the root directory exists.
      */
     public boolean exists() {
         return rootHolder.exists();
@@ -120,24 +117,23 @@ public final class JkFileTree  {
     // ----------------------- iterate over files ---------------------------------------------------
 
     /**
-     * Returns a path stream on this rootHolder path and all its children matching this filter.
-     * Returned paths are resolved against this tree rootHolder.
-     * This means that if this tree rootHolder is absolute then streamed paths are absolute as well.
-     * This also means that the rootHolder folder is included in the stream.
-     * If this method is called for a zip instance, then it should be closed or called within
+     * Returns a path stream of all files of this tree. Returned paths are resolved against this tree root.
+     * This means that if this tree root is absolute then streamed paths are absolute as well.
+     * Note that the root folder is included in the returned stream.
+     * If this method is called for a zip tree instance, then it should be closed or called within
      * <i>try-with-resources</i> statement in order to avoid resource leaks.
      */
     public Stream<Path> stream(FileVisitOption ...options) {
         if(!exists()) {
             return new LinkedList<Path>().stream();
         }
-        final JkPathMatcher matcher = JkPathMatcher.in(filter);
+        final JkPathMatcher matcher = JkPathMatcher.of(filter);
         return JkUtilsPath.walk(root(), options)
                 .filter(path -> matcher.matches(root().relativize(path))).onClose(() -> rootHolder.closeIfNeeded());
     }
 
     /**
-     * Same as {@link #files()} but returning paths relative to this rootHolder.
+     * Same as {@link #files()} but returning paths relative to this tree root.
      */
     public List<Path> relativeFiles() {
         try(Stream<Path> stream = stream()) {
@@ -146,7 +142,7 @@ public final class JkFileTree  {
     }
 
     /**
-     * Returns list ofMany paths returned by {@link #stream(FileVisitOption...)} but excluding
+     * Returns list of paths returned by {@link #stream(FileVisitOption...)} but excluding
      * directories from the result.
      */
     public List<Path> files() {
@@ -159,16 +155,16 @@ public final class JkFileTree  {
     // ---------------------- Navigate -----------------------------------------------------------
 
     /**
-     * Creates a {@link JkFileTree} having the default filter and the specified
-     * relative path to this rootHolder as rootHolder directory.
+     * Creates a {@link JkFileTree} having the specified relative path to this root as root directory.
+     * Note that the returned tree has no filter even if this tree has one.
      */
-    public JkFileTree go(String relativePath) {
+    public JkFileTree goTo(String relativePath) {
         final Path path = root().resolve(relativePath);
         return JkFileTree.of(path);
     }
 
     /**
-     * Returns path relative to this rootHolder ofMany the specified relative path.
+     * Returns path relative to this root of the specified relative path.
      */
     public Path get(String relativePath) {
         return root().resolve(relativePath);
@@ -178,18 +174,19 @@ public final class JkFileTree  {
 
 
     /**
-     * Short hand for <code>#importContent(JkFileTree.ofMany(dirToCopy, options)</code>.
+     * Short hand for <code>#merge(JkFileTree.of(dirToCopy, copyOptions)</code>.
      */
-    public JkFileTree importContent(Path dirToCopy, CopyOption... copyOptions) {
-        return importContent(JkFileTree.of(dirToCopy), copyOptions);
+    public JkFileTree merge(Path dirToCopy, CopyOption... copyOptions) {
+        return merge(JkFileTree.of(dirToCopy), copyOptions);
     }
 
     /**
-     * Copies the content ofMany the specified tree at the rootHolder ofMany this one.
-     * Specified tree to copy might not exists. The structure ofMany the specified tree
+     * Copies the content of the specified tree at the root of this one.
+     * Specified tree to copy might not exists. The structure of the specified tree
      * is preserved.
+     * Note that the the root of the specified tree is not part of the copied content.
      */
-    public JkFileTree importContent(JkFileTree tree, CopyOption... copyOptions) {
+    public JkFileTree merge(JkFileTree tree, CopyOption... copyOptions) {
         createIfNotExist();
         if (tree.exists()) {
             tree.stream().filter(excludeRootFilter()).forEach(path -> {
@@ -205,9 +202,9 @@ public final class JkFileTree  {
     }
 
     /**
-     * Copies the specified files at the rootHolder ofMany this tree.
+     * Copies the specified files at the root of this tree.
      */
-    public JkFileTree importFiles(Iterable<Path> files, StandardCopyOption ... copyOptions) {
+    public JkFileTree copyIn(Iterable<Path> files, StandardCopyOption ... copyOptions) {
         Iterable<Path> paths = JkUtilsPath.disambiguate(files);
         createIfNotExist();
         for (final Path file : paths) {
@@ -217,20 +214,7 @@ public final class JkFileTree  {
     }
 
     /**
-     * Copies the specified files at the rootHolder ofMany this tree
-     */
-    // WARN : importFiles(Iterable<Path>) is invoked when calling #importFiles with a single parameters
-    // so it has been renamed with distinct name
-    public JkFileTree importFile(Path... files) {
-        createIfNotExist();
-        for (final Path file : files) {
-            JkUtilsPath.copy(file, root().resolve(file.getFileName()), StandardCopyOption.REPLACE_EXISTING);
-        }
-        return this;
-    }
-
-    /**
-     * Deletes each and every files in this tree except the rootHolder and files not matching this tree filter.
+     * Deletes each and every files in this tree except the root and files not matching this tree filter.
      */
     public JkFileTree deleteContent() {
         JkUtilsPath.walkFileTree(root(), new SimpleFileVisitor<Path>() {
@@ -257,7 +241,7 @@ public final class JkFileTree  {
     }
 
     /**
-     * Deletes rootHolder directory of this tree.
+     * Deletes root directory of this tree.
      */
     public JkFileTree deleteRoot() {
         JkUtilsPath.walkFileTree(root(), new SimpleFileVisitor<Path>() {
@@ -284,8 +268,8 @@ public final class JkFileTree  {
     // ----------------------- Write out ----------------------------------------------------------------
 
     /**
-     * Zips the content ofMany this tree to the specified destination file. If the specified destination file
-     * already exists, the content ofMany this tree is appended to the existing archive, overriding existing entries within the archive.
+     * Zips the content of this tree to the specified destination file. If the specified destination file
+     * already exists, the content of this tree is appended to the existing archive, overriding existing entries within the archive.
      */
     public JkFileTree zipTo(Path destination) {
         if (destination.getParent() != null) {
@@ -308,8 +292,7 @@ public final class JkFileTree  {
     }
 
     /**
-     * Copies files contained in this {@link JkFileTree} to the specified
-     * directory.
+     * Copies files contained in this {@link JkFileTree} to the specified directory.
      */
     public int copyTo(Path destinationDir, CopyOption ... copyOptions) {
         if (!Files.exists(destinationDir)) {
@@ -326,6 +309,7 @@ public final class JkFileTree  {
      * Creates a {@link JkFileTree} which is a copy ofMany this {@link JkFileTree}
      * augmented with the specified {@link JkPathFilter}
      */
+    @Deprecated
     public JkFileTree andFilter(JkPathFilter filter) {
         return new JkFileTree(rootHolder, this.filter.and((PathMatcher) filter));
     }
@@ -355,7 +339,7 @@ public final class JkFileTree  {
      * specified <code>antPatterns</code>.
      */
     public JkFileTree exclude(String... antPatterns) {
-        return andMatcher(JkPathMatcher.notIn(antPatterns));
+        return andMatcher(JkPathMatcher.refuse(antPatterns));
     }
 
     // ------------------------ Misc ---------------------------------------

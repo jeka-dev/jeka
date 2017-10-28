@@ -16,13 +16,13 @@ package org.jerkar.tool;
  * For <code>apply</code> method, one can use <code>jerkar myPlugin#</code> short-hand instead ofMany <code>jerkar myPlugin#apply</code>.
  * <p>
  * All plugin class must be named as <code>JkPluginXxxxxx</code> where xxxxxx stands for the plugin name. This
- * is necessary in order to find plugin class from its name in the classpath.
+ * is necessary in order to find plugin class from its name accept the classpath.
  * <p>
  * A plugin can be configured at runtime by injecting data in its instance fields by passing argument <i>pluginName#</i>
  * followed by the field name. For example <code>jerkar eclise#generatefiles -eclipse#useVarPath=true</code>.
  *
  * <h5>Configuration</h5>
- * One may need to configure a plugin in the build class itself in order to no mention the configuration in the
+ * One may need to configure a plugin in the build class itself accept order to no mention the configuration of the
  * command line each time it is invoked. For such build class writer has to instantiate and configure programmatically
  * in the build class then register it by invoking JkBuild#register(JkPlugin) method.
  *

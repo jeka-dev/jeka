@@ -49,15 +49,15 @@ public class CoreBuild extends JkJavaProjectBuild {
         final JkJavaProject project = this.project();
         project.makeArtifactFilesIfNecessary(SOURCES_FILE_ID, JAVADOC_FILE_ID, project.mainArtifactFileId());
         final JkFileTree distrib = JkFileTree.of(distribFolder);
-        distrib.importFile(baseDir().getParent().resolve("LICENSE"));
-        distrib.importContent(baseDir().resolve("src/main/dist"));
-        distrib.importContent(baseDir().resolve("src/main/java/META-INF/bin"));
-        distrib.importFile(project.artifactPath(project.mainArtifactFileId()));
-        final List<Path> ivySourceLibs = baseTree().go("build/libs-sources").include("apache-ivy*.jar").files();
-        distrib.go("libs-sources")
-            .importFiles(ivySourceLibs)
-            .importFile(project.artifactPath(SOURCES_FILE_ID));
-        distrib.go("libs-javadoc").importFile(project.artifactPath(JAVADOC_FILE_ID));
+        distrib.copyIn(baseDir().getParent().resolve("LICENSE"));
+        distrib.merge(baseDir().resolve("src/main/dist"));
+        distrib.merge(baseDir().resolve("src/main/java/META-INF/bin"));
+        distrib.copyIn(project.artifactPath(project.mainArtifactFileId()));
+        final List<Path> ivySourceLibs = baseTree().goTo("build/libs-sources").include("apache-ivy*.jar").files();
+        distrib.goTo("libs-sources")
+            .copyIn(ivySourceLibs)
+            .copyIn(project.artifactPath(SOURCES_FILE_ID));
+        distrib.goTo("libs-javadoc").copyIn(project.artifactPath(JAVADOC_FILE_ID));
         final Path distripZipFile = project.artifactPath(DISTRIB_FILE_ID);
         distrib.zipTo(distripZipFile);
     }

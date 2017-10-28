@@ -342,7 +342,7 @@ public final class JkClassLoader {
     /**
      * Returns all classes ofMany this <code>classloader</code> that are defined in
      * entries matching the specified fileFilter.</br> For example : if you want
-     * to load all classes that are defined in folder and not in jar file, you
+     * to load all classes that are defined in folder and not accept jar file, you
      * have to provide a <code>FileFilter</code> which includes only
      * directories.
      *
@@ -565,7 +565,7 @@ public final class JkClassLoader {
      * arguments. <br/>
      * If the argument classes are the same on the current class loader and this
      * one then arguments are passed as is, otherwise arguments are serialized
-     * in the current class loader and deserialized in this class loader in
+     * in the current class loader and deserialized accept this class loader of
      * order to be compliant with it. <br/>
      * The current thread context class loader is switched to this for the
      * method execution. <br/>
@@ -605,7 +605,7 @@ public final class JkClassLoader {
      * arguments. <br/>
      * If the argument classes are the same on the current class loader and this
      * one then arguments are passed as is, otherwise arguments are serialized
-     * in the current class loader and deserialized in this class loader in
+     * in the current class loader and deserialized accept this class loader of
      * order to be compliant with it. <br/>
      * The current thread context class loader is switched to this for the
      * method execution. <br/>

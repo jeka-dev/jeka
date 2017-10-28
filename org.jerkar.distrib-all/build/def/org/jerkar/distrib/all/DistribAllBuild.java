@@ -38,16 +38,15 @@ class DistribAllBuild extends JkBuild {
         JkLog.info("Copy core distribution locally.");
         CoreBuild core = pluginsJacoco.core; // The core project is got by transitivity
         Path distDir = this.outputDir().resolve("dist");
-        JkFileTree dist = JkFileTree.of(distDir).importContent(core.distribFolder);
+        JkFileTree dist = JkFileTree.of(distDir).merge(core.distribFolder);
 
         JkLog.info("Add plugins to the distribution");
-        JkFileTree ext = dist.go("libs/builtins").importFile(
-                pluginsSonar.project().mainArtifactPath(),
-                pluginsJacoco.project().mainArtifactPath());
-        JkFileTree sourceDir = dist.go("libs-sources");
-        sourceDir.importFile(
-                pluginsSonar.project().artifactPath(JkJavaProject.SOURCES_FILE_ID),
-                pluginsJacoco.project().artifactPath(JkJavaProject.SOURCES_FILE_ID));
+        JkFileTree ext = dist.goTo("libs/builtins")
+                .copyIn(pluginsSonar.project().mainArtifactPath())
+                .copyIn(pluginsJacoco.project().mainArtifactPath());
+        JkFileTree sourceDir = dist.goTo("libs-sources");
+        sourceDir.copyIn(pluginsSonar.project().artifactPath(JkJavaProject.SOURCES_FILE_ID))
+                .copyIn(pluginsJacoco.project().artifactPath(JkJavaProject.SOURCES_FILE_ID));
 
         JkLog.info("Add plugins to the fat jar");
         Path fat = dist.get(core.project().artifactPath(JkArtifactFileId.of("all", "jar"))

@@ -204,7 +204,7 @@ public final class JkPom {
         codeWriter.repos = null;
         codeWriter.version = version();
         codeWriter.versionProvider = versionProvider();
-        if (baseDir.go("src/main/resources").exists()) {
+        if (baseDir.goTo("src/main/resources").exists()) {
             codeWriter.imports.add(JkFileTreeSet.class.getName());
             codeWriter.extraMethods.add(
                     "    // If you move your resources to src/main/java (collocated with java classes code), \n" +
@@ -214,7 +214,7 @@ public final class JkPom {
                             "        return baseDirAsTree().jump(\"src/main/resources\").asSet();\n" +
                     "    }");
         }
-        if (baseDir.go("src/test/resources").exists()) {
+        if (baseDir.goTo("src/test/resources").exists()) {
             codeWriter.imports.add(JkFileTreeSet.class.getName());
             codeWriter.extraMethods.add(
                     "    // If you move your test resources to src/test/java (collocated with java classes code), \n" +

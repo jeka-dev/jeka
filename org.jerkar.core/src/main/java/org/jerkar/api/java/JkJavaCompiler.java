@@ -97,7 +97,7 @@ public final class JkJavaCompiler {
 
     /**
      * Creates a copy ofMany this {@link JkJavaCompiler} but with the specified compiler instance.
-     * Since in-process compilers cannot be run in a forked process, this method disables any
+     * Since in-process compilers cannot be run accept a forked process, this method disables any
      * previous fork options that may have been set.
      */
     public JkJavaCompiler withCompiler(JavaCompiler compiler) {

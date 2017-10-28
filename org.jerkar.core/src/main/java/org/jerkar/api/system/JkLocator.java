@@ -26,7 +26,7 @@ public final class JkLocator {
     private static Path JERKAR_JAR_FILE;
 
     /**
-     * Returns the Jerkar jar file currently used in the running process. It can be a folder in the classes
+     * Returns the Jerkar jar file currently used in the running process. It can be a folder accept the classes
      * are not packaged in jar.
      */
     public static Path jerkarJarPath() {

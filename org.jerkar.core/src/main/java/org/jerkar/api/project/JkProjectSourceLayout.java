@@ -24,8 +24,8 @@ public class JkProjectSourceLayout {
     /**
      * Filter to consider as resources everything but java source stuff.
      */
-    public static final PathMatcher JAVA_RESOURCE_MATCHER = JkPathMatcher.notIn("**/*.java")
-            .andNot("**/package.html").andNot("**/doc-files");
+    public static final PathMatcher JAVA_RESOURCE_MATCHER = JkPathMatcher.refuse("**/*.java")
+            .andRefuse("**/package.html").andRefuse("**/doc-files");
 
     /**
      * Creates a Java project source structure according Maven conventions. It differs from Maven in that
@@ -103,7 +103,7 @@ public class JkProjectSourceLayout {
     }
 
     public JkProjectSourceLayout withSources(String relativePath) {
-        return new JkProjectSourceLayout(this.baseDir, baseTree().go(relativePath).asSet(), this.resources, this.tests, this.testResources);
+        return new JkProjectSourceLayout(this.baseDir, baseTree().goTo(relativePath).asSet(), this.resources, this.tests, this.testResources);
     }
 
     public JkProjectSourceLayout withResources(JkFileTreeSet resources) {
@@ -111,7 +111,7 @@ public class JkProjectSourceLayout {
     }
 
     public JkProjectSourceLayout withResources(String relativePath) {
-        return new JkProjectSourceLayout(this.baseDir, this.sources, baseTree().go(relativePath).asSet(), this.tests, this.testResources);
+        return new JkProjectSourceLayout(this.baseDir, this.sources, baseTree().goTo(relativePath).asSet(), this.tests, this.testResources);
     }
 
     public JkProjectSourceLayout withTests(JkFileTreeSet tests) {
@@ -119,7 +119,7 @@ public class JkProjectSourceLayout {
     }
 
     public JkProjectSourceLayout withTests(String relativePath) {
-        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, baseTree().go(relativePath).asSet(), this.testResources);
+        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, baseTree().goTo(relativePath).asSet(), this.testResources);
     }
 
     public JkProjectSourceLayout withTestResources(JkFileTreeSet testResources) {
@@ -127,7 +127,7 @@ public class JkProjectSourceLayout {
     }
 
     public JkProjectSourceLayout withTestResources(String relativePath) {
-        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, this.tests, baseTree().go(relativePath).asSet());
+        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, this.tests, baseTree().goTo(relativePath).asSet());
     }
 
 

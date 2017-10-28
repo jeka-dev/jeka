@@ -17,15 +17,19 @@ public final class JkPathMatcher implements PathMatcher {
 
     // --------------------- Factory methods ------------------------------------------------
 
+    public static JkPathMatcher of(PathMatcher matcher) {
+        return new JkPathMatcher(matcher);
+    }
+
     public static JkPathMatcher noDirectory(LinkOption...linkOptions) {
         return new JkPathMatcher(path -> !Files.isDirectory(path, linkOptions));
     }
 
-    public static JkPathMatcher in(String ... globPattern) {
-        return in(Arrays.asList(globPattern));
+    public static JkPathMatcher accept(String ... globPattern) {
+        return accept(Arrays.asList(globPattern));
     }
 
-    public static JkPathMatcher in(Iterable<String> globPatterns) {
+    public static JkPathMatcher accept(Iterable<String> globPatterns) {
         PathMatcher result = empty();
         for (final String pattern : globPatterns) {
             result = new OrMatcher(result, globMatcher(pattern));
@@ -33,15 +37,11 @@ public final class JkPathMatcher implements PathMatcher {
         return new JkPathMatcher(result);
     }
 
-    public static JkPathMatcher in(PathMatcher matcher) {
-        return new JkPathMatcher(matcher);
+    public static JkPathMatcher refuse(String ... globPatterns) {
+        return refuse(Arrays.asList(globPatterns));
     }
 
-    public static JkPathMatcher notIn(String ... globPatterns) {
-        return notIn(Arrays.asList(globPatterns));
-    }
-
-    public static JkPathMatcher notIn(Iterable<String> globPatterns) {
+    public static JkPathMatcher refuse(Iterable<String> globPatterns) {
         PathMatcher result = path -> true;
         for (final String pattern : globPatterns) {
             result = new AndMatcher(result, path -> !globMatcher(pattern).matches(path));
@@ -68,7 +68,11 @@ public final class JkPathMatcher implements PathMatcher {
 
     @Override
     public boolean matches(Path path) {
-        return matcher.matches(path);
+        boolean result = matcher.matches(path);
+        if (!result) {
+            System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$ refused " + path);
+        }
+        return result;
     }
 
     public List<String> getIncludePatterns() {
@@ -88,11 +92,15 @@ public final class JkPathMatcher implements PathMatcher {
     }
 
     public JkPathMatcher or(PathMatcher other) {
-        return new JkPathMatcher(new AndMatcher(this.matcher, other));
+        return new JkPathMatcher(new OrMatcher(this.matcher, other));
     }
 
-    public JkPathMatcher andNot(String pattern) {
-        return this.and(JkPathMatcher.notIn(pattern));
+    public JkPathMatcher andAccept(String pattern) {
+        return this.and(JkPathMatcher.accept(pattern));
+    }
+
+    public JkPathMatcher andRefuse(String ... patterns) {
+        return this.and(JkPathMatcher.refuse(patterns));
     }
 
     private static class Reverse implements PathMatcher  {

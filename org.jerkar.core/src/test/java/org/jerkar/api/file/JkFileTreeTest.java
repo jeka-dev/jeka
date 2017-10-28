@@ -77,7 +77,7 @@ public class JkFileTreeTest {
         Path zipFile = Files.createTempFile("jksample",".zip");
         Files.deleteIfExists(zipFile);
         JkFileTree zipTree = JkFileTree.ofZip(zipFile);
-        zipTree.importContent(sampleDir());
+        zipTree.merge(sampleDir());
         List<Path> paths = zipTree.files();
         assertEquals(1, paths.size());
 
@@ -106,7 +106,7 @@ public class JkFileTreeTest {
         Path zip2 = Files.createTempFile("sample2", ".zip");
         Files.delete(zip2);
         JkFileTree zip2Tree = JkFileTree.ofZip(zip2);
-        zip2Tree.importContent(JkFileTree.ofZip(zip).root());
+        zip2Tree.merge(JkFileTree.ofZip(zip).root());
         assertTrue(Files.isDirectory(zip2Tree.get("subfolder")));
         assertTrue(Files.isRegularFile(zip2Tree.get("subfolder").resolve("sample.txt")));
         assertTrue(Files.isDirectory(zip2Tree.get("emptyfolder")));
@@ -119,7 +119,7 @@ public class JkFileTreeTest {
         Path zip = createSampleZip();
         Path dirSample = Files.createTempDirectory("sample");
         JkFileTree tree = JkFileTree.of(dirSample);
-        tree.importContent(JkFileTree.ofZip(createSampleZip()));
+        tree.merge(JkFileTree.ofZip(createSampleZip()));
         assertTrue(Files.isDirectory(tree.get("subfolder")));
         assertTrue(Files.isRegularFile(tree.get("subfolder").resolve("sample.txt")));
         assertTrue(Files.isDirectory(tree.get("emptyfolder")));
@@ -131,7 +131,7 @@ public class JkFileTreeTest {
         Path dirSample = Files.createTempDirectory("sample");
         JkFileTree tree = JkFileTree.of(dirSample);
         Path tempFile = Files.createTempFile("example", ".txt");
-        tree.importFile(tempFile);
+        tree.copyIn(tempFile);
         assertTrue(Files.exists(tree.get(tempFile.getFileName().toString())));
         Files.delete(tempFile);
     }

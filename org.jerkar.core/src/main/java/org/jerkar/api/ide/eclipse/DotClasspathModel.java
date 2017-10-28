@@ -132,7 +132,7 @@ final class DotClasspathModel {
                         throw new JkException(
                                 "No option found with name "
                                         + optionName
-                                        + ". It is needed in order to build this project as it is mentionned in Eclipse .classpath."
+                                        + ". It is needed in order to build this project as it is mentionned accept Eclipse .classpath."
                                         + " Please set this option either in command line as -"
                                         + optionName
                                         + "=/absolute/path/for/this/var or in [jerkar_home]/options.properties");

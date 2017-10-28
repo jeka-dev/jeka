@@ -21,6 +21,7 @@ import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkScopeMapping;
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPathFilter;
+import org.jerkar.api.file.JkPathMatcher;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkClasspath;
@@ -43,6 +44,8 @@ import org.jerkar.tool.CommandLine.MethodInvocation;
 final class Engine {
 
     private final JkPathFilter BUILD_SOURCE_FILTER = JkPathFilter.include("**/*.java").andExclude("**/_*");
+
+    private final JkPathMatcher BUILD_SOURCE_MATCHER = JkPathMatcher.accept("**.java").andRefuse("**/_*", "_*");
 
     private final Path projectBaseDir;
 
@@ -68,8 +71,9 @@ final class Engine {
     }
 
     private void preCompile() {
-        final SourceParser parser = SourceParser.of(this.projectBaseDir,
-                JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER).files());
+        List<Path> sourceFiles = JkFileTree.of(resolver.buildSourceDir).andMatcher(BUILD_SOURCE_MATCHER).files();
+        final SourceParser parser = SourceParser.of(this.projectBaseDir, sourceFiles);
+
         this.buildDependencies = this.buildDependencies.and(parser.dependencies());
         this.buildRepos = parser.importRepos().and(buildRepos);
         this.rootsOfImportedBuilds = parser.projects();
