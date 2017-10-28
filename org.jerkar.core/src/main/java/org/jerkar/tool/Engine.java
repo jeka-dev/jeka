@@ -43,7 +43,7 @@ import org.jerkar.tool.CommandLine.MethodInvocation;
  */
 final class Engine {
 
-    private final JkPathFilter BUILD_SOURCE_FILTER = JkPathFilter.include("**/*.java").andExclude("**/_*");
+    //private final JkPathFilter BUILD_SOURCE_FILTER = JkPathFilter.include("**/*.java").andExclude("**/_*");
 
     private final JkPathMatcher BUILD_SOURCE_MATCHER = JkPathMatcher.accept("**.java").andRefuse("**/_*", "_*");
 
@@ -325,7 +325,7 @@ final class Engine {
     }
 
     private JkJavaCompileSpec buildCompileSpec() {
-        final JkFileTree buildSource = JkFileTree.of(resolver.buildSourceDir).andFilter(BUILD_SOURCE_FILTER);
+        final JkFileTree buildSource = JkFileTree.of(resolver.buildSourceDir).andMatcher(BUILD_SOURCE_MATCHER);
         JkUtilsPath.createDirectories(resolver.buildClassDir);
         return new JkJavaCompileSpec().setOutputDir(resolver.buildClassDir)
                 .addSources(buildSource.files());

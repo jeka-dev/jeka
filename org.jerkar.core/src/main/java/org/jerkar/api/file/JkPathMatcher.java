@@ -68,11 +68,7 @@ public final class JkPathMatcher implements PathMatcher {
 
     @Override
     public boolean matches(Path path) {
-        boolean result = matcher.matches(path);
-        if (!result) {
-            System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$ refused " + path);
-        }
-        return result;
+        return matcher.matches(path);
     }
 
     public List<String> getIncludePatterns() {

@@ -30,6 +30,7 @@ import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
 
+import org.jerkar.api.file.JkPathMatcher;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
@@ -447,7 +448,7 @@ public final class JkClassLoader {
     private Iterator<Class<?>> iterateClassesIn(Path dirOrJar) {
         final List<Path> paths;
         if (Files.isDirectory(dirOrJar)) {
-            paths = JkFileTree.of(dirOrJar).andFilter(JkPathFilter.include("**/*.class"))
+            paths = JkFileTree.of(dirOrJar).andMatcher(JkPathMatcher.accept("**.class"))
                     .relativeFiles();
         } else {
             final List<ZipEntry> entries = JkUtilsZip.zipEntries(JkUtilsZip.zipFile(dirOrJar.toFile()));
