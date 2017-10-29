@@ -1,5 +1,8 @@
 package org.jerkar.api.file;
 
+import org.jerkar.api.utils.JkUtilsAssert;
+import org.jerkar.api.utils.JkUtilsPath;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -12,9 +15,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsPath;
 
 /**
  * Provides a view on files and sub-folders contained in a given directory or zip file. A
@@ -305,16 +305,6 @@ public final class JkFileTree  {
 
 
     // ------------------------- Filter ----------------------------------------------
-
-    /**
-     * Creates a {@link JkFileTree} which is a copy ofMany this {@link JkFileTree}
-     * augmented with the specified {@link JkPathFilter}
-     */
-    @Deprecated
-    public JkFileTree andFilter(JkPathFilter filter) {
-        return new JkFileTree(rootHolder, this.filter.and((PathMatcher) filter));
-    }
-
 
     /**
      * Creates a {@link JkFileTree} which is a copy ofMany this {@link JkFileTree}

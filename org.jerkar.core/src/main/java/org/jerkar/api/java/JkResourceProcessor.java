@@ -3,6 +3,8 @@ package org.jerkar.api.java;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -106,12 +108,7 @@ public final class JkResourceProcessor {
         return and(JkFileTree.of(dir));
     }
 
-    /**
-     * @see JkResourceProcessor#and(JkFileTreeSet)
-     */
-    public JkResourceProcessor and(JkFileTree tree, Map<String, String> tokenReplacement) {
-        return and(tree).and(JkInterpolator.of(JkPathFilter.ACCEPT_ALL, tokenReplacement));
-    }
+
 
     /**
      * Creates a <code>JkResourceProcessor</code> identical at this one but
@@ -133,17 +130,6 @@ public final class JkResourceProcessor {
         return new JkResourceProcessor(this.resourceTrees, list);
     }
 
-
-    /**
-     * Shorthand for {@link #and(JkInterpolator)}.
-     *
-     * @see JkInterpolator#of(String, String, String, String...)
-     */
-    public JkResourceProcessor interpolating(String includeFilter, String key, String value,
-            String... others) {
-        return and(JkInterpolator.of(includeFilter, key, value, others));
-    }
-
     /**
      * Defines values to be interpolated (replacing <code>${key}</code> by their
      * value), and the file filter to apply it.
@@ -152,46 +138,12 @@ public final class JkResourceProcessor {
 
         private final Map<String, String> keyValues;
 
-        private final JkPathFilter fileFilter;
+        private final PathMatcher matcher;
 
-        private JkInterpolator(JkPathFilter fileFilter, Map<String, String> keyValues) {
+        private JkInterpolator(PathMatcher matcher, Map<String, String> keyValues) {
             super();
             this.keyValues = keyValues;
-            this.fileFilter = fileFilter;
-        }
-
-        /**
-         * Creates a <code>JkInterpolator</code> with the specified filter and
-         * key/values to replace.
-         */
-        public static JkInterpolator of(JkPathFilter filter, Map<String, String> map) {
-            return new JkInterpolator(filter, new HashMap<>(map));
-        }
-
-        /**
-         * Same as {@link #of(JkPathFilter, Map)} but you can specify key values
-         * in line.
-         */
-        public static JkInterpolator of(JkPathFilter filter, String key, String value,
-                String... others) {
-            return new JkInterpolator(filter, JkUtilsIterable.mapOf(key, value, (Object[]) others));
-        }
-
-        /**
-         * Same as {@link #of(JkPathFilter, String, String, String...)} but
-         * specify an include pattern that will be used as the path filter.
-         */
-        public static JkInterpolator of(String includeFilter, String key, String value,
-                String... others) {
-            return of(JkPathFilter.include(includeFilter), key, value, others);
-        }
-
-        /**
-         * Same as {@link #of(JkPathFilter, Map)} but you can specify key values
-         * in line.
-         */
-        public static JkInterpolator of(String includeFilter, Map<String, String> map) {
-            return new JkInterpolator(JkPathFilter.include(includeFilter), map);
+            this.matcher = matcher;
         }
 
         /**
@@ -201,14 +153,14 @@ public final class JkResourceProcessor {
         public JkInterpolator and(String key, String value, String... others) {
             final Map<String, String> map = JkUtilsIterable.mapOf(key, value, (Object[]) others);
             map.putAll(keyValues);
-            return new JkInterpolator(this.fileFilter, map);
+            return new JkInterpolator(this.matcher, map);
         }
 
         private static Map<String, String> interpolateData(String path,
                 Iterable<JkInterpolator> interpolators) {
             final Map<String, String> result = new HashMap<>();
             for (final JkInterpolator interpolator : interpolators) {
-                if (interpolator.fileFilter.accept(path)) {
+                if (interpolator.matcher.matches(Paths.get(path))) {
                     result.putAll(interpolator.keyValues);
                 }
             }

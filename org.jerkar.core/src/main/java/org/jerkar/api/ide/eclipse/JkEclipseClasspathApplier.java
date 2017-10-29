@@ -44,9 +44,9 @@ public class JkEclipseClasspathApplier {
         final JkFileTreeSet sources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources;
         final JkFileTreeSet testSources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources;
         final JkFileTreeSet resources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources
-                .andFilter(JkProjectSourceLayout.JAVA_RESOURCE_FILTER);
+                .andFilter(JkProjectSourceLayout.JAVA_RESOURCE_MATCHER);
         final JkFileTreeSet testResources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources
-                .andFilter(JkProjectSourceLayout.JAVA_RESOURCE_FILTER);
+                .andFilter(JkProjectSourceLayout.JAVA_RESOURCE_MATCHER);
 
         final ScopeResolver scopeResolver = scopeResolver(baseDir);
         final List<Lib> libs = dotClasspathModel.libs(baseDir, scopeResolver);

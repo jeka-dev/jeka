@@ -117,17 +117,6 @@ public final class JkFileTreeSet {
 
     // ------------------------ additional filters -------------------------------------------
 
-    /**
-     * Creates a {@link JkFileTree} which is a copy of this {@link JkFileTree}
-     * augmented with the specified {@link JkPathFilter}
-     */
-    public JkFileTreeSet andFilter(JkPathFilter filter) {
-        final List<JkFileTree> list = new LinkedList<>();
-        for (final JkFileTree tree : this.jkFileTrees) {
-            list.add(tree.andFilter(filter));
-        }
-        return new JkFileTreeSet(list);
-    }
 
     public JkFileTreeSet accept(Iterable<String> globPatterns) {
         final List<JkFileTree> list = new LinkedList<>();
