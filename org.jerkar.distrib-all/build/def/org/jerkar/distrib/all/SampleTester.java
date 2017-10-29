@@ -1,6 +1,7 @@
 package org.jerkar.distrib.all;
 
 import java.io.File;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -51,7 +52,7 @@ class SampleTester {
         testDependee("FatJarBuild");
         Path classpathFile = sampleBaseDir.get(".classpath");
         Path classpathFile2 = sampleBaseDir.get(".classpath2");
-        Files.copy(classpathFile, classpathFile2);
+        Files.copy(classpathFile, classpathFile2, StandardCopyOption.REPLACE_EXISTING);
         testSamples("", "eclipse#generateAll");
         if (restoreEclipseClasspathFile) {
             Files.move(classpathFile2, classpathFile, StandardCopyOption.REPLACE_EXISTING);

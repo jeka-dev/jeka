@@ -235,11 +235,11 @@ final class DotClasspathModel {
             JkFileTree jkFileTree = JkFileTree.of(dir);
             if (!excluding.isEmpty()) {
                 final String[] patterns = excluding.split("\\|");
-                jkFileTree = jkFileTree.exclude(patterns);
+                jkFileTree = jkFileTree.refuse(patterns);
             }
             if (!including.isEmpty()) {
                 final String[] patterns = including.split("\\|");
-                jkFileTree = jkFileTree.include(patterns);
+                jkFileTree = jkFileTree.accept(patterns);
             }
             return jkFileTree;
         }

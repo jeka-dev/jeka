@@ -85,7 +85,7 @@ public final class JkPluginEclipse implements JkPlugin {
     public void generateAll(JkBuild build) {
         final Iterable<Path> folders = build.baseTree()
                 .accept("**/" + JkConstants.BUILD_DEF_DIR, JkConstants.BUILD_DEF_DIR)
-                .exclude("**/build/output/**")
+                .refuse("**/build/output/**")
                 .stream().collect(Collectors.toList());
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();

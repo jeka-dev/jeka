@@ -40,7 +40,7 @@ public final class JkUtilsPath {
     }
 
     public static Path zipRoot(Path zipFile) {
-        final URI uri = URI.create("jar:file:" + zipFile.toUri().getPath());
+        final URI uri = URI.create("jar:" + zipFile.toUri());
         final Map<String, String> env = JkUtilsIterable.mapOf("create", "true");
         FileSystem fileSystem;
         try {

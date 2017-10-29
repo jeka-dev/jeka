@@ -2,6 +2,7 @@ package org.jerkar.api.utils;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,8 +34,16 @@ public class JkUtilsPathTest {
         System.out.println(target2);
         assertTrue(Files.exists(target2.resolve("sample.txt")));
 
+    }
 
-
+    @Test
+    public void testZipRoot() throws IOException {
+        Path zipPath = JkUtilsPath.zipRoot(Paths.get("toto.zip"));
+        System.out.println(zipPath);
+        Path dirWithSpaces = Files.createTempDirectory("folder name with space");
+        Path otherPath = dirWithSpaces.resolve("toto.zip");
+        System.out.println(otherPath.toUri());
+        JkUtilsPath.zipRoot(otherPath);
     }
 
 

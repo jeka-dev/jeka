@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -54,7 +55,7 @@ public final class JkFileTree  {
     private final JkPathMatcher filter;
 
     private JkFileTree(Path rootDir, boolean zip) {
-        this(rootDir, JkPathMatcher.of(path -> true), zip);
+        this(rootDir, JkPathMatcher.of(), zip);
     }
 
     private JkFileTree(Path rootDirOrArchive, JkPathMatcher matcher, boolean zipFile) {
@@ -76,8 +77,8 @@ public final class JkFileTree  {
     }
 
     /**
-     * Returns root of this tree if this tree is a directory tree and returns zip file if this
-     * tree is a zip tree.
+     * Returns root directory if this tree is a directory tree and returns a zip file if this
+     * tree has been created from a zip file.
      */
     public Path rootDirOrZipFile() {
         return  rootHolder.rootFile();
@@ -159,7 +160,7 @@ public final class JkFileTree  {
      * Note that the returned tree has no filter even if this tree has one.
      */
     public JkFileTree goTo(String relativePath) {
-        final Path path = root().resolve(relativePath);
+        final Path path = root().resolve(relativePath).normalize();
         return JkFileTree.of(path);
     }
 
@@ -334,17 +335,19 @@ public final class JkFileTree  {
     }
 
     public JkFileTree accept(String... globPatterns) {
-        return andMatcher(JkPathMatcher.accept(globPatterns));
+        return accept(Arrays.asList(globPatterns));
     }
 
+    public JkFileTree accept(Iterable<String> globPatterns) {
+        return andMatcher(JkPathMatcher.accept(this.root().getFileSystem(), globPatterns));
+    }
 
-    /**
-     * Short hand to {@link #andFilter(JkPathFilter)} defining an exclude Ant
-     * pattern filter. This will exclude any file matching at least one ofMany
-     * specified <code>antPatterns</code>.
-     */
-    public JkFileTree exclude(String... antPatterns) {
-        return andMatcher(JkPathMatcher.refuse(antPatterns));
+    public JkFileTree refuse(Iterable<String> globPatterns) {
+        return andMatcher(JkPathMatcher.refuse(this.root().getFileSystem(), globPatterns));
+    }
+
+    public JkFileTree refuse(String... globPatterns) {
+        return refuse(Arrays.asList(globPatterns));
     }
 
     // ------------------------ Misc ---------------------------------------
@@ -480,6 +483,10 @@ public final class JkFileTree  {
             return this.dir;
         }
 
+        @Override
+        public String toString() {
+            return isZip() ? zipFile.toString() : dir.toString();
+        }
     }
 
 }

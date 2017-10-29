@@ -328,7 +328,7 @@ public final class JkClassLoader {
             return null;
 
         } catch (final ClassNotFoundException e) { // NOSONAR
-            final Set<Class<?>> classes = loadClasses("**/" + name);
+            final Set<Class<?>> classes = loadClasses("**/" + name, name);
             for (final Class<?> clazz : classes) {
                 if (clazz.getSimpleName().equals(name) && superClass == null
                         || superClass != null && superClass.isAssignableFrom(clazz)) {
@@ -384,9 +384,9 @@ public final class JkClassLoader {
      * <code>my/pack/&#42;&#42;/&#42;.class</code>. Note that ending with
      * <code>.class</code> is important.
      */
-    private Set<Class<?>> loadClasses(JkPathFilter classFileFilter) {
+    private Set<Class<?>> loadClasses(Iterable<String> patterns) {
         final Set<Class<?>> result = new HashSet<>();
-        final Set<Path> classFiles = this.fullClasspath().allItemsMatching(classFileFilter);
+        final Set<Path> classFiles = this.fullClasspath().allPathMatching(patterns);
         for (final Path classFile : classFiles) {
             final String className = getAsClassName(classFile.toString());
             result.add(this.load(className));
@@ -400,14 +400,13 @@ public final class JkClassLoader {
      * <code>my.pack</code> or its sub package, then you have to supply a the
      * following pattern <code>my/pack/&#42;&#42;/&#42;</code>.
      *
-     * @see JkClassLoader#loadClasses(JkPathFilter)
      */
-    public Set<Class<?>> loadClasses(String... includingPatterns) {
+    public Set<Class<?>> loadClasses(String... globPatterns) {
         final List<String> patterns = new LinkedList<>();
-        for (final String pattern : includingPatterns) {
+        for (final String pattern : globPatterns) {
             patterns.add(pattern + ".class");
         }
-        return loadClasses(JkPathFilter.include(patterns));
+        return loadClasses(patterns);
     }
 
     /**
@@ -448,8 +447,7 @@ public final class JkClassLoader {
     private Iterator<Class<?>> iterateClassesIn(Path dirOrJar) {
         final List<Path> paths;
         if (Files.isDirectory(dirOrJar)) {
-            paths = JkFileTree.of(dirOrJar).andMatcher(JkPathMatcher.accept("**.class"))
-                    .relativeFiles();
+            paths = JkFileTree.of(dirOrJar).accept("**.class").relativeFiles();
         } else {
             final List<ZipEntry> entries = JkUtilsZip.zipEntries(JkUtilsZip.zipFile(dirOrJar.toFile()));
             paths = new LinkedList<>();

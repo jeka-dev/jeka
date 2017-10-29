@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -12,6 +13,7 @@ import java.util.zip.ZipFile;
 
 import org.jerkar.api.file.JkFileTree;
 import org.jerkar.api.file.JkPathFilter;
+import org.jerkar.api.file.JkPathMatcher;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
@@ -126,27 +128,12 @@ public final class JkClasspath implements Iterable<Path> {
         return null;
     }
 
-    /**
-     * Returns all the elements contained in this classpath. It can be either a
-     * class file or any resource file. The element is expressed with its path
-     * relative to its containing entry.
-     */
-    Set<Path> allItemsMatching(JkPathFilter fileFilter) {
-        final Set<Path> result = new HashSet<>();
+    Set<Path> allPathMatching(Iterable<String> globPatterns) {
+        final Set<Path> result = new LinkedHashSet<>();
         for (final Path classpathEntry : this.entries) {
-            if (Files.isDirectory(classpathEntry)) {
-                result.addAll(JkFileTree.of(classpathEntry).andFilter(fileFilter).relativeFiles());
-            } else {
-                final ZipFile zipFile = JkUtilsZip.zipFile(classpathEntry.toFile());
-                for (final Enumeration<? extends ZipEntry> zipEntries = zipFile.entries(); zipEntries
-                        .hasMoreElements();) {
-                    final ZipEntry zipEntry = zipEntries.nextElement();
-                    if (fileFilter.accept(zipEntry.getName())) {
-                        result.add(Paths.get(zipEntry.getName()));
-                    }
-                }
-                JkUtilsIO.closeQuietly(zipFile);
-            }
+            JkFileTree tree = Files.isDirectory(classpathEntry) ?
+                    JkFileTree.of(classpathEntry) : JkFileTree.ofZip(classpathEntry);
+            result.addAll(tree.accept(globPatterns).relativeFiles());
         }
         return result;
     }
@@ -157,7 +144,6 @@ public final class JkClasspath implements Iterable<Path> {
      * Returns a <code>JkClasspath</code> made ofMany, in the order, the specified
      * entries plus the entries ofMany this one.
      */
-    @SuppressWarnings("unchecked")
     public JkClasspath andManyFirst(Iterable<Path> otherEntries) {
         Iterable<Path> paths = JkUtilsPath.disambiguate(otherEntries);
         final LinkedList<Path> list = new LinkedList<>();

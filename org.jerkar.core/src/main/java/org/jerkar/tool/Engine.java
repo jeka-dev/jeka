@@ -20,7 +20,6 @@ import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkScopeMapping;
 import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkPathFilter;
 import org.jerkar.api.file.JkPathMatcher;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.java.JkClassLoader;
@@ -230,7 +229,7 @@ final class Engine {
     private void compileBuild(JkPathSequence buildPath) {
         JkJavaCompileSpec compileSpec = buildCompileSpec().setClasspath(buildPath);
         JkJavaCompiler.base().compile(compileSpec);
-        JkFileTree.of(this.resolver.buildSourceDir).exclude("**/*.java").copyTo(this.resolver.buildClassDir,
+        JkFileTree.of(this.resolver.buildSourceDir).refuse("**/*.java").copyTo(this.resolver.buildClassDir,
                 StandardCopyOption.REPLACE_EXISTING);
     }
 

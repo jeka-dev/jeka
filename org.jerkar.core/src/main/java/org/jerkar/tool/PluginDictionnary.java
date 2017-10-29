@@ -86,13 +86,14 @@ final class PluginDictionnary {
 
     private static <T> Set<JkPluginDescription> loadAllPlugins() {
         final String nameSuffix = JkPlugin.class.getSimpleName();
-        return loadPlugins( "**/" + nameSuffix + "*", "**/*$" + nameSuffix + "*");
+        return loadPlugins( "**/" + nameSuffix + "*", nameSuffix, "**/*$" + nameSuffix + "*",
+                "*$" + nameSuffix + "*");
     }
 
     private static JkPluginDescription loadPluginHavingShortName(String shortName) {
         final String simpleName = simpleClassName(shortName);
-        final Set<JkPluginDescription> set = loadPlugins( "**/" + simpleName);
-        set.addAll(loadPlugins( "**/*$" + simpleName));
+        final Set<JkPluginDescription> set = loadPlugins( "**/" + simpleName, simpleName);
+        set.addAll(loadPlugins( "**/*$" + simpleName, "*$" + simpleName ));
         if (set.size() > 1) {
             throw new JkException("Several plugin have the same short name : '" + shortName
                     + "'. Please disambiguate with using plugin long name (full class name)."
