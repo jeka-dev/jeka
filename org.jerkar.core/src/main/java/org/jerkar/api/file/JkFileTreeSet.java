@@ -129,6 +129,14 @@ public final class JkFileTreeSet {
         return new JkFileTreeSet(list);
     }
 
+    public JkFileTreeSet accept(Iterable<String> globPatterns) {
+        final List<JkFileTree> list = new LinkedList<>();
+        for (final JkFileTree tree : this.jkFileTrees) {
+            list.add(tree.accept(globPatterns));
+        }
+        return new JkFileTreeSet(list);
+    }
+
     /**
      * Creates a {@link JkFileTree} which is a copy of this {@link JkFileTree}
      * augmented with the specified {@link JkPathMatcher}

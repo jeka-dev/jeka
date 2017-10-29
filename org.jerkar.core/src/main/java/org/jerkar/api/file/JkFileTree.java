@@ -324,16 +324,6 @@ public final class JkFileTree  {
         return new JkFileTree(rootHolder, this.filter.and(pathMatcher));
     }
 
-    /**
-     * Short hand to {@link #andFilter(JkPathFilter)} defining an include Ant
-     * pattern filter. This will include any file matching at least one ofMany the
-     * specified <code>antPatterns</code>.
-     */
-    @Deprecated
-    public JkFileTree include(String... antPatterns) {
-        return andFilter(JkPathFilter.include(antPatterns));
-    }
-
     public JkFileTree accept(String... globPatterns) {
         return accept(Arrays.asList(globPatterns));
     }

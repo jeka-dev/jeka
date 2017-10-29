@@ -433,7 +433,7 @@ public final class JkClassLoader {
      * @see JkClassLoader#loadClassesInEntries(PathMatcher)
      */
     public Iterator<Class<?>> iterateClassesIn(JkFileTreeSet jkFileTreeSet) {
-        final List<Path> fileNames = jkFileTreeSet.andFilter(JkPathFilter.include("**/*.class"))
+        final List<Path> fileNames = jkFileTreeSet.andFilter(JkPathMatcher.accept("**/*.class"))
                 .relativeFiles();
         return classIterator(fileNames.stream().map(path -> path.toString()).collect(Collectors.toList()));
     }

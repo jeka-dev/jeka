@@ -4,6 +4,7 @@ import java.nio.file.Path;
 
 import org.jerkar.api.file.JkFileTreeSet;
 import org.jerkar.api.file.JkPathFilter;
+import org.jerkar.api.file.JkPathMatcher;
 
 /**
  * Utilities class to produce Jar files with conventional naming
@@ -15,6 +16,12 @@ public final class JkJarMaker {
      */
     public static final JkPathFilter EXCLUDE_SIGNATURE_FILTER =
             JkPathFilter.exclude("meta-inf/*.rsa", "meta-inf/*.dsa", "meta-inf/*.sf").caseSensitive(false);
+
+    /**
+     * Filter to exclude signature files from fat jar (aka uber jar).
+     */
+    public static final JkPathMatcher EXCLUDE_SIGNATURE_MATCHER =
+            JkPathMatcher.refuse("meta-inf/*.rsa", "meta-inf/*.dsa", "meta-inf/*.sf");
 
     private JkJarMaker() {
         // Not instantiable
@@ -52,7 +59,7 @@ public final class JkJarMaker {
         }
 
         JkFileTreeSet.of(classDir).and(extraFiles).andZips(otherJars)
-                .andFilter(EXCLUDE_SIGNATURE_FILTER).zipTo(resultFile);
+                .andFilter(EXCLUDE_SIGNATURE_MATCHER).zipTo(resultFile);
 
     }
 
