@@ -31,7 +31,7 @@ import org.w3c.dom.NodeList;
  */
 public final class JkEclipseProject {
 
-    public static JkEclipseProject of(File dotProjectFile) {
+    private static JkEclipseProject of(Path dotProjectFile) {
         final Document document = getDotProjectAsDom(dotProjectFile);
         return from(document);
     }
@@ -44,21 +44,6 @@ public final class JkEclipseProject {
         return new JkEclipseProject(name, new HashSet<>());
     }
 
-
-    @Deprecated
-    public static Map<String, File> findProjects(File parent) {
-        final Map<String, File> map = new HashMap<>();
-        for (final File file : parent.listFiles()) {
-            final File dotProject = new File(file, ".project");
-            if (!(dotProject.exists())) {
-                continue;
-            }
-            final JkEclipseProject project = JkEclipseProject.of(dotProject);
-            map.put(project.name, file);
-        }
-        return map;
-    }
-
     public static Map<String, Path> findProjectPath(Path parent) {
         final Map<String, Path> map = new HashMap<>();
         for (final Path file : JkUtilsPath.listDirectChildren(parent)) {
@@ -66,7 +51,7 @@ public final class JkEclipseProject {
             if (!Files.exists(dotProject)) {
                 continue;
             }
-            final JkEclipseProject project = JkEclipseProject.of(dotProject.toFile());
+            final JkEclipseProject project = JkEclipseProject.of(dotProject);
             map.put(project.name, file);
         }
         return map;
@@ -78,15 +63,6 @@ public final class JkEclipseProject {
 
     boolean hasJavaNature() {
         return natures.contains("org.eclipse.jdt.core.javanature");
-    }
-
-    @Deprecated
-    public void writeTo(File dotProjectFile) {
-        try {
-            writeToFile(dotProjectFile.toPath());
-        } catch (final FileNotFoundException | FactoryConfigurationError | XMLStreamException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public void writeTo(Path dotProjectFile) {
@@ -166,15 +142,15 @@ public final class JkEclipseProject {
         return new JkEclipseProject(name, natures);
     }
 
-    private static Document getDotProjectAsDom(File dotProjectFile) {
-        if (!dotProjectFile.exists()) {
-            throw new IllegalStateException(dotProjectFile.getAbsolutePath() + " file not found.");
+    private static Document getDotProjectAsDom(Path dotProjectFile) {
+        if (!Files.exists(dotProjectFile)) {
+            throw new IllegalStateException(dotProjectFile + " file not found.");
         }
         final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         try {
             final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc;
-            doc = dBuilder.parse(dotProjectFile);
+            doc = dBuilder.parse(dotProjectFile.toFile());
             doc.getDocumentElement().normalize();
             return doc;
         } catch (final Exception e) {

@@ -37,57 +37,6 @@ import java.util.zip.ZipInputStream;
 public final class JkUtilsFile {
 
     /**
-     * Throws an {@link IllegalArgumentException} if one ofMany the specified file
-     * is not a directory or does not exist.
-     */
-    public static void assertAllDir(File... candidates) {
-        assertAllExist(candidates);
-        for (final File candidate : candidates) {
-            if (!candidate.isDirectory()) {
-                throw new IllegalArgumentException(candidate + " is not a directory.");
-            }
-        }
-    }
-
-    /**
-     * Throws an {@link IllegalArgumentException} if one ofMany the specified file
-     * or directory does not exist.
-     */
-    public static void assertAllExist(File... candidates) {
-        for (final File candidate : candidates) {
-            if (!candidate.exists()) {
-                throw new IllegalArgumentException(candidate.getPath() + " does not exist.");
-            }
-        }
-    }
-
-    /**
-     * Moves a file to another location.
-     */
-    public static void move(File from, File to) {
-        if (!from.renameTo(to)) {
-            copyFile(from, to);
-            if (!from.delete()) {
-                if (!to.delete()) {
-                    throw new RuntimeException("Unable to delete " + to);
-                }
-                throw new RuntimeException("Unable to delete " + from);
-            }
-        }
-    }
-
-    /**
-     * Returns the relative path ofMany the specified file relative to the specified
-     * base directory. File argument must be a child ofMany the base directory
-     * otherwise method throw an {@link IllegalArgumentException}.
-     */
-    public static String getRelativePath(File baseDir, File file) {
-        final FilePath basePath = FilePath.of(baseDir);
-        final FilePath filePath = FilePath.of(file);
-        return filePath.relativeTo(basePath).toString();
-    }
-
-    /**
      * Returns the content ofMany the specified property file as a
      * {@link Properties} object.
      */
@@ -121,25 +70,6 @@ public final class JkUtilsFile {
     public static Map<String, String> readPropertyFileAsMap(Path propertyfile) {
         final Properties properties = readPropertyFile(propertyfile);
         return JkUtilsIterable.propertiesToMap(properties);
-    }
-
-    /**
-     * Returns the content ofMany the specified file as a string.
-     */
-    public static String read(File file) {
-        try (final FileInputStream fileInputStream = JkUtilsIO.inputStream(file)) {
-            return JkUtilsIO.readAsString(fileInputStream);
-        } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
-        }
-    }
-
-
-    /**
-     * Copies the given file to the specified directory.
-     */
-    public static void copyFile(File from, File toFile) {
-        copyFile(from, toFile, null);
     }
 
     /**
@@ -180,21 +110,6 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Fully delete the content ofMany he specified directory.
-     */
-    public static void deleteDirContent(File dir) {
-        final File[] files = dir.listFiles();
-        if (files != null) {
-            for (final File file : files) {
-                if (file.isDirectory()) {
-                    deleteDirContent(file);
-                }
-                delete(file);
-            }
-        }
-    }
-
-    /**
      * Get the url to the specified file.
      */
     public static URL toUrl(File file) {
@@ -225,31 +140,6 @@ public final class JkUtilsFile {
             throw new IllegalArgumentException(url + " : " + e.getMessage(), e);
         }
         return result;
-    }
-
-    /**
-     * Returns <code>true</code> if the ancestor candidate file is an ancestor ofMany
-     * the specified child candidate.
-     */
-    public static boolean isAncestor(File ancestorCandidate, File childCandidate) {
-        File parent = childCandidate;
-        while (true) {
-            parent = parent.getParentFile();
-            if (parent == null) {
-                return false;
-            }
-            if (isSame(parent, ancestorCandidate)) {
-                return true;
-            }
-        }
-    }
-
-    /**
-     * Returns <code>true</code> if the canonical files passed as arguments have
-     * the same canonical file.
-     */
-    public static boolean isSame(File file1, File file2) {
-        return canonicalFile(file1).equals(canonicalFile(file2));
     }
 
     /**
@@ -310,14 +200,6 @@ public final class JkUtilsFile {
     }
 
     /**
-     * Return the system temp directory as given by system property
-     * <i>java.io.tmpdir</i>.
-     */
-    public static File tempDir() {
-        return new File(System.getProperty("java.io.tmpdir"));
-    }
-
-    /**
      * Writes the specified content in the the specified file. If append is
      * <code>true</code> the content is written at the end ofMany the file.
      */
@@ -330,20 +212,6 @@ public final class JkUtilsFile {
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * Inserts the specified content at the begining ofMany the specified file. For
-     * such a temp file is create then the original file is replaced by the temp
-     * file.
-     */
-    public static void writeStringAtTop(File file, String content) {
-        createFileIfNotExist(file);
-        final File temp = tempFile("jerkar-copy", "");
-        writeString(temp, content, false);
-        append(temp, file);
-        move(temp, file);
-        temp.delete();
     }
 
     /**
@@ -384,8 +252,6 @@ public final class JkUtilsFile {
         return result;
     }
 
-
-
     /**
      * Creates the specified file on the File system if not exist.
      */
@@ -412,9 +278,6 @@ public final class JkUtilsFile {
             throw new RuntimeException("File " + file.getAbsolutePath() + " can't be deleted.");
         }
     }
-
-
-
 
     /**
      * Same as {@link #copyFileReplacingTokens(File, File, Map, PrintStream)}
@@ -448,109 +311,6 @@ public final class JkUtilsFile {
             }
         } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
-        }
-
-    }
-
-    private static class FilePath {
-
-        public static FilePath of(File file) {
-            final File canonicalFile = JkUtilsFile.canonicalFile(file);
-            final List<String> elements = new ArrayList<>();
-            for (File indexFile = canonicalFile; indexFile != null; indexFile = indexFile.getParentFile()) {
-                if (indexFile.getParent() == null) {
-                    elements.add(JkUtilsString.substringBeforeLast(indexFile.getPath(), File.separator));
-                } else {
-                    elements.add(indexFile.getName());
-                }
-            }
-            Collections.reverse(elements);
-            return new FilePath(elements);
-        }
-
-        private final List<String> elements;
-
-        private FilePath(List<String> elements) {
-            super();
-            this.elements = Collections.unmodifiableList(elements);
-        }
-
-        private FilePath common(FilePath other) {
-            final List<String> result = new LinkedList<>();
-            for (int i = 0; i < elements.size(); i++) {
-                if (i >= other.elements.size()) {
-                    break;
-                }
-                final String thisElement = this.elements.get(i);
-                final String otherElement = other.elements.get(i);
-                if (thisElement.equals(otherElement)) {
-                    result.add(thisElement);
-                } else {
-                    break;
-                }
-            }
-            return new FilePath(result);
-        }
-
-        public FilePath relativeTo(FilePath otherFolder) {
-            final FilePath common = this.common(otherFolder);
-
-            // this path is a sub past ofMany the other
-            if (common.equals(otherFolder)) {
-                List<String> result = new ArrayList<>(this.elements);
-                result = result.subList(common.elements.size(), this.elements.size());
-                return new FilePath(result);
-            }
-
-            final List<String> result = new ArrayList<>();
-            for (int i = common.elements.size(); i < otherFolder.elements.size(); i++) {
-                result.add("..");
-            }
-            result.addAll(this.relativeTo(common).elements);
-            return new FilePath(result);
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder builder = new StringBuilder();
-            final Iterator<String> it = this.elements.iterator();
-            while (it.hasNext()) {
-                builder.append(it.next());
-                if (it.hasNext()) {
-                    builder.append(File.separator);
-                }
-            }
-            return builder.toString();
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((elements == null) ? 0 : elements.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final FilePath other = (FilePath) obj;
-            if (elements == null) {
-                if (other.elements != null) {
-                    return false;
-                }
-            } else if (!elements.equals(other.elements)) {
-                return false;
-            }
-            return true;
         }
 
     }

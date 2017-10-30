@@ -8,8 +8,6 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-//import java.io.File;
-
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry;
 import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry.Kind;

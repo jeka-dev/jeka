@@ -2,6 +2,7 @@ package org.jerkar.tool.builtins.idea;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import javax.xml.stream.FactoryConfigurationError;
@@ -9,7 +10,6 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
@@ -47,8 +47,8 @@ class ModulesXmlGenerator {
 
     private void _generate() throws IOException, XMLStreamException, FactoryConfigurationError {
 
-        final ByteArrayOutputStream fos = new ByteArrayOutputStream();
-        final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(fos, ENCODING);
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(baos, ENCODING);
         writer.writeStartDocument(ENCODING, "1.0");
         writer.writeCharacters("\n");
         writer.writeStartElement("project");
@@ -74,7 +74,7 @@ class ModulesXmlGenerator {
         writer.flush();
         writer.close();
         JkUtilsPath.deleteFile(outputFile);
-        JkUtilsFile.writeStringAtTop(outputFile.toFile(), fos.toString(ENCODING));
+        Files.write(outputFile, baos.toByteArray());
     }
 
     private String path(Path iml) {

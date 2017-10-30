@@ -29,7 +29,9 @@ import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.java.JkJavaProjectDefinition;
 import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.utils.*;
+import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.api.utils.JkUtilsThrowable;
 import org.jerkar.tool.JkConstants;
 
 /**
@@ -318,7 +320,7 @@ public final class JkEclipseClasspathGenerator {
             if (!fileTree.exists()) {
                 continue;
             }
-            final String path = relativePathIfPossible(sourceLayout.baseDir().toFile(), fileTree.root().toFile());
+            final String path = relativePathIfPossible(sourceLayout.baseDir(), fileTree.root());
             if (sourcePaths.contains(path)) {
                 continue;
             }
@@ -333,11 +335,11 @@ public final class JkEclipseClasspathGenerator {
 
     }
 
-    private static String relativePathIfPossible(File base, File candidate) {
-        if (!JkUtilsFile.isAncestor(base, candidate)) {
-            return JkUtilsFile.canonicalPath(candidate).replace(File.separator, "/");
+    private static String relativePathIfPossible(Path base, Path candidate) {
+        if (!candidate.startsWith(base)) {
+            return candidate.toAbsolutePath().normalize().toString().replace(File.separator, "/");
         }
-        return JkUtilsFile.getRelativePath(base, candidate).replace(File.separator, "/");
+        return base.relativize(candidate).toString().replace(File.separator, "/");
     }
 
     private void writeIncludingExcluding(XMLStreamWriter writer, JkPathTree fileTree) throws XMLStreamException {
@@ -432,7 +434,8 @@ public final class JkEclipseClasspathGenerator {
             writer.writeEmptyElement("attribute");
             writer.writeAttribute("name", "javadoc_location");
             writer.writeAttribute("value",   // Eclipse does not accept variable for javadoc path
-                    "jar:file:/" + JkUtilsFile.canonicalPath(javadoc).replace(File.separator, "/") + "!/");
+                    "jar:file:/" + javadoc.toPath().toAbsolutePath().normalize().toString()
+                            .replace(File.separator, "/") + "!/");
             writer.writeCharacters("\n\t\t");
             writer.writeEndElement();
             writer.writeCharacters("\n\t");
