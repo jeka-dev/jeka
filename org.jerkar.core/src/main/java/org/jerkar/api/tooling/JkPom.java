@@ -16,8 +16,8 @@ import org.jerkar.api.depmanagement.JkScopedDependency;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.depmanagement.JkVersionProvider;
 import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkFileTreeSet;
+import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsXml;
 import org.w3c.dom.Document;
@@ -192,7 +192,7 @@ public final class JkPom {
     /**
      * The Jerkar build class source equivalent to this POM.
      */
-    public String jerkarSourceCode(JkFileTree baseDir) {
+    public String jerkarSourceCode(JkPathTree baseDir) {
         final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
         codeWriter.moduleId = JkModuleId.of(groupId(), artifactId());
         codeWriter.dependencies = dependencies();
@@ -205,22 +205,22 @@ public final class JkPom {
         codeWriter.version = version();
         codeWriter.versionProvider = versionProvider();
         if (baseDir.goTo("src/main/resources").exists()) {
-            codeWriter.imports.add(JkFileTreeSet.class.getName());
+            codeWriter.imports.add(JkPathTreeSet.class.getName());
             codeWriter.extraMethods.add(
                     "    // If you move your resources to src/main/java (collocated with java classes code), \n" +
                             "    // you can remove this method. \n" +
                             "    @Override\n" +
-                            "    public JkFileTreeSet resources() {\n" +
+                            "    public JkPathTreeSet resources() {\n" +
                             "        return baseDirAsTree().jump(\"src/main/resources\").asSet();\n" +
                     "    }");
         }
         if (baseDir.goTo("src/test/resources").exists()) {
-            codeWriter.imports.add(JkFileTreeSet.class.getName());
+            codeWriter.imports.add(JkPathTreeSet.class.getName());
             codeWriter.extraMethods.add(
                     "    // If you move your test resources to src/test/java (collocated with java classes code), \n" +
                             "    // you can remove this method.\n" +
                             "    @Override\n" +
-                            "    public JkFileTreeSet unitTestResources() {\n" +
+                            "    public JkPathTreeSet unitTestResources() {\n" +
                             "        return baseDirAsTree().jump(\"src/test/resources\").asSet();\n" +
                     "    }");
         }

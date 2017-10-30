@@ -23,7 +23,7 @@ import org.jerkar.api.depmanagement.JkModuleDependency;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkResolveResult;
 import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
@@ -294,7 +294,7 @@ public final class JkEclipseClasspathGenerator {
         final Set<String> sourcePaths = new HashSet<>();
 
         // Test Sources
-        for (final JkFileTree fileTree : sourceLayout.tests().and(sourceLayout.testResources()).fileTrees()) {
+        for (final JkPathTree fileTree : sourceLayout.tests().and(sourceLayout.testResources()).fileTrees()) {
             if (!fileTree.exists()) {
                 continue;
             }
@@ -314,7 +314,7 @@ public final class JkEclipseClasspathGenerator {
         }
 
         // Sources
-        for (final JkFileTree fileTree : sourceLayout.sources().and(sourceLayout.resources()).fileTrees()) {
+        for (final JkPathTree fileTree : sourceLayout.sources().and(sourceLayout.resources()).fileTrees()) {
             if (!fileTree.exists()) {
                 continue;
             }
@@ -340,7 +340,7 @@ public final class JkEclipseClasspathGenerator {
         return JkUtilsFile.getRelativePath(base, candidate).replace(File.separator, "/");
     }
 
-    private void writeIncludingExcluding(XMLStreamWriter writer, JkFileTree fileTree) throws XMLStreamException {
+    private void writeIncludingExcluding(XMLStreamWriter writer, JkPathTree fileTree) throws XMLStreamException {
         final String including = toPatternString(fileTree.matcher().getIncludePatterns());
         if (!JkUtilsString.isBlank(including)) {
             writer.writeAttribute("including", including);

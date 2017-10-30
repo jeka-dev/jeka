@@ -25,7 +25,7 @@ import org.jerkar.api.depmanagement.JkResolveResult;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
@@ -183,7 +183,7 @@ public final class JkImlGenerator {
 
         // Write test sources
         final Path projectDir = this.sourceLayout.baseDir();
-        for (final JkFileTree fileTree : this.sourceLayout.tests().fileTrees()) {
+        for (final JkPathTree fileTree : this.sourceLayout.tests().fileTrees()) {
             if (fileTree.exists()) {
                 writer.writeCharacters(T3);
                 writer.writeEmptyElement("sourceFolder");
@@ -196,7 +196,7 @@ public final class JkImlGenerator {
         }
 
         // write test resources
-        for (final JkFileTree fileTree : this.sourceLayout.testResources().fileTrees()) {
+        for (final JkPathTree fileTree : this.sourceLayout.testResources().fileTrees()) {
             if (fileTree.exists()) {
                 writer.writeCharacters(T3);
                 writer.writeEmptyElement("sourceFolder");
@@ -209,7 +209,7 @@ public final class JkImlGenerator {
 
         // Write production sources
 
-        for (final JkFileTree fileTree : this.sourceLayout.sources().fileTrees()) {
+        for (final JkPathTree fileTree : this.sourceLayout.sources().fileTrees()) {
             if (fileTree.exists()) {
                 writer.writeCharacters(T3);
                 writer.writeEmptyElement("sourceFolder");
@@ -221,7 +221,7 @@ public final class JkImlGenerator {
         }
 
         // Write production test resources
-        for (final JkFileTree fileTree : this.sourceLayout.resources().fileTrees()) {
+        for (final JkPathTree fileTree : this.sourceLayout.resources().fileTrees()) {
             if (fileTree.exists()) {
                 writer.writeCharacters(T3);
                 writer.writeEmptyElement("sourceFolder");
@@ -513,7 +513,7 @@ public final class JkImlGenerator {
         }
         Path folder = files.iterator().next().getParent();
         while (folder != null) {
-            if (JkFileTree.of(folder).accept("*.iml").count(1, false) == 1) {
+            if (JkPathTree.of(folder).accept("*.iml").count(1, false) == 1) {
                 return folder;
             }
             if (JkUtilsIterable.listOf(projectDependencies).contains(folder)) {

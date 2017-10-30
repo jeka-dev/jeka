@@ -40,8 +40,8 @@ public class JkPluginSonar implements JkPlugin {
                 .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)
                 .withBinaries(project.getOutLayout().classDir())
                 .withLibraries(libs)
-                .withSourcesPath(sourceLayout.sources().rootFiles())
-                .withTestPath(sourceLayout.tests().rootFiles())
+                .withSourcesPath(sourceLayout.sources().rootDirsOrZipFiles())
+                .withTestPath(sourceLayout.tests().rootDirsOrZipFiles())
                 .withProperty(JkSonar.WORKING_DIRECTORY, sourceLayout.baseDir().resolve("build/.sonar").toString())
                 .withProperty(JkSonar.JUNIT_REPORTS_PATH,
                         baseDir.relativize( testReportDir.resolve("junit")).toString())

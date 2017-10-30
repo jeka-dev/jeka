@@ -1,6 +1,8 @@
 package org.jerkar.api.crypto.pgp;
 
+import java.io.OutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -124,8 +126,10 @@ public final class JkPgp implements Serializable {
         if (!Files.exists(secretRing())) {
             throw new IllegalStateException("Specified secret ring file not found.");
         }
-        JkUtilsReflect.invokeStaticMethod(PGPUTILS_CLASS, "sign", fileToSign.toFile(),
-                secRing.toFile(), output.toFile(), pass, true);
+        Method signMethod = JkUtilsReflect.getMethod(PGPUTILS_CLASS, "sign", Path.class, Path.class, Path.class,
+                char[].class, boolean.class);
+        JkUtilsReflect.invoke(null, signMethod, fileToSign,
+                secRing, output, pass, true);
     }
 
     /**

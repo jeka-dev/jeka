@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.jerkar.api.depmanagement.JkArtifactFileId;
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJarMaker;
 
@@ -55,7 +55,7 @@ public final class JkJavaProjectPackager {
                     + " : can't create javadoc jar. Please, generate Javadoc prior to package it in jar.");
         }
         Path result = project.artifactPath(JkJavaProject.JAVADOC_FILE_ID);
-        JkFileTree.of(javadocDir).zipTo(result);
+        JkPathTree.of(javadocDir).zipTo(result);
         return  result;
     }
 

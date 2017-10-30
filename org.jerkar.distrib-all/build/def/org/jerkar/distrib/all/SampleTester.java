@@ -1,13 +1,12 @@
 package org.jerkar.distrib.all;
 
 import java.io.File;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsAssert;
@@ -17,17 +16,17 @@ import org.jerkar.api.utils.JkUtilsSystem;
 
 class SampleTester {
 
-    private final JkFileTree sampleBaseDir;
+    private final JkPathTree sampleBaseDir;
 
-    private final JkFileTree sampleDependeeBaseDir;
+    private final JkPathTree sampleDependeeBaseDir;
 
-    private final JkFileTree output;
+    private final JkPathTree output;
 
     private Path launchScript;
     
     boolean restoreEclipseClasspathFile;
 
-    SampleTester(JkFileTree buildDir) {
+    SampleTester(JkPathTree buildDir) {
         super();
         this.sampleBaseDir = buildDir.goTo("../org.jerkar.samples");
         this.sampleDependeeBaseDir = buildDir.goTo("../org.jerkar.samples-dependee");

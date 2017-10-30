@@ -11,7 +11,7 @@ import org.jerkar.api.depmanagement.JkArtifactFileId;
 import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
 import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkPublishRepos;
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
@@ -48,7 +48,7 @@ public class CoreBuild extends JkJavaProjectBuild {
     private void doDistrib() {
         final JkJavaProject project = this.project();
         project.makeArtifactFilesIfNecessary(SOURCES_FILE_ID, JAVADOC_FILE_ID, project.mainArtifactFileId());
-        final JkFileTree distrib = JkFileTree.of(distribFolder);
+        final JkPathTree distrib = JkPathTree.of(distribFolder);
         distrib.copyIn(baseDir().getParent().resolve("LICENSE"));
         distrib.merge(baseDir().resolve("src/main/dist"));
         distrib.merge(baseDir().resolve("src/main/java/META-INF/bin"));

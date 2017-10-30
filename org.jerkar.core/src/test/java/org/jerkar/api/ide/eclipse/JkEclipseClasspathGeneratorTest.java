@@ -13,7 +13,7 @@ import org.jerkar.api.depmanagement.JkComputedDependency;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.depmanagement.JkScopedDependency;
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
@@ -102,7 +102,7 @@ public class JkEclipseClasspathGeneratorTest {
         final JkComputedDependency baseProjectDep = (JkComputedDependency) coreDeps2.get(0).dependency();
         assertEquals(base, baseProjectDep.ideProjectBaseDir());
 
-        JkFileTree.of(top).deleteContent();
+        JkPathTree.of(top).deleteContent();
     }
 
     private static File unzipToDir(String zipName) {

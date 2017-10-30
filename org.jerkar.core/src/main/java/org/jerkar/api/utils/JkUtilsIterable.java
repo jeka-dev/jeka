@@ -141,30 +141,6 @@ public final class JkUtilsIterable {
         return result;
     }
 
-    /**
-     * Returns an {@link Iterable} iterating on items ofMany specified iterables.
-     * Result is backed by the specified iterables.
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> Iterable<T> chain(Iterable<T>... iterables) {
-        return chainAll(Arrays.asList(iterables));
-    }
-
-
-    /**
-     * @see JkUtilsIterable#chain(Iterable...)
-     */
-    public static <T> Iterable<T> chainAll(Iterable<Iterable<T>> iterables) {
-        final List<Iterable<T>> effectiveIterables = removeEmptyIt(iterables);
-        if (effectiveIterables.isEmpty()) {
-            return Collections.emptyList();
-        }
-        if (effectiveIterables.size() == 1) {
-            return effectiveIterables.get(0);
-        }
-        return new ChainedIterable<>(effectiveIterables);
-    }
-
     private static <T> List<Iterable<T>> removeEmptyIt(Iterable<Iterable<T>> iterables) {
         final List<Iterable<T>> result = new LinkedList<>();
         for (final Iterable<T> iterable : iterables) {

@@ -1,19 +1,8 @@
 package org.jerkar.api.project.java;
 
-import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.jerkar.api.depmanagement.JkArtifactFileId;
-import org.jerkar.api.depmanagement.JkArtifactProducer;
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkJavaDepScopes;
-import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileSystemLocalizable;
-import org.jerkar.api.file.JkFileTreeSet;
-import org.jerkar.api.file.JkPathFilter;
+import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaVersion;
@@ -22,10 +11,11 @@ import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.project.JkProjectOutLayout;
 import org.jerkar.api.project.JkProjectSourceLayout;
 
+import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
+
 /**
- * Beware : Experimental !!!!!!!!!!!!!!!!!!!!!!!
- * The API is likely to change subsequently.
- *
  * Container for a Java project with classic characteristic :
  * <ul>
  *     <li>Contains Java source files to be compiled</li>
@@ -81,7 +71,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
 
     private JkManifest manifest = JkManifest.empty();
 
-    private JkFileTreeSet extraFilesToIncludeInFatJar = JkFileTreeSet.empty();
+    private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.empty();
 
     private JkMavenPublicationInfo mavenPublicationInfo;
 
@@ -269,11 +259,11 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
         return this;
     }
 
-    public JkFileTreeSet getExtraFilesToIncludeInJar() {
+    public JkPathTreeSet getExtraFilesToIncludeInJar() {
         return extraFilesToIncludeInFatJar;
     }
 
-    public JkJavaProject setExtraFilesToIncludeInFatJar(JkFileTreeSet extraFilesToIncludeInFatJar) {
+    public JkJavaProject setExtraFilesToIncludeInFatJar(JkPathTreeSet extraFilesToIncludeInFatJar) {
         this.extraFilesToIncludeInFatJar = extraFilesToIncludeInFatJar;
         return this;
     }

@@ -1,11 +1,8 @@
 package org.jerkar.api.crypto.pgp;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,6 +33,7 @@ import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPContentVerifierBuilderProvider;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
+import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsThrowable;
@@ -44,21 +42,21 @@ final class PgpUtils {
 
     private static final int HASH_ALGO = PGPUtil.SHA1;
 
-    public static boolean verify(File fileToVerify, File pubringFile, File signatureFile) {
+    static boolean verify(Path fileToVerify, Path pubringFile, Path signatureFile) {
 
-        try (final InputStream streamToVerify = JkUtilsIO.inputStream(fileToVerify);
-             final InputStream signatureStream = JkUtilsIO.inputStream(signatureFile);
-             final InputStream pubringStream = JkUtilsIO.inputStream(pubringFile)) {
+        try (final InputStream streamToVerify = Files.newInputStream(fileToVerify);
+             final InputStream signatureStream = Files.newInputStream(signatureFile);
+             final InputStream pubringStream = Files.newInputStream(pubringFile)) {
             return verify(streamToVerify, signatureStream, pubringStream);
         } catch (final IOException | PGPException e) {
             throw JkUtilsThrowable.unchecked(e);
         } catch (final IllegalArgumentException e) {
             throw new IllegalArgumentException("Error with one ofMany this file : signatureFile = "
-                    + signatureFile.getPath());
+                    + signatureFile);
         }
     }
 
-    public static boolean verify(InputStream streamToVerify, InputStream signatureStream,
+    static boolean verify(InputStream streamToVerify, InputStream signatureStream,
             InputStream keyInputStream) throws IOException, PGPException {
 
         final InputStream sigInputStream = PGPUtil.getDecoderStream(new BufferedInputStream(
@@ -96,12 +94,14 @@ final class PgpUtils {
         return signature.verify();
     }
 
-    public static void sign(File fileToSign, File secringFile, File signatureFile, char[] pass,
-            boolean armor) {
-        JkUtilsFile.assertAllExist(fileToSign, secringFile);
-        try (final InputStream toSign = JkUtilsIO.inputStream(fileToSign);
-            final InputStream keyRing = JkUtilsIO.inputStream(secringFile);
-            final FileOutputStream out = JkUtilsIO.outputStream(signatureFile, false)) {
+    public static void sign(Path fileToSign, Path secringFile, Path signatureFile, char[] pass,
+                            boolean armor) {
+        //JkUtilsFile.assertAllExist(fileToSign, secringFile);
+        JkUtilsAssert.isTrue(Files.exists(fileToSign), fileToSign + " not found.");
+        JkUtilsAssert.isTrue(Files.exists(secringFile), secringFile + " not found.");
+        try (final InputStream toSign = Files.newInputStream(fileToSign);
+             final InputStream keyRing = Files.newInputStream(secringFile);
+             final OutputStream out = Files.newOutputStream(signatureFile)) {
 
             sign(toSign, keyRing, out, pass, armor);
         } catch (IOException e) {
@@ -110,7 +110,8 @@ final class PgpUtils {
 
     }
 
-    public static void sign(InputStream toSign, InputStream keyRing, OutputStream out, char[] pass,
+
+    static void sign(InputStream toSign, InputStream keyRing, OutputStream out, char[] pass,
             boolean armor) {
 
         if (armor) {

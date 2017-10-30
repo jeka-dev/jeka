@@ -1,6 +1,6 @@
 package org.jerkar.api.ide.eclipse;
 
-import org.jerkar.api.file.JkFileTreeSet;
+import org.jerkar.api.file.JkPathTreeSet;
 
 class Sources {
 
@@ -8,11 +8,11 @@ class Sources {
 
     public static final TestSegregator SMART = path -> path.toLowerCase().contains("test");
 
-    public final JkFileTreeSet prodSources;
+    public final JkPathTreeSet prodSources;
 
-    public final JkFileTreeSet testSources;
+    public final JkPathTreeSet testSources;
 
-    public Sources(JkFileTreeSet prodSources, JkFileTreeSet testSources) {
+    public Sources(JkPathTreeSet prodSources, JkPathTreeSet testSources) {
         super();
         this.prodSources = prodSources;
         this.testSources = testSources;

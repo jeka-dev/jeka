@@ -27,10 +27,10 @@ import org.jerkar.api.depmanagement.JkResolutionParameters;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkVersionProvider;
 import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkFileTreeSet;
+import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.file.JkPathSequence;
-import org.jerkar.api.file.JkCheckSumer;
+import org.jerkar.api.file.JkCheckSum;
 import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkJavaTestSpec;
@@ -84,7 +84,7 @@ public class JkJavaProjectMaker {
         this.project = project;
         this.packager = JkJavaProjectPackager.of(project);
         this.cleaner = JkRunnables.of(
-                () -> JkFileTree.of(project.getOutLayout().outputPath()).deleteContent());
+                () -> JkPathTree.of(project.getOutLayout().outputPath()).deleteContent());
         this.resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().resources())
                 .and(project.getOutLayout().generatedResourceDir().toFile())
                 .and(project.getResourceInterpolators())
@@ -170,7 +170,7 @@ public class JkJavaProjectMaker {
         return result
                 .setClasspath(classpath)
                 .addSources(project.getSourceLayout().sources().files())
-                .addSources(JkFileTree.of(project.getOutLayout().generatedSourceDir()).files())
+                .addSources(JkPathTree.of(project.getOutLayout().generatedSourceDir()).files())
                 .setOutputDir(project.getOutLayout().classDir());
     }
 
@@ -223,7 +223,7 @@ public class JkJavaProjectMaker {
         final JkClasspath classpath = JkClasspath.of(project.getOutLayout().testClassDir())
                 .and(project.getOutLayout().classDir())
                 .andMany(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
-        return JkJavaTestSpec.of(classpath, JkFileTreeSet.of(project.getOutLayout().testClassDir()));
+        return JkJavaTestSpec.of(classpath, JkPathTreeSet.of(project.getOutLayout().testClassDir()));
     }
 
     public final JkRunnables testExecutor = JkRunnables.of(() -> juniter().run(testSpec()));
@@ -310,7 +310,7 @@ public class JkJavaProjectMaker {
     }
 
     public void checksum(String ...algorithms) {
-        this.project.allArtifactPaths().forEach((file) -> JkCheckSumer.of(file).digest(algorithms));
+        this.project.allArtifactPaths().forEach((file) -> JkCheckSum.of(file).produce(algorithms));
     }
 
     public void signArtifactFiles(JkPgp pgp) {

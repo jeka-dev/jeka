@@ -1,6 +1,6 @@
 package org.jerkar.api.project;
 
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -112,12 +112,12 @@ public class JkProjectOutLayout {
      * but not the outputDir.
      */
     public void deleteDirs() {
-        JkFileTree.of(this.classDir).deleteContent();
-        JkFileTree.of(this.testClassDir).deleteContent();
-        JkFileTree.of(this.testReportDir).deleteContent();
-        JkFileTree.of(this.generatedResourceDir).deleteContent();
-        JkFileTree.of(this.generatedSourceDir).deleteContent();
-        JkFileTree.of(this.generatedTestResourceDir).deleteContent();
+        JkPathTree.of(this.classDir).deleteContent();
+        JkPathTree.of(this.testClassDir).deleteContent();
+        JkPathTree.of(this.testReportDir).deleteContent();
+        JkPathTree.of(this.generatedResourceDir).deleteContent();
+        JkPathTree.of(this.generatedSourceDir).deleteContent();
+        JkPathTree.of(this.generatedTestResourceDir).deleteContent();
     }
 
 

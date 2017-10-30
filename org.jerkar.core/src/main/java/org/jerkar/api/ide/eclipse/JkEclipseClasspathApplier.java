@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.file.JkFileTreeSet;
+import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkException;
@@ -41,12 +41,12 @@ public class JkEclipseClasspathApplier {
     private void apply(JkJavaProject javaProject, DotClasspathModel dotClasspathModel) {
         final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
         final Path baseDir = javaProject.getSourceLayout().baseDir();
-        final JkFileTreeSet sources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources;
-        final JkFileTreeSet testSources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources;
-        final JkFileTreeSet resources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources
-                .andFilter(JkProjectSourceLayout.JAVA_RESOURCE_MATCHER);
-        final JkFileTreeSet testResources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources
-                .andFilter(JkProjectSourceLayout.JAVA_RESOURCE_MATCHER);
+        final JkPathTreeSet sources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources;
+        final JkPathTreeSet testSources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources;
+        final JkPathTreeSet resources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources
+                .andMatcher(JkProjectSourceLayout.JAVA_RESOURCE_MATCHER);
+        final JkPathTreeSet testResources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources
+                .andMatcher(JkProjectSourceLayout.JAVA_RESOURCE_MATCHER);
 
         final ScopeResolver scopeResolver = scopeResolver(baseDir);
         final List<Lib> libs = dotClasspathModel.libs(baseDir, scopeResolver);

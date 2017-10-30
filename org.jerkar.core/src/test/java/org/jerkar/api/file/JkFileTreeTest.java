@@ -30,13 +30,13 @@ public class JkFileTreeTest {
         assertTrue(Files.exists(sampleFile));
         final Path sampleFolder = sampleFile.getParent().getParent();
 
-        System.out.println(JkFileTree.of(sampleFolder).relativeFiles());
+        System.out.println(JkPathTree.of(sampleFolder).relativeFiles());
 
-        final JkFileTree subfolderTxt1 = JkFileTree.of(sampleFolder).accept("subfolder/*.txt");
+        final JkPathTree subfolderTxt1 = JkPathTree.of(sampleFolder).accept("subfolder/*.txt");
         assertEquals(1, subfolderTxt1.files().size());
         System.out.println(subfolderTxt1);
 
-        final JkFileTree subfolderTxt2 = JkFileTree.of(sampleFolder).accept("subfolder/*.txt");
+        final JkPathTree subfolderTxt2 = JkPathTree.of(sampleFolder).accept("subfolder/*.txt");
         assertEquals(1, subfolderTxt2.files().size());
     }
 
@@ -47,7 +47,7 @@ public class JkFileTreeTest {
         final Path source = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
         Files.createDirectories(source.resolve("emptyfolder"));   // git won't copy empty dir
 
-        final JkFileTree tree = JkFileTree.of(Paths.get(sampleFileUrl.toURI()).getParent().getParent());
+        final JkPathTree tree = JkPathTree.of(Paths.get(sampleFileUrl.toURI()).getParent().getParent());
         System.out.println(tree.relativeFiles());
     }
 
@@ -56,27 +56,27 @@ public class JkFileTreeTest {
         Path sampleDir = sampleDir();
 
         // Root is included in the stream
-        assertTrue(JkFileTree.of(sampleDir).stream().anyMatch(path -> path.equals(sampleDir)));
+        assertTrue(JkPathTree.of(sampleDir).stream().anyMatch(path -> path.equals(sampleDir)));
     }
 
     @Test
     public void testZipTo() throws Exception {
         Path zip = Files.createTempFile("filetree", ".zip");
         Files.delete(zip);
-        JkFileTree.of(sampleDir()).zipTo(zip);
+        JkPathTree.of(sampleDir()).zipTo(zip);
         Path zipRoot = JkUtilsPath.zipRoot(zip);
         assertTrue(Files.exists(zipRoot.resolve("subfolder/sample.txt")));
         zipRoot.getFileSystem().close();
 
         // Test overwrite
-        JkFileTree.of(sampleDir()).zipTo(zip);
+        JkPathTree.of(sampleDir()).zipTo(zip);
     }
 
     @Test
     public void testOfZip() throws Exception {
         Path zipFile = Files.createTempFile("jksample",".zip");
         Files.deleteIfExists(zipFile);
-        JkFileTree zipTree = JkFileTree.ofZip(zipFile);
+        JkPathTree zipTree = JkPathTree.ofZip(zipFile);
         zipTree.merge(sampleDir());
         List<Path> paths = zipTree.files();
         assertEquals(1, paths.size());
@@ -91,8 +91,8 @@ public class JkFileTreeTest {
         Path zip = createSampleZip();
         Path zip2 = Files.createTempFile("sample2", ".zip");
         Files.delete(zip2);
-        JkFileTree.ofZip(zip).zipTo(zip2);
-        JkFileTree zip2Tree = JkFileTree.ofZip(zip2);
+        JkPathTree.ofZip(zip).zipTo(zip2);
+        JkPathTree zip2Tree = JkPathTree.ofZip(zip2);
         assertTrue(Files.isDirectory(zip2Tree.get("subfolder")));
         assertTrue(Files.isRegularFile(zip2Tree.get("subfolder").resolve("sample.txt")));
         assertTrue(Files.isDirectory(zip2Tree.get("emptyfolder")));
@@ -105,8 +105,8 @@ public class JkFileTreeTest {
         Path zip = createSampleZip();
         Path zip2 = Files.createTempFile("sample2", ".zip");
         Files.delete(zip2);
-        JkFileTree zip2Tree = JkFileTree.ofZip(zip2);
-        zip2Tree.merge(JkFileTree.ofZip(zip).root());
+        JkPathTree zip2Tree = JkPathTree.ofZip(zip2);
+        zip2Tree.merge(JkPathTree.ofZip(zip).root());
         assertTrue(Files.isDirectory(zip2Tree.get("subfolder")));
         assertTrue(Files.isRegularFile(zip2Tree.get("subfolder").resolve("sample.txt")));
         assertTrue(Files.isDirectory(zip2Tree.get("emptyfolder")));
@@ -118,8 +118,8 @@ public class JkFileTreeTest {
     public void testImportTree() throws IOException, URISyntaxException {
         Path zip = createSampleZip();
         Path dirSample = Files.createTempDirectory("sample");
-        JkFileTree tree = JkFileTree.of(dirSample);
-        tree.merge(JkFileTree.ofZip(createSampleZip()));
+        JkPathTree tree = JkPathTree.of(dirSample);
+        tree.merge(JkPathTree.ofZip(createSampleZip()));
         assertTrue(Files.isDirectory(tree.get("subfolder")));
         assertTrue(Files.isRegularFile(tree.get("subfolder").resolve("sample.txt")));
         assertTrue(Files.isDirectory(tree.get("emptyfolder")));
@@ -129,7 +129,7 @@ public class JkFileTreeTest {
     @Test
     public void testImportFile() throws IOException, URISyntaxException {
         Path dirSample = Files.createTempDirectory("sample");
-        JkFileTree tree = JkFileTree.of(dirSample);
+        JkPathTree tree = JkPathTree.of(dirSample);
         Path tempFile = Files.createTempFile("example", ".txt");
         tree.copyIn(tempFile);
         assertTrue(Files.exists(tree.get(tempFile.getFileName().toString())));
@@ -161,7 +161,7 @@ public class JkFileTreeTest {
         Path folder = sampleFolder();
         Path zip = Files.createTempFile("sample", ".zip");
         Files.delete(zip);
-        JkFileTree.of(folder).zipTo(zip);
+        JkPathTree.of(folder).zipTo(zip);
         return zip;
     }
 

@@ -6,7 +6,7 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkModuleDependency;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopedDependency;
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsSystem;
@@ -126,7 +126,7 @@ public final class JkMvn implements Runnable {
      * Creates the java code ofMany the Jerkar build class jump the effective pom ofMany
      * this Maven JkEclipseProject
      */
-    public String createBuildClassCode(JkFileTree baseDir) {
+    public String createBuildClassCode(JkPathTree baseDir) {
         final Path pom = JkUtilsPath.createTempFile("effectivepom", ".xml");
         commands("help:effective-pom", "-Doutput=" + pom.toAbsolutePath().normalize().toString()).run();
         final JkPom jkPom = JkPom.of(pom);

@@ -16,7 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import org.jerkar.api.file.JkFileTreeSet;
+import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaProcess;
@@ -293,7 +293,7 @@ public final class JkUnit {
 
     @SuppressWarnings("rawtypes")
     private Collection<Class> getClassesToTest(JkJavaTestSpec testSpec) {
-        final JkClasspath classpath = testSpec.classpath().andManyFirst(testSpec.classesToTest().rootFiles());
+        final JkClasspath classpath = testSpec.classpath().andManyFirst(testSpec.classesToTest().rootDirsOrZipFiles());
         final JkClassLoader classLoader = JkClassLoader.system().parent().child(classpath)
                 .loadAllServices();
         final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, testSpec.classesToTest());
@@ -305,8 +305,8 @@ public final class JkUnit {
 
     @SuppressWarnings("rawtypes")
     private static Collection<Class> getJunitTestClassesInClassLoader(JkClassLoader classloader,
-            JkFileTreeSet jkFileTreeSet) {
-        final Iterable<Class<?>> classes = classloader.loadClassesIn(jkFileTreeSet);
+            JkPathTreeSet jkPathTreeSet) {
+        final Iterable<Class<?>> classes = classloader.loadClassesIn(jkPathTreeSet);
         final List<Class> testClasses = new LinkedList<>();
         if (classloader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
             final Class<Annotation> testAnnotation = classloader

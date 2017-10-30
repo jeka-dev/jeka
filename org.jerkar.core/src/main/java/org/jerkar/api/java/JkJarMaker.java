@@ -1,10 +1,9 @@
 package org.jerkar.api.java;
 
-import java.nio.file.Path;
-
-import org.jerkar.api.file.JkFileTreeSet;
-import org.jerkar.api.file.JkPathFilter;
+import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.file.JkPathMatcher;
+
+import java.nio.file.Path;
 
 /**
  * Utilities class to produce Jar files with conventional naming
@@ -28,12 +27,12 @@ public final class JkJarMaker {
      * @param manifest Can be <code>null</code>.
      * @param extraFiles Extra files to embed in jar. Can be empty or <code>null</code>.
      */
-    public static void jar(Path resultFile, JkManifest manifest, Path classDir, JkFileTreeSet extraFiles) {
+    public static void jar(Path resultFile, JkManifest manifest, Path classDir, JkPathTreeSet extraFiles) {
         if (manifest != null && !manifest.isEmpty()) {
             manifest.writeToStandardLocation(classDir);
         }
-        JkFileTreeSet treeSet = extraFiles == null ? JkFileTreeSet.empty() : extraFiles;
-        JkFileTreeSet.of(classDir).and(treeSet).zipTo(resultFile);
+        JkPathTreeSet treeSet = extraFiles == null ? JkPathTreeSet.empty() : extraFiles;
+        JkPathTreeSet.of(classDir).and(treeSet).zipTo(resultFile);
     }
 
     /**
@@ -47,13 +46,13 @@ public final class JkJarMaker {
      * @param otherJars content ofMany other jar to merge with the original jar
      */
     public static void fatJar(Path resultFile, JkManifest manifest, Path classDir,
-                              JkFileTreeSet extraFiles, Iterable<Path> otherJars) {
+                              JkPathTreeSet extraFiles, Iterable<Path> otherJars) {
         if (manifest != null && !manifest.isEmpty()) {
             manifest.writeToStandardLocation(classDir);
         }
 
-        JkFileTreeSet.of(classDir).and(extraFiles).andZips(otherJars)
-                .andFilter(EXCLUDE_SIGNATURE_MATCHER).zipTo(resultFile);
+        JkPathTreeSet.of(classDir).and(extraFiles).andZips(otherJars)
+                .andMatcher(EXCLUDE_SIGNATURE_MATCHER).zipTo(resultFile);
 
     }
 

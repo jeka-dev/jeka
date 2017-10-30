@@ -26,9 +26,9 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkFileTreeSet;
-import org.jerkar.api.file.JkPathFilter;
+import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.file.JkPathTreeSet;
+//import org.jerkar.api.file.JkPathFilter;
 
 import org.jerkar.api.file.JkPathMatcher;
 import org.jerkar.api.system.JkLocator;
@@ -355,7 +355,7 @@ public final class JkClassLoader {
         final Map<Path, Path> file2Entry = new HashMap<>();
         for (final Path file : childClasspath()) {
             if (entryFilter == null || entryFilter.matches(file) && Files.isDirectory(file)) {
-                final List<Path> files = JkFileTree.of(file).andMatcher(CLASS_FILE_FILTER).files();
+                final List<Path> files = JkPathTree.of(file).andMatcher(CLASS_FILE_FILTER).files();
                 classfiles.addAll(files);
                 JkUtilsIterable.putMultiEntry(file2Entry, files, file);
             }
@@ -378,7 +378,7 @@ public final class JkClassLoader {
 
     /**
      * Loads all class having a relative path matching the supplied
-     * {@link JkPathFilter}. For example, if you want to load all class
+     * glob patterns. For example, if you want to load all class
      * belonging to <code>my.pack</code> or its sub package, then you have to
      * supply a filter with an include pattern as
      * <code>my/pack/&#42;&#42;/&#42;.class</code>. Note that ending with
@@ -411,13 +411,13 @@ public final class JkClassLoader {
 
     /**
      * Returns all classes ofMany this <code>classloader</code> that are defined
-     * inside the provided <code>JkFileTreeSet</code>.
+     * inside the provided <code>JkPathTreeSet</code>.
      *
      * @see JkClassLoader#loadClassesInEntries(PathMatcher)
      */
-    public Set<Class<?>> loadClassesIn(JkFileTreeSet jkFileTreeSet) {
+    public Set<Class<?>> loadClassesIn(JkPathTreeSet jkPathTreeSet) {
         final Set<Class<?>> result = new HashSet<>();
-        for (final Path path : jkFileTreeSet.relativeFiles()) {
+        for (final Path path : jkPathTreeSet.relativeFiles()) {
             if (path.toString().endsWith(".class")) {
                 final String className = getAsClassName(path.toString());
                 result.add(this.load(className));
@@ -428,12 +428,12 @@ public final class JkClassLoader {
 
     /**
      * Returns all classes ofMany this <code>classloader</code> that are defined
-     * inside the provided <code>JkFileTreeSet</code>.
+     * inside the provided <code>JkPathTreeSet</code>.
      *
      * @see JkClassLoader#loadClassesInEntries(PathMatcher)
      */
-    public Iterator<Class<?>> iterateClassesIn(JkFileTreeSet jkFileTreeSet) {
-        final List<Path> fileNames = jkFileTreeSet.andFilter(JkPathMatcher.accept("**/*.class"))
+    public Iterator<Class<?>> iterateClassesIn(JkPathTreeSet jkPathTreeSet) {
+        final List<Path> fileNames = jkPathTreeSet.andMatcher(JkPathMatcher.accept("**/*.class"))
                 .relativeFiles();
         return classIterator(fileNames.stream().map(path -> path.toString()).collect(Collectors.toList()));
     }
@@ -447,7 +447,7 @@ public final class JkClassLoader {
     private Iterator<Class<?>> iterateClassesIn(Path dirOrJar) {
         final List<Path> paths;
         if (Files.isDirectory(dirOrJar)) {
-            paths = JkFileTree.of(dirOrJar).accept("**.class").relativeFiles();
+            paths = JkPathTree.of(dirOrJar).accept("**.class").relativeFiles();
         } else {
             final List<ZipEntry> entries = JkUtilsZip.zipEntries(JkUtilsZip.zipFile(dirOrJar.toFile()));
             paths = new LinkedList<>();

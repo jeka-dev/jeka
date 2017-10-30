@@ -19,7 +19,7 @@ import org.jerkar.api.depmanagement.JkPublishRepo;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkScopeMapping;
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathMatcher;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.java.JkClassLoader;
@@ -70,7 +70,7 @@ final class Engine {
     }
 
     private void preCompile() {
-        List<Path> sourceFiles = JkFileTree.of(resolver.buildSourceDir).andMatcher(BUILD_SOURCE_MATCHER).files();
+        List<Path> sourceFiles = JkPathTree.of(resolver.buildSourceDir).andMatcher(BUILD_SOURCE_MATCHER).files();
         final SourceParser parser = SourceParser.of(this.projectBaseDir, sourceFiles);
 
         this.buildDependencies = this.buildDependencies.and(parser.dependencies());
@@ -201,7 +201,7 @@ final class Engine {
         final List<Path>  extraLibs = new LinkedList<>();
         final Path localDeflibDir = this.projectBaseDir.resolve(JkConstants.BUILD_BOOT);
         if (Files.exists(localDeflibDir)) {
-            extraLibs.addAll(JkFileTree.of(localDeflibDir).accept("**.jar").files());
+            extraLibs.addAll(JkPathTree.of(localDeflibDir).accept("**.jar").files());
         }
         return JkPathSequence.ofMany(extraLibs).withoutDuplicates();
     }
@@ -229,7 +229,7 @@ final class Engine {
     private void compileBuild(JkPathSequence buildPath) {
         JkJavaCompileSpec compileSpec = buildCompileSpec().setClasspath(buildPath);
         JkJavaCompiler.base().compile(compileSpec);
-        JkFileTree.of(this.resolver.buildSourceDir).refuse("**/*.java").copyTo(this.resolver.buildClassDir,
+        JkPathTree.of(this.resolver.buildSourceDir).refuse("**/*.java").copyTo(this.resolver.buildClassDir,
                 StandardCopyOption.REPLACE_EXISTING);
     }
 
@@ -324,7 +324,7 @@ final class Engine {
     }
 
     private JkJavaCompileSpec buildCompileSpec() {
-        final JkFileTree buildSource = JkFileTree.of(resolver.buildSourceDir).andMatcher(BUILD_SOURCE_MATCHER);
+        final JkPathTree buildSource = JkPathTree.of(resolver.buildSourceDir).andMatcher(BUILD_SOURCE_MATCHER);
         JkUtilsPath.createDirectories(resolver.buildClassDir);
         return new JkJavaCompileSpec().setOutputDir(resolver.buildClassDir)
                 .addSources(buildSource.files());

@@ -1,11 +1,14 @@
 package org.jerkar.tool;
 
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.function.Supplier;
 
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.function.JkRunnables;
+import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
 import org.jerkar.api.utils.JkUtilsFile;
@@ -17,7 +20,7 @@ import org.jerkar.api.utils.JkUtilsPath;
  */
 public final class JkScaffolder {
 
-    private final JkFileTree baseTree;
+    private final JkPathTree baseTree;
 
     private Supplier<String> mainBuildclassWriter;
 
@@ -27,7 +30,7 @@ public final class JkScaffolder {
 
     JkScaffolder(Path baseDir, boolean embed) {
         super();
-        this.baseTree = JkFileTree.of(baseDir);
+        this.baseTree = JkPathTree.of(baseDir);
         this.mainBuildclassWriter = basicScaffoldedBuildClassCode();
         this.embed = embed;
     }
@@ -43,7 +46,9 @@ public final class JkScaffolder {
         if (embed) {
             JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar.bat"), baseTree.root().resolve("jerkar.bat").toFile());
             JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar"), baseTree.root().resolve("jerkar").toFile());
-            JkUtilsFile.copyFileToDir(JkLocator.jerkarJarPath().toFile(), baseTree.root().resolve("build/boot").toFile());
+            JkUtilsPath.copy(JkLocator.jerkarJarPath(),
+                    baseTree.root().resolve("build/boot").resolve(JkLocator.jerkarJarPath().getFileName()),
+                    StandardCopyOption.REPLACE_EXISTING);
         }
         extraActions.run();
     }

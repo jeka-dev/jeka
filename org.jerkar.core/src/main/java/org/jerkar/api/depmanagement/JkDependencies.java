@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsAssert;
@@ -92,7 +92,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * test are supposed to be in <code>baseTree/test</code> and so on.
      */
     public static JkDependencies ofLocalScoped(File baseDir) {
-        final JkFileTree libDir = JkFileTree.of(baseDir);
+        final JkPathTree libDir = JkPathTree.of(baseDir);
         if (!libDir.exists()) {
             return JkDependencies.of();
         }

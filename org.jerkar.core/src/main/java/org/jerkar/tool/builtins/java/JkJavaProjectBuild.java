@@ -7,7 +7,7 @@ import org.jerkar.api.depmanagement.JkPublishRepo;
 import org.jerkar.api.depmanagement.JkPublishRepos;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkResolveResult;
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
@@ -127,8 +127,8 @@ public abstract class JkJavaProjectBuild extends JkBuild {
     }
 
     @Override
-    public JkFileTree ouputTree() {
-        return JkFileTree.of(this.project().getOutLayout().outputPath());
+    public JkPathTree ouputTree() {
+        return JkPathTree.of(this.project().getOutLayout().outputPath());
     }
 
     @Override

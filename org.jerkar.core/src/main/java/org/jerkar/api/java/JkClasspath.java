@@ -1,26 +1,20 @@
 package org.jerkar.api.java;
 
+import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.JkUtilsPath;
+import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.api.utils.JkUtilsZip;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkPathFilter;
-import org.jerkar.api.file.JkPathMatcher;
-import org.jerkar.api.file.JkPathSequence;
-import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsIO;
-
-import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.api.utils.JkUtilsZip;
 
 /**
  * A sequence ofMany file to be used as a <code>class path</code>.<br/>
@@ -131,8 +125,8 @@ public final class JkClasspath implements Iterable<Path> {
     Set<Path> allPathMatching(Iterable<String> globPatterns) {
         final Set<Path> result = new LinkedHashSet<>();
         for (final Path classpathEntry : this.entries) {
-            JkFileTree tree = Files.isDirectory(classpathEntry) ?
-                    JkFileTree.of(classpathEntry) : JkFileTree.ofZip(classpathEntry);
+            JkPathTree tree = Files.isDirectory(classpathEntry) ?
+                    JkPathTree.of(classpathEntry) : JkPathTree.ofZip(classpathEntry);
             result.addAll(tree.accept(globPatterns).relativeFiles());
         }
         return result;
@@ -218,7 +212,7 @@ public final class JkClasspath implements Iterable<Path> {
                             + " does not exist : classpath entry " + file
                             + " will be ignored.");
                 } else {
-                    result.addAll(JkFileTree.of(parent).accept("*.jar").files());
+                    result.addAll(JkPathTree.of(parent).accept("*.jar").files());
                 }
             } else if (!Files.exists(file)) {
                 JkLog.trace("File " + file + " does not exist : classpath entry "
@@ -247,7 +241,7 @@ public final class JkClasspath implements Iterable<Path> {
                         + " does not exist : classpath entry " + file
                         + " will be ignored.");
             } else {
-                result.addAll(JkFileTree.of(parent).accept("**.jar").files());
+                result.addAll(JkPathTree.of(parent).accept("**.jar").files());
             }
         } else {
             result.add(Paths.get(candidatePath));

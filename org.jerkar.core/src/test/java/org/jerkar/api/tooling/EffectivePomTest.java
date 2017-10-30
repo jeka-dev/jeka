@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.system.JkLocator;
@@ -35,7 +35,7 @@ public class EffectivePomTest {
         final URL url = EffectivePomTest.class.getResource("effectivepom.xml");
         final Path file = Paths.get(url.toURI());
         final JkPom jkPom = JkPom.of(file);
-        final String code = jkPom.jerkarSourceCode(JkFileTree.of(new File("toto")));
+        final String code = jkPom.jerkarSourceCode(JkPathTree.of(new File("toto")));
         System.out.println(code);
         final Path srcDir = Paths.get("build/output/test-generated-src");
         Files.createDirectories(srcDir);

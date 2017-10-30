@@ -1,8 +1,7 @@
 package org.jerkar.api.project;
 
-import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkFileTreeSet;
-import org.jerkar.api.file.JkPathFilter;
+import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.file.JkPathMatcher;
 
 import java.nio.file.Path;
@@ -27,11 +26,11 @@ public class JkProjectSourceLayout {
      */
     public static JkProjectSourceLayout mavenJava() {
         final Path baseDir = Paths.get(".");
-        final JkFileTreeSet sources = JkFileTreeSet.of(baseDir.resolve("src/main/java"));
-        final JkFileTreeSet resources = JkFileTreeSet.of(baseDir.resolve("src/main/resources"))
-                .and(sources.andFilter(JAVA_RESOURCE_MATCHER));
-        final JkFileTreeSet tests = JkFileTreeSet.of(baseDir.resolve("src/test/java"));
-        final JkFileTreeSet testResources = JkFileTreeSet.of(baseDir.resolve("src/test/resources")).and(tests.andFilter(JAVA_RESOURCE_MATCHER));
+        final JkPathTreeSet sources = JkPathTreeSet.of(baseDir.resolve("src/main/java"));
+        final JkPathTreeSet resources = JkPathTreeSet.of(baseDir.resolve("src/main/resources"))
+                .and(sources.andMatcher(JAVA_RESOURCE_MATCHER));
+        final JkPathTreeSet tests = JkPathTreeSet.of(baseDir.resolve("src/test/java"));
+        final JkPathTreeSet testResources = JkPathTreeSet.of(baseDir.resolve("src/test/resources")).and(tests.andMatcher(JAVA_RESOURCE_MATCHER));
         return new JkProjectSourceLayout(baseDir, sources, resources, tests, testResources);
     }
 
@@ -41,10 +40,10 @@ public class JkProjectSourceLayout {
      */
     public static JkProjectSourceLayout simple() {
         final Path baseDir = Paths.get(".");
-        final JkFileTreeSet sources = JkFileTreeSet.of(baseDir.resolve("src"));
-        final JkFileTreeSet resources = sources.andFilter(JAVA_RESOURCE_MATCHER);
-        final JkFileTreeSet tests = JkFileTreeSet.of(baseDir.resolve("test"));
-        final JkFileTreeSet testResources = tests.andFilter(JAVA_RESOURCE_MATCHER);
+        final JkPathTreeSet sources = JkPathTreeSet.of(baseDir.resolve("src"));
+        final JkPathTreeSet resources = sources.andMatcher(JAVA_RESOURCE_MATCHER);
+        final JkPathTreeSet tests = JkPathTreeSet.of(baseDir.resolve("test"));
+        final JkPathTreeSet testResources = tests.andMatcher(JAVA_RESOURCE_MATCHER);
         return new JkProjectSourceLayout(baseDir, sources, resources, tests, testResources);
     }
 
@@ -55,27 +54,27 @@ public class JkProjectSourceLayout {
      * Returns the location ofMany production source code that has been edited
      * manually (not generated).
      */
-    private final JkFileTreeSet sources;
+    private final JkPathTreeSet sources;
 
     /**
      * Returns the location ofMany unit test source code that has been edited
      * manually (not generated).
      */
-    private final JkFileTreeSet tests;
+    private final JkPathTreeSet tests;
 
     /**
      * Returns the location ofMany production resources that has been edited
      * manually (not generated).
      */
-    private final JkFileTreeSet resources;
+    private final JkPathTreeSet resources;
 
     /**
      * Returns location ofMany edited resources for tests.
      */
-    private final JkFileTreeSet testResources;
+    private final JkPathTreeSet testResources;
 
-    private JkProjectSourceLayout(Path baseDir, JkFileTreeSet sources, JkFileTreeSet resources,
-                                  JkFileTreeSet tests, JkFileTreeSet testResources) {
+    private JkProjectSourceLayout(Path baseDir, JkPathTreeSet sources, JkPathTreeSet resources,
+                                  JkPathTreeSet tests, JkPathTreeSet testResources) {
         super();
         this.baseDir = baseDir;
         this.sources = sources;
@@ -92,7 +91,7 @@ public class JkProjectSourceLayout {
                 sources, resources, tests, testResources);
     }
 
-    public JkProjectSourceLayout withSources(JkFileTreeSet sources) {
+    public JkProjectSourceLayout withSources(JkPathTreeSet sources) {
         return new JkProjectSourceLayout(this.baseDir, sources, this.resources, this.tests, this.testResources);
     }
 
@@ -100,7 +99,7 @@ public class JkProjectSourceLayout {
         return new JkProjectSourceLayout(this.baseDir, baseTree().goTo(relativePath).asSet(), this.resources, this.tests, this.testResources);
     }
 
-    public JkProjectSourceLayout withResources(JkFileTreeSet resources) {
+    public JkProjectSourceLayout withResources(JkPathTreeSet resources) {
         return new JkProjectSourceLayout(this.baseDir, this.sources, resources, this.tests, this.testResources);
     }
 
@@ -108,7 +107,7 @@ public class JkProjectSourceLayout {
         return new JkProjectSourceLayout(this.baseDir, this.sources, baseTree().goTo(relativePath).asSet(), this.tests, this.testResources);
     }
 
-    public JkProjectSourceLayout withTests(JkFileTreeSet tests) {
+    public JkProjectSourceLayout withTests(JkPathTreeSet tests) {
         return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, tests, this.testResources);
     }
 
@@ -116,7 +115,7 @@ public class JkProjectSourceLayout {
         return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, baseTree().goTo(relativePath).asSet(), this.testResources);
     }
 
-    public JkProjectSourceLayout withTestResources(JkFileTreeSet testResources) {
+    public JkProjectSourceLayout withTestResources(JkPathTreeSet testResources) {
         return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, this.tests, testResources);
     }
 
@@ -130,14 +129,14 @@ public class JkProjectSourceLayout {
     /**
      * Returns location ofMany production source code (containing only edited sources, not generated sources).
      */
-    public final JkFileTreeSet sources() {
+    public final JkPathTreeSet sources() {
         return sources.resolve(this.baseDir);
     }
 
     /**
      * Returns location ofMany production resources.
      */
-    public final JkFileTreeSet resources() {
+    public final JkPathTreeSet resources() {
         return resources.resolve(this.baseDir);
     }
 
@@ -145,14 +144,14 @@ public class JkProjectSourceLayout {
      * Returns location ofMany test source code (containing edited + generated
      * sources).
      */
-    public final JkFileTreeSet tests() {
+    public final JkPathTreeSet tests() {
         return tests.resolve(this.baseDir);
     }
 
     /**
      * Returns location ofMany test resources.
      */
-    public final JkFileTreeSet testResources() {
+    public final JkPathTreeSet testResources() {
         return testResources.resolve(this.baseDir);
     }
 
@@ -162,10 +161,10 @@ public class JkProjectSourceLayout {
 
 
     /**
-     * Returns base directory as a {@link JkFileTree}.
+     * Returns base directory as a {@link JkPathTree}.
      */
-    public JkFileTree baseTree() {
-        return JkFileTree.of(baseDir);
+    public JkPathTree baseTree() {
+        return JkPathTree.of(baseDir);
     }
 
     @Override

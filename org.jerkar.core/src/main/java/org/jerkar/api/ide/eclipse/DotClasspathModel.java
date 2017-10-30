@@ -11,8 +11,8 @@ import java.util.Map;
 
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkFileTreeSet;
+import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry.Kind;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
@@ -72,8 +72,8 @@ final class DotClasspathModel {
     }
 
     public Sources sourceDirs(Path baseDir, Sources.TestSegregator segregator) {
-        final List<JkFileTree> prods = new LinkedList<>();
-        final List<JkFileTree> tests = new LinkedList<>();
+        final List<JkPathTree> prods = new LinkedList<>();
+        final List<JkPathTree> tests = new LinkedList<>();
         for (final ClasspathEntry classpathEntry : classpathentries) {
             if (classpathEntry.kind.equals(ClasspathEntry.Kind.SRC) && !classpathEntry.isOptional()) {
                 if (segregator.isTest(classpathEntry.path)) {
@@ -83,7 +83,7 @@ final class DotClasspathModel {
                 }
             }
         }
-        return new Sources(JkFileTreeSet.of(prods), JkFileTreeSet.of(tests));
+        return new Sources(JkPathTreeSet.of(prods), JkPathTreeSet.of(tests));
     }
 
     public List<String> projectDependencies() {
@@ -226,13 +226,13 @@ final class DotClasspathModel {
             return result;
         }
 
-        public JkFileTree srcAsJkDir(Path baseDir) {
+        public JkPathTree srcAsJkDir(Path baseDir) {
             if (!this.kind.equals(Kind.SRC)) {
                 throw new IllegalStateException(
                         "Can only get source dir to classpath entry ofMany kind 'src'.");
             }
             final Path dir = baseDir.resolve(path);
-            JkFileTree jkFileTree = JkFileTree.of(dir);
+            JkPathTree jkFileTree = JkPathTree.of(dir);
             if (!excluding.isEmpty()) {
                 final String[] patterns = excluding.split("\\|");
                 jkFileTree = jkFileTree.refuse(patterns);
@@ -276,7 +276,7 @@ final class DotClasspathModel {
                     return Collections.emptyList();
                 }
             }
-            final JkFileTree dirView = JkFileTree.of(conFolder).accept("**.jar");
+            final JkPathTree dirView = JkPathTree.of(conFolder).accept("**.jar");
             final List<Path> result = new LinkedList<>();
             result.addAll(dirView.files());
             return result;

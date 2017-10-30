@@ -11,7 +11,7 @@ import org.jerkar.api.depmanagement.JkPublishRepo;
 import org.jerkar.api.depmanagement.JkPublisher;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkJavaTestSpec;
 import org.jerkar.api.java.junit.JkUnit;
@@ -45,13 +45,13 @@ public class AntStyleBuild extends JkBuild {
                 .setOutputDir(classDir)
                 .setClasspath(classpath)
                 .addSources(src));
-        JkFileTree.of(src).refuse("**/*.java").copyTo(classDir);
+        JkPathTree.of(src).refuse("**/*.java").copyTo(classDir);
     }
 
     public void jar() {
         compile();
         JkManifest.empty().addMainClass("org.jerkar.samples.RunClass").writeToStandardLocation(classDir);
-        JkFileTree.of(classDir).zipTo(jarFile);
+        JkPathTree.of(classDir).zipTo(jarFile);
     }
 
     public void run() {
@@ -73,7 +73,7 @@ public class AntStyleBuild extends JkBuild {
         .withReport(JunitReportDetail.FULL)
         .run(JkJavaTestSpec.of(
                 classpath.andMany(jarFile),
-                JkFileTree.of(classDir).accept("**/*Test.class", "*Test.class") ));
+                JkPathTree.of(classDir).accept("**/*Test.class", "*Test.class") ));
     }
 
     /*
@@ -106,7 +106,7 @@ public class AntStyleBuild extends JkBuild {
 
         // Optional : if you want publish sources
         Path srcZip = outputDir().resolve("src.zip");
-        JkFileTree.of(srcZip).zipTo(srcZip);
+        JkPathTree.of(srcZip).zipTo(srcZip);
 
         JkMavenPublication publication = JkMavenPublication.of(jarFile)
                 .with(info).and(srcZip, "sources");

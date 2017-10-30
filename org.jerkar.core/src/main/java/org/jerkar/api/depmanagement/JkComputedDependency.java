@@ -1,7 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
@@ -126,7 +126,7 @@ public class JkComputedDependency implements JkFileDependency {
         final Set<Path> files = new LinkedHashSet<>();
         for (final Path file : this.files) {
             if (!Files.exists(file)
-                    || (Files.isDirectory(file) && JkFileTree.of(file).count(0, true) == 0)) {
+                    || (Files.isDirectory(file) && JkPathTree.of(file).count(0, true) == 0)) {
                 files.add(file);
             }
         }

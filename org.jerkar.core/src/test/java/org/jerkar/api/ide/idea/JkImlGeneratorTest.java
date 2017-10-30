@@ -5,7 +5,7 @@ import java.nio.file.Path;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkPopularModules;
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.ide.eclipse.JkEclipseClasspathGeneratorTest;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
@@ -61,7 +61,7 @@ public class JkImlGeneratorTest {
         desktopProject.setDependencies(deps);
         desktopProject.makeAllArtifactFiles();
 
-        JkFileTree.of(top).deleteContent();
+        JkPathTree.of(top).deleteContent();
     }
 
     private static File unzipToDir(String zipName) {

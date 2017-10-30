@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
@@ -61,14 +61,14 @@ final class BuildResolver {
         if (!Files.exists(buildSourceDir)) {
             return false;
         }
-        return JkFileTree.of(buildSourceDir).accept("**.java", "*.java").count(0, false) > 0;
+        return JkPathTree.of(buildSourceDir).accept("**.java", "*.java").count(0, false) > 0;
     }
 
     boolean needCompile() {
         if (!this.hasBuildSource()) {
             return false;
         }
-        final JkFileTree dir = JkFileTree.of(buildSourceDir);
+        final JkPathTree dir = JkPathTree.of(buildSourceDir);
         for (final Path path : dir.relativeFiles()) {
             final String pathName = path.toString();
             if (pathName.endsWith(".java")) {
@@ -114,7 +114,7 @@ final class BuildResolver {
 
         // If there is a build file
         if (this.hasBuildSource()) {
-            final JkFileTree dir = JkFileTree.of(buildSourceDir);
+            final JkPathTree dir = JkPathTree.of(buildSourceDir);
             for (final Path path : dir.relativeFiles()) {
                 if (path.toString().endsWith(".java")) {
                     final Class<?> clazz = classLoader.loadGivenClassSourcePath(path.toString());
@@ -153,7 +153,7 @@ final class BuildResolver {
 
         // If there is a build source
         if (this.hasBuildSource()) {
-            final JkFileTree dir = JkFileTree.of(buildSourceDir);
+            final JkPathTree dir = JkPathTree.of(buildSourceDir);
             for (final Path path : dir.relativeFiles()) {
                 if (path.toString().endsWith(".java")) {
                     final Class<?> clazz = classLoader.loadGivenClassSourcePath(path.toString());

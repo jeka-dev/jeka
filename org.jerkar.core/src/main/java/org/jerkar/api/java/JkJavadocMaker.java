@@ -6,12 +6,11 @@ import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkFileTreeSet;
+import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
@@ -28,7 +27,7 @@ public final class JkJavadocMaker {
 
     private static final String JAVADOC_MAIN_CLASS_NAME = "com.sun.tools.javadoc.Main";
 
-    private final JkFileTreeSet srcDirs;
+    private final JkPathTreeSet srcDirs;
 
     private final List<String> extraArgs;
 
@@ -40,8 +39,8 @@ public final class JkJavadocMaker {
 
     private final File zipFile;
 
-    private JkJavadocMaker(JkFileTreeSet srcDirs, Class<?> doclet, Iterable<File> classpath,
-            List<String> extraArgs, File outputDir, File zipFile) {
+    private JkJavadocMaker(JkPathTreeSet srcDirs, Class<?> doclet, Iterable<File> classpath,
+                           List<String> extraArgs, File outputDir, File zipFile) {
         this.srcDirs = srcDirs;
         this.extraArgs = extraArgs;
         this.doclet = doclet;
@@ -54,7 +53,7 @@ public final class JkJavadocMaker {
      * Creates a {@link JkJavadocMaker} from the specified sources. The result will be outputed in
      * the specified directory then compacted in the specified zip file.
      */
-    public static JkJavadocMaker of(JkFileTreeSet sources, File outputDir, File zipFile) {
+    public static JkJavadocMaker of(JkPathTreeSet sources, File outputDir, File zipFile) {
         return new JkJavadocMaker(sources, null, null, new LinkedList<>(), outputDir, zipFile);
     }
 
@@ -62,7 +61,7 @@ public final class JkJavadocMaker {
      * Creates a {@link JkJavadocMaker} from the specified sources. The result will be outputed in
      * the specified directory.
      */
-    public static JkJavadocMaker of(JkFileTreeSet sources, File outputDir) {
+    public static JkJavadocMaker of(JkPathTreeSet sources, File outputDir) {
         return new JkJavadocMaker(sources, null, null, new LinkedList<>(), outputDir, null);
     }
 
@@ -70,7 +69,7 @@ public final class JkJavadocMaker {
      * Creates a {@link JkJavadocMaker} from the specified sources. The result will be outputed in
      * the specified directory.
      */
-    public static JkJavadocMaker of(JkFileTreeSet sources, Path outputDir) {
+    public static JkJavadocMaker of(JkPathTreeSet sources, Path outputDir) {
         return new JkJavadocMaker(sources, null, null, new LinkedList<>(), outputDir.toFile(), null);
     }
 
@@ -146,7 +145,7 @@ public final class JkJavadocMaker {
         outputDir.mkdirs();
         execute(doclet, JkLog.infoStream(), warn, error, args);
         if (outputDir.exists() && zipFile != null) {
-            JkFileTree.of(outputDir).zipTo(zipFile.toPath());
+            JkPathTree.of(outputDir).zipTo(zipFile.toPath());
         }
         JkLog.done();
     }
@@ -154,7 +153,7 @@ public final class JkJavadocMaker {
     private String[] toArguments(File outputDir) {
         final List<String> list = new LinkedList<>();
         list.add("-sourcepath");
-        list.add(JkPathSequence.ofMany(this.srcDirs.rootFiles()).toString());
+        list.add(JkPathSequence.ofMany(this.srcDirs.rootDirsOrZipFiles()).toString());
         list.add("-d");
         list.add(outputDir.getAbsolutePath());
         if (JkLog.verbose()) {

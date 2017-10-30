@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.Path;
@@ -37,6 +38,14 @@ public final class JkUtilsPath {
             return result;
         }
         return paths;
+    }
+
+    public static Path get(URL url) {
+        try {
+            return Paths.get(url.toURI());
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Url " + url + " can not be turned to an URI", e);
+        }
     }
 
     public static Path zipRoot(Path zipFile) {

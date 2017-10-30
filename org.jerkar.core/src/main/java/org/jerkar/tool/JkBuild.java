@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
-import org.jerkar.api.file.JkFileTree;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsObject;
@@ -81,8 +81,8 @@ public class JkBuild {
      * Returns the base directory tree for this project. All file/directory path are
      * resolved to this directory.
      */
-    public final JkFileTree baseTree() {
-        return JkFileTree.of(baseDir);
+    public final JkPathTree baseTree() {
+        return JkPathTree.of(baseDir);
     }
 
     /**
@@ -96,8 +96,8 @@ public class JkBuild {
      * The output directory where all the final and intermediate artifacts are
      * generated.
      */
-    public JkFileTree ouputTree() {
-        return JkFileTree.of(outputDir());
+    public JkPathTree ouputTree() {
+        return JkPathTree.of(outputDir());
     }
 
     /**

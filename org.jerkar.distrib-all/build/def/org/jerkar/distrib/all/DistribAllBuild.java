@@ -6,8 +6,8 @@ import java.nio.file.StandardCopyOption;
 
 import org.jerkar.CoreBuild;
 import org.jerkar.api.depmanagement.JkArtifactFileId;
-import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkFileTreeSet;
+import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
@@ -38,13 +38,13 @@ class DistribAllBuild extends JkBuild {
         JkLog.info("Copy core distribution locally.");
         CoreBuild core = pluginsJacoco.core; // The core project is got by transitivity
         Path distDir = this.outputDir().resolve("dist");
-        JkFileTree dist = JkFileTree.of(distDir).merge(core.distribFolder);
+        JkPathTree dist = JkPathTree.of(distDir).merge(core.distribFolder);
 
         JkLog.info("Add plugins to the distribution");
-        JkFileTree ext = dist.goTo("libs/builtins")
+        JkPathTree ext = dist.goTo("libs/builtins")
                 .copyIn(pluginsSonar.project().mainArtifactPath())
                 .copyIn(pluginsJacoco.project().mainArtifactPath());
-        JkFileTree sourceDir = dist.goTo("libs-sources");
+        JkPathTree sourceDir = dist.goTo("libs-sources");
         sourceDir.copyIn(pluginsSonar.project().artifactPath(JkJavaProject.SOURCES_FILE_ID))
                 .copyIn(pluginsJacoco.project().artifactPath(JkJavaProject.SOURCES_FILE_ID));
 
@@ -52,16 +52,16 @@ class DistribAllBuild extends JkBuild {
         Path fat = dist.get(core.project().artifactPath(JkArtifactFileId.of("all", "jar"))
                 .getFileName().toString());
         Files.copy(core.project().mainArtifactPath(), fat, StandardCopyOption.REPLACE_EXISTING);
-        ext.accept("**.jar").stream().map(path -> JkFileTree.ofZip(path)).forEach(tree -> tree.zipTo(fat));
+        ext.accept("**.jar").stream().map(path -> JkPathTree.ofZip(path)).forEach(tree -> tree.zipTo(fat));
 
         JkLog.info("Create a fat source jar");
         Path fatSource = sourceDir.get("org.jerkar.core-all-sources.jar");
         sourceDir.accept("**.jar", "**.zip").refuse(fatSource.getFileName().toString()).stream()
-                .map(path -> JkFileTree.ofZip(path)).forEach(tree -> tree.zipTo(fatSource));
+                .map(path -> JkPathTree.ofZip(path)).forEach(tree -> tree.zipTo(fatSource));
 
         if (javadoc) {
             JkLog.info("Create javadoc");
-            JkFileTreeSet sources = this.pluginsJacoco.core.project().getSourceLayout().sources()
+            JkPathTreeSet sources = this.pluginsJacoco.core.project().getSourceLayout().sources()
                     .and(this.pluginsJacoco.project().getSourceLayout().sources())
                     .and(this.pluginsSonar.project().getSourceLayout().sources());
             Path javadocAllDir = this.outputDir().resolve("javadoc-all");

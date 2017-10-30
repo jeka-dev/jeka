@@ -95,22 +95,6 @@ public final class JkManifest {
     }
 
     /**
-     * Returns the Manifest read from the specified archive. The manifest is
-     * expected to be found at META-INF/MANIFEST.MF. Returns <code>null</code>
-     * if no manifest found.
-     */
-    public static JkManifest ofArchive(File archive) {
-        try (final InputStream inputStream = JkUtilsZip.readZipEntryOrNull(archive, PATH)) {
-            if (inputStream == null) {
-                return null;
-            }
-            return JkManifest.of(inputStream);
-        } catch (IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
-        }
-    }
-
-    /**
      * Returns an empty manifest containing only the "Manifest-Version=1.0"
      * attribute.
      */

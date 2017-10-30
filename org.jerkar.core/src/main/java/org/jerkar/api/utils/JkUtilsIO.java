@@ -89,27 +89,6 @@ public final class JkUtilsIO {
         }
     }
 
-    /**
-     * Finishes the specified zip output stream object, ignoring any exceptions.
-     */
-    public static void finish(ZipOutputStream zipOutputStream) {
-        try {
-            zipOutputStream.finish();
-        } catch (final IOException e) {
-            throw new IllegalStateException("Cannot finish zip output on " + zipOutputStream);
-        }
-    }
-
-    /**
-     * Flushes the specified zip output stream object, ignoring any exceptions.
-     */
-    public static void flush(ZipOutputStream zipOutputStream) {
-        try {
-            zipOutputStream.flush();
-        } catch (final IOException e) {
-            throw new IllegalStateException("Cannot flush zip output on " + zipOutputStream);
-        }
-    }
 
 
     /**

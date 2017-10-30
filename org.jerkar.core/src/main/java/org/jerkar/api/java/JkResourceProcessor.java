@@ -1,25 +1,19 @@
 package org.jerkar.api.java;
 
+import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.file.JkPathTreeSet;
+import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.jerkar.api.file.JkFileTree;
-import org.jerkar.api.file.JkFileTreeSet;
-import org.jerkar.api.file.JkPathFilter;
-import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsPath;
 
 /**
  * This processor basically copies some resource files to a target folder
@@ -33,11 +27,11 @@ import org.jerkar.api.utils.JkUtilsPath;
  */
 public final class JkResourceProcessor {
 
-    private final JkFileTreeSet resourceTrees;
+    private final JkPathTreeSet resourceTrees;
 
     private final Collection<JkInterpolator> interpolators;
 
-    private JkResourceProcessor(JkFileTreeSet trees, Collection<JkInterpolator> interpolators) {
+    private JkResourceProcessor(JkPathTreeSet trees, Collection<JkInterpolator> interpolators) {
         super();
         this.resourceTrees = trees;
         this.interpolators = interpolators;
@@ -45,18 +39,18 @@ public final class JkResourceProcessor {
 
     /**
      * Creates a <code>JkResourceProcessor</code> jump the given
-     * <code>JkFileTreeSet</code> without processing any token replacement.
+     * <code>JkPathTreeSet</code> without processing any token replacement.
      */
     @SuppressWarnings("unchecked")
-    public static JkResourceProcessor of(JkFileTreeSet trees) {
+    public static JkResourceProcessor of(JkPathTreeSet trees) {
         return new JkResourceProcessor(trees, Collections.EMPTY_LIST);
     }
 
     /**
      * Creates a <code>JkResourceProcessor</code> jump the given
-     * <code>JkFileTree</code> without processing any token replacement.
+     * <code>JkPathTree</code> without processing any token replacement.
      */
-    public static JkResourceProcessor of(JkFileTree tree) {
+    public static JkResourceProcessor of(JkPathTree tree) {
         return of(tree.asSet());
     }
 
@@ -67,7 +61,7 @@ public final class JkResourceProcessor {
     public void generateTo(File outputDir) {
         JkLog.startln("Coping resource files to " + outputDir.getPath());
         final AtomicInteger count = new AtomicInteger(0);
-        for (final JkFileTree resourceTree : this.resourceTrees.fileTrees()) {
+        for (final JkPathTree resourceTree : this.resourceTrees.fileTrees()) {
             if (!resourceTree.exists()) {
                 continue;
             }
@@ -88,24 +82,24 @@ public final class JkResourceProcessor {
     }
 
     /**
-     * @see JkResourceProcessor#and(JkFileTreeSet)
+     * @see JkResourceProcessor#and(JkPathTreeSet)
      */
-    public JkResourceProcessor and(JkFileTreeSet trees) {
+    public JkResourceProcessor and(JkPathTreeSet trees) {
         return new JkResourceProcessor(this.resourceTrees.and(trees), this.interpolators);
     }
 
     /**
-     * @see JkResourceProcessor#and(JkFileTreeSet)
+     * @see JkResourceProcessor#and(JkPathTreeSet)
      */
-    public JkResourceProcessor and(JkFileTree tree) {
+    public JkResourceProcessor and(JkPathTree tree) {
         return and(tree.asSet());
     }
 
     /**
-     * @see JkResourceProcessor#and(JkFileTree)
+     * @see JkResourceProcessor#and(JkPathTree)
      */
     public JkResourceProcessor and(File dir) {
-        return and(JkFileTree.of(dir));
+        return and(JkPathTree.of(dir));
     }
 
 
