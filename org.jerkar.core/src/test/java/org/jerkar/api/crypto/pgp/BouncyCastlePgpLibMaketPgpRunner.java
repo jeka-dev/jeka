@@ -3,6 +3,9 @@ package org.jerkar.api.crypto.pgp;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -53,13 +56,15 @@ public class BouncyCastlePgpLibMaketPgpRunner {
         removeUnusedClass(new File(jar.getFile()), new File("bouncycastle-pgp-152.jar"), classNames);
     }
 
-    private static void testSignAndVerify(Class<?> pgpClass) {
-        final File pubFile = JkUtilsFile.fromUrl(JkPgpTest.class.getResource("pubring.gpg"));
-        final File secringFile = JkUtilsFile.fromUrl(JkPgpTest.class.getResource("secring.gpg"));
-        final File signatureFile = JkUtilsFile.createFileIfNotExist(new File(
-                "build/output/test-out/signature-runner.asm"));
-        final File sampleFile = JkUtilsFile.fromUrl(JkPgpTest.class
-                .getResource("sampleFileToSign.txt"));
+    private static void testSignAndVerify(Class<?> pgpClass) throws Exception {
+        final Path pubFile = Paths.get(JkPgpTest.class.getResource("pubring.gpg").toURI());
+        final Path secringFile = Paths.get(JkPgpTest.class.getResource("secring.gpg").toURI());
+        final Path signatureFile = Paths.get("build/output/test-out/signature-runner.asm");
+        Files.createDirectories(signatureFile.getParent());
+        if (!Files.exists(signatureFile)) {
+            Files.createFile(signatureFile);
+        }
+        final Path sampleFile = Paths.get(JkPgpTest.class.getResource("sampleFileToSign.txt").toURI());
 
         sign(sampleFile, signatureFile, "jerkar", secringFile, pgpClass);
         verify(sampleFile, signatureFile, pubFile, pgpClass);
@@ -81,8 +86,8 @@ public class BouncyCastlePgpLibMaketPgpRunner {
         pgp.sign(sampleFile, signatureFile);
     }
 
-    private static void sign(File fileToSign, File output, String password, File secRing,
-            Class<?> clazz) {
+    private static void sign(Path fileToSign, Path output, String password, Path secRing,
+            Class<?> clazz) throws Exception {
         final char[] pass;
         if (password == null) {
             pass = new char[0];
@@ -91,11 +96,16 @@ public class BouncyCastlePgpLibMaketPgpRunner {
         }
         JkUtilsAssert.isTrue(secRing != null,
                 "You must supply a secret ring file (as secring.gpg) to sign files");
-        JkUtilsReflect.invokeStaticMethod(clazz, "sign", fileToSign, secRing, output, pass, true);
+        Method method = clazz.getMethod("sign", Path.class, Path.class, Path.class, char[].class, boolean.class);
+        method.setAccessible(true);
+        method.invoke(null, fileToSign, secRing, output, pass, true);
     }
 
-    private static void verify(File fileToVerify, File signature, File pubRing, Class<?> clazz) {
-        JkUtilsReflect.invokeStaticMethod(clazz, "verify", fileToVerify, pubRing, signature);
+    private static void verify(Path fileToVerify, Path signature, Path pubRing, Class<?> clazz) throws Exception {
+        Method method = clazz.getMethod("verify", Path.class, Path.class, Path.class);
+        method.setAccessible(true);
+        method.invoke(null, fileToVerify, pubRing, signature);
+
     }
 
     private static void removeUnusedClass(File jar, File outputJar, Set<String> classes)

@@ -90,9 +90,9 @@ public class MergeFileDepIT {
     }
 
     @Test
-    public void flattenOnlyFileDeps() {
-        File dep0File = JkUtilsFile.resourceAsFile(MergeFileDepIT.class, "dep0");
-        File dep1File = JkUtilsFile.resourceAsFile(MergeFileDepIT.class, "dep1");
+    public void flattenOnlyFileDeps() throws URISyntaxException {
+        Path dep0File = Paths.get(MergeFileDepIT.class.getResource("dep0").toURI());
+        Path dep1File = Paths.get(MergeFileDepIT.class.getResource("dep1").toURI());
         JkDependencies deps = JkDependencies.builder()
                 .on(dep0File).scope(TEST)
                 .on(dep1File).scope(TEST).build();

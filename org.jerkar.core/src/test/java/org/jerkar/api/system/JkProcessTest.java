@@ -1,6 +1,9 @@
 package org.jerkar.api.system;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsSystem;
@@ -16,13 +19,13 @@ public class JkProcessTest {
     public void dirOnWindows() throws Exception {
 
         if (JkUtilsSystem.IS_WINDOWS) {
-            File toto = JkUtilsFile.resourceAsFile(JkProcessTest.class, "toto");
-            File totoWithSpaces = JkUtilsFile.resourceAsFile(JkProcessTest.class, "toto with spaces");
-            File parent = toto.getParentFile();
+            Path toto = Paths.get(JkProcessTest.class.getResource( "toto").toURI());
+            Path totoWithSpaces = Paths.get(JkProcessTest.class.getResource("toto with spaces").toURI());
+            Path parent = toto.getParent();
 
-            Assert.assertTrue(parent.exists());
+            Assert.assertTrue(Files.exists(parent));
             //new ProcessBuilder().command("explorer", parent.getAbsolutePath()).start().waitFor();
-            JkProcess.of("find", "a string", totoWithSpaces.getAbsolutePath()).runSync();
+            JkProcess.of("find", "a string", totoWithSpaces.toAbsolutePath().toString()).runSync();
         }
     }
 

@@ -42,7 +42,7 @@ final class PgpUtils {
 
     private static final int HASH_ALGO = PGPUtil.SHA1;
 
-    static boolean verify(Path fileToVerify, Path pubringFile, Path signatureFile) {
+    public static boolean verify(Path fileToVerify, Path pubringFile, Path signatureFile) {
 
         try (final InputStream streamToVerify = Files.newInputStream(fileToVerify);
              final InputStream signatureStream = Files.newInputStream(signatureFile);
