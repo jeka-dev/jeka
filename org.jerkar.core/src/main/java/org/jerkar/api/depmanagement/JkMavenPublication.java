@@ -32,7 +32,7 @@ public final class JkMavenPublication implements Serializable {
      * Creates a Maven publication specifying the file to publish as main artifact.
      */
     public static JkMavenPublication of(Path file) {
-        return new JkMavenPublication(JkUtilsPath.toFiles(JkUtilsIterable.listOf(file)),
+        return new JkMavenPublication(JkUtilsIterable.listOf(file.toFile()),
                 Collections.emptyList(), null);
     }
 
@@ -68,9 +68,9 @@ public final class JkMavenPublication implements Serializable {
 
 
     /**
-     * Same as {@link #and(File, String)} but effective only if the specified condition is <code>true</code>.
+     * Same as {@link #and(Path, String)} but effective only if the specified condition is <code>true</code>.
      */
-    public JkMavenPublication andIf(boolean condition, File file, String classifier) {
+    public JkMavenPublication andIf(boolean condition, Path file, String classifier) {
         if (condition) {
             return and(file, classifier);
         }
@@ -80,11 +80,11 @@ public final class JkMavenPublication implements Serializable {
     /**
      * Returns a {@link JkMavenPublication} identical to this one but adding a classified artifact.
      */
-    public JkMavenPublication and(File file, String classifier) {
+    public JkMavenPublication and(Path file, String classifier) {
         JkUtilsAssert.isTrue(!JkUtilsString.isBlank(classifier), "classifier cannot be empty");
-        final String fileExt = JkUtilsString.substringAfterLast(file.getName(), ".");
+        final String fileExt = JkUtilsString.substringAfterLast(file.getFileName().toString(), ".");
         if (JkUtilsString.isBlank(fileExt)) {
-            throw new IllegalArgumentException("the file " + file.getPath()
+            throw new IllegalArgumentException("File " + file
             + " must have an extension (as .jar, .zip, ...");
         }
         if (contains(fileExt, classifier)) {
@@ -98,13 +98,6 @@ public final class JkMavenPublication implements Serializable {
                 this.classifiedArtifacts);
         list.add(artifact);
         return new JkMavenPublication(this.mainArtifacts, list, this.extraInfo);
-    }
-
-    /**
-     * Returns a {@link JkMavenPublication} identical to this one but adding a classified artifact.
-     */
-    public JkMavenPublication and(Path file, String classifier) {
-        return and(file.toFile(), classifier);
     }
 
     private boolean contains(String ext, String classifier) {
@@ -127,7 +120,7 @@ public final class JkMavenPublication implements Serializable {
     }
 
     /**
-     * Same as {@link #and(File, String)} but effective only if the specified file exists.
+     * Same as {@link #and(Path, String)} but effective only if the specified file exists.
      * If not the case, this method returns this object.
      */
     public JkMavenPublication andOptional(Path file, String classifier) {
@@ -175,12 +168,12 @@ public final class JkMavenPublication implements Serializable {
         private static final long serialVersionUID = 1L;
 
         private final String classifier;
-        private final File file;
+        private final File file;  // Path not serializable
 
-        JkClassifiedFileArtifact(String classifier, File file) {
+        JkClassifiedFileArtifact(String classifier, Path file) {
             super();
             this.classifier = classifier;
-            this.file = file;
+            this.file = file.toFile();
         }
 
         /** Classifier string for this classified artifact */

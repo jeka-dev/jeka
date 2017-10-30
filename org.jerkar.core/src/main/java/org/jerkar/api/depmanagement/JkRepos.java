@@ -1,6 +1,6 @@
 package org.jerkar.api.depmanagement;
 
-import java.io.File;
+
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -57,9 +57,9 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
     /**
      * Creates a {@link JkRepos} from Maven repositories having specified file roots.
      */
-    public static JkRepos maven(File... files) {
+    public static JkRepos maven(Path... files) {
         final List<JkRepo> list = new LinkedList<>();
-        for (final File file : files) {
+        for (final Path file : files) {
             list.add(JkRepo.maven(file));
         }
         return new JkRepos(list);
@@ -79,9 +79,9 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
     /**
      * Creates a {@link JkRepos} from Maven repositories having specified Ivy files.
      */
-    public static JkRepos ivy(File... files) {
+    public static JkRepos ivy(Path... files) {
         final List<JkRepo> list = new LinkedList<>();
-        for (final File file : files) {
+        for (final Path file : files) {
             list.add(JkRepo.ivy(file));
         }
         return new JkRepos(list);
@@ -154,7 +154,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
     /**
      * Returns a {@link JkRepos} identical to this one but adding Ivy {@link JkRepo} having specified baseTree files.
      */
-    public JkRepos andIvy(File... files) {
+    public JkRepos andIvy(Path... files) {
         final List<JkRepo> list = new LinkedList<>(this.repos);
         list.addAll(JkRepos.ivy(files).repos);
         return new JkRepos(list);
@@ -163,7 +163,7 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
     /**
      * Returns a {@link JkRepos} identical to this one but adding Maven {@link JkRepo} having specified baseTree files.
      */
-    public JkRepos andMaven(File... files) {
+    public JkRepos andMaven(Path... files) {
         final List<JkRepo> list = new LinkedList<>(this.repos);
         list.addAll(maven(files).repos);
         return new JkRepos(list);
@@ -204,31 +204,28 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
         return repos.toString();
     }
 
+
+
     /**
      * Retrieves directly the file embodying the specified the external dependency.
      */
-    @Deprecated
-    public File get(JkModuleDependency moduleDependency) {
+    public Path get(JkModuleDependency moduleDependency) {
         final InternalDepResolver depResolver = ivyResolver();
-        return depResolver.get(moduleDependency);
-    }
-
-    public Path getPath(JkModuleDependency moduleDependency) {
-        return get(moduleDependency).toPath();
+        return depResolver.get(moduleDependency).toPath();
     }
 
 
     /**
      * Short hand for {@link #get(JkModuleDependency)}
      */
-    public File get(JkModuleId moduleId, String version) {
+    public Path get(JkModuleId moduleId, String version) {
         return get(JkModuleDependency.of(moduleId, version));
     }
 
     /**
      * Short hand for {@link #get(JkModuleDependency)}
      */
-    public File get(String moduleGroup, String moduleName, String version) {
+    public Path get(String moduleGroup, String moduleName, String version) {
         return get(JkModuleId.of(moduleGroup, moduleName), version);
     }
 

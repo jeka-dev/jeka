@@ -1,7 +1,11 @@
 package org.jerkar.api.ide.idea;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkPopularModules;
@@ -20,7 +24,7 @@ public class JkImlGeneratorTest {
 
     @Test
     public void generate() throws Exception {
-        final Path top = unzipToDir("sample-multi-scriptless.zip").toPath();
+        final Path top = unzipToDir("sample-multi-scriptless.zip");
         JkLog.silent(true);
 
         final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
@@ -64,11 +68,11 @@ public class JkImlGeneratorTest {
         JkPathTree.of(top).deleteContent();
     }
 
-    private static File unzipToDir(String zipName) {
-        final File dest = JkUtilsFile.createTempDir(JkEclipseClasspathGeneratorTest.class.getName());
-        final File zip = JkUtilsFile.toFile(JkEclipseClasspathGeneratorTest.class.getResource(zipName));
-        JkUtilsFile.unzip(zip, dest);
-        System.out.println("unzipped in " + dest.getAbsolutePath());
+    private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {
+        final Path dest = Files.createTempDirectory(JkEclipseClasspathGeneratorTest.class.getName());
+        final Path zip = Paths.get(JkEclipseClasspathGeneratorTest.class.getResource(zipName).toURI());
+        JkPathTree.ofZip(zip).copyTo(dest);
+        System.out.println("unzipped in " + dest);
         return dest;
     }
 

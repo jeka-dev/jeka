@@ -310,8 +310,8 @@ public final class JkImlGenerator {
             final LibPath libPath = new LibPath();
             libPath.bin = file;
             libPath.scope = scope;
-            libPath.source = repos.getPath(JkModuleDependency.of(versionedModule).classifier("sources"));
-            libPath.javadoc = repos.getPath(JkModuleDependency.of(versionedModule).classifier("javadoc"));
+            libPath.source = repos.get(JkModuleDependency.of(versionedModule).classifier("sources"));
+            libPath.javadoc = repos.get(JkModuleDependency.of(versionedModule).classifier("javadoc"));
             result.add(libPath);
         }
         return result;

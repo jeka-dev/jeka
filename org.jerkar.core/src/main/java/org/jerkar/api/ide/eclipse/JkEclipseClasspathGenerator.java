@@ -3,6 +3,7 @@ package org.jerkar.api.ide.eclipse;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -247,7 +248,7 @@ public final class JkEclipseClasspathGenerator {
 
     private void writeFileDepsEntries(XMLStreamWriter writer, Iterable<Path> fileDeps, Set<String> paths) throws XMLStreamException {
         for (final Path file : fileDeps) {
-            writeClasspathEl(file.toFile(), writer, paths);
+            writeClasspathEl(file, writer, paths);
         }
     }
 
@@ -270,22 +271,22 @@ public final class JkEclipseClasspathGenerator {
         writer.writeCharacters("\n");
     }
 
-    private void writeClasspathEl(File file, XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
+    private void writeClasspathEl(Path file, XMLStreamWriter writer, Set<String> paths) throws XMLStreamException {
 
-        final String name = JkUtilsString.substringBeforeLast(file.getName(), ".jar");
-        File source = new File(file.getParentFile(), name + "-sources.jar");
-        if (!source.exists()) {
-            source = new File(file.getParentFile(), "../../libs-sources/" + name + "-sources.jar");
+        final String name = JkUtilsString.substringBeforeLast(file.getFileSystem().toString(), ".jar");
+        Path source = file.resolveSibling(name + "-sources.jar");
+        if (!Files.exists(source)) {
+            source = file.resolveSibling("../../libs-sources/" + name + "-sources.jar");
         }
-        if (!source.exists()) {
-            source = new File(file.getParentFile(), "libs-sources/" + name + "-sources.jar");
+        if (!Files.exists(source)) {
+            source = file.resolveSibling("libs-sources/" + name + "-sources.jar");
         }
-        File javadoc = new File(file.getParentFile(), name + "-javadoc.jar");
-        if (!javadoc.exists()) {
-            javadoc = new File(file.getParentFile(), "../../libs-javadoc/" + name + "-javadoc.jar");
+        Path javadoc = file.resolveSibling(name + "-javadoc.jar");
+        if (!Files.exists(javadoc)) {
+            javadoc = file.resolveSibling("../../libs-javadoc/" + name + "-javadoc.jar");
         }
-        if (!javadoc.exists()) {
-            javadoc = new File(file.getParentFile(), "libs-javadoc/" + name + "-javadoc.jar");
+        if (!Files.exists(javadoc)) {
+            javadoc = file.resolveSibling("libs-javadoc/" + name + "-javadoc.jar");
         }
         writeClasspathEl(writer, file, source, javadoc, paths);
 
@@ -386,30 +387,30 @@ public final class JkEclipseClasspathGenerator {
 
     private void writeModuleEntry(XMLStreamWriter writer, JkVersionedModule versionedModule, Iterable<Path> files,
             JkRepos repos, Set<String> paths) throws XMLStreamException {
-        final File source = repos.get(JkModuleDependency.of(versionedModule).classifier("sources"));
-        File javadoc = null;
-        if (source == null || !source.exists()) {
+        final Path source = repos.get(JkModuleDependency.of(versionedModule).classifier("sources"));
+        Path javadoc = null;
+        if (source == null || !Files.exists(source)) {
             javadoc = repos.get(JkModuleDependency.of(versionedModule).classifier("javadoc"));
         }
         for (final Path file : files) {
-            writeClasspathEl(writer, file.toFile(), source, javadoc, paths);
+            writeClasspathEl(writer, file, source, javadoc, paths);
         }
     }
 
-    private void writeClasspathEl(XMLStreamWriter writer, File bin, File source, File javadoc, Set<String> paths)
+    private void writeClasspathEl(XMLStreamWriter writer, Path bin, Path source, Path javadoc, Set<String> paths)
             throws XMLStreamException {
-        String binPath = bin.getAbsolutePath();
+        String binPath = bin.toAbsolutePath().toString();
         if (!paths.add(binPath)) {
             return;
         }
         if (usePathVariables) {
-            binPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.jerkarRepositoryCache().resolve(bin.toPath()).toString();
+            binPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.jerkarRepositoryCache().resolve(bin).toString();
         } else {
             binPath = binPath.replace(File.separator, "/");
         }
         writer.writeCharacters("\t");
         final boolean mustWriteJavadoc = includeJavadoc && javadoc != null
-                && javadoc.exists() && (source == null || !source.exists());
+                && Files.exists(javadoc) && (source == null || !Files.exists(source));
         if (!mustWriteJavadoc) {
             writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
         } else {
@@ -418,10 +419,10 @@ public final class JkEclipseClasspathGenerator {
         writer.writeAttribute("kind", usePathVariables ? "var" : "lib");
         writer.writeAttribute("path", binPath);
         writer.writeAttribute("exported", "true");
-        if (source != null && source.exists()) {
-            String srcPath = source.getAbsolutePath();
+        if (source != null && Files.exists(source)) {
+            String srcPath = source.toAbsolutePath().toString();
             if (usePathVariables) {
-                srcPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.jerkarRepositoryCache().resolve(source.toPath()).toString();
+                srcPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.jerkarRepositoryCache().resolve(source).toString();
             } else {
                 srcPath = srcPath.replace(File.separator, "/");
             }
@@ -434,7 +435,7 @@ public final class JkEclipseClasspathGenerator {
             writer.writeEmptyElement("attribute");
             writer.writeAttribute("name", "javadoc_location");
             writer.writeAttribute("value",   // Eclipse does not accept variable for javadoc path
-                    "jar:file:/" + javadoc.toPath().toAbsolutePath().normalize().toString()
+                    "jar:file:/" + javadoc.toAbsolutePath().normalize().toString()
                             .replace(File.separator, "/") + "!/");
             writer.writeCharacters("\n\t\t");
             writer.writeEndElement();

@@ -2,6 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -52,7 +53,7 @@ public final class JkPublishRepo implements Serializable {
      * Creates a repository for publishing locally under <code></code>[USER HOME]/.jerkar/publish</code> folder.
      */
     public static JkPublishRepo local() {
-        final File file = new File(JkLocator.jerkarUserHomeDir().toFile(), "maven-publish-dir");
+        final Path file = JkLocator.jerkarUserHomeDir().resolve("maven-publish-dir");
         return JkRepo.maven(file).asPublishRepo();
     }
 

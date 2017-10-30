@@ -1,6 +1,5 @@
 package org.jerkar.api.depmanagement;
 
-
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.system.JkLog;

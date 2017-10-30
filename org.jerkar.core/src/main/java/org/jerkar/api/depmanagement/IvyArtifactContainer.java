@@ -1,6 +1,5 @@
 package org.jerkar.api.depmanagement;
 
-
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedList;

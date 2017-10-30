@@ -2,6 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.HashMap;
@@ -64,8 +65,8 @@ final class IvyPublisher implements InternalPublisher {
      * Creates an instance using specified repository for publishing and the
      * specified repositories for resolving.
      */
-    public static IvyPublisher of(JkPublishRepos publishRepos, File descriptorOutputDir) {
-        return of(ivySettingsOf(publishRepos), publishRepos, descriptorOutputDir);
+    public static IvyPublisher of(JkPublishRepos publishRepos, Path descriptorOutputDir) {
+        return of(ivySettingsOf(publishRepos), publishRepos, descriptorOutputDir.toFile());
     }
 
     private static boolean isMaven(DependencyResolver dependencyResolver) {

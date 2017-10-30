@@ -1,7 +1,8 @@
 package org.jerkar.api.depmanagement;
 
-import java.io.File;
+
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,7 +29,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
      * Creates a repository for publishing locally under <code></code>[USER HOME]/.jerkar/publish</code> folder.
      */
     public static JkPublishRepos local() {
-        final File file = new File(JkLocator.jerkarUserHomeDir().toFile(), "maven-publish-dir");
+        final Path file = JkLocator.jerkarUserHomeDir().resolve("maven-publish-dir");
         return JkRepo.maven(file).asPublishRepos();
     }
 
@@ -67,14 +68,14 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
     /**
      * Returns a Maven repository for publishing located at the specified file.
      */
-    public static JkPublishRepos maven(File file) {
+    public static JkPublishRepos maven(Path file) {
         return new JkPublishRepos(JkUtilsIterable.listOf(JkPublishRepo.of(JkRepo.maven(file))));
     }
 
     /**
      * Returns an Ivy repository for publishing located at the specified file.
      */
-    public static JkPublishRepos ivy(File file) {
+    public static JkPublishRepos ivy(Path file) {
         return new JkPublishRepos(JkUtilsIterable.listOf(JkPublishRepo.of(JkRepo.ivy(file))));
     }
 

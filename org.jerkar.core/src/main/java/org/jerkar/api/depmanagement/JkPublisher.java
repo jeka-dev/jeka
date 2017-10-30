@@ -1,6 +1,5 @@
 package org.jerkar.api.depmanagement;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Set;
@@ -39,19 +38,8 @@ public final class JkPublisher {
      * Creates a publisher that publish locally under <code></code>[USER HOME]/.jerkar/publish</code> folder.
      */
     public static JkPublisher local() {
-        final File file = new File(JkLocator.jerkarUserHomeDir().toFile(), "maven-publish-dir");
+        final Path file = JkLocator.jerkarUserHomeDir().resolve("maven-publish-dir");
         return JkPublisher.of(JkRepo.maven(file).asPublishRepo());
-    }
-
-    /**
-     * Creates a {@link JkPublisher} with the specified {@link JkPublishRepo}
-     * and output directory. The output directory is the place where pom.xml and
-     * ivy.xml are generated.
-     */
-    public static JkPublisher of(JkPublishRepos publishRepos, File outDir) {
-        final InternalPublisher ivyPublisher = IVY_CLASS_LOADER.transClassloaderProxy(
-                InternalPublisher.class, IVY_PUB_CLASS, "ofMany", publishRepos, outDir);
-        return new JkPublisher(ivyPublisher);
     }
 
     /**

@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -88,10 +90,10 @@ public abstract class JkRepo implements Serializable {
     }
 
     /**
-     * Creates a Maven repository having the specified file baseTree location.
+     * Creates a Maven repository having the specified file location.
      */
-    public static JkMavenRepository maven(File file) {
-        return new JkMavenRepository(JkUtilsFile.toUrl(file), null, null, null);
+    public static JkMavenRepository maven(Path dir) {
+        return new JkMavenRepository(JkUtilsPath.toUrl(dir), null, null, null);
     }
 
     /**
@@ -188,12 +190,8 @@ public abstract class JkRepo implements Serializable {
     /**
      * Creates a Ivy repository located at the specified file location.
      */
-    public static JkRepo.JkIvyRepository ivy(File file) {
-        try {
-            return ivy(file.toURI().toURL());
-        } catch (final MalformedURLException e) {
-            throw new IllegalArgumentException(e);
-        }
+    public static JkRepo.JkIvyRepository ivy(Path file) {
+        return ivy(JkUtilsPath.toUrl(file));
     }
 
     /**

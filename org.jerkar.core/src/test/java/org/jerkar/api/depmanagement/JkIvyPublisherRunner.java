@@ -1,8 +1,10 @@
 package org.jerkar.api.depmanagement;
 
-import java.io.File;
+
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -13,16 +15,16 @@ import org.jerkar.api.utils.JkUtilsFile;
 @SuppressWarnings("javadoc")
 public class JkIvyPublisherRunner {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         JkLog.verbose(true);
         // JkUtilsTool.loadUserSystemProperties();
         testPublishIvy();
         // testPublishMaven();
     }
 
-    public static void testPublishIvy() {
+    public static void testPublishIvy() throws IOException {
         final IvyPublisher jkIvyResolver = IvyPublisher.of(ivyRepos().withSha1Checksum()
-                .withMd5Checksum(), new File("build/output/test-out"));
+                .withMd5Checksum(), Paths.get("build/output/test-out"));
         final JkVersionedModule versionedModule = JkVersionedModule.of(
                 JkModuleId.of("mygroup", "mymodule"), JkVersion.name("myVersion"));
         final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(),
@@ -34,9 +36,9 @@ public class JkIvyPublisherRunner {
                 JkVersionProvider.of(spring, "3.0.8"));
     }
 
-    public static void testPublishMaven() {
+    public static void testPublishMaven() throws IOException {
         final IvyPublisher jkIvyPublisher = IvyPublisher.of(mavenRepos().withMd5AndSha1Checksum()
-                .withUniqueSnapshot(false), new File("build/output/test-out"));
+                .withUniqueSnapshot(false), Paths.get("build/output/test-out"));
         final JkVersionedModule versionedModule = JkVersionedModule.of(
                 JkModuleId.of("mygroup2", "mymodule2"), JkVersion.name("0.0.12-SNAPSHOT"));
         final JkMavenPublication publication = JkMavenPublication.of(sampleJarfile())
@@ -58,25 +60,25 @@ public class JkIvyPublisherRunner {
         }
     }
 
-    private static File sampleJarSourcefile() {
+    private static Path sampleJarSourcefile() {
         final URL url = JkIvyPublisherRunner.class.getResource("myArtifactSample-source.jar");
         try {
-            return new File(url.toURI().getPath());
+            return Paths.get(url.toURI().getPath());
         } catch (final URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static JkPublishRepos ivyRepos() {
-        final File baseDir = new File(JkUtilsFile.workingDir(), "build/output/testIvyRepo");
-        baseDir.mkdir();
+    private static JkPublishRepos ivyRepos() throws IOException {
+        final Path baseDir = Paths.get("build/output/testIvyRepo");
+        Files.createDirectories(baseDir);
         return JkPublishRepos.ivy(baseDir);
     }
 
-    private static JkPublishRepos mavenRepos() {
-        final File baseDir = new File(JkUtilsFile.workingDir(), "build/output/mavenRepo");
-        baseDir.mkdir();
-        return JkPublishRepos.maven(baseDir);
+    private static JkPublishRepos mavenRepos() throws IOException {
+        final Path baseDir = Paths.get( "build/output/mavenRepo");
+        Files.createDirectories(baseDir);
+        return JkPublishRepos.ivy(baseDir);
     }
 
 }

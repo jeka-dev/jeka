@@ -116,12 +116,12 @@ final class PomTemplateGenerator {
         writer.writeCharacters("\n");
     }
 
-    private static void writeElement(String ident, XMLStreamWriter writer, String elementName,
+    private static void writeElement(String indent, XMLStreamWriter writer, String elementName,
             String text) throws XMLStreamException {
         if (text == null) {
             return;
         }
-        writer.writeCharacters(ident);
+        writer.writeCharacters(indent);
         writeElement(writer, elementName, text);
     }
 
