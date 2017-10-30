@@ -1,9 +1,9 @@
 package org.jerkar.api.depmanagement;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.ModuleDescriptor;
@@ -21,11 +21,7 @@ import org.jerkar.api.depmanagement.IvyPublisher.CheckFileFlag;
 import org.jerkar.api.depmanagement.JkMavenPublication.JkClassifiedFileArtifact;
 import org.jerkar.api.depmanagement.MavenMetadata.Versioning.Snapshot;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsObject;
-import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.api.utils.JkUtilsThrowable;
-import org.jerkar.api.utils.JkUtilsTime;
+import org.jerkar.api.utils.*;
 
 /**
  * {@link IvyPublisher} delegates to this class for publishing to Maven
@@ -64,7 +60,7 @@ final class IvyPublisherForMaven {
         final MavenMetadata returnedMetaData = publish(versionedModule, publication);
 
         // publish pom
-        final File pomXml = makePom(moduleDescriptor, publication);
+        final Path pomXml = makePom(moduleDescriptor, publication);
         final String version;
         if (versionedModule.version().isSnapshot() && this.uniqueSnapshot) {
             final String path = snapshotMetadataPath(versionedModule);
@@ -83,7 +79,7 @@ final class IvyPublisherForMaven {
             putAll(pomXml, pomDest, true);
         }
         if (this.descriptorOutputDir == null) {
-            pomXml.delete();
+            JkUtilsPath.deleteFile(pomXml);
         }
 
         // update maven-metadata
@@ -118,7 +114,7 @@ final class IvyPublisherForMaven {
             final String versionUniqueSnapshot = versionForUniqueSnapshot(versionedModule.version()
                     .name(), timestamp, buildNumber);
 
-            for (final File file : mavenPublication.mainArtifactFiles()) {
+            for (final Path file : mavenPublication.mainArtifactFiles()) {
                 publishUniqueSnapshot(versionedModule, null, file, versionUniqueSnapshot,
                         mavenMetadata);
             }
@@ -129,7 +125,7 @@ final class IvyPublisherForMaven {
             }
             return mavenMetadata;
         } else {
-            for (final File file : mavenPublication.mainArtifactFiles()) {
+            for (final Path file : mavenPublication.mainArtifactFiles()) {
                 publishNormal(versionedModule, null, file);
             }
             for (final JkClassifiedFileArtifact classifiedArtifact : mavenPublication
@@ -141,18 +137,18 @@ final class IvyPublisherForMaven {
         }
     }
 
-    private File makePom(ModuleDescriptor moduleDescriptor, JkMavenPublication publication) {
+    private Path makePom(ModuleDescriptor moduleDescriptor, JkMavenPublication publication) {
         final ModuleRevisionId ivyModuleRevisionId = moduleDescriptor.getModuleRevisionId();
         final String artifactName = ivyModuleRevisionId.getName();
-        final File pomXml;
+        final Path pomXml;
         if (this.descriptorOutputDir != null) {
-            pomXml = new File(targetDir(), "published-pom-" + ivyModuleRevisionId.getOrganisation()
+            pomXml = Paths.get(targetDir()).resolve("published-pom-" + ivyModuleRevisionId.getOrganisation()
             + "-" + artifactName + "-" + ivyModuleRevisionId.getRevision() + ".xml");
         } else {
-            pomXml = JkUtilsFile.tempFile("published-pom-", ".xml");
+            pomXml = JkUtilsPath.createTempFile("published-pom-", ".xml");
         }
         final String packaging = JkUtilsString.substringAfterLast(publication.mainArtifactFiles()
-                .get(0).getName(), ".");
+                .get(0).getFileName().toString(), ".");
         final PomWriterOptions pomWriterOptions = new PomWriterOptions();
         pomWriterOptions.setArtifactPackaging(packaging);
         File fileToDelete = null;
@@ -162,7 +158,7 @@ final class IvyPublisherForMaven {
             fileToDelete = template;
         }
         try {
-            PomModuleDescriptorWriter.write(moduleDescriptor, pomXml, pomWriterOptions);
+            PomModuleDescriptorWriter.write(moduleDescriptor, pomXml.toFile(), pomWriterOptions);
             if (fileToDelete != null) {
                 JkUtilsFile.delete(fileToDelete);
             }
@@ -180,8 +176,8 @@ final class IvyPublisherForMaven {
                 throw new IllegalArgumentException("The main artifact as already exist for "
                         + versionedModule);
             }
-            for (final File file : mavenPublication.mainArtifactFiles()) {
-                final String ext = JkUtilsString.substringAfterLast(file.getName(), ".");
+            for (final Path file : mavenPublication.mainArtifactFiles()) {
+                final String ext = JkUtilsString.substringAfterLast(file.getFileName().toString(), ".");
                 final String dest = destination(versionedModule, ext, null);
                 if (existOnRepo(dest)) {
                     return dest;
@@ -190,7 +186,7 @@ final class IvyPublisherForMaven {
         }
         for (final JkClassifiedFileArtifact classifiedArtifact : mavenPublication.classifiedArtifacts()) {
             final String ext = JkUtilsString.substringAfterLast(
-                    classifiedArtifact.file().getName(), ".");
+                    classifiedArtifact.file().getFileName().toString(), ".");
             final String dest = destination(versionedModule, ext, classifiedArtifact.classifier());
             if (existOnRepo(dest)) {
                 return dest;
@@ -210,9 +206,9 @@ final class IvyPublisherForMaven {
     }
 
     private void publishUniqueSnapshot(JkVersionedModule versionedModule, String classifier,
-            File source, String versionForUniqueSpshot, MavenMetadata mavenMetadata) {
+            Path source, String versionForUniqueSpshot, MavenMetadata mavenMetadata) {
 
-        final String extension = JkUtilsString.substringAfterLast(source.getName(), ".");
+        final String extension = JkUtilsString.substringAfterLast(source.getFileName().toString(), ".");
         final String dest = destination(versionedModule, extension, classifier,
                 versionForUniqueSpshot);
         putAll(source, dest, false);
@@ -221,9 +217,9 @@ final class IvyPublisherForMaven {
         push(mavenMetadata, path);
     }
 
-    private void publishNormal(JkVersionedModule versionedModule, String classifier, File source) {
+    private void publishNormal(JkVersionedModule versionedModule, String classifier, Path source) {
 
-        final String extension = JkUtilsString.substringAfterLast(source.getName(), ".");
+        final String extension = JkUtilsString.substringAfterLast(source.getFileName().toString(), ".");
         final String version = versionedModule.version().name();
         final String dest = destination(versionedModule.withVersion(version), extension, classifier);
         final boolean overwrite = versionedModule.version().isSnapshot();
@@ -266,13 +262,13 @@ final class IvyPublisherForMaven {
     }
 
     private void push(MavenMetadata metadata, String path) {
-        final File file = JkUtilsFile.tempFile("metadata-", ".xml");
+        final Path file = JkUtilsPath.createTempFile("metadata-", ".xml");
 
-        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+        try (OutputStream outputStream = Files.newOutputStream(file)) {
             metadata.output(outputStream);
             outputStream.flush();
         } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
+            throw new UncheckedIOException(e);
         }
         putAll(file, path, true);
     }
@@ -310,7 +306,7 @@ final class IvyPublisherForMaven {
         }
     }
 
-    private void putAll(File source, String dest, boolean overwrite) {
+    private void putAll(Path source, String dest, boolean overwrite) {
         putAll(source, dest, overwrite, true);
     }
 
@@ -322,16 +318,16 @@ final class IvyPublisherForMaven {
         return path;
     }
 
-    private void putAll(File source, String destination, boolean overwrite, boolean signIfneeded) {
+    private void putAll(Path source, String destination, boolean overwrite, boolean signIfneeded) {
         final String[] checksums = this.resolver.getChecksumAlgorithms();
         final Repository repository = this.resolver.getRepository();
         try {
             final String dest = completePath(destination);
             JkLog.info("publishing to " + dest);
-            repository.put(null, source, dest, overwrite);
+            repository.put(null, source.toFile(), dest, overwrite);
             for (final String algo : checksums) {
                 final File temp = JkUtilsFile.tempFile("jk-checksum-", algo);
-                final String checkSum = ChecksumHelper.computeAsString(source, algo);
+                final String checkSum = ChecksumHelper.computeAsString(source.toFile(), algo);
                 JkUtilsFile.writeString(temp, checkSum, false);
                 final String csDest = dest + "." + algo;
                 JkLog.info("publishing to " + csDest);
@@ -339,7 +335,7 @@ final class IvyPublisherForMaven {
                 temp.delete();
             }
             if (this.checkFileFlag.pgpSigner != null && signIfneeded) {
-                final File signed = checkFileFlag.pgpSigner.sign(source.toPath())[0].toFile();
+                final Path signed = checkFileFlag.pgpSigner.sign(source)[0];
                 final String signedDest = destination + ".asc";
                 putAll(signed, signedDest, overwrite, false);
             }

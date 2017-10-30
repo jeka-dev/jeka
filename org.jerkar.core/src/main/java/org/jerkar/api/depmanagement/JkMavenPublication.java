@@ -26,8 +26,6 @@ public final class JkMavenPublication implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-
-
     /**
      * Creates a Maven publication specifying the file to publish as main artifact.
      */
@@ -141,8 +139,8 @@ public final class JkMavenPublication implements Serializable {
     }
 
     /** Files constituting main artifact */
-    public List<File> mainArtifactFiles() {
-        return Collections.unmodifiableList(this.mainArtifacts);
+    public List<Path> mainArtifactFiles() {
+        return JkUtilsPath.toPaths(this.mainArtifacts);
     }
 
     /** Files constituting classified artifacts */
@@ -182,8 +180,8 @@ public final class JkMavenPublication implements Serializable {
         }
 
         /** File for this classified artifact */
-        public File file() {
-            return file;
+        public Path file() {
+            return file.toPath();
         }
 
     }

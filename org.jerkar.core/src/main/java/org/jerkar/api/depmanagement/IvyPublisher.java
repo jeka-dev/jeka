@@ -22,8 +22,10 @@ import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.RepositoryResolver;
 import org.jerkar.api.crypto.pgp.JkPgp;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
 /**
@@ -188,11 +190,11 @@ final class IvyPublisher implements InternalPublisher {
             }
 
             // Publish Ivy file
-            final File publishedIvy = createIvyFile(moduleDescriptor);
+            final Path publishedIvy = createIvyFile(moduleDescriptor);
             final Artifact artifact = MDArtifact.newIvyArtifact(moduleDescriptor);
-            resolver.publish(artifact, publishedIvy, true);
+            resolver.publish(artifact, publishedIvy.toFile(), true);
             if (this.descriptorOutputDir == null) {
-                publishedIvy.delete();
+                JkUtilsPath.deleteFile(publishedIvy);
             }
         } catch (final Exception e) {
             abortPublishTransaction(resolver);
@@ -249,17 +251,17 @@ final class IvyPublisher implements InternalPublisher {
         return moduleDescriptor;
     }
 
-    private File createIvyFile(ModuleDescriptor moduleDescriptor) {
+    private Path createIvyFile(ModuleDescriptor moduleDescriptor) {
         try {
             final ModuleRevisionId mrId = moduleDescriptor.getModuleRevisionId();
-            final File file;
+            final Path file;
             if (this.descriptorOutputDir != null) {
-                file = new File(this.descriptorOutputDir, "published-ivy-" + mrId.getOrganisation()
+                file = this.descriptorOutputDir.toPath().resolve("published-ivy-" + mrId.getOrganisation()
                 + "-" + mrId.getName() + "-" + mrId.getRevision() + ".xml");
             } else {
-                file = JkUtilsFile.tempFile("published-ivy-", ".xml");
+                file = JkUtilsPath.createTempFile("published-ivy-", ".xml");
             }
-            moduleDescriptor.toIvyFile(file);
+            moduleDescriptor.toIvyFile(file.toFile());
             return file;
         } catch (final IOException | ParseException e) {
             throw new RuntimeException(e);

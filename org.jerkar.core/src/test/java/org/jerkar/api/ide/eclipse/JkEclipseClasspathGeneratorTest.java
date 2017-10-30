@@ -4,9 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.jerkar.api.depmanagement.JkComputedDependency;
@@ -25,7 +28,7 @@ public class JkEclipseClasspathGeneratorTest {
 
     @Test
     public void generate() throws Exception {
-        final Path top = unzipToDir("sample-multi-scriptless.zip").toPath();
+        final Path top = unzipToDir("sample-multi-scriptless.zip");
         // JkLog.silent(true);
 
         final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
@@ -105,11 +108,11 @@ public class JkEclipseClasspathGeneratorTest {
         JkPathTree.of(top).deleteContent();
     }
 
-    private static File unzipToDir(String zipName) {
-        final File dest = JkUtilsFile.createTempDir(JkEclipseClasspathGeneratorTest.class.getName());
-        final File zip = JkUtilsFile.toFile(JkEclipseClasspathGeneratorTest.class.getResource(zipName));
-        JkUtilsFile.unzip(zip, dest);
-        System.out.println("unzipped in " + dest.getAbsolutePath());
+    private static Path unzipToDir(String zipName) throws IOException, URISyntaxException {
+        final Path dest = Files.createTempDirectory(JkEclipseClasspathGeneratorTest.class.getName());
+        final Path zip = Paths.get(JkEclipseClasspathGeneratorTest.class.getResource(zipName).toURI());
+        JkPathTree.ofZip(zip).copyTo(dest);
+        System.out.println("unzipped in " + dest);
         return dest;
     }
 

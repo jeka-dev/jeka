@@ -95,8 +95,6 @@ public final class JkUtilsFile {
             if (!toFile.exists()) {
                 toFile.createNewFile();
             }
-
-
             final byte[] buf = new byte[1024];
             int len;
             while ((len = in.read(buf)) > 0) {
@@ -118,13 +116,6 @@ public final class JkUtilsFile {
         } catch (final MalformedURLException e) {
             throw new IllegalArgumentException(e);
         }
-    }
-
-    /**
-     * Get the file to the specified url.
-     */
-    public static File toFile(URL url) {
-        return new File(url.getFile());
     }
 
     /**
@@ -242,15 +233,6 @@ public final class JkUtilsFile {
         }
     }
 
-    /**
-     * Creates a temp directory with the specified prefix.
-     */
-    public static File createTempDir(String prefix) {
-        final File result = tempFile(prefix, "");
-        result.delete();
-        result.mkdirs();
-        return result;
-    }
 
     /**
      * Creates the specified file on the File system if not exist.
@@ -328,55 +310,9 @@ public final class JkUtilsFile {
         return fromUrl(url);
     }
 
-    private static final int BUFFER_SIZE = 4096;
 
-    private static void extractFile(ZipInputStream in, File outdir, String name) throws IOException {
-        final byte[] buffer = new byte[BUFFER_SIZE];
-        try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(outdir, name)))) {
-            int count = -1;
-            while((count =in.read(buffer))!=-1) {
-                out.write(buffer, 0, count);
-            }
-        }
-    }
 
-    private static void mkdirs(File outdir, String path) {
-        final File d = new File(outdir, path);
-        if (!d.exists()) {
-            d.mkdirs();
-        }
-    }
 
-    private static String dirpart(String name) {
-        final int s = name.lastIndexOf(File.separatorChar);
-        return s == -1 ? null : name.substring(0, s);
-    }
-
-    /***
-     * Unzip a zip file to the specified folder
-     */
-    public static void unzip(File zipfile, File outdir) {
-        try (ZipInputStream zin = new ZipInputStream(new FileInputStream(zipfile))){
-
-            ZipEntry entry;
-            String name, dir;
-            while ((entry = zin.getNextEntry()) != null) {
-                name = entry.getName();
-                if (entry.isDirectory()) {
-                    mkdirs(outdir, name);
-                    continue;
-                }
-                dir = dirpart(name);
-                if (dir != null) {
-                    mkdirs(outdir, dir);
-                }
-                extractFile(zin, outdir, name);
-            }
-            zin.close();
-        } catch (final IOException e) {
-            throw JkUtilsThrowable.unchecked(e);
-        }
-    }
 
 
 }

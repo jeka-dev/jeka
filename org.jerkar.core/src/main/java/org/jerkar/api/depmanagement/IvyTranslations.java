@@ -3,6 +3,7 @@ package org.jerkar.api.depmanagement;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
@@ -407,7 +408,7 @@ final class IvyTranslations {
         populateDescriptorWithMavenArtifact(descriptor, mainConf, mavenMainArtifact);
 
         for (final JkClassifiedFileArtifact artifactEntry : publication.classifiedArtifacts()) {
-            final File file = artifactEntry.file();
+            final Path file = artifactEntry.file();
             final String classifier = artifactEntry.classifier();
             final Artifact mavenArtifact = toPublishedMavenArtifact(file, artifactName, classifier,
                     descriptor.getModuleRevisionId(), publishDate);
@@ -433,9 +434,9 @@ final class IvyTranslations {
         return new DefaultArtifact(moduleId, new Date(date.toEpochMilli()), artifactName, type, extension);
     }
 
-    private static Artifact toPublishedMavenArtifact(File artifact, String artifactName,
-            String classifier, ModuleRevisionId moduleId, Instant date) {
-        final String extension = JkUtilsString.substringAfterLast(artifact.getName(), ".");
+    private static Artifact toPublishedMavenArtifact(Path artifact, String artifactName,
+                                                     String classifier, ModuleRevisionId moduleId, Instant date) {
+        final String extension = JkUtilsString.substringAfterLast(artifact.getFileName().toString(), ".");
         final Map<String, String> extraMap;
         if (classifier == null) {
             extraMap = new HashMap<>();
