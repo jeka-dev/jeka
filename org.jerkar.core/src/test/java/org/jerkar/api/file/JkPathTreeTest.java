@@ -136,6 +136,16 @@ public class JkPathTreeTest {
         Files.delete(tempFile);
     }
 
+    @Test
+    public void testZipGet() throws Exception {
+        Path zipFile = createSampleZip();
+        JkPathTree zipTree = JkPathTree.ofZip(zipFile);
+        Path zipEntry = zipTree.get("/subfolder/sample.txt");
+        assertTrue(Files.exists(zipEntry));
+        assertFalse(Files.exists(zipTree.get("/opopkhjkjkjh")));
+        Files.delete(zipFile);
+    }
+
 
     private static Path sampleDir() throws Exception {
         final URL sampleFileUrl = JkUtilsPathTest.class
@@ -164,6 +174,8 @@ public class JkPathTreeTest {
         JkPathTree.of(folder).zipTo(zip);
         return zip;
     }
+
+
 
 
 

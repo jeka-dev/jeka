@@ -66,7 +66,7 @@ class DistribAllBuild extends JkBuild {
                     .and(this.pluginsSonar.project().getSourceLayout().sources());
             Path javadocAllDir = this.outputDir().resolve("javadoc-all");
             Path javadocAllFile = dist.root().resolve("libs-javadoc/org.jerkar.core-fat-javadoc.jar");
-            JkJavadocMaker.of(sources, javadocAllDir.toFile(), javadocAllFile.toFile()).process();
+            JkJavadocMaker.of(sources, javadocAllDir, javadocAllFile).process();
         }
 
         JkLog.info("Pack all");

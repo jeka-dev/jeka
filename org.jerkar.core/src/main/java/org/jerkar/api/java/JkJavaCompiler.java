@@ -1,6 +1,5 @@
 package org.jerkar.api.java;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -18,7 +17,6 @@ import javax.tools.ToolProvider;
 
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
@@ -41,10 +39,10 @@ public final class JkJavaCompiler {
 
     private final JavaCompiler compiler;
 
-    private final Map<JkJavaVersion, File> compilerBinRepo;
+    private final Map<JkJavaVersion, Path> compilerBinRepo;
 
     private JkJavaCompiler(boolean failOnError,
-            JkProcess fork, JavaCompiler compiler, Map<JkJavaVersion, File> compilerBinRepo) {
+            JkProcess fork, JavaCompiler compiler, Map<JkJavaVersion, Path> compilerBinRepo) {
         super();
         this.failOnError = failOnError;
         this.fork = fork;
@@ -53,7 +51,7 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * Creates a copy ofMany this {@link JkJavaCompiler} but with the specified
+     * Creates a copy of this {@link JkJavaCompiler} but with the specified
      * failed-on-error parameter. If <code>true</code> then
      * a compilation error will throw a {@link IllegalStateException}.
      */
@@ -63,7 +61,7 @@ public final class JkJavaCompiler {
 
 
     /**
-     * Creates a copy ofMany this {@link JkJavaCompiler} but with forking the javac
+     * Creates a copy of this {@link JkJavaCompiler} but with forking the javac
      * process. The javac process is created using specified argument defined in
      * {@link JkProcess#ofJavaTool(String, String...)}
      */
@@ -96,7 +94,7 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * Creates a copy ofMany this {@link JkJavaCompiler} but with the specified compiler instance.
+     * Creates a copy of this {@link JkJavaCompiler} but with the specified compiler instance.
      * Since in-process compilers cannot be run accept a forked process, this method disables any
      * previous fork options that may have been set.
      */
@@ -105,12 +103,12 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * Creates a copy ofMany this {@link JkJavaCompiler} but adding an external java compiler for
+     * Creates a copy of this {@link JkJavaCompiler} but adding an external java compiler for
      * the specified source version. The compiler will try to get compliant compiler to
      * compile source.
      */
-    public JkJavaCompiler withJavacBin(JkJavaVersion version, File javacBin) {
-        final HashMap<JkJavaVersion, File> map = new HashMap<>(this.compilerBinRepo);
+    public JkJavaCompiler withJavacBin(JkJavaVersion version, Path javacBin) {
+        final HashMap<JkJavaVersion, Path> map = new HashMap<>(this.compilerBinRepo);
         map.put(version, javacBin);
         return new JkJavaCompiler(failOnError, fork, compiler, map);
     }

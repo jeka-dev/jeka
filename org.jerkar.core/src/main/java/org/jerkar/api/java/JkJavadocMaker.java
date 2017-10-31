@@ -1,9 +1,10 @@
 package org.jerkar.api.java;
 
-import java.io.File;
+
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -33,14 +34,14 @@ public final class JkJavadocMaker {
 
     private final Class<?> doclet;
 
-    private final Iterable<File> classpath;
+    private final Iterable<Path> classpath;
 
-    private final File outputDir;
+    private final Path outputDir;
 
-    private final File zipFile;
+    private final Path zipFile;
 
-    private JkJavadocMaker(JkPathTreeSet srcDirs, Class<?> doclet, Iterable<File> classpath,
-                           List<String> extraArgs, File outputDir, File zipFile) {
+    private JkJavadocMaker(JkPathTreeSet srcDirs, Class<?> doclet, Iterable<Path> classpath,
+                           List<String> extraArgs, Path outputDir, Path zipFile) {
         this.srcDirs = srcDirs;
         this.extraArgs = extraArgs;
         this.doclet = doclet;
@@ -53,7 +54,7 @@ public final class JkJavadocMaker {
      * Creates a {@link JkJavadocMaker} from the specified sources. The result will be outputed in
      * the specified directory then compacted in the specified zip file.
      */
-    public static JkJavadocMaker of(JkPathTreeSet sources, File outputDir, File zipFile) {
+    public static JkJavadocMaker of(JkPathTreeSet sources, Path outputDir, Path zipFile) {
         return new JkJavadocMaker(sources, null, null, new LinkedList<>(), outputDir, zipFile);
     }
 
@@ -61,23 +62,15 @@ public final class JkJavadocMaker {
      * Creates a {@link JkJavadocMaker} from the specified sources. The result will be outputed in
      * the specified directory.
      */
-    public static JkJavadocMaker of(JkPathTreeSet sources, File outputDir) {
-        return new JkJavadocMaker(sources, null, null, new LinkedList<>(), outputDir, null);
-    }
-
-    /**
-     * Creates a {@link JkJavadocMaker} from the specified sources. The result will be outputed in
-     * the specified directory.
-     */
     public static JkJavadocMaker of(JkPathTreeSet sources, Path outputDir) {
-        return new JkJavadocMaker(sources, null, null, new LinkedList<>(), outputDir.toFile(), null);
+        return new JkJavadocMaker(sources, null, null, new LinkedList<>(), outputDir, null);
     }
 
 
     /**
      * Returns the zip file containing all the produced Javadoc.
      */
-    public File zipFile() {
+    public Path zipFile() {
         return zipFile;
     }
 
@@ -110,16 +103,8 @@ public final class JkJavadocMaker {
     /**
      * Returns a {@link JkJavadocMaker} identical to this one but using the specified classpath.
      */
-    public JkJavadocMaker withClasspath(Iterable<File> classpath) {
-        return new JkJavadocMaker(srcDirs, doclet, classpath, extraArgs, outputDir, zipFile);
-    }
-
-    /**
-     * Returns a {@link JkJavadocMaker} identical to this one but using the specified classpath.
-     */
-    public JkJavadocMaker withClasspathPath(Iterable<Path> classpath) {
-        return new JkJavadocMaker(srcDirs, doclet, JkUtilsPath.toFiles(JkUtilsPath.disambiguate(classpath)),
-                extraArgs, outputDir, zipFile);
+    public JkJavadocMaker withClasspath(Iterable<Path> classpath) {
+        return new JkJavadocMaker(srcDirs, doclet, JkUtilsPath.disambiguate(classpath), extraArgs, outputDir, zipFile);
     }
 
     /**
@@ -142,20 +127,20 @@ public final class JkJavadocMaker {
             warn = JkUtilsIO.nopPrintStream();
             error = JkUtilsIO.nopPrintStream();
         }
-        outputDir.mkdirs();
+        JkUtilsPath.createDirectories(outputDir);
         execute(doclet, JkLog.infoStream(), warn, error, args);
-        if (outputDir.exists() && zipFile != null) {
-            JkPathTree.of(outputDir).zipTo(zipFile.toPath());
+        if (Files.exists(outputDir) && zipFile != null) {
+            JkPathTree.of(outputDir).zipTo(zipFile);
         }
         JkLog.done();
     }
 
-    private String[] toArguments(File outputDir) {
+    private String[] toArguments(Path outputDir) {
         final List<String> list = new LinkedList<>();
         list.add("-sourcepath");
         list.add(JkPathSequence.ofMany(this.srcDirs.rootDirsOrZipFiles()).toString());
         list.add("-d");
-        list.add(outputDir.getAbsolutePath());
+        list.add(outputDir.toAbsolutePath().toString());
         if (JkLog.verbose()) {
             list.add("-verbose");
         } else {
@@ -165,7 +150,7 @@ public final class JkJavadocMaker {
         list.add(JkUtilsJdk.toolsJar().toString());
         if (classpath != null && classpath.iterator().hasNext()) {
             list.add("-classpath");
-            list.add(JkPathSequence.ofMany(JkUtilsPath.toPaths(this.classpath)).toString());
+            list.add(JkPathSequence.ofMany(this.classpath).toString());
         }
         list.addAll(extraArgs);
 
@@ -200,7 +185,7 @@ public final class JkJavadocMaker {
             mainClass = classLoader.loadIfExist(JAVADOC_MAIN_CLASS_NAME);
             if (mainClass == null) {
                 throw new RuntimeException(
-                        "It seems that you are running a JRE instead ofMany a JDK, please run Jerkar using a JDK.");
+                        "It seems that you are running a JRE instead of a JDK, please run Jerkar using a JDK.");
             }
         }
         return mainClass;

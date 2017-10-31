@@ -7,7 +7,6 @@ import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsZip;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -16,8 +15,9 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.zip.ZipFile;
 
+
 /**
- * A sequence ofMany file to be used as a <code>class path</code>.<br/>
+ * A sequence of file to be used as a <code>class path</code>.<br/>
  * Each file is called an <code>entry</code>.<br/>
  * Each entry is supposed to be either a <code>jar</code> file either a
  * <code>folder</code>.<br/>
@@ -83,7 +83,7 @@ public final class JkClasspath implements Iterable<Path> {
     }
 
     /**
-     * Returns this classpath as an array ofMany URL.
+     * Returns this classpath as an array of URL.
      */
     public URL[] asArrayOfUrl() {
         final URL[] result = new URL[this.entries.size()];
@@ -100,8 +100,7 @@ public final class JkClasspath implements Iterable<Path> {
     }
 
     /**
-     * Returns the first entry ofMany this <code>classpath</code> containing the
-     * given class.
+     * Returns the first entry of this <code>classpath</code> containing the given class.
      */
     public Path getEntryContainingClass(String className) {
         final String path = toFilePath(className);
@@ -117,6 +116,10 @@ public final class JkClasspath implements Iterable<Path> {
                     return file;
                 }
                 JkUtilsIO.closeQuietly(zipFile);
+
+               /* if (Files.exists(JkPathTree.ofZip(file).get(path))) {
+                    return file;
+                }*/
             }
         }
         return null;
@@ -135,8 +138,8 @@ public final class JkClasspath implements Iterable<Path> {
    // ------------------------------ wither, adder --------------------------------------------
 
     /**
-     * Returns a <code>JkClasspath</code> made ofMany, in the order, the specified
-     * entries plus the entries ofMany this one.
+     * Returns a <code>JkClasspath</code> made of, in the order, the specified
+     * entries plus the entries of this one.
      */
     public JkClasspath andManyFirst(Iterable<Path> otherEntries) {
         Iterable<Path> paths = JkUtilsPath.disambiguate(otherEntries);
@@ -147,7 +150,7 @@ public final class JkClasspath implements Iterable<Path> {
     }
 
     /**
-     * Returns a <code>JkClasspath</code> made ofMany, in the order, the entries ofMany
+     * Returns a <code>JkClasspath</code> made of, in the order, the entries of
      * this one plus the specified ones.
      */
     public JkClasspath andMany(Iterable<Path> otherEntries) {
@@ -234,11 +237,11 @@ public final class JkClasspath implements Iterable<Path> {
     private static List<Path> resolveWildCard(String candidatePath) {
         List<Path> result = new LinkedList<>();
         if (candidatePath.endsWith(WILD_CARD)) {
-            File file = new File(candidatePath);
-            final Path parent = file.getParentFile().toPath();
+            String candidateFolder = JkUtilsString.substringBeforeFirst(candidatePath, WILD_CARD);
+            final Path parent = Paths.get(candidateFolder);
             if (!Files.exists(parent)) {
                 JkLog.trace("File " + parent
-                        + " does not exist : classpath entry " + file
+                        + " does not exist : classpath entry " + candidatePath
                         + " will be ignored.");
             } else {
                 result.addAll(JkPathTree.of(parent).accept("**.jar").files());

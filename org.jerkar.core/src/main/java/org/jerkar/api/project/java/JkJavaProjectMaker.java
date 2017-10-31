@@ -118,7 +118,7 @@ public class JkJavaProjectMaker {
 
     public void generateJavadoc() {
         JkJavadocMaker.of(project.getSourceLayout().sources(), project.getOutLayout().getJavadocDir())
-                .withClasspathPath(depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION).entries())
+                .withClasspath(depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
                 .andOptions(this.javadocOptions).process();
         status.javadocGenerated = true;
     }
