@@ -117,13 +117,13 @@ public final class JkImportedBuilds {
                     throw new IllegalStateException("Can't inject slave build instance ofMany type " + subBuild.getClass().getSimpleName()
                             + " into field " + field.getDeclaringClass().getName()
                             + "#" + field.getName() + " from directory " + build.baseDir()
-                            + " while working dir is " + JkUtilsFile.workingDir());
+                            + " while working dir is " + Paths.get("").toAbsolutePath());
                 }
                 throw new IllegalStateException("Can't inject slave build instance ofMany type " + subBuild.getClass().getSimpleName()
                         + " into field " + field.getDeclaringClass().getName()
                         + "#" + field.getName() + " from directory " + build.baseDir()
                         + "\nBuild class is located in " + currentClassBaseDir
-                        + " while working dir is " + JkUtilsFile.workingDir()
+                        + " while working dir is " + Paths.get("").toAbsolutePath()
                         + ".\nPlease set working dir to " + currentClassBaseDir, e);
             }
             result.add(subBuild);

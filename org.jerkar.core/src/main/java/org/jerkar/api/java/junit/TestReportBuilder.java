@@ -1,16 +1,18 @@
 package org.jerkar.api.java.junit;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.java.junit.JkTestSuiteResult.IgnoredCase;
 import org.jerkar.api.java.junit.JkTestSuiteResult.TestCaseFailure;
-import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
 final class TestReportBuilder {
@@ -29,13 +31,13 @@ final class TestReportBuilder {
         return new TestReportBuilder(result);
     }
 
-    public void writeToFileSystem(File folder) {
-        folder.mkdirs();
-        final File xmlFile = new File(folder, "TEST-" + result.suiteName() + ".xml");
-        final File textFile = new File(folder, result.suiteName() + ".txt");
+    public void writeToFileSystem(Path folder)  {
+        JkUtilsPath.createDirectories(folder);
+        final Path xmlFile = folder.resolve("TEST-" + result.suiteName() + ".xml");
+        final Path textFile = folder.resolve(result.suiteName() + ".txt");
         try {
-            xmlFile.createNewFile();
-            textFile.createNewFile();
+            JkPathFile.of(xmlFile).createIfNotExist();
+            JkPathFile.of(textFile).createIfNotExist();
             writeXmlFile(xmlFile);
             writeTxtFile(textFile);
         } catch (final RuntimeException e) {
@@ -45,7 +47,7 @@ final class TestReportBuilder {
         }
     }
 
-    private void writeTxtFile(File txtFile) {
+    private void writeTxtFile(Path txtFile) throws IOException {
         String builder = TEXT_HEAD + "\n" +
                 "Test set: " + result.suiteName() + "\n" + TEXT_HEAD +
                 "\n" + "Tests run: " + result.runCount() + ", " +
@@ -53,11 +55,11 @@ final class TestReportBuilder {
                 "Errors: " + result.errorCount() + ", " + "Skipped: " +
                 result.ignoreCount() + ", " + "Time elapsed: " +
                 result.durationInMillis() / 1000f + " sec";
-        JkUtilsFile.writeString(txtFile, builder, false);
+        Files.write(txtFile, builder.getBytes());
     }
 
-    private void writeXmlFile(File xmlFile) throws XMLStreamException, IOException {
-        final XMLStreamWriter writer = FACTORY.createXMLStreamWriter(new FileWriter(xmlFile));
+    private void writeXmlFile(Path xmlFile) throws XMLStreamException, IOException {
+        final XMLStreamWriter writer = FACTORY.createXMLStreamWriter(new FileWriter(xmlFile.toFile()));
         writer.writeStartDocument();
         writer.writeCharacters("\n");
         writer.writeStartElement("testsuite");

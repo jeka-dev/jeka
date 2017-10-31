@@ -1,6 +1,7 @@
 package org.jerkar.api.java;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -18,7 +19,7 @@ public final class JkJavaCompileSpec {
 
     public static final String PROCESSOR_OPTS = "-processor";
 
-    public static final String ENCODING_OPTS = "-encoding";
+    public static  final String ENCODING_OPTS = "-encoding";
 
     private static final String CLASSPATH_OPTS = "-cp";
 

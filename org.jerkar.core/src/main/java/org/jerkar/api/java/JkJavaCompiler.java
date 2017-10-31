@@ -124,16 +124,16 @@ public final class JkJavaCompiler {
      */
     @SuppressWarnings("unchecked")
     public boolean compile(JkJavaCompileSpec compileSpec) {
-        final File outputDir = compileSpec.getOutputDir();
+        final Path outputDir = compileSpec.getOutputDir().toPath();
         List<String> options = compileSpec.getOptions();
         if (outputDir == null) {
             throw new IllegalStateException("Output dir option (-d) has not been specified on the compiler. Specified options : " + options);
         }
-        outputDir.mkdirs();
+        JkUtilsPath.createDirectories(outputDir);
         final JavaCompiler compiler = this.compiler != null ? this.compiler : getDefaultOrFail();
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null,
                 null);
-        String message = "Compiling " + compileSpec.getSourceFiles() + " source files to " + JkUtilsFile.canonicalPath(outputDir);
+        String message = "Compiling " + compileSpec.getSourceFiles() + " source files to " + outputDir;
         if (JkLog.verbose()) {
             message = message + " using options : " + JkUtilsString
                     .join(options, " ");

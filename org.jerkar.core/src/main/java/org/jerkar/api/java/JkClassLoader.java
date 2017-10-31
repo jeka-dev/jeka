@@ -166,9 +166,9 @@ public final class JkClassLoader {
                 final File candidate = new File(path);
                 if (JkUtilsString.isBlank(path)
                         || (!candidate.isFile() && !candidate.isDirectory())) {
-                    final File file = JkUtilsIO.copyUrlContentToCacheFile(url,
-                            JkLog.infoStreamIfVerbose(), urlCacheDir.toFile());
-                    files.add(file.toPath());
+                    final Path file = JkUtilsIO.copyUrlContentToCacheFile(url,
+                            JkLog.infoStreamIfVerbose(), urlCacheDir);
+                    files.add(file);
                 } else {
                     files.add(candidate.toPath());
                 }

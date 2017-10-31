@@ -44,8 +44,8 @@ public final class JkScaffolder {
         final Path buildClass = def.resolve("Build.java");
         JkUtilsPath.write(buildClass, mainBuildclassWriter.get().getBytes(Charset.forName("UTF-8")));
         if (embed) {
-            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar.bat"), baseTree.root().resolve("jerkar.bat").toFile());
-            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar"), baseTree.root().resolve("jerkar").toFile());
+            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar.bat"), baseTree.root().resolve("jerkar.bat"));
+            JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar"), baseTree.root().resolve("jerkar"));
             JkUtilsPath.copy(JkLocator.jerkarJarPath(),
                     baseTree.root().resolve("build/boot").resolve(JkLocator.jerkarJarPath().getFileName()),
                     StandardCopyOption.REPLACE_EXISTING);

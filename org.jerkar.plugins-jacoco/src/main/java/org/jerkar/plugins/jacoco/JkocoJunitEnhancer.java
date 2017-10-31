@@ -37,7 +37,7 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
     public static JkocoJunitEnhancer of(Path destFile) {
         final URL url = JkPluginJacoco.class.getResource("jacocoagent.jar");
         final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, JkLog.infoStreamIfVerbose(),
-                JkClassLoader.urlCacheDir().toFile()).toPath();
+                JkClassLoader.urlCacheDir());
         return new JkocoJunitEnhancer(file, true, destFile);
     }
 

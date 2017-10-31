@@ -1,6 +1,7 @@
 package org.jerkar.api.java.junit;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
 
 class JUnit4TestLauncher {
 
@@ -21,8 +23,8 @@ class JUnit4TestLauncher {
             boolean printEachTestOnConsole, JunitReportDetail reportDetail,
             Iterable<Class> classes, File reportDir) {
         final List<String> args = new LinkedList<>();
-        final File file = JkUtilsFile.tempFile("testResult-", ".ser");
-        args.add("\"" + file.getAbsolutePath() + "\"");
+        final Path file = JkUtilsPath.createTempFile("testResult-", ".ser");
+        args.add("\"" + file.toAbsolutePath() + "\"");
         args.add(Boolean.toString(printEachTestOnConsole));
         args.add(reportDetail.name());
         args.add("\"" + reportDir.getAbsolutePath() + "\"");

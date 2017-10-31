@@ -1,26 +1,9 @@
 package org.jerkar.api.utils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -205,20 +188,20 @@ public final class JkUtilsIO {
      * last '/')]. If the file already exist than the content ofMany the url is not
      * copied and the file is directly returned.
      */
-    public static File copyUrlContentToCacheFile(URL url, PrintStream report, File cacheDir) {
+    public static Path copyUrlContentToCacheFile(URL url, PrintStream report, Path cacheDir) {
         final String name = JkUtilsString.substringAfterLast(url.getPath(), "/");
-        final File result = new File(cacheDir, name);
-        if (result.exists()) {
+        final Path result = cacheDir.resolve(name);
+        if (Files.exists(result)) {
             if (report != null) {
                 report.println("Url " + url.toExternalForm() + " transformed to file by reading existing cached file "
-                        + result.getAbsolutePath());
+                        + result);
             }
             return result;
         }
-        JkUtilsFile.createFileIfNotExist(result);
+        JkUtilsPath.createFileSafely(result);
         if (report != null) {
             report.println("Url " + url.toExternalForm() + " transformed to file by creating file "
-                    + result.getAbsolutePath());
+                    + result);
         }
         copyUrlToFile(url, result);
         return result;
@@ -227,8 +210,8 @@ public final class JkUtilsIO {
     /**
      * Copies the content ofMany the given url to the specified file.
      */
-    public static void copyUrlToFile(URL url, File file) {
-        try (FileOutputStream fileOutputStream = new FileOutputStream(file);
+    public static void copyUrlToFile(URL url, Path file) {
+        try (OutputStream fileOutputStream = Files.newOutputStream(file);
                 final InputStream inputStream = url.openStream()){
             copy(inputStream, fileOutputStream);
         } catch (final IOException e) {
@@ -280,11 +263,11 @@ public final class JkUtilsIO {
     /**
      * Deserializes the content ofMany the specified file to a Java object.
      */
-    public static Object deserialize(File file) {
+    public static Object deserialize(Path file) {
         try {
-            return deserialize(new FileInputStream(file));
-        } catch (final FileNotFoundException e) {
-            throw new IllegalArgumentException(e);
+            return deserialize(Files.newInputStream(file));
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 

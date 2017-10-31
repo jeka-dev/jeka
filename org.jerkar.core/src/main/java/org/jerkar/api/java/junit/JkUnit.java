@@ -1,6 +1,5 @@
 package org.jerkar.api.java.junit;
 
-import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -62,7 +61,7 @@ public final class JkUnit {
 
     private final JunitReportDetail reportDetail;
 
-    private final File reportDir;
+    private final Path reportDir;
 
     private final JkJavaProcess forkedProcess;
 
@@ -72,7 +71,7 @@ public final class JkUnit {
 
     private final boolean printOutputOnConsole;
 
-    private JkUnit(JunitReportDetail reportDetail, File reportDir,
+    private JkUnit(JunitReportDetail reportDetail, Path reportDir,
             JkJavaProcess fork, List<Runnable> runnables,
             boolean crashOnFailed, boolean printOutputOnConsole) {
         this.reportDetail = reportDetail;
@@ -84,7 +83,7 @@ public final class JkUnit {
     }
 
     @SuppressWarnings("unchecked")
-    private JkUnit(JunitReportDetail reportDetail, File reportDir,
+    private JkUnit(JunitReportDetail reportDetail, Path reportDir,
             JkJavaProcess fork, boolean crashOnFailed,
             boolean printOutputOnConsole) {
         this(reportDetail, reportDir, fork, Collections.EMPTY_LIST,
@@ -108,19 +107,13 @@ public final class JkUnit {
                 this.breakOnFailure, this.printOutputOnConsole);
     }
 
-    /**
-     * Returns a copy ofMany this launcher but with the specified report directory output.
-     */
-    public JkUnit withReportDir(File reportDir) {
-        return new JkUnit(reportDetail, reportDir, this.forkedProcess,
-                this.breakOnFailure, this.printOutputOnConsole);
-    }
+
 
     /**
      * Returns a copy ofMany this launcher but with the specified report directory output.
      */
     public JkUnit withReportDir(Path reportDir) {
-        return new JkUnit(reportDetail, reportDir.toFile(), this.forkedProcess,
+        return new JkUnit(reportDetail, reportDir, this.forkedProcess,
                 this.breakOnFailure, this.printOutputOnConsole);
     }
 
@@ -208,7 +201,7 @@ public final class JkUnit {
     /**
      * Returns the output report dir.
      */
-    public File reportDir() {
+    public Path reportDir() {
         return reportDir;
     }
 
@@ -242,11 +235,11 @@ public final class JkUnit {
                 JkLog.startln("Run JUnit tests in forked mode");
                 result = JUnit4TestLauncher.launchInFork(forkedProcess.withClasspaths(testSpec.classpath()),
                         printOutputOnConsole,
-                        reportDetail, classes, reportDir);
+                        reportDetail, classes, reportDir.toFile());
             } else {
                 JkLog.startln("Run JUnit tests");
                 result = JUnit4TestLauncher.launchInClassLoader(classes, printOutputOnConsole,
-                        reportDetail, reportDir);
+                        reportDetail, reportDir.toFile());
             }
         } else if (classLoader.isDefined(JUNIT3_RUNNER_CLASS_NAME)) {
             JkLog.startln("Run JUnit tests");

@@ -1,6 +1,7 @@
 package org.jerkar.api.java.junit;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -29,13 +30,13 @@ class JUnitReportListener extends RunListener {
 
     private int ignoreCount;
 
-    private final File folder;
+    private final Path folder;
 
     private String currentTestName;
 
     private boolean failureFlag;
 
-    public JUnitReportListener(File folder) {
+    public JUnitReportListener(Path folder) {
         super();
         this.folder = folder;
     }

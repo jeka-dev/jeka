@@ -42,7 +42,7 @@ class JUnit4TestExecutor {
         final JUnitCore jUnitCore = new JUnitCore();
 
         if (reportDetail.equals(JunitReportDetail.FULL)) {
-            jUnitCore.addListener(new JUnitReportListener(reportDir));
+            jUnitCore.addListener(new JUnitReportListener(reportDir.toPath()));
         }
         final PrintStream out = System.out;
         final PrintStream err = System.err;

@@ -2,6 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import java.io.File;
 import java.io.StringWriter;
+import java.nio.file.Path;
 import java.util.List;
 
 import javax.xml.stream.FactoryConfigurationError;
@@ -17,6 +18,7 @@ import org.jerkar.api.system.JkInfo;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsObject;
+import org.jerkar.api.utils.JkUtilsPath;
 
 final class PomTemplateGenerator {
 
@@ -24,7 +26,7 @@ final class PomTemplateGenerator {
 
     private static final String VERSION_TOKEN = "____jerkarVersion____";
 
-    public static File generateTemplate(JkMavenPublicationInfo publicationInfo) {
+    public static Path generateTemplate(JkMavenPublicationInfo publicationInfo) {
         final String firstTemplate = JkUtilsIO.read(PomTemplateGenerator.class
                 .getResource("pom-full.template"));
         String extraXml;
@@ -36,8 +38,8 @@ final class PomTemplateGenerator {
         String completeTemplate = firstTemplate.replace(TOKEN, extraXml);
         final String jerkarVersion = JkUtilsObject.firstNonNull(JkInfo.jerkarVersion(), "Development version");
         completeTemplate = completeTemplate.replace(VERSION_TOKEN, jerkarVersion);
-        final File result = JkUtilsFile.tempFile("jerkar-pom", ".template");
-        JkUtilsFile.writeString(result, completeTemplate, false);
+        final Path result = JkUtilsPath.createTempFile("jerkar-pom", ".template");
+        JkUtilsPath.write(result, completeTemplate.getBytes());
         return result;
     }
 

@@ -1,16 +1,9 @@
 package org.jerkar.api.project.java;
 
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
@@ -85,10 +78,12 @@ public class JkJavaProjectMaker {
         this.packager = JkJavaProjectPackager.of(project);
         this.cleaner = JkRunnables.of(
                 () -> JkPathTree.of(project.getOutLayout().outputPath()).deleteContent());
+        Charset charset = project.getCompileSpec().getEncoding() == null ? Charset.defaultCharset() :
+                Charset.forName(project.getCompileSpec().getEncoding());
         this.resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().resources())
                 .and(project.getOutLayout().generatedResourceDir().toFile())
                 .and(project.getResourceInterpolators())
-                .generateTo(project.getOutLayout().classDir().toFile()));
+                .generateTo(project.getOutLayout().classDir(), charset));
         this.compiler = JkRunnables.of(() -> {
             JkJavaCompileSpec compileSpec = compileSourceSpec();
             baseCompiler.compile(compileSpec);
@@ -96,7 +91,7 @@ public class JkJavaProjectMaker {
         testResourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().testResources())
                 .and(project.getOutLayout().generatedTestResourceDir().toFile())
                 .and(project.getResourceInterpolators())
-                .generateTo(project.getOutLayout().testClassDir().toFile()));
+                .generateTo(project.getOutLayout().testClassDir(), charset));
         testCompiler = JkRunnables.of(() -> {
             JkJavaCompileSpec testCompileSpec = testCompileSpec();
             testBaseCompiler.compile(testCompileSpec);

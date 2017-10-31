@@ -20,6 +20,7 @@ import org.apache.ivy.util.ChecksumHelper;
 import org.jerkar.api.depmanagement.IvyPublisher.CheckFileFlag;
 import org.jerkar.api.depmanagement.JkMavenPublication.JkClassifiedFileArtifact;
 import org.jerkar.api.depmanagement.MavenMetadata.Versioning.Snapshot;
+import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.*;
 
@@ -151,16 +152,16 @@ final class IvyPublisherForMaven {
                 .get(0).getFileName().toString(), ".");
         final PomWriterOptions pomWriterOptions = new PomWriterOptions();
         pomWriterOptions.setArtifactPackaging(packaging);
-        File fileToDelete = null;
+        Path fileToDelete = null;
         if (publication.extraInfo() != null) {
-            final File template = PomTemplateGenerator.generateTemplate(publication.extraInfo());
-            pomWriterOptions.setTemplate(template);
+            final Path template = PomTemplateGenerator.generateTemplate(publication.extraInfo());
+            pomWriterOptions.setTemplate(template.toFile());
             fileToDelete = template;
         }
         try {
             PomModuleDescriptorWriter.write(moduleDescriptor, pomXml.toFile(), pomWriterOptions);
             if (fileToDelete != null) {
-                JkUtilsFile.delete(fileToDelete);
+                Files.deleteIfExists(fileToDelete);
             }
             return pomXml;
         } catch (final IOException e) {
@@ -326,13 +327,13 @@ final class IvyPublisherForMaven {
             JkLog.info("publishing to " + dest);
             repository.put(null, source.toFile(), dest, overwrite);
             for (final String algo : checksums) {
-                final File temp = JkUtilsFile.tempFile("jk-checksum-", algo);
+                final Path temp = Files.createTempFile("jk-checksum-", algo);
                 final String checkSum = ChecksumHelper.computeAsString(source.toFile(), algo);
-                JkUtilsFile.writeString(temp, checkSum, false);
+                Files.write(temp, checkSum.getBytes());
                 final String csDest = dest + "." + algo;
                 JkLog.info("publishing to " + csDest);
-                repository.put(null, temp, csDest, overwrite);
-                temp.delete();
+                repository.put(null, temp.toFile(), csDest, overwrite);
+                Files.deleteIfExists(temp);
             }
             if (this.checkFileFlag.pgpSigner != null && signIfneeded) {
                 final Path signed = checkFileFlag.pgpSigner.sign(source)[0];
@@ -340,7 +341,7 @@ final class IvyPublisherForMaven {
                 putAll(signed, signedDest, overwrite, false);
             }
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 

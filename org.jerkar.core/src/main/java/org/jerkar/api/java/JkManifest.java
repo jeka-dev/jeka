@@ -1,7 +1,6 @@
 package org.jerkar.api.java;
 
-import java.io.File;
-import java.io.FileInputStream;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -13,10 +12,8 @@ import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
 
 import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsThrowable;
-import org.jerkar.api.utils.JkUtilsZip;
 
 
 /**
@@ -63,9 +60,9 @@ public final class JkManifest {
      * supposed to be a manifest file. If the manifest file does not exist, an
      * {@link IllegalArgumentException} is thrown.
      */
-    public static JkManifest of(File manifestFile) {
-        if (!manifestFile.exists()) {
-            throw new IllegalArgumentException("Manifest file " + manifestFile.getPath()
+    public static JkManifest of(Path manifestFile) {
+        if (!Files.exists(manifestFile)) {
+            throw new IllegalArgumentException("Manifest file " + manifestFile
             + " not found.");
         }
         return new JkManifest(read(manifestFile));
@@ -77,9 +74,9 @@ public final class JkManifest {
      * directory to create the returned manifest. If no such file is found, an
      * empty manifest is returned.
      */
-    public static JkManifest ofClassDir(File classDir) {
-        final File manifestFile = new File(classDir, PATH);
-        if (!manifestFile.exists()) {
+    public static JkManifest ofClassDir(Path classDir) {
+        final Path manifestFile = classDir.resolve(PATH);
+        if (!Files.exists(manifestFile)) {
             return JkManifest.empty();
         }
         return of(manifestFile);
@@ -188,12 +185,12 @@ public final class JkManifest {
         return this.manifest().getMainAttributes().getValue(name);
     }
 
-    private static Manifest read(File file) {
-        JkUtilsAssert.isTrue(file.exists(), JkUtilsFile.canonicalPath(file) + " not found.");
-        JkUtilsAssert.isTrue(file.isFile(), JkUtilsFile.canonicalPath(file) + " is directory : need file.");
+    private static Manifest read(Path file) {
+        JkUtilsAssert.isTrue(Files.exists(file), file.normalize() + " not found.");
+        JkUtilsAssert.isTrue(Files.isRegularFile(file), file.normalize() + " is directory : need file.");
         final Manifest manifest = new Manifest();
 
-        try (FileInputStream is = new FileInputStream(file)){
+        try (InputStream is = Files.newInputStream(file)){
             manifest.read(is);
             return manifest;
         } catch (final IOException e) {
@@ -211,13 +208,6 @@ public final class JkManifest {
         }
     }
 
-    /**
-     * Writes this manifest to the specified file.
-     */
-    public void writeTo(File file) {
-        writeTo(file.getAbsoluteFile().toPath());
-    }
-
     public void writeTo(Path file) {
         JkUtilsPath.createFileSafely(file);
         try (OutputStream outputStream = Files.newOutputStream(file)) {
@@ -225,14 +215,6 @@ public final class JkManifest {
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * Writes this manifest at the standard place (META-INF/MANIFEST.MF) ofMany the
-     * specified directory.
-     */
-    public void writeToStandardLocation(File classDir) {
-        writeTo(new File(classDir, PATH));
     }
 
     /**

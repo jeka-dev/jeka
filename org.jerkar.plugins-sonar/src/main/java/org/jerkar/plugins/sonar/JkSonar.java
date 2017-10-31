@@ -91,7 +91,7 @@ public final class JkSonar {
         JkUtilsPath.createDirectories(parent);
         final Path file = parent.resolve(RUNNER_JAR_NAME_24);
         JkUtilsPath.createFile(file);
-        JkUtilsIO.copyUrlToFile(JkSonar.class.getResource(RUNNER_JAR_NAME_24), file.toFile());
+        JkUtilsIO.copyUrlToFile(JkSonar.class.getResource(RUNNER_JAR_NAME_24), file);
         return file;
     }
 

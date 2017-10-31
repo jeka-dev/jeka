@@ -1,5 +1,6 @@
 package org.jerkar.api.java;
 
+import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.system.JkLog;
@@ -8,6 +9,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsPath;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -20,8 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * (generally the class folder). It can also proceed to token replacement, i.e
  * replacing strings between <code>${</code> and <code>}</code> by a specified
  * values.<br/>
- * The processor is constructed using a list ofMany <code>JkDirSets</code> and for
- * each ofMany them, we can associate a map ofMany token to replace.<br/>
+ * The processor is constructed from a <code>{@link JkPathTreeSet}</code> and for
+ * each of them, we can associate a token map for interpolation.<br/>
  *
  * @author Jerome Angibaud
  */
@@ -58,8 +60,8 @@ public final class JkResourceProcessor {
      * Actually processes the resources, meaning copies the resources to the
      * specified output directory along replacing specified tokens.
      */
-    public void generateTo(File outputDir) {
-        JkLog.startln("Coping resource files to " + outputDir.getPath());
+    public void generateTo(Path outputDir, Charset charset) {
+        JkLog.startln("Coping resource files to " + outputDir);
         final AtomicInteger count = new AtomicInteger(0);
         for (final JkPathTree resourceTree : this.resourceTrees.fileTrees()) {
             if (!resourceTree.exists()) {
@@ -67,13 +69,13 @@ public final class JkResourceProcessor {
             }
             resourceTree.stream().forEach(path -> {
                 final Path relativePath = resourceTree.root().relativize(path);
-                final Path out = outputDir.toPath().resolve(relativePath);
+                final Path out = outputDir.resolve(relativePath);
                 final Map<String, String> data = JkInterpolator.interpolateData(relativePath.toString(),
                         interpolators);
                 if (Files.isDirectory(path)) {
                     JkUtilsPath.createDirectories(out);
                 } else {
-                    JkUtilsFile.copyFileReplacingTokens(path.toFile(), out.toFile(), data, JkLog.infoStreamIfVerbose());
+                    JkPathFile.of(path).copyReplacingTokens(out, data, charset);
                     count.incrementAndGet();
                 }
             });
@@ -125,8 +127,9 @@ public final class JkResourceProcessor {
     }
 
     /**
-     * Defines values to be interpolated (replacing <code>${key}</code> by their
-     * value), and the file filter to apply it.
+     * Defines values to be interpolated (replacing key by their
+     * value), and the file filter to apply it. Keys are generally formatted as <code>${keyName}</code>
+     * but can be of any form.
      */
     public static class JkInterpolator {
 
@@ -141,8 +144,7 @@ public final class JkResourceProcessor {
         }
 
         /**
-         * Returns a copy ofMany this {@link JkInterpolator} but adding key values
-         * to interpolate
+         * Returns a copy of this {@link JkInterpolator} but adding key values to interpolate.
          */
         public JkInterpolator and(String key, String value, String... others) {
             final Map<String, String> map = JkUtilsIterable.mapOf(key, value, (Object[]) others);

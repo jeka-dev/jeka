@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaCompiler;
@@ -41,10 +42,9 @@ public class EffectivePomTest {
         Files.createDirectories(srcDir);
         final Path binDir = Paths.get("build/output/test-generated-bin");
         Files.createDirectories(binDir);
-        final File javaCode = new File(srcDir.toFile(), "Build.java");
-        javaCode.getParentFile().mkdirs();
-        javaCode.createNewFile();
-        JkUtilsFile.writeString(javaCode, code, false);
+        final Path javaCode = srcDir.resolve("Build.java");
+        JkPathFile.of(javaCode).createIfNotExist();
+        Files.write(javaCode, code.getBytes());
         final boolean success = JkJavaCompiler.base().compile( new JkJavaCompileSpec()
                 .setOutputDir(binDir)
                 .addSources(srcDir)

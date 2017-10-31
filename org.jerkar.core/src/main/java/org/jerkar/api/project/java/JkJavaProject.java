@@ -87,9 +87,6 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkArtifactProduce
         this.addDefaultArtifactFiles();
     }
 
-
-
-
     // ----------- artifact management --------------------------------------
 
     protected void addDefaultArtifactFiles() {
