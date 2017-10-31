@@ -29,6 +29,10 @@ public final class JkPathFile {
         return new JkPathFile(path);
     }
 
+    public Path get() {
+        return path;
+    }
+
     public JkPathFile createIfNotExist() {
         if (!Files.exists(path)) {
             JkUtilsPath.createDirectories(path.getParent());
