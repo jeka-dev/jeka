@@ -1,9 +1,11 @@
 package org.jerkar.api.file;
 
+import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsPath;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.util.List;
@@ -57,6 +59,12 @@ public final class JkPathFile {
         return this;
     }
 
+    public JkPathFile copyIn(URL url) {
+        createIfNotExist();
+        JkUtilsIO.copyUrlToFile(url, this.path);
+        return this;
+    }
+
     private static String interpolated(String original, Map<String, String> tokenValues) {
         boolean changed = false;
         String result = original;
@@ -72,4 +80,6 @@ public final class JkPathFile {
         }
         return result;
     }
+
+
 }

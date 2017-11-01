@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.jerkar.api.depmanagement.JkVersion;
+import org.jerkar.api.file.JkPathFile;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.system.JkLog;
@@ -88,11 +90,8 @@ public final class JkSonar {
     }
 
     private static Path createRunnerJar(Path parent) {
-        JkUtilsPath.createDirectories(parent);
         final Path file = parent.resolve(RUNNER_JAR_NAME_24);
-        JkUtilsPath.createFile(file);
-        JkUtilsIO.copyUrlToFile(JkSonar.class.getResource(RUNNER_JAR_NAME_24), file);
-        return file;
+        return JkPathFile.of(file).copyIn(JkSonar.class.getResource(RUNNER_JAR_NAME_24)).get();
     }
 
     public void run() {
@@ -144,7 +143,7 @@ public final class JkSonar {
     }
 
     public JkSonar withSourcesPath(Iterable<Path> files) {
-        return withProperty(SOURCES, toPaths(files));
+        return withProperty(SOURCES, toPaths(JkUtilsPath.disambiguate(files)));
     }
 
 
@@ -153,7 +152,7 @@ public final class JkSonar {
     }
 
     public JkSonar withBinaries(Iterable<Path> files) {
-        String path = toPaths(files);
+        String path = toPaths(JkUtilsPath.disambiguate(files));
         return withProperty(BINARIES, path).withProperty(JAVA_BINARIES, path);
     }
 
@@ -162,7 +161,7 @@ public final class JkSonar {
     }
 
     public JkSonar withLibraries(Iterable<Path> files) {
-        return withProperty(LIBRARIES, toPaths(files));
+        return withProperty(LIBRARIES, toPaths(JkUtilsPath.disambiguate(files)));
     }
 
     public JkSonar withSkipDesign(boolean skip) {

@@ -110,7 +110,10 @@ public final class JkPathTree {
         return rootHolder.exists();
     }
 
-    private void createIfNotExist() {
+    /**
+     * Creates root directory if not exists.
+     */
+    public void createIfNotExist() {
         this.rootHolder.createIfNotExist();
     }
 
