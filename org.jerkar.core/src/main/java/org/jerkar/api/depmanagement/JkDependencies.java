@@ -15,8 +15,8 @@ import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * A set ofMany {@link JkScopedDependency} generally standing for the entire
- * dependencies ofMany a project/module.
+ * A set of {@link JkScopedDependency} generally standing for the entire
+ * dependencies of a project/module.
  *
  * @author Jerome Angibaud.
  */
@@ -122,14 +122,14 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns the unmodifiable list list ofMany scoped dependencies for this object.
+     * Returns the unmodifiable list list of scoped dependencies for this object.
      */
     public List<JkScopedDependency> list() {
         return this.dependencies;
     }
 
     /**
-     * Returns a clone ofMany this object minus the dependencies on the given
+     * Returns a clone of this object minus the dependencies on the given
      * {@link JkModuleId}. This is used to exclude a given module to all
      * scope.
      */
@@ -148,7 +148,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns a clone ofMany this dependencies but replacing the unscoped
+     * Returns a clone of this dependencies but replacing the unscoped
      * dependencies with the specified ones.
      */
     public JkDependencies withDefaultScope(JkScope... scopes) {
@@ -163,7 +163,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns a clone ofMany this dependencies but replacing the unscoped
+     * Returns a clone of this dependencies but replacing the unscoped
      * dependencies with the specified scope mapping.
      */
     public JkDependencies withDefaultScope(JkScopeMapping scopeMapping) {
@@ -178,15 +178,15 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns a clone ofMany this object but using specified version provider to override
-     * versions ofMany transitive dependencies.
+     * Returns a clone of this object but using specified version provider to override
+     * versions of transitive dependencies.
      */
     public JkDependencies withExplicitVersions(JkVersionProvider explicitVersions) {
         return new JkDependencies(this.dependencies, this.excludes(), explicitVersions);
     }
 
     /**
-     * Returns a clone ofMany this object plus the specified
+     * Returns a clone of this object plus the specified
      * {@link JkScopedDependency}s.
      */
     public JkDependencies and(Iterable<JkScopedDependency> others) {
@@ -197,7 +197,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns a clone ofMany this object plus the specified scoped dependencies.
+     * Returns a clone of this object plus the specified scoped dependencies.
      */
     public JkDependencies andScopeless(Iterable<? extends JkDependency> others) {
         if (!others.iterator().hasNext()) {
@@ -207,14 +207,14 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns a clone ofMany this object plus the specified scoped dependencies.
+     * Returns a clone of this object plus the specified scoped dependencies.
      */
     public JkDependencies and(JkScopedDependency... others) {
         return and(Arrays.asList(others));
     }
 
     /**
-     * Returns a clone ofMany this object plus the specified scoped dependencies.
+     * Returns a clone of this object plus the specified scoped dependencies.
      */
     public JkDependencies and(String groupAndName, String version, JkScope... scopes) {
         final JkModuleDependency dep = JkModuleDependency.of(JkModuleId.of(groupAndName), version);
@@ -222,7 +222,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns a clone ofMany this object plus {@link JkScopedDependency}s on the
+     * Returns a clone of this object plus {@link JkScopedDependency}s on the
      * specified file.
      */
     public JkDependencies and(JkScope scope, File... files) {
@@ -230,7 +230,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns a clone ofMany this object plus {@link JkScopedDependency}s on the
+     * Returns a clone of this object plus {@link JkScopedDependency}s on the
      * specified file.
      */
     public JkDependencies and(Iterable<File> files, JkScope... scopes) {
@@ -240,7 +240,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns a clone ofMany this object plus {@link JkScopedDependency}s on the
+     * Returns a clone of this object plus {@link JkScopedDependency}s on the
      * specified external module.
      *
      * @param versionedModuleId
@@ -291,7 +291,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns the set ofMany {@link JkDependency} involved for the specified
+     * Returns the set of {@link JkDependency} involved for the specified
      * {@link JkScope}.
      */
     public Set<JkDependency> dependenciesDeclaredWith(JkScope scope) {
@@ -328,7 +328,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns the set ofMany scopes involved in these dependencies.
+     * Returns the set of scopes involved in these dependencies.
      */
     public Set<JkScope> declaredScopes() {
         final Set<JkScope> result = new HashSet<>();
@@ -343,9 +343,9 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns all scopes that are involved in these dependencies. That means if one ofMany these scoped
+     * Returns all scopes that are involved in these dependencies. That means if one of these scoped
      * dependencies is declared with scope 'FOO' and scope 'BAR' extends scope 'FOO', then 'FOO' and 'BAR' is
-     * part ofMany involved scopes.
+     * part of involved scopes.
      */
     public Set<JkScope> involvedScopes() {
         return JkScope.involvedScopes(declaredScopes());
@@ -393,7 +393,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns a set ofMany dependencies that contains all and only module
+     * Returns a set of dependencies that contains all and only module
      * dependencies declared in this object.
      */
     public JkDependencies onlyModules() {
@@ -407,7 +407,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Creates a clone ofMany these dependencies replacing the dynamic versions by
+     * Creates a clone of these dependencies replacing the dynamic versions by
      * the static ones specified in the {@link JkVersionedModule}s passed as
      * argument. <br/>
      */
@@ -475,7 +475,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns all files declared as {@link JkFileDependency} for any ofMany the
+     * Returns all files declared as {@link JkFileDependency} for any of the
      * specified scopes.
      */
     public JkPathSequence localFileDependencies(JkScope... scopes) {
@@ -493,7 +493,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns all files declared as {@link JkFileSystemDependency} for any ofMany
+     * Returns all files declared as {@link JkFileSystemDependency} for any of
      * the specified scopes. If no scopes are specified then it returns all file
      * system dependencies.
      */
@@ -767,7 +767,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
         /**
          * Same as {@link #on(JkProcess, Path, Path, JkScope...)} but it will take the working dir
-         * ofMany the specified process as the ide project base dir. When generating IDE metadata, if
+         * of the specified process as the ide project base dir. When generating IDE metadata, if
          * useIdeProjectDep flag is <code>false</code>,
          * the project dependency won't be taken in account and regular file dependency will apply.
          */
@@ -829,8 +829,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         }
 
         /**
-         * Returned type after an addition ofMany a {@link JkDependency}. This type
-         * allows to chain definition ofMany scopes.
+         * Returned type after an addition of a {@link JkDependency}. This type
+         * allows to chain definition of scopes.
          */
         public static class JkFluentScopeableBuilder extends Builder {
 
@@ -860,8 +860,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         }
 
         /**
-         * Returned type after an addition ofMany a {@link JkModuleDependency}. This
-         * type allows to chain redefinition ofMany scope, scope mapping,
+         * Returned type after an addition of a {@link JkModuleDependency}. This
+         * type allows to chain redefinition of scope, scope mapping,
          * transitivity and exclusions.
          */
         public static final class JkFluentModuleDepBuilder extends JkFluentScopeableBuilder {
@@ -903,7 +903,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
             /**
              * Excludes the specified dependency to the transitive
-             * dependencies ofMany the right previously added dependency on this
+             * dependencies of the right previously added dependency on this
              * builder.
              */
             public JkFluentModuleDepBuilder excludeLocally(JkDepExclude depExclude) {
@@ -938,8 +938,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         }
 
         /**
-         * Type returned after the left part ofMany the scope mapping has been
-         * declared. It allows chaining with the right part ofMany the mapping.
+         * Type returned after the left part of the scope mapping has been
+         * declared. It allows chaining with the right part of the mapping.
          */
         public static class JkFluentAfterMapScopeBuilder {
 
@@ -954,7 +954,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             }
 
             /**
-             * Defines the right part ofMany the mapping.
+             * Defines the right part of the mapping.
              */
             public JkFluentAfterToBuilder to(JkScope... jkScopes) {
                 final JkScopedDependency scopedDependency = dependencies.pollLast();
@@ -971,7 +971,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             }
 
             /**
-             * Defines the right part ofMany the mapping.Specified scope string are
+             * Defines the right part of the mapping.Specified scope string are
              * internally turned to {@link JkScope}
              */
             public JkFluentAfterToBuilder to(String... scopeNames) {
@@ -985,8 +985,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         }
 
         /**
-         * Type returned after the right side declaration ofMany a scope mapping. It
-         * gives the opportunity to complete the mapping with another pair ofMany
+         * Type returned after the right side declaration of a scope mapping. It
+         * gives the opportunity to complete the mapping with another pair of
          * (left->right) mapping.
          */
         public static class JkFluentAfterToBuilder extends Builder {
@@ -1004,7 +1004,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Throws a <code>IllegalStateException</code> if one ofMany the module
+     * Throws a <code>IllegalStateException</code> if one of the module
      * dependencies has an unspecified version.
      */
     public JkDependencies assertNoUnspecifiedVersion() {

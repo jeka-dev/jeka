@@ -34,7 +34,7 @@ public final class JkUtilsSystem {
     }
 
     /**
-     * Returns the classpath ofMany this classloader without mentioning classpath ofMany
+     * Returns the classpath of this classloader without mentioning classpath of
      * the parent classloaders.
      */
     public static List<Path> classloaderEntries(URLClassLoader classLoader) {

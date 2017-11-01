@@ -9,7 +9,7 @@ import java.nio.file.Path;
 public interface JkFileSystemLocalizable {
 
     /**
-     * Returns the base directory ofMany this object.
+     * Returns the base directory of this object.
      */
     Path baseDir();
 }

@@ -100,7 +100,7 @@ public final class JkUnit {
 
 
     /**
-     * Returns a copy ofMany this launcher but with the specified report detail.
+     * Returns a copy of this launcher but with the specified report detail.
      */
     public JkUnit withReport(JunitReportDetail reportDetail) {
         return new JkUnit(reportDetail, reportDir, this.forkedProcess,
@@ -110,7 +110,7 @@ public final class JkUnit {
 
 
     /**
-     * Returns a copy ofMany this launcher but with the specified report directory output.
+     * Returns a copy of this launcher but with the specified report directory output.
      */
     public JkUnit withReportDir(Path reportDir) {
         return new JkUnit(reportDetail, reportDir, this.forkedProcess,
@@ -118,7 +118,7 @@ public final class JkUnit {
     }
 
     /**
-     * Returns a copy ofMany this launcher but that fail fast on the first failure.
+     * Returns a copy of this launcher but that fail fast on the first failure.
      */
     public JkUnit withBreakOnFailure(boolean crashOnFailure) {
         return new JkUnit(reportDetail, reportDir, this.forkedProcess,
@@ -126,7 +126,7 @@ public final class JkUnit {
     }
 
     /**
-     * Returns a copy ofMany this launcher but specifying an action to run at the end ofMany execution.
+     * Returns a copy of this launcher but specifying an action to run at the end of execution.
      */
     public JkUnit withPostAction(Runnable runnable) {
         final List<Runnable> list = new LinkedList<>(this.postActions);
@@ -178,7 +178,7 @@ public final class JkUnit {
     }
 
     /**
-     * Returns an enhanced copy ofMany this launcher but specifying if the output should be displayed on console.
+     * Returns an enhanced copy of this launcher but specifying if the output should be displayed on console.
      */
     public JkUnit withOutputOnConsole(boolean outputOnConsole) {
         return new JkUnit(reportDetail, reportDir, forkedProcess, breakOnFailure, outputOnConsole);

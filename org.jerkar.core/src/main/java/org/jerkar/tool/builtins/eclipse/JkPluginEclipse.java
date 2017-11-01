@@ -30,8 +30,8 @@ public final class JkPluginEclipse implements JkPlugin {
     @JkDoc({ "If not null, this value will be used as the JRE container path when generating .classpath file." })
     public String jreContainer = null;
 
-    /** Flag to set whether 'generateAll' task should use absolute paths instead ofMany classpath variables */
-    @JkDoc({ "Set it to true to use absolute paths in the classpath instead ofMany classpath variables." })
+    /** Flag to set whether 'generateAll' task should use absolute paths instead of classpath variables */
+    @JkDoc({ "Set it to true to use absolute paths in the classpath instead of classpath variables." })
     public boolean useVarPath = false;
 
 
@@ -81,7 +81,7 @@ public final class JkPluginEclipse implements JkPlugin {
         }
     }
 
-    @JkDoc("Generate Eclipse files on all subfolder ofMany the current directory. Only subfolder having a build/def directory are impacted.")
+    @JkDoc("Generate Eclipse files on all subfolder of the current directory. Only subfolder having a build/def directory are impacted.")
     public void generateAll(JkBuild build) {
         final Iterable<Path> folders = build.baseTree()
                 .accept("**/" + JkConstants.BUILD_DEF_DIR, JkConstants.BUILD_DEF_DIR)

@@ -9,7 +9,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 
 
 /*
- * A dependency on a given artifact file id ofMany a given {@link JkArtifactProducer}
+ * A dependency on a given artifact file id of a given {@link JkArtifactProducer}
  */
 class ArtifactProducerDependency extends JkComputedDependency  {
 

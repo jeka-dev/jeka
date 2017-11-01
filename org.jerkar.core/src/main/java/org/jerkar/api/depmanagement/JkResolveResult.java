@@ -9,10 +9,10 @@ import java.util.Set;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
- * Result ofMany a module dependency resolution for a given scope.<br/>
+ * Result of a module dependency resolution for a given scope.<br/>
  * When resolving a module dependencies for a given scope, we expect to get
  * <ul>
- *   <li>The list ofMany publishLocally file constituting the resolved dependencies (the jar
+ *   <li>The list of publishLocally file constituting the resolved dependencies (the jar
  *        files for instance)</li>
  *   <li>The {@link JkVersionProvider} that specify which static version has been
  *        taken in account when a module dependency is declared using dynamic versions
@@ -31,7 +31,7 @@ public final class JkResolveResult implements Serializable {
     }
 
     /**
-     * Creates a dependency resolve result object form a list ofMany module dependency files and a list ofMany resolved versions.
+     * Creates a dependency resolve result object form a list of module dependency files and a list of resolved versions.
      */
     public static JkResolveResult of(JkDependencyNode depTree, JkErrorReport errorReport) {
         return new JkResolveResult(depTree, errorReport);
@@ -99,7 +99,7 @@ public final class JkResolveResult implements Serializable {
     }
 
     /**
-     * Returns a concatenation ofMany this resolve result and the specified one.
+     * Returns a concatenation of this resolve result and the specified one.
      */
     public JkResolveResult and(JkResolveResult other) {
         return new JkResolveResult(this.depTree.merge(other.depTree),
@@ -161,7 +161,7 @@ public final class JkResolveResult implements Serializable {
         }
 
         /**
-         * Returns the list ofMany problems.
+         * Returns the list of problems.
          */
         public List<JkModuleDepProblem> moduleProblems() {
             return moduleProblems;

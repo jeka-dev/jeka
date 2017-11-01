@@ -13,7 +13,7 @@ import org.jerkar.api.utils.JkUtilsObject;
 
 /**
  * Base class defining commons tasks and utilities necessary for building any
- * kind ofMany project, regardless involved technologies.
+ * kind of project, regardless involved technologies.
  *
  * @author Jerome Angibaud
  */
@@ -68,7 +68,7 @@ public class JkBuild {
 
     /**
      * This method is invoked right after the option values has been injected to instance fields
-     * ofMany this object.
+     * of this object.
      */
     protected void init() {
         // Do nothing by default
@@ -117,7 +117,7 @@ public class JkBuild {
     }
 
     /**
-     * Returns the scaffolder object in charge ofMany doing the scaffolding for this build.
+     * Returns the scaffolder object in charge of doing the scaffolding for this build.
      * Override this method if you write a template class that need to do custom action for scaffolding.
      */
     public final JkScaffolder scaffolder() {
@@ -143,7 +143,7 @@ public class JkBuild {
     }
 
     /**
-     * Returns the dependency resolver used to compile/run scripts ofMany this
+     * Returns the dependency resolver used to compile/run scripts of this
      * project.
      */
     public JkDependencyResolver buildDependencyResolver() {
@@ -168,7 +168,7 @@ public class JkBuild {
 
     /**
      * Creates the project structure (mainly project folder layout, build class code and IDE metadata) at the asScopedDependency
-     * ofMany the current project.
+     * of the current project.
      */
     @JkDoc("Creates the project structure")
     public final void scaffold() {

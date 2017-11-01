@@ -11,7 +11,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsReflect;
 
 /**
- * A result ofMany a test suite execution. It contains both overall information about suite execution
+ * A result of a test suite execution. It contains both overall information about suite execution
  * and details about each test case execution.
  */
 public class JkTestSuiteResult implements Serializable {
@@ -108,14 +108,14 @@ public class JkTestSuiteResult implements Serializable {
     }
 
     /**
-     * Returns duration ofMany the suite execution.
+     * Returns duration of the suite execution.
      */
     public long durationInMillis() {
         return durationInMilis;
     }
 
     /**
-     * Returns a multi line string representation ofMany the suite execution result;
+     * Returns a multi line string representation of the suite execution result;
      */
     public List<String> toStrings(boolean showStackTrace) {
         final List<String> lines = new LinkedList<>();
@@ -143,7 +143,7 @@ public class JkTestSuiteResult implements Serializable {
     }
 
     /**
-     * A result for a single test case execution in case ofMany success.
+     * A result for a single test case execution in case of success.
      */
     @SuppressWarnings("serial")
     public static class TestCaseResult implements Serializable {
@@ -176,7 +176,7 @@ public class JkTestSuiteResult implements Serializable {
         }
 
         /**
-         * Returns duration ofMany the suite execution.
+         * Returns duration of the suite execution.
          */
         public float getDurationInSecond() {
             return durationInSecond;
@@ -185,7 +185,7 @@ public class JkTestSuiteResult implements Serializable {
     }
 
     /**
-     * A result for a single test case execution in case ofMany failure.
+     * A result for a single test case execution in case of failure.
      */
     public static class TestCaseFailure extends TestCaseResult implements Serializable {
 
@@ -203,14 +203,14 @@ public class JkTestSuiteResult implements Serializable {
         }
 
         /**
-         * Returns the description ofMany the failure.
+         * Returns the description of the failure.
          */
         public ExceptionDescription getExceptionDescription() {
             return exceptionDescription;
         }
 
         /**
-         * Returns a multi line string representation ofMany the test case execution result;
+         * Returns a multi line string representation of the test case execution result;
          */
         public List<String> toStrings(boolean withStackTrace) {
             final List<String> result = new LinkedList<>();
@@ -229,7 +229,7 @@ public class JkTestSuiteResult implements Serializable {
     }
 
     /**
-     * A result for a single test case execution in case ofMany ignore.
+     * A result for a single test case execution in case of ignore.
      */
     public static class IgnoredCase extends TestCaseResult implements Serializable {
 
@@ -259,7 +259,7 @@ public class JkTestSuiteResult implements Serializable {
     }
 
     /**
-     * Description ofMany an execption occured during the test suite execution.
+     * Description of an execption occured during the test suite execution.
      */
     public static class ExceptionDescription implements Serializable {
 
@@ -289,28 +289,28 @@ public class JkTestSuiteResult implements Serializable {
         }
 
         /**
-         * Returns the name ofMany the exception.
+         * Returns the name of the exception.
          */
         public String getClassName() {
             return className;
         }
 
         /**
-         * Returns the message ofMany the exception.
+         * Returns the message of the exception.
          */
         public String getMessage() {
             return message;
         }
 
         /**
-         * Returns the stack trace ofMany the exception.
+         * Returns the stack trace of the exception.
          */
         public StackTraceElement[] getStackTrace() {
             return stackTrace;
         }
 
         /**
-         * Returns the cause ofMany the exception.
+         * Returns the cause of the exception.
          */
         public ExceptionDescription getCause() {
             return cause;
@@ -324,7 +324,7 @@ public class JkTestSuiteResult implements Serializable {
         }
 
         /**
-         * Returns a multi-line representation ofMany the stack trace.
+         * Returns a multi-line representation of the stack trace.
          */
         public List<String> stackTracesAsStrings() {
             return stackTracesAsStrings(className + ": " + message);

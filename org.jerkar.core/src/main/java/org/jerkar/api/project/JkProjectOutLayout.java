@@ -31,7 +31,7 @@ public class JkProjectOutLayout {
     private final Path generatedSourceDir;
 
     /**
-     * Returns location ofMany generated resources.
+     * Returns location of generated resources.
      */
     private final Path generatedResourceDir;
 
@@ -146,21 +146,21 @@ public class JkProjectOutLayout {
     }
 
     /**
-     * Returns location ofMany generated sources.
+     * Returns location of generated sources.
      */
     public Path generatedSourceDir() {
         return outputDir.resolve(generatedSourceDir);
     }
 
     /**
-     * Returns location ofMany generated resources.
+     * Returns location of generated resources.
      */
     public Path generatedResourceDir() {
         return outputDir.resolve(generatedResourceDir);
     }
 
     /**
-     * Returns location ofMany generated resources for tests.
+     * Returns location of generated resources for tests.
      */
     public Path generatedTestResourceDir() {
         return outputDir.resolve(generatedTestResourceDir);

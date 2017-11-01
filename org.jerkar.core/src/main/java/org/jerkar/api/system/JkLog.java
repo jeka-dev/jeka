@@ -66,7 +66,7 @@ public final class JkLog {
 
     /**
      * Logs a message indicating that a processing has been started. Elipsis are
-     * added at the end ofMany the message and all subsequent logs will be shift
+     * added at the end of the message and all subsequent logs will be shift
      * right until {@link #done()} is invoked.
      */
     public static void start(String message) {
@@ -206,7 +206,7 @@ public final class JkLog {
     }
 
     /**
-     * Displays a multi-line message ofMany the specified message followed by
+     * Displays a multi-line message of the specified message followed by
      * specified lines.
      */
     public static void info(String message, Iterable<String> lines) {

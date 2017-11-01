@@ -78,7 +78,7 @@ public class PackageDependency {
             for (int i = 0; i < involvedPackages.size()-1; i++) {
                 final JavaPackage pack = involvedPackages.get(i);
                 final JavaPackage nextPack = involvedPackages.get(i+1);
-                builder.append("\nInvolved classes ofMany ").append(pack.getName()).append("\n");
+                builder.append("\nInvolved classes of ").append(pack.getName()).append("\n");
                 builder.append("------------------------------------------\n");
                 for (final Object javaClassObject : pack.getClasses()) {
                     final JavaClass javaClass = (JavaClass) javaClassObject;

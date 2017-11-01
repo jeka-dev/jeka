@@ -82,7 +82,7 @@ public final class JkScopedDependency implements Serializable {
     }
 
     /**
-     * Returns the dependency object ofMany this scoped dependency.
+     * Returns the dependency object of this scoped dependency.
      */
     public JkDependency dependency() {
         return dependency;
@@ -101,7 +101,7 @@ public final class JkScopedDependency implements Serializable {
 
     /**
      * Returns <code>true</code> if this scoped dependency should be taken in account when one grabs the dependencies for
-     * any ofMany the specified scopes.
+     * any of the specified scopes.
      */
     public boolean isInvolvedInAnyOf(Iterable<JkScope> scopes) {
         for (final JkScope scope : scopes) {
@@ -114,7 +114,7 @@ public final class JkScopedDependency implements Serializable {
 
     /**
      * Returns <code>true</code> if this scoped dependency should be taken in account when one grabs the dependencies for
-     * any ofMany the specified scopes.
+     * any of the specified scopes.
      */
     public boolean isInvolvedInAnyOf(JkScope... scopes) {
         return isInvolvedInAnyOf(Arrays.asList(scopes));
@@ -151,12 +151,12 @@ public final class JkScopedDependency implements Serializable {
 
     /**
      * Returns a scoped dependency identical to this one but with the specified scope mapping and no scopes.
-     * This method should be invoked only when this dependency is type ofMany {@link JkModuleDependency}.
+     * This method should be invoked only when this dependency is type of {@link JkModuleDependency}.
      * If it is not the case, an {@link IllegalStateException} is thrown.
      */
     public JkScopedDependency withScopeMapping(JkScopeMapping scopeMapping) {
         if (! (this.dependency instanceof JkModuleDependency)) {
-            throw new IllegalStateException("This dependency is type ofMany "
+            throw new IllegalStateException("This dependency is type of "
                     + this.dependency.getClass().getName() + ". Expecting JkModuleDependency.");
         }
         return JkScopedDependency.of((JkModuleDependency) this.dependency, scopeMapping);
@@ -180,7 +180,7 @@ public final class JkScopedDependency implements Serializable {
     }
 
     /**
-     * Returns a scoped dependency formed ofMany the scope/scopeMapping ofMany this scoped dependency
+     * Returns a scoped dependency formed of the scope/scopeMapping of this scoped dependency
      * and the specified dependency.
      */
     public JkScopedDependency dependency(JkDependency dependency) {

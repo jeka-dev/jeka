@@ -92,7 +92,7 @@ public final class JkPom {
 
     /**
      * The map groupId:ArtifactId -> version provideded by the <code>dependencyManagement</code>
-     * section ofMany this POM.
+     * section of this POM.
      */
     public JkVersionProvider versionProvider() {
         final List<JkVersionedModule> versionedModules = new LinkedList<>();
@@ -115,7 +115,7 @@ public final class JkPom {
 
     /**
      * The {@link JkDependencyExclusions} instance provided by the <code>dependencyManagement</code>
-     * section ofMany this POM.
+     * section of this POM.
      */
     public JkDependencyExclusions dependencyExclusion() {
         final JkDependencyExclusions.Builder builder = JkDependencyExclusions.builder();

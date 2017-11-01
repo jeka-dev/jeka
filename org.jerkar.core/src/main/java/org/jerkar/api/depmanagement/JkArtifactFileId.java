@@ -2,9 +2,9 @@ package org.jerkar.api.depmanagement;
 
 /**
  * An artifact producer is likely to produce several artifact files (main jar, sources, javadoc, native jars, ...). <br/>
- * To distinguish them one use the notion ofMany 'classifier' and 'extension'. <br/>
- * Extension is simply the char sequence at the end ofMany ofMany file to determine its technical type (.exe, .jar, .zip, ...). <br/>
- * Classifier is to mention the purpose ofMany the file (main artifact, sources, javadoc, uberjar, native lib, ...).
+ * To distinguish them one use the notion of 'classifier' and 'extension'. <br/>
+ * Extension is simply the char sequence at the end of of file to determine its technical type (.exe, .jar, .zip, ...). <br/>
+ * Classifier is to mention the purpose of the file (main artifact, sources, javadoc, uberjar, native lib, ...).
  */
 public final class JkArtifactFileId {
 
@@ -25,21 +25,21 @@ public final class JkArtifactFileId {
     }
 
     /**
-     * Returns the classifier ofMany this object.
+     * Returns the classifier of this object.
      */
     public String classifier() {
         return classifier;
     }
 
     /**
-     * Returns the file extension ofMany this object.
+     * Returns the file extension of this object.
      */
     public String extension() {
         return extension;
     }
 
     /**
-     * Returns <code>true</code> if any ofMany the specified classifiers is equals to this classifier.
+     * Returns <code>true</code> if any of the specified classifiers is equals to this classifier.
      */
     public boolean isClassifier(String... classifiers) {
         for (String classifier : classifiers) {
@@ -51,7 +51,7 @@ public final class JkArtifactFileId {
     }
 
     /**
-     * Returns <code>true</code> if any ofMany the specified extension is equals to this extension.
+     * Returns <code>true</code> if any of the specified extension is equals to this extension.
      */
     public boolean isExtension(String... extensions) {
         for (String extension : extensions) {

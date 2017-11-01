@@ -17,7 +17,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsReflect;
 
 /**
- * Defines importedBuilds ofMany a given master build.
+ * Defines importedBuilds of a given master build.
  *
  * @author Jerome Angibaud
  */
@@ -52,7 +52,7 @@ public final class JkImportedBuilds {
     }
 
     /**
-     * Returns only the direct slave ofMany this master build.
+     * Returns only the direct slave of this master build.
      */
     public List<JkBuild> directs() {
         return Collections.unmodifiableList(directImports);
@@ -72,7 +72,7 @@ public final class JkImportedBuilds {
     }
 
     /**
-     * Same as {@link #all()} but only returns builds instance ofMany the specified class or its subclasses.
+     * Same as {@link #all()} but only returns builds instance of the specified class or its subclasses.
      */
     public <T extends JkBuild> List<T> allOf(Class<T> ofClass) {
         final List<T> result = new LinkedList<>();
@@ -114,12 +114,12 @@ public final class JkImportedBuilds {
                     currentClassBaseDir = currentClassBaseDir.getParent();
                 }
                 if (currentClassBaseDir == null) {
-                    throw new IllegalStateException("Can't inject slave build instance ofMany type " + subBuild.getClass().getSimpleName()
+                    throw new IllegalStateException("Can't inject slave build instance of type " + subBuild.getClass().getSimpleName()
                             + " into field " + field.getDeclaringClass().getName()
                             + "#" + field.getName() + " from directory " + build.baseDir()
                             + " while working dir is " + Paths.get("").toAbsolutePath());
                 }
-                throw new IllegalStateException("Can't inject slave build instance ofMany type " + subBuild.getClass().getSimpleName()
+                throw new IllegalStateException("Can't inject slave build instance of type " + subBuild.getClass().getSimpleName()
                         + " into field " + field.getDeclaringClass().getName()
                         + "#" + field.getName() + " from directory " + build.baseDir()
                         + "\nBuild class is located in " + currentClassBaseDir
@@ -132,7 +132,7 @@ public final class JkImportedBuilds {
     }
 
     /**
-     * Creates an instance ofMany <code>JkBuild</code> for the given project and
+     * Creates an instance of <code>JkBuild</code> for the given project and
      * build class. The instance field annotated with <code>JkOption</code> are
      * populated as usual.
      */

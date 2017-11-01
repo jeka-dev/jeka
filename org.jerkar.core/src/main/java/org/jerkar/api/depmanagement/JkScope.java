@@ -13,7 +13,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * Defines a context where is defined dependencies ofMany a given project. According
+ * Defines a context where is defined dependencies of a given project. According
  * we need to compile, test or run the application, the dependencies may
  * diverge. For example, <code>Junit</code> library may only be necessary for
  * testing, so we can declare that
@@ -63,14 +63,14 @@ public final class JkScope implements Serializable {
     }
 
     /**
-     * Returns the name ofMany this scope. Name is used as identifier for scopes.
+     * Returns the name of this scope. Name is used as identifier for scopes.
      */
     public String name() {
         return name;
     }
 
     /**
-     * Human description for the purpose ofMany this scope, can be <code>null</code>.
+     * Human description for the purpose of this scope, can be <code>null</code>.
      */
     public String description() {
         return description;
@@ -86,14 +86,14 @@ public final class JkScope implements Serializable {
 
     /**
      * Returns <code>true</code> if the dependencies defined with this scope should be resolved recursively
-     * (meaning returning the dependencies ofMany the dependencies and so on)
+     * (meaning returning the dependencies of the dependencies and so on)
      */
     public boolean transitive() {
         return this.transitive;
     }
 
     /**
-     * Returns scopes this scope inherits from. It returns recursively parent scopes, parent ofMany parent scopes
+     * Returns scopes this scope inherits from. It returns recursively parent scopes, parent of parent scopes
      * and so on.
      */
     public List<JkScope> ancestorScopes() {
@@ -157,7 +157,7 @@ public final class JkScope implements Serializable {
     }
 
     /**
-     * Returns <code>true</code> if this scope is one or is extending any ofMany the specified scopes.
+     * Returns <code>true</code> if this scope is one or is extending any of the specified scopes.
      */
     public boolean isInOrIsExtendingAnyOf(Iterable<? extends JkScope> scopes) {
         for (final JkScope scope : scopes) {
@@ -211,7 +211,7 @@ public final class JkScope implements Serializable {
     }
 
     /**
-     * returns all specified scopes and all ofMany their ancestors.
+     * returns all specified scopes and all of their ancestors.
      */
     public static Set<JkScope> involvedScopes(Iterable<JkScope> scopes) {
         final Set<JkScope> result = JkUtilsIterable.setOf(scopes);

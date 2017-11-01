@@ -23,7 +23,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 /**
- * Utilities methods to ease XML api ofMany the JDK
+ * Utilities methods to ease XML api of the JDK
  *
  * @author Jerome Angibaud
  */
@@ -99,7 +99,7 @@ public final class JkUtilsXml {
     }
 
     /**
-     * Returns the direct child node ofMany the specified element having specified
+     * Returns the direct child node of the specified element having specified
      * name.
      */
     public static Element directChild(Element parent, String childName) {
@@ -135,7 +135,7 @@ public final class JkUtilsXml {
     }
 
     /**
-     * Returns the text ofMany the specified direct child ofMany the specified element.
+     * Returns the text of the specified direct child of the specified element.
      */
     public static String directChildText(Element parent, String childName) {
         final Element child = directChild(parent, childName);

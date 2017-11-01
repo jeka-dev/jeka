@@ -33,9 +33,9 @@ import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
 /**
- * Jerkar users : This class is not part ofMany the public API !!! Please, Use
+ * Jerkar users : This class is not part of the public API !!! Please, Use
  * {@link JkDependencyResolver} instead. Ivy wrapper providing high level methods. The
- * API is expressed using Jerkar classes only (mostly free ofMany Ivy classes).
+ * API is expressed using Jerkar classes only (mostly free of Ivy classes).
  *
  * @author Jerome Angibaud
  */

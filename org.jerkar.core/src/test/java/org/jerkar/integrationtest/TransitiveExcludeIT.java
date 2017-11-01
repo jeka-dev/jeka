@@ -64,7 +64,7 @@ public class TransitiveExcludeIT {
         resolveResult = resolver.resolve(deps);  // works also with empty socpes resolution
         assertFalse(resolveResult.contains(JkModuleId.of("org.springframework.boot:spring-boot-test")));
 
-        // Test with JkDepExclude without scope specified ofMany the exclusion
+        // Test with JkDepExclude without scope specified of the exclusion
 
         exclude = JkDepExclude.of("org.springframework.boot:spring-boot-test");
         deps = JkDependencies.builder()

@@ -33,7 +33,7 @@ final class BuildMethod {
     private final Class<? extends JkPlugin> pluginClass;
 
     /**
-     * Returns the name ofMany the method.
+     * Returns the name of the method.
      */
     public String name() {
         return methodName;

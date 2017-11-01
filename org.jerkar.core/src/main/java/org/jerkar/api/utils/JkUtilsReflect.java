@@ -66,7 +66,7 @@ public final class JkUtilsReflect {
     }
 
     /**
-     * Returns an array ofMany the types ofMany specified objects.
+     * Returns an array of the types of specified objects.
      */
     public static Class<?>[] getTypesOf(Object[] params) {
         final Class<?>[] result = new Class[params.length];
@@ -103,7 +103,7 @@ public final class JkUtilsReflect {
     }
 
     /**
-     * Gets the value ofMany the field having the specified name on a given object.
+     * Gets the value of the field having the specified name on a given object.
      */
     public static Object getFieldValue(Object object, String fieldName) {
         try {
@@ -188,7 +188,7 @@ public final class JkUtilsReflect {
         } catch (final RuntimeException e) {
             throw e;
         } catch (final Exception e) {
-            throw new RuntimeException("No constructor found with parameter ofMany type " + parameterType.getName(), e);
+            throw new RuntimeException("No constructor found with parameter of type " + parameterType.getName(), e);
         }
     }
 
@@ -289,7 +289,7 @@ public final class JkUtilsReflect {
     }
 
     /**
-     * Returns the method ofMany the given name and argument type on the specified
+     * Returns the method of the given name and argument type on the specified
      * class. If none, this method returns <code>null</code>.
      */
     public static Method getMethodOrNull(Class<?> clazz, String name, Class<?>... argTypes) {
@@ -303,7 +303,7 @@ public final class JkUtilsReflect {
     }
 
     /**
-     * Returns the method ofMany the given name and argument type on the specified
+     * Returns the method of the given name and argument type on the specified
      * class.
      */
     public static Method getDeclaredMethod(Class<?> clazz, String name, Class<?>... argTypes) {

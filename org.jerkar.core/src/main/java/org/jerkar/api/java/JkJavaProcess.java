@@ -133,7 +133,7 @@ public final class JkJavaProcess {
 
     /**
      * Takes the specified command line as is and add it to the process command
-     * line. Example ofMany command line is <i>-Xms2G -Xmx2G</i>.
+     * line. Example of command line is <i>-Xms2G -Xmx2G</i>.
      */
     public JkJavaProcess andCommandLine(String commandLine) {
         if (JkUtilsString.isBlank(commandLine)) {
@@ -209,7 +209,7 @@ public final class JkJavaProcess {
 
     private void runClassOrJarSync(String mainClassName, Path jar, String... arguments) {
         JkUtilsAssert.isTrue(jar != null || mainClassName != null,
-                "main class name and jar can't be both null while launching a Java process, please set at least one ofMany them.");
+                "main class name and jar can't be both null while launching a Java process, please set at least one of them.");
         final List<String> command = new LinkedList<>();
         final OptionAndEnv optionAndEnv = optionsAndEnv();
         command.add(runningJavaCommand());
@@ -309,7 +309,7 @@ public final class JkJavaProcess {
     }
 
     /**
-     * Returns the classpth ofMany this {@link JkJavaProcess}.
+     * Returns the classpth of this {@link JkJavaProcess}.
      * @return
      */
     public JkClasspath classpath() {

@@ -35,7 +35,7 @@ import org.jerkar.api.utils.JkUtilsTime;
 import org.jerkar.tool.CommandLine.MethodInvocation;
 
 /**
- * Engine having responsibility ofMany compiling build classes, instantiate/configure build instances
+ * Engine having responsibility of compiling build classes, instantiate/configure build instances
  * and run them.<br/>
  * Build classes are expected to lie in [project base dir]/build/def <br/>
  * Classes having simple name starting with '_' are ignored.
@@ -112,7 +112,7 @@ final class Engine {
 
     /**
      * Pre-compile and compile build classes (if needed) then execute the build
-     * ofMany this project.
+     * of this project.
      */
     void execute(JkInit init) {
         this.buildDependencies = this.buildDependencies.andScopeless(init.commandLine().dependencies());
@@ -215,7 +215,7 @@ final class Engine {
     private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
         JkPathSequence pathSequence = JkPathSequence.of();
         if (!this.rootsOfImportedBuilds.isEmpty()) {
-            JkLog.info("Compile build classes ofMany dependent projects : "
+            JkLog.info("Compile build classes of dependent projects : "
                     + toRelativePaths(this.projectBaseDir, this.rootsOfImportedBuilds));
         }
         for (final Path file : this.rootsOfImportedBuilds) {

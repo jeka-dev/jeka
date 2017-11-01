@@ -62,7 +62,7 @@ public final class JkPathTreeSet {
     // -------------------------- additional elements in set ----------------------------------
 
     /**
-     * Creates a {@link JkPathTreeSet} which is a concatenation ofMany this
+     * Creates a {@link JkPathTreeSet} which is a concatenation of this
      * {@link JkPathTreeSet} and the {@link JkPathTree} array passed as
      * parameter.
      */
@@ -73,7 +73,7 @@ public final class JkPathTreeSet {
     }
 
     /**
-     * Creates a {@link JkPathTreeSet} which is a concatenation ofMany this
+     * Creates a {@link JkPathTreeSet} which is a concatenation of this
      * {@link JkPathTreeSet} and zip files passed as parameter.
      */
     public final JkPathTreeSet andZips(Iterable<Path> zipFiles) {
@@ -91,7 +91,7 @@ public final class JkPathTreeSet {
     }
 
     /**
-     * Creates a {@link JkPathTreeSet} which is a concatenation ofMany this
+     * Creates a {@link JkPathTreeSet} which is a concatenation of this
      * {@link JkPathTreeSet} and the folder array passed as parameter.
      */
     public final JkPathTreeSet and(Path... folders) {
@@ -103,7 +103,7 @@ public final class JkPathTreeSet {
     }
 
     /**
-     * Creates a {@link JkPathTreeSet} which is a concatenation ofMany this
+     * Creates a {@link JkPathTreeSet} which is a concatenation of this
      * {@link JkPathTreeSet} and the {@link JkPathTreeSet} array passed as
      * parameter.
      */

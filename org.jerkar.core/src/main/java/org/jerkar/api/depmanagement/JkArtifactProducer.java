@@ -19,7 +19,7 @@ public interface JkArtifactProducer extends JkArtifactLocator {
     void makeArtifactFile(JkArtifactFileId jkArtifactId);
 
     /**
-     * Returns the runtime dependencies ofMany the specified artifact file. This is usefull to use the artifact file as
+     * Returns the runtime dependencies of the specified artifact file. This is usefull to use the artifact file as
      * a transitive dependency.
      */
     JkPathSequence runtimeDependencies(JkArtifactFileId jkArtifactId);

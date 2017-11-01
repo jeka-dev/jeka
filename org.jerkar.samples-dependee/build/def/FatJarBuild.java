@@ -10,7 +10,7 @@ import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
- * Simple build demonstrating ofMany how Jerkar can handle multi-project build.
+ * Simple build demonstrating of how Jerkar can handle multi-project build.
  * <p>
  * Here, the project depends on the <code>org.jerkar.samples</code> project.
  * More precisely, on the [fat
@@ -19,7 +19,7 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
  * <p>
  * The compilation relies on a fat jar (a jar containing all the dependencies)
  * produced by <code>org.jerkar.samples</code> project. The build produces in
- * turns, produces a fat jar merging the fat jar dependency, the classes ofMany this
+ * turns, produces a fat jar merging the fat jar dependency, the classes of this
  * project and its module dependencies.
  * 
  * @author Jerome Angibaud

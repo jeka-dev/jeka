@@ -51,7 +51,7 @@ final class PgpUtils {
         } catch (final IOException | PGPException e) {
             throw JkUtilsThrowable.unchecked(e);
         } catch (final IllegalArgumentException e) {
-            throw new IllegalArgumentException("Error with one ofMany this file : signatureFile = "
+            throw new IllegalArgumentException("Error with one of this file : signatureFile = "
                     + signatureFile);
         }
     }
@@ -143,7 +143,7 @@ final class PgpUtils {
         } catch (final IOException e) {
             throw JkUtilsThrowable.unchecked(e);
         } catch (final PGPException e) {
-            if (e.getMessage().equals("checksum mismatch at 0 ofMany 20")) {
+            if (e.getMessage().equals("checksum mismatch at 0 of 20")) {
                 throw new IllegalStateException("Secret key password is probably wrong.", e);
             }
             throw JkUtilsThrowable.unchecked(e);

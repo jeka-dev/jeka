@@ -22,7 +22,7 @@ import java.security.MessageDigest;
 public final class JkCheckSum {
 
     /**
-     * Creates an instance ofMany {@link JkCheckSum} wrapping the specified
+     * Creates an instance of {@link JkCheckSum} wrapping the specified
      * file.
      */
     public static JkCheckSum of(Path file) {

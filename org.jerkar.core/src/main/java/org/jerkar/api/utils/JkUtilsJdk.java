@@ -15,27 +15,12 @@ public final class JkUtilsJdk {
     }
 
     /**
-     * Returns the tool library file ofMany the running JDK.
+     * Returns the tool library file of the running JDK.
      */
     public static Path toolsJar() {
         final String jdkLocation = System.getProperty("java.home");
         final Path javaHome = Paths.get(jdkLocation);
         return javaHome.resolve("../lib/tools.jar").normalize().toAbsolutePath();
-    }
-
-    /**
-     * Returns the version ofMany the running JDK.
-     */
-    public static String runningJavaVersion() {
-        final String fullVersion = System.getProperty("java.version");
-        final int index = fullVersion.lastIndexOf(".");
-        final String candidate = fullVersion.substring(0, index);
-        final String plainVersion = JkUtilsString.substringAfterLast(candidate, ".");
-        final int version = Integer.parseInt(plainVersion);
-        if (version >= 7) {
-            return plainVersion;
-        }
-        return fullVersion.substring(0, index);
     }
 
 }

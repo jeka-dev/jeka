@@ -81,7 +81,7 @@ public class JkJavaProjectMaker {
         Charset charset = project.getCompileSpec().getEncoding() == null ? Charset.defaultCharset() :
                 Charset.forName(project.getCompileSpec().getEncoding());
         this.resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().resources())
-                .and(project.getOutLayout().generatedResourceDir().toFile())
+                .and(project.getOutLayout().generatedResourceDir())
                 .and(project.getResourceInterpolators())
                 .generateTo(project.getOutLayout().classDir(), charset));
         this.compiler = JkRunnables.of(() -> {
@@ -89,7 +89,7 @@ public class JkJavaProjectMaker {
             baseCompiler.compile(compileSpec);
         });
         testResourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().testResources())
-                .and(project.getOutLayout().generatedTestResourceDir().toFile())
+                .and(project.getOutLayout().generatedTestResourceDir())
                 .and(project.getResourceInterpolators())
                 .generateTo(project.getOutLayout().testClassDir(), charset));
         testCompiler = JkRunnables.of(() -> {

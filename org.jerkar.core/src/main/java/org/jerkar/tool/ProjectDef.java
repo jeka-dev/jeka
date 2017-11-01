@@ -199,7 +199,7 @@ final class ProjectDef {
     }
 
     /**
-     * Definition ofMany method in a given class that can be called by Jerkar.
+     * Definition of method in a given class that can be called by Jerkar.
      *
      * @author Jerome Angibaud
      */
@@ -334,7 +334,7 @@ final class ProjectDef {
 
         private String type() {
             if (type.isEnum()) {
-                return "Enum ofMany " + enumValues(type);
+                return "Enum of " + enumValues(type);
             }
             return this.type.getSimpleName();
         }

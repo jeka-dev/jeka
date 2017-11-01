@@ -49,7 +49,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Returns a duplicate free list ofMany the given items
+     * Returns a duplicate free list of the given items
      */
     public static <T> List<T> listWithoutDuplicateOf(Iterable<T> items) {
         final Set<T> set = new HashSet<>();
@@ -75,7 +75,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Creates an array ofMany the specified class and populate it with items ofMany the specified {@link Iterable}.
+     * Creates an array of the specified class and populate it with items of the specified {@link Iterable}.
      */
     @SuppressWarnings("unchecked")
     public static <T> T[] arrayOf(Iterable<T> it, Class<T> clazz) {
@@ -90,7 +90,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Creates a set ofMany specified items.
+     * Creates a set of specified items.
      */
     @SuppressWarnings("unchecked")
     public static <T> Set<T> setOf(T... items) {
@@ -100,7 +100,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Creates a set ofMany specified items.
+     * Creates a set of specified items.
      */
     public static <T> Set<T> setOf(Iterable<T> items) {
         final HashSet<T> result = new HashSet<>();
@@ -111,7 +111,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Creates a map ofMany specified key/value. Key value should be declared in sequence as
+     * Creates a map of specified key/value. Key value should be declared in sequence as
      * <code>mapOf(key1, value1, key2, value2,...)</code>
      */
     @SuppressWarnings("unchecked")
@@ -127,7 +127,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Creates a map ofMany specified key/value. Key value should be declared in sequence as
+     * Creates a map of specified key/value. Key value should be declared in sequence as
      * <code>mapOf(key1, value1, key2, value2,...)</code>
      */
     @SuppressWarnings("unchecked")
@@ -151,74 +151,6 @@ public final class JkUtilsIterable {
         return result;
     }
 
-    private static final class ChainedIterable<T> implements Iterable<T> {
-
-        private final Iterable<Iterable<T>> iterables;
-
-        public ChainedIterable(Iterable<Iterable<T>> iterables) {
-            super();
-            this.iterables = iterables;
-        }
-
-        @Override
-        public Iterator<T> iterator() {
-            final List<Iterator<T>> iterators = new LinkedList<>();
-            for (final Iterable<T> iterable : iterables) {
-                iterators.add(iterable.iterator());
-            }
-            return new ChainedIterator<>(iterators);
-        }
-
-    }
-
-    private static final class ChainedIterator<T> implements Iterator<T> {
-
-        private final Iterator<Iterator<T>> iterators;
-
-        private Iterator<T> current;
-
-        public ChainedIterator(Iterable<Iterator<T>> iterables) {
-            super();
-            this.iterators = iterables.iterator();
-            current = iterators.next();
-        }
-
-        @Override
-        public boolean hasNext() {
-            final boolean currentNext = current.hasNext();
-            if (currentNext) {
-                return true;
-            }
-            while (iterators.hasNext()) {
-                current = iterators.next();
-                if (current.hasNext()) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public T next() {
-            if (current.hasNext()) {
-                return current.next();
-            }
-            while (iterators.hasNext()) {
-                current = iterators.next();
-                if (current.hasNext()) {
-                    return current.next();
-                }
-            }
-            return current.next();
-        }
-
-        @Override
-        public void remove() {
-            current.remove();
-        }
-
-    }
-
     /**
      * Convenient method to put several entry in a map having the same value at
      * once.
@@ -230,7 +162,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Returns a list that is a concatenation ofMany the specified lists.
+     * Returns a list that is a concatenation of the specified lists.
      * The result is not backed by specified {@link Iterable}.
      */
     @SuppressWarnings("unchecked")
@@ -256,7 +188,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Returns a string representation ofMany the specified map constructed as
+     * Returns a string representation of the specified map constructed as
      * [key0]=[value0], [key1]=[value1], ...
      */
     @SuppressWarnings("unchecked")
@@ -274,7 +206,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Returns a multi-line string representation ofMany the specified map
+     * Returns a multi-line string representation of the specified map
      * constructed as [key0]=[value0], [key1]=[value1], ...
      */
     @SuppressWarnings("unchecked")

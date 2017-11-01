@@ -15,14 +15,14 @@ import java.util.function.Supplier;
 
 /**
  * Dependency on computed resource. More concretely, this is a file dependency on files that might not
- * be present at the time ofMany the build and that has to be generated. Instances ofMany this class are
+ * be present at the time of the build and that has to be generated. Instances of this class are
  * responsible to generate the missing files. <p>
  *
  * Computed dependencies are instantiated by providing expected files and a {@link Runnable} that
- * generates these files in case one ofMany them misses. <p>
+ * generates these files in case one of them misses. <p>
  *
  * This is yet simple but quite powerful mechanism, cause the runnable can be anything as Maven or ANT build
- * ofMany another project, a Jerkar build ofMany another project, ... <p>
+ * of another project, a Jerkar build of another project, ... <p>
  *
  * This is the way for creating multi-projet (and multi-techno if desired) builds.
  *
@@ -63,8 +63,8 @@ public class JkComputedDependency implements JkFileDependency {
     }
 
     /**
-     * Identical to {@link #of(Path, JkJavaProcess, String, String...)} but you specified a set ofMany files
-     * instead ofMany a single one.
+     * Identical to {@link #of(Path, JkJavaProcess, String, String...)} but you specified a set of files
+     * instead of a single one.
      */
     public static final JkComputedDependency of(Iterable<Path> files, final JkJavaProcess process,
             final String className, final String... args) {
@@ -105,14 +105,14 @@ public class JkComputedDependency implements JkFileDependency {
     }
 
     /**
-     * Returns a duplicate ofMany this computed dependency but specifying that it can be replaced by a project dependency in a IDE.
+     * Returns a duplicate of this computed dependency but specifying that it can be replaced by a project dependency in a IDE.
      */
     public JkComputedDependency withIdeProjectBaseDir(Path baseDir) {
         return new JkComputedDependency(this.runnable, baseDir, this.files, EMPTY_SUPPLIER);
     }
 
     /**
-     * Returns <code>true</code> if at least one ofMany these files is missing or one ofMany these directory is empty.
+     * Returns <code>true</code> if at least one of these files is missing or one of these directory is empty.
      */
     public final boolean hasMissingFilesOrEmptyDirs() {
         return !missingFilesOrEmptyDirs().isEmpty();
@@ -151,7 +151,7 @@ public class JkComputedDependency implements JkFileDependency {
 
     /**
      * If this dependency can be represented as a project dependency in a IDE,
-     * this field mentions the baseTree dir ofMany the project.
+     * this field mentions the baseTree dir of the project.
      */
     public Path ideProjectBaseDir() {
         return ideProjectBaseDir;

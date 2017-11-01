@@ -11,6 +11,8 @@ import java.util.TimeZone;
  */
 public final class JkUtilsTime {
 
+    private JkUtilsTime() {}
+
     /**
      * Returns the current system date
      */
@@ -35,14 +37,6 @@ public final class JkUtilsTime {
     }
 
     /**
-     * Formats the specified date as <code>yyyyMMdd-HHmmss</code>
-     */
-    public static String timestampSec(Date date) {
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmss");
-        return dateFormat.format(date);
-    }
-
-    /**
      * Returns the duration in second between the specified nano time and now.
      */
     public static float durationInSeconds(long startNano) {
@@ -58,14 +52,6 @@ public final class JkUtilsTime {
     public static long durationInMillis(long startNano) {
         final long endNano = System.nanoTime();
         return (endNano - startNano) / 1000000;
-    }
-
-    /**
-     * Formats the specified date using <code>yyyy-MM-dd HH:mm:ss</code>
-     * pattern.
-     */
-    public static String iso(Date date) {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
     }
 
 }

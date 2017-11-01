@@ -4,11 +4,10 @@ import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsPath;
 
-import java.io.File;
+//import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -100,7 +99,7 @@ public final class JkResourceProcessor {
     /**
      * @see JkResourceProcessor#and(JkPathTree)
      */
-    public JkResourceProcessor and(File dir) {
+    public JkResourceProcessor and(Path dir) {
         return and(JkPathTree.of(dir));
     }
 

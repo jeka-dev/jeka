@@ -16,7 +16,7 @@ import java.util.StringTokenizer;
 public final class JkUtilsString {
 
     /**
-     * Creates a string by concatenating items array ofMany specified items,
+     * Creates a string by concatenating items array of specified items,
      * separating each with the specified separator.
      */
     public static String join(String[] items, String separator) {
@@ -25,7 +25,7 @@ public final class JkUtilsString {
 
     /**
      * Same as {@link #join(String[], String)} but expecting an {@link Iterable}
-     * instead ofMany an array
+     * instead of an array
      */
     public static String join(Iterable<?> items, String separator) {
         final StringBuilder builder = new StringBuilder();
@@ -70,7 +70,7 @@ public final class JkUtilsString {
     }
 
     /**
-     * Returns the first string out ofMany the specified candidates matching the
+     * Returns the first string out of the specified candidates matching the
      * specified string.
      */
     public static String firstMatching(String stringToMatch, String... candidates) {
@@ -83,7 +83,7 @@ public final class JkUtilsString {
     }
 
     /**
-     * Returns occurrence count ofMany the specified character into the specified
+     * Returns occurrence count of the specified character into the specified
      * string.
      */
     public static int countOccurence(String matchedString, char occurrence) {
@@ -134,8 +134,8 @@ public final class JkUtilsString {
 
 
     /**
-     * Returns the substring after the last delimiter ofMany the specified
-     * occurrence. The delimiter is not part ofMany the result.
+     * Returns the substring after the last delimiter of the specified
+     * occurrence. The delimiter is not part of the result.
      */
     public static String substringAfterLast(String string, String delimiter) {
         final int index = string.lastIndexOf(delimiter);
@@ -146,8 +146,8 @@ public final class JkUtilsString {
     }
 
     /**
-     * Returns the substring before the first delimiter ofMany the specified
-     * occurrence. The delimiter is not part ofMany the result.
+     * Returns the substring before the first delimiter of the specified
+     * occurrence. The delimiter is not part of the result.
      */
     public static String substringBeforeFirst(String string, String delimiter) {
         final int index = string.indexOf(delimiter);
@@ -158,8 +158,8 @@ public final class JkUtilsString {
     }
 
     /**
-     * Returns the substring after the first delimiter ofMany the specified
-     * occurrence. The delimiter is not part ofMany the result.
+     * Returns the substring after the first delimiter of the specified
+     * occurrence. The delimiter is not part of the result.
      */
     public static String substringAfterFirst(String string, String delimiter) {
         final int index = string.indexOf(delimiter);
@@ -170,8 +170,8 @@ public final class JkUtilsString {
     }
 
     /**
-     * Returns the substring before the last delimiter ofMany the specified
-     * occurrence. The delimiter is not part ofMany the result.
+     * Returns the substring before the last delimiter of the specified
+     * occurrence. The delimiter is not part of the result.
      * Returns empty string if not found.
      */
     public static String substringBeforeLast(String string, String delimiter) {
@@ -183,7 +183,7 @@ public final class JkUtilsString {
     }
 
     /**
-     * Returns a string made ofMany the the specified pattern repeat the
+     * Returns a string made of the the specified pattern repeat the
      * specified count. So, for example, <code>repeat("##", 3)</code> will return <i>######</i>
      */
     public static String repeat(String pattern, int count) {
@@ -214,7 +214,7 @@ public final class JkUtilsString {
     }
 
     /**
-     * Create an instance ofMany the specified type from its string value. For now
+     * Create an instance of the specified type from its string value. For now
      * handled types are :
      * <ul>
      * <li>primitive Wrapper types</li>
@@ -270,7 +270,7 @@ public final class JkUtilsString {
             (byte) 'b', (byte) 'c', (byte) 'd', (byte) 'e', (byte) 'f' };
 
     /**
-     * Returns the hexadecimal for ofMany the given array ofMany bytes.
+     * Returns the hexadecimal for of the given array of bytes.
      *
      * @throws IllegalArgumentException
      */
@@ -291,7 +291,7 @@ public final class JkUtilsString {
     }
 
     /**
-     * Returns <code>true</code> if any ofMany the candidate string is equal to the
+     * Returns <code>true</code> if any of the candidate string is equal to the
      * string to match.
      */
     public static boolean equalsAny(String stringToMatch, String... candidates) {
@@ -314,7 +314,7 @@ public final class JkUtilsString {
     }
 
     /**
-     * Returns <code>true</code> if the specified string ends with any ofMany the
+     * Returns <code>true</code> if the specified string ends with any of the
      * candidates.
      */
     public static boolean endsWithAny(String stringToMatch, String... candidates) {
@@ -327,7 +327,7 @@ public final class JkUtilsString {
     }
 
     /**
-     * Returns <code>true</code> if the specified string starts with any ofMany the
+     * Returns <code>true</code> if the specified string starts with any of the
      * candidates.
      */
     public static boolean startsWithAny(String stringToMatch, String... stringToCheckEquals) {

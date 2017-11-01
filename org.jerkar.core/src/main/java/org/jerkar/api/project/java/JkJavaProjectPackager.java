@@ -10,7 +10,7 @@ import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJarMaker;
 
 /**
- * Creates jar and others elements ofMany a java project.
+ * Creates jar and others elements of a java project.
  */
 public final class JkJavaProjectPackager {
 

@@ -37,29 +37,29 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
 
     private final Writer writer = new Writer();
 
-    /** The package name ofMany the generated code */
+    /** The package name of the generated code */
     public String packageName;
 
-    /** The class name ofMany the generated code */
+    /** The class name of the generated code */
     public String className = "Build";
 
     /** The extended class. Can be null */
     public String extendedClass = "JkBuild";
 
     /**
-     * The list ofMany package/class to import.
+     * The list of package/class to import.
      * It can me expressed as "my.pack.MyClass" or "my.pack.*".
      */
     public final List<String> imports = importsForJkBuild();
 
     /**
-     * The list ofMany package/class to import statically.
+     * The list of package/class to import statically.
      * It can me expressed as "my.pack.MyClass" or "my.pack.*".
      */
     public final List<String> staticImports = new LinkedList<>();
 
     /**
-     * The list ofMany module/files to add to JkImport class annotation
+     * The list of module/files to add to JkImport class annotation
      */
     public final List<String> jkImports = new LinkedList<>();
 
@@ -105,7 +105,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
 
     /**
      * When generating versionProvider method, if you want that the all the
-     * moduleId for a given group map to a variable (instead ofMany the version
+     * moduleId for a given group map to a variable (instead of the version
      * literal), add an entry to this map as
      * <code>groupVersionVariableMap.put("my.group", "myGroupVersion")</code>
      * where "myGroupVersion" is a a field declared in
@@ -321,7 +321,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
 
         public String moduleId(JkModuleId moduleId) {
             return "    @Override\n" +
-                    "    public JkModuleId moduleId() {\n" + "        return JkModuleId.ofMany(\"" + moduleId.group() + "\", \"" + moduleId.name() + "\");\n" + "    }";
+                    "    public JkModuleId moduleId() {\n" + "        return JkModuleId.of(\"" + moduleId.group() + "\", \"" + moduleId.name() + "\");\n" + "    }";
         }
 
         public String version(String version) {
@@ -366,7 +366,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
             }
             final StringBuilder builder = new StringBuilder().append("    @Override\n")
                     .append("    public JkVersionProvider versionProvider() {\n")
-                    .append("        return JkVersionProvider.ofMany()");
+                    .append("        return JkVersionProvider.of()");
             final List<JkModuleId> moduleIds = JkUtilsIterable.listOf(versionProvider.moduleIds());
             moduleIds.sort(JkModuleId.GROUP_NAME_COMPARATOR);
             for (final JkModuleId moduleId : moduleIds) {

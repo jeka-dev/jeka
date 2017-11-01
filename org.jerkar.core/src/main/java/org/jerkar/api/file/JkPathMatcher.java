@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * A collection ofMany PathMatcher commonly used.
+ * A collection of PathMatcher commonly used.
  */
 public final class JkPathMatcher implements PathMatcher {
 

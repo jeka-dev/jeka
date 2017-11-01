@@ -21,7 +21,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Object representation ofMany the maven-metadata.xml file found in Maven
+ * Object representation of the maven-metadata.xml file found in Maven
  * repositories for describing available timestamped snapshot available for a
  * given version. This is a not used for Maven2 repositories.
  * 

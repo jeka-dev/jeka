@@ -82,7 +82,7 @@ public final class JkPathSequence implements Iterable<Path> {
     // -------------------------- iterate -----------------------------------------
 
     /**
-     * Returns the sequence ofMany files as a list.
+     * Returns the sequence of files as a list.
      */
     public List<Path> entries() {
         return entries;

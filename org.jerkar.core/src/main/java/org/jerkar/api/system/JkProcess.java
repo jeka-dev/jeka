@@ -18,24 +18,24 @@ import org.jerkar.api.utils.JkUtilsSystem;
 /**
  * Provides fluent API to define and launch external process.
  * <p>
- * Parameters ofMany the command are passed as array (and not as single string
+ * Parameters of the command are passed as array (and not as single string
  * representing several parameter separated with whitespace).<br/>
  * So for example, if you want to create a Maven process, then you should write
  * 
  * <pre>
- * <code>JkProcess.ofMany("mvn", "deleteArtifacts", "install")</code>
+ * <code>JkProcess.of("mvn", "deleteArtifacts", "install")</code>
  * </pre>
  * 
- * instead ofMany
+ * instead of
  * 
  * <pre>
- * <code>JkProcess.ofMany("mvn", "deleteArtifacts install")</code>
+ * <code>JkProcess.of("mvn", "deleteArtifacts install")</code>
  * </pre>
  * 
  * or
  * 
  * <pre>
- * <code>JkProcess.ofMany("mvn deleteArtifacts install")</code>
+ * <code>JkProcess.of("mvn deleteArtifacts install")</code>
  * </pre>
  * 
  * .
@@ -80,8 +80,8 @@ public final class JkProcess implements Runnable {
     }
 
     /**
-     * Defines a <code>JkProcess</code> using the specified tool ofMany the JDK and
-     * parameters. An example ofMany JDK tool is 'javac'.
+     * Defines a <code>JkProcess</code> using the specified tool of the JDK and
+     * parameters. An example of JDK tool is 'javac'.
      */
     public static JkProcess ofJavaTool(String javaTool, String... parameters) {
         Path candidate = CURRENT_JAVA_DIR;
@@ -139,7 +139,7 @@ public final class JkProcess implements Runnable {
 
     /**
      * Returns a <code>JkProcess</code> identical to this one but with the
-     * specified parameters in place ofMany this parameters. Contrary to
+     * specified parameters in place of this parameters. Contrary to
      * {@link #andParameters(String...)}, this method replaces this parameters
      * by the specified ones (not adding).
      */
@@ -169,7 +169,7 @@ public final class JkProcess implements Runnable {
     /**
      * Returns a <code>JkProcess</code> identical to this one but with the
      * specified behavior if the the underlying process does not exit with 0
-     * code. In case ofMany fail flag is <code>true</code> and the underlying
+     * code. In case of fail flag is <code>true</code> and the underlying
      * process exit with a non 0 value, the {@link #runSync()} method witll
      * throw a {@link IllegalStateException}.
      */
@@ -188,7 +188,7 @@ public final class JkProcess implements Runnable {
 
     /**
      * Starts this process and wait for the process has finished prior
-     * returning. The output ofMany the created process will be redirected on the
+     * returning. The output of the created process will be redirected on the
      * current output.
      */
     public int runSync() {
@@ -257,7 +257,7 @@ public final class JkProcess implements Runnable {
     }
 
     /**
-     * Returns the working directory ofMany this process.
+     * Returns the working directory of this process.
      */
     public Path workingDir() {
         return workingDir;

@@ -3,7 +3,7 @@ package org.jerkar.api.depmanagement;
 import java.io.Serializable;
 
 /**
- * CInstances ofMany this class are used to parameter the dependency resolution
+ * CInstances of this class are used to parameter the dependency resolution
  */
 public final class JkResolutionParameters implements Serializable {
 

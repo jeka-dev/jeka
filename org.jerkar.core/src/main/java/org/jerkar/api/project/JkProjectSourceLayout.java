@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 
 /**
  * Describes a project layout about the source parts. Generated sources/resources are not
- * considered as source part since it is generated (so part ofMany the output).
+ * considered as source part since it is generated (so part of the output).
  */
 public class JkProjectSourceLayout {
 
@@ -51,25 +51,25 @@ public class JkProjectSourceLayout {
     private final Path baseDir;
 
     /**
-     * Returns the location ofMany production source code that has been edited
+     * Returns the location of production source code that has been edited
      * manually (not generated).
      */
     private final JkPathTreeSet sources;
 
     /**
-     * Returns the location ofMany unit test source code that has been edited
+     * Returns the location of unit test source code that has been edited
      * manually (not generated).
      */
     private final JkPathTreeSet tests;
 
     /**
-     * Returns the location ofMany production resources that has been edited
+     * Returns the location of production resources that has been edited
      * manually (not generated).
      */
     private final JkPathTreeSet resources;
 
     /**
-     * Returns location ofMany edited resources for tests.
+     * Returns location of edited resources for tests.
      */
     private final JkPathTreeSet testResources;
 
@@ -127,21 +127,21 @@ public class JkProjectSourceLayout {
     // --------------------------- Views ---------------------------------
 
     /**
-     * Returns location ofMany production source code (containing only edited sources, not generated sources).
+     * Returns location of production source code (containing only edited sources, not generated sources).
      */
     public final JkPathTreeSet sources() {
         return sources.resolve(this.baseDir);
     }
 
     /**
-     * Returns location ofMany production resources.
+     * Returns location of production resources.
      */
     public final JkPathTreeSet resources() {
         return resources.resolve(this.baseDir);
     }
 
     /**
-     * Returns location ofMany test source code (containing edited + generated
+     * Returns location of test source code (containing edited + generated
      * sources).
      */
     public final JkPathTreeSet tests() {
@@ -149,7 +149,7 @@ public class JkProjectSourceLayout {
     }
 
     /**
-     * Returns location ofMany test resources.
+     * Returns location of test resources.
      */
     public final JkPathTreeSet testResources() {
         return testResources.resolve(this.baseDir);

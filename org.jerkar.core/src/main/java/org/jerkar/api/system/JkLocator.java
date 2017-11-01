@@ -76,7 +76,7 @@ public final class JkLocator {
     }
 
     /**
-     * Returns the location ofMany the artifact repository cache.
+     * Returns the location of the artifact repository cache.
      */
     public static Path jerkarRepositoryCache() {
         final String jerkarCacheOption = System.getenv(JK_REPOSITORY_CACHE_ENV_NAME);

@@ -268,8 +268,8 @@ public final class JkUtilsPath {
     }
 
     /**
-     * Copies the content ofMany the source directory into the target directory. The root ofMany source directory is
-     * not created as an entry ofMany the target directory.
+     * Copies the content of the source directory into the target directory. The root of source directory is
+     * not created as an entry of the target directory.
      * @return the copied file count.
      */
     public static int copyDirContent(Path sourceDir, Path targetDir, PathMatcher pathMatcher, CopyOption ... copyOptions)  {

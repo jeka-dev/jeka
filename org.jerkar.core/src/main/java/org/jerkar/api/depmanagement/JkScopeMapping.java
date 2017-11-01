@@ -13,13 +13,13 @@ import java.util.Set;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
- * A mapping to scopes to scopes acting when declaring dependencies. The goal ofMany a scope mapping is to determine :<ul>
+ * A mapping to scopes to scopes acting when declaring dependencies. The goal of a scope mapping is to determine :<ul>
  * <li>which scopes a dependency is declared for</li>
- * <li>for each scope a dependency is declared, which scopes ofMany its transitive dependencies to retrieve</li>
+ * <li>for each scope a dependency is declared, which scopes of its transitive dependencies to retrieve</li>
  * </ul>.
  *
- * For example, Your component 'A' depends ofMany component 'B' for compiling. You can declare 'A' depends ofMany 'B' with scope 'compile'. <br/>
- * Now imagine that for compiling, 'A' needs also the test class ofMany 'B' along the dependencies 'B' needs for testing. For such, you
+ * For example, Your component 'A' depends of component 'B' for compiling. You can declare 'A' depends of 'B' with scope 'compile'. <br/>
+ * Now imagine that for compiling, 'A' needs also the test class of 'B' along the dependencies 'B' needs for testing. For such, you
  * can declare a scope mapping as 'compile->compile, test'.
  *
  * This concept matches strictly with the <i>configuration</i> concept found in Ivy : <a href="http://wrongnotes.blogspot.be/2014/02/simplest-explanation-of-ivy.html">see here.</a>.
@@ -29,7 +29,7 @@ public final class JkScopeMapping implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * A scope mapping active for any scope that map to the default scope ofMany the dependencies.
+     * A scope mapping active for any scope that map to the default scope of the dependencies.
      */
     public static final JkScopeMapping ALL_TO_DEFAULT = JkScope.of("*").mapTo(JkScope.of("default(*)"));
 
@@ -94,7 +94,7 @@ public final class JkScopeMapping implements Serializable {
 
     /**
      * Returns a partial object to construct a scope mapping identical to this one but augmented with the specified
-     * mapping. The specified arguments stands for the left side scopes ofMany the mapping to be construct.
+     * mapping. The specified arguments stands for the left side scopes of the mapping to be construct.
      */
     public Partial and(JkScope... from) {
         return and(Arrays.asList(from));
@@ -135,7 +135,7 @@ public final class JkScopeMapping implements Serializable {
     }
 
     /**
-     * Returns all the scopes declared on the left side ofMany this scope mapping.
+     * Returns all the scopes declared on the left side of this scope mapping.
      */
     public Set<JkScope> entries() {
         return Collections.unmodifiableSet(this.map.keySet());
@@ -161,7 +161,7 @@ public final class JkScopeMapping implements Serializable {
 
     /**
      * Partial object to construct a scope mapping. The partial object contains only the left side
-     * ofMany a scope mapping entries.
+     * of a scope mapping entries.
      */
     public static class Partial {
 

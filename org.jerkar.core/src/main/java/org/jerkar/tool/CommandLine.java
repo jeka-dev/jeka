@@ -20,7 +20,7 @@ import org.jerkar.api.utils.JkUtilsString;
  * So here we segregate settings appliable for the master project only go
  * settings appliable everywhere (master + subproject).
  *
- * In other words sub-project settings are a subset ofMany master settings.
+ * In other words sub-project settings are a subset of master settings.
  *
  */
 final class CommandLine {

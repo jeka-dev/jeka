@@ -1,15 +1,13 @@
 package org.jerkar.tool.builtins.templates.javabuild;
 
-import java.io.File;
+import org.jerkar.api.java.JkManifest;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.jar.Attributes.Name;
-
-import org.jerkar.api.java.JkManifest;
-import org.jerkar.api.utils.JKUtilsTests;
-import org.junit.Assert;
-import org.junit.Test;
 
 @SuppressWarnings("javadoc")
 public class JkManifestTest {

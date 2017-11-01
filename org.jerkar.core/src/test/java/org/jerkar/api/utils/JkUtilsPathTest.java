@@ -38,8 +38,11 @@ public class JkUtilsPathTest {
 
     @Test
     public void testZipRoot() throws IOException {
-        Path zipPath = JkUtilsPath.zipRoot(Paths.get("toto.zip"));
-        System.out.println(zipPath);
+        Path zipFile = Paths.get("toto.zip");
+        Files.deleteIfExists(zipFile);
+        Path zipPath = JkUtilsPath.zipRoot(zipFile);  // create the zip file if needed
+        assertTrue(Files.exists(zipPath));
+        Files.deleteIfExists(zipFile);
         Path dirWithSpaces = Files.createTempDirectory("folder name with space");
         Path otherPath = dirWithSpaces.resolve("toto.zip");
         System.out.println(otherPath.toUri());
