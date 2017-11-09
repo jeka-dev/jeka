@@ -2,12 +2,16 @@ package org.jerkar.api.file;
 
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsPath;
+import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.api.utils.JkUtilsThrowable;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.*;
+import java.security.MessageDigest;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -59,9 +63,54 @@ public final class JkPathFile {
         return this;
     }
 
-    public JkPathFile copyIn(URL url) {
+    public JkPathFile copyFrom(URL url) {
         createIfNotExist();
         JkUtilsIO.copyUrlToFile(url, this.path);
+        return this;
+    }
+
+    public boolean exists() {
+        return Files.exists(path);
+    }
+
+    public JkPathFile deleteIfExist() {
+        if (!exists()) {
+            JkUtilsPath.deleteFile(this.path);
+        }
+        return this;
+    }
+
+    /**
+     * Returns a ASCII string representation of the checksum of this file for the specified algorithm.
+     * @param algorithm Hashing algorithm as MD5, SHA-2, ...
+     */
+    public String getChecksum(String algorithm) {
+        try (final InputStream is = Files.newInputStream(path)) {
+            final MessageDigest md = MessageDigest.getInstance(algorithm);
+            md.reset();
+            final byte[] buf = new byte[2048];
+            int len = 0;
+            while ((len = is.read(buf)) != -1) {
+                md.update(buf, 0, len);
+            }
+            final byte[] bytes = md.digest();
+            return JkUtilsString.toHexString(bytes);
+        } catch (final Exception e) {
+            throw JkUtilsThrowable.unchecked(e);
+        }
+    }
+
+    public JkPathFile write(byte[] bytes, OpenOption ... options) {
+        JkUtilsPath.write(path, bytes, options);
+        return this;
+    }
+
+    public JkPathFile checksum(String ... algorithms) {
+        for (String algorithm : algorithms) {
+            final String fileName = this.path.getFileName().toString() + "." + algorithm.toLowerCase();
+            JkPathFile checksumPath = JkPathFile.of(path.resolveSibling(fileName)).deleteIfExist().write(
+                    this.getChecksum(algorithm).getBytes(Charset.forName("ASCII")));
+        }
         return this;
     }
 
@@ -80,6 +129,5 @@ public final class JkPathFile {
         }
         return result;
     }
-
 
 }

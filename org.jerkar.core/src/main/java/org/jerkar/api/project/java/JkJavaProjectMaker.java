@@ -20,10 +20,7 @@ import org.jerkar.api.depmanagement.JkResolutionParameters;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkVersionProvider;
 import org.jerkar.api.depmanagement.JkVersionedModule;
-import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.file.JkPathTreeSet;
-import org.jerkar.api.file.JkPathSequence;
-import org.jerkar.api.file.JkCheckSum;
+import org.jerkar.api.file.*;
 import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkJavaTestSpec;
@@ -305,7 +302,7 @@ public class JkJavaProjectMaker {
     }
 
     public void checksum(String ...algorithms) {
-        this.project.allArtifactPaths().forEach((file) -> JkCheckSum.of(file).produce(algorithms));
+        this.project.allArtifactPaths().forEach((file) -> JkPathFile.of(file).checksum(algorithms));
     }
 
     public void signArtifactFiles(JkPgp pgp) {

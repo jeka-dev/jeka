@@ -15,7 +15,6 @@ import java.util.Properties;
 
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.file.JkPathFile;
-import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.system.JkLog;
@@ -91,7 +90,7 @@ public final class JkSonar {
 
     private static Path createRunnerJar(Path parent) {
         final Path file = parent.resolve(RUNNER_JAR_NAME_24);
-        return JkPathFile.of(file).copyIn(JkSonar.class.getResource(RUNNER_JAR_NAME_24)).get();
+        return JkPathFile.of(file).copyFrom(JkSonar.class.getResource(RUNNER_JAR_NAME_24)).get();
     }
 
     public void run() {

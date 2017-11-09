@@ -36,7 +36,7 @@ public class AClassicBuild extends JkJavaProjectBuild {
         return defaultProject()
                 .setSourceVersion(JkJavaVersion.V7)
                 .setDependencies(dependencies)
-                .addFatJarArtifactFile("fat");
+                .addFatJarArtifactFile("fat");  // project will produce a fat jar as well.
     }
     
     public static void main(String[] args) {
