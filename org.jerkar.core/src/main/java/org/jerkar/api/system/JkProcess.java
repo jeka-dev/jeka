@@ -167,6 +167,15 @@ public final class JkProcess implements Runnable {
     }
 
     /**
+     * Returns a <code>JkProcess</code> identical to this one but using the
+     * specified directory as the working directory.
+     */
+    public JkProcess withWorkingDir(String workingDir) {
+        return withWorkingDir(Paths.get(workingDir));
+    }
+
+
+    /**
      * Returns a <code>JkProcess</code> identical to this one but with the
      * specified behavior if the the underlying process does not exit with 0
      * code. In case of fail flag is <code>true</code> and the underlying

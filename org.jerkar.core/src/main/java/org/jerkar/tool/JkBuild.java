@@ -218,7 +218,7 @@ public class JkBuild {
 
     @Override
     public String toString() {
-        return this.baseDir.toString();
+        return this.getClass().getName() + " at " + this.baseDir.toString();
     }
 
 }

@@ -65,6 +65,18 @@ public final class JkUtilsReflect {
                 + targetClass.getName());
     }
 
+    public static List<Method> methodsHavingName(Class clazz, String name) {
+        List<Method> result = new LinkedList<>();
+        for (Method method : clazz.getMethods()) {
+            if (method.getName().equals(name)) {
+                result.add(method);
+            }
+        }
+        return result;
+    }
+
+
+
     /**
      * Returns an array of the types of specified objects.
      */
@@ -245,9 +257,9 @@ public final class JkUtilsReflect {
             }
             throw JkUtilsThrowable.unchecked((Exception) targetEx);
         } catch (final IllegalArgumentException e) {
-            throw new IllegalArgumentException("Expecting "
-                    + Arrays.toString(classloaderOf(method.getParameterTypes())) + " but got "
-                    + Arrays.toString(detailedTypesOf(params)));
+            throw new IllegalArgumentException("Type mismatch. Expecting "
+                    + Arrays.toString(method.getParameterTypes()) + " but got "
+                    + Arrays.toString(params), e);
         } catch (final Exception e) {
             throw JkUtilsThrowable.unchecked(e, "Error while invoking " + method + " with params "
                     + Arrays.toString(params));

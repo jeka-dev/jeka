@@ -1,6 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 
+import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -211,6 +212,10 @@ public final class JkRepos implements Iterable<JkRepo>, Serializable {
      */
     public Path get(JkModuleDependency moduleDependency) {
         final InternalDepResolver depResolver = ivyResolver();
+        File file = depResolver.get(moduleDependency);
+        if (file == null) {
+            return null;
+        }
         return depResolver.get(moduleDependency).toPath();
     }
 

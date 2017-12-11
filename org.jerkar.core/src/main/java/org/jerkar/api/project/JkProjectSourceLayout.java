@@ -47,7 +47,6 @@ public class JkProjectSourceLayout {
         return new JkProjectSourceLayout(baseDir, sources, resources, tests, testResources);
     }
 
-
     private final Path baseDir;
 
     /**

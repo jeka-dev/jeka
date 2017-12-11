@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.ide.idea.JkImlGenerator;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
@@ -20,28 +22,38 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 @JkDoc("Provides method to generate Idea Intellij metadata files.")
 public final class JkPluginIdea implements JkPlugin {
 
-
     @JkDoc("If true, path to cache repository and to Jerkar install will be replaces by $JERKAR_REPO$ and $JERKAR_HOME$ path variable")
     boolean useVarPath = false;
 
     /** Generates Idea [my-module].iml file */
     @JkDoc("Generates Idea [my-module].iml file")
-    public void generateIml(JkJavaProjectBuild build) {
-        final JkJavaProject project = build.project();
-        final JkImlGenerator generator = new JkImlGenerator(project);
+    public void generateIml(JkBuild build) {
+
+        final JkImlGenerator generator;
+        if (build instanceof JkJavaProjectBuild) {
+            final JkJavaProjectBuild projectBuild = (JkJavaProjectBuild) build;
+            generator = new JkImlGenerator(projectBuild.project());
+        } else {
+            generator = new JkImlGenerator(build.baseDir());
+        }
         final List<Path> depProjects = new LinkedList<>();
         for (final JkBuild depBuild : build.importedBuilds().directs()) {
             depProjects.add(depBuild.baseTree().root());
         }
         generator.setUseVarPath(useVarPath);
         generator.setBuildDependencies(build.buildDependencyResolver(), build.buildDependencies());
+
         generator.setImportedBuildProjects(depProjects);
-        generator.setDependencies(project.maker().getDependencyResolver(), project.getDependencies());
-        generator.setSourceJavaVersion(project.getSourceVersion());
-        generator.setForceJdkVersion(true);
+        if (build instanceof JkJavaProjectBuild) {
+            final JkJavaProjectBuild projectBuild = (JkJavaProjectBuild) build;
+            JkJavaProject project = projectBuild.project();
+            generator.setDependencies(project.maker().getDependencyResolver(), project.getDependencies());
+            generator.setSourceJavaVersion(project.getSourceVersion());
+            generator.setForceJdkVersion(true);
+        }
         final String xml = generator.generate();
-        final Path imlFile = project.getSourceLayout().baseDir().resolve(
-                project.getSourceLayout().baseDir().getFileName().toString() + ".iml");
+        final Path imlFile = build.baseDir().resolve(
+                build.baseDir().getFileName().toString() + ".iml");
         JkUtilsPath.deleteFile(imlFile);
         JkUtilsPath.write(imlFile, xml.getBytes(Charset.forName("UTF-8")));
         JkLog.info(imlFile + " generated.");

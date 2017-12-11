@@ -34,7 +34,7 @@ public final class JkBuildPlugins {
 
     void invoke(JkPlugin plugin, String methodName) {
         JkLog.startUnderlined("Method " + methodName + " to plugin " + plugin.getClass().getSimpleName());
-        final Method method = JkUtilsReflect.getMethod(plugin.getClass(), methodName, JkBuild.class);
+        final Method method = pluginMethod(plugin.getClass(), methodName, holder.getClass());
         JkUtilsReflect.invoke(plugin, method, this.holder);
         JkLog.done();
     }
@@ -45,6 +45,29 @@ public final class JkBuildPlugins {
         final T plugin = optPlugin.orElse(JkUtilsReflect.newInstance(pluginClass));
         JkOptions.populateFields(plugin, options);
         return plugin;
+    }
+
+    private Method pluginMethod(Class pluginClass, String name, Class buildClass) {
+        Class<JkBuild> buildClassParamType = null;
+        for (Method method : JkUtilsReflect.methodsHavingName(pluginClass, name)) {
+            if (method.getParameterCount() != 1) {
+                continue;
+            }
+            Class paramType = method.getParameterTypes()[0];
+            if (paramType.isAssignableFrom(buildClass)) {
+                return method;
+            }
+            if (JkBuild.class.isAssignableFrom(paramType)) {
+                buildClassParamType = paramType;
+                continue;
+            }
+            return method;
+        }
+        if (buildClassParamType == null) {
+            throw new IllegalStateException("No method " + name + "(JkBuild) found on " + buildClass);
+        }
+        throw new IllegalStateException("Method " + name + " from " + buildClass.getName() + " is not callable from a build scrpit of class or extending "
+                + buildClass + " but a script of class or extending extending " + buildClassParamType);
     }
 
 }

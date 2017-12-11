@@ -282,10 +282,7 @@ final class Engine {
         try {
             method = build.getClass().getMethod(methodName);
         } catch (final NoSuchMethodException e) {
-            JkLog.warn("No zero-arg method '" + methodName + "' found in class '" + build.getClass()
-            + "'. Skip.");
-            JkLog.warnStream().flush();
-            return;
+            throw new JkException("No zero-arg method '" + methodName + "' found in class '" + build.getClass());
         }
         final String context;
         if (fromDir != null) {

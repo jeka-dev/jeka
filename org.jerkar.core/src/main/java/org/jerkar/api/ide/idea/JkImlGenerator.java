@@ -14,17 +14,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkDependencyNode;
-import org.jerkar.api.depmanagement.JkDependencyResolver;
-import org.jerkar.api.depmanagement.JkJavaDepScopes;
-import org.jerkar.api.depmanagement.JkModuleDependency;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkResolveResult;
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.depmanagement.JkVersion;
-import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
@@ -53,6 +43,8 @@ public final class JkImlGenerator {
     private static final String T5 = T4 + T1;
 
     private JkProjectSourceLayout sourceLayout;
+
+    private Path baseDir;
 
     /** Used to generate JRE container */
     private JkJavaVersion sourceJavaVersion;
@@ -87,8 +79,16 @@ public final class JkImlGenerator {
                           JkDependencyResolver resolver) {
         super();
         this.sourceLayout = sourceLayout;
+        this.baseDir = sourceLayout.baseDir();
         this.dependencies = dependencies;
         this.dependencyResolver = resolver;
+    }
+
+    public JkImlGenerator(Path baseDir) {
+        super();
+        this.baseDir = baseDir;
+        this.dependencies = JkDependencies.builder().build();
+        this.dependencyResolver = JkDependencyResolver.of();
     }
 
     public JkImlGenerator(JkJavaProject javaProject) {
@@ -181,55 +181,59 @@ public final class JkImlGenerator {
         writer.writeCharacters("\n");
         writer.writeCharacters(T2);
 
-        // Write test sources
-        final Path projectDir = this.sourceLayout.baseDir();
-        for (final JkPathTree fileTree : this.sourceLayout.tests().fileTrees()) {
-            if (fileTree.exists()) {
-                writer.writeCharacters(T3);
-                writer.writeEmptyElement("sourceFolder");
+        if (sourceLayout != null) {
 
-                final String path =  fileTree.root().relativize(projectDir).toString().replace('\\', '/');
-                writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
-                writer.writeAttribute("isTestSource", "true");
-                writer.writeCharacters("\n");
+            // Write test sources
+            final Path projectDir = this.sourceLayout.baseDir();
+            for (final JkPathTree fileTree : this.sourceLayout.tests().fileTrees()) {
+                if (fileTree.exists()) {
+                    writer.writeCharacters(T1);
+                    writer.writeEmptyElement("sourceFolder");
+
+                    final String path = projectDir.relativize(fileTree.root()).normalize().toString().replace('\\', '/');
+                    writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
+                    writer.writeAttribute("isTestSource", "true");
+                    writer.writeCharacters("\n");
+                }
             }
-        }
 
-        // write test resources
-        for (final JkPathTree fileTree : this.sourceLayout.testResources().fileTrees()) {
-            if (fileTree.exists()) {
-                writer.writeCharacters(T3);
-                writer.writeEmptyElement("sourceFolder");
-                final String path = fileTree.root().relativize(projectDir).toString().replace('\\', '/');
-                writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
-                writer.writeAttribute("type", "java-test-resource");
-                writer.writeCharacters("\n");
+            // write test resources
+            for (final JkPathTree fileTree : this.sourceLayout.testResources().fileTrees()) {
+                if (fileTree.exists()) {
+                    writer.writeCharacters(T3);
+                    writer.writeEmptyElement("sourceFolder");
+                    final String path = projectDir.relativize(fileTree.root()).normalize().toString().replace('\\', '/');
+                    writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
+                    writer.writeAttribute("type", "java-test-resource");
+                    writer.writeCharacters("\n");
+                }
             }
-        }
 
-        // Write production sources
+            // Write production sources
 
-        for (final JkPathTree fileTree : this.sourceLayout.sources().fileTrees()) {
-            if (fileTree.exists()) {
-                writer.writeCharacters(T3);
-                writer.writeEmptyElement("sourceFolder");
-                final String path = fileTree.root().relativize(projectDir).toString().replace('\\', '/');
-                writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
-                writer.writeAttribute("isTestSource", "false");
-                writer.writeCharacters("\n");
+            for (final JkPathTree fileTree : this.sourceLayout.sources().fileTrees()) {
+                if (fileTree.exists()) {
+                    writer.writeCharacters(T3);
+                    writer.writeEmptyElement("sourceFolder");
+                    final String path = projectDir.relativize(fileTree.root()).normalize().toString().replace('\\', '/');
+                    writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
+                    writer.writeAttribute("isTestSource", "false");
+                    writer.writeCharacters("\n");
+                }
             }
-        }
 
-        // Write production test resources
-        for (final JkPathTree fileTree : this.sourceLayout.resources().fileTrees()) {
-            if (fileTree.exists()) {
-                writer.writeCharacters(T3);
-                writer.writeEmptyElement("sourceFolder");
-                final String path = fileTree.root().relativize(projectDir).toString().replace('\\', '/');
-                writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
-                writer.writeAttribute("type", "java-resource");
-                writer.writeCharacters("\n");
+            // Write production test resources
+            for (final JkPathTree fileTree : this.sourceLayout.resources().fileTrees()) {
+                if (fileTree.exists()) {
+                    writer.writeCharacters(T3);
+                    writer.writeEmptyElement("sourceFolder");
+                    final String path = projectDir.relativize(fileTree.root()).normalize().toString().replace('\\', '/');
+                    writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
+                    writer.writeAttribute("type", "java-resource");
+                    writer.writeCharacters("\n");
+                }
             }
+
         }
 
         writer.writeCharacters(T3);
@@ -406,8 +410,8 @@ public final class JkImlGenerator {
             writer.writeStartElement(type);
             writer.writeCharacters("\n");
             writer.writeCharacters(T5);
-            writer.writeEmptyElement("baseTree");
-            writer.writeAttribute("url", ideaPath(this.sourceLayout.baseDir(), file));
+            writer.writeEmptyElement("root");
+            writer.writeAttribute("url", ideaPath(baseDir, file));
             writer.writeCharacters("\n" + T4);
             writer.writeEndElement();
         } else {

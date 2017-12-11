@@ -19,6 +19,9 @@ class IvyArtifactContainer {
     static IvyArtifactContainer of(ArtifactDownloadReport[] artifactDownloadReports) {
         IvyArtifactContainer result = new IvyArtifactContainer();
         for (ArtifactDownloadReport report : artifactDownloadReports) {
+            if (report.getLocalFile() == null) {
+                throw new IllegalStateException("File for " + report.getArtifact() + " hasn't been downloaded.");
+            }
             result.put(report.getArtifact().getModuleRevisionId(), report.getLocalFile().toPath());
         }
         return result;
