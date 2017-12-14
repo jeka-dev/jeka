@@ -30,13 +30,13 @@ public abstract class JkJavaProjectBuild extends JkBuild {
     protected final String version = null;
 
     @JkDoc("Publication")
-    protected final JkRepoOptions repos = new JkRepoOptions();
+    public final JkRepoOptions repos = new JkRepoOptions();
 
     @JkDoc("Packing")
-    protected final JkJavaPackOptions pack = new JkJavaPackOptions();
+    public final JkJavaPackOptions pack = new JkJavaPackOptions();
 
     @JkDoc("Tests")
-    protected final JkTestOptions tests = new JkTestOptions();
+    public final JkTestOptions tests = new JkTestOptions();
 
     // -------------------------------------------------------------------------------
 
@@ -148,8 +148,8 @@ public abstract class JkJavaProjectBuild extends JkBuild {
     @JkDoc("Displays the resolved dependency tree on the console.")
     public final void showDependencies() {
         JkLog.infoHeaded("Resolved dependencies ");
-        final JkResolveResult resolveResult = this.project.maker().getDependencyResolver()
-                .resolve(this.buildDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME));
+        final JkResolveResult resolveResult = this.project().maker().getDependencyResolver()
+                .resolve(this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME));
         final JkDependencyNode tree = resolveResult.dependencyTree();
         JkLog.info(tree.toStrings());
     }

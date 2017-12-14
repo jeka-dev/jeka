@@ -28,7 +28,14 @@ class DistribAllBuild extends JkBuild {
 
     public boolean testSamples = false;
 
+    public boolean skipTests = true;
+
     public boolean javadoc = true;
+
+    @Override
+    protected void init() {
+        pluginsJacoco.core.tests.skip = skipTests;
+    }
 
     @JkDoc("Construct a distrib assuming all dependent sub projects are already built.")
     public void distrib() throws Exception {
@@ -37,7 +44,7 @@ class DistribAllBuild extends JkBuild {
 
         JkLog.info("Copy core distribution locally.");
         CoreBuild core = pluginsJacoco.core; // The core project is got by transitivity
-        Path distDir = this.outputDir().resolve("dist");
+                Path distDir = this.outputDir().resolve("dist");
         JkPathTree dist = JkPathTree.of(distDir).merge(core.distribFolder);
 
         JkLog.info("Add plugins to the distribution");
@@ -97,7 +104,7 @@ class DistribAllBuild extends JkBuild {
     }
 
     public static void main(String[] args) throws Exception {
-        JkInit.instanceOf(DistribAllBuild.class, "-testSamples=true").doDefault();
+        JkInit.instanceOf(DistribAllBuild.class, args).doDefault();
     }
 
 }

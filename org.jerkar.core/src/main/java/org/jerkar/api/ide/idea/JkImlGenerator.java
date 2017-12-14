@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,11 +17,13 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsThrowable;
 import org.jerkar.tool.JkConstants;
@@ -199,7 +202,7 @@ public final class JkImlGenerator {
 
             // write test resources
             for (final JkPathTree fileTree : this.sourceLayout.testResources().fileTrees()) {
-                if (fileTree.exists()) {
+                if (fileTree.exists() && !contains(this.sourceLayout.tests(), fileTree.rootDirOrZipFile())) {
                     writer.writeCharacters(T3);
                     writer.writeEmptyElement("sourceFolder");
                     final String path = projectDir.relativize(fileTree.root()).normalize().toString().replace('\\', '/');
@@ -224,7 +227,7 @@ public final class JkImlGenerator {
 
             // Write production test resources
             for (final JkPathTree fileTree : this.sourceLayout.resources().fileTrees()) {
-                if (fileTree.exists()) {
+                if (fileTree.exists() && !contains(this.sourceLayout.sources(), fileTree.rootDirOrZipFile())) {
                     writer.writeCharacters(T3);
                     writer.writeEmptyElement("sourceFolder");
                     final String path = projectDir.relativize(fileTree.root()).normalize().toString().replace('\\', '/');
@@ -245,6 +248,15 @@ public final class JkImlGenerator {
         writer.writeCharacters(T2);
         writer.writeEndElement();
         writer.writeCharacters("\n");
+    }
+
+    private static boolean contains(JkPathTreeSet treeSet, Path path) {
+        for (JkPathTree tree : treeSet.fileTrees()) {
+            if (JkUtilsPath.isSameFile(tree.root(), path)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void writeBuildProjectDependencies(Set<Path> allModules) throws XMLStreamException {
