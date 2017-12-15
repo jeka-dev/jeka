@@ -132,6 +132,17 @@ public final class JkUtilsPath {
     }
 
     /**
+     * Delegates to {@link Files#readAllBytes(Path)} (Path)}
+     */
+    public static byte[] readAllBytes(Path path) {
+        try {
+            return Files.readAllBytes(path);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
      * Delegates to Files{@link #deleteFile(Path)}
      */
     public static void deleteFile(Path path) {
