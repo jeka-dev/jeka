@@ -138,7 +138,7 @@ public final class JkImportedBuilds {
      */
     @SuppressWarnings("unchecked")
     private static <T extends JkBuild> T createImportedBuild(Class<T> clazz, String relativePath, JkBuild build) {
-        final Path projectDir = build.baseDir().resolve(relativePath);
+        final Path projectDir = build.baseDir().resolve(relativePath).normalize();
         final ImportedBuildRef projectRef = new ImportedBuildRef(projectDir, clazz);
         Map<ImportedBuildRef, JkBuild> map = IMPORTED_BUILD_CONTEXT.get();
         if (map == null) {

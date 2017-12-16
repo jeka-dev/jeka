@@ -180,7 +180,9 @@ public class JkBuild {
     @JkDoc("Cleans the output directory.")
     public void clean() {
         JkLog.start("Cleaning output directory " + outputDir());
-        ouputTree().refuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
+        if (Files.exists(outputDir())) {
+            ouputTree().refuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
+        }
         JkLog.done();
     }
 

@@ -221,6 +221,9 @@ public final class JkPathTree {
      * Deletes each and every files in this tree except the root and files not matching this tree filter.
      */
     public JkPathTree deleteContent() {
+        if (!Files.exists(root())) {
+            return this;
+        }
         JkUtilsPath.walkFileTree(root(), new SimpleFileVisitor<Path>() {
 
             @Override
