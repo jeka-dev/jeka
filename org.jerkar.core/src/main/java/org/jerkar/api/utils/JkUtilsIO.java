@@ -60,6 +60,19 @@ public final class JkUtilsIO {
     /**
      * Closes the specified closeable object, ignoring any exceptions.
      */
+    public static void closeifClosable(Object closeable) {
+        if (closeable != null && closeable instanceof  Closeable) {
+            try {
+                ((Closeable)closeable).close();
+            } catch (final Exception e) {
+                // Ignored
+            }
+        }
+    }
+
+    /**
+     * Closes the specified closeable object, ignoring any exceptions.
+     */
     public static void closeOrFail(Closeable... closeables) {
         for (final Closeable closeable : closeables) {
             try {

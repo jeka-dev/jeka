@@ -4,6 +4,10 @@ if [ -z "$JERKAR_OPTS" ] ; then
   export "JERKAR_OPTS= "
 fi
 
+if [ -n "$JERKAR_JDK" ] ; then
+  export JAVA_HOME=$JERKAR_JDK
+fi
+
 # OS specific support.  $var _must_ be set to either true or false.
 cygwin=false;
 darwin=false;
@@ -37,11 +41,11 @@ case "`uname`" in
              export JAVA_HOME=/Library/Java/JavaVirtualMachines/CurrentJDK/Contents/Home
            fi           
 
-           if [ -z "$JAVA_HOME" ] && [ -x "/usr/libexec/java_home" ]; then
+           if [ -z "$JAVA_HOME" ] && [ -L "/usr/libexec/java_home" ]; then
              #
              # Apple JDKs
              #
-             export JAVA_HOME=/usr/libexec/java_home
+             export JAVA_HOME=`/usr/libexec/java_home`
            fi
            ;;
 esac
@@ -126,8 +130,9 @@ if [ -z "$JAVACMD" ] ; then
 fi
 
 if [ ! -x "$JAVACMD" ] ; then
-  echo "Error: JAVA_HOME is not defined correctly." >&2
+  echo "Error: JAVA_HOME is not defined correctly (valued to $JAVA_HOME )." >&2
   echo "  We cannot execute $JAVACMD" >&2
+  echo "  You can specify which JDK to use by setting JERKAR_JDK environment variable." >&2
   exit 1
 fi
 

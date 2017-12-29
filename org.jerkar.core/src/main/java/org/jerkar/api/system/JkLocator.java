@@ -1,6 +1,8 @@
 package org.jerkar.api.system;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -26,25 +28,36 @@ public final class JkLocator {
     private static Path JERKAR_JAR_FILE;
 
     /**
-     * Returns the Jerkar jar file currently used in the running process. It can be a folder accept the classes
+     * Returns the Jerkar jar file currently used in the running process. Returns a folder if the classes
      * are not packaged in jar.
      */
     public static Path jerkarJarPath() {
         if (JERKAR_JAR_FILE != null) {
             return JERKAR_JAR_FILE;
         }
-        for (final Path file : JkUtilsSystem.classloaderEntries((URLClassLoader) JkLocator.class.getClassLoader())) {
-            final URL url = JkUtilsPath.toUrl(file);
+        if (JkLocator.class.getClassLoader() instanceof URLClassLoader) {
+            for (final Path file : JkUtilsSystem.classloaderEntries((URLClassLoader) JkLocator.class.getClassLoader())) {
+                final URL url = JkUtilsPath.toUrl(file);
 
-            try ( URLClassLoader classLoader =  new URLClassLoader(new URL[] { url }, ClassLoader.getSystemClassLoader().getParent())) {
-                classLoader.loadClass(JkLocator.class.getName());
-                JERKAR_JAR_FILE = file;
-                return file;
-            } catch (final ClassNotFoundException e) {
-                // Class just not there
-            } catch (final IOException e) {
-                throw JkUtilsThrowable.unchecked(e);
+                try ( URLClassLoader classLoader =  new URLClassLoader(new URL[] { url }, ClassLoader.getSystemClassLoader().getParent())) {
+                    classLoader.loadClass(JkLocator.class.getName());
+                    JERKAR_JAR_FILE = file;
+                    return file;
+                } catch (final ClassNotFoundException e) {
+                    // Class just not there
+                } catch (final IOException e) {
+                    throw JkUtilsThrowable.unchecked(e);
+                }
             }
+        } else {
+            URI uri;
+            try {
+                uri = JkLocator.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+            } catch (URISyntaxException e) {
+                throw new IllegalStateException("Cannot find llocation of "
+                        + JkLocator.class.getProtectionDomain().getCodeSource().getLocation());
+            }
+            return Paths.get(uri);
         }
         throw new IllegalStateException("Main not found in classpath");
     }
