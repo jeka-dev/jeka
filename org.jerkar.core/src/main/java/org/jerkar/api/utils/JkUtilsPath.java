@@ -1,7 +1,5 @@
 package org.jerkar.api.utils;
 
-import javafx.scene.shape.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;

@@ -82,9 +82,9 @@ public final class JkClassLoader {
         return urlCacheDir;
     }
 
-    private final URLClassLoader delegate;
+    private final ClassLoader delegate;
 
-    private JkClassLoader(URLClassLoader delegate) {
+    private JkClassLoader(ClassLoader delegate) {
         this.delegate = delegate;
     }
 
@@ -117,7 +117,7 @@ public final class JkClassLoader {
     /**
      * Return the {@link URLClassLoader} wrapped by this object.
      */
-    public URLClassLoader classloader() {
+    public ClassLoader classloader() {
         return delegate;
     }
 
@@ -192,7 +192,7 @@ public final class JkClassLoader {
      */
     public JkClassLoader printingSearchedClasses(Set<String> searchedClassContainer) {
         return new JkClassLoader(new TrackingClassLoader(searchedClassContainer, this
-                .childClasspath().asArrayOfUrl(), this.parent().delegate));
+                .childClasspath().asArrayOfUrl(), (URLClassLoader) this.parent().delegate));
     }
 
     /**
@@ -200,7 +200,7 @@ public final class JkClassLoader {
      * the parent classloaders.
      */
     public JkClasspath childClasspath() {
-        return JkClasspath.ofMany(JkUtilsSystem.classloaderEntries(this.delegate));
+        return JkClasspath.ofMany(JkUtilsSystem.classloaderEntries((URLClassLoader) this.delegate));
     }
 
     /**
@@ -506,7 +506,7 @@ public final class JkClassLoader {
         final StringBuilder builder = new StringBuilder();
         builder.append(delegate.getClass().getName());
         if (delegate instanceof URLClassLoader) {
-            for (final URL url : delegate.getURLs()) {
+            for (final URL url : ((URLClassLoader) delegate).getURLs()) {
                 builder.append("\n  ").append(url);
             }
         }
@@ -515,6 +515,8 @@ public final class JkClassLoader {
         }
         return builder.toString();
     }
+
+
 
     /**
      * Add a new entry to this class loader. WARN : This method has side effect
@@ -715,7 +717,7 @@ public final class JkClassLoader {
 
         private final Set<String> searchedClasses;
 
-        public TrackingClassLoader(Set<String> searchedClasses, URL[] urls, URLClassLoader parent) {
+        public TrackingClassLoader(Set<String> searchedClasses, URL[] urls, ClassLoader parent) {
             super(urls, parent);
             this.searchedClasses = searchedClasses;
         }
