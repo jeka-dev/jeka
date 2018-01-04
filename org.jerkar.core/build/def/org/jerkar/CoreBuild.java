@@ -1,7 +1,7 @@
 package org.jerkar;
 
-import static org.jerkar.api.project.java.JkJavaProject.JAVADOC_FILE_ID;
-import static org.jerkar.api.project.java.JkJavaProject.SOURCES_FILE_ID;
+import static org.jerkar.api.project.java.JkJavaProjectMaker.JAVADOC_FILE_ID;
+import static org.jerkar.api.project.java.JkJavaProjectMaker.SOURCES_FILE_ID;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -15,6 +15,7 @@ import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.api.project.java.JkJavaProjectMaker;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.JkOptions;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
@@ -34,31 +35,31 @@ public class CoreBuild extends JkJavaProjectBuild {
     protected JkJavaProject createProject() {
         final JkJavaProject project = defaultProject();
         applyCommons(project, "core");
-        project.addArtifactFile(DISTRIB_FILE_ID, this::doDistrib);
-        this.distribFolder = project.getOutLayout().outputPath().resolve("distrib");
+        project.maker().addArtifactFile(DISTRIB_FILE_ID, this::doDistrib);
+        this.distribFolder = project.getOutLayout().getOutputPath().resolve("distrib");
         return project;
     }
 
     @Override
     public void doDefault() {
         project().maker().clean();
-        project().makeAllArtifactFiles();
+        project().maker().makeAllArtifactFiles();
     }
 
     private void doDistrib() {
-        final JkJavaProject project = this.project();
-        project.makeArtifactFilesIfNecessary(SOURCES_FILE_ID, JAVADOC_FILE_ID, project.mainArtifactFileId());
+        final JkJavaProjectMaker maker = this.project().maker();
+        maker.makeArtifactFilesIfNecessary(SOURCES_FILE_ID, JAVADOC_FILE_ID, maker.mainArtifactFileId());
         final JkPathTree distrib = JkPathTree.of(distribFolder);
         distrib.copyIn(baseDir().getParent().resolve("LICENSE"));
         distrib.merge(baseDir().resolve("src/main/dist"));
         distrib.merge(baseDir().resolve("src/main/java/META-INF/bin"));
-        distrib.copyIn(project.artifactPath(project.mainArtifactFileId()));
+        distrib.copyIn(maker.artifactPath(maker.mainArtifactFileId()));
         final List<Path> ivySourceLibs = baseTree().goTo("build/libs-sources").accept("apache-ivy*.jar").files();
         distrib.goTo("libs-sources")
             .copyIn(ivySourceLibs)
-            .copyIn(project.artifactPath(SOURCES_FILE_ID));
-        distrib.goTo("libs-javadoc").copyIn(project.artifactPath(JAVADOC_FILE_ID));
-        final Path distripZipFile = project.artifactPath(DISTRIB_FILE_ID);
+            .copyIn(maker.artifactPath(SOURCES_FILE_ID));
+        distrib.goTo("libs-javadoc").copyIn(maker.artifactPath(JAVADOC_FILE_ID));
+        final Path distripZipFile = maker.artifactPath(DISTRIB_FILE_ID);
         distrib.zipTo(distripZipFile);
     }
 

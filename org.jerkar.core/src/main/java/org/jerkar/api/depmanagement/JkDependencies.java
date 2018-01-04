@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Supplier;
 
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.file.JkPathTree;
@@ -39,6 +40,13 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         final ArtifactProducerDependency dependency = new ArtifactProducerDependency(artifactProducer, artifactFileIds);
         final JkScopedDependency scopedependency = JkScopedDependency.of(dependency);
         return of(scopedependency);
+    }
+
+    /**
+     * Creates a {@link JkDependencies} to the specified artifact producer supplier
+     */
+    public static JkDependencies of(Supplier<JkArtifactProducer> artifactProducerSupplier, JkArtifactFileId ... artifactFileIds) {
+        return of(artifactProducerSupplier.get(), artifactFileIds);
     }
 
     /**
@@ -796,6 +804,12 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
             return new JkFluentScopeableBuilder(this);
         }
 
+        /**
+         * Adds a dependency on the specified artifact producer.
+         */
+        public JkFluentScopeableBuilder on(Supplier<JkArtifactProducer> artifactProducerSupplier, JkArtifactFileId ... artifactFileIds) {
+            return on(artifactProducerSupplier.get(), artifactFileIds);
+        }
 
         /**
          * Excludes the specified module/artifact to the direct or transitive

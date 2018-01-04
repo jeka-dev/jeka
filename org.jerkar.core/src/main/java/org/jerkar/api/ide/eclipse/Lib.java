@@ -55,7 +55,7 @@ class Lib {
                 final Path projectDir = parentDir.resolve(lib.projectRelativePath);
                 final JkJavaProject project = new JkJavaProject(projectDir);
                 applier.apply(project);
-                builder.on(project).scope(lib.scope);
+                builder.on(project.maker()).scope(lib.scope);
             }
         }
         return builder.build();

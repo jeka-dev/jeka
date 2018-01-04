@@ -100,7 +100,7 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private boolean hasBuildDef() {
-        return new File(this.sourceLayout.baseDir().toFile(), JkConstants.BUILD_DEF_DIR).exists();
+        return new File(this.sourceLayout.getBaseDir().toFile(), JkConstants.BUILD_DEF_DIR).exists();
     }
 
 
@@ -173,7 +173,7 @@ public final class JkEclipseClasspathGenerator {
         final Set<String> paths = new HashSet<>();
 
         // Write sources for build classes
-        if (hasBuildDef() && new File(sourceLayout.baseDir().toFile(), JkConstants.BUILD_DEF_DIR).exists()) {
+        if (hasBuildDef() && new File(sourceLayout.getBaseDir().toFile(), JkConstants.BUILD_DEF_DIR).exists()) {
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "kind", "src",
                     "including", "**/*",
@@ -276,10 +276,10 @@ public final class JkEclipseClasspathGenerator {
         final String name = JkUtilsString.substringBeforeLast(file.getFileSystem().toString(), ".jar");
         Path source = file.resolveSibling(name + "-sources.jar");
         if (!Files.exists(source)) {
-            source = file.resolveSibling("../../libs-sources/" + name + "-sources.jar");
+            source = file.resolveSibling("../../libs-sources/" + name + "-getSources.jar");
         }
         if (!Files.exists(source)) {
-            source = file.resolveSibling("libs-sources/" + name + "-sources.jar");
+            source = file.resolveSibling("libs-sources/" + name + "-getSources.jar");
         }
         Path javadoc = file.resolveSibling(name + "-javadoc.jar");
         if (!Files.exists(javadoc)) {
@@ -297,11 +297,11 @@ public final class JkEclipseClasspathGenerator {
         final Set<String> sourcePaths = new HashSet<>();
 
         // Test Sources
-        for (final JkPathTree fileTree : sourceLayout.tests().and(sourceLayout.testResources()).fileTrees()) {
+        for (final JkPathTree fileTree : sourceLayout.getTests().and(sourceLayout.getTestResources()).fileTrees()) {
             if (!fileTree.exists()) {
                 continue;
             }
-            final String path = sourceLayout.baseDir().relativize(fileTree.root()).toString().replace(File.separator, "/");
+            final String path = sourceLayout.getBaseDir().relativize(fileTree.root()).toString().replace(File.separator, "/");
             if (sourcePaths.contains(path)) {
                 continue;
             }
@@ -317,11 +317,11 @@ public final class JkEclipseClasspathGenerator {
         }
 
         // Sources
-        for (final JkPathTree fileTree : sourceLayout.sources().and(sourceLayout.resources()).fileTrees()) {
+        for (final JkPathTree fileTree : sourceLayout.getSources().and(sourceLayout.getResources()).fileTrees()) {
             if (!fileTree.exists()) {
                 continue;
             }
-            final String path = relativePathIfPossible(sourceLayout.baseDir(), fileTree.root());
+            final String path = relativePathIfPossible(sourceLayout.getBaseDir(), fileTree.root());
             if (sourcePaths.contains(path)) {
                 continue;
             }

@@ -25,7 +25,7 @@ public class JkJavaProjectTest {
         JkLog.silent(false);
 
         JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
-                .withResources("res").withTestResources("res-test");
+                .setResources("res").setTestResources("res-test");
 
         Path base = top.resolve("base");
         JkJavaProject baseProject = new JkJavaProject(base);
@@ -44,8 +44,8 @@ public class JkJavaProjectTest {
         desktopProject.setSourceLayout(sourceLayout);
         final JkDependencies deps = JkDependencies.builder().on(coreProject).build();
         desktopProject.setDependencies(deps);
-        desktopProject.addFatJarArtifactFile("fat");
-        desktopProject.makeAllArtifactFiles();
+        desktopProject.maker().addFatJarArtifactFile("fat");
+        desktopProject.maker().makeAllArtifactFiles();
 
 
         // Desktop.getDesktop().open(desktop);

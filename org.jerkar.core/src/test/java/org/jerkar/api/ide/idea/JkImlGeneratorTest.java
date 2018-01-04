@@ -28,7 +28,7 @@ public class JkImlGeneratorTest {
         JkLog.silent(true);
 
         final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
-                .withResources("res").withTestResources("res-test");
+                .setResources("res").setTestResources("res-test");
 
         final Path base = top.resolve("base");
         final JkJavaProject baseProject = new JkJavaProject(base);
@@ -53,7 +53,7 @@ public class JkImlGeneratorTest {
         final Path desktop = top.resolve("desktop");
         final JkDependencies deps = JkDependencies.of(coreProject);
         final JkImlGenerator desktopGenerator =
-                new JkImlGenerator(sourceLayout.withBaseDir(desktop), deps,
+                new JkImlGenerator(sourceLayout.setBaseDir(desktop), deps,
                         coreProject.maker().getDependencyResolver());
         final String result2 = desktopGenerator.generate();
 
@@ -63,7 +63,7 @@ public class JkImlGeneratorTest {
         final JkJavaProject desktopProject = new JkJavaProject(desktop);
         desktopProject.setSourceLayout(sourceLayout);
         desktopProject.setDependencies(deps);
-        desktopProject.makeAllArtifactFiles();
+        desktopProject.maker().makeAllArtifactFiles();
 
         JkPathTree.of(top).deleteContent();
     }

@@ -10,6 +10,7 @@ import org.jerkar.api.depmanagement.JkResolveResult;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.api.project.java.JkJavaProjectMaker;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
 import org.jerkar.api.utils.JkUtilsString;
@@ -69,10 +70,10 @@ public abstract class JkJavaProjectBuild extends JkBuild {
             project.setVersionedModule(project().getVersionedModule().withVersion(version));
         }
         if (!repos.publishSources) {
-            project.maker().getArtifactFileIdsToNotPublish().addAll(project.artifactsFileIdsWithClassifier("sources"));
+            project.maker().getArtifactFileIdsToNotPublish().addAll(project.maker().artifactsFileIdsWithClassifier("sources"));
         }
         if (!repos.publishTests) {
-            project.maker().getArtifactFileIdsToNotPublish().addAll(project.artifactsFileIdsWithClassifier("test"));
+            project.maker().getArtifactFileIdsToNotPublish().addAll(project.maker().artifactsFileIdsWithClassifier("test"));
         }
         final JkPublishRepos optionPublishRepos = repos.publishRepositories();
         if (optionPublishRepos != null) {
@@ -88,14 +89,14 @@ public abstract class JkJavaProjectBuild extends JkBuild {
             project.maker().setDependencyResolver(resolver);
         }
         if (pack.javadoc != null && pack.javadoc) {
-            project.removeArtifactFile(JkJavaProject.JAVADOC_FILE_ID);
+            project.removeArtifactFile(JkJavaProjectMaker.JAVADOC_FILE_ID);
         } else if (pack.javadoc != null && !pack.javadoc) {
-            project.addArtifactFile(JkJavaProject.JAVADOC_FILE_ID, project.maker()::makeJavadocJar);
+            project.maker().addArtifactFile(JkJavaProjectMaker.JAVADOC_FILE_ID, project.maker()::makeJavadocJar);
         }
         if (pack.tests != null && pack.tests) {
-            project.removeArtifactFile(JkJavaProject.TEST_FILE_ID, JkJavaProject.TEST_SOURCE_FILE_ID);
+            project.removeArtifactFile(JkJavaProjectMaker.TEST_FILE_ID, JkJavaProjectMaker.TEST_SOURCE_FILE_ID);
         } else if (pack.tests != null && !pack.tests) {
-            project.addArtifactFile(JkJavaProject.TEST_FILE_ID, project.maker()::makeTestJar);
+            project.maker().addArtifactFile(JkJavaProjectMaker.TEST_FILE_ID, project.maker()::makeTestJar);
         }
         if (pack.checksums().length > 0) {
             project.maker().afterPackage.chain(() -> project.maker().checksum(pack.checksums()));
@@ -123,12 +124,12 @@ public abstract class JkJavaProjectBuild extends JkBuild {
     @Override
     public void doDefault() {
         this.project().maker().clean();
-        this.project().makeAllArtifactFiles();
+        this.project().maker().makeAllArtifactFiles();
     }
 
     @Override
     public JkPathTree ouputTree() {
-        return JkPathTree.of(this.project().getOutLayout().outputPath());
+        return JkPathTree.of(this.project().getOutLayout().getOutputPath());
     }
 
     @Override

@@ -56,7 +56,7 @@ public final class JkResourceProcessor {
     }
 
     /**
-     * Actually processes the resources, meaning copies the resources to the
+     * Actually processes the resources, meaning copies the getResources to the
      * specified output directory along replacing specified tokens.
      */
     public void generateTo(Path outputDir, Charset charset) {

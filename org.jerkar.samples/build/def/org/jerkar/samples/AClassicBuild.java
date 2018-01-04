@@ -33,10 +33,11 @@ public class AClassicBuild extends JkJavaProjectBuild {
             .on("com.orientechnologies:orientdb-client:2.0.8")
             .on("junit:junit:4.11", TEST)
             .on("org.mockito:mockito-all:1.9.5", TEST).build();
-        return defaultProject()
+        JkJavaProject project = defaultProject()
                 .setSourceVersion(JkJavaVersion.V7)
-                .setDependencies(dependencies)
-                .addFatJarArtifactFile("fat");  // project will produce a fat jar as well.
+                .setDependencies(dependencies);
+        project.maker().addFatJarArtifactFile("fat");  // project will produce a fat jar as well.
+        return project;
     }
     
     public static void main(String[] args) {

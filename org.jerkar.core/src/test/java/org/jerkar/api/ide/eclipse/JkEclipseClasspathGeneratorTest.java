@@ -3,7 +3,6 @@ package org.jerkar.api.ide.eclipse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -20,7 +19,6 @@ import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.junit.Test;
 
 
@@ -32,7 +30,7 @@ public class JkEclipseClasspathGeneratorTest {
         // JkLog.silent(true);
 
         final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
-                .withResources("res").withTestResources("res-test");
+                .setResources("res").setTestResources("res-test");
 
         final Path base = top.resolve("base");
         final JkJavaProject baseProject = new JkJavaProject(base);
@@ -61,7 +59,7 @@ public class JkEclipseClasspathGeneratorTest {
         final Path desktop = top.resolve("desktop");
         final JkDependencies deps = JkDependencies.of(coreProject);
         final JkEclipseClasspathGenerator desktopGenerator =
-                new JkEclipseClasspathGenerator(sourceLayout.withBaseDir(desktop), deps,
+                new JkEclipseClasspathGenerator(sourceLayout.setBaseDir(desktop), deps,
                         coreProject.maker().getDependencyResolver(), JkJavaVersion.V8);
         final String result2 = desktopGenerator.generate();
 
@@ -71,7 +69,7 @@ public class JkEclipseClasspathGeneratorTest {
         final JkJavaProject desktopProject = new JkJavaProject(desktop);
         desktopProject.setSourceLayout(sourceLayout);
         desktopProject.setDependencies(deps);
-        desktopProject.makeAllArtifactFiles();
+        desktopProject.maker().makeAllArtifactFiles();
 
         // ----------------- Now,  try to applyCommons generated .classpath to projects and compare if it matches
 
@@ -85,11 +83,11 @@ public class JkEclipseClasspathGeneratorTest {
         classpathApplier.apply(baseProject2);
         final JkProjectSourceLayout base2Layout = baseProject2.getSourceLayout();
         final JkProjectSourceLayout baseLayout = baseProject.getSourceLayout();
-        assertEquals(baseLayout.baseDir(), base2Layout.baseDir());
-        final List<Path> srcFiles = base2Layout.sources().files();
+        assertEquals(baseLayout.getBaseDir(), base2Layout.getBaseDir());
+        final List<Path> srcFiles = base2Layout.getSources().files();
         assertEquals(2, srcFiles.size());
         assertEquals("Base.java", srcFiles.get(0).getFileName().toString());
-        final List<Path> resFiles = base2Layout.resources().files();
+        final List<Path> resFiles = base2Layout.getResources().files();
         assertEquals(1, resFiles.size());
         assertEquals("base.txt", resFiles.get(0).getFileName().toString());
         assertEquals(5, baseProject2.getDependencies().list().size());
