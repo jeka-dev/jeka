@@ -25,7 +25,7 @@ public class JkJavaProjectTest {
         JkLog.silent(false);
 
         JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
-                .setResources("res").setTestResources("res-test");
+                .withResources("res").withTestResources("res-test");
 
         Path base = top.resolve("base");
         JkJavaProject baseProject = new JkJavaProject(base);
@@ -58,6 +58,10 @@ public class JkJavaProjectTest {
         JkPathTree.ofZip(zip).copyTo(dest);
         System.out.println("unzipped in " + dest);
         return dest;
+    }
+
+    private void sourceLayoutConfigurer(JkProjectSourceLayout projectSourceLayout) {
+
     }
 
 }

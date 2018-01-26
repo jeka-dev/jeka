@@ -69,9 +69,9 @@ class DistribAllBuild extends JkBuild {
 
         if (javadoc) {
             JkLog.info("Create javadoc");
-            JkPathTreeSet sources = this.pluginsJacoco.core.project().getSourceLayout().getSources()
-                    .and(this.pluginsJacoco.project().getSourceLayout().getSources())
-                    .and(this.pluginsSonar.project().getSourceLayout().getSources());
+            JkPathTreeSet sources = this.pluginsJacoco.core.project().getSourceLayout().sources()
+                    .and(this.pluginsJacoco.project().getSourceLayout().sources())
+                    .and(this.pluginsSonar.project().getSourceLayout().sources());
             Path javadocAllDir = this.outputDir().resolve("javadoc-all");
             Path javadocAllFile = dist.root().resolve("libs-javadoc/org.jerkar.core-fat-javadoc.jar");
             JkJavadocMaker.of(sources, javadocAllDir, javadocAllFile).process();

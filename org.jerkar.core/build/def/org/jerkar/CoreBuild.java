@@ -36,7 +36,7 @@ public class CoreBuild extends JkJavaProjectBuild {
         final JkJavaProject project = defaultProject();
         applyCommons(project, "core");
         project.maker().addArtifactFile(DISTRIB_FILE_ID, this::doDistrib);
-        this.distribFolder = project.getOutLayout().getOutputPath().resolve("distrib");
+        this.distribFolder = project.getOutLayout().outputPath().resolve("distrib");
         return project;
     }
 

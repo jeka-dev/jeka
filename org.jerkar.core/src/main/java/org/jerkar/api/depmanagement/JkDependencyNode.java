@@ -101,16 +101,12 @@ public class JkDependencyNode implements Serializable {
                 + " (for " + this.nodeInfo + "), so is not a module dependency as expected. Caller must check if type is correct before calling this method.");
     }
 
-
-
     /**
      * Returns information relative to this dependency node.
      */
     public NodeInfo nodeInfo() {
         return this.nodeInfo;
     }
-
-
 
     /**
      * Returns the children nodes for this node in the tree structure.
@@ -441,7 +437,7 @@ public class JkDependencyNode implements Serializable {
             return new FileNodeInfo(dependency.paths() ,scopes, null);
         }
 
-        // for serialization
+        // for serialization we need to use File class instead of Path
         private List<File> files;
 
         private final Set<JkScope> scopes;

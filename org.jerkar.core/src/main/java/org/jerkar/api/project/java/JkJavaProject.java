@@ -75,8 +75,8 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         baseDir = baseDir.toAbsolutePath().normalize();
         this.baseDir = baseDir;
         this.artifactName = this.baseDir.getFileName().toString();
-        this.sourceLayout = JkProjectSourceLayout.mavenJava().setBaseDir(baseDir);
-        this.outLayout = JkProjectOutLayout.classicJava().setOutputDir(baseDir.resolve("build/output"));
+        this.sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir);
+        this.outLayout = JkProjectOutLayout.classicJava().withOutputDir(baseDir.resolve("build/output"));
         this.dependencies = JkDependencies.ofLocalScoped(baseDir.resolve("build/libs").toFile());
         this.maker.addDefaultArtifactFiles();
     }
@@ -125,15 +125,15 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     }
 
     public JkJavaProject setSourceLayout(JkProjectSourceLayout sourceLayout) {
-        this.sourceLayout.setBaseDir(this.baseDir);
+        this.sourceLayout = sourceLayout.withBaseDir(this.baseDir);
         return this;
     }
 
     public JkJavaProject setOutLayout(JkProjectOutLayout outLayout) {
-        if (outLayout.getOutputPath().isAbsolute()) {
+        if (outLayout.outputPath().isAbsolute()) {
             this.outLayout = outLayout;
         } else {
-            this.outLayout.setOutputDir(this.baseDir.resolve(outLayout.getOutputPath()));
+            this.outLayout = outLayout.withOutputDir(this.baseDir.resolve(outLayout.outputPath()));
         }
         return this;
     }

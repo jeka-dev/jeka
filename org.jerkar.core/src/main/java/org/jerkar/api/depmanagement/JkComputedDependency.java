@@ -157,12 +157,6 @@ public class JkComputedDependency implements JkFileDependency {
         return ideProjectBaseDir;
     }
 
-    public Path ideProjectBasePath() {
-        if (ideProjectBaseDir == null) {
-            return null;
-        }
-        return ideProjectBaseDir;
-    }
 
     @Override
     public String toString() {

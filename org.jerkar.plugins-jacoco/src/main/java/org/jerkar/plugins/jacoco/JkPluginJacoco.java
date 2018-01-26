@@ -22,7 +22,7 @@ public class JkPluginJacoco implements JkPlugin {
         }
         final JkJavaProject project = ((JkJavaProjectBuild) build).project();
         final JkocoJunitEnhancer junitEnhancer = JkocoJunitEnhancer.of(project.getOutLayout()
-              .getOutputPath(OUTPUT_RELATIVE_PATH));
+              .outputPath(OUTPUT_RELATIVE_PATH));
         project.maker().setJuniter( junitEnhancer.apply( project.maker().getJuniter()) );
     }
     

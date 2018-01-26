@@ -26,7 +26,7 @@ public final class JkJavaProjectPackager {
 
     public Path mainJar() {
         Path result = project.maker().mainArtifactPath();
-        JkJarMaker.jar(result, project.getManifest(), project.getOutLayout().getClassDir(), project.getExtraFilesToIncludeInJar());
+        JkJarMaker.jar(result, project.getManifest(), project.getOutLayout().classDir(), project.getExtraFilesToIncludeInJar());
         return result;
     }
 
@@ -37,14 +37,14 @@ public final class JkJavaProjectPackager {
         JkClasspath classpath = JkClasspath.ofMany(project.maker().runtimeDependencies(project.maker().mainArtifactFileId()));
         JkArtifactFileId artifactFileId = JkArtifactFileId.of(classifier, "jar");
         Path result = project.maker().artifactPath(artifactFileId);
-        JkJarMaker.fatJar(result, project.getManifest(), project.getOutLayout().getClassDir(),
+        JkJarMaker.fatJar(result, project.getManifest(), project.getOutLayout().classDir(),
                 project.getExtraFilesToIncludeInJar(), classpath);
         return result;
     }
 
     public Path sourceJar() {
         Path result = project.maker().artifactPath(JkJavaProjectMaker.SOURCES_FILE_ID);
-        project.getSourceLayout().getSources().and(project.getOutLayout().getGeneratedSourceDir()).zipTo(result);
+        project.getSourceLayout().sources().and(project.getOutLayout().generatedSourceDir()).zipTo(result);
         return result;
     }
 
@@ -52,7 +52,7 @@ public final class JkJavaProjectPackager {
         Path javadocDir = project.getOutLayout().getJavadocDir();
         if (!Files.exists(javadocDir)) {
             throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.toAbsolutePath()
-                    + " : can't create javadoc jar. Please, generate Javadoc prior to package it in jar.");
+                    + ". Can't create a javadoc jar until javadoc files has been generated.");
         }
         Path result = project.maker().artifactPath(JkJavaProjectMaker.JAVADOC_FILE_ID);
         JkPathTree.of(javadocDir).zipTo(result);
@@ -61,13 +61,13 @@ public final class JkJavaProjectPackager {
 
     public Path testJar() {
         Path result = project.maker().artifactPath(JkJavaProjectMaker.TEST_FILE_ID);
-        JkJarMaker.jar(result, project.getManifest(), project.getOutLayout().getTestClassDir(),  null);
+        JkJarMaker.jar(result, project.getManifest(), project.getOutLayout().testClassDir(),  null);
         return result;
     }
 
     public Path testSourceJar() {
         Path result = project.maker().artifactPath(JkJavaProjectMaker.SOURCES_FILE_ID);
-        project.getSourceLayout().getTests().zipTo(result);
+        project.getSourceLayout().tests().zipTo(result);
         return result;
     }
 

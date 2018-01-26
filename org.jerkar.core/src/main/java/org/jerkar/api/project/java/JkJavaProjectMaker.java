@@ -21,7 +21,7 @@ import org.jerkar.api.system.JkLog;
  *
  * All defined tasks are extensible so you can modify/improve the build behavior.
  */
-public class JkJavaProjectMaker implements JkArtifactProducer {
+public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocalizable {
 
     public static final JkArtifactFileId SOURCES_FILE_ID = JkArtifactFileId.of("sources", "jar");
 
@@ -69,21 +69,21 @@ public class JkJavaProjectMaker implements JkArtifactProducer {
         this.project = project;
         this.packager = JkJavaProjectPackager.of(project);
         this.cleaner = JkRunnables.of(
-                () -> JkPathTree.of(project.getOutLayout().getOutputPath()).deleteContent());
+                () -> JkPathTree.of(project.getOutLayout().outputPath()).deleteContent());
         Charset charset = project.getCompileSpec().getEncoding() == null ? Charset.defaultCharset() :
                 Charset.forName(project.getCompileSpec().getEncoding());
-        this.resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().getResources())
-                .and(project.getOutLayout().getGeneratedResourceDir())
+        this.resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().resources())
+                .and(project.getOutLayout().generatedResourceDir())
                 .and(project.getResourceInterpolators())
-                .generateTo(project.getOutLayout().getClassDir(), charset));
+                .generateTo(project.getOutLayout().classDir(), charset));
         this.compiler = JkRunnables.of(() -> {
             JkJavaCompileSpec compileSpec = compileSourceSpec();
             baseCompiler.compile(compileSpec);
         });
-        testResourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().getTestResources())
-                .and(project.getOutLayout().getGeneratedTestResourceDir())
+        testResourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().testResources())
+                .and(project.getOutLayout().generatedTestResourceDir())
                 .and(project.getResourceInterpolators())
-                .generateTo(project.getOutLayout().getTestClassDir(), charset));
+                .generateTo(project.getOutLayout().testClassDir(), charset));
         testCompiler = JkRunnables.of(() -> {
             JkJavaCompileSpec testCompileSpec = testCompileSpec();
             testBaseCompiler.compile(testCompileSpec);
@@ -109,7 +109,7 @@ public class JkJavaProjectMaker implements JkArtifactProducer {
     }
 
     public void generateJavadoc() {
-        JkJavadocMaker.of(project.getSourceLayout().getSources(), project.getOutLayout().getJavadocDir())
+        JkJavadocMaker.of(project.getSourceLayout().sources(), project.getOutLayout().getJavadocDir())
                 .withClasspath(depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
                 .andOptions(this.javadocOptions).process();
         status.javadocGenerated = true;
@@ -156,9 +156,9 @@ public class JkJavaProjectMaker implements JkArtifactProducer {
         final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
         return result
                 .setClasspath(classpath)
-                .addSources(project.getSourceLayout().getSources().files())
-                .addSources(JkPathTree.of(project.getOutLayout().getGeneratedSourceDir()).files())
-                .setOutputDir(project.getOutLayout().getClassDir());
+                .addSources(project.getSourceLayout().sources().files())
+                .addSources(JkPathTree.of(project.getOutLayout().generatedSourceDir()).files())
+                .setOutputDir(project.getOutLayout().classDir());
     }
 
     public final JkRunnables afterCompile = JkRunnables.of(() -> {
@@ -191,26 +191,26 @@ public class JkJavaProjectMaker implements JkArtifactProducer {
 
     private JkJavaCompileSpec testCompileSpec() {
         JkJavaCompileSpec result = project.getCompileSpec().copy();
-        final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andFirst(project.getOutLayout().getClassDir());
+        final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andFirst(project.getOutLayout().classDir());
         return result
                 .setClasspath(classpath)
-                .addSources(project.getSourceLayout().getTests().files())
-                .setOutputDir(project.getOutLayout().getTestClassDir());
+                .addSources(project.getSourceLayout().tests().files())
+                .setOutputDir(project.getOutLayout().testClassDir());
     }
 
     private JkUnit juniter() {
-        final JkClasspath classpath = JkClasspath.of(project.getOutLayout().getTestClassDir())
-                .and(project.getOutLayout().getClassDir())
+        final JkClasspath classpath = JkClasspath.of(project.getOutLayout().testClassDir())
+                .and(project.getOutLayout().classDir())
                 .andMany(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
-        final Path junitReport = project.getOutLayout().getTestReportDir().resolve("junit");
+        final Path junitReport = project.getOutLayout().testReportDir().resolve("junit");
         return this.juniter.withReportDir(junitReport);
     }
 
     private JkJavaTestSpec testSpec() {
-        final JkClasspath classpath = JkClasspath.of(project.getOutLayout().getTestClassDir())
-                .and(project.getOutLayout().getClassDir())
+        final JkClasspath classpath = JkClasspath.of(project.getOutLayout().classDir())
+                .and(project.getOutLayout().classDir())
                 .andMany(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
-        return JkJavaTestSpec.of(classpath, JkPathTreeSet.of(project.getOutLayout().getTestClassDir()));
+        return JkJavaTestSpec.of(classpath, JkPathTreeSet.of(project.getOutLayout().testClassDir()));
     }
 
     public final JkRunnables testExecutor = JkRunnables.of(() -> juniter().run(testSpec()));
@@ -220,8 +220,8 @@ public class JkJavaProjectMaker implements JkArtifactProducer {
 
     public JkJavaProjectMaker test() {
         JkLog.startln("Running unit tests");
-        if (this.project.getSourceLayout().getTests().count(0, false) == 0) {
-            JkLog.info("No unit test found in : " + this.project.getSourceLayout().getTests());
+        if (this.project.getSourceLayout().tests().count(0, false) == 0) {
+            JkLog.info("No unit test found in : " + this.project.getSourceLayout().tests());
             JkLog.done();
             return this;
         }
@@ -250,7 +250,7 @@ public class JkJavaProjectMaker implements JkArtifactProducer {
         final String namePart = artifactFileNameSupplier.get();
         final String classifier = artifactId.classifier() == null ? "" : "-" + artifactId.classifier();
         final String extension = artifactId.extension() == null ? "" : "." + artifactId.extension();
-        return project.getOutLayout().getOutputPath().resolve(namePart + classifier + extension);
+        return project.getOutLayout().outputPath().resolve(namePart + classifier + extension);
     }
 
     protected String fileName(JkVersionedModule versionedModule) {
@@ -309,7 +309,7 @@ public class JkJavaProjectMaker implements JkArtifactProducer {
     }
 
     public JkJavaProjectMaker publishMaven() {
-        JkPublisher.of(this.publishRepos, project.getOutLayout().getOutputPath())
+        JkPublisher.of(this.publishRepos, project.getOutLayout().outputPath())
         .publishMaven(project.getVersionedModule(), this, artifactFileIdsToNotPublish,
                 this.getDefaultedDependencies(), project.getMavenPublicationInfo());
         return this;
@@ -324,7 +324,7 @@ public class JkJavaProjectMaker implements JkArtifactProducer {
                 .andOptional(artifactPath(TEST_SOURCE_FILE_ID), JkJavaDepScopes.SOURCES);
         final JkVersionProvider resolvedVersions = this.dependencyResolver
                 .resolve(dependencies, dependencies.involvedScopes()).resolvedVersionProvider();
-        JkPublisher.of(this.publishRepos, project.getOutLayout().getOutputPath())
+        JkPublisher.of(this.publishRepos, project.getOutLayout().outputPath())
         .publishIvy(project.getVersionedModule(), publication, dependencies,
                 JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
         return this;
@@ -460,10 +460,10 @@ public class JkJavaProjectMaker implements JkArtifactProducer {
         }
     }
 
-    protected void addDefaultArtifactFiles() {
-        this.addArtifactFile(mainArtifactFileId(), () -> makeBinJar());
-        this.addArtifactFile(SOURCES_FILE_ID, () -> makeSourceJar());
-        this.addArtifactFile(JAVADOC_FILE_ID, () -> makeJavadocJar());
+    void addDefaultArtifactFiles() {
+        this.addArtifactFile(mainArtifactFileId(), this::makeBinJar);
+        this.addArtifactFile(SOURCES_FILE_ID, this::makeSourceJar);
+        this.addArtifactFile(JAVADOC_FILE_ID, this::makeJavadocJar);
     }
 
 
@@ -471,7 +471,7 @@ public class JkJavaProjectMaker implements JkArtifactProducer {
      * JkEclipseProject will produces one artifact file for test binaries and one for test sources.
      */
     public JkJavaProjectMaker addTestArtifactFiles() {
-        this.addArtifactFile(TEST_FILE_ID, () -> this.makeTestJar());
+        this.addArtifactFile(TEST_FILE_ID, this::makeTestJar);
         this.addArtifactFile(TEST_SOURCE_FILE_ID, () -> this.getPackager().testSourceJar());
         return this;
     }
@@ -512,6 +512,11 @@ public class JkJavaProjectMaker implements JkArtifactProducer {
         }
     }
 
+    @Override
+    public Path baseDir() {
+        return this.project.baseDir();
+    }
+
     private static class Status {
         private boolean sourceGenerated = false;
         private boolean compileDone = false;
@@ -529,5 +534,8 @@ public class JkJavaProjectMaker implements JkArtifactProducer {
 
     }
 
-
+    @Override
+    public String toString() {
+        return this.project.toString();
+    }
 }

@@ -35,7 +35,7 @@ public class JkProjectSourceLayout {
     }
 
     /**
-     * Creates a simple Java project structure. Production sources and resources are located under src. Test getSources
+     * Creates a simple Java project structure. Production sources and resources are located under src. Test sources
      * and resources are located in test.
      */
     public static JkProjectSourceLayout simple() {
@@ -47,30 +47,30 @@ public class JkProjectSourceLayout {
         return new JkProjectSourceLayout(baseDir, sources, resources, tests, testResources);
     }
 
-    private Path baseDir;
+    private final Path baseDir;
 
     /**
      * Returns the location of production source code that has been edited
      * manually (not generated).
      */
-    private JkPathTreeSet sources;
+    private final JkPathTreeSet sources;
 
     /**
      * Returns the location of unit test source code that has been edited
      * manually (not generated).
      */
-    private JkPathTreeSet tests;
+    private final JkPathTreeSet tests;
 
     /**
      * Returns the location of production resources that has been edited
      * manually (not generated).
      */
-    private JkPathTreeSet resources;
+    private final JkPathTreeSet resources;
 
     /**
      * Returns location of edited resources for tests.
      */
-    private JkPathTreeSet testResources;
+    private final JkPathTreeSet testResources;
 
     private JkProjectSourceLayout(Path baseDir, JkPathTreeSet sources, JkPathTreeSet resources,
                                   JkPathTreeSet tests, JkPathTreeSet testResources) {
@@ -85,60 +85,57 @@ public class JkProjectSourceLayout {
     /**
      * Re-localise all locations defined under the base directory to the specified new base directory keeping the same relative path.
      */
-    public JkProjectSourceLayout setBaseDir(Path newBaseDir) {
-       this.baseDir = newBaseDir;
-       return this;
+    public JkProjectSourceLayout withBaseDir(Path newBaseDir) {
+        return new JkProjectSourceLayout(newBaseDir,
+                sources, resources, tests, testResources);
     }
 
-    public JkProjectSourceLayout setSources(JkPathTreeSet sources) {
-        this.sources = sources;
-        return this;
+    public JkProjectSourceLayout withSources(JkPathTreeSet sources) {
+        return new JkProjectSourceLayout(this.baseDir, sources, this.resources, this.tests, this.testResources);
     }
 
-    public JkProjectSourceLayout setSources(String relativePath) {
-        return setSources(JkPathTreeSet.of(Paths.get(relativePath)));
+    public JkProjectSourceLayout withSources(String relativePath) {
+        return new JkProjectSourceLayout(this.baseDir, baseTree().goTo(relativePath).asSet(), this.resources, this.tests, this.testResources);
     }
 
-    public JkProjectSourceLayout setResources(JkPathTreeSet resources) {
-        this.resources = resources;
-        return this;
+    public JkProjectSourceLayout withResources(JkPathTreeSet resources) {
+        return new JkProjectSourceLayout(this.baseDir, this.sources, resources, this.tests, this.testResources);
     }
 
-    public JkProjectSourceLayout setResources(String relativePath) {
-        return setResources(JkPathTreeSet.of(Paths.get(relativePath)));
+    public JkProjectSourceLayout withResources(String relativePath) {
+        return new JkProjectSourceLayout(this.baseDir, this.sources, baseTree().goTo(relativePath).asSet(), this.tests, this.testResources);
     }
 
-    public JkProjectSourceLayout setTests(JkPathTreeSet tests) {
-        this.tests = tests;
-        return this;
+    public JkProjectSourceLayout withTests(JkPathTreeSet tests) {
+        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, tests, this.testResources);
     }
 
-    public JkProjectSourceLayout setTests(String relativePath) {
-        return setTests(JkPathTreeSet.of(Paths.get(relativePath)));
+    public JkProjectSourceLayout withTests(String relativePath) {
+        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, baseTree().goTo(relativePath).asSet(), this.testResources);
     }
 
-    public JkProjectSourceLayout setTestResources(JkPathTreeSet testResources) {
-        this.testResources = testResources;
-        return this;
+    public JkProjectSourceLayout withTestResources(JkPathTreeSet testResources) {
+        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, this.tests, testResources);
     }
 
-    public JkProjectSourceLayout setTestResources(String relativePath) {
-        return setTestResources(JkPathTreeSet.of(Paths.get(relativePath)));
+    public JkProjectSourceLayout withTestResources(String relativePath) {
+        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, this.tests, baseTree().goTo(relativePath).asSet());
     }
+
 
     // --------------------------- Views ---------------------------------
 
     /**
-     * Returns location of production source code (containing only edited sources, not generated getSources).
+     * Returns location of production source code (containing only edited sources, not generated sources).
      */
-    public final JkPathTreeSet getSources() {
+    public final JkPathTreeSet sources() {
         return sources.resolve(this.baseDir);
     }
 
     /**
      * Returns location of production resources.
      */
-    public final JkPathTreeSet getResources() {
+    public final JkPathTreeSet resources() {
         return resources.resolve(this.baseDir);
     }
 
@@ -146,18 +143,18 @@ public class JkProjectSourceLayout {
      * Returns location of test source code (containing edited + generated
      * sources).
      */
-    public final JkPathTreeSet getTests() {
+    public final JkPathTreeSet tests() {
         return tests.resolve(this.baseDir);
     }
 
     /**
      * Returns location of test resources.
      */
-    public final JkPathTreeSet getTestResources() {
+    public final JkPathTreeSet testResources() {
         return testResources.resolve(this.baseDir);
     }
 
-    public Path getBaseDir() {
+    public Path baseDir() {
         return baseDir;
     }
 
@@ -165,7 +162,7 @@ public class JkProjectSourceLayout {
     /**
      * Returns base directory as a {@link JkPathTree}.
      */
-    public JkPathTree getBaseTree() {
+    public JkPathTree baseTree() {
         return JkPathTree.of(baseDir);
     }
 

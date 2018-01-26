@@ -4,7 +4,11 @@ import static org.jerkar.api.depmanagement.JkScopedDependencyTest.COMPILE;
 import static org.jerkar.api.depmanagement.JkScopedDependencyTest.RUNTIME;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
+import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,15 +47,13 @@ public class JkDependenciesTest {
         return JkDependencies.builder().on("454545:5445:54545").on("lkll:llljk:poo").build();
     }
 
-    public void onFile() {
-        final File depFile1 = new File("/my/file1.jar");
-        final File depFile2 = new File("/my/file2.zip");
-        JkDependencies.builder().on(depFile1, depFile2).build();
-    }
-
-    public void onModule() {
-        JkDependencies.builder().on("myGroup:otherModule:2.2.0").on("myGroup:moduleB:2.3:client")
-        .build();
+    @Test
+    public void onProject() throws IOException {
+        Path root = Files.createTempDirectory("jerkartestproject");
+        JkJavaProject javaProject = new JkJavaProject(root);
+        JkDependencies dependencies = JkDependencies.of(javaProject);
+        JkComputedDependency computedDependency = (JkComputedDependency) dependencies.list().get(0).dependency();
+        Assert.assertEquals(root, computedDependency.ideProjectBaseDir());
     }
 
 }

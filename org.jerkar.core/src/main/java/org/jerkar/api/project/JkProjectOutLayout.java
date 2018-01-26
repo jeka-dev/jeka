@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 
+// Experimental !!!!
+
 /**
  * Folder layout for a project output.
  */
@@ -24,33 +26,33 @@ public class JkProjectOutLayout {
                 generatedTestResourceDir, classDir, testClassDir, testReportDir, javadocDir);
     }
 
-    private Path outputDir;
+    private final Path outputDir;
 
-    private Path generatedSourceDir;
+    private final Path generatedSourceDir;
 
     /**
      * Returns location of generated resources.
      */
-    private Path generatedResourceDir;
+    private final Path generatedResourceDir;
 
-    private Path generatedTestResourceDir;
-
-    /**
-     * Returns location where the java production classes are compiled.
-     */
-    private Path classDir;
+    private final Path generatedTestResourceDir;
 
     /**
      * Returns location where the java production classes are compiled.
      */
-    private Path testClassDir;
+    private final Path classDir;
+
+    /**
+     * Returns location where the java production classes are compiled.
+     */
+    private final Path testClassDir;
 
     /**
      * Returns location where the test reports are written.
      */
-    private Path testReportDir;
+    private final Path testReportDir;
 
-    private Path javadocDir;
+    private final Path javadocDir;
 
     private JkProjectOutLayout(Path outputDir, Path generatedSourceDir, Path generatedResourceDir,
                                Path generatedTestResourceDir, Path classDir, Path testClassDir, Path testReportDir,
@@ -66,63 +68,43 @@ public class JkProjectOutLayout {
         this.javadocDir = javadocDir;
     }
 
-    public JkProjectOutLayout setOutputDir(String newOutputDirPath) {
-        return setOutputDir(Paths.get(newOutputDirPath));
+    public JkProjectOutLayout withOutputDir(String newOutputDirPath) {
+        return withOutputDir(Paths.get(newOutputDirPath));
     }
 
-    public JkProjectOutLayout setOutputDir(Path newOutputDir) {
-        this.outputDir = newOutputDir;
-        return this;
+    public JkProjectOutLayout withOutputDir(Path newOutputDir) {
+        return new JkProjectOutLayout(newOutputDir, generatedSourceDir, generatedResourceDir, generatedTestResourceDir,
+                classDir, testClassDir, testReportDir, javadocDir);
     }
 
-    public JkProjectOutLayout setGeneratedSourceDir(String path) {
-        return setGeneratedSourceDir(Paths.get(path));
+    public JkProjectOutLayout withGeneratedSourceDir(String path) {
+        return new JkProjectOutLayout(this.outputDir, Paths.get(path), this.generatedResourceDir, this.generatedTestResourceDir,
+                this.classDir, this.testClassDir, this.testReportDir, this.javadocDir);
     }
 
-    public JkProjectOutLayout setGeneratedSourceDir(Path path) {
-        this.generatedSourceDir = path;
-        return this;
+    public JkProjectOutLayout withGeneratedResourceDir(String path) {
+        return new JkProjectOutLayout(this.outputDir, this.generatedSourceDir, Paths.get( path), this.generatedTestResourceDir,
+                this.classDir, this.testClassDir, this.testReportDir, this.javadocDir);
     }
 
-    public JkProjectOutLayout setGeneratedResourceDir(Path path) {
-        this.generatedResourceDir = path;
-        return this;
+    public JkProjectOutLayout withGeneratedTestResourceDir(String path) {
+        return new JkProjectOutLayout(this.outputDir, this.generatedSourceDir, this.generatedResourceDir, Paths.get( path),
+                this.classDir, this.testClassDir, this.testReportDir, this.javadocDir);
     }
 
-    public JkProjectOutLayout setGeneratedTestResourceDir(Path path) {
-        this.generatedTestResourceDir = path;
-        return this;
+    public JkProjectOutLayout withClassDir(String path) {
+        return new JkProjectOutLayout(this.outputDir, this.generatedSourceDir, this.generatedResourceDir, this.generatedResourceDir,
+                Paths.get( path), this.testClassDir, this.testReportDir, this.javadocDir);
     }
 
-    public JkProjectOutLayout setGeneratedTestResourceDir(String path) {
-        return setGeneratedTestResourceDir(Paths.get(path));
+    public JkProjectOutLayout withTestClassDir(String path) {
+        return new JkProjectOutLayout(this.outputDir, this.generatedSourceDir, this.generatedResourceDir, this.generatedResourceDir,
+                this.classDir, Paths.get( path), this.testReportDir, this.javadocDir);
     }
 
-    public JkProjectOutLayout setClassDir(Path path) {
-        this.classDir = path;
-        return this;
-    }
-
-    public JkProjectOutLayout setClassDir(String path) {
-        return this.setClassDir(Paths.get(path));
-    }
-
-    public JkProjectOutLayout setTestClassDir(Path path) {
-        this.testClassDir = path;
-        return this;
-    }
-
-    public JkProjectOutLayout setTestClassDir(String path) {
-        return this.setTestClassDir(Paths.get(path));
-    }
-
-    public JkProjectOutLayout setTestReportDir(Path path) {
-        this.testReportDir = path;
-        return this;
-    }
-
-    public JkProjectOutLayout setTestReportDir(String path) {
-        return this.setTestReportDir(Paths.get(path));
+    public JkProjectOutLayout withTestReportDir(String path) {
+        return new JkProjectOutLayout(this.outputDir, this.generatedSourceDir, this.generatedResourceDir, this.generatedResourceDir,
+                this.classDir, this.testClassDir, Paths.get( path), this.javadocDir);
     }
 
     /**
@@ -130,12 +112,12 @@ public class JkProjectOutLayout {
      * but not the outputDir.
      */
     public void deleteDirs() {
-        JkPathTree.of(this.getClassDir()).deleteContent();
-        JkPathTree.of(this.getTestClassDir()).deleteContent();
-        JkPathTree.of(this.getTestReportDir()).deleteContent();
-        JkPathTree.of(this.getGeneratedResourceDir()).deleteContent();
-        JkPathTree.of(this.getGeneratedSourceDir()).deleteContent();
-        JkPathTree.of(this.getGeneratedTestResourceDir()).deleteContent();
+        JkPathTree.of(this.classDir).deleteContent();
+        JkPathTree.of(this.testClassDir).deleteContent();
+        JkPathTree.of(this.testReportDir).deleteContent();
+        JkPathTree.of(this.generatedResourceDir).deleteContent();
+        JkPathTree.of(this.generatedSourceDir).deleteContent();
+        JkPathTree.of(this.generatedTestResourceDir).deleteContent();
     }
 
 
@@ -143,51 +125,49 @@ public class JkProjectOutLayout {
     // --------------------------- Views ---------------------------------
 
 
-    public final Path getOutputPath() {
+    public final Path outputPath() {
         return outputDir;
     }
 
-    public Path getOutputPath(String relativePath) {
+    public Path outputPath(String relativePath) {
         return outputDir.resolve(relativePath);
     }
 
-    public Path getClassDir() {
+    public Path classDir() {
         return outputDir.resolve(classDir);
     }
 
-    public Path getTestReportDir() {
+    public Path testReportDir() {
         return outputDir.resolve(testReportDir);
     }
 
-    public Path getTestClassDir() {
+    public Path testClassDir() {
         return outputDir.resolve(testClassDir);
     }
 
     /**
      * Returns location of generated sources.
      */
-    public Path getGeneratedSourceDir() {
+    public Path generatedSourceDir() {
         return outputDir.resolve(generatedSourceDir);
     }
 
     /**
      * Returns location of generated resources.
      */
-    public Path getGeneratedResourceDir() {
+    public Path generatedResourceDir() {
         return outputDir.resolve(generatedResourceDir);
     }
 
     /**
      * Returns location of generated resources for tests.
      */
-    public Path getGeneratedTestResourceDir() {
+    public Path generatedTestResourceDir() {
         return outputDir.resolve(generatedTestResourceDir);
     }
 
     public Path getJavadocDir() {
         return outputDir.resolve(javadocDir);
     }
-
-
 
 }

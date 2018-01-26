@@ -21,7 +21,7 @@ import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.junit.Test;
 
-
+// Test on a project structure as Base -> Core -> Desktop
 public class JkEclipseClasspathGeneratorTest {
 
     @Test
@@ -30,7 +30,7 @@ public class JkEclipseClasspathGeneratorTest {
         // JkLog.silent(true);
 
         final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
-                .setResources("res").setTestResources("res-test");
+                .withResources("res").withTestResources("res-test");
 
         final Path base = top.resolve("base");
         final JkJavaProject baseProject = new JkJavaProject(base);
@@ -59,7 +59,7 @@ public class JkEclipseClasspathGeneratorTest {
         final Path desktop = top.resolve("desktop");
         final JkDependencies deps = JkDependencies.of(coreProject);
         final JkEclipseClasspathGenerator desktopGenerator =
-                new JkEclipseClasspathGenerator(sourceLayout.setBaseDir(desktop), deps,
+                new JkEclipseClasspathGenerator(sourceLayout.withBaseDir(desktop), deps,
                         coreProject.maker().getDependencyResolver(), JkJavaVersion.V8);
         final String result2 = desktopGenerator.generate();
 
@@ -83,11 +83,11 @@ public class JkEclipseClasspathGeneratorTest {
         classpathApplier.apply(baseProject2);
         final JkProjectSourceLayout base2Layout = baseProject2.getSourceLayout();
         final JkProjectSourceLayout baseLayout = baseProject.getSourceLayout();
-        assertEquals(baseLayout.getBaseDir(), base2Layout.getBaseDir());
-        final List<Path> srcFiles = base2Layout.getSources().files();
+        assertEquals(baseLayout.baseDir(), base2Layout.baseDir());
+        final List<Path> srcFiles = base2Layout.sources().files();
         assertEquals(2, srcFiles.size());
         assertEquals("Base.java", srcFiles.get(0).getFileName().toString());
-        final List<Path> resFiles = base2Layout.getResources().files();
+        final List<Path> resFiles = base2Layout.resources().files();
         assertEquals(1, resFiles.size());
         assertEquals("base.txt", resFiles.get(0).getFileName().toString());
         assertEquals(5, baseProject2.getDependencies().list().size());

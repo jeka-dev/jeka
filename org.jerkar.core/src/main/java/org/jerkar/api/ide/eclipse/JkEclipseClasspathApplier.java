@@ -31,16 +31,16 @@ public class JkEclipseClasspathApplier {
      * Modifies the specified javaProject in a way it reflects its eclipse .classpath file.
      */
     public void apply(JkJavaProject javaProject) {
-        final Path dotClasspathFile =javaProject.getSourceLayout().getBaseDir().resolve(".classpath");
+        final Path dotClasspathFile = javaProject.getSourceLayout().baseDir().resolve(".classpath");
         if (!Files.exists(dotClasspathFile)) {
-            throw new JkException(".classpath file not found in " + javaProject.getSourceLayout().getBaseDir());
+            throw new JkException(".classpath file not found in " + javaProject.getSourceLayout().baseDir());
         }
         apply(javaProject, DotClasspathModel.from(dotClasspathFile));
     }
 
     private void apply(JkJavaProject javaProject, DotClasspathModel dotClasspathModel) {
         final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
-        final Path baseDir = javaProject.getSourceLayout().getBaseDir();
+        final Path baseDir = javaProject.getSourceLayout().baseDir();
         final JkPathTreeSet sources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources;
         final JkPathTreeSet testSources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources;
         final JkPathTreeSet resources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources
@@ -51,10 +51,10 @@ public class JkEclipseClasspathApplier {
         final ScopeResolver scopeResolver = scopeResolver(baseDir);
         final List<Lib> libs = dotClasspathModel.libs(baseDir, scopeResolver);
         final JkDependencies dependencies = Lib.toDependencies(/*build*/
-                javaProject.getSourceLayout().getBaseDir(), libs, this);
+                javaProject.getSourceLayout().baseDir(), libs, this);
 
-        javaProject.getSourceLayout().setSources(sources).setResources(resources)
-                .setTests(testSources).setTestResources(testResources);
+        javaProject.setSourceLayout(javaProject.getSourceLayout().withSources(sources).withResources(resources)
+                .withTests(testSources).withTestResources(testResources));
         javaProject.setDependencies(dependencies);
     }
 

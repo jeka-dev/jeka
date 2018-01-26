@@ -27,30 +27,30 @@ public class JkPluginSonar implements JkPlugin {
 
     public static JkSonar configureSonarFrom(JkJavaProject project) {
         final JkProjectSourceLayout sourceLayout = project.getSourceLayout();
-        final Path baseDir = sourceLayout.getBaseDir();
+        final Path baseDir = sourceLayout.baseDir();
         final JkPathSequence libs = project.maker().getDependencyResolver().get(project.getDependencies(),
                 JkJavaDepScopes.RUNTIME, JkJavaDepScopes.PROVIDED);
-        final Path testReportDir = project.getOutLayout().getTestReportDir();
+        final Path testReportDir = project.getOutLayout().testReportDir();
         final JkVersionedModule module = project.getVersionedModule();
         final String fullName = module != null ? module.moduleId().fullName() : project.getArtifactName();
         final String name = module != null ? module.moduleId().name() : project.getArtifactName();
         final JkVersion version = module != null ? module.version() : JkVersion.name("");
-        System.out.println("**********************************************************" + project.getOutLayout().getClassDir());
+        System.out.println("**********************************************************" + project.getOutLayout().classDir());
         return JkSonar
                 .of(fullName, name, version)
                 .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)
-                .withBinaries(project.getOutLayout().getClassDir())
+                .withBinaries(project.getOutLayout().classDir())
                 .withLibraries(libs)
-                .withSourcesPath(sourceLayout.getSources().rootDirsOrZipFiles())
-                .withTestPath(sourceLayout.getTests().rootDirsOrZipFiles())
-                .withProperty(JkSonar.WORKING_DIRECTORY, sourceLayout.getBaseDir().resolve("build/.sonar").toString())
+                .withSourcesPath(sourceLayout.sources().rootDirsOrZipFiles())
+                .withTestPath(sourceLayout.tests().rootDirsOrZipFiles())
+                .withProperty(JkSonar.WORKING_DIRECTORY, sourceLayout.baseDir().resolve("build/.sonar").toString())
                 .withProperty(JkSonar.JUNIT_REPORTS_PATH,
                         baseDir.relativize( testReportDir.resolve("junit")).toString())
                 .withProperty(JkSonar.SUREFIRE_REPORTS_PATH,
                         baseDir.relativize(testReportDir.resolve("junit")).toString())
                 .withProperty(JkSonar.SOURCE_ENCODING, project.getCompileSpec().getEncoding())
                 .withProperty(JkSonar.JACOCO_REPORTS_PATHS,
-                        baseDir.relativize(project.getOutLayout().getOutputPath("jacoco/jacoco.exec")).toString());
+                        baseDir.relativize(project.getOutLayout().outputPath("jacoco/jacoco.exec")).toString());
 
     }
 

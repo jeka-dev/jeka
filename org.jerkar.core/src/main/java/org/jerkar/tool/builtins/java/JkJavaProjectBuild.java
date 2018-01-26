@@ -129,7 +129,7 @@ public abstract class JkJavaProjectBuild extends JkBuild {
 
     @Override
     public JkPathTree ouputTree() {
-        return JkPathTree.of(this.project().getOutLayout().getOutputPath());
+        return JkPathTree.of(this.project().getOutLayout().outputPath());
     }
 
     @Override
