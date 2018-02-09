@@ -133,7 +133,8 @@ public final class JkPathTree {
         }
         final JkPathMatcher matcher = JkPathMatcher.of(filter);
         return JkUtilsPath.walk(root(), options)
-                .filter(path -> matcher.matches(root().relativize(path))).onClose(() -> rootHolder.closeIfNeeded());
+                .filter(path -> matcher.matches(root().relativize(path)))
+                .onClose(() -> rootHolder.closeIfNeeded());
     }
 
     /**

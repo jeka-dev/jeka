@@ -7,6 +7,8 @@ import org.jerkar.api.file.JkPathMatcher;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Describes a project layout about the source parts. Generated sources/resources are not
@@ -26,11 +28,12 @@ public class JkProjectSourceLayout {
      */
     public static JkProjectSourceLayout mavenJava() {
         final Path baseDir = Paths.get(".");
-        final JkPathTreeSet sources = JkPathTreeSet.of(baseDir.resolve("src/main/java"));
-        final JkPathTreeSet resources = JkPathTreeSet.of(baseDir.resolve("src/main/resources"))
+        final JkPathTreeSet sources = JkPathTreeSet.of(baseDir.resolve("src/main/java").normalize());
+        final JkPathTreeSet resources = JkPathTreeSet.of(baseDir.resolve("src/main/resources").normalize())
                 .and(sources.andMatcher(JAVA_RESOURCE_MATCHER));
-        final JkPathTreeSet tests = JkPathTreeSet.of(baseDir.resolve("src/test/java"));
-        final JkPathTreeSet testResources = JkPathTreeSet.of(baseDir.resolve("src/test/resources")).and(tests.andMatcher(JAVA_RESOURCE_MATCHER));
+        final JkPathTreeSet tests = JkPathTreeSet.of(baseDir.resolve("src/test/java").normalize());
+        final JkPathTreeSet testResources = JkPathTreeSet.of(baseDir.resolve("src/test/resources").normalize())
+                .and(tests.andMatcher(JAVA_RESOURCE_MATCHER));
         return new JkProjectSourceLayout(baseDir, sources, resources, tests, testResources);
     }
 
@@ -40,9 +43,9 @@ public class JkProjectSourceLayout {
      */
     public static JkProjectSourceLayout simple() {
         final Path baseDir = Paths.get(".");
-        final JkPathTreeSet sources = JkPathTreeSet.of(baseDir.resolve("src"));
+        final JkPathTreeSet sources = JkPathTreeSet.of(baseDir.resolve("src").normalize());
         final JkPathTreeSet resources = sources.andMatcher(JAVA_RESOURCE_MATCHER);
-        final JkPathTreeSet tests = JkPathTreeSet.of(baseDir.resolve("test"));
+        final JkPathTreeSet tests = JkPathTreeSet.of(baseDir.resolve("test").normalize());
         final JkPathTreeSet testResources = tests.andMatcher(JAVA_RESOURCE_MATCHER);
         return new JkProjectSourceLayout(baseDir, sources, resources, tests, testResources);
     }
@@ -94,32 +97,32 @@ public class JkProjectSourceLayout {
         return new JkProjectSourceLayout(this.baseDir, sources, this.resources, this.tests, this.testResources);
     }
 
-    public JkProjectSourceLayout withSources(String relativePath) {
-        return new JkProjectSourceLayout(this.baseDir, baseTree().goTo(relativePath).asSet(), this.resources, this.tests, this.testResources);
+    public JkProjectSourceLayout withSources(String ... relativePath) {
+        return new JkProjectSourceLayout(this.baseDir, toSet(relativePath), this.resources, this.tests, this.testResources);
     }
 
     public JkProjectSourceLayout withResources(JkPathTreeSet resources) {
         return new JkProjectSourceLayout(this.baseDir, this.sources, resources, this.tests, this.testResources);
     }
 
-    public JkProjectSourceLayout withResources(String relativePath) {
-        return new JkProjectSourceLayout(this.baseDir, this.sources, baseTree().goTo(relativePath).asSet(), this.tests, this.testResources);
+    public JkProjectSourceLayout withResources(String ... relativePath) {
+        return new JkProjectSourceLayout(this.baseDir, this.sources, toSet(relativePath), this.tests, this.testResources);
     }
 
     public JkProjectSourceLayout withTests(JkPathTreeSet tests) {
         return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, tests, this.testResources);
     }
 
-    public JkProjectSourceLayout withTests(String relativePath) {
-        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, baseTree().goTo(relativePath).asSet(), this.testResources);
+    public JkProjectSourceLayout withTests(String ... relativePath) {
+        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, toSet(relativePath), this.testResources);
     }
 
     public JkProjectSourceLayout withTestResources(JkPathTreeSet testResources) {
         return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, this.tests, testResources);
     }
 
-    public JkProjectSourceLayout withTestResources(String relativePath) {
-        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, this.tests, baseTree().goTo(relativePath).asSet());
+    public JkProjectSourceLayout withTestResources(String ... relativePath) {
+        return new JkProjectSourceLayout(this.baseDir, this.sources, this.resources, this.tests, toSet(relativePath));
     }
 
 
@@ -200,6 +203,14 @@ public class JkProjectSourceLayout {
         result = 31 * result + resources.hashCode();
         result = 31 * result + testResources.hashCode();
         return result;
+    }
+
+    private JkPathTreeSet toSet(String ... relativePaths) {
+        List<JkPathTree> trees = new LinkedList<>();
+        for (String relativePath : relativePaths) {
+            trees.add(baseTree().goTo(relativePath));
+        }
+        return JkPathTreeSet.of(trees);
     }
 
 

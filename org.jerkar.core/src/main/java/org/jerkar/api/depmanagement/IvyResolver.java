@@ -86,7 +86,7 @@ final class IvyResolver implements InternalDepResolver {
      */
     public static IvyResolver of(JkRepos resolveRepos) {
         IvySettings ivySettings = ivySettingsOf(resolveRepos);
-        return of(ivySettingsOf(resolveRepos));
+        return of(ivySettings);
     }
 
     @SuppressWarnings("unchecked")

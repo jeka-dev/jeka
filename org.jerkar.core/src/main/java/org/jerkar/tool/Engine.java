@@ -72,7 +72,6 @@ final class Engine {
     private void preCompile() {
         List<Path> sourceFiles = JkPathTree.of(resolver.buildSourceDir).andMatcher(BUILD_SOURCE_MATCHER).files();
         final SourceParser parser = SourceParser.of(this.projectBaseDir, sourceFiles);
-
         this.buildDependencies = this.buildDependencies.and(parser.dependencies());
         this.buildRepos = parser.importRepos().and(buildRepos);
         this.rootsOfImportedBuilds = parser.projects();
@@ -328,8 +327,7 @@ final class Engine {
     }
 
     private JkDependencyResolver getBuildDefDependencyResolver() {
-        final JkDependencies deps = this.buildDefDependencies();
-        if (deps.containsModules()) {
+        if (this.buildDefDependencies().containsModules()) {
             return JkDependencyResolver.of(this.buildRepos);
         }
         return JkDependencyResolver.of();
@@ -342,8 +340,10 @@ final class Engine {
 
     private static JkRepos repos() {
         return JkRepo
-                .firstNonNull(JkRepoOptions.repoFromOptions("build"),
-                        JkRepoOptions.repoFromOptions("download"), JkRepo.mavenCentral())
+                .firstNonNull(
+                        JkRepoOptions.repoFromOptions("build"),
+                        JkRepoOptions.repoFromOptions("download"),
+                        JkRepo.mavenCentral())
                 .and(JkPublishRepo.local().repo());
     }
 

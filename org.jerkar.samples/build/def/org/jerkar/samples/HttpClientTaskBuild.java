@@ -37,10 +37,10 @@ public class HttpClientTaskBuild extends JkJavaProjectBuild {
 
     private JkDependencies dependencies() {
         return JkDependencies.builder()
-                .on(GUAVA, "18.0")
+                .on(GUAVA, "21.0")
                 .on(JAVAX_SERVLET_API, "3.1.0", PROVIDED)
                 .on(JUNIT, "4.11", TEST)
-                .on(MOCKITO_ALL, "1.9.5", TEST).build();
+                .on(MOCKITO_ALL, "1.10.19", TEST).build();
     }
 
     @JkDoc("Performs some load test using http client")

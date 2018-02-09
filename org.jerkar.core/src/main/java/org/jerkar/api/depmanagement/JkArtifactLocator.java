@@ -49,7 +49,6 @@ public interface JkArtifactLocator {
      */
     default List<Path> allArtifactPaths() {
         final List<Path> result = new LinkedList<>();
-        result.add(artifactPath(mainArtifactFileId()));
         artifactFileIds().forEach(artifactFileId -> result.add(artifactPath(artifactFileId)));
         return result;
     }
