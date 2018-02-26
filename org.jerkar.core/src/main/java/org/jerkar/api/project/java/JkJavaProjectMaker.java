@@ -207,7 +207,7 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
     }
 
     private JkJavaTestSpec testSpec() {
-        final JkClasspath classpath = JkClasspath.of(project.getOutLayout().classDir())
+        final JkClasspath classpath = JkClasspath.of(project.getOutLayout().testClassDir())
                 .and(project.getOutLayout().classDir())
                 .andMany(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
         return JkJavaTestSpec.of(classpath, JkPathTreeSet.of(project.getOutLayout().testClassDir()));
