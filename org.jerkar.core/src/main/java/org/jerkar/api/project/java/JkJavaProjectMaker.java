@@ -199,9 +199,6 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
     }
 
     private JkUnit juniter() {
-        final JkClasspath classpath = JkClasspath.of(project.getOutLayout().testClassDir())
-                .and(project.getOutLayout().classDir())
-                .andMany(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
         final Path junitReport = project.getOutLayout().testReportDir().resolve("junit");
         return this.juniter.withReportDir(junitReport);
     }

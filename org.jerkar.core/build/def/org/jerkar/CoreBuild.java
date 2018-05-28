@@ -31,6 +31,10 @@ public class CoreBuild extends JkJavaProjectBuild {
 
     public Path distribFolder;
 
+    {
+        tests.fork = false;
+    }
+
     @Override
     protected JkJavaProject createProject() {
         final JkJavaProject project = defaultProject();
@@ -67,7 +71,7 @@ public class CoreBuild extends JkJavaProjectBuild {
         JkInit.instanceOf(CoreBuild.class).doDefault();
     }
 
-    // build methods shared with other modules from org.jerkar
+    // Applies settings common to all projects within org.jerkar
     public static void applyCommons(JkJavaProject project, String moduleName) {
 
         // Fork to avoid compile failure bug on github/travis

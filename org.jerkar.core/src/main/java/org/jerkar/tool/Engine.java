@@ -37,7 +37,7 @@ import org.jerkar.tool.CommandLine.MethodInvocation;
 /**
  * Engine having responsibility of compiling build classes, instantiate/configure build instances
  * and run them.<br/>
- * Build classes are expected to lie in [project base dir]/build/def <br/>
+ * Build class sources are expected to lie in [project base dir]/build/def <br/>
  * Classes having simple name starting with '_' are ignored.
  */
 final class Engine {
@@ -57,7 +57,7 @@ final class Engine {
     private final BuildResolver resolver;
 
     /**
-     * Constructs an engine for specified base directory .
+     * Constructs an engine for the specified base directory.
      */
     Engine(Path baseDir) {
         super();

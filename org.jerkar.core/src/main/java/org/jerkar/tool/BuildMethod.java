@@ -6,8 +6,8 @@ import java.util.List;
 import org.jerkar.api.utils.JkUtilsAssert;
 
 /**
- * Reference to a build method (callable Jerkar from command line). A build
- * method can be defined on a build class or on a plug-in.
+ * Reference to a build method (callable by Jerkar from the command line). A build
+ * method can be defined in a build class or inside a plug-in.
  *
  * @author Jerome Angibaud
  */

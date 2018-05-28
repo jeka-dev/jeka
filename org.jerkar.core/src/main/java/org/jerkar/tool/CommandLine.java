@@ -14,10 +14,10 @@ import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsString;
 
 /*
- * Master and subproject notion are relevant only in a multi-project build.
- * When doing a multiproject build there is always 1 master and many subprojects.
+ * Master and sub-project concepts are relevant only in a multi-project build.
+ * When doing a multi-project build there is always 1 master and 1 or many sub-projects.
  *
- * So here we segregate settings appliable for the master project only go
+ * So here we segregate settings appliable for the master project only and
  * settings appliable everywhere (master + subproject).
  *
  * In other words sub-project settings are a subset of master settings.

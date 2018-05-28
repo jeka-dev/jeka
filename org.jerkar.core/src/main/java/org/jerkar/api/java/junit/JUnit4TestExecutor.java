@@ -24,7 +24,7 @@ class JUnit4TestExecutor {
         if (args.length == 0) {
             throw new IllegalArgumentException(
                     "There should be at least 2 args. "
-                            + "First is the file where is serialized the result, and others are the classes to test.");
+                            + "First is the file containing serialized result and others are the classes to test.");
         }
         final File resultFile = new File(args[0]);
         final boolean printEachTestInConsole = Boolean.parseBoolean(args[1]);
@@ -70,11 +70,11 @@ class JUnit4TestExecutor {
 
     private static Class<?>[] toClassArray(String[] classNames) {
         final List<Class<?>> classes = new ArrayList<>();
-        for (final String each : classNames) {
+        for (final String className : classNames) {
             try {
-                classes.add(Class.forName(each));
+                classes.add(Class.forName(className));
             } catch (final ClassNotFoundException e) {
-                throw new IllegalArgumentException("Class " + each + " not found in classloader "
+                throw new IllegalArgumentException("Class " + className + " not found in classloader "
                         + JkClassLoader.current());
             }
         }

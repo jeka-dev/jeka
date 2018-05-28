@@ -17,7 +17,8 @@ import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsReflect;
 
 /**
- * Defines importedBuilds of a given master build.
+ * A build class can import one or several build classes. It is an important mechanism to reuse builds across projects.
+ * This class holds imported builds within a build class.
  *
  * @author Jerome Angibaud
  */

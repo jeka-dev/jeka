@@ -133,7 +133,11 @@ public final class JkDependencyResolver {
 
     private JkResolveResult resolveWithInternalResolver(JkDependencies dependencies, JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {
         JkLog.trace("Preparing to resolve dependencies for module " + module);
-        JkLog.startln("Resolving dependencies with specified scopes " + Arrays.asList(scopes) );
+        if (scopes.length == 0) {
+            JkLog.startln("Resolving dependencies for any scope");
+        } else {
+            JkLog.startln("Resolving dependencies with specified scopes " + Arrays.asList(scopes) );
+        }
         JkResolveResult resolveResult = internalResolver.resolve(module, dependencies.onlyModules(),
                 parameters, transitiveVersionOverride, scopes);
         final JkDependencyNode mergedNode = resolveResult.dependencyTree().mergeNonModules(dependencies,
