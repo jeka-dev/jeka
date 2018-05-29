@@ -8,8 +8,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
  * Information about excluding artifacts or whole modules.
- * 
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkDepExclude implements Serializable {

@@ -27,7 +27,7 @@ public final class JkPathSequence implements Iterable<Path> {
     }
 
     /**
-     * Creates a path to a sequence of files.
+     * Creates a <code>JkPathSequence</code> from an <code>Iterable</code> of paths.
      */
     public static JkPathSequence ofMany(Iterable<Path> entries) {
         Iterable<Path> paths = JkUtilsPath.disambiguate(entries);
@@ -37,11 +37,11 @@ public final class JkPathSequence implements Iterable<Path> {
     }
 
     /**
-     * Creates a <code>JkPathSequence</code> to a base directory and string of
+     * Creates a <code>JkPathSequence</code> from a base directory and string of
      * relative paths separated with a ";".
      */
-    public static JkPathSequence of(Path baseDir, String relativePathAsString) {
-        final String[] paths = JkUtilsString.split(relativePathAsString, File.pathSeparator);
+    public static JkPathSequence of(Path baseDir, String relativePathsAsString) {
+        final String[] paths = JkUtilsString.split(relativePathsAsString, File.pathSeparator);
         final List<Path> result = new LinkedList<>();
         for (final String path : paths) {
             Path file = Paths.get(path);
@@ -64,9 +64,9 @@ public final class JkPathSequence implements Iterable<Path> {
     // --------------------------- cleaning ----------------------------------------
 
     /**
-     * Returns a <code>JkPathSequence</code> identical to this one but without redundant
-     * files. So if a given file in the sequence exist twice or more, then only
-     * the first occurrence is kept.
+     * Returns a <code>JkPathSequence</code> identical to this one but without duplicates.
+     * If a given file in this sequence exist twice or more, then only the first occurrence is kept in the returned
+     * sequence.
      */
     public JkPathSequence withoutDuplicates() {
         final List<Path> files = new LinkedList<>();
@@ -81,7 +81,7 @@ public final class JkPathSequence implements Iterable<Path> {
     // -------------------------- iterate -----------------------------------------
 
     /**
-     * Returns the sequence of files as a list.
+     * Returns this sequence as a list.
      */
     public List<Path> entries() {
         return entries;
@@ -102,8 +102,8 @@ public final class JkPathSequence implements Iterable<Path> {
     }
 
     /**
-     * Returns a <code>JkPathSequence</code> made of, in the order, the specified
-     * entries plus the entries ofM this one.
+     * Returns a <code>JkPathSequence</code> made of the specified
+     * entries followed by this sequence entries.
      */
     @SuppressWarnings("unchecked")
     public JkPathSequence andManyFirst(Iterable<Path> otherEntries) {

@@ -48,6 +48,9 @@ public final class JkPathMatcher implements PathMatcher {
         return accept(FileSystems.getDefault(), Arrays.asList(globPattern));
     }
 
+    /**
+     * A matcher accepting specified glob patterns within specified file system.
+     */
     public static JkPathMatcher accept(FileSystem fileSystem, Iterable<String> globPatterns) {
         PathMatcher result = empty();
         for (final String pattern : globPatterns) {
