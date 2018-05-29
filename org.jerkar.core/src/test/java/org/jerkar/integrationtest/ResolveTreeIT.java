@@ -111,7 +111,7 @@ public class ResolveTreeIT {
 
         JkDependencyNode bootNode = tree.children().get(0);
         JkDependencyNode.ModuleNodeInfo springCoreTransitiveModuleNodeInfo = bootNode.find(springCoreModule).moduleInfo();
-        assertEquals("4.3.8.RELEASE", springCoreTransitiveModuleNodeInfo.declaredVersion().definition());
+        assertEquals("4.3.14.RELEASE", springCoreTransitiveModuleNodeInfo.declaredVersion().definition());
         assertEquals(directCoreVersion, springCoreTransitiveModuleNodeInfo.resolvedVersion().name());  // cause evicted
 
         // As the spring-core version is declared as direct dependency and the declared version is exact (not dynamic)
