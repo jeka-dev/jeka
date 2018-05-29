@@ -13,7 +13,7 @@ import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
- * This build deletes artifacts, compile,test launch sonar analyse .
+ * This build deletes artifacts, compiles, tests and launches SonarQube analyse.
  */
 public class SonarPluginBuild extends JkJavaProjectBuild {
 
