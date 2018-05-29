@@ -7,28 +7,43 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * A collection of PathMatcher commonly used.
+ * A collection of PathMatcher commonly used each assosciated with a label for human recognising.
  */
 public final class JkPathMatcher implements PathMatcher {
 
     // --------------------- Factory methods ------------------------------------------------
 
+    /**
+     * Creates an instance from a {@link PathMatcher} instance.
+     */
     public static JkPathMatcher of(PathMatcher matcher) {
         return new JkPathMatcher(matcher, "?");
     }
 
+    /**
+     * A matcher accepting all entries.
+     */
     public static JkPathMatcher of() {
         return new JkPathMatcher(path -> true, "all");
     }
 
+    /**
+     * A matcher filtering out directories.
+     */
     public static JkPathMatcher noDirectory(LinkOption...linkOptions) {
         return new JkPathMatcher(path -> !Files.isDirectory(path, linkOptions), "No directories");
     }
 
+    /**
+     * A matcher accepting specified glob pattern within specified file system.
+     */
     public static JkPathMatcher accept(FileSystem fileSystem, String ... globPattern) {
         return accept(fileSystem, Arrays.asList(globPattern));
     }
 
+    /**
+     * A matcher accepting specified glob patterns within default file system.
+     */
     public static JkPathMatcher accept(String ... globPattern) {
         return accept(FileSystems.getDefault(), Arrays.asList(globPattern));
     }

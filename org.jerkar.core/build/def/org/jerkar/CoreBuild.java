@@ -38,7 +38,7 @@ public class CoreBuild extends JkJavaProjectBuild {
     @Override
     protected JkJavaProject createProject() {
         final JkJavaProject project = defaultProject();
-        applyCommons(project, "core");
+        applyCommonSettings(project, "core");
         project.maker().addArtifactFile(DISTRIB_FILE_ID, this::doDistrib);
         this.distribFolder = project.getOutLayout().outputPath().resolve("distrib");
         return project;
@@ -72,7 +72,7 @@ public class CoreBuild extends JkJavaProjectBuild {
     }
 
     // Applies settings common to all projects within org.jerkar
-    public static void applyCommons(JkJavaProject project, String moduleName) {
+    public static void applyCommonSettings(JkJavaProject project, String moduleName) {
 
         // Fork to avoid compile failure bug on github/travis
         project.maker().setBaseCompiler(JkJavaCompiler.base().fork(true));

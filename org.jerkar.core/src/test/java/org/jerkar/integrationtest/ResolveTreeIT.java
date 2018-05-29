@@ -99,9 +99,9 @@ public class ResolveTreeIT {
     public void treeHandleMultipleVersionWithLastestVersionWinConflictManager() {
         JkModuleId starterWebModule = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
         JkModuleId springCoreModule = JkModuleId.of("org.springframework:spring-core");
-        String directCoreVersion = "4.0.0.RELEASE";
+        String directCoreVersion = "4.3.6.RELEASE";
         JkDependencies deps = JkDependencies.builder()
-                .on(starterWebModule, "1.5.3.RELEASE").scope(COMPILE)
+                .on(starterWebModule, "1.5.10.RELEASE").scope(COMPILE)
                 .on(springCoreModule, directCoreVersion).scope(COMPILE)  // force a version lower than the transitive above
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())

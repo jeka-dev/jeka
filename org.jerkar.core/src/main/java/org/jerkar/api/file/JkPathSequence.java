@@ -10,11 +10,10 @@ import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * A sequence of file (folder or archive) to be used as a <code>path</code>. <br/>
- * Each file is called an <code>entry</code>.<br/>
+ * A sequence of file path (folder or archive). Each file is called an <code>entry</code>.<br/>
  * Instances of this class are immutable.
  * 
- * @author Djeang
+ * @author Jerome Angibaud
  */
 public final class JkPathSequence implements Iterable<Path> {
 

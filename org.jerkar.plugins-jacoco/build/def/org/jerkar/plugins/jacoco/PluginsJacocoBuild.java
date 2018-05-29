@@ -17,7 +17,7 @@ public class PluginsJacocoBuild extends JkJavaProjectBuild {
     @Override
     protected JkJavaProject createProject() {
         JkJavaProject project = defaultProject();
-        CoreBuild.applyCommons(project, "plugins-jacoco");
+        CoreBuild.applyCommonSettings(project, "plugins-jacoco");
         project.setDependencies(JkDependencies.builder()
                 .on(core.project()).scope(PROVIDED)
                 .on(core.baseDir().resolve("build/libs/provided/junit-4.11.jar")).scope(TEST)

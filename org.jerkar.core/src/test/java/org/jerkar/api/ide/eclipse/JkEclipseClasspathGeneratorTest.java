@@ -71,7 +71,7 @@ public class JkEclipseClasspathGeneratorTest {
         desktopProject.setDependencies(deps);
         desktopProject.maker().makeAllArtifactFiles();
 
-        // ----------------- Now,  try to applyCommons generated .classpath to projects and compare if it matches
+        // ----------------- Now,  try to applyCommonSettings generated .classpath to projects and compare if it matches
 
         final JkEclipseClasspathApplier classpathApplier = new JkEclipseClasspathApplier(false);
 

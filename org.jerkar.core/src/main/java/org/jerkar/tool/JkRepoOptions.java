@@ -50,7 +50,7 @@ public class JkRepoOptions {
      * <code>repo.[repoName].password</code> options for creating according
      * repository.
      *
-     * You can specify severals urls by using comma separation in
+     * You can specify several urls by using comma separation in
      * <code>repo.[repoName].url</code> option value but credential will remain
      * the same for all returned repositories.
      */
@@ -107,7 +107,7 @@ public class JkRepoOptions {
      * This methods returns an empy repos if no matching options found.
      */
     public JkRepos downloadRepositories() {
-        final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("repo.downloadname"), "download");
+        final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("repo.downloadName"), "download");
         return reposFromOptions(repoName);
     }
 

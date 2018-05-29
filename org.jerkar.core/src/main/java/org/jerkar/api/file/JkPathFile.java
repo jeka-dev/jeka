@@ -73,6 +73,9 @@ public final class JkPathFile {
         return Files.exists(path);
     }
 
+    /**
+     * Deletes this file if exists.
+     */
     public JkPathFile deleteIfExist() {
         if (!exists()) {
             JkUtilsPath.deleteFile(this.path);
@@ -100,15 +103,21 @@ public final class JkPathFile {
         }
     }
 
+    /**
+     * Shorthand for {@link Files#write(Path, byte[], OpenOption...)}
+     */
     public JkPathFile write(byte[] bytes, OpenOption ... options) {
         JkUtilsPath.write(path, bytes, options);
         return this;
     }
 
+    /**
+     * Produces a files, in the same directory, that contains the checksum og this file.
+     */
     public JkPathFile checksum(String ... algorithms) {
         for (String algorithm : algorithms) {
             final String fileName = this.path.getFileName().toString() + "." + algorithm.toLowerCase();
-            JkPathFile checksumPath = JkPathFile.of(path.resolveSibling(fileName)).deleteIfExist().write(
+            JkPathFile.of(path.resolveSibling(fileName)).deleteIfExist().write(
                     this.getChecksum(algorithm).getBytes(Charset.forName("ASCII")));
         }
         return this;
