@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsObject;
@@ -40,6 +41,8 @@ public class JkBuild {
     private JkDependencies buildDependencies;
 
     private final JkImportedBuilds importedBuilds;
+
+    private JkRunnables defaulter = JkRunnables.noOp();
 
     private JkScaffolder scaffolder;
 
@@ -93,22 +96,6 @@ public class JkBuild {
     }
 
     /**
-     * The output directory where all the final and intermediate artifacts are
-     * generated.
-     */
-    public JkPathTree ouputTree() {
-        return JkPathTree.of(outputDir());
-    }
-
-    /**
-     * The output directory where all the final and intermediate artifacts are
-     * generated.
-     */
-    public Path outputDir() {
-        return baseDir.resolve(JkConstants.BUILD_OUTPUT_PATH);
-    }
-
-    /**
      * Returns a formatted string providing information about this build definition.
      */
     public String infoString() {
@@ -133,6 +120,10 @@ public class JkBuild {
 
     protected JkBuildPlugins plugins() {
         return this.plugins;
+    }
+
+    protected void addDefaultOperation(Runnable runnable) {
+        defaulter = defaulter.chain(runnable);
     }
 
     // ------------------------------ build dependencies ---------------------------------------------
@@ -176,21 +167,13 @@ public class JkBuild {
         //  JkPlugin.applyScaffold(this.plugins.getActivated());
     }
 
-    /** Clean the output directory. */
-    @JkDoc("Cleans the output directory.")
-    public void clean() {
-        JkLog.start("Cleaning output directory " + outputDir());
-        if (Files.exists(outputDir())) {
-            ouputTree().refuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
-        }
-        JkLog.done();
-    }
-
-    /** Conventional method standing for the default operations to perform.
-     * @throws Exception */
+    /**
+     * Conventional method standing for the default operations to perform.
+     * @throws Exception
+     * */
     @JkDoc("Conventional method standing for the default operations to perform.")
     public void doDefault() throws Exception {
-        clean();
+        defaulter.run();
     }
 
     /** Displays all available methods defined in this build. */
