@@ -59,14 +59,23 @@ public final class JkPathMatcher implements PathMatcher {
         return new JkPathMatcher(result, "accept:" + globPatterns);
     }
 
+    /**
+     * A matcher refusing specified glob pattern within specified file system.
+     */
     public static JkPathMatcher refuse(FileSystem fileSystem, String ... globPatterns) {
         return refuse(fileSystem, Arrays.asList(globPatterns));
     }
 
+    /**
+     * A matcher refusing specified glob patterns within default file system.
+     */
     public static JkPathMatcher refuse(String ... globPatterns) {
         return refuse(FileSystems.getDefault(), Arrays.asList(globPatterns));
     }
 
+    /**
+     * A matcher refusing specified glob patterns within specified file system.
+     */
     public static JkPathMatcher refuse(FileSystem fileSystem, Iterable<String> globPatterns) {
         PathMatcher result = path -> true;
         for (final String pattern : globPatterns) {
@@ -94,6 +103,9 @@ public final class JkPathMatcher implements PathMatcher {
         return label;
     }
 
+    /**
+     * Returns this matcher as a {@link Predicate}
+     */
     public Predicate<Path> asPredicate() {
         return path -> matcher.matches(path);
     }

@@ -28,6 +28,9 @@ public final class JkPathFile {
         this.path = path;
     }
 
+    /**
+     * Creates a {@link JkPathFile instance from the specified path.}
+     */
     public static JkPathFile of(Path path) {
         if (Files.isDirectory(path)) {
             throw new IllegalArgumentException(path + " is a directory");
@@ -35,10 +38,16 @@ public final class JkPathFile {
         return new JkPathFile(path);
     }
 
+    /**
+     * Returns the underlying path.
+     */
     public Path get() {
         return path;
     }
 
+    /**
+     * Creates a file at this location if such file does not exist yet.
+     */
     public JkPathFile createIfNotExist() {
         if (!Files.exists(path)) {
             JkUtilsPath.createDirectories(path.getParent());
@@ -47,6 +56,10 @@ public final class JkPathFile {
         return this;
     }
 
+    /**
+     * Creates a copy of this file replacing all occurrences of specified map keys by their matching value.
+     * Keys may value '${my.key.1}', '[myKey]' or whatever.
+     */
     public JkPathFile copyReplacingTokens(Path to, Map<String, String> tokens, Charset charset) {
         JkPathFile.of(to).createIfNotExist();
         if (tokens.isEmpty()) {
@@ -63,12 +76,18 @@ public final class JkPathFile {
         return this;
     }
 
+    /**
+     * Copies the specified url at this location.
+     */
     public JkPathFile copyFrom(URL url) {
         createIfNotExist();
         JkUtilsIO.copyUrlToFile(url, this.path);
         return this;
     }
 
+    /**
+     * Returns <code>true</code> if a file already exists at this location.
+     */
     public boolean exists() {
         return Files.exists(path);
     }
