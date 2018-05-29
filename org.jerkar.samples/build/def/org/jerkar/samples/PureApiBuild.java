@@ -10,7 +10,7 @@ import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkInit;
 
 /**
- * This should be run with org.jerkar.samples as workinf dir.
+ * This should be run with org.jerkar.samples as working dir.
  */
 public class PureApiBuild extends JkBuild {
 

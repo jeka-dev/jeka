@@ -11,7 +11,7 @@ import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
- * This build illustrate how one can use other dependency scopes then the standard ones.
+ * This build illustrates how one can use other dependency scope mapping then the standard ones.
  */
 public class SimpleScopeBuild extends JkJavaProjectBuild {
 

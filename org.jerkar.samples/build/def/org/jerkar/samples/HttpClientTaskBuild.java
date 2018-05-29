@@ -20,7 +20,7 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 import com.google.common.base.MoreObjects;
 
 /**
- * This build demonstrates how to use 3rd party dependencies in your build.
+ * This build demonstrates how to use 3rd party dependencies into your build class.
  * 
  * @author Jerome Angibaud
  * @formatter:off

@@ -15,9 +15,10 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
  * Build sample for a jar project depending on several external modules. This
- * build : - produces jar, fat-jar, sources-jar by launching 'jerkar' - produces
- * all this + javadoc by launching 'jerkar doDefault doc' - produces all this +
- * publish on remote repository by typing 'jerkar doDefault doc publish'
+ * build produces :
+ * - jar, fat-jar, sources-jar by launching 'jerkar'
+ * - all this + javadoc by launching 'jerkar doDefault doc'
+ * - all this + publish on remote repository by typing 'jerkar doDefault doc publish'
  * 
  * @author Jerome Angibaud
  */

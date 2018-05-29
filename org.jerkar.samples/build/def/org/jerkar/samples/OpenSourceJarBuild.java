@@ -10,7 +10,7 @@ import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
- * This build demonstrate how to specified project metadata required to publish on 
+ * This build demonstrates how to specify project metadata required to publish on
  * Maven central ( see https://maven.apache.org/guides/mini/guide-central-repository-upload.html )
  * 
  * @author Jerome Angibaud

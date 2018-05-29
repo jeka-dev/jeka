@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * A collection of PathMatcher commonly used each assosciated with a label for human recognising.
+ * A collection of PathMatcher commonly used each associated with a label for human recognising.
  */
 public final class JkPathMatcher implements PathMatcher {
 
@@ -151,20 +151,6 @@ public final class JkPathMatcher implements PathMatcher {
         return andRefuse(FileSystems.getDefault(), patterns);
     }
 
-    private static class Reverse implements PathMatcher  {
-
-        private final PathMatcher matcher;
-
-        Reverse(PathMatcher matcher) {
-            this.matcher = matcher;
-        }
-
-        @Override
-        public boolean matches(Path path) {
-            return !matcher.matches(path);
-        }
-
-    }
 
     // --------------------------------------------- matcher
 
