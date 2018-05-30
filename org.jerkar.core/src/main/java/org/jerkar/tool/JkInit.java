@@ -86,6 +86,7 @@ public final class JkInit {
             JkBuild.baseDirContext(null);
         }
         init.configureBuildFromEnvironment(build);
+        build.postConfigure();
         JkLog.info("Build class " + build.getClass().getName());
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
         if (JkLog.verbose()) {

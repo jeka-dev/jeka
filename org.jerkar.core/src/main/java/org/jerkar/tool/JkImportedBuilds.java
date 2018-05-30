@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsReflect;
 
@@ -153,6 +152,7 @@ public final class JkImportedBuilds {
         final Engine engine = new Engine(projectDir);
         final T result = engine.getBuild(clazz);
         JkOptions.populateFields(result);
+        result.postConfigure();
         IMPORTED_BUILD_CONTEXT.get().put(projectRef, result);
         return result;
     }
@@ -193,6 +193,5 @@ public final class JkImportedBuilds {
             return result;
         }
     }
-
 
 }
