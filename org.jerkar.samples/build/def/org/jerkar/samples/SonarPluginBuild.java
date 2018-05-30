@@ -5,7 +5,6 @@ import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
-import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.plugins.sonar.JkPluginSonar;
 import org.jerkar.plugins.sonar.JkSonar;
 import org.jerkar.tool.JkDoc;
@@ -34,7 +33,6 @@ public class SonarPluginBuild extends JkJavaProjectBuild {
                 .on(GUAVA, "18.0")
                 .on(JUNIT, "4.11", JkJavaDepScopes.TEST).build());
     }
-
 
 
     public void runSonar() {

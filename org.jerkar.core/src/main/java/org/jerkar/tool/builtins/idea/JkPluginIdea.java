@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @JkDoc("Provides method to generate Idea Intellij metadata files.")
-public final class JkPluginIdea extends JkPlugin2 {
+public final class JkPluginIdea extends JkPlugin {
 
     @JkDoc("If true, path to cache repository and to Jerkar install will be replaces by $JERKAR_REPO$ and $JERKAR_HOME$ path variable")
     boolean useVarPath = false;

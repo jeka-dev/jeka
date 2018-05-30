@@ -10,8 +10,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkOptions;
-import org.jerkar.tool.JkPlugin2;
-import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.builtins.java.JkPluginJava;
 
 import java.nio.file.Path;
@@ -22,7 +21,7 @@ import java.util.Map;
         "The ananlysis is performed when the 'run' method is invoked.",
         "To parameterize this plugin just set the relevant sonar properies as options.",
         "For example you can launch the build whith '-sonar.host.url=http://myserver/..' to specify the SonarQube server url."})
-public class JkPluginSonar extends JkPlugin2 {
+public class JkPluginSonar extends JkPlugin {
 
     private final Map<String, String> properties = new HashMap<>();
 

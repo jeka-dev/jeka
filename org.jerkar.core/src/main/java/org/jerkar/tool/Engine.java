@@ -266,7 +266,7 @@ final class Engine {
 
     private static void invoke(JkBuild build, BuildMethod modelMethod, Path fromDir) {
         if (modelMethod.isMethodPlugin()) {
-            final JkPlugin2 plugin = build.plugins().get(modelMethod.pluginClass());
+            final JkPlugin plugin = build.plugins().get(modelMethod.pluginClass());
             build.plugins().invoke(plugin, modelMethod.name());
         } else {
             invoke(build, modelMethod.name(), fromDir);
@@ -309,7 +309,7 @@ final class Engine {
         final List<BuildMethod> buildMethods = new LinkedList<>();
         for (final MethodInvocation methodInvokation : invocations) {
             if (methodInvokation.isMethodPlugin()) {
-                final Class<? extends JkPlugin2> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName)
+                final Class<? extends JkPlugin> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName)
                         .pluginClass();
                 buildMethods.add(BuildMethod.pluginMethod(clazz, methodInvokation.methodName));
             } else {

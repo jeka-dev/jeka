@@ -15,7 +15,7 @@ import org.jerkar.tool.*;
  * and a decoration for scaffolding.
  */
 @SuppressWarnings("javadoc")
-public class JkPluginJava extends JkPlugin2 {
+public class JkPluginJava extends JkPlugin {
 
     // ------------------------------ options -------------------------------------------
 

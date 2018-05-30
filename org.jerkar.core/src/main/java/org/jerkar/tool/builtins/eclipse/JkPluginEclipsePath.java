@@ -5,12 +5,12 @@ import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkPlugin2;
+import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.builtins.java.JkPluginJava;
 
 @JkDoc("Plugin to use Eclipse .classpath file as build definition. When this plugin is activated the .classpath file " +
         "is used over project setting set in the build class.")
-public final class JkPluginEclipsePath extends JkPlugin2 {
+public final class JkPluginEclipsePath extends JkPlugin {
 
     static final String OPTION_VAR_PREFIX = "eclipse.var.";
 

@@ -2,13 +2,13 @@ package org.jerkar.tool;
 
 import org.jerkar.api.utils.JkUtilsString;
 
-public abstract class JkPlugin2 {
+public abstract class JkPlugin {
 
     private static final String CLASS_PREFIX = "JkPlugin";
 
     protected final JkBuild build;
 
-    protected JkPlugin2(JkBuild build) {
+    protected JkPlugin(JkBuild build) {
         this.build = build;
     }
 

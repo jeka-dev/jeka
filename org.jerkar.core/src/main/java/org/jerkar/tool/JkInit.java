@@ -227,10 +227,10 @@ public final class JkInit {
     private static void configureAndActivatePlugins(JkBuild build, Collection<JkPluginSetup> pluginSetups,
             PluginDictionary dictionnary) {
         for (final JkPluginSetup pluginSetup : pluginSetups) {
-            final Class<? extends JkPlugin2> pluginClass = dictionnary.loadByNameOrFail(pluginSetup.pluginName)
+            final Class<? extends JkPlugin> pluginClass = dictionnary.loadByNameOrFail(pluginSetup.pluginName)
                     .pluginClass();
             JkLog.startln("Configuring plugin " + pluginClass.getName());
-            final JkPlugin2 plugin = build.plugins().getOrCreate(pluginClass, pluginSetup.options);
+            final JkPlugin plugin = build.plugins().getOrCreate(pluginClass, pluginSetup.options);
             JkLog.done("Configuring plugin " + pluginClass.getName() + " with options "
                     + JkOptions.fieldOptionsToString(plugin));
             if (pluginSetup.activated) {

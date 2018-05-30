@@ -34,7 +34,7 @@ public class JkBuild {
 
     private final Path baseDir;
 
-    public final JkBuildPlugins2 plugins = new JkBuildPlugins2(this);
+    public final JkBuildPlugins plugins = new JkBuildPlugins(this);
 
     private JkDependencyResolver buildDefDependencyResolver;
 
@@ -134,7 +134,7 @@ public class JkBuild {
         return new JkScaffolder(this.baseDir, this.scaffoldEmbed);
     }
 
-    protected JkBuildPlugins2 plugins() {
+    protected JkBuildPlugins plugins() {
         return this.plugins;
     }
 
