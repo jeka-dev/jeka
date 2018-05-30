@@ -36,7 +36,7 @@ public final class JkOptions {
 
     static synchronized void init(Map<String, String> options) {
         if (populated) {
-            throw new IllegalStateException("The init method can be called only once.");
+            throw new IllegalStateException("The postConfigure method can be called only once.");
         }
         final Map<String, String> map = new HashMap<>();
         map.putAll(options);
@@ -121,7 +121,7 @@ public final class JkOptions {
         return result;
     }
 
-    private static Map<String, String> loadSystemAndUserOptions() {
+    static Map<String, String> loadSystemAndUserOptions() {
         final Path propFile = JkLocator.jerkarHomeDir().resolve("options.properties");
         final Map<String, String> result = new HashMap<>();
         if (Files.exists(propFile)) {

@@ -25,13 +25,12 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 public class MavenStyleBuild extends JkJavaProjectBuild {
 
     @Override
-    protected JkJavaProject createProject() {
-        JkJavaProject project = new JkJavaProject(this.baseDir())
+    protected void postConfigure() {
+        java().project()
                 .setVersionedModule("org.jerkar:script-samples", "0.3-SNAPSHOT")
                 .setDependencies(dependencies());
-        project.maker().setDownloadRepos(JkRepos.of(JkRepo.maven("http://my.repo1"), JkRepo.mavenCentral()));
-        project.maker().setPublishRepos(publishRepositories());
-        return project;
+        java().project().maker().setDownloadRepos(JkRepos.of(JkRepo.maven("http://my.repo1"), JkRepo.mavenCentral()));
+        java().project().maker().setPublishRepos(publishRepositories());
     }
 
     JkDependencies dependencies() {

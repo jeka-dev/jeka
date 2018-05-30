@@ -18,7 +18,7 @@ import org.jerkar.api.utils.JkUtilsTime;
 public final class Main {
 
     /**
-     * Entry point for Jerkar application when launched to command-line
+     * Entry point for Jerkar application when launched from command-line
      */
     public static void main(String[] args) {
         final long start = System.nanoTime();

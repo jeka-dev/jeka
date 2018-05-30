@@ -17,29 +17,29 @@ public final class JkBuildPlugins {
 
     private final JkBuild holder;
 
-    private final List<JkPlugin> configuredPlugins = new LinkedList<>();
+    private final List<JkPluginOld> configuredPlugins = new LinkedList<>();
 
     JkBuildPlugins(JkBuild holder) {
         super();
         this.holder = holder;
     }
 
-    public void configure(JkPlugin plugin) {
+    public void configure(JkPluginOld plugin) {
         configuredPlugins.add(plugin);
     }
 
-    public <T extends JkPlugin> T get(Class<T> pluginClass) {
+    public <T extends JkPluginOld> T get(Class<T> pluginClass) {
         return getOrCreate(pluginClass, new HashMap<String, String>());
     }
 
-    void invoke(JkPlugin plugin, String methodName) {
+    void invoke(JkPluginOld plugin, String methodName) {
         JkLog.startUnderlined("Method " + methodName + " to plugin " + plugin.getClass().getSimpleName());
         final Method method = pluginMethod(plugin.getClass(), methodName, holder.getClass());
         JkUtilsReflect.invoke(plugin, method, this.holder);
         JkLog.done();
     }
 
-    <T extends JkPlugin> T getOrCreate(Class<T> pluginClass, Map<String, String> options) {
+    <T extends JkPluginOld> T getOrCreate(Class<T> pluginClass, Map<String, String> options) {
         final Optional<T> optPlugin = (Optional<T>) this.configuredPlugins.stream().filter(
                 (item) -> item.getClass().equals(pluginClass)).findFirst();
         final T plugin = optPlugin.orElse(JkUtilsReflect.newInstance(pluginClass));

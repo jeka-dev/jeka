@@ -19,25 +19,26 @@ public class SonarPluginBuild extends JkJavaProjectBuild {
 
     @JkDoc("Sonar server environment")
     protected SonarEnv sonarEnv = SonarEnv.DEV;
+
+    @Override
+    public void preConfigure() {
+        this.plugins().get(JkPluginSonar.class)
+                .prop(JkSonar.BRANCH, "myBranch");
+    }
     
     @Override
-    protected JkJavaProject createProject() {
-        return defaultProject()
+    protected void postConfigure() {
+        java().project()
                 .setVersionedModule("org.jerkar:samples", "0.1")
                 .setDependencies(JkDependencies.builder()
                 .on(GUAVA, "18.0")
                 .on(JUNIT, "4.11", JkJavaDepScopes.TEST).build());
     }
 
-    @Override
-    public void init() {
-        this.plugins().configure(new JkPluginSonar()
-                //     .prop(JkSonar.HOST_URL, sonarEnv.url)
-                .prop(JkSonar.BRANCH, "myBranch"));
-    }
+
 
     public void runSonar() {
-        this.plugins().get(JkPluginSonar.class).run(this);
+        this.plugins().get(JkPluginSonar.class).run();
     }
 
     enum SonarEnv {

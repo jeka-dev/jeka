@@ -1,38 +1,36 @@
 package org.jerkar.tool.builtins.idea;
 
+import org.jerkar.api.ide.idea.JkImlGenerator;
+import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsPath;
+import org.jerkar.tool.*;
+import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkDependencyResolver;
-import org.jerkar.api.ide.idea.JkImlGenerator;
-import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkConstants;
-import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkPlugin;
-import org.jerkar.tool.Main;
-import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
-
 @JkDoc("Provides method to generate Idea Intellij metadata files.")
-public final class JkPluginIdea implements JkPlugin {
+public final class JkPluginIdea extends JkPlugin2 {
 
     @JkDoc("If true, path to cache repository and to Jerkar install will be replaces by $JERKAR_REPO$ and $JERKAR_HOME$ path variable")
     boolean useVarPath = false;
 
+    protected JkPluginIdea(JkBuild build) {
+        super(build);
+    }
+
     /** Generates Idea [my-module].iml file */
     @JkDoc("Generates Idea [my-module].iml file")
-    public void generateIml(JkBuild build) {
+    public void generateIml() {
 
         final JkImlGenerator generator;
         if (build instanceof JkJavaProjectBuild) {
             final JkJavaProjectBuild projectBuild = (JkJavaProjectBuild) build;
-            generator = new JkImlGenerator(projectBuild.project());
+            generator = new JkImlGenerator(projectBuild.java().project());
         } else {
             generator = new JkImlGenerator(build.baseDir());
         }
@@ -46,7 +44,7 @@ public final class JkPluginIdea implements JkPlugin {
         generator.setImportedBuildProjects(depProjects);
         if (build instanceof JkJavaProjectBuild) {
             final JkJavaProjectBuild projectBuild = (JkJavaProjectBuild) build;
-            JkJavaProject project = projectBuild.project();
+            JkJavaProject project = projectBuild.java().project();
             generator.setDependencies(project.maker().getDependencyResolver(), project.getDependencies());
             generator.setSourceJavaVersion(project.getSourceVersion());
             generator.setForceJdkVersion(true);
@@ -61,7 +59,7 @@ public final class JkPluginIdea implements JkPlugin {
 
     /** Generate modules.xml files */
     @JkDoc("Generates ./idea/modules.xml file")
-    public void generateModulesXml(JkBuild build) {
+    public void generateModulesXml() {
         final Path current = build.baseTree().root();
         final Iterable<Path> imls = build.baseTree().accept("**.iml").files();
         final ModulesXmlGenerator modulesXmlGenerator = new ModulesXmlGenerator(current, imls);
@@ -69,7 +67,7 @@ public final class JkPluginIdea implements JkPlugin {
     }
 
     @JkDoc("Generates iml files on this folder and its descendant recursively.")
-    public void generateAllIml(JkBuild build) {
+    public void generateAllIml() {
         final Iterable<Path> folders = build.baseTree()
                 .accept("**/" + JkConstants.BUILD_DEF_DIR, JkConstants.BUILD_DEF_DIR)
                 .refuse("**/build/output/**")
@@ -83,13 +81,10 @@ public final class JkPluginIdea implements JkPlugin {
     }
 
     @JkDoc(("Shorthand for #generateAllIml + generateModulesXml"))
-    public void generateAll(JkBuild build) {
-        generateAllIml(build);
-        generateModulesXml(build);
+    public void generateAll() {
+        generateAllIml();
+        generateModulesXml();
     }
 
-    @Override
-    public void apply(JkBuild build) {
 
-    }
 }

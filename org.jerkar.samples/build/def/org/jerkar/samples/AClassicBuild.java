@@ -20,14 +20,14 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 public class AClassicBuild extends JkJavaProjectBuild {
 
     {
-	    pack.checksums = "sha1";
-	    pack.tests = true;
-	    pack.javadoc = true;
+	    java().pack.checksums = "sha1";
+	    java().pack.tests = true;
+	    java().pack.javadoc = true;
     }
     
     @Override
-    protected JkJavaProject createProject() {
-        JkJavaProject project = defaultProject()
+    protected void postConfigure() {
+        JkJavaProject project = java().project()
                 .setSourceVersion(JkJavaVersion.V7)
                 .setDependencies(JkDependencies.builder()
                         .on("com.google.guava:guava:21.0")
@@ -36,10 +36,9 @@ public class AClassicBuild extends JkJavaProjectBuild {
                         .on("junit:junit:4.11", TEST)
                         .on("org.mockito:mockito-all:1.9.5", TEST).build());
         project.maker().addFatJarArtifactFile("fat");  // project will produce a fat jar as well.
-        return project;
     }
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 	    JkInit.instanceOf(AClassicBuild.class, args).doDefault();
     }
 

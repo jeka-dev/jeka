@@ -182,7 +182,7 @@ public final class JkUtilsReflect {
     }
 
     /**
-     * Instantiates the given class.
+     * Instantiates the given class using a constructor with specified single argument.
      */
     public static <T> T newInstance(Class<T> clazz, Class<?> parameterType, Object parameter) {
         try {

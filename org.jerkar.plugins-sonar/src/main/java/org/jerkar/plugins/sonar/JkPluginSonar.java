@@ -1,9 +1,5 @@
 package org.jerkar.plugins.sonar;
 
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.depmanagement.JkVersionedModule;
@@ -14,16 +10,25 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkOptions;
-import org.jerkar.tool.JkPlugin;
+import org.jerkar.tool.JkPlugin2;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+import org.jerkar.tool.builtins.java.JkPluginJava;
+
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 @JkDoc({"Add SonarQube capability to a build.",
         "The ananlysis is performed when the 'run' method is invoked.",
         "To parameterize this plugin just set the relevant sonar properies as options.",
         "For example you can launch the build whith '-sonar.host.url=http://myserver/..' to specify the SonarQube server url."})
-public class JkPluginSonar implements JkPlugin {
+public class JkPluginSonar extends JkPlugin2 {
 
     private final Map<String, String> properties = new HashMap<>();
+
+    public JkPluginSonar(JkBuild build) {
+        super(build);
+    }
 
     public static JkSonar configureSonarFrom(JkJavaProject project) {
         final JkProjectSourceLayout sourceLayout = project.getSourceLayout();
@@ -55,9 +60,9 @@ public class JkPluginSonar implements JkPlugin {
     }
 
     @JkDoc("Launch a Sonar analysis")
-    public void run(JkBuild build) {
-        if (build instanceof JkJavaProjectBuild) {
-            configureSonarFrom(((JkJavaProjectBuild) build).project()).withProperties(properties).run();
+    public void run() {
+        if (build.plugins.has(JkPluginJava.class)) {
+            configureSonarFrom(build.plugins.get(JkPluginJava.class).project()).withProperties(properties).run();
         } else {
             JkLog.warn("Plugin " + this.getClass().getSimpleName() + " not appliable for build type " + build.getClass());
         }
@@ -66,11 +71,6 @@ public class JkPluginSonar implements JkPlugin {
     public JkPluginSonar prop(String key, String value) {
         this.properties.put(key, value);
         return this;
-    }
-
-    @Override
-    public void apply(JkBuild build) {
-        // do nothing
     }
 
 }

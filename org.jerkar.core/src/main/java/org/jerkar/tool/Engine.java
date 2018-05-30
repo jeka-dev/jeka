@@ -35,7 +35,7 @@ import org.jerkar.api.utils.JkUtilsTime;
 import org.jerkar.tool.CommandLine.MethodInvocation;
 
 /**
- * Engine having responsibility of compiling build classes, instantiate/configure build instances
+ * Engine having responsibility of compiling build classes, instantiate/preConfigure build instances
  * and run them.<br/>
  * Build class sources are expected to lie in [project base dir]/build/def <br/>
  * Classes having simple name starting with '_' are ignored.
@@ -167,7 +167,7 @@ final class Engine {
         }
         try {
             build.setBuildDefDependencyResolver(this.buildDefDependencies(), getBuildDefDependencyResolver());
-            final PluginDictionnary dictionnary = init.initProject(build);
+            final PluginDictionary dictionnary = init.configureBuildFromEnvironment(build);
             final BuildAndPluginDictionnary result = new BuildAndPluginDictionnary();
             result.build = build;
             result.dictionnary = dictionnary;
@@ -180,7 +180,7 @@ final class Engine {
 
     private static class BuildAndPluginDictionnary {
         JkBuild build;
-        PluginDictionnary dictionnary;
+        PluginDictionary dictionnary;
     }
 
     private JkDependencies buildDefDependencies() {
@@ -232,7 +232,7 @@ final class Engine {
                 StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private void launch(JkBuild build, PluginDictionnary dictionnary, CommandLine commandLine) {
+    private void launch(JkBuild build, PluginDictionary dictionnary, CommandLine commandLine) {
 
         // Now run projects
         if (!commandLine.getSubProjectMethods().isEmpty()) {
@@ -244,7 +244,7 @@ final class Engine {
     }
 
     private static void runProject(JkBuild build, List<MethodInvocation> invokes,
-            PluginDictionnary dictionnary) {
+            PluginDictionary dictionnary) {
         JkLog.infoHeaded("Executing build for project " + build.baseTree().root().getFileName().toString());
         JkLog.info("Build class : " + build.getClass().getName());
         JkLog.info("Base dir : " + build.baseDir());
@@ -266,7 +266,7 @@ final class Engine {
 
     private static void invoke(JkBuild build, BuildMethod modelMethod, Path fromDir) {
         if (modelMethod.isMethodPlugin()) {
-            final JkPlugin plugin = build.plugins().get(modelMethod.pluginClass());
+            final JkPlugin2 plugin = build.plugins().get(modelMethod.pluginClass());
             build.plugins().invoke(plugin, modelMethod.name());
         } else {
             invoke(build, modelMethod.name(), fromDir);
@@ -305,11 +305,11 @@ final class Engine {
     }
 
     private static List<BuildMethod> toBuildMethods(Iterable<MethodInvocation> invocations,
-            PluginDictionnary dictionnary) {
+            PluginDictionary dictionnary) {
         final List<BuildMethod> buildMethods = new LinkedList<>();
         for (final MethodInvocation methodInvokation : invocations) {
             if (methodInvokation.isMethodPlugin()) {
-                final Class<? extends JkPlugin> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName)
+                final Class<? extends JkPlugin2> clazz = dictionnary.loadByNameOrFail(methodInvokation.pluginName)
                         .pluginClass();
                 buildMethods.add(BuildMethod.pluginMethod(clazz, methodInvokation.methodName));
             } else {

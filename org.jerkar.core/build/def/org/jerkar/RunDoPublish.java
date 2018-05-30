@@ -11,6 +11,6 @@ class RunDoPublish {
      * Wait some hours/days before see it on Maven central !
      */
     public static void main(String[] args) {
-        JkInit.instanceOf(CoreBuild.class, args).project().maker().publish();
+        JkInit.instanceOf(CoreBuild.class, args).java().project().maker().publish();
     }
 }

@@ -11,7 +11,8 @@ import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.*;
 
 /**
- * Build for {@link JkJavaProject}
+ * Plugin for building Java projects. It comes with a {@link JkJavaProject} pre-configured with {@link JkOptions}.
+ * and a decoration for scaffolding.
  */
 @SuppressWarnings("javadoc")
 public class JkPluginJava extends JkPlugin2 {
@@ -38,20 +39,19 @@ public class JkPluginJava extends JkPlugin2 {
         super(build);
     }
 
-    @Override
-    protected void setupBuild() {
-        project = new JkJavaProject(this.build.baseDir());
-        applyOptions(project);
+    @Override  
+    protected void postConfigure() {
+        this.project = new JkJavaProject(this.build.baseDir());
+        this.applyOptions();
+        this.addDefaultAction(this::doDefault);
     }
 
-    @Override
-    public void doDefault() {
+    private void doDefault() {
         this.project().maker().clean();
         this.project().maker().makeAllArtifactFiles();
     }
 
-
-    private void applyOptions(JkJavaProject project) {
+    private void applyOptions() {
         if (project.getVersionedModule() != null && !JkUtilsString.isBlank(version)) {
             project.setVersionedModule(project.getVersionedModule().withVersion(version));
         }

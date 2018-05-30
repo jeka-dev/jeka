@@ -16,12 +16,12 @@ import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkConstants;
 import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkPlugin;
+import org.jerkar.tool.JkPlugin2;
 import org.jerkar.tool.Main;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 @JkDoc("Generates Eclipse meta data files from a JkJavaProjectBuild")
-public final class JkPluginEclipse implements JkPlugin {
+public final class JkPluginEclipse extends JkPlugin2 {
 
     @JkDoc("Set it to false to not mention javadoc in generated .classpath file.")
     boolean javadoc = true;
@@ -34,6 +34,9 @@ public final class JkPluginEclipse implements JkPlugin {
     @JkDoc({ "Set it to true to use absolute paths in the classpath instead of classpath variables." })
     public boolean useVarPath = false;
 
+    protected JkPluginEclipse(JkBuild build) {
+        super(build);
+    }
 
     // ------------------------- setters ----------------------------
 
@@ -45,16 +48,16 @@ public final class JkPluginEclipse implements JkPlugin {
     // ------------------------ plugin methods ----------------------
 
     @Override
-    public void apply(final JkBuild build) {
-        build.scaffolder().extraActions.chain(()-> this.generateFiles(build));  // If this plugin is activated while scaffolding, we want Eclipse metada file be generated.
+    public void postConfigure() {
+        build.scaffolder().extraActions.chain(this::generateFiles);  // If this plugin is activated while scaffolding, we want Eclipse metada file be generated.
     }
 
     @JkDoc("Generates Eclipse .classpath file according project dependencies.")
-    public void generateFiles(JkBuild build) {
+    public void generateFiles() {
         final Path dotProject = build.baseDir().resolve(".project");
         if (build instanceof JkJavaProjectBuild) {
             final JkJavaProjectBuild javaProjectBuild = (JkJavaProjectBuild) build;
-            final JkJavaProject javaProject = javaProjectBuild.project();
+            final JkJavaProject javaProject = javaProjectBuild.java().project();
             final List<Path> importedBuildProjects = new LinkedList<>();
             for (final JkBuild depBuild : build.importedBuilds().directs()) {
                 importedBuildProjects.add(depBuild.baseTree().root());
@@ -82,7 +85,7 @@ public final class JkPluginEclipse implements JkPlugin {
     }
 
     @JkDoc("Generate Eclipse files on all subfolder of the current directory. Only subfolder having a build/def directory are impacted.")
-    public void generateAll(JkBuild build) {
+    public void generateAll() {
         final Iterable<Path> folders = build.baseTree()
                 .accept("**/" + JkConstants.BUILD_DEF_DIR, JkConstants.BUILD_DEF_DIR)
                 .refuse("**/build/output/**")

@@ -32,26 +32,19 @@ public class CoreBuild extends JkJavaProjectBuild {
     public Path distribFolder;
 
     {
-        tests.fork = false;
+        java().tests.fork = false;
     }
 
-    @Override
-    protected JkJavaProject createProject() {
-        final JkJavaProject project = defaultProject();
+    protected void postConfigure() {
+        final JkJavaProject project = java().project();
         applyCommonSettings(project, "core");
         project.maker().addArtifactFile(DISTRIB_FILE_ID, this::doDistrib);
         this.distribFolder = project.getOutLayout().outputPath().resolve("distrib");
-        return project;
     }
 
-    @Override
-    public void doDefault() {
-        project().maker().clean();
-        project().maker().makeAllArtifactFiles();
-    }
 
     private void doDistrib() {
-        final JkJavaProjectMaker maker = this.project().maker();
+        final JkJavaProjectMaker maker = this.java().project().maker();
         maker.makeArtifactFilesIfNecessary(SOURCES_FILE_ID, JAVADOC_FILE_ID, maker.mainArtifactFileId());
         final JkPathTree distrib = JkPathTree.of(distribFolder);
         distrib.copyIn(baseDir().getParent().resolve("LICENSE"));

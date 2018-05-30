@@ -1,6 +1,5 @@
 package org.jerkar.tool;
 
-import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
@@ -28,7 +27,7 @@ public final class JkConstants {
     public static final String BUILD_DEF_BIN_DIR = BUILD_OUTPUT_PATH + "/" + BUILD_DEF_BIN_DIR_NAME;
 
     /**
-     * Relative path to the project where the build definition sources are.
+     * Relative path to the project where the build definition sources lie.
      */
     public static final String BUILD_DEF_DIR = "build/def";
 
@@ -38,11 +37,6 @@ public final class JkConstants {
     public static final String DEFAULT_METHOD = "doDefault";
 
     private static class DefaultBuildClass extends JkJavaProjectBuild {
-
-        @Override
-        protected JkJavaProject createProject() {
-            return defaultProject();
-        }
 
     }
 

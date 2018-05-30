@@ -12,7 +12,7 @@ import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsThrowable;
 import org.jerkar.api.utils.JkUtilsXml;
-import org.jerkar.tool.PluginDictionnary.JkPluginDescription;
+import org.jerkar.tool.PluginDictionary.JkPluginDescription;
 import org.jerkar.tool.ProjectDef.ProjectBuildClassDef;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -50,7 +50,7 @@ final class HelpDisplayer {
 
     static void helpPlugins() {
         JkLog.startln("Looking for plugins");
-        final Set<JkPluginDescription> pluginDescriptions = new PluginDictionnary().getAll();
+        final Set<JkPluginDescription> pluginDescriptions = new PluginDictionary().getAll();
         for (final JkPluginDescription description : pluginDescriptions) {
             JkLog.nextLine();
             JkLog.infoHeaded("Plugin  Name : " + description.shortName());
