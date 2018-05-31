@@ -6,7 +6,7 @@ import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.java.JkJavaProjectMaker;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
+import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.*;
 
@@ -19,8 +19,8 @@ public class JkPluginJava extends JkPlugin {
 
     // ------------------------------ options -------------------------------------------
 
-    @JkDoc("Override version defined in JkJavaProject. No effect if null or blank.")
-    protected final String version = null;
+    @JkDoc("Module version for the project to build. No effect if null or blank.")
+    protected String version;
 
     @JkDoc("Publication")
     public final JkRepoOptions repos = new JkRepoOptions();
@@ -40,10 +40,12 @@ public class JkPluginJava extends JkPlugin {
     }
 
     @Override  
-    protected void postConfigure() {
+    protected void decorate() {
         this.project = new JkJavaProject(this.build.baseDir());
         this.applyOptions();
         this.addDefaultAction(this::doDefault);
+        this.setupScaffolder();
+        this.setupInfo();
     }
 
     private void doDefault() {
@@ -107,12 +109,17 @@ public class JkPluginJava extends JkPlugin {
         }
     }
 
-    private JkScaffolder scaffolder() {
-        final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
-        codeWriter.extendedClass = JkPluginJava.class.getName();
-        codeWriter.imports.clear();
-        codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsForJkJavaProjectBuild());
-        return this.build.scaffolder().buildClassWriter(codeWriter);
+    private void setupScaffolder() {
+        String template = JkUtilsIO.read(JkPluginJava.class.getResource("buildclass.snippet"));
+        String baseDirName = build.baseDir().getFileName().toString();
+        String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
+        this.build.scaffolder().setBuildClassCode(code);
+    }
+
+    private void setupInfo() {
+        build.infoProvider()
+                .append(project.toString()).append('\n')
+                .append(project.getVersionedModule());
     }
 
     // ------------------------------ Accessors -----------------------------------------

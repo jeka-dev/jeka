@@ -4,12 +4,13 @@ import org.jerkar.api.utils.JkUtilsString;
 
 public abstract class JkPlugin {
 
-    private static final String CLASS_PREFIX = "JkPlugin";
+    private static final String CLASS_PREFIX = JkPlugin.class.getSimpleName();
 
     protected final JkBuild build;
 
     protected JkPlugin(JkBuild build) {
         this.build = build;
+        preConfigure();
     }
 
     protected void addDefaultAction(Runnable action) {
@@ -17,10 +18,17 @@ public abstract class JkPlugin {
     }
 
     /**
+     * Called prior environment options has been set. Override this method to define sensitive default overridable
+     * by environment option.
+     */
+    protected void preConfigure() {
+    }
+
+    /**
      * Called once options has been injected into this plugin instance. Typically this should
      * contain the code that initialize this plugin and decorate the build instance.
      */
-    protected void postConfigure() {
+    protected void decorate() {
     }
 
     final String name() {

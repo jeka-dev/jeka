@@ -20,7 +20,7 @@ public class JkPluginJacoco extends JkPlugin {
     }
 
     @Override
-    protected void postConfigure() {
+    protected void decorate() {
         JkPluginJava pluginJava = build.plugins.get(JkPluginJava.class);
         final JkJavaProject project = pluginJava.project();
         final JkocoJunitEnhancer junitEnhancer = JkocoJunitEnhancer.of(project.getOutLayout()

@@ -1,6 +1,5 @@
 package org.jerkar.tool;
 
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -87,7 +86,7 @@ public final class JkInit {
         }
         init.configureBuildFromEnvironment(build);
         build.postConfigure();
-        JkLog.info("Build class " + build.getClass().getName());
+        JkLog.infoHeaded("Build class " + build.getClass().getName());
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
         if (JkLog.verbose()) {
             JkInit.logProps("Field values", displayedOptions);
@@ -236,7 +235,7 @@ public final class JkInit {
                     + JkOptions.fieldOptionsToString(plugin));
             if (pluginSetup.activated) {
                 JkLog.info("Activating plugin " + pluginClass.getName());
-                plugin.postConfigure();
+                plugin.decorate();
             }
         }
     }

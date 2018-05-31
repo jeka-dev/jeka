@@ -36,8 +36,12 @@ public final class JkConstants {
      */
     public static final String DEFAULT_METHOD = "doDefault";
 
-    private static class DefaultBuildClass extends JkJavaProjectBuild {
+    private static class DefaultBuildClass extends JkBuild {
 
+        private DefaultBuildClass() {
+            super();
+            this.plugins.get(PluginDictionary.loadByName("java").pluginClass()); // load java plugin
+        }
     }
 
 }

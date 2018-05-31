@@ -1,0 +1,45 @@
+import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkJavaDepScopes;
+import org.jerkar.api.java.JkJavaVersion;
+import org.jerkar.tool.JkInit;
+import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+
+/**
+ * @formatter:off
+ */
+class Build extends JkJavaProjectBuild {
+
+    /**
+     * Put here configuration you may want to override with runtime environment options (command line, configuration files,...)
+     * The project version is a good candidate as you may override it from your C.I. tools with the VCS version.
+     * When this method is called, options fields of the plugin instance are not yet populated, though you can access options using {@link org.jerkar.tool.JkOptions#get(String)}.
+     */
+    @Override
+    protected void preConfigure() {
+        java().project().setVersionedModule("${group}:${name}", "0.0.1");
+    }
+
+    /**
+     * Put here configuration you don't want to be overrode by environment options or actions that need
+     * option instance field to be populated.
+     * When this method is called, options fields of the plugin instance are already populated.
+     */
+    @Override
+    protected void postConfigure() {
+        java().project()
+                .setSourceVersion(JkJavaVersion.V8)
+                .setDependencies(dependencies());
+    }
+
+    private JkDependencies dependencies() {
+        return JkDependencies.builder()
+                .on("com.google.guava:guava:21.0")
+                .on("junit:junit:4.11", JkJavaDepScopes.TEST)
+                .build();
+    }
+
+    public static void main(String[] args) {
+        JkInit.instanceOf(Build.class, args).doDefault();
+    }
+
+}

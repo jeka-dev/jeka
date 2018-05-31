@@ -36,7 +36,7 @@ public final class JkBuildPlugins {
     void invoke(JkPlugin plugin, String methodName) {
         JkLog.startUnderlined("Method " + methodName + " to plugin " + plugin.getClass().getSimpleName());
         final Method method = pluginMethod(plugin.getClass(), methodName);
-        JkUtilsReflect.invoke(plugin, method, this.holder);
+        JkUtilsReflect.invoke(plugin, method);
         JkLog.done();
     }
 
@@ -48,8 +48,9 @@ public final class JkBuildPlugins {
         }
         final T plugin = JkUtilsReflect.newInstance(pluginClass, JkBuild.class, this.holder);
         JkOptions.populateFields(plugin, options);
-        plugin.postConfigure();
+        plugin.decorate();
         configuredPlugins.add(plugin);
+        JkLog.info("Build instance " + this.holder + " decorated with plugin " + plugin);
         return plugin;
     }
 

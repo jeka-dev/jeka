@@ -49,7 +49,7 @@ final class PluginDictionary {
      * "myPluging" or "MyPlugin" is equal. If not found, returns
      * <code>null</code>.
      */
-    JkPluginDescription loadByName(String name) {
+    static JkPluginDescription loadByName(String name) {
         if (!name.contains(".")) {
             final JkPluginDescription result = loadPluginHavingShortName(
                     JkUtilsString.capitalize(name));

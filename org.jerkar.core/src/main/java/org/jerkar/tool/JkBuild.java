@@ -10,6 +10,7 @@ import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
+import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsObject;
 
 /**
@@ -42,9 +43,11 @@ public class JkBuild {
 
     private final JkImportedBuilds importedBuilds;
 
-    private JkRunnables defaulter = JkRunnables.noOp();
+    private final JkRunnables defaulter = JkRunnables.noOp();
 
     private JkScaffolder scaffolder;
+
+    private final StringBuilder infoProvider = new StringBuilder();
 
     // ------------------ options --------------------------------------------------------
 
@@ -66,6 +69,8 @@ public class JkBuild {
         this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get("").toAbsolutePath());
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
         this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), this);
+        infoProvider.append("base directory : " + this.baseDir + "\n"
+                + "imported builds : " + this.importedBuilds.directs() + "\n");
         preConfigure();
     }
 
@@ -79,14 +84,13 @@ public class JkBuild {
 
     /**
      * This method is invoked right after options has been injected into this instance.
-     * It is not advised that you define option values here cause you won't be able to override it from
-     * command line.
+     * 
      */
     protected void postConfigure() {
         // Do nothing by default
     }
 
-    // -------------------------------- basic functions ---------------------------------------
+    // -------------------------------- accessor functions ---------------------------------------
 
 
     /**
@@ -112,14 +116,6 @@ public class JkBuild {
     }
 
     /**
-     * Returns a formatted string providing information about this build definition.
-     */
-    public String infoString() {
-        return "base directory : " + this.baseDir + "\n"
-                + "imported builds : " + this.importedBuilds.directs();
-    }
-
-    /**
      * Returns the scaffolder object in charge of doing the scaffolding for this build.
      * Override this method if you write a template class that need to do custom action for scaffolding.
      */
@@ -130,17 +126,24 @@ public class JkBuild {
         return this.scaffolder;
     }
 
-    protected JkScaffolder createScaffolder() {
-        return new JkScaffolder(this.baseDir, this.scaffoldEmbed);
+    public final StringBuilder infoProvider() {
+        return infoProvider;
     }
 
     protected JkBuildPlugins plugins() {
         return this.plugins;
     }
 
-    protected void addDefaultOperation(Runnable runnable) {
-        defaulter = defaulter.chain(runnable);
+    protected JkScaffolder createScaffolder() {
+        JkScaffolder scaffolder = new JkScaffolder(this.baseDir, this.scaffoldEmbed);
+        scaffolder.setBuildClassCode(JkUtilsIO.read(JkBuild.class.getResource("buildclass.snippet")));
+        return scaffolder;
     }
+
+    protected void addDefaultOperation(Runnable runnable) {
+        this.defaulter.chain(runnable);
+    }
+
 
     // ------------------------------ build dependencies ---------------------------------------------
 
@@ -153,14 +156,14 @@ public class JkBuild {
      * Returns the dependency resolver used to compile/run scripts of this
      * project.
      */
-    public JkDependencyResolver buildDependencyResolver() {
+    public final JkDependencyResolver buildDependencyResolver() {
         return this.buildDefDependencyResolver;
     }
 
     /**
      * Dependencies necessary to compile the this build class. It is not the dependencies for building the project.
      */
-    public JkDependencies buildDependencies() {
+    public final JkDependencies buildDependencies() {
         return buildDependencies;
     }
 
@@ -213,7 +216,7 @@ public class JkBuild {
     /** Displays meaningful information about this build. */
     @JkDoc("Displays meaningful information about this build.")
     public final void info() {
-        JkLog.info(infoString());
+        JkLog.info(infoProvider.toString());
     }
 
     // ----------------------------------------------------------------------------------

@@ -81,7 +81,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
      * The dependencies declared in the generated build class. Set it to <code>null</code> to
      * not generate #dependencies method.
      */
-    public JkDependencies dependencies = JkDependencies.builder().build();
+    public JkDependencies dependencies;
 
     /**
      * The repositories declared in the generated build class.
@@ -104,7 +104,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
 
 
     /**
-     * When generating versionProvider method, if you want that the all the
+     * When generating versionProvider method, if you want that all the
      * moduleId for a given group map to a variable (instead of the version
      * literal), add an entry to this map as
      * <code>groupVersionVariableMap.put("my.group", "myGroupVersion")</code>
@@ -132,7 +132,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
      * build class extending JkJavaBuild
      */
     public static List<String> importsForJkJavaBuild() {
-        final List<String> imports = new LinkedList<>(importsForJkDependencyBuildSupport());
+        final List<String> imports = new LinkedList<>();
         imports.add("org.jerkar.api.depmanagement.*");
         imports.add("org.jerkar.tool.builtins.javabuild.JkJavaBuild");
         imports.remove("org.jerkar.tool.JkBuildDependencySupport");
@@ -174,16 +174,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
         return imports;
     }
 
-    /**
-     * Returns the java code portion that declares imports for a basic
-     * build class extending {@link org.jerkar.tool.builtins.java.JkJavaProjectBuild}
-     */
-    public static List<String> importsForJkJavaProjectBuild() {
-        final List<String> imports = new LinkedList<>(importsForJkBuild());
-        imports.add(JkJavaProject.class.getName());
-        imports.add("org.jerkar.tool.builtins.javabuild.JkJavaProjectBuild");
-        return imports;
-    }
+
 
     /**
      * Returns the entire class code except the last "}".
@@ -320,19 +311,16 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
         }
 
         public String moduleId(JkModuleId moduleId) {
-            return "    @Override\n" +
-                    "    public JkModuleId moduleId() {\n" + "        return JkModuleId.of(\"" + moduleId.group() + "\", \"" + moduleId.name() + "\");\n" + "    }";
+            return "    JkModuleId moduleId() {\n" + "        return JkModuleId.of(\"" + moduleId.group() + "\", \"" + moduleId.name() + "\");\n" + "    }";
         }
 
         public String version(String version) {
-            return "    @Override\n" +
-                    "    public JkVersion version() {\n" + "        return JkVersion.name(\"" + version + "\");\n" +
+            return "    JkVersion version() {\n" + "        return JkVersion.name(\"" + version + "\");\n" +
                     "    }";
         }
 
         public String dependencies(JkDependencies dependencies) {
-            return "    @Override\n" +
-                    "    public JkDependencies dependencies() {\n" +
+            return "    JkDependencies dependencies() {\n" +
                     "        return " + dependencies.toJavaCode(8) + "\n    }" +
                     "\n";
         }
@@ -347,8 +335,8 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
             if (repos.isEmpty()) {
                 return null;
             }
-            final StringBuilder builder = new StringBuilder().append("    @Override\n")
-                    .append("    public JkRepos downloadRepositories() {\n")
+            final StringBuilder builder = new StringBuilder()
+                    .append("    JkRepos downloadRepositories() {\n")
                     .append("        return JkRepos.maven(");
             for (final JkRepo repo : repos) {
                 builder.append("\"").append(repo.url().toString()).append("\", ");
@@ -364,8 +352,8 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
             if (versionProvider.moduleIds().isEmpty()) {
                 return null;
             }
-            final StringBuilder builder = new StringBuilder().append("    @Override\n")
-                    .append("    public JkVersionProvider versionProvider() {\n")
+            final StringBuilder builder = new StringBuilder()
+                    .append("    JkVersionProvider versionProvider() {\n")
                     .append("        return JkVersionProvider.of()");
             final List<JkModuleId> moduleIds = JkUtilsIterable.listOf(versionProvider.moduleIds());
             moduleIds.sort(JkModuleId.GROUP_NAME_COMPARATOR);
@@ -389,8 +377,8 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
             if (exclusions.isEmpty()) {
                 return null;
             }
-            final StringBuilder builder = new StringBuilder().append("    @Override\n")
-                    .append("    public JkDependencyExclusions dependencyExclusions() {\n")
+            final StringBuilder builder = new StringBuilder()
+                    .append("    JkDependencyExclusions dependencyExclusions() {\n")
                     .append("        return JkDependencyExclusions.builder()");
             final List<JkModuleId> moduleIds = JkUtilsIterable.listOf(exclusions.moduleIds());
             moduleIds.sort(JkModuleId.GROUP_NAME_COMPARATOR);
