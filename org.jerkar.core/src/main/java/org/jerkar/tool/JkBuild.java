@@ -86,9 +86,12 @@ public class JkBuild {
                     CommandLine.INSTANCE.getSubProjectBuildOptions();
             JkOptions.populateFields(this, options);
 
+            // configure
+            postConfigure();
+
             // Load plugins declared in command line
             plugins.loadCommandLinePlugins(isMaster);
-
+            plugins.all().stream().filter(plugin -> plugin.isActivated()).forEach(plugin -> plugin.decorate());
 
             this.infoProvider.append("base directory : " + this.baseDir + "\n"
                     + "imported builds : " + this.importedBuilds.directs() + "\n");
