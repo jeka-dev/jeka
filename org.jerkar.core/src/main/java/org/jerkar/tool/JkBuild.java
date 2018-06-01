@@ -3,6 +3,7 @@ package org.jerkar.tool;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
@@ -22,6 +23,8 @@ import org.jerkar.api.utils.JkUtilsObject;
 public class JkBuild {
 
     private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
+
+    private static final ThreadLocal<Boolean> MASTER_BUILD = new ThreadLocal<>();
 
     static void baseDirContext(Path baseDir) {
         if (baseDir == null) {
@@ -49,6 +52,58 @@ public class JkBuild {
 
     private final StringBuilder infoProvider = new StringBuilder();
 
+
+    // ------------------ Instantiation cycle cycle --------------------------------------
+
+    /**
+     * Constructs a {@link JkBuild}
+     */
+    public JkBuild() {
+        final Path baseDirContext = BASE_DIR_CONTEXT.get();
+        final boolean isMaster;
+        if (MASTER_BUILD.get() == null) {
+            isMaster = true;
+            MASTER_BUILD.set(true);
+        } else {
+            isMaster = false;
+        }
+        try {
+            JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
+            this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get("").toAbsolutePath());
+            JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
+
+            // Instantiating imported builds
+            MASTER_BUILD.set(false);
+            this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), this);
+            MASTER_BUILD.set(isMaster);
+
+            // Allow sub-classes to define defaults prior options are injected
+            preConfigure();
+
+            // Inject options
+            JkOptions.populateFields(this, JkOptions.loadSystemAndUserOptions());
+            Map<String, String> options = isMaster ? CommandLine.INSTANCE.getMasterBuildOptions() :
+                    CommandLine.INSTANCE.getSubProjectBuildOptions();
+            JkOptions.populateFields(this, options);
+
+            // Load plugins declared in command line
+            plugins.loadCommandLinePlugins(isMaster);
+
+
+            this.infoProvider.append("base directory : " + this.baseDir + "\n"
+                    + "imported builds : " + this.importedBuilds.directs() + "\n");
+        } catch (RuntimeException e) {
+            BASE_DIR_CONTEXT.remove();
+            throw e;
+        } finally {
+            if (isMaster == true) {
+                BASE_DIR_CONTEXT.remove();
+            }
+        }
+    }
+
+
+
     // ------------------ options --------------------------------------------------------
 
 
@@ -60,19 +115,7 @@ public class JkBuild {
 
     // --------------------------- constructs ----------------------------------
 
-    /**
-     * Constructs a {@link JkBuild}
-     */
-    public JkBuild() {
-        final Path baseDirContext = BASE_DIR_CONTEXT.get();
-        JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
-        this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get("").toAbsolutePath());
-        JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
-        this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), this);
-        infoProvider.append("base directory : " + this.baseDir + "\n"
-                + "imported builds : " + this.importedBuilds.directs() + "\n");
-        preConfigure();
-    }
+
 
     /**
      * This method is invoked before options are injected into this instance.

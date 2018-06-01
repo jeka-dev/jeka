@@ -33,15 +33,15 @@ public class JkPluginJava extends JkPlugin {
 
     // ----------------------------------------------------------------------------------
 
-    private JkJavaProject project;
+    private final JkJavaProject project;
 
     protected JkPluginJava(JkBuild build) {
         super(build);
+        this.project = new JkJavaProject(this.build.baseDir());
     }
 
     @Override  
     protected void decorate() {
-        this.project = new JkJavaProject(this.build.baseDir());
         this.applyOptions();
         this.addDefaultAction(this::doDefault);
         this.setupScaffolder();

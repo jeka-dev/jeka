@@ -29,6 +29,8 @@ final class CommandLine {
 
     private static final String MODULE_SYMBOL_CHAR = "@";
 
+    static CommandLine INSTANCE = of(new String[0]);
+
     public static CommandLine of(String[] words) {
         final CommandLine result = new CommandLine();
         result.masterBuildOptions = extractOptions(words, true);
@@ -172,7 +174,7 @@ final class CommandLine {
         return word.startsWith("-") && word.indexOf(PLUGIN_SYMBOL) > 2;
     }
 
-    public static final class MethodInvocation {
+    static final class MethodInvocation {
 
         public static MethodInvocation parse(String word) {
             if (isPluginMethodInvokation(word)) {
@@ -289,48 +291,24 @@ final class CommandLine {
         return masterBuildOptions;
     }
 
-    public void setMasterBuildOptions(Map<String, String> masterBuildOptions) {
-        this.masterBuildOptions = masterBuildOptions;
-    }
-
     public Map<String, String> getSubProjectBuildOptions() {
         return subProjectBuildOptions;
-    }
-
-    public void setSubProjectBuildOptions(Map<String, String> subProjectBuildOptions) {
-        this.subProjectBuildOptions = subProjectBuildOptions;
     }
 
     public List<MethodInvocation> getMasterMethods() {
         return masterMethods;
     }
 
-    public void setMasterMethods(List<MethodInvocation> masterMethods) {
-        this.masterMethods = masterMethods;
-    }
-
     public List<MethodInvocation> getSubProjectMethods() {
         return subProjectMethods;
-    }
-
-    public void setSubProjectMethods(List<MethodInvocation> subProjectMethods) {
-        this.subProjectMethods = subProjectMethods;
     }
 
     public Collection<JkPluginSetup> getMasterPluginSetups() {
         return masterPluginSetups;
     }
 
-    public void setMasterPluginSetups(Collection<JkPluginSetup> masterPluginSetups) {
-        this.masterPluginSetups = masterPluginSetups;
-    }
-
     public Collection<JkPluginSetup> getSubProjectPluginSetups() {
         return subProjectPluginSetups;
-    }
-
-    public void setSubProjectPluginSetups(Collection<JkPluginSetup> subProjectPluginSetups) {
-        this.subProjectPluginSetups = subProjectPluginSetups;
     }
 
     public List<JkModuleDependency> dependencies() {

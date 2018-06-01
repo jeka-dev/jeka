@@ -84,7 +84,6 @@ public final class JkInit {
         } finally {
             JkBuild.baseDirContext(null);
         }
-        init.configureBuildFromEnvironment(build);
         build.postConfigure();
         JkLog.infoHeaded("Build class " + build.getClass().getName());
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
@@ -186,58 +185,6 @@ public final class JkInit {
             }
         }
         return result;
-    }
-
-    PluginDictionary configureBuildFromEnvironment(JkBuild build) {
-        final CommandLine commandLine = this.loadResult.commandLine;
-        JkOptions.populateFields(build, commandLine.getMasterBuildOptions());
-        build.postConfigure();
-
-        // setup plugins activated in command line
-        final PluginDictionary dictionary = new PluginDictionary();
-        final List<JkBuild> importedBuilds = build.importedBuilds().all();
-        if (!importedBuilds.isEmpty()) {
-            JkLog.startHeaded("Configure imported builds");
-            for (final JkBuild subBuild : importedBuilds) {
-                JkLog.startln("Configure build " + build.baseDir().relativize(subBuild.baseDir()));
-                configureBuildFromEnvironment(subBuild, commandLine.getSubProjectPluginSetups(),
-                        commandLine.getSubProjectBuildOptions(), dictionary);
-                JkLog.done();
-            }
-            JkLog.done();
-        }
-        configureBuildFromEnvironment(build, commandLine.getMasterPluginSetups(), commandLine.getMasterBuildOptions(), dictionary);
-        return dictionary;
-
-    }
-
-
-
-    private static void configureBuildFromEnvironment(JkBuild build, Collection<JkPluginSetup> pluginSetups,
-                                                      Map<String, String> commandlineOptions, PluginDictionary dictionary) {
-        JkOptions.populateFields(build);
-        final Path localProps = build.baseDir().resolve(JkConstants.BUILD_DEF_DIR + "/build.properties");
-        if (Files.exists(localProps)) {
-            JkOptions.populateFields(build, JkUtilsFile.readPropertyFileAsMap(localProps));
-        }
-        JkOptions.populateFields(build, commandlineOptions);
-        configureAndActivatePlugins(build, pluginSetups, dictionary);
-    }
-
-    private static void configureAndActivatePlugins(JkBuild build, Collection<JkPluginSetup> pluginSetups,
-            PluginDictionary dictionnary) {
-        for (final JkPluginSetup pluginSetup : pluginSetups) {
-            final Class<? extends JkPlugin> pluginClass = dictionnary.loadByNameOrFail(pluginSetup.pluginName)
-                    .pluginClass();
-            JkLog.startln("Configuring plugin " + pluginClass.getName());
-            final JkPlugin plugin = build.plugins().getOrCreate(pluginClass, pluginSetup.options);
-            JkLog.done("Configuring plugin " + pluginClass.getName() + " with options "
-                    + JkOptions.fieldOptionsToString(plugin));
-            if (pluginSetup.activated) {
-                JkLog.info("Activating plugin " + pluginClass.getName());
-                plugin.decorate();
-            }
-        }
     }
 
     private static boolean embedded(Path jarFolder) {

@@ -3,13 +3,17 @@ package org.jerkar.tool;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsReflect;
 
+import java.awt.*;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.List;
 
 /**
  * Set of plugins configured or activated in a {@link JkBuild}.
  */
 public final class JkBuildPlugins {
+
+    private static PluginDictionary PLUGIN_DICTIONARY = new PluginDictionary();
 
     private final JkBuild holder;
 
@@ -24,6 +28,10 @@ public final class JkBuildPlugins {
         return getOrCreate(pluginClass, Collections.emptyMap());
     }
 
+    public JkPlugin get(String pluginName) {
+        return configuredPlugins.stream().filter(plugin -> plugin.name().equals(pluginName)).findFirst().get();
+    }
+
     public boolean has(Class<? extends JkPlugin> pluginClass) {
         for (JkPlugin plugin : configuredPlugins) {
             if (plugin.getClass().equals(pluginClass)) {
@@ -31,6 +39,10 @@ public final class JkBuildPlugins {
             }
         }
         return false;
+    }
+
+    public List<JkPlugin> all() {
+        return Collections.unmodifiableList(configuredPlugins);
     }
 
     void invoke(JkPlugin plugin, String methodName) {
@@ -48,7 +60,6 @@ public final class JkBuildPlugins {
         }
         final T plugin = JkUtilsReflect.newInstance(pluginClass, JkBuild.class, this.holder);
         JkOptions.populateFields(plugin, options);
-        plugin.decorate();
         configuredPlugins.add(plugin);
         JkLog.info("Build instance " + this.holder + " decorated with plugin " + plugin);
         return plugin;
@@ -60,6 +71,29 @@ public final class JkBuildPlugins {
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException("No method " + name + "(JkBuild) found on plugin " + pluginClass);
         }
+    }
+
+    void loadCommandLinePlugins(boolean master) {
+        Iterable<CommandLine.JkPluginSetup> pluginSetups = master ? CommandLine.INSTANCE.getMasterPluginSetups() :
+                CommandLine.INSTANCE.getSubProjectPluginSetups();
+        for (CommandLine.JkPluginSetup pluginSetup : pluginSetups){
+            if (pluginSetup.activated || !pluginSetup.options.isEmpty()) {
+                PluginDictionary.JkPluginDescription pluginDescription = PluginDictionary.loadByName(pluginSetup.pluginName);
+                JkPlugin plugin = getOrCreate(pluginDescription.pluginClass(), pluginSetup.options);
+                plugin.setActivated(true);
+            }
+        }
+    }
+
+    private static Map<String, String> commandLineOptions(JkPlugin plugin, boolean master) {
+        Iterable<CommandLine.JkPluginSetup> pluginSetups = master ? CommandLine.INSTANCE.getMasterPluginSetups() :
+                CommandLine.INSTANCE.getSubProjectPluginSetups();
+        for (CommandLine.JkPluginSetup pluginSetup : pluginSetups){
+            if (pluginSetup.pluginName.equals(plugin.name())) {
+                return pluginSetup.options;
+            }
+        }
+        return Collections.emptyMap();
     }
 
 }
