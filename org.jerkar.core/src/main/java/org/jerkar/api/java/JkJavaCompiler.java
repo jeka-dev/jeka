@@ -104,7 +104,7 @@ public final class JkJavaCompiler {
 
     /**
      * Creates a copy of this {@link JkJavaCompiler} but adding an external java compiler for
-     * the specified source version. The compiler will try to get compliant compiler to
+     * the specified source projectVersion. The compiler will try to get compliant compiler to
      * compile source.
      */
     public JkJavaCompiler withJavacBin(JkJavaVersion version, Path javacBin) {
@@ -181,7 +181,7 @@ public final class JkJavaCompiler {
     }
 
     static String currentJdkSourceVersion() {
-        final String fullVersion = System.getProperty("java.version");
+        final String fullVersion = System.getProperty("java.projectVersion");
         final int firstDot = fullVersion.indexOf(".");
         final String version;
         if (firstDot == -1 ) {
@@ -207,29 +207,29 @@ public final class JkJavaCompiler {
     }
 
     /**
-     * Returns a {@link JkProcess} standing for a forked compiler with relevant JDK if this specified source version
+     * Returns a {@link JkProcess} standing for a forked compiler with relevant JDK if this specified source projectVersion
      * does not match with the current running JDK. The specified map may include
-     * the JDK location for this source version.
-     * If no need to fork, cause current JDK is aligned with target version, then yhis method returns <code>null</code>.
-     * The keys must be formatted as "jdk.[source version]". For example, "jdk.1.4" or
+     * the JDK location for this source projectVersion.
+     * If no need to fork, cause current JDK is aligned with target projectVersion, then yhis method returns <code>null</code>.
+     * The keys must be formatted as "jdk.[source projectVersion]". For example, "jdk.1.4" or
      * "jdk.7". The values must absolute path.
      */
     public JkProcess forkedIfNeeded(Map<String, String> jdkLocations, String version) {
         if (version.equals(currentJdkSourceVersion())) {
-            JkLog.info("Current JDK matches with source version (" + version + "). Don't need to fork.");
+            JkLog.info("Current JDK matches with source projectVersion (" + version + "). Don't need to fork.");
             return null;
         }
         final String key = "jdk." + version;
         final String path = jdkLocations.get(key);
         if (path == null) {
-            JkLog.warn("Current JDK does not match with source version " + version + ".",
-                    " No exact matching JDK found for version " + version + ".",
-                    " Will use the current one which is version " + currentJdkSourceVersion() + ".",
-                    " Pass option -jdk." + version + "=[JDK location] to specify the JDK to use for Java version " + version);
+            JkLog.warn("Current JDK does not match with source projectVersion " + version + ".",
+                    " No exact matching JDK found for projectVersion " + version + ".",
+                    " Will use the current one which is projectVersion " + currentJdkSourceVersion() + ".",
+                    " Pass option -jdk." + version + "=[JDK location] to specify the JDK to use for Java projectVersion " + version);
             return null;
         }
         final String cmd = path + "/bin/javac";
-        JkLog.info("Current JDK does not match with source version (" + version + "). Will use JDK "
+        JkLog.info("Current JDK does not match with source projectVersion (" + version + "). Will use JDK "
                 + path);
         return JkProcess.of(cmd);
     }

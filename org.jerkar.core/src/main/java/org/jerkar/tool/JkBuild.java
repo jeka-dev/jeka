@@ -52,6 +52,16 @@ public class JkBuild {
 
     private final StringBuilder infoProvider = new StringBuilder();
 
+    // ------------------ options --------------------------------------------------------
+
+
+    @JkDoc("Help options")
+    private final JkHelpOptions help = new JkHelpOptions();
+
+    @JkDoc("Embed Jerkar jar along bin script in the project while scaffolding so the project can be run without Jerkar installed.")
+    boolean scaffoldEmbed;
+
+
 
     // ------------------ Instantiation cycle cycle --------------------------------------
 
@@ -76,9 +86,11 @@ public class JkBuild {
             MASTER_BUILD.set(false);
             this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), this);
             MASTER_BUILD.set(isMaster);
+            this.infoProvider.append("base directory : " + this.baseDir + "\n"
+                    + "imported builds : " + this.importedBuilds.directs() + "\n");
 
             // Allow sub-classes to define defaults prior options are injected
-            preConfigure();
+            setupOptionDefaults();
 
             // Inject options
             JkOptions.populateFields(this, JkOptions.loadSystemAndUserOptions());
@@ -87,11 +99,14 @@ public class JkBuild {
             JkOptions.populateFields(this, options);
 
             // Load plugins declared in command line
+            this.configurePlugins();
             plugins.loadCommandLinePlugins(isMaster);
+            plugins.all().stream().filter(plugin -> plugin.isActivated()).forEach(plugin -> plugin.decorateBuild());
+
+            // Extra build configuration
+            this.configure();
 
 
-            this.infoProvider.append("base directory : " + this.baseDir + "\n"
-                    + "imported builds : " + this.importedBuilds.directs() + "\n");
         } catch (RuntimeException e) {
             BASE_DIR_CONTEXT.remove();
             throw e;
@@ -102,38 +117,33 @@ public class JkBuild {
         }
     }
 
-
-
-    // ------------------ options --------------------------------------------------------
-
-
-    @JkDoc("Help options")
-    private final JkHelpOptions help = new JkHelpOptions();
-
-    @JkDoc("Embed Jerkar jar along bin script in the project while scaffolding so the project can be run without Jerkar installed.")
-    boolean scaffoldEmbed;
-
-    // --------------------------- constructs ----------------------------------
-
-
-
     /**
-     * This method is invoked before options are injected into this instance.
-     * The values set here are likely to be overrode by command line arguments or external configuration.
+     * Override this method to set sensitive defaults for options on this build or plugins.<br/>
+     * This method is invoked before options are injected into build instance, so options specified in
+     * command line or configuration files will overwrite the default values you have defined here. <p/>
+     * Note you should call <code>super()</code> at the begining of the method in order to not wipe defaults
+     * that superclasses may have defined.
      */
-    protected void preConfigure() {
+    protected void setupOptionDefaults() {
         // Do nothing by default
     }
 
     /**
      * This method is invoked right after options has been injected into this instance.
-     * 
      */
-    protected void postConfigure() {
+    protected void configurePlugins() {
         // Do nothing by default
     }
 
-    // -------------------------------- accessor functions ---------------------------------------
+    /**
+     * This method is called once all plugin has decorated this build.
+     */
+    protected void configure() {
+        // Do nothing by default
+    }
+
+
+    // -------------------------------- accessors ---------------------------------------
 
 
     /**
@@ -188,7 +198,7 @@ public class JkBuild {
     }
 
 
-    // ------------------------------ build dependencies ---------------------------------------------
+    // ------------------------------ build dependencies --------------------------------
 
     void setBuildDefDependencyResolver(JkDependencies buildDependencies, JkDependencyResolver scriptDependencyResolver) {
         this.buildDependencies = buildDependencies;
@@ -217,7 +227,7 @@ public class JkBuild {
         return importedBuilds;
     }
 
-    // ------------------------------ Command line methods ---------------------------------------------------
+    // ------------------------------ Command line methods ------------------------------
 
     /**
      * Creates the project structure (mainly project folder layout, build class code and IDE metadata) at the asScopedDependency

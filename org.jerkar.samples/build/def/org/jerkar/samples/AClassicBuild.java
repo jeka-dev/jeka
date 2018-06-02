@@ -11,7 +11,7 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 /**
  * This build is equivalent to {@link MavenStyleBuild} but removing the needless
  * part cause we respect the convention project folder name =
- * groupName.projectName and the version number is taken from build.properties
+ * groupName.projectName and the projectVersion number is taken from build.properties
  * (default behavior)
  *
  * @author Jerome Angibaud
@@ -26,7 +26,7 @@ public class AClassicBuild extends JkJavaProjectBuild {
     }
     
     @Override
-    protected void postConfigure() {
+    protected void configurePlugins() {
         JkJavaProject project = java().project()
                 .setSourceVersion(JkJavaVersion.V7)
                 .setDependencies(JkDependencies.builder()
@@ -35,7 +35,7 @@ public class AClassicBuild extends JkJavaProjectBuild {
                         .on("com.orientechnologies:orientdb-client:2.0.8")
                         .on("junit:junit:4.11", TEST)
                         .on("org.mockito:mockito-all:1.9.5", TEST).build());
-        project.maker().addFatJarArtifactFile("fat");  // project will produce a fat jar as well.
+        project.maker().defineFatJarArtifact("fat");  // project will produce a fat jar as well.
     }
     
     public static void main(String[] args) throws Exception {

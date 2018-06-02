@@ -60,15 +60,6 @@ final class PluginDictionary {
         return loadPluginsHavingLongName(name);
     }
 
-    public JkPluginDescription loadByNameOrFail(String name) {
-        final JkPluginDescription result = loadByName(name);
-        if (result == null) {
-            throw new IllegalArgumentException("No class found having name "
-                    + simpleClassName(name) + " for plugin '" + name + "'.");
-        }
-        return result;
-    }
-
     private static String simpleClassName(String pluginName) {
         return JkPlugin.class.getSimpleName() + JkUtilsString.capitalize(pluginName);
     }

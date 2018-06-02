@@ -17,7 +17,7 @@ import org.jerkar.api.system.JkLog;
 
 /**
  * Object responsible to build (to make) a java project. It provides methods to perform common build
- * tasks (compile, test, javadoc, package to jar) along methods to define how to build extra artifacts.
+ * tasks (compile, test, javadoc, package jars, publish artifacts) along methods to define how to build extra artifacts.
  *
  * All defined tasks are extensible so you can modify/improve the build behavior.
  */
@@ -258,12 +258,12 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
         return this.artifactProducers.keySet();
     }
 
-    public JkJavaProjectMaker addArtifactFile(JkArtifactFileId artifactFileId, Runnable runnable) {
+    public JkJavaProjectMaker defineArtifact(JkArtifactFileId artifactFileId, Runnable runnable) {
         this.artifactProducers.put(artifactFileId, runnable);
         return this;
     }
 
-    JkJavaProjectMaker removeArtifactFile(JkArtifactFileId artifactFileId) {
+    JkJavaProjectMaker undefineArtifact(JkArtifactFileId artifactFileId) {
         this.artifactProducers.remove(artifactFileId);
         return this;
     }
@@ -457,28 +457,20 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
         }
     }
 
-    void addDefaultArtifactFiles() {
-        this.addArtifactFile(mainArtifactFileId(), this::makeBinJar);
-        this.addArtifactFile(SOURCES_FILE_ID, this::makeSourceJar);
-        this.addArtifactFile(JAVADOC_FILE_ID, this::makeJavadocJar);
+    void defineDefaultArtifacts() {
+        this.defineArtifact(mainArtifactFileId(), this::makeBinJar);
+        this.defineArtifact(SOURCES_FILE_ID, this::makeSourceJar);
+        this.defineArtifact(JAVADOC_FILE_ID, this::makeJavadocJar);
+        this.defineArtifact(TEST_FILE_ID, this::makeTestJar);
+        this.defineArtifact(TEST_SOURCE_FILE_ID, this.getPackager()::testSourceJar);
     }
 
 
     /**
-     * JkEclipseProject will produces one artifact file for test binaries and one for test sources.
+     * Convenient method for defining a fat jar artifact having the specified classifier name.
      */
-    public JkJavaProjectMaker addTestArtifactFiles() {
-        this.addArtifactFile(TEST_FILE_ID, this::makeTestJar);
-        this.addArtifactFile(TEST_SOURCE_FILE_ID, () -> this.getPackager().testSourceJar());
-        return this;
-    }
-
-    /**
-     * Convenient method.
-     * JkEclipseProject will produces one artifact file for fat jar having the specified name.
-     */
-    public JkJavaProjectMaker addFatJarArtifactFile(String classifier) {
-        this.addArtifactFile(JkArtifactFileId.of(classifier, "jar"),
+    public JkJavaProjectMaker defineFatJarArtifact(String classifier) {
+        this.defineArtifact(JkArtifactFileId.of(classifier, "jar"),
                 () -> {compileAndTestIfNeeded(); getPackager().fatJar(classifier);});
         return this;
     }

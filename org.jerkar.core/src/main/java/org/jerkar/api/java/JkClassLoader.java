@@ -94,6 +94,10 @@ public final class JkClassLoader {
      * @see Class#getClassLoader()
      */
     public static JkClassLoader current() {
+        if (! (JkClassLoader.class.getClassLoader() instanceof URLClassLoader)) {
+            throw new RuntimeException("You seem running on JDK9+, Jerkar is not currently compatible with JDK8 only. " +
+                    "\nYou can build JDK9 project but Jerkar itself has to be run on JDK8.");
+        }
         return new JkClassLoader((URLClassLoader) JkClassLoader.class.getClassLoader());
     }
 

@@ -48,7 +48,7 @@ public final class JkPluginEclipse extends JkPlugin {
     // ------------------------ plugin methods ----------------------
 
     @Override
-    public void decorate() {
+    public void decorateBuild() {
         build.scaffolder().extraActions.chain(this::generateFiles);  // If this plugin is activated while scaffolding, we want Eclipse metada file be generated.
     }
 

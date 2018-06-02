@@ -25,7 +25,7 @@ public final class JkPluginEclipsePath extends JkPlugin {
     }
 
     @Override
-    public void decorate() {
+    public void decorateBuild() {
         JkPluginJava pluginJava = build.plugins.get(JkPluginJava.class);
         if (pluginJava != null) {
             final JkJavaProject project = pluginJava.project();

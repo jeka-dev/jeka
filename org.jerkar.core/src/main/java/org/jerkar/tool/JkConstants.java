@@ -18,7 +18,15 @@ public final class JkConstants {
 
     static final String DEFAULT_JAVA_SOURCE = "src/main/java";
 
-    static final Class<?> DEFAULT_BUILD_CLASS = DefaultBuildClass.class;
+    static final Class<?> DEFAULT_BUILD_CLASS;
+
+    static {
+        try {
+            DEFAULT_BUILD_CLASS = Class.forName("org.jerkar.tool.builtins.java.JkJavaProjectBuild");
+        } catch (ClassNotFoundException e) {
+           throw new IllegalStateException(e);
+        }
+    }
 
     /**
      * Relative path to the project where the build definition classes will be
@@ -35,13 +43,5 @@ public final class JkConstants {
      * The default method to be invoked when none is specified.
      */
     public static final String DEFAULT_METHOD = "doDefault";
-
-    private static class DefaultBuildClass extends JkBuild {
-
-        private DefaultBuildClass() {
-            super();
-            this.plugins.get(PluginDictionary.loadByName("java").pluginClass()); // load java plugin
-        }
-    }
 
 }

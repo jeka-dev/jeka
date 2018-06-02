@@ -35,10 +35,10 @@ public class CoreBuild extends JkJavaProjectBuild {
         java().tests.fork = false;
     }
 
-    protected void postConfigure() {
+    protected void configurePlugins() {
         final JkJavaProject project = java().project();
         applyCommonSettings(project, "core");
-        project.maker().addArtifactFile(DISTRIB_FILE_ID, this::doDistrib);
+        project.maker().defineArtifact(DISTRIB_FILE_ID, this::doDistrib);
         this.distribFolder = project.getOutLayout().outputPath().resolve("distrib");
     }
 

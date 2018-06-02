@@ -10,6 +10,9 @@ import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Plugin for building Java projects. It comes with a {@link JkJavaProject} pre-configured with {@link JkOptions}.
  * and a decoration for scaffolding.
@@ -19,8 +22,8 @@ public class JkPluginJava extends JkPlugin {
 
     // ------------------------------ options -------------------------------------------
 
-    @JkDoc("Module version for the project to build. No effect if null or blank.")
-    protected String version;
+    @JkDoc("Version for the project to build")
+    public String projectVersion;
 
     @JkDoc("Publication")
     public final JkRepoOptions repos = new JkRepoOptions();
@@ -35,13 +38,16 @@ public class JkPluginJava extends JkPlugin {
 
     private final JkJavaProject project;
 
+    private final List<JkArtifactFileId> producedArtifacts = new ArrayList<>();
+
     protected JkPluginJava(JkBuild build) {
         super(build);
         this.project = new JkJavaProject(this.build.baseDir());
+        this.producedArtifacts.add(project.maker().mainArtifactFileId());
     }
 
     @Override  
-    protected void decorate() {
+    protected void decorateBuild() {
         this.applyOptions();
         this.addDefaultAction(this::doDefault);
         this.setupScaffolder();
@@ -50,12 +56,12 @@ public class JkPluginJava extends JkPlugin {
 
     private void doDefault() {
         this.project().maker().clean();
-        this.project().maker().makeAllArtifactFiles();
+        this.project().maker().makeArtifactFiles(producedArtifacts);
     }
 
     private void applyOptions() {
-        if (project.getVersionedModule() != null && !JkUtilsString.isBlank(version)) {
-            project.setVersionedModule(project.getVersionedModule().withVersion(version));
+        if (project.getVersionedModule() != null && !JkUtilsString.isBlank(projectVersion)) {
+            project.setVersionedModule(project.getVersionedModule().withVersion(projectVersion));
         }
         if (!repos.publishSources) {
             project.maker().getArtifactFileIdsToNotPublish().addAll(project.maker().artifactsFileIdsWithClassifier("sources"));
@@ -76,15 +82,14 @@ public class JkPluginJava extends JkPlugin {
             resolver = resolver.withRepos(optionDownloadRepos.and(JkPublishRepo.local().repo())); // always look in local repo
             project.maker().setDependencyResolver(resolver);
         }
-        if (pack.javadoc != null && pack.javadoc) {
-            project.removeArtifactFile(JkJavaProjectMaker.JAVADOC_FILE_ID);
-        } else if (pack.javadoc != null && !pack.javadoc) {
-            project.maker().addArtifactFile(JkJavaProjectMaker.JAVADOC_FILE_ID, project.maker()::makeJavadocJar);
+        if (pack.javadoc) {
+            producedArtifacts.add(JkJavaProjectMaker.JAVADOC_FILE_ID);
         }
-        if (pack.tests != null && pack.tests) {
-            project.removeArtifactFile(JkJavaProjectMaker.TEST_FILE_ID, JkJavaProjectMaker.TEST_SOURCE_FILE_ID);
-        } else if (pack.tests != null && !pack.tests) {
-            project.maker().addArtifactFile(JkJavaProjectMaker.TEST_FILE_ID, project.maker()::makeTestJar);
+        if (pack.sources) {
+            producedArtifacts.add(JkJavaProjectMaker.SOURCES_FILE_ID);
+        }
+        if (pack.tests) {
+            producedArtifacts.add(JkJavaProjectMaker.TEST_FILE_ID);
         }
         if (pack.checksums().length > 0) {
             project.maker().afterPackage.chain(() -> project.maker().checksum(pack.checksums()));
@@ -92,27 +97,23 @@ public class JkPluginJava extends JkPlugin {
         if (pack.signWithPgp) {
             project.maker().afterPackage.chain(() -> project.maker().signArtifactFiles(repos.pgpSigner()));
         }
-        if (tests.fork != null && tests.fork) {
+        if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
             project.maker().setJuniter(project.maker().getJuniter().forked(javaProcess));
-        } else if (tests.fork != null && !tests.fork){
-            project.maker().setJuniter(project.maker().getJuniter().forked(false));
         }
-        if (tests.skip != null) {
-            project.maker().setSkipTests(tests.skip);
-        }
-        if (tests.output != null) {
-            project.maker().setJuniter(project.maker().getJuniter().withOutputOnConsole(tests.output));
-        }
-        if (tests.report != null) {
-            project.maker().setJuniter(project.maker().getJuniter().withReport(tests.report));
-        }
+        project.maker().setSkipTests(tests.skip);
+        project.maker().setJuniter(project.maker().getJuniter().withOutputOnConsole(tests.output));
+        project.maker().setJuniter(project.maker().getJuniter().withReport(tests.report));
     }
 
     private void setupScaffolder() {
         String template = JkUtilsIO.read(JkPluginJava.class.getResource("buildclass.snippet"));
         String baseDirName = build.baseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
+        project.getSourceLayout().sources().fileTrees().stream().forEach(tree -> tree.createIfNotExist());
+        project.getSourceLayout().resources().fileTrees().stream().forEach(tree -> tree.createIfNotExist());
+        project.getSourceLayout().tests().fileTrees().stream().forEach(tree -> tree.createIfNotExist());
+        project.getSourceLayout().testResources().fileTrees().stream().forEach(tree -> tree.createIfNotExist());
         this.build.scaffolder().setBuildClassCode(code);
     }
 

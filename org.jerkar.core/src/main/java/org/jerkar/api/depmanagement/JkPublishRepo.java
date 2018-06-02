@@ -58,7 +58,7 @@ public final class JkPublishRepo implements Serializable {
     }
 
     /**
-     * Creates a {@link JkPublishRepo} for publishing snapshot version on the specified {@link JkRepo}.
+     * Creates a {@link JkPublishRepo} for publishing snapshot projectVersion on the specified {@link JkRepo}.
      * Release versions are not publishable on this {@link JkPublishRepos}
      */
     public static JkPublishRepo ofSnapshot(JkRepo jkRepo) {
@@ -67,7 +67,7 @@ public final class JkPublishRepo implements Serializable {
     }
 
     /**
-     * Creates a {@link JkPublishRepo} for publishing non-snapshot version on the specified {@link JkRepo}.
+     * Creates a {@link JkPublishRepo} for publishing non-snapshot projectVersion on the specified {@link JkRepo}.
      * Snapshot versions are not publishable on this {@link JkPublishRepos}
      */
     public static JkPublishRepo ofRelease(JkRepo jkRepo) {
@@ -118,8 +118,8 @@ public final class JkPublishRepo implements Serializable {
     }
 
     /**
-     * When <code>true</code> the snapshot version are replaced with a
-     * timestamped version (ala Maven 3) See
+     * When <code>true</code> the snapshot projectVersion are replaced with a
+     * timestamped projectVersion (ala Maven 3) See
      * http://stackoverflow.com/questions/4275466/how-do-you-deal-with-maven-3-
      * timestamped-snapshots-efficiently
      */
@@ -185,7 +185,7 @@ public final class JkPublishRepo implements Serializable {
 
     /**
      * Returns a {@link JkPublishRepos} made of this {@link JkPublishRepo} and the specified {@link JkRepo}
-     * for artifact having a non-snapshot version.
+     * for artifact having a non-snapshot projectVersion.
      */
     public JkPublishRepos andRelease(JkRepo repo) {
         return and(JkPublishRepo.ofRelease(repo));
@@ -194,7 +194,7 @@ public final class JkPublishRepo implements Serializable {
     /**
      * Returns a {@link JkPublishRepo} identical to this one but with the specified <i>uniqueSnapshot</i>
      * property. When this property is <code>true</code>n artifact deployed on this repository are timestamped so
-     * several artifact from the same snapshot version can coexist in the this repository. <br/>
+     * several artifact from the same snapshot projectVersion can coexist in the this repository. <br/>
      * This is the default behavior for artifact deployed with Maven 3, while this is not the case with Maven 2.
      */
     public JkPublishRepo withUniqueSnapshot(boolean uniqueSnapShot) {

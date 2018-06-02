@@ -115,7 +115,7 @@ final class IvyPublisher implements InternalPublisher {
      * are necessary in order to generate the ivy.xml file.
      *
      * @param versionedModule
-     *            The module/version to publish.
+     *            The module/projectVersion to publish.
      * @param publication
      *            The artifacts to publish.
      * @param dependencies

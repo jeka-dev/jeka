@@ -37,7 +37,7 @@ public abstract class JkPlugin {
      * Called once options has been injected into this plugin instance. Typically this should
      * contain the code that initialize this plugin and decorate the build instance.
      */
-    protected void decorate() {
+    protected void decorateBuild() {
     }
 
     final String name() {

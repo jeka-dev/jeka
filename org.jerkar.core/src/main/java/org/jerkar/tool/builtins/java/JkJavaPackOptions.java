@@ -13,8 +13,8 @@ public class JkJavaPackOptions {
     public boolean signWithPgp;
 
     /** When true, tests classes and sources are packed in jars.*/
-    @JkDoc("When true, tests classes and sources are packed in jars.")
-    public Boolean tests;
+    @JkDoc("When true, tests classes are packed in a jar.")
+    public boolean tests;
 
     /** Comma separated list of algorithm to use to produce checksums (ex : 'sha-1,md5'). */
     @JkDoc("Comma separated list of algorithm to use to produce checksums (ex : 'sha-1,md5').")
@@ -22,7 +22,11 @@ public class JkJavaPackOptions {
 
     /** When true, javadoc is created and packed in a jar file.*/
     @JkDoc("When true, javadoc is created and packed in a jar file.")
-    public Boolean javadoc;
+    public boolean javadoc;
+
+    /** When true, sources are packed in a jar file.*/
+    @JkDoc("When true, sources are packed in a jar file.")
+    public boolean sources;
 
     /**
      * Returns the checksums algorithms to checksum artifact files.

@@ -4,9 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -19,7 +17,6 @@ import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.tool.CommandLine.JkPluginSetup;
 
 /**
  * Initializer for build instances. It instantiates build class and inject
@@ -84,7 +81,6 @@ public final class JkInit {
         } finally {
             JkBuild.baseDirContext(null);
         }
-        build.postConfigure();
         JkLog.infoHeaded("Build class " + build.getClass().getName());
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
         if (JkLog.verbose()) {
@@ -105,7 +101,7 @@ public final class JkInit {
         JkLog.info("Jerkar Version : " + JkInfo.jerkarVersion());
         JkLog.info("Working Directory : " + System.getProperty("user.dir"));
         JkLog.info("Java Home : " + System.getProperty("java.home"));
-        JkLog.info("Java Version : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
+        JkLog.info("Java Version : " + System.getProperty("java.projectVersion") + ", " + System.getProperty("java.vendor"));
         if ( embedded(JkLocator.jerkarHomeDir())) {
             JkLog.info("Jerkar Home : " + bootDir() + " ( embedded !!! )");
         } else {

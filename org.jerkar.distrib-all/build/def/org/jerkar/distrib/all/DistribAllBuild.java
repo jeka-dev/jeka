@@ -35,7 +35,7 @@ class DistribAllBuild extends JkBuild {
     public boolean javadoc = true;
 
     @Override
-    protected void postConfigure() {
+    protected void configurePlugins() {
         jacocoPluginBuild.core.java().tests.skip = skipTests;
     }
 

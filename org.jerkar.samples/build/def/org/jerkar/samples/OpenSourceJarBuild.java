@@ -18,7 +18,7 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 public class OpenSourceJarBuild extends JkJavaProjectBuild {
 
     @Override
-    protected void postConfigure() {
+    protected void configurePlugins() {
         JkDependencies deps = JkDependencies.builder()
                 .on(GUAVA, "18.0") 
                 .on(JUNIT, "4.11", TEST).build();

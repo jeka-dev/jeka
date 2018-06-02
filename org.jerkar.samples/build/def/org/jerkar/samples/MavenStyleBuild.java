@@ -25,7 +25,7 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 public class MavenStyleBuild extends JkJavaProjectBuild {
 
     @Override
-    protected void postConfigure() {
+    protected void configurePlugins() {
         java().project()
                 .setVersionedModule("org.jerkar:script-samples", "0.3-SNAPSHOT")
                 .setDependencies(dependencies());

@@ -11,7 +11,7 @@ public final class JkResolutionParameters implements Serializable {
 
     /**
      * Creates resolution parameters without default mapping and no dynamic
-     * version resolving refresh.
+     * projectVersion resolving refresh.
      * 
      * @see JkResolutionParameters#defaultMapping()
      * @see #refreshed()
@@ -22,7 +22,7 @@ public final class JkResolutionParameters implements Serializable {
 
     /**
      * Creates resolution parameters with the specified default scope mapping
-     * and no dynamic version resolving refresh.
+     * and no dynamic projectVersion resolving refresh.
      * 
      * @see JkResolutionParameters#defaultMapping()
      * @see #refreshed()
@@ -49,7 +49,7 @@ public final class JkResolutionParameters implements Serializable {
 
     /**
      * Returns <code>true</code> if during the resolution phase, the dynamic
-     * version must be resolved as well or the cache can be reused.
+     * projectVersion must be resolved as well or the cache can be reused.
      */
     public boolean refreshed() {
         return refreshed;

@@ -30,7 +30,7 @@ import com.google.common.base.MoreObjects;
 public class HttpClientTaskBuild extends JkJavaProjectBuild {
     
     @Override
-    protected void postConfigure() {
+    protected void configurePlugins() {
         java().project().setDependencies(dependencies());
     }
 

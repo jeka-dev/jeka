@@ -8,7 +8,7 @@ import java.util.*;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * Stands for a compilation settings as source and target version, encoding, annotation processing
+ * Stands for a compilation settings as source and target projectVersion, encoding, annotation processing
  * or any option supported by the compiler.
  */
 public final class JkJavaCompileSpec {
@@ -55,7 +55,7 @@ public final class JkJavaCompileSpec {
         return addOptions(OUTPUT_DIR_OPTS, outputDir.toString());
     }
 
-    // ------- Java version & encoding ----------------
+    // ------- Java projectVersion & encoding ----------------
 
     public JkJavaVersion getSourceVersion() {
         final String rawResult = getNextValue(SOURCE_OPTS);
@@ -74,7 +74,7 @@ public final class JkJavaCompileSpec {
     }
 
     /**
-     * Sets the version of source code accepted.
+     * Sets the projectVersion of source code accepted.
      */
     public JkJavaCompileSpec setSourceVersion(JkJavaVersion version) {
         if (version == null) {
@@ -84,7 +84,7 @@ public final class JkJavaCompileSpec {
     }
 
     /**
-     * Sets the target Java version for compiled classes. Normally it is the same as the
+     * Sets the target Java projectVersion for compiled classes. Normally it is the same as the
      * platform compiler shipped with but you can set it explicitly. Also, when set explicitly
      * {@link JkJavaCompiler} can choose to use the appropriate compiler to compile to the
      * specified target.
@@ -181,7 +181,7 @@ public final class JkJavaCompileSpec {
     }
 
     /**
-     * Some options of a compiler are set in a couple of name/value (version, classpath, .....).
+     * Some options of a compiler are set in a couple of name/value (projectVersion, classpath, .....).
      * So if you want to explicitly set such an option it is desirable to remove current value
      * instead of adding it at the queue of options. This method does this for you.
      */

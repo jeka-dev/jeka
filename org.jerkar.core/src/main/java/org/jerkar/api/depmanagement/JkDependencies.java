@@ -51,7 +51,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
     /**
      * Creates a {@link JkDependencies} on the specified module with unspecified
-     * version (expected to be resolved with a version provider).
+     * projectVersion (expected to be resolved with a projectVersion provider).
      */
     public static JkDependencies of(JkModuleId moduleId, JkScope... scopes) {
         final JkModuleDependency moduleDependency = JkModuleDependency.of(moduleId,
@@ -186,7 +186,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     }
 
     /**
-     * Returns a clone of this object but using specified version provider to override
+     * Returns a clone of this object but using specified projectVersion provider to override
      * versions of transitive dependencies.
      */
     public JkDependencies withExplicitVersions(JkVersionProvider explicitVersions) {
@@ -361,8 +361,8 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
     /**
      * Returns <code>true</code> if this object contains dependency on external
-     * module whose rely on dynamic version. It can be either dynamic version as
-     * "1.3.+", "[1.0, 2.0[" ,... or snapshot version as defined in Maven (as
+     * module whose rely on dynamic projectVersion. It can be either dynamic projectVersion as
+     * "1.3.+", "[1.0, 2.0[" ,... or snapshot projectVersion as defined in Maven (as
      * "1.0-SNAPSHOT).
      */
     public boolean hasDynamicVersions() {
@@ -381,7 +381,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
     /**
      * Returns <code>true</code> if this object contains dependency on external
-     * module whose rely on dynamic version that are resolvable (Maven Snapshot
+     * module whose rely on dynamic projectVersion that are resolvable (Maven Snapshot
      * versions are dynamic but not resolvable). It only stands for dynamic
      * versions as "1.3.+", "[1.0, 2.0[" ,... If so, when resolving, dynamic
      * versions are replaced by fixed resolved ones.
@@ -702,7 +702,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         }
 
         /**
-         * Adds a module dependency with unspecified version on this builder.
+         * Adds a module dependency with unspecified projectVersion on this builder.
          */
         public JkFluentModuleDepBuilder on(JkModuleId module, JkScope... scopes) {
             return on(JkModuleDependency.of(module, JkVersionRange.UNSPECIFIED), scopes);
@@ -1019,11 +1019,11 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
 
     /**
      * Throws a <code>IllegalStateException</code> if one of the module
-     * dependencies has an unspecified version.
+     * dependencies has an unspecified projectVersion.
      */
     public JkDependencies assertNoUnspecifiedVersion() {
         final List<JkModuleDependency> unspecifieds = this.unspecifiedVersionDependencies();
-        JkUtilsAssert.isTrue(unspecifieds.isEmpty(), "Following module does not specify version : "
+        JkUtilsAssert.isTrue(unspecifieds.isEmpty(), "Following module does not specify projectVersion : "
                 + unspecifieds);
         return this;
     }

@@ -30,13 +30,13 @@ public final class JkManifest {
     public static final String PATH = "META-INF/MANIFEST.MF";
 
     /**
-     * The JDK version who was running while bulding this manifest.
+     * The JDK projectVersion who was running while bulding this manifest.
      */
     public static final String BUILD_JDK = "Build-Jdk";
 
     /**
      * The software that has created this manifest. Normally "Jerkar" along its
-     * version
+     * projectVersion
      */
     public static final String CREATED_BY = "Created-By";
 
@@ -146,7 +146,7 @@ public final class JkManifest {
     public JkManifest addContextualInfo() {
         return addMainAttribute(CREATED_BY, "Jerkar").addMainAttribute(BUILT_BY,
                 System.getProperty("user.name")).addMainAttribute(BUILD_JDK,
-                        System.getProperty("java.vendor") + " " + System.getProperty("java.version"));
+                        System.getProperty("java.vendor") + " " + System.getProperty("java.projectVersion"));
     }
 
     /**

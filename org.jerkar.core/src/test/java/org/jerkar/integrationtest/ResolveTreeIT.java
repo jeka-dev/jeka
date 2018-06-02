@@ -102,7 +102,7 @@ public class ResolveTreeIT {
         String directCoreVersion = "4.3.6.RELEASE";
         JkDependencies deps = JkDependencies.builder()
                 .on(starterWebModule, "1.5.10.RELEASE").scope(COMPILE)
-                .on(springCoreModule, directCoreVersion).scope(COMPILE)  // force a version lower than the transitive above
+                .on(springCoreModule, directCoreVersion).scope(COMPILE)  // force a projectVersion lower than the transitive above
                 .build();
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
@@ -114,8 +114,8 @@ public class ResolveTreeIT {
         assertEquals("4.3.14.RELEASE", springCoreTransitiveModuleNodeInfo.declaredVersion().definition());
         assertEquals(directCoreVersion, springCoreTransitiveModuleNodeInfo.resolvedVersion().name());  // cause evicted
 
-        // As the spring-core version is declared as direct dependency and the declared version is exact (not dynamic)
-        // then the resolved version should the one declared.
+        // As the spring-core projectVersion is declared as direct dependency and the declared projectVersion is exact (not dynamic)
+        // then the resolved projectVersion should the one declared.
         JkDependencyNode.ModuleNodeInfo springCoreDirectModuleNodeInfo = tree.children().get(1).moduleInfo();
         assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.declaredVersion().definition());
         assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.resolvedVersion().name());

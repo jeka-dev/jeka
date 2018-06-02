@@ -15,7 +15,7 @@ public final class JkInfo {
     private static String version;
 
     /**
-     * Returns the current Jerkar version.
+     * Returns the current Jerkar projectVersion.
      */
     public static String jerkarVersion() {
         if (JkUtilsString.isBlank(version)) {

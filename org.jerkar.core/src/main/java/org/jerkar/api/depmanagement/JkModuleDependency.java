@@ -12,7 +12,7 @@ import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * A dependency on an external module. External modules are supposed to be
- * located in a repository. The version range identify which versions are likely
+ * located in a repository. The projectVersion range identify which versions are likely
  * to be compatible with the project to build.<br/>
  * For example, <code>org.hibernate:hibernate-core:3.0.+</code> is a legal
  * description for an external module dependency.
@@ -67,8 +67,8 @@ public final class JkModuleDependency implements JkDependency {
     }
 
     /**
-     * Creates a {@link JkModuleDependency} to its group, name and version
-     * range. The version range can be any string accepted by
+     * Creates a {@link JkModuleDependency} to its group, name and projectVersion
+     * range. The projectVersion range can be any string accepted by
      * {@link JkVersionRange#of(String)}.
      */
     public static JkModuleDependency of(String group, String name, String version) {
@@ -79,10 +79,10 @@ public final class JkModuleDependency implements JkDependency {
      * Creates a JkModuleDependency to a formatted string description. The
      * expected format are :
      * <ul>
-     * <li>groupName:moduleName:version</li>.
-     * <li>groupName:moduleName:version:classifier</li>.
-     * <li>groupName:moduleName:version@extension</li>.
-     * <li>groupName:moduleName:version:classifier@extension</li>.
+     * <li>groupName:moduleName:projectVersion</li>.
+     * <li>groupName:moduleName:projectVersion:classifier</li>.
+     * <li>groupName:moduleName:projectVersion@extension</li>.
+     * <li>groupName:moduleName:projectVersion:classifier@extension</li>.
      * </ul>
      */
     public static JkModuleDependency of(String description) {
@@ -95,7 +95,7 @@ public final class JkModuleDependency implements JkDependency {
         final String[] strings = JkUtilsString.split(description, ":");
         if (strings.length != 3 && strings.length != 4) {
             throw new IllegalArgumentException(
-                    "Module should be formated as 'groupName:moduleName:version' or 'groupName:moduleName:version:classifier'. Was "
+                    "Module should be formated as 'groupName:moduleName:projectVersion' or 'groupName:moduleName:projectVersion:classifier'. Was "
                             + description);
         }
         final JkModuleDependency result = of(strings[0], strings[1], strings[2]).ext(ext)
@@ -143,7 +143,7 @@ public final class JkModuleDependency implements JkDependency {
     }
 
     /**
-     * Returns the version of the module this dependencies is constrained to.
+     * Returns the projectVersion of the module this dependencies is constrained to.
      */
     public JkVersionRange versionRange() {
         return versionRange;
@@ -158,7 +158,7 @@ public final class JkModuleDependency implements JkDependency {
     }
 
     /**
-     * Returns <code>true</code> if the version of the module for this dependency is not specified.
+     * Returns <code>true</code> if the projectVersion of the module for this dependency is not specified.
      */
     public boolean hasUnspecifedVersion() {
         return this.versionRange.isUnspecified();
@@ -166,7 +166,7 @@ public final class JkModuleDependency implements JkDependency {
 
     /**
      * Returns a JkModuleDependency identical to this one but with the specified
-     * static version. If the specified version is <code>null</code> then returned version is this one.
+     * static projectVersion. If the specified projectVersion is <code>null</code> then returned projectVersion is this one.
      *
      */
     public JkModuleDependency resolvedTo(JkVersion version) {
