@@ -7,7 +7,7 @@ import java.nio.file.Path;
  */
 public final class JkHelpOptions {
 
-    @JkDoc("Output help formatted in XML if true. To be used accept conjonction of -silent option to parse the output stream friendly.")
+    @JkDoc("Output help formatted in XML if true. To be used in conjonction of -silent option to parse the output stream friendly.")
     public boolean xml;
 
     @JkDoc("Output help in this xml file. If xml option is false, no need to specify help.xml option.")

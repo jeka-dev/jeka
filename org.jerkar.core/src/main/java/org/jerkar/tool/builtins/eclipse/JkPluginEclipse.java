@@ -20,18 +20,18 @@ import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.Main;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
-@JkDoc("Generates Eclipse meta data files from a JkJavaProjectBuild")
+@JkDoc("Generation of Eclipse files (.project and .claasspath) from actual project structure and dependencies.")
 public final class JkPluginEclipse extends JkPlugin {
 
-    @JkDoc("Set it to false to not mention javadoc in generated .classpath file.")
+    @JkDoc("If true, .classpath will include javadoc reference for declared dependencies.")
     boolean javadoc = true;
 
     /** If not null, this value will be used as the JRE container path when generating .classpath file.*/
-    @JkDoc({ "If not null, this value will be used as the JRE container path when generating .classpath file." })
+    @JkDoc({ "If not null, this value will be used as the JRE container path in .classpath" })
     public String jreContainer = null;
 
     /** Flag to set whether 'generateAll' task should use absolute paths instead of classpath variables */
-    @JkDoc({ "Set it to true to use absolute paths in the classpath instead of classpath variables." })
+    @JkDoc({ "If true, dependency paths will be expressed relatively to Eclipse path variables instead of absolute path." })
     public boolean useVarPath = false;
 
     protected JkPluginEclipse(JkBuild build) {
@@ -48,11 +48,12 @@ public final class JkPluginEclipse extends JkPlugin {
     // ------------------------ plugin methods ----------------------
 
     @Override
-    public void decorateBuild() {
+    protected void decorateBuild() {
         build.scaffolder().extraActions.chain(this::generateFiles);  // If this plugin is activated while scaffolding, we want Eclipse metada file be generated.
     }
 
-    @JkDoc("Generates Eclipse .classpath file according project dependencies.")
+    @JkDoc("Generates Eclipse files (.classpath and .project) in the current directory. The files reflect project " +
+            "dependencies and source layout.")
     public void generateFiles() {
         final Path dotProject = build.baseDir().resolve(".project");
         if (build instanceof JkJavaProjectBuild) {
@@ -84,7 +85,7 @@ public final class JkPluginEclipse extends JkPlugin {
         }
     }
 
-    @JkDoc("Generate Eclipse files on all subfolder of the current directory. Only subfolder having a build/def directory are impacted.")
+    @JkDoc("Generates Eclipse files (.project and .claasspath) on all sub-folders of the current directory. Only sub-folders having a build/def directory are taken in account. See generateFiles.")
     public void generateAll() {
         final Iterable<Path> folders = build.baseTree()
                 .accept("**/" + JkConstants.BUILD_DEF_DIR, JkConstants.BUILD_DEF_DIR)

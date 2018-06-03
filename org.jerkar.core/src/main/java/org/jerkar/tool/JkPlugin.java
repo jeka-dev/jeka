@@ -40,7 +40,7 @@ public abstract class JkPlugin {
     protected void decorateBuild() {
     }
 
-    final String name() {
+    public final String name() {
         final String className = this.getClass().getSimpleName();
         if (! className.startsWith(CLASS_PREFIX) || className.equals(CLASS_PREFIX)) {
             throw new IllegalStateException(String.format("Plugin class not properly named. Name should be formatted as " +

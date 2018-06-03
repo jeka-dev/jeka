@@ -261,8 +261,7 @@ public class JkBuild {
         if (help.xml || help.xmlFile != null) {
             HelpDisplayer.help(this, help.xmlFile);
         } else {
-            HelpDisplayer.help(this);
-            HelpDisplayer.helpPlugins();
+            HelpDisplayer.help(this);;
         }
     }
 

@@ -86,5 +86,8 @@ public final class JkPluginIdea extends JkPlugin {
         generateModulesXml();
     }
 
-
+    @Override
+    protected void decorateBuild() {
+        this.build.scaffolder().extraActions.chain(this::generateIml);
+    }
 }

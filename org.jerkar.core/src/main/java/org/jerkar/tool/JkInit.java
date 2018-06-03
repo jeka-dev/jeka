@@ -53,7 +53,7 @@ public final class JkInit {
         if (result == null) {
             throw new JkException("No build class found for engine located at : " + base);
         }
-        JkLog.info("Build class " + result.getClass().getName());
+        JkLog.info("Build class : " + result.getClass().getName());
         return result;
     }
 
@@ -81,7 +81,6 @@ public final class JkInit {
         } finally {
             JkBuild.baseDirContext(null);
         }
-        JkLog.infoHeaded("Build class " + build.getClass().getName());
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
         if (JkLog.verbose()) {
             JkInit.logProps("Field values", displayedOptions);
