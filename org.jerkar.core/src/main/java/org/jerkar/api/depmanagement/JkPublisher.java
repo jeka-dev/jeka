@@ -112,7 +112,7 @@ public final class JkPublisher {
      *               artifact files. If an artifact files is not present, it is not created by this method.
      */
     public void publishMaven(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator,
-                             Set<JkArtifactFileId> excludedArtifacts,
+                             Set<JkArtifactId> excludedArtifacts,
                              JkDependencies dependencies, JkMavenPublicationInfo extraPublishInfo) {
         JkMavenPublication publication = JkMavenPublication.of(artifactLocator, excludedArtifacts).with(extraPublishInfo);
         this.ivyPublisher.publishMaven(versionedModule, publication, dependencies.modulesOnly());

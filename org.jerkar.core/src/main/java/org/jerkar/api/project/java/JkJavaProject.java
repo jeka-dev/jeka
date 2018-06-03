@@ -77,7 +77,6 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         this.sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir);
         this.outLayout = JkProjectOutLayout.classicJava().withOutputDir(baseDir.resolve("build/output"));
         this.dependencies = JkDependencies.ofLocalScoped(baseDir.resolve("build/libs").toFile());
-        this.maker.defineDefaultArtifacts();
     }
 
     // -------------------------- Other -------------------------
@@ -205,8 +204,8 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         return this;
     }
 
-    public JkJavaProject removeArtifactFile(JkArtifactFileId ... artifactFileIds) {
-        for (final JkArtifactFileId artifactFileId : artifactFileIds) {
+    public JkJavaProject removeArtifactFile(JkArtifactId... artifactFileIds) {
+        for (final JkArtifactId artifactFileId : artifactFileIds) {
             this.maker.undefineArtifact(artifactFileId);
         }
         return this;

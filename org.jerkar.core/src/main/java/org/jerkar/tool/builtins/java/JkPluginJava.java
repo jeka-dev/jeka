@@ -38,12 +38,12 @@ public class JkPluginJava extends JkPlugin {
 
     private final JkJavaProject project;
 
-    private final List<JkArtifactFileId> producedArtifacts = new ArrayList<>();
+    private final List<JkArtifactId> producedArtifacts = new ArrayList<>();
 
     protected JkPluginJava(JkBuild build) {
         super(build);
         this.project = new JkJavaProject(this.build.baseDir());
-        this.producedArtifacts.add(project.maker().mainArtifactFileId());
+        this.producedArtifacts.add(project.maker().mainArtifactId());
     }
 
     @Override  
@@ -56,7 +56,7 @@ public class JkPluginJava extends JkPlugin {
 
     private void doDefault() {
         this.project().maker().clean();
-        this.project().maker().makeArtifactFiles(producedArtifacts);
+        this.project().maker().pack(producedArtifacts);
     }
 
     private void applyOptions() {
@@ -64,10 +64,10 @@ public class JkPluginJava extends JkPlugin {
             project.setVersionedModule(project.getVersionedModule().withVersion(projectVersion));
         }
         if (!repos.publishSources) {
-            project.maker().getArtifactFileIdsToNotPublish().addAll(project.maker().artifactsFileIdsWithClassifier("sources"));
+            project.maker().getArtifactFileIdsToNotPublish().addAll(project.maker().artifactIdsWithClassifier("sources"));
         }
         if (!repos.publishTests) {
-            project.maker().getArtifactFileIdsToNotPublish().addAll(project.maker().artifactsFileIdsWithClassifier("test"));
+            project.maker().getArtifactFileIdsToNotPublish().addAll(project.maker().artifactIdsWithClassifier("test"));
         }
         final JkPublishRepos optionPublishRepos = repos.publishRepositories();
         if (optionPublishRepos != null) {
@@ -83,19 +83,19 @@ public class JkPluginJava extends JkPlugin {
             project.maker().setDependencyResolver(resolver);
         }
         if (pack.javadoc) {
-            producedArtifacts.add(JkJavaProjectMaker.JAVADOC_FILE_ID);
+            producedArtifacts.add(JkJavaProjectMaker.JAVADOC_ARTIFACT_ID);
         }
         if (pack.sources) {
-            producedArtifacts.add(JkJavaProjectMaker.SOURCES_FILE_ID);
+            producedArtifacts.add(JkJavaProjectMaker.SOURCES_ARTIFACT_ID);
         }
         if (pack.tests) {
-            producedArtifacts.add(JkJavaProjectMaker.TEST_FILE_ID);
+            producedArtifacts.add(JkJavaProjectMaker.TEST_ARTIFACT_ID);
         }
         if (pack.checksums().length > 0) {
-            project.maker().afterPackage.chain(() -> project.maker().checksum(pack.checksums()));
+            project.maker().afterPack.chain(() -> project.maker().checksum(pack.checksums()));
         }
         if (pack.signWithPgp) {
-            project.maker().afterPackage.chain(() -> project.maker().signArtifactFiles(repos.pgpSigner()));
+            project.maker().afterPack.chain(() -> project.maker().signArtifactFiles(repos.pgpSigner()));
         }
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);

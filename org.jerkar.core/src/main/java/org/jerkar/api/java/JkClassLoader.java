@@ -289,7 +289,7 @@ public final class JkClassLoader {
      * Loads the class having the specified full name or the specified simple
      * name. Returns <code>null</code> if no class matches. </br> For example :
      * loadFromNameOrSimpleName("MyClass", null) may returns
-     * my.pack.MyClass class.
+     * my.packAllArtifacts.MyClass class.
      *
      * @param name          The full name or the simple name of the class to load
      * @param superClassArg If not null, the search is narrowed to classes/interfaces
@@ -360,9 +360,9 @@ public final class JkClassLoader {
     /**
      * Loads all class having a relative path matching the supplied
      * glob patterns. For example, if you want to load all class
-     * belonging to <code>my.pack</code> or its sub package, then you have to
+     * belonging to <code>my.packAllArtifacts</code> or its sub package, then you have to
      * supply a filter with an include pattern as
-     * <code>my/pack/&#42;&#42;/&#42;.class</code>. Note that ending with
+     * <code>my/packAllArtifacts/&#42;&#42;/&#42;.class</code>. Note that ending with
      * <code>.class</code> is important.
      */
     private Set<Class<?>> loadClasses(Iterable<String> patterns) {
@@ -378,8 +378,8 @@ public final class JkClassLoader {
     /**
      * Loads all class having a relative path matching the supplied ANT pattern.
      * For example, if you want to load all class belonging to
-     * <code>my.pack</code> or its sub package, then you have to supply a the
-     * following pattern <code>my/pack/&#42;&#42;/&#42;</code>.
+     * <code>my.packAllArtifacts</code> or its sub package, then you have to supply a the
+     * following pattern <code>my/packAllArtifacts/&#42;&#42;/&#42;</code>.
      */
     public Set<Class<?>> loadClasses(String... globPatterns) {
         final List<String> patterns = new LinkedList<>();

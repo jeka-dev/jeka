@@ -36,7 +36,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     /**
      * Creates a {@link JkDependencies} to the specified artifact producer
      */
-    public static JkDependencies of(JkArtifactProducer artifactProducer, JkArtifactFileId ... artifactFileIds) {
+    public static JkDependencies of(JkArtifactProducer artifactProducer, JkArtifactId... artifactFileIds) {
         final ArtifactProducerDependency dependency = new ArtifactProducerDependency(artifactProducer, artifactFileIds);
         final JkScopedDependency scopedependency = JkScopedDependency.of(dependency);
         return of(scopedependency);
@@ -45,7 +45,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
     /**
      * Creates a {@link JkDependencies} to the specified artifact producer supplier
      */
-    public static JkDependencies of(Supplier<JkArtifactProducer> artifactProducerSupplier, JkArtifactFileId ... artifactFileIds) {
+    public static JkDependencies of(Supplier<JkArtifactProducer> artifactProducerSupplier, JkArtifactId... artifactFileIds) {
         return of(artifactProducerSupplier.get(), artifactFileIds);
     }
 
@@ -796,7 +796,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         /**
          * Adds a dependency on the specified artifact producer.
          */
-        public JkFluentScopeableBuilder on(JkArtifactProducer artifactProducer, JkArtifactFileId ... artifactFileIds) {
+        public JkFluentScopeableBuilder on(JkArtifactProducer artifactProducer, JkArtifactId... artifactFileIds) {
             final ArtifactProducerDependency dependency = new ArtifactProducerDependency(artifactProducer,
                     Arrays.asList(artifactFileIds));
             final JkScopedDependency scopedDependency = JkScopedDependency.of(dependency);
@@ -807,7 +807,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         /**
          * Adds a dependency on the specified artifact producer.
          */
-        public JkFluentScopeableBuilder on(Supplier<JkArtifactProducer> artifactProducerSupplier, JkArtifactFileId ... artifactFileIds) {
+        public JkFluentScopeableBuilder on(Supplier<JkArtifactProducer> artifactProducerSupplier, JkArtifactId... artifactFileIds) {
             return on(artifactProducerSupplier.get(), artifactFileIds);
         }
 

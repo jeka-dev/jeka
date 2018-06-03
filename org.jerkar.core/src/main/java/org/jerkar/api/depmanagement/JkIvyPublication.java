@@ -34,8 +34,8 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
      * Creates an Ivy publication from the specified artifact producer.
      */
     public static JkIvyPublication of(JkArtifactProducer artifactProducer) {
-       JkIvyPublication result =  JkIvyPublication.of(artifactProducer.artifactPath(artifactProducer.mainArtifactFileId()), JkJavaDepScopes.COMPILE);
-       for (JkArtifactFileId extraFileId : artifactProducer.artifactFileIds()) {
+       JkIvyPublication result =  JkIvyPublication.of(artifactProducer.artifactPath(artifactProducer.mainArtifactId()), JkJavaDepScopes.COMPILE);
+       for (JkArtifactId extraFileId : artifactProducer.artifactIds()) {
             Path file = artifactProducer.artifactPath(extraFileId);
             result = result.andOptional(file, extraFileId.classifier(), scopeFor(extraFileId.classifier()));
        }

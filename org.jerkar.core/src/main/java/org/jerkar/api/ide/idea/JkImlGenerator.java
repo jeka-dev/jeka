@@ -139,7 +139,7 @@ public final class JkImlGenerator {
         writer.writeCharacters("\n" + T1);
         writer.writeStartElement("component");
         writer.writeAttribute("name", "NewModuleRootManager");
-        writer.writeAttribute("inherit-compiler-output", "false");
+        writer.writeAttribute("inherit-compileRunner-output", "false");
         writer.writeCharacters("\n");
     }
 
@@ -270,9 +270,7 @@ public final class JkImlGenerator {
     private void writeDependencies(JkDependencies dependencies, JkDependencyResolver resolver, Set<Path> allPaths, Set<Path> allModules,
             boolean forceTest) throws XMLStreamException {
 
-        System.out.println("++++++++++++++++++++++++++++++++++ write dependencies with repo " + resolver.repositories());
         final JkResolveResult resolveResult = resolver.resolve(dependencies);
-        System.out.println("++++++++++++++++++++++++++++++++++ write dependencies with repo done");
         final JkDependencyNode tree = resolveResult.dependencyTree();
         for (final JkDependencyNode node : tree.flatten()) {
 

@@ -1,13 +1,13 @@
 package org.jerkar;
 
-import static org.jerkar.api.project.java.JkJavaProjectMaker.JAVADOC_FILE_ID;
-import static org.jerkar.api.project.java.JkJavaProjectMaker.SOURCES_FILE_ID;
+import static org.jerkar.api.project.java.JkJavaProjectMaker.JAVADOC_ARTIFACT_ID;
+import static org.jerkar.api.project.java.JkJavaProjectMaker.SOURCES_ARTIFACT_ID;
 
 import java.nio.file.Path;
 import java.util.List;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
-import org.jerkar.api.depmanagement.JkArtifactFileId;
+import org.jerkar.api.depmanagement.JkArtifactId;
 import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
 import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkPublishRepos;
@@ -25,7 +25,7 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
  */
 public class CoreBuild extends JkJavaProjectBuild {
 
-    public static final JkArtifactFileId DISTRIB_FILE_ID = JkArtifactFileId.of("distrib", "zip");
+    public static final JkArtifactId DISTRIB_FILE_ID = JkArtifactId.of("distrib", "zip");
 
     private static final String VERSION = "0.7-SNAPSHOT";
 
@@ -45,17 +45,17 @@ public class CoreBuild extends JkJavaProjectBuild {
 
     private void doDistrib() {
         final JkJavaProjectMaker maker = this.java().project().maker();
-        maker.makeArtifactFilesIfNecessary(SOURCES_FILE_ID, JAVADOC_FILE_ID, maker.mainArtifactFileId());
+        maker.makeArtifactsIfAbsent(SOURCES_ARTIFACT_ID, JAVADOC_ARTIFACT_ID, maker.mainArtifactId());
         final JkPathTree distrib = JkPathTree.of(distribFolder);
         distrib.copyIn(baseDir().getParent().resolve("LICENSE"));
         distrib.merge(baseDir().resolve("src/main/dist"));
         distrib.merge(baseDir().resolve("src/main/java/META-INF/bin"));
-        distrib.copyIn(maker.artifactPath(maker.mainArtifactFileId()));
+        distrib.copyIn(maker.artifactPath(maker.mainArtifactId()));
         final List<Path> ivySourceLibs = baseTree().goTo("build/libs-sources").accept("apache-ivy*.jar").files();
         distrib.goTo("libs-sources")
             .copyIn(ivySourceLibs)
-            .copyIn(maker.artifactPath(SOURCES_FILE_ID));
-        distrib.goTo("libs-javadoc").copyIn(maker.artifactPath(JAVADOC_FILE_ID));
+            .copyIn(maker.artifactPath(SOURCES_ARTIFACT_ID));
+        distrib.goTo("libs-javadoc").copyIn(maker.artifactPath(JAVADOC_ARTIFACT_ID));
         final Path distripZipFile = maker.artifactPath(DISTRIB_FILE_ID);
         distrib.zipTo(distripZipFile);
     }
@@ -68,8 +68,8 @@ public class CoreBuild extends JkJavaProjectBuild {
     public static void applyCommonSettings(JkJavaProject project, String moduleName) {
 
         // Fork to avoid compile failure bug on github/travis
-        project.maker().setBaseCompiler(JkJavaCompiler.base().fork(true));
-        project.maker().setTestBaseCompiler(JkJavaCompiler.base().fork(true));
+        project.maker().setCompiler(JkJavaCompiler.base().fork(true));
+        project.maker().setTestCompiler(JkJavaCompiler.base().fork(true));
 
         project.setVersionedModule(JkModuleId.of("org.jerkar", moduleName).version(VERSION));
         project.maker().setArtifactFileNameSupplier(() -> project.getVersionedModule().moduleId().fullName());

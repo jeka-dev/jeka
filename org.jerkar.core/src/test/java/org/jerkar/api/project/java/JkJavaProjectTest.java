@@ -43,7 +43,7 @@ public class JkJavaProjectTest {
         final JkDependencies deps = JkDependencies.builder().on(coreProject).build();
         desktopProject.setDependencies(deps);
         desktopProject.maker().defineFatJarArtifact("fat");
-        desktopProject.maker().makeAllArtifactFiles();
+        desktopProject.maker().makeAllArtifacts();
 
 
         // Desktop.getDesktop().open(desktop);

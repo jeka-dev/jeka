@@ -9,7 +9,7 @@ import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * Stands for a compilation settings as source and target projectVersion, encoding, annotation processing
- * or any option supported by the compiler.
+ * or any option supported by the compileRunner.
  */
 public final class JkJavaCompileSpec {
 
@@ -85,8 +85,8 @@ public final class JkJavaCompileSpec {
 
     /**
      * Sets the target Java projectVersion for compiled classes. Normally it is the same as the
-     * platform compiler shipped with but you can set it explicitly. Also, when set explicitly
-     * {@link JkJavaCompiler} can choose to use the appropriate compiler to compile to the
+     * platform compileRunner shipped with but you can set it explicitly. Also, when set explicitly
+     * {@link JkJavaCompiler} can choose to use the appropriate compileRunner to compile to the
      * specified target.
      */
     public JkJavaCompileSpec setTargetVersion(JkJavaVersion version) {
@@ -162,7 +162,7 @@ public final class JkJavaCompileSpec {
     // ------------------ generic options -------------------------
 
     /**
-     * Adds specified options to pass to the compiler.
+     * Adds specified options to pass to the compileRunner.
      * Options are option you pass in javac command line as
      * -deprecation, -nowarn, ... For example, if you want something equivalent
      * to <code>javac -deprecation -cp path1 path2</code>, you should pass "-deprecation",
@@ -181,7 +181,7 @@ public final class JkJavaCompileSpec {
     }
 
     /**
-     * Some options of a compiler are set in a couple of name/value (projectVersion, classpath, .....).
+     * Some options of a compileRunner are set in a couple of name/value (projectVersion, classpath, .....).
      * So if you want to explicitly set such an option it is desirable to remove current value
      * instead of adding it at the queue of options. This method does this for you.
      */

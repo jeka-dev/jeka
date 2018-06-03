@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 import org.jerkar.CoreBuild;
-import org.jerkar.api.depmanagement.JkArtifactFileId;
+import org.jerkar.api.depmanagement.JkArtifactId;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkJavadocMaker;
@@ -54,11 +54,11 @@ class DistribAllBuild extends JkBuild {
                 .copyIn(sonarPluginBuild.java().project().maker().mainArtifactPath())
                 .copyIn(jacocoPluginBuild.java().project().maker().mainArtifactPath());
         JkPathTree sourceDir = dist.goTo("libs-sources");
-        sourceDir.copyIn(sonarPluginBuild.java().project().maker().artifactPath(JkJavaProjectMaker.SOURCES_FILE_ID))
-                .copyIn(jacocoPluginBuild.java().project().maker().artifactPath(JkJavaProjectMaker.SOURCES_FILE_ID));
+        sourceDir.copyIn(sonarPluginBuild.java().project().maker().artifactPath(JkJavaProjectMaker.SOURCES_ARTIFACT_ID))
+                .copyIn(jacocoPluginBuild.java().project().maker().artifactPath(JkJavaProjectMaker.SOURCES_ARTIFACT_ID));
 
         JkLog.info("Add plugins to the fat jar");
-        Path fat = dist.get(core.java().project().maker().artifactPath(JkArtifactFileId.of("all", "jar"))
+        Path fat = dist.get(core.java().project().maker().artifactPath(JkArtifactId.of("all", "jar"))
                 .getFileName().toString());
         Files.copy(core.java().project().maker().mainArtifactPath(), fat, StandardCopyOption.REPLACE_EXISTING);
         ext.accept("**.jar").stream().map(path -> JkPathTree.ofZip(path)).forEach(tree -> tree.zipTo(fat));
@@ -88,9 +88,9 @@ class DistribAllBuild extends JkBuild {
     public void doDefault()  {
         clean();
         this.importedBuilds().all().forEach(JkBuild::clean);
-        jacocoPluginBuild.core.java().project().maker().makeArtifactFile(CoreBuild.DISTRIB_FILE_ID);
-        jacocoPluginBuild.java().project().maker().makeAllArtifactFiles();
-        sonarPluginBuild.java().project().maker().makeAllArtifactFiles();
+        jacocoPluginBuild.core.java().project().maker().makeArtifact(CoreBuild.DISTRIB_FILE_ID);
+        jacocoPluginBuild.java().project().maker().makeAllArtifacts();
+        sonarPluginBuild.java().project().maker().makeAllArtifacts();
         try {
             distrib();
             if (testSamples) {

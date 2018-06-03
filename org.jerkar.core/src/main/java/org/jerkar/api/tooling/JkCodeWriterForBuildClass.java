@@ -48,13 +48,13 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
 
     /**
      * The list of package/class to import.
-     * It can me expressed as "my.pack.MyClass" or "my.pack.*".
+     * It can me expressed as "my.packAllArtifacts.MyClass" or "my.packAllArtifacts.*".
      */
     public final List<String> imports = importsForJkBuild();
 
     /**
      * The list of package/class to import statically.
-     * It can me expressed as "my.pack.MyClass" or "my.pack.*".
+     * It can me expressed as "my.packAllArtifacts.MyClass" or "my.packAllArtifacts.*".
      */
     public final List<String> staticImports = new LinkedList<>();
 
