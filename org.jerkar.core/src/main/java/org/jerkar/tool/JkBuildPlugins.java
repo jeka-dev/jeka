@@ -3,7 +3,6 @@ package org.jerkar.tool;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsReflect;
 
-import java.awt.*;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.List;
@@ -29,7 +28,15 @@ public final class JkBuildPlugins {
     }
 
     public JkPlugin get(String pluginName) {
-        return configuredPlugins.stream().filter(plugin -> plugin.name().equals(pluginName)).findFirst().get();
+        Optional<JkPlugin> optPlugin = configuredPlugins.stream().filter(plugin -> plugin.name().equals(pluginName)).findFirst();
+        if (optPlugin.isPresent()) {
+            return optPlugin.get();
+        }
+        PluginDictionary.PluginDescription pluginDescription = PluginDictionary.loadByName(pluginName);
+        if (pluginDescription == null) {
+            return null;
+        }
+        return get(pluginDescription.pluginClass());
     }
 
     public boolean has(Class<? extends JkPlugin> pluginClass) {
@@ -46,7 +53,7 @@ public final class JkBuildPlugins {
     }
 
     void invoke(JkPlugin plugin, String methodName) {
-        JkLog.startUnderlined("Method " + methodName + " to plugin " + plugin.getClass().getSimpleName());
+        JkLog.startUnderlined("Method " + methodName + " of plugin " + plugin.getClass().getSimpleName());
         final Method method = pluginMethod(plugin.getClass(), methodName);
         JkUtilsReflect.invoke(plugin, method);
         JkLog.done();
@@ -61,7 +68,7 @@ public final class JkBuildPlugins {
         final T plugin = JkUtilsReflect.newInstance(pluginClass, JkBuild.class, this.holder);
         JkOptions.populateFields(plugin, options);
         configuredPlugins.add(plugin);
-        JkLog.info("Build instance " + this.holder + " decorated with plugin " + plugin);
+        JkLog.info("Build instance : " + this.holder + " will decorated with plugin " + plugin.name());
         return plugin;
     }
 
@@ -69,7 +76,7 @@ public final class JkBuildPlugins {
         try {
             return pluginClass.getMethod(name);
         } catch (NoSuchMethodException e) {
-            throw new IllegalStateException("No method " + name + "(JkBuild) found on plugin " + pluginClass);
+            throw new IllegalStateException("No method " + name + " found on plugin " + pluginClass);
         }
     }
 
@@ -78,7 +85,7 @@ public final class JkBuildPlugins {
                 CommandLine.INSTANCE.getSubProjectPluginSetups();
         for (CommandLine.JkPluginSetup pluginSetup : pluginSetups){
             if (pluginSetup.activated || !pluginSetup.options.isEmpty()) {
-                PluginDictionary.JkPluginDescription pluginDescription = PluginDictionary.loadByName(pluginSetup.pluginName);
+                PluginDictionary.PluginDescription pluginDescription = PluginDictionary.loadByName(pluginSetup.pluginName);
                 JkPlugin plugin = getOrCreate(pluginDescription.pluginClass(), pluginSetup.options);
                 plugin.setActivated(true);
             }

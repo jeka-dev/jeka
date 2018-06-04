@@ -1,6 +1,5 @@
 package org.jerkar.api.project.java;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -13,7 +12,6 @@ import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.ide.eclipse.JkEclipseClasspathGeneratorTest;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.junit.Test;
 
 
@@ -44,8 +42,8 @@ public class JkJavaProjectTest {
         desktopProject.setSourceLayout(sourceLayout);
         final JkDependencies deps = JkDependencies.builder().on(coreProject).build();
         desktopProject.setDependencies(deps);
-        desktopProject.maker().addFatJarArtifactFile("fat");
-        desktopProject.maker().makeAllArtifactFiles();
+        desktopProject.maker().defineFatJarArtifact("fat");
+        desktopProject.maker().makeAllArtifacts();
 
 
         // Desktop.getDesktop().open(desktop);

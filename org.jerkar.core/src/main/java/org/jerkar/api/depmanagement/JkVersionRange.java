@@ -6,8 +6,8 @@ import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * Expresses a version constraints for a given external modules. It can be an
- * exact version as 1.4.2 or a dynamic version as [1.0,2.0[. As this tool relies
+ * Expresses a projectVersion constraints for a given external modules. It can be an
+ * exact projectVersion as 1.4.2 or a dynamic projectVersion as [1.0,2.0[. As this tool relies
  * on Ivy to to perform dependency resolution, you can use any syntax accepted
  * by Ivy.
  *
@@ -21,11 +21,11 @@ public final class JkVersionRange implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /** Mention that the version is unspecified */
+    /** Mention that the projectVersion is unspecified */
     public static final JkVersionRange UNSPECIFIED = new JkVersionRange("unspecified");
 
     /**
-     * Creates a version range to String expression described at :
+     * Creates a projectVersion range to String expression described at :
      * http://ant.apache.org/ivy/history/latest-milestone/ivyfile/dependency.
      * html.
      */
@@ -37,7 +37,7 @@ public final class JkVersionRange implements Serializable {
 
     private JkVersionRange(String definition) {
         JkUtilsAssert.isTrue(!JkUtilsString.isBlank(definition),
-                "Can't instantatiate a version range with a blank or null definition.");
+                "Can't instantatiate a projectVersion range with a blank or null definition.");
         this.definition = definition;
     }
 
@@ -49,7 +49,7 @@ public final class JkVersionRange implements Serializable {
     }
 
     /**
-     * Returns <code>true</code> if the definition stands for a dynamic version
+     * Returns <code>true</code> if the definition stands for a dynamic projectVersion
      * (as "1.4.+", "[1.0,2.0[", "3.0-SNAPSHOT", ...) or <code>false</code> if
      * it stands for a fixed one (as "1.4.0, "2.0.3-23654114", ...).
      */
@@ -61,7 +61,7 @@ public final class JkVersionRange implements Serializable {
     }
 
     /**
-     * Returns <code>true</code> if this version range is unspecified.
+     * Returns <code>true</code> if this projectVersion range is unspecified.
      */
     public boolean isUnspecified() {
         return this.equals(UNSPECIFIED);
@@ -69,8 +69,8 @@ public final class JkVersionRange implements Serializable {
 
     /**
      * Returns <code>true</code> if the definition stands for dynamic resolvable
-     * version (as 1.4.+, [1.0, 2.0[, ...).<br/>
-     * . Returns <code>false</code> if the version is static or snapshot (as
+     * projectVersion (as 1.4.+, [1.0, 2.0[, ...).<br/>
+     * . Returns <code>false</code> if the projectVersion is static or snapshot (as
      * 1.4.0, 3.1-SNAPSHOT) A snapshot is not considered as 'resolvable'.
      */
     public boolean isDynamicAndResovable() {

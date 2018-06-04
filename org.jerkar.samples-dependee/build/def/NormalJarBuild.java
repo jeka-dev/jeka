@@ -31,7 +31,7 @@ public class NormalJarBuild extends JkJavaProjectBuild {
     private MavenStyleBuild sampleBuild;  
 
     @Override
-    protected void postConfigure() {
+    protected void configurePlugins() {
         java().project()
                 .setDependencies(JkDependencies.of(sampleBuild.java().project()))
                 .setSourceVersion(JkJavaVersion.V7);

@@ -3,7 +3,6 @@ package org.jerkar.api.project.java;
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileSystemLocalizable;
 import org.jerkar.api.file.JkPathTreeSet;
-import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.JkManifest;
@@ -20,13 +19,13 @@ import java.util.function.Supplier;
  * Container for a Java project with classic characteristic :
  * <ul>
  *     <li>Contains Java source files to be compiled</li>
- *     <li>All Java sources file (prod + test) are wrote against the same Java version and encoding</li>
+ *     <li>All Java sources file (prod + test) are wrote against the same Java projectVersion and encoding</li>
  *     <li>JkEclipseProject may contain unit tests</li>
  *     <li>It can depends on any accepted dependencies (Maven module, other project, files on fs, ...)</li>
  *
  *     <li>It produces a bin jar, a source jar and a javadoc jar</li>
  *     <li>It can produce any other artifact files (fat-jar, test jar, doc, ...)</li>
- *     <li>It can be identified as a Maven module (means it can provide a group, artifact id, version) in order to be published/reused</li>
+ *     <li>It can be identified as a Maven module (means it can provide a group, artifact id, projectVersion) in order to be published/reused</li>
  *     <li>It can be published on any Maven/Ivy repository, including Maven central</li>
  *
  *     <li>Part of the sources/resources may be generated</li>
@@ -78,10 +77,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         this.sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir);
         this.outLayout = JkProjectOutLayout.classicJava().withOutputDir(baseDir.resolve("build/output"));
         this.dependencies = JkDependencies.ofLocalScoped(baseDir.resolve("build/libs").toFile());
-        this.maker.addDefaultArtifactFiles();
     }
-
-
 
     // -------------------------- Other -------------------------
 
@@ -208,9 +204,9 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         return this;
     }
 
-    public JkJavaProject removeArtifactFile(JkArtifactFileId ... artifactFileIds) {
-        for (final JkArtifactFileId artifactFileId : artifactFileIds) {
-            this.maker.removeArtifactFile(artifactFileId);
+    public JkJavaProject removeArtifactFile(JkArtifactId... artifactFileIds) {
+        for (final JkArtifactId artifactFileId : artifactFileIds) {
+            this.maker.undefineArtifact(artifactFileId);
         }
         return this;
     }

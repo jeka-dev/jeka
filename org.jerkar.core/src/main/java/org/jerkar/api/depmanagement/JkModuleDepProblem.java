@@ -33,7 +33,7 @@ public class JkModuleDepProblem implements Serializable {
     }
 
     /**
-     * Returns the version range for which the problematic module dependency has been declared.
+     * Returns the projectVersion range for which the problematic module dependency has been declared.
      */
     public JkVersionRange versionRange() {
         return versionRange;

@@ -9,14 +9,9 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
  */
 class Build extends JkJavaProjectBuild {
 
-    /**
-     * Put here configuration you may want to override with runtime environment options (command line, configuration files,...)
-     * The project version is a good candidate as you may override it from your C.I. tools with the VCS version.
-     * When this method is called, options fields of the plugin instance are not yet populated, though you can access options using {@link org.jerkar.tool.JkOptions#get(String)}.
-     */
     @Override
-    protected void preConfigure() {
-        java().project().setVersionedModule("${group}:${name}", "0.0.1");
+    protected void setupOptionDefaults() {
+        java().projectVersion = "0.0.1";
     }
 
     /**
@@ -25,7 +20,8 @@ class Build extends JkJavaProjectBuild {
      * When this method is called, options fields of the plugin instance are already populated.
      */
     @Override
-    protected void postConfigure() {
+    protected void configurePlugins() {
+        java().project().setVersionedModule("${group}:${name}", java().projectVersion);
         java().project()
                 .setSourceVersion(JkJavaVersion.V8)
                 .setDependencies(dependencies());

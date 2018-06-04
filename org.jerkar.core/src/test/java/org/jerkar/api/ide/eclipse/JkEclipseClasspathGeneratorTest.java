@@ -69,7 +69,7 @@ public class JkEclipseClasspathGeneratorTest {
         final JkJavaProject desktopProject = new JkJavaProject(desktop);
         desktopProject.setSourceLayout(sourceLayout);
         desktopProject.setDependencies(deps);
-        desktopProject.maker().makeAllArtifactFiles();
+        desktopProject.maker().makeAllArtifacts();
 
         // ----------------- Now,  try to applyCommonSettings generated .classpath to projects and compare if it matches
 

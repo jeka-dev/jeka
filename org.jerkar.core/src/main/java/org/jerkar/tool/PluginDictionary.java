@@ -1,11 +1,13 @@
 package org.jerkar.tool;
 
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.utils.JkUtilsString;
@@ -23,19 +25,19 @@ import org.jerkar.api.utils.JkUtilsString;
  *
  * @author Jerome Angibaud
  * 
- * @see {@link JkPluginDescription}
+ * @see {@link PluginDescription}
  */
 final class PluginDictionary {
 
-    private Set<JkPluginDescription> plugins;
+    private Set<PluginDescription> plugins;
 
     /**
      * Returns all the plugins present in classpath for this template class.
      */
-    Set<JkPluginDescription> getAll() {
+    Set<PluginDescription> getAll() {
         if (plugins == null) {
             synchronized (this) {
-                final Set<JkPluginDescription> result = loadAllPlugins();
+                final Set<PluginDescription> result = loadAllPlugins();
                 this.plugins = Collections.unmodifiableSet(result);
             }
         }
@@ -49,24 +51,15 @@ final class PluginDictionary {
      * "myPluging" or "MyPlugin" is equal. If not found, returns
      * <code>null</code>.
      */
-    static JkPluginDescription loadByName(String name) {
+    static PluginDescription loadByName(String name) {
         if (!name.contains(".")) {
-            final JkPluginDescription result = loadPluginHavingShortName(
+            final PluginDescription result = loadPluginHavingShortName(
                     JkUtilsString.capitalize(name));
             if (result != null) {
                 return result;
             }
         }
         return loadPluginsHavingLongName(name);
-    }
-
-    public JkPluginDescription loadByNameOrFail(String name) {
-        final JkPluginDescription result = loadByName(name);
-        if (result == null) {
-            throw new IllegalArgumentException("No class found having name "
-                    + simpleClassName(name) + " for plugin '" + name + "'.");
-        }
-        return result;
     }
 
     private static String simpleClassName(String pluginName) {
@@ -81,15 +74,15 @@ final class PluginDictionary {
         return this.plugins.toString();
     }
 
-    private static <T> Set<JkPluginDescription> loadAllPlugins() {
+    private static <T> Set<PluginDescription> loadAllPlugins() {
         final String nameSuffix = JkPlugin.class.getSimpleName();
         return loadPlugins( "**/" + nameSuffix + "*", nameSuffix, "**/*$" + nameSuffix + "*",
                 "*$" + nameSuffix + "*");
     }
 
-    private static JkPluginDescription loadPluginHavingShortName(String shortName) {
+    private static PluginDescription loadPluginHavingShortName(String shortName) {
         final String simpleName = simpleClassName(shortName);
-        final Set<JkPluginDescription> set = loadPlugins( "**/" + simpleName, simpleName);
+        final Set<PluginDescription> set = loadPlugins( "**/" + simpleName, simpleName);
         set.addAll(loadPlugins( "**/*$" + simpleName, "*$" + simpleName ));
         if (set.size() > 1) {
             throw new JkException("Several plugin have the same short name : '" + shortName
@@ -102,25 +95,27 @@ final class PluginDictionary {
         return set.iterator().next();
     }
 
-    private static JkPluginDescription loadPluginsHavingLongName(String longName) {
+    private static PluginDescription loadPluginsHavingLongName(String longName) {
         final Class<? extends JkPlugin> pluginClass = JkClassLoader.current().loadIfExist(longName);
         if (pluginClass == null) {
             return null;
         }
-        return new JkPluginDescription(pluginClass);
+        return new PluginDescription(pluginClass);
     }
 
-    private static Set<JkPluginDescription> loadPlugins(String... patterns) {
+    private static Set<PluginDescription> loadPlugins(String... patterns) {
         final Set<Class<?>> matchingClasses = JkClassLoader.of(JkPlugin.class).loadClasses(patterns);
-        final Set<Class<?>> result = new HashSet<>();
-        return toPluginSet(matchingClasses);
+        return toPluginSet(matchingClasses.stream()
+                .filter(clazz -> JkPlugin.class.isAssignableFrom(clazz))
+                .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
+                .collect(Collectors.toSet()));
     }
 
     @SuppressWarnings("unchecked")
-    private static Set<JkPluginDescription> toPluginSet(Iterable<Class<?>> classes) {
-        final Set<JkPluginDescription> result = new TreeSet<>();
+    private static Set<PluginDescription> toPluginSet(Iterable<Class<?>> classes) {
+        final Set<PluginDescription> result = new TreeSet<>();
         for (final Class<?> clazz : classes) {
-            result.add(new JkPluginDescription((Class<? extends JkPlugin>) clazz));
+            result.add(new PluginDescription((Class<? extends JkPlugin>) clazz));
         }
         return result;
     }
@@ -131,11 +126,11 @@ final class PluginDictionary {
      * 
      * @author Jerome Angibaud
      */
-    static class JkPluginDescription implements Comparable<JkPluginDescription> {
+    static class PluginDescription implements Comparable<PluginDescription> {
 
         private static String shortName(Class<?> clazz) {
-            return JkUtilsString.uncapitalize(JkUtilsString.substringAfterFirst(JkPlugin.class.getSimpleName(),
-                    clazz.getSimpleName()));
+            return JkUtilsString.uncapitalize(JkUtilsString.substringAfterFirst(clazz.getSimpleName(),
+                    JkPlugin.class.getSimpleName()));
         }
 
         private static String longName(Class<?> clazz) {
@@ -148,7 +143,7 @@ final class PluginDictionary {
 
         private final Class<? extends JkPlugin> clazz;
 
-        public JkPluginDescription(Class<? extends JkPlugin> clazz) {
+        public PluginDescription(Class<? extends JkPlugin> clazz) {
             super();
             this.shortName = shortName(clazz);
             this.fullName = longName(clazz);
@@ -180,7 +175,7 @@ final class PluginDictionary {
         }
 
         @Override
-        public int compareTo(JkPluginDescription o) {
+        public int compareTo(PluginDescription o) {
             return this.shortName.compareTo(o.shortName);
         }
     }

@@ -7,7 +7,7 @@ import org.jerkar.api.java.JkManifest;
 import org.jerkar.api.utils.JkUtilsAssert;
 
 /**
- * Identifies a given module in a given version
+ * Identifies a given module in a given projectVersion
  *
  * @author Jerome Angibaud
  */
@@ -16,16 +16,16 @@ public final class JkVersionedModule implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates a {@link JkVersionedModule} from the specified module and version.
+     * Creates a {@link JkVersionedModule} from the specified module and projectVersion.
      */
     public static JkVersionedModule of(JkModuleId moduleId, JkVersion version) {
-        JkUtilsAssert.notNull(version, "No version specified for " + moduleId);
+        JkUtilsAssert.notNull(version, "No projectVersion specified for " + moduleId);
         return new JkVersionedModule(moduleId, version);
     }
 
     /**
      * Creates a <code>JkVersionedModule</code> from a string formatted as
-     * <code>groupId:name</code> and another one standing for the version.
+     * <code>groupId:name</code> and another one standing for the projectVersion.
      */
     public static final JkVersionedModule of(String groupAndName, String version) {
         final String[] items = groupAndName.split(":");
@@ -38,13 +38,13 @@ public final class JkVersionedModule implements Serializable {
 
     /**
      * Creates a <code>JkVersionedModule</code> from a string formatted as
-     * <code>groupId:name:version</code>.
+     * <code>groupId:name:projectVersion</code>.
      */
     public static final JkVersionedModule of(String description) {
         final String[] items = description.split(":");
         if (items.length != 3) {
             throw new IllegalArgumentException(description
-                    + " does not tespect format groupId:name:version");
+                    + " does not tespect format groupId:name:projectVersion");
         }
         return JkVersionedModule.of(JkModuleId.of(items[0], items[1]), JkVersion.name(items[2]));
     }
@@ -67,14 +67,14 @@ public final class JkVersionedModule implements Serializable {
     }
 
     /**
-     * Returns the version.
+     * Returns the projectVersion.
      */
     public JkVersion version() {
         return version;
     }
 
     /**
-     * Returns a {@link JkVersionedModule} identical to this one but with the specified version.
+     * Returns a {@link JkVersionedModule} identical to this one but with the specified projectVersion.
      */
     public JkVersionedModule withVersion(JkVersion version) {
         return new JkVersionedModule(this.moduleId, version);

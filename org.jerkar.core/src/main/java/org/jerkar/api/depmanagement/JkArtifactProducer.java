@@ -16,54 +16,54 @@ public interface JkArtifactProducer extends JkArtifactLocator {
      * Produces the specified artifact file. This method is supposed to create it from scratch (should be working after
      * a clean) but implementations can caches already processed phase result as compilation result or so.
      */
-    void makeArtifactFile(JkArtifactFileId jkArtifactId);
+    void makeArtifact(JkArtifactId jkArtifactId);
 
     /**
      * Returns the runtime dependencies of the specified artifact file. This is usefull to use the artifact file as
      * a transitive dependency.
      */
-    JkPathSequence runtimeDependencies(JkArtifactFileId jkArtifactId);
+    JkPathSequence runtimeDependencies(JkArtifactId jkArtifactId);
 
     /**
      * Short hand to produce the main artifact file and returns the result.
      */
     default Path makeMainJar() {
-        this.makeArtifactFile(mainArtifactFileId());
-        return artifactPath(mainArtifactFileId());
+        this.makeArtifact(mainArtifactId());
+        return artifactPath(mainArtifactId());
     }
 
 
     /**
      * Produces all the artifact files for the specified artifact file ids.
      */
-    default void makeArtifactFiles(Iterable<JkArtifactFileId> artifactFileIds) {
-        for (final JkArtifactFileId artifactFileId : artifactFileIds) {
-            makeArtifactFile(artifactFileId);
+    default void makeArtifacts(Iterable<JkArtifactId> artifactFileIds) {
+        for (final JkArtifactId artifactFileId : artifactFileIds) {
+            makeArtifact(artifactFileId);
         }
     }
 
     /**
      * Produces all the artifact files for this producer.
      */
-    default void makeAllArtifactFiles() {
-        makeArtifactFiles(artifactFileIds());
+    default void makeAllArtifacts() {
+        makeArtifacts(artifactIds());
     }
 
     /**
      * Produces specified artifact files. Only non existing files are created.
      */
-    default void makeArtifactFilesIfNecessary(JkArtifactFileId ... artifactFileIds) {
-        makeArtifactFilesIfNecessary(Arrays.asList(artifactFileIds));
+    default void makeArtifactsIfAbsent(JkArtifactId... artifactFileIds) {
+        makeArtifactsIfAbsent(Arrays.asList(artifactFileIds));
     }
 
     /**
-     * Same as {@link #makeArtifactFile(JkArtifactFileId)}
+     * Same as {@link #makeArtifact(JkArtifactId)}
      */
-    default void makeArtifactFilesIfNecessary(Iterable<JkArtifactFileId> artifactFileIds) {
-        for (final JkArtifactFileId artifactFileId : artifactFileIds) {
+    default void makeArtifactsIfAbsent(Iterable<JkArtifactId> artifactFileIds) {
+        for (final JkArtifactId artifactFileId : artifactFileIds) {
             final Path path = artifactPath(artifactFileId);
             if (!Files.exists(path)) {
-                makeArtifactFile(artifactFileId);
+                makeArtifact(artifactFileId);
             }
         }
     }

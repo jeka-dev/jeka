@@ -10,11 +10,11 @@ public final class JkTestOptions {
 
     /** Turn it on to skip tests. */
     @JkDoc("Turn it on to skip tests.")
-    public Boolean skip;
+    public boolean skip;
 
     /** Turn it on to run tests in a forked process. */
     @JkDoc("Turn it on to run tests in a forked process.")
-    public Boolean fork;
+    public boolean fork;
 
     /** Argument passed to the JVM if tests are forked. Example : -Xms2G -Xmx2G */
     @JkDoc("Argument passed to the JVM if tests are forked. Example : -Xms2G -Xmx2G")
@@ -25,10 +25,10 @@ public final class JkTestOptions {
         "BASIC mention the total time elapsed along detail on failed tests.",
         "FULL detailed report displays additionally the time to run each tests.",
     "Example : -report=NONE" })
-    public JunitReportDetail report;
+    public JunitReportDetail report = JunitReportDetail.BASIC;
 
     /** Turn it on to display System.out and System.err on console while executing tests.*/
     @JkDoc("Turn it on to display System.out and System.err on console while executing tests.")
-    public Boolean output;
+    public boolean output;
 
 }

@@ -39,7 +39,6 @@ public class JkPluginSonar extends JkPlugin {
         final String fullName = module != null ? module.moduleId().fullName() : project.getArtifactName();
         final String name = module != null ? module.moduleId().name() : project.getArtifactName();
         final JkVersion version = module != null ? module.version() : JkVersion.name("");
-        System.out.println("**********************************************************" + project.getOutLayout().classDir());
         return JkSonar
                 .of(fullName, name, version)
                 .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)

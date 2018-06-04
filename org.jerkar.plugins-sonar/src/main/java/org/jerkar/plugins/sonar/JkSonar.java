@@ -71,7 +71,7 @@ public final class JkSonar {
     public static JkSonar of(String projectKey, String projectName, JkVersion projectVersion) {
         JkUtilsAssert.notNull(projectName, "JkEclipseProject name can't be null.");
         JkUtilsAssert.notNull(projectKey, "JkEclipseProject key can't be null.");
-        JkUtilsAssert.notNull(projectVersion, "JkEclipseProject version can't be null.");
+        JkUtilsAssert.notNull(projectVersion, "JkEclipseProject projectVersion can't be null.");
         final Map<String, String> map = new HashMap<>();
         map.put(PROJECT_KEY, projectKey);
         map.put(PROJECT_NAME, projectName);

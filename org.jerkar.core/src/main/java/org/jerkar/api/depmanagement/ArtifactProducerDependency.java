@@ -21,8 +21,8 @@ class ArtifactProducerDependency extends JkComputedDependency  {
      * Constructs a {@link ArtifactProducerDependency} from an artifact producer and the artifact file id
      * one is interested on.
      */
-    ArtifactProducerDependency(JkArtifactProducer producer, Iterable<JkArtifactFileId> fileIds) {
-        super(() -> producer.makeArtifactFilesIfNecessary(artifacts(producer, fileIds)),
+    ArtifactProducerDependency(JkArtifactProducer producer, Iterable<JkArtifactId> fileIds) {
+        super(() -> producer.makeArtifactsIfAbsent(artifacts(producer, fileIds)),
                 baseDir(producer),
                 jars(producer, artifacts(producer, fileIds)), () -> runtimeDeps(producer, artifacts(producer, fileIds)));
         this.artifactProducer = producer;
@@ -33,28 +33,28 @@ class ArtifactProducerDependency extends JkComputedDependency  {
      * one is interested on.
      */
     ArtifactProducerDependency(JkArtifactProducer artifactProducer,
-            JkArtifactFileId ... artifactFileIds) {
+            JkArtifactId... artifactFileIds) {
         this(artifactProducer, Arrays.asList(artifactFileIds));
     }
 
-    private static Iterable<JkArtifactFileId> artifacts(JkArtifactProducer artifactProducer, Iterable<JkArtifactFileId> artifactFileIds) {
+    private static Iterable<JkArtifactId> artifacts(JkArtifactProducer artifactProducer, Iterable<JkArtifactId> artifactFileIds) {
         if (!artifactFileIds.iterator().hasNext()) {
-            return JkUtilsIterable.listOf(artifactProducer.mainArtifactFileId());
+            return JkUtilsIterable.listOf(artifactProducer.mainArtifactId());
         }
         return artifactFileIds;
     }
 
-    private static Iterable<Path> jars(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
+    private static Iterable<Path> jars(JkArtifactProducer producer, Iterable<JkArtifactId> artifactIds) {
         JkPathSequence result = JkPathSequence.of();
-        for (final JkArtifactFileId artifactFileId : artifactIds) {
+        for (final JkArtifactId artifactFileId : artifactIds) {
             result = result.and( producer.artifactPath(artifactFileId));
         }
         return result.withoutDuplicates();
     }
 
-    private static Iterable<Path> runtimeDeps(JkArtifactProducer producer, Iterable<JkArtifactFileId> artifactIds) {
+    private static Iterable<Path> runtimeDeps(JkArtifactProducer producer, Iterable<JkArtifactId> artifactIds) {
         JkPathSequence result = JkPathSequence.of();
-        for (final JkArtifactFileId artifactFileId : artifactIds) {
+        for (final JkArtifactId artifactFileId : artifactIds) {
             result = result.andMany( producer.runtimeDependencies(artifactFileId));
         }
         return result.withoutDuplicates();

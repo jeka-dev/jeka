@@ -1,6 +1,5 @@
 package org.jerkar.api.ide.idea;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -14,7 +13,6 @@ import org.jerkar.api.ide.eclipse.JkEclipseClasspathGeneratorTest;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.junit.Test;
 
 /**
@@ -63,7 +61,7 @@ public class JkImlGeneratorTest {
         final JkJavaProject desktopProject = new JkJavaProject(desktop);
         desktopProject.setSourceLayout(sourceLayout);
         desktopProject.setDependencies(deps);
-        desktopProject.maker().makeAllArtifactFiles();
+        desktopProject.maker().makeAllArtifacts();
 
         JkPathTree.of(top).deleteContent();
     }

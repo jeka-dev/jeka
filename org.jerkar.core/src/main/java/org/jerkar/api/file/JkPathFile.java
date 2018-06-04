@@ -96,7 +96,7 @@ public final class JkPathFile {
      * Deletes this file if exists.
      */
     public JkPathFile deleteIfExist() {
-        if (!exists()) {
+        if (exists()) {
             JkUtilsPath.deleteFile(this.path);
         }
         return this;

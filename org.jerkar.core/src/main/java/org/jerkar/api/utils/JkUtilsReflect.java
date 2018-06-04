@@ -200,7 +200,7 @@ public final class JkUtilsReflect {
         } catch (final RuntimeException e) {
             throw e;
         } catch (final Exception e) {
-            throw new RuntimeException("No constructor found with parameter of type " + parameterType.getName(), e);
+            throw new RuntimeException("No constructor found with parameter of type " + parameterType.getName() + " on class " + clazz, e);
         }
     }
 

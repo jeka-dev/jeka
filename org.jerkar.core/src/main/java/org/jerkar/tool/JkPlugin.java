@@ -37,10 +37,10 @@ public abstract class JkPlugin {
      * Called once options has been injected into this plugin instance. Typically this should
      * contain the code that initialize this plugin and decorate the build instance.
      */
-    protected void decorate() {
+    protected void decorateBuild() {
     }
 
-    final String name() {
+    public final String name() {
         final String className = this.getClass().getSimpleName();
         if (! className.startsWith(CLASS_PREFIX) || className.equals(CLASS_PREFIX)) {
             throw new IllegalStateException(String.format("Plugin class not properly named. Name should be formatted as " +

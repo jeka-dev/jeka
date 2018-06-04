@@ -1,6 +1,7 @@
 package org.jerkar.api.project.java;
 
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
@@ -17,19 +18,19 @@ import org.jerkar.api.system.JkLog;
 
 /**
  * Object responsible to build (to make) a java project. It provides methods to perform common build
- * tasks (compile, test, javadoc, package to jar) along methods to define how to build extra artifacts.
+ * tasks (compile, test, javadoc, package jars, publish artifacts) along methods to define how to build extra artifacts.
  *
  * All defined tasks are extensible so you can modify/improve the build behavior.
  */
 public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocalizable {
 
-    public static final JkArtifactFileId SOURCES_FILE_ID = JkArtifactFileId.of("sources", "jar");
+    public static final JkArtifactId SOURCES_ARTIFACT_ID = JkArtifactId.of("sources", "jar");
 
-    public static final JkArtifactFileId JAVADOC_FILE_ID = JkArtifactFileId.of("javadoc", "jar");
+    public static final JkArtifactId JAVADOC_ARTIFACT_ID = JkArtifactId.of("javadoc", "jar");
 
-    public static final JkArtifactFileId TEST_FILE_ID = JkArtifactFileId.of("test", "jar");
+    public static final JkArtifactId TEST_ARTIFACT_ID = JkArtifactId.of("test", "jar");
 
-    public static final JkArtifactFileId TEST_SOURCE_FILE_ID = JkArtifactFileId.of("test-sources", "jar");
+    public static final JkArtifactId TEST_SOURCE_ARTIFACT_ID = JkArtifactId.of("test-sources", "jar");
 
 
     private final JkJavaProject project;
@@ -37,9 +38,9 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
     private JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.mavenCentral())
             .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaDepScopes.DEFAULT_SCOPE_MAPPING));
 
-    private JkJavaCompiler baseCompiler = JkJavaCompiler.base();
+    private JkJavaCompiler compiler = JkJavaCompiler.base();
 
-    private JkJavaCompiler testBaseCompiler = JkJavaCompiler.base();
+    private JkJavaCompiler testCompiler = JkJavaCompiler.base();
 
     private JkUnit juniter = JkUnit.of().withOutputOnConsole(false).withReport(JkUnit.JunitReportDetail.BASIC);
 
@@ -51,11 +52,11 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
 
     private final Status status = new Status();
 
-    private final Map<JkArtifactFileId, Runnable> artifactProducers = new LinkedHashMap<>();
+    private final Map<JkArtifactId, Runnable> artifactProducers = new LinkedHashMap<>();
 
     private final JkJavaProjectPackager packager;
 
-    private final Set<JkArtifactFileId> artifactFileIdsToNotPublish = new LinkedHashSet<>();
+    private final Set<JkArtifactId> artifactFileIdsToNotPublish = new LinkedHashSet<>();
 
     private Supplier<String> artifactFileNameSupplier;
 
@@ -76,17 +77,17 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
                 .and(project.getOutLayout().generatedResourceDir())
                 .and(project.getResourceInterpolators())
                 .generateTo(project.getOutLayout().classDir(), charset));
-        this.compiler = JkRunnables.of(() -> {
+        this.compileRunner = JkRunnables.of(() -> {
             JkJavaCompileSpec compileSpec = compileSourceSpec();
-            baseCompiler.compile(compileSpec);
+            compiler.compile(compileSpec);
         });
         testResourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().testResources())
                 .and(project.getOutLayout().generatedTestResourceDir())
                 .and(project.getResourceInterpolators())
                 .generateTo(project.getOutLayout().testClassDir(), charset));
-        testCompiler = JkRunnables.of(() -> {
+        testCompileRunner = JkRunnables.of(() -> {
             JkJavaCompileSpec testCompileSpec = testCompileSpec();
-            testBaseCompiler.compile(testCompileSpec);
+            testCompiler.compile(testCompileSpec);
         });
         artifactFileNameSupplier = () -> {
             if (project.getVersionedModule() != null) {
@@ -96,6 +97,13 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
             }
             return project.baseDir().getFileName().toString();
         };
+
+        // defines artifacts
+        this.defineArtifact(mainArtifactId(), this::makeBinJar);
+        this.defineArtifact(SOURCES_ARTIFACT_ID, this::makeSourceJar);
+        this.defineArtifact(JAVADOC_ARTIFACT_ID, this::makeJavadocJar);
+        this.defineArtifact(TEST_ARTIFACT_ID, this::makeTestJar);
+        this.defineArtifact(TEST_SOURCE_ARTIFACT_ID, this.getPackager()::testSourceJar);
     }
 
 
@@ -149,7 +157,7 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
 
     public final JkRunnables resourceProcessor;
 
-    public final JkRunnables compiler;
+    public final JkRunnables compileRunner;
 
     private JkJavaCompileSpec compileSourceSpec() {
         JkJavaCompileSpec result = project.getCompileSpec().copy();
@@ -169,7 +177,7 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
         beforeCompile.run();
         sourceGenerator.run();
         resourceGenerator.run();
-        compiler.run();
+        compileRunner.run();
         resourceProcessor.run();
         afterCompile.run();
         this.status.compileDone = true;
@@ -187,7 +195,7 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
 
     public final JkRunnables testResourceProcessor;
 
-    public final JkRunnables testCompiler;
+    public final JkRunnables testCompileRunner;
 
     private JkJavaCompileSpec testCompileSpec() {
         JkJavaCompileSpec result = project.getCompileSpec().copy();
@@ -226,7 +234,7 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
             compile();
         }
         beforeTest.run();
-        testCompiler.run();
+        testCompileRunner.run();
         testResourceGenerator.run();
         testResourceProcessor.run();
         testExecutor.run();
@@ -238,12 +246,8 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
 
     // Pack --------------------------------------------------------------------
 
-    public final JkRunnables beforePackage = JkRunnables.of(() -> {
-    });
 
-
-
-    Path getArtifactFile(JkArtifactFileId artifactId) {
+    Path getArtifactFile(JkArtifactId artifactId) {
         final String namePart = artifactFileNameSupplier.get();
         final String classifier = artifactId.classifier() == null ? "" : "-" + artifactId.classifier();
         final String extension = artifactId.extension() == null ? "" : "." + artifactId.extension();
@@ -254,42 +258,37 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
         return versionedModule.moduleId().fullName() + "-" + versionedModule.version().name();
     }
 
-    Iterable<JkArtifactFileId> getArtifactFileIds() {
-        return this.artifactProducers.keySet();
-    }
-
-    public JkJavaProjectMaker addArtifactFile(JkArtifactFileId artifactFileId, Runnable runnable) {
+    public JkJavaProjectMaker defineArtifact(JkArtifactId artifactFileId, Runnable runnable) {
         this.artifactProducers.put(artifactFileId, runnable);
         return this;
     }
 
-    JkJavaProjectMaker removeArtifactFile(JkArtifactFileId artifactFileId) {
+    JkJavaProjectMaker undefineArtifact(JkArtifactId artifactFileId) {
         this.artifactProducers.remove(artifactFileId);
         return this;
     }
 
-    boolean contains(JkArtifactFileId artifactFileId) {
-        return this.artifactProducers.containsKey(artifactFileId);
-    }
-
-    public final JkRunnables afterPackage = JkRunnables.of(() -> {
+    public final JkRunnables afterPack = JkRunnables.of(() -> {
     });
 
-    public JkJavaProjectMaker pack() {
-        beforePackage.run();
-        this.compileAndTestIfNeeded();
-        makeAllArtifactFiles();
-        afterPackage.run();
-        status.packagingDone = true;
+
+    public JkJavaProjectMaker packAllArtifacts() {
+       return pack(artifactIds());
+    }
+
+    public JkJavaProjectMaker pack(Iterable<JkArtifactId> artifactIds) {
+        makeArtifactsIfAbsent(artifactIds);
+        afterPack.run();
         return this;
     }
 
     public void checksum(String ...algorithms) {
-        this.allArtifactPaths().forEach((file) -> JkPathFile.of(file).checksum(algorithms));
+        this.allArtifactPaths().stream().filter(Files::exists)
+                .forEach((file) -> JkPathFile.of(file).checksum(algorithms));
     }
 
     public void signArtifactFiles(JkPgp pgp) {
-        this.allArtifactPaths().forEach((file) -> pgp.sign(file));
+        this.allArtifactPaths().stream().filter(Files::exists).forEach((file) -> pgp.sign(file));
     }
 
     // ----------------------- publish
@@ -315,10 +314,10 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
     public JkJavaProjectMaker publishIvy() {
         final JkDependencies dependencies = getDefaultedDependencies();
         final JkIvyPublication publication = JkIvyPublication.of(mainArtifactPath(), JkJavaDepScopes.COMPILE)
-                .andOptional(artifactPath(SOURCES_FILE_ID), JkJavaDepScopes.SOURCES)
-                .andOptional(artifactPath(JAVADOC_FILE_ID), JkJavaDepScopes.JAVADOC)
-                .andOptional(artifactPath(TEST_FILE_ID), JkJavaDepScopes.TEST)
-                .andOptional(artifactPath(TEST_SOURCE_FILE_ID), JkJavaDepScopes.SOURCES);
+                .andOptional(artifactPath(SOURCES_ARTIFACT_ID), JkJavaDepScopes.SOURCES)
+                .andOptional(artifactPath(JAVADOC_ARTIFACT_ID), JkJavaDepScopes.JAVADOC)
+                .andOptional(artifactPath(TEST_ARTIFACT_ID), JkJavaDepScopes.TEST)
+                .andOptional(artifactPath(TEST_SOURCE_ARTIFACT_ID), JkJavaDepScopes.SOURCES);
         final JkVersionProvider resolvedVersions = this.dependencyResolver
                 .resolve(dependencies, dependencies.involvedScopes()).resolvedVersionProvider();
         JkPublisher.of(this.publishRepos, project.getOutLayout().outputPath())
@@ -379,21 +378,21 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
         return this;
     }
 
-    public JkJavaCompiler getBaseCompiler() {
-        return baseCompiler;
+    public JkJavaCompiler getCompiler() {
+        return compiler;
     }
 
-    public JkJavaProjectMaker setBaseCompiler(JkJavaCompiler baseCompiler) {
-        this.baseCompiler = baseCompiler;
+    public JkJavaProjectMaker setCompiler(JkJavaCompiler compiler) {
+        this.compiler = compiler;
         return this;
     }
 
-    public JkJavaCompiler getTestBaseCompiler() {
-        return testBaseCompiler;
+    public JkJavaCompiler getTestCompiler() {
+        return testCompiler;
     }
 
-    public JkJavaProjectMaker setTestBaseCompiler(JkJavaCompiler testBaseCompiler) {
-        this.testBaseCompiler = testBaseCompiler;
+    public JkJavaProjectMaker setTestCompiler(JkJavaCompiler testCompiler) {
+        this.testCompiler = testCompiler;
         return this;
     }
 
@@ -433,7 +432,7 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
         return this;
     }
 
-    public Set<JkArtifactFileId> getArtifactFileIdsToNotPublish() {
+    public Set<JkArtifactId> getArtifactFileIdsToNotPublish() {
         return artifactFileIdsToNotPublish;
     }
 
@@ -447,7 +446,7 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
 
     // ----------- artifact management --------------------------------------
 
-    public void makeArtifactFile(JkArtifactFileId artifactFileId) {
+    public void makeArtifact(JkArtifactId artifactFileId) {
         if (artifactProducers.containsKey(artifactFileId)) {
             JkLog.startln("Producing artifact file " + getArtifactFile(artifactFileId).getFileName());
             this.artifactProducers.get(artifactFileId).run();
@@ -457,28 +456,11 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
         }
     }
 
-    void addDefaultArtifactFiles() {
-        this.addArtifactFile(mainArtifactFileId(), this::makeBinJar);
-        this.addArtifactFile(SOURCES_FILE_ID, this::makeSourceJar);
-        this.addArtifactFile(JAVADOC_FILE_ID, this::makeJavadocJar);
-    }
-
-
     /**
-     * JkEclipseProject will produces one artifact file for test binaries and one for test sources.
+     * Convenient method for defining a fat jar artifact having the specified classifier name.
      */
-    public JkJavaProjectMaker addTestArtifactFiles() {
-        this.addArtifactFile(TEST_FILE_ID, this::makeTestJar);
-        this.addArtifactFile(TEST_SOURCE_FILE_ID, () -> this.getPackager().testSourceJar());
-        return this;
-    }
-
-    /**
-     * Convenient method.
-     * JkEclipseProject will produces one artifact file for fat jar having the specified name.
-     */
-    public JkJavaProjectMaker addFatJarArtifactFile(String classifier) {
-        this.addArtifactFile(JkArtifactFileId.of(classifier, "jar"),
+    public JkJavaProjectMaker defineFatJarArtifact(String classifier) {
+        this.defineArtifact(JkArtifactId.of(classifier, "jar"),
                 () -> {compileAndTestIfNeeded(); getPackager().fatJar(classifier);});
         return this;
     }
@@ -487,18 +469,18 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
 
 
     @Override
-    public Path artifactPath(JkArtifactFileId artifactId) {
+    public Path artifactPath(JkArtifactId artifactId) {
         return getArtifactFile(artifactId);
     }
 
     @Override
-    public final Iterable<JkArtifactFileId> artifactFileIds() {
-        return getArtifactFileIds();
+    public final Iterable<JkArtifactId> artifactIds() {
+        return this.artifactProducers.keySet();
     }
 
     @Override
-    public JkPathSequence runtimeDependencies(JkArtifactFileId artifactFileId) {
-        if (artifactFileId.equals(mainArtifactFileId())) {
+    public JkPathSequence runtimeDependencies(JkArtifactId artifactFileId) {
+        if (artifactFileId.equals(mainArtifactId())) {
             return this.getDependencyResolver().get(
                     this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME), JkJavaDepScopes.RUNTIME);
         } else if (artifactFileId.isClassifier("test") && artifactFileId.isExtension("jar")) {
@@ -518,14 +500,12 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
         private boolean sourceGenerated = false;
         private boolean compileDone = false;
         private boolean unitTestDone = false;
-        private boolean packagingDone = false;
         private boolean javadocGenerated = false;
 
         void reset() {
             sourceGenerated = false;
             compileDone = false;
             unitTestDone = false;
-            packagingDone = false;
             javadocGenerated = false;
         }
 

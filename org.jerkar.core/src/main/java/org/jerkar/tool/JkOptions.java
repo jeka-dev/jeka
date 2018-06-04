@@ -36,7 +36,7 @@ public final class JkOptions {
 
     static synchronized void init(Map<String, String> options) {
         if (populated) {
-            throw new IllegalStateException("The decorate method can be called only once.");
+            throw new IllegalStateException("The decorateBuild method can be called only once.");
         }
         final Map<String, String> map = new HashMap<>();
         map.putAll(options);

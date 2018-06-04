@@ -133,7 +133,7 @@ public class JkDependencyNode implements Serializable {
     }
 
     /**
-     * Returns the resolved version for this node and all its flatten.
+     * Returns the resolved projectVersion for this node and all its flatten.
      */
     public JkVersionProvider flattenToVersionProvider() {
         return this.resolvedVersions;

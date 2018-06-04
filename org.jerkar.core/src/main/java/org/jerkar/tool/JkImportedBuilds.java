@@ -152,7 +152,7 @@ public final class JkImportedBuilds {
         final Engine engine = new Engine(projectDir);
         final T result = engine.getBuild(clazz);
         JkOptions.populateFields(result);
-        result.postConfigure();
+        result.configurePlugins();
         IMPORTED_BUILD_CONTEXT.get().put(projectRef, result);
         return result;
     }

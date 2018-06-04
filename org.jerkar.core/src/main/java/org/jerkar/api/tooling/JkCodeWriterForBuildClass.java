@@ -48,13 +48,13 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
 
     /**
      * The list of package/class to import.
-     * It can me expressed as "my.pack.MyClass" or "my.pack.*".
+     * It can me expressed as "my.packAllArtifacts.MyClass" or "my.packAllArtifacts.*".
      */
     public final List<String> imports = importsForJkBuild();
 
     /**
      * The list of package/class to import statically.
-     * It can me expressed as "my.pack.MyClass" or "my.pack.*".
+     * It can me expressed as "my.packAllArtifacts.MyClass" or "my.packAllArtifacts.*".
      */
     public final List<String> staticImports = new LinkedList<>();
 
@@ -73,7 +73,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
     public JkModuleId moduleId;
 
     /**
-     * The version declared in the generated build class. Can be null.
+     * The projectVersion declared in the generated build class. Can be null.
      */
     public String version;
 
@@ -89,12 +89,12 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
     public JkRepos repos;
 
     /**
-     * The version provider declared in the the generated build class.
+     * The projectVersion provider declared in the the generated build class.
      */
     public JkVersionProvider versionProvider;
 
     /**
-     * The version dependency exclusions declared in the generated build class.
+     * The projectVersion dependency exclusions declared in the generated build class.
      */
     public JkDependencyExclusions dependencyExclusions;
 
@@ -105,7 +105,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
 
     /**
      * When generating versionProvider method, if you want that all the
-     * moduleId for a given group map to a variable (instead of the version
+     * moduleId for a given group map to a variable (instead of the projectVersion
      * literal), add an entry to this map as
      * <code>groupVersionVariableMap.put("my.group", "myGroupVersion")</code>
      * where "myGroupVersion" is a a field declared in
@@ -315,7 +315,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
         }
 
         public String version(String version) {
-            return "    JkVersion version() {\n" + "        return JkVersion.name(\"" + version + "\");\n" +
+            return "    JkVersion projectVersion() {\n" + "        return JkVersion.name(\"" + version + "\");\n" +
                     "    }";
         }
 
