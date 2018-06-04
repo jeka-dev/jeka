@@ -12,8 +12,6 @@ import java.util.List;
  */
 public final class JkBuildPlugins {
 
-    private static PluginDictionary PLUGIN_DICTIONARY = new PluginDictionary();
-
     private final JkBuild holder;
 
     private final List<JkPlugin> configuredPlugins = new LinkedList<>();
@@ -84,23 +82,9 @@ public final class JkBuildPlugins {
         Iterable<CommandLine.JkPluginSetup> pluginSetups = master ? CommandLine.INSTANCE.getMasterPluginSetups() :
                 CommandLine.INSTANCE.getSubProjectPluginSetups();
         for (CommandLine.JkPluginSetup pluginSetup : pluginSetups){
-            if (pluginSetup.activated || !pluginSetup.options.isEmpty()) {
-                PluginDictionary.PluginDescription pluginDescription = PluginDictionary.loadByName(pluginSetup.pluginName);
-                JkPlugin plugin = getOrCreate(pluginDescription.pluginClass(), pluginSetup.options);
-                plugin.setActivated(true);
-            }
+            PluginDictionary.PluginDescription pluginDescription = PluginDictionary.loadByName(pluginSetup.pluginName);
+            getOrCreate(pluginDescription.pluginClass(), pluginSetup.options);
         }
-    }
-
-    private static Map<String, String> commandLineOptions(JkPlugin plugin, boolean master) {
-        Iterable<CommandLine.JkPluginSetup> pluginSetups = master ? CommandLine.INSTANCE.getMasterPluginSetups() :
-                CommandLine.INSTANCE.getSubProjectPluginSetups();
-        for (CommandLine.JkPluginSetup pluginSetup : pluginSetups){
-            if (pluginSetup.pluginName.equals(plugin.name())) {
-                return pluginSetup.options;
-            }
-        }
-        return Collections.emptyMap();
     }
 
 }

@@ -101,7 +101,7 @@ public class JkBuild {
             // Load plugins declared in command line
             this.configurePlugins();
             plugins.loadCommandLinePlugins(isMaster);
-            plugins.all().stream().filter(plugin -> plugin.isActivated()).forEach(plugin -> plugin.decorateBuild());
+            plugins.all().forEach(plugin -> plugin.decorateBuild());
 
             // Extra build configuration
             this.configure();

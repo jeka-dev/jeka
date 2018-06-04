@@ -9,10 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.api.utils.JkUtilsReflect;
-import org.jerkar.api.utils.JkUtilsThrowable;
-import org.jerkar.api.utils.JkUtilsXml;
+import org.jerkar.api.utils.*;
 import org.jerkar.tool.PluginDictionary.PluginDescription;
 import org.jerkar.tool.ProjectDef.BuildClassDef;
 import org.w3c.dom.Document;
@@ -61,11 +58,25 @@ final class HelpDisplayer {
             JkLog.nextLine();
             JkLog.infoUnderlined("Plugin class : " + description.fullName());
             JkLog.info("Plugin name : " + description.shortName());
+            List<String> deps = description.pluginDependencies();
+            if (!deps.isEmpty()) {
+                JkLog.info("Depends on plugins : " + JkUtilsString.join(deps, ", "));
+            }
             final List<String> explanations = description.explanation();
             if (!explanations.isEmpty()) {
                 JkLog.info("Purpose : " + description.explanation().get(0));
                 JkLog.info(description.explanation().subList(1, description.explanation().size())
                         .stream().map(line -> "          " + line).collect(Collectors.toList()));
+            }
+            final List<String> activationEffects = description.activationEffect();
+            if (!activationEffects.isEmpty()) {
+                JkLog.info("Activation effects : " + description.activationEffect().get(0));
+                JkLog.info(description.explanation().subList(1, description.activationEffect().size())
+                        .stream().map(line -> "                      " + line).collect(Collectors.toList()));
+            } else if (!description.isDecorateBuildDefined()){
+                JkLog.info("Activation effects : None.");
+            } else {
+                JkLog.info("Activation effects : Not documented.");
             }
             final Object object = JkUtilsReflect.newInstance(description.pluginClass(), JkBuild.class, DUMMY);
             BuildClassDef.of(object).log(description.shortName() + "#", false);

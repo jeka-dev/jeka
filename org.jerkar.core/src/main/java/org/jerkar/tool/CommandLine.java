@@ -141,20 +141,20 @@ final class CommandLine {
             if (MethodInvocation.isPluginMethodInvokation(word)) {
                 final String pluginName = JkUtilsString.substringBeforeFirst(word, PLUGIN_SYMBOL);
                 if (!setups.containsKey(pluginName)) {
-                    setups.put(pluginName, JkPluginSetup.of(pluginName, false));
+                    setups.put(pluginName, JkPluginSetup.of(pluginName));
                 }
             } else if (MethodInvocation.isPluginActivation(word)) {
                 final String pluginName = JkUtilsString.substringBeforeFirst(word, PLUGIN_SYMBOL);
                 final JkPluginSetup setup = setups.get(pluginName);
                 if (setup == null) {
-                    setups.put(pluginName, JkPluginSetup.of(pluginName, true));
+                    setups.put(pluginName, JkPluginSetup.of(pluginName));
                 } else {
                     setups.put(pluginName, setup.activated());
                 }
             } else if (isPluginOption(word)) {
                 final String pluginName = JkUtilsString.substringBeforeFirst(word, PLUGIN_SYMBOL)
                         .substring(1);
-                JkPluginSetup setup = setups.computeIfAbsent(pluginName, n -> JkPluginSetup.of(n, false));
+                JkPluginSetup setup = setups.computeIfAbsent(pluginName, n -> JkPluginSetup.of(n));
                 final int equalIndex = word.indexOf("=");
                 if (equalIndex <= -1) {
                     final String key = JkUtilsString.substringAfterFirst(word, PLUGIN_SYMBOL);
@@ -235,50 +235,31 @@ final class CommandLine {
 
     public static class JkPluginSetup {
 
-        public static Set<String> names(Iterable<JkPluginSetup> setups) {
-            final Set<String> result = new HashSet<>();
-            for (final JkPluginSetup setup : setups) {
-                result.add(setup.pluginName);
-            }
-            return result;
-        }
 
-        public static JkPluginSetup findOrFail(String name, Iterable<JkPluginSetup> setups) {
-            for (final JkPluginSetup setup : setups) {
-                if (name.equals(setup.pluginName)) {
-                    return setup;
-                }
-            }
-            throw new IllegalArgumentException("No setup found with name " + name + " found in "
-                    + setups);
-        }
 
         @SuppressWarnings("unchecked")
-        public static JkPluginSetup of(String name, boolean activated) {
-            return new JkPluginSetup(name, Collections.EMPTY_MAP, activated);
+        public static JkPluginSetup of(String name) {
+            return new JkPluginSetup(name, Collections.EMPTY_MAP);
         }
 
         public final String pluginName;
 
         public final Map<String, String> options;
 
-        public final boolean activated;
-
-        private JkPluginSetup(String pluginName, Map<String, String> options, boolean activated) {
+        private JkPluginSetup(String pluginName, Map<String, String> options) {
             super();
             this.pluginName = pluginName;
             this.options = Collections.unmodifiableMap(options);
-            this.activated = activated;
         }
 
         public JkPluginSetup with(String key, String value) {
             final Map<String, String> map = new HashMap<>(options);
             map.put(key, value);
-            return new JkPluginSetup(pluginName, map, activated);
+            return new JkPluginSetup(pluginName, map);
         }
 
         public JkPluginSetup activated() {
-            return new JkPluginSetup(pluginName, options, true);
+            return new JkPluginSetup(pluginName, options);
         }
 
         @Override

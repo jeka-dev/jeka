@@ -13,10 +13,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@JkDoc("Provides method to generate Idea Intellij metadata files.")
+@JkDoc("Generation of Idea Intellij metadata files (*.iml and modules.xml).")
 public final class JkPluginIdea extends JkPlugin {
 
-    @JkDoc("If true, path to cache repository and to Jerkar install will be replaces by $JERKAR_REPO$ and $JERKAR_HOME$ path variable")
+    @JkDoc("If true, dependency paths will be expressed relatively to $JERKAR_REPO$ and $JERKAR_HOME$ path variable instead of absolute paths.")
     boolean useVarPath = false;
 
     protected JkPluginIdea(JkBuild build) {
@@ -24,7 +24,7 @@ public final class JkPluginIdea extends JkPlugin {
     }
 
     /** Generates Idea [my-module].iml file */
-    @JkDoc("Generates Idea [my-module].iml file")
+    @JkDoc("Generates Idea [my-module].iml file.")
     public void generateIml() {
 
         final JkImlGenerator generator;
@@ -58,7 +58,7 @@ public final class JkPluginIdea extends JkPlugin {
     }
 
     /** Generate modules.xml files */
-    @JkDoc("Generates ./idea/modules.xml file")
+    @JkDoc("Generates ./idea/modules.xml file.")
     public void generateModulesXml() {
         final Path current = build.baseTree().root();
         final Iterable<Path> imls = build.baseTree().accept("**.iml").files();
@@ -80,12 +80,13 @@ public final class JkPluginIdea extends JkPlugin {
         }
     }
 
-    @JkDoc(("Shorthand for #generateAllIml + generateModulesXml"))
+    @JkDoc("Shorthand for idea#generateAllIml + idea#generateModulesXml.")
     public void generateAll() {
         generateAllIml();
         generateModulesXml();
     }
 
+    @JkDoc("Adds *.iml generation to scaffolding.")
     @Override
     protected void decorateBuild() {
         this.build.scaffolder().extraActions.chain(this::generateIml);

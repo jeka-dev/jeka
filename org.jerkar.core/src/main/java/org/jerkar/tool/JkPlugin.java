@@ -9,16 +9,6 @@ public abstract class JkPlugin {
     // Build instance owning  this plugin instance.
     protected final JkBuild build;
 
-    private boolean activated = true;
-
-    public final boolean isActivated() {
-        return activated;
-    }
-
-    public final void setActivated(boolean activated) {
-        this.activated = activated;
-    }
-
     /**
      * Right after to be instantiated, plugin instances are likely to configured by their build owner.
      * Therefore, every plugin members that are likely to be configured by the owning build must be
@@ -32,11 +22,6 @@ public abstract class JkPlugin {
         build.addDefaultOperation(action);
     }
 
-
-    /**
-     * Called once options has been injected into this plugin instance. Typically this should
-     * contain the code that initialize this plugin and decorate the build instance.
-     */
     protected void decorateBuild() {
     }
 

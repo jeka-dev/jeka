@@ -17,12 +17,12 @@ import java.util.List;
  * Plugin for building Java projects. It comes with a {@link JkJavaProject} pre-configured with {@link JkOptions}.
  * and a decoration for scaffolding.
  */
-@SuppressWarnings("javadoc")
+@JkDoc("Build of java project through a JkJavaProject instance.")
 public class JkPluginJava extends JkPlugin {
 
     // ------------------------------ options -------------------------------------------
 
-    @JkDoc("Version for the project to build")
+    @JkDoc("Version for the project to build.")
     public String projectVersion;
 
     @JkDoc("Publication")
@@ -72,6 +72,9 @@ public class JkPluginJava extends JkPlugin {
         final JkPublishRepos optionPublishRepos = repos.publishRepositories();
         if (optionPublishRepos != null) {
             project.maker().setPublishRepos(optionPublishRepos);
+        }
+        if (repos.publishLocally) {
+            project.maker().setPublishRepos(JkPublishRepos.local());
         }
         if (repos.signPublishedArtifacts) {
             project.maker().setPublishRepos(project.maker().getPublishRepos().withSigner(repos.pgpSigner()));
@@ -129,16 +132,33 @@ public class JkPluginJava extends JkPlugin {
         return project;
     }
 
+    public List<JkArtifactId> producedArtifacts() {
+        return producedArtifacts;
+    }
+
     public JkPathTree ouputTree() {
         return JkPathTree.of(this.project().getOutLayout().outputPath());
     }
 
     // ------------------------------- command line methods -----------------------------
 
+    @JkDoc("Performs compilation and testing.")
+    public void check() {
+        if (tests.skip) {
+            project.maker().compile();
+        } else {
+            project.maker().test();
+        }
+    }
+
+    @JkDoc("Generates all artifacts defined in producedArtifact list.")
+    public void pack() {
+        project.maker().pack(this.producedArtifacts);
+    }
     /**
      * Displays the resolved dependency tree on the console.
      */
-    @JkDoc("Displays the resolved dependency tree on the console.")
+    @JkDoc("Displays resolved dependency tree on console.")
     public final void showDependencies() {
         JkLog.infoHeaded("Resolved dependencies ");
         final JkResolveResult resolveResult = this.project().maker().getDependencyResolver()
@@ -146,5 +166,7 @@ public class JkPluginJava extends JkPlugin {
         final JkDependencyNode tree = resolveResult.dependencyTree();
         JkLog.info(tree.toStrings());
     }
+
+
 
 }

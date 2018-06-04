@@ -1,16 +1,13 @@
 package org.jerkar.tool;
 
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
 import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Contains description for all concrete plugins in current classpath.
@@ -150,6 +147,18 @@ final class PluginDictionary {
             this.clazz = clazz;
         }
 
+        public List<String> pluginDependencies() {
+            List<String> result = new LinkedList<>();
+            JkDocPluginDeps pluginDeps = clazz.getAnnotation(JkDocPluginDeps.class);
+            if (pluginDeps == null) {
+                return Collections.emptyList();
+            }
+            for (Class<?> depClass : pluginDeps.value()) {
+                result.add(depClass.getName());
+            }
+            return result;
+        }
+
         public String shortName() {
             return this.shortName;
         }
@@ -167,6 +176,16 @@ final class PluginDictionary {
                 return Collections.emptyList();
             }
             return Arrays.asList(this.clazz.getAnnotation(JkDoc.class).value());
+        }
+
+        public List<String> activationEffect() {
+            JkDoc doc = JkUtilsReflect.getInheritedAnnotation(clazz,  JkDoc.class, "decorateBuild");
+            return doc == null ? Collections.emptyList() : Arrays.asList(doc.value());
+        }
+
+        boolean isDecorateBuildDefined() {
+            Method decorateBuild = JkUtilsReflect.findMethodMethodDeclaration(clazz, "decorateBuild");
+            return  decorateBuild != null && !decorateBuild.getDeclaringClass().equals(JkPlugin.class);
         }
 
         @Override

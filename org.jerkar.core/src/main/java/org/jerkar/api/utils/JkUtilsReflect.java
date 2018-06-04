@@ -330,6 +330,23 @@ public final class JkUtilsReflect {
         }
     }
 
+    /**
+     * Find a method of the given name and argument type on the specified class or its parent classes.
+     */
+    public static Method findMethodMethodDeclaration(Class<?> clazz, String name, Class<?>... argTypes) {
+        try {
+            final Method method = clazz.getDeclaredMethod(name, argTypes);
+            return method;
+        } catch (final SecurityException e) {
+            throw new RuntimeException(e);
+        } catch (final NoSuchMethodException e) {
+            if (clazz.equals(Object.class)) {
+                return null;
+            }
+            return findMethodMethodDeclaration(clazz.getSuperclass(), name, argTypes);
+        }
+    }
+
     private static String toString(Class<?>... classes) {
         return "[" + JkUtilsString.join(Arrays.asList(classes), ", ") + "]";
     }
@@ -370,6 +387,23 @@ public final class JkUtilsReflect {
             return getInheritedAnnotation(superMethod, annotationClass);
         }
         return null;
+    }
+
+    /**
+     * Returns the annotation declared on a given method. If no annotation is
+     * declared on the method, then annotation is searched in parent classes.
+     */
+    public static <T extends Annotation> T getInheritedAnnotation(Class<?> clazz,
+                                                                  Class<T> annotationClass, String methodName,
+                                                                  Class<?> ... argTypes) {
+        Method method = getDeclaredMethod(clazz, methodName, argTypes);
+        if (method == null) {
+            if (clazz.equals(Object.class)) {
+                return null;
+            }
+            return getInheritedAnnotation(clazz.getSuperclass(), annotationClass, methodName, argTypes);
+        }
+        return getInheritedAnnotation(method, annotationClass);
     }
 
     /**

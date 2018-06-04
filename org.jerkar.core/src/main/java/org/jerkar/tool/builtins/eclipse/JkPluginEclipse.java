@@ -27,11 +27,11 @@ public final class JkPluginEclipse extends JkPlugin {
     boolean javadoc = true;
 
     /** If not null, this value will be used as the JRE container path when generating .classpath file.*/
-    @JkDoc({ "If not null, this value will be used as the JRE container path in .classpath" })
+    @JkDoc({ "If not null, this value will be used as the JRE container path in .classpath." })
     public String jreContainer = null;
 
     /** Flag to set whether 'generateAll' task should use absolute paths instead of classpath variables */
-    @JkDoc({ "If true, dependency paths will be expressed relatively to Eclipse path variables instead of absolute path." })
+    @JkDoc({ "If true, dependency paths will be expressed relatively to Eclipse path variables instead of absolute paths." })
     public boolean useVarPath = false;
 
     protected JkPluginEclipse(JkBuild build) {
@@ -48,7 +48,7 @@ public final class JkPluginEclipse extends JkPlugin {
     // ------------------------ plugin methods ----------------------
 
     @Override
-    @JkDoc("Adds .classpath and .project generation when scaffolding.")
+    @JkDoc("Adds .classpath and .project generation to scaffolding.")
     protected void decorateBuild() {
         build.scaffolder().extraActions.chain(this::generateFiles);  // If this plugin is activated while scaffolding, we want Eclipse metada file be generated.
     }
@@ -70,8 +70,6 @@ public final class JkPluginEclipse extends JkPlugin {
             classpathGenerator.setJreContainer(this.jreContainer);
             classpathGenerator.setImportedBuildProjects(importedBuildProjects);
             classpathGenerator.setUsePathVariables(this.useVarPath);
-            // generator.fileDependencyToProjectSubstitution = this.fileDependencyToProjectSubstitution;
-            // generator.projectDependencyToFileSubstitutions = this.projectDependencyToFileSubstitutions;
             final String result = classpathGenerator.generate();
             final Path dotClasspath = build.baseDir().resolve(".classpath");
             JkUtilsPath.write(dotClasspath, result.getBytes(Charset.forName("UTF-8")));

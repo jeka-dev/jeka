@@ -12,16 +12,16 @@ import org.jerkar.api.utils.JkUtilsString;
  */
 public class JkRepoOptions {
 
-    @JkDoc("Tell if the sources must be published.")
+    @JkDoc("If true, publishing to repository will include sources jar.")
     public boolean publishSources = true;
 
-    @JkDoc("Tell if the test classes must be published.")
+    @JkDoc("If true, publishing to repository will include tests jar.")
     public boolean publishTests = false;
 
-    @JkDoc("Force to publish in local repository.")
+    @JkDoc("If true, publishing will occur only in the local repository.")
     public boolean publishLocally = false;
 
-    @JkDoc("Sign the artifacts with PGP prior publishing.")
+    @JkDoc("If true, all artifacts to be published will be signed with PGP.")
     public boolean signPublishedArtifacts = false;
 
     /**

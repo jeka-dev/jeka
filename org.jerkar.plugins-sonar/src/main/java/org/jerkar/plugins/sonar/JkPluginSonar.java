@@ -7,20 +7,15 @@ import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkOptions;
-import org.jerkar.tool.JkPlugin;
+import org.jerkar.tool.*;
 import org.jerkar.tool.builtins.java.JkPluginJava;
 
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-@JkDoc({"Add SonarQube capability to a build.",
-        "The ananlysis is performed when the 'run' method is invoked.",
-        "To parameterize this plugin just set the relevant sonar properies as options.",
-        "For example you can launch the build whith '-sonar.host.url=http://myserver/..' to specify the SonarQube server url."})
+@JkDoc("Run SonarQube analysis.")
+@JkDocPluginDeps(JkPluginJava.class)
 public class JkPluginSonar extends JkPlugin {
 
     private final Map<String, String> properties = new HashMap<>();
@@ -57,15 +52,16 @@ public class JkPluginSonar extends JkPlugin {
 
     }
 
-    @JkDoc("Launch a Sonar analysis")
+    @JkDoc("Run a SonarQube analysis based on properties defined in this plugin. " +
+            "Options prefixed with 'sonar.' as '-sonar.host.url=http://myserver/..' " +
+            "will be appended to these properties.")
     public void run() {
-        if (build.plugins.has(JkPluginJava.class)) {
-            configureSonarFrom(build.plugins.get(JkPluginJava.class).project()).withProperties(properties).run();
-        } else {
-            JkLog.warn("Plugin " + this.getClass().getSimpleName() + " not appliable for build type " + build.getClass());
-        }
+        configureSonarFrom(build.plugins.get(JkPluginJava.class).project()).withProperties(properties).run();
     }
 
+    /**
+     * Adds a property to configure sonar instance to run. You'll find predefined keys in {@link JkSonar}.
+     */
     public JkPluginSonar prop(String key, String value) {
         this.properties.put(key, value);
         return this;
