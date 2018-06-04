@@ -20,7 +20,7 @@ import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.Main;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
-@JkDoc("Generation of Eclipse files (.project and .claasspath) from actual project structure and dependencies.")
+@JkDoc("Generation of Eclipse files (.project and .classpath) from actual project structure and dependencies.")
 public final class JkPluginEclipse extends JkPlugin {
 
     @JkDoc("If true, .classpath will include javadoc reference for declared dependencies.")
@@ -85,7 +85,7 @@ public final class JkPluginEclipse extends JkPlugin {
         }
     }
 
-    @JkDoc("Generates Eclipse files (.project and .claasspath) on all sub-folders of the current directory. Only sub-folders having a build/def directory are taken in account. See generateFiles.")
+    @JkDoc("Generates Eclipse files (.project and .classpath) on all sub-folders of the current directory. Only sub-folders having a build/def directory are taken in account. See generateFiles.")
     public void generateAll() {
         final Iterable<Path> folders = build.baseTree()
                 .accept("**/" + JkConstants.BUILD_DEF_DIR, JkConstants.BUILD_DEF_DIR)

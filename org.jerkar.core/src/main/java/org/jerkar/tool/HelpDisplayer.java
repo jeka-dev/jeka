@@ -59,8 +59,8 @@ final class HelpDisplayer {
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
         for (final PluginDescription description : pluginDescriptions) {
             JkLog.nextLine();
-            JkLog.info("Plugin class : " + description.fullName());
-            JkLog.info("Plugin name  : " + description.shortName());
+            JkLog.infoUnderlined("Plugin class : " + description.fullName());
+            JkLog.info("Plugin name : " + description.shortName());
             final List<String> explanations = description.explanation();
             if (!explanations.isEmpty()) {
                 JkLog.info("Purpose : " + description.explanation().get(0));
