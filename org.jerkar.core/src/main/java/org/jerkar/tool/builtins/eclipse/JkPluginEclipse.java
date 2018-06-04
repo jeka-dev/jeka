@@ -13,14 +13,12 @@ import org.jerkar.api.ide.eclipse.JkEclipseProject;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkConstants;
-import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkPlugin;
-import org.jerkar.tool.Main;
+import org.jerkar.tool.*;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+import org.jerkar.tool.builtins.java.JkPluginJava;
 
 @JkDoc("Generation of Eclipse files (.project and .classpath) from actual project structure and dependencies.")
+@JkDocPluginDeps(JkPluginJava.class)
 public final class JkPluginEclipse extends JkPlugin {
 
     @JkDoc("If true, .classpath will include javadoc reference for declared dependencies.")
@@ -57,9 +55,9 @@ public final class JkPluginEclipse extends JkPlugin {
             "dependencies and source layout.")
     public void generateFiles() {
         final Path dotProject = build.baseDir().resolve(".project");
-        if (build instanceof JkJavaProjectBuild) {
-            final JkJavaProjectBuild javaProjectBuild = (JkJavaProjectBuild) build;
-            final JkJavaProject javaProject = javaProjectBuild.java().project();
+        if (build.plugins.has(JkPluginJava.class)) {
+            final JkJavaProjectBuild javaBuild = (JkJavaProjectBuild) build;
+            final JkJavaProject javaProject = javaBuild.java().project();
             final List<Path> importedBuildProjects = new LinkedList<>();
             for (final JkBuild depBuild : build.importedBuilds().directs()) {
                 importedBuildProjects.add(depBuild.baseTree().root());
