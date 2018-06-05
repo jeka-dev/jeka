@@ -203,6 +203,7 @@ final class Engine {
             for (final JkBuild subBuild : build.importedBuilds().all()) {
                 runProject(subBuild, commandLine.getSubProjectMethods());
             }
+            runProject(build, commandLine.getSubProjectMethods());
         }
         runProject(build, commandLine.getMasterMethods());
     }
@@ -260,6 +261,7 @@ final class Engine {
         } catch (final NoSuchMethodException e) {
             throw new JkException("No zero-arg method '" + methodName + "' found in class '" + build.getClass());
         }
+        JkLog.nextLine();
         JkLog.infoUnderlined("Method : " + methodName);
         final long time = System.nanoTime();
         try {

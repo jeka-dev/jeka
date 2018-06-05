@@ -20,14 +20,11 @@ public class CommandLineTest {
         assertEquals("done", tested.getMasterMethods().get(2).methodName);
         assertEquals("sonar", tested.getMasterMethods().get(2).pluginName);
 
-        // Test plugin setup
-        assertEquals(1, tested.getSubProjectPluginSetups().size());
-        assertEquals("4", tested.getSubProjectPluginSetups().iterator().next().options.get("foo"));
-
     }
 
     private static CommandLine args(String string) {
-        return CommandLine.of(string.split(" "));
+        CommandLine.init(string.split(" "));
+        return CommandLine.instance();
     }
 
 }

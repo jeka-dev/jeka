@@ -16,13 +16,16 @@ public final class JkBuildPlugins {
 
     private final List<JkPlugin> configuredPlugins = new LinkedList<>();
 
-    JkBuildPlugins(JkBuild holder) {
+    private final List<PluginOptions> pluginOptionsList;
+
+    JkBuildPlugins(JkBuild holder,  List<PluginOptions> pluginOptionsList) {
         super();
         this.holder = holder;
+        this.pluginOptionsList = Collections.unmodifiableList(new ArrayList<>(pluginOptionsList));
     }
 
     public <T extends JkPlugin> T get(Class<T> pluginClass) {
-        return getOrCreate(pluginClass, Collections.emptyMap());
+        return getOrCreate(pluginClass);
     }
 
     public JkPlugin get(String pluginName) {
@@ -57,14 +60,14 @@ public final class JkBuildPlugins {
         JkLog.done();
     }
 
-    <T extends JkPlugin> T getOrCreate(Class<T> pluginClass, Map<String, String> options) {
+    private <T extends JkPlugin> T getOrCreate(Class<T> pluginClass) {
         final Optional<T> optPlugin = (Optional<T>) this.configuredPlugins.stream().filter(
                 (item) -> item.getClass().equals(pluginClass)).findFirst();
         if (optPlugin.isPresent()) {
             return optPlugin.get();
         }
         final T plugin = JkUtilsReflect.newInstance(pluginClass, JkBuild.class, this.holder);
-        JkOptions.populateFields(plugin, options);
+        JkOptions.populateFields(plugin, PluginOptions.options(plugin.name(), this.pluginOptionsList));
         configuredPlugins.add(plugin);
         JkLog.info("Build instance : " + this.holder + " will decorated with plugin " + plugin.name());
         return plugin;
@@ -78,12 +81,11 @@ public final class JkBuildPlugins {
         }
     }
 
-    void loadCommandLinePlugins(boolean master) {
-        Iterable<CommandLine.JkPluginSetup> pluginSetups = master ? CommandLine.INSTANCE.getMasterPluginSetups() :
-                CommandLine.INSTANCE.getSubProjectPluginSetups();
-        for (CommandLine.JkPluginSetup pluginSetup : pluginSetups){
+    void loadCommandLinePlugins() {
+        Iterable<PluginOptions> pluginSetups = CommandLine.instance().getPluginOptions();
+        for (PluginOptions pluginSetup : pluginSetups){
             PluginDictionary.PluginDescription pluginDescription = PluginDictionary.loadByName(pluginSetup.pluginName);
-            getOrCreate(pluginDescription.pluginClass(), pluginSetup.options);
+            getOrCreate(pluginDescription.pluginClass());
         }
     }
 

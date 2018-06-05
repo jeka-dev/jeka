@@ -38,7 +38,7 @@ public class JkBuild {
 
     private final Path baseDir;
 
-    public final JkBuildPlugins plugins = new JkBuildPlugins(this);
+    public final JkBuildPlugins plugins;
 
     private JkDependencyResolver buildDefDependencyResolver;
 
@@ -62,7 +62,6 @@ public class JkBuild {
     boolean scaffoldEmbed;
 
 
-
     // ------------------ Instantiation cycle cycle --------------------------------------
 
     /**
@@ -70,58 +69,38 @@ public class JkBuild {
      */
     public JkBuild() {
         final Path baseDirContext = BASE_DIR_CONTEXT.get();
-        final boolean isMaster;
-        if (MASTER_BUILD.get() == null) {
-            isMaster = true;
-            MASTER_BUILD.set(true);
-        } else {
-            isMaster = false;
-        }
-        try {
-            JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
-            this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get("").toAbsolutePath());
-            JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
+        this.plugins = new JkBuildPlugins(this, CommandLine.instance().getPluginOptions());
+        JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
+        this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get("").toAbsolutePath());
+        JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
 
-            // Instantiating imported builds
-            MASTER_BUILD.set(false);
-            this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), this);
-            MASTER_BUILD.set(isMaster);
-            this.infoProvider.append("base directory : " + this.baseDir + "\n"
-                    + "imported builds : " + this.importedBuilds.directs() + "\n");
+        // Instantiating imported builds
+        this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), this);
+        this.infoProvider.append("base directory : " + this.baseDir + "\n"
+                + "imported builds : " + this.importedBuilds.directs() + "\n");
 
-            // Allow sub-classes to define defaults prior options are injected
-            setupOptionDefaults();
+        // Allow sub-classes to define defaults prior options are injected
+        setupOptionDefaults();
 
-            // Inject options
-            JkOptions.populateFields(this, JkOptions.loadSystemAndUserOptions());
-            Map<String, String> options = isMaster ? CommandLine.INSTANCE.getMasterBuildOptions() :
-                    CommandLine.INSTANCE.getSubProjectBuildOptions();
-            JkOptions.populateFields(this, options);
+        // Inject options
+        JkOptions.populateFields(this, JkOptions.readSystemAndUserOptions());
+        Map<String, String> options = CommandLine.instance().getBuildOptions();
+        JkOptions.populateFields(this, options);
 
-            // Load plugins declared in command line
-            this.configurePlugins();
-            plugins.loadCommandLinePlugins(isMaster);
-            plugins.all().forEach(plugin -> plugin.decorateBuild());
+        // Load plugins declared in command line
+        this.configurePlugins();
+        plugins.loadCommandLinePlugins();
+        plugins.all().forEach(plugin -> plugin.decorateBuild());
 
-            // Extra build configuration
-            this.configure();
-
-
-        } catch (RuntimeException e) {
-            BASE_DIR_CONTEXT.remove();
-            throw e;
-        } finally {
-            if (isMaster == true) {
-                BASE_DIR_CONTEXT.remove();
-            }
-        }
+        // Extra build configuration
+        this.configure();
     }
 
     /**
      * Override this method to set sensitive defaults for options on this build or plugins.<br/>
      * This method is invoked before options are injected into build instance, so options specified in
      * command line or configuration files will overwrite the default values you have defined here. <p/>
-     * Note you should call <code>super()</code> at the begining of the method in order to not wipe defaults
+     * Note you should call <code>super()</code> at the beginning of the method in order to not wipe defaults
      * that superclasses may have defined.
      */
     protected void setupOptionDefaults() {
@@ -238,7 +217,9 @@ public class JkBuild {
         scaffolder().run();
     }
 
-    /** Clean the output directory. */
+    /**
+     * Clean the output directory.
+     */
     @JkDoc("Cleans the output directory.")
     public void clean() {
         JkLog.start("Cleaning output directory " + outputDir());
@@ -248,24 +229,32 @@ public class JkBuild {
         JkLog.done();
     }
 
-    /** Conventional method standing for the default operations to perform.
-     * @throws Exception */
+    /**
+     * Conventional method standing for the default operations to perform.
+     *
+     * @throws Exception
+     */
     @JkDoc("Conventional method standing for the default operations to perform.")
     public void doDefault() {
         defaulter.run();
     }
 
-    /** Displays all available methods defined in this build. */
+    /**
+     * Displays all available methods defined in this build.
+     */
     @JkDoc("Displays all available methods defined in this build.")
     public void help() {
         if (help.xml || help.xmlFile != null) {
             HelpDisplayer.help(this, help.xmlFile);
         } else {
-            HelpDisplayer.help(this);;
+            HelpDisplayer.help(this);
+            ;
         }
     }
 
-    /** Displays meaningful information about this build. */
+    /**
+     * Displays meaningful information about this build.
+     */
     @JkDoc("Displays meaningful information about this build.")
     public final void info() {
         JkLog.info(infoProvider.toString());

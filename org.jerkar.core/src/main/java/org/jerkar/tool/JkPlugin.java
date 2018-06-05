@@ -10,9 +10,9 @@ public abstract class JkPlugin {
     protected final JkBuild build;
 
     /**
-     * Right after to be instantiated, plugin instances are likely to configured by their build owner.
+     * Right after to be instantiated, plugin instances are likely to configured by the owning build.
      * Therefore, every plugin members that are likely to be configured by the owning build must be
-     * instantiated here.
+     * initialized in the constructor.
      */
     protected JkPlugin(JkBuild build) {
         this.build = build;
@@ -26,7 +26,11 @@ public abstract class JkPlugin {
     }
 
     public final String name() {
-        final String className = this.getClass().getSimpleName();
+        return nameOf(this.getClass());
+    }
+
+    static final String nameOf(Class<? extends JkPlugin> pluginClass) {
+        final String className = pluginClass.getSimpleName();
         if (! className.startsWith(CLASS_PREFIX) || className.equals(CLASS_PREFIX)) {
             throw new IllegalStateException(String.format("Plugin class not properly named. Name should be formatted as " +
                     "'%sXxxx' where xxxx is the name of the plugin (uncapitalized). Was %s.", CLASS_PREFIX, className));

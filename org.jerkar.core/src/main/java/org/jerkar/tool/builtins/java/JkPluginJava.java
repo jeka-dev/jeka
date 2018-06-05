@@ -17,7 +17,7 @@ import java.util.List;
  * Plugin for building Java projects. It comes with a {@link JkJavaProject} pre-configured with {@link JkOptions}.
  * and a decoration for scaffolding.
  */
-@JkDoc("Build of java project through a JkJavaProject instance.")
+@JkDoc("Build of a Java project through a JkJavaProject instance.")
 public class JkPluginJava extends JkPlugin {
 
     // ------------------------------ options -------------------------------------------
@@ -46,6 +46,9 @@ public class JkPluginJava extends JkPlugin {
         this.producedArtifacts.add(project.maker().mainArtifactId());
     }
 
+    @JkDoc("Adds artifacts creation to the default method, " +
+            "improves scaffolding by creating source folders and generating a build class tailored for building Java project,  " +
+            "enriches build information with project build structure.")
     @Override  
     protected void decorateBuild() {
         this.applyOptions();
@@ -151,7 +154,9 @@ public class JkPluginJava extends JkPlugin {
         }
     }
 
-    @JkDoc("Generates all artifacts defined in producedArtifact list.")
+    @JkDoc("Generates all artifacts defined in producedArtifact list. " +
+            "Does not re-generate artifacts already generated : " +
+            "execute 'clean pack' to re-genererate all artifacts.")
     public void pack() {
         project.maker().pack(this.producedArtifacts);
     }
@@ -160,13 +165,10 @@ public class JkPluginJava extends JkPlugin {
      */
     @JkDoc("Displays resolved dependency tree on console.")
     public final void showDependencies() {
-        JkLog.infoHeaded("Resolved dependencies ");
         final JkResolveResult resolveResult = this.project().maker().getDependencyResolver()
                 .resolve(this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME));
         final JkDependencyNode tree = resolveResult.dependencyTree();
         JkLog.info(tree.toStrings());
     }
-
-
 
 }

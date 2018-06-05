@@ -3,8 +3,7 @@ package org.jerkar.tool;
 import java.lang.annotation.*;
 
 /**
- * Documents the annotated element so that Jerkar can display some information
- * when 'help' or 'helpPlugins' are invoked from command line.
+ * Mentions that the annotated plugin class relies on other plugins.
  *
  * @author Jerome Angibaud
  */
@@ -14,7 +13,7 @@ import java.lang.annotation.*;
 public @interface JkDocPluginDeps {
 
     /**
-     * The text to display when help is requested.
+     * Plugins classes this plugin relies on.
      */
     Class<? extends JkPlugin>[] value();
 

@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 /**
  * Documents the annotated element so that Jerkar can display some information
- * when 'help' or 'helpPlugins' are invoked from command line.
+ * when 'help' is invoked from command line.
  *
  * @author Jerome Angibaud
  */

@@ -127,10 +127,10 @@ public final class JkInit {
         final Map<String, String> sysProps = getSpecifiedSystemProps(args);
         setSystemProperties(sysProps);
         final Map<String, String> optionMap = new HashMap<>();
-        optionMap.putAll(JkOptions.loadSystemAndUserOptions());
-        final CommandLine commandLine = CommandLine.of(args);
-        optionMap.putAll(commandLine.getSubProjectBuildOptions());
-        optionMap.putAll(commandLine.getMasterBuildOptions());
+        optionMap.putAll(JkOptions.readSystemAndUserOptions());
+        CommandLine.init(args);
+        final CommandLine commandLine = CommandLine.instance();
+        optionMap.putAll(commandLine.getBuildOptions());
         if (!JkOptions.isPopulated()) {
             JkOptions.init(optionMap);
         }

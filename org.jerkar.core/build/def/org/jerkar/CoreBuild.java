@@ -36,12 +36,10 @@ public class CoreBuild extends JkJavaProjectBuild {
     }
 
     protected void configurePlugins() {
-        final JkJavaProject project = java().project();
-        applyCommonSettings(project, "core");
-        project.maker().defineArtifact(DISTRIB_FILE_ID, this::doDistrib);
-        this.distribFolder = project.getOutLayout().outputPath().resolve("distrib");
+        applyCommonSettings(project(), "core");
+        maker().defineArtifact(DISTRIB_FILE_ID, this::doDistrib);
+        this.distribFolder = project().getOutLayout().outputPath().resolve("distrib");
     }
-
 
     private void doDistrib() {
         final JkJavaProjectMaker maker = this.java().project().maker();

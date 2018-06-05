@@ -24,15 +24,11 @@ import org.jerkar.api.utils.JkUtilsString;
  */
 public final class JkOptions {
 
-    private static JkOptions INSTANCE = new JkOptions(loadSystemAndUserOptions());
+    private static JkOptions INSTANCE = new JkOptions(readSystemAndUserOptions());
 
     private final Map<String, String> props = new HashMap<>();
 
     private static boolean populated;
-
-    static JkOptions instance() {
-        return INSTANCE;
-    }
 
     static synchronized void init(Map<String, String> options) {
         if (populated) {
@@ -121,7 +117,7 @@ public final class JkOptions {
         return result;
     }
 
-    static Map<String, String> loadSystemAndUserOptions() {
+    static Map<String, String> readSystemAndUserOptions() {
         final Path propFile = JkLocator.jerkarHomeDir().resolve("options.properties");
         final Map<String, String> result = new HashMap<>();
         if (Files.exists(propFile)) {

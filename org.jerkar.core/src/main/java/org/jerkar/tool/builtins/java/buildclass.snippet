@@ -1,36 +1,43 @@
 import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
 
 /**
  * @formatter:off
  */
 class Build extends JkJavaProjectBuild {
 
+    /*
+     * Configures default values for option fields of this class. When this method is called, build option
+     * fields have not been populated yet.
+     */
     @Override
     protected void setupOptionDefaults() {
         java().projectVersion = "0.0.1";
     }
 
-    /**
-     * Put here configuration you don't want to be overrode by environment options or actions that need
-     * option instance fields to be populated.
-     * When this method is called, options fields of the plugin instance are already populated.
+    /*
+     * Configures plugins to be bound to this build class. When this method is called, build option
+     * fields have already been populated.
      */
     @Override
     protected void configurePlugins() {
-        java().project().setVersionedModule("${group}:${name}", java().projectVersion);
-        java().project()
+        project()   // Configure project structure and dependencies using project() instance.
+                .setVersionedModule("${group}:${name}", java().projectVersion)
                 .setSourceVersion(JkJavaVersion.V8)
                 .setDependencies(dependencies());
+
+        maker()    // Configure how project should be build using maker() instance.
+                .setJuniter(maker().getJuniter().forked(true));
     }
 
-    private JkDependencies dependencies() {
+    private JkDependencies dependencies() {  // Example of dependencies.
         return JkDependencies.builder()
                 .on("com.google.guava:guava:21.0")
-                .on("junit:junit:4.11", JkJavaDepScopes.TEST)
+                .on("junit:junit:4.11", TEST)
                 .build();
     }
 
