@@ -31,8 +31,9 @@ public class CoreBuild extends JkJavaProjectBuild {
 
     public Path distribFolder;
 
-    {
-        java().tests.fork = false;
+    @Override
+    protected void setupOptionDefaults() {
+        java().tests.fork = false;;
     }
 
     protected void configurePlugins() {

@@ -473,13 +473,13 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     // ----------- artifact management --------------------------------------
 
-    public void makeArtifact(JkArtifactId artifactFileId) {
-        if (artifactProducers.containsKey(artifactFileId)) {
-            JkLog.startln("Producing artifact file " + getArtifactFile(artifactFileId).getFileName());
-            this.artifactProducers.get(artifactFileId).run();
+    public void makeArtifact(JkArtifactId artifactId) {
+        if (artifactProducers.containsKey(artifactId)) {
+            JkLog.startln("Producing artifact file " + getArtifactFile(artifactId).getFileName());
+            this.artifactProducers.get(artifactId).run();
             JkLog.done();
         } else {
-            throw new IllegalArgumentException("No artifact with classifier/extension " + artifactFileId + " is defined on project " + this.project);
+            throw new IllegalArgumentException("No artifact " + artifactId + " is defined on project " + this.project);
         }
     }
 

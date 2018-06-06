@@ -35,13 +35,13 @@ public class MavenStyleBuild extends JkJavaProjectBuild {
 
     JkDependencies dependencies() {
         return JkDependencies.builder()
-                .on(GUAVA, "18.0")	// Popular modules are available as Java constant
+                .on(GUAVA, "21.0")	// Popular modules are available as Java constant
                 .on(JERSEY_SERVER, "1.19")
-                .on("com.orientechnologies:orientdb-client:2.0.8")
-                .on(JUNIT, "4.11").scope(TEST).on(MOCKITO_ALL, "1.9.5")
-                .scope(TEST).build();
+             //   .on("com.orientechnologies:orientdb-client:2.2.35")
+                .on(JUNIT, "4.11").scope(TEST)
+             //   .on(MOCKITO_ALL, "1.9.5").scope(TEST)
+                .build();
     }
-
 
     JkPublishRepos publishRepositories() {
         return JkPublishRepos.of(JkRepo.maven("http://my.snapshot.repo").asPublishSnapshotRepo())

@@ -102,8 +102,8 @@ public final class JkUtilsReflect {
     }
 
     /**
-     * Sets the specified value to the specified filed, setting the field to
-     * accessible if not already done.
+     * Sets the specified value for the specified field and object. Field is marked as
+     * 'accessible' if not already done.
      */
     public static void setFieldValue(Object object, Field field, Object value) {
         try {

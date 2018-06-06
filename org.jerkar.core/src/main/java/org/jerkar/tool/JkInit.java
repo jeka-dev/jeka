@@ -77,7 +77,7 @@ public final class JkInit {
         JkBuild.baseDirContext(baseDir);
         final T build;
         try {
-            build = JkUtilsReflect.newInstance(clazz);
+            build = JkBuild.of(clazz);
         } finally {
             JkBuild.baseDirContext(null);
         }

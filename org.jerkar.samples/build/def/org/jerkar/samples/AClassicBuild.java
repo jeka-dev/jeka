@@ -19,7 +19,8 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
  */
 public class AClassicBuild extends JkJavaProjectBuild {
 
-    {
+    @Override
+    protected void setupOptionDefaults() {
 	    java().pack.checksums = "sha1";
 	    java().pack.tests = true;
 	    java().pack.javadoc = true;
@@ -32,9 +33,8 @@ public class AClassicBuild extends JkJavaProjectBuild {
                 .setDependencies(JkDependencies.builder()
                         .on("com.google.guava:guava:21.0")
                         .on("com.sun.jersey:jersey-server:1.19")
-                        .on("com.orientechnologies:orientdb-client:2.0.8")
                         .on("junit:junit:4.11", TEST)
-                        .on("org.mockito:mockito-all:1.9.5", TEST).build());
+                        .build());
         project.maker().defineFatJarArtifact("fat");  // project will produce a fat jar as well.
     }
     

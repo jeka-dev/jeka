@@ -105,7 +105,7 @@ public final class JkImportedBuilds {
         for (final Field field : fields) {
             final JkImportBuild jkProject = field.getAnnotation(JkImportBuild.class);
             final JkBuild importedBuild = createImportedBuild(
-                    (Class<? extends JkBuild>) field.getType(), jkProject.value(), masterBuild);
+                    (Class<? extends JkBuild>) field.getType(), jkProject.value(), masterBuild.baseDir());
             try {
                 JkUtilsReflect.setFieldValue(masterBuild, field, importedBuild);
             } catch (final RuntimeException e) {
@@ -137,9 +137,9 @@ public final class JkImportedBuilds {
      * populated as usual.
      */
     @SuppressWarnings("unchecked")
-    private static <T extends JkBuild> T createImportedBuild(Class<T> clazz, String relativePath, JkBuild masterBuild) {
-        final Path projectDir = masterBuild.baseDir().resolve(relativePath).normalize();
-        final ImportedBuildRef projectRef = new ImportedBuildRef(projectDir, clazz);
+    private static <T extends JkBuild> T createImportedBuild(Class<T> importedBuildClass, String relativePath, Path masterBuildPath) {
+        final Path projectDir = masterBuildPath.resolve(relativePath).normalize();
+        final ImportedBuildRef projectRef = new ImportedBuildRef(projectDir, importedBuildClass);
         Map<ImportedBuildRef, JkBuild> map = IMPORTED_BUILD_CONTEXT.get();
         if (map == null) {
             map = new HashMap<>();
@@ -150,9 +150,7 @@ public final class JkImportedBuilds {
             return cachedResult;
         }
         final Engine engine = new Engine(projectDir);
-        final T result = engine.getBuild(clazz);
-        JkOptions.populateFields(result);
-        result.configurePlugins();
+        final T result = engine.getBuild(importedBuildClass);
         IMPORTED_BUILD_CONTEXT.get().put(projectRef, result);
         return result;
     }

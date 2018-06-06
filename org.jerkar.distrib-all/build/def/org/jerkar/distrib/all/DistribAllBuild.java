@@ -28,16 +28,9 @@ class DistribAllBuild extends JkBuild {
     @JkImportBuild("../org.jerkar.plugins-jacoco")
     PluginsJacocoBuild jacocoPluginBuild;
 
-    public boolean testSamples = false;
-
-    public boolean skipTests = false;
+    boolean testSamples = false;
 
     public boolean javadoc = true;
-
-    @Override
-    protected void configurePlugins() {
-        jacocoPluginBuild.core.java().tests.skip = skipTests;
-    }
 
     @JkDoc("Construct a distrib assuming all dependent sub projects are already built.")
     public void distrib() throws IOException {

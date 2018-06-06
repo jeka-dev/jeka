@@ -13,6 +13,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsObject;
+import org.jerkar.api.utils.JkUtilsReflect;
 
 /**
  * Base build class for defining builds. All build classes must extend this class in order
@@ -38,7 +39,7 @@ public class JkBuild {
 
     private final Path baseDir;
 
-    public final JkBuildPlugins plugins;
+    public JkBuildPlugins plugins;
 
     private JkDependencyResolver buildDefDependencyResolver;
 
@@ -65,11 +66,12 @@ public class JkBuild {
     // ------------------ Instantiation cycle cycle --------------------------------------
 
     /**
-     * Constructs a {@link JkBuild}
+     * Constructs a {@link JkBuild}. Using constructor alone won't give you an instance populated with runtime options
+     * neither decorated with plugins. <br/>
+     * Use {@link JkBuild#of(Class)} to get instances populated with options and decorated with plugins.
      */
-    public JkBuild() {
+    protected JkBuild() {
         final Path baseDirContext = BASE_DIR_CONTEXT.get();
-        this.plugins = new JkBuildPlugins(this, CommandLine.instance().getPluginOptions());
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
         this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get("").toAbsolutePath());
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
@@ -78,22 +80,30 @@ public class JkBuild {
         this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), this);
         this.infoProvider.append("base directory : " + this.baseDir + "\n"
                 + "imported builds : " + this.importedBuilds.directs() + "\n");
+    }
+
+    public static <T extends JkBuild> T of(Class<T> buildClass) {
+        T build = JkUtilsReflect.newInstance(buildClass);
+
+        // plugins must be instantiated before setupOptionsDefault is invoked.
+        build.plugins = new JkBuildPlugins(build, CommandLine.instance().getPluginOptions());
 
         // Allow sub-classes to define defaults prior options are injected
-        setupOptionDefaults();
+        build.setupOptionDefaults();
 
         // Inject options
-        JkOptions.populateFields(this, JkOptions.readSystemAndUserOptions());
+        JkOptions.populateFields(build, JkOptions.readSystemAndUserOptions());
         Map<String, String> options = CommandLine.instance().getBuildOptions();
-        JkOptions.populateFields(this, options);
+        JkOptions.populateFields(build, options);
 
         // Load plugins declared in command line
-        this.configurePlugins();
-        plugins.loadCommandLinePlugins();
-        plugins.all().forEach(plugin -> plugin.decorateBuild());
+        build.configurePlugins();
+        build.plugins.loadCommandLinePlugins();
+        build.plugins.all().forEach(plugin -> plugin.decorateBuild());
 
         // Extra build configuration
-        this.configure();
+        build.configure();
+        return build;
     }
 
     /**

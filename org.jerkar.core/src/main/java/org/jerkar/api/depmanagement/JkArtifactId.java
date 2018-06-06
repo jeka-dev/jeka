@@ -82,7 +82,7 @@ public final class JkArtifactId {
 
     @Override
     public String toString() {
-        return "Classifier='" + classifier + '\'' + ", extension='" + extension + '\'' + '}';
+        return "{Classifier='" + classifier + '\'' + ", extension='" + extension + '\'' + '}';
     }
 
 
