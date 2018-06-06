@@ -98,10 +98,10 @@ public class JkPluginJava extends JkPlugin {
             producedArtifacts.add(JkJavaProjectMaker.TEST_ARTIFACT_ID);
         }
         if (pack.checksums().length > 0) {
-            project.maker().afterPack.chain(() -> project.maker().checksum(pack.checksums()));
+            project.maker().postPack.chain(() -> project.maker().checksum(pack.checksums()));
         }
         if (pack.signWithPgp) {
-            project.maker().afterPack.chain(() -> project.maker().signArtifactFiles(repos.pgpSigner()));
+            project.maker().postPack.chain(() -> project.maker().signArtifactFiles(repos.pgpSigner()));
         }
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);

@@ -22,7 +22,7 @@ import org.jerkar.api.system.JkLog;
  *
  * All defined tasks are extensible so you can modify/improve the build behavior.
  */
-public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocalizable {
+public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocalizable {
 
     public static final JkArtifactId SOURCES_ARTIFACT_ID = JkArtifactId.of("sources", "jar");
 
@@ -59,8 +59,6 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
     private final Set<JkArtifactId> artifactFileIdsToNotPublish = new LinkedHashSet<>();
 
     private Supplier<String> artifactFileNameSupplier;
-
-    private JkPgp pgpSigner;
 
     private final Map<Set<JkScope>, JkPathSequence> depCache = new HashMap<>();
 
@@ -149,7 +147,7 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
 
     // Compile phase (produce binaries and process resources) -----------------------------
 
-    public final JkRunnables beforeCompile = JkRunnables.noOp();
+    public final JkRunnables preCompile = JkRunnables.noOp();
 
     public final JkRunnables sourceGenerator = JkRunnables.noOp();
 
@@ -169,17 +167,17 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
                 .setOutputDir(project.getOutLayout().classDir());
     }
 
-    public final JkRunnables afterCompile = JkRunnables.of(() -> {
+    public final JkRunnables postCompile = JkRunnables.of(() -> {
     });
 
     public JkJavaProjectMaker compile() {
         JkLog.startln("Compiling");
-        beforeCompile.run();
+        preCompile.run();
         sourceGenerator.run();
         resourceGenerator.run();
         compileRunner.run();
         resourceProcessor.run();
-        afterCompile.run();
+        postCompile.run();
         this.status.compileDone = true;
         JkLog.done();
         return this;
@@ -187,11 +185,9 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
 
     // Test  -----------------------------------------------------
 
-    public final JkRunnables beforeTest = JkRunnables.of(() -> {
-    });
+    public final JkRunnables preTest = JkRunnables.of(() -> {});
 
-    public final JkRunnables testResourceGenerator = JkRunnables.of(() -> {
-    });
+    public final JkRunnables testResourceGenerator = JkRunnables.of(() -> {});
 
     public final JkRunnables testResourceProcessor;
 
@@ -220,7 +216,7 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
 
     public final JkRunnables testExecutor = JkRunnables.of(() -> juniter().run(testSpec()));
 
-    public final JkRunnables afterTest = JkRunnables.of(() -> {
+    public final JkRunnables postTest = JkRunnables.of(() -> {
     });
 
     public JkJavaProjectMaker test() {
@@ -233,12 +229,12 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
         if (!this.status.compileDone) {
             compile();
         }
-        beforeTest.run();
+        preTest.run();
         testCompileRunner.run();
         testResourceGenerator.run();
         testResourceProcessor.run();
         testExecutor.run();
-        afterTest.run();
+        postTest.run();
         this.status.unitTestDone = true;
         JkLog.done();
         return this;
@@ -254,39 +250,70 @@ public class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocal
         return project.getOutLayout().outputPath().resolve(namePart + classifier + extension);
     }
 
-    protected String fileName(JkVersionedModule versionedModule) {
+    String fileName(JkVersionedModule versionedModule) {
         return versionedModule.moduleId().fullName() + "-" + versionedModule.version().name();
     }
 
-    public JkJavaProjectMaker defineArtifact(JkArtifactId artifactFileId, Runnable runnable) {
-        this.artifactProducers.put(artifactFileId, runnable);
+    /**
+     * Defines how to produce the specified artifact. <br/>
+     * The specified artifact can be an already defined artifact (as 'main' artifact), in this
+     * case the current definition will be overwritten. <br/>
+     * The specified artifact can also be a new artifact (as an Uber jar for example). <br/>
+     * {@link JkJavaProjectMaker} declares predefined artifact ids as {@link JkJavaProjectMaker#SOURCES_ARTIFACT_ID}
+     * or {@link JkJavaProjectMaker#JAVADOC_ARTIFACT_ID}.
+     */
+    public JkJavaProjectMaker defineArtifact(JkArtifactId artifactId, Runnable runnable) {
+        this.artifactProducers.put(artifactId, runnable);
         return this;
     }
 
-    JkJavaProjectMaker undefineArtifact(JkArtifactId artifactFileId) {
-        this.artifactProducers.remove(artifactFileId);
+    /**
+     * Removes the definition of the specified artifacts. Once remove, invoking <code>makeArtifact(theRemovedArtifactId)</code>
+     * will raise an exception.
+     */
+    public JkJavaProjectMaker undefineArtifact(JkArtifactId artifactId) {
+        this.artifactProducers.remove(artifactId);
         return this;
     }
 
-    public final JkRunnables afterPack = JkRunnables.of(() -> {
+    /**
+     * Chain of actions that will be executed at the end of {@link #pack(Iterable)} method.
+     */
+    public final JkRunnables postPack = JkRunnables.of(() -> {
     });
 
 
-    public JkJavaProjectMaker packAllArtifacts() {
+    /**
+     * Invokes {@link #pack(Iterable)} for all artifacts defined in this maker.
+     */
+    public JkJavaProjectMaker packAllDefinedArtifacts() {
        return pack(artifactIds());
     }
 
+    /**
+     * Makes the missing specified artifacts (it won't re-generate already existing artifacts) and
+     * executes the {@link #postPack} actions.
+     */
     public JkJavaProjectMaker pack(Iterable<JkArtifactId> artifactIds) {
         makeArtifactsIfAbsent(artifactIds);
-        afterPack.run();
+        postPack.run();
         return this;
     }
 
+    /**
+     * Creates a checksum file of each specified algorithm and each existing defined artifact file.
+     * Checksum files will be created in same folder as their respecting artifact files with the same name suffixed
+     * by '.' and the name of the checksumm algorithm. <br/>
+     * Known working algorithm working on JDK8 platform includes <code>md5, sha-1, sha-2 and sha-256</code>.
+     */
     public void checksum(String ...algorithms) {
         this.allArtifactPaths().stream().filter(Files::exists)
                 .forEach((file) -> JkPathFile.of(file).checksum(algorithms));
     }
 
+    /**
+     * Signs each existing defined artifact files with the specified pgp signer.
+     */
     public void signArtifactFiles(JkPgp pgp) {
         this.allArtifactPaths().stream().filter(Files::exists).forEach((file) -> pgp.sign(file));
     }

@@ -204,13 +204,6 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         return this;
     }
 
-    public JkJavaProject removeArtifactFile(JkArtifactId... artifactFileIds) {
-        for (final JkArtifactId artifactFileId : artifactFileIds) {
-            this.maker.undefineArtifact(artifactFileId);
-        }
-        return this;
-    }
-
     @Override
     public JkArtifactProducer get() {
         return maker();

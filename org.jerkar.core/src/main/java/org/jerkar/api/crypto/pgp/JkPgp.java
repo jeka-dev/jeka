@@ -18,9 +18,7 @@ import org.jerkar.api.utils.JkUtilsSystem;
  * Provides method for signing and verify signature with PGP.
  * <p>
  * When constructing JkPgp, you can provide a secret key ring, a public key ring
- * or both. <br/>
- * Note that you need the secret ring for signing and the public ring for
- * verifying.
+ * or both.
  *
  * @author Jerome Angibaud
  */
@@ -99,7 +97,6 @@ public final class JkPgp implements Serializable {
     public static JkPgp ofSecretRing(Path secRing, String password) {
         return of(null, secRing, password);
     }
-
 
     private final Path pubRing;
 
