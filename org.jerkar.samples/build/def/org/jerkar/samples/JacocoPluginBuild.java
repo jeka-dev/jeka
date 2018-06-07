@@ -14,22 +14,18 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
  * This build deletes artifacts, compiles, tests and launches SonarQube analyse.
  */
 public class JacocoPluginBuild extends JkJavaProjectBuild {
-    
+
     @Override
-    protected JkJavaProject createProject() {
-        return defaultProject()
+    protected void configurePlugins() {
+        java().project()
                 .setDependencies(JkDependencies.builder()
                 .on(GUAVA, "18.0")
                 .on(JUNIT, "4.11", JkJavaDepScopes.TEST).build());
-    }
-
-    @Override
-    protected void setupPlugins() {
-        new JkPluginJacoco().apply(this);
+        plugins.get(JkPluginJacoco.class);
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(JacocoPluginBuild.class, args).project().maker().test();
+        JkInit.instanceOf(JacocoPluginBuild.class, args).java().project().maker().test();
     }
 
 }

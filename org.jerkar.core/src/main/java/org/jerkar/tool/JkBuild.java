@@ -3,23 +3,29 @@ package org.jerkar.tool;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
+import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsObject;
+import org.jerkar.api.utils.JkUtilsReflect;
 
 /**
- * Base class defining commons tasks and utilities necessary for building any
- * kind of project, regardless involved technologies.
+ * Base build class for defining builds. All build classes must extend this class in order
+ * to be run with Jerkar.
  *
  * @author Jerome Angibaud
  */
 public class JkBuild {
 
     private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
+
+    private static final ThreadLocal<Boolean> MASTER_BUILD = new ThreadLocal<>();
 
     static void baseDirContext(Path baseDir) {
         if (baseDir == null) {
@@ -33,7 +39,7 @@ public class JkBuild {
 
     private final Path baseDir;
 
-    private final JkBuildPlugins plugins = new JkBuildPlugins(this);
+    public JkBuildPlugins plugins;
 
     private JkDependencyResolver buildDefDependencyResolver;
 
@@ -41,7 +47,11 @@ public class JkBuild {
 
     private final JkImportedBuilds importedBuilds;
 
+    private final JkRunnables defaulter = JkRunnables.noOp();
+
     private JkScaffolder scaffolder;
+
+    private final StringBuilder infoProvider = new StringBuilder();
 
     // ------------------ options --------------------------------------------------------
 
@@ -52,29 +62,77 @@ public class JkBuild {
     @JkDoc("Embed Jerkar jar along bin script in the project while scaffolding so the project can be run without Jerkar installed.")
     boolean scaffoldEmbed;
 
-    // --------------------------- constructs ----------------------------------
+
+    // ------------------ Instantiation cycle cycle --------------------------------------
 
     /**
-     * Constructs a {@link JkBuild}
+     * Constructs a {@link JkBuild}. Using constructor alone won't give you an instance populated with runtime options
+     * neither decorated with plugins. <br/>
+     * Use {@link JkBuild#of(Class)} to get instances populated with options and decorated with plugins.
      */
-    public JkBuild() {
+    protected JkBuild() {
         final Path baseDirContext = BASE_DIR_CONTEXT.get();
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
         this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get("").toAbsolutePath());
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
+
+        // Instantiating imported builds
         this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), this);
+        this.infoProvider.append("base directory : " + this.baseDir + "\n"
+                + "imported builds : " + this.importedBuilds.directs() + "\n");
     }
 
+    public static <T extends JkBuild> T of(Class<T> buildClass) {
+        T build = JkUtilsReflect.newInstance(buildClass);
+
+        // plugins must be instantiated before setupOptionsDefault is invoked.
+        build.plugins = new JkBuildPlugins(build, CommandLine.instance().getPluginOptions());
+
+        // Allow sub-classes to define defaults prior options are injected
+        build.setupOptionDefaults();
+
+        // Inject options
+        JkOptions.populateFields(build, JkOptions.readSystemAndUserOptions());
+        Map<String, String> options = CommandLine.instance().getBuildOptions();
+        JkOptions.populateFields(build, options);
+
+        // Load plugins declared in command line
+        build.configurePlugins();
+        build.plugins.loadCommandLinePlugins();
+        build.plugins.all().forEach(plugin -> plugin.decorateBuild());
+
+        // Extra build configuration
+        build.configure();
+        return build;
+    }
 
     /**
-     * This method is invoked right after the option values has been injected to instance fields
-     * of this object.
+     * Override this method to set sensitive defaults for options on this build or plugins.<br/>
+     * This method is invoked before options are injected into build instance, so options specified in
+     * command line or configuration files will overwrite the default values you have defined here. <p/>
+     * Note you should call <code>super()</code> at the beginning of the method in order to not wipe defaults
+     * that superclasses may have defined.
      */
-    protected void init() {
+    protected void setupOptionDefaults() {
         // Do nothing by default
     }
 
-    // -------------------------------- basic functions ---------------------------------------
+    /**
+     * This method is invoked right after options has been injected into this instance.
+     */
+    protected void configurePlugins() {
+        // Do nothing by default
+    }
+
+    /**
+     * This method is called once all plugin has decorated this build.
+     */
+    protected void configure() {
+        // Do nothing by default
+    }
+
+
+    // -------------------------------- accessors ---------------------------------------
 
 
     /**
@@ -93,27 +151,10 @@ public class JkBuild {
     }
 
     /**
-     * The output directory where all the final and intermediate artifacts are
-     * generated.
-     */
-    public JkPathTree ouputTree() {
-        return JkPathTree.of(outputDir());
-    }
-
-    /**
-     * The output directory where all the final and intermediate artifacts are
-     * generated.
+     * The output directory where all the final and intermediate artifacts are generated.
      */
     public Path outputDir() {
         return baseDir.resolve(JkConstants.BUILD_OUTPUT_PATH);
-    }
-
-    /**
-     * Returns a formatted string providing information about this build definition.
-     */
-    public String infoString() {
-        return "base directory : " + this.baseDir + "\n"
-                + "imported builds : " + this.importedBuilds.directs();
     }
 
     /**
@@ -127,15 +168,26 @@ public class JkBuild {
         return this.scaffolder;
     }
 
-    protected JkScaffolder createScaffolder() {
-        return new JkScaffolder(this.baseDir, this.scaffoldEmbed);
+    public final StringBuilder infoProvider() {
+        return infoProvider;
     }
 
     protected JkBuildPlugins plugins() {
         return this.plugins;
     }
 
-    // ------------------------------ build dependencies ---------------------------------------------
+    protected JkScaffolder createScaffolder() {
+        JkScaffolder scaffolder = new JkScaffolder(this.baseDir, this.scaffoldEmbed);
+        scaffolder.setBuildClassCode(JkUtilsIO.read(JkBuild.class.getResource("buildclass.snippet")));
+        return scaffolder;
+    }
+
+    protected void addDefaultOperation(Runnable runnable) {
+        this.defaulter.chain(runnable);
+    }
+
+
+    // ------------------------------ build dependencies --------------------------------
 
     void setBuildDefDependencyResolver(JkDependencies buildDependencies, JkDependencyResolver scriptDependencyResolver) {
         this.buildDependencies = buildDependencies;
@@ -146,14 +198,14 @@ public class JkBuild {
      * Returns the dependency resolver used to compile/run scripts of this
      * project.
      */
-    public JkDependencyResolver buildDependencyResolver() {
+    public final JkDependencyResolver buildDependencyResolver() {
         return this.buildDefDependencyResolver;
     }
 
     /**
      * Dependencies necessary to compile the this build class. It is not the dependencies for building the project.
      */
-    public JkDependencies buildDependencies() {
+    public final JkDependencies buildDependencies() {
         return buildDependencies;
     }
 
@@ -164,7 +216,7 @@ public class JkBuild {
         return importedBuilds;
     }
 
-    // ------------------------------ Command line methods ---------------------------------------------------
+    // ------------------------------ Command line methods ------------------------------
 
     /**
      * Creates the project structure (mainly project folder layout, build class code and IDE metadata) at the asScopedDependency
@@ -173,50 +225,52 @@ public class JkBuild {
     @JkDoc("Creates the project structure")
     public final void scaffold() {
         scaffolder().run();
-        //  JkPlugin.applyScaffold(this.plugins.getActivated());
     }
 
-    /** Clean the output directory. */
+    /**
+     * Clean the output directory.
+     */
     @JkDoc("Cleans the output directory.")
     public void clean() {
         JkLog.start("Cleaning output directory " + outputDir());
         if (Files.exists(outputDir())) {
-            ouputTree().refuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
+            JkPathTree.of(outputDir()).refuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
         }
         JkLog.done();
     }
 
-    /** Conventional method standing for the default operations to perform.
-     * @throws Exception */
+    /**
+     * Conventional method standing for the default operations to perform.
+     *
+     * @throws Exception
+     */
     @JkDoc("Conventional method standing for the default operations to perform.")
-    public void doDefault() throws Exception {
-        clean();
+    public void doDefault() {
+        defaulter.run();
     }
 
-    /** Displays all available methods defined in this build. */
+    /**
+     * Displays all available methods defined in this build.
+     */
     @JkDoc("Displays all available methods defined in this build.")
     public void help() {
         if (help.xml || help.xmlFile != null) {
             HelpDisplayer.help(this, help.xmlFile);
         } else {
             HelpDisplayer.help(this);
+            ;
         }
     }
 
-    /** Displays details on all available plugins. */
-    @JkDoc("Displays details on all available plugins.")
-    public void helpPlugins() {
-        HelpDisplayer.helpPlugins();
-    }
-
-    /** Displays meaningful information about this build. */
+    /**
+     * Displays meaningful information about this build.
+     */
     @JkDoc("Displays meaningful information about this build.")
     public final void info() {
-        JkLog.info(infoString());
+        JkLog.info(infoProvider.toString());
     }
 
-
-    // -----------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------
 
     @Override
     public String toString() {

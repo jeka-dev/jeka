@@ -3,13 +3,8 @@ package org.jerkar.tool;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsObject;
@@ -25,16 +20,16 @@ import org.w3c.dom.Element;
  */
 final class ProjectDef {
 
-    private final List<Class<?>> buildClassNames;
+    private final List<Class<?>> buildClasses;
 
-    private ProjectDef(List<Class<?>> buildClassNames) {
+    private ProjectDef(List<Class<?>> buildClasses) {
         super();
-        this.buildClassNames = Collections.unmodifiableList(buildClassNames);
+        this.buildClasses = Collections.unmodifiableList(buildClasses);
     }
 
     public void logAvailableBuildClasses() {
         int i = 0;
-        for (final Class<?> classDef : this.buildClassNames) {
+        for (final Class<?> classDef : this.buildClasses) {
             final String defaultMessage = (i == 0) ? " (default)" : "";
             final JkDoc jkDoc = classDef.getAnnotation(JkDoc.class);
             final String desc;
@@ -53,37 +48,42 @@ final class ProjectDef {
      *
      * @author Jerome Angibaud
      */
-    static final class ProjectBuildClassDef {
+    static final class BuildClassDef {
 
-        private final List<JkProjectBuildMethodDef> methodDefs;
+        private final List<BuildMethodDef> methodDefs;
 
-        private final List<JkProjectBuildOptionDef> optionDefs;
+        private final List<BuildOptionDef> optionDefs;
 
-        private ProjectBuildClassDef(List<JkProjectBuildMethodDef> methodDefs,
-                List<JkProjectBuildOptionDef> optionDefs) {
+        private final Object buildOrPlugin;
+
+
+
+        private BuildClassDef(Object buildOrPlugin, List<BuildMethodDef> methodDefs,
+                              List<BuildOptionDef> optionDefs) {
             super();
+            this.buildOrPlugin = buildOrPlugin;
             this.methodDefs = Collections.unmodifiableList(methodDefs);
             this.optionDefs = Collections.unmodifiableList(optionDefs);
         }
 
-        List<JkProjectBuildMethodDef> methodDefinitions() {
+        List<BuildMethodDef> methodDefinitions() {
             return methodDefs;
         }
 
-        static ProjectBuildClassDef of(Object build) {
+        static BuildClassDef of(Object build) {
             final Class<?> clazz = build.getClass();
-            final List<JkProjectBuildMethodDef> methods = new LinkedList<>();
+            final List<BuildMethodDef> methods = new LinkedList<>();
             for (final Method method : executableMethods(clazz)) {
-                methods.add(JkProjectBuildMethodDef.of(method));
+                methods.add(BuildMethodDef.of(method));
             }
             Collections.sort(methods);
-            final List<JkProjectBuildOptionDef> options = new LinkedList<>();
+            final List<BuildOptionDef> options = new LinkedList<>();
             for (final NameAndField nameAndField : options(clazz, "", true, null)) {
-                options.add(JkProjectBuildOptionDef.of(build, nameAndField.field,
-                        nameAndField.name));
+                options.add(BuildOptionDef.of(build, nameAndField.field,
+                        nameAndField.name, nameAndField.rootClass));
             }
             Collections.sort(options);
-            return new ProjectBuildClassDef(methods, options);
+            return new BuildClassDef(build, methods, options);
         }
 
         private static List<Method> executableMethods(Class<?> clazz) {
@@ -119,48 +119,48 @@ final class ProjectDef {
             return !JkUtilsReflect.getAllDeclaredField(field.getType(), JkDoc.class).isEmpty();
         }
 
-        void log(boolean displayFromClass) {
-            log(displayFromClass, "");
+        void log(String prefix, boolean withHeader) {
+            for (Class<? extends JkBuild> buildClass : this.buildClassHierarchy()) {
+                log(buildClass, prefix, withHeader);
+            }
+            if (this.buildOrPlugin instanceof JkBuild) {
+                JkBuild build = (JkBuild) this.buildOrPlugin;
+                for (JkPlugin plugin : build.plugins.all()) {
+                    BuildClassDef.of(plugin).log(plugin.name() + "#", withHeader);
+                }
+            }
+
         }
 
-        void log(boolean displayFromClass, String methodPrefix) {
-            JkLog.nextLine();
-            JkLog.infoHeaded("Methods               ");
-            if (this.methodDefs.isEmpty()) {
-                JkLog.info("None");
+        private void log(Class<?> buildClass, String prefix, boolean withHeader) {
+            List<BuildMethodDef> methods = this.methodsOf(buildClass);
+            List<BuildOptionDef> options = this.optionsOf(buildClass);
+            if (methods.isEmpty() && options.isEmpty()) {
+                return;
             }
-            Class<?> currentClass = Object.class;
-            for (final JkProjectBuildMethodDef methodDef : this.methodDefs) {
+            String classWord = JkBuild.class.isAssignableFrom(buildClass) ? "class" : "plugin";
+            if (withHeader) {
                 JkLog.nextLine();
-                if (!methodDef.declaringClass.equals(currentClass) && displayFromClass) {
-                    JkLog.infoUnderlined("From " + methodDef.declaringClass.getName());
-                }
-                currentClass = methodDef.declaringClass;
-                final String displayedMethodName = methodPrefix + methodDef.name;
-                if (methodDef.description == null) {
-                    JkLog.info(displayedMethodName + " : No description available.");
-                } else if (!methodDef.description.contains("\n")) {
-                    JkLog.info(displayedMethodName+ " : " + methodDef.description);
-                } else {
-                    JkLog.info(displayedMethodName + " : ");
-                    JkLog.info(toLines(methodDef.description));
+                JkLog.info("From " + classWord + " " + buildClass.getName() + " :");
+            }
+            String margin = withHeader ? "  " : "";
+            if (!methods.isEmpty()) {
+                JkLog.info(margin + "Methods : ");
+                for (BuildMethodDef methodDef : this.methodsOf(buildClass)) {
+                    final String displayedMethodName = prefix + methodDef.name;
+                    if (methodDef.description == null) {
+                        JkLog.info(margin + "  " + displayedMethodName + " : No description available.");
+                    } else {
+                        JkLog.info(margin + "  " + displayedMethodName + " : " + methodDef.description.replace("\n", " "));
+                    }
                 }
             }
-            JkLog.nextLine();
-            JkLog.infoHeaded("Options               ");
-            if (this.optionDefs.isEmpty()) {
-                JkLog.info("None");
-            }
-            currentClass = Object.class;
-            for (final JkProjectBuildOptionDef optionDef : this.optionDefs) {
-                JkLog.nextLine();
-                if (!optionDef.jkBuild.getClass().equals(currentClass) && displayFromClass) {
-                    JkLog.infoUnderlined("From " + optionDef.jkBuild.getClass().getName());
+            if (!options.isEmpty()) {
+                JkLog.info(margin + "Options : ");
+                for (BuildOptionDef optionDef : this.optionsOf(buildClass)) {
+                    optionDef.log( prefix, margin);
                 }
-                currentClass = optionDef.jkBuild.getClass();
-                optionDef.log(methodPrefix);
             }
-
         }
 
         private static List<String> toLines(String string) {
@@ -172,9 +172,9 @@ final class ProjectDef {
 
         Map<String, String> optionValues(JkBuild build) {
             final Map<String, String> result = new LinkedHashMap<>();
-            for (final JkProjectBuildOptionDef optionDef : this.optionDefs) {
+            for (final BuildOptionDef optionDef : this.optionDefs) {
                 final String name = optionDef.name;
-                final Object value = JkProjectBuildOptionDef.value(build, name);
+                final Object value = BuildOptionDef.value(build, name);
                 result.put(name, JkUtilsObject.toString(value));
             }
             return result;
@@ -184,17 +184,37 @@ final class ProjectDef {
             final Element buildEl = document.createElement("build");
             final Element methodsEl = document.createElement("methods");
             buildEl.appendChild(methodsEl);
-            for (final JkProjectBuildMethodDef buildMethodDef : this.methodDefs) {
+            for (final BuildMethodDef buildMethodDef : this.methodDefs) {
                 final Element methodEl = buildMethodDef.toXmlElement(document);
                 methodsEl.appendChild(methodEl);
             }
             final Element optionsEl = document.createElement("options");
             buildEl.appendChild(optionsEl);
-            for (final JkProjectBuildOptionDef buildOptionDef : this.optionDefs) {
+            for (final BuildOptionDef buildOptionDef : this.optionDefs) {
                 final Element optionEl = buildOptionDef.toElement(document);
                 optionsEl.appendChild(optionEl);
             }
             return buildEl;
+        }
+
+        private List<Class<? extends JkBuild>> buildClassHierarchy() {
+            List<Class<? extends JkBuild>> result = new ArrayList<>();
+            Class<?> current = this.buildOrPlugin.getClass();
+            while (JkBuild.class.isAssignableFrom(current) || JkPlugin.class.isAssignableFrom(current)) {
+                result.add((Class<? extends JkBuild>) current);
+                current = current.getSuperclass();
+            }
+            return result;
+        }
+
+        private List<BuildMethodDef> methodsOf(Class<?> buildClass) {
+            return this.methodDefs.stream().filter(buildMethodDef -> buildClass.equals(buildMethodDef.declaringClass))
+                    .collect(Collectors.toList());
+        }
+
+        private List<BuildOptionDef> optionsOf(Class<?> buildClass) {
+            return this.optionDefs.stream().filter(buildOptionDef -> buildClass.equals(buildOptionDef.rootDeclaringClass))
+                    .collect(Collectors.toList());
         }
     }
 
@@ -203,7 +223,7 @@ final class ProjectDef {
      *
      * @author Jerome Angibaud
      */
-    public static final class JkProjectBuildMethodDef implements Comparable<JkProjectBuildMethodDef> {
+     static final class BuildMethodDef implements Comparable<BuildMethodDef> {
 
         private final String name;
 
@@ -211,21 +231,21 @@ final class ProjectDef {
 
         private final Class<?> declaringClass;
 
-        private JkProjectBuildMethodDef(String name, String description, Class<?> declaringClass) {
+        private BuildMethodDef(String name, String description, Class<?> declaringClass) {
             super();
             this.name = name;
             this.description = description;
             this.declaringClass = declaringClass;
         }
 
-        static JkProjectBuildMethodDef of(Method method) {
+        static BuildMethodDef of(Method method) {
             final JkDoc jkDoc = JkUtilsReflect.getInheritedAnnotation(method, JkDoc.class);
             final String descr = jkDoc != null ? JkUtilsString.join(jkDoc.value(), "\n") : null;
-            return new JkProjectBuildMethodDef(method.getName(), descr, method.getDeclaringClass());
+            return new BuildMethodDef(method.getName(), descr, method.getDeclaringClass());
         }
 
         @Override
-        public int compareTo(JkProjectBuildMethodDef other) {
+        public int compareTo(BuildMethodDef other) {
             if (this.declaringClass.equals(other.declaringClass)) {
                 return this.name.compareTo(other.name);
             }
@@ -263,34 +283,37 @@ final class ProjectDef {
      *
      * @author Jerome Angibaud
      */
-    public static final class JkProjectBuildOptionDef implements Comparable<JkProjectBuildOptionDef> {
+     static final class BuildOptionDef implements Comparable<BuildOptionDef> {
 
         private final String name;
 
         private final String description;
 
-        private final Object jkBuild;
+        private final Object build;
 
         private final Object defaultValue;
 
+        private final Class<?> rootDeclaringClass;
+
         private final Class<?> type;
 
-        private JkProjectBuildOptionDef(String name, String description, Object jkBuild, Object defaultValue,
-                Class<?> type) {
+        private BuildOptionDef(String name, String description, Object jkBuild, Object defaultValue,
+                               Class<?> type, Class<?> declaringClass) {
             super();
             this.name = name;
             this.description = description;
-            this.jkBuild = jkBuild;
+            this.build = jkBuild;
             this.defaultValue = defaultValue;
             this.type = type;
+            this.rootDeclaringClass = declaringClass;
         }
 
-        static JkProjectBuildOptionDef of(Object instance, Field field, String name) {
+        static BuildOptionDef of(Object instance, Field field, String name, Class<?> rootDeclaringClass) {
             final JkDoc opt = field.getAnnotation(JkDoc.class);
             final String descr = opt != null ? JkUtilsString.join(opt.value(), "\n") : null;
             final Class<?> type = field.getType();
             final Object defaultValue = value(instance, name);
-            return new JkProjectBuildOptionDef(name, descr, instance, defaultValue, type);
+            return new BuildOptionDef(name, descr, instance, defaultValue, type, rootDeclaringClass);
         }
 
         private static Object value(Object buildinstance, String optName) {
@@ -308,28 +331,21 @@ final class ProjectDef {
         }
 
         @Override
-        public int compareTo(JkProjectBuildOptionDef other) {
-            if (this.jkBuild.getClass().equals(other.jkBuild.getClass())) {
+        public int compareTo(BuildOptionDef other) {
+            if (this.build.getClass().equals(other.build.getClass())) {
                 return this.name.compareTo(other.name);
             }
-            if (this.jkBuild.getClass().isAssignableFrom(other.jkBuild.getClass())) {
+            if (this.build.getClass().isAssignableFrom(other.build.getClass())) {
                 return -1;
             }
             return 1;
         }
 
-        void log(String optionPrefix) {
-            final String displayedOptionName = optionPrefix + this.name;
-            if (this.description == null) {
-                JkLog.info(displayedOptionName + " : No description available.");
-            } else if (!this.description.contains("\n")) {
-                JkLog.info(displayedOptionName + " : " + this.description);
-            } else {
-                JkLog.info(displayedOptionName + " : ");
-                JkLog.info(ProjectBuildClassDef.toLines(this.description));
-            }
-            JkLog.info("Type : " + this.type());
-            JkLog.info("Default value : " + this.defaultValue);
+        void log(String prefix, String margin) {
+            StringBuilder builder = new StringBuilder();
+            builder.append(prefix).append(name).append(" (").append(type()).append( ", default : ").append(defaultValue)
+                    .append(") : ").append(description.replace("\n", " "));
+            JkLog.info(margin + "  " + builder.toString());
         }
 
         private String type() {

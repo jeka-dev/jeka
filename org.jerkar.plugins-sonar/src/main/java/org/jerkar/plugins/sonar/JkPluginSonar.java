@@ -1,9 +1,5 @@
 package org.jerkar.plugins.sonar;
 
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.depmanagement.JkVersionedModule;
@@ -11,19 +7,22 @@ import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.tool.JkBuild;
-import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkOptions;
-import org.jerkar.tool.JkPlugin;
-import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+import org.jerkar.tool.*;
+import org.jerkar.tool.builtins.java.JkPluginJava;
 
-@JkDoc({"Add SonarQube capability to a build.",
-        "The ananlysis is performed when the 'run' method is invoked.",
-        "To parameterize this plugin just set the relevant sonar properies as options.",
-        "For example you can launch the build whith '-sonar.host.url=http://myserver/..' to specify the SonarQube server url."})
-public class JkPluginSonar implements JkPlugin {
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+
+@JkDoc("Run SonarQube analysis.")
+@JkDocPluginDeps(JkPluginJava.class)
+public class JkPluginSonar extends JkPlugin {
 
     private final Map<String, String> properties = new HashMap<>();
+
+    public JkPluginSonar(JkBuild build) {
+        super(build);
+    }
 
     public static JkSonar configureSonarFrom(JkJavaProject project) {
         final JkProjectSourceLayout sourceLayout = project.getSourceLayout();
@@ -35,7 +34,6 @@ public class JkPluginSonar implements JkPlugin {
         final String fullName = module != null ? module.moduleId().fullName() : project.getArtifactName();
         final String name = module != null ? module.moduleId().name() : project.getArtifactName();
         final JkVersion version = module != null ? module.version() : JkVersion.name("");
-        System.out.println("**********************************************************" + project.getOutLayout().classDir());
         return JkSonar
                 .of(fullName, name, version)
                 .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)
@@ -54,23 +52,19 @@ public class JkPluginSonar implements JkPlugin {
 
     }
 
-    @JkDoc("Launch a Sonar analysis")
-    public void run(JkBuild build) {
-        if (build instanceof JkJavaProjectBuild) {
-            configureSonarFrom(((JkJavaProjectBuild) build).project()).withProperties(properties).run();
-        } else {
-            JkLog.warn("Plugin " + this.getClass().getSimpleName() + " not appliable for build type " + build.getClass());
-        }
+    @JkDoc("Run a SonarQube analysis based on properties defined in this plugin. " +
+            "Options prefixed with 'sonar.' as '-sonar.host.url=http://myserver/..' " +
+            "will be appended to these properties.")
+    public void run() {
+        configureSonarFrom(build.plugins.get(JkPluginJava.class).project()).withProperties(properties).run();
     }
 
+    /**
+     * Adds a property to configure sonar instance to run. You'll find predefined keys in {@link JkSonar}.
+     */
     public JkPluginSonar prop(String key, String value) {
         this.properties.put(key, value);
         return this;
-    }
-
-    @Override
-    public void apply(JkBuild build) {
-        // do nothing
     }
 
 }

@@ -14,7 +14,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 
 /**
- * Enhancer to configure JkUnit such it performs Jacoco code coverage while it runs unit tests.
+ * Enhancer to setupOptionDefaults JkUnit such it performs Jacoco code coverage while it runs unit tests.
  */
 public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
 

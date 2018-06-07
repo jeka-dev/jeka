@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsReflect;
 
@@ -26,20 +25,20 @@ public final class JkImportedBuilds {
 
     private static final ThreadLocal<Map<ImportedBuildRef, JkBuild>> IMPORTED_BUILD_CONTEXT = new ThreadLocal<>();
 
-    static JkImportedBuilds of(Path masterRootDir, JkBuild build) {
-        return new JkImportedBuilds(masterRootDir, getDirectImportedBuilds(build));
+    static JkImportedBuilds of(Path masterRootDir, JkBuild masterBuild) {
+        return new JkImportedBuilds(masterRootDir, getDirectImportedBuilds(masterBuild));
     }
 
-    private final List<JkBuild> directImports;
+    private final List<JkBuild> directImportedBuilds;
 
-    private List<JkBuild> transitiveImports;
+    private List<JkBuild> transitiveImportedBuilds;
 
-    private final Path masterBuildRoot;
+    private final Path masterBuildBaseDir;
 
     private JkImportedBuilds(Path masterDir, List<JkBuild> buildDeps) {
         super();
-        this.masterBuildRoot = masterDir;
-        this.directImports = Collections.unmodifiableList(buildDeps);
+        this.masterBuildBaseDir = masterDir;
+        this.directImportedBuilds = Collections.unmodifiableList(buildDeps);
     }
 
     /**
@@ -48,15 +47,15 @@ public final class JkImportedBuilds {
      */
     @SuppressWarnings("unchecked")
     public JkImportedBuilds and(List<JkBuild> slaves) {
-        return new JkImportedBuilds(this.masterBuildRoot, JkUtilsIterable.concatLists(
-                this.directImports, slaves));
+        return new JkImportedBuilds(this.masterBuildBaseDir, JkUtilsIterable.concatLists(
+                this.directImportedBuilds, slaves));
     }
 
     /**
      * Returns only the direct slave of this master build.
      */
     public List<JkBuild> directs() {
-        return Collections.unmodifiableList(directImports);
+        return Collections.unmodifiableList(directImportedBuilds);
     }
 
     /**
@@ -66,10 +65,10 @@ public final class JkImportedBuilds {
      *
      */
     public List<JkBuild> all() {
-        if (transitiveImports == null) {
-            transitiveImports = resolveTransitiveBuilds(new HashSet<>());
+        if (transitiveImportedBuilds == null) {
+            transitiveImportedBuilds = resolveTransitiveBuilds(new HashSet<>());
         }
-        return transitiveImports;
+        return transitiveImportedBuilds;
     }
 
     /**
@@ -87,7 +86,7 @@ public final class JkImportedBuilds {
 
     private List<JkBuild> resolveTransitiveBuilds(Set<Path> files) {
         final List<JkBuild> result = new LinkedList<>();
-        for (final JkBuild build : directImports) {
+        for (final JkBuild build : directImportedBuilds) {
             final Path dir = build.baseDir();
             if (!files.contains(dir)) {
                 result.addAll(build.importedBuilds().resolveTransitiveBuilds(files));
@@ -99,35 +98,35 @@ public final class JkImportedBuilds {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<JkBuild> getDirectImportedBuilds(JkBuild build) {
+    private static List<JkBuild> getDirectImportedBuilds(JkBuild masterBuild) {
         final List<JkBuild> result = new LinkedList<>();
-        final List<Field> fields = JkUtilsReflect.getAllDeclaredField(build.getClass(), JkImportBuild.class);
+        final List<Field> fields = JkUtilsReflect.getAllDeclaredField(masterBuild.getClass(), JkImportBuild.class);
 
         for (final Field field : fields) {
             final JkImportBuild jkProject = field.getAnnotation(JkImportBuild.class);
-            final JkBuild subBuild = createImportedBuild(
-                    (Class<? extends JkBuild>) field.getType(), jkProject.value(), build);
+            final JkBuild importedBuild = createImportedBuild(
+                    (Class<? extends JkBuild>) field.getType(), jkProject.value(), masterBuild.baseDir());
             try {
-                JkUtilsReflect.setFieldValue(build, field, subBuild);
+                JkUtilsReflect.setFieldValue(masterBuild, field, importedBuild);
             } catch (final RuntimeException e) {
-                Path currentClassBaseDir = Paths.get(build.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
+                Path currentClassBaseDir = Paths.get(masterBuild.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
                 while (!Files.exists(currentClassBaseDir.resolve("build/def")) && currentClassBaseDir != null) {
                     currentClassBaseDir = currentClassBaseDir.getParent();
                 }
                 if (currentClassBaseDir == null) {
-                    throw new IllegalStateException("Can't inject slave build instance of type " + subBuild.getClass().getSimpleName()
+                    throw new IllegalStateException("Can't inject slave build instance of type " + importedBuild.getClass().getSimpleName()
                             + " into field " + field.getDeclaringClass().getName()
-                            + "#" + field.getName() + " from directory " + build.baseDir()
+                            + "#" + field.getName() + " from directory " + masterBuild.baseDir()
                             + " while working dir is " + Paths.get("").toAbsolutePath());
                 }
-                throw new IllegalStateException("Can't inject slave build instance of type " + subBuild.getClass().getSimpleName()
+                throw new IllegalStateException("Can't inject slave build instance of type " + importedBuild.getClass().getSimpleName()
                         + " into field " + field.getDeclaringClass().getName()
-                        + "#" + field.getName() + " from directory " + build.baseDir()
+                        + "#" + field.getName() + " from directory " + masterBuild.baseDir()
                         + "\nBuild class is located in " + currentClassBaseDir
                         + " while working dir is " + Paths.get("").toAbsolutePath()
                         + ".\nPlease set working dir to " + currentClassBaseDir, e);
             }
-            result.add(subBuild);
+            result.add(importedBuild);
         }
         return result;
     }
@@ -138,9 +137,9 @@ public final class JkImportedBuilds {
      * populated as usual.
      */
     @SuppressWarnings("unchecked")
-    private static <T extends JkBuild> T createImportedBuild(Class<T> clazz, String relativePath, JkBuild build) {
-        final Path projectDir = build.baseDir().resolve(relativePath).normalize();
-        final ImportedBuildRef projectRef = new ImportedBuildRef(projectDir, clazz);
+    private static <T extends JkBuild> T createImportedBuild(Class<T> importedBuildClass, String relativePath, Path masterBuildPath) {
+        final Path projectDir = masterBuildPath.resolve(relativePath).normalize();
+        final ImportedBuildRef projectRef = new ImportedBuildRef(projectDir, importedBuildClass);
         Map<ImportedBuildRef, JkBuild> map = IMPORTED_BUILD_CONTEXT.get();
         if (map == null) {
             map = new HashMap<>();
@@ -151,8 +150,7 @@ public final class JkImportedBuilds {
             return cachedResult;
         }
         final Engine engine = new Engine(projectDir);
-        final T result = engine.getBuild(clazz);
-        JkOptions.populateFields(result);
+        final T result = engine.getBuild(importedBuildClass);
         IMPORTED_BUILD_CONTEXT.get().put(projectRef, result);
         return result;
     }
@@ -193,6 +191,5 @@ public final class JkImportedBuilds {
             return result;
         }
     }
-
 
 }

@@ -1,17 +1,13 @@
 package org.jerkar.tool;
 
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.system.JkInfo;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
@@ -21,7 +17,6 @@ import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.tool.CommandLine.JkPluginSetup;
 
 /**
  * Initializer for build instances. It instantiates build class and inject
@@ -58,7 +53,7 @@ public final class JkInit {
         if (result == null) {
             throw new JkException("No build class found for engine located at : " + base);
         }
-        JkLog.info("Build class " + result.getClass().getName());
+        JkLog.info("Build class : " + result.getClass().getName());
         return result;
     }
 
@@ -82,12 +77,10 @@ public final class JkInit {
         JkBuild.baseDirContext(baseDir);
         final T build;
         try {
-            build = JkUtilsReflect.newInstance(clazz);
+            build = JkBuild.of(clazz);
         } finally {
             JkBuild.baseDirContext(null);
         }
-        init.initProject(build);
-        JkLog.info("Build class " + build.getClass().getName());
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
         if (JkLog.verbose()) {
             JkInit.logProps("Field values", displayedOptions);
@@ -107,7 +100,7 @@ public final class JkInit {
         JkLog.info("Jerkar Version : " + JkInfo.jerkarVersion());
         JkLog.info("Working Directory : " + System.getProperty("user.dir"));
         JkLog.info("Java Home : " + System.getProperty("java.home"));
-        JkLog.info("Java Version : " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor"));
+        JkLog.info("Java Version : " + System.getProperty("java.projectVersion") + ", " + System.getProperty("java.vendor"));
         if ( embedded(JkLocator.jerkarHomeDir())) {
             JkLog.info("Jerkar Home : " + bootDir() + " ( embedded !!! )");
         } else {
@@ -134,10 +127,10 @@ public final class JkInit {
         final Map<String, String> sysProps = getSpecifiedSystemProps(args);
         setSystemProperties(sysProps);
         final Map<String, String> optionMap = new HashMap<>();
-        optionMap.putAll(loadOptionsProperties());
-        final CommandLine commandLine = CommandLine.of(args);
-        optionMap.putAll(commandLine.getSubProjectBuildOptions());
-        optionMap.putAll(commandLine.getMasterBuildOptions());
+        optionMap.putAll(JkOptions.readSystemAndUserOptions());
+        CommandLine.init(args);
+        final CommandLine commandLine = CommandLine.instance();
+        optionMap.putAll(commandLine.getBuildOptions());
         if (!JkOptions.isPopulated()) {
             JkOptions.init(optionMap);
         }
@@ -187,70 +180,6 @@ public final class JkInit {
             }
         }
         return result;
-    }
-
-    PluginDictionnary initProject(JkBuild build) {
-        final CommandLine commandLine = this.loadResult.commandLine;
-        JkOptions.populateFields(build, commandLine.getMasterBuildOptions());
-        build.init();
-
-        // setup plugins activated in command line
-        final Class<JkPlugin> baseClass = JkClassLoader.of(build.getClass()).load(JkPlugin.class.getName());
-        final PluginDictionnary dictionnary = new PluginDictionnary();
-        final List<JkBuild> importedBuilds = build.importedBuilds().all();
-        if (!importedBuilds.isEmpty()) {
-            JkLog.startHeaded("Configure imported builds");
-            for (final JkBuild subBuild : importedBuilds) {
-                JkLog.startln("Configure build " + build.baseDir().relativize(subBuild.baseDir()));
-                configureBuild(subBuild, commandLine.getSubProjectPluginSetups(),
-                        commandLine.getSubProjectBuildOptions(), dictionnary);
-                JkLog.done();
-            }
-            JkLog.done();
-        }
-        configureBuild(build, commandLine.getMasterPluginSetups(), commandLine.getMasterBuildOptions(), dictionnary);
-        return dictionnary;
-
-    }
-
-    private static Map<String, String> loadOptionsProperties() {
-        final Path propFile = JkLocator.jerkarHomeDir().resolve("options.properties");
-        final Map<String, String> result = new HashMap<>();
-        if (Files.exists(propFile)) {
-            result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
-        }
-        final Path userPropFile = JkLocator.jerkarUserHomeDir().resolve("options.properties");
-        if (Files.exists(userPropFile)) {
-            result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
-        }
-        return result;
-    }
-
-    private static void configureBuild(JkBuild build, Collection<JkPluginSetup> pluginSetups,
-            Map<String, String> commandlineOptions, PluginDictionnary dictionnary) {
-        JkOptions.populateFields(build);
-        final Path localProps = build.outputDir().resolve(JkConstants.BUILD_DEF_DIR + "/build.properties");
-        if (Files.exists(localProps)) {
-            JkOptions.populateFields(build, JkUtilsFile.readPropertyFileAsMap(localProps));
-        }
-        JkOptions.populateFields(build, commandlineOptions);
-        configureAndActivatePlugins(build, pluginSetups, dictionnary);
-    }
-
-    private static void configureAndActivatePlugins(JkBuild build, Collection<JkPluginSetup> pluginSetups,
-            PluginDictionnary dictionnary) {
-        for (final JkPluginSetup pluginSetup : pluginSetups) {
-            final Class<? extends JkPlugin> pluginClass = dictionnary.loadByNameOrFail(pluginSetup.pluginName)
-                    .pluginClass();
-            JkLog.startln("Configuring plugin " + pluginClass.getName());
-            final JkPlugin plugin = build.plugins().getOrCreate(pluginClass, pluginSetup.options);
-            JkLog.done("Configuring plugin " + pluginClass.getName() + " with options "
-                    + JkOptions.fieldOptionsToString(plugin));
-            if (pluginSetup.activated) {
-                JkLog.info("Activating plugin " + pluginClass.getName());
-                plugin.apply(build);
-            }
-        }
     }
 
     private static boolean embedded(Path jarFolder) {

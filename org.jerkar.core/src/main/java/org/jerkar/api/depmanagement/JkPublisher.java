@@ -65,7 +65,7 @@ public final class JkPublisher {
      * this publisher
      *
      * @param versionedModule
-     *            The module id and version to publish
+     *            The module id and projectVersion to publish
      * @param publication
      *            The content of the publication
      * @param dependencies
@@ -76,7 +76,7 @@ public final class JkPublisher {
      *            The delivery date (necessary to generate an ivy.xml file)
      * @param resolvedVersion
      *            If the dependencies contains dynamic versions (as 1.0.+) then
-     *            you can mention a static version replacement. If none, you can
+     *            you can mention a static projectVersion replacement. If none, you can
      *            just pass {@link JkVersionProvider#empty()}
      */
     public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
@@ -91,7 +91,7 @@ public final class JkPublisher {
      * publisher.
      *
      * @param versionedModule
-     *            The target moduleId and version for the specified publication
+     *            The target moduleId and projectVersion for the specified publication
      * @param publication
      *            The content of the publication
      * @param dependencies
@@ -105,14 +105,14 @@ public final class JkPublisher {
     /**
      * Publishes all artifact files for the specified artifact producer for the specified versioned module.
      *
-     * @param versionedModule The target moduleId and version for the specified publication
+     * @param versionedModule The target moduleId and projectVersion for the specified publication
      * @param dependencies The dependencies to specify in the generated pom file.
      * @param extraPublishInfo Extra information about authors, licensing, source control management, ...
      * @param artifactLocator Object producing artifacts to be deployed. This object is used only to find
      *               artifact files. If an artifact files is not present, it is not created by this method.
      */
     public void publishMaven(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator,
-                             Set<JkArtifactFileId> excludedArtifacts,
+                             Set<JkArtifactId> excludedArtifacts,
                              JkDependencies dependencies, JkMavenPublicationInfo extraPublishInfo) {
         JkMavenPublication publication = JkMavenPublication.of(artifactLocator, excludedArtifacts).with(extraPublishInfo);
         this.ivyPublisher.publishMaven(versionedModule, publication, dependencies.modulesOnly());

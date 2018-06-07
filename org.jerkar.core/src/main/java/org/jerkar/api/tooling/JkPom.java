@@ -77,7 +77,7 @@ public final class JkPom {
     }
 
     /**
-     * The version for this POM.
+     * The projectVersion for this POM.
      */
     public String version() {
         return JkUtilsXml.directChildText(projectEl(), "version");
@@ -91,7 +91,7 @@ public final class JkPom {
     }
 
     /**
-     * The map groupId:ArtifactId -> version provideded by the <code>dependencyManagement</code>
+     * The map groupId:ArtifactId -> projectVersion provideded by the <code>dependencyManagement</code>
      * section of this POM.
      */
     public JkVersionProvider versionProvider() {

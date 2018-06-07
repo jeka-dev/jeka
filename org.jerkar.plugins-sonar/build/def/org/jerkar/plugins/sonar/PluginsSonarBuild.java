@@ -14,17 +14,17 @@ public class PluginsSonarBuild extends JkJavaProjectBuild {
     @JkImportBuild("../org.jerkar.core")
     private CoreBuild core;
 
+
     @Override
-    protected JkJavaProject createProject() {
-        final JkJavaProject project = defaultProject();
+    protected void configurePlugins() {
+        final JkJavaProject project = java().project();
         CoreBuild.applyCommonSettings(project, "plugins-sonar");
         project.setDependencies(JkDependencies.builder()
-                .on(core.project()).scope(PROVIDED)
+                .on(core.java().project()).scope(PROVIDED)
                 .build());
-        return project;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         JkInit.instanceOf(PluginsSonarBuild.class, args).doDefault();
     }
 

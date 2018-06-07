@@ -9,7 +9,7 @@ import java.util.Set;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
- * Association between moduleIds and version.
+ * Association between moduleIds and projectVersion.
  *
  * @author Jerome Angibaud
  */
@@ -40,7 +40,7 @@ public final class JkVersionProvider implements Serializable {
     }
 
     /**
-     * Creates a {@link JkVersionProvider} holding a single version providing.
+     * Creates a {@link JkVersionProvider} holding a single projectVersion providing.
      */
     public static JkVersionProvider of(JkModuleId moduleId, JkVersion version) {
         final Map<JkModuleId, JkVersion> result = JkUtilsIterable.mapOf(moduleId, version);
@@ -48,14 +48,14 @@ public final class JkVersionProvider implements Serializable {
     }
 
     /**
-     * Creates an empty version provider.
+     * Creates an empty projectVersion provider.
      */
     public static JkVersionProvider of() {
         return new JkVersionProvider(new HashMap<>());
     }
 
     /**
-     * Creates a version provider from the specified versioned modules.
+     * Creates a projectVersion provider from the specified versioned modules.
      */
     public static JkVersionProvider of(Iterable<JkVersionedModule> modules) {
         final Map<JkModuleId, JkVersion> result = new HashMap<>();
@@ -73,7 +73,7 @@ public final class JkVersionProvider implements Serializable {
     }
 
     /**
-     * Returns the version to use with specified module.
+     * Returns the projectVersion to use with specified module.
      */
     public JkVersion versionOf(JkModuleId moduleId) {
         return this.map.get(moduleId);
@@ -126,7 +126,7 @@ public final class JkVersionProvider implements Serializable {
     }
 
     /**
-     * Returns all modules that this object provides version for.
+     * Returns all modules that this object provides projectVersion for.
      */
     public Set<JkModuleId> moduleIds() {
         return map.keySet();

@@ -43,7 +43,6 @@ class VersionConstanter {
             }
         }
         return new VersionConstanter(electedGroupToVersion);
-
     }
 
 }

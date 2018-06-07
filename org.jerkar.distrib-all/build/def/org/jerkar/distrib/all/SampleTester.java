@@ -1,6 +1,7 @@
 package org.jerkar.distrib.all;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -35,7 +36,7 @@ class SampleTester {
         launchScript = buildDir.root().resolve("build/output/dist/" + scriptName);
     }
 
-    void doTest() throws Exception {
+    void doTest() throws IOException {
         testSamples("AClassicBuild");
         testSamples("AntStyleBuild");
         testSamples("MavenStyleBuild");
@@ -44,7 +45,7 @@ class SampleTester {
         File file = new File("build/output/test-out/mavenrepo");
         //testSamples("", "doPublish", "-repo.publish.url=" + file.getAbsolutePath());
         //File file2 = new File("build/output/test-out/mavenrepo-release");
-        //testSamples("", "doPublish", "-version=1.0-SNAPSHOT", "-repo.release.url=" + file2.getAbsolutePath());
+        //testSamples("", "doPublish", "-projectVersion=1.0-SNAPSHOT", "-repo.release.url=" + file2.getAbsolutePath());
         //File file3 = new File("build/output/test-out/ivyrepo");
         //testSamples("", "doPublish", "-repo.publish.url=ivy:" + file3.getAbsolutePath());
         // scaffoldAndEclipse();   // TODO

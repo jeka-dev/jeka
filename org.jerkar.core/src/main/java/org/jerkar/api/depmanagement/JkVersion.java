@@ -8,7 +8,7 @@ import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * Used to specify a module version. Versions are comparable.
+ * Used to specify a module projectVersion. Versions are comparable.
  *
  * @author Jerome Angibaud
  */
@@ -42,14 +42,14 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
     }
 
     /**
-     * Returns the name of the version.
+     * Returns the name of the projectVersion.
      */
     public String name() {
         return name;
     }
 
     /**
-     * Returns <code>true</code> if this version stands for a snapshot one.
+     * Returns <code>true</code> if this projectVersion stands for a snapshot one.
      */
     public boolean isSnapshot() {
         return this.name.toLowerCase().endsWith("-snapshot");
@@ -61,7 +61,7 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
     }
 
     /**
-     * Returns <code>true</code> if this version is to be considered superior to the specified one.
+     * Returns <code>true</code> if this projectVersion is to be considered superior to the specified one.
      */
     public boolean isGreaterThan(JkVersion other) {
         return this.compareTo(other) > 0;

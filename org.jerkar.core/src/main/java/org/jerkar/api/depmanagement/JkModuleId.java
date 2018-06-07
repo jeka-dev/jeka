@@ -92,7 +92,7 @@ public final class JkModuleId implements Serializable {
 
     /**
      * Creates a {@link JkVersionedModule} from this module and the specified
-     * version.
+     * projectVersion.
      */
     public JkVersionedModule version(String version) {
         return version(JkVersion.name(version));
@@ -100,7 +100,7 @@ public final class JkModuleId implements Serializable {
 
     /**
      * Creates a {@link JkVersionedModule} from this module and the specified
-     * version.
+     * projectVersion.
      */
     public JkVersionedModule version(JkVersion version) {
         return JkVersionedModule.of(this, version);

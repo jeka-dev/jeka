@@ -105,7 +105,7 @@ final class BuildResolver {
             JkBuild.baseDirContext(baseDir);
             final JkBuild build;
             try {
-                build = JkUtilsReflect.newInstance(clazz);
+                build = JkBuild.of(clazz);
             } finally {
                 JkBuild.baseDirContext(null);
             }
@@ -123,7 +123,7 @@ final class BuildResolver {
                         JkBuild.baseDirContext(baseDir);
                         final JkBuild build;
                         try {
-                            build = (JkBuild) JkUtilsReflect.newInstance(clazz);
+                            build = JkBuild.of((Class<? extends JkBuild>) clazz);
                         } finally {
                             JkBuild.baseDirContext(null);
                         }

@@ -25,24 +25,23 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 public class MavenStyleBuild extends JkJavaProjectBuild {
 
     @Override
-    protected JkJavaProject createProject() {
-        JkJavaProject project = new JkJavaProject(this.baseDir())
+    protected void configurePlugins() {
+        java().project()
                 .setVersionedModule("org.jerkar:script-samples", "0.3-SNAPSHOT")
                 .setDependencies(dependencies());
-        project.maker().setDownloadRepos(JkRepos.of(JkRepo.maven("http://my.repo1"), JkRepo.mavenCentral()));
-        project.maker().setPublishRepos(publishRepositories());
-        return project;
+        java().project().maker().setDownloadRepos(JkRepos.of(JkRepo.maven("http://my.repo1"), JkRepo.mavenCentral()));
+        java().project().maker().setPublishRepos(publishRepositories());
     }
 
     JkDependencies dependencies() {
         return JkDependencies.builder()
-                .on(GUAVA, "18.0")	// Popular modules are available as Java constant
+                .on(GUAVA, "21.0")	// Popular modules are available as Java constant
                 .on(JERSEY_SERVER, "1.19")
-                .on("com.orientechnologies:orientdb-client:2.0.8")
-                .on(JUNIT, "4.11").scope(TEST).on(MOCKITO_ALL, "1.9.5")
-                .scope(TEST).build();
+             //   .on("com.orientechnologies:orientdb-client:2.2.35")
+                .on(JUNIT, "4.11").scope(TEST)
+             //   .on(MOCKITO_ALL, "1.9.5").scope(TEST)
+                .build();
     }
-
 
     JkPublishRepos publishRepositories() {
         return JkPublishRepos.of(JkRepo.maven("http://my.snapshot.repo").asPublishSnapshotRepo())

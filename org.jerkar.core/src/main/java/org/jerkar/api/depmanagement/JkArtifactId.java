@@ -6,20 +6,20 @@ package org.jerkar.api.depmanagement;
  * Extension is simply the char sequence at the end of of file to determine its technical type (.exe, .jar, .zip, ...). <br/>
  * Classifier is to mention the purpose of the file (main artifact, sources, javadoc, uberjar, native lib, ...).
  */
-public final class JkArtifactFileId {
+public final class JkArtifactId {
 
     /**
      * Creates an artifact file id with the specified classifier and extension. Both can be <code>null</code>. <br/>
      * A <code>null</code> or empty classifier generally means the main artifact. <br/>
      * A <code>extension</code> or empty extension generally means that the file has no extension.<br/>
      */
-    public static JkArtifactFileId of(String classifier, String extension) {
-        return new JkArtifactFileId(classifier, extension);
+    public static JkArtifactId of(String classifier, String extension) {
+        return new JkArtifactId(classifier, extension);
     }
 
     private final String classifier, extension;
 
-    private JkArtifactFileId(String classifier, String extension) {
+    private JkArtifactId(String classifier, String extension) {
         this.classifier = classifier == null || classifier.trim().length() == 0 ? null : classifier.trim().toLowerCase();
         this.extension = extension == null || extension.trim().length() == 0 ? null : extension.trim().toLowerCase();
     }
@@ -67,7 +67,7 @@ public final class JkArtifactFileId {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        JkArtifactFileId that = (JkArtifactFileId) o;
+        JkArtifactId that = (JkArtifactId) o;
 
         if (classifier != null ? !classifier.equals(that.classifier) : that.classifier != null) return false;
         return extension != null ? extension.equals(that.extension) : that.extension == null;
@@ -82,7 +82,7 @@ public final class JkArtifactFileId {
 
     @Override
     public String toString() {
-        return "Classifier='" + classifier + '\'' + ", extension='" + extension + '\'' + '}';
+        return "{Classifier='" + classifier + '\'' + ", extension='" + extension + '\'' + '}';
     }
 
 

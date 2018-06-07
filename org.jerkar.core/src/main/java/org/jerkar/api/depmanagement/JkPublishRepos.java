@@ -145,7 +145,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
      * Returns a {@link JkPublishRepo} identical to this one but with the specified value
      * for <i>unique snapshot</i> property.<br/>
      * When <i>unique snapshot</i> is <code>true</code>, the published artifact versioned with a Snapshot
-     * version, are timestamped so several 'version' on a given snapshot can coexist in the repository.
+     * projectVersion, are timestamped so several 'projectVersion' on a given snapshot can coexist in the repository.
      * It is the default behavior for Maven 3 while it was the opposit in Maven 2.
      *
      */
@@ -196,7 +196,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 
     /**
      * Returns <code>true</code> if it is required to sign the artifacts with
-     * PGP in order to publish the specified version and module.
+     * PGP in order to publish the specified projectVersion and module.
      */
     public boolean requirePgpSignature(JkVersionedModule versionedModule) {
         for (final JkPublishRepo jkPublishRepo : this.publishRepos) {

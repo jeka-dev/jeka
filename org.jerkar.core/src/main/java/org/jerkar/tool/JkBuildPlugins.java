@@ -1,14 +1,11 @@
 package org.jerkar.tool;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsReflect;
+
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.List;
 
 /**
  * Set of plugins configured or activated in a {@link JkBuild}.
@@ -19,55 +16,77 @@ public final class JkBuildPlugins {
 
     private final List<JkPlugin> configuredPlugins = new LinkedList<>();
 
-    JkBuildPlugins(JkBuild holder) {
+    private final List<PluginOptions> pluginOptionsList;
+
+    JkBuildPlugins(JkBuild holder,  List<PluginOptions> pluginOptionsList) {
         super();
         this.holder = holder;
-    }
-
-    public void configure(JkPlugin plugin) {
-        configuredPlugins.add(plugin);
+        this.pluginOptionsList = Collections.unmodifiableList(new ArrayList<>(pluginOptionsList));
     }
 
     public <T extends JkPlugin> T get(Class<T> pluginClass) {
-        return getOrCreate(pluginClass, new HashMap<String, String>());
+        return getOrCreate(pluginClass);
+    }
+
+    public JkPlugin get(String pluginName) {
+        Optional<JkPlugin> optPlugin = configuredPlugins.stream().filter(plugin -> plugin.name().equals(pluginName)).findFirst();
+        if (optPlugin.isPresent()) {
+            return optPlugin.get();
+        }
+        PluginDictionary.PluginDescription pluginDescription = PluginDictionary.loadByName(pluginName);
+        if (pluginDescription == null) {
+            return null;
+        }
+        return get(pluginDescription.pluginClass());
+    }
+
+    public boolean has(Class<? extends JkPlugin> pluginClass) {
+        for (JkPlugin plugin : configuredPlugins) {
+            if (plugin.getClass().equals(pluginClass)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<JkPlugin> all() {
+        return Collections.unmodifiableList(configuredPlugins);
     }
 
     void invoke(JkPlugin plugin, String methodName) {
-        JkLog.startUnderlined("Method " + methodName + " to plugin " + plugin.getClass().getSimpleName());
-        final Method method = pluginMethod(plugin.getClass(), methodName, holder.getClass());
-        JkUtilsReflect.invoke(plugin, method, this.holder);
+        JkLog.startUnderlined("Method " + methodName + " of plugin " + plugin.getClass().getSimpleName());
+        final Method method = pluginMethod(plugin.getClass(), methodName);
+        JkUtilsReflect.invoke(plugin, method);
         JkLog.done();
     }
 
-    <T extends JkPlugin> T getOrCreate(Class<T> pluginClass, Map<String, String> options) {
+    private <T extends JkPlugin> T getOrCreate(Class<T> pluginClass) {
         final Optional<T> optPlugin = (Optional<T>) this.configuredPlugins.stream().filter(
                 (item) -> item.getClass().equals(pluginClass)).findFirst();
-        final T plugin = optPlugin.orElse(JkUtilsReflect.newInstance(pluginClass));
-        JkOptions.populateFields(plugin, options);
+        if (optPlugin.isPresent()) {
+            return optPlugin.get();
+        }
+        final T plugin = JkUtilsReflect.newInstance(pluginClass, JkBuild.class, this.holder);
+        JkOptions.populateFields(plugin, PluginOptions.options(plugin.name(), this.pluginOptionsList));
+        configuredPlugins.add(plugin);
+        JkLog.info("Build instance : " + this.holder + " will decorated with plugin " + plugin.name());
         return plugin;
     }
 
-    private Method pluginMethod(Class pluginClass, String name, Class buildClass) {
-        Class<JkBuild> buildClassParamType = null;
-        for (Method method : JkUtilsReflect.methodsHavingName(pluginClass, name)) {
-            if (method.getParameterCount() != 1) {
-                continue;
-            }
-            Class paramType = method.getParameterTypes()[0];
-            if (paramType.isAssignableFrom(buildClass)) {
-                return method;
-            }
-            if (JkBuild.class.isAssignableFrom(paramType)) {
-                buildClassParamType = paramType;
-                continue;
-            }
-            return method;
+    private Method pluginMethod(Class pluginClass, String name) {
+        try {
+            return pluginClass.getMethod(name);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException("No method " + name + " found on plugin " + pluginClass);
         }
-        if (buildClassParamType == null) {
-            throw new IllegalStateException("No method " + name + "(JkBuild) found on " + buildClass);
+    }
+
+    void loadCommandLinePlugins() {
+        Iterable<PluginOptions> pluginSetups = CommandLine.instance().getPluginOptions();
+        for (PluginOptions pluginSetup : pluginSetups){
+            PluginDictionary.PluginDescription pluginDescription = PluginDictionary.loadByName(pluginSetup.pluginName);
+            getOrCreate(pluginDescription.pluginClass());
         }
-        throw new IllegalStateException("Method " + name + " from " + buildClass.getName() + " is not callable from a build scrpit of class or extending "
-                + buildClass + " but a script of class or extending extending " + buildClassParamType);
     }
 
 }

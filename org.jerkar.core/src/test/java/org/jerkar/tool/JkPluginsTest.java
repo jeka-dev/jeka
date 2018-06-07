@@ -2,7 +2,7 @@ package org.jerkar.tool;
 
 import java.util.Set;
 
-import org.jerkar.tool.PluginDictionnary.JkPluginDescription;
+import org.jerkar.tool.PluginDictionary.PluginDescription;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,9 +11,9 @@ public class JkPluginsTest {
 
     @Test
     public void testPluginsLoading() {
-        final PluginDictionnary plugins = new PluginDictionnary();
-        final Set<JkPluginDescription> pluginSet = plugins.getAll();
-        Assert.assertEquals(1, pluginSet.size());
+        final PluginDictionary plugins = new PluginDictionary();
+        final Set<PluginDescription> pluginSet = plugins.getAll();
+        Assert.assertEquals(4, pluginSet.size());
     }
 
     interface PluginBase {

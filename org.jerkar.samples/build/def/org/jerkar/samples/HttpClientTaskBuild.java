@@ -30,12 +30,12 @@ import com.google.common.base.MoreObjects;
 public class HttpClientTaskBuild extends JkJavaProjectBuild {
     
     @Override
-    protected JkJavaProject createProject() {
-        return defaultProject().setDependencies(dependencies());
+    protected void configurePlugins() {
+        java().project().setDependencies(dependencies());
     }
 
 
-    private JkDependencies dependencies() {
+    private static JkDependencies dependencies() {
         return JkDependencies.builder()
                 .on(GUAVA, "21.0")
                 .on(JAVAX_SERVLET_API, "3.1.0", PROVIDED)

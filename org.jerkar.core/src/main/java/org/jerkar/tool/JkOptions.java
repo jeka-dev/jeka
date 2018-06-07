@@ -24,19 +24,15 @@ import org.jerkar.api.utils.JkUtilsString;
  */
 public final class JkOptions {
 
-    private static JkOptions INSTANCE = new JkOptions(loadSystemAndUserOptions());
+    private static JkOptions INSTANCE = new JkOptions(readSystemAndUserOptions());
 
     private final Map<String, String> props = new HashMap<>();
 
     private static boolean populated;
 
-    static JkOptions instance() {
-        return INSTANCE;
-    }
-
     static synchronized void init(Map<String, String> options) {
         if (populated) {
-            throw new IllegalStateException("The init method can be called only once.");
+            throw new IllegalStateException("The decorateBuild method can be called only once.");
         }
         final Map<String, String> map = new HashMap<>();
         map.putAll(options);
@@ -121,7 +117,7 @@ public final class JkOptions {
         return result;
     }
 
-    private static Map<String, String> loadSystemAndUserOptions() {
+    static Map<String, String> readSystemAndUserOptions() {
         final Path propFile = JkLocator.jerkarHomeDir().resolve("options.properties");
         final Map<String, String> result = new HashMap<>();
         if (Files.exists(propFile)) {

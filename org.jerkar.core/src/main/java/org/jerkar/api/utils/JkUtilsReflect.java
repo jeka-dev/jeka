@@ -102,8 +102,8 @@ public final class JkUtilsReflect {
     }
 
     /**
-     * Sets the specified value to the specified filed, setting the field to
-     * accessible if not already done.
+     * Sets the specified value for the specified field and object. Field is marked as
+     * 'accessible' if not already done.
      */
     public static void setFieldValue(Object object, Field field, Object value) {
         try {
@@ -182,7 +182,7 @@ public final class JkUtilsReflect {
     }
 
     /**
-     * Instantiates the given class.
+     * Instantiates the given class using a constructor with specified single argument.
      */
     public static <T> T newInstance(Class<T> clazz, Class<?> parameterType, Object parameter) {
         try {
@@ -200,7 +200,7 @@ public final class JkUtilsReflect {
         } catch (final RuntimeException e) {
             throw e;
         } catch (final Exception e) {
-            throw new RuntimeException("No constructor found with parameter of type " + parameterType.getName(), e);
+            throw new RuntimeException("No constructor found with parameter of type " + parameterType.getName() + " on class " + clazz, e);
         }
     }
 
@@ -330,6 +330,23 @@ public final class JkUtilsReflect {
         }
     }
 
+    /**
+     * Find a method of the given name and argument type on the specified class or its parent classes.
+     */
+    public static Method findMethodMethodDeclaration(Class<?> clazz, String name, Class<?>... argTypes) {
+        try {
+            final Method method = clazz.getDeclaredMethod(name, argTypes);
+            return method;
+        } catch (final SecurityException e) {
+            throw new RuntimeException(e);
+        } catch (final NoSuchMethodException e) {
+            if (clazz.equals(Object.class)) {
+                return null;
+            }
+            return findMethodMethodDeclaration(clazz.getSuperclass(), name, argTypes);
+        }
+    }
+
     private static String toString(Class<?>... classes) {
         return "[" + JkUtilsString.join(Arrays.asList(classes), ", ") + "]";
     }
@@ -370,6 +387,23 @@ public final class JkUtilsReflect {
             return getInheritedAnnotation(superMethod, annotationClass);
         }
         return null;
+    }
+
+    /**
+     * Returns the annotation declared on a given method. If no annotation is
+     * declared on the method, then annotation is searched in parent classes.
+     */
+    public static <T extends Annotation> T getInheritedAnnotation(Class<?> clazz,
+                                                                  Class<T> annotationClass, String methodName,
+                                                                  Class<?> ... argTypes) {
+        Method method = getDeclaredMethod(clazz, methodName, argTypes);
+        if (method == null) {
+            if (clazz.equals(Object.class)) {
+                return null;
+            }
+            return getInheritedAnnotation(clazz.getSuperclass(), annotationClass, methodName, argTypes);
+        }
+        return getInheritedAnnotation(method, annotationClass);
     }
 
     /**
