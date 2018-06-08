@@ -17,7 +17,7 @@ import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkJavaProcess;
-import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.api.utils.*;
 
 /**
@@ -77,7 +77,7 @@ public final class JkSonar {
         map.put(PROJECT_NAME, projectName);
         map.put(PROJECT_VERSION, projectVersion.name());
         map.put(WORKING_DIRECTORY, ".sonarTempDir");
-        map.put(VERBOSE, Boolean.toString(JkLog.verbose()));
+        map.put(VERBOSE, Boolean.toString(JkEvent.Verbosity.VERBOSE == JkEvent.verbosity()));
         final Properties properties = System.getProperties();
         for (final Object keyObject : properties.keySet()) {
             final String key = (String) keyObject;
@@ -95,15 +95,15 @@ public final class JkSonar {
 
     public void run() {
         if (!enabled) {
-            JkLog.info("Sonar analysis skipped.");
+            JkEvent.info(this,"Sonar analysis skipped.");
         }
-        JkLog.startln("Launching Sonar analysis");
-        if (JkLog.verbose()) {
+        JkEvent.start(this, "Launching Sonar analysis");
+        if (JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE) {
             javaProcess().runClassSync("org.sonar.runner.Main", "-e", "-X");
         } else {
             javaProcess().runClassSync("org.sonar.runner.Main", "-e");
         }
-        JkLog.done();
+        JkEvent.end(this, "");
     }
 
     public JkSonar enabled(boolean enabled) {

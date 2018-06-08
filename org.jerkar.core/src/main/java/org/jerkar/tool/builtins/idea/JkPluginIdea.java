@@ -2,7 +2,7 @@ package org.jerkar.tool.builtins.idea;
 
 import org.jerkar.api.ide.idea.JkImlGenerator;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.*;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
@@ -54,7 +54,7 @@ public final class JkPluginIdea extends JkPlugin {
                 build.baseDir().getFileName().toString() + ".iml");
         JkUtilsPath.deleteFile(imlFile);
         JkUtilsPath.write(imlFile, xml.getBytes(Charset.forName("UTF-8")));
-        JkLog.info(imlFile + " generated.");
+        JkEvent.info(this,imlFile + " generated.");
     }
 
     /** Generate modules.xml files */
@@ -74,9 +74,9 @@ public final class JkPluginIdea extends JkPlugin {
                 .stream().collect(Collectors.toList());
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
-            JkLog.startln("Generating iml file on " + projectFolder);
+            JkEvent.start(this,"Generating iml file on " + projectFolder);
             Main.exec(projectFolder, "idea#generateIml");
-            JkLog.done();
+            JkEvent.end(this, "");
         }
     }
 

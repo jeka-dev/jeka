@@ -1,6 +1,6 @@
 package org.jerkar.tool;
 
-import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.api.utils.JkUtilsReflect;
 
 import java.lang.reflect.Method;
@@ -54,10 +54,10 @@ public final class JkBuildPlugins {
     }
 
     void invoke(JkPlugin plugin, String methodName) {
-        JkLog.startUnderlined("Method " + methodName + " of plugin " + plugin.getClass().getSimpleName());
+        JkEvent.start(this,"Method " + methodName + " of plugin " + plugin.getClass().getSimpleName());
         final Method method = pluginMethod(plugin.getClass(), methodName);
         JkUtilsReflect.invoke(plugin, method);
-        JkLog.done();
+        JkEvent.end(this,"");
     }
 
     private <T extends JkPlugin> T getOrCreate(Class<T> pluginClass) {
@@ -69,7 +69,7 @@ public final class JkBuildPlugins {
         final T plugin = JkUtilsReflect.newInstance(pluginClass, JkBuild.class, this.holder);
         JkOptions.populateFields(plugin, PluginOptions.options(plugin.name(), this.pluginOptionsList));
         configuredPlugins.add(plugin);
-        JkLog.info("Build instance : " + this.holder + " will decorated with plugin " + plugin.name());
+        JkEvent.info(this,"Build instance : " + this.holder + " will decorated with plugin " + plugin.name());
         return plugin;
     }
 

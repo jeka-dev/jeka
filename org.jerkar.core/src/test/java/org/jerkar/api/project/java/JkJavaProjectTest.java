@@ -11,7 +11,6 @@ import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.ide.eclipse.JkEclipseClasspathGeneratorTest;
 import org.jerkar.api.project.JkProjectSourceLayout;
-import org.jerkar.api.system.JkLog;
 import org.junit.Test;
 
 
@@ -20,7 +19,6 @@ public class JkJavaProjectTest {
     @Test
     public void generate() throws Exception {
         final Path top = unzipToDir("sample-multi-scriptless.zip");
-        JkLog.silent(false);
 
         JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
                 .withResources("res").withTestResources("res-test");

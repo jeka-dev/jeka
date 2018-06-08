@@ -1,17 +1,18 @@
 package org.jerkar.plugins.jacoco;
 
+import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.JkJavaProcess;
+import org.jerkar.api.java.junit.JkUnit;
+import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.utils.JkUtilsIO;
+
+import java.io.PrintStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.UnaryOperator;
-
-import org.jerkar.api.java.JkClassLoader;
-import org.jerkar.api.java.JkJavaProcess;
-import org.jerkar.api.java.junit.JkUnit;
-import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsIO;
 
 /**
  * Enhancer to setupOptionDefaults JkUnit such it performs Jacoco code coverage while it runs unit tests.
@@ -36,8 +37,8 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
 
     public static JkocoJunitEnhancer of(Path destFile) {
         final URL url = JkPluginJacoco.class.getResource("jacocoagent.jar");
-        final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, JkLog.infoStreamIfVerbose(),
-                JkClassLoader.urlCacheDir());
+        PrintStream outputStream = JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE ? new PrintStream(JkEvent.stream()) : null;
+        final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, outputStream, JkClassLoader.urlCacheDir());
         return new JkocoJunitEnhancer(file, true, destFile);
     }
 
@@ -80,7 +81,7 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
         @Override
         public void run() {
             if (enabled) {
-                JkLog.info("Jacoco report created at " + destFile.toAbsolutePath());
+                JkEvent.info(this,"Jacoco report created at " + destFile.toAbsolutePath());
             }
 
         }

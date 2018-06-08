@@ -9,9 +9,9 @@ import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
+
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsPath;
@@ -47,12 +47,11 @@ class JUnit4TestLauncher {
         final Class[] classArray = JkUtilsIterable.arrayOf(classes, Class.class);
         classloader.addEntry(JkLocator.jerkarJarPath());
         if (verbose) {
-            JkLog.info("Launching test using class loader :");
-            JkLog.info(classloader.toString());
+            JkEvent.info(JkTestSuiteResult.class,"Launching test using class loader :");
+            JkEvent.info(JkTestSuiteResult.class, classloader.toString());
         }
-
-        // initialise JkLog for the launcher classloader
-        classloader.invokeStaticMethod(false, JkLog.class.getName(), "beginOfLine");
+        // initialise JkEvent for the launcher classloader
+        JkEvent.initializeInClassLoader(classloader.classloader());
         return classloader.invokeStaticMethod(true, JUnit4TestExecutor.class.getName(),
                 "launchInProcess", classArray, verbose, reportDetail, reportDir, true);
     }

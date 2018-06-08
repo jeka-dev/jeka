@@ -1,11 +1,11 @@
 package org.jerkar.api.system;
 
+import org.jerkar.api.utils.JkUtilsString;
+
 import java.io.File;
 import java.net.URL;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-
-import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * Provides infoString about Jerkar itself.
@@ -29,12 +29,10 @@ public final class JkInfo {
                 final String classFolder = classPath.substring(0,
                         classPath.length() - relativePath.length() - 1);
                 final String manifestPath = classFolder + "/META-INF/MANIFEST.MF";
-                JkLog.trace("manifestPath=" + manifestPath);
                 version = readVersionFrom(manifestPath);
             } else {
                 final String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1)
                         + "/META-INF/MANIFEST.MF";
-                JkLog.trace("manifestPath=" + manifestPath);
                 version = readVersionFrom(manifestPath);
             }
         }

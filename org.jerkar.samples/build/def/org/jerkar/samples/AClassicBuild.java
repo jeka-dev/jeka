@@ -5,6 +5,7 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 

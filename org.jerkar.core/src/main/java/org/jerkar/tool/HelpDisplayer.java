@@ -6,9 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.api.utils.*;
 import org.jerkar.tool.PluginDictionary.PluginDescription;
 import org.jerkar.tool.ProjectDef.BuildClassDef;
@@ -24,15 +23,15 @@ final class HelpDisplayer {
             helpPlugins();
             return;
         }
-        JkLog.info("Usage: jerkar [methodA...] [-optionName=value...] [-DsystemPropName=value...]");
-        JkLog.info("When no method specified, 'doDefault' method is invoked.");
-        JkLog.info("Ex: jerkar javadoc compile -verbose=true -other=xxx -DmyProp=Xxxx");
-        JkLog.nextLine();
-        JkLog.info("Available methods and options :");
-        BuildClassDef.of(build).log("", true);
-        JkLog.nextLine();
-        JkLog.info("Type 'jerkar help -plugins' to get help on plugins available in the classpath.");
-        JkLog.nextLine();
+        StringBuilder sb = new StringBuilder()
+                .append("Usage: jerkar [methodA...] [-optionName=value...] [-DsystemPropName=value...]\n")
+                .append("When no method specified, 'doDefault' method is invoked.\n")
+                .append("Ex: jerkar javadoc compile -verbose=true -other=xxx -DmyProp=Xxxx\n\n")
+                .append("Available methods and options :\n");
+
+        sb.append(BuildClassDef.of(build).description("", true));
+        sb.append("\nType 'jerkar help -plugins' to get help on plugins available in the classpath.\n");
+        JkEvent.info(HelpDisplayer.class, sb.toString());
     }
 
     static void help(JkBuild build, Path xmlFile) {
@@ -48,39 +47,45 @@ final class HelpDisplayer {
             } catch (final IOException e) {
                 throw JkUtilsThrowable.unchecked(e);
             }
-            JkLog.info("Xml help file generated at " + xmlFile);
+            JkEvent.info(HelpDisplayer.class, "Xml help file generated at " + xmlFile);
         }
     }
 
     static void helpPlugins() {
+        JkEvent.info(HelpDisplayer.class, helpPluginsDescription());
+    }
+
+    private static String helpPluginsDescription() {
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
+        StringBuilder sb = new StringBuilder();
         for (final PluginDescription description : pluginDescriptions) {
-            JkLog.nextLine();
-            JkLog.infoUnderlined("Plugin class : " + description.fullName());
-            JkLog.info("Plugin name : " + description.shortName());
+            sb.append("\nPlugin class : " + description.fullName());
+            sb.append("\nPlugin name : " + description.shortName());
             List<String> deps = description.pluginDependencies();
             if (!deps.isEmpty()) {
-                JkLog.info("Depends on plugins : " + JkUtilsString.join(deps, ", "));
+                sb.append("Depends on plugins : " + JkUtilsString.join(deps, ", "));
             }
             final List<String> explanations = description.explanation();
             if (!explanations.isEmpty()) {
-                JkLog.info("Purpose : " + description.explanation().get(0));
-                JkLog.info(description.explanation().subList(1, description.explanation().size())
-                        .stream().map(line -> "          " + line).collect(Collectors.toList()));
+                sb.append("\nPurpose : " + description.explanation().get(0));
+                description.explanation().subList(1, description.explanation().size()).forEach(
+                        line -> sb.append("\n          " + line));
             }
             final List<String> activationEffects = description.activationEffect();
             if (!activationEffects.isEmpty()) {
-                JkLog.info("Activation effects : " + description.activationEffect().get(0));
-                JkLog.info(description.explanation().subList(1, description.activationEffect().size())
-                        .stream().map(line -> "                      " + line).collect(Collectors.toList()));
+                sb.append("\nActivation effects : " + description.activationEffect().get(0));
+                description.explanation().subList(1, description.activationEffect().size()).forEach(
+                        line -> sb.append("\n                      " + line));
             } else if (!description.isDecorateBuildDefined()){
-                JkLog.info("Activation effects : None.");
+                sb.append("\nActivation effects : None.");
             } else {
-                JkLog.info("Activation effects : Not documented.");
+                sb.append("\nActivation effects : Not documented.");
             }
             final Object object = JkUtilsReflect.newInstance(description.pluginClass(), JkBuild.class, DUMMY);
-            BuildClassDef.of(object).log(description.shortName() + "#", false);
+            sb.append("\n");
+            sb.append(BuildClassDef.of(object).description(description.shortName() + "#", false));
         }
+        return sb.toString();
     }
 
 }

@@ -2,7 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import org.apache.ivy.util.AbstractMessageLogger;
 import org.apache.ivy.util.Message;
-import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkEvent;
 
 class IvyMessageLogger extends AbstractMessageLogger {
 
@@ -11,22 +11,22 @@ class IvyMessageLogger extends AbstractMessageLogger {
         message = "[Ivy] " + message.trim();
         switch (level) {
         case Message.MSG_ERR:
-            JkLog.error(message);
+            JkEvent.error(this, message);
             break;
         case Message.MSG_WARN:
-            JkLog.warn(message);
+            JkEvent.warn(this, message);
             break;
         case Message.MSG_INFO:
-            JkLog.info(message);
+            JkEvent.info(this, message);
             break;
         case Message.MSG_VERBOSE:
-            JkLog.trace(message);
+            JkEvent.trace(this, message);
             break;
         case Message.MSG_DEBUG:
-            JkLog.trace(message);
+            JkEvent.trace(this, message);
             break;
         default:
-            JkLog.info("[" + level + "] " + message);
+            JkEvent.info(this,"[" + level + "] " + message);
         }
 
     }
@@ -38,12 +38,12 @@ class IvyMessageLogger extends AbstractMessageLogger {
 
     @Override
     public void doProgress() {
-        JkLog.infoStream().print(".");
+        JkEvent.progress(this, ".");
     }
 
     @Override
     public void doEndProgress(String msg) {
-        JkLog.infoStream().println(msg);
+        JkEvent.progress(this, msg);
     }
 
 }

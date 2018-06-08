@@ -1,11 +1,5 @@
 package org.jerkar.api.java.junit;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
-
 import org.jerkar.api.java.junit.JkTestSuiteResult.ExceptionDescription;
 import org.jerkar.api.java.junit.JkTestSuiteResult.IgnoredCase;
 import org.jerkar.api.java.junit.JkTestSuiteResult.TestCaseFailure;
@@ -15,6 +9,11 @@ import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
+
+import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 
 class JUnitReportListener extends RunListener {
 

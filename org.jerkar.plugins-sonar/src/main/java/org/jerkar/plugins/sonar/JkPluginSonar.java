@@ -6,7 +6,6 @@ import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.*;
 import org.jerkar.tool.builtins.java.JkPluginJava;
 

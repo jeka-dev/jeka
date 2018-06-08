@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsTime;
@@ -23,19 +23,18 @@ public final class Main {
     public static void main(String[] args) {
         final long start = System.nanoTime();
         final JkInit init = JkInit.of(args);
-        if (!JkLog.silent()) {
+        if (JkEvent.verbosity() != JkEvent.Verbosity.MUTE) {
             displayIntro();
         }
         init.displayInfo();
 
         final Path workingDir = Paths.get("").toAbsolutePath();
         final Engine engine = new Engine(workingDir);
-        JkLog.nextLine();
         try {
             engine.execute(init);
-            if (!JkLog.silent()) {
-                final int lenght = printAscii(false, "success.ascii");
-                System.out.println(JkUtilsString.repeat(" ", lenght) + "Total build time : "
+            if (JkEvent.verbosity() != JkEvent.Verbosity.MUTE) {
+                final int length = printAscii(false, "success.ascii");
+                System.out.println(JkUtilsString.repeat(" ", length) + "Total build time : "
                         + JkUtilsTime.durationInSeconds(start) + " seconds.");
             }
         } catch (final RuntimeException e) {
@@ -76,8 +75,7 @@ public final class Main {
 
     private static void displayIntro() {
         final int lenght = printAscii(false, "jerkar.ascii");
-        JkLog.info(JkUtilsString.repeat(" ", lenght) + "The 100% Java build tool.");
-        JkLog.nextLine();
+        JkEvent.info(Main.class,JkUtilsString.repeat(" ", lenght) + "The 100% Java build tool.\n");
     }
 
     private Main() {

@@ -9,7 +9,7 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.function.JkRunnables;
-import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsObject;
@@ -72,9 +72,9 @@ public class JkBuild {
      */
     protected JkBuild() {
         final Path baseDirContext = BASE_DIR_CONTEXT.get();
-        JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
+        JkEvent.trace(this,"Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
         this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get("").toAbsolutePath());
-        JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
+        JkEvent.trace(this, "Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
 
         // Instantiating imported builds
         this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), this);
@@ -232,11 +232,11 @@ public class JkBuild {
      */
     @JkDoc("Cleans the output directory.")
     public void clean() {
-        JkLog.start("Cleaning output directory " + outputDir());
+        JkEvent.start(this,"Cleaning output directory " + outputDir());
         if (Files.exists(outputDir())) {
             JkPathTree.of(outputDir()).refuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
         }
-        JkLog.done();
+        JkEvent.end(this, "");
     }
 
     /**
@@ -267,7 +267,7 @@ public class JkBuild {
      */
     @JkDoc("Displays meaningful information about this build.")
     public final void info() {
-        JkLog.info(infoProvider.toString());
+        JkEvent.info(this, infoProvider.toString());
     }
 
     // ----------------------------------------------------------------------------------

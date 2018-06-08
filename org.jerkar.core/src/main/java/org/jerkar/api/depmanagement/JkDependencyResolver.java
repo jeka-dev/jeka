@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.jerkar.api.file.JkPathSequence;
-import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
@@ -132,25 +132,25 @@ public final class JkDependencyResolver {
     }
 
     private JkResolveResult resolveWithInternalResolver(JkDependencies dependencies, JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {
-        JkLog.trace("Preparing to resolve dependencies for module " + module);
+        JkEvent.trace(this,"Preparing to resolve dependencies for module " + module);
         if (scopes.length == 0) {
-            JkLog.startln("Resolving dependencies for any scope");
+            JkEvent.start(this,"Resolving dependencies for any scope");
         } else {
-            JkLog.startln("Resolving dependencies with specified scopes " + Arrays.asList(scopes) );
+            JkEvent.start(this,"Resolving dependencies with specified scopes " + Arrays.asList(scopes) );
         }
         JkResolveResult resolveResult = internalResolver.resolve(module, dependencies.onlyModules(),
                 parameters, transitiveVersionOverride, scopes);
         final JkDependencyNode mergedNode = resolveResult.dependencyTree().mergeNonModules(dependencies,
                 JkUtilsIterable.setOf(scopes));
         resolveResult = JkResolveResult.of(mergedNode, resolveResult.errorReport());
-        if (JkLog.verbose()) {
-            JkLog.info(plurialize(resolveResult.involvedModules().size(), "module") + resolveResult.involvedModules());
-            JkLog.info(plurialize(resolveResult.localFiles().size(), "artifact") + ".");
+        if (JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE) {
+            JkEvent.info(this,plurialize(resolveResult.involvedModules().size(), "module") + resolveResult.involvedModules());
+            JkEvent.info(this, plurialize(resolveResult.localFiles().size(), "artifact") + ".");
         } else {
-            JkLog.info(plurialize(resolveResult.involvedModules().size(), "module") + " leading to " +
+            JkEvent.info(this, plurialize(resolveResult.involvedModules().size(), "module") + " leading to " +
                     plurialize(resolveResult.localFiles().size(),"artifact") + ".");
         }
-        JkLog.done();
+        JkEvent.end(this, "");
         return resolveResult;
     }
 

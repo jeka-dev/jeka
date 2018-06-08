@@ -6,7 +6,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
@@ -38,7 +38,7 @@ final class ProjectDef {
             } else {
                 desc = "No description available";
             }
-            JkLog.info(classDef.getName() + defaultMessage + " : " + desc);
+            JkEvent.info(this,classDef.getName() + defaultMessage + " : " + desc);
             i++;
         }
     }
@@ -55,8 +55,6 @@ final class ProjectDef {
         private final List<BuildOptionDef> optionDefs;
 
         private final Object buildOrPlugin;
-
-
 
         private BuildClassDef(Object buildOrPlugin, List<BuildMethodDef> methodDefs,
                               List<BuildOptionDef> optionDefs) {
@@ -119,49 +117,57 @@ final class ProjectDef {
             return !JkUtilsReflect.getAllDeclaredField(field.getType(), JkDoc.class).isEmpty();
         }
 
-        void log(String prefix, boolean withHeader) {
+        String description(String prefix, boolean withHeader) {
+            StringBuilder stringBuilder = new StringBuilder();
             for (Class<? extends JkBuild> buildClass : this.buildClassHierarchy()) {
-                log(buildClass, prefix, withHeader);
+                stringBuilder.append(description(buildClass, prefix, withHeader));
             }
             if (this.buildOrPlugin instanceof JkBuild) {
                 JkBuild build = (JkBuild) this.buildOrPlugin;
-                for (JkPlugin plugin : build.plugins.all()) {
-                    BuildClassDef.of(plugin).log(plugin.name() + "#", withHeader);
+                if (build.plugins != null) {
+                    for (JkPlugin plugin : build.plugins.all()) {
+                        stringBuilder.append(BuildClassDef.of(plugin).description(plugin.name() + "#", withHeader));
+                    }
                 }
             }
-
+            return stringBuilder.toString();
         }
 
-        private void log(Class<?> buildClass, String prefix, boolean withHeader) {
+        private String description(Class<?> buildClass, String prefix, boolean withHeader) {
             List<BuildMethodDef> methods = this.methodsOf(buildClass);
             List<BuildOptionDef> options = this.optionsOf(buildClass);
             if (methods.isEmpty() && options.isEmpty()) {
-                return;
+                return "";
             }
             String classWord = JkBuild.class.isAssignableFrom(buildClass) ? "class" : "plugin";
+            StringBuilder stringBuilder = new StringBuilder();
             if (withHeader) {
-                JkLog.nextLine();
-                JkLog.info("From " + classWord + " " + buildClass.getName() + " :");
+                stringBuilder.append("\nFrom " + classWord + " " + buildClass.getName() + " :\n");
             }
             String margin = withHeader ? "  " : "";
             if (!methods.isEmpty()) {
-                JkLog.info(margin + "Methods : ");
+                stringBuilder.append(margin + "Methods :\n");
                 for (BuildMethodDef methodDef : this.methodsOf(buildClass)) {
                     final String displayedMethodName = prefix + methodDef.name;
                     if (methodDef.description == null) {
-                        JkLog.info(margin + "  " + displayedMethodName + " : No description available.");
+                        stringBuilder.append( margin + "  " + displayedMethodName + " : No description available.\n");
                     } else {
-                        JkLog.info(margin + "  " + displayedMethodName + " : " + methodDef.description.replace("\n", " "));
+                        stringBuilder.append(margin).append("  ").append(displayedMethodName)
+                                .append(" : ").append(methodDef.description.replace("\n", " "))
+                                .append("\n");
                     }
                 }
             }
             if (!options.isEmpty()) {
-                JkLog.info(margin + "Options : ");
+                stringBuilder.append(margin + "Options :\n");
                 for (BuildOptionDef optionDef : this.optionsOf(buildClass)) {
-                    optionDef.log( prefix, margin);
+                    stringBuilder.append(optionDef.description(prefix, margin));
                 }
             }
+            return stringBuilder.toString();
         }
+
+
 
         private static List<String> toLines(String string) {
             if (string == null) {
@@ -341,11 +347,12 @@ final class ProjectDef {
             return 1;
         }
 
-        void log(String prefix, String margin) {
+
+        String description(String prefix, String margin) {
             StringBuilder builder = new StringBuilder();
             builder.append(prefix).append(name).append(" (").append(type()).append( ", default : ").append(defaultValue)
                     .append(") : ").append(description.replace("\n", " "));
-            JkLog.info(margin + "  " + builder.toString());
+            return builder.toString();
         }
 
         private String type() {

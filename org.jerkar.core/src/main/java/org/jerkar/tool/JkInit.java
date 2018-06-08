@@ -1,5 +1,10 @@
 package org.jerkar.tool;
 
+import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkInfo;
+import org.jerkar.api.system.JkLocator;
+import org.jerkar.api.utils.*;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -7,16 +12,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-
-import org.jerkar.api.system.JkInfo;
-import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsObject;
-import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.api.utils.JkUtilsReflect;
-import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * Initializer for build instances. It instantiates build class and inject
@@ -53,7 +48,7 @@ public final class JkInit {
         if (result == null) {
             throw new JkException("No build class found for engine located at : " + base);
         }
-        JkLog.info("Build class : " + result.getClass().getName());
+        JkEvent.info(JkInit.class,"Build class : " + result.getClass().getName());
         return result;
     }
 
@@ -73,6 +68,7 @@ public final class JkInit {
      */
     public static <T extends JkBuild> T instanceOf(Class<T> clazz, Path baseDir, String... args) {
         final JkInit init = JkInit.of(args);
+        JkEvent.register(new LogHandler());
         init.displayInfo();
         JkBuild.baseDirContext(baseDir);
         final T build;
@@ -82,8 +78,8 @@ public final class JkInit {
             JkBuild.baseDirContext(null);
         }
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
-        if (JkLog.verbose()) {
-            JkInit.logProps("Field values", displayedOptions);
+        if (JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE) {
+            JkEvent.info(propsAsString("\nField values", displayedOptions));
         }
         return build;
     }
@@ -97,22 +93,25 @@ public final class JkInit {
     }
 
     void displayInfo() {
-        JkLog.info("Jerkar Version : " + JkInfo.jerkarVersion());
-        JkLog.info("Working Directory : " + System.getProperty("user.dir"));
-        JkLog.info("Java Home : " + System.getProperty("java.home"));
-        JkLog.info("Java Version : " + System.getProperty("java.projectVersion") + ", " + System.getProperty("java.vendor"));
+        StringBuilder sb = new StringBuilder()
+                .append("Jerkar Version : " + JkInfo.jerkarVersion())
+                .append("\nWorking Directory : " + System.getProperty("user.dir"))
+                .append("\nJava Home : " + System.getProperty("java.home"))
+                .append("\nJava Version : " + System.getProperty("java.projectVersion") + ", "
+                        + System.getProperty("java.vendor"));
         if ( embedded(JkLocator.jerkarHomeDir())) {
-            JkLog.info("Jerkar Home : " + bootDir() + " ( embedded !!! )");
+            sb.append("\nJerkar Home : " + bootDir() + " ( embedded !!! )");
         } else {
-            JkLog.info("Jerkar Home : " + JkLocator.jerkarHomeDir());
+            sb.append("\nJerkar Home : " + JkLocator.jerkarHomeDir());
         }
-        JkLog.info("Jerkar User Home : " + JkLocator.jerkarUserHomeDir().toAbsolutePath().normalize());
-        JkLog.info("Jerkar Repository Cache : " + JkLocator.jerkarRepositoryCache());
-        JkLog.info("Jerkar Classpath : " + System.getProperty("java.class.path"));
-        JkLog.info("Command Line : " + JkUtilsString.join(Arrays.asList(args), " "));
-        logProps("Specified System Properties", loadResult.sysprops);
-        JkLog.info("Standard Options : " + loadResult.standardOptions);
-        logProps("Options", JkOptions.toDisplayedMap(JkOptions.getAll()));
+        sb.append("\nJerkar User Home : " + JkLocator.jerkarUserHomeDir().toAbsolutePath().normalize());
+        sb.append("\nJerkar Repository Cache : " + JkLocator.jerkarRepositoryCache());
+        sb.append("\nJerkar Classpath : " + System.getProperty("java.class.path"));
+        sb.append("\nCommand Line : " + JkUtilsString.join(Arrays.asList(args), " "));
+        sb.append(propsAsString("\nSpecified System Properties", loadResult.sysprops));
+        sb.append("\nStandard Options : " + loadResult.standardOptions);
+        sb.append(propsAsString("\nOptions", JkOptions.toDisplayedMap(JkOptions.getAll())));
+        JkEvent.info(sb.toString());
     }
 
     CommandLine commandLine() {
@@ -136,8 +135,11 @@ public final class JkInit {
         }
         final JkInit.StandardOptions standardOptions = new JkInit.StandardOptions();
         JkOptions.populateFields(standardOptions, optionMap);
-        JkLog.silent(standardOptions.silent);
-        JkLog.verbose(standardOptions.verbose);
+        if (standardOptions.silent) {
+            JkEvent.setVerbosity(JkEvent.Verbosity.MUTE);
+        } else if (standardOptions.verbose) {
+            JkEvent.setVerbosity(JkEvent.Verbosity.VERBOSE);
+        }
 
         JkOptions.populateFields(standardOptions);
         final JkInit.LoadResult loadResult = new JkInit.LoadResult();
@@ -147,17 +149,18 @@ public final class JkInit {
         return loadResult;
     }
 
-    static void logProps(String message, Map<String, String> props) {
+
+    static String propsAsString(String message, Map<String, String> props) {
+        StringBuilder sb = new StringBuilder();
         if (props.isEmpty()) {
-            JkLog.info(message + " : none.");
+            sb.append("\n" + message + " : none.");
         } else if (props.size() <= 3) {
-            JkLog.info(message + " : " + JkUtilsIterable.toString(props));
+            sb.append("\n" + message + " : " + JkUtilsIterable.toString(props));
         } else {
-            JkLog.info(message + " : ");
-            JkLog.delta(1);
-            JkLog.info(JkUtilsIterable.toStrings(props));
-            JkLog.delta(-1);
+            sb.append("\n" + message + " : ");
+            JkUtilsIterable.toStrings(props).forEach(line -> sb.append("  " + line));
         }
+        return sb.toString();
     }
 
     private static Map<String, String> getSpecifiedSystemProps(String[] args) {
@@ -232,5 +235,7 @@ public final class JkInit {
         }
 
     }
+
+
 
 }

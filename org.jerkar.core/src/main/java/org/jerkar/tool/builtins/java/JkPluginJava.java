@@ -5,7 +5,7 @@ import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.java.JkJavaProjectMaker;
-import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.*;
@@ -168,7 +168,7 @@ public class JkPluginJava extends JkPlugin {
         final JkResolveResult resolveResult = this.project().maker().getDependencyResolver()
                 .resolve(this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME));
         final JkDependencyNode tree = resolveResult.dependencyTree();
-        JkLog.info(tree.toStrings());
+        JkEvent.info(this,String.join("\n", tree.toStrings()));
     }
 
 }

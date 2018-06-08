@@ -12,7 +12,7 @@ import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkJavadocMaker;
 import org.jerkar.api.project.java.JkJavaProjectMaker;
-import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.plugins.jacoco.PluginsJacocoBuild;
 import org.jerkar.plugins.sonar.PluginsSonarBuild;
 import org.jerkar.tool.JkBuild;
@@ -35,14 +35,14 @@ class DistribAllBuild extends JkBuild {
     @JkDoc("Construct a distrib assuming all dependent sub projects are already built.")
     public void distrib() throws IOException {
 
-        JkLog.startln("Creating distribution file");
+        JkEvent.start(this,"Creating distribution file");
 
-        JkLog.info("Copy core distribution locally.");
+        JkEvent.info(this,"Copy core distribution locally.");
         CoreBuild core = jacocoPluginBuild.core; // The core project is got by transitivity
                 Path distDir = this.outputDir().resolve("dist");
         JkPathTree dist = JkPathTree.of(distDir).merge(core.distribFolder);
 
-        JkLog.info("Add plugins to the distribution");
+        JkEvent.info(this,"Add plugins to the distribution");
         JkPathTree ext = dist.goTo("libs/builtins")
                 .copyIn(sonarPluginBuild.java().project().maker().mainArtifactPath())
                 .copyIn(jacocoPluginBuild.java().project().maker().mainArtifactPath());
@@ -50,19 +50,19 @@ class DistribAllBuild extends JkBuild {
         sourceDir.copyIn(sonarPluginBuild.java().project().maker().artifactPath(JkJavaProjectMaker.SOURCES_ARTIFACT_ID))
                 .copyIn(jacocoPluginBuild.java().project().maker().artifactPath(JkJavaProjectMaker.SOURCES_ARTIFACT_ID));
 
-        JkLog.info("Add plugins to the fat jar");
+        JkEvent.info(this,"Add plugins to the fat jar");
         Path fat = dist.get(core.java().project().maker().artifactPath(JkArtifactId.of("all", "jar"))
                 .getFileName().toString());
         Files.copy(core.java().project().maker().mainArtifactPath(), fat, StandardCopyOption.REPLACE_EXISTING);
         ext.accept("**.jar").stream().map(path -> JkPathTree.ofZip(path)).forEach(tree -> tree.zipTo(fat));
 
-        JkLog.info("Create a fat source jar");
+        JkEvent.info(this,"Create a fat source jar");
         Path fatSource = sourceDir.get("org.jerkar.core-all-sources.jar");
         sourceDir.accept("**.jar", "**.zip").refuse(fatSource.getFileName().toString()).stream()
                 .map(path -> JkPathTree.ofZip(path)).forEach(tree -> tree.zipTo(fatSource));
 
         if (javadoc) {
-            JkLog.info("Create javadoc");
+            JkEvent.info(this,"Create javadoc");
             JkPathTreeSet sources = this.jacocoPluginBuild.core.java().project().getSourceLayout().sources()
                     .and(this.jacocoPluginBuild.java().project().getSourceLayout().sources())
                     .and(this.sonarPluginBuild.java().project().getSourceLayout().sources());
@@ -71,10 +71,10 @@ class DistribAllBuild extends JkBuild {
             JkJavadocMaker.of(sources, javadocAllDir, javadocAllFile).process();
         }
 
-        JkLog.info("Pack all");
+        JkEvent.info(this,"Pack all");
         dist.zipTo(outputDir().resolve("jerkar-distrib.zip"));
 
-        JkLog.done();
+        JkEvent.end(this, "");
     }
 
     @JkDoc("End to end method to construct a distrib.")
@@ -95,11 +95,11 @@ class DistribAllBuild extends JkBuild {
     }
 
     public void testSamples() throws IOException {
-        JkLog.startHeaded("Testing Samples");
+        JkEvent.start(this,"Testing Samples");
         SampleTester sampleTester = new SampleTester(this.baseTree());
         sampleTester.restoreEclipseClasspathFile = true;
         sampleTester.doTest();
-        JkLog.done();
+        JkEvent.end(this, "");
     }
 
     public static void main(String[] args) {

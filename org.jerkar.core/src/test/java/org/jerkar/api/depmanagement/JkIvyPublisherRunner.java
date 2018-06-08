@@ -1,6 +1,8 @@
 package org.jerkar.api.depmanagement;
 
 
+import org.jerkar.api.system.JkEvent;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -9,14 +11,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 
-import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsFile;
 
 @SuppressWarnings("javadoc")
 public class JkIvyPublisherRunner {
 
     public static void main(String[] args) throws IOException {
-        JkLog.verbose(true);
+        //JkEvent.verbose(true);
         // JkUtilsTool.loadUserSystemProperties();
         testPublishIvy();
         // testPublishMaven();

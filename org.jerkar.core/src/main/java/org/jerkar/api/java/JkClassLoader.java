@@ -2,6 +2,7 @@ package org.jerkar.api.java;
 
 
 import java.io.File;
+import java.io.PrintStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -29,8 +30,8 @@ import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
 
 import org.jerkar.api.file.JkPathMatcher;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsPath;
@@ -167,8 +168,9 @@ public final class JkClassLoader {
             final File candidate = new File(path);
             if (JkUtilsString.isBlank(path)
                     || (!candidate.isFile() && !candidate.isDirectory())) {
-                final Path file = JkUtilsIO.copyUrlContentToCacheFile(url,
-                        JkLog.infoStreamIfVerbose(), urlCacheDir);
+                PrintStream printStream =
+                        JkEvent.Verbosity.VERBOSE == JkEvent.verbosity() ? new PrintStream(JkEvent.stream()) : null;
+                final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, printStream, urlCacheDir);
                 files.add(file);
             } else {
                 files.add(candidate.toPath());
@@ -565,7 +567,7 @@ public final class JkClassLoader {
         }
         final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(delegate);
-        offsetLog();
+        initEventsInClassloader();
         try {
             final Object returned = JkUtilsReflect.invokeStaticMethod(clazz, methodName,
                     effectiveArgs);
@@ -604,7 +606,7 @@ public final class JkClassLoader {
         }
         final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(delegate);
-        offsetLog();
+        initEventsInClassloader();
         try {
 
             final Object returned = JkUtilsReflect.invoke(object, method, effectiveArgs);
@@ -640,7 +642,7 @@ public final class JkClassLoader {
         final Set<Class<?>> serviceClasses = new HashSet<>();
         for (final Path file : this.fullClasspath()) {
             if (Files.isRegularFile(file)) {
-                JkLog.trace("Scanning " + file + " for META-INF/services.");
+                JkEvent.trace(this, "Scanning " + file + " for META-INF/services.");
                 final ZipFile zipFile = JkUtilsZip.zipFile(file.toFile());
                 final ZipEntry serviceEntry = zipFile.getEntry("META-INF/services");
                 if (serviceEntry == null) {
@@ -653,7 +655,7 @@ public final class JkClassLoader {
                                 entry.getName(), "/");
                         final Class<?> serviceClass = this.loadIfExist(serviceName);
                         if (serviceClass != null) {
-                            JkLog.trace("Found service providers for : " + serviceName);
+                            JkEvent.trace(this,"Found service providers for : " + serviceName);
                             serviceClasses.add(serviceClass);
                         }
                     }
@@ -674,20 +676,14 @@ public final class JkClassLoader {
             }
         }
         for (final Class<?> serviceClass : serviceClasses) {
-            JkLog.trace("Reload service providers for : " + serviceClass.getName());
+            JkEvent.trace(this,"Reload service providers for : " + serviceClass.getName());
             ServiceLoader.loadInstalled(serviceClass).reload();
         }
         return this;
     }
 
-    private void offsetLog() {
-        if (this.isDefined(JkLog.class.getName())) {
-            final int offset = JkLog.offset();
-            final Class<?> toClass = this.load(JkLog.class.getName());
-            JkUtilsReflect.invokeStaticMethod(toClass, "offset", offset);
-            JkUtilsReflect.invokeStaticMethod(toClass, "verbose", JkLog.verbose());
-            JkUtilsReflect.invokeStaticMethod(toClass, "silent", JkLog.silent());
-        }
+    private void initEventsInClassloader() {
+        JkEvent.initializeInClassLoader(this.classloader());
     }
 
     private static Object traverseClassLoader(Object object, JkClassLoader to) {

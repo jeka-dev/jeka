@@ -1,6 +1,7 @@
 package org.jerkar.api.java;
 
 
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
@@ -13,7 +14,7 @@ import java.util.List;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.file.JkPathSequence;
-import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsJdk;
 import org.jerkar.api.utils.JkUtilsPath;
@@ -111,28 +112,28 @@ public final class JkJavadocMaker {
      * Actually processes and creates the javadoc files.
      */
     public void process() {
-        JkLog.startln("Generating javadoc");
+        JkEvent.start(this,"Generating javadoc");
         if (this.srcDirs.hasNoExistingRoot()) {
-            JkLog.warn("No sources found in " + this.srcDirs);
-            JkLog.done();
+            JkEvent.warn(this,"No sources found in " + this.srcDirs);
+            JkEvent.end(this, "");
             return;
         }
         final String[] args = toArguments(outputDir);
-        final PrintStream warn;
-        final PrintStream error;
-        if (JkLog.verbose()) {
-            warn = JkLog.warnStream();
-            error = JkLog.errorStream();
+        final OutputStream warn;
+        final OutputStream error;
+        if (JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE) {
+            warn = JkEvent.stream();
+            error = JkEvent.stream();
         } else {
             warn = JkUtilsIO.nopPrintStream();
             error = JkUtilsIO.nopPrintStream();
         }
         JkUtilsPath.createDirectories(outputDir);
-        execute(doclet, JkLog.infoStream(), warn, error, args);
+        execute(doclet, JkEvent.stream(), warn, error, args);
         if (Files.exists(outputDir) && zipFile != null) {
             JkPathTree.of(outputDir).zipTo(zipFile);
         }
-        JkLog.done();
+        JkEvent.end(this, "");
     }
 
     private String[] toArguments(Path outputDir) {
@@ -141,7 +142,7 @@ public final class JkJavadocMaker {
         list.add(JkPathSequence.ofMany(this.srcDirs.rootDirsOrZipFiles()).toString());
         list.add("-d");
         list.add(outputDir.toAbsolutePath().toString());
-        if (JkLog.verbose()) {
+        if (JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE) {
             list.add("-verbose");
         } else {
             list.add("-quiet");
@@ -163,8 +164,8 @@ public final class JkJavadocMaker {
         return list.toArray(new String[0]);
     }
 
-    private static void execute(Class<?> doclet, PrintStream normalStream, PrintStream warnStream,
-            PrintStream errorStream, String[] args) {
+    private static void execute(Class<?> doclet, OutputStream normalStream, OutputStream warnStream,
+                                OutputStream errorStream, String[] args) {
 
         final String docletString = doclet != null ? doclet.getName()
                 : "com.sun.tools.doclets.standard.Standard";

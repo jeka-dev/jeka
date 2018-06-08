@@ -208,7 +208,7 @@ public final class JkProcess implements Runnable {
         //} else {
         //}
         commands.addAll(parameters);
-        JkLog.startln("Starting program : " + commands.toString());
+        JkEvent.start(this,"Starting program : " + commands.toString());
         final int result;
         try {
             final ProcessBuilder processBuilder = processBuilder(commands);
@@ -217,9 +217,9 @@ public final class JkProcess implements Runnable {
             }
             final Process process = processBuilder.start();
             final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
-                    process.getInputStream(), JkLog.infoStream());
+                    process.getInputStream(), JkEvent.stream());
             final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
-                    process.getErrorStream(), JkLog.warnStream());
+                    process.getErrorStream(), JkEvent.stream());
             process.waitFor();
             outputStreamGobbler.stop();
             errorStreamGobbler.stop();
@@ -231,7 +231,7 @@ public final class JkProcess implements Runnable {
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
-        JkLog.done(" process exit with return code : " + result);
+        JkEvent.end(this, " process exit with return code : " + result);
         return result;
     }
 

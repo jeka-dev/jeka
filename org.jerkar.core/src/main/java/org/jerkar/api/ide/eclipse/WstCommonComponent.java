@@ -12,7 +12,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry;
 import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry.Kind;
-import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkEvent;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -103,7 +103,7 @@ class WstCommonComponent {
             final String rest = handle.substring(LIB_PREFIX.length());
             return ClasspathEntry.of(Kind.LIB, rest);
         } else {
-            JkLog.warn("Ignoring handle " + handle);
+            JkEvent.warn(WstCommonComponent.class,"Ignoring handle " + handle);
             result = null;
         }
         return result;

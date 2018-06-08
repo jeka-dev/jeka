@@ -9,7 +9,7 @@ import java.util.Properties;
 
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
-import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsTime;
 import org.junit.runner.JUnitCore;
@@ -48,7 +48,7 @@ class JUnit4TestExecutor {
         final PrintStream err = System.err;
         if (printEachTestOnConsole) {
             jUnitCore.addListener(new JUnitConsoleListener());
-        } else if (!JkLog.verbose()) {
+        } else if (JkEvent.Verbosity.VERBOSE != JkEvent.verbosity()) {
             System.setErr(JkUtilsIO.nopPrintStream());
             System.setOut(JkUtilsIO.nopPrintStream());
         }

@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry;
 import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry.Kind;
-import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkEvent;
 import org.jerkar.api.utils.JkUtilsString;
 
 class ScopeResolverSmart implements ScopeResolver {
@@ -30,7 +30,7 @@ class ScopeResolverSmart implements ScopeResolver {
             final ClasspathEntry classpathEntry = ClasspathEntry.of(kind, path);
             if (!wstCommonComponent.contains(classpathEntry)) {
                 if (scope.isInOrIsExtendingAnyOf(COMPILE)) {
-                    JkLog.trace(path + " not found as module in " + WstCommonComponent.FILE
+                    JkEvent.trace(this, path + " not found as module in " + WstCommonComponent.FILE
                             + " : turn scope to 'provided'.");
                     scope = PROVIDED;
                 }
