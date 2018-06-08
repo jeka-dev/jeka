@@ -5,6 +5,7 @@ import org.jerkar.api.utils.JkUtilsString;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.TimeZone;
 
 class LogHandler implements JkEvent.JkEventHandler {
 
@@ -17,7 +18,7 @@ class LogHandler implements JkEvent.JkEventHandler {
         final String prefix;
         if (event.type() == JkEvent.Type.END_TASK) {
             prefix = JkUtilsString.repeat("" + BOX_DRAWINGS_LIGHT_VERTICAL + " ", event.nestedLevel() - 1)
-            + BOX_DRAWINGS_LIGHT_UP_AND_RIGHT + " Done. ";
+            + BOX_DRAWINGS_LIGHT_UP_AND_RIGHT + " Done in " + (System.currentTimeMillis() - JkEvent.getLastTaskStartTs()) + " milliseconds. ";
         } else {
             prefix = JkUtilsString.repeat("" + BOX_DRAWINGS_LIGHT_VERTICAL + " ", event.nestedLevel());
         }

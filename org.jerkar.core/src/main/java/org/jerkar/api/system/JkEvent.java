@@ -23,9 +23,11 @@ public final class JkEvent {
 
     private static OutputStream stream = JkUtilsIO.nopOuputStream();
 
-    private static Verbosity verbosity;
+    private static Verbosity verbosity = Verbosity.NORMAL;
 
     private static int currentNestedTaskLevel = 0;
+
+    private static long lastTaskStartTs;
 
     private final Object emittingInstance;
 
@@ -60,6 +62,10 @@ public final class JkEvent {
 
     public static List<JkEventHandler> handlers() {
         return Collections.unmodifiableList(new LinkedList<>(HANDLERS));
+    }
+
+    public static long getLastTaskStartTs() {
+        return lastTaskStartTs;
     }
 
     public static void initializeInClassLoader(ClassLoader classLoader) {
@@ -99,11 +105,13 @@ public final class JkEvent {
     }
 
     public static void trace(Object emittingInstanceOrClass, String message) {
-        consume(new JkEvent(emittingInstanceOrClass, Type.TRACE, message));
+        if (verbosity() == Verbosity.VERBOSE) {
+            consume(new JkEvent(emittingInstanceOrClass, Type.TRACE, message));
+        }
     }
 
     public static void trace(String message) {
-        consume(new JkEvent(null, Type.TRACE, message));
+       trace(null,  message);
     }
 
     public static void error(Object emittingInstanceOrClass, String message) {
@@ -115,17 +123,18 @@ public final class JkEvent {
     }
 
     public static void start(Object emittingInstanceOrClass, String message) {
-        currentNestedTaskLevel++;
+        lastTaskStartTs = System.currentTimeMillis();
         consume(new JkEvent(emittingInstanceOrClass, Type.START_TASK, message));
+        currentNestedTaskLevel++;
     }
 
     public static void start(String message) {
-        currentNestedTaskLevel++;
-        consume(new JkEvent(null, Type.START_TASK, message));
+        start(null, message);
     }
 
     public static void end(Object emittingInstanceOrClass, String message) {
         consume(new JkEvent(emittingInstanceOrClass, Type.END_TASK, message));
+        lastTaskStartTs = 0;
         currentNestedTaskLevel--;
     }
 
