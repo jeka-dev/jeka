@@ -6,15 +6,16 @@ import org.jerkar.api.utils.JkUtilsString;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.TimeZone;
+import java.util.function.Consumer;
 
-class LogHandler implements JkEvent.JkEventHandler {
+class LogHandler implements Consumer<JkEvent> {
 
     private static final char BOX_DRAWINGS_LIGHT_VERTICAL = 0x2502;
 
     private static final char BOX_DRAWINGS_LIGHT_UP_AND_RIGHT = 0x2514;
 
     @Override
-    public void handle(JkEvent event) {
+    public void accept(JkEvent event) {
         final String prefix;
         if (event.type() == JkEvent.Type.END_TASK) {
             prefix = JkUtilsString.repeat("" + BOX_DRAWINGS_LIGHT_VERTICAL + " ", event.nestedLevel() - 1)
@@ -30,7 +31,6 @@ class LogHandler implements JkEvent.JkEventHandler {
         }
     }
 
-    @Override
     public OutputStream stream() {
         return System.out;
     }

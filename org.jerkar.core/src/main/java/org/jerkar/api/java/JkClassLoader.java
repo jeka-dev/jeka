@@ -548,7 +548,7 @@ public final class JkClassLoader {
      * arguments. <br/>
      * If the argument classes are the same on the current class loader and this
      * one then arguments are passed as is, otherwise arguments are serialized
-     * in the current class loader and deserialized accept this class loader of
+     * in the current class loader and deserialized in this class loader in
      * order to be compliant with it. <br/>
      * The current thread context class loader is switched to this for the
      * method execution. <br/>

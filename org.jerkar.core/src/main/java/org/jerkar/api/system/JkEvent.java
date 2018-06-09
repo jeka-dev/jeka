@@ -6,10 +6,13 @@ import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Consumer;
 
-public final class JkEvent {
+public final class JkEvent implements Serializable {
 
     public enum Type {
         INFO, WARN, ERROR, TRACE, PROGRESS, START_TASK, END_TASK;
@@ -19,7 +22,7 @@ public final class JkEvent {
         MUTE, NORMAL, VERBOSE;
     }
 
-    private static final Set<JkEventHandler> HANDLERS = new LinkedHashSet<>();
+    private static final Set<Consumer<JkEvent>> HANDLERS = new LinkedHashSet<>();
 
     private static OutputStream stream = JkUtilsIO.nopOuputStream();
 
@@ -27,11 +30,9 @@ public final class JkEvent {
 
     private static int currentNestedTaskLevel = 0;
 
-    private static long lastTaskStartTs;
+    private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<>();
 
-    private final Object emittingInstance;
-
-    private final Object emittingClass; // In case it is emitted from a static method
+    private final String emittingClassName; // In case it is emitted from a static method
 
     private final Type type;
 
@@ -39,19 +40,22 @@ public final class JkEvent {
 
     private final int nestedLevel;
 
-    private JkEvent(Object emittingInstance, Object emittingClass, Type type, String message, int nestedLevel) {
-        this.emittingInstance = emittingInstance;
-        this.emittingClass = emittingClass;
+    static {
+        START_TIMES.set(new LinkedList<>());
+    }
+
+    private JkEvent(String emittingClassName, Type type, String message, int nestedLevel) {
+        this.emittingClassName = emittingClassName;
         this.type = type;
         this.message = message;
         this.nestedLevel = nestedLevel;
     }
 
     private JkEvent(Object emittingInstanceOrClass, Type type, String message) {
-        this(emittingInstance(emittingInstanceOrClass), emittingClass(emittingInstanceOrClass), type, message, currentNestedTaskLevel);
+        this(emittingInstance(emittingInstanceOrClass), type, message, currentNestedTaskLevel);
     }
 
-    public static void register(JkEventHandler handler) {
+    public static void register(Consumer<JkEvent> handler) {
         HANDLERS.add(handler);
     }
 
@@ -60,12 +64,33 @@ public final class JkEvent {
         verbosity = verbosityArg;
     }
 
-    public static List<JkEventHandler> handlers() {
+    public static List<Consumer<JkEvent>> handlers() {
         return Collections.unmodifiableList(new LinkedList<>(HANDLERS));
     }
 
     public static long getLastTaskStartTs() {
-        return lastTaskStartTs;
+        final LinkedList<Long> times = START_TIMES.get();
+        if (times.isEmpty()) {
+            throw new IllegalStateException(
+                    "This 'done' do no match to any 'start'. "
+                            + "Please, use 'done' only to mention that the previous 'start' activity is done.");
+        }
+        return times.getLast();
+    }
+
+    private static void pollStartTs() {
+        final LinkedList<Long> times = START_TIMES.get();
+        if (times.isEmpty()) {
+            throw new IllegalStateException(
+                    "This 'done' do no match to any 'start'. "
+                            + "Please, use 'done' only to mention that the previous 'start' activity is done.");
+        }
+        times.poll();
+    }
+
+    private static void startTimer() {
+        LinkedList<Long> times = START_TIMES.get();
+        times.push(System.currentTimeMillis());
     }
 
     public static void initializeInClassLoader(ClassLoader classLoader) {
@@ -73,11 +98,12 @@ public final class JkEvent {
             Class<?> targetClass = classLoader.loadClass(JkEvent.class.getName());
             Field handlerField = targetClass.getDeclaredField("HANDLERS");
             handlerField.setAccessible(true);
-            Set<JkEventHandler> targetHandlers = (Set<JkEventHandler>) handlerField.get(null);
+            Set<Consumer<JkEvent>> targetHandlers = (Set<Consumer<JkEvent>>) handlerField.get(null);
             targetHandlers.addAll(HANDLERS);
             JkUtilsReflect.setFieldValue(null, targetClass.getDeclaredField("currentNestedTaskLevel"),
                     currentNestedTaskLevel);
-            JkUtilsReflect.setFieldValue(null, targetClass.getDeclaredField("verbosity"), verbosity);
+            JkUtilsReflect.setFieldValue(null, targetClass.getDeclaredField("verbosity"),
+                    JkUtilsIO.cloneBySerialization(verbosity, classLoader));
             JkUtilsReflect.setFieldValue(null,targetClass.getDeclaredField("stream"), stream);
         } catch (ReflectiveOperationException e) {
             throw JkUtilsThrowable.unchecked(e);
@@ -123,7 +149,7 @@ public final class JkEvent {
     }
 
     public static void start(Object emittingInstanceOrClass, String message) {
-        lastTaskStartTs = System.currentTimeMillis();
+        startTimer();
         consume(new JkEvent(emittingInstanceOrClass, Type.START_TASK, message));
         currentNestedTaskLevel++;
     }
@@ -134,13 +160,12 @@ public final class JkEvent {
 
     public static void end(Object emittingInstanceOrClass, String message) {
         consume(new JkEvent(emittingInstanceOrClass, Type.END_TASK, message));
-        lastTaskStartTs = 0;
+        pollStartTs();
         currentNestedTaskLevel--;
     }
 
     public static void end(String message) {
-        consume(new JkEvent(null, Type.END_TASK, message));
-        currentNestedTaskLevel--;
+        end(null, message);
     }
 
     public static void progress(Object emittingInstanceOrClass, String unitProgressSymbol) {
@@ -155,23 +180,35 @@ public final class JkEvent {
         return emittingInstanceOrClass.getClass().equals(Class.class) ? emittingInstanceOrClass : emittingInstanceOrClass.getClass();
     }
 
-    private static Object emittingInstance(Object emittingInstanceOrClass) {
+    private static String emittingInstance(Object emittingInstanceOrClass) {
         if (emittingInstanceOrClass == null) {
             return null;
         }
-        return emittingInstanceOrClass.getClass().equals(Class.class) ? null : emittingInstanceOrClass;
+        return emittingInstanceOrClass.getClass().equals(Class.class) ?
+                ((Class<?>) emittingInstanceOrClass).getName() :
+                emittingInstanceOrClass.getClass().getName();
     }
 
-    private static void consume(JkEvent event) {
-        HANDLERS.forEach(handler -> handler.handle(event));
+    private static void consume(Object event) {
+        HANDLERS.forEach(handler -> {
+            if (event.getClass().getClassLoader() != handler.getClass().getClassLoader()) {
+                final Object evt = JkUtilsIO.cloneBySerialization(event, handler.getClass().getClassLoader());
+                try {
+                    Method accept = handler.getClass().getMethod("accept", evt.getClass());
+                    accept.setAccessible(true);
+                    accept.invoke(handler, evt);
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                handler.accept((JkEvent) event);
+            }
+
+        });
     }
 
-    public Object emittingInstance() {
-        return emittingInstance;
-    }
-
-    public Object emittingClass() {
-        return emittingClass;
+    public Object emittingClassName() {
+        return emittingClassName;
     }
 
     public Type type() {
@@ -190,10 +227,5 @@ public final class JkEvent {
         return verbosity;
     }
 
-    public interface JkEventHandler {
 
-        void handle(JkEvent event);
-
-        OutputStream stream();
-    }
 }

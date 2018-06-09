@@ -108,9 +108,9 @@ public final class JkInit {
         sb.append("\nJerkar Repository Cache : " + JkLocator.jerkarRepositoryCache());
         sb.append("\nJerkar Classpath : " + System.getProperty("java.class.path"));
         sb.append("\nCommand Line : " + JkUtilsString.join(Arrays.asList(args), " "));
-        sb.append(propsAsString("\nSpecified System Properties", loadResult.sysprops));
+        sb.append(propsAsString("Specified System Properties", loadResult.sysprops));
         sb.append("\nStandard Options : " + loadResult.standardOptions);
-        sb.append(propsAsString("\nOptions", JkOptions.toDisplayedMap(JkOptions.getAll())));
+        sb.append(propsAsString("Options", JkOptions.toDisplayedMap(JkOptions.getAll())));
         JkEvent.info(sb.toString());
     }
 
