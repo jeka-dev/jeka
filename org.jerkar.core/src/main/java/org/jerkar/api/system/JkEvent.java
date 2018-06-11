@@ -6,6 +6,7 @@ import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -22,9 +23,11 @@ public final class JkEvent implements Serializable {
         MUTE, NORMAL, VERBOSE;
     }
 
-    private static final Set<Consumer<JkEvent>> HANDLERS = new LinkedHashSet<>();
+    private static Consumer<JkEvent> consumer;
 
-    private static OutputStream stream = JkUtilsIO.nopOuputStream();
+    private static PrintStream stream = JkUtilsIO.nopPrintStream();
+
+    private static PrintStream errorStream = JkUtilsIO.nopPrintStream();
 
     private static Verbosity verbosity = Verbosity.NORMAL;
 
@@ -55,8 +58,10 @@ public final class JkEvent implements Serializable {
         this(emittingInstance(emittingInstanceOrClass), type, message, currentNestedTaskLevel);
     }
 
-    public static void register(Consumer<JkEvent> handler) {
-        HANDLERS.add(handler);
+    public static void register(EventLogHandler eventLogHandler) {
+        consumer = eventLogHandler;
+        stream = eventLogHandler.outStream();
+        errorStream = eventLogHandler.errorStream();
     }
 
     public static void setVerbosity(Verbosity verbosityArg) {
@@ -64,54 +69,53 @@ public final class JkEvent implements Serializable {
         verbosity = verbosityArg;
     }
 
-    public static List<Consumer<JkEvent>> handlers() {
-        return Collections.unmodifiableList(new LinkedList<>(HANDLERS));
+    public static long getElapsedNanoSecondsFromStartOfCurrentTask() {
+        final LinkedList<Long> times = START_TIMES.get();
+        if (times.isEmpty()) {
+            throw new IllegalStateException(
+                    "This 'end' do no match to any 'start'. "
+                            + "Please, use 'end' only to mention that the previous 'start' activity is done.");
+        }
+        return System.nanoTime() - times.getLast();
     }
 
-    public static long getLastTaskStartTs() {
+    private static void removeLastStartTs() {
         final LinkedList<Long> times = START_TIMES.get();
         if (times.isEmpty()) {
             throw new IllegalStateException(
                     "This 'done' do no match to any 'start'. "
                             + "Please, use 'done' only to mention that the previous 'start' activity is done.");
         }
-        return times.getLast();
-    }
-
-    private static void pollStartTs() {
-        final LinkedList<Long> times = START_TIMES.get();
-        if (times.isEmpty()) {
-            throw new IllegalStateException(
-                    "This 'done' do no match to any 'start'. "
-                            + "Please, use 'done' only to mention that the previous 'start' activity is done.");
-        }
-        times.poll();
+        times.removeLast();
     }
 
     private static void startTimer() {
         LinkedList<Long> times = START_TIMES.get();
-        times.push(System.currentTimeMillis());
+        times.add(System.nanoTime());
     }
 
     public static void initializeInClassLoader(ClassLoader classLoader) {
         try {
             Class<?> targetClass = classLoader.loadClass(JkEvent.class.getName());
-            Field handlerField = targetClass.getDeclaredField("HANDLERS");
-            handlerField.setAccessible(true);
-            Set<Consumer<JkEvent>> targetHandlers = (Set<Consumer<JkEvent>>) handlerField.get(null);
-            targetHandlers.addAll(HANDLERS);
+            JkUtilsReflect.setFieldValue(null, targetClass.getDeclaredField("consumer"), consumer);
+            JkUtilsReflect.setFieldValue(null,targetClass.getDeclaredField("stream"), stream);
+            JkUtilsReflect.setFieldValue(null,targetClass.getDeclaredField("errorStream"), errorStream);
             JkUtilsReflect.setFieldValue(null, targetClass.getDeclaredField("currentNestedTaskLevel"),
                     currentNestedTaskLevel);
             JkUtilsReflect.setFieldValue(null, targetClass.getDeclaredField("verbosity"),
                     JkUtilsIO.cloneBySerialization(verbosity, classLoader));
-            JkUtilsReflect.setFieldValue(null,targetClass.getDeclaredField("stream"), stream);
+
         } catch (ReflectiveOperationException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
     }
 
-    public static OutputStream stream() {
+    public static PrintStream stream() {
         return stream;
+    }
+
+    public static PrintStream errorStream() {
+        return errorStream;
     }
 
     public static void info(Object emittingInstanceOrClass, String message) {
@@ -160,7 +164,7 @@ public final class JkEvent implements Serializable {
 
     public static void end(Object emittingInstanceOrClass, String message) {
         consume(new JkEvent(emittingInstanceOrClass, Type.END_TASK, message));
-        pollStartTs();
+        removeLastStartTs();
         currentNestedTaskLevel--;
     }
 
@@ -190,24 +194,21 @@ public final class JkEvent implements Serializable {
     }
 
     private static void consume(Object event) {
-        HANDLERS.forEach(handler -> {
-            if (event.getClass().getClassLoader() != handler.getClass().getClassLoader()) {
-                final Object evt = JkUtilsIO.cloneBySerialization(event, handler.getClass().getClassLoader());
-                try {
-                    Method accept = handler.getClass().getMethod("accept", evt.getClass());
-                    accept.setAccessible(true);
-                    accept.invoke(handler, evt);
-                } catch (ReflectiveOperationException e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                handler.accept((JkEvent) event);
+        if (event.getClass().getClassLoader() != consumer.getClass().getClassLoader()) {
+            final Object evt = JkUtilsIO.cloneBySerialization(event, consumer.getClass().getClassLoader());
+            try {
+                Method accept = consumer.getClass().getMethod("accept", evt.getClass());
+                accept.setAccessible(true);
+                accept.invoke(consumer, evt);
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
             }
-
-        });
+        } else {
+            consumer.accept((JkEvent) event);
+        }
     }
 
-    public Object emittingClassName() {
+    public String emittingClassName() {
         return emittingClassName;
     }
 
@@ -225,6 +226,14 @@ public final class JkEvent implements Serializable {
 
     public static Verbosity verbosity() {
         return verbosity;
+    }
+
+    public interface EventLogHandler extends Consumer<JkEvent> {
+
+        PrintStream outStream();
+
+        PrintStream errorStream();
+
     }
 
 

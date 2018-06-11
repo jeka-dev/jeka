@@ -48,7 +48,7 @@ class JUnit4TestExecutor {
         final PrintStream err = System.err;
         if (printEachTestOnConsole) {
             jUnitCore.addListener(new JUnitConsoleListener());
-        } else if (JkEvent.Verbosity.VERBOSE != JkEvent.verbosity()) {
+        } else {
             System.setErr(JkUtilsIO.nopPrintStream());
             System.setOut(JkUtilsIO.nopPrintStream());
         }

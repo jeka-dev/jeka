@@ -123,7 +123,7 @@ public final class JkJavadocMaker {
         final OutputStream error;
         if (JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE) {
             warn = JkEvent.stream();
-            error = JkEvent.stream();
+            error = JkEvent.errorStream();
         } else {
             warn = JkUtilsIO.nopPrintStream();
             error = JkUtilsIO.nopPrintStream();

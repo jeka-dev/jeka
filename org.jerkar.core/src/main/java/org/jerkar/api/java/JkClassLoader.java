@@ -169,7 +169,7 @@ public final class JkClassLoader {
             if (JkUtilsString.isBlank(path)
                     || (!candidate.isFile() && !candidate.isDirectory())) {
                 PrintStream printStream =
-                        JkEvent.Verbosity.VERBOSE == JkEvent.verbosity() ? new PrintStream(JkEvent.stream()) : null;
+                        JkEvent.Verbosity.VERBOSE == JkEvent.verbosity() ? JkEvent.stream() : null;
                 final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, printStream, urlCacheDir);
                 files.add(file);
             } else {

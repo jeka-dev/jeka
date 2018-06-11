@@ -23,7 +23,7 @@ class IvyMessageLogger extends AbstractMessageLogger {
             JkEvent.trace(this, message);
             break;
         case Message.MSG_DEBUG:
-            JkEvent.trace(this, message);
+           // JkEvent.trace(this, message);
             break;
         default:
             JkEvent.info(this,"[" + level + "] " + message);

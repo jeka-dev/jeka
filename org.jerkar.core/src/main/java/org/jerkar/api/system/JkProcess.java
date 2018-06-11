@@ -219,7 +219,7 @@ public final class JkProcess implements Runnable {
             final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
                     process.getInputStream(), JkEvent.stream());
             final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
-                    process.getErrorStream(), JkEvent.stream());
+                    process.getErrorStream(), JkEvent.errorStream());
             process.waitFor();
             outputStreamGobbler.stop();
             errorStreamGobbler.stop();
