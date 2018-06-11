@@ -69,7 +69,6 @@ public final class JkBuildPlugins {
         final T plugin = JkUtilsReflect.newInstance(pluginClass, JkBuild.class, this.holder);
         JkOptions.populateFields(plugin, PluginOptions.options(plugin.name(), this.pluginOptionsList));
         configuredPlugins.add(plugin);
-        JkEvent.info(this,"Build instance : " + this.holder + " will decorated with plugin " + plugin.name());
         return plugin;
     }
 

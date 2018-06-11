@@ -232,17 +232,17 @@ public final class JkUnit {
 
         if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
             if (this.forkedProcess != null) {
-                JkEvent.start(this,"Run JUnit tests in forked mode");
+                JkEvent.start(this,"Executing JUnit tests in forked mode");
                 result = JUnit4TestLauncher.launchInFork(forkedProcess.withClasspaths(testSpec.classpath()),
                         printOutputOnConsole,
                         reportDetail, classes, reportDir.toFile());
             } else {
-                JkEvent.start(this, "Run JUnit tests");
+                JkEvent.start(this, "Executing JUnit tests");
                 result = JUnit4TestLauncher.launchInClassLoader(classes, printOutputOnConsole,
                         reportDetail, reportDir.toFile());
             }
         } else if (classLoader.isDefined(JUNIT3_RUNNER_CLASS_NAME)) {
-            JkEvent.start(this, "Run JUnit tests");
+            JkEvent.start(this, "Executing JUnit tests");
             final Object suite = createJunit3TestSuite(classLoader, classes);
             final Class testResultClass = classLoader.load(JUNIT3_TEST_RESULT_CLASS_NAME);
             final Object testResult = JkUtilsReflect.newInstance(testResultClass);
@@ -282,7 +282,7 @@ public final class JkUnit {
         for (final Runnable runnable : this.postActions) {
             runnable.run(); // NOSONAR
         }
-        JkEvent.end(this,"Tests run");
+        JkEvent.end(this,"");
         JkUtilsIO.closeifClosable(classLoader.classloader());
         return result;
     }

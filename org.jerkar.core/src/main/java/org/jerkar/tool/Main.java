@@ -34,6 +34,7 @@ public final class Main {
         try {
             engine.execute(init);
             if (JkEvent.verbosity() != JkEvent.Verbosity.MUTE) {
+                System.out.println();
                 final int length = printAscii(false, "success.ascii");
                 System.out.println(JkUtilsString.repeat(" ", length) + "Total build time : "
                         + JkUtilsTime.durationInSeconds(start) + " seconds.");

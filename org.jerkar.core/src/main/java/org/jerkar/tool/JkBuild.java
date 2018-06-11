@@ -95,11 +95,14 @@ public class JkBuild {
         JkOptions.populateFields(build, JkOptions.readSystemAndUserOptions());
         Map<String, String> options = CommandLine.instance().getBuildOptions();
         JkOptions.populateFields(build, options);
+        JkEvent.info("Build " + build + " instantiated.");
 
         // Load plugins declared in command line
         build.configurePlugins();
         build.plugins.loadCommandLinePlugins();
-        build.plugins.all().forEach(plugin -> plugin.decorateBuild());
+        build.plugins.all().forEach(plugin -> {
+            JkEvent.info(build, "  Build decorated with plugin " + plugin.getClass());
+            plugin.decorateBuild();});
 
         // Extra build configuration
         build.configure();
