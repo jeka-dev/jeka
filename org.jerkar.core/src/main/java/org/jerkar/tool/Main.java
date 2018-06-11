@@ -11,7 +11,7 @@ import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsTime;
 
 /**
- * Main class for launching Jerkar to command line.
+ * Main class for launching Jerkar from command line.
  *
  * @author Jerome Angibaud
  */
@@ -23,6 +23,7 @@ public final class Main {
     public static void main(String[] args) {
         final long start = System.nanoTime();
         final JkInit init = JkInit.of(args);
+        JkEvent.register(new LogHandler());
         if (JkEvent.verbosity() != JkEvent.Verbosity.MUTE) {
             displayIntro();
         }
