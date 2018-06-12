@@ -19,7 +19,7 @@ import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaProcess;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsReflect;
@@ -221,7 +221,7 @@ public final class JkUnit {
         final String name = getSuiteName(classes);
 
         if (!classes.iterator().hasNext()) {
-            JkEvent.warn(this,"No test class found.");
+            JkLog.warn(this,"No test class found.");
             return JkTestSuiteResult.empty((Properties) System.getProperties().clone(), name, 0);
         }
         final long start = System.nanoTime();
@@ -232,17 +232,17 @@ public final class JkUnit {
 
         if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
             if (this.forkedProcess != null) {
-                JkEvent.start(this,"Executing JUnit tests in forked mode");
+                JkLog.start(this,"Executing JUnit tests in forked mode");
                 result = JUnit4TestLauncher.launchInFork(forkedProcess.withClasspaths(testSpec.classpath()),
                         printOutputOnConsole,
                         reportDetail, classes, reportDir.toFile());
             } else {
-                JkEvent.start(this, "Executing JUnit tests");
+                JkLog.start(this, "Executing JUnit tests");
                 result = JUnit4TestLauncher.launchInClassLoader(classes, printOutputOnConsole,
                         reportDetail, reportDir.toFile());
             }
         } else if (classLoader.isDefined(JUNIT3_RUNNER_CLASS_NAME)) {
-            JkEvent.start(this, "Executing JUnit tests");
+            JkLog.start(this, "Executing JUnit tests");
             final Object suite = createJunit3TestSuite(classLoader, classes);
             final Class testResultClass = classLoader.load(JUNIT3_TEST_RESULT_CLASS_NAME);
             final Object testResult = JkUtilsReflect.newInstance(testResultClass);
@@ -261,20 +261,20 @@ public final class JkUnit {
 
         if (result.failureCount() > 0) {
             if (breakOnFailure) {
-                JkEvent.error(this, String.join("\n" ,
-                        result.toStrings(JkEvent.Verbosity.VERBOSE == JkEvent.verbosity())));
+                JkLog.error(this, String.join("\n" ,
+                        result.toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
                 JkUtilsIO.closeifClosable(classLoader.classloader());
                 throw new IllegalStateException("Test failed : " + result.toString());
             } else {
-                JkEvent.warn(this,
-                        String.join("\n", result.toStrings(JkEvent.Verbosity.VERBOSE == JkEvent.verbosity())));
+                JkLog.warn(this,
+                        String.join("\n", result.toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
             }
         } else {
-            JkEvent.info(this, String.join("/n",
-                    result.toStrings(JkEvent.Verbosity.VERBOSE == JkEvent.verbosity())));
+            JkLog.info(this, String.join("/n",
+                    result.toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
         }
-        if (JkEvent.Verbosity.VERBOSE != JkEvent.verbosity() && result.failureCount() > 0) {
-            JkEvent.info(this, "Launch Jerkar in verbose mode to display failure stack traces accept console.");
+        if (JkLog.Verbosity.VERBOSE != JkLog.verbosity() && result.failureCount() > 0) {
+            JkLog.info(this, "Launch Jerkar in verbose mode to display failure stack traces accept console.");
         }
         if (reportDetail.equals(JunitReportDetail.BASIC)) {
             TestReportBuilder.of(result).writeToFileSystem(reportDir);
@@ -282,7 +282,7 @@ public final class JkUnit {
         for (final Runnable runnable : this.postActions) {
             runnable.run(); // NOSONAR
         }
-        JkEvent.end(this,"");
+        JkLog.end(this,"");
         JkUtilsIO.closeifClosable(classLoader.classloader());
         return result;
     }

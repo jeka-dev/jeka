@@ -15,7 +15,7 @@ import org.apache.ivy.util.ChecksumHelper;
 import org.jerkar.api.depmanagement.IvyPublisher.CheckFileFlag;
 import org.jerkar.api.depmanagement.JkMavenPublication.JkClassifiedFileArtifact;
 import org.jerkar.api.depmanagement.MavenMetadata.Versioning.Snapshot;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.*;
 
 import java.io.*;
@@ -323,14 +323,14 @@ final class IvyPublisherForMaven {
         final Repository repository = this.resolver.getRepository();
         try {
             final String dest = completePath(destination);
-            JkEvent.info(this,"publishing to " + dest);
+            JkLog.info(this,"publishing to " + dest);
             repository.put(null, source.toFile(), dest, overwrite);
             for (final String algo : checksums) {
                 final Path temp = Files.createTempFile("jk-checksum-", algo);
                 final String checkSum = ChecksumHelper.computeAsString(source.toFile(), algo);
                 Files.write(temp, checkSum.getBytes());
                 final String csDest = dest + "." + algo;
-                JkEvent.info(this,"publishing to " + csDest);
+                JkLog.info(this,"publishing to " + csDest);
                 repository.put(null, temp.toFile(), csDest, overwrite);
                 Files.deleteIfExists(temp);
             }

@@ -3,7 +3,7 @@ package org.jerkar.api.java;
 import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsPath;
 
@@ -60,7 +60,7 @@ public final class JkResourceProcessor {
      * specified output directory along replacing specified tokens.
      */
     public void generateTo(Path outputDir, Charset charset) {
-        JkEvent.start(this,"Coping resource files to " + outputDir);
+        JkLog.start(this,"Coping resource files to " + outputDir);
         final AtomicInteger count = new AtomicInteger(0);
         for (final JkPathTree resourceTree : this.resourceTrees.fileTrees()) {
             if (!resourceTree.exists()) {
@@ -79,7 +79,7 @@ public final class JkResourceProcessor {
                 }
             });
         }
-        JkEvent.end(this, count.intValue() + " file(s) copied.");
+        JkLog.end(this, count.intValue() + " file(s) copied.");
     }
 
     /**

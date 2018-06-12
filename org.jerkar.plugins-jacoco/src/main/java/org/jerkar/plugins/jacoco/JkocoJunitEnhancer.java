@@ -3,7 +3,7 @@ package org.jerkar.plugins.jacoco;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.java.junit.JkUnit;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 
 import java.io.PrintStream;
@@ -37,7 +37,7 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
 
     public static JkocoJunitEnhancer of(Path destFile) {
         final URL url = JkPluginJacoco.class.getResource("jacocoagent.jar");
-        PrintStream outputStream = JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE ? JkEvent.stream() : null;
+        PrintStream outputStream = JkLog.verbosity() == JkLog.Verbosity.VERBOSE ? JkLog.stream() : null;
         final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, outputStream, JkClassLoader.urlCacheDir());
         return new JkocoJunitEnhancer(file, true, destFile);
     }
@@ -81,7 +81,7 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
         @Override
         public void run() {
             if (enabled) {
-                JkEvent.info(this,"Jacoco report created at " + destFile.toAbsolutePath());
+                JkLog.info(this,"Jacoco report created at " + destFile.toAbsolutePath());
             }
 
         }

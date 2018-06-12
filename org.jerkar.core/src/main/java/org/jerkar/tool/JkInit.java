@@ -1,6 +1,6 @@
 package org.jerkar.tool;
 
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkInfo;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.*;
@@ -48,7 +48,7 @@ public final class JkInit {
         if (result == null) {
             throw new JkException("No build class found for engine located at : " + base);
         }
-        JkEvent.info(JkInit.class,"Build class : " + result.getClass().getName());
+        JkLog.info(JkInit.class,"Build class : " + result.getClass().getName());
         return result;
     }
 
@@ -68,7 +68,7 @@ public final class JkInit {
      */
     public static <T extends JkBuild> T instanceOf(Class<T> clazz, Path baseDir, String... args) {
         final JkInit init = JkInit.of(args);
-        JkEvent.register(new LogHandler());
+        JkLog.register(new LogHandler());
         init.displayInfo();
         JkBuild.baseDirContext(baseDir);
         final T build;
@@ -78,8 +78,8 @@ public final class JkInit {
             JkBuild.baseDirContext(null);
         }
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
-        if (JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE) {
-            JkEvent.info(propsAsString("\nField values", displayedOptions));
+        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
+            JkLog.info(propsAsString("\nField values", displayedOptions));
         }
         return build;
     }
@@ -111,7 +111,7 @@ public final class JkInit {
         sb.append(propsAsString("Specified System Properties", loadResult.sysprops));
         sb.append("\nStandard Options : " + loadResult.standardOptions);
         sb.append(propsAsString("Options", JkOptions.toDisplayedMap(JkOptions.getAll())));
-        JkEvent.info(sb.toString());
+        JkLog.info(sb.toString());
     }
 
     CommandLine commandLine() {
@@ -136,9 +136,9 @@ public final class JkInit {
         final JkInit.StandardOptions standardOptions = new JkInit.StandardOptions();
         JkOptions.populateFields(standardOptions, optionMap);
         if (standardOptions.silent) {
-            JkEvent.setVerbosity(JkEvent.Verbosity.MUTE);
+            JkLog.setVerbosity(JkLog.Verbosity.MUTE);
         } else if (standardOptions.verbose) {
-            JkEvent.setVerbosity(JkEvent.Verbosity.VERBOSE);
+            JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         }
 
         JkOptions.populateFields(standardOptions);

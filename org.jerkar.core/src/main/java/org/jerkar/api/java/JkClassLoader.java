@@ -30,7 +30,7 @@ import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
 
 import org.jerkar.api.file.JkPathMatcher;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -169,7 +169,7 @@ public final class JkClassLoader {
             if (JkUtilsString.isBlank(path)
                     || (!candidate.isFile() && !candidate.isDirectory())) {
                 PrintStream printStream =
-                        JkEvent.Verbosity.VERBOSE == JkEvent.verbosity() ? JkEvent.stream() : null;
+                        JkLog.Verbosity.VERBOSE == JkLog.verbosity() ? JkLog.stream() : null;
                 final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, printStream, urlCacheDir);
                 files.add(file);
             } else {
@@ -642,7 +642,7 @@ public final class JkClassLoader {
         final Set<Class<?>> serviceClasses = new HashSet<>();
         for (final Path file : this.fullClasspath()) {
             if (Files.isRegularFile(file)) {
-                JkEvent.trace(this, "Scanning " + file + " for META-INF/services.");
+                JkLog.trace(this, "Scanning " + file + " for META-INF/services.");
                 final ZipFile zipFile = JkUtilsZip.zipFile(file.toFile());
                 final ZipEntry serviceEntry = zipFile.getEntry("META-INF/services");
                 if (serviceEntry == null) {
@@ -655,7 +655,7 @@ public final class JkClassLoader {
                                 entry.getName(), "/");
                         final Class<?> serviceClass = this.loadIfExist(serviceName);
                         if (serviceClass != null) {
-                            JkEvent.trace(this,"Found service providers for : " + serviceName);
+                            JkLog.trace(this,"Found service providers for : " + serviceName);
                             serviceClasses.add(serviceClass);
                         }
                     }
@@ -676,14 +676,14 @@ public final class JkClassLoader {
             }
         }
         for (final Class<?> serviceClass : serviceClasses) {
-            JkEvent.trace(this,"Reload service providers for : " + serviceClass.getName());
+            JkLog.trace(this,"Reload service providers for : " + serviceClass.getName());
             ServiceLoader.loadInstalled(serviceClass).reload();
         }
         return this;
     }
 
     private void initEventsInClassloader() {
-        JkEvent.initializeInClassLoader(this.classloader());
+        JkLog.initializeInClassLoader(this.classloader());
     }
 
     private static Object traverseClassLoader(Object object, JkClassLoader to) {

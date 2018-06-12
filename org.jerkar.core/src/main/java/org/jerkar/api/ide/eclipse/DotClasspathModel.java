@@ -14,7 +14,7 @@ import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.ide.eclipse.DotClasspathModel.ClasspathEntry.Kind;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsXml;
@@ -142,7 +142,7 @@ final class DotClasspathModel {
                 final Path file = Paths.get(varFile).resolve(JkUtilsString.substringAfterFirst(
                         classpathEntry.path, "/"));
                 if (!Files.exists(file)) {
-                    JkEvent.warn(this, "Can't find Eclipse classpath entry : " + file.toAbsolutePath());
+                    JkLog.warn(this, "Can't find Eclipse classpath entry : " + file.toAbsolutePath());
                 }
                 final JkScope scope = scopeResolver.scopeOfLib(Kind.VAR, classpathEntry.path);
                 result.add(Lib.file(file, scope, classpathEntry.exported));
@@ -261,7 +261,7 @@ final class DotClasspathModel {
                         "Can only get files to classpath entry of kind 'con'.");
             }
             if (!Files.exists(Lib.CONTAINER_DIR) && !Files.exists(Lib.CONTAINER_USER_DIR)) {
-                JkEvent.warn(this,"Eclipse containers directory " + Lib.CONTAINER_USER_DIR
+                JkLog.warn(this,"Eclipse containers directory " + Lib.CONTAINER_USER_DIR
                         + " or  " + Lib.CONTAINER_DIR + " does not exists... Ignore");
                 return Collections.emptyList();
             }
@@ -270,7 +270,7 @@ final class DotClasspathModel {
             if (!Files.exists(conFolder)) {
                 conFolder = Lib.CONTAINER_DIR.resolve(folderName);
                 if (!Files.exists(conFolder)) {
-                    JkEvent.warn(this, "Eclipse containers directory " + conFolder + " or "
+                    JkLog.warn(this, "Eclipse containers directory " + conFolder + " or "
                             + Lib.CONTAINER_USER_DIR.resolve(folderName)
                             + "  do not exists... ignogre.");
                     return Collections.emptyList();

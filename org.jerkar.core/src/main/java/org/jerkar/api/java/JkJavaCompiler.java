@@ -15,7 +15,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
@@ -132,27 +132,27 @@ public final class JkJavaCompiler {
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null,
                 null);
         String message = "Compiling " + compileSpec.getSourceFiles() + " source files to " + outputDir;
-        if (JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE) {
+        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
             message = message + " using options : " + JkUtilsString
                     .join(options, " ");
         }
-        JkEvent.start(this, message);
+        JkLog.start(this, message);
         if (compileSpec.getSourceFiles().isEmpty()) {
-            JkEvent.warn(this,"No source to compile");
-            JkEvent.end(this, "");
+            JkLog.warn(this,"No source to compile");
+            JkLog.end(this, "");
             return true;
         }
         final boolean result;
         if (this.fork == null) {
             final Iterable<? extends JavaFileObject> javaFileObjects = fileManager
                     .getJavaFileObjectsFromFiles(JkUtilsPath.toFiles(compileSpec.getSourceFiles()));
-            final CompilationTask task = compiler.getTask(new PrintWriter(JkEvent.stream()),
+            final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.stream()),
                     null, new JkDiagnosticListener(), options, null, javaFileObjects);
             result = task.call();
         } else {
             result = runOnFork(compileSpec);
         }
-        JkEvent.end(this, "");
+        JkLog.end(this, "");
         if (!result) {
             if (failOnError) {
                 throw new IllegalStateException("Compilation failed with options " + options);
@@ -216,20 +216,20 @@ public final class JkJavaCompiler {
      */
     public JkProcess forkedIfNeeded(Map<String, String> jdkLocations, String version) {
         if (version.equals(currentJdkSourceVersion())) {
-            JkEvent.info(this, "Current JDK matches with source projectVersion (" + version + "). Don't need to fork.");
+            JkLog.info(this, "Current JDK matches with source projectVersion (" + version + "). Don't need to fork.");
             return null;
         }
         final String key = "jdk." + version;
         final String path = jdkLocations.get(key);
         if (path == null) {
-            JkEvent.warn(this,"Current JDK does not match with source projectVersion " + version + ".\n" +
+            JkLog.warn(this,"Current JDK does not match with source projectVersion " + version + ".\n" +
                     " No exact matching JDK found for projectVersion " + version + ".\n" +
                     " Will use the current one which is projectVersion " + currentJdkSourceVersion() + ".\n" +
                     " Pass option -jdk." + version + "=[JDK location] to specify the JDK to use for Java projectVersion " + version);
             return null;
         }
         final String cmd = path + "/bin/javac";
-        JkEvent.info(this,"Current JDK does not match with source projectVersion (" + version + "). Will use JDK "
+        JkLog.info(this,"Current JDK does not match with source projectVersion (" + version + "). Will use JDK "
                 + path);
         return JkProcess.of(cmd);
     }
@@ -240,7 +240,7 @@ public final class JkJavaCompiler {
         @Override
         public void report(Diagnostic diagnostic) {
             if (!diagnostic.getKind().equals(Diagnostic.Kind.ERROR)) {
-                JkEvent.info(this, diagnostic.toString());
+                JkLog.info(this, diagnostic.toString());
             } else {
                 System.out.println(diagnostic);
             }

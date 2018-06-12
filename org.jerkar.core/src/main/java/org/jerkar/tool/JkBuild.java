@@ -9,7 +9,7 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.function.JkRunnables;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsObject;
@@ -72,9 +72,9 @@ public class JkBuild {
      */
     protected JkBuild() {
         final Path baseDirContext = BASE_DIR_CONTEXT.get();
-        JkEvent.trace(this,"Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
+        JkLog.trace(this,"Initializing " + this.getClass().getName() + " instance with base dir context : " + baseDirContext);
         this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get("").toAbsolutePath());
-        JkEvent.trace(this, "Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
+        JkLog.trace(this, "Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
 
         // Instantiating imported builds
         this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), this);
@@ -95,13 +95,13 @@ public class JkBuild {
         JkOptions.populateFields(build, JkOptions.readSystemAndUserOptions());
         Map<String, String> options = CommandLine.instance().getBuildOptions();
         JkOptions.populateFields(build, options);
-        JkEvent.info("Build " + build + " instantiated.");
+        JkLog.info("Build " + build + " instantiated.");
 
         // Load plugins declared in command line
         build.configurePlugins();
         build.plugins.loadCommandLinePlugins();
         build.plugins.all().forEach(plugin -> {
-            JkEvent.info(build, "  Build decorated with plugin " + plugin.getClass());
+            JkLog.info(build, "  Build decorated with plugin " + plugin.getClass());
             plugin.decorateBuild();});
 
         // Extra build configuration
@@ -235,11 +235,11 @@ public class JkBuild {
      */
     @JkDoc("Cleans the output directory.")
     public void clean() {
-        JkEvent.start(this,"Cleaning output directory " + outputDir());
+        JkLog.start(this,"Cleaning output directory " + outputDir());
         if (Files.exists(outputDir())) {
             JkPathTree.of(outputDir()).refuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
         }
-        JkEvent.end(this, "");
+        JkLog.end(this, "");
     }
 
     /**
@@ -270,7 +270,7 @@ public class JkBuild {
      */
     @JkDoc("Displays meaningful information about this build.")
     public final void info() {
-        JkEvent.info(this, infoProvider.toString());
+        JkLog.info(this, infoProvider.toString());
     }
 
     // ----------------------------------------------------------------------------------

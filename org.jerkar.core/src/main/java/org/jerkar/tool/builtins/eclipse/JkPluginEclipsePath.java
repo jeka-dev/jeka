@@ -2,7 +2,7 @@ package org.jerkar.tool.builtins.eclipse;
 
 import org.jerkar.api.ide.eclipse.JkEclipseClasspathApplier;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkDocPluginDeps;
@@ -31,7 +31,7 @@ public final class JkPluginEclipsePath extends JkPlugin {
             final JkEclipseClasspathApplier classpathApplier = new JkEclipseClasspathApplier(smartScope);
             classpathApplier.apply(project);
         } else {
-            JkEvent.warn(this,"No Java plugin detected in this build : ignore.");
+            JkLog.warn(this,"No Java plugin detected in this build : ignore.");
         }
     }
 

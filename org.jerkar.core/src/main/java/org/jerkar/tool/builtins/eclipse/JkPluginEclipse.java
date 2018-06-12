@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import org.jerkar.api.ide.eclipse.JkEclipseClasspathGenerator;
 import org.jerkar.api.ide.eclipse.JkEclipseProject;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.*;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
@@ -90,9 +90,9 @@ public final class JkPluginEclipse extends JkPlugin {
                 .stream().collect(Collectors.toList());
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
-            JkEvent.start(this,"Generating Eclipse files on " + projectFolder);
+            JkLog.start(this,"Generating Eclipse files on " + projectFolder);
             Main.exec(projectFolder, "eclipse#generateFiles");
-            JkEvent.end(this, "");
+            JkLog.end(this, "");
         }
     }
 

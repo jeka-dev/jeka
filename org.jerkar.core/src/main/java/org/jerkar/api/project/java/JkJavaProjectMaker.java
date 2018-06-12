@@ -14,7 +14,7 @@ import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkJavaTestSpec;
 import org.jerkar.api.java.junit.JkUnit;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 
 /**
  * Object responsible to build (to make) a java project. It provides methods to perform common build
@@ -171,7 +171,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     });
 
     public JkJavaProjectMaker compile() {
-        JkEvent.start(this, "Compiling");
+        JkLog.start(this, "Compiling");
         preCompile.run();
         sourceGenerator.run();
         resourceGenerator.run();
@@ -179,7 +179,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         resourceProcessor.run();
         postCompile.run();
         this.status.compileDone = true;
-        JkEvent.end(this, "");
+        JkLog.end(this, "");
         return this;
     }
 
@@ -220,11 +220,11 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     });
 
     public JkJavaProjectMaker test() {
-        JkEvent.start(this,"Running unit tests");
+        JkLog.start(this,"Running unit tests");
         if (this.project.getSourceLayout().tests().count(0, false) == 0) {
-            JkEvent.info(this,"No unit test found in : "
+            JkLog.info(this,"No unit test found in : "
                     + this.project.getSourceLayout().tests());
-            JkEvent.end(this, "");
+            JkLog.end(this, "");
             return this;
         }
         if (!this.status.compileDone) {
@@ -237,7 +237,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         testExecutor.run();
         postTest.run();
         this.status.unitTestDone = true;
-        JkEvent.end(this, "");
+        JkLog.end(this, "");
         return this;
     }
 
@@ -476,9 +476,9 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     public void makeArtifact(JkArtifactId artifactId) {
         if (artifactProducers.containsKey(artifactId)) {
-            JkEvent.start(this,"Producing artifact file " + getArtifactFile(artifactId).getFileName());
+            JkLog.start(this,"Producing artifact file " + getArtifactFile(artifactId).getFileName());
             this.artifactProducers.get(artifactId).run();
-            JkEvent.end(this, "");
+            JkLog.end(this, "");
         } else {
             throw new IllegalArgumentException("No artifact " + artifactId + " is defined on project " + this.project);
         }

@@ -26,7 +26,7 @@ import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.util.url.URLHandlerRegistry;
 import org.jerkar.api.depmanagement.JkDependencyNode.ModuleNodeInfo;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsObject;
@@ -61,7 +61,7 @@ final class IvyResolver implements InternalDepResolver {
         final Ivy ivy = new Ivy();
         ivy.getLoggerEngine().popLogger();
         ivy.getLoggerEngine().setDefaultLogger(new IvyMessageLogger());
-        ivy.getLoggerEngine().setShowProgress(JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE);
+        ivy.getLoggerEngine().setShowProgress(JkLog.verbosity() == JkLog.Verbosity.VERBOSE);
         ivy.getLoggerEngine().clearProblems();
         IvyContext.getContext().setIvy(ivy);
         ivy.setSettings(ivySettings);
@@ -114,7 +114,7 @@ final class IvyResolver implements InternalDepResolver {
         final ResolveOptions resolveOptions = new ResolveOptions();
         resolveOptions.setConfs(confs);
         resolveOptions.setTransitive(true);
-        resolveOptions.setOutputReport(JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE);
+        resolveOptions.setOutputReport(JkLog.verbosity() == JkLog.Verbosity.VERBOSE);
         resolveOptions.setLog(logLevel());
         resolveOptions.setRefresh(parameters.refreshed());
         resolveOptions.setCheckIfChanged(true);
@@ -154,10 +154,10 @@ final class IvyResolver implements InternalDepResolver {
     }
 
     private static String logLevel() {
-        if (JkEvent.Verbosity.MUTE == JkEvent.verbosity()) {
+        if (JkLog.Verbosity.MUTE == JkLog.verbosity()) {
             return "quiet";
         }
-        if (JkEvent.Verbosity.VERBOSE == JkEvent.verbosity()) {
+        if (JkLog.Verbosity.VERBOSE == JkLog.verbosity()) {
             return "verbose";
         }
         return "download-only";

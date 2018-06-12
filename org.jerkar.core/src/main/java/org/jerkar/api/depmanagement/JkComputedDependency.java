@@ -2,7 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaProcess;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsPath;
@@ -135,9 +135,9 @@ public class JkComputedDependency implements JkFileDependency {
     @Override
     public List<Path> paths() {
         if (this.hasMissingFilesOrEmptyDirs()) {
-            JkEvent.start(this, "Building dependency : " + this);
+            JkLog.start(this, "Building dependency : " + this);
             runnable.run();
-            JkEvent.end(this, "");
+            JkLog.end(this, "");
         }
         final Set<Path> missingFiles = this.missingFilesOrEmptyDirs();
         if (!missingFiles.isEmpty()) {

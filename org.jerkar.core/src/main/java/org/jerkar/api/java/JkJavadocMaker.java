@@ -1,8 +1,8 @@
 package org.jerkar.api.java;
 
 
+import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
@@ -14,7 +14,7 @@ import java.util.List;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.file.JkPathSequence;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsJdk;
 import org.jerkar.api.utils.JkUtilsPath;
@@ -112,28 +112,26 @@ public final class JkJavadocMaker {
      * Actually processes and creates the javadoc files.
      */
     public void process() {
-        JkEvent.start(this,"Generating javadoc");
+        JkLog.start(this,"Generating javadoc");
         if (this.srcDirs.hasNoExistingRoot()) {
-            JkEvent.warn(this,"No sources found in " + this.srcDirs);
-            JkEvent.end(this, "");
+            JkLog.warn(this,"No sources found in " + this.srcDirs);
+            JkLog.end(this, "");
             return;
         }
         final String[] args = toArguments(outputDir);
-        final OutputStream warn;
-        final OutputStream error;
-        if (JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE) {
-            warn = JkEvent.stream();
-            error = JkEvent.errorStream();
-        } else {
-            warn = JkUtilsIO.nopPrintStream();
-            error = JkUtilsIO.nopPrintStream();
+        OutputStream info = JkLog.stream();
+        OutputStream warn = JkUtilsIO.nopPrintStream();   // error and log produces very verbose logs in jdoclet
+        OutputStream error = JkUtilsIO.nopPrintStream();
+        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
+            warn = JkLog.stream();
+            error = JkLog.errorStream();
         }
         JkUtilsPath.createDirectories(outputDir);
-        execute(doclet, JkEvent.stream(), warn, error, args);
+        execute(doclet, info, warn, error, args);
         if (Files.exists(outputDir) && zipFile != null) {
             JkPathTree.of(outputDir).zipTo(zipFile);
         }
-        JkEvent.end(this, "");
+        JkLog.end(this, "");
     }
 
     private String[] toArguments(Path outputDir) {
@@ -142,7 +140,7 @@ public final class JkJavadocMaker {
         list.add(JkPathSequence.ofMany(this.srcDirs.rootDirsOrZipFiles()).toString());
         list.add("-d");
         list.add(outputDir.toAbsolutePath().toString());
-        if (JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE) {
+        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
             list.add("-verbose");
         } else {
             list.add("-quiet");

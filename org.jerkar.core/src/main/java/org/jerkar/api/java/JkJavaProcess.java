@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIO.StreamGobbler;
@@ -229,16 +229,16 @@ public final class JkJavaProcess {
         }
 
         command.addAll(Arrays.asList(arguments));
-        JkEvent.start(this, "Starting java program : " + execPart);
-        JkEvent.info(this, String.join("\n", command));
+        JkLog.start(this, "Starting java program : " + execPart);
+        JkLog.info(this, String.join("\n", command));
         final int result;
         try {
             final Process process = processBuilder(command, optionAndEnv.env).start();
 
             final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
-                    process.getInputStream(), JkEvent.stream());
+                    process.getInputStream(), JkLog.stream());
             final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
-                    process.getErrorStream(), JkEvent.errorStream());
+                    process.getErrorStream(), JkLog.errorStream());
             process.waitFor();
             outputStreamGobbler.stop();
             errorStreamGobbler.stop();
@@ -250,7 +250,7 @@ public final class JkJavaProcess {
             throw new IllegalStateException("Process terminated in error : exit value = " + result
                     + ".");
         }
-        JkEvent.end(this, "");
+        JkLog.end(this, "");
     }
 
     private OptionAndEnv optionsAndEnv() {
@@ -259,7 +259,7 @@ public final class JkJavaProcess {
         if (classpath != null && !classpath.entries().isEmpty()) {
             final String classpathString = classpath.toString();
             if (JkUtilsSystem.IS_WINDOWS && classpathString.length() > 7500) {
-                JkEvent.warn(this, "classpath too long, classpath will be passed using CLASSPATH env variable.");
+                JkLog.warn(this, "classpath too long, classpath will be passed using CLASSPATH env variable.");
                 env.put("CLASSPATH", classpathString);
             } else {
                 options.add("-cp");

@@ -8,7 +8,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 
 import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsPath;
@@ -64,32 +64,32 @@ class SampleTester {
     }
 
     private void testSamples(String className, String... args) {
-        JkEvent.info(this,"Test " + className + " " + Arrays.toString(args));
+        JkLog.info(this,"Test " + className + " " + Arrays.toString(args));
         JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(sampleBaseDir.root().toAbsolutePath().normalize())
                 .withParametersIf(!JkUtilsString.isBlank(className), "-verbose=true -buildClass=" + className).andParameters(args)
                 .failOnError(true).runSync();
     }
 
     private void testDependee(String className, String... args) {
-        JkEvent.info(this,"Test " + className + " " + Arrays.toString(args));
+        JkLog.info(this,"Test " + className + " " + Arrays.toString(args));
         JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependeeBaseDir.root())
                 .withParametersIf(!JkUtilsString.isBlank(className), "-buildClass=" + className).andParameters(args)
                 .failOnError(true).runSync();
     }
 
     private void scaffoldAndEclipse() {
-        JkEvent.start(this, "Test scaffolding");
+        JkLog.start(this, "Test scaffolding");
         Path scafoldedProject = output.root().resolve("scaffolded");
         JkProcess scaffoldProcess = process().withWorkingDir(scafoldedProject);
         JkUtilsPath.createDirectories(scafoldedProject);
         scaffoldProcess.withParameters("scaffold").runSync(); // scaffold
         // project
         scaffoldProcess.runSync(); // Build the scaffolded project
-        JkEvent.info(this,"Test eclipse generation and compile            ");
+        JkLog.info(this,"Test eclipse generation and compile            ");
         scaffoldProcess.withParameters("eclipse#generateAll").runSync();
         scaffoldProcess.withParameters("eclipse#").runSync(); // build using the .classpath for resolving classpath
         scaffoldProcess.withParameters("idea#generateIml", "idea#generateModulesXml").runSync();
-        JkEvent.end(this, "");
+        JkLog.end(this, "");
     }
 
     private JkProcess process() {

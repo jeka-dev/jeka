@@ -1,8 +1,6 @@
 package org.jerkar.api.depmanagement;
 
 
-import org.jerkar.api.system.JkEvent;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;

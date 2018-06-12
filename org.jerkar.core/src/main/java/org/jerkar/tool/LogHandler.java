@@ -1,6 +1,6 @@
 package org.jerkar.tool;
 
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.io.InterruptedIOException;
 import java.io.PrintStream;
 import java.util.LinkedList;
 
-class LogHandler implements JkEvent.EventLogHandler {
+class LogHandler implements JkLog.EventLogHandler {
 
     private static final char BOX_DRAWINGS_LIGHT_VERTICAL = 0x2502;
 
@@ -18,9 +18,7 @@ class LogHandler implements JkEvent.EventLogHandler {
 
     private static final byte[] MARGIN_UNIT = ("" + BOX_DRAWINGS_LIGHT_VERTICAL + " ").getBytes();
 
-    private final LinkedList<Boolean> hasLoggedSinceStart = new LinkedList<>();
-
-    private int nestedLevel = 0;
+    //private final LinkedList<Boolean> hasLoggedSinceStart = new LinkedList<>();
 
     private final PrintStream out = new MarginStream(System.out);
 
@@ -28,51 +26,61 @@ class LogHandler implements JkEvent.EventLogHandler {
 
 
     @Override
-    public void accept(JkEvent event) {
+    public void accept(JkLog.JkLogEvent event) {
         boolean newLine = true;
         String message = event.message();
-        nestedLevel = event.nestedLevel();
-        if (event.type() == JkEvent.Type.END_TASK) {
+        if (event.type() == JkLog.Type.END_TASK) {
             StringBuilder sb = new StringBuilder();
-            if (!hasLoggedSinceStart.getLast()) {
-                newLine = false;
-            } else {
+    //        if (!hasLoggedSinceStart.getLast()) {
+    //            newLine = false;
+    //        } else {
                 sb.append(BOX_DRAWINGS_LIGHT_UP_AND_RIGHT);
-            }
-            sb.append(" done in " + (JkEvent.getElapsedNanoSecondsFromStartOfCurrentTask() / 1000000) + " milliseconds. ")
+     //       }
+            sb.append(" done in " + (JkLog.getElapsedNanoSecondsFromStartOfCurrentTask() / 1000000) + " milliseconds. ")
                     .append(message);
             message = sb.toString();
+            /*
             if (!hasLoggedSinceStart.isEmpty()){
                 hasLoggedSinceStart.removeLast();
                 hasLoggedSinceStart.add(Boolean.TRUE);
-            }
+            }*/
         } else {
-            if (event.type() == JkEvent.Type.START_TASK) {
+            if (event.type() == JkLog.Type.START_TASK) {
                 message = message +  " ... ";
-                hasLoggedSinceStart.add(Boolean.FALSE);
-            } else if (!hasLoggedSinceStart.isEmpty()){
-                hasLoggedSinceStart.removeLast();
-                hasLoggedSinceStart.add(Boolean.TRUE);
-            }
+            } /*else if (!hasLoggedSinceStart.isEmpty()){
+                markHasLoadedSinceStart();
+            } */
         }
-        final PrintStream printStream = event.type() == JkEvent.Type.ERROR ? err : out;
+        final PrintStream printStream = event.type() == JkLog.Type.ERROR ? err : out;
         if (newLine) {
             printStream.println();
         }
         printStream.print(message);
+        /*
+        if (event.type() == JkLog.Type.START_TASK) {
+            hasLoggedSinceStart.add(Boolean.FALSE);
+        } */
+
     }
+/*
+    private void markHasLoadedSinceStart() {
+        if (hasLoggedSinceStart.isEmpty()) {
+            return;
+        }
+        hasLoggedSinceStart.removeLast();
+        hasLoggedSinceStart.add(Boolean.TRUE);
+    }
+    */
 
 
     @Override
     public PrintStream outStream() {
-        //return out;
-       return JkUtilsIO.nopPrintStream();
-}
+        return out;
+    }
 
     @Override
     public PrintStream errorStream() {
-        //return  new MarginStream(System.err);
-        return JkUtilsIO.nopPrintStream();
+        return err;
     }
 
     private class MarginStream extends PrintStream {
@@ -86,6 +94,7 @@ class LogHandler implements JkEvent.EventLogHandler {
             if (len == 0) {
                 return;
             }
+           // markHasLoadedSinceStart();
             try {
                 synchronized (this) {
                     for (int i = 0 ; i < len ; i++) {
@@ -106,9 +115,8 @@ class LogHandler implements JkEvent.EventLogHandler {
             }
         }
 
-
         private void writeLeftMargin()  {
-            for (int j = 0; j < nestedLevel; j++) {
+            for (int j = 0; j < JkLog.currentNestedLevel(); j++) {
                 try {
                     out.write(MARGIN_UNIT);
                 } catch (IOException e) {

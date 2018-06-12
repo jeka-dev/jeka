@@ -5,15 +5,13 @@ import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
 
-public final class JkEvent implements Serializable {
+public final class JkLog implements Serializable {
 
     public enum Type {
         INFO, WARN, ERROR, TRACE, PROGRESS, START_TASK, END_TASK;
@@ -23,7 +21,7 @@ public final class JkEvent implements Serializable {
         MUTE, NORMAL, VERBOSE;
     }
 
-    private static Consumer<JkEvent> consumer;
+    private static Consumer<JkLogEvent> consumer;
 
     private static PrintStream stream = JkUtilsIO.nopPrintStream();
 
@@ -35,27 +33,8 @@ public final class JkEvent implements Serializable {
 
     private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<>();
 
-    private final String emittingClassName; // In case it is emitted from a static method
-
-    private final Type type;
-
-    private final String message;
-
-    private final int nestedLevel;
-
     static {
         START_TIMES.set(new LinkedList<>());
-    }
-
-    private JkEvent(String emittingClassName, Type type, String message, int nestedLevel) {
-        this.emittingClassName = emittingClassName;
-        this.type = type;
-        this.message = message;
-        this.nestedLevel = nestedLevel;
-    }
-
-    private JkEvent(Object emittingInstanceOrClass, Type type, String message) {
-        this(emittingInstance(emittingInstanceOrClass), type, message, currentNestedTaskLevel);
     }
 
     public static void register(EventLogHandler eventLogHandler) {
@@ -94,9 +73,13 @@ public final class JkEvent implements Serializable {
         times.add(System.nanoTime());
     }
 
+    public static int currentNestedLevel() {
+        return currentNestedTaskLevel;
+    }
+
     public static void initializeInClassLoader(ClassLoader classLoader) {
         try {
-            Class<?> targetClass = classLoader.loadClass(JkEvent.class.getName());
+            Class<?> targetClass = classLoader.loadClass(JkLog.class.getName());
             JkUtilsReflect.setFieldValue(null, targetClass.getDeclaredField("consumer"), consumer);
             JkUtilsReflect.setFieldValue(null,targetClass.getDeclaredField("stream"), stream);
             JkUtilsReflect.setFieldValue(null,targetClass.getDeclaredField("errorStream"), errorStream);
@@ -119,24 +102,24 @@ public final class JkEvent implements Serializable {
     }
 
     public static void info(Object emittingInstanceOrClass, String message) {
-        consume(new JkEvent(emittingInstanceOrClass, Type.INFO, message));
+        consume(new JkLogEvent(emittingInstanceOrClass, Type.INFO, message));
     }
 
     public static void info(String message) {
-        consume(new JkEvent(null, Type.INFO, message));
+        info(null, message);
     }
 
     public static void warn(Object emittingInstanceOrClass, String message) {
-        consume(new JkEvent(emittingInstanceOrClass, Type.WARN, message));
+        consume(new JkLogEvent(emittingInstanceOrClass, Type.WARN, message));
     }
 
     public static void warn(String message) {
-        consume(new JkEvent(null, Type.WARN, message));
+        warn(null, message);
     }
 
     public static void trace(Object emittingInstanceOrClass, String message) {
         if (verbosity() == Verbosity.VERBOSE) {
-            consume(new JkEvent(emittingInstanceOrClass, Type.TRACE, message));
+            consume(new JkLogEvent(emittingInstanceOrClass, Type.TRACE, message));
         }
     }
 
@@ -145,16 +128,16 @@ public final class JkEvent implements Serializable {
     }
 
     public static void error(Object emittingInstanceOrClass, String message) {
-        consume(new JkEvent(emittingInstanceOrClass, Type.ERROR, message));
+        consume(new JkLogEvent(emittingInstanceOrClass, Type.ERROR, message));
     }
 
     public static void error(String message) {
-        consume(new JkEvent(null, Type.ERROR, message));
+        error(null,message);
     }
 
     public static void start(Object emittingInstanceOrClass, String message) {
         startTimer();
-        consume(new JkEvent(emittingInstanceOrClass, Type.START_TASK, message));
+        consume(new JkLogEvent(emittingInstanceOrClass, Type.START_TASK, message));
         currentNestedTaskLevel++;
     }
 
@@ -164,7 +147,7 @@ public final class JkEvent implements Serializable {
 
     public static void end(Object emittingInstanceOrClass, String message) {
         currentNestedTaskLevel--;
-        consume(new JkEvent(emittingInstanceOrClass, Type.END_TASK, message));
+        consume(new JkLogEvent(emittingInstanceOrClass, Type.END_TASK, message));
         removeLastStartTs();
     }
 
@@ -173,7 +156,7 @@ public final class JkEvent implements Serializable {
     }
 
     public static void progress(Object emittingInstanceOrClass, String unitProgressSymbol) {
-        consume(new JkEvent(emittingInstanceOrClass, Type.PROGRESS, unitProgressSymbol));
+        progress(null, unitProgressSymbol);
     }
 
 
@@ -204,31 +187,53 @@ public final class JkEvent implements Serializable {
                 throw new RuntimeException(e);
             }
         } else {
-            consumer.accept((JkEvent) event);
+            consumer.accept((JkLogEvent) event);
         }
     }
 
-    public String emittingClassName() {
-        return emittingClassName;
-    }
+    public static class JkLogEvent implements Serializable {
 
-    public Type type() {
-        return type;
-    }
+        private JkLogEvent(String emittingClassName, Type type, String message, int nestedLevel) {
+            this.emittingClassName = emittingClassName;
+            this.type = type;
+            this.message = message;
+            this.nestedLevel = nestedLevel;
+        }
 
-    public String message() {
-        return message;
-    }
+        private JkLogEvent(Object emittingInstanceOrClass, Type type, String message) {
+            this(emittingInstance(emittingInstanceOrClass), type, message, currentNestedTaskLevel);
+        }
 
-    public int nestedLevel() {
-        return nestedLevel;
+        private final String emittingClassName; // In case it is emitted from a static method
+
+        private final Type type;
+
+        private final String message;
+
+        private final int nestedLevel;
+
+        public String emittingClassName() {
+            return emittingClassName;
+        }
+
+        public Type type() {
+            return type;
+        }
+
+        public String message() {
+            return message;
+        }
+
+        public int nestedLevel() {
+            return nestedLevel;
+        }
     }
 
     public static Verbosity verbosity() {
         return verbosity;
     }
 
-    public interface EventLogHandler extends Consumer<JkEvent> {
+    public interface EventLogHandler extends Consumer<JkLogEvent> {
 
         PrintStream outStream();
 

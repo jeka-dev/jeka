@@ -9,7 +9,7 @@ import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkLocator;
 
 import org.jerkar.api.utils.JkUtilsIO;
@@ -46,8 +46,8 @@ class JUnit4TestLauncher {
         final JkClassLoader classloader = JkClassLoader.of(classes.iterator().next());
         final Class[] classArray = JkUtilsIterable.arrayOf(classes, Class.class);
         classloader.addEntry(JkLocator.jerkarJarPath());
-        if (JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE) {
-            JkEvent.trace(JkTestSuiteResult.class, "Launching test using class loader : " + classloader.toString());
+        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
+            JkLog.trace(JkTestSuiteResult.class, "Launching test using class loader : " + classloader.toString());
         }
         return classloader.invokeStaticMethod(true, JUnit4TestExecutor.class.getName(),
                 "launchInProcess", classArray, logRunningTest, reportDetail, reportDir, true);

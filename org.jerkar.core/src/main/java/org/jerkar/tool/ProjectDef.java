@@ -6,7 +6,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
@@ -38,7 +38,7 @@ final class ProjectDef {
             } else {
                 desc = "No description available";
             }
-            JkEvent.info(this,classDef.getName() + defaultMessage + " : " + desc);
+            JkLog.info(this,classDef.getName() + defaultMessage + " : " + desc);
             i++;
         }
     }

@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.*;
 import org.jerkar.tool.PluginDictionary.PluginDescription;
 import org.jerkar.tool.ProjectDef.BuildClassDef;
@@ -31,7 +31,7 @@ final class HelpDisplayer {
 
         sb.append(BuildClassDef.of(build).description("", true));
         sb.append("\nType 'jerkar help -plugins' to get help on plugins available in the classpath.\n");
-        JkEvent.info(HelpDisplayer.class, sb.toString());
+        JkLog.info(HelpDisplayer.class, sb.toString());
     }
 
     static void help(JkBuild build, Path xmlFile) {
@@ -47,12 +47,12 @@ final class HelpDisplayer {
             } catch (final IOException e) {
                 throw JkUtilsThrowable.unchecked(e);
             }
-            JkEvent.info(HelpDisplayer.class, "Xml help file generated at " + xmlFile);
+            JkLog.info(HelpDisplayer.class, "Xml help file generated at " + xmlFile);
         }
     }
 
     static void helpPlugins() {
-        JkEvent.info(HelpDisplayer.class, helpPluginsDescription());
+        JkLog.info(HelpDisplayer.class, helpPluginsDescription());
     }
 
     private static String helpPluginsDescription() {

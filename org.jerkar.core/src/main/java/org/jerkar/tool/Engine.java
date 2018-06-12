@@ -8,7 +8,7 @@ import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaCompiler;
-import org.jerkar.api.system.JkEvent;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsPath;
@@ -72,29 +72,29 @@ final class Engine {
      */
     void execute(JkInit init) {
         this.buildDependencies = this.buildDependencies.andScopeless(init.commandLine().dependencies());
-        JkEvent.start(this,"Compiling and instantiating build class");
+        JkLog.start(this,"Compiling and instantiating build class");
         JkPathSequence runtimeClasspath = compile();
         if (!init.commandLine().dependencies().isEmpty()) {
-            JkEvent.start(this,"Grab dependencies specified in command line");
+            JkLog.start(this,"Grab dependencies specified in command line");
             final JkPathSequence cmdPath = pathOf(init.commandLine().dependencies());
             runtimeClasspath = runtimeClasspath.andManyFirst(cmdPath);
-            if (JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE) {
-                JkEvent.end(this, "Command line extra path : " + cmdPath);
+            if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
+                JkLog.end(this, "Command line extra path : " + cmdPath);
             } else {
-                JkEvent.end(this, "");
+                JkLog.end(this, "");
             }
         }
-        JkEvent.info(this,"Instantiating and configuring build class");
+        JkLog.info(this,"Instantiating and configuring build class");
         final JkBuild build = getBuildInstance(init, runtimeClasspath);
         if (build == null) {
             throw new JkException("Can't find or guess any build class for project hosted in " + this.projectBaseDir
                     + " .\nAre you sure this directory is a buildable project ?");
         }
-        JkEvent.end(this, "");
+        JkLog.end(this, "");
         try {
             this.launch(build, init.commandLine());
         } catch (final RuntimeException e) {
-            JkEvent.error(this,"Engine " + projectBaseDir + " failed");
+            JkLog.error(this,"Engine " + projectBaseDir + " failed");
             throw e;
         }
     }
@@ -125,22 +125,22 @@ final class Engine {
         }
         yetCompiledProjects.add(this.projectBaseDir);
         preCompile(); // This enrich dependencies
-        JkEvent.start(this,"Compiling build classes for project " + this.projectBaseDir.getFileName().toString());
-        JkEvent.start(this,"Resolving compilation classpath");
+        JkLog.start(this,"Compiling build classes for project " + this.projectBaseDir.getFileName().toString());
+        JkLog.start(this,"Resolving compilation classpath");
         final JkDependencyResolver buildClassDependencyResolver = getBuildDefDependencyResolver();
         final JkPathSequence buildPath = buildClassDependencyResolver.get(this.buildDefDependencies());
         path.addAll(buildPath.entries());
         path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
-        JkEvent.end(this, "");
+        JkLog.end(this, "");
         this.compileBuild(JkPathSequence.ofMany(path));
         path.add(this.resolver.buildClassDir);
-        JkEvent.end(this, "");
+        JkLog.end(this, "");
     }
 
     private JkBuild getBuildInstance(JkInit init, JkPathSequence runtimePath) {
         final JkClassLoader classLoader = JkClassLoader.current();
         classLoader.addEntries(runtimePath);
-        JkEvent.trace(this,"Setting build execution classpath to : " + classLoader.childClasspath());
+        JkLog.trace(this,"Setting build execution classpath to : " + classLoader.childClasspath());
         final JkBuild build = resolver.resolve(init.buildClassHint());
         if (build == null) {
             return null;
@@ -149,7 +149,7 @@ final class Engine {
             build.setBuildDefDependencyResolver(this.buildDefDependencies(), getBuildDefDependencyResolver());
             return build;
         } catch (final RuntimeException e) {
-            JkEvent.error(this,"Engine " + projectBaseDir + " failed");
+            JkLog.error(this,"Engine " + projectBaseDir + " failed");
             throw e;
         }
     }
@@ -179,7 +179,7 @@ final class Engine {
     private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
         JkPathSequence pathSequence = JkPathSequence.of();
         if (!this.rootsOfImportedBuilds.isEmpty()) {
-            JkEvent.info(this,"Compile build classes of dependent projects : "
+            JkLog.info(this,"Compile build classes of dependent projects : "
                     + toRelativePaths(this.projectBaseDir, this.rootsOfImportedBuilds));
         }
         for (final Path file : this.rootsOfImportedBuilds) {
@@ -228,12 +228,12 @@ final class Engine {
     }
 
     private static void runProject(JkBuild build, List<MethodInvocation> invokes) {
-        JkEvent.info(Engine.class,"Executing build for project " + build.baseTree().root().getFileName().toString());
-        JkEvent.info(Engine.class, "Build class : " + build.getClass().getName());
-        JkEvent.info(Engine.class, "Base dir : " + build.baseDir());
+        JkLog.info(Engine.class,"Executing build for project " + build.baseTree().root().getFileName().toString());
+        JkLog.info(Engine.class, "Build class : " + build.getClass().getName());
+        JkLog.info(Engine.class, "Base dir : " + build.baseDir());
         final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
-        if (JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE) {
-            JkEvent.info(Engine.class, JkInit.propsAsString("Field values", displayedOptions));
+        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
+            JkLog.info(Engine.class, JkInit.propsAsString("Field values", displayedOptions));
         }
         for (MethodInvocation methodInvocation : invokes) {
             invokeMethodOnBuildClassOrPlugin(build, methodInvocation);
@@ -260,14 +260,14 @@ final class Engine {
         } catch (final NoSuchMethodException e) {
             throw new JkException("No zero-arg method '" + methodName + "' found in class '" + build.getClass());
         }
-        JkEvent.info(Engine.class,"\nMethod : " + methodName);
+        JkLog.info(Engine.class,"\nMethod : " + methodName);
         final long time = System.nanoTime();
         try {
             JkUtilsReflect.invoke(build, method);
-            JkEvent.info(Engine.class, "Method " + methodName + " success in "
+            JkLog.info(Engine.class, "Method " + methodName + " success in "
                     + JkUtilsTime.durationInSeconds(time) + " seconds.");
         } catch (final RuntimeException e) {
-            JkEvent.info(Engine.class, "Method " + methodName + " failed in " + JkUtilsTime.durationInSeconds(time)
+            JkLog.info(Engine.class, "Method " + methodName + " failed in " + JkUtilsTime.durationInSeconds(time)
                     + " seconds.");
             throw e;
         }
