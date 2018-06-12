@@ -1,19 +1,18 @@
 package org.jerkar.api.java.junit;
 
+import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
+import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.JkUtilsTime;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-
-import org.jerkar.api.java.JkClassLoader;
-import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
-import org.jerkar.api.system.JkEvent;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsTime;
-import org.junit.runner.JUnitCore;
-import org.junit.runner.Result;
 
 /**
  * Class to run test in a separate process.

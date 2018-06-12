@@ -163,9 +163,9 @@ public final class JkEvent implements Serializable {
     }
 
     public static void end(Object emittingInstanceOrClass, String message) {
+        currentNestedTaskLevel--;
         consume(new JkEvent(emittingInstanceOrClass, Type.END_TASK, message));
         removeLastStartTs();
-        currentNestedTaskLevel--;
     }
 
     public static void end(String message) {

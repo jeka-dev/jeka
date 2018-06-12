@@ -49,8 +49,6 @@ class JUnit4TestLauncher {
         if (JkEvent.verbosity() == JkEvent.Verbosity.VERBOSE) {
             JkEvent.trace(JkTestSuiteResult.class, "Launching test using class loader : " + classloader.toString());
         }
-        // initialise JkEvent for the launcher classloader
-        JkEvent.initializeInClassLoader(classloader.classloader());
         return classloader.invokeStaticMethod(true, JUnit4TestExecutor.class.getName(),
                 "launchInProcess", classArray, logRunningTest, reportDetail, reportDir, true);
     }
