@@ -37,7 +37,7 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
 
     public static JkocoJunitEnhancer of(Path destFile) {
         final URL url = JkPluginJacoco.class.getResource("jacocoagent.jar");
-        PrintStream outputStream = JkLog.verbosity() == JkLog.Verbosity.VERBOSE ? JkLog.stream() : null;
+        PrintStream outputStream = JkLog.verbosity() == JkLog.Verbosity.VERBOSE ? new PrintStream(JkLog.stream()) : null;
         final Path file = JkUtilsIO.copyUrlContentToCacheFile(url, outputStream, JkClassLoader.urlCacheDir());
         return new JkocoJunitEnhancer(file, true, destFile);
     }

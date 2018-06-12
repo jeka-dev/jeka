@@ -3,10 +3,9 @@ package org.jerkar.tool;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.LinkedList;
+import java.util.function.Supplier;
 
 class LogHandler implements JkLog.EventLogHandler {
 
@@ -20,9 +19,9 @@ class LogHandler implements JkLog.EventLogHandler {
 
     //private final LinkedList<Boolean> hasLoggedSinceStart = new LinkedList<>();
 
-    private final PrintStream out = new MarginStream(System.out);
+    private final MarginStream out = new MarginStream(System.out);
 
-    private final PrintStream err = new MarginStream(System.err);
+    private final OutputStream err = new MarginStream(System.err);
 
 
     @Override
@@ -34,8 +33,13 @@ class LogHandler implements JkLog.EventLogHandler {
     //        if (!hasLoggedSinceStart.getLast()) {
     //            newLine = false;
     //        } else {
-                sb.append(BOX_DRAWINGS_LIGHT_UP_AND_RIGHT);
+
      //       }
+            if (out.lastByteWasNewLine) {
+                //newLine = false;
+                //sb.append("\b");
+            }
+            sb.append(BOX_DRAWINGS_LIGHT_UP_AND_RIGHT);
             sb.append(" done in " + (JkLog.getElapsedNanoSecondsFromStartOfCurrentTask() / 1000000) + " milliseconds. ")
                     .append(message);
             message = sb.toString();
@@ -51,11 +55,20 @@ class LogHandler implements JkLog.EventLogHandler {
                 markHasLoadedSinceStart();
             } */
         }
-        final PrintStream printStream = event.type() == JkLog.Type.ERROR ? err : out;
+        final OutputStream stream = event.type() == JkLog.Type.ERROR ? err : out;
         if (newLine) {
-            printStream.println();
+            try {
+                stream.write(LINE_SEPARATOR);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
-        printStream.print(message);
+        try {
+            stream.write(message.getBytes());
+            stream.flush();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
         /*
         if (event.type() == JkLog.Type.START_TASK) {
             hasLoggedSinceStart.add(Boolean.FALSE);
@@ -74,57 +87,74 @@ class LogHandler implements JkLog.EventLogHandler {
 
 
     @Override
-    public PrintStream outStream() {
-        return out;
+    public Supplier<OutputStream> outStreamSupplier() {
+        return () -> new IntroWithNewLineStream(out);
     }
 
     @Override
-    public PrintStream errorStream() {
-        return err;
+    public Supplier<OutputStream> errorStreamSupplier() {
+        return () -> err;
     }
 
-    private class MarginStream extends PrintStream {
+    private static class MarginStream extends OutputStream {
 
-        public MarginStream(PrintStream delegate) {
-            super(delegate);
+        private final OutputStream delegate;
+
+        private boolean lastByteWasNewLine;
+
+        public MarginStream(OutputStream delegate) {
+            super();
+            this.delegate = delegate;
         }
 
         @Override
-        public void write(byte[] bytes, int off, int len) {
-            if (len == 0) {
-                return;
-            }
-           // markHasLoadedSinceStart();
-            try {
-                synchronized (this) {
-                    for (int i = 0 ; i < len ; i++) {
-                        byte b = bytes[off + i];
-                        out.write(b);
-                        if (b == LINE_SEPARATOR) {
-                            writeLeftMargin();
-                        }
-                    }
-                    this.flush();
+        public void write(int b) throws IOException {
+            delegate.write(b);
+            if (b == LINE_SEPARATOR) {
+                for (int j = 0; j < JkLog.currentNestedLevel(); j++) {
+                    delegate.write(MARGIN_UNIT);
                 }
-            }
-            catch (InterruptedIOException x) {
-                Thread.currentThread().interrupt();
-            }
-            catch (IOException x) {
-                setError();
+                lastByteWasNewLine = true;
+            } else {
+                lastByteWasNewLine = false;
             }
         }
 
-        private void writeLeftMargin()  {
-            for (int j = 0; j < JkLog.currentNestedLevel(); j++) {
-                try {
-                    out.write(MARGIN_UNIT);
-                } catch (IOException e) {
-                    setError();
-                }
-            }
+        @Override
+        public void flush() throws IOException {
+            delegate.flush();
         }
 
     }
+
+    private static final class IntroWithNewLineStream extends OutputStream {
+
+        private final OutputStream delegate;
+
+        private boolean firstByte = true;
+
+        public IntroWithNewLineStream(OutputStream delegate) {
+            super();
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            if (firstByte) {
+                delegate.write(LINE_SEPARATOR);
+                firstByte = false;
+            }
+            delegate.write(b);
+        }
+
+        @Override
+        public void flush() throws IOException {
+            delegate.flush();
+        }
+
+
+    }
+
+
 
 }

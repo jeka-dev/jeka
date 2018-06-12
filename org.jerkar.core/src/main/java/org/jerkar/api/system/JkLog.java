@@ -5,11 +5,14 @@ import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
+import javax.xml.ws.Provider;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public final class JkLog implements Serializable {
 
@@ -23,9 +26,9 @@ public final class JkLog implements Serializable {
 
     private static Consumer<JkLogEvent> consumer;
 
-    private static PrintStream stream = JkUtilsIO.nopPrintStream();
+    private static Supplier<OutputStream> stream = JkUtilsIO::nopPrintStream;
 
-    private static PrintStream errorStream = JkUtilsIO.nopPrintStream();
+    private static Supplier<OutputStream> errorStream = JkUtilsIO::nopOuputStream;
 
     private static Verbosity verbosity = Verbosity.NORMAL;
 
@@ -39,8 +42,8 @@ public final class JkLog implements Serializable {
 
     public static void register(EventLogHandler eventLogHandler) {
         consumer = eventLogHandler;
-        stream = eventLogHandler.outStream();
-        errorStream = eventLogHandler.errorStream();
+        stream = eventLogHandler.outStreamSupplier();
+        errorStream = eventLogHandler.errorStreamSupplier();
     }
 
     public static void setVerbosity(Verbosity verbosityArg) {
@@ -93,12 +96,12 @@ public final class JkLog implements Serializable {
         }
     }
 
-    public static PrintStream stream() {
-        return stream;
+    public static OutputStream stream() {
+        return stream.get();
     }
 
-    public static PrintStream errorStream() {
-        return errorStream;
+    public static OutputStream errorStream() {
+        return errorStream.get();
     }
 
     public static void info(Object emittingInstanceOrClass, String message) {
@@ -235,9 +238,9 @@ public final class JkLog implements Serializable {
 
     public interface EventLogHandler extends Consumer<JkLogEvent> {
 
-        PrintStream outStream();
+        Supplier<OutputStream> outStreamSupplier();
 
-        PrintStream errorStream();
+        Supplier<OutputStream> errorStreamSupplier();
 
     }
 

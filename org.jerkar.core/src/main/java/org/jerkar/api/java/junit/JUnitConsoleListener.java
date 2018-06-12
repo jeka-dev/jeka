@@ -18,8 +18,8 @@ class JUnitConsoleListener extends RunListener {
         JkLog.start(this, "Running " + description.getClassName() + "." + description.getMethodName());
         out = System.out;
         err = System.err;
-        System.setOut(JkLog.stream());
-        System.setErr(JkLog.errorStream());
+        System.setOut(new PrintStream(JkLog.stream()));
+        System.setErr(new PrintStream(JkLog.errorStream()));
     }
 
     @Override
@@ -36,12 +36,12 @@ class JUnitConsoleListener extends RunListener {
 
     @Override
     public void testAssumptionFailure(Failure failure) {
-        failure.getException().printStackTrace(JkLog.stream());
+        failure.getException().printStackTrace(new PrintStream(JkLog.stream()));
     }
 
     @Override
     public void testFailure(Failure failure) {
-        failure.getException().printStackTrace(JkLog.stream());
+        failure.getException().printStackTrace(new PrintStream(JkLog.stream()));
     }
 
 }
