@@ -16,7 +16,7 @@ import org.w3c.dom.Element;
 
 final class HelpDisplayer {
 
-    private static final JkBuild DUMMY = new JkBuild();
+    private static final JkBuild DUMMY = JkBuild.of(JkBuild.class);
 
     static void help(JkBuild build) {
         if (JkOptions.containsKey("plugins")) {

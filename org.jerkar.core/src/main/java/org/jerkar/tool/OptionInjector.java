@@ -5,13 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
@@ -21,23 +15,10 @@ final class OptionInjector {
     private static final String UNHANDLED_TYPE = "";
 
     public static void inject(Object target, Map<String, String> props) {
-        final List<Field> fields = involvedFields(target, props);
-        // final List<Field> fields = optionField(target.getClass());
+        final List<Field> fields = Arrays.asList(target.getClass().getFields());
         for (final Field field : fields) {
             inject(target, field, props);
         }
-    }
-
-    private static List<Field> involvedFields(Object inspected, Map<String, String> props) {
-        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(inspected.getClass(), true);
-        final Set<String> candidateFields = candidateFields(props);
-        final List<Field> result = new LinkedList<>();
-        for (final Field field : fields) {
-            if (candidateFields.contains(field.getName()) && injectable(field)) {
-                result.add(field);
-            }
-        }
-        return result;
     }
 
     private static boolean injectable(Field field) {
