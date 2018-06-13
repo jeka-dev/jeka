@@ -411,8 +411,8 @@ public final class JkUtilsReflect {
      * Returns all fields declared in the class passed as argument or accept its
      * super classes annotated with the supplied annotation.
      */
-    public static List<Field> getAllDeclaredField(Class<?> clazz,
-            Class<? extends Annotation> annotationClass) {
+    public static List<Field> getAllDeclaredFields(Class<?> clazz,
+                                                   Class<? extends Annotation> annotationClass) {
         final List<Field> result = new LinkedList<>();
         for (final Field field : clazz.getDeclaredFields()) {
             final Object option = field.getAnnotation(annotationClass);
@@ -422,7 +422,7 @@ public final class JkUtilsReflect {
         }
         final Class<?> superClass = clazz.getSuperclass();
         if (superClass != null) {
-            result.addAll(getAllDeclaredField(superClass, annotationClass));
+            result.addAll(getAllDeclaredFields(superClass, annotationClass));
         }
         return result;
     }
@@ -431,12 +431,12 @@ public final class JkUtilsReflect {
      * Returns all fields declared in the class passed as argument or accept its
      * super classes.
      */
-    public static List<Field> getAllDeclaredField(Class<?> clazz, boolean includeSuperClass) {
+    public static List<Field> getAllDeclaredFields(Class<?> clazz, boolean includeSuperClass) {
         final List<Field> result = new LinkedList<>();
         Collections.addAll(result, clazz.getDeclaredFields());
         final Class<?> superClass = clazz.getSuperclass();
         if (superClass != null && includeSuperClass) {
-            result.addAll(getAllDeclaredField(superClass, true));
+            result.addAll(getAllDeclaredFields(superClass, true));
         }
         return result;
     }

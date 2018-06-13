@@ -29,7 +29,7 @@ final class OptionInjector {
     }
 
     private static List<Field> involvedFields(Object inspected, Map<String, String> props) {
-        final List<Field> fields = JkUtilsReflect.getAllDeclaredField(inspected.getClass(), true);
+        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(inspected.getClass(), true);
         final Set<String> candidateFields = candidateFields(props);
         final List<Field> result = new LinkedList<>();
         for (final Field field : fields) {
@@ -172,7 +172,7 @@ final class OptionInjector {
     }
 
     private static Map<String, String> injectedFields(String context, Object inspected) {
-        final List<Field> fields = JkUtilsReflect.getAllDeclaredField(inspected.getClass(), true);
+        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(inspected.getClass(), true);
         fields.removeIf(field -> !injectable(field));
         final Map<String, String> result = new TreeMap<>();
         for (final Field field : fields) {

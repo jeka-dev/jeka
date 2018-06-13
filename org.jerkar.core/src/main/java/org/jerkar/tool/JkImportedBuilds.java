@@ -100,7 +100,7 @@ public final class JkImportedBuilds {
     @SuppressWarnings("unchecked")
     private static List<JkBuild> getDirectImportedBuilds(JkBuild masterBuild) {
         final List<JkBuild> result = new LinkedList<>();
-        final List<Field> fields = JkUtilsReflect.getAllDeclaredField(masterBuild.getClass(), JkImportBuild.class);
+        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterBuild.getClass(), JkImportBuild.class);
 
         for (final Field field : fields) {
             final JkImportBuild jkProject = field.getAnnotation(JkImportBuild.class);

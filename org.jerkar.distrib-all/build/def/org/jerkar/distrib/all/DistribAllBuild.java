@@ -28,7 +28,7 @@ class DistribAllBuild extends JkBuild {
     @JkImportBuild("../org.jerkar.plugins-jacoco")
     PluginsJacocoBuild jacocoPluginBuild;
 
-    boolean testSamples = false;
+    public boolean testSamples = false;
 
     public boolean javadoc = true;
 

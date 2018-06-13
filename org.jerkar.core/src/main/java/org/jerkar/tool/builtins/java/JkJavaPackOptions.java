@@ -25,7 +25,7 @@ public class JkJavaPackOptions {
     public boolean sources;
 
     /** When true, tests classes and sources are packed in jars.*/
-    @JkDoc("If true, tests jar is added in the list of artifact to produce..")
+    @JkDoc("If true, tests jar is added in the list of artifact to produce.")
     public boolean tests;
 
     /**

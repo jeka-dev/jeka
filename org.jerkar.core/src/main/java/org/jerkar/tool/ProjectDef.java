@@ -100,7 +100,7 @@ final class ProjectDef {
 
         private static List<NameAndField> options(Class<?> clazz, String prefix, boolean root, Class<?> rClass) {
             final List<NameAndField> result = new LinkedList<>();
-            for (final Field field : JkUtilsReflect.getAllDeclaredField(clazz, JkDoc.class)) {
+            for (final Field field : clazz.getFields()) {
                 final Class<?> rootClass = root ? field.getDeclaringClass() : rClass;
                 if (!hasSubOption(field)) {
                     result.add(new NameAndField(prefix + field.getName(), field, rootClass));
@@ -114,7 +114,7 @@ final class ProjectDef {
         }
 
         private static boolean hasSubOption(Field field) {
-            return !JkUtilsReflect.getAllDeclaredField(field.getType(), JkDoc.class).isEmpty();
+            return !JkUtilsReflect.getAllDeclaredFields(field.getType(), JkDoc.class).isEmpty();
         }
 
         String description(String prefix, boolean withHeader) {
@@ -261,10 +261,6 @@ final class ProjectDef {
             return 1;
         }
 
-        String serialize() {
-            return name + '|' + description + '|' + declaringClass.getName();
-        }
-
         Element toXmlElement(Document document) {
             final Element methodEl = document.createElement("method");
             final Element nameEl = document.createElement("name");
@@ -349,9 +345,10 @@ final class ProjectDef {
 
 
         String description(String prefix, String margin) {
+            String desc = description != null ? description : "No description available.";
             StringBuilder builder = new StringBuilder();
             builder.append(margin).append("  ").append(prefix).append(name).append(" (").append(type()).append( ", default : ").append(defaultValue)
-                    .append(") : ").append(description.replace("\n", " ")).append("\n");
+                    .append(") : ").append(desc.replace("\n", " ")).append("\n");
             return builder.toString();
         }
 
