@@ -171,15 +171,15 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     });
 
     public JkJavaProjectMaker compile() {
-        JkLog.start(this, "Compiling");
-        preCompile.run();
-        sourceGenerator.run();
-        resourceGenerator.run();
-        compileRunner.run();
-        resourceProcessor.run();
-        postCompile.run();
-        this.status.compileDone = true;
-        JkLog.end(this, "");
+        JkLog.execute(this, "Compiling", () -> {
+            preCompile.run();
+            sourceGenerator.run();
+            resourceGenerator.run();
+            compileRunner.run();
+            resourceProcessor.run();
+            postCompile.run();
+            this.status.compileDone = true;
+        });
         return this;
     }
 
@@ -220,24 +220,23 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     });
 
     public JkJavaProjectMaker test() {
-        JkLog.start(this,"Running unit tests");
-        if (this.project.getSourceLayout().tests().count(0, false) == 0) {
-            JkLog.info(this,"No unit test found in : "
-                    + this.project.getSourceLayout().tests());
-            JkLog.end(this, "");
-            return this;
-        }
-        if (!this.status.compileDone) {
-            compile();
-        }
-        preTest.run();
-        testCompileRunner.run();
-        testResourceGenerator.run();
-        testResourceProcessor.run();
-        testExecutor.run();
-        postTest.run();
-        this.status.unitTestDone = true;
-        JkLog.end(this, "");
+        JkLog.execute(this,"Running unit tests", () -> {
+            if (this.project.getSourceLayout().tests().count(0, false) == 0) {
+                JkLog.info(this, "No unit test found in : "
+                        + this.project.getSourceLayout().tests());
+                return;
+            }
+            if (!this.status.compileDone) {
+                compile();
+            }
+            preTest.run();
+            testCompileRunner.run();
+            testResourceGenerator.run();
+            testResourceProcessor.run();
+            testExecutor.run();
+            postTest.run();
+            this.status.unitTestDone = true;
+        });
         return this;
     }
 
@@ -476,9 +475,8 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     public void makeArtifact(JkArtifactId artifactId) {
         if (artifactProducers.containsKey(artifactId)) {
-            JkLog.start(this,"Producing artifact file " + getArtifactFile(artifactId).getFileName());
-            this.artifactProducers.get(artifactId).run();
-            JkLog.end(this, "");
+            JkLog.execute(this,"Producing artifact file " + getArtifactFile(artifactId).getFileName(),
+                    this.artifactProducers.get(artifactId));
         } else {
             throw new IllegalArgumentException("No artifact " + artifactId + " is defined on project " + this.project);
         }

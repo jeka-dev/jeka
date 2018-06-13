@@ -229,28 +229,29 @@ public final class JkJavaProcess {
         }
 
         command.addAll(Arrays.asList(arguments));
-        JkLog.start(this, "Starting java program : " + execPart);
-        JkLog.info(this, String.join("\n", command));
-        final int result;
-        try {
-            final Process process = processBuilder(command, optionAndEnv.env).start();
+        Runnable task = () -> {
+            JkLog.info(this, String.join("\n", command));
+            final int result;
+            try {
+                final Process process = processBuilder(command, optionAndEnv.env).start();
 
-            final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
-                    process.getInputStream(), JkLog.stream());
-            final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
-                    process.getErrorStream(), JkLog.errorStream());
-            process.waitFor();
-            outputStreamGobbler.stop();
-            errorStreamGobbler.stop();
-            result = process.exitValue();
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
-        if (result != 0) {
-            throw new IllegalStateException("Process terminated in error : exit value = " + result
-                    + ".");
-        }
-        JkLog.end(this, "");
+                final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
+                        process.getInputStream(), JkLog.stream());
+                final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
+                        process.getErrorStream(), JkLog.errorStream());
+                process.waitFor();
+                outputStreamGobbler.stop();
+                errorStreamGobbler.stop();
+                result = process.exitValue();
+            } catch (final Exception e) {
+                throw new RuntimeException(e);
+            }
+            if (result != 0) {
+                throw new IllegalStateException("Process terminated in error : exit value = " + result
+                        + ".");
+            }
+        };
+        JkLog.execute(this, "Starting java program : " + execPart, task);
     }
 
     private OptionAndEnv optionsAndEnv() {

@@ -4,6 +4,10 @@ import org.apache.ivy.util.AbstractMessageLogger;
 import org.apache.ivy.util.Message;
 import org.jerkar.api.system.JkLog;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.UncheckedIOException;
+
 class IvyMessageLogger extends AbstractMessageLogger {
 
     @Override
@@ -38,12 +42,12 @@ class IvyMessageLogger extends AbstractMessageLogger {
 
     @Override
     public void doProgress() {
-        JkLog.progress(this, ".");
+        new PrintStream(JkLog.stream()).print(".");
     }
 
     @Override
     public void doEndProgress(String msg) {
-        JkLog.progress(this, msg);
+        new PrintStream(JkLog.stream()).print(msg);
     }
 
 }

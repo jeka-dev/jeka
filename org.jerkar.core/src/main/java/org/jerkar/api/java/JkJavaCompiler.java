@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticListener;
@@ -136,30 +137,32 @@ public final class JkJavaCompiler {
             message = message + " using options : " + JkUtilsString
                     .join(options, " ");
         }
-        JkLog.start(this, message);
-        if (compileSpec.getSourceFiles().isEmpty()) {
-            JkLog.warn(this,"No source to compile");
-            JkLog.end(this, "");
-            return true;
-        }
-        final boolean result;
-        if (this.fork == null) {
-            final Iterable<? extends JavaFileObject> javaFileObjects = fileManager
-                    .getJavaFileObjectsFromFiles(JkUtilsPath.toFiles(compileSpec.getSourceFiles()));
-            final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.stream()),
-                    null, new JkDiagnosticListener(), options, null, javaFileObjects);
-            result = task.call();
-        } else {
-            result = runOnFork(compileSpec);
-        }
-        JkLog.end(this, "");
-        if (!result) {
-            if (failOnError) {
-                throw new IllegalStateException("Compilation failed with options " + options);
+        final AtomicBoolean result = new AtomicBoolean();
+        Runnable run = () -> {
+            if (compileSpec.getSourceFiles().isEmpty()) {
+                JkLog.warn(this, "No source to compile");
+                result.set(true);
+                return;
             }
-            return false;
-        }
-        return true;
+            if (this.fork == null) {
+                final Iterable<? extends JavaFileObject> javaFileObjects = fileManager
+                        .getJavaFileObjectsFromFiles(JkUtilsPath.toFiles(compileSpec.getSourceFiles()));
+                final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.stream()),
+                        null, new JkDiagnosticListener(), options, null, javaFileObjects);
+                result.set(task.call());
+            } else {
+                result.set(runOnFork(compileSpec));
+            }
+            if (!result.get()) {
+                if (failOnError) {
+                    throw new IllegalStateException("Compilation failed with options " + options);
+                }
+                result.set(false);
+            }
+            result.set(true);
+        };
+        JkLog.execute(this, message, run);
+        return result.get();
     }
 
     private boolean runOnFork(JkJavaCompileSpec compileSpec) {

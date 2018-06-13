@@ -135,9 +135,7 @@ public class JkComputedDependency implements JkFileDependency {
     @Override
     public List<Path> paths() {
         if (this.hasMissingFilesOrEmptyDirs()) {
-            JkLog.start(this, "Building dependency : " + this);
-            runnable.run();
-            JkLog.end(this, "");
+            JkLog.execute(this, "Building dependency : " + this, runnable);
         }
         final Set<Path> missingFiles = this.missingFilesOrEmptyDirs();
         if (!missingFiles.isEmpty()) {

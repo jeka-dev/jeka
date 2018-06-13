@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIO.StreamGobbler;
@@ -203,36 +204,33 @@ public final class JkProcess implements Runnable {
     public int runSync() {
         final List<String> commands = new LinkedList<>();
         commands.add(this.command);
-        // if (param.contains(" ")) {
-        //     commands.add("\""+ param + "\"");
-        //} else {
-        //}
         commands.addAll(parameters);
-        JkLog.start(this,"Starting program : " + commands.toString());
-        final int result;
-        try {
-            final ProcessBuilder processBuilder = processBuilder(commands);
-            if (workingDir != null) {
-                processBuilder.directory(this.workingDir.toAbsolutePath().normalize().toFile());
+        final AtomicInteger result = new AtomicInteger();
+        Runnable runnable = () -> {
+            try {
+                final ProcessBuilder processBuilder = processBuilder(commands);
+                if (workingDir != null) {
+                    processBuilder.directory(this.workingDir.toAbsolutePath().normalize().toFile());
+                }
+                final Process process = processBuilder.start();
+                final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
+                        process.getInputStream(), JkLog.stream());
+                final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
+                        process.getErrorStream(), JkLog.errorStream());
+                process.waitFor();
+                outputStreamGobbler.stop();
+                errorStreamGobbler.stop();
+                result.set(process.exitValue());
+                if (result.get() != 0 && failOnError) {
+                    throw new IllegalStateException("The process has returned with error code "
+                            + result);
+                }
+            } catch (final Exception e) {
+                throw new RuntimeException(e);
             }
-            final Process process = processBuilder.start();
-            final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
-                    process.getInputStream(), JkLog.stream());
-            final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
-                    process.getErrorStream(), JkLog.errorStream());
-            process.waitFor();
-            outputStreamGobbler.stop();
-            errorStreamGobbler.stop();
-            result = process.exitValue();
-            if (result != 0 && failOnError) {
-                throw new IllegalStateException("The process has returned with error code "
-                        + result);
-            }
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
-        JkLog.end(this, " process exit with return code : " + result);
-        return result;
+        };
+        JkLog.execute(this,"Starting program : " + commands.toString(), runnable);
+        return result.get();
     }
 
     private ProcessBuilder processBuilder(List<String> command) {

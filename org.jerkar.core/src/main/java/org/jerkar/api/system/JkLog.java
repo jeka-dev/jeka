@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 public final class JkLog implements Serializable {
 
     public enum Type {
-        INFO, WARN, ERROR, TRACE, PROGRESS, START_TASK, END_TASK;
+        INFO, WARN, ERROR, TRACE, PROGRESS, TASK, START_TASK, END_TASK;
     }
 
     public enum Verbosity {
@@ -26,9 +26,9 @@ public final class JkLog implements Serializable {
 
     private static Consumer<JkLogEvent> consumer;
 
-    private static Supplier<OutputStream> stream = JkUtilsIO::nopPrintStream;
+    private static OutputStream stream = JkUtilsIO.nopPrintStream();
 
-    private static Supplier<OutputStream> errorStream = JkUtilsIO::nopOuputStream;
+    private static OutputStream errorStream = JkUtilsIO.nopOuputStream();
 
     private static Verbosity verbosity = Verbosity.NORMAL;
 
@@ -42,8 +42,8 @@ public final class JkLog implements Serializable {
 
     public static void register(EventLogHandler eventLogHandler) {
         consumer = eventLogHandler;
-        stream = eventLogHandler.outStreamSupplier();
-        errorStream = eventLogHandler.errorStreamSupplier();
+        stream = eventLogHandler.outStream();
+        errorStream = eventLogHandler.errorStream();
     }
 
     public static void setVerbosity(Verbosity verbosityArg) {
@@ -59,21 +59,6 @@ public final class JkLog implements Serializable {
                             + "Please, use 'end' only to mention that the previous 'start' activity is done.");
         }
         return System.nanoTime() - times.getLast();
-    }
-
-    private static void removeLastStartTs() {
-        final LinkedList<Long> times = START_TIMES.get();
-        if (times.isEmpty()) {
-            throw new IllegalStateException(
-                    "This 'done' do no match to any 'start'. "
-                            + "Please, use 'done' only to mention that the previous 'start' activity is done.");
-        }
-        times.removeLast();
-    }
-
-    private static void startTimer() {
-        LinkedList<Long> times = START_TIMES.get();
-        times.add(System.nanoTime());
     }
 
     public static int currentNestedLevel() {
@@ -97,15 +82,15 @@ public final class JkLog implements Serializable {
     }
 
     public static OutputStream stream() {
-        return stream.get();
+        return stream;
     }
 
     public static OutputStream errorStream() {
-        return errorStream.get();
+        return errorStream;
     }
 
     public static void info(Object emittingInstanceOrClass, String message) {
-        consume(new JkLogEvent(emittingInstanceOrClass, Type.INFO, message));
+        consume(JkLogEvent.regular(emittingInstanceOrClass, Type.INFO, message));
     }
 
     public static void info(String message) {
@@ -113,7 +98,7 @@ public final class JkLog implements Serializable {
     }
 
     public static void warn(Object emittingInstanceOrClass, String message) {
-        consume(new JkLogEvent(emittingInstanceOrClass, Type.WARN, message));
+        consume(JkLogEvent.regular(emittingInstanceOrClass, Type.WARN, message));
     }
 
     public static void warn(String message) {
@@ -122,7 +107,7 @@ public final class JkLog implements Serializable {
 
     public static void trace(Object emittingInstanceOrClass, String message) {
         if (verbosity() == Verbosity.VERBOSE) {
-            consume(new JkLogEvent(emittingInstanceOrClass, Type.TRACE, message));
+            consume(JkLogEvent.regular(emittingInstanceOrClass, Type.TRACE, message));
         }
     }
 
@@ -131,37 +116,27 @@ public final class JkLog implements Serializable {
     }
 
     public static void error(Object emittingInstanceOrClass, String message) {
-        consume(new JkLogEvent(emittingInstanceOrClass, Type.ERROR, message));
+        consume(JkLogEvent.regular(emittingInstanceOrClass, Type.ERROR, message));
     }
 
     public static void error(String message) {
         error(null,message);
     }
 
-    public static void start(Object emittingInstanceOrClass, String message) {
-        startTimer();
-        consume(new JkLogEvent(emittingInstanceOrClass, Type.START_TASK, message));
+    public static void execute(Object emmittingClassOrInstance, String message, Runnable task) {
+        consume(JkLogEvent.regular(emmittingClassOrInstance, Type.START_TASK, message));
         currentNestedTaskLevel++;
-    }
-
-    public static void start(String message) {
-        start(null, message);
-    }
-
-    public static void end(Object emittingInstanceOrClass, String message) {
+        final long startTs = System.nanoTime();
+        task.run();
+        long durationMs = (System.nanoTime() - startTs) / 1000000;
         currentNestedTaskLevel--;
-        consume(new JkLogEvent(emittingInstanceOrClass, Type.END_TASK, message));
-        removeLastStartTs();
+        consume((JkLogEvent.endTask(emmittingClassOrInstance, durationMs)));
+
     }
 
-    public static void end(String message) {
-        end(null, message);
+    public static void execute( String message, Runnable task) {
+        execute(null, message, task);
     }
-
-    public static void progress(Object emittingInstanceOrClass, String unitProgressSymbol) {
-        progress(null, unitProgressSymbol);
-    }
-
 
     private static Object emittingClass(Object emittingInstanceOrClass) {
         if (emittingInstanceOrClass == null) {
@@ -180,7 +155,7 @@ public final class JkLog implements Serializable {
     }
 
     private static void consume(Object event) {
-        if (event.getClass().getClassLoader() != consumer.getClass().getClassLoader()) {
+        if (event.getClass().getClassLoader() != consumer.getClass().getClassLoader()) {  // survive to classloader change
             final Object evt = JkUtilsIO.cloneBySerialization(event, consumer.getClass().getClassLoader());
             try {
                 Method accept = consumer.getClass().getMethod("accept", evt.getClass());
@@ -196,15 +171,20 @@ public final class JkLog implements Serializable {
 
     public static class JkLogEvent implements Serializable {
 
-        private JkLogEvent(String emittingClassName, Type type, String message, int nestedLevel) {
+        private JkLogEvent(String emittingClassName, Type type, String message, Runnable task, long duration) {
             this.emittingClassName = emittingClassName;
             this.type = type;
             this.message = message;
-            this.nestedLevel = nestedLevel;
+            this.task = task;
+            this.duration = duration;
         }
 
-        private JkLogEvent(Object emittingInstanceOrClass, Type type, String message) {
-            this(emittingInstance(emittingInstanceOrClass), type, message, currentNestedTaskLevel);
+        static JkLogEvent regular(Object emittingInstanceOrClass, Type type, String message) {
+            return new JkLogEvent(emittingInstance(emittingInstanceOrClass), type, message, null, 0);
+        }
+
+        static JkLogEvent endTask(Object emittingInstanceOrClass, long duration) {
+            return new JkLogEvent(emittingInstance(emittingInstanceOrClass), Type.END_TASK, "", null, duration);
         }
 
         private final String emittingClassName; // In case it is emitted from a static method
@@ -213,7 +193,9 @@ public final class JkLog implements Serializable {
 
         private final String message;
 
-        private final int nestedLevel;
+        private final Runnable task;
+
+        private final long duration;
 
         public String emittingClassName() {
             return emittingClassName;
@@ -227,8 +209,12 @@ public final class JkLog implements Serializable {
             return message;
         }
 
-        public int nestedLevel() {
-            return nestedLevel;
+        public Runnable task() {
+            return task;
+        }
+
+        public long durationMs() {
+            return duration;
         }
     }
 
@@ -238,9 +224,9 @@ public final class JkLog implements Serializable {
 
     public interface EventLogHandler extends Consumer<JkLogEvent> {
 
-        Supplier<OutputStream> outStreamSupplier();
+        OutputStream outStream();
 
-        Supplier<OutputStream> errorStreamSupplier();
+        OutputStream errorStream();
 
     }
 

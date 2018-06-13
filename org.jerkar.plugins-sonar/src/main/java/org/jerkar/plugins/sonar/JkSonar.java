@@ -97,13 +97,13 @@ public final class JkSonar {
         if (!enabled) {
             JkLog.info(this,"Sonar analysis skipped.");
         }
-        JkLog.start(this, "Launching Sonar analysis");
-        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-            javaProcess().runClassSync("org.sonar.runner.Main", "-e", "-X");
-        } else {
-            javaProcess().runClassSync("org.sonar.runner.Main", "-e");
-        }
-        JkLog.end(this, "");
+        JkLog.execute(this, "Launching Sonar analysis", () -> {
+            if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
+                javaProcess().runClassSync("org.sonar.runner.Main", "-e", "-X");
+            } else {
+                javaProcess().runClassSync("org.sonar.runner.Main", "-e");
+            }
+        });
     }
 
     public JkSonar enabled(boolean enabled) {

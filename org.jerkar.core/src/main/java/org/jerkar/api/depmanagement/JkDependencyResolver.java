@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.jerkar.api.file.JkPathSequence;
 import org.jerkar.api.system.JkLog;
@@ -133,25 +134,26 @@ public final class JkDependencyResolver {
 
     private JkResolveResult resolveWithInternalResolver(JkDependencies dependencies, JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {
         JkLog.trace(this,"Preparing to resolve dependencies for module " + module);
-        if (scopes.length == 0) {
-            JkLog.start(this,"Resolving dependencies for any scope");
-        } else {
-            JkLog.start(this,"Resolving dependencies with specified scopes " + Arrays.asList(scopes) );
-        }
-        JkResolveResult resolveResult = internalResolver.resolve(module, dependencies.onlyModules(),
-                parameters, transitiveVersionOverride, scopes);
-        final JkDependencyNode mergedNode = resolveResult.dependencyTree().mergeNonModules(dependencies,
-                JkUtilsIterable.setOf(scopes));
-        resolveResult = JkResolveResult.of(mergedNode, resolveResult.errorReport());
-        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-            JkLog.info(this,plurialize(resolveResult.involvedModules().size(), "module") + resolveResult.involvedModules());
-            JkLog.info(this, plurialize(resolveResult.localFiles().size(), "artifact") + ".");
-        } else {
-            JkLog.info(this, plurialize(resolveResult.involvedModules().size(), "module") + " leading to " +
-                    plurialize(resolveResult.localFiles().size(),"artifact") + ".");
-        }
-        JkLog.end(this, "");
-        return resolveResult;
+        final AtomicReference<JkResolveResult> resolveResult = new AtomicReference<>();
+        Runnable task = () -> {
+            resolveResult.set(internalResolver.resolve(module, dependencies.onlyModules(),
+                    parameters, transitiveVersionOverride, scopes));
+            final JkDependencyNode mergedNode = resolveResult.get().dependencyTree().mergeNonModules(dependencies,
+                    JkUtilsIterable.setOf(scopes));
+            resolveResult.set(JkResolveResult.of(mergedNode, resolveResult.get().errorReport()));
+            if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
+                JkLog.info(this, plurialize(resolveResult.get().involvedModules().size(), "module")
+                        + resolveResult.get().involvedModules());
+                JkLog.info(this, plurialize(resolveResult.get().localFiles().size(), "artifact") + ".");
+            } else {
+                JkLog.info(this, plurialize(resolveResult.get().involvedModules().size(), "module") + " leading to " +
+                        plurialize(resolveResult.get().localFiles().size(), "artifact") + ".");
+            }
+        };
+        final String msg = scopes.length == 0 ? "Resolving dependencies for any scope" :
+                "Resolving dependencies with specified scopes " + Arrays.asList(scopes);
+        JkLog.execute(this, msg, task);
+        return resolveResult.get();
     }
 
     /**

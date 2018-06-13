@@ -112,26 +112,26 @@ public final class JkJavadocMaker {
      * Actually processes and creates the javadoc files.
      */
     public void process() {
-        JkLog.start(this,"Generating javadoc");
-        if (this.srcDirs.hasNoExistingRoot()) {
-            JkLog.warn(this,"No sources found in " + this.srcDirs);
-            JkLog.end(this, "");
-            return;
-        }
-        final String[] args = toArguments(outputDir);
-        OutputStream info = JkLog.stream();
-        OutputStream warn = JkUtilsIO.nopPrintStream();   // error and log produces very verbose logs in jdoclet
-        OutputStream error = JkUtilsIO.nopPrintStream();
-        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-            warn = JkLog.stream();
-            error = JkLog.errorStream();
-        }
-        JkUtilsPath.createDirectories(outputDir);
-        execute(doclet, info, warn, error, args);
-        if (Files.exists(outputDir) && zipFile != null) {
-            JkPathTree.of(outputDir).zipTo(zipFile);
-        }
-        JkLog.end(this, "");
+        Runnable task = () -> {
+            if (this.srcDirs.hasNoExistingRoot()) {
+                JkLog.warn(this, "No sources found in " + this.srcDirs);
+                return;
+            }
+            final String[] args = toArguments(outputDir);
+            OutputStream info = JkLog.stream();
+            OutputStream warn = JkUtilsIO.nopPrintStream();   // error and log produces very verbose logs in jdoclet
+            OutputStream error = JkUtilsIO.nopPrintStream();
+            if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
+                warn = JkLog.stream();
+                error = JkLog.errorStream();
+            }
+            JkUtilsPath.createDirectories(outputDir);
+            execute(doclet, info, warn, error, args);
+            if (Files.exists(outputDir) && zipFile != null) {
+                JkPathTree.of(outputDir).zipTo(zipFile);
+            }
+        };
+        JkLog.execute(this,"Generating javadoc", task);
     }
 
     private String[] toArguments(Path outputDir) {

@@ -235,11 +235,12 @@ public class JkBuild {
      */
     @JkDoc("Cleans the output directory.")
     public void clean() {
-        JkLog.start(this,"Cleaning output directory " + outputDir());
-        if (Files.exists(outputDir())) {
-            JkPathTree.of(outputDir()).refuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
-        }
-        JkLog.end(this, "");
+        JkLog.execute(this,"Cleaning output directory " + outputDir(), () ->
+            {
+                if (Files.exists(outputDir())) {
+                    JkPathTree.of(outputDir()).refuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
+                }
+            });
     }
 
     /**

@@ -34,9 +34,6 @@ class DistribAllBuild extends JkBuild {
 
     @JkDoc("Construct a distrib assuming all dependent sub projects are already built.")
     public void distrib() throws IOException {
-
-        JkLog.start(this,"Creating distribution file");
-
         JkLog.info(this,"Copy core distribution locally.");
         CoreBuild core = jacocoPluginBuild.core; // The core project is got by transitivity
                 Path distDir = this.outputDir().resolve("dist");
@@ -73,8 +70,6 @@ class DistribAllBuild extends JkBuild {
 
         JkLog.info(this,"Pack all");
         dist.zipTo(outputDir().resolve("jerkar-distrib.zip"));
-
-        JkLog.end(this, "");
     }
 
     @JkDoc("End to end method to construct a distrib.")
@@ -95,11 +90,9 @@ class DistribAllBuild extends JkBuild {
     }
 
     public void testSamples() throws IOException {
-        JkLog.start(this,"Testing Samples");
         SampleTester sampleTester = new SampleTester(this.baseTree());
         sampleTester.restoreEclipseClasspathFile = true;
         sampleTester.doTest();
-        JkLog.end(this, "");
     }
 
     public static void main(String[] args) {

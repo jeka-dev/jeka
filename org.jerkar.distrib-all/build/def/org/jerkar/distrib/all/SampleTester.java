@@ -78,7 +78,6 @@ class SampleTester {
     }
 
     private void scaffoldAndEclipse() {
-        JkLog.start(this, "Test scaffolding");
         Path scafoldedProject = output.root().resolve("scaffolded");
         JkProcess scaffoldProcess = process().withWorkingDir(scafoldedProject);
         JkUtilsPath.createDirectories(scafoldedProject);
@@ -89,7 +88,6 @@ class SampleTester {
         scaffoldProcess.withParameters("eclipse#generateAll").runSync();
         scaffoldProcess.withParameters("eclipse#").runSync(); // build using the .classpath for resolving classpath
         scaffoldProcess.withParameters("idea#generateIml", "idea#generateModulesXml").runSync();
-        JkLog.end(this, "");
     }
 
     private JkProcess process() {

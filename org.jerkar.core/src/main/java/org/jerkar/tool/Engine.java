@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Engine having responsibility of compiling build classes, instantiate and run them.<br/>
@@ -72,27 +73,23 @@ final class Engine {
      */
     void execute(JkInit init) {
         this.buildDependencies = this.buildDependencies.andScopeless(init.commandLine().dependencies());
-        JkLog.start(this,"Compiling and instantiating build class");
-        JkPathSequence runtimeClasspath = compile();
-        if (!init.commandLine().dependencies().isEmpty()) {
-            JkLog.start(this,"Grab dependencies specified in command line");
-            final JkPathSequence cmdPath = pathOf(init.commandLine().dependencies());
-            runtimeClasspath = runtimeClasspath.andManyFirst(cmdPath);
-            if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-                JkLog.end(this, "Command line extra path : " + cmdPath);
-            } else {
-                JkLog.end(this, "");
+        final AtomicReference<JkBuild> build = new AtomicReference<>();
+        JkLog.execute(this,"Compiling and instantiating build class", () -> {
+            JkPathSequence runtimeClasspath = compile();
+            if (!init.commandLine().dependencies().isEmpty()) {
+                final JkPathSequence cmdPath = pathOf(init.commandLine().dependencies());
+                runtimeClasspath = runtimeClasspath.andManyFirst(cmdPath);
+                JkLog.trace(this, "Command line extra path : " + cmdPath);
             }
-        }
-        JkLog.info(this,"Instantiating and configuring build class");
-        final JkBuild build = getBuildInstance(init, runtimeClasspath);
-        if (build == null) {
-            throw new JkException("Can't find or guess any build class for project hosted in " + this.projectBaseDir
-                    + " .\nAre you sure this directory is a buildable project ?");
-        }
-        JkLog.end(this, "");
+            JkLog.info(this, "Instantiating and configuring build class");
+            build.set(getBuildInstance(init, runtimeClasspath));
+            if (build == null) {
+                throw new JkException("Can't find or guess any build class for project hosted in " + this.projectBaseDir
+                        + " .\nAre you sure this directory is a buildable project ?");
+            }
+        });
         try {
-            this.launch(build, init.commandLine());
+            this.launch(build.get(), init.commandLine());
         } catch (final RuntimeException e) {
             JkLog.error(this,"Engine " + projectBaseDir + " failed");
             throw e;
@@ -125,16 +122,15 @@ final class Engine {
         }
         yetCompiledProjects.add(this.projectBaseDir);
         preCompile(); // This enrich dependencies
-        JkLog.start(this,"Compiling build classes for project " + this.projectBaseDir.getFileName().toString());
-        JkLog.start(this,"Resolving compilation classpath");
-        final JkDependencyResolver buildClassDependencyResolver = getBuildDefDependencyResolver();
-        final JkPathSequence buildPath = buildClassDependencyResolver.get(this.buildDefDependencies());
-        path.addAll(buildPath.entries());
-        path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
-        JkLog.end(this, "");
-        this.compileBuild(JkPathSequence.ofMany(path));
-        path.add(this.resolver.buildClassDir);
-        JkLog.end(this, "");
+        String msg = "Compiling build classes for project " + this.projectBaseDir.getFileName().toString();
+        JkLog.execute(this,msg, () -> {
+            final JkDependencyResolver buildClassDependencyResolver = getBuildDefDependencyResolver();
+            final JkPathSequence buildPath = buildClassDependencyResolver.get(this.buildDefDependencies());
+            path.addAll(buildPath.entries());
+            path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
+            this.compileBuild(JkPathSequence.ofMany(path));
+            path.add(this.resolver.buildClassDir);
+        });
     }
 
     private JkBuild getBuildInstance(JkInit init, JkPathSequence runtimePath) {

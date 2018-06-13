@@ -123,25 +123,26 @@ final class IvyPublisher implements InternalPublisher {
     public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
             JkDependencies dependencies, JkScopeMapping defaultMapping, Instant deliveryDate,
             JkVersionProvider resolvedVersions) {
-        JkLog.start(this, "Publishing for Ivy");
-        final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
-                publication, dependencies, defaultMapping, deliveryDate, resolvedVersions);
-        publishIvyArtifacts(publication, deliveryDate, moduleDescriptor);
-        JkLog.end(this, "");
+        JkLog.execute(this, "Publishing for Ivy", () -> {
+                    final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
+                            publication, dependencies, defaultMapping, deliveryDate, resolvedVersions);
+                    publishIvyArtifacts(publication, deliveryDate, moduleDescriptor);
+                });
     }
 
     @Override
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
             JkDependencies dependencies) {
-        JkLog.start(this,"Publishing for Maven");
-        final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
-                publication, dependencies, Instant.now(), JkVersionProvider.empty());
-        final int count = publishMavenArtifacts(publication, moduleDescriptor);
-        if (count <= 1) {
-            JkLog.end(this, "Module published in " + count + " repository.");
-        } else {
-            JkLog.end(this, "Module published in " + count + " repositories.");
-        }
+        JkLog.execute(this,"Publishing for Maven", () -> {
+            final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
+                    publication, dependencies, Instant.now(), JkVersionProvider.empty());
+            final int count = publishMavenArtifacts(publication, moduleDescriptor);
+            if (count <= 1) {
+                JkLog.info(this, "Module published in " + count + " repository.");
+            } else {
+                JkLog.info(this, "Module published in " + count + " repositories.");
+            }
+        });
 
     }
 
@@ -155,9 +156,8 @@ final class IvyPublisher implements InternalPublisher {
             final JkVersionedModule jkModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
             if (!isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
-                JkLog.start(this,"Publishing for repository " + resolver);
-                this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor);
-                JkLog.end(this, "");
+                JkLog.execute(this,"Publishing for repository " + resolver, () ->
+                    this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor));
                 count++;
             }
         }
@@ -208,12 +208,12 @@ final class IvyPublisher implements InternalPublisher {
             final JkVersionedModule jkModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
             if (isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
-                JkLog.start(this,"Publishing for repository " + resolver);
-                final CheckFileFlag checkFileFlag = CheckFileFlag.of(publishRepo);
-                final IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(
-                        checkFileFlag, resolver, descriptorOutputDir, publishRepo.uniqueSnapshot());
-                ivyPublisherForMaven.publish(moduleDescriptor, publication);
-                JkLog.end(this, "");
+                JkLog.execute(this,"Publishing for repository " + resolver, () -> {
+                    final CheckFileFlag checkFileFlag = CheckFileFlag.of(publishRepo);
+                    final IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(
+                            checkFileFlag, resolver, descriptorOutputDir, publishRepo.uniqueSnapshot());
+                    ivyPublisherForMaven.publish(moduleDescriptor, publication);
+                });
                 count++;
             }
         }

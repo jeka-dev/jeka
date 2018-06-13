@@ -74,9 +74,8 @@ public final class JkPluginIdea extends JkPlugin {
                 .stream().collect(Collectors.toList());
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
-            JkLog.start(this,"Generating iml file on " + projectFolder);
-            Main.exec(projectFolder, "idea#generateIml");
-            JkLog.end(this, "");
+            JkLog.execute(this,"Generating iml file on " + projectFolder, () ->
+                Main.exec(projectFolder, "idea#generateIml"));
         }
     }
 
