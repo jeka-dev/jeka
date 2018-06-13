@@ -350,8 +350,8 @@ final class ProjectDef {
 
         String description(String prefix, String margin) {
             StringBuilder builder = new StringBuilder();
-            builder.append(prefix).append(name).append(" (").append(type()).append( ", default : ").append(defaultValue)
-                    .append(") : ").append(description.replace("\n", " "));
+            builder.append(margin).append("  ").append(prefix).append(name).append(" (").append(type()).append( ", default : ").append(defaultValue)
+                    .append(") : ").append(description.replace("\n", " ")).append("\n");
             return builder.toString();
         }
 

@@ -9,11 +9,11 @@ import org.jerkar.tool.JkDoc;
 public final class JkTestOptions {
 
     /** Turn it on to skip tests. */
-    @JkDoc("Turn it on to skip tests.")
+    @JkDoc("If true, tests are not run.")
     public boolean skip;
 
     /** Turn it on to run tests in a forked process. */
-    @JkDoc("Turn it on to run tests in a forked process.")
+    @JkDoc("If tyrue, tests will be executed in a forked process.")
     public boolean fork;
 
     /** Argument passed to the JVM if tests are forked. Example : -Xms2G -Xmx2G */
@@ -28,7 +28,7 @@ public final class JkTestOptions {
     public JunitReportDetail report = JunitReportDetail.BASIC;
 
     /** Turn it on to display System.out and System.err on console while executing tests.*/
-    @JkDoc("Turn it on to display System.out and System.err on console while executing tests.")
+    @JkDoc("If true, tests System.out and System.err will be displayed on console.")
     public boolean output;
 
 }
