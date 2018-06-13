@@ -39,7 +39,7 @@ public class JkBuild {
 
     private final Path baseDir;
 
-    public JkBuildPlugins plugins;
+    private JkBuildPlugins plugins;
 
     private JkDependencyResolver buildDefDependencyResolver;
 
@@ -83,24 +83,25 @@ public class JkBuild {
     }
 
     public static <T extends JkBuild> T of(Class<T> buildClass) {
-        T build = JkUtilsReflect.newInstance(buildClass);
+        final T build = JkUtilsReflect.newInstance(buildClass);
+        final JkBuild jkBuild = (JkBuild) build;
 
         // plugins must be instantiated before setupOptionsDefault is invoked.
-        build.plugins = new JkBuildPlugins(build, CommandLine.instance().getPluginOptions());
+        jkBuild.plugins = new JkBuildPlugins(build, CommandLine.instance().getPluginOptions());
 
         // Allow sub-classes to define defaults prior options are injected
         build.setupOptionDefaults();
 
         // Inject options
         JkOptions.populateFields(build, JkOptions.readSystemAndUserOptions());
-        Map<String, String> options = CommandLine.instance().getBuildOptions();
+        final Map<String, String> options = CommandLine.instance().getBuildOptions();
         JkOptions.populateFields(build, options);
         JkLog.info("Build " + build + " instantiated.");
 
         // Load plugins declared in command line
         build.configurePlugins();
-        build.plugins.loadCommandLinePlugins();
-        build.plugins.all().forEach(plugin -> {
+        jkBuild.plugins.loadCommandLinePlugins();
+        jkBuild.plugins.all().forEach(plugin -> {
             JkLog.info(build, "  Build decorated with plugin " + plugin.getClass());
             plugin.decorateBuild();});
 
@@ -175,7 +176,7 @@ public class JkBuild {
         return infoProvider;
     }
 
-    protected JkBuildPlugins plugins() {
+    public JkBuildPlugins plugins() {
         return this.plugins;
     }
 

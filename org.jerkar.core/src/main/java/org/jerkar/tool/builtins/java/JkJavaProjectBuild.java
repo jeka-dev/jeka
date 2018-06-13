@@ -16,7 +16,7 @@ public class JkJavaProjectBuild extends JkBuild {
     }
 
     public final JkPluginJava java() {
-        return this.plugins.get(JkPluginJava.class);
+        return this.plugins().get(JkPluginJava.class);
     }
 
     public final JkJavaProject project() {

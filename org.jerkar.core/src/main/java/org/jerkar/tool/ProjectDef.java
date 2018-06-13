@@ -124,8 +124,8 @@ final class ProjectDef {
             }
             if (this.buildOrPlugin instanceof JkBuild) {
                 JkBuild build = (JkBuild) this.buildOrPlugin;
-                if (build.plugins != null) {
-                    for (JkPlugin plugin : build.plugins.all()) {
+                if (build.plugins() != null) {
+                    for (JkPlugin plugin : build.plugins().all()) {
                         stringBuilder.append(BuildClassDef.of(plugin).description(plugin.name() + "#", withHeader));
                     }
                 }

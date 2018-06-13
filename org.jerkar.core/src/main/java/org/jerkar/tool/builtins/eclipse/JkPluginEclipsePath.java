@@ -25,7 +25,7 @@ public final class JkPluginEclipsePath extends JkPlugin {
     @JkDoc("Configure java plugin instance in order java project reflects project structure and dependencies described in Eclipse .classpath file.")
     @Override
     protected void decorateBuild() {
-        JkPluginJava pluginJava = build.plugins.get(JkPluginJava.class);
+        JkPluginJava pluginJava = build.plugins().get(JkPluginJava.class);
         if (pluginJava != null) {
             final JkJavaProject project = pluginJava.project();
             final JkEclipseClasspathApplier classpathApplier = new JkEclipseClasspathApplier(smartScope);
