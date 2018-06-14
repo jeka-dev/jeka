@@ -72,10 +72,16 @@ public final class JkLog implements Serializable {
     }
 
     public static OutputStream stream() {
+        if (Verbosity.MUTE == verbosity()) {
+            return JkUtilsIO.nopPrintStream();
+        }
         return stream;
     }
 
     public static OutputStream errorStream() {
+        if (Verbosity.MUTE == verbosity()) {
+            return JkUtilsIO.nopPrintStream();
+        }
         return errorStream;
     }
 
@@ -118,6 +124,9 @@ public final class JkLog implements Serializable {
     }
 
     private static void consume(Object event) {
+        if (Verbosity.MUTE == verbosity()) {
+            return;
+        }
         if (event.getClass().getClassLoader() != consumer.getClass().getClassLoader()) {  // survive to classloader change
             final Object evt = JkUtilsIO.cloneBySerialization(event, consumer.getClass().getClassLoader());
             try {

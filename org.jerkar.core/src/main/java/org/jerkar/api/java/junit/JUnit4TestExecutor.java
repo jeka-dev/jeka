@@ -2,6 +2,7 @@ package org.jerkar.api.java.junit;
 
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsTime;
 import org.junit.runner.JUnitCore;
@@ -45,9 +46,12 @@ class JUnit4TestExecutor {
         }
         final PrintStream out = System.out;
         final PrintStream err = System.err;
+        final JkLog.Verbosity previousVerbosity = JkLog.verbosity();
         if (printEachTestOnConsole) {
-            jUnitCore.addListener(new JUnitConsoleListener());
+            jUnitCore.addListener(new PrintConsoleTestListener());
         } else {
+            jUnitCore.addListener(new ProgressTestListener(JkLog.stream()));
+            JkLog.setVerbosity(JkLog.Verbosity.MUTE);
             System.setErr(JkUtilsIO.nopPrintStream());
             System.setOut(JkUtilsIO.nopPrintStream());
         }
@@ -59,6 +63,7 @@ class JUnit4TestExecutor {
             result = jUnitCore.run(classes);
         } finally {
             if (restoreSystemOut) {
+                JkLog.setVerbosity(previousVerbosity);
                 System.setErr(err);
                 System.setOut(out);
             }
