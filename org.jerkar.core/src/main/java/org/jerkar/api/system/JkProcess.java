@@ -229,7 +229,11 @@ public final class JkProcess implements Runnable {
                 throw new RuntimeException(e);
             }
         };
-        JkLog.execute("Starting program : " + commands.toString(), runnable);
+        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
+            JkLog.execute("Starting program : " + commands.toString(), runnable);
+        } else {
+            runnable.run();;
+        }
         return result.get();
     }
 
