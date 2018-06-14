@@ -252,7 +252,7 @@ final class Engine {
         final long time = System.nanoTime();
         try {
             JkUtilsReflect.invoke(build, method);
-            JkLog.info("Method " + methodName + " success in "
+            JkLog.info("Method " + methodName + " succeeded in "
                     + JkUtilsTime.durationInSeconds(time) + " seconds.");
         } catch (final RuntimeException e) {
             JkLog.info("Method " + methodName + " failed in " + JkUtilsTime.durationInSeconds(time)

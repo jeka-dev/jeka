@@ -42,8 +42,8 @@ public final class Main {
         } catch (final RuntimeException e) {
             System.err.println();
             e.printStackTrace(System.err);
-            final int lenght = printAscii(true, "failed.ascii");
-            System.err.println(JkUtilsString.repeat(" ", lenght) + "Total build time : "
+            final int length = printAscii(true, "failed.ascii");
+            System.err.println(JkUtilsString.repeat(" ", length) + "Total build time : "
                     + JkUtilsTime.durationInSeconds(start) + " seconds.");
             System.exit(1);
         }
