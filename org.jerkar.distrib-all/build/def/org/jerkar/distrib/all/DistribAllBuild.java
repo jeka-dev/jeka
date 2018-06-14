@@ -34,12 +34,12 @@ class DistribAllBuild extends JkBuild {
 
     @JkDoc("Construct a distrib assuming all dependent sub projects are already built.")
     public void distrib() throws IOException {
-        JkLog.info("Copy core distribution locally.");
+        JkLog.info("Copying core distribution locally");
         CoreBuild core = jacocoPluginBuild.core; // The core project is got by transitivity
                 Path distDir = this.outputDir().resolve("dist");
         JkPathTree dist = JkPathTree.of(distDir).merge(core.distribFolder);
 
-        JkLog.info("Add plugins to the distribution");
+        JkLog.info("Adding plugins to the distribution");
         JkPathTree ext = dist.goTo("libs/builtins")
                 .copyIn(sonarPluginBuild.java().project().maker().mainArtifactPath())
                 .copyIn(jacocoPluginBuild.java().project().maker().mainArtifactPath());
@@ -47,19 +47,18 @@ class DistribAllBuild extends JkBuild {
         sourceDir.copyIn(sonarPluginBuild.java().project().maker().artifactPath(JkJavaProjectMaker.SOURCES_ARTIFACT_ID))
                 .copyIn(jacocoPluginBuild.java().project().maker().artifactPath(JkJavaProjectMaker.SOURCES_ARTIFACT_ID));
 
-        JkLog.info("Add plugins to the fat jar");
+        JkLog.info("Adding plugins to the fat jar");
         Path fat = dist.get(core.java().project().maker().artifactPath(JkArtifactId.of("all", "jar"))
                 .getFileName().toString());
         Files.copy(core.java().project().maker().mainArtifactPath(), fat, StandardCopyOption.REPLACE_EXISTING);
         ext.accept("**.jar").stream().map(path -> JkPathTree.ofZip(path)).forEach(tree -> tree.zipTo(fat));
 
-        JkLog.info("Create a fat source jar");
+        JkLog.info("Creating a fat source jar");
         Path fatSource = sourceDir.get("org.jerkar.core-all-sources.jar");
         sourceDir.accept("**.jar", "**.zip").refuse(fatSource.getFileName().toString()).stream()
                 .map(path -> JkPathTree.ofZip(path)).forEach(tree -> tree.zipTo(fatSource));
 
         if (javadoc) {
-            JkLog.info("Create javadoc");
             JkPathTreeSet sources = this.jacocoPluginBuild.core.java().project().getSourceLayout().sources()
                     .and(this.jacocoPluginBuild.java().project().getSourceLayout().sources())
                     .and(this.sonarPluginBuild.java().project().getSourceLayout().sources());
@@ -68,7 +67,7 @@ class DistribAllBuild extends JkBuild {
             JkJavadocMaker.of(sources, javadocAllDir, javadocAllFile).process();
         }
 
-        JkLog.info("Pack all");
+        JkLog.info("Packing all");
         dist.zipTo(outputDir().resolve("jerkar-distrib.zip"));
     }
 

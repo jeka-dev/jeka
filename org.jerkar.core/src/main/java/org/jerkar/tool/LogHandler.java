@@ -5,8 +5,11 @@ import org.jerkar.api.system.JkLog;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
 
 class LogHandler implements JkLog.EventLogHandler {
+
+    private static final Charset UTF8 = Charset.forName("UTF-8");
 
     private static final char BOX_DRAWINGS_LIGHT_VERTICAL = 0x2502;   // Shape similar to '|'
 
@@ -14,7 +17,7 @@ class LogHandler implements JkLog.EventLogHandler {
 
     private static final byte LINE_SEPARATOR = 10;
 
-    private static final byte[] MARGIN_UNIT = ("" + BOX_DRAWINGS_LIGHT_VERTICAL + " ").getBytes();
+    private static final byte[] MARGIN_UNIT = ("" + BOX_DRAWINGS_LIGHT_VERTICAL + " ").getBytes(UTF8);
 
     private final MarginStream out = new MarginStream(System.out);
 
@@ -33,7 +36,7 @@ class LogHandler implements JkLog.EventLogHandler {
         }
         final OutputStream stream = event.type() == JkLog.Type.ERROR ? err : out;
         try {
-            stream.write(message.getBytes());
+            stream.write(message.getBytes(UTF8));
             stream.write(LINE_SEPARATOR);
             stream.flush();
         } catch (IOException e) {

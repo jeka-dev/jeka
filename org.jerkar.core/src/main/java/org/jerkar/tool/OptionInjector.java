@@ -6,6 +6,7 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
@@ -15,17 +16,14 @@ final class OptionInjector {
     private static final String UNHANDLED_TYPE = "";
 
     public static void inject(Object target, Map<String, String> props) {
-        final List<Field> fields = Arrays.asList(target.getClass().getFields());
-        for (final Field field : fields) {
+        for (final Field field : getOptionFields(target.getClass())) {
             inject(target, field, props);
         }
     }
 
-    private static boolean injectable(Field field) {
-        if (Modifier.isPrivate(field.getModifiers()) && field.getAnnotation(JkDoc.class) == null) {
-            return false;
-        }
-        return !Modifier.isStatic(field.getModifiers());
+    static List<Field> getOptionFields(Class<?> clazz) {
+        return Arrays.asList(clazz.getFields()).stream().filter(field -> !Modifier.isStatic(field.getModifiers()))
+                .collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -153,8 +151,7 @@ final class OptionInjector {
     }
 
     private static Map<String, String> injectedFields(String context, Object inspected) {
-        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(inspected.getClass(), true);
-        fields.removeIf(field -> !injectable(field));
+        final List<Field> fields = getOptionFields(inspected.getClass());
         final Map<String, String> result = new TreeMap<>();
         for (final Field field : fields) {
             final Object value = JkUtilsReflect.getFieldValue(inspected, field);

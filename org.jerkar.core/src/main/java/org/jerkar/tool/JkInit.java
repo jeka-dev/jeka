@@ -5,6 +5,9 @@ import org.jerkar.api.system.JkInfo;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.*;
 
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -94,11 +97,11 @@ public final class JkInit {
 
     void displayInfo() {
         StringBuilder sb = new StringBuilder()
-                .append("Jerkar Version : " + JkInfo.jerkarVersion())
                 .append("\nWorking Directory : " + System.getProperty("user.dir"))
                 .append("\nJava Home : " + System.getProperty("java.home"))
-                .append("\nJava Version : " + System.getProperty("java.projectVersion") + ", "
-                        + System.getProperty("java.vendor"));
+                .append("\nJava Version : " + System.getProperty("java.version") + ", "
+                        + System.getProperty("java.vendor"))
+                .append("\nJerkar Version : " + JkInfo.jerkarVersion());
         if ( embedded(JkLocator.jerkarHomeDir())) {
             sb.append("\nJerkar Home : " + bootDir() + " ( embedded !!! )");
         } else {
