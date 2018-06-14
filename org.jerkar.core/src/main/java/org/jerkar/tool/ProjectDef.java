@@ -38,7 +38,7 @@ final class ProjectDef {
             } else {
                 desc = "No description available";
             }
-            JkLog.info(this,classDef.getName() + defaultMessage + " : " + desc);
+            JkLog.info(classDef.getName() + defaultMessage + " : " + desc);
             i++;
         }
     }

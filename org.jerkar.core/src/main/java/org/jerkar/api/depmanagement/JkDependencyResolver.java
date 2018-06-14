@@ -133,7 +133,7 @@ public final class JkDependencyResolver {
     }
 
     private JkResolveResult resolveWithInternalResolver(JkDependencies dependencies, JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {
-        JkLog.trace(this,"Preparing to resolve dependencies for module " + module);
+        JkLog.trace("Preparing to resolve dependencies for module " + module);
         final AtomicReference<JkResolveResult> resolveResult = new AtomicReference<>();
         Runnable task = () -> {
             resolveResult.set(internalResolver.resolve(module, dependencies.onlyModules(),
@@ -142,17 +142,17 @@ public final class JkDependencyResolver {
                     JkUtilsIterable.setOf(scopes));
             resolveResult.set(JkResolveResult.of(mergedNode, resolveResult.get().errorReport()));
             if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-                JkLog.info(this, plurialize(resolveResult.get().involvedModules().size(), "module")
+                JkLog.info(plurialize(resolveResult.get().involvedModules().size(), "module")
                         + resolveResult.get().involvedModules());
-                JkLog.info(this, plurialize(resolveResult.get().localFiles().size(), "artifact") + ".");
+                JkLog.info(plurialize(resolveResult.get().localFiles().size(), "artifact") + ".");
             } else {
-                JkLog.info(this, plurialize(resolveResult.get().involvedModules().size(), "module") + " leading to " +
+                JkLog.info(plurialize(resolveResult.get().involvedModules().size(), "module") + " leading to " +
                         plurialize(resolveResult.get().localFiles().size(), "artifact") + ".");
             }
         };
-        final String msg = scopes.length == 0 ? "Resolving dependencies for any scope" :
+        final String msg = scopes.length == 0 ? "Resolving dependencies " :
                 "Resolving dependencies with specified scopes " + Arrays.asList(scopes);
-        JkLog.execute(this, msg, task);
+        JkLog.execute(msg, task);
         return resolveResult.get();
     }
 

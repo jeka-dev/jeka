@@ -55,7 +55,7 @@ class LogHandler implements JkLog.EventLogHandler {
 
         private final OutputStream delegate;
 
-        private int lastByte;
+        private int lastByte = LINE_SEPARATOR;  // Display margin at first use (relevant for system.err)
 
         public MarginStream(OutputStream delegate) {
             super();

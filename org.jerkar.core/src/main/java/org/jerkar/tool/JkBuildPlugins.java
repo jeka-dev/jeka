@@ -56,7 +56,7 @@ public final class JkBuildPlugins {
     void invoke(JkPlugin plugin, String methodName) {
         Runnable task = () -> JkUtilsReflect.invoke(plugin, pluginMethod(plugin.getClass(), methodName));
         String msg = "Method " + methodName + " of plugin " + plugin.getClass().getSimpleName();
-        JkLog.execute(this, msg, task);
+        JkLog.execute( msg, task);
     }
 
     private <T extends JkPlugin> T getOrCreate(Class<T> pluginClass) {

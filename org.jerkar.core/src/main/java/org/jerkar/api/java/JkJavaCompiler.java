@@ -140,7 +140,7 @@ public final class JkJavaCompiler {
         final AtomicBoolean result = new AtomicBoolean();
         Runnable run = () -> {
             if (compileSpec.getSourceFiles().isEmpty()) {
-                JkLog.warn(this, "No source to compile");
+                JkLog.warn("No source to compile");
                 result.set(true);
                 return;
             }
@@ -161,7 +161,7 @@ public final class JkJavaCompiler {
             }
             result.set(true);
         };
-        JkLog.execute(this, message, run);
+        JkLog.execute( message, run);
         return result.get();
     }
 
@@ -219,20 +219,20 @@ public final class JkJavaCompiler {
      */
     public JkProcess forkedIfNeeded(Map<String, String> jdkLocations, String version) {
         if (version.equals(currentJdkSourceVersion())) {
-            JkLog.info(this, "Current JDK matches with source projectVersion (" + version + "). Don't need to fork.");
+            JkLog.info("Current JDK matches with source projectVersion (" + version + "). Don't need to fork.");
             return null;
         }
         final String key = "jdk." + version;
         final String path = jdkLocations.get(key);
         if (path == null) {
-            JkLog.warn(this,"Current JDK does not match with source projectVersion " + version + ".\n" +
+            JkLog.warn("Current JDK does not match with source projectVersion " + version + ".\n" +
                     " No exact matching JDK found for projectVersion " + version + ".\n" +
                     " Will use the current one which is projectVersion " + currentJdkSourceVersion() + ".\n" +
                     " Pass option -jdk." + version + "=[JDK location] to specify the JDK to use for Java projectVersion " + version);
             return null;
         }
         final String cmd = path + "/bin/javac";
-        JkLog.info(this,"Current JDK does not match with source projectVersion (" + version + "). Will use JDK "
+        JkLog.info("Current JDK does not match with source projectVersion (" + version + "). Will use JDK "
                 + path);
         return JkProcess.of(cmd);
     }
@@ -243,7 +243,7 @@ public final class JkJavaCompiler {
         @Override
         public void report(Diagnostic diagnostic) {
             if (!diagnostic.getKind().equals(Diagnostic.Kind.ERROR)) {
-                JkLog.info(this, diagnostic.toString());
+                JkLog.info(diagnostic.toString());
             } else {
                 System.out.println(diagnostic);
             }

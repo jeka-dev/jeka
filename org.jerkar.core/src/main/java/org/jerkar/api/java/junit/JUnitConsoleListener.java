@@ -18,7 +18,7 @@ class JUnitConsoleListener extends RunListener {
 
     @Override
     public void testStarted(Description description) throws Exception {
-        JkLog.info(this, "Running " + description.getClassName() + "." + description.getMethodName() + " ... ");
+        JkLog.startTask("Running " + description.getClassName() + "." + description.getMethodName());
         out = System.out;
         err = System.err;
         System.setOut(new PrintStream(JkLog.stream()));
@@ -28,14 +28,14 @@ class JUnitConsoleListener extends RunListener {
 
     @Override
     public void testFinished(Description description) throws Exception {
-        JkLog.info(this, "Done in " + JkUtilsTime.durationInMillis(startTs) + " milliseconds");
+        JkLog.endTask(JkUtilsTime.durationInMillis(startTs));
         System.setOut(out);
         System.setErr(err);
     }
 
     @Override
     public void testIgnored(Description description) throws Exception {
-        JkLog.info(this,"- Test " + description.getDisplayName() + " ignored.");
+        JkLog.info("- Test " + description.getDisplayName() + " ignored.");
     }
 
     @Override

@@ -31,7 +31,7 @@ final class HelpDisplayer {
 
         sb.append(BuildClassDef.of(build).description("", true));
         sb.append("\nType 'jerkar help -plugins' to get help on plugins available in the classpath.\n");
-        JkLog.info(HelpDisplayer.class, sb.toString());
+        JkLog.info(sb.toString());
     }
 
     static void help(JkBuild build, Path xmlFile) {
@@ -47,12 +47,12 @@ final class HelpDisplayer {
             } catch (final IOException e) {
                 throw JkUtilsThrowable.unchecked(e);
             }
-            JkLog.info(HelpDisplayer.class, "Xml help file generated at " + xmlFile);
+            JkLog.info("Xml help file generated at " + xmlFile);
         }
     }
 
     static void helpPlugins() {
-        JkLog.info(HelpDisplayer.class, helpPluginsDescription());
+        JkLog.info(helpPluginsDescription());
     }
 
     private static String helpPluginsDescription() {

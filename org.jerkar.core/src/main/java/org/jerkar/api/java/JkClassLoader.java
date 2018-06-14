@@ -567,7 +567,7 @@ public final class JkClassLoader {
         }
         final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(delegate);
-        initEventsInClassloader();
+        initLogInClassloader();
         try {
             final Object returned = JkUtilsReflect.invokeStaticMethod(clazz, methodName,
                     effectiveArgs);
@@ -606,7 +606,7 @@ public final class JkClassLoader {
         }
         final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(delegate);
-        initEventsInClassloader();
+        initLogInClassloader();
         try {
 
             final Object returned = JkUtilsReflect.invoke(object, method, effectiveArgs);
@@ -642,7 +642,7 @@ public final class JkClassLoader {
         final Set<Class<?>> serviceClasses = new HashSet<>();
         for (final Path file : this.fullClasspath()) {
             if (Files.isRegularFile(file)) {
-                JkLog.trace(this, "Scanning " + file + " for META-INF/services.");
+                JkLog.trace("Scanning " + file + " for META-INF/services.");
                 final ZipFile zipFile = JkUtilsZip.zipFile(file.toFile());
                 final ZipEntry serviceEntry = zipFile.getEntry("META-INF/services");
                 if (serviceEntry == null) {
@@ -655,7 +655,7 @@ public final class JkClassLoader {
                                 entry.getName(), "/");
                         final Class<?> serviceClass = this.loadIfExist(serviceName);
                         if (serviceClass != null) {
-                            JkLog.trace(this,"Found service providers for : " + serviceName);
+                            JkLog.trace("Found service providers for : " + serviceName);
                             serviceClasses.add(serviceClass);
                         }
                     }
@@ -676,13 +676,13 @@ public final class JkClassLoader {
             }
         }
         for (final Class<?> serviceClass : serviceClasses) {
-            JkLog.trace(this,"Reload service providers for : " + serviceClass.getName());
+            JkLog.trace("Reload service providers for : " + serviceClass.getName());
             ServiceLoader.loadInstalled(serviceClass).reload();
         }
         return this;
     }
 
-    private void initEventsInClassloader() {
+    private void initLogInClassloader() {
         JkLog.initializeInClassLoader(this.classloader());
     }
 

@@ -81,7 +81,7 @@ public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
         @Override
         public void run() {
             if (enabled) {
-                JkLog.info(this,"Jacoco report created at " + destFile.toAbsolutePath());
+                JkLog.info("Jacoco report created at " + destFile.toAbsolutePath());
             }
 
         }

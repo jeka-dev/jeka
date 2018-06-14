@@ -103,7 +103,7 @@ class WstCommonComponent {
             final String rest = handle.substring(LIB_PREFIX.length());
             return ClasspathEntry.of(Kind.LIB, rest);
         } else {
-            JkLog.warn(WstCommonComponent.class,"Ignoring handle " + handle);
+            JkLog.warn("Ignoring handle " + handle);
             result = null;
         }
         return result;

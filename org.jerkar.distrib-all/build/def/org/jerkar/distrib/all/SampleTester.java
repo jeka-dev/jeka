@@ -42,13 +42,6 @@ class SampleTester {
         testSamples("MavenStyleBuild");
         testSamples("OpenSourceJarBuild");
         testSamples("HttpClientTaskBuild");
-        File file = new File("build/output/test-out/mavenrepo");
-        //testSamples("", "doPublish", "-repo.publish.url=" + file.getAbsolutePath());
-        //File file2 = new File("build/output/test-out/mavenrepo-release");
-        //testSamples("", "doPublish", "-projectVersion=1.0-SNAPSHOT", "-repo.release.url=" + file2.getAbsolutePath());
-        //File file3 = new File("build/output/test-out/ivyrepo");
-        //testSamples("", "doPublish", "-repo.publish.url=ivy:" + file3.getAbsolutePath());
-        // scaffoldAndEclipse();   // TODO
         testDependee("FatJarBuild");
         Path classpathFile = sampleBaseDir.get(".classpath");
         Path classpathFile2 = sampleBaseDir.get(".classpath2");
@@ -64,14 +57,14 @@ class SampleTester {
     }
 
     private void testSamples(String className, String... args) {
-        JkLog.info(this,"Test " + className + " " + Arrays.toString(args));
+        JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(sampleBaseDir.root().toAbsolutePath().normalize())
                 .withParametersIf(!JkUtilsString.isBlank(className), "-verbose=true -buildClass=" + className).andParameters(args)
                 .failOnError(true).runSync();
     }
 
     private void testDependee(String className, String... args) {
-        JkLog.info(this,"Test " + className + " " + Arrays.toString(args));
+        JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependeeBaseDir.root())
                 .withParametersIf(!JkUtilsString.isBlank(className), "-buildClass=" + className).andParameters(args)
                 .failOnError(true).runSync();
@@ -84,7 +77,7 @@ class SampleTester {
         scaffoldProcess.withParameters("scaffold").runSync(); // scaffold
         // project
         scaffoldProcess.runSync(); // Build the scaffolded project
-        JkLog.info(this,"Test eclipse generation and compile            ");
+        JkLog.info("Test eclipse generation and compile            ");
         scaffoldProcess.withParameters("eclipse#generateAll").runSync();
         scaffoldProcess.withParameters("eclipse#").runSync(); // build using the .classpath for resolving classpath
         scaffoldProcess.withParameters("idea#generateIml", "idea#generateModulesXml").runSync();

@@ -30,7 +30,7 @@ class ScopeResolverSmart implements ScopeResolver {
             final ClasspathEntry classpathEntry = ClasspathEntry.of(kind, path);
             if (!wstCommonComponent.contains(classpathEntry)) {
                 if (scope.isInOrIsExtendingAnyOf(COMPILE)) {
-                    JkLog.trace(this, path + " not found as module in " + WstCommonComponent.FILE
+                    JkLog.trace(path + " not found as module in " + WstCommonComponent.FILE
                             + " : turn scope to 'provided'.");
                     scope = PROVIDED;
                 }

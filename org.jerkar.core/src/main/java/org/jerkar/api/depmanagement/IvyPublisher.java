@@ -123,7 +123,7 @@ final class IvyPublisher implements InternalPublisher {
     public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
             JkDependencies dependencies, JkScopeMapping defaultMapping, Instant deliveryDate,
             JkVersionProvider resolvedVersions) {
-        JkLog.execute(this, "Publishing for Ivy", () -> {
+        JkLog.execute( "Publishing for Ivy", () -> {
                     final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
                             publication, dependencies, defaultMapping, deliveryDate, resolvedVersions);
                     publishIvyArtifacts(publication, deliveryDate, moduleDescriptor);
@@ -133,14 +133,14 @@ final class IvyPublisher implements InternalPublisher {
     @Override
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
             JkDependencies dependencies) {
-        JkLog.execute(this,"Publishing for Maven", () -> {
+        JkLog.execute("Publishing for Maven", () -> {
             final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
                     publication, dependencies, Instant.now(), JkVersionProvider.empty());
             final int count = publishMavenArtifacts(publication, moduleDescriptor);
             if (count <= 1) {
-                JkLog.info(this, "Module published in " + count + " repository.");
+                JkLog.info("Module published in " + count + " repository.");
             } else {
-                JkLog.info(this, "Module published in " + count + " repositories.");
+                JkLog.info("Module published in " + count + " repositories.");
             }
         });
 
@@ -156,7 +156,7 @@ final class IvyPublisher implements InternalPublisher {
             final JkVersionedModule jkModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
             if (!isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
-                JkLog.execute(this,"Publishing for repository " + resolver, () ->
+                JkLog.execute("Publishing for repository " + resolver, () ->
                     this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor));
                 count++;
             }
@@ -208,7 +208,7 @@ final class IvyPublisher implements InternalPublisher {
             final JkVersionedModule jkModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
             if (isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
-                JkLog.execute(this,"Publishing for repository " + resolver, () -> {
+                JkLog.execute("Publishing for repository " + resolver, () -> {
                     final CheckFileFlag checkFileFlag = CheckFileFlag.of(publishRepo);
                     final IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(
                             checkFileFlag, resolver, descriptorOutputDir, publishRepo.uniqueSnapshot());
@@ -230,7 +230,7 @@ final class IvyPublisher implements InternalPublisher {
         try {
             resolver.abortPublishTransaction();
         } catch (final IOException e) {
-            JkLog.warn(IvyPublisher.class,"Publish transction hasn't been properly aborted");
+            JkLog.warn("Publish transction hasn't been properly aborted");
         }
     }
 
@@ -313,7 +313,7 @@ final class IvyPublisher implements InternalPublisher {
 
                 final File signedFile = new File(file.getPath() + ".asc");
                 if (!signedFile.exists()) {
-                    JkLog.info(this, "Signing file " + file.getPath() + " on detached signature "
+                    JkLog.info("Signing file " + file.getPath() + " on detached signature "
                             + signedFile.getPath());
                     pgpSigner.sign(file.toPath());
                 }

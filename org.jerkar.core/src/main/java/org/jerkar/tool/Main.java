@@ -77,7 +77,7 @@ public final class Main {
 
     private static void displayIntro() {
         final int lenght = printAscii(false, "jerkar.ascii");
-        JkLog.info(Main.class,JkUtilsString.repeat(" ", lenght) + "The 100% Java build tool.\n");
+        JkLog.info(JkUtilsString.repeat(" ", lenght) + "The 100% Java build tool.\n");
     }
 
     private Main() {

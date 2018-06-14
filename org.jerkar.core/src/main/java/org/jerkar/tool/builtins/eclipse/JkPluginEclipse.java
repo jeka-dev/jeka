@@ -90,7 +90,7 @@ public final class JkPluginEclipse extends JkPlugin {
                 .stream().collect(Collectors.toList());
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
-            JkLog.execute(this, "Generating Eclipse files on " + projectFolder,
+            JkLog.execute("Generating Eclipse files on " + projectFolder,
                     () -> Main.exec(projectFolder, "eclipse#generateFiles"));
         }
     }

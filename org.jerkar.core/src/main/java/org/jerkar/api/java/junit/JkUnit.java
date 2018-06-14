@@ -222,7 +222,7 @@ public final class JkUnit {
         final String name = getSuiteName(classes);
 
         if (!classes.iterator().hasNext()) {
-            JkLog.warn(this,"No test class found.");
+            JkLog.warn("No test class found.");
             return JkTestSuiteResult.empty((Properties) System.getProperties().clone(), name, 0);
         }
         final long start = System.nanoTime();
@@ -230,21 +230,18 @@ public final class JkUnit {
 
 
         final AtomicReference<JkTestSuiteResult> result = new AtomicReference<>();
-        final AtomicReference<String> taskMessage = new AtomicReference<>();
         Runnable task = () -> {
             if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
                 if (this.forkedProcess != null) {
-                    taskMessage.set("Executing JUnit tests in forked mode");
+                    JkLog.info("Test are executed in forked mode");
                     result.set(JUnit4TestLauncher.launchInFork(forkedProcess.withClasspaths(testSpec.classpath()),
                             printOutputOnConsole,
                             reportDetail, classes, reportDir.toFile()));
                 } else {
-                    taskMessage.set("Executing JUnit tests");
                     result.set(JUnit4TestLauncher.launchInClassLoader(classes, printOutputOnConsole,
                             reportDetail, reportDir.toFile()));
                 }
             } else if (classLoader.isDefined(JUNIT3_RUNNER_CLASS_NAME)) {
-                taskMessage.set("Executing JUnit tests");
                 final Object suite = createJunit3TestSuite(classLoader, classes);
                 final Class testResultClass = classLoader.load(JUNIT3_TEST_RESULT_CLASS_NAME);
                 final Object testResult = JkUtilsReflect.newInstance(testResultClass);
@@ -258,25 +255,24 @@ public final class JkUnit {
             } else {
                 JkUtilsIO.closeifClosable(classLoader.classloader());
                 throw new IllegalStateException("No Junit found on test classpath.");
-
             }
 
             if (result.get().failureCount() > 0) {
                 if (breakOnFailure) {
-                    JkLog.error(this, String.join("\n",
+                    JkLog.error(String.join("\n",
                             result.get().toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
                     JkUtilsIO.closeifClosable(classLoader.classloader());
                     throw new IllegalStateException("Test failed : " + result.toString());
                 } else {
-                    JkLog.warn(this,
-                            String.join("\n", result.get().toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
+                    JkLog.warn(String.join("\n",
+                            result.get().toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
                 }
             } else {
-                JkLog.info(this, String.join("/n",
+                JkLog.info(String.join("/n",
                         result.get().toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
             }
             if (JkLog.Verbosity.VERBOSE != JkLog.verbosity() && result.get().failureCount() > 0) {
-                JkLog.info(this, "Launch Jerkar in verbose mode to display failure stack traces accept console.");
+                JkLog.info("Launch Jerkar in verbose mode to display failure stack traces accept console.");
             }
             if (reportDetail.equals(JunitReportDetail.BASIC)) {
                 TestReportBuilder.of(result.get()).writeToFileSystem(reportDir);
@@ -285,7 +281,7 @@ public final class JkUnit {
                 runnable.run(); // NOSONAR
             }
         };
-        JkLog.execute(this, taskMessage.get(), task);
+        JkLog.execute("Executing JUnit tests", task);
         JkUtilsIO.closeifClosable(classLoader.classloader());
         return result.get();
     }

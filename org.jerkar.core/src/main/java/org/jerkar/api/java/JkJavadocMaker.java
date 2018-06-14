@@ -114,7 +114,7 @@ public final class JkJavadocMaker {
     public void process() {
         Runnable task = () -> {
             if (this.srcDirs.hasNoExistingRoot()) {
-                JkLog.warn(this, "No sources found in " + this.srcDirs);
+                JkLog.warn("No sources found in " + this.srcDirs);
                 return;
             }
             final String[] args = toArguments(outputDir);
@@ -131,7 +131,7 @@ public final class JkJavadocMaker {
                 JkPathTree.of(outputDir).zipTo(zipFile);
             }
         };
-        JkLog.execute(this,"Generating javadoc", task);
+        JkLog.execute("Generating javadoc", task);
     }
 
     private String[] toArguments(Path outputDir) {

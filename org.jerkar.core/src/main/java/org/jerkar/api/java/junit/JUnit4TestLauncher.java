@@ -47,7 +47,7 @@ class JUnit4TestLauncher {
         final Class[] classArray = JkUtilsIterable.arrayOf(classes, Class.class);
         classloader.addEntry(JkLocator.jerkarJarPath());
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-            JkLog.trace(JkTestSuiteResult.class, "Launching test using class loader : " + classloader.toString());
+            JkLog.trace("Launching test using class loader : " + classloader.toString());
         }
         return classloader.invokeStaticMethod(true, JUnit4TestExecutor.class.getName(),
                 "launchInProcess", classArray, logRunningTest, reportDetail, reportDir, true);

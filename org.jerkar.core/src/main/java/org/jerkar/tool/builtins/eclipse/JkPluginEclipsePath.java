@@ -31,7 +31,7 @@ public final class JkPluginEclipsePath extends JkPlugin {
             final JkEclipseClasspathApplier classpathApplier = new JkEclipseClasspathApplier(smartScope);
             classpathApplier.apply(project);
         } else {
-            JkLog.warn(this,"No Java plugin detected in this build : ignore.");
+            JkLog.warn("No Java plugin detected in this build : ignore.");
         }
     }
 

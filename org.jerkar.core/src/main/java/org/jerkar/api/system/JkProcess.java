@@ -229,7 +229,7 @@ public final class JkProcess implements Runnable {
                 throw new RuntimeException(e);
             }
         };
-        JkLog.execute(this,"Starting program : " + commands.toString(), runnable);
+        JkLog.execute("Starting program : " + commands.toString(), runnable);
         return result.get();
     }
 

@@ -168,7 +168,7 @@ public class JkPluginJava extends JkPlugin {
         final JkResolveResult resolveResult = this.project().maker().getDependencyResolver()
                 .resolve(this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME));
         final JkDependencyNode tree = resolveResult.dependencyTree();
-        JkLog.info(this,String.join("\n", tree.toStrings()));
+        JkLog.info(String.join("\n", tree.toStrings()));
     }
 
 }

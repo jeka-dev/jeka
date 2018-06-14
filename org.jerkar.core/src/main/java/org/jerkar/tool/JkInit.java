@@ -48,7 +48,7 @@ public final class JkInit {
         if (result == null) {
             throw new JkException("No build class found for engine located at : " + base);
         }
-        JkLog.info(JkInit.class,"Build class : " + result.getClass().getName());
+        JkLog.info("Build class : " + result.getClass().getName());
         return result;
     }
 

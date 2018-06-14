@@ -11,6 +11,7 @@ import java.io.PrintStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -32,7 +33,7 @@ public final class JkLog implements Serializable {
 
     private static Verbosity verbosity = Verbosity.NORMAL;
 
-    private static int currentNestedTaskLevel = 0;
+    private static AtomicInteger currentNestedTaskLevel = new AtomicInteger(0);
 
     private static final ThreadLocal<LinkedList<Long>> START_TIMES = new ThreadLocal<>();
 
@@ -51,18 +52,8 @@ public final class JkLog implements Serializable {
         verbosity = verbosityArg;
     }
 
-    public static long getElapsedNanoSecondsFromStartOfCurrentTask() {
-        final LinkedList<Long> times = START_TIMES.get();
-        if (times.isEmpty()) {
-            throw new IllegalStateException(
-                    "This 'end' do no match to any 'start'. "
-                            + "Please, use 'end' only to mention that the previous 'start' activity is done.");
-        }
-        return System.nanoTime() - times.getLast();
-    }
-
     public static int currentNestedLevel() {
-        return currentNestedTaskLevel;
+        return currentNestedTaskLevel.get();
     }
 
     public static void initializeInClassLoader(ClassLoader classLoader) {
@@ -75,7 +66,6 @@ public final class JkLog implements Serializable {
                     currentNestedTaskLevel);
             JkUtilsReflect.setFieldValue(null, targetClass.getDeclaredField("verbosity"),
                     JkUtilsIO.cloneBySerialization(verbosity, classLoader));
-
         } catch (ReflectiveOperationException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
@@ -89,69 +79,42 @@ public final class JkLog implements Serializable {
         return errorStream;
     }
 
-    public static void info(Object emittingInstanceOrClass, String message) {
-        consume(JkLogEvent.regular(emittingInstanceOrClass, Type.INFO, message));
-    }
-
     public static void info(String message) {
-        info(null, message);
-    }
-
-    public static void warn(Object emittingInstanceOrClass, String message) {
-        consume(JkLogEvent.regular(emittingInstanceOrClass, Type.WARN, message));
+        consume(JkLogEvent.regular(Type.INFO, message));
     }
 
     public static void warn(String message) {
-        warn(null, message);
-    }
-
-    public static void trace(Object emittingInstanceOrClass, String message) {
-        if (verbosity() == Verbosity.VERBOSE) {
-            consume(JkLogEvent.regular(emittingInstanceOrClass, Type.TRACE, message));
-        }
+        consume(JkLogEvent.regular(Type.WARN, message));
     }
 
     public static void trace(String message) {
-       trace(null,  message);
-    }
-
-    public static void error(Object emittingInstanceOrClass, String message) {
-        consume(JkLogEvent.regular(emittingInstanceOrClass, Type.ERROR, message));
+        if (verbosity() == Verbosity.VERBOSE) {
+            consume(JkLogEvent.regular(Type.TRACE, message));
+        }
     }
 
     public static void error(String message) {
-        error(null,message);
+        consume(JkLogEvent.regular(Type.ERROR, message));
     }
 
-    public static void execute(Object emmittingClassOrInstance, String message, Runnable task) {
-        consume(JkLogEvent.regular(emmittingClassOrInstance, Type.START_TASK, message));
-        currentNestedTaskLevel++;
+    public static void execute(String message, Runnable task) {
+        consume(JkLogEvent.regular(Type.START_TASK, message));
+        currentNestedTaskLevel.incrementAndGet();
         final long startTs = System.nanoTime();
         task.run();
         long durationMs = (System.nanoTime() - startTs) / 1000000;
-        currentNestedTaskLevel--;
-        consume((JkLogEvent.endTask(emmittingClassOrInstance, durationMs)));
-
+        currentNestedTaskLevel.decrementAndGet();
+        consume((JkLogEvent.endTask(durationMs)));
     }
 
-    public static void execute( String message, Runnable task) {
-        execute(null, message, task);
+    public static void startTask(String message) {
+        consume(JkLogEvent.regular(Type.START_TASK, message));
+        currentNestedTaskLevel.incrementAndGet();
     }
 
-    private static Object emittingClass(Object emittingInstanceOrClass) {
-        if (emittingInstanceOrClass == null) {
-            return null;
-        }
-        return emittingInstanceOrClass.getClass().equals(Class.class) ? emittingInstanceOrClass : emittingInstanceOrClass.getClass();
-    }
-
-    private static String emittingInstance(Object emittingInstanceOrClass) {
-        if (emittingInstanceOrClass == null) {
-            return null;
-        }
-        return emittingInstanceOrClass.getClass().equals(Class.class) ?
-                ((Class<?>) emittingInstanceOrClass).getName() :
-                emittingInstanceOrClass.getClass().getName();
+    public static void endTask(long duration) {
+        currentNestedTaskLevel.decrementAndGet();
+        consume(JkLogEvent.endTask(duration));
     }
 
     private static void consume(Object event) {
@@ -171,23 +134,20 @@ public final class JkLog implements Serializable {
 
     public static class JkLogEvent implements Serializable {
 
-        private JkLogEvent(String emittingClassName, Type type, String message, Runnable task, long duration) {
-            this.emittingClassName = emittingClassName;
+        private JkLogEvent(Type type, String message, Runnable task, long duration) {
             this.type = type;
             this.message = message;
             this.task = task;
             this.duration = duration;
         }
 
-        static JkLogEvent regular(Object emittingInstanceOrClass, Type type, String message) {
-            return new JkLogEvent(emittingInstance(emittingInstanceOrClass), type, message, null, 0);
+        static JkLogEvent regular(Type type, String message) {
+            return new JkLogEvent(type, message, null, 0);
         }
 
-        static JkLogEvent endTask(Object emittingInstanceOrClass, long duration) {
-            return new JkLogEvent(emittingInstance(emittingInstanceOrClass), Type.END_TASK, "", null, duration);
+        static JkLogEvent endTask(long duration) {
+            return new JkLogEvent(Type.END_TASK, "", null, duration);
         }
-
-        private final String emittingClassName; // In case it is emitted from a static method
 
         private final Type type;
 
@@ -196,10 +156,6 @@ public final class JkLog implements Serializable {
         private final Runnable task;
 
         private final long duration;
-
-        public String emittingClassName() {
-            return emittingClassName;
-        }
 
         public Type type() {
             return type;

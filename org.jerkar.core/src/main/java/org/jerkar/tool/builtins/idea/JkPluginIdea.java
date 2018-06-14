@@ -54,7 +54,7 @@ public final class JkPluginIdea extends JkPlugin {
                 build.baseDir().getFileName().toString() + ".iml");
         JkUtilsPath.deleteFile(imlFile);
         JkUtilsPath.write(imlFile, xml.getBytes(Charset.forName("UTF-8")));
-        JkLog.info(this,imlFile + " generated.");
+        JkLog.info(imlFile + " generated.");
     }
 
     /** Generate modules.xml files */
@@ -74,7 +74,7 @@ public final class JkPluginIdea extends JkPlugin {
                 .stream().collect(Collectors.toList());
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
-            JkLog.execute(this,"Generating iml file on " + projectFolder, () ->
+            JkLog.execute("Generating iml file on " + projectFolder, () ->
                 Main.exec(projectFolder, "idea#generateIml"));
         }
     }

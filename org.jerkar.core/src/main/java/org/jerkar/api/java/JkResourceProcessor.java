@@ -60,7 +60,7 @@ public final class JkResourceProcessor {
      * specified output directory along replacing specified tokens.
      */
     public void generateTo(Path outputDir, Charset charset) {
-        JkLog.execute(this,"Coping resource files to " + outputDir, () -> {
+        JkLog.execute("Coping resource files to " + outputDir, () -> {
             final AtomicInteger count = new AtomicInteger(0);
             for (final JkPathTree resourceTree : this.resourceTrees.fileTrees()) {
                 if (!resourceTree.exists()) {
@@ -79,7 +79,7 @@ public final class JkResourceProcessor {
                     }
                 });
             }
-            JkLog.info(this, count.intValue() + " file(s) copied.");
+            JkLog.info(count.intValue() + " file(s) copied.");
         });
 
 

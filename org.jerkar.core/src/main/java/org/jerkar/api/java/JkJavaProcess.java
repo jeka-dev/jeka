@@ -230,7 +230,7 @@ public final class JkJavaProcess {
 
         command.addAll(Arrays.asList(arguments));
         Runnable task = () -> {
-            JkLog.info(this, String.join("\n", command));
+            JkLog.info(String.join("\n", command));
             final int result;
             try {
                 final Process process = processBuilder(command, optionAndEnv.env).start();
@@ -251,7 +251,7 @@ public final class JkJavaProcess {
                         + ".");
             }
         };
-        JkLog.execute(this, "Starting java program : " + execPart, task);
+        JkLog.execute("Starting java program : " + execPart, task);
     }
 
     private OptionAndEnv optionsAndEnv() {
@@ -260,7 +260,7 @@ public final class JkJavaProcess {
         if (classpath != null && !classpath.entries().isEmpty()) {
             final String classpathString = classpath.toString();
             if (JkUtilsSystem.IS_WINDOWS && classpathString.length() > 7500) {
-                JkLog.warn(this, "classpath too long, classpath will be passed using CLASSPATH env variable.");
+                JkLog.warn("Classpath too long, classpath will be passed using CLASSPATH env variable.");
                 env.put("CLASSPATH", classpathString);
             } else {
                 options.add("-cp");

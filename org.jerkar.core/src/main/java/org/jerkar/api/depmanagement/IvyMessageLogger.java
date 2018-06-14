@@ -15,22 +15,22 @@ class IvyMessageLogger extends AbstractMessageLogger {
         message = "[Ivy] " + message.trim();
         switch (level) {
         case Message.MSG_ERR:
-            JkLog.error(this, message);
+            JkLog.error(message);
             break;
         case Message.MSG_WARN:
-            JkLog.warn(this, message);
+            JkLog.warn(message);
             break;
         case Message.MSG_INFO:
-            JkLog.info(this, message);
+            JkLog.info(message);
             break;
         case Message.MSG_VERBOSE:
-            JkLog.trace(this, message);
+            JkLog.trace(message);
             break;
         case Message.MSG_DEBUG:
            // JkEvent.trace(this, message);
             break;
         default:
-            JkLog.info(this,"[" + level + "] " + message);
+            JkLog.info("[" + level + "] " + message);
         }
 
     }
