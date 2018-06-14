@@ -3,6 +3,7 @@ package org.jerkar.tool;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 
 import org.jerkar.api.depmanagement.JkDependencies;
@@ -63,7 +64,7 @@ public class JkBuild {
     boolean scaffoldEmbed;
 
 
-    // ------------------ Instantiation cycle cycle --------------------------------------
+    // ------------------ Instantiation cycle  --------------------------------------
 
     /**
      * Constructs a {@link JkBuild}. Using constructor alone won't give you an instance populated with runtime options
@@ -83,6 +84,7 @@ public class JkBuild {
     }
 
     public static <T extends JkBuild> T of(Class<T> buildClass) {
+        JkLog.startTask("Initializing class " + buildClass.getName() + " at " + BASE_DIR_CONTEXT.get());
         final T build = JkUtilsReflect.newInstance(buildClass);
         final JkBuild jkBuild = (JkBuild) build;
 
@@ -96,17 +98,22 @@ public class JkBuild {
         JkOptions.populateFields(build, JkOptions.readSystemAndUserOptions());
         final Map<String, String> options = CommandLine.instance().getBuildOptions();
         JkOptions.populateFields(build, options);
-        JkLog.info("Build " + build + " instantiated.");
 
         // Load plugins declared in command line
         build.configurePlugins();
         jkBuild.plugins.loadCommandLinePlugins();
         jkBuild.plugins.all().forEach(plugin -> {
-            JkLog.info("  Build decorated with plugin " + plugin.getClass());
-            plugin.decorateBuild();});
+            List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(plugin).optionDefs();
+            plugin.decorateBuild();
+            JkLog.info("Instance decorated with plugin " + plugin.getClass()
+                    + HelpDisplayer.optionValues(defs));
+        });
 
         // Extra build configuration
         build.configure();
+        List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(build).optionDefs();
+        JkLog.info("Build instance initialized with options " + HelpDisplayer.optionValues(defs));
+        JkLog.endTask("Done.");
         return build;
     }
 

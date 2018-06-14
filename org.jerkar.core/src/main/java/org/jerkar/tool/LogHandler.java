@@ -29,7 +29,10 @@ class LogHandler implements JkLog.EventLogHandler {
         if (event.type() == JkLog.Type.END_TASK) {
                 StringBuilder sb = new StringBuilder();
                 sb.append(BOX_DRAWINGS_LIGHT_UP_AND_RIGHT);
-                sb.append(" done in " + event.durationMs() + " milliseconds. ").append(message);
+                if (event.durationMs() >= 0) {
+                    sb.append(" Done in " + event.durationMs() + " milliseconds.");
+                }
+                sb.append(" ").append(message);
                 message = sb.toString();
         } else if (event.type() == JkLog.Type.START_TASK) {
                 message = message +  " ... ";

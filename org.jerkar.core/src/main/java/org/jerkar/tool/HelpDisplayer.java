@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.*;
@@ -16,7 +17,7 @@ import org.w3c.dom.Element;
 
 final class HelpDisplayer {
 
-    private static final JkBuild DUMMY = JkBuild.of(JkBuild.class);
+    private static final JkBuild DUMMY = JkUtilsReflect.newInstance(JkBuild.class);
 
     static void help(JkBuild build) {
         if (JkOptions.containsKey("plugins")) {
@@ -86,6 +87,10 @@ final class HelpDisplayer {
             sb.append(BuildClassDef.of(object).description(description.shortName() + "#", false));
         }
         return sb.toString();
+    }
+
+    static List<String> optionValues(List<ProjectDef.BuildOptionDef> optionDefs) {
+        return optionDefs.stream().map(optionDef -> optionDef.shortDescription()).collect(Collectors.toList());
     }
 
 }

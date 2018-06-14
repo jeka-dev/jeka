@@ -28,7 +28,7 @@ class JUnitConsoleListener extends RunListener {
 
     @Override
     public void testFinished(Description description) throws Exception {
-        JkLog.endTask(JkUtilsTime.durationInMillis(startTs));
+        JkLog.endTask(("Done in " + JkUtilsTime.durationInMillis(startTs) + " milliseconds."));
         System.setOut(out);
         System.setErr(err);
     }

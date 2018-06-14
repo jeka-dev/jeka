@@ -80,10 +80,7 @@ public final class JkInit {
         } finally {
             JkBuild.baseDirContext(null);
         }
-        final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
-        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-            JkLog.info(propsAsString("\nField values", displayedOptions));
-        }
+        JkLog.info("Build ready to start.");
         return build;
     }
 

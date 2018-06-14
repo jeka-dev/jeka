@@ -68,6 +68,10 @@ final class ProjectDef {
             return methodDefs;
         }
 
+        List<BuildOptionDef> optionDefs() {
+            return optionDefs;
+        }
+
         static BuildClassDef of(Object build) {
             final Class<?> clazz = build.getClass();
             final List<BuildMethodDef> methods = new LinkedList<>();
@@ -341,6 +345,10 @@ final class ProjectDef {
                 return -1;
             }
             return 1;
+        }
+
+        String shortDescription() {
+            return name + " = " + defaultValue;
         }
 
 

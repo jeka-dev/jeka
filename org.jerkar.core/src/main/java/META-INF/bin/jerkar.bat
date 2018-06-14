@@ -4,7 +4,7 @@
 @rem SET JERKAR_OPTS == ""
 
 @rem set terminal encoding to utf-8
-chcp 65001
+chcp 65001 >null
 
 SET JERKAR_HOME=%~dp0
 if "%JAVA_HOME%" == "" set "JAVA_CMD=java" 

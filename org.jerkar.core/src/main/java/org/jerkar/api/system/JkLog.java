@@ -112,9 +112,9 @@ public final class JkLog implements Serializable {
         currentNestedTaskLevel.incrementAndGet();
     }
 
-    public static void endTask(long duration) {
+    public static void endTask(String message) {
         currentNestedTaskLevel.decrementAndGet();
-        consume(JkLogEvent.endTask(duration));
+        consume(JkLogEvent.regular(Type.END_TASK, message));
     }
 
     private static void consume(Object event) {
@@ -142,7 +142,7 @@ public final class JkLog implements Serializable {
         }
 
         static JkLogEvent regular(Type type, String message) {
-            return new JkLogEvent(type, message, null, 0);
+            return new JkLogEvent(type, message, null, -1);
         }
 
         static JkLogEvent endTask(long duration) {

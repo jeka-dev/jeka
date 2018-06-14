@@ -74,20 +74,20 @@ final class Engine {
     void execute(JkInit init) {
         this.buildDependencies = this.buildDependencies.andScopeless(init.commandLine().dependencies());
         final AtomicReference<JkBuild> build = new AtomicReference<>();
-        JkLog.execute("Compiling and instantiating build class", () -> {
+        JkLog.execute("Compile and initialise build classes", () -> {
             JkPathSequence runtimeClasspath = compile();
             if (!init.commandLine().dependencies().isEmpty()) {
                 final JkPathSequence cmdPath = pathOf(init.commandLine().dependencies());
                 runtimeClasspath = runtimeClasspath.andManyFirst(cmdPath);
                 JkLog.trace("Command line extra path : " + cmdPath);
             }
-            JkLog.info("Instantiating and configuring build class");
             build.set(getBuildInstance(init, runtimeClasspath));
             if (build == null) {
                 throw new JkException("Can't find or guess any build class for project hosted in " + this.projectBaseDir
                         + " .\nAre you sure this directory is a buildable project ?");
             }
         });
+        JkLog.info("Build is ready to start.");
         try {
             this.launch(build.get(), init.commandLine());
         } catch (final RuntimeException e) {
@@ -224,17 +224,9 @@ final class Engine {
     }
 
     private static void runProject(JkBuild build, List<MethodInvocation> invokes) {
-        JkLog.info("Executing build for project " + build.baseTree().root().getFileName().toString());
-        JkLog.info("Build class : " + build.getClass().getName());
-        JkLog.info("Base dir : " + build.baseDir());
-        final Map<String, String> displayedOptions = JkOptions.toDisplayedMap(OptionInjector.injectedFields(build));
-        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-            JkLog.info(JkInit.propsAsString("Field values", displayedOptions));
-        }
         for (MethodInvocation methodInvocation : invokes) {
             invokeMethodOnBuildClassOrPlugin(build, methodInvocation);
         }
-
     }
 
     private static void invokeMethodOnBuildClassOrPlugin(JkBuild build, MethodInvocation methodInvocation) {
@@ -256,7 +248,7 @@ final class Engine {
         } catch (final NoSuchMethodException e) {
             throw new JkException("No zero-arg method '" + methodName + "' found in class '" + build.getClass());
         }
-        JkLog.info("\nMethod : " + methodName);
+        JkLog.info("\nMethod : " + methodName + " on " + build);
         final long time = System.nanoTime();
         try {
             JkUtilsReflect.invoke(build, method);
