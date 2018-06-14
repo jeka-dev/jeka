@@ -11,10 +11,7 @@ import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsObject;
-import org.jerkar.api.utils.JkUtilsReflect;
+import org.jerkar.api.utils.*;
 
 /**
  * Base build class for defining builds. All build classes must extend this class in order
@@ -84,6 +81,7 @@ public class JkBuild {
     }
 
     public static <T extends JkBuild> T of(Class<T> buildClass) {
+        long ts = System.nanoTime();
         JkLog.startTask("Initializing class " + buildClass.getName() + " at " + BASE_DIR_CONTEXT.get());
         final T build = JkUtilsReflect.newInstance(buildClass);
         final JkBuild jkBuild = (JkBuild) build;
@@ -113,7 +111,7 @@ public class JkBuild {
         build.configure();
         List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(build).optionDefs();
         JkLog.info("Build instance initialized with options " + HelpDisplayer.optionValues(defs));
-        JkLog.endTask("Done.");
+        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(ts) + " milliseconds.");
         return build;
     }
 

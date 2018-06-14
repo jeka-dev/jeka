@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 
 import org.jerkar.api.file.JkPathSequence;
+import org.jerkar.api.system.JkLog;
 
 
 /**
@@ -64,6 +65,8 @@ public interface JkArtifactProducer extends JkArtifactLocator {
             final Path path = artifactPath(artifactFileId);
             if (!Files.exists(path)) {
                 makeArtifact(artifactFileId);
+            } else {
+                JkLog.info("Artifact " + path + " already exist ... won't process.");
             }
         }
     }

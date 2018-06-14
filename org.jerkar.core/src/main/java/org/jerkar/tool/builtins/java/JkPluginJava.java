@@ -43,7 +43,7 @@ public class JkPluginJava extends JkPlugin {
     protected JkPluginJava(JkBuild build) {
         super(build);
         this.project = new JkJavaProject(this.build.baseDir());
-        this.producedArtifacts.add(project.maker().mainArtifactId());
+        this.producedArtifacts.add(this.project.maker().mainArtifactId());
     }
 
     @JkDoc("Adds artifacts creation to the default method, " +
@@ -160,6 +160,7 @@ public class JkPluginJava extends JkPlugin {
     public void pack() {
         project.maker().pack(this.producedArtifacts);
     }
+
     /**
      * Displays the resolved dependency tree on the console.
      */
