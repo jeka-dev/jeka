@@ -14,18 +14,14 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
- * Initializer for build instances. It instantiates build class and inject
- * values according command line and option files.
+ * Class for instantiating builds while displaying meaningful information about environment on console.
  */
 public final class JkInit {
 
     /**
-     * Creates an instance of the specified build class. the build instance is
-     * configured according specified command line arguments and option files
-     * found in running environment. The base directory is the specified one.
+     * Creates an instance of the specified build class and displays information about build class and environment.
      */
     public static <T extends JkBuild> T instanceOf(Class<T> clazz, String... args) {
-        final Path baseDir = Paths.get("").toAbsolutePath();
         JkLog.register(new LogHandler());
         displayInfo(OptionsAndCommandLine.loadOptionsAndSystemProps(args));
         final T build = JkBuild.of(clazz);

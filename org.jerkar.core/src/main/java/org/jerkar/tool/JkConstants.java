@@ -18,11 +18,11 @@ public final class JkConstants {
 
     static final String DEFAULT_JAVA_SOURCE = "src/main/java";
 
-    static final Class<?> DEFAULT_BUILD_CLASS;
+    static final Class<? extends JkBuild> DEFAULT_BUILD_CLASS;
 
     static {
         try {
-            DEFAULT_BUILD_CLASS = Class.forName("org.jerkar.tool.builtins.java.JkJavaProjectBuild");
+            DEFAULT_BUILD_CLASS = (Class<? extends JkBuild>) Class.forName("org.jerkar.tool.builtins.java.JkJavaProjectBuild");
         } catch (ClassNotFoundException e) {
            throw new IllegalStateException(e);
         }

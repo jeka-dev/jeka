@@ -138,8 +138,7 @@ final class BuildResolver {
         JkBuild.baseDirContext(baseDir);
         final JkBuild result;
         try {
-            result = (JkBuild) JkUtilsReflect
-                    .newInstance(JkConstants.DEFAULT_BUILD_CLASS);
+            result = JkBuild.of(JkConstants.DEFAULT_BUILD_CLASS);
         } finally {
             JkBuild.baseDirContext(null);
         }

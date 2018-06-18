@@ -27,7 +27,9 @@ public final class Main {
             displayIntro();
         }
         OptionsAndCommandLine optionsAndCommandLine = OptionsAndCommandLine.loadOptionsAndSystemProps(args);
-        JkInit.displayInfo(optionsAndCommandLine);
+        if (JkLog.verbosity() != JkLog.Verbosity.MUTE) {
+            JkInit.displayInfo(optionsAndCommandLine);
+        }
         final Path workingDir = Paths.get("").toAbsolutePath();
         final Engine engine = new Engine(workingDir);
         try {
