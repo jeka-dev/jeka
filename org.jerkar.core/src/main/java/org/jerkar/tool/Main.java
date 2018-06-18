@@ -22,27 +22,29 @@ public final class Main {
      */
     public static void main(String[] args) {
         final long start = System.nanoTime();
+        OptionsAndCommandLine optionsAndCommandLine = OptionsAndCommandLine.loadOptionsAndSystemProps(args);
         JkLog.register(new LogHandler());
-        if (JkLog.verbosity() != JkLog.Verbosity.MUTE) {
+        if (!optionsAndCommandLine.standardOptions.hideHeaders) {
             displayIntro();
         }
-        OptionsAndCommandLine optionsAndCommandLine = OptionsAndCommandLine.loadOptionsAndSystemProps(args);
-        if (JkLog.verbosity() != JkLog.Verbosity.MUTE) {
+        if (!optionsAndCommandLine.standardOptions.hideHeaders) {
             JkInit.displayInfo(optionsAndCommandLine);
         }
         final Path workingDir = Paths.get("").toAbsolutePath();
         final Engine engine = new Engine(workingDir);
         try {
             engine.execute(optionsAndCommandLine.commandLine, optionsAndCommandLine.standardOptions.buildClass);
-            if (JkLog.verbosity() != JkLog.Verbosity.MUTE) {
+            if (!optionsAndCommandLine.standardOptions.hideHeaders) {
                 displayOutro(start);
             }
         } catch (final RuntimeException e) {
             System.err.println();
             e.printStackTrace(System.err);
-            final int length = printAscii(true, "failed.ascii");
-            System.err.println(JkUtilsString.repeat(" ", length) + "Total build time : "
-                    + JkUtilsTime.durationInSeconds(start) + " seconds.");
+            if (!optionsAndCommandLine.standardOptions.hideHeaders) {
+                final int length = printAscii(true, "failed.ascii");
+                System.err.println(JkUtilsString.repeat(" ", length) + "Total build time : "
+                        + JkUtilsTime.durationInSeconds(start) + " seconds.");
+            }
             System.exit(1);
         }
     }
@@ -74,8 +76,8 @@ public final class Main {
     }
 
     private static void displayIntro() {
-        final int lenght = printAscii(false, "jerkar.ascii");
-        JkLog.info(JkUtilsString.repeat(" ", lenght) + "The 100% Java build tool.\n");
+        final int length = printAscii(false, "jerkar.ascii");
+        JkLog.info(JkUtilsString.repeat(" ", length) + "The 100% Java build tool.\n");
     }
 
     private static void displayOutro(long startTs) {

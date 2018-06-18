@@ -20,6 +20,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.api.utils.JkUtilsTime;
 
 /**
  * Stand for a compilation setting and process. Use this class to perform java
@@ -132,37 +133,40 @@ public final class JkJavaCompiler {
         final JavaCompiler compiler = this.compiler != null ? this.compiler : getDefaultOrFail();
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null,
                 null);
-        String message = "Compiling " + compileSpec.getSourceFiles() + " source files to " + outputDir;
-        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-            message = message + " using options : " + JkUtilsString
+        String message = "Compiling " + compileSpec.getSourceFiles() + " source files to " + outputDir
+                + " using options : " + JkUtilsString
                     .join(options, " ");
+        long start = System.nanoTime();
+        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
+            JkLog.startTask(message);
         }
-        final AtomicBoolean result = new AtomicBoolean();
-        Runnable run = () -> {
-            if (compileSpec.getSourceFiles().isEmpty()) {
+        if (compileSpec.getSourceFiles().isEmpty()) {
+            if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
                 JkLog.warn("No source to compile");
-                result.set(true);
-                return;
+                JkLog.endTask("");
             }
-            if (this.fork == null) {
-                final Iterable<? extends JavaFileObject> javaFileObjects = fileManager
-                        .getJavaFileObjectsFromFiles(JkUtilsPath.toFiles(compileSpec.getSourceFiles()));
-                final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.stream()),
-                        null, new JkDiagnosticListener(), options, null, javaFileObjects);
-                result.set(task.call());
-            } else {
-                result.set(runOnFork(compileSpec));
+            return true;
+        }
+        final boolean result;
+        if (this.fork == null) {
+            final Iterable<? extends JavaFileObject> javaFileObjects = fileManager
+                    .getJavaFileObjectsFromFiles(JkUtilsPath.toFiles(compileSpec.getSourceFiles()));
+            final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.stream()),
+                    null, new JkDiagnosticListener(), options, null, javaFileObjects);
+            result = task.call();
+        } else {
+            result = runOnFork(compileSpec);
+        }
+        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
+            JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
+        }
+        if (!result) {
+            if (failOnError) {
+                throw new IllegalStateException("Compilation failed with options " + options);
             }
-            if (!result.get()) {
-                if (failOnError) {
-                    throw new IllegalStateException("Compilation failed with options " + options);
-                }
-                result.set(false);
-            }
-            result.set(true);
-        };
-        JkLog.execute( message, run);
-        return result.get();
+            return false;
+        }
+        return true;
     }
 
     private boolean runOnFork(JkJavaCompileSpec compileSpec) {

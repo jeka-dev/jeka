@@ -19,6 +19,8 @@ class OptionsAndCommandLine {
 
     StandardOptions standardOptions;
 
+    static boolean hideHeaders = false;
+
     static OptionsAndCommandLine loadOptionsAndSystemProps(String[] args) {
         final Map<String, String> sysProps = getSpecifiedSystemProps(args);
         setSystemProperties(sysProps);
@@ -32,9 +34,7 @@ class OptionsAndCommandLine {
         }
         final StandardOptions standardOptions = new StandardOptions();
         JkOptions.populateFields(standardOptions, optionMap);
-        if (standardOptions.silent) {
-            JkLog.setVerbosity(JkLog.Verbosity.MUTE);
-        } else if (standardOptions.verbose) {
+        if (standardOptions.verbose) {
             JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         }
 
@@ -43,6 +43,7 @@ class OptionsAndCommandLine {
         loadResult.sysprops = sysProps;
         loadResult.commandLine = commandLine;
         loadResult.standardOptions = standardOptions;
+        hideHeaders = standardOptions.hideHeaders;
         return loadResult;
     }
 
@@ -86,15 +87,15 @@ class OptionsAndCommandLine {
 
     static class StandardOptions {
 
-        boolean verbose;
+        public boolean verbose;
 
-        boolean silent;
+        public boolean hideHeaders;
 
-        String buildClass;
+        public String buildClass;
 
         @Override
         public String toString() {
-            return "buildClass=" + JkUtilsObject.toString(buildClass) + ", verbose=" + verbose + ", silent=" + silent;
+            return "buildClass=" + JkUtilsObject.toString(buildClass) + ", verbose=" + verbose + ", hideHeaders=" + hideHeaders;
         }
     }
 

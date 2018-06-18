@@ -23,9 +23,14 @@ public final class JkInit {
      */
     public static <T extends JkBuild> T instanceOf(Class<T> clazz, String... args) {
         JkLog.register(new LogHandler());
-        displayInfo(OptionsAndCommandLine.loadOptionsAndSystemProps(args));
+        OptionsAndCommandLine optionsAndCommandLine = OptionsAndCommandLine.loadOptionsAndSystemProps(args);
+        if (!optionsAndCommandLine.standardOptions.hideHeaders) {
+            displayInfo(OptionsAndCommandLine.loadOptionsAndSystemProps(args));
+        }
         final T build = JkBuild.of(clazz);
-        JkLog.info("Build is ready to start.");
+        if (!optionsAndCommandLine.standardOptions.hideHeaders) {
+            JkLog.info("Build is ready to start.");
+        }
         return build;
     }
 

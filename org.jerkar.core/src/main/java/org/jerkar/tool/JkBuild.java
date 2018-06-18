@@ -83,7 +83,9 @@ public class JkBuild {
         if (BASE_DIR_CONTEXT.get() == null) {
             baseDirContext(Paths.get("").toAbsolutePath());
         }
-        JkLog.startTask("Initializing class " + buildClass.getName() + " at " + BASE_DIR_CONTEXT.get());
+        if (!OptionsAndCommandLine.hideHeaders) {
+            JkLog.startTask("Initializing class " + buildClass.getName() + " at " + BASE_DIR_CONTEXT.get());
+        }
         final T build = JkUtilsReflect.newInstance(buildClass);
         final JkBuild jkBuild = build;
 
@@ -104,15 +106,19 @@ public class JkBuild {
         jkBuild.plugins.all().forEach(plugin -> {
             List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(plugin).optionDefs();
             plugin.decorateBuild();
-            JkLog.info("Instance decorated with plugin " + plugin.getClass()
-                    + HelpDisplayer.optionValues(defs));
+            if (!OptionsAndCommandLine.hideHeaders) {
+                JkLog.info("Instance decorated with plugin " + plugin.getClass()
+                        + HelpDisplayer.optionValues(defs));
+            }
         });
 
         // Extra build configuration
         build.configure();
         List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(build).optionDefs();
-        JkLog.info("Build instance initialized with options " + HelpDisplayer.optionValues(defs));
-        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(ts) + " milliseconds.");
+        if (!OptionsAndCommandLine.hideHeaders) {
+            JkLog.info("Build instance initialized with options " + HelpDisplayer.optionValues(defs));
+            JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(ts) + " milliseconds.");
+        }
         baseDirContext(null);
         return build;
     }
