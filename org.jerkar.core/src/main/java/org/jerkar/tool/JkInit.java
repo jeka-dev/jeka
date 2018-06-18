@@ -1,20 +1,17 @@
 package org.jerkar.tool;
 
-import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkInfo;
 import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.utils.*;
+import org.jerkar.api.system.JkLog;
+import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
+import org.jerkar.api.utils.JkUtilsString;
 
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Initializer for build instances. It instantiates build class and inject
@@ -22,77 +19,21 @@ import java.util.TreeMap;
  */
 public final class JkInit {
 
-    private final LoadResult loadResult;
-
-    private final String[] args; // command line arguments
-
-    private JkInit(LoadResult loadResult, String[] args) {
-        super();
-        this.loadResult = loadResult;
-        this.args = args;
-    }
-
-    static JkInit of(String[] args) {
-        final LoadResult loadResult = loadOptionsAndSystemProps(args);
-        return new JkInit(loadResult, args);
-    }
-
-    /**
-     * Creates an instance of the build class for the specified project. It is
-     * slower than {@link #instanceOf(Class, String...)} cause it needs
-     * compilation prior instantiating the object.
-     */
-    @SuppressWarnings("unchecked")
-    public static <T extends JkBuild> T instanceOf(Path base, String... args) {
-        final JkInit init = JkInit.of(args);
-        init.displayInfo();
-        final Engine engine = new Engine(base.toAbsolutePath().normalize());
-        final T result = (T) engine.instantiate(init);
-        if (result == null) {
-            throw new JkException("No build class found for engine located at : " + base);
-        }
-        JkLog.info("Build class : " + result.getClass().getName());
-        return result;
-    }
-
-    /**
-     * Creates an instance of the specified build class. the build instance is
-     * configured according specified command line arguments and option files
-     * found in running environment.
-     */
-    public static <T extends JkBuild> T instanceOf(Class<T> clazz, String... args) {
-        return instanceOf(clazz, Paths.get("").toAbsolutePath(), args);
-    }
-
     /**
      * Creates an instance of the specified build class. the build instance is
      * configured according specified command line arguments and option files
      * found in running environment. The base directory is the specified one.
      */
-    public static <T extends JkBuild> T instanceOf(Class<T> clazz, Path baseDir, String... args) {
-        final JkInit init = JkInit.of(args);
+    public static <T extends JkBuild> T instanceOf(Class<T> clazz, String... args) {
+        final Path baseDir = Paths.get("").toAbsolutePath();
         JkLog.register(new LogHandler());
-        init.displayInfo();
-        JkBuild.baseDirContext(baseDir);
-        final T build;
-        try {
-            build = JkBuild.of(clazz);
-        } finally {
-            JkBuild.baseDirContext(null);
-        }
-        JkLog.info("Build ready to start.");
+        displayInfo(OptionsAndCommandLine.loadOptionsAndSystemProps(args));
+        final T build = JkBuild.of(clazz);
+        JkLog.info("Build is ready to start.");
         return build;
     }
 
-    /**
-     * As {@link #instanceOf(Class, String...)} but you can specified the
-     * command line using two distinct arrays that will be concatenated.
-     */
-    public static <T extends JkBuild> T instanceOf(Class<T> clazz, String[] args, String... extraArgs) {
-        return instanceOf(clazz, JkUtilsIterable.concat(args, extraArgs));
-    }
-
-    void displayInfo() {
+    static void displayInfo(OptionsAndCommandLine optionsAndCommandLine) {
         StringBuilder sb = new StringBuilder()
                 .append("\nWorking Directory : " + System.getProperty("user.dir"))
                 .append("\nJava Home : " + System.getProperty("java.home"))
@@ -107,50 +48,14 @@ public final class JkInit {
         sb.append("\nJerkar User Home : " + JkLocator.jerkarUserHomeDir().toAbsolutePath().normalize());
         sb.append("\nJerkar Repository Cache : " + JkLocator.jerkarRepositoryCache());
         sb.append("\nJerkar Classpath : " + System.getProperty("java.class.path"));
-        sb.append("\nCommand Line : " + JkUtilsString.join(Arrays.asList(args), " "));
-        sb.append(propsAsString("Specified System Properties", loadResult.sysprops));
-        sb.append("\nStandard Options : " + loadResult.standardOptions);
+        sb.append("\nCommand Line : " + JkUtilsString.join(Arrays.asList(optionsAndCommandLine.commandLine.rawArgs()), " "));
+        sb.append(propsAsString("Specified System Properties", optionsAndCommandLine.sysprops));
+        sb.append("\nStandard Options : " + optionsAndCommandLine.standardOptions);
         sb.append(propsAsString("Options", JkOptions.toDisplayedMap(JkOptions.getAll())));
         JkLog.info(sb.toString());
     }
 
-    CommandLine commandLine() {
-        return this.loadResult.commandLine;
-    }
-
-    String buildClassHint() {
-        return loadResult.standardOptions.buildClass;
-    }
-
-    private static LoadResult loadOptionsAndSystemProps(String[] args) {
-        final Map<String, String> sysProps = getSpecifiedSystemProps(args);
-        setSystemProperties(sysProps);
-        final Map<String, String> optionMap = new HashMap<>();
-        optionMap.putAll(JkOptions.readSystemAndUserOptions());
-        CommandLine.init(args);
-        final CommandLine commandLine = CommandLine.instance();
-        optionMap.putAll(commandLine.getBuildOptions());
-        if (!JkOptions.isPopulated()) {
-            JkOptions.init(optionMap);
-        }
-        final JkInit.StandardOptions standardOptions = new JkInit.StandardOptions();
-        JkOptions.populateFields(standardOptions, optionMap);
-        if (standardOptions.silent) {
-            JkLog.setVerbosity(JkLog.Verbosity.MUTE);
-        } else if (standardOptions.verbose) {
-            JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
-        }
-
-        JkOptions.populateFields(standardOptions);
-        final JkInit.LoadResult loadResult = new JkInit.LoadResult();
-        loadResult.sysprops = sysProps;
-        loadResult.commandLine = commandLine;
-        loadResult.standardOptions = standardOptions;
-        return loadResult;
-    }
-
-
-    static String propsAsString(String message, Map<String, String> props) {
+    private final static String propsAsString(String message, Map<String, String> props) {
         StringBuilder sb = new StringBuilder();
         if (props.isEmpty()) {
             sb.append("\n" + message + " : none.");
@@ -163,28 +68,6 @@ public final class JkInit {
         return sb.toString();
     }
 
-    private static Map<String, String> getSpecifiedSystemProps(String[] args) {
-        final Map<String, String> result = new TreeMap<>();
-        final Path propFile = JkLocator.jerkarHomeDir().resolve("system.properties");
-        if (Files.exists(propFile)) {
-            result.putAll(JkUtilsFile.readPropertyFileAsMap(propFile));
-        }
-        result.putAll(userSystemProperties());
-        for (final String arg : args) {
-            if (arg.startsWith("-D")) {
-                final int equalIndex = arg.indexOf("=");
-                if (equalIndex <= -1) {
-                    result.put(arg.substring(2), "");
-                } else {
-                    final String name = arg.substring(2, equalIndex);
-                    final String value = arg.substring(equalIndex + 1);
-                    result.put(name, value);
-                }
-            }
-        }
-        return result;
-    }
-
     private static boolean embedded(Path jarFolder) {
         if (!Files.exists(bootDir())) {
             return false;
@@ -195,47 +78,5 @@ public final class JkInit {
     private static Path bootDir() {
         return Paths.get("./build/boot");
     }
-
-    private static Map<String, String> userSystemProperties() {
-        final Map<String, String> result = new HashMap<>();
-        final Path userPropFile = JkLocator.jerkarUserHomeDir().resolve("system.properties");
-        if (Files.exists(userPropFile)) {
-            result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
-        }
-        return result;
-    }
-
-    private static void setSystemProperties(Map<String, String> props) {
-        for (final Map.Entry<String, String> entry : props.entrySet()) {
-            System.setProperty(entry.getKey(), entry.getValue());
-        }
-    }
-
-    private static class LoadResult {
-
-        Map<String, String> sysprops;
-
-        CommandLine commandLine;
-
-        private JkInit.StandardOptions standardOptions;
-
-    }
-
-    private static class StandardOptions {
-
-        boolean verbose;
-
-        boolean silent;
-
-        String buildClass;
-
-        @Override
-        public String toString() {
-            return "buildClass=" + JkUtilsObject.toString(buildClass) + ", verbose=" + verbose + ", silent=" + silent;
-        }
-
-    }
-
-
 
 }

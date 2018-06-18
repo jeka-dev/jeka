@@ -23,8 +23,6 @@ public class JkBuild {
 
     private static final ThreadLocal<Path> BASE_DIR_CONTEXT = new ThreadLocal<>();
 
-    private static final ThreadLocal<Boolean> MASTER_BUILD = new ThreadLocal<>();
-
     static void baseDirContext(Path baseDir) {
         if (baseDir == null) {
             BASE_DIR_CONTEXT.set(null);
@@ -82,9 +80,12 @@ public class JkBuild {
 
     public static <T extends JkBuild> T of(Class<T> buildClass) {
         long ts = System.nanoTime();
+        if (BASE_DIR_CONTEXT.get() == null) {
+            baseDirContext(Paths.get("").toAbsolutePath());
+        }
         JkLog.startTask("Initializing class " + buildClass.getName() + " at " + BASE_DIR_CONTEXT.get());
         final T build = JkUtilsReflect.newInstance(buildClass);
-        final JkBuild jkBuild = (JkBuild) build;
+        final JkBuild jkBuild = build;
 
         // plugins must be instantiated before setupOptionsDefault is invoked.
         jkBuild.plugins = new JkBuildPlugins(build, CommandLine.instance().getPluginOptions());
@@ -112,6 +113,7 @@ public class JkBuild {
         List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(build).optionDefs();
         JkLog.info("Build instance initialized with options " + HelpDisplayer.optionValues(defs));
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(ts) + " milliseconds.");
+        baseDirContext(null);
         return build;
     }
 

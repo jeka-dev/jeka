@@ -22,22 +22,18 @@ public final class Main {
      */
     public static void main(String[] args) {
         final long start = System.nanoTime();
-        final JkInit init = JkInit.of(args);
         JkLog.register(new LogHandler());
         if (JkLog.verbosity() != JkLog.Verbosity.MUTE) {
             displayIntro();
         }
-        init.displayInfo();
-
+        OptionsAndCommandLine optionsAndCommandLine = OptionsAndCommandLine.loadOptionsAndSystemProps(args);
+        JkInit.displayInfo(optionsAndCommandLine);
         final Path workingDir = Paths.get("").toAbsolutePath();
         final Engine engine = new Engine(workingDir);
         try {
-            engine.execute(init);
+            engine.execute(optionsAndCommandLine.commandLine, optionsAndCommandLine.standardOptions.buildClass);
             if (JkLog.verbosity() != JkLog.Verbosity.MUTE) {
-                System.out.println();
-                final int length = printAscii(false, "success.ascii");
-                System.out.println(JkUtilsString.repeat(" ", length) + "Total build time : "
-                        + JkUtilsTime.durationInSeconds(start) + " seconds.");
+                displayOutro(start);
             }
         } catch (final RuntimeException e) {
             System.err.println();
@@ -53,9 +49,9 @@ public final class Main {
      * Entry point to call Jerkar on a given folder
      */
     public static void exec(Path projectDir, String... args) {
-        final JkInit init = JkInit.of(args);
         final Engine engine = new Engine(projectDir);
-        engine.execute(init);
+        OptionsAndCommandLine optionsAndCommandLine = OptionsAndCommandLine.loadOptionsAndSystemProps(args);
+        engine.execute(optionsAndCommandLine.commandLine, optionsAndCommandLine.standardOptions.buildClass);
     }
 
     private static int printAscii(boolean error, String fileName) {
@@ -78,6 +74,12 @@ public final class Main {
     private static void displayIntro() {
         final int lenght = printAscii(false, "jerkar.ascii");
         JkLog.info(JkUtilsString.repeat(" ", lenght) + "The 100% Java build tool.\n");
+    }
+
+    private static void displayOutro(long startTs) {
+        final int length = printAscii(false, "success.ascii");
+        System.out.println(JkUtilsString.repeat(" ", length) + "Total build time : "
+                + JkUtilsTime.durationInSeconds(startTs) + " seconds.");
     }
 
     private Main() {

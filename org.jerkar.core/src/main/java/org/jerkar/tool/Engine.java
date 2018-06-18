@@ -62,26 +62,21 @@ final class Engine {
         return resolver.resolve(baseClass);
     }
 
-    JkBuild instantiate(JkInit init) {
-        final JkPathSequence runtimePath = compile();
-        return getBuildInstance(init, runtimePath);
-    }
-
     /**
      * Pre-compile and compile build classes (if needed) then execute the build
      * of this project.
      */
-    void execute(JkInit init) {
-        this.buildDependencies = this.buildDependencies.andScopeless(init.commandLine().dependencies());
+    void execute(CommandLine commandLine, String buildClassHint) {
+        this.buildDependencies = this.buildDependencies.andScopeless(commandLine.dependencies());
         final AtomicReference<JkBuild> build = new AtomicReference<>();
         JkLog.execute("Compile and initialise build classes", () -> {
             JkPathSequence runtimeClasspath = compile();
-            if (!init.commandLine().dependencies().isEmpty()) {
-                final JkPathSequence cmdPath = pathOf(init.commandLine().dependencies());
+            if (!commandLine.dependencies().isEmpty()) {
+                final JkPathSequence cmdPath = pathOf(commandLine.dependencies());
                 runtimeClasspath = runtimeClasspath.andManyFirst(cmdPath);
                 JkLog.trace("Command line extra path : " + cmdPath);
             }
-            build.set(getBuildInstance(init, runtimeClasspath));
+            build.set(getBuildInstance(buildClassHint, runtimeClasspath));
             if (build == null) {
                 throw new JkException("Can't find or guess any build class for project hosted in " + this.projectBaseDir
                         + " .\nAre you sure this directory is a buildable project ?");
@@ -89,7 +84,7 @@ final class Engine {
         });
         JkLog.info("Build is ready to start.");
         try {
-            this.launch(build.get(), init.commandLine());
+            this.launch(build.get(), commandLine);
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
@@ -133,11 +128,11 @@ final class Engine {
         });
     }
 
-    private JkBuild getBuildInstance(JkInit init, JkPathSequence runtimePath) {
+    private JkBuild getBuildInstance(String buildClassHint, JkPathSequence runtimePath) {
         final JkClassLoader classLoader = JkClassLoader.current();
         classLoader.addEntries(runtimePath);
         JkLog.trace("Setting build execution classpath to : " + classLoader.childClasspath());
-        final JkBuild build = resolver.resolve(init.buildClassHint());
+        final JkBuild build = resolver.resolve(buildClassHint);
         if (build == null) {
             return null;
         }

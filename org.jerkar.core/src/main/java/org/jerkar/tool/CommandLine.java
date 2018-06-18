@@ -1,10 +1,10 @@
 package org.jerkar.tool;
 
-import java.util.*;
-
 import org.jerkar.api.depmanagement.JkModuleDependency;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsString;
+
+import java.util.*;
 
 /*
  * Master and imported build concepts are relevant only in a multi-project build.
@@ -31,6 +31,7 @@ final class CommandLine {
         result.subProjectMethods = extractMethods(words, false);
         result.pluginOptions = extractPluginOptions(words);
         result.buildDependencies = dependencies(words);
+        result.rawArgs = words;
         return result;
     }
 
@@ -43,6 +44,8 @@ final class CommandLine {
     private List<PluginOptions> pluginOptions;
 
     private List<JkModuleDependency> buildDependencies;
+
+    private String[] rawArgs;
 
     private CommandLine() {
         super();
@@ -236,6 +239,10 @@ final class CommandLine {
 
     List<JkModuleDependency> dependencies() {
         return this.buildDependencies;
+    }
+
+    String[] rawArgs() {
+        return rawArgs;
     }
 
 }
