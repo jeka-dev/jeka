@@ -45,6 +45,9 @@ class Environment {
         if (standardOptions.logVerbose) {
             JkLog.setVerbosity(JkLog.Verbosity.VERBOSE);
         }
+        LogHandler.MAX_LENGTH = standardOptions.logMaxLength;
+
+
         Environment.systemProps = sysProps;
         Environment.commandLine = commandLine;
         Environment.standardOptions = standardOptions;
@@ -86,11 +89,14 @@ class Environment {
 
         boolean logNoHeaders;
 
+        int logMaxLength = -1;
+
         String buildClass;
 
         StandardOptions (Map<String, String> map) {
-            this.logVerbose = valueOf(Boolean.class, map, false, "Log.Verbose", "LV");
-            this.logNoHeaders = valueOf(Boolean.class, map, false,"Log.NoHeaders", "NH");
+            this.logVerbose = valueOf(Boolean.class, map, false, "Log.verbose", "LV");
+            this.logNoHeaders = valueOf(Boolean.class, map, false,"Log.noHeaders", "NH");
+            this.logMaxLength = valueOf(Integer.class, map, -1,"Log.maxLength", "ML");
             this.buildClass = valueOf(String.class, map, null, "BuildClass", "BC");
         }
 

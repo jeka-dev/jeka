@@ -20,7 +20,7 @@ class LogHandler implements JkLog.EventLogHandler {
 
     private static final int MARGIN_UNIT_LENGTH = new String(MARGIN_UNIT, UTF8).length();
 
-    static final int MAX_LENGTH = -1;
+    static int MAX_LENGTH = -1;
 
     private final MarginStream out = new MarginStream(System.out, MAX_LENGTH);
 
