@@ -30,7 +30,7 @@
 
 	<target name="test" depends="create-bin">
 		<java classname="org.jerkar.tool.Main" dir="org.jerkar.distrib-all" fork="true" failonerror="true">
-			<arg line="-testSamples=false -Log.maxLength=150" />
+			<arg line="-testSamples=false -Log.maxLength=100" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />
