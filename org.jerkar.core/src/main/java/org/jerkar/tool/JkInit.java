@@ -23,18 +23,18 @@ public final class JkInit {
      */
     public static <T extends JkBuild> T instanceOf(Class<T> clazz, String... args) {
         JkLog.register(new LogHandler());
-        OptionsAndCommandLine optionsAndCommandLine = OptionsAndCommandLine.loadOptionsAndSystemProps(args);
-        if (!optionsAndCommandLine.standardOptions.hideHeaders) {
-            displayInfo(OptionsAndCommandLine.loadOptionsAndSystemProps(args));
+        Environment.initialize(args);
+        if (!Environment.standardOptions.logNoHeaders) {
+            displayInfo();
         }
         final T build = JkBuild.of(clazz);
-        if (!optionsAndCommandLine.standardOptions.hideHeaders) {
+        if (!Environment.standardOptions.logNoHeaders) {
             JkLog.info("Build is ready to start.");
         }
         return build;
     }
 
-    static void displayInfo(OptionsAndCommandLine optionsAndCommandLine) {
+    static void displayInfo() {
         StringBuilder sb = new StringBuilder()
                 .append("\nWorking Directory : " + System.getProperty("user.dir"))
                 .append("\nJava Home : " + System.getProperty("java.home"))
@@ -49,9 +49,9 @@ public final class JkInit {
         sb.append("\nJerkar User Home : " + JkLocator.jerkarUserHomeDir().toAbsolutePath().normalize());
         sb.append("\nJerkar Repository Cache : " + JkLocator.jerkarRepositoryCache());
         sb.append("\nJerkar Classpath : " + System.getProperty("java.class.path"));
-        sb.append("\nCommand Line : " + JkUtilsString.join(Arrays.asList(optionsAndCommandLine.commandLine.rawArgs()), " "));
-        sb.append(propsAsString("Specified System Properties", optionsAndCommandLine.sysprops));
-        sb.append("\nStandard Options : " + optionsAndCommandLine.standardOptions);
+        sb.append("\nCommand Line : " + JkUtilsString.join(Arrays.asList(Environment.commandLine.rawArgs()), " "));
+        sb.append(propsAsString("Specified System Properties", Environment.systemProps));
+        sb.append("\nStandard Options : " + Environment.standardOptions);
         sb.append(propsAsString("Options", JkOptions.toDisplayedMap(JkOptions.getAll())));
         JkLog.info(sb.toString());
     }

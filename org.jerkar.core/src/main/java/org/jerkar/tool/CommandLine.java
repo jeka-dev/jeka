@@ -7,10 +7,7 @@ import org.jerkar.api.utils.JkUtilsString;
 import java.util.*;
 
 /*
- * Master and imported build concepts are relevant only in a multi-project build.
- * When doing a multi-project build there is always 1 master and 1 or many imported builds (1 imported build per project).
- *
- * Settings for the master project only are distinct from overall settings (master + imported builds).
+ * Holds information carried by the command line.
  */
 final class CommandLine {
 
@@ -24,9 +21,10 @@ final class CommandLine {
 
     private static CommandLine INSTANCE = null;
 
-    private static CommandLine of(String[] words) {
+    static CommandLine parse(String[] words) {
         final CommandLine result = new CommandLine();
         result.buildOptions = extractOptions(words);
+        result.systemProperties = extractSystemProperties(words);
         result.masterMethods = extractMethods(words, true);
         result.subProjectMethods = extractMethods(words, false);
         result.pluginOptions = extractPluginOptions(words);
@@ -36,6 +34,8 @@ final class CommandLine {
     }
 
     private Map<String, String> buildOptions;
+
+    private Map<String, String> systemProperties;
 
     private List<MethodInvocation> masterMethods;
 
@@ -51,23 +51,12 @@ final class CommandLine {
         super();
     }
 
-    static void init(String[] args) {
-        INSTANCE = of(args);
-    }
-
-    static CommandLine instance() {
-        if (INSTANCE == null) {
-            INSTANCE = of(new String[0]);
-        }
-        return INSTANCE;
-    }
-
     private static List<JkModuleDependency> dependencies(String[] words) {
         final List<JkModuleDependency> result = new LinkedList<>();
         for (final String word : words) {
             if (word.startsWith(MODULE_SYMBOL_CHAR)) {
-                final String depdef = word.substring(1);
-                result.add(JkModuleDependency.of(depdef));
+                final String dependencyDef = word.substring(1);
+                result.add(JkModuleDependency.of(dependencyDef));
             }
         }
         return result;
@@ -108,6 +97,23 @@ final class CommandLine {
                         final String value = word.substring(equalIndex + 1);
                         result.put(key, value);
                     }
+                }
+            }
+        }
+        return Collections.unmodifiableMap(result);
+    }
+
+    private static Map<String, String> extractSystemProperties(String[] args) {
+        final Map<String, String> result = new HashMap<>();
+        for (final String arg : args) {
+            if (arg.startsWith("-D")) {
+                final int equalIndex = arg.indexOf("=");
+                if (equalIndex <= -1) {
+                    result.put(arg.substring(2), "");
+                } else {
+                    final String name = arg.substring(2, equalIndex);
+                    final String value = arg.substring(equalIndex + 1);
+                    result.put(name, value);
                 }
             }
         }
@@ -169,7 +175,7 @@ final class CommandLine {
 
         public static MethodInvocation pluginMethod(String pluginName, String methodName) {
             JkUtilsAssert.isTrue(pluginName != null && !pluginName.isEmpty(),
-                    "PluginName can' t ne null or empty");
+                    "PluginName can't be null or empty");
             return new MethodInvocation(methodName, pluginName);
         }
 
@@ -212,8 +218,12 @@ final class CommandLine {
 
     }
 
-    Map<String, String> getBuildOptions() {
+    Map<String, String> getOptions() {
         return buildOptions;
+    }
+
+    Map<String, String> getSystemProperties() {
+        return systemProperties;
     }
 
     List<MethodInvocation> getMasterMethods() {

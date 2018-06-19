@@ -23,8 +23,7 @@ public class CommandLineTest {
     }
 
     private static CommandLine args(String string) {
-        CommandLine.init(string.split(" "));
-        return CommandLine.instance();
+        return CommandLine.parse(string.split(" "));
     }
 
 }

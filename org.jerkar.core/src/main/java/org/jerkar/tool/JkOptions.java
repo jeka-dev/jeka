@@ -1,17 +1,16 @@
 package org.jerkar.tool;
 
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsFile;
-import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Key/value string storage for build parameters. Both keys and values are java
@@ -24,6 +23,7 @@ import org.jerkar.api.utils.JkUtilsString;
  */
 public final class JkOptions {
 
+    // Default populated instance without needing to invoke #init method.
     private static JkOptions INSTANCE = new JkOptions(readSystemAndUserOptions());
 
     private final Map<String, String> props = new HashMap<>();
@@ -128,12 +128,6 @@ public final class JkOptions {
             result.putAll(JkUtilsFile.readPropertyFileAsMap(userPropFile));
         }
         return result;
-    }
-
-    static String fieldOptionsToString(Object object) {
-        final Map<String, String> map = JkOptions.toDisplayedMap(OptionInjector
-                .injectedFields(object));
-        return JkUtilsIterable.toString(map);
     }
 
 }

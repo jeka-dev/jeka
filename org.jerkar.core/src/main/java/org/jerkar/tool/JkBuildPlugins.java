@@ -80,7 +80,7 @@ public final class JkBuildPlugins {
     }
 
     void loadCommandLinePlugins() {
-        Iterable<PluginOptions> pluginSetups = CommandLine.instance().getPluginOptions();
+        Iterable<PluginOptions> pluginSetups = Environment.commandLine.getPluginOptions();
         for (PluginOptions pluginSetup : pluginSetups){
             PluginDictionary.PluginDescription pluginDescription = PluginDictionary.loadByName(pluginSetup.pluginName);
             getOrCreate(pluginDescription.pluginClass());

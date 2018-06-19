@@ -83,21 +83,21 @@ public class JkBuild {
         if (BASE_DIR_CONTEXT.get() == null) {
             baseDirContext(Paths.get("").toAbsolutePath());
         }
-        if (!OptionsAndCommandLine.hideHeaders) {
+        if (!Environment.standardOptions.logNoHeaders) {
             JkLog.startTask("Initializing class " + buildClass.getName() + " at " + BASE_DIR_CONTEXT.get());
         }
         final T build = JkUtilsReflect.newInstance(buildClass);
         final JkBuild jkBuild = build;
 
         // plugins must be instantiated before setupOptionsDefault is invoked.
-        jkBuild.plugins = new JkBuildPlugins(build, CommandLine.instance().getPluginOptions());
+        jkBuild.plugins = new JkBuildPlugins(build, Environment.commandLine.getPluginOptions());
 
         // Allow sub-classes to define defaults prior options are injected
         build.setupOptionDefaults();
 
         // Inject options
         JkOptions.populateFields(build, JkOptions.readSystemAndUserOptions());
-        final Map<String, String> options = CommandLine.instance().getBuildOptions();
+        final Map<String, String> options = Environment.commandLine.getOptions();
         JkOptions.populateFields(build, options);
 
         // Load plugins declared in command line
@@ -106,7 +106,7 @@ public class JkBuild {
         jkBuild.plugins.all().forEach(plugin -> {
             List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(plugin).optionDefs();
             plugin.decorateBuild();
-            if (!OptionsAndCommandLine.hideHeaders) {
+            if (!Environment.standardOptions.logNoHeaders) {
                 JkLog.info("Instance decorated with plugin " + plugin.getClass()
                         + HelpDisplayer.optionValues(defs));
             }
@@ -115,7 +115,7 @@ public class JkBuild {
         // Extra build configuration
         build.configure();
         List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(build).optionDefs();
-        if (!OptionsAndCommandLine.hideHeaders) {
+        if (!Environment.standardOptions.logNoHeaders) {
             JkLog.info("Build instance initialized with options " + HelpDisplayer.optionValues(defs));
             JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(ts) + " milliseconds.");
         }

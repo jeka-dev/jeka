@@ -2,11 +2,7 @@ package org.jerkar.api.utils;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * Utility class for dealing with strings.
@@ -130,6 +126,20 @@ public final class JkUtilsString {
             tokens.add(token.trim());
         }
         return tokens.toArray(new String[tokens.size()]);
+    }
+
+    public static List<String> split(String string, int maxLength) {
+        List<String> result = new LinkedList<>();
+        StringBuilder line = new StringBuilder();
+        int previousSpaceIndex = 0;
+        while (previousSpaceIndex < string.length()) {
+            int nextSpaceIndex = string.indexOf(" ", previousSpaceIndex);
+            int tempLength = nextSpaceIndex - previousSpaceIndex;
+            if (tempLength + line.length() > maxLength) {
+                result.add(line.toString());
+            }
+        }
+        return result;
     }
 
 

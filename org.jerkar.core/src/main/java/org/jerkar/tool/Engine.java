@@ -8,8 +8,8 @@ import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaCompiler;
-import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkLocator;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsReflect;
@@ -76,7 +76,7 @@ final class Engine {
         this.buildDependencies = this.buildDependencies.andScopeless(commandLine.dependencies());
         final AtomicReference<JkBuild> build = new AtomicReference<>();
         long start = System.nanoTime();
-        if (!OptionsAndCommandLine.hideHeaders) {
+        if (!Environment.standardOptions.logNoHeaders) {
             JkLog.startTask("Compile and initialise build classes");
         }
         JkPathSequence runtimeClasspath = compile();
@@ -90,14 +90,14 @@ final class Engine {
             throw new JkException("Can't find or guess any build class for project hosted in " + this.projectBaseDir
                     + " .\nAre you sure this directory is a buildable project ?");
         }
-        if (!OptionsAndCommandLine.hideHeaders) {
+        if (!Environment.standardOptions.logNoHeaders) {
             JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
             JkLog.info("Build is ready to start.");
         }
         try {
             this.launch(build.get(), commandLine);
         } catch (final RuntimeException e) {
-            if (!OptionsAndCommandLine.hideHeaders) {
+            if (!Environment.standardOptions.logNoHeaders) {
                 JkLog.error("Engine " + projectBaseDir + " failed");
             }
             throw e;
@@ -132,7 +132,7 @@ final class Engine {
         preCompile(); // This enrich dependencies
         String msg = "Compiling build classes for project " + this.projectBaseDir.getFileName().toString();
         long start = System.nanoTime();
-        if (!OptionsAndCommandLine.hideHeaders) {
+        if (!Environment.standardOptions.logNoHeaders) {
             JkLog.startTask(msg);
         }
             final JkDependencyResolver buildClassDependencyResolver = getBuildDefDependencyResolver();
@@ -141,7 +141,7 @@ final class Engine {
             path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
             this.compileBuild(JkPathSequence.ofMany(path));
             path.add(this.resolver.buildClassDir);
-        if (!OptionsAndCommandLine.hideHeaders) {
+        if (!Environment.standardOptions.logNoHeaders) {
             JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
         }
     }
@@ -188,7 +188,7 @@ final class Engine {
     private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
         JkPathSequence pathSequence = JkPathSequence.of();
         if (!this.rootsOfImportedBuilds.isEmpty()) {
-            if (!OptionsAndCommandLine.hideHeaders) {
+            if (!Environment.standardOptions.logNoHeaders) {
                 JkLog.info("Compile build classes of dependent projects : "
                         + toRelativePaths(this.projectBaseDir, this.rootsOfImportedBuilds));
             }
@@ -263,18 +263,18 @@ final class Engine {
         } catch (final NoSuchMethodException e) {
             throw new JkException("No zero-arg method '" + methodName + "' found in class '" + build.getClass());
         }
-        if (!OptionsAndCommandLine.hideHeaders) {
+        if (!Environment.standardOptions.logNoHeaders) {
             JkLog.info("\nMethod : " + methodName + " on " + build);
         }
         final long time = System.nanoTime();
         try {
             JkUtilsReflect.invoke(build, method);
-            if (!OptionsAndCommandLine.hideHeaders) {
+            if (!Environment.standardOptions.logNoHeaders) {
                 JkLog.info("Method " + methodName + " succeeded in "
                         + JkUtilsTime.durationInSeconds(time) + " seconds.");
             }
         } catch (final RuntimeException e) {
-            if (!OptionsAndCommandLine.hideHeaders) {
+            if (!Environment.standardOptions.logNoHeaders) {
                 JkLog.info("Method " + methodName + " failed in " + JkUtilsTime.durationInSeconds(time)
                         + " seconds.");
             }

@@ -27,7 +27,7 @@ final class HelpDisplayer {
         StringBuilder sb = new StringBuilder()
                 .append("Usage: jerkar [methodA...] [-optionName=value...] [-DsystemPropName=value...]\n")
                 .append("When no method specified, 'doDefault' method is invoked.\n")
-                .append("Ex: jerkar javadoc compile -verbose=true -other=xxx -DmyProp=Xxxx\n\n")
+                .append("Ex: jerkar javadoc compile -logVerbose=true -other=xxx -DmyProp=Xxxx\n\n")
                 .append("Available methods and options :\n");
 
         sb.append(BuildClassDef.of(build).description("", true));

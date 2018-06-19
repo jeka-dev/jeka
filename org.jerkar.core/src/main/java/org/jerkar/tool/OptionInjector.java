@@ -33,12 +33,7 @@ final class OptionInjector {
         final boolean present = props.containsKey(name);
         if (present) {
             final String stringValue = props.get(name);
-            Object value;
-            if (stringValue == null) {
-                value = defaultValue(type);
-            } else {
-                value = parse((Class<Object>) type, stringValue);
-            }
+            Object value = parse((Class<Object>) type, stringValue);
             if (value == UNHANDLED_TYPE) {
                 throw new IllegalArgumentException("Class " + target.getClass().getName()
                         + ", field " + name + ", can't handle type " + type);
@@ -56,7 +51,7 @@ final class OptionInjector {
 
     }
 
-    private static Object defaultValue(Class<?> type) {
+    static Object defaultValue(Class<?> type) {
         if (type.equals(Boolean.class) || type.equals(boolean.class)) {
             return true;
         }
@@ -64,8 +59,11 @@ final class OptionInjector {
     }
 
     @SuppressWarnings("unchecked")
-    private static Object parse(Class<Object> type, String stringValue)
+    static Object parse(Class<?> type, String stringValue)
             throws IllegalArgumentException {
+        if (stringValue == null) {
+            return defaultValue(type);
+        }
         if (type.equals(String.class)) {
             return stringValue;
         }

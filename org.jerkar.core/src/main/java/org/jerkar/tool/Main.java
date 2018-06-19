@@ -22,25 +22,25 @@ public final class Main {
      */
     public static void main(String[] args) {
         final long start = System.nanoTime();
-        OptionsAndCommandLine optionsAndCommandLine = OptionsAndCommandLine.loadOptionsAndSystemProps(args);
+        Environment.initialize(args);
         JkLog.register(new LogHandler());
-        if (!optionsAndCommandLine.standardOptions.hideHeaders) {
+        if (!Environment.standardOptions.logNoHeaders) {
             displayIntro();
         }
-        if (!optionsAndCommandLine.standardOptions.hideHeaders) {
-            JkInit.displayInfo(optionsAndCommandLine);
+        if (!Environment.standardOptions.logNoHeaders) {
+            JkInit.displayInfo();
         }
         final Path workingDir = Paths.get("").toAbsolutePath();
         final Engine engine = new Engine(workingDir);
         try {
-            engine.execute(optionsAndCommandLine.commandLine, optionsAndCommandLine.standardOptions.buildClass);
-            if (!optionsAndCommandLine.standardOptions.hideHeaders) {
+            engine.execute(Environment.commandLine, Environment.standardOptions.buildClass);
+            if (!Environment.standardOptions.logNoHeaders) {
                 displayOutro(start);
             }
         } catch (final RuntimeException e) {
             System.err.println();
             e.printStackTrace(System.err);
-            if (!optionsAndCommandLine.standardOptions.hideHeaders) {
+            if (!Environment.standardOptions.logNoHeaders) {
                 final int length = printAscii(true, "failed.ascii");
                 System.err.println(JkUtilsString.repeat(" ", length) + "Total build time : "
                         + JkUtilsTime.durationInSeconds(start) + " seconds.");
@@ -54,8 +54,8 @@ public final class Main {
      */
     public static void exec(Path projectDir, String... args) {
         final Engine engine = new Engine(projectDir);
-        OptionsAndCommandLine optionsAndCommandLine = OptionsAndCommandLine.loadOptionsAndSystemProps(args);
-        engine.execute(optionsAndCommandLine.commandLine, optionsAndCommandLine.standardOptions.buildClass);
+        Environment.initialize(args);
+        engine.execute(Environment.commandLine, Environment.standardOptions.buildClass);
     }
 
     private static int printAscii(boolean error, String fileName) {
