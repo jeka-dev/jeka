@@ -441,6 +441,10 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return this;
     }
 
+    public JkJavaProjectMaker setPublishRepos(JkPublishRepo ... publishRepos) {
+        return setPublishRepos(JkPublishRepos.of(publishRepos));
+    }
+
     public List<String> getJavadocOptions() {
         return this.javadocOptions;
     }

@@ -12,7 +12,7 @@ import org.jerkar.api.utils.JkUtilsIterable;
  * Result of a module dependency resolution for a given scope.<br/>
  * When resolving a module dependencies for a given scope, we expect to get
  * <ul>
- *   <li>The list of publishLocally file constituting the resolved dependencies (the jar
+ *   <li>The list of publishLocalOnly file constituting the resolved dependencies (the jar
  *        files for instance)</li>
  *   <li>The {@link JkVersionProvider} that specify which static projectVersion has been
  *        taken in account when a module dependency is declared using dynamic versions
@@ -88,7 +88,7 @@ public final class JkResolveResult implements Serializable {
     }
 
     /**
-     * Returns the publishLocally files the specified module turns to.
+     * Returns the publishLocalOnly files the specified module turns to.
      */
     public List<Path> filesOf(JkModuleId moduleId) {
         final JkDependencyNode dependencyNode = this.depTree.find(moduleId);

@@ -59,14 +59,14 @@ class SampleTester {
     private void testSamples(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(sampleBaseDir.root().toAbsolutePath().normalize())
-                .withParametersIf(!JkUtilsString.isBlank(className), "-verbose=true -buildClass=" + className).andParameters(args)
+                .withParametersIf(!JkUtilsString.isBlank(className), "-Log.verbose=true -BuildClass=" + className).andParameters(args)
                 .failOnError(true).runSync();
     }
 
     private void testDependee(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependeeBaseDir.root())
-                .withParametersIf(!JkUtilsString.isBlank(className), "-buildClass=" + className).andParameters(args)
+                .withParametersIf(!JkUtilsString.isBlank(className), "-BuildClass=" + className).andParameters(args)
                 .failOnError(true).runSync();
     }
 

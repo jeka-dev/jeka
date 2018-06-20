@@ -22,28 +22,35 @@ public final class Main {
      */
     public static void main(String[] args) {
         final long start = System.nanoTime();
-        Environment.initialize(args);
-        JkLog.register(new LogHandler());
-        if (!Environment.standardOptions.logNoHeaders) {
-            displayIntro();
-        }
-        if (!Environment.standardOptions.logNoHeaders) {
-            JkInit.displayInfo();
-        }
-        final Path workingDir = Paths.get("").toAbsolutePath();
-        final Engine engine = new Engine(workingDir);
         try {
+            Environment.initialize(args);
+            JkLog.register(new LogHandler());
+            if (!Environment.standardOptions.logNoHeaders) {
+                displayIntro();
+            }
+            if (!Environment.standardOptions.logNoHeaders) {
+                JkInit.displayInfo();
+            }
+            final Path workingDir = Paths.get("").toAbsolutePath();
+            final Engine engine = new Engine(workingDir);
+
             engine.execute(Environment.commandLine, Environment.standardOptions.buildClass);
             if (!Environment.standardOptions.logNoHeaders) {
                 displayOutro(start);
             }
         } catch (final RuntimeException e) {
             System.err.println();
-            e.printStackTrace(System.err);
+            if (e instanceof JkException) {
+                System.err.println(e.getMessage());
+            } else {
+                e.printStackTrace(System.err);
+            }
             if (!Environment.standardOptions.logNoHeaders) {
                 final int length = printAscii(true, "failed.ascii");
                 System.err.println(JkUtilsString.repeat(" ", length) + "Total build time : "
                         + JkUtilsTime.durationInSeconds(start) + " seconds.");
+            } else {
+                System.err.println("Failed !");
             }
             System.exit(1);
         }

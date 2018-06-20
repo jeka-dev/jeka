@@ -33,7 +33,12 @@ final class OptionInjector {
         final boolean present = props.containsKey(name);
         if (present) {
             final String stringValue = props.get(name);
-            Object value = parse((Class<Object>) type, stringValue);
+            Object value;
+            try {
+                value = parse((Class<Object>) type, stringValue);
+            } catch (IllegalArgumentException e) {
+                throw new JkException("Option " + name + " has been set with improper value '" + stringValue + "'");
+            }
             if (value == UNHANDLED_TYPE) {
                 throw new IllegalArgumentException("Class " + target.getClass().getName()
                         + ", field " + name + ", can't handle type " + type);

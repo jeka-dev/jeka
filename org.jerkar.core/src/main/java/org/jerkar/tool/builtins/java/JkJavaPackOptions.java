@@ -8,10 +8,6 @@ import org.jerkar.tool.JkDoc;
  */
 public class JkJavaPackOptions {
 
-    /** When true, the produced artifacts are signed with PGP */
-    @JkDoc("If true, the produced artifacts are signed with PGP.")
-    public boolean signWithPgp;
-
     /** Comma separated list of algorithm to use to produce checksums (ex : 'sha-1,md5'). */
     @JkDoc("Comma separated list of algorithms to use to produce checksums (ex : 'sha-1,md5,sha-256').")
     public String checksums;

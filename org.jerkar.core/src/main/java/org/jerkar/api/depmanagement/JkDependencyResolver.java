@@ -176,6 +176,13 @@ public final class JkDependencyResolver {
     }
 
     /**
+     * Change the repositories for dependency resolution
+     */
+    public JkDependencyResolver withRepos(JkRepo ... otherRepos) {
+        return withRepos(JkRepos.of(otherRepos));
+    }
+
+    /**
      * You can alter the resolver behavior through these settings. his is only
      * relevant for of dependencies and have no effect for of
      * dependencies.

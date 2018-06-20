@@ -9,6 +9,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.*;
+import org.jerkar.tool.builtins.repos.JkPluginRepos;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.List;
  * and a decoration for scaffolding.
  */
 @JkDoc("Build of a Java project through a JkJavaProject instance.")
+@JkDocPluginDeps(JkPluginRepos.class)
 public class JkPluginJava extends JkPlugin {
 
     // ------------------------------ options -------------------------------------------
@@ -25,8 +27,8 @@ public class JkPluginJava extends JkPlugin {
     @JkDoc("Version for the project to build.")
     public String projectVersion;
 
-    @JkDoc("Publication")
-    public final JkRepoOptions repos = new JkRepoOptions();
+    @JkDoc("Publish")
+    public final JkPublishOptions publish = new JkPublishOptions();
 
     @JkDoc("Packing")
     public final JkJavaPackOptions pack = new JkJavaPackOptions();
@@ -36,12 +38,15 @@ public class JkPluginJava extends JkPlugin {
 
     // ----------------------------------------------------------------------------------
 
+    private final JkPluginRepos repos;
+
     private final JkJavaProject project;
 
     private final List<JkArtifactId> producedArtifacts = new ArrayList<>();
 
     protected JkPluginJava(JkBuild build) {
         super(build);
+        this.repos = build.plugins().get(JkPluginRepos.class);
         this.project = new JkJavaProject(this.build.baseDir());
         this.producedArtifacts.add(this.project.maker().mainArtifactId());
     }
@@ -66,28 +71,22 @@ public class JkPluginJava extends JkPlugin {
         if (project.getVersionedModule() != null && !JkUtilsString.isBlank(projectVersion)) {
             project.setVersionedModule(project.getVersionedModule().withVersion(projectVersion));
         }
-        if (!repos.publishSources) {
-            project.maker().getArtifactFileIdsToNotPublish().addAll(project.maker().artifactIdsWithClassifier("sources"));
+        if (!publish.sources) {
+            project.maker().getArtifactFileIdsToNotPublish().addAll(
+                    project.maker().artifactIdsWithClassifier("sources"));
         }
-        if (!repos.publishTests) {
-            project.maker().getArtifactFileIdsToNotPublish().addAll(project.maker().artifactIdsWithClassifier("test"));
+        if (!publish.tests) {
+            project.maker().getArtifactFileIdsToNotPublish().addAll(
+                    project.maker().artifactIdsWithClassifier("test"));
         }
-        final JkPublishRepos optionPublishRepos = repos.publishRepositories();
-        if (optionPublishRepos != null) {
-            project.maker().setPublishRepos(optionPublishRepos);
-        }
-        if (repos.publishLocally) {
+        project.maker().setPublishRepos(repos.publishRepository());
+        if (publish.localOnly) {
             project.maker().setPublishRepos(JkPublishRepos.local());
         }
-        if (repos.signPublishedArtifacts) {
-            project.maker().setPublishRepos(project.maker().getPublishRepos().withSigner(repos.pgpSigner()));
-        }
-        final JkRepos optionDownloadRepos = repos.downloadRepositories();
-        if (!optionDownloadRepos.isEmpty()) {
-            JkDependencyResolver resolver = project.maker().getDependencyResolver();
-            resolver = resolver.withRepos(optionDownloadRepos.and(JkPublishRepo.local().repo())); // always look in local repo
-            project.maker().setDependencyResolver(resolver);
-        }
+        final JkRepo downloadRepo = repos.downloadRepository();
+        JkDependencyResolver resolver = project.maker().getDependencyResolver();
+        resolver = resolver.withRepos(downloadRepo); // always look in local repo
+        project.maker().setDependencyResolver(resolver);
         if (pack.javadoc) {
             producedArtifacts.add(JkJavaProjectMaker.JAVADOC_ARTIFACT_ID);
         }
@@ -100,7 +99,7 @@ public class JkPluginJava extends JkPlugin {
         if (pack.checksums().length > 0) {
             project.maker().postPack.chain(() -> project.maker().checksum(pack.checksums()));
         }
-        if (pack.signWithPgp) {
+        if (publish.signArtifacts) {
             project.maker().postPack.chain(() -> project.maker().signArtifactFiles(repos.pgpSigner()));
         }
         if (tests.fork) {
@@ -171,5 +170,22 @@ public class JkPluginJava extends JkPlugin {
         final JkDependencyNode tree = resolveResult.dependencyTree();
         JkLog.info(String.join("\n", tree.toStrings()));
     }
+
+    public static class JkPublishOptions {
+
+        @JkDoc("If true, publishing to repository will include sources jar.")
+        public boolean sources = true;
+
+        @JkDoc("If true, publishing to repository will include tests jar.")
+        public boolean tests = false;
+
+        @JkDoc("If true, publishing will occur only in the local repository.")
+        public boolean localOnly = false;
+
+        @JkDoc("If true, all artifacts to be published will be signed with PGP.")
+        public boolean signArtifacts = false;
+
+    }
+
 
 }

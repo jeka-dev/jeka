@@ -6,7 +6,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 
 
-class LogHandler implements JkLog.EventLogHandler {
+final class LogHandler implements JkLog.EventLogHandler {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
@@ -26,6 +26,11 @@ class LogHandler implements JkLog.EventLogHandler {
 
     private final MarginStream err = new MarginStream(System.err, MAX_LENGTH);
 
+    {
+        System.setOut(new PrintStream(out));
+        System.setErr(new PrintStream(err));
+    }
+
     @Override
     public void accept(JkLog.JkLogEvent event) {
         String message = event.message();
@@ -40,8 +45,9 @@ class LogHandler implements JkLog.EventLogHandler {
         } else if (event.type() == JkLog.Type.START_TASK) {
                 message = message +  " ... ";
         }
-        final MarginStream stream = (event.type() == JkLog.Type.ERROR) ? err : out;
-        stream.handlingStart = event.type() == JkLog.Type.START_TASK;
+        final MarginStream marginStream = (event.type() == JkLog.Type.ERROR) ? err : out;
+        final PrintStream stream = (event.type() == JkLog.Type.ERROR) ? System.err : System.out;
+        marginStream.handlingStart = event.type() == JkLog.Type.START_TASK;
         try {
             stream.write(message.getBytes(UTF8));
             stream.write(LINE_SEPARATOR);
@@ -49,7 +55,7 @@ class LogHandler implements JkLog.EventLogHandler {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        stream.handlingStart = false;
+        marginStream.handlingStart = false;
     }
 
     @Override

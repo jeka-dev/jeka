@@ -39,7 +39,7 @@ public abstract class JkRepo implements Serializable {
     /**
      * URL of the OSSRH repository for deploying released artifacts.
      */
-    public static final URL MAVEN_OSSRH_DEPLOY_RELEASE = toUrl("https://oss.sonatype.org/service/publishLocally/staging/deploy/maven2/");
+    public static final URL MAVEN_OSSRH_DEPLOY_RELEASE = toUrl("https://oss.sonatype.org/service/publishLocalOnly/staging/deploy/maven2/");
 
     /**
      * URL of the OSSRH repository for downloading both snapshot and released artifacts.

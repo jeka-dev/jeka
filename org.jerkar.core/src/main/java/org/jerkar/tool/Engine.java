@@ -283,12 +283,7 @@ final class Engine {
     }
 
     private static JkRepos repos() {
-        return JkRepo
-                .firstNonNull(
-                        JkRepoOptions.repoFromOptions("build"),
-                        JkRepoOptions.repoFromOptions("download"),
-                        JkRepo.mavenCentral())
-                .and(JkPublishRepo.local().repo());
+        return JkRepos.of(JkRepoOptionLoader.buildRepository(), JkPublishRepo.local().repo());
     }
 
     private static List<String> toRelativePaths(Path from, List<Path>  files) {

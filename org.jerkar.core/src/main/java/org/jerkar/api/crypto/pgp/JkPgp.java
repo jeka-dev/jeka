@@ -26,12 +26,6 @@ public final class JkPgp implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String PUB_KEYRING = "pgp.pubring";
-
-    private static final String SECRET_KEYRING = "pgp.secring";
-
-    private static final String SECRET_KEY_PASS_WORD_PROPERTY = "pgp.secretKeyPassword";
-
     private static final String PGPUTILS_CLASS_NAME = "org.jerkar.api.crypto.pgp.PgpUtils";
 
     private static final Path USER_HOME = Paths.get(System.getProperty("user.home"));
@@ -65,24 +59,7 @@ public final class JkPgp implements Serializable {
         return new JkPgp(pub, sec, null);
     }
 
-    /**
-     * Creates a JkPgp with key/values map
-     */
-    public static JkPgp of(Map<String, String> options) {
-        JkPgp result = ofDefaultGnuPg();
-        final String pub = options.get(PUB_KEYRING);
-        if (pub != null) {
-            result = result.publicRing(Paths.get(pub));
-        }
-        final String sec = options.get(SECRET_KEYRING);
-        final String password = options.get(SECRET_KEY_PASS_WORD_PROPERTY);
-        if (sec != null) {
-            result = result.secretRing(Paths.get(sec), password);
-        } else {
-            result = result.secretRing(result.secRing, password);
-        }
-        return result;
-    }
+
 
     /**
      * Creates a JkPgp with the specified public key ring.

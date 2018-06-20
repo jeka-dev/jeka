@@ -14,8 +14,8 @@ public class JkPluginsTest {
         final PluginDictionary plugins = new PluginDictionary();
         final Set<PluginDescription> pluginSet = plugins.getAll();
 
-        // 4 or 6 depending of the classpath where tests are executed
-        Assert.assertTrue(pluginSet.toString(), 4 == pluginSet.size() || 6 == pluginSet.size());
+        // 6 or 8 depending of the classpath where tests are executed
+        Assert.assertTrue(pluginSet.toString(), 6 == pluginSet.size() || 8 == pluginSet.size());
     }
 
     interface PluginBase {

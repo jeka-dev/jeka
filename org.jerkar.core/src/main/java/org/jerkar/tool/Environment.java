@@ -109,7 +109,12 @@ class Environment {
         private static <T> T valueOf(Class<T> type, Map<String, String> map, T defaultValue, String ... names) {
             for (String name : names) {
                 if (map.containsKey(name)) {
-                    return (T) OptionInjector.parse(type, map.get(name));
+                    String stringValue = map.get(name);
+                    try {
+                        return (T) OptionInjector.parse(type, stringValue);
+                    } catch (IllegalArgumentException e) {
+                        throw new JkException("Option " + name + " has been set with improper value '" + stringValue + "'");
+                    }
                 }
             }
             return defaultValue;

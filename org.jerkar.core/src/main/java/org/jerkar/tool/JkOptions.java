@@ -97,11 +97,8 @@ public final class JkOptions {
         OptionInjector.inject(target, props);
     }
 
-    static void populateFields(Object build) {
-        populateFields(build, INSTANCE.props);
-    }
 
-    static Map<String, String> toDisplayedMap(Map<String, String> props) {
+    public static Map<String, String> toDisplayedMap(Map<String, String> props) {
         final Map<String, String> result = new TreeMap<>();
         for (final Map.Entry<String, String> entry : props.entrySet()) {
             final String value;

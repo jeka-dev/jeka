@@ -86,7 +86,7 @@ public class CoreBuild extends JkJavaProjectBuild {
 
     private static JkPublishRepos publishRepos() {
         return JkPublishRepos.ossrh(JkOptions.get("repo.ossrh.username"),
-                JkOptions.get("repo.ossrh.password"), JkPgp.of(JkOptions.getAll())).withUniqueSnapshot(true);
+                JkOptions.get("repo.ossrh.password"), JkPgp.ofDefaultGnuPg()).withUniqueSnapshot(true);
     }
 
 }

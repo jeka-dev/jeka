@@ -3,6 +3,7 @@ package org.jerkar.api.depmanagement;
 
 import java.io.Serializable;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,8 +37,8 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
     /**
      * Creates a JkPublishRepos that publish on the specified repositories.
      */
-    public static JkPublishRepos of(JkPublishRepo publishRepo) {
-        final List<JkPublishRepo> list = JkUtilsIterable.listOf(publishRepo);
+    public static JkPublishRepos of(JkPublishRepo ...  publishRepos) {
+        final List<JkPublishRepo> list = Arrays.asList(publishRepos);
         return new JkPublishRepos(list);
     }
 
