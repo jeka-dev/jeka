@@ -11,6 +11,7 @@ import java.nio.file.*;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,7 @@ public final class JkUtilsPath {
         return fileSystem.getPath("/");
     }
 
-    public static List<File> toFiles(Iterable<Path> paths) {
+    public static List<File> toFiles(Collection<Path> paths) {
         final List<File> result = new LinkedList<>();
         for (final Path path : paths) {
             result.add(path.toFile());

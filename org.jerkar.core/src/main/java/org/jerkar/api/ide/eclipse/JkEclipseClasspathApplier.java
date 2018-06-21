@@ -9,7 +9,7 @@ import org.jerkar.api.depmanagement.JkDependencies;
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.tool.JkException;
+import org.jerkar.api.system.JkException;
 
 /**
  * Provides methods to modify a given {@link JkJavaProject} in order it reflects a given .classpath file.

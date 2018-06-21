@@ -28,6 +28,8 @@ import java.util.stream.Stream;
  */
 public final class JkPathTree {
 
+    private static final JkPathMatcher NO_FILTER = JkPathMatcher.of();
+
     /**
      * Creates a {@link JkPathTree} having the specified root directory.
      */
@@ -55,7 +57,7 @@ public final class JkPathTree {
     private final JkPathMatcher filter;
 
     private JkPathTree(Path rootDir, boolean zip) {
-        this(rootDir, JkPathMatcher.of(), zip);
+        this(rootDir, NO_FILTER, zip);
     }
 
     private JkPathTree(Path rootDirOrArchive, JkPathMatcher matcher, boolean zipFile) {
@@ -89,6 +91,13 @@ public final class JkPathTree {
      */
     public JkPathMatcher matcher() {
         return filter;
+    }
+
+    /**
+     * Returns true if a filter has explicitly been defined on this tree.
+     */
+    public boolean isDefineFilter() {
+        return this.filter == NO_FILTER;
     }
 
     // ------------------------------- functional ---------------------------------

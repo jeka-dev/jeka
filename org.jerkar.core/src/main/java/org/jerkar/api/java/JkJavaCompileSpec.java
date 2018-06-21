@@ -1,9 +1,12 @@
 package org.jerkar.api.java;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -125,10 +128,24 @@ public final class JkJavaCompileSpec {
      **/
     public JkJavaCompileSpec addSources(Collection<Path> files) {
         for (final Path file : files) {
-            if (file.getFileName().toString().toLowerCase().endsWith(".java")) {
+            if (Files.isDirectory(file)) {
+                this.sourceFiles.add(file);
+            } else if (file.getFileName().toString().toLowerCase().endsWith(".java")) {
                 this.sourceFiles.add(file);
             }
         }
+        return this;
+    }
+
+    public JkJavaCompileSpec addSources(JkPathTree tree) {
+        if (tree.isDefineFilter()) {
+            return addSources(tree.root());
+        }
+        return addSources(tree.files());
+    }
+
+    public JkJavaCompileSpec addSources(JkPathTreeSet treeSet) {
+        treeSet.fileTrees().forEach(this::addSources);
         return this;
     }
 

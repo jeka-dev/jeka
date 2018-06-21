@@ -17,10 +17,10 @@ import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.system.JkLog;
 
 /**
- * Object responsible to build (to make) a java project. It provides methods to perform common build
+ * Objects responsible to build (to make) a java project. It provides methods to perform common build
  * tasks (compile, test, javadoc, package jars, publish artifacts) along methods to define how to build extra artifacts.
  *
- * All defined tasks are extensible so you can modify/improve the build behavior.
+ * All defined tasks are extensible using {@link JkRunnables} mechanism.
  */
 public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSystemLocalizable {
 
@@ -105,7 +105,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
 
-    protected void compileAndTestIfNeeded() {
+    private void compileAndTestIfNeeded() {
         if (!status.compileDone) {
             compile();
         }
@@ -114,6 +114,9 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         }
     }
 
+    /**
+     * Generates javadoc files (files + zip)
+     */
     public void generateJavadoc() {
         JkJavadocMaker.of(project.getSourceLayout().sources(), project.getOutLayout().getJavadocDir())
                 .withClasspath(depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
@@ -121,13 +124,20 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         status.javadocGenerated = true;
     }
 
+    /**
+     * Returns lib paths standing for the resolution of this project dependencies for the specified dependency scopes.
+     */
     public JkPathSequence depsFor(JkScope... scopes) {
         final Set<JkScope> scopeSet = new HashSet<>(Arrays.asList(scopes));
         return this.depCache.computeIfAbsent(scopeSet,
-                scopes1 -> this.dependencyResolver.get(getDefaultedDependencies(), scopes ));
+                scopes1 -> this.dependencyResolver.get(getDeclaredDependencies(), scopes));
     }
 
-    public JkDependencies getDefaultedDependencies() {
+    /**
+     * Returns dependencies declared for this project. Dependencies declared without specifying
+     * scope are defaulted to scope {@link JkJavaDepScopes#COMPILE_AND_RUNTIME}
+     */
+    public JkDependencies getDeclaredDependencies() {
         return project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME);
     }
 
@@ -137,8 +147,15 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     // Clean -----------------------------------------------
 
+    /**
+     * Holds runnables executed while {@link #clean()} method is invoked. Add your own runnable if you want to
+     * improve the <code>clean</code> method.
+     */
     public final JkRunnables cleaner;
 
+    /**
+     * Deletes project build outputs.
+     */
     public JkJavaProjectMaker clean() {
         status.reset();
         cleaner.run();
@@ -162,13 +179,12 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
         return result
                 .setClasspath(classpath)
-                .addSources(project.getSourceLayout().sources().files())
-                .addSources(JkPathTree.of(project.getOutLayout().generatedSourceDir()).files())
+                .addSources(project.getSourceLayout().sources())
+                .addSources(project.getOutLayout().generatedSourceDir())
                 .setOutputDir(project.getOutLayout().classDir());
     }
 
-    public final JkRunnables postCompile = JkRunnables.of(() -> {
-    });
+    public final JkRunnables postCompile = JkRunnables.noOp();
 
     public JkJavaProjectMaker compile() {
         JkLog.execute( "Compiling", () -> {
@@ -334,12 +350,12 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     public JkJavaProjectMaker publishMaven() {
         JkPublisher.of(this.publishRepos, project.getOutLayout().outputPath())
         .publishMaven(project.getVersionedModule(), this, artifactFileIdsToNotPublish,
-                this.getDefaultedDependencies(), project.getMavenPublicationInfo());
+                this.getDeclaredDependencies(), project.getMavenPublicationInfo());
         return this;
     }
 
     public JkJavaProjectMaker publishIvy() {
-        final JkDependencies dependencies = getDefaultedDependencies();
+        final JkDependencies dependencies = getDeclaredDependencies();
         final JkIvyPublication publication = JkIvyPublication.of(mainArtifactPath(), JkJavaDepScopes.COMPILE)
                 .andOptional(artifactPath(SOURCES_ARTIFACT_ID), JkJavaDepScopes.SOURCES)
                 .andOptional(artifactPath(JAVADOC_ARTIFACT_ID), JkJavaDepScopes.JAVADOC)

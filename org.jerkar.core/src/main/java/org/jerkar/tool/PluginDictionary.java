@@ -1,6 +1,7 @@
 package org.jerkar.tool;
 
 import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.system.JkException;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
 

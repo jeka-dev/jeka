@@ -11,10 +11,13 @@ import java.nio.file.Paths;
 @JkDoc("Provides configured JkPgp instance for signing artifacts.")
 public class JkPluginPgp extends JkPlugin {
 
+    @JkDoc("Path for the public key ring.")
     public String publicRingPath;
 
+    @JkDoc("Path for the secret key ring.")
     public String secretRingPath;
 
+    @JkDoc("Secret password for decoding secret key ring.")
     public String secretKeyPassword;
 
 

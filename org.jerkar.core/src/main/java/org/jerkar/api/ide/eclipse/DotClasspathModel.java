@@ -18,7 +18,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsXml;
-import org.jerkar.tool.JkException;
+import org.jerkar.api.system.JkException;
 import org.jerkar.tool.JkOptions;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

@@ -8,6 +8,7 @@ import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaCompiler;
+import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;

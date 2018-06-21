@@ -22,9 +22,9 @@ final class LogHandler implements JkLog.EventLogHandler {
 
     static int MAX_LENGTH = -1;
 
-    private final MarginStream out = new MarginStream(System.out, MAX_LENGTH);
+    private final MarginStream out = new MarginStream(System.out);
 
-    private final MarginStream err = new MarginStream(System.err, MAX_LENGTH);
+    private final MarginStream err = new MarginStream(System.err);
 
     {
         System.setOut(new PrintStream(out));
@@ -72,8 +72,6 @@ final class LogHandler implements JkLog.EventLogHandler {
 
         private final PrintStream delegate;
 
-        private final int maxLength;
-
         private int lineLength;
 
         private int lastByte = LINE_SEPARATOR;  // Display margin at first use (relevant for system.err)
@@ -81,10 +79,9 @@ final class LogHandler implements JkLog.EventLogHandler {
         private boolean handlingStart;
 
 
-        public MarginStream(PrintStream delegate, int maxLength) {
+        public MarginStream(PrintStream delegate) {
             super();
             this.delegate = delegate;
-            this.maxLength = maxLength;
         }
 
         @Override
@@ -99,7 +96,7 @@ final class LogHandler implements JkLog.EventLogHandler {
             delegate.write(b);
             lastByte = b;
             lineLength ++;  // approximate 1 byte = 1 char (untrue for special characters).
-            if (maxLength > -1 && lineLength > maxLength) {
+            if (LogHandler.MAX_LENGTH > -1 && lineLength > LogHandler.MAX_LENGTH) {
                 lineLength = 0;
                 if (handlingStart) {
                     this.write(("\n" + new String(MARGIN_UNIT, UTF8) + "  ").getBytes(UTF8));

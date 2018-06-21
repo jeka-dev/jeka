@@ -1,12 +1,10 @@
 package org.jerkar.api.java;
 
+import java.io.File;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.*;
 
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticListener;
@@ -16,11 +14,13 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
+import com.sun.xml.internal.bind.v2.runtime.reflect.Lister;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsTime;
+import org.jerkar.api.system.JkException;
 
 /**
  * Stand for a compilation setting and process. Use this class to perform java
@@ -137,36 +137,42 @@ public final class JkJavaCompiler {
                 + " using options : " + JkUtilsString
                     .join(options, " ");
         long start = System.nanoTime();
-        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-            JkLog.startTask(message);
-        }
+        JkLog.startTask(message);
         if (compileSpec.getSourceFiles().isEmpty()) {
-            if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-                JkLog.warn("No source to compile");
-                JkLog.endTask("");
-            }
+            JkLog.warn("No source to compile");
+            JkLog.endTask("");
             return true;
         }
         final boolean result;
         if (this.fork == null) {
             final Iterable<? extends JavaFileObject> javaFileObjects = fileManager
-                    .getJavaFileObjectsFromFiles(JkUtilsPath.toFiles(compileSpec.getSourceFiles()));
+                    .getJavaFileObjectsFromFiles(toFiles(compileSpec.getSourceFiles()));
             final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.stream()),
                     null, new JkDiagnosticListener(), options, null, javaFileObjects);
             result = task.call();
         } else {
             result = runOnFork(compileSpec);
         }
-        if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
-            JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
-        }
+        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
         if (!result) {
             if (failOnError) {
-                throw new IllegalStateException("Compilation failed with options " + options);
+                throw new JkException("Compilation failed with options " + options);
             }
             return false;
         }
         return true;
+    }
+
+    private List<File> toFiles(Collection<Path> paths) {
+        List<File> result = new LinkedList<>();
+        for (Path path : paths) {
+            if (Files.isDirectory(path)) {
+                result.add(new File(path.toString() + File.separator + "*.java"));
+            } else {
+                result.add(path.toFile());
+            }
+        }
+        return result;
     }
 
     private boolean runOnFork(JkJavaCompileSpec compileSpec) {
