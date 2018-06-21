@@ -14,7 +14,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import com.sun.xml.internal.bind.v2.runtime.reflect.Lister;
+import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsPath;
@@ -167,7 +167,7 @@ public final class JkJavaCompiler {
         List<File> result = new LinkedList<>();
         for (Path path : paths) {
             if (Files.isDirectory(path)) {
-                result.add(new File(path.toString() + File.separator + "*.java"));
+                JkPathTree.of(path).accept("**/*.java").stream().forEach(pat -> result.add(pat.toFile()));
             } else {
                 result.add(path.toFile());
             }
@@ -178,7 +178,11 @@ public final class JkJavaCompiler {
     private boolean runOnFork(JkJavaCompileSpec compileSpec) {
         final List<String> sourcePaths = new LinkedList<>();
         for (final Path file : compileSpec.getSourceFiles()) {
-            sourcePaths.add(file.toAbsolutePath().toString());
+            if (Files.isDirectory(file)) {
+                JkPathTree.of(file).accept("**/*.java").stream().forEach(path -> sourcePaths.add(path.toString()));
+            } else {
+                sourcePaths.add(file.toAbsolutePath().toString());
+            }
         }
         final JkProcess jkProcess = this.fork.andParameters(compileSpec.getOptions()).andParameters(sourcePaths);
         final int result = jkProcess.runSync();
