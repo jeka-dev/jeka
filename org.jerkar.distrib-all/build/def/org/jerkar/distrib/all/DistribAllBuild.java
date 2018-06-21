@@ -39,7 +39,7 @@ class DistribAllBuild extends JkBuild {
                 Path distDir = this.outputDir().resolve("dist");
         JkPathTree dist = JkPathTree.of(distDir).merge(core.distribFolder);
 
-        JkLog.info("Adding plugins to the distribution");
+        JkLog.info("Add plugins to the distribution");
         JkPathTree ext = dist.goTo("libs/builtins")
                 .copyIn(sonarPluginBuild.java().project().maker().mainArtifactPath())
                 .copyIn(jacocoPluginBuild.java().project().maker().mainArtifactPath());
@@ -47,13 +47,13 @@ class DistribAllBuild extends JkBuild {
         sourceDir.copyIn(sonarPluginBuild.java().project().maker().artifactPath(JkJavaProjectMaker.SOURCES_ARTIFACT_ID))
                 .copyIn(jacocoPluginBuild.java().project().maker().artifactPath(JkJavaProjectMaker.SOURCES_ARTIFACT_ID));
 
-        JkLog.info("Adding plugins to the fat jar");
+        JkLog.info("Add plugins to the fat jar");
         Path fat = dist.get(core.java().project().maker().artifactPath(JkArtifactId.of("all", "jar"))
                 .getFileName().toString());
         Files.copy(core.java().project().maker().mainArtifactPath(), fat, StandardCopyOption.REPLACE_EXISTING);
         ext.accept("**.jar").stream().map(path -> JkPathTree.ofZip(path)).forEach(tree -> tree.zipTo(fat));
 
-        JkLog.info("Creating a fat source jar");
+        JkLog.info("Create a fat source jar");
         Path fatSource = sourceDir.get("org.jerkar.core-all-sources.jar");
         sourceDir.accept("**.jar", "**.zip").refuse(fatSource.getFileName().toString()).stream()
                 .map(path -> JkPathTree.ofZip(path)).forEach(tree -> tree.zipTo(fatSource));
@@ -66,9 +66,9 @@ class DistribAllBuild extends JkBuild {
             Path javadocAllFile = dist.root().resolve("libs-javadoc/org.jerkar.core-fat-javadoc.jar");
             JkJavadocMaker.of(sources, javadocAllDir, javadocAllFile).process();
         }
-
-        JkLog.info("Packing all");
-        dist.zipTo(outputDir().resolve("jerkar-distrib.zip"));
+        Path dest = outputDir().resolve("jerkar-distrib.zip");
+        JkLog.info("Pack complete distribution in " + dest);
+        dist.zipTo(dest);
     }
 
     @JkDoc("End to end method to construct a distrib.")

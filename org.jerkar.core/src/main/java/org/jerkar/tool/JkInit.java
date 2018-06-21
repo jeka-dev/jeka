@@ -24,13 +24,14 @@ public final class JkInit {
     public static <T extends JkBuild> T instanceOf(Class<T> clazz, String... args) {
         JkLog.register(new LogHandler());
         Environment.initialize(args);
-        if (!Environment.standardOptions.logNoHeaders) {
-            displayInfo();
+        JkLog.Verbosity verbosity = JkLog.verbosity();
+        if (Environment.standardOptions.logNoHeaders) {
+            JkLog.setVerbosity(JkLog.Verbosity.MUTE);
         }
+        displayInfo();
         final T build = JkBuild.of(clazz);
-        if (!Environment.standardOptions.logNoHeaders) {
-            JkLog.info("Build is ready to start.");
-        }
+        JkLog.info("Build is ready to start.");
+        JkLog.setVerbosity(verbosity);
         return build;
     }
 

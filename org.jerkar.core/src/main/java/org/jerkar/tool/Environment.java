@@ -34,12 +34,7 @@ class Environment {
         final Map<String, String> optionMap = new HashMap<>();
         optionMap.putAll(JkOptions.readSystemAndUserOptions());
         optionMap.putAll(commandLine.getOptions());
-        if (!JkOptions.isPopulated()) {
-            JkOptions.init(optionMap);
-        } else {
-            JkLog.warn("Options already populated, can't modify it.");
-            Thread.dumpStack();
-        }
+        JkOptions.init(optionMap);
 
         final StandardOptions standardOptions = new StandardOptions(optionMap);
         if (standardOptions.logVerbose) {
@@ -95,15 +90,15 @@ class Environment {
 
         StandardOptions (Map<String, String> map) {
             this.logVerbose = valueOf(Boolean.class, map, false, "Log.verbose", "LV");
-            this.logNoHeaders = valueOf(Boolean.class, map, false,"Log.noHeaders", "NH");
-            this.logMaxLength = valueOf(Integer.class, map, -1,"Log.maxLength", "ML");
+            this.logNoHeaders = valueOf(Boolean.class, map, false,"Log.noHeaders", "LNH");
+            this.logMaxLength = valueOf(Integer.class, map, -1,"Log.maxLength", "LML");
             this.buildClass = valueOf(String.class, map, null, "BuildClass", "BC");
         }
 
         @Override
         public String toString() {
             return "BuildClass=" + JkUtilsObject.toString(buildClass) + ", Log.Verbose=" + logVerbose
-                    + ", Log.NoHeaders=" + logNoHeaders;
+                    + ", Log.NoHeaders=" + logNoHeaders + ", Log.maxLength=" + logMaxLength;
         }
 
         private static <T> T valueOf(Class<T> type, Map<String, String> map, T defaultValue, String ... names) {

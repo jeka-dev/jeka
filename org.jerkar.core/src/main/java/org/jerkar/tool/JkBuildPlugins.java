@@ -1,6 +1,5 @@
 package org.jerkar.tool;
 
-import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsReflect;
 
 import java.lang.reflect.Method;
@@ -51,12 +50,6 @@ public final class JkBuildPlugins {
 
     public List<JkPlugin> all() {
         return Collections.unmodifiableList(configuredPlugins);
-    }
-
-    void invoke(JkPlugin plugin, String methodName) {
-        Runnable task = () -> JkUtilsReflect.invoke(plugin, pluginMethod(plugin.getClass(), methodName));
-        String msg = "Method " + methodName + " of plugin " + plugin.getClass().getSimpleName();
-        JkLog.execute( msg, task);
     }
 
     private <T extends JkPlugin> T getOrCreate(Class<T> pluginClass) {

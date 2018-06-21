@@ -72,13 +72,11 @@ final class Engine {
      * Pre-compile and compile build classes (if needed) then execute the build
      * of this project.
      */
-    void execute(CommandLine commandLine, String buildClassHint) {
+    void execute(CommandLine commandLine, String buildClassHint, JkLog.Verbosity verbosityToRestore) {
         this.buildDependencies = this.buildDependencies.andScopeless(commandLine.dependencies());
         final AtomicReference<JkBuild> build = new AtomicReference<>();
         long start = System.nanoTime();
-        if (!Environment.standardOptions.logNoHeaders) {
-            JkLog.startTask("Compile and initialise build classes");
-        }
+        JkLog.startTask("Compile and initialise build classes");
         JkPathSequence runtimeClasspath = compile();
         if (!commandLine.dependencies().isEmpty()) {
             final JkPathSequence cmdPath = pathOf(commandLine.dependencies());
@@ -90,16 +88,13 @@ final class Engine {
             throw new JkException("Can't find or guess any build class for project hosted in " + this.projectBaseDir
                     + " .\nAre you sure this directory is a buildable project ?");
         }
-        if (!Environment.standardOptions.logNoHeaders) {
-            JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
-            JkLog.info("Build is ready to start.");
-        }
+        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
+        JkLog.info("Build is ready to start.");
+        JkLog.setVerbosity(verbosityToRestore);
         try {
             this.launch(build.get(), commandLine);
         } catch (final RuntimeException e) {
-            if (!Environment.standardOptions.logNoHeaders) {
-                JkLog.error("Engine " + projectBaseDir + " failed");
-            }
+            JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
         }
     }
@@ -132,18 +127,14 @@ final class Engine {
         preCompile(); // This enrich dependencies
         String msg = "Compiling build classes for project " + this.projectBaseDir.getFileName().toString();
         long start = System.nanoTime();
-        if (!Environment.standardOptions.logNoHeaders) {
-            JkLog.startTask(msg);
-        }
-            final JkDependencyResolver buildClassDependencyResolver = getBuildDefDependencyResolver();
-            final JkPathSequence buildPath = buildClassDependencyResolver.get(this.buildDefDependencies());
-            path.addAll(buildPath.entries());
-            path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
-            this.compileBuild(JkPathSequence.ofMany(path));
-            path.add(this.resolver.buildClassDir);
-        if (!Environment.standardOptions.logNoHeaders) {
-            JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
-        }
+        JkLog.startTask(msg);
+        final JkDependencyResolver buildClassDependencyResolver = getBuildDefDependencyResolver();
+        final JkPathSequence buildPath = buildClassDependencyResolver.get(this.buildDefDependencies());
+        path.addAll(buildPath.entries());
+        path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
+        this.compileBuild(JkPathSequence.ofMany(path));
+        path.add(this.resolver.buildClassDir);
+        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
     }
 
     private JkBuild getBuildInstance(String buildClassHint, JkPathSequence runtimePath) {
@@ -188,10 +179,8 @@ final class Engine {
     private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
         JkPathSequence pathSequence = JkPathSequence.of();
         if (!this.rootsOfImportedBuilds.isEmpty()) {
-            if (!Environment.standardOptions.logNoHeaders) {
-                JkLog.info("Compile build classes of dependent projects : "
+            JkLog.info("Compile build classes of dependent projects : "
                         + toRelativePaths(this.projectBaseDir, this.rootsOfImportedBuilds));
-            }
         }
         for (final Path file : this.rootsOfImportedBuilds) {
             final Engine engine = new Engine(file.toAbsolutePath().normalize());
@@ -247,16 +236,16 @@ final class Engine {
     private static void invokeMethodOnBuildClassOrPlugin(JkBuild build, MethodInvocation methodInvocation) {
         if (methodInvocation.pluginName != null) {
             final JkPlugin plugin = build.plugins().get(methodInvocation.pluginName);
-            build.plugins().invoke(plugin, methodInvocation.methodName);
+            invokeMethodOnBuildOrPlugin(plugin, methodInvocation.methodName);
         } else {
-            invokeMethodOnBuildClass(build, methodInvocation.methodName);
+            invokeMethodOnBuildOrPlugin(build, methodInvocation.methodName);
         }
     }
 
     /**
      * Invokes the specified method in this build.
      */
-    private static void invokeMethodOnBuildClass(JkBuild build, String methodName) {
+    private static void invokeMethodOnBuildOrPlugin(Object build, String methodName) {
         final Method method;
         try {
             method = build.getClass().getMethod(methodName);
@@ -264,21 +253,18 @@ final class Engine {
             throw new JkException("No zero-arg method '" + methodName + "' found in class '" + build.getClass());
         }
         if (!Environment.standardOptions.logNoHeaders) {
-            JkLog.info("\nMethod : " + methodName + " on " + build);
+            JkLog.info("Method : " + methodName + " on " + build);
         }
         final long time = System.nanoTime();
         try {
             JkUtilsReflect.invoke(build, method);
             if (!Environment.standardOptions.logNoHeaders) {
                 JkLog.info("Method " + methodName + " succeeded in "
-                        + JkUtilsTime.durationInSeconds(time) + " seconds.");
+                        + JkUtilsTime.durationInMillis(time) + " milliseconds.");
             }
         } catch (final RuntimeException e) {
-            if (!Environment.standardOptions.logNoHeaders) {
-                JkLog.info("Method " + methodName + " failed in " + JkUtilsTime.durationInSeconds(time)
-                        + " seconds.");
-            }
-            throw e;
+            JkLog.info("Method " + methodName + " failed in " + JkUtilsTime.durationInMillis(time)
+                        + " milliseconds.");
         }
     }
 

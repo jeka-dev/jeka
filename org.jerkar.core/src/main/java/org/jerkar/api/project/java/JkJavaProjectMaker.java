@@ -479,7 +479,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     public void makeArtifact(JkArtifactId artifactId) {
         if (artifactProducers.containsKey(artifactId)) {
-            JkLog.execute("Producing artifact file " + getArtifactFile(artifactId).getFileName(),
+            JkLog.execute("Producing artifact file " + project.baseDir().relativize(getArtifactFile(artifactId)),
                     this.artifactProducers.get(artifactId));
         } else {
             throw new IllegalArgumentException("No artifact " + artifactId + " is defined on project " + this.project);

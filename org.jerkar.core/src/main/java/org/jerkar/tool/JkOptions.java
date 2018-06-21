@@ -28,20 +28,10 @@ public final class JkOptions {
 
     private final Map<String, String> props = new HashMap<>();
 
-    private static boolean populated;
-
     static synchronized void init(Map<String, String> options) {
-        if (populated) {
-            throw new IllegalStateException("The decorateBuild method can be called only once.");
-        }
         final Map<String, String> map = new HashMap<>();
         map.putAll(options);
-        INSTANCE = new JkOptions(map);
-        populated = true;
-    }
-
-    static boolean isPopulated() {
-        return populated;
+        INSTANCE.props.putAll(options);
     }
 
     private JkOptions(Map<String, String> options) {

@@ -83,9 +83,7 @@ public class JkBuild {
         if (BASE_DIR_CONTEXT.get() == null) {
             baseDirContext(Paths.get("").toAbsolutePath());
         }
-        if (!Environment.standardOptions.logNoHeaders) {
-            JkLog.startTask("Initializing class " + buildClass.getName() + " at " + BASE_DIR_CONTEXT.get());
-        }
+        JkLog.startTask("Initializing class " + buildClass.getName() + " at " + BASE_DIR_CONTEXT.get());
         final T build = JkUtilsReflect.newInstance(buildClass);
         final JkBuild jkBuild = build;
 
@@ -106,19 +104,15 @@ public class JkBuild {
         jkBuild.plugins.all().forEach(plugin -> {
             List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(plugin).optionDefs();
             plugin.decorateBuild();
-            if (!Environment.standardOptions.logNoHeaders) {
-                JkLog.info("Instance decorated with plugin " + plugin.getClass()
+            JkLog.info("Instance decorated with plugin " + plugin.getClass()
                         + HelpDisplayer.optionValues(defs));
-            }
         });
 
         // Extra build configuration
         build.configure();
         List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(build).optionDefs();
-        if (!Environment.standardOptions.logNoHeaders) {
-            JkLog.info("Build instance initialized with options " + HelpDisplayer.optionValues(defs));
-            JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(ts) + " milliseconds.");
-        }
+        JkLog.info("Build instance initialized with options " + HelpDisplayer.optionValues(defs));
+        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(ts) + " milliseconds.");
         baseDirContext(null);
         return build;
     }
@@ -249,12 +243,11 @@ public class JkBuild {
      */
     @JkDoc("Cleans the output directory.")
     public void clean() {
-        JkLog.execute("Cleaning output directory " + outputDir(), () ->
-            {
-                if (Files.exists(outputDir())) {
-                    JkPathTree.of(outputDir()).refuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
-                }
-            });
+        JkLog.info("Clean output directory " + outputDir());
+        if (Files.exists(outputDir())) {
+            JkPathTree.of(outputDir()).refuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
+        }
+
     }
 
     /**

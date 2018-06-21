@@ -25,16 +25,16 @@ public final class Main {
         try {
             Environment.initialize(args);
             JkLog.register(new LogHandler());
-            if (!Environment.standardOptions.logNoHeaders) {
+            JkLog.Verbosity verbosity = JkLog.verbosity();
+            if (Environment.standardOptions.logNoHeaders) {
+                JkLog.setVerbosity(JkLog.Verbosity.MUTE);
+            } else {
                 displayIntro();
             }
-            if (!Environment.standardOptions.logNoHeaders) {
-                JkInit.displayInfo();
-            }
+            JkInit.displayInfo();
             final Path workingDir = Paths.get("").toAbsolutePath();
             final Engine engine = new Engine(workingDir);
-
-            engine.execute(Environment.commandLine, Environment.standardOptions.buildClass);
+            engine.execute(Environment.commandLine, Environment.standardOptions.buildClass, verbosity);
             if (!Environment.standardOptions.logNoHeaders) {
                 displayOutro(start);
             }
@@ -62,7 +62,11 @@ public final class Main {
     public static void exec(Path projectDir, String... args) {
         final Engine engine = new Engine(projectDir);
         Environment.initialize(args);
-        engine.execute(Environment.commandLine, Environment.standardOptions.buildClass);
+        JkLog.Verbosity verbosity = JkLog.verbosity();
+        if (Environment.standardOptions.logNoHeaders) {
+            JkLog.setVerbosity(JkLog.Verbosity.MUTE);
+        }
+        engine.execute(Environment.commandLine, Environment.standardOptions.buildClass, verbosity);
     }
 
     private static int printAscii(boolean error, String fileName) {
