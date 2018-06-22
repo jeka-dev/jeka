@@ -133,9 +133,11 @@ public final class JkJavaCompiler {
         final JavaCompiler compiler = this.compiler != null ? this.compiler : getDefaultOrFail();
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null,
                 null);
-        String message = "Compiling " + compileSpec.getSourceFiles() + " source files to " + outputDir
-                + " using options : " + JkUtilsString
+        String message = "Compiling " + compileSpec.getSourceFiles() + " source files";
+        if (JkLog.isVerbose()) {
+            message = message + " to " + outputDir + " using options : " + JkUtilsString
                     .join(options, " ");
+        }
         long start = System.nanoTime();
         JkLog.startTask(message);
         if (compileSpec.getSourceFiles().isEmpty()) {
@@ -145,12 +147,14 @@ public final class JkJavaCompiler {
         }
         final boolean result;
         if (this.fork == null) {
-            final Iterable<? extends JavaFileObject> javaFileObjects = fileManager
-                    .getJavaFileObjectsFromFiles(toFiles(compileSpec.getSourceFiles()));
+            List<File> files = toFiles(compileSpec.getSourceFiles());
+            final Iterable<? extends JavaFileObject> javaFileObjects = fileManager.getJavaFileObjectsFromFiles(files);
             final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.stream()),
                     null, new JkDiagnosticListener(), options, null, javaFileObjects);
+            JkLog.info("" + files.size() + " files to compile.");
             result = task.call();
         } else {
+            JkLog.info("Use a forked process to perform compilation : " + fork.commandName());
             result = runOnFork(compileSpec);
         }
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
@@ -185,6 +189,7 @@ public final class JkJavaCompiler {
             }
         }
         final JkProcess jkProcess = this.fork.andParameters(compileSpec.getOptions()).andParameters(sourcePaths);
+        JkLog.info("" + sourcePaths.size() + " files to compile.");
         final int result = jkProcess.runSync();
         return (result == 0);
     }

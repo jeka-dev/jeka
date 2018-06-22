@@ -55,11 +55,14 @@ public final class JkProcess implements Runnable {
 
     private final boolean failOnError;
 
-    private JkProcess(String command, List<String> parameters, Path workingDir, boolean failOnError) {
+    private final boolean logCommand;
+
+    private JkProcess(String command, List<String> parameters, Path workingDir, boolean failOnError, boolean logCommand) {
         this.command = command;
         this.parameters = parameters;
         this.workingDir = workingDir;
         this.failOnError = failOnError;
+        this.logCommand = logCommand;
     }
 
     /**
@@ -67,7 +70,7 @@ public final class JkProcess implements Runnable {
      * parameters.
      */
     public static JkProcess of(String command, String... parameters) {
-        return new JkProcess(command, Arrays.asList(parameters), null, false);
+        return new JkProcess(command, Arrays.asList(parameters), null, false, false);
     }
 
     /**
@@ -77,7 +80,7 @@ public final class JkProcess implements Runnable {
     public static JkProcess ofWinOrUx(String windowsCommand, String unixCommand,
             String... parameters) {
         final String cmd = JkUtilsSystem.IS_WINDOWS ? windowsCommand : unixCommand;
-        return new JkProcess(cmd, Arrays.asList(parameters), null, false);
+        return new JkProcess(cmd, Arrays.asList(parameters), null, false, false);
     }
 
     /**
@@ -135,7 +138,7 @@ public final class JkProcess implements Runnable {
     public JkProcess andParameters(Collection<String> parameters) {
         final List<String> list = new ArrayList<>(this.parameters);
         list.addAll(parameters);
-        return new JkProcess(command, list, workingDir, failOnError);
+        return new JkProcess(command, list, workingDir, failOnError, logCommand);
     }
 
     /**
@@ -145,7 +148,7 @@ public final class JkProcess implements Runnable {
      * by the specified ones (not adding).
      */
     public JkProcess withParameters(String... parameters) {
-        return new JkProcess(command, Arrays.asList(parameters), workingDir, failOnError);
+        return new JkProcess(command, Arrays.asList(parameters), workingDir, failOnError, logCommand);
     }
 
     /**
@@ -164,7 +167,7 @@ public final class JkProcess implements Runnable {
      * specified directory as the working directory.
      */
     public JkProcess withWorkingDir(Path workingDir) {
-        return new JkProcess(command, parameters, workingDir, failOnError);
+        return new JkProcess(command, parameters, workingDir, failOnError, logCommand);
     }
 
     /**
@@ -184,7 +187,16 @@ public final class JkProcess implements Runnable {
      * throw a {@link IllegalStateException}.
      */
     public JkProcess failOnError(boolean fail) {
-        return new JkProcess(command, parameters, workingDir, fail);
+        return new JkProcess(command, parameters, workingDir, fail, logCommand);
+    }
+
+    /**
+     * Returns a <code>JkProcess</code> identical to this one but with the specified logging behavior.
+     * If parameter is <code>true</code>, a process execution will be wrapped in a log showing start and end of
+     * the execution showing details about the command to be executed and execution duration.
+     */
+    public  JkProcess logCommand(boolean logCommand) {
+        return new JkProcess(command, parameters, workingDir, failOnError, logCommand);
     }
 
     /**
@@ -229,7 +241,11 @@ public final class JkProcess implements Runnable {
                 throw new RuntimeException(e);
             }
         };
-        JkLog.execute("Starting program : " + commands.toString(), runnable);
+        if (logCommand) {
+            JkLog.execute("Starting program : " + commands.toString(), runnable);
+        } else {
+            runnable.run();
+        }
         return result.get();
     }
 
@@ -268,6 +284,13 @@ public final class JkProcess implements Runnable {
      */
     public Path workingDir() {
         return workingDir;
+    }
+
+    /**
+     * Returns the command launched by this process.
+     */
+    public String commandName() {
+        return this.command;
     }
 
     @Override

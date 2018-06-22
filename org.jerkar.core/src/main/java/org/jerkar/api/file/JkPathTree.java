@@ -33,14 +33,6 @@ public final class JkPathTree {
     /**
      * Creates a {@link JkPathTree} having the specified root directory.
      */
-    @Deprecated
-    public static JkPathTree of(File rootDir) {
-        return new JkPathTree(rootDir.toPath(), false);
-    }
-
-    /**
-     * Creates a {@link JkPathTree} having the specified root directory.
-     */
     public static JkPathTree of(Path rootDir) {
         return new JkPathTree(rootDir, false);
     }
@@ -293,8 +285,8 @@ public final class JkPathTree {
             JkUtilsPath.createDirectories(destination.getParent());
         }
         final Path zipRootEntry = JkUtilsPath.zipRoot(destination);
-        try (FileSystem fileSystem = zipRootEntry.getFileSystem();
-             Stream<Path> stream = this.stream()) {
+        try (FileSystem fileSystem = zipRootEntry.getFileSystem();  // zipRootEntry.getFileSystem() need to be called in
+             Stream<Path> stream = this.stream()) {                 // try-resources-catch otherwise it fails
 
             stream.filter(excludeRootFilter()).forEach(path -> {
                 Path zipEntry = zipRootEntry.resolve(root().relativize(path).toString());

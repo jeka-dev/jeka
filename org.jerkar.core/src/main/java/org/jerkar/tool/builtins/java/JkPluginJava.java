@@ -36,6 +36,9 @@ public class JkPluginJava extends JkPlugin {
     @JkDoc("Tests")
     public final JkTestOptions tests = new JkTestOptions();
 
+    @JkDoc("Extra arguments to be passed to the compiler")
+    public String compilerExtraArgs;
+
     // ----------------------------------------------------------------------------------
 
     private final JkPluginRepos repos;
@@ -109,6 +112,9 @@ public class JkPluginJava extends JkPlugin {
         project.maker().setSkipTests(tests.skip);
         project.maker().setJuniter(project.maker().getJuniter().withOutputOnConsole(tests.output));
         project.maker().setJuniter(project.maker().getJuniter().withReport(tests.report));
+        if (this.compilerExtraArgs != null) {
+            project.getCompileSpec().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
+        }
     }
 
     private void setupScaffolder() {

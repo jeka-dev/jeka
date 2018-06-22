@@ -187,7 +187,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     public final JkRunnables postCompile = JkRunnables.noOp();
 
     public JkJavaProjectMaker compile() {
-        JkLog.execute( "Compiling", () -> {
+        JkLog.execute( "Compilation and resource processing", () -> {
             preCompile.run();
             sourceGenerator.run();
             resourceGenerator.run();
@@ -214,7 +214,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andFirst(project.getOutLayout().classDir());
         return result
                 .setClasspath(classpath)
-                .addSources(project.getSourceLayout().tests().files())
+                .addSources(project.getSourceLayout().tests())
                 .setOutputDir(project.getOutLayout().testClassDir());
     }
 

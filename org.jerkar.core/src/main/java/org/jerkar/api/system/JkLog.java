@@ -123,8 +123,15 @@ public final class JkLog implements Serializable {
         consume(JkLogEvent.regular(Type.END_TASK, message));
     }
 
+    public static boolean isVerbose() {
+        return verbosity == Verbosity.VERBOSE;
+    }
+
     private static void consume(Object event) {
         if (Verbosity.MUTE == verbosity()) {
+            return;
+        }
+        if (consumer == null) {
             return;
         }
         if (event.getClass().getClassLoader() != consumer.getClass().getClassLoader()) {  // survive to classloader change

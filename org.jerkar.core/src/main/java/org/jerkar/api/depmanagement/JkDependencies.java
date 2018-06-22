@@ -99,7 +99,7 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      * So jars needed for compilation are supposed to be in <code>baseTree/compile</code>, jar needed for
      * test are supposed to be in <code>baseTree/test</code> and so on.
      */
-    public static JkDependencies ofLocalScoped(File baseDir) {
+    public static JkDependencies ofLocalScoped(Path baseDir) {
         final JkPathTree libDir = JkPathTree.of(baseDir);
         if (!libDir.exists()) {
             return JkDependencies.of();

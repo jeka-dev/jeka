@@ -42,7 +42,6 @@ import java.util.function.Supplier;
  */
 public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocalizable, Supplier<JkArtifactProducer> {
 
-
     private final Path baseDir;
 
     // A project has either a name either a versioned module.
@@ -76,7 +75,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         this.artifactName = this.baseDir.getFileName().toString();
         this.sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir);
         this.outLayout = JkProjectOutLayout.classicJava().withOutputDir(baseDir.resolve("build/output"));
-        this.dependencies = JkDependencies.ofLocalScoped(baseDir.resolve("build/libs").toFile());
+        this.dependencies = JkDependencies.ofLocalScoped(baseDir.resolve("build/libs"));
     }
 
     // -------------------------- Other -------------------------

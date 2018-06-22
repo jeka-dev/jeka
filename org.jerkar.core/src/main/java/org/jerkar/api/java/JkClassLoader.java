@@ -163,7 +163,7 @@ public final class JkClassLoader {
     public JkClassLoader sibling(Iterable<URL> fileOrUrls) {
         final List<Path> files = new LinkedList<>();
         for (final URL entry : fileOrUrls) {
-            final URL url = (URL) entry;
+            final URL url = entry;
             final String path = url.getFile();
             final File candidate = new File(path);
             if (JkUtilsString.isBlank(path)

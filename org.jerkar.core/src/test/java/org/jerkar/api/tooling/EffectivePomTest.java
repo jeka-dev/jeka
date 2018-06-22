@@ -36,7 +36,7 @@ public class EffectivePomTest {
         final URL url = EffectivePomTest.class.getResource("effectivepom.xml");
         final Path file = Paths.get(url.toURI());
         final JkPom jkPom = JkPom.of(file);
-        final String code = jkPom.jerkarSourceCode(JkPathTree.of(new File("toto")));
+        final String code = jkPom.jerkarSourceCode(JkPathTree.of(Paths.get("toto")));
         System.out.println(code);
         final Path srcDir = Paths.get("build/output/test-generated-src");
         Files.createDirectories(srcDir);
