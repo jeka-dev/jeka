@@ -75,7 +75,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         this.artifactName = this.baseDir.getFileName().toString();
         this.sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir);
         this.outLayout = JkProjectOutLayout.classicJava().withOutputDir(baseDir.resolve("build/output"));
-        this.dependencies = JkDependencies.ofLocalScoped(baseDir.resolve("build/libs"));
+        this.dependencies = JkDependencies.ofLocal(baseDir.resolve("build/libs"));
     }
 
     // -------------------------- Other -------------------------

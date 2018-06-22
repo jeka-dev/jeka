@@ -30,7 +30,7 @@ public class JkJavaProjectTest {
 
         final Path core = top.resolve("core");
         final JkJavaProject coreProject = new JkJavaProject(core);
-        JkDependencies coreDeps = JkDependencies.of(baseProject);
+        JkDependencies coreDeps = JkDependencies.of().and(baseProject);
         coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
         coreProject.maker().setJuniter(
                 coreProject.maker().getJuniter().forked(true));

@@ -31,7 +31,7 @@ public class FatJarBuild extends JkJavaProjectBuild {
     @Override
     protected void configurePlugins() {
         java().project()
-                .setDependencies(JkDependencies.of(sampleBuild.java().project(), JkArtifactId.of("fat", "jar")))
+                .setDependencies(JkDependencies.of().and(sampleBuild.java().project(), JkArtifactId.of("fat", "jar")))
                 .setSourceVersion(JkJavaVersion.V7);
     } 
     

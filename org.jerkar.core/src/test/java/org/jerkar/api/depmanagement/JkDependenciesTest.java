@@ -24,10 +24,10 @@ public class JkDependenciesTest {
     @Test
     public void testBuilder() {
         final JkScopeMapping run2run = JkScopeMapping.of(RUNTIME).to(RUNTIME);
-        final JkDependencies deps = JkDependencies.builder().usingDefaultScopeMapping(run2run)
+        final JkDependencies deps = JkDependencies.builder()
                 .on("hibernate:hjmlm:1212.0").on("spring:spring:6.3").scope(COMPILE)
                 .on(secondaryDeps()).on("klklkl:lklk:mlml").on("hhhhh:ll:ppp")
-                .on(JkModuleId.of("lmlmlm", "mùmùmù"), JkVersionRange.of("5454")).build();
+                .on(JkModuleId.of("lmlmlm", "mùmùmù"), JkVersionRange.of("5454")).build().withDefaultScope(run2run);
         final JkScopedDependency springDependency = deps.get(JkModuleId.of("spring", "spring"));
         Assert.assertEquals(JkUtilsIterable.setOf(COMPILE), springDependency.scopes());
         final JkScopedDependency hibernateDep = deps.get(JkModuleId.of("hibernate", "hjmlm"));
@@ -51,7 +51,7 @@ public class JkDependenciesTest {
     public void onProject() throws IOException {
         Path root = Files.createTempDirectory("jerkartestproject");
         JkJavaProject javaProject = new JkJavaProject(root);
-        JkDependencies dependencies = JkDependencies.of(javaProject);
+        JkDependencies dependencies = JkDependencies.of().and(javaProject);
         JkComputedDependency computedDependency = (JkComputedDependency) dependencies.list().get(0).dependency();
         Assert.assertEquals(root, computedDependency.ideProjectBaseDir());
     }

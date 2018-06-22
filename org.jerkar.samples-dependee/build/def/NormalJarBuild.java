@@ -31,7 +31,7 @@ public class NormalJarBuild extends JkJavaProjectBuild {
     @Override
     protected void configurePlugins() {
         java().project()
-                .setDependencies(JkDependencies.of(sampleBuild.java().project()))
+                .setDependencies(JkDependencies.of().and(sampleBuild.java().project()))
                 .setSourceVersion(JkJavaVersion.V7);
     }
 

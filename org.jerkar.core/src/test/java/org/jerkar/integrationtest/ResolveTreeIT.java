@@ -125,9 +125,8 @@ public class ResolveTreeIT {
     @Test
     public void triplePlayAnd() {
         JkDependencies deps = JkDependencies.builder()
-                .usingDefaultScopes(COMPILE_AND_RUNTIME)
                 .on("com.googlecode.playn", "playn-core", "1.4")
-                .on("com.threerings", "tripleplay", "1.4").build();
+                .on("com.threerings", "tripleplay", "1.4").build().withDefaultScope(COMPILE_AND_RUNTIME);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);

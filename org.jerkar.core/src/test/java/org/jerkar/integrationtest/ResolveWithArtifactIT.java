@@ -30,11 +30,10 @@ public class ResolveWithArtifactIT {
     public void artifactsAreHandled() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
         JkDependencies deps = JkDependencies.builder()
-                .usingDefaultScopes(COMPILE)
                 .on("org.lwjgl:lwjgl:3.1.1:natives-linux")
                 .on(JkPopularModules.GUAVA, "19.0" )
                 .on("org.lwjgl:lwjgl:3.1.1")
-                .build();
+                .build().withDefaultScope(COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);

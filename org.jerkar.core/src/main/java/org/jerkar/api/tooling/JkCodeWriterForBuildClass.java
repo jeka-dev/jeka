@@ -17,7 +17,6 @@ import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.depmanagement.JkVersionProvider;
-import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.JkBuild;
@@ -173,7 +172,6 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
         imports.remove("org.jerkar.tool.JkBuild");
         return imports;
     }
-
 
 
     /**

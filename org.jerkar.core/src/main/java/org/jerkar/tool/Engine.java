@@ -74,7 +74,9 @@ final class Engine {
      * of this project.
      */
     void execute(CommandLine commandLine, String buildClassHint, JkLog.Verbosity verbosityToRestore) {
-        this.buildDependencies = this.buildDependencies.andScopeless(commandLine.dependencies());
+        this.buildDependencies = JkDependencies.builder()
+                .on(this.buildDependencies.list())
+                .onScopeless(commandLine.dependencies()).build();
         final AtomicReference<JkBuild> build = new AtomicReference<>();
         long start = System.nanoTime();
         JkLog.startTask("Compile and initialise build classes");
@@ -101,7 +103,7 @@ final class Engine {
     }
 
     private JkPathSequence pathOf(List<? extends JkDependency> dependencies) {
-        final JkDependencies deps = JkDependencies.of(dependencies);
+        final JkDependencies deps = JkDependencies.builder().onScopeless(dependencies).build();
         return JkDependencyResolver.of(this.buildRepos).get(deps);
     }
 

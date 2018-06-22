@@ -1,7 +1,6 @@
 package org.jerkar.api.ide.eclipse;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -46,7 +45,7 @@ public class JkEclipseClasspathGeneratorTest {
 
         final Path core = top.resolve("core");
         final JkJavaProject coreProject = new JkJavaProject(core);
-        final JkDependencies coreDeps = JkDependencies.of(baseProject);
+        final JkDependencies coreDeps = JkDependencies.of().and(baseProject);
         coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
         coreProject.maker().setJuniter(
                 coreProject.maker().getJuniter().forked(true));
@@ -57,7 +56,7 @@ public class JkEclipseClasspathGeneratorTest {
         System.out.println(coreClasspath);
 
         final Path desktop = top.resolve("desktop");
-        final JkDependencies deps = JkDependencies.of(coreProject);
+        final JkDependencies deps = JkDependencies.of().and(coreProject);
         final JkEclipseClasspathGenerator desktopGenerator =
                 new JkEclipseClasspathGenerator(sourceLayout.withBaseDir(desktop), deps,
                         coreProject.maker().getDependencyResolver(), JkJavaVersion.V8);
