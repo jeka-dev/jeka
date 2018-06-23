@@ -50,12 +50,15 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         if (!libDir.exists()) {
             return JkDependencies.of();
         }
-        return JkDependencies.builder()
-                .on(JkFileSystemDependency.ofPaths(libDir.accept("*.jar", "compile/*.jar").files())).scope(JkJavaDepScopes.COMPILE)
-                .on(JkFileSystemDependency.ofPaths(libDir.accept("provided/*.jar").files())).scope(JkJavaDepScopes.PROVIDED)
-                .on(JkFileSystemDependency.ofPaths(libDir.accept("runtime/*.jar").files())).scope(JkJavaDepScopes.RUNTIME)
-                .on(JkFileSystemDependency.ofPaths(libDir.accept("test/*.jar").files())).scope(JkJavaDepScopes.TEST)
-                .build();
+        return JkDependencies.of()
+                .and(JkFileSystemDependency.ofPaths(libDir.accept("*.jar", "compile/*.jar").files()))
+                    .withDefaultScope(JkJavaDepScopes.COMPILE)
+                .and(JkFileSystemDependency.ofPaths(libDir.accept("provided/*.jar").files()))
+                    .withDefaultScope(JkJavaDepScopes.PROVIDED)
+                .and(JkFileSystemDependency.ofPaths(libDir.accept("runtime/*.jar").files()))
+                    .withDefaultScope(JkJavaDepScopes.RUNTIME)
+                .and(JkFileSystemDependency.ofPaths(libDir.accept("test/*.jar").files()))
+                    .withDefaultScope(JkJavaDepScopes.TEST);
     }
 
     private final List<JkScopedDependency> dependencies;
@@ -151,6 +154,13 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
      */
     public JkDependencies and(JkScopedDependency... others) {
         return and(Arrays.asList(others));
+    }
+
+    /**
+     * Returns a clone of this object plus the specified scoped dependencies.
+     */
+    public JkDependencies and(JkDependency dependency, JkScope ... scopes) {
+        return this.and(JkScopedDependency.of(dependency, scopes));
     }
 
     /**
@@ -370,30 +380,6 @@ public class JkDependencies implements Iterable<JkScopedDependency>, Serializabl
         Set<JkDepExclude> depExcludes = new HashSet<>(this.depExcludes);
         depExcludes.add(exclude);
         return new JkDependencies(this.dependencies, depExcludes, this.explicitVersions);
-    }
-
-    /**
-     * Create a <code>JkDependencies</code> identical to this one but adding exclusion clauses
-     * on the specified dependency.
-     */
-    public JkDependencies excludeLocally(JkModuleId holdingDependencies, List<JkDepExclude> excludes) {
-        final List<JkScopedDependency> depList = new LinkedList<>();
-        for (final JkScopedDependency scopedDependency : this.dependencies) {
-            if (scopedDependency.dependency() instanceof JkModuleDependency) {
-                final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
-                        .dependency();
-                if (!moduleDependency.moduleId().equals(holdingDependencies)) {
-                    depList.add(scopedDependency);
-                    continue;
-                }
-                final List<JkDepExclude> depExcludeList = excludes;
-                final JkModuleDependency newDep = moduleDependency.andExclude(depExcludeList);
-                depList.add(scopedDependency.dependency(newDep));
-            } else {
-                depList.add(scopedDependency);
-            }
-        }
-        return new JkDependencies(depList, this.depExcludes, this.explicitVersions);
     }
 
     /**

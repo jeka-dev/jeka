@@ -1,24 +1,22 @@
 package org.jerkar.api.depmanagement;
 
-import static org.jerkar.api.depmanagement.JkScopedDependencyTest.COMPILE;
-import static org.jerkar.api.depmanagement.JkScopedDependencyTest.RUNTIME;
-
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.jerkar.api.depmanagement.JkScopedDependencyTest.*;
+
 /**
  * @formatter:off
  * @author djeang
  * 
  */
-@SuppressWarnings("javadoc")
 public class JkDependenciesTest {
 
     @Test
