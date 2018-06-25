@@ -9,14 +9,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
 
-import org.jerkar.api.depmanagement.JkDependencies;
-import org.jerkar.api.depmanagement.JkDependencyResolver;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkPopularModules;
-import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkResolutionParameters;
-import org.jerkar.api.depmanagement.JkResolveResult;
-import org.jerkar.api.depmanagement.JkScope;
+import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.utils.JkUtilsSystem;
 import org.junit.Test;
 
@@ -28,18 +21,16 @@ public class ResolverWithoutScopeMapperIT {
 
     @Test
     public void resolveCompile() {
-        JkDependencies deps = JkDependencies.builder()
-                .on(JkPopularModules.APACHE_COMMONS_DBCP, "1.4").scope(COMPILE)
-                .build();
+        JkDependencySet deps = JkDependencySet.of()
+                .and(JkPopularModules.APACHE_COMMONS_DBCP, "1.4", COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of(REPOS)
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
         assertTrue(resolveResult.contains(JkModuleId.of("commons-pool")));
         assertEquals(2, resolveResult.dependencyTree().flattenToVersionProvider().moduleIds().size());
 
-        deps = JkDependencies.builder()
-                .on(JkPopularModules.HIBERNATE_CORE, "5.2.10.Final").scope(COMPILE)
-                .build();
+        deps = JkDependencySet.of()
+                .and(JkPopularModules.HIBERNATE_CORE, "5.2.10.Final", COMPILE);
         resolver = JkDependencyResolver.of(REPOS)
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
         resolveResult = resolver.resolve(deps, COMPILE);
@@ -49,9 +40,7 @@ public class ResolverWithoutScopeMapperIT {
 
     @Test
     public void resolveInheritedScopes() {
-        JkDependencies deps = JkDependencies.builder()
-                .on(JkPopularModules.APACHE_COMMONS_DBCP, "1.4").scope(COMPILE)
-                .build();
+        JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.APACHE_COMMONS_DBCP, "1.4", COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of(REPOS)
             .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
 
@@ -70,9 +59,8 @@ public class ResolverWithoutScopeMapperIT {
 
     @Test
     public void resolveWithOptionals() {
-        JkDependencies deps = JkDependencies.builder()
-                .on(JkPopularModules.SPRING_ORM, "4.3.8.RELEASE").mapScope(COMPILE).to("compile", "master", "optional")
-                .build();
+        JkDependencySet deps = JkDependencySet.of()
+                .and(JkPopularModules.SPRING_ORM, "4.3.8.RELEASE", JkScopeMapping.of(COMPILE).to("compile", "master", "optional"));
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
         assertEquals(37, resolveResult.dependencyTree().flattenToVersionProvider().moduleIds().size());
@@ -80,9 +68,8 @@ public class ResolverWithoutScopeMapperIT {
 
     @Test
     public void resolveSpringbootTestStarter() {
-        JkDependencies deps = JkDependencies.builder()
-                .on("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE").mapScope(TEST).to("master", "runtime")
-                .build();
+        JkDependencySet deps = JkDependencySet.of()
+                .and("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE", JkScopeMapping.of(TEST).to("master", "runtime"));
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral());
         JkResolveResult resolveResult = resolver.resolve(deps, TEST);
         Set<JkModuleId> moduleIds = resolveResult.dependencyTree().flattenToVersionProvider().moduleIds();

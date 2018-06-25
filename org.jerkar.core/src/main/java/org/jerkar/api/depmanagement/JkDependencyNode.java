@@ -57,7 +57,7 @@ public class JkDependencyNode implements Serializable {
         return new JkDependencyNode(moduleInfo, Collections.unmodifiableList(new LinkedList<>()));
     }
 
-    JkDependencyNode mergeNonModules(JkDependencies dependencies, Set<JkScope> scopes) {
+    JkDependencyNode mergeNonModules(JkDependencySet dependencies, Set<JkScope> scopes) {
         final List<JkDependencyNode> result = new LinkedList<>();
         final Set<JkFileDependency> addedFileDeps = new HashSet<>();
         for (final JkDependencyNode node : this.children) {
@@ -196,8 +196,8 @@ public class JkDependencyNode implements Serializable {
         return new JkDependencyNode(this.nodeInfo, resultChildren);
     }
 
-    private static void addFileDepsToTree(JkDependencies dependencies, Set<JkScope> scopes, List<JkDependencyNode> result,
-            Set<JkFileDependency> addedFileDeps, JkModuleId moduleId) {
+    private static void addFileDepsToTree(JkDependencySet dependencies, Set<JkScope> scopes, List<JkDependencyNode> result,
+                                          Set<JkFileDependency> addedFileDeps, JkModuleId moduleId) {
         for (final JkScopedDependency scopedDependency : depsUntilLast(dependencies, moduleId)) {
             if (scopes.isEmpty() || scopedDependency.isInvolvedInAnyOf(scopes)) {
                 final JkFileDependency fileDep = (JkFileDependency) scopedDependency.dependency();
@@ -391,7 +391,7 @@ public class JkDependencyNode implements Serializable {
         }
     }
 
-    private static List<JkScopedDependency> depsUntilLast(JkDependencies deps, JkModuleId to) {
+    private static List<JkScopedDependency> depsUntilLast(JkDependencySet deps, JkModuleId to) {
         final List<JkScopedDependency> result = new LinkedList<>();
         final List<JkScopedDependency> partialResult = new LinkedList<>();
         for (final JkScopedDependency scopedDependency : deps) {

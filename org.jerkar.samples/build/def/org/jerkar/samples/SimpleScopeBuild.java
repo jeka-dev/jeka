@@ -5,9 +5,9 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.PROVIDED;
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.RUNTIME;
 import static org.jerkar.api.depmanagement.JkPopularModules.JERSEY_SERVER;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.api.depmanagement.JkScopeMapping;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
@@ -21,11 +21,11 @@ public class SimpleScopeBuild extends JkJavaProjectBuild {
 
     @Override
     protected void configurePlugins() {
-        java().project().setDependencies(JkDependencies.builder()
-                .on(baseDir().resolve("libs/foo.jar"))
-                .on(JERSEY_SERVER, "1.19")
-                    .mapScope(COMPILE).to(RUNTIME)
-                    .and(FOO, PROVIDED).to(BAR, PROVIDED).build());
+        java().project().setDependencies(JkDependencySet.of()
+                .and(baseDir().resolve("libs/foo.jar"))
+                .and(JERSEY_SERVER, "1.19", JkScopeMapping
+                    .of(COMPILE).to(RUNTIME)
+                    .and(FOO, PROVIDED).to(BAR, PROVIDED)));
     }
 }
 

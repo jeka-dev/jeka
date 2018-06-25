@@ -24,13 +24,12 @@ public class MergeFileDepIT {
         Path dep0File = Paths.get(MergeFileDepIT.class.getResource("dep0").toURI());
         Path dep1File = Paths.get(MergeFileDepIT.class.getResource( "dep1").toURI());
         Path dep2File = Paths.get(MergeFileDepIT.class.getResource( "dep2").toURI());
-        JkDependencies deps = JkDependencies.builder()
-                .on(dep0File).scope(TEST)
-                .on("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE").scope(COMPILE_AND_RUNTIME)
-                .on(dep1File).scope(TEST)
-                .on("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0").scope(COMPILE)
-                .on(dep2File).scope(COMPILE)
-                .build();
+        JkDependencySet deps = JkDependencySet.of()
+                .and(dep0File, TEST)
+                .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", COMPILE_AND_RUNTIME)
+                .and(dep1File, TEST)
+                .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", COMPILE)
+                .and(dep2File, COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
@@ -81,9 +80,9 @@ public class MergeFileDepIT {
     public void flattenOnlyFileDeps() throws URISyntaxException {
         Path dep0File = Paths.get(MergeFileDepIT.class.getResource("dep0").toURI());
         Path dep1File = Paths.get(MergeFileDepIT.class.getResource("dep1").toURI());
-        JkDependencies deps = JkDependencies.builder()
-                .on(dep0File).scope(TEST)
-                .on(dep1File).scope(TEST).build();
+        JkDependencySet deps = JkDependencySet.of()
+                .and(dep0File, TEST)
+                .and(dep1File, TEST);
         JkDependencyResolver resolver = JkDependencyResolver.of();
         JkDependencyNode tree = resolver.resolve(deps).dependencyTree();
         assertEquals(2, tree.flatten().size());

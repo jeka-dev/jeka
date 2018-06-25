@@ -3,7 +3,6 @@ package org.jerkar.api.depmanagement;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -20,12 +19,14 @@ import static org.jerkar.api.depmanagement.JkScopedDependencyTest.*;
 public class JkDependenciesTest {
 
     @Test
-    public void testBuilder() {
+    public void testAnd() {
         final JkScopeMapping run2run = JkScopeMapping.of(RUNTIME).to(RUNTIME);
-        final JkDependencies deps = JkDependencies.builder()
-                .on("hibernate:hjmlm:1212.0").on("spring:spring:6.3").scope(COMPILE)
-                .on(secondaryDeps()).on("klklkl:lklk:mlml").on("hhhhh:ll:ppp")
-                .on(JkModuleId.of("lmlmlm", "mùmùmù"), JkVersionRange.of("5454")).build().withDefaultScope(run2run);
+        final JkDependencySet deps = JkDependencySet.of()
+                .and("hibernate:hjmlm:1212.0")
+                .and("spring:spring:6.3", COMPILE)
+                .and(secondaryDeps())
+                .and("klklkl:lklk:mlml")
+                .and("hhhhh:ll:ppp").withDefaultScope(run2run);
         final JkScopedDependency springDependency = deps.get(JkModuleId.of("spring", "spring"));
         Assert.assertEquals(JkUtilsIterable.setOf(COMPILE), springDependency.scopes());
         final JkScopedDependency hibernateDep = deps.get(JkModuleId.of("hibernate", "hjmlm"));
@@ -41,15 +42,15 @@ public class JkDependenciesTest {
         Assert.assertEquals(run2runA, run2runB);
     }
 
-    private JkDependencies secondaryDeps() {
-        return JkDependencies.builder().on("454545:5445:54545").on("lkll:llljk:poo").build();
+    private JkDependencySet secondaryDeps() {
+        return JkDependencySet.of().and("454545:5445:54545").and("lkll:llljk:poo");
     }
 
     @Test
     public void onProject() throws IOException {
         Path root = Files.createTempDirectory("jerkartestproject");
         JkJavaProject javaProject = new JkJavaProject(root);
-        JkDependencies dependencies = JkDependencies.of().and(javaProject);
+        JkDependencySet dependencies = JkDependencySet.of().and(javaProject);
         JkComputedDependency computedDependency = (JkComputedDependency) dependencies.list().get(0).dependency();
         Assert.assertEquals(root, computedDependency.ideProjectBaseDir());
     }

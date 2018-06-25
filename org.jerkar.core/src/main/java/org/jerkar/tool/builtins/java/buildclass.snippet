@@ -1,4 +1,4 @@
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
@@ -34,11 +34,10 @@ class Build extends JkJavaProjectBuild {
                 .setJuniter(maker().getJuniter().forked(true));
     }
 
-    private JkDependencies dependencies() {  // Example of dependencies.
-        return JkDependencies.builder()
-                .on("com.google.guava:guava:21.0")
-                .on("junit:junit:4.11", TEST)
-                .build();
+    private JkDependencySet dependencies() {  // Example of dependencies.
+        return JkDependencySet.of()
+                .and("com.google.guava:guava:21.0")
+                .and("junit:junit:4.11", TEST);
     }
 
     public static void main(String[] args) {

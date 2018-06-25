@@ -2,6 +2,7 @@ package org.jerkar.api.depmanagement;
 
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsPath;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,7 +20,8 @@ public final class JkFileSystemDependency implements JkFileDependency {
      * Creates a {@link JkFileSystemDependency} on the specified files.
      */
     public static JkFileSystemDependency ofPaths(Iterable<Path> files) {
-        return new JkFileSystemDependency(files);
+        Iterable<Path> trueFiles = JkUtilsPath.disambiguate(files);
+        return new JkFileSystemDependency(trueFiles);
     }
 
     private final List<Path> files;
@@ -31,7 +33,7 @@ public final class JkFileSystemDependency implements JkFileDependency {
     @Override
     public final List<Path> paths() {
         for (final Path file : files) {
-            JkUtilsAssert.isTrue(Files.exists(file), "The file " + file + " does not exist.");
+            JkUtilsAssert.isTrue(Files.exists(file), "File " + file + " does not exist.");
         }
         return files;
     }

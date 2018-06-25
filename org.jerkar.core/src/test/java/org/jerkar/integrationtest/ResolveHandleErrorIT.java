@@ -4,7 +4,7 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.COMPILE_AND_RUNTIME;
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.DEFAULT_SCOPE_MAPPING;
 import static org.junit.Assert.assertEquals;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.depmanagement.JkRepos;
@@ -21,9 +21,8 @@ public class ResolveHandleErrorIT {
     @Test
     public void artifactNotFound() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
-        JkDependencies deps = JkDependencies.builder()
-                .on(JkPopularModules.JAVAX_SERVLET_API, "2.5.3").scope(COMPILE_AND_RUNTIME)  // does not exist
-                .build();
+        JkDependencySet deps = JkDependencySet.of()
+                .and(JkPopularModules.JAVAX_SERVLET_API, "2.5.3", COMPILE_AND_RUNTIME);  // does not exist
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);

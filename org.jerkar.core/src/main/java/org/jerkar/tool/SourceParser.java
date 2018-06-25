@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkModuleDependency;
 import org.jerkar.api.depmanagement.JkRepos;
 import org.jerkar.api.system.JkException;
@@ -34,7 +34,7 @@ final class SourceParser {
     }
 
     public static SourceParser of(Path baseDir, Iterable<Path>  files) {
-        SourceParser result = new SourceParser(JkDependencies.of(), JkRepos.empty(),
+        SourceParser result = new SourceParser(JkDependencySet.of(), JkRepos.empty(),
                 new LinkedList<>());
         for (final Path code : files) {
             result = result.and(of(baseDir, code));
@@ -45,7 +45,7 @@ final class SourceParser {
     static SourceParser of(Path baseDir, URL codeUrl) {
         try (final InputStream inputStream = JkUtilsIO.inputStream(codeUrl)) {
             final String uncomentedCode = removeComments(inputStream);
-            final JkDependencies deps = dependencies(uncomentedCode, baseDir, codeUrl);
+            final JkDependencySet deps = dependencies(uncomentedCode, baseDir, codeUrl);
             final List<Path>  projects = projects(uncomentedCode, baseDir, codeUrl);
             return new SourceParser(deps, repos(uncomentedCode, codeUrl), projects);
         } catch (IOException e) {
@@ -53,13 +53,13 @@ final class SourceParser {
         }
     }
 
-    private final JkDependencies dependencies;
+    private final JkDependencySet dependencies;
 
     private final JkRepos importRepos;
 
     private final List<Path>  dependecyProjects;
 
-    private SourceParser(JkDependencies deps, JkRepos repos, List<Path>  dependencyProjects) {
+    private SourceParser(JkDependencySet deps, JkRepos repos, List<Path>  dependencyProjects) {
         super();
         this.dependencies = deps;
         this.importRepos = repos;
@@ -73,7 +73,7 @@ final class SourceParser {
                 this.dependecyProjects, other.dependecyProjects));
     }
 
-    public JkDependencies dependencies() {
+    public JkDependencySet dependencies() {
         return this.dependencies;
     }
 
@@ -85,7 +85,7 @@ final class SourceParser {
         return this.dependecyProjects;
     }
 
-    private static JkDependencies dependencies(String code, Path baseDir, URL url) {
+    private static JkDependencySet dependencies(String code, Path baseDir, URL url) {
         final List<String> deps = stringsInJkImport(code, url);
         return dependenciesFromImports(baseDir, deps);
     }
@@ -100,11 +100,11 @@ final class SourceParser {
         return projectDependencies(baseDir, deps);
     }
 
-    private static JkDependencies dependenciesFromImports(Path baseDir, List<String> deps) {
-        final JkDependencies.Builder builder = JkDependencies.builder();
+    private static JkDependencySet dependenciesFromImports(Path baseDir, List<String> deps) {
+        JkDependencySet result = JkDependencySet.of();
         for (final String dependency : deps) {
             if (JkModuleDependency.isModuleDependencyDescription(dependency)) {
-                builder.on(JkModuleDependency.of(dependency));
+                result = result.and(JkModuleDependency.of(dependency));
             } else {
                 Path depFile = Paths.get(dependency);
                 if (!Files.exists(depFile)) {
@@ -117,11 +117,11 @@ final class SourceParser {
                     }
                 }
 
-                builder.on(depFile);
+                result = result.and(depFile);
             }
 
         }
-        return builder.build();
+        return result;
     }
 
     private static List<Path>  projectDependencies(Path baseDir, List<String> deps) {

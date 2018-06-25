@@ -137,7 +137,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * Returns dependencies declared for this project. Dependencies declared without specifying
      * scope are defaulted to scope {@link JkJavaDepScopes#COMPILE_AND_RUNTIME}
      */
-    public JkDependencies getDeclaredDependencies() {
+    public JkDependencySet getDeclaredDependencies() {
         return project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME);
     }
 
@@ -355,7 +355,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     public JkJavaProjectMaker publishIvy() {
-        final JkDependencies dependencies = getDeclaredDependencies();
+        final JkDependencySet dependencies = getDeclaredDependencies();
         final JkIvyPublication publication = JkIvyPublication.of(mainArtifactPath(), JkJavaDepScopes.COMPILE)
                 .andOptional(artifactPath(SOURCES_ARTIFACT_ID), JkJavaDepScopes.SOURCES)
                 .andOptional(artifactPath(JAVADOC_ARTIFACT_ID), JkJavaDepScopes.JAVADOC)

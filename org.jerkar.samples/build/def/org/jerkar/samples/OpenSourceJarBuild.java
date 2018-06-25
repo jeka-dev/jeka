@@ -4,9 +4,8 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
 import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
-import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
@@ -19,9 +18,9 @@ public class OpenSourceJarBuild extends JkJavaProjectBuild {
 
     @Override
     protected void configurePlugins() {
-        JkDependencies deps = JkDependencies.builder()
-                .on(GUAVA, "18.0") 
-                .on(JUNIT, "4.11", TEST).build();
+        JkDependencySet deps = JkDependencySet.of()
+                .and(GUAVA, "18.0")
+                .and(JUNIT, "4.11", TEST);
         
         JkMavenPublicationInfo info = JkMavenPublicationInfo
                 .of("my project", "my description", "https://github.com/jerkar/samples")

@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import org.jerkar.api.depmanagement.JkComputedDependency;
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.depmanagement.JkScopedDependency;
 import org.jerkar.api.file.JkPathTree;
@@ -34,18 +34,18 @@ public class JkEclipseClasspathGeneratorTest {
         final Path base = top.resolve("base");
         final JkJavaProject baseProject = new JkJavaProject(base);
         baseProject.setSourceLayout(sourceLayout);
-        baseProject.setDependencies(JkDependencies.builder().on(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3").build());
+        baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3"));
         final JkEclipseClasspathGenerator baseGenerator =
                 new JkEclipseClasspathGenerator(baseProject);
         baseGenerator.setBuildDependencyResolver(baseProject.maker().getDependencyResolver(),
-                JkDependencies.builder().on(JkPopularModules.GUAVA, "21.0").build());
+                JkDependencySet.of().and(JkPopularModules.GUAVA, "21.0"));
         final String baseClasspath = baseGenerator.generate();
         System.out.println("\nbase .classpath");
         System.out.println(baseClasspath);
 
         final Path core = top.resolve("core");
         final JkJavaProject coreProject = new JkJavaProject(core);
-        final JkDependencies coreDeps = JkDependencies.of().and(baseProject);
+        final JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
         coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
         coreProject.maker().setJuniter(
                 coreProject.maker().getJuniter().forked(true));
@@ -56,7 +56,7 @@ public class JkEclipseClasspathGeneratorTest {
         System.out.println(coreClasspath);
 
         final Path desktop = top.resolve("desktop");
-        final JkDependencies deps = JkDependencies.of().and(coreProject);
+        final JkDependencySet deps = JkDependencySet.of().and(coreProject);
         final JkEclipseClasspathGenerator desktopGenerator =
                 new JkEclipseClasspathGenerator(sourceLayout.withBaseDir(desktop), deps,
                         coreProject.maker().getDependencyResolver(), JkJavaVersion.V8);

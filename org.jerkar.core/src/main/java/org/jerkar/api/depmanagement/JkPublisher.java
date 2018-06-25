@@ -80,7 +80,7 @@ public final class JkPublisher {
      *            just pass {@link JkVersionProvider#empty()}
      */
     public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
-                           JkDependencies dependencies, JkScopeMapping defaultMapping,
+                           JkDependencySet dependencies, JkScopeMapping defaultMapping,
                            Instant deliveryDate, JkVersionProvider resolvedVersion) {
         this.ivyPublisher.publishIvy(versionedModule, publication, dependencies, defaultMapping,
                 deliveryDate, resolvedVersion);
@@ -98,7 +98,7 @@ public final class JkPublisher {
      *            The dependencies to specify in the generated pom file.
      */
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
-            JkDependencies dependencies) {
+            JkDependencySet dependencies) {
         this.ivyPublisher.publishMaven(versionedModule, publication, dependencies.modulesOnly());
     }
 
@@ -113,7 +113,7 @@ public final class JkPublisher {
      */
     public void publishMaven(JkVersionedModule versionedModule, JkArtifactLocator artifactLocator,
                              Set<JkArtifactId> excludedArtifacts,
-                             JkDependencies dependencies, JkMavenPublicationInfo extraPublishInfo) {
+                             JkDependencySet dependencies, JkMavenPublicationInfo extraPublishInfo) {
         JkMavenPublication publication = JkMavenPublication.of(artifactLocator, excludedArtifacts).with(extraPublishInfo);
         this.ivyPublisher.publishMaven(versionedModule, publication, dependencies.modulesOnly());
     }

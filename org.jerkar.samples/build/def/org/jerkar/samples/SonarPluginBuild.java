@@ -3,7 +3,7 @@ package org.jerkar.samples;
 import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
 import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.plugins.sonar.JkPluginSonar;
 import org.jerkar.plugins.sonar.JkSonar;
@@ -29,9 +29,9 @@ public class SonarPluginBuild extends JkJavaProjectBuild {
     protected void configurePlugins() {
         java().project()
                 .setVersionedModule("org.jerkar:samples", "0.1")
-                .setDependencies(JkDependencies.builder()
-                .on(GUAVA, "18.0")
-                .on(JUNIT, "4.11", JkJavaDepScopes.TEST).build());
+                .setDependencies(JkDependencySet.of()
+                    .and(GUAVA, "18.0")
+                    .and(JUNIT, "4.11", JkJavaDepScopes.TEST));
     }
 
 

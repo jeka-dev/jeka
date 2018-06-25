@@ -91,7 +91,7 @@ final class IvyResolver implements InternalDepResolver {
 
     @SuppressWarnings("unchecked")
     @Override
-    public JkResolveResult resolve(JkVersionedModule moduleArg, JkDependencies deps,
+    public JkResolveResult resolve(JkVersionedModule moduleArg, JkDependencySet deps,
             JkResolutionParameters parameters, JkVersionProvider versionProvider, JkScope ... resolvedScopes) {
 
         final JkVersionedModule module;

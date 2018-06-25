@@ -4,13 +4,11 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
 import static org.jerkar.api.depmanagement.JkPopularModules.JERSEY_SERVER;
 import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
-import static org.jerkar.api.depmanagement.JkPopularModules.MOCKITO_ALL;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkPublishRepos;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
@@ -33,14 +31,11 @@ public class MavenStyleBuild extends JkJavaProjectBuild {
         java().project().maker().setPublishRepos(publishRepositories());
     }
 
-    JkDependencies dependencies() {
-        return JkDependencies.builder()
-                .on(GUAVA, "21.0")	// Popular modules are available as Java constant
-                .on(JERSEY_SERVER, "1.19")
-             //   .on("com.orientechnologies:orientdb-client:2.2.35")
-                .on(JUNIT, "4.11").scope(TEST)
-             //   .on(MOCKITO_ALL, "1.9.5").scope(TEST)
-                .build();
+    JkDependencySet dependencies() {
+        return JkDependencySet.of()
+                .and(GUAVA, "21.0")	// Popular modules are available as Java constant
+                .and(JERSEY_SERVER, "1.19")
+                .and(JUNIT, "4.11", TEST);
     }
 
     JkPublishRepos publishRepositories() {

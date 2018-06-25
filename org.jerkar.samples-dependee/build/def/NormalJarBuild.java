@@ -1,4 +1,4 @@
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.samples.MavenStyleBuild;
 import org.jerkar.tool.JkImportBuild;
@@ -30,8 +30,8 @@ public class NormalJarBuild extends JkJavaProjectBuild {
 
     @Override
     protected void configurePlugins() {
-        java().project()
-                .setDependencies(JkDependencies.of().and(sampleBuild.java().project()))
+        project()
+                .setDependencies(JkDependencySet.of().and(sampleBuild.java().project()))
                 .setSourceVersion(JkJavaVersion.V7);
     }
 

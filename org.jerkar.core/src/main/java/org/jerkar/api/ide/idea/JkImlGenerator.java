@@ -55,12 +55,12 @@ public final class JkImlGenerator {
     /** Dependency resolver to fetch module dependencies */
     private JkDependencyResolver dependencyResolver;
 
-    public JkDependencies dependencies;
+    public JkDependencySet dependencies;
 
     /** Dependency resolver to fetch module dependencies for build classes */
     private JkDependencyResolver buildDependencyResolver;
 
-    private JkDependencies buildDependencies;
+    private JkDependencySet buildDependencies;
 
     /** Can be empty but not null */
     private Iterable<Path> importedBuildProjects = JkUtilsIterable.listOf();
@@ -77,7 +77,7 @@ public final class JkImlGenerator {
     /**
      * Constructs a {@link JkImlGenerator} to the project base directory
      */
-    public JkImlGenerator(JkProjectSourceLayout sourceLayout, JkDependencies dependencies,
+    public JkImlGenerator(JkProjectSourceLayout sourceLayout, JkDependencySet dependencies,
                           JkDependencyResolver resolver) {
         super();
         this.sourceLayout = sourceLayout;
@@ -89,7 +89,7 @@ public final class JkImlGenerator {
     public JkImlGenerator(Path baseDir) {
         super();
         this.baseDir = baseDir;
-        this.dependencies = JkDependencies.builder().build();
+        this.dependencies = JkDependencySet.of();
         this.dependencyResolver = JkDependencyResolver.of();
     }
 
@@ -267,8 +267,8 @@ public final class JkImlGenerator {
         }
     }
 
-    private void writeDependencies(JkDependencies dependencies, JkDependencyResolver resolver, Set<Path> allPaths, Set<Path> allModules,
-            boolean forceTest) throws XMLStreamException {
+    private void writeDependencies(JkDependencySet dependencies, JkDependencyResolver resolver, Set<Path> allPaths, Set<Path> allModules,
+                                   boolean forceTest) throws XMLStreamException {
 
         final JkResolveResult resolveResult = resolver.resolve(dependencies);
         final JkDependencyNode tree = resolveResult.dependencyTree();
@@ -591,13 +591,13 @@ public final class JkImlGenerator {
         return this;
     }
 
-    public JkImlGenerator setDependencies(JkDependencyResolver dependencyResolver, JkDependencies dependencies) {
+    public JkImlGenerator setDependencies(JkDependencyResolver dependencyResolver, JkDependencySet dependencies) {
         this.dependencyResolver = dependencyResolver;
         this.dependencies = dependencies;
         return this;
     }
 
-    public JkImlGenerator setBuildDependencies(JkDependencyResolver buildDependencyResolver, JkDependencies dependencies) {
+    public JkImlGenerator setBuildDependencies(JkDependencyResolver buildDependencyResolver, JkDependencySet dependencies) {
         this.buildDependencyResolver = buildDependencyResolver;
         this.buildDependencies = dependencies;
         return this;

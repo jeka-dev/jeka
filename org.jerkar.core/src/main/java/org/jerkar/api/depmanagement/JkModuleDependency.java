@@ -215,6 +215,14 @@ public final class JkModuleDependency implements JkDependency {
      * Returns a JkModuleDependency identical to this one but adding the
      * specified exclusion.
      */
+    public JkModuleDependency andExclude(String groupeAndName) {
+        return andExclude(JkDepExclude.of(groupeAndName));
+    }
+
+    /**
+     * Returns a JkModuleDependency identical to this one but adding the
+     * specified exclusion.
+     */
     public JkModuleDependency andExclude(Iterable<JkDepExclude> depExcludes) {
         final List<JkDepExclude> list = new LinkedList<>(excludes);
         list.addAll(JkUtilsIterable.listOf(depExcludes));

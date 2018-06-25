@@ -36,7 +36,7 @@ public final class JkResolutionParameters implements Serializable {
     private final boolean refreshed;
 
     /**
-     * Returns the default scope mapping to use for the {@link JkDependencies}
+     * Returns the default scope mapping to use for the {@link JkDependencySet}
      * to be resolved. <code>null</code> means no default scope mapping.
      * 
      * @see <a href=

@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkMavenPublication;
 import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
 import org.jerkar.api.depmanagement.JkPublishRepo;
@@ -111,7 +111,7 @@ public class AntStyleBuild extends JkBuild {
         JkMavenPublication publication = JkMavenPublication.of(jarFile)
                 .with(info).and(srcZip, "sources");
         JkPublisher.of(repo).publishMaven(versionedModule, publication,
-                JkDependencies.of());
+                JkDependencySet.of());
     }
 
     public static void main(String[] args) {

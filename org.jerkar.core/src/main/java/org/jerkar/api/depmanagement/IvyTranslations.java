@@ -73,8 +73,8 @@ final class IvyTranslations {
     }
 
     static DefaultModuleDescriptor toPublicationLessModule(JkVersionedModule module,
-            JkDependencies dependencies, JkScopeMapping defaultMapping,
-            JkVersionProvider resolvedVersions) {
+                                                           JkDependencySet dependencies, JkScopeMapping defaultMapping,
+                                                           JkVersionProvider resolvedVersions) {
         final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module
                 .moduleId().group(), module.moduleId().name(), module.version().name());
         final DefaultModuleDescriptor result = new DefaultModuleDescriptor(
@@ -294,8 +294,8 @@ final class IvyTranslations {
     }
 
     private static void populateModuleDescriptor(DefaultModuleDescriptor moduleDescriptor,
-            JkDependencies dependencies, JkScopeMapping defaultMapping,
-            JkVersionProvider resolvedVersions) {
+                                                 JkDependencySet dependencies, JkScopeMapping defaultMapping,
+                                                 JkVersionProvider resolvedVersions) {
 
         // Add configuration definitions
         for (final JkScope involvedScope : dependencies.involvedScopes()) {

@@ -20,8 +20,8 @@ public class JkDependencyResolverTest {
         Path core = root.resolve("core");
         JkJavaProject baseProject = new JkJavaProject(base);
         JkJavaProject coreProject = new JkJavaProject(core);
-        baseProject.setDependencies(JkDependencies.builder().on(JkPopularModules.GUAVA, "19.0").build());
-        coreProject.setDependencies(JkDependencies.of().and(baseProject));
+        baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.GUAVA, "19.0"));
+        coreProject.setDependencies(JkDependencySet.of().and(baseProject));
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepos.mavenCentral());
 
         JkResolveResult resolveResult = dependencyResolver.resolve(coreProject.getDependencies());

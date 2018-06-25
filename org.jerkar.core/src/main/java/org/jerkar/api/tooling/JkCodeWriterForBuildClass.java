@@ -11,7 +11,7 @@ import java.util.TreeMap;
 import java.util.function.Supplier;
 
 import org.jerkar.api.depmanagement.JkDepExclude;
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkDependencyExclusions;
 import org.jerkar.api.depmanagement.JkModuleId;
 import org.jerkar.api.depmanagement.JkRepo;
@@ -80,7 +80,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
      * The dependencies declared in the generated build class. Set it to <code>null</code> to
      * not generate #dependencies method.
      */
-    public JkDependencies dependencies;
+    public JkDependencySet dependencies;
 
     /**
      * The repositories declared in the generated build class.
@@ -317,7 +317,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
                     "    }";
         }
 
-        public String dependencies(JkDependencies dependencies) {
+        public String dependencies(JkDependencySet dependencies) {
             return "    JkDependencies dependencies() {\n" +
                     "        return " + dependencies.toJavaCode(8) + "\n    }" +
                     "\n";

@@ -5,11 +5,11 @@ import java.time.Instant;
 interface InternalPublisher {
 
     void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
-            JkDependencies dependencies, JkScopeMapping defaultMapping, Instant deliveryDate,
-            JkVersionProvider resolvedVersion);
+                    JkDependencySet dependencies, JkScopeMapping defaultMapping, Instant deliveryDate,
+                    JkVersionProvider resolvedVersion);
 
     void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
-            JkDependencies dependencies);
+            JkDependencySet dependencies);
 
     boolean hasMavenPublishRepo();
 

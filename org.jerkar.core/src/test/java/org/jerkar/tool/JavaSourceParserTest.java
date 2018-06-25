@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,7 +16,7 @@ public class JavaSourceParserTest {
     @Test
     public void withOneImport() {
         final URL resource = JavaSourceParserTest.class.getResource("with1import.javasource");
-        final JkDependencies dependencies = SourceParser.of(Paths.get(""), resource).dependencies();
+        final JkDependencySet dependencies = SourceParser.of(Paths.get(""), resource).dependencies();
         Assert.assertEquals(1, JkUtilsIterable.listOf(dependencies).size());
     }
 
@@ -24,7 +24,7 @@ public class JavaSourceParserTest {
     public void with3Imports() {
         SourceParser parser = SourceParser.of(Paths.get(""),
                 JavaSourceParserTest.class.getResource("with3Imports.javasource"));
-        final JkDependencies dependencies = parser.dependencies();
+        final JkDependencySet dependencies = parser.dependencies();
         Assert.assertEquals(3, JkUtilsIterable.listOf(dependencies).size());
         Assert.assertEquals(1, JkUtilsIterable.listOf(parser.importRepos()).size());
     }
@@ -33,14 +33,14 @@ public class JavaSourceParserTest {
     public void with3MultiAnnoImports() {
         SourceParser parser = SourceParser.of(Paths.get(""),
                 JavaSourceParserTest.class.getResource("with3MultiImports.javasource"));
-        final JkDependencies dependencies = parser.dependencies();
+        final JkDependencySet dependencies = parser.dependencies();
         Assert.assertEquals(3, JkUtilsIterable.listOf(dependencies).size());
         Assert.assertEquals(2, JkUtilsIterable.listOf(parser.importRepos()).size());
     }
 
     @Test
     public void withoutImport() {
-        final JkDependencies dependencies = SourceParser.of(Paths.get(""),
+        final JkDependencySet dependencies = SourceParser.of(Paths.get(""),
                 JavaSourceParserTest.class.getResource("withoutImport.javasource")).dependencies();
         Assert.assertEquals(0, JkUtilsIterable.listOf(dependencies).size());
     }

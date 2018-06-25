@@ -65,9 +65,9 @@ public final class JkDependencyResolver {
     }
 
     /**
-     * @see JkDependencyResolver#resolve(JkDependencies, JkScope...)
+     * @see JkDependencyResolver#resolve(JkDependencySet, JkScope...)
      */
-    public JkResolveResult resolve(JkDependencies dependencies, Iterable<JkScope> scopes) {
+    public JkResolveResult resolve(JkDependencySet dependencies, Iterable<JkScope> scopes) {
         return resolve(dependencies, JkUtilsIterable.arrayOf(scopes, JkScope.class));
     }
 
@@ -76,7 +76,7 @@ public final class JkDependencyResolver {
      * module) for the specified scopes. If no scope is specified, then it is
      * resolved for all scopes.
      */
-    public JkResolveResult resolve(JkDependencies dependencies, JkScope... scopes) {
+    public JkResolveResult resolve(JkDependencySet dependencies, JkScope... scopes) {
         if (internalResolver == null) {
             final List<JkDependencyNode> nodes = new LinkedList<>();
             for (final JkScopedDependency scopedDependency : dependencies) {
@@ -107,7 +107,7 @@ public final class JkDependencyResolver {
      * <p>
      * If no scope is specified then return all file dependencies and the
      * dependencies specified. About the of dependency the same rule than
-     * for {@link #resolve(JkDependencies, JkScope...)} apply.
+     * for {@link #resolve(JkDependencySet, JkScope...)} apply.
      * </p>
      * The result is ordered according the order dependencies has been declared.
      * About ordering of transitive dependencies, they come after the explicit ones and
@@ -115,7 +115,7 @@ public final class JkDependencyResolver {
      * of the second one and so on.
      * @throws IllegalStateException if the resolution has not been achieved successfully
      */
-    public JkPathSequence get(JkDependencies dependencies, JkScope... scopes) {
+    public JkPathSequence get(JkDependencySet dependencies, JkScope... scopes) {
         JkResolveResult resolveResult = null;
         if (internalResolver != null && dependencies.containsModules()) {
             resolveResult = resolveWithInternalResolver(dependencies, dependencies.explicitVersions(), scopes).assertNoError();
@@ -132,7 +132,7 @@ public final class JkDependencyResolver {
         return JkPathSequence.ofMany(result).withoutDuplicates();
     }
 
-    private JkResolveResult resolveWithInternalResolver(JkDependencies dependencies, JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {
+    private JkResolveResult resolveWithInternalResolver(JkDependencySet dependencies, JkVersionProvider transitiveVersionOverride, JkScope ... scopes) {
         JkLog.trace("Preparing to resolve dependencies for module " + module);
         final AtomicReference<JkResolveResult> resolveResult = new AtomicReference<>();
         Runnable task = () -> {

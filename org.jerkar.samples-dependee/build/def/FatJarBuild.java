@@ -1,5 +1,5 @@
 import org.jerkar.api.depmanagement.JkArtifactId;
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.samples.AClassicBuild;
 import org.jerkar.tool.JkImportBuild;
@@ -31,7 +31,8 @@ public class FatJarBuild extends JkJavaProjectBuild {
     @Override
     protected void configurePlugins() {
         java().project()
-                .setDependencies(JkDependencies.of().and(sampleBuild.java().project(), JkArtifactId.of("fat", "jar")))
+                .setDependencies(JkDependencySet.of()
+                        .and(sampleBuild.project(), JkArtifactId.of("fat", "jar")))
                 .setSourceVersion(JkJavaVersion.V7);
     } 
     

@@ -121,8 +121,8 @@ final class IvyPublisher implements InternalPublisher {
      */
     @Override
     public void publishIvy(JkVersionedModule versionedModule, JkIvyPublication publication,
-            JkDependencies dependencies, JkScopeMapping defaultMapping, Instant deliveryDate,
-            JkVersionProvider resolvedVersions) {
+                           JkDependencySet dependencies, JkScopeMapping defaultMapping, Instant deliveryDate,
+                           JkVersionProvider resolvedVersions) {
         JkLog.execute( "Publishing for Ivy", () -> {
                     final ModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
                             publication, dependencies, defaultMapping, deliveryDate, resolvedVersions);
@@ -132,7 +132,7 @@ final class IvyPublisher implements InternalPublisher {
 
     @Override
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
-            JkDependencies dependencies) {
+            JkDependencySet dependencies) {
         JkLog.execute("Publishing for Maven", () -> {
             final DefaultModuleDescriptor moduleDescriptor = createModuleDescriptor(versionedModule,
                     publication, dependencies, Instant.now(), JkVersionProvider.empty());
@@ -235,7 +235,7 @@ final class IvyPublisher implements InternalPublisher {
     }
 
     private ModuleDescriptor createModuleDescriptor(JkVersionedModule jkVersionedModule,
-            JkIvyPublication publication, JkDependencies dependencies,
+            JkIvyPublication publication, JkDependencySet dependencies,
             JkScopeMapping defaultMapping, Instant deliveryDate, JkVersionProvider resolvedVersions) {
 
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
@@ -277,8 +277,8 @@ final class IvyPublisher implements InternalPublisher {
     }
 
     private DefaultModuleDescriptor createModuleDescriptor(JkVersionedModule jkVersionedModule,
-            JkMavenPublication publication, JkDependencies resolvedDependencies, Instant deliveryDate,
-            JkVersionProvider resolvedVersions) {
+                                                           JkMavenPublication publication, JkDependencySet resolvedDependencies, Instant deliveryDate,
+                                                           JkVersionProvider resolvedVersions) {
 
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
                 jkVersionedModule, resolvedDependencies, null, resolvedVersions);

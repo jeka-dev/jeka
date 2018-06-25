@@ -11,7 +11,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Set;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkDependencyNode;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.depmanagement.JkModuleId;
@@ -30,11 +30,10 @@ public class ResolveTreeIT {
     @Test
     public void treeIsCorrect() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
-        JkDependencies deps = JkDependencies.builder()
-                .on("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE").scope(COMPILE_AND_RUNTIME)
-                .on("org.springframework.boot:spring-boot-starter-test:1.5.+").scope(TEST)
-                .on("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0").scope(COMPILE)
-                .build();
+        JkDependencySet deps = JkDependencySet.of()
+                .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", COMPILE_AND_RUNTIME)
+                .and("org.springframework.boot:spring-boot-starter-test:1.5.+", TEST)
+                .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
@@ -81,9 +80,7 @@ public class ResolveTreeIT {
     public void treeDistinctDynamicAndResolvedVersion() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
         JkModuleId moduleId = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
-        JkDependencies deps = JkDependencies.builder()
-                .on(moduleId, "1.4.+").scope(TEST)
-                .build();
+        JkDependencySet deps = JkDependencySet.of().and(moduleId, "1.4.+", TEST);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
@@ -100,10 +97,9 @@ public class ResolveTreeIT {
         JkModuleId starterWebModule = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
         JkModuleId springCoreModule = JkModuleId.of("org.springframework:spring-core");
         String directCoreVersion = "4.3.6.RELEASE";
-        JkDependencies deps = JkDependencies.builder()
-                .on(starterWebModule, "1.5.10.RELEASE").scope(COMPILE)
-                .on(springCoreModule, directCoreVersion).scope(COMPILE)  // force a projectVersion lower than the transitive above
-                .build();
+        JkDependencySet deps = JkDependencySet.of()
+                .and(starterWebModule, "1.5.10.RELEASE", COMPILE)
+                .and(springCoreModule, directCoreVersion, COMPILE);  // force a projectVersion lower than the transitive above
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
@@ -124,9 +120,10 @@ public class ResolveTreeIT {
 
     @Test
     public void triplePlayAnd() {
-        JkDependencies deps = JkDependencies.builder()
-                .on("com.googlecode.playn", "playn-core", "1.4")
-                .on("com.threerings", "tripleplay", "1.4").build().withDefaultScope(COMPILE_AND_RUNTIME);
+        JkDependencySet deps = JkDependencySet.of()
+                .and("com.googlecode.playn:playn-core:1.4")
+                .and("com.threerings:tripleplay:1.4")
+                .withDefaultScope(COMPILE_AND_RUNTIME);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);

@@ -17,7 +17,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.jerkar.api.depmanagement.JkComputedDependency;
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkDependencyNode;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.depmanagement.JkModuleDependency;
@@ -48,12 +48,12 @@ public final class JkEclipseClasspathGenerator {
 
     private final JkDependencyResolver dependencyResolver;
 
-    private final JkDependencies dependencies;
+    private final JkDependencySet dependencies;
 
     // content for build class only
     private JkDependencyResolver buildDependencyResolver;
 
-    private JkDependencies buildDependencies;
+    private JkDependencySet buildDependencies;
 
     // content for build class only
     private List<Path> importedBuildProjects = new LinkedList<>();
@@ -76,7 +76,7 @@ public final class JkEclipseClasspathGenerator {
     /**
      * Constructs a {@link JkEclipseClasspathGenerator}.
      */
-    public JkEclipseClasspathGenerator(JkProjectSourceLayout sourceLayout, JkDependencies dependencies,
+    public JkEclipseClasspathGenerator(JkProjectSourceLayout sourceLayout, JkDependencySet dependencies,
                                        JkDependencyResolver resolver, JkJavaVersion sourceVersion) {
         this.sourceLayout = sourceLayout;
         this.dependencies = dependencies;
@@ -143,7 +143,7 @@ public final class JkEclipseClasspathGenerator {
      * If the build script depends on external libraries, you must set the resolver of this dependencies here.
      */
     public JkEclipseClasspathGenerator setBuildDependencyResolver(JkDependencyResolver buildDependencyResolver,
-            JkDependencies buildDependencies) {
+            JkDependencySet buildDependencies) {
         this.buildDependencyResolver = buildDependencyResolver;
         this.buildDependencies = buildDependencies;
         return this;
@@ -354,7 +354,7 @@ public final class JkEclipseClasspathGenerator {
         }
     }
 
-    private void writeDependenciesEntries(XMLStreamWriter writer, JkDependencies dependencies, JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
+    private void writeDependenciesEntries(XMLStreamWriter writer, JkDependencySet dependencies, JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
         final JkResolveResult resolveResult = resolver.resolve(dependencies);
         final JkRepos repos = resolver.repositories();
         for (final JkDependencyNode node : resolveResult.dependencyTree().flatten()) {

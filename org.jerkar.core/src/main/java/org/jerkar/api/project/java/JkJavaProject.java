@@ -54,7 +54,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
 
     private JkProjectOutLayout outLayout;
 
-    private JkDependencies dependencies;
+    private JkDependencySet dependencies;
 
     private JkJavaCompileSpec compileSpec =
             new JkJavaCompileSpec().setSourceAndTargetVersion(JkJavaVersion.V8).setEncoding("UTF-8");
@@ -75,7 +75,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         this.artifactName = this.baseDir.getFileName().toString();
         this.sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir);
         this.outLayout = JkProjectOutLayout.classicJava().withOutputDir(baseDir.resolve("build/output"));
-        this.dependencies = JkDependencies.ofLocal(baseDir.resolve("build/libs"));
+        this.dependencies = JkDependencySet.ofLocal(baseDir.resolve("build/libs"));
     }
 
     // -------------------------- Other -------------------------
@@ -102,7 +102,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     }
 
     @Override
-    public JkDependencies getDependencies() {
+    public JkDependencySet getDependencies() {
         return this.dependencies;
     }
 
@@ -133,7 +133,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         return this;
     }
 
-    public JkJavaProject setDependencies(JkDependencies dependencies) {
+    public JkJavaProject setDependencies(JkDependencySet dependencies) {
         this.maker.cleanDepChache();
         this.dependencies = dependencies;
         return this;

@@ -41,7 +41,7 @@ final class Engine {
 
     private final Path projectBaseDir;
 
-    private JkDependencies buildDependencies;
+    private JkDependencySet buildDependencies;
 
     private JkRepos buildRepos;
 
@@ -58,7 +58,7 @@ final class Engine {
         JkUtilsAssert.isTrue(Files.isDirectory(baseDir), baseDir + " is not directory.");
         this.projectBaseDir = baseDir.normalize();
         buildRepos = repos();
-        this.buildDependencies = JkDependencies.of();
+        this.buildDependencies = JkDependencySet.of();
         this.resolver = new BuildResolver(baseDir);
     }
 
@@ -74,9 +74,7 @@ final class Engine {
      * of this project.
      */
     void execute(CommandLine commandLine, String buildClassHint, JkLog.Verbosity verbosityToRestore) {
-        this.buildDependencies = JkDependencies.builder()
-                .on(this.buildDependencies.list())
-                .onScopeless(commandLine.dependencies()).build();
+        buildDependencies = buildDependencies.andUnscoped(commandLine.dependencies());
         final AtomicReference<JkBuild> build = new AtomicReference<>();
         long start = System.nanoTime();
         JkLog.startTask("Compile and initialise build classes");
@@ -103,7 +101,10 @@ final class Engine {
     }
 
     private JkPathSequence pathOf(List<? extends JkDependency> dependencies) {
-        final JkDependencies deps = JkDependencies.builder().onScopeless(dependencies).build();
+        JkDependencySet deps = JkDependencySet.of();
+        for (JkDependency dependency : dependencies) {
+            deps = deps.and(dependency);
+        }
         return JkDependencyResolver.of(this.buildRepos).get(deps);
     }
 
@@ -157,17 +158,16 @@ final class Engine {
         }
     }
 
-    private JkDependencies buildDefDependencies() {
+    private JkDependencySet buildDefDependencies() {
 
         // If true, we assume Jerkar is provided by IDE (development mode)
         final boolean devMode = Files.isDirectory(JkLocator.jerkarJarPath());
 
-        return JkDependencies.builder().on(buildDependencies
-                .withDefaultScope(JkScopeMapping.ALL_TO_DEFAULT))
-                .onFiles(localBuildPath())
-                .onFilesIf(devMode, JkClasspath.current())
-                .onFilesIf(!devMode, jerkarLibs())
-                .build();
+        return JkDependencySet.of(buildDependencies
+                .andFiles(localBuildPath())
+                .andFiles(JkClasspath.current()).onlyIf(devMode)
+                .andFiles(jerkarLibs()).onlyIf(!devMode)
+                .withDefaultScope(JkScopeMapping.ALL_TO_DEFAULT));
     }
 
     private JkPathSequence localBuildPath() {

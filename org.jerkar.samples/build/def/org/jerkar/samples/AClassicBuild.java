@@ -2,7 +2,7 @@ package org.jerkar.samples;
 
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkInit;
@@ -30,11 +30,10 @@ public class AClassicBuild extends JkJavaProjectBuild {
     protected void configurePlugins() {
         JkJavaProject project = java().project()
                 .setSourceVersion(JkJavaVersion.V7)
-                .setDependencies(JkDependencies.builder()
-                        .on("com.google.guava:guava:21.0")
-                        .on("com.sun.jersey:jersey-server:1.19")
-                        .on("junit:junit:4.11", TEST)
-                        .build());
+                .setDependencies(JkDependencySet.of()
+                        .and("com.google.guava:guava:21.0")
+                        .and("com.sun.jersey:jersey-server:1.19")
+                        .and("junit:junit:4.11", TEST));
         project.maker().defineFatJarArtifact("fat");  // project will produce a fat jar as well.
     }
     

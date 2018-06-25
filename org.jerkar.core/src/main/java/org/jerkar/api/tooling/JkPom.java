@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jerkar.api.depmanagement.JkDepExclude;
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkDependencyExclusions;
 import org.jerkar.api.depmanagement.JkModuleDependency;
 import org.jerkar.api.depmanagement.JkModuleId;
@@ -86,7 +86,7 @@ public final class JkPom {
     /**
      * The dependencies declared in this POM.
      */
-    public JkDependencies dependencies() {
+    public JkDependencySet dependencies() {
         return dependencies(dependenciesElement());
     }
 
@@ -101,7 +101,7 @@ public final class JkPom {
         }
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
                 "dependencies");
-        final JkDependencies dependencies = dependencies(dependenciesEl);
+        final JkDependencySet dependencies = dependencies(dependenciesEl);
         for (final JkScopedDependency scopedDependency : dependencies) {
             final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
                     .dependency();
@@ -124,7 +124,7 @@ public final class JkPom {
         }
         final Element dependenciesEl = JkUtilsXml.directChild(dependencyManagementEl(),
                 "dependencies");
-        final JkDependencies dependencies = dependencies(dependenciesEl);
+        final JkDependencySet dependencies = dependencies(dependenciesEl);
         for (final JkScopedDependency scopedDependency : dependencies) {
             final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency
                     .dependency();
@@ -149,12 +149,12 @@ public final class JkPom {
         return JkRepos.of(JkUtilsIterable.arrayOf(urls, String.class));
     }
 
-    private JkDependencies dependencies(Element dependenciesEl) {
-        final JkDependencies.Builder builder = JkDependencies.builder();
+    private JkDependencySet dependencies(Element dependenciesEl) {
+        List<JkScopedDependency> scopedDependencies = new LinkedList<>();
         for (final Element dependencyEl : JkUtilsXml.directChildren(dependenciesEl, "dependency")) {
-            builder.on(jkDependency(dependencyEl));
+            scopedDependencies.add(jkDependency(dependencyEl));
         }
-        return builder.build();
+        return JkDependencySet.of(scopedDependencies);
     }
 
     private JkScopedDependency jkDependency(Element mvnDependency) {

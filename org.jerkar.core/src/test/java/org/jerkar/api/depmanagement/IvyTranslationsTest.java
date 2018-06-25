@@ -41,11 +41,10 @@ public class IvyTranslationsTest {
 
     }
 
-    private static JkDependencies deps() {
-        return JkDependencies.builder()
-                .on("aGroup:aName:1", COMPILE)
-                .on("aGroup:aName:1:linux", RUNTIME, JkScope.of("toto"))
-                .build();
+    private static JkDependencySet deps() {
+        return JkDependencySet.of()
+                .and("aGroup:aName:1", COMPILE)
+                .and("aGroup:aName:1:linux", RUNTIME, JkScope.of("toto"));
     }
 
     private DependencyArtifactDescriptor findArtifactIn(DependencyArtifactDescriptor[] artifactDescs, String classsifier) {

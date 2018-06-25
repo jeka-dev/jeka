@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.ide.eclipse.JkEclipseClasspathGeneratorTest;
@@ -29,7 +29,7 @@ public class JkImlGeneratorTest {
         final Path base = top.resolve("base");
         final JkJavaProject baseProject = new JkJavaProject(base);
         baseProject.setSourceLayout(sourceLayout);
-        baseProject.setDependencies(JkDependencies.builder().on(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3").build());
+        baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3"));
         final JkImlGenerator baseGenerator = new JkImlGenerator(baseProject);
         final String result0 = baseGenerator.generate();
         System.out.println("\nbase .classpath");
@@ -37,7 +37,7 @@ public class JkImlGeneratorTest {
 
         final Path core = top.resolve("core");
         final JkJavaProject coreProject = new JkJavaProject(core);
-        final JkDependencies coreDeps = JkDependencies.of().and(baseProject);
+        final JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
         coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
         coreProject.maker().setJuniter(
                 coreProject.maker().getJuniter().forked(true));
@@ -47,7 +47,7 @@ public class JkImlGeneratorTest {
         System.out.println(result1);
 
         final Path desktop = top.resolve("desktop");
-        final JkDependencies deps = JkDependencies.of().and(coreProject);
+        final JkDependencySet deps = JkDependencySet.of().and(coreProject);
         final JkImlGenerator desktopGenerator =
                 new JkImlGenerator(sourceLayout.withBaseDir(desktop), deps,
                         coreProject.maker().getDependencyResolver());

@@ -2,7 +2,7 @@ package org.jerkar.api.ide.eclipse;
 
 import java.nio.file.Path;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLocator;
@@ -45,20 +45,20 @@ class Lib {
         return scope + ":" + file == null ? projectRelativePath : file.toString();
     }
 
-    public static JkDependencies toDependencies(Path parentDir, Iterable<Lib> libs, JkEclipseClasspathApplier applier) {
-        final JkDependencies.Builder builder = JkDependencies.builder();
+    public static JkDependencySet toDependencies(Path parentDir, Iterable<Lib> libs, JkEclipseClasspathApplier applier) {
+        JkDependencySet result = JkDependencySet.of();
         for (final Lib lib : libs) {
             if (lib.projectRelativePath == null) {
-                builder.on(lib.file.toFile()).scope(lib.scope);
+                result = result.and(lib.file, lib.scope);
 
             } else { // This is a dependency on an eclipse project
                 final Path projectDir = parentDir.resolve(lib.projectRelativePath);
                 final JkJavaProject project = new JkJavaProject(projectDir);
                 applier.apply(project);
-                builder.on(project.maker()).scope(lib.scope);
+                result = result.and(project.maker(), lib.scope);
             }
         }
-        return builder.build();
+        return result;
     }
 
 }

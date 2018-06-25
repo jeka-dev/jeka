@@ -1,10 +1,9 @@
 package org.jerkar.samples;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.java.JkJavaVersion;
-import org.jerkar.api.project.JkProjectOutLayout;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkInit;
@@ -22,9 +21,7 @@ public class PureApiBuild extends JkBuild {
         // We want to output stuff in another place than build/output
         javaProject.setOutLayout(javaProject.getOutLayout().withOutputDir("build/output/alt-output"));
 
-        JkDependencies deps = JkDependencies.builder()
-                .on(JkPopularModules.JUNIT, "4.12").scope(JkJavaDepScopes.TEST)
-                .build();
+        JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT, "4.12",JkJavaDepScopes.TEST);
 
         javaProject.setDependencies(deps).setSourceVersion(JkJavaVersion.V6);
 

@@ -15,7 +15,7 @@ interface InternalDepResolver {
      * @param parameters can be null.
      * @param versionProvider can be null.
      */
-    JkResolveResult resolve(JkVersionedModule module, JkDependencies deps,
+    JkResolveResult resolve(JkVersionedModule module, JkDependencySet deps,
             JkResolutionParameters parameters, JkVersionProvider versionProvider, JkScope... resolvedScopes);
 
     File get(JkModuleDependency dependency);

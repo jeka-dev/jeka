@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.function.JkRunnables;
@@ -39,7 +39,7 @@ public class JkBuild {
 
     private JkDependencyResolver buildDefDependencyResolver;
 
-    private JkDependencies buildDependencies;
+    private JkDependencySet buildDependencies;
 
     private final JkImportedBuilds importedBuilds;
 
@@ -200,7 +200,7 @@ public class JkBuild {
 
     // ------------------------------ build dependencies --------------------------------
 
-    void setBuildDefDependencyResolver(JkDependencies buildDependencies, JkDependencyResolver scriptDependencyResolver) {
+    void setBuildDefDependencyResolver(JkDependencySet buildDependencies, JkDependencyResolver scriptDependencyResolver) {
         this.buildDependencies = buildDependencies;
         this.buildDefDependencyResolver = scriptDependencyResolver;
     }
@@ -216,7 +216,7 @@ public class JkBuild {
     /**
      * Dependencies necessary to compile the this build class. It is not the dependencies for building the project.
      */
-    public final JkDependencies buildDependencies() {
+    public final JkDependencySet buildDependencies() {
         return buildDependencies;
     }
 

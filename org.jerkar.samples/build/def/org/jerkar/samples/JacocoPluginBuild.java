@@ -3,9 +3,8 @@ package org.jerkar.samples;
 import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
 import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
-import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.plugins.jacoco.JkPluginJacoco;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
@@ -18,9 +17,9 @@ public class JacocoPluginBuild extends JkJavaProjectBuild {
     @Override
     protected void configurePlugins() {
         java().project()
-                .setDependencies(JkDependencies.builder()
-                .on(GUAVA, "18.0")
-                .on(JUNIT, "4.11", JkJavaDepScopes.TEST).build());
+                .setDependencies(JkDependencySet.of()
+                .and(GUAVA, "18.0")
+                .and(JUNIT, "4.11", JkJavaDepScopes.TEST));
         plugins().get(JkPluginJacoco.class);
     }
 

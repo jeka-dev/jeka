@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.project.JkProjectSourceLayout;
 import org.jerkar.api.project.java.JkJavaProject;
@@ -50,7 +50,7 @@ public class JkEclipseClasspathApplier {
 
         final ScopeResolver scopeResolver = scopeResolver(baseDir);
         final List<Lib> libs = dotClasspathModel.libs(baseDir, scopeResolver);
-        final JkDependencies dependencies = Lib.toDependencies(/*build*/
+        final JkDependencySet dependencies = Lib.toDependencies(/*build*/
                 javaProject.getSourceLayout().baseDir(), libs, this);
 
         javaProject.setSourceLayout(javaProject.getSourceLayout().withSources(sources).withResources(resources)

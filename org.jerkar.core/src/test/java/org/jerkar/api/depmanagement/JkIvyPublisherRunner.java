@@ -28,8 +28,7 @@ public class JkIvyPublisherRunner {
         final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(),
                 JkScopedDependencyTest.COMPILE, JkScopedDependencyTest.TEST);
         final JkModuleId spring = JkModuleId.of("org.springframework", "spring-jdbc");
-        final JkDependencies deps = JkDependencies.builder().on(spring, "3.0.+")
-                .scope(JkScopedDependencyTest.COMPILE).build();
+        final JkDependencySet deps = JkDependencySet.of().and(spring, "3.0.+", JkScopedDependencyTest.COMPILE);
         jkIvyResolver.publishIvy(versionedModule, ivyPublication, deps, null, Instant.now(),
                 JkVersionProvider.of(spring, "3.0.8"));
     }
@@ -41,9 +40,8 @@ public class JkIvyPublisherRunner {
                 JkModuleId.of("mygroup2", "mymodule2"), JkVersion.name("0.0.12-SNAPSHOT"));
         final JkMavenPublication publication = JkMavenPublication.of(sampleJarfile())
                 .and(sampleJarSourcefile(), "sources").and(sampleJarSourcefile(), "other");
-        final JkModuleId spring = JkModuleId.of("org.springframework", "spring-jdbc");
-        final JkDependencies deps = JkDependencies.builder().on(spring, "2.0.+")
-                .scope(JkScopedDependencyTest.COMPILE).build();
+        final JkModuleId spring = JkModuleId.of("org.springframework:spring-jdbc");
+        final JkDependencySet deps = JkDependencySet.of().and(spring, "2.0.+", JkScopedDependencyTest.COMPILE);
         final JkVersionProvider versionProvider = JkVersionProvider.of(spring, "2.0.5");
         jkIvyPublisher.publishMaven(versionedModule, publication,
                 deps.resolvedWith(versionProvider));

@@ -1,8 +1,10 @@
 package org.jerkar.api.tooling;
 
 import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkModuleDependency;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopedDependency;
@@ -94,10 +96,10 @@ public final class JkMvn implements Runnable {
     /**
      * Reads the dependencies of this Maven project
      */
-    public JkDependencies readDependencies() {
+    public JkDependencySet readDependencies() {
         final Path file = JkUtilsPath.createTempFile("dependency", ".txt");
         commands("dependency:list", "-DoutputFile=" + file).run();
-        final JkDependencies result = fromMvnFlatFile(file);
+        final JkDependencySet result = fromMvnFlatFile(file);
         JkUtilsPath.deleteFile(file);
         return result;
     }
@@ -154,7 +156,7 @@ public final class JkMvn implements Runnable {
     }
 
     /**
-     * Creates a {@link JkDependencies} jump a file describing definition like.
+     * Creates a {@link JkDependencySet} jump a file describing definition like.
      *
      * <pre>
      * <code>
@@ -182,15 +184,15 @@ public final class JkMvn implements Runnable {
      * </ul>
      *
      */
-    public static JkDependencies fromMvnFlatFile(Path flatFile) {
-        final JkDependencies.Builder builder = JkDependencies.builder();
+    public static JkDependencySet fromMvnFlatFile(Path flatFile) {
+        List<JkScopedDependency> scopedDependencies = new LinkedList<>();
         for (final String line : JkUtilsPath.readAllLines(flatFile)) {
             final JkScopedDependency scopedDependency = mvnDep(line);
             if (scopedDependency != null) {
-                builder.on(scopedDependency);
+                scopedDependencies.add(scopedDependency);
             }
         }
-        return builder.build();
+        return JkDependencySet.of(scopedDependencies);
     }
 
     private static JkScopedDependency mvnDep(String description) {

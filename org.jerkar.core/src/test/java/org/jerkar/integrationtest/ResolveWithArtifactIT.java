@@ -6,11 +6,10 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.DEFAULT_SCOPE_MAPPING
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
-import org.jerkar.api.depmanagement.JkDependencies;
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkDependencyNode;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.depmanagement.JkPopularModules;
@@ -29,11 +28,11 @@ public class ResolveWithArtifactIT {
     @Test
     public void artifactsAreHandled() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
-        JkDependencies deps = JkDependencies.builder()
-                .on("org.lwjgl:lwjgl:3.1.1:natives-linux")
-                .on(JkPopularModules.GUAVA, "19.0" )
-                .on("org.lwjgl:lwjgl:3.1.1")
-                .build().withDefaultScope(COMPILE);
+        JkDependencySet deps = JkDependencySet.of()
+                .and("org.lwjgl:lwjgl:3.1.1:natives-linux")
+                .and(JkPopularModules.GUAVA, "19.0" )
+                .and("org.lwjgl:lwjgl:3.1.1")
+                .withDefaultScope(COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
@@ -58,11 +57,10 @@ public class ResolveWithArtifactIT {
     @Test
     public void artifactCountIsOk() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
-        JkDependencies deps = JkDependencies.builder()
-                .on("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE").scope(COMPILE_AND_RUNTIME)
-                .on("org.springframework.boot:spring-boot-starter-test:1.5.+").scope(TEST)
-                .on("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0").scope(COMPILE)
-                .build();
+        JkDependencySet deps = JkDependencySet.of()
+                .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", COMPILE_AND_RUNTIME)
+                .and("org.springframework.boot:spring-boot-starter-test:1.5.+", TEST)
+                .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", COMPILE);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
