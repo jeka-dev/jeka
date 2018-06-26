@@ -44,12 +44,13 @@ public final class JkPublisher {
 
     /**
      * Creates a {@link JkPublisher} with the specified {@link JkPublishRepo}
-     * and output directory. The output directory is the place where pom.xml and
+     * and output directory. <code>artifactDir</code> is the place where pom.xml and
      * ivy.xml are generated.
      */
-    public static JkPublisher of(JkPublishRepos publishRepos, Path outDir) {
+    public static JkPublisher of(JkPublishRepos publishRepos, Path artifactDir) {
         final InternalPublisher ivyPublisher = IVY_CLASS_LOADER.transClassloaderProxy(
-                InternalPublisher.class, IVY_PUB_CLASS, "of", publishRepos, outDir.toFile());
+                InternalPublisher.class, IVY_PUB_CLASS, "of", publishRepos,
+                artifactDir == null ? null : artifactDir.toFile());
         return new JkPublisher(ivyPublisher);
     }
 

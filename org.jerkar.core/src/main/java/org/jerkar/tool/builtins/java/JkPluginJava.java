@@ -41,7 +41,7 @@ public class JkPluginJava extends JkPlugin {
 
     // ----------------------------------------------------------------------------------
 
-    private final JkPluginRepos repos;
+    private final JkPluginRepos repoPlugin;
 
     private final JkJavaProject project;
 
@@ -49,7 +49,7 @@ public class JkPluginJava extends JkPlugin {
 
     protected JkPluginJava(JkBuild build) {
         super(build);
-        this.repos = build.plugins().get(JkPluginRepos.class);
+        this.repoPlugin = build.plugins().get(JkPluginRepos.class);
         this.project = new JkJavaProject(this.build.baseDir());
         this.producedArtifacts.add(this.project.maker().mainArtifactId());
     }
@@ -82,11 +82,11 @@ public class JkPluginJava extends JkPlugin {
             project.maker().getArtifactFileIdsToNotPublish().addAll(
                     project.maker().artifactIdsWithClassifier("test"));
         }
-        project.maker().setPublishRepos(repos.publishRepository());
+        project.maker().setPublishRepos(repoPlugin.publishRepository());
         if (publish.localOnly) {
             project.maker().setPublishRepos(JkPublishRepos.local());
         }
-        final JkRepo downloadRepo = repos.downloadRepository();
+        final JkRepo downloadRepo = repoPlugin.downloadRepository();
         JkDependencyResolver resolver = project.maker().getDependencyResolver();
         resolver = resolver.withRepos(downloadRepo); // always look in local repo
         project.maker().setDependencyResolver(resolver);
@@ -103,7 +103,7 @@ public class JkPluginJava extends JkPlugin {
             project.maker().postPack.chain(() -> project.maker().checksum(pack.checksums()));
         }
         if (publish.signArtifacts) {
-            project.maker().postPack.chain(() -> project.maker().signArtifactFiles(repos.pgpSigner()));
+            project.maker().postPack.chain(() -> project.maker().signArtifactFiles(repoPlugin.pgpSigner()));
         }
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);

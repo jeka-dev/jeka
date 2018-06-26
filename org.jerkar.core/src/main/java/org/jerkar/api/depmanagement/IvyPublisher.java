@@ -42,12 +42,6 @@ final class IvyPublisher implements InternalPublisher {
         this.descriptorOutputDir = descriptorOutputDir;
     }
 
-    private static IvyPublisher of(IvySettings ivySettings, JkPublishRepos publishRepos,
-            File descriptorOutputDir) {
-        final Ivy ivy = IvyResolver.ivy(ivySettings);
-        return new IvyPublisher(ivy, publishRepos, descriptorOutputDir);
-    }
-
     /**
      * Creates an <code>IvySettings</code> to the specified repositories.
      */
@@ -57,12 +51,18 @@ final class IvyPublisher implements InternalPublisher {
         return ivySettings;
     }
 
+    private static IvyPublisher of(IvySettings ivySettings, JkPublishRepos publishRepos,
+                                   File descriptorOutputDir) {
+        final Ivy ivy = IvyResolver.ivy(ivySettings);
+        return new IvyPublisher(ivy, publishRepos, descriptorOutputDir);
+    }
+
     /**
      * Creates an instance using specified repository for publishing and the
      * specified repositories for resolving.
      */
-    public static IvyPublisher of(JkPublishRepos publishRepos, Path descriptorOutputDir) {
-        return of(ivySettingsOf(publishRepos), publishRepos, descriptorOutputDir.toFile());
+    public static IvyPublisher of(JkPublishRepos publishRepos, File descriptorOutputDir) {
+        return of(ivySettingsOf(publishRepos), publishRepos, descriptorOutputDir);
     }
 
     private static boolean isMaven(DependencyResolver dependencyResolver) {

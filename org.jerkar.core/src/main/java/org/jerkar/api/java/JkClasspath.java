@@ -55,7 +55,7 @@ public final class JkClasspath implements Iterable<Path> {
     }
 
     /**
-     * Returns the current claaspath as given by
+     * Returns the current classpath as given by
      * <code>System.getProperty("java.class.path")</code>.
      */
     public static JkClasspath current() {

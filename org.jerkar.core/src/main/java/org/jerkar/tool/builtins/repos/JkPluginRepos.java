@@ -65,7 +65,8 @@ public class JkPluginRepos extends JkPlugin {
         } else if (!JkUtilsString.isBlank(publishUrl)) {
             result = JkPublishRepo.of(JkRepo.of(publishUrl).withCredential(publishUsername, publishPassword));
         } else {
-            result = JkRepoOptionLoader.publishRepository();
+            JkPublishRepo optionRepo = JkRepoOptionLoader.publishRepository();
+            result = optionRepo != null ? optionRepo : JkPublishRepo.local();
         }
         return result.withSigner(pgp.get());
     }

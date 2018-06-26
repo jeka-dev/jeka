@@ -31,6 +31,10 @@ public class JkRepoOptionLoader {
      */
     public static JkPublishRepo publishRepository() {
         final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("Repo.publishName"), "publish");
+        JkRepo repo = repoFromOptions(repoName);
+        if (repo == null) {
+            return null;
+        }
         return JkPublishRepo.of(repoFromOptions(repoName));
     }
 

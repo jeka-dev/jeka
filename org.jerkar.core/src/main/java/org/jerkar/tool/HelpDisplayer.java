@@ -17,21 +17,20 @@ import org.w3c.dom.Element;
 
 final class HelpDisplayer {
 
-    private static final JkBuild DUMMY = JkUtilsReflect.newInstance(JkBuild.class);
 
     static void help(JkBuild build) {
-        if (JkOptions.containsKey("plugins")) {
-            helpPlugins();
+        if (JkOptions.containsKey("Plugins")) {
+            helpPlugins(build);
             return;
         }
         StringBuilder sb = new StringBuilder()
-                .append("Usage: jerkar [methodA...] [-optionName=value...] [-DsystemPropName=value...]\n")
+                .append("Usage: jerkar [methodA...] [pluginName#methodB] [-optionName=value...] [-pluginName#optionName=value...] [-DsystemPropName=value...]\n")
                 .append("When no method specified, 'doDefault' method is invoked.\n")
-                .append("Ex: jerkar javadoc compile -logVerbose=true -other=xxx -DmyProp=Xxxx\n\n")
+                .append("Ex: jerkar clean java#pack -java#pack.sources=true -Log.verbose=true -other=xxx -DmyProp=Xxxx\n\n")
                 .append("Available methods and options :\n");
 
         sb.append(BuildClassDef.of(build).description("", true));
-        sb.append("\nType 'jerkar help -plugins' to get help on plugins available in the classpath.\n");
+        sb.append("\nType 'jerkar help -Plugins' to get help on plugins available in the classpath.\n");
         JkLog.info(sb.toString());
     }
 
@@ -52,40 +51,56 @@ final class HelpDisplayer {
         }
     }
 
-    static void helpPlugins() {
-        JkLog.info(helpPluginsDescription());
+    static void helpPlugins(JkBuild build) {
+        JkLog.info(helpPluginsDescription(build));
     }
 
-    private static String helpPluginsDescription() {
+    static void helpPlugin(JkPlugin plugin) {
+        final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
+        for (PluginDescription pluginDescription : pluginDescriptions) {
+            if (pluginDescription.shortName().equals(plugin.name())) {
+                JkLog.info(helpPluginDescription(plugin.build, pluginDescription));
+                return;
+            }
+        }
+    }
+
+    private static String helpPluginsDescription(JkBuild build) {
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
         StringBuilder sb = new StringBuilder();
         for (final PluginDescription description : pluginDescriptions) {
-            sb.append("\nPlugin class : " + description.fullName());
-            sb.append("\nPlugin name : " + description.shortName());
-            List<String> deps = description.pluginDependencies();
-            if (!deps.isEmpty()) {
-                sb.append("Depends on plugins : " + JkUtilsString.join(deps, ", "));
-            }
-            final List<String> explanations = description.explanation();
-            if (!explanations.isEmpty()) {
-                sb.append("\nPurpose : " + description.explanation().get(0));
-                description.explanation().subList(1, description.explanation().size()).forEach(
-                        line -> sb.append("\n          " + line));
-            }
-            final List<String> activationEffects = description.activationEffect();
-            if (!activationEffects.isEmpty()) {
-                sb.append("\nActivation effects : " + description.activationEffect().get(0));
-                description.explanation().subList(1, description.activationEffect().size()).forEach(
-                        line -> sb.append("\n                      " + line));
-            } else if (!description.isDecorateBuildDefined()){
-                sb.append("\nActivation effects : None.");
-            } else {
-                sb.append("\nActivation effects : Not documented.");
-            }
-            final Object object = JkUtilsReflect.newInstance(description.pluginClass(), JkBuild.class, DUMMY);
-            sb.append("\n");
-            sb.append(BuildClassDef.of(object).description(description.shortName() + "#", false));
+            sb.append(helpPluginDescription(build, description));
         }
+        return sb.toString();
+    }
+
+    private static String helpPluginDescription(JkBuild build, PluginDescription description) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nPlugin class : " + description.fullName());
+        sb.append("\nPlugin name : " + description.shortName());
+        List<String> deps = description.pluginDependencies();
+        if (!deps.isEmpty()) {
+            sb.append("Depends on plugins : " + JkUtilsString.join(deps, ", "));
+        }
+        final List<String> explanations = description.explanation();
+        if (!explanations.isEmpty()) {
+            sb.append("\nPurpose : " + description.explanation().get(0));
+            description.explanation().subList(1, description.explanation().size()).forEach(
+                    line -> sb.append("\n          " + line));
+        }
+        final List<String> activationEffects = description.activationEffect();
+        if (!activationEffects.isEmpty()) {
+            sb.append("\nActivation effects : " + description.activationEffect().get(0));
+            description.explanation().subList(1, description.activationEffect().size()).forEach(
+                    line -> sb.append("\n                      " + line));
+        } else if (!description.isDecorateBuildDefined()){
+            sb.append("\nActivation effects : None.");
+        } else {
+            sb.append("\nActivation effects : Not documented.");
+        }
+        final Object object = JkUtilsReflect.newInstance(description.pluginClass(), JkBuild.class, build);
+        sb.append("\n");
+        sb.append(BuildClassDef.of(object).description(description.shortName() + "#", false));
         return sb.toString();
     }
 

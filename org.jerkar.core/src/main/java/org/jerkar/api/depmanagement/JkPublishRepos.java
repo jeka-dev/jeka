@@ -26,6 +26,13 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
 
     private static final long serialVersionUID = 1L;
 
+    private final List<JkPublishRepo> publishRepos;
+
+    private JkPublishRepos(List<JkPublishRepo> repos) {
+        super();
+        this.publishRepos = repos;
+    }
+
     /**
      * Creates a repository for publishing locally under <code></code>[USER HOME]/.jerkar/publish</code> folder.
      */
@@ -87,12 +94,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
         return new JkPublishRepos(JkUtilsIterable.listOf(JkPublishRepo.of(JkRepo.ivy(url))));
     }
 
-    private final List<JkPublishRepo> publishRepos;
 
-    private JkPublishRepos(List<JkPublishRepo> repos) {
-        super();
-        this.publishRepos = repos;
-    }
 
     /**
      * Returns a {@link JkPublishRepo} identical to this one but with the specified Pgp elements
@@ -145,9 +147,9 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
     /**
      * Returns a {@link JkPublishRepo} identical to this one but with the specified value
      * for <i>unique snapshot</i> property.<br/>
-     * When <i>unique snapshot</i> is <code>true</code>, the published artifact versioned with a Snapshot
-     * projectVersion, are timestamped so several 'projectVersion' on a given snapshot can coexist in the repository.
-     * It is the default behavior for Maven 3 while it was the opposit in Maven 2.
+     * When <i>unique snapshot</i> is <code>true</code>, the published artifacts versioned with a snapshot
+     * version (ending with -SNAPSHOT), are suffixed with timestamp so several artifacts with the same snapshot can coexist in the repository.
+     * It is the default behavior for Maven 3 while it was not in Maven 2.
      *
      */
     public JkPublishRepos withUniqueSnapshot(boolean uniqueSnapshot) {

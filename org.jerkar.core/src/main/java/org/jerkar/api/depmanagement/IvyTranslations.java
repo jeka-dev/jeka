@@ -247,9 +247,9 @@ final class IvyTranslations {
 
     static void populateIvySettingsWithPublishRepo(IvySettings ivySettings,
             JkPublishRepos repos) {
-        for (final JkPublishRepo repo : repos) {
-            final DependencyResolver resolver = toResolver(repo.repo(), repo.checksumAlgorithms(), false);
-            resolver.setName(PUBLISH_RESOLVER_NAME + repo.repo().url());
+        for (final JkPublishRepo publishRepo : repos) {
+            final DependencyResolver resolver = toResolver(publishRepo.repo(), publishRepo.checksumAlgorithms(), false);
+            resolver.setName(PUBLISH_RESOLVER_NAME + publishRepo.repo().url());
             ivySettings.addResolver(resolver);
         }
     }
@@ -343,16 +343,7 @@ final class IvyTranslations {
                     new OverrideDependencyDescriptorMediator(null, version.name()));
         }
 
-        /* Add conflic manager
-        LatestRevisionStrategy latestRevisionStrategy = new LatestRevisionStrategy();
-        LatestCompatibleConflictManager conflictManager = new LatestCompatibleConflictManager();
-        conflictManager.setSettings(ivySettings);
-        moduleDescriptor.addConflictManager(ModuleId.newInstance("*", "*"),
-                ExactOrRegexpPatternMatcher.INSTANCE, conflictManager);
-         */
-
     }
-
 
     private static JkScopeMapping resolveSimple(JkScope scope, JkScopeMapping defaultMapping) {
         final JkScopeMapping result;

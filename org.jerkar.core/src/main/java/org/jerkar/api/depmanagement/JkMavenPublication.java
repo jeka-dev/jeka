@@ -26,6 +26,20 @@ public final class JkMavenPublication implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private final List<JkClassifiedFileArtifact> classifiedArtifacts;
+
+    private final List<File> mainArtifacts; // can't have 2 artifacts with same extension
+
+    private final JkMavenPublicationInfo extraInfo;
+
+    private JkMavenPublication(List<File> mainArtifacts, List<JkClassifiedFileArtifact> classified,
+                               JkMavenPublicationInfo extraInfo) {
+        super();
+        this.mainArtifacts = mainArtifacts;
+        this.classifiedArtifacts = classified;
+        this.extraInfo = extraInfo;
+    }
+
     /**
      * Creates a Maven publication specifying the file to publish as main artifact.
      */
@@ -49,22 +63,6 @@ public final class JkMavenPublication implements Serializable {
         return result;
     }
 
-    private final List<JkClassifiedFileArtifact> classifiedArtifacts;
-
-    private final List<File> mainArtifacts; // can't have 2 artifacts with same
-    // extension
-
-    private final JkMavenPublicationInfo extraInfo;
-
-    private JkMavenPublication(List<File> mainArtifacts, List<JkClassifiedFileArtifact> classified,
-            JkMavenPublicationInfo extraInfo) {
-        super();
-        this.mainArtifacts = mainArtifacts;
-        this.classifiedArtifacts = classified;
-        this.extraInfo = extraInfo;
-    }
-
-
     /**
      * Same as {@link #and(Path, String)} but effective only if the specified condition is <code>true</code>.
      */
@@ -79,7 +77,7 @@ public final class JkMavenPublication implements Serializable {
      * Returns a {@link JkMavenPublication} identical to this one but adding a classified artifact.
      */
     public JkMavenPublication and(Path file, String classifier) {
-        JkUtilsAssert.isTrue(!JkUtilsString.isBlank(classifier), "classifier cannot be empty");
+        JkUtilsAssert.isTrue(!JkUtilsString.isBlank(classifier), "classifier can not be empty");
         final String fileExt = JkUtilsString.substringAfterLast(file.getFileName().toString(), ".");
         if (JkUtilsString.isBlank(fileExt)) {
             throw new IllegalArgumentException("File " + file

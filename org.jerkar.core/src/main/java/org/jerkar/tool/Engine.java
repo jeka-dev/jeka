@@ -253,10 +253,10 @@ final class Engine {
         try {
             method = build.getClass().getMethod(methodName);
         } catch (final NoSuchMethodException e) {
-            throw new JkException("No zero-arg method '" + methodName + "' found in class '" + build.getClass());
+            throw new JkException("No public zero-arg method '" + methodName + "' found in class '" + build.getClass());
         }
         if (!Environment.standardOptions.logNoHeaders) {
-            JkLog.info("Method : " + methodName + " on " + build);
+            JkLog.info("Method : " + methodName + " on " + build.getClass().getName());
         }
         final long time = System.nanoTime();
         try {

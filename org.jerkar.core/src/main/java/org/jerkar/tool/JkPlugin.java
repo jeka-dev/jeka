@@ -18,6 +18,11 @@ public abstract class JkPlugin {
         this.build = build;
     }
 
+    @JkDoc("Display help about this plugin.")
+    public void help() {
+        HelpDisplayer.helpPlugin(this);
+    }
+
     protected void addDefaultAction(Runnable action) {
         build.addDefaultOperation(action);
     }
@@ -38,4 +43,6 @@ public abstract class JkPlugin {
         final String suffix = className.substring(CLASS_PREFIX.length());
         return JkUtilsString.uncapitalize(suffix);
     }
+
+
 }

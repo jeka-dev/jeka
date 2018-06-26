@@ -1,6 +1,5 @@
 package org.jerkar.api.depmanagement;
 
-import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -10,6 +9,7 @@ import java.util.Set;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.system.JkLocator;
+import org.jerkar.api.utils.JkUtilsAssert;
 
 /**
  * Stands for a repository for deploying artifacts.
@@ -20,7 +20,7 @@ public final class JkPublishRepo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final JkRepo jkRepo;
+    private final JkRepo repo;
 
     private final JkPublishFilter filter;
 
@@ -44,8 +44,9 @@ public final class JkPublishRepo implements Serializable {
     /**
      * Creates a {@link JkPublishRepo} for publishing always on the specified {@link JkRepo}.
      */
-    public static JkPublishRepo of(JkRepo jkRepo) {
-        return new JkPublishRepo(jkRepo, JkPublishFilter.ACCEPT_ALL, null, new HashSet<>(),
+    public static JkPublishRepo of(JkRepo repo) {
+        JkUtilsAssert.notNull(repo, "Repo arg can not be null.");
+        return new JkPublishRepo(repo, JkPublishFilter.ACCEPT_ALL, null, new HashSet<>(),
                 false);
     }
 
@@ -61,8 +62,8 @@ public final class JkPublishRepo implements Serializable {
      * Creates a {@link JkPublishRepo} for publishing snapshot projectVersion on the specified {@link JkRepo}.
      * Release versions are not publishable on this {@link JkPublishRepos}
      */
-    public static JkPublishRepo ofSnapshot(JkRepo jkRepo) {
-        return new JkPublishRepo(jkRepo, JkPublishFilter.ACCEPT_SNAPSHOT_ONLY, null,
+    public static JkPublishRepo ofSnapshot(JkRepo repo) {
+        return new JkPublishRepo(repo, JkPublishFilter.ACCEPT_SNAPSHOT_ONLY, null,
                 new HashSet<>(), false);
     }
 
@@ -78,7 +79,7 @@ public final class JkPublishRepo implements Serializable {
     private JkPublishRepo(JkRepo jkRepo, JkPublishFilter filter, JkPgp requirePgpSign,
             Set<String> digesters, boolean uniqueSnapshot) {
         super();
-        this.jkRepo = jkRepo;
+        this.repo = jkRepo;
         this.filter = filter;
         this.pgpSigner = requirePgpSign;
         this.checksumAlgorithms = Collections.unmodifiableSet(digesters);
@@ -89,7 +90,7 @@ public final class JkPublishRepo implements Serializable {
      * Returns the underlying {@link JkRepo}.
      */
     public JkRepo repo() {
-        return jkRepo;
+        return repo;
     }
 
     /**
@@ -133,7 +134,7 @@ public final class JkPublishRepo implements Serializable {
      * Pgp signer, if this one is not <code>null<code>.
      */
     public JkPublishRepo withSigner(JkPgp signer) {
-        return new JkPublishRepo(jkRepo, filter, signer, checksumAlgorithms, uniqueSnapshot);
+        return new JkPublishRepo(repo, filter, signer, checksumAlgorithms, uniqueSnapshot);
     }
 
     /*
@@ -148,7 +149,7 @@ public final class JkPublishRepo implements Serializable {
     private JkPublishRepo andChecksums(String... algorithms) {
         final HashSet<String> set = new HashSet<>(this.checksumAlgorithms);
         set.addAll(Arrays.asList(algorithms));
-        return new JkPublishRepo(jkRepo, filter, pgpSigner, set, uniqueSnapshot);
+        return new JkPublishRepo(repo, filter, pgpSigner, set, uniqueSnapshot);
     }
 
     /**
@@ -198,7 +199,7 @@ public final class JkPublishRepo implements Serializable {
      * This is the default behavior for artifact deployed with Maven 3, while this is not the case with Maven 2.
      */
     public JkPublishRepo withUniqueSnapshot(boolean uniqueSnapShot) {
-        return new JkPublishRepo(jkRepo, filter, pgpSigner, this.checksumAlgorithms,
+        return new JkPublishRepo(repo, filter, pgpSigner, this.checksumAlgorithms,
                 uniqueSnapShot);
     }
 
