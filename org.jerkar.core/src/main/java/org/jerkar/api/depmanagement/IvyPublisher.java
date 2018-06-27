@@ -208,7 +208,7 @@ final class IvyPublisher implements InternalPublisher {
             final JkVersionedModule jkModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
             if (isMaven(resolver) && publishRepo.filter().accept(jkModule)) {
-                JkLog.execute("Publishing for repository " + resolver, () -> {
+                JkLog.execute("Publishing to " + resolver, () -> {
                     final CheckFileFlag checkFileFlag = CheckFileFlag.of(publishRepo);
                     final IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(
                             checkFileFlag, resolver, descriptorOutputDir, publishRepo.uniqueSnapshot());
@@ -230,7 +230,7 @@ final class IvyPublisher implements InternalPublisher {
         try {
             resolver.abortPublishTransaction();
         } catch (final IOException e) {
-            JkLog.warn("Publish transction hasn't been properly aborted");
+            JkLog.warn("Publish transaction hasn't been properly aborted");
         }
     }
 
