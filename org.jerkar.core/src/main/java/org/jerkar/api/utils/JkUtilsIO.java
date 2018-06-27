@@ -79,8 +79,8 @@ public final class JkUtilsIO {
                 if (closeable != null) {
                     closeable.close();
                 }
-            } catch (final Exception e) {
-                throw new IllegalStateException("Cannot close " + closeable);
+            } catch (final IOException e) {
+                throw new UncheckedIOException("Cannot close " + closeable, e);
             }
         }
     }
@@ -95,7 +95,7 @@ public final class JkUtilsIO {
         try {
             return new FileInputStream(file);
         } catch (final FileNotFoundException e) {
-            throw new IllegalArgumentException("File " + file + " not found.", e);
+            throw new UncheckedIOException("File " + file + " not found.", e);
         }
     }
 
@@ -118,7 +118,7 @@ public final class JkUtilsIO {
         try {
             return file.openStream();
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -129,8 +129,8 @@ public final class JkUtilsIO {
     public static int read(InputStream inputStream) {
         try {
             return inputStream.read();
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -147,7 +147,7 @@ public final class JkUtilsIO {
                 result.add(line);
             }
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
         return result;
     }
@@ -159,7 +159,7 @@ public final class JkUtilsIO {
         try (InputStream is =  url.openStream()){
             return readAsString(is);
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -177,7 +177,7 @@ public final class JkUtilsIO {
                 out.append(newLine);
             }
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
         return out.toString();
     }
@@ -190,7 +190,7 @@ public final class JkUtilsIO {
             try {
                 zipFile.close();
             } catch (final IOException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
         }
     }
@@ -228,7 +228,7 @@ public final class JkUtilsIO {
                 final InputStream inputStream = url.openStream()){
             copy(inputStream, fileOutputStream);
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -244,7 +244,7 @@ public final class JkUtilsIO {
                 out.write(buf, 0, len);
             }
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -255,7 +255,7 @@ public final class JkUtilsIO {
         try {
             serialize(object, new FileOutputStream(file));
         } catch (final FileNotFoundException e) {
-            throw new IllegalArgumentException("File must exist.", e);
+            throw new UncheckedIOException("File must exist.", e);
         }
     }
 
@@ -269,7 +269,7 @@ public final class JkUtilsIO {
                 output.writeObject(object);
             }
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException("Error while serializing " + object, e);
         }
     }
 
@@ -391,7 +391,7 @@ public final class JkUtilsIO {
                         out.write('\n');
                     }
                 } catch (final IOException e) {
-                    throw new RuntimeException(e);
+                    throw new UncheckedIOException(e);
                 }
             }
 

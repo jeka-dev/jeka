@@ -70,13 +70,13 @@ final class IvyPublisherForMaven {
             version = versionForUniqueSnapshot(versionedModule.version().name(), snap.timestamp,
                     snap.buildNumber);
             final String pomDest = destination(versionedModule, "pom", null, version);
-            putAll(pomXml, pomDest, true);
+            putInRepo(pomXml, pomDest, true);
             mavenMetadata.addSnapshotVersion("pom", null);
             push(mavenMetadata, path);
         } else {
             version = versionedModule.version().name();
             final String pomDest = destination(versionedModule, "pom", null, version);
-            putAll(pomXml, pomDest, true);
+            putInRepo(pomXml, pomDest, true);
         }
         if (this.descriptorOutputDir == null) {
             JkUtilsPath.deleteFile(pomXml);
@@ -211,7 +211,7 @@ final class IvyPublisherForMaven {
         final String extension = JkUtilsString.substringAfterLast(source.getFileName().toString(), ".");
         final String dest = destination(versionedModule, extension, classifier,
                 versionForUniqueSpshot);
-        putAll(source, dest, false);
+        putInRepo(source, dest, false);
         final String path = snapshotMetadataPath(versionedModule);
         mavenMetadata.addSnapshotVersion(extension, classifier);
         push(mavenMetadata, path);
@@ -223,7 +223,7 @@ final class IvyPublisherForMaven {
         final String version = versionedModule.version().name();
         final String dest = destination(versionedModule.withVersion(version), extension, classifier);
         final boolean overwrite = versionedModule.version().isSnapshot();
-        putAll(source, dest, overwrite);
+        putInRepo(source, dest, overwrite);
     }
 
     private static String destination(JkVersionedModule versionedModule, String ext,
@@ -270,7 +270,7 @@ final class IvyPublisherForMaven {
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
-        putAll(file, path, true);
+        putInRepo(file, path, true);
     }
 
     private static JkVersionedModule of(ModuleId moduleId, String version) {
@@ -306,8 +306,8 @@ final class IvyPublisherForMaven {
         }
     }
 
-    private void putAll(Path source, String dest, boolean overwrite) {
-        putAll(source, dest, overwrite, true);
+    private void putInRepo(Path source, String dest, boolean overwrite) {
+        putInRepo(source, dest, overwrite, true);
     }
 
     private String completePath(String path) {
@@ -318,7 +318,7 @@ final class IvyPublisherForMaven {
         return path;
     }
 
-    private void putAll(Path source, String destination, boolean overwrite, boolean signIfneeded) {
+    private void putInRepo(Path source, String destination, boolean overwrite, boolean signIfneeded) {
         final String[] checksums = this.resolver.getChecksumAlgorithms();
         final Repository repository = this.resolver.getRepository();
         try {
@@ -337,7 +337,7 @@ final class IvyPublisherForMaven {
             if (this.checkFileFlag.pgpSigner != null && signIfneeded) {
                 final Path signed = checkFileFlag.pgpSigner.sign(source)[0];
                 final String signedDest = destination + ".asc";
-                putAll(signed, signedDest, overwrite, false);
+                putInRepo(signed, signedDest, overwrite, false);
             }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);

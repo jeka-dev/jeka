@@ -268,6 +268,7 @@ final class Engine {
         } catch (final RuntimeException e) {
             JkLog.info("Method " + methodName + " failed in " + JkUtilsTime.durationInMillis(time)
                         + " milliseconds.");
+            throw e;
         }
     }
 

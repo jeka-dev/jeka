@@ -54,7 +54,7 @@ public final class JkMavenPublication implements Serializable {
     public static JkMavenPublication of(JkArtifactLocator artifactLocator, Set<JkArtifactId> excludedArtifacts) {
         JkMavenPublication result = JkMavenPublication.of(artifactLocator.artifactPath(artifactLocator.mainArtifactId()));
         for (final JkArtifactId artifactFileId : artifactLocator.artifactIds()) {
-            if (excludedArtifacts.contains(artifactFileId)) {
+            if (excludedArtifacts.contains(artifactFileId) || artifactFileId.classifier() == null) {
                 continue;
             }
             final Path file = artifactLocator.artifactPath(artifactFileId);
@@ -77,7 +77,8 @@ public final class JkMavenPublication implements Serializable {
      * Returns a {@link JkMavenPublication} identical to this one but adding a classified artifact.
      */
     public JkMavenPublication and(Path file, String classifier) {
-        JkUtilsAssert.isTrue(!JkUtilsString.isBlank(classifier), "classifier can not be empty");
+        JkUtilsAssert.isTrue(!JkUtilsString.isBlank(classifier), "classifier can not be empty. Use JkMavenPublication#of " +
+                "for creating a publication with the main artifact.");
         final String fileExt = JkUtilsString.substringAfterLast(file.getFileName().toString(), ".");
         if (JkUtilsString.isBlank(fileExt)) {
             throw new IllegalArgumentException("File " + file

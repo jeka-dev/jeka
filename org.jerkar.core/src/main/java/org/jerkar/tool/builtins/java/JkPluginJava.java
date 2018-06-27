@@ -177,6 +177,11 @@ public class JkPluginJava extends JkPlugin {
         JkLog.info(String.join("\n", tree.toStrings()));
     }
 
+    @JkDoc("Publishes produced artifacts to configured repository.")
+    public void publish() {
+        project.maker().publish();
+    }
+
     public static class JkPublishOptions {
 
         @JkDoc("If true, publishing to repository will include sources jar.")

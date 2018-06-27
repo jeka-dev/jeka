@@ -51,6 +51,22 @@ public abstract class JkRepo implements Serializable {
      */
     public static final URL JCENTERL_URL = toUrl("https://jcenter.bintray.com");
 
+    private final URL url;
+
+    private final String userName;
+
+    private final String realm;
+
+    private final String password;
+
+    private JkRepo(URL url, String realm, String userName, String password) {
+        this.url = url;
+        this.realm = realm;
+        this.userName = userName;
+        this.password = password;
+    }
+
+
     /**
      * Creates a repository or <code>null</code> according the url is <code>null</code> or not.
      */
@@ -60,8 +76,6 @@ public abstract class JkRepo implements Serializable {
         }
         return of(url).withCredential(userName, password);
     }
-
-
 
     /**
      * Returns the first repository not <code>null</code> from the specified ones.
@@ -205,20 +219,6 @@ public abstract class JkRepo implements Serializable {
         return ivy(toUrl(urlOrDir));
     }
 
-    private final URL url;
-
-    private final String userName;
-
-    private final String realm;
-
-    private final String password;
-
-    private JkRepo(URL url, String realm, String userName, String password) {
-        this.url = url;
-        this.realm = realm;
-        this.userName = userName;
-        this.password = password;
-    }
 
     /**
      * Returns the url of this repository.
