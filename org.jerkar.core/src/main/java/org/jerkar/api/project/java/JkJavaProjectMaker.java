@@ -559,7 +559,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         }
 
         boolean compileOutputPresent() {
-            return JkJavaProjectMaker.this.compileSourceSpec().getOutputDir().exists();
+            return Files.exists(JkJavaProjectMaker.this.project.getOutLayout().classDir());
         }
 
     }
