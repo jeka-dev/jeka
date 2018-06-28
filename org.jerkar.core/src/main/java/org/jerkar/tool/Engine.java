@@ -255,13 +255,13 @@ final class Engine {
         } catch (final NoSuchMethodException e) {
             throw new JkException("No public zero-arg method '" + methodName + "' found in class '" + build.getClass());
         }
-        if (!Environment.standardOptions.logNoHeaders) {
+        if (Environment.standardOptions.logHeaders) {
             JkLog.info("Method : " + methodName + " on " + build.getClass().getName());
         }
         final long time = System.nanoTime();
         try {
             JkUtilsReflect.invoke(build, method);
-            if (!Environment.standardOptions.logNoHeaders) {
+            if (Environment.standardOptions.logHeaders) {
                 JkLog.info("Method " + methodName + " succeeded in "
                         + JkUtilsTime.durationInMillis(time) + " milliseconds.");
             }

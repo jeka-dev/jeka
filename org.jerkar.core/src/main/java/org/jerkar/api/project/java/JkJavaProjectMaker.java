@@ -242,7 +242,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
                         + this.project.getSourceLayout().tests());
                 return;
             }
-            if (!this.status.compileDone) {
+            if (!this.status.compileOutputPresent()) {
                 compile();
             }
             preTest.run();
@@ -542,10 +542,13 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return this.project.baseDir();
     }
 
-    private static class Status {
+    private class Status {
         private boolean sourceGenerated = false;
+
         private boolean compileDone = false;
+
         private boolean unitTestDone = false;
+
         private boolean javadocGenerated = false;
 
         void reset() {
@@ -553,6 +556,10 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
             compileDone = false;
             unitTestDone = false;
             javadocGenerated = false;
+        }
+
+        boolean compileOutputPresent() {
+            return JkJavaProjectMaker.this.compileSourceSpec().getOutputDir().exists();
         }
 
     }

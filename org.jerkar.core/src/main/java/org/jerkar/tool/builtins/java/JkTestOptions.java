@@ -13,7 +13,7 @@ public final class JkTestOptions {
     public boolean skip;
 
     /** Turn it on to run tests in a forked process. */
-    @JkDoc("If tyrue, tests will be executed in a forked process.")
+    @JkDoc("If true, tests will be executed in a forked process.")
     public boolean fork;
 
     /** Argument passed to the JVM if tests are forked. Example : -Xms2G -Xmx2G */
@@ -21,9 +21,9 @@ public final class JkTestOptions {
     public String jvmOptions;
 
     /** Detail level for the test report */
-    @JkDoc({ "The more details the longer tests take to be processed.",
-        "BASIC mention the total time elapsed along detail on failed tests.",
-        "FULL detailed report displays additionally the time to run each tests.",
+    @JkDoc({ "Detail level of generated report.",
+        "BASIC mentions the total duration along details on failed tests.",
+        "FULL mentions durations of each tests.",
     "Example : -report=NONE" })
     public JunitReportDetail report = JunitReportDetail.BASIC;
 

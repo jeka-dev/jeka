@@ -52,9 +52,9 @@ public final class JkPluginIdea extends JkPlugin {
         final String xml = generator.generate();
         final Path imlFile = build.baseDir().resolve(
                 build.baseDir().getFileName().toString() + ".iml");
-        JkUtilsPath.deleteFile(imlFile);
+        JkUtilsPath.deleteIfExists(imlFile);
         JkUtilsPath.write(imlFile, xml.getBytes(Charset.forName("UTF-8")));
-        JkLog.info(imlFile + " generated.");
+        JkLog.info("Iml file generated at " + imlFile);
     }
 
     /** Generate modules.xml files */

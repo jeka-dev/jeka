@@ -82,7 +82,7 @@ class Environment {
 
         boolean logVerbose;
 
-        boolean logNoHeaders;
+        boolean logHeaders;
 
         int logMaxLength = -1;
 
@@ -90,7 +90,7 @@ class Environment {
 
         StandardOptions (Map<String, String> map) {
             this.logVerbose = valueOf(Boolean.class, map, false, "Log.verbose", "LV");
-            this.logNoHeaders = valueOf(Boolean.class, map, false,"Log.noHeaders", "LNH");
+            this.logHeaders = valueOf(Boolean.class, map, false,"Log.headers", "LH");
             this.logMaxLength = valueOf(Integer.class, map, -1,"Log.maxLength", "LML");
             this.buildClass = valueOf(String.class, map, null, "BuildClass", "BC");
         }
@@ -98,7 +98,7 @@ class Environment {
         @Override
         public String toString() {
             return "BuildClass=" + JkUtilsObject.toString(buildClass) + ", Log.Verbose=" + logVerbose
-                    + ", Log.NoHeaders=" + logNoHeaders + ", Log.maxLength=" + logMaxLength;
+                    + ", Log.headers=" + logHeaders + ", Log.maxLength=" + logMaxLength;
         }
 
         private static <T> T valueOf(Class<T> type, Map<String, String> map, T defaultValue, String ... names) {

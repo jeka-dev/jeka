@@ -25,7 +25,7 @@ public final class JkInit {
         JkLog.register(new LogHandler());
         Environment.initialize(args);
         JkLog.Verbosity verbosity = JkLog.verbosity();
-        if (Environment.standardOptions.logNoHeaders) {
+        if (!Environment.standardOptions.logHeaders) {
             JkLog.setVerbosity(JkLog.Verbosity.MUTE);
         }
         displayInfo();

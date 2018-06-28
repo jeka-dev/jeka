@@ -150,14 +150,17 @@ public class JkPluginJava extends JkPlugin {
 
     // ------------------------------- command line methods -----------------------------
 
-    @JkDoc("Performs compilation and testing.")
-    public void check() {
-        if (tests.skip) {
-            project.maker().compile();
-        } else {
-            project.maker().test();
-        }
+    @JkDoc("Performs compilation and resource processing.")
+    public void compile() {
+        project.maker().compile();
     }
+
+    @JkDoc("Compiles and run tests defined within the project (typically Junit tests).")
+    public void test() {
+        project.maker().test();
+    }
+
+
 
     @JkDoc("Generates all artifacts defined in producedArtifact list. " +
             "Does not re-generate artifacts already generated : " +

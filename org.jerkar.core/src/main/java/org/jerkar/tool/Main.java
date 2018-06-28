@@ -27,7 +27,7 @@ public final class Main {
             Environment.initialize(args);
             JkLog.register(new LogHandler());
             JkLog.Verbosity verbosity = JkLog.verbosity();
-            if (Environment.standardOptions.logNoHeaders) {
+            if (!Environment.standardOptions.logHeaders) {
                 JkLog.setVerbosity(JkLog.Verbosity.MUTE);
             } else {
                 displayIntro();
@@ -36,7 +36,7 @@ public final class Main {
             final Path workingDir = Paths.get("").toAbsolutePath();
             final Engine engine = new Engine(workingDir);
             engine.execute(Environment.commandLine, Environment.standardOptions.buildClass, verbosity);
-            if (!Environment.standardOptions.logNoHeaders) {
+            if (Environment.standardOptions.logHeaders) {
                 displayOutro(start);
             }
         } catch (final RuntimeException e) {
@@ -46,7 +46,7 @@ public final class Main {
             } else {
                 e.printStackTrace(System.err);
             }
-            if (!Environment.standardOptions.logNoHeaders) {
+            if (Environment.standardOptions.logHeaders) {
                 final int length = printAscii(true, "failed.ascii");
                 System.err.println(JkUtilsString.repeat(" ", length) + "Total build time : "
                         + JkUtilsTime.durationInSeconds(start) + " seconds.");
@@ -64,7 +64,7 @@ public final class Main {
         final Engine engine = new Engine(projectDir);
         Environment.initialize(args);
         JkLog.Verbosity verbosity = JkLog.verbosity();
-        if (Environment.standardOptions.logNoHeaders) {
+        if (!Environment.standardOptions.logHeaders) {
             JkLog.setVerbosity(JkLog.Verbosity.MUTE);
         }
         engine.execute(Environment.commandLine, Environment.standardOptions.buildClass, verbosity);
