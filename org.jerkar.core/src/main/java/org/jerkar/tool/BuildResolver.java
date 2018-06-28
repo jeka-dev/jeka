@@ -100,7 +100,7 @@ final class BuildResolver {
             final Class<? extends JkBuild> clazz = classLoader.loadFromNameOrSimpleName(
                     classNameHint, JkBuild.class);
             if (clazz == null) {
-                throw new JkException("No build class named " + classNameHint + " found.");
+                return null;
             }
             JkBuild.baseDirContext(baseDir);
             final JkBuild build;

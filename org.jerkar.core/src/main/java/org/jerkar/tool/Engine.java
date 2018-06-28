@@ -11,10 +11,7 @@ import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.api.utils.JkUtilsReflect;
-import org.jerkar.api.utils.JkUtilsTime;
+import org.jerkar.api.utils.*;
 import org.jerkar.tool.CommandLine.MethodInvocation;
 
 import java.lang.reflect.Method;
@@ -22,7 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Engine having responsibility of compiling build classes, instantiate and run them.<br/>
@@ -75,16 +71,22 @@ final class Engine {
      */
     void execute(CommandLine commandLine, String buildClassHint, JkLog.Verbosity verbosityToRestore) {
         buildDependencies = buildDependencies.andUnscoped(commandLine.dependencies());
-        final AtomicReference<JkBuild> build = new AtomicReference<>();
         long start = System.nanoTime();
         JkLog.startTask("Compile and initialise build classes");
-        JkPathSequence runtimeClasspath = compile();
+        JkBuild build = null;
+        JkPathSequence path = JkPathSequence.of();
         if (!commandLine.dependencies().isEmpty()) {
             final JkPathSequence cmdPath = pathOf(commandLine.dependencies());
-            runtimeClasspath = runtimeClasspath.andManyFirst(cmdPath);
+            path = path.andManyFirst(cmdPath);
             JkLog.trace("Command line extra path : " + cmdPath);
         }
-        build.set(getBuildInstance(buildClassHint, runtimeClasspath));
+        if (!JkUtilsString.isBlank(buildClassHint)) {  // First find in the such a class in the existing classpath without compiling
+            build = getBuildInstance(buildClassHint, path);
+        }
+        if (build == null) {
+            path = compile().andMany(path);
+            build = getBuildInstance(buildClassHint, path);
+        }
         if (build == null) {
             throw new JkException("Can't find or guess any build class for project hosted in " + this.projectBaseDir
                     + " .\nAre you sure this directory is a buildable project ?");
@@ -93,7 +95,7 @@ final class Engine {
         JkLog.info("Build is ready to start.");
         JkLog.setVerbosity(verbosityToRestore);
         try {
-            this.launch(build.get(), commandLine);
+            this.launch(build, commandLine);
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;

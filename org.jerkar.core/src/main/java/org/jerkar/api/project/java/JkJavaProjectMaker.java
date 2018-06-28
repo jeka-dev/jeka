@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Supplier;
 
+import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.*;
@@ -35,8 +36,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private final JkJavaProject project;
 
-    private JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.mavenCentral())
-            .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaDepScopes.DEFAULT_SCOPE_MAPPING));
+    private JkDependencyResolver dependencyResolver;
 
     private JkJavaCompiler compiler = JkJavaCompiler.base();
 
@@ -104,6 +104,14 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         this.defineArtifact(TEST_SOURCE_ARTIFACT_ID, this.getPackager()::testSourceJar);
     }
 
+    private JkDependencyResolver dependencyResolver() {
+        if (dependencyResolver == null) {
+            dependencyResolver = JkDependencyResolver.of(JkRepo.mavenCentral())
+                  .withParams(JkResolutionParameters.defaultScopeMapping(JkJavaDepScopes.DEFAULT_SCOPE_MAPPING));
+        }
+        return dependencyResolver;
+    }
+
 
     private void compileAndTestIfNeeded() {
         if (!status.compileDone) {
@@ -130,7 +138,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     public JkPathSequence depsFor(JkScope... scopes) {
         final Set<JkScope> scopeSet = new HashSet<>(Arrays.asList(scopes));
         return this.depCache.computeIfAbsent(scopeSet,
-                scopes1 -> this.dependencyResolver.get(getDeclaredDependencies(), scopes));
+                scopes1 -> this.dependencyResolver().get(getDeclaredDependencies(), scopes));
     }
 
     /**
@@ -361,7 +369,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
                 .andOptional(artifactPath(JAVADOC_ARTIFACT_ID), JkJavaDepScopes.JAVADOC)
                 .andOptional(artifactPath(TEST_ARTIFACT_ID), JkJavaDepScopes.TEST)
                 .andOptional(artifactPath(TEST_SOURCE_ARTIFACT_ID), JkJavaDepScopes.SOURCES);
-        final JkVersionProvider resolvedVersions = this.dependencyResolver
+        final JkVersionProvider resolvedVersions = this.dependencyResolver()
                 .resolve(dependencies, dependencies.involvedScopes()).resolvedVersionProvider();
         JkPublisher.of(this.publishRepos, project.getOutLayout().outputPath())
         .publishIvy(project.getVersionedModule(), publication, dependencies,
@@ -408,7 +416,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     public JkDependencyResolver getDependencyResolver() {
-        return dependencyResolver;
+        return dependencyResolver();
     }
 
     public JkJavaProjectMaker setDependencyResolver(JkDependencyResolver dependencyResolver) {
@@ -417,7 +425,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     public JkJavaProjectMaker setDownloadRepos(JkRepos repos) {
-        this.dependencyResolver = this.dependencyResolver.withRepos(repos);
+        this.dependencyResolver = this.dependencyResolver().withRepos(repos);
         return this;
     }
 

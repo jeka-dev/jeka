@@ -171,7 +171,7 @@ public final class JkDependencyResolver {
      * Change the repositories for dependency resolution
      */
     public JkDependencyResolver withRepos(JkRepos otherRepos) {
-        return new JkDependencyResolver(this.internalResolver, this.module,
+        return new JkDependencyResolver(InternalDepResolvers.ivy(otherRepos), this.module,
                 this.parameters, otherRepos);
     }
 
