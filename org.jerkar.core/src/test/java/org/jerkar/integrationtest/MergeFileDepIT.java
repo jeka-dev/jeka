@@ -20,7 +20,7 @@ public class MergeFileDepIT {
 
     @Test
     public void treeIsCorrectAfterFileDepInsert() throws URISyntaxException {
-        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
+        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
         Path dep0File = Paths.get(MergeFileDepIT.class.getResource("dep0").toURI());
         Path dep1File = Paths.get(MergeFileDepIT.class.getResource( "dep1").toURI());
         Path dep2File = Paths.get(MergeFileDepIT.class.getResource( "dep2").toURI());

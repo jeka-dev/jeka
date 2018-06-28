@@ -95,7 +95,7 @@ public class AntStyleBuild extends JkBuild {
                 .andSha1Md5Checksums();
 
         JkVersionedModule versionedModule = JkVersionedModule.of(
-                "myGroup:myName", "0.2.1");
+                "myGroup:myName:0.2.1");
 
         // Optinal : if you need to add metadata in the generated pom
         JkMavenPublicationInfo info = JkMavenPublicationInfo

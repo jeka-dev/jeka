@@ -27,7 +27,7 @@ public class ResolveWithArtifactIT {
 
     @Test
     public void artifactsAreHandled() {
-        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
+        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
         JkDependencySet deps = JkDependencySet.of()
                 .and("org.lwjgl:lwjgl:3.1.1:natives-linux")
                 .and(JkPopularModules.GUAVA, "19.0" )
@@ -56,7 +56,7 @@ public class ResolveWithArtifactIT {
 
     @Test
     public void artifactCountIsOk() {
-        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
+        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
         JkDependencySet deps = JkDependencySet.of()
                 .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", COMPILE_AND_RUNTIME)
                 .and("org.springframework.boot:spring-boot-starter-test:1.5.+", TEST)
