@@ -20,7 +20,7 @@ public class ResolveHandleErrorIT {
 
     @Test
     public void artifactNotFound() {
-        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
+        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
         JkDependencySet deps = JkDependencySet.of()
                 .and(JkPopularModules.JAVAX_SERVLET_API, "2.5.3", COMPILE_AND_RUNTIME);  // does not exist
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())

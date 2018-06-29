@@ -103,7 +103,7 @@ public class ResolverWithScopeMapperIT {
 
     @Test
     public void getRuntimeTransitiveWithRuntime() {
-        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion2");
+        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion2");
         JkDependencySet deps = JkDependencySet.of()
                 .and("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE", COMPILE, RUNTIME);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
@@ -116,7 +116,7 @@ public class ResolverWithScopeMapperIT {
 
     @Test
     public void dontGetRuntimeTransitiveWithCompile() {
-        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
+        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
         JkDependencySet deps = JkDependencySet.of()
                 .and("org.springframework.boot:spring-boot-starter:1.5.3.RELEASE", COMPILE, RUNTIME);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())

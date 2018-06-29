@@ -25,19 +25,6 @@ public final class JkVersionedModule implements Serializable {
 
     /**
      * Creates a <code>JkVersionedModule</code> from a string formatted as
-     * <code>groupId:name</code> and another one standing for the projectVersion.
-     */
-    public static final JkVersionedModule of(String groupAndName, String version) {
-        final String[] items = groupAndName.split(":");
-        if (items.length != 2) {
-            throw new IllegalArgumentException(groupAndName
-                    + " does not respect format groupId:name");
-        }
-        return JkVersionedModule.of(JkModuleId.of(groupAndName), JkVersion.name(version));
-    }
-
-    /**
-     * Creates a <code>JkVersionedModule</code> from a string formatted as
      * <code>groupId:name:projectVersion</code>.
      */
     public static final JkVersionedModule of(String description) {

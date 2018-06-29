@@ -29,7 +29,7 @@ public class ResolveTreeIT {
 
     @Test
     public void treeIsCorrect() {
-        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
+        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
         JkDependencySet deps = JkDependencySet.of()
                 .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", COMPILE_AND_RUNTIME)
                 .and("org.springframework.boot:spring-boot-starter-test:1.5.+", TEST)
@@ -78,7 +78,7 @@ public class ResolveTreeIT {
 
     @Test
     public void treeDistinctDynamicAndResolvedVersion() {
-        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname", "myversion");
+        JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
         JkModuleId moduleId = JkModuleId.of("org.springframework.boot:spring-boot-starter-web");
         JkDependencySet deps = JkDependencySet.of().and(moduleId, "1.4.+", TEST);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
