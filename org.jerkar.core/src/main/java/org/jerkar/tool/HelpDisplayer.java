@@ -27,12 +27,13 @@ final class HelpDisplayer {
                 .append("Usage: jerkar [methodA...] [pluginName#methodB] [-optionName=value...] [-pluginName#optionName=value...] [-DsystemPropName=value...]\n")
                 .append("When no method specified, 'doDefault' method is invoked.\n")
                 .append("Ex: jerkar clean java#pack -java#pack.sources=true -Log.verbose=true -other=xxx -DmyProp=Xxxx\n\n")
-                .append("Available methods and options :\n");
+                .append(standardOptions())
+                .append("\nAvailable methods and options :\n");
 
-        sb.append(BuildClassDef.of(build).description("", true, false));
-        final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
+        sb.append(BuildClassDef.of(build).description("", true));
 
         // List plugins
+        final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
         List<String> names = pluginDescriptions.stream().map(pluginDescription -> pluginDescription.shortName()).collect(Collectors.toList());
         sb.append("\nAvailable plugins in classpath : ").append(JkUtilsString.join(names, ", "))
                 .append(".\n");
@@ -40,6 +41,16 @@ final class HelpDisplayer {
         sb.append("\nType 'jerkar [pluginName]#help' to get help on a perticular plugin (ex : 'jerkar java#help'). ");
         sb.append("\nType 'jerkar help -Plugins' to get help on all available plugins in the classpath.\n");
         JkLog.info(sb.toString());
+    }
+
+    static String standardOptions() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Global options (these options are not specific to a plugin or a build class) :\n");
+        sb.append("  -LogVerbose (shorthand -LV) : if true, logs will display 'trace' level logs.\n");
+        sb.append("  -LogHeaders (shorthand -LH) : if true, meta-information about the build creation itself and method execution will be logged.\n");
+        sb.append("  -LogMaxLength (shorthand -LMH) : Console will do a carriage return automatically after N characters are outputted in a single line (ex : -LML=120).\n");
+        sb.append("  -BuildClass (shorthand -BC) : Force to use the specified class as the build class. It can be the short name of the class (without package prefix).\n");
+        return sb.toString();
     }
 
     static void help(JkBuild build, Path xmlFile) {
@@ -108,7 +119,7 @@ final class HelpDisplayer {
         }
         final Object object = JkUtilsReflect.newInstance(description.pluginClass(), JkBuild.class, build);
         sb.append("\n");
-        sb.append(BuildClassDef.of(object).description(description.shortName() + "#", false, false));
+        sb.append(BuildClassDef.of(object).flatDescription(description.shortName() + "#", false, false));
         return sb.toString();
     }
 

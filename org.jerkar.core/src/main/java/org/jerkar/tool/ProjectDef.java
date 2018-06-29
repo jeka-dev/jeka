@@ -121,25 +121,23 @@ final class ProjectDef {
             return !JkUtilsReflect.getAllDeclaredFields(field.getType(), JkDoc.class).isEmpty();
         }
 
-        String description(String prefix, boolean withHeader, boolean showBuildPlugin) {
+        String description(String prefix, boolean withHeader) {
             StringBuilder stringBuilder = new StringBuilder();
             for (Class<? extends JkBuild> buildClass : this.buildClassHierarchy()) {
-                stringBuilder.append(description(buildClass, prefix, withHeader));
-            }
-            if (this.buildOrPlugin instanceof JkBuild && showBuildPlugin) {
-                JkBuild build = (JkBuild) this.buildOrPlugin;
-                if (build.plugins() != null) {
-                    for (JkPlugin plugin : build.plugins().all()) {
-                        stringBuilder.append(BuildClassDef.of(plugin).description(plugin.name() + "#", withHeader, false));
-                    }
-                }
+                stringBuilder.append(description(buildClass, prefix, withHeader, false));
             }
             return stringBuilder.toString();
         }
 
-        private String description(Class<?> buildClass, String prefix, boolean withHeader) {
-            List<BuildMethodDef> methods = this.methodsOf(buildClass);
-            List<BuildOptionDef> options = this.optionsOf(buildClass);
+        String flatDescription(String prefix, boolean withHeader, boolean showBuildPlugin) {
+            return description(this.buildOrPlugin.getClass(), prefix, withHeader, true);
+        }
+
+
+
+        private String description(Class<?> buildClass, String prefix, boolean withHeader, boolean includeHierarchy) {
+            List<BuildMethodDef> methods = includeHierarchy ? this.methodDefs : this.methodsOf(buildClass);
+            List<BuildOptionDef> options = includeHierarchy ? this.optionDefs : this.optionsOf(buildClass);
             if (methods.isEmpty() && options.isEmpty()) {
                 return "";
             }
@@ -151,7 +149,7 @@ final class ProjectDef {
             String margin = withHeader ? "  " : "";
             if (!methods.isEmpty()) {
                 stringBuilder.append(margin + "Methods :\n");
-                for (BuildMethodDef methodDef : this.methodsOf(buildClass)) {
+                for (BuildMethodDef methodDef : methods) {
                     final String displayedMethodName = prefix + methodDef.name;
                     if (methodDef.description == null) {
                         stringBuilder.append( margin + "  " + displayedMethodName + " : No description available.\n");
@@ -164,7 +162,7 @@ final class ProjectDef {
             }
             if (!options.isEmpty()) {
                 stringBuilder.append(margin + "Options :\n");
-                for (BuildOptionDef optionDef : this.optionsOf(buildClass)) {
+                for (BuildOptionDef optionDef : options) {
                     stringBuilder.append(optionDef.description(prefix, margin));
                 }
             }

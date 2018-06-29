@@ -89,9 +89,9 @@ class Environment {
         String buildClass;
 
         StandardOptions (Map<String, String> map) {
-            this.logVerbose = valueOf(Boolean.class, map, false, "Log.verbose", "LV");
-            this.logHeaders = valueOf(Boolean.class, map, false,"Log.headers", "LH");
-            this.logMaxLength = valueOf(Integer.class, map, -1,"Log.maxLength", "LML");
+            this.logVerbose = valueOf(Boolean.class, map, false, "LogVerbose", "LV");
+            this.logHeaders = valueOf(Boolean.class, map, false,"LogHeaders", "LH");
+            this.logMaxLength = valueOf(Integer.class, map, -1,"LogMaxLength", "LML");
             this.buildClass = valueOf(String.class, map, null, "BuildClass", "BC");
         }
 
