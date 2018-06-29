@@ -37,8 +37,7 @@ public final class JkPublishRepos implements Iterable<JkPublishRepo>, Serializab
      * Creates a repository for publishing locally under <code></code>[USER HOME]/.jerkar/publish</code> folder.
      */
     public static JkPublishRepos local() {
-        final Path file = JkLocator.jerkarUserHomeDir().resolve("maven-publish-dir");
-        return JkRepo.maven(file).asPublishRepos();
+        return JkRepo.local().asPublishRepos();
     }
 
     /**

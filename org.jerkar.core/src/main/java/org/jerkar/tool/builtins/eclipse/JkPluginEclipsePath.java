@@ -22,7 +22,7 @@ public final class JkPluginEclipsePath extends JkPlugin {
         super(build);
     }
 
-    @JkDoc("Configure java plugin instance in order java project reflects project structure and dependencies described in Eclipse .classpath file.")
+    @JkDoc("Configures java plugin instance in order java project reflects project structure and dependencies described in Eclipse .classpath file.")
     @Override
     protected void decorateBuild() {
         JkPluginJava pluginJava = build.plugins().get(JkPluginJava.class);

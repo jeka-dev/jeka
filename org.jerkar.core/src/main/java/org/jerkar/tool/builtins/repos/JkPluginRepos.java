@@ -10,16 +10,16 @@ import org.jerkar.tool.*;
 import java.util.Map;
 
 /**
- * Plugin for defining download and publish repositories.
+ * Plugin for defining repositories.
  */
 @JkDoc("Provides configured repositories to download or upload artifacts.\n" +
-        "To select a download (respectively a publish) repository, this plugin check in order : \n" +
-        "  - the  plugin option 'downloadRepoName' which designate the name of the configured plugin\n" +
-        "  - the plugin options 'downloadUrl', 'downloadUsername' and 'downloadPassword' to instantiate a repo based on these values\n" +
-        "  - the 'Repos.download.url', 'Repos.download.username' and 'Repo.download.password' to instantiate repo based on these values\n" +
-        "  - the default : JkRepo#mavenCentral() for downloading and local repository for publishing.\n" +
-        "To configure a named repository, add following properties into your [Jerkar_user_home]/options.properties file :\n" +
-        "  'Repos.[name].url', 'Repos.[name].username' and 'Repos.[name].password'"
+        "  To select a 'download' (respectively a 'publish') repository, this plugin check in order : \n" +
+        "    - the 'repos#downloadRepoName' option which designate the name of the configured plugin\n" +
+        "    - the 'repos#downloadUrl', 'repos#downloadUsername' and 'repos#downloadPassword' options to instantiate a repo based on these values\n" +
+        "    - the 'Repos.download.url', 'Repos.download.username' and 'Repo.download.password' options to instantiate repo based on these values\n" +
+        "    - the default repo returned by JkRepo#mavenCentral() for downloading and local repository for publishing.\n" +
+        "  To configure a named repository, add following properties into your [Jerkar_user_home]/options.properties file :\n" +
+        "    'Repos.[name].url', 'Repos.[name].username' and 'Repos.[name].password'"
 )
 public class JkPluginRepos extends JkPlugin {
 

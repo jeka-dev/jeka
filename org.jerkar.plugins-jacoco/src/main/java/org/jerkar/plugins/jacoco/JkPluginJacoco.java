@@ -20,7 +20,7 @@ public class JkPluginJacoco extends JkPlugin {
         super(build);
     }
 
-    @JkDoc("Configure java plugin in order unit tests are run with Jacoco coverage tool. Result is located in [OUTPUT DIR]/"
+    @JkDoc("Configures java plugin in order unit tests are run with Jacoco coverage tool. Result is located in [OUTPUT DIR]/"
             + OUTPUT_RELATIVE_PATH + " file.")
     @Override
     protected void decorateBuild() {

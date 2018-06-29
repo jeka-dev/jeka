@@ -1,5 +1,6 @@
 package org.jerkar.tool;
 
+import org.jerkar.api.system.JkException;
 import org.jerkar.api.utils.JkUtilsReflect;
 
 import java.lang.reflect.Method;
@@ -76,6 +77,9 @@ public final class JkBuildPlugins {
         Iterable<PluginOptions> pluginSetups = Environment.commandLine.getPluginOptions();
         for (PluginOptions pluginSetup : pluginSetups){
             PluginDictionary.PluginDescription pluginDescription = PluginDictionary.loadByName(pluginSetup.pluginName);
+            if (pluginDescription == null) {
+                throw new JkException("No plugin found with name '" + pluginSetup.pluginName + "'.");
+            }
             getOrCreate(pluginDescription.pluginClass());
         }
     }

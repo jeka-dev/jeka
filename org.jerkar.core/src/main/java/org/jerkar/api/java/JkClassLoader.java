@@ -490,7 +490,7 @@ public final class JkClassLoader {
      * Returns the first class having a main method from the specified class
      * directory or Jar. Returns <code>null</code> if no such class found.
      */
-    static String findMainClass(Path classDirOrJar) {
+    public static String findMainClass(Path classDirOrJar) {
         final JkClassLoader classLoader = JkClassLoader.system().child(classDirOrJar);
         final Iterator<Class<?>> it = classLoader.iterateClassesIn(classDirOrJar);
         while (it.hasNext()) {

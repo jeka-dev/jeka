@@ -8,6 +8,10 @@ import java.nio.charset.Charset;
 
 final class LogHandler implements JkLog.EventLogHandler {
 
+    private static final PrintStream FORMER_OUT = System.out;
+
+    private static final PrintStream FORMER_ERR = System.err;
+
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
     private static final char BOX_DRAWINGS_LIGHT_VERTICAL = 0x2502;   // Shape similar to '|'
@@ -29,6 +33,11 @@ final class LogHandler implements JkLog.EventLogHandler {
     {
         System.setOut(new PrintStream(out));
         System.setErr(new PrintStream(err));
+    }
+
+    static void restore() {
+        System.setOut(FORMER_OUT);
+        System.setErr(FORMER_ERR);
     }
 
     @Override

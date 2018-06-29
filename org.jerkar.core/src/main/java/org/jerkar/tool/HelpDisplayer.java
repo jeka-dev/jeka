@@ -29,8 +29,16 @@ final class HelpDisplayer {
                 .append("Ex: jerkar clean java#pack -java#pack.sources=true -Log.verbose=true -other=xxx -DmyProp=Xxxx\n\n")
                 .append("Available methods and options :\n");
 
-        sb.append(BuildClassDef.of(build).description("", true));
-        sb.append("\nType 'jerkar help -Plugins' to get help on plugins available in the classpath.\n");
+        sb.append(BuildClassDef.of(build).description("", true, false));
+        final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
+
+        // List plugins
+        List<String> names = pluginDescriptions.stream().map(pluginDescription -> pluginDescription.shortName()).collect(Collectors.toList());
+        sb.append("\nAvailable plugins in classpath : ").append(JkUtilsString.join(names, ", "))
+                .append(".\n");
+
+        sb.append("\nType 'jerkar [pluginName]#help' to get help on a perticular plugin (ex : 'jerkar java#help'). ");
+        sb.append("\nType 'jerkar help -Plugins' to get help on all available plugins in the classpath.\n");
         JkLog.info(sb.toString());
     }
 
@@ -94,13 +102,13 @@ final class HelpDisplayer {
             description.explanation().subList(1, description.activationEffect().size()).forEach(
                     line -> sb.append("\n                      " + line));
         } else if (!description.isDecorateBuildDefined()){
-            sb.append("\nActivation effects : None.");
+            sb.append("\nActivation effect : None.");
         } else {
-            sb.append("\nActivation effects : Not documented.");
+            sb.append("\nActivation effect : Not documented.");
         }
         final Object object = JkUtilsReflect.newInstance(description.pluginClass(), JkBuild.class, build);
         sb.append("\n");
-        sb.append(BuildClassDef.of(object).description(description.shortName() + "#", false));
+        sb.append(BuildClassDef.of(object).description(description.shortName() + "#", false, false));
         return sb.toString();
     }
 

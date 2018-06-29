@@ -101,12 +101,16 @@ public class JkBuild {
         // Load plugins declared in command line
         build.configurePlugins();
         jkBuild.plugins.loadCommandLinePlugins();
-        jkBuild.plugins.all().forEach(plugin -> {
+        for (JkPlugin plugin : jkBuild.plugins().all()) {
             List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(plugin).optionDefs();
-            plugin.decorateBuild();
+            try {
+                plugin.decorateBuild();
+            } catch (RuntimeException e) {
+                throw new RuntimeException("Plugin " + plugin.name() + " has caused build instantiation failure.", e);
+            }
             JkLog.info("Instance decorated with plugin " + plugin.getClass()
                         + HelpDisplayer.optionValues(defs));
-        });
+        }
 
         // Extra build configuration
         build.configure();

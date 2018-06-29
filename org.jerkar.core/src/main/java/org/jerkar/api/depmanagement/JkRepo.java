@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsPath;
@@ -146,6 +147,14 @@ public abstract class JkRepo implements Serializable {
      */
     public static JkRepo mavenJCenter() {
         return maven(JkMavenRepository.JCENTERL_URL.toString());
+    }
+
+    /**
+     * Creates a repository for publishing locally under <code></code>[USER HOME]/.jerkar/publish</code> folder.
+     */
+    public static JkRepo local() {
+        final Path file = JkLocator.jerkarUserHomeDir().resolve("maven-publish-dir");
+        return JkRepo.maven(file);
     }
 
     /**

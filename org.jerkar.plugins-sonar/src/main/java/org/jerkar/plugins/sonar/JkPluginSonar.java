@@ -51,7 +51,7 @@ public class JkPluginSonar extends JkPlugin {
 
     }
 
-    @JkDoc("Run a SonarQube analysis based on properties defined in this plugin. " +
+    @JkDoc("Runs a SonarQube analysis based on properties defined in this plugin. " +
             "Options prefixed with 'sonar.' as '-sonar.host.url=http://myserver/..' " +
             "will be appended to these properties.")
     public void run() {

@@ -54,9 +54,9 @@ public class JkPluginJava extends JkPlugin {
         this.producedArtifacts.add(this.project.maker().mainArtifactId());
     }
 
-    @JkDoc("Adds artifacts creation to the default method, " +
-            "improves scaffolding by creating source folders and generating a build class tailored for building Java project,  " +
-            "enriches build information with project build structure.")
+    @JkDoc("Adds artifact creation task to 'doDefault' method." +
+            "\n  Improves scaffolding by creating a project structure ready to build." +
+            "\n  Enriches build information with project build structure.")
     @Override  
     protected void decorateBuild() {
         this.applyOptions();

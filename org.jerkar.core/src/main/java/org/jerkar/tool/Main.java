@@ -40,7 +40,7 @@ public final class Main {
                 displayOutro(start);
             }
         } catch (final RuntimeException e) {
-            System.err.println();
+            LogHandler.restore();
             if (e instanceof JkException) {
                 System.err.println(e.getMessage());
             } else {

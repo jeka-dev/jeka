@@ -1,5 +1,6 @@
 package org.jerkar.api.ide.eclipse;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -317,8 +318,7 @@ final class DotClasspathModel {
             }
             final Path otherProjectDir = projectLocationMap.get(projectName);
             if (otherProjectDir == null) {
-                throw new IllegalStateException("JkEclipseProject " + projectName + " not found in "
-                        + parent);
+                throw new IllegalStateException(parent + File.separator + projectName + " is not an Eclipse project (.classpath is missing).");
             }
             return otherProjectDir;
         }

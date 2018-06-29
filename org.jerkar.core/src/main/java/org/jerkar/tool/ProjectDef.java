@@ -121,16 +121,16 @@ final class ProjectDef {
             return !JkUtilsReflect.getAllDeclaredFields(field.getType(), JkDoc.class).isEmpty();
         }
 
-        String description(String prefix, boolean withHeader) {
+        String description(String prefix, boolean withHeader, boolean showBuildPlugin) {
             StringBuilder stringBuilder = new StringBuilder();
             for (Class<? extends JkBuild> buildClass : this.buildClassHierarchy()) {
                 stringBuilder.append(description(buildClass, prefix, withHeader));
             }
-            if (this.buildOrPlugin instanceof JkBuild) {
+            if (this.buildOrPlugin instanceof JkBuild && showBuildPlugin) {
                 JkBuild build = (JkBuild) this.buildOrPlugin;
                 if (build.plugins() != null) {
                     for (JkPlugin plugin : build.plugins().all()) {
-                        stringBuilder.append(BuildClassDef.of(plugin).description(plugin.name() + "#", withHeader));
+                        stringBuilder.append(BuildClassDef.of(plugin).description(plugin.name() + "#", withHeader, false));
                     }
                 }
             }
