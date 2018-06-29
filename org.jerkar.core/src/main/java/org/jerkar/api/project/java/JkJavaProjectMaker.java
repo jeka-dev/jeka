@@ -1,13 +1,5 @@
 package org.jerkar.api.project.java;
 
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.*;
-import java.util.function.Supplier;
-
-import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.*;
@@ -16,6 +8,13 @@ import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkJavaTestSpec;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.system.JkLog;
+
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * Objects responsible to build (to make) a java project. It provides methods to perform common build

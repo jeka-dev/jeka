@@ -91,7 +91,7 @@ public final class JkDependencyResolver {
             final JkDependencyNode root = JkDependencyNode.ofModuleDep(info, nodes);
             return JkResolveResult.of(root, JkResolveResult.JkErrorReport.allFine());
         }
-        return resolveWithInternalResolver(dependencies, dependencies.explicitVersions(), scopes);
+        return resolveWithInternalResolver(dependencies, dependencies.versionProvider(), scopes);
     }
 
     /**
@@ -118,7 +118,7 @@ public final class JkDependencyResolver {
     public JkPathSequence get(JkDependencySet dependencies, JkScope... scopes) {
         JkResolveResult resolveResult = null;
         if (internalResolver != null && dependencies.containsModules()) {
-            resolveResult = resolveWithInternalResolver(dependencies, dependencies.explicitVersions(), scopes).assertNoError();
+            resolveResult = resolveWithInternalResolver(dependencies, dependencies.versionProvider(), scopes).assertNoError();
             return JkPathSequence.ofMany(resolveResult.dependencyTree().allFiles()).withoutDuplicates();
         }
         final List<Path> result = new LinkedList<>();

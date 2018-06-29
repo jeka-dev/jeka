@@ -25,13 +25,13 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
 
     private final Set<JkDepExclude> depExcludes;
 
-    private final JkVersionProvider explicitVersions;
+    private final JkVersionProvider versionProvider;
 
     private JkDependencySet(Iterable<JkScopedDependency> dependencies, Set<JkDepExclude> excludes, JkVersionProvider explicitVersions) {
         super();
         this.dependencies = Collections.unmodifiableList(JkUtilsIterable.listOf(dependencies));
         this.depExcludes = Collections.unmodifiableSet(excludes);
-        this.explicitVersions = explicitVersions;
+        this.versionProvider = explicitVersions;
     }
 
     /**
@@ -87,7 +87,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             return this;
         }
         List<JkScopedDependency> deps = JkUtilsIterable.concatLists(this.dependencies, others);
-        return new JkDependencySet(deps, this.depExcludes, this.explicitVersions);
+        return new JkDependencySet(deps, this.depExcludes, this.versionProvider);
     }
 
     /**
@@ -163,6 +163,10 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
         return and(JkModuleDependency.of(moduleId, version), scopes);
     }
 
+    public JkDependencySet and(JkModuleId moduleId, JkScope ... scopes) {
+        return and(JkModuleDependency.of(moduleId, JkVersionRange.UNSPECIFIED), scopes);
+    }
+
     public JkDependencySet and(JkModuleId moduleId, String version, JkScopeMapping scopeMapping) {
         return and(JkModuleDependency.of(moduleId, version), scopeMapping);
     }
@@ -180,9 +184,8 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
         for(JkDependency dependency : dependencies) {
             deps.add(JkScopedDependency.of(dependency));
         }
-        return new JkDependencySet(deps, this.depExcludes, this.explicitVersions);
+        return new JkDependencySet(deps, this.depExcludes, this.versionProvider);
     }
-
 
     /**
      * Returns a clone of this object minus the dependencies on the given
@@ -200,7 +203,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
                 }
             }
         }
-        return new JkDependencySet(result, this.depExcludes, this.explicitVersions);
+        return new JkDependencySet(result, this.depExcludes, this.versionProvider);
     }
 
     public JkDependencySet onlyIf(boolean condition) {
@@ -209,7 +212,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
         }
         LinkedList<JkScopedDependency> deps = new LinkedList<>(dependencies);
         deps.removeLast();
-        return new JkDependencySet(dependencies, depExcludes, explicitVersions);
+        return new JkDependencySet(dependencies, depExcludes, versionProvider);
     }
 
     /**
@@ -224,7 +227,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             }
             list.add(dep);
         }
-        return new JkDependencySet(list, this.depExcludes, this.explicitVersions);
+        return new JkDependencySet(list, this.depExcludes, this.versionProvider);
     }
 
     /**
@@ -239,15 +242,25 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             }
             list.add(dep);
         }
-        return new JkDependencySet(list, this.depExcludes, this.explicitVersions);
+        return new JkDependencySet(list, this.depExcludes, this.versionProvider);
     }
 
     /**
      * Returns a clone of this object but using specified projectVersion provider to override
-     * versions of transitive dependencies.
+     * versions of transitive dependencies. The previous version provider is replaced
+     * by the specified one, there is no addition.
      */
-    public JkDependencySet withExplicitVersions(JkVersionProvider explicitVersions) {
-        return new JkDependencySet(this.dependencies, this.excludes(), explicitVersions);
+    public JkDependencySet withVersionProvider(JkVersionProvider versionProvider) {
+        return new JkDependencySet(this.dependencies, this.excludes(), versionProvider);
+    }
+
+    /**
+     * Returns a clone of this object but using specified projectVersion provider to override
+     * versions of transitive dependencies. The specified version provider is added
+     * to the specified one.
+     */
+    public JkDependencySet andVersionProvider(JkVersionProvider versionProvider) {
+        return new JkDependencySet(this.dependencies, this.excludes(), this.versionProvider.and(versionProvider));
     }
 
     /**
@@ -279,8 +292,8 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      * Returns overridden versions for transitive dependencies. Versions present here will
      * overwrite versions found in transitive dependencies.
      */
-    public JkVersionProvider explicitVersions() {
-        return this.explicitVersions;
+    public JkVersionProvider versionProvider() {
+        return this.versionProvider;
     }
 
     @Override
@@ -401,7 +414,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
                 deps.add(scopedDependency);
             }
         }
-        return new JkDependencySet(deps, excludes(), this.explicitVersions);
+        return new JkDependencySet(deps, excludes(), this.versionProvider);
     }
 
     /**
@@ -444,13 +457,13 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             }
             result.add(toAdd);
         }
-        return new JkDependencySet(result, this.depExcludes, this.explicitVersions);
+        return new JkDependencySet(result, this.depExcludes, this.versionProvider);
     }
 
     public JkDependencySet excludeGlobally(JkDepExclude exclude) {
         Set<JkDepExclude> depExcludes = new HashSet<>(this.depExcludes);
         depExcludes.add(exclude);
-        return new JkDependencySet(this.dependencies, depExcludes, this.explicitVersions);
+        return new JkDependencySet(this.dependencies, depExcludes, this.versionProvider);
     }
 
     /**
