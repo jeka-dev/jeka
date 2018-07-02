@@ -108,16 +108,20 @@ public class JkBuild {
             } catch (RuntimeException e) {
                 throw new RuntimeException("Plugin " + plugin.name() + " has caused build instantiation failure.", e);
             }
-            JkLog.info("Instance decorated with plugin " + plugin.getClass()
-                        + HelpDisplayer.optionValues(defs));
+            String pluginInfo = "Instance decorated with plugin " + plugin.getClass()
+                    + HelpDisplayer.optionValues(defs);
+            JkLog.info(pluginInfo);
         }
 
         // Extra build configuration
         build.configure();
+        jkBuild.infoProvider().append("\n").append("\nActive plugins :" + jkBuild.plugins().all());
         List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(build).optionDefs();
         JkLog.info("Build instance initialized with options " + HelpDisplayer.optionValues(defs));
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(ts) + " milliseconds.");
         baseDirContext(null);
+
+
         return build;
     }
 

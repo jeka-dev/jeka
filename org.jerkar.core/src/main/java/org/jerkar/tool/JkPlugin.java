@@ -44,5 +44,8 @@ public abstract class JkPlugin {
         return JkUtilsString.uncapitalize(suffix);
     }
 
-
+    @Override
+    public String toString() {
+        return this.getClass().getName();
+    }
 }

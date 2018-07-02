@@ -50,7 +50,6 @@ public class ResolveTreeIT {
         assertTrue(scopes.contains(COMPILE));
         assertTrue(scopes.contains(RUNTIME));
 
-
         List<JkDependencyNode> snakeYamlNodes = starterNode.children(JkModuleId.of("org.yaml:snakeyaml"));
         assertEquals(1, snakeYamlNodes.size());
         JkDependencyNode snakeYamlNode = snakeYamlNodes.get(0);
@@ -65,7 +64,6 @@ public class ResolveTreeIT {
         JkDependencyNode springCoreNode = springCoreNodes.get(0);
         List<JkDependencyNode> commonLoggingNodes = springCoreNode.children(JkModuleId.of("commons-logging:commons-logging"));
         assertEquals(1, commonLoggingNodes.size());
-
     }
 
     @Test
@@ -107,7 +105,6 @@ public class ResolveTreeIT {
         JkDependencyNode.ModuleNodeInfo springCoreDirectModuleNodeInfo = tree.children().get(1).moduleInfo();
         assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.declaredVersion().definition());
         assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.resolvedVersion().name());
-
     }
 
     @Test

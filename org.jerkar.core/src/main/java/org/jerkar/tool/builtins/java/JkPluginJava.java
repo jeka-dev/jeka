@@ -130,8 +130,8 @@ public class JkPluginJava extends JkPlugin {
 
     private void setupInfo() {
         build.infoProvider()
-                .append(project.toString()).append('\n')
-                .append(project.getVersionedModule());
+                .append('\n')
+                .append(project.toString());
     }
 
     // ------------------------------ Accessors -----------------------------------------
@@ -159,8 +159,6 @@ public class JkPluginJava extends JkPlugin {
     public void test() {
         project.maker().test();
     }
-
-
 
     @JkDoc("Generates all artifacts defined in producedArtifact list. " +
             "Does not re-generate artifacts already generated : " +
@@ -200,6 +198,5 @@ public class JkPluginJava extends JkPlugin {
         public boolean signArtifacts = false;
 
     }
-
 
 }
