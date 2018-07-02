@@ -169,15 +169,6 @@ final class ProjectDef {
             return stringBuilder.toString();
         }
 
-
-
-        private static List<String> toLines(String string) {
-            if (string == null) {
-                return Collections.emptyList();
-            }
-            return Arrays.asList(JkUtilsString.split(string, "\n"));
-        }
-
         Map<String, String> optionValues(JkBuild build) {
             final Map<String, String> result = new LinkedHashMap<>();
             for (final BuildOptionDef optionDef : this.optionDefs) {

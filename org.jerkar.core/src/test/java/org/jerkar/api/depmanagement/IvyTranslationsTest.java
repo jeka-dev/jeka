@@ -27,7 +27,8 @@ public class IvyTranslationsTest {
         final JkVersionProvider versionProvider = JkVersionProvider.empty();
 
         // handle multiple artifacts properly
-        final DefaultModuleDescriptor desc = IvyTranslations.toPublicationLessModule(OWNER, deps(), mapping, versionProvider);
+        JkDependencySet deps = deps();
+        final DefaultModuleDescriptor desc = IvyTranslations.toPublicationLessModule(OWNER, deps, mapping, versionProvider);
         final DependencyDescriptor[] dependencyDescriptors = desc.getDependencies();
         assertEquals(1, dependencyDescriptors.length);
         final DependencyDescriptor depDesc = dependencyDescriptors[0];
@@ -44,7 +45,7 @@ public class IvyTranslationsTest {
     private static JkDependencySet deps() {
         return JkDependencySet.of()
                 .and("aGroup:aName:1", COMPILE)
-                .and("aGroup:aName:1:linux", RUNTIME, JkScope.of("toto"));
+                .and("aGroup:aName::linux:1", RUNTIME, JkScope.of("toto"));
     }
 
     private DependencyArtifactDescriptor findArtifactIn(DependencyArtifactDescriptor[] artifactDescs, String classsifier) {

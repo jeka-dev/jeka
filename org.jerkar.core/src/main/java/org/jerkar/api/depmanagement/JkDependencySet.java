@@ -170,7 +170,11 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     }
 
     public JkDependencySet and(String moduleDescription, JkScope ... scopes) {
-        return and(JkModuleDependency.of(moduleDescription), scopes);
+        JkModuleDependency moduleDependency = JkModuleDependency.of(moduleDescription);
+        if (moduleDependency.classifier() != null) {
+            moduleDependency = moduleDependency.transitive(false);
+        }
+        return and(moduleDependency, scopes);
     }
 
     public JkDependencySet and(String moduleDescription, JkScopeMapping scopeMapping) {

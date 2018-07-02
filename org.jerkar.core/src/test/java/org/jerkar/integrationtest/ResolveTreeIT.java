@@ -11,15 +11,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Set;
 
-import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.depmanagement.JkDependencyNode;
-import org.jerkar.api.depmanagement.JkDependencyResolver;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkResolutionParameters;
-import org.jerkar.api.depmanagement.JkResolveResult;
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.depmanagement.*;
 import org.junit.Test;
 
 /**
@@ -130,6 +122,20 @@ public class ResolveTreeIT {
         JkDependencyNode tree = resolveResult.dependencyTree();
         System.out.println(tree.toStringComplete());
         System.out.println(resolveResult.localFiles());
-
     }
+
+    @Test
+    public void versionProvider() {
+        JkDependencySet deps = JkDependencySet.of()
+                .and("com.google.guava:guava")
+                .withVersionProvider(JkVersionProvider.of("com.google.guava:guava", "22.0"))
+                .withDefaultScope(COMPILE_AND_RUNTIME);
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
+                .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
+        JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
+        JkDependencyNode tree = resolveResult.dependencyTree();
+        JkDependencyNode.ModuleNodeInfo moduleNodeInfo = tree.children().get(0).moduleInfo();
+        assertEquals("22.0", moduleNodeInfo.declaredVersion().definition());
+    }
+
 }

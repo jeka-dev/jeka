@@ -41,7 +41,7 @@ public final class JkPathSequence implements Iterable<Path> {
      * relative paths separated with a ";".
      */
     public static JkPathSequence of(Path baseDir, String relativePathsAsString) {
-        final String[] paths = JkUtilsString.split(relativePathsAsString, File.pathSeparator);
+        final String[] paths = relativePathsAsString.split(File.pathSeparator);
         final List<Path> result = new LinkedList<>();
         for (final String path : paths) {
             Path file = Paths.get(path);

@@ -9,14 +9,7 @@ import static org.junit.Assert.assertEquals;
 import java.nio.file.Path;
 import java.util.List;
 
-import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.depmanagement.JkDependencyNode;
-import org.jerkar.api.depmanagement.JkDependencyResolver;
-import org.jerkar.api.depmanagement.JkPopularModules;
-import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkResolutionParameters;
-import org.jerkar.api.depmanagement.JkResolveResult;
-import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.utils.JkUtilsString;
 import org.junit.Test;
 
@@ -28,8 +21,9 @@ public class ResolveWithArtifactIT {
     @Test
     public void artifactsAreHandled() {
         JkVersionedModule holder = JkVersionedModule.of("mygroup:myname:myversion");
+        JkModuleDependency jgllinux = JkModuleDependency.of("org.lwjgl:lwjgl::natives-linux:3.1.1");
         JkDependencySet deps = JkDependencySet.of()
-                .and("org.lwjgl:lwjgl:3.1.1:natives-linux")
+                .and(jgllinux)
                 .and(JkPopularModules.GUAVA, "19.0" )
                 .and("org.lwjgl:lwjgl:3.1.1")
                 .withDefaultScope(COMPILE);

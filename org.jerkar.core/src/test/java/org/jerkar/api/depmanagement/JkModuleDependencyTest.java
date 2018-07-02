@@ -8,17 +8,15 @@ public class JkModuleDependencyTest {
 
     @Test
     public void testOf() {
-        final JkModuleDependency dep = JkModuleDependency.of("group:name:projectVersion:sources")
+        final JkModuleDependency dep = JkModuleDependency.of("group:name::sources:projectVersion")
                 .transitive(true).ext("zip");
         Assert.assertEquals("sources", dep.classifier());
         Assert.assertTrue(dep.transitive());
 
-        final JkModuleDependency dep2 = JkModuleDependency.of("group:name:projectVersion:sources@zip");
+        final JkModuleDependency dep2 = JkModuleDependency.of("group:name:zip:sources:projectVersion");
         Assert.assertEquals("zip", dep2.ext());
-        Assert.assertFalse(dep2.transitive());
 
         final JkModuleDependency dep3 = JkModuleDependency.of("group:name:projectVersion:sources");
-        Assert.assertTrue(dep3.transitive());
 
     }
 

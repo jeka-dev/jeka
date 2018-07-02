@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jerkar.api.system.JkException;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
@@ -76,34 +77,31 @@ public final class JkModuleDependency implements JkDependency {
     }
 
     /**
-     * Creates a JkModuleDependency to a formatted string description. The
-     * expected format are :
-     * <ul>
-     * <li>groupName:moduleName:projectVersion</li>.
-     * <li>groupName:moduleName:projectVersion:classifier</li>.
-     * <li>groupName:moduleName:projectVersion@extension</li>.
-     * <li>groupName:moduleName:projectVersion:classifier@extension</li>.
-     * </ul>
+     * group:name
+     * group:name:version
+     * group:name:type:version
+     * group:name:type:artifact:version
+     *
+     * Version can be a '?' if it is unspecified.
      */
     public static JkModuleDependency of(String description) {
-        final String ext;
-        if (description.contains("@")) {
-            ext = JkUtilsString.substringAfterLast(description, "@");
-        } else {
-            ext = null;
+        final String[] strings = description.split( ":");
+        JkModuleId moduleId = JkModuleId.of(strings[0], strings[1]);
+        if (strings.length == 2) {
+            return JkModuleDependency.of(moduleId, JkVersionRange.UNSPECIFIED);
         }
-        final String[] strings = JkUtilsString.split(description, ":");
-        if (strings.length != 3 && strings.length != 4) {
-            throw new IllegalArgumentException(
-                    "Module should be formated as 'groupName:moduleName:projectVersion' or 'groupName:moduleName:projectVersion:classifier'. Was "
-                            + description);
-        }
-        final JkModuleDependency result = of(strings[0], strings[1], strings[2]).ext(ext)
-                .transitive(ext == null);
         if (strings.length == 3) {
-            return result;
+            return JkModuleDependency.of(moduleId, JkVersionRange.of(strings[2]));
         }
-        return result.classifier(strings[3]);
+        if (strings.length ==4) {
+            return JkModuleDependency.of(moduleId, JkVersionRange.of(strings[3])).ext(strings[2]);
+        }
+        if (strings.length ==5) {
+            return JkModuleDependency.of(moduleId, JkVersionRange.of(strings[4]))
+                    .classifier(strings[3]).ext(strings[2]);
+        }
+        throw new JkException("Dependency specification '" + description + "' is not correct. Should be one of group:name\n" +
+                ", group:name:version, 'group:name:type:version, group:name:type:artifact:version");
     }
 
     private final JkModuleId module;
@@ -199,7 +197,8 @@ public final class JkModuleDependency implements JkDependency {
      * artifact extension.
      */
     public JkModuleDependency ext(String extension) {
-        return new JkModuleDependency(module, versionRange, classifier, transitive, extension,
+        String ext = JkUtilsString.isBlank(extension) ? null : extension;
+        return new JkModuleDependency(module, versionRange, classifier, transitive, ext,
                 excludes);
     }
 

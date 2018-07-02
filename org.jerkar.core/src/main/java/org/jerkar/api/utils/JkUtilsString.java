@@ -94,24 +94,6 @@ public final class JkUtilsString {
 
     /**
      * Splits the specified String into an array by separating by the specified
-     * delimiter. If <code>str</code> is <code>null</code> then it returns an
-     * empty array.
-     */
-    public static String[] split(String str, String delimiters) {
-        if (str == null) {
-            return new String[0];
-        }
-        final StringTokenizer st = new StringTokenizer(str, delimiters);
-        final List<String> tokens = new ArrayList<>();
-        while (st.hasMoreTokens()) {
-            final String token = st.nextToken();
-            tokens.add(token);
-        }
-        return tokens.toArray(new String[tokens.size()]);
-    }
-
-    /**
-     * Splits the specified String into an array by separating by the specified
      * delimiter. Items are trimmed to eliminate blank spaces. If <code>str</code> is <code>null</code> then it returns an
      * empty array.
      */
@@ -126,20 +108,6 @@ public final class JkUtilsString {
             tokens.add(token.trim());
         }
         return tokens.toArray(new String[tokens.size()]);
-    }
-
-    public static List<String> split(String string, int maxLength) {
-        List<String> result = new LinkedList<>();
-        StringBuilder line = new StringBuilder();
-        int previousSpaceIndex = 0;
-        while (previousSpaceIndex < string.length()) {
-            int nextSpaceIndex = string.indexOf(" ", previousSpaceIndex);
-            int tempLength = nextSpaceIndex - previousSpaceIndex;
-            if (tempLength + line.length() > maxLength) {
-                result.add(line.toString());
-            }
-        }
-        return result;
     }
 
 
