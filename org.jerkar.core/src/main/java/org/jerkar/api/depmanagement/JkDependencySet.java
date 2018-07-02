@@ -4,6 +4,7 @@ import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
+import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsString;
 
 import java.io.Serializable;
@@ -76,6 +77,23 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      */
     public List<JkScopedDependency> list() {
         return this.dependencies;
+    }
+
+    public JkVersionRange getVersion(JkModuleId moduleId) {
+        JkScopedDependency dep = this.get(moduleId);
+        if (dep == null) {
+            return null;
+        }
+        JkModuleDependency moduleDependency = (JkModuleDependency) dep.dependency();
+        JkVersionRange versionRange = moduleDependency.versionRange();
+        if (!versionRange.isUnspecified()) {
+            return versionRange;
+        }
+        JkVersion version =  this.versionProvider.versionOf(moduleId);
+        if (version == null) {
+            return JkVersionRange.of(version.name());
+        }
+        return JkVersionRange.UNSPECIFIED;
     }
 
     /**

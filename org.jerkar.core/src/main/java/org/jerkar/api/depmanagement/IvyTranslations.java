@@ -314,10 +314,9 @@ final class IvyTranslations {
         }
 
         // Add dependencies
-        final DependenciesContainer dependencyContainer = new DependenciesContainer(defaultMapping);
+        final DependenciesContainer dependencyContainer = new DependenciesContainer(defaultMapping, dependencies);
         for (final JkScopedDependency scopedDependency : dependencies) {
             if (scopedDependency.dependency() instanceof JkModuleDependency) {
-                final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency.dependency();
                 dependencyContainer.populate(scopedDependency);
             }
         }
@@ -524,8 +523,11 @@ final class IvyTranslations {
 
         private final JkScopeMapping defaultMapping;
 
-        DependenciesContainer(JkScopeMapping defaultMapping) {
+        private final JkDependencySet dependencySet;
+
+        DependenciesContainer(JkScopeMapping defaultMapping, JkDependencySet dependencySet) {
             this.defaultMapping = defaultMapping;
+            this.dependencySet = dependencySet;
         }
 
         void populate(JkScopedDependency scopedDependency) {
@@ -533,7 +535,8 @@ final class IvyTranslations {
             final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.dependency();
             final JkModuleId moduleId = moduleDep.moduleId();
             final boolean mainArtifact = moduleDep.classifier() == null && moduleDep.ext() == null;
-            this.put(moduleId, moduleDep.transitive(), moduleDep.versionRange(), mainArtifact);
+            JkVersionRange versionRange = dependencySet.getVersion(moduleId);
+            this.put(moduleId, moduleDep.transitive(), versionRange, mainArtifact);
 
             // fill configuration
             final List<Conf> confs = new LinkedList<>();
