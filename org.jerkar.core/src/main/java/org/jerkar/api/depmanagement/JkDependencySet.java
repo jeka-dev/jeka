@@ -90,7 +90,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             return versionRange;
         }
         JkVersion version =  this.versionProvider.versionOf(moduleId);
-        if (version == null) {
+        if (version != null) {
             return JkVersionRange.of(version.name());
         }
         return JkVersionRange.UNSPECIFIED;
