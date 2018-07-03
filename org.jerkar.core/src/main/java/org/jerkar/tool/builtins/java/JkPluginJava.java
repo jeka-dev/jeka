@@ -62,7 +62,6 @@ public class JkPluginJava extends JkPlugin {
         this.applyOptions();
         this.addDefaultAction(this::doDefault);
         this.setupScaffolder();
-        this.setupInfo();
     }
 
     private void doDefault() {
@@ -128,12 +127,6 @@ public class JkPluginJava extends JkPlugin {
         this.build.scaffolder().setBuildClassCode(code);
     }
 
-    private void setupInfo() {
-        build.infoProvider()
-                .append('\n')
-                .append(project.toString());
-    }
-
     // ------------------------------ Accessors -----------------------------------------
 
     public JkJavaProject project() {
@@ -148,6 +141,14 @@ public class JkPluginJava extends JkPlugin {
         return JkPathTree.of(this.project().getOutLayout().outputPath());
     }
 
+    public void addArtifactToProduce(JkArtifactId artifactId) {
+        this.producedArtifacts.add(artifactId);
+    }
+
+    public void removeArtifactToProduce(JkArtifactId artifactId) {
+        this.producedArtifacts.remove(artifactId);
+    }
+
     // ------------------------------- command line methods -----------------------------
 
     @JkDoc("Performs compilation and resource processing.")
@@ -160,9 +161,9 @@ public class JkPluginJava extends JkPlugin {
         project.maker().test();
     }
 
-    @JkDoc("Generates all artifacts defined in producedArtifact list. " +
+    @JkDoc("Generates artifacts defined through 'pack' options. " +
             "Does not re-generate artifacts already generated : " +
-            "execute 'clean pack' to re-genererate all artifacts.")
+            "execute 'clean java#pack' to re-generate artifacts.")
     public void pack() {
         project.maker().pack(this.producedArtifacts);
     }
@@ -176,6 +177,12 @@ public class JkPluginJava extends JkPlugin {
                 .resolve(this.project.getDependencies().withDefaultScope(JkJavaDepScopes.COMPILE_AND_RUNTIME));
         final JkDependencyNode tree = resolveResult.dependencyTree();
         JkLog.info(String.join("\n", tree.toStrings()));
+    }
+
+    @JkDoc("Displays information about the Java project to build.")
+    public void info() {
+        JkLog.info(this.project.info());
+        JkLog.info("Execute 'java#showDependencies' to display details on dependencies.");
     }
 
     @JkDoc("Publishes produced artifacts to configured repository.")

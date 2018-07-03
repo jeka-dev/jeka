@@ -48,7 +48,7 @@ final class HelpDisplayer {
         sb.append("Global options (these options are not specific to a plugin or a build class) :\n");
         sb.append("  -LogVerbose (shorthand -LV) : if true, logs will display 'trace' level logs.\n");
         sb.append("  -LogHeaders (shorthand -LH) : if true, meta-information about the build creation itself and method execution will be logged.\n");
-        sb.append("  -LogMaxLength (shorthand -LMH) : Console will do a carriage return automatically after N characters are outputted in a single line (ex : -LML=120).\n");
+        sb.append("  -LogMaxLength (shorthand -LML) : Console will do a carriage return automatically after N characters are outputted in a single line (ex : -LML=120).\n");
         sb.append("  -BuildClass (shorthand -BC) : Force to use the specified class as the build class. It can be the short name of the class (without package prefix).\n");
         return sb.toString();
     }
@@ -95,11 +95,11 @@ final class HelpDisplayer {
 
     private static String helpPluginDescription(JkBuild build, PluginDescription description) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\nPlugin class : " + description.fullName());
-        sb.append("\nPlugin name : " + description.shortName());
+        sb.append("\nPlugin Class : " + description.fullName());
+        sb.append("\nPlugin Name : " + description.shortName());
         List<String> deps = description.pluginDependencies();
         if (!deps.isEmpty()) {
-            sb.append("Depends on plugins : " + JkUtilsString.join(deps, ", "));
+            sb.append("\nDepends on plugins : " + JkUtilsString.join(deps, ", "));
         }
         final List<String> explanations = description.explanation();
         if (!explanations.isEmpty()) {
@@ -109,13 +109,13 @@ final class HelpDisplayer {
         }
         final List<String> activationEffects = description.activationEffect();
         if (!activationEffects.isEmpty()) {
-            sb.append("\nActivation effects : " + description.activationEffect().get(0));
+            sb.append("\nActivation Effects : " + description.activationEffect().get(0));
             description.explanation().subList(1, description.activationEffect().size()).forEach(
                     line -> sb.append("\n                      " + line));
         } else if (!description.isDecorateBuildDefined()){
-            sb.append("\nActivation effect : None.");
+            sb.append("\nActivation Effect : None.");
         } else {
-            sb.append("\nActivation effect : Not documented.");
+            sb.append("\nActivation Effect : Not documented.");
         }
         final Object object = JkUtilsReflect.newInstance(description.pluginClass(), JkBuild.class, build);
         sb.append("\n");

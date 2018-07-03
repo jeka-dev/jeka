@@ -47,7 +47,7 @@ public class JkBuild {
 
     private JkScaffolder scaffolder;
 
-    private final StringBuilder infoProvider = new StringBuilder();
+    //private final StringBuilder infoProvider = new StringBuilder();
 
     // ------------------ options --------------------------------------------------------
 
@@ -74,8 +74,7 @@ public class JkBuild {
 
         // Instantiating imported builds
         this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), this);
-        this.infoProvider.append("base directory : " + this.baseDir + "\n"
-                + "imported builds : " + this.importedBuilds.directs() + "\n");
+
     }
 
     public static <T extends JkBuild> T of(Class<T> buildClass) {
@@ -115,7 +114,6 @@ public class JkBuild {
 
         // Extra build configuration
         build.configure();
-        jkBuild.infoProvider().append("\n").append("\nActive plugins :" + jkBuild.plugins().all());
         List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(build).optionDefs();
         JkLog.info("Build instance initialized with options " + HelpDisplayer.optionValues(defs));
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(ts) + " milliseconds.");
@@ -185,10 +183,6 @@ public class JkBuild {
             this.scaffolder = createScaffolder();
         }
         return this.scaffolder;
-    }
-
-    public final StringBuilder infoProvider() {
-        return infoProvider;
     }
 
     public JkBuildPlugins plugins() {
@@ -286,7 +280,9 @@ public class JkBuild {
      */
     @JkDoc("Displays meaningful information about this build.")
     public final void info() {
-        JkLog.info(infoProvider.toString());
+        JkLog.info("Base Directory : " + this.baseDir + "\n"
+                + "Imported Builds : " + this.importedBuilds.directs() + "\n"
+                + "Active plugins :" + plugins().all());
     }
 
     // ----------------------------------------------------------------------------------

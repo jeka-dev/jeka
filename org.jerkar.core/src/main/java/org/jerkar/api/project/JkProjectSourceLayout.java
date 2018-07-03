@@ -195,6 +195,14 @@ public class JkProjectSourceLayout {
         return testResources.equals(that.testResources);
     }
 
+    public String info() {
+        return new StringBuffer("Sources : " + this.sources + "\n")
+                .append("Resources : " + this.resources + "\n")
+                .append("Tests : " + this.tests + "\n")
+                .append("Tests resources : " + this.testResources)
+                .toString();
+    }
+
     @Override
     public int hashCode() {
         int result = baseDir.hashCode();
