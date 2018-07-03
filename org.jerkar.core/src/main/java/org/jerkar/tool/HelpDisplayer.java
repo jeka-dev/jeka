@@ -26,7 +26,7 @@ final class HelpDisplayer {
         StringBuilder sb = new StringBuilder()
                 .append("Usage: jerkar [methodA...] [pluginName#methodB] [-optionName=value...] [-pluginName#optionName=value...] [-DsystemPropName=value...]\n")
                 .append("When no method specified, 'doDefault' method is invoked.\n")
-                .append("Ex: jerkar clean java#pack -java#pack.sources=true -Log.verbose=true -other=xxx -DmyProp=Xxxx\n\n")
+                .append("Ex: jerkar clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx\n\n")
                 .append(standardOptions())
                 .append("\nAvailable methods and options :\n");
 

@@ -47,8 +47,6 @@ public class JkBuild {
 
     private JkScaffolder scaffolder;
 
-    //private final StringBuilder infoProvider = new StringBuilder();
-
     // ------------------ options --------------------------------------------------------
 
 
@@ -249,7 +247,6 @@ public class JkBuild {
         if (Files.exists(outputDir())) {
             JkPathTree.of(outputDir()).refuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
         }
-
     }
 
     /**
@@ -271,18 +268,7 @@ public class JkBuild {
             HelpDisplayer.help(this, help.xmlFile);
         } else {
             HelpDisplayer.help(this);
-            ;
         }
-    }
-
-    /**
-     * Displays meaningful information about this build.
-     */
-    @JkDoc("Displays meaningful information about this build.")
-    public final void info() {
-        JkLog.info("Base Directory : " + this.baseDir + "\n"
-                + "Imported Builds : " + this.importedBuilds.directs() + "\n"
-                + "Active plugins :" + plugins().all());
     }
 
     // ----------------------------------------------------------------------------------

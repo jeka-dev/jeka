@@ -134,9 +134,9 @@ public final class JkClassLoader {
     }
 
     /**
-     * @see #child(Iterable)
+     * @see #childWithMany(Iterable)
      */
-    public JkClassLoader child(Path... entries) {
+    public JkClassLoader childWith(Path... entries) {
         return new JkClassLoader(new URLClassLoader(toUrl(Arrays.asList(entries)), this.delegate));
     }
 
@@ -144,7 +144,8 @@ public final class JkClassLoader {
      * Creates a <code>JkClassLoader</code>, child of this one and having the
      * specified entries.
      */
-    public JkClassLoader child(Iterable<Path> entries) {
+    public JkClassLoader childWithMany(Iterable<Path> entries) {
+        Iterable<Path> paths = JkUtilsPath.disambiguate(entries);
         return new JkClassLoader(new URLClassLoader(toUrl(entries), this.delegate));
     }
 
@@ -176,7 +177,7 @@ public final class JkClassLoader {
                 files.add(candidate.toPath());
             }
         }
-        return parent().child(this.childClasspath().andMany(files));
+        return parent().childWithMany(this.childClasspath().andMany(files));
     }
 
     /**
@@ -491,7 +492,7 @@ public final class JkClassLoader {
      * directory or Jar. Returns <code>null</code> if no such class found.
      */
     public static String findMainClass(Path classDirOrJar) {
-        final JkClassLoader classLoader = JkClassLoader.system().child(classDirOrJar);
+        final JkClassLoader classLoader = JkClassLoader.system().childWith(classDirOrJar);
         final Iterator<Class<?>> it = classLoader.iterateClassesIn(classDirOrJar);
         while (it.hasNext()) {
             final Class<?> clazz = it.next();
