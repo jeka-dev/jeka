@@ -204,6 +204,17 @@ public final class JkUtilsPath {
         }
     }
 
+    /**
+     * Delegates to Files{@link #createTempDirectory(String, FileAttribute[])}
+     */
+    public static Path createTempDirectory(String prefix, FileAttribute ... fileAttributes) {
+        try {
+            return Files.createTempDirectory(prefix, fileAttributes);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     public static DirectoryStream<Path> newDirectoryStream(Path root, DirectoryStream.Filter<Path> filter) {
         try {
             return Files.newDirectoryStream(root, filter);

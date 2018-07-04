@@ -139,6 +139,11 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         return this;
     }
 
+    public JkJavaProject addDependencies(JkDependencySet dependencies) {
+        return this.setDependencies(this.dependencies.and(dependencies));
+    }
+
+
     public JkJavaProject setSourceEncoding(String encoding) {
         this.compileSpec.setEncoding(encoding);
         return this;
@@ -211,12 +216,12 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     public String info() {
         return new StringBuilder("Project Location : " + this.baseDir + "\n")
                 .append("Published Module & version : " + this.versionedModule + "\n")
-                .append("Defined Artifacts : " + this.get().artifactIds() + "\n")
                 .append(this.sourceLayout.info()).append("\n")
                 .append("Java Source Version : " + this.getSourceVersion() + "\n")
                 .append("Source Encoding : " + this.compileSpec.getEncoding() + "\n")
                 .append("Download Repositories : " + this.maker.getDependencyResolver().repositories()).append("\n")
-                .append("Declared Dependencies : " + this.getDependencies().list().size() + " elements.")
+                .append("Declared Dependencies : " + this.getDependencies().list().size() + " elements.\n")
+                .append("Defined Artifacts : " + this.get().artifactIds())
                 .toString();
     }
 }

@@ -182,7 +182,9 @@ public class JkPluginJava extends JkPlugin {
     @JkDoc("Displays information about the Java project to build.")
     public void info() {
         JkLog.info(this.project.info());
+        JkLog.info("Produced Artifacts : " + this.producedArtifacts);
         JkLog.info("Execute 'java#showDependencies' to display details on dependencies.");
+
     }
 
     @JkDoc("Publishes produced artifacts to configured repository.")

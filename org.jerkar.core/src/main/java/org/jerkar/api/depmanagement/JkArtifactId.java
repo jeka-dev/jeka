@@ -82,7 +82,8 @@ public final class JkArtifactId {
 
     @Override
     public String toString() {
-        return "{Classifier='" + classifier + '\'' + ", extension='" + extension + '\'' + '}';
+        String classif = classifier == null ? "[main-artifact]" : "-" + classifier;
+        return "" + classif + '.' + extension;
     }
 
 

@@ -87,7 +87,7 @@ public class JkPathTreeTest {
     }
 
     @Test  // Ensure we can create a zip from a zip
-    public void testZipZipTo() throws IOException, URISyntaxException {
+    public void testZipZipTo() throws Exception {
         Path zip = createSampleZip();
         Path zip2 = Files.createTempFile("sample2", ".zip");
         Files.delete(zip2);
@@ -101,12 +101,12 @@ public class JkPathTreeTest {
     }
 
     @Test  // Ensure we can import  a zip from a zip
-    public void testZipImportDir() throws IOException, URISyntaxException {
+    public void testZipMergeDir() throws Exception {
         Path zip = createSampleZip();
         Path zip2 = Files.createTempFile("sample2", ".zip");
         Files.delete(zip2);
         JkPathTree zip2Tree = JkPathTree.ofZip(zip2);
-        zip2Tree.merge(JkPathTree.ofZip(zip).root());
+        zip2Tree.merge(JkPathTree.ofZip(zip));
         assertTrue(Files.isDirectory(zip2Tree.get("subfolder")));
         assertTrue(Files.isRegularFile(zip2Tree.get("subfolder").resolve("sample.txt")));
         assertTrue(Files.isDirectory(zip2Tree.get("emptyfolder")));
@@ -115,7 +115,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void testImportTree() throws IOException, URISyntaxException {
+    public void testImportTree() throws Exception {
         Path zip = createSampleZip();
         Path dirSample = Files.createTempDirectory("sample");
         JkPathTree tree = JkPathTree.of(dirSample);
@@ -127,7 +127,7 @@ public class JkPathTreeTest {
     }
 
     @Test
-    public void testImportFile() throws IOException, URISyntaxException {
+    public void testImportFile() throws Exception {
         Path dirSample = Files.createTempDirectory("sample");
         JkPathTree tree = JkPathTree.of(dirSample);
         Path tempFile = Files.createTempFile("example", ".txt");
