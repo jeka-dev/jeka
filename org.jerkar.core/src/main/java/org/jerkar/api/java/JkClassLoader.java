@@ -294,7 +294,7 @@ public final class JkClassLoader {
      * loadFromNameOrSimpleName("MyClass", null) may returns
      * my.packAllArtifacts.MyClass class.
      *
-     * @param name          The full name or the simple name of the class to load
+     * @param name          The full name or the simple value of the class to load
      * @param superClassArg If not null, the search is narrowed to classes/interfaces
      *                      children of this class/interface.
      * @return The loaded class or <code>null</code>.

@@ -149,7 +149,7 @@ public class JkDependencyNode implements Serializable {
     private Set<JkVersionedModule> resolvedModules(boolean root) {
         final Set<JkVersionedModule> result = new HashSet<>();
         if (!root && this.isModuleNode() && !this.moduleInfo().isEvicted()) {
-            result.add(this.moduleInfo().moduleId.version(this.moduleInfo().resolvedVersion.name()));
+            result.add(this.moduleInfo().moduleId.version(this.moduleInfo().resolvedVersion.value()));
         }
         for (final JkDependencyNode child : this.children) {
             result.addAll(child.resolvedModules(false));
@@ -307,29 +307,29 @@ public class JkDependencyNode implements Serializable {
         private static final long serialVersionUID = 1L;
 
         static ModuleNodeInfo anonymousRoot() {
-            return new ModuleNodeInfo(JkModuleId.of("anonymousGroup:anonymousName"), JkVersionRange.of("-"),
-                    new HashSet<>(), new HashSet<>(), JkVersion.name("-"), new LinkedList<>());
+            return new ModuleNodeInfo(JkModuleId.of("anonymousGroup:anonymousName"), JkVersion.of("-"),
+                    new HashSet<>(), new HashSet<>(), JkVersion.of("-"), new LinkedList<>());
         }
 
         static ModuleNodeInfo root(JkVersionedModule versionedModule) {
-            return new ModuleNodeInfo(versionedModule.moduleId(), JkVersionRange.of("-"),
+            return new ModuleNodeInfo(versionedModule.moduleId(), JkVersion.of("-"),
                     new HashSet<>(), new HashSet<>(), versionedModule.version(), new LinkedList<>());
         }
 
         private final JkModuleId moduleId;
-        private final JkVersionRange declaredVersion;
+        private final JkVersion declaredVersion;
         private final Set<JkScope> declaredScopes;  // the left conf mapping side in the caller dependency description
         private final Set<JkScope> rootScopes; // scopes fetching this node to baseTree
         private final JkVersion resolvedVersion;
         private final List<File> artifacts; // Path is not serializable
         private final boolean treeRoot;
 
-        ModuleNodeInfo(JkModuleId moduleId, JkVersionRange declaredVersion, Set<JkScope> declaredScopes,
+        ModuleNodeInfo(JkModuleId moduleId, JkVersion declaredVersion, Set<JkScope> declaredScopes,
                 Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts) {
             this(moduleId, declaredVersion, declaredScopes, rootScopes, resolvedVersion, artifacts, false);
         }
 
-        ModuleNodeInfo(JkModuleId moduleId, JkVersionRange declaredVersion, Set<JkScope> declaredScopes,
+        ModuleNodeInfo(JkModuleId moduleId, JkVersion declaredVersion, Set<JkScope> declaredScopes,
                 Set<JkScope> rootScopes, JkVersion resolvedVersion, List<Path> artifacts, boolean treeRoot) {
             this.moduleId = moduleId;
             this.declaredVersion = declaredVersion;
@@ -348,10 +348,10 @@ public class JkDependencyNode implements Serializable {
          * Shorthand for {@link #moduleId} + {@link #resolvedVersion()}
          */
         public JkVersionedModule resolvedVersionedModule() {
-            return moduleId.version(resolvedVersion.name());
+            return moduleId.version(resolvedVersion.value());
         }
 
-        public JkVersionRange declaredVersion() {
+        public JkVersion declaredVersion() {
             return declaredVersion;
         }
 
@@ -370,8 +370,8 @@ public class JkDependencyNode implements Serializable {
 
         @Override
         public String toString() {
-            final String resolvedVersionName = isEvicted() ? "(evicted)" : resolvedVersion.name();
-            final String declaredVersionLabel = declaredVersion().definition().equals(resolvedVersionName) ? "" : " as " + declaredVersion();
+            final String resolvedVersionName = isEvicted() ? "(evicted)" : resolvedVersion.value();
+            final String declaredVersionLabel = declaredVersion().value().equals(resolvedVersionName) ? "" : " as " + declaredVersion();
             return moduleId + ":" + resolvedVersion
                     + " (present in " + rootScopes + ")"
                     + " (declared" + declaredVersionLabel + " for scope " + declaredScopes + ")";

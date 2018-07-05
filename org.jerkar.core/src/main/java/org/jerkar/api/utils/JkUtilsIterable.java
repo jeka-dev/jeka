@@ -111,7 +111,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Creates a map of specified key/value. Key value should be declared in sequence as
+     * Creates a map of specified key/value. Key of should be declared in sequence as
      * <code>mapOf(key1, value1, key2, value2,...)</code>
      */
     @SuppressWarnings("unchecked")
@@ -127,7 +127,7 @@ public final class JkUtilsIterable {
     }
 
     /**
-     * Creates a map of specified key/value. Key value should be declared in sequence as
+     * Creates a map of specified key/value. Key of should be declared in sequence as
      * <code>mapOf(key1, value1, key2, value2,...)</code>
      */
     @SuppressWarnings("unchecked")

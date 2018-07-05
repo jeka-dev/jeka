@@ -192,7 +192,7 @@ final class SourceParser {
             if (trimedItem.startsWith("{")) {
                 return curlyBraceToStrings(betweenParenthesis, url, context);
             }
-            if (trimedItem.startsWith("value ") || trimedItem.startsWith("value=")) {
+            if (trimedItem.startsWith("value ") || trimedItem.startsWith("of=")) {
                 final String after = JkUtilsString.substringAfterFirst(trimedItem, "=").trim();
                 if (after.startsWith("\"")) {
                     return JkUtilsIterable.listOf(withoutQuotes(after));

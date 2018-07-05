@@ -34,7 +34,7 @@ final class MavenMetadata {
         metadata.groupId = versionedModule.moduleId().group();
         metadata.artifactId = versionedModule.moduleId().name();
         metadata.modelVersion = "1.1.0";
-        metadata.version = versionedModule.version().name();
+        metadata.version = versionedModule.version().value();
         metadata.versioning = new Versioning();
         metadata.versioning.snapshot = new Snapshot(timestamp, 0);
         return metadata;

@@ -10,23 +10,23 @@ public class JkModuleDepProblem implements Serializable {
     private static final long serialVersionUID = 1L;
 
     static JkModuleDepProblem of(JkModuleId moduleId, String version, String text) {
-        return new JkModuleDepProblem(moduleId, JkVersionRange.of(version), text);
+        return new JkModuleDepProblem(moduleId, JkVersion.of(version), text);
     }
 
     private final JkModuleId moduleId;
 
-    private final JkVersionRange versionRange;
+    private final JkVersion version;
 
     private final String problemText;
 
-    private JkModuleDepProblem(JkModuleId moduleId, JkVersionRange versionRange, String problemText) {
+    private JkModuleDepProblem(JkModuleId moduleId, JkVersion version, String problemText) {
         this.moduleId = moduleId;
-        this.versionRange = versionRange;
+        this.version= version;
         this.problemText = problemText;
     }
 
     /**
-     * Returns the modueId related to this problem.
+     * Returns the moduleId related to this problem.
      */
     public JkModuleId moduleId() {
         return moduleId;
@@ -35,8 +35,8 @@ public class JkModuleDepProblem implements Serializable {
     /**
      * Returns the projectVersion range for which the problematic module dependency has been declared.
      */
-    public JkVersionRange versionRange() {
-        return versionRange;
+    public JkVersion version() {
+        return version;
     }
 
     /**
@@ -48,6 +48,6 @@ public class JkModuleDepProblem implements Serializable {
 
     @Override
     public String toString() {
-        return moduleId + ":" + versionRange + " -> " + problemText;
+        return moduleId + ":" + version + " -> " + problemText;
     }
 }

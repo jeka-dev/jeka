@@ -1,10 +1,8 @@
 package org.jerkar.api.depmanagement;
 
 import java.io.Serializable;
-import java.net.URL;
 
 import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -16,48 +14,42 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /** Mention that the projectVersion is unspecified */
+    public static final JkVersion UNSPECIFIED = new JkVersion("unspecified");
+
     /**
-     * Creates a {@link JkVersion} with the specified name.
-     * @deprecated Use {@link #name()} instead.
+     * Creates a {@link JkVersion} with the specified value.
      */
-    @Deprecated
-    public static JkVersion ofName(String name) {
+    public static JkVersion of(String name) {
         return new JkVersion(name);
     }
 
-    /**
-     * Creates a {@link JkVersion} with the specified name.
-     */
-    public static JkVersion name(String name) {
-        return new JkVersion(name);
-    }
+    private final String value;
 
-    private final String name;
-
-    private JkVersion(String name) {
+    private JkVersion(String value) {
         super();
-        JkUtilsAssert.notNull(name, "name can't be null");
-        JkUtilsAssert.isTrue(!JkUtilsString.isBlank(name), "name can't ne blank");
-        this.name = name;
+        JkUtilsAssert.notNull(value, "value can't be null");
+        JkUtilsAssert.isTrue(!JkUtilsString.isBlank(value), "value can't ne blank");
+        this.value = value;
     }
 
     /**
-     * Returns the name of the projectVersion.
+     * Returns the value of the projectVersion.
      */
-    public String name() {
-        return name;
+    public String value() {
+        return value;
     }
 
     /**
      * Returns <code>true</code> if this projectVersion stands for a snapshot one.
      */
     public boolean isSnapshot() {
-        return this.name.toLowerCase().endsWith("-snapshot");
+        return this.value.toLowerCase().endsWith("-snapshot");
     }
 
     @Override
     public int compareTo(JkVersion other) {
-        return name.compareTo(other.name);
+        return value.compareTo(other.value);
     }
 
     /**
@@ -67,11 +59,50 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
         return this.compareTo(other) > 0;
     }
 
+    /**
+     * Returns <code>true</code> if the definition stands for a dynamic projectVersion
+     * (as "1.4.+", "[1.0,2.0[", "3.0-SNAPSHOT", ...) or <code>false</code> if
+     * it stands for a fixed one (as "1.4.0, "2.0.3-23654114", ...).
+     */
+    public boolean isDynamic() {
+        if (value.endsWith("-SNAPSHOT")) {
+            return true;
+        }
+        return this.isDynamicAndResovable();
+    }
+
+    /**
+     * Returns <code>true</code> if this projectVersion range is unspecified.
+     */
+    public boolean isUnspecified() {
+        return this.equals(UNSPECIFIED);
+    }
+
+    /**
+     * Returns <code>true</code> if the definition stands for dynamic resolvable
+     * projectVersion (as 1.4.+, [1.0, 2.0[, ...).<br/>
+     * . Returns <code>false</code> if the projectVersion is static or snapshot (as
+     * 1.4.0, 3.1-SNAPSHOT) A snapshot is not considered as 'resolvable'.
+     */
+    public boolean isDynamicAndResovable() {
+        if ("+".equals(value)) {
+            return true;
+        }
+        if (JkUtilsString.endsWithAny(value, ".+", ")", "]", "[")) {
+            return true;
+        }
+        if (value.startsWith("latest.")) {
+            return true;
+        }
+        return JkUtilsString.startsWithAny(value, "[", "]", "(")
+                && JkUtilsString.endsWithAny(value, ")", "]", "[");
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((value == null) ? 0 : value.hashCode());
         return result;
     }
 
@@ -87,11 +118,11 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
             return false;
         }
         final JkVersion other = (JkVersion) obj;
-        if (name == null) {
-            if (other.name != null) {
+        if (value == null) {
+            if (other.value != null) {
                 return false;
             }
-        } else if (!name.equals(other.name)) {
+        } else if (!value.equals(other.value)) {
             return false;
         }
         return true;
@@ -99,7 +130,7 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
 
     @Override
     public String toString() {
-        return name;
+        return value;
     }
 
 }

@@ -74,7 +74,7 @@ public final class JkModuleId implements Serializable {
     }
 
     /**
-     * A concatenation of the group and name of the module as '[group].[name]'.
+     * A concatenation of the group and name of the module as '[group].[value]'.
      */
     public String fullName() {
         if (group.equals(name)) {
@@ -84,7 +84,7 @@ public final class JkModuleId implements Serializable {
     }
 
     /**
-     * A concatenation of the group and name of this module as '[group]:[name]'.
+     * A concatenation of the group and name of this module as '[group]:[value]'.
      */
     public String groupAndName() {
         return group + ":" + name;
@@ -95,7 +95,7 @@ public final class JkModuleId implements Serializable {
      * projectVersion.
      */
     public JkVersionedModule version(String version) {
-        return version(JkVersion.name(version));
+        return version(JkVersion.of(version));
     }
 
     /**

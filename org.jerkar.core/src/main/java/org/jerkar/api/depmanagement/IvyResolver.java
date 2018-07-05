@@ -175,13 +175,13 @@ final class IvyResolver implements InternalDepResolver {
 
     private static JkVersionedModule anonymousVersionedModule() {
         final String version = Long.toString(RANDOM.nextLong());
-        return JkVersionedModule.of(JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.name(version));
+        return JkVersionedModule.of(JkModuleId.of("anonymousGroup", "anonymousName"), JkVersion.of(version));
     }
 
     @Override
     public File get(JkModuleDependency dependency) {
         final ModuleRevisionId moduleRevisionId = IvyTranslations.toModuleRevisionId(dependency.moduleId(),
-                dependency.versionRange());
+                dependency.version());
         final boolean isMetadata = "pom".equalsIgnoreCase(dependency.ext());
         final String typeAndExt = JkUtilsObject.firstNonNull(dependency.ext(), "jar");
         final DefaultArtifact artifact;
@@ -204,7 +204,7 @@ final class IvyResolver implements InternalDepResolver {
             IvyArtifactContainer artifactContainer) {
         final IvyTreeResolver treeResolver = new IvyTreeResolver(nodes, artifactContainer);
         final ModuleNodeInfo treeRootNodeInfo = new ModuleNodeInfo(rootVersionedModule.moduleId(),
-                JkVersionRange.of(rootVersionedModule.version().name()), new HashSet<>(), new HashSet<>(),
+                JkVersion.of(rootVersionedModule.version().value()), new HashSet<>(), new HashSet<>(),
                 rootVersionedModule.version() , new LinkedList<>(), true);
         return treeResolver.createNode(treeRootNodeInfo);
     }
@@ -224,12 +224,12 @@ final class IvyResolver implements InternalDepResolver {
 
                 final Caller[] callers = node.getAllCallers();
                 final JkModuleId moduleId = JkModuleId.of(node.getId().getOrganisation(), node.getId().getName());
-                final JkVersion resolvedVersion = JkVersion.name(node.getResolvedId().getRevision());
+                final JkVersion resolvedVersion = JkVersion.of(node.getResolvedId().getRevision());
                 final Set<JkScope> rootScopes = IvyTranslations.toJkScopes(node.getRootModuleConfigurations());
 
                 List<Path> artifacts;
                 if (!node.isCompletelyEvicted()) {
-                    artifacts = artifactContainer.getArtifacts(moduleId.version(resolvedVersion.name()));
+                    artifacts = artifactContainer.getArtifacts(moduleId.version(resolvedVersion.value()));
                 } else {
                     artifacts = new LinkedList<>();
                 }
@@ -239,10 +239,10 @@ final class IvyResolver implements InternalDepResolver {
                     final JkVersionedModule parent = IvyTranslations.toJkVersionedModule(caller.getModuleRevisionId());
                     final List<ModuleNodeInfo> list = parentChildMap.computeIfAbsent(parent.moduleId(), k -> new LinkedList<>());
                     final Set<JkScope> declaredScopes = IvyTranslations.toJkScopes(dependencyDescriptor.getModuleConfigurations());
-                    final JkVersionRange versionRange = JkVersionRange.of(dependencyDescriptor
+                    final JkVersion version = JkVersion.of(dependencyDescriptor
                             .getDynamicConstraintDependencyRevisionId().getRevision());
 
-                    final ModuleNodeInfo moduleNodeInfo  = new ModuleNodeInfo(moduleId, versionRange, declaredScopes,
+                    final ModuleNodeInfo moduleNodeInfo  = new ModuleNodeInfo(moduleId, version, declaredScopes,
                             rootScopes, resolvedVersion, artifacts);
                     if (!containSame(list, moduleId)) {
                         list.add(moduleNodeInfo);

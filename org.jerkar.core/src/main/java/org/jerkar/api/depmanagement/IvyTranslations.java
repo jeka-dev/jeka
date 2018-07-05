@@ -76,7 +76,7 @@ final class IvyTranslations {
                                                            JkDependencySet dependencies, JkScopeMapping defaultMapping,
                                                            JkVersionProvider resolvedVersions) {
         final ModuleRevisionId thisModuleRevisionId = ModuleRevisionId.newInstance(module
-                .moduleId().group(), module.moduleId().name(), module.version().name());
+                .moduleId().group(), module.moduleId().name(), module.version().value());
         final DefaultModuleDescriptor result = new DefaultModuleDescriptor(
                 thisModuleRevisionId, "integration", null);
 
@@ -118,8 +118,8 @@ final class IvyTranslations {
     }
 
 
-    static ModuleRevisionId toModuleRevisionId(JkModuleId moduleId, JkVersionRange versionRange) {
-        final String originalVersion = versionRange.definition();
+    static ModuleRevisionId toModuleRevisionId(JkModuleId moduleId, JkVersion version) {
+        final String originalVersion = version.value();
         final Map<String, String> extra = new HashMap<>();
         return ModuleRevisionId.newInstance(moduleId.group(), moduleId.name(), originalVersion, extra);
     }
@@ -130,13 +130,13 @@ final class IvyTranslations {
 
     static ModuleRevisionId toModuleRevisionId(JkVersionedModule jkVersionedModule) {
         return new ModuleRevisionId(toModuleId(jkVersionedModule.moduleId()), jkVersionedModule
-                .version().name());
+                .version().value());
     }
 
     static JkVersionedModule toJkVersionedModule(ModuleRevisionId moduleRevisionId) {
         return JkVersionedModule.of(
                 JkModuleId.of(moduleRevisionId.getOrganisation(), moduleRevisionId.getName()),
-                JkVersion.name(moduleRevisionId.getRevision()));
+                JkVersion.of(moduleRevisionId.getRevision()));
     }
 
     // see
@@ -339,7 +339,7 @@ final class IvyTranslations {
             final JkVersion version = resolvedVersions.versionOf(moduleId);
             moduleDescriptor.addDependencyDescriptorMediator(toModuleId(moduleId),
                     ExactOrRegexpPatternMatcher.INSTANCE,
-                    new OverrideDependencyDescriptorMediator(null, version.name()));
+                    new OverrideDependencyDescriptorMediator(null, version.value()));
         }
 
     }
@@ -448,7 +448,7 @@ final class IvyTranslations {
 
         Set<Conf> confs = new HashSet<>();
 
-        JkVersionRange revision;
+        JkVersion version;
 
         List<ArtifactDef> artifacts = new LinkedList<>();
 
@@ -460,9 +460,9 @@ final class IvyTranslations {
 
         @SuppressWarnings("rawtypes")
         DefaultDependencyDescriptor toDescriptor(JkModuleId moduleId) {
-            final ModuleRevisionId moduleRevisionId = toModuleRevisionId(moduleId, revision);
-            final boolean changing = revision.definition().endsWith("-SNAPSHOT");
-            final boolean forceVersion = !revision.isDynamic();
+            final ModuleRevisionId moduleRevisionId = toModuleRevisionId(moduleId, version);
+            final boolean changing = version.value().endsWith("-SNAPSHOT");
+            final boolean forceVersion = !version.isDynamic();
             final DefaultDependencyDescriptor result = new DefaultDependencyDescriptor(null,
                     moduleRevisionId, forceVersion, changing, transitive);
             for (final Conf conf : confs) {
@@ -535,8 +535,8 @@ final class IvyTranslations {
             final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency.dependency();
             final JkModuleId moduleId = moduleDep.moduleId();
             final boolean mainArtifact = moduleDep.classifier() == null && moduleDep.ext() == null;
-            JkVersionRange versionRange = dependencySet.getVersion(moduleId);
-            this.put(moduleId, moduleDep.transitive(), versionRange, mainArtifact);
+            JkVersion version = dependencySet.getVersion(moduleId);
+            this.put(moduleId, moduleDep.transitive(), version, mainArtifact);
 
             // fill configuration
             final List<Conf> confs = new LinkedList<>();
@@ -594,13 +594,13 @@ final class IvyTranslations {
         }
 
 
-        private void put(JkModuleId moduleId, boolean transitive, JkVersionRange revision, boolean mainArtifact) {
+        private void put(JkModuleId moduleId, boolean transitive, JkVersion version, boolean mainArtifact) {
             final DependencyDefinition definition = definitions.computeIfAbsent(moduleId, k -> new DependencyDefinition());
 
             // if dependency has been declared only once non-transive and once transitive then we consider it has non-transitive
             definition.transitive = definition.transitive && transitive;
 
-            definition.revision = revision;
+            definition.version = version;
             definition.includeMainArtifact = definition.includeMainArtifact || mainArtifact;
         }
 

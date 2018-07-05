@@ -77,8 +77,8 @@ public class ResolveTreeIT {
         JkDependencyNode tree = resolver.resolve(deps, TEST).dependencyTree();
         System.out.println(tree.toStrings());
         JkDependencyNode.ModuleNodeInfo moduleNodeInfo = tree.find(moduleId).moduleInfo();
-        assertTrue(moduleNodeInfo.declaredVersion().definition().equals("1.4.+"));
-        String resolvedVersionName = moduleNodeInfo.resolvedVersion().name();
+        assertTrue(moduleNodeInfo.declaredVersion().value().equals("1.4.+"));
+        String resolvedVersionName = moduleNodeInfo.resolvedVersion().value();
         assertEquals("1.4.7.RELEASE", resolvedVersionName);
     }
 
@@ -97,14 +97,14 @@ public class ResolveTreeIT {
 
         JkDependencyNode bootNode = tree.children().get(0);
         JkDependencyNode.ModuleNodeInfo springCoreTransitiveModuleNodeInfo = bootNode.find(springCoreModule).moduleInfo();
-        assertEquals("4.3.14.RELEASE", springCoreTransitiveModuleNodeInfo.declaredVersion().definition());
-        assertEquals(directCoreVersion, springCoreTransitiveModuleNodeInfo.resolvedVersion().name());  // cause evicted
+        assertEquals("4.3.14.RELEASE", springCoreTransitiveModuleNodeInfo.declaredVersion().value());
+        assertEquals(directCoreVersion, springCoreTransitiveModuleNodeInfo.resolvedVersion().value());  // cause evicted
 
         // As the spring-core projectVersion is declared as direct dependency and the declared projectVersion is exact (not dynamic)
         // then the resolved projectVersion should the one declared.
         JkDependencyNode.ModuleNodeInfo springCoreDirectModuleNodeInfo = tree.children().get(1).moduleInfo();
-        assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.declaredVersion().definition());
-        assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.resolvedVersion().name());
+        assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.declaredVersion().value());
+        assertEquals(directCoreVersion, springCoreDirectModuleNodeInfo.resolvedVersion().value());
     }
 
     @Test
@@ -132,7 +132,7 @@ public class ResolveTreeIT {
         JkResolveResult resolveResult = resolver.resolve(deps, RUNTIME);
         JkDependencyNode tree = resolveResult.dependencyTree();
         JkDependencyNode.ModuleNodeInfo moduleNodeInfo = tree.children().get(0).moduleInfo();
-        assertEquals("22.0", moduleNodeInfo.declaredVersion().definition());
+        assertEquals("22.0", moduleNodeInfo.declaredVersion().value());
     }
 
 }

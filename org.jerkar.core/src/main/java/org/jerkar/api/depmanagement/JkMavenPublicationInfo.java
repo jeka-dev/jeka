@@ -169,7 +169,7 @@ public final  class JkMavenPublicationInfo implements Serializable {
         public final String organisationUrl;
 
         /**
-         * Constructs a {@link JkDeveloperInfo} specifying its name, email, organization name
+         * Constructs a {@link JkDeveloperInfo} specifying its name, email, organization value
          * and organization url.
          */
         public JkDeveloperInfo(String name, String email, String organisation,

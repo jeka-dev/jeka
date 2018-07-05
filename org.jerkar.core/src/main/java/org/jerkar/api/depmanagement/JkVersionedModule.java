@@ -33,7 +33,7 @@ public final class JkVersionedModule implements Serializable {
             throw new IllegalArgumentException(description
                     + " does not tespect format groupId:name:projectVersion");
         }
-        return JkVersionedModule.of(JkModuleId.of(items[0], items[1]), JkVersion.name(items[2]));
+        return JkVersionedModule.of(JkModuleId.of(items[0], items[1]), JkVersion.of(items[2]));
     }
 
     private final JkModuleId moduleId;
@@ -71,7 +71,7 @@ public final class JkVersionedModule implements Serializable {
      * @see #withVersion(JkVersion)
      */
     public JkVersionedModule withVersion(String version) {
-        return new JkVersionedModule(this.moduleId, JkVersion.name(version));
+        return new JkVersionedModule(this.moduleId, JkVersion.of(version));
     }
 
     @Override
@@ -122,7 +122,7 @@ public final class JkVersionedModule implements Serializable {
      */
     public void populateManifest(JkManifest manifest) {
         manifest.addMainAttribute(Attributes.Name.IMPLEMENTATION_TITLE, moduleId().fullName())
-        .addMainAttribute(Attributes.Name.IMPLEMENTATION_VERSION, version().name());
+        .addMainAttribute(Attributes.Name.IMPLEMENTATION_VERSION, version().value());
     }
 
 }

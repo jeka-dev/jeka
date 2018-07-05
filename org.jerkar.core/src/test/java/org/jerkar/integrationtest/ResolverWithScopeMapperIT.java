@@ -80,7 +80,7 @@ public class ResolverWithScopeMapperIT {
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);
-        assertEquals(directCoreVersion, resolveResult.versionOf(springCoreModule).name());
+        assertEquals(directCoreVersion, resolveResult.versionOf(springCoreModule).value());
     }
 
     /*

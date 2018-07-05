@@ -9,7 +9,7 @@ public class JkRevisionTest {
 
     @Test
     public void test() {
-        assertTrue(JkVersion.name("1.0.1").isGreaterThan(JkVersion.name("1.0.0")));
+        assertTrue(JkVersion.of("1.0.1").isGreaterThan(JkVersion.of("1.0.0")));
     }
 
 }

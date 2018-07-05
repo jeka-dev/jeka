@@ -19,7 +19,7 @@ import java.util.Map;
         "    - the 'Repos.download.url', 'Repos.download.username' and 'Repo.download.password' options to instantiate repo based on these values\n" +
         "    - the default repo returned by JkRepo#mavenCentral() for downloading and local repository for publishing.\n" +
         "  To configure a named repository, add following properties into your [Jerkar_user_home]/options.properties file :\n" +
-        "    'Repos.[name].url', 'Repos.[name].username' and 'Repos.[name].password'"
+        "    'Repos.[name].url', 'Repos.[value].username' and 'Repos.[of].password'"
 )
 public class JkPluginRepos extends JkPlugin {
 

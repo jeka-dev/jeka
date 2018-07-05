@@ -75,7 +75,7 @@ public final class JkSonar {
         final Map<String, String> map = new HashMap<>();
         map.put(PROJECT_KEY, projectKey);
         map.put(PROJECT_NAME, projectName);
-        map.put(PROJECT_VERSION, projectVersion.name());
+        map.put(PROJECT_VERSION, projectVersion.value());
         map.put(WORKING_DIRECTORY, ".sonarTempDir");
         map.put(VERBOSE, Boolean.toString(JkLog.Verbosity.VERBOSE == JkLog.verbosity()));
         final Properties properties = System.getProperties();

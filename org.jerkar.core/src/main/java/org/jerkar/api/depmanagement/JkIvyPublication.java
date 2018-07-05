@@ -85,7 +85,7 @@ public final class JkIvyPublication implements Iterable<Artifact>, Serializable 
 
     /**
      * Returns a {@link JkIvyPublication} identical to this one but adding the specified
-     * artifact and giving it the specified name (otherwise the name it the file name).
+     * artifact and giving it the specified name (otherwise the value it the file of).
      * @see #of(Path, String, JkScope...)
      */
     public JkIvyPublication and(String name, Path file, String type, JkScope... jkScopes) {

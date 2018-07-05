@@ -275,7 +275,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     String fileName(JkVersionedModule versionedModule) {
-        return versionedModule.moduleId().fullName() + "-" + versionedModule.version().name();
+        return versionedModule.moduleId().fullName() + "-" + versionedModule.version().value();
     }
 
     /**

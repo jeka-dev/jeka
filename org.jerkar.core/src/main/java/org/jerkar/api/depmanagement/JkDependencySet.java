@@ -79,21 +79,21 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
         return this.dependencies;
     }
 
-    public JkVersionRange getVersion(JkModuleId moduleId) {
+    public JkVersion getVersion(JkModuleId moduleId) {
         JkScopedDependency dep = this.get(moduleId);
         if (dep == null) {
             return null;
         }
         JkModuleDependency moduleDependency = (JkModuleDependency) dep.dependency();
-        JkVersionRange versionRange = moduleDependency.versionRange();
-        if (!versionRange.isUnspecified()) {
-            return versionRange;
+        JkVersion version = moduleDependency.version();
+        if (!version.isUnspecified()) {
+            return version;
         }
-        JkVersion version =  this.versionProvider.versionOf(moduleId);
+        version =  this.versionProvider.versionOf(moduleId);
         if (version != null) {
-            return JkVersionRange.of(version.name());
+            return version;
         }
-        return JkVersionRange.UNSPECIFIED;
+        return JkVersion.UNSPECIFIED;
     }
 
     /**
@@ -186,7 +186,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     }
 
     public JkDependencySet and(JkModuleId moduleId, JkScope ... scopes) {
-        return and(JkModuleDependency.of(moduleId, JkVersionRange.UNSPECIFIED), scopes);
+        return and(JkModuleDependency.of(moduleId, JkVersion.UNSPECIFIED), scopes);
     }
 
     public JkDependencySet and(JkModuleId moduleId, String version, JkScopeMapping scopeMapping) {
@@ -395,8 +395,8 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             if (scopedDependency.dependency() instanceof JkModuleDependency) {
                 final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency
                         .dependency();
-                final JkVersionRange versionRange = externalModule.versionRange();
-                if (versionRange.isDynamic()) {
+                final JkVersion version = externalModule.version();
+                if (version.isDynamic()) {
                     return true;
                 }
             }
@@ -416,8 +416,8 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             if (scopedDependency.dependency() instanceof JkModuleDependency) {
                 final JkModuleDependency externalModule = (JkModuleDependency) scopedDependency
                         .dependency();
-                final JkVersionRange versionRange = externalModule.versionRange();
-                if (versionRange.isDynamicAndResovable()) {
+                final JkVersion version = externalModule.version();
+                if (version.isDynamicAndResovable()) {
                     return true;
                 }
             }
@@ -463,7 +463,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency.dependency();
             final JkModuleId moduleId = moduleDependency.moduleId();
             final JkScopedDependency toAdd;
-            if (moduleDependency.versionRange().isDynamicAndResovable()
+            if (moduleDependency.version().isDynamicAndResovable()
                     || moduleDependency.hasUnspecifedVersion()) {
                 final JkVersion resolvedVersion = provider.versionOf(moduleId);
                 if (resolvedVersion != null) {
@@ -525,7 +525,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
                 builder.append("\n").append(indent).append(".on(\"")
                 .append(moduleDep.moduleId().group()).append("\", \"")
                 .append(moduleDep.moduleId().name()).append("\", \"")
-                .append(moduleDep.versionRange().definition()).append("\"");
+                .append(moduleDep.version().value()).append("\"");
                 if (!scopedDependency.scopes().isEmpty()) {
                     builder.append(", ");
                     for (final JkScope scope : scopedDependency.scopes()) {

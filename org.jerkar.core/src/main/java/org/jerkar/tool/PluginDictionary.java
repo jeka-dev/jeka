@@ -43,9 +43,9 @@ final class PluginDictionary {
     }
 
     /**
-     * Returns the plugin having a full name equals to the specified name. If
+     * Returns the plugin having a full name equals to the specified value. If
      * not found, returns the plugin having a short name equals to the specified
-     * name. Note that the short name is capitalized for you so using
+     * name. Note that the short value is capitalized for you so using
      * "myPluging" or "MyPlugin" is equal. If not found, returns
      * <code>null</code>.
      */
@@ -84,7 +84,7 @@ final class PluginDictionary {
         set.addAll(loadPlugins( "**/*$" + simpleName, "*$" + simpleName ));
         if (set.size() > 1) {
             throw new JkException("Several plugin have the same short name : '" + shortName
-                    + "'. Please disambiguate with using plugin long name (full class name)."
+                    + "'. Please disambiguate with using plugin long name (full class value)."
                     + " Following plugins have same shortName : " + set);
         }
         if (set.isEmpty()) {

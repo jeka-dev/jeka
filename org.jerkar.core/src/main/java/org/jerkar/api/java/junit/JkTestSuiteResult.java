@@ -169,7 +169,7 @@ public class JkTestSuiteResult implements Serializable {
         }
 
         /**
-         * Returns the test name (generally the method name);
+         * Returns the test name (generally the method value);
          */
         public String getTestName() {
             return testName;

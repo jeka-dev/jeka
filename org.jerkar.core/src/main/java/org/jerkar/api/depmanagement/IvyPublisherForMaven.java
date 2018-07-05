@@ -67,14 +67,14 @@ final class IvyPublisherForMaven {
             final MavenMetadata mavenMetadata = JkUtilsObject.firstNonNull(loadMavenMedatata(path),
                     returnedMetaData);
             final Snapshot snap = mavenMetadata.currentSnapshot();
-            version = versionForUniqueSnapshot(versionedModule.version().name(), snap.timestamp,
+            version = versionForUniqueSnapshot(versionedModule.version().value(), snap.timestamp,
                     snap.buildNumber);
             final String pomDest = destination(versionedModule, "pom", null, version);
             putInRepo(pomXml, pomDest, true);
             mavenMetadata.addSnapshotVersion("pom", null);
             push(mavenMetadata, path);
         } else {
-            version = versionedModule.version().name();
+            version = versionedModule.version().value();
             final String pomDest = destination(versionedModule, "pom", null, version);
             putInRepo(pomXml, pomDest, true);
         }
@@ -112,7 +112,7 @@ final class IvyPublisherForMaven {
             final int buildNumber = mavenMetadata.currentBuildNumber();
 
             final String versionUniqueSnapshot = versionForUniqueSnapshot(versionedModule.version()
-                    .name(), timestamp, buildNumber);
+                    .value(), timestamp, buildNumber);
 
             for (final Path file : mavenPublication.mainArtifactFiles()) {
                 publishUniqueSnapshot(versionedModule, null, file, versionUniqueSnapshot,
@@ -220,7 +220,7 @@ final class IvyPublisherForMaven {
     private void publishNormal(JkVersionedModule versionedModule, String classifier, Path source) {
 
         final String extension = JkUtilsString.substringAfterLast(source.getFileName().toString(), ".");
-        final String version = versionedModule.version().name();
+        final String version = versionedModule.version().value();
         final String dest = destination(versionedModule.withVersion(version), extension, classifier);
         final boolean overwrite = versionedModule.version().isSnapshot();
         putInRepo(source, dest, overwrite);
@@ -228,13 +228,13 @@ final class IvyPublisherForMaven {
 
     private static String destination(JkVersionedModule versionedModule, String ext,
             String classifier) {
-        return destination(versionedModule, ext, classifier, versionedModule.version().name());
+        return destination(versionedModule, ext, classifier, versionedModule.version().value());
     }
 
     private static String destination(JkVersionedModule versionedModule, String ext,
             String classifier, String uniqueVersion) {
         final JkModuleId moduleId = versionedModule.moduleId();
-        final String version = versionedModule.version().name();
+        final String version = versionedModule.version().value();
         final StringBuilder result = new StringBuilder(moduleBasePath(moduleId)).append("/")
                 .append(version).append("/").append(moduleId.name()).append("-")
                 .append(uniqueVersion);
@@ -275,7 +275,7 @@ final class IvyPublisherForMaven {
 
     private static JkVersionedModule of(ModuleId moduleId, String version) {
         return JkVersionedModule.of(JkModuleId.of(moduleId.getOrganisation(), moduleId.getName()),
-                JkVersion.name(version));
+                JkVersion.of(version));
     }
 
     private static String versionMetadataPath(JkVersionedModule module) {
@@ -287,7 +287,7 @@ final class IvyPublisherForMaven {
     }
 
     private static String snapshotMetadataPath(JkVersionedModule module) {
-        return moduleBasePath(module.moduleId()) + "/" + module.version().name()
+        return moduleBasePath(module.moduleId()) + "/" + module.version().value()
                 + "/maven-metadata.xml";
     }
 
