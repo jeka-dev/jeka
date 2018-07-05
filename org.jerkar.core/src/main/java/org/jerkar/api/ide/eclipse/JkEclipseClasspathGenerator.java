@@ -297,7 +297,7 @@ public final class JkEclipseClasspathGenerator {
         final Set<String> sourcePaths = new HashSet<>();
 
         // Test Sources
-        for (final JkPathTree fileTree : sourceLayout.tests().and(sourceLayout.testResources()).fileTrees()) {
+        for (final JkPathTree fileTree : sourceLayout.tests().and(sourceLayout.testResources()).pathTrees()) {
             if (!fileTree.exists()) {
                 continue;
             }
@@ -317,7 +317,7 @@ public final class JkEclipseClasspathGenerator {
         }
 
         // Sources
-        for (final JkPathTree fileTree : sourceLayout.sources().and(sourceLayout.resources()).fileTrees()) {
+        for (final JkPathTree fileTree : sourceLayout.sources().and(sourceLayout.resources()).pathTrees()) {
             if (!fileTree.exists()) {
                 continue;
             }

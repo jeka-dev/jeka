@@ -62,7 +62,7 @@ public final class JkResourceProcessor {
     public void generateTo(Path outputDir, Charset charset) {
         JkLog.execute("Coping resource files to " + outputDir, () -> {
             final AtomicInteger count = new AtomicInteger(0);
-            for (final JkPathTree resourceTree : this.resourceTrees.fileTrees()) {
+            for (final JkPathTree resourceTree : this.resourceTrees.pathTrees()) {
                 if (!resourceTree.exists()) {
                     continue;
                 }

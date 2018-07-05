@@ -18,13 +18,13 @@ import org.jerkar.api.utils.JkUtilsPath;
  */
 public final class JkPathTreeSet {
 
-    private final List<JkPathTree> jkFileTrees;
+    private final List<JkPathTree> pathTrees;
 
     private JkPathTreeSet(List<JkPathTree> dirs) {
         if (dirs == null) {
             throw new IllegalArgumentException("dirs can't be null.");
         }
-        this.jkFileTrees = Collections.unmodifiableList(dirs);
+        this.pathTrees = Collections.unmodifiableList(dirs);
     }
 
     /**
@@ -67,7 +67,7 @@ public final class JkPathTreeSet {
      * parameter.
      */
     public final JkPathTreeSet and(JkPathTree... trees) {
-        final List<JkPathTree> list = new LinkedList<>(this.jkFileTrees);
+        final List<JkPathTree> list = new LinkedList<>(this.pathTrees);
         list.addAll(Arrays.asList(trees));
         return new JkPathTreeSet(list);
     }
@@ -78,7 +78,7 @@ public final class JkPathTreeSet {
      */
     public final JkPathTreeSet andZips(Iterable<Path> zipFiles) {
         Iterable<Path> paths = JkUtilsPath.disambiguate(zipFiles);
-        final List<JkPathTree> list = new LinkedList<>(this.jkFileTrees);
+        final List<JkPathTree> list = new LinkedList<>(this.pathTrees);
         paths.forEach(zipFile -> list.add(JkPathTree.ofZip(zipFile)));
         return new JkPathTreeSet(list);
     }
@@ -108,9 +108,9 @@ public final class JkPathTreeSet {
      * parameter.
      */
     public final JkPathTreeSet and(JkPathTreeSet... otherDirSets) {
-        final List<JkPathTree> list = new LinkedList<>(this.jkFileTrees);
+        final List<JkPathTree> list = new LinkedList<>(this.pathTrees);
         for (final JkPathTreeSet otherDirSet : otherDirSets) {
-            list.addAll(otherDirSet.jkFileTrees);
+            list.addAll(otherDirSet.pathTrees);
         }
         return new JkPathTreeSet(list);
     }
@@ -120,7 +120,7 @@ public final class JkPathTreeSet {
 
     public JkPathTreeSet accept(Iterable<String> globPatterns) {
         final List<JkPathTree> list = new LinkedList<>();
-        for (final JkPathTree tree : this.jkFileTrees) {
+        for (final JkPathTree tree : this.pathTrees) {
             list.add(tree.accept(globPatterns));
         }
         return new JkPathTreeSet(list);
@@ -132,7 +132,7 @@ public final class JkPathTreeSet {
      */
     public JkPathTreeSet andMatcher(PathMatcher matcher) {
         final List<JkPathTree> list = new LinkedList<>();
-        for (final JkPathTree tree : this.jkFileTrees) {
+        for (final JkPathTree tree : this.pathTrees) {
             list.add(tree.andMatcher(matcher));
         }
         return new JkPathTreeSet(list);
@@ -145,7 +145,7 @@ public final class JkPathTreeSet {
      */
     public List<Path> files() {
         final LinkedList<Path> result = new LinkedList<>();
-        for (final JkPathTree dirView : this.jkFileTrees) {
+        for (final JkPathTree dirView : this.pathTrees) {
             if (dirView.exists()) {
                 result.addAll(dirView.files());
             }
@@ -158,7 +158,7 @@ public final class JkPathTreeSet {
      */
     public List<Path> relativeFiles() {
         final LinkedList<Path> result = new LinkedList<>();
-        for (final JkPathTree dir : this.jkFileTrees) {
+        for (final JkPathTree dir : this.pathTrees) {
             if (dir.exists()) {
                 result.addAll(dir.relativeFiles());
             }
@@ -172,7 +172,7 @@ public final class JkPathTreeSet {
      * Zips the content of all trees involved in this set.
      */
     public JkPathTreeSet zipTo(Path dir) {
-        this.jkFileTrees.forEach(tree -> tree.zipTo(dir));
+        this.pathTrees.forEach(tree -> tree.zipTo(dir));
         return this;
     }
 
@@ -181,8 +181,8 @@ public final class JkPathTreeSet {
     /**
      * Returns {@link JkPathTree} instances constituting this {@link JkPathTreeSet}.
      */
-    public List<JkPathTree> fileTrees() {
-        return jkFileTrees;
+    public List<JkPathTree> pathTrees() {
+        return pathTrees;
     }
 
     /**
@@ -191,7 +191,7 @@ public final class JkPathTreeSet {
      */
     public List<Path> rootDirsOrZipFiles() {
         final List<Path> result = new LinkedList<>();
-        for (final JkPathTree tree : jkFileTrees) {
+        for (final JkPathTree tree : pathTrees) {
             result.add(tree.rootDirOrZipFile());
         }
         return result;
@@ -203,7 +203,7 @@ public final class JkPathTreeSet {
      * Returns <code>true</code> if no tree of this set has an existing baseTree.
      */
     public boolean hasNoExistingRoot() {
-        for (final JkPathTree tree : jkFileTrees) {
+        for (final JkPathTree tree : pathTrees) {
             if (tree.exists()) {
                 return false;
             }
@@ -216,7 +216,7 @@ public final class JkPathTreeSet {
      */
     public int count(int max, boolean includeFolder) {
         int result = 0;
-        for (final JkPathTree dirView : jkFileTrees) {
+        for (final JkPathTree dirView : pathTrees) {
             result += dirView.count(max - result, includeFolder);
         }
         return result;
@@ -224,7 +224,7 @@ public final class JkPathTreeSet {
 
     public JkPathTreeSet resolve(Path path) {
         List<JkPathTree> list = new LinkedList<>();
-        for (JkPathTree tree : jkFileTrees) {
+        for (JkPathTree tree : pathTrees) {
             list.add(tree.resolve(path));
         }
         return new JkPathTreeSet(list);
@@ -233,14 +233,14 @@ public final class JkPathTreeSet {
 
     @Override
     public String toString() {
-        return this.jkFileTrees.toString();
+        return this.pathTrees.toString();
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((jkFileTrees == null) ? 0 : jkFileTrees.hashCode());
+        result = prime * result + ((pathTrees == null) ? 0 : pathTrees.hashCode());
         return result;
     }
 
@@ -256,11 +256,11 @@ public final class JkPathTreeSet {
             return false;
         }
         final JkPathTreeSet other = (JkPathTreeSet) obj;
-        if (jkFileTrees == null) {
-            if (other.jkFileTrees != null) {
+        if (pathTrees == null) {
+            if (other.pathTrees != null) {
                 return false;
             }
-        } else if (!jkFileTrees.equals(other.jkFileTrees)) {
+        } else if (!pathTrees.equals(other.pathTrees)) {
             return false;
         }
         return true;

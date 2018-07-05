@@ -145,7 +145,7 @@ public final class JkJavaCompileSpec {
     }
 
     public JkJavaCompileSpec addSources(JkPathTreeSet treeSet) {
-        treeSet.fileTrees().forEach(this::addSources);
+        treeSet.pathTrees().forEach(this::addSources);
         return this;
     }
 

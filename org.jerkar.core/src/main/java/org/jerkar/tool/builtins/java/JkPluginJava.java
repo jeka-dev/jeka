@@ -120,10 +120,10 @@ public class JkPluginJava extends JkPlugin {
         String template = JkUtilsIO.read(JkPluginJava.class.getResource("buildclass.snippet"));
         String baseDirName = build.baseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
-        project.getSourceLayout().sources().fileTrees().stream().forEach(tree -> tree.createIfNotExist());
-        project.getSourceLayout().resources().fileTrees().stream().forEach(tree -> tree.createIfNotExist());
-        project.getSourceLayout().tests().fileTrees().stream().forEach(tree -> tree.createIfNotExist());
-        project.getSourceLayout().testResources().fileTrees().stream().forEach(tree -> tree.createIfNotExist());
+        project.getSourceLayout().sources().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
+        project.getSourceLayout().resources().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
+        project.getSourceLayout().tests().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
+        project.getSourceLayout().testResources().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
         this.build.scaffolder().setBuildClassCode(code);
     }
 

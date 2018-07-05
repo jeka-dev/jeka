@@ -188,7 +188,7 @@ public final class JkImlGenerator {
 
             // Write test sources
             final Path projectDir = this.sourceLayout.baseDir();
-            for (final JkPathTree fileTree : this.sourceLayout.tests().fileTrees()) {
+            for (final JkPathTree fileTree : this.sourceLayout.tests().pathTrees()) {
                 if (fileTree.exists()) {
                     writer.writeCharacters(T1);
                     writer.writeEmptyElement("sourceFolder");
@@ -201,7 +201,7 @@ public final class JkImlGenerator {
             }
 
             // write test resources
-            for (final JkPathTree fileTree : this.sourceLayout.testResources().fileTrees()) {
+            for (final JkPathTree fileTree : this.sourceLayout.testResources().pathTrees()) {
                 if (fileTree.exists() && !contains(this.sourceLayout.tests(), fileTree.rootDirOrZipFile())) {
                     writer.writeCharacters(T3);
                     writer.writeEmptyElement("sourceFolder");
@@ -214,7 +214,7 @@ public final class JkImlGenerator {
 
             // Write production sources
 
-            for (final JkPathTree fileTree : this.sourceLayout.sources().fileTrees()) {
+            for (final JkPathTree fileTree : this.sourceLayout.sources().pathTrees()) {
                 if (fileTree.exists()) {
                     writer.writeCharacters(T3);
                     writer.writeEmptyElement("sourceFolder");
@@ -226,7 +226,7 @@ public final class JkImlGenerator {
             }
 
             // Write production test resources
-            for (final JkPathTree fileTree : this.sourceLayout.resources().fileTrees()) {
+            for (final JkPathTree fileTree : this.sourceLayout.resources().pathTrees()) {
                 if (fileTree.exists() && !contains(this.sourceLayout.sources(), fileTree.rootDirOrZipFile())) {
                     writer.writeCharacters(T3);
                     writer.writeEmptyElement("sourceFolder");
@@ -254,7 +254,7 @@ public final class JkImlGenerator {
     }
 
     private static boolean contains(JkPathTreeSet treeSet, Path path) {
-        for (JkPathTree tree : treeSet.fileTrees()) {
+        for (JkPathTree tree : treeSet.pathTrees()) {
             if (JkUtilsPath.isSameFile(tree.root(), path)) {
                 return true;
             }
