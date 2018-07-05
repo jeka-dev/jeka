@@ -96,11 +96,12 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         };
 
         // defines artifacts
-        this.defineArtifact(mainArtifactId(), this::makeBinJar);
-        this.defineArtifact(SOURCES_ARTIFACT_ID, this::makeSourceJar);
-        this.defineArtifact(JAVADOC_ARTIFACT_ID, this::makeJavadocJar);
-        this.defineArtifact(TEST_ARTIFACT_ID, this::makeTestJar);
-        this.defineArtifact(TEST_SOURCE_ARTIFACT_ID, this.getPackager()::testSourceJar);
+        this.defineArtifact(mainArtifactId(), () -> makeBinJar(getArtifactFile(mainArtifactId())));
+        this.defineArtifact(SOURCES_ARTIFACT_ID, () -> makeSourceJar(getArtifactFile(SOURCES_ARTIFACT_ID)));
+        this.defineArtifact(JAVADOC_ARTIFACT_ID, () -> makeJavadocJar(getArtifactFile(JAVADOC_ARTIFACT_ID)));
+        this.defineArtifact(TEST_ARTIFACT_ID, () -> makeTestJar(getArtifactFile(TEST_ARTIFACT_ID)));
+        this.defineArtifact(TEST_SOURCE_ARTIFACT_ID,
+                () -> getPackager().testSourceJar(getArtifactFile(TEST_SOURCE_ARTIFACT_ID)));
     }
 
     private JkDependencyResolver dependencyResolver() {
@@ -378,32 +379,32 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     // ---------------------- from scratch
 
-    public Path makeBinJar() {
+    public void makeBinJar(Path target) {
         compileAndTestIfNeeded();
-        return packager.mainJar();
+        packager.mainJar(target);
     }
 
-    public Path makeSourceJar() {
+    public void makeSourceJar(Path target) {
         if (!status.sourceGenerated) {
             this.sourceGenerator.run();
             status.sourceGenerated = true;
         }
-        return packager.sourceJar();
+        packager.sourceJar(target);
     }
 
-    public Path makeJavadocJar() {
+    public void makeJavadocJar(Path target) {
         if (!status.javadocGenerated) {
             generateJavadoc();
         }
-        return packager.javadocJar();
+        packager.javadocJar(target);
     }
 
-    public Path makeTestJar() {
+    public void makeTestJar(Path target) {
         compileAndTestIfNeeded();
         if (!status.unitTestDone) {
             test();
         }
-        return packager.testJar();
+        packager.testJar(target);
     }
 
 
