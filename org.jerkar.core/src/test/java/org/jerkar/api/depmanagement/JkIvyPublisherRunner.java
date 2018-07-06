@@ -21,8 +21,7 @@ public class JkIvyPublisherRunner {
     }
 
     public static void testPublishIvy() throws IOException {
-        final IvyPublisher jkIvyResolver = IvyPublisher.of(ivyRepos().withSha1Checksum()
-                .withMd5Checksum(), Paths.get("build/output/test-out").toFile());
+        final IvyPublisher jkIvyResolver = IvyPublisher.of(ivyRepo().asSet(), Paths.get("build/output/test-out").toFile());
         final JkVersionedModule versionedModule = JkVersionedModule.of(
                 JkModuleId.of("mygroup", "mymodule"), JkVersion.of("myVersion"));
         final JkIvyPublication ivyPublication = JkIvyPublication.of(sampleJarfile(),
@@ -34,8 +33,8 @@ public class JkIvyPublisherRunner {
     }
 
     public static void testPublishMaven() throws IOException {
-        final IvyPublisher jkIvyPublisher = IvyPublisher.of(mavenRepos().withMd5AndSha1Checksum()
-                .withUniqueSnapshot(false), Paths.get("build/output/test-out").toFile());
+        final IvyPublisher jkIvyPublisher = IvyPublisher.of(mavenRepo().with(JkRepo.JkRepoPublishConfig.of()
+                .withUniqueSnapshot(false)).asSet(), Paths.get("build/output/test-out").toFile());
         final JkVersionedModule versionedModule = JkVersionedModule.of(
                 JkModuleId.of("mygroup2", "mymodule2"), JkVersion.of("0.0.12-SNAPSHOT"));
         final JkMavenPublication publication = JkMavenPublication.of(sampleJarfile())
@@ -65,16 +64,16 @@ public class JkIvyPublisherRunner {
         }
     }
 
-    private static JkPublishRepos ivyRepos() throws IOException {
+    private static JkRepo ivyRepo() throws IOException {
         final Path baseDir = Paths.get("build/output/testIvyRepo");
         Files.createDirectories(baseDir);
-        return JkPublishRepos.ivy(baseDir);
+        return JkRepo.ofIvy(baseDir);
     }
 
-    private static JkPublishRepos mavenRepos() throws IOException {
+    private static JkRepo mavenRepo() throws IOException {
         final Path baseDir = Paths.get( "build/output/mavenRepo");
         Files.createDirectories(baseDir);
-        return JkPublishRepos.ivy(baseDir);
+        return JkRepo.ofMaven(baseDir);
     }
 
 }

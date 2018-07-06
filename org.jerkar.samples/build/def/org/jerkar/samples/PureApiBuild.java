@@ -8,6 +8,8 @@ import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkInit;
 
+import java.nio.file.Paths;
+
 /**
  * This should be run with org.jerkar.samples as working dir.
  */
@@ -26,8 +28,8 @@ public class PureApiBuild extends JkBuild {
         javaProject.setDependencies(deps).setSourceVersion(JkJavaVersion.V6);
 
         javaProject.maker().clean();
-        javaProject.maker().makeMainJar();
-        javaProject.maker().makeJavadocJar();
+        javaProject.maker().makeArtifact(javaProject.get().mainArtifactId());
+        javaProject.maker().makeJavadocJar(Paths.get("javadoc.jar"));
     }
 
     public static void main(String[] args) {

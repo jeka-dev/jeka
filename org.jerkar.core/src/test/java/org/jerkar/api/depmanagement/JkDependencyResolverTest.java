@@ -22,7 +22,7 @@ public class JkDependencyResolverTest {
         JkJavaProject coreProject = new JkJavaProject(core);
         baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.GUAVA, "19.0"));
         coreProject.setDependencies(JkDependencySet.of().and(baseProject));
-        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepos.mavenCentral());
+        JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet());
 
         JkResolveResult resolveResult = dependencyResolver.resolve(coreProject.getDependencies());
 

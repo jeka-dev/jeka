@@ -1,5 +1,11 @@
 package org.jerkar.tool;
 
+import org.jerkar.api.depmanagement.JkDependencySet;
+import org.jerkar.api.depmanagement.JkModuleDependency;
+import org.jerkar.api.depmanagement.JkRepoSet;
+import org.jerkar.api.system.JkException;
+import org.jerkar.api.utils.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -10,16 +16,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
-
-import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.depmanagement.JkModuleDependency;
-import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.system.JkException;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.api.utils.JkUtilsThrowable;
 
 /*
  * Without doubt, the most crappy code of this project.
@@ -34,7 +30,7 @@ final class SourceParser {
     }
 
     public static SourceParser of(Path baseDir, Iterable<Path>  files) {
-        SourceParser result = new SourceParser(JkDependencySet.of(), JkRepos.empty(),
+        SourceParser result = new SourceParser(JkDependencySet.of(), JkRepoSet.empty(),
                 new LinkedList<>());
         for (final Path code : files) {
             result = result.and(of(baseDir, code));
@@ -55,11 +51,11 @@ final class SourceParser {
 
     private final JkDependencySet dependencies;
 
-    private final JkRepos importRepos;
+    private final JkRepoSet importRepos;
 
     private final List<Path>  dependecyProjects;
 
-    private SourceParser(JkDependencySet deps, JkRepos repos, List<Path>  dependencyProjects) {
+    private SourceParser(JkDependencySet deps, JkRepoSet repos, List<Path>  dependencyProjects) {
         super();
         this.dependencies = deps;
         this.importRepos = repos;
@@ -77,7 +73,7 @@ final class SourceParser {
         return this.dependencies;
     }
 
-    public JkRepos importRepos() {
+    public JkRepoSet importRepos() {
         return this.importRepos;
     }
 
@@ -90,9 +86,9 @@ final class SourceParser {
         return dependenciesFromImports(baseDir, deps);
     }
 
-    private static JkRepos repos(String code, URL url) {
+    private static JkRepoSet repos(String code, URL url) {
         final List<String> repoUrls = stringsInAnnotation(code, JkImportRepo.class, url);
-        return JkRepos.of(repoUrls);
+        return JkRepoSet.of(repoUrls.toArray(new String[0]));
     }
 
     private static List<Path>  projects(String code, Path baseDir, URL url) {

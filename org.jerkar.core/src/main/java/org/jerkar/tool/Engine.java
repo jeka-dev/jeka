@@ -39,7 +39,7 @@ final class Engine {
 
     private JkDependencySet buildDependencies;
 
-    private JkRepos buildRepos;
+    private JkRepoSet buildRepos;
 
     private List<Path>  rootsOfImportedBuilds = new LinkedList<>();
 
@@ -274,8 +274,8 @@ final class Engine {
         }
     }
 
-    private static JkRepos repos() {
-        return JkRepos.of(JkRepoOptionLoader.buildRepository(), JkPublishRepo.local().repo());
+    private static JkRepoSet repos() {
+        return JkRepoSet.of(JkRepoConfigOptionLoader.buildRepository(), JkRepo.local());
     }
 
     private static List<String> toRelativePaths(Path from, List<Path>  files) {

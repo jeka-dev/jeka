@@ -1,25 +1,12 @@
 package org.jerkar.api.tooling;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.function.Supplier;
-
-import org.jerkar.api.depmanagement.JkDepExclude;
-import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.depmanagement.JkDependencyExclusions;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkRepo;
-import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkVersionProvider;
+import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.JkBuild;
+
+import java.util.*;
+import java.util.function.Supplier;
 
 
 
@@ -85,7 +72,7 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
     /**
      * The repositories declared in the generated build class.
      */
-    public JkRepos repos;
+    public JkRepoSet repos;
 
     /**
      * The projectVersion provider declared in the the generated build class.
@@ -329,14 +316,14 @@ public class JkCodeWriterForBuildClass implements Supplier<String> {
                     "    }\n";
         }
 
-        public String downloadRepositories(JkRepos repos) {
-            if (repos.isEmpty()) {
+        public String downloadRepositories(JkRepoSet repos) {
+            if (repos.list().isEmpty()) {
                 return null;
             }
             final StringBuilder builder = new StringBuilder()
-                    .append("    JkRepos downloadRepositories() {\n")
-                    .append("        return JkRepos.maven(");
-            for (final JkRepo repo : repos) {
+                    .append("    JkRepoSet downloadRepositories() {\n")
+                    .append("        return JkRepoSet.maven(");
+            for (final JkRepo repo : repos.list()) {
                 builder.append("\"").append(repo.url().toString()).append("\", ");
             }
             builder.delete(builder.length() - 2, builder.length());

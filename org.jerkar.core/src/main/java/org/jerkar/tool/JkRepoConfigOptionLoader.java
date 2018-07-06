@@ -1,9 +1,7 @@
 package org.jerkar.tool;
 
-import org.jerkar.api.crypto.pgp.JkPgp;
-import org.jerkar.api.depmanagement.JkPublishRepo;
 import org.jerkar.api.depmanagement.JkRepo;
-import org.jerkar.api.depmanagement.JkRepos;
+import org.jerkar.api.depmanagement.JkRepoSet;
 import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsString;
 
@@ -12,9 +10,9 @@ import java.util.Map;
 
 
 /**
- * Provides static methods for defining {@link JkRepos} from {@link JkOptions}.
+ * Provides static methods for defining {@link JkRepoSet} from {@link JkOptions}.
  */
-public class JkRepoOptionLoader {
+public class JkRepoConfigOptionLoader {
 
     /**
      * Returns repository where are published artifacts. By default it
@@ -29,13 +27,13 @@ public class JkRepoOptionLoader {
      * <p>
      * This methods returns <code>null</code> if no matching option found
      */
-    public static JkPublishRepo publishRepository() {
+    public static JkRepo publishRepository() {
         final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("Repo.publishName"), "publish");
         JkRepo repo = repoFromOptions(repoName);
         if (repo == null) {
             return null;
         }
-        return JkPublishRepo.of(repoFromOptions(repoName));
+        return repoFromOptions(repoName);
     }
 
     /**

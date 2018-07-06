@@ -27,7 +27,7 @@ public class ResolveWithArtifactIT {
                 .and(JkPopularModules.GUAVA, "19.0" )
                 .and("org.lwjgl:lwjgl:3.1.1")
                 .withDefaultScope(COMPILE);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps);
@@ -55,7 +55,7 @@ public class ResolveWithArtifactIT {
                 .and("org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE", COMPILE_AND_RUNTIME)
                 .and("org.springframework.boot:spring-boot-starter-test:1.5.+", TEST)
                 .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", COMPILE);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkResolveResult resolveResult = resolver.resolve(deps);

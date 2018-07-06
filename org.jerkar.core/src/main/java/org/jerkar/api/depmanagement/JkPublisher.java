@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.Set;
 
 import org.jerkar.api.java.JkClassLoader;
-import org.jerkar.api.system.JkLocator;
 
 /**
  * A class to publish artifacts on repositories. According the nature of the
@@ -28,26 +27,18 @@ public final class JkPublisher {
     }
 
     /**
-     * Creates a {@link JkPublisher} with the specified {@link JkPublishRepo}.
+     * Creates a {@link JkPublisher} with the specified {@link JkRepo}.
      */
-    public static JkPublisher of(JkPublishRepo publishRepo) {
-        return of(JkPublishRepos.of(publishRepo));
+    public static JkPublisher of(JkRepo repoConfig) {
+        return of(JkRepoSet.of(repoConfig));
     }
 
     /**
-     * Creates a publisher that publish locally under <code></code>[USER HOME]/.jerkar/publish</code> folder.
-     */
-    public static JkPublisher local() {
-        final Path file = JkLocator.jerkarUserHomeDir().resolve("maven-publish-dir");
-        return JkPublisher.of(JkRepo.maven(file).asPublishRepo());
-    }
-
-    /**
-     * Creates a {@link JkPublisher} with the specified {@link JkPublishRepo}
+     * Creates a {@link JkPublisher} with the specified {@link JkRepoSet}
      * and output directory. <code>artifactDir</code> is the place where pom.xml and
      * ivy.xml are generated.
      */
-    public static JkPublisher of(JkPublishRepos publishRepos, Path artifactDir) {
+    public static JkPublisher of(JkRepoSet publishRepos, Path artifactDir) {
         final InternalPublisher ivyPublisher = IVY_CLASS_LOADER.transClassloaderProxy(
                 InternalPublisher.class, IVY_PUB_CLASS, "of", publishRepos,
                 artifactDir == null ? null : artifactDir.toFile());
@@ -55,9 +46,9 @@ public final class JkPublisher {
     }
 
     /**
-     * Creates a {@link JkPublisher} with the specified {@link JkPublishRepo}.
+     * Creates a {@link JkPublisher} with the specified {@link JkRepoSet}.
      */
-    public static JkPublisher of(JkPublishRepos publishRepos) {
+    public static JkPublisher of(JkRepoSet publishRepos) {
         return of(publishRepos, (Path) null);
     }
 

@@ -31,19 +31,19 @@ public final class JkDependencyResolver {
      * Creates a dependency resolver fetching module dependencies in the specified repos. If
      * the specified JkRepo contains no {@link JkRepo} then the created.
      */
-    public static JkDependencyResolver of(JkRepos repos) {
-        if (!repos.iterator().hasNext()) {
-            return new JkDependencyResolver(null, null, null, JkRepos.empty());
+    public static JkDependencyResolver of(JkRepoSet repos) {
+        if (repos.list().isEmpty()) {
+            return new JkDependencyResolver(null, null, null, JkRepoSet.empty());
         }
         final InternalDepResolver ivyResolver = InternalDepResolvers.ivy(repos);
         return new JkDependencyResolver(ivyResolver,  null, null, repos);
     }
 
     /**
-     * @See {@link #of(JkRepos)}
+     * @See {@link #of(JkRepoSet)}
      */
-    public static JkDependencyResolver of(JkRepo ... repos) {
-        return of(JkRepos.of(repos));
+    public static JkDependencyResolver of(JkRepo... repos) {
+        return of(JkRepoSet.of(repos));
     }
 
     private final InternalDepResolver internalResolver;
@@ -54,10 +54,10 @@ public final class JkDependencyResolver {
     // efficiently.
     private final JkVersionedModule module;
 
-    private final JkRepos repos;
+    private final JkRepoSet repos;
 
     private JkDependencyResolver(InternalDepResolver internalResolver,
-            JkVersionedModule module, JkResolutionParameters resolutionParameters, JkRepos repos) {
+            JkVersionedModule module, JkResolutionParameters resolutionParameters, JkRepoSet repos) {
         this.internalResolver = internalResolver;
         this.module = module;
         this.parameters = resolutionParameters;
@@ -97,7 +97,7 @@ public final class JkDependencyResolver {
     /**
      * Returns the repositories the resolution is made on.
      */
-    public JkRepos repositories() {
+    public JkRepoSet repositories() {
         return this.repos;
     }
 
@@ -170,7 +170,7 @@ public final class JkDependencyResolver {
     /**
      * Change the repositories for dependency resolution
      */
-    public JkDependencyResolver withRepos(JkRepos otherRepos) {
+    public JkDependencyResolver withRepos(JkRepoSet otherRepos) {
         return new JkDependencyResolver(InternalDepResolvers.ivy(otherRepos), this.module,
                 this.parameters, otherRepos);
     }
@@ -178,8 +178,8 @@ public final class JkDependencyResolver {
     /**
      * Change the repositories for dependency resolution
      */
-    public JkDependencyResolver withRepos(JkRepo ... otherRepos) {
-        return withRepos(JkRepos.of(otherRepos));
+    public JkDependencyResolver withRepos(JkRepo... otherRepos) {
+        return withRepos(JkRepoSet.of(otherRepos));
     }
 
     /**

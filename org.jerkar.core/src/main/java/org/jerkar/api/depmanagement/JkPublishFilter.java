@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * Defines filter to accept or not module to be published on a given
- * {@link JkPublishRepo}
+ * {@link JkRepo}
  * 
  * @author Jerome Angibaud
  */

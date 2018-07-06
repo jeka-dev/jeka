@@ -45,7 +45,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private List<String> javadocOptions = new LinkedList<>();
 
-    private JkPublishRepos publishRepos = JkPublishRepos.local();
+    private JkRepoSet publishRepos = JkRepoSet.local();
 
     private boolean skipTests = false;
 
@@ -384,6 +384,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         packager.mainJar(target);
     }
 
+
     public void makeSourceJar(Path target) {
         if (!status.sourceGenerated) {
             this.sourceGenerator.run();
@@ -407,6 +408,10 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         packager.testJar(target);
     }
 
+    public void makeTestJar() {
+        makeTestJar(artifactPath(TEST_ARTIFACT_ID));
+    }
+
 
     // -------------------- getters/setters -------------------------------------------------------
 
@@ -424,7 +429,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return this;
     }
 
-    public JkJavaProjectMaker setDownloadRepos(JkRepos repos) {
+    public JkJavaProjectMaker setDownloadRepos(JkRepoSet repos) {
         this.dependencyResolver = this.dependencyResolver().withRepos(repos);
         return this;
     }
@@ -456,19 +461,14 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return this;
     }
 
-    public JkPublishRepos getPublishRepos() {
+    public JkRepoSet getPublishRepos() {
         return this.publishRepos;
     }
 
-    public JkJavaProjectMaker setPublishRepos(JkPublishRepos publishRepos) {
+    public JkJavaProjectMaker setPublishRepos(JkRepoSet publishRepos) {
         this.publishRepos = publishRepos;
         return this;
     }
-
-    public JkJavaProjectMaker setPublishRepos(JkPublishRepo ... publishRepos) {
-        return setPublishRepos(JkPublishRepos.of(publishRepos));
-    }
-
     public List<String> getJavadocOptions() {
         return this.javadocOptions;
     }

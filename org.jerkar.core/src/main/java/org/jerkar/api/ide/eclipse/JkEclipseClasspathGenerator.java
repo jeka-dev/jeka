@@ -16,14 +16,8 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import org.jerkar.api.depmanagement.JkComputedDependency;
-import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.depmanagement.JkDependencyNode;
-import org.jerkar.api.depmanagement.JkDependencyResolver;
-import org.jerkar.api.depmanagement.JkModuleDependency;
-import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkResolveResult;
-import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.depmanagement.JkRepoSet;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.JkProjectSourceLayout;
@@ -356,7 +350,7 @@ public final class JkEclipseClasspathGenerator {
 
     private void writeDependenciesEntries(XMLStreamWriter writer, JkDependencySet dependencies, JkDependencyResolver resolver, Set<String> allPaths) throws XMLStreamException {
         final JkResolveResult resolveResult = resolver.resolve(dependencies);
-        final JkRepos repos = resolver.repositories();
+        final JkRepoSet repos = resolver.repositories();
         for (final JkDependencyNode node : resolveResult.dependencyTree().flatten()) {
             // Maven dependency
             if (node.isModuleNode()) {
@@ -386,7 +380,7 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private void writeModuleEntry(XMLStreamWriter writer, JkVersionedModule versionedModule, Iterable<Path> files,
-            JkRepos repos, Set<String> paths) throws XMLStreamException {
+                                  JkRepoSet repos, Set<String> paths) throws XMLStreamException {
         final Path source = repos.get(JkModuleDependency.of(versionedModule).classifier("sources"));
         Path javadoc = null;
         if (source == null || !Files.exists(source)) {

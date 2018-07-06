@@ -26,21 +26,19 @@ public interface JkArtifactProducer extends JkArtifactLocator {
     JkPathSequence runtimeDependencies(JkArtifactId jkArtifactId);
 
     /**
-     * Short hand to produce the main artifact file and returns the result.
-     */
-    default Path makeMainJar() {
-        this.makeArtifact(mainArtifactId());
-        return artifactPath(mainArtifactId());
-    }
-
-
-    /**
      * Produces all the artifact files for the specified artifact file ids.
      */
     default void makeArtifacts(Iterable<JkArtifactId> artifactFileIds) {
         for (final JkArtifactId artifactFileId : artifactFileIds) {
             makeArtifact(artifactFileId);
         }
+    }
+
+    /**
+     * Produces all the artifact files for the specified artifact file ids.
+     */
+    default void makeArtifacts(JkArtifactId ... artifactFileIds) {
+        makeArtifacts(Arrays.asList(artifactFileIds));
     }
 
     /**

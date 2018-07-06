@@ -30,7 +30,7 @@ public class MergeFileDepIT {
                 .and(dep1File, TEST)
                 .and("com.github.briandilley.jsonrpc4j:jsonrpc4j:1.5.0", COMPILE)
                 .and(dep2File, COMPILE);
-        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepos.mavenCentral())
+        JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING))
                 .withModuleHolder(holder);
         JkDependencyNode tree = resolver.resolve(deps).dependencyTree();
@@ -86,7 +86,7 @@ public class MergeFileDepIT {
         JkDependencyResolver resolver = JkDependencyResolver.of();
         JkDependencyNode tree = resolver.resolve(deps).dependencyTree();
         assertEquals(2, tree.flatten().size());
-        resolver = JkDependencyResolver.of(JkRepos.mavenCentral());
+        resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet());
         assertEquals(2, resolver.resolve(deps).dependencyTree().flatten().size());
 
     }

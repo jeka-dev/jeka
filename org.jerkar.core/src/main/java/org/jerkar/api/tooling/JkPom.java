@@ -6,17 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jerkar.api.depmanagement.JkDepExclude;
-import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.depmanagement.JkDependencyExclusions;
-import org.jerkar.api.depmanagement.JkModuleDependency;
-import org.jerkar.api.depmanagement.JkModuleId;
-import org.jerkar.api.depmanagement.JkRepos;
-import org.jerkar.api.depmanagement.JkScope;
-import org.jerkar.api.depmanagement.JkScopedDependency;
-import org.jerkar.api.depmanagement.JkVersion;
-import org.jerkar.api.depmanagement.JkVersionProvider;
-import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.depmanagement.*;
+import org.jerkar.api.depmanagement.JkRepoSet;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -165,15 +156,15 @@ public final class JkPom {
     /**
      * Repositories declared in this POM.
      */
-    public JkRepos repos() {
+    public JkRepoSet repos() {
         final List<String> urls = new LinkedList<>();
         if (repositoriesEl() == null) {
-            return JkRepos.empty();
+            return JkRepoSet.empty();
         }
         for (final Element repositoryEl : JkUtilsXml.directChildren(repositoriesEl(), "repository")) {
             urls.add(JkUtilsXml.directChildText(repositoryEl, "url"));
         }
-        return JkRepos.of(JkUtilsIterable.arrayOf(urls, String.class));
+        return JkRepoSet.of(JkUtilsIterable.arrayOf(urls, String.class));
     }
 
     private JkDependencySet dependencies(Element dependenciesEl, Map<String, String> props) {

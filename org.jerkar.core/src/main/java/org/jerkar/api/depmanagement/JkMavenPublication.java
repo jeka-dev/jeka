@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -20,7 +21,6 @@ import org.jerkar.api.utils.JkUtilsString;
  *   <li>The artifacts to be published (main artifact and artifacts with classifiers)</li>
  *   <li>Information about describing the project as some public repositories require</li>
  * </ul>
- *
  */
 public final class JkMavenPublication implements Serializable {
 
@@ -32,12 +32,18 @@ public final class JkMavenPublication implements Serializable {
 
     private final JkMavenPublicationInfo extraInfo;
 
+    private final UnaryOperator<Path> signer;
+
+    private final Set<String> checksumAlgos;
+
     private JkMavenPublication(List<File> mainArtifacts, List<JkClassifiedFileArtifact> classified,
-                               JkMavenPublicationInfo extraInfo) {
+                               JkMavenPublicationInfo extraInfo, UnaryOperator<Path> signer, Set<String> checksumsAlgos) {
         super();
         this.mainArtifacts = mainArtifacts;
         this.classifiedArtifacts = classified;
         this.extraInfo = extraInfo;
+        this.signer = signer;
+        this.checksumAlgos = checksumsAlgos;
     }
 
     /**
@@ -45,7 +51,7 @@ public final class JkMavenPublication implements Serializable {
      */
     public static JkMavenPublication of(Path file) {
         return new JkMavenPublication(JkUtilsIterable.listOf(file.toFile()),
-                Collections.emptyList(), null);
+                Collections.emptyList(), null, null, Collections.emptySet());
     }
 
     /**
@@ -61,16 +67,6 @@ public final class JkMavenPublication implements Serializable {
             result = result.andOptional(file, artifactFileId.classifier());
         }
         return result;
-    }
-
-    /**
-     * Same as {@link #and(Path, String)} but effective only if the specified condition is <code>true</code>.
-     */
-    public JkMavenPublication andIf(boolean condition, Path file, String classifier) {
-        if (condition) {
-            return and(file, classifier);
-        }
-        return this;
     }
 
     /**
@@ -94,7 +90,15 @@ public final class JkMavenPublication implements Serializable {
         final List<JkClassifiedFileArtifact> list = new LinkedList<>(
                 this.classifiedArtifacts);
         list.add(artifact);
-        return new JkMavenPublication(this.mainArtifacts, list, this.extraInfo);
+        return new JkMavenPublication(this.mainArtifacts, list, this.extraInfo, this.signer, this.checksumAlgos);
+    }
+
+    public UnaryOperator<Path> signer() {
+        return signer;
+    }
+
+    public Set<String> checksumAlgos() {
+        return checksumAlgos;
     }
 
     private boolean contains(String ext, String classifier) {
@@ -113,7 +117,23 @@ public final class JkMavenPublication implements Serializable {
      * publication extra infoString required to publish on Maven central repository.
      */
     public JkMavenPublication with(JkMavenPublicationInfo extraInfo) {
-        return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, extraInfo);
+        return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, extraInfo, this.signer,
+                this.checksumAlgos);
+    }
+
+    /**
+     * Returns a new publication based on this one but with the specified signer to sign published artifacts.
+     */
+    public JkMavenPublication withSigner(UnaryOperator<Path> signer) {
+        return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, this.extraInfo, signer, this.checksumAlgos);
+    }
+
+    /**
+     * Returns a new publication based on this one but with the specified signer to sign published artifacts.
+     */
+    public JkMavenPublication withChecksums(Set<String> checksumAlgos) {
+        return new JkMavenPublication(this.mainArtifacts, this.classifiedArtifacts, this.extraInfo, this.signer,
+                checksumAlgos);
     }
 
     /**

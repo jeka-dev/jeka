@@ -89,8 +89,8 @@ public class AntStyleBuild extends JkBuild {
 
     public void publish() {
         JkPgp pgp = JkPgp.ofSecretRing(Paths.get(pgpPrivateRingFile), pgpPassword);
-        JkPublishRepo repo = JkRepo.maven(publishRepo)
-                .withCredential("myRepoUserName", "myRepoPassword")
+        JkPublishRepo repo = JkRepo.of(publishRepo)
+                .withOptionalCredentials("myRepoUserName", "myRepoPassword")
                 .asPublishRepo().withUniqueSnapshot(false).withSigner(pgp)
                 .andSha1Md5Checksums();
 

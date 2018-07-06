@@ -12,7 +12,6 @@ import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
 import org.apache.ivy.plugins.resolver.RepositoryResolver;
 import org.apache.ivy.util.ChecksumHelper;
-import org.jerkar.api.depmanagement.IvyPublisher.CheckFileFlag;
 import org.jerkar.api.depmanagement.JkMavenPublication.JkClassifiedFileArtifact;
 import org.jerkar.api.depmanagement.MavenMetadata.Versioning.Snapshot;
 import org.jerkar.api.system.JkLog;
@@ -22,6 +21,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
+import java.util.function.UnaryOperator;
 
 /**
  * {@link IvyPublisher} delegates to this class for publishing to Maven
@@ -31,19 +32,22 @@ final class IvyPublisherForMaven {
 
     private final RepositoryResolver resolver;
 
-    private final CheckFileFlag checkFileFlag;
+    private final UnaryOperator<Path> signer;
 
     private final File descriptorOutputDir;
 
     private final boolean uniqueSnapshot;
 
-    IvyPublisherForMaven(CheckFileFlag checkFileFlag, RepositoryResolver dependencyResolver,
-            File descriptorOutputDir, boolean uniqueSnapshot) {
+    private final Set<String> checksumAlgos;
+
+    IvyPublisherForMaven(UnaryOperator<Path> signer, RepositoryResolver dependencyResolver,
+                         File descriptorOutputDir, boolean uniqueSnapshot, Set<String> checksumAlgos) {
         super();
         this.resolver = dependencyResolver;
         this.descriptorOutputDir = descriptorOutputDir;
-        this.checkFileFlag = checkFileFlag;
+        this.signer = signer;
         this.uniqueSnapshot = uniqueSnapshot;
+        this.checksumAlgos = checksumAlgos;
     }
 
     void publish(DefaultModuleDescriptor moduleDescriptor, JkMavenPublication publication) {
@@ -306,10 +310,6 @@ final class IvyPublisherForMaven {
         }
     }
 
-    private void putInRepo(Path source, String dest, boolean overwrite) {
-        putInRepo(source, dest, overwrite, true);
-    }
-
     private String completePath(String path) {
         if (this.resolver instanceof IBiblioResolver) {
             final IBiblioResolver iBiblioResolver = (IBiblioResolver) this.resolver;
@@ -318,14 +318,14 @@ final class IvyPublisherForMaven {
         return path;
     }
 
-    private void putInRepo(Path source, String destination, boolean overwrite, boolean signIfneeded) {
-        final String[] checksums = this.resolver.getChecksumAlgorithms();
+
+    private void putInRepo(Path source, String destination, boolean overwrite) {
         final Repository repository = this.resolver.getRepository();
         try {
             final String dest = completePath(destination);
             JkLog.info("publishing to " + dest);
             repository.put(null, source.toFile(), dest, overwrite);
-            for (final String algo : checksums) {
+            for (final String algo : checksumAlgos) {
                 final Path temp = Files.createTempFile("jk-checksum-", algo);
                 final String checkSum = ChecksumHelper.computeAsString(source.toFile(), algo);
                 Files.write(temp, checkSum.getBytes());
@@ -333,11 +333,17 @@ final class IvyPublisherForMaven {
                 JkLog.info("publishing to " + csDest);
                 repository.put(null, temp.toFile(), csDest, overwrite);
                 Files.deleteIfExists(temp);
+                if (signer != null) {
+                    final Path signed = signer.apply(source);
+                    final String signedDest = csDest + ".asc";
+                    repository.put(null, signed.toFile(), signedDest, overwrite);
+                    Files.deleteIfExists(signed);
+                }
             }
-            if (this.checkFileFlag.pgpSigner != null && signIfneeded) {
-                final Path signed = checkFileFlag.pgpSigner.sign(source)[0];
+            if (this.signer != null) {
+                final Path signed = signer.apply(source);
                 final String signedDest = destination + ".asc";
-                putInRepo(signed, signedDest, overwrite, false);
+                repository.put(null, signed.toFile(), signedDest, overwrite);
             }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);

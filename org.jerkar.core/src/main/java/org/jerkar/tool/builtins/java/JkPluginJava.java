@@ -9,7 +9,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.*;
-import org.jerkar.tool.builtins.repos.JkPluginRepos;
+import org.jerkar.tool.builtins.repos.JkPluginRepoConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.List;
  * and a decoration for scaffolding.
  */
 @JkDoc("Build of a Java project through a JkJavaProject instance.")
-@JkDocPluginDeps(JkPluginRepos.class)
+@JkDocPluginDeps(JkPluginRepoConfig.class)
 public class JkPluginJava extends JkPlugin {
 
     // ------------------------------ options -------------------------------------------
@@ -41,7 +41,7 @@ public class JkPluginJava extends JkPlugin {
 
     // ----------------------------------------------------------------------------------
 
-    private final JkPluginRepos repoPlugin;
+    private final JkPluginRepoConfig repoPlugin;
 
     private final JkJavaProject project;
 
@@ -49,7 +49,7 @@ public class JkPluginJava extends JkPlugin {
 
     protected JkPluginJava(JkBuild build) {
         super(build);
-        this.repoPlugin = build.plugins().get(JkPluginRepos.class);
+        this.repoPlugin = build.plugins().get(JkPluginRepoConfig.class);
         this.project = new JkJavaProject(this.build.baseDir());
         this.producedArtifacts.add(this.project.maker().mainArtifactId());
     }
@@ -81,9 +81,9 @@ public class JkPluginJava extends JkPlugin {
             project.maker().getArtifactFileIdsToNotPublish().addAll(
                     project.maker().artifactIdsWithClassifier("test"));
         }
-        project.maker().setPublishRepos(repoPlugin.publishRepository());
+        project.maker().setPublishRepos(JkRepoSet.of(repoPlugin.publishRepository()));
         if (publish.localOnly) {
-            project.maker().setPublishRepos(JkPublishRepos.local());
+            project.maker().setPublishRepos(JkRepoSet.local());
         }
         final JkRepo downloadRepo = repoPlugin.downloadRepository();
         JkDependencyResolver resolver = project.maker().getDependencyResolver();
@@ -101,9 +101,11 @@ public class JkPluginJava extends JkPlugin {
         if (pack.checksums().length > 0) {
             project.maker().postPack.chain(() -> project.maker().checksum(pack.checksums()));
         }
+        /*
         if (publish.signArtifacts) {
             project.maker().postPack.chain(() -> project.maker().signArtifactFiles(repoPlugin.pgpSigner()));
         }
+        */
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
             project.maker().setJuniter(project.maker().getJuniter().forked(javaProcess));

@@ -8,7 +8,7 @@ import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkPublishRepos;
 import org.jerkar.api.depmanagement.JkRepo;
-import org.jerkar.api.depmanagement.JkRepos;
+import org.jerkar.api.depmanagement.JkRepoSet;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
@@ -27,7 +27,7 @@ public class MavenStyleBuild extends JkJavaProjectBuild {
         java().project()
                 .setVersionedModule("org.jerkar:script-samples", "0.3-SNAPSHOT")
                 .setDependencies(dependencies());
-        java().project().maker().setDownloadRepos(JkRepos.of(JkRepo.maven("http://my.repo1"), JkRepo.mavenCentral()));
+        java().project().maker().setDownloadRepos(JkRepoSet.of(JkRepo.of("http://my.repo1"), JkRepo.mavenCentral()));
         java().project().maker().setPublishRepos(publishRepositories());
     }
 
@@ -39,8 +39,8 @@ public class MavenStyleBuild extends JkJavaProjectBuild {
     }
 
     JkPublishRepos publishRepositories() {
-        return JkPublishRepos.of(JkRepo.maven("http://my.snapshot.repo").asPublishSnapshotRepo())
-                .and(JkRepo.maven("http://my.release.repo").asPublishReleaseRepo());
+        return JkPublishRepos.of(JkRepo.of("http://my.snapshot.repo").asPublishSnapshotRepo())
+                .and(JkRepo.of("http://my.release.repo").asPublishReleaseRepo());
     }
 
 }

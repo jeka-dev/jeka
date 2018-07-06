@@ -6,7 +6,6 @@ import static org.jerkar.api.project.java.JkJavaProjectMaker.SOURCES_ARTIFACT_ID
 import java.nio.file.Path;
 import java.util.List;
 
-import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaCompiler;
@@ -14,7 +13,6 @@ import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.java.JkJavaProjectMaker;
 import org.jerkar.tool.JkInit;
-import org.jerkar.tool.JkOptions;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
@@ -81,10 +79,8 @@ public class CoreBuild extends JkJavaProjectBuild {
                 .andGitHubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 
-    private static JkPublishRepos publishRepos() {
-        return JkPublishRepos.local().withSigner(null);
-       // return JkPublishRepos.ossrh(JkOptions.get("repo.ossrh.username"),
-        //        JkOptions.get("repo.ossrh.password"), JkPgp.ofDefaultGnuPg()).withUniqueSnapshot(true);
+    private static JkRepoSet publishRepos() {
+        return JkRepoSet.local();
     }
 
 }

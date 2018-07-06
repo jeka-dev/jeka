@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.utils.JkUtilsAssert;
@@ -22,7 +24,7 @@ import org.jerkar.api.utils.JkUtilsSystem;
  *
  * @author Jerome Angibaud
  */
-public final class JkPgp implements Serializable {
+public final class JkPgp implements UnaryOperator<Path>,  Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -181,4 +183,13 @@ public final class JkPgp implements Serializable {
         return pubRing;
     }
 
+    @Override
+    public Path apply(Path file) {
+        if (!Files.exists(file)) {
+            return null;
+        }
+        final Path signatureFile = file.getParent().resolve(file.getFileName().toString() + ".asc");
+        sign(file, signatureFile, password);
+        return signatureFile;
+    }
 }

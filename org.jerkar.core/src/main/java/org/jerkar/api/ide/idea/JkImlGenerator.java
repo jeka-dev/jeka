@@ -318,7 +318,7 @@ public final class JkImlGenerator {
         }
     }
 
-    private List<LibPath> toLibPath(JkDependencyNode.ModuleNodeInfo moduleInfo, JkRepos repos,
+    private List<LibPath> toLibPath(JkDependencyNode.ModuleNodeInfo moduleInfo, JkRepoSet repos,
             String scope) {
         final List<LibPath> result = new LinkedList<>();
         final JkModuleId moduleId = moduleInfo.moduleId();

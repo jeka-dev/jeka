@@ -9,7 +9,6 @@ import org.apache.ivy.plugins.resolver.AbstractPatternsBasedResolver;
 import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.RepositoryResolver;
-import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsThrowable;
@@ -31,11 +30,11 @@ final class IvyPublisher implements InternalPublisher {
 
     private final Ivy ivy;
 
-    private final JkPublishRepos publishRepos;
+    private final JkRepoSet publishRepos;
 
     private final File descriptorOutputDir;
 
-    private IvyPublisher(Ivy ivy, JkPublishRepos publishRepo, File descriptorOutputDir) {
+    private IvyPublisher(Ivy ivy, JkRepoSet publishRepo, File descriptorOutputDir) {
         super();
         this.ivy = ivy;
         this.publishRepos = publishRepo;
@@ -45,13 +44,13 @@ final class IvyPublisher implements InternalPublisher {
     /**
      * Creates an <code>IvySettings</code> to the specified repositories.
      */
-    private static IvySettings ivySettingsOf(JkPublishRepos publishRepos) {
+    private static IvySettings ivySettingsOf(JkRepoSet publishRepos) {
         final IvySettings ivySettings = new IvySettings();
         IvyTranslations.populateIvySettingsWithPublishRepo(ivySettings, publishRepos);
         return ivySettings;
     }
 
-    private static IvyPublisher of(IvySettings ivySettings, JkPublishRepos publishRepos,
+    private static IvyPublisher of(IvySettings ivySettings, JkRepoSet publishRepos,
                                    File descriptorOutputDir) {
         final Ivy ivy = IvyResolver.ivy(ivySettings);
         return new IvyPublisher(ivy, publishRepos, descriptorOutputDir);
@@ -61,7 +60,7 @@ final class IvyPublisher implements InternalPublisher {
      * Creates an instance using specified repository for publishing and the
      * specified repositories for resolving.
      */
-    public static IvyPublisher of(JkPublishRepos publishRepos, File descriptorOutputDir) {
+    public static IvyPublisher of(JkRepoSet publishRepos, File descriptorOutputDir) {
         return of(ivySettingsOf(publishRepos), publishRepos, descriptorOutputDir);
     }
 
@@ -151,11 +150,11 @@ final class IvyPublisher implements InternalPublisher {
         int count = 0;
         for (final DependencyResolver resolver : IvyTranslations.publishResolverOf(this.ivy
                 .getSettings())) {
-            final JkPublishRepo publishRepo = this.publishRepos.getRepoHavingUrl(IvyTranslations
+            final JkRepo publishRepo = this.publishRepos.getRepoConfigHavingUrl(IvyTranslations
                     .publishResolverUrl(resolver));
             final JkVersionedModule versionedModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
-            if (!isMaven(resolver) && publishRepo.filter().accept(versionedModule)) {
+            if (!isMaven(resolver) && publishRepo.publishConfig().filter().accept(versionedModule)) {
                 JkLog.execute("Publishing for repository " + resolver, () ->
                     this.publishIvyArtifacts(resolver, publication, date, moduleDescriptor));
                 count++;
@@ -203,15 +202,16 @@ final class IvyPublisher implements InternalPublisher {
         int count = 0;
         for (final RepositoryResolver resolver : IvyTranslations.publishResolverOf(this.ivy
                 .getSettings())) {
-            final JkPublishRepo publishRepo = this.publishRepos.getRepoHavingUrl(IvyTranslations
+            final JkRepo publishRepo = this.publishRepos.getRepoConfigHavingUrl(IvyTranslations
                     .publishResolverUrl(resolver));
             final JkVersionedModule versionedModule = IvyTranslations
                     .toJkVersionedModule(moduleDescriptor.getModuleRevisionId());
-            if (isMaven(resolver) && publishRepo.filter().accept(versionedModule)) {
+            if (isMaven(resolver) && publishRepo.publishConfig().filter().accept(versionedModule)) {
                 JkLog.execute("Publishing to " + resolver, () -> {
-                    final CheckFileFlag checkFileFlag = CheckFileFlag.of(publishRepo);
                     final IvyPublisherForMaven ivyPublisherForMaven = new IvyPublisherForMaven(
-                            checkFileFlag, resolver, descriptorOutputDir, publishRepo.uniqueSnapshot());
+                            publication.signer(), resolver, descriptorOutputDir,
+                            publishRepo.publishConfig().isUniqueSnapshot(),
+                            publication.checksumAlgos());
                     ivyPublisherForMaven.publish(moduleDescriptor, publication);
                 });
                 count++;
@@ -277,9 +277,10 @@ final class IvyPublisher implements InternalPublisher {
     }
 
     private DefaultModuleDescriptor createModuleDescriptor(JkVersionedModule jkVersionedModule,
-                                                           JkMavenPublication publication, JkDependencySet resolvedDependencies, Instant deliveryDate,
+                                                           JkMavenPublication publication,
+                                                           JkDependencySet resolvedDependencies,
+                                                           Instant deliveryDate,
                                                            JkVersionProvider resolvedVersions) {
-
         final DefaultModuleDescriptor moduleDescriptor = IvyTranslations.toPublicationLessModule(
                 jkVersionedModule, resolvedDependencies, null, resolvedVersions);
         IvyTranslations.populateModuleDescriptorWithPublication(moduleDescriptor, publication,
@@ -295,32 +296,6 @@ final class IvyPublisher implements InternalPublisher {
         }
     }
 
-    static class CheckFileFlag {
 
-        JkPgp pgpSigner;
-
-        private static CheckFileFlag of(JkPublishRepo publishRepo) {
-            final CheckFileFlag flag = new CheckFileFlag();
-            flag.pgpSigner = publishRepo.pgpSigner();
-            return flag;
-        }
-
-        public void publishChecks(DependencyResolver resolver, Artifact artifact, File file)
-                throws IOException {
-            if (pgpSigner != null) {
-                final String ext = artifact.getExt();
-                final Artifact signArtifact = withExtension(artifact, ext + ".asc");
-
-                final File signedFile = new File(file.getPath() + ".asc");
-                if (!signedFile.exists()) {
-                    JkLog.info("Signing file " + file.getPath() + " on detached signature "
-                            + signedFile.getPath());
-                    pgpSigner.sign(file.toPath());
-                }
-                resolver.publish(signArtifact, signedFile, true);
-            }
-        }
-
-    }
 
 }
