@@ -22,7 +22,7 @@ import java.util.Map;
         "  To configure a named repository, add following properties into your [Jerkar_user_home]/options.properties file :\n" +
         "    'Repos.[name].url', 'Repos.[value].username' and 'Repos.[of].password'"
 )
-public class JkPluginRepoConfig extends JkPlugin {
+public class JkPluginRepo extends JkPlugin {
 
     // ------------------------------ options -------------------------------------------
 
@@ -52,7 +52,7 @@ public class JkPluginRepoConfig extends JkPlugin {
 
     // ----------------------------------------------------------------------------------
 
-    protected JkPluginRepoConfig(JkBuild build) {
+    protected JkPluginRepo(JkBuild build) {
         super(build);
     }
 

@@ -16,9 +16,10 @@ import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.*;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 import org.jerkar.tool.builtins.java.JkPluginJava;
+import org.jerkar.tool.builtins.scaffold.JkPluginScaffold;
 
 @JkDoc("Generation of Eclipse files (.project and .classpath) from actual project structure and dependencies.")
-@JkDocPluginDeps(JkPluginJava.class)
+@JkDocPluginDeps({JkPluginJava.class})
 public final class JkPluginEclipse extends JkPlugin {
 
     @JkDoc("If true, .classpath will include javadoc reference for declared dependencies.")
@@ -32,8 +33,11 @@ public final class JkPluginEclipse extends JkPlugin {
     @JkDoc({ "If true, dependency paths will be expressed relatively to Eclipse path variables instead of absolute paths." })
     public boolean useVarPath = false;
 
+    private final JkPluginScaffold scaffold;
+
     protected JkPluginEclipse(JkBuild build) {
         super(build);
+        this.scaffold = build.plugins().get(JkPluginScaffold.class);
     }
 
     // ------------------------- setters ----------------------------
@@ -45,10 +49,12 @@ public final class JkPluginEclipse extends JkPlugin {
 
     // ------------------------ plugin methods ----------------------
 
+
+
     @Override
     @JkDoc("Adds .classpath and .project generation to scaffolding.")
     protected void decorateBuild() {
-        build.scaffolder().extraActions.chain(this::generateFiles);  // If this plugin is activated while scaffolding, we want Eclipse metada file be generated.
+        scaffold.addExtraAction(this::generateFiles);  // If this plugin is activated while scaffolding, we want Eclipse metada file be generated.
     }
 
     @JkDoc("Generates Eclipse files (.classpath and .project) in the current directory. The files reflect project " +

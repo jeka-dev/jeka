@@ -333,12 +333,6 @@ final class IvyPublisherForMaven {
                 JkLog.info("publishing to " + csDest);
                 repository.put(null, temp.toFile(), csDest, overwrite);
                 Files.deleteIfExists(temp);
-                if (signer != null) {
-                    final Path signed = signer.apply(source);
-                    final String signedDest = csDest + ".asc";
-                    repository.put(null, signed.toFile(), signedDest, overwrite);
-                    Files.deleteIfExists(signed);
-                }
             }
             if (this.signer != null) {
                 final Path signed = signer.apply(source);

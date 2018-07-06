@@ -38,8 +38,8 @@ public class MavenStyleBuild extends JkJavaProjectBuild {
                 .and(JUNIT, "4.11", TEST);
     }
 
-    JkPublishRepos publishRepositories() {
-        return JkPublishRepos.of(JkRepo.of("http://my.snapshot.repo").asPublishSnapshotRepo())
+    JkRepoSet publishRepositories() {
+        return JkRepoSet.of(JkRepo.of("http://my.snapshot.repo").asPublishSnapshotRepo())
                 .and(JkRepo.of("http://my.release.repo").asPublishReleaseRepo());
     }
 

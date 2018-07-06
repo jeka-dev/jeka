@@ -9,7 +9,8 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.*;
-import org.jerkar.tool.builtins.repos.JkPluginRepoConfig;
+import org.jerkar.tool.builtins.repos.JkPluginRepo;
+import org.jerkar.tool.builtins.scaffold.JkPluginScaffold;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ import java.util.List;
  * and a decoration for scaffolding.
  */
 @JkDoc("Build of a Java project through a JkJavaProject instance.")
-@JkDocPluginDeps(JkPluginRepoConfig.class)
+@JkDocPluginDeps(JkPluginRepo.class)
 public class JkPluginJava extends JkPlugin {
 
     // ------------------------------ options -------------------------------------------
@@ -41,7 +42,9 @@ public class JkPluginJava extends JkPlugin {
 
     // ----------------------------------------------------------------------------------
 
-    private final JkPluginRepoConfig repoPlugin;
+    private final JkPluginRepo repoPlugin;
+
+    private final JkPluginScaffold scaffoldPlugin;
 
     private final JkJavaProject project;
 
@@ -49,9 +52,10 @@ public class JkPluginJava extends JkPlugin {
 
     protected JkPluginJava(JkBuild build) {
         super(build);
-        this.repoPlugin = build.plugins().get(JkPluginRepoConfig.class);
+        this.repoPlugin = build.plugins().get(JkPluginRepo.class);
         this.project = new JkJavaProject(this.build.baseDir());
         this.producedArtifacts.add(this.project.maker().mainArtifactId());
+        this.scaffoldPlugin = build.plugins().get(JkPluginScaffold.class);
     }
 
     @JkDoc("Adds artifact creation task to 'doDefault' method." +
@@ -126,7 +130,7 @@ public class JkPluginJava extends JkPlugin {
         project.getSourceLayout().resources().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
         project.getSourceLayout().tests().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
         project.getSourceLayout().testResources().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
-        this.build.scaffolder().setBuildClassCode(code);
+        scaffoldPlugin.setBuildClassClode(code);
     }
 
     // ------------------------------ Accessors -----------------------------------------

@@ -1,16 +1,7 @@
 package org.jerkar.samples;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import org.jerkar.api.crypto.pgp.JkPgp;
-import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.depmanagement.JkMavenPublication;
-import org.jerkar.api.depmanagement.JkMavenPublicationInfo;
-import org.jerkar.api.depmanagement.JkPublishRepo;
-import org.jerkar.api.depmanagement.JkPublisher;
-import org.jerkar.api.depmanagement.JkRepo;
-import org.jerkar.api.depmanagement.JkVersionedModule;
+import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkJavaTestSpec;
@@ -19,6 +10,9 @@ import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkInit;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Equivalent to http://ant.apache.org/manual/tutorial-HelloWorldWithAnt.html
@@ -89,10 +83,8 @@ public class AntStyleBuild extends JkBuild {
 
     public void publish() {
         JkPgp pgp = JkPgp.ofSecretRing(Paths.get(pgpPrivateRingFile), pgpPassword);
-        JkPublishRepo repo = JkRepo.of(publishRepo)
-                .withOptionalCredentials("myRepoUserName", "myRepoPassword")
-                .asPublishRepo().withUniqueSnapshot(false).withSigner(pgp)
-                .andSha1Md5Checksums();
+        JkRepo repo = JkRepo.of(publishRepo)
+                .withOptionalCredentials("myRepoUserName", "myRepoPassword");
 
         JkVersionedModule versionedModule = JkVersionedModule.of(
                 "myGroup:myName:0.2.1");

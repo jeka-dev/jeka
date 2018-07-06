@@ -6,6 +6,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.*;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+import org.jerkar.tool.builtins.scaffold.JkPluginScaffold;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -14,13 +15,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @JkDoc("Generation of Idea Intellij metadata files (*.iml and modules.xml).")
+@JkDocPluginDeps(JkPluginScaffold.class)
 public final class JkPluginIdea extends JkPlugin {
 
     @JkDoc("If true, dependency paths will be expressed relatively to $JERKAR_REPO$ and $JERKAR_HOME$ path variable instead of absolute paths.")
     boolean useVarPath = false;
 
+    private final JkPluginScaffold scaffold;
+
     protected JkPluginIdea(JkBuild build) {
         super(build);
+        scaffold = build.plugins().get(JkPluginScaffold.class);
     }
 
     /** Generates Idea [my-module].iml file */
@@ -88,6 +93,6 @@ public final class JkPluginIdea extends JkPlugin {
     @JkDoc("Adds *.iml generation to scaffolding.")
     @Override
     protected void decorateBuild() {
-        this.build.scaffolder().extraActions.chain(this::generateIml);
+        scaffold.addExtraAction(this::generateIml);
     }
 }

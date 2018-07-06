@@ -12,6 +12,7 @@ import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.*;
+import org.jerkar.tool.builtins.scaffold.JkScaffolder;
 
 /**
  * Base build class for defining builds. All build classes must extend this class in order
@@ -44,8 +45,6 @@ public class JkBuild {
     private final JkImportedBuilds importedBuilds;
 
     private final JkRunnables defaulter = JkRunnables.noOp();
-
-    private JkScaffolder scaffolder;
 
     // ------------------ options --------------------------------------------------------
 
@@ -172,25 +171,8 @@ public class JkBuild {
         return baseDir.resolve(JkConstants.BUILD_OUTPUT_PATH);
     }
 
-    /**
-     * Returns the scaffolder object in charge of doing the scaffolding for this build.
-     * Override this method if you write a template class that need to do custom action for scaffolding.
-     */
-    public final JkScaffolder scaffolder() {
-        if (this.scaffolder == null) {
-            this.scaffolder = createScaffolder();
-        }
-        return this.scaffolder;
-    }
-
     public JkBuildPlugins plugins() {
         return this.plugins;
-    }
-
-    protected JkScaffolder createScaffolder() {
-        JkScaffolder scaffolder = new JkScaffolder(this.baseDir, this.scaffoldEmbed);
-        scaffolder.setBuildClassCode(JkUtilsIO.read(JkBuild.class.getResource("buildclass.snippet")));
-        return scaffolder;
     }
 
     protected void addDefaultOperation(Runnable runnable) {
@@ -228,15 +210,6 @@ public class JkBuild {
     }
 
     // ------------------------------ Command line methods ------------------------------
-
-    /**
-     * Creates the project structure (mainly project folder layout, build class code and IDE metadata) at the asScopedDependency
-     * of the current project.
-     */
-    @JkDoc("Creates the project structure")
-    public final void scaffold() {
-        scaffolder().run();
-    }
 
     /**
      * Clean the output directory.
