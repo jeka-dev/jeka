@@ -62,8 +62,8 @@ public class CoreBuild extends JkJavaProjectBuild {
     public static void applyCommonSettings(JkJavaProject project, String moduleName) {
 
         // Fork to avoid compile failure bug on github/travis
-        project.maker().setCompiler(JkJavaCompiler.base().fork(true));
-        project.maker().setTestCompiler(JkJavaCompiler.base().fork(true));
+        project.maker().setCompiler(JkJavaCompiler.of().fork(true));
+        project.maker().setTestCompiler(JkJavaCompiler.of().fork(true));
 
         project.setVersionedModule(JkModuleId.of("org.jerkar", moduleName).version(VERSION));
         project.maker().setArtifactFileNameSupplier(() -> project.getVersionedModule().moduleId().fullName());

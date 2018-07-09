@@ -37,9 +37,9 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private JkDependencyResolver dependencyResolver;
 
-    private JkJavaCompiler compiler = JkJavaCompiler.base();
+    private JkJavaCompiler compiler = JkJavaCompiler.of();
 
-    private JkJavaCompiler testCompiler = JkJavaCompiler.base();
+    private JkJavaCompiler testCompiler = JkJavaCompiler.of();
 
     private JkUnit juniter = JkUnit.of().withOutputOnConsole(false).withReport(JkUnit.JunitReportDetail.BASIC);
 

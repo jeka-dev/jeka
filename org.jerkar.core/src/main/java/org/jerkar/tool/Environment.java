@@ -97,8 +97,8 @@ class Environment {
 
         @Override
         public String toString() {
-            return "BuildClass=" + JkUtilsObject.toString(buildClass) + ", Log.Verbose=" + logVerbose
-                    + ", Log.headers=" + logHeaders + ", Log.maxLength=" + logMaxLength;
+            return "BuildClass=" + JkUtilsObject.toString(buildClass) + ", LogVerbose=" + logVerbose
+                    + ", LogHeaders=" + logHeaders + ", LogMaxLength=" + logMaxLength;
         }
 
         private static <T> T valueOf(Class<T> type, Map<String, String> map, T defaultValue, String ... names) {

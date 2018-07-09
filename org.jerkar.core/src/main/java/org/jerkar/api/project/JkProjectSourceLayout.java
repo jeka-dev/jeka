@@ -86,7 +86,7 @@ public class JkProjectSourceLayout {
     }
 
     /**
-     * Re-localise all locations defined under the base directory to the specified new base directory keeping the same relative path.
+     * Re-localise all locations defined under the base directory to the specified new of directory keeping the same relative path.
      */
     public JkProjectSourceLayout withBaseDir(Path newBaseDir) {
         return new JkProjectSourceLayout(newBaseDir,

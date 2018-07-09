@@ -1,15 +1,12 @@
 package org.jerkar.samples;
 
-import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
-import static org.jerkar.api.depmanagement.JkPopularModules.GUAVA;
-import static org.jerkar.api.depmanagement.JkPopularModules.JERSEY_SERVER;
-import static org.jerkar.api.depmanagement.JkPopularModules.JUNIT;
-
 import org.jerkar.api.depmanagement.JkDependencySet;
-import org.jerkar.api.depmanagement.JkPublishRepos;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.depmanagement.JkRepoSet;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
+import static org.jerkar.api.depmanagement.JkPopularModules.*;
 
 /**
  * Build sample for a jar project depending on several external modules. This
@@ -27,7 +24,6 @@ public class MavenStyleBuild extends JkJavaProjectBuild {
         java().project()
                 .setVersionedModule("org.jerkar:script-samples", "0.3-SNAPSHOT")
                 .setDependencies(dependencies());
-        java().project().maker().setDownloadRepos(JkRepoSet.of(JkRepo.of("http://my.repo1"), JkRepo.mavenCentral()));
         java().project().maker().setPublishRepos(publishRepositories());
     }
 
@@ -39,8 +35,7 @@ public class MavenStyleBuild extends JkJavaProjectBuild {
     }
 
     JkRepoSet publishRepositories() {
-        return JkRepoSet.of(JkRepo.of("http://my.snapshot.repo").asPublishSnapshotRepo())
-                .and(JkRepo.of("http://my.release.repo").asPublishReleaseRepo());
+        return JkRepoSet.ossrhSnapshotAndRelease("myusername", "mypasword");
     }
 
 }

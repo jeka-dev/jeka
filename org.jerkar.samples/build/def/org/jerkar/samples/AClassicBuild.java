@@ -2,9 +2,12 @@ package org.jerkar.samples;
 
 import static org.jerkar.api.depmanagement.JkJavaDepScopes.TEST;
 
+import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 import org.jerkar.api.depmanagement.JkDependencySet;
+import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.tool.JkImport;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
@@ -17,6 +20,7 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
  * @author Jerome Angibaud
  * @formatter:off
  */
+@JkImport("org.eclipse.jdt.core.compiler:ecj:4.6.1")
 public class AClassicBuild extends JkJavaProjectBuild {
 
     @Override
@@ -28,12 +32,13 @@ public class AClassicBuild extends JkJavaProjectBuild {
     
     @Override
     protected void configurePlugins() {
-        JkJavaProject project = java().project()
+        JkJavaProject project = project()
                 .setSourceVersion(JkJavaVersion.V7)
                 .setDependencies(JkDependencySet.of()
                         .and("com.google.guava:guava:21.0")
                         .and("com.sun.jersey:jersey-server:1.19")
                         .and("junit:junit:4.11", TEST));
+        project.maker().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
         project.maker().defineFatJarArtifact("fat");  // project will produce a fat jar as well.
     }
     

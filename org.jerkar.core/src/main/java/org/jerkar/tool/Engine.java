@@ -197,7 +197,7 @@ final class Engine {
 
     private void compileBuild(JkPathSequence buildPath) {
         JkJavaCompileSpec compileSpec = buildCompileSpec().setClasspath(buildPath);
-        JkJavaCompiler.base().compile(compileSpec);
+        JkJavaCompiler.of().compile(compileSpec);
         JkPathTree.of(this.resolver.buildSourceDir).refuse("**/*.java").copyTo(this.resolver.buildClassDir,
                 StandardCopyOption.REPLACE_EXISTING);
     }

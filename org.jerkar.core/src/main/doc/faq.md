@@ -35,14 +35,15 @@ Jerkar can use any JSR199 Java compiler to compile your Java code. Just set the 
 import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
 @JkImport("org.eclipse.jdt.core.compiler:ecj:4.6.1")
-public class Build extends JkJavaBuild {
+public class Build extends JkJavaProjectBuild {
 
-	@Override
-	public JkJavaCompiler productionCompiler() {
-		// need to use ECJ to compile this, not javac!
-		return super.productionCompiler().withCompiler(new EclipseCompiler())
-            .andOptions("-warn:nullDereference,unusedPrivate");  // Now you can use ecj specific options
-	}
+    @Override
+    protected void configurePlugins() {
+        ...
+        maker().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
+        ...
+    }
+    
 }
 ```
 

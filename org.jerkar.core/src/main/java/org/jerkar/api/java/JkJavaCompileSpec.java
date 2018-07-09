@@ -249,7 +249,7 @@ public final class JkJavaCompileSpec {
 
     private void addOrReplace(String optionName, String value) {
         int index = options.indexOf(optionName);
-        while ( index > 0) {
+        while ( index >= 0) {
             options.remove(index);
             if (index < options.size()) {
                 options.remove(index);

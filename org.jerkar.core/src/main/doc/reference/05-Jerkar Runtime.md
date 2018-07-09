@@ -5,7 +5,7 @@ This section details what happens behind the cover when Jerkar is run.
 
 ### Launching Java Process
  
-Jerkar is a pure Java application requiring __JDK 6 or above__. __JDK__ is required and __JRE__ is not sufficient.
+Jerkar is a pure Java application requiring __JDK 8__. __JDK__ is required and __JRE__ is not sufficient.
 Indeed Jerkar uses the JDK tools to compile java source files located under _[PROJECT DIR]/build/def_.
 
 To ease launching Java process in command line, Jerkar provides native scripts ( _jerkar.bat_ for __Windows__ and _jerkar_ for __Unix__ ).

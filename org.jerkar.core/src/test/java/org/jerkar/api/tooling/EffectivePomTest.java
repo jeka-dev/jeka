@@ -1,6 +1,5 @@
 package org.jerkar.api.tooling;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -13,7 +12,6 @@ import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.system.JkLocator;
-import org.jerkar.api.utils.JkUtilsFile;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -45,7 +43,7 @@ public class EffectivePomTest {
         final Path javaCode = srcDir.resolve("Build.java");
         JkPathFile.of(javaCode).createIfNotExist();
         Files.write(javaCode, code.getBytes());
-        final boolean success = JkJavaCompiler.base().compile( new JkJavaCompileSpec()
+        final boolean success = JkJavaCompiler.of().compile( new JkJavaCompileSpec()
                 .setOutputDir(binDir)
                 .addSources(srcDir)
                 .setOption("-cp", JkLocator.jerkarJarPath().toAbsolutePath().normalize().toString()));

@@ -1,26 +1,20 @@
 package org.jerkar.api.java;
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticListener;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaCompiler.CompilationTask;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
-
 import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsTime;
-import org.jerkar.api.system.JkException;
+
+import javax.tools.*;
+import javax.tools.JavaCompiler.CompilationTask;
+import java.io.File;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
 /**
  * Stand for a compilation setting and process. Use this class to perform java
@@ -28,12 +22,7 @@ import org.jerkar.api.system.JkException;
  */
 public final class JkJavaCompiler {
 
-    /**
-     * Creates a {@link JkJavaCompiler} producing its output in the given directory.
-     */
-    public static JkJavaCompiler base() {
-        return new JkJavaCompiler(true, null, null, new HashMap<>());
-    }
+
 
     private final boolean failOnError;
 
@@ -50,6 +39,17 @@ public final class JkJavaCompiler {
         this.fork = fork;
         this.compiler = compiler;
         this.compilerBinRepo = compilerBinRepo;
+    }
+
+    /**
+     * Creates a {@link JkJavaCompiler} producing its output in the given directory.
+     */
+    public static JkJavaCompiler of() {
+        return new JkJavaCompiler(true, null, null, new HashMap<>());
+    }
+
+    public static JkJavaCompiler of(JavaCompiler compiler) {
+        return new JkJavaCompiler(true, null, compiler, new HashMap<>());
     }
 
     /**
