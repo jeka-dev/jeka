@@ -1,4 +1,4 @@
-package org.jerkar.tool.builtins.idea;
+package org.jerkar.tool.builtins.intellij;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

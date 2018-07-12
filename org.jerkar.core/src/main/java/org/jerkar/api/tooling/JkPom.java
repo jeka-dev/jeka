@@ -208,48 +208,6 @@ public final class JkPom {
 
     }
 
-    /**
-     * The Jerkar build class source equivalent to this POM.
-     */
-    public String jerkarSourceCode(JkPathTree baseDir) {
-        final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
-        codeWriter.moduleId = JkModuleId.of(groupId(), artifactId());
-        codeWriter.dependencies = dependencies();
-        codeWriter.dependencyExclusions = dependencyExclusion();
-        codeWriter.extendedClass = "JkJavaProjectBuild";
-        codeWriter.imports.clear();
-        codeWriter.imports.addAll(JkCodeWriterForBuildClass.importsForJkJavaBuild());
-        codeWriter.staticImports.addAll(JkCodeWriterForBuildClass.staticImportsForJkJavaBuild());
-        codeWriter.repos = null;
-        codeWriter.version = version();
-        codeWriter.versionProvider = versionProvider();
-        if (baseDir.goTo("src/main/resources").exists()) {
-            codeWriter.imports.add(JkPathTreeSet.class.getName());
-            codeWriter.extraMethods.add(
-                    "    // If you move your resources to src/main/java (collocated with java classes code), \n" +
-                            "    // you can remove this method. \n" +
-                            "    @Override\n" +
-                            "    public JkPathTreeSet resources() {\n" +
-                            "        return baseDirAsTree().jump(\"src/main/resources\").asSet();\n" +
-                    "    }");
-        }
-        if (baseDir.goTo("src/test/resources").exists()) {
-            codeWriter.imports.add(JkPathTreeSet.class.getName());
-            codeWriter.extraMethods.add(
-                    "    // If you move your test resources to src/test/java (collocated with java classes code), \n" +
-                            "    // you can remove this method.\n" +
-                            "    @Override\n" +
-                            "    public JkPathTreeSet unitTestResources() {\n" +
-                            "        return baseDirAsTree().jump(\"src/test/resources\").asSet();\n" +
-                    "    }");
-        }
-        final VersionConstanter constanter = VersionConstanter.of(codeWriter.versionProvider);
-        for (final Map.Entry<String, String> entry : constanter.groupToVersion().entrySet()) {
-            codeWriter.addGroupVersionVariable(entry.getKey(), entry.getValue());
-        }
-        return codeWriter.wholeClass() + codeWriter.endClass();
-    }
-
     private static String resolveProps(String value, Map<String, String> props) {
         if (JkUtilsString.isBlank(value)) {
             return value;

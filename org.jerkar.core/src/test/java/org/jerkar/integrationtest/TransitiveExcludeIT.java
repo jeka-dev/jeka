@@ -45,7 +45,7 @@ public class TransitiveExcludeIT {
         JkDepExclude exclude = JkDepExclude.of("org.springframework.boot:spring-boot-test").scopes(COMPILE);
         JkDependencySet deps = JkDependencySet.of()
                 .and("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE", COMPILE)
-                .excludeGlobally(exclude);
+                .withGlobalExclusion(exclude);
         JkDependencyResolver resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
         JkResolveResult resolveResult = resolver.resolve(deps, COMPILE);  // works with non empty scopes resolution
@@ -59,7 +59,7 @@ public class TransitiveExcludeIT {
         exclude = JkDepExclude.of("org.springframework.boot:spring-boot-test");
         deps = JkDependencySet.of()
                 .and("org.springframework.boot:spring-boot-starter-test:1.5.3.RELEASE", COMPILE)
-                .excludeGlobally(exclude);
+                .withGlobalExclusion(exclude);
         resolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet())
                 .withParams(JkResolutionParameters.defaultScopeMapping(DEFAULT_SCOPE_MAPPING));
         resolveResult = resolver.resolve(deps);  // works with non empty scopes resolution

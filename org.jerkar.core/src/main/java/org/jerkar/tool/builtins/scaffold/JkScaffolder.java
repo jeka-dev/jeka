@@ -4,7 +4,7 @@ import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.system.JkLocator;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
+
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.JkConstants;
@@ -29,7 +29,7 @@ public final class JkScaffolder {
     JkScaffolder(Path baseDir, boolean embed) {
         super();
         this.baseTree = JkPathTree.of(baseDir);
-        this.buildClassCode = basicScaffoldedBuildClassCode();
+        this.buildClassCode = "";
         this.embed = embed;
     }
 
@@ -65,10 +65,6 @@ public final class JkScaffolder {
         this.buildClassCode = code;
     }
 
-    private static String basicScaffoldedBuildClassCode() {
-        final JkCodeWriterForBuildClass codeWriter = new JkCodeWriterForBuildClass();
-        codeWriter.extendedClass = "JkBuild";
-        return codeWriter.get();
-    }
+
 
 }

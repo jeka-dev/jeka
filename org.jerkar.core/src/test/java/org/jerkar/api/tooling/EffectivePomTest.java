@@ -29,25 +29,5 @@ public class EffectivePomTest {
         jkPom.repos();
     }
 
-    // Compilation fails for obscure reason (stack overflow)
-    public void testJerkarSourceCode() throws IOException, URISyntaxException {
-        final URL url = EffectivePomTest.class.getResource("effectivepom.xml");
-        final Path file = Paths.get(url.toURI());
-        final JkPom jkPom = JkPom.of(file);
-        final String code = jkPom.jerkarSourceCode(JkPathTree.of(Paths.get("toto")));
-        System.out.println(code);
-        final Path srcDir = Paths.get("build/output/test-generated-src");
-        Files.createDirectories(srcDir);
-        final Path binDir = Paths.get("build/output/test-generated-bin");
-        Files.createDirectories(binDir);
-        final Path javaCode = srcDir.resolve("Build.java");
-        JkPathFile.of(javaCode).createIfNotExist();
-        Files.write(javaCode, code.getBytes());
-        final boolean success = JkJavaCompiler.of().compile( new JkJavaCompileSpec()
-                .setOutputDir(binDir)
-                .addSources(srcDir)
-                .setOption("-cp", JkLocator.jerkarJarPath().toAbsolutePath().normalize().toString()));
-        Assert.assertTrue("The generated build class does not compile " + javaCode, success);
-    }
 
 }

@@ -4,7 +4,6 @@ import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsIterable;
-import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsString;
 
 import java.io.Serializable;
@@ -24,14 +23,14 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
 
     private final List<JkScopedDependency> dependencies;
 
-    private final Set<JkDepExclude> depExcludes;
+    private final Set<JkDepExclude> globalExclusions;
 
     private final JkVersionProvider versionProvider;
 
     private JkDependencySet(Iterable<JkScopedDependency> dependencies, Set<JkDepExclude> excludes, JkVersionProvider explicitVersions) {
         super();
         this.dependencies = Collections.unmodifiableList(JkUtilsIterable.listOf(dependencies));
-        this.depExcludes = Collections.unmodifiableSet(excludes);
+        this.globalExclusions = Collections.unmodifiableSet(excludes);
         this.versionProvider = explicitVersions;
     }
 
@@ -52,8 +51,8 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     /**
      * Creates a {@link JkDependencySet} based on jars located under the specified directory. Jars are
      * supposed to lie in a directory structure standing for the different scopes they are intended.
-     * So jars needed for compilation are supposed to be in <code>baseTree/compile</code>, jar needed for
-     * test are supposed to be in <code>baseTree/test</code> and so on.
+     * So jars needed for compilation are supposed to be in <code>baseDir/compile</code>, jar needed for
+     * test are supposed to be in <code>baseDir/test</code> and so on.
      */
     public static JkDependencySet ofLocal(Path baseDir) {
         final JkPathTree libDir = JkPathTree.of(baseDir);
@@ -105,7 +104,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             return this;
         }
         List<JkScopedDependency> deps = JkUtilsIterable.concatLists(this.dependencies, others);
-        return new JkDependencySet(deps, this.depExcludes, this.versionProvider);
+        return new JkDependencySet(deps, this.globalExclusions, this.versionProvider);
     }
 
     /**
@@ -206,11 +205,11 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
         for(JkDependency dependency : dependencies) {
             deps.add(JkScopedDependency.of(dependency));
         }
-        return new JkDependencySet(deps, this.depExcludes, this.versionProvider);
+        return new JkDependencySet(deps, this.globalExclusions, this.versionProvider);
     }
 
     /**
-     * Returns a clone of this object minus the dependencies on the given
+     * Returns a dependency set identical to this one minus the dependencies on the given
      * {@link JkModuleId}. This is used to exclude a given module to all
      * scope.
      */
@@ -225,16 +224,21 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
                 }
             }
         }
-        return new JkDependencySet(result, this.depExcludes, this.versionProvider);
+        return new JkDependencySet(result, this.globalExclusions, this.versionProvider);
     }
 
+    /**
+     * Returns a clone of this dep
+     * @param condition
+     * @return
+     */
     public JkDependencySet onlyIf(boolean condition) {
         if (condition) {
             return this;
         }
         LinkedList<JkScopedDependency> deps = new LinkedList<>(dependencies);
         deps.removeLast();
-        return new JkDependencySet(dependencies, depExcludes, versionProvider);
+        return new JkDependencySet(dependencies, globalExclusions, versionProvider);
     }
 
     /**
@@ -249,7 +253,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             }
             list.add(dep);
         }
-        return new JkDependencySet(list, this.depExcludes, this.versionProvider);
+        return new JkDependencySet(list, this.globalExclusions, this.versionProvider);
     }
 
     /**
@@ -264,7 +268,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             }
             list.add(dep);
         }
-        return new JkDependencySet(list, this.depExcludes, this.versionProvider);
+        return new JkDependencySet(list, this.globalExclusions, this.versionProvider);
     }
 
     /**
@@ -307,7 +311,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
      * Returns the dependencies to be excluded to the transitive chain when using this dependency.
      */
     public Set<JkDepExclude> excludes() {
-        return this.depExcludes;
+        return this.globalExclusions;
     }
 
     /**
@@ -337,7 +341,6 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
                             && scopedDependency.scopeMapping().entries().contains(scope))) {
                 depList.add(scopedDependency.dependency());
             }
-
         }
         return depList;
     }
@@ -436,56 +439,29 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
                 deps.add(scopedDependency);
             }
         }
-        return new JkDependencySet(deps, excludes(), this.versionProvider);
+        return new JkDependencySet(deps, this.globalExclusions, this.versionProvider);
     }
 
-    /**
-     * Creates a clone of these dependencies replacing the dynamic versions by
-     * the static ones specified in the {@link JkVersionedModule}s passed as
-     * argument. <br/>
-     */
-    public JkDependencySet resolvedWith(Iterable<JkVersionedModule> resolvedModules) {
-        return resolvedWith(JkVersionProvider.of(resolvedModules));
-    }
-
-
-    /**
-     * @see #resolvedWith(Iterable)
-     */
-    public JkDependencySet resolvedWith(JkVersionProvider provider) {
-
-        final List<JkScopedDependency> result  = new LinkedList<>();
-        for (final JkScopedDependency scopedDependency : this) {
-            if (! (scopedDependency.dependency() instanceof JkModuleDependency)) {
-                result.add(scopedDependency);
-                continue;
-            }
-            final JkModuleDependency moduleDependency = (JkModuleDependency) scopedDependency.dependency();
-            final JkModuleId moduleId = moduleDependency.moduleId();
-            final JkScopedDependency toAdd;
-            if (moduleDependency.version().isDynamicAndResovable()
-                    || moduleDependency.hasUnspecifedVersion()) {
-                final JkVersion resolvedVersion = provider.versionOf(moduleId);
-                if (resolvedVersion != null) {
-                    final JkModuleDependency resolvedModule = moduleDependency
-                            .resolvedTo(resolvedVersion);
-                    toAdd = scopedDependency
-                            .dependency(resolvedModule);
-                } else {
-                    toAdd = scopedDependency;
-                }
-            } else {
-                toAdd = scopedDependency;
-            }
-            result.add(toAdd);
-        }
-        return new JkDependencySet(result, this.depExcludes, this.versionProvider);
-    }
-
-    public JkDependencySet excludeGlobally(JkDepExclude exclude) {
-        Set<JkDepExclude> depExcludes = new HashSet<>(this.depExcludes);
+    public JkDependencySet withGlobalExclusion(JkDepExclude exclude) {
+        Set<JkDepExclude> depExcludes = new HashSet<>(this.globalExclusions);
         depExcludes.add(exclude);
         return new JkDependencySet(this.dependencies, depExcludes, this.versionProvider);
+    }
+
+    /**
+     * Returns a set a dependency set identical to this one but excluding the specified exclude
+     * from the transitive dependencies of the specified module.
+     */
+    public JkDependencySet withLocalExclusion(JkModuleId fromModule, JkDepExclude exclude) {
+        final List<JkScopedDependency> list = new LinkedList<>();
+        for (JkScopedDependency dep : this) {
+            if (dep.dependency() instanceof JkModuleDependency) {
+                JkModuleDependency moduleDependency = (JkModuleDependency) dep.dependency();
+                dep = dep.dependency(moduleDependency.andExclude(exclude));
+            }
+            list.add(dep);
+        }
+        return new JkDependencySet(list, this.globalExclusions, this.versionProvider);
     }
 
     /**
@@ -517,15 +493,18 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
     public String toJavaCode(int indentCount) {
         final String indent = JkUtilsString.repeat(" ", indentCount);
         final StringBuilder builder = new StringBuilder();
-        builder.append("JkDependencies.builder()");
+        builder.append("JkDependencySet.of()");
         for (final JkScopedDependency scopedDependency : this) {
             if (scopedDependency.dependency() instanceof JkModuleDependency) {
                 final JkModuleDependency moduleDep = (JkModuleDependency) scopedDependency
                         .dependency();
-                builder.append("\n").append(indent).append(".on(\"")
-                .append(moduleDep.moduleId().group()).append("\", \"")
-                .append(moduleDep.moduleId().name()).append("\", \"")
-                .append(moduleDep.version().value()).append("\"");
+                builder.append("\n").append(indent).append(".and(\"")
+                .append(moduleDep.moduleId().group()).append(":")
+                .append(moduleDep.moduleId().name());
+                if (!moduleDep.version().isUnspecified()) {
+                    builder.append(":" + moduleDep.version().value());
+                }
+                builder.append('"');
                 if (!scopedDependency.scopes().isEmpty()) {
                     builder.append(", ");
                     for (final JkScope scope : scopedDependency.scopes()) {
@@ -536,7 +515,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
                 builder.append(")");
             }
         }
-        builder.append(".build();");
+        builder.append(";");
         return builder.toString();
     }
 
