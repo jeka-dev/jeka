@@ -32,17 +32,71 @@ You can `jerkar help` to display the the command-line interface help.
 
 ### Create a project
 
-1. Create a new folder as root of your project.
-2. Execute `jerkar scaffold#run` under the project base directory. 
-This will create your project skeleton (sources and test directories, build sample class, etc...). 
+1. Create a new directory named 'mygroup.myproject' as the root of your project.
+2. Execute `jerkar scaffold#run` under this directory. 
+This will generate a project skeleton with the following build class at _[PROJECT DIR]/build/def/Build.java_
+
+<pre><code>import org.jerkar.api.depmanagement.JkDependencySet;
+import org.jerkar.api.java.JkJavaVersion;
+import org.jerkar.tool.JkInit;
+import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+
+import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
+
+/**
+ * @formatter:off
+ */
+class Build extends JkJavaProjectBuild {
+
+    /*
+     * Configures default values for option fields of this class. When this method is called, build option
+     * fields have not been populated yet.
+     */
+    @Override
+    protected void setupOptionDefaults() {
+        java().projectVersion = "0.0.1-SNAPSHOT";
+    }
+
+    /*
+     * Configures plugins to be bound to this build class. When this method is called, build option
+     * fields have already been populated.
+     */
+    @Override
+    protected void configurePlugins() {
+        project()   // Configure project structure and dependencies using project() instance.
+                .setVersionedModule("mygroup:myproject", java().projectVersion)
+                .setSourceVersion(JkJavaVersion.V8)
+                .setDependencies(dependencies());
+
+        maker()    // Configure how project should be build using maker() instance.
+                .setJuniter(maker().getJuniter().forked(true));
+    }
+
+    private JkDependencySet dependencies() {  // Example of dependencies.
+        return JkDependencySet.of()
+                .and("com.google.guava:guava:21.0")
+                .and("junit:junit:4.11", TEST);
+    }
+
+    public static void main(String[] args) {
+        JkInit.instanceOf(Build.class, args).doDefault();
+    }
+
+}</code></pre>
+
+You can execute `jerkar java#info` to see your project setup.
 
 ### Build your project
 
-1. Edit the Build.java source files under _[project root]/build/def_ folder if needed. For example, you can add compile dependencies.
-2. Execute `jerkar` under the project base directory. This will compile, run test and package your project in a jar file.
+1. Edit the Build.java source file above. For example, you can add compile dependencies.
+2. Just execute `jerkar` under the project base directory. This will compile, run test and package your project in a jar file.
 3. If you need to do more specific things, execute `jerkar java#help` to see which possibilities Java plugin offers.
 
-## Use Jerkar with Eclipse without any Eclipse plugin
+### Explore functions
+
+Execute `jerkar help` to display all what you can do from the command line for the current project.
+
+## Use with Eclipse
 
 ### Setup Eclipse 
 
@@ -78,23 +132,35 @@ Jerkar Repository Cache : C:\users\djeang\.jerkar\cache\repo   <-- This is the v
 ...
 ```
 
-### Configure a Jerkar project within Eclipse
+### setup _.classpath_ file
 
-To use Jerkar inside an Eclipse project, you have to add Jerkar lib, build/def folder and project dependencies to the build path.
-Jerkar can do it for you be executing `jerkar eclipse#generateFiles` from project root folder.
+Execute `jerkar eclipse#generateFiles` from project root folder to generate a _.classpath_ file 
+according the Build.java file.
 
-### Configure a Jerkar project within Idea
+### run/debug within Eclipse
 
-
-
-## Launch/Debug from your IDE
-
-You can execute your build within Eclipse using two ways :
-- Just execute your Build class main method within your IDE.
+You can go two ways :
+- Just execute your Build class main method.
 - Configure a launcher on `org.jerkar.tool.Main` class that has your project root dir as working directory.
 
 
+## Use with intellij
 
+### setup intellij
 
+As for Eclipse, you must declare the two path variable (go settings -> Apparence & behavior -> Path Variables)
+ * `JERKAR_HOME` which point to _[Jerkar Home]_, 
+ * `JERKAR_REPO` which point to _[Jerkar User Home]_/.jerkar/cache/repo_
 
- 
+### setup iml file
+
+Execute `jerkar intellij#generateIml` from project root folder to generate an iml file 
+according the Build.java file.
+
+### run/debug within Intellij
+
+You can go two ways :
+- Just execute your Build class main method.
+- Create a Run/Debug application configuration for class `org.jerkar.tool.Main` class.
+
+**Important :** Make sure you choose __$MODULE_DIR$__ as the working directory for the Run/Debug configuration.

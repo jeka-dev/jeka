@@ -3,6 +3,7 @@ package org.jerkar.tool.builtins.scaffold;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.system.JkLocator;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.tooling.JkCodeWriterForBuildClass;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsPath;
@@ -42,14 +43,20 @@ public final class JkScaffolder {
     public void run() {
         final Path def = baseTree.root().resolve(JkConstants.BUILD_DEF_DIR);
         JkUtilsPath.createDirectories(def);
+        JkLog.info("Create " + def);
         final Path buildClass = def.resolve("Build.java");
+        JkLog.info("Create " + buildClass);
         JkUtilsPath.write(buildClass, buildClassCode.getBytes(Charset.forName("UTF-8")));
         if (embed) {
+            JkLog.info("Create shell files.");
             JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar.bat"), baseTree.root().resolve("jerkar.bat"));
             JkUtilsIO.copyUrlToFile(JkScaffolder.class.getClassLoader().getResource("META-INF/bin/jerkar"), baseTree.root().resolve("jerkar"));
-            JkUtilsPath.copy(JkLocator.jerkarJarPath(),
-                    baseTree.root().resolve("build/boot").resolve(JkLocator.jerkarJarPath().getFileName()),
-                    StandardCopyOption.REPLACE_EXISTING);
+            Path jerkarJar = JkLocator.jerkarJarPath();
+            Path bootFolder = baseTree.root().resolve("build/boot");
+            JkUtilsPath.createDirectories(bootFolder);
+            Path target = bootFolder.resolve(jerkarJar.getFileName());
+            JkLog.info("Copy jerkar jar to " + baseTree.root().relativize(target));
+            JkUtilsPath.copy(jerkarJar, target, StandardCopyOption.REPLACE_EXISTING);
         }
         extraActions.run();
     }

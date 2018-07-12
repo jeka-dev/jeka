@@ -1,5 +1,6 @@
 package org.jerkar.tool.builtins.scaffold;
 
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
@@ -13,7 +14,7 @@ import org.jerkar.tool.JkPlugin;
 public class JkPluginScaffold extends JkPlugin {
 
     @JkDoc("If true, the Jerkar executables will be copied inside the project in order to be run in embedded mode.")
-    public boolean embbed;
+    public boolean embed;
 
     private final JkScaffolder scaffolder;
 
@@ -33,6 +34,7 @@ public class JkPluginScaffold extends JkPlugin {
 
     @JkDoc("Generates project skeleton (folders and files necessary to work with the project).")
     public void run() {
-       scaffolder.setEmbbed(embbed);
+       scaffolder.setEmbbed(embed);
+       scaffolder.run();
     }
 }

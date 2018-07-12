@@ -151,8 +151,14 @@ public final class JkJavaCompiler {
             final Iterable<? extends JavaFileObject> javaFileObjects = fileManager.getJavaFileObjectsFromFiles(files);
             final CompilationTask task = compiler.getTask(new PrintWriter(JkLog.stream()),
                     null, new JkDiagnosticListener(), options, null, javaFileObjects);
-            JkLog.info("" + files.size() + " files to compile.");
-            result = task.call();
+            if (files.size() > 0) {
+                JkLog.info("" + files.size() + " files to compile.");
+                result = task.call();
+            } else {
+                JkLog.warn("" + files.size() + " files to compile.");
+                JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
+                return true;
+            }
         } else {
             JkLog.info("Use a forked process to perform compilation : " + fork.commandName());
             result = runOnFork(compileSpec);

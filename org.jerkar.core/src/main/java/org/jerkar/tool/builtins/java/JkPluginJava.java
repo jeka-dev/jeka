@@ -20,7 +20,7 @@ import java.util.List;
  * and a decoration for scaffolding.
  */
 @JkDoc("Build of a Java project through a JkJavaProject instance.")
-@JkDocPluginDeps(JkPluginRepo.class)
+@JkDocPluginDeps({JkPluginRepo.class, JkPluginScaffold.class})
 public class JkPluginJava extends JkPlugin {
 
     // ------------------------------ options -------------------------------------------
@@ -126,6 +126,7 @@ public class JkPluginJava extends JkPlugin {
         String template = JkUtilsIO.read(JkPluginJava.class.getResource("buildclass.snippet"));
         String baseDirName = build.baseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
+        JkLog.info("Create source directories.");
         project.getSourceLayout().sources().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
         project.getSourceLayout().resources().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
         project.getSourceLayout().tests().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
