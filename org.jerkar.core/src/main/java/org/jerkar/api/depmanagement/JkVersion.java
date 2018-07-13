@@ -21,6 +21,9 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
      * Creates a {@link JkVersion} with the specified value.
      */
     public static JkVersion of(String name) {
+        if (name == null) {
+            return UNSPECIFIED;
+        }
         return new JkVersion(name);
     }
 

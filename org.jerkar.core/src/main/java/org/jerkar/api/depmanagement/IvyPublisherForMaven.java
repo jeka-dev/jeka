@@ -323,20 +323,21 @@ final class IvyPublisherForMaven {
         final Repository repository = this.resolver.getRepository();
         try {
             final String dest = completePath(destination);
-            JkLog.info("publishing to " + dest);
+            JkLog.info("Publish file " + dest);
             repository.put(null, source.toFile(), dest, overwrite);
             for (final String algo : checksumAlgos) {
                 final Path temp = Files.createTempFile("jk-checksum-", algo);
                 final String checkSum = ChecksumHelper.computeAsString(source.toFile(), algo);
                 Files.write(temp, checkSum.getBytes());
                 final String csDest = dest + "." + algo;
-                JkLog.info("publishing to " + csDest);
+                JkLog.info("Publish file " + csDest);
                 repository.put(null, temp.toFile(), csDest, overwrite);
                 Files.deleteIfExists(temp);
             }
             if (this.signer != null) {
                 final Path signed = signer.apply(source);
                 final String signedDest = destination + ".asc";
+                JkLog.info("Publish file " + signedDest);
                 repository.put(null, signed.toFile(), signedDest, overwrite);
             }
         } catch (final IOException e) {

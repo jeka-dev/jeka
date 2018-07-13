@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.jerkar.api.system.JkException;
 import org.jerkar.api.utils.JkUtilsIterable;
 
 /**
@@ -125,7 +126,7 @@ public final class JkResolveResult implements Serializable {
      */
     public JkResolveResult assertNoError() {
         if (this.errorReport.hasErrors) {
-            throw new IllegalStateException("Error in dependency resolution : "
+            throw new JkException("Error in dependency resolution : "
                     + this.errorReport + "On following tree : \n" + depTree.toStringComplete());
         }
         return this;

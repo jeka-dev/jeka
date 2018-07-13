@@ -2,9 +2,11 @@ package org.jerkar.api.depmanagement;
 
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 import org.jerkar.api.java.JkClassLoader;
+import org.jerkar.api.system.JkException;
 
 /**
  * A class to publish artifacts on repositories. According the nature of the
@@ -91,8 +93,16 @@ public final class JkPublisher {
      */
     public void publishMaven(JkVersionedModule versionedModule, JkMavenPublication publication,
             JkDependencySet dependencies) {
+        assertFilesToPublishExist(publication);
         this.ivyPublisher.publishMaven(versionedModule, publication, dependencies.modulesOnly());
     }
+
+    private void assertFilesToPublishExist(JkMavenPublication publication) {
+        List<Path> missingFiles = publication.missingFiles();
+        if (!missingFiles.isEmpty()) {
+            throw new JkException("One or several files to publish do not exist : " + missingFiles);
+        }
+     }
 
     /**
      * Publishes all artifact files for the specified artifact producer for the specified versioned module.
@@ -107,7 +117,7 @@ public final class JkPublisher {
                              Set<JkArtifactId> excludedArtifacts,
                              JkDependencySet dependencies, JkMavenPublicationInfo extraPublishInfo) {
         JkMavenPublication publication = JkMavenPublication.of(artifactLocator, excludedArtifacts).with(extraPublishInfo);
-        this.ivyPublisher.publishMaven(versionedModule, publication, dependencies.modulesOnly());
+        this.publishMaven(versionedModule, publication, dependencies);
     }
 
     /**

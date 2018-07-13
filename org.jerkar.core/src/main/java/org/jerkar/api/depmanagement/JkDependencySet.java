@@ -515,7 +515,6 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
                 builder.append(")");
             }
         }
-        builder.append(";");
         return builder.toString();
     }
 

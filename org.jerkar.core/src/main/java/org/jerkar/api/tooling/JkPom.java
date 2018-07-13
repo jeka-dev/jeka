@@ -197,8 +197,13 @@ public final class JkPom {
             }
         }
         final String scope = JkUtilsXml.directChildText(mvnDependency, "scope");
-        final JkScope jkScope = (scope == null) ? JkScope.of("compile") : JkScope.of(scope);
-        return JkScopedDependency.of(moduleDependency, jkScope);
+        final JkScope[] jkScopes;
+        if (scope == null || scope.equalsIgnoreCase("compile")) {
+            jkScopes = new JkScope[0];
+        } else {
+            jkScopes =  new JkScope[] {JkScope.of(scope)};
+        }
+        return JkScopedDependency.of(moduleDependency, jkScopes);
     }
 
     private JkDepExclude jkDepExclude(Element exclusionEl) {

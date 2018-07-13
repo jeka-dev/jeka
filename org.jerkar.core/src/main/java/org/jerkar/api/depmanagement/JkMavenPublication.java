@@ -177,6 +177,21 @@ public final class JkMavenPublication implements Serializable {
         return mainArtifacts.toString() + " / " + classifiedArtifacts.toString();
     }
 
+    List<Path> missingFiles() {
+        List<Path> result = new LinkedList<>();
+        for (File file : this.mainArtifacts) {
+            if (!file.exists()) {
+                result.add(file.toPath());
+            }
+        }
+        for (JkClassifiedFileArtifact classifiedFileArtifact : this.classifiedArtifacts) {
+            if (!classifiedFileArtifact.file.exists()) {
+                result.add(classifiedFileArtifact.file.toPath());
+            }
+        }
+        return result;
+    }
+
     /**
      * An artifact with a classifier for Maven repository.
      */
@@ -204,5 +219,9 @@ public final class JkMavenPublication implements Serializable {
         }
 
     }
+
+
+
+
 
 }
