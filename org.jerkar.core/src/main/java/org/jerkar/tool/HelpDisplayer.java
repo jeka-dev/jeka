@@ -24,13 +24,13 @@ final class HelpDisplayer {
             return;
         }
         StringBuilder sb = new StringBuilder()
-                .append("Usage: jerkar [methodA...] [pluginName#methodB] [-optionName=value...] [-pluginName#optionName=of...] [-DsystemPropName=of...]\n")
+                .append("Usage: jerkar [methodA...] [pluginName#methodB...] [-optionName=value...] [-pluginName#optionName=value...] [-DsystemPropName=value...]\n")
+                .append("Execute the specified methods defined in build class or plugins using the specified options and system properties.\n")
                 .append("When no method specified, 'doDefault' method is invoked.\n")
                 .append("Ex: jerkar clean java#pack -java#pack.sources=true -LogVerbose -other=xxx -DmyProp=Xxxx\n\n")
                 .append(standardOptions())
-                .append("\nAvailable methods and options :\n");
-
-        sb.append(BuildClassDef.of(build).description("", true));
+                .append("\nAvailable methods and options :\n")
+                .append(BuildClassDef.of(build).description("", true));
 
         // List plugins
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();

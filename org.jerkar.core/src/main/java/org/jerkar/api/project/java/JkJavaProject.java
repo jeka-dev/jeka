@@ -44,15 +44,9 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
 
     private final Path baseDir;
 
-    // A project has either a name either a versioned module.
-    private String artifactName;
-
-    // A project has either a name either a versioned module.
     private JkVersionedModule versionedModule;
 
     private JkProjectSourceLayout sourceLayout;
-
-    private JkProjectOutLayout outLayout;
 
     private JkDependencySet dependencies;
 
@@ -67,15 +61,14 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
 
     private JkMavenPublicationInfo mavenPublicationInfo;
 
-    private final JkJavaProjectMaker maker = new JkJavaProjectMaker(this);
+    private final JkJavaProjectMaker maker;
 
     public JkJavaProject(Path baseDir) {
         baseDir = baseDir.toAbsolutePath().normalize();
         this.baseDir = baseDir;
-        this.artifactName = this.baseDir.getFileName().toString();
         this.sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir);
-        this.outLayout = JkProjectOutLayout.classicJava().withOutputDir(baseDir.resolve("build/output"));
         this.dependencies = JkDependencySet.ofLocal(baseDir.resolve("build/libs"));
+        this.maker = new JkJavaProjectMaker(this);
     }
 
     // -------------------------- Other -------------------------
@@ -97,10 +90,6 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         return sourceLayout;
     }
 
-    public JkProjectOutLayout getOutLayout() {
-        return outLayout;
-    }
-
     @Override
     public JkDependencySet getDependencies() {
         return this.dependencies;
@@ -110,26 +99,8 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         return maker;
     }
 
-    public String getArtifactName() {
-        return artifactName;
-    }
-
-    public JkJavaProject setArtifactName(String artifactName) {
-        this.artifactName = artifactName;
-        return this;
-    }
-
     public JkJavaProject setSourceLayout(JkProjectSourceLayout sourceLayout) {
         this.sourceLayout = sourceLayout.withBaseDir(this.baseDir);
-        return this;
-    }
-
-    public JkJavaProject setOutLayout(JkProjectOutLayout outLayout) {
-        if (outLayout.outputPath().isAbsolute()) {
-            this.outLayout = outLayout;
-        } else {
-            this.outLayout = outLayout.withOutputDir(this.baseDir.resolve(outLayout.outputPath()));
-        }
         return this;
     }
 

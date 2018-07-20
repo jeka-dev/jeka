@@ -9,8 +9,8 @@ public abstract class JkPlugin {
     // Build instance owning  this plugin instance.
     protected final JkBuild build;
 
-    /**
-     * Right after to be instantiated, plugin instances are likely to configured by the owning build.
+    /*
+     * Right after to be instantiated, plugin instances are likely to be configured by the owning build.
      * Therefore, every plugin members that are likely to be configured by the owning build must be
      * initialized in the constructor.
      */
@@ -18,7 +18,7 @@ public abstract class JkPlugin {
         this.build = build;
     }
 
-    @JkDoc("Display help about this plugin.")
+    @JkDoc("Displays help about this plugin.")
     public void help() {
         HelpDisplayer.helpPlugin(this);
     }

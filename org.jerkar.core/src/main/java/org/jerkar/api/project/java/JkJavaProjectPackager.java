@@ -25,7 +25,7 @@ public final class JkJavaProjectPackager {
     }
 
     public void mainJar(Path target) {
-        JkJarMaker.jar(target, project.getManifest(), project.getOutLayout().classDir(),
+        JkJarMaker.jar(target, project.getManifest(), project.maker().getOutLayout().classDir(),
                 project.getExtraFilesToIncludeInJar());
     }
 
@@ -36,17 +36,17 @@ public final class JkJavaProjectPackager {
         JkClasspath classpath = JkClasspath.ofMany(project.maker().runtimeDependencies(project.maker().mainArtifactId()));
         JkArtifactId artifactFileId = JkArtifactId.of(classifier, "jar");
         Path result = project.maker().artifactPath(artifactFileId);
-        JkJarMaker.fatJar(result, project.getManifest(), project.getOutLayout().classDir(),
+        JkJarMaker.fatJar(result, project.getManifest(), project.maker().getOutLayout().classDir(),
                 project.getExtraFilesToIncludeInJar(), classpath);
         return result;
     }
 
     public void sourceJar(Path target) {
-        project.getSourceLayout().sources().and(project.getOutLayout().generatedSourceDir()).zipTo(target);
+        project.getSourceLayout().sources().and(project.maker().getOutLayout().generatedSourceDir()).zipTo(target);
     }
 
     public void javadocJar(Path target) {
-        Path javadocDir = project.getOutLayout().getJavadocDir();
+        Path javadocDir = project.maker().getOutLayout().getJavadocDir();
         if (!Files.exists(javadocDir)) {
             throw new IllegalStateException("No javadoc has not been generated in " + javadocDir.toAbsolutePath()
                     + ". Can't create a javadoc jar until javadoc files has been generated.");
@@ -55,7 +55,7 @@ public final class JkJavaProjectPackager {
     }
 
     public void testJar(Path target) {
-        JkJarMaker.jar(target, project.getManifest(), project.getOutLayout().testClassDir(),  null);
+        JkJarMaker.jar(target, project.getManifest(), project.maker().getOutLayout().testClassDir(),  null);
     }
 
     public void testSourceJar(Path target) {

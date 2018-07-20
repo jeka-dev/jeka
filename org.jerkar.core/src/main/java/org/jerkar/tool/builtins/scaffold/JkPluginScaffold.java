@@ -10,7 +10,7 @@ import org.jerkar.tool.JkPlugin;
 /**
  * proposes method to generate a project skeleton (folder structure, build artifacts, configuration files, ....)
  */
-@JkDoc("Proposes method to generate a project skeleton.")
+@JkDoc("Provides method to generate a project skeleton (folder structure and basic build files).")
 public class JkPluginScaffold extends JkPlugin {
 
     @JkDoc("If true, the Jerkar executables will be copied inside the project in order to be run in embedded mode.")

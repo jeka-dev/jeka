@@ -7,6 +7,7 @@ import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkJavaTestSpec;
 import org.jerkar.api.java.junit.JkUnit;
+import org.jerkar.api.project.JkProjectOutLayout;
 import org.jerkar.api.system.JkLog;
 
 import java.nio.charset.Charset;
@@ -43,6 +44,8 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private JkUnit juniter = JkUnit.of().withOutputOnConsole(false).withReport(JkUnit.JunitReportDetail.BASIC);
 
+    private JkPathMatcher testClassMatcher = JkPathMatcher.accept("**/*Test.class");
+
     private List<String> javadocOptions = new LinkedList<>();
 
     private JkRepoSet publishRepos = JkRepoSet.local();
@@ -61,27 +64,30 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private final Map<Set<JkScope>, JkPathSequence> depCache = new HashMap<>();
 
+    private JkProjectOutLayout outLayout;
+
     // commons ------------------------
 
     JkJavaProjectMaker(JkJavaProject project) {
         this.project = project;
+        this.outLayout = JkProjectOutLayout.classicJava().withOutputDir(project.baseDir().resolve("build/output"));
         this.packager = JkJavaProjectPackager.of(project);
         this.cleaner = JkRunnables.of(
-                () -> JkPathTree.of(project.getOutLayout().outputPath()).deleteContent());
+                () -> JkPathTree.of(getOutLayout().outputPath()).deleteContent());
         Charset charset = project.getCompileSpec().getEncoding() == null ? Charset.defaultCharset() :
                 Charset.forName(project.getCompileSpec().getEncoding());
         this.resourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().resources())
-                .and(project.getOutLayout().generatedResourceDir())
+                .and(getOutLayout().generatedResourceDir())
                 .and(project.getResourceInterpolators())
-                .generateTo(project.getOutLayout().classDir(), charset));
+                .generateTo(getOutLayout().classDir(), charset));
         this.compileRunner = JkRunnables.of(() -> {
             JkJavaCompileSpec compileSpec = compileSourceSpec();
             compiler.compile(compileSpec);
         });
         testResourceProcessor = JkRunnables.of(() -> JkResourceProcessor.of(project.getSourceLayout().testResources())
-                .and(project.getOutLayout().generatedTestResourceDir())
+                .and(getOutLayout().generatedTestResourceDir())
                 .and(project.getResourceInterpolators())
-                .generateTo(project.getOutLayout().testClassDir(), charset));
+                .generateTo(getOutLayout().testClassDir(), charset));
         testCompileRunner = JkRunnables.of(() -> {
             JkJavaCompileSpec testCompileSpec = testCompileSpec();
             testCompiler.compile(testCompileSpec);
@@ -89,8 +95,6 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         artifactFileNameSupplier = () -> {
             if (project.getVersionedModule() != null) {
                 return fileName(project.getVersionedModule());
-            } else if (project.getArtifactName() != null) {
-                return project.getArtifactName();
             }
             return project.baseDir().getFileName().toString();
         };
@@ -112,7 +116,6 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return dependencyResolver;
     }
 
-
     private void compileAndTestIfNeeded() {
         if (!status.compileDone) {
             compile();
@@ -126,7 +129,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      * Generates javadoc files (files + zip)
      */
     public void generateJavadoc() {
-        JkJavadocMaker.of(project.getSourceLayout().sources(), project.getOutLayout().getJavadocDir())
+        JkJavadocMaker.of(project.getSourceLayout().sources(), getOutLayout().getJavadocDir())
                 .withClasspath(depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
                 .andOptions(this.javadocOptions).process();
         status.javadocGenerated = true;
@@ -188,8 +191,8 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return result
                 .setClasspath(classpath)
                 .addSources(project.getSourceLayout().sources())
-                .addSources(project.getOutLayout().generatedSourceDir())
-                .setOutputDir(project.getOutLayout().classDir());
+                .addSources(getOutLayout().generatedSourceDir())
+                .setOutputDir(getOutLayout().classDir());
     }
 
     public final JkRunnables postCompile = JkRunnables.noOp();
@@ -219,23 +222,27 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private JkJavaCompileSpec testCompileSpec() {
         JkJavaCompileSpec result = project.getCompileSpec().copy();
-        final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andFirst(project.getOutLayout().classDir());
+        final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andFirst(getOutLayout().classDir());
         return result
                 .setClasspath(classpath)
                 .addSources(project.getSourceLayout().tests())
-                .setOutputDir(project.getOutLayout().testClassDir());
+                .setOutputDir(getOutLayout().testClassDir());
     }
 
     private JkUnit juniter() {
-        final Path junitReport = project.getOutLayout().testReportDir().resolve("junit");
+        final Path junitReport = getOutLayout().testReportDir().resolve("junit");
         return this.juniter.withReportDir(junitReport);
     }
 
     private JkJavaTestSpec testSpec() {
-        final JkClasspath classpath = JkClasspath.of(project.getOutLayout().testClassDir())
-                .and(project.getOutLayout().classDir())
+        return JkJavaTestSpec.of(testClasspath(),
+                JkPathTreeSet.of(getOutLayout().testClassDir()).andMatcher(testClassMatcher));
+    }
+
+    public JkClasspath testClasspath() {
+        return JkClasspath.of(getOutLayout().testClassDir())
+                .and(getOutLayout().classDir())
                 .andMany(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
-        return JkJavaTestSpec.of(classpath, JkPathTreeSet.of(project.getOutLayout().testClassDir()));
     }
 
     public final JkRunnables testExecutor = JkRunnables.of(() -> juniter().run(testSpec()));
@@ -271,11 +278,12 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         final String namePart = artifactFileNameSupplier.get();
         final String classifier = artifactId.classifier() == null ? "" : "-" + artifactId.classifier();
         final String extension = artifactId.extension() == null ? "" : "." + artifactId.extension();
-        return project.getOutLayout().outputPath().resolve(namePart + classifier + extension);
+        return getOutLayout().outputPath().resolve(namePart + classifier + extension);
     }
 
     String fileName(JkVersionedModule versionedModule) {
-        return versionedModule.moduleId().fullName() + "-" + versionedModule.version().value();
+        String version = versionedModule.version().isUnspecified() ? "" : "-" + versionedModule.version().value();
+        return versionedModule.moduleId().fullName() + version;
     }
 
     /**
@@ -356,7 +364,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     public JkJavaProjectMaker publishMaven() {
-        JkPublisher.of(this.publishRepos, project.getOutLayout().outputPath())
+        JkPublisher.of(this.publishRepos, getOutLayout().outputPath())
         .publishMaven(project.getVersionedModule(), this, artifactFileIdsToNotPublish,
                 this.getDeclaredDependencies(), project.getMavenPublicationInfo());
         return this;
@@ -371,7 +379,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
                 .andOptional(artifactPath(TEST_SOURCE_ARTIFACT_ID), JkJavaDepScopes.SOURCES);
         final JkVersionProvider resolvedVersions = this.dependencyResolver()
                 .resolve(dependencies, dependencies.involvedScopes()).resolvedVersionProvider();
-        JkPublisher.of(this.publishRepos, project.getOutLayout().outputPath())
+        JkPublisher.of(this.publishRepos, getOutLayout().outputPath())
         .publishIvy(project.getVersionedModule(), publication, dependencies,
                 JkJavaDepScopes.DEFAULT_SCOPE_MAPPING, Instant.now(), resolvedVersions);
         return this;
@@ -418,6 +426,19 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     public JkJavaProjectPackager getPackager() {
         return packager;
+    }
+
+    public JkProjectOutLayout getOutLayout() {
+        return outLayout;
+    }
+
+    public JkJavaProjectMaker setOutLayout(JkProjectOutLayout outLayout) {
+        if (outLayout.outputPath().isAbsolute()) {
+            this.outLayout = outLayout;
+        } else {
+            this.outLayout = outLayout.withOutputDir(this.project.baseDir().resolve(outLayout.outputPath()));
+        }
+        return this;
     }
 
     public JkDependencyResolver getDependencyResolver() {
@@ -499,6 +520,13 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         this.skipTests = skipTests;
     }
 
+    public JkPathMatcher getTestClassMatcher() {
+        return testClassMatcher;
+    }
+
+    public void setTestClassMatcher(JkPathMatcher testClassMatcher) {
+        this.testClassMatcher = testClassMatcher;
+    }
     // ----------- artifact management --------------------------------------
 
     public void makeArtifact(JkArtifactId artifactId) {
@@ -567,7 +595,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         }
 
         boolean compileOutputPresent() {
-            return Files.exists(JkJavaProjectMaker.this.project.getOutLayout().classDir());
+            return Files.exists(JkJavaProjectMaker.this.getOutLayout().classDir());
         }
 
     }

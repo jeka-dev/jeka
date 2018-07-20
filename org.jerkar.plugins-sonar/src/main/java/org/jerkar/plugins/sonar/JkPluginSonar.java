@@ -28,15 +28,15 @@ public class JkPluginSonar extends JkPlugin {
         final Path baseDir = sourceLayout.baseDir();
         final JkPathSequence libs = project.maker().getDependencyResolver().get(project.getDependencies(),
                 JkJavaDepScopes.RUNTIME, JkJavaDepScopes.PROVIDED);
-        final Path testReportDir = project.getOutLayout().testReportDir();
+        final Path testReportDir = project.maker().getOutLayout().testReportDir();
         final JkVersionedModule module = project.getVersionedModule();
-        final String fullName = module != null ? module.moduleId().fullName() : project.getArtifactName();
-        final String name = module != null ? module.moduleId().name() : project.getArtifactName();
+        final String fullName = module != null ? module.moduleId().fullName() : project.baseDir().getFileName().toString();
+        final String name = module != null ? module.moduleId().name() : project.baseDir().getFileName().toString();
         final JkVersion version = module != null ? module.version() : JkVersion.of("");
         return JkSonar
                 .of(fullName, name, version)
                 .withProperties(JkOptions.getAllStartingWith("sonar.")).withProjectBaseDir(baseDir)
-                .withBinaries(project.getOutLayout().classDir())
+                .withBinaries(project.maker().getOutLayout().classDir())
                 .withLibraries(libs)
                 .withSourcesPath(sourceLayout.sources().rootDirsOrZipFiles())
                 .withTestPath(sourceLayout.tests().rootDirsOrZipFiles())
@@ -47,7 +47,7 @@ public class JkPluginSonar extends JkPlugin {
                         baseDir.relativize(testReportDir.resolve("junit")).toString())
                 .withProperty(JkSonar.SOURCE_ENCODING, project.getCompileSpec().getEncoding())
                 .withProperty(JkSonar.JACOCO_REPORTS_PATHS,
-                        baseDir.relativize(project.getOutLayout().outputPath("jacoco/jacoco.exec")).toString());
+                        baseDir.relativize(project.maker().getOutLayout().outputPath("jacoco/jacoco.exec")).toString());
 
     }
 

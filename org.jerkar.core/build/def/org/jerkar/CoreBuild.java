@@ -34,7 +34,7 @@ public class CoreBuild extends JkJavaProjectBuild {
     protected void configurePlugins() {
         applyCommonSettings(project(), "core");
         maker().defineArtifact(DISTRIB_FILE_ID, this::doDistrib);
-        this.distribFolder = project().getOutLayout().outputPath().resolve("distrib");
+        this.distribFolder = project().maker().getOutLayout().outputPath().resolve("distrib");
     }
 
     private void doDistrib() {

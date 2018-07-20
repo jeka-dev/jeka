@@ -46,7 +46,7 @@ public class JkPluginJava extends JkPlugin {
 
     private final JkPluginScaffold scaffoldPlugin;
 
-    private final JkJavaProject project;
+    private JkJavaProject project;
 
     private final List<JkArtifactId> producedArtifacts = new ArrayList<>();
 
@@ -140,12 +140,16 @@ public class JkPluginJava extends JkPlugin {
         return project;
     }
 
+    public void setProject(JkJavaProject javaProject) {
+        this.project = javaProject;
+    }
+
     public List<JkArtifactId> producedArtifacts() {
         return producedArtifacts;
     }
 
     public JkPathTree ouputTree() {
-        return JkPathTree.of(this.project().getOutLayout().outputPath());
+        return JkPathTree.of(this.project().maker().getOutLayout().outputPath());
     }
 
     public void addArtifactToProduce(JkArtifactId artifactId) {

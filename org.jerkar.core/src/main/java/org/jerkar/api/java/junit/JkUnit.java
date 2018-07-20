@@ -20,6 +20,7 @@ import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.JkClasspath;
 import org.jerkar.api.java.JkJavaProcess;
+import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
@@ -254,7 +255,7 @@ public final class JkUnit {
                 result.set(fromJunit3Result(properties, name, testResult, duration));
             } else {
                 JkUtilsIO.closeifClosable(classLoader.classloader());
-                throw new IllegalStateException("No Junit found on test classpath.");
+                throw new JkException("No Junit found on test classpath.");
             }
 
             if (result.get().failureCount() > 0) {
@@ -262,7 +263,7 @@ public final class JkUnit {
                     JkLog.error(String.join("\n",
                             result.get().toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
                     JkUtilsIO.closeifClosable(classLoader.classloader());
-                    throw new IllegalStateException("Test failed : " + result.toString());
+                    throw new JkException("Test failed : " + result.toString());
                 } else {
                     JkLog.warn(String.join("\n",
                             result.get().toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
