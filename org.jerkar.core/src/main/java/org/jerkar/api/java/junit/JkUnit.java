@@ -239,7 +239,7 @@ public final class JkUnit {
                             printOutputOnConsole,
                             reportDetail, classes, reportDir.toFile()));
                 } else {
-                    result.set(JUnit4TestLauncher.launchInClassLoader(classes, printOutputOnConsole,
+                    result.set(JUnit4TestLauncher.launchInProcess(classes, printOutputOnConsole,
                             reportDetail, reportDir.toFile()));
                 }
             } else if (classLoader.isDefined(JUNIT3_RUNNER_CLASS_NAME)) {

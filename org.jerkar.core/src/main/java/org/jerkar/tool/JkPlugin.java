@@ -31,11 +31,7 @@ public abstract class JkPlugin {
     }
 
     public final String name() {
-        return nameOf(this.getClass());
-    }
-
-    static final String nameOf(Class<? extends JkPlugin> pluginClass) {
-        final String className = pluginClass.getSimpleName();
+        final String className = this.getClass().getSimpleName();
         if (! className.startsWith(CLASS_PREFIX) || className.equals(CLASS_PREFIX)) {
             throw new IllegalStateException(String.format("Plugin class not properly named. Name should be formatted as " +
                     "'%sXxxx' where xxxx is the name of the plugin (uncapitalized). Was %s.", CLASS_PREFIX, className));

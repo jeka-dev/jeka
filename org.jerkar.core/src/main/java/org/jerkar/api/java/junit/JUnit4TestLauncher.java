@@ -41,8 +41,8 @@ class JUnit4TestLauncher {
     /**
      * @param classes Non-empty <code>Iterable</code>.
      */
-    public static JkTestSuiteResult launchInClassLoader(Iterable<Class> classes, boolean logRunningTest,
-            JunitReportDetail reportDetail, File reportDir) {
+    public static JkTestSuiteResult launchInProcess(Iterable<Class> classes, boolean logRunningTest,
+                                                    JunitReportDetail reportDetail, File reportDir) {
         final JkClassLoader classloader = JkClassLoader.of(classes.iterator().next());
         final Class[] classArray = JkUtilsIterable.arrayOf(classes, Class.class);
         classloader.addEntry(JkLocator.jerkarJarPath());

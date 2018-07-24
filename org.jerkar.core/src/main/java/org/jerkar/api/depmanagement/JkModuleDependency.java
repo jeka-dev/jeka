@@ -107,6 +107,11 @@ public final class JkModuleDependency implements JkDependency {
      */
     public static JkModuleDependency of(String description) {
         final String[] strings = description.split( ":");
+        final String errorMessage = "Dependency specification '" + description + "' is not correct. Should be one of group:name\n" +
+        ", group:name:version, 'group:value:type:version, group:of:type:artifact:version";
+        if (strings.length < 2) {
+            throw new JkException(errorMessage);
+        }
         JkModuleId moduleId = JkModuleId.of(strings[0], strings[1]);
         if (strings.length == 2) {
             return JkModuleDependency.of(moduleId, JkVersion.UNSPECIFIED);
@@ -121,8 +126,7 @@ public final class JkModuleDependency implements JkDependency {
             return JkModuleDependency.of(moduleId, JkVersion.of(strings[4]))
                     .classifier(strings[3]).ext(strings[2]);
         }
-        throw new JkException("Dependency specification '" + description + "' is not correct. Should be one of group:name\n" +
-                ", group:name:version, 'group:value:type:version, group:of:type:artifact:version");
+        throw new JkException(errorMessage);
     }
 
     /**

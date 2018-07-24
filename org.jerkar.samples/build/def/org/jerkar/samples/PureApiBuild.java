@@ -18,10 +18,8 @@ public class PureApiBuild extends JkBuild {
     public void doDefault() {
         JkJavaProject javaProject = new JkJavaProject(this.baseDir());
 
-        javaProject.setArtifactName("pure-api-build-project");
-
         // We want to output stuff in another place than build/output
-        javaProject.setOutLayout(javaProject.getOutLayout().withOutputDir("build/output/alt-output"));
+        javaProject.maker().setOutLayout(javaProject.maker().getOutLayout().withOutputDir("build/output/alt-output"));
 
         JkDependencySet deps = JkDependencySet.of().and(JkPopularModules.JUNIT, "4.12",JkJavaDepScopes.TEST);
 

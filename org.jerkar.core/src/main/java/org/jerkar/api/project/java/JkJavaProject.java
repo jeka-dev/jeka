@@ -9,7 +9,9 @@ import org.jerkar.api.java.JkManifest;
 import org.jerkar.api.java.JkResourceProcessor;
 import org.jerkar.api.project.JkProjectOutLayout;
 import org.jerkar.api.project.JkProjectSourceLayout;
+import org.jerkar.tool.JkConstants;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
@@ -68,6 +70,10 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         this.baseDir = baseDir;
         this.sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir);
         this.dependencies = JkDependencySet.ofLocal(baseDir.resolve("build/libs"));
+        final Path path = baseDir.resolve("build/def/dependencies.txt");
+        if (Files.exists(path)) {
+            this.dependencies = this.dependencies.and(JkDependencySet.fromDescription(path));
+        }
         this.maker = new JkJavaProjectMaker(this);
     }
 

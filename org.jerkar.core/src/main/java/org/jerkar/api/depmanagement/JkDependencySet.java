@@ -3,10 +3,12 @@ package org.jerkar.api.depmanagement;
 import org.jerkar.api.depmanagement.JkScopedDependency.ScopeType;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.utils.JkUtilsAssert;
+import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsString;
 
-import java.io.Serializable;
+import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Supplier;
@@ -539,6 +541,56 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
             }
         }
         return result;
+    }
+
+    public static JkDependencySet fromDescription(Path path) {
+        try (InputStream inputStream = Files.newInputStream(path)) {
+            return fromDescription(inputStream);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static JkDependencySet fromDescription(InputStream inputStream) {
+        String content = JkUtilsIO.readAsString(inputStream);
+        return fromDescription(content);
+    }
+
+    public static JkDependencySet fromDescription(String description) {
+        String[] lines = description.split(System.lineSeparator());
+        JkScope[] currentScopes = JkJavaDepScopes.COMPILE_AND_RUNTIME;
+        List<JkScopedDependency> list = new LinkedList<>();
+        for (String line : lines) {
+            if (line.trim().isEmpty()) {
+                continue;
+            }
+            if (line.startsWith("-")) {
+                currentScopes = translateToScopes(line);
+                continue;
+            }
+            JkModuleDependency dependency = JkModuleDependency.of(line.trim());
+            JkScopedDependency scopedDependency = JkScopedDependency.of(dependency, currentScopes);
+            list.add(scopedDependency);
+        }
+        return JkDependencySet.of(list);
+    }
+
+    private static JkScope[] translateToScopes(String line) {
+        String payload = JkUtilsString.substringAfterFirst(line,"-");
+        String[] items = payload.split(" ");
+        List<JkScope> result = new LinkedList<>();
+        for (String item : items) {
+            if (JkUtilsString.isBlank(item)) {
+                continue;
+            }
+            JkScope javaDcope = JkJavaDepScopes.of(item.trim());
+            if (javaDcope != null) {
+                result.add(javaDcope);
+            } else {
+                result.add(JkScope.of(item.trim()));
+            }
+        }
+        return result.toArray(new JkScope[0]);
     }
 
 }

@@ -68,7 +68,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     // commons ------------------------
 
-    JkJavaProjectMaker(JkJavaProject project) {
+    public JkJavaProjectMaker(JkJavaProject project) {
         this.project = project;
         this.outLayout = JkProjectOutLayout.classicJava().withOutputDir(project.baseDir().resolve("build/output"));
         this.packager = JkJavaProjectPackager.of(project);

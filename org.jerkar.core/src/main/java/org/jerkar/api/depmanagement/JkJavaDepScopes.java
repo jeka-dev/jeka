@@ -57,6 +57,22 @@ public final class JkJavaDepScopes {
     public static final JkScope JAVADOC = JkScope.build("javadoc").transitive(false)
             .descr("Contains the javadoc of this project").build();
 
+    public static JkScope of(String name) {
+        if (name.equalsIgnoreCase("compile")) {
+            return COMPILE;
+        }
+        if (name.equalsIgnoreCase("runtime")) {
+            return RUNTIME;
+        }
+        if (name.equalsIgnoreCase("test")) {
+            return TEST;
+        }
+        if (name.equalsIgnoreCase("provided")) {
+            return PROVIDED;
+        }
+        return null;
+    }
+
     /**
      * Shorthand to declare both COMPILE and RUNTIME scope at once. This is the default scope for dependencies.
      * It is equivalent to Maven 'compile'.
