@@ -47,7 +47,7 @@ class JUnit4TestExecutor {
         JkUtilsIO.serialize(result, resultFile);
     }
 
-    // This method is also called by Junit4TestLaunch by reflection cross classloader.
+    // This method is also called by Junit4TestLaunch using reflection cross classloader.
     private static JkTestSuiteResult launchInProcess(Class<?>[] classes,
             boolean printEachTestOnConsole, JunitReportDetail reportDetail, File reportDir,
             boolean restoreSystemOut) {

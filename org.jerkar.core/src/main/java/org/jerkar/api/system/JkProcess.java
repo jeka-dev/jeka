@@ -1,5 +1,6 @@
 package org.jerkar.api.system;
 
+import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsSystem;
@@ -218,11 +219,14 @@ public final class JkProcess implements Runnable {
                 if (workingDir != null) {
                     processBuilder.directory(this.workingDir.toAbsolutePath().normalize().toFile());
                 }
-                processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-                processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
                 final Process process = processBuilder.start();
+                final JkUtilsIO.StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
+                        process.getInputStream(), JkLog.stream());
+                final JkUtilsIO.StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
+                        process.getErrorStream(), JkLog.errorStream());
                 process.waitFor();
-                result.set(process.exitValue());
+                outputStreamGobbler.stop();
+                errorStreamGobbler.stop();
                 if (result.get() != 0 && failOnError) {
                     throw new IllegalStateException("The process has returned with error code "
                             + result);
