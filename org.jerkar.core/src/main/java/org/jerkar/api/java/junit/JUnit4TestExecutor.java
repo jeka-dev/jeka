@@ -4,12 +4,16 @@ import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.JkUtilsPath;
+import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsTime;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,16 +30,24 @@ class JUnit4TestExecutor {
                     "There should be at least 2 args. "
                             + "First is the file containing serialized result and others are the classes to test.");
         }
-        final File resultFile = new File(args[0]);
+        final Path resultFile = Paths.get(args[0]);
         final boolean printEachTestInConsole = Boolean.parseBoolean(args[1]);
         final JunitReportDetail reportDetail = JunitReportDetail.valueOf(args[2]);
-        final File reportDir = new File(args[3]);
-        final Class<?>[] classes = toClassArray(Arrays.copyOfRange(args, 4, args.length));
+        final Path reportDir = Paths.get(args[3]);
+        final String logHandlerSerPath = args[4];
+        if (!logHandlerSerPath.isEmpty()) {
+            Path serFile = Paths.get(logHandlerSerPath);
+            JkLog.EventLogHandler eventLogHandler = (JkLog.EventLogHandler) JkUtilsIO.deserialize(serFile);
+            JkUtilsPath.deleteFile(serFile);
+            JkLog.register(eventLogHandler);
+        }
+        final Class<?>[] classes = toClassArray(Arrays.copyOfRange(args, 5, args.length));
         final JkTestSuiteResult result = launchInProcess(classes, printEachTestInConsole,
-                reportDetail, reportDir, false);
+                reportDetail, reportDir.toFile(), false);
         JkUtilsIO.serialize(result, resultFile);
     }
 
+    // This method is also called by Junit4TestLaunch by reflection cross classloader.
     private static JkTestSuiteResult launchInProcess(Class<?>[] classes,
             boolean printEachTestOnConsole, JunitReportDetail reportDetail, File reportDir,
             boolean restoreSystemOut) {

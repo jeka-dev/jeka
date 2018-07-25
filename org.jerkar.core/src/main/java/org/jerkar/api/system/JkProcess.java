@@ -1,20 +1,14 @@
 package org.jerkar.api.system;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsIO.StreamGobbler;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsSystem;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Provides fluent API to define and launch external process.
@@ -224,14 +218,10 @@ public final class JkProcess implements Runnable {
                 if (workingDir != null) {
                     processBuilder.directory(this.workingDir.toAbsolutePath().normalize().toFile());
                 }
+                processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
                 final Process process = processBuilder.start();
-                final StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
-                        process.getInputStream(), JkLog.stream());
-                final StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
-                        process.getErrorStream(), JkLog.errorStream());
                 process.waitFor();
-                outputStreamGobbler.stop();
-                errorStreamGobbler.stop();
                 result.set(process.exitValue());
                 if (result.get() != 0 && failOnError) {
                     throw new IllegalStateException("The process has returned with error code "

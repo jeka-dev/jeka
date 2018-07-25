@@ -25,6 +25,7 @@ public final class JkLog implements Serializable {
         MUTE, NORMAL, VERBOSE;
     }
 
+    // Must not be replaced by EventLogHandler cause serialisation/classloader issues.
     private static Consumer<JkLogEvent> consumer;
 
     private static OutputStream stream = JkUtilsIO.nopPrintStream();
@@ -146,6 +147,10 @@ public final class JkLog implements Serializable {
         } else {
             consumer.accept((JkLogEvent) event);
         }
+    }
+
+    public static Consumer<JkLogEvent> getLogConsumer() {
+        return consumer;
     }
 
     public static class JkLogEvent implements Serializable {

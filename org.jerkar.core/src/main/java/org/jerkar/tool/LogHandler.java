@@ -6,7 +6,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 
 
-final class LogHandler implements JkLog.EventLogHandler {
+final class LogHandler implements JkLog.EventLogHandler, Serializable {
 
     private static final PrintStream FORMER_OUT = System.out;
 
@@ -26,9 +26,9 @@ final class LogHandler implements JkLog.EventLogHandler {
 
     static int MAX_LENGTH = -1;
 
-    private final MarginStream out = new MarginStream(System.out);
+    private transient MarginStream out = new MarginStream(System.out);
 
-    private final MarginStream err = new MarginStream(System.err);
+    private transient MarginStream err = new MarginStream(System.err);
 
     {
         System.setOut(new PrintStream(out));
@@ -38,6 +38,11 @@ final class LogHandler implements JkLog.EventLogHandler {
     static void restore() {
         System.setOut(FORMER_OUT);
         System.setErr(FORMER_ERR);
+    }
+
+    private void readObject(ObjectInputStream objectInputStream) {
+        out = new MarginStream(System.out);
+        err = new MarginStream(System.err);
     }
 
     @Override
@@ -121,5 +126,7 @@ final class LogHandler implements JkLog.EventLogHandler {
         }
 
     }
+
+
 
 }

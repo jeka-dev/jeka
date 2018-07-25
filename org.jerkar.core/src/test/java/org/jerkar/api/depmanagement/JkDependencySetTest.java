@@ -9,7 +9,7 @@ import java.io.InputStream;
 public class JkDependencySetTest {
 
     @Test
-    public void testFromDestription() throws IOException {
+    public void testFromDescription() throws IOException {
         InputStream is = JkDependencySetTest.class.getResourceAsStream("dependencies.txt");
         JkDependencySet dependencySet = JkDependencySet.fromDescription(is);
         Assert.assertEquals(4, dependencySet.declaredScopes().size());

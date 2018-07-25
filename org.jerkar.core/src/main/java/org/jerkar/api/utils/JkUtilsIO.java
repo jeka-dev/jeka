@@ -85,8 +85,6 @@ public final class JkUtilsIO {
         }
     }
 
-
-
     /**
      * Same as {@link FileInputStream} constructor but throwing unchecked
      * exceptions.
@@ -251,10 +249,10 @@ public final class JkUtilsIO {
     /**
      * Serializes a given Java object to the specified file.
      */
-    public static void serialize(Object object, File file) {
-        try {
-            serialize(object, new FileOutputStream(file));
-        } catch (final FileNotFoundException e) {
+    public static void serialize(Object object, Path file) {
+        try (OutputStream out = Files.newOutputStream(file)){
+            serialize(object, out);
+        } catch (final IOException e) {
             throw new UncheckedIOException("File must exist.", e);
         }
     }
@@ -334,69 +332,6 @@ public final class JkUtilsIO {
         final byte[] bytes = arrayOutputStream.toByteArray();
         final ByteArrayInputStream bin = new ByteArrayInputStream(bytes);
         return (T) deserialize(bin, targetClassLoader);
-    }
-
-    /**
-     * Returns a thread that write each data read to the specified input
-     * stream to the specified output stream.
-     */
-    public static StreamGobbler newStreamGobbler(InputStream is, OutputStream os) {
-        return new StreamGobbler(is, os);
-    }
-
-    /**
-     * Runs a thread copying all data to a stream to a specified writer. The
-     * thread is started when the instance is created. You have to call
-     * {@link #stop()} to stop the thread.
-     */
-    public static final class StreamGobbler {
-
-        private final InnerRunnable innerRunnable;
-
-        private StreamGobbler(InputStream is, OutputStream os) {
-            this.innerRunnable = new InnerRunnable(is, os);
-            new Thread(innerRunnable).start();
-        }
-
-        /**
-         * Stop the gobbling, meaning stop the thread.
-         */
-        public StreamGobbler stop() {
-            this.innerRunnable.stop.set(true);
-            return this;
-        }
-
-        private static class InnerRunnable implements Runnable {
-
-            private final InputStream in;
-
-            private final OutputStream out;
-
-            private final AtomicBoolean stop = new AtomicBoolean(false);
-
-            private InnerRunnable(InputStream is, OutputStream os) {
-                this.in = is;
-                this.out = os;
-            }
-
-            @Override
-            public void run() {
-                try {
-                    final InputStreamReader isr = new InputStreamReader(in);
-                    final BufferedReader br = new BufferedReader(isr);
-                    String line = null;
-                    while (!stop.get() && (line = br.readLine()) != null) {
-                        final byte[] bytes = line.getBytes();
-                        out.write(bytes, 0, bytes.length);
-                        out.write('\n');
-                    }
-                } catch (final IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            }
-
-        }
-
     }
 
     /* table mapping primitive type names to corresponding class objects */

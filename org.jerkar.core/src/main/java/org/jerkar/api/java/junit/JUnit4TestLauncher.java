@@ -1,6 +1,7 @@
 package org.jerkar.api.java.junit;
 
 import java.io.File;
+import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,10 +28,25 @@ class JUnit4TestLauncher {
         args.add("\"" + file.toAbsolutePath() + "\"");
         args.add(Boolean.toString(printEachTestOnConsole));
         args.add(reportDetail.name());
+
         args.add("\"" + reportDir.getAbsolutePath() + "\"");
+
+        // Serialize log handler
+        if (JkLog.getLogConsumer() != null && (JkLog.getLogConsumer() instanceof Serializable)) {
+            Path path = JkUtilsPath.createTempFile("jk-logHandler", ".ser");
+            JkUtilsIO.serialize(JkLog.getLogConsumer(), path);
+            args.add("\"" + path.normalize().toAbsolutePath().toString() + "\"");
+        } else {
+            args.add("\"\"");
+        }
+
+        // Classes to test
         for (final Class<?> clazz : classes) {
             args.add(clazz.getName());
         }
+
+
+
         final JkJavaProcess process;
         process = javaProcess.andClasspath(JkClasspath.of(JkLocator.jerkarJarPath()));
         process.runClassSync(JUnit4TestExecutor.class.getName(), args.toArray(new String[0]));
