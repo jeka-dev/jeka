@@ -28,7 +28,7 @@ public class CoreBuild extends JkJavaProjectBuild {
 
     @Override
     protected void setupOptionDefaults() {
-        java().tests.fork = true;
+        java().tests.fork = false;
     }
 
     protected void configurePlugins() {
