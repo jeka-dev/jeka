@@ -1,5 +1,6 @@
 package org.jerkar.api.java.junit;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -100,7 +101,6 @@ public final class JkUnit {
                 true, true);
     }
 
-
     /**
      * Returns a copy of this launcher but with the specified report detail.
      */
@@ -108,8 +108,6 @@ public final class JkUnit {
         return new JkUnit(reportDetail, reportDir, this.forkedProcess,
                 this.breakOnFailure, this.printOutputOnConsole);
     }
-
-
 
     /**
      * Returns a copy of this launcher but with the specified report directory output.
@@ -219,6 +217,9 @@ public final class JkUnit {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public JkTestSuiteResult run(JkJavaTestSpec testSpec) {
+        if (reportDir == null && reportDetail == JunitReportDetail.FULL) {
+            throw new IllegalStateException("Report directory has not been set on JkUnit instance.");
+        }
         final Collection<Class> classes = getClassesToTest(testSpec);
         final String name = getSuiteName(classes);
 
@@ -228,19 +229,18 @@ public final class JkUnit {
         }
         final long start = System.nanoTime();
         final JkClassLoader classLoader = JkClassLoader.of(classes.iterator().next());
-
-
         final AtomicReference<JkTestSuiteResult> result = new AtomicReference<>();
         Runnable task = () -> {
             if (classLoader.isDefined(JUNIT4_RUNNER_CLASS_NAME)) {
+                File report = reportDir == null ? null : reportDir.toFile();
                 if (this.forkedProcess != null) {
                     JkLog.info("Test are executed in forked mode");
-                    result.set(JUnit4TestLauncher.launchInFork(forkedProcess.withClasspaths(testSpec.classpath()),
-                            printOutputOnConsole,
-                            reportDetail, classes, reportDir.toFile()));
+                    JkClasspath classpath = testSpec.classpath();
+                    result.set(JUnit4TestLauncher.launchInFork(forkedProcess.withClasspaths(classpath),
+                            printOutputOnConsole, reportDetail, classes, report));
                 } else {
                     result.set(JUnit4TestLauncher.launchInProcess(classes, printOutputOnConsole,
-                            reportDetail, reportDir.toFile()));
+                            reportDetail, report));
                 }
             } else if (classLoader.isDefined(JUNIT3_RUNNER_CLASS_NAME)) {
                 final Object suite = createJunit3TestSuite(classLoader, classes);

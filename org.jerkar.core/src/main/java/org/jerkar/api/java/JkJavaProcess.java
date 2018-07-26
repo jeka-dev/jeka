@@ -13,11 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jerkar.api.system.JkLog;
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.api.utils.*;
 import org.jerkar.api.utils.JkUtilsIO.StreamGobbler;
-import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.api.utils.JkUtilsSystem;
 
 /**
  * Offers fluent interface for launching Java processes.
@@ -159,7 +156,7 @@ public final class JkJavaProcess {
         if (classpath == null) {
             throw new IllegalArgumentException("Classpath can't be null.");
         }
-        final JkClasspath jkClasspath = JkClasspath.ofMany(classpath);
+        final JkClasspath jkClasspath = JkClasspath.ofMany(JkUtilsPath.disambiguate(classpath));
         return new JkJavaProcess(this.javaDir, this.sytemProperties, jkClasspath, this.agents,
                 this.options, this.workingDir, this.environment);
     }

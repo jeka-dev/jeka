@@ -138,6 +138,20 @@ public final class JkPathTreeSet {
         return new JkPathTreeSet(list);
     }
 
+    // ------------------------- Replacing filter ----------------------------------
+
+    /**
+     * Creates a {@link JkPathTree} which is a copy of this {@link JkPathTree}
+     * replacing matcher by the specified one.
+     */
+    public JkPathTreeSet withMatcher(PathMatcher matcher) {
+        final List<JkPathTree> list = new LinkedList<>();
+        for (final JkPathTree tree : this.pathTrees) {
+            list.add(JkPathTree.of(tree.root()).andMatcher(matcher));
+        }
+        return new JkPathTreeSet(list);
+    }
+
     // ---------------------------- iterate over files -----------------------------------
 
     /**

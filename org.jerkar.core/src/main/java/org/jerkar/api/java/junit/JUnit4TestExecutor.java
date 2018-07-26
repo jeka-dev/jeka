@@ -2,6 +2,7 @@ package org.jerkar.api.java.junit;
 
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
+import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsPath;
@@ -24,6 +25,8 @@ import java.util.Properties;
  */
 class JUnit4TestExecutor {
 
+    static final String NO_REPORT_FILE = "NoReportFile";
+
     public static void main(String[] args) {
         if (args.length == 0) {
             throw new IllegalArgumentException(
@@ -33,7 +36,7 @@ class JUnit4TestExecutor {
         final Path resultFile = Paths.get(args[0]);
         final boolean printEachTestInConsole = Boolean.parseBoolean(args[1]);
         final JunitReportDetail reportDetail = JunitReportDetail.valueOf(args[2]);
-        final Path reportDir = Paths.get(args[3]);
+        final Path reportDir = NO_REPORT_FILE.equals(args[3]) ? null : Paths.get(args[3]);
         final String logHandlerSerPath = args[4];
         if (!logHandlerSerPath.isEmpty()) {
             Path serFile = Paths.get(logHandlerSerPath);
@@ -41,9 +44,10 @@ class JUnit4TestExecutor {
             JkUtilsPath.deleteFile(serFile);
             JkLog.register(eventLogHandler);
         }
+        final File reportDirFile = reportDir == null ? null : reportDir.toFile();
         final Class<?>[] classes = toClassArray(Arrays.copyOfRange(args, 5, args.length));
         final JkTestSuiteResult result = launchInProcess(classes, printEachTestInConsole,
-                reportDetail, reportDir.toFile(), false);
+                reportDetail, reportDirFile, false);
         JkUtilsIO.serialize(result, resultFile);
     }
 
@@ -52,8 +56,10 @@ class JUnit4TestExecutor {
             boolean printEachTestOnConsole, JunitReportDetail reportDetail, File reportDir,
             boolean restoreSystemOut) {
         final JUnitCore jUnitCore = new JUnitCore();
-
         if (reportDetail.equals(JunitReportDetail.FULL)) {
+            if (reportDir == null) {
+                throw new JkException("No report dir has been specified to output test report.");
+            }
             jUnitCore.addListener(new JUnitReportListener(reportDir.toPath()));
         }
         final PrintStream out = System.out;

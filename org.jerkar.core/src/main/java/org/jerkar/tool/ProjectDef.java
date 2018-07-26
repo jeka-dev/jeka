@@ -344,7 +344,7 @@ final class ProjectDef {
         String description(String prefix, String margin) {
             String desc = description != null ? description : "No description available.";
             StringBuilder builder = new StringBuilder();
-            builder.append(margin).append("  ").append(prefix).append(name).append(" (").append(type()).append( ", default : ").append(defaultValue)
+            builder.append(margin).append("  -").append(prefix).append(name).append(" (").append(type()).append( ", default : ").append(defaultValue)
                     .append(") : ").append(desc.replace("\n", " ")).append("\n");
             return builder.toString();
         }

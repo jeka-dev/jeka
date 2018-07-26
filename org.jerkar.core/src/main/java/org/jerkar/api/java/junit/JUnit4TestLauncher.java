@@ -28,8 +28,8 @@ class JUnit4TestLauncher {
         args.add("\"" + file.toAbsolutePath() + "\"");
         args.add(Boolean.toString(printEachTestOnConsole));
         args.add(reportDetail.name());
-
-        args.add("\"" + reportDir.getAbsolutePath() + "\"");
+        String reportFileArg = reportDir == null ? JUnit4TestExecutor.NO_REPORT_FILE : reportDir.getAbsolutePath();
+        args.add("\"" + reportFileArg + "\"");
 
         // Serialize log handler
         if (JkLog.getLogConsumer() != null && (JkLog.getLogConsumer() instanceof Serializable)) {
@@ -44,9 +44,6 @@ class JUnit4TestLauncher {
         for (final Class<?> clazz : classes) {
             args.add(clazz.getName());
         }
-
-
-
         final JkJavaProcess process;
         process = javaProcess.andClasspath(JkClasspath.of(JkLocator.jerkarJarPath()));
         process.runClassSync(JUnit4TestExecutor.class.getName(), args.toArray(new String[0]));

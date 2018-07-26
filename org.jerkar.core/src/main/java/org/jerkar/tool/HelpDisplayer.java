@@ -17,7 +17,6 @@ import org.w3c.dom.Element;
 
 final class HelpDisplayer {
 
-
     static void help(JkBuild build) {
         if (JkOptions.containsKey("Plugins")) {
             helpPlugins(build);

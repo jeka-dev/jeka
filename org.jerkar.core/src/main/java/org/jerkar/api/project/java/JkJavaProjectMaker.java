@@ -33,7 +33,6 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     public static final JkArtifactId TEST_SOURCE_ARTIFACT_ID = JkArtifactId.of("test-sources", "jar");
 
-
     private final JkJavaProject project;
 
     private JkDependencyResolver dependencyResolver;
@@ -89,7 +88,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
                 .and(project.getResourceInterpolators())
                 .generateTo(getOutLayout().testClassDir(), charset));
         testCompileRunner = JkRunnables.of(() -> {
-            JkJavaCompileSpec testCompileSpec = testCompileSpec();
+            JkJavaCompileSpec testCompileSpec = getTestCompileSpec();
             testCompiler.compile(testCompileSpec);
         });
         artifactFileNameSupplier = () -> {
@@ -130,7 +129,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
      */
     public void generateJavadoc() {
         JkJavadocMaker.of(project.getSourceLayout().sources(), getOutLayout().getJavadocDir())
-                .withClasspath(depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
+                .withClasspath(getDependenciesFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION))
                 .andOptions(this.javadocOptions).process();
         status.javadocGenerated = true;
     }
@@ -138,7 +137,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     /**
      * Returns lib paths standing for the resolution of this project dependencies for the specified dependency scopes.
      */
-    public JkPathSequence depsFor(JkScope... scopes) {
+    public JkPathSequence getDependenciesFor(JkScope... scopes) {
         final Set<JkScope> scopeSet = new HashSet<>(Arrays.asList(scopes));
         return this.depCache.computeIfAbsent(scopeSet,
                 scopes1 -> this.dependencyResolver().get(getDeclaredDependencies(), scopes));
@@ -187,7 +186,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private JkJavaCompileSpec compileSourceSpec() {
         JkJavaCompileSpec result = project.getCompileSpec().copy();
-        final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
+        final JkPathSequence classpath = getDependenciesFor(JkJavaDepScopes.SCOPES_FOR_COMPILATION);
         return result
                 .setClasspath(classpath)
                 .addSources(project.getSourceLayout().sources())
@@ -220,9 +219,9 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     public final JkRunnables testCompileRunner;
 
-    private JkJavaCompileSpec testCompileSpec() {
+    private JkJavaCompileSpec getTestCompileSpec() {
         JkJavaCompileSpec result = project.getCompileSpec().copy();
-        final JkPathSequence classpath = depsFor(JkJavaDepScopes.SCOPES_FOR_TEST).andFirst(getOutLayout().classDir());
+        final JkPathSequence classpath = getDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST).andFirst(getOutLayout().classDir());
         return result
                 .setClasspath(classpath)
                 .addSources(project.getSourceLayout().tests())
@@ -234,18 +233,18 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return this.juniter.withReportDir(junitReport);
     }
 
-    private JkJavaTestSpec testSpec() {
-        return JkJavaTestSpec.of(testClasspath(),
+    public JkJavaTestSpec getTestSpec() {
+        return JkJavaTestSpec.of(getTestClasspath(),
                 JkPathTreeSet.of(getOutLayout().testClassDir()).andMatcher(testClassMatcher));
     }
 
-    public JkClasspath testClasspath() {
+    public JkClasspath getTestClasspath() {
         return JkClasspath.of(getOutLayout().testClassDir())
                 .and(getOutLayout().classDir())
-                .andMany(depsFor(JkJavaDepScopes.SCOPES_FOR_TEST));
+                .andMany(getDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST));
     }
 
-    public final JkRunnables testExecutor = JkRunnables.of(() -> juniter().run(testSpec()));
+    public final JkRunnables testExecutor = JkRunnables.of(() -> juniter().run(getTestSpec()));
 
     public final JkRunnables postTest = JkRunnables.of(() -> {
     });

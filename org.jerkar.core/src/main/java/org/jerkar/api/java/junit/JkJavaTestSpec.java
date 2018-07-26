@@ -1,8 +1,10 @@
 package org.jerkar.api.java.junit;
 
+import org.jerkar.api.file.JkPathMatcher;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkClasspath;
+import org.jerkar.api.project.java.JkJavaProject;
 
 /**
  * Convenient class to launch Junit tests.
@@ -38,5 +40,15 @@ public final class JkJavaTestSpec {
     public JkPathTreeSet classesToTest() {
         return classesToTest;
     }
+
+    public JkJavaTestSpec withClassesToTest(JkPathTreeSet classesToTest) {
+        return new JkJavaTestSpec(this.classpath, classesToTest);
+    }
+
+    public JkJavaTestSpec withClassesToTest(String includePattern) {
+        return withClassesToTest(this.classesToTest.withMatcher(JkPathMatcher.accept(includePattern)));
+    }
+
+
 
 }
