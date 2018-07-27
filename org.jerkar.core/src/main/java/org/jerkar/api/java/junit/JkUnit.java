@@ -217,7 +217,7 @@ public final class JkUnit {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public JkTestSuiteResult run(JkJavaTestSpec testSpec) {
-        if (reportDir == null && reportDetail == JunitReportDetail.FULL) {
+        if (reportDir == null && reportDetail != JunitReportDetail.NONE) {
             throw new IllegalStateException("Report directory has not been set on JkUnit instance.");
         }
         final Collection<Class> classes = getClassesToTest(testSpec);
