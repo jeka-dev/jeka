@@ -15,7 +15,7 @@ public class PluginsJacocoBuild extends JkJavaProjectBuild {
     public CoreBuild core;
 
     @Override
-    protected void configurePlugins() {
+    protected void afterOptionsInjected() {
         JkJavaProject project = java().project();
         CoreBuild.applyCommonSettings(project, "plugins-jacoco");
         project.setDependencies(JkDependencySet.of()

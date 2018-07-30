@@ -20,13 +20,13 @@ public class SonarPluginBuild extends JkJavaProjectBuild {
     protected SonarEnv sonarEnv = SonarEnv.DEV;
 
     @Override
-    public void setupOptionDefaults() {
+    public void beforeOptionsInjected() {
         this.plugins().get(JkPluginSonar.class)
                 .prop(JkSonar.BRANCH, "myBranch");
     }
     
     @Override
-    protected void configurePlugins() {
+    protected void afterOptionsInjected() {
         java().project()
                 .setVersionedModule("org.jerkar:samples", "0.1")
                 .setDependencies(JkDependencySet.of()

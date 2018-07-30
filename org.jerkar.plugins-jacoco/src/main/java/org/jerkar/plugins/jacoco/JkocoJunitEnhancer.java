@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 
 /**
- * Enhancer to setupOptionDefaults JkUnit such it performs Jacoco code coverage while it runs unit tests.
+ * Enhancer to beforeOptionsInjected JkUnit such it performs Jacoco code coverage while it runs unit tests.
  */
 public final class JkocoJunitEnhancer implements UnaryOperator<JkUnit> {
 

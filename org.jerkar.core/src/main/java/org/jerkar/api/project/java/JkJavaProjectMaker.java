@@ -6,6 +6,7 @@ import org.jerkar.api.file.*;
 import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkJavaTestSpec;
+import org.jerkar.api.java.junit.JkTestSuiteResult;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.project.JkProjectOutLayout;
 import org.jerkar.api.system.JkLog;
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -41,7 +43,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private JkJavaCompiler testCompiler = JkJavaCompiler.of();
 
-    private JkUnit juniter = JkUnit.of().withOutputOnConsole(false).withReport(JkUnit.JunitReportDetail.BASIC);
+    private Function<JkJavaTestSpec, JkTestSuiteResult> tester;
 
     private JkPathMatcher testClassMatcher = JkPathMatcher.accept("**/*Test.class");
 
@@ -91,6 +93,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
             JkJavaCompileSpec testCompileSpec = getTestCompileSpec();
             testCompiler.compile(testCompileSpec);
         });
+        tester = getDefaultTester();
         artifactFileNameSupplier = () -> {
             if (project.getVersionedModule() != null) {
                 return fileName(project.getVersionedModule());
@@ -228,9 +231,10 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
                 .setOutputDir(getOutLayout().testClassDir());
     }
 
-    private JkUnit juniter() {
+    public final JkUnit getDefaultTester() {
         final Path junitReport = getOutLayout().testReportDir().resolve("junit");
-        return this.juniter.withReportDir(junitReport);
+        return JkUnit.of().withOutputOnConsole(false).withReport(JkUnit.JunitReportDetail.BASIC)
+                .withReportDir(junitReport);
     }
 
     public JkJavaTestSpec getTestSpec() {
@@ -244,7 +248,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
                 .andMany(getDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST));
     }
 
-    public final JkRunnables testExecutor = JkRunnables.of(() -> juniter().run(getTestSpec()));
+    public final JkRunnables testExecutor = JkRunnables.of(() -> tester.apply(getTestSpec()));
 
     public final JkRunnables postTest = JkRunnables.of(() -> {
     });
@@ -472,12 +476,12 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return this;
     }
 
-    public JkUnit getJuniter() {
-        return juniter;
+    public Function<JkJavaTestSpec, JkTestSuiteResult> getTester() {
+        return tester;
     }
 
-    public JkJavaProjectMaker setJuniter(JkUnit juniter) {
-        this.juniter = juniter;
+    public JkJavaProjectMaker setTester(JkUnit tester) {
+        this.tester = tester;
         return this;
     }
 

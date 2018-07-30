@@ -180,12 +180,12 @@ final class PluginDictionary {
         }
 
         public List<String> activationEffect() {
-            JkDoc doc = JkUtilsReflect.getInheritedAnnotation(clazz,  JkDoc.class, "decorateBuild");
+            JkDoc doc = JkUtilsReflect.getInheritedAnnotation(clazz,  JkDoc.class, "activate");
             return doc == null ? Collections.emptyList() : Arrays.asList(doc.value());
         }
 
         boolean isDecorateBuildDefined() {
-            Method decorateBuild = JkUtilsReflect.findMethodMethodDeclaration(clazz, "decorateBuild");
+            Method decorateBuild = JkUtilsReflect.findMethodMethodDeclaration(clazz, "activate");
             return  decorateBuild != null && !decorateBuild.getDeclaringClass().equals(JkPlugin.class);
         }
 

@@ -3,6 +3,7 @@ package org.jerkar.tool.builtins.java;
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaProcess;
+import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.java.JkJavaProjectMaker;
 import org.jerkar.api.system.JkLog;
@@ -62,7 +63,7 @@ public class JkPluginJava extends JkPlugin {
             "\n  Improves scaffolding by creating a project structure ready to build." +
             "\n  Enriches build information with project build structure.")
     @Override  
-    protected void decorateBuild() {
+    protected void activate() {
         this.applyOptions();
         this.addDefaultAction(this::doDefault);
         this.setupScaffolder();
@@ -110,13 +111,15 @@ public class JkPluginJava extends JkPlugin {
             project.maker().postPack.chain(() -> project.maker().signArtifactFiles(repoPlugin.pgpSigner()));
         }
         */
+        JkUnit tester = (JkUnit) project.maker().getTester();
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
-            project.maker().setJuniter(project.maker().getJuniter().forked(javaProcess));
+            tester = tester.forked(javaProcess);
         }
+        tester = tester.withOutputOnConsole(tests.output);
+        tester = tester.withReport(tests.report);
+        project.maker().setTester(tester);
         project.maker().setSkipTests(tests.skip);
-        project.maker().setJuniter(project.maker().getJuniter().withOutputOnConsole(tests.output));
-        project.maker().setJuniter(project.maker().getJuniter().withReport(tests.report));
         if (this.compilerExtraArgs != null) {
             project.getCompileSpec().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));
         }

@@ -27,11 +27,11 @@ public class CoreBuild extends JkJavaProjectBuild {
     public Path distribFolder;
 
     @Override
-    protected void setupOptionDefaults() {
+    protected void beforeOptionsInjected() {
         java().tests.fork = false;
     }
 
-    protected void configurePlugins() {
+    protected void afterOptionsInjected() {
         applyCommonSettings(project(), "core");
         maker().defineArtifact(DISTRIB_FILE_ID, this::doDistrib);
         this.distribFolder = project().maker().getOutLayout().outputPath().resolve("distrib");

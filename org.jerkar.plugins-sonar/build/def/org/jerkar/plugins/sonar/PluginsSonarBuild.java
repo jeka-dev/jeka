@@ -16,7 +16,7 @@ public class PluginsSonarBuild extends JkJavaProjectBuild {
 
 
     @Override
-    protected void configurePlugins() {
+    protected void afterOptionsInjected() {
         final JkJavaProject project = java().project();
         CoreBuild.applyCommonSettings(project, "plugins-sonar");
         project.setDependencies(JkDependencySet.of()

@@ -31,7 +31,7 @@ class Build extends JkJavaProjectBuild {
                 .setDependencies(dependencies());
 
         maker()    // Configure how project should be build using maker() instance.
-                .setJuniter(maker().getJuniter().forked(true));
+                .setTester(maker().getTester().forked(true));
     }
 
     private JkDependencySet dependencies() {  // Example of dependencies.

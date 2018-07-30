@@ -20,7 +20,7 @@ import static org.jerkar.api.depmanagement.JkPopularModules.*;
 public class MavenStyleBuild extends JkJavaProjectBuild {
 
     @Override
-    protected void configurePlugins() {
+    protected void afterOptionsInjected() {
         java().project()
                 .setVersionedModule("org.jerkar:script-samples", "0.3-SNAPSHOT")
                 .setDependencies(dependencies());

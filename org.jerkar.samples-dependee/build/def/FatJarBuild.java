@@ -29,7 +29,7 @@ public class FatJarBuild extends JkJavaProjectBuild {
     private AClassicBuild sampleBuild;
 
     @Override
-    protected void configurePlugins() {
+    protected void afterOptionsInjected() {
         java().project()
                 .setDependencies(JkDependencySet.of()
                         .and(sampleBuild.project(), JkArtifactId.of("fat", "jar")))

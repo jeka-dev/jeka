@@ -12,7 +12,6 @@ import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.*;
-import org.jerkar.tool.builtins.scaffold.JkScaffolder;
 
 /**
  * Base build class for defining builds. All build classes must extend this class in order
@@ -87,7 +86,7 @@ public class JkBuild {
         jkBuild.plugins = new JkBuildPlugins(build, Environment.commandLine.getPluginOptions());
 
         // Allow sub-classes to define defaults prior options are injected
-        build.setupOptionDefaults();
+        build.beforeOptionsInjected();
 
         // Inject options
         JkOptions.populateFields(build, JkOptions.readSystemAndUserOptions());
@@ -95,12 +94,12 @@ public class JkBuild {
         JkOptions.populateFields(build, options);
 
         // Load plugins declared in command line
-        build.configurePlugins();
+        build.afterOptionsInjected();
         jkBuild.plugins.loadCommandLinePlugins();
         for (JkPlugin plugin : jkBuild.plugins().all()) {
             List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(plugin).optionDefs();
             try {
-                plugin.decorateBuild();
+                plugin.activate();
             } catch (RuntimeException e) {
                 throw new RuntimeException("Plugin " + plugin.name() + " has caused build instantiation failure.", e);
             }
@@ -110,7 +109,7 @@ public class JkBuild {
         }
 
         // Extra build configuration
-        build.configure();
+        build.afterPluginsActivated();
         List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(build).optionDefs();
         JkLog.info("Build instance initialized with options " + HelpDisplayer.optionValues(defs));
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(ts) + " milliseconds.");
@@ -127,21 +126,22 @@ public class JkBuild {
      * Note you should call <code>super()</code> at the beginning of the method in order to not wipe defaults
      * that superclasses may have defined.
      */
-    protected void setupOptionDefaults() {
+    protected void beforeOptionsInjected() {
         // Do nothing by default
     }
 
     /**
-     * This method is invoked right after options has been injected into this instance.
+     * This method is invoked right after options has been injected into this instance. You will typically
+     * setup plugins here before they decorate tis build.
      */
-    protected void configurePlugins() {
+    protected void afterOptionsInjected() {
         // Do nothing by default
     }
 
     /**
      * This method is called once all plugin has decorated this build.
      */
-    protected void configure() {
+    protected void afterPluginsActivated() {
         // Do nothing by default
     }
 

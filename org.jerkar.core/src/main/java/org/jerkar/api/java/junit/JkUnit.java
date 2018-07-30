@@ -16,6 +16,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkClassLoader;
@@ -33,7 +35,7 @@ import org.jerkar.api.utils.JkUtilsString;
  *
  * @author Jerome Angibaud
  */
-public final class JkUnit {
+public final class JkUnit implements Function<JkJavaTestSpec, JkTestSuiteResult> {
 
     /**
      * Detail level for the junit report.
@@ -213,7 +215,7 @@ public final class JkUnit {
     }
 
     /**
-     * Runs the test suite and return the result.
+     * Alias for {@link #apply(JkJavaTestSpec)}
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public JkTestSuiteResult run(JkJavaTestSpec testSpec) {
@@ -285,6 +287,14 @@ public final class JkUnit {
         JkLog.execute("Executing JUnit tests", task);
         JkUtilsIO.closeifClosable(classLoader.classloader());
         return result.get();
+    }
+
+    /**
+     * Runs the test suite and return the result.
+     */
+    @Override
+    public JkTestSuiteResult apply(JkJavaTestSpec jkJavaTestSpec) {
+        return this.run(jkJavaTestSpec);
     }
 
     @SuppressWarnings("rawtypes")

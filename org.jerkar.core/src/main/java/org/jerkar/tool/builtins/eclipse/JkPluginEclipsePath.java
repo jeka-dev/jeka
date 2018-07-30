@@ -9,7 +9,7 @@ import org.jerkar.tool.JkDocPluginDeps;
 import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.builtins.java.JkPluginJava;
 
-@JkDoc("Use Eclipse .classpath file to configure project structure and dependencies.")
+@JkDoc("Use Eclipse .classpath file to afterPluginsActivated project structure and dependencies.")
 @JkDocPluginDeps(JkPluginJava.class)
 public final class JkPluginEclipsePath extends JkPlugin {
 
@@ -24,7 +24,7 @@ public final class JkPluginEclipsePath extends JkPlugin {
 
     @JkDoc("Configures java plugin instance in order java project reflects project structure and dependencies described in Eclipse .classpath file.")
     @Override
-    protected void decorateBuild() {
+    protected void activate() {
         JkPluginJava pluginJava = build.plugins().get(JkPluginJava.class);
         if (pluginJava != null) {
             final JkJavaProject project = pluginJava.project();

@@ -11,7 +11,7 @@ import org.jerkar.tool.JkBuild;
 public class JkJavaProjectBuild extends JkBuild {
 
     @Override
-    protected void configurePlugins() {
+    protected void afterOptionsInjected() {
         java();
     }
 

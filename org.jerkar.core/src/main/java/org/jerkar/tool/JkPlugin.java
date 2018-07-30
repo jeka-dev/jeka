@@ -27,7 +27,10 @@ public abstract class JkPlugin {
         build.addDefaultOperation(action);
     }
 
-    protected void decorateBuild() {
+    /**
+     * Override this method to modify the build itself or its bound plugins.
+     */
+    protected void activate() {
     }
 
     public final String name() {

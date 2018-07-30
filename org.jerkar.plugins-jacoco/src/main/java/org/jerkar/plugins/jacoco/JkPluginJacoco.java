@@ -1,5 +1,6 @@
 package org.jerkar.plugins.jacoco;
 
+import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkBuild;
 import org.jerkar.tool.JkDoc;
@@ -23,12 +24,12 @@ public class JkPluginJacoco extends JkPlugin {
     @JkDoc("Configures java plugin in order unit tests are run with Jacoco coverage tool. Result is located in [OUTPUT DIR]/"
             + OUTPUT_RELATIVE_PATH + " file.")
     @Override
-    protected void decorateBuild() {
+    protected void activate() {
         JkPluginJava pluginJava = build.plugins().get(JkPluginJava.class);
         final JkJavaProject project = pluginJava.project();
         final JkocoJunitEnhancer junitEnhancer = JkocoJunitEnhancer.of(project.maker().getOutLayout()
               .outputPath(OUTPUT_RELATIVE_PATH));
-        project.maker().setJuniter( junitEnhancer.apply( project.maker().getJuniter()) );
+        project.maker().setTester( junitEnhancer.apply((JkUnit) project.maker().getTester()) );
     }
     
 }

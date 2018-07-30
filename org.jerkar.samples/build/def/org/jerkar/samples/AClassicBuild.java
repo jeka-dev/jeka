@@ -24,14 +24,14 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 public class AClassicBuild extends JkJavaProjectBuild {
 
     @Override
-    protected void setupOptionDefaults() {
+    protected void beforeOptionsInjected() {
 	    java().pack.checksums = "sha1";
 	    java().pack.tests = true;
 	    java().pack.javadoc = true;
     }
     
     @Override
-    protected void configurePlugins() {
+    protected void afterOptionsInjected() {
         JkJavaProject project = project()
                 .setSourceVersion(JkJavaVersion.V7)
                 .setDependencies(JkDependencySet.of()
