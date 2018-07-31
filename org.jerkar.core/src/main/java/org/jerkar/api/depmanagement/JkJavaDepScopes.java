@@ -14,8 +14,6 @@ public final class JkJavaDepScopes {
             .descr("Dependencies to compile the project but that should not be embedded in produced artifacts.").build();
 
     /**
-     * A dependency declared with this scope will be available in all classpaths (compiling, testing, running and packaging the product).<p>
-     *
      * A dependency resolution made with this scope will only fetch dependencies declared with {@link #COMPILE} scope and
      * transitive dependencies declared with {@link #COMPILE } scope as well. <p>>
      *
