@@ -1,5 +1,6 @@
 package org.jerkar.tool.builtins.intellij;
 
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.ide.intellij.JkImlGenerator;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
@@ -19,7 +20,10 @@ import java.util.stream.Collectors;
 public final class JkPluginIntellij extends JkPlugin {
 
     @JkDoc("If true, dependency paths will be expressed relatively to $JERKAR_REPO$ and $JERKAR_HOME$ path variable instead of absolute paths.")
-    boolean useVarPath = false;
+    public boolean useVarPath = false;
+
+    @JkDoc("If true, the project dependencies are not taken in account to generate iml, only build class dependencies are.")
+    public boolean onlyBuildDependencies = false;
 
     private final JkPluginScaffold scaffold;
 
@@ -50,7 +54,11 @@ public final class JkPluginIntellij extends JkPlugin {
         if (build instanceof JkJavaProjectBuild) {
             final JkJavaProjectBuild projectBuild = (JkJavaProjectBuild) build;
             JkJavaProject project = projectBuild.java().project();
-            generator.setDependencies(project.maker().getDependencyResolver(), project.getDependencies());
+            if (!onlyBuildDependencies) {
+                generator.setDependencies(project.maker().getDependencyResolver(), project.getDependencies());
+            } else {
+                generator.setDependencies(project.maker().getDependencyResolver(), JkDependencySet.of());
+            }
             generator.setSourceJavaVersion(project.getSourceVersion());
             generator.setForceJdkVersion(true);
         }
