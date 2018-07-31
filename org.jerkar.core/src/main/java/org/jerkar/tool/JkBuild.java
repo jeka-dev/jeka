@@ -132,7 +132,7 @@ public class JkBuild {
 
     /**
      * This method is invoked right after options has been injected into this instance. You will typically
-     * setup plugins here before they decorate tis build.
+     * setup plugins here before they decorate this build.
      */
     protected void afterOptionsInjected() {
         // Do nothing by default
