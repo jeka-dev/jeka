@@ -480,7 +480,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return tester;
     }
 
-    public JkJavaProjectMaker setTester(JkUnit tester) {
+    public JkJavaProjectMaker setTester(Function<JkJavaTestSpec, JkTestSuiteResult> tester) {
         this.tester = tester;
         return this;
     }
@@ -530,6 +530,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     public void setTestClassMatcher(JkPathMatcher testClassMatcher) {
         this.testClassMatcher = testClassMatcher;
     }
+
     // ----------- artifact management --------------------------------------
 
     public void makeArtifact(JkArtifactId artifactId) {
@@ -551,7 +552,6 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     // artifact producers -----------------------------------------------------------
-
 
     @Override
     public Path artifactPath(JkArtifactId artifactId) {
@@ -582,6 +582,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     private class Status {
+
         private boolean sourceGenerated = false;
 
         private boolean compileDone = false;
