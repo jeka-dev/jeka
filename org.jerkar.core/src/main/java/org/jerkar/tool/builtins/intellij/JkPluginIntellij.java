@@ -63,7 +63,7 @@ public final class JkPluginIntellij extends JkPlugin {
             generator.setForceJdkVersion(true);
         }
         final String xml = generator.generate();
-        final Path imlFile = build.baseDir().resolve(
+        final Path imlFile = build.baseDir().resolve(".idea").resolve(
                 build.baseDir().getFileName().toString() + ".iml");
         JkUtilsPath.deleteIfExists(imlFile);
         JkUtilsPath.write(imlFile, xml.getBytes(Charset.forName("UTF-8")));

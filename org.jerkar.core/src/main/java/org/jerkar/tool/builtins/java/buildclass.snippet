@@ -15,7 +15,7 @@ class Build extends JkJavaProjectBuild {
      * fields have not been populated yet.
      */
     @Override
-    protected void setupOptionDefaults() {
+    protected void beforeOptionsInjected() {
         java().projectVersion = "0.0.1-SNAPSHOT";
     }
 
@@ -24,14 +24,12 @@ class Build extends JkJavaProjectBuild {
      * fields have already been populated.
      */
     @Override
-    protected void configurePlugins() {
+    protected void afterOptionsInjected() {
         project()   // Configure project structure and dependencies using project() instance.
                 .setVersionedModule("${group}:${name}", java().projectVersion)
                 .setSourceVersion(JkJavaVersion.V8)
                 .setDependencies(dependencies());
-
-        maker()    // Configure how project should be build using maker() instance.
-                .setTester(maker().getTester().forked(true));
+        maker().setTestRunner(maker().getTestRunner().forked(true));  // force tu run test in forked process
     }
 
     private JkDependencySet dependencies() {  // Example of dependencies.

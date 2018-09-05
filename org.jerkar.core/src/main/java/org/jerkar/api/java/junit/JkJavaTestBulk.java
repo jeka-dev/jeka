@@ -4,34 +4,33 @@ import org.jerkar.api.file.JkPathMatcher;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkClasspath;
-import org.jerkar.api.project.java.JkJavaProject;
 
 /**
- * Convenient class to launch Junit tests.
+ * Defines the tests classes to run along the classpath.
  *
  * @author Jerome Angibaud
  */
-public final class JkJavaTestSpec {
+public final class JkJavaTestBulk {
 
     private final JkClasspath classpath;
 
     private final JkPathTreeSet classesToTest;
 
-    public static JkJavaTestSpec of(JkClasspath classpath, JkPathTreeSet testClasses) {
-        return new JkJavaTestSpec(classpath, testClasses);
+    public static JkJavaTestBulk of(JkClasspath classpath, JkPathTreeSet testClasses) {
+        return new JkJavaTestBulk(classpath, testClasses);
     }
 
-    public static JkJavaTestSpec of(JkClasspath classpath, JkPathTree testClasses) {
+    public static JkJavaTestBulk of(JkClasspath classpath, JkPathTree testClasses) {
         return of(classpath, testClasses.asSet());
     }
 
-    private JkJavaTestSpec(JkClasspath classpath, JkPathTreeSet testClasses) {
+    private JkJavaTestBulk(JkClasspath classpath, JkPathTreeSet testClasses) {
         this.classpath = classpath;
         this.classesToTest = testClasses;
     }
 
     /**
-     * Returns the classpath for this launcher.
+     * Returns the classpath to run these tests.
      */
     public JkClasspath classpath() {
         return classpath;
@@ -41,11 +40,11 @@ public final class JkJavaTestSpec {
         return classesToTest;
     }
 
-    public JkJavaTestSpec withClassesToTest(JkPathTreeSet classesToTest) {
-        return new JkJavaTestSpec(this.classpath, classesToTest);
+    public JkJavaTestBulk withClassesToTest(JkPathTreeSet classesToTest) {
+        return new JkJavaTestBulk(this.classpath, classesToTest);
     }
 
-    public JkJavaTestSpec withClassesToTest(String includePattern) {
+    public JkJavaTestBulk withClassesToTest(String includePattern) {
         return withClassesToTest(this.classesToTest.withMatcher(JkPathMatcher.accept(includePattern)));
     }
 

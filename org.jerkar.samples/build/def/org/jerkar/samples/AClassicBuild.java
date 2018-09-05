@@ -32,14 +32,15 @@ public class AClassicBuild extends JkJavaProjectBuild {
     
     @Override
     protected void afterOptionsInjected() {
-        JkJavaProject project = project()
+        project()
                 .setSourceVersion(JkJavaVersion.V7)
                 .setDependencies(JkDependencySet.of()
                         .and("com.google.guava:guava:21.0")
                         .and("com.sun.jersey:jersey-server:1.19")
                         .and("junit:junit:4.11", TEST));
-        project.maker().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
-        project.maker().defineFatJarArtifact("fat");  // project will produce a fat jar as well.
+        maker().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
+        maker().defineFatJarArtifact("fat");  // project will produce a fat jar as well.
+        maker().setTestRunner(maker().getTestRunner().forked(true));
     }
     
     public static void main(String[] args) throws Exception {

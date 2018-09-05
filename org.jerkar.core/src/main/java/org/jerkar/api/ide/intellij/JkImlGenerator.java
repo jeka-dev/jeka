@@ -158,11 +158,11 @@ public final class JkImlGenerator {
         // TODO should get location to #outputClassFolder and #outputTestClassFolder
         writer.writeCharacters(T2);
         writer.writeEmptyElement("output");
-        writer.writeAttribute("url", "file://$MODULE_DIR$/idea-output/classes");
+        writer.writeAttribute("url", "file://$MODULE_DIR$/.idea/output/production");
         writer.writeCharacters("\n");
         writer.writeCharacters(T2);
         writer.writeEmptyElement("output-test");
-        writer.writeAttribute("url", "file://$MODULE_DIR$/idea-output/test-classes");
+        writer.writeAttribute("url", "file://$MODULE_DIR$/.idea/output/test");
         writer.writeCharacters("\n");
 
         writer.writeCharacters(T2);
@@ -246,7 +246,7 @@ public final class JkImlGenerator {
         writer.writeCharacters("\n");
         writer.writeCharacters(T3);
         writer.writeEmptyElement("excludeFolder");
-        writer.writeAttribute("url", "file://$MODULE_DIR$/idea-output");
+        writer.writeAttribute("url", "file://$MODULE_DIR$/.idea/output");
         writer.writeCharacters("\n");
         writer.writeCharacters(T2);
         writer.writeEndElement();

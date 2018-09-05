@@ -111,14 +111,14 @@ public class JkPluginJava extends JkPlugin {
             project.maker().postPack.chain(() -> project.maker().signArtifactFiles(repoPlugin.pgpSigner()));
         }
         */
-        JkUnit tester = (JkUnit) project.maker().getTester();
+        JkUnit tester = (JkUnit) project.maker().getTestRunner();
         if (tests.fork) {
             final JkJavaProcess javaProcess = JkJavaProcess.of().andCommandLine(this.tests.jvmOptions);
             tester = tester.forked(javaProcess);
         }
         tester = tester.withOutputOnConsole(tests.output);
         tester = tester.withReport(tests.report);
-        project.maker().setTester(tester);
+        project.maker().setTestRunner(tester);
         project.maker().setSkipTests(tests.skip);
         if (this.compilerExtraArgs != null) {
             project.getCompileSpec().addOptions(JkUtilsString.translateCommandline(this.compilerExtraArgs));

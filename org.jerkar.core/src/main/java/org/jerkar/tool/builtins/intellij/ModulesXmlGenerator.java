@@ -79,7 +79,7 @@ class ModulesXmlGenerator {
 
     private String path(Path iml) {
         String relPath = iml.relativize(projectDir).toString();
-        return "$PROJECT_DIR$/" + relPath;
+        return "$PROJECT_DIR$/.idea/" + relPath;
     }
 
 

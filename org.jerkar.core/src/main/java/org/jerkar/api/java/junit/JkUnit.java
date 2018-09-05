@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.jerkar.api.file.JkPathTreeSet;
@@ -31,11 +30,11 @@ import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * Convenient class to launch Junit tests.
+ * Convenient class to run Junit tests.
  *
  * @author Jerome Angibaud
  */
-public final class JkUnit implements Function<JkJavaTestSpec, JkTestSuiteResult> {
+public final class JkUnit {
 
     /**
      * Detail level for the junit report.
@@ -215,10 +214,10 @@ public final class JkUnit implements Function<JkJavaTestSpec, JkTestSuiteResult>
     }
 
     /**
-     * Alias for {@link #apply(JkJavaTestSpec)}
+     * Runs specified test bulk.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public JkTestSuiteResult run(JkJavaTestSpec testSpec) {
+    public JkTestSuiteResult run(JkJavaTestBulk testSpec) {
         if (reportDir == null && reportDetail != JunitReportDetail.NONE) {
             throw new IllegalStateException("Report directory has not been set on JkUnit instance.");
         }
@@ -289,16 +288,8 @@ public final class JkUnit implements Function<JkJavaTestSpec, JkTestSuiteResult>
         return result.get();
     }
 
-    /**
-     * Runs the test suite and return the result.
-     */
-    @Override
-    public JkTestSuiteResult apply(JkJavaTestSpec jkJavaTestSpec) {
-        return this.run(jkJavaTestSpec);
-    }
-
     @SuppressWarnings("rawtypes")
-    private Collection<Class> getClassesToTest(JkJavaTestSpec testSpec) {
+    private Collection<Class> getClassesToTest(JkJavaTestBulk testSpec) {
         final JkClasspath classpath = testSpec.classpath().andManyFirst(testSpec.classesToTest().rootDirsOrZipFiles());
         final JkClassLoader classLoader = JkClassLoader.system().parent().childWithMany(classpath)
                 .loadAllServices();
