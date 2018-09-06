@@ -29,7 +29,7 @@
 	</target>
 
 	<target name="test" depends="create-bin">
-		<java classname="org.jerkar.tool.Main" dir="org.jerkar.distrib-all" fork="true" failonerror="true">
+		<java classname="org.jerkar.tool.Main" dir="org.jerkar.core" fork="true" failonerror="true">
 			<arg line="-testSamples=false -Log.maxLength=100" />
 			<classpath>
 				<pathelement location="${bin}" />
@@ -39,7 +39,7 @@
 	</target>
 
 	<target name="test-all" depends="create-bin">
-		<java classname="org.jerkar.tool.Main" dir="org.jerkar.distrib-all" fork="true" failonerror="true">
+		<java classname="org.jerkar.tool.Main" dir="org.jerkar.core" fork="true" failonerror="true">
 			<arg line="-testSamples=true -verbose=true" />
 			<classpath>
 				<pathelement location="${bin}" />
