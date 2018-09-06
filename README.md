@@ -31,17 +31,17 @@ Built-in up-to-date documentation is available using command line by executing `
 Jerkar is made of following projects :
 * org.jerkar.core : complete Jerkar project
 * org.jerkar.samples : A sample project with several build classes to illustrate how Jerkar can be used in different ways
-* org.jerkar.samples-dependee : A sample project depending on the above sample project to illustrate multi-project builds
-These samples project are also used to run some black-box tests
+* org.jerkar.samples-dependee : A sample project depending on the above sample project to illustrate multi-project builds. 
+These sample projects are also used to run some black-box tests
 
-Jerkar builds itself. To get Jerkar full distrib built from the Java sources only, the simpler is to build it from your IDE.
+Jerkar builds itself. To build Jerkar full distrib built from sources, the simpler is to use your IDE.
 
-When distrib is created add the distrib folder to your PATH variable.
+Once distrib created, add the distrib folder to your PATH environment variable.
 
 ## Build Jerkar from Eclipse
 
-* Import *org.jerkar.core project*, described  in Eclipse (it already holds *.project* and *.classpath* files) 
-* Make sure the project is configured with a JDK8 and not a JRE.
+* Import *org.jerkar.core project* in Eclipse (it already holds *.project* and *.classpath* files) 
+* Make sure the project is configured to compile using a JDK8 and not a JRE.
 * Run `org.jerkar.CoreBuild` class main method. This class is located in *build/def* folder. 
 * This launches a Jerkar build that create the full distrib in *org.jerkar.core/build/output/distrib* folder
 
@@ -49,13 +49,13 @@ When distrib is created add the distrib folder to your PATH variable.
 
 * The Jerkar project is preconfigured for Intellij (.iml and modules.xml are stored in git).
 * Make sure the project is configured with a JDK8.
-* Run `org.jerkar.CoreBuild` class main method. This class is located in *build/def* folder of *org.jerkar.core* project.
+* Run `org.jerkar.CoreBuild` class main method. This class is located in *build/def* folder, inside *org.jerkar.core* project.
 * This launches a Jerkar build that create the full distrib in *org.jerkar.core/build/output/distrib* folder
 
 # Status
 
-First releases has been delivered. It contains all features a self respecting build tool must have : from compilation to publication features.
-Currently Jerkar is undergoing a deep reworking in order to leverage of JKK8 features. API is getting more polished 
+Last release contains all features a self respecting build tool must have : from compilation to publication features.
+Currently Jerkar is undergoing a deep reworking in order to leverage of Java8 features. API is getting more polished 
 but cannot be considered as stable for now.
 
 
