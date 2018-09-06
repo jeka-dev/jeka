@@ -10,6 +10,7 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 import org.jerkar.tool.builtins.scaffold.JkPluginScaffold;
 
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
@@ -66,6 +67,7 @@ public final class JkPluginIntellij extends JkPlugin {
         final Path imlFile = build.baseDir().resolve(".idea").resolve(
                 build.baseDir().getFileName().toString() + ".iml");
         JkUtilsPath.deleteIfExists(imlFile);
+        JkUtilsPath.createDirectories(imlFile.getParent());
         JkUtilsPath.write(imlFile, xml.getBytes(Charset.forName("UTF-8")));
         JkLog.info("Iml file generated at " + imlFile);
     }

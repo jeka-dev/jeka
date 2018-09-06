@@ -1,9 +1,6 @@
 package org.jerkar.api.system;
 
-import org.jerkar.api.utils.JkUtilsAssert;
-import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.api.utils.JkUtilsReflect;
-import org.jerkar.api.utils.JkUtilsThrowable;
+import org.jerkar.api.utils.*;
 
 import javax.xml.ws.Provider;
 import java.io.OutputStream;
@@ -117,11 +114,21 @@ public final class JkLog implements Serializable {
     public static void startTask(String message) {
         consume(JkLogEvent.regular(Type.START_TASK, message));
         currentNestedTaskLevel.incrementAndGet();
+        START_TIMES.get().push(System.nanoTime());
     }
 
     public static void endTask(String message) {
         currentNestedTaskLevel.decrementAndGet();
         consume(JkLogEvent.regular(Type.END_TASK, message));
+        START_TIMES.get().pollLast();
+    }
+
+    public static void endTask() {
+        currentNestedTaskLevel.decrementAndGet();
+        Long startTime = START_TIMES.get().pollLast();
+        Long durationMillis = JkUtilsTime.durationInMillis(startTime);
+        consume(JkLogEvent.regular(Type.END_TASK, "Done in " + durationMillis + " milliseconds."));
+
     }
 
     public static boolean isVerbose() {

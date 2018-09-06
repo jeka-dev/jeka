@@ -2,12 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/org.jerkar.core/org.jerkar.core.iml" filepath="$PROJECT_DIR$/org.jerkar.core/org.jerkar.core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/org.jerkar.distrib-all/org.jerkar.distrib-all.iml" filepath="$PROJECT_DIR$/org.jerkar.distrib-all/org.jerkar.distrib-all.iml" />
-      <module fileurl="file://$PROJECT_DIR$/org.jerkar.plugins-jacoco/org.jerkar.plugins-jacoco.iml" filepath="$PROJECT_DIR$/org.jerkar.plugins-jacoco/org.jerkar.plugins-jacoco.iml" />
-      <module fileurl="file://$PROJECT_DIR$/org.jerkar.plugins-sonar/org.jerkar.plugins-sonar.iml" filepath="$PROJECT_DIR$/org.jerkar.plugins-sonar/org.jerkar.plugins-sonar.iml" />
-      <module fileurl="file://$PROJECT_DIR$/org.jerkar.samples/org.jerkar.samples.iml" filepath="$PROJECT_DIR$/org.jerkar.samples/org.jerkar.samples.iml" />
-      <module fileurl="file://$PROJECT_DIR$/org.jerkar.samples-dependee/org.jerkar.samples-dependee.iml" filepath="$PROJECT_DIR$/org.jerkar.samples-dependee/org.jerkar.samples-dependee.iml" />
+      <module fileurl="file://$PROJECT_DIR$/org.jerkar.core/.idea/org.jerkar.core.iml" filepath="$PROJECT_DIR$/org.jerkar.core/.idea/org.jerkar.core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/org.jerkar.samples/.idea/org.jerkar.samples.iml" filepath="$PROJECT_DIR$/org.jerkar.samples/.idea/org.jerkar.samples.iml" group="org/jerkar" />
+      <module fileurl="file://$PROJECT_DIR$/org.jerkar.samples-dependee/.idea/org.jerkar.samples-dependee.iml" filepath="$PROJECT_DIR$/org.jerkar.samples-dependee/.idea/org.jerkar.samples-dependee.iml" group="org/jerkar" />
     </modules>
   </component>
 </project>

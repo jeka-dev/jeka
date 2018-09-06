@@ -65,8 +65,6 @@ public final class JkEclipseClasspathGenerator {
      */
     private boolean usePathVariables;
 
-
-
     /**
      * Constructs a {@link JkEclipseClasspathGenerator}.
      */
@@ -173,18 +171,7 @@ public final class JkEclipseClasspathGenerator {
                     "including", "**/*",
                     "path", JkConstants.BUILD_DEF_DIR);
         }
-
         generateSrcAndTestSrc(writer);
-        if (this.dependencyResolver != null) {
-            writeDependenciesEntries(writer, this.dependencies, this.dependencyResolver, paths);
-        }
-        writeJre(writer);
-
-        // add build dependencies
-        if (hasBuildDef() && buildDependencyResolver != null) {
-            final Iterable<Path> files = buildDependencyResolver.get(buildDependencies);
-            writeFileDepsEntries(writer, files, paths);
-        }
 
         // write entries for project importedBuilds
         for (final Path projectFile : this.importedBuildProjects) {
@@ -195,6 +182,17 @@ public final class JkEclipseClasspathGenerator {
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "combineaccessrules", "false", "kind", "src", "exported", "true",
                     "path", "/" + projectFile.getFileName().toString());
+        }
+
+        if (this.dependencyResolver != null) {
+            writeDependenciesEntries(writer, this.dependencies, this.dependencyResolver, paths);
+        }
+        writeJre(writer);
+
+        // add build dependencies
+        if (hasBuildDef() && buildDependencyResolver != null) {
+            final Iterable<Path> files = buildDependencyResolver.get(buildDependencies);
+            writeFileDepsEntries(writer, files, paths);
         }
 
         // Write output
@@ -397,11 +395,17 @@ public final class JkEclipseClasspathGenerator {
         if (!paths.add(binPath)) {
             return;
         }
-        if (usePathVariables) {
-            binPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.jerkarRepositoryCache().resolve(bin).toString();
+        boolean useRepoVariable = usePathVariables && bin.startsWith(JkLocator.jerkarRepositoryCache());
+        boolean isVar = true;
+        if (useRepoVariable) {
+            binPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.jerkarRepositoryCache().relativize(bin).toString();
+        } else if (usePathVariables && bin.startsWith(JkLocator.jerkarHomeDir())) {
+            binPath = DotClasspathModel.JERKAR_HOME + "/" + JkLocator.jerkarHomeDir().relativize(bin).toString();
         } else {
-            binPath = binPath.replace(File.separator, "/");
+            isVar = false;
+            binPath = sourceLayout.baseDir().relativize(bin).toString();
         }
+        binPath = binPath.replace(File.separator, "/");
         writer.writeCharacters("\t");
         final boolean mustWriteJavadoc = includeJavadoc && javadoc != null
                 && Files.exists(javadoc) && (source == null || !Files.exists(source));
@@ -410,16 +414,19 @@ public final class JkEclipseClasspathGenerator {
         } else {
             writer.writeStartElement(DotClasspathModel.CLASSPATHENTRY);
         }
-        writer.writeAttribute("kind", usePathVariables ? "var" : "lib");
+        writer.writeAttribute("kind", isVar ? "var" : "lib");
         writer.writeAttribute("path", binPath);
         writer.writeAttribute("exported", "true");
         if (source != null && Files.exists(source)) {
-            String srcPath = source.toAbsolutePath().toString();
-            if (usePathVariables) {
-                srcPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.jerkarRepositoryCache().resolve(source).toString();
-            } else {
-                srcPath = srcPath.replace(File.separator, "/");
+            String srcPath;
+            if (usePathVariables && source.startsWith(JkLocator.jerkarRepositoryCache())) {
+                srcPath = DotClasspathModel.JERKAR_REPO + "/" + JkLocator.jerkarRepositoryCache().relativize(source).toString();
+            } else if (usePathVariables && source.startsWith(JkLocator.jerkarHomeDir())) {
+                srcPath = DotClasspathModel.JERKAR_HOME + "/" + JkLocator.jerkarHomeDir().relativize(source).toString();
+            }else {
+                srcPath = sourceLayout.baseDir().relativize(source).toString();
             }
+            srcPath = srcPath.replace(File.separator, "/");
             writer.writeAttribute("sourcepath", srcPath);
         }
         if (mustWriteJavadoc) {

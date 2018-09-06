@@ -10,13 +10,14 @@ import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaVersion;
-import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.java.JkJavaProjectMaker;
+import org.jerkar.api.system.JkLog;
+import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 
 /**
- * Build script for Jerkar 0.7 using new features
+ * Build class for Jerkar. Run main method to create full distrib.
  */
 public class CoreBuild extends JkJavaProjectBuild {
 
@@ -24,23 +25,37 @@ public class CoreBuild extends JkJavaProjectBuild {
 
     private static final String VERSION = "0.7-SNAPSHOT";
 
-    public Path distribFolder;
+    @JkDoc("If true, executes black-box tests on sample projects prior ending the distrib.")
+    public boolean testSamples = false;
+
+    private Path distribFolder;
 
     @Override
     protected void beforeOptionsInjected() {
         java().tests.fork = false;
     }
 
-    protected void afterOptionsInjected() {
-        applyCommonSettings(project(), "core");
+    @Override
+    protected void afterOptionsInjected()  {
+        project().setVersionedModule(JkModuleId.of("org.jerkar:core").version(VERSION));
+        project().setSourceVersion(JkJavaVersion.V8);
+        project().setMavenPublicationInfo(mavenPublication());
+
+        maker().setCompiler(JkJavaCompiler.of().fork(true));  // Fork to avoid compile failure bug on github/travis
+        maker().setTestCompiler(JkJavaCompiler.of().fork(true));
+        maker().setArtifactFileNameSupplier(() -> project().getVersionedModule().moduleId().fullName());
+        maker().setPublishRepos(publishRepos());
         maker().defineArtifact(DISTRIB_FILE_ID, this::doDistrib);
-        this.distribFolder = project().maker().getOutLayout().outputPath().resolve("distrib");
+
+        this.distribFolder = maker().getOutLayout().outputPath().resolve("distrib");
     }
 
     private void doDistrib() {
         final JkJavaProjectMaker maker = this.java().project().maker();
-        maker.makeArtifactsIfAbsent(SOURCES_ARTIFACT_ID, JAVADOC_ARTIFACT_ID, maker.mainArtifactId());
+        maker.makeArtifactsIfAbsent(maker.mainArtifactId(), SOURCES_ARTIFACT_ID, JAVADOC_ARTIFACT_ID);
         final JkPathTree distrib = JkPathTree.of(distribFolder);
+        distrib.deleteContent();
+        JkLog.startTask("Create distrib");
         distrib.copyIn(baseDir().getParent().resolve("LICENSE"));
         distrib.merge(baseDir().resolve("src/main/dist"));
         distrib.merge(baseDir().resolve("src/main/java/META-INF/bin"));
@@ -50,28 +65,27 @@ public class CoreBuild extends JkJavaProjectBuild {
             .copyIn(ivySourceLibs)
             .copyIn(maker.artifactPath(SOURCES_ARTIFACT_ID));
         distrib.goTo("libs-javadoc").copyIn(maker.artifactPath(JAVADOC_ARTIFACT_ID));
+        if (testSamples) {
+            testSamples();
+        }
+        JkLog.info("Distribution created in " + distrib.root());
         final Path distripZipFile = maker.artifactPath(DISTRIB_FILE_ID);
         distrib.zipTo(distripZipFile);
+        JkLog.info("Distribution zipped in " + distripZipFile);
+        JkLog.endTask();
     }
 
     public static void main(String[] args) {
         JkInit.instanceOf(CoreBuild.class).doDefault();
     }
 
-    // Applies settings common to all projects within org.jerkar
-    public static void applyCommonSettings(JkJavaProject project, String moduleName) {
-
-        // Fork to avoid compile failure bug on github/travis
-        project.maker().setCompiler(JkJavaCompiler.of().fork(true));
-        project.maker().setTestCompiler(JkJavaCompiler.of().fork(true));
-
-        project.setVersionedModule(JkModuleId.of("org.jerkar", moduleName).version(VERSION));
-        project.maker().setArtifactFileNameSupplier(() -> project.getVersionedModule().moduleId().fullName());
-        project.setSourceVersion(JkJavaVersion.V8);
-        project.setMavenPublicationInfo(mavenPublication());
-        project.maker().setPublishRepos(publishRepos());
+    @Override
+    public void doDefault() {
+        clean();
+        doDistrib();
     }
 
+    // Necessary to publish on OSSRH
     private static JkMavenPublicationInfo mavenPublication() {
         return JkMavenPublicationInfo
                 .of("Jerkar", "Build simpler, stronger, faster", "http://jerkar.github.io")
@@ -81,6 +95,12 @@ public class CoreBuild extends JkJavaProjectBuild {
 
     private static JkRepoSet publishRepos() {
         return JkRepoSet.local();
+    }
+
+    void testSamples()  {
+        SampleTester sampleTester = new SampleTester(this.baseTree());
+        sampleTester.restoreEclipseClasspathFile = true;
+        sampleTester.doTest();
     }
 
 }

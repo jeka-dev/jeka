@@ -19,38 +19,45 @@ We expect from this move a much cleaner and polished API for a more intuitive pr
 Jerkar is expected to have a very fast learning curve for Java developers. You can visit the following page in this order :
 
 * http://jerkar.github.io/tell-me-more.html : introduction to Jerkar. Answer to the question : *What Jerkar is exactly ?*
-* http://jerkar.github.io/tour.html : to give a concrete idea on how Jerkar is working
-* http://jerkar.github.io/documentation/latest/getting_started.html : to get hand-on experience
-* http://jerkar.github.io/documentation/latest/reference.html : to know the details about Jerkar behavior
-* https://github.com/jerkar/jerkar-examples : Examples of project built with Jerkar.
+* http://jerkar.gith ub.io/tour.html : to give a concrete idea on how Jerkar is working (version 0.6)
+* http://jerkar.github.io/documentation/latest/getting_started.html : to get hand-on experience (version 0.6)
+* http://jerkar.github.io/documentation/latest/reference.html : to know the details about Jerkar behavior (version 0.6)
+* https://github.com/jerkar/jerkar-examples : Examples of project built with Jerkar (version 0.6)
+
+Built-in up-to-date documentation is available using command line by executing `jerkar help`.
 
 # How to build Jerkar
+
 Jerkar is made of following projects :
-* core : complete Jerkar project but without embedding following plugins
-* plugins-jacoco : a plugin to perform test coverage
-* plugins-sonar : a plugin to perform sonar analysis
-* distrib-all : the core distrib augmented with the above plugins
+* org.jerkar.core : complete Jerkar project
+* org.jerkar.samples : A sample project with several build classes to illustrate how Jerkar can be used in different ways
+* org.jerkar.samples-dependee : A sample project depending on the above sample project to illustrate multi-project builds
+These samples project are also used to run some black-box tests
 
 Jerkar builds itself. To get Jerkar full distrib built from the Java sources only, the simpler is to build it from your IDE.
 
+When distrib is created add the distrib folder to your PATH variable.
+
 ## Build Jerkar from Eclipse
 
-* Import the 4 projects described above in Eclipse (that already holds *.project* and *.classpath* files) 
-* Create a Java Application run configuration (Run Configuration ... -> Java Application -> new)
-    * Make sure that the Runtime JRE is a JDK (6 or above)
-    * Choose `org.jerkar.distrib-all` as project
-    * Choose `org.jerkar.tool.Main` as Main class
-* Run it : It will launch a multi-project build. You will find result for the full distrib in *org.jerkar.distrib-all/build/output* directory 
+* Import *org.jerkar.core project*, described  in Eclipse (it already holds *.project* and *.classpath* files) 
+* Make sure the project is configured with a JDK8 and not a JRE.
+* Run `org.jerkar.CoreBuild` class main method. This class is located in *build/def* folder. 
+* This launches a Jerkar build that create the full distrib in *org.jerkar.core/build/output/distrib* folder
 
 ## Build Jerkar from IntelliJ
 
-You can achieve the same using **Intellij** as Intellij module definitions (.iml) are stored in git. You should get a single project containing 4 modules.
-Execute 'DistribAllBuild' run config to build the full distrib in *org.jerkar.distrib-all/build/output* directory.
+* The Jerkar project is preconfigured for Intellij (.iml and modules.xml are stored in git).
+* Make sure the project is configured with a JDK8.
+* Run `org.jerkar.CoreBuild` class main method. This class is located in *build/def* folder of *org.jerkar.core* project.
+* This launches a Jerkar build that create the full distrib in *org.jerkar.core/build/output/distrib* folder
 
 # Status
 
 First releases has been delivered. It contains all features a self respecting build tool must have : from compilation to publication features.
-Now we'll plan to deliver new releases at fast pace. You're welcome to push your expectation for next releases. 
+Currently Jerkar is undergoing a deep reworking in order to leverage of JKK8 features. API is getting more polished 
+but cannot be considered as stable for now.
+
 
 # Want to contribute ?
 
@@ -62,7 +69,7 @@ If you contribute to Jerkar Core project, there's only 1 rule : try to mimic the
 More concretely :
 
 * Make a class public only when really needed. If a class is public, it should be prefixed with `Jk` (The goal is to not pollute auto-completion in IDE when Jerkar is on the build path).
-* Favor immutable objects.
-* Embrace a fluent style API (so stay away from JavaBean coding conventions).
+* Favor immutable objects when reasonable
+* Embrace a fluent style API
 * Don't use 3rd party dependencies (Use or enrich JkUtilsXxxxx classes for commons). 
-* Jerkar 0.7.x relies on JDK 8
+* Jerkar 0.7.x relies on JDK8

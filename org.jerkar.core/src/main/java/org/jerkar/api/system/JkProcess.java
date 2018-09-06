@@ -1,15 +1,19 @@
 package org.jerkar.api.system;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.api.utils.JkUtilsSystem;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Provides fluent API to define and launch external process.
@@ -17,25 +21,25 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Parameters of the command are passed as array (and not as single string
  * representing several parameter separated with whitespace).<br/>
  * So for example, if you want to create a Maven process, then you should write
- * 
+ *
  * <pre>
  * <code>JkProcess.of("mvn", "deleteArtifacts", "install")</code>
  * </pre>
- * 
+ *
  * instead of
- * 
+ *
  * <pre>
  * <code>JkProcess.of("mvn", "deleteArtifacts install")</code>
  * </pre>
- * 
+ *
  * or
- * 
+ *
  * <pre>
  * <code>JkProcess.of("mvn deleteArtifacts install")</code>
  * </pre>
- * 
+ *
  * .
- * 
+ *
  * @author Jerome Angibaud
  */
 public final class JkProcess implements Runnable {
@@ -213,7 +217,7 @@ public final class JkProcess implements Runnable {
         commands.add(this.command);
         commands.addAll(parameters);
         final AtomicInteger result = new AtomicInteger();
-        Runnable runnable = () -> {
+        final Runnable runnable = () -> {
             try {
                 final ProcessBuilder processBuilder = processBuilder(commands);
                 if (workingDir != null) {
@@ -253,6 +257,9 @@ public final class JkProcess implements Runnable {
     }
 
     private static boolean findTool(Path dir, String name) {
+        if (!Files.exists(dir)) {
+            return false;
+        }
         for (final Path file : JkUtilsPath.listDirectChildren(dir)) {
             if (Files.isDirectory(file)) {
                 continue;
