@@ -25,14 +25,9 @@ import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 
 @JkImport("org.eclipse.jdt.core.compiler:ecj:4.6.1")
 public class Build extends JkJavaProjectBuild {
-
-    @Override
-    protected void configurePlugins() {
-        ...
-        maker().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
-        ...
-    }
-    
+    ...
+    maker().setCompiler(JkJavaCompiler.of(new EclipseCompiler()));
+    ...
 }
 ```
 

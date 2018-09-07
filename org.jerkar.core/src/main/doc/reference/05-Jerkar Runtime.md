@@ -6,55 +6,67 @@ This section details what happens behind the cover when Jerkar is run.
 ### Launching Java Process
  
 Jerkar is a pure Java application requiring __JDK 8__. __JDK__ is required and __JRE__ is not sufficient.
-Indeed Jerkar uses the JDK tools to compile java source files located under _[PROJECT DIR]/build/def_.
+Indeed Jerkar uses the JDK tools to compile build classes.
 
-To ease launching Java process in command line, Jerkar provides native scripts ( _jerkar.bat_ for __Windows__ and _jerkar_ for __Unix__ ).
+To ease launching Java process in command line, Jerkar provides shell scripts ( _jerkar.bat_ for __Windows__ and _jerkar_ for __Unix__ ).
 These scripts do the following :
 
 1. __Find the java executable path__ : If a `JAVA_HOME` environment variable is defined then it takes its value as `java` path. Otherwise it takes the `java` executable defined in the _PATH_ of your OS.
 2. __Get java execution option__ : If an environment variable `JERKAR_OPTS` exists then its value is passed to the `java` command line parameters, otherwise default `-Xmx512m -XX:MaxPermSize=512m` is passed.
 3. __Set Jerkar classpath__ in the following order :
 	* all jar and zip files found under _[WORKING DIR]/build/boot_
-	* all jar and zip files found under _[JERKAR HOME]/libs/ext_
 	* the _[JERKAR_HOME]/org.jerkar.core.jar_ file 
 4. __Run the `org.jerkar.tool.Main` class__ passing the command line argument as is. So if you have typed `jerkar myArg1 myArg2` the `myArg1 myArg2` will be passed as Java command-line arguments.
 
 #### Embedded Mode
-Note that ___[JERKAR_HOME]/org.jerkar.core-all.jar___ comes after ___[WORKING_DIR]/build/boot/*___ in the classpath.
+
+Note that ___[JERKAR_HOME]/org.jerkar.core.jar___ comes after ___[WORKING_DIR]/build/boot/*___ in the classpath.
 This means that if a version of Jerkar (org.jerkar.core.jar) is in this directory, the build will be processed with this instance of Jerkar and not with the one located in in _[JERKAR HOME]_.
 
-This is called the __Embedded__ mode. It guarantees that your project will build regardless of Jerkar version installed on the host machine. 
-This mode allows to build your project even if Jerkar is not installed on the host machine.
+This is called the __Embedded__ mode. The Jerkar tool is embded within your project so the build does not depends 
+of the presence and version of Jerkar in the host machine.
 
 ##### Enable embedded mode
-To enable embedded mode :
-   1. Copy ___[JERKAR_HOME]/org.jerkar.core-all.jar___ into ___[PROJECT_DIR]/build/boot/*___ directory.
-   2. Copy ___[JERKAR_HOME]/jerkar.bat___ and ___[JERKAR_HOME]/jerkar___ at the root of ___[PROJECT_DIR]___.
 
-You can also achieve this by invoking `jerkar scaffold -scaffoldEmbed`.
-This will generate ___jerkar.bat___ and ___jerkar___ file at the root of ___[PROJECT_DIR]___ and copy  ___[JERKAR_HOME]/org.jerkar.core-all.jar___ to ___[PROJECT_DIR]/build/boot___.
+To enable embedded mode :
+   1. Copy ___[JERKAR_HOME]/org.jerkar.core.jar___ into ___[PROJECT_DIR]/build/boot/*___ directory.
+   2. Copy ___[JERKAR_HOME]/jerkar.bat___ and ___[JERKAR_HOME]/jerkar___ at the root of ___[PROJECT_DIR]___ (optional).
+
+Jerkar is provided with a _scaffold_ plugin that do it for you : just execute `jerkar scaffold#run -scaffold#embed`.
 
 ##### Run in embedded mode
-Once a project enables embedded mode, all Jerkar command will run in that mode, there is nothing special to do.
-If you don't want to make in enables by default, remove ___jerkar.bat___ and ___jerkar___ from ___[PROJECT_DIR]___. In this case, to run in embedded mode you need to use`java -cp build/boot/* org.jerkar.tool.Main` instead of `jerkar` in the command line.
+
+You can go two ways :
+  - execute `jerkar myFunction ...` as you would do in regular mode. This works only if you have copied jerkar/jerkar.bat shell scripts into __[PROJECT DIR]__
+  - or execute `java -cp build/boot/* org.jerkar.tool.Main myFunction ...` from ___[PROJECT_DIR]___.
 
 ### Jerkar Execution
 
-The `org.jerkar.tool.Main#main` is the entry point of Jerkar. This is the method you invoke to launch or debug a Jerkar build within your IDE.
+You can invoke Jerkar both from the command line or directly from your IDE.
+
+The `org.jerkar.tool.Main#main` is the entry point when invoking Java from the command line. 
 
 It processes as follow :
 
 1. Parse the command line.
-2. Populate system properties and Jerkar options from configuration files and command line (see <strong>build configuration</strong>).
-3. Pre-process and compile java source files located under under _[PROJECT DIR]/build/def_ (see <strong>Build Definition Compilation</strong>). 
-4. Instantiate the build class (see <strong>Build Class Instantiation</strong>)
-5. Inject options in build instance fields (see <strong>Build Configuration</strong>).
-6. Instantiate and configure plugins specified in command line arguments (see <strong>Mention Plugins in the Command Line</strong>).
-7. Invoke methods specified in command line arguments : methods are executed in the order they appear on the command line.
+2. Populate system properties and Jerkar options from configuration files and command line.
+3. Pre-process build classes . In this stage, it parses build classes source file to detect if build classpath need to be augmented.
+4. Compile build classes using the classpath computed above.
+5. Instantiate build class, including injecting options.
+6. Invoke methods specified in command line arguments : methods are executed in the order they appear on the command line.
+
+If launched from the IDE, process is simpler cause build classes are already compiled and the classpath already set by 
+the IDE. Only steps 2 and 5 are executed. You just have to implement a main method in the build class as :
+
+```
+public static void main(String[] args) {
+    JkInit.instanceOf(CoreBuild.class).doDefault();
+} 
+```
 
 #### Command Line
 
-Jerkar parses the command line and processes each arguments according this pattern :
+Jerkar parses the command line and processes each arguments according the following pattern :
 
 * Argument starts with `@` : This is a module import clause, the following will be used for adding a jar to the build classpath. For example if the command line contains `@org.jerkar:addin-spring-boot:1.3.1`, the build class will be run with the spring-boot-addin on its classpath.
 
@@ -63,7 +75,8 @@ Jerkar parses the command line and processes each arguments according this patte
 * in the other cases, argument is considered as a method name to invoke on the build class instance.
 
 
-#### Build class Compilation
+#### Build Classes Compilation
+
 Jerkar compiles build class files prior to execute it. Build class files are expected to be in _[PROJECT DIR]/build/def_. If this directory does not exist or does not contains java sources, the compilation is skipped.
 Compilation outputs class files in _[PROJECT DIR]/build/output/def-bin_ directory and uses classpath containing :
 
