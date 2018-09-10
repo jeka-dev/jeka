@@ -28,7 +28,7 @@ public class JkRepoConfigOptionLoader {
      * This methods returns <code>null</code> if no matching option found
      */
     public static JkRepo publishRepository() {
-        final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("Repo.publishName"), "publish");
+        final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("repo.publishName"), "publish");
         JkRepo repo = repoFromOptions(repoName);
         if (repo == null) {
             return null;

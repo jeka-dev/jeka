@@ -24,7 +24,10 @@ Jerkar is expected to have a very fast learning curve for Java developers. You c
 * http://jerkar.github.io/documentation/latest/reference.html : to know the details about Jerkar behavior (version 0.6)
 * https://github.com/jerkar/jerkar-examples : Examples of project built with Jerkar (version 0.6)
 
-Built-in up-to-date documentation is available using command line by executing `jerkar help`.
+However above links reflect documentation for version 0.6. 
+
+To get documentation matching version yiu are using, please refer to documentation provided inside Jerkar distrib and 
+command line documentation available executing `jerkar help`.
 
 # How to build Jerkar
 

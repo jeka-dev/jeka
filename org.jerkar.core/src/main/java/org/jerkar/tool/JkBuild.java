@@ -74,7 +74,6 @@ public class JkBuild {
     }
 
     public static <T extends JkBuild> T of(Class<T> buildClass) {
-        long ts = System.nanoTime();
         if (BASE_DIR_CONTEXT.get() == null) {
             baseDirContext(Paths.get("").toAbsolutePath());
         }
@@ -82,7 +81,6 @@ public class JkBuild {
         final T build = JkUtilsReflect.newInstance(buildClass);
         final JkBuild jkBuild = build;
 
-        // plugins must be instantiated before setupOptionsDefault is invoked.
         jkBuild.plugins = new JkBuildPlugins(build, Environment.commandLine.getPluginOptions());
 
         // Allow sub-classes to define defaults prior options are injected
@@ -93,8 +91,9 @@ public class JkBuild {
         final Map<String, String> options = Environment.commandLine.getOptions();
         JkOptions.populateFields(build, options);
 
-        // Load plugins declared in command line
         build.afterOptionsInjected();
+
+        // Load plugins declared in command line
         jkBuild.plugins.loadCommandLinePlugins();
         for (JkPlugin plugin : jkBuild.plugins().all()) {
             List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(plugin).optionDefs();
@@ -112,7 +111,7 @@ public class JkBuild {
         build.afterPluginsActivated();
         List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(build).optionDefs();
         JkLog.info("Build instance initialized with options " + HelpDisplayer.optionValues(defs));
-        JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(ts) + " milliseconds.");
+        JkLog.endTask();
         baseDirContext(null);
 
 
