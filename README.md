@@ -26,7 +26,7 @@ Jerkar is expected to have a very fast learning curve for Java developers. You c
 
 However above links reflect documentation for version 0.6. 
 
-To get documentation matching version yiu are using, please refer to documentation provided inside Jerkar distrib and 
+To get documentation matching version you are using, please refer to documentation provided inside Jerkar distrib and 
 command line documentation available executing `jerkar help`.
 
 # How to build Jerkar
