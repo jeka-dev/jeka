@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-class DocMaker {
+public class DocMaker {
 
     private static final Charset UTF8 = Charset.forName("UTF8");
 
