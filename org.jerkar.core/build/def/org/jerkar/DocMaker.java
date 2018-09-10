@@ -9,6 +9,7 @@ import org.jerkar.api.utils.JkUtilsPath;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 class DocMaker {
 
@@ -40,8 +41,6 @@ class DocMaker {
     void assembleHtmlDoc() {
         Path targetFolder = docDist.resolve("html");
         JkUtilsPath.createDirectories(targetFolder);
-        Parser parser = Parser.builder().build();
-        HtmlRenderer renderer = HtmlRenderer.builder().build();
         docSource.accept("*.md").files().forEach(path -> {
             String content = new String(JkUtilsPath.readAllBytes(path), UTF8);
             String html = mdToHtml(content);
@@ -55,10 +54,12 @@ class DocMaker {
 
     private String createSingleReferenceMdPage() {
         final StringBuilder sb = new StringBuilder();
-        docSource.goTo("reference").files().forEach(path -> {
+        List<Path> paths = docSource.goTo("reference").files();
+        paths.sort((path1, path2) -> path1.compareTo(path2));
+        for(Path path : paths) {
             String content = new String(JkUtilsPath.readAllBytes(path), Charset.forName("UTF8"));
             sb.append(content);
-        });
+        }
         return sb.toString();
     }
 

@@ -19,7 +19,7 @@ These scripts do the following :
 3. Set Jerkar classpath in the following order :
 	* all jar and zip files found under _[WORKING DIR]/build/boot_
 	* the _[JERKAR_HOME]/org.jerkar.core.jar_ file 
-4. Run the `org.jerkar.tool.Main` class passing the command line argument as is. It processes as follow :                                                                     
+4. Run the `org.jerkar.tool.Main` class passing the command line argument as is. This class main method does the following :                                                                     
      1. Parse the command line.
      2. Populate system properties from configuration files and command line.
      3. Pre-process build classes . In this stage, it parses build classes source file to detect if build classpath need to be augmented.
@@ -101,7 +101,7 @@ Jerkar uses the compiler provided by the running JDK.
 
 #### Build Class Selection
 
-Once compiled, Jerkar selects one _build class_, instantiate it in order to invoke instance methods on it.
+Once compiled, Jerkar selects one _build class_ and instantiate it in order to invoke instance methods on it.
 The selection process is :
 * If `BuildClass` option (shorthand `BC`) is specified, then Jerkar selects a class having the same name or same 
 short name among the _build classes_. 
@@ -123,7 +123,7 @@ The build instantiation process is defined in `ork.jerkar.tool.JkBuild#of` facto
 #### Method Invocation
 
 Once build class instantiated, Jerkar invokes instance methods mentioned in command line. Method are invoked in 
-order they appear in command line regardless if method is defined on build class or in plugin.
+order they appear in command line regardless if method is defined on the build class itself or in a plugin.
 
 In order a method is considered as a build method (invokable from Jerkar command line) it must :
 * Be public
@@ -159,15 +159,15 @@ public static void main(String[] args) {
 The `JkInit#instanceOf` method loads options from args and instanciate BuildClass instance. Then user can 
 configure it using hard coding prior launching any method programmatically.
 
-The other way is to launch `org.jerkar.tool.Main` method from your IDE with appropriate arguments.
+The other way is to launch `org.jerkar.tool.Main` method from your IDE with same arguments as you would use with command line.
 
 ### Embedded Mode
 
-Note that ___[JERKAR_HOME]/org.jerkar.core.jar___ comes after ___[WORKING_DIR]/build/boot/*___ in the classpath.
+When launched from command line, ___[JERKAR_HOME]/org.jerkar.core.jar___ comes after ___[WORKING_DIR]/build/boot/*___ in Jerkar classpath.
 This means that if a version of Jerkar (org.jerkar.core.jar) is in this directory, the build will be processed with this instance of Jerkar and not with the one located in in _[JERKAR HOME]_.
 
 This is called the __Embedded__ mode. The Jerkar tool is embded within your project so the build does not depends 
-of the presence and version of Jerkar in the host machine.
+of the presence and version of Jerkar installed in the host machine.
 
 <strong>Enable embedded mode : </strong>
 

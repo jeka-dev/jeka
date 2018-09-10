@@ -65,6 +65,7 @@ public class CoreBuild extends JkJavaProjectBuild {
             .copyIn(ivySourceLibs)
             .copyIn(maker.artifactPath(SOURCES_ARTIFACT_ID));
         distrib.goTo("libs-javadoc").copyIn(maker.artifactPath(JAVADOC_ARTIFACT_ID));
+        JkLog.execute("Making documentation", () -> new DocMaker(baseDir(), distribFolder).assembleAllDoc());
         if (testSamples) {
             testSamples();
         }

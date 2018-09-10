@@ -1,7 +1,7 @@
 ## Build Configuration
 ----------------------
 
-Jerkar builds are configurable. Build definition classes can retrieve values defined at runtime by reading :
+Jerkar builds are configurable. Build classes can retrieve values defined at runtime by reading :
 
 * environment variables
 * system properties
