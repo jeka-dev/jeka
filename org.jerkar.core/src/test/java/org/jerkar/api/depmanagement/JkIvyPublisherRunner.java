@@ -33,7 +33,7 @@ public class JkIvyPublisherRunner {
     }
 
     public static void testPublishMaven() throws IOException {
-        final IvyPublisher jkIvyPublisher = IvyPublisher.of(mavenRepo().with(JkRepo.JkRepoPublishConfig.of()
+        final IvyPublisher jkIvyPublisher = IvyPublisher.of(mavenRepo().with(JkRepo.JkPublishConfig.of()
                 .withUniqueSnapshot(false)).asSet(), Paths.get("build/output/test-out").toFile());
         final JkVersionedModule versionedModule = JkVersionedModule.of(
                 JkModuleId.of("mygroup2", "mymodule2"), JkVersion.of("0.0.12-SNAPSHOT"));

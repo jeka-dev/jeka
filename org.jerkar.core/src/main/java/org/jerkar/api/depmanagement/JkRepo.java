@@ -53,10 +53,10 @@ public final class JkRepo implements Serializable {
 
     private final JkRepoIvyConfig ivyConfig;
 
-    private final JkRepoPublishConfig publishConfig;
+    private final JkPublishConfig publishConfig;
 
 
-    private JkRepo(URL url, JkRepoCredential credential, JkRepoIvyConfig ivyConfig, JkRepoPublishConfig publishConfig) {
+    private JkRepo(URL url, JkRepoCredential credential, JkRepoIvyConfig ivyConfig, JkPublishConfig publishConfig) {
         this.url = url;
         this.credential = credential;
         this.ivyConfig = ivyConfig;
@@ -69,23 +69,23 @@ public final class JkRepo implements Serializable {
      */
     public static JkRepo of(String url) {
         if (url.toLowerCase().startsWith("ivy:")) {
-            return new JkRepo(toUrl(url.substring(4)), null, JkRepoIvyConfig.of(), JkRepoPublishConfig.of());
+            return new JkRepo(toUrl(url.substring(4)), null, JkRepoIvyConfig.of(), JkPublishConfig.of());
         }
-        return new JkRepo(toUrl(url), null, null, JkRepoPublishConfig.of());
+        return new JkRepo(toUrl(url), null, null, JkPublishConfig.of());
     }
 
     /**
      * Creates a Maven repository having the specified file location.
      */
     public static JkRepo ofMaven(Path dir) {
-        return new JkRepo(JkUtilsPath.toUrl(dir), null, null, JkRepoPublishConfig.of());
+        return new JkRepo(JkUtilsPath.toUrl(dir), null, null, JkPublishConfig.of());
     }
 
     /**
      * Creates a Maven repository having the specified file location.
      */
     public static JkRepo ofIvy(Path dir) {
-        return new JkRepo(JkUtilsPath.toUrl(dir), null, JkRepoIvyConfig.of(), JkRepoPublishConfig.of());
+        return new JkRepo(JkUtilsPath.toUrl(dir), null, JkRepoIvyConfig.of(), JkPublishConfig.of());
     }
 
     /**
@@ -168,7 +168,7 @@ public final class JkRepo implements Serializable {
         return credential;
     }
 
-    public JkRepoPublishConfig publishConfig() {
+    public JkPublishConfig publishConfig() {
         return publishConfig;
     }
 
@@ -186,7 +186,7 @@ public final class JkRepo implements Serializable {
         return this;
     }
 
-    public JkRepo with(JkRepoPublishConfig publishConfig) {
+    public JkRepo with(JkPublishConfig publishConfig) {
         return new JkRepo(this.url, this.credential, this.ivyConfig, publishConfig);
     }
 
@@ -320,7 +320,7 @@ public final class JkRepo implements Serializable {
     /**
      * Configuration specific to publishing.
      */
-    public static class JkRepoPublishConfig implements Serializable {
+    public static class JkPublishConfig implements Serializable {
 
         private static final long serialVersionUID = 1L;
 
@@ -330,35 +330,35 @@ public final class JkRepo implements Serializable {
 
         private final boolean uniqueSnapshot;
 
-        private JkRepoPublishConfig(JkPublishFilter filter, boolean needSignature, boolean uniqueSnapshot) {
+        private JkPublishConfig(JkPublishFilter filter, boolean needSignature, boolean uniqueSnapshot) {
             super();
             this.filter = filter;;
             this.uniqueSnapshot = uniqueSnapshot;
             this.needSignature = needSignature;
         }
 
-        public static JkRepoPublishConfig of() {
-            return new JkRepoPublishConfig(JkPublishFilter.ACCEPT_ALL, false, false);
+        public static JkPublishConfig of() {
+            return new JkPublishConfig(JkPublishFilter.ACCEPT_ALL, false, false);
         }
 
         /**
-         * Creates a {@link JkRepoPublishConfig} for publishing snapshot version on the specified {@link JkRepo}.
-         * Release versions are not publishable on this {@link JkRepoPublishConfig}
+         * Creates a {@link JkPublishConfig} for publishing snapshot version on the specified {@link JkRepo}.
+         * Release versions are not publishable on this {@link JkPublishConfig}
          */
-        public static JkRepoPublishConfig ofSnapshotOnly(boolean uniqueSnapshot) {
-            return new JkRepoPublishConfig(JkPublishFilter.ACCEPT_SNAPSHOT_ONLY, false, uniqueSnapshot);
+        public static JkPublishConfig ofSnapshotOnly(boolean uniqueSnapshot) {
+            return new JkPublishConfig(JkPublishFilter.ACCEPT_SNAPSHOT_ONLY, false, uniqueSnapshot);
         }
 
         /**
-         * Creates a {@link JkRepoPublishConfig} for publishing non-snapshot projectVersion on the specified {@link JkRepo}.
-         * Snapshot versions are not publishable on this {@link JkRepoPublishConfig}
+         * Creates a {@link JkPublishConfig} for publishing non-snapshot projectVersion on the specified {@link JkRepo}.
+         * Snapshot versions are not publishable on this {@link JkPublishConfig}
          */
-        public static JkRepoPublishConfig ofReleaseOnly(boolean needSignature) {
-            return new JkRepoPublishConfig(JkPublishFilter.ACCEPT_RELEASE_ONLY, needSignature, false);
+        public static JkPublishConfig ofReleaseOnly(boolean needSignature) {
+            return new JkPublishConfig(JkPublishFilter.ACCEPT_RELEASE_ONLY, needSignature, false);
         }
 
         /**
-         * Returns the filter used for this {@link JkRepoPublishConfig}.
+         * Returns the filter used for this {@link JkPublishConfig}.
          * Only modules accepted by this filter will pb published on this repo.
          */
         public JkPublishFilter filter() {
@@ -373,12 +373,12 @@ public final class JkRepo implements Serializable {
             return uniqueSnapshot;
         }
 
-        public JkRepoPublishConfig withUniqueSnapshot(boolean uniqueSnapshot) {
-            return new JkRepoPublishConfig(this.filter, this.needSignature, uniqueSnapshot);
+        public JkPublishConfig withUniqueSnapshot(boolean uniqueSnapshot) {
+            return new JkPublishConfig(this.filter, this.needSignature, uniqueSnapshot);
         }
 
-        public JkRepoPublishConfig withNeedSignature(boolean needSignature) {
-            return new JkRepoPublishConfig(this.filter, needSignature, uniqueSnapshot);
+        public JkPublishConfig withNeedSignature(boolean needSignature) {
+            return new JkPublishConfig(this.filter, needSignature, uniqueSnapshot);
         }
     }
 
