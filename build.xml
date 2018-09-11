@@ -30,7 +30,7 @@
 
 	<target name="test" depends="create-bin">
 		<java classname="org.jerkar.tool.Main" dir="org.jerkar.core" fork="true" failonerror="true">
-			<arg line="-testSamples=false -Log.maxLength=100" />
+			<arg line="-testSamples=false -LogMaxLength=200 -LogHeaders -LogVerbose -java#pack.javadoc=false" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />
@@ -40,7 +40,7 @@
 
 	<target name="test-all" depends="create-bin">
 		<java classname="org.jerkar.tool.Main" dir="org.jerkar.core" fork="true" failonerror="true">
-			<arg line="-testSamples=true -verbose=true" />
+			<arg line="-testSamples=true -LogMaxLength=100 -LogHeaders -LogVerbose" />
 			<classpath>
 				<pathelement location="${bin}" />
 				<fileset refid="libs" />

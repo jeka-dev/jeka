@@ -33,7 +33,7 @@ class SampleTester {
         this.sampleDependeeBaseDir = buildDir.goTo("../org.jerkar.samples-dependee");
         this.output = sampleBaseDir.goTo("build/output");
         String scriptName = JkUtilsSystem.IS_WINDOWS ? "jerkar.bat" : "jerkar";
-        launchScript = buildDir.root().resolve("build/output/dist/" + scriptName);
+        launchScript = buildDir.root().resolve("build/output/distrib/" + scriptName);
     }
 
     void doTest()  {
@@ -42,6 +42,7 @@ class SampleTester {
         testSamples("MavenStyleBuild");
         testSamples("OpenSourceJarBuild");
         testSamples("HttpClientTaskBuild");
+        testSamples("SimpleScopeBuild");
         testDependee("FatJarBuild");
         Path classpathFile = sampleBaseDir.get(".classpath");
         Path classpathFile2 = sampleBaseDir.get(".classpath2");

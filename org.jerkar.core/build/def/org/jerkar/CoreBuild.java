@@ -26,7 +26,7 @@ public class CoreBuild extends JkJavaProjectBuild {
     private static final String VERSION = "0.7-SNAPSHOT";
 
     @JkDoc("If true, executes black-box tests on sample projects prior ending the distrib.")
-    public boolean testSamples = false;
+    public boolean testSamples;
 
     private Path distribFolder;
 
@@ -77,7 +77,7 @@ public class CoreBuild extends JkJavaProjectBuild {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(CoreBuild.class).doDefault();
+        JkInit.instanceOf(CoreBuild.class, args).doDefault();
     }
 
     @Override
@@ -99,9 +99,11 @@ public class CoreBuild extends JkJavaProjectBuild {
     }
 
     void testSamples()  {
+        JkLog.startTask("Launching integration tests on samples");
         SampleTester sampleTester = new SampleTester(this.baseTree());
         sampleTester.restoreEclipseClasspathFile = true;
         sampleTester.doTest();
+        JkLog.endTask();
     }
 
 }

@@ -3,6 +3,7 @@ package org.jerkar.api.java;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import org.jerkar.api.file.JkPathTree;
@@ -48,9 +49,9 @@ public final class JkJavaCompileSpec {
 
     // ------------ Output dir ------------------------
 
-    public File getOutputDir() {
+    public Path getOutputDir() {
         final String path = findValueAfter( OUTPUT_DIR_OPTS);
-        return path == null ? null : new File(path);
+        return path == null ? null : Paths.get(path);
     }
 
     public JkJavaCompileSpec setOutputDir(Path outputDir) {

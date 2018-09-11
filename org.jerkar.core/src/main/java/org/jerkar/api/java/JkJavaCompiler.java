@@ -124,7 +124,7 @@ public final class JkJavaCompiler {
      */
     @SuppressWarnings("unchecked")
     public boolean compile(JkJavaCompileSpec compileSpec) {
-        final Path outputDir = compileSpec.getOutputDir().toPath();
+        final Path outputDir = compileSpec.getOutputDir();
         List<String> options = compileSpec.getOptions();
         if (outputDir == null) {
             throw new IllegalStateException("Output dir option (-d) has not been specified on the compileRunner. Specified options : " + options);

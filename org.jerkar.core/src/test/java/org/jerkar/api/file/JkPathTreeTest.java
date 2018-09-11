@@ -1,15 +1,15 @@
 package org.jerkar.api.file;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 import org.jerkar.api.utils.JkUtilsPath;
@@ -146,6 +146,24 @@ public class JkPathTreeTest {
         Files.delete(zipFile);
     }
 
+    @Test
+    public void testDeleteContent() throws IOException {
+        Path foo = Files.createTempDirectory("foo");
+        Path bar = foo.resolve("bar");
+        Files.createDirectories(bar);
+        Path txt = bar.resolve("file.txt");
+        Files.write(txt, "toto".getBytes(Charset.forName("UTF8")));
+        Path txt2 = foo.resolve("file2.txt");
+        Files.copy(txt, txt2);
+        assertTrue(Files.exists(txt));
+        JkPathTree fooTree = JkPathTree.of(foo).refuse("bar/**", "bar");
+        System.out.println(fooTree.files());
+        assertFalse(fooTree.files().contains(txt));
+        fooTree.deleteContent();
+        assertTrue(Files.exists(txt));
+        fooTree.deleteRoot();  // cleanup
+    }
+
 
     private static Path sampleDir() throws Exception {
         final URL sampleFileUrl = JkUtilsPathTest.class
@@ -157,27 +175,12 @@ public class JkPathTreeTest {
         return sampleFile.getParent().getParent();
     }
 
-    private static Path sampleFolder() throws IOException, URISyntaxException {
-        final URL sampleFileUrl = JkUtilsPathTest.class
-                .getResource("samplefolder/subfolder/sample.txt");
-        final Path source = Paths.get(sampleFileUrl.toURI()).getParent().getParent();
-        Files.createDirectories(source.resolve("emptyfolder"));   // git won't copy empty dir
-        final Path sampleFile = Paths.get(sampleFileUrl.toURI());
-        assertTrue(Files.exists(sampleFile));
-        return sampleFile.getParent().getParent();
-    }
-
-    private static Path createSampleZip() throws IOException, URISyntaxException {
-        Path folder = sampleFolder();
+    private static Path createSampleZip() throws Exception {
+        Path folder = sampleDir();
         Path zip = Files.createTempFile("sample", ".zip");
         Files.delete(zip);
         JkPathTree.of(folder).zipTo(zip);
         return zip;
     }
-
-
-
-
-
 
 }

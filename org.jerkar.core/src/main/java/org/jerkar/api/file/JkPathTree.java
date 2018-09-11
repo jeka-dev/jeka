@@ -231,16 +231,24 @@ public final class JkPathTree {
 
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                return visit(file);
+                return visitFile(file);
             }
 
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                return visit(dir);
+                return visitDir(dir);
             }
 
-            private FileVisitResult visit(Path path) {
-                if (!JkUtilsPath.isSameFile(root(), path) && filter.matches(path)) {
+            private FileVisitResult visitFile(Path path) {
+                if (filter.matches(root().relativize(path))) {
+                    JkUtilsPath.deleteFile(path);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            private FileVisitResult visitDir(Path path) {
+                if (!JkUtilsPath.isSameFile(root(), path) && filter.matches(root().relativize(path))
+                        && JkUtilsPath.listDirectChildren(path).isEmpty()) {
                     JkUtilsPath.deleteFile(path);
                 }
                 return FileVisitResult.CONTINUE;

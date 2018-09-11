@@ -26,7 +26,10 @@ public class SimpleScopeBuild extends JkJavaProjectBuild {
                 .and(JERSEY_SERVER, "1.19", JkScopeMapping
                     .of(COMPILE).to(RUNTIME)
                     .and(FOO, PROVIDED).to(BAR, PROVIDED)));
+        BuildUtility.printHello();
     }
+
+
 }
 
 
