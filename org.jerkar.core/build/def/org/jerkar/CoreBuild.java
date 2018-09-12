@@ -33,6 +33,7 @@ public class CoreBuild extends JkJavaProjectBuild {
     @Override
     protected void beforeOptionsInjected() {
         java().tests.fork = false;
+        java().pack.javadoc = true;
     }
 
     @Override
@@ -52,7 +53,7 @@ public class CoreBuild extends JkJavaProjectBuild {
 
     private void doDistrib() {
         final JkJavaProjectMaker maker = this.java().project().maker();
-        maker.makeArtifactsIfAbsent(maker.mainArtifactId(), SOURCES_ARTIFACT_ID, JAVADOC_ARTIFACT_ID);
+        maker.makeArtifactsIfAbsent(maker.mainArtifactId(), SOURCES_ARTIFACT_ID);
         final JkPathTree distrib = JkPathTree.of(distribFolder);
         distrib.deleteContent();
         JkLog.startTask("Create distrib");
@@ -64,7 +65,10 @@ public class CoreBuild extends JkJavaProjectBuild {
         distrib.goTo("libs-sources")
             .copyIn(ivySourceLibs)
             .copyIn(maker.artifactPath(SOURCES_ARTIFACT_ID));
-        distrib.goTo("libs-javadoc").copyIn(maker.artifactPath(JAVADOC_ARTIFACT_ID));
+        if (java().pack.javadoc) {
+            maker.makeArtifactsIfAbsent(maker.mainArtifactId(), JAVADOC_ARTIFACT_ID);
+            distrib.goTo("libs-javadoc").copyIn(maker.artifactPath(JAVADOC_ARTIFACT_ID));
+        }
         JkLog.execute("Making documentation", () -> new DocMaker(baseDir(), distribFolder).assembleAllDoc());
         if (testSamples) {
             testSamples();

@@ -91,9 +91,15 @@ public class JkBuild {
         final Map<String, String> options = Environment.commandLine.getOptions();
         JkOptions.populateFields(build, options);
 
+        // Load plugins declared in command line and inject options
+        jkBuild.plugins.loadCommandLinePlugins();
+        for (JkPlugin plugin : jkBuild.plugins().all()) {
+           jkBuild.plugins.injectOptions(plugin);
+        }
+
         build.afterOptionsInjected();
 
-        // Load plugins declared in command line
+
         jkBuild.plugins.loadCommandLinePlugins();
         for (JkPlugin plugin : jkBuild.plugins().all()) {
             List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(plugin).optionDefs();

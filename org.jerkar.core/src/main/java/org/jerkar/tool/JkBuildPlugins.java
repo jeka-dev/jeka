@@ -3,9 +3,7 @@ package org.jerkar.tool;
 import org.jerkar.api.system.JkException;
 import org.jerkar.api.utils.JkUtilsReflect;
 
-import java.lang.reflect.Method;
 import java.util.*;
-import java.util.List;
 
 /**
  * Set of plugins configured or activated in a {@link JkBuild}.
@@ -60,17 +58,13 @@ public final class JkBuildPlugins {
             return optPlugin.get();
         }
         final T plugin = JkUtilsReflect.newInstance(pluginClass, JkBuild.class, this.holder);
-        JkOptions.populateFields(plugin, PluginOptions.options(plugin.name(), this.pluginOptionsList));
+        injectOptions(plugin);
         configuredPlugins.add(plugin);
         return plugin;
     }
 
-    private Method pluginMethod(Class pluginClass, String name) {
-        try {
-            return pluginClass.getMethod(name);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException("No method " + name + " found on plugin " + pluginClass);
-        }
+    void injectOptions(JkPlugin plugin) {
+        JkOptions.populateFields(plugin, PluginOptions.options(plugin.name(), this.pluginOptionsList));
     }
 
     void loadCommandLinePlugins() {
