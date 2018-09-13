@@ -43,7 +43,7 @@ public class JkBuild {
 
     private final JkImportedBuilds importedBuilds;
 
-    private final JkRunnables defaulter = JkRunnables.noOp();
+    private final JkRunnables defaultMethod = JkRunnables.noOp();
 
     // ------------------ options --------------------------------------------------------
 
@@ -180,7 +180,7 @@ public class JkBuild {
     }
 
     protected void addDefaultOperation(Runnable runnable) {
-        this.defaulter.chain(runnable);
+        this.defaultMethod.chain(runnable);
     }
 
 
@@ -233,7 +233,7 @@ public class JkBuild {
      */
     @JkDoc("Conventional method standing for the default operations to perform.")
     public void doDefault() {
-        defaulter.run();
+        defaultMethod.run();
     }
 
     /**

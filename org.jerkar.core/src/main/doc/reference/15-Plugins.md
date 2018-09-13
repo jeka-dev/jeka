@@ -1,44 +1,20 @@
 ## Plugins (Out Dated)
 ----
 
-Jerkar provides a plugable architecture. To be precise, build templates provided with Jerkar (`org.jerkar.tool.JkBuild`, `org.jerkar.tool.builtins.javabuild.JkJavaBuild`) are plugable.
-They provide methods designed for extension point. Methods designed for extension point alter their behavior according template plugins activated in the enclosing template.
+Jerkar provides a plugable architecture. To be precise, `org.jerkar.tool.JkBuild` sub-classes are plugable.
+
+A Plugin class must extends `org.jerkar.tool.JkPlugin` and must be named as *JkPlugin[PluginName]* .
+
+When a instance of a plugin is plugged in a `JkBuild` instance :
+
+- The public method of the plugin are available (invokable) from the command line using `jerkar pluginName#MethodName`
+- The public instance field values of the plugin can be injected as options from command line using `jerkar -pluginName#FieldName=Xxxx`
+- When the plugin is activated, its `activate` method is invoked. This method is supposed to act on the hosting JkBuild instance and its other bound plugins.
+
+Executing `jerkar help` provides an exhaustive list of available plugins in the _build classpath_ and you can have details on each 
+by executing `jerkar [pluginName]#help`.
 
 
-
-Example for `JkJavaBuild` template : 
-
-```
-/**
- * Returns location of production source code (containing edited + generated sources).
- */
-public JkFileTreeSet sources() {
-    return JkJavaBuildPlugin.applySourceDirs(this.plugins.getActives(),
-        editedSources().and(generatedSourceDir()));
-}
-``` 
-
-By default this method simply returns the files mentioned by the `#editedSources()` and `#generatedSourceDir()`.  If plugins 
-are activated, the result may be altered as the `JkJavaBuildPlugin` class specifies :
-
-```
-static JkFileTreeSet applySourceDirs(Iterable<? extends JkBuildPlugin> plugins, JkFileTreeSet original) {
-    JkFileTreeSet result = original;
-        for (final JkBuildPlugin plugin : plugins) {
-            result = ((JkJavaBuildPlugin) plugin).alterSourceDirs(result);
-        }
-    return result;
-}
-	
-/**
- * Override this method if the plugin need to alter the source directory to use for compiling.
- * 
- * @see JkJavaBuild#sources()
- */
-protected JkFileTreeSet alterSourceDirs(JkFileTreeSet original) {
-    return original;
-}
-```
 For instance, the Eclipse plugin for `JkJavaBuild` redefines this method to enforce the source directories defined in the _.classpath_ file. 
 
 To bind plugin to a template : you can either declare it inside the build class or mention it in the command line...

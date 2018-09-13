@@ -124,8 +124,8 @@ The build instantiation process is defined in `ork.jerkar.tool.JkBuild#of` facto
 
 #### Method Invocation
 
-Once build class instantiated, Jerkar invokes instance methods mentioned in command line. Method are invoked in 
-order they appear in command line regardless if method is defined on the build class itself or in a plugin.
+Once build class instantiated, Jerkar invokes instance methods mentioned in command line as `jerkar myFistMethod mySecondMethod ...`. 
+Methods are invoked in order they appear in command line regardless if method is defined on the build class itself or in a plugin.
 
 In order a method is considered as a build method (invokable from Jerkar command line) it must :
 * Be public
@@ -133,11 +133,13 @@ In order a method is considered as a build method (invokable from Jerkar command
 * Accept no arguments
 * Return void
 
+If Jerkar command line specifies no method, then the `doDefault` method is invoked.
+
 ### Jerkar from IDE
 
 #### IDE Classpath Setting
 
-In order your IDE compile and launch your build class, you must ensure that project/module classpath contains :
+In order your IDE compiles and launches your build class, you must ensure that project/module classpath contains :
 * `org.jerkar.core.jar` found in Jerkar distrib
 * libs and folders mentioned in `@JkImport` annotations of your build classes
 * project/modules mentionned in `@JkImportBuild` annotations of your build classes

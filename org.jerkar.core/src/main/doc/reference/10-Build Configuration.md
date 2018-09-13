@@ -16,7 +16,7 @@ As for environment variables, your build classes can read system properties usin
 
 Jerkar proposes 3 ways to inject system properties. They are considered in following order :
 
-* Properties mentioned in Jerkar __command line__ as `Jerkar doDefault -DmyProperty=myValue`.
+* Properties mentioned in Jerkar command line as `Jerkar doDefault -DmyProperty=myValue`.
 * Properties mentioned in ___[Jerkar User Home]/system.properties___ file. 
 * Properties mentioned in ___[Jerkar Home]/system.properties___ file. 
   Note that if you are running Jerkar in embedded mode, the ___[Jerkar Home]/system.properties___ file will not be taken in account but ___[project dir]/build/boot/system.properties___.
@@ -25,7 +25,7 @@ In every case, defined system properties are injected after the creation of the 
 
 ### Jerkar Options
 
-Jerkar options are similar to system properties as it stands for a set of __key/value__. 
+Jerkar options are similar to system properties as it stands for a set of key/value. 
 
 Options are globally available in all build classes but can be retrieve in a static typed way (injected in build class fields) 
 or as set of key/string value. 
@@ -49,7 +49,7 @@ This way you only get the string literal value for the option and you have to pa
 
 #### Retrieve Option in Build Class Fields
 
-You can retrieve options just by __declaring fields in build classes__. 
+You can retrieve options just by declaring fields in build classes. 
 All public non-final instance fields of the invoked build class, are likely to be injected as an option.
 
 For example, if you declare a field like :
@@ -64,7 +64,7 @@ Then you can override the value by mentioning in command line `jerkar doSomethin
 
 Note that the injected string value will be automatically converted to the target type.
 
-Handled types are : __String__, __all primitive types (and their wrappers)__, __enum__, __File__ and __composite object__.
+Handled types are : _String_, _all primitive types (and their wrappers)_, _enum_, _File_ and _composite object_.
 If the value is not parsable to the target type, build fails. 
 
 To get a precise idea on how types are converted see [this code](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/src/main/java/org/jerkar/tool/OptionInjector.java).
@@ -112,12 +112,12 @@ public boolean forkTests = false;
 
 #### Built-in Options
 
-Jerkar defines some standard options that are used by Jerkar engine itself. They respect an UpperCamelCase naming
+Jerkar defines some built-in options that are used by the engine itself. Unlike regular options, they respect an UpperCamelCase naming
 convention :
 
-- LogVerbose (shorthand -LV) : if true, logs will display 'trace' level logs.
-- LogHeaders (shorthand -LH) : if true, meta-information about the build creation itself and method execution will be logged.
-- LogMaxLength (shorthand -LML) : Console will do a carriage return automatically after N characters are outputted in a single line (ex : -LML=120).
-- BuildClass (shorthand -BC) : Force to use the specified class as the build class to invoke. It can be the short name of the class (without package prefix).
+- -LogVerbose (shorthand -LV) : if true, logs will display 'trace' level logs.
+- -LogHeaders (shorthand -LH) : if true, meta-information about the build creation itself and method execution will be logged.
+- -LogMaxLength (shorthand -LML) : Console will do a carriage return automatically after N characters are outputted in a single line (ex : -LML=120).
+- -BuildClass (shorthand -BC) : Force to use the specified class as the build class to invoke. It can be the short name of the class (without package prefix).
 
 
