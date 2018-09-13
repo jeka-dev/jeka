@@ -99,7 +99,6 @@ public class JkBuild {
 
         build.afterOptionsInjected();
 
-
         jkBuild.plugins.loadCommandLinePlugins();
         for (JkPlugin plugin : jkBuild.plugins().all()) {
             List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(plugin).optionDefs();

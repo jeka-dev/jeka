@@ -1,4 +1,4 @@
-## Plugins
+## Plugins (Out Dated)
 ----
 
 Jerkar provides a plugable architecture. To be precise, build templates provided with Jerkar (`org.jerkar.tool.JkBuild`, `org.jerkar.tool.builtins.javabuild.JkJavaBuild`) are plugable.

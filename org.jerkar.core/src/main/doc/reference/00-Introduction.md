@@ -1,6 +1,3 @@
-# Jerkar - Reference Guide
---------------------------
-
 ## Introduction
 ----
 

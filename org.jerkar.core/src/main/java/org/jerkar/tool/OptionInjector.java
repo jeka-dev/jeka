@@ -36,7 +36,7 @@ final class OptionInjector {
             final String stringValue = props.get(name);
             Object value;
             try {
-                value = parse((Class<Object>) type, stringValue);
+                value = parse(type, stringValue);
             } catch (IllegalArgumentException e) {
                 throw new JkException("Option " + name + " has been set with improper value '" + stringValue + "'");
             }

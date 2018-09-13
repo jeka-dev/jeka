@@ -44,7 +44,8 @@ the running build.
 2. Execute `jerkar scaffold#run` under this directory. 
 This will generate a project skeleton with the following build class at _[PROJECT DIR]/build/def/Build.java_
 
-<pre><code>import org.jerkar.api.depmanagement.JkDependencySet;
+```Java
+import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
@@ -90,7 +91,8 @@ class Build extends JkJavaProjectBuild {
         JkInit.instanceOf(Build.class, args).doDefault();
     }
 
-}</code></pre>
+}
+```
 
 By default the project layout mimics the Maven one so sources are supposed to lie in _src/main/java_.
 

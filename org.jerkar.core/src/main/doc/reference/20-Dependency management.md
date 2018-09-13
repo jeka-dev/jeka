@@ -1,4 +1,4 @@
-## Dependency Management
+## Dependency Management (Out Dated)
 ----
 
 ### What is a dependency ?
@@ -102,7 +102,7 @@ This section describes how to declare different types of dependencies.
 
 You just have to mention the path of one or several files. If one of the files does not exist at resolution time (when the dependency is actually retrieved), build fails.
 
-```
+```Java
     @Override
     protected JkDependencies dependencies() {
         final File depFile1 = new File("/my/file1.jar");  // file with absolute path
@@ -128,7 +128,7 @@ This mechanism is quite simple yet powerful as it addresses following use cases 
 
 The generic way is to construct this kind of dependency using a `java.lang.Runnable`.
 
-```
+```Java
 private Runnable computation = new Runnable() {...}; 
 	
 File fooFile = new File("../otherproject/target/output/foo.jar");  // dependency file  
@@ -143,7 +143,7 @@ Here, if the _fooFile_ is absent then the __computation__ will be run prior to r
 
 Jerkar provides some shortcuts to deal with other Jerkar projects : For this, you can create the dependency directly from the slave build instance. 
 
-```
+```Java
 @JkProject("../foo")          // The external project path relative to the current project root
 public JkJavaBuild fooBuild;  // This build comes from 'foo' project 
 	
@@ -159,7 +159,7 @@ See _Multi Module Project_ to get details how parameters are propagated to slave
 
 You can also use another kind of project mentioning the command line to run in order to build the project.
  
-```
+```Java
 File fooDir = new File("../../foo");  // base dir of a Ant project 
 File fooJar = new File(fooDir, "build/foo.jar");
 JkProcess antBuild = JkProcess.of("ant", "makeJar").withWorkingDir(fooDir));
@@ -179,7 +179,7 @@ If the file still does not exist then the build fails.
 
 This is for declaring a dependency on module hosted in _Maven_ or _Ivy_ repository. Basically you instantiate a `JkModuleDepency` from it's group, name and version.
 
-```
+```Java
 ...	
 @Override  
 protected JkDependencies dependencies() {
@@ -199,7 +199,7 @@ Note that a version ending by `-SNAPSHOT` has a special meaning : Jerkar will co
 
 Jerkar allows to specify a version range, for example, the following is legal :
 
-```
+```Java
 ...	
 @Override  
 protected JkDependencies dependencies() {
@@ -217,7 +217,7 @@ As Jerkar relies on Ivy under the hood, you can use any expression mentioned (he
 Maven or Ivy module dependencies need to be downloaded from a binary repository. This could be a managed repository (as _Nexus_ or _Artifactory_), simple file system repo or a combination of any.
 
 
-```
+```Java
 ...	
 @Override 
 protected JkDependencies dependencies() {
@@ -230,7 +230,7 @@ protected JkDependencies dependencies() {
 
 You can also precise the extension of the artifact :
 
-```
+```Java
 ...	
 @Override 
 protected JkDependencies dependencies() {
@@ -252,7 +252,7 @@ If use `JkBuildDependencySupport` template, or one of its subclass as `JkBuildJa
 If the repository is an Ivy one, you should prefix the url with `ivy:`  as _ivy:/my/shared/drive/repo_
 
 
-```
+```Java
 repo.download.url=ivy:http://my/ivy/repo
 repo.download.username=myIvyUsername
 repo.download.password=myIvyPassword
@@ -285,7 +285,7 @@ The whole project dependency description lie in a single instance of `JkDependen
 
 You can bind any kind of dependency to on one or several scopes as :
 
-```
+```Java
 private static final JkScope FOO = JkScope.of("foo"); 
 
 private static final JkScope BAR = JkScope.of("bar"); 
@@ -305,7 +305,7 @@ For resolving __module dependency__ Jerkar uses [__Ivy__](http://ant.apache.org/
  
 So the above module dependencies are translated to Ivy equivalent :
 
-```
+```Java
 ...
 <dependency org="org.foo" name="barcomp" rev="1.19" conf="bar;foo"/>
 <dependency org="com.google.guava" name="guava" rev="18.0"/>
@@ -315,7 +315,7 @@ So the above module dependencies are translated to Ivy equivalent :
 
 You can also specify a _scope mapping_ (aka _Ivy configuration mapping_) for __module dependencies__ :
 
-```
+```Java
 protected JkDependencies dependencies() {
 		return JkDependencies.builder()
 			.on("com.foo:barcomp", "1.19")

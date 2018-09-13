@@ -7,75 +7,87 @@ Jerkar builds are configurable. Build classes can retrieve values defined at run
 * system properties
 * Jerkar options
 
-### Environment variables
-There is nothing specific to Jerkar. Just set the environment variable as you usually do on your OS and get the value from build using the standard `System#getenv` method.
+### Environment Variables
+There is nothing specific to Jerkar. Just set the environment variables as you usually do on your OS and get 
+the value in your build classes using the standard `System#getenv` method.
 
-### System properties
-Naturally, your build definitions can read system properties by using the standard `System#getProperty` method.
+### System Properties
+As for environment variables, your build classes can read system properties using the standard `System#getProperty` method.
 
-Jerkar proposes 3 ways to inject system properties :
+Jerkar proposes 3 ways to inject system properties. They are considered in following order :
 
-* By editing ___[Jerkar Home]/system.properties___ file. 
-  Note that if you are running Jerkar in embedded mode, the ___[Jerkar Home]/system.properties___ file will not be taken in account but ___[project dir]/build/def/build/system.properties___.
-* By editing ___[Jerkar User Home]/system.properties___ file. 
-* By mentioning the property/value in Jerkar __command line__ as `Jerkar doDefault -DmyProperty=myValue`. 
-
-The __command line__ takes precedence on ___[Jerkar User Home]/system.properties___ that in turn, takes precedence on ___[Jerkar Home]/system.properties___.
+* Properties mentioned in Jerkar __command line__ as `Jerkar doDefault -DmyProperty=myValue`.
+* Properties mentioned in ___[Jerkar User Home]/system.properties___ file. 
+* Properties mentioned in ___[Jerkar Home]/system.properties___ file. 
+  Note that if you are running Jerkar in embedded mode, the ___[Jerkar Home]/system.properties___ file will not be taken in account but ___[project dir]/build/boot/system.properties___.
 
 In every case, defined system properties are injected after the creation of the java process (via `System#setProperty` method).
 
-### Jerkar options
+### Jerkar Options
 
-Jerkar options are similar to system properties as it stands for a set of __key/value__. You can read it by using a dedicated API or let it be injected in Java field as explained below.
+Jerkar options are similar to system properties as it stands for a set of __key/value__. 
 
-#### Injecting options
+Options are globally available in all build classes but can be retrieve in a static typed way (injected in build class fields) 
+or as set of key/string value. 
 
-Jerkar proposes 3 ways to inject options :
+#### Inject Options
 
-* By editing ___[Jerkar Home]/options.properties___ file. 
-  Note that if you are running Jerkar in embedded mode, the ___[Jerkar Home]/options.properties___ file will not be taken in account but ___[project dir]/build/def/build/options.properties___.
-* By editing ___[Jerkar User Home]/options.properties___ file.
-* By mentioning the property/value in the Jerkar command line as `Jerkar doDefault -myOption=myValue`.
+Jerkar proposes 3 ways to inject options. They are considered in following order :
 
-As for system properties, The __command line__ takes precedence on ___[Jerkar User Home]/options.properties___ that takes in turn,  precedence on ___[Jerkar Home]/options.properties___.
+* Options mentioned in Jerkar command line as `Jerkar doDefault -myOption=myValue`.
+* Options mentioned in ___[Jerkar User Home]/options.properties___ file.
+* Options mentioned in ___[Jerkar Home]/options.properties___ file. 
+  Note that if you are running Jerkar in embedded mode, the ___[Jerkar Home]/options.properties___ file will not be taken in account but ___[project dir]/build/boot/options.properties___.
 
-Note for boolean, when no value is specified, `true` will be used as default.
+Note for boolean options, when no value is specified, `true` will be used as default.
 
-#### Retrieve Jerkar options
+#### Retrieve Options as String Values
 
 You can retrieve string values using the `JkOptions` API providing convenient static methods as `JkOptions#get`, `JkOptions#getAll` or `JkOptions#getAllStartingWith(String prefix)`.
 
-You can also retrieve options just by __declaring fields in build definition class__. 
-All non private instance fields of the build definition class, are likely to be injected as an option.
+This way you only get the string literal value for the option and you have to parse it if the intended type was a boolean or a number.
 
-For example, if you declare a field like `protected int size = 3;` then you can override the default value by injecting the option value with any of the 3 ways described above.
+#### Retrieve Option in Build Class Fields
 
-Any fields __except static fields or private fields__ can be used to inject options.
-If you want __inject option in a private field__, you must annotate it with `@JkDoc` as `@JkDoc private boolean myField;` 
+You can retrieve options just by __declaring fields in build classes__. 
+All public non-final instance fields of the invoked build class, are likely to be injected as an option.
+
+For example, if you declare a field like :
+
+```
+class MyBuild extends JkBuild {
+   public int size = 10;
+   ...
+}
+``` 
+Then you can override the value by mentioning in command line `jerkar doSomething -size=5`.
 
 Note that the injected string value will be automatically converted to the target type.
-Handled types are __String__, __all primitive types (and their wrappers)__, __enum__, __File__ and __composite object__.
+
+Handled types are : __String__, __all primitive types (and their wrappers)__, __enum__, __File__ and __composite object__.
+If the value is not parsable to the target type, build fails. 
+
 To get a precise idea on how types are converted see [this code](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/src/main/java/org/jerkar/tool/OptionInjector.java).
 
-#### Composite options
+##### Composite options
 
-Composite options are a way to structure your options. Say that you want to configure some server access with url, userName and passwsord,
-you can gather all these information in a object as 
+Composite options are a way to structure your options. Say that you want to configure some server access with url, userName and passwsord. 
+You can group all these information into a single object as :
 
 ```Java
 class Server {
-    private String url;
-    private String userName;
-    private String password;
+    public String url;
+    public String userName;
+    public String password;
     // ...
 }
 ```
 
-declare a Server field in your build :
+Declare a Server field in your build :
 
 ```Java
 class MyBuild extends JkBuild {
-   Server deployServer;
+   public Server deployServer;
    ...
 }
 ```
@@ -87,17 +99,7 @@ deployServer.username=myUsername
 deployServer.password=myPassword
 ```
 
-#### Standard options
-
-Jerkar predefines some standard options that you can set for any build :
-
-* buildClass : This forces the build class to use. If this option is not null then Jerkar will used the specified class as the build class.
-Note that this can be a simple class as `MyBuildClass` is enough for running `org.my.project.MyBuildClass`. 
-* verbose : when `true` Jerkar will be more verbose at logging at the price of being slower and bloating logs. Default value is `false`.
-* silent : when `true`nothing will be logged. Default is `false`
-
-
-#### How to document options ?
+#### Document Options
 
 If you want your option been displayed when invoking `jerkar help` you need to annotate it with `@JkDoc`.
 
@@ -105,5 +107,17 @@ For example :
 
 ```
 @JkDoc("Make the test run in a forked process")
-private boolean forkTests = false;
+public boolean forkTests = false;
 ```
+
+#### Built-in Options
+
+Jerkar defines some standard options that are used by Jerkar engine itself. They respect an UpperCamelCase naming
+convention :
+
+- LogVerbose (shorthand -LV) : if true, logs will display 'trace' level logs.
+- LogHeaders (shorthand -LH) : if true, meta-information about the build creation itself and method execution will be logged.
+- LogMaxLength (shorthand -LML) : Console will do a carriage return automatically after N characters are outputted in a single line (ex : -LML=120).
+- BuildClass (shorthand -BC) : Force to use the specified class as the build class to invoke. It can be the short name of the class (without package prefix).
+
+

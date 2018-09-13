@@ -57,15 +57,17 @@ Jerkar follows a similar process to load options. It loads in order :
 
 The last loaded options override the previous ones if there is some conflicts.
 
-#### Build Class Pre-processing (Compute Build Classpath).
+#### Build Class Pre-processing (Import 3rd party library into Build Classpath).
 
 In order to compile _build classes_, Jerkar has to compute _build classpath_ first. With Jerkar you can specify build dependencies 
 directly inside the source code using `@JkImport` or  `@JkImportBuild` annotations as shown below.
 
+Note that these dependencies are only to be used in _build classes_ and are not included in the dependencies of the project to build.
+
 ```Java 
 @JkImport("commons-httpclient:commons-httpclient:3.1")
 @JkImport("com.google.guava:guava:18.0")
-@JkImport("../otherProject/bin")
+@JkImport("../local/library/bin")
 public class HttpClientTaskBuild extends JkBuild {
 
     @JkImportBuild("../another/project/using/jerkar")
@@ -77,10 +79,10 @@ public class HttpClientTaskBuild extends JkBuild {
 To achieve this, Jerkar parses source code of <strong>all</strong> _build classes_ inside the project and add it the the build classpath.
 
 When a dependency is expressed as a maven/ivy module, Jerkar tries to resolve it using repository url defined by in order : 
-* If option `repo.buildName` is present and option `repo.${repo.buildName}.url` is present as well, it takes the value of the latest. 
+* If option `repo.buildName` is present and option `repo.${repo.buildName}.url` is present as well, it takes the value of this property. 
 * If no url is defined as such, it takes the value of `repo.build.url` option.
 * If this option is not set, then it takes the value of `repo.download.url` option. 
-* If the latest is nor present as well, it falls back in Maven Central.
+* If the latest is not present as well, it falls back to Maven Central.
 
 If a repository needs credentials, you need to supply it through Jerkar options `repo.[repo name].username` and `repo.[repo name].password`.
 
@@ -101,10 +103,10 @@ Jerkar uses the compiler provided by the running JDK.
 
 #### Build Class Selection
 
-Once compiled, Jerkar selects one _build class_ and instantiate it in order to invoke instance methods on it.
+Once compiled, Jerkar selects one _build class_ from _build classpath_ extending `org.jerkar.tool.JkBuild` and instantiate it in order to invoke instance methods on it.
 The selection process is :
 * If `BuildClass` option (shorthand `BC`) is specified, then Jerkar selects a class having the same name or same 
-short name among the _build classes_. 
+short name among the _build classes_.
 * If this option is not set, Jerkar selects the first build class extending `JkBuild` in alphabetic order then sub-package in deep first. 
   This means that class `MyBuid` will be selected prior `apackage.ABuild`, and `aa.bb.MyClass` will be selected prior `ab.OtherClass`.
 * If no such class found, Jerkar selects the built-in `org.jerkar.tool.builtins.java.JkJavaProjectBuild`
@@ -143,7 +145,7 @@ In order your IDE compile and launch your build class, you must ensure that proj
 
 Plugin methods `eclipse#generateFiles` and `intellij#generateIml` can achieve this automatically.
 
-#### Launching from IDE
+#### Launch from IDE
 
 If launched from the IDE, process is simpler cause build classes are already compiled and the classpath already set by 
 the IDE. 
@@ -173,15 +175,15 @@ of the presence and version of Jerkar installed in the host machine.
 
 To enable embedded mode :
    1. Copy ___[JERKAR_HOME]/org.jerkar.core.jar___ into ___[PROJECT_DIR]/build/boot/*___ directory.
-   2. Copy ___[JERKAR_HOME]/jerkar.bat___ and ___[JERKAR_HOME]/jerkar___ at the root of ___[PROJECT_DIR]___ (optional).
+   2. Copy ___[JERKAR_HOME]/jerkar.bat___ and ___[JERKAR_HOME]/jerkar___ at the root of ***[PROJECT_DIR]*** (optional).
 
 Jerkar is provided with a _scaffold_ plugin that do it for you : just execute `jerkar scaffold#run -scaffold#embed`.
 
 <strong>Run in embedded mode : </strong>
 
 You can go two ways :
-  - execute `jerkar myFunction ...` as you would do in regular mode. This works only if you have copied jerkar/jerkar.bat shell scripts into __[PROJECT DIR]__
-  - or execute `java -cp build/boot/* org.jerkar.tool.Main myFunction ...` from ___[PROJECT_DIR]___.
+  - execute `jerkar myFunction ...` as you would do in regular mode. This works only if you have copied jerkar/jerkar.bat shell scripts into ***[PROJECT DIR]***
+  - or execute `java -cp build/boot/* org.jerkar.tool.Main myFunction ...` from ***[PROJECT_DIR]*** .
 
 
 ### Default path settings
@@ -193,15 +195,15 @@ By default the this directory is located at _[User Home]/.jerkar_ (_[User Home]_
 You can override this setting by defining the `JERKAR_USER_HOME` environment variable.
 You can get this location programmatically in your build classes using `JkLocator.jerkarUserHome()` method. 
 
-#### Specify the local repository cache
+#### Specify the local Repository Cache
 
 Jerkar uses [Apache Ivy](http://ant.apache.org/ivy/) under the hood to handle module dependencies. Ivy downloads and stores locally artifacts consumed by projects.
 By default the location is _[JERKAR USER HOME]/cache/repo_ but you can redefine it by defining the `JERKAR_REPO` environment variable.
 You can get this location programmatically in your build classes using `JkLocator.jerkarRepositoryCache()` method.
 
-#### See the effective paths
+#### See Effective Paths
 
-The Jerkar logs displays the effective path at the very start of the process, if launched with `-LogHeaders=true` option :
+The Jerkar displays the effective path at the very start of the process if launched with `-LogHeaders=true` option :
 
 For example, `jerkar help -LogHeaders` will output :
 
