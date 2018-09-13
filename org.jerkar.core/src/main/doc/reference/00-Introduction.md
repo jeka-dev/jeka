@@ -18,8 +18,13 @@ __[JERKAR USER HOME]__ : refers to the folder where Jerkar stores caches, binary
 <strong>Build Classes :</strong> Java source code containing build instructions. These files are edited by the users and are located under _[PROJECT DIR]/build/def_ directory.  
 This term can also be use to designate their compiled counterparts (.class files). 
 
-<strong>Build classpath :</strong> Classpath on which depends _build classes_ to get compiled and executed. It consists
+<strong>Build Classpath :</strong> Classpath on which depends _build classes_ to get compiled and executed. It consists
 in _Jerkar_ core classes but can be augmented with any third party lib or build classes located in another project.
+  
+<strong>Build Methods :</strong> Java methods member of _Build Classes_ invokable from Jerkar command line. These methods 
+are hosted in classes extending `org.jerkar.tool.JkBuild` or `org.jerkar.tool.JkPlugin`. They must be public zero-args instance methods 
+returning void. 
+  
   
 <strong>Options :</strong> This is a set of key-value used to inject parameters. Options can be mentioned as command line arguments, stored in specific files or be hard coded in build classes.
 

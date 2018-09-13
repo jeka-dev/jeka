@@ -118,9 +118,9 @@ The build instantiation process is defined in `ork.jerkar.tool.JkBuild#of` facto
 2. Invoking `JkBuild#beforeOptionsInjected` method on build class. This method might be overridden by users to define option default values.
 3. Injecting defined options in public instance fields.
 4. Invoking `JkBuild#afterOptionsInjected` method on build class. This method might be overridden by users to configure build and plugins before they have been activated.
-5. Loading and configuring plugins defined in command line
-6. Invoke `JkPlugin#activate` method on each defined plugins. This method is defined by plugin authors.
-7. Invoke `JkBuild#afterPluginsActivated` on build class. This method might be overridden by users to configure build class instance once plugins have been activated.
+5. Loading plugins defined in command line and injecting options into them.
+6. Invoking `JkPlugin#activate` method on each loaded plugins. This method is defined by plugin authors.
+7. Invoking `JkBuild#afterPluginsActivated` on build class. This method might be overridden by users to configure build class instance once plugins have been activated.
 
 #### Method Invocation
 

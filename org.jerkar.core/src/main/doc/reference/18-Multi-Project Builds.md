@@ -53,8 +53,8 @@ If a slave build do not have such a method, the build does not fail but warns it
 When mentioning an option on the command line, only the master build try to inject its corresponding field with the option value.
 
 If you want to inject option field on the slave build as well, just append a `*` at the end of the option declaration as `jerkar aField=myValue*`.
-
-If a build don't have such field, the injection simply does not happen and the build does not fail.
+                                                                   
+                                                                   If a build don't have such field, the injection simply does not happen and the build does not fail.
 
 Note that `JkOptions` class is shared among master and slave builds so slave builds can have access to master options by using its static methods.
 

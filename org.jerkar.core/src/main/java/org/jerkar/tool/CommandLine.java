@@ -234,15 +234,6 @@ final class CommandLine {
         return subProjectMethods;
     }
 
-    Map<String, String> getPluginOptions(String pluginName) {
-        for (PluginOptions pluginOptions : this.pluginOptions) {
-            if (pluginOptions.pluginName.equals(pluginName)) {
-                return pluginOptions.options;
-            }
-        }
-        return Collections.emptyMap();
-    }
-
     List<PluginOptions> getPluginOptions() {
         return pluginOptions;
     }

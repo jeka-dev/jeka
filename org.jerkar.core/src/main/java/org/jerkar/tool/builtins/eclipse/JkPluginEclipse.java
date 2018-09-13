@@ -49,8 +49,6 @@ public final class JkPluginEclipse extends JkPlugin {
 
     // ------------------------ plugin methods ----------------------
 
-
-
     @Override
     @JkDoc("Adds .classpath and .project generation to scaffolding.")
     protected void activate() {

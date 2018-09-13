@@ -68,11 +68,11 @@ public final class JkBuildPlugins {
     }
 
     void loadCommandLinePlugins() {
-        Iterable<PluginOptions> pluginSetups = Environment.commandLine.getPluginOptions();
-        for (PluginOptions pluginSetup : pluginSetups){
-            PluginDictionary.PluginDescription pluginDescription = PluginDictionary.loadByName(pluginSetup.pluginName);
+        Iterable<PluginOptions> pluginOptionsList = Environment.commandLine.getPluginOptions();
+        for (PluginOptions pluginOptions : pluginOptionsList){
+            PluginDictionary.PluginDescription pluginDescription = PluginDictionary.loadByName(pluginOptions.pluginName);
             if (pluginDescription == null) {
-                throw new JkException("No plugin found with name '" + pluginSetup.pluginName + "'.");
+                throw new JkException("No plugin found with name '" + pluginOptions.pluginName + "'.");
             }
             getOrCreate(pluginDescription.pluginClass());
         }
