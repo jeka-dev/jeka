@@ -50,7 +50,7 @@ class DocMaker {
         });
         String html = mdToHtml(createSingleReferenceMdPage());
         JkUtilsPath.write(targetFolder.resolve("reference.html"), html.getBytes(Charset.forName("UTF8")));
-        docSource.goTo("templates").accept("**/*.css").copyTo(docDist.resolve("html"));
+        docSource.goTo("templates").accept("**/*.css", "**/*.jpg", "**/*.svg").copyTo(docDist.resolve("html"));
     }
 
     private String createSingleReferenceMdPage() {
@@ -93,10 +93,10 @@ class DocMaker {
                     counters[i] = 0;
                 }
                 StringBuilder sb = new StringBuilder();
-                for (int i = 2; i <= heading.getLevel(); i++) {
+                for (int i = 1; i <= heading.getLevel(); i++) {
                     sb.append(counters[i]).append(".");
                 }
-                if (sb.length() > 1 && heading.getLevel() > 2) {
+                if (sb.length() > 1 && heading.getLevel() > 1) {
                    sb.delete(sb.length() - 1, sb.length() );
                 }
                 String number = sb.toString();
@@ -108,7 +108,7 @@ class DocMaker {
                 heading.insertBefore(htmlInline);
                 String numberedTitle = number + " " + content;
                 text.setLiteral(numberedTitle);
-                MenuItem menuItem = new MenuItem(numberedTitle, anchorId, heading.getLevel() -1);
+                MenuItem menuItem = new MenuItem(numberedTitle, anchorId, heading.getLevel());
                 menuItems.add(menuItem);
             }
         });
@@ -122,7 +122,7 @@ class DocMaker {
         List<MenuItem> reversedItems = new LinkedList<>(menuItems);
         Collections.reverse(reversedItems);
         for (MenuItem menuItem : reversedItems) {
-            if (menuItem.level > 4) {
+            if (menuItem.level > 5) {
                 continue;
             }
             Link link = new Link();
@@ -146,7 +146,6 @@ class DocMaker {
         final String anchorId;
 
         final int level;
-
 
         public MenuItem(String title, String anchorId, int level) {
             super();

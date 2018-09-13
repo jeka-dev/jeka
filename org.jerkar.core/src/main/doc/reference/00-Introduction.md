@@ -1,5 +1,4 @@
-## Introduction
-----
+# Introduction
 
 This document stands for reference guide and provides details about Jerkar behaviour. If you are looking for 
 how exactly Jerkar behaves or you want to get a pretty exhaustive list of Jerkar features, you are in the right place.

@@ -1,5 +1,4 @@
 ## Jerkar Runtime
-----
 
 This section details what happens behind the cover when Jerkar is run. 
 

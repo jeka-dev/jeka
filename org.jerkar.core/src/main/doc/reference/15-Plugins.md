@@ -49,7 +49,7 @@ Example of loading and configuring a plugin in build class.
 ```
 
 
-### Adding Plugins to Build Classpath
+### Add Plugins to Build Classpath
 
 To be activated or configured a plugin has to be in the _build classpath_. 
 
@@ -63,3 +63,13 @@ public class MyBuild extends JkJavaBuild {`
 ```
 
 For now, Jerkar ships with several plugins out-of-the-box. You'll get a comprehensive list by executing `jerkar help`.
+
+### Document Plugins
+
+Plugin writers can embed self-documentation using `@JkDoc` annotation on class, build method and option field declaration.
+
+Writers can also mention that the plugin has dependencies on other plugin using `@JkDocPluginDeps` annotation. This annotation 
+has only a documentation purpose and does not has influence on plugin loading mechanism.
+
+A good example is [*Java Plugin*](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/src/main/java/org/jerkar/tool/builtins/java/JkPluginJava.java)
+

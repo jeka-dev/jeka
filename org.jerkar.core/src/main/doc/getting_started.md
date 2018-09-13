@@ -1,7 +1,4 @@
-# Getting Started
-------------------
-
-### Lexical
+# Lexical
 
 These terms are used in this document, this short lexical disambiguates their meanings.
 
@@ -12,7 +9,7 @@ __[JERKAR USER HOME]__ : refers to the folder where Jerkar stores caches, binary
 __[USER HOME]__ : User Home in Windows or Unix meaning.
 
 
-## Install Jerkar
+# Install Jerkar
 
 1. unzip the [distribution archive](http://jerkar.github.io/binaries/jerkar-distrib.zip) to the directory you want to install Jerkar : let's call it _[Jerkar Home]_
 2. make sure that either a valid JDK is on your _PATH_ environment variable or that a _JAVA_HOME_ variable is pointing on
@@ -36,9 +33,9 @@ Jerkar User Home : C:\users\djeang\.jerkar
 Note : -LH option stands for "Log Headers". In this mode, Jerkar displays meta-information about 
 the running build.
 
-## Use Jerkar with command line
+# Use Jerkar with command line
 
-### Create a project
+## Create a project
 
 1. Create a new directory named 'mygroup.myproject' as the root of your project.
 2. Execute `jerkar scaffold#run` under this directory. 
@@ -98,20 +95,20 @@ By default the project layout mimics the Maven one so sources are supposed to li
 
 You can execute `jerkar java#info` to see an abstract of the project setup. 
 
-### Build your project
+## Build your project
 
 1. Edit the Build.java source file above. For example, you can add compile dependencies.
 2. Just execute `jerkar` under the project base directory. This will compile, run test and package your project in a jar file.
 
-### Explore functions
+## Explore functions
 
 Execute `jerkar help` to display all what you can do from the command line for the current project. As told on the help screen,
 you can execute `jerkar aGivenPluginName#help` to display help on a specific plugin. 
 The list of available plugins on the Jerkar classpath is displayed in help screen.
 
-## Use with Eclipse
+# Use with Eclipse
 
-### Setup Eclipse 
+## Setup Eclipse 
 
 To use Jerkar within Eclipse, you just have to set 2 classpath variables in Eclipse.
 
@@ -143,12 +140,12 @@ Jerkar Repository Cache : C:\users\djeang\.jerkar\cache\repo   <-- This is the v
 ...
 ```
 
-### setup _.classpath_ file
+## setup _.classpath_ file
 
 Execute `jerkar eclipse#generateFiles` from project root folder to generate a _.classpath_ file 
 according the `Build.java` file.
 
-### run/debug within Eclipse
+## run/debug within Eclipse
 
 You can go two ways :
 - Just execute your Build class main method.
@@ -156,20 +153,20 @@ You can go two ways :
 can specify which method to execute along options and system properties.
 
 
-## Use with intellij
+# Use with intellij
 
-### setup intellij
+## setup intellij
 
 As for Eclipse, you must declare the two path variable (go settings -> Apparence & behavior -> Path Variables)
  * `JERKAR_HOME` which point to _[Jerkar Home]_, 
  * `JERKAR_REPO` which point to _[Jerkar User Home]_/cache/repo_
 
-### setup iml file
+## setup iml file
 
 Execute `jerkar intellij#generateIml` from project root folder to generate an iml file 
 according the Build.java file.
 
-### run/debug within Intellij
+## run/debug within Intellij
 
 You can go two ways :
 - Just execute your Build class main method.

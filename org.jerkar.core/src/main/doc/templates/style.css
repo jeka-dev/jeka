@@ -27,6 +27,7 @@ body {
     background-color: white;
     padding: 30px;
     color: #333;
+    /* background-image: url("./bg-image.jpg"); */
 }
 
 body > *:first-child {
@@ -100,9 +101,15 @@ h6 tt, h6 code {
     font-size: inherit;
 }
 
-h1 {
+.title {
     font-size: 42px;
     text-align: center;
+    font-weight: bold;
+    color: #317eac;
+}
+
+h1 {
+    font-size: 28px;
 }
 
 h2 {
