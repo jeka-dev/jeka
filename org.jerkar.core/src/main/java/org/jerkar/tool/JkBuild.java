@@ -71,6 +71,7 @@ public class JkBuild {
         // Instantiating imported builds
         this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), this);
 
+        this.plugins = new JkBuildPlugins(this, Environment.commandLine.getPluginOptions());
     }
 
     public static <T extends JkBuild> T of(Class<T> buildClass) {
@@ -81,7 +82,7 @@ public class JkBuild {
         final T build = JkUtilsReflect.newInstance(buildClass);
         final JkBuild jkBuild = build;
 
-        jkBuild.plugins = new JkBuildPlugins(build, Environment.commandLine.getPluginOptions());
+
 
         // Allow sub-classes to define defaults prior options are injected
         build.beforeOptionsInjected();

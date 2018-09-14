@@ -2,6 +2,7 @@ package org.jerkar.tool;
 
 import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.system.JkException;
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
 
@@ -26,6 +27,8 @@ import java.util.stream.Collectors;
  * @see {@link PluginDescription}
  */
 final class PluginDictionary {
+
+    private static final Map<String, PluginDescription> SHORTNAME_CACHE = new LinkedHashMap<>();
 
     private Set<PluginDescription> plugins;
 
@@ -79,9 +82,13 @@ final class PluginDictionary {
     }
 
     private static PluginDescription loadPluginHavingShortName(String shortName) {
+        PluginDescription result = SHORTNAME_CACHE.get(shortName);
+        if (result != null) {
+            return result;
+        }
         final String simpleName = simpleClassName(shortName);
-        final Set<PluginDescription> set = loadPlugins( "**/" + simpleName, simpleName);
-        set.addAll(loadPlugins( "**/*$" + simpleName, "*$" + simpleName ));
+        final Set<PluginDescription> set = loadPlugins( "**/" + simpleName, simpleName, "**/*$" + simpleName,
+                "*$" + simpleName );
         if (set.size() > 1) {
             throw new JkException("Several plugin have the same short name : '" + shortName
                     + "'. Please disambiguate with using plugin long name (full class value)."
@@ -90,7 +97,9 @@ final class PluginDictionary {
         if (set.isEmpty()) {
             return null;
         }
-        return set.iterator().next();
+        result = set.iterator().next();
+        SHORTNAME_CACHE.put(shortName, result);
+        return result;
     }
 
     private static PluginDescription loadPluginsHavingLongName(String longName) {
@@ -102,7 +111,9 @@ final class PluginDictionary {
     }
 
     private static Set<PluginDescription> loadPlugins(String... patterns) {
+        JkLog.startTask("Load plugin " + Arrays.asList(patterns));
         final Set<Class<?>> matchingClasses = JkClassLoader.of(JkPlugin.class).loadClasses(patterns);
+        JkLog.endTask();
         return toPluginSet(matchingClasses.stream()
                 .filter(clazz -> JkPlugin.class.isAssignableFrom(clazz))
                 .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
