@@ -5,6 +5,7 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.utils.JkUtilsPath;
+import org.jerkar.api.utils.JkUtilsString;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -44,11 +45,11 @@ class DocMaker {
         JkUtilsPath.createDirectories(targetFolder);
         docSource.accept("*.md").files().forEach(path -> {
             String content = new String(JkUtilsPath.readAllBytes(path), UTF8);
-            String html = mdToHtml(content);
+            String html = mdToHtml(content, JkUtilsString.substringBeforeLast(path.getFileName().toString(), "."));
             String name = path.getFileName().toString().replace(".md", ".html");
             JkUtilsPath.write(targetFolder.resolve(name), html.getBytes(UTF8));
         });
-        String html = mdToHtml(createSingleReferenceMdPage());
+        String html = mdToHtml(createSingleReferenceMdPage(), "Reference Guide");
         JkUtilsPath.write(targetFolder.resolve("reference.html"), html.getBytes(Charset.forName("UTF8")));
         docSource.goTo("templates").accept("**/*.css", "**/*.jpg", "**/*.svg").copyTo(docDist.resolve("html"));
     }
@@ -64,9 +65,10 @@ class DocMaker {
         return sb.toString();
     }
 
-    private String mdToHtml(String mdContent) {
+    private String mdToHtml(String mdContent, String title) {
         StringBuilder sb = new StringBuilder();
-        sb.append( new String(JkUtilsPath.readAllBytes(docSource.get("templates/header.html")), UTF8) );
+        String rawHeader = new String(JkUtilsPath.readAllBytes(docSource.get("templates/header.html")), UTF8);
+        sb.append( rawHeader.replace("${title}", title) );
         Parser parser = Parser.builder().build();
         Node document = parser.parse(mdContent);
         List<MenuItem> menuItems = addAnchorAndNumberingToHeaders(document);
