@@ -42,16 +42,6 @@ public final class JkImportedBuilds {
     }
 
     /**
-     * Returns a {@link JkImportedBuilds} identical to this one but augmented with
-     * specified slave builds.
-     */
-    @SuppressWarnings("unchecked")
-    public JkImportedBuilds and(List<JkBuild> slaves) {
-        return new JkImportedBuilds(this.masterBuildBaseDir, JkUtilsIterable.concatLists(
-                this.directImportedBuilds, slaves));
-    }
-
-    /**
      * Returns only the direct slave of this master build.
      */
     public List<JkBuild> directs() {

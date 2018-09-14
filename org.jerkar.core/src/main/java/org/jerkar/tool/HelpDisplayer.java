@@ -44,7 +44,7 @@ final class HelpDisplayer {
 
     static String standardOptions() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Global options (these options are not specific to a plugin or a build class) :\n");
+        sb.append("Built-in options (these options are not specific to a plugin or a build class) :\n");
         sb.append("  -LogVerbose (shorthand -LV) : if true, logs will display 'trace' level logs.\n");
         sb.append("  -LogHeaders (shorthand -LH) : if true, meta-information about the build creation itself and method execution will be logged.\n");
         sb.append("  -LogMaxLength (shorthand -LML) : Console will do a carriage return automatically after N characters are outputted in a single line (ex : -LML=120).\n");

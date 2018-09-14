@@ -1,5 +1,4 @@
 ## Build Configuration
-----------------------
 
 Jerkar builds are configurable. Build classes can retrieve values defined at runtime by reading :
 

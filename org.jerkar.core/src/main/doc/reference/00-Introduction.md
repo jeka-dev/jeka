@@ -23,8 +23,7 @@ in _Jerkar_ core classes but can be augmented with any third party lib or build 
 <strong>Build Methods :</strong> Java methods member of _Build Classes_ invokable from Jerkar command line. These methods 
 are hosted in classes extending `org.jerkar.tool.JkBuild` or `org.jerkar.tool.JkPlugin`. They must be public zero-args instance methods 
 returning void. 
-  
-  
+ 
 <strong>Options :</strong> This is a set of key-value used to inject parameters. Options can be mentioned as command line arguments, stored in specific files or be hard coded in build classes.
 
 

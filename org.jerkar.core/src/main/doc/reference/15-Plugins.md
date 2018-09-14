@@ -1,5 +1,4 @@
 ## Plugins
-----
 
 Jerkar provides a plugable architecture. To be precise, `org.jerkar.tool.JkBuild` instances are plugable.
 

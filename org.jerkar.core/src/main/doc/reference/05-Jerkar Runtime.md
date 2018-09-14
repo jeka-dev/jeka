@@ -31,14 +31,15 @@ These scripts do the following :
 
 Jerkar parses the command line and processes each arguments according the following pattern :
 
-* Argument starts with `@` : This is a library import clause : the content following it will be added to the _build classpath_. 
-  For example `@org.jerkar:an-extra-plugin:3.3` augment the _build classpath_ with the specified library.
-  This is useful to load plugins that modifies/enrich behavior of build classes without needing to modify their code.
+* __Argument starts with `@` :__ This is a library import clause : the content following it will be added to the _build classpath_. 
+  For example `jarkar myMethod @org.jerkar:an-extra-plugin:3.3` augments the _build classpath_ with the _an-extra-Plugin_ jar.
+  This is similar to add `@JkImport("org.jerkar:an-extra-plugin:3.3")` on the _build class_.
+  This is useful to load plugins that modifies/enrich behavior of build classes without needing to mention it in the code.
 
-* Argument starts with `-` : This is an option declaration. The content following is is expected to be formatted as _optionName=optionValue_. 
+* __Argument starts with `-` :__ This is an option declaration. The content following is is expected to be formatted as _optionName=optionValue_. 
   For example, `-repo.build.url=http://my.repo.milestone/' will inject 'http://my.repo.milestone/' in the 'repo.build.url' Jerkar option.
 
-* in the other cases, argument is considered as a method name to invoke on the build class instance.
+* __In other cases :__ argument is considered as a method name to invoke on the build class intance.
 
 #### System Properties and Options Population from Configuration Files and Command Line
 
