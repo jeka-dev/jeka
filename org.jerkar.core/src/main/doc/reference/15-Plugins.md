@@ -65,9 +65,9 @@ For now, Jerkar ships with several plugins out-of-the-box. You'll get a comprehe
 
 ### Document Plugins
 
-Plugin writers can embed self-documentation using `@JkDoc` annotation on class, build method and option field declaration.
+Plugin writers can embed self-documentation using `@JkDoc` annotation on classes, build methods and public fields.
 
-Writers can also mention that the plugin has dependencies on other plugin using `@JkDocPluginDeps` annotation. This annotation 
+Writers can also mention that the plugin has dependencies on other plugins using `@JkDocPluginDeps` annotation. This annotation 
 has only a documentation purpose and does not has influence on plugin loading mechanism.
 
 A good example is [*Java Plugin*](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/src/main/java/org/jerkar/tool/builtins/java/JkPluginJava.java)

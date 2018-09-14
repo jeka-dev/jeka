@@ -111,9 +111,7 @@ final class PluginDictionary {
     }
 
     private static Set<PluginDescription> loadPlugins(String... patterns) {
-        JkLog.startTask("Load plugin " + Arrays.asList(patterns));
         final Set<Class<?>> matchingClasses = JkClassLoader.of(JkPlugin.class).loadClasses(patterns);
-        JkLog.endTask();
         return toPluginSet(matchingClasses.stream()
                 .filter(clazz -> JkPlugin.class.isAssignableFrom(clazz))
                 .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))

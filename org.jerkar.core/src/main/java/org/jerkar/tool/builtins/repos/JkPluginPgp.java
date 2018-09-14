@@ -8,7 +8,7 @@ import org.jerkar.tool.JkPlugin;
 
 import java.nio.file.Paths;
 
-@JkDoc("Provides configured JkPgp instance for signing artifacts.")
+@JkDoc("Provides configurable JkPgp instance for signing artifacts. This instance is directly usable by build code.")
 public class JkPluginPgp extends JkPlugin {
 
     @JkDoc("Path for the public key ring.")

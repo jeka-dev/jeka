@@ -1,13 +1,13 @@
 # Tool Part
 
 The tool part of Jerkar consists in an engine able to run Java code as script (meaning directly callable from the command line). 
-Generally this code is intended to build Java project but it can used for any purpose.
+Generally this code is intended to build Java projects but it can be used for any purpose.
 
 To be callable code must be wrapped in a class extending `org.jerkar.tool.JkBuild` or `org.jerkar.tool.JkPlugin`.
 
-The code can be both **compiled jar** or **source file** (.java files).
+The code can be both **compiled jars** and **source files** (.java files).
 
-In practice, you have a project structure respecting the following schema :
+In practice, you have a project structure respecting the following layout :
 
 ```
 [Project Dir]
@@ -25,7 +25,7 @@ In practice, you have a project structure respecting the following schema :
 
 From __[Project Dir]__,  you can invoke any build method defined on `MyBuild` class. This class can be non-public.
 
-For example, executing `jerkar myMethod1 myMethod2 -myParam1=foo` will instantiate a `MyBuild` instance, inject _"foo"_ in the `myParam1` field then will invoke `myMethod1()` and `myMethod2()` in sequence.
+For example, executing `jerkar myMethod1 myMethod2 -myParam1=foo` will instantiate a `MyBuild` instance, inject _"foo"_ in the `myParam1` field then invoke `myMethod1()` and `myMethod2()` in sequence.
 
 A build class may look like :
 
@@ -57,6 +57,11 @@ public class MyBuild extends JkBuild {    <---- Callable build class (extending 
 
 }
 ```
+
+If your project does not supply any build class, then Jerkar will use`org.jerkar.tool.builtin.java.JkJavaProjectBuild` 
+which contains all methods for building a Java project respecting defined conventions.
+
+Executing `jerkar help` command line displays all callable methods and options for the current _build class_.
 
 The following chapters detail about how the mechanism works, what you can do and the limitations.
 

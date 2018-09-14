@@ -1,8 +1,8 @@
 <project name="Jerkar" default="test" basedir=".">
 
 	<description>
-    This ANT file is here to let Travis build Jerkar (as Jerkar is not supported yet by Travis).
-  </description>
+    This ANT file is here to let Travis build Jerkar (as Jerkar is not supported by Travis).
+    </description>
 
 	<property name="bin" location="jerkar-bin" />
 
