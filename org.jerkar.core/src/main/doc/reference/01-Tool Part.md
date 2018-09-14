@@ -37,7 +37,7 @@ import org.jerkar.tool.JkImport;
 import org.jerkar.tool.JkBuildd;
 import com.google.common.base.MoreObjects;
 
-@JkImport("commons-httpclient:commons-httpclient:3.1")  <---- The build class can use Guava and Http client libraries
+@JkImport("commons-httpclient:commons-httpclient:3.1")  <---- Build classes inside this project can use Guava and Http client libraries
 @JkImport("com.google.guava:guava:21.0")
 public class MyBuild extends JkBuild {    <---- Callable build class (extending JkBuild)
     
@@ -51,6 +51,7 @@ public class MyBuild extends JkBuild {    <---- Callable build class (extending 
     }
     
     public void myMethod2() {   <----- An other build method 
+        MyUtility.soSomething();
         ...
     }
 
