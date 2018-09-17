@@ -27,4 +27,9 @@ public class JkJavaProjectBuild extends JkBuild {
         return project().maker();
     }
 
+    public void cleanMake() {
+        this.clean();
+
+    }
+
 }

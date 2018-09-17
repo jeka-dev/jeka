@@ -133,7 +133,7 @@ In order a method is considered as a build method (invokable from Jerkar command
 * Accept no arguments
 * Return void
 
-If Jerkar command line specifies no method, then the `doDefault` method is invoked.
+If Jerkar command line specifies no method, then `help` method is invoked.
 
 ### Jerkar from IDE
 
@@ -149,8 +149,8 @@ Plugin methods `eclipse#generateFiles` and `intellij#generateIml` can achieve th
 
 #### Launch from IDE
 
-If launched from the IDE, process is simpler cause build classes are already compiled and the classpath already set by 
-the IDE. 
+If launched from the IDE, proceasses are already compiled and the classpath already set by 
+the IDE. ss is simpler cause build cl
 
 You can go two ways. One is to create a main method within your build class as below and invoke it.
 

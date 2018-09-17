@@ -42,6 +42,6 @@ public final class JkConstants {
     /**
      * The default method to be invoked when none is specified.
      */
-    public static final String DEFAULT_METHOD = "doDefault";
+    public static final String DEFAULT_METHOD = "help";
 
 }

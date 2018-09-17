@@ -43,17 +43,10 @@ public class JkBuild {
 
     private final JkImportedBuilds importedBuilds;
 
-    private final JkRunnables defaultMethod = JkRunnables.noOp();
-
     // ------------------ options --------------------------------------------------------
-
 
     @JkDoc("Help options")
     private final JkHelpOptions help = new JkHelpOptions();
-
-    @JkDoc("Embed Jerkar jar along bin script in the project while scaffolding so the project can be run without Jerkar installed.")
-    boolean scaffoldEmbed;
-
 
     // ------------------ Instantiation cycle  --------------------------------------
 
@@ -81,8 +74,6 @@ public class JkBuild {
         JkLog.startTask("Initializing class " + buildClass.getName() + " at " + BASE_DIR_CONTEXT.get());
         final T build = JkUtilsReflect.newInstance(buildClass);
         final JkBuild jkBuild = build;
-
-
 
         // Allow sub-classes to define defaults prior options are injected
         build.beforeOptionsInjected();
@@ -180,10 +171,6 @@ public class JkBuild {
         return this.plugins;
     }
 
-    protected void addDefaultOperation(Runnable runnable) {
-        this.defaultMethod.chain(runnable);
-    }
-
 
     // ------------------------------ build dependencies --------------------------------
 
@@ -225,16 +212,6 @@ public class JkBuild {
         if (Files.exists(outputDir())) {
             JkPathTree.of(outputDir()).refuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
         }
-    }
-
-    /**
-     * Conventional method standing for the default operations to perform.
-     *
-     * @throws Exception
-     */
-    @JkDoc("Conventional method standing for the default operations to perform.")
-    public void doDefault() {
-        defaultMethod.run();
     }
 
     /**

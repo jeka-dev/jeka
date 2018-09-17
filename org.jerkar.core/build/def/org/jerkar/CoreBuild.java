@@ -84,7 +84,6 @@ public class CoreBuild extends JkJavaProjectBuild {
         JkInit.instanceOf(CoreBuild.class, args).doDefault();
     }
 
-    @Override
     public void doDefault() {
         clean();
         doDistrib();

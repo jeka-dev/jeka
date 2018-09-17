@@ -43,8 +43,8 @@ public class AClassicBuild extends JkJavaProjectBuild {
         maker().setTestRunner(maker().getTestRunner().forked(true));
     }
     
-    public static void main(String[] args) throws Exception {
-	    JkInit.instanceOf(AClassicBuild.class, args).doDefault();
+    public static void main(String[] args) {
+	    JkInit.instanceOf(AClassicBuild.class, args).maker().makeAllArtifacts();
     }
 
 }

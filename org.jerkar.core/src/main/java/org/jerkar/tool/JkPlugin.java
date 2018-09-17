@@ -23,10 +23,6 @@ public abstract class JkPlugin {
         HelpDisplayer.helpPlugin(this);
     }
 
-    protected void addDefaultAction(Runnable action) {
-        build.addDefaultOperation(action);
-    }
-
     /**
      * Override this method to modify the build itself or its bound plugins.
      */

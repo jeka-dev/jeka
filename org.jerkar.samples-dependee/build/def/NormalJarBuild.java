@@ -36,7 +36,7 @@ public class NormalJarBuild extends JkJavaProjectBuild {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(NormalJarBuild.class).doDefault();
+        JkInit.instanceOf(NormalJarBuild.class).maker().makeAllArtifacts();
     }
 
 }

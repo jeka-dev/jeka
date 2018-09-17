@@ -59,22 +59,14 @@ public class JkPluginJava extends JkPlugin {
         this.scaffoldPlugin = build.plugins().get(JkPluginScaffold.class);
     }
 
-    @JkDoc("Adds artifact creation task to 'doDefault' method." +
-            "\n  Improves scaffolding by creating a project structure ready to build." +
-            "\n  Enriches build information with project build structure.")
+    @JkDoc("Improves scaffolding by creating a project structure ready to build.")
     @Override  
     protected void activate() {
-        this.applyOptions();
-        this.addDefaultAction(this::doDefault);
+        this.applyOptionsToUnderlyingProject();
         this.setupScaffolder();
     }
 
-    private void doDefault() {
-        this.project().maker().clean();
-        this.project().maker().pack(producedArtifacts);
-    }
-
-    private void applyOptions() {
+    private void applyOptionsToUnderlyingProject() {
         if (project.getVersionedModule() != null && !JkUtilsString.isBlank(projectVersion)) {
             project.setVersionedModule(project.getVersionedModule().withVersion(projectVersion));
         }

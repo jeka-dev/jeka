@@ -37,7 +37,7 @@ public class FatJarBuild extends JkJavaProjectBuild {
     } 
     
     public static void main(String[] args) {
-		JkInit.instanceOf(FatJarBuild.class, args).doDefault();
+		JkInit.instanceOf(FatJarBuild.class, args).maker().makeAllArtifacts();
 	}
 
    
