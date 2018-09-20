@@ -1,6 +1,6 @@
 ## Jerkar Runtime
 
-This section details what happens behind the cover when Jerkar is run. 
+This section describe how to use Jerkar with command line and mostly what happens behind the cover when Jerkar is run. 
 
 Jerkar is a pure Java application requiring __JDK 8__. __JDK__ is required and __JRE__ is not sufficient as Jerkar uses the JDK tools to compile build classes.
 

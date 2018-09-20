@@ -4,11 +4,11 @@ Jerkar provides a plugable architecture. To be precise, `org.jerkar.tool.JkBuild
 
 A Plugin class must extends `org.jerkar.tool.JkPlugin` and must be named as *JkPlugin[PluginName]* (In fact, plugin name will be inferred from Plugin class name).
 
-When a instance of a plugin is plugged in a `JkBuild` instance :
+When a plugin class is on the classpath : 
 
 - The public methods of the plugin are available (invokable) from the command line using `jerkar pluginName#MethodName`
 - The public instance field values of the plugin can be injected as options from command line using `jerkar -pluginName#FieldName=Xxxx`
-- When the plugin is activated, its `activate` method is invoked. This method is supposed to act on the hosting JkBuild instance and its other bound plugins (by modifying the state of these objects).
+- If the plugin is activated, its `activate` method is invoked. This method is supposed to act on the hosting JkBuild instance and its other bound plugins (by modifying the state of these ones).
 
 Executing `jerkar help` provides an exhaustive list of available plugins in the _build classpath_ and you can have details on each 
 by executing `jerkar [pluginName]#help`.

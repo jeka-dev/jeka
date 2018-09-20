@@ -8,7 +8,6 @@ Breaking a common belief, it makes proof that Java is perfectly suitable in this
 
 # News
  
- 
 Master version now relies on JDK 8 while 0.6 and prior are relying on JDK 6.
 In order to leverage new features bring by these versions, **Jerkar is deeply reworked**. <br/>
 Also, to avoid bloating API with legacy stuff, Jerkar 0.7 won't be compatible with Jerkar 0.6 (you can still run current builds using embedded mode). 
@@ -26,8 +25,10 @@ Jerkar is expected to have a very fast learning curve for Java developers. You c
 
 However above links reflect documentation for version 0.6. 
 
-To get documentation matching version you are using, please refer to documentation provided inside Jerkar distrib and 
-command line documentation available executing `jerkar help`.
+To get documentation matching version you are using, please refer to documentation provided inside Jerkar distrib/doc
+produced when you have built Jerkar.
+
+Also you can navigate command line documentation executing `jerkar kelp`.
 
 # How to build Jerkar
 
