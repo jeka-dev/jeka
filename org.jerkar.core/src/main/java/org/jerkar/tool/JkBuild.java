@@ -75,9 +75,6 @@ public class JkBuild {
         final T build = JkUtilsReflect.newInstance(buildClass);
         final JkBuild jkBuild = build;
 
-        // Allow sub-classes to define defaults prior options are injected
-        build.beforeOptionsInjected();
-
         // Inject options
         JkOptions.populateFields(build, JkOptions.readSystemAndUserOptions());
         final Map<String, String> options = Environment.commandLine.getOptions();
@@ -113,17 +110,6 @@ public class JkBuild {
 
 
         return build;
-    }
-
-    /**
-     * Override this method to set sensitive defaults for options on this build or plugins.<br/>
-     * This method is invoked before options are injected into build instance, so options specified in
-     * command line or configuration files will overwrite the default values you have defined here. <p/>
-     * Note you should call <code>super()</code> at the beginning of the method in order to not wipe defaults
-     * that superclasses may have defined.
-     */
-    protected void beforeOptionsInjected() {
-        // Do nothing by default
     }
 
     /**
@@ -206,7 +192,7 @@ public class JkBuild {
     /**
      * Clean the output directory.
      */
-    @JkDoc("Cleans the output directory.")
+    @JkDoc("Cleans the output directory except the compiled build classes.")
     public void clean() {
         JkLog.info("Clean output directory " + outputDir());
         if (Files.exists(outputDir())) {

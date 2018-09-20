@@ -30,18 +30,11 @@ class DocMaker {
     void assembleAllDoc() {
         JkUtilsPath.createDirectories(docDist);
         JkPathTree.of(docDist).deleteContent();
-        assembleMdDoc();
         assembleHtmlDoc();
     }
 
-    void assembleMdDoc() {
-        Path targetFolder = docDist.resolve("markdown");
-        JkUtilsPath.createDirectories(targetFolder);
-        docSource.accept("*.md").copyTo(targetFolder);
-    }
-
-    void assembleHtmlDoc() {
-        Path targetFolder = docDist.resolve("html");
+    public void assembleHtmlDoc() {
+        Path targetFolder = docDist;
         JkUtilsPath.createDirectories(targetFolder);
         docSource.accept("*.md").files().forEach(path -> {
             String content = new String(JkUtilsPath.readAllBytes(path), UTF8);
@@ -51,7 +44,7 @@ class DocMaker {
         });
         String html = mdToHtml(createSingleReferenceMdPage(), "Reference Guide");
         JkUtilsPath.write(targetFolder.resolve("reference.html"), html.getBytes(Charset.forName("UTF8")));
-        docSource.goTo("templates").accept("**/*.css", "**/*.jpg", "**/*.svg").copyTo(docDist.resolve("html"));
+        docSource.goTo("templates").accept("**/*.css", "**/*.jpg", "**/*.svg").copyTo(docDist);
     }
 
     private String createSingleReferenceMdPage() {

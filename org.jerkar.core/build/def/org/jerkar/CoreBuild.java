@@ -30,8 +30,7 @@ public class CoreBuild extends JkJavaProjectBuild {
 
     private Path distribFolder;
 
-    @Override
-    protected void beforeOptionsInjected() {
+    protected CoreBuild() {
         java().tests.fork = false;
         java().pack.javadoc = true;
     }

@@ -19,8 +19,7 @@ public class SonarPluginBuild extends JkJavaProjectBuild {
     @JkDoc("Sonar server environment")
     protected SonarEnv sonarEnv = SonarEnv.DEV;
 
-    @Override
-    public void beforeOptionsInjected() {
+    public SonarPluginBuild() {
         this.plugins().get(JkPluginSonar.class)
                 .prop(JkSonar.BRANCH, "myBranch");
     }

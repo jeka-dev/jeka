@@ -61,7 +61,7 @@ public class MyBuild extends JkBuild {    <---- Callable build class (extending 
 If your project does not supply any build class, then Jerkar will use`org.jerkar.tool.builtin.java.JkJavaProjectBuild` 
 which contains all methods for building a Java project respecting defined conventions.
 
-Executing `jerkar help` command line displays all callable methods and options for the current _build class_.
+Executing `jerkar` or `jerkar help` command line displays all callable methods and options for the current _build class_.
 
 The following chapters detail about how the mechanism works, what you can do and the limitations.
 

@@ -23,8 +23,7 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 @JkImport("org.eclipse.jdt.core.compiler:ecj:4.6.1")
 public class AClassicBuild extends JkJavaProjectBuild {
 
-    @Override
-    protected void beforeOptionsInjected() {
+    protected void AClassicBuild() {
 	    java().pack.checksums = "sha1";
 	    java().pack.tests = true;
 	    java().pack.javadoc = true;
