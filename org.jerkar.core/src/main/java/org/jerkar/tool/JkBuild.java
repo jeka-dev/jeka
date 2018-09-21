@@ -203,7 +203,7 @@ public class JkBuild {
     /**
      * Displays all available methods defined in this build.
      */
-    @JkDoc("Displays all available methods defined in this build.")
+    @JkDoc("Displays all available methods and options defined for this build class.")
     public void help() {
         if (help.xml || help.xmlFile != null) {
             HelpDisplayer.help(this, help.xmlFile);

@@ -66,8 +66,7 @@ final class Engine {
     }
 
     /**
-     * Pre-compile and compile build classes (if needed) then execute the build
-     * of this project.
+     * Pre-compile and compile build classes (if needed) then execute methods mentioned in command line
      */
     void execute(CommandLine commandLine, String buildClassHint, JkLog.Verbosity verbosityToRestore) {
         buildDependencies = buildDependencies.andUnscoped(commandLine.dependencies());
@@ -80,7 +79,7 @@ final class Engine {
             path = path.andManyFirst(cmdPath);
             JkLog.trace("Command line extra path : " + cmdPath);
         }
-        if (!JkUtilsString.isBlank(buildClassHint)) {  // First find in the such a class in the existing classpath without compiling
+        if (!JkUtilsString.isBlank(buildClassHint)) {  // First find a class in the existing classpath without compiling
             build = getBuildInstance(buildClassHint, path);
         }
         if (build == null) {

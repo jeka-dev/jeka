@@ -167,8 +167,8 @@ public class JkPluginJava extends JkPlugin {
         project.maker().test();
     }
 
-    @JkDoc("Generates artifacts defined through 'pack' options. " +
-            "Does not re-generate artifacts already generated : " +
+    @JkDoc("Generates from scratch artifacts defined through 'pack' options (Perform compilation and testing if needed).  " +
+            "\nDoes not re-generate artifacts already generated : " +
             "execute 'clean java#pack' to re-generate artifacts.")
     public void pack() {
         project.maker().pack(this.producedArtifacts);

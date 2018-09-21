@@ -1,3 +1,22 @@
+# General
+
+## Can build classes and code to build be hosted in separate projects ?
+Of course yes. If you prefer your build code lives in a distinct project, you can create a Jerkar project in a sibling 
+folder and mention where is located the project to build.
+
+```
+public class Build extends JkJavaProjectBuild {
+
+   @Override
+    protected void afterOptionsInjected() {
+         Path projectPath = this.baseDir().resolve("../myProject");   // project to build lies in a sibling folder. 
+         project().setSourceLayout(project().getSourceLayout().withBaseDir(projectPath));
+         maker().setOutLayout(maker().getOutLayout().withOutputDir(this.outputDir())); // Force output files here
+         ...
+    }
+
+```
+
 # Compilation
 
 ## How can I choose the JDK used to compile ?
@@ -27,6 +46,8 @@ public class Build extends JkJavaProjectBuild {
     ...
 }
 ```
+
+
 
 
 
