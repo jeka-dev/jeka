@@ -23,7 +23,6 @@ import java.util.*;
 public final class JkJavaCompiler {
 
 
-
     private final boolean failOnError;
 
     private final JkProcess fork;
@@ -91,7 +90,7 @@ public final class JkJavaCompiler {
      * @param executable The executable for the compileRunner as 'jike' or '/my/specific/jdk/javac'
      */
     public JkJavaCompiler forkOnCompiler(String executable, String... parameters) {
-        final JkProcess compileProcess = JkProcess.ofJavaTool("javac", parameters);
+        final JkProcess compileProcess = JkProcess.of(executable, parameters);
         return new JkJavaCompiler(failOnError, compileProcess, compiler, compilerBinRepo);
     }
 
