@@ -84,6 +84,10 @@ public final class JkJavaCompiler {
         }
     }
 
+    public JkJavaCompiler fork(JkProcess compileProcess) {
+        return new JkJavaCompiler(failOnError, compileProcess , compiler, compilerBinRepo);
+    }
+
     /**
      * As {@link #fork(String...)} but specifying the executable for the compileRunner.
      *
@@ -208,7 +212,7 @@ public final class JkJavaCompiler {
     }
 
     static String currentJdkSourceVersion() {
-        final String fullVersion = System.getProperty("java.projectVersion");
+        final String fullVersion = System.getProperty("java.version");
         final int firstDot = fullVersion.indexOf(".");
         final String version;
         if (firstDot == -1 ) {
@@ -237,11 +241,11 @@ public final class JkJavaCompiler {
      * Returns a {@link JkProcess} standing for a forked compileRunner with relevant JDK if this specified source projectVersion
      * does not match with the current running JDK. The specified map may include
      * the JDK location for this source projectVersion.
-     * If no need to fork, cause current JDK is aligned with target projectVersion, then yhis method returns <code>null</code>.
+     * If no need to fork, cause current JDK is aligned with target projectVersion, then this method returns <code>null</code>.
      * The keys must be formatted as "jdk.[source projectVersion]". For example, "jdk.1.4" or
      * "jdk.7". The values must absolute path.
      */
-    public JkProcess forkedIfNeeded(Map<String, String> jdkLocations, String version) {
+    public static JkProcess getForkedProcessIfNeeded(Map<String, String> jdkLocations, String version) {
         if (version.equals(currentJdkSourceVersion())) {
             JkLog.info("Current JDK matches with source projectVersion (" + version + "). Don't need to fork.");
             return null;

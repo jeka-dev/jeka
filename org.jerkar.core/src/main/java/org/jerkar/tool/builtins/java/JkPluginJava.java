@@ -2,11 +2,13 @@ package org.jerkar.tool.builtins.java;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPathTree;
+import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaProcess;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.java.JkJavaProjectMaker;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsIO;
 import org.jerkar.api.utils.JkUtilsString;
 import org.jerkar.tool.*;
@@ -14,7 +16,9 @@ import org.jerkar.tool.builtins.repos.JkPluginRepo;
 import org.jerkar.tool.builtins.scaffold.JkPluginScaffold;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Plugin for building Java projects. It comes with a {@link JkJavaProject} pre-configured with {@link JkOptions}.
@@ -78,6 +82,7 @@ public class JkPluginJava extends JkPlugin {
             project.maker().getArtifactFileIdsToNotPublish().addAll(
                     project.maker().artifactIdsWithClassifier("test"));
         }
+        project.maker().setCompiler(compiler());
         project.maker().setPublishRepos(JkRepoSet.of(repoPlugin.publishRepository()));
         if (publish.localOnly) {
             project.maker().setPublishRepos(JkRepoSet.local());
@@ -212,6 +217,16 @@ public class JkPluginJava extends JkPlugin {
         @JkDoc("If true, all artifacts to be published will be signed with PGP.")
         public boolean signArtifacts = false;
 
+    }
+
+    private JkJavaCompiler compiler() {
+        final Map<String, String> jdkOptions = JkOptions.getAllStartingWith("jdk.");
+        final JkProcess process =  JkJavaCompiler.getForkedProcessIfNeeded(jdkOptions,
+                project().getCompileSpec().getSourceVersion().name());
+        if (process != null) {
+            return project().maker().getCompiler().fork(process);
+        }
+        return project.maker().getCompiler();
     }
 
 }
