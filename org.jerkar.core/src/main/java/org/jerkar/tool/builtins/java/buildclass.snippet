@@ -10,14 +10,10 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
  */
 class Build extends JkJavaProjectBuild {
 
-    /*
-     * Configures default values for option fields of this class. When this method is called, build option
-     * fields have not been populated yet.
-     */
-    @Override
-    protected void beforeOptionsInjected() {
+    protected Build() {
         java().projectVersion = "0.0.1-SNAPSHOT";
     }
+
 
     /*
      * Configures plugins to be bound to this build class. When this method is called, build option
@@ -39,7 +35,8 @@ class Build extends JkJavaProjectBuild {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(Build.class, args).doDefault();
+        Build build = JkInit.instanceOf(Build.class, args);
+        build.clean();
+        build.java().pack();
     }
-
 }

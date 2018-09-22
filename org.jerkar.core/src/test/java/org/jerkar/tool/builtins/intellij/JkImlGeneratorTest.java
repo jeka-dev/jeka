@@ -22,7 +22,7 @@ public class JkImlGeneratorTest {
 
     @Test
     public void withJavaProject() {
-        JkJavaProject project = new JkJavaProject(Paths.get(""));
+        JkJavaProject project = JkJavaProject.ofMavenLayout(Paths.get(""));
         project.setDependencies(dependencies());
        // project.maker().setDependencyResolver(JkDependencyResolver.of(JkRepo.maven("http://194.253.70.251:8081/nexus/content/groups/multipharma")));
         JkImlGenerator imlGenerator = new JkImlGenerator(project);

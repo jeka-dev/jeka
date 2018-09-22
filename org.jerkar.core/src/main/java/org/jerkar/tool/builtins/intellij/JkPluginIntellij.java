@@ -10,7 +10,6 @@ import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 import org.jerkar.tool.builtins.scaffold.JkPluginScaffold;
 
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
@@ -76,7 +75,7 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("Generates ./idea/modules.xml file.")
     public void generateModulesXml() {
         final Path current = build.baseTree().root();
-        final Iterable<Path> imls = build.baseTree().accept("**.iml").files();
+        final Iterable<Path> imls = build.baseTree().andAccept("**.iml").files();
         final ModulesXmlGenerator modulesXmlGenerator = new ModulesXmlGenerator(current, imls);
         modulesXmlGenerator.generate();
     }
@@ -84,8 +83,8 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("Generates iml files on this folder and its descendant recursively.")
     public void generateAllIml() {
         final Iterable<Path> folders = build.baseTree()
-                .accept("**/" + JkConstants.BUILD_DEF_DIR, JkConstants.BUILD_DEF_DIR)
-                .refuse("**/build/output/**")
+                .andAccept("**/" + JkConstants.BUILD_DEF_DIR, JkConstants.BUILD_DEF_DIR)
+                .andRefuse("**/build/output/**")
                 .stream().collect(Collectors.toList());
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();

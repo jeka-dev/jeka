@@ -121,7 +121,7 @@ public final class JkPathTreeSet {
     public JkPathTreeSet accept(Iterable<String> globPatterns) {
         final List<JkPathTree> list = new LinkedList<>();
         for (final JkPathTree tree : this.pathTrees) {
-            list.add(tree.accept(globPatterns));
+            list.add(tree.andAccept(globPatterns));
         }
         return new JkPathTreeSet(list);
     }

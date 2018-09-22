@@ -18,8 +18,8 @@ public class JkDependencyResolverTest {
         Path root = unzipToDir("sample-multiproject.zip");
         Path base = root.resolve("base");
         Path core = root.resolve("core");
-        JkJavaProject baseProject = new JkJavaProject(base);
-        JkJavaProject coreProject = new JkJavaProject(core);
+        JkJavaProject baseProject = JkJavaProject.ofMavenLayout(base);
+        JkJavaProject coreProject = JkJavaProject.ofMavenLayout(core);
         baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.GUAVA, "19.0"));
         coreProject.setDependencies(JkDependencySet.of().and(baseProject));
         JkDependencyResolver dependencyResolver = JkDependencyResolver.of(JkRepo.mavenCentral().asSet());

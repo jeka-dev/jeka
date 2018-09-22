@@ -40,7 +40,7 @@ public class JkEclipseClasspathApplier {
 
     private void apply(JkJavaProject javaProject, DotClasspathModel dotClasspathModel) {
         final Sources.TestSegregator segregator = smartScope ? Sources.SMART : Sources.ALL_PROD;
-        final Path baseDir = javaProject.getSourceLayout().baseDir();
+        final Path baseDir = javaProject.baseDir();
         final JkPathTreeSet sources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources;
         final JkPathTreeSet testSources = dotClasspathModel.sourceDirs(baseDir, segregator).testSources;
         final JkPathTreeSet resources = dotClasspathModel.sourceDirs(baseDir, segregator).prodSources

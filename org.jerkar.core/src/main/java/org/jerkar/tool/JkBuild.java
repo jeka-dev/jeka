@@ -9,7 +9,6 @@ import java.util.Map;
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkDependencyResolver;
 import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.*;
 
@@ -196,7 +195,7 @@ public class JkBuild {
     public void clean() {
         JkLog.info("Clean output directory " + outputDir());
         if (Files.exists(outputDir())) {
-            JkPathTree.of(outputDir()).refuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
+            JkPathTree.of(outputDir()).andRefuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
         }
     }
 

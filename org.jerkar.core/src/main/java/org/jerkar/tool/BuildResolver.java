@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkClassLoader;
-import org.jerkar.api.system.JkException;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -61,7 +60,7 @@ final class BuildResolver {
         if (!Files.exists(buildSourceDir)) {
             return false;
         }
-        return JkPathTree.of(buildSourceDir).accept("**.java", "*.java").count(0, false) > 0;
+        return JkPathTree.of(buildSourceDir).andAccept("**.java", "*.java").count(0, false) > 0;
     }
 
     boolean needCompile() {

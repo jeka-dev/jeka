@@ -430,7 +430,7 @@ public final class JkClassLoader {
     private Iterator<Class<?>> iterateClassesIn(Path dirOrJar) {
         final List<Path> paths;
         if (Files.isDirectory(dirOrJar)) {
-            paths = JkPathTree.of(dirOrJar).accept("**.class").relativeFiles();
+            paths = JkPathTree.of(dirOrJar).andAccept("**.class").relativeFiles();
         } else {
             final List<ZipEntry> entries = JkUtilsZip.zipEntries(JkUtilsZip.zipFile(dirOrJar.toFile()));
             paths = new LinkedList<>();

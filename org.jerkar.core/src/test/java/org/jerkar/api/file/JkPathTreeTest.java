@@ -1,6 +1,5 @@
 package org.jerkar.api.file;
 
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -9,7 +8,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 import org.jerkar.api.utils.JkUtilsPath;
@@ -32,11 +30,11 @@ public class JkPathTreeTest {
 
         System.out.println(JkPathTree.of(sampleFolder).relativeFiles());
 
-        final JkPathTree subfolderTxt1 = JkPathTree.of(sampleFolder).accept("subfolder/*.txt");
+        final JkPathTree subfolderTxt1 = JkPathTree.of(sampleFolder).andAccept("subfolder/*.txt");
         assertEquals(1, subfolderTxt1.files().size());
         System.out.println(subfolderTxt1);
 
-        final JkPathTree subfolderTxt2 = JkPathTree.of(sampleFolder).accept("subfolder/*.txt");
+        final JkPathTree subfolderTxt2 = JkPathTree.of(sampleFolder).andAccept("subfolder/*.txt");
         assertEquals(1, subfolderTxt2.files().size());
     }
 
@@ -156,7 +154,7 @@ public class JkPathTreeTest {
         Path txt2 = foo.resolve("file2.txt");
         Files.copy(txt, txt2);
         assertTrue(Files.exists(txt));
-        JkPathTree fooTree = JkPathTree.of(foo).refuse("bar/**", "bar");
+        JkPathTree fooTree = JkPathTree.of(foo).andRefuse("bar/**", "bar");
         System.out.println(fooTree.files());
         assertFalse(fooTree.files().contains(txt));
         fooTree.deleteContent();

@@ -54,7 +54,7 @@ public class JkPluginJava extends JkPlugin {
     protected JkPluginJava(JkBuild build) {
         super(build);
         this.repoPlugin = build.plugins().get(JkPluginRepo.class);
-        this.project = new JkJavaProject(this.build.baseDir());
+        this.project = JkJavaProject.ofMavenLayout(this.build.baseDir());
         this.producedArtifacts.add(this.project.maker().mainArtifactId());
         this.scaffoldPlugin = build.plugins().get(JkPluginScaffold.class);
     }

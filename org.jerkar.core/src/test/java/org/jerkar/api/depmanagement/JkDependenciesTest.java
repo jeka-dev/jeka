@@ -49,7 +49,7 @@ public class JkDependenciesTest {
     @Test
     public void onProject() throws IOException {
         Path root = Files.createTempDirectory("jerkartestproject");
-        JkJavaProject javaProject = new JkJavaProject(root);
+        JkJavaProject javaProject = JkJavaProject.ofMavenLayout(root);
         JkDependencySet dependencies = JkDependencySet.of().and(javaProject);
         JkComputedDependency computedDependency = (JkComputedDependency) dependencies.list().get(0).dependency();
         Assert.assertEquals(root, computedDependency.ideProjectBaseDir());

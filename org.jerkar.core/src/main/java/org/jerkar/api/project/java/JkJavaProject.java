@@ -44,8 +44,6 @@ import java.util.function.Supplier;
  */
 public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocalizable, Supplier<JkArtifactProducer> {
 
-    private final Path baseDir;
-
     private JkVersionedModule versionedModule;
 
     private JkProjectSourceLayout sourceLayout;
@@ -65,30 +63,40 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
 
     private final JkJavaProjectMaker maker;
 
-    public JkJavaProject(Path baseDir) {
-        baseDir = baseDir.toAbsolutePath().normalize();
-        this.baseDir = baseDir;
-        this.sourceLayout = JkProjectSourceLayout.mavenJava().withBaseDir(baseDir);
-        this.dependencies = JkDependencySet.ofLocal(baseDir.resolve("build/libs"));
-        final Path path = baseDir.resolve("build/def/dependencies.txt");
+    private JkJavaProject(JkProjectSourceLayout sourceLayout) {
+        this.sourceLayout = sourceLayout;
+        this.dependencies = JkDependencySet.ofLocal(sourceLayout.baseDir().resolve("build/libs"));
+        final Path path = sourceLayout.baseDir().resolve("build/def/dependencies.txt");
         if (Files.exists(path)) {
             this.dependencies = this.dependencies.and(JkDependencySet.fromDescription(path));
         }
         this.maker = new JkJavaProjectMaker(this);
     }
 
+    public static JkJavaProject of(JkProjectSourceLayout layout) {
+        return new JkJavaProject(layout);
+    }
+
+    public static JkJavaProject ofMavenLayout(Path baseDir) {
+        return new JkJavaProject(JkProjectSourceLayout.mavenJava().withBaseDir(baseDir));
+    }
+
+    public static JkJavaProject ofSimpleLayout(Path baseDir) {
+        return new JkJavaProject(JkProjectSourceLayout.simple().withBaseDir(baseDir));
+    }
+
     // -------------------------- Other -------------------------
 
     @Override
     public String toString() {
-        return "project " + this.baseDir.getFileName();
+        return "project " + this.sourceLayout.baseDir().getFileName();
     }
 
     // ---------------------------- Getters / setters --------------------------------------------
 
     @Override
     public Path baseDir() {
-        return this.baseDir;
+        return this.getSourceLayout().baseDir();
     }
 
     @Override
@@ -106,7 +114,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     }
 
     public JkJavaProject setSourceLayout(JkProjectSourceLayout sourceLayout) {
-        this.sourceLayout = sourceLayout.withBaseDir(this.baseDir);
+        this.sourceLayout = sourceLayout;
         return this;
     }
 
@@ -191,7 +199,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     }
 
     public String info() {
-        return new StringBuilder("Project Location : " + this.baseDir + "\n")
+        return new StringBuilder("Project Location : " + this.baseDir() + "\n")
                 .append("Published Module & version : " + this.versionedModule + "\n")
                 .append(this.sourceLayout.info()).append("\n")
                 .append("Java Source Version : " + this.getSourceVersion() + "\n")

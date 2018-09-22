@@ -175,7 +175,7 @@ final class Engine {
         final List<Path>  extraLibs = new LinkedList<>();
         final Path localDefLibDir = this.projectBaseDir.resolve(JkConstants.BUILD_BOOT);
         if (Files.exists(localDefLibDir)) {
-            extraLibs.addAll(JkPathTree.of(localDefLibDir).accept("**.jar").files());
+            extraLibs.addAll(JkPathTree.of(localDefLibDir).andAccept("**.jar").files());
         }
         return JkPathSequence.ofMany(extraLibs).withoutDuplicates();
     }
@@ -197,7 +197,7 @@ final class Engine {
     private void compileBuild(JkPathSequence buildPath) {
         JkJavaCompileSpec compileSpec = buildCompileSpec().setClasspath(buildPath);
         JkJavaCompiler.of().compile(compileSpec);
-        JkPathTree.of(this.resolver.buildSourceDir).refuse("**/*.java").copyTo(this.resolver.buildClassDir,
+        JkPathTree.of(this.resolver.buildSourceDir).andRefuse("**/*.java").copyTo(this.resolver.buildClassDir,
                 StandardCopyOption.REPLACE_EXISTING);
     }
 

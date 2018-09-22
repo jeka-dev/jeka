@@ -3,7 +3,6 @@ package org.jerkar.api.file;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsPath;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.*;
@@ -331,20 +330,28 @@ public final class JkPathTree {
         return new JkPathTree(rootHolder, this.filter.and(pathMatcher));
     }
 
-    public JkPathTree accept(String... globPatterns) {
-        return accept(Arrays.asList(globPatterns));
+    /**
+     * Creates a {@link JkPathTree} which is a copy of this {@link JkPathTree}
+     * but with the specified {@link JkPathMatcher}
+     */
+    public JkPathTree withMatcher(JkPathMatcher pathMatcher) {
+        return new JkPathTree(rootHolder, pathMatcher);
     }
 
-    public JkPathTree accept(Iterable<String> globPatterns) {
+    public JkPathTree andAccept(String... globPatterns) {
+        return andAccept(Arrays.asList(globPatterns));
+    }
+
+    public JkPathTree andAccept(Iterable<String> globPatterns) {
         return andMatcher(JkPathMatcher.accept(this.root().getFileSystem(), globPatterns));
     }
 
-    public JkPathTree refuse(Iterable<String> globPatterns) {
+    public JkPathTree andRefuse(Iterable<String> globPatterns) {
         return andMatcher(JkPathMatcher.refuse(this.root().getFileSystem(), globPatterns));
     }
 
-    public JkPathTree refuse(String... globPatterns) {
-        return refuse(Arrays.asList(globPatterns));
+    public JkPathTree andRefuse(String... globPatterns) {
+        return andRefuse(Arrays.asList(globPatterns));
     }
 
     // ------------------------ Misc ---------------------------------------

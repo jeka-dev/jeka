@@ -19,25 +19,24 @@ public class JkJavaProjectTest {
     @Test
     public void generate() throws Exception {
         final Path top = unzipToDir("sample-multi-scriptless.zip");
+        Path base = top.resolve("base");
 
         JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
                 .withResources("res").withTestResources("res-test");
 
-        Path base = top.resolve("base");
-        JkJavaProject baseProject = new JkJavaProject(base);
-        baseProject.setSourceLayout(sourceLayout);
+
+        JkJavaProject baseProject = JkJavaProject.of(sourceLayout.withBaseDir(base));
         baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3"));
 
         final Path core = top.resolve("core");
-        final JkJavaProject coreProject = new JkJavaProject(core);
+        final JkJavaProject coreProject = JkJavaProject.of(sourceLayout.withBaseDir(core));
         JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
-        coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
+        coreProject.setDependencies(coreDeps);
         coreProject.maker().setTestRunner(
                 coreProject.maker().getTestRunner().forked(true));
 
         final Path desktop = top.resolve("desktop");
-        final JkJavaProject desktopProject = new JkJavaProject(desktop);
-        desktopProject.setSourceLayout(sourceLayout);
+        final JkJavaProject desktopProject = JkJavaProject.of(sourceLayout.withBaseDir(desktop));
         final JkDependencySet deps = JkDependencySet.of().and(coreProject);
         desktopProject.setDependencies(deps);
         desktopProject.maker().defineFatJarArtifact("fat");

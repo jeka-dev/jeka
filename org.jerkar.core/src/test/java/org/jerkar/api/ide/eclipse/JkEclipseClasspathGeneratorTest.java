@@ -32,8 +32,7 @@ public class JkEclipseClasspathGeneratorTest {
                 .withResources("res").withTestResources("res-test");
 
         final Path base = top.resolve("base");
-        final JkJavaProject baseProject = new JkJavaProject(base);
-        baseProject.setSourceLayout(sourceLayout);
+        final JkJavaProject baseProject = JkJavaProject.of(sourceLayout.withBaseDir(base));
         baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3"));
         final JkEclipseClasspathGenerator baseGenerator =
                 new JkEclipseClasspathGenerator(baseProject);
@@ -44,9 +43,9 @@ public class JkEclipseClasspathGeneratorTest {
         System.out.println(baseClasspath);
 
         final Path core = top.resolve("core");
-        final JkJavaProject coreProject = new JkJavaProject(core);
+        final JkJavaProject coreProject = JkJavaProject.of(sourceLayout.withBaseDir(core));
         final JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
-        coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
+        coreProject.setDependencies(coreDeps);
         coreProject.maker().setTestRunner(
                 coreProject.maker().getTestRunner().forked(true));
         final JkEclipseClasspathGenerator coreGenerator =
@@ -65,8 +64,7 @@ public class JkEclipseClasspathGeneratorTest {
         System.out.println("\ndesktop .classpath");
         System.out.println(result2);
 
-        final JkJavaProject desktopProject = new JkJavaProject(desktop);
-        desktopProject.setSourceLayout(sourceLayout);
+        final JkJavaProject desktopProject = JkJavaProject.of(sourceLayout.withBaseDir(desktop));
         desktopProject.setDependencies(deps);
         desktopProject.maker().makeAllArtifacts();
 
@@ -74,7 +72,7 @@ public class JkEclipseClasspathGeneratorTest {
 
         final JkEclipseClasspathApplier classpathApplier = new JkEclipseClasspathApplier(false);
 
-        final JkJavaProject baseProject2 = new JkJavaProject(base);
+        final JkJavaProject baseProject2 = JkJavaProject.of(sourceLayout.withBaseDir(base));
         Files.deleteIfExists(base.resolve(".classpath"));
         Files.write(base.resolve(".classpath"), baseClasspath.getBytes(Charset.forName("UTF-8")));
         //JkUtilsFile.writeString(new File(base, ".classpath"), baseClasspath, false);
@@ -91,7 +89,7 @@ public class JkEclipseClasspathGeneratorTest {
         assertEquals("base.txt", resFiles.get(0).getFileName().toString());
         assertEquals(5, baseProject2.getDependencies().list().size());
 
-        final JkJavaProject coreProject2 = new JkJavaProject(core);
+        final JkJavaProject coreProject2 = JkJavaProject.ofMavenLayout(core);
 
         Files.write(core.resolve(".classpath"), coreClasspath.getBytes(Charset.forName("utf-8")));
         //JkUtilsFile.writeString(new File(core, ".classpath"), coreClasspath, false);

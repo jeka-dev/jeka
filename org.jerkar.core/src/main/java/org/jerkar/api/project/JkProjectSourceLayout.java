@@ -78,7 +78,7 @@ public class JkProjectSourceLayout {
     private JkProjectSourceLayout(Path baseDir, JkPathTreeSet sources, JkPathTreeSet resources,
                                   JkPathTreeSet tests, JkPathTreeSet testResources) {
         super();
-        this.baseDir = baseDir;
+        this.baseDir = baseDir.normalize().toAbsolutePath();
         this.sources = sources;
         this.tests = tests;
         this.resources = resources;
@@ -89,8 +89,10 @@ public class JkProjectSourceLayout {
      * Re-localise all locations defined under the base directory to the specified new of directory keeping the same relative path.
      */
     public JkProjectSourceLayout withBaseDir(Path newBaseDir) {
-        return new JkProjectSourceLayout(newBaseDir,
-                sources, resources, tests, testResources);
+        Path path = newBaseDir.toAbsolutePath().normalize();
+        return new JkProjectSourceLayout(path,
+                relocalize(path,sources), relocalize(path, resources),
+                relocalize(path, tests), relocalize(path, testResources));
     }
 
     public JkProjectSourceLayout withSources(JkPathTreeSet sources) {
@@ -220,6 +222,26 @@ public class JkProjectSourceLayout {
         }
         return JkPathTreeSet.of(trees);
     }
+
+    private Path relocalize(Path newBase, Path path) {
+        if (!path.isAbsolute()) {
+            return newBase.resolve(path);
+        }
+        if (!path.startsWith(baseDir)) {
+            return path;
+        }
+        final Path relPath = baseDir.relativize(path);
+        return newBase.resolve(relPath);
+    }
+
+    private JkPathTreeSet relocalize(Path newBase, JkPathTreeSet pathTreeSet) {
+        JkPathTreeSet result = JkPathTreeSet.empty();
+        for (JkPathTree tree : pathTreeSet.pathTrees()) {
+            result = result.and(JkPathTree.of(relocalize(newBase, tree.root())).withMatcher(tree.matcher()));
+        }
+        return result;
+    }
+
 
 
 }

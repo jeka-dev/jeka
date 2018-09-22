@@ -22,13 +22,11 @@ public class JkImlGeneratorTest {
     @Test
     public void generate() throws Exception {
         final Path top = unzipToDir("sample-multi-scriptless.zip");
+        final Path base = top.resolve("base");
 
         final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
-                .withResources("res").withTestResources("res-test");
-
-        final Path base = top.resolve("base");
-        final JkJavaProject baseProject = new JkJavaProject(base);
-        baseProject.setSourceLayout(sourceLayout);
+                .withResources("res").withTestResources("res-test").withBaseDir(base);
+        final JkJavaProject baseProject = JkJavaProject.of(sourceLayout);
         baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3"));
         final JkImlGenerator baseGenerator = new JkImlGenerator(baseProject);
         final String result0 = baseGenerator.generate();
@@ -36,9 +34,9 @@ public class JkImlGeneratorTest {
         System.out.println(result0);
 
         final Path core = top.resolve("core");
-        final JkJavaProject coreProject = new JkJavaProject(core);
+        final JkJavaProject coreProject = JkJavaProject.of(sourceLayout.withBaseDir(core));
         final JkDependencySet coreDeps = JkDependencySet.of().and(baseProject);
-        coreProject.setSourceLayout(sourceLayout).setDependencies(coreDeps);
+        coreProject.setDependencies(coreDeps);
         coreProject.maker().setTestRunner(
                 coreProject.maker().getTestRunner().forked(true));
         final JkImlGenerator coreGenerator = new JkImlGenerator(coreProject);
@@ -56,8 +54,7 @@ public class JkImlGeneratorTest {
         System.out.println("\ndesktop .classpath");
         System.out.println(result2);
 
-        final JkJavaProject desktopProject = new JkJavaProject(desktop);
-        desktopProject.setSourceLayout(sourceLayout);
+        final JkJavaProject desktopProject = JkJavaProject.of(sourceLayout.withBaseDir(desktop));
         desktopProject.setDependencies(deps);
         desktopProject.maker().makeAllArtifacts();
 
