@@ -8,7 +8,11 @@ When a plugin class is on the classpath :
 
 - The public methods of the plugin are available (invokable) from the command line using `jerkar pluginName#MethodName`
 - The public instance field values of the plugin can be injected as options from command line using `jerkar -pluginName#FieldName=Xxxx`
-- If the plugin is activated, its `activate` method is invoked. This method is supposed to act on the hosting JkBuild instance and its other bound plugins (by modifying the state of these ones).
+- If the plugin is loaded, its `activate` method is invoked. This method is supposed to act on the hosting JkBuild instance and its other bound plugins (by modifying the state of these ones).
+- A plugin is loaded when :
+    * one of its method or option is mentioned in the command line
+    * its name followed by a single `#` is mentioned in the command line (e.g. `jerkar scaffold#run java#` loads both scaffold and java plugin)
+    * the plugin is loaded programmatically using `JkBuild.plugins.get` methods.
 
 Executing `jerkar help` provides an exhaustive list of available plugins in the _build classpath_ and you can have details on each 
 by executing `jerkar [pluginName]#help`.
@@ -18,12 +22,12 @@ Plugins may :
 - override `activate` method (which does nothing by default).
 - provide utility classes/methods to build classes or other plugins.
 
-For example, [**Jacoco Plugin**](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/src/main/java/org/jerkar/tool/builtins/jacoco/JkPluginJacoco.java) 
+For example, [Jacoco Plugin](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/src/main/java/org/jerkar/tool/builtins/jacoco/JkPluginJacoco.java) 
 does not provide _build method_ but configures Java Plugin in such unit tests are forked on a JVM with Jacoco agent activated. This plugin can be activated 
 using the command line `jerkar jacoco#` (No need to declare the plugin into your build class !).
 It also provides a utility class `JKocoJunitEnhancer` that supplies lower level features to launch Jacoco programmatically.
 
-An other example is, [**Scaffold Plugin**](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/src/main/java/org/jerkar/tool/builtins/scaffold/JkScaffolder.java) .
+An other example is, [Scaffold Plugin](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/src/main/java/org/jerkar/tool/builtins/scaffold/JkPluginScaffold.java) .
 This plugin does not override `activate` method, in such it has no side effect on the running build but it features 
 a _build method_ `run` that generates a typical Java project skeleton for Jerkar. This method is executed with `jerkar scaffold#run`.
 
@@ -56,7 +60,7 @@ Therefore it can be mentioned either in command line as `jerkar foo#run @my.comp
 in build class code as below : 
 
 ``` 
-@JkImport(`{"my.comp:jerkar-plugin-myPlugin:1.1"})
+@JkImport("my.comp:jerkar-plugin-myPlugin:1.1")
 public class MyBuild extends JkJavaBuild {`
 ...
 ```

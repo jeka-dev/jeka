@@ -10,7 +10,7 @@ public class Build extends JkJavaProjectBuild {
    @Override
     protected void afterOptionsInjected() {
          Path projectPath = this.baseDir().resolve("../myProject");   // project to build lies in a sibling folder. 
-         project().setSourceLayout(project().getSourceLayout().withBaseDir(projectPath));
+         project().setSourceLayout(JkProjectSourceLayout.ofMavenStyle().withBaseDir(projectPath));
          ...
     }
 
