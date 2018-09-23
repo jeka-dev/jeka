@@ -26,7 +26,7 @@ public class JkProjectSourceLayout {
      * Creates a Java project source structure according Maven conventions. It differs from Maven in that
      * non-java files located under src/main/java and src/test/java are also considered as resources.
      */
-    public static JkProjectSourceLayout mavenJava() {
+    public static JkProjectSourceLayout ofMavenStyle() {
         final Path baseDir = Paths.get(".");
         final JkPathTreeSet sources = JkPathTreeSet.of(baseDir.resolve("src/main/java").normalize());
         final JkPathTreeSet resources = JkPathTreeSet.of(baseDir.resolve("src/main/resources").normalize())
@@ -41,7 +41,7 @@ public class JkProjectSourceLayout {
      * Creates a simple Java project structure. Production sources and resources are located under src. Test sources
      * and resources are located in test.
      */
-    public static JkProjectSourceLayout simple() {
+    public static JkProjectSourceLayout ofSimpleStyle() {
         final Path baseDir = Paths.get(".");
         final JkPathTreeSet sources = JkPathTreeSet.of(baseDir.resolve("src").normalize());
         final JkPathTreeSet resources = sources.andMatcher(JAVA_RESOURCE_MATCHER);

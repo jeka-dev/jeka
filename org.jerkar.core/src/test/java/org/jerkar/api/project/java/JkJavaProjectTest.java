@@ -21,7 +21,7 @@ public class JkJavaProjectTest {
         final Path top = unzipToDir("sample-multi-scriptless.zip");
         Path base = top.resolve("base");
 
-        JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
+        JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.ofSimpleStyle()
                 .withResources("res").withTestResources("res-test");
 
 

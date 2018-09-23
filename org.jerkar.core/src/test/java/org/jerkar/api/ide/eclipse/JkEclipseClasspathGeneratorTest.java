@@ -28,7 +28,7 @@ public class JkEclipseClasspathGeneratorTest {
         final Path top = unzipToDir("sample-multi-scriptless.zip");
         // JkLog.silent(true);
 
-        final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
+        final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.ofSimpleStyle()
                 .withResources("res").withTestResources("res-test");
 
         final Path base = top.resolve("base");

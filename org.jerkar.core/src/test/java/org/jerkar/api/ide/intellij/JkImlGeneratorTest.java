@@ -24,7 +24,7 @@ public class JkImlGeneratorTest {
         final Path top = unzipToDir("sample-multi-scriptless.zip");
         final Path base = top.resolve("base");
 
-        final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.simple()
+        final JkProjectSourceLayout sourceLayout= JkProjectSourceLayout.ofSimpleStyle()
                 .withResources("res").withTestResources("res-test").withBaseDir(base);
         final JkJavaProject baseProject = JkJavaProject.of(sourceLayout);
         baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3"));

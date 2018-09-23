@@ -11,11 +11,15 @@ public class Build extends JkJavaProjectBuild {
     protected void afterOptionsInjected() {
          Path projectPath = this.baseDir().resolve("../myProject");   // project to build lies in a sibling folder. 
          project().setSourceLayout(project().getSourceLayout().withBaseDir(projectPath));
-         maker().setOutLayout(maker().getOutLayout().withOutputDir(this.outputDir())); // Force output files here
          ...
     }
 
 ```
+
+## My build class does not compile so I can't invoke any Jerkar method as 'help' or 'scaffold#run'. What can I do ?
+
+You can specify a built-in build class to run, as compilation won't occur.
+For example `jerkar -BuildClass=JkBuild help` or `jerkar -BC=JkBuild scaffold#run java#"`.
 
 # Compilation
 
@@ -25,8 +29,9 @@ Jerkar uses the JDK it is running on to compile your production or test code.
 If your code must be build on a another JDK version, you can specify JDK path for different version. For such, just mention it as option.
 
 ```
-jdk.6=c:/software/jdk6
-jdk.7=c:/software/jdk7
+jdk.6=/software/jdk6
+jdk.7=/software/jdk7
+jdk.9=/software/jdk9
 ...
 ```
 

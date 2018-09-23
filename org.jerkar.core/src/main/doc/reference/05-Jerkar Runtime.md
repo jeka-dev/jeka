@@ -109,7 +109,7 @@ The selection process is :
 short name among the _build classes_.
 * If this option is not set, Jerkar selects the first build class extending `JkBuild` in alphabetic order then sub-package in deep first. 
   This means that class `MyBuid` will be selected prior `apackage.ABuild`, and `aa.bb.MyClass` will be selected prior `ab.OtherClass`.
-* If no such class found, Jerkar selects the built-in `org.jerkar.tool.builtins.java.JkJavaProjectBuild`
+* If no such class found, Jerkar selects the built-in `org.jerkar.tool.JkBuild` class.
 
 #### Build Class Instantiation
 

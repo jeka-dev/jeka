@@ -7,9 +7,7 @@ import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.JkManifest;
 import org.jerkar.api.java.JkResourceProcessor;
-import org.jerkar.api.project.JkProjectOutLayout;
 import org.jerkar.api.project.JkProjectSourceLayout;
-import org.jerkar.tool.JkConstants;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -78,11 +76,11 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     }
 
     public static JkJavaProject ofMavenLayout(Path baseDir) {
-        return new JkJavaProject(JkProjectSourceLayout.mavenJava().withBaseDir(baseDir));
+        return new JkJavaProject(JkProjectSourceLayout.ofMavenStyle().withBaseDir(baseDir));
     }
 
     public static JkJavaProject ofSimpleLayout(Path baseDir) {
-        return new JkJavaProject(JkProjectSourceLayout.simple().withBaseDir(baseDir));
+        return new JkJavaProject(JkProjectSourceLayout.ofSimpleStyle().withBaseDir(baseDir));
     }
 
     // -------------------------- Other -------------------------

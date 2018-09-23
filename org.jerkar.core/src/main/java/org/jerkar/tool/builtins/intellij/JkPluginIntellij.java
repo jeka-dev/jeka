@@ -7,9 +7,11 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.*;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
+import org.jerkar.tool.builtins.java.JkPluginJava;
 import org.jerkar.tool.builtins.scaffold.JkPluginScaffold;
 
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,6 +26,9 @@ public final class JkPluginIntellij extends JkPlugin {
 
     @JkDoc("If true, the project dependencies are not taken in account to generate iml, only build class dependencies are.")
     public boolean onlyBuildDependencies = false;
+
+    @JkDoc("If true, the project in taken in account is not the build project but the project configured in java plugin.")
+    public boolean externalDir = false;
 
     private final JkPluginScaffold scaffold;
 
@@ -48,12 +53,12 @@ public final class JkPluginIntellij extends JkPlugin {
             depProjects.add(depBuild.baseTree().root());
         }
         generator.setUseVarPath(useVarPath);
-        generator.setBuildDependencies(build.buildDependencyResolver(), build.buildDependencies());
+        generator.setBuildDependencies(externalDir ? null : build.buildDependencyResolver(), build.buildDependencies());
 
         generator.setImportedBuildProjects(depProjects);
-        if (build instanceof JkJavaProjectBuild) {
-            final JkJavaProjectBuild projectBuild = (JkJavaProjectBuild) build;
-            JkJavaProject project = projectBuild.java().project();
+        Path basePath = build.baseDir();
+        if (build.plugins().has(JkPluginJava.class)) {
+            JkJavaProject project = build.plugins().get(JkPluginJava.class).project();
             if (!onlyBuildDependencies) {
                 generator.setDependencies(project.maker().getDependencyResolver(), project.getDependencies());
             } else {
@@ -61,10 +66,15 @@ public final class JkPluginIntellij extends JkPlugin {
             }
             generator.setSourceJavaVersion(project.getSourceVersion());
             generator.setForceJdkVersion(true);
+            if (externalDir) {
+                basePath = project.baseDir();
+            }
         }
         final String xml = generator.generate();
-        final Path imlFile = build.baseDir().resolve(".idea").resolve(
-                build.baseDir().getFileName().toString() + ".iml");
+        String filename = basePath.getFileName().toString() + ".iml";
+        Path candidateImlFile = basePath.resolve(".idea").resolve(filename);
+        final Path imlFile = Files.exists(candidateImlFile) ? candidateImlFile :
+                basePath.resolve(".idea").resolve(filename);
         JkUtilsPath.deleteIfExists(imlFile);
         JkUtilsPath.createDirectories(imlFile.getParent());
         JkUtilsPath.write(imlFile, xml.getBytes(Charset.forName("UTF-8")));

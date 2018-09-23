@@ -10,7 +10,7 @@ import org.jerkar.api.project.JkProjectSourceLayout;
 public interface JkJavaProjectDefinition {
 
     default JkProjectSourceLayout getSourceLayout() {
-        return JkProjectSourceLayout.mavenJava();
+        return JkProjectSourceLayout.ofMavenStyle();
     }
 
     default JkDependencySet getDependencies() {

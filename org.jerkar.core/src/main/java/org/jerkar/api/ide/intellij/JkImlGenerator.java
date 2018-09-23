@@ -472,6 +472,12 @@ public final class JkImlGenerator {
         if (JkJavaVersion.V9.equals(javaVersion)) {
             return "1.9";
         }
+        if (JkJavaVersion.V9.equals(javaVersion)) {
+            return "1.9";
+        }
+        if (JkJavaVersion.V10.equals(javaVersion)) {
+            return "1.10";
+        }
         return javaVersion.name();
     }
 
@@ -520,27 +526,6 @@ public final class JkImlGenerator {
         } catch (final XMLStreamException e) {
             throw JkUtilsThrowable.unchecked(e);
         }
-    }
-
-    /*
-     * If the specified folder is the output folder of an eclipse project than it returns the asScopedDependency of this project,
-     * else otherwise.
-     */
-    private static Path getProjectFolderOf(Iterable<Path> files, Iterable<Path> projectDependencies) {
-        if (!files.iterator().hasNext()) {
-            return null;
-        }
-        Path folder = files.iterator().next().getParent();
-        while (folder != null) {
-            if (JkPathTree.of(folder).andAccept("*.iml").count(1, false) == 1) {
-                return folder;
-            }
-            if (JkUtilsIterable.listOf(projectDependencies).contains(folder)) {
-                return folder;
-            }
-            folder = folder.getParent();
-        }
-        return null;
     }
 
     private Path lookForSources(Path binary) {
