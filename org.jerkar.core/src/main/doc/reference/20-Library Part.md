@@ -8,7 +8,7 @@ tooling, or in a basic main class.
 
 As Jerkar tool is relatively lightweight comparing to its library, I see no compelling reason to split it in two jars.
 
-The library part embeds third party products as ivy or bouncycastle but this dependencies are hidden and loaded in 
+The library part embeds third party products as _Ivy_ or _BouncyCastle_ but these dependencies are hidden and loaded in 
 a specific class loader. These 3rd party APIs are not visible/accessible to clients so they can use their own 
 version of these APIs without conflict.
 
