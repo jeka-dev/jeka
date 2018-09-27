@@ -1,16 +1,28 @@
 # Library Part
 
-Jerkar contains a library for dealing with files, compilations, dependency management, tests, 
-external process, crypto signatures, ... In a glance, all regulars things you need to build/publish projects and especially Java projects.
+As said in intro, Jerkar contains a library for all regulars things you need to build/publish projects and especially Java projects.
 
-Even if bundled in the same jar, the library does not depend of the tool part, so you can use it in your own 
-tooling, or in a basic main class.
+The library part embeds third party jar as _Ivy_ or _BouncyCastle_ but these dependencies are hidden and loaded in 
+a specific class loader. These 3rd party APIs are not visible/accessible to client code so one can use another 
+version of these APIs without conflict : you can consider Jerkar as a *zero-dependency library*.
 
-As Jerkar tool is relatively lightweight comparing to its library, I see no compelling reason to split it in two jars.
 
-The library part embeds third party products as _Ivy_ or _BouncyCastle_ but these dependencies are hidden and loaded in 
-a specific class loader. These 3rd party APIs are not visible/accessible to clients so they can use their own 
-version of these APIs without conflict.
+* files : file trees, filter, zip, path sequence
+* system : launching external process, log, info on Jerkar
+* cryptography : PGP signer
+* dependency management
+  * dependency resolution : dependency manager, module dependencies, project dependencies
+  * publication : publishing on repositories
+* java
+  * main : compilation, javadoc, resource processor, manifest, packager, classloader, classpath, launching 
+  * junit : launching, report
+  * project : project structure to build
+* tooling : eclipse integration, intellij integration, Maven integration/migration, Pom parsing
+* support
+ 
+
+
+
 
 
 

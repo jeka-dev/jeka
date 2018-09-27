@@ -68,7 +68,8 @@ public class CoreBuild extends JkJavaProjectBuild {
             maker.makeArtifactsIfAbsent(maker.mainArtifactId(), JAVADOC_ARTIFACT_ID);
             distrib.goTo("libs-javadoc").copyIn(maker.artifactPath(JAVADOC_ARTIFACT_ID));
         }
-        JkLog.execute("Making documentation", () -> new DocMaker(baseDir(), distribFolder).assembleAllDoc());
+        JkLog.execute("Making documentation", () -> new DocMaker(baseDir(), distribFolder,
+                project().getVersionedModule().version().value()).assembleAllDoc());
         if (testSamples) {
             testSamples();
         }

@@ -16,7 +16,7 @@ __[USER HOME]__ : User Home in Windows or Unix meaning.
 3. add _[Jerkar Home]_ to your _PATH_ environment variable
 4. execute `jerkar -LH help` in the command line. You should get an output starting by : 
 
-<pre><code>
+```
  _______           _
 (_______)         | |
      _ _____  ____| |  _ _____  ____
@@ -28,17 +28,17 @@ Java Home : C:\Program Files (x86)\Java\jdk1.8.0_121\jre
 Java Version : 1.8.0_121, Oracle Corporation
 Jerkar Home : C:\software\jerkar                             
 Jerkar User Home : C:\users\djeang\.jerkar
-</code></pre>
+...
+```
 
-Note : -LH option stands for "Log Headers". In this mode, Jerkar displays meta-information about 
-the running build.
+Note : -LH option stands for "Log Headers". In this mode, Jerkar displays meta-information about the running build.
 
 # Use Jerkar with command line
 
 ## Create a project
 
 1. Create a new directory named 'mygroup.myproject' as the root of your project.
-2. Execute `jerkar scaffold#run` under this directory. 
+2. Execute `jerkar scaffold#run java#` under this directory. 
 This will generate a project skeleton with the following build class at _[PROJECT DIR]/build/def/Build.java_
 
 ```Java
@@ -91,9 +91,12 @@ class Build extends JkJavaProjectBuild {
 }
 ```
 
+Explanation : `scaffold#run` invokes 'run' method on the 'scaffold' plugin.  `java#` forces the `java` plugin to be loaded. When loaded, 
+'java' plugin has the effect to instruct scaffold plugin extra actions for generating a Java project.
+
 By default the project layout mimics the Maven one so sources are supposed to lie in _src/main/java_.
 
-You can execute `jerkar java#info` to see an abstract of the project setup. 
+Execute `jerkar java#info` to see an abstract of the project setup. 
 
 ## Build your project
 

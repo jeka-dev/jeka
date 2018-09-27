@@ -3,27 +3,27 @@
 This document stands for reference guide and provides details about Jerkar behaviour. If you are looking for 
 how exactly Jerkar behaves or you want to get a pretty exhaustive list of Jerkar features, you are in the right place.
 
-However, a document can not replace a source code or API for exhaustion. So you are encouraged to navigate into 
-source code or Javadoc to get more details.  
+However, a document can not replace a source code or API for exhaustion. Jerkar philosophy is to be as transparent and 
+easy to master as possible. We hope that no user will ever feel the need to buy some trainings or books to master it.
+The source code has been written with intelligibility in mind in order to navigate easily from the user build code 
+to the Jerkar engine room. For Java developers, reading source code and placing break points will troubleshoot faster 
+than documentation/support most of the time.  
 
-The following terms are used all over the document :
+**What is Jerkar ?**
 
-__[PROJECT DIR]__ : refers to the root folder of the project to build (the one where you would put pom.xml or build.xml file if you were using ANT or Maven).
+Jerkar contains both a library and a tool. 
 
-__[JERKAR HOME]__ : refers to the folder where is intalled Jerkar. You should find _jerkar.bat_ and _jerkar_ shell scripts directly under this folder.
+Library is for dealing with files, compilations, dependency management, tests, 
+external process, crypto signatures, ... In a word, all regulars things you need to build/publish projects and especially Java projects.
 
-__[JERKAR USER HOME]__ : refers to the folder where Jerkar stores caches, binary repository and global user configuration.
+Tool is intended to execute Java source code from the console in a parameterizable way. Its architecture eases the 
+reuse of build elements (logic, settings, doc, ...) across projects. 
 
-<strong>Build Classes :</strong> Java source code containing build instructions. These files are edited by the users and are located under _[PROJECT DIR]/build/def_ directory.  
-This term can also be use to designate their compiled counterparts (.class files). 
+Although library and tool are bundled in the same jar, the library does not depend on the tool at all so it can be understood 
+on its own without any knowledge of the tool part. If you are only interested in the library part you can [jump to this section](#LibraryPart).
 
-<strong>Build Classpath :</strong> Classpath on which depends _build classes_ to get compiled and executed. It consists
-in _Jerkar_ core classes but can be augmented with any third party lib or build classes located in another project.
-  
-<strong>Build Methods :</strong> Java methods member of _Build Classes_ invokable from Jerkar command line. These methods 
-are hosted in classes extending `org.jerkar.tool.JkBuild` or `org.jerkar.tool.JkPlugin`. They must be public zero-args instance methods 
-returning void. 
- 
-<strong>Options :</strong> This is a set of key-value used to inject parameters. Options can be mentioned as command line arguments, stored in specific files or be hard coded in build classes.
+You may ask why these two parts are not bundled in distinct jar...well, the tool part is very lightweight compared 
+to the lib part, so splitting drawbacks would outweigh advantage. This decision may be reconsidered later when Jerkar will 
+embrace JDK9+.
 
 

@@ -14,6 +14,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+/*
+ * Utility class to build friendly HTML doc from markdown files.
+ */
 class DocMaker {
 
     private static final Charset UTF8 = Charset.forName("UTF8");
@@ -22,9 +25,12 @@ class DocMaker {
 
     private final Path docDist;
 
-    DocMaker(Path baseDir, Path distribPath) {
+    private final String version;
+
+    DocMaker(Path baseDir, Path distribPath, String version) {
         docSource = JkPathTree.of(baseDir.resolve("src/main/doc"));
         docDist = distribPath.resolve("doc");
+        this.version = version;
     }
 
     void assembleAllDoc() {
@@ -61,7 +67,7 @@ class DocMaker {
     private String mdToHtml(String mdContent, String title) {
         StringBuilder sb = new StringBuilder();
         String rawHeader = new String(JkUtilsPath.readAllBytes(docSource.get("templates/header.html")), UTF8);
-        sb.append( rawHeader.replace("${title}", title) );
+        sb.append( rawHeader.replace("${title}", title).replace("${version}", version) );
         Parser parser = Parser.builder().build();
         Node document = parser.parse(mdContent);
         List<MenuItem> menuItems = addAnchorAndNumberingToHeaders(document);
@@ -73,7 +79,7 @@ class DocMaker {
     }
 
     public static void main(String[] args) {
-        new DocMaker(Paths.get("."), Paths.get("build/output/distrib")).assembleAllDoc();
+        new DocMaker(Paths.get("."), Paths.get("build/output/distrib"), "unspecified").assembleAllDoc();
     }
 
     private List<MenuItem> addAnchorAndNumberingToHeaders(Node node) {
