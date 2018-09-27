@@ -41,15 +41,20 @@ So for example you execute `jerkar java#pack -java#tests.fork`, the main build a
 Methods mentioned in the command line are not automatically propagated to imported builds. Executing `jerkar clean` will 
 only clean the current build project.
 
-To propagate method call to every imported build, method name should be prefixed with a '*'. Executing `jerkar clean*` will 
+To propagate method call to every imported builds, method name should be prefixed with a '*'. Executing `jerkar clean*` will 
 invoke 'clean' method on the current _build class_ along along all imported build classes.
 
 ### Access Imported Builds Programmatically
 
-You can access to the list of import build within a JkBuild instance using `JkBuild#ImportedBuilds` methods as show below :
+You can access to the list of imported build classes within using `JkBuild#ImportedBuilds` methods as show below :
 
-```
-public void doForAll() {
+```Java
+public class MyBuild extends JkBuild {
+
+    ...
+
+    public void doForAll() {
+        this.clean();
         this.importedBuilds().all().forEach(JkBuild::clean);
         this.importedBuilds().allOf(JkJavaProjectBuild.class).forEach(build -> build.java().pack());
     }
