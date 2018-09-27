@@ -1,71 +1,80 @@
 ## Plugins
 
-Jerkar provides a plugable architecture. To be precise, `org.jerkar.tool.JkBuild` instances are plugable.
+Jerkar provides a plugable architecture. In Jerkar, a plugin is a class extending `org.jerkar.tool.JkPlugin` and named as *JkPlugin[PluginName]*.
+The plugin name is inferred from Plugin class name.
 
-A Plugin class must extends `org.jerkar.tool.JkPlugin` and must be named as *JkPlugin[PluginName]* (In fact, plugin name will be inferred from Plugin class name).
+Each plugin instance is owned by a JkBuild object, and can access to it through `JkPlugin#build` protected field.
 
-When a plugin class is on the classpath : 
+Plugins has 3 capabilities :
+* Access to their owning JkBuild instance (so potentially modify it, load/modify other plugins)
+* Expose _build methods_ and _options_ to command line.
+* Provide self documentation.
 
-- The public methods of the plugin are available (invokable) from the command line using `jerkar pluginName#MethodName`
-- The public instance field values of the plugin can be injected as options from command line using `jerkar -pluginName#FieldName=Xxxx`
-- If the plugin is loaded, its `activate` method is invoked. This method is supposed to act on the hosting JkBuild instance and its other bound plugins (by modifying the state of these ones).
-- A plugin is loaded when :
-    * one of its method or option is mentioned in the command line
-    * its name followed by a single `#` is mentioned in the command line (e.g. `jerkar scaffold#run java#` loads both scaffold and java plugin)
-    * the plugin is loaded programmatically using `JkBuild.plugins.get` methods.
+Jerkar is bundled with a bunch plugins (java, scaffold, eclipse, intellij, ...) but one can add extra plugins just 
+by adding the jar or directory containing the plugin class to your _build classpath_. 
 
-Executing `jerkar help` provides an exhaustive list of available plugins in the _build classpath_ and you can have details on each 
-by executing `jerkar [pluginName]#help`.
+To see all available plugins in the _build classpath_, just execute `jerkar help`.
+See [Command Line Parsing](#CommandLineParsing) and [Build Class Pre-processing](#BuildClassPre-processing(Import3rdpartylibraryintoBuildClasspath))
+to augment _build_classpath_ .
 
-Plugins may :
-- declare _build methods_ .
-- override `activate` method (which does nothing by default).
-- provide utility classes/methods to build classes or other plugins.
+### Load Plugins
+
+Plugins need not to be mentioned in _build class_ code in order to be bound to the JkBuild instance. Just the fact to 
+mention a plugin _build method_, _options_ or _[pluginName]#_ in the command line will load the plugin.
+
+For example `jerkar scaffold#run java#` will load 'java' and 'scaffold' plugins into a JkBuild instance. 
+'java' plugin instance will modify 'scaffold' plugin instance in such it produces a build class code extending `JkJavaProjectBuild` 
+instead of 'JkBuild' when 'scaffold#run' command is executed. It also creates Java project layout folders. See `activate` method in [JkPluginJava Code](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/src/main/java/org/jerkar/tool/builtins/java/JkPluginJava.java) 
+to have a concrete view.
+
+You can also force a plugin to load in your _build class_ code as below. That way, you don't need to mention `java#` in command line.
+
+```Java
+public class MyBuild extends JkBuild {
+    
+    MyBuild() {
+        plugins().get(JkPluginJava.class);  // Loads 'java' plugins in this instance, a second call on 'plugins().get(JkPluginJava.class)' will return same instance.
+        plugins().get("intellij");   // You can also load plugin by mentioning its name but it's slower cause it involves classpath scanning
+    }
+    
+}
+```
+
+### Modify Owing JkBuild Instance
+
+JkBuild instances are created using `JkBuild#of` factory method. This method invoke `JkPlugin#active` method on all plugin loaded in the JkBuild instance.
+By default, this method does nothing but plugin implementations can override it in order to let the plugin modify its owning JkBuild or owe of its plugins.
+
+In fact, many plugins act just as modifier/enhancer of other plugins. 
 
 For example, [Jacoco Plugin](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/src/main/java/org/jerkar/tool/builtins/jacoco/JkPluginJacoco.java) 
-does not provide _build method_ but configures Java Plugin in such unit tests are forked on a JVM with Jacoco agent activated. This plugin can be activated 
-using the command line `jerkar jacoco#` (No need to declare the plugin into your build class !).
+does not provide _build method_ but configures 'java' plugin in such unit tests are forked on a JVM with Jacoco agent on. 
 It also provides a utility class `JKocoJunitEnhancer` that supplies lower level features to launch Jacoco programmatically.
 
-An other example is, [Scaffold Plugin](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/src/main/java/org/jerkar/tool/builtins/scaffold/JkPluginScaffold.java) .
-This plugin does not override `activate` method, in such it has no side effect on the running build but it features 
-a _build method_ `run` that generates a typical Java project skeleton for Jerkar. This method is executed with `jerkar scaffold#run`.
+Some other plugins does not modify their owning JkBuild instance, for example [Scaffold Plugin](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/src/main/java/org/jerkar/tool/builtins/scaffold/JkPluginScaffold.java) 
+does not override `activate` method, therefore it has no side effect on its owning `JkBuild` instance. It only features _build methods_  along _options_.
 
 
-### Load Plugins in Build Class
+### Configure Plugins in JkBuild Class
 
-A plugin is loaded implicitly in build class by invoking `JkBuild.plugins().get(JkPlugin[pluginName].class)`.
-Methods `JkBuild#beforeOptionsInjected` and `JkBuild#afterOptionsInjected` are designated places to declare and configure plugins.
+There is three places where you can configure plugins :
+* In `JkBuild` subclass constructor : at this point options has yet been injected so it's the place to configure default option values.
+* In `JkBuild#afterOptionsInjected` subclass method : at this point, options has been injected but plugins has not been activated yet. 
+  It is the place to configure plugins and other instance member to take options in account.
+* In `JkBuild#afterPluginsActivated` subclass method : at this point plugins has been activated. If you wan't to override 
+some values plugins may have set, override this method.
 
-If a plugin has been loaded in methods designated above, its `activate` method will be automatically invoked at build class instantiation time.
-If you do not want this, you must declare it in `afterPluginsActivated` method.
-
-Example of loading and configuring a plugin in build class.
+Example of configuring a plugin in build class.
 
 ```Java
     ...
-    @Override
-    public void afterOptionsInjected() {
-        this.plugins().get(JkPluginSonar.class).prop(JkSonar.BRANCH, "myBranch");
+    public MyBuild() {
+        JkPluginSonar sonarPlugin = this.plugins().get(JkPluginSonar.class);  // Load sonar plugin 
+		sonarPlugin.prop(JkSonar.BRANCH, "myBranch");  // define a default for sonar.branch property
         ...
     }
 ```
-
-
-### Add Plugins to Build Classpath
-
-To be activated or configured a plugin has to be in the _build classpath_. 
-
-Therefore it can be mentioned either in command line as `jerkar foo#run @my.comp:jerkar-plugin-foo:1.1 ` or  
-in build class code as below : 
-
-``` 
-@JkImport("my.comp:jerkar-plugin-myPlugin:1.1")
-public class MyBuild extends JkJavaBuild {`
-...
-```
-
-For now, Jerkar ships with several plugins out-of-the-box. You'll get a comprehensive list by executing `jerkar help`.
+[Jerkar own build class](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/build/def/org/jerkar/CoreBuild.java) makes a good example.
 
 ### Document Plugins
 

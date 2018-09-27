@@ -44,7 +44,7 @@ class DocMaker {
         });
         String html = mdToHtml(createSingleReferenceMdPage(), "Reference Guide");
         JkUtilsPath.write(targetFolder.resolve("reference.html"), html.getBytes(Charset.forName("UTF8")));
-        docSource.goTo("templates").andAccept("**/*.css", "**/*.jpg", "**/*.svg").copyTo(docDist);
+        docSource.goTo("templates").andAccept("**/*.css", "**/*.jpg", "**/*.svg").copyTo(docDist.resolve("style"));
     }
 
     private String createSingleReferenceMdPage() {

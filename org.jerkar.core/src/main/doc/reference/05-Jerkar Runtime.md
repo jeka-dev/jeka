@@ -57,7 +57,7 @@ Jerkar follows a similar process to load options. It loads in order :
 
 The last loaded options override the previous ones if there is some conflicts.
 
-#### Build Class Pre-processing (Import 3rd party library into Build Classpath).
+#### Build Class Pre-processing (Import 3rd party library into Build Classpath)
 
 In order to compile _build classes_, Jerkar has to compute _build classpath_ first. With Jerkar you can specify build dependencies 
 directly inside the source code using `@JkImport` or  `@JkImportBuild` annotations as shown below.

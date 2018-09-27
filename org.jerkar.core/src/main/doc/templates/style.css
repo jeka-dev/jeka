@@ -370,6 +370,10 @@ span.float-right > span {
     text-align: right;
 }
 
+code {
+    color: darkred;
+}
+
 code, tt {
     margin: 0 2px;
     padding: 0 5px;
@@ -385,7 +389,10 @@ pre code {
     white-space: pre;
     border: none;
     background: transparent;
+    color: #333;
 }
+
+
 
 .highlight pre {
     background-color: #f8f8f8;
