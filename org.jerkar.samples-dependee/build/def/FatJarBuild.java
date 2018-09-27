@@ -30,14 +30,13 @@ public class FatJarBuild extends JkJavaProjectBuild {
 
     @Override
     protected void afterOptionsInjected() {
-        java().project()
-                .setDependencies(JkDependencySet.of()
-                        .and(sampleBuild.project(), JkArtifactId.of("fat", "jar")))
-                .setSourceVersion(JkJavaVersion.V7);
+        project().addDependencies(JkDependencySet.of()
+                .and(sampleBuild.project(), JkArtifactId.of("fat", "jar")));
+        project().setSourceVersion(JkJavaVersion.V7);
     } 
     
     public static void main(String[] args) {
-		JkInit.instanceOf(FatJarBuild.class, args).maker().makeAllArtifacts();
+		JkInit.instanceOf(FatJarBuild.class, "-java#tests.fork").maker().makeAllArtifacts();
 	}
 
    

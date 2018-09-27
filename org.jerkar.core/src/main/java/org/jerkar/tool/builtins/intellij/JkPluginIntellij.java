@@ -57,7 +57,7 @@ public final class JkPluginIntellij extends JkPlugin {
 
         generator.setImportedBuildProjects(depProjects);
         Path basePath = build.baseDir();
-        if (build.plugins().has(JkPluginJava.class)) {
+        if (build.plugins().hasLoaded(JkPluginJava.class)) {
             JkJavaProject project = build.plugins().get(JkPluginJava.class).project();
             if (!onlyBuildDependencies) {
                 generator.setDependencies(project.maker().getDependencyResolver(), project.getDependencies());

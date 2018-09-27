@@ -16,7 +16,7 @@ import java.nio.file.Paths;
 public class PureApiBuild extends JkBuild {
 
     public void doDefault() {
-        JkJavaProject javaProject = new JkJavaProject(this.baseDir());
+        JkJavaProject javaProject = JkJavaProject.ofMavenLayout(this.baseDir());
 
         // We want to output stuff in another place than build/output
         javaProject.maker().setOutLayout(javaProject.maker().getOutLayout().withOutputDir("build/output/alt-output"));

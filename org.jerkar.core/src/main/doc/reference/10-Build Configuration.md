@@ -68,7 +68,7 @@ If the value is not parsable to the target type, build fails.
 
 To get a precise idea on how types are converted see [this code](https://github.com/jerkar/jerkar/blob/master/org.jerkar.core/src/main/java/org/jerkar/tool/OptionInjector.java).
 
-##### Composite options
+#### Composite options
 
 Composite options are a way to structure your options. Say that you want to configure some server access with url, userName and passwsord. 
 You can group all these information into a single object as :

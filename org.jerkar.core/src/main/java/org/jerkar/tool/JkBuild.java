@@ -66,6 +66,10 @@ public class JkBuild {
         this.plugins = new JkBuildPlugins(this, Environment.commandLine.getPluginOptions());
     }
 
+    /**
+     * Creates a instance of the specified build class (extending JkBuild), including option injection, plugin loading
+     * and plugin activation.
+     */
     public static <T extends JkBuild> T of(Class<T> buildClass) {
         if (BASE_DIR_CONTEXT.get() == null) {
             baseDirContext(Paths.get("").toAbsolutePath());
@@ -132,7 +136,7 @@ public class JkBuild {
 
     /**
      * Returns the base directory tree for this project. All file/directory path are
-     * resolved to this directory.
+     * resolved to this directory. Short-hand for <code>JkPathTree.of(baseDir)</code>.
      */
     public final JkPathTree baseTree() {
         return JkPathTree.of(baseDir);
@@ -152,6 +156,9 @@ public class JkBuild {
         return baseDir.resolve(JkConstants.BUILD_OUTPUT_PATH);
     }
 
+    /**
+     * Returns the container of loaded plugins for this instance.
+     */
     public JkBuildPlugins plugins() {
         return this.plugins;
     }

@@ -52,7 +52,6 @@ public final class JkImportedBuilds {
      * Returns direct and transitive importedBuilds. Transitive importedBuilds are resolved by
      * invoking recursively <code>JkBuildDependencySupport#importedBuilds()</code> on
      * direct importedBuilds.
-     *
      */
     public List<JkBuild> all() {
         if (transitiveImportedBuilds == null) {
@@ -121,7 +120,7 @@ public final class JkImportedBuilds {
         return result;
     }
 
-    /**
+    /*
      * Creates an instance of <code>JkBuild</code> for the given project and
      * build class. The instance field annotated with <code>JkOption</code> are
      * populated as usual.

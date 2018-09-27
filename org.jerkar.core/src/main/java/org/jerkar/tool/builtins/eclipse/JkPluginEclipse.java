@@ -59,7 +59,7 @@ public final class JkPluginEclipse extends JkPlugin {
             "dependencies and source layout.")
     public void generateFiles() {
         final Path dotProject = build.baseDir().resolve(".project");
-        if (build.plugins().has(JkPluginJava.class)) {
+        if (build.plugins().hasLoaded(JkPluginJava.class)) {
             final JkJavaProjectBuild javaBuild = (JkJavaProjectBuild) build;
             final JkJavaProject javaProject = javaBuild.java().project();
             final List<Path> importedBuildProjects = new LinkedList<>();
