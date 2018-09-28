@@ -62,20 +62,20 @@ import org.jerkar.tool.JkImport;
 import org.jerkar.tool.JkBuildd;
 import com.google.common.base.MoreObjects;
 
-@JkImport("commons-httpclient:commons-httpclient:3.1")  <---- Build classes inside this project can use Guava and Http client libraries
+@JkImport("commons-httpclient:commons-httpclient:3.1")  // <---- Build classes inside this project can use Guava and Http client libraries
 @JkImport("com.google.guava:guava:21.0")
-public class MyBuild extends JkBuild {    <---- Callable build class (extending JkBuild)
+public class MyBuild extends JkBuild {    // <---- Callable build class (extending JkBuild)
     
-    public String myParam1 = "myDefault";    <----- Can be overrided with option
+    public String myParam1 = "myDefault";    // <----- Can be overrided with option
 
-    @JkDoc("Performs some tasks using http client")    <----- For self documentation purpose
-    public void myMethod1() {                    <----- Build method (callable from command line)
+    @JkDoc("Performs some tasks using http client")    // <----- For self documentation purpose
+    public void myMethod1() {                   // <----- Build method (callable from command line)
         HttpClient client = new HttpClient();
         GetMethod getMethod = new GetMethod("http://my.url/" + myParam1);
         ....
     }
     
-    public void myMethod2() {   <----- An other build method 
+    public void myMethod2() {   // <----- An other build method 
         MyUtility.soSomething();
         ...
     }
