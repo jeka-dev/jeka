@@ -54,12 +54,7 @@ import static org.jerkar.api.depmanagement.JkJavaDepScopes.*;
  */
 class Build extends JkJavaProjectBuild {
 
-    /*
-     * Configures default values for option fields of this class. When this method is called, build option
-     * fields have not been populated yet.
-     */
-    @Override
-    protected void setupOptionDefaults() {
+    protected Build() {
         java().projectVersion = "0.0.1-SNAPSHOT";
     }
 
@@ -68,14 +63,12 @@ class Build extends JkJavaProjectBuild {
      * fields have already been populated.
      */
     @Override
-    protected void configurePlugins() {
+    protected void afterOptionsInjected() {
         project()   // Configure project structure and dependencies using project() instance.
-                .setVersionedModule("mygroup:myproject", java().projectVersion)
+                .setVersionedModule("org.djeang.build:org.djeang.build", java().projectVersion)
                 .setSourceVersion(JkJavaVersion.V8)
                 .setDependencies(dependencies());
-
-        maker()    // Configure how project should be build using maker() instance.
-                .setJuniter(maker().getJuniter().forked(true));
+        maker().setTestRunner(maker().getTestRunner().forked(true));  // force tu run test in forked process
     }
 
     private JkDependencySet dependencies() {  // Example of dependencies.
@@ -85,9 +78,10 @@ class Build extends JkJavaProjectBuild {
     }
 
     public static void main(String[] args) {
-        JkInit.instanceOf(Build.class, args).doDefault();
+        Build build = JkInit.instanceOf(Build.class, args);
+        build.clean();
+        build.java().pack();
     }
-
 }
 ```
 
@@ -101,9 +95,29 @@ Execute `jerkar java#info` to see an abstract of the project setup.
 ## Build your project
 
 1. Edit the Build.java source file above. For example, you can add compile dependencies.
-2. Just execute `jerkar` under the project base directory. This will compile, run test and package your project in a jar file.
+2. Just execute `jerkar clean java#pack` under the project base directory. This will compile, run test and package your project in a jar file.
 
-## Explore functions
+## Extra function
+
+If you want to create javadoc, jar sources and  jar tests or checksums : 
+just execute `jerkar clean java#pack -java#pack.tests -java#pack.sources -java#pack.checksums=sha-256`.
+
+Explanation  '-' prefix means that you want to set an option value. For example `-java#pack.sources` means that 
+`JkPluginJava.pack.sources` will be injected the 'true' value.
+
+You can also set it by default in the build class constructor :
+
+```Java
+    protected Build() {
+        java().pack.javadoc = true;
+        java().pack.sources = true;
+        java().pack.tests = true;
+        java().pack.checksums = "sha-256";
+    }
+```
+
+
+## Explore functions and options provided out-of-thebox
 
 Execute `jerkar help` to display all what you can do from the command line for the current project. As told on the help screen,
 you can execute `jerkar aGivenPluginName#help` to display help on a specific plugin. 
