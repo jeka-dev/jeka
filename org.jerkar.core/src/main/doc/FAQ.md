@@ -25,8 +25,8 @@ For example `jerkar -BuildClass=JkBuild help` or `jerkar -BC=JkBuild scaffold#ru
 
 ## How can I choose the JDK used to compile ?
 
-Jerkar uses the JDK it is running on to compile your production or test code. 
-If your code must be build on a another JDK version, you can specify JDK path for different version.
+Jerkar uses the JDK it is running on to compile production or test code. 
+If code must be build on a another JDK version, you can specify JDK path for different version.
 Just mention it as option, for example in your _[JERKAR HOME]/options.properties_ file.
 
 ```
