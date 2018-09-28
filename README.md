@@ -24,12 +24,12 @@ Note that you can still access Jerkar 0.6 documentation from [official web-site]
 # How to use Jerkar
 
 Jerkar is designed to be easy to master for Java developers. In despite it offers rich functionalities, 
-developers should be able to figure out how it work by knowing few concepts and navigate in source code.
+developers should be able to figure out how it works by knowing few concepts and navigate in source code.
 
 That says, documentation is needed for a starting point. Jerkar distribution ships documentation (getting started, faq, reference guide) 
-but you can consult the  [current one here] (#org.jerkar.core/src/main/doc).
+but you can consult the  [current one here](org.jerkar.core/src/main/doc).
 
-You can start [here](#org.jerkar.core/src/main/doc/Getting%20Started.md)
+You can start [here](org.jerkar.core/src/main/doc/Getting%20Started.md)
 
 # How to build Jerkar
 
