@@ -6,7 +6,7 @@
 <strong>Jerkar</strong> is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using **pure Java** to automate your tasks. No XML or scripts : only rock solid Java code.
 
 Enjoy all the engineering power you are comfortable with (Java code, IDE, 3rd party libs,  Maven repository, ...) to define, 
-structure, run, debug, reuse your automated tasks. Exactly as you would do with regular code.
+structure, run, debug, reuse your automated tasks or builds. Exactly as you would do with regular code.
 
 # News
  
@@ -30,8 +30,9 @@ That said, documentation is needed for a starting point.
 
 Visit following pages according your expectation :
 * [Getting Started](org.jerkar.core/src/main/doc/Getting%20Started.md)
-* [Frequently Asked Questions](org.jerkar.core/src/main/doc/FAQ.md)
 * [Reference Guide](org.jerkar.core/src/main/doc/Reference%20Guide)
+* [Frequently Asked Questions](org.jerkar.core/src/main/doc/FAQ.md)
+
 
 # How to build Jerkar
 

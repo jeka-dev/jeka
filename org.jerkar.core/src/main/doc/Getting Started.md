@@ -6,14 +6,14 @@ __[JERKAR HOME]__ : refers to the folder where _Jerkar_ is intalled. You should 
 
 __[JERKAR USER HOME]__ : refers to the folder where Jerkar stores caches, binary repository and global user configuration.
 
-__[USER HOME]__ : User Home in Windows or Unix meaning.
+__[USER HOME]__ : User Home within the meaning of Windows or Unix.
 
 
 # Install Jerkar
 
-1. unzip the [distribution archive](http://jerkar.github.io/binaries/jerkar-distrib.zip) to the directory you want to install Jerkar : let's call it _[Jerkar Home]_
+1. unzip the [distribution archive](http://jerkar.github.io/binaries/jerkar-distrib.zip) to the directory you want to install Jerkar (_[JERKAR HOME]_)
 2. make sure that either a valid JDK is on your _PATH_ environment variable or that a _JAVA_HOME_ variable is pointing on
-3. add _[Jerkar Home]_ to your _PATH_ environment variable
+3. add _[JERKAR HOME]_ to your _PATH_ environment variable
 4. execute `jerkar -LH help` in the command line. You should get an output starting by : 
 
 ```
