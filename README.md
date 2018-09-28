@@ -5,32 +5,31 @@
 
 <strong>Jerkar</strong> is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using **pure Java** to automate your tasks. No XML or scripts : only rock solid Java code.
 
-Enjoy all the engineering power you are confortable with (Java code, IDE, 3rd party libs,  Maven repository, ...) to define, 
-structure, run, debug, reuse your automated tasks. Exactly as you would do for regular code.
+Enjoy all the engineering power you are comfortable with (Java code, IDE, 3rd party libs,  Maven repository, ...) to define, 
+structure, run, debug, reuse your automated tasks. Exactly as you would do with regular code.
 
 # News
  
 Master version now relies on JDK 8 while 0.6 and prior are relying on JDK 6.
 In order to leverage new features bring by these versions, **Jerkar is deeply reworked**. <br/>
-Also, to avoid bloating API with legacy stuff, Jerkar 0.7 won't be compatible with Jerkar 0.6 (you can still run current builds using embedded mode). 
+
+To avoid bloating API with legacy stuff, Jerkar 0.7 won't be compatible with Jerkar 0.6 (you can still run current builds using embedded mode). 
 We expect from this move a much more clean, polished and intuitive product.
+
+Documentation is now entirely hosted in this repository to better sync. Great progress has been done recently.
+Please visit [latest documentation](#org.jerkar.core/src/main/doc).
+
+Note that you can still access Jerkar 0.6 documentation from [official web-site](http://project.jerkar.org/).
 
 # How to use Jerkar
 
-Jerkar is expected to have a very fast learning curve for Java developers. You can visit the following page in this order :
+Jerkar is designed to be easy to master for Java developers. In despite it offers rich functionalities, 
+developers should be able to figure out how it work by knowing few concepts and navigate in source code.
 
-* http://jerkar.github.io/tell-me-more.html : introduction to Jerkar. Answer to the question : *What Jerkar is exactly ?*
-* http://jerkar.gith ub.io/tour.html : to give a concrete idea on how Jerkar is working (version 0.6)
-* http://jerkar.github.io/documentation/latest/getting_started.html : to get hand-on experience (version 0.6)
-* http://jerkar.github.io/documentation/latest/reference.html : to know the details about Jerkar behavior (version 0.6)
-* https://github.com/jerkar/jerkar-examples : Examples of project built with Jerkar (version 0.6)
+That says, documentation is needed for a starting point. Jerkar distribution ships documentation (getting started, faq, reference guide) 
+but you can consult the  [current one here] (#org.jerkar.core/src/main/doc).
 
-However above links reflect documentation for version 0.6. 
-
-To get documentation matching version you are using, please refer to documentation provided inside Jerkar distrib/doc
-produced when you have built Jerkar.
-
-Also you can navigate command line documentation executing `jerkar help`.
+You can start [here](#org.jerkar.core/src/main/doc/Getting%20Started.md)
 
 # How to build Jerkar
 
@@ -40,7 +39,7 @@ Jerkar is made of following projects :
 * org.jerkar.samples-dependee : A sample project depending on the above sample project to illustrate multi-project builds. 
 These sample projects are also used to run some black-box tests
 
-Jerkar builds itself. To build Jerkar full distrib built from sources, the simpler is to use your IDE.
+Jerkar builds itself. To build Jerkar full distrib from sources, the simpler is to use your IDE.
 
 Once distrib created, add the distrib folder to your PATH environment variable.
 
