@@ -1,6 +1,8 @@
-## Ongoing 0.7.O
+## Ongoing 0.7.0
 
 * Move from jdk6 to jdk8
+* Documentation hosted in Jerkar repository for better sync.
+* Deeply reworked plugin mechanism
 * Completely new build API based on Java8 lambdas
 * Completely new file API based on Java7 nio
 * Removed legacy API (no backward compatibility with Jerkar 0.6.x)

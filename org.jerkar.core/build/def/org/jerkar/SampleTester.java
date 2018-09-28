@@ -49,6 +49,8 @@ class SampleTester {
         testDependee("FatJarBuild");
         Path classpathFile = sampleBaseDir.get(".classpath");
         Path classpathFile2 = sampleBaseDir.get(".classpath2");
+
+        // Test eclipse
         try {
             Files.copy(classpathFile, classpathFile2, StandardCopyOption.REPLACE_EXISTING);
             testSamples("", "eclipse#generateAll");
@@ -62,20 +64,34 @@ class SampleTester {
         }
         testDependee("NormalJarBuild");
         testFork();
+        testScaffoldJava();
     }
+
 
     private void testSamples(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(sampleBaseDir.root().toAbsolutePath().normalize())
-                .withParametersIf(!JkUtilsString.isBlank(className), "-Log.verbose=true -BuildClass=" + className).andParameters(args)
+                .withParametersIf(!JkUtilsString.isBlank(className), "-LV=true -BC=" + className)
+                .andParameters("clean", "java#pack")
+                .andParameters(args)
                 .failOnError(true).runSync();
     }
 
     private void testDependee(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependeeBaseDir.root())
-                .withParametersIf(!JkUtilsString.isBlank(className), "-BuildClass=" + className).andParameters(args)
+                .withParametersIf(!JkUtilsString.isBlank(className), "-BC=" + className)
+                .withParameters("clean", "java#pack")
+                .andParameters(args)
                 .failOnError(true).runSync();
+    }
+
+    private void testScaffoldJava() {
+        JkLog.info("Test scaffold Java");
+        Path root = JkUtilsPath.createTempDirectory("jerkar");
+        process().withWorkingDir(root).andParameters("scaffold#run", "java#").runSync();
+        process().withWorkingDir(root).andParameters("java#pack").runSync();
+        JkPathTree.of(root).deleteRoot();
     }
 
     private void scaffoldAndEclipse() {

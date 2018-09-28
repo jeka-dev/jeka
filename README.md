@@ -26,10 +26,12 @@ Note that you can still access Jerkar 0.6 documentation from [official web-site]
 Jerkar is designed to be easy to master for Java developers. In despite it offers rich functionalities, 
 developers should be able to figure out how it works by knowing few concepts and navigate in source code.
 
-That says, documentation is needed for a starting point. Jerkar distribution ships documentation (getting started, faq, reference guide) 
-but you can consult the  [current one here](org.jerkar.core/src/main/doc).
+That sayd, documentation is needed for a starting point.
 
-You can start [here](org.jerkar.core/src/main/doc/Getting%20Started.md)
+Visit following pages according your expectation :
+* [Getting Started](org.jerkar.core/src/main/doc/Getting%20Started.md)
+* [Frequently Asked Questions](org.jerkar.core/src/main/doc/FAQ.md)
+* [Reference Guide](org.jerkar.core/src/main/doc/Reference%20Guide)
 
 # How to build Jerkar
 
@@ -45,14 +47,14 @@ Once distrib created, add the distrib folder to your PATH environment variable.
 
 ## Build Jerkar from Eclipse
 
-* Import *org.jerkar.core project* in Eclipse (it already holds *.project* and *.classpath* files) 
+* Clone this repository in Eclipse. Project is already configured ( *.project* and *.classpath* are stored in git). 
 * Make sure the project is configured to compile using a JDK8 and not a JRE.
 * Run `org.jerkar.CoreBuild` class main method. This class is located in *build/def* folder. 
 * This creates the full distrib in *org.jerkar.core/build/output/distrib* folder
 
 ## Build Jerkar from IntelliJ
 
-* The Jerkar project is preconfigured for Intellij (.iml and modules.xml are stored in git).
+* Clone this repository into IntelliJ. Project is already configured (.iml and modules.xml are stored in git).
 * Make sure the project is configured with a JDK8.
 * Run `org.jerkar.CoreBuild` class main method. This class is located in *build/def* folder, inside *org.jerkar.core* project.
 * This creates the full distrib in *org.jerkar.core/build/output/distrib* folder

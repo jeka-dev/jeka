@@ -6,6 +6,7 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.tool.JkConstants;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -25,11 +26,14 @@ class DocMaker {
 
     private final Path docDist;
 
+    private final Path htmlTemplates;
+
     private final String version;
 
     DocMaker(Path baseDir, Path distribPath, String version) {
         docSource = JkPathTree.of(baseDir.resolve("src/main/doc"));
         docDist = distribPath.resolve("doc");
+        htmlTemplates = baseDir.resolve("build/doc-templates").toAbsolutePath().normalize();
         this.version = version;
     }
 
@@ -50,12 +54,12 @@ class DocMaker {
         });
         String html = mdToHtml(createSingleReferenceMdPage(), "Reference Guide");
         JkUtilsPath.write(targetFolder.resolve("reference.html"), html.getBytes(Charset.forName("UTF8")));
-        docSource.goTo("templates").andAccept("**/*.css", "**/*.jpg", "**/*.svg").copyTo(docDist.resolve("style"));
+        JkPathTree.of(htmlTemplates).andAccept("**/*.css", "**/*.jpg", "**/*.svg").copyTo(docDist.resolve("style"));
     }
 
     private String createSingleReferenceMdPage() {
         final StringBuilder sb = new StringBuilder();
-        List<Path> paths = docSource.goTo("reference").files();
+        List<Path> paths = docSource.goTo("Reference Guide").files();
         paths.sort((path1, path2) -> path1.compareTo(path2));
         for(Path path : paths) {
             String content = new String(JkUtilsPath.readAllBytes(path), Charset.forName("UTF8"));
@@ -66,7 +70,7 @@ class DocMaker {
 
     private String mdToHtml(String mdContent, String title) {
         StringBuilder sb = new StringBuilder();
-        String rawHeader = new String(JkUtilsPath.readAllBytes(docSource.get("templates/header.html")), UTF8);
+        String rawHeader = new String(JkUtilsPath.readAllBytes(htmlTemplates.resolve("header.html")), UTF8);
         sb.append( rawHeader.replace("${title}", title).replace("${version}", version) );
         Parser parser = Parser.builder().build();
         Node document = parser.parse(mdContent);
@@ -74,7 +78,7 @@ class DocMaker {
         addMenu(document, menuItems);
         HtmlRenderer renderer = HtmlRenderer.builder().build();
         sb.append(renderer.render(document));
-        sb.append( new String(JkUtilsPath.readAllBytes(docSource.get("templates/footer.html")), UTF8) );
+        sb.append( new String(JkUtilsPath.readAllBytes(htmlTemplates.resolve("footer.html")), UTF8) );
         return sb.toString();
     }
 
