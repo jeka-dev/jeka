@@ -26,7 +26,7 @@ Note that you can still access Jerkar 0.6 documentation from [official web-site]
 Jerkar is designed to be easy to master for Java developers. In despite it offers rich functionalities, 
 developers should be able to figure out how it works by knowing few concepts and navigate in source code.
 
-That sayd, documentation is needed for a starting point.
+That said, documentation is needed for a starting point.
 
 Visit following pages according your expectation :
 * [Getting Started](org.jerkar.core/src/main/doc/Getting%20Started.md)
