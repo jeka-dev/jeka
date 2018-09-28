@@ -8,12 +8,10 @@
 Enjoy all the engineering power you are comfortable with (Java code, IDE, 3rd party libs,  Maven repository, ...) to define, 
 structure, run, debug, reuse your automated tasks or builds. Exactly as you would do with regular code.
 
-Also, Jerkar conventions and plugin mechanism are so powerful that you can perform pretty exotic tasks without writing a single line of build code : 
-just by following conventions. 
+Also, __Jerkar conventions and plugin mechanism are so powerful__ that it can perform pretty exotic tasks without needing a single line of build code. 
 
-For example `jerkar java#pack -java#pack.javadoc jacoco# sonar#run -sonar#host.url=http://myserver/sonar`
-compiles the project, runs unit tests under jacoco coverage tools, packages javadoc in a jar and performs Sonar analysis 
-on the specified server. Everything without providing a single script, code or configuration files : just following commonly accepted conventions. 
+For example `jerkar java#pack jacoco# sonar#run -sonar#host.url=http://myserver/sonar`
+perfoms a complete buid running unit tests under Jacoco coverage tools and performs Sonar analysis on a project free of any build code/sonfiguration/script. 
 
 # News
  
