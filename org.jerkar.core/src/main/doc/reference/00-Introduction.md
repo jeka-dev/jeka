@@ -14,7 +14,7 @@ than documentation/support most of the time.
 Jerkar contains both a library and a tool. 
 
 Library is for dealing with files, compilations, dependency management, tests, 
-external process, crypto signatures, ... In a word, all regulars things you need to build/publish projects and especially Java projects.
+external process, crypto signatures, ... In a word, all regular things you need to build/publish projects and especially Java projects.
 
 Tool is intended to execute Java source code from the console in a parameterizable way. Its architecture eases the 
 reuse of build elements (logic, settings, doc, ...) across projects. 
