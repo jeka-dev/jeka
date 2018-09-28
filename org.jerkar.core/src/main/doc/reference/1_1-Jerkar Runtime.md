@@ -1,17 +1,17 @@
 ## Jerkar Runtime
 
-This section describe how to use Jerkar with command line and mostly what happens behind the cover when Jerkar is run. 
+This chapter describes how to use Jerkar with command line and mostly what happens behind the cover when Jerkar is run. 
 
-Jerkar is a pure Java application requiring __JDK 8__. __JDK__ is required and __JRE__ is not sufficient as Jerkar uses the JDK tools to compile build classes.
+Jerkar is a pure Java application requiring __JDK 8__. __JDK__ is required and __JRE__ is not sufficient as Jerkar uses the __JDK tools__ to compile build classes.
 
 Jerkar can be launched both from command line and from your IDE.
 
 ### Jerkar from Command line
  
 To ease launching Java process from command line, Jerkar provides shell scripts ( _jerkar.bat_ for __Windows__ and _jerkar_ for __Unix__ ), located at root 
-of [JERKAR HOME] (so supposed to be directly accessible from your PATH environment). 
+of [JERKAR HOME]. [JERKAR HOME] is supposed to be in your PATH environment variable. 
 
-These scripts do the following :
+This script does the following :
 
 1. Find the java executable path : If a `JAVA_HOME` environment variable is defined then it takes its value as `java` path. Otherwise it takes the `java` executable defined in the _PATH_ of your OS.
 2. Get java execution option : If an environment variable `JERKAR_OPTS` exists then its value is passed to the `java` command line parameters.
