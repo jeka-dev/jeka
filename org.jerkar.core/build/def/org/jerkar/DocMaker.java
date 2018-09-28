@@ -89,6 +89,7 @@ class DocMaker {
     private List<MenuItem> addAnchorAndNumberingToHeaders(Node node) {
         List<MenuItem> menuItems = new LinkedList<>();
         int[] counters = new int[10];
+        counters[1] = -1; // start with 0 instead of 1
         node.accept(new AbstractVisitor() {
 
             @Override
