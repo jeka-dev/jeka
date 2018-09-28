@@ -17,7 +17,7 @@ To avoid bloating API with legacy stuff, Jerkar 0.7 won't be compatible with Jer
 We expect from this move a much more clean, polished and intuitive product.
 
 Documentation is now entirely hosted in this repository to better sync. Great progress has been done recently.
-Please visit [latest documentation](#org.jerkar.core/src/main/doc).
+Please visit [latest documentation](org.jerkar.core/src/main/doc).
 
 Note that you can still access Jerkar 0.6 documentation from [official web-site](http://project.jerkar.org/).
 
