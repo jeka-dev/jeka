@@ -2,7 +2,7 @@
 
 ## Lexical
 
-The following terms are used all over the document :
+The following terms are used all over the tool part section :
 
 __[PROJECT DIR]__ : refers to the root folder of the project to build (the one where you would put pom.xml or build.xml file if you were using ANT or Maven).
 
@@ -11,7 +11,7 @@ __[JERKAR HOME]__ : refers to the folder where is intalled Jerkar. You should fi
 __[JERKAR USER HOME]__ : refers to the folder where Jerkar stores caches, binary repository and global user configuration.
 
 <strong>Build Classes :</strong> Java source code containing build instructions. These files are edited by the users and are located under _[PROJECT DIR]/build/def_ directory.  
-This term can also be use to designate their compiled counterparts (.class files). 
+This term is also used to designate their compiled counterparts (.class files). 
 
 <strong>Build Classpath :</strong> Classpath on which depends _build classes_ to get compiled and executed. It consists
 in _Jerkar_ core classes but can be augmented with any third party lib or build classes located in another project.
@@ -30,7 +30,7 @@ Generally this code is intended to build Java projects but it can be used for an
 
 To be callable code must be wrapped in a class extending `org.jerkar.tool.JkBuild` or `org.jerkar.tool.JkPlugin`.
 
-The code can be both **compiled jars** and **source files** (.java files).
+The code can be both **compiled jars** or **source files** (.java files).
 
 In practice, you have a project structure respecting the following layout :
 
@@ -54,7 +54,7 @@ For example, executing `jerkar myMethod1 myMethod2 -myParam1=foo` will instantia
 
 A build class may look like :
 
-```
+```Java
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.jerkar.tool.JkDoc;
