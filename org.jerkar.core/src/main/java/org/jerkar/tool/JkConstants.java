@@ -6,15 +6,18 @@ package org.jerkar.tool;
 public final class JkConstants {
 
     /**
+     * Relative path to the project where Jerkar elements lie.
+     */
+    public static final String JERKAR_DIR = "jerkar";
+
+    /**
      * Relative path to the project base directory where output files are generated.
      */
-    public static final String BUILD_OUTPUT_PATH = "build/output";
+    public static final String OUTPUT_PATH = JERKAR_DIR + "/output";
 
-    static final String BUILD_DEF_BIN_DIR_NAME = "build-classes";
+    static final String DEF_BIN_DIR_NAME = "def-classes";
 
-    static final String BUILD_BOOT = "build/boot";
-
-    static final String DEFAULT_JAVA_SOURCE = "src/main/java";
+    static final String BOOT_DIR = JERKAR_DIR + "/boot";
 
     static final Class<? extends JkRun> DEFAULT_BUILD_CLASS = JkRun.class;
 
@@ -22,12 +25,16 @@ public final class JkConstants {
      * Relative path to the project where the build definition classes will be
      * compiled.
      */
-    public static final String BUILD_DEF_BIN_DIR = BUILD_OUTPUT_PATH + "/" + BUILD_DEF_BIN_DIR_NAME;
+    public static final String DEF_BIN_DIR = OUTPUT_PATH + "/" + DEF_BIN_DIR_NAME;
+
+
 
     /**
      * Relative path to the project where the build definition sources lie.
      */
-    public static final String BUILD_DEF_DIR = "build/def";
+    public static final String DEF_DIR = JERKAR_DIR + "/def";
+
+
 
     /**
      * The default method to be invoked when none is specified.

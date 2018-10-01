@@ -173,7 +173,7 @@ final class Engine {
 
     private JkPathSequence localBuildPath() {
         final List<Path>  extraLibs = new LinkedList<>();
-        final Path localDefLibDir = this.projectBaseDir.resolve(JkConstants.BUILD_BOOT);
+        final Path localDefLibDir = this.projectBaseDir.resolve(JkConstants.BOOT_DIR);
         if (Files.exists(localDefLibDir)) {
             extraLibs.addAll(JkPathTree.of(localDefLibDir).andAccept("**.jar").files());
         }

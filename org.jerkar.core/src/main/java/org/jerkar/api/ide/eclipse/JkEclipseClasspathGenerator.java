@@ -92,7 +92,7 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private boolean hasBuildDef() {
-        return new File(this.sourceLayout.baseDir().toFile(), JkConstants.BUILD_DEF_DIR).exists();
+        return new File(this.sourceLayout.baseDir().toFile(), JkConstants.DEF_DIR).exists();
     }
 
 
@@ -165,11 +165,11 @@ public final class JkEclipseClasspathGenerator {
         final Set<String> paths = new HashSet<>();
 
         // Write sources for build classes
-        if (hasBuildDef() && new File(sourceLayout.baseDir().toFile(), JkConstants.BUILD_DEF_DIR).exists()) {
+        if (hasBuildDef() && new File(sourceLayout.baseDir().toFile(), JkConstants.DEF_DIR).exists()) {
             writer.writeCharacters("\t");
             writeClasspathEl(writer, "kind", "src",
                     "including", "**/*",
-                    "path", JkConstants.BUILD_DEF_DIR);
+                    "path", JkConstants.DEF_DIR);
         }
         generateSrcAndTestSrc(writer);
 

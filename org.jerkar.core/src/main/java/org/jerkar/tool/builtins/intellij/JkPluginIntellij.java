@@ -93,7 +93,7 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("Generates iml files on this folder and its descendant recursively.")
     public void generateAllIml() {
         final Iterable<Path> folders = build.baseTree()
-                .andAccept("**/" + JkConstants.BUILD_DEF_DIR, JkConstants.BUILD_DEF_DIR)
+                .andAccept("**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
                 .andRefuse("**/build/output/**")
                 .stream().collect(Collectors.toList());
         for (final Path folder : folders) {

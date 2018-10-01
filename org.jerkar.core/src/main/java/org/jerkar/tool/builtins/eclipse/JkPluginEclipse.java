@@ -89,7 +89,7 @@ public final class JkPluginEclipse extends JkPlugin {
     @JkDoc("Generates Eclipse files (.project and .classpath) on all sub-folders of the current directory. Only sub-folders having a build/def directory are taken in account. See eclipse#generateFiles.")
     public void generateAll() {
         final Iterable<Path> folders = build.baseTree()
-                .andAccept("**/" + JkConstants.BUILD_DEF_DIR, JkConstants.BUILD_DEF_DIR)
+                .andAccept("**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
                 .andRefuse("**/build/output/**")
                 .stream().collect(Collectors.toList());
         for (final Path folder : folders) {

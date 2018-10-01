@@ -24,14 +24,11 @@ final class BuildResolver {
 
     final Path buildClassDir;
 
-    final Path defaultJavaSource;
-
     BuildResolver(Path baseDir) {
         super();
         this.baseDir = baseDir;
-        this.buildSourceDir = baseDir.resolve(JkConstants.BUILD_DEF_DIR);
-        this.buildClassDir = baseDir.resolve(JkConstants.BUILD_DEF_BIN_DIR);
-        this.defaultJavaSource = baseDir.resolve(JkConstants.DEFAULT_JAVA_SOURCE);
+        this.buildSourceDir = baseDir.resolve(JkConstants.DEF_DIR);
+        this.buildClassDir = baseDir.resolve(JkConstants.DEF_BIN_DIR);
     }
 
     /**

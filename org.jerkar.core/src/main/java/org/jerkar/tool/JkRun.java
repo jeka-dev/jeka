@@ -153,7 +153,7 @@ public class JkRun {
      * The output directory where all the final and intermediate artifacts are generated.
      */
     public Path outputDir() {
-        return baseDir.resolve(JkConstants.BUILD_OUTPUT_PATH);
+        return baseDir.resolve(JkConstants.OUTPUT_PATH);
     }
 
     /**
@@ -202,7 +202,7 @@ public class JkRun {
     public void clean() {
         JkLog.info("Clean output directory " + outputDir());
         if (Files.exists(outputDir())) {
-            JkPathTree.of(outputDir()).andRefuse(JkConstants.BUILD_DEF_BIN_DIR_NAME + "/**").deleteContent();
+            JkPathTree.of(outputDir()).andRefuse(JkConstants.DEF_BIN_DIR_NAME + "/**").deleteContent();
         }
     }
 

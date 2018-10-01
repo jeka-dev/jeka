@@ -15,6 +15,8 @@ import org.jerkar.tool.*;
 import org.jerkar.tool.builtins.repos.JkPluginRepo;
 import org.jerkar.tool.builtins.scaffold.JkPluginScaffold;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +60,12 @@ public class JkPluginJava extends JkPlugin {
         super(build);
         this.repoPlugin = build.plugins().get(JkPluginRepo.class);
         this.project = JkJavaProject.ofMavenLayout(this.build.baseDir());
+        this.project.setDependencies(JkDependencySet.ofLocal(project().getSourceLayout()
+                .baseDir().resolve(JkConstants.JERKAR_DIR + "/libs")));
+        final Path path = this.project.getSourceLayout().baseDir().resolve(JkConstants.DEF_DIR + "/dependencies.txt");
+        if (Files.exists(path)) {
+            this.project.setDependencies(this.project.getDependencies().and(JkDependencySet.fromDescription(path)));
+        }
         this.producedArtifacts.add(this.project.maker().mainArtifactId());
         this.scaffoldPlugin = build.plugins().get(JkPluginScaffold.class);
     }

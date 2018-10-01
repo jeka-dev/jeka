@@ -41,7 +41,7 @@ public final class JkScaffolder {
      * Runs the scaffolding.
      */
     public void run() {
-        final Path def = baseTree.root().resolve(JkConstants.BUILD_DEF_DIR);
+        final Path def = baseTree.root().resolve(JkConstants.DEF_DIR);
         JkUtilsPath.createDirectories(def);
         JkLog.info("Create " + def);
         final Path buildClass = def.resolve("Build.java");

@@ -179,7 +179,7 @@ public final class JkImlGenerator {
         // Write build sources
         writer.writeCharacters(T3);
         writer.writeEmptyElement("sourceFolder");
-        writer.writeAttribute("url", "file://$MODULE_DIR$/" + JkConstants.BUILD_DEF_DIR);
+        writer.writeAttribute("url", "file://$MODULE_DIR$/" + JkConstants.DEF_DIR);
         writer.writeAttribute("isTestSource", "true");
         writer.writeCharacters("\n");
         writer.writeCharacters(T2);
@@ -241,7 +241,7 @@ public final class JkImlGenerator {
 
         writer.writeCharacters(T3);
         writer.writeEmptyElement("excludeFolder");
-        final String path = JkConstants.BUILD_OUTPUT_PATH;
+        final String path = JkConstants.OUTPUT_PATH;
         writer.writeAttribute("url", "file://$MODULE_DIR$/" + path);
         writer.writeCharacters("\n");
         writer.writeCharacters(T3);

@@ -69,7 +69,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     public JkJavaProjectMaker(JkJavaProject project) {
         this.project = project;
-        this.outLayout = JkProjectOutLayout.classicJava().withOutputDir(project.baseDir().resolve("build/output"));
+        this.outLayout = JkProjectOutLayout.classicJava().withOutputDir(project.baseDir().resolve("jerkar/output"));
         this.packager = JkJavaProjectPackager.of(project);
         this.cleaner = JkRunnables.of(
                 () -> JkPathTree.of(getOutLayout().outputPath()).deleteContent());
