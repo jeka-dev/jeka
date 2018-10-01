@@ -16,7 +16,6 @@ import org.jerkar.tool.builtins.repos.JkPluginRepo;
 import org.jerkar.tool.builtins.scaffold.JkPluginScaffold;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +54,7 @@ public class JkPluginJava extends JkPlugin {
 
     private final List<JkArtifactId> producedArtifacts = new ArrayList<>();
 
-    protected JkPluginJava(JkBuild build) {
+    protected JkPluginJava(JkRun build) {
         super(build);
         this.repoPlugin = build.plugins().get(JkPluginRepo.class);
         this.project = JkJavaProject.ofMavenLayout(this.build.baseDir());

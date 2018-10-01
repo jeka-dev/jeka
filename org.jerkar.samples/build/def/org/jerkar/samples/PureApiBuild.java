@@ -5,7 +5,7 @@ import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkInit;
 
 import java.nio.file.Paths;
@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 /**
  * This should be run with org.jerkar.samples as working dir.
  */
-public class PureApiBuild extends JkBuild {
+public class PureApiBuild extends JkRun {
 
     public void doDefault() {
         JkJavaProject javaProject = JkJavaProject.ofMavenLayout(this.baseDir());

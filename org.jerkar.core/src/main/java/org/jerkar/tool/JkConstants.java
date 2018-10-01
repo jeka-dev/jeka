@@ -1,7 +1,5 @@
 package org.jerkar.tool;
 
-import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
-
 /**
  * Holds constants about project structures
  */
@@ -18,7 +16,7 @@ public final class JkConstants {
 
     static final String DEFAULT_JAVA_SOURCE = "src/main/java";
 
-    static final Class<? extends JkBuild> DEFAULT_BUILD_CLASS = JkBuild.class;
+    static final Class<? extends JkRun> DEFAULT_BUILD_CLASS = JkRun.class;
 
     /**
      * Relative path to the project where the build definition classes will be

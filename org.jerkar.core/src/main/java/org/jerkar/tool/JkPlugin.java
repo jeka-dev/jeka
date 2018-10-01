@@ -7,14 +7,14 @@ public abstract class JkPlugin {
     private static final String CLASS_PREFIX = JkPlugin.class.getSimpleName();
 
     // Build instance owning  this plugin instance.
-    protected final JkBuild build;
+    protected final JkRun build;
 
     /*
      * Right after to be instantiated, plugin instances are likely to be configured by the owning build.
      * Therefore, every plugin members that are likely to be configured by the owning build must be
      * initialized in the constructor.
      */
-    protected JkPlugin(JkBuild build) {
+    protected JkPlugin(JkRun build) {
         this.build = build;
     }
 

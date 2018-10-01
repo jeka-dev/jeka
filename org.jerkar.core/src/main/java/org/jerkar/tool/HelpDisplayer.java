@@ -17,7 +17,7 @@ import org.w3c.dom.Element;
 
 final class HelpDisplayer {
 
-    static void help(JkBuild build) {
+    static void help(JkRun build) {
         if (JkOptions.containsKey("Plugins")) {
             helpPlugins(build);
             return;
@@ -51,7 +51,7 @@ final class HelpDisplayer {
         return sb.toString();
     }
 
-    static void help(JkBuild build, Path xmlFile) {
+    static void help(JkRun build, Path xmlFile) {
         final Document document = JkUtilsXml.createDocument();
         final Element buildEl = BuildClassDef.of(build).toElement(document);
         document.appendChild(buildEl);
@@ -68,7 +68,7 @@ final class HelpDisplayer {
         }
     }
 
-    static void helpPlugins(JkBuild build) {
+    static void helpPlugins(JkRun build) {
         JkLog.info(helpPluginsDescription(build));
     }
 
@@ -82,7 +82,7 @@ final class HelpDisplayer {
         }
     }
 
-    private static String helpPluginsDescription(JkBuild build) {
+    private static String helpPluginsDescription(JkRun build) {
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
         StringBuilder sb = new StringBuilder();
         for (final PluginDescription description : pluginDescriptions) {
@@ -91,7 +91,7 @@ final class HelpDisplayer {
         return sb.toString();
     }
 
-    private static String helpPluginDescription(JkBuild build, PluginDescription description) {
+    private static String helpPluginDescription(JkRun build, PluginDescription description) {
         StringBuilder sb = new StringBuilder();
         sb.append("\nPlugin Class : " + description.fullName());
         sb.append("\nPlugin Name : " + description.shortName());
@@ -115,7 +115,7 @@ final class HelpDisplayer {
         } else {
             sb.append("\nActivation Effect : Not documented.");
         }
-        final Object object = JkUtilsReflect.newInstance(description.pluginClass(), JkBuild.class, build);
+        final Object object = JkUtilsReflect.newInstance(description.pluginClass(), JkRun.class, build);
         sb.append("\n");
         sb.append(BuildClassDef.of(object).flatDescription(description.shortName() + "#", false, false));
         return sb.toString();

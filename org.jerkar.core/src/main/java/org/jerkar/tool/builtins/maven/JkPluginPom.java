@@ -2,7 +2,7 @@ package org.jerkar.tool.builtins.maven;
 
 import org.jerkar.api.system.JkException;
 import org.jerkar.api.tooling.JkPom;
-import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkPlugin;
 
@@ -12,7 +12,7 @@ import java.nio.file.Path;
 @JkDoc("Provides method to help migration from Maven.")
 public class JkPluginPom extends JkPlugin {
 
-    protected JkPluginPom(JkBuild build) {
+    protected JkPluginPom(JkRun build) {
         super(build);
     }
 

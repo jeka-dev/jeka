@@ -3,7 +3,7 @@ package org.jerkar.tool.builtins.repos;
 import org.jerkar.api.depmanagement.JkRepo;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkPlugin;
 import org.jerkar.tool.JkRepoConfigOptionLoader;
@@ -52,7 +52,7 @@ public class JkPluginRepo extends JkPlugin {
 
     // ----------------------------------------------------------------------------------
 
-    protected JkPluginRepo(JkBuild build) {
+    protected JkPluginRepo(JkRun build) {
         super(build);
     }
 

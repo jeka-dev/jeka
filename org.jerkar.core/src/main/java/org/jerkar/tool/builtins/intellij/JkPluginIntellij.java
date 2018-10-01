@@ -32,7 +32,7 @@ public final class JkPluginIntellij extends JkPlugin {
 
     private final JkPluginScaffold scaffold;
 
-    protected JkPluginIntellij(JkBuild build) {
+    protected JkPluginIntellij(JkRun build) {
         super(build);
         scaffold = build.plugins().get(JkPluginScaffold.class);
     }
@@ -49,7 +49,7 @@ public final class JkPluginIntellij extends JkPlugin {
             generator = new JkImlGenerator(build.baseDir());
         }
         final List<Path> depProjects = new LinkedList<>();
-        for (final JkBuild depBuild : build.importedBuilds().directs()) {
+        for (final JkRun depBuild : build.importedBuilds().directs()) {
             depProjects.add(depBuild.baseTree().root());
         }
         generator.setUseVarPath(useVarPath);

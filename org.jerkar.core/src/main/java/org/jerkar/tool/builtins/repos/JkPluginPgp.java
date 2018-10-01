@@ -2,7 +2,7 @@ package org.jerkar.tool.builtins.repos;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkPlugin;
 
@@ -21,7 +21,7 @@ public class JkPluginPgp extends JkPlugin {
     public String secretKeyPassword;
 
 
-    protected JkPluginPgp(JkBuild build) {
+    protected JkPluginPgp(JkRun build) {
         super(build);
         JkPgp defaultPgp = JkPgp.ofDefaultGnuPg();
         publicRingPath = defaultPgp.publicRing().normalize().toString();

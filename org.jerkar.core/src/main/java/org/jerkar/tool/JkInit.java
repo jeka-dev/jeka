@@ -21,7 +21,7 @@ public final class JkInit {
     /**
      * Creates an instance of the specified build class and displays information about build class and environment.
      */
-    public static <T extends JkBuild> T instanceOf(Class<T> clazz, String... args) {
+    public static <T extends JkRun> T instanceOf(Class<T> clazz, String... args) {
         JkLog.register(new LogHandler());
         Environment.initialize(args);
         JkLog.Verbosity verbosity = JkLog.verbosity();
@@ -29,7 +29,7 @@ public final class JkInit {
             JkLog.setVerbosity(JkLog.Verbosity.MUTE);
         }
         displayInfo();
-        final T build = JkBuild.of(clazz);
+        final T build = JkRun.of(clazz);
         JkLog.info("Build is ready to start.");
         JkLog.setVerbosity(verbosity);
         return build;

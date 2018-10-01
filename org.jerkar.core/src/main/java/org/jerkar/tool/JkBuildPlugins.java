@@ -6,24 +6,24 @@ import org.jerkar.api.utils.JkUtilsReflect;
 import java.util.*;
 
 /**
- * Set of plugins configured or activated in a {@link JkBuild}.
+ * Set of plugins configured or activated in a {@link JkRun}.
  */
 public final class JkBuildPlugins {
 
-    private final JkBuild holder;
+    private final JkRun holder;
 
     private final List<JkPlugin> loadedPlugins = new LinkedList<>();
 
     private final List<PluginOptions> pluginOptionsList;
 
-    JkBuildPlugins(JkBuild holder,  List<PluginOptions> pluginOptionsList) {
+    JkBuildPlugins(JkRun holder, List<PluginOptions> pluginOptionsList) {
         super();
         this.holder = holder;
         this.pluginOptionsList = Collections.unmodifiableList(new ArrayList<>(pluginOptionsList));
     }
 
     /**
-     * Returns the plugin instance of the specified class loaded in the holding JkBuild instance. If it does not hold
+     * Returns the plugin instance of the specified class loaded in the holding JkRun instance. If it does not hold
      * a plugin of the specified class at call time, the plugin is loaded then returned.
      */
     public <T extends JkPlugin> T get(Class<T> pluginClass) {
@@ -31,7 +31,7 @@ public final class JkBuildPlugins {
     }
 
     /**
-     * Returns the plugin instance of the specified name loaded in the holding JkBuild instance. If it does not hold
+     * Returns the plugin instance of the specified name loaded in the holding JkRun instance. If it does not hold
      * a plugin of the specified name at call time, the plugin is loaded then returned.<br/>
      * Caution : this method may be significantly slower than {@link #get(Class)} as it may involve classpath scanning.
      */
@@ -48,7 +48,7 @@ public final class JkBuildPlugins {
     }
 
     /**
-     * Returns <code>true</code> if the specified plugin class has been loaded in the holding JkBuild instance.
+     * Returns <code>true</code> if the specified plugin class has been loaded in the holding JkRun instance.
      */
     public boolean hasLoaded(Class<? extends JkPlugin> pluginClass) {
         for (JkPlugin plugin : loadedPlugins) {
@@ -60,7 +60,7 @@ public final class JkBuildPlugins {
     }
 
     /**
-     * Returns a list of all loaded plugins in the holding JkBuild instance.
+     * Returns a list of all loaded plugins in the holding JkRun instance.
      */
     public List<JkPlugin> all() {
         return Collections.unmodifiableList(loadedPlugins);
@@ -72,7 +72,7 @@ public final class JkBuildPlugins {
         if (optPlugin.isPresent()) {
             return optPlugin.get();
         }
-        final T plugin = JkUtilsReflect.newInstance(pluginClass, JkBuild.class, this.holder);
+        final T plugin = JkUtilsReflect.newInstance(pluginClass, JkRun.class, this.holder);
         injectOptions(plugin);
         loadedPlugins.add(plugin);
         return plugin;

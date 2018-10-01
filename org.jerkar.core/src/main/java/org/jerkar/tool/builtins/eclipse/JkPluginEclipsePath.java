@@ -3,7 +3,7 @@ package org.jerkar.tool.builtins.eclipse;
 import org.jerkar.api.ide.eclipse.JkEclipseClasspathApplier;
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.system.JkLog;
-import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkDocPluginDeps;
 import org.jerkar.tool.JkPlugin;
@@ -18,7 +18,7 @@ public final class JkPluginEclipsePath extends JkPlugin {
             " will be considered as test code, so won't be packaged in main jar file.")
     public boolean smartScope = true;
 
-    protected JkPluginEclipsePath(JkBuild build) {
+    protected JkPluginEclipsePath(JkRun build) {
         super(build);
     }
 

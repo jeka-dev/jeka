@@ -2,7 +2,7 @@ package org.jerkar.tool.builtins.jacoco;
 
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkDocPluginDeps;
 import org.jerkar.tool.JkPlugin;
@@ -17,7 +17,7 @@ public class JkPluginJacoco extends JkPlugin {
      */
     public static final String OUTPUT_RELATIVE_PATH = "jacoco/jacoco.exec";
 
-    protected JkPluginJacoco(JkBuild build) {
+    protected JkPluginJacoco(JkRun build) {
         super(build);
     }
 

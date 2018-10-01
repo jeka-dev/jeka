@@ -12,7 +12,7 @@ import org.jerkar.api.java.JkClassLoader;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
- * A resolver for the {@link JkBuild} to use for a given project.
+ * A resolver for the {@link JkRun} to use for a given project.
  *
  * @author Jerome Angibaud
  */
@@ -38,21 +38,21 @@ final class BuildResolver {
      * Resolves the build classes defined in this project
      */
     List<Class<?>> resolveBuildClasses() {
-        return resolveBuildClasses(JkBuild.class);
+        return resolveBuildClasses(JkRun.class);
     }
 
     /**
-     * Resolves the {@link JkBuild} instance to use on this project.
+     * Resolves the {@link JkRun} instance to use on this project.
      */
-    JkBuild resolve(String classNameHint) {
-        return resolve(classNameHint, JkBuild.class);
+    JkRun resolve(String classNameHint) {
+        return resolve(classNameHint, JkRun.class);
     }
 
     /**
-     * Resolves the {@link JkBuild} instance to use on this project.
+     * Resolves the {@link JkRun} instance to use on this project.
      */
     @SuppressWarnings("unchecked")
-    <T extends JkBuild> T resolve(Class<T> baseClass) {
+    <T extends JkRun> T resolve(Class<T> baseClass) {
         return (T) resolve(null, baseClass);
     }
 
@@ -90,23 +90,23 @@ final class BuildResolver {
         return false;
     }
 
-    private JkBuild resolve(String classNameHint, Class<? extends JkBuild> baseClass) {
+    private JkRun resolve(String classNameHint, Class<? extends JkRun> baseClass) {
 
         final JkClassLoader classLoader = JkClassLoader.current();
 
         // If class name specified in options.
         if (!JkUtilsString.isBlank(classNameHint)) {
-            final Class<? extends JkBuild> clazz = classLoader.loadFromNameOrSimpleName(
-                    classNameHint, JkBuild.class);
+            final Class<? extends JkRun> clazz = classLoader.loadFromNameOrSimpleName(
+                    classNameHint, JkRun.class);
             if (clazz == null) {
                 return null;
             }
-            JkBuild.baseDirContext(baseDir);
-            final JkBuild build;
+            JkRun.baseDirContext(baseDir);
+            final JkRun build;
             try {
-                build = JkBuild.of(clazz);
+                build = JkRun.of(clazz);
             } finally {
-                JkBuild.baseDirContext(null);
+                JkRun.baseDirContext(null);
             }
             return build;
         }
@@ -119,12 +119,12 @@ final class BuildResolver {
                     final Class<?> clazz = classLoader.loadGivenClassSourcePath(path.toString());
                     if (baseClass.isAssignableFrom(clazz)
                             && !Modifier.isAbstract(clazz.getModifiers())) {
-                        JkBuild.baseDirContext(baseDir);
-                        final JkBuild build;
+                        JkRun.baseDirContext(baseDir);
+                        final JkRun build;
                         try {
-                            build = JkBuild.of((Class<? extends JkBuild>) clazz);
+                            build = JkRun.of((Class<? extends JkRun>) clazz);
                         } finally {
-                            JkBuild.baseDirContext(null);
+                            JkRun.baseDirContext(null);
                         }
                         return build;
                     }
@@ -134,17 +134,17 @@ final class BuildResolver {
         }
 
         // If nothing yet found use defaults
-        JkBuild.baseDirContext(baseDir);
-        final JkBuild result;
+        JkRun.baseDirContext(baseDir);
+        final JkRun result;
         try {
-            result = JkBuild.of(JkConstants.DEFAULT_BUILD_CLASS);
+            result = JkRun.of(JkConstants.DEFAULT_BUILD_CLASS);
         } finally {
-            JkBuild.baseDirContext(null);
+            JkRun.baseDirContext(null);
         }
         return result;
     }
 
-    private List<Class<?>> resolveBuildClasses(Class<? extends JkBuild> baseClass) {
+    private List<Class<?>> resolveBuildClasses(Class<? extends JkRun> baseClass) {
 
         final JkClassLoader classLoader = JkClassLoader.current();
         final List<Class<?>> result = new LinkedList<>();

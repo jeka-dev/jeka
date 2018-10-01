@@ -7,7 +7,7 @@ import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkJavaTestBulk;
 import org.jerkar.api.java.junit.JkUnit;
 import org.jerkar.api.java.junit.JkUnit.JunitReportDetail;
-import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkInit;
 
@@ -19,7 +19,7 @@ import java.nio.file.Paths;
  * 
  * @author Jerome Angibaud
  */
-public class AntStyleBuild extends JkBuild {
+public class AntStyleBuild extends JkRun {
 
     Path src = baseDir().resolve("src/main/java");
     Path buildDir = baseDir().resolve("build/output");

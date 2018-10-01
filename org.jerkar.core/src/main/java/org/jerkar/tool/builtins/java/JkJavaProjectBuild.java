@@ -2,13 +2,13 @@ package org.jerkar.tool.builtins.java;
 
 import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.api.project.java.JkJavaProjectMaker;
-import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkRun;
 
 /**
  * Build configured with a Java plugin.
  */
 @SuppressWarnings("javadoc")
-public class JkJavaProjectBuild extends JkBuild {
+public class JkJavaProjectBuild extends JkRun {
 
     @Override
     protected void afterOptionsInjected() {

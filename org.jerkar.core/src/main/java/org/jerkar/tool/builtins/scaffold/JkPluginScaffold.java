@@ -1,10 +1,8 @@
 package org.jerkar.tool.builtins.scaffold;
 
-import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsIO;
-import org.jerkar.tool.JkBuild;
+import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkDoc;
-import org.jerkar.tool.JkDocPluginDeps;
 import org.jerkar.tool.JkPlugin;
 
 /**
@@ -18,7 +16,7 @@ public class JkPluginScaffold extends JkPlugin {
 
     private final JkScaffolder scaffolder;
 
-    protected JkPluginScaffold(JkBuild build) {
+    protected JkPluginScaffold(JkRun build) {
         super(build);
         this.scaffolder = new JkScaffolder(build.baseDir(), false);
         this.scaffolder.setBuildClassCode(JkUtilsIO.read(JkPluginScaffold.class.getResource("buildclass.snippet")));

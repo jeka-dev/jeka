@@ -58,7 +58,7 @@ final class Engine {
         this.resolver = new BuildResolver(baseDir);
     }
 
-    <T extends JkBuild> T getBuild(Class<T> baseClass) {
+    <T extends JkRun> T getBuild(Class<T> baseClass) {
         if (resolver.needCompile()) {
             this.compile();
         }
@@ -72,7 +72,7 @@ final class Engine {
         buildDependencies = buildDependencies.andUnscoped(commandLine.dependencies());
         long start = System.nanoTime();
         JkLog.startTask("Compile and initialise build classes");
-        JkBuild build = null;
+        JkRun build = null;
         JkPathSequence path = JkPathSequence.of();
         if (!commandLine.dependencies().isEmpty()) {
             final JkPathSequence cmdPath = pathOf(commandLine.dependencies());
@@ -142,11 +142,11 @@ final class Engine {
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
     }
 
-    private JkBuild getBuildInstance(String buildClassHint, JkPathSequence runtimePath) {
+    private JkRun getBuildInstance(String buildClassHint, JkPathSequence runtimePath) {
         final JkClassLoader classLoader = JkClassLoader.current();
         classLoader.addEntries(runtimePath);
         JkLog.trace("Setting build execution classpath to : " + classLoader.childClasspath());
-        final JkBuild build = resolver.resolve(buildClassHint);
+        final JkRun build = resolver.resolve(buildClassHint);
         if (build == null) {
             return null;
         }
@@ -201,9 +201,9 @@ final class Engine {
                 StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private void launch(JkBuild build, CommandLine commandLine) {
+    private void launch(JkRun build, CommandLine commandLine) {
         if (!commandLine.getSubProjectMethods().isEmpty()) {
-            for (final JkBuild subBuild : build.importedBuilds().all()) {
+            for (final JkRun subBuild : build.importedBuilds().all()) {
                 runProject(subBuild, commandLine.getSubProjectMethods());
             }
             runProject(build, commandLine.getSubProjectMethods());
@@ -231,13 +231,13 @@ final class Engine {
         return JkPathSequence.ofMany(extraLibs).withoutDuplicates();
     }
 
-    private static void runProject(JkBuild build, List<MethodInvocation> invokes) {
+    private static void runProject(JkRun build, List<MethodInvocation> invokes) {
         for (MethodInvocation methodInvocation : invokes) {
             invokeMethodOnBuildClassOrPlugin(build, methodInvocation);
         }
     }
 
-    private static void invokeMethodOnBuildClassOrPlugin(JkBuild build, MethodInvocation methodInvocation) {
+    private static void invokeMethodOnBuildClassOrPlugin(JkRun build, MethodInvocation methodInvocation) {
         if (methodInvocation.pluginName != null) {
             final JkPlugin plugin = build.plugins().get(methodInvocation.pluginName);
             invokeMethodOnBuildOrPlugin(plugin, methodInvocation.methodName);

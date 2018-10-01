@@ -35,7 +35,7 @@ public final class JkPluginEclipse extends JkPlugin {
 
     private final JkPluginScaffold scaffold;
 
-    protected JkPluginEclipse(JkBuild build) {
+    protected JkPluginEclipse(JkRun build) {
         super(build);
         this.scaffold = build.plugins().get(JkPluginScaffold.class);
     }
@@ -63,7 +63,7 @@ public final class JkPluginEclipse extends JkPlugin {
             final JkJavaProjectBuild javaBuild = (JkJavaProjectBuild) build;
             final JkJavaProject javaProject = javaBuild.java().project();
             final List<Path> importedBuildProjects = new LinkedList<>();
-            for (final JkBuild depBuild : build.importedBuilds().directs()) {
+            for (final JkRun depBuild : build.importedBuilds().directs()) {
                 importedBuildProjects.add(depBuild.baseTree().root());
             }
             final JkEclipseClasspathGenerator classpathGenerator = new JkEclipseClasspathGenerator(javaProject);
