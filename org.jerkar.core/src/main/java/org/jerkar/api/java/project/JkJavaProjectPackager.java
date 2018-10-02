@@ -14,7 +14,7 @@ import org.jerkar.api.java.JkJarMaker;
  */
 public final class JkJavaProjectPackager {
 
-    public static final JkJavaProjectPackager of(JkJavaProject project) {
+    public static JkJavaProjectPackager of(JkJavaProject project) {
         return new JkJavaProjectPackager(project);
     }
 
