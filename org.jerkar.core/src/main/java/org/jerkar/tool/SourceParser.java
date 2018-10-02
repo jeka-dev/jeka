@@ -172,7 +172,7 @@ final class SourceParser {
     }
 
     private static List<String> jkImportBuild(String code, URL url) {
-        return stringsInAnnotation(code, JkImportBuild.class, url);
+        return stringsInAnnotation(code, JkImportRun.class, url);
     }
 
     @SuppressWarnings("unchecked")

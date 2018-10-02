@@ -19,8 +19,8 @@ public class DepManagedBuild extends Build {
 
 	public static final JkScope DISTRIB = JkScope.of("distrib").descr("Contains Jerkar distribution zip file");
 	
-	@JkImportBuild("../org.jerkar.core")
+	@JkImportRun("../org.jerkar.core")
 	public CoreBuild foo;
 	
-	@JkImportBuild("../org.jerkar.core/src")
+	@JkImportRun("../org.jerkar.core/src")
 	public CoreBuild bar;

@@ -6,7 +6,7 @@
 
 	<property name="bin" location="jerkar-bin" />
 
-	<fileset id="libs" dir="org.jerkar.core/build/libs/provided">
+	<fileset id="libs" dir="org.jerkar.core/jerkar/libs/provided">
 		<include name='**/*.jar' />
 	</fileset>
 

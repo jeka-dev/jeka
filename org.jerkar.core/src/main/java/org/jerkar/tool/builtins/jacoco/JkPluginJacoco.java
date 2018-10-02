@@ -25,7 +25,7 @@ public class JkPluginJacoco extends JkPlugin {
             + OUTPUT_RELATIVE_PATH + " file.")
     @Override
     protected void activate() {
-        JkPluginJava pluginJava = build.plugins().get(JkPluginJava.class);
+        JkPluginJava pluginJava = owner.plugins().get(JkPluginJava.class);
         final JkJavaProject project = pluginJava.project();
         final JkocoJunitEnhancer junitEnhancer = JkocoJunitEnhancer.of(project.maker().getOutLayout()
               .outputPath(OUTPUT_RELATIVE_PATH));

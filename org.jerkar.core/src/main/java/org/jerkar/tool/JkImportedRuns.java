@@ -20,12 +20,12 @@ import org.jerkar.api.utils.JkUtilsReflect;
  *
  * @author Jerome Angibaud
  */
-public final class JkImportedBuilds {
+public final class JkImportedRuns {
 
     private static final ThreadLocal<Map<ImportedBuildRef, JkRun>> IMPORTED_BUILD_CONTEXT = new ThreadLocal<>();
 
-    static JkImportedBuilds of(Path masterRootDir, JkRun masterBuild) {
-        return new JkImportedBuilds(masterRootDir, getDirectImportedBuilds(masterBuild));
+    static JkImportedRuns of(Path masterRootDir, JkRun masterBuild) {
+        return new JkImportedRuns(masterRootDir, getDirectImportedBuilds(masterBuild));
     }
 
     private final List<JkRun> directImportedBuilds;
@@ -34,7 +34,7 @@ public final class JkImportedBuilds {
 
     private final Path masterBuildBaseDir;
 
-    private JkImportedBuilds(Path masterDir, List<JkRun> buildDeps) {
+    private JkImportedRuns(Path masterDir, List<JkRun> buildDeps) {
         super();
         this.masterBuildBaseDir = masterDir;
         this.directImportedBuilds = Collections.unmodifiableList(buildDeps);
@@ -48,9 +48,9 @@ public final class JkImportedBuilds {
     }
 
     /**
-     * Returns direct and transitive importedBuilds. Transitive importedBuilds are resolved by
-     * invoking recursively <code>JkBuildDependencySupport#importedBuilds()</code> on
-     * direct importedBuilds.
+     * Returns direct and transitive importedRuns. Transitive importedRuns are resolved by
+     * invoking recursively <code>JkBuildDependencySupport#importedRuns()</code> on
+     * direct importedRuns.
      */
     public List<JkRun> all() {
         if (transitiveImportedBuilds == null) {
@@ -77,7 +77,7 @@ public final class JkImportedBuilds {
         for (final JkRun build : directImportedBuilds) {
             final Path dir = build.baseDir();
             if (!files.contains(dir)) {
-                result.addAll(build.importedBuilds().resolveTransitiveBuilds(files));
+                result.addAll(build.importedRuns().resolveTransitiveBuilds(files));
                 result.add(build);
                 files.add(dir);
             }
@@ -88,10 +88,10 @@ public final class JkImportedBuilds {
     @SuppressWarnings("unchecked")
     private static List<JkRun> getDirectImportedBuilds(JkRun masterBuild) {
         final List<JkRun> result = new LinkedList<>();
-        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterBuild.getClass(), JkImportBuild.class);
+        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterBuild.getClass(), JkImportRun.class);
 
         for (final Field field : fields) {
-            final JkImportBuild jkProject = field.getAnnotation(JkImportBuild.class);
+            final JkImportRun jkProject = field.getAnnotation(JkImportRun.class);
             final JkRun importedBuild = createImportedBuild(
                     (Class<? extends JkRun>) field.getType(), jkProject.value(), masterBuild.baseDir());
             try {

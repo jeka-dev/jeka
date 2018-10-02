@@ -155,8 +155,8 @@ fi
 JERKAR_CMD_LINE_ARGS="$@"
 export JERKAR_CMD_LINE_ARGS
 
-if [ -d "./build/boot" ]; then
-   LOCAL_BUILD_DIR="./build/boot/*:"
+if [ -d "./jerkar/boot" ]; then
+   LOCAL_BUILD_DIR="./jerkar/boot/*:"
 else
    LOCAL_BUILD_DIR=""
 fi

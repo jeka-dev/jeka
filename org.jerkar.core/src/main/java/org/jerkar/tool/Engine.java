@@ -203,7 +203,7 @@ final class Engine {
 
     private void launch(JkRun build, CommandLine commandLine) {
         if (!commandLine.getSubProjectMethods().isEmpty()) {
-            for (final JkRun subBuild : build.importedBuilds().all()) {
+            for (final JkRun subBuild : build.importedRuns().all()) {
                 runProject(subBuild, commandLine.getSubProjectMethods());
             }
             runProject(build, commandLine.getSubProjectMethods());

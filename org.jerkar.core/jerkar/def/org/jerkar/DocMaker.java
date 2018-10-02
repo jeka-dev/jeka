@@ -89,14 +89,18 @@ class DocMaker {
     private List<MenuItem> addAnchorAndNumberingToHeaders(Node node) {
         List<MenuItem> menuItems = new LinkedList<>();
         int[] counters = new int[10];
-        counters[1] = 0; // start with 0 instead of 1
         node.accept(new AbstractVisitor() {
 
             @Override
             public void visit(Heading heading) {
-                counters[heading.getLevel()] ++;
-                for (int i = heading.getLevel() + 1; i < 6; i++) {
-                    counters[i] = 0;
+                Text text = (Text) heading.getFirstChild();
+                String content = text.getLiteral();
+                boolean intro = "Introduction".equals(content);  // Do not number Introduction
+                if (!intro) {
+                    counters[heading.getLevel()]++;
+                    for (int i = heading.getLevel() + 1; i < 6; i++) {
+                        counters[i] = 0;
+                    }
                 }
                 StringBuilder sb = new StringBuilder();
                 for (int i = 1; i <= heading.getLevel(); i++) {
@@ -106,13 +110,11 @@ class DocMaker {
                    sb.delete(sb.length() - 1, sb.length() );
                 }
                 String number = sb.toString();
-                Text text = (Text) heading.getFirstChild();
-                String content = text.getLiteral();
                 String anchorId = content.replace(" ", "");
                 HtmlInline htmlInline = new HtmlInline();
                 htmlInline.setLiteral("<a name=\"" + anchorId + "\"></a>");
                 heading.insertBefore(htmlInline);
-                String numberedTitle = number + " " + content;
+                String numberedTitle = intro ? content : number + " " + content;
                 text.setLiteral(numberedTitle);
                 MenuItem menuItem = new MenuItem(numberedTitle, anchorId, heading.getLevel());
                 menuItems.add(menuItem);

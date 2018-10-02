@@ -2,20 +2,25 @@ package org.jerkar.tool;
 
 import org.jerkar.api.utils.JkUtilsString;
 
+/**
+ * Plugin instances are owned by a JkRun instance. The relationship is bidirectional. JkRun instances may
+ * invoke plugin methods or fields and plugin instances may invoke owner methods.
+ *
+ * Therefore plugins can interact with or load other plugins into the owner instance, which is quite common in Jerkar.
+ */
 public abstract class JkPlugin {
 
     private static final String CLASS_PREFIX = JkPlugin.class.getSimpleName();
 
-    // Build instance owning  this plugin instance.
-    protected final JkRun build;
+    protected final JkRun owner;
 
     /*
      * Right after to be instantiated, plugin instances are likely to be configured by the owning build.
      * Therefore, every plugin members that are likely to be configured by the owning build must be
      * initialized in the constructor.
      */
-    protected JkPlugin(JkRun build) {
-        this.build = build;
+    protected JkPlugin(JkRun owner) {
+        this.owner = owner;
     }
 
     @JkDoc("Displays help about this plugin.")

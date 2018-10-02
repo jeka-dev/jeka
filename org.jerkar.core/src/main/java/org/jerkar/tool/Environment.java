@@ -86,18 +86,18 @@ class Environment {
 
         int logMaxLength = -1;
 
-        String buildClass;
+        String runClass;
 
         StandardOptions (Map<String, String> map) {
             this.logVerbose = valueOf(Boolean.class, map, false, "LogVerbose", "LV");
             this.logHeaders = valueOf(Boolean.class, map, false,"LogHeaders", "LH");
             this.logMaxLength = valueOf(Integer.class, map, -1,"LogMaxLength", "LML");
-            this.buildClass = valueOf(String.class, map, null, "BuildClass", "BC");
+            this.runClass = valueOf(String.class, map, null, "RunClass", "RC");
         }
 
         @Override
         public String toString() {
-            return "BuildClass=" + JkUtilsObject.toString(buildClass) + ", LogVerbose=" + logVerbose
+            return "RunClass=" + JkUtilsObject.toString(runClass) + ", LogVerbose=" + logVerbose
                     + ", LogHeaders=" + logHeaders + ", LogMaxLength=" + logMaxLength;
         }
 

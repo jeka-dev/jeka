@@ -58,12 +58,12 @@ public final class JkImlGenerator {
     public JkDependencySet dependencies;
 
     /** Dependency resolver to fetch module dependencies for build classes */
-    private JkDependencyResolver buildDependencyResolver;
+    private JkDependencyResolver runDependencyResolver;
 
-    private JkDependencySet buildDependencies;
+    private JkDependencySet runDependencies;
 
     /** Can be empty but not null */
-    private Iterable<Path> importedBuildProjects = JkUtilsIterable.listOf();
+    private Iterable<Path> importedProjects = JkUtilsIterable.listOf();
 
     private boolean forceJdkVersion;
 
@@ -120,8 +120,8 @@ public final class JkImlGenerator {
         if (this.dependencyResolver != null) {
             writeDependencies(dependencies, this.dependencyResolver, allPaths, allModules, false);
         }
-        if (this.buildDependencyResolver != null) {
-            writeDependencies(this.buildDependencies, this.buildDependencyResolver, allPaths, allModules, true);
+        if (this.runDependencyResolver != null) {
+            writeDependencies(this.runDependencies, this.runDependencyResolver, allPaths, allModules, true);
         }
         writeBuildProjectDependencies(allModules);
 
@@ -263,7 +263,7 @@ public final class JkImlGenerator {
     }
 
     private void writeBuildProjectDependencies(Set<Path> allModules) throws XMLStreamException {
-        for (final Path rootFolder : this.importedBuildProjects) {
+        for (final Path rootFolder : this.importedProjects) {
             if (!allModules.contains(rootFolder)) {
                 writeOrderEntryForModule(rootFolder.getFileName().toString(), "COMPILE");
                 allModules.add(rootFolder);
@@ -586,14 +586,14 @@ public final class JkImlGenerator {
         return this;
     }
 
-    public JkImlGenerator setBuildDependencies(JkDependencyResolver buildDependencyResolver, JkDependencySet dependencies) {
-        this.buildDependencyResolver = buildDependencyResolver;
-        this.buildDependencies = dependencies;
+    public JkImlGenerator setRunDependencies(JkDependencyResolver buildDependencyResolver, JkDependencySet dependencies) {
+        this.runDependencyResolver = buildDependencyResolver;
+        this.runDependencies = dependencies;
         return this;
     }
 
-    public JkImlGenerator setImportedBuildProjects(Iterable<Path> importedBuildProjects) {
-        this.importedBuildProjects = importedBuildProjects;
+    public JkImlGenerator setImportedProjects(Iterable<Path> importedProjects) {
+        this.importedProjects = importedProjects;
         return this;
     }
 

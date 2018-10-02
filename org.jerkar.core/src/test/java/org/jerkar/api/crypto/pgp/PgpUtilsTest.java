@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import org.jerkar.api.file.JkPathFile;
 import org.jerkar.api.utils.JkUtilsFile;
 import org.jerkar.api.utils.JkUtilsIO;
+import org.jerkar.tool.JkConstants;
 import org.junit.Test;
 
 @SuppressWarnings("javadoc")
@@ -14,8 +15,8 @@ public class PgpUtilsTest {
 
     @Test
     public void testSignAndVerify() throws Exception {
-        final JkPathFile path = JkPathFile.of(Paths.get(
-                "build/output/test-out/signature.asm")).createIfNotExist();
+        final JkPathFile path = JkPathFile.of(Paths.get(JkConstants.OUTPUT_PATH +
+                "/test-out/signature.asm")).createIfNotExist();
         PgpUtils.sign(sample(), PgpUtilsTest.class.getResourceAsStream("secring.gpg"),
                 JkUtilsIO.outputStream(path.get().toFile(), false), "jerkar".toCharArray(), true);
 

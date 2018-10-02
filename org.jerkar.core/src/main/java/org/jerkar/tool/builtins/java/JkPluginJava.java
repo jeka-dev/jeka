@@ -59,7 +59,7 @@ public class JkPluginJava extends JkPlugin {
     protected JkPluginJava(JkRun build) {
         super(build);
         this.repoPlugin = build.plugins().get(JkPluginRepo.class);
-        this.project = JkJavaProject.ofMavenLayout(this.build.baseDir());
+        this.project = JkJavaProject.ofMavenLayout(this.owner.baseDir());
         this.project.setDependencies(JkDependencySet.ofLocal(project().getSourceLayout()
                 .baseDir().resolve(JkConstants.JERKAR_DIR + "/libs")));
         final Path path = this.project.getSourceLayout().baseDir().resolve(JkConstants.DEF_DIR + "/dependencies.txt");
@@ -131,7 +131,7 @@ public class JkPluginJava extends JkPlugin {
 
     private void setupScaffolder() {
         String template = JkUtilsIO.read(JkPluginJava.class.getResource("buildclass.snippet"));
-        String baseDirName = build.baseDir().getFileName().toString();
+        String baseDirName = owner.baseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         JkLog.info("Create source directories.");
         project.getSourceLayout().sources().pathTrees().stream().forEach(tree -> tree.createIfNotExist());

@@ -45,12 +45,12 @@ public final class JkEclipseClasspathGenerator {
     private final JkDependencySet dependencies;
 
     // content for build class only
-    private JkDependencyResolver buildDependencyResolver;
+    private JkDependencyResolver runDependencyResolver;
 
-    private JkDependencySet buildDependencies;
+    private JkDependencySet runDependencies;
 
     // content for build class only
-    private List<Path> importedBuildProjects = new LinkedList<>();
+    private List<Path> importedProjects = new LinkedList<>();
 
     // --------------------- options --------------------------------
 
@@ -126,18 +126,18 @@ public final class JkEclipseClasspathGenerator {
     /**
      * If the build script depends on build script located in another projects, you must add those projects here.
      */
-    public JkEclipseClasspathGenerator setImportedBuildProjects(List<Path> importedBuildProjects) {
-        this.importedBuildProjects = importedBuildProjects;
+    public JkEclipseClasspathGenerator setImportedProjects(List<Path> importedBuildProjects) {
+        this.importedProjects = importedBuildProjects;
         return this;
     }
 
     /**
      * If the build script depends on external libraries, you must set the resolver of this dependencies here.
      */
-    public JkEclipseClasspathGenerator setBuildDependencyResolver(JkDependencyResolver buildDependencyResolver,
-            JkDependencySet buildDependencies) {
-        this.buildDependencyResolver = buildDependencyResolver;
-        this.buildDependencies = buildDependencies;
+    public JkEclipseClasspathGenerator setRunDependencies(JkDependencyResolver buildDependencyResolver,
+                                                          JkDependencySet buildDependencies) {
+        this.runDependencyResolver = buildDependencyResolver;
+        this.runDependencies = buildDependencies;
         return this;
     }
 
@@ -173,8 +173,8 @@ public final class JkEclipseClasspathGenerator {
         }
         generateSrcAndTestSrc(writer);
 
-        // write entries for project importedBuilds
-        for (final Path projectFile : this.importedBuildProjects) {
+        // write entries for project importedRuns
+        for (final Path projectFile : this.importedProjects) {
             if (paths.contains(projectFile)) {
                 continue;
             }
@@ -190,8 +190,8 @@ public final class JkEclipseClasspathGenerator {
         writeJre(writer);
 
         // add build dependencies
-        if (hasBuildDef() && buildDependencyResolver != null) {
-            final Iterable<Path> files = buildDependencyResolver.get(buildDependencies);
+        if (hasBuildDef() && runDependencyResolver != null) {
+            final Iterable<Path> files = runDependencyResolver.get(runDependencies);
             writeFileDepsEntries(writer, files, paths);
         }
 

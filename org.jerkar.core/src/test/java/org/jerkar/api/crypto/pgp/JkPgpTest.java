@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.jerkar.api.utils.JkUtilsFile;
+import org.jerkar.tool.JkConstants;
 import org.junit.Test;
 
 @SuppressWarnings("javadoc")
@@ -17,7 +18,7 @@ public class JkPgpTest {
         final Path pubFile = Paths.get(JkPgpTest.class.getResource("pubring.gpg").toURI());
         final Path secringFile = Paths.get(JkPgpTest.class.getResource("secring.gpg").toURI());
         final JkPgp pgp = JkPgp.of(pubFile, secringFile, "jerkar");
-        final Path signatureFile = Paths.get("build/output/test-out/signature.asm");
+        final Path signatureFile = Paths.get(JkConstants.OUTPUT_PATH+ "/test-out/signature.asm");
         if (!Files.exists(signatureFile)) {
             Files.createDirectories(signatureFile.getParent());
             Files.createFile(signatureFile);
@@ -31,7 +32,7 @@ public class JkPgpTest {
         final Path pubFile = Paths.get(JkPgpTest.class.getResource("pubring.gpg").toURI());
         final Path secringFile = Paths.get(JkPgpTest.class.getResource("secring.gpg").toURI());
         final JkPgp pgp = JkPgp.of(pubFile, secringFile, "badPassword");
-        final Path signatureFile = Paths.get("build/output/test-out/signature-fake.asm");
+        final Path signatureFile = Paths.get(JkConstants.OUTPUT_PATH + "/test-out/signature-fake.asm");
         if (!Files.exists(signatureFile)) {
             Files.createDirectories(signatureFile.getParent());
             Files.createFile(signatureFile);

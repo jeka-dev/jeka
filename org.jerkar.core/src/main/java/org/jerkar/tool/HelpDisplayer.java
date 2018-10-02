@@ -47,7 +47,7 @@ final class HelpDisplayer {
         sb.append("  -LogVerbose (shorthand -LV) : if true, logs will display 'trace' level logs.\n");
         sb.append("  -LogHeaders (shorthand -LH) : if true, meta-information about the build creation itself and method execution will be logged.\n");
         sb.append("  -LogMaxLength (shorthand -LML) : Console will do a carriage return automatically after N characters are outputted in a single line (ex : -LML=120).\n");
-        sb.append("  -BuildClass (shorthand -BC) : Force to use the specified class as the build class to invoke. It can be the short name of the class (without package prefix).\n");
+        sb.append("  -RunClass (shorthand -RC) : Force to use the specified class as the run class to invoke. It can be the short name of the class (without package prefix).\n");
         return sb.toString();
     }
 
@@ -76,7 +76,7 @@ final class HelpDisplayer {
         final Set<PluginDescription> pluginDescriptions = new PluginDictionary().getAll();
         for (PluginDescription pluginDescription : pluginDescriptions) {
             if (pluginDescription.shortName().equals(plugin.name())) {
-                JkLog.info(helpPluginDescription(plugin.build, pluginDescription));
+                JkLog.info(helpPluginDescription(plugin.owner, pluginDescription));
                 return;
             }
         }

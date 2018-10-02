@@ -13,7 +13,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.*;
 
 /**
- * Base build class for defining builds. All build classes must extend this class in order
+ * Base class for defining runs. All run classes must extend this class in order
  * to be run with Jerkar.
  *
  * @author Jerome Angibaud
@@ -36,11 +36,11 @@ public class JkRun {
 
     private JkBuildPlugins plugins;
 
-    private JkDependencyResolver buildDefDependencyResolver;
+    private JkDependencyResolver runDefDependencyResolver;
 
-    private JkDependencySet buildDependencies;
+    private JkDependencySet runDependencies;
 
-    private final JkImportedBuilds importedBuilds;
+    private final JkImportedRuns importedRuns;
 
     // ------------------ options --------------------------------------------------------
 
@@ -61,7 +61,7 @@ public class JkRun {
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
 
         // Instantiating imported builds
-        this.importedBuilds = JkImportedBuilds.of(this.baseTree().root(), this);
+        this.importedRuns = JkImportedRuns.of(this.baseTree().root(), this);
 
         this.plugins = new JkBuildPlugins(this, Environment.commandLine.getPluginOptions());
     }
@@ -167,30 +167,30 @@ public class JkRun {
     // ------------------------------ build dependencies --------------------------------
 
     void setBuildDefDependencyResolver(JkDependencySet buildDependencies, JkDependencyResolver scriptDependencyResolver) {
-        this.buildDependencies = buildDependencies;
-        this.buildDefDependencyResolver = scriptDependencyResolver;
+        this.runDependencies = buildDependencies;
+        this.runDefDependencyResolver = scriptDependencyResolver;
     }
 
     /**
      * Returns the dependency resolver used to compile/run scripts of this
      * project.
      */
-    public final JkDependencyResolver buildDependencyResolver() {
-        return this.buildDefDependencyResolver;
+    public final JkDependencyResolver runDependencyResolver() {
+        return this.runDefDependencyResolver;
     }
 
     /**
      * Dependencies necessary to compile the this build class. It is not the dependencies for building the project.
      */
-    public final JkDependencySet buildDependencies() {
-        return buildDependencies;
+    public final JkDependencySet runDependencies() {
+        return runDependencies;
     }
 
     /**
      * Returns imported builds with plugins applied on.
      */
-    public final JkImportedBuilds importedBuilds() {
-        return importedBuilds;
+    public final JkImportedRuns importedRuns() {
+        return importedRuns;
     }
 
     // ------------------------------ Command line methods ------------------------------
@@ -198,7 +198,7 @@ public class JkRun {
     /**
      * Clean the output directory.
      */
-    @JkDoc("Cleans the output directory except the compiled build classes.")
+    @JkDoc("Cleans the output directory except the compiled run classes.")
     public void clean() {
         JkLog.info("Clean output directory " + outputDir());
         if (Files.exists(outputDir())) {
@@ -209,7 +209,7 @@ public class JkRun {
     /**
      * Displays all available methods defined in this build.
      */
-    @JkDoc("Displays all available methods and options defined for this build class.")
+    @JkDoc("Displays all available methods and options defined for this run class.")
     public void help() {
         if (help.xml || help.xmlFile != null) {
             HelpDisplayer.help(this, help.xmlFile);

@@ -9,7 +9,7 @@ chcp 65001 > nul
 if "%JAVA_HOME%" == "" set "JAVA_CMD=java"
 if not "%JAVA_HOME%" == "" set "JAVA_CMD=%JAVA_HOME%\bin\java"
 
-if exist %cd%\build\boot set "LOCAL_BUILD_DIR=build\boot\*;"
+if exist %cd%\jerkar\boot set "LOCAL_BUILD_DIR=jerkar\boot\*;"
 set "COMMAND="%JAVA_CMD%" %JERKAR_OPTS% -cp "%JERKAR_HOME%\org.jerkar.core.jar" org.jerkar.tool.Main %*"
 if not "%JERKAR_ECHO_CMD%" == "" (
 	@echo on

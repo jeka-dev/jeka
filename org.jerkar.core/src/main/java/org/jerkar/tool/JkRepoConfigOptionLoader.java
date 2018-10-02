@@ -58,7 +58,7 @@ public class JkRepoConfigOptionLoader {
      * Returns the repositories where are downloaded dependencies needed to run the build.
      */
     public static JkRepo buildRepository() {
-        final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("repo.buildName"), "build");
+        final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("repo.runName"), "run");
         JkRepo namedRepo = repoFromOptions(repoName);
         return JkUtilsObject.firstNonNull(namedRepo, downloadRepository());
     }
@@ -85,7 +85,7 @@ public class JkRepoConfigOptionLoader {
         Map<String, String> options = new HashMap<>();
         JkOptions.getAll().forEach((key, value) -> {
             if (key.startsWith(".repo") && JkUtilsString.endsWithAny(key, ".url", ".username", ".password",
-                    ".downloadName", ".publishName", ".buildName")) {
+                    ".downloadName", ".publishName", ".runName")) {
                 options.put(key, value);
             }
         });

@@ -36,7 +36,7 @@ public class JkEclipseClasspathGeneratorTest {
         baseProject.setDependencies(JkDependencySet.of().and(JkPopularModules.APACHE_HTTP_CLIENT, "4.5.3"));
         final JkEclipseClasspathGenerator baseGenerator =
                 new JkEclipseClasspathGenerator(baseProject);
-        baseGenerator.setBuildDependencyResolver(baseProject.maker().getDependencyResolver(),
+        baseGenerator.setRunDependencies(baseProject.maker().getDependencyResolver(),
                 JkDependencySet.of().and(JkPopularModules.GUAVA, "21.0"));
         final String baseClasspath = baseGenerator.generate();
         System.out.println("\nbase .classpath");
