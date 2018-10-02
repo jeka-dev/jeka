@@ -6,12 +6,13 @@
 <strong>Jerkar</strong> is a complete **Java build system** ala _Ant_, _Maven_, _Gradle_ or _Buildr_ using **pure Java** to automate your tasks. No XML or scripts : only rock solid Java code.
 
 Enjoy all the engineering power you are comfortable with (Java code, IDE, 3rd party libs,  Maven repository, ...) to define, 
-structure, run, debug, reuse your automated tasks or builds. Exactly as you would do with regular code.
+design, run, debug, reuse your automated tasks/builds. Exactly as you would do with regular code.
 
-Also, __Jerkar conventions and plugin mechanism are so powerful__ that it can perform pretty exotic tasks without needing a single line of build code. 
+Also, __Jerkar conventions and plugin mechanism are so powerful__ that it can perform pretty exotic tasks without needing a single line of code/configuration. 
 
 For example `jerkar java#pack jacoco# sonar#run -sonar#host.url=http://myserver/sonar`
-perfoms a complete buid running unit tests under Jacoco coverage tools and performs Sonar analysis on a project free of any build code/configuration/script. 
+performs a complete build running unit tests under Jacoco coverage tools and performs Sonar analysis on a project free 
+of any build code/configuration/script. 
 
 # News
  
