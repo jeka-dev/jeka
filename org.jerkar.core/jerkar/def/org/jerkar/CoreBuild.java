@@ -1,7 +1,7 @@
 package org.jerkar;
 
-import static org.jerkar.api.project.java.JkJavaProjectMaker.JAVADOC_ARTIFACT_ID;
-import static org.jerkar.api.project.java.JkJavaProjectMaker.SOURCES_ARTIFACT_ID;
+import static org.jerkar.api.java.project.JkJavaProjectMaker.JAVADOC_ARTIFACT_ID;
+import static org.jerkar.api.java.project.JkJavaProjectMaker.SOURCES_ARTIFACT_ID;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaVersion;
-import org.jerkar.api.project.java.JkJavaProjectMaker;
+import org.jerkar.api.java.project.JkJavaProjectMaker;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkInit;

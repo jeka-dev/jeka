@@ -1,7 +1,7 @@
 package org.jerkar.tool.builtins.eclipse;
 
 import org.jerkar.api.ide.eclipse.JkEclipseClasspathApplier;
-import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkDoc;

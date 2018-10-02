@@ -1,8 +1,7 @@
-package org.jerkar.api.project.java;
+package org.jerkar.api.java.project;
 
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.java.JkJavaVersion;
-import org.jerkar.api.project.JkProjectSourceLayout;
 
 /**
  * Minimal information necessary to generate metadata project file for IDE.

@@ -1,7 +1,7 @@
 package org.jerkar.tool.builtins.jacoco;
 
 import org.jerkar.api.java.junit.JkUnit;
-import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkDocPluginDeps;

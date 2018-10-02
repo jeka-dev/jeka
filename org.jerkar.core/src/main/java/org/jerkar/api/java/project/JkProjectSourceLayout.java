@@ -1,4 +1,4 @@
-package org.jerkar.api.project;
+package org.jerkar.api.java.project;
 
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.file.JkPathTreeSet;
@@ -19,8 +19,8 @@ public class JkProjectSourceLayout {
     /**
      * Filter to consider as resources everything but java source stuff.
      */
-    public static final PathMatcher JAVA_RESOURCE_MATCHER = JkPathMatcher.refuse("**/*.java", "*.java")
-            .andRefuse("**/package.html", "package.html").andRefuse("**/doc-files", "doc-files");
+    public static final PathMatcher JAVA_RESOURCE_MATCHER = JkPathMatcher.refuse("**/*.java", "*.java",
+            "**/package.html", "package.html", "**/doc-files", "doc-files");
 
     /**
      * Creates a Java project source structure according Maven conventions. It differs from Maven in that

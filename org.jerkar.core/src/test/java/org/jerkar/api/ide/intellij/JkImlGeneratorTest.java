@@ -10,8 +10,8 @@ import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.ide.eclipse.JkEclipseClasspathGeneratorTest;
-import org.jerkar.api.project.JkProjectSourceLayout;
-import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.api.java.project.JkProjectSourceLayout;
+import org.jerkar.api.java.project.JkJavaProject;
 import org.junit.Test;
 
 /**

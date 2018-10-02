@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import org.jerkar.api.ide.eclipse.JkEclipseClasspathGenerator;
 import org.jerkar.api.ide.eclipse.JkEclipseProject;
-import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.*;

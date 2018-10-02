@@ -4,7 +4,7 @@ import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.depmanagement.JkPopularModules;
 import org.jerkar.api.java.JkJavaVersion;
-import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.tool.JkRun;
 import org.jerkar.tool.JkInit;
 

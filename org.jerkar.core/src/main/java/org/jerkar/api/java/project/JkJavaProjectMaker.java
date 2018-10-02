@@ -1,4 +1,4 @@
-package org.jerkar.api.project.java;
+package org.jerkar.api.java.project;
 
 import org.jerkar.api.crypto.pgp.JkPgp;
 import org.jerkar.api.depmanagement.*;
@@ -7,7 +7,6 @@ import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkJavaTestBulk;
 import org.jerkar.api.java.junit.JkUnit;
-import org.jerkar.api.project.JkProjectOutLayout;
 import org.jerkar.api.system.JkLog;
 
 import java.nio.charset.Charset;

@@ -1,7 +1,7 @@
 package org.jerkar.api.depmanagement;
 
 import org.jerkar.api.file.JkPathTree;
-import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.api.java.project.JkJavaProject;
 import org.junit.Assert;
 import org.junit.Test;
 

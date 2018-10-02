@@ -6,7 +6,6 @@ import org.eclipse.jdt.internal.compiler.tool.EclipseCompiler;
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaVersion;
-import org.jerkar.api.project.java.JkJavaProject;
 import org.jerkar.tool.JkImport;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;

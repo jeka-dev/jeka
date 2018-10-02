@@ -4,8 +4,8 @@ import org.jerkar.api.depmanagement.JkJavaDepScopes;
 import org.jerkar.api.depmanagement.JkVersion;
 import org.jerkar.api.depmanagement.JkVersionedModule;
 import org.jerkar.api.file.JkPathSequence;
-import org.jerkar.api.project.JkProjectSourceLayout;
-import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.api.java.project.JkProjectSourceLayout;
+import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.tool.*;
 import org.jerkar.tool.builtins.java.JkPluginJava;
 

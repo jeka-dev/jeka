@@ -1,4 +1,4 @@
-package org.jerkar.api.project.java;
+package org.jerkar.api.java.project;
 
 import org.jerkar.api.depmanagement.*;
 import org.jerkar.api.file.JkFileSystemLocalizable;
@@ -7,9 +7,7 @@ import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.JkManifest;
 import org.jerkar.api.java.JkResourceProcessor;
-import org.jerkar.api.project.JkProjectSourceLayout;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;

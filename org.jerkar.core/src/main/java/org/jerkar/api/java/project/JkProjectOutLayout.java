@@ -1,4 +1,4 @@
-package org.jerkar.api.project;
+package org.jerkar.api.java.project;
 
 import org.jerkar.api.file.JkPathTree;
 

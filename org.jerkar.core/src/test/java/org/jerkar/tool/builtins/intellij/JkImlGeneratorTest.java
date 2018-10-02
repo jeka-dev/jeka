@@ -3,7 +3,7 @@ package org.jerkar.tool.builtins.intellij;
 
 import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.ide.intellij.JkImlGenerator;
-import org.jerkar.api.project.java.JkJavaProject;
+import org.jerkar.api.java.project.JkJavaProject;
 import org.junit.Test;
 
 import java.nio.file.Paths;

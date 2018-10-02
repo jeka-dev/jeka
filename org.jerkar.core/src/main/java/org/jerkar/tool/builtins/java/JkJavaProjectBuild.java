@@ -1,7 +1,7 @@
 package org.jerkar.tool.builtins.java;
 
-import org.jerkar.api.project.java.JkJavaProject;
-import org.jerkar.api.project.java.JkJavaProjectMaker;
+import org.jerkar.api.java.project.JkJavaProject;
+import org.jerkar.api.java.project.JkJavaProjectMaker;
 import org.jerkar.tool.JkRun;
 
 /**
