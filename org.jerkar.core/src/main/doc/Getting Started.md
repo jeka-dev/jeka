@@ -176,7 +176,7 @@ can specify which method to execute along options and system properties.
 
 As for Eclipse, you must declare the two path variable (go settings -> Apparence & behavior -> Path Variables)
  * `JERKAR_HOME` which point to _[Jerkar Home]_, 
- * `JERKAR_REPO` which point to _[Jerkar User Home]_/cache/repo_
+ * `JERKAR_REPO` which point to _[Jerkar User Home]/cache/repo_
 
 ## setup iml file
 
