@@ -24,8 +24,8 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("If true, dependency paths will be expressed relatively to $JERKAR_REPO$ and $JERKAR_HOME$ path variable instead of absolute paths.")
     public boolean useVarPath = false;
 
-    @JkDoc("If true, the project dependencies are not taken in account to generate iml, only build class dependencies are.")
-    public boolean onlyBuildDependencies = false;
+    @JkDoc("If true, the project dependencies are not taken in account to generate iml, only run class dependencies are.")
+    public boolean onlyRunDependencies = false;
 
     @JkDoc("If true, the project in taken in account is not the build project but the project configured in java plugin.")
     public boolean externalDir = false;
@@ -59,7 +59,7 @@ public final class JkPluginIntellij extends JkPlugin {
         Path basePath = owner.baseDir();
         if (owner.plugins().hasLoaded(JkPluginJava.class)) {
             JkJavaProject project = owner.plugins().get(JkPluginJava.class).project();
-            if (!onlyBuildDependencies) {
+            if (!onlyRunDependencies) {
                 generator.setDependencies(project.maker().getDependencyResolver(), project.getDependencies());
             } else {
                 generator.setDependencies(project.maker().getDependencyResolver(), JkDependencySet.of());
@@ -72,7 +72,7 @@ public final class JkPluginIntellij extends JkPlugin {
         }
         final String xml = generator.generate();
         String filename = basePath.getFileName().toString() + ".iml";
-        Path candidateImlFile = basePath.resolve(".idea").resolve(filename);
+        Path candidateImlFile = basePath.resolve(filename);
         final Path imlFile = Files.exists(candidateImlFile) ? candidateImlFile :
                 basePath.resolve(".idea").resolve(filename);
         JkUtilsPath.deleteIfExists(imlFile);
@@ -94,16 +94,16 @@ public final class JkPluginIntellij extends JkPlugin {
     public void generateAllIml() {
         final Iterable<Path> folders = owner.baseTree()
                 .andAccept("**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
-                .andRefuse("**/build/output/**")
+                .andRefuse("**/" + JkConstants.OUTPUT_PATH + "/**")
                 .stream().collect(Collectors.toList());
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
             JkLog.execute("Generating iml file on " + projectFolder, () ->
-                Main.exec(projectFolder, "idea#generateIml"));
+                Main.exec(projectFolder, "intellij#generateIml"));
         }
     }
 
-    @JkDoc("Shorthand for idea#generateAllIml + idea#generateModulesXml.")
+    @JkDoc("Shorthand for intellij#generateAllIml + intellij#generateModulesXml.")
     public void generateAll() {
         generateAllIml();
         generateModulesXml();

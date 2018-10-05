@@ -240,7 +240,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
         }
         LinkedList<JkScopedDependency> deps = new LinkedList<>(dependencies);
         deps.removeLast();
-        return new JkDependencySet(dependencies, globalExclusions, versionProvider);
+        return new JkDependencySet(deps, globalExclusions, versionProvider);
     }
 
     /**

@@ -37,11 +37,11 @@ final class Engine {
 
     private final Path projectBaseDir;
 
-    private JkDependencySet buildDependencies;
+    private JkDependencySet runDependencies;
 
-    private JkRepoSet buildRepos;
+    private JkRepoSet runRepos;
 
-    private List<Path>  rootsOfImportedBuilds = new LinkedList<>();
+    private List<Path> rootsOfImportedRuns = new LinkedList<>();
 
     private final BuildResolver resolver;
 
@@ -53,8 +53,8 @@ final class Engine {
         JkUtilsAssert.isTrue(baseDir.isAbsolute(), baseDir + " is not absolute.");
         JkUtilsAssert.isTrue(Files.isDirectory(baseDir), baseDir + " is not directory.");
         this.projectBaseDir = baseDir.normalize();
-        buildRepos = repos();
-        this.buildDependencies = JkDependencySet.of();
+        runRepos = repos();
+        this.runDependencies = JkDependencySet.of();
         this.resolver = new BuildResolver(baseDir);
     }
 
@@ -69,7 +69,7 @@ final class Engine {
      * Pre-compile and compile build classes (if needed) then execute methods mentioned in command line
      */
     void execute(CommandLine commandLine, String buildClassHint, JkLog.Verbosity verbosityToRestore) {
-        buildDependencies = buildDependencies.andUnscoped(commandLine.dependencies());
+        runDependencies = runDependencies.andUnscoped(commandLine.dependencies());
         long start = System.nanoTime();
         JkLog.startTask("Compile and initialise build classes");
         JkRun build = null;
@@ -106,15 +106,15 @@ final class Engine {
         for (JkDependency dependency : dependencies) {
             deps = deps.and(dependency);
         }
-        return JkDependencyResolver.of(this.buildRepos).get(deps);
+        return JkDependencyResolver.of(this.runRepos).get(deps);
     }
 
     private void preCompile() {
         List<Path> sourceFiles = JkPathTree.of(resolver.buildSourceDir).andMatcher(BUILD_SOURCE_MATCHER).files();
         final SourceParser parser = SourceParser.of(this.projectBaseDir, sourceFiles);
-        this.buildDependencies = this.buildDependencies.and(parser.dependencies());
-        this.buildRepos = parser.importRepos().and(buildRepos);
-        this.rootsOfImportedBuilds = parser.projects();
+        this.runDependencies = this.runDependencies.and(parser.dependencies());
+        this.runRepos = parser.importRepos().and(runRepos);
+        this.rootsOfImportedRuns = parser.projects();
     }
 
     // Compiles and returns the runtime classpath
@@ -133,9 +133,9 @@ final class Engine {
         String msg = "Compiling build classes for project " + this.projectBaseDir.getFileName().toString();
         long start = System.nanoTime();
         JkLog.startTask(msg);
-        final JkDependencyResolver buildClassDependencyResolver = getBuildDefDependencyResolver();
-        final JkPathSequence buildPath = buildClassDependencyResolver.get(this.buildDefDependencies());
-        path.addAll(buildPath.entries());
+        final JkDependencyResolver runDependencyResolver = getRunDependencyResolver();
+        final JkPathSequence runPath = runDependencyResolver.get(this.computeRunDependencies());
+        path.addAll(runPath.entries());
         path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
         this.compileBuild(JkPathSequence.ofMany(path));
         path.add(this.resolver.buildClassDir);
@@ -145,26 +145,25 @@ final class Engine {
     private JkRun getBuildInstance(String buildClassHint, JkPathSequence runtimePath) {
         final JkClassLoader classLoader = JkClassLoader.current();
         classLoader.addEntries(runtimePath);
-        JkLog.trace("Setting build execution classpath to : " + classLoader.childClasspath());
-        final JkRun build = resolver.resolve(buildClassHint);
-        if (build == null) {
+        JkLog.trace("Setting run execution classpath to : " + classLoader.childClasspath());
+        final JkRun run = resolver.resolve(buildClassHint);
+        if (run == null) {
             return null;
         }
         try {
-            build.setBuildDefDependencyResolver(this.buildDefDependencies(), getBuildDefDependencyResolver());
-            return build;
+            run.setBuildDefDependencyResolver(this.computeRunDependencies(), getRunDependencyResolver());
+            return run;
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
         }
     }
 
-    private JkDependencySet buildDefDependencies() {
+    private JkDependencySet computeRunDependencies() {
 
         // If true, we assume Jerkar is provided by IDE (development mode)
         final boolean devMode = Files.isDirectory(JkLocator.jerkarJarPath());
-
-        return JkDependencySet.of(buildDependencies
+        return JkDependencySet.of(runDependencies
                 .andFiles(localBuildPath())
                 .andFiles(JkClasspath.current()).onlyIf(devMode)
                 .andFiles(jerkarLibs()).onlyIf(!devMode)
@@ -182,11 +181,11 @@ final class Engine {
 
     private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
         JkPathSequence pathSequence = JkPathSequence.of();
-        if (!this.rootsOfImportedBuilds.isEmpty()) {
+        if (!this.rootsOfImportedRuns.isEmpty()) {
             JkLog.info("Compile build classes of dependent projects : "
-                        + toRelativePaths(this.projectBaseDir, this.rootsOfImportedBuilds));
+                        + toRelativePaths(this.projectBaseDir, this.rootsOfImportedRuns));
         }
-        for (final Path file : this.rootsOfImportedBuilds) {
+        for (final Path file : this.rootsOfImportedRuns) {
             final Engine engine = new Engine(file.toAbsolutePath().normalize());
             engine.compile(yetCompiledProjects, pathEntries);
             pathSequence = pathSequence.and(file);
@@ -218,9 +217,9 @@ final class Engine {
                 .addSources(buildSource.files());
     }
 
-    private JkDependencyResolver getBuildDefDependencyResolver() {
-        if (this.buildDefDependencies().containsModules()) {
-            return JkDependencyResolver.of(this.buildRepos);
+    private JkDependencyResolver getRunDependencyResolver() {
+        if (this.computeRunDependencies().containsModules()) {
+            return JkDependencyResolver.of(this.runRepos);
         }
         return JkDependencyResolver.of();
     }

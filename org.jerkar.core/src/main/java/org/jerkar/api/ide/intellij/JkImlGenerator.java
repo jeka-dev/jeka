@@ -435,22 +435,29 @@ public final class JkImlGenerator {
     }
 
     private String ideaPath(Path projectDir, Path file) {
-        if (file.getFileName().toString().toLowerCase().endsWith(".jar")) {
-            if (file.startsWith(projectDir)) {
-                final String relPath = file.relativize(projectDir).toString();
-                return "jar://$MODULE_DIR$/" + replacePathWithVar(relPath) + "!/";
-            }
-            final String path = file.normalize().toAbsolutePath().toString().replace('\\', '/');
-            return "jar://" + replacePathWithVar(path) + "!/";
+        boolean jarFile = file.getFileName().toString().toLowerCase().endsWith(".jar");
+        String type = jarFile ? "jar" : "file";
+        Path basePath  = projectDir;
+        String varName = "MODULE_DIR";
+        if (useVarPath && file.toAbsolutePath().startsWith(JkLocator.jerkarHomeDir())) {
+            basePath = JkLocator.jerkarHomeDir();
+            varName = "JERKAR_HOME";
         }
-        if (file.startsWith(projectDir)) {
-            final String relPath = file.relativize(projectDir).toString();
-            return "file://$MODULE_DIR$/" + replacePathWithVar(relPath);
+        String result;
+        if (file.startsWith(basePath)) {
+            final String relPath = basePath.relativize(file).toString();
+            result = type + "://$" + varName + "$/" + replacePathWithVar(relPath).replace('\\', '/');
+        } else {
+            result = file.toAbsolutePath().normalize().toString().replace('\\', '/');
         }
-        final String path = file.normalize().toAbsolutePath().toString().replace('\\', '/');
-        return "file://" + replacePathWithVar(replacePathWithVar(path));
-
+        if (jarFile) {
+            result = result + "!/";
+        }
+        return result;
     }
+
+
+
 
 
     private static String jdkVersion(JkJavaVersion javaVersion) {
