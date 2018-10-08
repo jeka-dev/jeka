@@ -1,0 +1,19 @@
+.menuItem1 {
+    font-weight: bold;
+    font-size: x-large;
+}
+.menuItem2 {
+    margin-left: 3em;
+    font-size: large;
+    font-weight: bold;
+}
+.menuItem3 {
+    margin-left: 6em;
+    font-weight: bold;
+}
+.menuItem4 {
+    margin-left: 9em;
+}
+.menuItem5 {
+    margin-left: 12em;
+}
