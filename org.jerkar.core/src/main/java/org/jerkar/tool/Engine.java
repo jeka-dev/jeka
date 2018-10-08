@@ -71,7 +71,7 @@ final class Engine {
     void execute(CommandLine commandLine, String buildClassHint, JkLog.Verbosity verbosityToRestore) {
         runDependencies = runDependencies.andUnscoped(commandLine.dependencies());
         long start = System.nanoTime();
-        JkLog.startTask("Compile and initialise build classes");
+        JkLog.startTask("Compile and initialise run classes");
         JkRun build = null;
         JkPathSequence path = JkPathSequence.of();
         if (!commandLine.dependencies().isEmpty()) {
@@ -87,11 +87,11 @@ final class Engine {
             build = getBuildInstance(buildClassHint, path);
         }
         if (build == null) {
-            throw new JkException("Can't find or guess any build class for project hosted in " + this.projectBaseDir
-                    + " .\nAre you sure this directory is a buildable project ?");
+            throw new JkException("Can't find or guess any run class for project hosted in " + this.projectBaseDir
+                    + " .\nAre you sure this directory is a Jerkar project ?");
         }
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
-        JkLog.info("Build is ready to start.");
+        JkLog.info("Jerkar run is ready to start.");
         JkLog.setVerbosity(verbosityToRestore);
         try {
             this.launch(build, commandLine);
@@ -110,7 +110,7 @@ final class Engine {
     }
 
     private void preCompile() {
-        List<Path> sourceFiles = JkPathTree.of(resolver.buildSourceDir).andMatcher(BUILD_SOURCE_MATCHER).files();
+        List<Path> sourceFiles = JkPathTree.of(resolver.runSourceDir).andMatcher(BUILD_SOURCE_MATCHER).files();
         final SourceParser parser = SourceParser.of(this.projectBaseDir, sourceFiles);
         this.runDependencies = this.runDependencies.and(parser.dependencies());
         this.runRepos = parser.importRepos().and(runRepos);
@@ -130,7 +130,7 @@ final class Engine {
         }
         yetCompiledProjects.add(this.projectBaseDir);
         preCompile(); // This enrich dependencies
-        String msg = "Compiling build classes for project " + this.projectBaseDir.getFileName().toString();
+        String msg = "Compiling run classes for project " + this.projectBaseDir.getFileName().toString();
         long start = System.nanoTime();
         JkLog.startTask(msg);
         final JkDependencyResolver runDependencyResolver = getRunDependencyResolver();
@@ -138,7 +138,7 @@ final class Engine {
         path.addAll(runPath.entries());
         path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
         this.compileBuild(JkPathSequence.ofMany(path));
-        path.add(this.resolver.buildClassDir);
+        path.add(this.resolver.runClassDir);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
     }
 
@@ -182,7 +182,7 @@ final class Engine {
     private JkPathSequence compileDependentProjects(Set<Path> yetCompiledProjects, LinkedHashSet<Path>  pathEntries) {
         JkPathSequence pathSequence = JkPathSequence.of();
         if (!this.rootsOfImportedRuns.isEmpty()) {
-            JkLog.info("Compile build classes of dependent projects : "
+            JkLog.info("Compile run classes of dependent projects : "
                         + toRelativePaths(this.projectBaseDir, this.rootsOfImportedRuns));
         }
         for (final Path file : this.rootsOfImportedRuns) {
@@ -196,7 +196,7 @@ final class Engine {
     private void compileBuild(JkPathSequence buildPath) {
         JkJavaCompileSpec compileSpec = buildCompileSpec().setClasspath(buildPath);
         JkJavaCompiler.of().compile(compileSpec);
-        JkPathTree.of(this.resolver.buildSourceDir).andRefuse("**/*.java").copyTo(this.resolver.buildClassDir,
+        JkPathTree.of(this.resolver.runSourceDir).andRefuse("**/*.java").copyTo(this.resolver.runClassDir,
                 StandardCopyOption.REPLACE_EXISTING);
     }
 
@@ -211,9 +211,9 @@ final class Engine {
     }
 
     private JkJavaCompileSpec buildCompileSpec() {
-        final JkPathTree buildSource = JkPathTree.of(resolver.buildSourceDir).andMatcher(BUILD_SOURCE_MATCHER);
-        JkUtilsPath.createDirectories(resolver.buildClassDir);
-        return new JkJavaCompileSpec().setOutputDir(resolver.buildClassDir)
+        final JkPathTree buildSource = JkPathTree.of(resolver.runSourceDir).andMatcher(BUILD_SOURCE_MATCHER);
+        JkUtilsPath.createDirectories(resolver.runClassDir);
+        return new JkJavaCompileSpec().setOutputDir(resolver.runClassDir)
                 .addSources(buildSource.files());
     }
 

@@ -34,7 +34,7 @@ public class JkRun {
 
     private final Path baseDir;
 
-    private JkBuildPlugins plugins;
+    private JkRunPlugins plugins;
 
     private JkDependencyResolver runDefDependencyResolver;
 
@@ -63,7 +63,7 @@ public class JkRun {
         // Instantiating imported builds
         this.importedRuns = JkImportedRuns.of(this.baseTree().root(), this);
 
-        this.plugins = new JkBuildPlugins(this, Environment.commandLine.getPluginOptions());
+        this.plugins = new JkRunPlugins(this, Environment.commandLine.getPluginOptions());
     }
 
     /**
@@ -159,7 +159,7 @@ public class JkRun {
     /**
      * Returns the container of loaded plugins for this instance.
      */
-    public JkBuildPlugins plugins() {
+    public JkRunPlugins plugins() {
         return this.plugins;
     }
 

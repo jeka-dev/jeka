@@ -1,7 +1,7 @@
 # General
 
-## Can build classes and code to build be hosted in separate projects ?
-Of course yes. If you prefer that your build code lies in a distinct project, you can create a Jerkar project in a sibling 
+## Can run classes and code to build be hosted in separate projects ?
+Of course yes. If you prefer that your Jerkar run code lies in a distinct project, create a Jerkar project in a sibling 
 folder and mention where is located the project to build.
 
 ```
@@ -16,10 +16,10 @@ public class Build extends JkJavaProjectBuild {
 
 ```
 
-## My build class does not compile so I can't invoke any Jerkar method as 'help' or 'scaffold#run'. What can I do ?
+## My run class does not compile so I can't invoke any Jerkar method as 'help' or 'scaffold#run'. What can I do ?
 
-You can specify a built-in build class to run, as is, compilation won't occur.
-For example `jerkar -BuildClass=JkBuild help` or `jerkar -BC=JkBuild scaffold#run java#"`.
+You can specify a built-in run class to run, as is, compilation won't occur.
+For example `jerkar -RunClass=JkRun help` or `jerkar -RC=JkRun scaffold#run java#"`.
 
 # Compilation
 

@@ -20,15 +20,15 @@ final class BuildResolver {
 
     private final Path baseDir;
 
-    final Path buildSourceDir;
+    final Path runSourceDir;
 
-    final Path buildClassDir;
+    final Path runClassDir;
 
     BuildResolver(Path baseDir) {
         super();
         this.baseDir = baseDir;
-        this.buildSourceDir = baseDir.resolve(JkConstants.DEF_DIR);
-        this.buildClassDir = baseDir.resolve(JkConstants.DEF_BIN_DIR);
+        this.runSourceDir = baseDir.resolve(JkConstants.DEF_DIR);
+        this.runClassDir = baseDir.resolve(JkConstants.DEF_BIN_DIR);
     }
 
     /**
@@ -54,17 +54,17 @@ final class BuildResolver {
     }
 
     boolean hasBuildSource() {
-        if (!Files.exists(buildSourceDir)) {
+        if (!Files.exists(runSourceDir)) {
             return false;
         }
-        return JkPathTree.of(buildSourceDir).andAccept("**.java", "*.java").count(0, false) > 0;
+        return JkPathTree.of(runSourceDir).andAccept("**.java", "*.java").count(0, false) > 0;
     }
 
     boolean needCompile() {
         if (!this.hasBuildSource()) {
             return false;
         }
-        final JkPathTree dir = JkPathTree.of(buildSourceDir);
+        final JkPathTree dir = JkPathTree.of(runSourceDir);
         for (final Path path : dir.relativeFiles()) {
             final String pathName = path.toString();
             if (pathName.endsWith(".java")) {
@@ -110,7 +110,7 @@ final class BuildResolver {
 
         // If there is a build file
         if (this.hasBuildSource()) {
-            final JkPathTree dir = JkPathTree.of(buildSourceDir);
+            final JkPathTree dir = JkPathTree.of(runSourceDir);
             for (final Path path : dir.relativeFiles()) {
                 if (path.toString().endsWith(".java")) {
                     final Class<?> clazz = classLoader.loadGivenClassSourcePath(path.toString());
@@ -148,7 +148,7 @@ final class BuildResolver {
 
         // If there is a build source
         if (this.hasBuildSource()) {
-            final JkPathTree dir = JkPathTree.of(buildSourceDir);
+            final JkPathTree dir = JkPathTree.of(runSourceDir);
             for (final Path path : dir.relativeFiles()) {
                 if (path.toString().endsWith(".java")) {
                     final Class<?> clazz = classLoader.loadGivenClassSourcePath(path.toString());

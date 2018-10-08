@@ -5,15 +5,10 @@ import org.jerkar.api.java.project.JkJavaProjectMaker;
 import org.jerkar.tool.JkRun;
 
 /**
- * Build configured with a Java plugin.
+ * Just provides convenient methods to access Java plugin structure.
  */
 @SuppressWarnings("javadoc")
 public class JkJavaProjectBuild extends JkRun {
-
-    @Override
-    protected void afterOptionsInjected() {
-        java();
-    }
 
     public final JkPluginJava java() {
         return this.plugins().get(JkPluginJava.class);
