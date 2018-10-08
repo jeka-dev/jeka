@@ -17,14 +17,14 @@ public final class JkTestOptions {
     public boolean fork;
 
     /** Argument passed to the JVM if tests are forked. Example : -Xms2G -Xmx2G */
-    @JkDoc("Argument passed to the JVM if tests are forked. Example : -Xms2G -Xmx2G")
+    @JkDoc("Argument passed to the JVM if tests are forked. E.g. -Xms2G -Xmx2G.")
     public String jvmOptions;
 
     /** Detail level for the test report */
     @JkDoc({ "Detail level of generated report.",
         "BASIC mentions the total duration along details on failed tests.",
-        "FULL mentions durations of each tests.",
-    "Example : -report=NONE" })
+        "FULL mentions durations of each tests. ",
+    "(e.g. -report=NONE)." })
     public JunitReportDetail report = JunitReportDetail.BASIC;
 
     /** Turn it on to display System.out and System.err on console while executing tests.*/

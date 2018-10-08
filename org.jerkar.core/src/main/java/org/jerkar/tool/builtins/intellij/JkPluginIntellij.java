@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public final class JkPluginIntellij extends JkPlugin {
 
     @JkDoc("If true, dependency paths will be expressed relatively to $JERKAR_REPO$ and $JERKAR_HOME$ path variable instead of absolute paths.")
-    public boolean useVarPath = false;
+    public boolean useVarPath = true;
 
     @JkDoc("If true, the project dependencies are not taken in account to generate iml, only run class dependencies are.")
     public boolean onlyRunDependencies = false;
@@ -40,7 +40,6 @@ public final class JkPluginIntellij extends JkPlugin {
     /** Generates Idea [my-module].iml file */
     @JkDoc("Generates Idea [my-module].iml file.")
     public void generateIml() {
-
         final JkImlGenerator generator;
         if (owner instanceof JkJavaProjectBuild) {
             final JkJavaProjectBuild projectBuild = (JkJavaProjectBuild) owner;

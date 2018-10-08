@@ -31,7 +31,7 @@ public final class JkPluginEclipse extends JkPlugin {
 
     /** Flag to set whether 'generateAll' task should use absolute paths instead of classpath variables */
     @JkDoc({ "If true, dependency paths will be expressed relatively to Eclipse path variables instead of absolute paths." })
-    public boolean useVarPath = false;
+    public boolean useVarPath = true;
 
     private final JkPluginScaffold scaffold;
 

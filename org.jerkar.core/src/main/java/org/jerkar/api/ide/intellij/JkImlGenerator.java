@@ -53,9 +53,9 @@ public final class JkImlGenerator {
 
 
     /** Dependency resolver to fetch module dependencies */
-    private JkDependencyResolver dependencyResolver;
+    private JkDependencyResolver projectDependencyResolver;
 
-    public JkDependencySet dependencies;
+    public JkDependencySet projectDependencies;
 
     /** Dependency resolver to fetch module dependencies for build classes */
     private JkDependencyResolver runDependencyResolver;
@@ -82,15 +82,15 @@ public final class JkImlGenerator {
         super();
         this.sourceLayout = sourceLayout;
         this.baseDir = sourceLayout.baseDir();
-        this.dependencies = dependencies;
-        this.dependencyResolver = resolver;
+        this.projectDependencies = dependencies;
+        this.projectDependencyResolver = resolver;
     }
 
     public JkImlGenerator(Path baseDir) {
         super();
         this.baseDir = baseDir;
-        this.dependencies = JkDependencySet.of();
-        this.dependencyResolver = JkDependencyResolver.of();
+        this.projectDependencies = JkDependencySet.of();
+        this.projectDependencyResolver = JkDependencyResolver.of();
     }
 
     public JkImlGenerator(JkJavaProject javaProject) {
@@ -117,13 +117,13 @@ public final class JkImlGenerator {
         writeOrderEntrySourceFolder();
         final Set<Path> allPaths = new HashSet<>();
         final Set<Path> allModules = new HashSet<>();
-        if (this.dependencyResolver != null) {
-            writeDependencies(dependencies, this.dependencyResolver, allPaths, allModules, false);
+        if (this.projectDependencyResolver != null) {
+            writeDependencies(projectDependencies, this.projectDependencyResolver, allPaths, allModules, false);
         }
         if (this.runDependencyResolver != null) {
             writeDependencies(this.runDependencies, this.runDependencyResolver, allPaths, allModules, true);
         }
-        writeBuildProjectDependencies(allModules);
+        writeProjectImportDependencies(allModules);
 
         writeFoot();
         writer.close();
@@ -262,7 +262,7 @@ public final class JkImlGenerator {
         return false;
     }
 
-    private void writeBuildProjectDependencies(Set<Path> allModules) throws XMLStreamException {
+    private void writeProjectImportDependencies(Set<Path> allModules) throws XMLStreamException {
         for (final Path rootFolder : this.importedProjects) {
             if (!allModules.contains(rootFolder)) {
                 writeOrderEntryForModule(rootFolder.getFileName().toString(), "COMPILE");
@@ -442,6 +442,9 @@ public final class JkImlGenerator {
         if (useVarPath && file.toAbsolutePath().startsWith(JkLocator.jerkarHomeDir())) {
             basePath = JkLocator.jerkarHomeDir();
             varName = "JERKAR_HOME";
+        } else if (useVarPath && file.toAbsolutePath().startsWith(JkLocator.jerkarRepositoryCache())) {
+            basePath = JkLocator.jerkarRepositoryCache();
+            varName = "JERKAR_REPO";
         }
         String result;
         if (file.startsWith(basePath)) {
@@ -588,8 +591,8 @@ public final class JkImlGenerator {
     }
 
     public JkImlGenerator setDependencies(JkDependencyResolver dependencyResolver, JkDependencySet dependencies) {
-        this.dependencyResolver = dependencyResolver;
-        this.dependencies = dependencies;
+        this.projectDependencyResolver = dependencyResolver;
+        this.projectDependencies = dependencies;
         return this;
     }
 

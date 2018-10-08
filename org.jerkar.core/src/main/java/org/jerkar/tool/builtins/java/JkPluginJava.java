@@ -34,16 +34,13 @@ public class JkPluginJava extends JkPlugin {
     @JkDoc("Version for the project to build.")
     public String projectVersion;
 
-    @JkDoc("Publish")
     public final JkPublishOptions publish = new JkPublishOptions();
 
-    @JkDoc("Packing")
     public final JkJavaPackOptions pack = new JkJavaPackOptions();
 
-    @JkDoc("Tests")
     public final JkTestOptions tests = new JkTestOptions();
 
-    @JkDoc("Extra arguments to be passed to the compiler")
+    @JkDoc("Extra arguments to be passed to the compiler (e.g. -Xlint:unchecked).")
     public String compilerExtraArgs;
 
     // ----------------------------------------------------------------------------------

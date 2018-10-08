@@ -9,7 +9,7 @@ import org.jerkar.tool.JkDoc;
 public class JkJavaPackOptions {
 
     /** Comma separated list of algorithm to use to produce checksums (ex : 'sha-1,md5'). */
-    @JkDoc("Comma separated list of algorithms to use to produce checksums (ex : 'sha-1,md5,sha-256').")
+    @JkDoc("Comma separated list of algorithms to use to produce checksums (e.g. 'sha-1,md5,sha-256').")
     public String checksums;
 
     /** When true, javadoc is created and packed in a jar file.*/
