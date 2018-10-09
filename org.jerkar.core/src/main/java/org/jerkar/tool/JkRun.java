@@ -166,7 +166,7 @@ public class JkRun {
 
     // ------------------------------ build dependencies --------------------------------
 
-    void setBuildDefDependencyResolver(JkDependencySet buildDependencies, JkDependencyResolver scriptDependencyResolver) {
+    void setRunDependencyResolver(JkDependencySet buildDependencies, JkDependencyResolver scriptDependencyResolver) {
         this.runDependencies = buildDependencies;
         this.runDefDependencyResolver = scriptDependencyResolver;
     }

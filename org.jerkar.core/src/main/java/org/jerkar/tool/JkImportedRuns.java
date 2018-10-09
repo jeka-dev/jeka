@@ -136,7 +136,7 @@ public final class JkImportedRuns {
             return cachedResult;
         }
         final Engine engine = new Engine(projectDir);
-        final T result = engine.getBuild(importedBuildClass);
+        final T result = engine.getRun(importedBuildClass);
         IMPORTED_BUILD_CONTEXT.get().put(projectRef, result);
         return result;
     }

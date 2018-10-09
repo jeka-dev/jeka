@@ -57,7 +57,7 @@ public class JkRepoConfigOptionLoader {
     /**
      * Returns the repositories where are downloaded dependencies needed to run the build.
      */
-    public static JkRepo buildRepository() {
+    public static JkRepo runRepository() {
         final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("repo.runName"), "run");
         JkRepo namedRepo = repoFromOptions(repoName);
         return JkUtilsObject.firstNonNull(namedRepo, downloadRepository());

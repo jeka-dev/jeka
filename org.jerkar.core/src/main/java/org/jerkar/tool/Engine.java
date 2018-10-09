@@ -21,19 +21,19 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 /**
- * Engine having responsibility of compiling build classes, instantiate and run them.<br/>
- * Build class sources are expected to lie in [project base dir]/build/def <br/>
+ * Engine having responsibility of compiling run classes, instantiate and run them.<br/>
+ * Run class sources are expected to lie in [project base dir]/jerkar/def <br/>
  * Classes having simple name starting with '_' are ignored.
  *
- * Build classes can have dependencies on jars : <ul>
- *     <li>located in [base dir]/build/boot directory</li>
+ * Run classes can have dependencies on jars : <ul>
+ *     <li>located in [base dir]/jerkar/boot directory</li>
  *     <li>declared in {@link JkImport} annotation</li>
  * </ul>
  *
  */
 final class Engine {
 
-    private final JkPathMatcher BUILD_SOURCE_MATCHER = JkPathMatcher.accept("**.java").andRefuse("**/_*", "_*");
+    private final JkPathMatcher RUN_SOURCE_MATCHER = JkPathMatcher.accept("**.java").andRefuse("**/_*", "_*");
 
     private final Path projectBaseDir;
 
@@ -43,7 +43,7 @@ final class Engine {
 
     private List<Path> rootsOfImportedRuns = new LinkedList<>();
 
-    private final BuildResolver resolver;
+    private final RunResolver resolver;
 
     /**
      * Constructs an engine for the specified base directory.
@@ -55,10 +55,10 @@ final class Engine {
         this.projectBaseDir = baseDir.normalize();
         runRepos = repos();
         this.runDependencies = JkDependencySet.of();
-        this.resolver = new BuildResolver(baseDir);
+        this.resolver = new RunResolver(baseDir);
     }
 
-    <T extends JkRun> T getBuild(Class<T> baseClass) {
+    <T extends JkRun> T getRun(Class<T> baseClass) {
         if (resolver.needCompile()) {
             this.compile();
         }
@@ -66,28 +66,28 @@ final class Engine {
     }
 
     /**
-     * Pre-compile and compile build classes (if needed) then execute methods mentioned in command line
+     * Pre-compile and compile run classes (if needed) then execute methods mentioned in command line
      */
-    void execute(CommandLine commandLine, String buildClassHint, JkLog.Verbosity verbosityToRestore) {
+    void execute(CommandLine commandLine, String runClassHint, JkLog.Verbosity verbosityToRestore) {
         runDependencies = runDependencies.andUnscoped(commandLine.dependencies());
         long start = System.nanoTime();
         JkLog.startTask("Compile and initialise run classes");
-        JkRun build = null;
+        JkRun jkRun = null;
         JkPathSequence path = JkPathSequence.of();
         if (!commandLine.dependencies().isEmpty()) {
             final JkPathSequence cmdPath = pathOf(commandLine.dependencies());
             path = path.andManyFirst(cmdPath);
             JkLog.trace("Command line extra path : " + cmdPath);
         }
-        if (!JkUtilsString.isBlank(buildClassHint)) {  // First find a class in the existing classpath without compiling
+        if (!JkUtilsString.isBlank(runClassHint)) {  // First find a class in the existing classpath without compiling
             preCompile();  // Need to pre-compile to get the declared run dependencies
-            build = getBuildInstance(buildClassHint, path);
+            jkRun = getRunInstance(runClassHint, path);
         }
-        if (build == null) {
+        if (jkRun == null) {
             path = compile().andMany(path);
-            build = getBuildInstance(buildClassHint, path);
+            jkRun = getRunInstance(runClassHint, path);
         }
-        if (build == null) {
+        if (jkRun == null) {
             throw new JkException("Can't find or guess any run class for project hosted in " + this.projectBaseDir
                     + " .\nAre you sure this directory is a Jerkar project ?");
         }
@@ -95,7 +95,7 @@ final class Engine {
         JkLog.info("Jerkar run is ready to start.");
         JkLog.setVerbosity(verbosityToRestore);
         try {
-            this.launch(build, commandLine);
+            this.launch(jkRun, commandLine);
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
             throw e;
@@ -111,7 +111,7 @@ final class Engine {
     }
 
     private void preCompile() {
-        List<Path> sourceFiles = JkPathTree.of(resolver.runSourceDir).andMatcher(BUILD_SOURCE_MATCHER).files();
+        List<Path> sourceFiles = JkPathTree.of(resolver.runSourceDir).andMatcher(RUN_SOURCE_MATCHER).files();
         final SourceParser parser = SourceParser.of(this.projectBaseDir, sourceFiles);
         this.runDependencies = this.runDependencies.and(parser.dependencies());
         this.runRepos = parser.importRepos().and(runRepos);
@@ -126,7 +126,7 @@ final class Engine {
     }
 
     private void compile(Set<Path>  yetCompiledProjects, LinkedHashSet<Path>  path) {
-        if (!this.resolver.hasBuildSource() || yetCompiledProjects.contains(this.projectBaseDir)) {
+        if (!this.resolver.hasDefSource() || yetCompiledProjects.contains(this.projectBaseDir)) {
             return;
         }
         yetCompiledProjects.add(this.projectBaseDir);
@@ -138,21 +138,21 @@ final class Engine {
         final JkPathSequence runPath = runDependencyResolver.get(this.computeRunDependencies());
         path.addAll(runPath.entries());
         path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
-        this.compileBuild(JkPathSequence.ofMany(path));
+        this.compileDef(JkPathSequence.ofMany(path));
         path.add(this.resolver.runClassDir);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
     }
 
-    private JkRun getBuildInstance(String buildClassHint, JkPathSequence runtimePath) {
+    private JkRun getRunInstance(String runClassHint, JkPathSequence runtimePath) {
         final JkClassLoader classLoader = JkClassLoader.current();
         classLoader.addEntries(runtimePath);
         JkLog.trace("Setting run execution classpath to : " + classLoader.childClasspath());
-        final JkRun run = resolver.resolve(buildClassHint);
+        final JkRun run = resolver.resolve(runClassHint);
         if (run == null) {
             return null;
         }
         try {
-            run.setBuildDefDependencyResolver(this.computeRunDependencies(), getRunDependencyResolver());
+            run.setRunDependencyResolver(this.computeRunDependencies(), getRunDependencyResolver());
             return run;
         } catch (final RuntimeException e) {
             JkLog.error("Engine " + projectBaseDir + " failed");
@@ -165,13 +165,13 @@ final class Engine {
         // If true, we assume Jerkar is provided by IDE (development mode)
         final boolean devMode = Files.isDirectory(JkLocator.jerkarJarPath());
         return JkDependencySet.of(runDependencies
-                .andFiles(localBuildPath())
+                .andFiles(localRunPath())
                 .andFiles(JkClasspath.current()).onlyIf(devMode)
                 .andFiles(jerkarLibs()).onlyIf(!devMode)
                 .withDefaultScope(JkScopeMapping.ALL_TO_DEFAULT));
     }
 
-    private JkPathSequence localBuildPath() {
+    private JkPathSequence localRunPath() {
         final List<Path>  extraLibs = new LinkedList<>();
         final Path localDefLibDir = this.projectBaseDir.resolve(JkConstants.BOOT_DIR);
         if (Files.exists(localDefLibDir)) {
@@ -194,28 +194,28 @@ final class Engine {
         return pathSequence;
     }
 
-    private void compileBuild(JkPathSequence buildPath) {
-        JkJavaCompileSpec compileSpec = buildCompileSpec().setClasspath(buildPath);
+    private void compileDef(JkPathSequence runPath) {
+        JkJavaCompileSpec compileSpec = defCompileSpec().setClasspath(runPath);
         JkJavaCompiler.of().compile(compileSpec);
         JkPathTree.of(this.resolver.runSourceDir).andRefuse("**/*.java").copyTo(this.resolver.runClassDir,
                 StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private void launch(JkRun build, CommandLine commandLine) {
+    private void launch(JkRun jkRun, CommandLine commandLine) {
         if (!commandLine.getSubProjectMethods().isEmpty()) {
-            for (final JkRun subBuild : build.importedRuns().all()) {
-                runProject(subBuild, commandLine.getSubProjectMethods());
+            for (final JkRun importedRun : jkRun.importedRuns().all()) {
+                runProject(importedRun, commandLine.getSubProjectMethods());
             }
-            runProject(build, commandLine.getSubProjectMethods());
+            runProject(jkRun, commandLine.getSubProjectMethods());
         }
-        runProject(build, commandLine.getMasterMethods());
+        runProject(jkRun, commandLine.getMasterMethods());
     }
 
-    private JkJavaCompileSpec buildCompileSpec() {
-        final JkPathTree buildSource = JkPathTree.of(resolver.runSourceDir).andMatcher(BUILD_SOURCE_MATCHER);
+    private JkJavaCompileSpec defCompileSpec() {
+        final JkPathTree defSource = JkPathTree.of(resolver.runSourceDir).andMatcher(RUN_SOURCE_MATCHER);
         JkUtilsPath.createDirectories(resolver.runClassDir);
         return new JkJavaCompileSpec().setOutputDir(resolver.runClassDir)
-                .addSources(buildSource.files());
+                .addSources(defSource.files());
     }
 
     private JkDependencyResolver getRunDependencyResolver() {
@@ -231,37 +231,37 @@ final class Engine {
         return JkPathSequence.ofMany(extraLibs).withoutDuplicates();
     }
 
-    private static void runProject(JkRun build, List<MethodInvocation> invokes) {
+    private static void runProject(JkRun jkRun, List<MethodInvocation> invokes) {
         for (MethodInvocation methodInvocation : invokes) {
-            invokeMethodOnBuildClassOrPlugin(build, methodInvocation);
+            invokeMethodOnRunClassOrPlugin(jkRun, methodInvocation);
         }
     }
 
-    private static void invokeMethodOnBuildClassOrPlugin(JkRun build, MethodInvocation methodInvocation) {
+    private static void invokeMethodOnRunClassOrPlugin(JkRun jkRun, MethodInvocation methodInvocation) {
         if (methodInvocation.pluginName != null) {
-            final JkPlugin plugin = build.plugins().get(methodInvocation.pluginName);
-            invokeMethodOnBuildOrPlugin(plugin, methodInvocation.methodName);
+            final JkPlugin plugin = jkRun.plugins().get(methodInvocation.pluginName);
+            invokeMethodOnRunOrPlugin(plugin, methodInvocation.methodName);
         } else {
-            invokeMethodOnBuildOrPlugin(build, methodInvocation.methodName);
+            invokeMethodOnRunOrPlugin(jkRun, methodInvocation.methodName);
         }
     }
 
     /**
-     * Invokes the specified method in this build.
+     * Invokes the specified method in this run.
      */
-    private static void invokeMethodOnBuildOrPlugin(Object build, String methodName) {
+    private static void invokeMethodOnRunOrPlugin(Object run, String methodName) {
         final Method method;
         try {
-            method = build.getClass().getMethod(methodName);
+            method = run.getClass().getMethod(methodName);
         } catch (final NoSuchMethodException e) {
-            throw new JkException("No public zero-arg method '" + methodName + "' found in class '" + build.getClass());
+            throw new JkException("No public zero-arg method '" + methodName + "' found in class '" + run.getClass());
         }
         if (Environment.standardOptions.logHeaders) {
-            JkLog.info("Method : " + methodName + " on " + build.getClass().getName());
+            JkLog.info("Method : " + methodName + " on " + run.getClass().getName());
         }
         final long time = System.nanoTime();
         try {
-            JkUtilsReflect.invoke(build, method);
+            JkUtilsReflect.invoke(run, method);
             if (Environment.standardOptions.logHeaders) {
                 JkLog.info("Method " + methodName + " succeeded in "
                         + JkUtilsTime.durationInMillis(time) + " milliseconds.");
@@ -274,7 +274,7 @@ final class Engine {
     }
 
     private static JkRepoSet repos() {
-        return JkRepoSet.of(JkRepoConfigOptionLoader.buildRepository(), JkRepo.local());
+        return JkRepoSet.of(JkRepoConfigOptionLoader.runRepository(), JkRepo.local());
     }
 
     private static List<String> toRelativePaths(Path from, List<Path>  files) {
