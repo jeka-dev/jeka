@@ -19,7 +19,7 @@ import java.util.Map;
 public final class JkInit {
 
     /**
-     * Creates an instance of the specified build class and displays information about build class and environment.
+     * Creates an instance of the specified run class and displays information about this class and environment.
      */
     public static <T extends JkRun> T instanceOf(Class<T> clazz, String... args) {
         JkLog.register(new LogHandler());
@@ -29,10 +29,10 @@ public final class JkInit {
             JkLog.setVerbosity(JkLog.Verbosity.MUTE);
         }
         displayInfo();
-        final T build = JkRun.of(clazz);
-        JkLog.info("Build is ready to start.");
+        final T jkRun = JkRun.of(clazz);
+        JkLog.info("Jerkar run is ready to start.");
         JkLog.setVerbosity(verbosity);
-        return build;
+        return jkRun;
     }
 
     static void displayInfo() {
@@ -78,7 +78,7 @@ public final class JkInit {
     }
 
     private static Path bootDir() {
-        return Paths.get("./build/boot");
+        return Paths.get(JkConstants.BOOT_DIR);
     }
 
 }

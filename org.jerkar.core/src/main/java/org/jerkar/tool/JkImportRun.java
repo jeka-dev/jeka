@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Specifies that the annotated element is a build of a another project. This
+ * Specifies that the annotated element is a JkRun of a another project. This
  * annotated element is supposed to be a {@link JkRun} or instance of a subclass. The
  * expected value is the referenced project path relative to the project the
  * annotated element belong. <br/>

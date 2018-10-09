@@ -15,46 +15,46 @@ import java.util.Set;
 import org.jerkar.api.utils.JkUtilsReflect;
 
 /**
- * A build class can import one or several build classes. It is an important mechanism to reuse builds across projects.
- * This class holds imported builds within a build class.
+ * A run class can import one or several run classes. It is an important mechanism to reuse runs across projects.
+ * This class holds imported runs within a run class.
  *
  * @author Jerome Angibaud
  */
 public final class JkImportedRuns {
 
-    private static final ThreadLocal<Map<ImportedBuildRef, JkRun>> IMPORTED_BUILD_CONTEXT = new ThreadLocal<>();
+    private static final ThreadLocal<Map<ImportedRunRef, JkRun>> IMPORTED_RUN_CONTEXT = new ThreadLocal<>();
 
-    static JkImportedRuns of(Path masterRootDir, JkRun masterBuild) {
-        return new JkImportedRuns(masterRootDir, getDirectImportedBuilds(masterBuild));
+    static JkImportedRuns of(Path masterRootDir, JkRun masterRun) {
+        return new JkImportedRuns(masterRootDir, getDirectImportedRuns(masterRun));
     }
 
-    private final List<JkRun> directImportedBuilds;
+    private final List<JkRun> directImportedRuns;
 
-    private List<JkRun> transitiveImportedBuilds;
+    private List<JkRun> transitiveImportedRuns;
 
-    private final Path masterBuildBaseDir;
+    private final Path masterRunBaseDir;
 
-    private JkImportedRuns(Path masterDir, List<JkRun> buildDeps) {
+    private JkImportedRuns(Path masterDir, List<JkRun> runDeps) {
         super();
-        this.masterBuildBaseDir = masterDir;
-        this.directImportedBuilds = Collections.unmodifiableList(buildDeps);
+        this.masterRunBaseDir = masterDir;
+        this.directImportedRuns = Collections.unmodifiableList(runDeps);
     }
 
     /**
-     * Returns only the direct slave of this master build.
+     * Returns only the direct slave of this master run.
      */
     public List<JkRun> directs() {
-        return Collections.unmodifiableList(directImportedBuilds);
+        return Collections.unmodifiableList(directImportedRuns);
     }
 
     /**
      * Returns direct and transitive importedRuns.
      */
     public List<JkRun> all() {
-        if (transitiveImportedBuilds == null) {
-            transitiveImportedBuilds = resolveTransitiveBuilds(new HashSet<>());
+        if (transitiveImportedRuns == null) {
+            transitiveImportedRuns = resolveTransitiveRuns(new HashSet<>());
         }
-        return transitiveImportedBuilds;
+        return transitiveImportedRuns;
     }
 
     /**
@@ -62,21 +62,21 @@ public final class JkImportedRuns {
      */
     public <T extends JkRun> List<T> allOf(Class<T> ofClass) {
         final List<T> result = new LinkedList<>();
-        for (final JkRun build : all()) {
-            if (ofClass.isAssignableFrom(build.getClass())) {
-                result.add((T) build);
+        for (final JkRun run : all()) {
+            if (ofClass.isAssignableFrom(run.getClass())) {
+                result.add((T) run);
             }
         }
         return result;
     }
 
-    private List<JkRun> resolveTransitiveBuilds(Set<Path> files) {
+    private List<JkRun> resolveTransitiveRuns(Set<Path> files) {
         final List<JkRun> result = new LinkedList<>();
-        for (final JkRun build : directImportedBuilds) {
-            final Path dir = build.baseDir();
+        for (final JkRun run : directImportedRuns) {
+            final Path dir = run.baseDir();
             if (!files.contains(dir)) {
-                result.addAll(build.importedRuns().resolveTransitiveBuilds(files));
-                result.add(build);
+                result.addAll(run.importedRuns().resolveTransitiveRuns(files));
+                result.add(run);
                 files.add(dir);
             }
         }
@@ -84,70 +84,70 @@ public final class JkImportedRuns {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<JkRun> getDirectImportedBuilds(JkRun masterBuild) {
+    private static List<JkRun> getDirectImportedRuns(JkRun masterRun) {
         final List<JkRun> result = new LinkedList<>();
-        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterBuild.getClass(), JkImportRun.class);
+        final List<Field> fields = JkUtilsReflect.getAllDeclaredFields(masterRun.getClass(), JkImportRun.class);
 
         for (final Field field : fields) {
             final JkImportRun jkProject = field.getAnnotation(JkImportRun.class);
-            final JkRun importedBuild = createImportedBuild(
-                    (Class<? extends JkRun>) field.getType(), jkProject.value(), masterBuild.baseDir());
+            final JkRun importedRun = createImportedRun(
+                    (Class<? extends JkRun>) field.getType(), jkProject.value(), masterRun.baseDir());
             try {
-                JkUtilsReflect.setFieldValue(masterBuild, field, importedBuild);
+                JkUtilsReflect.setFieldValue(masterRun, field, importedRun);
             } catch (final RuntimeException e) {
-                Path currentClassBaseDir = Paths.get(masterBuild.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
-                while (!Files.exists(currentClassBaseDir.resolve("build/def")) && currentClassBaseDir != null) {
+                Path currentClassBaseDir = Paths.get(masterRun.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
+                while (!Files.exists(currentClassBaseDir.resolve(JkConstants.DEF_DIR)) && currentClassBaseDir != null) {
                     currentClassBaseDir = currentClassBaseDir.getParent();
                 }
                 if (currentClassBaseDir == null) {
-                    throw new IllegalStateException("Can't inject slave build instance of type " + importedBuild.getClass().getSimpleName()
+                    throw new IllegalStateException("Can't inject imported run instance of type " + importedRun.getClass().getSimpleName()
                             + " into field " + field.getDeclaringClass().getName()
-                            + "#" + field.getName() + " from directory " + masterBuild.baseDir()
+                            + "#" + field.getName() + " from directory " + masterRun.baseDir()
                             + " while working dir is " + Paths.get("").toAbsolutePath());
                 }
-                throw new IllegalStateException("Can't inject slave build instance of type " + importedBuild.getClass().getSimpleName()
+                throw new IllegalStateException("Can't inject imported run instance of type " + importedRun.getClass().getSimpleName()
                         + " into field " + field.getDeclaringClass().getName()
-                        + "#" + field.getName() + " from directory " + masterBuild.baseDir()
-                        + "\nBuild class is located in " + currentClassBaseDir
+                        + "#" + field.getName() + " from directory " + masterRun.baseDir()
+                        + "\nRun class is located in " + currentClassBaseDir
                         + " while working dir is " + Paths.get("").toAbsolutePath()
                         + ".\nPlease set working dir to " + currentClassBaseDir, e);
             }
-            result.add(importedBuild);
+            result.add(importedRun);
         }
         return result;
     }
 
     /*
      * Creates an instance of <code>JkRun</code> for the given project and
-     * build class. The instance field annotated with <code>JkOption</code> are
+     * run class. The instance field annotated with <code>JkOption</code> are
      * populated as usual.
      */
     @SuppressWarnings("unchecked")
-    private static <T extends JkRun> T createImportedBuild(Class<T> importedBuildClass, String relativePath, Path masterBuildPath) {
-        final Path projectDir = masterBuildPath.resolve(relativePath).normalize();
-        final ImportedBuildRef projectRef = new ImportedBuildRef(projectDir, importedBuildClass);
-        Map<ImportedBuildRef, JkRun> map = IMPORTED_BUILD_CONTEXT.get();
+    private static <T extends JkRun> T createImportedRun(Class<T> importedRunClass, String relativePath, Path masterRunPath) {
+        final Path projectDir = masterRunPath.resolve(relativePath).normalize();
+        final ImportedRunRef projectRef = new ImportedRunRef(projectDir, importedRunClass);
+        Map<ImportedRunRef, JkRun> map = IMPORTED_RUN_CONTEXT.get();
         if (map == null) {
             map = new HashMap<>();
-            IMPORTED_BUILD_CONTEXT.set(map);
+            IMPORTED_RUN_CONTEXT.set(map);
         }
-        final T cachedResult = (T) IMPORTED_BUILD_CONTEXT.get().get(projectRef);
+        final T cachedResult = (T) IMPORTED_RUN_CONTEXT.get().get(projectRef);
         if (cachedResult != null) {
             return cachedResult;
         }
         final Engine engine = new Engine(projectDir);
-        final T result = engine.getRun(importedBuildClass);
-        IMPORTED_BUILD_CONTEXT.get().put(projectRef, result);
+        final T result = engine.getRun(importedRunClass);
+        IMPORTED_RUN_CONTEXT.get().put(projectRef, result);
         return result;
     }
 
-    private static class ImportedBuildRef {
+    private static class ImportedRunRef {
 
         final String canonicalFileName;
 
         final Class<?> clazz;
 
-        ImportedBuildRef(Path projectDir, Class<?> clazz) {
+        ImportedRunRef(Path projectDir, Class<?> clazz) {
             super();
             this.canonicalFileName = projectDir.normalize().toAbsolutePath().toString();
             this.clazz = clazz;
@@ -162,7 +162,7 @@ public final class JkImportedRuns {
                 return false;
             }
 
-            final ImportedBuildRef that = (ImportedBuildRef) o;
+            final ImportedRunRef that = (ImportedRunRef) o;
 
             if (!canonicalFileName.equals(that.canonicalFileName)) {
                 return false;

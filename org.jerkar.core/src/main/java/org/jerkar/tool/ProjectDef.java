@@ -14,7 +14,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Defines build classes defined on a given project.
+ * Defines run classes defined on a given project.
  *
  * @author Jerome Angibaud
  */
@@ -48,16 +48,16 @@ final class ProjectDef {
      *
      * @author Jerome Angibaud
      */
-    static final class BuildClassDef {
+    static final class RunClassDef {
 
         private final List<BuildMethodDef> methodDefs;
 
-        private final List<BuildOptionDef> optionDefs;
+        private final List<RunOptionDef> optionDefs;
 
         private final Object buildOrPlugin;
 
-        private BuildClassDef(Object buildOrPlugin, List<BuildMethodDef> methodDefs,
-                              List<BuildOptionDef> optionDefs) {
+        private RunClassDef(Object buildOrPlugin, List<BuildMethodDef> methodDefs,
+                            List<RunOptionDef> optionDefs) {
             super();
             this.buildOrPlugin = buildOrPlugin;
             this.methodDefs = Collections.unmodifiableList(methodDefs);
@@ -68,24 +68,24 @@ final class ProjectDef {
             return methodDefs;
         }
 
-        List<BuildOptionDef> optionDefs() {
+        List<RunOptionDef> optionDefs() {
             return optionDefs;
         }
 
-        static BuildClassDef of(Object build) {
+        static RunClassDef of(Object build) {
             final Class<?> clazz = build.getClass();
             final List<BuildMethodDef> methods = new LinkedList<>();
             for (final Method method : executableMethods(clazz)) {
                 methods.add(BuildMethodDef.of(method));
             }
             Collections.sort(methods);
-            final List<BuildOptionDef> options = new LinkedList<>();
+            final List<RunOptionDef> options = new LinkedList<>();
             for (final NameAndField nameAndField : options(clazz, "", true, null)) {
-                options.add(BuildOptionDef.of(build, nameAndField.field,
+                options.add(RunOptionDef.of(build, nameAndField.field,
                         nameAndField.name, nameAndField.rootClass));
             }
             Collections.sort(options);
-            return new BuildClassDef(build, methods, options);
+            return new RunClassDef(build, methods, options);
         }
 
         private static List<Method> executableMethods(Class<?> clazz) {
@@ -137,7 +137,7 @@ final class ProjectDef {
 
         private String description(Class<?> buildClass, String prefix, boolean withHeader, boolean includeHierarchy) {
             List<BuildMethodDef> methods = includeHierarchy ? this.methodDefs : this.methodsOf(buildClass);
-            List<BuildOptionDef> options = includeHierarchy ? this.optionDefs : this.optionsOf(buildClass);
+            List<RunOptionDef> options = includeHierarchy ? this.optionDefs : this.optionsOf(buildClass);
             if (methods.isEmpty() && options.isEmpty()) {
                 return "";
             }
@@ -162,7 +162,7 @@ final class ProjectDef {
             }
             if (!options.isEmpty()) {
                 stringBuilder.append(margin + "Options :\n");
-                for (BuildOptionDef optionDef : options) {
+                for (RunOptionDef optionDef : options) {
                     stringBuilder.append(optionDef.description(prefix, margin));
                 }
             }
@@ -171,9 +171,9 @@ final class ProjectDef {
 
         Map<String, String> optionValues(JkRun build) {
             final Map<String, String> result = new LinkedHashMap<>();
-            for (final BuildOptionDef optionDef : this.optionDefs) {
+            for (final RunOptionDef optionDef : this.optionDefs) {
                 final String name = optionDef.name;
-                final Object value = BuildOptionDef.value(build, name);
+                final Object value = RunOptionDef.value(build, name);
                 result.put(name, JkUtilsObject.toString(value));
             }
             return result;
@@ -189,7 +189,7 @@ final class ProjectDef {
             }
             final Element optionsEl = document.createElement("options");
             buildEl.appendChild(optionsEl);
-            for (final BuildOptionDef buildOptionDef : this.optionDefs) {
+            for (final RunOptionDef buildOptionDef : this.optionDefs) {
                 final Element optionEl = buildOptionDef.toElement(document);
                 optionsEl.appendChild(optionEl);
             }
@@ -211,7 +211,7 @@ final class ProjectDef {
                     .collect(Collectors.toList());
         }
 
-        private List<BuildOptionDef> optionsOf(Class<?> buildClass) {
+        private List<RunOptionDef> optionsOf(Class<?> buildClass) {
             return this.optionDefs.stream().filter(buildOptionDef -> buildClass.equals(buildOptionDef.rootDeclaringClass))
                     .collect(Collectors.toList());
         }
@@ -278,7 +278,7 @@ final class ProjectDef {
      *
      * @author Jerome Angibaud
      */
-     static final class BuildOptionDef implements Comparable<BuildOptionDef> {
+     static final class RunOptionDef implements Comparable<RunOptionDef> {
 
         private final String name;
 
@@ -292,8 +292,8 @@ final class ProjectDef {
 
         private final Class<?> type;
 
-        private BuildOptionDef(String name, String description, Object jkRun, Object defaultValue,
-                               Class<?> type, Class<?> declaringClass) {
+        private RunOptionDef(String name, String description, Object jkRun, Object defaultValue,
+                             Class<?> type, Class<?> declaringClass) {
             super();
             this.name = name;
             this.description = description;
@@ -303,12 +303,12 @@ final class ProjectDef {
             this.rootDeclaringClass = declaringClass;
         }
 
-        static BuildOptionDef of(Object instance, Field field, String name, Class<?> rootDeclaringClass) {
+        static RunOptionDef of(Object instance, Field field, String name, Class<?> rootDeclaringClass) {
             final JkDoc opt = field.getAnnotation(JkDoc.class);
             final String descr = opt != null ? JkUtilsString.join(opt.value(), "\n") : null;
             final Class<?> type = field.getType();
             final Object defaultValue = value(instance, name);
-            return new BuildOptionDef(name, descr, instance, defaultValue, type, rootDeclaringClass);
+            return new RunOptionDef(name, descr, instance, defaultValue, type, rootDeclaringClass);
         }
 
         private static Object value(Object buildinstance, String optName) {
@@ -326,7 +326,7 @@ final class ProjectDef {
         }
 
         @Override
-        public int compareTo(BuildOptionDef other) {
+        public int compareTo(RunOptionDef other) {
             if (this.run.getClass().equals(other.run.getClass())) {
                 return this.name.compareTo(other.name);
             }

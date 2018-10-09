@@ -11,7 +11,7 @@ import java.util.*;
  */
 final class CommandLine {
 
-    private static final String ALL_BUILD_SYMBOL = "*";
+    private static final String ALL_RUN_SYMBOL = "*";
 
     private static final String PLUGIN_SYMBOL = "#";
 
@@ -23,17 +23,17 @@ final class CommandLine {
 
     static CommandLine parse(String[] words) {
         final CommandLine result = new CommandLine();
-        result.buildOptions = extractOptions(words);
+        result.runOptions = extractOptions(words);
         result.systemProperties = extractSystemProperties(words);
         result.masterMethods = extractMethods(words, true);
         result.subProjectMethods = extractMethods(words, false);
         result.pluginOptions = extractPluginOptions(words);
-        result.buildDependencies = dependencies(words);
+        result.runDependencies = dependencies(words);
         result.rawArgs = words;
         return result;
     }
 
-    private Map<String, String> buildOptions;
+    private Map<String, String> runOptions;
 
     private Map<String, String> systemProperties;
 
@@ -43,7 +43,7 @@ final class CommandLine {
 
     private List<PluginOptions> pluginOptions;
 
-    private List<JkModuleDependency> buildDependencies;
+    private List<JkModuleDependency> runDependencies;
 
     private String[] rawArgs;
 
@@ -66,9 +66,9 @@ final class CommandLine {
         final List<MethodInvocation> result = new LinkedList<>();
         for (final String word : words) {
             if (!word.startsWith("-") && !word.startsWith("@") && !word.endsWith(PLUGIN_SYMBOL)
-                    && !word.endsWith(PLUGIN_SYMBOL + ALL_BUILD_SYMBOL)) {
-                if (word.endsWith(ALL_BUILD_SYMBOL)) {
-                    final String trunc = JkUtilsString.substringBeforeLast(word, ALL_BUILD_SYMBOL);
+                    && !word.endsWith(PLUGIN_SYMBOL + ALL_RUN_SYMBOL)) {
+                if (word.endsWith(ALL_RUN_SYMBOL)) {
+                    final String trunc = JkUtilsString.substringBeforeLast(word, ALL_RUN_SYMBOL);
                     result.add(MethodInvocation.parse(trunc));
                 } else if (master) {
                     result.add(MethodInvocation.parse(word));
@@ -219,7 +219,7 @@ final class CommandLine {
     }
 
     Map<String, String> getOptions() {
-        return buildOptions;
+        return runOptions;
     }
 
     Map<String, String> getSystemProperties() {
@@ -239,7 +239,7 @@ final class CommandLine {
     }
 
     List<JkModuleDependency> dependencies() {
-        return this.buildDependencies;
+        return this.runDependencies;
     }
 
     String[] rawArgs() {

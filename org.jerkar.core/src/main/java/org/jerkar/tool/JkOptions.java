@@ -13,10 +13,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Key/value string storage for build parameters. Both keys and values are java
+ * Key/value string storage for run parameters. Both keys and values are java
  * {@link String}. Parameters are stored in a static field so they are available
- * to everywhere. These parameters are consumed by the build definitions but
- * not set here.<br/>
+ * to everywhere.<br/>
  * To define these values see <a
  * href="http://jerkar.github.io/documentation/latest/reference.html">Jerkar
  * Reference Guide section 3.3</a>

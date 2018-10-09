@@ -48,7 +48,7 @@ public final class Main {
             }
             if (Environment.standardOptions.logHeaders) {
                 final int length = printAscii(true, "failed.ascii");
-                System.err.println(JkUtilsString.repeat(" ", length) + "Total build time : "
+                System.err.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
                         + JkUtilsTime.durationInSeconds(start) + " seconds.");
             } else {
                 System.err.println("Failed !");
@@ -94,7 +94,7 @@ public final class Main {
 
     private static void displayOutro(long startTs) {
         final int length = printAscii(false, "success.ascii");
-        System.out.println(JkUtilsString.repeat(" ", length) + "Total build time : "
+        System.out.println(JkUtilsString.repeat(" ", length) + "Total run duration : "
                 + JkUtilsTime.durationInSeconds(startTs) + " seconds.");
     }
 

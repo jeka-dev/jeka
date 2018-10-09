@@ -6,7 +6,6 @@ import org.jerkar.api.java.project.JkJavaProject;
 import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.tool.*;
-import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
 import org.jerkar.tool.builtins.java.JkPluginJava;
 import org.jerkar.tool.builtins.scaffold.JkPluginScaffold;
 
@@ -41,9 +40,8 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("Generates Idea [my-module].iml file.")
     public void generateIml() {
         final JkImlGenerator generator;
-        if (owner instanceof JkJavaProjectBuild) {
-            final JkJavaProjectBuild projectBuild = (JkJavaProjectBuild) owner;
-            generator = new JkImlGenerator(projectBuild.java().project());
+        if (owner.plugins().hasLoaded(JkPluginJava.class)) {
+            generator = new JkImlGenerator(owner.plugins().get(JkPluginJava.class).project());
         } else {
             generator = new JkImlGenerator(owner.baseDir());
         }

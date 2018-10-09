@@ -60,14 +60,14 @@ public class JkRun {
         this.baseDir = JkUtilsObject.firstNonNull(baseDirContext, Paths.get("").toAbsolutePath());
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
 
-        // Instantiating imported builds
+        // Instantiating imported runs
         this.importedRuns = JkImportedRuns.of(this.baseTree().root(), this);
 
         this.plugins = new JkRunPlugins(this, Environment.commandLine.getPluginOptions());
     }
 
     /**
-     * Creates a instance of the specified build class (extending JkRun), including option injection, plugin loading
+     * Creates a instance of the specified run class (extending JkRun), including option injection, plugin loading
      * and plugin activation.
      */
     public static <T extends JkRun> T of(Class<T> runClass) {
@@ -75,13 +75,13 @@ public class JkRun {
             baseDirContext(Paths.get("").toAbsolutePath());
         }
         JkLog.startTask("Initializing class " + runClass.getName() + " at " + BASE_DIR_CONTEXT.get());
-        final T build = JkUtilsReflect.newInstance(runClass);
-        final JkRun jkRun = build;
+        final T run = JkUtilsReflect.newInstance(runClass);
+        final JkRun jkRun = run;
 
         // Inject options
-        JkOptions.populateFields(build, JkOptions.readSystemAndUserOptions());
+        JkOptions.populateFields(run, JkOptions.readSystemAndUserOptions());
         final Map<String, String> options = Environment.commandLine.getOptions();
-        JkOptions.populateFields(build, options);
+        JkOptions.populateFields(run, options);
 
         // Load plugins declared in command line and inject options
         jkRun.plugins.loadCommandLinePlugins();
@@ -89,11 +89,11 @@ public class JkRun {
            jkRun.plugins.injectOptions(plugin);
         }
 
-        build.afterOptionsInjected();
+        run.afterOptionsInjected();
 
         jkRun.plugins.loadCommandLinePlugins();
         for (JkPlugin plugin : jkRun.plugins().all()) {
-            List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(plugin).optionDefs();
+            List<ProjectDef.RunOptionDef> defs = ProjectDef.RunClassDef.of(plugin).optionDefs();
             try {
                 plugin.activate();
             } catch (RuntimeException e) {
@@ -104,27 +104,27 @@ public class JkRun {
             JkLog.info(pluginInfo);
         }
 
-        // Extra build configuration
-        build.afterPluginsActivated();
-        List<ProjectDef.BuildOptionDef> defs = ProjectDef.BuildClassDef.of(build).optionDefs();
-        JkLog.info("Build instance initialized with options " + HelpDisplayer.optionValues(defs));
+        // Extra run configuration
+        run.afterPluginsActivated();
+        List<ProjectDef.RunOptionDef> defs = ProjectDef.RunClassDef.of(run).optionDefs();
+        JkLog.info("Run instance initialized with options " + HelpDisplayer.optionValues(defs));
         JkLog.endTask();
         baseDirContext(null);
 
 
-        return build;
+        return run;
     }
 
     /**
      * This method is invoked right after options has been injected into this instance. You will typically
-     * setup plugins here before they decorate this build.
+     * setup plugins here before they decorate this run.
      */
     protected void afterOptionsInjected() {
         // Do nothing by default
     }
 
     /**
-     * This method is called once all plugin has decorated this build.
+     * This method is called once all plugin has decorated this run.
      */
     protected void afterPluginsActivated() {
         // Do nothing by default
@@ -164,10 +164,10 @@ public class JkRun {
     }
 
 
-    // ------------------------------ build dependencies --------------------------------
+    // ------------------------------ run dependencies --------------------------------
 
-    void setRunDependencyResolver(JkDependencySet buildDependencies, JkDependencyResolver scriptDependencyResolver) {
-        this.runDependencies = buildDependencies;
+    void setRunDependencyResolver(JkDependencySet runDependencies, JkDependencyResolver scriptDependencyResolver) {
+        this.runDependencies = runDependencies;
         this.runDefDependencyResolver = scriptDependencyResolver;
     }
 
@@ -180,14 +180,14 @@ public class JkRun {
     }
 
     /**
-     * Dependencies necessary to compile the this build class. It is not the dependencies for building the project.
+     * Dependencies necessary to compile the this run class. It is not the dependencies for building the project.
      */
     public final JkDependencySet runDependencies() {
         return runDependencies;
     }
 
     /**
-     * Returns imported builds with plugins applied on.
+     * Returns imported runs with plugins applied on.
      */
     public final JkImportedRuns importedRuns() {
         return importedRuns;
@@ -207,7 +207,7 @@ public class JkRun {
     }
 
     /**
-     * Displays all available methods defined in this build.
+     * Displays all available methods defined in this run.
      */
     @JkDoc("Displays all available methods and options defined for this run class.")
     public void help() {

@@ -15,8 +15,8 @@ public abstract class JkPlugin {
     protected final JkRun owner;
 
     /*
-     * Right after to be instantiated, plugin instances are likely to be configured by the owning build.
-     * Therefore, every plugin members that are likely to be configured by the owning build must be
+     * Right after to be instantiated, plugin instances are likely to be configured by the owning run.
+     * Therefore, every plugin members that are likely to be configured by the owning run must be
      * initialized in the constructor.
      */
     protected JkPlugin(JkRun owner) {
@@ -29,7 +29,7 @@ public abstract class JkPlugin {
     }
 
     /**
-     * Override this method to modify the build itself or its bound plugins.
+     * Override this method to modify the run itself or its bound plugins.
      */
     protected void activate() {
     }

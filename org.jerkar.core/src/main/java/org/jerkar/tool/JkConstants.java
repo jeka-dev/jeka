@@ -19,10 +19,10 @@ public final class JkConstants {
 
     static final String BOOT_DIR = JERKAR_DIR + "/boot";
 
-    static final Class<? extends JkRun> DEFAULT_BUILD_CLASS = JkRun.class;
+    static final Class<? extends JkRun> DEFAULT_RUN_CLASS = JkRun.class;
 
     /**
-     * Relative path to the project where the build definition classes will be
+     * Relative path to the project where the def classes will be
      * compiled.
      */
     public static final String DEF_BIN_DIR = OUTPUT_PATH + "/" + DEF_BIN_DIR_NAME;
@@ -30,7 +30,7 @@ public final class JkConstants {
 
 
     /**
-     * Relative path to the project where the build definition sources lie.
+     * Relative path to the project where the def definition sources lie.
      */
     public static final String DEF_DIR = JERKAR_DIR + "/def";
 

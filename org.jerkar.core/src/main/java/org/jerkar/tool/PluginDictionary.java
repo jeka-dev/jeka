@@ -193,9 +193,9 @@ final class PluginDictionary {
             return doc == null ? Collections.emptyList() : Arrays.asList(doc.value());
         }
 
-        boolean isDecorateBuildDefined() {
-            Method decorateBuild = JkUtilsReflect.findMethodMethodDeclaration(clazz, "activate");
-            return  decorateBuild != null && !decorateBuild.getDeclaringClass().equals(JkPlugin.class);
+        boolean isDecorateRunDefined() {
+            Method decorateRun = JkUtilsReflect.findMethodMethodDeclaration(clazz, "activate");
+            return  decorateRun != null && !decorateRun.getDeclaringClass().equals(JkPlugin.class);
         }
 
         @Override

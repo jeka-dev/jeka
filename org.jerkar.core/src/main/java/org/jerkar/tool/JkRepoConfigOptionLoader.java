@@ -55,7 +55,7 @@ public class JkRepoConfigOptionLoader {
     }
 
     /**
-     * Returns the repositories where are downloaded dependencies needed to run the build.
+     * Returns the repositories where are downloaded dependencies needed to execute the Jerkar run.
      */
     public static JkRepo runRepository() {
         final String repoName = JkUtilsObject.firstNonNull(JkOptions.get("repo.runName"), "run");

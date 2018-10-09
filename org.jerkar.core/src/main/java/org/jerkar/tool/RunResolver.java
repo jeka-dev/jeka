@@ -134,7 +134,7 @@ final class RunResolver {
         JkRun.baseDirContext(baseDir);
         final JkRun result;
         try {
-            result = JkRun.of(JkConstants.DEFAULT_BUILD_CLASS);
+            result = JkRun.of(JkConstants.DEFAULT_RUN_CLASS);
         } finally {
             JkRun.baseDirContext(null);
         }
