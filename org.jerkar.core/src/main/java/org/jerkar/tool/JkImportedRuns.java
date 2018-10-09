@@ -48,9 +48,7 @@ public final class JkImportedRuns {
     }
 
     /**
-     * Returns direct and transitive importedRuns. Transitive importedRuns are resolved by
-     * invoking recursively <code>JkBuildDependencySupport#importedRuns()</code> on
-     * direct importedRuns.
+     * Returns direct and transitive importedRuns.
      */
     public List<JkRun> all() {
         if (transitiveImportedBuilds == null) {
@@ -60,7 +58,7 @@ public final class JkImportedRuns {
     }
 
     /**
-     * Same as {@link #all()} but only returns builds instance of the specified class or its subclasses.
+     * Same as {@link #all()} but only returns run instance of the specified class or its subclasses.
      */
     public <T extends JkRun> List<T> allOf(Class<T> ofClass) {
         final List<T> result = new LinkedList<>();

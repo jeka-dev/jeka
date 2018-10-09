@@ -67,15 +67,15 @@ public class JkRun {
     }
 
     /**
-     * Creates a instance of the specified build class (extending JkBuild), including option injection, plugin loading
+     * Creates a instance of the specified build class (extending JkRun), including option injection, plugin loading
      * and plugin activation.
      */
-    public static <T extends JkRun> T of(Class<T> buildClass) {
+    public static <T extends JkRun> T of(Class<T> runClass) {
         if (BASE_DIR_CONTEXT.get() == null) {
             baseDirContext(Paths.get("").toAbsolutePath());
         }
-        JkLog.startTask("Initializing class " + buildClass.getName() + " at " + BASE_DIR_CONTEXT.get());
-        final T build = JkUtilsReflect.newInstance(buildClass);
+        JkLog.startTask("Initializing class " + runClass.getName() + " at " + BASE_DIR_CONTEXT.get());
+        final T build = JkUtilsReflect.newInstance(runClass);
         final JkRun jkRun = build;
 
         // Inject options

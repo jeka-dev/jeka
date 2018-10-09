@@ -284,7 +284,7 @@ final class ProjectDef {
 
         private final String description;
 
-        private final Object build;
+        private final Object run;
 
         private final Object defaultValue;
 
@@ -292,12 +292,12 @@ final class ProjectDef {
 
         private final Class<?> type;
 
-        private BuildOptionDef(String name, String description, Object jkBuild, Object defaultValue,
+        private BuildOptionDef(String name, String description, Object jkRun, Object defaultValue,
                                Class<?> type, Class<?> declaringClass) {
             super();
             this.name = name;
             this.description = description;
-            this.build = jkBuild;
+            this.run = jkRun;
             this.defaultValue = defaultValue;
             this.type = type;
             this.rootDeclaringClass = declaringClass;
@@ -327,10 +327,10 @@ final class ProjectDef {
 
         @Override
         public int compareTo(BuildOptionDef other) {
-            if (this.build.getClass().equals(other.build.getClass())) {
+            if (this.run.getClass().equals(other.run.getClass())) {
                 return this.name.compareTo(other.name);
             }
-            if (this.build.getClass().isAssignableFrom(other.build.getClass())) {
+            if (this.run.getClass().isAssignableFrom(other.run.getClass())) {
                 return -1;
             }
             return 1;
