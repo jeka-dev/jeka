@@ -80,6 +80,7 @@ final class Engine {
             JkLog.trace("Command line extra path : " + cmdPath);
         }
         if (!JkUtilsString.isBlank(buildClassHint)) {  // First find a class in the existing classpath without compiling
+            preCompile();  // Need to pre-compile to get the declared run dependencies
             build = getBuildInstance(buildClassHint, path);
         }
         if (build == null) {
