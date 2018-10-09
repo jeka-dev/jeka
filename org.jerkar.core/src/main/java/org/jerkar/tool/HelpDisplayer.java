@@ -117,7 +117,7 @@ final class HelpDisplayer {
         }
         final Object object = JkUtilsReflect.newInstance(description.pluginClass(), JkRun.class, jkRun);
         sb.append("\n");
-        sb.append(RunClassDef.of(object).flatDescription(description.shortName() + "#", false, false));
+        sb.append(RunClassDef.of(object).flatDescription(description.shortName() + "#", false));
         return sb.toString();
     }
 

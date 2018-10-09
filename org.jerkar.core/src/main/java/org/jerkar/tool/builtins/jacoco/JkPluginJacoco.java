@@ -17,8 +17,8 @@ public class JkPluginJacoco extends JkPlugin {
      */
     public static final String OUTPUT_RELATIVE_PATH = "jacoco/jacoco.exec";
 
-    protected JkPluginJacoco(JkRun build) {
-        super(build);
+    protected JkPluginJacoco(JkRun run) {
+        super(run);
     }
 
     @JkDoc("Configures java plugin in order unit tests are run with Jacoco coverage tool. Result is located in [OUTPUT DIR]/"

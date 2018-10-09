@@ -6,7 +6,6 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsReflect;
 import org.jerkar.api.utils.JkUtilsString;
@@ -20,27 +19,11 @@ import org.w3c.dom.Element;
  */
 final class ProjectDef {
 
-    private final List<Class<?>> buildClasses;
+    private final List<Class<?>> runClasses;
 
-    private ProjectDef(List<Class<?>> buildClasses) {
+    private ProjectDef(List<Class<?>> runClasses) {
         super();
-        this.buildClasses = Collections.unmodifiableList(buildClasses);
-    }
-
-    public void logAvailableBuildClasses() {
-        int i = 0;
-        for (final Class<?> classDef : this.buildClasses) {
-            final String defaultMessage = (i == 0) ? " (default)" : "";
-            final JkDoc jkDoc = classDef.getAnnotation(JkDoc.class);
-            final String desc;
-            if (jkDoc != null) {
-                desc = JkUtilsString.join(jkDoc.value(), "\n");
-            } else {
-                desc = "No description available";
-            }
-            JkLog.info(classDef.getName() + defaultMessage + " : " + desc);
-            i++;
-        }
+        this.runClasses = Collections.unmodifiableList(runClasses);
     }
 
     /**
@@ -50,21 +33,21 @@ final class ProjectDef {
      */
     static final class RunClassDef {
 
-        private final List<BuildMethodDef> methodDefs;
+        private final List<RunMethodDef> methodDefs;
 
         private final List<RunOptionDef> optionDefs;
 
-        private final Object buildOrPlugin;
+        private final Object runOrPlugin;
 
-        private RunClassDef(Object buildOrPlugin, List<BuildMethodDef> methodDefs,
+        private RunClassDef(Object runOrPlugin, List<RunMethodDef> methodDefs,
                             List<RunOptionDef> optionDefs) {
             super();
-            this.buildOrPlugin = buildOrPlugin;
+            this.runOrPlugin = runOrPlugin;
             this.methodDefs = Collections.unmodifiableList(methodDefs);
             this.optionDefs = Collections.unmodifiableList(optionDefs);
         }
 
-        List<BuildMethodDef> methodDefinitions() {
+        List<RunMethodDef> methodDefinitions() {
             return methodDefs;
         }
 
@@ -72,20 +55,20 @@ final class ProjectDef {
             return optionDefs;
         }
 
-        static RunClassDef of(Object build) {
-            final Class<?> clazz = build.getClass();
-            final List<BuildMethodDef> methods = new LinkedList<>();
+        static RunClassDef of(Object run) {
+            final Class<?> clazz = run.getClass();
+            final List<RunMethodDef> methods = new LinkedList<>();
             for (final Method method : executableMethods(clazz)) {
-                methods.add(BuildMethodDef.of(method));
+                methods.add(RunMethodDef.of(method));
             }
             Collections.sort(methods);
             final List<RunOptionDef> options = new LinkedList<>();
             for (final NameAndField nameAndField : options(clazz, "", true, null)) {
-                options.add(RunOptionDef.of(build, nameAndField.field,
+                options.add(RunOptionDef.of(run, nameAndField.field,
                         nameAndField.name, nameAndField.rootClass));
             }
             Collections.sort(options);
-            return new RunClassDef(build, methods, options);
+            return new RunClassDef(run, methods, options);
         }
 
         private static List<Method> executableMethods(Class<?> clazz) {
@@ -123,33 +106,33 @@ final class ProjectDef {
 
         String description(String prefix, boolean withHeader) {
             StringBuilder stringBuilder = new StringBuilder();
-            for (Class<? extends JkRun> buildClass : this.buildClassHierarchy()) {
+            for (Class<? extends JkRun> buildClass : this.runClassHierarchy()) {
                 stringBuilder.append(description(buildClass, prefix, withHeader, false));
             }
             return stringBuilder.toString();
         }
 
-        String flatDescription(String prefix, boolean withHeader, boolean showBuildPlugin) {
-            return description(this.buildOrPlugin.getClass(), prefix, withHeader, true);
+        String flatDescription(String prefix, boolean withHeader) {
+            return description(this.runOrPlugin.getClass(), prefix, withHeader, true);
         }
 
 
 
-        private String description(Class<?> buildClass, String prefix, boolean withHeader, boolean includeHierarchy) {
-            List<BuildMethodDef> methods = includeHierarchy ? this.methodDefs : this.methodsOf(buildClass);
-            List<RunOptionDef> options = includeHierarchy ? this.optionDefs : this.optionsOf(buildClass);
+        private String description(Class<?> runClass, String prefix, boolean withHeader, boolean includeHierarchy) {
+            List<RunMethodDef> methods = includeHierarchy ? this.methodDefs : this.methodsOf(runClass);
+            List<RunOptionDef> options = includeHierarchy ? this.optionDefs : this.optionsOf(runClass);
             if (methods.isEmpty() && options.isEmpty()) {
                 return "";
             }
-            String classWord = JkRun.class.isAssignableFrom(buildClass) ? "class" : "plugin";
+            String classWord = JkRun.class.isAssignableFrom(runClass) ? "class" : "plugin";
             StringBuilder stringBuilder = new StringBuilder();
             if (withHeader) {
-                stringBuilder.append("\nFrom " + classWord + " " + buildClass.getName() + " :\n");
+                stringBuilder.append("\nFrom " + classWord + " " + runClass.getName() + " :\n");
             }
             String margin = withHeader ? "  " : "";
             if (!methods.isEmpty()) {
                 stringBuilder.append(margin + "Methods :\n");
-                for (BuildMethodDef methodDef : methods) {
+                for (RunMethodDef methodDef : methods) {
                     final String displayedMethodName = prefix + methodDef.name;
                     if (methodDef.description == null) {
                         stringBuilder.append( margin + "  " + displayedMethodName + " : No description available.\n");
@@ -169,36 +152,36 @@ final class ProjectDef {
             return stringBuilder.toString();
         }
 
-        Map<String, String> optionValues(JkRun build) {
+        Map<String, String> optionValues(JkRun run) {
             final Map<String, String> result = new LinkedHashMap<>();
             for (final RunOptionDef optionDef : this.optionDefs) {
                 final String name = optionDef.name;
-                final Object value = RunOptionDef.value(build, name);
+                final Object value = RunOptionDef.value(run, name);
                 result.put(name, JkUtilsObject.toString(value));
             }
             return result;
         }
 
         Element toElement(Document document) {
-            final Element buildEl = document.createElement("build");
+            final Element runEl = document.createElement("run");
             final Element methodsEl = document.createElement("methods");
-            buildEl.appendChild(methodsEl);
-            for (final BuildMethodDef buildMethodDef : this.methodDefs) {
-                final Element methodEl = buildMethodDef.toXmlElement(document);
+            runEl.appendChild(methodsEl);
+            for (final RunMethodDef runMethodDef : this.methodDefs) {
+                final Element methodEl = runMethodDef.toXmlElement(document);
                 methodsEl.appendChild(methodEl);
             }
             final Element optionsEl = document.createElement("options");
-            buildEl.appendChild(optionsEl);
-            for (final RunOptionDef buildOptionDef : this.optionDefs) {
-                final Element optionEl = buildOptionDef.toElement(document);
+            runEl.appendChild(optionsEl);
+            for (final RunOptionDef runOptionDef : this.optionDefs) {
+                final Element optionEl = runOptionDef.toElement(document);
                 optionsEl.appendChild(optionEl);
             }
-            return buildEl;
+            return runEl;
         }
 
-        private List<Class<? extends JkRun>> buildClassHierarchy() {
+        private List<Class<? extends JkRun>> runClassHierarchy() {
             List<Class<? extends JkRun>> result = new ArrayList<>();
-            Class<?> current = this.buildOrPlugin.getClass();
+            Class<?> current = this.runOrPlugin.getClass();
             while (JkRun.class.isAssignableFrom(current) || JkPlugin.class.isAssignableFrom(current)) {
                 result.add((Class<? extends JkRun>) current);
                 current = current.getSuperclass();
@@ -206,13 +189,13 @@ final class ProjectDef {
             return result;
         }
 
-        private List<BuildMethodDef> methodsOf(Class<?> buildClass) {
-            return this.methodDefs.stream().filter(buildMethodDef -> buildClass.equals(buildMethodDef.declaringClass))
+        private List<RunMethodDef> methodsOf(Class<?> runClass) {
+            return this.methodDefs.stream().filter(runMethodDef -> runClass.equals(runMethodDef.declaringClass))
                     .collect(Collectors.toList());
         }
 
-        private List<RunOptionDef> optionsOf(Class<?> buildClass) {
-            return this.optionDefs.stream().filter(buildOptionDef -> buildClass.equals(buildOptionDef.rootDeclaringClass))
+        private List<RunOptionDef> optionsOf(Class<?> runClass) {
+            return this.optionDefs.stream().filter(runOptionDef -> runClass.equals(runOptionDef.rootDeclaringClass))
                     .collect(Collectors.toList());
         }
     }
@@ -222,7 +205,7 @@ final class ProjectDef {
      *
      * @author Jerome Angibaud
      */
-     static final class BuildMethodDef implements Comparable<BuildMethodDef> {
+     static final class RunMethodDef implements Comparable<RunMethodDef> {
 
         private final String name;
 
@@ -230,21 +213,21 @@ final class ProjectDef {
 
         private final Class<?> declaringClass;
 
-        private BuildMethodDef(String name, String description, Class<?> declaringClass) {
+        private RunMethodDef(String name, String description, Class<?> declaringClass) {
             super();
             this.name = name;
             this.description = description;
             this.declaringClass = declaringClass;
         }
 
-        static BuildMethodDef of(Method method) {
+        static RunMethodDef of(Method method) {
             final JkDoc jkDoc = JkUtilsReflect.getInheritedAnnotation(method, JkDoc.class);
             final String descr = jkDoc != null ? JkUtilsString.join(jkDoc.value(), "\n") : null;
-            return new BuildMethodDef(method.getName(), descr, method.getDeclaringClass());
+            return new RunMethodDef(method.getName(), descr, method.getDeclaringClass());
         }
 
         @Override
-        public int compareTo(BuildMethodDef other) {
+        public int compareTo(RunMethodDef other) {
             if (this.declaringClass.equals(other.declaringClass)) {
                 return this.name.compareTo(other.name);
             }
@@ -273,8 +256,8 @@ final class ProjectDef {
     }
 
     /**
-     * Definition for build option. Build options are fields belonging to a
-     * build class.
+     * Definition for run option. Run options are fields belonging to a
+     * run class.
      *
      * @author Jerome Angibaud
      */
@@ -311,14 +294,14 @@ final class ProjectDef {
             return new RunOptionDef(name, descr, instance, defaultValue, type, rootDeclaringClass);
         }
 
-        private static Object value(Object buildinstance, String optName) {
+        private static Object value(Object runInstance, String optName) {
             if (!optName.contains(".")) {
-                return JkUtilsReflect.getFieldValue(buildinstance, optName);
+                return JkUtilsReflect.getFieldValue(runInstance, optName);
             }
             final String first = JkUtilsString.substringBeforeFirst(optName, ".");
-            Object firstObject = JkUtilsReflect.getFieldValue(buildinstance, first);
+            Object firstObject = JkUtilsReflect.getFieldValue(runInstance, first);
             if (firstObject == null) {
-                final Class<?> firstClass = JkUtilsReflect.getField(buildinstance.getClass(), first).getType();
+                final Class<?> firstClass = JkUtilsReflect.getField(runInstance.getClass(), first).getType();
                 firstObject = JkUtilsReflect.newInstance(firstClass);
             }
             final String last = JkUtilsString.substringAfterFirst(optName, ".");

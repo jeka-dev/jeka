@@ -52,8 +52,8 @@ public class JkPluginRepo extends JkPlugin {
 
     // ----------------------------------------------------------------------------------
 
-    protected JkPluginRepo(JkRun build) {
-        super(build);
+    protected JkPluginRepo(JkRun run) {
+        super(run);
     }
 
     public JkRepo publishRepository() {

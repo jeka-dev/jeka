@@ -18,8 +18,8 @@ public final class JkPluginEclipsePath extends JkPlugin {
             " will be considered as test code, so won't be packaged in main jar file.")
     public boolean smartScope = true;
 
-    protected JkPluginEclipsePath(JkRun build) {
-        super(build);
+    protected JkPluginEclipsePath(JkRun run) {
+        super(run);
     }
 
     @JkDoc("Configures java plugin instance in order java project reflects project structure and dependencies described in Eclipse .classpath file.")
@@ -31,7 +31,7 @@ public final class JkPluginEclipsePath extends JkPlugin {
             final JkEclipseClasspathApplier classpathApplier = new JkEclipseClasspathApplier(smartScope);
             classpathApplier.apply(project);
         } else {
-            JkLog.warn("No Java plugin detected in this build : ignore.");
+            JkLog.warn("No Java plugin detected in this Jerkar run : ignore.");
         }
     }
 

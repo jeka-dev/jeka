@@ -9,6 +9,7 @@ import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsAssert;
 import org.jerkar.api.utils.JkUtilsObject;
 import org.jerkar.api.utils.JkUtilsPath;
+import org.jerkar.tool.JkConstants;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,7 +52,7 @@ public final class JkSonar {
     public static final String JDBC_USERNAME = "jdbc.username";
     public static final String JDBC_PASSWORD = "jdbc.password";
     private static final String RUNNER_JAR_NAME_24 = "sonar-runner-2.4.jar";
-    private static final String RUNNER_LOCAL_PATH = "build/output/temp/" + RUNNER_JAR_NAME_24;
+    private static final String RUNNER_LOCAL_PATH = JkConstants.OUTPUT_PATH + "/temp/" + RUNNER_JAR_NAME_24;
     private static final String SONAR_PREFIX = "sonar.";
     private final Map<String, String> params;
 

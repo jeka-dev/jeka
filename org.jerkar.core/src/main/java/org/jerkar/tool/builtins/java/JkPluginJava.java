@@ -53,9 +53,9 @@ public class JkPluginJava extends JkPlugin {
 
     private final List<JkArtifactId> producedArtifacts = new ArrayList<>();
 
-    protected JkPluginJava(JkRun build) {
-        super(build);
-        this.repoPlugin = build.plugins().get(JkPluginRepo.class);
+    protected JkPluginJava(JkRun run) {
+        super(run);
+        this.repoPlugin = run.plugins().get(JkPluginRepo.class);
         this.project = JkJavaProject.ofMavenLayout(this.owner.baseDir());
         this.project.setDependencies(JkDependencySet.ofLocal(project().getSourceLayout()
                 .baseDir().resolve(JkConstants.JERKAR_DIR + "/libs")));
@@ -64,7 +64,7 @@ public class JkPluginJava extends JkPlugin {
             this.project.setDependencies(this.project.getDependencies().and(JkDependencySet.fromDescription(path)));
         }
         this.producedArtifacts.add(this.project.maker().mainArtifactId());
-        this.scaffoldPlugin = build.plugins().get(JkPluginScaffold.class);
+        this.scaffoldPlugin = run.plugins().get(JkPluginScaffold.class);
     }
 
     @JkDoc("Improves scaffolding by creating a project structure ready to build.")
@@ -135,7 +135,7 @@ public class JkPluginJava extends JkPlugin {
         project.getSourceLayout().resources().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
         project.getSourceLayout().tests().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
         project.getSourceLayout().testResources().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
-        scaffoldPlugin.setBuildClassClode(code);
+        scaffoldPlugin.setRunClassClode(code);
     }
 
     // ------------------------------ Accessors -----------------------------------------

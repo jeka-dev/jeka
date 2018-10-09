@@ -26,14 +26,14 @@ public final class JkPluginIntellij extends JkPlugin {
     @JkDoc("If true, the project dependencies are not taken in account to generate iml, only run class dependencies are.")
     public boolean onlyRunDependencies = false;
 
-    @JkDoc("If true, the project in taken in account is not the build project but the project configured in java plugin.")
+    @JkDoc("If true, the project taken in account is not the run project but the project configured in java plugin.")
     public boolean externalDir = false;
 
     private final JkPluginScaffold scaffold;
 
-    protected JkPluginIntellij(JkRun build) {
-        super(build);
-        scaffold = build.plugins().get(JkPluginScaffold.class);
+    protected JkPluginIntellij(JkRun run) {
+        super(run);
+        scaffold = run.plugins().get(JkPluginScaffold.class);
     }
 
     /** Generates Idea [my-module].iml file */
@@ -46,8 +46,8 @@ public final class JkPluginIntellij extends JkPlugin {
             generator = new JkImlGenerator(owner.baseDir());
         }
         final List<Path> depProjects = new LinkedList<>();
-        for (final JkRun depBuild : owner.importedRuns().directs()) {
-            depProjects.add(depBuild.baseTree().root());
+        for (final JkRun depRun : owner.importedRuns().directs()) {
+            depProjects.add(depRun.baseTree().root());
         }
         generator.setUseVarPath(useVarPath);
         generator.setRunDependencies(externalDir ? null : owner.runDependencyResolver(), owner.runDependencies());

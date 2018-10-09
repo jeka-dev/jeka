@@ -61,7 +61,7 @@ public final class JkScaffolder {
         extraActions.run();
     }
 
-    public void setBuildClassCode(String code) {
+    public void setRunClassCode(String code) {
         this.buildClassCode = code;
     }
 

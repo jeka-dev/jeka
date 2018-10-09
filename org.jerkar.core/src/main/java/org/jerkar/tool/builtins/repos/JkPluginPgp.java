@@ -8,7 +8,7 @@ import org.jerkar.tool.JkPlugin;
 
 import java.nio.file.Paths;
 
-@JkDoc("Provides configurable JkPgp instance for signing artifacts. This instance is directly usable by build code.")
+@JkDoc("Provides configurable JkPgp instance for signing artifacts. This instance is directly usable by def code.")
 public class JkPluginPgp extends JkPlugin {
 
     @JkDoc("Path for the public key ring.")
@@ -21,8 +21,8 @@ public class JkPluginPgp extends JkPlugin {
     public String secretKeyPassword;
 
 
-    protected JkPluginPgp(JkRun build) {
-        super(build);
+    protected JkPluginPgp(JkRun run) {
+        super(run);
         JkPgp defaultPgp = JkPgp.ofDefaultGnuPg();
         publicRingPath = defaultPgp.publicRing().normalize().toString();
         secretRingPath = defaultPgp.secretRing().normalize().toString();

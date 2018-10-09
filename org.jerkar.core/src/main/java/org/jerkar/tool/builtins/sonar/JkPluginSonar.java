@@ -19,8 +19,8 @@ public class JkPluginSonar extends JkPlugin {
 
     private final Map<String, String> properties = new HashMap<>();
 
-    public JkPluginSonar(JkRun build) {
-        super(build);
+    public JkPluginSonar(JkRun run) {
+        super(run);
     }
 
     public static JkSonar configureSonarFrom(JkJavaProject project) {
@@ -40,7 +40,7 @@ public class JkPluginSonar extends JkPlugin {
                 .withLibraries(libs)
                 .withSourcesPath(sourceLayout.sources().rootDirsOrZipFiles())
                 .withTestPath(sourceLayout.tests().rootDirsOrZipFiles())
-                .withProperty(JkSonar.WORKING_DIRECTORY, sourceLayout.baseDir().resolve("build/.sonar").toString())
+                .withProperty(JkSonar.WORKING_DIRECTORY, sourceLayout.baseDir().resolve(JkConstants.JERKAR_DIR + "/.sonar").toString())
                 .withProperty(JkSonar.JUNIT_REPORTS_PATH,
                         baseDir.relativize( testReportDir.resolve("junit")).toString())
                 .withProperty(JkSonar.SUREFIRE_REPORTS_PATH,

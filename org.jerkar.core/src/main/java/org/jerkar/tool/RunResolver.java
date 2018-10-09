@@ -32,10 +32,10 @@ final class RunResolver {
     }
 
     /**
-     * Resolves the build classes defined in this project
+     * Resolves run classes defined in this project
      */
-    List<Class<?>> resolveBuildClasses() {
-        return resolveBuildClasses(JkRun.class);
+    List<Class<?>> resolveRunClasses() {
+        return resolveRunClasses(JkRun.class);
     }
 
     /**
@@ -99,16 +99,16 @@ final class RunResolver {
                 return null;
             }
             JkRun.baseDirContext(baseDir);
-            final JkRun build;
+            final JkRun run;
             try {
-                build = JkRun.of(clazz);
+                run = JkRun.of(clazz);
             } finally {
                 JkRun.baseDirContext(null);
             }
-            return build;
+            return run;
         }
 
-        // If there is a build file
+        // If there is a run file
         if (this.hasDefSource()) {
             final JkPathTree dir = JkPathTree.of(runSourceDir);
             for (final Path path : dir.relativeFiles()) {
@@ -117,13 +117,13 @@ final class RunResolver {
                     if (baseClass.isAssignableFrom(clazz)
                             && !Modifier.isAbstract(clazz.getModifiers())) {
                         JkRun.baseDirContext(baseDir);
-                        final JkRun build;
+                        final JkRun run;
                         try {
-                            build = JkRun.of((Class<? extends JkRun>) clazz);
+                            run = JkRun.of((Class<? extends JkRun>) clazz);
                         } finally {
                             JkRun.baseDirContext(null);
                         }
-                        return build;
+                        return run;
                     }
                 }
 
@@ -141,12 +141,12 @@ final class RunResolver {
         return result;
     }
 
-    private List<Class<?>> resolveBuildClasses(Class<? extends JkRun> baseClass) {
+    private List<Class<?>> resolveRunClasses(Class<? extends JkRun> baseClass) {
 
         final JkClassLoader classLoader = JkClassLoader.current();
         final List<Class<?>> result = new LinkedList<>();
 
-        // If there is a build source
+        // If there is a def sources
         if (this.hasDefSource()) {
             final JkPathTree dir = JkPathTree.of(runSourceDir);
             for (final Path path : dir.relativeFiles()) {

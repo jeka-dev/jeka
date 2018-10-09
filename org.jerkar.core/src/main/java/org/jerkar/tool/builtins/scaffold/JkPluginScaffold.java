@@ -6,7 +6,7 @@ import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkPlugin;
 
 /**
- * proposes method to generate a project skeleton (folder structure, build artifacts, configuration files, ....)
+ * Provides method to generate a project skeleton (folder structure, configuration files, ....)
  */
 @JkDoc("Provides method to generate a project skeleton (folder structure and basic build files).")
 public class JkPluginScaffold extends JkPlugin {
@@ -16,18 +16,18 @@ public class JkPluginScaffold extends JkPlugin {
 
     private final JkScaffolder scaffolder;
 
-    protected JkPluginScaffold(JkRun build) {
-        super(build);
-        this.scaffolder = new JkScaffolder(build.baseDir(), false);
-        this.scaffolder.setBuildClassCode(JkUtilsIO.read(JkPluginScaffold.class.getResource("buildclass.snippet")));
+    protected JkPluginScaffold(JkRun run) {
+        super(run);
+        this.scaffolder = new JkScaffolder(run.baseDir(), false);
+        this.scaffolder.setRunClassCode(JkUtilsIO.read(JkPluginScaffold.class.getResource("buildclass.snippet")));
     }
 
     public void addExtraAction(Runnable runnable) {
         this.scaffolder.extraActions.chain(runnable);
     }
 
-    public void setBuildClassClode(String code) {
-        scaffolder.setBuildClassCode(code);
+    public void setRunClassClode(String code) {
+        scaffolder.setRunClassCode(code);
     }
 
     @JkDoc("Generates project skeleton (folders and files necessary to work with the project).")

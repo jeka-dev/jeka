@@ -12,8 +12,8 @@ import java.nio.file.Path;
 @JkDoc("Provides method to help migration from Maven.")
 public class JkPluginPom extends JkPlugin {
 
-    protected JkPluginPom(JkRun build) {
-        super(build);
+    protected JkPluginPom(JkRun run) {
+        super(run);
     }
 
     @JkDoc("Prints Java code for declaring dependencies on console based on pom.xml. The pom.xml file is supposed to be in root directory.")

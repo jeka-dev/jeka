@@ -92,7 +92,7 @@ final class SourceParser {
     }
 
     private static List<Path>  projects(String code, Path baseDir, URL url) {
-        final List<String> deps = jkImportBuild(code, url);
+        final List<String> deps = jkImportRun(code, url);
         return projectDependencies(baseDir, deps);
     }
 
@@ -171,7 +171,7 @@ final class SourceParser {
         return left.isEmpty();
     }
 
-    private static List<String> jkImportBuild(String code, URL url) {
+    private static List<String> jkImportRun(String code, URL url) {
         return stringsInAnnotation(code, JkImportRun.class, url);
     }
 
