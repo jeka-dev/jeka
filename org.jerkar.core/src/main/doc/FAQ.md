@@ -18,7 +18,7 @@ public class Build extends JkJavaProjectBuild {
 
 ## My run class does not compile so I can't invoke any Jerkar method as 'help' or 'scaffold#run'. What can I do ?
 
-You can specify a built-in run class to run, as is, compilation won't occur.
+You can specify a built-in run class to run. This way, compilation won't occur.
 For example `jerkar -RunClass=JkRun help` or `jerkar -RC=JkRun scaffold#run java#"`.
 
 # Compilation
