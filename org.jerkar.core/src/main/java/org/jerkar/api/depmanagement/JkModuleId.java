@@ -3,6 +3,7 @@ package org.jerkar.api.depmanagement;
 import java.io.Serializable;
 import java.util.Comparator;
 
+import org.jerkar.api.system.JkException;
 import org.jerkar.api.utils.JkUtilsString;
 
 /**
@@ -24,6 +25,8 @@ public final class JkModuleId implements Serializable {
      * Creates a project id according the specified group and name.
      */
     public static JkModuleId of(String group, String name) {
+        JkException.throwIf(JkUtilsString.isBlank(group), "Module group can't be empty");
+        JkException.throwIf(JkUtilsString.isBlank(name), "Module name can't be empty");
         return new JkModuleId(group, name);
     }
 
@@ -37,16 +40,16 @@ public final class JkModuleId implements Serializable {
      */
     public static JkModuleId of(String groupAndName) {
         if (groupAndName.contains(":")) {
-            final String group = JkUtilsString.substringBeforeLast(groupAndName, ":");
-            final String name = JkUtilsString.substringAfterLast(groupAndName, ":");
-            return new JkModuleId(group, name);
+            final String group = JkUtilsString.substringBeforeLast(groupAndName, ":").trim();
+            final String name = JkUtilsString.substringAfterLast(groupAndName, ":").trim();
+            return JkModuleId.of(group, name);
         }
         if (groupAndName.contains(".")) {
-            final String group = JkUtilsString.substringBeforeLast(groupAndName, ".");
-            final String name = JkUtilsString.substringAfterLast(groupAndName, ".");
-            return new JkModuleId(group, name);
+            final String group = JkUtilsString.substringBeforeLast(groupAndName, ".").trim();
+            final String name = JkUtilsString.substringAfterLast(groupAndName, ".").trim();
+            return JkModuleId.of(group, name);
         }
-        return new JkModuleId(groupAndName, groupAndName);
+        return JkModuleId.of(groupAndName, groupAndName);
     }
 
     private final String group;
@@ -74,9 +77,9 @@ public final class JkModuleId implements Serializable {
     }
 
     /**
-     * A concatenation of the group and name of the module as '[group].[value]'.
+     * A concatenation of the group and name of the module as '[group].[name]'.
      */
-    public String fullName() {
+    public String dotedName() {
         if (group.equals(name)) {
             return name;
         }

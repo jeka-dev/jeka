@@ -23,7 +23,7 @@ public class NormalJarBuild extends JkJavaProjectBuild {
     /*
      *  Creates a sample build instance of the 'org.jerkar.samples' project.
      *  The 'samples' project path must be relative to this one.
-     *  So in this case, the two project are supposed to lie accept the same folder.
+     *  So in this case, the two projects are supposed to lie in the same folder.
      */
     @JkImportRun("../org.jerkar.samples")
     private MavenStyleBuild sampleBuild;  

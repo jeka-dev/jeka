@@ -17,4 +17,10 @@ public final class JkException extends RuntimeException {
         super(message);
     }
 
+    public static void throwIf(boolean condition, String message) {
+        if (condition) {
+            throw new JkException(message);
+        }
+    }
+
 }

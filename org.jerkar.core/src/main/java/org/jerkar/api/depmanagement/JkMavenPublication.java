@@ -103,9 +103,7 @@ public final class JkMavenPublication implements Serializable {
 
     private boolean contains(String ext, String classifier) {
         for (final JkClassifiedFileArtifact classifiedArtifact : this.classifiedArtifacts) {
-            final String fileExt = JkUtilsString.substringAfterLast(
-                    classifiedArtifact.file.getName(), ".");
-            if (classifier.contains(classifiedArtifact.classifier) && fileExt.equals(ext)) {
+            if (classifier.equals(classifiedArtifact.classifier) && classifiedArtifact.extension().equals(ext)) {
                 return true;
             }
         }
@@ -216,6 +214,11 @@ public final class JkMavenPublication implements Serializable {
         /** File for this classified artifact */
         public Path file() {
             return file.toPath();
+        }
+
+        /** File extension */
+        public String extension() {
+            return JkUtilsString.substringAfterLast(file.getName(), ".");
         }
 
     }

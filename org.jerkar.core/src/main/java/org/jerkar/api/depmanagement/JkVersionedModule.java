@@ -15,6 +15,16 @@ public final class JkVersionedModule implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private final JkModuleId moduleId;
+
+    private final JkVersion version;
+
+    private JkVersionedModule(JkModuleId moduleId, JkVersion version) {
+        super();
+        this.moduleId = moduleId;
+        this.version = version;
+    }
+
     /**
      * Creates a {@link JkVersionedModule} from the specified module and projectVersion.
      */
@@ -36,14 +46,12 @@ public final class JkVersionedModule implements Serializable {
         return JkVersionedModule.of(JkModuleId.of(items[0], items[1]), JkVersion.of(items[2]));
     }
 
-    private final JkModuleId moduleId;
-
-    private final JkVersion version;
-
-    private JkVersionedModule(JkModuleId moduleId, JkVersion version) {
-        super();
-        this.moduleId = moduleId;
-        this.version = version;
+    /**
+     * Creates a <code>JkVersionedModule</code> from a string formatted as
+     * <code>groupId:name:projectVersion</code>.
+     */
+    public static final JkVersionedModule defaultFor(String rootDirName) {
+        return of(JkModuleId.of(rootDirName), JkVersion.UNSPECIFIED);
     }
 
     /**
@@ -121,7 +129,7 @@ public final class JkVersionedModule implements Serializable {
      * Fills the manifest with <code>implementation</code> infoString.
      */
     public void populateManifest(JkManifest manifest) {
-        manifest.addMainAttribute(Attributes.Name.IMPLEMENTATION_TITLE, moduleId().fullName())
+        manifest.addMainAttribute(Attributes.Name.IMPLEMENTATION_TITLE, moduleId().dotedName())
         .addMainAttribute(Attributes.Name.IMPLEMENTATION_VERSION, version().value());
     }
 

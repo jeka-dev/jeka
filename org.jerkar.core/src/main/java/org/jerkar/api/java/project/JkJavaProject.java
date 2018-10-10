@@ -7,6 +7,7 @@ import org.jerkar.api.java.JkJavaCompileSpec;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.JkManifest;
 import org.jerkar.api.java.JkResourceProcessor;
+import org.jerkar.api.utils.JkUtilsAssert;
 
 import java.nio.file.Path;
 import java.util.LinkedList;
@@ -62,6 +63,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     private JkJavaProject(JkProjectSourceLayout sourceLayout) {
         this.sourceLayout = sourceLayout;
         this.dependencies = JkDependencySet.of();
+        this.versionedModule = JkVersionedModule.defaultFor(sourceLayout.baseDir().getFileName().toString());
         this.maker = new JkJavaProjectMaker(this);
     }
 
@@ -70,11 +72,11 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
     }
 
     public static JkJavaProject ofMavenLayout(Path baseDir) {
-        return new JkJavaProject(JkProjectSourceLayout.ofMavenStyle().withBaseDir(baseDir));
+        return JkJavaProject.of(JkProjectSourceLayout.ofMavenStyle().withBaseDir(baseDir));
     }
 
     public static JkJavaProject ofSimpleLayout(Path baseDir) {
-        return new JkJavaProject(JkProjectSourceLayout.ofSimpleStyle().withBaseDir(baseDir));
+        return JkJavaProject.of(JkProjectSourceLayout.ofSimpleStyle().withBaseDir(baseDir));
     }
 
     // -------------------------- Other -------------------------
@@ -135,16 +137,27 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
         return resourceInterpolators;
     }
 
-
+    /**
+     * Returns the module name and version of this project. This information is used for naming produced artifact files,
+     * publishing. It is also consumed by tools as SonarQube.
+     */
     public JkVersionedModule getVersionedModule() {
         return versionedModule;
     }
 
+    /**
+     * Sets the specified module name and version for this project.
+     * @see #getVersionedModule()
+     */
     public JkJavaProject setVersionedModule(JkVersionedModule versionedModule) {
+        JkUtilsAssert.notNull(versionedModule, "Can't set null value for versioned module.");
         this.versionedModule = versionedModule;
         return this;
     }
 
+    /**
+     * @see #setVersionedModule(JkVersionedModule)
+     */
     public JkJavaProject setVersionedModule(String groupAndName, String version) {
         return setVersionedModule(JkModuleId.of(groupAndName).version(version));
     }

@@ -7,6 +7,7 @@ import org.jerkar.api.function.JkRunnables;
 import org.jerkar.api.java.*;
 import org.jerkar.api.java.junit.JkJavaTestBulk;
 import org.jerkar.api.java.junit.JkUnit;
+import org.jerkar.api.system.JkException;
 import org.jerkar.api.system.JkLog;
 
 import java.nio.charset.Charset;
@@ -91,12 +92,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
             testCompiler.compile(testCompileSpec);
         });
         testRunner = getDefaultTester();
-        artifactFileNameSupplier = () -> {
-            if (project.getVersionedModule() != null) {
-                return fileName(project.getVersionedModule());
-            }
-            return project.baseDir().getFileName().toString();
-        };
+        artifactFileNameSupplier = getModuleNameFileNameSupplier();
 
         // defines artifacts
         this.defineArtifact(mainArtifactId(), () -> makeBinJar(getArtifactFile(mainArtifactId())));
@@ -281,10 +277,24 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
         return getOutLayout().outputPath().resolve(namePart + classifier + extension);
     }
 
-    String fileName(JkVersionedModule versionedModule) {
-        String version = versionedModule.version().isUnspecified() ? "" : "-" + versionedModule.version().value();
-        return versionedModule.moduleId().fullName() + version;
+    /**
+     * Returns an artifact file name supplier for including version in artifact file names.
+     */
+    public Supplier<String> getIncludingVersionFileNameSupplier() {
+        return () -> {
+            String version = this.project.getVersionedModule().version().isUnspecified() ? "" : "-"
+                    + this.project.getVersionedModule().version().value();
+            return this.project.getVersionedModule().moduleId().dotedName() + version;
+        };
     }
+
+    /**
+     * Returns an artifact file name supplier for NOT including version in artifact file names.
+     */
+    public Supplier<String> getModuleNameFileNameSupplier() {
+        return () -> project.getVersionedModule().moduleId().dotedName();
+    }
+
 
     /**
      * Defines how to produce the specified artifact. <br/>
@@ -364,6 +374,8 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     public JkJavaProjectMaker publishMaven() {
+        JkException.throwIf(project.getVersionedModule() == null, "No versionedModule has been set on "
+                + project + ". Can't publish.");
         JkPublisher.of(this.publishRepos, getOutLayout().outputPath())
         .publishMaven(project.getVersionedModule(), this, artifactFileIdsToNotPublish,
                 this.getDeclaredDependencies(), project.getMavenPublicationInfo());
@@ -371,6 +383,8 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
     }
 
     public JkJavaProjectMaker publishIvy() {
+        JkException.throwIf(project.getVersionedModule() == null, "No versionedModule has been set on "
+                + project + ". Can't publish.");
         final JkDependencySet dependencies = getDeclaredDependencies();
         final JkIvyPublication publication = JkIvyPublication.of(mainArtifactPath(), JkJavaDepScopes.COMPILE)
                 .andOptional(artifactPath(SOURCES_ARTIFACT_ID), JkJavaDepScopes.SOURCES)

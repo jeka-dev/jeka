@@ -43,7 +43,7 @@ public class CoreBuild extends JkJavaProjectBuild {
 
         maker().setCompiler(JkJavaCompiler.of().fork(true));  // Fork to avoid compile failure bug on github/travis
         maker().setTestCompiler(JkJavaCompiler.of().fork(true));
-        maker().setArtifactFileNameSupplier(() -> project().getVersionedModule().moduleId().fullName());
+        maker().setArtifactFileNameSupplier(() -> project().getVersionedModule().moduleId().dotedName());
         maker().setPublishRepos(publishRepos());
         maker().defineArtifact(DISTRIB_FILE_ID, this::doDistrib);
 
@@ -93,7 +93,8 @@ public class CoreBuild extends JkJavaProjectBuild {
     private static JkMavenPublicationInfo mavenPublication() {
         return JkMavenPublicationInfo
                 .of("Jerkar", "Build simpler, stronger, faster", "http://jerkar.github.io")
-                .withScm("https://github.com/jerkar/jerkar.git").andApache2License()
+                .withScm("https://github.com/jerkar/jerkar.git")
+                .andApache2License()
                 .andGitHubDeveloper("djeang", "djeangdev@yahoo.fr");
     }
 

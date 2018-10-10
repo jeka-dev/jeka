@@ -72,8 +72,8 @@ class SampleTester {
     private void testSamples(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(sampleBaseDir.root().toAbsolutePath().normalize())
-                .withParametersIf(!JkUtilsString.isBlank(className), "-LV=true -BC=" + className)
-                .andParameters("clean", "java#pack")
+                .withParametersIf(!JkUtilsString.isBlank(className), "-LV=true -RC=" + className)
+                .andParameters("clean", "java#pack", "java#publish", "-java#publish.localOnly")
                 .andParameters(args)
                 .failOnError(true).runSync();
     }
@@ -81,7 +81,7 @@ class SampleTester {
     private void testDependee(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
         JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependeeBaseDir.root())
-                .withParametersIf(!JkUtilsString.isBlank(className), "-BC=" + className)
+                .withParametersIf(!JkUtilsString.isBlank(className), "-RC=" + className)
                 .withParameters("clean", "java#pack")
                 .andParameters(args)
                 .failOnError(true).runSync();
@@ -113,7 +113,7 @@ class SampleTester {
     }
 
     private void testFork() {
-        testSamples("", "-tests.fork");
+        testSamples("", "-java#tests.fork");
         JkUtilsAssert.isTrue(output.goTo("test-reports/junit").exists(), "No test report generated in test fork mode.");
     }
 

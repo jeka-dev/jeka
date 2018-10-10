@@ -15,7 +15,7 @@ public final class JkVersion implements Comparable<JkVersion>, Serializable {
     private static final long serialVersionUID = 1L;
 
     /** Mention that the projectVersion is unspecified */
-    public static final JkVersion UNSPECIFIED = new JkVersion("unspecified");
+    public static final JkVersion UNSPECIFIED = new JkVersion("UNSPECIFIED-VERSION-SNAPSHOT");
 
     /**
      * Creates a {@link JkVersion} with the specified value.
