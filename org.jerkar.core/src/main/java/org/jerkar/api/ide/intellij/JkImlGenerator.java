@@ -451,7 +451,11 @@ public final class JkImlGenerator {
             final String relPath = basePath.relativize(file).toString();
             result = type + "://$" + varName + "$/" + replacePathWithVar(relPath).replace('\\', '/');
         } else {
-            result = file.toAbsolutePath().normalize().toString().replace('\\', '/');
+            if (file.isAbsolute()) {
+                result = type + "://" + file.normalize().toString().replace('\\', '/');
+            } else {
+                result = type + "://$MODULE_DIR$/" + file.normalize().toString().replace('\\', '/');
+            }
         }
         if (jarFile) {
             result = result + "!/";

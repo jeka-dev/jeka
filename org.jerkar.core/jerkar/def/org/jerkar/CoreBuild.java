@@ -43,7 +43,6 @@ public class CoreBuild extends JkJavaProjectBuild {
 
         maker().setCompiler(JkJavaCompiler.of().fork(true));  // Fork to avoid compile failure bug on github/travis
         maker().setTestCompiler(JkJavaCompiler.of().fork(true));
-        maker().setArtifactFileNameSupplier(() -> project().getVersionedModule().moduleId().dotedName());
         maker().setPublishRepos(publishRepos());
         maker().defineArtifact(DISTRIB_FILE_ID, this::doDistrib);
 

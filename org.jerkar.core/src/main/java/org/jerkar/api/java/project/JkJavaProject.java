@@ -209,7 +209,8 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
                 .append(this.sourceLayout.info()).append("\n")
                 .append("Java Source Version : " + this.getSourceVersion() + "\n")
                 .append("Source Encoding : " + this.compileSpec.getEncoding() + "\n")
-                .append("Download Repositories : " + this.maker.getDependencyResolver().repositories()).append("\n")
+                .append("Download Repositories : " + this.maker.getDependencyResolver().repositories() + "\n")
+                .append("Publish repositories : " + this.maker.getPublishRepos()  + "\n")
                 .append("Declared Dependencies : " + this.getDependencies().list().size() + " elements.\n")
                 .append("Defined Artifacts : " + this.get().artifactIds())
                 .toString();

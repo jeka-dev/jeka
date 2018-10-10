@@ -198,7 +198,7 @@ public class JkPluginJava extends JkPlugin {
     public void info() {
         JkLog.info(this.project.info());
         JkLog.info("Produced Artifacts : " + this.producedArtifacts);
-        JkLog.info("Execute 'java#showDependencies' to display details on dependencies.");
+        JkLog.info("\nExecute 'java#showDependencies' to display details on dependencies.");
 
     }
 

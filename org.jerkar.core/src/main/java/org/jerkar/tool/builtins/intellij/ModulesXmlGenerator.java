@@ -10,6 +10,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import org.jerkar.api.system.JkLog;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsThrowable;
 
@@ -45,6 +46,10 @@ class ModulesXmlGenerator {
         }
     }
 
+    public Path outputFile() {
+        return outputFile;
+    }
+
     private void _generate() throws IOException, XMLStreamException, FactoryConfigurationError {
 
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -59,7 +64,9 @@ class ModulesXmlGenerator {
         writer.writeStartElement("modules");
         writer.writeCharacters("\n");
         for (Path iml : imlFiles) {
-            String path = path(iml);
+            Path relPath = projectDir.relativize(iml);
+            JkLog.info("Iml file detected : " + relPath);
+            String path = path(relPath);
             writer.writeCharacters(T3);
             writer.writeEmptyElement("module");
             writer.writeAttribute("fileurl", "file://" + path);
@@ -77,9 +84,8 @@ class ModulesXmlGenerator {
         Files.write(outputFile, baos.toByteArray());
     }
 
-    private String path(Path iml) {
-        String relPath = iml.relativize(projectDir).toString();
-        return "$PROJECT_DIR$/.idea/" + relPath;
+    private String path(Path relPath) {
+        return "$PROJECT_DIR$/" + relPath.toString().replace('\\', '/');
     }
 
 

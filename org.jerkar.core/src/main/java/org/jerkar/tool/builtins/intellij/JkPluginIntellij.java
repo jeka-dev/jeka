@@ -85,6 +85,7 @@ public final class JkPluginIntellij extends JkPlugin {
         final Iterable<Path> imls = owner.baseTree().andAccept("**.iml").files();
         final ModulesXmlGenerator modulesXmlGenerator = new ModulesXmlGenerator(current, imls);
         modulesXmlGenerator.generate();
+        JkLog.info("File generated at : " + modulesXmlGenerator.outputFile());
     }
 
     @JkDoc("Generates iml files on this folder and its descendant recursively.")

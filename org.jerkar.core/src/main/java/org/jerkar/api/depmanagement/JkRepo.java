@@ -226,7 +226,7 @@ public final class JkRepo implements Serializable {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "(" + url + ")";
+        return url.toString();
     }
 
     private static URL toUrl(String urlOrDir) {
