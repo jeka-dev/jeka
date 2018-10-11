@@ -8,14 +8,14 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 /**
- * Provides infoString about Jerkar itself.
+ * Provides information about Jerkar running instance.
  */
 public final class JkInfo {
 
     private static String version;
 
     /**
-     * Returns the current Jerkar projectVersion.
+     * Returns the current Jerkar version.
      */
     public static String jerkarVersion() {
         if (JkUtilsString.isBlank(version)) {

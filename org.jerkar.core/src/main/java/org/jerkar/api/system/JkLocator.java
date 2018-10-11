@@ -1,5 +1,10 @@
 package org.jerkar.api.system;
 
+import org.jerkar.api.utils.JkUtilsPath;
+import org.jerkar.api.utils.JkUtilsString;
+import org.jerkar.api.utils.JkUtilsSystem;
+import org.jerkar.api.utils.JkUtilsThrowable;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -8,11 +13,6 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.api.utils.JkUtilsString;
-import org.jerkar.api.utils.JkUtilsSystem;
-import org.jerkar.api.utils.JkUtilsThrowable;
 
 /**
  * Provides location related to the running Jerkar instance.

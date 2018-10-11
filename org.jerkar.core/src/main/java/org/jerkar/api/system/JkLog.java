@@ -2,16 +2,23 @@ package org.jerkar.api.system;
 
 import org.jerkar.api.utils.*;
 
-import javax.xml.ws.Provider;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
+/**
+ * Provides static methods for logging events. <p>
+ *
+ * Events are simply forwarded to an event consumer which has the responsibility to handle it. A basic handler may
+ * simply displays event on the console. That is the case for the Jerkar tool.
+ * By default, logging events turns in a no-op.<p>
+ *
+ * This class provides task concept for hierarchical log. A log event happening during a task will be assigned a nested
+ * task level (task can be nested).
+ */
 public final class JkLog implements Serializable {
 
     public enum Type {
@@ -162,26 +169,23 @@ public final class JkLog implements Serializable {
 
     public static class JkLogEvent implements Serializable {
 
-        private JkLogEvent(Type type, String message, Runnable task, long duration) {
+        private JkLogEvent(Type type, String message, long duration) {
             this.type = type;
             this.message = message;
-            this.task = task;
             this.duration = duration;
         }
 
         static JkLogEvent regular(Type type, String message) {
-            return new JkLogEvent(type, message, null, -1);
+            return new JkLogEvent(type, message,  -1);
         }
 
         static JkLogEvent endTask(long duration) {
-            return new JkLogEvent(Type.END_TASK, "", null, duration);
+            return new JkLogEvent(Type.END_TASK, "",  duration);
         }
 
         private final Type type;
 
         private final String message;
-
-        private final Runnable task;
 
         private final long duration;
 
@@ -191,10 +195,6 @@ public final class JkLog implements Serializable {
 
         public String message() {
             return message;
-        }
-
-        public Runnable task() {
-            return task;
         }
 
         public long durationMs() {

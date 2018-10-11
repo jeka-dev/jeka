@@ -1,8 +1,7 @@
 package org.jerkar.api.system;
 
 /**
- * Exception launched to break the build. Throw this exception when you want to
- * break the build for whatever reason (compilation error, test failures, ...).
+ * Marker exception to notice a misconfiguration from the user.
  *
  * @author Jerome Angibaud
  */
@@ -17,6 +16,9 @@ public final class JkException extends RuntimeException {
         super(message);
     }
 
+    /**
+     * Throws a JkException with the specified message if the specified condition is met.
+     */
     public static void throwIf(boolean condition, String message) {
         if (condition) {
             throw new JkException(message);
