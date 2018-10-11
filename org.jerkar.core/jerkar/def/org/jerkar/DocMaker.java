@@ -43,7 +43,8 @@ class DocMaker {
         assembleHtmlDoc();
     }
 
-    public void assembleHtmlDoc() {
+
+    private void assembleHtmlDoc() {
         Path targetFolder = docDist;
         JkUtilsPath.createDirectories(targetFolder);
         docSource.andAccept("*.md").files().forEach(path -> {

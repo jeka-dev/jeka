@@ -4,6 +4,7 @@ import static org.jerkar.api.java.project.JkJavaProjectMaker.JAVADOC_ARTIFACT_ID
 import static org.jerkar.api.java.project.JkJavaProjectMaker.SOURCES_ARTIFACT_ID;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.jerkar.api.depmanagement.*;
@@ -12,6 +13,7 @@ import org.jerkar.api.java.JkJavaCompiler;
 import org.jerkar.api.java.JkJavaVersion;
 import org.jerkar.api.java.project.JkJavaProjectMaker;
 import org.jerkar.api.system.JkLog;
+import org.jerkar.api.system.JkProcess;
 import org.jerkar.tool.JkDoc;
 import org.jerkar.tool.JkInit;
 import org.jerkar.tool.builtins.java.JkJavaProjectBuild;
@@ -29,6 +31,8 @@ public class CoreBuild extends JkJavaProjectBuild {
     public boolean testSamples;
 
     private Path distribFolder;
+
+    public String githubSiteRoot = "../../jerkar-site-source";
 
     protected CoreBuild() {
         java().tests.fork = false;
@@ -86,6 +90,18 @@ public class CoreBuild extends JkJavaProjectBuild {
     public void doDefault() {
         clean();
         doDistrib();
+    }
+
+    public void publishDocOnGithub() {
+        Path root = Paths.get(githubSiteRoot);
+        JkProcess git = JkProcess.of("git").withWorkingDir(root).withLogCommand(true);
+        git.withExtraParams("pull").runSync();
+        JkPathTree target = JkPathTree.of(root.resolve("documentation"));
+        target.deleteRoot();
+        JkPathTree.of(distribFolder.resolve("doc")).copyTo(target.root());
+        git.withExtraParams("add", "documentation").runSync();
+        git.withExtraParams("commit", "-m", "Doc").runSync();
+        git.withExtraParams("push").runSync();
     }
 
     // Necessary to publish on OSSRH

@@ -163,7 +163,7 @@ public final class JkJavaCompiler {
                 return true;
             }
         } else {
-            JkLog.info("Use a forked process to perform compilation : " + fork.commandName());
+            JkLog.info("Use a forked process to perform compilation : " + fork.getCommand());
             result = runOnFork(compileSpec);
         }
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
@@ -197,7 +197,7 @@ public final class JkJavaCompiler {
                 sourcePaths.add(file.toAbsolutePath().toString());
             }
         }
-        final JkProcess jkProcess = this.fork.andParameters(compileSpec.getOptions()).andParameters(sourcePaths);
+        final JkProcess jkProcess = this.fork.withExtraParams(compileSpec.getOptions()).withExtraParams(sourcePaths);
         JkLog.info("" + sourcePaths.size() + " files to compile.");
         final int result = jkProcess.runSync();
         return (result == 0);

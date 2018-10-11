@@ -1,5 +1,7 @@
 package org.jerkar.api.system;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -105,18 +107,18 @@ public final class JkProcess implements Runnable {
      * Returns a <code>JkProcess</code> identical to this one but with the
      * specified extra parameters.
      */
-    public JkProcess andParameters(String... parameters) {
-        return andParameters(Arrays.asList(parameters));
+    public JkProcess withExtraParams(String... parameters) {
+        return withExtraParams(Arrays.asList(parameters));
     }
 
     /**
      * Returns a <code>JkProcess</code> identical to this one but minus the
      * specified parameter.
      */
-    public JkProcess minusParameter(String parameter) {
+    public JkProcess withoutParam(String parameter) {
         final List<String> list = new LinkedList<>(parameters);
         list.remove(parameter);
-        return withParameters(list.toArray(new String[0]));
+        return withParams(list.toArray(new String[0]));
     }
 
     /**
@@ -124,17 +126,17 @@ public final class JkProcess implements Runnable {
      * specified extra parameters if the conditional is <code>true</code>.
      * Returns <code>this</code> otherwise.
      */
-    public JkProcess andParametersIf(boolean conditional, String... parameters) {
+    public JkProcess withExtraParamsIf(boolean conditional, String... parameters) {
         if (conditional) {
-            return andParameters(parameters);
+            return withExtraParams(parameters);
         }
         return this;
     }
 
     /**
-     * @see #andParameters(String...)
+     * @see #withExtraParams(String...)
      */
-    public JkProcess andParameters(Collection<String> parameters) {
+    public JkProcess withExtraParams(Collection<String> parameters) {
         final List<String> list = new ArrayList<>(this.parameters);
         list.addAll(parameters);
         return new JkProcess(command, list, workingDir, failOnError, logCommand);
@@ -143,20 +145,20 @@ public final class JkProcess implements Runnable {
     /**
      * Returns a <code>JkProcess</code> identical to this one but with the
      * specified parameters in place of this parameters. Contrary to
-     * {@link #andParameters(String...)}, this method replaces this parameters
+     * {@link #withExtraParams(String...)}, this method replaces this parameters
      * by the specified ones (not adding).
      */
-    public JkProcess withParameters(String... parameters) {
+    public JkProcess withParams(String... parameters) {
         return new JkProcess(command, Arrays.asList(parameters), workingDir, failOnError, logCommand);
     }
 
     /**
-     * Same as {@link #withParameters(String...)} but only effective if the
+     * Same as {@link #withParams(String...)} but only effective if the
      * specified conditional is true.
      */
-    public JkProcess withParametersIf(boolean conditional, String... parameters) {
-        if (conditional) {
-            return this.withParameters(parameters);
+    public JkProcess withParamsIf(boolean condition, String... parameters) {
+        if (condition) {
+            return this.withParams(parameters);
         }
         return this;
     }
@@ -185,7 +187,7 @@ public final class JkProcess implements Runnable {
      * process exit with a non 0 value, the {@link #runSync()} method witll
      * throw a {@link IllegalStateException}.
      */
-    public JkProcess failOnError(boolean fail) {
+    public JkProcess withFailOnError(boolean fail) {
         return new JkProcess(command, parameters, workingDir, fail, logCommand);
     }
 
@@ -194,7 +196,7 @@ public final class JkProcess implements Runnable {
      * If parameter is <code>true</code>, a process execution will be wrapped in a log showing start and end of
      * the execution showing details about the command to be executed and execution duration.
      */
-    public  JkProcess logCommand(boolean logCommand) {
+    public  JkProcess withLogCommand(boolean logCommand) {
         return new JkProcess(command, parameters, workingDir, failOnError, logCommand);
     }
 
@@ -218,26 +220,33 @@ public final class JkProcess implements Runnable {
         commands.addAll(parameters);
         final AtomicInteger result = new AtomicInteger();
         final Runnable runnable = () -> {
-            try {
+
                 final ProcessBuilder processBuilder = processBuilder(commands);
                 if (workingDir != null) {
                     processBuilder.directory(this.workingDir.toAbsolutePath().normalize().toFile());
                 }
-                final Process process = processBuilder.start();
-                final JkUtilsIO.StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
+            final Process process;
+            try {
+                process = processBuilder.start();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+            final JkUtilsIO.StreamGobbler outputStreamGobbler = JkUtilsIO.newStreamGobbler(
                         process.getInputStream(), JkLog.stream());
                 final JkUtilsIO.StreamGobbler errorStreamGobbler = JkUtilsIO.newStreamGobbler(
                         process.getErrorStream(), JkLog.errorStream());
+            try {
                 process.waitFor();
-                outputStreamGobbler.stop();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            outputStreamGobbler.stop();
                 errorStreamGobbler.stop();
                 if (result.get() != 0 && failOnError) {
                     throw new IllegalStateException("The process has returned with error code "
                             + result);
                 }
-            } catch (final Exception e) {
-                throw new RuntimeException(e);
-            }
+
         };
         if (logCommand) {
             JkLog.execute("Starting program : " + commands.toString(), runnable);
@@ -290,7 +299,7 @@ public final class JkProcess implements Runnable {
     /**
      * Returns the command launched by this process.
      */
-    public String commandName() {
+    public String getCommand() {
         return this.command;
     }
 

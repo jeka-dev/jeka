@@ -8,7 +8,6 @@ import org.jerkar.api.depmanagement.JkDependencySet;
 import org.jerkar.api.depmanagement.JkModuleDependency;
 import org.jerkar.api.depmanagement.JkScope;
 import org.jerkar.api.depmanagement.JkScopedDependency;
-import org.jerkar.api.file.JkPathTree;
 import org.jerkar.api.system.JkProcess;
 import org.jerkar.api.utils.JkUtilsPath;
 import org.jerkar.api.utils.JkUtilsSystem;
@@ -76,7 +75,7 @@ public final class JkMvn implements Runnable {
      * withCommand("deleteArtifacts", "install", "-U").
      */
     public final JkMvn commands(String... args) {
-        return new JkMvn(jkProcess.withParameters(args));
+        return new JkMvn(jkProcess.withParams(args));
     }
 
     /**
@@ -109,9 +108,9 @@ public final class JkMvn implements Runnable {
      */
     public final JkMvn forceUpdate(boolean flag) {
         if (flag) {
-            return new JkMvn(this.jkProcess.andParameters("-U"));
+            return new JkMvn(this.jkProcess.withExtraParams("-U"));
         }
-        return new JkMvn(this.jkProcess.minusParameter("-U"));
+        return new JkMvn(this.jkProcess.withoutParam("-U"));
     }
 
     /**
@@ -119,9 +118,9 @@ public final class JkMvn implements Runnable {
      */
     public final JkMvn verbose(boolean flag) {
         if (flag) {
-            return new JkMvn(this.jkProcess.andParameters("-X"));
+            return new JkMvn(this.jkProcess.withExtraParams("-X"));
         }
-        return new JkMvn(this.jkProcess.minusParameter("-X"));
+        return new JkMvn(this.jkProcess.withoutParam("-X"));
     }
 
     /**
@@ -132,10 +131,10 @@ public final class JkMvn implements Runnable {
     }
 
     /**
-     * Shorthand for {@link JkProcess#failOnError(boolean)}
+     * Shorthand for {@link JkProcess#withFailOnError(boolean)}
      */
     public JkMvn failOnError(boolean flag) {
-        return new JkMvn(this.jkProcess.failOnError(flag));
+        return new JkMvn(this.jkProcess.withFailOnError(flag));
     }
 
     @Override
