@@ -133,7 +133,7 @@ final class DotClasspathModel {
                         throw new JkException(
                                 "No option found with name "
                                         + optionName
-                                        + ". It is needed in order to build this project as it is mentionned accept Eclipse .classpath."
+                                        + ". It is needed in order to build this project as it is mentionned andAccept Eclipse .classpath."
                                         + " Please set this option either in command line as -"
                                         + optionName
                                         + "=/absolute/path/for/this/var or in [jerkar_home]/options.properties");
@@ -279,7 +279,7 @@ final class DotClasspathModel {
             }
             final JkPathTree dirView = JkPathTree.of(conFolder).andAccept("**.jar");
             final List<Path> result = new LinkedList<>();
-            result.addAll(dirView.files());
+            result.addAll(dirView.getFiles());
             return result;
         }
 

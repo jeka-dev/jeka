@@ -141,11 +141,11 @@ public final class JkJavaCompileSpec {
         if (tree.isDefineMatcher()) {
             return addSources(tree.root());
         }
-        return addSources(tree.files());
+        return addSources(tree.getFiles());
     }
 
     public JkJavaCompileSpec addSources(JkPathTreeSet treeSet) {
-        treeSet.pathTrees().forEach(this::addSources);
+        treeSet.getPathTrees().forEach(this::addSources);
         return this;
     }
 

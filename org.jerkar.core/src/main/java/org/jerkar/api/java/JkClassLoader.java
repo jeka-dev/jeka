@@ -328,7 +328,7 @@ public final class JkClassLoader {
     /**
      * Returns all classes of this <code>classloader</code> that are defined in
      * entries matching the specified fileFilter.</br> For example : if you want
-     * to load all classes that are defined in folder and not accept jar file, you
+     * to load all classes that are defined in folder and not andAccept jar file, you
      * have to provide a <code>FileFilter</code> which includes only
      * directories.
      *
@@ -339,7 +339,7 @@ public final class JkClassLoader {
         final Map<Path, Path> file2Entry = new HashMap<>();
         for (final Path file : childClasspath()) {
             if (entryFilter == null || entryFilter.matches(file) && Files.isDirectory(file)) {
-                final List<Path> files = JkPathTree.of(file).andMatcher(CLASS_FILE_FILTER).files();
+                final List<Path> files = JkPathTree.of(file).andMatcher(CLASS_FILE_FILTER).getFiles();
                 classfiles.addAll(files);
                 JkUtilsIterable.putMultiEntry(file2Entry, files, file);
             }
@@ -400,7 +400,7 @@ public final class JkClassLoader {
      */
     public Set<Class<?>> loadClassesIn(JkPathTreeSet jkPathTreeSet) {
         final Set<Class<?>> result = new HashSet<>();
-        for (final Path path : jkPathTreeSet.relativeFiles()) {
+        for (final Path path : jkPathTreeSet.getRelativeFiles()) {
             if (path.toString().endsWith(".class")) {
                 final String className = getAsClassName(path.toString());
                 result.add(this.load(className));
@@ -417,7 +417,7 @@ public final class JkClassLoader {
      */
     public Iterator<Class<?>> iterateClassesIn(JkPathTreeSet jkPathTreeSet) {
         final List<Path> fileNames = jkPathTreeSet.andMatcher(JkPathMatcher.accept("**/*.class"))
-                .relativeFiles();
+                .getRelativeFiles();
         return classIterator(fileNames.stream().map(path -> path.toString()).collect(Collectors.toList()));
     }
 
@@ -430,7 +430,7 @@ public final class JkClassLoader {
     private Iterator<Class<?>> iterateClassesIn(Path dirOrJar) {
         final List<Path> paths;
         if (Files.isDirectory(dirOrJar)) {
-            paths = JkPathTree.of(dirOrJar).andAccept("**.class").relativeFiles();
+            paths = JkPathTree.of(dirOrJar).andAccept("**.class").getRelativeFiles();
         } else {
             final List<ZipEntry> entries = JkUtilsZip.zipEntries(JkUtilsZip.zipFile(dirOrJar.toFile()));
             paths = new LinkedList<>();
@@ -589,7 +589,7 @@ public final class JkClassLoader {
      * arguments. <br/>
      * If the argument classes are the same on the current class loader and this
      * one then arguments are passed as is, otherwise arguments are serialized
-     * in the current class loader and deserialized accept this class loader of
+     * in the current class loader and deserialized andAccept this class loader of
      * order to be compliant with it. <br/>
      * The current thread context class loader is switched to this for the
      * method execution. <br/>

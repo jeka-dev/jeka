@@ -65,7 +65,7 @@ final class RunResolver {
             return false;
         }
         final JkPathTree dir = JkPathTree.of(runSourceDir);
-        for (final Path path : dir.relativeFiles()) {
+        for (final Path path : dir.getRelativeFiles()) {
             final String pathName = path.toString();
             if (pathName.endsWith(".java")) {
                 final String simpleName;
@@ -111,7 +111,7 @@ final class RunResolver {
         // If there is a run file
         if (this.hasDefSource()) {
             final JkPathTree dir = JkPathTree.of(runSourceDir);
-            for (final Path path : dir.relativeFiles()) {
+            for (final Path path : dir.getRelativeFiles()) {
                 if (path.toString().endsWith(".java")) {
                     final Class<?> clazz = classLoader.loadGivenClassSourcePath(path.toString());
                     if (baseClass.isAssignableFrom(clazz)
@@ -149,7 +149,7 @@ final class RunResolver {
         // If there is a def sources
         if (this.hasDefSource()) {
             final JkPathTree dir = JkPathTree.of(runSourceDir);
-            for (final Path path : dir.relativeFiles()) {
+            for (final Path path : dir.getRelativeFiles()) {
                 if (path.toString().endsWith(".java")) {
                     final Class<?> clazz = classLoader.loadGivenClassSourcePath(path.toString());
                     if (baseClass.isAssignableFrom(clazz)

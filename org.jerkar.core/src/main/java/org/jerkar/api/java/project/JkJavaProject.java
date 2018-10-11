@@ -54,7 +54,7 @@ public class JkJavaProject implements JkJavaProjectDefinition, JkFileSystemLocal
 
     private JkManifest manifest = JkManifest.empty();
 
-    private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.empty();
+    private JkPathTreeSet extraFilesToIncludeInFatJar = JkPathTreeSet.ofEmpty();
 
     private JkMavenPublicationInfo mavenPublicationInfo;
 

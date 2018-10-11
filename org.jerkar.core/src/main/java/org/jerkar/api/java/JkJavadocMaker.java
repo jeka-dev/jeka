@@ -1,7 +1,6 @@
 package org.jerkar.api.java;
 
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
@@ -137,7 +136,7 @@ public final class JkJavadocMaker {
     private String[] toArguments(Path outputDir) {
         final List<String> list = new LinkedList<>();
         list.add("-sourcepath");
-        list.add(JkPathSequence.ofMany(this.srcDirs.rootDirsOrZipFiles()).toString());
+        list.add(JkPathSequence.ofMany(this.srcDirs.getRootDirsOrZipFiles()).toString());
         list.add("-d");
         list.add(outputDir.toAbsolutePath().toString());
         if (JkLog.verbosity() == JkLog.Verbosity.VERBOSE) {
@@ -153,7 +152,7 @@ public final class JkJavadocMaker {
         }
         list.addAll(extraArgs);
 
-        for (final Path sourceFile : this.srcDirs.files()) {
+        for (final Path sourceFile : this.srcDirs.getFiles()) {
             if (sourceFile.getFileName().toString().endsWith(".java")) {
                 list.add(sourceFile.toString());
             }

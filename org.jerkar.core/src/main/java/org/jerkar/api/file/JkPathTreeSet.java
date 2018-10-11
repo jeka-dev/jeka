@@ -37,7 +37,7 @@ public final class JkPathTreeSet {
     /**
      * Creates an empty {@link JkPathTreeSet}.
      */
-    public static final JkPathTreeSet empty() {
+    public static final JkPathTreeSet ofEmpty() {
         return new JkPathTreeSet(Collections.emptyList());
     }
 
@@ -118,7 +118,7 @@ public final class JkPathTreeSet {
     // ------------------------ additional filters -------------------------------------------
 
 
-    public JkPathTreeSet accept(Iterable<String> globPatterns) {
+    public JkPathTreeSet andAccept(Iterable<String> globPatterns) {
         final List<JkPathTree> list = new LinkedList<>();
         for (final JkPathTree tree : this.pathTrees) {
             list.add(tree.andAccept(globPatterns));
@@ -155,26 +155,26 @@ public final class JkPathTreeSet {
     // ---------------------------- iterate over files -----------------------------------
 
     /**
-     * Returns a concatenation of {@link #files()} for all trees involved in this set.
+     * Returns a concatenation of {@link #getFiles()} for all trees involved in this set.
      */
-    public List<Path> files() {
+    public List<Path> getFiles() {
         final LinkedList<Path> result = new LinkedList<>();
         for (final JkPathTree dirView : this.pathTrees) {
             if (dirView.exists()) {
-                result.addAll(dirView.files());
+                result.addAll(dirView.getFiles());
             }
         }
         return result;
     }
 
     /**
-     * Returns a concatenation of {@link #relativeFiles()} ()} for all trees involved in this set.
+     * Returns a concatenation of {@link #getRelativeFiles()} ()} for all trees involved in this set.
      */
-    public List<Path> relativeFiles() {
+    public List<Path> getRelativeFiles() {
         final LinkedList<Path> result = new LinkedList<>();
         for (final JkPathTree dir : this.pathTrees) {
             if (dir.exists()) {
-                result.addAll(dir.relativeFiles());
+                result.addAll(dir.getRelativeFiles());
             }
         }
         return result;
@@ -195,7 +195,7 @@ public final class JkPathTreeSet {
     /**
      * Returns {@link JkPathTree} instances constituting this {@link JkPathTreeSet}.
      */
-    public List<JkPathTree> pathTrees() {
+    public List<JkPathTree> getPathTrees() {
         return pathTrees;
     }
 
@@ -203,7 +203,7 @@ public final class JkPathTreeSet {
      * Returns root dir or zip file for each {@link JkPathTree} tree involved in this
      * {@link JkPathTreeSet}.
      */
-    public List<Path> rootDirsOrZipFiles() {
+    public List<Path> getRootDirsOrZipFiles() {
         final List<Path> result = new LinkedList<>();
         for (final JkPathTree tree : pathTrees) {
             result.add(tree.rootDirOrZipFile());

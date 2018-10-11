@@ -31,7 +31,7 @@ public final class JkJarMaker {
         if (manifest != null && !manifest.isEmpty()) {
             manifest.writeToStandardLocation(classDir);
         }
-        JkPathTreeSet treeSet = extraFiles == null ? JkPathTreeSet.empty() : extraFiles;
+        JkPathTreeSet treeSet = extraFiles == null ? JkPathTreeSet.ofEmpty() : extraFiles;
         JkPathTreeSet.of(classDir).and(treeSet).zipTo(resultFile);
     }
 

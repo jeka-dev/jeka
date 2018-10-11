@@ -100,7 +100,7 @@ public final class JkJavaCompiler {
 
     /**
      * Creates a copy of this {@link JkJavaCompiler} but with the specified compileRunner instance.
-     * Since in-process compilers cannot be run accept a forked process, this method disables any
+     * Since in-process compilers cannot be run andAccept a forked process, this method disables any
      * previous fork options that may have been set.
      */
     public JkJavaCompiler withCompiler(JavaCompiler compiler) {

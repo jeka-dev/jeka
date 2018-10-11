@@ -235,8 +235,8 @@ public class JkProjectSourceLayout {
     }
 
     private JkPathTreeSet relocalize(Path newBase, JkPathTreeSet pathTreeSet) {
-        JkPathTreeSet result = JkPathTreeSet.empty();
-        for (JkPathTree tree : pathTreeSet.pathTrees()) {
+        JkPathTreeSet result = JkPathTreeSet.ofEmpty();
+        for (JkPathTree tree : pathTreeSet.getPathTrees()) {
             result = result.and(JkPathTree.of(relocalize(newBase, tree.root())).withMatcher(tree.matcher()));
         }
         return result;

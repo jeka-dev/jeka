@@ -76,7 +76,7 @@ final class Engine {
         JkPathSequence path = JkPathSequence.of();
         if (!commandLine.dependencies().isEmpty()) {
             final JkPathSequence cmdPath = pathOf(commandLine.dependencies());
-            path = path.prependMany(cmdPath);
+            path = path.withPrependingMany(cmdPath);
             JkLog.trace("Command line extra path : " + cmdPath);
         }
         if (!JkUtilsString.isBlank(runClassHint)) {  // First find a class in the existing classpath without compiling
@@ -84,7 +84,7 @@ final class Engine {
             jkRun = getRunInstance(runClassHint, path);
         }
         if (jkRun == null) {
-            path = compile().appendMany(path);
+            path = compile().withAppendingMany(path);
             jkRun = getRunInstance(runClassHint, path);
         }
         if (jkRun == null) {
@@ -111,7 +111,7 @@ final class Engine {
     }
 
     private void preCompile() {
-        List<Path> sourceFiles = JkPathTree.of(resolver.runSourceDir).andMatcher(RUN_SOURCE_MATCHER).files();
+        List<Path> sourceFiles = JkPathTree.of(resolver.runSourceDir).andMatcher(RUN_SOURCE_MATCHER).getFiles();
         final SourceParser parser = SourceParser.of(this.projectBaseDir, sourceFiles);
         this.runDependencies = this.runDependencies.and(parser.dependencies());
         this.runRepos = parser.importRepos().and(runRepos);
@@ -136,8 +136,8 @@ final class Engine {
         JkLog.startTask(msg);
         final JkDependencyResolver runDependencyResolver = getRunDependencyResolver();
         final JkPathSequence runPath = runDependencyResolver.get(this.computeRunDependencies());
-        path.addAll(runPath.entries());
-        path.addAll(compileDependentProjects(yetCompiledProjects, path).entries());
+        path.addAll(runPath.getEntries());
+        path.addAll(compileDependentProjects(yetCompiledProjects, path).getEntries());
         this.compileDef(JkPathSequence.ofMany(path));
         path.add(this.resolver.runClassDir);
         JkLog.endTask("Done in " + JkUtilsTime.durationInMillis(start) + " milliseconds.");
@@ -175,7 +175,7 @@ final class Engine {
         final List<Path>  extraLibs = new LinkedList<>();
         final Path localDefLibDir = this.projectBaseDir.resolve(JkConstants.BOOT_DIR);
         if (Files.exists(localDefLibDir)) {
-            extraLibs.addAll(JkPathTree.of(localDefLibDir).andAccept("**.jar").files());
+            extraLibs.addAll(JkPathTree.of(localDefLibDir).andAccept("**.jar").getFiles());
         }
         return JkPathSequence.ofMany(extraLibs).withoutDuplicates();
     }
@@ -189,7 +189,7 @@ final class Engine {
         for (final Path file : this.rootsOfImportedRuns) {
             final Engine engine = new Engine(file.toAbsolutePath().normalize());
             engine.compile(yetCompiledProjects, pathEntries);
-            pathSequence = pathSequence.append(file);
+            pathSequence = pathSequence.withAppending(file);
         }
         return pathSequence;
     }
@@ -215,7 +215,7 @@ final class Engine {
         final JkPathTree defSource = JkPathTree.of(resolver.runSourceDir).andMatcher(RUN_SOURCE_MATCHER);
         JkUtilsPath.createDirectories(resolver.runClassDir);
         return new JkJavaCompileSpec().setOutputDir(resolver.runClassDir)
-                .addSources(defSource.files());
+                .addSources(defSource.getFiles());
     }
 
     private JkDependencyResolver getRunDependencyResolver() {

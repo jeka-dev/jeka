@@ -289,7 +289,7 @@ public final class JkEclipseClasspathGenerator {
         final Set<String> sourcePaths = new HashSet<>();
 
         // Test Sources
-        for (final JkPathTree fileTree : sourceLayout.tests().and(sourceLayout.testResources()).pathTrees()) {
+        for (final JkPathTree fileTree : sourceLayout.tests().and(sourceLayout.testResources()).getPathTrees()) {
             if (!fileTree.exists()) {
                 continue;
             }
@@ -307,7 +307,7 @@ public final class JkEclipseClasspathGenerator {
         }
 
         // Sources
-        for (final JkPathTree fileTree : sourceLayout.sources().and(sourceLayout.resources()).pathTrees()) {
+        for (final JkPathTree fileTree : sourceLayout.sources().and(sourceLayout.resources()).getPathTrees()) {
             if (!fileTree.exists()) {
                 continue;
             }
@@ -434,7 +434,7 @@ public final class JkEclipseClasspathGenerator {
             writer.writeCharacters("\n\t\t\t");
             writer.writeEmptyElement("attribute");
             writer.writeAttribute("name", "javadoc_location");
-            writer.writeAttribute("value",   // Eclipse does not accept variable for javadoc path
+            writer.writeAttribute("value",   // Eclipse does not andAccept variable for javadoc path
                     "jar:file:/" + javadoc.toAbsolutePath().normalize().toString()
                             .replace(File.separator, "/") + "!/");
             writer.writeCharacters("\n\t\t");

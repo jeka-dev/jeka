@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 import org.jerkar.api.file.JkPathTreeSet;
 import org.jerkar.api.java.JkClassLoader;
@@ -274,7 +273,7 @@ public final class JkUnit {
                         result.get().toStrings(JkLog.Verbosity.VERBOSE == JkLog.verbosity())));
             }
             if (JkLog.Verbosity.VERBOSE != JkLog.verbosity() && result.get().failureCount() > 0) {
-                JkLog.info("Launch Jerkar in verbose mode to display failure stack traces accept console.");
+                JkLog.info("Launch Jerkar in verbose mode to display failure stack traces andAccept console.");
             }
             if (reportDetail.equals(JunitReportDetail.BASIC)) {
                 TestReportBuilder.of(result.get()).writeToFileSystem(reportDir);
@@ -290,7 +289,7 @@ public final class JkUnit {
 
     @SuppressWarnings("rawtypes")
     private Collection<Class> getClassesToTest(JkJavaTestBulk testSpec) {
-        final JkClasspath classpath = testSpec.classpath().andManyFirst(testSpec.classesToTest().rootDirsOrZipFiles());
+        final JkClasspath classpath = testSpec.classpath().andManyFirst(testSpec.classesToTest().getRootDirsOrZipFiles());
         final JkClassLoader classLoader = JkClassLoader.system().parent().childWithMany(classpath)
                 .loadAllServices();
         final Collection<Class> result = getJunitTestClassesInClassLoader(classLoader, testSpec.classesToTest());

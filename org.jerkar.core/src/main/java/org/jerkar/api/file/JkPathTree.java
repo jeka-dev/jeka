@@ -139,19 +139,18 @@ public final class JkPathTree {
     }
 
     /**
-     * Same as {@link #files()} but returning paths relative to this tree root.
+     * Same as {@link #getFiles()} but returning paths relative to this tree root.
      */
-    public List<Path> relativeFiles() {
+    public List<Path> getRelativeFiles() {
         try(Stream<Path> stream = stream()) {
             return stream.filter(JkPathMatcher.noDirectory().asPredicate()).map(relativePathFunction()).collect(Collectors.toList());
         }
     }
 
     /**
-     * Returns list of paths returned by {@link #stream(FileVisitOption...)} but excluding
-     * directories from the result.
+     * Returns list of paths returned by {@link #stream(FileVisitOption...)} but excluding directories from the result.
      */
-    public List<Path> files() {
+    public List<Path> getFiles() {
         try (Stream<Path> stream = stream()) {
             return stream.filter(JkPathMatcher.noDirectory().asPredicate()).collect(Collectors.toList());
         }
@@ -338,14 +337,14 @@ public final class JkPathTree {
     }
 
     /**
-     * Creates a copy of this {@link JkPathTree} augmented with the specified accept pattern.
+     * Creates a copy of this {@link JkPathTree} augmented with the specified andAccept pattern.
      */
     public JkPathTree andAccept(String... globPatterns) {
         return andAccept(Arrays.asList(globPatterns));
     }
 
     /**
-     * Creates a copy of this {@link JkPathTree} augmented with the specified accept patterns.
+     * Creates a copy of this {@link JkPathTree} augmented with the specified andAccept patterns.
      */
     public JkPathTree andAccept(Iterable<String> globPatterns) {
         return andMatcher(JkPathMatcher.accept(this.root().getFileSystem(), globPatterns));

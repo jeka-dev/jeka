@@ -28,14 +28,14 @@ public class JkPathTreeTest {
         assertTrue(Files.exists(sampleFile));
         final Path sampleFolder = sampleFile.getParent().getParent();
 
-        System.out.println(JkPathTree.of(sampleFolder).relativeFiles());
+        System.out.println(JkPathTree.of(sampleFolder).getRelativeFiles());
 
         final JkPathTree subfolderTxt1 = JkPathTree.of(sampleFolder).andAccept("subfolder/*.txt");
-        assertEquals(1, subfolderTxt1.files().size());
+        assertEquals(1, subfolderTxt1.getFiles().size());
         System.out.println(subfolderTxt1);
 
         final JkPathTree subfolderTxt2 = JkPathTree.of(sampleFolder).andAccept("subfolder/*.txt");
-        assertEquals(1, subfolderTxt2.files().size());
+        assertEquals(1, subfolderTxt2.getFiles().size());
     }
 
     @Test
@@ -46,7 +46,7 @@ public class JkPathTreeTest {
         Files.createDirectories(source.resolve("emptyfolder"));   // git won't copy empty dir
 
         final JkPathTree tree = JkPathTree.of(Paths.get(sampleFileUrl.toURI()).getParent().getParent());
-        System.out.println(tree.relativeFiles());
+        System.out.println(tree.getRelativeFiles());
     }
 
     @Test
@@ -76,7 +76,7 @@ public class JkPathTreeTest {
         Files.deleteIfExists(zipFile);
         JkPathTree zipTree = JkPathTree.ofZip(zipFile);
         zipTree.merge(sampleDir());
-        List<Path> paths = zipTree.files();
+        List<Path> paths = zipTree.getFiles();
         assertEquals(1, paths.size());
 
         //System.out.println(Files.exists(zipRoot));
@@ -155,8 +155,8 @@ public class JkPathTreeTest {
         Files.copy(txt, txt2);
         assertTrue(Files.exists(txt));
         JkPathTree fooTree = JkPathTree.of(foo).andReject("bar/**", "bar");
-        System.out.println(fooTree.files());
-        assertFalse(fooTree.files().contains(txt));
+        System.out.println(fooTree.getFiles());
+        assertFalse(fooTree.getFiles().contains(txt));
         fooTree.deleteContent();
         assertTrue(Files.exists(txt));
         fooTree.deleteRoot();  // cleanup

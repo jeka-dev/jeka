@@ -54,7 +54,7 @@ public final class JkPathMatcher implements PathMatcher {
         for (final String pattern : globPatterns) {
             result = new OrMatcher(result, globMatcher(fileSystem, pattern));
         }
-        return new JkPathMatcher(result, "accept:" + globPatterns);
+        return new JkPathMatcher(result, "andAccept:" + globPatterns);
     }
 
     /**

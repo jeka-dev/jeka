@@ -131,10 +131,10 @@ public class JkPluginJava extends JkPlugin {
         String baseDirName = owner.baseDir().getFileName().toString();
         String code = template.replace("${group}", baseDirName).replace("${name}", baseDirName);
         JkLog.info("Create source directories.");
-        project.getSourceLayout().sources().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
-        project.getSourceLayout().resources().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
-        project.getSourceLayout().tests().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
-        project.getSourceLayout().testResources().pathTrees().stream().forEach(tree -> tree.createIfNotExist());
+        project.getSourceLayout().sources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
+        project.getSourceLayout().resources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
+        project.getSourceLayout().tests().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
+        project.getSourceLayout().testResources().getPathTrees().stream().forEach(tree -> tree.createIfNotExist());
         scaffoldPlugin.setRunClassClode(code);
     }
 
