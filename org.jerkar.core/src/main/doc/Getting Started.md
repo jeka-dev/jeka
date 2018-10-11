@@ -68,7 +68,7 @@ class Build extends JkJavaProjectBuild {
                 .setVersionedModule("org.djeang.build:org.djeang.build", java().projectVersion)
                 .setSourceVersion(JkJavaVersion.V8)
                 .setDependencies(dependencies());
-        maker().setTestRunner(maker().getTestRunner().forked(true));  // force tu run test in forked process
+        maker().setTestRunner(maker().getTestRunner().forked(true));  // force to run test in forked process
     }
 
     private JkDependencySet dependencies() {  // Example of dependencies.
