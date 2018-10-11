@@ -7,7 +7,6 @@ import java.util.*;
 
 import org.jerkar.api.utils.JkUtilsIterable;
 import org.jerkar.api.utils.JkUtilsPath;
-import org.jerkar.api.utils.JkUtilsString;
 
 /**
  * A sequence of file path (folder or archive). Each file is called an <code>entry</code>.<br/>
@@ -95,10 +94,10 @@ public final class JkPathSequence implements Iterable<Path> {
     // ------------------------------ withers and adders ------------------------------------
 
     /**
-     * @see #andManyFirst(Iterable)
+     * @see #prependMany(Iterable)
      */
-    public JkPathSequence andFirst(Path... entries) {
-        return andManyFirst(Arrays.asList(entries));
+    public JkPathSequence prepend(Path... entries) {
+        return prependMany(Arrays.asList(entries));
     }
 
     /**
@@ -106,7 +105,7 @@ public final class JkPathSequence implements Iterable<Path> {
      * entries followed by this sequence entries.
      */
     @SuppressWarnings("unchecked")
-    public JkPathSequence andManyFirst(Iterable<Path> otherEntries) {
+    public JkPathSequence prependMany(Iterable<Path> otherEntries) {
         Iterable<Path> paths = JkUtilsPath.disambiguate(otherEntries);
         List<Path> list = new LinkedList<>();
         paths.forEach(path -> list.add(path));
@@ -115,10 +114,10 @@ public final class JkPathSequence implements Iterable<Path> {
     }
 
     /**
-     * @see #andMany(Iterable)
+     * @see #appendMany(Iterable)
      */
-    public JkPathSequence and(Path... files) {
-        return andMany(Arrays.asList(files));
+    public JkPathSequence append(Path... files) {
+        return appendMany(Arrays.asList(files));
     }
 
     /**
@@ -126,7 +125,7 @@ public final class JkPathSequence implements Iterable<Path> {
      * one plus the specified ones.
      */
     @SuppressWarnings("unchecked")
-    public JkPathSequence andMany(Iterable<Path> otherEntries) {
+    public JkPathSequence appendMany(Iterable<Path> otherEntries) {
         Iterable<Path> paths = JkUtilsPath.disambiguate(otherEntries);
         final List<Path> list = new LinkedList<>(entries);
         paths.forEach(path -> list.add(path));

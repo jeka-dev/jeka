@@ -2,8 +2,6 @@ package org.jerkar.api.file;
 
 import java.nio.file.*;
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -62,26 +60,26 @@ public final class JkPathMatcher implements PathMatcher {
     /**
      * A matcher refusing specified glob pattern within specified file system.
      */
-    public static JkPathMatcher refuse(FileSystem fileSystem, String ... globPatterns) {
-        return refuse(fileSystem, Arrays.asList(globPatterns));
+    public static JkPathMatcher reject(FileSystem fileSystem, String ... globPatterns) {
+        return reject(fileSystem, Arrays.asList(globPatterns));
     }
 
     /**
      * A matcher refusing specified glob patterns within default file system.
      */
-    public static JkPathMatcher refuse(String ... globPatterns) {
-        return refuse(FileSystems.getDefault(), Arrays.asList(globPatterns));
+    public static JkPathMatcher reject(String ... globPatterns) {
+        return reject(FileSystems.getDefault(), Arrays.asList(globPatterns));
     }
 
     /**
      * A matcher refusing specified glob patterns within specified file system.
      */
-    public static JkPathMatcher refuse(FileSystem fileSystem, Iterable<String> globPatterns) {
+    public static JkPathMatcher reject(FileSystem fileSystem, Iterable<String> globPatterns) {
         PathMatcher result = path -> true;
         for (final String pattern : globPatterns) {
             result = new AndMatcher(result, path -> !globMatcher(fileSystem, pattern).matches(path));
         }
-        return new JkPathMatcher(result, "refuse:" + globPatterns);
+        return new JkPathMatcher(result, "reject:" + globPatterns);
     }
 
 
@@ -117,16 +115,6 @@ public final class JkPathMatcher implements PathMatcher {
         return matcher.matches(path);
     }
 
-    public List<String> getIncludePatterns() {
-        final List<String> result = new LinkedList<>();
-        return result; // TODO
-    }
-
-    public List<String> getExcludePatterns() {
-        final List<String> result = new LinkedList<>();
-        return result; // TODO
-    }
-
     // ---------------------------- adders ---------------------------------------
 
     public JkPathMatcher and(PathMatcher other) {
@@ -143,12 +131,12 @@ public final class JkPathMatcher implements PathMatcher {
         return this.and(JkPathMatcher.accept(fileSystem, pattern));
     }
 
-    public JkPathMatcher andRefuse(FileSystem fileSystem, String ... patterns) {
-        return this.and(JkPathMatcher.refuse(fileSystem, patterns));
+    public JkPathMatcher andReject(FileSystem fileSystem, String ... patterns) {
+        return this.and(JkPathMatcher.reject(fileSystem, patterns));
     }
 
-    public JkPathMatcher andRefuse(String ... patterns) {
-        return andRefuse(FileSystems.getDefault(), patterns);
+    public JkPathMatcher andReject(String ... patterns) {
+        return andReject(FileSystems.getDefault(), patterns);
     }
 
 

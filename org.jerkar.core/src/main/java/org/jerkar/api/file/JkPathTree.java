@@ -45,7 +45,7 @@ public final class JkPathTree {
 
     private final RootHolder rootHolder;
 
-    private final JkPathMatcher filter;
+    private final JkPathMatcher matcher;
 
     private JkPathTree(Path rootDir, boolean zip) {
         this(rootDir, NO_FILTER, zip);
@@ -53,12 +53,12 @@ public final class JkPathTree {
 
     private JkPathTree(Path rootDirOrArchive, JkPathMatcher matcher, boolean zipFile) {
         this.rootHolder = zipFile ? RootHolder.ofZip(rootDirOrArchive) : RootHolder.ofDir(rootDirOrArchive);
-        this.filter = matcher;
+        this.matcher = matcher;
     }
 
     private JkPathTree(RootHolder rootHolder, JkPathMatcher matcher) {
         this.rootHolder = rootHolder;
-        this.filter = matcher;
+        this.matcher = matcher;
     }
 
     /**
@@ -81,14 +81,14 @@ public final class JkPathTree {
      * Returns the filter defined on this {@link JkPathTree}, never <code>null</code>.
      */
     public JkPathMatcher matcher() {
-        return filter;
+        return matcher;
     }
 
     /**
-     * Returns true if a filter has explicitly been defined on this tree.
+     * Returns true if a matcher has explicitly been defined on this tree.
      */
-    public boolean isDefineFilter() {
-        return this.filter == NO_FILTER;
+    public boolean isDefineMatcher() {
+        return this.matcher == NO_FILTER;
     }
 
     // ------------------------------- functional ---------------------------------
@@ -132,7 +132,7 @@ public final class JkPathTree {
         if(!exists()) {
             return new LinkedList<Path>().stream();
         }
-        final JkPathMatcher matcher = JkPathMatcher.of(filter);
+        final JkPathMatcher matcher = JkPathMatcher.of(this.matcher);
         return JkUtilsPath.walk(root(), options)
                 .filter(path -> matcher.matches(root().relativize(path)))
                 .onClose(() -> rootHolder.closeIfNeeded());
@@ -239,14 +239,14 @@ public final class JkPathTree {
             }
 
             private FileVisitResult visitFile(Path path) {
-                if (filter.matches(root().relativize(path))) {
+                if (matcher.matches(root().relativize(path))) {
                     JkUtilsPath.deleteFile(path);
                 }
                 return FileVisitResult.CONTINUE;
             }
 
             private FileVisitResult visitDir(Path path) {
-                if (!JkUtilsPath.isSameFile(root(), path) && filter.matches(root().relativize(path))
+                if (!JkUtilsPath.isSameFile(root(), path) && matcher.matches(root().relativize(path))
                         && JkUtilsPath.listDirectChildren(path).isEmpty()) {
                     JkUtilsPath.deleteFile(path);
                 }
@@ -315,7 +315,7 @@ public final class JkPathTree {
         if (!Files.exists(destinationDir)) {
             JkUtilsPath.createDirectories(destinationDir);
         }
-        return JkUtilsPath.copyDirContent(root(), destinationDir, filter, copyOptions);
+        return JkUtilsPath.copyDirContent(root(), destinationDir, matcher, copyOptions);
     }
 
 
@@ -323,35 +323,43 @@ public final class JkPathTree {
     // ------------------------- Filter ----------------------------------------------
 
     /**
-     * Creates a {@link JkPathTree} which is a copy of this {@link JkPathTree}
-     * augmented with the specified {@link JkPathMatcher}
+     * Creates a copy of this {@link JkPathTree} augmented with the specified {@link JkPathMatcher}
      */
     public JkPathTree andMatcher(PathMatcher pathMatcher) {
-        return new JkPathTree(rootHolder, this.filter.and(pathMatcher));
+        return new JkPathTree(rootHolder, this.matcher.and(pathMatcher));
     }
 
     /**
      * Creates a {@link JkPathTree} which is a copy of this {@link JkPathTree}
-     * but with the specified {@link JkPathMatcher}
+     * but the matcher is replaced with the specified one.
      */
     public JkPathTree withMatcher(JkPathMatcher pathMatcher) {
         return new JkPathTree(rootHolder, pathMatcher);
     }
 
+    /**
+     * Creates a copy of this {@link JkPathTree} augmented with the specified accept pattern.
+     */
     public JkPathTree andAccept(String... globPatterns) {
         return andAccept(Arrays.asList(globPatterns));
     }
 
+    /**
+     * Creates a copy of this {@link JkPathTree} augmented with the specified accept patterns.
+     */
     public JkPathTree andAccept(Iterable<String> globPatterns) {
         return andMatcher(JkPathMatcher.accept(this.root().getFileSystem(), globPatterns));
     }
 
-    public JkPathTree andRefuse(Iterable<String> globPatterns) {
-        return andMatcher(JkPathMatcher.refuse(this.root().getFileSystem(), globPatterns));
+    /**
+     * Creates a copy of this {@link JkPathTree} augmented with the specified reject pattern.
+     */
+    public JkPathTree andReject(Iterable<String> globPatterns) {
+        return andMatcher(JkPathMatcher.reject(this.root().getFileSystem(), globPatterns));
     }
 
-    public JkPathTree andRefuse(String... globPatterns) {
-        return andRefuse(Arrays.asList(globPatterns));
+    public JkPathTree andReject(String... globPatterns) {
+        return andReject(Arrays.asList(globPatterns));
     }
 
     // ------------------------ Misc ---------------------------------------
@@ -374,7 +382,7 @@ public final class JkPathTree {
      * resolved from the specified path to this root.
      */
     public JkPathTree resolve(Path path) {
-        return new JkPathTree(rootHolder.resolve(path), this.filter);
+        return new JkPathTree(rootHolder.resolve(path), this.matcher);
     }
 
 
@@ -388,7 +396,7 @@ public final class JkPathTree {
 
     @Override
     public String toString() {
-        return rootHolder + ":" + filter;
+        return rootHolder + ":" + matcher;
     }
 
     private static class RootHolder {

@@ -236,7 +236,7 @@ final class DotClasspathModel {
             JkPathTree jkFileTree = JkPathTree.of(dir);
             if (!excluding.isEmpty()) {
                 final String[] patterns = excluding.split("\\|");
-                jkFileTree = jkFileTree.andRefuse(patterns);
+                jkFileTree = jkFileTree.andReject(patterns);
             }
             if (!including.isEmpty()) {
                 final String[] patterns = including.split("\\|");

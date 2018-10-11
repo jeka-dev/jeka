@@ -1,6 +1,5 @@
 package org.jerkar.api.java;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -139,7 +138,7 @@ public final class JkJavaCompileSpec {
     }
 
     public JkJavaCompileSpec addSources(JkPathTree tree) {
-        if (tree.isDefineFilter()) {
+        if (tree.isDefineMatcher()) {
             return addSources(tree.root());
         }
         return addSources(tree.files());

@@ -33,7 +33,7 @@ import java.util.*;
  */
 final class Engine {
 
-    private final JkPathMatcher RUN_SOURCE_MATCHER = JkPathMatcher.accept("**.java").andRefuse("**/_*", "_*");
+    private final JkPathMatcher RUN_SOURCE_MATCHER = JkPathMatcher.accept("**.java").andReject("**/_*", "_*");
 
     private final Path projectBaseDir;
 
@@ -76,7 +76,7 @@ final class Engine {
         JkPathSequence path = JkPathSequence.of();
         if (!commandLine.dependencies().isEmpty()) {
             final JkPathSequence cmdPath = pathOf(commandLine.dependencies());
-            path = path.andManyFirst(cmdPath);
+            path = path.prependMany(cmdPath);
             JkLog.trace("Command line extra path : " + cmdPath);
         }
         if (!JkUtilsString.isBlank(runClassHint)) {  // First find a class in the existing classpath without compiling
@@ -84,7 +84,7 @@ final class Engine {
             jkRun = getRunInstance(runClassHint, path);
         }
         if (jkRun == null) {
-            path = compile().andMany(path);
+            path = compile().appendMany(path);
             jkRun = getRunInstance(runClassHint, path);
         }
         if (jkRun == null) {
@@ -189,7 +189,7 @@ final class Engine {
         for (final Path file : this.rootsOfImportedRuns) {
             final Engine engine = new Engine(file.toAbsolutePath().normalize());
             engine.compile(yetCompiledProjects, pathEntries);
-            pathSequence = pathSequence.and(file);
+            pathSequence = pathSequence.append(file);
         }
         return pathSequence;
     }
@@ -197,7 +197,7 @@ final class Engine {
     private void compileDef(JkPathSequence runPath) {
         JkJavaCompileSpec compileSpec = defCompileSpec().setClasspath(runPath);
         JkJavaCompiler.of().compile(compileSpec);
-        JkPathTree.of(this.resolver.runSourceDir).andRefuse("**/*.java").copyTo(this.resolver.runClassDir,
+        JkPathTree.of(this.resolver.runSourceDir).andReject("**/*.java").copyTo(this.resolver.runClassDir,
                 StandardCopyOption.REPLACE_EXISTING);
     }
 

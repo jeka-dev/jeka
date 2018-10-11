@@ -89,7 +89,7 @@ public final class JkPluginEclipse extends JkPlugin {
     public void generateAll() {
         final Iterable<Path> folders = owner.baseTree()
                 .andAccept("**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
-                .andRefuse("**/" + JkConstants.OUTPUT_PATH + "/**")
+                .andReject("**/" + JkConstants.OUTPUT_PATH + "/**")
                 .stream().collect(Collectors.toList());
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();

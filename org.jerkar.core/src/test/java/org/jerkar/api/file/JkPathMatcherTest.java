@@ -36,21 +36,21 @@ public class JkPathMatcherTest {
     @Test
     public void testRefuse() {
 
-        assertTrue(JkPathMatcher.refuse("org/**", "com/**").matches(Paths.get("foo/subfoo/bar.java")));
-        assertFalse(JkPathMatcher.refuse("org/**", "com/**").matches(Paths.get("com/subfoo/bar.java")));
-        assertFalse(JkPathMatcher.refuse("org/**", "com/**").matches(Paths.get("org/subfoo/bar.java")));
+        assertTrue(JkPathMatcher.reject("org/**", "com/**").matches(Paths.get("foo/subfoo/bar.java")));
+        assertFalse(JkPathMatcher.reject("org/**", "com/**").matches(Paths.get("com/subfoo/bar.java")));
+        assertFalse(JkPathMatcher.reject("org/**", "com/**").matches(Paths.get("org/subfoo/bar.java")));
 
-        assertFalse(JkPathMatcher.refuse("**/_*").matches(Paths.get("foo/subfoo/_Bar.java")));
-        assertFalse(JkPathMatcher.refuse("**/_*", "_*").matches(Paths.get("_Bar.java")));
+        assertFalse(JkPathMatcher.reject("**/_*").matches(Paths.get("foo/subfoo/_Bar.java")));
+        assertFalse(JkPathMatcher.reject("**/_*", "_*").matches(Paths.get("_Bar.java")));
     }
 
     @Test
     public void testAndRefuse() {
-        assertTrue(JkPathMatcher.accept("**/*.java").andRefuse("**/_*")
+        assertTrue(JkPathMatcher.accept("**/*.java").andReject("**/_*")
                 .matches(Paths.get("foo/subfoo/Bar.java")));
 
         Path path = Paths.get("C:/samples/sample-dependee/AClassicBuild.java");
-        assertTrue(JkPathMatcher.accept("**/*.java").andRefuse("**/_*").matches(path));
+        assertTrue(JkPathMatcher.accept("**/*.java").andReject("**/_*").matches(path));
 
 
     }

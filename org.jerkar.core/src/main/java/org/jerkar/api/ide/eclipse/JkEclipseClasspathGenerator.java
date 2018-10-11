@@ -302,8 +302,6 @@ public final class JkEclipseClasspathGenerator {
             writer.writeEmptyElement(DotClasspathModel.CLASSPATHENTRY);
             writer.writeAttribute("kind", "src");
             writeIncludingExcluding(writer, fileTree);
-            //writer.writeAttribute("output",
-            //        relativePathIfPossible(structure.baseDirAsTree(), structure.testClassDir()));
             writer.writeAttribute("path", path);
             writer.writeCharacters("\n");
         }
@@ -336,11 +334,12 @@ public final class JkEclipseClasspathGenerator {
     }
 
     private void writeIncludingExcluding(XMLStreamWriter writer, JkPathTree fileTree) throws XMLStreamException {
-        final String including = toPatternString(fileTree.matcher().getIncludePatterns());
+        // TODO
+        final String including = ""; //toPatternString(fileTree.matcher().getIncludePatterns());
         if (!JkUtilsString.isBlank(including)) {
             writer.writeAttribute("including", including);
         }
-        final String excluding = toPatternString(fileTree.matcher().getExcludePatterns());
+        final String excluding = ""; //toPatternString(fileTree.matcher().getExcludePatterns());
         if (!JkUtilsString.isBlank(excluding)) {
             writer.writeAttribute("excluding", excluding);
         }

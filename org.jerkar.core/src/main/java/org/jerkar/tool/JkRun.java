@@ -202,7 +202,7 @@ public class JkRun {
     public void clean() {
         JkLog.info("Clean output directory " + outputDir());
         if (Files.exists(outputDir())) {
-            JkPathTree.of(outputDir()).andRefuse(JkConstants.DEF_BIN_DIR_NAME + "/**").deleteContent();
+            JkPathTree.of(outputDir()).andReject(JkConstants.DEF_BIN_DIR_NAME + "/**").deleteContent();
         }
     }
 

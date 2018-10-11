@@ -154,7 +154,7 @@ public class JkPathTreeTest {
         Path txt2 = foo.resolve("file2.txt");
         Files.copy(txt, txt2);
         assertTrue(Files.exists(txt));
-        JkPathTree fooTree = JkPathTree.of(foo).andRefuse("bar/**", "bar");
+        JkPathTree fooTree = JkPathTree.of(foo).andReject("bar/**", "bar");
         System.out.println(fooTree.files());
         assertFalse(fooTree.files().contains(txt));
         fooTree.deleteContent();

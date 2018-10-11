@@ -92,7 +92,7 @@ public final class JkPluginIntellij extends JkPlugin {
     public void generateAllIml() {
         final Iterable<Path> folders = owner.baseTree()
                 .andAccept("**/" + JkConstants.DEF_DIR, JkConstants.DEF_DIR)
-                .andRefuse("**/" + JkConstants.OUTPUT_PATH + "/**")
+                .andReject("**/" + JkConstants.OUTPUT_PATH + "/**")
                 .stream().collect(Collectors.toList());
         for (final Path folder : folders) {
             final Path projectFolder = folder.getParent().getParent();
