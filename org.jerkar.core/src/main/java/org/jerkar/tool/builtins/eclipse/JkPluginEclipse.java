@@ -18,7 +18,7 @@ import org.jerkar.tool.*;
 import org.jerkar.tool.builtins.java.JkPluginJava;
 import org.jerkar.tool.builtins.scaffold.JkPluginScaffold;
 
-@JkDoc("Generation of Eclipse files (.project and .classpath) from actual project structure and dependencies.")
+@JkDoc("Generation of Eclipse files (.project and .classpath) from actual project structure andPrepending dependencies.")
 @JkDocPluginDeps({JkPluginJava.class})
 public final class JkPluginEclipse extends JkPlugin {
 
@@ -63,7 +63,7 @@ public final class JkPluginEclipse extends JkPlugin {
             final JkJavaProject javaProject = owner.plugins().get(JkPluginJava.class).project();
             final List<Path> importedRunProjects = new LinkedList<>();
             for (final JkRun depRun : owner.importedRuns().directs()) {
-                importedRunProjects.add(depRun.baseTree().root());
+                importedRunProjects.add(depRun.baseTree().getRoot());
             }
             final JkEclipseClasspathGenerator classpathGenerator = new JkEclipseClasspathGenerator(javaProject);
             classpathGenerator.setRunDependencies(owner.runDependencyResolver(), owner.runDependencies());
@@ -76,11 +76,11 @@ public final class JkPluginEclipse extends JkPlugin {
             JkUtilsPath.write(dotClasspath, result.getBytes(Charset.forName("UTF-8")));
 
             if (!Files.exists(dotProject)) {
-                JkEclipseProject.ofJavaNature(owner.baseTree().root().getFileName().toString()).writeTo(dotProject);
+                JkEclipseProject.ofJavaNature(owner.baseTree().getRoot().getFileName().toString()).writeTo(dotProject);
             }
         } else {
             if (!Files.exists(dotProject)) {
-                JkEclipseProject.ofSimpleNature(owner.baseTree().root().getFileName().toString()).writeTo(dotProject);
+                JkEclipseProject.ofSimpleNature(owner.baseTree().getRoot().getFileName().toString()).writeTo(dotProject);
             }
         }
     }

@@ -19,7 +19,7 @@ public class JkProjectSourceLayout {
     /**
      * Filter to consider as resources everything but java source stuff.
      */
-    public static final PathMatcher JAVA_RESOURCE_MATCHER = JkPathMatcher.reject("**/*.java", "*.java",
+    public static final PathMatcher JAVA_RESOURCE_MATCHER = JkPathMatcher.ofReject("**/*.java", "*.java",
             "**/package.html", "package.html", "**/doc-files", "doc-files");
 
     /**
@@ -237,7 +237,7 @@ public class JkProjectSourceLayout {
     private JkPathTreeSet relocalize(Path newBase, JkPathTreeSet pathTreeSet) {
         JkPathTreeSet result = JkPathTreeSet.ofEmpty();
         for (JkPathTree tree : pathTreeSet.getPathTrees()) {
-            result = result.and(JkPathTree.of(relocalize(newBase, tree.root())).withMatcher(tree.matcher()));
+            result = result.and(JkPathTree.of(relocalize(newBase, tree.getRoot())).withMatcher(tree.getMatcher()));
         }
         return result;
     }

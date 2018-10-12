@@ -28,28 +28,28 @@ public final class JkPathMatcher implements PathMatcher {
     /**
      * A matcher filtering out directories.
      */
-    public static JkPathMatcher noDirectory(LinkOption...linkOptions) {
+    public static JkPathMatcher ofNoDirectory(LinkOption...linkOptions) {
         return new JkPathMatcher(path -> !Files.isDirectory(path, linkOptions), "No directories");
     }
 
     /**
      * A matcher accepting specified glob pattern within specified file system.
      */
-    public static JkPathMatcher accept(FileSystem fileSystem, String ... globPattern) {
-        return accept(fileSystem, Arrays.asList(globPattern));
+    public static JkPathMatcher ofAccept(FileSystem fileSystem, String ... globPattern) {
+        return ofAccept(fileSystem, Arrays.asList(globPattern));
     }
 
     /**
      * A matcher accepting specified glob patterns within default file system.
      */
-    public static JkPathMatcher accept(String ... globPattern) {
-        return accept(FileSystems.getDefault(), Arrays.asList(globPattern));
+    public static JkPathMatcher ofAccept(String ... globPattern) {
+        return ofAccept(FileSystems.getDefault(), Arrays.asList(globPattern));
     }
 
     /**
      * A matcher accepting specified glob patterns within specified file system.
      */
-    public static JkPathMatcher accept(FileSystem fileSystem, Iterable<String> globPatterns) {
+    public static JkPathMatcher ofAccept(FileSystem fileSystem, Iterable<String> globPatterns) {
         PathMatcher result = empty();
         for (final String pattern : globPatterns) {
             result = new OrMatcher(result, globMatcher(fileSystem, pattern));
@@ -60,21 +60,21 @@ public final class JkPathMatcher implements PathMatcher {
     /**
      * A matcher refusing specified glob pattern within specified file system.
      */
-    public static JkPathMatcher reject(FileSystem fileSystem, String ... globPatterns) {
-        return reject(fileSystem, Arrays.asList(globPatterns));
+    public static JkPathMatcher ofReject(FileSystem fileSystem, String ... globPatterns) {
+        return ofReject(fileSystem, Arrays.asList(globPatterns));
     }
 
     /**
      * A matcher refusing specified glob patterns within default file system.
      */
-    public static JkPathMatcher reject(String ... globPatterns) {
-        return reject(FileSystems.getDefault(), Arrays.asList(globPatterns));
+    public static JkPathMatcher ofReject(String ... globPatterns) {
+        return ofReject(FileSystems.getDefault(), Arrays.asList(globPatterns));
     }
 
     /**
      * A matcher refusing specified glob patterns within specified file system.
      */
-    public static JkPathMatcher reject(FileSystem fileSystem, Iterable<String> globPatterns) {
+    public static JkPathMatcher ofReject(FileSystem fileSystem, Iterable<String> globPatterns) {
         PathMatcher result = path -> true;
         for (final String pattern : globPatterns) {
             result = new AndMatcher(result, path -> !globMatcher(fileSystem, pattern).matches(path));
@@ -104,7 +104,7 @@ public final class JkPathMatcher implements PathMatcher {
     /**
      * Returns this matcher as a {@link Predicate}
      */
-    public Predicate<Path> asPredicate() {
+    public Predicate<Path> toPredicate() {
         return path -> matcher.matches(path);
     }
 
@@ -128,11 +128,11 @@ public final class JkPathMatcher implements PathMatcher {
     }
 
     public JkPathMatcher andAccept(FileSystem fileSystem, String pattern) {
-        return this.and(JkPathMatcher.accept(fileSystem, pattern));
+        return this.and(JkPathMatcher.ofAccept(fileSystem, pattern));
     }
 
     public JkPathMatcher andReject(FileSystem fileSystem, String ... patterns) {
-        return this.and(JkPathMatcher.reject(fileSystem, patterns));
+        return this.and(JkPathMatcher.ofReject(fileSystem, patterns));
     }
 
     public JkPathMatcher andReject(String ... patterns) {

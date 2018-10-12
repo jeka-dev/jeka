@@ -293,7 +293,7 @@ public final class JkEclipseClasspathGenerator {
             if (!fileTree.exists()) {
                 continue;
             }
-            final String path = sourceLayout.baseDir().relativize(fileTree.root()).toString().replace(File.separator, "/");
+            final String path = sourceLayout.baseDir().relativize(fileTree.getRoot()).toString().replace(File.separator, "/");
             if (sourcePaths.contains(path)) {
                 continue;
             }
@@ -311,7 +311,7 @@ public final class JkEclipseClasspathGenerator {
             if (!fileTree.exists()) {
                 continue;
             }
-            final String path = relativePathIfPossible(sourceLayout.baseDir(), fileTree.root());
+            final String path = relativePathIfPossible(sourceLayout.baseDir(), fileTree.getRoot());
             if (sourcePaths.contains(path)) {
                 continue;
             }

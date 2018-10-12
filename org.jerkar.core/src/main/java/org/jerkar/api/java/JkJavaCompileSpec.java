@@ -139,7 +139,7 @@ public final class JkJavaCompileSpec {
 
     public JkJavaCompileSpec addSources(JkPathTree tree) {
         if (tree.isDefineMatcher()) {
-            return addSources(tree.root());
+            return addSources(tree.getRoot());
         }
         return addSources(tree.getFiles());
     }

@@ -61,7 +61,7 @@ public class JkRun {
         JkLog.trace("Initializing " + this.getClass().getName() + " instance with base dir  : " + this.baseDir);
 
         // Instantiating imported runs
-        this.importedRuns = JkImportedRuns.of(this.baseTree().root(), this);
+        this.importedRuns = JkImportedRuns.of(this.baseTree().getRoot(), this);
 
         this.plugins = new JkRunPlugins(this, Environment.commandLine.getPluginOptions());
     }

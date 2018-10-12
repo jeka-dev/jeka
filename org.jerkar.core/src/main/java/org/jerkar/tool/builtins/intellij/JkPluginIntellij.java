@@ -47,7 +47,7 @@ public final class JkPluginIntellij extends JkPlugin {
         }
         final List<Path> depProjects = new LinkedList<>();
         for (final JkRun depRun : owner.importedRuns().directs()) {
-            depProjects.add(depRun.baseTree().root());
+            depProjects.add(depRun.baseTree().getRoot());
         }
         generator.setUseVarPath(useVarPath);
         generator.setRunDependencies(externalDir ? null : owner.runDependencyResolver(), owner.runDependencies());
@@ -81,7 +81,7 @@ public final class JkPluginIntellij extends JkPlugin {
     /** Generate modules.xml files */
     @JkDoc("Generates ./idea/modules.xml file.")
     public void generateModulesXml() {
-        final Path current = owner.baseTree().root();
+        final Path current = owner.baseTree().getRoot();
         final Iterable<Path> imls = owner.baseTree().andAccept("**.iml").getFiles();
         final ModulesXmlGenerator modulesXmlGenerator = new ModulesXmlGenerator(current, imls);
         modulesXmlGenerator.generate();

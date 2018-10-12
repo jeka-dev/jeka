@@ -43,7 +43,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private JkUnit testRunner;
 
-    private JkPathMatcher testClassMatcher = JkPathMatcher.accept("**/*Test.class");
+    private JkPathMatcher testClassMatcher = JkPathMatcher.ofAccept("**/*Test.class");
 
     private List<String> javadocOptions = new LinkedList<>();
 
@@ -217,7 +217,7 @@ public final class JkJavaProjectMaker implements JkArtifactProducer, JkFileSyste
 
     private JkJavaCompileSpec getTestCompileSpec() {
         JkJavaCompileSpec result = project.getCompileSpec().copy();
-        final JkPathSequence classpath = getDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST).withPrepending(getOutLayout().classDir());
+        final JkPathSequence classpath = getDependenciesFor(JkJavaDepScopes.SCOPES_FOR_TEST).andPrepending(getOutLayout().classDir());
         return result
                 .setClasspath(classpath)
                 .addSources(project.getSourceLayout().tests())

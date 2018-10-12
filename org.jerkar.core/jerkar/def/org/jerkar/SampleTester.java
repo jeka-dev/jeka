@@ -71,7 +71,7 @@ class SampleTester {
 
     private void testSamples(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(sampleBaseDir.root().toAbsolutePath().normalize())
+        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(sampleBaseDir.getRoot().toAbsolutePath().normalize())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-LV=true -RC=" + className)
                 .withExtraParams("clean", "java#pack", "java#publish", "-java#publish.localOnly")
                 .withExtraParams(args)
@@ -80,7 +80,7 @@ class SampleTester {
 
     private void testDependee(String className, String... args) {
         JkLog.info("Test " + className + " " + Arrays.toString(args));
-        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependeeBaseDir.root())
+        JkProcess.of(launchScript.toAbsolutePath().toString()).withWorkingDir(this.sampleDependeeBaseDir.getRoot())
                 .withParamsIf(!JkUtilsString.isBlank(className), "-RC=" + className)
                 .withParams("clean", "java#pack")
                 .withExtraParams(args)
@@ -96,7 +96,7 @@ class SampleTester {
     }
 
     private void scaffoldAndEclipse() {
-        Path scafoldedProject = output.root().resolve("scaffolded");
+        Path scafoldedProject = output.getRoot().resolve("scaffolded");
         JkProcess scaffoldProcess = process().withWorkingDir(scafoldedProject);
         JkUtilsPath.createDirectories(scafoldedProject);
         scaffoldProcess.withParams("scaffold").runSync(); // scaffold

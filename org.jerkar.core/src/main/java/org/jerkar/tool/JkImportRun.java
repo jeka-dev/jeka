@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * annotated element is supposed to be a {@link JkRun} or instance of a subclass. The
  * expected value is the referenced project path relative to the project the
  * annotated element belong. <br/>
- * So for example if there is a project FooA and and a project FooB belonging to
+ * So for example if there is a project FooA and andPrepending a project FooB belonging to
  * the same folder. In project FooA we can reference project FooB by annotating
  * a {@link JkRun} field with value <code>../FooB</code>.
  * 

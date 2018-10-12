@@ -389,7 +389,7 @@ public class JkDependencySet implements Iterable<JkScopedDependency>, Serializab
 
     /**
      * Returns all scopes that are involved in these dependencies. That means if one of these scoped
-     * dependencies is declared with scope 'FOO' and scope 'BAR' extends scope 'FOO', then 'FOO' and 'BAR' is
+     * dependencies is declared with scope 'FOO' and scope 'BAR' extends scope 'FOO', then 'FOO' andPrepending 'BAR' is
      * part of involved scopes.
      */
     public Set<JkScope> getInvolvedScopes() {

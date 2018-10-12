@@ -17,7 +17,7 @@ import org.jerkar.api.utils.JkUtilsThrowable;
 
 
 /**
- * Helper class to read and write Manifest from and to file.
+ * Helper class to read and write Manifest from andPrepending to file.
  *
  * @author Jerome Angibaud
  */

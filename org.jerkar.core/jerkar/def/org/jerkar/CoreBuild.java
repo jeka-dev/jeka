@@ -76,7 +76,7 @@ public class CoreBuild extends JkJavaProjectBuild {
         if (testSamples) {
             testSamples();
         }
-        JkLog.info("Distribution created in " + distrib.root());
+        JkLog.info("Distribution created in " + distrib.getRoot());
         final Path distripZipFile = maker.getArtifactPath(DISTRIB_FILE_ID);
         distrib.zipTo(distripZipFile);
         JkLog.info("Distribution zipped in " + distripZipFile);
@@ -100,7 +100,7 @@ public class CoreBuild extends JkJavaProjectBuild {
         if (target.exists()) {
             target.deleteRoot();
         }
-        JkPathTree.of(distribFolder.resolve("doc")).copyTo(target.root());
+        JkPathTree.of(distribFolder.resolve("doc")).copyTo(target.getRoot());
         git.withExtraParams("add", "documentation-latest").runSync();
         git.withExtraParams("commit", "-m", "Doc").runSync();
         git.withExtraParams("push").runSync();

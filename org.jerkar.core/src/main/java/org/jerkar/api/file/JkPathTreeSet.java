@@ -147,7 +147,7 @@ public final class JkPathTreeSet {
     public JkPathTreeSet withMatcher(PathMatcher matcher) {
         final List<JkPathTree> list = new LinkedList<>();
         for (final JkPathTree tree : this.pathTrees) {
-            list.add(JkPathTree.of(tree.root()).andMatcher(matcher));
+            list.add(JkPathTree.of(tree.getRoot()).andMatcher(matcher));
         }
         return new JkPathTreeSet(list);
     }
@@ -206,7 +206,7 @@ public final class JkPathTreeSet {
     public List<Path> getRootDirsOrZipFiles() {
         final List<Path> result = new LinkedList<>();
         for (final JkPathTree tree : pathTrees) {
-            result.add(tree.rootDirOrZipFile());
+            result.add(tree.getRootDirOrZipFile());
         }
         return result;
     }

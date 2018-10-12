@@ -21,7 +21,7 @@ public final class JkJavaTestBulk {
     }
 
     public static JkJavaTestBulk of(JkClasspath classpath, JkPathTree testClasses) {
-        return of(classpath, testClasses.asSet());
+        return of(classpath, testClasses.toSet());
     }
 
     private JkJavaTestBulk(JkClasspath classpath, JkPathTreeSet testClasses) {
@@ -45,7 +45,7 @@ public final class JkJavaTestBulk {
     }
 
     public JkJavaTestBulk withClassesToTest(String includePattern) {
-        return withClassesToTest(this.classesToTest.withMatcher(JkPathMatcher.accept(includePattern)));
+        return withClassesToTest(this.classesToTest.withMatcher(JkPathMatcher.ofAccept(includePattern)));
     }
 
 

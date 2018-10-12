@@ -37,7 +37,7 @@ public final class JkPublisher {
 
     /**
      * Creates a {@link JkPublisher} with the specified {@link JkRepoSet}
-     * and output directory. <code>artifactDir</code> is the place where pom.xml and
+     * and output directory. <code>artifactDir</code> is the place where pom.xml andPrepending
      * ivy.xml are generated.
      */
     public static JkPublisher of(JkRepoSet publishRepos, Path artifactDir) {

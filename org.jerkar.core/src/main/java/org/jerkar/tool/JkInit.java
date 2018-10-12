@@ -19,7 +19,7 @@ import java.util.Map;
 public final class JkInit {
 
     /**
-     * Creates an instance of the specified run class and displays information about this class and environment.
+     * Creates an instance of the specified run class and displays information about this class andPrepending environment.
      */
     public static <T extends JkRun> T instanceOf(Class<T> clazz, String... args) {
         JkLog.register(new LogHandler());

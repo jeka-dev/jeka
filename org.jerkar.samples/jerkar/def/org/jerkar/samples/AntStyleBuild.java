@@ -24,7 +24,7 @@ public class AntStyleBuild extends JkRun {
     Path src = baseDir().resolve("src/main/java");
     Path buildDir = baseDir().resolve("build/output");
     Path classDir = outputDir().resolve("classes");
-    Path jarFile = outputDir().resolve("jar/" + baseTree().root().getFileName() + ".jar");
+    Path jarFile = outputDir().resolve("jar/" + baseTree().getRoot().getFileName() + ".jar");
     JkClasspath classpath = JkClasspath.ofMany(baseTree().andAccept("libs/**/*.jar").getFiles());
     Path reportDir =buildDir.resolve("junitRreport");
 

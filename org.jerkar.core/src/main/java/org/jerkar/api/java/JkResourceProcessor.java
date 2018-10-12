@@ -52,7 +52,7 @@ public final class JkResourceProcessor {
      * <code>JkPathTree</code> without processing any token replacement.
      */
     public static JkResourceProcessor of(JkPathTree tree) {
-        return of(tree.asSet());
+        return of(tree.toSet());
     }
 
     /**
@@ -67,7 +67,7 @@ public final class JkResourceProcessor {
                     continue;
                 }
                 resourceTree.stream().forEach(path -> {
-                    final Path relativePath = resourceTree.root().relativize(path);
+                    final Path relativePath = resourceTree.getRoot().relativize(path);
                     final Path out = outputDir.resolve(relativePath);
                     final Map<String, String> data = JkInterpolator.interpolateData(relativePath.toString(),
                             interpolators);
@@ -96,7 +96,7 @@ public final class JkResourceProcessor {
      * @see JkResourceProcessor#and(JkPathTreeSet)
      */
     public JkResourceProcessor and(JkPathTree tree) {
-        return and(tree.asSet());
+        return and(tree.toSet());
     }
 
     /**

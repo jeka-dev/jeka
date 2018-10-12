@@ -24,8 +24,8 @@ public class JkPluginPgp extends JkPlugin {
     protected JkPluginPgp(JkRun run) {
         super(run);
         JkPgp defaultPgp = JkPgp.ofDefaultGnuPg();
-        publicRingPath = defaultPgp.publicRing().normalize().toString();
-        secretRingPath = defaultPgp.secretRing().normalize().toString();
+        publicRingPath = defaultPgp.getPublicRing().normalize().toString();
+        secretRingPath = defaultPgp.getSecretRing().normalize().toString();
     }
 
     /**
@@ -39,8 +39,8 @@ public class JkPluginPgp extends JkPlugin {
     public void display() {
         StringBuilder sb = new StringBuilder();
         JkPgp pgp = get();
-        sb.append("PGP public ring path : " + pgp.publicRing());
-        sb.append("\nPGP secret ring path : " + pgp.secretRing());
+        sb.append("PGP public ring path : " + pgp.getPublicRing());
+        sb.append("\nPGP secret ring path : " + pgp.getSecretRing());
         JkLog.info(sb.toString());
     }
 }

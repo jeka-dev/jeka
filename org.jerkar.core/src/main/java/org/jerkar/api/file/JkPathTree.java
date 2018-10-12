@@ -65,7 +65,7 @@ public final class JkPathTree {
      * Returns the root directory. In case of zip archive it returns a directory entry
      * within the zip archive.
      */
-    public Path root() {
+    public Path getRoot() {
         return rootHolder.get();
     }
 
@@ -73,14 +73,14 @@ public final class JkPathTree {
      * Returns root directory if this tree is a directory tree and returns a zip file if this
      * tree has been created from a zip file.
      */
-    public Path rootDirOrZipFile() {
+    public Path getRootDirOrZipFile() {
         return  rootHolder.rootFile();
     }
 
     /**
      * Returns the filter defined on this {@link JkPathTree}, never <code>null</code>.
      */
-    public JkPathMatcher matcher() {
+    public JkPathMatcher getMatcher() {
         return matcher;
     }
 
@@ -94,11 +94,11 @@ public final class JkPathTree {
     // ------------------------------- functional ---------------------------------
 
     private Predicate<Path> excludeRootFilter() {
-        return path -> !path.equals(root());
+        return path -> !path.equals(getRoot());
     }
 
     private Function<Path, Path> relativePathFunction() {
-        return path ->  root().relativize(path);
+        return path ->  getRoot().relativize(path);
     }
 
     // ------------------------- check exists --------------------------------------
@@ -133,8 +133,8 @@ public final class JkPathTree {
             return new LinkedList<Path>().stream();
         }
         final JkPathMatcher matcher = JkPathMatcher.of(this.matcher);
-        return JkUtilsPath.walk(root(), options)
-                .filter(path -> matcher.matches(root().relativize(path)))
+        return JkUtilsPath.walk(getRoot(), options)
+                .filter(path -> matcher.matches(getRoot().relativize(path)))
                 .onClose(() -> rootHolder.closeIfNeeded());
     }
 
@@ -143,7 +143,7 @@ public final class JkPathTree {
      */
     public List<Path> getRelativeFiles() {
         try(Stream<Path> stream = stream()) {
-            return stream.filter(JkPathMatcher.noDirectory().asPredicate()).map(relativePathFunction()).collect(Collectors.toList());
+            return stream.filter(JkPathMatcher.ofNoDirectory().toPredicate()).map(relativePathFunction()).collect(Collectors.toList());
         }
     }
 
@@ -152,7 +152,7 @@ public final class JkPathTree {
      */
     public List<Path> getFiles() {
         try (Stream<Path> stream = stream()) {
-            return stream.filter(JkPathMatcher.noDirectory().asPredicate()).collect(Collectors.toList());
+            return stream.filter(JkPathMatcher.ofNoDirectory().toPredicate()).collect(Collectors.toList());
         }
     }
 
@@ -160,11 +160,11 @@ public final class JkPathTree {
     // ---------------------- Navigate -----------------------------------------------------------
 
     /**
-     * Creates a {@link JkPathTree} having the specified relative path to this root as root directory.
+     * Creates a {@link JkPathTree} having the specified relative path to this root as getRoot directory.
      * Note that the returned tree has no filter even if this tree has one.
      */
     public JkPathTree goTo(String relativePath) {
-        final Path path = root().resolve(relativePath).normalize();
+        final Path path = getRoot().resolve(relativePath).normalize();
         return JkPathTree.of(path);
     }
 
@@ -172,7 +172,7 @@ public final class JkPathTree {
      * Returns path relative to this root of the specified relative path.
      */
     public Path get(String relativePath) {
-        return root().resolve(relativePath);
+        return getRoot().resolve(relativePath);
     }
 
     // ----------------------- Write in ----------------------------------------------------------------
@@ -195,7 +195,7 @@ public final class JkPathTree {
         createIfNotExist();
         if (tree.exists()) {
             tree.stream().filter(excludeRootFilter()).forEach(path -> {
-                Path target = this.root().resolve(tree.root().relativize(path).toString());
+                Path target = this.getRoot().resolve(tree.getRoot().relativize(path).toString());
                 if (Files.isDirectory(path)) {
                     JkUtilsPath.createDirectories(target);
                 } else {
@@ -213,19 +213,19 @@ public final class JkPathTree {
         Iterable<Path> paths = JkUtilsPath.disambiguate(files);
         createIfNotExist();
         for (final Path file : paths) {
-            JkUtilsPath.copy(file, root().resolve(file.getFileName()), copyOptions);
+            JkUtilsPath.copy(file, getRoot().resolve(file.getFileName()), copyOptions);
         }
         return this;
     }
 
     /**
-     * Deletes each and every files in this tree except the root and files not matching this tree filter.
+     * Deletes each and every files in this tree except the root andPrepending files not matching this tree filter.
      */
     public JkPathTree deleteContent() {
-        if (!Files.exists(root())) {
+        if (!Files.exists(getRoot())) {
             return this;
         }
-        JkUtilsPath.walkFileTree(root(), new SimpleFileVisitor<Path>() {
+        JkUtilsPath.walkFileTree(getRoot(), new SimpleFileVisitor<Path>() {
 
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
@@ -238,14 +238,14 @@ public final class JkPathTree {
             }
 
             private FileVisitResult visitFile(Path path) {
-                if (matcher.matches(root().relativize(path))) {
+                if (matcher.matches(getRoot().relativize(path))) {
                     JkUtilsPath.deleteFile(path);
                 }
                 return FileVisitResult.CONTINUE;
             }
 
             private FileVisitResult visitDir(Path path) {
-                if (!JkUtilsPath.isSameFile(root(), path) && matcher.matches(root().relativize(path))
+                if (!JkUtilsPath.isSameFile(getRoot(), path) && matcher.matches(getRoot().relativize(path))
                         && JkUtilsPath.listDirectChildren(path).isEmpty()) {
                     JkUtilsPath.deleteFile(path);
                 }
@@ -260,7 +260,7 @@ public final class JkPathTree {
      * Deletes root directory of this tree.
      */
     public JkPathTree deleteRoot() {
-        JkUtilsPath.walkFileTree(root(), new SimpleFileVisitor<Path>() {
+        JkUtilsPath.walkFileTree(getRoot(), new SimpleFileVisitor<Path>() {
 
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
@@ -296,7 +296,7 @@ public final class JkPathTree {
              Stream<Path> stream = this.stream()) {                 // try-resources-catch otherwise it fails
 
             stream.filter(excludeRootFilter()).forEach(path -> {
-                Path zipEntry = zipRootEntry.resolve(root().relativize(path).toString());
+                Path zipEntry = zipRootEntry.resolve(getRoot().relativize(path).toString());
                 if (!Files.exists(zipEntry) || !Files.isDirectory(zipEntry)) {
                     JkUtilsPath.copy(path, zipEntry, StandardCopyOption.REPLACE_EXISTING);
                 }
@@ -314,7 +314,7 @@ public final class JkPathTree {
         if (!Files.exists(destinationDir)) {
             JkUtilsPath.createDirectories(destinationDir);
         }
-        return JkUtilsPath.copyDirContent(root(), destinationDir, matcher, copyOptions);
+        return JkUtilsPath.copyDirContent(getRoot(), destinationDir, matcher, copyOptions);
     }
 
 
@@ -347,14 +347,14 @@ public final class JkPathTree {
      * Creates a copy of this {@link JkPathTree} augmented with the specified andAccept patterns.
      */
     public JkPathTree andAccept(Iterable<String> globPatterns) {
-        return andMatcher(JkPathMatcher.accept(this.root().getFileSystem(), globPatterns));
+        return andMatcher(JkPathMatcher.ofAccept(this.getRoot().getFileSystem(), globPatterns));
     }
 
     /**
      * Creates a copy of this {@link JkPathTree} augmented with the specified reject pattern.
      */
     public JkPathTree andReject(Iterable<String> globPatterns) {
-        return andMatcher(JkPathMatcher.reject(this.root().getFileSystem(), globPatterns));
+        return andMatcher(JkPathMatcher.ofReject(this.getRoot().getFileSystem(), globPatterns));
     }
 
     public JkPathTree andReject(String... globPatterns) {
@@ -372,12 +372,12 @@ public final class JkPathTree {
         if (!exists()) {
             return 0;
         }
-        return JkUtilsPath.childrenCount(root(), max, includeDirectories);
+        return JkUtilsPath.childrenCount(getRoot(), max, includeDirectories);
     }
 
     /**
      * If the root of this tree is absolute then this method returns this tree.
-     * If the root of this tree is relative then this method returns a tree having a root
+     * If the root of this tree is relative then this method returns a tree having a getRoot
      * resolved from the specified path to this root.
      */
     public JkPathTree resolve(Path path) {
@@ -389,7 +389,7 @@ public final class JkPathTree {
      * Returns a {@link JkPathTreeSet} containing this tree as its single
      * element.
      */
-    public JkPathTreeSet asSet() {
+    public JkPathTreeSet toSet() {
         return JkPathTreeSet.of(this);
     }
 
